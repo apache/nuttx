@@ -97,7 +97,7 @@ struct vs1053_struct_s
 
   /* Our specific driver data goes here */
 
-  const FAR struct vs1053_lower_s *hw_lower; /* Pointer to the hardware lower functions */
+  FAR const struct vs1053_lower_s *hw_lower; /* Pointer to the hardware lower functions */
   FAR struct spi_dev_s    *spi;              /* Pointer to the SPI bus */
   FAR struct ap_buffer_s  *apb;              /* Pointer to the buffer we are processing */
   struct dq_queue_s       apbq;              /* Our queue for enqueued buffers */

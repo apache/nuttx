@@ -299,75 +299,89 @@
 
 /* In mstatus register */
 
-#define MSTATUS_MIE       (0x1 << 3)  /* Machine Interrupt Enable */
-#define MSTATUS_MPIE      (0x1 << 7)  /* Machine Previous Interrupt Enable */
-#define MSTATUS_MPPM      (0x3 << 11) /* Machine Previous Privilege (m-mode) */
-#define MSTATUS_FS        (0x3 << 13) /* Machine Floating-point Status */
-#define MSTATUS_FS_INIT   (0x1 << 13)
-#define MSTATUS_FS_CLEAN  (0x2 << 13)
-#define MSTATUS_FS_DIRTY  (0x3 << 13)
+#define MSTATUS_UIE         (0x1 << 0)  /* User Interrupt Enable */
+#define MSTATUS_SIE         (0x1 << 1)  /* Supervisor Interrupt Enable */
+#define MSTATUS_MIE         (0x1 << 3)  /* Machine Interrupt Enable */
+#define MSTATUS_SPIE        (0x1 << 5)  /* Supervisor Previous Interrupt Enable */
+#define MSTATUS_MPIE        (0x1 << 7)  /* Machine Previous Interrupt Enable */
+#define MSTATUS_SPPU        (0x0 << 8)  /* Supervisor Previous Privilege (u-mode) */
+#define MSTATUS_SPPS        (0x1 << 8)  /* Supervisor Previous Privilege (s-mode) */
+#define MSTATUS_MPPU        (0x0 << 11) /* Machine Previous Privilege (u-mode) */
+#define MSTATUS_MPPS        (0x1 << 11) /* Machine Previous Privilege (s-mode) */
+#define MSTATUS_MPPM        (0x3 << 11) /* Machine Previous Privilege (m-mode) */
+#define MSTATUS_MPP_MASK    (0x3 << 11)
+#define MSTATUS_FS          (0x3 << 13) /* Machine Floating-point Status */
+#define MSTATUS_FS_INIT     (0x1 << 13)
+#define MSTATUS_FS_CLEAN    (0x2 << 13)
+#define MSTATUS_FS_DIRTY    (0x3 << 13)
+#define MSTATUS_MPRV        (0x1 << 17) /* Modify Privilege */
+#define MSTATUS_SUM         (0x1 << 18) /* S mode access to U mode memory */
+#define MSTATUS_MXR         (0x1 << 19) /* Make executable / readable */
+#define MSTATUS_TVM         (0x1 << 20) /* Trap access to satp from S mode */
+#define MSTATUS_TW          (0x1 << 21) /* Trap WFI instruction from S mode */
+#define MSTATUS_TSR         (0x1 << 22) /* Trap supervisor return (sret) */
 
 /* Mask of preserved bits for mstatus */
 
 #ifdef CONFIG_ARCH_RV32
-#define MSTATUS_WPRI      (0xff << 23 | 0x15)
+#define MSTATUS_WPRI        (0xff << 23 | 0x15)
 #else
-#define MSTATUS_WPRI      (UINT64_C(0x1ffffff) << 38 | UINT64_C(0x1ff) << 23 | 0x15)
+#define MSTATUS_WPRI        (UINT64_C(0x1ffffff) << 38 | UINT64_C(0x1ff) << 23 | 0x15)
 #endif
 
 /* In mie (machine interrupt enable) register */
 
-#define MIE_MSIE      (0x1 << 3)  /* Machine Software Interrupt Enable */
-#define MIE_MTIE      (0x1 << 7)  /* Machine Timer Interrupt Enable */
-#define MIE_MEIE      (0x1 << 11) /* Machine External Interrupt Enable */
+#define MIE_SSIE            (0x1 << 1)  /* Supervisor Software Interrupt Enable */
+#define MIE_MSIE            (0x1 << 3)  /* Machine Software Interrupt Enable */
+#define MIE_STIE            (0x1 << 5)  /* Supervisor Timer Interrupt Enable */
+#define MIE_MTIE            (0x1 << 7)  /* Machine Timer Interrupt Enable */
+#define MIE_SEIE            (0x1 << 9)  /* Supervisor External Interrupt Enable */
+#define MIE_MEIE            (0x1 << 11) /* Machine External Interrupt Enable */
 
 /* In mip (machine interrupt pending) register */
 
-#define MIP_MTIP      (0x1 << 7)
+#define MIP_SSIP            (0x1 << 1)
+#define MIP_STIP            (0x1 << 5)
+#define MIP_MTIP            (0x1 << 7)
+#define MIP_SEIP            (0x1 << 9)
 
-#define CSR_STR(csr) #csr
+/* In sstatus register (which is a view of mstatus) */
 
-#define READ_CSR(reg) \
-  ({ \
-     unsigned long tmp; \
-     asm volatile("csrr %0, " CSR_STR(reg) : "=r"(tmp)); \
-     tmp; \
-  })
+#define SSTATUS_SIE         MSTATUS_SIE
+#define SSTATUS_SPIE        MSTATUS_SPIE
+#define SSTATUS_SPPU        MSTATUS_SPPU
+#define SSTATUS_SPPS        MSTATUS_SPPS
+#define SSTATUS_FS          MSTATUS_FS
+#define SSTATUS_FS_INIT     MSTATUS_FS_INIT
+#define SSTATUS_FS_CLEAN    MSTATUS_FS_CLEAN
+#define SSTATUS_FS_DIRTY    MSTATUS_FS_DIRTY
+#define SSTATUS_SUM         MSTATUS_SUM
+#define SSTATUS_MXR         MSTATUS_MXR
 
-#define READ_AND_SET_CSR(reg, bits) \
-  ({ \
-     unsigned long tmp; \
-     asm volatile("csrrs %0, " CSR_STR(reg) ", %1": "=r"(tmp) : "rK"(bits)); \
-     tmp; \
-  })
+/* In sie register (which is a view of mie) */
 
-#define WRITE_CSR(reg, val) \
-  ({ \
-     asm volatile("csrw " CSR_STR(reg) ", %0" :: "rK"(val)); \
-  })
+#define SIE_SSIE            MIE_SSIE
+#define SIE_STIE            MIE_STIE
+#define SIE_SEIE            MIE_SEIE
 
-#define SET_CSR(reg, bits) \
-  ({ \
-     asm volatile("csrs " CSR_STR(reg) ", %0" :: "rK"(bits)); \
-  })
+/* In sip register (which is a view of mip) */
 
-#define CLEAR_CSR(reg, bits) \
-  ({ \
-     asm volatile("csrc " CSR_STR(reg) ", %0" :: "rK"(bits)); \
-  })
+#define SIP_SSIP            MIP_SSIP
+#define SIP_STIP            MIP_STIP
+#define SIP_SEIP            MIP_SEIP
 
 /* In pmpcfg (PMP configuration) register */
 
-#define PMPCFG_R        (1 << 0)  /* readable ? */
-#define PMPCFG_W        (1 << 1)  /* writeable ? */
-#define PMPCFG_X        (1 << 2)  /* excutable ? */
-#define PMPCFG_RWX_MASK (7 << 0)  /* access rights mask */
-#define PMPCFG_A_OFF    (0 << 3)  /* null region (disabled) */
-#define PMPCFG_A_TOR    (1 << 3)  /* top of range */
-#define PMPCFG_A_NA4    (2 << 3)  /* naturally aligned four-byte region */
-#define PMPCFG_A_NAPOT  (3 << 3)  /* naturally aligned power-of-two region */
-#define PMPCFG_A_MASK   (3 << 3)  /* address-matching mode mask */
-#define PMPCFG_L        (1 << 7)  /* locked ? */
+#define PMPCFG_R            (1 << 0)  /* readable ? */
+#define PMPCFG_W            (1 << 1)  /* writable ? */
+#define PMPCFG_X            (1 << 2)  /* executable ? */
+#define PMPCFG_RWX_MASK     (7 << 0)  /* access rights mask */
+#define PMPCFG_A_OFF        (0 << 3)  /* null region (disabled) */
+#define PMPCFG_A_TOR        (1 << 3)  /* top of range */
+#define PMPCFG_A_NA4        (2 << 3)  /* naturally aligned four-byte region */
+#define PMPCFG_A_NAPOT      (3 << 3)  /* naturally aligned power-of-two region */
+#define PMPCFG_A_MASK       (3 << 3)  /* address-matching mode mask */
+#define PMPCFG_L            (1 << 7)  /* locked ? */
 
 /****************************************************************************
  * Public Types

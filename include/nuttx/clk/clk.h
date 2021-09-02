@@ -74,7 +74,7 @@ int      clk_set_phase(FAR struct clk_s *clk, int degrees);
 int      clk_get_phase(FAR struct clk_s *clk);
 
 void clk_disable_unused(void);
-FAR const char *clk_get_name(const FAR struct clk_s *clk);
+FAR const char *clk_get_name(FAR const struct clk_s *clk);
 
 #undef EXTERN
 #ifdef __cplusplus

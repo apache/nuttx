@@ -89,7 +89,7 @@ static void x86_64_stackdump(uint64_t sp, uint64_t stack_top)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -101,7 +101,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return OK;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -115,7 +115,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
   uint64_t sp = up_getsp();
   uint64_t ustackbase;
   uint64_t ustacksize;
@@ -200,7 +200,7 @@ static void up_dumpstate(void)
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */
 
-  (void)usbtrace_enumerate(assert_tracecallback, NULL);
+  usbtrace_enumerate(assert_tracecallback, NULL);
 #endif
 }
 #else
@@ -221,7 +221,7 @@ static void _up_assert(void)
 
   if (g_current_regs || (running_task())->flink == NULL)
     {
-      (void)up_irq_save();
+      up_irq_save();
       for (; ; )
         {
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1

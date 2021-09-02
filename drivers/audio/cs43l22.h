@@ -321,7 +321,7 @@ struct cs43l22_dev_s
 
   /* Our specific driver data goes here */
 
-  const FAR struct cs43l22_lower_s *lower;  /* Pointer to the board lower functions */
+  FAR const struct cs43l22_lower_s *lower;  /* Pointer to the board lower functions */
   FAR struct i2c_master_s *i2c;             /* I2C driver to use */
   FAR struct i2s_dev_s   *i2s;              /* I2S driver to use */
   struct dq_queue_s       pendq;            /* Queue of pending buffers to be sent */

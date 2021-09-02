@@ -24,7 +24,10 @@
 
 #include <nuttx/config.h>
 
+#include <arch/arch.h>
 #include <arch/syscall.h>
+
+#include "riscv_internal.h"
 
 #if defined(CONFIG_BUILD_PROTECTED) && !defined(__KERNEL__)
 
@@ -69,8 +72,8 @@ up_signal_handler:
 
   /* Save ra on the stack */
 
-  addi sp, sp, -16
-  sd   ra, 8(sp)
+  addi sp, sp, -STACK_FRAME_SIZE
+  REGSTORE ra, 8(sp)
 
   /* Call the signal handler */
 
@@ -82,8 +85,8 @@ up_signal_handler:
 
   /* Restore the register */
 
-  ld   ra, 8(sp)  /* Restore ra in sp */
-  addi sp, sp, 16
+  REGLOAD ra, 8(sp)  /* Restore ra in sp */
+  addi sp, sp, STACK_FRAME_SIZE
 
   /* Execute the SYS_signal_handler_return SVCall (will not return) */
 

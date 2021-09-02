@@ -277,7 +277,7 @@ int stm32_cs43l22_initialize(int minor)
 
       /* Configure the CS43L22 interrupt pin */
 
-      /* TODO: (void)stm32_configgpio(PIO_INT_CS43L22); */
+      /* TODO: stm32_configgpio(PIO_INT_CS43L22); */
 
       /* Get an instance of the I2C interface for the CS43L22 chip select */
 

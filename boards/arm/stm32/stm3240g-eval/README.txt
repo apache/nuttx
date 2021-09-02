@@ -176,7 +176,6 @@ There are two version of the FPU support built into the STM32 port.
    file:
 
      CONFIG_ARCH_FPU=y
-     CONFIG_ARMV7M_LAZYFPU=y
 
 FSMC SRAM
 =========
@@ -631,7 +630,7 @@ Where <subdir> is one of the following:
 
       CONFIG_HOST_WINDOWS=y
       CONFIG_WINDOWS_CYGWIN=y
-      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
 
   discover:
   --------
@@ -646,7 +645,7 @@ Where <subdir> is one of the following:
     Configuration settings that you may need to change for your
     environment:
 
-      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL=y     - GNU EABI toolchain for Linux
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y      - GNU EABI toolchain for Linux
       CONFIG_EXAMPLES_DISCOVER_DHCPC=y        - DHCP Client
       CONFIG_EXAMPLES_DISCOVER_IPADDR         - (not defined)
       CONFIG_EXAMPLES_DISCOVER_DRIPADDR       - Router IP address
@@ -810,7 +809,7 @@ Where <subdir> is one of the following:
     using the STM32's Ethernet controller. It uses apps/examples/nettest to exercise the
     TCP/IP network.
 
-    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y                    : GNU EABI toolchain for Windows
+    CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y                     : GNU EABI toolchain for Windows
     CONFIG_EXAMPLES_NETTEST_SERVER=n                       : Target is configured as the client
     CONFIG_EXAMPLES_NETTEST_PERFORMANCE=y                  : Only network performance is verified.
     CONFIG_EXAMPLES_NETTEST_IPADDR=(10<<24|0<<16|0<<8|2)   : Target side is IP: 10.0.0.2
@@ -833,7 +832,7 @@ Where <subdir> is one of the following:
     Configures the NuttShell (nsh) located at apps/examples/nsh.  The
     Configuration enables both the serial and telnet NSH interfaces.
 
-   CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y        : GNU EABI toolchain for Windows
+   CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y         : GNU EABI toolchain for Windows
     CONFIG_NSH_DHCPC=n                        : DHCP is disabled
     CONFIG_NSH_IPADDR=(10<<24|0<<16|0<<8|2)   : Target IP address 10.0.0.2
     CONFIG_NSH_DRIPADDR=(10<<24|0<<16|0<<8|1) : Host IP address 10.0.0.1
@@ -1169,7 +1168,7 @@ Where <subdir> is one of the following:
 
          CONFIG_HOST_WINDOWS=y                    : Windows
          CONFIG_WINDOWS_CYGWIN=y                  : With Cygwin
-         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y      : GNU EABI toolchain for Windows
+         CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y       : GNU EABI toolchain for Windows
 
   nxwm
   ----
@@ -1207,7 +1206,7 @@ Where <subdir> is one of the following:
 
       CONFIG_HOST_WINDOWS=y
       CONFIG_WINDOWS_CYGWIN=y
-      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y
+      CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y
 
   xmlrpc
   ------

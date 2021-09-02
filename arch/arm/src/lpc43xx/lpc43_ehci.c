@@ -517,7 +517,8 @@ static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr,
          usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
          uint16_t maxpacketsize);
 static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
-         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                         FAR const struct usbhost_epdesc_s *epdesc,
+                         FAR usbhost_ep_t *ep);
 static int lpc43_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int lpc43_alloc(FAR struct usbhost_driver_s *drvr,
          FAR uint8_t **buffer, FAR size_t *maxlen);
@@ -3829,8 +3830,8 @@ static int lpc43_ep0configure(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 static int lpc43_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc,
-                         usbhost_ep_t *ep)
+                         FAR const struct usbhost_epdesc_s *epdesc,
+                         FAR usbhost_ep_t *ep)
 {
   struct lpc43_epinfo_s *epinfo;
   struct usbhost_hubport_s *hport;

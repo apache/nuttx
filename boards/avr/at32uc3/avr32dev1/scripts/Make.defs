@@ -24,16 +24,7 @@ include $(TOPDIR)/arch/avr/src/avr32/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)avr32dev1.ld
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -ffunction-sections -fdata-sections -fno-strict-aliasing
-endif
-
-ARCHCFLAGS = -fno-common -muse-rodata-section
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new
+ARCHCFLAGS = -muse-rodata-section
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHNOPICFLAGS = -fno-pic
@@ -47,7 +38,3 @@ CXXFLAGS := $(ARCHNOPICFLAGS) $(ARCHALLCXXFLAGS)
 CXXPICFLAGS = $(ARCHPICFLAGS) $(ARCHALLCXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(ARCHALLCFLAGS) -D__ASSEMBLY__
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif

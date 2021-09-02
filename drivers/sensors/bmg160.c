@@ -87,7 +87,6 @@ static int bmg160_close(FAR struct file *filep);
 static ssize_t bmg160_read(FAR struct file *, FAR char *, size_t);
 static ssize_t bmg160_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
-static int bmg160_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -100,7 +99,7 @@ static const struct file_operations g_bmg160_fops =
   bmg160_read,     /* read */
   bmg160_write,    /* write */
   NULL,            /* seek */
-  bmg160_ioctl,    /* ioctl */
+  NULL,            /* ioctl */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
@@ -480,27 +479,6 @@ static ssize_t bmg160_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: bmg160_ioctl
- ****************************************************************************/
-
-static int bmg160_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  int ret = OK;
-
-  switch (cmd)
-    {
-      /* Command was not recognized */
-
-    default:
-      snerr("ERROR: Unrecognized cmd: %d\n", cmd);
-      ret = -ENOTTY;
-      break;
-    }
-
-  return ret;
 }
 
 /****************************************************************************

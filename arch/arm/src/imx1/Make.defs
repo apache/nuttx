@@ -18,26 +18,7 @@
 #
 ############################################################################
 
-HEAD_ASRC = arm_head.S
-
-CMN_ASRCS  = arm_cache.S arm_fullcontextrestore.S arm_saveusercontext.S
-CMN_ASRCS += arm_vectors.S arm_vectoraddrexcptn.S arm_vectortab.S vfork.S
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c
-CMN_CSRCS += arm_dataabort.c arm_mdelay.c arm_udelay.c arm_exit.c
-CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_releasestack.c
-CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_syscall.c arm_unblocktask.c
-CMN_CSRCS += arm_undefinedinsn.c arm_usestack.c arm_vfork.c arm_puts.c
-CMN_CSRCS += arm_tcbinfo.c arm_switchcontext.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += arm_idle.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
+include arm/Make.defs
 
 CHIP_ASRCS  = imx_lowputc.S
 CHIP_CSRCS  = imx_boot.c imx_gpio.c imx_allocateheap.c imx_irq.c

@@ -30,19 +30,6 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-  ASARCHCPUFLAGS += -Wa,-g
-endif
-
-MAXOPTIMIZATION = -Os
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
-ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -52,6 +39,6 @@ CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
 CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
-AFLAGS += $(CFLAGS) -D__ASSEMBLY__ $(ASARCHCPUFLAGS)
+AFLAGS += $(CFLAGS) -D__ASSEMBLY__
 
-LDFLAGS += --gc-sections -melf32lriscv
+LDFLAGS += -melf32lriscv

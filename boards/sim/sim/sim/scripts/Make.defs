@@ -41,20 +41,26 @@ ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
 ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-  ARCHOPTIMIZATIONRUST = -g
+  ARCHOPTIMIZATION += -g
+  ARCHOPTIMIZATIONRUST += -g
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION ?= -O2
+  ARCHOPTIMIZATION += $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_DEBUG_FULLOPT),y)
+  ARCHOPTIMIZATION += -O2
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
+  ARCHOPTIMIZATION += -fno-strict-aliasing
 else
   ARCHOPTIMIZATIONRUST += -C opt-level=0
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  ARCHOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  ARCHOPTIMIZATION += -fomit-frame-pointer
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -116,16 +122,6 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
-  # Why c++17?
-  #  * libcxx seems to require c++11.
-  #  * The compiler defaults varies:
-  #      clang/macOS (from xcode): 199711L
-  #      gcc/ubuntu:               201402L
-  #  * There is a precedent to use c++14.
-  #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
-  #  * libs/libxx/libcxx/src/barrier.cpp depends on aligned new
-  CXXFLAGS += -std=c++17
-
   ifeq ($(CONFIG_HOST_MACOS),y)
     # macOS uses libc++abi
     CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
@@ -156,14 +152,6 @@ endif
 ifeq ($(CONFIG_SIM_UBSAN),y)
   CFLAGS += -fsanitize=undefined
   CXXFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CFLAGS += -fomit-frame-pointer
-  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
@@ -211,7 +199,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main --gc-sections
-LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/binfmt/libelf/gnu-elf.ld)
 
 ifeq ($(CONFIG_HOST_MACOS),y)
   LDFLAGS += -Wl,-dead_strip

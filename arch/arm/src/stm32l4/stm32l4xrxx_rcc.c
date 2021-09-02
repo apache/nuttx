@@ -46,10 +46,6 @@
 #define HSIRDY_TIMEOUT HSERDY_TIMEOUT
 #define MSIRDY_TIMEOUT HSERDY_TIMEOUT
 
-/* HSE divisor to yield ~1MHz RTC clock */
-
-#define HSE_DIVISOR (STM32L4_HSE_FREQUENCY + 500000) / 1000000
-
 /* Determine if board wants to use HSI48 as 48 MHz oscillator. */
 
 #if defined(CONFIG_STM32L4_HAVE_HSI48) && defined(STM32L4_USE_CLK48)
@@ -579,16 +575,19 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_I2C1
   /* Select HSI16 as I2C1 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C1SEL_MASK;
   regval |= RCC_CCIPR_I2C1SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C2
   /* Select HSI16 as I2C2 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C2SEL_MASK;
   regval |= RCC_CCIPR_I2C2SEL_HSI;
 #endif
 #ifdef CONFIG_STM32L4_I2C3
   /* Select HSI16 as I2C3 clock source. */
 
+  regval &= ~RCC_CCIPR_I2C3SEL_MASK;
   regval |= RCC_CCIPR_I2C3SEL_HSI;
 #endif
 #endif /* STM32L4_I2C_USE_HSI16 */
@@ -599,12 +598,14 @@ static inline void rcc_enableccip(void)
    * warning messages.
    */
 
+  regval &= ~RCC_CCIPR_CLK48SEL_MASK;
   regval |= STM32L4_CLK48_SEL;
 #endif
 
 #if defined(CONFIG_STM32L4_ADC1)
   /* Select SYSCLK as ADC clock source */
 
+  regval &= ~RCC_CCIPR_ADCSEL_MASK;
   regval |= RCC_CCIPR_ADCSEL_SYSCLK;
 #endif
 
@@ -618,6 +619,7 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_I2C4
   /* Select HSI16 as I2C4 clock source. */
 
+  regval &= ~RCC_CCIPR2_I2C4SEL_MASK;
   regval |= RCC_CCIPR2_I2C4SEL_HSI;
 #endif
 #endif
@@ -625,6 +627,7 @@ static inline void rcc_enableccip(void)
 #ifdef CONFIG_STM32L4_DFSDM1
   /* Select SAI1 as DFSDM audio clock source. */
 
+  regval &= ~RCC_CCIPR2_ADFSDMSEL_MASK;
   regval |= RCC_CCIPR2_ADFSDMSEL_SAI1;
 
   /* Select SYSCLK as DFSDM kernel clock source. */
@@ -696,6 +699,7 @@ static void stm32l4_stdclockconfig(void)
   /* setting MSIRANGE */
 
   regval  = getreg32(STM32L4_RCC_CR);
+  regval &= ~RCC_CR_MSIRANGE_MASK;
   regval |= (STM32L4_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
   putreg32(regval, STM32L4_RCC_CR);
 
@@ -788,15 +792,6 @@ static void stm32l4_stdclockconfig(void)
       regval &= ~RCC_CFGR_PPRE1_MASK;
       regval |= STM32L4_RCC_CFGR_PPRE1;
       putreg32(regval, STM32L4_RCC_CFGR);
-
-#ifdef CONFIG_STM32L4_RTC_HSECLOCK
-      /* Set the RTC clock divisor */
-
-      regval  = getreg32(STM32L4_RCC_CFGR);
-      regval &= ~RCC_CFGR_RTCPRE_MASK;
-      regval |= RCC_CFGR_RTCPRE(HSE_DIVISOR);
-      putreg32(regval, STM32L4_RCC_CFGR);
-#endif
 
       /* Set the PLL source and main divider */
 

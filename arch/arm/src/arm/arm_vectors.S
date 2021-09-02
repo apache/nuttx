@@ -42,6 +42,66 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: savefpu
+ *
+ * Description:
+ *   Save the state of the floating point registers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+	.macro	savefpu, out, tmp
+	/* Store all floating point registers.  Registers are stored in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vstmia.64	\out!, {d0-d15}		/* Save the full FP context */
+	vstmia.64	\out!, {d16-d31}
+#else
+	vstmia		\out!, {s0-s31}		/* Save the full FP context */
+#endif
+
+	/* Store the floating point control and status register.  At the end of the
+	 * vstmia, r1 will point to the FPSCR storage location.
+	 */
+
+	vmrs		\tmp, fpscr		/* Fetch the FPSCR */
+	str		\tmp, [\out], #4	/* Save the floating point control and status register */
+	.endm
+#endif
+
+/****************************************************************************
+ * Name: restorefpu
+ *
+ * Description:
+ *   Restore the state of the floating point registers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+	.macro	restorefpu, in, tmp
+	/* Load all floating point registers.  Registers are loaded in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vldmia.64	\in!, {d0-d15}		/* Restore the full FP context */
+	vldmia.64	\in!, {d16-d31}
+#else
+	vldmia		\in!, {s0-s31}		/* Restore the full FP context */
+#endif
+
+	/* Load the floating point control and status register.   At the end of the
+	 * vstmia, \in will point to the FPSCR storage location.
+	 */
+
+	ldr		\tmp, [\in], #4		/* Fetch the floating point control and status register */
+	vmsr		fpscr, \tmp		/* Restore the FPSCR */
+	.endm
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -101,6 +161,13 @@ arm_vectorirq:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add	r0, sp, #(4*REG_S0)	/* R1=Address of FP register storage */
+	savefpu	r0, r1
+#endif
+
 	/* Then call the IRQ handler with interrupts disabled. */
 
 	mov	fp, #0			/* Init frame pointer */
@@ -116,7 +183,7 @@ arm_vectorirq:
 #else
 	/* Call arm_decodeirq() on the user stack */
 
-	mov		r4, sp			/* Save the SP in a preserved register */
+	mov		r4, sp		/* Save the SP in a preserved register */
 
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -131,17 +198,35 @@ arm_vectorirq:
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
 
-	bic	sp, sp, #7			/* Force 8-byte alignment */
-	bl	arm_decodeirq			/* Call the handler */
-	mov	sp, r4				/* Restore the possibly unaligned stack pointer */
+	bic	sp, sp, #7		/* Force 8-byte alignment */
+	bl	arm_decodeirq		/* Call the handler */
+	mov	sp, r4			/* Restore the possibly unaligned stack pointer */
 #endif
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add	r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
+
+	/* Switch back IRQ mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_IRQ | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back IRQ mode */
 
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is IRQ mode */
+
+	mov	r14, sp			/* (IRQ) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (IRQ) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lirqstacktop:
@@ -201,6 +286,13 @@ arm_vectorsvc:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add	r0, sp, #(4*REG_S0)	/* R1=Address of FP register storage */
+	savefpu	r0, r1
+#endif
+
 	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
@@ -209,12 +301,30 @@ arm_vectorsvc:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_syscall		/* Call the handler */
 
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add	r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
+
+	/* Switch back SVC mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back SVC mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is SVC mode */
+
+	mov	r14, sp			/* (SVC) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
@@ -272,6 +382,13 @@ arm_vectordata:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add	r0, sp, #(4*REG_S0)	/* R1=Address of FP register storage */
+	savefpu	r0, r1
+#endif
+
 	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
 	 */
@@ -284,12 +401,30 @@ arm_vectordata:
 #endif
 	bl	arm_dataabort		/* Call the handler */
 
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add	r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
+
+	/* Switch back ABT mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back ABT mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is ABT mode */
+
+	mov	r14, sp			/* (ABT) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (ABT) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -347,6 +482,13 @@ arm_vectorprefetch:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add	r0, sp, #(4*REG_S0)	/* R1=Address of FP register storage */
+	savefpu	r0, r1
+#endif
+
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */
@@ -355,12 +497,30 @@ arm_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_prefetchabort	/* Call the handler */
 
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add	r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
+
+	/* Switch back ABT mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back ABT mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is ABT mode */
+
+	mov	r14, sp			/* (ABT) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (ABT) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
@@ -416,6 +576,13 @@ arm_vectorundefinsn:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add	r0, sp, #(4*REG_S0)	/* R1=Address of FP register storage */
+	savefpu	r0, r1
+#endif
+
 	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
 	 */
@@ -424,12 +591,30 @@ arm_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_undefinedinsn	/* Call the handler */
 
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add	r1, r0, #(4*REG_S0)	/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
+
+	/* Switch back UND mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_UND | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back UND mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is UND mode */
+
+	mov	r14, sp			/* (FIQ) r14=Register storage area */
+	ldmia	r14!, {r0-r7}		/* Restore common r0-r7 */
+	ldmia	r14, {r8-r14}^		/* Restore user mode r8-r14 */
+	add	r14, r14, #(4*7)	/* (FIQ) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5

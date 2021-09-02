@@ -92,7 +92,8 @@ config ESP32S2_INSTRUCTION_CACHE_LINE_SIZE
 
 choice ESP32S2_DATA_CACHE_SIZE
 	prompt "Data cache size"
-	default ESP32S2_DATA_CACHE_0KB
+	default ESP32S2_DATA_CACHE_0KB if !ESP32S2_SPIRAM
+	default ESP32S2_DATA_CACHE_8KB if ESP32S2_SPIRAM
 	---help---
 		Data cache size to be set on application startup.
 		If you use 0KB data cache, the other 16KB will be added to the heap.
@@ -100,6 +101,7 @@ choice ESP32S2_DATA_CACHE_SIZE
 		will be added to the heap.
 
 config ESP32S2_DATA_CACHE_0KB
+	depends on !ESP32S2_SPIRAM
 	bool "No DATA CACHE"
 	---help---
 		Disable Data Cache
@@ -441,6 +443,96 @@ config ESP32S2_OTA_SCRATCH_DEVPATH
 endif
 
 endmenu # SPI Flash Configuration
+
+menu "SPI RAM Configuration"
+	depends on ESP32S2_SPIRAM
+
+config ESP32S2_DEFAULT_PSRAM_CLK_IO
+	int "PSRAM CLK pin"
+	default 30
+
+config ESP32S2_DEFAULT_PSRAM_CS_IO
+	int "PSRAM CS pin"
+	default 26
+
+choice ESP32S2_SPIRAM_TYPE
+	prompt "Type of SPI RAM chip in use"
+	default ESP32S2_SPIRAM_TYPE_AUTO
+
+config ESP32S2_SPIRAM_TYPE_AUTO
+	bool "Auto-detect"
+
+config ESP32S2_SPIRAM_TYPE_ESPPSRAM32
+	bool "ESP-PSRAM32 or IS25WP032"
+
+config ESP32S2_SPIRAM_TYPE_ESPPSRAM64
+	bool "ESP-PSRAM64 or LY68L6400"
+
+endchoice # ESP32S2_SPIRAM_TYPE
+
+config ESP32S2_SPIRAM_SIZE
+	int
+	default -1 if ESP32S2_SPIRAM_TYPE_AUTO
+	default 4194304 if ESP32S2_SPIRAM_TYPE_ESPPSRAM32
+	default 8388608 if ESP32S2_SPIRAM_TYPE_ESPPSRAM64
+	default 0
+
+config ESP32S2_SPIRAM_FETCH_INSTRUCTIONS
+	bool "Cache fetch instructions from SPI RAM"
+	default n
+	---help---
+		If enabled, instruction in flash will be copied into SPI RAM.
+		If ESP32S2_SPIRAM_RODATA is also enabled, you can run the instruction
+		when erasing or programming the flash.
+
+config ESP32S2_SPIRAM_RODATA
+	bool "Cache load read only data from SPI RAM"
+	default n
+	---help---
+		If enabled, rodata in flash will be copied into SPI RAM.
+		If ESP32S2_SPIRAM_FETCH_INSTRUCTIONS is also enabled,
+		you can run the instruction when erasing or programming the
+		flash.
+
+choice ESP32S2_SPIRAM_SPEED
+	prompt "Set RAM clock speed"
+	default ESP32S2_SPIRAM_SPEED_40M
+	---help---
+		Select the speed for the SPI RAM chip.
+
+config ESP32S2_SPIRAM_SPEED_40M
+	bool "40MHz clock speed"
+
+config ESP32S2_SPIRAM_SPEED_80M
+	bool "80MHz clock speed"
+
+endchoice # ESP32S2_SPIRAM_SPEED
+
+config ESP32S2_SPIRAM_SPEED
+	int
+	default 80 if ESP32S2_SPIRAM_SPEED_80M
+	default 40 if ESP32S2_SPIRAM_SPEED_40M
+
+config ESP32S2_SPIRAM_BOOT_INIT
+	bool "Initialize SPI RAM during startup"
+	default "y"
+	---help---
+		If this is enabled, the SPI RAM will be enabled during initial
+		boot. Unless you have specific requirements, you'll want to leave
+		this enabled so memory allocated during boot-up can also be
+		placed in SPI RAM.
+
+config ESP32S2_SPIRAM_IGNORE_NOTFOUND
+	bool "Ignore PSRAM when not found"
+	default "n"
+	depends on ESP32S2_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
+	---help---
+		Normally, if PSRAM initialization is enabled during compile time
+		but not found at runtime, it is seen as an error making the CPU
+		panic. If this is enabled, booting will complete but no PSRAM
+		will be available.
+
+endmenu # SPI RAM Configuration
 
 menu "Real-Time Timer Configuration"
 	depends on ESP32S2_RT_TIMER

@@ -83,8 +83,6 @@ static int     lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf);
 
 /* Character driver methods */
 
-static int     lm75_open(FAR struct file *filep);
-static int     lm75_close(FAR struct file *filep);
 static ssize_t lm75_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t lm75_write(FAR struct file *filep, FAR const char *buffer,
@@ -98,8 +96,8 @@ static int     lm75_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_lm75fops =
 {
-  lm75_open,       /* open */
-  lm75_close,      /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   lm75_read,       /* read */
   lm75_write,      /* write */
   NULL,            /* seek */
@@ -336,32 +334,6 @@ static int lm75_writeconf(FAR struct lm75_dev_s *priv, uint8_t conf)
   /* Write the register address followed by the data (no RESTART) */
 
   return lm75_i2c_write(priv, buffer, 2);
-}
-
-/****************************************************************************
- * Name: lm75_open
- *
- * Description:
- *   This function is called whenever the LM-75 device is opened.
- *
- ****************************************************************************/
-
-static int lm75_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: lm75_close
- *
- * Description:
- *   This routine is called when the LM-75 device is closed.
- *
- ****************************************************************************/
-
-static int lm75_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

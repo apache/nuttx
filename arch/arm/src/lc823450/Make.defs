@@ -18,46 +18,7 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += vfork.S
-
-CMN_CSRCS  = arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
-CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
-CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_systemreset.c
-CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_doirq.c arm_hardfault.c
-CMN_CSRCS += arm_svcall.c arm_vfork.c arm_trigger_irq.c arm_switchcontext.c
-CMN_CSRCS += arm_puts.c arm_tcbinfo.c
-
-# CMN_CSRCS += up_dwt.c
-
-CMN_CSRCS += arm_stackframe.c
-CMN_ASRCS += arm_exception.S
-CMN_CSRCS += arm_vectors.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_ARCH_MEMCPY),y)
-CMN_ASRCS += memcpy-armv7m.S
-endif
-
-ifeq ($(CONFIG_ARCH_MEMMOVE),y)
-CMN_CSRCS += up_memmove.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
+include armv7-m/Make.defs
 
 CHIP_CSRCS  = lc823450_allocateheap2.c lc823450_start.c lc823450_irq.c lc823450_timer.c
 CHIP_CSRCS += lc823450_lowputc.c lc823450_serial.c lc823450_clockconfig.c
@@ -95,7 +56,7 @@ CHIP_CSRCS += lc823450_spi.c
 endif
 
 ifeq ($(CONFIG_ARCH_DMA), y)
-CMN_CSRCS += lc823450_dma.c
+CHIP_CSRCS += lc823450_dma.c
 endif
 
 ifeq ($(CONFIG_RTC),y)
@@ -134,6 +95,7 @@ CHIP_CSRCS += lc823450_cpuindex.c
 CHIP_CSRCS += lc823450_cpupause.c
 CHIP_CSRCS += lc823450_cpustart.c
 CHIP_CSRCS += lc823450_testset.c
+CMN_ASRCS  := $(filter-out arm_testset.S,$(CMN_ASRCS))
 endif
 
 ifeq ($(CONFIG_LC823450_SDRAM), y)
@@ -154,6 +116,5 @@ CHIP_CSRCS += lc823450_userspace.c
 endif
 
 ifeq ($(CONFIG_ARM_MPU),y)
-CMN_CSRCS  += arm_mpu.c
 CHIP_CSRCS += lc823450_mpuinit2.c
 endif

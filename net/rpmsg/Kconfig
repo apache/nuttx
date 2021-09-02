@@ -8,6 +8,7 @@ menu "Rpmsg Socket Support"
 
 config NET_RPMSG
 	bool "Rpmsg domain (remote) sockets"
+	depends on RPTUN
 	select MM_CIRCBUF
 	default n
 	---help---

@@ -54,7 +54,7 @@
 void xtensa_sig_deliver(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint32_t regs[XCPTCONTEXT_REGS];
+  uint32_t *regs = rtcb->xcp.saved_regs;
 
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
@@ -70,10 +70,6 @@ void xtensa_sig_deliver(void)
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the return state on the stack. */
-
-  xtensa_copystate(regs, rtcb->xcp.regs);
 
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
@@ -141,8 +137,6 @@ void xtensa_sig_deliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_PS]         = rtcb->xcp.saved_ps;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Issue:
@@ -184,5 +178,5 @@ void xtensa_sig_deliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
-  xtensa_context_restore(regs);
+  xtensa_context_restore(&regs);
 }

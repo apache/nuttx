@@ -68,8 +68,6 @@ struct cxd56_geofence_dev_s
 
 /* file operation functions */
 
-static int cxd56_geofence_open(FAR struct file *filep);
-static int cxd56_geofence_close(FAR struct file *filep);
 static ssize_t cxd56_geofence_read(FAR struct file *filep,
                                    FAR char *buffer,
                                    size_t len);
@@ -101,8 +99,8 @@ static int cxd56_geofence_set_mode(unsigned long arg);
 
 static const struct file_operations g_geofencefops =
 {
-  cxd56_geofence_open,  /* open */
-  cxd56_geofence_close, /* close */
+  NULL,                 /* open */
+  NULL,                 /* close */
   cxd56_geofence_read,  /* read */
   NULL,                 /* write */
   NULL,                 /* seek */
@@ -450,7 +448,7 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
       if (fds)
         {
           fds->revents |= POLLIN;
-          gnssinfo("Report events: %02x\n", fds->revents);
+          gnssinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -472,48 +470,6 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
  ****************************************************************************/
 
 static int cxd56_geofence_initialize(FAR struct cxd56_geofence_dev_s *dev)
-{
-  int32_t ret = 0;
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_geofence_open
- *
- * Description:
- *   Standard character driver open method.
- *
- * Input Parameters:
- *   filep - File structure pointer
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int cxd56_geofence_open(FAR struct file *filep)
-{
-  int32_t ret = 0;
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: cxd56_geofence_close
- *
- * Description:
- *   Standard character driver close method.
- *
- * Input Parameters:
- *   filep - File structure pointer
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- ****************************************************************************/
-
-static int cxd56_geofence_close(FAR struct file *filep)
 {
   int32_t ret = 0;
 

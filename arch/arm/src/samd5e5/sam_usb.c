@@ -957,7 +957,7 @@ static int sam_ep0configure(FAR struct usbhost_driver_s *drvr,
                             uint8_t speed,
                             uint16_t maxpacketsize);
 static int sam_epalloc(FAR struct usbhost_driver_s *drvr,
-                       FAR const FAR struct usbhost_epdesc_s *epdesc,
+                       FAR const struct usbhost_epdesc_s *epdesc,
                        FAR usbhost_ep_t *ep);
 static int sam_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int sam_alloc(FAR struct usbhost_driver_s *drvr,

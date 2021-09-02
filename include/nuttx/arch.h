@@ -479,7 +479,7 @@ void up_reprioritize_rtr(FAR struct tcb_s *tcb, uint8_t priority);
  *
  ****************************************************************************/
 
-void up_exit() noreturn_function;
+void up_exit(int status) noreturn_function;
 
 /* Prototype is in unistd.h */
 
@@ -831,6 +831,8 @@ void up_textheap_free(FAR void *p);
  *                         address environment
  *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
  *                         address environment
+ *   up_addrenv_vheap    - Returns the virtual base address of the heap
+ *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
  *   up_addrenv_restore  - Restore an address environment
@@ -990,6 +992,28 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_vheap
+ *
+ * Description:
+ *   Return the heap virtual address associated with the newly created
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   vheap - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+int up_addrenv_vheap(FAR const group_addrenv_t *addrenv, FAR void **vheap);
 #endif
 
 /****************************************************************************
@@ -1159,6 +1183,44 @@ int up_addrenv_attach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_text_enable_write
+ *
+ * Description:
+ *   Temporarily enable write access to the .text section. This must be
+ *   called prior to loading the process code into memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be modified.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int up_addrenv_text_enable_write(FAR group_addrenv_t *addrenv);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_text_disable_write
+ *
+ * Description:
+ *   Disable write access to the .text section. This must be called after the
+ *   process code is loaded into memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be modified.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int up_addrenv_text_disable_write(FAR group_addrenv_t *addrenv);
 #endif
 
 /****************************************************************************
@@ -2562,6 +2624,30 @@ void up_perf_init(FAR void *arg);
 uint32_t up_perf_gettime(void);
 uint32_t up_perf_getfreq(void);
 void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
+
+/****************************************************************************
+ * Name: up_saveusercontext
+ *
+ * Description:
+ *   Save the current thread context
+ *
+ ****************************************************************************/
+
+int up_saveusercontext(FAR void *saveregs);
+
+/****************************************************************************
+ * Name: up_fpucmp
+ *
+ * Description:
+ *   compare FPU areas from thread context
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+bool up_fpucmp(FAR const void *saveregs1, FAR const void *saveregs2);
+#else
+#define up_fpucmp(r1, r2) (true)
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

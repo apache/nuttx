@@ -64,72 +64,9 @@
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "xtensa_macros.S"
+
 #include "chip.h"
-
-/****************************************************************************
- * Assembly Language Macros
- ****************************************************************************/
-
-/****************************************************************************
- * Name: setintstack
- *
- * Description:
- *   Set the current stack pointer to the "top" the interrupt stack.
- *   Single CPU case.
- *   Must be provided by MCU-specific logic in the SMP case.
- *
- ****************************************************************************/
-
-#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
-	.macro	setintstack tmp1 tmp2
-	movi		a1, g_intstacktop
-	.endm
-#endif
-
-/****************************************************************************
- * Macro: ps_setup
- *
- * Description:
- *   Set up PS for C, enable interrupts above this level and clear EXCM.
- *
- * Entry Conditions:
- *   level - interrupt level
- *   tmp   - scratch register
- *
- * Side Effects:
- *   PS and scratch register modified
- *
- * Assumptions:
- *   - PS.EXCM = 1, C calling disabled
- *
- ****************************************************************************/
-
-	.macro	ps_setup	level tmp
-
-#if 0 /* Nested interrupts no yet supported */
-#  ifdef __XTENSA_CALL0_ABI__
-	/* Disable interrupts at level and below */
-
-	movi	\tmp, PS_INTLEVEL(\level) | PS_UM
-#  else
-	movi	\tmp, PS_INTLEVEL(\level) | PS_UM | PS_WOE
-#  endif
-#else
-#  ifdef __XTENSA_CALL0_ABI__
-	/* Disable all low- and medium-priority interrupts.  Nested are not yet
-	 * supported.
-	 */
-
-	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
-#  else
-	movi	\tmp, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
-#  endif
-#endif
-
-	wsr		\tmp, PS
-	rsync
-
-	.endm
 
 /****************************************************************************
  * Waypoints
@@ -245,29 +182,23 @@ _xtensa_user_handler:
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
-#ifdef __XTENSA_CALL0_ABI__
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM
-#else
-	movi	a0, PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE
-#endif
-	wsr		a0, PS
+	ps_setup	1 a0
 
-  /* Create pseudo base save area. At this point, sp is still pointing to the
-   * allocated and filled exception stack frame.
-   */
+	/* Create pseudo base save area. At this point, a12 points to the
+	 * allocated and filled exception stack frame (old value of SP in case of
+	 * an interrupt stack).
+	 */
 
 #ifdef CONFIG_XTENSA_INTBACKTRACE
-  l32i    a3, sp, (4 * REG_A0)     /* Copy pre-exception a0 (return address) */
-  s32e    a3, sp, -16
-  l32i    a3, sp, (4 * REG_A1)     /* Copy pre-exception a1 (stack pointer) */
-  s32e    a3, sp, -12
-  rsr     a0, EPC_1                /* return address for debug backtrace */
-  movi    a4, 0xc0000000           /* constant with top 2 bits set (call size) */
-  rsync                            /* wait for WSR.PS to complete */
-  or      a0, a0, a4               /* set top 2 bits */
-  addx2   a0, a4, a0               /* clear top bit -- thus simulating call4 size */
-#else
-  rsync                            /* wait for WSR.PS to complete */
+	l32i    a3, a12, (4 * REG_A0)     /* Copy pre-exception a0 (return address) */
+	s32e    a3, sp, -16
+	l32i    a3, a12, (4 * REG_A1)     /* Copy pre-exception a1 (stack pointer) */
+	s32e    a3, sp, -12
+
+	rsr     a0, EPC_1                /* return address for debug backtrace */
+	movi    a4, 0xc0000000           /* constant with top 2 bits set (call size) */
+	or      a0, a0, a4               /* set top 2 bits */
+	addx2   a0, a4, a0               /* clear top bit -- thus simulating call4 size */
 #endif
 
 	/* Call xtensa_user, passing both the EXCCAUSE and a pointer to the

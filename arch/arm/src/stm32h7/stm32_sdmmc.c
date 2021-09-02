@@ -1609,7 +1609,7 @@ static void stm32_sdmmc_fifo_monitor(FAR void *arg)
       STM32_SDMMC_STA_DPSMACT)
     {
       work_queue(HPWORK, &priv->cbfifo,
-                 (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
+                 stm32_sdmmc_fifo_monitor, arg, 1);
     }
 }
 #endif
@@ -1696,7 +1696,7 @@ static int stm32_sdmmc_interrupt(int irq, void *context, void *arg)
 
               stm32_recvfifo(priv);
               work_queue(HPWORK, &priv->cbfifo,
-                         (worker_t)stm32_sdmmc_fifo_monitor, arg, 1);
+                         stm32_sdmmc_fifo_monitor, arg, 1);
             }
 
           /* Otherwise, Is the transmit FIFO half empty or less?  If so
@@ -3402,7 +3402,7 @@ static void stm32_callback(void *arg)
           mcinfo("Queuing callback to %p(%p)\n",
                  priv->callback, priv->cbarg);
 
-          work_queue(HPWORK, &priv->cbwork, (worker_t)priv->callback,
+          work_queue(HPWORK, &priv->cbwork, priv->callback,
                      priv->cbarg, 0);
         }
       else

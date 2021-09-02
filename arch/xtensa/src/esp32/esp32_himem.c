@@ -103,8 +103,6 @@
 
 /* Character driver methods */
 
-static int     himem_open(struct file *filep);
-static int     himem_close(struct file *filep);
 static ssize_t himem_read(struct file *filep, char *buffer,
                           size_t buflen);
 static ssize_t himem_write(struct file *filep, const char *buffer,
@@ -151,8 +149,8 @@ irqstate_t spinlock_flags;
 
 static const struct file_operations g_himemfops =
 {
-  himem_open,       /* open   */
-  himem_close,      /* close */
+  NULL,             /* open   */
+  NULL,             /* close */
   himem_read,       /* read */
   himem_write,      /* write */
   NULL,             /* seek */
@@ -648,32 +646,6 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
 }
 
 /****************************************************************************
- * Name: himem_open
- *
- * Description:
- *   This function is called whenever the LM-75 device is opened.
- *
- ****************************************************************************/
-
-static int himem_open(struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: himem_close
- *
- * Description:
- *   This routine is called when the LM-75 device is closed.
- *
- ****************************************************************************/
-
-static int himem_close(struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: himem_read
  ****************************************************************************/
 
@@ -699,7 +671,7 @@ static ssize_t himem_write(struct file *filep, const char *buffer,
 
 static int himem_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  int ret   = OK;
+  int ret = OK;
 
   switch (cmd)
     {

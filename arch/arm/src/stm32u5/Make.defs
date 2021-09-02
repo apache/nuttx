@@ -25,53 +25,7 @@ HEAD_ASRC =
 
 # Common ARM and Cortex-M4 files (copied from stm32/Make.defs)
 
-CMN_UASRCS =
-CMN_UCSRCS =
-
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
-
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c
-CMN_CSRCS += arm_doirq.c arm_exit.c arm_hardfault.c arm_initialize.c
-CMN_CSRCS += arm_initialstate.c arm_interruptcontext.c arm_mdelay.c arm_memfault.c
-CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c arm_puts.c
-CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
-CMN_CSRCS += arm_svcall.c arm_switchcontext.c arm_systemreset.c arm_tcbinfo.c
-CMN_CSRCS += arm_trigger_irq.c arm_udelay.c arm_unblocktask.c arm_usestack.c
-CMN_CSRCS += arm_vfork.c
-
-# Configuration-dependent common files
-
-ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
-CMN_CSRCS += arm_stackcheck.c
-endif
-
-ifeq ($(CONFIG_ARMV8M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
-endif
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_pthread_exit.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
+include armv8-m/Make.defs
 
 # Required STM32U5 files
 

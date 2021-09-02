@@ -18,28 +18,9 @@
 #
 ##############################################################################
 
+include arm/Make.defs
+
 HEAD_ASRC = str71x_head.S
-
-CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S arm_vectors.S
-CMN_ASRCS += vfork.S
-
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_dataabort.c arm_mdelay.c arm_udelay.c
-CMN_CSRCS += arm_exit.c arm_initialize.c arm_initialstate.c
-CMN_CSRCS += arm_interruptcontext.c arm_prefetchabort.c arm_releasepending.c
-CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_stackframe.c
-CMN_CSRCS += arm_syscall.c arm_unblocktask.c arm_undefinedinsn.c arm_usestack.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_lowputs.c arm_vfork.c arm_puts.c arm_tcbinfo.c
-CMN_CSRCS += arm_switchcontext.c
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += arm_idle.c
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
 
 CHIP_CSRCS  = str71x_prccu.c str71x_lowputc.c str71x_decodeirq.c str71x_irq.c
 CHIP_CSRCS += str71x_serial.c

@@ -149,12 +149,11 @@ struct xcptcontext
    * another signal handler is executing will be ignored!
    */
 
-  uint32_t saved_pc;
-  uint32_t saved_ps;
+  uint32_t *saved_regs;
 
   /* Register save area */
 
-  uint32_t regs[XCPTCONTEXT_REGS];
+  uint32_t *regs;
 
 #if XCHAL_CP_NUM > 0
   /* Co-processor save area */

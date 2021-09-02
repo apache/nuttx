@@ -46,18 +46,18 @@ does the following:
 ~~~~~~~~~~~~~~~~~~~~
 
 The NSH initialization function, ``nsh_initialize()``, be found in
-``apps/nshlib/nsh_init.c``. It does only three things:
+``apps/nshlib/nsh_init.c``. It does only four things:
 
-  #. ``nsh_romfsetc()``: If so configured, it executes an NSH start-up
-     script that can be found at ``/etc/init.d/rcS`` in the target file
-     system. The ``nsh_romfsetc()`` function can be found in
-     ``apps/nshlib/nsh_romfsetc.c``. This function will (1) register a
-     ROMFS file system, then (2) mount the ROMFS file system. ``/etc`` is
-     the default location where a read-only, ROMFS file system is mounted
-     by ``nsh_romfsetc()``.
+  #. ``nsh_romfsetc()``: If so configured, it executes NSH system init and
+     start-up script that can be found at ``/etc/init.d/rc.sysinit`` and
+     ``/etc/init.d/rcS`` in the target file system. The ``nsh_romfsetc()``
+     function can be found in ``apps/nshlib/nsh_romfsetc.c``.
+     This function will (1) register a ROMFS file system, then (2) mount
+     the ROMFS file system. ``/etc`` is the default location where a
+     read-only, ROMFS file system is mounted by ``nsh_romfsetc()``.
 
      The ROMFS image is, itself, just built into the firmware. By default,
-     this ``rcS`` start-up script contains the following logic::
+     this ``rc.sysinit`` system init script contains the following logic::
 
         # Create a RAMDISK and mount it at XXXRDMOUNTPOINTXXX
 
@@ -79,7 +79,7 @@ The NSH initialization function, ``nsh_initialize()``, be found in
      -  ``XXXRDMOUNTPOINTXXX`` will become the configured mount point.
         Default: ``/etc``
 
-     By default, the substituted values would yield an ``rcS`` file like::
+     By default, the substituted values would yield an ``rc.sysinit`` file like::
 
         # Create a RAMDISK and mount it at /tmp
 
@@ -96,8 +96,8 @@ The NSH initialization function, ``nsh_initialize()``, be found in
 
      -  Mount the FAT file system at a configured mountpoint, ``/tmp``.
 
-     This ``rcS`` template file can be found at
-     ``apps/nshlib/rcS.template``. The resulting ROMFS file system can be
+     This ``rc.sysinit.template`` template file can be found at
+     ``apps/nshlib/rc.sysinit.template``. The resulting ROMFS file system can be
      found in ``apps/nshlib/nsh_romfsimg.h``.
 
   #. ``board_app_initialize()``: Next any architecture-specific NSH
@@ -109,6 +109,13 @@ The NSH initialization function, ``nsh_initialize()``, be found in
 
   #. ``nsh_netinit()``: The ``nsh_netinit()`` function can be found in
      ``apps/nshlib/nsh_netinit.c``.
+
+  #. The start-up script ``rcS`` is executed after the system-init script
+     to startup some application and other system service.
+
+     This ``rcS`` template file can be found at
+     ``apps/nshlib/rcS.template``. The resulting ROMFS file system can be
+     found in ``apps/nshlib/nsh_romfsimg.h``.
 
 NSH Commands
 ************

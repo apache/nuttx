@@ -50,7 +50,7 @@ int sim_gpio_initialize(void)
 {
   /* Get an instance of the simulated I/O expander */
 
-  FAR struct ioexpander_dev_s *ioe = ioe_dummy_initialize();
+  struct ioexpander_dev_s *ioe = ioe_dummy_initialize();
   if (ioe == NULL)
     {
       gpioerr("ERROR: ioe_dummy_initialize failed\n");
@@ -63,36 +63,36 @@ int sim_gpio_initialize(void)
 
   IOEXP_SETDIRECTION(ioe, 0, IOEXPANDER_DIRECTION_IN);
   IOEXP_SETOPTION(ioe, 0, IOEXPANDER_OPTION_INVERT,
-                  (FAR void *)IOEXPANDER_VAL_NORMAL);
+                  (void *)IOEXPANDER_VAL_NORMAL);
   IOEXP_SETOPTION(ioe, 0, IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_DISABLE);
+                  (void *)IOEXPANDER_VAL_DISABLE);
   gpio_lower_half(ioe, 0, GPIO_INPUT_PIN, 0);
 
   /* Pin 1: an non-inverted, output pin */
 
   IOEXP_SETDIRECTION(ioe, 1, IOEXPANDER_DIRECTION_OUT);
   IOEXP_SETOPTION(ioe, 1, IOEXPANDER_OPTION_INVERT,
-                  (FAR void *)IOEXPANDER_VAL_NORMAL);
+                  (void *)IOEXPANDER_VAL_NORMAL);
   IOEXP_SETOPTION(ioe, 2, IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_DISABLE);
+                  (void *)IOEXPANDER_VAL_DISABLE);
   gpio_lower_half(ioe, 1, GPIO_OUTPUT_PIN, 1);
 
   /* Pin 2: an non-inverted, edge interrupting pin */
 
   IOEXP_SETDIRECTION(ioe, 2, IOEXPANDER_DIRECTION_IN);
   IOEXP_SETOPTION(ioe, 2, IOEXPANDER_OPTION_INVERT,
-                  (FAR void *)IOEXPANDER_VAL_NORMAL);
+                  (void *)IOEXPANDER_VAL_NORMAL);
   IOEXP_SETOPTION(ioe, 2, IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_BOTH);
+                  (void *)IOEXPANDER_VAL_BOTH);
   gpio_lower_half(ioe, 2, GPIO_INTERRUPT_PIN, 2);
 
   /* Pin 3: a non-inverted, level interrupting pin */
 
   IOEXP_SETDIRECTION(ioe, 3, IOEXPANDER_DIRECTION_IN);
   IOEXP_SETOPTION(ioe, 3, IOEXPANDER_OPTION_INVERT,
-                  (FAR void *)IOEXPANDER_VAL_NORMAL);
+                  (void *)IOEXPANDER_VAL_NORMAL);
   IOEXP_SETOPTION(ioe, 3, IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_HIGH);
+                  (void *)IOEXPANDER_VAL_HIGH);
   gpio_lower_half(ioe, 3, GPIO_INTERRUPT_PIN, 3);
 
   return 0;

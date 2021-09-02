@@ -252,7 +252,7 @@
  * header
  */
 
-#define BUF ((FAR struct eth_hdr_s *)priv->pd_dev.d_buf)
+#define BUF ((struct eth_hdr_s *)priv->pd_dev.d_buf)
 
 /* PHYs *********************************************************************/
 
@@ -454,7 +454,7 @@ static void pic32mz_rxdone(struct pic32mz_driver_s *priv);
 static void pic32mz_txdone(struct pic32mz_driver_s *priv);
 
 static void pic32mz_interrupt_work(void *arg);
-static int  pic32mz_interrupt(int irq, void *context, FAR void *arg);
+static int  pic32mz_interrupt(int irq, void *context, void *arg);
 
 /* Watchdog timer expirations */
 
@@ -2019,7 +2019,7 @@ static void pic32mz_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static int pic32mz_interrupt(int irq, void *context, FAR void *arg)
+static int pic32mz_interrupt(int irq, void *context, void *arg)
 {
   struct pic32mz_driver_s *priv;
   uint32_t status;

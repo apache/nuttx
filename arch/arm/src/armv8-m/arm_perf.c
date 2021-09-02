@@ -40,7 +40,7 @@ static uint32_t g_cpu_freq;
  * Public Functions
  ****************************************************************************/
 
-void up_perf_init(FAR void *arg)
+void up_perf_init(void *arg)
 {
   g_cpu_freq = (uint32_t)(uintptr_t)arg;
 
@@ -66,7 +66,7 @@ uint32_t up_perf_gettime(void)
   return getreg32(DWT_CYCCNT);
 }
 
-void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
+void up_perf_convert(uint32_t elapsed, struct timespec *ts)
 {
   uint32_t left;
 

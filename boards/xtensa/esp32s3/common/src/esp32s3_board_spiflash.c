@@ -69,7 +69,7 @@
  ****************************************************************************/
 
 #if defined (CONFIG_ESP32S3_SPIFLASH_SMARTFS)
-static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
+static int setup_smartfs(int smartn, struct mtd_dev_s *mtd,
                          const char *mnt_pt)
 {
   int ret = OK;
@@ -130,7 +130,7 @@ static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
  ****************************************************************************/
 
 #if defined (CONFIG_ESP32S3_SPIFLASH_LITTLEFS)
-static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
+static int setup_littlefs(const char *path, struct mtd_dev_s *mtd,
                           const char *mnt_pt, int priv)
 {
   int ret = OK;
@@ -178,7 +178,7 @@ static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
  ****************************************************************************/
 
 #if defined (CONFIG_ESP32S3_SPIFLASH_SPIFFS)
-static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
+static int setup_spiffs(const char *path, struct mtd_dev_s *mtd,
                         const char *mnt_pt, int priv)
 {
   int ret = OK;
@@ -220,7 +220,7 @@ static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
  ****************************************************************************/
 
 #if defined (CONFIG_ESP32S3_SPIFLASH_NXFFS)
-static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
+static int setup_nxffs(struct mtd_dev_s *mtd, const char *mnt_pt)
 {
   int ret = OK;
 
@@ -259,7 +259,7 @@ static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
 static int init_storage_partition(void)
 {
   int ret = OK;
-  FAR struct mtd_dev_s *mtd;
+  struct mtd_dev_s *mtd;
 
   mtd = esp32s3_spiflash_alloc_mtdpart(CONFIG_ESP32S3_STORAGE_MTD_OFFSET,
                                        CONFIG_ESP32S3_STORAGE_MTD_SIZE,

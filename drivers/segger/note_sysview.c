@@ -83,7 +83,11 @@ static void sysview_send_taskinfo(FAR struct tcb_s *tcb)
   SEGGER_SYSVIEW_TASKINFO info;
 
   info.TaskID     = tcb->pid;
+#if CONFIG_TASK_NAME_SIZE > 0
   info.sName      = tcb->name;
+#else
+  info.sName      = "<noname>";
+#endif
   info.Prio       = tcb->sched_priority;
   info.StackBase  = (uintptr_t)tcb->stack_base_ptr;
   info.StackSize  = tcb->adj_stack_size;
@@ -474,7 +478,9 @@ int sysview_initialize(void)
   SEGGER_SYSVIEW_SetRAMBase(CONFIG_SEGGER_SYSVIEW_RAM_BASE);
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
   if ((g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE) != 0)
+#endif
     {
       SEGGER_SYSVIEW_Start();
     }

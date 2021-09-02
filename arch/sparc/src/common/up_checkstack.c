@@ -40,22 +40,6 @@
 #ifdef CONFIG_STACK_COLORATION
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* 32bit alignment macros */
-
-#define INT32_ALIGN_MASK    (3)
-#define INT32_ALIGN_DOWN(a) ((a) & ~INT32_ALIGN_MASK)
-#define INT32_ALIGN_UP(a)   (((a) + INT32_ALIGN_MASK) & ~INT32_ALIGN_MASK)
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static size_t do_stackcheck(FAR void *stackbase, size_t nbytes);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -76,11 +60,11 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes);
  *
  ****************************************************************************/
 
-static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
+static size_t do_stackcheck(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
-  FAR uint32_t *ptr;
+  uint32_t *ptr;
   size_t mark;
 
   if (nbytes == 0)
@@ -90,8 +74,8 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not check outside the stack boundaries */
 
-  start = INT32_ALIGN_UP((uintptr_t)stackbase);
-  end   = INT32_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -103,7 +87,7 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
    * that does not have the magic value is the high water mark.
    */
 
-  for (ptr = (FAR uint32_t *)start, mark = (nbytes >> 2);
+  for (ptr = (uint32_t *)start, mark = (nbytes >> 2);
        *ptr == STACK_COLOR && mark > 0;
        ptr++, mark--);
 
@@ -123,7 +107,7 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
       int i;
       int j;
 
-      ptr = (FAR uint32_t *)start;
+      ptr = (uint32_t *)start;
       for (i = 0; i < size; i += 4 * 64)
         {
           for (j = 0; j < 64; j++)
@@ -163,29 +147,38 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void up_stack_color(void *stackbase, size_t nbytes)
 {
-  uintptr_t start;
-  uintptr_t end;
-  size_t nwords;
-  FAR uint32_t *ptr;
+  uint32_t *stkptr;
+  uintptr_t stkend;
+  size_t    nwords;
+  uintptr_t sp;
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  start = INT32_ALIGN_UP((uintptr_t)stackbase);
-  end   = nbytes ? INT32_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
-          up_getsp(); /* 0: colorize the running stack */
+  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
 
-  /* Get the adjusted size based on the top and bottom of the stack */
+  if (nbytes == 0) /* 0: colorize the running stack */
+    {
+      stkend = up_getsp();
+      if (stkend > (uintptr_t)&sp)
+        {
+          stkend = (uintptr_t)&sp;
+        }
+    }
+  else
+    {
+      stkend = (uintptr_t)stackbase + nbytes;
+    }
 
-  nwords = (end - start) >> 2;
-  ptr  = (FAR uint32_t *)start;
+  stkend = STACK_ALIGN_DOWN(stkend);
+  nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */
 
   while (nwords-- > 0)
     {
-      *ptr++ = STACK_COLOR;
+      *stkptr++ = STACK_COLOR;
     }
 }
 
@@ -205,12 +198,12 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
  *
  ****************************************************************************/
 
-size_t up_check_tcbstack(FAR struct tcb_s *tcb)
+size_t up_check_tcbstack(struct tcb_s *tcb)
 {
   return do_stackcheck(tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
-ssize_t up_check_tcbstack_remain(FAR struct tcb_s *tcb)
+ssize_t up_check_tcbstack_remain(struct tcb_s *tcb)
 {
   return tcb->adj_stack_size - up_check_tcbstack(tcb);
 }
@@ -229,12 +222,12 @@ ssize_t up_check_stack_remain(void)
 size_t up_check_intstack(void)
 {
   return do_stackcheck((uintptr_t)&g_intstackalloc,
-                       (CONFIG_ARCH_INTERRUPTSTACK & ~3));
+                       STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 }
 
 size_t up_check_intstack_remain(void)
 {
-  return (CONFIG_ARCH_INTERRUPTSTACK & ~3) - up_check_intstack();
+  return STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK) - up_check_intstack();
 }
 #endif
 

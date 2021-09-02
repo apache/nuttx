@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
     .section .init
     .globl bl602_start
@@ -125,20 +125,6 @@ bl602_entry_zero_wifi_bss_loop:
     addi a0, a0, 4
     bltu a0, a1, bl602_entry_zero_wifi_bss_loop
 bl602_entry_zero_wifi_bss_end:
-
-#ifndef __riscv_float_abi_soft
-
-    /* Enable FPU */
-
-    li t0, MSTATUS_FS
-    csrs mstatus, t0
-    csrr t1, mstatus
-    and t1, t1, t0
-    beqz t1, bl602_entry_enable_fpu_end
-    fssr x0
-
-bl602_entry_enable_fpu_end:
-#endif
 
     auipc ra, 0
     addi sp, sp, -16

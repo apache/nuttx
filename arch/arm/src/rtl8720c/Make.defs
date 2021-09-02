@@ -18,36 +18,12 @@
 #
 ############################################################################
 
-# arch/arm/src/common
-#
-CMN_CSRCS += arm_checkstack.c arm_createstack.c arm_exit.c arm_hostfs.c
-CMN_CSRCS += arm_initialize.c arm_interruptcontext.c arm_modifyreg8.c
-CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_pthread_start.c
-CMN_CSRCS += arm_puts.c arm_releasestack.c arm_semi_syslog.c
-CMN_CSRCS += arm_stackframe.c arm_task_start.c arm_usestack.c arm_vfork.c
-
-CMN_ASRCS += arm_exception.S
-
-# arch/arm/src/armv8-m
-#
-CMN_ASRCS += arm_fetchadd.S arm_fpu.S arm_setjmp.S
-CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
-CMN_ASRCS += arm_testset.S vfork.S
-
-CMN_UASRCS += arm_signal_handler.S
-
-CMN_CSRCS += arm_assert.c arm_blocktask.c arm_cache.c
-CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_initialstate.c
-CMN_CSRCS += arm_itm_syslog.c arm_memfault.c arm_mpu.c arm_ramvec_attach.c
-CMN_CSRCS += arm_ramvec_initialize.c arm_releasepending.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_signal_dispatch.c
-CMN_CSRCS += arm_stackcheck.c arm_svcall.c arm_systick.c arm_unblocktask.c
-CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
+include armv8-m/Make.defs
 
 # arch/arm/src/rtl8720c
 #
-CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c ameba_vectors.c
-CHIP_CSRCS += ameba_efuse.c ameba_flash.c ameba_wdt.c ameba_hci.c
+CHIP_CSRCS += ameba_nvic.c ameba_heap.c ameba_idle.c ameba_uart.c ameba_start.c
+CHIP_CSRCS += ameba_vectors.c ameba_efuse.c ameba_flash.c ameba_wdt.c ameba_hci.c
 
 CHIP_ASRCS += ameba_lto.S
 

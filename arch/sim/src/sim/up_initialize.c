@@ -27,6 +27,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/spi/spi_flash.h>
 #include <nuttx/spi/qspi_flash.h>
 
@@ -50,12 +51,12 @@
 static void up_init_smartfs(void)
 {
 #if defined(CONFIG_MTD_M25P) || defined(CONFIG_MTD_W25) || defined(CONFIG_MTD_SST26)
-  FAR struct mtd_dev_s *mtd;
-  FAR struct spi_dev_s *spi;
+  struct mtd_dev_s *mtd;
+  struct spi_dev_s *spi;
   int minor = 0;
 #endif
 #ifdef CONFIG_MTD_N25QXXX
-  FAR struct qspi_dev_s *qspi;
+  struct qspi_dev_s *qspi;
 #endif
 
 #ifdef CONFIG_SPI_FLASH
@@ -138,7 +139,7 @@ static void up_init_smartfs(void)
 }
 #endif
 
-static int up_loop_task(int argc, FAR char **argv)
+static int up_loop_task(int argc, char **argv)
 {
   while (1)
     {
@@ -215,6 +216,16 @@ static int up_loop_task(int argc, FAR char **argv)
 
 void up_initialize(void)
 {
+#ifdef CONFIG_PM
+  /* Initialize the power management subsystem.  This MCU-specific function
+   * must be called *very* early in the initialization sequence *before* any
+   * other device drivers are initialized (since they may attempt to register
+   * with the power management subsystem).
+   */
+
+  pm_initialize();
+#endif
+
   /* Register some tty-port to access tty-port on sim platform */
 
   up_uartinit();

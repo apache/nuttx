@@ -48,8 +48,6 @@
 
 /* Character driver methods */
 
-static int     xen1210_open(FAR struct file *filep);
-static int     xen1210_close(FAR struct file *filep);
 static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
                             size_t len);
 
@@ -61,8 +59,8 @@ static ssize_t xen1210_read(FAR struct file *filep, FAR char *buffer,
 
 static const struct file_operations g_xen1210fops =
 {
-  xen1210_open,    /* open */
-  xen1210_close,   /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   xen1210_read,    /* read */
   NULL,            /* write */
   NULL,            /* seek */
@@ -92,32 +90,6 @@ static inline void xen1210_configspi(FAR struct spi_dev_s *spi)
   SPI_SETBITS(spi, 8);
   SPI_HWFEATURES(spi, 0);
   SPI_SETFREQUENCY(spi, XEN1210_SPI_MAXFREQUENCY);
-}
-
-/****************************************************************************
- * Name: xen1210_open
- *
- * Description:
- *   Standard character driver open method.
- *
- ****************************************************************************/
-
-static int xen1210_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: xen1210_close
- *
- * Description:
- *   Standard character driver close method.
- *
- ****************************************************************************/
-
-static int xen1210_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************
@@ -369,7 +341,7 @@ int xen1210_register(XEN1210_HANDLE handle, int minor)
 
   /* Register the character driver */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   ret = register_driver(devname, &g_xen1210fops, 0444, priv);
   if (ret < 0)
     {

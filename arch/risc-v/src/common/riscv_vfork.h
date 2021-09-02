@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/mips32/irq.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,28 +60,28 @@
  * r31     ra     Return address.
  */
 
-#define VFORK_S0_OFFSET   (0*4)   /* Saved register s0 */
-#define VFORK_S1_OFFSET   (1*4)   /* Saved register s1 */
-#define VFORK_S2_OFFSET   (2*4)   /* Saved register s2 */
-#define VFORK_S3_OFFSET   (3*4)   /* Saved register s3 */
-#define VFORK_S4_OFFSET   (4*4)   /* Saved register s4 */
-#define VFORK_S5_OFFSET   (5*4)   /* Saved register s5 */
-#define VFORK_S6_OFFSET   (6*4)   /* Saved register s6 */
-#define VFORK_S7_OFFSET   (7*4)   /* Saved register s7 */
+#define VFORK_S0_OFFSET   (0*INT_REG_SIZE)   /* Saved register s0 */
+#define VFORK_S1_OFFSET   (1*INT_REG_SIZE)   /* Saved register s1 */
+#define VFORK_S2_OFFSET   (2*INT_REG_SIZE)   /* Saved register s2 */
+#define VFORK_S3_OFFSET   (3*INT_REG_SIZE)   /* Saved register s3 */
+#define VFORK_S4_OFFSET   (4*INT_REG_SIZE)   /* Saved register s4 */
+#define VFORK_S5_OFFSET   (5*INT_REG_SIZE)   /* Saved register s5 */
+#define VFORK_S6_OFFSET   (6*INT_REG_SIZE)   /* Saved register s6 */
+#define VFORK_S7_OFFSET   (7*INT_REG_SIZE)   /* Saved register s7 */
 
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-#  define VFORK_FP_OFFSET (8*4)   /* Frame pointer */
+#  define VFORK_FP_OFFSET (8*INT_REG_SIZE)   /* Frame pointer */
 #else
-#  define VFORK_S8_OFFSET (8*4)   /* Saved register s8 */
+#  define VFORK_S8_OFFSET (8*INT_REG_SIZE)   /* Saved register s8 */
 #endif
 
-#define VFORK_SP_OFFSET   (9*4)   /* Stack pointer*/
-#define VFORK_RA_OFFSET   (10*4)  /* Return address*/
+#define VFORK_SP_OFFSET   (9*INT_REG_SIZE)   /* Stack pointer*/
+#define VFORK_RA_OFFSET   (10*INT_REG_SIZE)  /* Return address*/
 #ifdef RISCV_SAVE_GP
-#  define VFORK_GP_OFFSET (11*4)   /* Global pointer */
-#  define VFORK_SIZEOF    (12*4)
+#  define VFORK_GP_OFFSET (11*INT_REG_SIZE)  /* Global pointer */
+#  define VFORK_SIZEOF    (12*INT_REG_SIZE)
 #else
-#  define VFORK_SIZEOF    (11*4)
+#  define VFORK_SIZEOF    (11*INT_REG_SIZE)
 #endif
 
 /****************************************************************************
@@ -93,23 +93,23 @@ struct vfork_s
 {
   /* CPU registers */
 
-  uint32_t s0;   /* Saved register s0 */
-  uint32_t s1;   /* Saved register s1 */
-  uint32_t s2;   /* Saved register s2 */
-  uint32_t s3;   /* Saved register s3 */
-  uint32_t s4;   /* Saved register s4 */
-  uint32_t s5;   /* Saved register s5 */
-  uint32_t s6;   /* Saved register s6 */
-  uint32_t s7;   /* Saved register s7 */
+  uintptr_t s0;   /* Saved register s0 */
+  uintptr_t s1;   /* Saved register s1 */
+  uintptr_t s2;   /* Saved register s2 */
+  uintptr_t s3;   /* Saved register s3 */
+  uintptr_t s4;   /* Saved register s4 */
+  uintptr_t s5;   /* Saved register s5 */
+  uintptr_t s6;   /* Saved register s6 */
+  uintptr_t s7;   /* Saved register s7 */
 #ifdef CONFIG_RISCV_FRAMEPOINTER
-  uint32_t fp;   /* Frame pointer */
+  uintptr_t fp;   /* Frame pointer */
 #else
-  uint32_t s8;   /* Saved register s8 */
+  uintptr_t s8;   /* Saved register s8 */
 #endif
-  uint32_t sp;   /* Stack pointer */
-  uint32_t ra;   /* Return address */
+  uintptr_t sp;   /* Stack pointer */
+  uintptr_t ra;   /* Return address */
 #ifdef RISCV_SAVE_GP
-  uint32_t gp;   /* Global pointer */
+  uintptr_t gp;   /* Global pointer */
 #endif
 
   /* Floating point registers (not yet) */

@@ -83,7 +83,7 @@ Toolchain
        CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
 
 LEDs and Buttons
 ================
@@ -211,7 +211,7 @@ Configurations
        CONFIG_WINDOWS_CYGWIN=y             : Cywin under Windows
 
      System Type -> Toolchain:
-       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIW=y : GNU ARM EABI toolchain
+       CONFIG_ARMV7M_TOOLCHAIN_GNU_EABI=y  : GNU ARM EABI toolchain
 
 Configuration sub-directories
 -----------------------------

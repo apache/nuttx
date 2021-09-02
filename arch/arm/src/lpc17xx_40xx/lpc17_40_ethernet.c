@@ -1277,7 +1277,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                */
 
               work_queue(ETHWORK, &priv->lp_rxwork,
-                         (worker_t)lpc17_40_rxdone_work, priv, 0);
+                         lpc17_40_rxdone_work, priv, 0);
             }
 
           /* Check for Tx events ********************************************/
@@ -1339,7 +1339,7 @@ static int lpc17_40_interrupt(int irq, void *context, FAR void *arg)
                */
 
               work_queue(ETHWORK, &priv->lp_txwork,
-                         (worker_t)lpc17_40_txdone_work, priv, 0);
+                         lpc17_40_txdone_work, priv, 0);
             }
         }
     }
@@ -1489,7 +1489,7 @@ static void lpc17_40_poll_work(FAR void *arg)
 
   if (considx != prodidx)
     {
-      work_queue(ETHWORK, &priv->lp_rxwork, (worker_t)lpc17_40_rxdone_work,
+      work_queue(ETHWORK, &priv->lp_rxwork, lpc17_40_rxdone_work,
                  priv, 0);
     }
 

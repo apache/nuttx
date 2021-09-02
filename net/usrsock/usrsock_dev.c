@@ -143,7 +143,7 @@ static ssize_t iovec_do(FAR void *srcdst, size_t srcdstlen,
 
   /* Rewind to correct position. */
 
-  while (pos > 0 && iovcnt > 0)
+  while (pos >= 0 && iovcnt > 0)
     {
       if (iov->iov_len <= pos)
         {
@@ -295,7 +295,7 @@ static void usrsockdev_pollnotify(FAR struct usrsockdev_s *dev,
           fds->revents |= (fds->events & eventset);
           if (fds->revents != 0)
             {
-              ninfo("Report events: %02x\n", fds->revents);
+              ninfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }
@@ -479,13 +479,13 @@ static ssize_t usrsockdev_handle_event(FAR struct usrsockdev_s *dev,
 #ifdef CONFIG_DEV_RANDOM
         /* Add randomness. */
 
-        add_sw_randomness((hdr->events << 16) - hdr->usockid);
+        add_sw_randomness((hdr->head.events << 16) - hdr->usockid);
 #endif
 
         /* Handle event. */
 
         ret = usrsock_event(conn,
-                            hdr->events & ~USRSOCK_EVENT_INTERNAL_MASK);
+                            hdr->head.events & ~USRSOCK_EVENT_INTERNAL_MASK);
         if (ret < 0)
           {
             return ret;

@@ -96,7 +96,7 @@ struct unionfs_file_s
 /* Helper functions */
 
 static int     unionfs_semtake(FAR struct unionfs_inode_s *ui, bool noint);
-#define        unionfs_semgive(ui) (void)nxsem_post(&(ui)->ui_exclsem)
+#define        unionfs_semgive(ui) nxsem_post(&(ui)->ui_exclsem)
 
 static FAR const char *unionfs_offsetpath(FAR const char *relpath,
                  FAR const char *prefix);
@@ -1001,12 +1001,15 @@ static int unionfs_close(FAR struct file *filep)
     {
       unionfs_destroy(ui);
     }
+  else
+    {
+      unionfs_semgive(ui);
+    }
 
   /* Free the open file container */
 
   kmm_free(uf);
   filep->f_priv = NULL;
-  unionfs_semgive(ui);
   return ret;
 }
 
@@ -1418,6 +1421,11 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
+  if (!relpath)
+    {
+      return -EINVAL;
+    }
+
   /* Recover the filesystem data from the struct inode instance */
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
@@ -1438,7 +1446,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
    * omit duplicates on file system 1.
    */
 
-  if (relpath && strlen(relpath) > 0)
+  if (strlen(relpath) > 0)
     {
       fu->fu_relpath = strdup(relpath);
       if (!fu->fu_relpath)
@@ -1853,6 +1861,10 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                   if (ops->rewinddir != NULL)
                     {
                       ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+                      if (ret < 0)
+                        {
+                          return ret;
+                        }
                     }
 
                   /* Then try the read operation again */

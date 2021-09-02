@@ -22,11 +22,22 @@
 
 4. Run the nuttx with qemu
 
-  $ qemu-system-riscv32 -M virt -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
+  $ qemu-system-riscv32 -semihosting -M virt -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
 
   or
 
-  $ qemu-system-riscv64 -M virt -cpu rv64 -smp 8-bios none -kernel nuttx -nographic
+  $ qemu-system-riscv64 -semihosting -M virt -cpu rv64 -smp 8 -bios none -kernel nuttx -nographic
+
+  NuttShell (NSH) NuttX-10.3.0-RC1
+  nsh> mount -t hostfs -o fs=. /host
+  nsh> cat /host/AUTHORS
+  This is a list of all the contributors that have submitted ICLA, SGA
+  If you are not on this list and believe you should be, please inform us.
+
+  ICLA
+  ====
+  ...
+  nsh>
 
 5. TODO
 

@@ -42,8 +42,6 @@ static ssize_t syslog_console_read(FAR struct file *filep, FAR char *buffer,
                                    size_t buflen);
 static ssize_t syslog_console_write(FAR struct file *filep,
                                     FAR const char *buffer, size_t buflen);
-static int     syslog_console_ioctl(FAR struct file *filep, int cmd,
-                                    unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -56,7 +54,7 @@ static const struct file_operations g_consoleops =
   syslog_console_read,  /* read */
   syslog_console_write, /* write */
   NULL,                 /* seek */
-  syslog_console_ioctl, /* ioctl */
+  NULL,                 /* ioctl */
   NULL                  /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL                /* unlink */
@@ -66,16 +64,6 @@ static const struct file_operations g_consoleops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: syslog_console_ioctl
- ****************************************************************************/
-
-static int syslog_console_ioctl(FAR struct file *filep, int cmd,
-                                unsigned long arg)
-{
-  return -ENOTTY;
-}
 
 /****************************************************************************
  * Name: syslog_console_read

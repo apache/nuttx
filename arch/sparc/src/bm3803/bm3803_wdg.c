@@ -63,7 +63,7 @@ struct bm3803_lowerhalf_s
 {
   /* Lower half operations */
 
-  FAR const struct watchdog_ops_s  *ops;
+  const struct watchdog_ops_s  *ops;
   uint32_t timeout;    /* The (actual) selected timeout */
   uint32_t lastreset;  /* The last reset time */
   bool     started;    /* true: The watchdog timer has been started */
@@ -80,16 +80,16 @@ struct bm3803_lowerhalf_s
 # define        bm3803_getreg(addr)     getreg32(addr)
 # define        bm3803_putreg(val,addr) putreg32(val,addr)
 
-static inline void bm3803_setreload(FAR struct bm3803_lowerhalf_s *priv);
+static inline void bm3803_setreload(struct bm3803_lowerhalf_s *priv);
 
 /* "Lower half" driver methods **********************************************/
 
-static int      bm3803_start(FAR struct watchdog_lowerhalf_s *lower);
-static int      bm3803_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int      bm3803_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int      bm3803_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                  FAR struct watchdog_status_s *status);
-static int      bm3803_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int      bm3803_start(struct watchdog_lowerhalf_s *lower);
+static int      bm3803_stop(struct watchdog_lowerhalf_s *lower);
+static int      bm3803_keepalive(struct watchdog_lowerhalf_s *lower);
+static int      bm3803_getstatus(struct watchdog_lowerhalf_s *lower,
+                  struct watchdog_status_s *status);
+static int      bm3803_settimeout(struct watchdog_lowerhalf_s *lower,
                   uint32_t timeout);
 
 /****************************************************************************
@@ -129,7 +129,7 @@ static struct bm3803_lowerhalf_s g_wdgdev;
  *
  ****************************************************************************/
 
-static inline void bm3803_setreload(FAR struct bm3803_lowerhalf_s *priv)
+static inline void bm3803_setreload(struct bm3803_lowerhalf_s *priv)
 {
   /* Set the reload value */
 
@@ -151,10 +151,10 @@ static inline void bm3803_setreload(FAR struct bm3803_lowerhalf_s *priv)
  *
  ****************************************************************************/
 
-static int bm3803_start(FAR struct watchdog_lowerhalf_s *lower)
+static int bm3803_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct bm3803_lowerhalf_s *priv =
-                                      (FAR struct bm3803_lowerhalf_s *)lower;
+  struct bm3803_lowerhalf_s *priv =
+                                      (struct bm3803_lowerhalf_s *)lower;
   irqstate_t flags;
   uint32_t val = bm3803_getreg(BM3803_TIM1_BASE + BM3803_TIM_CR_OFFSET);
   val |= TIMER_WDG;
@@ -202,7 +202,7 @@ static int bm3803_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bm3803_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int bm3803_stop(struct watchdog_lowerhalf_s *lower)
 {
   uint32_t val = bm3803_getreg(BM3803_TIM1_BASE + BM3803_TIM_CR_OFFSET);
 
@@ -232,10 +232,10 @@ static int bm3803_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bm3803_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int bm3803_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct bm3803_lowerhalf_s *priv =
-                                      (FAR struct bm3803_lowerhalf_s *)lower;
+  struct bm3803_lowerhalf_s *priv =
+                                      (struct bm3803_lowerhalf_s *)lower;
   irqstate_t flags;
 
   wdinfo("Entry\n");
@@ -266,11 +266,11 @@ static int bm3803_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bm3803_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                             FAR struct watchdog_status_s *status)
+static int bm3803_getstatus(struct watchdog_lowerhalf_s *lower,
+                             struct watchdog_status_s *status)
 {
-  FAR struct bm3803_lowerhalf_s *priv =
-                                      (FAR struct bm3803_lowerhalf_s *)lower;
+  struct bm3803_lowerhalf_s *priv =
+                                      (struct bm3803_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -326,11 +326,11 @@ static int bm3803_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bm3803_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int bm3803_settimeout(struct watchdog_lowerhalf_s *lower,
                               uint32_t timeout)
 {
-  FAR struct bm3803_lowerhalf_s *priv =
-                                      (FAR struct bm3803_lowerhalf_s *)lower;
+  struct bm3803_lowerhalf_s *priv =
+                                      (struct bm3803_lowerhalf_s *)lower;
   uint32_t reload;
   uint16_t prescaler;
   uint32_t freqin;
@@ -402,9 +402,9 @@ static int bm3803_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-void bm3803_wdginitialize(FAR const char *devpath)
+void bm3803_wdginitialize(const char *devpath)
 {
-  FAR struct bm3803_lowerhalf_s *priv = &g_wdgdev;
+  struct bm3803_lowerhalf_s *priv = &g_wdgdev;
 
   wdinfo("Entry: devpath=%s \n", devpath);
 
@@ -422,12 +422,12 @@ void bm3803_wdginitialize(FAR const char *devpath)
    * device option bits, the watchdog is automatically enabled at power-on.
    */
 
-  bm3803_settimeout((FAR struct watchdog_lowerhalf_s *)priv,
+  bm3803_settimeout((struct watchdog_lowerhalf_s *)priv,
                     CONFIG_BM3803_WDG_DEFTIMOUT);
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
-  (void)watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
+  watchdog_register(devpath, (FAR struct watchdog_lowerhalf_s *)priv);
 }
 
 #endif /* CONFIG_WATCHDOG && CONFIG_BM3803_WDG */

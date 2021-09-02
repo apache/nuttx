@@ -211,7 +211,7 @@ long sysconf(int name)
         return CLOCKS_PER_SEC;
 
       case _SC_OPEN_MAX:
-        return _POSIX_OPEN_MAX;
+        return OPEN_MAX;
 
       case _SC_ATEXIT_MAX:
 #ifdef CONFIG_SCHED_EXIT_MAX

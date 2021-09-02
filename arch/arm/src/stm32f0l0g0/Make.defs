@@ -18,32 +18,7 @@
 #
 ############################################################################
 
-CMN_ASRCS  = arm_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += vfork.S
-
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
-CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
-CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
-CMN_CSRCS += arm_puts.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
-CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
-CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
-CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
-CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
-
-ifeq ($(CONFIG_DEBUG_FEATURES),y)
-CMN_CSRCS += arm_dumpnvic.c
-endif
+include armv6-m/Make.defs
 
 CHIP_CSRCS  = stm32_start.c stm32_gpio.c stm32_exti_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_lse.c stm32_lowputc.c stm32_serial.c stm32_rcc.c

@@ -2985,12 +2985,12 @@ int video_uninitialize(void)
   return OK;
 }
 
-void imgsensor_register(const FAR struct imgsensor_ops_s *ops)
+void imgsensor_register(FAR const struct imgsensor_ops_s *ops)
 {
   g_video_sensor_ops = ops;
 }
 
-void imgdata_register(const FAR struct imgdata_ops_s *ops)
+void imgdata_register(FAR const struct imgdata_ops_s *ops)
 {
   g_video_data_ops = ops;
 }

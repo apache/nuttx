@@ -77,8 +77,6 @@ static int charger_online(FAR bool *online);
 static int charger_get_temptable(FAR struct battery_temp_table_s *table);
 static int charger_set_temptable(FAR struct battery_temp_table_s *table);
 
-static int charger_open(FAR struct file *filep);
-static int charger_close(FAR struct file *filep);
 static ssize_t charger_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t charger_write(FAR struct file *filep,
@@ -92,8 +90,8 @@ static int charger_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_chargerops =
 {
-  charger_open,   /* open */
-  charger_close,  /* close */
+  NULL,           /* open */
+  NULL,           /* close */
   charger_read,   /* read */
   charger_write,  /* write */
   NULL,           /* seek */
@@ -417,32 +415,6 @@ static int charger_set_temptable(FAR struct battery_temp_table_s *table)
   buf.T00 = table->T00;
 
   return cxd56_pmic_settemptable(&buf);
-}
-
-/****************************************************************************
- * Name: charger_open
- *
- * Description:
- *   This function is called whenever the battery device is opened.
- *
- ****************************************************************************/
-
-static int charger_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: charger_close
- *
- * Description:
- *   This routine is called when the battery device is closed.
- *
- ****************************************************************************/
-
-static int charger_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

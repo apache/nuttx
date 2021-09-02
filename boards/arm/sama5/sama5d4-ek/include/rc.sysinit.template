@@ -1,0 +1,12 @@
+# Mount the procfs file system at /proc
+
+mount -t procfs /proc
+echo "rc.sysinit: Mounted /proc"
+
+# Create a RAMDISK at /dev/ram1, size 0.5MiB, format it with a FAT
+# file system and mount it at /tmp
+
+mkrd -m 1 -s 512 1024
+mkfatfs /dev/ram1
+mount -t vfat /dev/ram1 /tmp
+echo "rc.sysinit: Mounted /tmp"

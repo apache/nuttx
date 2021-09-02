@@ -3499,6 +3499,15 @@ config BOARD_ASSERT_RESET_VALUE
 		implementations to handle the reset differently for the
 		case of a crash.
 
+config BOARDCTL_RESET_CAUSE
+	bool "Return reset cause"
+	default n
+	depends on ARCH_HAVE_RESET
+	---help---
+		Enables support for the BOARDIOC_RESET_CAUSE boardctl() command.
+		Architecture specific logic must provide the board_reset_cause()
+		interface.
+
 config BOARDCTL_UNIQUEID
 	bool "Return board unique ID"
 	default n

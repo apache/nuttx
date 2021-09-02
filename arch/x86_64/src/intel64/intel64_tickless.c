@@ -27,10 +27,10 @@
  *
  *   void sim_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_initialize()).
- *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
+ *   int up_timer_gettime(struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
- *   int up_timer_start(FAR const struct timespec *ts): Start (or re-starts)
+ *   int up_timer_start(const struct timespec *ts): Start (or re-starts)
  *     the interval timer.
  *
  * The RTOS will provide the following interfaces for use by the platform-
@@ -129,22 +129,22 @@ void up_timer_initialize(void)
   g_last_stop_time = g_start_tsc = rdtsc();
 
 #ifndef CONFIG_SCHED_TICKLESS_ALARM
-  (void)irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
+  irq_attach(TMR_IRQ, (xcpt_t)up_timer_expire, NULL);
 #else
-  (void)irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
+  irq_attach(TMR_IRQ, (xcpt_t)up_alarm_expire, NULL);
 #endif
 
   return;
 }
 
-static inline uint64_t up_ts2tick(FAR const struct timespec *ts)
+static inline uint64_t up_ts2tick(const struct timespec *ts)
 {
   return ROUND_INT_DIV((uint64_t)ts->tv_nsec * x86_64_timer_freq,
                        NS_PER_SEC) +
          (uint64_t)ts->tv_sec * x86_64_timer_freq;
 }
 
-static inline void up_tick2ts(uint64_t tick, FAR struct timespec *ts)
+static inline void up_tick2ts(uint64_t tick, struct timespec *ts)
 {
   ts->tv_sec  = (tick / x86_64_timer_freq);
   ts->tv_nsec = (uint64_t)(ROUND_INT_DIV((tick % x86_64_timer_freq) *
@@ -182,7 +182,7 @@ static inline void up_tmr_sync_down(void)
  *   sim_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
- *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
+ *      int clock_gettime(clockid_t clockid, struct timespec *ts);
  *
  *   when clockid is CLOCK_MONOTONIC.
  *
@@ -207,7 +207,7 @@ static inline void up_tmr_sync_down(void)
  *
  ****************************************************************************/
 
-int up_timer_gettime(FAR struct timespec *ts)
+int up_timer_gettime(struct timespec *ts)
 {
   uint64_t diff = (rdtsc() - g_start_tsc);
   up_tick2ts(diff, ts);
@@ -247,7 +247,7 @@ int up_timer_gettime(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_cancel(FAR struct timespec *ts)
+int up_timer_cancel(struct timespec *ts)
 {
   up_tmr_sync_up();
 
@@ -298,7 +298,7 @@ int up_timer_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_timer_start(FAR const struct timespec *ts)
+int up_timer_start(const struct timespec *ts)
 {
   uint64_t ticks;
 
@@ -375,7 +375,7 @@ void up_timer_expire(void)
  *
  ****************************************************************************/
 
-int up_alarm_cancel(FAR struct timespec *ts)
+int up_alarm_cancel(struct timespec *ts)
 {
   up_tmr_sync_up();
 
@@ -418,7 +418,7 @@ int up_alarm_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int up_alarm_start(FAR const struct timespec *ts)
+int up_alarm_start(const struct timespec *ts)
 {
   uint64_t ticks;
 

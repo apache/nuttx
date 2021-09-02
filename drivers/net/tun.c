@@ -212,7 +212,6 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv);
 
 /* File interface */
 
-static int tun_open(FAR struct file *filep);
 static int tun_close(FAR struct file *filep);
 static ssize_t tun_read(FAR struct file *filep, FAR char *buffer,
                         size_t buflen);
@@ -231,7 +230,7 @@ static struct tun_device_s g_tun_devices[CONFIG_TUN_NINTERFACES];
 
 static const struct file_operations g_tun_file_ops =
 {
-  tun_open,     /* open */
+  NULL,         /* open */
   tun_close,    /* close */
   tun_read,     /* read */
   tun_write,    /* write */
@@ -1149,16 +1148,6 @@ static void tun_dev_uninit(FAR struct tun_device_s *priv)
   nxsem_destroy(&priv->waitsem);
   nxsem_destroy(&priv->read_wait_sem);
   nxsem_destroy(&priv->write_wait_sem);
-}
-
-/****************************************************************************
- * Name: tun_open
- ****************************************************************************/
-
-static int tun_open(FAR struct file *filep)
-{
-  filep->f_priv = 0;
-  return OK;
 }
 
 /****************************************************************************

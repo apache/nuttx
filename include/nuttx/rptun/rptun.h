@@ -38,6 +38,10 @@
 
 #define RPTUNIOC_START              _RPTUNIOC(1)
 #define RPTUNIOC_STOP               _RPTUNIOC(2)
+#define RPTUNIOC_RESET              _RPTUNIOC(3)
+#define RPTUNIOC_PANIC              _RPTUNIOC(4)
+#define RPTUNIOC_DUMP               _RPTUNIOC(5)
+#define RPTUNIOC_PING               _RPTUNIOC(6)
 
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
 
@@ -58,7 +62,7 @@
  ****************************************************************************/
 
 #define RPTUN_GET_CPUNAME(d) ((d)->ops->get_cpuname ? \
-                              (d)->ops->get_cpuname(d) : NULL)
+                              (d)->ops->get_cpuname(d) : "")
 
 /****************************************************************************
  * Name: RPTUN_GET_FIRMWARE
@@ -251,6 +255,41 @@
                                       (d)->ops->register_callback(d,NULL,NULL) : -ENOSYS)
 
 /****************************************************************************
+ * Name: RPTUN_RESET
+ *
+ * Description:
+ *   Reset remote cpu
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   value    - reset value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define RPTUN_RESET(d,v) ((d)->ops->reset ? \
+                          (d)->ops->reset(d,v) : -ENOSYS)
+
+/****************************************************************************
+ * Name: RPTUN_PANIC
+ *
+ * Description:
+ *   Panic remote cpu
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define RPTUN_PANIC(d) ((d)->ops->panic ? \
+                        (d)->ops->panic(d) : -ENOSYS)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -293,11 +332,23 @@ struct rptun_ops_s
   CODE int (*notify)(FAR struct rptun_dev_s *dev, uint32_t vqid);
   CODE int (*register_callback)(FAR struct rptun_dev_s *dev,
                                 rptun_callback_t callback, FAR void *arg);
+
+  CODE void (*reset)(FAR struct rptun_dev_s *dev, int value);
+  CODE void (*panic)(FAR struct rptun_dev_s *dev);
 };
 
 struct rptun_dev_s
 {
   FAR const struct rptun_ops_s *ops;
+};
+
+/* used for ioctl RPTUNIOC_PING */
+
+struct rptun_ping_s
+{
+  int  times;
+  int  len;
+  bool ack;
 };
 
 /****************************************************************************
@@ -314,6 +365,9 @@ extern "C"
 
 int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
+int rptun_reset(FAR const char *cpuname, int value);
+int rptun_panic(FAR const char *cpuname);
+void rptun_dump_all(void);
 
 #ifdef __cplusplus
 }

@@ -138,7 +138,7 @@ FAR struct nxterm_state_s *
 
   /* Register the driver */
 
-  snprintf(devname, NX_DEVNAME_SIZE, NX_DEVNAME_FORMAT, minor);
+  snprintf(devname, sizeof(devname), NX_DEVNAME_FORMAT, minor);
   ret = register_driver(devname, &g_nxterm_drvrops, 0666, priv);
   if (ret < 0)
     {

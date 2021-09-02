@@ -332,12 +332,11 @@ static void riscv_dumpstate(void)
 
   if (CURRENT_REGS)
     {
-      memcpy(rtcb->xcp.regs,
-             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
+      rtcb->xcp.regs = (uintptr_t *)CURRENT_REGS;
     }
   else
     {
-      riscv_saveusercontext(rtcb->xcp.regs);
+      up_saveusercontext(rtcb->xcp.regs);
     }
 
   /* Dump the registers (if available) */

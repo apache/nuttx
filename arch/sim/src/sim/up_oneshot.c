@@ -61,8 +61,8 @@ struct sim_oneshot_lowerhalf_s
   sq_entry_t link;
   struct timespec alarm;
 
-  oneshot_callback_t callback;    /* internal handler that receives callback */
-  FAR void *arg;                  /* Argument that is passed to the handler */
+  oneshot_callback_t callback; /* internal handler that receives callback */
+  void *arg;                   /* Argument that is passed to the handler */
 };
 
 /****************************************************************************
@@ -71,15 +71,15 @@ struct sim_oneshot_lowerhalf_s
 
 static void sim_process_tick(sq_entry_t *entry);
 
-static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR struct timespec *ts);
-static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, FAR void *arg,
-                     FAR const struct timespec *ts);
-static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                      FAR struct timespec *ts);
-static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
-                       FAR struct timespec *ts);
+static int sim_max_delay(struct oneshot_lowerhalf_s *lower,
+                         struct timespec *ts);
+static int sim_start(struct oneshot_lowerhalf_s *lower,
+                     oneshot_callback_t callback, void *arg,
+                     const struct timespec *ts);
+static int sim_cancel(struct oneshot_lowerhalf_s *lower,
+                      struct timespec *ts);
+static int sim_current(struct oneshot_lowerhalf_s *lower,
+                       struct timespec *ts);
 
 /****************************************************************************
  * Private Data
@@ -109,7 +109,7 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static inline void sim_timer_current(FAR struct timespec *ts)
+static inline void sim_timer_current(struct timespec *ts)
 {
   uint64_t nsec;
   time_t sec;
@@ -133,7 +133,7 @@ static inline void sim_timer_current(FAR struct timespec *ts)
 
 static void sim_timer_update(void)
 {
-  FAR sq_entry_t *entry;
+  sq_entry_t *entry;
 
   for (entry = sq_peek(&g_oneshot_list); entry; entry = sq_next(entry))
     {
@@ -157,10 +157,10 @@ static void sim_timer_update(void)
 
 static void sim_process_tick(sq_entry_t *entry)
 {
-  FAR struct sim_oneshot_lowerhalf_s *priv =
+  struct sim_oneshot_lowerhalf_s *priv =
     container_of(entry, struct sim_oneshot_lowerhalf_s, link);
   oneshot_callback_t callback;
-  FAR void *cbarg;
+  void *cbarg;
 
   DEBUGASSERT(priv != NULL);
 
@@ -207,8 +207,8 @@ static void sim_process_tick(sq_entry_t *entry)
  *
  ****************************************************************************/
 
-static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                         FAR struct timespec *ts)
+static int sim_max_delay(struct oneshot_lowerhalf_s *lower,
+                         struct timespec *ts)
 {
   DEBUGASSERT(ts != NULL);
 
@@ -237,12 +237,12 @@ static int sim_max_delay(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
-                     oneshot_callback_t callback, FAR void *arg,
-                     FAR const struct timespec *ts)
+static int sim_start(struct oneshot_lowerhalf_s *lower,
+                     oneshot_callback_t callback, void *arg,
+                     const struct timespec *ts)
 {
-  FAR struct sim_oneshot_lowerhalf_s *priv =
-    (FAR struct sim_oneshot_lowerhalf_s *)lower;
+  struct sim_oneshot_lowerhalf_s *priv =
+    (struct sim_oneshot_lowerhalf_s *)lower;
   struct timespec current;
 
   DEBUGASSERT(priv != NULL && callback != NULL && ts != NULL);
@@ -280,11 +280,11 @@ static int sim_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                      FAR struct timespec *ts)
+static int sim_cancel(struct oneshot_lowerhalf_s *lower,
+                      struct timespec *ts)
 {
-  FAR struct sim_oneshot_lowerhalf_s *priv =
-    (FAR struct sim_oneshot_lowerhalf_s *)lower;
+  struct sim_oneshot_lowerhalf_s *priv =
+    (struct sim_oneshot_lowerhalf_s *)lower;
   struct timespec current;
 
   DEBUGASSERT(priv != NULL && ts != NULL);
@@ -317,8 +317,8 @@ static int sim_cancel(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
-                       FAR struct timespec *ts)
+static int sim_current(struct oneshot_lowerhalf_s *lower,
+                       struct timespec *ts)
 {
   DEBUGASSERT(ts != NULL);
 
@@ -342,7 +342,7 @@ static int sim_current(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int sim_alarm_handler(int irq, FAR void *context, FAR void *arg)
+static int sim_alarm_handler(int irq, void *context, void *arg)
 {
   sim_timer_update();
   return OK;
@@ -372,14 +372,14 @@ static int sim_alarm_handler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
-                                                   uint16_t resolution)
+struct oneshot_lowerhalf_s *oneshot_initialize(int chan,
+                                               uint16_t resolution)
 {
-  FAR struct sim_oneshot_lowerhalf_s *priv;
+  struct sim_oneshot_lowerhalf_s *priv;
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (FAR struct sim_oneshot_lowerhalf_s *)
+  priv = (struct sim_oneshot_lowerhalf_s *)
     kmm_zalloc(sizeof(struct sim_oneshot_lowerhalf_s));
 
   if (priv == NULL)

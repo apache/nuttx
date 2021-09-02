@@ -24,15 +24,19 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/arch_alarm.h>
 #include <arch/board/board.h>
 
+#include "hardware/c906_clint.h"
 #include "riscv_internal.h"
+#include "riscv_mtimer.h"
 #include "c906.h"
 #include "c906_clockconfig.h"
 
@@ -40,67 +44,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define getreg64(a)   (*(volatile uint64_t *)(a))
-#define putreg64(v,a) (*(volatile uint64_t *)(a) = (v))
-
 #ifdef CONFIG_C906_WITH_QEMU
-#define TICK_COUNT (10000000UL / TICK_PER_SEC)
+#define MTIMER_FREQ 10000000UL
 #else
-#define TICK_COUNT ((c906_get_cpuclk()) / TICK_PER_SEC)
+#define MTIMER_FREQ c906_get_cpuclk()
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static bool _b_tick_started = false;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name:  c906_reload_mtimecmp
- ****************************************************************************/
-
-static void c906_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(C906_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(C906_CLINT_MTIMECMP);
-    }
-
-  uint64_t tick = TICK_COUNT;
-  next = current + tick;
-
-  putreg64(next, C906_CLINT_MTIMECMP);
-
-  spin_unlock_irqrestore(NULL, flags);
-}
-
-/****************************************************************************
- * Name:  c906_timerisr
- ****************************************************************************/
-
-static int c906_timerisr(int irq, void *context, void *arg)
-{
-  c906_reload_mtimecmp();
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
 
 /****************************************************************************
  * Public Functions
@@ -117,15 +65,11 @@ static int c906_timerisr(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  /* Attach timer interrupt handler */
+  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
+    C906_CLINT_MTIME, C906_CLINT_MTIMECMP,
+    RISCV_IRQ_MTIMER, MTIMER_FREQ);
 
-  irq_attach(RISCV_IRQ_MTIMER, c906_timerisr, NULL);
+  DEBUGASSERT(lower);
 
-  /* Reload CLINT mtimecmp */
-
-  c906_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  up_alarm_set_lowerhalf(lower);
 }

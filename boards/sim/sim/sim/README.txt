@@ -955,9 +955,9 @@ nxwm
         /* Execute the startup script */
 
       #ifdef CONFIG_NSH_ROMFSETC
-     -  (void)nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
+     -  nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
      +// REMOVE ME
-     +//  (void)nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
+     +//  nsh_script(&pstate->cn_vtbl, "init", NSH_INITPATH);
       #endif
 
         /* Then enter the command line parsing loop */

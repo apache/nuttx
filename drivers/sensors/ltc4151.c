@@ -74,14 +74,10 @@ static int     ltc4151_readpower(FAR struct ltc4151_dev_s *priv,
 
 /* Character driver methods */
 
-static int     ltc4151_open(FAR struct file *filep);
-static int     ltc4151_close(FAR struct file *filep);
 static ssize_t ltc4151_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t ltc4151_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen);
-static int     ltc4151_ioctl(FAR struct file *filep, int cmd,
-                             unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -89,12 +85,12 @@ static int     ltc4151_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_ltc4151fops =
 {
-  ltc4151_open,    /* open */
-  ltc4151_close,   /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   ltc4151_read,    /* read */
   ltc4151_write,   /* write */
   NULL,            /* seek */
-  ltc4151_ioctl,   /* ioctl */
+  NULL,            /* ioctl */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
@@ -204,32 +200,6 @@ static int ltc4151_readpower(FAR struct ltc4151_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: ltc4151_open
- *
- * Description:
- *   This function is called whenever the LTC4151 device is opened.
- *
- ****************************************************************************/
-
-static int ltc4151_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: ltc4151_close
- *
- * Description:
- *   This routine is called when the LTC4151 device is closed.
- *
- ****************************************************************************/
-
-static int ltc4151_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: ltc4151_read
  ****************************************************************************/
 
@@ -281,15 +251,6 @@ static ssize_t ltc4151_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: ltc4151_ioctl
- ****************************************************************************/
-
-static int ltc4151_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  return -ENOTTY;
 }
 
 /****************************************************************************

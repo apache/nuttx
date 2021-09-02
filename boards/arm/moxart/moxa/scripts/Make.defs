@@ -24,16 +24,8 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)moxa.ld
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  ARCHOPTIMIZATION = -g
-endif
-
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
-ARCHCFLAGS = -fno-common -mno-thumb-interwork -march=armv4 -Uarm
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new -mno-thumb-interwork -march=armv4 -Uarm
+ARCHCFLAGS += -mno-thumb-interwork -march=armv4 -Uarm
+ARCHCXXFLAGS += -mno-thumb-interwork -march=armv4 -Uarm
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -51,7 +43,3 @@ LDNXFLAT = ldnxflat
 NXFLATLDFLAGS1 = -r -d -warn-common
 NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  LDFLAGS += -g
-endif

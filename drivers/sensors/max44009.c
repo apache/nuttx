@@ -770,7 +770,7 @@ static void max44009_notify(FAR struct max44009_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          max44009_dbg("Report events: %02x\n", fds->revents);
+          max44009_dbg("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
           priv->int_pending = false;
         }

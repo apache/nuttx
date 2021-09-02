@@ -939,8 +939,11 @@ static void seq_setstartphase(int sid, int phase)
 static void seq_startseq(int sid)
 {
   uint32_t val;
+  irqstate_t flags;
+  flags = enter_critical_section();
   val = getreg32(SCU_START_MODE0);
   putreg32(val | (1 << sid), SCU_START_MODE0);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -957,8 +960,11 @@ static void seq_startseq(int sid)
 static void seq_stopseq(int sid)
 {
   uint32_t val;
+  irqstate_t flags;
+  flags = enter_critical_section();
   val = getreg32(SCU_START_MODE0);
   putreg32(val & ~(1 << sid), SCU_START_MODE0);
+  leave_critical_section(flags);
 }
 
 /****************************************************************************

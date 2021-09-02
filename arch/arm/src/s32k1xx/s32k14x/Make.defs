@@ -20,34 +20,7 @@
 
 # Source files specific to the Cortex-M4F
 
-CMN_ASRCS += arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
-
-CMN_CSRCS += arm_assert.c arm_blocktask.c arm_createstack.c
-CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_initialstate.c arm_memfault.c
-CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c arm_schedulesigaction.c
-CMN_CSRCS += arm_sigdeliver.c arm_svcall.c arm_trigger_irq.c arm_unblocktask.c
-CMN_CSRCS += arm_systemreset.c arm_switchcontext.c
-
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
-
-ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
-CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
-endif
+include armv7-m/Make.defs
 
 # Source file specific to the S32k11x family
 

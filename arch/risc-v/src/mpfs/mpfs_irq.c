@@ -30,8 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <arch/irq.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 #include "mpfs.h"
@@ -56,10 +55,6 @@ void up_irqinitialize(void)
   /* Disable Machine interrupts */
 
   up_irq_save();
-
-  /* Disable timer interrupt (in case of hotloading with debugger) */
-
-  up_disable_irq(RISCV_IRQ_MTIMER);
 
   /* Disable all global interrupts for current hart */
 
@@ -103,13 +98,9 @@ void up_irqinitialize(void)
 
   CURRENT_REGS = NULL;
 
-  /* Attach the ecall interrupt handler */
+  /* Attach the common interrupt handler */
 
-  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
-
-#ifndef CONFIG_BUILD_FLAT
-  irq_attach(RISCV_IRQ_ECALLU, riscv_swint, NULL);
-#endif
+  riscv_exception_attach();
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -131,17 +122,17 @@ void up_disable_irq(int irq)
 {
   int extirq = 0;
 
-  if (irq == RISCV_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_SOFT)
     {
-      /* Read mstatus & clear machine software interrupt enable in mie */
+      /* Read m/sstatus & clear machine software interrupt enable in m/sie */
 
-      CLEAR_CSR(mie, MIE_MSIE);
+      CLEAR_CSR(CSR_IE, IE_SIE);
     }
-  else if (irq == RISCV_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_TIMER)
     {
-      /* Read mstatus & clear machine timer interrupt enable in mie */
+      /* Read m/sstatus & clear timer interrupt enable in m/sie */
 
-      CLEAR_CSR(mie, MIE_MTIE);
+      CLEAR_CSR(CSR_IE, IE_TIE);
     }
   else if (irq >= MPFS_IRQ_EXT_START)
     {
@@ -174,17 +165,17 @@ void up_enable_irq(int irq)
 {
   int extirq;
 
-  if (irq == RISCV_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_SOFT)
     {
-      /* Read mstatus & set machine software interrupt enable in mie */
+      /* Read m/sstatus & set machine software interrupt enable in m/sie */
 
-      SET_CSR(mie, MIE_MSIE);
+      SET_CSR(CSR_IE, IE_SIE);
     }
-  else if (irq == RISCV_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_TIMER)
     {
-      /* Read mstatus & set machine timer interrupt enable in mie */
+      /* Read m/sstatus & set timer interrupt enable in m/sie */
 
-      SET_CSR(mie, MIE_MTIE);
+      SET_CSR(CSR_IE, IE_TIE);
     }
   else if (irq >= MPFS_IRQ_EXT_START)
     {
@@ -229,12 +220,13 @@ irqstate_t up_irq_enable(void)
 {
   irqstate_t oldstat;
 
-  /* Enable MEIE (machine external interrupt enable) */
+  /* Enable external interrupts (mie/sie) */
 
-  SET_CSR(mie, MIE_MEIE);
+  SET_CSR(CSR_IE, IE_EIE);
 
-  /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
+  /* Read and enable global interrupts (M/SIE) in m/sstatus */
 
-  oldstat = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
+  oldstat = READ_AND_SET_CSR(CSR_STATUS, STATUS_IE);
+
   return oldstat;
 }

@@ -54,7 +54,7 @@
 int board_oneshot_init(int timer, uint16_t resolution)
 {
   int ret = OK;
-  FAR struct oneshot_lowerhalf_s *os_lower = NULL;
+  struct oneshot_lowerhalf_s *os_lower = NULL;
 
   os_lower = oneshot_initialize(timer, resolution);
   if (os_lower != NULL)

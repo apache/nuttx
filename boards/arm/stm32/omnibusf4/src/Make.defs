@@ -60,10 +60,6 @@ ifeq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CSRCS += stm32_idle.c
 endif
 
-ifeq ($(CONFIG_TESTING_OSTEST),y)
-CSRCS += stm32_ostest.c
-endif
-
 ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif

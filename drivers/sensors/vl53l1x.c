@@ -230,8 +230,6 @@ static void vl53l1x_calibrateoffset(FAR struct vl53l1x_dev_s *priv,
 
 /* Character driver methods */
 
-static int vl53l1x_open(FAR struct file *filep);
-static int vl53l1x_close(FAR struct file *filep);
 static void vl53l1x_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t vl53l1x_write(FAR struct file *filep, FAR const char *buffer,
@@ -244,15 +242,15 @@ static void vl53l1x_ioctl(FAR struct file *filep, int cmd, uint16_t arg);
 
 static const struct file_operations g_vl53l1xfops =
 {
-  vl53l1x_open,                 /* open */
-  vl53l1x_close,                /* close */
-  vl53l1x_read,                 /* read */
-  vl53l1x_write,                /* write */
-  NULL,                         /* seek */
-  vl53l1x_ioctl,                /* ioctl */
-  NULL                          /* poll */
+  NULL,                 /* open */
+  NULL,                 /* close */
+  vl53l1x_read,         /* read */
+  vl53l1x_write,        /* write */
+  NULL,                 /* seek */
+  vl53l1x_ioctl,        /* ioctl */
+  NULL                  /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
+  , NULL                /* unlink */
 #endif
 };
 
@@ -1034,32 +1032,6 @@ static void vl53l1x_putreg32(FAR struct vl53l1x_dev_s *priv,
     }
 
   return;
-}
-
-/****************************************************************************
- * Name: vl53l1x_open
- *
- * Description:
- *   This function is called whenever the vl53l1x device is opened.
- *
- ****************************************************************************/
-
-static int vl53l1x_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: vl53l1x_close
- *
- * Description:
- *   This routine is called when the vl53l1x device is closed.
- *
- ****************************************************************************/
-
-static int vl53l1x_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

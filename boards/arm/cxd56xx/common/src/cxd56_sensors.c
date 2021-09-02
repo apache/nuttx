@@ -216,6 +216,9 @@ static struct sensor_device_s sensor_device[] =
 #if defined(CONFIG_SENSORS_BH1745NUC) || defined(CONFIG_SENSORS_BH1745NUC_SCU)
   _I2C_DEVICE(bh1745nuc, "/dev/color"), /* Color */
 #endif
+#if defined(CONFIG_SENSORS_SCD41)
+  _I2C_DEVICE(scd41, "/dev/co2"), /* CO2 */
+#endif
 };
 
 /****************************************************************************

@@ -93,14 +93,12 @@ static int16_t as726x_getchannel(FAR struct as726x_dev_s *priv,
 static uint8_t read_register(FAR struct as726x_dev_s *priv, uint8_t addr);
 static uint8_t as726x_read8(FAR struct as726x_dev_s *priv, uint8_t regval);
 static void write_register(FAR struct as726x_dev_s *priv, uint8_t addr,
-                          uint8_t val);
+                           uint8_t val);
 static void as726x_write8(FAR struct as726x_dev_s *priv, uint8_t regaddr,
                           uint8_t regval);
 
 /* Character driver methods */
 
-static int as726x_open(FAR struct file *filep);
-static int as726x_close(FAR struct file *filep);
 static ssize_t as726x_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
 static ssize_t as726x_write(FAR struct file *filep,
@@ -112,8 +110,8 @@ static ssize_t as726x_write(FAR struct file *filep,
 
 static const struct file_operations g_as726x_fops =
 {
-  as726x_open,                  /* open */
-  as726x_close,                 /* close */
+  NULL,                         /* open */
+  NULL,                         /* close */
   as726x_read,                  /* read */
   as726x_write,                 /* write */
   NULL,                         /* seek */
@@ -332,32 +330,6 @@ static void as726x_write8(FAR struct as726x_dev_s *priv, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Name: as726x_open
- *
- * Description:
- *   This function is called whenever the AS726X device is opened.
- *
- ****************************************************************************/
-
-static int as726x_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: as726x_close
- *
- * Description:
- *   This routine is called when the AS726X device is closed.
- *
- ****************************************************************************/
-
-static int as726x_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: as726x_read
  ****************************************************************************/
 
@@ -445,7 +417,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
 
   /* Check HW version for AS7262 and AS7263 */
 
-  _sensor_version = as726x_read8(priv, AS726x_HW_VERSION);
+  _sensor_version = as726x_read8(priv, AS726X_HW_VERSION);
   if (_sensor_version != 0x3e && _sensor_version != 0x3f)
     {
       snerr("ID (should be 0x3e or 0x3f): 0x %d\n", ret);
@@ -455,7 +427,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
    * Read the register value toggle and disable led
    */
 
-  ret = as726x_read8(priv, AS726x_LED_CONTROL);
+  ret = as726x_read8(priv, AS726X_LED_CONTROL);
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the AS726X!\n");
@@ -465,16 +437,16 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   value  = ret;
   value &= ~(1 << 0);           /* Clear the bit */
 
-  as726x_write8(priv, AS726x_LED_CONTROL, value);
+  as726x_write8(priv, AS726X_LED_CONTROL, value);
 
   /* If you use Mode 2 or 3 (all the colors) then integration time is double.
    * 140*2 = 280ms between readings.
    * 50 * 2.8ms = 140ms. 0 to 255 is valid.
    */
 
-  as726x_write8(priv, AS726x_INT_T, AS726X_INTEGRATION_TIME);
+  as726x_write8(priv, AS726X_INT_T, AS726X_INTEGRATION_TIME);
 
-  ret = as726x_read8(priv, AS726x_CONTROL_SETUP);
+  ret = as726x_read8(priv, AS726X_CONTROL_SETUP);
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the AS726X!\n");
@@ -485,9 +457,9 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   value &= 0b11001111;          /* Clear GAIN bits */
   value |= (AS726X_GAIN << 4);  /* Set GAIN bits with user's choice */
 
-  as726x_write8(priv, AS726x_CONTROL_SETUP, value);
+  as726x_write8(priv, AS726X_CONTROL_SETUP, value);
 
-  ret = as726x_read8(priv, AS726x_CONTROL_SETUP);
+  ret = as726x_read8(priv, AS726X_CONTROL_SETUP);
   if (ret < 0)
     {
       snerr("ERROR: Failed to initialize the AS726X!\n");
@@ -499,7 +471,7 @@ int as726x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c)
   value |= (AS726X_MEASURMENT_MODE << 2);   /* Set BANK bits with user's
                                              * choice */
 
-  as726x_write8(priv, AS726x_CONTROL_SETUP, value);
+  as726x_write8(priv, AS726X_CONTROL_SETUP, value);
 
   /* Register the character driver */
 

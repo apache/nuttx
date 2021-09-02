@@ -45,19 +45,10 @@ class dump_line:
             return
         self.size = int(tmp.group(0)[1:])
 
-        tmp = re.search(r"\b0x[0-9a-fA-F]+\b", line_str[tmp.span()[1] :])
-        self.addr = tmp.group(0)
-        line_str = line_str[tmp.span()[1] :]
-        while 1:
-            tmp = re.search(r"\b0x[0-9a-fA-F]+\b", line_str[tmp.span()[1] :])
-            if tmp is None:
-                break
-            self.mem.append(tmp.group(0))
-            line_str = line_str[tmp.span()[1] :]
-
-        if self.mem.__len__() == 0:
-            self.err = 1
-            return
+        tmp = re.findall("0x([0-9a-fA-F]+)", line_str[tmp.span()[1] :])
+        self.addr = tmp[0]
+        for str in tmp[1:]:
+            self.mem.append(str)
 
 
 class log_output:

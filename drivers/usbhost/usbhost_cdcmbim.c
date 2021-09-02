@@ -418,7 +418,7 @@ static void usbhost_pollnotify(FAR struct usbhost_cdcmbim_s *priv)
           fds->revents |= (fds->events & POLLIN);
           if (fds->revents != 0)
             {
-              uinfo("Report events: %02x\n", fds->revents);
+              uinfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }
@@ -499,9 +499,9 @@ static ssize_t cdcwdm_read(FAR struct file *filep, FAR char *buffer,
       uinfo("Reading next message\n");
       if (work_available(&priv->comm_rxwork))
         {
-          (void)work_queue(LPWORK, &priv->comm_rxwork,
-                           (worker_t)usbhost_rxdata_work,
-                           priv, 0);
+          work_queue(LPWORK, &priv->comm_rxwork,
+                     (worker_t)usbhost_rxdata_work,
+                     priv, 0);
         }
     }
 
@@ -767,7 +767,7 @@ static void usbhost_freedevno(FAR struct usbhost_cdcmbim_s *priv)
 static inline void usbhost_mkdevname(FAR struct usbhost_cdcmbim_s *priv,
                                      FAR char *devname)
 {
-  (void)snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
+  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, priv->minor);
 }
 
 static void usbhost_bulkin_callback(FAR void *arg, ssize_t nbytes)
@@ -796,8 +796,8 @@ static void usbhost_bulkin_callback(FAR void *arg, ssize_t nbytes)
 
   if (work_available(&priv->bulk_rxwork))
     {
-      (void)work_queue(LPWORK, &priv->bulk_rxwork,
-                       (worker_t)usbhost_bulkin_work, priv, delay);
+      work_queue(LPWORK, &priv->bulk_rxwork,
+                 usbhost_bulkin_work, priv, delay);
     }
 }
 
@@ -1021,9 +1021,9 @@ static void usbhost_notification_work(FAR void *arg)
                 {
                   if (work_available(&priv->comm_rxwork))
                     {
-                      (void)work_queue(LPWORK, &priv->comm_rxwork,
-                                       (worker_t)usbhost_rxdata_work,
-                                       priv, 0);
+                      work_queue(LPWORK, &priv->comm_rxwork,
+                                 usbhost_rxdata_work,
+                                 priv, 0);
                     }
                 }
             }
@@ -1116,9 +1116,9 @@ static void usbhost_notification_callback(FAR void *arg, ssize_t nbytes)
 
       if (work_available(&priv->ntwork))
         {
-          (void)work_queue(LPWORK, &priv->ntwork,
-                           (worker_t)usbhost_notification_work,
-                           priv, delay);
+          work_queue(LPWORK, &priv->ntwork,
+                     usbhost_notification_work,
+                     priv, delay);
         }
     }
 }
@@ -1665,7 +1665,7 @@ static inline int usbhost_devinit(FAR struct usbhost_cdcmbim_s *priv)
 
   /* Register the network device */
 
-  (void)netdev_register(&priv->netdev, NET_LL_MBIM);
+  netdev_register(&priv->netdev, NET_LL_MBIM);
 
   /* Check if we successfully initialized. We now have to be concerned
    * about asynchronous modification of crefs because the character
@@ -2128,7 +2128,7 @@ static int usbhost_disconnected(struct usbhost_class_s *usbclass)
           uinfo("Queuing destruction: worker %p->%p\n",
                 priv->destroywork.worker, usbhost_destroy);
           DEBUGASSERT(priv->destroywork.worker == NULL);
-          (void)work_queue(LPWORK, &priv->destroywork,
+          work_queue(LPWORK, &priv->destroywork,
                            usbhost_destroy, priv, 0);
         }
       else
@@ -2316,7 +2316,7 @@ static void cdcmbim_txpoll_work(void *arg)
   net_lock();
   priv->netdev.d_buf = priv->txpktbuf;
 
-  (void)devif_timer(&priv->netdev, CDCMBIM_WDDELAY, cdcmbim_txpoll);
+  devif_timer(&priv->netdev, CDCMBIM_WDDELAY, cdcmbim_txpoll);
 
   /* setup the watchdog poll timer again */
 
@@ -2496,7 +2496,7 @@ static void cdcmbim_txavail_work(void *arg)
 
   if (priv->bifup)
     {
-      (void)devif_timer(&priv->netdev, 0, cdcmbim_txpoll);
+      devif_timer(&priv->netdev, 0, cdcmbim_txpoll);
     }
 
   net_unlock();

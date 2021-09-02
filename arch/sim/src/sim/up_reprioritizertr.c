@@ -77,7 +77,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
     }
   else
     {
-      FAR struct tcb_s *rtcb = this_task();
+      struct tcb_s *rtcb = this_task();
       bool switch_needed;
 
       sinfo("TCB=%p PRI=%d\n", tcb, priority);

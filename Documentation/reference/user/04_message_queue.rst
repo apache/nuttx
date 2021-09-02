@@ -167,7 +167,7 @@ handlers may send messages via named message queues.
   priority messages The value of ``prio`` must not exceed ``MQ_PRIO_MAX``.
 
   If the specified message queue is full and ``O_NONBLOCK`` is not set in
-  the message queue, then ``mq_send()`` will block until space becomes
+  the message queue, then ``mq_timedsend()`` will block until space becomes
   available to the queue the message or until a timeout occurs.
 
   ``mq_timedsend()`` behaves just like ``mq_send()``, except that if the
@@ -188,7 +188,7 @@ handlers may send messages via named message queues.
     error, -1 (``ERROR``) is returned, with ```errno`` <#ErrnoAccess>`__ set
     to indicate the error:
 
-    -  ``EAGAIN``. The queue was empty, and the ``O_NONBLOCK`` flag was set
+    -  ``EAGAIN``. The queue was full, and the ``O_NONBLOCK`` flag was set
        for the message queue description referred to by ``mqdes``.
     -  ``EINVAL``. Either ``msg`` or ``mqdes`` is ``NULL`` or the value of
        ``prio`` is invalid.

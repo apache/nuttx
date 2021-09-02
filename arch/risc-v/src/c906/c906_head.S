@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/csr.h>
-#include <arch/irq.h>
+
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "c906_memorymap.h"
@@ -51,13 +51,6 @@ __start:
   /* invalid all MMU TLB Entry */
 
   sfence.vma x0,x0
-
-  /* enable FPU if CFLAGS has 'f' or 'd' in -march */
-
-#ifdef __riscv_flen
-    li      a0, MSTATUS_FS_INIT
-    csrs    mstatus, a0
-#endif
 
   /* enable thead ISA extension:
    * BIT22: enable the THEAD ISA extensions.

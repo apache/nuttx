@@ -1618,6 +1618,24 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
 /****************************************************************************
+ * Name: tcp_wrbuffer_inqueue_size
+ *
+ * Description:
+ *   Get the in-queued write buffer size from connection
+ *
+ * Input Parameters:
+ *   conn - The TCP connection of interest
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+uint32_t tcp_wrbuffer_inqueue_size(FAR struct tcp_conn_s *conn);
+#endif
+
+/****************************************************************************
  * Name: tcp_wrbuffer_test
  *
  * Description:

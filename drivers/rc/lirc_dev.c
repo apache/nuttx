@@ -124,7 +124,7 @@ static void lirc_pollnotify(FAR struct lirc_fh_s *fh,
 
       if (fh->fd->revents != 0)
         {
-          rcinfo("Report events: %02x\n", fh->fd->revents);
+          rcinfo("Report events: %08" PRIx32 "\n", fh->fd->revents);
 
           nxsem_get_value(fh->fd->sem, &semcount);
           if (semcount < 1)

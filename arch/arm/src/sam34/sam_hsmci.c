@@ -41,6 +41,7 @@
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -186,7 +187,7 @@
  */
 
 #ifdef CONFIG_SAM34_DMAC0
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #    define HSMCI_DATA_ERRORS \
        (HSMCI_INT_UNRE | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
         HSMCI_INT_DTOE | HSMCI_INT_DCRCE)
@@ -205,7 +206,7 @@
   (HSMCI_INT_CSTOE | HSMCI_INT_DTOE)
 
 #ifdef CONFIG_SAM34_DMAC0
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #    define HSMCI_DATA_DMARECV_ERRORS \
       (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
        HSMCI_INT_DCRCE)
@@ -354,7 +355,7 @@ struct sam_hsmciregs_s
   uint32_t rsp3;     /* Response Register 3 */
   uint32_t sr;       /* Status Register */
   uint32_t imr;      /* Interrupt Mask Register */
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   uint32_t dma;      /* DMA Configuration Register */
 #endif
   uint32_t cfg;      /* Configuration Register */
@@ -783,7 +784,7 @@ static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
   regs->rsp3     = getreg32(SAM_HSMCI_RSPR3);
   regs->sr       = getreg32(SAM_HSMCI_SR);
   regs->imr      = getreg32(SAM_HSMCI_IMR);
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regs->dma      = getreg32(SAM_HSMCI_DMA);
 #endif
   regs->cfg      = getreg32(SAM_HSMCI_CFG);
@@ -843,7 +844,7 @@ static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
          SAM_HSMCI_SR, regs->sr);
   mcinfo("    IMR[%08x]: %08x\n",
          SAM_HSMCI_IMR, regs->imr);
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   mcinfo("    DMA[%08x]: %08x\n",
          SAM_HSMCI_DMA, regs->dma);
 #endif
@@ -1181,7 +1182,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
@@ -1224,7 +1225,7 @@ static void sam_notransfer(struct sam_dev_s *priv)
 
   regval = getreg32(SAM_HSMCI_MR);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
 #else
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF);
@@ -1436,7 +1437,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   /* Disable the DMA interface */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   putreg32(0, SAM_HSMCI_DMA);
 #endif
 
@@ -1493,6 +1494,7 @@ static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev)
 
 #ifdef CONFIG_SAM34_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 #endif
 
   return caps;
@@ -1800,6 +1802,19 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
          cmd, arg, regval);
   putreg32(regval, SAM_HSMCI_CMDR);
   sam_cmdsample1(SAMPLENDX_AFTER_CMDR);
+
+  /* Card initialisation is unsuccessful without the following delay.
+   *
+   * It appears the timing from writing SAM_HSMCI_CMDR to calling
+   * sam_waitresponse is too short.
+   *
+   * For now the simplest solution is to add this delay.
+   * Further investigation is required to find the root cause and
+   * correct solution.
+   */
+
+  nxsig_usleep(10);
+
   return OK;
 }
 
@@ -1834,7 +1849,7 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
 
   regval = getreg32(SAM_HSMCI_MR);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
   regval |= HSMCU_PROOF_BITS;
   regval |= (blocklen << HSMCI_MR_BLKLEN_SHIFT);
@@ -1901,7 +1916,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
   priv->dmabusy = false;
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
@@ -2495,7 +2510,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam_cmcc_invalidate((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
@@ -2565,7 +2580,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   sam_dmatxsetup(priv->dma, SAM_HSMCI_TDR, (uint32_t)buffer, buflen);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
@@ -2667,7 +2682,7 @@ static void sam_callback(void *arg)
                  priv->callback, priv->cbarg);
 
           work_queue(LPWORK, &priv->cbwork,
-                    (worker_t)priv->callback, priv->cbarg, 0);
+                    priv->callback, priv->cbarg, 0);
         }
       else
         {
@@ -2730,6 +2745,18 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * any card detection GPIOs must be set up in board-specific logic.
    */
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X)
+  sam_configgpio(GPIO_HSMCIA_DAT0);   /* Data 0 of Slot A - PA21 */
+  sam_configgpio(GPIO_HSMCIA_DAT1);   /* Data 1 of Slot A - PA22 */
+  sam_configgpio(GPIO_HSMCIA_DAT2);   /* Data 2 of Slot A - PA23 */
+  sam_configgpio(GPIO_HSMCIA_DAT3);   /* Data 3 of Slot A - PA24 */
+  sam_configgpio(GPIO_HSMCI_CK);      /* SD clock - PA19 */
+  sam_configgpio(GPIO_HSMCIA_CD);     /* Command/Response - PA20 */
+
+#ifdef CONFIG_DEBUG_FS
+  sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 19-24");
+#endif
+#else
   sam_configgpio(GPIO_HSMCI_DAT0);   /* Data 0 of Slot A */
   sam_configgpio(GPIO_HSMCI_DAT1);   /* Data 1 of Slot A */
   sam_configgpio(GPIO_HSMCI_DAT2);   /* Data 2 of Slot A */
@@ -2740,6 +2767,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 #ifdef CONFIG_DEBUG_FS
   sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
   sam_dumpgpio(GPIO_PORT_PIOB, "Pins: 28-31");
+#endif
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured

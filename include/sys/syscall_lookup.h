@@ -151,7 +151,7 @@ SYSCALL_LOOKUP(up_assert,                  2)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
   SYSCALL_LOOKUP(posix_spawn,              6)
-  SYSCALL_LOOKUP(execv,                    2)
+  SYSCALL_LOOKUP(execve,                   3)
 #endif
 #endif
 
@@ -353,6 +353,7 @@ SYSCALL_LOOKUP(futimens,                   2)
 /* The following are defined only if environment variables are supported */
 
 #ifndef CONFIG_DISABLE_ENVIRON
+  SYSCALL_LOOKUP(get_environ_ptr,          0)
   SYSCALL_LOOKUP(clearenv,                 0)
   SYSCALL_LOOKUP(getenv,                   1)
   SYSCALL_LOOKUP(putenv,                   1)

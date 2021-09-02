@@ -18,66 +18,7 @@
 #
 ############################################################################
 
-# The vector table is the "head" object, i.e., the one that must forced into
-# the link in order to draw in all of the other components
-
-HEAD_ASRC  = arm_vectortab.S
-
-# Common assembly language files
-
-CMN_ASRCS += arm_vectortab.S arm_vectors.S arm_head.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
-CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
-CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S
-CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S
-CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_cache_size.S arm_tcbinfo.c
-
-# Configuration dependent assembly language files
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpuconfig.S
-endif
-
-# Common C source files
-
-CMN_CSRCS  = arm_allocateheap.c arm_initialize.c arm_interruptcontext.c
-CMN_CSRCS += arm_exit.c arm_createstack.c arm_releasestack.c arm_usestack.c
-CMN_CSRCS += arm_vfork.c arm_puts.c arm_mdelay.c arm_stackframe.c arm_udelay.c
-CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
-
-CMN_CSRCS += arm_assert.c arm_blocktask.c arm_dataabort.c
-CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
-CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
-CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
-CMN_CSRCS += arm_switchcontext.c
-
-# Configuration dependent C files
-
-ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
-CMN_CSRCS += arm_idle.c
-endif
-
-ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS += arm_mpu.c arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_signal_dispatch.c
-CMN_UASRCS += arm_signal_handler.S
-endif
-
-ifeq ($(CONFIG_ARMV7R_L2CC_PL310),y)
-CMN_CSRCS += arm_l2cc_pl310.c
-endif
-
-CMN_CSRCS += arm_cache.c
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
-endif
-
-ifeq ($(CONFIG_STACK_COLORATION),y)
-CMN_CSRCS += arm_checkstack.c
-endif
+include armv7-r/Make.defs
 
 # SAMA5-specific C source files
 

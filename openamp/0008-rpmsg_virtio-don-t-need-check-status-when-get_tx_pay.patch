@@ -1,0 +1,34 @@
+From 0e2e59941d9694e060f8ac06fce6b8284d8e74ec Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Mon, 28 Feb 2022 16:31:54 +0800
+Subject: [PATCH 3/3] rpmsg_virtio: don't need check status when get_tx_payload
+
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+---
+ lib/rpmsg/rpmsg_virtio.c | 6 ------
+ 1 file changed, 6 deletions(-)
+
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 8a2c795..b95bf6d 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -359,16 +359,10 @@ static void *rpmsg_virtio_get_tx_payload_buffer(struct rpmsg_device *rdev,
+ 	struct rpmsg_hdr *rp_hdr;
+ 	uint16_t idx;
+ 	int tick_count;
+-	int status;
+ 
+ 	/* Get the associated remote device for channel. */
+ 	rvdev = metal_container_of(rdev, struct rpmsg_virtio_device, rdev);
+ 
+-	/* Validate device state */
+-	status = rpmsg_virtio_get_status(rvdev);
+-	if (!(status & VIRTIO_CONFIG_STATUS_DRIVER_OK))
+-		return NULL;
+-
+ 	if (wait)
+ 		tick_count = RPMSG_TICK_COUNT / RPMSG_TICKS_PER_INTERVAL;
+ 	else
+-- 
+2.25.1
+

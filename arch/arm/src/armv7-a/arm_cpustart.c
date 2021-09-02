@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 #if 0 /* Was useful in solving some startup problems */
-static inline void arm_registerdump(FAR struct tcb_s *tcb)
+static inline void arm_registerdump(struct tcb_s *tcb)
 {
   int regndx;
 
@@ -90,9 +90,9 @@ static inline void arm_registerdump(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int arm_start_handler(int irq, FAR void *context, FAR void *arg)
+int arm_start_handler(int irq, void *context, void *arg)
 {
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 
   sinfo("CPU%d Started\n", this_cpu());
 

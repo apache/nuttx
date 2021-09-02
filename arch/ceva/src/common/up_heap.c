@@ -171,7 +171,7 @@ void *g_idle_topstack  = _START_HEAP;
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   int i;
 
@@ -240,7 +240,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
  ****************************************************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-void up_allocate_kheap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_kheap(void **heap_start, size_t *heap_size)
 {
   int i;
 

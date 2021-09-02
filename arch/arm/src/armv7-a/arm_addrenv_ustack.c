@@ -126,7 +126,7 @@
  *
  ****************************************************************************/
 
-int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
+int up_addrenv_ustackalloc(struct tcb_s *tcb, size_t stacksize)
 {
   int ret;
 
@@ -175,7 +175,7 @@ int up_addrenv_ustackalloc(FAR struct tcb_s *tcb, size_t stacksize)
  *
  ****************************************************************************/
 
-int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
+int up_addrenv_ustackfree(struct tcb_s *tcb)
 {
   binfo("tcb=%p\n", tcb);
   DEBUGASSERT(tcb);
@@ -206,14 +206,14 @@ int up_addrenv_ustackfree(FAR struct tcb_s *tcb)
  *
  ****************************************************************************/
 
-int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack)
+int up_addrenv_vustack(const struct tcb_s *tcb, void **vstack)
 {
-  binfo("Return=%p\n", (FAR void *)CONFIG_ARCH_STACK_VBASE);
+  binfo("Return=%p\n", (void *)CONFIG_ARCH_STACK_VBASE);
 
   /* Not much to do in this case */
 
   DEBUGASSERT(tcb);
-  *vstack = (FAR void *)CONFIG_ARCH_STACK_VBASE;
+  *vstack = (void *)CONFIG_ARCH_STACK_VBASE;
   return OK;
 }
 
@@ -236,7 +236,7 @@ int up_addrenv_vustack(FAR const struct tcb_s *tcb, FAR void **vstack)
  *
  ****************************************************************************/
 
-int up_addrenv_ustackselect(FAR const struct tcb_s *tcb)
+int up_addrenv_ustackselect(const struct tcb_s *tcb)
 {
   uintptr_t vaddr;
   uintptr_t paddr;

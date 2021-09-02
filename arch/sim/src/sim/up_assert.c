@@ -73,7 +73,7 @@
 
 void up_assert(const char *filename, int lineno)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
 
   /* Flush any buffered SYSLOG data (prior to the assertion) */
 

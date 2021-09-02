@@ -99,29 +99,29 @@ struct bm3803_tim_ops_s
 {
   /* Basic Timers */
 
-  int  (*setmode)(FAR struct bm3803_tim_dev_s *dev,
+  int  (*setmode)(struct bm3803_tim_dev_s *dev,
                   enum bm3803_tim_mode_e mode);
-  int  (*setclock)(FAR struct bm3803_tim_dev_s *dev, uint32_t freq);
-  uint32_t (*getclock)(FAR struct bm3803_tim_dev_s *dev);
-  void (*setperiod)(FAR struct bm3803_tim_dev_s *dev, uint32_t period);
-  uint32_t (*getperiod)(FAR struct bm3803_tim_dev_s *dev);
-  uint32_t (*getcounter)(FAR struct bm3803_tim_dev_s *dev);
+  int  (*setclock)(struct bm3803_tim_dev_s *dev, uint32_t freq);
+  uint32_t (*getclock)(struct bm3803_tim_dev_s *dev);
+  void (*setperiod)(struct bm3803_tim_dev_s *dev, uint32_t period);
+  uint32_t (*getperiod)(struct bm3803_tim_dev_s *dev);
+  uint32_t (*getcounter)(struct bm3803_tim_dev_s *dev);
 
   /* Timer interrupts */
 
-  int  (*setisr)(FAR struct bm3803_tim_dev_s *dev,
+  int  (*setisr)(struct bm3803_tim_dev_s *dev,
                  xcpt_t handler, void *arg, int source);
-  void (*clrint)(FAR struct bm3803_tim_dev_s *dev, int source);
-  int  (*checkint)(FAR struct bm3803_tim_dev_s *dev, int source);
+  void (*clrint)(struct bm3803_tim_dev_s *dev, int source);
+  int  (*checkint)(struct bm3803_tim_dev_s *dev, int source);
 };
 
 /* Power-up timer and get its structure */
 
-FAR struct bm3803_tim_dev_s *bm3803_tim_init(int timer);
+struct bm3803_tim_dev_s *bm3803_tim_init(int timer);
 
 /* Power-down timer, mark it as unused */
 
-int bm3803_tim_deinit(FAR struct bm3803_tim_dev_s *dev);
+int bm3803_tim_deinit(struct bm3803_tim_dev_s *dev);
 
 /****************************************************************************
  * Name: bm3803_timer_initialize
@@ -142,7 +142,7 @@ int bm3803_tim_deinit(FAR struct bm3803_tim_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-int bm3803_timer_initialize(FAR const char *devpath, int timer);
+int bm3803_timer_initialize(const char *devpath, int timer);
 #endif
 
 #undef EXTERN

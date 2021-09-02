@@ -143,7 +143,6 @@ void up_decodeirq(uint32_t *regs);
 uint32_t *up_doirq(int irq, uint32_t *regs);
 void up_fullcontextrestore(uint32_t *regs) noreturn_function;
 void up_prefetchabort(uint32_t *regs);
-int  up_saveusercontext(uint32_t *regs);
 void up_sigdeliver(void);
 void up_syscall(uint32_t *regs);
 void up_undefinedinsn(uint32_t *regs);

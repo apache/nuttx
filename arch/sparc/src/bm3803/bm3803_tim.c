@@ -59,7 +59,7 @@
 
 struct bm3803_tim_priv_s
 {
-  FAR const struct bm3803_tim_ops_s *ops;
+  const struct bm3803_tim_ops_s *ops;
   enum bm3803_tim_mode_e mode;
   uint32_t base;                      /* TIMn base address */
 };
@@ -70,43 +70,43 @@ struct bm3803_tim_priv_s
 
 /* Register helpers */
 
-static inline uint16_t bm3803_getreg16(FAR struct bm3803_tim_dev_s *dev,
+static inline uint16_t bm3803_getreg16(struct bm3803_tim_dev_s *dev,
                                         uint8_t offset);
-static inline void bm3803_putreg16(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_putreg16(struct bm3803_tim_dev_s *dev,
                                     uint8_t offset, uint16_t value);
-static inline void bm3803_modifyreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_modifyreg32(struct bm3803_tim_dev_s *dev,
                                        uint8_t offset, uint32_t clearbits,
                                        uint32_t setbits);
-static inline uint32_t bm3803_getreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline uint32_t bm3803_getreg32(struct bm3803_tim_dev_s *dev,
                                         uint8_t offset);
-static inline void bm3803_putreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_putreg32(struct bm3803_tim_dev_s *dev,
                                     uint8_t offset, uint32_t value);
 
 /* Timer helpers */
 
-static void bm3803_tim_reload_counter(FAR struct bm3803_tim_dev_s *dev);
-static void bm3803_tim_enable(FAR struct bm3803_tim_dev_s *dev);
-static void bm3803_tim_disable(FAR struct bm3803_tim_dev_s *dev);
-static void bm3803_tim_reset(FAR struct bm3803_tim_dev_s *dev);
+static void bm3803_tim_reload_counter(struct bm3803_tim_dev_s *dev);
+static void bm3803_tim_enable(struct bm3803_tim_dev_s *dev);
+static void bm3803_tim_disable(struct bm3803_tim_dev_s *dev);
+static void bm3803_tim_reset(struct bm3803_tim_dev_s *dev);
 
 /* Timer methods */
 
-static int bm3803_tim_setmode(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setmode(struct bm3803_tim_dev_s *dev,
                                enum bm3803_tim_mode_e mode);
 
-static int bm3803_tim_setclock(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setclock(struct bm3803_tim_dev_s *dev,
                                 uint32_t freq);
-static uint32_t  bm3803_tim_getclock(FAR struct bm3803_tim_dev_s *dev);
-static void bm3803_tim_setperiod(FAR struct bm3803_tim_dev_s *dev,
+static uint32_t  bm3803_tim_getclock(struct bm3803_tim_dev_s *dev);
+static void bm3803_tim_setperiod(struct bm3803_tim_dev_s *dev,
                                   uint32_t period);
-static uint32_t bm3803_tim_getperiod(FAR struct bm3803_tim_dev_s *dev);
-static uint32_t bm3803_tim_getcounter(FAR struct bm3803_tim_dev_s *dev);
+static uint32_t bm3803_tim_getperiod(struct bm3803_tim_dev_s *dev);
+static uint32_t bm3803_tim_getcounter(struct bm3803_tim_dev_s *dev);
 
-static int bm3803_tim_setisr(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setisr(struct bm3803_tim_dev_s *dev,
                               xcpt_t handler, void *arg, int source);
 
-static int bm3803_tim_checkint(FAR struct bm3803_tim_dev_s *dev, int source);
-static void bm3803_tim_clrint(FAR struct bm3803_tim_dev_s *dev, int source);
+static int bm3803_tim_checkint(struct bm3803_tim_dev_s *dev, int source);
+static void bm3803_tim_clrint(struct bm3803_tim_dev_s *dev, int source);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -153,7 +153,7 @@ struct bm3803_tim_priv_s bm3803_tim2_priv =
  *
  ****************************************************************************/
 
-static inline uint16_t bm3803_getreg16(FAR struct bm3803_tim_dev_s *dev,
+static inline uint16_t bm3803_getreg16(struct bm3803_tim_dev_s *dev,
                                         uint8_t offset)
 {
   return getreg16(((struct bm3803_tim_priv_s *)dev)->base + offset);
@@ -167,7 +167,7 @@ static inline uint16_t bm3803_getreg16(FAR struct bm3803_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void bm3803_putreg16(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_putreg16(struct bm3803_tim_dev_s *dev,
                                     uint8_t offset, uint16_t value)
 {
   putreg16(value, ((struct bm3803_tim_priv_s *)dev)->base + offset);
@@ -181,7 +181,7 @@ static inline void bm3803_putreg16(FAR struct bm3803_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void bm3803_modifyreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_modifyreg32(struct bm3803_tim_dev_s *dev,
                                        uint8_t offset, uint32_t clearbits,
                                        uint32_t setbits)
 {
@@ -198,7 +198,7 @@ static inline void bm3803_modifyreg32(FAR struct bm3803_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline uint32_t bm3803_getreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline uint32_t bm3803_getreg32(struct bm3803_tim_dev_s *dev,
                                         uint8_t offset)
 {
   return getreg32(((struct bm3803_tim_priv_s *)dev)->base + offset);
@@ -213,7 +213,7 @@ static inline uint32_t bm3803_getreg32(FAR struct bm3803_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static inline void bm3803_putreg32(FAR struct bm3803_tim_dev_s *dev,
+static inline void bm3803_putreg32(struct bm3803_tim_dev_s *dev,
                                     uint8_t offset, uint32_t value)
 {
   putreg32(value, ((struct bm3803_tim_priv_s *)dev)->base + offset);
@@ -223,7 +223,7 @@ static inline void bm3803_putreg32(FAR struct bm3803_tim_dev_s *dev,
  * Name: bm3803_tim_reload_counter
  ****************************************************************************/
 
-static void bm3803_tim_reload_counter(FAR struct bm3803_tim_dev_s *dev)
+static void bm3803_tim_reload_counter(struct bm3803_tim_dev_s *dev)
 {
   uint32_t val = bm3803_getreg32(dev, BM3803_TIM_CR_OFFSET);
   val |= TIMER_LOADCOUNT;
@@ -234,7 +234,7 @@ static void bm3803_tim_reload_counter(FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_enable
  ****************************************************************************/
 
-static void bm3803_tim_enable(FAR struct bm3803_tim_dev_s *dev)
+static void bm3803_tim_enable(struct bm3803_tim_dev_s *dev)
 {
   uint32_t val = bm3803_getreg32(dev, BM3803_TIM_CR_OFFSET);
   val |= TIMER_ENABLE | TIMER_RELOADCOUNT;
@@ -246,7 +246,7 @@ static void bm3803_tim_enable(FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_disable
  ****************************************************************************/
 
-static void bm3803_tim_disable(FAR struct bm3803_tim_dev_s *dev)
+static void bm3803_tim_disable(struct bm3803_tim_dev_s *dev)
 {
   uint32_t val = bm3803_getreg32(dev, BM3803_TIM_CR_OFFSET);
   val &= ~TIMER_ENABLE;
@@ -261,7 +261,7 @@ static void bm3803_tim_disable(FAR struct bm3803_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void bm3803_tim_reset(FAR struct bm3803_tim_dev_s *dev)
+static void bm3803_tim_reset(struct bm3803_tim_dev_s *dev)
 {
   ((struct bm3803_tim_priv_s *)dev)->mode = BM3803_TIM_MODE_DISABLED;
   bm3803_tim_disable(dev);
@@ -271,7 +271,7 @@ static void bm3803_tim_reset(FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_setmode
  ****************************************************************************/
 
-static int bm3803_tim_setmode(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setmode(struct bm3803_tim_dev_s *dev,
                                enum bm3803_tim_mode_e mode)
 {
   uint32_t val = bm3803_getreg32(dev, BM3803_TIM_CR_OFFSET);
@@ -304,7 +304,7 @@ static int bm3803_tim_setmode(FAR struct bm3803_tim_dev_s *dev,
  * Name: bm3803_tim_setclock
  ****************************************************************************/
 
-static int bm3803_tim_setclock(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setclock(struct bm3803_tim_dev_s *dev,
                                 uint32_t freq)
 {
   uint32_t freqin;
@@ -377,7 +377,7 @@ static int bm3803_tim_setclock(FAR struct bm3803_tim_dev_s *dev,
  * Name: bm3803_tim_getclock
  ****************************************************************************/
 
-static uint32_t bm3803_tim_getclock(FAR struct bm3803_tim_dev_s *dev)
+static uint32_t bm3803_tim_getclock(struct bm3803_tim_dev_s *dev)
 {
   uint32_t freqin;
   uint32_t clock;
@@ -418,7 +418,7 @@ static uint32_t bm3803_tim_getclock(FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_setperiod
  ****************************************************************************/
 
-static void bm3803_tim_setperiod(FAR struct bm3803_tim_dev_s *dev,
+static void bm3803_tim_setperiod(struct bm3803_tim_dev_s *dev,
                                 uint32_t period)
 {
   DEBUGASSERT(dev != NULL);
@@ -430,7 +430,7 @@ static void bm3803_tim_setperiod(FAR struct bm3803_tim_dev_s *dev,
  * Name: bm3803_tim_getperiod
  ****************************************************************************/
 
-static uint32_t bm3803_tim_getperiod (FAR struct bm3803_tim_dev_s *dev)
+static uint32_t bm3803_tim_getperiod (struct bm3803_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   return 0xffffff & bm3803_getreg32(dev, BM3803_TIM_ARR_OFFSET);
@@ -440,7 +440,7 @@ static uint32_t bm3803_tim_getperiod (FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_getcounter
  ****************************************************************************/
 
-static uint32_t bm3803_tim_getcounter(FAR struct bm3803_tim_dev_s *dev)
+static uint32_t bm3803_tim_getcounter(struct bm3803_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
   uint32_t counter = bm3803_getreg32(dev, BM3803_TIM_CNT_OFFSET);
@@ -452,7 +452,7 @@ static uint32_t bm3803_tim_getcounter(FAR struct bm3803_tim_dev_s *dev)
  * Name: bm3803_tim_setisr
  ****************************************************************************/
 
-static int bm3803_tim_setisr(FAR struct bm3803_tim_dev_s *dev,
+static int bm3803_tim_setisr(struct bm3803_tim_dev_s *dev,
                               xcpt_t handler, void *arg, int source)
 {
   int vectorno;
@@ -500,7 +500,7 @@ static int bm3803_tim_setisr(FAR struct bm3803_tim_dev_s *dev,
  * Name: bm3803_tim_clrint
  ****************************************************************************/
 
-static void bm3803_tim_clrint(FAR struct bm3803_tim_dev_s *dev, int source)
+static void bm3803_tim_clrint(struct bm3803_tim_dev_s *dev, int source)
 {
   int vectorno;
 
@@ -532,7 +532,7 @@ static void bm3803_tim_clrint(FAR struct bm3803_tim_dev_s *dev, int source)
  * Name: bm3803_tim_checkint
  ****************************************************************************/
 
-static int bm3803_tim_checkint(FAR struct bm3803_tim_dev_s *dev, int source)
+static int bm3803_tim_checkint(struct bm3803_tim_dev_s *dev, int source)
 {
   int vectorno;
 
@@ -568,7 +568,7 @@ static int bm3803_tim_checkint(FAR struct bm3803_tim_dev_s *dev, int source)
  * Name: bm3803_tim_init
  ****************************************************************************/
 
-FAR struct bm3803_tim_dev_s *bm3803_tim_init(int timer)
+struct bm3803_tim_dev_s *bm3803_tim_init(int timer)
 {
   struct bm3803_tim_dev_s *dev = NULL;
 
@@ -613,7 +613,7 @@ FAR struct bm3803_tim_dev_s *bm3803_tim_init(int timer)
  *
  ****************************************************************************/
 
-int bm3803_tim_deinit(FAR struct bm3803_tim_dev_s *dev)
+int bm3803_tim_deinit(struct bm3803_tim_dev_s *dev)
 {
   DEBUGASSERT(dev != NULL);
 

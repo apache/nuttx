@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 void up_signal_dispatch(_sa_sigaction_t sighand, int signo,
-                        FAR siginfo_t *info, FAR void *ucontext)
+                        siginfo_t *info, void *ucontext)
 {
   /* Let sys_call4() do all of the work */
 

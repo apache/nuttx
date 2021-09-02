@@ -480,22 +480,27 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
 #ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
   /* Calculate the left channel volume level {0..1000} */
 
-  if (priv->balance <= 500)
+  if (priv->balance <= (b16HALF - 1))
     {
       leftlevel = volume;
     }
-  else if (priv->balance == 1000)
+  else if (priv->balance == (b16ONE - 1))
     {
       leftlevel = 0;
     }
   else
     {
-      leftlevel = wm8904_scalevolume(volume, b16ONE - (b16_t)priv->balance);
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
+
+      leftlevel = wm8904_scalevolume(2 * volume,
+                                     b16ONE - (b16_t)priv->balance);
     }
 
   /* Calculate the right channel volume level {0..1000} */
 
-  if (priv->balance >= 500)
+  if (priv->balance >= (b16HALF - 1))
     {
       rightlevel = volume;
     }
@@ -505,7 +510,12 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
     }
   else
     {
-      rightlevel = wm8904_scalevolume(volume, (b16_t)priv->balance);
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
+
+      rightlevel = wm8904_scalevolume(2 * volume,
+                                      (b16_t)priv->balance);
     }
 #else
   leftlevel  = priv->volume;
@@ -1209,6 +1219,31 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
            }
           break;
 #endif /* CONFIG_AUDIO_EXCLUDE_VOLUME */
+
+#ifndef CONFIG_AUDIO_EXCLUDE_BALANCE
+        case AUDIO_FU_BALANCE:
+          {
+            /* Set the balance.  The percentage level * 10 (0-1000) is in the
+             * ac_controls.b[0] parameter.
+             */
+
+            uint16_t balance = caps->ac_controls.hw[0];
+            audinfo("    Balance: %d\n", balance);
+
+            if (balance >= 0 && balance <= 1000)
+              {
+                /* Scale the balance setting to the range {0..(b16ONE - 1)} */
+
+                priv->balance = (balance * (b16ONE - 1)) / 1000;
+                wm8904_setvolume(priv, priv->volume, priv->mute);
+              }
+            else
+              {
+                ret = -EDOM;
+              }
+           }
+          break;
+#endif /* CONFIG_AUDIO_EXCLUDE_BALANCE */
 
 #ifndef CONFIG_AUDIO_EXCLUDE_TONE
         case AUDIO_FU_BASS:
@@ -2492,7 +2527,7 @@ static void wm8904_hw_reset(FAR struct wm8904_dev_s *priv)
   priv->nchannels  = WM8904_DEFAULT_NCHANNELS;
   priv->bpsamp     = WM8904_DEFAULT_BPSAMP;
 #if !defined(CONFIG_AUDIO_EXCLUDE_VOLUME) && !defined(CONFIG_AUDIO_EXCLUDE_BALANCE)
-  priv->balance    = b16HALF;            /* Center balance */
+  priv->balance    = b16HALF - 1;            /* Center balance */
 #endif
 
   /* Software reset.  This puts all WM8904 registers back in their

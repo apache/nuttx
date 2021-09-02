@@ -144,6 +144,15 @@
 
 #define SIOCSIWCOUNTRY      _WLIOC(0x0037)  /* Country code extension */
 
+#define WL_IS80211POINTERCMD(cmd) ((cmd) == SIOCGIWSCAN || \
+                                   (cmd) == SIOCSIWSCAN || \
+                                   (cmd) == SIOCSIWCOUNTRY || \
+                                   (cmd) == SIOCGIWRANGE || \
+                                   (cmd) == SIOCSIWENCODEEXT || \
+                                   (cmd) == SIOCGIWENCODEEXT || \
+                                   (cmd) == SIOCGIWESSID || \
+                                   (cmd) == SIOCSIWESSID)
+
 /* Device-specific network IOCTL commands *******************************************/
 
 #define WL_NETFIRST         0x0000          /* First network command */

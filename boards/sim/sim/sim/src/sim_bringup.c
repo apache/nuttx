@@ -89,19 +89,19 @@ void rpmsg_serialinit(void)
 int sim_bringup(void)
 {
 #ifdef CONFIG_ONESHOT
-  FAR struct oneshot_lowerhalf_s *oneshot;
+  struct oneshot_lowerhalf_s *oneshot;
 #endif
 #ifdef CONFIG_RAMMTD
-  FAR uint8_t *ramstart;
+  uint8_t *ramstart;
 #endif
 #ifdef CONFIG_SIM_I2CBUS
-  FAR struct i2c_master_s *i2cbus;
+  struct i2c_master_s *i2cbus;
 #endif
 #ifdef CONFIG_MPU60X0_I2C
-  FAR struct mpu_config_s *mpu_config;
+  struct mpu_config_s *mpu_config;
 #endif
 #ifdef CONFIG_SIM_SPI
-  FAR struct spi_dev_s *spidev;
+  struct spi_dev_s *spidev;
 #endif
   int ret = OK;
 
@@ -152,7 +152,7 @@ int sim_bringup(void)
 #ifdef CONFIG_RAMMTD
   /* Create a RAM MTD device if configured */
 
-  ramstart = (FAR uint8_t *)kmm_malloc(128 * 1024);
+  ramstart = (uint8_t *)kmm_malloc(128 * 1024);
   if (ramstart == NULL)
     {
       syslog(LOG_ERR, "ERROR: Allocation for RAM MTD failed\n");
@@ -161,7 +161,7 @@ int sim_bringup(void)
     {
       /* Initialized the RAM MTD */
 
-      FAR struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
+      struct mtd_dev_s *mtd = rammtd_initialize(ramstart, 128 * 1024);
       if (mtd == NULL)
         {
           syslog(LOG_ERR, "ERROR: rammtd_initialize failed\n");
@@ -318,6 +318,16 @@ int sim_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SIM_KEYBOARD
+  /* Initialize the keyboard */
+
+  ret = sim_kbd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sim_kbd_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_IEEE802154_LOOPBACK
   /* Initialize and register the IEEE802.15.4 MAC network loop device */
 
@@ -351,7 +361,7 @@ int sim_bringup(void)
 #ifdef CONFIG_SIM_HCISOCKET
   /* Register the Host Bluetooth network device via HCI socket */
 
-  ret = bthcisock_register(0);  /* Use HCI0 */
+  ret = bthcisock_register(CONFIG_SIM_HCISOCKET_DEVID);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: bthcisock_register() failed: %d\n", ret);

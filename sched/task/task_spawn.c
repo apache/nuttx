@@ -292,7 +292,8 @@ static int nxtask_spawn_proxy(int argc, FAR char *argv[])
  *     array of pointers to null-terminated strings. The list is terminated
  *     with a null pointer.
  *
- *   envp - The envp[] argument is not used by NuttX and may be NULL.
+ *   envp - envp[] is an array of character pointers to null-terminated
+ *     strings that provide the environment for the new process image.
  *
  * Returned Value:
  *   task_spawn() will return process ID of new task on success.
@@ -365,6 +366,7 @@ int task_spawn(FAR const char *name, main_t entry,
   g_spawn_parms.file_actions = file_actions ? *file_actions : NULL;
   g_spawn_parms.attr         = attr;
   g_spawn_parms.argv         = argv;
+  g_spawn_parms.envp         = envp;
   g_spawn_parms.u.task.name  = name;
   g_spawn_parms.u.task.entry = entry;
 

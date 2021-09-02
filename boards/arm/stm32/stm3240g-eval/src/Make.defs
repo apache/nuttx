@@ -57,10 +57,6 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += stm32_ostest.c
-endif
-
 ifeq ($(CONFIG_INPUT_STMPE811),y)
 CSRCS += stm32_stmpe811.c
 endif

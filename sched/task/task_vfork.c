@@ -37,6 +37,7 @@
 #include <nuttx/tls.h>
 
 #include "sched/sched.h"
+#include "environ/environ.h"
 #include "group/group.h"
 #include "task/task.h"
 
@@ -146,6 +147,14 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
   /* Allocate a new task group with the same privileges as the parent */
 
   ret = group_allocate(child, ttype);
+  if (ret < 0)
+    {
+      goto errout_with_tcb;
+    }
+
+  /* Duplicate the parent tasks environment */
+
+  ret = env_dup(child->cmn.group, environ);
   if (ret < 0)
     {
       goto errout_with_tcb;

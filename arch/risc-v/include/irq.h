@@ -32,14 +32,13 @@
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
 #include <nuttx/config.h>
+
 #include <arch/types.h>
 
-#ifndef __ASSEMBLY__
-#include <stdint.h>
-#include <nuttx/irq.h>
+#include <arch/arch.h>
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
-#endif
+#include <arch/mode.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -50,7 +49,7 @@
 /* IRQ 0-15 : (exception:interrupt=0) */
 
 #define RISCV_IRQ_IAMISALIGNED  (0)   /* Instruction Address Misaligned */
-#define RISCV_IRQ_IAFAULT       (1)   /* Instruction Address Fault */
+#define RISCV_IRQ_IAFAULT       (1)   /* Instruction Access Fault */
 #define RISCV_IRQ_IINSTRUCTION  (2)   /* Illegal Instruction */
 #define RISCV_IRQ_BPOINT        (3)   /* Break Point */
 #define RISCV_IRQ_LAMISALIGNED  (4)   /* Load Address Misaligned */
@@ -64,7 +63,7 @@
 #define RISCV_IRQ_INSTRUCTIONPF (12)  /* Instruction page fault */
 #define RISCV_IRQ_LOADPF        (13)  /* Load page fault */
 #define RISCV_IRQ_RESERVED      (14)  /* Reserved */
-#define RISCV_IRQ_SROREPF       (15)  /* Store/AMO page fault */
+#define RISCV_IRQ_STOREPF       (15)  /* Store/AMO page fault */
 
 #define RISCV_MAX_EXCEPTION     (15)
 
@@ -472,7 +471,7 @@ struct xcpt_syscall_s
 {
   uintptr_t sysreturn;   /* The return PC */
 #ifndef CONFIG_BUILD_FLAT
-  uintptr_t int_ctx;     /* Interrupt context (i.e. mstatus) */
+  uintptr_t int_ctx;     /* Interrupt context (i.e. m-/sstatus) */
 #endif
 };
 #endif
@@ -580,9 +579,9 @@ static inline irqstate_t up_irq_save(void)
 
   __asm__ __volatile__
     (
-      "csrrc %0, mstatus, %1\n"
+      "csrrc %0, " __XSTR(CSR_STATUS) ", %1\n"
       : "=r" (flags)
-      : "r"(MSTATUS_MIE)
+      : "r"(STATUS_IE)
       : "memory"
     );
 
@@ -605,7 +604,7 @@ static inline void up_irq_restore(irqstate_t flags)
 {
   __asm__ __volatile__
     (
-      "csrw mstatus, %0\n"
+      "csrw " __XSTR(CSR_STATUS) ", %0\n"
       : /* no output */
       : "r" (flags)
       : "memory"

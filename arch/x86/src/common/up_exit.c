@@ -70,7 +70,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   sinfo("  TCB=%p name=%s pid=%d\n", tcb, tcb->name, tcb->pid);
   sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
-  filelist = tcb->group->tg_filelist;
+  filelist = &tcb->group->tg_filelist;
   for (i = 0; i < filelist->fl_rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
@@ -114,14 +114,14 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
+  /* Destroy the task at the head of the ready to run list. */
+
+  nxtask_exit();
+
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
   nxsched_foreach(_up_dumponexit, NULL);
 #endif
-
-  /* Destroy the task at the head of the ready to run list. */
-
-  nxtask_exit();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.

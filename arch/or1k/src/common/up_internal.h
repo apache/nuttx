@@ -240,7 +240,6 @@ int  or1k_print_cpuinfo(void);
 
 void up_copyfullstate(uint32_t *dest, uint32_t *src);
 void up_decodeirq(uint32_t *regs);
-int  up_saveusercontext(uint32_t *saveregs);
 void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
@@ -267,8 +266,8 @@ uint32_t *up_doirq(int irq, uint32_t *regs);
 
 /* Exception Handlers */
 
-int  up_hardfault(int irq, FAR void *context, FAR void *arg);
-int  up_memfault(int irq, FAR void *context, FAR void *arg);
+int  up_hardfault(int irq, void *context, void *arg);
+int  up_memfault(int irq, void *context, void *arg);
 
 /* Interrupt acknowledge and dispatch */
 
@@ -343,7 +342,7 @@ void up_usbuninitialize(void);
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

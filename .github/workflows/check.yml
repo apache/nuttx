@@ -39,5 +39,5 @@ jobs:
           cd nuttx
           commits="${{ github.event.pull_request.base.sha }}..HEAD"
           git log --oneline $commits
-          echo "../nuttx/tools/checkpatch.sh -g $commits"
-          ../nuttx/tools/checkpatch.sh -g $commits
+          echo "../nuttx/tools/checkpatch.sh -m -g $commits"
+          ../nuttx/tools/checkpatch.sh -m -g $commits

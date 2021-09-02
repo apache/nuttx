@@ -114,7 +114,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int arm_svcall(int irq, FAR void *context, FAR void *arg)
+int arm_svcall(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
@@ -154,7 +154,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
     {
       /* R0=SYS_save_context:  This is a save context command:
        *
-       *   int arm_saveusercontext(uint32_t *saveregs);
+       *   int up_saveusercontext(void *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -261,14 +261,14 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
            */
 
           rtcb->flags          &= ~TCB_FLAG_SYSCALL;
-          (void)nxsig_unmask_pendingsignal();
+          nxsig_unmask_pendingsignal();
         }
         break;
 #endif
 
       /* R0=SYS_task_start:  This a user task start
        *
-       *   void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+       *   void up_task_start(main_t taskentry, int argc, char *argv[])
        *     noreturn_function;
        *
        * At this point, the following values are saved in context:
@@ -335,7 +335,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
-       *                     FAR siginfo_t *info, FAR void *ucontext);
+       *                     siginfo_t *info, void *ucontext);
        *
        * At this point, the following values are saved in context:
        *
@@ -408,7 +408,7 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */
