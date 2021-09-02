@@ -36,11 +36,9 @@ distclean::
 #	$(call DELDIR, uClibc++)
 
 CPPSRCS += algorithm.cpp associative_base.cpp bitset.cpp char_traits.cpp
-CPPSRCS += complex.cpp del_op.cpp del_opnt.cpp del_ops.cpp del_opv.cpp
-CPPSRCS += del_opvnt.cpp del_opvs.cpp deque.cpp exception.cpp fstream.cpp
+CPPSRCS += complex.cpp deque.cpp exception.cpp fstream.cpp
 CPPSRCS += func_exception.cpp iomanip.cpp ios.cpp iostream.cpp istream.cpp
-CPPSRCS += iterator.cpp limits.cpp list.cpp locale.cpp map.cpp new_handler.cpp
-CPPSRCS += new_op.cpp new_opnt.cpp new_opv.cpp new_opvnt.cpp numeric.cpp
+CPPSRCS += iterator.cpp limits.cpp list.cpp locale.cpp map.cpp numeric.cpp
 CPPSRCS += ostream.cpp queue.cpp set.cpp sstream.cpp stack.cpp stdexcept.cpp
 CPPSRCS += streambuf.cpp string.cpp typeinfo.cpp utility.cpp valarray.cpp
 CPPSRCS += vector.cpp
