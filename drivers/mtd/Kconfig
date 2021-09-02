@@ -194,6 +194,7 @@ comment "MTD Device Drivers"
 
 menuconfig MTD_NAND
 	bool "MTD NAND support"
+	depends on ALLOW_BSD_COMPONENTS
 	default n
 	---help---
 		Enable support for NAND FLASH devices.
