@@ -123,7 +123,7 @@ my (@stack, $re, $dre, $sub, $x, $xs, $funcre, $min_stack);
 # e.g. c01f0d48: e92ddff0 push {r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
 #
 sub arm_push_handling {
-	my $regex = qr/.*push.*}/o;
+	my $regex = qr/.*(?:push.*}|stmdb.*sp.*}).*/o;
 	my $size = 0;
 	my $line_arg = shift;
 
