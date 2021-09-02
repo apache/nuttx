@@ -1356,6 +1356,24 @@ static int littlefs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
     }
 
   ret = lfs_mkdir(&fs->lfs, relpath);
+  if (ret >= 0)
+    {
+      struct littlefs_attr_s attr;
+      struct timespec time;
+
+      clock_gettime(CLOCK_REALTIME, &time);
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = mode;
+      attr.at_ctim = 1000000000ull * time.tv_sec + time.tv_nsec;
+      attr.at_atim = attr.at_ctim;
+      attr.at_mtim = attr.at_ctim;
+      ret = lfs_setattr(&fs->lfs, relpath, 0, &attr, sizeof(attr));
+      if (ret < 0)
+        {
+          lfs_remove(&fs->lfs, relpath);
+        }
+    }
+
   littlefs_semgive(fs);
 
   return ret;
@@ -1450,6 +1468,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
 
       ret = 0;
       memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
     }
 
   buf->st_mode         = attr.at_mode;
