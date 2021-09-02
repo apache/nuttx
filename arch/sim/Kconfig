@@ -562,6 +562,31 @@ endchoice
 
 endif
 
+config SIM_SPI
+	bool "Simulated SPI port"
+	default n
+	select SPI
+	---help---
+		Build in support for simulated spi port
+
+if SIM_SPI
+
+choice
+	prompt "Simulated SPI Type"
+	default SIM_SPI_LINUX
+
+config SIM_SPI_LINUX
+	bool "Linux SPI Character Dev"
+	depends on HOST_LINUX
+	---help---
+		Attach a Linux SPI port via the character device
+		interface. To achieve a SPI port on Linux host, it is
+		recommended to use a USB<>SPI device such as CH341A/B.
+
+endchoice
+
+endif
+
 config SIM_UART_NUMBER
 	int "The number of tty ports on sim platform, range is 0~4"
 	default 0
