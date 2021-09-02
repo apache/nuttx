@@ -1,13 +1,6 @@
 /****************************************************************************
  * libs/libc/math/lib_copysignf.c
  *
- *   Copyright (C) 2015, 2016 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Dave Marples <dave@marples.net>
- *
- * Replaced on 2016-07-30 by David Alession with a faster version of
- * copysignf() from NetBSD with the following Copyright:
- *
  *   Copyright (C) 1993 by Sun Microsystems, Inc. All rights reserved.
  *
  *   Developed at SunPro, a Sun Microsystems, Inc. business.
