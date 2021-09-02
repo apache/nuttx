@@ -1448,6 +1448,7 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
           goto errout;
         }
 
+      ret = 0;
       memset(&attr, 0, sizeof(attr));
     }
 
@@ -1464,6 +1465,15 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
   buf->st_blksize      = fs->cfg.block_size;
   buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
                          buf->st_blksize;
+
+  if (info.type == LFS_TYPE_REG)
+    {
+      buf->st_mode |= S_IFREG;
+    }
+  else
+    {
+      buf->st_mode |= S_IFDIR;
+    }
 
 errout:
   littlefs_semgive(fs);
@@ -1498,6 +1508,7 @@ static int littlefs_chstat(FAR struct inode *mountpt,
           goto errout;
         }
 
+      ret = 0;
       memset(&attr, 0, sizeof(attr));
     }
 
