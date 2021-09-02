@@ -34,6 +34,7 @@
 #include <nuttx/fs/fs.h>
 #include "devif/devif.h"
 
+#include "socket/socket.h"
 #include "local/local.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_NET_LOCAL)
@@ -112,9 +113,8 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *   Send a packet on the write-only FIFO.
  *
  * Input Parameters:
- *   filep    File structure of write-only FIFO.
- *   buf      Data to send
- *   len      Length of data to send
+ *   conn     The connection
+ *   msg      Message to send
  *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
@@ -123,11 +123,12 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len, bool preamble)
+int local_send_packet(FAR struct local_conn_s *conn,
+                      FAR struct msghdr *msg, bool preamble)
 {
-  FAR const struct iovec *end = buf + len;
-  FAR const struct iovec *iov;
+  FAR struct iovec *end = msg->msg_iov + msg->msg_iovlen;
+  FAR struct file *filep = &conn->lc_outfile;
+  FAR struct iovec *iov;
   int ret = -EINVAL;
   uint16_t len16;
 
@@ -141,12 +142,12 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
           return ret;
         }
 
-      /* Send the packet length */
-
-      for (len16 = 0, iov = buf; iov != end; iov++)
+      for (len16 = 0, iov = msg->msg_iov; iov != end; iov++)
         {
           len16 += iov->iov_len;
         }
+
+      /* Send the data packet length */
 
       ret = local_fifo_write(filep, (FAR const uint8_t *)&len16,
                              sizeof(uint16_t));
@@ -156,7 +157,9 @@ int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
         }
     }
 
-  for (len16 = 0, iov = buf; iov != end; iov++)
+  /* Send the packet data */
+
+  for (len16 = 0, iov = msg->msg_iov; iov != end; iov++)
     {
       ret = local_fifo_write(filep, iov->iov_base, iov->iov_len);
       if (ret < 0)

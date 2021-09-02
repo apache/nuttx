@@ -406,9 +406,8 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   Send a packet on the write-only FIFO.
  *
  * Input Parameters:
- *   filep    File structure of write-only FIFO.
- *   buf      Data to send
- *   len      Length of data to send
+ *   conn     The connection
+ *   msg      Message to send
  *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
@@ -417,8 +416,8 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *
  ****************************************************************************/
 
-int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len, bool preamble);
+int local_send_packet(FAR struct local_conn_s *conn,
+                      FAR struct msghdr *msg, bool preamble);
 
 /****************************************************************************
  * Name: local_recvmsg
