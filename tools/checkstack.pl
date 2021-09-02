@@ -115,12 +115,12 @@ my (@stack, $re, $dre, $sub, $x, $xs, $funcre, $min_stack);
 }
 
 #
-# To count stack usage of push {*, fp, ip, lr, pc} instruction in ARM,
+# To count stack usage of push {*} instruction in ARM,
 # if FRAME POINTER is enabled.
 # e.g. c01f0d48: e92ddff0 push {r4, r5, r6, r7, r8, r9, sl, fp, ip, lr, pc}
 #
 sub arm_push_handling {
-	my $regex = qr/.*push.*fp, ip, lr, pc}/o;
+	my $regex = qr/.*push.*}/o;
 	my $size = 0;
 	my $line_arg = shift;
 
