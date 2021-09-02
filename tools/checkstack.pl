@@ -108,6 +108,9 @@ my (@stack, $re, $dre, $sub, $x, $xs, $funcre, $min_stack);
 	} elsif ($arch eq 'sparc' || $arch eq 'sparc64') {
 		# f0019d10:       9d e3 bf 90     save  %sp, -112, %sp
 		$re = qr/.*save.*%sp, -(([0-9]{2}|[3-9])[0-9]{2}), %sp/o;
+	} elsif ($arch eq 'riscv') {
+		# 23002fd0:       11 41           addi  sp, sp, -16
+		$re = qr/.*addi.*sp,sp,-([0-9]{1,4})/o;
 	} else {
 		print("wrong or unknown architecture \"$arch\"\n");
 		exit
