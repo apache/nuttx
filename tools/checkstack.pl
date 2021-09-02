@@ -18,7 +18,7 @@
 #	ppc64le port by Breno Leitao <leitao@debian.org>
 #
 #	Usage:
-#	objdump -d vmlinux | scripts/checkstack.pl [arch]
+#	objdump -d nuttx | tools/checkstack.pl [arch]
 #
 #	TODO :	Port to all architectures (one regex per arch)
 
