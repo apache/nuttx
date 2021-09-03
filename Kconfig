@@ -22,6 +22,8 @@ config ALLOW_BSD_COMPONENTS
 
 		NOTE: If this option is not set the following components
 		are not included in the setup menu:
+		Crypto
+		    AES cypher support
 		FS
 		    NFS client file system
 		    SPIFFS File System
