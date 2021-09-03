@@ -144,6 +144,7 @@ define POSTBUILD
 		-H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header \
 		-S $(CONFIG_ESP32_OTA_SLOT_SIZE) \
 		nuttx.bin nuttx.signed.bin
+	$(Q) echo nuttx.signed.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
 	$(call MERGEBIN)
 endef
