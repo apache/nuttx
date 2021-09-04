@@ -280,6 +280,16 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       }
       break;
 #endif
+    case LCDDEVIO_SETFRAMERATE:
+      {
+        ret = priv->lcd_ptr->setframerate(priv->lcd_ptr, (int)arg);
+      }
+      break;
+    case LCDDEVIO_GETFRAMERATE:
+      {
+        *((FAR int *)arg) = priv->lcd_ptr->getframerate(priv->lcd_ptr);
+      }
+      break;
     default:
       ret = -EINVAL;
       break;
