@@ -128,10 +128,10 @@ define MERGEBIN
 endef
 endif
 
-# POSTBUILD -- Perform post build operations
+# SIGNBIN -- Sign the binary image file
 
 ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-define POSTBUILD
+define SIGNBIN
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! imgtool version 1>/dev/null 2>&1; then \
 		echo ""; \
@@ -146,10 +146,13 @@ define POSTBUILD
 		nuttx.bin nuttx.signed.bin
 	$(Q) echo nuttx.signed.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
-	$(call MERGEBIN)
 endef
-else
-define POSTBUILD
+endif
+
+# ELF2IMAGE -- Convert an ELF file into a binary file in Espressif application image format
+
+ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+define ELF2IMAGE
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
@@ -165,6 +168,19 @@ define POSTBUILD
 	$(eval ESPTOOL_ELF2IMG_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
 	esptool.py -c esp32 elf2image $(ESPTOOL_ELF2IMG_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
+endef
+endif
+
+# POSTBUILD -- Perform post build operations
+
+ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+define POSTBUILD
+	$(call SIGNBIN)
+	$(call MERGEBIN)
+endef
+else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+define POSTBUILD
+	$(call ELF2IMAGE)
 	$(call MERGEBIN)
 	$(Q) $(MK_QEMU_IMG)
 endef
