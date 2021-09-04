@@ -29,6 +29,10 @@ config FB_OVERLAY
 	bool "Framebuffer overlay support"
 	default n
 
+config FB_MODULEINFO
+	bool "Framebuffer module information support"
+	default n
+
 config FB_OVERLAY_BLIT
 	bool "Framebuffer overlay blit support"
 	depends on FB_OVERLAY

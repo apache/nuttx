@@ -516,6 +516,44 @@ static int fb_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
 #endif /* CONFIG_FB_OVERLAY */
 
+      case FBIOSET_POWER:
+        {
+          DEBUGASSERT(fb->vtable != NULL &&
+                      fb->vtable->setpower != NULL);
+          ret = fb->vtable->setpower(fb->vtable, (int)arg);
+        }
+        break;
+
+      case FBIOGET_POWER:
+        {
+          FAR int *power = (FAR int *)((uintptr_t)arg);
+
+          DEBUGASSERT(power != NULL && fb->vtable != NULL &&
+                      fb->vtable->getpower != NULL);
+          *(power) = fb->vtable->getpower(fb->vtable);
+          ret = OK;
+        }
+        break;
+
+      case FBIOGET_FRAMERATE:
+        {
+          FAR int *rate = (FAR int *)((uintptr_t)arg);
+
+          DEBUGASSERT(rate != NULL && fb->vtable != NULL &&
+                      fb->vtable->getframerate != NULL);
+          *(rate) = fb->vtable->getframerate(fb->vtable);
+          ret = OK;
+        }
+        break;
+
+      case FBIOSET_FRAMERATE:
+        {
+          DEBUGASSERT(fb->vtable != NULL &&
+                      fb->vtable->setframerate != NULL);
+          ret = fb->vtable->setframerate(fb->vtable, (int)arg);
+        }
+        break;
+
       default:
         gerr("ERROR: Unsupported IOCTL command: %d\n", cmd);
         ret = -ENOTTY;
