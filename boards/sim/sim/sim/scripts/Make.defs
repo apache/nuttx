@@ -87,12 +87,11 @@ LD = $(CROSSDEV)cc
 ifeq ($(CONFIG_HOST_MACOS),y)
 STRIP = $(CROSSDEV)strip
 AR = $(TOPDIR)/tools/macar-rcs.sh
-NM = $(CROSSDEV)nm
 else
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)gcc-ar rcs
-NM = $(CROSSDEV)gcc-nm
+AR = $(CROSSDEV)ar rcs
 endif
+NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
