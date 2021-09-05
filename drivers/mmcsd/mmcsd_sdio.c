@@ -362,12 +362,12 @@ static inline int mmcsd_sendcmd4(FAR struct mmcsd_state_s *priv)
        */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
-      up_udelay(MMCSD_DSR_DELAY);
+      nxsig_usleep(MMCSD_DSR_DELAY);
 
       /* Send it again to have more confidence */
 
       mmcsd_sendcmdpoll(priv, MMCSD_CMD4, CONFIG_MMCSD_DSR << 16);
-      up_udelay(MMCSD_DSR_DELAY);
+      nxsig_usleep(MMCSD_DSR_DELAY);
     }
 #endif
 
@@ -3020,7 +3020,7 @@ static int mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv)
   /* Select high speed SD clocking (which may depend on the DSR setting) */
 
   SDIO_CLOCK(priv->dev, CLOCK_SD_TRANSFER_1BIT);
-  up_udelay(MMCSD_CLK_DELAY);
+  nxsig_usleep(MMCSD_CLK_DELAY);
 
   /* Get the SD card Configuration Register (SCR).  We need this now because
    * that configuration register contains the indication whether or not
@@ -3099,7 +3099,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
   /* Then send CMD0 just once is standard procedure */
 
   mmcsd_sendcmdpoll(priv, MMCSD_CMD0, 0);
-  up_udelay(MMCSD_IDLE_DELAY);
+  nxsig_usleep(MMCSD_IDLE_DELAY);
 
 #ifdef CONFIG_MMCSD_MMCSUPPORT
   /* Send CMD1 which is supported only by MMC.  if there is valid response
