@@ -48,7 +48,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/clock.h>
 #include <nuttx/arch.h>
-#include <nuttx/drivers/rwbuffer.h>
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 #include <nuttx/semaphore.h>
@@ -131,12 +130,6 @@ struct mmcsd_state_s
 #else
   uint32_t capacity;               /* Total capacity of volume (Limited to 4Gb) */
 #endif
-
-  /* Read-ahead and write buffering support */
-
-#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
-  struct rwbuffer_s rwbuffer;
-#endif
 };
 
 /****************************************************************************
@@ -193,20 +186,12 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
 static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
                  FAR uint8_t *buffer, off_t startblock, size_t nblocks);
 #endif
-#ifdef CONFIG_DRVR_READAHEAD
-static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
-                 off_t startblock, size_t nblocks);
-#endif
 static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
                  FAR const uint8_t *buffer, off_t startblock);
 #ifndef CONFIG_MMCSD_MULTIBLOCK_DISABLE
 static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
                  FAR const uint8_t *buffer, off_t startblock,
                  size_t nblocks);
-#endif
-#ifdef CONFIG_DRVR_WRITEBUFFER
-static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
-                 off_t startblock, size_t nblocks);
 #endif
 
 /* Block driver methods *****************************************************/
@@ -1634,70 +1619,6 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
 #endif
 
 /****************************************************************************
- * Name: mmcsd_reload
- *
- * Description:
- *   Reload the specified number of sectors from the physical device into the
- *   read-ahead buffer.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_DRVR_READAHEAD
-static ssize_t mmcsd_reload(FAR void *dev, FAR uint8_t *buffer,
-                            off_t startblock, size_t nblocks)
-{
-  FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)dev;
-#ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
-  size_t block;
-  size_t endblock;
-#endif
-  ssize_t ret;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0);
-
-#ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
-  /* Read each block using only the single block transfer method */
-
-  endblock = startblock + nblocks - 1;
-  ret = nblocks;
-
-  for (block = startblock; block <= endblock; block++)
-    {
-      /* Read this block into the user buffer */
-
-      ssize_t nread = mmcsd_readsingle(priv, buffer, block);
-      if (nread < 0)
-        {
-          ret = nread;
-          break;
-        }
-
-      /* Increment the buffer pointer by the block size */
-
-      buffer += priv->blocksize;
-    }
-
-#else
-  /* Use either the single- or muliple-block transfer method */
-
-  if (nblocks == 1)
-    {
-      ret = mmcsd_readsingle(priv, buffer, startblock);
-    }
-  else
-    {
-      ret = mmcsd_readmultiple(priv, buffer, startblock, nblocks);
-    }
-
-#endif
-
-  /* On success, return the number of blocks read */
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Name: mmcsd_writesingle
  *
  * Description:
@@ -2090,67 +2011,6 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
 #endif
 
 /****************************************************************************
- * Name: mmcsd_flush
- *
- * Description:
- *   Flush the specified number of sectors from the write buffer to the card.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_DRVR_WRITEBUFFER)
-static ssize_t mmcsd_flush(FAR void *dev, FAR const uint8_t *buffer,
-                           off_t startblock, size_t nblocks)
-{
-  FAR struct mmcsd_state_s *priv = (FAR struct mmcsd_state_s *)dev;
-#ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
-  size_t block;
-  size_t endblock;
-#endif
-  ssize_t ret;
-
-  DEBUGASSERT(priv != NULL && buffer != NULL && nblocks > 0);
-
-#ifdef CONFIG_MMCSD_MULTIBLOCK_DISABLE
-  /* Write each block using only the single block transfer method */
-
-  endblock = startblock + nblocks - 1;
-  ret = nblocks;
-
-  for (block = startblock; block <= endblock; block++)
-    {
-      /* Write this block from the user buffer */
-
-      ssize_t nread = mmcsd_writesingle(priv, buffer, block);
-      if (nread < 0)
-        {
-          ret = nread;
-          break;
-        }
-
-      /* Increment the buffer pointer by the block size */
-
-      buffer += priv->blocksize;
-    }
-
-#else
-  if (nblocks == 1)
-    {
-      ret = mmcsd_writesingle(priv, buffer, startblock);
-    }
-  else
-    {
-      ret = mmcsd_writemultiple(priv, buffer, startblock, nblocks);
-    }
-
-#endif
-
-  /* On success, return the number of blocks written */
-
-  return ret;
-}
-#endif
-
-/****************************************************************************
  * Name: mmcsd_open
  *
  * Description: Open the block device
@@ -2224,7 +2084,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
                           blkcnt_t startsector, unsigned int nsectors)
 {
   FAR struct mmcsd_state_s *priv;
-#if !defined(CONFIG_DRVR_READAHEAD) && defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#if defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
   size_t sector;
   size_t endsector;
 #endif
@@ -2243,12 +2103,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
           return (ssize_t)ret;
         }
 
-#if defined(CONFIG_DRVR_READAHEAD)
-      /* Get the data from the read-ahead buffer */
-
-      ret = rwb_read(&priv->rwbuffer, startsector, nsectors, buffer);
-
-#elif defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#if defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
       /* Read each block using only the single block transfer method */
 
       ret = nsectors;
@@ -2324,12 +2179,7 @@ static ssize_t mmcsd_write(FAR struct inode *inode,
           return (ssize_t)ret;
         }
 
-#if defined(CONFIG_DRVR_WRITEBUFFER)
-      /* Write the data to the write buffer */
-
-      ret = rwb_write(&priv->rwbuffer, startsector, nsectors, buffer);
-
-#elif defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
+#if defined(CONFIG_MMCSD_MULTIBLOCK_DISABLE)
       /* Write each block using only the single block transfer method */
 
       ret = nsectors;
@@ -3756,18 +3606,6 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
         }
     }
 
-#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
-  /* Initialize buffering */
-
-#warning "Missing setup of rwbuffer"
-  ret = rwb_initialize(&priv->rwbuffer);
-  if (ret < 0)
-    {
-      ferr("ERROR: Buffer setup failed: %d\n", ret);
-      goto errout_with_hwinit;
-    }
-#endif
-
   /* Create a MMCSD device name */
 
   snprintf(devname, 16, "/dev/mmcsd%d", minor);
@@ -3778,16 +3616,12 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
   if (ret < 0)
     {
       ferr("ERROR: register_blockdriver failed: %d\n", ret);
-      goto errout_with_buffers;
+      goto errout_with_hwinit;
     }
 
   return OK;
 
-errout_with_buffers:
-#if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
-  rwb_uninitialize(&priv->rwbuffer);
 errout_with_hwinit:
-#endif
   mmcsd_hwuninitialize(priv);
 errout_with_alloc:
   nxsem_destroy(&priv->sem);
