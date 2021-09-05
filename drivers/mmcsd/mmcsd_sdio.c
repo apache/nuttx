@@ -229,7 +229,7 @@ static void    mmcsd_mediachange(FAR void *arg);
 static int     mmcsd_widebus(FAR struct mmcsd_state_s *priv);
 #ifdef CONFIG_MMCSD_MMCSUPPORT
 static int     mmcsd_mmcinitialize(FAR struct mmcsd_state_s *priv);
-static int     mmcsd_read_csd (FAR struct mmcsd_state_s *priv);
+static int     mmcsd_read_csd(FAR struct mmcsd_state_s *priv);
 #endif
 static int     mmcsd_sdinitialize(FAR struct mmcsd_state_s *priv);
 static int     mmcsd_cardidentify(FAR struct mmcsd_state_s *priv);
@@ -3668,12 +3668,8 @@ static int mmcsd_hwinitialize(FAR struct mmcsd_state_s *priv)
 
 static void mmcsd_hwuninitialize(FAR struct mmcsd_state_s *priv)
 {
-  if (priv)
-    {
-      mmcsd_removed(priv);
-      SDIO_RESET(priv->dev);
-      kmm_free(priv);
-    }
+  mmcsd_removed(priv);
+  SDIO_RESET(priv->dev);
 }
 
 /****************************************************************************
@@ -3715,74 +3711,76 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev)
 
   priv = (FAR struct mmcsd_state_s *)
     kmm_malloc(sizeof(struct mmcsd_state_s));
-  if (priv)
+  if (priv == NULL)
     {
-      /* Initialize the MMC/SD state structure */
+      return -ENOMEM;
+    }
 
-      memset(priv, 0, sizeof(struct mmcsd_state_s));
-      nxsem_init(&priv->sem, 0, 1);
+  /* Initialize the MMC/SD state structure */
 
-      /* Bind the MMCSD driver to the MMCSD state structure */
+  memset(priv, 0, sizeof(struct mmcsd_state_s));
+  nxsem_init(&priv->sem, 0, 1);
 
-      priv->dev = dev;
+  /* Bind the MMCSD driver to the MMCSD state structure */
 
-      /* Initialize the hardware associated with the slot */
+  priv->dev = dev;
 
-      ret = mmcsd_hwinitialize(priv);
+  /* Initialize the hardware associated with the slot */
 
-      /* Was the slot initialized successfully? */
+  ret = mmcsd_hwinitialize(priv);
 
-      if (ret != OK)
+  /* Was the slot initialized successfully? */
+
+  if (ret != OK)
+    {
+      /* No... But the error ENODEV is returned if hardware
+       * initialization succeeded but no card is inserted in the slot.
+       * In this case, the no error occurred, but the driver is still
+       * not ready.
+       */
+
+      if (ret == -ENODEV)
         {
-          /* No... But the error ENODEV is returned if hardware
-           * initialization succeeded but no card is inserted in the slot.
-           * In this case, the no error occurred, but the driver is still
-           * not ready.
+          /* No card in the slot (or if there is, we could not recognize
+           * it).. Setup to receive the media inserted event
            */
 
-          if (ret == -ENODEV)
-            {
-              /* No card in the slot (or if there is, we could not recognize
-               * it).. Setup to receive the media inserted event
-               */
+          SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
 
-              SDIO_CALLBACKENABLE(priv->dev, SDIOMEDIA_INSERTED);
-
-              finfo("MMC/SD slot is empty\n");
-            }
-          else
-            {
-              /* Some other non-recoverable bad thing happened */
-
-              ferr("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
-              goto errout_with_alloc;
-            }
+          finfo("MMC/SD slot is empty\n");
         }
+      else
+        {
+          /* Some other non-recoverable bad thing happened */
+
+          ferr("ERROR: Failed to initialize MMC/SD slot: %d\n", ret);
+          goto errout_with_alloc;
+        }
+    }
 
 #if defined(CONFIG_DRVR_WRITEBUFFER) || defined(CONFIG_DRVR_READAHEAD)
-      /* Initialize buffering */
+  /* Initialize buffering */
 
 #warning "Missing setup of rwbuffer"
-      ret = rwb_initialize(&priv->rwbuffer);
-      if (ret < 0)
-        {
-          ferr("ERROR: Buffer setup failed: %d\n", ret);
-          goto errout_with_hwinit;
-        }
+  ret = rwb_initialize(&priv->rwbuffer);
+  if (ret < 0)
+    {
+      ferr("ERROR: Buffer setup failed: %d\n", ret);
+      goto errout_with_hwinit;
+    }
 #endif
 
-      /* Create a MMCSD device name */
+  /* Create a MMCSD device name */
 
-      snprintf(devname, 16, "/dev/mmcsd%d", minor);
+  snprintf(devname, 16, "/dev/mmcsd%d", minor);
 
-      /* Inode private data is a reference to the MMCSD state structure */
+  /* Inode private data is a reference to the MMCSD state structure */
 
-      ret = register_blockdriver(devname, &g_bops, 0, priv);
-      if (ret < 0)
-        {
-          ferr("ERROR: register_blockdriver failed: %d\n", ret);
-          goto errout_with_buffers;
-        }
+  ret = register_blockdriver(devname, &g_bops, 0, priv);
+  if (ret < 0)
+    {
+      ferr("ERROR: register_blockdriver failed: %d\n", ret);
+      goto errout_with_buffers;
     }
 
   return OK;
@@ -3792,10 +3790,9 @@ errout_with_buffers:
   rwb_uninitialize(&priv->rwbuffer);
 errout_with_hwinit:
 #endif
-  mmcsd_hwuninitialize(priv);  /* This will free the private data structure */
-  return ret;
-
+  mmcsd_hwuninitialize(priv);
 errout_with_alloc:
+  nxsem_destroy(&priv->sem);
   kmm_free(priv);
   return ret;
 }
