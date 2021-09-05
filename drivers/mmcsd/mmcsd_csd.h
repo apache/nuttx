@@ -206,7 +206,7 @@
 
 #define MMC_CSD_SPECVERS(csd) ((csd[0] >> 2) & 0x0f)
 
-/* Reserved 120-155 */
+/* Reserved 120-121 */
 
 /* TAAC 112-119 = Data read access-time-1
  *   TIME_VALUE 3-6 = Time mantissa
