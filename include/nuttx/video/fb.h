@@ -429,7 +429,7 @@ struct fb_cursorsize_s
 };
 #endif
 
-/* The following are used to get/get the cursor attributes via IOCTL
+/* The following are used to get/set the cursor attributes via IOCTL
  * command.
  */
 
