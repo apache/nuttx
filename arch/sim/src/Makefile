@@ -83,7 +83,6 @@ HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_hostmisc.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_LIBCXX),y)
-  STDLIBS += -lc++abi
   # Note: up_macho_init.c is not in CSRCS because it's picky about
   # the place in the object list for linking. Namely, its constructor
   # should be the first one in the executable.
