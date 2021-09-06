@@ -112,6 +112,10 @@ ifeq ($(CONFIG_SENSORS_LPS25H),y)
   CSRCS += lps25h.c
 endif
 
+ifeq ($(CONFIG_SENSORS_LPS27HHW),y)
+  CSRCS += lps27hhw.c
+endif
+
 ifeq ($(CONFIG_ADXL345_I2C),y)
   CSRCS += adxl345_i2c.c
 endif

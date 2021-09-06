@@ -556,6 +556,13 @@ config DEBUG_LPS25H
 
 endif # SENSORS_LPS25H
 
+config SENSORS_LPS27HHW
+	bool "STMicro LPS27HHW barometer sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the STMicro LPS27HHW barometer sensor.
+
 config SENSORS_LTC4151
 	bool "LTC4151 current and voltage monitor"
 	default n
