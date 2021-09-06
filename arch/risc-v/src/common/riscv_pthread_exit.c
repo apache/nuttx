@@ -55,6 +55,10 @@
 void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
 {
   sys_call2(SYS_pthread_exit, (uintptr_t)exit, (uintptr_t)exit_value);
+
+  /* Suppress "'noreturn' function does return" warning */
+
+  while (1);
 }
 
 #endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */
