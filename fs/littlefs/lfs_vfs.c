@@ -1466,11 +1466,11 @@ static int littlefs_stat(FAR struct inode *mountpt, FAR const char *relpath,
           goto errout;
         }
 
-      ret = 0;
       memset(&attr, 0, sizeof(attr));
       attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
     }
 
+  ret = 0;
   buf->st_mode         = attr.at_mode;
   buf->st_uid          = attr.at_uid;
   buf->st_gid          = attr.at_gid;
@@ -1527,7 +1527,6 @@ static int littlefs_chstat(FAR struct inode *mountpt,
           goto errout;
         }
 
-      ret = 0;
       memset(&attr, 0, sizeof(attr));
     }
 
