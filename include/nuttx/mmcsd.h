@@ -27,6 +27,47 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <nuttx/fs/ioctl.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* mmcsd ioctl */
+
+#define MMC_RPMB_TRANSFER       _MMCSDIOC(0x0000)
+
+/* rpmb request */
+
+#define MMC_RPMB_WRITE_KEY      0x01
+#define MMC_RPMB_READ_CNT       0x02
+#define MMC_RPMB_WRITE          0x03
+#define MMC_RPMB_READ           0x04
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+struct mmc_rpmb_frame_s
+{
+  uint8_t  stuff[196];
+  uint8_t  key_mac[32];
+  uint8_t  data[256];
+  uint8_t  nonce[16];
+  uint32_t write_counter;
+  uint16_t addr;
+  uint16_t block_count;
+  uint16_t result;
+  uint16_t req_resp;
+};
+
+struct mmc_rpmb_transfer_s
+{
+  unsigned int num_of_frames;
+  struct mmc_rpmb_frame_s frames[0];
+};
+
 /****************************************************************************
  * Public Functions Definitions
  ****************************************************************************/
@@ -76,8 +117,7 @@ int mmcsd_slotinitialize(int minor, FAR struct sdio_dev_s *dev);
  ****************************************************************************/
 
 struct spi_dev_s; /* See nuttx/spi/spi.h */
-int mmcsd_spislotinitialize(int minor,
-                            int slotno,
+int mmcsd_spislotinitialize(int minor, int slotno,
                             FAR struct spi_dev_s *spi);
 
 #undef EXTERN
