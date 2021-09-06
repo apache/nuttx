@@ -122,18 +122,23 @@ endif
 
 ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
+  CC = clang
+  CXX = clang++
+  CPP = clang -E -P -x c
+  LD = $(CROSSDEV)ld
+  AR = $(CROSSDEV)ar rcs
+  NM = $(CROSSDEV)nm
+else
+  CC = $(CROSSDEV)gcc
+  CXX = $(CROSSDEV)g++
+  CPP = $(CROSSDEV)gcc -E -P -x c
+  LD = $(CROSSDEV)gcc
+  AR = $(CROSSDEV)gcc-ar rcs
+  NM = $(CROSSDEV)gcc-nm
 endif
 
-# Default toolchain
-
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)gcc
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)gcc-ar rcs
-NM = $(CROSSDEV)gcc-nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
