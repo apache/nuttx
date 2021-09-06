@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -953,7 +954,7 @@ FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
       size = mtd_size;
     }
 
-  finfo("\tMTD offset = 0x%x\n", mtd_offset);
+  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
   finfo("\tMTD size = 0x%" PRIx32 "\n", size);
 
   startblock = MTD_SIZE2BLK(priv, mtd_offset);

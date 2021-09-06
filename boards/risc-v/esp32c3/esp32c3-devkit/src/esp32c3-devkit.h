@@ -189,6 +189,22 @@ int board_bmp180_initialize(int devno, int busno);
 #endif
 
 /****************************************************************************
+ * Name: board_wlan_init
+ *
+ * Description:
+ *   Configure the wireless subsystem.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_WIRELESS
+int board_wlan_init(void);
+#endif
+
+/****************************************************************************
  * Name: esp32c3_spiflash_init
  *
  * Description:

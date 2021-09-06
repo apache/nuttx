@@ -46,12 +46,347 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ESP32C3_MTD_PATH      "/dev/esp32c3flash"
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
-#define ESP32C3_FS_MOUNT_PT   CONFIG_ESP32C3_SPIFLASH_FS_MOUNT_PT
+/****************************************************************************
+ * Name: setup_smartfs
+ *
+ * Description:
+ *   Provide a block driver wrapper around MTD partition and mount a
+ *   SMART FS over it.
+ *
+ * Parameters:
+ *   smartn - Number used to register the mtd partition: /dev/smartx, where
+ *            x = smartn.
+ *   mtd    - Pointer to a pre-allocated mtd partition.
+ *   mnt_pt - Mount point
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-#define ESP32C3_MTD_OFFSET            CONFIG_ESP32C3_MTD_OFFSET
-#define ESP32C3_MTD_SIZE              CONFIG_ESP32C3_MTD_SIZE
+#if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
+static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
+                         const char *mnt_pt)
+{
+  int ret = OK;
+  char path[22];
+
+  ret = smart_initialize(smartn, mtd, NULL);
+  if (ret < 0)
+    {
+      finfo("smart_initialize failed, Trying to erase first...\n");
+      ret = mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
+      if (ret < 0)
+        {
+          ferr("ERROR: ioctl(BULKERASE) failed: %d\n", ret);
+          return ret;
+        }
+
+      finfo("Erase successful, initializing it again.\n");
+      ret = smart_initialize(smartn, mtd, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: smart_initialize failed: %d\n", ret);
+          return ret;
+        }
+    }
+
+  if (mnt_pt != NULL)
+    {
+      snprintf(path, sizeof(path), "/dev/smart%d", smartn);
+
+      ret = nx_mount(path, mnt_pt, "smartfs", 0, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: setup_littlefs
+ *
+ * Description:
+ *   Register a mtd driver and mount a Little FS over it.
+ *
+ * Parameters:
+ *   path   - Path name used to register the mtd driver.
+ *   mtd    - Pointer to a pre-allocated mtd partition.
+ *   mnt_pt - Mount point
+ *   priv   - Privileges
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
+static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
+                          const char *mnt_pt, int priv)
+{
+  int ret = OK;
+
+  ret = register_mtddriver(path, mtd, priv, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register MTD: %d\n", ret);
+      return ERROR;
+    }
+
+  if (mnt_pt != NULL)
+    {
+      ret = nx_mount(path, mnt_pt, "littlefs", 0, NULL);
+      if (ret < 0)
+        {
+          ret = nx_mount(path, mnt_pt, "littlefs", 0, "forceformat");
+          if (ret < 0)
+            {
+              ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+              return ret;
+            }
+        }
+    }
+
+  return OK;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: setup_spiffs
+ *
+ * Description:
+ *   Register a mtd driver and mount a SPIFFS over it.
+ *
+ * Parameters:
+ *   path   - Path name used to register the mtd driver.
+ *   mtd    - Pointer to a pre-allocated mtd partition.
+ *   mnt_pt - Mount point
+ *   priv   - Privileges
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined  (CONFIG_ESP32C3_SPIFLASH_SPIFFS)
+static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
+                        const char *mnt_pt, int priv)
+{
+  int ret = OK;
+
+  ret = register_mtddriver(path, mtd, priv, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register MTD: %d\n", ret);
+      return ERROR;
+    }
+
+  if (mnt_pt != NULL)
+    {
+      ret = nx_mount(path, mnt_pt, "spiffs", 0, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: setup_nxffs
+ *
+ * Description:
+ *   Register a mtd driver and mount a SPIFFS over it.
+ *
+ * Parameters:
+ *   mtd    - Pointer to a pre-allocated mtd partition.
+ *   mnt_pt - Mount point
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined (CONFIG_ESP32C3_SPIFLASH_NXFFS)
+static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
+{
+  int ret = OK;
+
+  ret = nxffs_initialize(mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: NXFFS init failed: %d\n", ret);
+      return ret;
+    }
+
+  if (mnt_pt != NULL)
+    {
+      ret = nx_mount(NULL, mnt_pt, "nxffs", 0, NULL);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to mount the FS volume: %d\n", ret);
+          return ret;
+        }
+    }
+
+  return ret;
+}
+#endif
+
+/****************************************************************************
+ * Name: init_wifi_partition
+ *
+ * Description:
+ *   Initialize partition that is dedicated to Wi-Fi.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined (CONFIG_ESP32C3_WIFI_SAVE_PARAM)
+static int init_wifi_partition(void)
+{
+  int ret = OK;
+  FAR struct mtd_dev_s *mtd;
+
+  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_WIFI_MTD_OFFSET,
+                                       CONFIG_ESP32C3_WIFI_MTD_SIZE);
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      return ERROR;
+    }
+
+#if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
+
+  ret = setup_smartfs(1, mtd, CONFIG_ESP32C3_WIFI_FS_MOUNTPT);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup smartfs\n");
+      return ret;
+    }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
+
+  const char *path = "/dev/mtdblock1";
+  ret = setup_littlefs(path, mtd, CONFIG_ESP32C3_WIFI_FS_MOUNTPT, 0777);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup littlefs\n");
+      return ret;
+    }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_SPIFFS)
+
+  const char *path = "/dev/mtdblock1";
+  ret = setup_spiffs(path, mtd, CONFIG_ESP32C3_WIFI_FS_MOUNTPT, 0777);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup spiffs\n");
+      return ret;
+    }
+
+#else
+
+    ferr("ERROR: No supported FS selected. Wi-Fi partition "
+         "should be mounted before Wi-Fi initialization\n");
+
+#endif
+
+  return ret;
+}
+
+#endif
+/****************************************************************************
+ * Name: init_storage_partition
+ *
+ * Description:
+ *   Initialize partition that is dedicated to general use.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int init_storage_partition(void)
+{
+  int ret = OK;
+  FAR struct mtd_dev_s *mtd;
+
+  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_MTD_OFFSET,
+                                       CONFIG_ESP32C3_MTD_SIZE);
+  if (!mtd)
+    {
+      ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
+      return ERROR;
+    }
+
+#if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
+
+  ret = setup_smartfs(0, mtd, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup smartfs\n");
+      return ret;
+    }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_NXFFS)
+
+  ret = setup_nxffs(mtd, "/mnt");
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup nxffs\n");
+      return ret;
+    }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
+
+  const char *path = "/dev/esp32c3flash";
+  ret = setup_littlefs(path, mtd, NULL, 0755);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup littlefs\n");
+      return ret;
+    }
+
+#elif defined (CONFIG_ESP32C3_SPIFLASH_SPIFFS)
+
+  const char *path = "/dev/esp32c3flash";
+  ret = setup_spiffs(path, mtd, NULL, 0755);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to setup spiffs\n");
+      return ret;
+    }
+
+#else
+
+  ret = register_mtddriver("/dev/esp32c3flash", mtd, 0755, NULL);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to register MTD: %d\n", ret);
+      return ret;
+    }
+
+#endif
+
+  return ret;
+}
 
 /****************************************************************************
  * Public Functions
@@ -66,70 +401,21 @@
 
 int esp32c3_spiflash_init(void)
 {
-  FAR struct mtd_dev_s *mtd;
-  int ret = ERROR;
+  int ret = OK;
 
-  mtd = esp32c3_spiflash_alloc_mtdpart(ESP32C3_MTD_OFFSET,
-                                       ESP32C3_MTD_SIZE);
-
-#if defined (CONFIG_ESP32C3_SPIFLASH_SMARTFS)
-  ret = smart_initialize(0, mtd, NULL);
+#ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
+  ret = init_wifi_partition();
   if (ret < 0)
     {
-      finfo("smart_initialize failed, Trying to erase first...\n");
-      ret = mtd->ioctl(mtd, MTDIOC_BULKERASE, 0);
-      if (ret < 0)
-        {
-          ferr("ERROR: ioctl(BULKERASE) failed: %d\n", ret);
-          return ret;
-        }
-
-      finfo("Erase successful, initializing it again.\n");
-      ret = smart_initialize(0, mtd, NULL);
-      if (ret < 0)
-        {
-          ferr("ERROR: smart_initialize failed: %d\n", ret);
-          return ret;
-        }
-    }
-
-#elif defined (CONFIG_ESP32C3_SPIFLASH_NXFFS)
-  ret = nxffs_initialize(mtd);
-  if (ret < 0)
-    {
-      ferr("ERROR: NXFFS init failed: %d\n", ret);
-      return ret;
-    }
-
-#elif defined (CONFIG_ESP32C3_SPIFLASH_LITTLEFS)
-  ret = register_mtddriver(ESP32C3_MTD_PATH, mtd, 0755, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Register MTD failed: %d\n", ret);
-      return ret;
-    }
-
-  ret = mount(ESP32C3_MTD_PATH, ESP32C3_FS_MOUNT_PT,
-              "littlefs", 0, NULL);
-  if (ret < 0)
-    {
-      ret = mount(ESP32C3_MTD_PATH, ESP32C3_FS_MOUNT_PT,
-                  "littlefs", 0, "forceformat");
-      if (ret < 0)
-        {
-          syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n",
-                 errno);
-          return ret;
-        }
-    }
-#else
-  ret = register_mtddriver("/dev/esp32c3flash", mtd, 0755, NULL);
-  if (ret < 0)
-    {
-      ferr("ERROR: Register MTD failed: %d\n", ret);
       return ret;
     }
 #endif
+
+  ret = init_storage_partition();
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   return ret;
 }
