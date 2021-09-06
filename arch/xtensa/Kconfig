@@ -70,6 +70,30 @@ config ARCH_CHIP_XTENSA_CUSTOM
 
 endchoice # XTENSA chip selection
 
+config XTENSA_HAVE_ICACHE
+	bool
+	default n
+
+config XTENSA_HAVE_DCACHE
+	bool
+	default n
+
+config XTENSA_ICACHE
+	bool "Use I-Cache"
+	default n
+	depends on XTENSA_HAVE_ICACHE
+	select ARCH_ICACHE
+	---help---
+		Enable Xtensa I-Cache
+
+config XTENSA_DCACHE
+	bool "Use D-Cache"
+	default n
+	depends on XTENSA_HAVE_DCACHE
+	select ARCH_DCACHE
+	---help---
+		Enable Xtensa D-Cache
+
 config ARCH_FAMILY_LX6
 	bool
 	default n
