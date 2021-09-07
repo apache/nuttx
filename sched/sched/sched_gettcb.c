@@ -76,7 +76,7 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
 
       /* Verify that the correct TCB was found. */
 
-      if (pid == g_pidhash[hash_ndx].pid)
+      if (g_pidhash && pid == g_pidhash[hash_ndx].pid)
         {
           /* Return the TCB associated with this pid (if any) */
 
