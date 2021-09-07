@@ -344,6 +344,10 @@ config ARCH_HAVE_SYSCALL_HOOKS
 		required if CONFIG_SCHED_INSTRUMENTATION_SYSCALL is enabled.  Refer
 		to sched/Kconfig for additional information.
 
+config ARCH_HAVE_BACKTRACE
+	bool
+	default n
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
