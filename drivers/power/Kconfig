@@ -365,6 +365,15 @@ config BQ2429X
 	---help---
 		The BQ24296/BQ24297/BQ24296M are battery charger for lithium-ion batteries.
 
+config BQ25618
+	bool "BQ25618 Battery charger support"
+	default n
+	select I2C
+	select I2C_BQ25618
+	depends on BATTERY_CHARGER
+	---help---
+		The BQ25618 are battery charger for lithium-ion batteries.
+
 config MCP73871
 	bool "Microchip MCP73871 Battery charger support"
 	default n
@@ -381,6 +390,16 @@ config DEBUG_BQ2429X
 		Enable BQ2429X battery management debug features.
 
 endif # BQ2429X
+
+if BQ25618
+
+config DEBUG_BQ25618
+	bool "BQ25618 Debug Features"
+	default n
+	---help---
+		Enable BQ25618 battery management debug features.
+
+endif # BQ25618
 
 config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
@@ -426,6 +445,10 @@ config I2C_BQ2425X
 config I2C_BQ2429X
 	bool
 	default y if BQ2429X
+
+config I2C_BQ25618
+	bool
+	default y if BQ25618
 
 config I2C_MAX1704X
 	bool
