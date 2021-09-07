@@ -28,6 +28,7 @@
 
 #include <arpa/inet.h>
 #include <nuttx/net/loopback.h>
+#include <netpacket/rpmsg.h>
 #include <netdb.h>
 #include <sys/un.h>
 
@@ -46,6 +47,7 @@ struct ai_s
     struct sockaddr_un sun;
     struct sockaddr_in sin;
     struct sockaddr_in6 sin6;
+    struct sockaddr_rpmsg srp;
   } sa;
 };
 
@@ -92,6 +94,14 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
         ai->sa.sin6.sin6_family = AF_INET6;
         ai->sa.sin6.sin6_port   = port;  /* Already network order */
         memcpy(&ai->sa.sin6.sin6_addr, addr, sizeof(ai->sa.sin6.sin6_addr));
+        break;
+#endif
+#ifdef CONFIG_NET_RPMSG
+      case AF_RPMSG:
+        ai->ai.ai_addrlen       = sizeof(struct sockaddr_rpmsg);
+        ai->sa.srp.rp_family    = AF_RPMSG;
+        strncpy(ai->sa.srp.rp_cpu, addr, sizeof(ai->sa.srp.rp_cpu));
+        snprintf(ai->sa.srp.rp_name, sizeof(ai->sa.srp.rp_name), "%d", port);
         break;
 #endif
     }
@@ -145,6 +155,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family != AF_INET &&
           family != AF_INET6 &&
           family != AF_LOCAL &&
+          family != AF_RPMSG &&
           family != AF_UNSPEC)
         {
           return EAI_FAMILY;
@@ -272,10 +283,10 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #endif /* CONFIG_NET_LOOPBACK */
     }
 
-#ifdef CONFIG_NET_LOCAL
-  if (family == AF_LOCAL)
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_RPMSG)
+  if (family == AF_LOCAL || family == AF_RPMSG)
     {
-      ai = alloc_ai(AF_LOCAL, socktype, proto, port, hostname);
+      ai = alloc_ai(family, socktype, proto, port, hostname);
       if (ai != NULL)
         {
           *res = (FAR struct addrinfo *)ai;
