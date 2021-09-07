@@ -53,6 +53,22 @@
 
 /* Built-in functions */
 
+/* The <stddef.h> header shall define the following macros:
+ *
+ * offsetof(type, member-designator)
+ *   Integer constant expression of type size_t, the value of which is the
+ *   offset in bytes to the structure member (member-designator), from the
+ *   beginning of its structure (type).
+ *
+ *     NOTE: This version of offsetof() depends on behaviors that could be
+ *     undefined for some compilers.  It would be better to use a builtin
+ *     function if one exists.
+ *
+ * Reference: Opengroup.org
+ */
+
+#  define offsetof(a, b) __builtin_offsetof(a, b)
+
 /* GCC 4.x have __builtin_ctz(|l|ll) and __builtin_clz(|l|ll). These count
  * trailing/leading zeros of input number and typically will generate few
  * fast bit-counting instructions. Inputting zero to these functions is
@@ -146,6 +162,29 @@
 /* The noinstrument_function attribute informs GCC don't instrument it */
 
 #  define noinstrument_function __attribute__ ((no_instrument_function))
+
+/* The nostackprotect_function attribute disables stack protection in
+ * sensitive functions, e.g., stack coloration routines.
+ */
+
+#if defined(__has_attribute)
+#  if __has_attribute(no_stack_protector)
+#    define nostackprotect_function __attribute__ ((no_stack_protector))
+#  endif
+#endif
+
+/* nostackprotect_function definition for older versions of GCC and Clang.
+ * Note that Clang does not support setting per-function optimizations,
+ * simply disable the entire optimization pass for the required function.
+ */
+
+#ifndef nostackprotect_function
+#  if defined(__clang__)
+#    define nostackprotect_function __attribute__ ((optnone))
+#  else
+#    define nostackprotect_function __attribute__ ((__optimize__ ("-fno-stack-protector")))
+#  endif
+#endif
 
 /* The unsued code or data */
 
@@ -409,6 +448,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 
 #  define unused_code
 #  define unused_data
@@ -491,6 +531,8 @@
 
 #  define UNUSED(a) ((void)(1 || (a)))
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* Zilog-specific definitions ***********************************************/
 
 #elif defined(__ZILOG__)
@@ -546,6 +588,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
@@ -626,6 +669,8 @@
 
 #  define UNUSED(a) ((void)(1 || (a)))
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
@@ -654,6 +699,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
@@ -690,6 +736,8 @@
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* Unknown compiler *********************************************************/
 
 #else
@@ -717,6 +765,7 @@
 #  define inline_function
 #  define noinline_function
 #  define noinstrument_function
+#  define nostackprotect_function
 #  define unused_code
 #  define unused_data
 #  define formatlike(a)
@@ -741,6 +790,8 @@
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
 #  define UNUSED(a) ((void)(1 || (a)))
+
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 #endif
 

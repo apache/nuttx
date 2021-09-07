@@ -35,6 +35,17 @@
 
 /* TTGO-LoRa-SX1276-ESP32 GPIOs *********************************************/
 
+/* OLED SSD1306 */
+
+#define HAVE_SSD1306 1
+
+#if !defined(CONFIG_ESP32_I2C) || !defined(CONFIG_ESP32_I2C0) || \
+    !defined(CONFIG_LCD_SSD1306_I2C)
+#  undef HAVE_SSD1306
+#endif
+
+#define GPIO_SSD1306_RST 16
+
 /* BOOT Button */
 
 #define BUTTON_BOOT  0

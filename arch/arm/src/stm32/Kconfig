@@ -9896,7 +9896,7 @@ endif # STM32_UART7_HCIUART
 choice
 	prompt "UART8 Driver Configuration"
 	default STM32_UART8_SERIALDRIVER
-	depends on STM32_UART7
+	depends on STM32_UART8
 
 config STM32_UART8_SERIALDRIVER
 	bool "Standard serial driver"

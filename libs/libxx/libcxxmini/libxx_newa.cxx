@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_newa.cxx
+// libs/libxx/libcxxmini/libxx_newa.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <debug.h>
 
-#include "libxx.hxx"
+#include <nuttx/lib/lib.h>
 
 //***************************************************************************
 // Pre-processor Definitions

@@ -632,16 +632,17 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
 
           /* Terminate the partition name and add to output buffer */
 
-          ret = snprintf(&buffer[total], buflen - total, "%s%7ju %ju   %s\n",
-                  partname,
-                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
-                  (uintmax_t)attr->nextpart->neraseblocks,
-                  attr->nextpart->parent->name);
+          ret = snprintf(&buffer[total], buflen - total,
+                         "%s%7ju %7ju   %s\n",
+                         partname,
+                         (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                         (uintmax_t)attr->nextpart->neraseblocks,
+                         attr->nextpart->parent->name);
 #else
           ret = snprintf(&buffer[total], buflen - total, "%7ju %7ju   %s\n",
-                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
-                  (uintmax_t)attr->nextpart->neraseblocks,
-                  attr->nextpart->parent->name);
+                         (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                         (uintmax_t)attr->nextpart->neraseblocks,
+                         attr->nextpart->parent->name);
 #endif
 
           if (ret + total < buflen)

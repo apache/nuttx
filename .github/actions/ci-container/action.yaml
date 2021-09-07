@@ -18,7 +18,7 @@ inputs:
     required: true
 runs:
   using: 'docker'
-  image: 'docker.pkg.github.com/apache/incubator-nuttx/apache-nuttx-ci-linux'
+  image: 'ghcr.io/apache/incubator-nuttx/apache-nuttx-ci-linux'
   args:
     - "/bin/bash"
     - "-ce"

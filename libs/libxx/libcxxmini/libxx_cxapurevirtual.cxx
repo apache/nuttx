@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_newa.cxx
+// libs/libxx/libcxxmini/libxx_cxapurevirtual.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -14,7 +14,6 @@
 // distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 // WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
 // License for the specific language governing permissions and limitations
-// under the License.
 //
 //***************************************************************************
 
@@ -22,8 +21,7 @@
 // Included Files
 //***************************************************************************
 
-#include <cstdlib>
-#include <debug.h>
+#include <cassert>
 
 //***************************************************************************
 // Pre-processor Definitions
@@ -34,32 +32,21 @@
 //***************************************************************************
 
 //***************************************************************************
-// Public Functions
+// Operators
 //***************************************************************************
 
-namespace std
+//***************************************************************************
+// Name:  __cxa_pure_virtual
+//
+// Description:
+//    Crash when an un-implemented pure virtual function is called
+//
+//***************************************************************************
+
+extern "C"
 {
-  void __throw_out_of_range(const char*)
+  void __cxa_pure_virtual(void)
   {
-    _err("ERROR: C++: Vector .at() with argument out of range\n");
-    abort();
-   }
-
-  void __throw_length_error(const char*)
-  {
-    _err("ERROR: C++: Vector resize to excessive length\n");
-    abort();
-  }
-
-  void __throw_bad_alloc()
-  {
-    _err("ERROR: C++: Bad allocation\n");
-    abort();
-  }
-
-  void __throw_bad_function_call()
-  {
-    _err("ERROR: C++: Bad function call\n");
-    abort();
+    DEBUGPANIC();
   }
 }

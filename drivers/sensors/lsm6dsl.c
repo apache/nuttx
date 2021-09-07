@@ -52,6 +52,7 @@
 #include <errno.h>
 #include <debug.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <nuttx/kmalloc.h>
 #include <nuttx/random.h>
@@ -70,6 +71,13 @@
 #  define CONFIG_LSM6DSL_I2C_FREQUENCY 400000
 #endif
 
+/* Self test limits. */
+
+#define LSM6DSL_MIN_ST_LIMIT_MG   50.0f      /* Accelerator min limit */
+#define LSM6DSL_MAX_ST_LIMIT_MG   1700.0f    /* Accelerator max limit */
+#define LSM6DSL_MIN_ST_LIMIT_MDPS 150000.0f  /* Gyroscope min limit */
+#define LSM6DSL_MAX_ST_LIMIT_MDPS 700000.0f  /* Gyroscope max limit */
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -86,8 +94,6 @@ static int lsm6dsl_modifyreg8(FAR struct lsm6dsl_dev_s *priv,
 
 /* Other Helpers */
 
-static int lsm6dsl_find_minimum(int16_t a[], int n);
-static int lsm6dsl_find_maximum(int16_t a[], int n);
 static bool lsm6dsl_isbitset(int8_t b, int8_t n);
 
 /* Accelerometer Operations */
@@ -303,58 +309,6 @@ static int lsm6dsl_modifyreg8(FAR struct lsm6dsl_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: lsm6dsl_find_minimum
- *
- * Description:
- *   Find the minimum value in an array of numbers.
- *
- ****************************************************************************/
-
-static int lsm6dsl_find_minimum(int16_t a[], int n)
-{
-  int c;
-  int min = a[0];
-  int index = 0;
-
-  for (c = 1; c < n; c++)
-    {
-      if (a[c] < min)
-        {
-          index = c;
-          min = a[c];
-        }
-    }
-
-  return index;
-}
-
-/****************************************************************************
- * Name: lsm6dsl_find_maximum
- *
- * Description:
- *   Find the maximum value in an array of numbers.
- *
- ****************************************************************************/
-
-static int lsm6dsl_find_maximum(int16_t am[], int n)
-{
-  int c;
-  int max = am[0];
-  int index = 0;
-
-  for (c = 1; c < n; c++)
-    {
-      if (am[c] > max)
-        {
-          index = c;
-          max = am[c];
-        }
-    }
-
-  return index;
-}
-
-/****************************************************************************
  * Name: lsm6dsl_sensor_config
  *
  * Description:
@@ -526,20 +480,9 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
   int16_t avr_xst = 0;
   int16_t avr_yst = 0;
   int16_t avr_zst = 0;
-
-  int16_t min_x = 0;
-  int16_t min_y = 0;
-  int16_t min_z = 0;
-  int16_t max_x = 0;
-  int16_t max_y = 0;
-  int16_t max_z = 0;
-
-  int16_t min_xst = 0;
-  int16_t min_yst = 0;
-  int16_t min_zst = 0;
-  int16_t max_xst = 0;
-  int16_t max_yst = 0;
-  int16_t max_zst = 0;
+  int16_t test_x  = 0;
+  int16_t test_y  = 0;
+  int16_t test_z  = 0;
 
   int16_t raw_x = 0;
   int16_t raw_y = 0;
@@ -548,6 +491,9 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
   int16_t raw_xst = 0;
   int16_t raw_yst = 0;
   int16_t raw_zst = 0;
+
+  float st_limit_min = 0.0;
+  float st_limit_max = 0.0;
 
   /* mode = 0 then add hex 0x06 to OUT registers */
 
@@ -569,6 +515,8 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x00);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL3_C, 0x44);
       g_accelerofactor = (0.122 / 1000);
+      st_limit_min = LSM6DSL_MIN_ST_LIMIT_MG;
+      st_limit_max = LSM6DSL_MAX_ST_LIMIT_MG;
     }
   else
     {
@@ -580,6 +528,8 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL2_G, 0x5c);
       lsm6dsl_writereg8(priv, LSM6DSL_CTRL3_C, 0x44);
       g_gyrofactor = (70 / 1000); /* 2000dps */
+      st_limit_min = LSM6DSL_MIN_ST_LIMIT_MDPS;
+      st_limit_max = LSM6DSL_MAX_ST_LIMIT_MDPS;
     }
 
   lsm6dsl_writereg8(priv, LSM6DSL_CTRL4_C, 0x00);
@@ -804,90 +754,57 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode)
   avr_yst = (int16_t) avr_yst / samples;
   avr_zst = (int16_t) avr_zst / samples;
 
-  min_x = OUTX_NOST[lsm6dsl_find_minimum(OUTX_NOST, samples)];
-  min_y = OUTY_NOST[lsm6dsl_find_minimum(OUTY_NOST, samples)];
-  min_z = OUTZ_NOST[lsm6dsl_find_minimum(OUTZ_NOST, samples)];
-
-  max_x = OUTX_NOST[lsm6dsl_find_maximum(OUTX_NOST, samples)];
-  max_y = OUTY_NOST[lsm6dsl_find_maximum(OUTY_NOST, samples)];
-  max_z = OUTZ_NOST[lsm6dsl_find_maximum(OUTZ_NOST, samples)];
-
-  min_xst = OUTX_ST[lsm6dsl_find_minimum(OUTX_ST, samples)];
-  min_yst = OUTY_ST[lsm6dsl_find_minimum(OUTY_ST, samples)];
-  min_zst = OUTZ_ST[lsm6dsl_find_minimum(OUTZ_ST, samples)];
-
-  max_xst = OUTX_ST[lsm6dsl_find_maximum(OUTX_ST, samples)];
-  max_yst = OUTY_ST[lsm6dsl_find_maximum(OUTY_ST, samples)];
-  max_zst = OUTZ_ST[lsm6dsl_find_maximum(OUTZ_ST, samples)];
-
-  sninfo("stdev_x: -%d %d +%d\n", avr_x - min_x, avr_x, max_x - avr_x);
-  sninfo("stdev_y: -%d %d +%d\n", avr_y - min_y, avr_y, max_y - avr_y);
-  sninfo("stdev_z: -%d %d +%d\n", avr_z - min_z, avr_z, max_z - avr_z);
-
-  sninfo("stdev_xst: -%d %d +%d\n", avr_xst - min_xst, avr_xst,
-         max_xst - avr_xst);
-  sninfo("stdev_yst: -%d %d +%d\n", avr_yst - min_yst, avr_yst,
-         max_yst - avr_yst);
-  sninfo("stdev_zst: -%d %d +%d\n", avr_zst - min_zst, avr_zst,
-         max_zst - avr_zst);
-
   sninfo("avr_x: %d\n", avr_x);
   sninfo("avr_y: %d\n", avr_y);
   sninfo("avr_z: %d\n", avr_z);
-  sninfo("min_x: %d\n", min_x);
-  sninfo("max_x: %d\n", max_x);
-  sninfo("min_xst: %d\n", min_xst);
-  sninfo("max_xst: %d\n", max_xst);
+
+  test_x = fabs(avr_xst - avr_xst);
+  test_y = fabs(avr_yst - avr_yst);
+  test_z = fabs(avr_zst - avr_zst);
 
   /* Validation Question is placed at ST FAE because the equation in the
    * datasheet is doubtful.
    */
 
-  if ((avr_x >= min_x && avr_x <= max_x) &&
-      (avr_xst >= min_xst && avr_xst <= max_xst))
+  if (test_x >= st_limit_min && test_x <= st_limit_max)
     {
       sninfo("PASSED NOST AND ST FOR X!\n");
     }
   else
     {
       sninfo("FAILED NOST AND ST FOR X!\n");
-      sninfo("[ %d - %d ]", min_x, min_xst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", avr_x, avr_xst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", max_x, max_xst);
+      sninfo("[test_x: %d min: %f - max: %f ]"
+            , test_x
+            , st_limit_min
+            , st_limit_max);
       sninfo("\n");
     }
 
-  if ((avr_y >= min_y && avr_y <= max_y) &&
-      (avr_yst >= min_yst && avr_yst <= max_yst))
+  if (test_y >= st_limit_min && test_y <= st_limit_max)
     {
       sninfo("PASSED NOST AND ST FOR Y!\n");
     }
   else
     {
       sninfo("FAILED NOST AND ST FOR Y!\n");
-      sninfo("[ %d - %d ]", min_y, min_yst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", avr_y, avr_yst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", max_y, max_yst);
+      sninfo("[test_y: %d min: %f - max: %f ]"
+            , test_y
+            , st_limit_min
+            , st_limit_max);
       sninfo("\n");
     }
 
-  if ((avr_z >= min_z && avr_z <= max_z) &&
-      (avr_zst >= min_zst && avr_zst <= max_zst))
+  if (test_z >= st_limit_min && test_z <= st_limit_max)
     {
       sninfo("PASSED NOST AND ST FOR Z!\n");
     }
   else
     {
       sninfo("FAILED NOST AND ST FOR Z!\n");
-      sninfo("[ %d - %d ]", min_z, min_zst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", avr_z, avr_zst);
-      sninfo(" <=\n ");
-      sninfo("[ %d - %d ]", max_z, max_zst);
+      sninfo("[test_z: %d min: %f - max: %f ]"
+            , test_z
+            , st_limit_min
+            , st_limit_max);
       sninfo("\n");
     }
 

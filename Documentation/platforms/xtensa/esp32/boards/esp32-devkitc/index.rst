@@ -119,7 +119,44 @@ USB connection by means of CP2102 converter, at 115200 bps).
 wapi
 ----
 
-Enables WiFi support
+Enables WiFi support. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Or if you don't want to keep it saved in the firmware you can do it
+at runtime::
+
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
+
+wifinsh
+-------
+
+The ``wifinsh`` is similar to the ``wapi`` board example, but it will connect
+automatically to your Access Point (Wi-Fi Router) and will run telnet daemon
+in the board. Then you can connect to your board from your computer using the
+telnet program.
+
+After configuring the ``esp32-devkit:wifinsh`` you need to define your creden-
+tials in the menuconfig. You can define your credentials this way::
+
+    $ make menuconfig
+    -> Application Configuration
+        -> Network Utilities
+            -> Network initialization (NETUTILS_NETINIT [=y])
+                -> WAPI Configuration
+
+Find your board IP using ``nsh> ifconfig`` and then from your computer::
+
+    $ telnet 192.168.x.y
+
+Where x and y are the last two numbers of the IP that your router gave to
+your board.
 
 mqttc
 -----
@@ -129,14 +166,14 @@ This configuration tests the MQTT-C publisher example.
 From the host, start the broker and subscribe to the :code:`test` topic.  Using
 `mosquitto` this should be::
 
-    mosquitto&
-    mosquitto_sub -t test
+    $ mosquitto&
+    $ mosquitto_sub -t test
 
 From the NSH, connect to an access point::
 
-    wapi psk wlan0 mypasswd 1
-    wapi essid wlan0 myssid 1
-    renew wlan0
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
 
 Publish to the broker::
 
@@ -211,7 +248,7 @@ SPI2 is used and kept with the default IOMUX pins, i.e.::
 
 Once booted the following command is used to mount a FAT file system::
 
-    mount -t vfat /dev/mmcsd0 /mnt
+    nsh> mount -t vfat /dev/mmcsd0 /mnt
 
 module
 ------
@@ -232,8 +269,8 @@ through SPI1.
 By default a SmartFS file system is selected.
 Once booted you can use the following commands to mount the file system::
 
-    mksmartfs /dev/smart0
-    mount -t smartfs /dev/smart0 /mnt
+    nsh> mksmartfs /dev/smart0
+    nsh> mount -t smartfs /dev/smart0 /mnt
 
 Note that mksmartfs is only needed the first time.
 

@@ -40,44 +40,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ESP32_MTD_OFFSET            CONFIG_ESP32_MTD_OFFSET
-#define ESP32_MTD_SIZE              CONFIG_ESP32_MTD_SIZE
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-static int esp32_init_wifi_storage(void)
-{
-  int ret;
-  const char *path = "/dev/mtdblock1";
-  FAR struct mtd_dev_s *mtd_part;
-
-  mtd_part = esp32_spiflash_alloc_mtdpart(ESP32_MTD_OFFSET, ESP32_MTD_SIZE);
-  if (!mtd_part)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
-      return -1;
-    }
-
-  ret = register_mtddriver(path, mtd_part, 0777, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to regitser MTD: %d\n", ret);
-      return -1;
-    }
-
-  ret = nx_mount(path, CONFIG_ESP32_WIFI_FS_MOUNTPT, "spiffs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
-      return ret;
-    }
-
-  return 0;
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -99,20 +64,11 @@ int board_wlan_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
-  ret = esp32_init_wifi_storage();
-  if (ret)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi storage\n");
-      return ret;
-    }
-#endif
-
 #ifdef ESP32_WLAN_HAS_STA
   ret = esp32_wlan_sta_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi station\n");
+      wlerr("ERROR: Failed to initialize WiFi station\n");
       return ret;
     }
 #endif
@@ -121,7 +77,7 @@ int board_wlan_init(void)
   ret = esp32_wlan_softap_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize WiFi softAP\n");
+      wlerr("ERROR: Failed to initialize WiFi softAP\n");
       return ret;
     }
 #endif

@@ -1,0 +1,28 @@
+From 828208f5061fabe5c42ceee6fb1ab0783c956271 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Sat, 28 Aug 2021 09:20:09 +0800
+Subject: [PATCH] [libc++] avoid the waring: "__EXCEPTIONS" is not defined,
+ evaluates to 0 [-Werror=undef]
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: If529bbb2f87e55dce5d0df37f2bf72c3d02bf260
+---
+ include/__config | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git libcxx/include/__config libcxx/include/__config
+index e5828628d..edfe51224 100644
+--- libcxx/include/__config
++++ libcxx/include/__config
+@@ -551,7 +551,7 @@ typedef __char32_t char32_t;
+ 
+ #define _LIBCPP_NORETURN __attribute__((noreturn))
+ 
+-#if !__EXCEPTIONS
++#if !defined(__EXCEPTIONS)
+ #  define _LIBCPP_NO_EXCEPTIONS
+ #endif
+ 
+-- 
+2.25.1
+

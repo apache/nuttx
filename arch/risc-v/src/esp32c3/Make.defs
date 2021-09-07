@@ -123,10 +123,6 @@ ifeq ($(CONFIG_ESP32C3_FREERUN),y)
 CHIP_CSRCS += esp32c3_freerun.c
 endif
 
-ifeq ($(CONFIG_ESP32C3_DISABLE_STDC_ATOMIC),)
-CHIP_CSRCS += esp32c3_std_atomic.c
-endif
-
 ifeq ($(CONFIG_ESP32C3_DMA),y)
 CHIP_CSRCS += esp32c3_dma.c
 endif

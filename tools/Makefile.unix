@@ -327,7 +327,6 @@ endif
 
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip drivers/platform
 	$(Q) $(MAKE) -C boards dirlinks
-	$(Q) $(MAKE) -C openamp dirlinks
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks
 
 # context
@@ -569,10 +568,11 @@ $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
 
 subdir_distclean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_distclean)
 
-distclean: clean subdir_distclean clean_context
+distclean: clean subdir_distclean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) distclean
 endif
+	$(Q) $(MAKE) clean_context
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)

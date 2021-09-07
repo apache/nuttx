@@ -75,3 +75,9 @@ ifeq ($(CONFIG_ESP32S2_UART),y)
 CMN_CSRCS += esp32s2_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_TIMER),y)
+CHIP_CSRCS += esp32s2_tim.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += esp32s2_tim_lowerhalf.c
+endif
+endif

@@ -1,5 +1,5 @@
 //***************************************************************************
-// libs/libxx/libxx_cxapurevirtual.cxx
+// libs/libxx/libcxxmini/libxx_deletea_sized.cxx
 //
 // Licensed to the Apache Software Foundation (ASF) under one or more
 // contributor license agreements.  See the NOTICE file distributed with
@@ -21,32 +21,26 @@
 // Included Files
 //***************************************************************************
 
-#include <cassert>
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
-//***************************************************************************
-// Pre-processor Definitions
-//***************************************************************************
+#include <cstddef>
 
-//***************************************************************************
-// Private Data
-//***************************************************************************
+#include <nuttx/lib/lib.h>
+
+#ifdef CONFIG_HAVE_CXX14
 
 //***************************************************************************
 // Operators
 //***************************************************************************
 
 //***************************************************************************
-// Name:  __cxa_pure_virtual
-//
-// Description:
-//    Crash when an un-implemented pure virtual function is called
-//
+// Name: delete[]
 //***************************************************************************
 
-extern "C"
+void operator delete[](FAR void *ptr, std::size_t size)
 {
-  void __cxa_pure_virtual(void)
-  {
-    DEBUGPANIC();
-  }
+  lib_free(ptr);
 }
+
+#endif /* CONFIG_HAVE_CXX14 */

@@ -352,6 +352,13 @@ struct i2c_master_s *sim_i2cbus_initialize(int bus);
 int sim_i2cbus_uninitialize(struct i2c_master_s *dev);
 #endif
 
+/* up_spi*.c ****************************************************************/
+
+#ifdef CONFIG_SIM_SPI
+struct spi_dev_s *sim_spi_initialize(const char *filename);
+int sim_spi_uninitialize(struct spi_dev_s *dev);
+#endif
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
