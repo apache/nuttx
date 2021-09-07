@@ -160,6 +160,18 @@ Serial Console
 The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary to
 use either the VCOM or an external RS-232 driver.  Here are some options.
 
+  - VCOM.  The Virtual Com Port gateway is available on USART1 and it is the
+    default console.  Besides PB04 is by default connected to debug pin TDI,
+    both JTAG port and EDBG can only be used in SWD mode in this board.
+
+    ------ --------
+    SAMV71 SAMV71
+    PIO    Function
+    ------ --------
+    PB04   TXD1
+    PA21   RXD1
+    ------ --------
+
   - Arduino Serial Shield:  One option is to use an Arduino-compatible
     serial shield.  This will use the RXD and TXD signals available at pins
     0 an 1, respectively, of the Arduino "Digital Low" connector.  On the
@@ -219,27 +231,12 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     13   USART_RX PA21   RXD1
     14   USART_TX PB04   TXD1
 
-  - VCOM.  The Virtual Com Port gateway is available on USART1:
-
-    ------ --------
-    SAMV71 SAMV71
-    PIO    Function
-    ------ --------
-    PB04   TXD1
-    PA21   RXD1
-    ------ --------
-
 Any of these options can be selected as the serial console by:
 
   1. Enabling the UART/USART peripheral in the
      "System Type -> Peripheral Selection" menu, then
   2. Configuring the peripheral in the "Drivers -> Serial Configuration"
      menu.
-
-NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
-SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
-the capability to debug is lost!  If you plan to debug you should most
-certainly not use USART1.
 
 SD Card
 =======
