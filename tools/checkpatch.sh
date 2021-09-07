@@ -90,7 +90,18 @@ check_patch() {
   fi
 }
 
+check_msg() {
+  while read; do
+    if [[ $REPLY =~  ^Change-Id ]]; then
+      echo "Remove Gerrit Change-ID's before submitting upstream"
+      fail=1
+    fi
+  done
+}
+
 check_commit() {
+  msg=`git show -s --format=%B $1`
+  check_msg <<< "$msg"
   diffs=`git diff $1`
   check_ranges <<< "$diffs"
 }
