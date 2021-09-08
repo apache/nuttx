@@ -463,7 +463,7 @@ void up_coherent_dcache(uintptr_t addr, size_t len)
   if (len > 0)
     {
       up_clean_dcache(addr, addr + len);
-      up_invalidate_icache(addr, add + len);
+      up_invalidate_icache(addr, addr + len);
     }
 }
 #endif
