@@ -41,7 +41,7 @@ CPPSRCS += complex.cpp deque.cpp exception.cpp fstream.cpp
 CPPSRCS += func_exception.cpp iomanip.cpp ios.cpp iostream.cpp istream.cpp
 CPPSRCS += iterator.cpp limits.cpp list.cpp locale.cpp map.cpp numeric.cpp
 CPPSRCS += ostream.cpp queue.cpp set.cpp sstream.cpp stack.cpp stdexcept.cpp
-CPPSRCS += streambuf.cpp string.cpp typeinfo.cpp utility.cpp valarray.cpp
+CPPSRCS += streambuf.cpp string.cpp utility.cpp valarray.cpp
 CPPSRCS += vector.cpp
 
 DEPPATH += --dep-path uClibc++/src
