@@ -58,6 +58,8 @@ else
 	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
 endif
 
+ESPTOOL_FLASH_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ)
+
 # Configure the variables according to build environment
 
 ifdef ESPTOOL_BINDIR
@@ -117,8 +119,7 @@ define MERGEBIN
 		echo "Missing Flash memory size configuration for the ESP32 chip."; \
 		exit 1; \
 	fi
-	$(eval ESPTOOL_MERGEBIN_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
-	esptool.py -c esp32 merge_bin --output nuttx.merged.bin $(ESPTOOL_MERGEBIN_OPTS) $(ESPTOOL_BINS)
+	esptool.py -c esp32 merge_bin --output nuttx.merged.bin $(ESPTOOL_FLASH_OPTS) $(ESPTOOL_BINS)
 	$(Q) echo nuttx.merged.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.merged.bin"
 endef
@@ -165,8 +166,7 @@ define ELF2IMAGE
 		echo "Missing Flash memory size configuration for the ESP32 chip."; \
 		exit 1; \
 	fi
-	$(eval ESPTOOL_ELF2IMG_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ))
-	esptool.py -c esp32 elf2image $(ESPTOOL_ELF2IMG_OPTS) -o nuttx.bin nuttx
+	esptool.py -c esp32 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
 endef
 endif
