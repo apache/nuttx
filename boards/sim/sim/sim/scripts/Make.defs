@@ -55,6 +55,10 @@ ifeq ($(CONFIG_SIM_SANITIZE),y)
   ARCHOPTIMIZATION += -fsanitize=address -fno-omit-frame-pointer
 endif
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
+endif
+
 ARCHCPUFLAGS = -fno-builtin
 ARCHCPUFLAGSXX = -fno-builtin -nostdinc++
 ifeq ($(CONFIG_CXX_EXCEPTION),)

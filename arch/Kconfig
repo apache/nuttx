@@ -217,6 +217,14 @@ config ARCH_SIZET_LONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
+config ARCH_COVERAGE
+	bool "arch coverage"
+	select HAVE_CXX
+	select HAVE_CXXINITIALIZE
+	default n
+	---help---
+		Generate code coverage
+
 comment "Architecture Options"
 
 config ARCH_NOINTC

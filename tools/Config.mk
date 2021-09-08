@@ -459,6 +459,10 @@ endef
 
 # CLEAN - Default clean target
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+	OBJS += *.gcno *.gcda
+endif
+
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 define CLEAN
 	$(Q) if exist *$(OBJEXT) (del /f /q *$(OBJEXT))
