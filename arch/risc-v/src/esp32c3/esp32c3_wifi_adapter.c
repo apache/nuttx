@@ -6521,7 +6521,15 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
         }
 
       if (strncmp(country_code, "US", 3) == 0 ||
-          strncmp(country_code, "CA", 3) == 0)
+          strncmp(country_code, "CA", 3) == 0 ||
+          strncmp(country_code, "CO", 3) == 0 ||
+          strncmp(country_code, "DO", 3) == 0 ||
+          strncmp(country_code, "GT", 3) == 0 ||
+          strncmp(country_code, "MX", 3) == 0 ||
+          strncmp(country_code, "PA", 3) == 0 ||
+          strncmp(country_code, "PR", 3) == 0 ||
+          strncmp(country_code, "TW", 3) == 0 ||
+          strncmp(country_code, "UZ", 3) == 0)
         {
           country.nchan  = 11;
         }
