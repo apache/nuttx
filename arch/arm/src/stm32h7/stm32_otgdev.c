@@ -2080,6 +2080,8 @@ static void stm32_usbreset(struct stm32_usbdev_s *priv)
       /* Reset IN endpoint status */
 
       privep->stalled = false;
+      privep->active  = false;
+      privep->zlp     = false;
 
       /* Return read requests to the class implementation */
 
@@ -2089,6 +2091,8 @@ static void stm32_usbreset(struct stm32_usbdev_s *priv)
       /* Reset endpoint status */
 
       privep->stalled = false;
+      privep->active  = false;
+      privep->zlp     = false;
     }
 
   stm32_putreg(0xffffffff, STM32_OTG_DAINT);
@@ -3959,6 +3963,8 @@ static int stm32_epout_configure(FAR struct stm32_ep_s *privep,
       privep->ep.maxpacket = maxpacket;
       privep->eptype       = eptype;
       privep->stalled      = false;
+      privep->active       = false;
+      privep->zlp          = false;
     }
 
   /* Enable the interrupt for this endpoint */
@@ -4030,6 +4036,8 @@ static int stm32_epin_configure(FAR struct stm32_ep_s *privep,
       privep->ep.maxpacket = maxpacket;
       privep->eptype       = eptype;
       privep->stalled      = false;
+      privep->active       = false;
+      privep->zlp          = false;
     }
 
   /* Enable the interrupt for this endpoint */
