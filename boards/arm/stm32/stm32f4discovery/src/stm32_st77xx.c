@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_st7789.c
+ * boards/arm/stm32/stm32f4discovery/src/stm32_st77xx.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/st7789.h>
+#include <nuttx/lcd/st77xx.h>
 
 #include "stm32.h"
 #include "stm32_gpio.h"
@@ -98,7 +98,7 @@ int board_lcd_initialize(void)
 
 FAR struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  g_lcd = st7789_lcdinitialize(g_spidev);
+  g_lcd = st77xx_lcdinitialize(g_spidev);
   if (!g_lcd)
     {
       lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", LCD_SPI_PORTNO,

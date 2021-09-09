@@ -175,8 +175,8 @@ ifeq ($(CONFIG_WL_GS2200M),y)
 CSRCS += stm32_gs2200m.c
 endif
 
-ifeq ($(CONFIG_LCD_ST7789),y)
-CSRCS += stm32_st7789.c
+ifeq ($(CONFIG_LCD_ST77XX),y)
+CSRCS += stm32_st77xx.c
 endif
 
 DEPPATH += --dep-path board

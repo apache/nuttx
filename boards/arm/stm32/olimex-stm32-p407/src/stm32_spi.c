@@ -56,7 +56,7 @@
 
 void weak_function stm32_spidev_initialize(void)
 {
-  stm32_configgpio(GPIO_ST7735_CS);
+  stm32_configgpio(GPIO_ST77XX_CS);
 }
 
 /****************************************************************************
@@ -120,10 +120,10 @@ void stm32_spi3select(FAR struct spi_dev_s *dev, uint32_t devid,
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
 
-#ifdef CONFIG_LCD_ST7735
+#ifdef CONFIG_LCD_ST77XX
   if (devid == SPIDEV_DISPLAY(0))
     {
-      stm32_gpiowrite(GPIO_ST7735_CS, !selected);
+      stm32_gpiowrite(GPIO_ST77XX_CS, !selected);
     }
 #endif
 }
@@ -179,10 +179,10 @@ int stm32_spi3cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
    *  data bits are data or a command.
    */
 
-#ifdef CONFIG_LCD_ST7735
+#ifdef CONFIG_LCD_ST77XX
   if (devid == SPIDEV_DISPLAY(0))
     {
-      stm32_gpiowrite(GPIO_ST7735_AO, !cmd);
+      stm32_gpiowrite(GPIO_ST77XX_AO, !cmd);
       return OK;
     }
 #endif

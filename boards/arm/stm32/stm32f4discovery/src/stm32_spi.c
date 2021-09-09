@@ -75,7 +75,7 @@ void weak_function stm32_spidev_initialize(void)
 #endif
 
 #if defined(CONFIG_LCD_ST7567) || defined(CONFIG_LCD_ST7567)
-  stm32_configgpio(STM32_LCD_CS);     /* ST7567/ST7789 chip select */
+  stm32_configgpio(STM32_LCD_CS);     /* ST7567/ST77XX chip select */
 #endif
 #if defined(CONFIG_STM32_SPI2) && defined(CONFIG_SENSORS_MAX6675)
   stm32_configgpio(GPIO_MAX6675_CS); /* MAX6675 chip select */
@@ -141,7 +141,7 @@ void stm32_spi1select(FAR struct spi_dev_s *dev, uint32_t devid,
     }
 #endif
 
-#if defined(CONFIG_LCD_ST7567) || defined(CONFIG_LCD_ST7789)
+#if defined(CONFIG_LCD_ST7567) || defined(CONFIG_LCD_ST77XX)
   if (devid == SPIDEV_DISPLAY(0))
     {
       stm32_gpiowrite(STM32_LCD_CS, !selected);
@@ -276,7 +276,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #ifdef CONFIG_STM32_SPI1
 int stm32_spi1cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
-#if defined(CONFIG_LCD_ST7567) || defined(CONFIG_LCD_ST7789)
+#if defined(CONFIG_LCD_ST7567) || defined(CONFIG_LCD_ST77XX)
   if (devid == SPIDEV_DISPLAY(0))
     {
       /*  This is the Data/Command control pad which determines whether the

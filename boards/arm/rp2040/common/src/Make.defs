@@ -34,12 +34,8 @@ ifeq ($(CONFIG_LCD_SSD1306),y)
 CSRCS += rp2040_ssd1306.c
 endif
 
-ifeq ($(CONFIG_LCD_ST7789),y)
-CSRCS += rp2040_st7789.c
-endif
-
-ifeq ($(CONFIG_LCD_ST7735),y)
-CSRCS += rp2040_st7735.c
+ifeq ($(CONFIG_LCD_ST77XX),y)
+CSRCS += rp2040_st77xx.c
 endif
 
 ifeq ($(CONFIG_USBMSC),y)

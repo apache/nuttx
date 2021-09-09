@@ -62,8 +62,8 @@ ifeq ($(CONFIG_IMXRT_ADC),y)
 CSRCS += imxrt_adc.c
 endif
 
-ifeq ($(CONFIG_LCD_ST7789),y)
-CSRCS += imxrt_st7789.c
+ifeq ($(CONFIG_LCD_ST77XX),y)
+CSRCS += imxrt_st77xx.c
 endif
 
 ifeq ($(CONFIG_IMXRT_ENC),y)

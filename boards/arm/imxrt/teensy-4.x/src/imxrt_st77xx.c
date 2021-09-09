@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/rp2040/common/src/rp2040_st7789.c
+ * boards/arm/imxrt/teensy-4.x/src/imxrt_st77xx.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,24 +33,16 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/st7789.h>
+#include <nuttx/lcd/st77xx.h>
 
-#include "rp2040_spi.h"
-#include "rp2040_gpio.h"
+#include "imxrt_lpspi.h"
+#include "teensy-4.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LCD_SPI_PORTNO CONFIG_RP2040_LCD_SPI_CH
-
-#if LCD_SPI_PORTNO
-#define LCD_DC         CONFIG_RP2040_SPI1_GPIO
-#define LCD_RST        12
-#define LCD_BL         13
-#else
-#define LCD_DC         CONFIG_RP2040_SPI0_GPIO
-#endif
+#define LCD_SPI_PORTNO 4
 
 /****************************************************************************
  * Private Data
@@ -75,34 +67,19 @@ static struct lcd_dev_s *g_lcd = NULL;
 
 int board_lcd_initialize(void)
 {
-  g_spidev = rp2040_spibus_initialize(LCD_SPI_PORTNO);
+  imxrt_config_gpio(GPIO_LCD_RST);
+
+  g_spidev = imxrt_lpspibus_initialize(LCD_SPI_PORTNO);
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
       return -ENODEV;
     }
 
-  /* SPI RX is not used. Same pin is used as LCD Data/Command control */
-
-  rp2040_gpio_init(LCD_DC);
-  rp2040_gpio_setdir(LCD_DC, true);
-  rp2040_gpio_put(LCD_DC, true);
-
-#if LCD_SPI_PORTNO
-
-  /* Pull LCD_RESET high */
-
-  rp2040_gpio_init(LCD_RST);
-  rp2040_gpio_setdir(LCD_RST, true);
-  rp2040_gpio_put(LCD_RST, true);
-
-  /* Set full brightness */
-
-  rp2040_gpio_init(LCD_BL);
-  rp2040_gpio_setdir(LCD_BL, true);
-  rp2040_gpio_put(LCD_BL, true);
-
-#endif
+  imxrt_gpio_write(GPIO_LCD_RST, 0);
+  up_mdelay(1);
+  imxrt_gpio_write(GPIO_LCD_RST, 1);
+  up_mdelay(120);
 
   return OK;
 }
@@ -118,15 +95,14 @@ int board_lcd_initialize(void)
 
 FAR struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  g_lcd = st7789_lcdinitialize(g_spidev);
+  g_lcd = st77xx_lcdinitialize(g_spidev);
   if (!g_lcd)
     {
-      lcderr("ERROR: Failed to bind SPI port %d to LCD %d\n", LCD_SPI_PORTNO,
-      devno);
+      lcderr("ERROR: Failed to bind SPI port 4 to LCD %d\n", devno);
     }
   else
     {
-      lcdinfo("SPI port %d bound to LCD %d\n", LCD_SPI_PORTNO, devno);
+      lcdinfo("SPI port 4 bound to LCD %d\n", devno);
       return g_lcd;
     }
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/imxrt/teensy-4.x/src/imxrt_st7789.c
+ * boards/arm/samv7/samv71-xult/src/sam_st77xx.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,16 +33,17 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
-#include <nuttx/lcd/st7789.h>
+#include <nuttx/lcd/st77xx.h>
 
-#include "imxrt_lpspi.h"
-#include "teensy-4.h"
+#include "sam_gpio.h"
+#include "sam_spi.h"
+#include "samv71-xult.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define LCD_SPI_PORTNO 4
+#define LCD_SPI_PORTNO 0
 
 /****************************************************************************
  * Private Data
@@ -67,18 +68,18 @@ static struct lcd_dev_s *g_lcd = NULL;
 
 int board_lcd_initialize(void)
 {
-  imxrt_config_gpio(GPIO_LCD_RST);
+  sam_configgpio(GPIO_LCD_RST);
 
-  g_spidev = imxrt_lpspibus_initialize(LCD_SPI_PORTNO);
+  g_spidev = sam_spibus_initialize(LCD_SPI_PORTNO);
   if (!g_spidev)
     {
       lcderr("ERROR: Failed to initialize SPI port %d\n", LCD_SPI_PORTNO);
       return -ENODEV;
     }
 
-  imxrt_gpio_write(GPIO_LCD_RST, 0);
+  sam_gpiowrite(GPIO_LCD_RST, 0);
   up_mdelay(1);
-  imxrt_gpio_write(GPIO_LCD_RST, 1);
+  sam_gpiowrite(GPIO_LCD_RST, 1);
   up_mdelay(120);
 
   return OK;
@@ -95,7 +96,7 @@ int board_lcd_initialize(void)
 
 FAR struct lcd_dev_s *board_lcd_getdev(int devno)
 {
-  g_lcd = st7789_lcdinitialize(g_spidev);
+  g_lcd = st77xx_lcdinitialize(g_spidev);
   if (!g_lcd)
     {
       lcderr("ERROR: Failed to bind SPI port 4 to LCD %d\n", devno);

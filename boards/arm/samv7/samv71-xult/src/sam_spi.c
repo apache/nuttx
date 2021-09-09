@@ -75,7 +75,7 @@ void sam_spidev_initialize(void)
 
 #endif
 
-#ifdef CONFIG_LCD_ST7789
+#ifdef CONFIG_LCD_ST77XX
   /* Enable CS and CMD/DATA for LCD */
 
   sam_configgpio(SPI0_NPCS1);
@@ -176,7 +176,7 @@ void sam_spi0select(uint32_t devid, bool selected)
         break;
 #endif
 
-#ifdef CONFIG_LCD_ST7789
+#ifdef CONFIG_LCD_ST77XX
       case SPIDEV_DISPLAY(0):
         sam_gpiowrite(SPI0_NPCS1, !selected);
         break;
