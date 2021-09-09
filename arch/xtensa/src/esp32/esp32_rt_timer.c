@@ -37,6 +37,7 @@
 #include <nuttx/kthread.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 
 #include "hardware/esp32_soc.h"
 #include "esp32_tim.h"
@@ -70,6 +71,7 @@ static sem_t s_toutsem;
 static struct list_node s_runlist;
 static struct list_node s_toutlist;
 
+static spinlock_t g_lock;
 static struct esp32_tim_dev_s *s_esp32_tim_dev;
 
 /****************************************************************************
@@ -103,7 +105,7 @@ static void start_rt_timer(struct rt_timer_s *timer,
   uint64_t counter;
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   /* Only idle timer can be started */
 
@@ -160,7 +162,7 @@ static void start_rt_timer(struct rt_timer_s *timer,
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -186,7 +188,7 @@ static void stop_rt_timer(struct rt_timer_s *timer)
   uint64_t alarm;
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   /* "start" function can set the timer's repeat flag, and function "stop"
    * should remove this flag.
@@ -233,7 +235,7 @@ static void stop_rt_timer(struct rt_timer_s *timer)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -256,7 +258,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (timer->state == RT_TIMER_READY)
     {
@@ -275,7 +277,7 @@ static void delete_rt_timer(struct rt_timer_s *timer)
   timer->state = RT_TIMER_DELETE;
 
 exit:
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -312,7 +314,7 @@ static int rt_timer_thread(int argc, char *argv[])
           assert(0);
         }
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_lock);
 
       /* Process all the timers in the list */
 
@@ -334,7 +336,7 @@ static int rt_timer_thread(int argc, char *argv[])
 
           timer->state = RT_TIMER_IDLE;
 
-          leave_critical_section(flags);
+          spin_unlock_irqrestore(&g_lock, flags);
 
           if (raw_state == RT_TIMER_TIMEOUT)
             {
@@ -347,7 +349,7 @@ static int rt_timer_thread(int argc, char *argv[])
 
           /* Enter critical section for next scanning list */
 
-          flags = enter_critical_section();
+          flags = spin_lock_irqsave(&g_lock);
 
           if (raw_state == RT_TIMER_TIMEOUT)
             {
@@ -360,7 +362,7 @@ static int rt_timer_thread(int argc, char *argv[])
             }
         }
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
     }
 
   return 0;
@@ -398,7 +400,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   nxsem_post(&s_toutsem);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   /* Check if there is a timer running */
 
@@ -440,7 +442,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   return 0;
 }
@@ -595,7 +597,7 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
   uint64_t alarm_value = 0;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   ESP32_TIM_GETCTR(tim, &counter);
   ESP32_TIM_GETALRVL(tim, &alarm_value);
@@ -609,7 +611,7 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
       alarm_value -= counter;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   return alarm_value;
 }
@@ -634,12 +636,14 @@ void IRAM_ATTR rt_timer_calibration(uint64_t time_us)
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
+
   ESP32_TIM_GETCTR(tim, &counter);
   counter += time_us;
   ESP32_TIM_SETCTR(tim, counter);
   ESP32_TIM_RLD_NOW(tim);
-  leave_critical_section(flags);
+
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -689,7 +693,7 @@ int esp32_rt_timer_init(void)
   s_esp32_tim_dev = tim;
   s_pid = pid;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   /* ESP32 hardware timer configuration:
    *   - 1 counter = 1us
@@ -707,7 +711,7 @@ int esp32_rt_timer_init(void)
 
   ESP32_TIM_START(tim);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   return 0;
 }
@@ -730,13 +734,13 @@ void esp32_rt_timer_deinit(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   ESP32_TIM_STOP(s_esp32_tim_dev);
   esp32_tim_deinit(s_esp32_tim_dev);
   s_esp32_tim_dev = NULL;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   kthread_delete(s_pid);
   nxsem_destroy(&s_toutsem);
