@@ -44,6 +44,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
 #include <nuttx/list.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/net/ioctl.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/mii.h>
@@ -231,6 +232,10 @@ struct esp32_emac_s
   /* RX and TX buffer allocations */
 
   uint8_t alloc[EMAC_BUF_NUM * EMAC_BUF_LEN];
+
+  /* Device specific lock. */
+
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -402,11 +407,11 @@ static inline uint8_t *emac_alloc_buffer(struct esp32_emac_s *priv)
 
   /* Allocate a buffer by returning the head of the free buffer list */
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   p = (uint8_t *)sq_remfirst(&priv->freeb);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return p;
 }
