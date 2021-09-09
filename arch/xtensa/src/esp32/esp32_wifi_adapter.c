@@ -430,6 +430,10 @@ static bool g_softap_started;
 static wifi_txdone_cb_t g_softap_txdone_cb;
 #endif
 
+/* Device specific lock */
+
+static spinlock_t g_lock;
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -2105,9 +2109,9 @@ static void esp_evt_work_cb(void *arg)
 
   while (1)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_lock);
       evt_adpt = (struct evt_adpt *)sq_remfirst(&g_wifi_evt_queue);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
       if (!evt_adpt)
         {
           break;
@@ -2287,9 +2291,9 @@ int32_t esp_event_post(esp_event_base_t event_base,
   evt_adpt->id = id;
   memcpy(evt_adpt->buf, event_data, event_data_size);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   sq_addlast(&evt_adpt->entry, &g_wifi_evt_queue);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   work_queue(LPWORK, &g_wifi_evt_work, esp_evt_work_cb, NULL, 0);
 
@@ -2523,7 +2527,7 @@ void esp_phy_enable_clock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (g_phy_clk_en_cnt == 0)
     {
@@ -2533,7 +2537,7 @@ void esp_phy_enable_clock(void)
 
   g_phy_clk_en_cnt++;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -2554,7 +2558,7 @@ void esp_phy_disable_clock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (g_phy_clk_en_cnt)
     {
@@ -2567,7 +2571,7 @@ void esp_phy_disable_clock(void)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
