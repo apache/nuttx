@@ -655,6 +655,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+  struct littlefs_attr_s attr;
   char path[LFS_NAME_MAX];
   int ret;
 
@@ -674,20 +675,43 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
       return ret;
     }
 
-  ret = lfs_file_path(&fs->lfs, &priv->file, path, sizeof(path));
+  buf->st_size = lfs_file_size(&fs->lfs, &priv->file);
+  if (buf->st_size < 0)
+    {
+      ret = buf->st_size;
+      goto errout;
+    }
+
+  ret = lfs_file_getattr(&fs->lfs, &priv->file, 0, &attr, sizeof(attr));
+  if (ret < 0)
+    {
+      if (ret != LFS_ERR_NOATTR)
+        {
+          goto errout;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
   littlefs_semgive(fs);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
-  ret = littlefs_stat(inode, path, buf);
-  if (ret < 0)
-    {
-      return ret;
-    }
+  ret = 0;
+  buf->st_mode         = attr.at_mode | S_IFREG;
+  buf->st_uid          = attr.at_uid;
+  buf->st_gid          = attr.at_gid;
+  buf->st_atim.tv_sec  = attr.at_atim / 1000000000ull;
+  buf->st_atim.tv_nsec = attr.at_atim % 1000000000ull;
+  buf->st_mtim.tv_sec  = attr.at_mtim / 1000000000ull;
+  buf->st_mtim.tv_nsec = attr.at_mtim % 1000000000ull;
+  buf->st_ctim.tv_sec  = attr.at_ctim / 1000000000ull;
+  buf->st_ctim.tv_nsec = attr.at_ctim % 1000000000ull;
+  buf->st_blksize      = fs->cfg.block_size;
+  buf->st_blocks       = (buf->st_size + buf->st_blksize - 1) /
+                         buf->st_blksize;
 
-  return OK;
+errout:
+  return ret;
 }
 
 static int littlefs_fchstat(FAR const struct file *filep,
@@ -696,6 +720,7 @@ static int littlefs_fchstat(FAR const struct file *filep,
   FAR struct littlefs_mountpt_s *fs;
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
+  struct littlefs_attr_s attr;
   char path[LFS_NAME_MAX];
   int ret;
 
@@ -713,20 +738,58 @@ static int littlefs_fchstat(FAR const struct file *filep,
       return ret;
     }
 
-  ret = lfs_file_path(&fs->lfs, &priv->file, path, sizeof(path));
+  ret = lfs_file_getattr(&fs->lfs, &priv->file, 0, &attr, sizeof(attr));
+  if (ret < 0)
+    {
+      if (ret != LFS_ERR_NOATTR)
+        {
+          goto errout;
+        }
+
+      memset(&attr, 0, sizeof(attr));
+      attr.at_mode = S_IRWXG | S_IRWXU | S_IRWXO;
+    }
+
+  if ((CH_STAT_MODE & flags) == CH_STAT_MODE)
+    {
+      attr.at_mode = buf->st_mode;
+    }
+
+  if ((CH_STAT_UID & flags) == CH_STAT_UID)
+    {
+      attr.at_uid = buf->st_uid;
+    }
+
+  if ((CH_STAT_GID & flags) == CH_STAT_GID)
+    {
+      attr.at_gid = buf->st_gid;
+    }
+
+  attr.at_ctim = 1000000000ull * buf->st_ctim.tv_sec +
+                 buf->st_ctim.tv_nsec;
+
+  if ((CH_STAT_ATIME & flags) == CH_STAT_ATIME)
+    {
+      attr.at_atim = 1000000000ull * buf->st_atim.tv_sec +
+                     buf->st_atim.tv_nsec;
+    }
+
+  if ((CH_STAT_MTIME & flags) == CH_STAT_MTIME)
+    {
+      attr.at_mtim = 1000000000ull * buf->st_mtim.tv_sec +
+                     buf->st_mtim.tv_nsec;
+    }
+
+  ret = lfs_file_setattr(&fs->lfs, &priv->file, 0, &attr, sizeof(attr));
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
   littlefs_semgive(fs);
-  if (ret < 0)
-    {
-      return ret;
-    }
 
-  ret = littlefs_chstat(inode, path, buf, flags);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return OK;
+errout:
+  return ret;
 }
 
 /****************************************************************************
