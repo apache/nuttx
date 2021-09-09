@@ -975,11 +975,7 @@ static uint32_t IRAM_ATTR esp_wifi_int_disable(void *wifi_int_mux)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
-  /* In SMP mode enter_critical_section already hold the global IRQ spinlock.
-   * We don't need another spinlock, so wifi_int_mux is unused here.
-   */
+  flags = spin_lock_irqsave((spinlock_t *)wifi_int_mux);
 
   return (uint32_t)flags;
 }
@@ -1004,7 +1000,7 @@ static void IRAM_ATTR esp_wifi_int_restore(void *wifi_int_mux, uint32_t tmp)
 {
   irqstate_t flags = (irqstate_t)tmp;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore((spinlock_t *)wifi_int_mux, flags);
 }
 
 /****************************************************************************
