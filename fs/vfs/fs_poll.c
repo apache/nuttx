@@ -299,7 +299,7 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
   FAR struct inode *inode;
   int ret = -ENOSYS;
 
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  DEBUGASSERT(filep != NULL);
   inode = filep->f_inode;
 
   if (inode != NULL)
@@ -336,6 +336,13 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
           ret = OK;
         }
+    }
+  else
+    {
+      fds->revents |= (POLLERR | POLLHUP);
+      nxsem_post(fds->sem);
+
+      ret = OK;
     }
 
   return ret;
