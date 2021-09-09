@@ -564,8 +564,13 @@ config SSD1351_MSTRCONTRAST
 
 endif
 
+config LCD_ST77XX
+	bool
+	default n
+
 config LCD_ST7735
 	bool "Sitronix ST7735 TFT Controller"
+	select LCD_ST77XX
 	default n
 
 if LCD_ST7735
@@ -576,22 +581,23 @@ if LCD_ST7735
 			Two resolutions are available, either the 132x162 or
 			the 128x160
 
-	config LCD_ST7735_BPP
-		int "Bit Per Pixel (12, 16 or 18)"
+	config LCD_ST77XX_BPP
+		int "Bit Per Pixel (12 or 16)"
 		default 16
 
-	config LCD_ST7735_SPIMODE
+	config LCD_ST77XX_SPIMODE
 		int "SPI Mode"
 		default 0
 
-	config LCD_ST7735_FREQUENCY
+	config LCD_ST77XX_FREQUENCY
 		int "SPI Frequency"
-		default 3000000
+		default 1000000
 
 endif # LCD_ST7735
 
 config LCD_ST7789
 	bool "Sitronix ST7789 TFT Controller"
+	select LCD_ST77XX
 	default n
 
 if LCD_ST7789
@@ -619,15 +625,15 @@ if LCD_ST7789
 		---help---
 			Specifies the Y offset of the LCD.
 
-	config LCD_ST7789_BPP
+	config LCD_ST77XX_BPP
 		int "Bit Per Pixel (12 or 16)"
 		default 16
 
-	config LCD_ST7789_SPIMODE
+	config LCD_ST77XX_SPIMODE
 		int "SPI Mode"
 		default 0
 
-	config LCD_ST7789_FREQUENCY
+	config LCD_ST77XX_FREQUENCY
 		int "SPI Frequency"
 		default 1000000
 

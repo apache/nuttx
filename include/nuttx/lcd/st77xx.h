@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/lcd/st7735.h
+ * include/nuttx/lcd/st77xx.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_ST7735_H
-#define __INCLUDE_NUTTX_ST7735_H
+#ifndef __INCLUDE_NUTTX_ST77XX_H
+#define __INCLUDE_NUTTX_ST77XX_H
 
 /****************************************************************************
  * Included Files
@@ -49,10 +49,10 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  st7735_initialize
+ * Name:  st77xx_initialize
  *
  * Description:
- *   Initialize the ST7735 video hardware.  The initial state of the
+ *   Initialize the ST77XX video hardware.  The initial state of the
  *   LCD is fully initialized, display memory cleared, and the LCD ready
  *   to use, but with the power setting at 0 (full off == sleep mode).
  *
@@ -63,10 +63,10 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct lcd_dev_s *st7735_lcdinitialize(FAR struct spi_dev_s *spi);
+FAR struct lcd_dev_s *st77xx_lcdinitialize(FAR struct spi_dev_s *spi);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_ST7735_H */
+#endif /* __INCLUDE_NUTTX_ST77XX_H */
