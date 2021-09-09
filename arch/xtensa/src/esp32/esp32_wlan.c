@@ -36,6 +36,7 @@
 #include <nuttx/nuttx.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/net/arp.h>
@@ -171,6 +172,10 @@ struct wlan_priv_s
   /* Free packet buffer queue */
 
   sq_queue_t    freeb;
+
+  /* Device specific lock */
+
+  spinlock_t    lock;
 };
 
 /****************************************************************************
@@ -298,7 +303,7 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
   int i;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   priv->dev.d_buf = NULL;
   priv->dev.d_len = 0;
@@ -312,7 +317,7 @@ static inline void wlan_init_buffer(struct wlan_priv_s *priv)
       sq_addlast(&priv->pktbuf[i].entry, &priv->freeb);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -335,7 +340,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
   irqstate_t flags;
   struct wlan_pktbuf *pktbuf = NULL;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   entry = sq_remfirst(&priv->freeb);
   if (entry)
@@ -343,7 +348,7 @@ static inline struct wlan_pktbuf *wlan_alloc_buffer(struct wlan_priv_s *priv)
       pktbuf = container_of(entry, struct wlan_pktbuf, entry);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return pktbuf;
 }
@@ -369,12 +374,12 @@ static inline void wlan_free_buffer(struct wlan_priv_s *priv,
   struct wlan_pktbuf *pktbuf;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   pktbuf = container_of(buffer, struct wlan_pktbuf, buffer);
   sq_addlast(&pktbuf->entry, &priv->freeb);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -400,9 +405,9 @@ static inline void wlan_cache_txpkt_tail(struct wlan_priv_s *priv)
   pktbuf = container_of(dev->d_buf, struct wlan_pktbuf, buffer);
   pktbuf->len = dev->d_len;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   sq_addlast(&pktbuf->entry, &priv->txb);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   dev->d_buf = NULL;
   dev->d_len = 0;
@@ -427,9 +432,9 @@ static inline void wlan_add_txpkt_head(struct wlan_priv_s *priv,
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   sq_addfirst(&pktbuf->entry, &priv->txb);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************
@@ -452,7 +457,7 @@ static struct wlan_pktbuf *wlan_recvframe(struct wlan_priv_s *priv)
   sq_entry_t *entry;
   struct wlan_pktbuf *pktbuf = NULL;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   entry = sq_remfirst(&priv->rxb);
   if (entry)
@@ -460,7 +465,7 @@ static struct wlan_pktbuf *wlan_recvframe(struct wlan_priv_s *priv)
       pktbuf = container_of(entry, struct wlan_pktbuf, entry);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return pktbuf;
 }
@@ -485,7 +490,7 @@ static struct wlan_pktbuf *wlan_txframe(struct wlan_priv_s *priv)
   sq_entry_t *entry;
   struct wlan_pktbuf *pktbuf = NULL;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   entry = sq_remfirst(&priv->txb);
   if (entry)
@@ -493,7 +498,7 @@ static struct wlan_pktbuf *wlan_txframe(struct wlan_priv_s *priv)
       pktbuf = container_of(entry, struct wlan_pktbuf, entry);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return pktbuf;
 }
@@ -610,9 +615,9 @@ static int wlan_rx_done(struct wlan_priv_s *priv, void *buffer,
       esp_wifi_free_eb(eb);
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   sq_addlast(&pktbuf->entry, &priv->rxb);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   if (work_available(&priv->rxwork))
     {
