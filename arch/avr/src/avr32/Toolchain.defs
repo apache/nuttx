@@ -41,10 +41,10 @@ ARCHCPUFLAGS = -mpart=uc3b0256
 CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)gcc
+LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)gcc-ar rcs
-NM = $(CROSSDEV)gcc-nm
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 

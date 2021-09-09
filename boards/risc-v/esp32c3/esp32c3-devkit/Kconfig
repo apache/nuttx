@@ -41,6 +41,15 @@ config ESP32C3_DEVKIT_RUN_IRAM
 	bool "Run from IRAM"
 	default n
 
+config ESP32C3_MERGE_BINS
+	bool "Merge raw binary files into a single file"
+	default n
+	---help---
+		Merge the raw binary files into a single file for flashing to the
+		device.
+		This is only useful when the path to binary files (e.g. bootloader)
+		is provided via the ESPTOOL_BINDIR variable.
+
 choice
   prompt "SPIFLASH File System"
   default ESP32C3_SPIFLASH_SMARTFS

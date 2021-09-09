@@ -614,7 +614,7 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  ****************************************************************************/
 
 void up_pthread_start(pthread_trampoline_t startup,
-                      pthread_startroutine_t entrypt, pthread_addr_t arg);
+                      pthread_startroutine_t entrypt, pthread_addr_t arg)
        noreturn_function;
 
 /****************************************************************************
@@ -633,7 +633,7 @@ void up_pthread_start(pthread_trampoline_t startup,
  *   None
  ****************************************************************************/
 
-void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value);
+void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
         noreturn_function;
 #endif
 
