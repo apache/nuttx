@@ -99,13 +99,10 @@ static void start_rt_timer(struct rt_timer_s *timer,
                            uint64_t timeout,
                            bool repeat)
 {
-  irqstate_t flags;
   struct rt_timer_s *p;
   bool inserted = false;
   uint64_t counter;
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
-
-  flags = spin_lock_irqsave(&g_lock);
 
   /* Only idle timer can be started */
 
@@ -161,8 +158,6 @@ static void start_rt_timer(struct rt_timer_s *timer,
           ESP32_TIM_SETALRM(tim, true);
         }
     }
-
-  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -182,13 +177,10 @@ static void start_rt_timer(struct rt_timer_s *timer,
 
 static void stop_rt_timer(struct rt_timer_s *timer)
 {
-  irqstate_t flags;
   bool ishead;
   struct rt_timer_s *next_timer;
   uint64_t alarm;
   struct esp32_tim_dev_s *tim = s_esp32_tim_dev;
-
-  flags = spin_lock_irqsave(&g_lock);
 
   /* "start" function can set the timer's repeat flag, and function "stop"
    * should remove this flag.
@@ -234,8 +226,6 @@ static void stop_rt_timer(struct rt_timer_s *timer)
             }
         }
     }
-
-  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -509,9 +499,14 @@ void rt_timer_start(struct rt_timer_s *timer,
                     uint64_t timeout,
                     bool repeat)
 {
-  stop_rt_timer(timer);
+  irqstate_t flags;
 
+  flags = spin_lock_irqsave(&g_lock);
+
+  stop_rt_timer(timer);
   start_rt_timer(timer, timeout, repeat);
+
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -530,7 +525,11 @@ void rt_timer_start(struct rt_timer_s *timer,
 
 void rt_timer_stop(struct rt_timer_s *timer)
 {
+  irqstate_t flags;
+
+  flags = spin_lock_irqsave(&g_lock);
   stop_rt_timer(timer);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
