@@ -764,11 +764,11 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
         priv = &g_mpfs_i2c0_lo_priv;
         break;
 #endif /* CONFIG_MPFS_I2C0 */
-#ifdef CONFIG_MPFS_I2C0
+#ifdef CONFIG_MPFS_I2C1
       case 1:
         priv = &g_mpfs_i2c1_lo_priv;
         break;
-#endif /* CONFIG_MPFS_I2C0 */
+#endif /* CONFIG_MPFS_I2C1 */
       default:
         return NULL;
   }
