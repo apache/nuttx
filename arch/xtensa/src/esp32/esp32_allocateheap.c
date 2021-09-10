@@ -133,7 +133,7 @@ void xtensa_add_region(void)
 #endif
 #endif
 
-#ifndef CONFIG_ESP32_QEMU_IMAGE
+#if !defined(CONFIG_ESP32_QEMU_IMAGE) && !defined(CONFIG_ESP32_BLE)
   start = (void *)HEAP_REGION0_START;
   size  = (size_t)(HEAP_REGION0_END - HEAP_REGION0_START);
   umm_addregion(start, size);

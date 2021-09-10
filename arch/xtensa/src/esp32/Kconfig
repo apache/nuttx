@@ -509,6 +509,13 @@ config ESP32_WIRELESS
 	---help---
 		Enable Wireless support
 
+config ESP32_BLE
+	bool "BLE"
+	default n
+	select ESP32_WIRELESS
+	---help---
+		Enable BLE support
+
 config ESP32_I2C0
 	bool "I2C 0"
 	default n
@@ -525,11 +532,16 @@ config ESP32_AES_ACCELERATOR
 
 endmenu # ESP32 Peripheral Selection
 
+menuconfig ESP32_WIFI_BT_COEXIST
+	bool "Wi-Fi and BT coexist"
+	default n
+	depends on ESP32_WIRELESS && ESP32_BLE
+
 menu "Memory Configuration"
 
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
-	default 0
+	default 65536
 
 config ESP32_TRACEMEM_RESERVE_DRAM
 	int "Reserved trace memory DRAM"
@@ -1169,6 +1181,33 @@ choice EXAMPLE_POWER_SAVE_MODE
 endchoice
 
 endmenu # ESP32_WIRELESS
+
+menu "BLE Configuration"
+	depends on ESP32_BLE
+
+config ESP32_BLE_PKTBUF_NUM
+	int "BLE netcard packet buffer number per netcard"
+	default 16
+
+config ESP32_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config ESP32_BLE_TASK_STACK_SIZE
+	int "Controller task stack size"
+	default 4096
+
+config ESP32_BLE_TASK_PRIORITY
+	int "Controller task priority"
+	default 110
+
+config ESP32_BLE_MAX_CONN
+	int "Maximum BLE simultaneous connections"
+	range 1 3
+	default 1
+
+endmenu # BLE Configuration
 
 menu "Real-Time Timer"
 	depends on ESP32_RT_TIMER
