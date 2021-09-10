@@ -415,6 +415,59 @@ static void check_spaces_leftright(char *line, int lineno, int ndx1, int ndx2)
 }
 
 /********************************************************************************
+ * Name: check_nospaces_leftright
+ *
+ * Description:
+ *   Check if there are whitespaces on the left of right. If there is, report
+ *   an error.
+ *
+ ********************************************************************************/
+
+static void check_nospaces_leftright(char *line, int lineno, int ndx1, int ndx2)
+{
+  if (ndx1 > 0 && line[ndx1 - 1] == ' ')
+    {
+      ERROR("There should be no spaces before the operator/assignment",
+            lineno, ndx1);
+    }
+
+  if (line[ndx2 + 1] == ' ')
+    {
+      ERROR("There should be no spaces after the operator/assignment",
+            lineno, ndx2);
+    }
+}
+
+/********************************************************************************
+ * Name: check_operand_leftright
+ *
+ * Description:
+ *   Check if the operator is next to an operand. If not, report the error.
+ *
+ ********************************************************************************/
+
+static void check_operand_leftright(char *line, int lineno, int ndx1, int ndx2)
+{
+  /* The cases below includes("xx" represents the operator):
+   *   " xx " | " xx(end)" | " xx;" | " xx\n" | " xx)" | " xx]"  - (ndx1 > 0)
+   *   "(xx " | "(xx(end)" | "(xx;" | "(xx\n" | "(xx)" | "(xx]"  - (ndx1 > 0)
+   *   "[xx " | "[xx(end)" | "[xx;" | "[xx\n" | "[xx)" | "[xx]"  - (ndx1 > 0)
+   *   "xx "  | "xx(end)"  | "xx;"  | "xx\n"  | "xx)"  | "xx]"   - (ndx1 = 0)
+   * In these cases, the operators must be not next any operands, thus errors
+   * are reported.
+   */
+
+  if (ndx1 > 0 && (line[ndx1 - 1] == ' ' || line[ndx1 - 1] == '(' ||
+                   line[ndx1 - 1] == '[') &&
+                  (line[ndx2 + 1] == ' ' || line[ndx2 + 1] == '\0' ||
+                   line[ndx2 + 1] == ';' || line[ndx2 + 1] == '\n' ||
+                   line[ndx2 + 1] == ')' || line[ndx2 + 1] == ']'))
+    {
+      ERROR("Operator must be next to an operand", lineno, ndx2);
+    }
+}
+
+/********************************************************************************
  * Name: block_comment_width
  *
  * Description:
@@ -2226,10 +2279,27 @@ int main(int argc, char **argv, char **envp)
 
                 case '-':
 
-                  /* ->, -- */
+                  /* -> */
 
-                  if (line[n + 1] == '>' || line[n + 1] == '-')
+                  if (line[n + 1] == '>')
                     {
+                      /* -> must have no whitespaces on its left or right */
+
+                      check_nospaces_leftright(line, lineno, n, n + 1);
+                      n++;
+                    }
+
+                  /* -- */
+
+                  else if (line[n + 1] == '-')
+                    {
+                      /* "--" should be next to its operand. If there are
+                       * whitespaces or non-operand characters on both left
+                       * and right (e.g. "a -- "， “a[i --]”, "(-- i)"),
+                       * there's an error.
+                       */
+
+                      check_operand_leftright(line, lineno, n, n + 1);
                       n++;
                     }
 
@@ -2270,6 +2340,13 @@ int main(int argc, char **argv, char **envp)
 
                   if (line[n + 1] == '+')
                     {
+                      /* "++" should be next to its operand. If there are
+                       * whitespaces or non-operand characters on both left
+                       * and right (e.g. "a ++ "， “a[i ++]”, "(++ i)"),
+                       * there's an error.
+                       */
+
+                      check_operand_leftright(line, lineno, n, n + 1);
                       n++;
                     }
 
