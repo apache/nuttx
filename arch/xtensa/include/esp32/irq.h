@@ -396,7 +396,7 @@
 
 #define ESP32_NCPUINTS              32
 #define ESP32_CPUINT_MAX            (ESP32_NCPUINTS - 1)
-#define ESP32_CPUINT_PERIPHSET      0xdffe773f
+#define ESP32_CPUINT_PERIPHSET      0xdffe741f
 #define ESP32_CPUINT_INTERNALSET    0x200188c0
 
 /* Priority 1:   0-10, 12-13, 17-18    (15)

@@ -349,6 +349,8 @@ static void *wifi_coex_get_schm_curr_phase(void);
 static int wifi_coex_set_schm_curr_phase_idx(int idx);
 static int wifi_coex_get_schm_curr_phase_idx(void);
 
+extern void coex_bt_high_prio(void);
+
 /****************************************************************************
  * Public Functions declaration
  ****************************************************************************/
@@ -2495,6 +2497,7 @@ static void wifi_phy_enable(void)
       esp_phy_enable_clock();
       phy_set_wifi_mode_only(0);
       register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+      coex_bt_high_prio();
     }
 
   g_phy_access_ref++;
@@ -2603,7 +2606,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   uint8_t crc;
   int i;
 
-  if (type > ESP_MAC_WIFI_SOFTAP)
+  if (type > ESP_MAC_BT)
     {
       wlerr("Input type is error=%d\n", type);
       return -1;
@@ -2643,6 +2646,22 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
           wlerr("Failed to generate SoftAP MAC\n");
           return -1;
         }
+    }
+
+  if (type == ESP_MAC_BT)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+      mac[5] += 1;
     }
 
   return 0;

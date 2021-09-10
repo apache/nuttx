@@ -102,6 +102,14 @@
 #  define ESP32_WIRELESS_RESERVE_INT  0
 #endif
 
+#ifdef CONFIG_ESP32_BLE
+#  define ESP32_BLE_RESERVE_INT ((1 << ESP32_PERIPH_BT_BB_NMI) | \
+                                 (1 << ESP32_PERIPH_RWBLE_IRQ) | \
+                                 (1 << ESP32_PERIPH_RWBT_NMI))
+#else
+#  define ESP32_BLE_RESERVE_INT 0
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -171,10 +179,12 @@ static uint32_t g_intenable[1];
  */
 
 static uint32_t g_cpu0_freeints = ESP32_CPUINT_PERIPHSET &
-                                  (~ESP32_WIRELESS_RESERVE_INT);
+                                  (~ESP32_WIRELESS_RESERVE_INT &
+                                   ~ESP32_BLE_RESERVE_INT);
 #ifdef CONFIG_SMP
 static uint32_t g_cpu1_freeints = ESP32_CPUINT_PERIPHSET &
-                                  (~ESP32_WIRELESS_RESERVE_INT);
+                                  (~ESP32_WIRELESS_RESERVE_INT &
+                                   ~ESP32_BLE_RESERVE_INT);
 #endif
 
 /* Bitsets for each interrupt priority 1-5 */
@@ -464,6 +474,12 @@ void up_irqinitialize(void)
   g_irqmap[ESP32_IRQ_MAC] = IRQ_MKMAP(0, ESP32_CPUINT_MAC);
 #endif
 
+#ifdef CONFIG_ESP32_BLE
+  g_irqmap[ESP32_IRQ_BT_BB_NMI] = IRQ_MKMAP(0, ESP32_PERIPH_BT_BB_NMI);
+  g_irqmap[ESP32_IRQ_RWBT_NMI]  = IRQ_MKMAP(0, ESP32_PERIPH_RWBT_NMI);
+  g_irqmap[ESP32_IRQ_RWBLE_IRQ] = IRQ_MKMAP(0, ESP32_PERIPH_RWBLE_IRQ);
+#endif
+
   /* Initialize CPU interrupts */
 
   esp32_cpuint_initialize();
@@ -741,6 +757,15 @@ int esp32_cpuint_initialize(void)
 #ifdef CONFIG_ESP32_WIRELESS
   intmap[ESP32_CPUINT_MAC]    = CPUINT_ASSIGN(ESP32_IRQ_MAC);
   xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
+#endif
+
+#ifdef CONFIG_ESP32_BLE
+  intmap[ESP32_PERIPH_BT_BB_NMI] = CPUINT_ASSIGN(ESP32_IRQ_BT_BB_NMI);
+  intmap[ESP32_PERIPH_RWBT_NMI]  = CPUINT_ASSIGN(ESP32_IRQ_RWBT_NMI);
+  intmap[ESP32_PERIPH_RWBLE_IRQ] = CPUINT_ASSIGN(ESP32_IRQ_RWBLE_IRQ);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_BT_BB_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBT_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBLE_IRQ);
 #endif
 
   return OK;

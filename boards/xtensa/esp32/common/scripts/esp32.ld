@@ -93,6 +93,17 @@ SECTIONS
 
     . = ALIGN (8);
     _sbss = ABSOLUTE(.);
+    _bss_start = ABSOLUTE(.);
+    *(.ext_ram.bss*)
+    _bt_bss_start = ABSOLUTE(.);
+    *libbt.a:(.bss .bss.* COMMON)
+    . = ALIGN (4);
+    _bt_bss_end = ABSOLUTE(.);
+    _btdm_bss_start = ABSOLUTE(.);
+    *libbtdm_app.a:(.bss .bss.* COMMON)
+    . = ALIGN (4);
+    _btdm_bss_end = ABSOLUTE(.);
+    . = ALIGN (8);
     *(.dynsbss)
     *(.sbss)
     *(.sbss.*)
@@ -109,6 +120,7 @@ SECTIONS
     *(COMMON)
     *libarch.a:esp32_spiflash.*(.bss  .bss.*  COMMON)
     . = ALIGN(8);
+    _bss_end = ABSOLUTE(.);
     _ebss = ABSOLUTE(.);
   } >dram0_0_seg
 
@@ -126,6 +138,14 @@ SECTIONS
     /* .data initialized on power-up in ROMed configurations. */
 
     _sdata = ABSOLUTE(.);
+    _bt_data_start = ABSOLUTE(.);
+    *libbt.a:(.data .data.*)
+    . = ALIGN (4);
+    _bt_data_end = ABSOLUTE(.);
+    _btdm_data_start = ABSOLUTE(.);
+    *libbtdm_app.a:(.data .data.*)
+    . = ALIGN (4);
+    _btdm_data_end = ABSOLUTE(.);
     KEEP (*(.data))
     KEEP (*(.data.*))
     KEEP (*(.gnu.linkonce.d.*))
