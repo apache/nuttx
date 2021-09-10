@@ -38,6 +38,9 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#ifdef CONFIG_BCH
+#include <nuttx/drivers/drivers.h>
+#endif
 
 #include "esp32c3_spiflash.h"
 #include "esp32c3-devkit.h"
@@ -46,9 +49,110 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+
+struct ota_partition_s
+{
+  uint32_t    offset;          /* Partition offset from the beginning of MTD */
+  uint32_t    size;            /* Partition size in bytes */
+  const char *devpath;         /* Partition device path */
+};
+
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static const struct ota_partition_s g_ota_partition_table[] =
+{
+  {
+    .offset  = CONFIG_ESP32C3_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_PRIMARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32C3_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_SECONDARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32C3_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_SCRATCH_DEVPATH
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_BCH
+  char blockdev[18];
+#endif
+  int ret = OK;
+
+  for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
+    {
+      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size);
+
+      ret = ftl_initialize(i, mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#ifdef CONFIG_BCH
+      snprintf(blockdev, 18, "/dev/mtdblock%d", i);
+
+      ret = bchdev_register(blockdev, part->devpath, false);
+      if (ret < 0)
+        {
+          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
+          return ret;
+        }
+#endif
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -402,6 +506,14 @@ static int init_storage_partition(void)
 int esp32c3_spiflash_init(void)
 {
   int ret = OK;
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   ret = init_wifi_partition();
