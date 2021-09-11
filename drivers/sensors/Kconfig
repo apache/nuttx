@@ -196,6 +196,14 @@ config SENSORS_OPT3007_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
+config SENSORS_PAT9126JA
+	bool "PixArt PAT9126JA optical tracking sensor support"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the PixArt PAT9126JA optical tracking
+		sensor.
+
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
 	default n
