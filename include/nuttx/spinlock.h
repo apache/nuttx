@@ -389,7 +389,7 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
 #if defined(CONFIG_SMP)
 irqstate_t spin_lock_irqsave(spinlock_t *lock);
 #else
-#  define spin_lock_irqsave(l) up_irq_save()
+#  define spin_lock_irqsave(l) ((void)(l), up_irq_save())
 #endif
 
 /****************************************************************************
