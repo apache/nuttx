@@ -115,8 +115,6 @@ else
   LDELFFLAGS += -T $(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld
 endif
 
-LDFLAGS += -nostartfiles -nodefaultlibs
-
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" --cref
 else

@@ -70,12 +70,6 @@ else
   LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
-ifneq ($(CROSSDEV),arm-nuttx-elf-)
-ifneq ($(CROSSDEV),armeb-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
-endif
-endif
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
