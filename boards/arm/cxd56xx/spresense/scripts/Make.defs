@@ -90,9 +90,6 @@ endif
 
 LDFLAGS += --gc-sections
 
-ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
-endif
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   CFLAGS += -gdwarf-3
   CXXFLAGS += -gdwarf-3

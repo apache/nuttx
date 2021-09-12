@@ -100,9 +100,6 @@ NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) \
                  -no-check-sections
 LDNXFLATFLAGS = -e main -s 2048
 
-ifneq ($(CROSSDEV),arm-nuttx-elf-)
-  LDFLAGS += -nostartfiles -nodefaultlibs
-endif
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
   LDFLAGS += -g
 endif
