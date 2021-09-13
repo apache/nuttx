@@ -207,6 +207,7 @@ config ESP32C3_LEDC
 	bool "LEDC (PWM)"
 	default n
 	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
 
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
