@@ -57,14 +57,6 @@
 #define MPFS_UART_RTO_OFFSET       0x004C /* UART Receiver time-out register */
 #define MPFS_UART_ADR_OFFSET       0x0050 /* UART Address register */
 
-/* Register virtual addresses ***********************************************/
-
-#define MPFS250_UART0_VADDR  MPFS_UART0_BASE
-#define MPFS250_UART1_VADDR  MPFS_UART1_BASE
-#define MPFS250_UART2_VADDR  MPFS_UART2_BASE
-#define MPFS250_UART3_VADDR  MPFS_UART3_BASE
-#define MPFS250_UART4_VADDR  MPFS_UART4_BASE
-
 /* Register bit field definitions *******************************************/
 
 /* UART Receive Buffer Register */
@@ -89,7 +81,6 @@
 #define UART_IER_ETBEI            (1 << 1) /* Bit 1:  Enable Transmit Holding Register Empty Interrupt */
 #define UART_IER_ELSI             (1 << 2) /* Bit 2:  Enable Receiver Line Status Interrupt */
 #define UART_IER_EDSSI            (1 << 3) /* Bit 3:  Enable Modem Status Interrupt */
-#define UART_IER_PTIME            (1 << 7) /* Bit 7:  Programmable THRE Interrupt Mode Enable */
 #define UART_IER_ALLIE            0x0000008f
 
 /* UART Interrupt Identity Register */

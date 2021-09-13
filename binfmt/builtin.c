@@ -78,6 +78,7 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
                               int nexports)
 {
   FAR const struct builtin_s *builtin;
+  FAR char *name;
   struct file file;
   int index;
   int ret;
@@ -93,22 +94,13 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
       return ret;
     }
 
-  /* If this file is a BINFS file system, then we can recover the name of
-   * the file using the FIOC_FILENAME ioctl() call.
-   */
-
-  ret = file_ioctl(&file, FIOC_FILENAME,
-                   (unsigned long)((uintptr_t)&filename));
-  if (ret < 0)
+  name = strrchr(filename, '/');
+  if (name != NULL)
     {
-      berr("ERROR: FIOC_FILENAME ioctl failed: %d\n", ret);
-      file_close(&file);
-      return ret;
+      filename = name + 1;
     }
 
-  /* Other file systems may also support FIOC_FILENAME, so the real proof
-   * is that we can look up the index to this name in g_builtins[].
-   */
+  /* Looking up the index to this name in g_builtins[] */
 
   index = builtin_isavail(filename);
   if (index < 0)

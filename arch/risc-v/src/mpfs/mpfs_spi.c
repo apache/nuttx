@@ -1332,25 +1332,21 @@ static void mpfs_spi_init(struct spi_dev_s *dev)
 
   if (priv->id == 0)
     {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0,
-                  (1 << SYSREG_SOFT_RESET_CR_SPI0));
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_SPI0);
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                  (1 << SYSREG_SOFT_RESET_CR_SPI0), 0);
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_SPI0, 0);
 
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_SPI0));
+                  SYSREG_SUBBLK_CLOCK_CR_SPI0);
     }
   else
     {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0,
-                  (1 << SYSREG_SOFT_RESET_CR_SPI1));
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_SPI1);
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
-                  (1 << SYSREG_SOFT_RESET_CR_SPI1), 0);
+      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_SPI1, 0);
 
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_SPI1));
+                  SYSREG_SUBBLK_CLOCK_CR_SPI1);
     }
 
   /* Reset the device */
@@ -1399,14 +1395,12 @@ static void mpfs_spi_deinit(struct spi_dev_s *dev)
   if (priv->id == 0)
     {
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_SPI0),
-                  0);
+                  SYSREG_SUBBLK_CLOCK_CR_SPI0, 0);
     }
   else
     {
       modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
-                  (1 << SYSREG_SUBBLK_CLOCK_CR_SPI1),
-                  0);
+                  SYSREG_SUBBLK_CLOCK_CR_SPI1, 0);
     }
 
   priv->frequency = 0;

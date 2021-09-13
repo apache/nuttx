@@ -213,6 +213,68 @@ bool stm32l4_pwr_enableusv(bool set)
 }
 
 /****************************************************************************
+ * Name: stm32l4_pwr_vddio2_valid
+ *
+ * Description:
+ *   Report that the Vddio2 independent I/Os supply voltage is valid or not.
+ *   Setting this bit is mandatory to use the PG2 - PG15 I/Os.
+ *
+ * Input Parameters:
+ *   set - True: Vddio2 is value; False: Vddio2 is not present.  Logical and
+ *         electrical isolation is applied to ignore this supply.
+ *
+ * Returned Value:
+ *   True: The bit was previously set.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+bool stm32l4_pwr_vddio2_valid(bool set)
+{
+  uint32_t regval;
+  bool was_set;
+  bool was_clk_enabled;
+
+  regval = getreg32(STM32L4_RCC_APB1ENR1);
+  was_clk_enabled = ((regval & RCC_APB1ENR1_PWREN) != 0);
+
+  if (!was_clk_enabled)
+    {
+      stm32l4_pwr_enableclk(true);
+    }
+
+  /* Get the current state of the STM32L4 PWR control register 2 */
+
+  regval  = stm32l4_pwr_getreg(STM32L4_PWR_CR2_OFFSET);
+  was_set = ((regval & PWR_CR2_IOSV) != 0);
+
+  /* Enable or disable the ability to write */
+
+  if (was_set && !set)
+    {
+      /* Reset the Vddio2 independent I/O supply valid bit. */
+
+      regval &= ~PWR_CR2_IOSV;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
+    }
+  else if (!was_set && set)
+    {
+      /* Set the Vddio2 independent I/O supply valid bit. */
+
+      regval |= PWR_CR2_IOSV;
+      stm32l4_pwr_putreg(STM32L4_PWR_CR2_OFFSET, regval);
+    }
+
+  if (!was_clk_enabled)
+    {
+      stm32l4_pwr_enableclk(false);
+    }
+
+  return was_set;
+}
+#endif
+
+/****************************************************************************
  * Name: stm32_pwr_setvos
  *
  * Description:

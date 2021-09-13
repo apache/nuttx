@@ -106,6 +106,25 @@ bool stm32l4_pwr_enablebkp(bool writable);
 bool stm32l4_pwr_enableusv(bool set);
 
 /****************************************************************************
+ * Name: stm32l4_pwr_vddio2_valid
+ *
+ * Description:
+ *   Report that the Vddio2 independent I/Os supply voltage is valid or not.
+ *   Setting this bit is mandatory to use the PG2 - PG15 I/Os.
+ *
+ * Input Parameters:
+ *   set - True: Vddio2 is value; False: Vddio2 is not present.  Logical and
+ *         electrical isolation is applied to ignore this supply.
+ *
+ * Returned Value:
+ *   True: The bit was previously set.
+ ****************************************************************************/
+
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+bool stm32l4_pwr_vddio2_valid(bool set);
+#endif
+
+/****************************************************************************
  * Name: stm32_pwr_setvos
  *
  * Description:

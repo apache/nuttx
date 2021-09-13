@@ -749,6 +749,20 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	---help---
 		Mount point of Wi-Fi storage file system.
 
+config ESP32C3_WIFI_MTD_OFFSET
+	hex "Wi-Fi MTD partition offset"
+	default 0x280000
+	depends on ESP32C3_WIFI_SAVE_PARAM
+	---help---
+		This is the base address of the Wi-Fi MTD partition.
+
+config ESP32C3_WIFI_MTD_SIZE
+	hex "Wi-Fi MTD partition size"
+	default 0xb0000
+	depends on ESP32C3_WIFI_SAVE_PARAM
+	---help---
+		This is the size of the Wi-Fi MTD partition.
+
 config ESP32C3_WIFI_STA_DISCONNECT_PM
 	bool "Power Management for station when disconnected"
 	default n

@@ -52,26 +52,29 @@ else ifeq ($(CONFIG_ESP32C3_FLASH_FREQ_20M),y)
 	FLASH_FREQ := 20m
 endif
 
-ESPTOOL_ELF2IMG_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ)
-
 ifeq ($(CONFIG_ESP32C3_FLASH_DETECT),y)
 	ESPTOOL_WRITEFLASH_OPTS := -fs detect -fm dio -ff $(FLASH_FREQ)
 else
 	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
 endif
 
+ESPTOOL_FLASH_OPTS := -fs $(FLASH_SIZE) -fm $(FLASH_MODE) -ff $(FLASH_FREQ)
+
 ifdef ESPTOOL_BINDIR
-	BL_OFFSET := 0x0
-	PT_OFFSET := 0x8000
-	BOOTLOADER := $(ESPTOOL_BINDIR)/bootloader-esp32c3.bin
+	BL_OFFSET       := 0x0
+	PT_OFFSET       := 0x8000
+	BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-esp32c3.bin
 	PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-esp32c3.bin
-	FLASH_BL := $(BL_OFFSET) $(BOOTLOADER)
-	FLASH_PT := $(PT_OFFSET) $(PARTITION_TABLE)
+	FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
+	FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
+	ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)
 endif
 
-# POSTBUILD -- Perform post build operations
+ESPTOOL_BINS += 0x10000 nuttx.bin
 
-define POSTBUILD
+# ELF2IMAGE -- Convert an ELF file into a binary file in Espressif application image format
+
+define ELF2IMAGE
 	$(Q) echo "MKIMAGE: ESP32-C3 binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
@@ -84,8 +87,38 @@ define POSTBUILD
 		echo "Missing Flash memory size configuration for the ESP32-C3 chip."; \
 		exit 1; \
 	fi
-	esptool.py -c esp32c3 elf2image $(ESPTOOL_ELF2IMG_OPTS) -o nuttx.bin nuttx
+	esptool.py -c esp32c3 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32-C3 compatible)"
+endef
+
+# MERGEBIN -- Merge raw binary files into a single file
+
+ifeq ($(CONFIG_ESP32C3_MERGE_BINS),y)
+define MERGEBIN
+	$(Q) if [ -z $(ESPTOOL_BINDIR) ]; then \
+		echo "MERGEBIN error: Missing argument for binary files directory."; \
+		echo "USAGE: make ESPTOOL_BINDIR=<dir>"; \
+		exit 1; \
+	fi
+	$(Q) if [ -z $(FLASH_SIZE) ]; then \
+		echo "Missing Flash memory size configuration for the ESP32-C3 chip."; \
+		exit 1; \
+	fi
+	esptool.py -c esp32c3 merge_bin --output nuttx.merged.bin $(ESPTOOL_FLASH_OPTS) $(ESPTOOL_BINS)
+	$(Q) echo nuttx.merged.bin >> nuttx.manifest
+	$(Q) echo "Generated: nuttx.merged.bin"
+endef
+else
+define MERGEBIN
+
+endef
+endif
+
+# POSTBUILD -- Perform post build operations
+
+define POSTBUILD
+	$(call ELF2IMAGE)
+	$(call MERGEBIN)
 endef
 
 # ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
@@ -95,9 +128,6 @@ ESPTOOL_BAUD ?= 921600
 # DOWNLOAD -- Download binary image via esptool.py
 
 define DOWNLOAD
-
-	$(eval ESPTOOL_BINS := $(FLASH_BL) $(FLASH_PT) 0x10000 $(1).bin)
-
 	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
 		echo "DOWNLOAD error: Missing serial port device argument."; \
 		echo "USAGE: make download ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ]"; \

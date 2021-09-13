@@ -42,7 +42,7 @@
 #define set_errno(e) \
   do \
     { \
-       errno = (int)(e); \
+      errno = (int)(e); \
     } \
   while (0)
 #define get_errno() errno
