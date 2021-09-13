@@ -315,9 +315,9 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
   /* Align to XCHAL_DCACHE_SIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_SIZE - 1));
+  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
 
-  for (; addr < end; addr += XCHAL_DCACHE_SIZE)
+  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
     {
       __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(addr));
     }
@@ -430,7 +430,7 @@ void up_flush_dcache_all(void)
 {
   uint32_t index;
 
-  for (index = 0; index < XCHAL_ICACHE_SIZE; index += XCHAL_DCACHE_LINESIZE)
+  for (index = 0; index < XCHAL_DCACHE_SIZE; index += XCHAL_DCACHE_LINESIZE)
     {
       __asm__ __volatile__ ("diwbi %0, 0\n" : : "r"(index));
     };
