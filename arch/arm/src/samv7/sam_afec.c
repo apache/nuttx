@@ -45,7 +45,7 @@
 
 
 #include "arm_arch.h"
-#include "sam_adc.h"
+#include "sam_afec.h"
 #include "sam_periphclks.h"
 
 #include <arch/board/board.h>
@@ -347,11 +347,11 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
   g_sam_adc_dev.ad_ops = &sam_adc_ops;
 
   priv->num_channels = BOARD_ADC_NUM_CHANNELS;
-  priv->logic2physicalCHmap[0] = 4;
-  priv->logic2physicalCHmap[1] = 5;
-  priv->logic2physicalCHmap[2] = 6;
-  priv->logic2physicalCHmap[3] = 7;
-  priv->logic2physicalCHmap[4] = 8;
+  priv->logic2physicalCHmap[0] = 7;
+  priv->logic2physicalCHmap[1] = 8;
+  priv->logic2physicalCHmap[2] = 4;
+  priv->logic2physicalCHmap[3] = 5;
+  priv->logic2physicalCHmap[4] = 6;
 
   sam_adc_init_clock(&g_sam_adc_dev);
 
@@ -366,16 +366,27 @@ struct adc_dev_s *sam_adcinitialize(int genclk)
            AFEC_MR_PRESCAL(0xFF);
   putreg32(regval,SAM_AFEC1_MR);
 
-  putreg32(AFEC_EMR_TAG,SAM_AFEC1_EMR);
+  putreg32(AFEC_EMR_TAG|AFEC_EMR_RES_NOAVG,SAM_AFEC1_EMR);
 
   regval = 0;
   for (iii=0;iii<priv->num_channels; iii++)
     {
       regval |= AFEC_CH(priv->logic2physicalCHmap[iii]);
     }
+
   putreg32(regval,SAM_AFEC1_CHER);
 
-  putreg32(AFEC_ACR_PGA0EN|AFEC_ACR_PGA1EN, SAM_AFEC1_ACR);
+
+  /* Set all channels CM voltage to Vrefp/2 (512). */
+  for (iii=0;iii<priv->num_channels; iii++)
+    {
+      regval = AFEC_CSELR_CSEL(priv->logic2physicalCHmap[iii]);
+      putreg32(regval, SAM_AFEC1_CSELR);
+
+      putreg32(512, SAM_AFEC1_COCR);
+    }
+
+  putreg32(AFEC_ACR_PGA0EN|AFEC_ACR_PGA1EN|AFEC_ACR_IBCTL(1), SAM_AFEC1_ACR);
 
   flags = enter_critical_section();
 

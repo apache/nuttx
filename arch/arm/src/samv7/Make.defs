@@ -100,7 +100,7 @@ CHIP_CSRCS += sam_gpioirq.c
 endif
 
 ifeq ($(CONFIG_SAMV7_ADC),y)
-CHIP_CSRCS += sam_adc.c
+CHIP_CSRCS += sam_afec.c
 endif
 
 ifeq ($(CONFIG_SAMV7_XDMAC),y)
