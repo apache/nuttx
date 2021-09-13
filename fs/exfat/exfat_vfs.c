@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <time.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string.h>
@@ -1405,3 +1406,9 @@ static int exfatfs_format(FAR struct exfat *ef, FAR const char *spec,
 
   return exfat_close(dev);
 }
+
+#ifndef CONFIG_LIBC_LOCALTIME
+void tzset(void)
+{
+}
+#endif
