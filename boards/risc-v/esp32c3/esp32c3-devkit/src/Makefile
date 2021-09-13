@@ -82,6 +82,18 @@ ifeq ($(CONFIG_ADC),y)
 CSRCS += esp32c3_adc.c
 endif
 
+ifeq ($(CONFIG_LCD_ST7735),y)
+CSRCS += esp32c3_st7735.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += esp32c3_st7789.c
+endif
+
+ifeq ($(CONFIG_LCD_GC9A01),y)
+CSRCS += esp32c3_gc9a01.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL_IOCTL),y)
 CSRCS += esp32c3_ioctl.c
 endif

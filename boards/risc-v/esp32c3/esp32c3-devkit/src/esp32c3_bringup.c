@@ -46,6 +46,15 @@
 #  include "esp32c3_spi.h"
 #endif
 
+#ifdef CONFIG_LCD_DEV
+#  include <nuttx/board.h>
+#  include <nuttx/lcd/lcd_dev.h>
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
+#endif
+
 #ifdef CONFIG_ESP32C3_RT_TIMER
 #  include "esp32c3_rt_timer.h"
 #endif
@@ -186,6 +195,28 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
              ESP32C3_SPI2, ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Frame Buffer Driver.\n");
+    }
+#elif defined(CONFIG_LCD)
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
     }
 #endif
 

@@ -262,6 +262,29 @@ config ESP32C3_SPIFLASH
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
 
+config ESP32C3_SPI_LCD
+	bool "Generic SPI LCD Module"
+	default n
+	select ESP32C3_SPI2
+	select SPI_CMDDATA
+	select ESP32C3_SPI_SWCS
+	select SPI_SWAPBYTES
+
+if ESP32C3_SPI_LCD
+
+config SPI_SWAPBYTES
+	bool "Swap high and low bytes during 16bit SPI send"
+
+config ESP32C3_LCD_RSTPIN
+	int "LCD reset pin"
+	default 9
+
+config ESP32C3_LCD_BLPIN
+	int "LCD backlight pin"
+	default 18
+
+endif # ESP32C3_SPI_LCD
+
 config ESP32C3_SPI2
 	bool "SPI 2"
 	default n

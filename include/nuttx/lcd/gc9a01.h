@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/esp32c3/esp32c3-devkit/src/esp32c3_board_spi.c
+ * include/nuttx/lcd/gc9a01.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,68 +18,55 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_GC9A01_H
+#define __INCLUDE_NUTTX_GC9A01_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
-
-#include <nuttx/spi/spi.h>
-
-#include "esp32c3_gpio.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spi2_status
+ * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32C3_SPI2
-
-uint8_t esp32c3_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
+#ifdef __cplusplus
+extern "C"
 {
-  uint8_t status = 0;
-
-  return status;
-}
-
 #endif
 
 /****************************************************************************
- * Name: esp32c3_spi2_cmddata
+ * Public Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_ESP32C3_SPI2) && defined(CONFIG_SPI_CMDDATA)
+/****************************************************************************
+ * Name:  gc9a01_initialize
+ *
+ * Description:
+ *   Initialize the GC9A01 video hardware.  The initial state of the
+ *   LCD is fully initialized, display memory cleared, and the LCD ready
+ *   to use, but with the power setting at 0 (full off == sleep mode).
+ *
+ * Returned Value:
+ *
+ *   On success, this function returns a reference to the LCD object for
+ *   the specified LCD.  NULL is returned on any failure.
+ *
+ ****************************************************************************/
 
-int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
-{
-#ifdef CONFIG_ESP32C3_SPI_LCD
-  if (devid == SPIDEV_DISPLAY(0))
-    {
-      /*  This is the Data/Command control pad which determines whether the
-       *  data bits are data or a command.
-       */
+FAR struct lcd_dev_s *gc9a01_lcdinitialize(FAR struct spi_dev_s *spi);
 
-      esp32c3_gpiowrite(CONFIG_ESP32C3_SPI2_MISOPIN, !cmd);
-
-      return OK;
-    }
-
-#endif
-  spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
-          "data");
-
-  return -ENODEV;
+#ifdef __cplusplus
 }
-
 #endif
+
+#endif /* __INCLUDE_NUTTX_GC9A01_H */

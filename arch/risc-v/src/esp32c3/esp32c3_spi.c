@@ -849,6 +849,13 @@ static uint32_t esp32c3_spi_poll_send(FAR struct esp32c3_spi_priv_s *priv,
 {
   uint32_t val;
 
+#ifdef CONFIG_SPI_SWAPBYTES
+  if (priv->nbits == 16)
+    {
+      wd = __builtin_bswap16(wd);
+    }
+#endif
+
   putreg32((priv->nbits - 1), SPI_MS_DLEN_REG);
 
   putreg32(wd, SPI_W0_REG);
@@ -952,7 +959,6 @@ static void esp32c3_spi_poll_exchange(FAR struct esp32c3_spi_priv_s *priv,
           if (tp != NULL)
             {
               memcpy(&w_wd, tp, sizeof(uint32_t));
-
               tp += sizeof(uintptr_t);
             }
 
