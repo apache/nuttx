@@ -97,10 +97,6 @@ int local_release(FAR struct local_conn_s *conn)
         }
 
       conn->u.server.lc_pending = 0;
-
-      /* Remove the server from the list of listeners. */
-
-      dq_rem(&conn->lc_node, &g_local_listeners);
     }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
