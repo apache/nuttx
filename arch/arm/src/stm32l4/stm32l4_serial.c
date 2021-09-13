@@ -993,20 +993,16 @@ static int stm32l4serial_dmanextrx(FAR struct stm32l4_serial_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32l4serial_setformat
+ * Name: stm32l4serial_setbaud_usart
  *
  * Description:
- *   Set the serial line format and speed.
+ *   Set the serial line baud rate (standard UART and USART).
  *
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
+static void stm32l4serial_setbaud_usart(FAR struct stm32l4_serial_s *priv)
 {
-  FAR struct stm32l4_serial_s *priv =
-      (FAR struct stm32l4_serial_s *)dev->priv;
-  uint32_t regval;
-
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    */
@@ -1062,6 +1058,73 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
 
   stm32l4serial_putreg(priv, STM32L4_USART_CR1_OFFSET, cr1);
   stm32l4serial_putreg(priv, STM32L4_USART_BRR_OFFSET, brr);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_setbaud_lpuart
+ *
+ * Description:
+ *   Set the serial line baud rate (LPUART only).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+static void stm32l4serial_setbaud_lpuart(FAR struct stm32l4_serial_s *priv)
+{
+  uint32_t brr;
+
+  /* The equation is:
+   *
+   *   baud = 256 * fCK / brr
+   *   brr  = 256 * fCK / baud
+   *
+   * It is forbidden to write values lower than LPUART_BRR_MIN in
+   * the LPUART_BRR register. fCK must range from 3 x baud rate to
+   * 4096 x baud rate.
+   */
+
+  brr = (((uint64_t)priv->apbclock << 8) + (priv->baud >> 1)) / priv->baud;
+  brr &= LPUART_BRR_MASK;
+
+  if (brr < LPUART_BRR_MIN)
+    {
+      brr = LPUART_BRR_MIN;
+    }
+
+  stm32l4serial_putreg(priv, STM32L4_USART_BRR_OFFSET, brr);
+}
+#endif
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_setformat
+ *
+ * Description:
+ *   Set the serial line format and speed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
+{
+  FAR struct stm32l4_serial_s *priv =
+      (FAR struct stm32l4_serial_s *)dev->priv;
+  uint32_t regval;
+
+  /* Set baud rate */
+
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+  if (priv->usartbase == STM32L4_LPUART1_BASE)
+    {
+      stm32l4serial_setbaud_lpuart(priv);
+    }
+  else
+#endif
+    {
+      stm32l4serial_setbaud_usart(priv);
+    }
 
   /* Configure parity mode */
 
