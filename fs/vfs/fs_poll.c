@@ -337,6 +337,13 @@ int file_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
           ret = OK;
         }
     }
+  else
+    {
+      fds->revents |= (POLLERR | POLLHUP);
+      nxsem_post(fds->sem);
+
+      ret = OK;
+    }
 
   return ret;
 }
