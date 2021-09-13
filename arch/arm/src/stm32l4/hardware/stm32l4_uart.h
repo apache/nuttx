@@ -219,12 +219,18 @@
 
 #define USART_CR3_WUFIE           (1 << 22) /* Bit 22: Wakeup from Stop mode interrupt enable */
 
-/* Baud Rate Register */
+/* Baud Rate Register (USART) */
 
 #define USART_BRR_FRAC_SHIFT      (0)       /* Bits 3-0: fraction of USARTDIV */
 #define USART_BRR_FRAC_MASK       (0x0f << USART_BRR_FRAC_SHIFT)
 #define USART_BRR_MANT_SHIFT      (4)       /* Bits 15-4: mantissa of USARTDIV */
 #define USART_BRR_MANT_MASK       (0x0fff << USART_BRR_MANT_SHIFT)
+
+/* Baud Rate Register (LPUART) */
+
+#define LPUART_BRR_SHIFT          (0)       /* Bits 19-0: LPUART baud rate */
+#define LPUART_BRR_MASK           (0xfffff << LPUART_BRR_SHIFT)
+#define LPUART_BRR_MIN            (0x300)   /* Minimum value permitted for BRR register */
 
 /* Guard time and prescaler register */
 
