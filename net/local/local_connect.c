@@ -267,13 +267,6 @@ int psock_local_connect(FAR struct socket *psock,
   net_lock();
   while ((conn = local_nextconn(conn)) != NULL)
     {
-      /* Anything in the listener list should be a stream socket in the
-       * listening state
-       */
-
-      DEBUGASSERT(conn->lc_state == LOCAL_STATE_LISTENING &&
-                  conn->lc_proto == SOCK_STREAM);
-
       /* Handle according to the server connection type */
 
       switch (conn->lc_type)
@@ -289,7 +282,13 @@ int psock_local_connect(FAR struct socket *psock,
 
         case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
           {
-            if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1)
+            /* Anything in the listener list should be a stream socket in the
+             * listening state
+             */
+
+            if (conn->lc_state == LOCAL_STATE_LISTENING &&
+                conn->lc_proto == SOCK_STREAM &&
+                strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1)
                 == 0)
               {
                 int ret = OK;
