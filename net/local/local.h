@@ -200,12 +200,6 @@ extern "C"
 
 EXTERN const struct sock_intf_s g_local_sockif;
 
-#ifdef CONFIG_NET_LOCAL_STREAM
-/* A list of all SOCK_STREAM listener connections */
-
-EXTERN dq_queue_t g_local_listeners;
-#endif
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
