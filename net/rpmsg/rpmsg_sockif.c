@@ -260,21 +260,21 @@ static int rpmsg_socket_wakeup(FAR struct rpmsg_socket_conn_s *conn)
       return ret;
     }
 
+  rpmsg_socket_lock(&conn->recvlock);
   space = conn->recvpos - conn->lastpos;
 
   if (space > circbuf_size(&conn->recvbuf) / 2)
     {
+      conn->lastpos = conn->recvpos;
       msg.cmd = RPMSG_SOCKET_CMD_DATA;
       msg.pos = conn->recvpos;
       msg.len = 0;
-      ret = rpmsg_send(&conn->ept, &msg, sizeof(msg));
-      if (ret >= 0)
-        {
-          conn->lastpos = conn->recvpos;
-        }
+      ret = 1;
     }
 
-  return ret;
+  rpmsg_socket_unlock(&conn->recvlock);
+
+  return ret ? rpmsg_send(&conn->ept, &msg, sizeof(msg)) : 0;
 }
 
 static inline uint32_t rpmsg_socket_get_space(
@@ -908,29 +908,27 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
   uint32_t offset = 0;
   int ret = 0;
 
-  rpmsg_socket_lock(&conn->sendlock);
-
   while (written < len)
     {
-      uint32_t block = MIN(len - written, rpmsg_socket_get_space(conn));
       FAR struct rpmsg_socket_data_s *msg;
       uint32_t block_written = 0;
       uint32_t ipcsize;
+      uint32_t block;
+
+      rpmsg_socket_lock(&conn->sendlock);
+      block = MIN(len - written, rpmsg_socket_get_space(conn));
+      rpmsg_socket_unlock(&conn->sendlock);
 
       if (block == 0)
         {
           if (!_SS_ISNONBLOCK(psock->s_flags))
             {
-              rpmsg_socket_unlock(&conn->sendlock);
-
               ret = net_timedwait(&conn->sendsem,
                                   _SO_TIMEOUT(psock->s_sndtimeo));
               if (!conn->ept.rdev)
                 {
                   ret = -ECONNRESET;
                 }
-
-              rpmsg_socket_lock(&conn->sendlock);
 
               if (ret < 0)
                 {
@@ -942,6 +940,8 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
               ret = -EAGAIN;
               break;
             }
+
+          continue;
         }
 
       msg = rpmsg_get_tx_payload_buffer(&conn->ept, &ipcsize, true);
@@ -951,6 +951,9 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
           break;
         }
 
+      rpmsg_socket_lock(&conn->sendlock);
+
+      block = MIN(len - written, rpmsg_socket_get_space(conn));
       block = MIN(block, ipcsize - sizeof(*msg));
 
       msg->cmd = RPMSG_SOCKET_CMD_DATA;
@@ -974,6 +977,8 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
       conn->lastpos  = conn->recvpos;
       conn->sendpos += msg->len;
 
+      rpmsg_socket_unlock(&conn->sendlock);
+
       ret = rpmsg_send_nocopy(&conn->ept, msg, block + sizeof(*msg));
       if (ret < 0)
         {
@@ -982,8 +987,6 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
 
       written += block;
     }
-
-  rpmsg_socket_unlock(&conn->sendlock);
 
   return written ? written : ret;
 }
@@ -998,6 +1001,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   uint32_t total = len + sizeof(*msg) + sizeof(uint32_t);
   uint32_t written = 0;
   uint32_t ipcsize;
+  uint32_t space;
   char *msgpos;
   int ret;
 
@@ -1006,14 +1010,17 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
       return -EFBIG;
     }
 
-  rpmsg_socket_lock(&conn->sendlock);
-
-  while (total - sizeof(*msg) > rpmsg_socket_get_space(conn))
+  while (1)
     {
+      rpmsg_socket_lock(&conn->sendlock);
+      space = rpmsg_socket_get_space(conn);
+      rpmsg_socket_unlock(&conn->sendlock);
+
+      if (space >= total - sizeof(*msg))
+          break;
+
       if (!_SS_ISNONBLOCK(psock->s_flags))
         {
-          rpmsg_socket_unlock(&conn->sendlock);
-
           ret = net_timedwait(&conn->sendsem,
                               _SO_TIMEOUT(psock->s_sndtimeo));
           if (!conn->ept.rdev)
@@ -1021,32 +1028,29 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
               ret = -ECONNRESET;
             }
 
-          rpmsg_socket_lock(&conn->sendlock);
-
           if (ret < 0)
             {
-              goto out;
+              return ret;
             }
         }
       else
         {
-          ret = -EAGAIN;
-          goto out;
+          return -EAGAIN;
         }
     }
 
   msg = rpmsg_get_tx_payload_buffer(&conn->ept, &ipcsize, true);
   if (!msg)
     {
-      ret = -EINVAL;
-      goto out;
+      return -EINVAL;
     }
 
-  if (total > ipcsize)
-    {
-      total = ipcsize;
-      len   = ipcsize - sizeof(*msg) - sizeof(uint32_t);
-    }
+  rpmsg_socket_lock(&conn->sendlock);
+
+  space = rpmsg_socket_get_space(conn);
+  total = MIN(total, space + sizeof(*msg));
+  total = MIN(total, ipcsize);
+  len = total - sizeof(*msg) - sizeof(uint32_t);
 
   /* SOCK_DGRAM need write len to buffer */
 
@@ -1074,9 +1078,10 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   conn->lastpos  = conn->recvpos;
   conn->sendpos += len + sizeof(uint32_t);
 
-  ret = rpmsg_send_nocopy(&conn->ept, msg, total);
-out:
   rpmsg_socket_unlock(&conn->sendlock);
+
+  ret = rpmsg_send_nocopy(&conn->ept, msg, total);
+
   return ret > 0 ? len : ret;
 }
 
@@ -1180,7 +1185,6 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
 
   if (ret > 0)
     {
-      rpmsg_socket_wakeup(conn);
       goto out;
     }
 
@@ -1215,7 +1219,6 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   if (!conn->recvdata)
     {
       ret = conn->recvlen;
-      rpmsg_socket_wakeup(conn);
     }
   else
     {
@@ -1227,6 +1230,7 @@ out:
 
   if (ret > 0)
     {
+      rpmsg_socket_wakeup(conn);
       rpmsg_socket_getaddr(conn, from, fromlen);
     }
 
