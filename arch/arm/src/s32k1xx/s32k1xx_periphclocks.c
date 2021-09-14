@@ -107,29 +107,6 @@ static uint32_t *s32k1xx_get_pclkctrl(enum clock_names_e clkname)
 }
 
 /****************************************************************************
- * Name: s32k1xx_pclk_disable
- *
- * Description:
- *   This function enables/disables the clock for a given peripheral.
- *
- * Input Parameters:
- *   clkname - The name of the peripheral clock to be disabled
- *   enable  - true:  Enable the peripheral clock.
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void s32k1xx_pclk_disable(enum clock_names_e clkname)
-{
-  uint32_t *ctrlp = s32k1xx_get_pclkctrl(clkname);
-  DEBUGASSERT(ctrlp != NULL);
-
-  *ctrlp &= ~PCC_CGC;
-}
-
-/****************************************************************************
  * Name: s32k1xx_set_pclkctrl
  *
  * Description:
@@ -279,7 +256,7 @@ void s32k1xx_periphclocks(unsigned int count,
     {
       /* Disable the peripheral clock */
 
-      s32k1xx_pclk_disable(pclks->clkname);
+      s32k1xx_pclk_enable(pclks->clkname, false);
 
       /* Set peripheral clock control */
 
@@ -397,4 +374,40 @@ int s32k1xx_get_pclkfreq(enum clock_names_e clkname, uint32_t *frequency)
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: s32k1xx_pclk_enable
+ *
+ * Description:
+ *   This function enables/disables the clock for a given peripheral.
+ *
+ * Input Parameters:
+ *   clkname - The name of the peripheral clock to be disabled
+ *   enable  - true:  Enable the peripheral clock.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void s32k1xx_pclk_enable(enum clock_names_e clkname, bool enable)
+{
+  uint32_t *ctrlp = s32k1xx_get_pclkctrl(clkname);
+  DEBUGASSERT(ctrlp != NULL);
+
+  /* check if it needs to be enabled */
+
+  if (enable)
+    {
+      /* enable it */
+
+      *ctrlp |= PCC_CGC;
+    }
+  else
+    {
+      /* disable it */
+
+      *ctrlp &= ~PCC_CGC;
+    }
 }
