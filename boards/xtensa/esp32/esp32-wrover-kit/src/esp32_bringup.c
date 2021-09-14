@@ -94,6 +94,10 @@
 #  include "esp32_rtc_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_LCD_BACKPACK
+#  include "esp32_lcd_backpack.h"
+#endif
+
 #include "esp32-wrover-kit.h"
 
 /****************************************************************************
@@ -145,6 +149,17 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:0, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 0, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
     }
 #endif
 
