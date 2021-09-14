@@ -459,6 +459,26 @@ endif
 download: $(BIN)
 	$(call DOWNLOAD, $<)
 
+# bootloader
+#
+# Some architectures require the provisioning of a bootloader or other
+# functions required for properly executing the NuttX binary.
+# Make.defs files for those architectures should define a bootloader target
+# with the correct operations for that platform. It will generate an error
+# if the bootloader target is not defined.
+
+bootloader:
+	$(Q) $(MAKE) -C $(ARCH_SRC) bootloader
+
+# clean_bootloader
+#
+# Removes all of the files and directories created by the bootloader target.
+# It will generate an error if the clean_bootloader target is not defined on
+# the architecture-specific Makefile.
+
+clean_bootloader:
+	$(Q) $(MAKE) -C $(ARCH_SRC) clean_bootloader
+
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
 
