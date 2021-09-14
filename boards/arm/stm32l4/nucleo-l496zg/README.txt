@@ -112,50 +112,7 @@ Hardware
       in effect but will assume the factory default settings.
 
   Our main concern is establishing a console and LED utilization for
-  debugging. Because so many pins can be multiplexed with so many functions,
-  the above mentioned graphic may be helpful in identifying a serial port.
-
-  There are 4 choices that can be made from the menuconfig:
-
-  CONFIG_NUCLEO_CONSOLE_ARDUINO or CONFIG_NUCLEO_CONSOLE_MORPHO or
-  CONFIG_NUCLEO_CONSOLE_VIRTUAL or CONFIG_NUCLEO_CONSOLE_NONE
-
-  The CONFIG_NUCLEO_CONSOLE_NONE makes no preset for the console. You should still visit
-  the U[S]ART selection and Device Drivers to disable any U[S]ART remaining.
-
-  The CONFIG_NUCLEO_CONSOLE_ARDUINO configurations assume that you are using a
-  standard Arduino RS-232 shield with the serial interface with RX on pin D0 and
-  TX on pin D1 from USART6:
-
-            -------- ---------------
-                        STM32F7
-            ARDUIONO FUNCTION  GPIO
-            -- ----- --------- -----
-            DO RX    USART6_RX PG9
-            D1 TX    USART6_TX PG14
-            -- ----- --------- -----
-
-  The CONFIG_NUCLEO_CONSOLE_MORPHO configurations uses Serial Port 8 (USART8)
-  with TX on PE1 and RX on PE0.
-
-            Serial
-            ------
-            SERIAL_RX         PE_0
-            SERIAL_TX         PE_1
-
-  The CONFIG_NUCLEO_CONSOLE_VIRTUAL configurations uses Serial Port 3 (USART3)
-  with TX on PD8 and RX on PD9.
-
-            Serial
-            ------
-            SERIAL_RX         PD9
-            SERIAL_TX         PD8
-
-  These signals are internally connected to the on board ST-Link
-
-  Of course if your design has used those pins you can choose a completely
-  different U[S]ART to use as the console. In that Case, you will need to edit
-  the include/board.h to select different U[S]ART and / or pin selections.
+  debugging.
 
   Buttons
   -------
@@ -263,8 +220,8 @@ Serial Consoles
   ----------------
   Yet another option is to use LPUART1 and the USB virtual COM port.  This
   option may be more convenient for long term development, but is painful
-  to use during board bring-up. However as LPUART peripheral has not been
-  implemented for STM32L4, this cannot currently be used.
+  to use during board bring-up. However the LPUART peripheral has not yet
+  been tested for this board.
 
   Solder Bridges.  This configuration requires:
 
