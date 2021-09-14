@@ -217,7 +217,7 @@ static struct spi_dev_s *sam_mmcsd_spiinitialize(void)
 
   /* Create the SPI driver instance */
 
-  return spi_create_bitbang(&g_spiops);
+  return spi_create_bitbang(&g_spiops, NULL);
 }
 
 /****************************************************************************

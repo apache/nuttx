@@ -515,7 +515,8 @@ static int spi_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
  ****************************************************************************/
 
 FAR struct spi_dev_s *spi_create_bitbang(FAR const struct
-                                         spi_bitbang_ops_s *low)
+                                         spi_bitbang_ops_s *low,
+                                         FAR void *low_priv)
 {
   FAR struct spi_bitbang_s *priv;
 
@@ -535,6 +536,7 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct
 
   priv->dev.ops = &g_spiops;
   priv->low     = low;
+  priv->priv    = low_priv;
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
   priv->nbits   = 8;
 #endif
@@ -549,6 +551,12 @@ FAR struct spi_dev_s *spi_create_bitbang(FAR const struct
   /* And return the initialized driver structure */
 
   return &priv->dev;
+}
+
+void spi_destroy_bitbang(FAR struct spi_dev_s *dev)
+{
+  DEBUGASSERT(dev);
+  kmm_free(dev);
 }
 
 #endif /* CONFIG_SPI_BITBANG */
