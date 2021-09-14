@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H
-#define __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_S32K1XX_S32K118EVB_INCLUDE_BOARD_H
+#define __BOARDS_ARM_S32K1XX_S32K118EVB_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -27,30 +27,25 @@
 
 #include <nuttx/config.h>
 
-#ifndef __ASSEMBLY__
-#  include <stdint.h>
-#  include <stdbool.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Clocking *****************************************************************/
 
-/* The S32K118EVB is fitted with a 40MHz Crystal */
+/* The S32K118EVB is fitted with a 40 MHz crystal */
 
-#define BOARD_XTAL_FREQUENCY 40000000
+#define BOARD_XTAL_FREQUENCY  40000000
 
-/* The S32K118 will run at 48MHz */
+/* The S32K118 will run at 48 MHz */
 
 /* LED definitions **********************************************************/
 
 /* The S32K118EVB has one RGB LED:
  *
- *   RedLED   PTD16 (FTM0 CH1)
- *   GreenLED PTD15 (FTM0 CH0)
- *   BlueLED  PTE8  (FTM0 CH6)
+ *   RedLED    PTD16  (FTM0 CH1)
+ *   GreenLED  PTD15  (FTM0 CH0)
+ *   BlueLED   PTE8   (FTM0 CH6)
  *
  * If CONFIG_ARCH_LEDS is not defined, then the user can control the LEDs in
  * any way.  The following definitions are used to access individual RGB
@@ -77,20 +72,20 @@
  * the S32K118EVB.  The following definitions describe how NuttX controls the
  * LEDs:
  *
- *   SYMBOL                Meaning                      LED state
- *                                                      RED   GREEN  BLUE
- *   -------------------  ----------------------------  -----------------
+ *      SYMBOL            Meaning                         LED state
+ *                                                        RED    GREEN  BLUE
+ *      ----------------  -----------------------------  -------------------
  */
 
-#define LED_STARTED       1 /* NuttX has been started    OFF   OFF    OFF */
-#define LED_HEAPALLOCATE  2 /* Heap has been allocated   OFF   OFF    ON  */
-#define LED_IRQSENABLED   0 /* Interrupts enabled        OFF   OFF    ON  */
-#define LED_STACKCREATED  3 /* Idle stack created        OFF   ON     OFF */
-#define LED_INIRQ         0 /* In an interrupt          (no change)       */
-#define LED_SIGNAL        0 /* In a signal handler      (no change)       */
-#define LED_ASSERTION     0 /* An assertion failed      (no change)       */
-#define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
-#undef  LED_IDLE            /* S32K118EVB in sleep mode (Not used)        */
+#define LED_STARTED       1 /* NuttX has been started     OFF    OFF    OFF */
+#define LED_HEAPALLOCATE  2 /* Heap has been allocated    OFF    OFF    ON  */
+#define LED_IRQSENABLED   0 /* Interrupts enabled         OFF    OFF    ON  */
+#define LED_STACKCREATED  3 /* Idle stack created         OFF    ON     OFF */
+#define LED_INIRQ         0 /* In an interrupt           (No change)        */
+#define LED_SIGNAL        0 /* In a signal handler       (No change)        */
+#define LED_ASSERTION     0 /* An assertion failed       (No change)        */
+#define LED_PANIC         4 /* The system has crashed     FLASH  OFF    OFF */
+#undef  LED_IDLE            /* S32K118 is in sleep mode  (Not used)         */
 
 /* Button definitions *******************************************************/
 
@@ -100,22 +95,38 @@
  *   SW3  PTD5
  */
 
-#define BUTTON_SW2         0
-#define BUTTON_SW3         1
-#define NUM_BUTTONS        2
+#define BUTTON_SW2        0
+#define BUTTON_SW3        1
+#define NUM_BUTTONS       2
 
 #define BUTTON_SW2_BIT    (1 << BUTTON_SW2)
 #define BUTTON_SW3_BIT    (1 << BUTTON_SW3)
 
-/* Alternate function pin selections ****************************************/
+/* UART selections **********************************************************/
 
 /* By default, the serial console will be provided on the OpenSDA VCOM port:
  *
- *   OpenSDA UART TX  PTB1(LPUART0_TX)
- *   OpenSDA UART RX  PTB0(LPUART0_RX)
+ *   OpenSDA UART RX  PTB0  (LPUART0_RX)
+ *   OpenSDA UART TX  PTB1  (LPUART0_TX)
  */
 
-#define PIN_LPUART0_RX    PIN_LPUART0_RX_1  /* PTB0 */
-#define PIN_LPUART0_TX    PIN_LPUART0_TX_1  /* PTB1 */
+#define PIN_LPUART0_RX    PIN_LPUART0_RX_1   /* PTB0 */
+#define PIN_LPUART0_TX    PIN_LPUART0_TX_1   /* PTB1 */
 
-#endif  /* __BOARDS_ARM_S32K118EVB_INCLUDE_BOARD_H */
+/* SPI selections ***********************************************************/
+
+/* UJA1169TK/F SBC SPI  (LPSPI0) */
+
+#define PIN_LPSPI0_SCK    PIN_LPSPI0_SOUT_2  /* PTB2 */
+#define PIN_LPSPI0_MISO   PIN_LPSPI0_SIN_2   /* PTB3 */
+#define PIN_LPSPI0_MOSI   PIN_LPSPI0_SOUT_1  /* PTB4 */
+#define PIN_LPSPI0_PCS    PIN_LPSPI0_PCS0_2  /* PTB5 */
+
+/* CAN selections ***********************************************************/
+
+/* UJA1169TK/F SBC CAN  (CAN0) */
+
+#define PIN_CAN0_RX       PIN_CAN0_RX_3      /* PTE4 */
+#define PIN_CAN0_TX       PIN_CAN0_TX_3      /* PTE5 */
+
+#endif  /* __BOARDS_ARM_S32K1XX_S32K118EVB_INCLUDE_BOARD_H */
