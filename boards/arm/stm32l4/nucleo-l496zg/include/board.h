@@ -550,20 +550,20 @@
 
 /* Alternate function pin selections ****************************************/
 
-#define GPIO_USART2_TX        GPIO_USART2_TX_2
-#define GPIO_USART2_RX        GPIO_USART2_RX_2
-#define GPIO_USART3_TX        GPIO_USART3_TX_2
-#define GPIO_USART3_RX        GPIO_USART3_RX_2
+#define GPIO_USART2_TX     GPIO_USART2_TX_2
+#define GPIO_USART2_RX     GPIO_USART2_RX_2
+#define GPIO_USART3_TX     GPIO_USART3_TX_2
+#define GPIO_USART3_RX     GPIO_USART3_RX_2
 
 #if defined(CONFIG_NUCLEO_CONSOLE_ARDUINO)
 /* USART6:
  *
- * These configurations assume that you are using a standard Arduio RS-232
+ * These configurations assume that you are using a standard Arduino RS-232
  * shield with the serial interface with RX on pin D0 and TX on pin D1:
  *
  *   -------- ---------------
- *               STM32F7
- *   ARDUIONO FUNCTION  GPIO
+ *               STM32L4
+ *   ARDUINO  FUNCTION  GPIO
  *   -- ----- --------- -----
  *   DO RX    USART6_RX PG9
  *   D1 TX    USART6_TX PG14
@@ -578,17 +578,10 @@
  * Use  USART3 and the USB virtual COM port
  */
 
-#if defined(CONFIG_NUCLEO_CONSOLE_VIRTUAL)
-/* LPUART1 is connector to Virtual COM port PG6 and PG7,
- * but there is no lpserial.
- */
+/* LPUART1 is connector to Virtual COM port PG6 and PG7. */
 
-/* #define GPIO_USART2_TX        GPIO_LPUART1_TX_3 */
-
-/* #define GPIO_USART2_RX        GPIO_LPUART1_RX_3 */
-
-#  error "No Nucleo virtual console before lpserial is unimplemented"
-#endif
+#define GPIO_LPUART1_TX    GPIO_LPUART1_TX_3
+#define GPIO_LPUART1_RX    GPIO_LPUART1_RX_3
 
 /* DMA channels *************************************************************/
 
