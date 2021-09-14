@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/s32k146evb/src/s32k1xx_userleds.c
+ * boards/arm/s32k1xx/s32k146evb/src/s32k1xx_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,76 +23,59 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
+#include <sys/types.h>
 #include <stdint.h>
-#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
 
-#include <nuttx/board.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include "s32k1xx_pin.h"
-
-#include <arch/board/board.h>
+#include "s32k1xx_lpi2c.h"
 
 #include "s32k146evb.h"
 
-#ifndef CONFIG_ARCH_LEDS
+#ifdef CONFIG_S32K1XX_LPI2C
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_userled_initialize
+ * Name: s32k1xx_i2cdev_initialize
+ *
+ * Description:
+ *   Initialize I2C driver and register /dev/i2cN devices.
+ *
  ****************************************************************************/
 
-uint32_t board_userled_initialize(void)
+int weak_function s32k1xx_i2cdev_initialize(void)
 {
-  /* Configure LED GPIOs for output */
+  int ret = OK;
 
-  s32k1xx_pinconfig(GPIO_LED_R);
-  s32k1xx_pinconfig(GPIO_LED_G);
-  s32k1xx_pinconfig(GPIO_LED_B);
+#if defined(CONFIG_S32K1XX_LPI2C0) && defined(CONFIG_I2C_DRIVER)
+  /* LPI2C0 *****************************************************************/
 
-  return BOARD_NLEDS;
+  /* Initialize the I2C driver for LPI2C0 */
+
+  struct i2c_master_s *lpi2c0 = s32k1xx_i2cbus_initialize(0);
+  if (lpi2c0 == NULL)
+    {
+      i2cerr("ERROR: FAILED to initialize LPI2C0\n");
+      return -ENODEV;
+    }
+
+  ret = i2c_register(lpi2c0, 0);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: FAILED to register LPI2C0 driver\n");
+      s32k1xx_i2cbus_uninitialize(lpi2c0);
+      return ret;
+    }
+#endif /* CONFIG_S32K1XX_LPI2C0 && CONFIG_I2C_DRIVER */
+
+  return ret;
 }
 
-/****************************************************************************
- * Name: board_userled
- ****************************************************************************/
-
-void board_userled(int led, bool ledon)
-{
-  uint32_t ledcfg;
-
-  if (led == BOARD_LED_R)
-    {
-      ledcfg = GPIO_LED_R;
-    }
-  else if (led == BOARD_LED_G)
-    {
-      ledcfg = GPIO_LED_G;
-    }
-  else if (led == BOARD_LED_B)
-    {
-      ledcfg = GPIO_LED_B;
-    }
-  else
-    {
-      return;
-    }
-
-  s32k1xx_gpiowrite(ledcfg, ledon);
-}
-
-/****************************************************************************
- * Name: board_userled_all
- ****************************************************************************/
-
-void board_userled_all(uint32_t ledset)
-{
-  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
-  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
-  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);
-}
-
-#endif /* !CONFIG_ARCH_LEDS */
+#endif /* CONFIG_S32K1XX_LPSPI */
