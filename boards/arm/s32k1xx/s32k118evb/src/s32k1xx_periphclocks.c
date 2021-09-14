@@ -58,7 +58,9 @@
 
 #include <nuttx/config.h>
 
+#include "s32k11x/s32k11x_clocknames.h"
 #include "s32k1xx_periphclocks.h"
+
 #include "s32k118evb.h"
 
 /****************************************************************************
