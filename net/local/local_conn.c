@@ -83,6 +83,33 @@ FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: local_peerconn
+ *
+ * Description:
+ *   Traverse the connections list to find the peer
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn)
+{
+  FAR struct local_conn_s *peer = NULL;
+
+  while ((peer = local_nextconn(peer)) != NULL)
+    {
+      if (conn->lc_proto == peer->lc_proto && conn != peer &&
+          !strncmp(conn->lc_path, peer->lc_path, UNIX_PATH_MAX - 1))
+        {
+          return peer;
+        }
+    }
+
+  return NULL;
+}
+
+/****************************************************************************
  * Name: local_alloc()
  *
  * Description:
