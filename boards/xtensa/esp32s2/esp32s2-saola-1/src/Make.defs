@@ -28,6 +28,9 @@ CSRCS = esp32s2_boot.c esp32s2_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += esp32s2_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += esp32s2_reset.c
+endif
 endif
 
 ifeq ($(CONFIG_DEV_GPIO),y)

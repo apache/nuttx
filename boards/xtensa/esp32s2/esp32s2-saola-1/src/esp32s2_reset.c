@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/sam_usb.h
+ * boards/xtensa/esp32s2/esp32s2-saola-1/src/esp32s2_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,63 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/usb/usbdev.h>
-#include <stdint.h>
 
-#include "chip.h"
-#include "hardware/saml_usb.h"
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+
+#ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Name:  sam_usb_suspend
+ * Name: board_reset
  *
  * Description:
- *   Board logic must provide the sam_usb_suspend logic if the USB driver is
- *   used. This function is called whenever the USB enters or leaves
- *   suspend mode.
+ *   Reset board.  Support for this function is required by board-level
+ *   logic if CONFIG_BOARDCTL_RESET is selected.
  *
- *   When 'resume' is false, this function call provides an opportunity to
- *   perform board-specific power-saving actions so that less power is
- *   consumed while the USB is suspended.
+ * Input Parameters:
+ *   status - Status information provided with the reset event.  This
+ *            meaning of this status information is board-specific.  If not
+ *            used by a board, the value zero may be provided in calls to
+ *            board_reset().
  *
- * XXX:
- *   Certain power-saving operations are performed by the UDP driver when it
- *   enters suspend mode:  The USB device peripheral clocks are be switched
- *   off. MCK and UDPCK are switched off and the USB transceiver is disabled.
- *
- *   When 'resume' is true, normal clocking and operations must all be
- *   restored.
+ * Returned Value:
+ *   If this function returns, then it was not possible to power-off the
+ *   board due to some constraints.  The return value in this case is a
+ *   board-specific reason for the failure to shutdown.
  *
  ****************************************************************************/
 
-void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume);
+int board_reset(int status)
+{
+  up_systemreset();
 
-#undef EXTERN
-#if defined(__cplusplus)
+  return 0;
 }
-#endif
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H */
+#endif /* CONFIG_BOARDCTL_RESET */

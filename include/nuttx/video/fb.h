@@ -272,6 +272,17 @@
 #endif
 #endif /* CONFIG_FB_OVERLAY */
 
+/* Specific Controls ********************************************************/
+
+#define FBIOSET_POWER         _FBIOC(0x0012)  /* Set panel power
+                                               * Argument:             int */
+#define FBIOGET_POWER         _FBIOC(0x0013)  /* Get panel current power
+                                               * Argument:            int* */
+#define FBIOSET_FRAMERATE     _FBIOC(0x0014)  /* Set frame rate
+                                               * Argument:             int */
+#define FBIOGET_FRAMERATE     _FBIOC(0x0015)  /* Get frame rate
+                                               * Argument:            int* */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -286,12 +297,15 @@ typedef uint16_t fb_coord_t;
 
 struct fb_videoinfo_s
 {
-  uint8_t    fmt;         /* see FB_FMT_*  */
-  fb_coord_t xres;        /* Horizontal resolution in pixel columns */
-  fb_coord_t yres;        /* Vertical resolution in pixel rows */
-  uint8_t    nplanes;     /* Number of color planes supported */
+  uint8_t    fmt;               /* see FB_FMT_*  */
+  fb_coord_t xres;              /* Horizontal resolution in pixel columns */
+  fb_coord_t yres;              /* Vertical resolution in pixel rows */
+  uint8_t    nplanes;           /* Number of color planes supported */
 #ifdef CONFIG_FB_OVERLAY
-  uint8_t    noverlays;   /* Number of overlays supported */
+  uint8_t    noverlays;         /* Number of overlays supported */
+#endif
+#ifdef CONFIG_FB_MODULEINFO
+  uint8_t    moduleinfo[128];   /* Module information filled by vendor */
 #endif
 };
 
@@ -569,6 +583,24 @@ struct fb_vtable_s
                FAR const struct fb_overlayblend_s *blend);
 # endif
 #endif
+
+  /* Specific Controls ******************************************************/
+
+  /* Set the frequency of the framebuffer update panel (0: disable refresh) */
+
+  int (*setframerate)(FAR struct fb_vtable_s *vtable, int rate);
+
+  /* Get the frequency of the framebuffer update panel (0: disable refresh) */
+
+  int (*getframerate)(FAR struct fb_vtable_s *vtable);
+
+  /* Get the panel power status (0: full off). */
+
+  int (*getpower)(FAR struct fb_vtable_s *vtable);
+
+  /* Enable/disable panel power (0: full off). */
+
+  int (*setpower)(FAR struct fb_vtable_s *vtable, int power);
 };
 
 /****************************************************************************

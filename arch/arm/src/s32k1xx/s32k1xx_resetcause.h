@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/sam_usb.h
+ * arch/arm/src/s32k1xx/s32k1xx_resetcause.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,63 +18,46 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H
+#define __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/usb/usbdev.h>
-#include <stdint.h>
+#include <nuttx/compiler.h>
 
-#include "chip.h"
-#include "hardware/saml_usb.h"
+#include <sys/types.h>
+#include <stdint.h>
+#include <stdbool.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
-
 /****************************************************************************
- * Name:  sam_usb_suspend
+ * Name: s32k1xx_resetcause_init
  *
- * Description:
- *   Board logic must provide the sam_usb_suspend logic if the USB driver is
- *   used. This function is called whenever the USB enters or leaves
- *   suspend mode.
- *
- *   When 'resume' is false, this function call provides an opportunity to
- *   perform board-specific power-saving actions so that less power is
- *   consumed while the USB is suspended.
- *
- * XXX:
- *   Certain power-saving operations are performed by the UDP driver when it
- *   enters suspend mode:  The USB device peripheral clocks are be switched
- *   off. MCK and UDPCK are switched off and the USB transceiver is disabled.
- *
- *   When 'resume' is true, normal clocking and operations must all be
- *   restored.
+ * Description: This function initializes the resetcause
+ *              It will get the resetcause and store it
  *
  ****************************************************************************/
 
-void sam_usb_suspend(FAR struct usbdev_s *dev, bool resume);
+void s32k1xx_resetcause_init(void);
 
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
+/****************************************************************************
+ * Name: s32k1xx_resetcause_initialize_procfs
+ *
+ * Description:   This function registrates the reset cause as a proc fs
+ *                Returns 0 if OK, error number otherwise
+ *
+ ****************************************************************************/
 
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_USB_H */
+int s32k1xx_resetcause_initialize_procfs(void);
+
+#endif /* __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H */

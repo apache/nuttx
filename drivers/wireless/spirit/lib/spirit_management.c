@@ -1,13 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/lib/spirit_management.c
- * The management layer for SPIRIT1 library.
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
- *
- *   Adapted for NuttX by:
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

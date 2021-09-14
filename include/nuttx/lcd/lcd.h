@@ -204,6 +204,14 @@ struct lcd_dev_s
   /* Set LCD panel contrast (0-CONFIG_LCD_MAXCONTRAST) */
 
   int (*setcontrast)(struct lcd_dev_s *dev, unsigned int contrast);
+
+  /* Set LCD panel frame rate (0: disable refresh) */
+
+  int (*setframerate)(struct lcd_dev_s *dev, int rate);
+
+  /* Get LCD panel frame rate (0: disable refresh) */
+
+  int (*getframerate)(struct lcd_dev_s *dev);
 };
 
 /****************************************************************************

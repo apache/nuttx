@@ -281,7 +281,9 @@ static inline void xtensa_intclear(uint32_t mask)
   __asm__ __volatile__
   (
     "wsr %0, INTCLEAR\n"
-    : "=r"(mask) : :
+    :
+    : "r"(mask)
+    :
   );
 }
 
