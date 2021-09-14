@@ -39,7 +39,7 @@
 #include <nuttx/sensors/sensor.h>
 
 /****************************************************************************
- * Pre-process Definitions
+ * Pre-processor Definitions
  ****************************************************************************/
 
 /* Roundup func define */
@@ -47,8 +47,8 @@
 #define LSM6DSO_ROUNDUP(x, esize) ((x + (esize - 1)) / (esize)) * (esize)
 
 #define LSM6DSO_WAIT_COUNT_MAX    300        /* Max count wait for reset */
-#define LSM6DSO_SET_DELAY         10         /* Delay after set(ms). */
-#define LSM6DSO_READ_DELAY        10         /* Selftest data read delay(ms). */
+#define LSM6DSO_SET_DELAY         10         /* Delay after set(ms) */
+#define LSM6DSO_READ_DELAY        10         /* Selftest data read delay (ms) */
 #define LSM6DSO_SPI_MAX_BUFFER    10         /* SPI exchange buffer size */
 
 /* Multi sensor index */
@@ -111,9 +111,10 @@
 #define LSM6DSO_4G                0x02       /* Accelerator scale 4g */
 #define LSM6DSO_8G                0x03       /* Accelerator scale 8g */
 
-#define LSM6DSO_2G_FACTOR         0.061f     /* Accelerator 2g factor*/
-#define LSM6DSO_4G_FACTOR         0.122f     /* Accelerator 4g factor*/
-#define LSM6DSO_8G_FACTOR         0.244f     /* Accelerator 8g factor*/
+#define LSM6DSO_2G_FACTOR         0.061f     /* Accelerator 2g factor (mg) */
+#define LSM6DSO_4G_FACTOR         0.122f     /* Accelerator 4g factor (mg) */
+#define LSM6DSO_8G_FACTOR         0.244f     /* Accelerator 8g factor (mg) */
+#define LSM6DSO_MG2G_FACTOR       0.001f     /* Convert mg to g factor */
 
 #define LSM6DSO_125DPS            0x01       /* Gyroscope scale 125dpg */
 #define LSM6DSO_250DPS            0x00       /* Gyroscope scale 250dpg */
@@ -121,11 +122,22 @@
 #define LSM6DSO_1000DPS           0x04       /* Gyroscope scale 1000dpg */
 #define LSM6DSO_2000DPS           0x06       /* Gyroscope scale 2000dpg */
 
-#define LSM6DSO_125DPS_FACTOR     4.375f     /* Gyroscope 125dpg factor */
-#define LSM6DSO_250DPS_FACTOR     8.75f      /* Gyroscope 250dpg factor */
-#define LSM6DSO_500DPS_FACTOR     17.5f      /* Gyroscope 500dpg factor */
-#define LSM6DSO_1000DPS_FACTOR    35.0f      /* Gyroscope 1000dpg factor */
-#define LSM6DSO_2000DPS_FACTOR    70.0f      /* Gyroscope 2000dpg factor */
+#define LSM6DSO_125DPS_FACTOR     4.375f     /* Gyroscope 125dpg factor (mdps/LSB) */
+#define LSM6DSO_250DPS_FACTOR     8.75f      /* Gyroscope 250dpg factor (mdps/LSB) */
+#define LSM6DSO_500DPS_FACTOR     17.5f      /* Gyroscope 500dpg factor (mdps/LSB) */
+#define LSM6DSO_1000DPS_FACTOR    35.0f      /* Gyroscope 1000dpg factor (mdps/LSB) */
+#define LSM6DSO_2000DPS_FACTOR    70.0f      /* Gyroscope 2000dpg factor (mdps/LSB) */
+#define LSM6DSO_MDPS2DPS_FACTOR   0.001f     /* Convert mdps to dpg factor */
+
+/* Factory test instructions. */
+
+#define LSM6DSO_ID_CMD           0x60        /* Read device ID */
+#define LSM6DSO_ST_CMD           0x61        /* Start selftest */
+
+/* Factory test results. */
+
+#define LSM6DSO_FT_SUCCESS        true       /* Factory test success */
+#define LSM6DSO_FT_FAILED         false      /* Factory test failed */
 
 /* Self test results. */
 
@@ -156,35 +168,35 @@
 
 /* Timestamp counter */
 
-#define LSM6DSO_TIMESTAMP_DISABLE 0x00      /* Disabled timestamp */
-#define LSM6DSO_TIMESTAMP_ENABLE  0x01      /* Enable timestamp */
+#define LSM6DSO_TIMESTAMP_DISABLE 0x00       /* Disabled timestamp */
+#define LSM6DSO_TIMESTAMP_ENABLE  0x01       /* Enable timestamp */
 
 /* Accelerometer LP f2 enable */
 
-#define LSM6DSO_LPF2_DISABLE      0x00      /* Disabled LPF2 */
-#define LSM6DSO_LPF2_ENABLE       0x01      /* Enable LPF2 */
+#define LSM6DSO_LPF2_DISABLE      0x00       /* Disabled LPF2 */
+#define LSM6DSO_LPF2_ENABLE       0x01       /* Enable LPF2 */
 
 /* Accelerometer HP filter */
 
-#define LSM6DSO_LPODR_DIV100      0x04      /* Accelerometer bandwidth 100 */
+#define LSM6DSO_LPODR_DIV100      0x04       /* Accelerometer bandwidth 100 */
 
 /* High-performance operating mode disable for accelerometer */
 
-#define LSM6DSO_HIGHT_ENABLE      0x00      /* High-performance enable */
-#define LSM6DSO_HIGHT_DISABLE     0x01      /* High-performance disable */
+#define LSM6DSO_HIGHT_ENABLE      0x00       /* High-performance enable */
+#define LSM6DSO_HIGHT_DISABLE     0x01       /* High-performance disable */
 
 /* Interrupt set */
 
-#define LSM6DSO_XL_INT_ENABLE     0x01      /* Accel interrupt enable */
-#define LSM6DSO_XL_INT_DISABLE    0x00      /* Accel interrupt disable */
+#define LSM6DSO_XL_INT_ENABLE     0x01       /* Accel interrupt enable */
+#define LSM6DSO_XL_INT_DISABLE    0x00       /* Accel interrupt disable */
 
-#define LSM6DSO_GY_INT_ENABLE     0x01      /* Gyro interrupt enable */
-#define LSM6DSO_GY_INT_DISABLE    0x00      /* Gyro interrupt disable */
+#define LSM6DSO_GY_INT_ENABLE     0x01       /* Gyro interrupt enable */
+#define LSM6DSO_GY_INT_DISABLE    0x00       /* Gyro interrupt disable */
 
 /* Interrupt set */
 
-#define LSM6DSO_FIFO_INT_ENABLE   0x01      /* FIFO interrupt enable */
-#define LSM6DSO_FIFO_INT_DISABLE  0x00      /* FIFO interrupt disable */
+#define LSM6DSO_FIFO_INT_ENABLE   0x01       /* FIFO interrupt enable */
+#define LSM6DSO_FIFO_INT_DISABLE  0x00       /* FIFO interrupt disable */
 
 /* Batch mode */
 
@@ -199,54 +211,54 @@
 
 /* Device Register */
 
-#define LSM6DSO_FIFO_CTRL1        0x07       /* FIFO control register (r/w). */
-#define LSM6DSO_FIFO_CTRL2        0x08       /* FIFO control register (r/w). */
-#define LSM6DSO_FIFO_CTRL3        0x09       /* FIFO control register (r/w). */
-#define LSM6DSO_FIFO_CTRL4        0x0a       /* FIFO control register (r/w). */
-#define LSM6DSO_COUNTER_BDR_REG1  0x0b       /* DataReady configuration register (r/w).*/
-#define LSM6DSO_INT1_CTRL         0x0d       /* INT1 pad control register (r/w). */
-#define LSM6DSO_WHO_AM_I          0x0f       /* Who_AM_I register (r). This register is a read-only register. */
-#define LSM6DSO_CTRL1_XL          0x10       /* Linear acceleration sensor control register 1 (r/w). */
-#define LSM6DSO_CTRL3_C           0x12       /* Control register 3 (r/w). */
-#define LSM6DSO_CTRL2_G           0x11       /* Angular rate sensor control register 2 (r/w). */
-#define LSM6DSO_CTRL6_C           0x15       /* Angular rate sensor control register 6 (r/w). */
-#define LSM6DSO_CTRL4_C           0x13       /* Control register 4 (r/w).*/
-#define LSM6DSO_CTRL5_C           0x14       /* Control register 5 (r/w). */
-#define LSM6DSO_CTRL7_G           0x16       /* Angular rate sensor control register 7 (r/w). */
-#define LSM6DSO_CTRL10_C          0x19       /* Control register 10 (r/w). */
-#define LSM6DSO_I3C_BUS_AVB       0x62       /* I3C bus available register. */
-#define LSM6DSO_CTRL9_XL          0x18       /* Linear acceleration sensor control register 9 (r/w). */
-#define LSM6DSO_CTRL8_XL          0x17       /* Linear acceleration sensor control register 8 (r/w). */
-#define LSM6DSO_STATUS_REG        0x1e       /* The STATUS_REG register is read by the SPI/I2C interface (r). */
-#define LSM6DSO_FSM_ENABLE_A      0x46       /* FSM enable register (r/w). */
-#define LSM6DSO_FSM_ENABLE_B      0x47       /* FSM enable register (r/w). */
-#define LSM6DSO_FIFO_DATA_OUT_TAG 0x78       /* FIFO out data tag register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_X_L 0x79       /* FIFO out data x low register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_X_H 0x7a       /* FIFO out data x high register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_Y_L 0x7b       /* FIFO out data y low register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_Y_H 0x7c       /* FIFO out data y high register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_Z_L 0x7d       /* FIFO out data z low register (r). */
-#define LSM6DSO_FIFO_DATA_OUT_Z_H 0x7e       /* FIFO out data z high register (r). */
+#define LSM6DSO_FIFO_CTRL1        0x07       /* FIFO control register (r/w) */
+#define LSM6DSO_FIFO_CTRL2        0x08       /* FIFO control register (r/w) */
+#define LSM6DSO_FIFO_CTRL3        0x09       /* FIFO control register (r/w) */
+#define LSM6DSO_FIFO_CTRL4        0x0a       /* FIFO control register (r/w) */
+#define LSM6DSO_COUNTER_BDR_REG1  0x0b       /* DataReady configuration register (r/w)*/
+#define LSM6DSO_INT1_CTRL         0x0d       /* INT1 pad control register (r/w) */
+#define LSM6DSO_WHO_AM_I          0x0f       /* Who_AM_I register (r). This register is a read-only register */
+#define LSM6DSO_CTRL1_XL          0x10       /* Linear acceleration sensor control register 1 (r/w) */
+#define LSM6DSO_CTRL3_C           0x12       /* Control register 3 (r/w) */
+#define LSM6DSO_CTRL2_G           0x11       /* Angular rate sensor control register 2 (r/w) */
+#define LSM6DSO_CTRL6_C           0x15       /* Angular rate sensor control register 6 (r/w) */
+#define LSM6DSO_CTRL4_C           0x13       /* Control register 4 (r/w) */
+#define LSM6DSO_CTRL5_C           0x14       /* Control register 5 (r/w) */
+#define LSM6DSO_CTRL7_G           0x16       /* Angular rate sensor control register 7 (r/w) */
+#define LSM6DSO_CTRL10_C          0x19       /* Control register 10 (r/w) */
+#define LSM6DSO_I3C_BUS_AVB       0x62       /* I3C bus available register */
+#define LSM6DSO_CTRL9_XL          0x18       /* Linear acceleration sensor control register 9 (r/w) */
+#define LSM6DSO_CTRL8_XL          0x17       /* Linear acceleration sensor control register 8 (r/w) */
+#define LSM6DSO_STATUS_REG        0x1e       /* The STATUS_REG register is read by the SPI/I2C interface (r) */
+#define LSM6DSO_FSM_ENABLE_A      0x46       /* FSM enable register (r/w) */
+#define LSM6DSO_FSM_ENABLE_B      0x47       /* FSM enable register (r/w) */
+#define LSM6DSO_FIFO_DATA_OUT_TAG 0x78       /* FIFO out data tag register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_X_L 0x79       /* FIFO out data x low register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_X_H 0x7a       /* FIFO out data x high register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_Y_L 0x7b       /* FIFO out data y low register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_Y_H 0x7c       /* FIFO out data y high register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_Z_L 0x7d       /* FIFO out data z low register (r) */
+#define LSM6DSO_FIFO_DATA_OUT_Z_H 0x7e       /* FIFO out data z high register (r) */
 
-#define LSM6DSO_OUT_TEMP_L        0x20       /* Temperature data output register (r). */
-#define LSM6DSO_OUT_TEMP_H        0x21       /* Temperature data output register (r). */
-#define LSM6DSO_OUTX_L_G          0x22       /* Angular rate sensor pitch axis (X) angular rate output register (r). */
-#define LSM6DSO_OUTX_H_G          0x23       /* Angular rate sensor pitch axis (X) angular rate output register (r). */
-#define LSM6DSO_OUTY_L_G          0x24       /* Angular rate sensor roll axis (Y) angular rate output register (r). */
-#define LSM6DSO_OUTY_H_G          0x25       /* Angular rate sensor roll axis (Y) angular rate output register (r). */
-#define LSM6DSO_OUTZ_L_G          0x26       /* Angular rate sensor yaw axis (Z) angular rate output register (r). */
-#define LSM6DSO_OUTZ_H_G          0x27       /* Angular rate sensor yaw axis (Z) angular rate output register (r). */
-#define LSM6DSO_OUTX_L_XL         0x28       /* Linear acceleration sensor X-axis output register (r). */
-#define LSM6DSO_OUTX_H_XL         0x29       /* Linear acceleration sensor X-axis output register (r). */
-#define LSM6DSO_OUTY_L_XL         0x2a       /* Linear acceleration sensor Y-axis output register (r). */
-#define LSM6DSO_OUTY_H_XL         0x2b       /* Linear acceleration sensor Y-axis output register (r). */
-#define LSM6DSO_OUTZ_L_XL         0x2c       /* Linear acceleration sensor Z-axis output register (r). */
-#define LSM6DSO_OUTZ_H_XL         0x2d       /* Linear acceleration sensor Z-axis output register (r). */
-#define LSM6DSO_FIFO_STATUS1      0x3a       /* FIFO status control register (r). */
-#define LSM6DSO_FIFO_STATUS2      0x3b       /* FIFO status control register (r). */
-#define LSM6DSO_TIMESTAMP0_REG    0x40       /* Timestamp first (least significant) byte data output register (r). */
-#define LSM6DSO_TIMESTAMP1_REG    0x41       /* Timestamp second byte data output register (r). */
-#define LSM6DSO_TIMESTAMP2_REG    0x42       /* Timestamp third (most significant) byte data output register (r). */
+#define LSM6DSO_OUT_TEMP_L        0x20       /* Temperature data output register (r) */
+#define LSM6DSO_OUT_TEMP_H        0x21       /* Temperature data output register (r) */
+#define LSM6DSO_OUTX_L_G          0x22       /* Angular rate sensor pitch axis (X) angular rate output register (r) */
+#define LSM6DSO_OUTX_H_G          0x23       /* Angular rate sensor pitch axis (X) angular rate output register (r) */
+#define LSM6DSO_OUTY_L_G          0x24       /* Angular rate sensor roll axis (Y) angular rate output register (r) */
+#define LSM6DSO_OUTY_H_G          0x25       /* Angular rate sensor roll axis (Y) angular rate output register (r) */
+#define LSM6DSO_OUTZ_L_G          0x26       /* Angular rate sensor yaw axis (Z) angular rate output register (r) */
+#define LSM6DSO_OUTZ_H_G          0x27       /* Angular rate sensor yaw axis (Z) angular rate output register (r) */
+#define LSM6DSO_OUTX_L_XL         0x28       /* Linear acceleration sensor X-axis output register (r) */
+#define LSM6DSO_OUTX_H_XL         0x29       /* Linear acceleration sensor X-axis output register (r) */
+#define LSM6DSO_OUTY_L_XL         0x2a       /* Linear acceleration sensor Y-axis output register (r) */
+#define LSM6DSO_OUTY_H_XL         0x2b       /* Linear acceleration sensor Y-axis output register (r) */
+#define LSM6DSO_OUTZ_L_XL         0x2c       /* Linear acceleration sensor Z-axis output register (r) */
+#define LSM6DSO_OUTZ_H_XL         0x2d       /* Linear acceleration sensor Z-axis output register (r) */
+#define LSM6DSO_FIFO_STATUS1      0x3a       /* FIFO status control register (r) */
+#define LSM6DSO_FIFO_STATUS2      0x3b       /* FIFO status control register (r) */
+#define LSM6DSO_TIMESTAMP0_REG    0x40       /* Timestamp first (least significant) byte data output register (r) */
+#define LSM6DSO_TIMESTAMP1_REG    0x41       /* Timestamp second byte data output register (r) */
+#define LSM6DSO_TIMESTAMP2_REG    0x42       /* Timestamp third (most significant) byte data output register (r) */
 
 /****************************************************************************
  * Private Types
@@ -513,8 +525,8 @@ typedef struct lsm6dso_fifo_data_out_tag_s lsm6dso_fifo_data_out_tag_t;
 
 union axis3bit16_u
 {
-  int16_t i16bit[3];                /* 16 bit int data. */
-  uint8_t u8bit[6];                 /* 8 bit unsigned int data. */
+  int16_t i16bit[3];                /* 16 bit int data */
+  uint8_t u8bit[6];                 /* 8 bit unsigned int data */
 };
 
 typedef union axis3bit16_u axis3bit16_t;
@@ -580,7 +592,7 @@ static void lsm6dso_spi_write(FAR struct lsm6dso_dev_s *priv,
 /* Lsm6dso handle functions */
 
 static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv);
-static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv);
+static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv, int type);
 static int lsm6dso_reset(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_resetwait(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_seti3c(FAR struct lsm6dso_dev_s *priv, uint8_t value);
@@ -654,6 +666,8 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned int *period_us);
 static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
+static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+                           int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -661,66 +675,75 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
 static void lsm6dso_worker(FAR void *arg);
 
+/* Factory test functions */
+
+static int lsm6dso_factory_readid(FAR struct lsm6dso_dev_s *priv,
+                                  void *arg);
+static int lsm6dso_factory_selftest(FAR struct lsm6dso_dev_s *priv,
+                                    int type, void *arg);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
 static const struct sensor_ops_s g_lsm6dso_xl_ops =
 {
-  .activate = lsm6dso_activate,         /* Enable/disable sensor. */
-  .set_interval = lsm6dso_set_interval, /* Set output data period. */
-  .batch = lsm6dso_batch                /* Set maximum report latency. */
+  .activate = lsm6dso_activate,         /* Enable/disable sensor */
+  .set_interval = lsm6dso_set_interval, /* Set output data period */
+  .batch = lsm6dso_batch,               /* Set maximum report latency */
+  .control = lsm6dso_control            /* Set special config for sensor */
 };
 
 static const struct sensor_ops_s g_lsm6dso_gy_ops =
 {
-  .activate = lsm6dso_activate,         /* Enable/disable sensor. */
-  .set_interval = lsm6dso_set_interval, /* Set output data period. */
-  .batch = lsm6dso_batch                /* Set maximum report latency. */
+  .activate = lsm6dso_activate,         /* Enable/disable sensor */
+  .set_interval = lsm6dso_set_interval, /* Set output data period */
+  .batch = lsm6dso_batch,               /* Set maximum report latency */
+  .control = lsm6dso_control            /* Set special config for sensor */
 };
 
 static const struct lsm6dso_odr_s g_lsm6dso_xl_odr[] =
 {
-  {LSM6DSO_XL_ODR_12p5HZ, 12.5},   /* Sampling interval is 80ms. */
-  {LSM6DSO_XL_ODR_26HZ,   26},     /* Sampling interval is about 38.462ms. */
-  {LSM6DSO_XL_ODR_52HZ,   52},     /* Sampling interval is about 19.231ms. */
-  {LSM6DSO_XL_ODR_104HZ,  104},    /* Sampling interval is about 9.616ms. */
-  {LSM6DSO_XL_ODR_208HZ,  208},    /* Sampling interval is about 4.808ms. */
-  {LSM6DSO_XL_ODR_416HZ,  416},    /* Sampling interval is about 2.404ms. */
-  {LSM6DSO_XL_ODR_833HZ,  833},    /* Sampling interval is about 1.201ms. */
+  {LSM6DSO_XL_ODR_12p5HZ, 12.5},   /* Sampling interval is 80ms */
+  {LSM6DSO_XL_ODR_26HZ,   26},     /* Sampling interval is about 38.462ms */
+  {LSM6DSO_XL_ODR_52HZ,   52},     /* Sampling interval is about 19.231ms */
+  {LSM6DSO_XL_ODR_104HZ,  104},    /* Sampling interval is about 9.616ms */
+  {LSM6DSO_XL_ODR_208HZ,  208},    /* Sampling interval is about 4.808ms */
+  {LSM6DSO_XL_ODR_416HZ,  416},    /* Sampling interval is about 2.404ms */
+  {LSM6DSO_XL_ODR_833HZ,  833},    /* Sampling interval is about 1.201ms */
 };
 
 static const struct lsm6dso_odr_s g_lsm6dso_gy_odr[] =
 {
-  {LSM6DSO_GY_ODR_12p5HZ, 12.5},    /* Sampling interval is 80ms. */
-  {LSM6DSO_GY_ODR_26HZ,   26},      /* Sampling interval is about 38.462ms. */
-  {LSM6DSO_GY_ODR_52HZ,   52},      /* Sampling interval is about 19.231ms. */
-  {LSM6DSO_GY_ODR_104HZ,  104},     /* Sampling interval is about 9.616ms. */
-  {LSM6DSO_GY_ODR_208HZ,  208},     /* Sampling interval is about 4.808ms. */
-  {LSM6DSO_GY_ODR_416HZ,  416},     /* Sampling interval is about 2.404ms. */
-  {LSM6DSO_GY_ODR_833HZ,  833},     /* Sampling interval is about 1.201ms. */
+  {LSM6DSO_GY_ODR_12p5HZ, 12.5},    /* Sampling interval is 80ms */
+  {LSM6DSO_GY_ODR_26HZ,   26},      /* Sampling interval is about 38.462ms */
+  {LSM6DSO_GY_ODR_52HZ,   52},      /* Sampling interval is about 19.231ms */
+  {LSM6DSO_GY_ODR_104HZ,  104},     /* Sampling interval is about 9.616ms */
+  {LSM6DSO_GY_ODR_208HZ,  208},     /* Sampling interval is about 4.808ms */
+  {LSM6DSO_GY_ODR_416HZ,  416},     /* Sampling interval is about 2.404ms */
+  {LSM6DSO_GY_ODR_833HZ,  833},     /* Sampling interval is about 1.201ms */
 };
 
 static const struct lsm6dso_bdr_s g_lsm6dso_xl_bdr[] =
 {
-  {LSM6DSO_XL_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms. */
-  {LSM6DSO_XL_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms. */
-  {LSM6DSO_XL_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms. */
-  {LSM6DSO_XL_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms. */
-  {LSM6DSO_XL_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms. */
-  {LSM6DSO_XL_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms. */
-  {LSM6DSO_XL_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms. */
+  {LSM6DSO_XL_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms */
+  {LSM6DSO_XL_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms */
+  {LSM6DSO_XL_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms */
+  {LSM6DSO_XL_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms */
+  {LSM6DSO_XL_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms */
+  {LSM6DSO_XL_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms */
+  {LSM6DSO_XL_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms */
 };
 
 static const struct lsm6dso_bdr_s g_lsm6dso_gy_bdr[] =
 {
-  {LSM6DSO_GY_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms. */
-  {LSM6DSO_GY_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms. */
-  {LSM6DSO_GY_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms. */
-  {LSM6DSO_GY_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms. */
-  {LSM6DSO_GY_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms. */
-  {LSM6DSO_GY_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms. */
-  {LSM6DSO_GY_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms. */
+  {LSM6DSO_GY_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms */
+  {LSM6DSO_GY_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms */
+  {LSM6DSO_GY_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms */
+  {LSM6DSO_GY_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms */
+  {LSM6DSO_GY_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms */
+  {LSM6DSO_GY_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms */
+  {LSM6DSO_GY_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms */
 };
 
 /****************************************************************************
@@ -824,7 +847,7 @@ static void lsm6dso_spi_write(FAR struct lsm6dso_dev_s *priv,
   uint8_t revbuffer[2];
 
   /* Lock the SPI bus so that only one device can access it at the same
-   * time
+   * time.
    */
 
   SPI_LOCK(priv->config->spi, true);
@@ -834,7 +857,7 @@ static void lsm6dso_spi_write(FAR struct lsm6dso_dev_s *priv,
   SPI_SETFREQUENCY(priv->config->spi, priv->config->freq);
   SPI_SETMODE(priv->config->spi, SPIDEV_MODE3);
 
-  /* Set CS to low which selects the LIS3MDL */
+  /* Set CS to low which selects the LIS3MDL. */
 
   SPI_SELECT(priv->config->spi, priv->config->cs, true);
 
@@ -846,11 +869,11 @@ static void lsm6dso_spi_write(FAR struct lsm6dso_dev_s *priv,
   sendbuffer[1] = *value;
   SPI_EXCHANGE(priv->config->spi, sendbuffer, revbuffer, 2);
 
-  /* Set CS to high which deselects the LIS3MDL */
+  /* Set CS to high which deselects the LIS3MDL. */
 
   SPI_SELECT(priv->config->spi, priv->config->cs, false);
 
-  /* Unlock the SPI bus */
+  /* Unlock the SPI bus. */
 
   SPI_LOCK(priv->config->spi, false);
 }
@@ -904,15 +927,15 @@ static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv)
  *   priv  - Device struct.
  *
  * Returned Value:
- *   Return 0 if the driver was success; A negated errno
- *   value is returned on any failure.
+ *   Return LSM6DSO_ST_PASS if the selftest was success;
+ *   Return LSM6DSO_ST_FAIL if the selftest was failed.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
+static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv, int type)
 {
   struct sensor_event_accel temp_xl;
   struct sensor_event_gyro temp_gy;
@@ -924,17 +947,6 @@ static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
   uint8_t drdy;
   uint8_t i;
   uint8_t j;
-
-  /* Accelerometer Self Test. */
-
-  /* Set Output Data Rate. */
-
-  lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_52HZ);
-
-  /* Set full scale. */
-
-  lsm6dso_xl_setfullscale(priv, LSM6DSO_4G);
-  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_4G_FACTOR;
 
   /* Ensure these registers set to zero. */
 
@@ -948,30 +960,22 @@ static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
   lsm6dso_spi_write(priv, LSM6DSO_CTRL9_XL, &valuezero);
   lsm6dso_spi_write(priv, LSM6DSO_CTRL10_C, &valuezero);
 
-  /* Wait stable output */
-
-  up_mdelay(LSM6DSO_SET_DELAY);               /* 100ms */
-
-  /* Check if new value available */
-
-  do
+  if (type == SENSOR_TYPE_ACCELEROMETER)        /* Accelerometer Self Test */
     {
-      up_mdelay(LSM6DSO_READ_DELAY);
-      lsm6dso_xl_isready(priv, &drdy);
-    }
-  while (!drdy);
+      /* Set Output Data Rate. */
 
-  /* Read dummy data and discard it */
+      lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_52HZ);
 
-  lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+      /* Set full scale. */
 
-  /* Read 5 sample and get the average vale for each axis */
+      lsm6dso_xl_setfullscale(priv, LSM6DSO_4G);
+      priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_4G_FACTOR;
 
-  memset(val_st_off, 0x00, sizeof(val_st_off));
+      /* Wait stable output. */
 
-  for (i = 0; i < 5; i++)
-    {
-      /* Check if new value available */
+      up_mdelay(LSM6DSO_SET_DELAY);             /* 100ms */
+
+      /* Check if new value available. */
 
       do
         {
@@ -980,54 +984,54 @@ static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
         }
       while (!drdy);
 
-      /* Read data and accumulate the mg value */
+      /* Read dummy data and discard it. */
 
       lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
 
-      val_st_off[0] = val_st_off[0] + temp_xl.x;
-      val_st_off[1] = val_st_off[1] + temp_xl.y;
-      val_st_off[2] = val_st_off[2] + temp_xl.z;
+      /* Read 5 sample and get the average vale for each axis. */
 
-      sninfo("acceleration x normal data --->: %d:%f mg\n", i, temp_xl.x);
-      sninfo("acceleration y normal data --->: %d:%f mg\n", i, temp_xl.y);
-      sninfo("acceleration z normal data --->: %d:%f mg\n", i, temp_xl.z);
-    }
+      memset(val_st_off, 0x00, sizeof(val_st_off));
 
-  /* Calculate the mg average values */
+      for (i = 0; i < 5; i++)
+        {
+          /* Check if new value available. */
 
-  for (i = 0; i < 3; i++)
-    {
-      val_st_off[i] = val_st_off[i] / 5.0f;
-    }
+          do
+            {
+              up_mdelay(LSM6DSO_READ_DELAY);
+              lsm6dso_xl_isready(priv, &drdy);
+            }
+          while (!drdy);
 
-  /* Enable Self Test positive (or negative) */
+          /* Read data and accumulate the mg value. */
 
-  lsm6dso_xl_setselftest(priv, LSM6DSO_POSIGN_MODE);
+          lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
 
-  /* Wait stable output */
+          val_st_off[0] = val_st_off[0] + temp_xl.x;
+          val_st_off[1] = val_st_off[1] + temp_xl.y;
+          val_st_off[2] = val_st_off[2] + temp_xl.z;
 
-  up_mdelay(LSM6DSO_SET_DELAY);         /* 100ms */
+          sninfo("accel x normal data ->: %d:%f mg\n", i, temp_xl.x);
+          sninfo("accel y normal data ->: %d:%f mg\n", i, temp_xl.y);
+          sninfo("accel z normal data ->: %d:%f mg\n", i, temp_xl.z);
+        }
 
-  /* Check if new value available */
+      /* Calculate the mg average values. */
 
-  do
-    {
-      up_mdelay(LSM6DSO_READ_DELAY);
-      lsm6dso_xl_isready(priv, &drdy);
-    }
-  while (!drdy);
+      for (i = 0; i < 3; i++)
+        {
+          val_st_off[i] = val_st_off[i] / 5.0f;
+        }
 
-  /* Read dummy data and discard it */
+      /* Enable Self Test positive (or negative). */
 
-  lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+      lsm6dso_xl_setselftest(priv, LSM6DSO_POSIGN_MODE);
 
-  /* Read 5 sample and get the average vale for each axis */
+      /* Wait stable output. */
 
-  memset(val_st_on, 0x00, sizeof(val_st_on));
+      up_mdelay(LSM6DSO_SET_DELAY);         /* 100ms */
 
-  for (i = 0; i < 5; i++)
-    {
-      /* Check if new value available */
+      /* Check if new value available. */
 
       do
         {
@@ -1036,94 +1040,94 @@ static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
         }
       while (!drdy);
 
-      /* Read data and accumulate the mg value */
+      /* Read dummy data and discard it. */
 
       lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
 
-      val_st_on[0] = val_st_on[0] + temp_xl.x;
-      val_st_on[1] = val_st_on[1] + temp_xl.y;
-      val_st_on[2] = val_st_on[2] + temp_xl.z;
+      /* Read 5 sample and get the average vale for each axis. */
 
-      sninfo("acceleration x selftest data --->: %d:%f mg\n", i, temp_xl.x);
-      sninfo("acceleration y selftest data --->: %d:%f mg\n", i, temp_xl.y);
-      sninfo("acceleration z selftest data --->: %d:%f mg\n", i, temp_xl.z);
-    }
+      memset(val_st_on, 0x00, sizeof(val_st_on));
 
-  /* Calculate the mg average values */
-
-  for (i = 0; i < 3; i++)
-    {
-      val_st_on[i] = val_st_on[i] / 5.0f;
-    }
-
-  /* Calculate the mg values for self test */
-
-  for (i = 0; i < 3; i++)
-    {
-      test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
-    }
-
-  /* Check self test limit */
-
-  st_result = LSM6DSO_ST_PASS;
-
-  for (i = 0; i < 3; i++)
-    {
-      if ((LSM6DSO_MIN_ST_LIMIT_MG > test_val[i])
-         || (test_val[i] > LSM6DSO_MAX_ST_LIMIT_MG))
+      for (i = 0; i < 5; i++)
         {
-          st_result = LSM6DSO_ST_FAIL;
-          sninfo("acceleration %d LSM6DSO_ST_FAIL : "
-          "min limit:%f  test_val[%d]:%f  max limit:%f\n",
-          i, LSM6DSO_MIN_ST_LIMIT_MG,
-          i, test_val[i], LSM6DSO_MAX_ST_LIMIT_MG);
+          /* Check if new value available. */
+
+          do
+            {
+              up_mdelay(LSM6DSO_READ_DELAY);
+              lsm6dso_xl_isready(priv, &drdy);
+            }
+          while (!drdy);
+
+          /* Read data and accumulate the mg value. */
+
+          lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+
+          val_st_on[0] = val_st_on[0] + temp_xl.x;
+          val_st_on[1] = val_st_on[1] + temp_xl.y;
+          val_st_on[2] = val_st_on[2] + temp_xl.z;
+
+          sninfo("accel x selftest data ->: %d:%f mg\n", i, temp_xl.x);
+          sninfo("accel y selftest data ->: %d:%f mg\n", i, temp_xl.y);
+          sninfo("accel z selftest data ->: %d:%f mg\n", i, temp_xl.z);
         }
+
+      /* Calculate the mg average values. */
+
+      for (i = 0; i < 3; i++)
+        {
+          val_st_on[i] = val_st_on[i] / 5.0f;
+        }
+
+      /* Calculate the mg values for self test. */
+
+      for (i = 0; i < 3; i++)
+        {
+          test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+        }
+
+      /* Check self test limit. */
+
+      st_result = LSM6DSO_ST_PASS;
+
+      for (i = 0; i < 3; i++)
+        {
+          if ((LSM6DSO_MIN_ST_LIMIT_MG > test_val[i])
+            || (test_val[i] > LSM6DSO_MAX_ST_LIMIT_MG))
+            {
+              st_result = LSM6DSO_ST_FAIL;
+              sninfo("acceleration %d LSM6DSO_ST_FAIL : "
+              "min limit:%f  test_val[%d]:%f  max limit:%f\n",
+              i, LSM6DSO_MIN_ST_LIMIT_MG,
+              i, test_val[i], LSM6DSO_MAX_ST_LIMIT_MG);
+            }
+        }
+
+      /* Disable Self Test. */
+
+      lsm6dso_xl_setselftest(priv, LSM6DSO_NORMAL_MODE);
+
+      /* Disable sensor. */
+
+      lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_OFF);
     }
-
-  /* Disable Self Test */
-
-  lsm6dso_xl_setselftest(priv, LSM6DSO_NORMAL_MODE);
-
-  /* Disable sensor. */
-
-  lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_OFF);
-
-  /* Gyroscope Self Test */
-
-  /* Set Output Data Rate */
-
-  lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_208HZ);
-
-  /* Set full scale */
-
-  lsm6dso_gy_setfullscale(priv, LSM6DSO_2000DPS);
-
-  priv->dev[LSM6DSO_GY_IDX].factor = LSM6DSO_2000DPS_FACTOR;
-
-  /* Wait stable output */
-
-  up_mdelay(LSM6DSO_SET_DELAY);         /* 100ms */
-
-  /* Check if new value available */
-
-  do
+  else if (type == SENSOR_TYPE_GYROSCOPE)   /* Gyroscope Self Test */
     {
-      up_mdelay(LSM6DSO_READ_DELAY);
-      lsm6dso_gy_isready(priv, &drdy);
-    }
-  while (!drdy);
+      /* Set Output Data Rate. */
 
-  /* Read dummy data and discard it */
+      lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_208HZ);
 
-  lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+      /* Set full scale. */
 
-  /* Read 5 sample and get the average vale for each axis */
+      lsm6dso_gy_setfullscale(priv, LSM6DSO_2000DPS);
 
-  memset(val_st_off, 0x00, sizeof(val_st_off));
+      priv->dev[LSM6DSO_GY_IDX].factor = LSM6DSO_2000DPS_FACTOR;
 
-  for (i = 0; i < 5; i++)
-    {
-      /* Check if new value available */
+      /* Wait stable output. */
+
+      up_mdelay(LSM6DSO_SET_DELAY);         /* 100ms */
+
+      /* Check if new value available. */
 
       do
         {
@@ -1132,109 +1136,134 @@ static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv)
         }
       while (!drdy);
 
-      /* Read data and accumulate the mdps value */
+      /* Read dummy data and discard it. */
 
       lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
 
-      val_st_off[0] = val_st_off[0] + temp_gy.x;
-      val_st_off[1] = val_st_off[1] + temp_gy.y;
-      val_st_off[2] = val_st_off[2] + temp_gy.z;
+      /* Read 5 sample and get the average vale for each axis. */
 
-      sninfo("angular x normal data --->: %d:%f mdps\n", i, temp_gy.x);
-      sninfo("angular y normal data --->: %d:%f mdps\n", i, temp_gy.y);
-      sninfo("angular z normal data --->: %d:%f mdps\n", i, temp_gy.z);
-    }
+      memset(val_st_off, 0x00, sizeof(val_st_off));
 
-  /* Calculate the mdps average values */
-
-  for (i = 0; i < 3; i++)
-    {
-      val_st_off[i] = val_st_off[i] / 5.0f;
-    }
-
-  /* Enable Self Test positive (or negative) */
-
-  lsm6dso_gy_setselftest(priv, LSM6DSO_POSIGN_MODE);
-
-  /* Wait stable output */
-
-  up_mdelay(LSM6DSO_SET_DELAY);               /* 100ms */
-
-  /* Read 5 sample and get the average vale for each axis */
-
-  memset(val_st_on, 0x00, sizeof(val_st_on));
-
-  for (i = 0; i < 5; i++)
-    {
-      /* Check if new value available */
-
-      do
+      for (i = 0; i < 5; i++)
         {
-          up_mdelay(LSM6DSO_READ_DELAY);
-          lsm6dso_gy_isready(priv, &drdy);
+          /* Check if new value available. */
+
+          do
+            {
+              up_mdelay(LSM6DSO_READ_DELAY);
+              lsm6dso_gy_isready(priv, &drdy);
+            }
+          while (!drdy);
+
+          /* Read data and accumulate the mdps value. */
+
+          lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+
+          val_st_off[0] = val_st_off[0] + temp_gy.x;
+          val_st_off[1] = val_st_off[1] + temp_gy.y;
+          val_st_off[2] = val_st_off[2] + temp_gy.z;
+
+          sninfo("gyro x normal data ->: %d:%f mdps\n", i, temp_gy.x);
+          sninfo("gyro y normal data ->: %d:%f mdps\n", i, temp_gy.y);
+          sninfo("gyro z normal data ->: %d:%f mdps\n", i, temp_gy.z);
         }
-      while (!drdy);
 
-      /* Read data and accumulate the mdps value */
+      /* Calculate the mdps average values. */
 
-      lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
-
-      val_st_on[0] = val_st_on[0] + temp_gy.x;
-      val_st_on[1] = val_st_on[1] + temp_gy.y;
-      val_st_on[2] = val_st_on[2] + temp_gy.z;
-
-      sninfo("acceleration x selftest data--->: %d:%f mdps\n", i, temp_gy.x);
-      sninfo("acceleration y selftest data--->: %d:%f mdps\n", i, temp_gy.y);
-      sninfo("acceleration z selftest data--->: %d:%f mdps\n", i, temp_gy.z);
-    }
-
-  /* Calculate the mdps average values */
-
-  for (i = 0; i < 3; i++)
-    {
-      val_st_on[i] = val_st_on[i] / 5.0f;
-    }
-
-  /* Calculate the mg values for self test */
-
-  for (i = 0; i < 3; i++)
-    {
-      test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
-    }
-
-  /* Check self test limit */
-
-  for (i = 0; i < 3; i++)
-    {
-      if ((LSM6DSO_MIN_ST_LIMIT_MDPS > test_val[i])
-         || (test_val[i] > LSM6DSO_MAX_ST_LIMIT_MDPS))
+      for (i = 0; i < 3; i++)
         {
-          st_result = LSM6DSO_ST_FAIL;
-          sninfo("angular %d LSM6DSO_ST_FAIL : "
-          "min limit:%f  test_val[%d]:%f  max limit:%f\n",
-          i, LSM6DSO_MIN_ST_LIMIT_MDPS, i,
-          test_val[i], LSM6DSO_MAX_ST_LIMIT_MDPS);
+          val_st_off[i] = val_st_off[i] / 5.0f;
         }
-    }
 
-  /* Disable Self Test */
+      /* Enable Self Test positive (or negative). */
 
-  lsm6dso_gy_setselftest(priv, LSM6DSO_NORMAL_MODE);
+      lsm6dso_gy_setselftest(priv, LSM6DSO_POSIGN_MODE);
 
-  /* Disable sensor. */
+      /* Wait stable output. */
 
-  lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_OFF);
+      up_mdelay(LSM6DSO_SET_DELAY);               /* 100ms */
 
-  if (st_result == LSM6DSO_ST_PASS)
-    {
-      sninfo("Self Test - PASS\n");
+      /* Read 5 sample and get the average vale for each axis. */
+
+      memset(val_st_on, 0x00, sizeof(val_st_on));
+
+      for (i = 0; i < 5; i++)
+        {
+          /* Check if new value available. */
+
+          do
+            {
+              up_mdelay(LSM6DSO_READ_DELAY);
+              lsm6dso_gy_isready(priv, &drdy);
+            }
+          while (!drdy);
+
+          /* Read data and accumulate the mdps value. */
+
+          lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+
+          val_st_on[0] = val_st_on[0] + temp_gy.x;
+          val_st_on[1] = val_st_on[1] + temp_gy.y;
+          val_st_on[2] = val_st_on[2] + temp_gy.z;
+
+          sninfo("gyro x selftest data ->: %d:%f mdps\n", i, temp_gy.x);
+          sninfo("gyro y selftest data ->: %d:%f mdps\n", i, temp_gy.y);
+          sninfo("gyro z selftest data ->: %d:%f mdps\n", i, temp_gy.z);
+        }
+
+      /* Calculate the mdps average values. */
+
+      for (i = 0; i < 3; i++)
+        {
+          val_st_on[i] = val_st_on[i] / 5.0f;
+        }
+
+      /* Calculate the mg values for self test. */
+
+      for (i = 0; i < 3; i++)
+        {
+          test_val[i] = fabs((val_st_on[i] - val_st_off[i]));
+        }
+
+      /* Check self test limit. */
+
+      for (i = 0; i < 3; i++)
+        {
+          if ((LSM6DSO_MIN_ST_LIMIT_MDPS > test_val[i])
+            || (test_val[i] > LSM6DSO_MAX_ST_LIMIT_MDPS))
+            {
+              st_result = LSM6DSO_ST_FAIL;
+              sninfo("angular %d LSM6DSO_ST_FAIL : "
+              "min limit:%f  test_val[%d]:%f  max limit:%f\n",
+              i, LSM6DSO_MIN_ST_LIMIT_MDPS, i,
+              test_val[i], LSM6DSO_MAX_ST_LIMIT_MDPS);
+            }
+        }
+
+      /* Disable Self Test. */
+
+      lsm6dso_gy_setselftest(priv, LSM6DSO_NORMAL_MODE);
+
+      /* Disable sensor. */
+
+      lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_OFF);
+
+      if (st_result == LSM6DSO_ST_PASS)
+        {
+          sninfo("Self Test - PASS\n");
+        }
+      else
+        {
+          sninfo("Self Test - FAIL\n");
+        }
     }
   else
     {
-      sninfo("Self Test - FAIL\n");
+      snerr("Failed to match sensor type.\n");
+      return -EINVAL;
     }
 
-  return OK;
+  return st_result;
 }
 
 /****************************************************************************
@@ -1562,7 +1591,8 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
        */
 
       lsm6dso_xl_setfullscale(priv, LSM6DSO_2G);
-      priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR;
+      priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
+                                       * LSM6DSO_MG2G_FACTOR;
 
       /* Configure filtering chain(No aux interface)
        * Accelerometer - LPF1 + LPF2 path.
@@ -1906,7 +1936,8 @@ static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
        */
 
       lsm6dso_gy_setfullscale(priv, LSM6DSO_2000DPS);
-      priv->dev[LSM6DSO_GY_IDX].factor = LSM6DSO_2000DPS_FACTOR;
+      priv->dev[LSM6DSO_GY_IDX].factor = LSM6DSO_2000DPS_FACTOR
+                                       * LSM6DSO_MDPS2DPS_FACTOR;
 
       /* Set interrupt for gyroscope. */
 
@@ -2224,7 +2255,7 @@ static int lsm6dso_fifo_findbdr(FAR struct lsm6dso_sensor_s *sensor)
 
       return num - 1;
     }
-  else if(sensor->lower.type == SENSOR_TYPE_GYROSCOPE)
+  else if (sensor->lower.type == SENSOR_TYPE_GYROSCOPE)
     {
       num = sizeof(g_lsm6dso_gy_bdr) / sizeof(struct lsm6dso_bdr_s);
       freq = LSM6DSO_UNIT_TIME / sensor->interval;
@@ -2364,6 +2395,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
   unsigned int counter_gy = 0;
   unsigned int num;
   int ret;
+  int i;
   uint8_t reg_tag;
 
   memset(temp_xl, 0x00, sizeof(temp_xl));
@@ -2383,33 +2415,25 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
       lsm6dso_fifo_gettag(priv, &reg_tag);
       switch (reg_tag)
         {
-          case LSM6DSO_XL_NC_TAG:    /* Accelerator data tag. */
+          case LSM6DSO_XL_NC_TAG:    /* Accelerator data tag */
             {
               lsm6dso_xl_getdata(priv,
                                  LSM6DSO_FIFO_DATA_OUT_X_L,
                                  &temp_xl[counter_xl]);
-              temp_xl[counter_xl].timestamp
-                            = priv->timestamp
-                            + priv->dev[LSM6DSO_XL_IDX].interval
-                            * counter_xl;
               counter_xl++;
             }
             break;
 
-          case LSM6DSO_GYRO_NC_TAG:  /* Gyroscope data tag. */
+          case LSM6DSO_GYRO_NC_TAG:  /* Gyroscope data tag */
             {
               lsm6dso_gy_getdata(priv,
                                  LSM6DSO_FIFO_DATA_OUT_X_L,
                                  &temp_gy[counter_gy]);
-              temp_gy[counter_gy].timestamp
-                            = priv->timestamp
-                            + priv->dev[LSM6DSO_GY_IDX].interval
-                            * counter_xl;
               counter_gy++;
             }
             break;
 
-          default:                   /* Other data tag. */
+          default:                   /* Other data tag */
             {
               lsm6dso_fifo_flushdata(priv);
             }
@@ -2420,6 +2444,18 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
 
     if (counter_xl)
       {
+        /* Inferred data timestamp. */
+
+        for (i = 0; i < counter_xl; i++)
+          {
+            temp_xl[i].timestamp
+              = priv->timestamp
+              - priv->dev[LSM6DSO_XL_IDX].interval
+              * (counter_xl - i - 1);
+          }
+
+        /* Push data to the upper layer. */
+
         priv->dev[LSM6DSO_XL_IDX].lower.push_event(
               priv->dev[LSM6DSO_XL_IDX].lower.priv,
               temp_xl,
@@ -2428,10 +2464,22 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
 
     if (counter_gy)
       {
-        priv->dev[LSM6DSO_XL_IDX].lower.push_event(
-              priv->dev[LSM6DSO_XL_IDX].lower.priv,
+        /* Inferred data timestamp. */
+
+        for (i = 0; i < counter_gy; i++)
+          {
+            temp_gy[i].timestamp
+              = priv->timestamp
+              - priv->dev[LSM6DSO_GY_IDX].interval
+              * (counter_gy - i - 1);
+          }
+
+        /* Push data to the upper layer. */
+
+        priv->dev[LSM6DSO_GY_IDX].lower.push_event(
+              priv->dev[LSM6DSO_GY_IDX].lower.priv,
               temp_gy,
-              sizeof(struct sensor_event_accel) * counter_gy);
+              sizeof(struct sensor_event_gyro) * counter_gy);
       }
 
   return ret;
@@ -2466,7 +2514,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
   uint32_t max_latency;
   int idx;
 
-  /* Sanity check */
+  /* Sanity check. */
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
@@ -2489,7 +2537,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
     {
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
     }
-  else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
     }
@@ -2513,7 +2561,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
         {
           lsm6dso_fifo_xl_setbatch(priv, g_lsm6dso_xl_bdr[idx].regval);
         }
-      else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+      else if (lower->type == SENSOR_TYPE_GYROSCOPE)
         {
           lsm6dso_fifo_gy_setbatch(priv, g_lsm6dso_gy_bdr[idx].regval);
         }
@@ -2601,7 +2649,7 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
   int ret;
   int idx;
 
-  /* Sanity check */
+  /* Sanity check. */
 
   DEBUGASSERT(sensor != NULL && period_us != NULL);
 
@@ -2624,7 +2672,7 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
       *period_us = LSM6DSO_UNIT_TIME / freq;
       priv->dev[LSM6DSO_XL_IDX].interval = *period_us;
     }
-  else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
 
@@ -2703,7 +2751,7 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
           sensor->activated = enable;
         }
     }
-  else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
     {
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
       if (sensor->activated != enable)
@@ -2744,6 +2792,87 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 }
 
+/****************************************************************************
+ * Name: lsm6dso_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   cmd        - The special cmd for sensor.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *   -EINVAL    - Failed to match sensor type.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+                           int cmd, unsigned long arg)
+{
+  FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
+  FAR struct lsm6dso_dev_s * priv;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  if (lower->type == SENSOR_TYPE_ACCELEROMETER)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
+    }
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
+    }
+  else
+    {
+      snerr("Failed to match sensor type.\n");
+      return -EINVAL;
+    }
+
+  /* Process ioctl commands. */
+
+  switch (cmd)
+    {
+      case LSM6DSO_ID_CMD:    /* Read device ID cmd tag */
+        {
+          ret = lsm6dso_factory_readid(priv, arg);
+          if (ret < 0)
+            {
+              snerr("ERROR: Failed to get DeviceID: %d\n", ret);
+            }
+        }
+        break;
+
+      case LSM6DSO_ST_CMD:    /* Start selftest cmd tag */
+        {
+          ret = lsm6dso_factory_selftest(priv, lower->type, arg);
+          if (ret < 0)
+            {
+              snerr("ERROR: Failed to selftest: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                /* Other cmd tag */
+        {
+          ret = -ENOTTY;
+          snerr("ERROR: The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+    return ret;
+}
+
 /* Sensor interrupt functions */
 
 /****************************************************************************
@@ -2778,7 +2907,7 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   DEBUGASSERT(priv != NULL);
 
-  /* Get the timestamp */
+  /* Get the timestamp. */
 
   priv->timestamp = sensor_get_timestamp();
 
@@ -2820,7 +2949,7 @@ static void lsm6dso_worker(FAR void *arg)
   struct sensor_event_gyro temp_gy;
   uint8_t drdy;
 
-  /* Sanity check */
+  /* Sanity check. */
 
   DEBUGASSERT(priv != NULL);
 
@@ -2837,17 +2966,17 @@ static void lsm6dso_worker(FAR void *arg)
     }
   else
     {
-      /* Check if new value available */
+      /* Check if new value available. */
 
       lsm6dso_xl_isready(priv, &drdy);
       if (drdy)
         {
-          /* Read out the latest sensor data */
+          /* Read out the latest sensor data. */
 
           lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
           temp_xl.timestamp = priv->timestamp;
 
-          /* push data to upper half driver */
+          /* push data to upper half driver. */
 
           priv->dev[LSM6DSO_XL_IDX].lower.push_event(
                 priv->dev[LSM6DSO_XL_IDX].lower.priv,
@@ -2855,17 +2984,17 @@ static void lsm6dso_worker(FAR void *arg)
                 sizeof(struct sensor_event_accel));
         }
 
-      /* Check if new value available */
+      /* Check if new value available. */
 
       lsm6dso_gy_isready(priv, &drdy);
       if (drdy)
         {
-          /* Read out the latest sensor data */
+          /* Read out the latest sensor data. */
 
           lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
           temp_gy.timestamp = priv->timestamp;
 
-          /* push data to upper half driver */
+          /* push data to upper half driver. */
 
           priv->dev[LSM6DSO_GY_IDX].lower.push_event(
                 priv->dev[LSM6DSO_GY_IDX].lower.priv,
@@ -2873,6 +3002,98 @@ static void lsm6dso_worker(FAR void *arg)
                 sizeof(struct sensor_event_gyro));
         }
     }
+}
+
+/* Factory test functions */
+
+/****************************************************************************
+ * Name: lsm6dso_factory_readid
+ *
+ * Description:
+ *   Read device ID in factory test.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   arg   - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_factory_readid(FAR struct lsm6dso_dev_s *priv, void *arg)
+{
+  bool *buffer = arg;
+  int ret;
+
+  /* Sanity check. */
+
+  DEBUGASSERT(arg != NULL);
+
+  /* Read device ID. */
+
+  ret = lsm6dso_readdevid(priv);
+  if (ret >= 0)
+    {
+      *buffer = LSM6DSO_FT_SUCCESS;  /* Read device ID success */
+    }
+  else
+    {
+      *buffer = LSM6DSO_FT_FAILED;   /* Read device ID failed */
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_factory_selftest
+ *
+ * Description:
+ *   Start selftest in factory test.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   type  - Sensor type.
+ *   arg   - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_factory_selftest(FAR struct lsm6dso_dev_s *priv,
+                                    int type, void *arg)
+{
+  bool *buffer = arg;
+  int ret;
+
+  /* Sanity check. */
+
+  DEBUGASSERT(arg != NULL);
+
+  /* Run selftest. */
+
+  ret = lsm6dso_selftest(priv, type);
+  if (ret == LSM6DSO_ST_PASS)
+    {
+      *buffer = LSM6DSO_FT_SUCCESS;     /* Selftest success */
+    }
+  else if (ret == LSM6DSO_ST_FAIL)
+    {
+      *buffer = LSM6DSO_FT_FAILED;      /* Selftest failed */
+    }
+  else
+    {
+      return ret;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -2902,14 +3123,14 @@ static void lsm6dso_worker(FAR void *arg)
 int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
 {
   FAR struct lsm6dso_dev_s *priv;
-  int ioephanle;
+  void *ioephandle;
   int ret;
 
-  /* Sanity check */
+  /* Sanity check. */
 
   DEBUGASSERT(config != NULL);
 
-  /* Initialize the LSM6DSO device structure */
+  /* Initialize the LSM6DSO device structure. */
 
   priv = kmm_zalloc(sizeof(*priv));
   if (priv == NULL)
@@ -2936,11 +3157,11 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_GY_IDX].lower.batch_number
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
-  /* Wait sensor boot time */
+  /* Wait sensor boot time. */
 
   up_mdelay(LSM6DSO_WAITBOOT_TIME);
 
-  /* Read the deviceID */
+  /* Read the deviceID. */
 
   ret = lsm6dso_readdevid(priv);
   if (ret < 0)
@@ -2949,20 +3170,20 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
       goto err;
     }
 
-  /* Reset devices */
+  /* Reset devices. */
 
   lsm6dso_reset(priv);
   lsm6dso_resetwait(priv);
 
-  /* Disable I3C interface */
+  /* Disable I3C interface. */
 
   lsm6dso_seti3c(priv, LSM6DSO_I3C_DISABLE);
 
-  /* Enable Block Data Update */
+  /* Enable Block Data Update. */
 
   lsm6dso_setupdate(priv, LSM6DSO_BDU_UNTILREAD);
 
-  /* Interrupt register */
+  /* Interrupt register. */
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->pin,
                            IOEXPANDER_DIRECTION_IN_PULLDOWN);
@@ -2972,12 +3193,12 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
       goto err;
     }
 
-  ioephanle = IOEP_ATTACH(priv->config->ioedev, (1 << priv->config->pin),
+  ioephandle = IOEP_ATTACH(priv->config->ioedev, (1 << priv->config->pin),
                           lsm6dso_interrupt_handler, priv);
-  if (ioephanle == 0)
+  if (ioephandle == NULL)
     {
-      snerr("Failed to attach: %d\n", ret);
       ret = -EIO;
+      snerr("Failed to attach: %d\n", ret);
       goto err;
     }
 
@@ -2990,12 +3211,13 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
       goto err;
     }
 
-  /* Register the character driver */
+  /* Register the character driver. */
 
   ret = sensor_register((&(priv->dev[LSM6DSO_XL_IDX].lower)), devno);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
+      IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
       sensor_unregister((&(priv->dev[LSM6DSO_XL_IDX].lower)), devno);
       goto err;
     }
@@ -3004,6 +3226,7 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
+      IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
       sensor_unregister((&(priv->dev[LSM6DSO_GY_IDX].lower)), devno);
       goto err;
     }
