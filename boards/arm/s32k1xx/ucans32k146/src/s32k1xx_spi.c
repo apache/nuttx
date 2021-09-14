@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/s32k1xx_spi.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_spi.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,7 +38,7 @@
 #include "s32k1xx_config.h"
 #include "s32k1xx_lpspi.h"
 #include "s32k1xx_pin.h"
-#include "rddrone-uavcan146.h"
+#include "ucans32k146.h"
 
 #if defined(CONFIG_S32K1XX_LPSPI0) || defined(CONFIG_S32K1XX_LPSPI1) || \
     defined(CONFIG_S32K1XX_LPSPI2)
@@ -51,8 +51,7 @@
  * Name: s32k1xx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the RDDRONE-UAVCAN146
- *   board.
+ *   Called to configure SPI chip select GPIO pins for the UCANS32K146 board.
  *
  ****************************************************************************/
 

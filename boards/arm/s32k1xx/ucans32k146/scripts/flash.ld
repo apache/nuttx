@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/scripts/sram.ld
+ * boards/arm/s32k1xx/ucans32k146/scripts/flash.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,20 +31,32 @@
 
 MEMORY
 {
-  flash (rx)  : ORIGIN = 0x00000000, LENGTH = 1M
+  vflash (rx) : ORIGIN = 0x00000000, LENGTH = 1K
+  pflash (rx) : ORIGIN = 0x00000400, LENGTH = 16
+  dflash (rx) : ORIGIN = 0x00000410, LENGTH = 1023K-16
   sram  (rwx) : ORIGIN = 0x1fff0000, LENGTH = 124K
 }
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
+EXTERN(g_flashcfg)
 ENTRY(_stext)
 
 SECTIONS
 {
-  .text :
+  .vectors :
   {
     _stext = ABSOLUTE(.);
     *(.vectors)
+  } > vflash
+
+  .flashcfg :
+  {
+    *(.flashcfg)
+  } > pflash
+
+  .text :
+  {
     *(.text .text.*)
     *(.fixup)
     *(.gnu.warning)
@@ -56,26 +68,26 @@ SECTIONS
     *(.gcc_except_table)
     *(.gnu.linkonce.r.*)
     _etext = ABSOLUTE(.);
-  } > sram
+  } > dflash
 
   .init_section :
   {
     _sinit = ABSOLUTE(.);
     KEEP(*(.init_array .init_array.*))
     _einit = ABSOLUTE(.);
-  } > sram
+  } > dflash
 
   .ARM.extab :
   {
     *(.ARM.extab*)
-  } >sram
+  } >dflash
 
   .ARM.exidx :
   {
     __exidx_start = ABSOLUTE(.);
     *(.ARM.exidx*)
     __exidx_end = ABSOLUTE(.);
-  } >sram
+  } >dflash
 
   .data :
   {
@@ -85,7 +97,18 @@ SECTIONS
     CONSTRUCTORS
     . = ALIGN(4);
     _edata = ABSOLUTE(.);
-  } > sram
+  } > sram AT > dflash
+
+  _eronly = LOADADDR(.data);
+
+  .ramfunc ALIGN(4):
+  {
+    _sramfuncs = ABSOLUTE(.);
+    *(.ramfunc  .ramfunc.*)
+    _eramfuncs = ABSOLUTE(.);
+  } > sram AT > dflash
+
+  _framfuncs = LOADADDR(.ramfunc);
 
   .bss :
   {

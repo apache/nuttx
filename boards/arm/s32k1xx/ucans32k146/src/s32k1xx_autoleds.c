@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/s32k1xx_autoleds.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* The RDDRONE-UAVCAN146 has one RGB LED:
+/* The UCANS32K146 has one RGB LED:
  *
  *   RedLED   PTD15 (FTM0 CH0)
  *   GreenLED PTD16 (FTM0 CH1)
@@ -61,7 +61,7 @@
 #include "arm_internal.h"
 
 #include "s32k1xx_pin.h"
-#include "rddrone-uavcan146.h"
+#include "ucans32k146.h"
 
 #include <arch/board/board.h>
 

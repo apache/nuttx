@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/include/board.h
+ * boards/arm/s32k1xx/ucans32k146/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_RDDRONE_UAVCAN146_INCLUDE_BOARD_H
-#define __BOARDS_ARM_RDDRONE_UAVCAN146_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_S32K1XX_UCANS32K146_INCLUDE_BOARD_H
+#define __BOARDS_ARM_S32K1XX_UCANS32K146_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -38,7 +38,7 @@
 
 /* Clocking *****************************************************************/
 
-/* The RDDRONE-UAVCAN146 is fitted with a 8MHz Crystal */
+/* The UCANS32K146 is fitted with a 8MHz Crystal */
 
 #define BOARD_XTAL_FREQUENCY 8000000
 
@@ -46,7 +46,7 @@
 
 /* LED definitions **********************************************************/
 
-/* The RDDRONE-UAVCAN146 has one RGB LED:
+/* The UCANS32K146 has one RGB LED:
  *
  *   RedLED   PTD15 (FTM0 CH0)
  *   GreenLED PTD16 (FTM0 CH1)
@@ -80,7 +80,7 @@
 #define BOARD_REVISION_DETECT_PIN  (GPIO_INPUT | PIN_PORTA | PIN10 )
 
 /* If CONFIG_ARCH_LEDs is defined, then NuttX will control the LEDs on board
- * the RDDRONE-UAVCAN146.  The following definitions describe how NuttX
+ * the UCANS32K146.  The following definitions describe how NuttX
  * controls the LEDs:
  *
  *   SYMBOL                Meaning                      LED state
@@ -96,11 +96,11 @@
 #define LED_SIGNAL        0 /* In a signal handler      (no change)       */
 #define LED_ASSERTION     0 /* An assertion failed      (no change)       */
 #define LED_PANIC         4 /* The system has crashed    FLASH OFF    OFF */
-#undef  LED_IDLE            /* RDDRONE-UAVCAN146 in sleep mode (Not used) */
+#undef  LED_IDLE            /* UCANS32K146 in sleep mode (Not used) */
 
 /* Button definitions *******************************************************/
 
-/* The RDDRONE-UAVCAN146 supports two buttons:
+/* The UCANS32K146 supports two buttons:
  *
  *   SW2  PTC12
  *   SW3  PTC13
@@ -149,4 +149,4 @@
 #define PIN_CAN1_RX      PIN_CAN1_RX_1      /* PTA12 */
 #define PIN_CAN1_STB     (GPIO_OUTPUT | PIN_PORTE | PIN10 )
 
-#endif  /* __BOARDS_ARM_RDDRONE_UAVCAN146_INCLUDE_BOARD_H */
+#endif  /* __BOARDS_ARM_S32K1XX_UCANS32K146_INCLUDE_BOARD_H */

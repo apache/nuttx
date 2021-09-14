@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/s32k1xx/rddrone-uavcan146/src/Makefile
+# boards/arm/s32k1xx/ucans32k146/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with

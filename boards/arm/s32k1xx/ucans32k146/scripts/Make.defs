@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/s32k1xx/rddrone-uavcan146/scripts/Make.defs
+# boards/arm/s32k1xx/ucans32k146/scripts/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
