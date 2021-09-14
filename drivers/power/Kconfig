@@ -383,6 +383,15 @@ config SC8551
 	---help---
 		The SC8551 are battery charger for lithium-ion batteries.
 
+config STWLC38
+	bool "STWLC38 Battery charger support"
+	default n
+	select I2C
+	select I2C_STWLC38
+	depends on BATTERY_CHARGER
+	---help---
+		The STWLC38 are wireless rx for power supply.
+
 config MCP73871
 	bool "Microchip MCP73871 Battery charger support"
 	default n
@@ -419,6 +428,16 @@ config DEBUG_SC8551
 		Enable SC8551 battery management debug features.
 
 endif # SC8551
+
+if STWLC38
+
+config DEBUG_STWLC38
+	bool "STWLC38 Debug Features"
+	default n
+	---help---
+		Enable STWLC38 wireless rx debug features.
+
+endif # STWLC38
 
 config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
@@ -481,6 +500,10 @@ config I2C_BQ25618
 config I2C_SC8551
 	bool
 	default y if SC8551
+
+config I2C_STWLC38
+	bool
+	default y if STWLC38
 
 config I2C_MAX1704X
 	bool
