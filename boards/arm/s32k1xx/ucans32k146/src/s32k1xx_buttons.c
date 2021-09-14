@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/s32k1xx_buttons.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* The RDDRONE-UAVCAN146 supports one button:
+/* The UCANS32K146 supports one button:
  *
  *   SW3  PTC14
  */
@@ -36,7 +36,7 @@
 #include <nuttx/board.h>
 
 #include "s32k1xx_pin.h"
-#include "rddrone-uavcan146.h"
+#include "ucans32k146.h"
 
 #include <arch/board/board.h>
 

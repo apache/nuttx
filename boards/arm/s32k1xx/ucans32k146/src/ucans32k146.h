@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/rddrone-uavcan146.h
+ * boards/arm/s32k1xx/ucans32k146/src/ucans32k146.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_S32K1XX_RDDRONE_UAVCAN146_SRC_RDDRONE_UAVCAN146_H
-#define __BOARDS_ARM_S32K1XX_RDDRONE_UAVCAN146_SRC_RDDRONE_UAVCAN146_H
+#ifndef __BOARDS_ARM_S32K1XX_UCANS32K146_SRC_UCANS32K146_H
+#define __BOARDS_ARM_S32K1XX_UCANS32K146_SRC_UCANS32K146_H
 
 /****************************************************************************
  * Included Files
@@ -39,9 +39,9 @@
 
 /* Configuration ************************************************************/
 
-/* RDDRONE-UAVCAN146 GPIOs **************************************************/
+/* UCANS32K146 GPIOs ********************************************************/
 
-/* LEDs.  The RDDRONE-UAVCAN146 has one RGB LED:
+/* LEDs.  The UCANS32K146 has one RGB LED:
  *
  *   RedLED   PTD15 (FTM0 CH0)
  *   GreenLED PTD16 (FTM0 CH1)
@@ -54,7 +54,7 @@
 #define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
 #define GPIO_LED_B     (PIN_PTD0  | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
 
-/* Buttons.  The RDDRONE-UAVCAN146 supports one button:
+/* Buttons.  The UCANS32K146 supports one button:
  *
  *   SW3  PTC14
  */
@@ -109,8 +109,7 @@ int s32k1xx_bringup(void);
  * Name: s32k1xx_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the RDDRONE-UAVCAN146
- *   board.
+ *   Called to configure SPI chip select GPIO pins for the UCANS32K146 board.
  *
  ****************************************************************************/
 
@@ -119,4 +118,4 @@ void s32k1xx_spidev_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_S32K1XX_RDDRONE_UAVCAN146_SRC_RDDRONE_UAVCAN146_H */
+#endif /* __BOARDS_ARM_S32K1XX_UCANS32K146_SRC_UCANS32K146_H */

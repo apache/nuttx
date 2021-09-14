@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/s32k1xx_appinit.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,7 +26,7 @@
 
 #include <nuttx/board.h>
 
-#include "rddrone-uavcan146.h"
+#include "ucans32k146.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/rddrone-uavcan146/src/s32k1xx_boot.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,55 +24,79 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
+#include <stdbool.h>
 #include <debug.h>
 
 #include <nuttx/board.h>
 
-#include "rddrone-uavcan146.h"
+#include "arm_arch.h"
+#include "arm_internal.h"
+
+#include "s32k1xx_pin.h"
+#include "ucans32k146.h"
+
+#include <arch/board/board.h>
+
+#ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k1xx_board_initialize
- *
- * Description:
- *   All S32K1XX architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
- *
+ * Name: board_userled_initialize
  ****************************************************************************/
 
-void s32k1xx_board_initialize(void)
+uint32_t board_userled_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Configure LED GPIOs for output */
 
-  board_autoled_initialize();
-#endif
+  s32k1xx_pinconfig(GPIO_LED_R);
+  s32k1xx_pinconfig(GPIO_LED_G);
+  s32k1xx_pinconfig(GPIO_LED_B);
+  return BOARD_NLEDS;
 }
 
 /****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
+ * Name: board_userled
  ****************************************************************************/
 
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
+void board_userled(int led, bool ledon)
 {
-  /* Perform board-specific initialization */
+  uint32_t ledcfg;
 
-  s32k1xx_bringup();
+  if (led == BOARD_LED_R)
+    {
+      ledcfg = GPIO_LED_R;
+    }
+  else if (led == BOARD_LED_G)
+    {
+      ledcfg = GPIO_LED_G;
+    }
+  else if (led == BOARD_LED_B)
+    {
+      ledcfg = GPIO_LED_B;
+    }
+  else
+    {
+      return;
+    }
+
+  s32k1xx_gpiowrite(ledcfg, ledon); /* High illuminates */
 }
-#endif
+
+/****************************************************************************
+ * Name: board_userled_all
+ ****************************************************************************/
+
+void board_userled_all(uint32_t ledset)
+{
+  /* Low illuminates */
+
+  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
+  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
+  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);
+}
+
+#endif /* !CONFIG_ARCH_LEDS */

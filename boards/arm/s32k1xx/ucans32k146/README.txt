@@ -1,7 +1,7 @@
 README
 ======
 
-This directory holds the port to the NXP RDDRONE-UAVCAN board with S32K146 MCU.
+This directory holds the port to the NXP UCANS32K board with S32K146 MCU.
 
 Contents
 ========
