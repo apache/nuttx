@@ -63,6 +63,7 @@
 
 /* Regulator Status and Control Register */
 
+#define PMC_REGSC_BIASEN            (1 << 0)  /* Bit 0:  Bias Enable Bit */
 #define PMC_REGSC_CLKBIASDIS        (1 << 1)  /* Bit 1:  Clock Bias Disable Bit */
 #define PMC_REGSC_REGFPM            (1 << 2)  /* Bit 2:  Regulator in Full Performance Mode Status Bit */
 #define PMC_REGSC_LPOSTAT           (1 << 6)  /* Bit 6:  LPO Status Bit */
