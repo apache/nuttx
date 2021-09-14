@@ -88,6 +88,7 @@ struct spi_bitbang_s
   uint32_t         holdtime;               /* SCK hold time to achieve requested frequency */
   bitexchange_t    exchange;               /* The select bit exchange function */
   mutex_t          lock;                   /* Supports mutually exclusive access to SPI */
+  FAR void        *priv;                   /* Private data for instance specific */
 #ifdef CONFIG_SPI_BITBANG_VARWIDTH
   uint8_t          nbits;                  /* Number of bits in the transfer */
 #endif
@@ -118,6 +119,7 @@ extern "C"
  *
  * Input Parameters:
  *   low - Low-level, platform specific device operations.
+ *   low_priv - Low-level private data, platform specific data.
  *
  * Returned Value:
  *   On success a non-NULL, initialized SPI driver instance is returned.
@@ -125,7 +127,21 @@ extern "C"
  ****************************************************************************/
 
 FAR struct spi_dev_s *spi_create_bitbang(
-                         FAR const struct spi_bitbang_ops_s *low);
+                         FAR const struct spi_bitbang_ops_s *low,
+                         FAR void *low_priv);
+
+/****************************************************************************
+ * Name:  spi_destroy_bitbang
+ *
+ * Description:
+ *   Destroy an instance of the SPI bit-bang driver.
+ *
+ * Input Parameters:
+ *   dev - device instance, target driver to destroy.
+ *
+ ****************************************************************************/
+
+void spi_destroy_bitbang(FAR struct spi_dev_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)
