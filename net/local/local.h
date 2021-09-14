@@ -260,6 +260,19 @@ void local_free(FAR struct local_conn_s *conn);
 FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn);
 
 /****************************************************************************
+ * Name: local_peerconn
+ *
+ * Description:
+ *   Traverse the connections list to find the peer
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn);
+
+/****************************************************************************
  * Name: psock_local_bind
  *
  * Description:
