@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/video/isx012.h
+ * include/nuttx/video/imgdata.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,24 +18,71 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDEO_ISX012_H
-#define __INCLUDE_NUTTX_VIDEO_ISX012_H
+#ifndef __INCLUDE_NUTTX_VIDEO_IMGDATA_H
+#define __INCLUDE_NUTTX_VIDEO_IMGDATA_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
+#include <sys/types.h>
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Format definition for start_capture() and validate_frame_setting */
+
+#define IMGDATA_FMT_MAX                  (2)
+#define IMGDATA_FMT_MAIN                 (0)
+#define IMGDATA_FMT_SUB                  (1)
+#define IMGDATA_PIX_FMT_UYVY             (0)
+#define IMGDATA_PIX_FMT_RGB565           (1)
+#define IMGDATA_PIX_FMT_JPEG             (2)
+#define IMGDATA_PIX_FMT_JPEG_WITH_SUBIMG (3)
+#define IMGDATA_PIX_FMT_SUBIMG_UYVY      (4)
+#define IMGDATA_PIX_FMT_SUBIMG_RGB565    (5)
 
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* structure for validate_frame_setting() and start_capture() */
+
+typedef struct imgdata_format_s
+{
+  uint16_t width;
+  uint16_t height;
+  uint32_t pixelformat;
+} imgdata_format_t;
+
+typedef struct imgdata_interval_s
+{
+  uint32_t numerator;
+  uint32_t denominator;
+} imgdata_interval_t;
+
+typedef int (*imgdata_capture_t)(uint8_t result, uint32_t size);
+
+/* Structure for Data Control I/F */
+
+struct imgdata_ops_s
+{
+  CODE int (*init)(void);
+  CODE int (*uninit)(void);
+
+  CODE int (*validate_buf)(uint8_t *addr, uint32_t size);
+  CODE int (*set_buf)(uint8_t *addr, uint32_t size);
+
+  CODE int (*validate_frame_setting)(uint8_t nr_datafmts,
+                                     FAR imgdata_format_t *datafmts,
+                                     FAR imgdata_interval_t *interval);
+  CODE int (*start_capture)(uint8_t nr_datafmts,
+                            FAR imgdata_format_t *datafmts,
+                            FAR imgdata_interval_t *interval,
+                            FAR imgdata_capture_t callback);
+  CODE int (*stop_capture)(void);
+};
 
 #ifdef __cplusplus
 #define EXTERN extern "C"
@@ -49,12 +96,13 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int isx012_initialize(FAR struct i2c_master_s *i2c);
-int isx012_uninitialize(void);
+/* Register image data operations. */
+
+void imgdata_register(const FAR struct imgdata_ops_s *ops);
 
 #undef EXTERN
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_VIDEO_ISX012_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_IMGDATA_H */

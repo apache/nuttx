@@ -21,54 +21,6 @@
 #ifndef __ARCH_ARM_INCLUDE_CXD56XX_CISIF_H
 #define __ARCH_ARM_INCLUDE_CXD56XX_CISIF_H
 
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-typedef void (*notify_callback_t)(uint8_t code,
-                                  uint32_t size,
-                                  uint32_t addr);
-typedef void (*comp_callback_t)(uint8_t code,
-                                uint32_t size,
-                                uint32_t addr);
-
-struct cisif_init_yuv_param_s
-{
-  uint16_t          hsize;
-  uint16_t          vsize;
-  uint32_t          notify_size;
-  notify_callback_t notify_func;
-};
-
-typedef struct cisif_init_yuv_param_s cisif_init_yuv_param_t;
-
-struct cisif_init_jpeg_param_s
-{
-  uint32_t notify_size;
-  notify_callback_t notify_func;
-};
-
-typedef struct cisif_init_jpeg_param_s cisif_init_jpeg_param_t;
-
-struct cisif_sarea_s
-{
-  uint8_t *strg_addr;
-  uint32_t strg_size;
-};
-
-typedef struct cisif_sarea_s cisif_sarea_t;
-
-struct cisif_param_s
-{
-  uint32_t                format;
-  cisif_init_yuv_param_t  yuv_param;
-  cisif_init_jpeg_param_t jpg_param;
-  cisif_sarea_t           sarea;
-  comp_callback_t         comp_func;
-};
-
-typedef struct cisif_param_s cisif_param_t;
-
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -84,11 +36,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-int cxd56_cisifinit(void);
-int cxd56_cisiffinalize(void);
-int cxd56_cisifstartcapture(cisif_param_t *param, cisif_sarea_t *sarea);
-int cxd56_cisifstopcapture(void);
-int cxd56_cisifsetdmabuf(cisif_sarea_t *sarea);
+int cxd56_cisif_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)
