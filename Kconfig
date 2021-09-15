@@ -1140,7 +1140,7 @@ comment "Driver Debug Options"
 config DEBUG_LCD
 	bool "Low-level LCD Debug Features"
 	default n
-	depends on LCD
+	depends on LCD || SLCD
 	---help---
 		Enable LCD driver debug features.
 
