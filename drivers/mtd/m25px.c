@@ -98,6 +98,7 @@
 #define M25P_M25P64_CAPACITY       0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY      0x18 /* 128 M-bit */
 #define M25P_MT25Q128_CAPACITY     0x18 /* 128 M-bit */
+#define M25P_MT25Q1G_CAPACITY      0x21 /* 1 G-bit */
 
 /*  M25P1 capacity is 131,072 bytes:
  *  (4 sectors) * (32,768 bytes per sector)
@@ -173,6 +174,17 @@
 #define M25P_MT25Q128_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_MT25Q128_NPAGES        65536
 #define M25P_MT25Q128_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
+
+/*  MT25Q1G capacity is 134,217,728  bytes:
+ *  (2048 sectors) * (65,536 bytes per sector)
+ *  (524288 pages) * (256 bytes per page)
+ */
+
+#define M25P_MT25Q1G_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_MT25Q1G_NSECTORS      2048
+#define M25P_MT25Q1G_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_MT25Q1G_NPAGES        524288
+#define M25P_MT25Q1G_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
 
 /* Instructions */
 
@@ -459,6 +471,19 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
           priv->npages         = M25P_MT25Q128_NPAGES;
 #ifdef CONFIG_M25P_SUBSECTOR_ERASE
           priv->subsectorshift = M25P_MT25Q128_SUBSECT_SHIFT;
+#endif
+          return OK;
+        }
+      else if (capacity == M25P_MT25Q1G_CAPACITY)
+        {
+          /* Save the FLASH geometry */
+
+          priv->sectorshift    = M25P_MT25Q1G_SECTOR_SHIFT;
+          priv->nsectors       = M25P_MT25Q1G_NSECTORS;
+          priv->pageshift      = M25P_MT25Q1G_PAGE_SHIFT;
+          priv->npages         = M25P_MT25Q1G_NPAGES;
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+          priv->subsectorshift = M25P_MT25Q1G_SUBSECT_SHIFT;
 #endif
           return OK;
         }
