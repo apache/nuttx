@@ -159,7 +159,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -168,7 +167,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SD slot: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -182,7 +180,6 @@ int esp32_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
-      return ret;
     }
 #endif
 
@@ -192,7 +189,6 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -210,7 +206,6 @@ int esp32_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize wireless subsystem=%d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -227,7 +222,6 @@ int esp32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize timer driver: %d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -238,7 +232,6 @@ int esp32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize timer driver: %d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -249,7 +242,6 @@ int esp32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize timer driver: %d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -260,7 +252,6 @@ int esp32_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize timer driver: %d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -305,7 +296,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -317,7 +307,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C Driver for I2C0: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -327,7 +316,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize I2C Driver for I2C1: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -341,7 +329,6 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
-      return ret;
     }
 #endif
 
