@@ -69,6 +69,13 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
         tcb->pid, (unsigned long)up_check_tcbstack(tcb),
         (unsigned long)tcb->adj_stack_size);
 #endif
+
+  /* Dump the backtrace */
+
+#if defined(CONFIG_XTENSA_DUMPBT_ON_ASSERT) && \
+    defined(CONFIG_SCHED_BACKTRACE)
+  sched_dumpstack(rtcb->pid);
+#endif
 }
 #endif
 
@@ -150,117 +157,6 @@ static inline void xtensa_registerdump(void)
 #endif
 }
 
-#ifdef CONFIG_XTENSA_DUMPBT_ON_ASSERT
-
-/****************************************************************************
- * Name: xtensa_getcause
- ****************************************************************************/
-
-static inline uint32_t xtensa_getcause(void)
-{
-  uint32_t cause;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, EXCCAUSE"  : "=r"(cause)
-  );
-
-  return cause;
-}
-
-/****************************************************************************
- * Name: stackpc
- ****************************************************************************/
-
-static inline uint32_t stackpc(uint32_t pc)
-{
-  if (pc & 0x80000000)
-    {
-      /* Top two bits of a0 (return address) specify window increment.
-       * Overwrite to map to address space.
-       */
-
-      pc = (pc & 0x3fffffff) | 0x40000000;
-    }
-
-  /* Minus 3 to get PC of previous instruction (i.e. instruction executed
-   * before return address).
-   */
-
-  return pc - 3;
-}
-
-/****************************************************************************
- * Name: corruptedframe
- ****************************************************************************/
-
-static inline bool corruptedframe(uint32_t pc, uint32_t sp)
-{
-  return !(xtensa_ptr_exec((void *)stackpc(pc)) || xtensa_sp_sane(sp));
-}
-
-/****************************************************************************
- * Name: nextframe
- ****************************************************************************/
-
-static bool nextframe(uint32_t *pc, uint32_t *sp, uint32_t *npc)
-{
-  /* Use frame(i - 1)'s base save area located below frame(i)'s sp to get
-   * frame(i - 1)'s sp and frame(i - 2)'s pc. Base save area consists of
-   * 4 words under SP.
-   */
-
-  void *bsa = (void *)*sp;
-
-  *pc  = *npc;
-  *npc = *((uint32_t *)(bsa - 16));
-  *sp  = *((uint32_t *)(bsa - 12));
-
-  return !corruptedframe(*pc, *sp);
-}
-
-/****************************************************************************
- * Name: xtensa_btdump
- ****************************************************************************/
-
-static inline void xtensa_btdump(void)
-{
-  uint32_t pc;
-  uint32_t sp;
-  uint32_t npc;
-  int i;
-  bool corrupted = false;
-
-  uint32_t *regs = (uint32_t *)CURRENT_REGS;
-
-  pc  = regs[REG_PC];
-  npc = regs[REG_A0]; /* return register */
-  sp  = regs[REG_A1]; /* stack pointer */
-
-  _alert("Backtrace0: %x:%x\n", stackpc(pc), sp);
-
-  corrupted = corruptedframe(pc, sp) &&
-              !(xtensa_getcause() == EXCCAUSE_INSTR_PROHIBITED);
-
-  for (i = 1; i <= CONFIG_XTENSA_BTDEPTH && npc != 0 && !corrupted; i++)
-    {
-      if (!nextframe(&pc, &sp, &npc))
-        {
-          corrupted = true;
-        }
-
-      _alert("Backtrace%d: %x:%x\n", i, stackpc(pc), sp);
-    }
-
-  _alert("BACKTRACE %s\n",
-         (corrupted ? "CORRUPTED!" : (npc == 0 ? "Done":"CONTINUES...")));
-}
-#endif /* CONFIG_XTENSA_DUMPBT_ON_ASSERT */
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
 /****************************************************************************
  * Name: xtensa_dumpstate
  ****************************************************************************/
@@ -288,8 +184,9 @@ void xtensa_dumpstate(void)
 
   /* Dump the backtrace */
 
-#ifdef CONFIG_XTENSA_DUMPBT_ON_ASSERT
-  xtensa_btdump();
+#if defined(CONFIG_XTENSA_DUMPBT_ON_ASSERT) && \
+    defined(CONFIG_SCHED_BACKTRACE)
+  sched_dumpstack(rtcb->pid);
 #endif
 
   /* Get the limits on the user stack memory */
