@@ -25,6 +25,7 @@
 
 #include <sys/ioctl.h>
 
+#include <debug.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -54,26 +55,6 @@
 #define VIDEO_FMT_SUB           (1)
 
 #define VIDEO_REMAINING_CAPNUM_INFINITY (-1)
-
-/* Debug option */
-
-#ifdef CONFIG_DEBUG_VIDEO_ERROR
-#define videoerr(format, ...)     _err(format, ##__VA_ARGS__)
-#else
-#define videoerr(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_VIDEO_WARN
-#define videowarn(format, ...)   _warn(format, ##__VA_ARGS__)
-#else
-#define videowarn(x...)
-#endif
-
-#ifdef CONFIG_DEBUG_VIDEO_INFO
-#define videoinfo(format, ...)   _info(format, ##__VA_ARGS__)
-#else
-#define videoinfo(x...)
-#endif
 
 #define VIDEO_SCENE_MAX (sizeof(g_video_scene_parameter) / \
                          sizeof(video_scene_params_t))
@@ -2795,7 +2776,7 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
 
       default:
-        videoerr("Unrecognized cmd: %d\n", cmd);
+        verr("Unrecognized cmd: %d\n", cmd);
         ret = - ENOTTY;
         break;
     }
@@ -2830,7 +2811,7 @@ static FAR void *video_register(FAR const char *devpath)
   priv = (FAR video_mng_t *)kmm_malloc(sizeof(video_mng_t));
   if (!priv)
     {
-      videoerr("Failed to allocate instance\n");
+      verr("Failed to allocate instance\n");
       return NULL;
     }
 
@@ -2857,7 +2838,7 @@ static FAR void *video_register(FAR const char *devpath)
   ret = register_driver(priv->devpath, &g_video_fops, 0666, priv);
   if (ret < 0)
     {
-      videoerr("Failed to register driver: %d\n", ret);
+      verr("Failed to register driver: %d\n", ret);
       kmm_free(priv->devpath);
       kmm_free(priv);
       return NULL;
