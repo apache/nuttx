@@ -112,7 +112,7 @@ int esp32s2_bringup(void)
 
 #ifdef CONFIG_TIMER
 
-#ifdef CONFIG_ESP32S2_TIMER0
+#if defined(CONFIG_ESP32S2_TIMER0) && !defined(CONFIG_ONESHOT)
   ret = esp32s2_timer_initialize("/dev/timer0", TIMER0);
   if (ret < 0)
     {
@@ -164,7 +164,19 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
     }
+
 #endif
+  /* Now register one oneshot driver */
+
+#if defined(CONFIG_ONESHOT) && defined(CONFIG_ESP32S2_TIMER0)
+
+  ret = board_oneshot_init(ONESHOT_TIMER, ONESHOT_RESOLUTION_US);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_oneshot_init() failed: %d\n", ret);
+    }
+
+#endif /* CONFIG_ONESHOT */
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

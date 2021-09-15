@@ -37,6 +37,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32s2_gpio.c
 endif
 
+ifeq ($(CONFIG_ONESHOT),y)
+CSRCS += esp32s2_oneshot.c
+endif
+
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32s2.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32s2_out.ld
 
