@@ -46,6 +46,11 @@
 #define TIMER2 2
 #define TIMER3 3
 
+/* ONESHOT */
+
+#define ONESHOT_TIMER         TIMER0
+#define ONESHOT_RESOLUTION_US 1
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -90,6 +95,26 @@ int esp32s2_bringup(void);
 
 #ifdef CONFIG_DEV_GPIO
 int esp32s2_gpio_init(void);
+#endif
+
+/****************************************************************************
+ * Name: board_oneshot_init
+ *
+ * Description:
+ *   Configure the oneshot timer driver.
+ *
+ * Input Parameters:
+ *   timer      - Timer instance to be used as oneshot timer.
+ *   resolution - Oneshot timer resolution.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ONESHOT
+int board_oneshot_init(int timer, uint16_t resolution);
 #endif
 
 #endif /* __ASSEMBLY__ */
