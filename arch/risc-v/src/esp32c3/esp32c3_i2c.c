@@ -799,8 +799,18 @@ static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
 
   clock_gettime(CLOCK_REALTIME, &abstime);
 
-  abstime.tv_sec += 10;
-  abstime.tv_nsec += 0;
+#if CONFIG_ESP32C3_I2CTIMEOSEC > 0
+  abstime.tv_sec += CONFIG_ESP32C3_I2CTIMEOSEC;
+#endif
+
+#if CONFIG_ESP32C3_I2CTIMEOMS > 0
+  abstime.tv_nsec += CONFIG_ESP32C3_I2CTIMEOMS * NSEC_PER_MSEC;
+  if (abstime.tv_nsec >= 1000 * NSEC_PER_MSEC)
+    {
+      abstime.tv_sec++;
+      abstime.tv_nsec -= 1000 * NSEC_PER_MSEC;
+    }
+#endif
 
   ret = nxsem_timedwait_uninterruptible(&priv->sem_isr, &abstime);
 
