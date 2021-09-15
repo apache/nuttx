@@ -728,6 +728,14 @@ config ESP32_I2C1_SDAPIN
 
 endif # ESP32_I2C1
 
+config ESP32_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
+
 endmenu # I2C configuration
 
 menu "SPI configuration"
