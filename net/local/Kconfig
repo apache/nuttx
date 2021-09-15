@@ -33,6 +33,12 @@ config NET_LOCAL_DGRAM
 	---help---
 		Enable support for Unix domain SOCK_DGRAM type sockets
 
+config NET_LOCAL_SCM
+	bool "Unix domain socket control message"
+	default n
+	---help---
+		Enable support for Unix domain socket control message
+
 endif # NET_LOCAL
 
 endmenu # Unix Domain Sockets

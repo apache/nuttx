@@ -46,6 +46,7 @@
  ****************************************************************************/
 
 #define LOCAL_NPOLLWAITERS 2
+#define LOCAL_NCONTROLFDS  4
 
 /* Packet format in FIFO:
  *
@@ -136,15 +137,22 @@ struct local_conn_s
 
   /* Fields common to SOCK_STREAM and SOCK_DGRAM */
 
-  uint8_t lc_crefs;            /* Reference counts on this instance */
-  uint8_t lc_proto;            /* SOCK_STREAM or SOCK_DGRAM */
-  uint8_t lc_type;             /* See enum local_type_e */
-  uint8_t lc_state;            /* See enum local_state_e */
-  struct file lc_infile;       /* File for read-only FIFO (peers) */
-  struct file lc_outfile;      /* File descriptor of write-only FIFO (peers) */
-  char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
-  int32_t lc_instance_id;      /* Connection instance ID for stream
-                                * server<->client connection pair */
+  uint8_t lc_crefs;              /* Reference counts on this instance */
+  uint8_t lc_proto;              /* SOCK_STREAM or SOCK_DGRAM */
+  uint8_t lc_type;               /* See enum local_type_e */
+  uint8_t lc_state;              /* See enum local_state_e */
+  struct file lc_infile;         /* File for read-only FIFO (peers) */
+  struct file lc_outfile;        /* File descriptor of write-only FIFO (peers) */
+  char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
+  int32_t lc_instance_id;        /* Connection instance ID for stream
+                                  * server<->client connection pair */
+#ifdef CONFIG_NET_LOCAL_SCM
+  FAR struct local_conn_s *
+                        lc_peer; /* Peer connection instance */
+  uint16_t lc_cfpcount;          /* Control file pointer counter */
+  FAR struct file *
+     lc_cfps[LOCAL_NCONTROLFDS]; /* Socket message control filep */
+#endif /* CONFIG_NET_LOCAL_SCM */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */
