@@ -375,6 +375,14 @@ config ESP32C3_I2C0_SDAPIN
 
 endif # ESP32C3_I2C0
 
+config ESP32C3_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32C3_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
+
 endmenu # I2C configuration
 
 menu "SPI configuration"
