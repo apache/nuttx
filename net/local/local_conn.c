@@ -161,12 +161,24 @@ FAR struct local_conn_s *local_alloc(void)
 
 void local_free(FAR struct local_conn_s *conn)
 {
+#ifdef CONFIG_NET_LOCAL_SCM
+  int i;
+#endif /* CONFIG_NET_LOCAL_SCM */
+
   DEBUGASSERT(conn != NULL);
 
   /* Remove the server from the list of listeners. */
 
   net_lock();
   dq_rem(&conn->lc_node, &g_local_connections);
+
+#ifdef CONFIG_NET_LOCAL_SCM
+  if (local_peerconn(conn) && conn->lc_peer)
+    {
+      conn->lc_peer->lc_peer = NULL;
+    }
+#endif /* CONFIG_NET_LOCAL_SCM */
+
   net_unlock();
 
   /* Make sure that the read-only FIFO is closed */
@@ -184,6 +196,20 @@ void local_free(FAR struct local_conn_s *conn)
       file_close(&conn->lc_outfile);
       conn->lc_outfile.f_inode = NULL;
     }
+
+#ifdef CONFIG_NET_LOCAL_SCM
+  /* Free the pending control file pointer */
+
+  for (i = 0; i < conn->lc_cfpcount; i++)
+    {
+      if (conn->lc_cfps[i])
+        {
+          file_close(conn->lc_cfps[i]);
+          kmm_free(conn->lc_cfps[i]);
+          conn->lc_cfps[i] = NULL;
+        }
+    }
+#endif /* CONFIG_NET_LOCAL_SCM */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* Destroy all FIFOs associted with the connection */
