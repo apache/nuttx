@@ -148,7 +148,6 @@ int esp32c3_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
-      return ret;
     }
 #endif
 
@@ -158,7 +157,6 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -167,7 +165,6 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -209,7 +206,6 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 "
                        "Driver for I2C0: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -270,7 +266,6 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -281,7 +276,6 @@ int esp32c3_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT coexist\n");
-      return ret;
     }
 #endif
 
@@ -290,7 +284,6 @@ int esp32c3_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
-      return ret;
     }
 #endif
 
@@ -319,7 +312,6 @@ int esp32c3_bringup(void)
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
-      return ret;
     }
 #endif /* CONFIG_ESP32C3_ADC */
 
