@@ -47,6 +47,7 @@
  * Name: up_getsp
  ****************************************************************************/
 
+static inline uint32_t up_getsp(void) inline_function;
 static inline uint32_t up_getsp(void)
 {
   register uint32_t sp;
