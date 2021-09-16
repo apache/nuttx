@@ -44,10 +44,6 @@
 #define HEADER_SIZE        0x12 /* Default sdpcm + bdc header size */
 #define FIRST_WORD_SIZE    4
 
-/* TODO move to Kconfig */
-
-#define BCMF_PKT_POOL_SIZE 4    /* Frame pool size */
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
