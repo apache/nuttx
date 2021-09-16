@@ -41,8 +41,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HEADER_SIZE        0x12 /* Default sdpcm + bdc header size */
-#define FIRST_WORD_SIZE    4
+#define HEADER_SIZE          0x12 /* Default sdpcm + bdc header size */
+#define FIRST_WORD_SIZE      4
+#define FC_UPDATE_PKT_LENGTH 12
 
 /****************************************************************************
  * Public Types
@@ -97,6 +98,7 @@ struct bcmf_sdio_dev_s
   uint8_t max_seq;                 /* Maximum transmit sequence allowed */
   uint8_t tx_seq;                  /* Transmit sequence number (next) */
   uint8_t rx_seq;                  /* Receive sequence number (expected) */
+  bool    flow_ctrl;               /* Current flow control status */
 
   sem_t queue_mutex;               /* Lock for TX/RX/free queues */
   dq_queue_t free_queue;           /* Queue of available frames */
