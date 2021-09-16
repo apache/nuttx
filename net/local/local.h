@@ -119,7 +119,7 @@ struct local_conn_s
 
   /* lc_node supports a doubly linked list: Listening SOCK_STREAM servers
    * will be linked into a list of listeners; SOCK_STREAM clients will be
-   * linked to the lc_waiters and lc_conn lists.
+   * linked to the lc_conn lists.
    */
 
   dq_entry_t lc_node;          /* Supports a doubly linked list */
@@ -179,6 +179,7 @@ struct local_conn_s
     struct
     {
       volatile int lc_result;  /* Result of the connection operation (client) */
+      dq_entry_t lc_waiter;    /* Linked to the lc_waiters lists */
     } client;
   } u;
 #endif /* CONFIG_NET_LOCAL_STREAM */
