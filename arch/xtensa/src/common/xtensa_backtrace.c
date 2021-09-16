@@ -37,7 +37,7 @@
 
 /* Convert return address to a valid pc  */
 
-#define MAKE_PC_FROM_RA(ra)    ((ra) & 0x3fffffff)
+#define MAKE_PC_FROM_RA(ra)   (uintptr_t *)((ra) & 0x3fffffff)
 
 /****************************************************************************
  * Private Types
@@ -53,6 +53,13 @@ struct xtensa_windowregs_s
 #endif
 
 /****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static void inline get_window_regs(struct xtensa_windowregs_s *frame)
+inline_function;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -66,7 +73,6 @@ struct xtensa_windowregs_s
 
 #ifndef __XTENSA_CALL0_ABI__
 static void get_window_regs(struct xtensa_windowregs_s *frame)
-inline_function
 {
   __asm__ __volatile__("\trsr %0, WINDOWSTART\n": "=r"(frame->windowstart));
   __asm__ __volatile__("\trsr %0, WINDOWBASE\n": "=r"(frame->windowbase));
@@ -125,7 +131,7 @@ static int backtrace_window(FAR uintptr_t *base, FAR uintptr_t *limit,
           ra = frame->areg[index * 4];
           sp = frame->areg[index * 4 + 1];
 
-          if (sp > limit || sp < base || ra == 0)
+          if (sp > (uint32_t)limit || sp < (uint32_t)base || ra == 0)
             {
               continue;
             }
@@ -226,6 +232,8 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 #else
           istackbase = &g_intstackalloc;
 #endif
+          xtensa_window_spill();
+
           ret = bactrace_stack((FAR void *)istackbase,
                           (FAR void *)((uint32_t)&g_intstackalloc +
                                        CONFIG_ARCH_INTERRUPTSTACK),
