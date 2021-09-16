@@ -31,6 +31,7 @@
 #include <queue.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/net/net.h>
 
 #include "socket/socket.h"
@@ -100,6 +101,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
   FAR struct local_conn_s *server;
   FAR struct local_conn_s *client;
   FAR struct local_conn_s *conn;
+  FAR dq_entry_t *waiter;
   int ret;
 
   /* Some sanity checks */
@@ -135,11 +137,13 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
        * head of the waiting list.
        */
 
-      client = (FAR struct local_conn_s *)
-        dq_remfirst(&server->u.server.lc_waiters);
+      waiter = dq_remfirst(&server->u.server.lc_waiters);
 
-      if (client)
+      if (waiter)
         {
+          client = container_of(waiter, struct local_conn_s,
+                                u.client.lc_waiter);
+
           /* Decrement the number of pending clients */
 
           DEBUGASSERT(server->u.server.lc_pending > 0);

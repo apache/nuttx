@@ -138,7 +138,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   /* Add ourself to the list of waiting connections and notify the server. */
 
-  dq_addlast(&client->lc_node, &server->u.server.lc_waiters);
+  dq_addlast(&client->u.client.lc_waiter, &server->u.server.lc_waiters);
   local_event_pollnotify(server, POLLIN);
 
   if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
