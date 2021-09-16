@@ -185,6 +185,8 @@ jobs:
           export CCACHE_DIR=`pwd`/ccache
           mkdir $CCACHE_DIR
           export ARTIFACTDIR=`pwd`/buildartifacts
+          wget http://secure.globalsign.com/cacert/root-r3.crt
+          sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain root-r3.crt
           cd sources/nuttx/tools/ci
           ./cibuild.sh -i -A -c testlist/${{matrix.boards}}.dat
           ccache -s
