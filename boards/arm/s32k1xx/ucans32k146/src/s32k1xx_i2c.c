@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_boot.c
+ * boards/arm/s32k1xx/ucans32k146/src/s32k1xx_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,53 +23,59 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/board.h>
+#include <nuttx/compiler.h>
+
+#include <sys/types.h>
+#include <stdint.h>
+#include <errno.h>
+#include <debug.h>
+
+#include <nuttx/i2c/i2c_master.h>
+
+#include "s32k1xx_lpi2c.h"
 
 #include "ucans32k146.h"
+
+#ifdef CONFIG_S32K1XX_LPI2C
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k1xx_board_initialize
+ * Name: s32k1xx_i2cdev_initialize
  *
  * Description:
- *   All S32K1XX architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured and mapped but before any devices have been
- *   initialized.
+ *   Initialize I2C driver and register /dev/i2cN devices.
  *
  ****************************************************************************/
 
-void s32k1xx_board_initialize(void)
+int weak_function s32k1xx_i2cdev_initialize(void)
 {
-#ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected */
+  int ret = OK;
 
-  board_autoled_initialize();
-#endif
+#if defined(CONFIG_S32K1XX_LPI2C0) && defined(CONFIG_I2C_DRIVER)
+  /* LPI2C0 *****************************************************************/
+
+  /* Initialize the I2C driver for LPI2C0 */
+
+  struct i2c_master_s *lpi2c0 = s32k1xx_i2cbus_initialize(0);
+  if (lpi2c0 == NULL)
+    {
+      i2cerr("ERROR: FAILED to initialize LPI2C0\n");
+      return -ENODEV;
+    }
+
+  ret = i2c_register(lpi2c0, 0);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: FAILED to register LPI2C0 driver\n");
+      s32k1xx_i2cbus_uninitialize(lpi2c0);
+      return ret;
+    }
+#endif /* CONFIG_S32K1XX_LPI2C0 && CONFIG_I2C_DRIVER */
+
+  return ret;
 }
 
-/****************************************************************************
- * Name: board_late_initialize
- *
- * Description:
- *   If CONFIG_BOARD_LATE_INITIALIZE is selected, then an additional
- *   initialization call will be performed in the boot-up sequence to a
- *   function called board_late_initialize().  board_late_initialize() will
- *   be called immediately after up_initialize() is called and just before
- *   the initial application is started.  This additional initialization
- *   phase may be used, for example, to initialize board-specific device
- *   drivers.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-void board_late_initialize(void)
-{
-  /* Perform board-specific initialization */
-
-  s32k1xx_bringup();
-}
-#endif
+#endif /* CONFIG_S32K1XX_LPSPI */

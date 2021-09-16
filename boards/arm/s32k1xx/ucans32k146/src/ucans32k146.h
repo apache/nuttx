@@ -32,6 +32,7 @@
 
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_periphclocks.h"
+#include "s32k1xx_pin.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,16 +44,16 @@
 
 /* LEDs.  The UCANS32K146 has one RGB LED:
  *
- *   RedLED   PTD15 (FTM0 CH0)
- *   GreenLED PTD16 (FTM0 CH1)
- *   BlueLED  PTD0  (FTM0 CH2)
+ *   RedLED    PTD15  (FTM0 CH0)
+ *   GreenLED  PTD16  (FTM0 CH1)
+ *   BlueLED   PTD0   (FTM0 CH2)
  *
- * An output of '1' illuminates the LED.
+ * An output of '0' illuminates the LED.
  */
 
-#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
-#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
-#define GPIO_LED_B     (PIN_PTD0  | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_B     (PIN_PTD0  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
 
 /* Buttons.  The UCANS32K146 supports one button:
  *
@@ -61,19 +62,13 @@
 
 #define GPIO_SW3       (PIN_PTC14 | PIN_INT_BOTH)
 
-/* SPI chip selects */
-
-/* SE050 Enable */
+/* SE050 Secure Element enable pin */
 
 #define GPIO_SE050_EN  (PIN_PTA6 | GPIO_LOWDRIVE)
 
 /* Count of peripheral clock user configurations */
 
 #define NUM_OF_PERIPHERAL_CLOCKS_0 12
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -106,16 +101,25 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
 int s32k1xx_bringup(void);
 
 /****************************************************************************
- * Name: s32k1xx_spidev_initialize
+ * Name: s32k1xx_i2cdev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the UCANS32K146 board.
+ *   Initialize I2C driver and register /dev/i2cN devices.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_S32K1XX_LPSPI
-void s32k1xx_spidev_initialize(void);
-#endif
+int s32k1xx_i2cdev_initialize(void);
+
+/****************************************************************************
+ * Name: s32k1xx_spidev_initialize
+ *
+ * Description:
+ *   Configure chip select pins, initialize the SPI driver and register
+ *   /dev/spiN devices.
+ *
+ ****************************************************************************/
+
+int s32k1xx_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_S32K1XX_UCANS32K146_SRC_UCANS32K146_H */

@@ -23,11 +23,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/board/board.h>
-#include <sys/types.h>
-#include <syslog.h>
 
-#include <nuttx/fs/fs.h>
+#include <sys/types.h>
+#include <stdint.h>
+#include <syslog.h>
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
@@ -37,15 +36,23 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_I2C_DRIVER
-#  include "s32k1xx_pin.h"
-#  include <nuttx/i2c/i2c_master.h>
-#  include "s32k1xx_lpi2c.h"
+#ifdef CONFIG_FS_PROCFS
+#  include <nuttx/fs/fs.h>
+#endif
+
+#ifdef CONFIG_S32K1XX_PROGMEM
+#  include <nuttx/mtd/mtd.h>
 #endif
 
 #ifdef CONFIG_S32K1XX_EEEPROM
 #  include "s32k1xx_eeeprom.h"
 #endif
+
+#ifdef CONFIG_S32K1XX_FLEXCAN
+#  include "s32k1xx_flexcan.h"
+#endif
+
+#include <arch/board/board.h>
 
 #include "ucans32k146.h"
 
@@ -101,69 +108,85 @@ int s32k1xx_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_S32K1XX_LPSPI
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
-   * function s32k1xx_spidev_initialize() has been brought into the link.
-   */
-
-  s32k1xx_spidev_initialize();
-#endif
-
-#if defined(CONFIG_S32K1XX_LPI2C0)
-#if defined(CONFIG_I2C_DRIVER)
-  FAR struct i2c_master_s *i2c;
-  i2c = s32k1xx_i2cbus_initialize(0);
-
-  if (i2c == NULL)
-    {
-      serr("ERROR: Failed to get I2C interface\n");
-    }
-  else
-    {
-      ret = i2c_register(i2c, 0);
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to register I2C driver: %d\n", ret);
-          s32k1xx_i2cbus_uninitialize(i2c);
-        }
-    }
-#endif
-#endif
-
 #ifdef CONFIG_S32K1XX_PROGMEM
   FAR struct mtd_dev_s *mtd;
-  int minor = 0;
 
   mtd = progmem_initialize();
-  if (!mtd)
+  if (mtd == NULL)
     {
-      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
+      syslog(LOG_ERR, "ERROR: progmem_initialize() failed\n");
     }
 #endif
 
 #ifdef CONFIG_S32K1XX_EEEPROM
   /* Register EEEPROM block device */
 
-  s32k1xx_eeeprom_register(0, 4096);
+  ret = s32k1xx_eeeprom_register(0, 4096);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_eeeprom_register() failed\n");
+    }
 #endif
 
-#ifdef CONFIG_S32K1XX_FLEXCAN
+#ifdef CONFIG_S32K1XX_LPI2C
+  /* Initialize I2C driver */
+
+  ret = s32k1xx_i2cdev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_i2cdev_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_S32K1XX_LPSPI
+  /* Initialize SPI driver */
+
+  ret = s32k1xx_spidev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_spidev_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_NETDEV_LATEINIT
   s32k1xx_pinconfig(BOARD_REVISION_DETECT_PIN);
 
+#  ifdef CONFIG_S32K1XX_FLEXCAN0
   if (s32k1xx_gpioread(BOARD_REVISION_DETECT_PIN))
     {
-      /* STB high -> active CAN phy */
+      /* STB high enables CAN phy on UCANS32K146B */
 
-      s32k1xx_pinconfig(PIN_CAN0_STB  | GPIO_OUTPUT_ONE);
+      s32k1xx_pinconfig(PIN_CAN0_STB | GPIO_OUTPUT_ONE);
     }
   else
     {
-      /* STB low -> active CAN phy */
+      /* STB low enables CAN phy on UCANS32K146-01 */
 
-      s32k1xx_pinconfig(PIN_CAN0_STB  | GPIO_OUTPUT_ZERO);
+      s32k1xx_pinconfig(PIN_CAN0_STB | GPIO_OUTPUT_ZERO);
     }
 
-#endif
+  s32k1xx_caninitialize(0);
+#  endif /* CONFIG_S32K1XX_FLEXCAN0 */
+
+#  ifdef CONFIG_S32K1XX_FLEXCAN1
+  if (s32k1xx_gpioread(BOARD_REVISION_DETECT_PIN))
+    {
+      /* STB high enables CAN phy on UCANS32K146B */
+
+      s32k1xx_pinconfig(PIN_CAN1_STB | GPIO_OUTPUT_ONE);
+    }
+  else
+    {
+      /* STB low enables CAN phy on UCANS32K146-01 */
+
+      s32k1xx_pinconfig(PIN_CAN1_STB | GPIO_OUTPUT_ZERO);
+    }
+
+  s32k1xx_caninitialize(1);
+#  endif /* CONFIG_S32K1XX_FLEXCAN1 */
+#endif /* CONFIG_NETDEV_LATEINIT */
 
   return ret;
 }
