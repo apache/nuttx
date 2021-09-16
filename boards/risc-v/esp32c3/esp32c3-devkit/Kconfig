@@ -94,4 +94,16 @@ config ESP32C3_SPIFLASH_TEST_ADDRESS
 	---help---
 		SPI Flash encryption test read/write address.
 
+if LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
+
+config ESP32C3_LCD_RSTPIN
+	int "LCD reset pin"
+	default 9
+
+config ESP32C3_LCD_BLPIN
+	int "LCD backlight pin"
+	default 18
+
+endif # LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
+
 endif # ARCH_BOARD_ESP32C3_DEVKIT
