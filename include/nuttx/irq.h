@@ -162,7 +162,7 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
  *   instrumentation):
  *
  *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
- *     specific counter is increment to indicate that the thread has IRQs
+ *     specific counter is incremented to indicate that the thread has IRQs
  *     disabled and to support nested calls to enter_critical_section().
  *
  *     NOTE: Most architectures do not support disabling all CPUs from one
