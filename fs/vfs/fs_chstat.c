@@ -118,11 +118,6 @@ static int chstat(FAR const char *path,
 
   /* Adjust and check buf and flags */
 
-  if ((flags & CH_STAT_MODE) && (buf->st_mode & ~07777))
-    {
-      goto errout;
-    }
-
   if ((flags & CH_STAT_UID) && buf->st_uid == -1)
     {
       flags &= ~CH_STAT_UID;
