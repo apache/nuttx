@@ -144,3 +144,9 @@ Configurations
       Configures the NuttShell (nsh) located at apps/examples/nsh.  Support
       for builtin applications is enabled, but in the base configuration the
       only application selected is the "Hello, World!" example.
+
+    can:
+    ---
+      Besides the NuttShell this configuration also enables (Socket)CAN
+      support, as well as I2C and SPI support.  It includes the SLCAN and
+      can-utils applications for monitoring and debugging CAN applications.
