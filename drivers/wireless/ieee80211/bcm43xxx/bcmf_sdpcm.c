@@ -125,6 +125,10 @@ int bcmf_sdpcm_process_header(FAR struct bcmf_sdio_dev_s *sbus,
 
   sbus->max_seq = header->credit;
 
+  /* Update flow control status */
+
+  sbus->flow_ctrl = (header->flow_control != 0);
+
   return OK;
 }
 
@@ -138,8 +142,65 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   uint16_t len;
   uint16_t checksum;
   struct bcmf_sdpcm_header *header;
+  struct bcmf_sdpcm_header tmp_hdr;
   struct bcmf_sdio_frame *sframe;
   FAR struct bcmf_sdio_dev_s *sbus = (FAR struct bcmf_sdio_dev_s *)priv->bus;
+
+  /* Read the first 4 bytes of sdpcm header
+   * to get the length of the following data to be read
+   */
+
+  ret = bcmf_transfer_bytes(sbus, false, 2, 0,
+                            (uint8_t *)&tmp_hdr,
+                            FIRST_WORD_SIZE);
+  if (ret != OK)
+    {
+      wlinfo("Failed to read size\n");
+      bcmf_sdpcm_rxfail(sbus, false);
+      return -EIO;
+    }
+
+  len = tmp_hdr.size;
+  checksum = tmp_hdr.checksum;
+
+  /* All zero means no more to read */
+
+  if (!(len | checksum))
+    {
+      return -ENODATA;
+    }
+
+  if (((~len & 0xffff) ^ checksum) || len < sizeof(struct bcmf_sdpcm_header))
+    {
+      wlerr("Invalid header checksum or len %x %x\n", len, checksum);
+      bcmf_sdpcm_rxfail(sbus, false);
+      return -EINVAL;
+    }
+
+  if (len == FC_UPDATE_PKT_LENGTH)
+    {
+      /* Flow control update packet with no data */
+
+      ret = bcmf_transfer_bytes(sbus, false, 2, 0,
+                                (uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
+                                FC_UPDATE_PKT_LENGTH - FIRST_WORD_SIZE);
+      if (ret != OK)
+        {
+          wlinfo("Failed to read the rest 8 bytes\n");
+          bcmf_sdpcm_rxfail(sbus, false);
+          return -EIO;
+        }
+
+      ret = bcmf_sdpcm_process_header(sbus, &tmp_hdr);
+
+      if (ret != OK)
+        {
+          wlerr("Error while processing header %d\n", ret);
+          return -EINVAL;
+        }
+
+      return OK;
+    }
 
   /* Request free frame buffer */
 
@@ -148,58 +209,59 @@ int bcmf_sdpcm_readframe(FAR struct bcmf_dev_s *priv)
   if (sframe == NULL)
     {
       wlinfo("fail alloc\n");
+
+      /* Read out the rest of the header to get the bus credit information */
+
+      ret = bcmf_transfer_bytes(sbus, false, 2, 0,
+                                (uint8_t *)&tmp_hdr + FIRST_WORD_SIZE,
+                                FC_UPDATE_PKT_LENGTH - FIRST_WORD_SIZE);
+
+      if (ret != OK)
+        {
+          wlinfo("Failed to read the rest 8 bytes\n");
+          bcmf_sdpcm_rxfail(sbus, false);
+          return -EIO;
+        }
+
+      bcmf_sdpcm_rxfail(sbus, false);
+
+      ret = bcmf_sdpcm_process_header(sbus, &tmp_hdr);
+
+      if (ret != OK)
+        {
+          wlerr("Error while processing header %d\n", ret);
+          return -EINVAL;
+        }
+
       return -EAGAIN;
     }
 
   header = (struct bcmf_sdpcm_header *)sframe->data;
 
-  /* Read the first 4 bytes of sdpcm header
-   * to get the length of the following data to be read
-   */
+  /* Read the remaining frame data (the buffer is DMA aligned here) */
 
-  ret = bcmf_transfer_bytes(sbus, false, 2, 0,
-                            (uint8_t *)header,
-                            FIRST_WORD_SIZE);
-  if (ret != OK)
+  if (len <= FIRST_WORD_SIZE)
     {
-      wlinfo("failread size\n");
-      ret = -EIO;
-      goto exit_abort;
-    }
-
-  len = header->size;
-  checksum = header->checksum;
-
-  /* All zero means no more to read */
-
-  if (!(len | checksum))
-    {
-      ret = -ENODATA;
+      ret = OK;
       goto exit_free_frame;
     }
-
-  if (((~len & 0xffff) ^ checksum) || len < sizeof(struct bcmf_sdpcm_header))
-    {
-      wlerr("Invalid header checksum or len %x %x\n", len, checksum);
-      ret = -EINVAL;
-      goto exit_abort;
-    }
-
-  if (len > sframe->header.len)
-    {
-      wlerr("Frame is too large, cancel %d %d\n", len, sframe->header.len);
-      ret = -ENOMEM;
-      goto exit_abort;
-    }
-
-  /* Read the remaining frame data (the buffer is DMA aligned here) */
 
   ret = bcmf_transfer_bytes(sbus, false, 2, 0,
                            (uint8_t *)header + FIRST_WORD_SIZE,
                            len - FIRST_WORD_SIZE);
   if (ret != OK)
     {
+      wlinfo("Failed to read remaining frame data\n");
       ret = -EIO;
+      goto exit_abort;
+    }
+
+  memcpy(header, &tmp_hdr, FIRST_WORD_SIZE);
+
+  if (len > sframe->header.len)
+    {
+      wlerr("Frame is too large, cancel %d %d\n", len, sframe->header.len);
+      ret = -ENOMEM;
       goto exit_abort;
     }
 
@@ -294,6 +356,11 @@ int bcmf_sdpcm_sendframe(FAR struct bcmf_dev_s *priv)
       /* No more frames to send */
 
       return -ENODATA;
+    }
+
+  if (sbus->flow_ctrl)
+    {
+      return -EAGAIN;
     }
 
   if (sbus->tx_seq == sbus->max_seq)
