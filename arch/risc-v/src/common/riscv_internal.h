@@ -200,7 +200,6 @@ void riscv_pminitialize(void);
 /* Low level serial output **************************************************/
 
 void riscv_lowputc(char ch);
-void riscv_puts(const char *str);
 void riscv_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
