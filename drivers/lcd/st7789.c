@@ -300,7 +300,7 @@ static void st7789_deselect(FAR struct spi_dev_s *spi)
 
 static inline void st7789_sendcmd(FAR struct st7789_dev_s *dev, uint8_t cmd)
 {
-  st7789_select(dev->spi, ST7789_BYTESPP * 8);
+  st7789_select(dev->spi, 8);
   SPI_CMDDATA(dev->spi, SPIDEV_DISPLAY(0), true);
   SPI_SEND(dev->spi, cmd);
   SPI_CMDDATA(dev->spi, SPIDEV_DISPLAY(0), false);
@@ -386,17 +386,21 @@ static void st7789_setarea(FAR struct st7789_dev_s *dev,
   /* Set row address */
 
   st7789_sendcmd(dev, ST7789_RASET);
-  st7789_select(dev->spi, 16);
-  SPI_SEND(dev->spi, y0 + ST7789_YOFFSET);
-  SPI_SEND(dev->spi, y1 + ST7789_YOFFSET);
+  st7789_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (y0 + ST7789_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y0 + ST7789_YOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (y1 + ST7789_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y1 + ST7789_YOFFSET) & 0xff);
   st7789_deselect(dev->spi);
 
   /* Set column address */
 
   st7789_sendcmd(dev, ST7789_CASET);
-  st7789_select(dev->spi, 16);
-  SPI_SEND(dev->spi, x0 + ST7789_XOFFSET);
-  SPI_SEND(dev->spi, x1 + ST7789_XOFFSET);
+  st7789_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (x0 + ST7789_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x0 + ST7789_XOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (x1 + ST7789_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x1 + ST7789_XOFFSET) & 0xff);
   st7789_deselect(dev->spi);
 }
 

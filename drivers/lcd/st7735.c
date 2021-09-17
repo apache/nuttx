@@ -405,17 +405,21 @@ static void st7735_setarea(FAR struct st7735_dev_s *dev,
   /* Set row address */
 
   st7735_sendcmd(dev, ST7735_RASET);
-  st7735_select(dev->spi, 16);
-  SPI_SEND(dev->spi, y0 + ST7735_YOFFSET);
-  SPI_SEND(dev->spi, y1 + ST7735_YOFFSET);
+  st7735_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (y0 + ST7735_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y0 + ST7735_YOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (y1 + ST7735_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y1 + ST7735_YOFFSET) & 0xff);
   st7735_deselect(dev->spi);
 
   /* Set column address */
 
   st7735_sendcmd(dev, ST7735_CASET);
-  st7735_select(dev->spi, 16);
-  SPI_SEND(dev->spi, x0 + ST7735_XOFFSET);
-  SPI_SEND(dev->spi, x1 + ST7735_XOFFSET);
+  st7735_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (x0 + ST7735_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x0 + ST7735_XOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (x1 + ST7735_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x1 + ST7735_XOFFSET) & 0xff);
   st7735_deselect(dev->spi);
 }
 
