@@ -426,7 +426,7 @@ static inline void IRAM_ATTR
 
   spi_disable_cache(state->cpu, &state->val[state->cpu]);
 #ifdef CONFIG_SMP
-  spi_disable_cache(state->cpu, &state->val[other]);
+  spi_disable_cache(other, &state->val[other]);
 #endif
 }
 
