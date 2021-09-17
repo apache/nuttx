@@ -64,7 +64,7 @@ function build_board()
     EXTRAFLAGS=""
   fi
 
-  if [ `grep -nR "TOOLCHAIN.*CLANG" ${NUTTXDIR}/.config` ]; then
+  if grep -nR "TOOLCHAIN.*CLANG.*y" ${NUTTXDIR}/.config; then
     TOOLCHAIN="clang"
   fi
 
