@@ -482,17 +482,21 @@ static void gc9a01_setarea(FAR struct gc9a01_dev_s *dev,
   /* Set row address */
 
   gc9a01_sendcmd(dev, GC9A01_RASET);
-  gc9a01_select(dev->spi, 16);
-  SPI_SEND(dev->spi, y0 + GC9A01_YOFFSET);
-  SPI_SEND(dev->spi, y1 + GC9A01_YOFFSET);
+  gc9a01_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (y0 + GC9A01_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y0 + GC9A01_YOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (y1 + GC9A01_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y1 + GC9A01_YOFFSET) & 0xff);
   gc9a01_deselect(dev->spi);
 
   /* Set column address */
 
   gc9a01_sendcmd(dev, GC9A01_CASET);
-  gc9a01_select(dev->spi, 16);
-  SPI_SEND(dev->spi, x0 + GC9A01_XOFFSET);
-  SPI_SEND(dev->spi, x1 + GC9A01_XOFFSET);
+  gc9a01_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (x0 + GC9A01_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x0 + GC9A01_XOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (x1 + GC9A01_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x1 + GC9A01_XOFFSET) & 0xff);
   gc9a01_deselect(dev->spi);
 }
 
