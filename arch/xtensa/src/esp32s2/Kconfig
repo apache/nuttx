@@ -173,6 +173,7 @@ endchoice # On-board Crystal Frequency
 
 config ESP32S2_RT_TIMER
 	bool "Real-time Timer"
+	select ESP32S2_TIMER
 	default n
 
 config ESP32S2_PARTITION

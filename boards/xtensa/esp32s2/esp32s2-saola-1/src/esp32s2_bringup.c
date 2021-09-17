@@ -50,6 +50,10 @@
 #  include "esp32s2_tim_lowerhalf.h"
 #endif
 
+#ifdef CONFIG_ESP32S2_RT_TIMER
+#  include "esp32s2_rt_timer.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -153,6 +157,14 @@ int esp32s2_bringup(void)
 #endif
 
 #endif /* CONFIG_TIMER */
+
+#ifdef CONFIG_ESP32S2_RT_TIMER
+  ret = esp32s2_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

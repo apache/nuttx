@@ -85,3 +85,7 @@ endif
 ifeq ($(CONFIG_ESP32S2_FREERUN),y)
 CHIP_CSRCS += esp32s2_freerun.c
 endif
+
+ifeq ($(CONFIG_ESP32S2_RT_TIMER),y)
+CHIP_CSRCS += esp32s2_rt_timer.c
+endif
