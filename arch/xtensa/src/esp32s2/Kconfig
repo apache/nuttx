@@ -855,6 +855,13 @@ config ESP32S2_ONESHOT
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
+config ESP32S2_FREERUN
+	bool "Freerun timer wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support freerun timer.
+
 endmenu # Timer/counter Configuration
 endif # ESP32S2_TIMER
 
