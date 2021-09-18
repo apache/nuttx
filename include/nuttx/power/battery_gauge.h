@@ -99,6 +99,14 @@ struct battery_gauge_operations_s
   /* Battery capacity */
 
   int (*capacity)(struct battery_gauge_dev_s *dev, b16_t *value);
+
+  /* Battery current */
+
+  int (*current)(struct battery_gauge_dev_s *dev, b16_t *value);
+
+  /* Battery temp */
+
+  int (*temp)(struct battery_gauge_dev_s *dev, b8_t *value);
 };
 
 /* This structure defines the battery driver state structure */
