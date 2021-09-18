@@ -1297,7 +1297,7 @@ static ssize_t mmcsd_read(FAR struct inode *inode, unsigned char *buffer,
   SPI_SEND(spi, 0xff);
   mmcsd_semgive(slot);
 
-  finfo("Read %d bytes:\n", nbytes);
+  finfo("Read %zu bytes:\n", nbytes);
   mmcsd_dumpbuffer("Read buffer", buffer, nbytes);
   return nsectors;
 
