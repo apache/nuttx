@@ -269,6 +269,20 @@ FAR struct devif_callback_s *
 
   net_lock();
 
+  /* Verify that the device pointer is valid, i.e., that it still
+   * points to a registered network device and also that the network
+   * device in the UP state.
+   */
+
+  if (dev && !netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
+    {
+      /* No.. release the callback structure and fail */
+
+      devif_callback_free(NULL, NULL, list_head, list_tail);
+      net_unlock();
+      return NULL;
+    }
+
   /* Allocate the callback entry from heap */
 
 #ifdef CONFIG_NET_ALLOC_CONNS
@@ -303,22 +317,6 @@ FAR struct devif_callback_s *
 
       if (dev)
         {
-          /* Verify that the device pointer is valid, i.e., that it still
-           * points to a registered network device and also that the network
-           * device in in the UP state.
-           *
-           * And if it does, should that device also not be in the UP state?
-           */
-
-          if (!netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
-            {
-              /* No.. release the callback structure and fail */
-
-              devif_callback_free(NULL, NULL, list_head, list_tail);
-              net_unlock();
-              return NULL;
-            }
-
           ret->nxtdev  = dev->d_devcb;
           dev->d_devcb = ret;
         }
