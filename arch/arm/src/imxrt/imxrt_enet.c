@@ -1838,7 +1838,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 {
 #if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
-    defined(CONFIG_ETH0_PHY_KSZ8081)
+    defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I)
   uint16_t phyval;
   int ret;
 
