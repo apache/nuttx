@@ -1455,7 +1455,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
       (FAR struct imxrt_driver_s *)dev->d_private;
   struct flexcan_timeseg data_timing;
   int ret;
-  
+
   switch (cmd)
     {
       case SIOCGCANBITRATE: /* Get bitrate from a CAN controller */
