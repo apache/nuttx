@@ -63,17 +63,26 @@
 #define ESP32C3_RT_TIMER          ESP32C3_SYSTIM /* Systimer 1 */
 
 /****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+struct esp32c3_rt_priv_s
+{
+  int pid;
+  sem_t s_toutsem;
+  struct list_node s_runlist;
+  struct list_node s_toutlist;
+  FAR struct esp32c3_tim_dev_s *timer;
+};
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static int s_pid;
-
-static sem_t s_toutsem;
-
-static struct list_node s_runlist;
-static struct list_node s_toutlist;
-
-static struct esp32c3_tim_dev_s *s_esp32c3_tim_dev;
+static struct esp32c3_rt_priv_s g_rt_priv =
+{
+  .pid = -EINVAL,
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -104,7 +113,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
   struct rt_timer_s *p;
   bool inserted = false;
   uint64_t counter;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
@@ -114,7 +123,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
     {
       /* Calculate the timer's alarm value */
 
-      ESP32C3_TIM_GETCTR(tim, &counter);
+      ESP32C3_TIM_GETCTR(priv->timer, &counter);
       counter = CYCLES_TO_USEC(counter);
       timer->timeout = timeout;
       timer->alarm = timer->timeout + counter;
@@ -132,7 +141,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
        * node of timer whose alarm value is larger than new one
        */
 
-      list_for_every_entry(&s_runlist, p, struct rt_timer_s, list)
+      list_for_every_entry(&priv->s_runlist, p, struct rt_timer_s, list)
         {
           if (p->alarm > timer->alarm)
             {
@@ -148,19 +157,20 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
 
       if (!inserted)
         {
-          list_add_tail(&s_runlist, &timer->list);
+          list_add_tail(&priv->s_runlist, &timer->list);
         }
 
       timer->state = RT_TIMER_READY;
 
       /* If this timer is at the head of the list */
 
-      if (timer == container_of(s_runlist.next, struct rt_timer_s, list))
+      if (timer == container_of(priv->s_runlist.next,
+                                struct rt_timer_s, list))
         {
           /* Reset the hardware timer alarm */
 
-          ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(timer->alarm));
-          ESP32C3_TIM_SETALRM(tim, true);
+          ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(timer->alarm));
+          ESP32C3_TIM_SETALRM(priv->timer, true);
         }
     }
 
@@ -188,7 +198,7 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
   bool ishead;
   struct rt_timer_s *next_timer;
   uint64_t alarm;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
@@ -204,7 +214,8 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
     {
       /* Check if the timer is at the head of the list */
 
-      if (timer == container_of(s_runlist.next, struct rt_timer_s, list))
+      if (timer == container_of(priv->s_runlist.next,
+                                struct rt_timer_s, list))
         {
           ishead = true;
         }
@@ -220,19 +231,19 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
 
       if (ishead)
         {
-          if (!list_is_empty(&s_runlist))
+          if (!list_is_empty(&priv->s_runlist))
             {
               /* Set the value from the next timer as the new hardware timer
                * alarm value.
                */
 
-              next_timer = container_of(s_runlist.next,
+              next_timer = container_of(priv->s_runlist.next,
                                         struct rt_timer_s,
                                         list);
               alarm = next_timer->alarm;
 
-              ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(alarm));
-              ESP32C3_TIM_SETALRM(tim, true);
+              ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(alarm));
+              ESP32C3_TIM_SETALRM(priv->timer, true);
             }
         }
     }
@@ -261,6 +272,8 @@ static void delete_rt_timer(FAR struct rt_timer_s *timer)
   int ret;
   irqstate_t flags;
 
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+
   flags = enter_critical_section();
 
   if (timer->state == RT_TIMER_READY)
@@ -276,12 +289,12 @@ static void delete_rt_timer(FAR struct rt_timer_s *timer)
       goto exit;
     }
 
-  list_add_after(&s_toutlist, &timer->list);
+  list_add_after(&priv->s_toutlist, &timer->list);
   timer->state = RT_TIMER_DELETE;
 
   /* Wake up the thread to process deleted timers */
 
-  ret = nxsem_post(&s_toutsem);
+  ret = nxsem_post(&priv->s_toutsem);
   if (ret < 0)
     {
       tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
@@ -313,12 +326,13 @@ static int rt_timer_thread(int argc, FAR char *argv[])
   irqstate_t flags;
   struct rt_timer_s *timer;
   enum rt_timer_state_e raw_state;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   while (1)
     {
       /* Waiting for all timers to time out */
 
-      ret = nxsem_wait(&s_toutsem);
+      ret = nxsem_wait(&priv->s_toutsem);
       if (ret)
         {
           tmrerr("ERROR: Wait s_toutsem error=%d\n", ret);
@@ -329,11 +343,12 @@ static int rt_timer_thread(int argc, FAR char *argv[])
 
       /* Process all the timers in list */
 
-      while (!list_is_empty(&s_toutlist))
+      while (!list_is_empty(&priv->s_toutlist))
         {
           /* Get the first timer in the list */
 
-          timer = container_of(s_toutlist.next, struct rt_timer_s, list);
+          timer = container_of(priv->s_toutlist.next,
+                               struct rt_timer_s, list);
 
           /* Cache the raw state to decide how to deal with this timer */
 
@@ -403,17 +418,17 @@ static int rt_timer_isr(int irq, void *context, void *arg)
   uint64_t alarm;
   uint64_t counter;
   bool wake = false;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   /* Clear interrupt register status */
 
-  ESP32C3_TIM_ACKINT(tim);
+  ESP32C3_TIM_ACKINT(priv->timer);
 
   flags = enter_critical_section();
 
   /* Check if there is a timer running */
 
-  if (!list_is_empty(&s_runlist))
+  if (!list_is_empty(&priv->s_runlist))
     {
       /**
        * When stop/delete timer, in the same time the hardware timer
@@ -421,8 +436,8 @@ static int rt_timer_isr(int irq, void *context, void *arg)
        * from running list, so the 1st timer is not which triggers.
        */
 
-      timer = container_of(s_runlist.next, struct rt_timer_s, list);
-      ESP32C3_TIM_GETCTR(tim, &counter);
+      timer = container_of(priv->s_runlist.next, struct rt_timer_s, list);
+      ESP32C3_TIM_GETCTR(priv->timer, &counter);
       counter = CYCLES_TO_USEC(counter);
       if (timer->alarm <= counter)
         {
@@ -435,32 +450,33 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
           list_delete(&timer->list);
           timer->state = RT_TIMER_TIMEOUT;
-          list_add_after(&s_toutlist, &timer->list);
+          list_add_after(&priv->s_toutlist, &timer->list);
           wake = true;
 
           /* Check if there is a timer running */
 
-          if (!list_is_empty(&s_runlist))
+          if (!list_is_empty(&priv->s_runlist))
             {
               /* Reset hardware timer alarm with next timer's alarm value */
 
-              timer = container_of(s_runlist.next, struct rt_timer_s, list);
+              timer = container_of(priv->s_runlist.next,
+                                   struct rt_timer_s, list);
               alarm = timer->alarm;
 
-              ESP32C3_TIM_SETALRVL(tim, USEC_TO_CYCLES(alarm));
+              ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(alarm));
             }
         }
 
       /* If there is a timer in the list, the alarm should be enabled */
 
-      ESP32C3_TIM_SETALRM(tim, true);
+      ESP32C3_TIM_SETALRM(priv->timer, true);
     }
 
   if (wake)
     {
       /* Wake up the thread to process timed-out timers */
 
-      ret = nxsem_post(&s_toutsem);
+      ret = nxsem_post(&priv->s_toutsem);
       if (ret < 0)
         {
           tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
@@ -594,9 +610,9 @@ void rt_timer_delete(FAR struct rt_timer_s *timer)
 uint64_t IRAM_ATTR rt_timer_time_us(void)
 {
   uint64_t counter;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
-  ESP32C3_TIM_GETCTR(tim, &counter);
+  ESP32C3_TIM_GETCTR(priv->timer, &counter);
   counter = CYCLES_TO_USEC(counter);
 
   return counter;
@@ -620,14 +636,14 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
 {
   irqstate_t flags;
   uint64_t counter;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
   uint64_t alarm_value = 0;
 
   flags = enter_critical_section();
 
-  ESP32C3_TIM_GETCTR(tim, &counter);
+  ESP32C3_TIM_GETCTR(priv->timer, &counter);
   counter = CYCLES_TO_USEC(counter);
-  ESP32C3_TIM_GETALRVL(tim, &alarm_value);
+  ESP32C3_TIM_GETALRVL(priv->timer, &alarm_value);
   alarm_value = CYCLES_TO_USEC(alarm_value);
 
   if (alarm_value <= counter)
@@ -661,15 +677,15 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
 void IRAM_ATTR rt_timer_calibration(uint64_t time_us)
 {
   uint64_t counter;
-  struct esp32c3_tim_dev_s *tim = s_esp32c3_tim_dev;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
-  ESP32C3_TIM_GETCTR(tim, &counter);
+  ESP32C3_TIM_GETCTR(priv->timer, &counter);
   counter = CYCLES_TO_USEC(counter);
   counter += time_us;
-  ESP32C3_TIM_SETCTR(tim, USEC_TO_CYCLES(counter));
-  ESP32C3_TIM_RLD_NOW(tim);
+  ESP32C3_TIM_SETCTR(priv->timer, USEC_TO_CYCLES(counter));
+  ESP32C3_TIM_RLD_NOW(priv->timer);
   leave_critical_section(flags);
 }
 
@@ -691,34 +707,31 @@ int esp32c3_rt_timer_init(void)
 {
   int pid;
   irqstate_t flags;
-  struct esp32c3_tim_dev_s *tim;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
-  tim = esp32c3_tim_init(ESP32C3_RT_TIMER);
-  if (!tim)
+  priv->timer = esp32c3_tim_init(ESP32C3_RT_TIMER);
+  if (priv->timer == NULL)
     {
       tmrerr("ERROR: Failed to initialize ESP32-C3 timer0\n");
       return -EINVAL;
     }
 
-  nxsem_init(&s_toutsem, 0, 0);
+  nxsem_init(&priv->s_toutsem, 0, 0);
 
-  pid = kthread_create(RT_TIMER_TASK_NAME,
+  priv->pid = kthread_create(RT_TIMER_TASK_NAME,
                        RT_TIMER_TASK_PRIORITY,
                        RT_TIMER_TASK_STACK_SIZE,
                        rt_timer_thread,
                        NULL);
-  if (pid < 0)
+  if (priv->pid < 0)
     {
       tmrerr("ERROR: Failed to create RT timer task error=%d\n", pid);
-      esp32c3_tim_deinit(tim);
-      return pid;
+      esp32c3_tim_deinit(priv->timer);
+      return priv->pid;
     }
 
-  list_initialize(&s_runlist);
-  list_initialize(&s_toutlist);
-
-  s_esp32c3_tim_dev = tim;
-  s_pid = pid;
+  list_initialize(&priv->s_runlist);
+  list_initialize(&priv->s_toutlist);
 
   flags = enter_critical_section();
 
@@ -732,10 +745,10 @@ int esp32c3_rt_timer_init(void)
    * until ESP32C3_TIM_SETALRM is set.
    */
 
-  ESP32C3_TIM_CLEAR(tim);
-  ESP32C3_TIM_SETISR(tim, rt_timer_isr, NULL);
-  ESP32C3_TIM_ENABLEINT(tim);
-  ESP32C3_TIM_START(tim);
+  ESP32C3_TIM_CLEAR(priv->timer);
+  ESP32C3_TIM_SETISR(priv->timer, rt_timer_isr, NULL);
+  ESP32C3_TIM_ENABLEINT(priv->timer);
+  ESP32C3_TIM_START(priv->timer);
 
   leave_critical_section(flags);
 
@@ -759,17 +772,23 @@ int esp32c3_rt_timer_init(void)
 void esp32c3_rt_timer_deinit(void)
 {
   irqstate_t flags;
+  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
-  ESP32C3_TIM_STOP(s_esp32c3_tim_dev);
-  ESP32C3_TIM_DISABLEINT(s_esp32c3_tim_dev);
-  ESP32C3_TIM_SETISR(s_esp32c3_tim_dev, NULL, NULL);
-  esp32c3_tim_deinit(s_esp32c3_tim_dev);
-  s_esp32c3_tim_dev = NULL;
+  ESP32C3_TIM_STOP(priv->timer);
+  ESP32C3_TIM_DISABLEINT(priv->timer);
+  ESP32C3_TIM_SETISR(priv->timer, NULL, NULL);
+  esp32c3_tim_deinit(priv->timer);
+  priv->timer = NULL;
 
   leave_critical_section(flags);
 
-  kthread_delete(s_pid);
-  nxsem_destroy(&s_toutsem);
+  if (priv->pid != -EINVAL)
+    {
+      kthread_delete(priv->pid);
+      priv->pid = -EINVAL;
+    }
+
+  nxsem_destroy(&priv->s_toutsem);
 }
