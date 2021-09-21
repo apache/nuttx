@@ -260,6 +260,7 @@ typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
 struct devif_callback_s
 {
   FAR struct devif_callback_s *nxtconn;
+  FAR struct devif_callback_s *prevconn;
   FAR struct devif_callback_s *nxtdev;
   FAR devif_callback_event_t event;
   FAR void *priv;

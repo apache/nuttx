@@ -119,41 +119,45 @@ static void devif_callback_free(FAR struct net_driver_s *dev,
 
       if (list_head)
         {
-          /* Find the callback structure in the connection event list */
-
-          for (prev = NULL, curr = *list_head;
-               curr && curr != cb;
-               prev = curr, curr = curr->nxtconn)
-            {
-            }
+          prev = cb->prevconn;
 
           /* Remove the structure from the connection event list */
 
-          DEBUGASSERT(curr);
-          if (curr)
+          if (prev)
             {
-              if (prev)
+              /* The item to be removed is not in the head. */
+
+              prev->nxtconn = cb->nxtconn;
+
+              if (cb->nxtconn)
                 {
-                  /* The found item to be removed is not in the head. */
+                  /* The item to be removed is not in the tail. */
 
-                  prev->nxtconn = cb->nxtconn;
+                  cb->nxtconn->prevconn = prev;
                 }
-              else
+            }
+          else
+            {
+              /* The item to be removed is in the head. */
+
+              *list_head = cb->nxtconn;
+
+              if (cb->nxtconn)
                 {
-                  /* The found item to be removed is in the head. */
+                  /* There are more items besides the head item. */
 
-                  *list_head = cb->nxtconn;
+                  cb->nxtconn->prevconn = NULL;
                 }
+            }
 
-              if (!cb->nxtconn)
-                {
-                  /* If the tail item is being removed,
-                   * update the tail pointer.
-                   */
+          if (!cb->nxtconn)
+            {
+              /* If the tail item is being removed,
+               * update the tail pointer.
+               */
 
-                  DEBUGASSERT(list_tail);
-                  *list_tail = prev;
-                }
+              DEBUGASSERT(list_tail);
+              *list_tail = prev;
             }
         }
 
@@ -297,6 +301,7 @@ FAR struct devif_callback_s *
       if (list_head && list_tail)
         {
           ret->nxtconn = NULL;
+          ret->prevconn = *list_tail;
 
           if (*list_tail)
             {
