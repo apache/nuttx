@@ -81,7 +81,9 @@ void board_userled(int led, bool ledon)
       return;
     }
 
-  s32k1xx_gpiowrite(ledcfg, !ledon); /* Invert output, an output of '0' illuminates the LED */
+  /* Invert output, an output of '0' illuminates the LED */
+
+  s32k1xx_gpiowrite(ledcfg, !ledon);
 }
 
 /****************************************************************************
