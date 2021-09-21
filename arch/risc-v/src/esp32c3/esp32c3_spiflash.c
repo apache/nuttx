@@ -78,7 +78,7 @@
 #define SPI_FLASH_ERASED_STATE      (0xff)
 #define SPI_FLASH_SIZE              (4 * 1024 * 1024)
 
-#define MTD2PRIV(_dev)              ((FAR struct esp32c3_spiflash_s *)_dev)
+#define MTD2PRIV(_dev)              ((struct esp32c3_spiflash_s *)_dev)
 #define MTD_SIZE(_priv)             ((*(_priv)->data)->chip.chip_size)
 #define MTD_BLKSIZE(_priv)          ((*(_priv)->data)->chip.page_size)
 #define MTD_ERASESIZE(_priv)        ((*(_priv)->data)->chip.sector_size)
@@ -923,12 +923,12 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
                                                      uint32_t mtd_size)
 {
   struct esp32c3_spiflash_s *priv = &g_esp32c3_spiflash;
   const esp32c3_spiflash_chip_t *chip = &(*priv->data)->chip;
-  FAR struct mtd_dev_s *mtd_part;
+  struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;

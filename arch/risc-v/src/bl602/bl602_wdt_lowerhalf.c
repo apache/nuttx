@@ -57,8 +57,8 @@
 
 struct bl602_wdt_lowerhalf_s
 {
-  FAR const struct watchdog_ops_s  *ops; /* Lower half operations */
-  uint32_t lastreset;                    /* The last reset time */
+  const struct watchdog_ops_s  *ops; /* Lower half operations */
+  uint32_t lastreset;                /* The last reset time */
   uint32_t timeout;
   uint8_t started;
 };
@@ -69,12 +69,12 @@ struct bl602_wdt_lowerhalf_s
 
 /* "Lower half" driver methods **********************************************/
 
-static int bl602_start(FAR struct watchdog_lowerhalf_s *lower);
-static int bl602_stop(FAR struct watchdog_lowerhalf_s *lower);
-static int bl602_keepalive(FAR struct watchdog_lowerhalf_s *lower);
-static int bl602_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status);
-static int bl602_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int bl602_start(struct watchdog_lowerhalf_s *lower);
+static int bl602_stop(struct watchdog_lowerhalf_s *lower);
+static int bl602_keepalive(struct watchdog_lowerhalf_s *lower);
+static int bl602_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status);
+static int bl602_settimeout(struct watchdog_lowerhalf_s *lower,
                             uint32_t timeout);
 
 /****************************************************************************
@@ -127,10 +127,10 @@ static struct bl602_wdt_lowerhalf_s g_wdtdev =
  *
  ****************************************************************************/
 
-static int bl602_start(FAR struct watchdog_lowerhalf_s *lower)
+static int bl602_start(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv =
-    (FAR struct bl602_wdt_lowerhalf_s *)lower;
+  struct bl602_wdt_lowerhalf_s *priv =
+    (struct bl602_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   DEBUGASSERT(priv);
@@ -169,10 +169,10 @@ static int bl602_start(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_stop(FAR struct watchdog_lowerhalf_s *lower)
+static int bl602_stop(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv =
-      (FAR struct bl602_wdt_lowerhalf_s *)lower;
+  struct bl602_wdt_lowerhalf_s *priv =
+      (struct bl602_wdt_lowerhalf_s *)lower;
 
   bl602_wdt_disable();
   priv->started = false;
@@ -196,10 +196,10 @@ static int bl602_stop(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_keepalive(FAR struct watchdog_lowerhalf_s *lower)
+static int bl602_keepalive(struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv =
-    (FAR struct bl602_wdt_lowerhalf_s *)lower;
+  struct bl602_wdt_lowerhalf_s *priv =
+    (struct bl602_wdt_lowerhalf_s *)lower;
   irqstate_t flags;
 
   /* Reload the WDT timer */
@@ -230,11 +230,11 @@ static int bl602_keepalive(FAR struct watchdog_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_getstatus(FAR struct watchdog_lowerhalf_s *lower,
-                           FAR struct watchdog_status_s *status)
+static int bl602_getstatus(struct watchdog_lowerhalf_s *lower,
+                           struct watchdog_status_s *status)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv =
-    (FAR struct bl602_wdt_lowerhalf_s *)lower;
+  struct bl602_wdt_lowerhalf_s *priv =
+    (struct bl602_wdt_lowerhalf_s *)lower;
   uint32_t ticks;
   uint32_t elapsed;
 
@@ -285,11 +285,11 @@ static int bl602_getstatus(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_settimeout(FAR struct watchdog_lowerhalf_s *lower,
+static int bl602_settimeout(struct watchdog_lowerhalf_s *lower,
                            uint32_t timeout)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv =
-    (FAR struct bl602_wdt_lowerhalf_s *)lower;
+  struct bl602_wdt_lowerhalf_s *priv =
+    (struct bl602_wdt_lowerhalf_s *)lower;
 
   DEBUGASSERT(priv);
 
@@ -334,14 +334,14 @@ static int bl602_settimeout(FAR struct watchdog_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int bl602_wdt_initialize(FAR const char *devpath)
+int bl602_wdt_initialize(const char *devpath)
 {
-  FAR struct bl602_wdt_lowerhalf_s *priv = &g_wdtdev;
-  FAR void *handle;
+  struct bl602_wdt_lowerhalf_s *priv = &g_wdtdev;
+  void *handle;
 
   /* Register the watchdog driver as /dev/watchdog0 */
 
   handle = watchdog_register(devpath,
-                             (FAR struct watchdog_lowerhalf_s *)priv);
+                             (struct watchdog_lowerhalf_s *)priv);
   return (handle != NULL) ? OK : -ENODEV;
 }

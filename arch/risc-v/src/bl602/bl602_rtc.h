@@ -62,7 +62,7 @@
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_sel(uint8_t clk_type);
+void bl602_hbn_sel(uint8_t clk_type);
 
 /****************************************************************************
  * Name: bl602_hbn_clear_rtc_int
@@ -79,7 +79,7 @@ FAR void bl602_hbn_sel(uint8_t clk_type);
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_clear_rtc_int(void);
+void bl602_hbn_clear_rtc_int(void);
 
 /****************************************************************************
  * Name: bl602_hbn_set_rtc_timer
@@ -98,7 +98,7 @@ FAR void bl602_hbn_clear_rtc_int(void);
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_set_rtc_timer(uint8_t delay_type, uint32_t compval_low,
+void bl602_hbn_set_rtc_timer(uint8_t delay_type, uint32_t compval_low,
                                  uint32_t compval_high,  uint8_t comp_mode);
 
 /****************************************************************************
@@ -115,7 +115,7 @@ FAR void bl602_hbn_set_rtc_timer(uint8_t delay_type, uint32_t compval_low,
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_clear_rtc_counter(void);
+void bl602_hbn_clear_rtc_counter(void);
 
 /****************************************************************************
  * Name: bl602_hbn_enable_rtc_counter
@@ -131,7 +131,7 @@ FAR void bl602_hbn_clear_rtc_counter(void);
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_enable_rtc_counter(void);
+void bl602_hbn_enable_rtc_counter(void);
 
 /****************************************************************************
  * Name: bl602_hbn_get_rtc_timer_val
@@ -148,7 +148,7 @@ FAR void bl602_hbn_enable_rtc_counter(void);
  *
  ****************************************************************************/
 
-FAR void bl602_hbn_get_rtc_timer_val(uint32_t *val_low, uint32_t *val_high);
+void bl602_hbn_get_rtc_timer_val(uint32_t *val_low, uint32_t *val_high);
 
 /****************************************************************************
  * Name: bl602_rtc_lowerhalf_initialize
@@ -165,6 +165,6 @@ FAR void bl602_hbn_get_rtc_timer_val(uint32_t *val_low, uint32_t *val_high);
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void);
+struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void);
 
 #endif /* __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H */

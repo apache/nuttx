@@ -324,58 +324,58 @@ struct mpfs_dev_s
 /* Mutual exclusion */
 
 #if defined(CONFIG_SDIO_MUXBUS)
-static int  mpfs_lock(FAR struct sdio_dev_s *dev, bool lock);
+static int  mpfs_lock(struct sdio_dev_s *dev, bool lock);
 #endif
 
 /* Initialization/setup */
 
-static void mpfs_reset(FAR struct sdio_dev_s *dev);
-static sdio_capset_t mpfs_capabilities(FAR struct sdio_dev_s *dev);
-static sdio_statset_t mpfs_status(FAR struct sdio_dev_s *dev);
-static void mpfs_widebus(FAR struct sdio_dev_s *dev, bool enable);
-static void mpfs_clock(FAR struct sdio_dev_s *dev,
+static void mpfs_reset(struct sdio_dev_s *dev);
+static sdio_capset_t mpfs_capabilities(struct sdio_dev_s *dev);
+static sdio_statset_t mpfs_status(struct sdio_dev_s *dev);
+static void mpfs_widebus(struct sdio_dev_s *dev, bool enable);
+static void mpfs_clock(struct sdio_dev_s *dev,
                        enum sdio_clock_e rate);
-static int  mpfs_attach(FAR struct sdio_dev_s *dev);
+static int  mpfs_attach(struct sdio_dev_s *dev);
 
 /* Command / Status / Data Transfer */
 
-static int  mpfs_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  mpfs_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
                          uint32_t arg);
 #ifdef CONFIG_SDIO_BLOCKSETUP
-static void mpfs_blocksetup(FAR struct sdio_dev_s *dev,
+static void mpfs_blocksetup(struct sdio_dev_s *dev,
               unsigned int blocksize, unsigned int nblocks);
 #endif
-static int  mpfs_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int  mpfs_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                            size_t nbytes);
-static int  mpfs_sendsetup(FAR struct sdio_dev_s *dev,
-                           FAR const uint8_t *buffer, size_t nbytes);
-static int  mpfs_cancel(FAR struct sdio_dev_s *dev);
+static int  mpfs_sendsetup(struct sdio_dev_s *dev,
+                           const uint8_t *buffer, size_t nbytes);
+static int  mpfs_cancel(struct sdio_dev_s *dev);
 
-static int  mpfs_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd);
-static int  mpfs_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd);
+static int  mpfs_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
                               uint32_t *rshort);
-static int  mpfs_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  mpfs_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
                           uint32_t rlong[4]);
-static int  mpfs_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int  mpfs_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
                            uint32_t *rshort);
 
 /* Event handler */
 
-static void mpfs_waitenable(FAR struct sdio_dev_s *dev,
+static void mpfs_waitenable(struct sdio_dev_s *dev,
                             sdio_eventset_t eventset, uint32_t timeout);
-static sdio_eventset_t mpfs_eventwait(FAR struct sdio_dev_s *dev);
-static void mpfs_callbackenable(FAR struct sdio_dev_s *dev,
+static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev);
+static void mpfs_callbackenable(struct sdio_dev_s *dev,
                                 sdio_eventset_t eventset);
-static int  mpfs_registercallback(FAR struct sdio_dev_s *dev,
+static int  mpfs_registercallback(struct sdio_dev_s *dev,
                                   worker_t callback, void *arg);
 
 /* DMA */
 
 #if defined(CONFIG_SDIO_DMA)
-static int  mpfs_dmarecvsetup(FAR struct sdio_dev_s *dev,
-                              FAR uint8_t *buffer, size_t buflen);
-static int  mpfs_dmasendsetup(FAR struct sdio_dev_s *dev,
-                              FAR const uint8_t *buffer, size_t buflen);
+static int  mpfs_dmarecvsetup(struct sdio_dev_s *dev,
+                              uint8_t *buffer, size_t buflen);
+static int  mpfs_dmasendsetup(struct sdio_dev_s *dev,
+                              const uint8_t *buffer, size_t buflen);
 #endif
 
 /* Initialization/uninitialization/reset ************************************/
@@ -1164,7 +1164,7 @@ static int mpfs_emmcsd_interrupt(int irq, void *context, void *arg)
  ****************************************************************************/
 
 #if defined(CONFIG_SDIO_MUXBUS)
-static int mpfs_lock(FAR struct sdio_dev_s *dev, bool lock)
+static int mpfs_lock(struct sdio_dev_s *dev, bool lock)
 {
   /* The multiplex bus is part of board support package. */
 
@@ -1375,9 +1375,9 @@ static void mpfs_sdcard_init(struct mpfs_dev_s *priv)
  *
  ****************************************************************************/
 
-static bool mpfs_device_reset(FAR struct sdio_dev_s *dev)
+static bool mpfs_device_reset(struct sdio_dev_s *dev)
 {
-  FAR struct mpfs_dev_s *priv = (FAR struct mpfs_dev_s *)dev;
+  struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   irqstate_t flags;
   uint32_t regval;
   uint32_t cap;
@@ -1608,7 +1608,7 @@ static bool mpfs_device_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void mpfs_reset(FAR struct sdio_dev_s *dev)
+static void mpfs_reset(struct sdio_dev_s *dev)
 {
   mpfs_device_reset(dev);
 }
@@ -1627,7 +1627,7 @@ static void mpfs_reset(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static sdio_capset_t mpfs_capabilities(FAR struct sdio_dev_s *dev)
+static sdio_capset_t mpfs_capabilities(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_capset_t caps = 0;
@@ -1665,7 +1665,7 @@ static sdio_capset_t mpfs_capabilities(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static sdio_statset_t mpfs_status(FAR struct sdio_dev_s *dev)
+static sdio_statset_t mpfs_status(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   return priv->cdstatus;
@@ -1688,7 +1688,7 @@ static sdio_statset_t mpfs_status(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static void mpfs_widebus(FAR struct sdio_dev_s *dev, bool wide)
+static void mpfs_widebus(struct sdio_dev_s *dev, bool wide)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   priv->widebus = wide;
@@ -1721,7 +1721,7 @@ static void mpfs_widebus(FAR struct sdio_dev_s *dev, bool wide)
  *
  ****************************************************************************/
 
-static void mpfs_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
+static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t clckr;
@@ -1779,7 +1779,7 @@ static void mpfs_clock(FAR struct sdio_dev_s *dev, enum sdio_clock_e rate)
  *
  ****************************************************************************/
 
-static int mpfs_attach(FAR struct sdio_dev_s *dev)
+static int mpfs_attach(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   int ret;
@@ -1832,7 +1832,7 @@ static int mpfs_attach(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int mpfs_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int mpfs_sendcmd(struct sdio_dev_s *dev, uint32_t cmd,
                          uint32_t arg)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -1941,7 +1941,7 @@ static int mpfs_sendcmd(FAR struct sdio_dev_s *dev, uint32_t cmd,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_BLOCKSETUP
-static void mpfs_blocksetup(FAR struct sdio_dev_s *dev,
+static void mpfs_blocksetup(struct sdio_dev_s *dev,
                              unsigned int blocksize, unsigned int nblocks)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -1975,7 +1975,7 @@ static void mpfs_blocksetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int mpfs_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
+static int mpfs_recvsetup(struct sdio_dev_s *dev, uint8_t *buffer,
                            size_t nbytes)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2030,7 +2030,7 @@ static int mpfs_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
  *
  ****************************************************************************/
 
-static int mpfs_sendsetup(FAR struct sdio_dev_s *dev, FAR const
+static int mpfs_sendsetup(struct sdio_dev_s *dev, const
                            uint8_t *buffer, size_t nbytes)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2084,8 +2084,8 @@ static int mpfs_sendsetup(FAR struct sdio_dev_s *dev, FAR const
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int mpfs_dmarecvsetup(FAR struct sdio_dev_s *dev,
-                              FAR uint8_t *buffer, size_t buflen)
+static int mpfs_dmarecvsetup(struct sdio_dev_s *dev,
+                              uint8_t *buffer, size_t buflen)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
 #ifndef CONFIG_SDIO_BLOCKSETUP
@@ -2144,8 +2144,8 @@ static int mpfs_dmarecvsetup(FAR struct sdio_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SDIO_DMA
-static int mpfs_dmasendsetup(FAR struct sdio_dev_s *dev,
-                              FAR const uint8_t *buffer, size_t buflen)
+static int mpfs_dmasendsetup(struct sdio_dev_s *dev,
+                              const uint8_t *buffer, size_t buflen)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
 #ifndef CONFIG_SDIO_BLOCKSETUP
@@ -2213,7 +2213,7 @@ static int mpfs_dmasendsetup(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int mpfs_cancel(FAR struct sdio_dev_s *dev)
+static int mpfs_cancel(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
 
@@ -2257,7 +2257,7 @@ static int mpfs_cancel(FAR struct sdio_dev_s *dev)
  *
  ****************************************************************************/
 
-static int mpfs_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
+static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t status;
@@ -2394,7 +2394,7 @@ static int mpfs_check_recverror(struct mpfs_dev_s *priv)
  *
  ****************************************************************************/
 
-static int mpfs_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int mpfs_recvshortcrc(struct sdio_dev_s *dev, uint32_t cmd,
                               uint32_t *rshort)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2432,7 +2432,7 @@ static int mpfs_recvshortcrc(FAR struct sdio_dev_s *dev, uint32_t cmd,
  *
  ****************************************************************************/
 
-static int mpfs_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int mpfs_recvshort(struct sdio_dev_s *dev, uint32_t cmd,
                            uint32_t *rshort)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2468,7 +2468,7 @@ static int mpfs_recvshort(FAR struct sdio_dev_s *dev, uint32_t cmd,
  *
  ****************************************************************************/
 
-static int mpfs_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
+static int mpfs_recvlong(struct sdio_dev_s *dev, uint32_t cmd,
                           uint32_t rlong[4])
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2522,7 +2522,7 @@ static int mpfs_recvlong(FAR struct sdio_dev_s *dev, uint32_t cmd,
  *
  ****************************************************************************/
 
-static void mpfs_waitenable(FAR struct sdio_dev_s *dev,
+static void mpfs_waitenable(struct sdio_dev_s *dev,
                             sdio_eventset_t eventset, uint32_t timeout)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2608,7 +2608,7 @@ static void mpfs_waitenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static sdio_eventset_t mpfs_eventwait(FAR struct sdio_dev_s *dev)
+static sdio_eventset_t mpfs_eventwait(struct sdio_dev_s *dev)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_eventset_t wkupevent = 0;
@@ -2698,7 +2698,7 @@ errout_with_waitints:
  *
  ****************************************************************************/
 
-static void mpfs_callbackenable(FAR struct sdio_dev_s *dev,
+static void mpfs_callbackenable(struct sdio_dev_s *dev,
                                  sdio_eventset_t eventset)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2732,7 +2732,7 @@ static void mpfs_callbackenable(FAR struct sdio_dev_s *dev,
  *
  ****************************************************************************/
 
-static int mpfs_registercallback(FAR struct sdio_dev_s *dev,
+static int mpfs_registercallback(struct sdio_dev_s *dev,
                                   worker_t callback, void *arg)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
@@ -2849,7 +2849,7 @@ static void mpfs_callback(void *arg)
  *
  ****************************************************************************/
 
-FAR struct sdio_dev_s *sdio_initialize(int slotno)
+struct sdio_dev_s *sdio_initialize(int slotno)
 {
   struct mpfs_dev_s *priv = NULL;
   priv = &g_emmcsd_dev;
@@ -2895,7 +2895,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
  *
  ****************************************************************************/
 
-void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
+void sdio_mediachange(struct sdio_dev_s *dev, bool cardinslot)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   sdio_statset_t cdstatus;
@@ -2943,7 +2943,7 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot)
  *
  ****************************************************************************/
 
-void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
+void sdio_wrprotect(struct sdio_dev_s *dev, bool wrprotect)
 {
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   irqstate_t flags;

@@ -34,7 +34,7 @@
  * Private Data
  ****************************************************************************/
 
-static FAR struct mm_heap_s *g_rtcheap;
+static struct mm_heap_s *g_rtcheap;
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +60,7 @@ void esp32c3_rtcheap_initialize(void)
   extern uint8_t *_srtcheap;
   extern uint8_t *_ertcheap;
 
-  start = (FAR void *)&_srtcheap;
+  start = (void *)&_srtcheap;
   size  = (size_t)((uintptr_t)&_ertcheap - (uintptr_t)&_srtcheap);
   g_rtcheap = mm_initialize("rtcheap", start, size);
 }
@@ -126,7 +126,7 @@ void *esp32c3_rtcheap_zalloc(size_t size)
  *
  ****************************************************************************/
 
-void esp32c3_rtcheap_free(FAR void *mem)
+void esp32c3_rtcheap_free(void *mem)
 {
   mm_free(g_rtcheap, mem);
 }
@@ -163,7 +163,7 @@ void *esp32c3_rtcheap_memalign(size_t alignment, size_t size)
  *
  ****************************************************************************/
 
-bool esp32c3_rtcheap_heapmember(FAR void *mem)
+bool esp32c3_rtcheap_heapmember(void *mem)
 {
   return mm_heapmember(g_rtcheap, mem);
 }
@@ -177,7 +177,7 @@ bool esp32c3_rtcheap_heapmember(FAR void *mem)
  *
  ****************************************************************************/
 
-int esp32c3_rtcheap_mallinfo(FAR struct mallinfo *info)
+int esp32c3_rtcheap_mallinfo(struct mallinfo *info)
 {
   return mm_mallinfo(g_rtcheap, info);
 }

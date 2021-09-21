@@ -72,7 +72,7 @@ struct esp32c3_rt_priv_s
   sem_t s_toutsem;
   struct list_node s_runlist;
   struct list_node s_toutlist;
-  FAR struct esp32c3_tim_dev_s *timer;
+  struct esp32c3_tim_dev_s *timer;
 };
 
 /****************************************************************************
@@ -105,7 +105,7 @@ static struct esp32c3_rt_priv_s g_rt_priv =
  *
  ****************************************************************************/
 
-static void start_rt_timer(FAR struct rt_timer_s *timer,
+static void start_rt_timer(struct rt_timer_s *timer,
                            uint64_t timeout,
                            bool repeat)
 {
@@ -113,7 +113,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
   struct rt_timer_s *p;
   bool inserted = false;
   uint64_t counter;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
@@ -192,13 +192,13 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
  *
  ****************************************************************************/
 
-static void stop_rt_timer(FAR struct rt_timer_s *timer)
+static void stop_rt_timer(struct rt_timer_s *timer)
 {
   irqstate_t flags;
   bool ishead;
   struct rt_timer_s *next_timer;
   uint64_t alarm;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
@@ -267,12 +267,12 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
  *
  ****************************************************************************/
 
-static void delete_rt_timer(FAR struct rt_timer_s *timer)
+static void delete_rt_timer(struct rt_timer_s *timer)
 {
   int ret;
   irqstate_t flags;
 
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 
@@ -320,13 +320,13 @@ exit:
  *
  ****************************************************************************/
 
-static int rt_timer_thread(int argc, FAR char *argv[])
+static int rt_timer_thread(int argc, char *argv[])
 {
   int ret;
   irqstate_t flags;
   struct rt_timer_s *timer;
   enum rt_timer_state_e raw_state;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   while (1)
     {
@@ -418,7 +418,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
   uint64_t alarm;
   uint64_t counter;
   bool wake = false;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   /* Clear interrupt register status */
 
@@ -507,8 +507,8 @@ static int rt_timer_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int rt_timer_create(FAR const struct rt_timer_args_s *args,
-                    FAR struct rt_timer_s **timer_handle)
+int rt_timer_create(const struct rt_timer_args_s *args,
+                    struct rt_timer_s **timer_handle)
 {
   struct rt_timer_s *timer;
 
@@ -546,7 +546,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
  *
  ****************************************************************************/
 
-void rt_timer_start(FAR struct rt_timer_s *timer,
+void rt_timer_start(struct rt_timer_s *timer,
                     uint64_t timeout,
                     bool repeat)
 {
@@ -569,7 +569,7 @@ void rt_timer_start(FAR struct rt_timer_s *timer,
  *
  ****************************************************************************/
 
-void rt_timer_stop(FAR struct rt_timer_s *timer)
+void rt_timer_stop(struct rt_timer_s *timer)
 {
   stop_rt_timer(timer);
 }
@@ -588,7 +588,7 @@ void rt_timer_stop(FAR struct rt_timer_s *timer)
  *
  ****************************************************************************/
 
-void rt_timer_delete(FAR struct rt_timer_s *timer)
+void rt_timer_delete(struct rt_timer_s *timer)
 {
   delete_rt_timer(timer);
 }
@@ -610,7 +610,7 @@ void rt_timer_delete(FAR struct rt_timer_s *timer)
 uint64_t IRAM_ATTR rt_timer_time_us(void)
 {
   uint64_t counter;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   ESP32C3_TIM_GETCTR(priv->timer, &counter);
   counter = CYCLES_TO_USEC(counter);
@@ -636,7 +636,7 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
 {
   irqstate_t flags;
   uint64_t counter;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
   uint64_t alarm_value = 0;
 
   flags = enter_critical_section();
@@ -677,7 +677,7 @@ uint64_t IRAM_ATTR rt_timer_get_alarm(void)
 void IRAM_ATTR rt_timer_calibration(uint64_t time_us)
 {
   uint64_t counter;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
   irqstate_t flags;
 
   flags = enter_critical_section();
@@ -707,7 +707,7 @@ int esp32c3_rt_timer_init(void)
 {
   int pid;
   irqstate_t flags;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   priv->timer = esp32c3_tim_init(ESP32C3_RT_TIMER);
   if (priv->timer == NULL)
@@ -772,7 +772,7 @@ int esp32c3_rt_timer_init(void)
 void esp32c3_rt_timer_deinit(void)
 {
   irqstate_t flags;
-  FAR struct esp32c3_rt_priv_s *priv = &g_rt_priv;
+  struct esp32c3_rt_priv_s *priv = &g_rt_priv;
 
   flags = enter_critical_section();
 

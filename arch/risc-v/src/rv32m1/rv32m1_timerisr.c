@@ -58,7 +58,7 @@
  ****************************************************************************/
 
 LOCATE_ITCM
-static int rv32m1_timerisr(int irq, void *context, FAR void *arg)
+static int rv32m1_timerisr(int irq, void *context, void *arg)
 {
   /* Write '1' to clear the pending flag */
 

@@ -281,13 +281,13 @@ EXTERN void rv32m1_gpio_irqdisable(uint32_t cfgset);
  * Name: rv32m1_gpio_irqattach
  ****************************************************************************/
 
-EXTERN int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, FAR void *arg);
+EXTERN int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Name: rv32m1_gpio_irqdetach
  ****************************************************************************/
 
-EXTERN int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, FAR void *arg);
+EXTERN int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, void *arg);
 
 /****************************************************************************
  * Name: rv32m1_gpio_clearpending

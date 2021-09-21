@@ -64,6 +64,6 @@ extern "C"
  *
  ****************************************************************************/
 
-int bl602_wdt_initialize(FAR const char *devpath);
+int bl602_wdt_initialize(const char *devpath);
 
 #endif /* __ARCH_RISCV_SRC_BL602_BL602_WDT_LOWERHALF_H */

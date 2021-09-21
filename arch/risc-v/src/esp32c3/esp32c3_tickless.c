@@ -27,10 +27,10 @@
  *
  *   void up_timer_initialize(void): Initializes the timer facilities.
  *     Called early in the initialization sequence (by up_initialize()).
- *   int up_timer_gettime(FAR struct timespec *ts):  Returns the current
+ *   int up_timer_gettime(struct timespec *ts):  Returns the current
  *     time from the platform specific time source.
  *   int up_timer_cancel(void):  Cancels the interval timer.
- *   int up_timer_start(FAR const struct timespec *ts): Start (or re-starts)
+ *   int up_timer_start(const struct timespec *ts): Start (or re-starts)
  *     the interval timer.
  *
  * The RTOS will provide the following interfaces for use by the platform-
@@ -112,7 +112,7 @@ static inline uint64_t up_tmr_getcounter(void);
 static inline uint64_t up_tmr_getalarmvalue(void);
 static inline void up_tmr_counter_advance(uint64_t tick);
 static void IRAM_ATTR up_tmr_setcounter(uint64_t ticks);
-static void IRAM_ATTR up_timer_expire(int irq, void *regs, FAR void *arg);
+static void IRAM_ATTR up_timer_expire(int irq, void *regs, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -275,7 +275,7 @@ static void IRAM_ATTR up_tmr_setcounter(uint64_t ticks)
  *
  ****************************************************************************/
 
-static void IRAM_ATTR up_timer_expire(int irq, void *regs, FAR void *arg)
+static void IRAM_ATTR up_timer_expire(int irq, void *regs, void *arg)
 {
   g_timer_started = false;
   setbits(SYS_TIMER_TARGET0_INT_CLR, SYS_TIMER_SYSTIMER_INT_CLR_REG);
@@ -294,7 +294,7 @@ static void IRAM_ATTR up_timer_expire(int irq, void *regs, FAR void *arg)
  *   up_timer_initialize() was called).  This function is functionally
  *   equivalent to:
  *
- *      int clock_gettime(clockid_t clockid, FAR struct timespec *ts);
+ *      int clock_gettime(clockid_t clockid, struct timespec *ts);
  *
  *   when clockid is CLOCK_MONOTONIC.
  *
@@ -319,7 +319,7 @@ static void IRAM_ATTR up_timer_expire(int irq, void *regs, FAR void *arg)
  *
  ****************************************************************************/
 
-int IRAM_ATTR up_timer_gettime(FAR struct timespec *ts)
+int IRAM_ATTR up_timer_gettime(struct timespec *ts)
 {
   uint64_t ticks;
   irqstate_t flags;
@@ -371,7 +371,7 @@ int IRAM_ATTR up_timer_gettime(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int IRAM_ATTR up_timer_cancel(FAR struct timespec *ts)
+int IRAM_ATTR up_timer_cancel(struct timespec *ts)
 {
   uint64_t alarm_value;
   uint64_t counter;
@@ -439,7 +439,7 @@ int IRAM_ATTR up_timer_cancel(FAR struct timespec *ts)
  *
  ****************************************************************************/
 
-int IRAM_ATTR up_timer_start(FAR const struct timespec *ts)
+int IRAM_ATTR up_timer_start(const struct timespec *ts)
 {
   uint64_t cpu_ticks;
   irqstate_t flags;

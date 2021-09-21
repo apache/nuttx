@@ -59,14 +59,14 @@ struct rv32m1_ctrlbase_s
   const uint32_t portgate;  /* Port Clock Control Gate */
   const uint32_t gpiogate;  /* GPIO Clock Control Gate */
   const uint32_t irq;       /* IRQ Number */
-  FAR sq_queue_t *isrchain; /* Interrupt Service Routine Chain */
+  sq_queue_t *isrchain;     /* Interrupt Service Routine Chain */
 };
 
 struct rv32m1_isr_s
 {
   sq_entry_t link;
   xcpt_t     isr;
-  FAR void   *arg;
+  void   *arg;
   uint32_t   pin;
 };
 
@@ -316,19 +316,19 @@ static void rv32m1_gpio_portconfig(uint32_t cfgset)
  ****************************************************************************/
 
 LOCATE_ITCM
-static int rv32m1_gpio_interrupt(int irq, FAR void *context, FAR void *arg)
+static int rv32m1_gpio_interrupt(int irq, void *context, void *arg)
 {
-  const FAR struct rv32m1_ctrlbase_s *ctrl;
-  const FAR sq_queue_t *isrchain;
-  const FAR sq_entry_t *e;
-  const FAR struct rv32m1_isr_s *priv;
+  const struct rv32m1_ctrlbase_s *ctrl;
+  const sq_queue_t *isrchain;
+  const sq_entry_t *e;
+  const struct rv32m1_isr_s *priv;
 
   uint32_t portbase;
 
   uint32_t risf; /* the Read([red]) Interrupt status Flag */
   uint32_t wisf; /* The Interrupt status Flag to write back */
 
-  ctrl = (const FAR struct rv32m1_ctrlbase_s *)arg;
+  ctrl = (const struct rv32m1_ctrlbase_s *)arg;
   portbase = ctrl->portbase;
   isrchain = ctrl->isrchain;
 
@@ -611,7 +611,7 @@ void rv32m1_gpio_irqdisable(uint32_t cfgset)
  * Name: rv32m1_gpio_irqattach
  ****************************************************************************/
 
-int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, FAR void *arg)
+int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, void *arg)
 {
   unsigned int port;
   unsigned int pin;
@@ -621,10 +621,10 @@ int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, FAR void *arg)
 
   irqstate_t flags;
 
-  FAR sq_queue_t *isrchain;
-  FAR sq_entry_t *e;
+  sq_queue_t *isrchain;
+  sq_entry_t *e;
 
-  FAR struct rv32m1_isr_s *priv;
+  struct rv32m1_isr_s *priv;
 
   if (!isr)
     {
@@ -661,7 +661,7 @@ int rv32m1_gpio_irqattach(uint32_t cfgset, xcpt_t isr, FAR void *arg)
       e = sq_next(e);
     }
 
-  priv = (FAR struct rv32m1_isr_s *)kmm_malloc(sizeof(*priv));
+  priv = (struct rv32m1_isr_s *)kmm_malloc(sizeof(*priv));
   if (priv)
     {
       /* If it is the first time to attach an isr, the generic gpio
@@ -698,7 +698,7 @@ done:
  * Name: rv32m1_gpio_irqdetach
  ****************************************************************************/
 
-int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, FAR void *arg)
+int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, void *arg)
 {
   uint32_t port;
   uint32_t pin;
@@ -707,11 +707,11 @@ int rv32m1_gpio_irqdetach(uint32_t cfgset, xcpt_t isr, FAR void *arg)
 
   irqstate_t flags;
 
-  FAR sq_queue_t *isrchain;
-  FAR sq_entry_t *cur;
-  FAR sq_entry_t *pre;
+  sq_queue_t *isrchain;
+  sq_entry_t *cur;
+  sq_entry_t *pre;
 
-  FAR struct rv32m1_isr_s *priv;
+  struct rv32m1_isr_s *priv;
 
   if (!isr)
     {

@@ -37,8 +37,8 @@
 
 struct esp32c3_efuse_lowerhalf_s
 {
-  FAR const struct efuse_ops_s *ops; /* Lower half operations */
-  void *upper;                       /* Pointer to efuse_upperhalf_s */
+  const struct efuse_ops_s *ops; /* Lower half operations */
+  void *upper;                   /* Pointer to efuse_upperhalf_s */
 };
 
 /****************************************************************************
@@ -47,14 +47,14 @@ struct esp32c3_efuse_lowerhalf_s
 
 /* "Lower half" driver methods */
 
-static int esp32c3_efuse_lowerhalf_read(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_read(struct efuse_lowerhalf_s *lower,
                                         const efuse_desc_t *field[],
                                         uint8_t *data, size_t bits_len);
-static int esp32c3_efuse_lowerhalf_write(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_write(struct efuse_lowerhalf_s *lower,
                                          const efuse_desc_t *field[],
                                          const uint8_t *data,
                                          size_t bits_len);
-static int esp32c3_efuse_lowerhalf_ioctl(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_ioctl(struct efuse_lowerhalf_s *lower,
                                          int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -100,7 +100,7 @@ static struct esp32c3_efuse_lowerhalf_s g_esp32c3_efuse_lowerhalf =
  *
  ****************************************************************************/
 
-static int esp32c3_efuse_lowerhalf_read(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_read(struct efuse_lowerhalf_s *lower,
                                         const efuse_desc_t *field[],
                                         uint8_t *data, size_t bits_len)
 {
@@ -131,7 +131,7 @@ static int esp32c3_efuse_lowerhalf_read(FAR struct efuse_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int esp32c3_efuse_lowerhalf_write(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_write(struct efuse_lowerhalf_s *lower,
                                          const efuse_desc_t *field[],
                                          const uint8_t *data,
                                          size_t bits_len)
@@ -172,7 +172,7 @@ static int esp32c3_efuse_lowerhalf_write(FAR struct efuse_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int esp32c3_efuse_lowerhalf_ioctl(FAR struct efuse_lowerhalf_s *lower,
+static int esp32c3_efuse_lowerhalf_ioctl(struct efuse_lowerhalf_s *lower,
                                          int cmd, unsigned long arg)
 {
   int ret = OK;
@@ -212,7 +212,7 @@ static int esp32c3_efuse_lowerhalf_ioctl(FAR struct efuse_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int esp32c3_efuse_initialize(FAR const char *devpath)
+int esp32c3_efuse_initialize(const char *devpath)
 {
   struct esp32c3_efuse_lowerhalf_s *lower = NULL;
   int ret = OK;
@@ -224,7 +224,7 @@ int esp32c3_efuse_initialize(FAR const char *devpath)
   /* Register the efuse upper driver */
 
   lower->upper = efuse_register(devpath,
-                                (FAR struct efuse_lowerhalf_s *)lower);
+                                (struct efuse_lowerhalf_s *)lower);
 
   if (lower->upper == NULL)
     {

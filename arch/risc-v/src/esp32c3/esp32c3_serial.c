@@ -235,7 +235,7 @@ static uart_dev_t g_uart1_dev =
  *
  ****************************************************************************/
 
-static int uart_handler(int irq, FAR void *context, FAR void *arg)
+static int uart_handler(int irq, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct esp32c3_uart_s *priv = dev->priv;

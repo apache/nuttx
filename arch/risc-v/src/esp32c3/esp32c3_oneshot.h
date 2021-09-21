@@ -58,14 +58,14 @@ typedef void (*oneshot_handler_t)(void *arg);
 
 struct esp32c3_oneshot_s
 {
-  uint8_t chan;                         /* The timer/counter in use */
-  volatile bool running;                /* True: the timer is running */
-  FAR struct esp32c3_tim_dev_s    *tim; /* Pointer returned by
-                                         * esp32c3_tim_init() */
-  volatile oneshot_handler_t handler;   /* Oneshot expiration callback */
-  volatile void                 *arg;   /* The argument that will accompany
-                                         * the callback */
-  uint32_t                resolution;   /* us */
+  uint8_t chan;                       /* The timer/counter in use */
+  volatile bool running;              /* True: the timer is running */
+  struct esp32c3_tim_dev_s      *tim; /* Pointer returned by
+                                       * esp32c3_tim_init() */
+  volatile oneshot_handler_t handler; /* Oneshot expiration callback */
+  volatile void                 *arg; /* The argument that will accompany
+                                       * the callback */
+  uint32_t                resolution; /* us */
 };
 
 /****************************************************************************

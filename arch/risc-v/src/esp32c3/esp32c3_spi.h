@@ -68,7 +68,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *esp32c3_spibus_initialize(int port);
+struct spi_dev_s *esp32c3_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  esp32c3_spi[0|1]_select and esp32c3_spi[0|1]_status
@@ -102,10 +102,10 @@ FAR struct spi_dev_s *esp32c3_spibus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2
-void esp32c3_spi2_select(FAR struct spi_dev_s *dev, uint32_t devid,
+void esp32c3_spi2_select(struct spi_dev_s *dev, uint32_t devid,
                          bool selected);
-uint8_t esp32c3_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid);
-int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev,
+uint8_t esp32c3_spi2_status(struct spi_dev_s *dev, uint32_t devid);
+int esp32c3_spi2_cmddata(struct spi_dev_s *dev,
                          uint32_t devid,
                          bool cmd);
 #endif
@@ -124,7 +124,7 @@ int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-int esp32c3_spibus_uninitialize(FAR struct spi_dev_s *dev);
+int esp32c3_spibus_uninitialize(struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: esp32c3_spislave_ctrlr_initialize
@@ -141,7 +141,7 @@ int esp32c3_spibus_uninitialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port);
+struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port);
 
 /****************************************************************************
  * Name: esp32c3_spislave_ctrlr_uninitialize
@@ -157,7 +157,7 @@ FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port);
  *
  ****************************************************************************/
 
-int esp32c3_spislave_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr);
+int esp32c3_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr);
 
 #endif /* CONFIG_ESP32C3_SPI */
 
