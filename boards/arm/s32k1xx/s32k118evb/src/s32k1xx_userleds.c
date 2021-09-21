@@ -81,6 +81,8 @@ void board_userled(int led, bool ledon)
       return;
     }
 
+  /* An output of '1' illuminates the LED */
+
   s32k1xx_gpiowrite(ledcfg, ledon);
 }
 
@@ -90,6 +92,8 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
+  /* An output of '1' illuminates the LED */
+
   s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
   s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
   s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);

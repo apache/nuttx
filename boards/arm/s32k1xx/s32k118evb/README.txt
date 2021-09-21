@@ -1,7 +1,7 @@
 README
 ======
 
-This directory hold the port to the NXP S32K118EVB-Q064 Development board.
+This directory holds the port to the NXP S32K118EVB-Q064 development board.
 
 Contents
 ========
