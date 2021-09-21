@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-static inline uint32_t xtensa_compareset(FAR volatile uint32_t *addr,
+static inline uint32_t xtensa_compareset(volatile uint32_t *addr,
                                          uint32_t compare,
                                          uint32_t set)
 {
@@ -88,13 +88,13 @@ static inline uint32_t xtensa_compareset(FAR volatile uint32_t *addr,
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile FAR spinlock_t *lock)
+spinlock_t up_testset(volatile spinlock_t *lock)
 {
   spinlock_t prev;
 
   /* Perform the 32-bit compare and set operation */
 
-  prev = xtensa_compareset((FAR volatile uint32_t *)lock,
+  prev = xtensa_compareset((volatile uint32_t *)lock,
                            SP_UNLOCKED, SP_LOCKED);
 
   /* xtensa_compareset() should return either SP_UNLOCKED if the spinlock

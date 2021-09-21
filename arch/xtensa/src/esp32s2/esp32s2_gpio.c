@@ -105,7 +105,7 @@ static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32S2_GPIO_IRQ
-static int gpio_interrupt(int irq, FAR void *context, FAR void *arg)
+static int gpio_interrupt(int irq, void *context, void *arg)
 {
   uint32_t status;
 

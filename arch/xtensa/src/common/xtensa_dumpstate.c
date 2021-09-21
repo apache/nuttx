@@ -56,7 +56,7 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+static void up_taskdump(struct tcb_s *tcb, void *arg)
 {
   /* Dump interesting properties of this task */
 

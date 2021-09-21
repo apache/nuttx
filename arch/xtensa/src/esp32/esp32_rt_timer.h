@@ -107,8 +107,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int rt_timer_create(FAR const struct rt_timer_args_s *args,
-                    FAR struct rt_timer_s **timer_handle);
+int rt_timer_create(const struct rt_timer_args_s *args,
+                    struct rt_timer_s **timer_handle);
 
 /****************************************************************************
  * Name: rt_timer_start
@@ -126,7 +126,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
  *
  ****************************************************************************/
 
-void rt_timer_start(FAR struct rt_timer_s *timer,
+void rt_timer_start(struct rt_timer_s *timer,
                     uint64_t timeout,
                     bool repeat);
 
@@ -144,7 +144,7 @@ void rt_timer_start(FAR struct rt_timer_s *timer,
  *
  ****************************************************************************/
 
-void rt_timer_stop(FAR struct rt_timer_s *timer);
+void rt_timer_stop(struct rt_timer_s *timer);
 
 /****************************************************************************
  * Name: rt_timer_delete
@@ -160,7 +160,7 @@ void rt_timer_stop(FAR struct rt_timer_s *timer);
  *
  ****************************************************************************/
 
-void rt_timer_delete(FAR struct rt_timer_s *timer);
+void rt_timer_delete(struct rt_timer_s *timer);
 
 /****************************************************************************
  * Name: rt_timer_time_us

@@ -63,7 +63,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
                                                    uint32_t mtd_size);
 
 /****************************************************************************
@@ -80,7 +80,7 @@ FAR struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void);
+struct mtd_dev_s *esp32_spiflash_get_mtd(void);
 
 /****************************************************************************
  * Name: esp32_spiflash_encrypt_get_mtd
@@ -96,7 +96,7 @@ FAR struct mtd_dev_s *esp32_spiflash_get_mtd(void);
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
+struct mtd_dev_s *esp32_spiflash_encrypt_get_mtd(void);
 
 #ifdef __cplusplus
 }

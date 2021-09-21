@@ -280,7 +280,7 @@ static int  esp32_setup(struct uart_dev_s *dev);
 static void esp32_shutdown(struct uart_dev_s *dev);
 static int  esp32_attach(struct uart_dev_s *dev);
 static void esp32_detach(struct uart_dev_s *dev);
-static int  esp32_interrupt(int cpuint, void *context, FAR void *arg);
+static int  esp32_interrupt(int cpuint, void *context, void *arg);
 static int  esp32_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  esp32_receive(struct uart_dev_s *dev, unsigned int *status);
 static void esp32_rxint(struct uart_dev_s *dev, bool enable);
@@ -300,7 +300,7 @@ static void dma_config(uint8_t dma_chan);
 static void dma_attach(uint8_t dma_chan);
 static inline void dma_enable_int(uint8_t dma_chan);
 static inline void dma_disable_int(uint8_t dma_chan);
-static int esp32_interrupt_dma(int cpuint, void *context, FAR void *arg);
+static int esp32_interrupt_dma(int cpuint, void *context, void *arg);
 #endif
 
 /****************************************************************************
@@ -1178,7 +1178,7 @@ static void dma_attach(uint8_t dma_chan)
  *
  ****************************************************************************/
 
-static int esp32_interrupt_dma(int irq, void *context, FAR void *arg)
+static int esp32_interrupt_dma(int irq, void *context, void *arg)
 {
   uint32_t value;
   uint32_t status;
@@ -1315,7 +1315,7 @@ static void dma_config(uint8_t dma_chan)
  *
  ****************************************************************************/
 
-static int esp32_interrupt(int cpuint, void *context, FAR void *arg)
+static int esp32_interrupt(int cpuint, void *context, void *arg)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
   struct esp32_dev_s *priv;

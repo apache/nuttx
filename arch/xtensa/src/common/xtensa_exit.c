@@ -63,11 +63,11 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DUMP_ON_EXIT
-static void _xtensa_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
+static void _xtensa_dumponexit(struct tcb_s *tcb, void *arg)
 {
-  FAR struct filelist *filelist;
+  struct filelist *filelist;
 #ifdef CONFIG_FILE_STREAM
-  FAR struct file_struct *filep;
+  struct file_struct *filep;
 #endif
   int i;
   int j;

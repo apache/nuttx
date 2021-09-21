@@ -373,7 +373,7 @@ static void emac_init_buffer(struct esp32_emac_s *priv)
 
   for (i = 0; i < EMAC_BUF_NUM; i++)
     {
-      sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+      sq_addlast((sq_entry_t *)buffer, &priv->freeb);
       buffer += EMAC_BUF_LEN;
     }
 }
@@ -435,7 +435,7 @@ static inline void emac_free_buffer(struct esp32_emac_s *priv,
 {
   /* Free the buffer by adding it to the end of the free buffer list */
 
-  sq_addlast((FAR sq_entry_t *)buffer, &priv->freeb);
+  sq_addlast((sq_entry_t *)buffer, &priv->freeb);
 }
 
 /****************************************************************************
@@ -1271,7 +1271,7 @@ static int phy_enable_interrupt(void)
  *
  ****************************************************************************/
 
-static void emac_txtimeout_work(FAR void *arg)
+static void emac_txtimeout_work(void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
 
@@ -1341,7 +1341,7 @@ static void emac_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void emac_rx_interrupt_work(FAR void *arg)
+static void emac_rx_interrupt_work(void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
   struct net_driver_s *dev = &priv->dev;
@@ -1496,7 +1496,7 @@ static void emac_rx_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void emac_tx_interrupt_work(FAR void *arg)
+static void emac_tx_interrupt_work(void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
 
@@ -1526,7 +1526,7 @@ static void emac_tx_interrupt_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int emac_interrupt(int irq, FAR void *context, FAR void *arg)
+static int emac_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
   uint32_t value = emac_get_reg(EMAC_DMA_SR_OFFSET);
@@ -1677,7 +1677,7 @@ static int emac_txpoll(struct net_driver_s *dev)
 
 static void emac_dopoll(struct esp32_emac_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   if (!TX_IS_BUSY(priv))
     {
@@ -1722,7 +1722,7 @@ static void emac_dopoll(struct esp32_emac_s *priv)
  *
  ****************************************************************************/
 
-static void emac_txavail_work(FAR void *arg)
+static void emac_txavail_work(void *arg)
 {
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
 
@@ -1758,11 +1758,11 @@ static void emac_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static void emac_poll_work(FAR void *arg)
+static void emac_poll_work(void *arg)
 {
   int ret;
   struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
 
   ninfo("ifup: %d\n", priv->ifup);
 
@@ -1826,7 +1826,7 @@ static void emac_poll_work(FAR void *arg)
 
 static void emac_poll_expiry(wdparm_t arg)
 {
-  FAR struct esp32_emac_s *priv = (FAR struct esp32_emac_s *)arg;
+  struct esp32_emac_s *priv = (struct esp32_emac_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -2026,7 +2026,7 @@ static int emac_txavail(struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int emac_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -2055,7 +2055,7 @@ static int emac_addmac(struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
+static int emac_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
   ninfo("MAC: %02x:%02x:%02x:%02x:%02x:%02x\n",
         mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
@@ -2096,7 +2096,7 @@ static int emac_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac)
 static int emac_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
 #if defined(CONFIG_NETDEV_PHY_IOCTL) && defined(CONFIG_ARCH_PHY_INTERRUPT)
-  FAR struct esp32_emacmac_s *priv = NET2PRIV(dev);
+  struct esp32_emacmac_s *priv = NET2PRIV(dev);
 #endif
   int ret;
 

@@ -86,7 +86,7 @@ uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS]
  *
  ****************************************************************************/
 
-int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
+int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 {
   /* XTENSA uses a push-down stack:  the stack grows toward lower* addresses
    * in memory.  The stack pointer register points to the lowest, valid
