@@ -24,7 +24,7 @@
  *   GreenLED  PTD16  (FTM0 CH1)
  *   BlueLED   PTD0   (FTM0 CH2)
  *
- * An output of '1' illuminates the LED.
+ * An output of '0' illuminates the LED.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
  * the S32K144EVB.  The following definitions describe how NuttX controls the
@@ -121,9 +121,11 @@ void board_autoled_on(int led)
             break;
         }
 
-      s32k1xx_gpiowrite(GPIO_LED_R, redon);
-      s32k1xx_gpiowrite(GPIO_LED_G, greenon);
-      s32k1xx_gpiowrite(GPIO_LED_B, blueon);
+      /* Invert output, an output of '0' illuminates the LED */
+
+      s32k1xx_gpiowrite(GPIO_LED_R, !redon);
+      s32k1xx_gpiowrite(GPIO_LED_G, !greenon);
+      s32k1xx_gpiowrite(GPIO_LED_B, !blueon);
     }
 }
 
@@ -135,9 +137,11 @@ void board_autoled_off(int led)
 {
   if (led == LED_ON_OFF_OFF)
     {
-      s32k1xx_gpiowrite(GPIO_LED_R, true);
-      s32k1xx_gpiowrite(GPIO_LED_G, false);
-      s32k1xx_gpiowrite(GPIO_LED_B, false);
+      /* Invert outputs, an output of '0' illuminates the LED */
+
+      s32k1xx_gpiowrite(GPIO_LED_R, !true);
+      s32k1xx_gpiowrite(GPIO_LED_G, !false);
+      s32k1xx_gpiowrite(GPIO_LED_B, !false);
     }
 }
 

@@ -121,6 +121,8 @@ void board_autoled_on(int led)
             break;
         }
 
+      /* An output of '1' illuminates the LED */
+
       s32k1xx_gpiowrite(GPIO_LED_R, redon);
       s32k1xx_gpiowrite(GPIO_LED_G, greenon);
       s32k1xx_gpiowrite(GPIO_LED_B, blueon);
@@ -135,6 +137,8 @@ void board_autoled_off(int led)
 {
   if (led == LED_ON_OFF_OFF)
     {
+      /* An output of '1' illuminates the LED */
+
       s32k1xx_gpiowrite(GPIO_LED_R, true);
       s32k1xx_gpiowrite(GPIO_LED_G, false);
       s32k1xx_gpiowrite(GPIO_LED_B, false);
