@@ -152,7 +152,7 @@ struct esp32c3_cpu_freq_config_s
 
 /* The form of an alarm callback */
 
-typedef CODE void (*alm_callback_t)(void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 enum alm_id_e
 {
