@@ -70,28 +70,28 @@ struct esp32_wdt_ops_s
 {
   /* WDT tasks */
 
-  CODE int (*start)(struct esp32_wdt_dev_s *dev);
-  CODE int (*stop)(struct esp32_wdt_dev_s *dev);
+  int (*start)(struct esp32_wdt_dev_s *dev);
+  int (*stop)(struct esp32_wdt_dev_s *dev);
 
   /* WDT configuration */
 
-  CODE int (*enablewp)(struct esp32_wdt_dev_s *dev);
-  CODE int (*disablewp)(struct esp32_wdt_dev_s *dev);
-  CODE int (*pre)(struct esp32_wdt_dev_s *dev, uint16_t value);
-  CODE int (*settimeout)(struct esp32_wdt_dev_s *dev,
+  int (*enablewp)(struct esp32_wdt_dev_s *dev);
+  int (*disablewp)(struct esp32_wdt_dev_s *dev);
+  int (*pre)(struct esp32_wdt_dev_s *dev, uint16_t value);
+  int (*settimeout)(struct esp32_wdt_dev_s *dev,
                          uint32_t value, uint8_t stage);
-  CODE int (*feed)(struct esp32_wdt_dev_s *dev);
-  CODE int (*stg_conf)(struct esp32_wdt_dev_s *dev,
+  int (*feed)(struct esp32_wdt_dev_s *dev);
+  int (*stg_conf)(struct esp32_wdt_dev_s *dev,
                                    uint8_t stage, uint8_t conf);
-  CODE uint16_t (*rtc_clk)(struct esp32_wdt_dev_s *dev);
+  uint16_t (*rtc_clk)(struct esp32_wdt_dev_s *dev);
 
   /* WDT interrupts */
 
-  CODE int (*setisr)(struct esp32_wdt_dev_s *dev, xcpt_t handler,
+  int (*setisr)(struct esp32_wdt_dev_s *dev, xcpt_t handler,
                      void * arg);
-  CODE int (*enableint)(struct esp32_wdt_dev_s *dev);
-  CODE int (*disableint)(struct esp32_wdt_dev_s *dev);
-  CODE int (*ackint)(struct esp32_wdt_dev_s *dev);
+  int (*enableint)(struct esp32_wdt_dev_s *dev);
+  int (*disableint)(struct esp32_wdt_dev_s *dev);
+  int (*ackint)(struct esp32_wdt_dev_s *dev);
 };
 
 /****************************************************************************

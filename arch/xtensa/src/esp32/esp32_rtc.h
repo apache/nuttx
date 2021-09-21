@@ -134,7 +134,7 @@ enum esp32_rtc_cal_sel_e
 
 /* The form of an alarm callback */
 
-typedef CODE void (*alm_callback_t)(void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 enum alm_id_e
 {

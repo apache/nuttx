@@ -82,32 +82,32 @@ struct esp32_tim_ops_s
 {
   /* Timer tasks */
 
-  CODE void (*start)(struct esp32_tim_dev_s *dev);
-  CODE void (*stop)(struct esp32_tim_dev_s *dev);
-  CODE void (*clear)(struct esp32_tim_dev_s *dev);
+  void (*start)(struct esp32_tim_dev_s *dev);
+  void (*stop)(struct esp32_tim_dev_s *dev);
+  void (*clear)(struct esp32_tim_dev_s *dev);
 
   /* Timer operations */
 
-  CODE void (*setmode)(struct esp32_tim_dev_s *dev, uint8_t mode);
-  CODE void (*setpre)(struct esp32_tim_dev_s *dev, uint16_t pre);
-  CODE void (*getcounter)(struct esp32_tim_dev_s *dev, uint64_t *value);
-  CODE void (*setcounter)(struct esp32_tim_dev_s *dev, uint64_t value);
-  CODE void (*reloadnow)(struct esp32_tim_dev_s *dev);
-  CODE void (*getalarmvalue)(struct esp32_tim_dev_s *dev,
+  void (*setmode)(struct esp32_tim_dev_s *dev, uint8_t mode);
+  void (*setpre)(struct esp32_tim_dev_s *dev, uint16_t pre);
+  void (*getcounter)(struct esp32_tim_dev_s *dev, uint64_t *value);
+  void (*setcounter)(struct esp32_tim_dev_s *dev, uint64_t value);
+  void (*reloadnow)(struct esp32_tim_dev_s *dev);
+  void (*getalarmvalue)(struct esp32_tim_dev_s *dev,
                             uint64_t *value);
-  CODE void (*setalarmvalue)(struct esp32_tim_dev_s *dev,
+  void (*setalarmvalue)(struct esp32_tim_dev_s *dev,
                              uint64_t value);
-  CODE void (*setalarm)(struct esp32_tim_dev_s *dev, bool enable);
-  CODE void (*setautoreload)(struct esp32_tim_dev_s *dev, bool enable);
+  void (*setalarm)(struct esp32_tim_dev_s *dev, bool enable);
+  void (*setautoreload)(struct esp32_tim_dev_s *dev, bool enable);
 
   /* Timer interrupts */
 
-  CODE int (*setisr)(struct esp32_tim_dev_s *dev, xcpt_t handler,
+  int (*setisr)(struct esp32_tim_dev_s *dev, xcpt_t handler,
                      void * arg);
-  CODE void (*enableint)(struct esp32_tim_dev_s *dev);
-  CODE void (*disableint)(struct esp32_tim_dev_s *dev);
-  CODE void (*ackint)(struct esp32_tim_dev_s *dev);
-  CODE int (*checkint)(struct esp32_tim_dev_s *dev);
+  void (*enableint)(struct esp32_tim_dev_s *dev);
+  void (*disableint)(struct esp32_tim_dev_s *dev);
+  void (*ackint)(struct esp32_tim_dev_s *dev);
+  int (*checkint)(struct esp32_tim_dev_s *dev);
 };
 
 /****************************************************************************
