@@ -90,9 +90,6 @@
 #  define  MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-#define DPORT_INTERRUPT_DISABLE()
-#define DPORT_INTERRUPT_RESTORE()
-
 /* Flash MMU table for PRO CPU */
 
 #define PRO_MMU_TABLE ((volatile uint32_t *)DPORT_PRO_FLASH_MMU_TABLE_REG)

@@ -52,10 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 #define RTC_VDDSDIO_TIEH_1_8V      0  /* TIEH field value for 1.8V VDDSDIO */
 #define RTC_VDDSDIO_TIEH_3_3V      1  /* TIEH field value for 3.3V VDDSDIO */
 
@@ -336,12 +332,6 @@ psram_2t_mode_enable(psram_spi_num_t spi_num);
 
 static int psram_2t_mode_check(psram_spi_num_t spi_num);
 #endif
-
-/****************************************************************************
- * ROM function prototypes
- ****************************************************************************/
-
-extern void ets_delay_us(int delay_us);
 
 /****************************************************************************
  * Private Functions
