@@ -268,7 +268,7 @@ static int  esp32c3_i2c_transfer(struct i2c_master_s *dev,
 static inline void esp32c3_i2c_process(struct esp32c3_i2c_priv_s *priv,
                                        uint32_t status);
 #ifdef CONFIG_I2C_POLLED
-static int esp32c3_i2c_polling_waitdone(FAR struct esp32c3_i2c_priv_s *priv);
+static int esp32c3_i2c_polling_waitdone(struct esp32c3_i2c_priv_s *priv);
 #endif
 
 #ifdef CONFIG_I2C_RESET
@@ -836,7 +836,7 @@ static int esp32c3_i2c_sem_waitdone(struct esp32c3_i2c_priv_s *priv)
  *
  ****************************************************************************/
 #ifdef CONFIG_I2C_POLLED
-static int esp32c3_i2c_polling_waitdone(FAR struct esp32c3_i2c_priv_s *priv)
+static int esp32c3_i2c_polling_waitdone(struct esp32c3_i2c_priv_s *priv)
 {
   int ret;
   struct timespec current_time;

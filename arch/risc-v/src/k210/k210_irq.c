@@ -52,7 +52,7 @@ volatile uint64_t *g_current_regs[1];
 #endif
 
 #ifdef CONFIG_SMP
-extern int riscv_pause_handler(int irq, void *c, FAR void *arg);
+extern int riscv_pause_handler(int irq, void *c, void *arg);
 #endif
 
 /****************************************************************************
@@ -88,7 +88,7 @@ void up_irqinitialize(void)
 #else
   intstack_size = ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15);
 #endif
-  riscv_stack_color((FAR void *)&g_intstackalloc, intstack_size);
+  riscv_stack_color((void *)&g_intstackalloc, intstack_size);
 #endif
 
   /* Set priority for all global interrupts to 1 (lowest) */

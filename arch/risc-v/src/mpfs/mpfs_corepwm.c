@@ -75,13 +75,13 @@ struct mpfs_pwmchan_s
 
 struct mpfs_pwmtimer_s
 {
-  FAR const struct pwm_ops_s *ops;     /* PWM operations */
-  uint8_t nchannels;                   /* Number of channels on this PWM block */
-  uint8_t pwmid;                       /* PWM ID {1,...} */
+  const struct pwm_ops_s *ops; /* PWM operations */
+  uint8_t nchannels;           /* Number of channels on this PWM block */
+  uint8_t pwmid;               /* PWM ID {1,...} */
   struct mpfs_pwmchan_s channels[MPFS_MAX_PWM_CHANNELS];
-  uint32_t frequency;                  /* Current frequency setting */
-  uintptr_t base;                      /* The base address of the pwm block */
-  uint32_t pwmclk;                     /* The frequency of the pwm clock */
+  uint32_t frequency;          /* Current frequency setting */
+  uintptr_t base;              /* The base address of the pwm block */
+  uint32_t pwmclk;             /* The frequency of the pwm clock */
 };
 
 /****************************************************************************
@@ -95,26 +95,26 @@ static void pwm_putreg(struct mpfs_pwmtimer_s *priv, int offset,
                        uint32_t value);
 
 #ifdef CONFIG_DEBUG_PWM_INFO
-static void pwm_dumpregs(struct mpfs_pwmtimer_s *priv, FAR const char *msg);
+static void pwm_dumpregs(struct mpfs_pwmtimer_s *priv, const char *msg);
 #else
 #  define pwm_dumpregs(priv,msg)
 #endif
 
 /* Timer management */
 
-static int pwm_timer(FAR struct mpfs_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info);
+static int pwm_timer(struct mpfs_pwmtimer_s *priv,
+                     const struct pwm_info_s *info);
 
 /* PWM driver methods */
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
+static int pwm_setup(struct pwm_lowerhalf_s *dev);
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev);
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info);
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info);
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int pwm_stop(struct pwm_lowerhalf_s *dev);
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev,
                      int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -326,7 +326,7 @@ static void pwm_putreg(struct mpfs_pwmtimer_s *priv, int offset,
 #ifdef CONFIG_DEBUG_PWM_INFO
 #define MPFS_PWMREG_STEP (MPFS_COREPWM_PWM2_POS_EDGE_OFFSET -  MPFS_COREPWM_PWM1_POS_EDGE_OFFSET)
 
-static void pwm_dumpregs(struct mpfs_pwmtimer_s *priv, FAR const char *msg)
+static void pwm_dumpregs(struct mpfs_pwmtimer_s *priv, const char *msg)
 {
   pwminfo("%s:\n", msg);
   pwminfo("  PRESCALE: %08x PERIOD: %08x\n",
@@ -366,8 +366,8 @@ static void pwm_dumpregs(struct mpfs_pwmtimer_s *priv, FAR const char *msg)
  *
  ****************************************************************************/
 
-static int pwm_timer(FAR struct mpfs_pwmtimer_s *priv,
-                     FAR const struct pwm_info_s *info)
+static int pwm_timer(struct mpfs_pwmtimer_s *priv,
+                     const struct pwm_info_s *info)
 {
   int      i;
 
@@ -497,7 +497,7 @@ static int pwm_timer(FAR struct mpfs_pwmtimer_s *priv,
  *
  ****************************************************************************/
 
-static int pwm_update_duty(FAR struct mpfs_pwmtimer_s *priv,
+static int pwm_update_duty(struct mpfs_pwmtimer_s *priv,
                            uint8_t channel, ub16_t duty16)
 {
   uint32_t              period;
@@ -553,9 +553,9 @@ static int pwm_update_duty(FAR struct mpfs_pwmtimer_s *priv,
  *
  ****************************************************************************/
 
-static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_setup(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct mpfs_pwmtimer_s *priv = (FAR struct mpfs_pwmtimer_s *)dev;
+  struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   pwminfo("PWMID%u\n", priv->pwmid);
   pwm_dumpregs(priv, "Initially");
@@ -579,9 +579,9 @@ static int pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct mpfs_pwmtimer_s *priv = (FAR struct mpfs_pwmtimer_s *)dev;
+  struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   pwminfo("PWM%u\n", priv->pwmid);
 
@@ -607,11 +607,11 @@ static int pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                     FAR const struct pwm_info_s *info)
+static int pwm_start(struct pwm_lowerhalf_s *dev,
+                     const struct pwm_info_s *info)
 {
   int ret = OK;
-  FAR struct mpfs_pwmtimer_s *priv = (FAR struct mpfs_pwmtimer_s *)dev;
+  struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   /* if frequency has not changed we just update duty */
 
@@ -671,9 +671,9 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int pwm_stop(struct pwm_lowerhalf_s *dev)
 {
-  FAR struct mpfs_pwmtimer_s *priv = (FAR struct mpfs_pwmtimer_s *)dev;
+  struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   pwminfo("PWM%u pwm_stop\n", priv->pwmid);
 
@@ -725,11 +725,11 @@ static int pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
+static int pwm_ioctl(struct pwm_lowerhalf_s *dev, int cmd,
                      unsigned long arg)
 {
 #ifdef CONFIG_DEBUG_PWM_INFO
-  FAR struct mpfs_pwmtimer_s *priv = (FAR struct mpfs_pwmtimer_s *)dev;
+  struct mpfs_pwmtimer_s *priv = (struct mpfs_pwmtimer_s *)dev;
 
   /* There are no platform-specific ioctl commands */
 
@@ -759,9 +759,9 @@ static int pwm_ioctl(FAR struct pwm_lowerhalf_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid)
+struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid)
 {
-  FAR struct mpfs_pwmtimer_s *lower;
+  struct mpfs_pwmtimer_s *lower;
 
   pwminfo("PWM%u\n", pwmid);
 
@@ -782,6 +782,6 @@ FAR struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid)
       return NULL;
   }
 
-  return (FAR struct pwm_lowerhalf_s *)lower;
+  return (struct pwm_lowerhalf_s *)lower;
 }
 

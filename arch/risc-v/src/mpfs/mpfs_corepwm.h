@@ -87,7 +87,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid);
+struct pwm_lowerhalf_s *mpfs_corepwm_init(int pwmid);
 
 #undef EXTERN
 #if defined(__cplusplus)

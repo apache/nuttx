@@ -1185,7 +1185,7 @@ uint32_t bl_os_get_tick()
  *
  ****************************************************************************/
 
-static int bl_os_isr_adpt_cb(int irq, void *context, FAR void *arg)
+static int bl_os_isr_adpt_cb(int irq, void *context, void *arg)
 {
   struct irq_adpt *adapter = (struct irq_adpt *)arg;
 

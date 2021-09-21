@@ -719,7 +719,7 @@ static int32_t wifi_errno_trans(int ret)
  *
  ****************************************************************************/
 
-static int esp_int_adpt_cb(int irq, void *context, FAR void *arg)
+static int esp_int_adpt_cb(int irq, void *context, void *arg)
 {
   struct irq_adpt *adapter = (struct irq_adpt *)arg;
 
@@ -2155,7 +2155,7 @@ static int esp_event_id_map(int event_id)
  *
  ****************************************************************************/
 
-static void esp_evt_work_cb(FAR void *arg)
+static void esp_evt_work_cb(void *arg)
 {
   int ret;
   irqstate_t flags;
@@ -4972,7 +4972,7 @@ void esp_wifi_free_eb(void *eb)
  *
  ****************************************************************************/
 
-int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
 {
   int id;
   struct wifi_notify *notify;
@@ -5297,7 +5297,7 @@ errout_set_mode:
  *
  ****************************************************************************/
 
-int esp_wifi_sta_send_data(FAR void *pbuf, size_t len)
+int esp_wifi_sta_send_data(void *pbuf, size_t len)
 {
   int ret;
 
@@ -6376,7 +6376,7 @@ errout_set_mode:
  *
  ****************************************************************************/
 
-int esp_wifi_softap_send_data(FAR void *pbuf, size_t len)
+int esp_wifi_softap_send_data(void *pbuf, size_t len)
 {
   int ret;
 

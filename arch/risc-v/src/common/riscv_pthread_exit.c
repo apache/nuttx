@@ -52,7 +52,7 @@
  *   None
  ****************************************************************************/
 
-void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
+void up_pthread_exit(pthread_exitroutine_t exit, void *exit_value)
 {
   sys_call2(SYS_pthread_exit, (uintptr_t)exit, (uintptr_t)exit_value);
 
