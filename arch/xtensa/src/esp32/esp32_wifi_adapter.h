@@ -134,7 +134,7 @@ void esp_wifi_free_eb(void *eb);
  *
  ****************************************************************************/
 
-int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event);
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event);
 
 #ifdef ESP32_WLAN_HAS_STA
 

@@ -60,4 +60,4 @@ int esp_efuse_write_field(const efuse_desc_t *field[],
 
 void esp_efuse_burn_efuses(void);
 
-int esp32_efuse_initialize(FAR const char *devpath);
+int esp32_efuse_initialize(const char *devpath);

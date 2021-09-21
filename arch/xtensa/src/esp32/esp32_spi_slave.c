@@ -169,23 +169,23 @@ struct esp32_spislv_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static void esp32_spislv_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void esp32_spislv_setmode(struct spi_slave_ctrlr_s *ctrlr,
                                  enum spi_mode_e mode);
-static void esp32_spislv_setbits(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void esp32_spislv_setbits(struct spi_slave_ctrlr_s *ctrlr,
                                  int nbits);
-static int esp32_spislv_interrupt(int irq, void *context, FAR void *arg);
-static void esp32_spislv_initialize(FAR struct spi_slave_ctrlr_s *ctrlr);
+static int esp32_spislv_interrupt(int irq, void *context, void *arg);
+static void esp32_spislv_initialize(struct spi_slave_ctrlr_s *ctrlr);
 static void esp32_spislv_bind(struct spi_slave_ctrlr_s *ctrlr,
                               struct spi_slave_dev_s *dev,
                               enum spi_slave_mode_e mode,
                               int nbits);
 static void esp32_spislv_unbind(struct spi_slave_ctrlr_s *ctrlr);
 static int esp32_spislv_enqueue(struct spi_slave_ctrlr_s *ctrlr,
-                                FAR const void *data,
+                                const void *data,
                                 size_t nwords);
 static bool esp32_spislv_qfull(struct spi_slave_ctrlr_s *ctrlr);
 static void esp32_spislv_qflush(struct spi_slave_ctrlr_s *ctrlr);
-static size_t esp32_spislv_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr);
+static size_t esp32_spislv_qpoll(struct spi_slave_ctrlr_s *ctrlr);
 
 /****************************************************************************
  * Private Data
@@ -458,7 +458,7 @@ static inline bool esp32_spi_iomux(struct esp32_spislv_priv_s *priv)
  *
  ****************************************************************************/
 
-static void esp32_spislv_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void esp32_spislv_setmode(struct spi_slave_ctrlr_s *ctrlr,
                                  enum spi_mode_e mode)
 {
   uint32_t ck_idle_edge;
@@ -587,7 +587,7 @@ static void esp32_spislv_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
  *
  ****************************************************************************/
 
-static void esp32_spislv_setbits(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void esp32_spislv_setbits(struct spi_slave_ctrlr_s *ctrlr,
                                  int nbits)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
@@ -614,7 +614,7 @@ static void esp32_spislv_setbits(FAR struct spi_slave_ctrlr_s *ctrlr,
  *
  ****************************************************************************/
 
-static int esp32_io_interrupt(int irq, void *context, FAR void *arg)
+static int esp32_io_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)arg;
 
@@ -755,7 +755,7 @@ static void esp32_spislv_rx(struct esp32_spislv_priv_s *priv)
  *
  ****************************************************************************/
 
-static int esp32_spislv_interrupt(int irq, void *context, FAR void *arg)
+static int esp32_spislv_interrupt(int irq, void *context, void *arg)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)arg;
   uint32_t n;
@@ -846,7 +846,7 @@ static int esp32_spislv_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void esp32_spislv_initialize(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void esp32_spislv_initialize(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
   const struct esp32_spislv_config_s *config = priv->config;
@@ -958,7 +958,7 @@ static void esp32_spislv_initialize(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static void esp32_spislv_deinit(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void esp32_spislv_deinit(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
 
@@ -1101,7 +1101,7 @@ static void esp32_spislv_unbind(struct spi_slave_ctrlr_s *ctrlr)
  ****************************************************************************/
 
 static int esp32_spislv_enqueue(struct spi_slave_ctrlr_s *ctrlr,
-                                FAR const void *data,
+                                const void *data,
                                 size_t nwords)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
@@ -1217,7 +1217,7 @@ static void esp32_spislv_qflush(struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static size_t esp32_spislv_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr)
+static size_t esp32_spislv_qpoll(struct spi_slave_ctrlr_s *ctrlr)
 {
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;
   irqstate_t flags;
@@ -1249,11 +1249,11 @@ static size_t esp32_spislv_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
+struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
 {
   int ret;
-  FAR struct spi_slave_ctrlr_s *spislv_dev;
-  FAR struct esp32_spislv_priv_s *priv;
+  struct spi_slave_ctrlr_s *spislv_dev;
+  struct esp32_spislv_priv_s *priv;
   irqstate_t flags;
 
   switch (port)
@@ -1272,7 +1272,7 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
         return NULL;
     }
 
-  spislv_dev = (FAR struct spi_slave_ctrlr_s *)priv;
+  spislv_dev = (struct spi_slave_ctrlr_s *)priv;
 
   flags = enter_critical_section();
 
@@ -1333,7 +1333,7 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port)
  *
  ****************************************************************************/
 
-int esp32_spislv_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
+int esp32_spislv_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
 {
   irqstate_t flags;
   struct esp32_spislv_priv_s *priv = (struct esp32_spislv_priv_s *)ctrlr;

@@ -65,7 +65,7 @@ static uint32_t g_tick_divisor;
  *
  ****************************************************************************/
 
-static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int esp32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t divisor;
   uint32_t compare;
