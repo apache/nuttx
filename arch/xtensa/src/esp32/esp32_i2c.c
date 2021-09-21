@@ -488,7 +488,7 @@ static void esp32_i2c_senddata(FAR struct esp32_i2c_priv_s *priv)
 
   /* Transfer the data from the msg buffer to the TX FIFO */
 
-  for (i = 0; i < n; i ++)
+  for (i = 0; i < n; i++)
     {
       esp32_i2c_set_reg(priv, I2C_DATA_OFFSET,
                         msg->buffer[priv->bytes + i]);
