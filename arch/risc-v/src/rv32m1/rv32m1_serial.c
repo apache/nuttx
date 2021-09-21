@@ -491,7 +491,7 @@ static void up_set_format(struct uart_dev_s *dev)
           /* Get the closer one. i.e. the minimum difference */
 
           tdiff = priv->baud - baud;
-          tsbr ++;
+          tsbr++;
         }
 
       /* Pick up the best osr and sbr with the minimum diff */
