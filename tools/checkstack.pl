@@ -111,6 +111,9 @@ my (@stack, $re, $dre, $sub, $x, $xs, $funcre, $min_stack);
 	} elsif ($arch eq 'riscv') {
 		# 23002fd0:       11 41           addi  sp, sp, -16
 		$re = qr/.*addi.*sp,sp,-([0-9]{1,4})/o;
+	} elsif ($arch eq 'xtensa') {
+		#20220de8: 004136                        entry a1, 32
+		$re = qr/.*entry.*a1, ([0-9]{1,4})/o;
 	} else {
 		print("wrong or unknown architecture \"$arch\"\n");
 		exit
