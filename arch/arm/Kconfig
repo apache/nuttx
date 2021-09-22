@@ -879,6 +879,34 @@ config ARM_MPU_NREGIONS
 	---help---
 		This is the number of protection regions supported by the MPU.
 
+config ARM_MPU_RESET
+	bool "MPU Reset before MPU initialization"
+	default n
+	depends on ARM_MPU
+	---help---
+		Configures the MPU initialization sequence to disable the MPU
+		before configuring it.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This may be all that is
+		needed to allow booting if the previous MPU configuration allow
+		the system to execute the MPU initialization code. If not use
+		ARM_MPU_EARLY_RESET.
+
+config ARM_MPU_EARLY_RESET
+	bool "MPU Early Reset"
+	default n
+	depends on ARCH_HAVE_MPU
+	---help---
+		Configures the early system initialization sequence to disable the MPU.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This is useful if the system
+		faults during bbs, or data initialization or before the
+		stm32_mpuinitialize can be called.
+
+		Note: This can be used without MPU Support enabled.
+
 config ARCH_HAVE_LOWVECTORS
 	bool
 
