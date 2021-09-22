@@ -272,12 +272,12 @@ config S32K1XX_FTM7
 	select S32K1XX_FTM
 	depends on S32K1XX_HAVE_FTM7
 
-menuconfig S32K1XX_LPI2C0
+config S32K1XX_LPI2C0
 	bool "LPI2C0"
 	default n
 	select S32K1XX_LPI2C
 
-menuconfig S32K1XX_LPI2C1
+config S32K1XX_LPI2C1
 	bool "LPI2C1"
 	default n
 	select S32K1XX_LPI2C
@@ -627,7 +627,7 @@ config S32K1XX_LPSPI_DWORD
 	
 endmenu # LPSPI Configuration
 
-menu "LPI2C0 Configuration"
+menu "LPI2C0 Master Configuration"
 	depends on S32K1XX_LPI2C0
 
 config LPI2C0_BUSYIDLE
@@ -642,9 +642,26 @@ config LPI2C0_FILTSDA
 	int "I2C master digital glitch filters for SDA input in clock cycles"
 	default 0
 
-endmenu # LPI2C0 Configuration
+endmenu # LPI2C0 Master Configuration
 
-menu "LPI2C1 Configuration"
+menu "LPI2C0 Slave Configuration"
+	depends on S32K1XX_LPI2C0
+
+config LPI2C0_SLAVE_ADDRESS
+	int "7-bit I2C address in decimal"
+	default 8
+	range 8 119
+
+config LPI2C0_SLAVE_BUS
+	bool "Separate I2C slave bus"
+	default n
+	---help---
+		When selected, the LPI2C slave will use separate SDA/SCL pins from
+		the LPI2C master.  These pins need to be defined in the board.h.
+
+endmenu # LPI2C0 Slave Configuration
+
+menu "LPI2C1 Master Configuration"
 	depends on S32K1XX_LPI2C1
 
 config LPI2C1_BUSYIDLE
@@ -659,7 +676,24 @@ config LPI2C1_FILTSDA
 	int "I2C master digital glitch filters for SDA input in clock cycles"
 	default 0
 
-endmenu # LPI2C1 Configuration
+endmenu # LPI2C1 Master Configuration
+
+menu "LPI2C1 Slave Configuration"
+	depends on S32K1XX_LPI2C1
+
+config LPI2C1_SLAVE_ADDRESS
+	int "7-bit I2C address in decimal"
+	default 9
+	range 8 119
+
+config LPI2C1_SLAVE_BUS
+	bool "Separate I2C slave bus"
+	default n
+	---help---
+		When selected, the LPI2C slave will use separate SDA/SCL pins from
+		the LPI2C master.  These pins need to be defined in the board.h.
+
+endmenu # LPI2C1 Slave Configuration
 
 menu "Ethernet Configuration"
 	depends on S32K1XX_ENET
