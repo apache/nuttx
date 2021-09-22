@@ -69,7 +69,6 @@ struct batio_operate_msg_s
   };
 };
 
-#if defined(CONFIG_I2C_BQ2429X)
 enum batio_operate_e
 {
   BATIO_OPRTN_NOP = 0,
@@ -83,6 +82,5 @@ enum batio_operate_e
   BATIO_OPRTN_WDOG,
   BATIO_OPRTN_END
 };
-#endif
 
 #endif /* __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H */
