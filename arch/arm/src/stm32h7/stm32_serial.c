@@ -468,7 +468,7 @@
                DMA_SCR_PBURST_SINGLE  | \
                DMA_SCR_MBURST_SINGLE  | \
                CONFIG_USART_TXDMAPRIO | \
-               DMA_TRBUFF)
+               DMA_SCR_TRBUFF)
 
 #endif /* SERIAL_HAVE_TXDMA */
 
