@@ -77,16 +77,6 @@ static bool spiram_inited = false;
  * Private Functions
  ****************************************************************************/
 
-/* If no function in esp_himem.c is used, this function will be linked into
- * the binary instead of the one in esp_himem.c, automatically making sure
- * no memory is reserved if no himem function is used.
- */
-
-size_t weak_function esp_himem_reserved_area_size(void)
-{
-  return 0;
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
