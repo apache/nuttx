@@ -61,11 +61,11 @@
 
 /* Debug ********************************************************************/
 #ifdef CONFIG_DEBUG_BQ25618
-#  define pwrerr  _err
-#  define pwrdbg  _err
+#  define baterr  _err
+#  define batdbg  _err
 #else
-#  define pwrerr  _none
-#  define pwrdbg  _none
+#  define baterr  _none
+#  define batdbg  _none
 #endif
 
 #define ARRAY_SIZE(a)  (sizeof(a)/sizeof(a[0]))
@@ -206,7 +206,7 @@ static int bq25618_getreg8(FAR struct bq25618_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      pwrerr("ERROR: i2c_write failed: %d\n", ret);
+      baterr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -215,7 +215,7 @@ static int bq25618_getreg8(FAR struct bq25618_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, &val, 1);
   if (ret < 0)
     {
-      pwrerr("ERROR: i2c_read failed: %d\n", ret);
+      baterr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -247,7 +247,7 @@ static int bq25618_putreg8(FAR struct bq25618_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  pwrdbg("addr: %02x regval: %08x\n", regaddr, regval);
+  batdbg("addr: %02x regval: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -301,31 +301,31 @@ static int (bq25618_dump_regs) (FAR struct bq25618_dev_s * priv)
   uint8_t value = 0;
 
   ret  = bq25618_getreg8(priv, BQ25618_INPUT_CURRENT_LIMIT, &value);
-  pwrdbg("REG#0: 0x%08X\n", value);
+  batdbg("REG#0: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_0, &value);
-  pwrdbg("REG#1: 0x%08X\n", value);
+  batdbg("REG#1: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGE_CURRENT_LIMIT, &value);
-  pwrdbg("REG#2: 0x%08X\n", value);
+  batdbg("REG#2: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &value);
-  pwrdbg("REG#3: 0x%08X\n", value);
+  batdbg("REG#3: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_BATTERY_VOLTAGE_LIMIT, &value);
-  pwrdbg("REG#4: 0x%08X\n", value);
+  batdbg("REG#4: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_1, &value);
-  pwrdbg("REG#5: 0x%08X\n", value);
+  batdbg("REG#5: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_2, &value);
-  pwrdbg("REG#6: 0x%08X\n", value);
+  batdbg("REG#6: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_3, &value);
-  pwrdbg("REG#7: 0x%08X\n", value);
+  batdbg("REG#7: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_0, &value);
-  pwrdbg("REG#8: 0x%08X\n", value);
+  batdbg("REG#8: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_1, &value);
-  pwrdbg("REG#9: 0x%08X\n", value);
+  batdbg("REG#9: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_2, &value);
-  pwrdbg("REG#A: 0x%08X\n", value);
+  batdbg("REG#A: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_PART_INFORMATION, &value);
-  pwrdbg("REG#B: 0x%08X\n", value);
+  batdbg("REG#B: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_4, &value);
-  pwrdbg("REG#C: 0x%08X\n", value);
+  batdbg("REG#C: 0x%08X\n", value);
 
   return ret;
 }
@@ -371,7 +371,7 @@ int bq25618_get_ichg_curr(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_CHARGE_CURRENT_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -400,7 +400,7 @@ int bq25618_get_input_curr_lim(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_INPUT_CURRENT_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -427,7 +427,7 @@ int bq25618_get_chrg_volt(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_BATTERY_VOLTAGE_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -458,7 +458,7 @@ int bq25618_get_iterm_curr(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -485,7 +485,7 @@ int bq25618_get_prechrg_curr(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -513,7 +513,7 @@ int bq25618_get_input_volt_lim(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_2, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -521,6 +521,78 @@ int bq25618_get_input_volt_lim(FAR struct bq25618_dev_s *priv)
 
   return (vindpm_reg_code * BQ25618_VINDPM_STEP_UV) +
                                      BQ25618_VINDPM_OFFSET_UV;
+}
+
+/****************************************************************************
+ * Name: bq25618_control_shipmode
+ *
+ * Description:
+ *   Return the control state
+ *
+ ****************************************************************************/
+
+int bq25618_control_shipmode(FAR struct bq25618_dev_s *priv, bool enable)
+{
+  int ret;
+  int idx;
+  uint8_t regval;
+
+  ret = bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_3, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+    }
+
+  /* true:enter ship mode; false:exit ship mode */
+
+  idx = enable;
+  regval &= ~(BQ25618_SHIPMODE_MASK);
+  regval |= (idx << BQ25618_SHIPMODE_SHIFT);
+
+  ret = bq25618_putreg8(priv, BQ25618_CHARGER_CONTROL_3, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: bq25618_control_charge
+ *
+ * Description:
+ *   Return the control enable and disable charge state
+ *
+ ****************************************************************************/
+
+int bq25618_control_charge(FAR struct bq25618_dev_s *priv, bool enable)
+{
+  int ret;
+  int idx;
+  uint8_t regval;
+
+  ret = bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_0, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+    }
+
+  /* true:enable charge; false:disable charge */
+
+  idx = enable;
+  regval &= ~(BQ25618_CONTROL_CHARGE_MASK);
+  regval |= (idx << BQ25618_CONTROL_CHARGE_SHIFT);
+
+  ret = bq25618_putreg8(priv, BQ25618_CHARGER_CONTROL_0, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      return ret;
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -541,14 +613,14 @@ static int bq25618_get_state(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_0, &charge_status_0);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return -1;
     }
 
   ret = bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_1, &charge_status_1);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return -1;
     }
 
@@ -581,7 +653,7 @@ static int bq25618_detect_device(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_PART_INFORMATION, &val);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return -1;
     }
 
@@ -589,11 +661,11 @@ static int bq25618_detect_device(FAR struct bq25618_dev_s *priv)
   part_no >>= BQ25618_DEV_ID_SHIFT;
   if (part_no == 0x05)
     {
-      pwrerr("detect bq25618 ID success\n");
+      baterr("detect bq25618 ID success\n");
     }
   else
     {
-      pwrerr("detect bq25618 ID fail\n");
+      baterr("detect bq25618 ID fail\n");
     }
 
   return OK;
@@ -617,7 +689,7 @@ static inline int bq25618_set_vindpm(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_2, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -632,7 +704,7 @@ static inline int bq25618_set_vindpm(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_CHARGER_CONTROL_2, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -657,7 +729,7 @@ static inline int bq25618_set_prechrg_curr(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -670,7 +742,7 @@ static inline int bq25618_set_prechrg_curr(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -695,7 +767,7 @@ static inline int bq25618_set_iterm_curr(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -708,7 +780,7 @@ static inline int bq25618_set_iterm_curr(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -733,7 +805,7 @@ static inline int bq25618_reset(FAR struct bq25618_dev_s *priv)
   ret = bq25618_getreg8(priv, BQ25618_PART_INFORMATION, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -743,7 +815,7 @@ static inline int bq25618_reset(FAR struct bq25618_dev_s *priv)
   ret = bq25618_putreg8(priv, BQ25618_PART_INFORMATION, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -757,7 +829,7 @@ static inline int bq25618_reset(FAR struct bq25618_dev_s *priv)
   ret = bq25618_putreg8(priv, BQ25618_PART_INFORMATION, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -781,7 +853,7 @@ static inline int bq25618_watchdog(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_1, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -797,7 +869,7 @@ static inline int bq25618_watchdog(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_CHARGER_CONTROL_1, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -862,6 +934,60 @@ static int bq25618_state(FAR struct battery_charger_dev_s *dev,
 static int bq25618_health(FAR struct battery_charger_dev_s *dev,
                           FAR int *health)
 {
+  FAR struct bq25618_dev_s *priv = (FAR struct bq25618_dev_s *)dev;
+  FAR struct bq25618_ic_state state;
+  int ret;
+
+  ret = bq25618_get_state(priv, &state);
+  if (ret < 0)
+    {
+      *health = BATTERY_HEALTH_UNKNOWN;
+      return ret;
+    }
+
+  if (state.wdt_fault)
+    {
+      *health = BATTERY_HEALTH_WD_TMR_EXP;
+    }
+
+  else if (state.bat_fault)
+    {
+      *health = BATTERY_HEALTH_OVERVOLTAGE;
+    }
+
+  else
+    {
+      switch (state.chrg_fault)
+        {
+          case BQ25618_CHRG_FAULT_INPUT:
+              *health =  BATTERY_HEALTH_UNSPEC_FAIL;
+              break;
+          case BQ25618_CHRG_FAULT_THERM:
+              *health =  BATTERY_HEALTH_OVERHEAT;
+              break;
+          case BQ25618_CHRG_FAULT_CST_EXPIRE:
+              *health =  BATTERY_HEALTH_SAFE_TMR_EXP;
+              break;
+          default:
+              break;
+        }
+
+      switch (state.ntc_fault)
+        {
+          case BQ25618_NTC_FAULT_WARM:
+          case BQ25618_NTC_FAULT_HOT:
+              *health =  BATTERY_HEALTH_OVERHEAT;
+              break;
+          case BQ25618_NTC_FAULT_COOL:
+          case BQ25618_NTC_FAULT_COLD:
+              *health =  BATTERY_HEALTH_COLD;
+              break;
+          default:
+              *health =  BATTERY_HEALTH_GOOD;
+              break;
+        }
+    }
+
   return OK;
 }
 
@@ -924,7 +1050,7 @@ static inline int bq25618_powersupply(FAR struct bq25618_dev_s *priv,
     break;
 
   default:
-    pwrerr("ERROR: Current not supported, setting default to 100mA!\n");
+    baterr("ERROR: Current not supported, setting default to 100mA!\n");
     idx = BQ25618_INP_CURR_LIM_100MA;
     break;
   }
@@ -934,7 +1060,7 @@ static inline int bq25618_powersupply(FAR struct bq25618_dev_s *priv,
   ret = bq25618_getreg8(priv, BQ25618_INPUT_CURRENT_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -946,7 +1072,7 @@ static inline int bq25618_powersupply(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_INPUT_CURRENT_LIMIT, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -971,14 +1097,14 @@ static inline int bq25618_setvolt(FAR struct bq25618_dev_s *priv, int volts)
 
   if (volts < BQ25618_VOLT_MIN || volts > BQ25618_VOLT_MAX)
     {
-      pwrerr("ERROR: Voltage %d mV is out of range.\n", volts);
+      baterr("ERROR: Voltage %d mV is out of range.\n", volts);
       return -EINVAL;
     }
 
   ret = bq25618_getreg8(priv, BQ25618_BATTERY_VOLTAGE_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1003,7 +1129,7 @@ static inline int bq25618_setvolt(FAR struct bq25618_dev_s *priv, int volts)
         idx = BQ25618_BATTERY_VOLT_ILIM_4V5;
         break;
     default:
-        pwrerr("ERROR:volt not supported, setting default to 4.2V!\n");
+        baterr("ERROR:volt not supported, setting default to 4.2V!\n");
         idx = BQ25618_BATTERY_VOLT_ILIM_4V2;
         break;
   }
@@ -1016,7 +1142,7 @@ static inline int bq25618_setvolt(FAR struct bq25618_dev_s *priv, int volts)
   ret = bq25618_putreg8(priv, BQ25618_BATTERY_VOLTAGE_LIMIT, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1044,14 +1170,14 @@ static inline int bq25618_setcurr(FAR struct bq25618_dev_s *priv,
 
   if (current < BQ25618_CURR_MIN || current > BQ25618_CURR_MAX)
     {
-      pwrerr("ERROR: Current %d mA is out of range.\n", current);
+      baterr("ERROR: Current %d mA is out of range.\n", current);
       return -EINVAL;
     }
 
   ret = bq25618_getreg8(priv, BQ25618_CHARGE_CURRENT_LIMIT, &regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error reading from BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1069,7 +1195,7 @@ static inline int bq25618_setcurr(FAR struct bq25618_dev_s *priv,
   ret = bq25618_putreg8(priv, BQ25618_CHARGE_CURRENT_LIMIT, regval);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error writing to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1094,7 +1220,7 @@ static int bq25618_voltage(FAR struct battery_charger_dev_s *dev, int value)
   ret = bq25618_setvolt(priv, value);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error setting voltage to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error setting voltage to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1119,7 +1245,7 @@ static int bq25618_current(FAR struct battery_charger_dev_s *dev, int value)
   ret = bq25618_setcurr(priv, value);
   if (ret < 0)
     {
-      pwrerr("ERROR: Error setting current to BQ25618! Error = %d\n", ret);
+      baterr("ERROR: Error setting current to BQ25618! Error = %d\n", ret);
       return ret;
     }
 
@@ -1143,7 +1269,7 @@ static int bq25618_input_current(FAR struct battery_charger_dev_s *dev,
   ret = bq25618_powersupply(priv, value);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set BQ25618 power supply: %d\n", ret);
+      baterr("ERROR: Failed to set BQ25618 power supply: %d\n", ret);
       return ret;
     }
 
@@ -1181,7 +1307,7 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_set_vindpm(priv, BQ25618_VINDPM_DEFAULT_UV);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set BQ25618 set vindpm: %d\n", ret);
+      baterr("ERROR: Failed to set BQ25618 set vindpm: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1191,7 +1317,7 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_powersupply(priv, current);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set BQ25618 power supply: %d\n", ret);
+      baterr("ERROR: Failed to set BQ25618 power supply: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1201,7 +1327,7 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_setcurr(priv, BQ25618_ICHG_DEFAULT_UA);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set BQ25618 current: %d\n", ret);
+      baterr("ERROR: Failed to set BQ25618 current: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1211,7 +1337,7 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_set_prechrg_curr(priv, BQ25618_PRE_CURR_DEFAULT_UA);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set pre current: %d\n", ret);
+      baterr("ERROR: Failed to set pre current: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1221,7 +1347,7 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_set_iterm_curr(priv, BQ25618_ITERM_DEFAULT_UA);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set iterm current: %d\n", ret);
+      baterr("ERROR: Failed to set iterm current: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
@@ -1231,13 +1357,13 @@ static int bq25618_init(FAR struct bq25618_dev_s *priv, int current)
   ret = bq25618_setvolt(priv, BQ25618_VBAT_DEFAULT_UV);
   if (ret < 0)
     {
-      pwrerr("ERROR: Failed to set BAT vol: %d\n", ret);
+      baterr("ERROR: Failed to set BAT vol: %d\n", ret);
       kmm_free(priv);
       return ret;
     }
 
   bq25618_dump_regs(priv);
-  pwrerr("bq25618 init success\n");
+  baterr("bq25618 init success\n");
 
   return ret;
 }
@@ -1297,7 +1423,7 @@ bq25618_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
       ret = bq25618_reset(priv);
       if (ret < 0)
         {
-          pwrerr("ERROR: Failed to reset the BQ25618: %d\n", ret);
+          baterr("ERROR: Failed to reset the BQ25618: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -1307,7 +1433,7 @@ bq25618_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
       ret = bq25618_watchdog(priv, false);
       if (ret < 0)
         {
-          pwrerr("ERROR: Failed to disable BQ25618 watchdog: %d\n", ret);
+          baterr("ERROR: Failed to disable BQ25618 watchdog: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -1315,7 +1441,7 @@ bq25618_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
       ret = bq25618_detect_device(priv);
       if (ret < 0)
         {
-          pwrerr("ERROR: Failed to detect_device: %d\n", ret);
+          baterr("ERROR: Failed to detect_device: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
@@ -1323,7 +1449,7 @@ bq25618_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
       ret = bq25618_init(priv, current);
       if (ret < 0)
         {
-          pwrerr("ERROR: Failed to init BQ25618:%d\n", ret);
+          baterr("ERROR: Failed to init BQ25618:%d\n", ret);
           kmm_free(priv);
           return NULL;
         }

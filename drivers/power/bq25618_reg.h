@@ -110,4 +110,17 @@
 #define BQ25618_ITERM_STEP_UA             20
 #define BQ25618_ITERM_DEFAULT_UA          60
 
+#define BQ25618_CHRG_FAULT_INPUT          0x10
+#define BQ25618_CHRG_FAULT_THERM          0x20
+#define BQ25618_CHRG_FAULT_CST_EXPIRE     0x30
+#define BQ25618_NTC_FAULT_WARM            0x02
+#define BQ25618_NTC_FAULT_COOL            0x03
+#define BQ25618_NTC_FAULT_COLD            0x05
+#define BQ25618_NTC_FAULT_HOT             0x06
+
+#define BQ25618_SHIPMODE_MASK             0x20
+#define BQ25618_SHIPMODE_SHIFT            5
+
+#define BQ25618_CONTROL_CHARGE_MASK       0x10
+#define BQ25618_CONTROL_CHARGE_SHIFT      4
 #endif
