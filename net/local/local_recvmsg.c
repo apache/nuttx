@@ -106,15 +106,18 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
 }
 
 /****************************************************************************
- * Name: psock_stream_recvmsg
+ * Name: psock_stream_recvfrom
  *
  * Description:
- *   psock_stream_recvmsg() receives messages from a local stream socket.
+ *   psock_stream_recvfrom() receives messages from a local stream socket.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive the message
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
  *   flags    Receive flags
+ *   from     Address of source (may be NULL)
+ *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  If no data is
@@ -126,11 +129,12 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
 
 #ifdef CONFIG_NET_LOCAL_STREAM
 static inline ssize_t
-psock_stream_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                     int flags)
+psock_stream_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                      int flags, FAR struct sockaddr *from,
+                      FAR socklen_t *fromlen)
 {
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
-  size_t readlen;
+  size_t readlen = len;
   int ret;
 
   /* Verify that this is a connected peer socket */
@@ -152,8 +156,7 @@ psock_stream_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Read the packet */
 
-  readlen = msg->msg_iov->iov_len;
-  ret     = psock_fifo_read(psock, msg->msg_iov->iov_base, &readlen, true);
+  ret = psock_fifo_read(psock, buf, &readlen, true);
   if (ret < 0)
     {
       return ret;
@@ -161,9 +164,9 @@ psock_stream_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Return the address family */
 
-  if (msg->msg_name)
+  if (from)
     {
-      ret = local_getaddr(conn, msg->msg_name, &msg->msg_namelen);
+      ret = local_getaddr(conn, from, fromlen);
       if (ret < 0)
         {
           return ret;
@@ -175,15 +178,18 @@ psock_stream_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #endif /* CONFIG_NET_LOCAL_STREAM */
 
 /****************************************************************************
- * Name: psock_dgram_recvmsg
+ * Name: psock_dgram_recvfrom
  *
  * Description:
- *   psock_dgram_recvmsg() receives messages from a local datagram socket.
+ *   psock_dgram_recvfrom() receives messages from a local datagram socket.
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Buffer to receive the message
+ *   buf      Buffer to receive data
+ *   len      Length of buffer
  *   flags    Receive flags
+ *   from     Address of source (may be NULL)
+ *   fromlen  The length of the address structure
  *
  * Returned Value:
  *   On success, returns the number of characters received.  Otherwise, on
@@ -194,8 +200,9 @@ psock_stream_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
 #ifdef CONFIG_NET_LOCAL_DGRAM
 static inline ssize_t
-psock_dgram_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
-                     int flags)
+psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
+                     int flags, FAR struct sockaddr *from,
+                     FAR socklen_t *fromlen)
 {
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
   uint16_t pktlen;
@@ -206,7 +213,7 @@ psock_dgram_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
    * 'len' that can be supported.
    */
 
-  DEBUGASSERT(msg->msg_iov->iov_len <= UINT16_MAX);
+  DEBUGASSERT(len <= UINT16_MAX);
 
   /* Verify that this is a bound, un-connected peer socket */
 
@@ -263,8 +270,8 @@ psock_dgram_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Read the packet */
 
-  readlen = MIN(pktlen, msg->msg_iov->iov_len);
-  ret     = psock_fifo_read(psock, msg->msg_iov->iov_base, &readlen, false);
+  readlen = MIN(pktlen, len);
+  ret     = psock_fifo_read(psock, buf, &readlen, false);
   if (ret < 0)
     {
       goto errout_with_infd;
@@ -314,9 +321,9 @@ psock_dgram_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Return the address family */
 
-  if (msg->msg_name)
+  if (from)
     {
-      ret = local_getaddr(conn, msg->msg_name, &msg->msg_namelen);
+      ret = local_getaddr(conn, from, fromlen);
       if (ret < 0)
         {
           return ret;
@@ -373,14 +380,19 @@ errout_with_halfduplex:
 ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
-  DEBUGASSERT(psock && psock->s_conn && msg);
+  FAR void *buf = msg->msg_iov->iov_base;
+  size_t len = msg->msg_iov->iov_len;
+  FAR struct sockaddr *from = msg->msg_name;
+  FAR socklen_t *fromlen = &msg->msg_namelen;
+
+  DEBUGASSERT(psock && psock->s_conn && buf);
 
   /* Check for a stream socket */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   if (psock->s_type == SOCK_STREAM)
     {
-      return psock_stream_recvmsg(psock, msg, flags);
+      return psock_stream_recvfrom(psock, buf, len, flags, from, fromlen);
     }
   else
 #endif
@@ -388,7 +400,7 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 #ifdef CONFIG_NET_LOCAL_DGRAM
   if (psock->s_type == SOCK_DGRAM)
     {
-      return psock_dgram_recvmsg(psock, msg, flags);
+      return psock_dgram_recvfrom(psock, buf, len, flags, from, fromlen);
     }
   else
 #endif

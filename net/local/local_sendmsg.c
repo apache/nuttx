@@ -49,7 +49,8 @@
  *
  * Input Parameters:
  *   psock    An instance of the internal socket structure.
- *   msg      Message to send
+ *   buf      Data to send
+ *   len      Length of data to send
  *   flags    Send flags (ignored for now)
  *
  * Returned Value:
@@ -59,8 +60,9 @@
  *
  ****************************************************************************/
 
-static ssize_t psock_local_send(FAR struct socket *psock,
-                                FAR struct msghdr *msg, int flags)
+static ssize_t local_send(FAR struct socket *psock,
+                          FAR const struct iovec *buf,
+                          size_t len, int flags)
 {
   ssize_t ret;
 
@@ -73,7 +75,7 @@ static ssize_t psock_local_send(FAR struct socket *psock,
 
           /* Local TCP packet send */
 
-          DEBUGASSERT(psock && psock->s_conn && msg);
+          DEBUGASSERT(psock && psock->s_conn && buf);
           peer = (FAR struct local_conn_s *)psock->s_conn;
 
           /* Verify that this is a connected peer socket and that it has
@@ -94,7 +96,7 @@ static ssize_t psock_local_send(FAR struct socket *psock,
 
           /* Send the packet */
 
-          ret = local_send_packet(peer, msg, false);
+          ret = local_send_packet(&peer->lc_outfile, buf, len, false);
         }
         break;
 #endif /* CONFIG_NET_LOCAL_STREAM */
@@ -134,8 +136,11 @@ static ssize_t psock_local_send(FAR struct socket *psock,
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Message to send
+ *   buf      Data to send
+ *   len      Length of data to send
  *   flags    Send flags
+ *   to       Address of recipient
+ *   tolen    The length of the address structure
  *
  *   NOTE: All input parameters were verified by sendto() before this
  *   function was called.
@@ -147,21 +152,23 @@ static ssize_t psock_local_send(FAR struct socket *psock,
  *
  ****************************************************************************/
 
-static ssize_t psock_local_sendto(FAR struct socket *psock,
-                                  FAR struct msghdr *msg, int flags)
+static ssize_t local_sendto(FAR struct socket *psock,
+                            FAR const struct iovec *buf,
+                            size_t len, int flags,
+                            FAR const struct sockaddr *to,
+                            socklen_t tolen)
 {
 #ifdef CONFIG_NET_LOCAL_DGRAM
   FAR struct local_conn_s *conn = (FAR struct local_conn_s *)psock->s_conn;
-  FAR struct sockaddr_un *unaddr = msg->msg_name;
+  FAR struct sockaddr_un *unaddr = (FAR struct sockaddr_un *)to;
   ssize_t ret;
 
   /* Verify that a valid address has been provided */
 
-  if (unaddr->sun_family != AF_LOCAL ||
-      msg->msg_namelen < sizeof(sa_family_t))
+  if (to->sa_family != AF_LOCAL || tolen < sizeof(sa_family_t))
     {
       nerr("ERROR: Unrecognized address family: %d\n",
-           unaddr->sun_family);
+           to->sa_family);
       return -EAFNOSUPPORT;
     }
 
@@ -193,7 +200,7 @@ static ssize_t psock_local_sendto(FAR struct socket *psock,
 
   /* At present, only standard pathname type address are support */
 
-  if (msg->msg_namelen < sizeof(sa_family_t) + 2)
+  if (tolen < sizeof(sa_family_t) + 2)
     {
       /* EFAULT
        * - An invalid user space address was specified for a parameter
@@ -229,7 +236,7 @@ static ssize_t psock_local_sendto(FAR struct socket *psock,
 
   /* Send the packet */
 
-  ret = local_send_packet(conn, msg, true);
+  ret = local_send_packet(&conn->lc_outfile, buf, len, true);
   if (ret < 0)
     {
       nerr("ERROR: Failed to send the packet: %zd\n", ret);
@@ -264,7 +271,7 @@ errout_with_halfduplex:
  *
  * Input Parameters:
  *   psock    A pointer to a NuttX-specific, internal socket structure
- *   msg      Message to send
+ *   msg      msg to send
  *   flags    Send flags
  *
  * Returned Value:
@@ -277,8 +284,13 @@ errout_with_halfduplex:
 ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
                       int flags)
 {
-  return msg->msg_name ? psock_local_sendto(psock, msg, flags) :
-                         psock_local_send(psock, msg, flags);
+  FAR const struct iovec *buf = msg->msg_iov;
+  size_t len = msg->msg_iovlen;
+  FAR const struct sockaddr *to = msg->msg_name;
+  socklen_t tolen = msg->msg_namelen;
+
+  return to ? local_sendto(psock, buf, len, flags, to, tolen) :
+              local_send(psock, buf, len, flags);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_LOCAL */
