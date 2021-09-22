@@ -57,10 +57,6 @@
 #endif
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 /* Let's to assume SPIFLASH SPEED == SPIRAM SPEED for now */
 
 #if defined(CONFIG_ESP32_SPIRAM_SPEED_40M)
@@ -71,11 +67,11 @@
 #  error "FLASH speed can only be equal to or higher than SRAM speed while SRAM is enabled!"
 #endif
 
-static bool spiram_inited = false;
-
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
+
+static bool spiram_inited = false;
 
 /****************************************************************************
  * Public Functions
