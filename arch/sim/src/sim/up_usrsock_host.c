@@ -365,8 +365,8 @@ int usrsock_host_getsockname(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen)
 {
+  socklen_t naddrlen = sizeof(struct sockaddr);
   struct sockaddr naddr;
-  socklen_t naddrlen;
   int ret;
 
   ret = getsockname(sockfd, &naddr, &naddrlen);
@@ -387,8 +387,8 @@ int usrsock_host_getpeername(int sockfd,
                              struct nuttx_sockaddr *addr,
                              nuttx_socklen_t *addrlen)
 {
+  socklen_t naddrlen = sizeof(struct sockaddr);
   struct sockaddr naddr;
-  socklen_t naddrlen;
   int ret;
 
   ret = getpeername(sockfd, &naddr, &naddrlen);
