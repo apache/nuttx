@@ -718,20 +718,22 @@ int esp32c3_rt_timer_init(void)
 
   nxsem_init(&priv->toutsem, 0, 0);
 
-  priv->pid = kthread_create(RT_TIMER_TASK_NAME,
+  pid = kthread_create(RT_TIMER_TASK_NAME,
                        RT_TIMER_TASK_PRIORITY,
                        RT_TIMER_TASK_STACK_SIZE,
                        rt_timer_thread,
                        NULL);
-  if (priv->pid < 0)
+  if (pid < 0)
     {
       tmrerr("ERROR: Failed to create RT timer task error=%d\n", pid);
       esp32c3_tim_deinit(priv->timer);
-      return priv->pid;
+      return pid;
     }
 
   list_initialize(&priv->runlist);
   list_initialize(&priv->toutlist);
+
+  priv->pid = pid;
 
   flags = enter_critical_section();
 
