@@ -69,9 +69,9 @@
 struct esp32c3_rt_priv_s
 {
   int pid;
-  sem_t s_toutsem;
-  struct list_node s_runlist;
-  struct list_node s_toutlist;
+  sem_t toutsem;
+  struct list_node runlist;
+  struct list_node toutlist;
   struct esp32c3_tim_dev_s *timer;
 };
 
@@ -141,7 +141,7 @@ static void start_rt_timer(struct rt_timer_s *timer,
        * node of timer whose alarm value is larger than new one
        */
 
-      list_for_every_entry(&priv->s_runlist, p, struct rt_timer_s, list)
+      list_for_every_entry(&priv->runlist, p, struct rt_timer_s, list)
         {
           if (p->alarm > timer->alarm)
             {
@@ -157,14 +157,14 @@ static void start_rt_timer(struct rt_timer_s *timer,
 
       if (!inserted)
         {
-          list_add_tail(&priv->s_runlist, &timer->list);
+          list_add_tail(&priv->runlist, &timer->list);
         }
 
       timer->state = RT_TIMER_READY;
 
       /* If this timer is at the head of the list */
 
-      if (timer == container_of(priv->s_runlist.next,
+      if (timer == container_of(priv->runlist.next,
                                 struct rt_timer_s, list))
         {
           /* Reset the hardware timer alarm */
@@ -214,7 +214,7 @@ static void stop_rt_timer(struct rt_timer_s *timer)
     {
       /* Check if the timer is at the head of the list */
 
-      if (timer == container_of(priv->s_runlist.next,
+      if (timer == container_of(priv->runlist.next,
                                 struct rt_timer_s, list))
         {
           ishead = true;
@@ -231,13 +231,13 @@ static void stop_rt_timer(struct rt_timer_s *timer)
 
       if (ishead)
         {
-          if (!list_is_empty(&priv->s_runlist))
+          if (!list_is_empty(&priv->runlist))
             {
               /* Set the value from the next timer as the new hardware timer
                * alarm value.
                */
 
-              next_timer = container_of(priv->s_runlist.next,
+              next_timer = container_of(priv->runlist.next,
                                         struct rt_timer_s,
                                         list);
               alarm = next_timer->alarm;
@@ -289,12 +289,12 @@ static void delete_rt_timer(struct rt_timer_s *timer)
       goto exit;
     }
 
-  list_add_after(&priv->s_toutlist, &timer->list);
+  list_add_after(&priv->toutlist, &timer->list);
   timer->state = RT_TIMER_DELETE;
 
   /* Wake up the thread to process deleted timers */
 
-  ret = nxsem_post(&priv->s_toutsem);
+  ret = nxsem_post(&priv->toutsem);
   if (ret < 0)
     {
       tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
@@ -332,10 +332,10 @@ static int rt_timer_thread(int argc, char *argv[])
     {
       /* Waiting for all timers to time out */
 
-      ret = nxsem_wait(&priv->s_toutsem);
+      ret = nxsem_wait(&priv->toutsem);
       if (ret)
         {
-          tmrerr("ERROR: Wait s_toutsem error=%d\n", ret);
+          tmrerr("ERROR: Wait toutsem error=%d\n", ret);
           assert(0);
         }
 
@@ -343,11 +343,11 @@ static int rt_timer_thread(int argc, char *argv[])
 
       /* Process all the timers in list */
 
-      while (!list_is_empty(&priv->s_toutlist))
+      while (!list_is_empty(&priv->toutlist))
         {
           /* Get the first timer in the list */
 
-          timer = container_of(priv->s_toutlist.next,
+          timer = container_of(priv->toutlist.next,
                                struct rt_timer_s, list);
 
           /* Cache the raw state to decide how to deal with this timer */
@@ -428,7 +428,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
   /* Check if there is a timer running */
 
-  if (!list_is_empty(&priv->s_runlist))
+  if (!list_is_empty(&priv->runlist))
     {
       /**
        * When stop/delete timer, in the same time the hardware timer
@@ -436,7 +436,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
        * from running list, so the 1st timer is not which triggers.
        */
 
-      timer = container_of(priv->s_runlist.next, struct rt_timer_s, list);
+      timer = container_of(priv->runlist.next, struct rt_timer_s, list);
       ESP32C3_TIM_GETCTR(priv->timer, &counter);
       counter = CYCLES_TO_USEC(counter);
       if (timer->alarm <= counter)
@@ -450,16 +450,16 @@ static int rt_timer_isr(int irq, void *context, void *arg)
 
           list_delete(&timer->list);
           timer->state = RT_TIMER_TIMEOUT;
-          list_add_after(&priv->s_toutlist, &timer->list);
+          list_add_after(&priv->toutlist, &timer->list);
           wake = true;
 
           /* Check if there is a timer running */
 
-          if (!list_is_empty(&priv->s_runlist))
+          if (!list_is_empty(&priv->runlist))
             {
               /* Reset hardware timer alarm with next timer's alarm value */
 
-              timer = container_of(priv->s_runlist.next,
+              timer = container_of(priv->runlist.next,
                                    struct rt_timer_s, list);
               alarm = timer->alarm;
 
@@ -476,7 +476,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
     {
       /* Wake up the thread to process timed-out timers */
 
-      ret = nxsem_post(&priv->s_toutsem);
+      ret = nxsem_post(&priv->toutsem);
       if (ret < 0)
         {
           tmrerr("ERROR: Failed to post sem ret=%d\n", ret);
@@ -716,7 +716,7 @@ int esp32c3_rt_timer_init(void)
       return -EINVAL;
     }
 
-  nxsem_init(&priv->s_toutsem, 0, 0);
+  nxsem_init(&priv->toutsem, 0, 0);
 
   priv->pid = kthread_create(RT_TIMER_TASK_NAME,
                        RT_TIMER_TASK_PRIORITY,
@@ -730,8 +730,8 @@ int esp32c3_rt_timer_init(void)
       return priv->pid;
     }
 
-  list_initialize(&priv->s_runlist);
-  list_initialize(&priv->s_toutlist);
+  list_initialize(&priv->runlist);
+  list_initialize(&priv->toutlist);
 
   flags = enter_critical_section();
 
@@ -790,5 +790,5 @@ void esp32c3_rt_timer_deinit(void)
       priv->pid = -EINVAL;
     }
 
-  nxsem_destroy(&priv->s_toutsem);
+  nxsem_destroy(&priv->toutsem);
 }
