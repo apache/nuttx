@@ -852,9 +852,12 @@ void tcp_listen_initialize(void);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno, uint8_t domain);
+FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
+                                        uint16_t portno,
+                                        uint8_t domain);
 #else
-FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno);
+FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
+                                        uint16_t portno);
 #endif
 
 /****************************************************************************
@@ -895,9 +898,10 @@ int tcp_listen(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-bool tcp_islistener(uint16_t portno, uint8_t domain);
+bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno,
+                    uint8_t domain);
 #else
-bool tcp_islistener(uint16_t portno);
+bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno);
 #endif
 
 /****************************************************************************

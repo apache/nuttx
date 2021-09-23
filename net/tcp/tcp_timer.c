@@ -250,9 +250,10 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                   /* Find the listener for this connection. */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-                  listener = tcp_findlistener(conn->lport, conn->domain);
+                  listener = tcp_findlistener(&conn->u, conn->lport,
+                                              conn->domain);
 #else
-                  listener = tcp_findlistener(conn->lport);
+                  listener = tcp_findlistener(&conn->u, conn->lport);
 #endif
                   if (listener != NULL)
                     {
