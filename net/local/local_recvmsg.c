@@ -123,7 +123,7 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
 static void local_recvctl(FAR struct local_conn_s *conn,
                           FAR struct msghdr *msg)
 {
-  FAR struct local_conn_s *peer = conn->lc_peer;
+  FAR struct local_conn_s *peer;
   struct cmsghdr *cmsg;
   int count;
   int *fds;
@@ -131,7 +131,16 @@ static void local_recvctl(FAR struct local_conn_s *conn,
 
   net_lock();
 
-  if (peer == NULL)
+  cmsg  = CMSG_FIRSTHDR(msg);
+  count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
+  cmsg->cmsg_len = 0;
+
+  if (count == 0)
+    {
+      goto out;
+    }
+
+  if (conn->lc_peer == NULL)
     {
       peer = local_peerconn(conn);
       if (peer == NULL)
@@ -139,16 +148,12 @@ static void local_recvctl(FAR struct local_conn_s *conn,
           goto out;
         }
     }
-
-  if (peer->lc_cfpcount == 0)
+  else
     {
-      goto out;
+      peer = conn;
     }
 
-  cmsg = CMSG_FIRSTHDR(msg);
-
-  count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
-  if (count == 0)
+  if (peer->lc_cfpcount == 0)
     {
       goto out;
     }

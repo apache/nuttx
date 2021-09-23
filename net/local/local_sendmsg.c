@@ -61,6 +61,7 @@
 static int local_sendctl(FAR struct local_conn_s *conn,
                          FAR struct msghdr *msg)
 {
+  FAR struct local_conn_s *peer;
   FAR struct file *filep2;
   FAR struct file *filep;
   struct cmsghdr *cmsg;
@@ -70,6 +71,12 @@ static int local_sendctl(FAR struct local_conn_s *conn,
   int i;
 
   net_lock();
+
+  peer = conn->lc_peer;
+  if (peer == NULL)
+    {
+      peer = conn;
+    }
 
   for_each_cmsghdr(cmsg, msg)
     {
@@ -84,7 +91,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
       fds = (int *)CMSG_DATA(cmsg);
       count = (cmsg->cmsg_len - sizeof(struct cmsghdr)) / sizeof(int);
 
-      if (count + conn->lc_cfpcount > LOCAL_NCONTROLFDS)
+      if (count + peer->lc_cfpcount > LOCAL_NCONTROLFDS)
         {
           ret = -EMFILE;
           goto fail;
@@ -112,7 +119,7 @@ static int local_sendctl(FAR struct local_conn_s *conn,
               goto fail;
             }
 
-          conn->lc_cfps[conn->lc_cfpcount++] = filep2;
+          peer->lc_cfps[peer->lc_cfpcount++] = filep2;
         }
     }
 
@@ -123,9 +130,9 @@ static int local_sendctl(FAR struct local_conn_s *conn,
 fail:
   while (i-- > 0)
     {
-      file_close(conn->lc_cfps[--conn->lc_cfpcount]);
-      kmm_free(conn->lc_cfps[conn->lc_cfpcount]);
-      conn->lc_cfps[conn->lc_cfpcount] = NULL;
+      file_close(peer->lc_cfps[--peer->lc_cfpcount]);
+      kmm_free(peer->lc_cfps[peer->lc_cfpcount]);
+      peer->lc_cfps[peer->lc_cfpcount] = NULL;
     }
 
   net_unlock();
