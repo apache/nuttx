@@ -18,6 +18,8 @@
 #
 ############################################################################
 
+include chip/Bootloader.mk
+
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
 
