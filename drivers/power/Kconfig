@@ -424,6 +424,15 @@ config BATTERY_GAUGE
 	bool "Battery Fuel Gauge support"
 	default n
 
+config CW2218
+	bool "CW2218 Battery fuel gauge support"
+	default n
+	select I2C
+	depends on BATTERY_GAUGE
+	---help---
+		The CW2218 is an ultra-compact, system-side or pack-side fuel gauging
+		IC for Lithium-ion based batteries used in wearable and portable devices
+
 config MAX1704X
 	bool "MAX1704X Battery fuel gauge support"
 	default n
