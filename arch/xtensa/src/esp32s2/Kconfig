@@ -934,6 +934,30 @@ comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
 endchoice # Application Image Format
 
 choice
+	prompt "Source for bootloader binaries"
+	default ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
+	---help---
+		Select the action to be taken by the build system for the
+		"make bootloader" target.
+
+config ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
+	bool "Download prebuilt binaries"
+	---help---
+		The build system will download the prebuilt binaries from
+		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
+		Application Image Format (ESP32S2_APP_FORMAT_LEGACY or ESP32S2_APP_FORMAT_MCUBOOT)
+
+config ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+	bool "Build binaries from source"
+	---help---
+		The build system will build all the required binaries from source. It will clone
+		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
+		custom bootloader according to the chosen Application Image Format
+		(ESP32S2_APP_FORMAT_LEGACY or ESP32S2_APP_FORMAT_MCUBOOT) and partition information.
+
+endchoice
+
+choice
 	prompt "Target slot for image flashing"
 	default ESP32S2_ESPTOOL_TARGET_PRIMARY
 	depends on ESP32S2_HAVE_OTA_PARTITION
