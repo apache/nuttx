@@ -137,18 +137,6 @@ SECTIONS
     *(.srodata.cst2)
     *(.srodata .srodata.*)
 
-    . = ALIGN(8);
-    *(._k_queue.static.*)
-    *(._k_sem.static.*)
-    *(._k_mutex.static.*)
-    _net_buf_pool_list = .;
-    KEEP(*(SORT_BY_NAME("._net_buf_pool.static.*")))
-    _bt_gatt_service_static_list_start = .;
-    KEEP(*(SORT_BY_NAME("._bt_gatt_service_static.static.*")))
-    _bt_gatt_service_static_list_end = .;
-    _bt_l2cap_fixed_chan_list_start = .;
-    KEEP(*(SORT_BY_NAME("._bt_l2cap_fixed_chan.static.*")))
-    _bt_l2cap_fixed_chan_list_end = .;
   } > ram_tcm AT > flash
 
   .boot2 (NOLOAD) :
