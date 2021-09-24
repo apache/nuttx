@@ -211,15 +211,15 @@ function xtensa-esp32-gcc-toolchain {
     cd "${prebuilt}"
     case ${os} in
       Darwin)
-        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_2_0-esp-2019r2-macos.tar.gz
-        tar xzf xtensa-esp32-elf-gcc8_2_0-esp-2019r2-macos.tar.gz
-        rm xtensa-esp32-elf-gcc8_2_0-esp-2019r2-macos.tar.gz
+        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
+        tar xzf xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
+        rm xtensa-esp32-elf-gcc8_4_0-esp-2021r1-macos.tar.gz
         ;;
       Linux)
-        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_2_0-esp32-2019r1-rc2-linux-amd64.tar.xz
-        xz -d xtensa-esp32-elf-gcc8_2_0-esp32-2019r1-rc2-linux-amd64.tar.xz
-        tar xf xtensa-esp32-elf-gcc8_2_0-esp32-2019r1-rc2-linux-amd64.tar
-        rm xtensa-esp32-elf-gcc8_2_0-esp32-2019r1-rc2-linux-amd64.tar
+        wget --quiet https://dl.espressif.com/dl/xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
+        xz -d xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar.xz
+        tar xf xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
+        rm xtensa-esp32-elf-gcc8_4_0-esp32-2021r1-linux-amd64.tar
         ;;
     esac
   fi
