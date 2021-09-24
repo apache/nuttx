@@ -61,8 +61,6 @@
 #  define CONFIG_NT38350_NPOLLWAITERS 2
 #endif
 
-#define NVT_OFFLINE_LOG
-
 #define NVT_DEV_FORMAT               "/dev/input%d"
 #define NVT_DEV_NAMELEN              16
 #define NVT_IIC_RETRY_NUM            2
@@ -93,14 +91,17 @@
 #define NVT_DELAY_10MS               10000
 #define NVT_DELAY_15MS               15000
 #define NVT_DELAY_20MS               20000
+#define NVT_DELAY_35MS               35000
 #define NVT_DELAY_80MS               80000
+#define NVT_DELAY_83MS               83000
+#define NVT_DELAY_100MS              100000
 
 #define NVT_NORMAL_MODE              0x00
 #define NVT_TEST_MODE_2              0x22
 #define NVT_HANDSHAKING_HOST_READY   0xbb
 #define NVT_XDATA_SECTOR_SIZE        256
 
-#ifdef  NVT_OFFLINE_LOG
+#ifdef  CONFIG_NVT_OFFLINE_LOG
 #define NVT_POINT_DATA_EXT_LEN       4   /* Event buffer offset 0x11~0x14 */
 #define NVT_S2D_DATA_LEN             59  /* Event buffer offset 0x15~0x4F
                                           * (Byte  1~59 of 2Ddata)
@@ -236,7 +237,7 @@ struct nt38350_dev_s
   uint32_t                      fw_size;
   const struct nvt_ts_mem_map_s *mmap;
   size_t                        fw_need_write_size;
-#ifdef NVT_OFFLINE_LOG
+#ifdef CONFIG_NVT_OFFLINE_LOG
   struct work_s                 nvt_log_wq;
   uint8_t point_xdata_temp[NVT_POINT_DATA_EXBUF_LEN];
 #endif
@@ -342,6 +343,118 @@ static const struct nvt_ts_trim_id_table_s g_trim_id_table[] =
     .hwinfo = &g_nt38350_hw_info
   },
 };
+
+#ifdef CONFIG_NVT_TOUCH_MP
+static const uint8_t AIN_X[10] =
+{
+  0, 1, 2, 3, 4, 5
+};
+
+static uint8_t AIN_Y[10] =
+{
+  0, 1, 2, 3, 4, 5
+};
+
+static const int32_t ps_config_lmt_short_rawdata_p[10 * 10] =
+{
+  14008, 14008, 14008, 14008, 14008, 14008,
+  14008, 14008, 14008, 14008, 14008, 14008,
+  14008, 14008, 14008, 14008, 14008, 14008,
+  14008, 14008, 14008, 14008, 14008, 14008,
+  14008, 14008, 14008, 14008, 14008, 14008,
+  14008, 14008, 14008, 14008, 14008, 14008
+};
+
+static const int32_t ps_config_lmt_short_rawdata_n[10 * 10] =
+{
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0
+};
+
+static const int32_t ps_config_lmt_open_rawdata_p[10 * 10] =
+{
+  5120, 5120, 5120, 5120, 5120, 5120,
+  5120, 5120, 5120, 5120, 5120, 5120,
+  5120, 5120, 5120, 5120, 5120, 5120,
+  5120, 5120, 5120, 5120, 5120, 5120,
+  5120, 5120, 5120, 5120, 5120, 5120,
+  5120, 5120, 5120, 5120, 5120, 5120
+};
+
+static const int32_t ps_config_lmt_open_rawdata_n[10 * 10] =
+{
+  -511, -511, -511, -511, -511, -511,
+  -511, -511, -511, -511, -511, -511,
+  -511, -511, -511, -511, -511, -511,
+  -511, -511, -511, -511, -511, -511,
+  -511, -511, -511, -511, -511, -511,
+  -511, -511, -511, -511, -511, -511
+};
+
+static const int32_t ps_config_lmt_fw_rawdata_p[10 * 10] =
+{
+  10000, 10000, 10000, 10000, 10000, 10000,
+  10000, 10000, 10000, 10000, 10000, 10000,
+  10000, 10000, 10000, 10000, 10000, 10000,
+  10000, 10000, 10000, 10000, 10000, 10000,
+  10000, 10000, 10000, 10000, 10000, 10000,
+  10000, 10000, 10000, 10000, 10000, 10000
+};
+
+static const int32_t ps_config_lmt_fw_rawdata_n[10 * 10] =
+{
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0
+};
+
+static const int32_t ps_config_lmt_fw_cc_p[10 * 10] =
+{
+  512, 512, 512, 512, 512, 512,
+  512, 512, 512, 512, 512, 512,
+  512, 512, 512, 512, 512, 512,
+  512, 512, 512, 512, 512, 512,
+  512, 512, 512, 512, 512, 512,
+  512, 512, 512, 512, 512, 512
+};
+
+static const int32_t ps_config_lmt_fw_cc_n[10 * 10] =
+{
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0,
+  0, 0, 0, 0, 0, 0
+};
+
+static const int32_t ps_config_lmt_fw_diff_p[10 * 10] =
+{
+  300, 300, 300, 300, 300, 300,
+  300, 300, 300, 300, 300, 300,
+  300, 300, 300, 300, 300, 300,
+  300, 300, 300, 300, 300, 300,
+  300, 300, 300, 300, 300, 300,
+  300, 300, 300, 300, 300, 300,
+};
+
+static const int32_t ps_config_lmt_fw_diff_n[10 *10] =
+{
+  -300, -300, -300, -300, -300, -300,
+  -300, -300, -300, -300, -300, -300,
+  -300, -300, -300, -300, -300, -300,
+  -300, -300, -300, -300, -300, -300,
+  -300, -300, -300, -300, -300, -300,
+  -300, -300, -300, -300, -300, -300
+};
+#endif
 
 /***************************************************************************
  * Private Functions
@@ -470,7 +583,8 @@ static void u8toi16(const uint8_t *stream, int32_t *data, uint32_t len)
 
   for (i = 0; i < len / 2; i++)
     {
-      data[i] = ((int32_t)stream[i * 2] + (((int32_t)stream[i * 2 + 1]) << 8));
+      data[i] = ((int32_t)stream[i * 2] +
+                 (((int32_t)stream[i * 2 + 1]) << 8));
     }
 }
 
@@ -1014,8 +1128,9 @@ static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
         {
           priv->fw_need_write_size = i * NVT_FLASH_SECTOR_SIZE;
 #if NVT_DEBUG
-          iinfo("fw_need_write_size = %zu(0x%zx)\n", priv->fw_need_write_size,
-                 priv->fw_need_write_size);
+          iinfo("fw_need_write_size = %zu(0x%zx)\n",
+                priv->fw_need_write_size,
+                priv->fw_need_write_size);
 #endif
           return 0;
         }
@@ -1975,6 +2090,7 @@ static int nvt_update_firmware_request(FAR struct nt38350_dev_s *priv,
 {
   size_t nvt_fw_bin_ver_offset;
   size_t nvt_fw_bin_ver_bar_offset;
+
   /* check FW need to write size */
 
   if (nvt_get_fw_need_write_size(priv, data))
@@ -2614,7 +2730,7 @@ static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
   return 0;
 }
 
-#ifdef NVT_OFFLINE_LOG
+#ifdef CONFIG_NVT_OFFLINE_LOG
 static void nvt_log_data_to_csv(FAR void *arg)
 {
   int      ret;
@@ -2766,6 +2882,835 @@ static void nvt_log_data_to_csv(FAR void *arg)
 }
 #endif
 
+#ifdef CONFIG_NVT_TOUCH_MP
+static void nvt_print_data_log_in_one_line(int32_t *data,
+                                           int32_t data_num)
+{
+  char *tmp_log = NULL;
+  int32_t i = 0;
+
+  tmp_log = (char *)kmm_zalloc(data_num * 7 + 1);
+  if (!tmp_log)
+    {
+      ierr("ERROR: kzalloc for tmp_log failed!\n ");
+      return;
+    }
+
+  for (i = 0; i < data_num; i++)
+    {
+      sprintf(tmp_log + i * 7, "%5d, ", data[i]);
+    }
+
+  tmp_log[data_num * 7] = '\0';
+
+  iinfo("%s \n", tmp_log);
+
+  if (tmp_log)
+    {
+      kmm_free(tmp_log);
+      tmp_log = NULL;
+    }
+
+  return;
+}
+
+static int8_t nvt_switch_freqhopendis(FAR struct nt38350_dev_s *priv,
+                                      uint8_t freqhopendis)
+{
+  uint8_t retry = 0;
+  int8_t  ret = 0;
+  uint8_t buf[8] =
+  {
+    0
+  };
+
+  for (retry = 0; retry < 20; retry++)
+    {
+      /* ---set xdata index to EVENT BUF ADDR--- */
+
+      nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+                   EVENT_MAP_HOST_CMD);
+
+      /* ---switch FreqHopEnDis--- */
+
+      buf[0] = EVENT_MAP_HOST_CMD;
+      buf[1] = freqhopendis;
+      nt38350_write_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+
+      usleep(NVT_DELAY_35MS);
+
+      buf[0] = EVENT_MAP_HOST_CMD;
+      buf[1] = 0xff;
+      nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+
+      if (buf[1] == 0x00)
+        {
+          break;
+        }
+    }
+
+  if (retry == 20)
+    {
+      ierr("ERROR: switch FreqHopEnDis 0x%02X failed, buf[1]=0x%02X\n",
+              freqhopendis, buf[1]);
+      ret = -1;
+    }
+
+  return ret;
+}
+
+static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
+                                       uint8_t x_ch,
+                                       uint8_t y_ch,
+                                       const char *file_path,
+                                       uint32_t offset)
+{
+  char     *fbufp = NULL;
+  int32_t  x = 0;
+  int32_t  y = 0;
+  int32_t  iarrayindex = 0;
+  int32_t  write_ret = 0;
+  uint32_t output_len = 0;
+  struct file *fp = NULL;
+
+  fbufp = (char *)kmm_zalloc(8192);
+  if (!fbufp)
+    {
+      ierr("ERROR: kzalloc for fbufp failed!\n");
+      return -ENOMEM;
+    }
+
+  for (y = 0; y < y_ch; y++)
+    {
+      for (x = 0; x < x_ch; x++)
+        {
+          iarrayindex = y * x_ch + x;
+          sprintf(fbufp + iarrayindex * 7 + y * 2, "%5d, ",
+                  rawdata[iarrayindex]);
+        }
+
+      nvt_print_data_log_in_one_line(rawdata + y * x_ch, x_ch);
+      sprintf(fbufp + (iarrayindex + 1) * 7 + y * 2, "\r\n");
+    }
+
+  if (offset == 0)
+    {
+      fp = open(file_path, O_RDWR | O_CREAT | O_TRUNC);
+    }
+  else
+    {
+      fp = open(file_path, O_RDWR | O_CREAT);
+    }
+
+  if (fp == NULL)
+    {
+      ierr("ERROR: open %s failed\n", file_path);
+      if (fbufp)
+        {
+          kmm_free(fbufp);
+          fbufp = NULL;
+        }
+
+      return -1;
+    }
+
+  output_len = y_ch * x_ch * 7 + y_ch * 2;
+
+  if (offset > 0)
+     lseek(fp, 0, SEEK_END);
+  else
+     lseek(fp, 0, SEEK_SET);
+
+  write_ret = write(fp, fbufp, output_len);
+  if (write_ret <= 0)
+    {
+      ierr("ERROR: write %s failed\n", file_path);
+      if (fp)
+        {
+          close(fp);
+          fp = NULL;
+        }
+
+      if (fbufp)
+        {
+          kmm_free(fbufp);
+          fbufp = NULL;
+        }
+
+      return -1;
+    }
+
+  if (fp)
+    {
+      close(fp);
+      fp = NULL;
+    }
+
+  if (fbufp)
+    {
+      kmm_free(fbufp);
+      fbufp = NULL;
+    }
+
+  return 0;
+}
+
+static void nvt_enable_short_test(FAR struct nt38350_dev_s *priv)
+{
+  uint8_t buf[8] =
+  {
+    0
+  };
+
+  /* ---set xdata index to EVENT BUF ADDR--- */
+
+  nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+               EVENT_MAP_HOST_CMD);
+
+  /* ---enable short test--- */
+
+  buf[0] = EVENT_MAP_HOST_CMD;
+  buf[1] = 0x43;
+  buf[2] = 0xaa;
+  buf[3] = 0x02;
+  buf[4] = 0x00;
+  nt38350_write_reg(priv, NVT_I2C_FW_ADDRESS, buf, 5);
+}
+
+static int32_t nvt_polling_hand_shake_status(FAR struct nt38350_dev_s *priv)
+{
+  int32_t i = 0;
+  const int32_t retry = 250;
+  uint8_t buf[8] =
+  {
+    0
+  };
+
+  usleep(NVT_DELAY_20MS);
+
+  for (i = 0; i < retry; i++)
+    {
+      /* ---set xdata index to EVENT BUF ADDR--- */
+
+      nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+                   EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE);
+
+      /* ---read fw status--- */
+
+      buf[0] = EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE;
+      buf[1] = 0x00;
+      nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+
+      if ((buf[1] == 0xa0) || (buf[1] == 0xa1))
+        {
+          break;
+        }
+
+      usleep(NVT_DELAY_10MS);
+    }
+
+  if (i >= retry)
+    {
+      ierr("ERROR: polling hand shake status failed, "
+           "buf[1]=0x%02X\n", buf[1]);
+
+      /* Read back 5 bytes from offset EVENT_MAP_HOST_CMD for debug check */
+
+      nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+                   EVENT_MAP_HOST_CMD);
+
+      buf[0] = EVENT_MAP_HOST_CMD;
+      buf[1] = 0x00;
+      buf[2] = 0x00;
+      buf[3] = 0x00;
+      buf[4] = 0x00;
+      buf[5] = 0x00;
+      nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 6);
+      ierr("ERROR: Read back 5 bytes from offset EVENT_MAP_HOST_CMD: "
+           "0x%02X, 0x%02X, 0x%02X, 0x%02X, 0x%02X\n",
+           buf[1], buf[2], buf[3], buf[4], buf[5]);
+
+      return -1;
+    }
+  else
+    {
+      return 0;
+    }
+}
+
+static int32_t nvt_read_fw_short(FAR struct nt38350_dev_s *priv,
+                                 FAR struct nvt_mp_test_s *mp)
+{
+  uint32_t raw_pipe_addr = 0;
+  uint8_t  *rawdata_buf = NULL;
+  uint32_t x = 0;
+  uint32_t y = 0;
+  int32_t  iarrayindex = 0;
+  uint8_t  buf[128] =
+  {
+    0
+  };
+
+  /* ---Enter Test Mode--- */
+
+  if (nvt_clear_fw_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  nvt_enable_short_test(priv);
+
+  if (nvt_polling_hand_shake_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  rawdata_buf = (uint8_t *)kmm_zalloc(NVT_X_CHANNEL * NVT_Y_CHANNEL * 2);
+  if (!rawdata_buf)
+    {
+      ierr("ERROR: kzalloc for rawdata_buf failed!\n");
+      return -ENOMEM;
+    }
+
+  if (nvt_get_fw_pipe(priv) == 0)
+    {
+      raw_pipe_addr = priv->mmap->raw_pipe0_addr;
+    }
+  else
+    {
+      raw_pipe_addr = priv->mmap->raw_pipe1_addr;
+    }
+
+  for (y = 0; y < NVT_Y_CHANNEL; y++)
+    {
+      /* ---change xdata index--- */
+
+      nvt_set_page(priv, NVT_I2C_FW_ADDRESS,
+                   raw_pipe_addr + y * NVT_X_CHANNEL * 2);
+      buf[0] = (uint8_t)((raw_pipe_addr + y * NVT_X_CHANNEL * 2) & 0xff);
+      nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf,
+                       NVT_X_CHANNEL * 2 + 1);
+      memcpy(rawdata_buf + y * NVT_X_CHANNEL * 2,
+             buf + 1, NVT_X_CHANNEL * 2);
+    }
+
+  for (y = 0; y < NVT_Y_CHANNEL; y++)
+    {
+      for (x = 0; x < NVT_X_CHANNEL; x++)
+        {
+          iarrayindex = y * NVT_X_CHANNEL + x;
+          mp->raw_data[iarrayindex] = (int16_t)(rawdata_buf[iarrayindex * 2]
+                                 + 256 * rawdata_buf[iarrayindex * 2 + 1]);
+        }
+    }
+
+  if (rawdata_buf)
+    {
+      kmm_free(rawdata_buf);
+      rawdata_buf = NULL;
+    }
+
+  /* ---Leave Test Mode--- */
+
+  nvt_change_mode(priv, NVT_NORMAL_MODE);
+
+  /* Save Rawdata to CSV file */
+
+  if (nvt_save_rawdata_to_csv(mp->raw_data, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                              mp->test_item, 0) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  return 0;
+}
+
+static int32_t rawdatatest_singlepoint_sub(FAR int32_t raw_data[],
+                                   uint8_t record_result[],
+                                   uint8_t x_ch, uint8_t y_ch,
+                                   const int32_t rawdata_limit_postive[],
+                                   const int32_t rawdata_limit_negative[])
+{
+  int32_t i = 0;
+  int32_t j = 0;
+  int32_t iarrayindex = 0;
+  bool    ispass = true;
+
+  for (j = 0; j < y_ch; j++)
+    {
+      for (i = 0; i < x_ch; i++)
+        {
+          iarrayindex = j * x_ch + i;
+
+          record_result[iarrayindex] = 0x00; /* default value for pass */
+
+          if (raw_data[iarrayindex] > rawdata_limit_postive[iarrayindex])
+            {
+              record_result[iarrayindex] |= 0x01;
+            }
+
+          if (raw_data[iarrayindex] < rawdata_limit_negative[iarrayindex])
+            {
+              record_result[iarrayindex] |= 0x02;
+            }
+        }
+    }
+
+  /* ---Check RecordResult--- */
+
+  for (j = 0; j < y_ch; j++)
+    {
+      for (i = 0; i < x_ch; i++)
+        {
+          if (record_result[j * x_ch + i] != 0)
+            {
+              ispass = false;
+              break;
+            }
+        }
+    }
+
+  if (ispass == false)
+    {
+      return -1; /* FAIL */
+    }
+  else
+    {
+      return 0; /* PASS */
+    }
+}
+
+static int32_t nvt_read_baseline(FAR struct nt38350_dev_s *priv,
+                                 FAR struct nvt_mp_test_s *mp)
+{
+  int32_t iarrayindex = 0;
+
+  nvt_read_mdata(priv, priv->mmap->baseline_addr,
+                 priv->mmap->baseline_btn_addr, mp->raw_data);
+
+  /* Save Rawdata to CSV file */
+
+  if (nvt_save_rawdata_to_csv(mp->raw_data, NVT_X_CHANNEL,
+                              NVT_Y_CHANNEL, mp->test_item, 0) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  return 0;
+}
+
+static int32_t nvt_read_cc(FAR struct nt38350_dev_s *priv,
+                           FAR struct nvt_mp_test_s *mp)
+{
+  if (nvt_get_fw_pipe(priv) == 0)
+    {
+      nvt_read_mdata(priv, priv->mmap->diff_pipe1_addr,
+                     priv->mmap->diff_btn_pipe1_addr, mp->raw_data);
+    }
+  else
+    {
+      nvt_read_mdata(priv, priv->mmap->diff_pipe0_addr,
+                     priv->mmap->diff_btn_pipe0_addr, mp->raw_data);
+    }
+
+  /* Save Rawdata to CSV file */
+
+  if (nvt_save_rawdata_to_csv(mp->raw_data, NVT_X_CHANNEL,
+                              NVT_Y_CHANNEL, mp->test_item, 0) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  return 0;
+}
+
+static void nvt_enable_noise_collect(FAR struct nt38350_dev_s *priv,
+                                     int32_t frame_num)
+{
+  uint8_t buf[8] =
+  {
+    0
+  };
+
+  nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+               EVENT_MAP_HOST_CMD);
+
+  buf[0] = EVENT_MAP_HOST_CMD;
+  buf[1] = 0x47;
+  buf[2] = 0xaa;
+  buf[3] = frame_num;
+  buf[4] = 0x00;
+  nt38350_write_reg(priv, NVT_I2C_FW_ADDRESS, buf, 5);
+}
+
+static int32_t nvt_read_fw_noise(FAR struct nt38350_dev_s *priv,
+                                 FAR struct nvt_mp_test_s *mp,
+                                 FAR int *diffmax_flag,
+                                 FAR int *diffmin_flag)
+{
+  uint32_t x = 0;
+  uint32_t y = 0;
+  int32_t iarrayindex = 0;
+  int32_t frame_num = 0;
+  uint32_t rawdata_diff_min_offset = 0;
+  int32_t *rawdata_diff_max;
+  int32_t *rawdata_diff_min;
+
+  /* ---Enter Test Mode--- */
+
+  rawdata_diff_max = (int8_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
+  if (!rawdata_diff_max)
+    {
+      ierr("ERROR: kzalloc for rawdata_diff_max failed!\n");
+      return -ENOMEM;
+    }
+
+  rawdata_diff_min = (int8_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
+  if (!rawdata_diff_min)
+    {
+      ierr("ERROR: kzalloc for rawdata_diff_min failed!\n");
+      return -ENOMEM;
+    }
+
+  if (nvt_clear_fw_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  frame_num = PS_CONFIG_DIFF_TEST_FRAME / 10;
+  if (frame_num <= 0)
+    {
+      frame_num = 1;
+    }
+
+  nvt_enable_noise_collect(priv, frame_num);
+
+  /* need wait PS_Config_Diff_Test_Frame * 8.3ms */
+
+  usleep(frame_num * NVT_DELAY_83MS);
+
+  if (nvt_polling_hand_shake_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  if (nvt_get_fw_pipe(priv) == 0)
+    {
+      nvt_read_mdata(priv, priv->mmap->diff_pipe0_addr,
+                     priv->mmap->diff_btn_pipe0_addr, mp->raw_data);
+    }
+  else
+    {
+      nvt_read_mdata(priv, priv->mmap->diff_pipe1_addr,
+                     priv->mmap->diff_btn_pipe1_addr, mp->raw_data);
+    }
+
+  for (y = 0; y < priv->y_num; y++)
+    {
+      for (x = 0; x < priv->x_num; x++)
+        {
+          iarrayindex = y * priv->x_num + x;
+          rawdata_diff_max[iarrayindex] =
+                          (int8_t)((mp->raw_data[iarrayindex] >> 8) & 0xff);
+          rawdata_diff_min[iarrayindex] =
+                          (int8_t)(mp->raw_data[iarrayindex] & 0xff);
+        }
+    }
+
+  /* ---Leave Test Mode--- */
+
+  nvt_change_mode(priv, NVT_NORMAL_MODE);
+
+  /* Save Rawdata to CSV file */
+
+  if (nvt_save_rawdata_to_csv(rawdata_diff_max, priv->x_num, priv->y_num,
+      mp->test_item, 0) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  rawdata_diff_min_offset = priv->y_num * priv->x_num * 7 +
+                            priv->y_num * 2;
+
+  /* Save Rawdata to CSV file */
+
+  if (nvt_save_rawdata_to_csv(rawdata_diff_min, priv->x_num, priv->y_num,
+      mp->test_item, rawdata_diff_min_offset) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  *diffmax_flag = rawdatatest_singlepoint_sub(rawdata_diff_max,
+                mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                ps_config_lmt_fw_diff_p, ps_config_lmt_fw_diff_n);
+
+  *diffmin_flag = rawdatatest_singlepoint_sub(rawdata_diff_min,
+                mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                ps_config_lmt_fw_diff_p, ps_config_lmt_fw_diff_n);
+  if (rawdata_diff_max)
+    kmm_free(rawdata_diff_max);
+
+  if (rawdata_diff_min)
+    kmm_free(rawdata_diff_min);
+
+  return 0;
+}
+
+static void nvt_enable_open_test(FAR struct nt38350_dev_s *priv)
+{
+  uint8_t buf[5] =
+  {
+    0
+  };
+
+  /* ---set xdata index to EVENT BUF ADDR--- */
+
+  nvt_set_page(priv, NVT_I2C_FW_ADDRESS, priv->mmap->event_buf_addr |
+               EVENT_MAP_HOST_CMD);
+
+  /* ---enable open test--- */
+
+  buf[0] = EVENT_MAP_HOST_CMD;
+  buf[1] = 0x45;
+  buf[2] = 0xaa;
+  buf[3] = 0x02;
+  buf[4] = 0x00;
+  nt38350_write_reg(priv, NVT_I2C_FW_ADDRESS, buf, 5);
+}
+
+static int32_t nvt_read_fw_open(FAR struct nt38350_dev_s *priv,
+                                FAR struct nvt_mp_test_s *mp)
+{
+  uint32_t raw_pipe_addr = 0;
+  uint8_t *rawdata_buf = NULL;
+  uint32_t x = 0;
+  uint32_t y = 0;
+  uint8_t buf[128] =
+  {
+    0
+  };
+
+  /* ---Enter Test Mode--- */
+
+  if (nvt_clear_fw_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  nvt_enable_open_test(priv);
+
+  if (nvt_polling_hand_shake_status(priv))
+    {
+      return -EAGAIN;
+    }
+
+  rawdata_buf = (uint8_t *)kmm_zalloc(NVT_IC_X_CFG_SIZE *
+                 NVT_IC_Y_CFG_SIZE * 2);
+  if (!rawdata_buf)
+    {
+      ierr("ERROR: kzalloc for rawdata_buf failed!\n");
+      return -ENOMEM;
+    }
+
+  if (nvt_get_fw_pipe(priv) == 0)
+    {
+      raw_pipe_addr = priv->mmap->raw_pipe0_addr;
+    }
+  else
+    {
+      raw_pipe_addr = priv->mmap->raw_pipe1_addr;
+    }
+
+  for (y = 0; y < NVT_IC_Y_CFG_SIZE; y++)
+    {
+      /* ---change xdata index--- */
+
+      nvt_set_page(priv, NVT_I2C_FW_ADDRESS, raw_pipe_addr +
+                   y * NVT_IC_X_CFG_SIZE * 2);
+      buf[0] = (uint8_t)((raw_pipe_addr +
+                         y * NVT_IC_X_CFG_SIZE * 2) & 0xff);
+      nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf,
+                       NVT_IC_X_CFG_SIZE * 2 + 1);
+      memcpy(rawdata_buf + y * NVT_IC_X_CFG_SIZE * 2,
+             buf + 1, NVT_IC_X_CFG_SIZE * 2);
+    }
+
+  for (y = 0; y < NVT_IC_Y_CFG_SIZE; y++)
+    {
+      for (x = 0; x < NVT_IC_X_CFG_SIZE; x++)
+        {
+          if ((AIN_Y[y] != 0xff) && (AIN_X[x] != 0xff))
+            {
+              mp->raw_data[AIN_Y[y] * NVT_X_CHANNEL + AIN_X[x]] =
+                   (int16_t)((rawdata_buf[(y * NVT_IC_X_CFG_SIZE + x) * 2] +
+                   256 * rawdata_buf[(y * NVT_IC_X_CFG_SIZE + x) * 2 + 1]));
+            }
+        }
+    }
+
+  if (rawdata_buf)
+    {
+      kmm_free(rawdata_buf);
+      rawdata_buf = NULL;
+    }
+
+  /* ---Leave Test Mode--- */
+
+  nvt_change_mode(priv, NVT_NORMAL_MODE);
+
+  /* Save RawData to CSV file */
+
+  if (nvt_save_rawdata_to_csv(mp->raw_data, NVT_X_CHANNEL,
+                              NVT_Y_CHANNEL, mp->test_item, 0) < 0)
+    {
+      ierr("ERROR: save rawdata to CSV file failed\n");
+      return -EAGAIN;
+    }
+
+  return 0;
+}
+
+static void nvt_selftest(FAR struct nt38350_dev_s *priv,
+                         FAR struct nvt_mp_test_s *mp)
+{
+  if (nvt_check_fw_reset_state(priv, RESET_STATE_REK))
+    {
+      ierr("check fw reset state failed!\n");
+    }
+
+  if (nvt_switch_freqhopendis(priv, NVT_FREQ_HOP_DISABLE))
+    {
+      ierr("switch frequency hopping disable failed!\n");
+    }
+
+  if (nvt_check_fw_reset_state(priv, RESET_STATE_NORMAL_RUN))
+    {
+      ierr("check fw reset state failed!\n");
+    }
+
+  usleep(NVT_DELAY_100MS);
+
+  if (nvt_clear_fw_status(priv))
+    {
+      ierr("clear fw status failed!\n");
+    }
+
+  nvt_change_mode(priv, NVT_MP_MODE_CC);
+
+  if (nvt_check_fw_status(priv))
+    {
+      ierr("check fw status failed!\n");
+    }
+
+  switch (mp->cmd)
+    {
+      case NVT_FW_RAW:
+        mp->test_item = CONFIG_NVT_FW_RAWDATA_CSV_FILE;
+        mp->result_flag = 0;
+        if (nvt_read_baseline(priv, mp) != 0)
+          {
+            mp->result_flag = 1;
+          }
+        else
+          {
+            mp->result_flag = rawdatatest_singlepoint_sub(mp->raw_data,
+                      mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                      ps_config_lmt_fw_rawdata_p,
+                      ps_config_lmt_fw_rawdata_n);
+          }
+
+        break;
+      case NVT_CC:
+        mp->test_item = CONFIG_NVT_FW_CC_CSV_FILE;
+        mp->result_flag = 0;
+        if (nvt_read_cc(priv, mp) != 0)
+          {
+            mp->result_flag = 1;
+          }
+        else
+          {
+            mp->result_flag = rawdatatest_singlepoint_sub(mp->raw_data,
+                        mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                        ps_config_lmt_fw_cc_p, ps_config_lmt_fw_cc_n);
+          }
+
+        break;
+      case NVT_FW_NOISE:
+      case NVT_FW_SHORT:
+      case NVT_FW_OPEN:
+        nvt_change_mode(priv, NVT_NORMAL_MODE);
+        if (mp->cmd == NVT_FW_NOISE)
+          {
+            int testresult_fw_diffmax;
+            int testresult_fw_diffmin;
+            mp->test_item = CONFIG_NVT_NOISE_TEST_CSV_FILE;
+            mp->result_flag = 0;
+            if (nvt_read_fw_noise(priv, mp, &testresult_fw_diffmax,
+                                  &testresult_fw_diffmin) != 0)
+              {
+                mp->result_flag = 1;
+              }
+            else
+              {
+                if ((testresult_fw_diffmax == -1) ||
+                    (testresult_fw_diffmin == -1))
+                  mp->result_flag = -1;
+                else
+                  mp->result_flag = 0;
+              }
+          }
+        else if (mp->cmd == NVT_FW_SHORT)
+          {
+            mp->test_item = CONFIG_NVT_SHORT_TEST_CSV_FILE;
+            mp->result_flag = 0;
+            if (nvt_read_fw_short(priv, mp) != 0)
+              {
+                mp->result_flag = 1;
+              }
+            else
+              {
+                mp->result_flag = rawdatatest_singlepoint_sub(mp->raw_data,
+                           mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                           ps_config_lmt_short_rawdata_p,
+                           ps_config_lmt_short_rawdata_n);
+              }
+          }
+        else if (mp->cmd == NVT_FW_OPEN)
+          {
+            mp->test_item = CONFIG_NVT_OPEN_TEST_CSV_FILE;
+            mp->result_flag = 0;
+            if (nvt_read_fw_open(priv, mp) != 0)
+              {
+                mp->result_flag = 1;
+              }
+            else
+              {
+                mp->result_flag = rawdatatest_singlepoint_sub(mp->raw_data,
+                           mp->record_result, NVT_X_CHANNEL, NVT_Y_CHANNEL,
+                           ps_config_lmt_open_rawdata_p,
+                           ps_config_lmt_open_rawdata_n);
+              }
+          }
+        else
+          {
+            ;
+          }
+
+        break;
+      default:
+        ierr("cmd out of mp_test_e range! cmd: %d\n", mp->cmd);
+        break;
+    }
+
+  nvt_bootloader_reset(priv);
+}
+#endif
+
 /***************************************************************************
  * Name: nt38350_notify
  ***************************************************************************/
@@ -2886,7 +3831,7 @@ static void nt38350_data_worker(FAR void *arg)
   FAR struct nt38350_config_s *config;
   int      i;
   int      ret;
-#ifdef NVT_OFFLINE_LOG
+#ifdef CONFIG_NVT_OFFLINE_LOG
   uint8_t  point_data[NVT_POINT_DATA_EXBUF_LEN + 1] =
   {
     0
@@ -2918,7 +3863,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
   while (ret < 0);
 
-#ifdef NVT_OFFLINE_LOG
+#ifdef CONFIG_NVT_OFFLINE_LOG
   ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, point_data,
                   NVT_POINT_DATA_EXBUF_LEN + 1);
 #else
@@ -2930,7 +3875,7 @@ static void nt38350_data_worker(FAR void *arg)
       ierr("Point data read failed!\n");
     }
 
-#ifdef NVT_OFFLINE_LOG
+#ifdef CONFIG_NVT_OFFLINE_LOG
   memcpy(priv->point_xdata_temp, (point_data + 1), NVT_POINT_DATA_LEN);
   memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN),
          (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN),
@@ -3350,14 +4295,22 @@ static int nt38350_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           *ptr = (uint32_t)priv->fw_ver;
         }
         break;
-
+#ifdef CONFIG_NVT_OFFLINE_LOG
       case TSIOC_GETNVTDIFF:  /* arg: Pointer to struct nvt_diff_s */
         {
           FAR struct nvt_diff_s *ptr = (FAR struct nvt_diff_s *)arg;
           nvt_diff_show(priv, ptr);
         }
         break;
-
+#endif
+#ifdef CONFIG_NVT_TOUCH_MP
+      case TSIOC_SELFTEST:  /* arg: Pointer to struct nvt_mp_test_s */
+        {
+          FAR struct nvt_mp_test_s *ptr = (FAR struct nvt_mp_test_s *)arg;
+          nvt_selftest(priv, ptr);
+        }
+        break;
+#endif
       default:
         ret = -ENOTTY;
         break;

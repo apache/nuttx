@@ -38,6 +38,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifdef CONFIG_NVT_TOUCH_MP
+#define NVT_FREQ_HOP_DISABLE         0x66
+#define NVT_FREQ_HOP_ENABLE          0x65
+#define NVT_MP_MODE_CC               0x41
+#define NVT_IC_X_CFG_SIZE            6
+#define NVT_IC_Y_CFG_SIZE            6
+#define NVT_IC_KEY_CFG_SIZE          0
+#define NVT_X_CHANNEL                6
+#define NVT_Y_CHANNEL                6
+#define NVT_KEY_CHANNEL              NVT_TOUCH_KEY_NUM
+#define NVT_RESULT_BUFSIZE           (NVT_IC_X_CFG_SIZE * NVT_IC_Y_CFG_SIZE + NVT_IC_KEY_CFG_SIZE)
+#define NVT_RAWDATA_BUFSIZE          ((NVT_RESULT_BUFSIZE) * sizeof(int32_t))
+#define PS_CONFIG_DIFF_TEST_FRAME    50
+#endif
+
 /* Specific IOCTL commands for NT38350 */
 
 #define TSIOC_GETNVTDIFF     _TSIOC(0x0006)  /* arg: Pointer to get struct nvt_diff_s */
@@ -96,6 +111,26 @@ struct nt38350_config_s
   void (*nreset)(FAR const struct nt38350_config_s *config,
                  bool state);
 };
+
+#ifdef CONFIG_NVT_TOUCH_MP
+struct nvt_mp_test_s
+{
+  int     cmd;
+  char    *test_item;
+  uint8_t record_result[NVT_RESULT_BUFSIZE];
+  int32_t result_flag;
+  int32_t raw_data[NVT_RAWDATA_BUFSIZE];
+};
+
+enum mp_test_e
+{
+  NVT_FW_RAW = 0x01,
+  NVT_CC,
+  NVT_FW_NOISE,
+  NVT_FW_SHORT,
+  NVT_FW_OPEN
+};
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

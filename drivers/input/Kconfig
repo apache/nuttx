@@ -111,6 +111,51 @@ config nt38350_NPOLLWAITERS
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
+config NVT_OFFLINE_LOG
+	bool "NovaTek NT38350 Offline log"
+	default n
+	---help---
+		Say yes here to enable Offline log
+
+config NVT_TOUCH_MP
+	bool "NovaTek NT38350 Self test"
+	default n
+	---help---
+		Say yes here to enable Self test
+if NVT_TOUCH_MP
+
+config NVT_SHORT_TEST_CSV_FILE
+	string "NovaTek NT38350 Self test Short test file path"
+	default "/mnt/data/ShortTest.csv"
+	---help---
+		Set up Short test file path
+
+config NVT_OPEN_TEST_CSV_FILE
+	string "NovaTek NT38350 Self test Open test file path"
+	default "/mnt/data/OpenTest.csv"
+	---help---
+		Set up Open test file path
+
+config NVT_FW_RAWDATA_CSV_FILE
+	string "NovaTek NT38350 Self test FW raw data test file path"
+	default "/mnt/data/FWRawdataTest.csv"
+	---help---
+		Set up FW raw data test file path
+
+config NVT_FW_CC_CSV_FILE
+	string "NovaTek NT38350 Self test FW CC test file path"
+	default "/mnt/data/FWCCTest.csv"
+	---help---
+		Set up FW CC test file path
+
+config NVT_NOISE_TEST_CSV_FILE
+	string "NovaTek NT38350 Self test Noise test file path"
+	default "/mnt/data/NoiseTest.csv"
+	---help---
+		Set up Noise test file path
+
+endif # NVT_TOUCH_MP
+
 endif # INPUT_NT38350
 
 config INPUT_FT5336
