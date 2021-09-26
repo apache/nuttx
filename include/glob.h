@@ -25,6 +25,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
 #include <stddef.h>
 
 /****************************************************************************
@@ -62,11 +63,11 @@
  ****************************************************************************/
 
 typedef struct
-  {
-    size_t gl_pathc; /* Count of paths matched by pattern. */
-    char **gl_pathv; /* Pointer to a list of matched pathnames. */
-    size_t gl_offs;  /* Slots to reserve at the beginning of gl_pathv. */
-  } glob_t;
+{
+  size_t gl_pathc;     /* Count of paths matched by pattern. */
+  FAR char **gl_pathv; /* Pointer to a list of matched pathnames. */
+  size_t gl_offs;      /* Slots to reserve at the beginning of gl_pathv. */
+} glob_t;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -88,9 +89,9 @@ extern "C"
  *
  ****************************************************************************/
 
-int glob(const char *pat, int flags,
-         int (*errfunc)(const char *path, int err),
-         glob_t *g);
+int glob(FAR const char *pat, int flags,
+         CODE int (*errfunc)(FAR const char *path, int err),
+         FAR glob_t *g);
 
 /****************************************************************************
  * Name: globfree
@@ -100,7 +101,7 @@ int glob(const char *pat, int flags,
  *
  ****************************************************************************/
 
-void globfree(glob_t *g);
+void globfree(FAR glob_t *g);
 
 #undef EXTERN
 #ifdef __cplusplus

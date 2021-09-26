@@ -171,7 +171,7 @@ static sq_queue_t g_tcd_free;
 /* This is a pool of pre-allocated TCDs */
 
 static struct s32k1xx_edmatcd_s g_tcd_pool[CONFIG_S32K1XX_EDMA_NTCD]
-              __attribute__((aligned(EDMA_ALIGN)));
+              aligned_data(EDMA_ALIGN);
 #endif
 
 /****************************************************************************

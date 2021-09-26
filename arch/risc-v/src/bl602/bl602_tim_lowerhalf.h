@@ -38,6 +38,6 @@
  * Name: bl602_timer_initialize
  ****************************************************************************/
 
-int bl602_timer_initialize(FAR const char *devpath, int timer);
+int bl602_timer_initialize(const char *devpath, int timer);
 
 #endif /* __ARCH_RISCV_SRC_BL602_TIM_LOWERHALF_H */

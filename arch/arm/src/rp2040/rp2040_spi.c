@@ -57,10 +57,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef __unused
-#define __unused __attribute__((unused))
-#endif
-
 /* 8 frame FIFOs for both transmit and receive */
 
 #define RP2040_SPI_FIFOSZ        8
@@ -110,9 +106,9 @@ static inline void spi_putreg(FAR struct rp2040_spidev_s *priv,
 /* DMA support */
 
 #ifdef CONFIG_RP2040_SPI_DMA
-static void __unused spi_dmaexchange(FAR struct spi_dev_s *dev,
-                                     FAR const void *txbuffer,
-                                     FAR void *rxbuffer, size_t nwords);
+static void unused_code spi_dmaexchange(FAR struct spi_dev_s *dev,
+                                        FAR const void *txbuffer,
+                                        FAR void *rxbuffer, size_t nwords);
 static void spi_dmatxcallback(DMA_HANDLE handle, uint8_t status, void *data);
 static void spi_dmarxcallback(DMA_HANDLE handle, uint8_t status, void *data);
 static void spi_dmatxsetup(FAR struct rp2040_spidev_s *priv,
@@ -136,10 +132,10 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 static void spi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
 static void spi_setbits(FAR struct spi_dev_s *dev, int nbits);
 static uint32_t spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void __unused spi_exchange(FAR struct spi_dev_s *dev,
-                                  FAR const void *txbuffer,
-                                  FAR void *rxbuffer,
-                                  size_t nwords);
+static void unused_code spi_exchange(FAR struct spi_dev_s *dev,
+                                     FAR const void *txbuffer,
+                                     FAR void *rxbuffer,
+                                     size_t nwords);
 #ifndef CONFIG_SPI_EXCHANGE
 static void spi_sndblock(FAR struct spi_dev_s *dev, FAR const void *buffer,
                          size_t nwords);

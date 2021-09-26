@@ -189,42 +189,42 @@ struct spislave_priv_s
 
 /* SPI Slave controller interrupt handlers */
 
-static int spislave_cs_interrupt(int irq, void *context, FAR void *arg);
-static int spislave_periph_interrupt(int irq, void *context, FAR void *arg);
+static int spislave_cs_interrupt(int irq, void *context, void *arg);
+static int spislave_periph_interrupt(int irq, void *context, void *arg);
 
 /* SPI Slave controller internal functions */
 
-static void spislave_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void spislave_setmode(struct spi_slave_ctrlr_s *ctrlr,
                              enum spi_slave_mode_e mode);
-static void spislave_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits);
-static void spislave_store_result(FAR struct spislave_priv_s *priv,
+static void spislave_setbits(struct spi_slave_ctrlr_s *ctrlr, int nbits);
+static void spislave_store_result(struct spislave_priv_s *priv,
                                   uint32_t recv_bytes);
-static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv);
-static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
+static void spislave_prepare_next_rx(struct spislave_priv_s *priv);
+static void spislave_evict_sent_data(struct spislave_priv_s *priv,
                                      uint32_t sent_bytes);
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static void spislave_setup_rx_dma(FAR struct spislave_priv_s *priv);
-static void spislave_setup_tx_dma(FAR struct spislave_priv_s *priv);
-static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv);
+static void spislave_setup_rx_dma(struct spislave_priv_s *priv);
+static void spislave_setup_tx_dma(struct spislave_priv_s *priv);
+static void spislave_prepare_next_tx(struct spislave_priv_s *priv);
 #else
-static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv);
+static void spislave_write_tx_buffer(struct spislave_priv_s *priv);
 #endif
-static void spislave_initialize(FAR struct spi_slave_ctrlr_s *ctrlr);
-static void spislave_deinitialize(FAR struct spi_slave_ctrlr_s *ctrlr);
+static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr);
+static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr);
 
 /* SPI Slave controller operations */
 
-static void spislave_bind(FAR struct spi_slave_ctrlr_s *ctrlr,
-                          FAR struct spi_slave_dev_s *dev,
+static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
+                          struct spi_slave_dev_s *dev,
                           enum spi_slave_mode_e mode,
                           int nbits);
-static void spislave_unbind(FAR struct spi_slave_ctrlr_s *ctrlr);
-static int spislave_enqueue(FAR struct spi_slave_ctrlr_s *ctrlr,
-                            FAR const void *data,
+static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr);
+static int spislave_enqueue(struct spi_slave_ctrlr_s *ctrlr,
+                            const void *data,
                             size_t nwords);
-static bool spislave_qfull(FAR struct spi_slave_ctrlr_s *ctrlr);
-static void spislave_qflush(FAR struct spi_slave_ctrlr_s *ctrlr);
-static size_t spislave_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr);
+static bool spislave_qfull(struct spi_slave_ctrlr_s *ctrlr);
+static void spislave_qflush(struct spi_slave_ctrlr_s *ctrlr);
+static size_t spislave_qpoll(struct spi_slave_ctrlr_s *ctrlr);
 
 /****************************************************************************
  * Private Data
@@ -414,10 +414,10 @@ static inline void spislave_dma_rx_fifo_reset(void)
  *
  ****************************************************************************/
 
-static void spislave_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
+static void spislave_setmode(struct spi_slave_ctrlr_s *ctrlr,
                              enum spi_slave_mode_e mode)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
 
   spiinfo("mode=%d\n", mode);
 
@@ -498,9 +498,9 @@ static void spislave_setmode(FAR struct spi_slave_ctrlr_s *ctrlr,
  *
  ****************************************************************************/
 
-static void spislave_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits)
+static void spislave_setbits(struct spi_slave_ctrlr_s *ctrlr, int nbits)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -524,9 +524,9 @@ static void spislave_setbits(FAR struct spi_slave_ctrlr_s *ctrlr, int nbits)
  *
  ****************************************************************************/
 
-static int spislave_cs_interrupt(int irq, void *context, FAR void *arg)
+static int spislave_cs_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)arg;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
 
   if (priv->is_processing)
     {
@@ -553,7 +553,7 @@ static int spislave_cs_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static void spislave_store_result(FAR struct spislave_priv_s *priv,
+static void spislave_store_result(struct spislave_priv_s *priv,
                                   uint32_t recv_bytes)
 {
   uint32_t remaining_space = SPI_SLAVE_BUFSIZE - priv->rx_length;
@@ -624,7 +624,7 @@ static void spislave_store_result(FAR struct spislave_priv_s *priv,
  *
  ****************************************************************************/
 
-static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv)
+static void spislave_prepare_next_rx(struct spislave_priv_s *priv)
 {
   if (priv->rx_length < SPI_SLAVE_BUFSIZE)
     {
@@ -650,7 +650,7 @@ static void spislave_prepare_next_rx(FAR struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
+static void spislave_evict_sent_data(struct spislave_priv_s *priv,
                                      uint32_t sent_bytes)
 {
   if (sent_bytes < priv->tx_length)
@@ -683,7 +683,7 @@ static void spislave_evict_sent_data(FAR struct spislave_priv_s *priv,
  ****************************************************************************/
 
 #ifndef CONFIG_ESP32C3_SPI2_DMA
-static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv)
+static void spislave_write_tx_buffer(struct spislave_priv_s *priv)
 {
   /* Initialize data_buf_reg with the address of the first data buffer
    * register (W0).
@@ -728,7 +728,7 @@ static void spislave_write_tx_buffer(FAR struct spislave_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static void spislave_setup_rx_dma(FAR struct spislave_priv_s *priv)
+static void spislave_setup_rx_dma(struct spislave_priv_s *priv)
 {
   uint32_t length = SPI_SLAVE_BUFSIZE - priv->rx_length;
 
@@ -767,7 +767,7 @@ static void spislave_setup_rx_dma(FAR struct spislave_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static void spislave_setup_tx_dma(FAR struct spislave_priv_s *priv)
+static void spislave_setup_tx_dma(struct spislave_priv_s *priv)
 {
   esp32c3_dma_setup(priv->dma_channel, true, dma_txdesc, SPI_DMA_DESC_NUM,
                     priv->tx_buffer, SPI_SLAVE_BUFSIZE);
@@ -803,7 +803,7 @@ static void spislave_setup_tx_dma(FAR struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
+static void spislave_prepare_next_tx(struct spislave_priv_s *priv)
 {
   if (priv->tx_length != 0)
     {
@@ -848,9 +848,9 @@ static void spislave_prepare_next_tx(FAR struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
+static int spislave_periph_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)arg;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)arg;
 
   uint32_t regval = getreg32(SPI_SLAVE1_REG);
   uint32_t transfer_size = REG_MASK(regval, SPI_SLV_DATA_BITLEN) / 8;
@@ -911,7 +911,7 @@ static int spislave_periph_interrupt(int irq, void *context, FAR void *arg)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-void spislave_dma_init(FAR struct spislave_priv_s *priv)
+void spislave_dma_init(struct spislave_priv_s *priv)
 {
   /* Enable GDMA clock for the SPI peripheral */
 
@@ -960,9 +960,9 @@ void spislave_dma_init(FAR struct spislave_priv_s *priv)
  *
  ****************************************************************************/
 
-static void spislave_initialize(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void spislave_initialize(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   const struct spislave_config_s *config = priv->config;
 
   spiinfo("ctrlr=%p\n", ctrlr);
@@ -1052,9 +1052,9 @@ static void spislave_initialize(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static void spislave_deinitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void spislave_deinitialize(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
 
   esp32c3_gpioirqdisable(ESP32C3_PIN2IRQ(priv->config->cs_pin));
 
@@ -1103,13 +1103,13 @@ static void spislave_deinitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static void spislave_bind(FAR struct spi_slave_ctrlr_s *ctrlr,
-                          FAR struct spi_slave_dev_s *dev,
+static void spislave_bind(struct spi_slave_ctrlr_s *ctrlr,
+                          struct spi_slave_dev_s *dev,
                           enum spi_slave_mode_e mode,
                           int nbits)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
-  FAR const void *data = NULL;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
+  const void *data = NULL;
   irqstate_t flags;
   size_t num_words;
 
@@ -1169,9 +1169,9 @@ static void spislave_bind(FAR struct spi_slave_ctrlr_s *ctrlr,
  *
  ****************************************************************************/
 
-static void spislave_unbind(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void spislave_unbind(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
@@ -1225,11 +1225,11 @@ static void spislave_unbind(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static int spislave_enqueue(FAR struct spi_slave_ctrlr_s *ctrlr,
-                            FAR const void *data,
+static int spislave_enqueue(struct spi_slave_ctrlr_s *ctrlr,
+                            const void *data,
                             size_t len)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   size_t num_bytes = WORDS2BYTES(priv, len);
   size_t bufsize;
   irqstate_t flags;
@@ -1280,9 +1280,9 @@ static int spislave_enqueue(FAR struct spi_slave_ctrlr_s *ctrlr,
  *
  ****************************************************************************/
 
-static bool spislave_qfull(FAR struct spi_slave_ctrlr_s *ctrlr)
+static bool spislave_qfull(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
   bool is_full = false;
 
@@ -1314,9 +1314,9 @@ static bool spislave_qfull(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static void spislave_qflush(FAR struct spi_slave_ctrlr_s *ctrlr)
+static void spislave_qflush(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
@@ -1345,9 +1345,9 @@ static void spislave_qflush(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-static size_t spislave_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr)
+static size_t spislave_qpoll(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
   uint32_t tmp;
   uint32_t recv_n;
@@ -1399,10 +1399,10 @@ static size_t spislave_qpoll(FAR struct spi_slave_ctrlr_s *ctrlr)
  *
  ****************************************************************************/
 
-FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port)
+struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port)
 {
-  FAR struct spi_slave_ctrlr_s *spislave_dev;
-  FAR struct spislave_priv_s *priv;
+  struct spi_slave_ctrlr_s *spislave_dev;
+  struct spislave_priv_s *priv;
   irqstate_t flags;
 
   switch (port)
@@ -1416,7 +1416,7 @@ FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port)
         return NULL;
     }
 
-  spislave_dev = (FAR struct spi_slave_ctrlr_s *)priv;
+  spislave_dev = (struct spi_slave_ctrlr_s *)priv;
 
   flags = enter_critical_section();
 
@@ -1484,9 +1484,9 @@ FAR struct spi_slave_ctrlr_s *esp32c3_spislave_ctrlr_initialize(int port)
  *
  ****************************************************************************/
 
-int esp32c3_spislave_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr)
+int esp32c3_spislave_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr)
 {
-  FAR struct spislave_priv_s *priv = (FAR struct spislave_priv_s *)ctrlr;
+  struct spislave_priv_s *priv = (struct spislave_priv_s *)ctrlr;
   irqstate_t flags;
 
   DEBUGASSERT(ctrlr != NULL);

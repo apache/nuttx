@@ -117,7 +117,7 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
       *mapped = kernel ? kmm_zalloc(length) : kumm_zalloc(length);
       if (*mapped == NULL)
         {
-          ferr("ERROR: kumm_alloc() failed: %d\n", ret);
+          ferr("ERROR: kumm_alloc() failed, enable DEBUG_MM for info!\n");
           return -ENOMEM;
         }
 

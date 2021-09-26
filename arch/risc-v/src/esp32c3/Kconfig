@@ -151,7 +151,9 @@ config ESP32C3_CPU_FREQ_MHZ
 config ESP32C3_RT_TIMER
 	bool "Real-time Timer"
 	default n
-	select ESP32C3_TIMER0
+	select ESP32C3_TIMER
+	---help---
+		Real-time Timer is relying upon the Systimer 1.
 
 config ESP32C3_DISABLE_STDC_ATOMIC
 	bool "Disable standard C atomic"
@@ -166,7 +168,6 @@ config ESP32C3_WIRELESS
 	bool
 	default n
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 
 menu "ESP32-C3 Peripheral Support"
 
@@ -206,6 +207,7 @@ config ESP32C3_LEDC
 	bool "LEDC (PWM)"
 	default n
 	select PWM
+	select ARCH_HAVE_PWM_MULTICHAN
 
 config ESP32C3_GPIO_IRQ
 	bool "GPIO pin interrupts"
@@ -309,7 +311,6 @@ config ESP32C3_WIRELESS
 	select NET
 	select ARCH_PHY_INTERRUPT
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 	---help---
 		Enable Wireless support
 
@@ -373,6 +374,14 @@ config ESP32C3_I2C0_SDAPIN
 	range 0 21
 
 endif # ESP32C3_I2C0
+
+config ESP32C3_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32C3_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
 
 endmenu # I2C configuration
 
@@ -749,6 +758,20 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	---help---
 		Mount point of Wi-Fi storage file system.
 
+config ESP32C3_WIFI_MTD_OFFSET
+	hex "Wi-Fi MTD partition offset"
+	default 0x280000
+	depends on ESP32C3_WIFI_SAVE_PARAM
+	---help---
+		This is the base address of the Wi-Fi MTD partition.
+
+config ESP32C3_WIFI_MTD_SIZE
+	hex "Wi-Fi MTD partition size"
+	default 0xb0000
+	depends on ESP32C3_WIFI_SAVE_PARAM
+	---help---
+		This is the size of the Wi-Fi MTD partition.
+
 config ESP32C3_WIFI_STA_DISCONNECT_PM
 	bool "Power Management for station when disconnected"
 	default n
@@ -876,7 +899,6 @@ config ESP32C3_AUTO_SLEEP
 	default n
 	select PM
 	select ESP32C3_RT_TIMER
-	select ESP32C3_TIMER0
 	select ESP32C3_TICKLESS
 	---help---
 		Enable ESP32-C3 Auto-sleep

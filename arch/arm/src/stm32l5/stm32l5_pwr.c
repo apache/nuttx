@@ -251,14 +251,14 @@ bool stm32l5_pwr_vddio2_valid(bool set)
 
   if (was_set && !set)
     {
-      /* Reset the Vddio2 invalid I/O supply valid bit. */
+      /* Reset the Vddio2 independent I/O supply valid bit. */
 
       regval &= ~PWR_CR2_IOSV;
       stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);
     }
   else if (!was_set && set)
     {
-      /* Set the Vddio2 invalid I/O supply valid bit. */
+      /* Set the Vddio2 independent I/O supply valid bit. */
 
       regval |= PWR_CR2_IOSV;
       stm32l5_pwr_putreg(STM32L5_PWR_CR2_OFFSET, regval);

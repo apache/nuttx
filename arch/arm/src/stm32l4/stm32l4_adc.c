@@ -1996,6 +1996,14 @@ static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->cchannels;
+        }
+        break;
+
       case ANIOC_WDOG_UPPER: /* Set watchdog upper threshold */
         {
           regval = adc_getreg(priv, STM32L4_ADC_TR1_OFFSET);

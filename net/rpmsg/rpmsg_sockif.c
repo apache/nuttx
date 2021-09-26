@@ -887,7 +887,7 @@ errout:
 }
 
 static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
-                                       size_t iovcnt)
+                                        size_t iovcnt)
 {
   uint32_t len = 0;
   while (iovcnt--)
@@ -1045,7 +1045,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   if (total > ipcsize)
     {
       total = ipcsize;
-      len = ipcsize - sizeof(*msg) - sizeof(uint32_t);
+      len   = ipcsize - sizeof(*msg) - sizeof(uint32_t);
     }
 
   /* SOCK_DGRAM need write len to buffer */

@@ -70,4 +70,12 @@ endif # BOARD_STM32_IHM16M1
 
 endif # STM32_FOC
 
+if SENSORS_HALL3PHASE
+
+config BOARD_STM32_HALL3PHASE_SAMPLES
+       int "3-phase Hall effect sensor number of samples"
+       default 10
+
+endif # SENSORS_HALL3PHASE
+
 endif # BOARD_STM32_COMMON

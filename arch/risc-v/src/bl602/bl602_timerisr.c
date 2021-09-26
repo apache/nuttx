@@ -111,7 +111,7 @@ static void bl602_reload_mtimecmp(void)
  * Name:  bl602_timerisr
  ****************************************************************************/
 
-static int bl602_timerisr(int irq, void *context, FAR void *arg)
+static int bl602_timerisr(int irq, void *context, void *arg)
 {
   bl602_reload_mtimecmp();
 

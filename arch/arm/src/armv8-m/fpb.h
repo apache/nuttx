@@ -29,7 +29,7 @@
 
 /* FPB Register Base Address ************************************************/
 
-#define FPB_BASE                  0xe0002000
+#define FPB_BASE              0xe0002000
 
 /* FPB Register Offsets *****************************************************/
 
@@ -70,7 +70,7 @@
  */
 
 #define FPB_CTRL_NUM_CODE2_SHIFT  12
-#define FPB_CTRL_NUM_CODE2_MASK   0x00003000
+#define FPB_CTRL_NUM_CODE2_MASK   0x00007000
 
 /* NUM_LIT
  *
@@ -126,6 +126,15 @@
 
 #define FPB_REMAP_REMAP_SHIFT     5
 #define FPB_REMAP_REMAP_MASK      0x1fffffe0
+
+/* REMAP
+ *
+ * Remap supported field.
+ */
+
+#define FPB_REMAP_RMPSPT_SHIFT    29
+#define FPB_REMAP_RMPSPT_MASK     0x20000000
+#  define FPB_REMAP_RMPSPT        0x20000000
 
 /* FPB_COMP0 - FPB_COMP7 */
 

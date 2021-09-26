@@ -1,0 +1,92 @@
+############################################################################
+# boards/mips/pic32mz/chipkit-wifire/scripts/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/tools/pic32/Config.mk
+include $(TOPDIR)/arch/mips/src/mips32/Toolchain.defs
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_GNU_ELF),y)
+  LDSCRIPT = mips-debug.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_PINGUINOW),y)
+  LDSCRIPT = pinguino-debug.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+  LDSCRIPT = xc32-debug.ld
+  MIPS_MPROCESSOR = 32MZ2048EFG100
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_XC32),y)
+  LDSCRIPT = xc32-debug.ld
+  MIPS_MPROCESSOR = 32MZ2048EFG100
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW),y)
+  LDSCRIPT = c32-debug.ld
+endif
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPW_LITE),y)
+  LDSCRIPT = c32-debug.ld
+endif
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
+else
+  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+endif
+
+ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
+  ARCHOPTIMIZATION = -g
+endif
+
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+endif
+
+ARCHCFLAGS = -fno-builtin
+ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new
+ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
+ARCHWARNINGSXX = -Wall -Wshadow -Wundef
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
+  ARCHCFLAGS += -D__DEBUG -D__MPLAB_DEBUGGER_PK3=1 -fframe-base-loclist
+endif
+endif
+
+CFLAGS := $(ARCHCFLAGS) $(ARCHWARNINGS) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPICFLAGS = $(ARCHPICFLAGS) $(CFLAGS)
+CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
+AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+
+ifeq ($(CONFIG_MIPS32_TOOLCHAIN_MICROCHIPL_XC32),y)
+  LDFLAGS = -nostdlib --defsym=__MPLAB_BUILD=1 --defsym=__MPLAB_DEBUG=1 --defsym=__DEBUG=1 --defsym=__MPLAB_DEBUGGER_PK3=1 --defsym=_min_heap_size=0 --gc-sections
+else
+  LDFLAGS = # -no-isn32 --relax
+endif
+
+NXFLATLDFLAGS1 = -r -d -warn-common
+NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-gotoff.ld -no-check-sections
+LDNXFLATFLAGS = -e main -s 2048

@@ -57,12 +57,12 @@
  *
  * REVISIT: Can this alignment requirement vary from core-to-core?  Yes, it
  * depends on the number of vectors supported by the MCU. The safest thing
- * to do is to put the vector table at the beginning of RAM in order toforce
+ * to do is to put the vector table at the beginning of RAM in order to force
  * the highest alignment possible.
  */
 
 extern up_vector_t g_ram_vectors[ARMV7M_VECTAB_SIZE]
-  __attribute__ ((section (".ram_vectors"), aligned (128)));
+  locate_data(".ram_vectors") aligned_data(128);
 
 /****************************************************************************
  * Public Function Prototypes

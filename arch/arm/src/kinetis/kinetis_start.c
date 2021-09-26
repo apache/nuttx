@@ -95,7 +95,7 @@ const uintptr_t g_idle_topstack = HEAP_BASE;
 #ifdef CONFIG_ARMV7M_STACKCHECK
 /* we need to get r10 set before we can allow instrumentation calls */
 
-void __start(void) __attribute__ ((no_instrument_function));
+void __start(void) noinstrument_function;
 #endif
 
 /****************************************************************************

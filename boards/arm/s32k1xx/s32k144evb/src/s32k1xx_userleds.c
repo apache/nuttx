@@ -26,17 +26,14 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
 
 #include <nuttx/board.h>
 
-#include "arm_arch.h"
-#include "arm_internal.h"
-
 #include "s32k1xx_pin.h"
-#include "s32k144evb.h"
 
 #include <arch/board/board.h>
+
+#include "s32k144evb.h"
 
 #ifndef CONFIG_ARCH_LEDS
 
@@ -55,6 +52,7 @@ uint32_t board_userled_initialize(void)
   s32k1xx_pinconfig(GPIO_LED_R);
   s32k1xx_pinconfig(GPIO_LED_G);
   s32k1xx_pinconfig(GPIO_LED_B);
+
   return BOARD_NLEDS;
 }
 
@@ -83,7 +81,9 @@ void board_userled(int led, bool ledon)
       return;
     }
 
-  s32k1xx_gpiowrite(ledcfg, ledon); /* High illuminates */
+  /* Invert output, an output of '0' illuminates the LED */
+
+  s32k1xx_gpiowrite(ledcfg, !ledon);
 }
 
 /****************************************************************************
@@ -92,11 +92,11 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
-  /* Low illuminates */
+  /* Invert output, an output of '0' illuminates the LED */
 
-  s32k1xx_gpiowrite(GPIO_LED_R, (ledset & BOARD_LED_R_BIT) != 0);
-  s32k1xx_gpiowrite(GPIO_LED_G, (ledset & BOARD_LED_G_BIT) != 0);
-  s32k1xx_gpiowrite(GPIO_LED_B, (ledset & BOARD_LED_B_BIT) != 0);
+  s32k1xx_gpiowrite(GPIO_LED_R, !((ledset & BOARD_LED_R_BIT) != 0));
+  s32k1xx_gpiowrite(GPIO_LED_G, !((ledset & BOARD_LED_G_BIT) != 0));
+  s32k1xx_gpiowrite(GPIO_LED_B, !((ledset & BOARD_LED_B_BIT) != 0));
 }
 
 #endif /* !CONFIG_ARCH_LEDS */

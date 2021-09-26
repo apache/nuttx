@@ -70,8 +70,8 @@ static const uint8_t g_preamble[LOCAL_PREAMBLE_SIZE] =
  *   len      Length of data to send
  *
  * Returned Value:
- *  On success, the number of bytes written are returned (zero indicates
- *  nothing was written).  On any failure, a negated errno value is returned
+ *   On success, the number of bytes written are returned (zero indicates
+ *   nothing was written).  On any failure, a negated errno value is returned
  *
  ****************************************************************************/
 
@@ -79,7 +79,7 @@ static int local_fifo_write(FAR struct file *filep, FAR const uint8_t *buf,
                             size_t len)
 {
   ssize_t nwritten = 0;
-  ssize_t ret;
+  ssize_t ret = 0;
 
   while (len != nwritten)
     {

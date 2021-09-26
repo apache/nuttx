@@ -105,9 +105,9 @@ static void get_window_regs(struct xtensa_windowregs_s *frame)
  ****************************************************************************/
 
 #ifndef __XTENSA_CALL0_ABI__
-static int backtrace_window(FAR uintptr_t *base, FAR uintptr_t *limit,
+static int backtrace_window(uintptr_t *base, uintptr_t *limit,
                      struct xtensa_windowregs_s *frame,
-                     FAR void **buffer, int size)
+                     void **buffer, int size)
 {
   uint32_t windowstart;
   uint32_t ra;
@@ -152,9 +152,9 @@ static int backtrace_window(FAR uintptr_t *base, FAR uintptr_t *limit,
  *
  ****************************************************************************/
 
-static int backtrace_stack(FAR uintptr_t *base, FAR uintptr_t *limit,
-                     FAR uintptr_t *sp, FAR uintptr_t *ra,
-                     FAR void **buffer, int size)
+static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
+                     uintptr_t *sp, uintptr_t *ra,
+                     void **buffer, int size)
 {
   int i = 0;
 
@@ -163,14 +163,14 @@ static int backtrace_stack(FAR uintptr_t *base, FAR uintptr_t *limit,
       buffer[i++] = MAKE_PC_FROM_RA((uintptr_t)ra);
     }
 
-  for (; i < size; sp = (FAR uintptr_t *)*(sp - 3), i++)
+  for (; i < size; sp = (uintptr_t *)*(sp - 3), i++)
     {
       if (sp > limit || sp < base)
         {
           break;
         }
 
-      ra = (FAR uintptr_t *)*(sp - 4);
+      ra = (uintptr_t *)*(sp - 4);
       if (ra == NULL)
         {
           break;
@@ -210,9 +210,9 @@ static int backtrace_stack(FAR uintptr_t *base, FAR uintptr_t *limit,
  *
  ****************************************************************************/
 
-int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
+int up_backtrace(struct tcb_s *tcb, void **buffer, int size)
 {
-  FAR struct tcb_s *rtcb = running_task();
+  struct tcb_s *rtcb = running_task();
   irqstate_t flags;
   int ret;
 
@@ -225,8 +225,6 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
     {
       if (up_interrupt_context())
         {
-          xtensa_window_spill();
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
           uintptr_t istackbase;
 #ifdef CONFIG_SMP
@@ -234,20 +232,22 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 #else
           istackbase = &g_intstackalloc;
 #endif
-          ret = bactrace_stack((FAR void *)istackbase,
-                          (FAR void *)((uint32_t)&g_intstackalloc +
+          xtensa_window_spill();
+
+          ret = bactrace_stack((void *)istackbase,
+                          (void *)((uint32_t)&g_intstackalloc +
                                        CONFIG_ARCH_INTERRUPTSTACK),
-                          (FAR void *)up_getsp(), NULL, buffer, size);
+                          (void *)up_getsp(), NULL, buffer, size);
 #else
           ret = backtrace_stack(rtcb->stack_base_ptr,
                           rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                          (FAR void *)up_getsp(), NULL, buffer, size);
+                          (void *)up_getsp(), NULL, buffer, size);
 #endif
           ret += backtrace_stack(rtcb->stack_base_ptr,
                           rtcb->stack_base_ptr +
                           rtcb->adj_stack_size,
-                          (FAR void *)CURRENT_REGS[REG_A1],
-                          (FAR void *)CURRENT_REGS[REG_A0],
+                          (void *)CURRENT_REGS[REG_A1],
+                          (void *)CURRENT_REGS[REG_A0],
                           &buffer[ret], size - ret);
         }
       else
@@ -273,7 +273,7 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 #endif
           ret += backtrace_stack(rtcb->stack_base_ptr,
                           rtcb->stack_base_ptr + rtcb->adj_stack_size,
-                          (FAR void *)up_getsp(), NULL, buffer, size - ret);
+                          (void *)up_getsp(), NULL, buffer, size - ret);
         }
     }
   else
@@ -284,8 +284,8 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
       ret = backtrace_stack(tcb->stack_base_ptr,
                       tcb->stack_base_ptr + tcb->adj_stack_size,
-                      (FAR void *)tcb->xcp.regs[REG_A1],
-                      (FAR void *)tcb->xcp.regs[REG_A0],
+                      (void *)tcb->xcp.regs[REG_A1],
+                      (void *)tcb->xcp.regs[REG_A0],
                       buffer, size);
 
       leave_critical_section(flags);

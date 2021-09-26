@@ -1,0 +1,28 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "MATH Acceleration Support"
+
+config MATH_CORDIC
+	bool "MATH CORDIC support"
+	default n
+	---help---
+		This selection enables building of the "upper-half" CORDIC driver.
+		See include/nuttx/math/cordic.h for further CORDIC driver information.
+
+if MATH_CORDIC
+
+choice
+	prompt "MATH CORDIC numeric type"
+	default MATH_CORDIC_USE_Q31
+
+config MATH_CORDIC_USE_Q31
+	bool "CORDIC uses Q1.31"
+
+endchoice
+
+endif
+
+endmenu  # MATH Acceleration Information

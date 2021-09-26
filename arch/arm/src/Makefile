@@ -19,7 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
--include chip/Make.defs
+include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
 ARCH_SUBDIR = armv7-a
@@ -56,7 +56,7 @@ endif
 # Additional rules for system call wrapper
 
 ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
-  EXTRALINKCMDS += -Wl,@$(TOPDIR)/syscall/syscall_wraps.ldcmd
+  EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
 endif
 
 # The "head" object
@@ -93,8 +93,8 @@ LDFLAGS += $(ARCHSCRIPT) $(EXTRALINKCMDS)
 
 # Override in Make.defs if linker is not 'ld'
 
-LDSTARTGROUP ?= -Wl,--start-group
-LDENDGROUP ?= -Wl,--end-group
+LDSTARTGROUP ?= --start-group
+LDENDGROUP ?= --end-group
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -153,7 +153,7 @@ board$(DELIM)libboard$(LIBEXT):
 
 nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT)
 	$(Q) echo "LD: nuttx"
-	$(Q) $(LD) -Wl,--entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
+	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(filter-out board/libboard$(LIBEXT), $^) $(EXTRA_OBJS) \
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
@@ -193,8 +193,6 @@ depend: .depend
 
 context::
 
-clean_context::
-
 clean:
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board clean
@@ -206,7 +204,7 @@ ifneq ($(EXTRADELFILE),)
 endif
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board distclean
 endif

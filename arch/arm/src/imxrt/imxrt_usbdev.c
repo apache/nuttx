@@ -503,10 +503,10 @@ static int         imxrt_pullup(struct usbdev_s *dev, bool enable);
 static struct imxrt_usbdev_s g_usbdev;
 
 static struct imxrt_dqh_s g_qh[IMXRT_NPHYSENDPOINTS]
-                               __attribute__((aligned(2048)));
+                               aligned_data(2048);
 
 static struct imxrt_dtd_s g_td[IMXRT_NPHYSENDPOINTS]
-                               __attribute__((aligned(32)));
+                               aligned_data(32);
 
 static const struct usbdev_epops_s g_epops =
 {

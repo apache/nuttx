@@ -89,7 +89,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       return &priv->shmem->rsc;
     }
 
-  while(priv->shmem == NULL)
+  while (priv->shmem == NULL)
     {
       priv->shmem = host_alloc_shmem(priv->shmemname, sizeof(*priv->shmem),
                                      priv->master);

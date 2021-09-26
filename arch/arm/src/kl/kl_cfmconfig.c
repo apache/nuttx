@@ -32,7 +32,7 @@
  * Public Data
  ****************************************************************************/
 
-const uint8_t _cfmconfig[16] __attribute__((section(".cfmconfig"))) =
+const uint8_t _cfmconfig[16] locate_data(".cfmconfig") =
 {
   0xff,  /* NV_BACKKEY3: KEY=0xff */
   0xff,  /* NV_BACKKEY2: KEY=0xff */

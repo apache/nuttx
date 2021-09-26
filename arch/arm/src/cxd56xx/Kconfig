@@ -1389,7 +1389,6 @@ config CXD56_TESTSET_WITH_HWSEM
 	bool "Use custom testset based on hardware semaphore"
 	default n if CXD56_USE_SYSBUS
 	default y if !CXD56_USE_SYSBUS
-	---help---
 
 endif
 

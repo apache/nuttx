@@ -178,7 +178,7 @@ void esp32c3_efuse_burn_efuses(void);
  *
  ****************************************************************************/
 
-int esp32c3_efuse_initialize(FAR const char *devpath);
+int esp32c3_efuse_initialize(const char *devpath);
 
 #ifdef __cplusplus
 }

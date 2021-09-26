@@ -2284,6 +2284,8 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |   `- ubw32/
      |   |   |       `- README.txt
      |   |   `-pic32mz/
+     |   |       |- chipkit-wifire/
+     |   |       |   `- README.txt
      |   |       |- flipnclick-pic32mz/
      |   |       |   `- README.txt
      |   |       `- pic32mz-starterkit/

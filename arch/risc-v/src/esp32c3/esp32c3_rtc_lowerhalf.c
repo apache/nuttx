@@ -46,7 +46,7 @@
 struct esp32c3_cbinfo_s
 {
   volatile rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  volatile FAR void *priv;           /* Private argurment to accompany callback */
+  volatile void *priv;               /* Private argurment to accompany callback */
 };
 #endif
 
@@ -60,7 +60,7 @@ struct esp32c3_lowerhalf_s
    * operations vtable (which may lie in FLASH or ROM)
    */
 
-  FAR const struct rtc_ops_s *ops;
+  const struct rtc_ops_s *ops;
 #ifdef CONFIG_RTC_ALARM
   /* Alarm callback information */
 
@@ -74,22 +74,22 @@ struct esp32c3_lowerhalf_s
 
 /* Prototypes for static methods in struct rtc_ops_s */
 
-static int rtc_lh_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct rtc_time *rtctime);
-static int rtc_lh_settime(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct rtc_time *rtctime);
-static bool rtc_lh_havesettime(FAR struct rtc_lowerhalf_s *lower);
+static int rtc_lh_rdtime(struct rtc_lowerhalf_s *lower,
+                         struct rtc_time *rtctime);
+static int rtc_lh_settime(struct rtc_lowerhalf_s *lower,
+                          const struct rtc_time *rtctime);
+static bool rtc_lh_havesettime(struct rtc_lowerhalf_s *lower);
 
 #ifdef CONFIG_RTC_ALARM
-static void rtc_lh_alarm_callback(FAR void *arg, unsigned int alarmid);
-static int rtc_lh_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                           FAR const struct lower_setalarm_s *alarminfo);
-static int rtc_lh_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                           FAR const struct lower_setrelative_s *alarminfo);
-static int rtc_lh_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+static void rtc_lh_alarm_callback(void *arg, unsigned int alarmid);
+static int rtc_lh_setalarm(struct rtc_lowerhalf_s *lower,
+                           const struct lower_setalarm_s *alarminfo);
+static int rtc_lh_setrelative(struct rtc_lowerhalf_s *lower,
+                           const struct lower_setrelative_s *alarminfo);
+static int rtc_lh_cancelalarm(struct rtc_lowerhalf_s *lower,
                               int alarmid);
-static int rtc_lh_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR struct lower_rdalarm_s *alarminfo);
+static int rtc_lh_rdalarm(struct rtc_lowerhalf_s *lower,
+                          struct lower_rdalarm_s *alarminfo);
 #endif
 
 /****************************************************************************
@@ -145,12 +145,12 @@ static struct esp32c3_lowerhalf_s g_rtc_lowerhalf =
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static void rtc_lh_alarm_callback(FAR void *arg, unsigned int alarmid)
+static void rtc_lh_alarm_callback(void *arg, unsigned int alarmid)
 {
-  FAR struct esp32c3_lowerhalf_s *lower;
-  FAR struct esp32c3_cbinfo_s *cbinfo;
+  struct esp32c3_lowerhalf_s *lower;
+  struct esp32c3_cbinfo_s *cbinfo;
   rtc_alarm_callback_t cb;
-  FAR void *priv;
+  void *priv;
 
   DEBUGASSERT((RTC_ALARM0 <= alarmid) && (alarmid < RTC_ALARM_LAST));
 
@@ -162,7 +162,7 @@ static void rtc_lh_alarm_callback(FAR void *arg, unsigned int alarmid)
    */
 
   cb           = (rtc_alarm_callback_t)cbinfo->cb;
-  priv         = (FAR void *)cbinfo->priv;
+  priv         = (void *)cbinfo->priv;
 
   cbinfo->cb   = NULL;
   cbinfo->priv = NULL;
@@ -192,11 +192,11 @@ static void rtc_lh_alarm_callback(FAR void *arg, unsigned int alarmid)
  *
  ****************************************************************************/
 
-static int rtc_lh_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct rtc_time *rtctime)
+static int rtc_lh_rdtime(struct rtc_lowerhalf_s *lower,
+                         struct rtc_time *rtctime)
 {
 #if defined(CONFIG_RTC_HIRES)
-  FAR struct timespec ts;
+  struct timespec ts;
   int ret;
 
   /* Get the higher resolution time */
@@ -212,7 +212,7 @@ static int rtc_lh_rdtime(FAR struct rtc_lowerhalf_s *lower,
    * compatible.
    */
 
-  if (!gmtime_r(&ts.tv_sec, (FAR struct tm *)rtctime))
+  if (!gmtime_r(&ts.tv_sec, (struct tm *)rtctime))
     {
       ret = -get_errno();
       goto errout;
@@ -233,7 +233,7 @@ errout:
 
   /* Convert the one second epoch time to a struct tm */
 
-  if (gmtime_r(&timer, (FAR struct tm *)rtctime) == 0)
+  if (gmtime_r(&timer, (struct tm *)rtctime) == 0)
     {
       int errcode = get_errno();
       DEBUGASSERT(errcode > 0);
@@ -262,8 +262,8 @@ errout:
  *
  ****************************************************************************/
 
-static int rtc_lh_settime(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct rtc_time *rtctime)
+static int rtc_lh_settime(struct rtc_lowerhalf_s *lower,
+                          const struct rtc_time *rtctime)
 {
   struct timespec ts;
 
@@ -271,7 +271,7 @@ static int rtc_lh_settime(FAR struct rtc_lowerhalf_s *lower,
    * rtc_time is cast compatible with struct tm.
    */
 
-  ts.tv_sec  = mktime((FAR struct tm *)rtctime);
+  ts.tv_sec  = mktime((struct tm *)rtctime);
   ts.tv_nsec = 0;
 
   /* Now set the time (with a accuracy of seconds) */
@@ -293,7 +293,7 @@ static int rtc_lh_settime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static bool rtc_lh_havesettime(FAR struct rtc_lowerhalf_s *lower)
+static bool rtc_lh_havesettime(struct rtc_lowerhalf_s *lower)
 {
   if (esp32c3_rtc_get_boot_time() == 0)
     {
@@ -321,11 +321,11 @@ static bool rtc_lh_havesettime(FAR struct rtc_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_lh_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                           FAR const struct lower_setalarm_s *alarminfo)
+static int rtc_lh_setalarm(struct rtc_lowerhalf_s *lower,
+                           const struct lower_setalarm_s *alarminfo)
 {
-  FAR struct esp32c3_lowerhalf_s *priv;
-  FAR struct esp32c3_cbinfo_s *cbinfo;
+  struct esp32c3_lowerhalf_s *priv;
+  struct esp32c3_cbinfo_s *cbinfo;
   struct alm_setalarm_s lowerinfo;
   int ret;
 
@@ -333,7 +333,7 @@ static int rtc_lh_setalarm(FAR struct rtc_lowerhalf_s *lower,
   DEBUGASSERT((RTC_ALARM0 <= alarminfo->id) &&
               (alarminfo->id < RTC_ALARM_LAST));
 
-  priv = (FAR struct esp32c3_lowerhalf_s *)lower;
+  priv = (struct esp32c3_lowerhalf_s *)lower;
 
   /* Remember the callback information */
 
@@ -349,7 +349,7 @@ static int rtc_lh_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
   /* Convert the RTC time to a timespec (1 second accuracy) */
 
-  lowerinfo.as_time.tv_sec  = mktime((FAR struct tm *)&alarminfo->time);
+  lowerinfo.as_time.tv_sec  = mktime((struct tm *)&alarminfo->time);
   lowerinfo.as_time.tv_nsec = 0;
 
   /* And set the alarm */
@@ -383,8 +383,8 @@ static int rtc_lh_setalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_lh_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                            FAR const struct lower_setrelative_s *alarminfo)
+static int rtc_lh_setrelative(struct rtc_lowerhalf_s *lower,
+                            const struct lower_setrelative_s *alarminfo)
 {
   struct lower_setalarm_s setalarm;
   time_t seconds;
@@ -400,7 +400,7 @@ static int rtc_lh_setrelative(FAR struct rtc_lowerhalf_s *lower,
       flags = spin_lock_irqsave(NULL);
 
       seconds = alarminfo->reltime;
-      gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+      gmtime_r(&seconds, (struct tm *)&setalarm.time);
 
       /* The set the alarm using this absolute time */
 
@@ -434,15 +434,15 @@ static int rtc_lh_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_lh_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int rtc_lh_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 {
-  FAR struct esp32c3_lowerhalf_s *priv;
-  FAR struct esp32c3_cbinfo_s *cbinfo;
+  struct esp32c3_lowerhalf_s *priv;
+  struct esp32c3_cbinfo_s *cbinfo;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT((RTC_ALARM0 <= alarmid) && (alarmid < RTC_ALARM_LAST));
 
-  priv = (FAR struct esp32c3_lowerhalf_s *)lower;
+  priv = (struct esp32c3_lowerhalf_s *)lower;
 
   /* Nullify callback information to reduce window for race conditions */
 
@@ -473,8 +473,8 @@ static int rtc_lh_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int rtc_lh_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR struct lower_rdalarm_s *alarminfo)
+static int rtc_lh_rdalarm(struct rtc_lowerhalf_s *lower,
+                          struct lower_rdalarm_s *alarminfo)
 {
   struct timespec ts;
   int ret;
@@ -487,8 +487,8 @@ static int rtc_lh_rdalarm(FAR struct rtc_lowerhalf_s *lower,
   flags = spin_lock_irqsave(NULL);
 
   ret = up_rtc_rdalarm(&ts, alarminfo->id);
-  localtime_r((FAR const time_t *)&ts.tv_sec,
-              (FAR struct tm *)alarminfo->time);
+  localtime_r((const time_t *)&ts.tv_sec,
+              (struct tm *)alarminfo->time);
 
   spin_unlock_irqrestore(NULL, flags);
 
@@ -515,9 +515,9 @@ static int rtc_lh_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *esp32c3_rtc_lowerhalf(void)
+struct rtc_lowerhalf_s *esp32c3_rtc_lowerhalf(void)
 {
-  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
+  return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }
 
 /****************************************************************************
@@ -539,7 +539,7 @@ FAR struct rtc_lowerhalf_s *esp32c3_rtc_lowerhalf(void)
 int esp32c3_rtc_driverinit(void)
 {
   int ret;
-  FAR struct rtc_lowerhalf_s *lower;
+  struct rtc_lowerhalf_s *lower;
 
   /* Instantiate the ESP32-C3 lower-half RTC driver */
 

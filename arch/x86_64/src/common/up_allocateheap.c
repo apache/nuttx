@@ -50,6 +50,9 @@
  * Public Functions
  ****************************************************************************/
 
+const uintptr_t g_idle_topstack = (uintptr_t)&_ebss +
+  CONFIG_IDLETHREAD_STACKSIZE;
+
 /****************************************************************************
  * Name: up_allocate_heap
  *
@@ -71,7 +74,7 @@ void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
 
   /* Calculate the end of .bss section */
 
-  uintptr_t hstart = (((uintptr_t)&_ebss + PAGE_SIZE - 1) & PAGE_MASK);
+  uintptr_t hstart = (g_idle_topstack + PAGE_SIZE - 1) & PAGE_MASK;
   *heap_start = (void *)hstart;
 
   /* The size is the rest of the RAM */

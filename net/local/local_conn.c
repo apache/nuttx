@@ -36,7 +36,7 @@
 #include "local/local.h"
 
 /****************************************************************************
- * Public Data
+ * Private Data
  ****************************************************************************/
 
 /* A list of all allocated packet socket connections */

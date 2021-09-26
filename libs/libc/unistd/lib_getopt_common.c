@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdbool.h>
 #include <string.h>
 
@@ -514,7 +515,7 @@ int getopt_common(int argc, FAR char * const argv[],
                * not think that the first interpretation is standard.
                */
 
-              else if (*(go->go_optptr + 1) != '\0')
+              else if (go->go_optptr == NULL || go->go_optptr[1] != '\0')
                 {
                   /* Skip over the unrecognized long option. */
 
@@ -541,6 +542,8 @@ int getopt_common(int argc, FAR char * const argv[],
                * discarding everything else that follows in the argv string
                * (which could be another single character command).
                */
+
+              DEBUGASSERT(go->go_optptr != NULL);
 
               go->go_optopt = *go->go_optptr;
               go->go_optptr = NULL;
@@ -569,6 +572,8 @@ int getopt_common(int argc, FAR char * const argv[],
         }
 
       /* Check if the option appears in 'optstring' */
+
+      DEBUGASSERT(go->go_optptr != NULL);
 
       optchar = strchr(optstring, *go->go_optptr);
       if (!optchar)

@@ -47,10 +47,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef MIN
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
-#endif
-
 #ifndef CONFIG_SMP
 #  define PSRAM_MODE PSRAM_VADDR_MODE_NORMAL
 #else
@@ -60,10 +56,6 @@
 #  define PSRAM_MODE PSRAM_VADDR_MODE_LOWHIGH
 #endif
 #endif
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
 
 /* Let's to assume SPIFLASH SPEED == SPIRAM SPEED for now */
 
@@ -75,25 +67,11 @@
 #  error "FLASH speed can only be equal to or higher than SRAM speed while SRAM is enabled!"
 #endif
 
-#if defined(CONFIG_BOOT_SDRAM_DATA)
-extern uint8_t _ext_ram_bss_start;
-extern uint8_t _ext_ram_bss_end;
-#endif
-static bool spiram_inited = false;
-
 /****************************************************************************
- * Private Functions
+ * Private Data
  ****************************************************************************/
 
-/* If no function in esp_himem.c is used, this function will be linked into
- * the binary instead of the one in esp_himem.c, automatically making sure
- * no memory is reserved if no himem function is used.
- */
-
-size_t __attribute__((weak)) esp_himem_reserved_area_size(void)
-{
-  return 0;
-}
+static bool spiram_inited = false;
 
 /****************************************************************************
  * Public Functions
@@ -323,58 +301,6 @@ int esp_spiram_init(void)
 
   return OK;
 }
-
-#if 0
-/* DMA is not supported yet */
-
-static uint8_t *dma_heap;
-
-int esp_spiram_reserve_dma_pool(size_t size)
-{
-  minfo("Reserving pool of %dK of internal memory for DMA/internal\
-        allocations", size / 1024);
-
-  /* Pool may be allocated in multiple non-contiguous chunks, depending on
-   * available RAM
-   */
-
-  while (size > 0)
-    {
-      size_t next_size = heap_caps_get_largest_free_block(MALLOC_CAP_DMA |
-                         MALLOC_CAP_INTERNAL);
-
-      next_size = MIN(next_size, size);
-
-      minfo("Allocating block of size %d bytes", next_size);
-
-      dma_heap = heap_caps_malloc(next_size, MALLOC_CAP_DMA |
-                                  MALLOC_CAP_INTERNAL);
-
-      if (!dma_heap || next_size == 0)
-        {
-          return ESP_ERR_NO_MEM;
-        }
-
-      uint32_t caps[] =
-                        {
-                          0, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL,
-                          MALLOC_CAP_8BIT | MALLOC_CAP_32BIT
-                        };
-
-      int e = heap_caps_add_region_with_caps(caps, (intptr_t) dma_heap,
-                                   (intptr_t) dma_heap + next_size - 1);
-
-      if (e != ESP_OK)
-        {
-          return e;
-        }
-
-      size -= next_size;
-    }
-
-  return OK;
-}
-#endif
 
 size_t esp_spiram_get_size(void)
 {

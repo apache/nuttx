@@ -30,6 +30,10 @@
 #include <stdbool.h>
 #include "xtensa_attr.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #define ESP_SPIRAM_SIZE_16MBITS   0   /* SPI RAM size is 16 MBits */
 #define ESP_SPIRAM_SIZE_32MBITS   1   /* SPI RAM size is 32 MBits */
 #define ESP_SPIRAM_SIZE_64MBITS   2   /* SPI RAM size is 64 MBits */
@@ -73,6 +77,10 @@
 /* sram MMU edge check (sram size default : 8*1024 K) */
 
 #define SRAM_MMU_EDGE_CHECK(mmu_val,num,psize) (((mmu_val) + (num)) > ((8*1024)/(psize)))
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /* Description: get SPI RAM size
  * return

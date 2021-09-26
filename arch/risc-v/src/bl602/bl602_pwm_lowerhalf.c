@@ -81,8 +81,8 @@ struct bl602_pwm_ch_cfgs
 
 struct bl602_pwm_s
 {
-  FAR const struct pwm_ops_s *ops;         /* PWM operations */
-  uint32_t                    chan_pin[5]; /* Channel pin */
+  const struct pwm_ops_s *ops;         /* PWM operations */
+  uint32_t                chan_pin[5]; /* Channel pin */
 };
 
 /****************************************************************************
@@ -91,12 +91,12 @@ struct bl602_pwm_s
 
 /* PWM driver methods */
 
-static int bl602_pwm_setup(FAR struct pwm_lowerhalf_s *dev);
-static int bl602_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev);
-static int bl602_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                           FAR const struct pwm_info_s *info);
-static int bl602_pwm_stop(FAR struct pwm_lowerhalf_s *dev);
-static int bl602_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int bl602_pwm_setup(struct pwm_lowerhalf_s *dev);
+static int bl602_pwm_shutdown(struct pwm_lowerhalf_s *dev);
+static int bl602_pwm_start(struct pwm_lowerhalf_s *dev,
+                           const struct pwm_info_s *info);
+static int bl602_pwm_stop(struct pwm_lowerhalf_s *dev);
+static int bl602_pwm_ioctl(struct pwm_lowerhalf_s *dev,
                            int cmd, unsigned long arg);
 
 /****************************************************************************
@@ -232,7 +232,7 @@ static int32_t pwm_init(uint8_t id, uint32_t freq)
  *
  ****************************************************************************/
 
-static int bl602_pwm_duty(FAR struct bl602_pwm_s *priv, uint8_t chan,
+static int bl602_pwm_duty(struct bl602_pwm_s *priv, uint8_t chan,
                           ub16_t duty)
 {
   uint16_t period;
@@ -268,7 +268,7 @@ static int bl602_pwm_duty(FAR struct bl602_pwm_s *priv, uint8_t chan,
  *
  ****************************************************************************/
 
-static int bl602_pwm_freq(FAR struct bl602_pwm_s *priv, uint8_t chan,
+static int bl602_pwm_freq(struct bl602_pwm_s *priv, uint8_t chan,
                           uint32_t freq)
 {
   uint16_t period = BL_PWM_CLK / freq;
@@ -298,11 +298,11 @@ static int bl602_pwm_freq(FAR struct bl602_pwm_s *priv, uint8_t chan,
  *
  ****************************************************************************/
 
-static int bl602_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
+static int bl602_pwm_setup(struct pwm_lowerhalf_s *dev)
 {
   int i;
   int ret = OK;
-  FAR struct bl602_pwm_s *priv = (FAR struct bl602_pwm_s *)dev;
+  struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
 
   UNUSED(i);
 
@@ -330,11 +330,11 @@ static int bl602_pwm_setup(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int bl602_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
+static int bl602_pwm_shutdown(struct pwm_lowerhalf_s *dev)
 {
   int i;
   int ret = OK;
-  FAR struct bl602_pwm_s *priv = (FAR struct bl602_pwm_s *)dev;
+  struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
 
   UNUSED(i);
 
@@ -360,10 +360,10 @@ static int bl602_pwm_shutdown(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int bl602_pwm_start(FAR struct pwm_lowerhalf_s *dev,
-                           FAR const struct pwm_info_s *info)
+static int bl602_pwm_start(struct pwm_lowerhalf_s *dev,
+                           const struct pwm_info_s *info)
 {
-  FAR struct bl602_pwm_s *priv = (FAR struct bl602_pwm_s *)dev;
+  struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
   int                     ret  = OK;
   int                     i;
 
@@ -393,10 +393,10 @@ static int bl602_pwm_start(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-static int bl602_pwm_stop(FAR struct pwm_lowerhalf_s *dev)
+static int bl602_pwm_stop(struct pwm_lowerhalf_s *dev)
 {
   int i;
-  FAR struct bl602_pwm_s *priv = (FAR struct bl602_pwm_s *)dev;
+  struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
 
   UNUSED(priv);
   UNUSED(i);
@@ -421,10 +421,10 @@ static int bl602_pwm_stop(FAR struct pwm_lowerhalf_s *dev)
  *
  ****************************************************************************/
 
-static int bl602_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
+static int bl602_pwm_ioctl(struct pwm_lowerhalf_s *dev,
                            int cmd, unsigned long arg)
 {
-  FAR struct bl602_pwm_s *priv = (FAR struct bl602_pwm_s *)dev;
+  struct bl602_pwm_s *priv = (struct bl602_pwm_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -454,7 +454,7 @@ static int bl602_pwm_ioctl(FAR struct pwm_lowerhalf_s *dev,
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *bl602_pwminitialize(int pwm)
+struct pwm_lowerhalf_s *bl602_pwminitialize(int pwm)
 {
   struct bl602_pwm_s *lower = NULL;
 

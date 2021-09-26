@@ -41,6 +41,10 @@ ifeq ($(CONFIG_STM32_COMP),y)
 CSRCS += stm32_comp.c
 endif
 
+ifeq ($(CONFIG_STM32_DAC),y)
+CSRCS += stm32_dac.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

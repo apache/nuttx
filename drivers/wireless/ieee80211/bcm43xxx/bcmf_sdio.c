@@ -116,7 +116,8 @@ FAR struct bcmf_dev_s *g_sdio_priv;
  * This pool is shared between all driver devices
  */
 
-static struct bcmf_sdio_frame g_pktframes[BCMF_PKT_POOL_SIZE];
+static struct bcmf_sdio_frame
+  g_pktframes[CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE];
 
 /* TODO free_queue should be static */
 
@@ -642,6 +643,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
   sbus->minor              = minor;
   sbus->ready              = false;
   sbus->sleeping           = true;
+  sbus->flow_ctrl          = false;
 
   sbus->bus.txframe        = bcmf_sdpcm_queue_frame;
   sbus->bus.rxframe        = bcmf_sdpcm_get_rx_frame;
@@ -664,7 +666,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
 
   /* FIXME this should be static to driver */
 
-  for (ret = 0; ret < BCMF_PKT_POOL_SIZE; ret++)
+  for (ret = 0; ret < CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE; ret++)
     {
       bcmf_dqueue_push(&sbus->free_queue, &g_pktframes[ret].list_entry);
     }
@@ -931,7 +933,9 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
         }
 
 #if 0
-      if (!tx || sbus->tx_queue_count < BCMF_PKT_POOL_SIZE - 1)
+      if (!tx ||
+          sbus->tx_queue_count <
+            CONFIG_IEEE80211_BROADCOM_FRAME_POOL_SIZE - 1)
 #endif
         {
           if ((entry = bcmf_dqueue_pop_tail(&sbus->free_queue)) != NULL)

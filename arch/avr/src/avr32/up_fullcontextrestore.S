@@ -39,7 +39,7 @@
  * Name: up_fullcontextrestore
  *
  * Description:
- *   Restore the full-running contex of a thread.
+ *   Restore the full-running context of a thread.
  *
  *   NOTE: Thus function must handle one very strange case.  That is when
  *   this function is called with up_sigdeliver().  That case is strange in

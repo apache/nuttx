@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <errno.h>
+#include <assert.h>
 #include <queue.h>
 #include <debug.h>
 
@@ -90,18 +90,18 @@ struct lp_wqueue_s g_lpwork;
  * Name: work_thread
  *
  * Description:
- *   These are the worker threads that performs the actions placed on the
+ *   These are the worker threads that perform the actions placed on the
  *   high priority work queue.
  *
  *   These, along with the lower priority worker thread(s) are the kernel
- *   mode work queues (also build in the flat build).
+ *   mode work queues (also built in the flat build).
  *
  *   All kernel mode worker threads are started by the OS during normal
  *   bring up.  This entry point is referenced by OS internally and should
  *   not be accessed by application logic.
  *
  * Input Parameters:
- *   argc, argv (not used)
+ *   argc, argv
  *
  * Returned Value:
  *   Does not return
@@ -143,7 +143,7 @@ static int work_thread(int argc, FAR char *argv[])
       if (work && work->worker)
         {
           /* Extract the work description from the entry (in case the work
-           * instance by the re-used after it has been de-queued).
+           * instance will be re-used after it has been de-queued).
            */
 
           worker = work->worker;

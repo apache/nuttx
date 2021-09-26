@@ -108,7 +108,7 @@ static void     stm32_putreg(uint16_t val, uint32_t addr);
 static void     stm32_setwindow(FAR struct stm32_lowerhalf_s *priv,
                   uint8_t window);
 
-/* Interrupt hanlding *******************************************************/
+/* Interrupt handling *******************************************************/
 
 static int      stm32_interrupt(int irq, FAR void *context, FAR void *arg);
 
@@ -530,7 +530,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
        * reload = timeout * Fwwdg / 1000 - 1
        *
        * Where
-       *  timeout is the desired timout in milliseconds
+       *  timeout is the desired timeout in milliseconds
        *  reload is the contents of T{5:0]
        *  Fwwdg is the frequency of the WWDG clock
        */
@@ -543,7 +543,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
        */
 
 #if 0
-      wdinfo("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
+      wdinfo("wdgtb=%d fwwdg=%d reload=%d timeout=%d\n",
              wdgtb, fwwdg, reload,  1000 * (reload + 1) / fwwdg);
 #endif
       if (reload <= WWDG_CR_T_MAX || wdgtb == 3)
@@ -576,7 +576,7 @@ static int stm32_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   priv->fwwdg  = fwwdg;
   priv->reload = reload;
 
-  wdinfo("wdgtb=%d fwwdg=%d reload=%d timout=%d\n",
+  wdinfo("wdgtb=%d fwwdg=%d reload=%d timeout=%d\n",
          wdgtb, fwwdg, reload, priv->timeout);
 
   /* Set WDGTB[1:0] bits according to calculated value */

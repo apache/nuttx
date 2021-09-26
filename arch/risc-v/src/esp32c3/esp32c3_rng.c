@@ -57,9 +57,9 @@
  ****************************************************************************/
 
 static int esp32c3_rng_initialize(void);
-static ssize_t esp32c3_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t esp32c3_rng_read(struct file *filep, char *buffer,
                                 size_t buflen);
-static int esp32c3_rng_open(FAR struct file *filep);
+static int esp32c3_rng_open(struct file *filep);
 
 /****************************************************************************
  * Private Types
@@ -164,7 +164,7 @@ static int esp32c3_rng_initialize(void)
  * Name: esp32c3_rng_open
  ****************************************************************************/
 
-static int esp32c3_rng_open(FAR struct file *filep)
+static int esp32c3_rng_open(struct file *filep)
 {
   /* O_NONBLOCK is not supported */
 
@@ -181,10 +181,10 @@ static int esp32c3_rng_open(FAR struct file *filep)
  * Name: esp32c3_rng_read
  ****************************************************************************/
 
-static ssize_t esp32c3_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t esp32c3_rng_read(struct file *filep, char *buffer,
                               size_t buflen)
 {
-  FAR struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
+  struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   ssize_t read_len;
   uint8_t *rd_buf = (uint8_t *)buffer;
 

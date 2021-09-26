@@ -265,7 +265,6 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs);
 /* Software interrupt handler */
 
 #ifdef CONFIG_SMP
-void __cpu1_start(void) noreturn_function;
 int xtensa_intercpu_interrupt(int tocpu, int intcode);
 void xtensa_pause_handler(void);
 #endif
@@ -345,7 +344,7 @@ void xtensa_pminitialize(void);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

@@ -506,7 +506,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   ninfo("ACK: wrb=%p trim %u bytes\n", wrb, trimlen);
 
                   TCP_WBTRIM(wrb, trimlen);
-                  TCP_WBSEQNO(wrb) = ackno;
+                  TCP_WBSEQNO(wrb) += trimlen;
                   TCP_WBSENT(wrb) -= trimlen;
 
                   /* Set the new sequence number for what remains */
@@ -571,7 +571,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           /* Trim the ACKed bytes from the beginning of the write buffer. */
 
           TCP_WBTRIM(wrb, nacked);
-          TCP_WBSEQNO(wrb) = ackno;
+          TCP_WBSEQNO(wrb) += nacked;
           TCP_WBSENT(wrb) -= nacked;
 
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
@@ -1142,69 +1142,73 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
         }
 #endif /* CONFIG_NET_SEND_BUFSIZE */
 
-      /* Allocate a write buffer.  Careful, the network will be momentarily
-       * unlocked here.
-       */
-
-      /* Try to coalesce into the last wrb.
-       *
-       * But only when it might yield larger segments.
-       * (REVISIT: It might make sense to lift this condition.
-       * IOB boundaries and segment boundaries usually do not match.
-       * It makes sense to save the number of IOBs.)
-       *
-       * Also, for simplicity, do it only when we haven't sent anything
-       * from the the wrb yet.
-       */
-
-      max_wrb_size = tcp_max_wrb_size(conn);
-      wrb = (FAR struct tcp_wrbuffer_s *)sq_tail(&conn->write_q);
-      if (wrb != NULL && TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
-          TCP_WBPKTLEN(wrb) < max_wrb_size &&
-          (TCP_WBPKTLEN(wrb) % conn->mss) != 0)
+      while (true)
         {
-          wrb = (FAR struct tcp_wrbuffer_s *)sq_remlast(&conn->write_q);
-          ninfo("coalesce %zu bytes to wrb %p (%" PRIu16 ")\n", len, wrb,
-                TCP_WBPKTLEN(wrb));
-          DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
-        }
-      else if (nonblock)
-        {
-          wrb = tcp_wrbuffer_tryalloc();
-          ninfo("new wrb %p (non blocking)\n", wrb);
-        }
-      else
-        {
-          wrb = tcp_wrbuffer_alloc();
-          ninfo("new wrb %p\n", wrb);
-        }
+          struct iob_s *iob;
 
-      if (wrb == NULL)
-        {
-          /* A buffer allocation error occurred */
+          /* Allocate a write buffer.  Careful, the network will be
+           * momentarily unlocked here.
+           */
 
-          nerr("ERROR: Failed to allocate write buffer\n");
-          ret = nonblock ? -EAGAIN : -ENOMEM;
-          goto errout_with_lock;
-        }
+          /* Try to coalesce into the last wrb.
+           *
+           * But only when it might yield larger segments.
+           * (REVISIT: It might make sense to lift this condition.
+           * IOB boundaries and segment boundaries usually do not match.
+           * It makes sense to save the number of IOBs.)
+           *
+           * Also, for simplicity, do it only when we haven't sent anything
+           * from the the wrb yet.
+           */
 
-      /* Initialize the write buffer */
+          max_wrb_size = tcp_max_wrb_size(conn);
+          wrb = (FAR struct tcp_wrbuffer_s *)sq_tail(&conn->write_q);
+          if (wrb != NULL && TCP_WBSENT(wrb) == 0 && TCP_WBNRTX(wrb) == 0 &&
+              TCP_WBPKTLEN(wrb) < max_wrb_size &&
+              (TCP_WBPKTLEN(wrb) % conn->mss) != 0)
+            {
+              wrb = (FAR struct tcp_wrbuffer_s *)sq_remlast(&conn->write_q);
+              ninfo("coalesce %zu bytes to wrb %p (%" PRIu16 ")\n", len, wrb,
+                    TCP_WBPKTLEN(wrb));
+              DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
+            }
+          else if (nonblock)
+            {
+              wrb = tcp_wrbuffer_tryalloc();
+              ninfo("new wrb %p (non blocking)\n", wrb);
+              DEBUGASSERT(wrb == NULL || TCP_WBPKTLEN(wrb) == 0);
+            }
+          else
+            {
+              wrb = tcp_wrbuffer_alloc();
+              ninfo("new wrb %p\n", wrb);
+              DEBUGASSERT(TCP_WBPKTLEN(wrb) == 0);
+            }
 
-      TCP_WBSEQNO(wrb) = (unsigned)-1;
-      TCP_WBNRTX(wrb)  = 0;
+          if (wrb == NULL)
+            {
+              /* A buffer allocation error occurred */
 
-      off = TCP_WBPKTLEN(wrb);
-      if (off + chunk_len > max_wrb_size)
-        {
-          chunk_len = max_wrb_size - off;
-        }
+              nerr("ERROR: Failed to allocate write buffer\n");
+              ret = nonblock ? -EAGAIN : -ENOMEM;
+              goto errout_with_lock;
+            }
 
-      /* Copy the user data into the write buffer.  We cannot wait for
-       * buffer space if the socket was opened non-blocking.
-       */
+          /* Initialize the write buffer */
 
-      if (nonblock)
-        {
+          TCP_WBSEQNO(wrb) = (unsigned)-1;
+          TCP_WBNRTX(wrb)  = 0;
+
+          off = TCP_WBPKTLEN(wrb);
+          if (off + chunk_len > max_wrb_size)
+            {
+              chunk_len = max_wrb_size - off;
+            }
+
+          /* Copy the user data into the write buffer.  We cannot wait for
+           * buffer space.
+           */
+
           /* The return value from TCP_WBTRYCOPYIN is either OK or
            * -ENOMEM if less than the entire data chunk could be allocated.
            * If -ENOMEM is returned, check if at least a part of the data
@@ -1233,34 +1237,48 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
                 }
               else
                 {
-                  nerr("ERROR: Failed to add data to the I/O chain\n");
-                  ret = -EWOULDBLOCK;
-                  goto errout_with_wrb;
+                  chunk_result = 0;
                 }
             }
           else
             {
               DEBUGASSERT(chunk_result == chunk_len);
             }
-        }
-      else
-        {
-          unsigned int count;
-          int blresult;
 
-          /* iob_copyin might wait for buffers to be freed, but if network is
-           * locked this might never happen, since network driver is also
-           * locked, therefore we need to break the lock
+          if (chunk_result > 0)
+            {
+              break;
+            }
+
+          /* release wrb */
+
+          if (TCP_WBPKTLEN(wrb) > 0)
+            {
+              DEBUGASSERT(TCP_WBSENT(wrb) == 0);
+              DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
+              sq_addlast(&wrb->wb_node, &conn->write_q);
+            }
+          else
+            {
+              tcp_wrbuffer_release(wrb);
+            }
+
+          if (nonblock)
+            {
+              nerr("ERROR: Failed to add data to the I/O chain\n");
+              ret = -EAGAIN;
+              goto errout_with_lock;
+            }
+
+          /* Wait for at least one IOB getting available.
+           *
+           * Note: net_ioballoc releases the network lock when blocking.
+           * It allows our write_q being drained in the meantime. Otherwise,
+           * we risk a deadlock with other threads competing on IOBs.
            */
 
-          blresult = net_breaklock(&count);
-          ninfo("starting copyin to wrb %p\n", wrb);
-          chunk_result = TCP_WBCOPYIN(wrb, cp, chunk_len, off);
-          ninfo("finished copyin to wrb %p\n", wrb);
-          if (blresult >= 0)
-            {
-              net_restorelock(count);
-            }
+          iob = net_ioballoc(true, IOBUSER_NET_TCP_WRITEBUFFER);
+          iob_free_chain(iob, IOBUSER_NET_TCP_WRITEBUFFER);
         }
 
       /* Dump I/O buffer chain */
@@ -1323,9 +1341,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   /* Return the number of bytes actually sent */
 
   return result;
-
-errout_with_wrb:
-  tcp_wrbuffer_release(wrb);
 
 errout_with_lock:
   net_unlock();
@@ -1391,7 +1406,7 @@ int psock_tcp_cansend(FAR struct socket *psock)
    * but we don't know how many more.
    */
 
-  if (tcp_wrbuffer_test() < 0 || iob_navail(false) <= 0)
+  if (tcp_wrbuffer_test() < 0 || iob_navail(true) <= 0)
     {
       return -EWOULDBLOCK;
     }

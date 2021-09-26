@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRNCMP
-#undef strncmp
+#undef strncmp /* See mm/README.txt */
 int strncmp(const char *cs, const char *ct, size_t nb)
 {
   int result = 0;

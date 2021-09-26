@@ -96,10 +96,6 @@
   (PHY_STAGSELECT | PHY_HSFALLCNTRL | PHY_IHSTX(0xc) | PHY_INHSRFRED | \
    PHY_INHSIPLUS | PHY_INHSDRVSLEW| PHY_INLFSFBCAP)
 
-#ifndef __aligned
-#  define __aligned(x) __attribute__((aligned(x)))
-#endif
-
 /* Debug ********************************************************************/
 
 /* Trace error codes */
@@ -556,9 +552,9 @@ static struct cxd56_usbdev_s g_usbdev;
 
 /* DMA Descriptors for each endpoints */
 
-static struct cxd56_setup_desc_s __aligned(4) g_ep0setup;
-static struct cxd56_data_desc_s __aligned(4) g_ep0in;
-static struct cxd56_data_desc_s __aligned(4) g_ep0out;
+static struct cxd56_setup_desc_s aligned_data(4) g_ep0setup;
+static struct cxd56_data_desc_s aligned_data(4) g_ep0in;
+static struct cxd56_data_desc_s aligned_data(4) g_ep0out;
 
 /* Summarizes information about all CXD56 endpoints */
 

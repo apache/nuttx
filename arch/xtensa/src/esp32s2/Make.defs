@@ -22,7 +22,7 @@
 
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
 HEAD_ASRC += xtensa_int_handlers.S  xtensa_user_handler.S
-HEAD_CSRC  = esp32s2_start.c
+HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c 
 
 # Common XTENSA files (arch/xtensa/src/common)
 
@@ -50,10 +50,6 @@ ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
 
-ifeq ($(CONFIG_XTENSA_DUMPBT_ON_ASSERT),y)
-  CMN_ASRCS += xtensa_backtrace.S
-endif
-
 ifeq ($(CONFIG_SPINLOCK),y)
   CMN_CSRCS += xtensa_testset.c
 endif
@@ -79,3 +75,24 @@ ifeq ($(CONFIG_ESP32S2_UART),y)
 CMN_CSRCS += esp32s2_serial.c
 endif
 
+ifeq ($(CONFIG_ESP32S2_TIMER),y)
+CHIP_CSRCS += esp32s2_tim.c
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += esp32s2_tim_lowerhalf.c
+endif
+endif
+
+ifeq ($(CONFIG_ESP32S2_FREERUN),y)
+CHIP_CSRCS += esp32s2_freerun.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_RT_TIMER),y)
+CHIP_CSRCS += esp32s2_rt_timer.c
+endif
+
+ifeq ($(CONFIG_ESP32S2_ONESHOT),y)
+CHIP_CSRCS += esp32s2_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32s2_oneshot_lowerhalf.c
+endif
+endif

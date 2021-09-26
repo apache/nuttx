@@ -91,7 +91,7 @@
  * BOARD_FMC_SDCR[1..2] - Initial value for SDRAM control registers for SDRAM
  *      bank 1-2. Note that some bits in SDCR1 influence both SDRAM banks and
  *      are unused in SDCR2!
- * BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registeres for SDRAM
+ * BOARD_FMC_SDTR[1..2] - Initial value for SDRAM timing registers for SDRAM
  *      bank 1-2. Note that some bits in SDTR1 influence both SDRAM banks and
  *      are unused in SDTR2!
  * BOARD_FMC_SDRAM_REFR_PERIOD - The SDRAM refresh rate period in FMC clocks,

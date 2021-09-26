@@ -34,7 +34,7 @@
 
 /* Configured FLASH configuration bytes.  NOTE:  Little endian assumed. */
 
-const uint8_t g_flashcfg[16]  __attribute__((section(".flashcfg"))) =
+const uint8_t g_flashcfg[16]  locate_data(".flashcfg") =
 {
   (uint8_t)(CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 & 0xff),         /* 0x0400 */
   (uint8_t)((CONFIG_S32K1XX_FLASHCFG_BACKDOOR1 >> 8) & 0xff),  /* 0x0401 */

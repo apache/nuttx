@@ -1964,7 +1964,7 @@ static void spi_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
   stm32_dmacfg_t rxdmacfg;
   stm32_dmacfg_t txdmacfg;
   static uint8_t rxdummy[ARMV7M_DCACHE_LINESIZE]
-    __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+    aligned_data(ARMV7M_DCACHE_LINESIZE);
   static const uint16_t txdummy = 0xffff;
   FAR void * orig_rxbuffer = rxbuffer;
 

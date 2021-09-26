@@ -30,6 +30,8 @@
 
 #include <nuttx/spi/spi.h>
 
+#include "esp32c3_gpio.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -61,6 +63,20 @@ uint8_t esp32c3_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid)
 
 int esp32c3_spi2_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
+#if defined(CONFIG_LCD_ST7735) || defined(CONFIG_LCD_ST7789) || \
+    defined(CONFIG_LCD_GC9A01)
+  if (devid == SPIDEV_DISPLAY(0))
+    {
+      /*  This is the Data/Command control pad which determines whether the
+       *  data bits are data or a command.
+       */
+
+      esp32c3_gpiowrite(CONFIG_ESP32C3_SPI2_MISOPIN, !cmd);
+
+      return OK;
+    }
+
+#endif
   spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
           "data");
 

@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_ARCH_STRNCAT
-#undef strncat
+#undef strncat /* See mm/README.txt */
 char *strncat(char *dest, const char *src, size_t n)
 {
   char *ret   = dest;

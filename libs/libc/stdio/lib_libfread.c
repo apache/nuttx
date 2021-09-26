@@ -207,8 +207,8 @@ ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream)
                             }
                           else
                             {
-                              /* An error occurred on the read.  The error code
-                               * is in the 'errno' variable.
+                              /* An error occurred on the read.  The error
+                               * code is in the 'errno' variable.
                                */
 
                               _NX_SETERRNO(bytes_read);

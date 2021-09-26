@@ -564,21 +564,21 @@ found:
 
 #ifdef CONFIG_NET_IPv6
 #  ifdef CONFIG_NET_IPv4
-        if (domain == PF_INET6)
+          if (domain == PF_INET6)
 #  endif
-          {
-            net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
-          }
+            {
+              net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
+            }
 #endif
 
 #ifdef CONFIG_NET_IPv4
 #  ifdef CONFIG_NET_IPv6
-        if (domain == PF_INET)
+          if (domain == PF_INET)
 #  endif
-          {
-            net_ipv4addr_copy(uaddr.ipv4.laddr,
-                              net_ip4addr_conv32(IPv4BUF->destipaddr));
-          }
+            {
+              net_ipv4addr_copy(uaddr.ipv4.laddr,
+                                net_ip4addr_conv32(IPv4BUF->destipaddr));
+            }
 #endif
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
@@ -684,6 +684,7 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+      uint32_t sndseq;
 
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
@@ -741,11 +742,15 @@ found:
        * be beyond ackseq.
        */
 
-      ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-            " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
-            tcp_getsequence(conn->sndseq), ackseq, unackseq,
-            (uint32_t)conn->tx_unacked);
-      tcp_setsequence(conn->sndseq, ackseq);
+      sndseq = tcp_getsequence(conn->sndseq);
+      if (TCP_SEQ_LT(sndseq, ackseq))
+        {
+          ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
+                " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
+                tcp_getsequence(conn->sndseq), ackseq, unackseq,
+                (uint32_t)conn->tx_unacked);
+          tcp_setsequence(conn->sndseq, ackseq);
+        }
 
       /* Do RTT estimation, unless we have done retransmissions. */
 

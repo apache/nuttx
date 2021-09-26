@@ -46,8 +46,19 @@
 #define ST7735_RASET     0x2b   /* Row Address Set */
 #define ST7735_RAMWR     0x2c   /* Memory Write */
 #define ST7735_RAMRD     0x2e   /* Memory Read */
+#define ST7735_MADCTL    0x36   /* Memory Data Access Control */
+
+#define ST7735_MADCTL_MY  (1<<7)  /* Page Address Order */
+#define ST7735_MADCTL_MX  (1<<6)  /* Column Address Order */
+#define ST7735_MADCTL_MV  (1<<5)  /* Page/Column Order */
+#define ST7735_MADCTL_ML  (1<<4)  /* Line Address Order */
+#define ST7735_MADCTL_BGR (1<<3)  /* Set Panel Order BGR */
+#define ST7735_MADCTL_MH  (1<<2)  /* Display Data Latch Order */
+
 #define ST7735_IDMOFF    0x38   /* Idle Mode Off */
 #define ST7735_IDMON     0x39   /* Idle Mode On */
 #define ST7735_COLMOD    0x3a   /* Interface Pixel Format */
+
+FAR struct lcd_dev_s *st7735_lcdinitialize(FAR struct spi_dev_s *spi);
 
 #endif /* __DRIVERS_LCD_ST7735_H */

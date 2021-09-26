@@ -249,6 +249,18 @@ config ARCH_BOARD_ESP32_WROVERKIT
   			LCD screen
   			MicroSD card slot
 
+config ARCH_BOARD_TTGO_LORA_ESP32
+	bool "TTGO LoRa SX1276 ESP32"
+	depends on ARCH_CHIP_ESP32WROOM32
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS if ESP32_GPIO_IRQ
+	---help---
+		TTGO-LoRa-SX1276-ESP32 is an ESP32 board with LoRa. Usually it
+		comes with an OLED display, but there are options without
+		display. This port is for board version 1.0, more info:
+		https://github.com/Xinyuan-LilyGO/TTGO-LoRa-Series
+
 config ARCH_BOARD_ESP32C3_DEVKIT
 	bool "Espressif ESP32-C3 DevKit"
 	depends on ARCH_CHIP_ESP32C3MINI1 || ARCH_CHIP_ESP32C3WROOM02
@@ -305,6 +317,17 @@ config ARCH_BOARD_FIRE_STM32
 		STM32F103VET6 chip.  See http://firestm32.taobao.com .  Version 2
 		and 3 of the boards are supported but only version 2 has been
 		tested.
+
+config ARCH_BOARD_CHIPKIT_WIFIRE
+    bool "chipKIT Wi-FIRE"
+    depends on ARCH_CHIP_PIC32MZ2048EFG
+    select ARCH_HAVE_LEDS
+    select ARCH_HAVE_BUTTONS
+    select ARCH_HAVE_IRQBUTTONS
+    ---help---
+        This options selects the chipKIT Wi-FIRE board. This
+        board is a chipKIT Arduino-compatible board. This board
+        features the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
 
 config ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	bool "Mikroe Flip&Click PIC32MZ"
@@ -1432,24 +1455,14 @@ config ARCH_BOARD_S32K144EVB
 		This options selects support for NuttX on the NXP S32K144EVB board
 		featuring the S32K144 Cortex-M4F.
 
-config ARCH_BOARD_RDDRONE_UAVCAN144
-	bool "NXP RDDRONE-UAVCAN144"
-	depends on ARCH_CHIP_S32K144
-	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
-	---help---
-		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
-		featuring the S32K144 Cortex-M4F.
-
-config ARCH_BOARD_RDDRONE_UAVCAN146
-	bool "NXP RDDRONE-UAVCAN146"
+config ARCH_BOARD_UCANS32K146
+	bool "NXP UCANS32K146"
 	depends on ARCH_CHIP_S32K146
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		This options selects support for NuttX on the NXP RDDRONE-UAVCAN board
+		This options selects support for NuttX on the NXP UCANS32K board
 		featuring the S32K146 Cortex-M4F.
 
 config ARCH_BOARD_S32K146EVB
@@ -1692,7 +1705,7 @@ config ARCH_BOARD_STM32_BUTTERFLY2
 	select ARCH_HAVE_BUTTONS
 	---help---
 		A configuration for the Kamami STM32Butterfly2 development board
-		based on STM32F107VC micro-controler chip with optional ETH
+		based on STM32F107VC micro-controller chip with optional ETH
 		board.  See
 		https://kamami.pl/zestawy-uruchomieniowe-stm32/178507-stm32butterfly2.html
 
@@ -2340,6 +2353,7 @@ config ARCH_BOARD
 	default "ez80f910200kitg"          if ARCH_BOARD_EZ80F910200KITG
 	default "ez80f910200zco"           if ARCH_BOARD_EZ80F910200ZCO
 	default "fire-stm32v2"             if ARCH_BOARD_FIRE_STM32
+	default "chipkit-wifire"           if ARCH_BOARD_CHIPKIT_WIFIRE
 	default "flipnclick-pic32mz"       if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	default "flipnclick-sam3x"         if ARCH_BOARD_FLIPNCLICK_SAM3X
 	default "freedom-k28f"             if ARCH_BOARD_FREEDOM_K28F
@@ -2450,8 +2464,7 @@ config ARCH_BOARD
 	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
-	default "rddrone-uavcan144"        if ARCH_BOARD_RDDRONE_UAVCAN144
-	default "rddrone-uavcan146"        if ARCH_BOARD_RDDRONE_UAVCAN146
+	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
@@ -2516,6 +2529,7 @@ config ARCH_BOARD
 	default "tm4c123g-launchpad"       if ARCH_BOARD_TM4C123G_LAUNCHPAD
 	default "tm4c1294-launchpad"       if ARCH_BOARD_TM4C1294_LAUNCHPAD
 	default "tms570ls31x-usb-kit"      if ARCH_BOARD_TMS570LS31X_USB_KIT
+	default "ttgo_lora_esp32"          if ARCH_BOARD_TTGO_LORA_ESP32
 	default "twr-k60n512"              if ARCH_BOARD_TWR_K60N512
 	default "twr-k64f120m"             if ARCH_BOARD_TWR_K64F120M
 	default "u-blox-c027"              if ARCH_BOARD_U_BLOX_C027
@@ -2609,11 +2623,8 @@ endif
 if ARCH_BOARD_S32K144EVB
 source "boards/arm/s32k1xx/s32k144evb/Kconfig"
 endif
-if ARCH_BOARD_RDDRONE_UAVCAN144
-source "boards/arm/s32k1xx/rddrone-uavcan144/Kconfig"
-endif
-if ARCH_BOARD_RDDRONE_UAVCAN146
-source "boards/arm/s32k1xx/rddrone-uavcan146/Kconfig"
+if ARCH_BOARD_UCANS32K146
+source "boards/arm/s32k1xx/ucans32k146/Kconfig"
 endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
@@ -3152,6 +3163,9 @@ endif
 if ARCH_BOARD_UBW32
 source "boards/mips/pic32mx/ubw32/Kconfig"
 endif
+if ARCH_BOARD_CHIPKIT_WIFIRE
+source "boards/mips/pic32mz/chipkit-wifire/Kconfig"
+endif
 if ARCH_BOARD_FLIPNCLICK_PIC32MZ
 source "boards/mips/pic32mz/flipnclick-pic32mz/Kconfig"
 endif
@@ -3191,6 +3205,9 @@ endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
 endif
+if ARCH_CHIP_ESP32S2 && !ARCH_BOARD_CUSTOM
+source "boards/xtensa/esp32s2/common/Kconfig"
+endif
 if ARCH_BOARD_ESP32S2_SAOLA_1
 source "boards/xtensa/esp32s2/esp32s2-saola-1/Kconfig"
 endif
@@ -3226,6 +3243,9 @@ source "boards/xtensa/esp32/esp32-ethernet-kit/Kconfig"
 endif
 if ARCH_BOARD_ESP32_WROVERKIT
 source "boards/xtensa/esp32/esp32-wrover-kit/Kconfig"
+endif
+if ARCH_BOARD_TTGO_LORA_ESP32
+source "boards/xtensa/esp32/ttgo_lora_esp32/Kconfig"
 endif
 if ARCH_BOARD_Z16F2800100ZCOG
 source "boards/z16/z16f/z16f2800100zcog/Kconfig"
@@ -3398,6 +3418,17 @@ config BOARDCTL_SWITCH_BOOT
 		case. It can be used to change the system boot behavior. For instance,
 		once a firmware updated successfully, this boardctl can be used to
 		modify FLASH bank selection.
+
+config BOARDCTL_BOOT_IMAGE
+	bool "Boot a new application firmware image"
+	default n
+	---help---
+		Boot a new application firmware image.
+		Architecture-specific logic must provide the board_boot_image()
+		interface for executing the required actions for booting a new
+		application firmware image (e.g. deinitialize peripherals, load the
+		Program Counter register with the application firmware image entry
+		point address).
 
 config BOARDCTL_MKRD
 	bool "Enable application space creation of RAM disks"

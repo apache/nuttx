@@ -57,12 +57,12 @@ static volatile uint8_t g_irq_spin_count[CONFIG_SMP_NCPUS];
  *     If the argument lock is not specified (i.e. NULL),
  *     disable local interrupts and take the global spinlock (g_irq_spin)
  *     if the call counter (g_irq_spin_count[cpu]) equals to 0. Then the
- *     counter on the CPU is increment to allow nested call and return
+ *     counter on the CPU is incremented to allow nested call and return
  *     the interrupt state.
  *
  *     If the argument lock is specified,
- *     disable local interrupts and take the lock spinlock and return
- *     the interrupt state.
+ *     disable local interrupts and take the given lock and return the
+ *     interrupt state.
  *
  *     NOTE: This API is very simple to protect data (e.g. H/W register
  *     or internal data structure) in SMP mode. But do not use this API
@@ -117,8 +117,8 @@ irqstate_t spin_lock_irqsave(spinlock_t *lock)
  *     restore the interrupt state as it was prior to the previous call to
  *     spin_lock_irqsave(NULL).
  *
- *     If the argument lock is specified, release the the lock and
- *     restore the interrupt state as it was prior to the previous call to
+ *     If the argument lock is specified, release the lock and restore
+ *     the interrupt state as it was prior to the previous call to
  *     spin_lock_irqsave(lock).
  *
  *   If SMP is not enabled:

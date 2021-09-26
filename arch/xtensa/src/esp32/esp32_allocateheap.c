@@ -34,6 +34,11 @@
 #include <arch/board/board.h>
 #include <arch/esp32/memory_layout.h>
 
+#ifdef CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE
+#include <nuttx/himem/himem.h>
+#include "esp32_himem.h"
+#endif
+
 #include "xtensa.h"
 
 /****************************************************************************
@@ -59,11 +64,11 @@
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
   board_autoled_on(LED_HEAPALLOCATE);
 
-  *heap_start = (FAR void *)&_sheap;
+  *heap_start = (void *)&_sheap;
   DEBUGASSERT(HEAP_REGION1_END > (uintptr_t)*heap_start);
   *heap_size = (size_t)(HEAP_REGION1_END - (uintptr_t)*heap_start);
 }
@@ -108,28 +113,28 @@ void xtensa_add_region(void)
     }
 
 #ifndef CONFIG_SMP
-  start = (FAR void *)(HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE);
+  start = (void *)(HEAP_REGION2_START + XTENSA_IMEM_REGION_SIZE);
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
 
 #else
 #ifdef CONFIG_ESP32_QEMU_IMAGE
-  start = (FAR void *)HEAP_REGION2_START;
+  start = (void *)HEAP_REGION2_START;
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
 #else
-  start = (FAR void *)HEAP_REGION2_START;
+  start = (void *)HEAP_REGION2_START;
   size  = (size_t)(HEAP_REGION2_END - HEAP_REGION2_START);
   umm_addregion(start, size);
 
-  start = (FAR void *)HEAP_REGION3_START + XTENSA_IMEM_REGION_SIZE;
+  start = (void *)HEAP_REGION3_START + XTENSA_IMEM_REGION_SIZE;
   size  = (size_t)(uintptr_t)&_eheap - (size_t)start;
   umm_addregion(start, size);
 #endif
 #endif
 
 #ifndef CONFIG_ESP32_QEMU_IMAGE
-  start = (FAR void *)HEAP_REGION0_START;
+  start = (void *)HEAP_REGION0_START;
   size  = (size_t)(HEAP_REGION0_END - HEAP_REGION0_START);
   umm_addregion(start, size);
 #endif
@@ -137,12 +142,15 @@ void xtensa_add_region(void)
 #ifdef CONFIG_ESP32_SPIRAM
 #  if defined(CONFIG_HEAP2_BASE) && defined(CONFIG_HEAP2_SIZE)
 #    ifdef CONFIG_XTENSA_EXTMEM_BSS
-      start = (FAR void *)(&_ebss_extmem);
+      start = (void *)(&_ebss_extmem);
       size = CONFIG_HEAP2_SIZE - (size_t)(&_ebss_extmem - &_sbss_extmem);
 #    else
-      start = (FAR void *)CONFIG_HEAP2_BASE;
+      start = (void *)CONFIG_HEAP2_BASE;
       size = CONFIG_HEAP2_SIZE;
 #    endif
+#  ifdef CONFIG_ESP32_SPIRAM_BANKSWITCH_ENABLE
+    size -= esp_himem_reserved_area_size();
+#  endif
     umm_addregion(start, size);
 #  endif
 #endif

@@ -202,6 +202,7 @@
 #define BOARDIOC_TESTSET           _BOARDIOC(0x0011)
 #define BOARDIOC_UNIQUEKEY         _BOARDIOC(0x0012)
 #define BOARDIOC_SWITCH_BOOT       _BOARDIOC(0x0013)
+#define BOARDIOC_BOOT_IMAGE        _BOARDIOC(0x0014)
 
 /* If CONFIG_BOARDCTL_IOCTL=y, then board-specific commands will be support.
  * In this case, all commands not recognized by boardctl() will be forwarded
@@ -210,7 +211,7 @@
  * User defined board commands may begin with this value:
  */
 
-#define BOARDIOC_USER              _BOARDIOC(0x0014)
+#define BOARDIOC_USER              _BOARDIOC(0x0015)
 
 /****************************************************************************
  * Public Type Definitions
@@ -391,6 +392,17 @@ struct boardioc_nxterm_ioctl_s
   uintptr_t arg;                   /* IOCTL argument */
 };
 #endif /* CONFIG_NXTERM */
+
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+
+/* Structure containing the arguments to the BOARDIOC_BOOT_IMAGE command */
+
+struct boardioc_boot_info_s
+{
+  FAR const char *path;           /* Path to application firmware image */
+  uint32_t        header_size;    /* Size of the image header in bytes */
+};
+#endif
 
 /****************************************************************************
  * Public Data

@@ -78,11 +78,9 @@ endif
 # Parametrization for ARCHCPUFLAGS
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)
   TOOLCHAIN_MCPU     := -mcpu=cortex-m23
-  TOOLCHAIN_MARCH    := -march=armv8-m.main
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
 else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   TOOLCHAIN_MCPU     := -mcpu=cortex-m33
-  TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
   else
@@ -90,7 +88,6 @@ else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   TOOLCHAIN_MCPU     := -mcpu=cortex-m35p
-  TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
   else
@@ -138,7 +135,7 @@ endif
 CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++
 CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)gcc
+LD = $(CROSSDEV)ld
 STRIP = $(CROSSDEV)strip --strip-unneeded
 AR = $(CROSSDEV)gcc-ar rcs
 NM = $(CROSSDEV)gcc-nm

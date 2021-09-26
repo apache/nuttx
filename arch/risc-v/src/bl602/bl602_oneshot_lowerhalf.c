@@ -71,7 +71,7 @@ struct bl602_oneshot_lowerhalf_s
   /* Private lower half data follows */
 
   oneshot_callback_t callback; /* Internal handler that receives callback */
-  FAR void *         arg;      /* Argument that is passed to the handler */
+  void *             arg;      /* Argument that is passed to the handler */
   uint8_t            tim;      /* timer tim 0,1 */
   uint8_t            irq;      /* IRQ associated with this timer */
   bool               started;  /* True: Timer has been started */
@@ -81,14 +81,14 @@ struct bl602_oneshot_lowerhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int bl602_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                           FAR struct timespec *           ts);
-static int bl602_start(FAR struct oneshot_lowerhalf_s *lower,
+static int bl602_max_delay(struct oneshot_lowerhalf_s *lower,
+                           struct timespec *           ts);
+static int bl602_start(struct oneshot_lowerhalf_s *lower,
                        oneshot_callback_t              callback,
-                       FAR void *                      arg,
-                       FAR const struct timespec *     ts);
-static int bl602_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR struct timespec *           ts);
+                       void *                      arg,
+                       const struct timespec *     ts);
+static int bl602_cancel(struct oneshot_lowerhalf_s *lower,
+                        struct timespec *           ts);
 
 /****************************************************************************
  * Private Data
@@ -122,13 +122,13 @@ static const struct oneshot_operations_s g_oneshot_ops =
  *
  ****************************************************************************/
 
-static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
+static int bl602_oneshot_handler(int irq, void *context, void *arg)
 {
-  FAR struct bl602_oneshot_lowerhalf_s *priv =
-    (FAR struct bl602_oneshot_lowerhalf_s *)arg;
+  struct bl602_oneshot_lowerhalf_s *priv =
+    (struct bl602_oneshot_lowerhalf_s *)arg;
 
   oneshot_callback_t callback;
-  FAR void *         cbarg;
+  void *         cbarg;
 
   /* Clear Interrupt Bits */
 
@@ -198,11 +198,11 @@ static int bl602_oneshot_handler(int irq, FAR void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-static int bl602_max_delay(FAR struct oneshot_lowerhalf_s *lower,
-                           FAR struct timespec *           ts)
+static int bl602_max_delay(struct oneshot_lowerhalf_s *lower,
+                           struct timespec *           ts)
 {
-  FAR struct bl602_oneshot_lowerhalf_s *priv =
-    (FAR struct bl602_oneshot_lowerhalf_s *)lower;
+  struct bl602_oneshot_lowerhalf_s *priv =
+    (struct bl602_oneshot_lowerhalf_s *)lower;
   uint64_t usecs;
 
   DEBUGASSERT(priv != NULL && ts != NULL);
@@ -237,13 +237,13 @@ static int bl602_max_delay(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_start(FAR struct oneshot_lowerhalf_s *lower,
+static int bl602_start(struct oneshot_lowerhalf_s *lower,
                        oneshot_callback_t              callback,
-                       FAR void *                      arg,
-                       FAR const struct timespec *     ts)
+                       void *                      arg,
+                       const struct timespec *     ts)
 {
-  FAR struct bl602_oneshot_lowerhalf_s *priv =
-    (FAR struct bl602_oneshot_lowerhalf_s *)lower;
+  struct bl602_oneshot_lowerhalf_s *priv =
+    (struct bl602_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
   uint64_t   usec;
 
@@ -307,11 +307,11 @@ static int bl602_start(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_cancel(FAR struct oneshot_lowerhalf_s *lower,
-                        FAR struct timespec *           ts)
+static int bl602_cancel(struct oneshot_lowerhalf_s *lower,
+                        struct timespec *           ts)
 {
-  FAR struct bl602_oneshot_lowerhalf_s *priv =
-    (FAR struct bl602_oneshot_lowerhalf_s *)lower;
+  struct bl602_oneshot_lowerhalf_s *priv =
+    (struct bl602_oneshot_lowerhalf_s *)lower;
   irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
@@ -359,15 +359,15 @@ static int bl602_cancel(FAR struct oneshot_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
+struct oneshot_lowerhalf_s *oneshot_initialize(int      chan,
                                                    uint16_t resolution)
 {
-  FAR struct bl602_oneshot_lowerhalf_s *priv;
+  struct bl602_oneshot_lowerhalf_s *priv;
   struct timer_cfg_s                    timstr;
 
   /* Allocate an instance of the lower half driver */
 
-  priv = (FAR struct bl602_oneshot_lowerhalf_s *)kmm_zalloc(
+  priv = (struct bl602_oneshot_lowerhalf_s *)kmm_zalloc(
     sizeof(struct bl602_oneshot_lowerhalf_s));
 
   if (priv == NULL)

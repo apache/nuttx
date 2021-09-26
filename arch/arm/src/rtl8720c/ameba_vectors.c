@@ -63,8 +63,8 @@ extern void exception_common(void);
  * Note that the [ ... ] designated initialiser is a GCC extension.
  */
 
-unsigned _vectors[] __attribute__((section(".vectors"))) \
-                    __attribute__((aligned(0x100))) =
+unsigned _vectors[] locate_data(".vectors") \
+                    aligned_data(0x100) =
 {
   /* Initial stack */
 

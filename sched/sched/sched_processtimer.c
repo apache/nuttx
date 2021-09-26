@@ -114,7 +114,7 @@ static inline void nxsched_process_scheduler(void)
   int i;
 
   /* If we are running on a single CPU architecture, then we know interrupts
-   * a disabled an there is no need to explicitly call
+   * are disabled and there is no need to explicitly call
    * enter_critical_section().  However, in the SMP case,
    * enter_critical_section() does much more than just disable interrupts on
    * the local CPU; it also manages spinlocks to assure the stability of the
@@ -161,7 +161,7 @@ static inline void nxsched_process_wdtimer(void)
 {
   irqstate_t flags;
 
-  /* We are in an interrupt handler as, as a consequence, interrupts are
+  /* We are in an interrupt handler and, as a consequence, interrupts are
    * disabled.  But in the SMP case, interrupts MAY be disabled only on
    * the local CPU since most architectures do not permit disabling
    * interrupts on other CPUS.

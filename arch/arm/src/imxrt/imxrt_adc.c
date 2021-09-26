@@ -37,6 +37,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/analog/adc.h>
+#include <nuttx/analog/ioctl.h>
 
 #include "arm_internal.h"
 #include "arm_arch.h"
@@ -458,11 +459,30 @@ static void adc_rxint(FAR struct adc_dev_s *dev, bool enable)
 
 static int adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg)
 {
-  /* No ioctl commands supported */
-
   /* TODO: ANIOC_TRIGGER, for SW triggered conversion */
 
-  return -ENOTTY;
+  FAR struct imxrt_dev_s *priv = (FAR struct imxrt_dev_s *)dev->ad_priv;
+  int ret = -ENOTTY;
+
+  switch (cmd)
+    {
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->nchannels;
+        }
+        break;
+
+      default:
+        {
+          aerr("ERROR: Unknown cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************

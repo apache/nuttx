@@ -308,7 +308,6 @@ struct nfsv3_sattr
 struct nfs_statfs
 {
   uint32_t           obj_attributes_follow;
-  struct nfs_fattr   obj_attributes;
   nfsuint64          sf_tbytes;
   nfsuint64          sf_fbytes;
   nfsuint64          sf_abytes;

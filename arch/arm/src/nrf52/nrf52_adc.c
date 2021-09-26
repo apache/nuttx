@@ -879,16 +879,23 @@ static int nrf52_adc_ioctl(FAR struct adc_dev_s *dev, int cmd,
           /* Trigger first sample */
 
           nrf52_adc_putreg(priv, NRF52_SAADC_TASKS_SAMPLE_OFFSET, 1);
-
-          break;
         }
+        break;
+
+      case ANIOC_GET_NCHANNELS:
+        {
+          /* Return the number of configured channels */
+
+          ret = priv->chan_len;
+        }
+        break;
 
       default:
         {
           aerr("ERROR: Unknown cmd: %d\n", cmd);
           ret = -ENOTTY;
-          break;
         }
+        break;
     }
 
   return ret;

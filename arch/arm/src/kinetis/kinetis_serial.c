@@ -409,7 +409,7 @@ static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART0_RXDMA
 static char g_uart0rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -418,7 +418,7 @@ static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART1_RXDMA
 static char g_uart1rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -427,7 +427,7 @@ static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART2_RXDMA
 static char g_uart2rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -436,7 +436,7 @@ static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART3_RXDMA
 static char g_uart3rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -445,7 +445,7 @@ static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -454,7 +454,7 @@ static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART5_RXDMA
 static char g_uart5rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -1252,22 +1252,6 @@ static int up_interrupts(int irq, void *context, FAR void *arg)
           uart_xmitchars(dev);
           handled = true;
         }
-
-#if defined(SERIAL_HAVE_DMA) && !defined(CONFIG_KINETIS_UARTFIFOS)
-      /* Check if the receiver has detected IDLE. If so
-       * then flush any partail data in the SW rx fifo.
-       */
-
-      if ((s1 & UART_S1_IDLE) != 0)
-        {
-          up_serialin(priv, KINETIS_UART_D_OFFSET);
-          up_dma_rxcallback(priv->rxdma, dev , false, 0);
-
-          /* Exit ASAP */
-
-          handled = false;
-        }
-#endif
     }
 
   return OK;
@@ -1689,9 +1673,6 @@ static void up_rxint(struct uart_dev_s *dev, bool enable)
 
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
       priv->ie |= UART_C2_RIE;
-#if defined(SERIAL_HAVE_DMA) && !defined(CONFIG_KINETIS_UARTFIFOS)
-      priv->ie |= UART_C2_RIE | UART_C2_ILIE;
-#endif
       up_setuartint(priv);
 #endif
     }
@@ -2086,6 +2067,70 @@ unsigned int kinetis_uart_serialinit(unsigned int first)
 #endif
   return first;
 }
+
+/****************************************************************************
+ * Name: kinetis_serial_dma_poll
+ *
+ * Description:
+ *   Checks receive DMA buffers for received bytes that have not accumulated
+ *   to the point where the DMA half/full interrupt has triggered.
+ *
+ *   This function should be called from a timer or other periodic context.
+ *
+ ****************************************************************************/
+
+#ifdef SERIAL_HAVE_DMA
+void kinetis_serial_dma_poll(void)
+{
+    irqstate_t flags;
+
+    flags = enter_critical_section();
+
+#ifdef CONFIG_KINETIS_UART0_RXDMA
+  if (g_uart0priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart0priv.rxdma, (void *)&g_uart0port, false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_UART1_RXDMA
+  if (g_uart1priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart1priv.rxdma, (void *)&g_uart1port, false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_UART2_RXDMA
+  if (g_uart2priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart2priv.rxdma, (void *)&g_uart2port, false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_UART3_RXDMA
+  if (g_uart3priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart3priv.rxdma, (void *)&g_uart3port, false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_UART4_RXDMA
+  if (g_uart4priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart4priv.rxdma, (void *)&g_uart4port, false, 0);
+    }
+#endif
+
+#ifdef CONFIG_KINETIS_UART5_RXDMA
+  if (g_uart5priv.rxdma != NULL)
+    {
+      up_dma_rxcallback(g_uart5priv.rxdma, (void *)&g_uart5port, false, 0);
+    }
+#endif
+
+  leave_critical_section(flags);
+}
+#endif
 
 /****************************************************************************
  * Name: up_putc

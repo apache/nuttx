@@ -377,10 +377,18 @@
 
 #define BUTTON_USER_BIT    (1 << BUTTON_USER)
 
-#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP)
-#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP)
+/* TIM2 input ***************************************************************/
+
+#ifndef CONFIG_NUCLEO_F446RE_QETIMER_TIM2_IHM08M1_MAP
+#  define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_1 | GPIO_PULLUP) /* PA8 */
+#  define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_1 | GPIO_PULLUP) /* PB0 */
+#else
+#  define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_2 | GPIO_PULLUP) /* PA15 */
+#  define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP) /* PB3 */
+#endif
 
 /* TIM3 configuration *******************************************************/
+
 #define GPIO_TIM3_CH1OUT GPIO_TIM3_CH1OUT_1
 
 #ifdef CONFIG_BOARD_STM32_IHM08M1

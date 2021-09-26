@@ -64,7 +64,7 @@
 
 #if defined(CONFIG_STM32_STM32F30XX) || defined(CONFIG_STM32_STM32F33XX)
 #  define STM32_EXTI1_OFFSET     0x0000  /* Offset to EXTI1 registers */
-#  define STM32_EXTI2_OFFSET     0x0018  /* Offset to EXTI2 registers */
+#  define STM32_EXTI2_OFFSET     0x0020  /* Offset to EXTI2 registers */
 #endif
 
 #define STM32_EXTI_IMR_OFFSET    0x0000  /* Interrupt mask register */

@@ -200,9 +200,9 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   if (cmd == FIOC_FILEPATH)
     {
-     /* IN:  FAR char *(length >= PATH_MAX)
-      * OUT: The full file path
-      */
+      /* IN:  FAR char *(length >= PATH_MAX)
+       * OUT: The full file path
+       */
 
       FAR char *ptr = (FAR char *)((uintptr_t)arg);
       if (ptr == NULL)
@@ -217,7 +217,6 @@ static int binfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               return ret;
             }
 
-          strcat(ptr, "/");
           strcat(ptr, builtin_getname((int)((uintptr_t)filep->f_priv)));
         }
     }

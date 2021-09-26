@@ -103,3 +103,30 @@ define esp32_bt
         set $x_a1 = $next_a1
     end
 end
+
+# Usage:
+#
+#       (gdb) esp32_bt_pid <pid>
+
+define esp32_bt_pid
+    set $_pid = $arg0
+    set $_tcb = g_pidhash[$_pid].tcb
+    if ($_tcb->pid == $_pid)
+        set $_regs = $_tcb->xcp.regs
+        printf "PID %d NAME %s\n", $_pid, $_tcb.name
+        esp32_bt $_regs[0] $_regs[2] $_regs[3]
+    end
+end
+
+# Usage:
+#
+#       (gdb) esp32_bt_all
+
+define esp32_bt_all
+    set $_max_pid = g_npidhash
+    set $_i = 0
+    while ($_i < $_max_pid)
+        esp32_bt_pid $_i
+        set $_i = $_i + 1
+    end
+end

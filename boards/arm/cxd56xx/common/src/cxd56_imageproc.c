@@ -136,7 +136,7 @@
 
 /* Copy command (32 bytes) */
 
-struct __attribute__ ((aligned(16))) ge2d_copycmd_s
+struct aligned_data(16) ge2d_copycmd_s
 {
   uint32_t cmd;               /* 0x00 */
   uint16_t srch;              /* 0x04 */
@@ -150,7 +150,7 @@ struct __attribute__ ((aligned(16))) ge2d_copycmd_s
 
 /* Raster operation (ROP) command (48 bytes) */
 
-struct __attribute__ ((aligned(16))) ge2d_ropcmd_s
+struct aligned_data(16) ge2d_ropcmd_s
 {
   uint16_t cmd;               /* 0x00 */
   uint8_t rop;                /* 0x02 */
@@ -183,7 +183,7 @@ struct __attribute__ ((aligned(16))) ge2d_ropcmd_s
 
 /* Alpha blending (AB) command (32 bytes) */
 
-struct __attribute__ ((aligned(16))) ge2d_abcmd_s
+struct aligned_data(16) ge2d_abcmd_s
 {
   uint16_t cmd;               /* 0x00 */
   uint16_t mode;              /* 0x02 */
@@ -210,7 +210,7 @@ static sem_t g_geexc;
 static sem_t g_abexc;
 
 static struct file g_gfile;
-static char g_gcmdbuf[256] __attribute__ ((aligned(16)));
+static char g_gcmdbuf[256] aligned_data(16);
 
 /****************************************************************************
  * Private Functions

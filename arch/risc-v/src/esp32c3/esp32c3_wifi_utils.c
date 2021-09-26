@@ -158,8 +158,7 @@ int esp_wifi_start_scan(struct iwreq *iwr)
           config->ssid[req->essid_len] = '\0';
         }
 
-      if (iwr->u.data.flags & IW_SCAN_THIS_FREQ &&
-          req->num_channels > 0)
+      if (req->num_channels > 0)
         {
           /* Scan specific channels */
 
@@ -364,6 +363,7 @@ void esp_wifi_scan_event_parse(void)
     {
       priv->scan_status = ESP_SCAN_DONE;
       wlinfo("INFO: None AP is scanned\n");
+      nxsem_post(&priv->scan_signal);
       return;
     }
 
@@ -372,6 +372,7 @@ void esp_wifi_scan_event_parse(void)
     {
       priv->scan_status = ESP_SCAN_DONE;
       wlerr("ERROR: Failed to calloc buffer to print scan results");
+      nxsem_post(&priv->scan_signal);
       return;
     }
 
@@ -447,7 +448,7 @@ void esp_wifi_scan_event_parse(void)
                * in pointer field.
                */
 
-              iwe->u.essid.pointer = (FAR void *)sizeof(iwe->u.essid);
+              iwe->u.essid.pointer = (void *)sizeof(iwe->u.essid);
               memcpy(&iwe->u.essid + 1,
                     ap_list_buffer[bss_count].ssid, essid_len);
 

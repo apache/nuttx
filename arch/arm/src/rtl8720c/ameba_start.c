@@ -42,7 +42,7 @@ const hal_irq_api_t sys_irq_api =
 
 /* We need to get r10 set before we can allow instrumentation calls */
 
-void __start(void) __attribute__((no_instrument_function));
+void __start(void) noinstrument_function;
 #endif
 void __start(void)
 {

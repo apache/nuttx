@@ -40,7 +40,15 @@ endif # PM
 config ESP32C3_DEVKIT_RUN_IRAM
 	bool "Run from IRAM"
 	default n
+
+config ESP32C3_MERGE_BINS
+	bool "Merge raw binary files into a single file"
+	default n
 	---help---
+		Merge the raw binary files into a single file for flashing to the
+		device.
+		This is only useful when the path to binary files (e.g. bootloader)
+		is provided via the ESPTOOL_BINDIR variable.
 
 choice
   prompt "SPIFLASH File System"
@@ -85,5 +93,17 @@ config ESP32C3_SPIFLASH_TEST_ADDRESS
 	depends on ESP32C3_SPIFLASH_ENCRYPTION_TEST
 	---help---
 		SPI Flash encryption test read/write address.
+
+if LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
+
+config ESP32C3_LCD_RSTPIN
+	int "LCD reset pin"
+	default 9
+
+config ESP32C3_LCD_BLPIN
+	int "LCD backlight pin"
+	default 18
+
+endif # LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
 
 endif # ARCH_BOARD_ESP32C3_DEVKIT

@@ -65,7 +65,7 @@ static uint32_t g_tick_divisor;
  *
  ****************************************************************************/
 
-static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int esp32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t divisor;
   uint32_t compare;
@@ -135,5 +135,5 @@ void up_timer_initialize(void)
 
   /* Enable the timer 0 CPU interrupt. */
 
-  up_enable_irq(ESP32_CPUINT_TIMER0);
+  up_enable_irq(XTENSA_IRQ_TIMER0);
 }

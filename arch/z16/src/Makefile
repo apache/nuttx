@@ -19,7 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
--include chip/Make.defs
+include chip/Make.defs
 
 COMPILER = ${shell basename "$(CC)"}
 ARCHSRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
@@ -140,8 +140,6 @@ depend: .depend
 
 context::
 
-clean_context::
-
 clean:
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board clean )
@@ -159,7 +157,7 @@ endif
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) if exist board$(DELIM)Makefile ( $(MAKE) -C board distclean )
 else

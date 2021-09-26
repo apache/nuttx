@@ -49,7 +49,7 @@
  *
  ****************************************************************************/
 
-static inline uint32_t xtensa_compareset(FAR volatile uint32_t *addr,
+static inline uint32_t xtensa_compareset(volatile uint32_t *addr,
                                          uint32_t compare,
                                          uint32_t set)
 {
@@ -77,24 +77,24 @@ static inline uint32_t xtensa_compareset(FAR volatile uint32_t *addr,
  *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   lock - The address of spinlock object.
+ *   lock  - A reference to the spinlock object.
  *
  * Returned Value:
- *   The spinlock is always locked upon return.  The value of previous value
- *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   was previously locked (meaning that the test-and-set operation failed to
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock)
+ *   (meaning that we successfully obtained the lock).
  *
  ****************************************************************************/
 
-spinlock_t up_testset(volatile FAR spinlock_t *lock)
+spinlock_t up_testset(volatile spinlock_t *lock)
 {
   spinlock_t prev;
 
   /* Perform the 32-bit compare and set operation */
 
-  prev = xtensa_compareset((FAR volatile uint32_t *)lock,
+  prev = xtensa_compareset((volatile uint32_t *)lock,
                            SP_UNLOCKED, SP_LOCKED);
 
   /* xtensa_compareset() should return either SP_UNLOCKED if the spinlock

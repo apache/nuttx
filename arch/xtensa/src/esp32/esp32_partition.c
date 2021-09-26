@@ -362,7 +362,7 @@ static int ota_set_bootseq(struct mtd_dev_priv *dev, int num)
  *
  ****************************************************************************/
 
-static int esp32_part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int esp32_part_erase(struct mtd_dev_s *dev, off_t startblock,
                             size_t nblocks)
 {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
@@ -387,8 +387,8 @@ static int esp32_part_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t esp32_part_read(FAR struct mtd_dev_s *dev, off_t offset,
-                               size_t nbytes, FAR uint8_t *buffer)
+static ssize_t esp32_part_read(struct mtd_dev_s *dev, off_t offset,
+                               size_t nbytes, uint8_t *buffer)
 {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
@@ -412,8 +412,8 @@ static ssize_t esp32_part_read(FAR struct mtd_dev_s *dev, off_t offset,
  *
  ****************************************************************************/
 
-static ssize_t esp32_part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                                size_t nblocks, FAR uint8_t *buffer)
+static ssize_t esp32_part_bread(struct mtd_dev_s *dev, off_t startblock,
+                                size_t nblocks, uint8_t *buffer)
 {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
@@ -437,8 +437,8 @@ static ssize_t esp32_part_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t esp32_part_write(FAR struct mtd_dev_s *dev, off_t offset,
-                                size_t nbytes, FAR const uint8_t *buffer)
+static ssize_t esp32_part_write(struct mtd_dev_s *dev, off_t offset,
+                                size_t nbytes, const uint8_t *buffer)
 {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
@@ -463,8 +463,8 @@ static ssize_t esp32_part_write(FAR struct mtd_dev_s *dev, off_t offset,
  *
  ****************************************************************************/
 
-static ssize_t esp32_part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                                 size_t nblocks, FAR const uint8_t *buffer)
+static ssize_t esp32_part_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                                 size_t nblocks, const uint8_t *buffer)
 {
   struct mtd_dev_priv *mtd_priv = (struct mtd_dev_priv *)dev;
 
@@ -487,7 +487,7 @@ static ssize_t esp32_part_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static int esp32_part_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
                             unsigned long arg)
 {
   int ret;

@@ -397,8 +397,7 @@ void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq);
  *
  ****************************************************************************/
 
-int nxmq_alloc_msgq(FAR struct mq_attr *attr,
-                    FAR struct mqueue_inode_s **msgq);
+FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr);
 
 /****************************************************************************
  * Name: nxmq_pollnotify

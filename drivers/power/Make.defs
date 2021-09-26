@@ -109,6 +109,12 @@ ifeq ($(CONFIG_I2C_BQ25618),y)
 CSRCS += bq25618.c
 endif
 
+# Add the axp202 I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_AXP202),y)
+CSRCS += axp202.c
+endif
+
 endif
 
 # Include power support in the build

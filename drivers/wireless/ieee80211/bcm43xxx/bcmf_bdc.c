@@ -48,30 +48,30 @@
  * Private Types
  ****************************************************************************/
 
-struct __attribute__((packed)) bcmf_bdc_header
+begin_packed_struct struct bcmf_bdc_header
 {
   uint8_t flags;       /* bdc frame flags */
   uint8_t priority;    /* bdc frame priority */
   uint8_t flags2;      /* bdc frame additional flags */
   uint8_t data_offset; /* Offset from end of header to payload data, in 4-bytes count */
-};
+} end_packed_struct;
 
-struct __attribute__((packed)) bcmf_eth_header
+begin_packed_struct struct bcmf_eth_header
 {
   uint16_t type;     /* Vendor specific type */
   uint16_t len;      /* Event data length */
   uint8_t  version;  /* Protocol version */
   uint8_t  oui[3];   /* Organizationally unique identifier */
   uint16_t usr_type; /* User specific type */
-};
+} end_packed_struct;
 
-struct __attribute__((packed)) bcmf_event_msg
+begin_packed_struct struct bcmf_event_msg
 {
   struct ether_header    eth;
   struct bcmf_eth_header bcm_eth;
   struct bcmf_event_s    event;
   uint8_t                data[0];
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Private Data

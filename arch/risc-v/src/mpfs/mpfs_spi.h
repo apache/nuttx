@@ -73,7 +73,7 @@ struct spi_dev_s *mpfs_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-int mpfs_spibus_uninitialize(FAR struct spi_dev_s *dev);
+int mpfs_spibus_uninitialize(struct spi_dev_s *dev);
 
 #ifdef __cplusplus
 }

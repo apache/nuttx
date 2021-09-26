@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+CONFIG_ALLOW_GPL_COMPONENTS=y
 CONFIG_ARCH="arm"
 CONFIG_ARCH_BOARD="sama5d3x-ek"
 CONFIG_ARCH_BOARD_SAMA5D3X_EK=y

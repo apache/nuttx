@@ -5,10 +5,18 @@
 
 if ARCH_BOARD_NUCLEO_F446RE
 
+if SENSORS_QENCODER
+
 config NUCLEO_F446RE_QETIMER
 	int "Timer to use with QE encoder"
 	default 3
-	depends on SENSORS_QENCODER
+
+config NUCLEO_F446RE_QETIMER_TIM2_IHM08M1_MAP
+	bool "Use TIM2 QE pins to match IHM08M1 board pins"
+	default n
+	depends on STM32_TIM2_QE
+
+endif # SENSORS_QENCODER
 
 config NUCLEO_F446RE_AJOY_MINBUTTONS
 	bool "Minimal Joystick Buttons"

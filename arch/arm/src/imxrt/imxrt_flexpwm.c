@@ -90,7 +90,7 @@ struct imxrt_flexpwm_s
   FAR struct imxrt_flexpwm_module_s *modules;
   uint8_t modules_num;            /* Number of modules */
   uint32_t frequency;             /* PWM frequency */
-  uint32_t base;                  /* Base addres of peripheral register */
+  uint32_t base;                  /* Base address of peripheral register */
 };
 
 /* PWM driver methods */
@@ -616,10 +616,6 @@ static int pwm_change_freq(FAR struct pwm_lowerhalf_s *dev,
   putreg16(regval, priv->base + IMXRT_FLEXPWM_SM0VAL5_OFFSET
                               + MODULE_OFFSET * shift);
 
-  regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-  regval |= MCTRL_LDOK(1 << shift);
-  putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-
   return OK;
 }
 
@@ -682,10 +678,6 @@ static int pwm_set_output(FAR struct pwm_lowerhalf_s *dev, uint8_t channel,
       regval |= OUTEN_PWMB_EN(1 << shift);
       putreg16(regval, priv->base + IMXRT_FLEXPWM_OUTEN_OFFSET);
     }
-
-  regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
-  regval |= MCTRL_LDOK(1 << shift);
-  putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
 
   return OK;
 }
@@ -887,6 +879,7 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 {
   FAR struct imxrt_flexpwm_s *priv = (FAR struct imxrt_flexpwm_s *)dev;
   int ret = OK;
+  uint8_t ldok_map = 0;
 
   /* Change frequency only if it is needed */
 
@@ -894,9 +887,23 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
     {
       for (int i = 0; i < PWM_NCHANNELS; i++)
         {
+#ifdef CONFIG_PWM_MULTICHAN
+          /* Break the loop if all following channels are not configured */
+
+          if (info->channels[i].channel == -1)
+            {
+              break;
+            }
+
           /* Configure the module freq only if is set to be used */
 
+          if (info->channels[i].channel != 0)
+            {
+              ret = pwm_change_freq(dev, info, i);
+            }
+#else
           ret = pwm_change_freq(dev, info, i);
+#endif
         }
 
       /* Save current frequency */
@@ -910,16 +917,40 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 #ifdef CONFIG_PWM_MULTICHAN
   for (int i = 0; ret == OK && i < PWM_NCHANNELS; i++)
     {
+      /* Break the loop if all following channels are not configured */
+
+      if (info->channels[i].channel == -1)
+        {
+          break;
+        }
+
       /* Enable PWM output for each channel */
 
-      ret = pwm_set_output(dev, info->channels[i].channel,
-                                info->channels[i].duty);
+      if (info->channels[i].channel != 0)
+        {
+          ret = pwm_set_output(dev, info->channels[i].channel,
+                                    info->channels[i].duty);
+
+          /* Remember the channel number in bitmap */
+
+          ldok_map |= 1 << (info->channels[i].channel - 1);
+        }
     }
 #else
   /* Enable PWM output just for first channel */
 
   ret = pwm_set_output(dev, priv->modules[0].module, info->duty);
+
+  /* Remember the channel number in bitmap */
+
+  ldok_map = 1 << (priv->modules[0].module - 1);
 #endif /* CONFIG_PWM_MULTICHAN */
+
+  /* Set Load Okay bits */
+
+  uint16_t regval = getreg16(priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
+  regval |= MCTRL_LDOK(ldok_map);
+  putreg16(regval, priv->base + IMXRT_FLEXPWM_MCTRL_OFFSET);
 
   return ret;
 }

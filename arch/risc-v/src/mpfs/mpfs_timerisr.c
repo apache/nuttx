@@ -87,7 +87,7 @@ static void mpfs_reload_mtimecmp(void)
  * Name:  mpfs_timerisr
  ****************************************************************************/
 
-static int mpfs_timerisr(int irq, void *context, FAR void *arg)
+static int mpfs_timerisr(int irq, void *context, void *arg)
 {
   mpfs_reload_mtimecmp();
 

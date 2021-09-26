@@ -666,6 +666,12 @@ errout:
 
       memcpy(&msg->addr, &pkt_dat->addr, sizeof(pkt_dat->addr));
 
+      /* Set the address family
+       * NOTE: gs2200m only supports IPv4
+       */
+
+      msg->addr.sin_family = AF_INET;
+
       /* In udp case, treat the packet separately */
 
       ret = false;
@@ -866,18 +872,18 @@ retry:
 
   _write_data(dev, hdr, sizeof(hdr));
 
-  /* NOTE: busy wait 30us
-   * workaround to avoid an invalid frame response
-   */
-
-  up_udelay(30);
-
   /* Wait for data ready */
 
   while (!dev->lower->dready(NULL))
     {
       /* TODO: timeout */
     }
+
+  /* NOTE: busy wait 50us
+   * workaround to avoid an invalid frame response
+   */
+
+  up_udelay(50);
 
   /* Read frame response */
 
