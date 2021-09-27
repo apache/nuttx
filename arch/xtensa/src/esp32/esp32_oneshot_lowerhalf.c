@@ -56,12 +56,12 @@ struct esp32_oneshot_lowerhalf_s
    * That means, opaque pointers.
    */
 
-  struct oneshot_lowerhalf_s        lh;  /* Lower half instance */
-  struct esp32_oneshot_s       oneshot;  /* ESP32-specific oneshot state */
-  oneshot_callback_t          callback;  /* Upper half Interrupt callback */
-  void                        *arg;      /* Argument passed to handler */
-  uint16_t                  resolution;
-  spinlock_t                      lock;  /* Device specific lock */
+  struct oneshot_lowerhalf_s  lh;         /* Lower half instance */
+  struct esp32_oneshot_s      oneshot;    /* ESP32-specific oneshot state */
+  oneshot_callback_t          callback;   /* Upper half Interrupt callback */
+  void                        *arg;       /* Argument passed to handler */
+  uint16_t                    resolution; /* Timer's resulation in uS */
+  spinlock_t                  lock;       /* Device specific lock */
 };
 
 /****************************************************************************
