@@ -69,10 +69,6 @@ int nxsem_trywait(FAR sem_t *sem)
   irqstate_t flags;
   int ret;
 
-  /* This API should not be called from interrupt handlers */
-
-  DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-
   if (sem != NULL)
     {
       /* The following operations must be performed with interrupts disabled
