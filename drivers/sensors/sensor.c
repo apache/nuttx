@@ -428,6 +428,18 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case SNIOC_SELFTEST:
+        {
+          if (lower->ops->selftest == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = lower->ops->selftest(lower, arg);
+        }
+        break;
+
       case SNIOC_GET_NEVENTBUF:
         {
           *val = lower->buffer_number + lower->batch_number;
