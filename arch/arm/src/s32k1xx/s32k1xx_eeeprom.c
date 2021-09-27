@@ -66,6 +66,9 @@ struct eeed_struct_s
  * Private Function Prototypes
  ****************************************************************************/
 
+static inline void wait_ftfc_ready(void);
+static uint32_t execute_ftfc_command(void);
+
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     eeed_open(FAR struct inode *inode);
 static int     eeed_close(FAR struct inode *inode);
@@ -209,7 +212,7 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
@@ -246,7 +249,7 @@ static ssize_t eeed_write(FAR struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
