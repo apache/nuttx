@@ -49,6 +49,7 @@
 #define AW88266A_CHIPID             (0x2013)
 #define AW88266A_SOFT_RESET         (0x55aa)
 #define MAX_RETRIES                 3
+#define AW88266A_SYSST_CHECK_MAX    10
 #define ARRAY_SIZE(array)           sizeof(array) / sizeof(array[0])
 
 /****************************************************************************
@@ -216,72 +217,126 @@ static int aw88266a_release(FAR struct audio_lowerhalf_s *dev);
 
 static const unsigned char g_aw88266a_reg_access[AW88266A_REG_MAX] =
 {
-  [AW88266A_ID_REG]       = (REG_RD_ACCESS),
-  [AW88266A_SYSST_REG]    = (REG_RD_ACCESS),
-  [AW88266A_SYSINT_REG]   = (REG_RD_ACCESS),
-  [AW88266A_SYSINTM_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_SYSCTRL_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_SYSCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_I2SCTRL_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_I2SCFG1_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_I2SCFG2_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG3_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG4_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG5_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG6_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCCFG7_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_HAGCST_REG]   = (REG_RD_ACCESS),
-  [AW88266A_PRODID_REG]   = (REG_RD_ACCESS),
-  [AW88266A_VBAT_REG]     = (REG_RD_ACCESS),
-  [AW88266A_TEMP_REG]     = (REG_RD_ACCESS),
-  [AW88266A_PVDD_REG]     = (REG_RD_ACCESS),
-  [AW88266A_DBGCTRL_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_I2SINT_REG]   = (REG_RD_ACCESS),
-  [AW88266A_I2SCAPCNT_REG]  = (REG_RD_ACCESS),
-  [AW88266A_CRCIN_REG]    = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_CRCOUT_REG]   = (REG_RD_ACCESS),
-  [AW88266A_VSNCTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_ISNCTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_ISNCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_VTMCTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_VTMCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_VTMCTRL3_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_ISNDAT_REG]   = (REG_RD_ACCESS),
-  [AW88266A_VSNDAT_REG]   = (REG_RD_ACCESS),
-  [AW88266A_PWMCTRL_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_PWMCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTCTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTCTRL3_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTDBG1_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTDBG2_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_BSTDBG3_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_PLLCTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_PLLCTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_PLLCTRL3_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_CDACTRL1_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_CDACTRL2_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_SADCCTRL_REG] = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_TESTCTRL1_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_TESTCTRL2_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFCTRL1_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFCTRL2_REG]  = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFWH_REG]     = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFWM2_REG]    = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFWM1_REG]    = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFWL_REG]     = (REG_RD_ACCESS | REG_WR_ACCESS),
-  [AW88266A_EFRH_REG]     = (REG_RD_ACCESS),
-  [AW88266A_EFRM2_REG]    = (REG_RD_ACCESS),
-  [AW88266A_EFRM1_REG]    = (REG_RD_ACCESS),
-  [AW88266A_EFRL_REG]     = (REG_RD_ACCESS),
-  [AW88266A_TESTDET_REG]  = (REG_RD_ACCESS),
+  [AW88266A_ID_REG]           = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_SYSST_REG]        = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_SYSINT_REG]       = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_SYSINTM_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_SYSCTRL_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_SYSCTRL2_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_I2SCTRL1_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_I2SCTRL2_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG1_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG2_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG3_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG4_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG5_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG6_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACCFG7_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_PWMCTRL_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_I2SCFG1_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DBGCTRL_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DACST_REG]        = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_VBAT_REG]         = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_TEMP_REG]         = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_PVDD_REG]         = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_ISNDAT_REG]       = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_VSNDAT_REG]       = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_I2SINT_REG]       = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_I2SCAPCNT_REG]    = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_ANASTA1_REG]      = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_ANASTA2_REG]      = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_ANASTA3_REG]      = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_TESTDET_REG]      = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_TESTIN_REG]       = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_TESTOUT_REG]      = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_VSNTM1_REG]       = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_VSNTM2_REG]       = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_ISNCTRL1_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_PLLCTRL1_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_PLLCTRL2_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_PLLCTRL3_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_CDACTRL1_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_CDACTRL2_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_SADCCTRL1_REG]    = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL1_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL2_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL3_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL4_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL5_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_BSTCTRL6_REG]     = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG1_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG2_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG3_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG4_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG5_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG6_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG7_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_DSMCFG8_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_TESTCTRL1_REG]    = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_TESTCTRL2_REG]    = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFCTRL1_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFCTRL2_REG]      = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFWH_REG]         = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFWM2_REG]        = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFWM1_REG]        = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFWL_REG]         = (AW88266A_REG_RD_ACCESS |
+                                 AW88266A_REG_WR_ACCESS),
+  [AW88266A_EFRH_REG]         = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_EFRM2_REG]        = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_EFRM1_REG]        = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_EFRL_REG]         = (AW88266A_REG_RD_ACCESS),
+  [AW88266A_TM_REG]           = (AW88266A_REG_NONE_ACCESS),
 };
 
 static const aw88266a_reg_cfg_t g_aw88266a_spk_cfg[] =
 {
-  {0x03, 0xfff},
+  {0x03, 0xffff},
   {0x04, 0xb240},
   {0x05, 0x6007},
   {0x06, 0x84e8},
@@ -400,7 +455,7 @@ static void aw88266a_run_pwd(FAR struct aw88266a_dev_s *priv,
     {
       aw88266a_write_reg_bit(priv, AW88266A_SYSCTRL_REG,
                              AW88266A_PWDN_MASK,
-                             AW88266A_PWDN_NORMAL_WORKING);
+                             AW88266A_PWDN_WORKING_VALUE);
     }
 }
 
@@ -430,10 +485,10 @@ static void aw88266a_set_channel(FAR struct aw88266a_dev_s *priv,
     }
   else
     {
-      reg_value = AW88266A_CHSEL_MONO_LR2_VALUE;
+      reg_value = AW88266A_CHSEL_MONO_VALUE;
     }
 
-  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL_REG,
+  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL1_REG,
                          AW88266A_CHSEL_MASK, reg_value);
 }
 
@@ -449,79 +504,67 @@ static void aw88266a_set_rate(FAR struct aw88266a_dev_s *priv,
                               uint16_t rate)
 {
   uint16_t  reg_value;
-  uint32_t cco_mux_value;
 
   switch (rate)
   {
     case 8000:
       {
-        reg_value = AW88266A_I2SSR_8KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_8_KHZ_VALUE;
       }
       break;
 
     case 11000:
       {
-        reg_value = AW88266A_I2SSR_11P025KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_EXC_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_11_KHZ_VALUE;
       }
       break;
 
     case 16000:
       {
-        reg_value = AW88266A_I2SSR_16KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_16_KHZ_VALUE;
       }
       break;
 
     case 22000:
       {
-        reg_value = AW88266A_I2SSR_22P05KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_EXC_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_22_KHZ_VALUE;
       }
       break;
 
     case 24000:
       {
-        reg_value = AW88266A_I2SSR_24KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_EXC_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_24_KHZ_VALUE;
       }
       break;
 
     case 32000:
       {
-        reg_value = AW88266A_I2SSR_32KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_32_KHZ_VALUE;
       }
       break;
 
     case 44000:
       {
-        reg_value = AW88266A_I2SSR_44P1KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_EXC_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_44_KHZ_VALUE;
       }
       break;
 
     case 48000:
       {
-        reg_value = AW88266A_I2SSR_48KHZ_VALUE;
-        cco_mux_value = AW88266A_I2S_CCO_MUX_EXC_8_16_32KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_48_KHZ_VALUE;
       }
       break;
 
     default:
       {
-        reg_value = AW88266A_I2SSR_48KHZ_VALUE;
+        reg_value = AW88266A_I2SSR_48_KHZ_VALUE;
       }
       break;
   }
 
-  aw88266a_write_reg_bit(priv, AW88266A_PLLCTRL1_REG,
-                         AW88266A_I2S_CCO_MUX_MASK, cco_mux_value);
-
   /* set rate */
 
-  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL_REG,
+  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL1_REG,
                          AW88266A_I2SSR_MASK, reg_value);
 }
 
@@ -567,7 +610,7 @@ static void aw88266a_set_width(FAR struct aw88266a_dev_s *priv,
 
   /* set width */
 
-  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL_REG,
+  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL1_REG,
                          AW88266A_I2SFS_MASK, reg_value);
 }
 
@@ -580,25 +623,25 @@ static void aw88266a_set_width(FAR struct aw88266a_dev_s *priv,
  ****************************************************************************/
 
 static void aw88266a_set_blck(FAR struct aw88266a_dev_s *priv,
-                              uint32_t bclk)
+                              uint8_t bclk_factor)
 {
   uint16_t  reg_value;
 
-  switch (bclk)
+  switch (bclk_factor)
   {
-    case 512000:
+    case 32:
       {
         reg_value = AW88266A_I2SBCK_32FS_VALUE;
       }
       break;
 
-    case 768000:
+    case 48:
       {
         reg_value = AW88266A_I2SBCK_48FS_VALUE;
       }
       break;
 
-    case 1024000:
+    case 64:
       {
         reg_value = AW88266A_I2SBCK_64FS_VALUE;
       }
@@ -613,7 +656,7 @@ static void aw88266a_set_blck(FAR struct aw88266a_dev_s *priv,
 
   /* set fs */
 
-  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL_REG,
+  aw88266a_write_reg_bit(priv, AW88266A_I2SCTRL1_REG,
                          AW88266A_I2SBCK_MASK, reg_value);
 }
 
@@ -669,10 +712,69 @@ static void aw88266a_dump_register(FAR struct aw88266a_dev_s *priv)
 
   for (i = 0; i < AW88266A_REG_MAX; i++)
     {
-      if (g_aw88266a_reg_access[i] & REG_RD_ACCESS)
+      if (g_aw88266a_reg_access[i] & AW88266A_REG_RD_ACCESS)
         {
           reg_val = aw88266a_read_reg(priv, i);
         }
+    }
+}
+
+/****************************************************************************
+ * Name: aw88266a_pll_check
+ *
+ * Description:
+ *   check aw88266a pll clock
+ *
+ ****************************************************************************/
+
+static int aw88266a_pll_check(FAR struct aw88266a_dev_s *priv)
+{
+  int ret;
+  uint8_t i;
+  uint16_t reg_val;
+
+  for (i = 0; i < AW88266A_SYSST_CHECK_MAX; i++)
+    {
+      reg_val = aw88266a_read_reg(priv, AW88266A_SYSST_REG);
+      if (((reg_val & (~AW88266A_SYSST_CHECK_MASK)) &
+            AW88266A_SYSST_CHECK) == AW88266A_SYSST_CHECK)
+        {
+          ret = OK;
+          break;
+        }
+      else
+        {
+          auderr("ERROR: check pll fail:cnt=%d reg_val=0x%04x\n\n",
+                 i, reg_val);
+          ret = ERROR;
+          up_mdelay(2);
+        }
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: aw88266a_run_amp
+ *
+ * Description:
+ *   enable/disable aw88266a amp running status
+ *
+ ****************************************************************************/
+
+static void aw88266a_run_amp(FAR struct aw88266a_dev_s *priv, bool status)
+{
+  if (status)
+    {
+      aw88266a_write_reg_bit(priv, AW88266A_SYSCTRL_REG,
+                             AW88266A_AMPPD_MASK,
+                             AW88266A_AMPPD_WORKING_VALUE);
+    }
+  else
+    {
+      aw88266a_write_reg_bit(priv, AW88266A_SYSCTRL_REG,
+                             AW88266A_AMPPD_MASK,
+                             AW88266A_AMPPD_POWER_DOWN_VALUE);
     }
 }
 
@@ -697,8 +799,8 @@ static int aw88266a_set_gain(FAR struct aw88266a_dev_s *priv, int gain)
 
   /* cal real gain */
 
-  gain = (((gain / AW88266A_VOL_6DB_STEP) << 6)
-          + (gain % AW88266A_VOL_6DB_STEP));
+  gain = (((gain / AW88266A_VOL_STEP_DB) << 6)
+          + (gain % AW88266A_VOL_STEP_DB));
 
   /* get reg_val form real gain */
 
@@ -727,7 +829,7 @@ int aw88266a_get_gain(FAR struct aw88266a_dev_s *priv, FAR int *gain)
   reg_val = (reg_val & (~0xfc00));
 
   *gain = AW88266A_GAIN_MAX -
-          ((reg_val >> 6) * AW88266A_VOL_6DB_STEP + (reg_val & 0x3f));
+          ((reg_val >> 6) * AW88266A_VOL_STEP_DB + (reg_val & 0x3f));
 
   return OK;
 }
@@ -1033,9 +1135,7 @@ static int aw88266a_configure(FAR struct audio_lowerhalf_s *dev,
           aw88266a_set_channel(priv, priv->nchannels);
           aw88266a_set_rate(priv, priv->samprate);
           aw88266a_set_width(priv, priv->bpsamp);
-          aw88266a_set_blck(priv, priv->bclk);
-
-          aw88266a_set_volume(priv, 100);
+          aw88266a_set_blck(priv, priv->lower->bclk_factor);
         }
         break;
 
@@ -1063,6 +1163,7 @@ static int aw88266a_shutdown(FAR struct audio_lowerhalf_s *dev)
   FAR struct aw88266a_dev_s *priv = (FAR struct aw88266a_dev_s *)dev;
 
   aw88266a_run_mute(priv, true);
+  aw88266a_run_amp(priv, false);
   aw88266a_run_pwd(priv, true);
 
   audinfo("shutdown OK\n");
@@ -1085,6 +1186,20 @@ aw88266a_start(FAR struct audio_lowerhalf_s *dev,
 static int aw88266a_start(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
+  FAR struct aw88266a_dev_s *priv = (FAR struct aw88266a_dev_s *)dev;
+
+  aw88266a_run_pwd(priv, false);
+
+  if (aw88266a_pll_check(priv) < 0)
+    {
+      auderr("ERROR: aw88266a pll check failed\n");
+    }
+
+  aw88266a_run_amp(priv, true);
+  aw88266a_run_mute(priv, false);
+  aw88266a_set_volume(priv, 100);
+
+  audinfo("Return OK\n");
   return OK;
 }
 
@@ -1208,10 +1323,6 @@ aw88266a_reserve(FAR struct audio_lowerhalf_s *dev, FAR void **session)
 static int aw88266a_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
 {
-  FAR struct aw88266a_dev_s *priv = (FAR struct aw88266a_dev_s *)dev;
-
-  aw88266a_run_pwd(priv, false);
-  aw88266a_run_mute(priv, false);
   audinfo("Reserve OK\n");
 
   return OK;
@@ -1275,6 +1386,10 @@ static void aw88266a_write_reg(FAR struct aw88266a_dev_s *priv,
       if (ret < 0)
         {
           auderr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+        }
+      else
+        {
+          break;
         }
 
       audinfo("retries=%d regaddr=%02x\n", retries, regaddr);
