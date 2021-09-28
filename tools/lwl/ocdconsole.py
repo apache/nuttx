@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # tools/lwl/ocdconsole.py
 #
-#   Copyright (C) 2019 Dave Marples. All rights reserved.
+#   Copyright (C) 2019 Greg Nutt. All rights reserved.
 #   Author: Dave Marples <dave@marples.net>
+#           Copyright donated to NuttX project.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
