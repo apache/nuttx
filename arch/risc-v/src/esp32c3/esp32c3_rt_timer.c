@@ -169,6 +169,7 @@ static void start_rt_timer(struct rt_timer_s *timer,
         {
           /* Reset the hardware timer alarm */
 
+          ESP32C3_TIM_SETALRM(priv->timer, false);
           ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(timer->alarm));
           ESP32C3_TIM_SETALRM(priv->timer, true);
         }
@@ -242,6 +243,7 @@ static void stop_rt_timer(struct rt_timer_s *timer)
                                         list);
               alarm = next_timer->alarm;
 
+              ESP32C3_TIM_SETALRM(priv->timer, false);
               ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(alarm));
               ESP32C3_TIM_SETALRM(priv->timer, true);
             }
@@ -463,6 +465,7 @@ static int rt_timer_isr(int irq, void *context, void *arg)
                                    struct rt_timer_s, list);
               alarm = timer->alarm;
 
+              ESP32C3_TIM_SETALRM(priv->timer, false);
               ESP32C3_TIM_SETALRVL(priv->timer, USEC_TO_CYCLES(alarm));
             }
         }
