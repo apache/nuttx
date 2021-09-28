@@ -170,13 +170,13 @@ static inline void wd_expiration(void)
  *
  ****************************************************************************/
 
-int wd_start(FAR struct wdog_s *wdog, int32_t delay,
+int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg)
 {
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
-  int32_t now;
+  sclock_t now;
   irqstate_t flags;
 
   /* Verify the wdog and setup parameters */
