@@ -209,8 +209,8 @@ bool nxsched_remove_readytorun(FAR struct tcb_s *rtcb)
 
       if (rtrtcb != NULL && rtrtcb->sched_priority >= nxttcb->sched_priority)
         {
-          /* The TCB at the head of the ready to run list has the higher
-           * priority.  Remove that task from the head of the g_readytorun
+          /* The TCB rtrtcb has the higher priority and it can be run on
+           * target CPU. Remove that task (rtrtcb) from the g_readytorun
            * list and add to the head of the g_assignedtasks[cpu] list.
            */
 
