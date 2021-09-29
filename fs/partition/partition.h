@@ -58,6 +58,12 @@ int parse_ptable_partition(FAR struct partition_state_s *state,
                            FAR void *arg);
 #endif
 
+#ifdef CONFIG_MBR_PARTITION
+int parse_mbr_partition(FAR struct partition_state_s *state,
+                        partition_handler_t handler,
+                        FAR void *arg);
+#endif
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 #endif /* __FS_PARTITION_PARTITION_H */
