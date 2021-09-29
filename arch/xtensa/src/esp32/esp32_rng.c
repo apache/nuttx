@@ -128,15 +128,6 @@ uint32_t IRAM_ATTR esp_random(void)
 
 static int esp32_rng_initialize(void)
 {
-  static bool first_flag = true;
-
-  if (false == first_flag)
-    {
-      return OK;
-    }
-
-  first_flag = false;
-
   _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
