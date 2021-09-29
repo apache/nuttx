@@ -78,8 +78,7 @@ struct bq25618_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_charger_operations_s *ops; /* Battery operations */
-  sem_t batsem;                                       /* Enforce mutually exclusive access */
+  struct battery_charger_dev_s dev; /* Battery charger device */
 
   /* Data fields specific to the lower half BQ25618 driver follow */
 
@@ -1412,8 +1411,7 @@ bq25618_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
     {
       /* Initialize the BQ25618 device structure */
 
-      nxsem_init(&priv->batsem, 0, 1);
-      priv->ops       = &g_bq25618ops;
+      priv->dev.ops   = &g_bq25618ops;
       priv->i2c       = i2c;
       priv->addr      = addr;
       priv->frequency = frequency;

@@ -60,8 +60,7 @@ struct cw2218_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_gauge_operations_s *ops;  /* Battery operations */
-  sem_t batsem;                                      /* Enforce mutually exclusive access */
+  struct battery_gauge_dev_s dev; /* Battery gauge device */
 
   /* Data fields specific to the lower half cw2218 driver follow */
 
@@ -1013,10 +1012,9 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
     {
       /* Initialize the cw2218 device structure */
 
-      nxsem_init(&priv->batsem, 0, 1);
-      priv->ops = &g_cw2218ops;
-      priv->i2c = i2c;
-      priv->addr  = addr;
+      priv->dev.ops   = &g_cw2218ops;
+      priv->i2c       = i2c;
+      priv->addr      = addr;
       priv->frequency = frequency;
     }
 
