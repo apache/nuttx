@@ -419,6 +419,7 @@ static inline void IRAM_ATTR
   DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
 #ifdef CONFIG_SMP
   DEBUGASSERT(other == 0 || other == 1);
+  up_cpu_pause(other);
 #endif
 
   spi_disable_cache(state->cpu, &state->val[state->cpu]);
@@ -454,6 +455,7 @@ static inline void IRAM_ATTR
   spi_enable_cache(state->cpu, state->val[state->cpu]);
 #ifdef CONFIG_SMP
   spi_enable_cache(other, state->val[other]);
+  up_cpu_resume(other);
 #endif
 
   leave_critical_section(state->flags);
