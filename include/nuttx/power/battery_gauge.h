@@ -61,7 +61,7 @@
  * lower half as summarized below:
  *
  * BATIOC_STATE - Return the current state of the battery (see
- *   enum battery_gauge_status_e).
+ *   enum battery_status_e).
  *   Input value:  A pointer to type int.
  * BATIOC_ONLINE - Return 1 if the battery is online; 0 if offline.
  *   Input value:  A pointer to type bool.
@@ -78,23 +78,12 @@
  * Public Types
  ****************************************************************************/
 
-/* Battery status */
-
-enum battery_gauge_status_e
-{
-  BATTERY_UNKNOWN = 0, /* Battery state is not known */
-  BATTERY_IDLE,        /* Not full, not charging, not discharging */
-  BATTERY_FULL,        /* Full, not discharging */
-  BATTERY_CHARGING,    /* Not full, charging */
-  BATTERY_DISCHARGING  /* Probably not full, discharging */
-};
-
 /* This structure defines the lower half battery interface */
 
 struct battery_gauge_dev_s;
 struct battery_gauge_operations_s
 {
-  /* Return the current battery state (see enum battery_gauge_status_e) */
+  /* Return the current battery state (see enum battery_status_e) */
 
   int (*state)(struct battery_gauge_dev_s *dev, int *status);
 
