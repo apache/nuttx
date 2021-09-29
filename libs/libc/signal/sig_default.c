@@ -71,7 +71,8 @@ static void sig_null_action(int signo);
 #endif
 
 #ifdef CONFIG_SIG_SIGKILL_ACTION
-static void sig_kill_action(int signo);
+static void sig_kill_action(int signo, FAR siginfo_t *siginfo,
+                            FAR void *context);
 #endif
 
 /* Helpers */
@@ -115,13 +116,13 @@ static const struct nxsig_defaction_s g_defactions[] =
   { SIGCONT, SIG_FLAG_NOCATCH, sig_null_action },
 #endif
 #ifdef CONFIG_SIG_SIGKILL_ACTION
-  { SIGINT,  0,                sig_kill_action },
-  { SIGKILL, SIG_FLAG_NOCATCH, sig_kill_action },
-  { SIGQUIT, 0,                sig_kill_action },
-  { SIGTERM, 0,                sig_kill_action },
+  { SIGINT,  0,                (_sa_handler_t)sig_kill_action },
+  { SIGKILL, SIG_FLAG_NOCATCH, (_sa_handler_t)sig_kill_action },
+  { SIGQUIT, 0,                (_sa_handler_t)sig_kill_action },
+  { SIGTERM, 0,                (_sa_handler_t)sig_kill_action },
 #endif
 #ifdef CONFIG_SIG_SIGPIPE_ACTION
-  { SIGPIPE, 0,                sig_kill_action }
+  { SIGPIPE, 0,                (_sa_handler_t)sig_kill_action }
 #endif
 };
 
@@ -182,7 +183,8 @@ static void sig_null_action(int signo)
  ****************************************************************************/
 
 #ifdef CONFIG_SIG_SIGKILL_ACTION
-static void sig_kill_action(int signo)
+static void sig_kill_action(int signo, FAR siginfo_t *siginfo,
+                            FAR void *context)
 {
   int flag = nxsig_abnormal_termination(signo);
   if (TCB_FLAG_TTYPE_PTHREAD == flag)
@@ -191,7 +193,7 @@ static void sig_kill_action(int signo)
     }
   else
     {
-      exit(EXIT_FAILURE);
+      exit(siginfo->si_value.sival_int);
     }
 }
 #endif

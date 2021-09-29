@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/sched/task_exit.c
+ * libs/libc/sched/task_atexit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,92 +24,44 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
 #include <stdlib.h>
+#include <assert.h>
 #include <unistd.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/sched.h>
-#include <nuttx/tls.h>
+
+#ifdef CONFIG_SCHED_ATEXIT
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
-
 /****************************************************************************
- * Name: nxtask_onexit
+ * Name: nxtask_atexit_proxy
  *
  * Description:
- *   Handle SIGEXIT (Call atexit/on_exit callbacks on exit).
+ *    A wrapper function to call atexit callback in onexit.
+ *
+ * Input Parameters:
+ *   exitcode - The exit status of task
+ *   arg      - The data pointer from user space
  *
  ****************************************************************************/
 
-static void nxtask_onexit(FAR struct task_info_s *info, int status)
+static void nxtask_atexit_proxy(int exitcode, FAR void *arg)
 {
-  int index;
-
-  DEBUGASSERT(info);
-
-  /* Call each on_exit function in reverse order of registration.
-       * on_exit() functions are registered from lower to higher array
-       * indices; they must be called in the reverse order of registration
-       * when the task group exits, i.e., from higher to lower indices.
-       */
-
-  for (index = CONFIG_SCHED_EXIT_MAX - 1; index >= 0; index--)
-    {
-      if (info->ta_exit[index].func.on)
-        {
-          onexitfunc_t func;
-          FAR void *arg;
-
-          /* Nullify the on_exit function to prevent its reuse. */
-
-          func = info->ta_exit[index].func.on;
-          arg = info->ta_exit[index].arg;
-
-          info->ta_exit[index].func.on = NULL;
-          info->ta_exit[index].arg = NULL;
-
-          /* Call the on_exit function */
-
-          (*func)(status, arg);
-        }
-    }
+  (*(atexitfunc_t)arg)();
 }
-
-#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: exit
- *
- * Description:
- *   The exit() function causes normal process termination and the value of
- *   status & 0377 to be returned to the parent.
- *
- *   All open streams are flushed and closed.
- *
- ****************************************************************************/
-
-void exit(int status)
+int atexit(void (*func)(void))
 {
-#if defined(CONFIG_SCHED_ATEXIT) || defined(CONFIG_SCHED_ONEXIT)
-  FAR struct task_info_s *info = task_get_info();
-
-  DEBUGASSERT(info);
-
-  if (info->ta_nmembers == 1)
-    {
-      nxtask_onexit(info, status);
-    }
-#endif
-
-  nx_exit(status);
+  return on_exit(nxtask_atexit_proxy, func);
 }
+
+#endif

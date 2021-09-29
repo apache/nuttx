@@ -38,6 +38,7 @@
 #include <nuttx/tls.h>
 
 #include "sched/sched.h"
+#include "signal/signal.h"
 #include "task/task.h"
 #include "pthread/pthread.h"
 
@@ -98,7 +99,7 @@ void nx_pthread_exit(FAR void *exit_value)
        * not really a pthread.  Exit by calling exit().
        */
 
-      exit(EXIT_FAILURE);
+      nx_exit(EXIT_FAILURE);
     }
 
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE

@@ -48,6 +48,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
+#include <nuttx/tls.h>
 #include <nuttx/arch.h>
 #include <nuttx/wireless/wireless.h>
 
@@ -1257,7 +1258,7 @@ static void *esp_thread_semphr_get(void)
 
   for (i = 0; i < CONFIG_SCHED_EXIT_MAX; i++)
     {
-      if (group->tg_exit[i].func.on == esp_thread_semphr_free)
+      if (group->tg_info->ta_exit[i].func.on == esp_thread_semphr_free)
         {
           break;
         }
@@ -1282,7 +1283,7 @@ static void *esp_thread_semphr_get(void)
     }
   else
     {
-      sem = group->tg_exit[i].arg;
+      sem = group->tg_info->ta_exit[i].arg;
     }
 
   return sem;

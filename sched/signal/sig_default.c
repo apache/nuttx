@@ -31,6 +31,7 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <assert.h>
+#include <sys/wait.h>
 
 #include <nuttx/sched.h>
 #include <nuttx/spinlock.h>

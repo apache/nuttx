@@ -24,10 +24,16 @@
 
 #include <nuttx/config.h>
 
-#include <sched.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
+#include <sched.h>
+#include <signal.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <nuttx/sched.h>
+#include <nuttx/signal.h>
+#include <nuttx/tls.h>
 
 #include <nuttx/signal.h>
 

@@ -153,7 +153,20 @@ bool enter_cancellation_point(void)
               else
 #endif
                 {
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+                  siginfo_t info;
+                  info.si_signo           = SIGKILL;
+                  info.si_code            = SI_USER;
+                  info.si_errno           = OK;
+                  info.si_value.sival_int = EXIT_FAILURE;
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+                  info.si_pid             = tcb->pid;
+                  info.si_status          = OK;
+#  endif
+                  nxsig_tcbdispatch(tcb, &info);
+#else
                   exit(EXIT_FAILURE);
+#endif
                 }
             }
         }
@@ -247,7 +260,20 @@ void leave_cancellation_point(void)
               else
 #endif
                 {
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+                  siginfo_t info;
+                  info.si_signo           = SIGKILL;
+                  info.si_code            = SI_USER;
+                  info.si_errno           = OK;
+                  info.si_value.sival_int = EXIT_FAILURE;
+#  ifdef CONFIG_SCHED_HAVE_PARENT
+                  info.si_pid             = tcb->pid;
+                  info.si_status          = OK;
+#  endif
+                  nxsig_tcbdispatch(tcb, &info);
+#else
                   exit(EXIT_FAILURE);
+#endif
                 }
             }
         }

@@ -39,6 +39,9 @@ ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CSRCS += sched_dumpstack.c sched_backtrace.c
 endif
 
+CSRCS += task_atexit.c
+CSRCS += task_onexit.c
+
 # Add the sched directory to the build
 
 DEPPATH += --dep-path sched
