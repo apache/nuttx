@@ -44,6 +44,14 @@ struct partition_state_s
   size_t erasesize;
 };
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int read_partition_block(FAR struct partition_state_s *state,
+                         FAR void *buffer, size_t startblock,
+                         size_t nblocks);
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 #endif /* __FS_PARTITION_PARTITION_H */
