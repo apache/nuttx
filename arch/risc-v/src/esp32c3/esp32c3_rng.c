@@ -222,7 +222,7 @@ void devurandom_register(void)
 #ifndef CONFIG_DEV_RANDOM
   esp32c3_rng_initialize();
 #endif
-  register_driver("dev/urandom", &g_rngops, 0444, NULL);
+  register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 
