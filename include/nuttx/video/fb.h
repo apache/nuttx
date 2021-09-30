@@ -283,7 +283,7 @@
 #define FBIOGET_FRAMERATE     _FBIOC(0x0015)  /* Get frame rate
                                                * Argument:            int* */
 
-#define FBIOPAN_DISPLAY       _FBIOC(0x0020)  /* Pan display
+#define FBIOPAN_DISPLAY       _FBIOC(0x0016)  /* Pan display
                                                * Argument: read-only struct
                                                *           fb_planeinfo_s* */
 
