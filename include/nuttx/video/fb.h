@@ -326,7 +326,7 @@ struct fb_planeinfo_s
   uint8_t    bpp;          /* Bits per pixel */
   uint32_t   xres_virtual; /* Virtual Horizontal resolution in pixel columns */
   uint32_t   yres_virtual; /* Virtual Vertical resolution in pixel rows */
-  uint32_t   xoffest;      /* X offset */
+  uint32_t   xoffset;      /* X offset */
   uint32_t   yoffset;      /* Y offset */
 };
 
