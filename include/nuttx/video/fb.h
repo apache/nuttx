@@ -283,7 +283,7 @@
 #define FBIOGET_FRAMERATE     _FBIOC(0x0015)  /* Get frame rate
                                                * Argument:            int* */
 
-#define FBIOPAN_DISPLAY       _FBIOC(0x0020)  /* Pan display
+#define FBIOPAN_DISPLAY       _FBIOC(0x0016)  /* Pan display
                                                * Argument: read-only struct
                                                *           fb_planeinfo_s* */
 
@@ -326,8 +326,8 @@ struct fb_planeinfo_s
   uint8_t    bpp;          /* Bits per pixel */
   uint32_t   xres_virtual; /* Virtual Horizontal resolution in pixel columns */
   uint32_t   yres_virtual; /* Virtual Vertical resolution in pixel rows */
-  uint32_t   xoffest;      /* X offset */
-  uint32_t   yoffset;      /* Y offset */
+  uint32_t   xoffset;      /* Offset from virtual to visible resolution */
+  uint32_t   yoffset;      /* Offset from virtual to visible resolution */
 };
 
 /* This structure describes an area. */
