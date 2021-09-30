@@ -30,6 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/tls.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
@@ -281,12 +282,15 @@ static inline void group_removemember(FAR struct task_group_s *group,
 {
   irqstate_t flags;
   int i;
+  FAR struct task_info_s *info;
 
-  DEBUGASSERT(group);
+  DEBUGASSERT(group && group->tg_info);
+
+  info = group->tg_info;
 
   /* Find the member in the array of members and remove it */
 
-  for (i = 0; i < group->tg_nmembers; i++)
+  for (i = 0; i < info->ta_nmembers; i++)
     {
       /* Does this member have the matching pid */
 
@@ -298,8 +302,8 @@ static inline void group_removemember(FAR struct task_group_s *group,
            */
 
           flags = enter_critical_section();
-          group->tg_members[i] = group->tg_members[group->tg_nmembers - 1];
-          group->tg_nmembers--;
+          group->tg_members[i] = group->tg_members[info->ta_nmembers - 1];
+          group->tg_info->ta_nmembers--;
           leave_critical_section(flags);
         }
     }
@@ -335,12 +339,15 @@ static inline void group_removemember(FAR struct task_group_s *group,
 void group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+  FAR struct task_info_s  *info;
 
-  DEBUGASSERT(tcb);
+  DEBUGASSERT(tcb && tcb->group && tcb->group->tg_info);
 
   /* Make sure that we have a group. */
 
   group = tcb->group;
+  info = group->tg_info;
+
   if (group)
     {
       /* Remove the member from group.  This function may be called
@@ -353,7 +360,7 @@ void group_leave(FAR struct tcb_s *tcb)
 
       /* Have all of the members left the group? */
 
-      if (group->tg_nmembers == 0)
+      if (info->ta_nmembers == 0)
         {
           /* Yes.. Release all of the resource held by the task group */
 
@@ -373,21 +380,24 @@ void group_leave(FAR struct tcb_s *tcb)
 void group_leave(FAR struct tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+  FAR struct task_info_s  *info;
 
-  DEBUGASSERT(tcb);
+  DEBUGASSERT(tcb && tcb->group && tcb->group->tg_info);
 
   /* Make sure that we have a group */
 
   group = tcb->group;
+  info = group->tg_info;
+
   if (group)
     {
       /* Yes, we have a group.. Is this the last member of the group? */
 
-      if (group->tg_nmembers > 1)
+      if (info->ta_nmembers > 1)
         {
           /* No.. just decrement the number of members in the group */
 
-          group->tg_nmembers--;
+          info->ta_nmembers--;
         }
 
       /* Yes.. that was the last member remaining in the group */

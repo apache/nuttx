@@ -32,6 +32,7 @@
 #include <errno.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 #include <nuttx/fs/fs.h>
 
 #include "sched/sched.h"
@@ -69,7 +70,7 @@ static inline void nxtask_atexit(FAR struct tcb_s *tcb)
    * the exiting task (or process).
    */
 
-  if (group && group->tg_nmembers == 1)
+  if (group && group->tg_info && group->tg_info->ta_nmembers == 1)
     {
       int index;
 
@@ -127,7 +128,7 @@ static inline void nxtask_onexit(FAR struct tcb_s *tcb, int status)
    * the exiting task (or process).
    */
 
-  if (group && group->tg_nmembers == 1)
+  if (group && group->tg_info->ta_nmembers == 1)
     {
       int index;
 
@@ -291,7 +292,7 @@ static inline void nxtask_sigchild(pid_t ppid, FAR struct tcb_s *ctcb,
    * should generate SIGCHLD.
    */
 
-  if (chgrp->tg_nmembers == 1)
+  if (chgrp->tg_info->ta_nmembers == 1)
     {
       /* Mark that all of the threads in the task group have exited */
 
@@ -477,7 +478,7 @@ static inline void nxtask_exitwakeup(FAR struct tcb_s *tcb, int status)
 
       /* Is this the last thread in the group? */
 
-      if (group->tg_nmembers == 1)
+      if (group->tg_info->ta_nmembers == 1)
         {
           /* Yes.. Wakeup any tasks waiting for this task to exit */
 
@@ -512,7 +513,7 @@ static inline void nxtask_flushstreams(FAR struct tcb_s *tcb)
 
   /* Have we already left the group?  Are we the last thread in the group? */
 
-  if (group && group->tg_nmembers == 1)
+  if (group && group->tg_info->ta_nmembers == 1)
     {
 #ifdef CONFIG_MM_KERNEL_HEAP
       lib_flushall(tcb->group->tg_streamlist);

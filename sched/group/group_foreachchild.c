@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 #include "group/group.h"
 
@@ -65,7 +66,7 @@ int group_foreachchild(FAR struct task_group_s *group,
 
   /* Visit the main thread last (if present) */
 
-  for (i = group->tg_nmembers - 1; i >= 0; i--)
+  for (i = group->tg_info->ta_nmembers - 1; i >= 0; i--)
     {
       ret = handler(group->tg_members[i], arg);
       if (ret != 0)

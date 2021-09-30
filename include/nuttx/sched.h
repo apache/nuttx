@@ -463,7 +463,6 @@ struct task_group_s
 
   /* Group membership *******************************************************/
 
-  uint8_t    tg_nmembers;           /* Number of members in the group           */
 #ifdef HAVE_GROUP_MEMBERS
   uint8_t    tg_mxmembers;          /* Number of members in allocation          */
   FAR pid_t *tg_members;            /* Members of the group                     */

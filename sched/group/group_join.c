@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/tls.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
@@ -72,13 +73,18 @@
 #ifdef HAVE_GROUP_MEMBERS
 static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
 {
+  FAR struct task_info_s *info;
   irqstate_t flags;
 
-  DEBUGASSERT(group && group->tg_nmembers < UINT8_MAX);
+  DEBUGASSERT(group);
+
+  info = group->tg_info;
+
+  DEBUGASSERT(info && info->ta_nmembers < UINT8_MAX);
 
   /* Will we need to extend the size of the array of groups? */
 
-  if (group->tg_nmembers >= group->tg_mxmembers)
+  if (info->ta_nmembers >= group->tg_mxmembers)
     {
       FAR pid_t *newmembers;
       unsigned int newmax;
@@ -111,11 +117,11 @@ static inline int group_addmember(FAR struct task_group_s *group, pid_t pid)
       leave_critical_section(flags);
     }
 
-  /* Assign this new pid to the group; group->tg_nmembers will be incremented
-   * by the caller.
+  /* Assign this new pid to the group; info->ta_nmembers will be
+   * incremented by the caller.
    */
 
-  group->tg_members[group->tg_nmembers] = pid;
+  group->tg_members[info->ta_nmembers] = pid;
   return OK;
 }
 #endif /* HAVE_GROUP_MEMBERS */
@@ -189,16 +195,20 @@ int group_bind(FAR struct pthread_tcb_s *tcb)
 int group_join(FAR struct pthread_tcb_s *tcb)
 {
   FAR struct task_group_s *group;
+  FAR struct task_info_s  *info;
 #ifdef HAVE_GROUP_MEMBERS
   int ret;
 #endif
 
-  DEBUGASSERT(tcb && tcb->cmn.group &&
-              tcb->cmn.group->tg_nmembers < UINT8_MAX);
+  DEBUGASSERT(tcb && tcb->cmn.group);
 
   /* Get the group from the TCB */
 
   group = tcb->cmn.group;
+
+  info = group->tg_info;
+
+  DEBUGASSERT(info && info->ta_nmembers < UINT8_MAX);
 
 #ifdef HAVE_GROUP_MEMBERS
   /* Add the member to the group */
@@ -210,7 +220,7 @@ int group_join(FAR struct pthread_tcb_s *tcb)
     }
 #endif
 
-  group->tg_nmembers++;
+  info->ta_nmembers++;
   return OK;
 }
 

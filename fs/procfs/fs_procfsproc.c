@@ -45,6 +45,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/environ.h>
 #include <nuttx/fs/fs.h>
@@ -1011,7 +1012,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
     }
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
-                               "Members:", group->tg_nmembers);
+                               "Members:", group->tg_info->ta_nmembers);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -1039,7 +1040,7 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
-  for (i = 0; i < group->tg_nmembers; i++)
+  for (i = 0; i < group->tg_info->ta_nmembers; i++)
     {
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, " %d",
                                    group->tg_members[i]);

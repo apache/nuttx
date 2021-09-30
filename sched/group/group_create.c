@@ -180,6 +180,10 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       goto errout_with_stream;
     }
 
+  /* Mark that there is one member in the group, the main task */
+
+  group->tg_info->ta_nmembers = 1;
+
   /* Initial user space semaphore */
 
   nxsem_init(&group->tg_info->ta_sem, 0, 1);
@@ -325,8 +329,5 @@ int group_initialize(FAR struct task_tcb_s *tcb)
 
   group->tg_pid = tcb->cmn.pid;
 
-  /* Mark that there is one member in the group, the main task */
-
-  group->tg_nmembers = 1;
   return OK;
 }
