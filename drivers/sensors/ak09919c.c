@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/wqueue.h>
@@ -37,69 +38,108 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define AK09919C_DEVID                  0x0E48       /* Device ID. */
+#define AK09919C_DEVID                  0x0E48     /* Device ID. */
 
 /* Mag resolution. */
 
-#define AK09919C_RESOLUTION             0.15f        /* uT/LSB. */
+#define AK09919C_RESOLUTION             0.15f      /* uT/LSB. */
 
 /* default ODR */
 
-#define AK09919C_DEFAULT_ODR            20000        /* default 50 ms */
+#define AK09919C_DEFAULT_ODR            20000      /* default 50 ms */
 
 /* Register address. */
 
-#define AK09919C_REG_WIA1               0x00         /* Company ID. */
-#define AK09919C_REG_WIA2               0x01         /* Device ID. */
-#define AK09919C_REG_ST1                0x10         /* Status 1 register. */
-#define AK09919C_REG_HXH                0x11         /* X-axis data high byte. */
-#define AK09919C_REG_HXL                0x12         /* X-axis data low byte. */
-#define AK09919C_REG_HYH                0x13         /* Y-axis data high byte. */
-#define AK09919C_REG_HYL                0x14         /* Y-axis data low byte. */
-#define AK09919C_REG_HZH                0x15         /* Z-axis data high byte. */
-#define AK09919C_REG_HZL                0x16         /* Z-axis data low byte. */
-#define AK09919C_REG_TMPS               0x17         /* Dummy. */
-#define AK09919C_REG_ST2                0x18         /* Status 2 register. */
-#define AK09919C_REG_CNTL1              0x30         /* Control settings 1 register. */
-#define AK09919C_REG_CNTL2              0x31         /* Control settings 2 register. */
-#define AK09919C_REG_CNTL3              0x32         /* Control settings 3 register. */
+#define AK09919C_REG_WIA1               0x00       /* Company ID. */
+#define AK09919C_REG_WIA2               0x01       /* Device ID. */
+#define AK09919C_REG_ST1                0x10       /* Status 1 register. */
+#define AK09919C_REG_HXH                0x11       /* X-axis data high byte. */
+#define AK09919C_REG_HXL                0x12       /* X-axis data low byte. */
+#define AK09919C_REG_HYH                0x13       /* Y-axis data high byte. */
+#define AK09919C_REG_HYL                0x14       /* Y-axis data low byte. */
+#define AK09919C_REG_HZH                0x15       /* Z-axis data high byte. */
+#define AK09919C_REG_HZL                0x16       /* Z-axis data low byte. */
+#define AK09919C_REG_TMPS               0x17       /* Dummy. */
+#define AK09919C_REG_ST2                0x18       /* Status 2 register. */
+#define AK09919C_REG_CNTL1              0x30       /* Control settings 1 register. */
+#define AK09919C_REG_CNTL2              0x31       /* Control settings 2 register. */
+#define AK09919C_REG_CNTL3              0x32       /* Control settings 3 register. */
 
 /* Noise Suppression Filter. */
 
-#define AK09919C_NSF_NONE               0x00         /* No noise suppression filter. */
-#define AK09919C_NSF_LOW                0x01         /* Low noise suppression filter. */
-#define AK09919C_NSF_MIDDLE             0x02         /* Middle noise suppression filter. */
-#define AK09919C_NSF_HIGH               0x03         /* High noise suppression filter. */
+#define AK09919C_NSF_NONE               0x00       /* No noise suppression filter. */
+#define AK09919C_NSF_LOW                0x01       /* Low noise suppression filter. */
+#define AK09919C_NSF_MIDDLE             0x02       /* Middle noise suppression filter. */
+#define AK09919C_NSF_HIGH               0x03       /* High noise suppression filter. */
 
 /* Power mode. */
 
-#define AK09919C_POWER_DOWN_MODE        0x00         /* Powerdown mode(default). */
-#define AK09919C_SINGLESHOT_MODE        0x01         /* Single-shot mode. */
-#define AK09919C_CONTINUOUS_MODE1       0x02         /* Continuous conversion mode 1. */
-#define AK09919C_CONTINUOUS_MODE2       0x04         /* Continuous conversion mode 2. */
-#define AK09919C_CONTINUOUS_MODE3       0x06         /* Continuous conversion mode 3. */
-#define AK09919C_CONTINUOUS_MODE4       0x08         /* Continuous conversion mode 4. */
-#define AK09919C_CONTINUOUS_MODE5       0x0E         /* Continuous conversion mode 5. */
-#define AK09919C_SELF_TEST_MODE         0x10         /* Self test mode. */
+#define AK09919C_POWER_DOWN_MODE        0x00       /* Powerdown mode(default). */
+#define AK09919C_SINGLESHOT_MODE        0x01       /* Single-shot mode. */
+#define AK09919C_CONTINUOUS_MODE1       0x02       /* Continuous conversion mode 1. */
+#define AK09919C_CONTINUOUS_MODE2       0x04       /* Continuous conversion mode 2. */
+#define AK09919C_CONTINUOUS_MODE3       0x06       /* Continuous conversion mode 3. */
+#define AK09919C_CONTINUOUS_MODE4       0x08       /* Continuous conversion mode 4. */
+#define AK09919C_CONTINUOUS_MODE5       0x0E       /* Continuous conversion mode 5. */
+#define AK09919C_SELF_TEST_MODE         0x10       /* Self test mode. */
+
+/* single mode register value threshold. */
+
+#define AK09919C_LOLIMIT_SNG_ST1        1          /* low limit of st1 in single mode. */
+#define AK09919C_HILIMIT_SNG_ST1        1          /* high limit of st1 in single mode. */
+#define AK09919C_LOLIMIT_SNG_HX         -32751     /* low limit of x-axis in single mode. */
+#define AK09919C_HILIMIT_SNG_HX         32751      /* high limit of x-axis in single mode. */
+#define AK09919C_LOLIMIT_SNG_HY         -32751     /* low limit of y-axis in single mode. */
+#define AK09919C_HILIMIT_SNG_HY         32751      /* high limit of y-axis in single mode. */
+#define AK09919C_LOLIMIT_SNG_HZ         -32751     /* low limit of z-axis in single mode. */
+#define AK09919C_HILIMIT_SNG_HZ         32751      /* high limit of z-axis in single mode. */
+#define AK09919C_LOLIMIT_SNG_ST2        4          /* low limit of st2 in single mode. */
+#define AK09919C_HILIMIT_SNG_ST2        116        /* high limit of st2 in single mode. */
+
+/* selftest mode register value threshold. */
+
+#define AK09919C_LOLIMIT_SLF_ST1        1          /* low limit of st1 in selftest mode. */
+#define AK09919C_HILIMIT_SLF_ST1        1          /* high limit of st1 in selftest mode. */
+#define AK09919C_LOLIMIT_SLF_HX         -200       /* low limit of x-axis in selftest mode. */
+#define AK09919C_HILIMIT_SLF_HX         200        /* high limit of x-axis in selftest mode. */
+#define AK09919C_LOLIMIT_SLF_HY         -200       /* low limit of y-axis in selftest mode. */
+#define AK09919C_HILIMIT_SLF_HY         200        /* high limit of y-axis in selftest mode. */
+#define AK09919C_LOLIMIT_SLF_HZ         -1000      /* low limit of z-axis in selftest mode. */
+#define AK09919C_HILIMIT_SLF_HZ         -150       /* high limit of z-axis in selftest mode. */
+#define AK09919C_LOLIMIT_SLF_ST2        4          /* low limit of st2 in selftest mode. */
+#define AK09919C_HILIMIT_SLF_ST2        116        /* high limit of st2 in selftest mode. */
+
+/* Factory test instructions. */
+
+#define AK09919C_SIMPLE_CHECK           0x00       /* Simple communication check. */
+#define AK09919C_FULL_CHECK             0x01       /* Fully functional check. */
 
 /* Reset control bit. */
 
 #define AK09919C_SOFT_RESET             0x01
 
+/* Device delay(us) control. */
+
+#define AK09919C_SOFT_RESET_DELAY       1000       /* Soft reset delay time(us). */
+#define AK09919C_MODE_SWITCH_DELAY      8000       /* Mode switching delay time(us). */
+
 /* Noise suppresion level control bit. */
 
 #define AK09919C_NOISE_SUPPRESION       0x60
 
-#define SET_BITSLICE(s, v, offset, mask)   \
-do                                         \
-  {                                        \
-    s &= mask;                             \
-    s |= (v << offset) & mask;             \
-  }                                        \
-while(0)                                   \
+#define SET_BITSLICE(s, v, offset, mask)         \
+do                                               \
+  {                                              \
+    s &= mask;                                   \
+    s |= (v << offset) & mask;                   \
+  }                                              \
+while(0)                                         \
 
-#define MAKE_S16(u8h, u8l)                 \
-    (int16_t)(((uint16_t)(u8h) << 8) | (uint16_t)(u8l))
+#define MAKE_S16(u8h, u8l)                       \
+        (int16_t)(((uint16_t)(u8h) << 8) | (uint16_t)(u8l))
+
+#define PARAMETER_VERIFY(data, lolimit, hilimit) \
+        ( data >= lolimit && data <= hilimit ) ? 0 : -EINVAL
 
 /****************************************************************************
  * Private Type Definitions
@@ -109,22 +149,53 @@ while(0)                                   \
 
 struct ak09919c_dev_s
 {
-  struct sensor_lowerhalf_s lower;          /* The struct of lower half driver. */
-  FAR struct ak09919c_config_s *config;     /* The board config function. */
-  uint64_t start_timestamp;                 /* Start timestamp(us). */
-  uint64_t sample_count;                    /* The count of sampling */
-  bool activated;                           /* Sensor working state. */
-  unsigned int interval;                    /* Sensor acquisition interval. */
-  uint8_t workmode;                         /* Sensor work mode. */
-  struct work_s work;                       /* Work queue for reading data. */
+  struct sensor_lowerhalf_s lower;        /* The struct of lower half driver. */
+  FAR struct ak09919c_config_s *config;   /* The board config function. */
+  uint64_t start_timestamp;               /* Start timestamp(us). */
+  uint64_t sample_count;                  /* The count of sampling */
+  bool activated;                         /* Sensor working state. */
+  unsigned int interval;                  /* Sensor acquisition interval. */
+  uint8_t workmode;                       /* Sensor work mode. */
+  struct work_s work;                     /* Work queue for reading data. */
 };
 
 /* Structure for ak09919C odr. */
 
 struct ak09919c_odr_s
 {
-  uint8_t regval;                           /* the data of register */
-  unsigned int odr;                         /* the unit is us */
+  uint8_t regval;                         /* the data of register. */
+  unsigned int odr;                       /* the unit is us. */
+};
+
+/* Structure for ak09919c data threshold. */
+
+struct ak09919c_threshold_s
+{
+  uint8_t st1_lolimit;                    /* low limit of st1. */
+  uint8_t st1_hilimit;                    /* high limit of st1. */
+  uint8_t st2_lolimit;                    /* low limit of st2. */
+  uint8_t st2_hilimit;                    /* high limit of st2. */
+  int xdata_lolimit;                      /* low limit of x-axis data. */
+  int xdata_hilimit;                      /* high limit of x-axis data. */
+  int ydata_lolimit;                      /* low limit of y-axis data. */
+  int ydata_hilimit;                      /* high limit of y-axis data. */
+  int zdata_lolimit;                      /* low limit of z-axis data. */
+  int zdata_hilimit;                      /* high limit of z-axis data. */
+};
+
+/* Structure for ak09919c data. */
+
+struct ak09919c_magdata_s
+{
+  uint8_t st1;                            /* data of AK09919C_REG_ST1. */
+  uint8_t xdata_hi;                       /* data of AK09919C_REG_HXH. */
+  uint8_t xdata_lo;                       /* data of AK09919C_REG_HXL. */
+  uint8_t ydata_hi;                       /* data of AK09919C_REG_HYH. */
+  uint8_t ydata_lo;                       /* data of AK09919C_REG_HYL. */
+  uint8_t zdata_hi;                       /* data of AK09919C_REG_HZH. */
+  uint8_t zdata_lo;                       /* data of AK09919C_REG_HZL. */
+  uint8_t res;                            /* data of AK09919C_REG_TMPS. */
+  uint8_t st2;                            /* data of AK09919C_REG_ST2. */
 };
 
 /****************************************************************************
@@ -146,6 +217,7 @@ static int ak09919c_i2c_read(FAR struct ak09919c_dev_s *priv,
 static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable);
 static int ak09919c_init(FAR struct ak09919c_dev_s *priv);
 static int ak09919c_checkid(FAR struct ak09919c_dev_s *priv);
+static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv);
 static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv, uint8_t mode);
 static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
                                    uint32_t nsf);
@@ -153,6 +225,8 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
                             FAR struct sensor_event_mag *data);
 static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv);
 static int ak09919c_findodr(FAR unsigned int *expect_period_us);
+static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
+                                FAR struct ak09919c_threshold_s *threshold);
 
 /* Sensor ops functions. */
 
@@ -160,6 +234,8 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
 static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned int * interval_us);
+static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg);
 
 /* Sensor poll functions. */
 
@@ -182,6 +258,35 @@ static const struct sensor_ops_s g_ak09919c_ops =
 {
   .activate = ak09919c_activate,            /* Enable/disable snesor. */
   .set_interval = ak09919c_set_interval,    /* Set output data period. */
+  .selftest = ak09919c_selftest             /* Sensor selftest function. */
+};
+
+static const struct ak09919c_threshold_s g_ak09919c_sngthr =
+{
+  .st1_lolimit = AK09919C_LOLIMIT_SNG_ST1,  /* low limit of st1 in single mode. */
+  .st1_hilimit = AK09919C_HILIMIT_SNG_ST1,  /* high limit of st1 in single mode. */
+  .st2_lolimit = AK09919C_LOLIMIT_SNG_ST2,  /* low limit of st2 in single mode. */
+  .st2_hilimit = AK09919C_HILIMIT_SNG_ST2,  /* high limit of st2 in single mode. */
+  .xdata_lolimit = AK09919C_LOLIMIT_SNG_HX, /* low limit of x-axis in single mode. */
+  .xdata_hilimit = AK09919C_HILIMIT_SNG_HX, /* high limit of x-axis in single mode. */
+  .ydata_lolimit = AK09919C_LOLIMIT_SNG_HY, /* low limit of y-axis in single mode. */
+  .ydata_hilimit = AK09919C_HILIMIT_SNG_HY, /* high limit of y-axis in single mode. */
+  .zdata_lolimit = AK09919C_LOLIMIT_SNG_HZ, /* low limit of z-axis in single mode. */
+  .zdata_hilimit = AK09919C_HILIMIT_SNG_HZ  /* high limit of z-axis in single mode. */
+};
+
+static const struct ak09919c_threshold_s g_ak09919c_slfthr =
+{
+  .st1_lolimit = AK09919C_LOLIMIT_SLF_ST1,  /* low limit of st1 in selftest mode. */
+  .st1_hilimit = AK09919C_HILIMIT_SLF_ST1,  /* high limit of st1 in selftest mode. */
+  .st2_lolimit = AK09919C_LOLIMIT_SLF_ST2,  /* low limit of st2 in selftest mode. */
+  .st2_hilimit = AK09919C_HILIMIT_SLF_ST2,  /* high limit of st2 in selftest mode. */
+  .xdata_lolimit = AK09919C_LOLIMIT_SLF_HX, /* low limit of x-axis in selftest mode. */
+  .xdata_hilimit = AK09919C_HILIMIT_SLF_HX, /* high limit of x-axis in selftest mode. */
+  .ydata_lolimit = AK09919C_LOLIMIT_SLF_HY, /* low limit of y-axis in selftest mode. */
+  .ydata_hilimit = AK09919C_HILIMIT_SLF_HY, /* high limit of y-axis in selftest mode. */
+  .zdata_lolimit = AK09919C_LOLIMIT_SLF_HZ, /* low limit of z-axis in selftest mode. */
+  .zdata_hilimit = AK09919C_HILIMIT_SLF_HZ  /* high limit of z-axis in selftest mode. */
 };
 
 /****************************************************************************
@@ -207,7 +312,7 @@ static const struct sensor_ops_s g_ak09919c_ops =
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -255,7 +360,7 @@ static int ak09919c_i2c_read(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -281,7 +386,7 @@ static int ak09919c_i2c_readreg(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -327,7 +432,7 @@ static int ak09919c_i2c_writereg(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -343,7 +448,7 @@ static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv,
     }
   else
     {
-      up_udelay(1000);
+      up_udelay(AK09919C_MODE_SWITCH_DELAY);
     }
 
   return ret;
@@ -364,7 +469,7 @@ static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -406,7 +511,7 @@ static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -457,7 +562,7 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -467,7 +572,13 @@ static int ak09919c_checkid(FAR struct ak09919c_dev_s *priv)
   uint16_t devid;
 
   ret = ak09919c_i2c_read(priv, AK09919C_REG_WIA1, (uint8_t *)&devid, 2);
-  if (ret < 0 || devid != AK09919C_DEVID)
+  if (ret < 0 )
+    {
+      snerr("Failed to read device id: %d\n", ret);
+      return ret;
+    }
+
+  if (devid != AK09919C_DEVID)
     {
       snerr("Wrong Device ID! %02x\n", devid);
       ret = -ENODEV;
@@ -490,7 +601,7 @@ static int ak09919c_checkid(FAR struct ak09919c_dev_s *priv)
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -506,7 +617,86 @@ static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv)
     }
   else
     {
-      up_udelay(1000);
+      up_udelay(AK09919C_SOFT_RESET_DELAY);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ak09919c_verifyparam
+ *
+ * Description:
+ *   Parameter verification
+ *
+ * Input Parameters
+ *   magdata   - Data of mag
+ *   threshold - Threshold of mag data
+ *
+ * Returned Value
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure;
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
+                                FAR struct ak09919c_threshold_s *threshold)
+{
+  int xdata;
+  int ydata;
+  int zdata;
+  int ret;
+
+  xdata = MAKE_S16(magdata->xdata_hi, magdata->xdata_lo);
+  ydata = MAKE_S16(magdata->ydata_hi, magdata->ydata_lo);
+  zdata = MAKE_S16(magdata->zdata_hi, magdata->zdata_lo);
+
+  ret = PARAMETER_VERIFY(magdata->st1,
+                         threshold->st1_lolimit,
+                         threshold->st1_hilimit);
+  if (ret < 0)
+    {
+      snerr("ST1 data is abnormal: %d\n", ret);
+      return ret;
+    }
+
+  ret = PARAMETER_VERIFY(magdata->st2,
+                         threshold->st2_lolimit,
+                         threshold->st2_hilimit);
+  if (ret < 0)
+    {
+      snerr("ST2 data is abnormal: %d\n", ret);
+      return ret;
+    }
+
+  ret = PARAMETER_VERIFY(xdata,
+                         threshold->xdata_lolimit,
+                         threshold->xdata_hilimit);
+  if (ret < 0)
+    {
+      snerr("X-axis data is abnormal: %d\n", ret);
+      return ret;
+    }
+
+  ret = PARAMETER_VERIFY(ydata,
+                         threshold->ydata_lolimit,
+                         threshold->ydata_hilimit);
+  if (ret < 0)
+    {
+      snerr("Y-axis data is abnormal: %d\n", ret);
+      return ret;
+    }
+
+  ret = PARAMETER_VERIFY(zdata,
+                         threshold->zdata_lolimit,
+                         threshold->zdata_hilimit);
+  if (ret < 0)
+    {
+      snerr("Z-axis data is abnormal: %d\n", ret);
+      return ret;
     }
 
   return ret;
@@ -526,7 +716,7 @@ static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv)
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -536,7 +726,7 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
 
   if (enable)
     {
-      /* Reset soft device */
+      /* Reset soft device. */
 
       ret = ak09919c_softreset(priv);
       if (ret < 0)
@@ -545,7 +735,7 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
           return ret;
         }
 
-      /* Set noise filter */
+      /* Set noise filter. */
 
       ret = ak09919c_setnoisefilter(priv, AK09919C_NSF_LOW);
       if (ret < 0)
@@ -554,7 +744,7 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
           return ret;
         }
 
-      /* Set work mode */
+      /* Set work mode. */
 
       ret = ak09919c_setmode(priv, priv->workmode);
       if (ret < 0)
@@ -562,12 +752,20 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
           snerr("Failed set work mode: %d\n", ret);
           return ret;
         }
+
+      priv->start_timestamp = sensor_get_timestamp();
+      priv->sample_count = 1;
+
+      work_queue(HPWORK, &priv->work,
+                 ak09919c_worker, priv,
+                 priv->interval / USEC_PER_TICK);
     }
   else
     {
-      /* Reset soft device */
+      work_cancel(HPWORK, &priv->work);
 
-      priv->workmode = AK09919C_POWER_DOWN_MODE;
+      /* Reset soft device. */
+
       ret = ak09919c_softreset(priv);
       if (ret < 0)
         {
@@ -589,10 +787,10 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
  *   expect_period_us  -the time(expext) between report data, in us.
  *
  * Returned Value
- *   index of odr param.
+ *   Index of odr param.
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -626,7 +824,7 @@ static int ak09919c_findodr(FAR unsigned int *expect_period_us)
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -634,7 +832,7 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
 {
   int ret;
 
-  /* Reset soft device */
+  /* Reset soft device. */
 
   ret = ak09919c_softreset(priv);
   if (ret < 0)
@@ -643,7 +841,7 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
       return ret;
     }
 
-  /* Set noise suppression level */
+  /* Set noise suppression level. */
 
   ret = ak09919c_setnoisefilter(priv, AK09919C_NSF_LOW);
   if (ret < 0)
@@ -652,12 +850,123 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
       return ret;
     }
 
-  /* Set power down mode */
+  /* Set power down mode. */
 
   ret = ak09919c_setmode(priv, priv->workmode);
   if (ret < 0)
     {
       snerr("Failed set work mode: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: ak09919c_checkdev
+ *
+ * Description:
+ *   Check if the device is working properly.
+ *
+ * Input Parameters
+ *   priv     -Device struct
+ *
+ * Returned Value
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure;
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
+{
+  struct ak09919c_magdata_s magdata;
+  int ret;
+
+  /* Reset soft device. */
+
+  ret = ak09919c_softreset(priv);
+  if (ret < 0)
+    {
+      snerr("Failed reset device: %d\n", ret);
+      return ret;
+    }
+
+  /* Set to single measurement mode. */
+
+  ret = ak09919c_setmode(priv, AK09919C_SINGLESHOT_MODE);
+  if (ret < 0)
+    {
+      snerr("Failed set single measurement mode: %d\n", ret);
+      return ret;
+    }
+
+  /* AK09919C_REG_ST1 must be read separately before reading data. */
+
+  ret = ak09919c_i2c_readreg(priv, AK09919C_REG_ST1, &magdata.st1);
+  if (ret < 0)
+    {
+      snerr("Failed to read state: %d\n", ret);
+      return ret;
+    }
+
+  /* New data can be unlocked only when AK09919C_REG_ST2(8th byte) is read. */
+
+  ret = ak09919c_i2c_read(priv, AK09919C_REG_HXH,
+                          &magdata.xdata_hi, 8);
+  if (ret < 0)
+    {
+      snerr("Failed to read mag: %d\n", ret);
+      return ret;
+    }
+
+  /* Check whether single mode data is right. */
+
+  ret = ak09919c_verifyparam(&magdata,
+                             &g_ak09919c_sngthr);
+  if (ret < 0)
+    {
+      snerr("The data of single mode is error: %d\n", ret);
+      return ret;
+    }
+
+  /* Set to selftest mode. */
+
+  ret = ak09919c_setmode(priv, AK09919C_SELF_TEST_MODE);
+  if (ret < 0)
+    {
+      snerr("Failed set selftest mode: %d\n", ret);
+      return ret;
+    }
+
+  /* AK09919C_REG_ST1 must be read separately before reading data. */
+
+  ret = ak09919c_i2c_readreg(priv, AK09919C_REG_ST1, &magdata.st1);
+  if (ret < 0)
+    {
+      snerr("Failed to read state: %d\n", ret);
+      return ret;
+    }
+
+  /* New data can be unlocked only when AK09919C_REG_ST2(8th byte) is read. */
+
+  ret = ak09919c_i2c_read(priv, AK09919C_REG_HXH,
+                          &magdata.xdata_hi, 8);
+  if (ret < 0)
+    {
+      snerr("Failed to read mag: %d\n", ret);
+      return ret;
+    }
+
+  /* Check whether selftest mode data is right. */
+
+  ret = ak09919c_verifyparam(&magdata,
+                             &g_ak09919c_slfthr);
+  if (ret < 0)
+    {
+      snerr("The data of selftest mode is error: %d\n", ret);
       return ret;
     }
 
@@ -681,7 +990,7 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -724,7 +1033,7 @@ static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -750,23 +1059,72 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
         }
 
       priv->activated = enable;
-
-      if (enable)
-        {
-          priv->start_timestamp = sensor_get_timestamp();
-          priv->sample_count = 1;
-
-          work_queue(HPWORK, &priv->work,
-                     ak09919c_worker, priv,
-                     priv->interval / USEC_PER_TICK);
-        }
-      else
-        {
-          work_cancel(HPWORK, &priv->work);
-        }
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: ak09919c_selftest
+ *
+ * Description:
+ *   Mainly used in the self-test link, including device ID inspection
+ *   and device functional inspection.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg)
+{
+  FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands. */
+
+  switch (arg)
+    {
+      case AK09919C_SIMPLE_CHECK:    /* Simple communication check. */
+        {
+          ret = ak09919c_checkid(priv);
+          if (ret < 0)
+            {
+              snerr("Failed to get DeviceID: %d\n", ret);
+            }
+        }
+        break;
+
+      case AK09919C_FULL_CHECK:      /* Fully functional check. */
+        {
+          ret = ak09919c_checkdev(priv);
+          if (ret < 0)
+            {
+              snerr("Failed to selftest: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                       /* Other cmd tag. */
+        {
+          ret = -ENOTTY;
+          snerr("The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+    return ret;
 }
 
 /****************************************************************************
@@ -783,7 +1141,7 @@ static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
  *   value is returned on any failure;
  *
  * Assumptions/Limitations:
- *   none.
+ *   None.
  *
  ****************************************************************************/
 
@@ -843,6 +1201,9 @@ static void ak09919c_worker(FAR void *arg)
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
  *
  ****************************************************************************/
 
