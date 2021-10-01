@@ -30,6 +30,8 @@
 
 #include <nuttx/config.h>
 
+#include "esp32c3_aliases.ld"
+
 #define SRAM_IRAM_START     0x4037c000
 #define SRAM_DRAM_START     0x3fc7c000
 

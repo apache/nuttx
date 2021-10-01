@@ -330,9 +330,9 @@ extern int btdm_hci_tl_io_event_post(int event);
 
 /* VHCI */
 
-extern bool API_vhci_host_check_send_available(void); /* Functions in bt lib */
-extern void API_vhci_host_send_packet(uint8_t * data, uint16_t len);
-extern int API_vhci_host_register_callback(const vhci_host_callback_t
+extern bool api_vhci_host_check_send_available(void); /* Functions in bt lib */
+extern void api_vhci_host_send_packet(uint8_t * data, uint16_t len);
+extern int api_vhci_host_register_callback(const vhci_host_callback_t
                                            *callback);
 
 /* TX power */
@@ -2404,7 +2404,7 @@ bool esp32c3_vhci_host_check_send_available(void)
       return false;
     }
 
-  return API_vhci_host_check_send_available();
+  return api_vhci_host_check_send_available();
 }
 
 /****************************************************************************
@@ -2428,7 +2428,7 @@ void esp32c3_vhci_host_send_packet(uint8_t *data, uint16_t len)
       return;
     }
 
-  API_vhci_host_send_packet(data, len);
+  api_vhci_host_send_packet(data, len);
 }
 
 /****************************************************************************
@@ -2452,7 +2452,7 @@ int esp32c3_vhci_register_callback(const esp_vhci_host_callback_t *callback)
       return ret;
     }
 
-  ret = API_vhci_host_register_callback(
+  ret = api_vhci_host_register_callback(
             (const vhci_host_callback_t *)callback) == 0 ? 0 : -1;
   return ret;
 }
