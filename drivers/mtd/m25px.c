@@ -83,6 +83,10 @@
 #  define CONFIG_MT25Q_MEMORY_TYPE  0xBA
 #endif
 
+#ifndef CONFIG_MT25QU_MEMORY_TYPE
+#  define CONFIG_MT25QU_MEMORY_TYPE  0xBB
+#endif
+
 /* M25P Registers ***********************************************************/
 
 /* Identification register values */
@@ -90,6 +94,7 @@
 #define M25P_MANUFACTURER          CONFIG_M25P_MANUFACTURER
 #define M25P_MEMORY_TYPE           CONFIG_M25P_MEMORY_TYPE
 #define MT25Q_MEMORY_TYPE          CONFIG_MT25Q_MEMORY_TYPE
+#define MT25QU_MEMORY_TYPE         CONFIG_MT25QU_MEMORY_TYPE
 #define M25P_RES_ID                0x13
 #define M25P_M25P1_CAPACITY        0x11 /* 1 M-bit */
 #define M25P_EN25F80_CAPACITY      0x14 /* 8 M-bit */
@@ -98,6 +103,7 @@
 #define M25P_M25P64_CAPACITY       0x17 /* 64 M-bit */
 #define M25P_M25P128_CAPACITY      0x18 /* 128 M-bit */
 #define M25P_MT25Q128_CAPACITY     0x18 /* 128 M-bit */
+#define M25P_MT25Q256_CAPACITY     0x19 /* 256 M-bit */
 #define M25P_MT25Q1G_CAPACITY      0x21 /* 1 G-bit */
 
 /*  M25P1 capacity is 131,072 bytes:
@@ -174,6 +180,17 @@
 #define M25P_MT25Q128_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
 #define M25P_MT25Q128_NPAGES        65536
 #define M25P_MT25Q128_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
+
+/*  MT25Q256 capacity is 33,554,432 bytes:
+ *  (512 sectors) * (65,536 bytes per sector)
+ *  (131072 pages) * (256 bytes per page)
+ */
+
+#define M25P_MT25Q256_SECTOR_SHIFT  16    /* Sector size 1 << 16 = 65,536 */
+#define M25P_MT25Q256_NSECTORS      512
+#define M25P_MT25Q256_PAGE_SHIFT    8     /* Page size 1 << 8 = 256 */
+#define M25P_MT25Q256_NPAGES        131072
+#define M25P_MT25Q256_SUBSECT_SHIFT 12    /* Sub-Sector size 1 << 12 = 4,096 */
 
 /*  MT25Q1G capacity is 134,217,728  bytes:
  *  (2048 sectors) * (65,536 bytes per sector)
@@ -454,7 +471,8 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
           return OK;
         }
     }
-  else if (manufacturer == M25P_MANUFACTURER && memory == MT25Q_MEMORY_TYPE)
+  else if (manufacturer == M25P_MANUFACTURER &&
+          (memory == MT25Q_MEMORY_TYPE || memory == MT25QU_MEMORY_TYPE))
     {
       /* Also okay.. is it a FLASH capacity that we understand? */
 
@@ -471,6 +489,19 @@ static inline int m25p_readid(struct m25p_dev_s *priv)
           priv->npages         = M25P_MT25Q128_NPAGES;
 #ifdef CONFIG_M25P_SUBSECTOR_ERASE
           priv->subsectorshift = M25P_MT25Q128_SUBSECT_SHIFT;
+#endif
+          return OK;
+        }
+      else if (capacity == M25P_MT25Q256_CAPACITY)
+        {
+          /* Save the FLASH geometry */
+
+          priv->sectorshift    = M25P_MT25Q256_SECTOR_SHIFT;
+          priv->nsectors       = M25P_MT25Q256_NSECTORS;
+          priv->pageshift      = M25P_MT25Q256_PAGE_SHIFT;
+          priv->npages         = M25P_MT25Q256_NPAGES;
+#ifdef CONFIG_M25P_SUBSECTOR_ERASE
+          priv->subsectorshift = M25P_MT25Q256_SUBSECT_SHIFT;
 #endif
           return OK;
         }
