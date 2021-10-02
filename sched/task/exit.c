@@ -57,20 +57,17 @@ void _exit(int status)
 }
 
 /****************************************************************************
- * Name: exit
+ * Name: nx_exit
  *
  * Description:
- *   The exit() function causes normal process termination and the value of
- *   status & 0377 to be returned to the parent.
- *
- *   All functions registered with atexit() and on_exit() are called, in the
- *   reverse order of their registration.
+ *   The nx_exit() function causes kernel side normal process termination and
+ *   the value of status & 0377 to be returned to the parent.
  *
  *   All open streams are flushed and closed.
  *
  ****************************************************************************/
 
-void exit(int status)
+void nx_exit(int status)
 {
   FAR struct tcb_s *tcb = this_task();
 

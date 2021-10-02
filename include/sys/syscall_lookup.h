@@ -25,7 +25,7 @@
  */
 
 SYSCALL_LOOKUP1(_exit,                     1)
-SYSCALL_LOOKUP(exit,                       1)
+SYSCALL_LOOKUP(nx_exit,                    1)
 SYSCALL_LOOKUP(getpid,                     0)
 SYSCALL_LOOKUP(gettid,                     0)
 
