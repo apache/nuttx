@@ -74,13 +74,18 @@
  *   None
  *
  * Assumptions:
- *   Called with the network locked.
+ *   It is called with the network locked.
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
  *
  ****************************************************************************/
 
 void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 {
   uint16_t result;
+
+  DEBUGASSERT(dev != NULL && conn != NULL && dev == conn->dev);
 
   /* Discard any currently buffered data */
 
@@ -91,43 +96,34 @@ void tcp_poll(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn)
 
   if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
     {
-      /* The TCP connection is established and, hence, should be bound
-       * to a device. Make sure that the polling device is the one that
-       * we are bound to.
+      /* Set up for the callback.  We can't know in advance if the
+       * application is going to send a IPv4 or an IPv6 packet, so this
+       * setup may not actually be used.
        */
 
-      DEBUGASSERT(conn->dev != NULL);
-      if (dev == conn->dev)
-        {
-          /* Set up for the callback.  We can't know in advance if the
-           * application is going to send a IPv4 or an IPv6 packet, so this
-           * setup may not actually be used.
-           */
-
 #if defined(CONFIG_NET_IPv6) && defined(CONFIG_NET_IPv4)
-          if (conn->domain == PF_INET)
-            {
-              tcp_ipv4_select(dev);
-            }
-          else
-            {
-              tcp_ipv6_select(dev);
-            }
+      if (conn->domain == PF_INET)
+        {
+          tcp_ipv4_select(dev);
+        }
+      else
+        {
+          tcp_ipv6_select(dev);
+        }
 
 #elif defined(CONFIG_NET_IPv4)
-          tcp_ipv4_select(dev);
+      tcp_ipv4_select(dev);
 
 #else /* if defined(CONFIG_NET_IPv6) */
-          tcp_ipv6_select(dev);
+      tcp_ipv6_select(dev);
 #endif
-          /* Perform the callback */
+      /* Perform the callback */
 
-          result = tcp_callback(dev, conn, TCP_POLL);
+      result = tcp_callback(dev, conn, TCP_POLL);
 
-          /* Handle the callback response */
+      /* Handle the callback response */
 
-          tcp_appsend(dev, conn, result);
-        }
+      tcp_appsend(dev, conn, result);
     }
 }
 
