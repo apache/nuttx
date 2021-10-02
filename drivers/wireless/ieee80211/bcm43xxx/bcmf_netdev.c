@@ -107,7 +107,7 @@ static int  bcmf_transmit(FAR struct bcmf_dev_s *priv,
                           FAR struct bcmf_frame_s *frame);
 static void bcmf_receive(FAR struct bcmf_dev_s *priv);
 static int  bcmf_txpoll(FAR struct net_driver_s *dev);
-static void bcmf_rxpoll(FAR void *arg);
+static void bcmf_rxpoll_work(FAR void *arg);
 
 /* Watchdog timer expirations */
 
@@ -484,7 +484,47 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
 }
 
 /****************************************************************************
- * Name: bcmf_rxpoll
+ * Function: bcmf_txdone_poll_work
+ *
+ * Description:
+ *   The function is called in order to perform an out-of-sequence TX poll.
+ *   This is done:
+ *
+ *   1. After completion of a transmission (bcmf_netdev_notify_tx_done), and
+ *   2. When new TX data is available (bcmf_txavail).
+ *
+ * Input Parameters:
+ *   arg - context of device to use
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *
+ ****************************************************************************/
+
+static void bcmf_txdone_poll_work(FAR void *arg)
+{
+  FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
+
+  /* Check if there is room in the hardware to hold another packet. */
+
+  net_lock();
+
+  if (bcmf_netdev_alloc_tx_frame(priv) == OK)
+    {
+      /* If so, then poll the network for new XMIT data */
+
+      priv->bc_dev.d_buf = priv->cur_tx_frame->data;
+      priv->bc_dev.d_len = 0;
+      devif_timer(&priv->bc_dev, 0, bcmf_txpoll);
+    }
+
+  net_unlock();
+}
+
+/****************************************************************************
+ * Name: bcmf_rxpoll_work
  *
  * Description:
  *   Process RX frames
@@ -496,11 +536,10 @@ static int bcmf_txpoll(FAR struct net_driver_s *dev)
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
  *
  ****************************************************************************/
 
-static void bcmf_rxpoll(FAR void *arg)
+static void bcmf_rxpoll_work(FAR void *arg)
 {
   FAR struct bcmf_dev_s *priv = (FAR struct bcmf_dev_s *)arg;
 
@@ -539,7 +578,11 @@ void bcmf_netdev_notify_tx_done(FAR struct bcmf_dev_s *priv)
 {
   /* Schedule to perform a poll for new Tx data the worker thread. */
 
-  work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_poll_work, priv, 0);
+  if (work_available(&priv->bc_pollwork))
+    {
+      work_queue(BCMFWORK, &priv->bc_pollwork,
+                 bcmf_txdone_poll_work, priv, 0);
+    }
 }
 
 /****************************************************************************
@@ -556,7 +599,7 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
 {
   /* Queue a job to process RX frames */
 
-  work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_rxpoll, priv, 0);
+  work_queue(BCMFWORK, &priv->bc_rxwork, bcmf_rxpoll_work, priv, 0);
 }
 
 /****************************************************************************
@@ -566,13 +609,12 @@ void bcmf_netdev_notify_rx(FAR struct bcmf_dev_s *priv)
  *   Perform periodic polling from the worker thread
  *
  * Input Parameters:
- *   arg - The argument passed when work_queue() as called.
+ *   arg - The argument passed when work_queue() was called.
  *
  * Returned Value:
  *   OK on success
  *
  * Assumptions:
- *   The network is locked.
  *
  ****************************************************************************/
 
@@ -610,9 +652,10 @@ static void bcmf_poll_work(FAR void *arg)
 
   /* Setup the watchdog poll timer again */
 
+exit_unlock:
   wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
            bcmf_poll_expiry, (wdparm_t)priv);
-exit_unlock:
+
   net_unlock();
 }
 
@@ -639,7 +682,15 @@ static void bcmf_poll_expiry(wdparm_t arg)
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
-  work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_poll_work, priv, 0);
+  if (work_available(&priv->bc_pollwork))
+    {
+      work_queue(BCMFWORK, &priv->bc_pollwork, bcmf_poll_work, priv, 0);
+    }
+  else
+    {
+      wd_start(&priv->bc_txpoll, BCMF_WDDELAY,
+           bcmf_poll_expiry, (wdparm_t)priv);
+    }
 }
 
 /****************************************************************************
