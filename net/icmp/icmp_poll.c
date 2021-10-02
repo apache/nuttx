@@ -54,11 +54,16 @@
  *
  * Assumptions:
  *   The network is locked.
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
  *
  ****************************************************************************/
 
 void icmp_poll(FAR struct net_driver_s *dev, FAR struct icmp_conn_s *conn)
 {
+  DEBUGASSERT(dev != NULL && conn != NULL && dev == conn->dev);
+
   /* Setup for the application callback */
 
   dev->d_appdata = &dev->d_buf[NET_LL_HDRLEN(dev) + IPICMP_HDRLEN];
