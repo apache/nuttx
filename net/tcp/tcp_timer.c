@@ -94,6 +94,9 @@
  *
  * Assumptions:
  *   The network is locked.
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev).
  *
  ****************************************************************************/
 
@@ -102,6 +105,14 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 {
   uint16_t result;
   uint8_t hdrlen;
+
+  /* NOTE: It is important to decrease conn->timer at "hsec" pace,
+   * not faster. Excessive (false) decrements of conn->timer are not allowed
+   * here. Otherwise, it breaks TCP timings and leads to TCP spurious
+   * retransmissions and other issues due to premature timeouts.
+   */
+
+  DEBUGASSERT(dev != NULL && conn != NULL && dev == conn->dev);
 
   /* Set up for the callback.  We can't know in advance if the application
    * is going to send a IPv4 or an IPv6 packet, so this setup may not
@@ -140,6 +151,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   dev->d_len    = 0;
   dev->d_sndlen = 0;
 
+  if (conn->tcpstateflags == TCP_CLOSED)
+    {
+      /* Nothing to be done */
+
+      return;
+    }
+
   /* Check if the connection is in a state in which we simply wait
    * for the connection to time out. If so, we increase the
    * connection's timer and remove the connection if it times
@@ -162,30 +180,13 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
           /* Set the timer to the maximum value */
 
           conn->timer = TCP_TIME_WAIT_TIMEOUT * HSEC_PER_SEC;
+          conn->tcpstateflags = TCP_CLOSED;
 
-          /* The TCP connection was established and, hence, should be bound
-           * to a device. Make sure that the polling device is the one that
-           * we are bound to.
-           *
-           * If not, then we will catch the timeout on the next poll from
-           * the correct device.
-           */
+          /* Notify upper layers about the timeout */
 
-          DEBUGASSERT(conn->dev != NULL);
-          if (dev != conn->dev)
-            {
-              ninfo("TCP: TCP_CLOSED pending\n");
-            }
-          else
-            {
-              conn->tcpstateflags = TCP_CLOSED;
+          tcp_callback(dev, conn, TCP_TIMEDOUT);
 
-              /* Notify upper layers about the timeout */
-
-              tcp_callback(dev, conn, TCP_TIMEDOUT);
-
-              ninfo("TCP state: TCP_CLOSED\n");
-            }
+          ninfo("TCP state: TCP_CLOSED\n");
         }
       else
         {
@@ -216,21 +217,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
               /* Will decrement to zero */
 
               conn->timer = 0;
-
-              /* The TCP is connected and, hence, should be bound to a
-               * device. Make sure that the polling device is the one that
-               * we are bound to.
-               *
-               * If not, then we will catch the timeout on the next poll
-               * from the correct device.
-               */
-
-              DEBUGASSERT(conn->dev != NULL);
-              if (dev != conn->dev)
-                {
-                  ninfo("TCP: TCP_CLOSED pending\n");
-                  goto done;
-                }
 
               /* Check for a timeout on connection in the TCP_SYN_RCVD state.
                * On such timeouts, we would normally resend the SYNACK until
@@ -370,157 +356,148 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
       else if ((conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED)
         {
-          /* The TCP connection is established and, hence, should be bound
-           * to a device. Make sure that the polling device is the one that
-           * we are bound to.
-           */
-
-          DEBUGASSERT(conn->dev != NULL);
-          if (dev == conn->dev)
-            {
 #ifdef CONFIG_NET_TCP_KEEPALIVE
-              /* Is this an established connected with KeepAlive enabled? */
+          /* Is this an established connected with KeepAlive enabled? */
 
-              if (conn->keepalive)
+          if (conn->keepalive)
+            {
+              socktimeo_t timeo;
+              uint32_t saveseq;
+
+              /* If this is the first probe, then the keepstart time is
+               * the time that the last ACK or data was received from the
+               * remote.
+               *
+               * On subsequent retries, keepstart is the time that the
+               * last probe was sent.
+               */
+
+              if (conn->keepretries > 0)
                 {
-                  socktimeo_t timeo;
-                  uint32_t saveseq;
+                  timeo = (socktimeo_t)conn->keepintvl;
+                }
+              else
+                {
+                  timeo = (socktimeo_t)conn->keepidle;
+                }
 
-                  /* If this is the first probe, then the keepstart time is
-                   * the time that the last ACK or data was received from the
-                   * remote.
-                   *
-                   * On subsequent retries, keepstart is the time that the
-                   * last probe was sent.
-                   */
+              /* Yes... has the idle period elapsed with no data or ACK
+               * received from the remote peer?
+               */
 
-                  if (conn->keepretries > 0)
+              if (net_timeo(conn->keeptime, timeo))
+                {
+                  /* Yes.. Has the retry count expired? */
+
+                  if (conn->keepretries >= conn->keepcnt)
                     {
-                      timeo = (socktimeo_t)conn->keepintvl;
+                      /* Yes... stop the network monitor, closing the
+                       * connection and all sockets associated with the
+                       * connection.
+                       */
+
+                      tcp_stop_monitor(conn, TCP_ABORT);
                     }
                   else
                     {
-                      timeo = (socktimeo_t)conn->keepidle;
-                    }
+                      unsigned int tcpiplen;
 
-                  /* Yes... has the idle period elapsed with no data or ACK
-                   * received from the remote peer?
-                   */
+                      /* No.. we need to send another probe.
+                       * Get the size of the IP and TCP header.
+                       */
 
-                  if (net_timeo(conn->keeptime, timeo))
-                    {
-                      /* Yes.. Has the retry count expired? */
-
-                      if (conn->keepretries >= conn->keepcnt)
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+                      if (conn->domain == PF_INET)
+#endif
                         {
-                          /* Yes... stop the network monitor, closing the
-                           * connection and all sockets associated with the
-                           * connection.
-                           */
-
-                          tcp_stop_monitor(conn, TCP_ABORT);
+                          tcpiplen = IPv4_HDRLEN + TCP_HDRLEN;
                         }
+#endif
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
                       else
+#endif
                         {
-                          unsigned int tcpiplen;
-
-                          /* No.. we need to send another probe.
-                           * Get the size of the IP and TCP header.
-                           */
-
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-                          if (conn->domain == PF_INET)
-#endif
-                            {
-                              tcpiplen = IPv4_HDRLEN + TCP_HDRLEN;
-                            }
-#endif
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-                          else
-#endif
-                            {
-                              tcpiplen = IPv6_HDRLEN + TCP_HDRLEN;
-                            }
+                          tcpiplen = IPv6_HDRLEN + TCP_HDRLEN;
+                        }
 #endif
 
-                          /* And send the probe.
-                           * The packet we send must have these properties:
-                           *
-                           *   - TCP_ACK flag (only) is set.
-                           *   - Sequence number is the sequence number of
-                           *     previously ACKed data, i.e., the expected
-                           *     sequence number minus one.
-                           *
-                           * tcp_send() will send the TCP sequence number as
-                           * conn->sndseq.  Rather than creating a new
-                           * interface, we spoof tcp_end() here:
-                           */
+                      /* And send the probe.
+                       * The packet we send must have these properties:
+                       *
+                       *   - TCP_ACK flag (only) is set.
+                       *   - Sequence number is the sequence number of
+                       *     previously ACKed data, i.e., the expected
+                       *     sequence number minus one.
+                       *
+                       * tcp_send() will send the TCP sequence number as
+                       * conn->sndseq.  Rather than creating a new
+                       * interface, we spoof tcp_end() here:
+                       */
 
-                          saveseq = tcp_getsequence(conn->sndseq);
-                          tcp_setsequence(conn->sndseq, saveseq - 1);
+                      saveseq = tcp_getsequence(conn->sndseq);
+                      tcp_setsequence(conn->sndseq, saveseq - 1);
 
-                          tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                      tcp_send(dev, conn, TCP_ACK, tcpiplen);
 
-                          tcp_setsequence(conn->sndseq, saveseq);
+                      tcp_setsequence(conn->sndseq, saveseq);
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-                          /* Increment the un-ACKed sequence number */
+                      /* Increment the un-ACKed sequence number */
 
-                          conn->sndseq_max++;
+                      conn->sndseq_max++;
 #endif
-                          /* Update for the next probe */
+                      /* Update for the next probe */
 
-                          conn->keeptime = clock_systime_ticks();
-                          conn->keepretries++;
-                        }
-
-                      goto done;
+                      conn->keeptime = clock_systime_ticks();
+                      conn->keepretries++;
                     }
+
+                  goto done;
                 }
+            }
 #endif
 
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
-              /* Handle delayed acknowledgments.  Is there a segment with a
-               * delayed acknowledgment?
+          /* Handle delayed acknowledgments.  Is there a segment with a
+           * delayed acknowledgment?
+           */
+
+          if (conn->rx_unackseg > 0)
+            {
+              /* Increment the ACK delay. */
+
+              conn->rx_acktimer += hsec;
+
+              /* Per RFC 1122:  "...an ACK should not be excessively
+               * delayed; in particular, the delay must be less than
+               * 0.5 seconds..."
                */
 
-              if (conn->rx_unackseg > 0)
+              if (conn->rx_acktimer >= ACK_DELAY)
                 {
-                  /* Increment the ACK delay. */
-
-                  conn->rx_acktimer += hsec;
-
-                  /* Per RFC 1122:  "...an ACK should not be excessively
-                   * delayed; in particular, the delay must be less than
-                   * 0.5 seconds..."
+                  /* Reset the delayed ACK state and send the ACK
+                   * packet.
                    */
 
-                  if (conn->rx_acktimer >= ACK_DELAY)
-                    {
-                      /* Reset the delayed ACK state and send the ACK
-                       * packet.
-                       */
-
-                      conn->rx_unackseg = 0;
-                      conn->rx_acktimer = 0;
-                      tcp_synack(dev, conn, TCP_ACK);
-                      goto done;
-                    }
+                  conn->rx_unackseg = 0;
+                  conn->rx_acktimer = 0;
+                  tcp_synack(dev, conn, TCP_ACK);
+                  goto done;
                 }
+            }
 #endif
 
-              /* There was no need for a retransmission and there was no
-               * need to probe the remote peer and there was no need to
-               * send a delayed ACK.  We poll the application for new
-               * outgoing data.
-               */
+          /* There was no need for a retransmission and there was no
+           * need to probe the remote peer and there was no need to
+           * send a delayed ACK.  We poll the application for new
+           * outgoing data.
+           */
 
-              result = tcp_callback(dev, conn, TCP_POLL);
-              tcp_appsend(dev, conn, result);
-              goto done;
-            }
+          result = tcp_callback(dev, conn, TCP_POLL);
+          tcp_appsend(dev, conn, result);
+          goto done;
         }
     }
 
