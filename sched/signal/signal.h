@@ -161,7 +161,7 @@ bool               nxsig_isdefault(FAR struct tcb_s *tcb, int signo);
 bool               nxsig_iscatchable(int signo);
 _sa_handler_t      nxsig_default(FAR struct tcb_s *tcb, int signo,
                                  bool defaction);
-int                nxsig_default_initialize(FAR struct tcb_s *tcb);
+int                nxsig_default_initialize(void);
 #endif
 
 /* sig_pending.c */

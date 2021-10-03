@@ -43,6 +43,11 @@ SYSCALL_LOOKUP(sched_setscheduler,         3)
 SYSCALL_LOOKUP(sched_unlock,               0)
 SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
+#ifdef CONFIG_SIG_DEFAULT
+  SYSCALL_LOOKUP(nxsig_stop_task,            1)
+  SYSCALL_LOOKUP(nxsig_abnormal_termination, 1)
+#endif
+SYSCALL_LOOKUP(nxsig_action,               4)
 
 #ifdef CONFIG_SCHED_BACKTRACE
   SYSCALL_LOOKUP(sched_backtrace,          3)

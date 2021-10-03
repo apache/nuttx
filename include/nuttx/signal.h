@@ -561,6 +561,56 @@ void nxsig_cancel_notification(FAR struct sigwork_s *work);
   #define nxsig_cancel_notification(work) (void)(work)
 #endif
 
+/****************************************************************************
+ * Name: nxsig_default_initialize
+ *
+ * Description:
+ *   Set all signals to their default action.  This is called from
+ *   nxtask_start() to configure the newly started task.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SIG_DEFAULT
+int nxsig_default_initialize(void);
+
+/****************************************************************************
+ * Name: nxsig_stop_task
+ *
+ * Description:
+ *   This is the handler for the stop default action.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void nxsig_stop_task(int signo);
+
+/****************************************************************************
+ * Name: nxsig_abnormal_termination
+ *
+ * Description:
+ *   This is the handler for the abnormal termination default action.
+ *
+ * Input Parameters:
+ *   Standard signal handler parameters
+ *
+ * Returned Value:
+ *   int - Thread type
+ *
+ ****************************************************************************/
+
+int nxsig_abnormal_termination(int signo);
+
+#endif
+
 #ifdef __cplusplus
 }
 #endif

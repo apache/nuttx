@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/signal.h>
+
 #ifndef CONFIG_BUILD_KERNEL
 
 /****************************************************************************
@@ -137,6 +139,12 @@ static void cxx_initialize(void)
 void nxtask_startup(main_t entrypt, int argc, FAR char *argv[])
 {
   DEBUGASSERT(entrypt);
+
+#ifdef CONFIG_SIG_DEFAULT
+  /* Set up default signal actions */
+
+  nxsig_default_initialize();
+#endif
 
   /* If C++ initialization for static constructors is supported, then do
    * that first
