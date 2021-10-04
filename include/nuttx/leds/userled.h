@@ -65,7 +65,7 @@
 #define ULEDIOC_SETALL     _ULEDIOC(0x0003)
 
 /* Command:     ULEDIOC_GETALL
- * Description: Get the state of one LED.
+ * Description: Get the state of all LEDs.
  * Argument:    A write-able pointer to a userled_set_t memory location in
  *              which to return the LED state.
  * Return:      Zero (OK) on success.  Minus one will be returned on failure
@@ -119,12 +119,12 @@ struct userled_lowerhalf_s
 
   /* Set the current state of one LED */
 
-  CODE void (*ll_led)(FAR const struct userled_lowerhalf_s *lower,
-                      int led, bool ledon);
+  CODE void (*ll_setled)(FAR const struct userled_lowerhalf_s *lower,
+                         int led, bool ledon);
 
   /* Set the state of all LEDs */
 
-  CODE void (*ll_ledset)(FAR const struct userled_lowerhalf_s *lower,
+  CODE void (*ll_setall)(FAR const struct userled_lowerhalf_s *lower,
                          userled_set_t ledset);
 };
 
