@@ -624,6 +624,10 @@ menu "LPSPI Configuration"
 config S32K1XX_LPSPI_DWORD
 	bool "DWORD up to 64 bit transfer support"
 	default n
+
+config S32K1XX_LPSPI_HWPCS
+	bool "Use native hardware peripheral chip selects instead of GPIO pins"
+	default n
 	
 endmenu # LPSPI Configuration
 
