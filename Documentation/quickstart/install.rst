@@ -165,8 +165,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
        $ cd nuttx
        $ curl -L https://github.com/apache/incubator-nuttx/tarball/master -o nuttx.tar.gz 
        $ curl -L https://github.com/apache/incubator-nuttx-apps/tarball/master -o apps.tar.gz
-       $ tar zxf nuttx.tar.gz
-       $ tar zxf apps.tar.gz
+       $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
+       $ tar zxf apps.tar.gz --one-top-level=apps --strip-components 1
        
     There are also ``.zip`` archives available (useful for Windows users): just replace ``tarball`` with
     ``zipball``.
@@ -174,13 +174,13 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
   .. tab:: Download stable release
   
     Go to `releases <https://nuttx.apache.org/download/>`_ and choose a version to download. The following
-    example uses version 9.1.0:
+    example uses version 10.1.0:
 
     .. code-block:: console
     
        $ mkdir nuttx
        $ cd nuttx
-       $ curl -L https://downloads.apache.org/incubator/nuttx/9.1.0/apache-nuttx-9.1.0-incubating.tar.gz -o nuttx.tar.gz 
-       $ curl -L https://downloads.apache.org/incubator/nuttx/9.1.0/apache-nuttx-apps-9.1.0-incubating.tar.gz -o apps.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-10.1.0-incubating.tar.gz?action=download -o nuttx.tar.gz 
+       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-apps-10.1.0-incubating.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz
        $ tar zxf apps.tar.gz

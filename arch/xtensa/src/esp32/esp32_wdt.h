@@ -70,37 +70,37 @@ struct esp32_wdt_ops_s
 {
   /* WDT tasks */
 
-  CODE int (*start)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*stop)(FAR struct esp32_wdt_dev_s *dev);
+  int (*start)(struct esp32_wdt_dev_s *dev);
+  int (*stop)(struct esp32_wdt_dev_s *dev);
 
   /* WDT configuration */
 
-  CODE int (*enablewp)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*disablewp)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*pre)(FAR struct esp32_wdt_dev_s *dev, uint16_t value);
-  CODE int (*settimeout)(FAR struct esp32_wdt_dev_s *dev,
+  int (*enablewp)(struct esp32_wdt_dev_s *dev);
+  int (*disablewp)(struct esp32_wdt_dev_s *dev);
+  int (*pre)(struct esp32_wdt_dev_s *dev, uint16_t value);
+  int (*settimeout)(struct esp32_wdt_dev_s *dev,
                          uint32_t value, uint8_t stage);
-  CODE int (*feed)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*stg_conf)(FAR struct esp32_wdt_dev_s *dev,
+  int (*feed)(struct esp32_wdt_dev_s *dev);
+  int (*stg_conf)(struct esp32_wdt_dev_s *dev,
                                    uint8_t stage, uint8_t conf);
-  CODE uint16_t (*rtc_clk)(FAR struct esp32_wdt_dev_s *dev);
+  uint16_t (*rtc_clk)(struct esp32_wdt_dev_s *dev);
 
   /* WDT interrupts */
 
-  CODE int (*setisr)(FAR struct esp32_wdt_dev_s *dev, xcpt_t handler,
-                     FAR void * arg);
-  CODE int (*enableint)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*disableint)(FAR struct esp32_wdt_dev_s *dev);
-  CODE int (*ackint)(FAR struct esp32_wdt_dev_s *dev);
+  int (*setisr)(struct esp32_wdt_dev_s *dev, xcpt_t handler,
+                     void * arg);
+  int (*enableint)(struct esp32_wdt_dev_s *dev);
+  int (*disableint)(struct esp32_wdt_dev_s *dev);
+  int (*ackint)(struct esp32_wdt_dev_s *dev);
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id);
+struct esp32_wdt_dev_s *esp32_wdt_init(uint8_t wdt_id);
 void esp32_wdt_early_deinit(void);
-int esp32_wdt_deinit(FAR struct esp32_wdt_dev_s *dev);
-bool esp32_wdt_is_running(FAR struct esp32_wdt_dev_s *dev);
+int esp32_wdt_deinit(struct esp32_wdt_dev_s *dev);
+bool esp32_wdt_is_running(struct esp32_wdt_dev_s *dev);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WDT_H */

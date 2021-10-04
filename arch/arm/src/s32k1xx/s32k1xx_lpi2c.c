@@ -105,22 +105,11 @@
 #  define CONFIG_I2C_NTRACE 32
 #endif
 
-#ifdef CONFIG_I2C_SLAVE
-#  error I2C slave logic is not supported yet for S32K1XX
-#endif
-
 #define LPI2C_MASTER    1
 #define LPI2C_SLAVE     2
 
-#define MKI2C_OUTPUT(p) (((p) & GPIO_PADMUX_MASK) | \
-                         IOMUX_OPENDRAIN | IOMUX_DRIVE_33OHM | \
-                         IOMUX_SLEW_SLOW | (5 << GPIO_ALT_SHIFT) | \
-                         IOMUX_PULL_NONE | GPIO_OUTPUT_ONE)
-
-#define MKI2C_INPUT(p) (((p) & GPIO_PADMUX_MASK) | \
-                        IOMUX_DRIVE_HIZ | IOMUX_SLEW_SLOW | \
-                        IOMUX_CMOS_INPUT | (5 << GPIO_ALT_SHIFT) | \
-                        IOMUX_PULL_NONE)
+#define MKI2C_OUTPUT(p) (((p) & (~_PIN_MODE_MASK)) | GPIO_OUTPUT | GPIO_OUTPUT_ONE)
+#define MKI2C_INPUT(p)  (((p) & (~_PIN_MODE_MASK)) | GPIO_INPUT)
 
 /****************************************************************************
  * Private Types
@@ -142,10 +131,10 @@ enum s32k1xx_trace_e
   I2CEVENT_NONE = 0,      /* No events have occurred with this status */
   I2CEVENT_SENDADDR,      /* Start/Master bit set and address sent, param = msgc */
   I2CEVENT_SENDBYTE,      /* Send byte, param = dcnt */
-  I2CEVENT_RCVBYTE,       /* Read more dta, param = dcnt */
+  I2CEVENT_RCVBYTE,       /* Read more data, param = dcnt */
   I2CEVENT_NOSTART,       /* BTF on last byte with no restart, param = msgc */
   I2CEVENT_STARTRESTART,  /* Last byte sent, re-starting, param = msgc */
-  I2CEVENT_STOP,          /* Last byte sten, send stop, param = 0 */
+  I2CEVENT_STOP,          /* Last byte sent, send stop, param = 0 */
   I2CEVENT_ERROR          /* Error occurred, param = 0 */
 };
 
@@ -160,7 +149,7 @@ struct s32k1xx_trace_s
   clock_t time;                  /* First of event or first status */
 };
 
-/* I2C Device hardware configuration */
+/* I2C device hardware configuration */
 
 struct s32k1xx_lpi2c_config_s
 {
@@ -270,7 +259,7 @@ static inline void
 static inline uint32_t
   s32k1xx_lpi2c_getstatus(FAR struct s32k1xx_lpi2c_priv_s *priv);
 
-static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s * priv);
+static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv);
 
 #ifndef CONFIG_I2C_POLLED
 static int s32k1xx_lpi2c_isr(int irq, void *context, FAR void *arg);
@@ -308,9 +297,9 @@ static const char *g_trace_names[] =
 
 static const struct i2c_ops_s s32k1xx_lpi2c_ops =
 {
-  .transfer = s32k1xx_lpi2c_transfer
+  .transfer = s32k1xx_lpi2c_transfer,
 #ifdef CONFIG_I2C_RESET
-  , .reset  = s32k1xx_lpi2c_reset
+  .reset  = s32k1xx_lpi2c_reset,
 #endif
 };
 
@@ -325,11 +314,7 @@ static const struct s32k1xx_lpi2c_config_s s32k1xx_lpi2c0_config =
   .filtsda    = CONFIG_LPI2C0_FILTSDA,
   .scl_pin    = PIN_LPI2C0_SCL,
   .sda_pin    = PIN_LPI2C0_SDA,
-#ifndef CONFIG_I2C_SLAVE
   .mode       = LPI2C_MASTER,
-#else
-  .mode       = LPI2C_SLAVE,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .irq        = S32K1XX_IRQ_LPI2C0M,
 #endif
@@ -346,9 +331,9 @@ static struct s32k1xx_lpi2c_priv_s s32k1xx_lpi2c0_priv =
   .ptr        = NULL,
   .dcnt       = 0,
   .flags      = 0,
-  .status     = 0
+  .status     = 0,
 };
-#endif
+#endif /* CONFIG_S32K1XX_LPI2C0 */
 
 #ifdef CONFIG_S32K1XX_LPI2C1
 static const struct s32k1xx_lpi2c_config_s s32k1xx_lpi2c1_config =
@@ -359,11 +344,7 @@ static const struct s32k1xx_lpi2c_config_s s32k1xx_lpi2c1_config =
   .filtsda    = CONFIG_LPI2C1_FILTSDA,
   .scl_pin    = PIN_LPI2C1_SCL,
   .sda_pin    = PIN_LPI2C1_SDA,
-#ifndef CONFIG_I2C_SLAVE
   .mode       = LPI2C_MASTER,
-#else
-  .mode       = LPI2C_SLAVE,
-#endif
 #ifndef CONFIG_I2C_POLLED
   .irq        = S32K1XX_IRQ_LPI2C1M,
 #endif
@@ -380,9 +361,9 @@ static struct s32k1xx_lpi2c_priv_s s32k1xx_lpi2c1_priv =
   .ptr        = NULL,
   .dcnt       = 0,
   .flags      = 0,
-  .status     = 0
+  .status     = 0,
 };
-#endif
+#endif /* CONFIG_S32K1XX_LPI2C1 */
 
 /****************************************************************************
  * Private Functions
@@ -592,12 +573,14 @@ static inline int
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MIER_OFFSET, 0);
     }
 
+#if 0
   /* Enable Interrupts when slave mode */
 
   else
     {
       s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_SIER_OFFSET, 0);
     }
+#endif
 
   leave_critical_section(flags);
   return ret;
@@ -1199,7 +1182,7 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
 
   s32k1xx_lpi2c_tracenew(priv, status);
 
-  /* After an error we can get an SDF  */
+  /* After an error we can get a STOP Detect Flag  */
 
   if (priv->intstate == INTSTATE_DONE && (status & LPI2C_MSR_SDF) != 0)
     {
@@ -1238,7 +1221,7 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
         {
           s32k1xx_lpi2c_traceevent(priv, I2CEVENT_RCVBYTE, priv->dcnt);
 
-          /* No interrupts or context switches should occur in the following
+          /* No interrupts or contex switches should occur in the following
            * sequence. Otherwise, additional bytes may be sent by the device.
            */
 
@@ -1272,9 +1255,9 @@ static int s32k1xx_lpi2c_isr_process(struct s32k1xx_lpi2c_priv_s *priv)
     {
       if (priv->msgc > 0 && priv->msgv != NULL)
         {
-          priv->ptr        = priv->msgv->buffer;
-          priv->dcnt    = priv->msgv->length;
-          priv->flags    = priv->msgv->flags;
+          priv->ptr   = priv->msgv->buffer;
+          priv->dcnt  = priv->msgv->length;
+          priv->flags = priv->msgv->flags;
 
           if ((priv->msgv->flags & I2C_M_NOSTART) == 0)
             {
@@ -1431,9 +1414,9 @@ static int s32k1xx_lpi2c_isr(int irq, void *context, FAR void *arg)
 
 static int s32k1xx_lpi2c_init(FAR struct s32k1xx_lpi2c_priv_s *priv)
 {
-  /* Power-up and configure GPIOs .
+  /* Power-up and configure pins.
    *
-   * NOTE: Clocking to the LPSPI peripheral must be provided by
+   * NOTE: Clocking to the LPI2C peripheral must be provided by
    * board-specific logic as part of the clock configuration logic.
    */
 
@@ -1447,7 +1430,7 @@ static int s32k1xx_lpi2c_init(FAR struct s32k1xx_lpi2c_priv_s *priv)
   s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MCR_OFFSET, LPI2C_MCR_RST);
   s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MCR_OFFSET, 0);
 
-  /* Disable doze mode (Set DOZEN bit in 1 to disable) */
+  /* Disable doze mode (Set DOZEN bit to 1 to disable) */
 
   s32k1xx_lpi2c_putreg(priv, S32K1XX_LPI2C_MCR_OFFSET, LPI2C_MCR_DOZEN);
 
@@ -1585,7 +1568,7 @@ static int s32k1xx_lpi2c_transfer(FAR struct i2c_master_s *dev,
 
   priv->status = 0;
 
-  /* Wait for an ISR, if there was a timeout, fetch latest status to get
+  /* Wait for ISR. If there was a timeout, fetch latest status to get
    * the BUSY flag.
    */
 
@@ -1820,7 +1803,7 @@ FAR struct i2c_master_s *s32k1xx_i2cbus_initialize(int port)
     }
 
   /* Initialize private data for the first time, increment reference count,
-   * power-up hardware and configure GPIOs.
+   * power-up hardware and configure pins.
    */
 
   flags = enter_critical_section();

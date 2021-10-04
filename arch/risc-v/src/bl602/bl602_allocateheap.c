@@ -57,9 +57,9 @@ extern uint8_t _heap_wifi_size;
  *
  ****************************************************************************/
 
-void up_allocate_heap(FAR void **heap_start, size_t *heap_size)
+void up_allocate_heap(void **heap_start, size_t *heap_size)
 {
-  *heap_start = (FAR void *)&_heap_start;
+  *heap_start = (void *)&_heap_start;
   *heap_size  = (size_t)&_heap_size;
 }
 

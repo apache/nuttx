@@ -140,7 +140,7 @@ void esp_wifi_free_eb(void *eb);
  *
  ****************************************************************************/
 
-int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event);
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event);
 
 #ifdef ESP32C3_WLAN_HAS_STA
 
@@ -194,7 +194,7 @@ int esp_wifi_sta_stop(void);
  *
  ****************************************************************************/
 
-int esp_wifi_sta_send_data(FAR void *pbuf, size_t len);
+int esp_wifi_sta_send_data(void *pbuf, size_t len);
 
 /****************************************************************************
  * Name: esp_wifi_sta_register_recv_cb

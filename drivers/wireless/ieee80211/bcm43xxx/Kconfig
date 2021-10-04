@@ -109,4 +109,11 @@ config IEEE80211_BROADCOM_DMABUF_ALIGNMENT
 		This parameter should be set depending on
 		the used SOC DMA configuration.
 
+config IEEE80211_BROADCOM_FRAME_POOL_SIZE
+	int "SDPCM frame pool size"
+	default 8
+	---help---
+		This parameter sets the size of the shared SDPCM frame pool
+		used for both RX and TX transfers.
+
 endif # IEEE80211_BROADCOM_FULLMAC

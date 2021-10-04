@@ -133,7 +133,7 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-int riscv_swint(int irq, FAR void *context, FAR void *arg)
+int riscv_swint(int irq, void *context, void *arg)
 {
   uint64_t *regs = (uint64_t *)context;
 
@@ -254,7 +254,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
       /* R0=SYS_task_start:  This a user task start
        *
        *   void up_task_start(main_t taskentry, int argc,
-       *                      FAR char *argv[]) noreturn_function;
+       *                      char *argv[]) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -318,7 +318,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
       /* R0=SYS_pthread_exit:  This pthread_exit call in user-space
        *
        *   void up_pthread_exit(pthread_exitroutine_t exit,
-       *                        FAR void *exit_value)
+       *                        void *exit_value)
        *
        * At this point, the following values are saved in context:
        *
@@ -348,7 +348,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
       /* R0=SYS_signal_handler:  This a user signal handler callback
        *
        * void signal_handler(_sa_sigaction_t sighand, int signo,
-       *                     FAR siginfo_t *info, FAR void *ucontext);
+       *                     siginfo_t *info, void *ucontext);
        *
        * At this point, the following values are saved in context:
        *
@@ -421,7 +421,7 @@ int riscv_swint(int irq, FAR void *context, FAR void *arg)
       default:
         {
 #ifdef CONFIG_LIB_SYSCALL
-          FAR struct tcb_s *rtcb = nxsched_self();
+          struct tcb_s *rtcb = nxsched_self();
           int index = rtcb->xcp.nsyscalls;
 
           /* Verify that the SYS call number is within range */

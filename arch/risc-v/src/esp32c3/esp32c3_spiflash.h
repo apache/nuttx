@@ -77,7 +77,7 @@ struct mtd_dev_s *esp32c3_spiflash_mtd(void);
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
                                                      uint32_t mtd_size);
 
 /****************************************************************************

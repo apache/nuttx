@@ -72,7 +72,7 @@ extern void ets_set_appcpu_boot_addr(uint32_t start);
  ****************************************************************************/
 
 #if 0 /* Was useful in solving some startup problems */
-static inline void xtensa_registerdump(FAR struct tcb_s *tcb)
+static inline void xtensa_registerdump(struct tcb_s *tcb)
 {
   _info("CPU%d:\n", up_cpu_index());
 
@@ -130,7 +130,7 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
 void xtensa_appcpu_start(void)
 {
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
   register uint32_t sp;
 
 #ifdef CONFIG_STACK_COLORATION

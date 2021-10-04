@@ -33,6 +33,8 @@
 #include "xtensa.h"
 
 #include "hardware/esp32s2_tim.h"
+#include "hardware/esp32s2_system.h"
+#include "hardware/esp32s2_systimer.h"
 
 #include "esp32s2_tim.h"
 #include "esp32s2_cpuint.h"
@@ -50,7 +52,7 @@
 
 struct esp32s2_tim_priv_s
 {
-  FAR struct esp32s2_tim_ops_s    *ops;
+  struct esp32s2_tim_ops_s    *ops;
   uint8_t                          gid;  /* Group instance */
   uint8_t                          tid;  /* Timer instance */
   uint8_t                      int_pri;
@@ -66,34 +68,43 @@ struct esp32s2_tim_priv_s
 
 /* TIM operations ***********************************************************/
 
-static void esp32s2_tim_start(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_stop(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_clear(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_setmode(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_start(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_stop(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_clear(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_setmode(struct esp32s2_tim_dev_s *dev,
                                 enum esp32s2_tim_mode_e mode);
-static void esp32s2_tim_setclksrc(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setclksrc(struct esp32s2_tim_dev_s *dev,
                                   enum esp32s2_tim_clksrc_e src);
-static void esp32s2_tim_setpre(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setpre(struct esp32s2_tim_dev_s *dev,
                                uint16_t pre);
-static void esp32s2_tim_getcounter(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setstep(struct esp32s2_tim_dev_s *dev,
+                                enum esp32s2_tim_clksrc_e src,
+                                uint16_t ticks);
+static void esp32s2_tim_getcounter(struct esp32s2_tim_dev_s *dev,
                                    uint64_t *value);
-static void esp32s2_tim_setcounter(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setcounter(struct esp32s2_tim_dev_s *dev,
                                    uint64_t value);
-static void esp32s2_tim_reload_now(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_getalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_reload_now(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_getalarmvalue(struct esp32s2_tim_dev_s *dev,
                                       uint64_t *value);
-static void esp32s2_tim_setalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_getperiod(struct esp32s2_tim_dev_s *dev,
+                                  uint32_t *value);
+static void esp32s2_tim_setalarmvalue(struct esp32s2_tim_dev_s *dev,
                                       uint64_t value);
-static void esp32s2_tim_setalarm(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setperiod(struct esp32s2_tim_dev_s *dev,
+                                  uint32_t value);
+static void esp32s2_tim_setworkmode(struct esp32s2_tim_dev_s *dev,
+                                    enum esp32s2_tim_work_mode_e mode);
+static void esp32s2_tim_setalarm(struct esp32s2_tim_dev_s *dev,
                                  bool enable);
-static void esp32s2_tim_setautoreload(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setautoreload(struct esp32s2_tim_dev_s *dev,
                                       bool enable);
-static int esp32s2_tim_setisr(FAR struct esp32s2_tim_dev_s *dev,
-                              xcpt_t handler, FAR void * arg);
-static void esp32s2_tim_enableint(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_disableint(FAR struct esp32s2_tim_dev_s *dev);
-static void esp32s2_tim_ackint(FAR struct esp32s2_tim_dev_s *dev);
-static int  esp32s2_tim_checkint(FAR struct esp32s2_tim_dev_s *dev);
+static int esp32s2_tim_setisr(struct esp32s2_tim_dev_s *dev,
+                              xcpt_t handler, void * arg);
+static void esp32s2_tim_enableint(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_disableint(struct esp32s2_tim_dev_s *dev);
+static void esp32s2_tim_ackint(struct esp32s2_tim_dev_s *dev);
+static int  esp32s2_tim_checkint(struct esp32s2_tim_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -110,12 +121,44 @@ struct esp32s2_tim_ops_s esp32s2_tim_ops =
   .getcounter    = esp32s2_tim_getcounter,
   .setclksrc     = esp32s2_tim_setclksrc,
   .setpre        = esp32s2_tim_setpre,
+  .setstep       = NULL,
   .setcounter    = esp32s2_tim_setcounter,
   .reloadnow     = esp32s2_tim_reload_now,
   .getalarmvalue = esp32s2_tim_getalarmvalue,
+  .getperiod     = NULL,
   .setalarmvalue = esp32s2_tim_setalarmvalue,
+  .setperiod     = NULL,
+  .setworkmode   = NULL,
   .setalarm      = esp32s2_tim_setalarm,
   .setautoreload = esp32s2_tim_setautoreload,
+  .setisr        = esp32s2_tim_setisr,
+  .enableint     = esp32s2_tim_enableint,
+  .disableint    = esp32s2_tim_disableint,
+  .ackint        = esp32s2_tim_ackint,
+  .checkint      = esp32s2_tim_checkint
+};
+
+/* ESP32S2 SYSTIMER ops */
+
+struct esp32s2_tim_ops_s esp32s2_systim_ops =
+{
+  .start         = NULL,  /* Systimer doesn't support releasing counter */
+  .stop          = NULL,  /* Systimer doesn't support halting counter */
+  .clear         = esp32s2_tim_clear,
+  .setmode       = NULL,
+  .getcounter    = esp32s2_tim_getcounter,
+  .setclksrc     = NULL,
+  .setpre        = NULL,
+  .setstep       = esp32s2_tim_setstep,
+  .setcounter    = esp32s2_tim_setcounter,
+  .reloadnow     = esp32s2_tim_reload_now,
+  .getalarmvalue = esp32s2_tim_getalarmvalue,
+  .getperiod     = esp32s2_tim_getperiod,
+  .setalarmvalue = esp32s2_tim_setalarmvalue,
+  .setperiod     = esp32s2_tim_setperiod,
+  .setworkmode   = esp32s2_tim_setworkmode,
+  .setalarm      = esp32s2_tim_setalarm,
+  .setautoreload = NULL,
   .setisr        = esp32s2_tim_setisr,
   .enableint     = esp32s2_tim_enableint,
   .disableint    = esp32s2_tim_disableint,
@@ -188,6 +231,22 @@ struct esp32s2_tim_priv_s g_esp32s2_tim3_priv =
 };
 #endif
 
+#ifdef CONFIG_ESP32S2_RT_TIMER
+/* SYSTIMER */
+
+struct esp32s2_tim_priv_s g_esp32s2_tim4_priv =
+{
+  .ops        = &esp32s2_systim_ops,
+  .gid        = -ENODEV,                       /* There's no group in systimer */
+  .tid        = SYSTIMER_COMP0,                /* Systimer contains 1 counter and 3 comps */
+  .int_pri    = ESP32S2_INT_PRIO_DEF,
+  .periph     = ESP32S2_PERI_SYSTIMER_TARGET0, /* Peripheral ID */
+  .irq        = ESP32S2_IRQ_SYSTIMER_TARGET0,  /* Interrupt ID */
+  .cpuint     = -ENOMEM,                       /* CPU interrupt assigned to this timer */
+  .inuse      = false,
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -203,9 +262,9 @@ struct esp32s2_tim_priv_s g_esp32s2_tim3_priv =
  *
  ****************************************************************************/
 
-static void esp32s2_tim_start(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_start(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -230,9 +289,9 @@ static void esp32s2_tim_start(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32s2_tim_stop(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_stop(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -257,7 +316,7 @@ static void esp32s2_tim_stop(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32s2_tim_clear(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_clear(struct esp32s2_tim_dev_s *dev)
 {
   uint64_t clear_value = 0;
 
@@ -279,10 +338,10 @@ static void esp32s2_tim_clear(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setmode(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setmode(struct esp32s2_tim_dev_s *dev,
                                 enum esp32s2_tim_mode_e mode)
 {
-  struct esp32s2_tim_priv_s *priv  = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv  = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -325,10 +384,10 @@ static void esp32s2_tim_setmode(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setclksrc(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setclksrc(struct esp32s2_tim_dev_s *dev,
                                   enum esp32s2_tim_clksrc_e src)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -356,10 +415,10 @@ static void esp32s2_tim_setclksrc(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setpre(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setpre(struct esp32s2_tim_dev_s *dev,
                                uint16_t pre)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
   uint32_t mask = (uint32_t)pre << TIMG_T0_DIVIDER_S;
 
   DEBUGASSERT(dev);
@@ -371,6 +430,37 @@ static void esp32s2_tim_setpre(FAR struct esp32s2_tim_dev_s *dev,
   else
     {
       modifyreg32(TIMG_T1CONFIG_REG(priv->gid), TIMG_T1_DIVIDER_M, mask);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s2_tim_setstep
+ *
+ * Description:
+ *    Set the timer increment step, i.e, defines the time interval in ticks
+ *    used by the counter.
+ *    NOTE: dev pointer is not used because this feature is not available
+ *    for Generic Timers and it doesn't rely in any systimer comparator.
+ *
+ * Parameters:
+ *   src           - Define the clock source for the ticks.
+ *   ticks         - Number of ticks to define 1 increment step.
+ *
+ ****************************************************************************/
+
+static void esp32s2_tim_setstep(struct esp32s2_tim_dev_s *dev,
+                                enum esp32s2_tim_clksrc_e src,
+                                uint16_t ticks)
+{
+  if (src == ESP32S2_TIM_PLL_CLK)
+    {
+      REG_SET_FIELD(SYSTIMER_STEP_REG, SYSTIMER_TIMER_PLL_STEP,
+                    ticks & SYSTIMER_TIMER_PLL_STEP_V);
+    }
+  else if(src == ESP32S2_TIM_XTAL_CLK)
+    {
+      REG_SET_FIELD(SYSTIMER_STEP_REG, SYSTIMER_TIMER_XTAL_STEP,
+                    ticks & SYSTIMER_TIMER_XTAL_STEP_V);
     }
 }
 
@@ -387,43 +477,64 @@ static void esp32s2_tim_setpre(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_getcounter(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_getcounter(struct esp32s2_tim_dev_s *dev,
                                    uint64_t *value)
 {
   uint32_t value_32;
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
   *value = 0;
-
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      /* Dummy value (0 or 1) to latch the counter value to read it */
+      /* Latch counter */
 
-      putreg32(BIT(0), TIMG_T0UPDATE_REG(priv->gid));
+      modifyreg32(SYSTIMER_UPDATE_REG, 0, SYSTIMER_TIMER_UPDATE);
+
+      /* Wait until result is ready */
+
+      while (!REG_GET_FIELD(SYSTIMER_UPDATE_REG,
+             SYSTIMER_TIMER_VALUE_VALID));
 
       /* Read value */
 
-      value_32  = getreg32(TIMG_T0HI_REG(priv->gid)); /* High 32 bits */
+      value_32  = getreg32(SYSTIMER_VALUE_HI_REG); /* High 32 bits */
       *value   |= (uint64_t)value_32;
       *value  <<= SHIFT_32;
-      value_32  = getreg32(TIMG_T0LO_REG(priv->gid)); /* Low 32 bits */
+      value_32  = getreg32(SYSTIMER_VALUE_LO_REG); /* Low 32 bits */
       *value   |= (uint64_t)value_32;
     }
   else
     {
-      /* Dummy value (0 or 1) to latch the counter value to read it */
+      if (priv->tid == TIMER0)
+        {
+          /* Dummy value (0 or 1) to latch the counter value to read it */
 
-      putreg32(BIT(0), TIMG_T1UPDATE_REG(priv->gid));
+          putreg32(BIT(0), TIMG_T0UPDATE_REG(priv->gid));
 
-      /* Read value */
+          /* Read value */
 
-      value_32  = getreg32(TIMG_T1HI_REG(priv->gid)); /* High 32 bits */
-      *value   |= (uint64_t)value_32;
-      *value  <<= SHIFT_32;
-      value_32  = getreg32(TIMG_T1LO_REG(priv->gid)); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+          value_32  = getreg32(TIMG_T0HI_REG(priv->gid)); /* High 32 bits */
+          *value   |= (uint64_t)value_32;
+          *value  <<= SHIFT_32;
+          value_32  = getreg32(TIMG_T0LO_REG(priv->gid)); /* Low 32 bits */
+          *value   |= (uint64_t)value_32;
+        }
+      else
+        {
+          /* Dummy value (0 or 1) to latch the counter value to read it */
+
+          putreg32(BIT(0), TIMG_T1UPDATE_REG(priv->gid));
+
+          /* Read value */
+
+          value_32  = getreg32(TIMG_T1HI_REG(priv->gid)); /* High 32 bits */
+          *value   |= (uint64_t)value_32;
+          *value  <<= SHIFT_32;
+          value_32  = getreg32(TIMG_T1LO_REG(priv->gid)); /* Low 32 bits */
+          *value   |= (uint64_t)value_32;
+        }
     }
 }
 
@@ -436,6 +547,7 @@ static void esp32s2_tim_getcounter(FAR struct esp32s2_tim_dev_s *dev,
  *   the auto-reload before.
  *   If you want the counter to be loaded instantly, call
  *   esp32s2_tim_reload_now() after this function.
+ *   NOTE: Systimer has 1 counter for 3 comparators.
  *
  * Parameters:
  *   dev           - Pointer to the timer driver struct.
@@ -443,10 +555,10 @@ static void esp32s2_tim_getcounter(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setcounter(FAR struct esp32s2_tim_dev_s *dev,
-                                  uint64_t value)
+static void esp32s2_tim_setcounter(struct esp32s2_tim_dev_s *dev,
+                                   uint64_t value)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
   uint64_t low_64 = value & UINT32_MAX;
   uint64_t high_64 = (value >> SHIFT_32);
 
@@ -454,15 +566,23 @@ static void esp32s2_tim_setcounter(FAR struct esp32s2_tim_dev_s *dev,
 
   /* Set the counter value */
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      putreg32((uint32_t)low_64, TIMG_T0LOADLO_REG(priv->gid));
-      putreg32((uint32_t)high_64, TIMG_T0LOADHI_REG(priv->gid));
+      putreg32((uint32_t)low_64, SYSTIMER_LOAD_LO_REG);
+      putreg32((uint32_t)high_64, SYSTIMER_LOAD_HI_REG);
     }
   else
     {
-      putreg32((uint32_t)low_64, TIMG_T1LOADLO_REG(priv->gid));
-      putreg32((uint32_t)high_64, TIMG_T1LOADHI_REG(priv->gid));
+      if (priv->tid == TIMER0)
+        {
+          putreg32((uint32_t)low_64, TIMG_T0LOADLO_REG(priv->gid));
+          putreg32((uint32_t)high_64, TIMG_T0LOADHI_REG(priv->gid));
+        }
+      else
+        {
+          putreg32((uint32_t)low_64, TIMG_T1LOADLO_REG(priv->gid));
+          putreg32((uint32_t)high_64, TIMG_T1LOADHI_REG(priv->gid));
+        }
     }
 }
 
@@ -478,21 +598,28 @@ static void esp32s2_tim_setcounter(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_reload_now(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_reload_now(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
   /* Dummy value to trigger reloading  */
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      putreg32(BIT(0), TIMG_T0LOAD_REG(priv->gid));
+      putreg32(BIT(31), SYSTIMER_LOAD_REG);
     }
   else
     {
-      putreg32(BIT(0), TIMG_T1LOAD_REG(priv->gid));
+      if (priv->tid == TIMER0)
+        {
+          putreg32(BIT(0), TIMG_T0LOAD_REG(priv->gid));
+        }
+      else
+        {
+          putreg32(BIT(0), TIMG_T1LOAD_REG(priv->gid));
+        }
     }
 }
 
@@ -501,6 +628,8 @@ static void esp32s2_tim_reload_now(FAR struct esp32s2_tim_dev_s *dev)
  *
  * Description:
  *   Get the alarm value.
+ *   NOTE: For systimer, the returned alarm value is the Time-Delay Alarm.
+ *   See TRM for more details.
  *
  * Parameters:
  *   dev           - Pointer to the timer driver struct.
@@ -508,11 +637,11 @@ static void esp32s2_tim_reload_now(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32s2_tim_getalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_getalarmvalue(struct esp32s2_tim_dev_s *dev,
                                       uint64_t *value)
 {
   uint32_t value_32;
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -520,21 +649,63 @@ static void esp32s2_tim_getalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
 
   /* Read value */
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      value_32  = getreg32(TIMG_T0ALARMHI_REG(priv->gid)); /* High 32 bits */
+      value_32  = getreg32(SYSTIMER_TARGET0_HI_REG); /* High 32 bits */
       *value   |= (uint64_t)value_32;
       *value  <<= SHIFT_32;
-      value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->gid)); /* Low 32 bits */
+      value_32  = getreg32(SYSTIMER_TARGET0_LO_REG); /* Low 32 bits */
       *value   |= (uint64_t)value_32;
     }
   else
     {
-      value_32  = getreg32(TIMG_T1ALARMHI_REG(priv->gid)); /* High 32 bits */
-      *value   |= (uint64_t)value_32;
-      *value  <<= SHIFT_32;
-      value_32  = getreg32(TIMG_T1ALARMLO_REG(priv->gid)); /* Low 32 bits */
-      *value   |= (uint64_t)value_32;
+      if (priv->tid == TIMER0)
+        {
+          value_32  = getreg32(TIMG_T0ALARMHI_REG(priv->gid)); /* High 32 bits */
+          *value   |= (uint64_t)value_32;
+          *value  <<= SHIFT_32;
+          value_32  = getreg32(TIMG_T0ALARMLO_REG(priv->gid)); /* Low 32 bits */
+          *value   |= (uint64_t)value_32;
+        }
+      else
+        {
+          value_32  = getreg32(TIMG_T1ALARMHI_REG(priv->gid)); /* High 32 bits */
+          *value   |= (uint64_t)value_32;
+          *value  <<= SHIFT_32;
+          value_32  = getreg32(TIMG_T1ALARMLO_REG(priv->gid)); /* Low 32 bits */
+          *value   |= (uint64_t)value_32;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s2_tim_getperiod
+ *
+ * Description:
+ *   This function is only available for Systimer. And it's intended to get
+ *   the alarm when it's working on periodic mode.
+ *
+ * Parameters:
+ *   dev           - Pointer to the timer driver struct.
+ *   value         - Pointer to retrieve the current configured alarm value.
+ *
+ ****************************************************************************/
+
+static void esp32s2_tim_getperiod(struct esp32s2_tim_dev_s *dev,
+                                  uint32_t *value)
+{
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
+
+  DEBUGASSERT(dev);
+
+  *value = 0;
+
+  /* Read value */
+
+  if (priv->tid == SYSTIMER_COMP0)
+    {
+      *value  = REG_GET_FIELD(SYSTIMER_TARGET0_CONF_REG,
+                              SYSTIMER_TARGET0_PERIOD);
     }
 }
 
@@ -551,10 +722,10 @@ static void esp32s2_tim_getalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setalarmvalue(struct esp32s2_tim_dev_s *dev,
                                       uint64_t value)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
   uint64_t low_64  = value & UINT32_MAX;
   uint64_t high_64 = (value >> SHIFT_32);
 
@@ -562,15 +733,81 @@ static void esp32s2_tim_setalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
 
   /* Set an alarm value */
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      putreg32((uint32_t)low_64, TIMG_T0ALARMLO_REG(priv->gid));
-      putreg32((uint32_t)high_64, TIMG_T0ALARMHI_REG(priv->gid));
+      putreg32((uint32_t)low_64, SYSTIMER_TARGET0_LO_REG);
+      putreg32((uint32_t)high_64, SYSTIMER_TARGET0_HI_REG);
     }
   else
     {
-      putreg32((uint32_t)low_64, TIMG_T1ALARMLO_REG(priv->gid));
-      putreg32((uint32_t)high_64, TIMG_T1ALARMHI_REG(priv->gid));
+      if (priv->tid == TIMER0)
+        {
+          putreg32((uint32_t)low_64, TIMG_T0ALARMLO_REG(priv->gid));
+          putreg32((uint32_t)high_64, TIMG_T0ALARMHI_REG(priv->gid));
+        }
+      else
+        {
+          putreg32((uint32_t)low_64, TIMG_T1ALARMLO_REG(priv->gid));
+          putreg32((uint32_t)high_64, TIMG_T1ALARMHI_REG(priv->gid));
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s2_tim_setperiod
+ *
+ * Description:
+ *   This function is only available for Systimer. And it's intended to set
+ *   the alarm when it's working on periodic mode.
+ *
+ * Parameters:
+ *   dev           - Pointer to the timer driver struct.
+ *   value         - Period value.
+ *
+ ****************************************************************************/
+
+static void esp32s2_tim_setperiod(struct esp32s2_tim_dev_s *dev,
+                                  uint32_t value)
+{
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
+
+  DEBUGASSERT(dev);
+
+  /* Read value */
+
+  if (priv->tid == SYSTIMER_COMP0)
+    {
+      REG_SET_FIELD(SYSTIMER_TARGET0_CONF_REG,
+                    SYSTIMER_TARGET0_PERIOD, value);
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s2_tim_setworkmode
+ *
+ * Description:
+ *   This function is only available for Systimer. And it's intended to set
+ *   the work mode: Time-Delay alarm mode or periodic alarm mode.
+ *
+ * Parameters:
+ *   dev           - Pointer to the timer driver struct.
+ *   value         - Period value.
+ *
+ ****************************************************************************/
+
+static void esp32s2_tim_setworkmode(struct esp32s2_tim_dev_s *dev,
+                                    enum esp32s2_tim_work_mode_e mode)
+{
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
+
+  DEBUGASSERT(dev);
+
+  /* Read value */
+
+  if (priv->tid == SYSTIMER_COMP0)
+    {
+      REG_SET_FIELD(SYSTIMER_TARGET0_CONF_REG,
+                    SYSTIMER_TARGET0_PERIOD_MODE, mode);
     }
 }
 
@@ -587,33 +824,53 @@ static void esp32s2_tim_setalarmvalue(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setalarm(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setalarm(struct esp32s2_tim_dev_s *dev,
                                  bool enable)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
       if (enable)
         {
-          modifyreg32(TIMG_T0CONFIG_REG(priv->gid), 0, TIMG_T0_ALARM_EN_M);
+          modifyreg32(SYSTIMER_TARGET0_CONF_REG, 0,
+                      SYSTIMER_TARGET0_WORK_EN);
         }
       else
         {
-          modifyreg32(TIMG_T0CONFIG_REG(priv->gid), TIMG_T0_ALARM_EN_M, 0);
+          modifyreg32(SYSTIMER_TARGET0_CONF_REG,
+                      SYSTIMER_TARGET0_WORK_EN, 0);
         }
     }
   else
     {
-      if (enable)
+      if (priv->tid == TIMER0)
         {
-          modifyreg32(TIMG_T1CONFIG_REG(priv->gid), 0, TIMG_T1_ALARM_EN_M);
+          if (enable)
+            {
+              modifyreg32(TIMG_T0CONFIG_REG(priv->gid), 0,
+                          TIMG_T0_ALARM_EN_M);
+            }
+          else
+            {
+              modifyreg32(TIMG_T0CONFIG_REG(priv->gid),
+                          TIMG_T0_ALARM_EN_M, 0);
+            }
         }
       else
         {
-          modifyreg32(TIMG_T1CONFIG_REG(priv->gid), TIMG_T1_ALARM_EN_M, 0);
+          if (enable)
+            {
+              modifyreg32(TIMG_T1CONFIG_REG(priv->gid),
+                          0, TIMG_T1_ALARM_EN_M);
+            }
+          else
+            {
+              modifyreg32(TIMG_T1CONFIG_REG(priv->gid),
+                          TIMG_T1_ALARM_EN_M, 0);
+            }
         }
     }
 }
@@ -632,10 +889,10 @@ static void esp32s2_tim_setalarm(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32s2_tim_setautoreload(FAR struct esp32s2_tim_dev_s *dev,
+static void esp32s2_tim_setautoreload(struct esp32s2_tim_dev_s *dev,
                                    bool enable)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
@@ -683,10 +940,10 @@ static void esp32s2_tim_setautoreload(FAR struct esp32s2_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static int esp32s2_tim_setisr(FAR struct esp32s2_tim_dev_s *dev,
-                              xcpt_t handler, FAR void *arg)
+static int esp32s2_tim_setisr(struct esp32s2_tim_dev_s *dev,
+                              xcpt_t handler, void *arg)
 {
-  FAR struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
   int ret = OK;
 
   DEBUGASSERT(dev);
@@ -729,7 +986,14 @@ static int esp32s2_tim_setisr(FAR struct esp32s2_tim_dev_s *dev,
           esp32s2_free_cpuint(priv->periph);
         }
 
-      priv->cpuint = esp32s2_alloc_levelint(priv->int_pri);
+      if (priv->tid == SYSTIMER_COMP0)
+        {
+          priv->cpuint = esp32s2_alloc_edgeint(priv->int_pri);
+        }
+      else
+        {
+          priv->cpuint = esp32s2_alloc_levelint(priv->int_pri);
+        }
 
       if (priv->cpuint < 0)
         {
@@ -765,28 +1029,39 @@ errout:
  * Name: esp32s2_tim_enableint
  *
  * Description:
- *   Enable a level Interrupt at the alarm if it is set.
+ *   Enable Interrupt at the alarm if it is set.
  *
  * Parameters:
  *   dev           - Pointer to the timer driver struct.
  *
  ****************************************************************************/
 
-static void esp32s2_tim_enableint(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_enableint(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      modifyreg32(TIMG_T0CONFIG_REG(priv->gid), 0, TIMG_T0_LEVEL_INT_EN_M);
-      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), 0, TIMG_T0_INT_ENA_M);
+      modifyreg32(SYSTIMER_INT_ENA_REG, 0, SYSTIMER_SYSTIMER_INT0_ENA_M);
     }
   else
     {
-      modifyreg32(TIMG_T1CONFIG_REG(priv->gid), 0, TIMG_T1_LEVEL_INT_EN_M);
-      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), 0, TIMG_T1_INT_ENA_M);
+      if (priv->tid == TIMER0)
+        {
+          modifyreg32(TIMG_T0CONFIG_REG(priv->gid), 0,
+                      TIMG_T0_LEVEL_INT_EN_M);
+          modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), 0,
+                      TIMG_T0_INT_ENA_M);
+        }
+      else
+        {
+          modifyreg32(TIMG_T1CONFIG_REG(priv->gid), 0,
+                      TIMG_T1_LEVEL_INT_EN_M);
+          modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), 0,
+                      TIMG_T1_INT_ENA_M);
+        }
     }
 }
 
@@ -794,28 +1069,39 @@ static void esp32s2_tim_enableint(FAR struct esp32s2_tim_dev_s *dev)
  * Name: esp32s2_tim_disableint
  *
  * Description:
- *   Disable a level Interrupt at the alarm if it is set.
+ *   Disable a Interrupt at the alarm if it is set.
  *
  * Parameters:
  *   dev           - Pointer to the timer driver struct.
  *
  ****************************************************************************/
 
-static void esp32s2_tim_disableint(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_disableint(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      modifyreg32(TIMG_T0CONFIG_REG(priv->gid), TIMG_T0_LEVEL_INT_EN_M, 0);
-      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), TIMG_T0_INT_ENA_M, 0);
+      modifyreg32(SYSTIMER_INT_ENA_REG, SYSTIMER_SYSTIMER_INT0_ENA_M, 0);
     }
   else
     {
-      modifyreg32(TIMG_T1CONFIG_REG(priv->gid), TIMG_T1_LEVEL_INT_EN_M, 0);
-      modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid), TIMG_T1_INT_ENA_M, 0);
+      if (priv->tid == TIMER0)
+        {
+          modifyreg32(TIMG_T0CONFIG_REG(priv->gid),
+                      TIMG_T0_LEVEL_INT_EN_M, 0);
+          modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid),
+                      TIMG_T0_INT_ENA_M, 0);
+        }
+      else
+        {
+          modifyreg32(TIMG_T1CONFIG_REG(priv->gid),
+                      TIMG_T1_LEVEL_INT_EN_M, 0);
+          modifyreg32(TIMG_INT_ENA_TIMERS_REG(priv->gid),
+                      TIMG_T1_INT_ENA_M, 0);
+        }
     }
 }
 
@@ -830,19 +1116,28 @@ static void esp32s2_tim_disableint(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32s2_tim_ackint(FAR struct esp32s2_tim_dev_s *dev)
+static void esp32s2_tim_ackint(struct esp32s2_tim_dev_s *dev)
 {
-  struct esp32s2_tim_priv_s *priv = (FAR struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->gid), 0, TIMG_T0_INT_CLR_M);
+      modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_SYSTIMER_INT0_CLR_M);
     }
   else
     {
-      modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->gid), 0, TIMG_T1_INT_CLR_M);
+      if (priv->tid == TIMER0)
+        {
+          modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->gid), 0,
+                      TIMG_T0_INT_CLR_M);
+        }
+      else
+        {
+          modifyreg32(TIMG_INT_CLR_TIMERS_REG(priv->gid), 0,
+                      TIMG_T1_INT_CLR_M);
+        }
     }
 }
 
@@ -860,7 +1155,7 @@ static void esp32s2_tim_ackint(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32s2_tim_checkint(FAR struct esp32s2_tim_dev_s *dev)
+static int esp32s2_tim_checkint(struct esp32s2_tim_dev_s *dev)
 {
   struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
   uint32_t reg_value;
@@ -868,15 +1163,23 @@ static int esp32s2_tim_checkint(FAR struct esp32s2_tim_dev_s *dev)
 
   DEBUGASSERT(dev);
 
-  if (priv->tid == TIMER0)
+  if (priv->tid == SYSTIMER_COMP0)
     {
-      reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->gid));
-      ret = REG_MASK(reg_value, TIMG_T0_INT_ST);
+      reg_value = getreg32(SYSTIMER_INT_RAW_REG);
+      ret = REG_MASK(reg_value, SYSTIMER_SYSTIMER_INT0_RAW);
     }
   else
     {
-      reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->gid));
-      ret = REG_MASK(reg_value, TIMG_T1_INT_ST);
+      if (priv->tid == TIMER0)
+        {
+          reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->gid));
+          ret = REG_MASK(reg_value, TIMG_T0_INT_ST);
+        }
+      else
+        {
+          reg_value = getreg32(TIMG_INT_ST_TIMERS_REG(priv->gid));
+          ret = REG_MASK(reg_value, TIMG_T1_INT_ST);
+        }
     }
 
   return ret;
@@ -903,16 +1206,16 @@ static int esp32s2_tim_checkint(FAR struct esp32s2_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
+struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
 {
-  FAR struct esp32s2_tim_priv_s *tim = NULL;
+  struct esp32s2_tim_priv_s *tim = NULL;
 
   /* First, take the data structure associated with the timer instance */
 
   switch (timer)
     {
 #ifdef CONFIG_ESP32S2_TIMER0
-      case 0:
+      case TIMER0:
         {
           tim = &g_esp32s2_tim0_priv;
           break;
@@ -920,7 +1223,7 @@ FAR struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
 #endif
 
 #ifdef CONFIG_ESP32S2_TIMER1
-      case 1:
+      case TIMER1:
         {
           tim = &g_esp32s2_tim1_priv;
           break;
@@ -928,7 +1231,7 @@ FAR struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
 #endif
 
 #ifdef CONFIG_ESP32S2_TIMER2
-      case 2:
+      case TIMER2:
         {
           tim = &g_esp32s2_tim2_priv;
           break;
@@ -936,18 +1239,28 @@ FAR struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
 #endif
 
 #ifdef CONFIG_ESP32S2_TIMER3
-      case 3:
+      case TIMER3:
         {
           tim = &g_esp32s2_tim3_priv;
           break;
         }
 #endif
 
-      default:
+#ifdef CONFIG_ESP32S2_RT_TIMER
+      case SYSTIMER_COMP0:
         {
-          tmrerr("ERROR: unsupported TIMER %d\n", timer);
-          goto errout;
+          tim = &g_esp32s2_tim4_priv;
+
+          /* Enable Systimer peripheral clock and reset it */
+
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_SYSTIMER_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, SYSTEM_SYSTIMER_RST);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
+          modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_CLK_EN
+                      | SYSTIMER_CLK_FO);
+          break;
         }
+#endif
     }
 
   /* Verify if it is in use */
@@ -962,8 +1275,7 @@ FAR struct esp32s2_tim_dev_s *esp32s2_tim_init(int timer)
       tim = NULL;
     }
 
-errout:
-  return (FAR struct esp32s2_tim_dev_s *)tim;
+  return (struct esp32s2_tim_dev_s *)tim;
 }
 
 /****************************************************************************
@@ -977,12 +1289,12 @@ errout:
  *
  ****************************************************************************/
 
-void esp32s2_tim_deinit(FAR struct esp32s2_tim_dev_s *dev)
+void esp32s2_tim_deinit(struct esp32s2_tim_dev_s *dev)
 {
-  FAR struct esp32s2_tim_priv_s *tim = NULL;
+  struct esp32s2_tim_priv_s *tim = NULL;
 
   DEBUGASSERT(dev);
 
-  tim = (FAR struct esp32s2_tim_priv_s *)dev;
+  tim = (struct esp32s2_tim_priv_s *)dev;
   tim->inuse = false;
 }

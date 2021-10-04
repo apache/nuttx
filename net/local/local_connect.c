@@ -138,7 +138,7 @@ static int inline local_stream_connect(FAR struct local_conn_s *client,
 
   /* Add ourself to the list of waiting connections and notify the server. */
 
-  dq_addlast(&client->lc_node, &server->u.server.lc_waiters);
+  dq_addlast(&client->u.client.lc_waiter, &server->u.server.lc_waiters);
   local_event_pollnotify(server, POLLIN);
 
   if (nxsem_get_value(&server->lc_waitsem, &sval) >= 0 && sval < 1)
@@ -267,13 +267,6 @@ int psock_local_connect(FAR struct socket *psock,
   net_lock();
   while ((conn = local_nextconn(conn)) != NULL)
     {
-      /* Anything in the listener list should be a stream socket in the
-       * listening state
-       */
-
-      DEBUGASSERT(conn->lc_state == LOCAL_STATE_LISTENING &&
-                  conn->lc_proto == SOCK_STREAM);
-
       /* Handle according to the server connection type */
 
       switch (conn->lc_type)
@@ -289,7 +282,13 @@ int psock_local_connect(FAR struct socket *psock,
 
         case LOCAL_TYPE_PATHNAME:  /* lc_path holds a null terminated string */
           {
-            if (strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1)
+            /* Anything in the listener list should be a stream socket in the
+             * listening state
+             */
+
+            if (conn->lc_state == LOCAL_STATE_LISTENING &&
+                conn->lc_proto == SOCK_STREAM &&
+                strncmp(conn->lc_path, unaddr->sun_path, UNIX_PATH_MAX - 1)
                 == 0)
               {
                 int ret = OK;
@@ -302,6 +301,9 @@ int psock_local_connect(FAR struct socket *psock,
                         UNIX_PATH_MAX - 1);
                 client->lc_path[UNIX_PATH_MAX - 1] = '\0';
                 client->lc_instance_id = local_generate_instance_id();
+#ifdef CONFIG_NET_LOCAL_SCM
+                client->lc_peer = conn;
+#endif /* CONFIG_NET_LOCAL_SCM */
 
                 /* The client is now bound to an address */
 

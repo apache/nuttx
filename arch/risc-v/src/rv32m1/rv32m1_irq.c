@@ -48,7 +48,7 @@
  ****************************************************************************/
 
 LOCATE_ITCM
-static int rv32m1_intmuxisr(int irq, void *context, FAR void *arg)
+static int rv32m1_intmuxisr(int irq, void *context, void *arg)
 {
   UNUSED(irq);
   UNUSED(context);
@@ -97,7 +97,7 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
   size_t intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-  riscv_stack_color((FAR void *)((uintptr_t)&g_intstacktop - intstack_size),
+  riscv_stack_color((void *)((uintptr_t)&g_intstacktop - intstack_size),
                  intstack_size);
 #endif
 

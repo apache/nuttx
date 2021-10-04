@@ -46,11 +46,11 @@
 
 struct esp32_freerun_s
 {
-  uint8_t chan;                    /* The timer/counter in use */
-  uint32_t overflow;               /* Timer counter overflow */
-  uint16_t resolution;             /* Timer resolution */
-  uint64_t max_timeout;            /* Maximum timeout to overflow */
-  FAR struct esp32_tim_dev_s *tch; /* Handle returned by esp32_tim_init() */
+  uint8_t chan;                /* The timer/counter in use */
+  uint32_t overflow;           /* Timer counter overflow */
+  uint16_t resolution;         /* Timer resolution */
+  uint64_t max_timeout;        /* Maximum timeout to overflow */
+  struct esp32_tim_dev_s *tch; /* Handle returned by esp32_tim_init() */
 };
 
 /****************************************************************************

@@ -51,32 +51,32 @@
 
 struct esp32s2_timer_lowerhalf_s
 {
-  FAR const struct timer_ops_s *ops;        /* Lower half operations */
-  FAR struct esp32s2_tim_dev_s *tim;        /* esp32s2 timer driver */
-  tccb_t                        callback;   /* Interrupt callback */
-  FAR void                     *arg;        /* Argument passed to upper half callback */
-  bool                          started;    /* True: Timer has been started */
-  FAR void                     *upper;      /* Pointer to watchdog_upperhalf_s */
+  const struct timer_ops_s *ops;        /* Lower half operations */
+  struct esp32s2_tim_dev_s *tim;        /* esp32s2 timer driver */
+  tccb_t                    callback;   /* Interrupt callback */
+  void                     *arg;        /* Argument passed to upper half callback */
+  bool                      started;    /* True: Timer has been started */
+  void                     *upper;      /* Pointer to watchdog_upperhalf_s */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int esp32s2_timer_handler(int irq, FAR void *context, void *arg);
+static int esp32s2_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods **********************************************/
 
-static int esp32s2_timer_start(FAR struct timer_lowerhalf_s *lower);
-static int esp32s2_timer_stop(FAR struct timer_lowerhalf_s *lower);
-static int esp32s2_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
-                                   FAR struct timer_status_s *status);
-static int esp32s2_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int esp32s2_timer_start(struct timer_lowerhalf_s *lower);
+static int esp32s2_timer_stop(struct timer_lowerhalf_s *lower);
+static int esp32s2_timer_getstatus(struct timer_lowerhalf_s *lower,
+                                   struct timer_status_s *status);
+static int esp32s2_timer_settimeout(struct timer_lowerhalf_s *lower,
                                     uint32_t timeout);
-static int esp32s2_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
+static int esp32s2_timer_maxtimeout(struct timer_lowerhalf_s *lower,
                                     uint32_t *timeout);
-static void esp32s2_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
-                                      tccb_t callback, FAR void *arg);
+static void esp32s2_timer_setcallback(struct timer_lowerhalf_s *lower,
+                                      tccb_t callback, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -147,10 +147,10 @@ static struct esp32s2_timer_lowerhalf_s g_esp32s2_timer3_lowerhalf =
  *
  ****************************************************************************/
 
-static int esp32s2_timer_handler(int irq, FAR void *context, void *arg)
+static int esp32s2_timer_handler(int irq, void *context, void *arg)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)arg;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
   if (priv->callback(&next_interval_us, priv->upper))
@@ -187,10 +187,10 @@ static int esp32s2_timer_handler(int irq, FAR void *context, void *arg)
  *
  ****************************************************************************/
 
-static int esp32s2_timer_start(FAR struct timer_lowerhalf_s *lower)
+static int esp32s2_timer_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)lower;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)lower;
   int ret = OK;
   uint16_t pre;
   irqstate_t flags;
@@ -282,10 +282,10 @@ errout:
  *
  ****************************************************************************/
 
-static int esp32s2_timer_stop(FAR struct timer_lowerhalf_s *lower)
+static int esp32s2_timer_stop(struct timer_lowerhalf_s *lower)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)lower;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)lower;
   int ret = OK;
   irqstate_t flags;
 
@@ -331,11 +331,11 @@ errout:
  *
  ****************************************************************************/
 
-static int esp32s2_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
-                                   FAR struct timer_status_s *status)
+static int esp32s2_timer_getstatus(struct timer_lowerhalf_s *lower,
+                                   struct timer_status_s *status)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)lower;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)lower;
   int ret = OK;
   uint64_t current_counter_value;
   uint64_t alarm_value;
@@ -393,11 +393,11 @@ static int esp32s2_timer_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int esp32s2_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int esp32s2_timer_settimeout(struct timer_lowerhalf_s *lower,
                                     uint32_t timeout)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)lower;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)lower;
   int ret = OK;
 
   DEBUGASSERT(priv);
@@ -425,7 +425,7 @@ static int esp32s2_timer_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int esp32s2_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
+static int esp32s2_timer_maxtimeout(struct timer_lowerhalf_s *lower,
                                   uint32_t *max_timeout)
 {
   DEBUGASSERT(max_timeout);
@@ -452,11 +452,11 @@ static int esp32s2_timer_maxtimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void esp32s2_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
-                                      tccb_t callback, FAR void *arg)
+static void esp32s2_timer_setcallback(struct timer_lowerhalf_s *lower,
+                                      tccb_t callback, void *arg)
 {
-  FAR struct esp32s2_timer_lowerhalf_s *priv =
-    (FAR struct esp32s2_timer_lowerhalf_s *)lower;
+  struct esp32s2_timer_lowerhalf_s *priv =
+    (struct esp32s2_timer_lowerhalf_s *)lower;
   irqstate_t flags;
   int ret = OK;
 
@@ -511,7 +511,7 @@ static void esp32s2_timer_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int esp32s2_timer_initialize(FAR const char *devpath, uint8_t timer)
+int esp32s2_timer_initialize(const char *devpath, uint8_t timer)
 {
   struct esp32s2_timer_lowerhalf_s *lower = NULL;
   int ret = OK;
@@ -577,7 +577,7 @@ int esp32s2_timer_initialize(FAR const char *devpath, uint8_t timer)
    */
 
   lower->upper = timer_register(devpath,
-                                (FAR struct timer_lowerhalf_s *)lower);
+                                (struct timer_lowerhalf_s *)lower);
   if (lower->upper == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate

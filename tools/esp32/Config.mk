@@ -66,10 +66,8 @@ ifdef ESPTOOL_BINDIR
 	ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 		BL_OFFSET       := 0x1000
 		PT_OFFSET       := 0x8000
-		APP_OFFSET      := 0x10000
 		BOOTLOADER      := $(ESPTOOL_BINDIR)/bootloader-esp32.bin
 		PARTITION_TABLE := $(ESPTOOL_BINDIR)/partition-table-esp32.bin
-		APP_IMAGE       := nuttx.bin
 		FLASH_BL        := $(BL_OFFSET) $(BOOTLOADER)
 		FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
 		ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)

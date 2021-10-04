@@ -1453,7 +1453,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
 {
   FAR struct imxrt_driver_s *priv =
       (FAR struct imxrt_driver_s *)dev->d_private;
-
+  struct flexcan_timeseg data_timing;
   int ret;
 
   switch (cmd)
@@ -1499,7 +1499,6 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
 
           if (priv->canfd_capable)
           {
-            struct flexcan_timeseg data_timing;
             data_timing.bitrate = req->data_bitrate * 1000;
             data_timing.samplep = req->data_samplep;
 

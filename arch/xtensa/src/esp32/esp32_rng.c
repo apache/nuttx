@@ -59,10 +59,8 @@
  ****************************************************************************/
 
 static int esp32_rng_initialize(void);
-static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t esp32_rng_read(struct file *filep, char *buffer,
                               size_t buflen);
-static int esp32_rng_open(FAR struct file *filep);
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -81,7 +79,6 @@ static struct rng_dev_s g_rngdev;
 
 static const struct file_operations g_rngops =
 {
-  .open  = esp32_rng_open,       /* open */
   .read  = esp32_rng_read,       /* read */
 };
 
@@ -126,55 +123,17 @@ uint32_t IRAM_ATTR esp_random(void)
 }
 
 /****************************************************************************
- * Name: esp32_rng_open
+ * Name: esp32_rng_initialize
  ****************************************************************************/
-
-static void esp32_rng_start(void)
-{
-  /* Nothing to do, bootloader already did it */
-}
-
-static void esp32_rng_stop(void)
-{
-  /* Nothing to do */
-}
 
 static int esp32_rng_initialize(void)
 {
-  static bool first_flag = true;
-
-  if (false == first_flag)
-    {
-      return OK;
-    }
-
-  first_flag = false;
-
   _info("Initializing RNG\n");
 
   memset(&g_rngdev, 0, sizeof(struct rng_dev_s));
 
   nxsem_init(&g_rngdev.rd_sem, 0, 1);
   nxsem_set_protocol(&g_rngdev.rd_sem, SEM_PRIO_NONE);
-
-  esp32_rng_stop();
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: esp32_rng_open
- ****************************************************************************/
-
-static int esp32_rng_open(FAR struct file *filep)
-{
-  /* O_NONBLOCK is not supported */
-
-  if (filep->f_oflags & O_NONBLOCK)
-    {
-      _err("ESP32 RNG didn't support O_NONBLOCK mode.\n");
-      return -EPERM;
-    }
 
   return OK;
 }
@@ -183,10 +142,10 @@ static int esp32_rng_open(FAR struct file *filep)
  * Name: esp32_rng_read
  ****************************************************************************/
 
-static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t esp32_rng_read(struct file *filep, char *buffer,
                               size_t buflen)
 {
-  FAR struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
+  struct rng_dev_s *priv = (struct rng_dev_s *)&g_rngdev;
   ssize_t read_len;
   uint8_t *rd_buf = (uint8_t *)buffer;
 
@@ -197,9 +156,7 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
 
   read_len = buflen;
 
-  /* start RNG and Wait until the buffer is filled */
-
-  esp32_rng_start();
+  /* Wait until the buffer is filled */
 
   while (buflen > 0)
     {
@@ -241,7 +198,7 @@ static ssize_t esp32_rng_read(FAR struct file *filep, FAR char *buffer,
 void devrandom_register(void)
 {
   esp32_rng_initialize();
-  register_driver("/dev/random", FAR & g_rngops, 0444, NULL);
+  register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -265,7 +222,7 @@ void devurandom_register(void)
 #ifndef CONFIG_DEV_RANDOM
   esp32_rng_initialize();
 #endif
-  register_driver("dev/urandom", FAR & g_rngops, 0444, NULL);
+  register_driver("/dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 

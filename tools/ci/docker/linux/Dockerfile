@@ -103,11 +103,11 @@ RUN mkdir riscv64-unknown-elf-gcc && \
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
 # Download the latest ESP32 GCC toolchain prebuilt by Espressif
 RUN mkdir -p xtensa-esp32-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2020r3/xtensa-esp32-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz" \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
   | tar -C xtensa-esp32-elf-gcc --strip-components 1 -xz
 
 RUN mkdir -p xtensa-esp32s2-elf-gcc && \
-  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2020r3/xtensa-esp32s2-elf-gcc8_4_0-esp-2020r3-linux-amd64.tar.gz" \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s2-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
   | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xz
 
 RUN echo "ESP Binaries: 2021/06/01"

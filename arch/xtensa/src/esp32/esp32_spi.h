@@ -72,7 +72,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *esp32_spibus_initialize(int port);
+struct spi_dev_s *esp32_spibus_initialize(int port);
 
 /****************************************************************************
  * Name:  esp32_spi0/1/...select and esp32_spi0/1/...status
@@ -105,17 +105,17 @@ FAR struct spi_dev_s *esp32_spibus_initialize(int port);
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_SPI2
-void esp32_spi2_select(FAR struct spi_dev_s *dev, uint32_t devid,
+void esp32_spi2_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-uint8_t esp32_spi2_status(FAR struct spi_dev_s *dev, uint32_t devid);
-int esp32_spi2_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t esp32_spi2_status(struct spi_dev_s *dev, uint32_t devid);
+int esp32_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 #ifdef CONFIG_ESP32_SPI3
-void esp32_spi3_select(FAR struct spi_dev_s *dev, uint32_t devid,
+void esp32_spi3_select(struct spi_dev_s *dev, uint32_t devid,
                        bool selected);
-uint8_t esp32_spi3_status(FAR struct spi_dev_s *dev, uint32_t devid);
-int esp32_spi3_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
+uint8_t esp32_spi3_status(struct spi_dev_s *dev, uint32_t devid);
+int esp32_spi3_cmddata(struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif
 
 /****************************************************************************
@@ -126,7 +126,7 @@ int esp32_spi3_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
  *
  ****************************************************************************/
 
-int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev);
+int esp32_spibus_uninitialize(struct spi_dev_s *dev);
 
 /****************************************************************************
  * Name: esp32_spislv_ctrlr_initialize
@@ -142,7 +142,7 @@ int esp32_spibus_uninitialize(FAR struct spi_dev_s *dev);
  *
  ****************************************************************************/
 
-FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port);
+struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port);
 
 /****************************************************************************
  * Name: esp32_spislv_ctrlr_uninitialize
@@ -158,7 +158,7 @@ FAR struct spi_slave_ctrlr_s *esp32_spislv_ctrlr_initialize(int port);
  *
  ****************************************************************************/
 
-int esp32_spislv_ctrlr_uninitialize(FAR struct spi_slave_ctrlr_s *ctrlr);
+int esp32_spislv_ctrlr_uninitialize(struct spi_slave_ctrlr_s *ctrlr);
 
 #endif /* CONFIG_ESP32_SPI */
 

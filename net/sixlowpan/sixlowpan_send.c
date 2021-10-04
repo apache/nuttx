@@ -203,6 +203,7 @@ end_wait:
 
 int sixlowpan_send(FAR struct net_driver_s *dev,
                    FAR struct devif_callback_s **list,
+                   FAR struct devif_callback_s **list_tail,
                    FAR const struct ipv6_hdr_s *ipv6hdr, FAR const void *buf,
                    size_t len, FAR const struct netdev_varaddr_s *destmac,
                    unsigned int timeout)
@@ -231,7 +232,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
        * device related events, no connect-related events.
        */
 
-      sinfo.s_cb = devif_callback_alloc(dev, list);
+      sinfo.s_cb = devif_callback_alloc(dev, list, list_tail);
       if (sinfo.s_cb != NULL)
         {
           int ret;
@@ -265,7 +266,7 @@ int sixlowpan_send(FAR struct net_driver_s *dev,
 
           /* Make sure that no further events are processed */
 
-          devif_conn_callback_free(dev, sinfo.s_cb, list);
+          devif_conn_callback_free(dev, sinfo.s_cb, list, list_tail);
         }
     }
 

@@ -50,7 +50,7 @@
  ****************************************************************************/
 
 #define SPIFLASH_BLOCKSIZE          (0x1000)
-#define MTD2PRIV(_dev)              ((FAR struct bl602_spiflash_s *)_dev)
+#define MTD2PRIV(_dev)              ((struct bl602_spiflash_s *)_dev)
 
 /****************************************************************************
  * Private Types
@@ -81,15 +81,15 @@ struct bl602_spiflash_s
 
 /* MTD driver methods */
 
-static int bl602_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int bl602_erase(struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks);
-static ssize_t bl602_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR uint8_t *buffer);
-static ssize_t bl602_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR const uint8_t *buffer);
-static ssize_t bl602_read(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR uint8_t *buffer);
-static int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+static ssize_t bl602_bread(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, uint8_t *buffer);
+static ssize_t bl602_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks, const uint8_t *buffer);
+static ssize_t bl602_read(struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, uint8_t *buffer);
+static int bl602_ioctl(struct mtd_dev_s *dev, int cmd,
                        unsigned long arg);
 
 /****************************************************************************
@@ -137,11 +137,11 @@ static struct bl602_spiflash_s g_bl602_spiflash =
  *
  ****************************************************************************/
 
-static int bl602_erase(FAR struct mtd_dev_s *dev, off_t startblock,
+static int bl602_erase(struct mtd_dev_s *dev, off_t startblock,
                        size_t nblocks)
 {
   int ret = 0;
-  FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
+  struct bl602_spiflash_s *priv = MTD2PRIV(dev);
   uint32_t addr = priv->config->flash_offset \
                   + startblock * SPIFLASH_BLOCKSIZE;
   uint32_t size = nblocks * SPIFLASH_BLOCKSIZE;
@@ -175,11 +175,11 @@ static int bl602_erase(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t bl602_read(FAR struct mtd_dev_s *dev, off_t offset,
-                          size_t nbytes, FAR uint8_t *buffer)
+static ssize_t bl602_read(struct mtd_dev_s *dev, off_t offset,
+                          size_t nbytes, uint8_t *buffer)
 {
   int ret = 0;
-  FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
+  struct bl602_spiflash_s *priv = MTD2PRIV(dev);
   uint32_t addr = priv->config->flash_offset + offset;
   uint32_t size = nbytes;
 
@@ -210,11 +210,11 @@ static ssize_t bl602_read(FAR struct mtd_dev_s *dev, off_t offset,
  *
  ****************************************************************************/
 
-static ssize_t bl602_bread(FAR struct mtd_dev_s *dev, off_t startblock,
-                           size_t nblocks, FAR uint8_t *buffer)
+static ssize_t bl602_bread(struct mtd_dev_s *dev, off_t startblock,
+                           size_t nblocks, uint8_t *buffer)
 {
   int ret = 0;
-  FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
+  struct bl602_spiflash_s *priv = MTD2PRIV(dev);
   uint32_t addr = priv->config->flash_offset \
                   + startblock * SPIFLASH_BLOCKSIZE;
   uint32_t size = nblocks * SPIFLASH_BLOCKSIZE;
@@ -247,11 +247,11 @@ static ssize_t bl602_bread(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-static ssize_t bl602_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
-                            size_t nblocks, FAR const uint8_t *buffer)
+static ssize_t bl602_bwrite(struct mtd_dev_s *dev, off_t startblock,
+                            size_t nblocks, const uint8_t *buffer)
 {
   int ret = 0;
-  FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
+  struct bl602_spiflash_s *priv = MTD2PRIV(dev);
   uint32_t addr = priv->config->flash_offset \
                   + startblock * SPIFLASH_BLOCKSIZE;
   uint32_t size = nblocks * SPIFLASH_BLOCKSIZE;
@@ -282,18 +282,18 @@ static ssize_t bl602_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
  *
  ****************************************************************************/
 
-int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
+int bl602_ioctl(struct mtd_dev_s *dev, int cmd,
                        unsigned long arg)
 {
   int ret = -EINVAL;
-  FAR struct bl602_spiflash_s *priv = MTD2PRIV(dev);
+  struct bl602_spiflash_s *priv = MTD2PRIV(dev);
 
   switch (cmd)
     {
       case MTDIOC_GEOMETRY:
         {
           finfo("cmd(0x%x) MTDIOC_GEOMETRY.\n", cmd);
-          FAR struct mtd_geometry_s *geo = (FAR struct mtd_geometry_s *)arg;
+          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = SPIFLASH_BLOCKSIZE;
@@ -309,8 +309,8 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         break;
       case BIOC_PARTINFO:
         {
-          FAR struct partition_info_s *info =
-            (FAR struct partition_info_s *)arg;
+          struct partition_info_s *info =
+            (struct partition_info_s *)arg;
           if (info != NULL)
             {
               info->numsectors  = priv->config->flash_size /
@@ -351,10 +351,10 @@ int bl602_ioctl(FAR struct mtd_dev_s *dev, int cmd,
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void)
+struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void)
 {
   struct bl602_spiflash_s *priv = &g_bl602_spiflash;
-  FAR struct mtd_dev_s *mtd_part = NULL;
+  struct mtd_dev_s *mtd_part = NULL;
 
   priv->config->flash_offset = CONFIG_BL602_MTD_OFFSET;
   priv->config->flash_size = CONFIG_BL602_MTD_SIZE;
@@ -384,7 +384,7 @@ FAR struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void)
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *bl602_spiflash_get_mtd(void)
+struct mtd_dev_s *bl602_spiflash_get_mtd(void)
 {
   struct bl602_spiflash_s *priv = &g_bl602_spiflash;
 

@@ -292,7 +292,9 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
    * packet.
    */
 
-  ret = sixlowpan_send(dev, &conn->list,
+  ret = sixlowpan_send(dev,
+                       &conn->list,
+                       &conn->list_tail,
                        (FAR const struct ipv6_hdr_s *)&ipv6udp,
                        buf, buflen, &destmac,
                        _SO_TIMEOUT(psock->s_sndtimeo));

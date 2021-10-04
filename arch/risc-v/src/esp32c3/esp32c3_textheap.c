@@ -57,9 +57,9 @@
  *
  ****************************************************************************/
 
-FAR void *up_textheap_memalign(size_t align, size_t size)
+void *up_textheap_memalign(size_t align, size_t size)
 {
-  FAR void *ret = NULL;
+  void *ret = NULL;
 
   /* Prioritise allocating from RTC. If that fails, allocate from the
    * main heap.
@@ -93,7 +93,7 @@ FAR void *up_textheap_memalign(size_t align, size_t size)
  *
  ****************************************************************************/
 
-void up_textheap_free(FAR void *p)
+void up_textheap_free(void *p)
 {
   if (p)
     {

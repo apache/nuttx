@@ -98,7 +98,7 @@ static int32_t esp32c3_wdt_config_stage(struct esp32c3_wdt_dev_s *dev,
                                         enum esp32c3_wdt_stage_e stage,
                                         enum esp32c3_wdt_stage_action_e cfg);
 static void esp32c3_wdt_update_conf(struct esp32c3_wdt_dev_s *dev);
-static uint16_t esp32c3_wdt_rtc_clk(FAR struct esp32c3_wdt_dev_s *dev);
+static uint16_t esp32c3_wdt_rtc_clk(struct esp32c3_wdt_dev_s *dev);
 static int32_t esp32c3_wdt_setisr(struct esp32c3_wdt_dev_s *dev,
                                   xcpt_t handler, void *arg);
 static void esp32c3_wdt_enableint(struct esp32c3_wdt_dev_s *dev);
@@ -657,7 +657,7 @@ static void esp32c3_wdt_feed(struct esp32c3_wdt_dev_s *dev)
  *
  ****************************************************************************/
 
-static uint16_t esp32c3_wdt_rtc_clk(FAR struct esp32c3_wdt_dev_s *dev)
+static uint16_t esp32c3_wdt_rtc_clk(struct esp32c3_wdt_dev_s *dev)
 {
   enum esp32c3_rtc_slow_freq_e slow_clk_rtc;
   uint32_t period_13q19;

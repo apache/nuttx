@@ -45,7 +45,7 @@
 
 struct esp32c3_tim_priv_s
 {
-  FAR struct esp32c3_tim_ops_s *ops;
+  struct esp32c3_tim_ops_s *ops;
   uint8_t                       id;      /* Timer instance */
   uint8_t                       periph;  /* Peripheral ID */
   uint8_t                       irq;     /* Interrupt ID */
@@ -59,34 +59,34 @@ struct esp32c3_tim_priv_s
 
 /* TIM operations ***********************************************************/
 
-static void esp32c3_tim_start(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_stop(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_clear(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_setmode(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_start(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_stop(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_clear(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_setmode(struct esp32c3_tim_dev_s *dev,
                                 enum esp32c3_tim_mode_e mode);
-static void esp32c3_tim_setclksrc(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setclksrc(struct esp32c3_tim_dev_s *dev,
                                   enum esp32c3_tim_clksrc_e src);
-static void esp32c3_tim_setpre(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setpre(struct esp32c3_tim_dev_s *dev,
                                uint16_t pre);
-static void esp32c3_tim_getcounter(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_getcounter(struct esp32c3_tim_dev_s *dev,
                                    uint64_t *value);
-static void esp32c3_tim_setcounter(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setcounter(struct esp32c3_tim_dev_s *dev,
                                    uint64_t value);
-static void esp32c3_tim_reload_now(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_getalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_reload_now(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_getalarmvalue(struct esp32c3_tim_dev_s *dev,
                                       uint64_t *value);
-static void esp32c3_tim_setalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setalarmvalue(struct esp32c3_tim_dev_s *dev,
                                       uint64_t value);
-static void esp32c3_tim_setalarm(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setalarm(struct esp32c3_tim_dev_s *dev,
                                  bool enable);
-static void esp32c3_tim_setautoreload(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setautoreload(struct esp32c3_tim_dev_s *dev,
                                       bool enable);
-static int esp32c3_tim_setisr(FAR struct esp32c3_tim_dev_s *dev,
-                               xcpt_t handler, FAR void * arg);
-static void esp32c3_tim_enableint(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_disableint(FAR struct esp32c3_tim_dev_s *dev);
-static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev);
-static int  esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev);
+static int esp32c3_tim_setisr(struct esp32c3_tim_dev_s *dev,
+                               xcpt_t handler, void * arg);
+static void esp32c3_tim_enableint(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_disableint(struct esp32c3_tim_dev_s *dev);
+static void esp32c3_tim_ackint(struct esp32c3_tim_dev_s *dev);
+static int  esp32c3_tim_checkint(struct esp32c3_tim_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -195,11 +195,11 @@ struct esp32c3_tim_priv_s g_esp32c3_tim2_priv =
  *
  ****************************************************************************/
 
-static void esp32c3_tim_start(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_start(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (priv->id == ESP32C3_SYSTIM)
     {
       /* Start counter 1 */
@@ -224,11 +224,11 @@ static void esp32c3_tim_start(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_stop(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_stop(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (priv->id == ESP32C3_SYSTIM)
     {
       /* Stop counter 1 */
@@ -253,7 +253,7 @@ static void esp32c3_tim_stop(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_clear(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_clear(struct esp32c3_tim_dev_s *dev)
 {
   uint64_t clear_value = 0;
   DEBUGASSERT(dev);
@@ -273,12 +273,12 @@ static void esp32c3_tim_clear(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setmode(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setmode(struct esp32c3_tim_dev_s *dev,
                                enum esp32c3_tim_mode_e mode)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (mode == ESP32C3_TIM_MODE_DOWN)
     {
       modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_INCREASE_M, 0);
@@ -301,12 +301,12 @@ static void esp32c3_tim_setmode(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setclksrc(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setclksrc(struct esp32c3_tim_dev_s *dev,
                                  enum esp32c3_tim_clksrc_e src)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (src == ESP32C3_TIM_APB_CLK)
     {
       modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_USE_XTAL_M, 0);
@@ -331,13 +331,13 @@ static void esp32c3_tim_setclksrc(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setpre(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setpre(struct esp32c3_tim_dev_s *dev,
                                uint16_t pre)
 {
   uint32_t mask = (uint32_t)pre << TIMG_T0_DIVIDER_S;
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   modifyreg32(TIMG_T0CONFIG_REG(priv->id), TIMG_T0_DIVIDER_M, mask);
 }
 
@@ -354,13 +354,13 @@ static void esp32c3_tim_setpre(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_getcounter(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_getcounter(struct esp32c3_tim_dev_s *dev,
                                 uint64_t *value)
 {
   uint32_t value_32;
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   *value = 0;
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -423,14 +423,14 @@ static void esp32c3_tim_getcounter(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setcounter(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setcounter(struct esp32c3_tim_dev_s *dev,
                                   uint64_t value)
 {
   uint64_t low_64 = value & LOW_32_MASK;
   uint64_t high_64;
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -469,11 +469,11 @@ static void esp32c3_tim_setcounter(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_reload_now(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_reload_now(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -502,13 +502,13 @@ static void esp32c3_tim_reload_now(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_getalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_getalarmvalue(struct esp32c3_tim_dev_s *dev,
                                    uint64_t *value)
 {
   uint32_t value_32;
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   *value = 0;
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -553,12 +553,12 @@ static void esp32c3_tim_getalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setalarmvalue(struct esp32c3_tim_dev_s *dev,
                                       uint64_t value)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -600,12 +600,12 @@ static void esp32c3_tim_setalarmvalue(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setalarm(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setalarm(struct esp32c3_tim_dev_s *dev,
                                  bool enable)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   if (priv->id == ESP32C3_SYSTIM)
     {
@@ -651,12 +651,12 @@ static void esp32c3_tim_setalarm(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_tim_setautoreload(FAR struct esp32c3_tim_dev_s *dev,
+static void esp32c3_tim_setautoreload(struct esp32c3_tim_dev_s *dev,
                                    bool enable)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   if (enable)
     {
@@ -688,15 +688,15 @@ static void esp32c3_tim_setautoreload(FAR struct esp32c3_tim_dev_s *dev,
  *
  ****************************************************************************/
 
-static int esp32c3_tim_setisr(FAR struct esp32c3_tim_dev_s *dev,
-                               xcpt_t handler, FAR void *arg)
+static int esp32c3_tim_setisr(struct esp32c3_tim_dev_s *dev,
+                               xcpt_t handler, void *arg)
 {
-  FAR struct esp32c3_tim_priv_s *priv = NULL;
+  struct esp32c3_tim_priv_s *priv = NULL;
   int ret = OK;
 
   DEBUGASSERT(dev);
 
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
 
   /* Disable interrupt when callback is removed. */
 
@@ -777,11 +777,11 @@ errout:
  *
  ****************************************************************************/
 
-static void esp32c3_tim_enableint(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_enableint(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (priv->id == ESP32C3_SYSTIM)
     {
       modifyreg32(SYS_TIMER_SYSTIMER_INT_ENA_REG, 0,
@@ -804,11 +804,11 @@ static void esp32c3_tim_enableint(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_disableint(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_disableint(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (priv->id == ESP32C3_SYSTIM)
     {
       modifyreg32(SYS_TIMER_SYSTIMER_INT_ENA_REG,
@@ -831,11 +831,11 @@ static void esp32c3_tim_disableint(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev)
+static void esp32c3_tim_ackint(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv;
   DEBUGASSERT(dev);
-  priv = (FAR struct esp32c3_tim_priv_s *)dev;
+  priv = (struct esp32c3_tim_priv_s *)dev;
   if (priv->id == ESP32C3_SYSTIM)
     {
       modifyreg32(SYS_TIMER_SYSTIMER_INT_CLR_REG, 0,
@@ -861,7 +861,7 @@ static void esp32c3_tim_ackint(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-static int esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev)
+static int esp32c3_tim_checkint(struct esp32c3_tim_dev_s *dev)
 {
   struct esp32c3_tim_priv_s *priv = (struct esp32c3_tim_priv_s *)dev;
   uint32_t reg_value;
@@ -905,9 +905,9 @@ static int esp32c3_tim_checkint(FAR struct esp32c3_tim_dev_s *dev)
  *
  ****************************************************************************/
 
-FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
+struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
 {
-  FAR struct esp32c3_tim_priv_s *tim = NULL;
+  struct esp32c3_tim_priv_s *tim = NULL;
 
   /* First, take the data structure associated with the timer instance */
 
@@ -967,7 +967,7 @@ FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
     }
 
   errout:
-  return (FAR struct esp32c3_tim_dev_s *)tim;
+  return (struct esp32c3_tim_dev_s *)tim;
 }
 
 /****************************************************************************
@@ -981,12 +981,12 @@ FAR struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
  *
  ****************************************************************************/
 
-void esp32c3_tim_deinit(FAR struct esp32c3_tim_dev_s *dev)
+void esp32c3_tim_deinit(struct esp32c3_tim_dev_s *dev)
 {
-  FAR struct esp32c3_tim_priv_s *tim = NULL;
+  struct esp32c3_tim_priv_s *tim = NULL;
 
   DEBUGASSERT(dev);
 
-  tim = (FAR struct esp32c3_tim_priv_s *)dev;
+  tim = (struct esp32c3_tim_priv_s *)dev;
   tim->inuse = false;
 }

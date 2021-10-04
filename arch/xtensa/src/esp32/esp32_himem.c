@@ -103,13 +103,13 @@
 
 /* Character driver methods */
 
-static int     himem_open(FAR struct file *filep);
-static int     himem_close(FAR struct file *filep);
-static ssize_t himem_read(FAR struct file *filep, FAR char *buffer,
+static int     himem_open(struct file *filep);
+static int     himem_close(struct file *filep);
+static ssize_t himem_read(struct file *filep, char *buffer,
                           size_t buflen);
-static ssize_t himem_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t himem_write(struct file *filep, const char *buffer,
                            size_t buflen);
-static int     himem_ioctl(FAR struct file *filep, int cmd,
+static int     himem_ioctl(struct file *filep, int cmd,
                            unsigned long arg);
 
 /* This structure is used only for access control */
@@ -222,7 +222,7 @@ size_t esp_himem_reserved_area_size(void)
 
 int esp_himem_init(void)
 {
-  FAR struct himem_access_s *priv;
+  struct himem_access_s *priv;
   int paddr_start = (4096 * 1024) - (CACHE_BLOCKSIZE *
                      SPIRAM_BANKSWITCH_RESERVE);
   int paddr_end;
@@ -236,7 +236,7 @@ int esp_himem_init(void)
 
   /* Allocate a new himem access instance */
 
-  priv = (FAR struct himem_access_s *)
+  priv = (struct himem_access_s *)
     kmm_zalloc(sizeof(struct himem_access_s));
 
   if (!priv)
@@ -652,7 +652,7 @@ int esp_himem_unmap(esp_himem_rangehandle_t range, void *ptr,
  *
  ****************************************************************************/
 
-static int himem_open(FAR struct file *filep)
+static int himem_open(struct file *filep)
 {
   return OK;
 }
@@ -665,7 +665,7 @@ static int himem_open(FAR struct file *filep)
  *
  ****************************************************************************/
 
-static int himem_close(FAR struct file *filep)
+static int himem_close(struct file *filep)
 {
   return OK;
 }
@@ -674,7 +674,7 @@ static int himem_close(FAR struct file *filep)
  * Name: himem_read
  ****************************************************************************/
 
-static ssize_t himem_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t himem_read(struct file *filep, char *buffer,
                           size_t buflen)
 {
   return -ENOSYS;
@@ -684,7 +684,7 @@ static ssize_t himem_read(FAR struct file *filep, FAR char *buffer,
  * Name: himem_write
  ****************************************************************************/
 
-static ssize_t himem_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t himem_write(struct file *filep, const char *buffer,
                           size_t buflen)
 {
   return -ENOSYS;
@@ -694,7 +694,7 @@ static ssize_t himem_write(FAR struct file *filep, FAR const char *buffer,
  * Name: himem_ioctl
  ****************************************************************************/
 
-static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
+static int himem_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
   int ret   = OK;
 
@@ -704,8 +704,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_ALLOC_BLOCKS:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -724,8 +724,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_FREE_BLOCKS:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -742,8 +742,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_ALLOC_MAP_RANGE:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -762,8 +762,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_FREE_MAP_RANGE:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -780,8 +780,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_MAP:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -804,8 +804,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_UNMAP:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -824,8 +824,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_GET_PHYS_SIZE:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 
@@ -837,8 +837,8 @@ static int himem_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case HIMEMIOC_GET_FREE_SIZE:
         {
-          FAR struct esp_himem_par *param =
-                     (FAR struct esp_himem_par *)((uintptr_t)arg);
+          struct esp_himem_par *param =
+                     (struct esp_himem_par *)((uintptr_t)arg);
 
           DEBUGASSERT(param != NULL);
 

@@ -111,7 +111,7 @@ static struct bat_gauge_dev_s g_gaugedev;
  * Name: gauge_get_status
  ****************************************************************************/
 
-static int gauge_get_status(FAR enum battery_gauge_status_e *status)
+static int gauge_get_status(FAR enum battery_status_e *status)
 {
   uint8_t state;
   int ret;
@@ -325,8 +325,8 @@ static int gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case BATIOC_STATE:
         {
-          FAR enum battery_gauge_status_e *status =
-            (FAR enum battery_gauge_status_e *)(uintptr_t)arg;
+          FAR enum battery_status_e *status =
+            (FAR enum battery_status_e *)(uintptr_t)arg;
           ret = gauge_get_status(status);
         }
         break;

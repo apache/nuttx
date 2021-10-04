@@ -60,7 +60,7 @@ struct esp32_oneshot_s
 {
   uint8_t chan;                       /* The timer/counter in use */
   volatile bool running;              /* True: the timer is running */
-  FAR struct esp32_tim_dev_s    *tim; /* Pointer returned by
+  struct esp32_tim_dev_s    *tim;     /* Pointer returned by
                                        * esp32_tim_init() */
   volatile oneshot_handler_t handler; /* Oneshot expiration callback */
   volatile void                 *arg; /* The argument that will accompany

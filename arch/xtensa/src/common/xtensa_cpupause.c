@@ -97,7 +97,7 @@ bool up_cpu_pausereq(int cpu)
 
 int up_cpu_paused(int cpu)
 {
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 
   /* Update scheduler parameters */
 

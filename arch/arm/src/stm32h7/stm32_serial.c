@@ -468,7 +468,7 @@
                DMA_SCR_PBURST_SINGLE  | \
                DMA_SCR_MBURST_SINGLE  | \
                CONFIG_USART_TXDMAPRIO | \
-               DMA_TRBUFF)
+               DMA_SCR_TRBUFF)
 
 #endif /* SERIAL_HAVE_TXDMA */
 
@@ -3531,6 +3531,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
       up_restoreusartint(priv, ie);
 
+#else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */

@@ -64,7 +64,7 @@
  ****************************************************************************/
 
 extern volatile bool g_serial_ok;
-extern int riscv_pause_handler(int irq, void *c, FAR void *arg);
+extern int riscv_pause_handler(int irq, void *c, void *arg);
 
 /****************************************************************************
  * Public Functions
@@ -113,7 +113,7 @@ void k210_cpu_boot(int cpu)
   DPRINTF("CPU%d Started\n", this_cpu());
 
 #ifdef CONFIG_STACK_COLORATION
-  FAR struct tcb_s *tcb = this_task();
+  struct tcb_s *tcb = this_task();
 
   /* If stack debug is enabled, then fill the stack with a
    * recognizable value that we can use later to test for high

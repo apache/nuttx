@@ -66,7 +66,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  * Name: irq_waitlock
  *
  * Description:
- *   Spin to get g_irq_waitlock, handling a known deadlock condition:
+ *   Spin to get g_cpu_irqlock, handling a known deadlock condition:
  *
  *   A deadlock may occur if enter_critical_section is called from an
  *   interrupt handler.  Suppose:
@@ -92,7 +92,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  *     section.  Since it is spinning with interrupts disabled, CPUm cannot
  *     process the pending pause interrupt, causing the deadlock.
  *
- *   This function detects this deadlock condition while spinning with \
+ *   This function detects this deadlock condition while spinning with
  *   interrupts disabled.
  *
  * Input Parameters:
@@ -106,7 +106,7 @@ volatile uint8_t g_cpu_nestcount[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 #ifdef CONFIG_SMP
-bool irq_waitlock(int cpu)
+static bool irq_waitlock(int cpu)
 {
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
   FAR struct tcb_s *tcb = current_task(cpu);
@@ -131,7 +131,7 @@ bool irq_waitlock(int cpu)
            */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_SPINLOCKS
-          /* Notify that we are waiting for a spinlock */
+          /* Notify that we have aborted the wait for the spinlock */
 
           sched_note_spinabort(tcb, &g_cpu_irqlock);
 #endif
@@ -161,7 +161,7 @@ bool irq_waitlock(int cpu)
  *
  * Description:
  *   Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
- *   specific counter is increment to indicate that the thread has IRQs
+ *   specific counter is incremented to indicate that the thread has IRQs
  *   disabled and to support nested calls to enter_critical_section().
  *
  ****************************************************************************/
@@ -253,7 +253,7 @@ try_again:
 
           else
             {
-              /* Make sure that the g_cpu_irqlock() was not already set
+              /* Make sure that the g_cpu_irqset was not already set
                * by previous logic on this CPU that was executed by the
                * interrupt handler.  We know that the bit in g_cpu_irqset
                * for this CPU was zero on entry into the interrupt handler,
@@ -270,8 +270,8 @@ try_again_in_irq:
                   if (!irq_waitlock(cpu))
                     {
                       /* We are in a deadlock condition due to a pending
-                       * pause request interrupt request.  Break the
-                       * deadlock by handling the pause interrupt now.
+                       * pause request interrupt.  Break the deadlock by
+                       * handling the pause request now.
                        */
 
                       DEBUGVERIFY(up_cpu_paused(cpu));
@@ -360,7 +360,7 @@ try_again_in_irq:
                   goto try_again;
                 }
 
-              /* The set the lock count to 1.
+              /* Then set the lock count to 1.
                *
                * Interrupts disables must follow a stacked order.  We
                * cannot other context switches to re-order the enabling

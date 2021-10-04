@@ -184,10 +184,10 @@ int board_isx012_initialize(int i2c_bus_num)
       return -ENODEV;
     }
 
-  ret = isx012_register(i2c);
+  ret = isx012_initialize(i2c);
   if (ret < 0)
     {
-      _err("Error registering ISX012.\n");
+      _err("Failed to initialize ISX012.\n");
     }
 
   return ret;
@@ -201,10 +201,10 @@ int board_isx012_uninitialize(void)
 
   /* Initialize i2c device */
 
-  ret = isx012_unregister();
+  ret = isx012_uninitialize();
   if (ret < 0)
     {
-      _err("Error unregistering ISX012.\n");
+      _err("Failed to uninitialize ISX012.\n");
     }
 
   if (!i2c)

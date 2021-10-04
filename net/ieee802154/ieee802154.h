@@ -40,9 +40,9 @@
 /* Allocate a new IEEE 802.15.4 socket data callback */
 
 #define ieee802154_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->list)
+  devif_callback_alloc(dev, &conn->list, &conn->list_tail)
 #define ieee802154_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list)
+  devif_conn_callback_free(dev, cb, &conn->list, &conn->list_tail)
 
 /* Memory Pools */
 
@@ -104,6 +104,7 @@ struct ieee802154_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* IEEE 802.15.4-specific content follows */
 

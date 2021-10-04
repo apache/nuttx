@@ -60,7 +60,7 @@
 #include "wifi_manager/wifi_mgmr_api.h"
 #include "wifi_manager/bl_wifi.h"
 #include "wifi_manager/include/wifi_mgmr_ext.h"
-#include "wifi_driver/os_hal.h"
+#include "bl602_os_hal.h"
 #include "bl602_netdev.h"
 #include "bl602_efuse.h"
 
@@ -107,12 +107,12 @@
 
 #define BL602_NET_WDDELAY (1 * CLOCKS_PER_SEC)
 
+#define WIFI_MTU_SIZE 1516
+
 #define BL602_NET_TXBUFF_NUM  12
-#define BL602_NET_TXBUFF_SIZE (1650)
+#define BL602_NET_TXBUFF_SIZE (WIFI_MTU_SIZE + PRESERVE_80211_HEADER_LEN)
 
 #define BL602_TXDESC_THRESHOLD 3
-
-#define WIFI_MTU_SIZE 1514
 
 #if BL602_NET_TXBUFF_SIZE & 0x3 != 0
 #error "BL602_NET_TXBUFF_SIZE must be aligned to 4 bytes"
@@ -167,7 +167,7 @@ struct bl602_net_driver_s
 
 struct scan_parse_param_s
 {
-  FAR struct bl602_net_driver_s *priv;
+  struct bl602_net_driver_s *priv;
 
   int                flags;
   struct iw_scan_req scan_req;
@@ -248,46 +248,47 @@ extern void wifi_mgmr_tsk_init(void);
 extern int bl602_ef_ctrl_read_mac_address(uint8_t mac[6]);
 extern void wifi_main(int argc, char *argv[]);
 extern void wifi_mgmr_start_background(wifi_conf_t *conf);
+extern int bl_pm_init(void);
 extern struct net_device bl606a0_sta;
 
 /* Common TX logic */
 
-static int bl602_net_transmit(FAR struct bl602_net_driver_s *priv);
-static int bl602_net_txpoll(FAR struct net_driver_s *dev);
+static int bl602_net_transmit(struct bl602_net_driver_s *priv);
+static int bl602_net_txpoll(struct net_driver_s *dev);
 
 /* Interrupt handling */
 
 static void bl602_net_reply(struct bl602_net_driver_s *priv);
-static void bl602_net_receive(FAR struct bl602_net_driver_s *priv);
+static void bl602_net_receive(struct bl602_net_driver_s *priv);
 
 /* Watchdog timer expirations */
 
-static void bl602_net_poll_work(FAR void *arg);
+static void bl602_net_poll_work(void *arg);
 static void bl602_net_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
 
-static int bl602_net_ifup(FAR struct net_driver_s *dev);
-static int bl602_net_ifdown(FAR struct net_driver_s *dev);
+static int bl602_net_ifup(struct net_driver_s *dev);
+static int bl602_net_ifdown(struct net_driver_s *dev);
 
-static void bl602_net_txavail_work(FAR void *arg);
-static int  bl602_net_txavail(FAR struct net_driver_s *dev);
+static void bl602_net_txavail_work(void *arg);
+static int  bl602_net_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int bl602_net_addmac(FAR struct net_driver_s *dev,
-                            FAR const uint8_t *mac);
+static int bl602_net_addmac(struct net_driver_s *dev,
+                            const uint8_t *mac);
 # ifdef CONFIG_NET_MCASTGROUP
-static int bl602_net_rmmac(FAR struct net_driver_s *dev,
-                           FAR const uint8_t *mac);
+static int bl602_net_rmmac(struct net_driver_s *dev,
+                           const uint8_t *mac);
 # endif
 # ifdef CONFIG_NET_ICMPv6
-static void bl602_net_ipv6multicast(FAR struct bl602_net_driver_s *priv);
+static void bl602_net_ipv6multicast(struct bl602_net_driver_s *priv);
 # endif
 #endif
 
 #ifdef CONFIG_NETDEV_IOCTL
 static int
-bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg);
+bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg);
 #endif
 
 /****************************************************************************
@@ -312,7 +313,7 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg);
  *
  ****************************************************************************/
 
-static int bl602_net_transmit(FAR struct bl602_net_driver_s *priv)
+static int bl602_net_transmit(struct bl602_net_driver_s *priv)
 {
   int ret = OK;
   ninfo("tx pkt len:%d\n", priv->net_dev.d_len);
@@ -379,10 +380,10 @@ static int bl602_net_transmit(FAR struct bl602_net_driver_s *priv)
  *
  ****************************************************************************/
 
-static int bl602_net_txpoll(FAR struct net_driver_s *dev)
+static int bl602_net_txpoll(struct net_driver_s *dev)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
 
   if (priv->net_dev.d_len > 0)
     {
@@ -556,7 +557,7 @@ static void bl602_net_reply(struct bl602_net_driver_s *priv)
  *
  ****************************************************************************/
 
-static void bl602_net_receive(FAR struct bl602_net_driver_s *priv)
+static void bl602_net_receive(struct bl602_net_driver_s *priv)
 {
 #ifdef CONFIG_NET_PKT
   /* When packet sockets are enabled, feed the frame into the tap */
@@ -741,8 +742,8 @@ int bl602_net_notify(uint32_t event, uint8_t *data, int len, void *opaque)
 {
   DEBUGASSERT(opaque != NULL);
 
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)opaque;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)opaque;
 
   DEBUGASSERT(priv == &g_bl602_net[0] || priv == &g_bl602_net[1]);
 
@@ -850,9 +851,9 @@ int bl602_net_notify(uint32_t event, uint8_t *data, int len, void *opaque)
  *
  ****************************************************************************/
 
-static void bl602_net_poll_work(FAR void *arg)
+static void bl602_net_poll_work(void *arg)
 {
-  FAR struct bl602_net_driver_s *priv = (FAR struct bl602_net_driver_s *)arg;
+  struct bl602_net_driver_s *priv = (struct bl602_net_driver_s *)arg;
 
   net_lock();
   DEBUGASSERT(priv->net_dev.d_buf == NULL);
@@ -912,7 +913,7 @@ static void bl602_net_poll_work(FAR void *arg)
 
 static void bl602_net_poll_expiry(wdparm_t arg)
 {
-  FAR struct bl602_net_driver_s *priv = (FAR struct bl602_net_driver_s *)arg;
+  struct bl602_net_driver_s *priv = (struct bl602_net_driver_s *)arg;
 
   /* Schedule to perform the interrupt processing on the worker thread. */
 
@@ -940,10 +941,10 @@ static void bl602_net_poll_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static int bl602_net_ifup(FAR struct net_driver_s *dev)
+static int bl602_net_ifup(struct net_driver_s *dev)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %ld.%ld.%ld.%ld\n",
@@ -1014,10 +1015,10 @@ static int bl602_net_soft_reset(void)
  *
  ****************************************************************************/
 
-static int bl602_net_ifdown(FAR struct net_driver_s *dev)
+static int bl602_net_ifdown(struct net_driver_s *dev)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
   irqstate_t flags;
 
   net_lock();
@@ -1054,9 +1055,9 @@ static int bl602_net_ifdown(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void bl602_net_txavail_work(FAR void *arg)
+static void bl602_net_txavail_work(void *arg)
 {
-  FAR struct bl602_net_driver_s *priv = (FAR struct bl602_net_driver_s *)arg;
+  struct bl602_net_driver_s *priv = (struct bl602_net_driver_s *)arg;
 
   net_lock();
   DEBUGASSERT(priv->net_dev.d_buf == NULL);
@@ -1127,10 +1128,10 @@ static void bl602_net_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int bl602_net_txavail(FAR struct net_driver_s *dev)
+static int bl602_net_txavail(struct net_driver_s *dev)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
 
   if (work_available(&priv->availwork))
     {
@@ -1159,11 +1160,11 @@ static int bl602_net_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int bl602_net_addmac(FAR struct net_driver_s *dev,
-                            FAR const uint8_t *mac)
+static int bl602_net_addmac(struct net_driver_s *dev,
+                            const uint8_t *mac)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1187,11 +1188,11 @@ static int bl602_net_addmac(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int bl602_net_rmmac(FAR struct net_driver_s *dev,
-                           FAR const uint8_t *mac)
+static int bl602_net_rmmac(struct net_driver_s *dev,
+                           const uint8_t *mac)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1214,9 +1215,9 @@ static int bl602_net_rmmac(FAR struct net_driver_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void bl602_net_ipv6multicast(FAR struct bl602_net_driver_s *priv)
+static void bl602_net_ipv6multicast(struct bl602_net_driver_s *priv)
 {
-  FAR struct net_driver_s *dev;
+  struct net_driver_s *dev;
   uint16_t                 tmp16;
   uint8_t                  mac[6];
 
@@ -1455,7 +1456,7 @@ static int format_scan_result_to_wapi(struct iwreq *req, int result_cnt)
 }
 
 static wifi_mgmr_t *
-bl602_netdev_get_wifi_mgmr(FAR struct bl602_net_driver_s *priv)
+bl602_netdev_get_wifi_mgmr(struct bl602_net_driver_s *priv)
 {
   if (priv->current_mode == IW_MODE_INFRA)
     {
@@ -1472,7 +1473,7 @@ bl602_netdev_get_wifi_mgmr(FAR struct bl602_net_driver_s *priv)
 }
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
+static int bl602_ioctl_wifi_start(struct bl602_net_driver_s *priv,
                                   uintptr_t                      arg)
 {
   UNUSED(arg);
@@ -1546,7 +1547,7 @@ static int bl602_ioctl_wifi_start(FAR struct bl602_net_driver_s *priv,
   return OK;
 }
 
-static int bl602_ioctl_wifi_stop(FAR struct bl602_net_driver_s *priv,
+static int bl602_ioctl_wifi_stop(struct bl602_net_driver_s *priv,
                                  uintptr_t                      arg)
 {
   UNUSED(arg);
@@ -1599,10 +1600,10 @@ static int bl602_ioctl_wifi_stop(FAR struct bl602_net_driver_s *priv,
  ****************************************************************************/
 
 static int
-bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
+bl602_net_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 {
-  FAR struct bl602_net_driver_s *priv =
-    (FAR struct bl602_net_driver_s *)dev->d_private;
+  struct bl602_net_driver_s *priv =
+    (struct bl602_net_driver_s *)dev->d_private;
   int ret = -ENOSYS;
 
   /* Decode and dispatch the driver-specific IOCTL command */
@@ -2002,8 +2003,9 @@ bl602_net_ioctl(FAR struct net_driver_s *dev, int cmd, unsigned long arg)
 }
 #endif
 
-static int wifi_manager_process(int argc, FAR char *argv[])
+static int wifi_manager_process(int argc, char *argv[])
 {
+  bl_pm_init();
   wifi_main_init();
   ipc_emb_notify();
 
@@ -2120,10 +2122,12 @@ void bl602_net_event(int evt, int val)
     case CODE_WIFI_ON_DISCONNECT:
       do
         {
-          struct bl602_net_driver_s *priv = &g_bl602_net[0];
+          /* struct bl602_net_driver_s *priv = &g_bl602_net[0]; */
+
           if (g_state.sta_connected == 1)
             {
-              netdev_carrier_off(&priv->net_dev);
+              /* netdev_carrier_off(&priv->net_dev); */
+
               g_state.sta_connected = 0;
             }
         }
@@ -2209,7 +2213,7 @@ void bl602_net_event(int evt, int val)
 
 int bl602_net_initialize(void)
 {
-  FAR struct bl602_net_driver_s *priv;
+  struct bl602_net_driver_s *priv;
   int                            tmp;
   int                            idx;
   uint8_t                        mac[6];

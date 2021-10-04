@@ -173,15 +173,8 @@ endchoice # On-board Crystal Frequency
 
 config ESP32S2_RT_TIMER
 	bool "Real-time Timer"
+	select ESP32S2_TIMER
 	default n
-
-config ESP32S2_PARTITION
-	bool "ESP32S2 Partition"
-	default n
-	select ESP32S2_SPIFLASH
-	---help---
-		Decode esp-idf's partition file and initialize
-		partition by nuttx MTD.
 
 config ESP32S2_RUN_IRAM
 	bool "Run from IRAM"
@@ -619,9 +612,50 @@ endmenu # ESP32S2_SPI
 menu "SPI Flash configuration"
 	depends on ESP32S2_SPIFLASH
 
+if ESP32S2_HAVE_OTA_PARTITION
+
+comment "Application Image OTA Update support"
+
+config ESP32S2_OTA_PRIMARY_SLOT_OFFSET
+	hex "Application image primary slot offset"
+	default "0x10000"
+
+config ESP32S2_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config ESP32S2_OTA_SECONDARY_SLOT_OFFSET
+	hex "Application image secondary slot offset"
+	default "0x110000"
+
+config ESP32S2_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config ESP32S2_OTA_SLOT_SIZE
+	hex "Application image slot size (in bytes)"
+	default "0x100000"
+
+config ESP32S2_OTA_SCRATCH_OFFSET
+	hex "Scratch partition offset"
+	default "0x210000"
+
+config ESP32S2_OTA_SCRATCH_SIZE
+	hex "Scratch partition size"
+	default "0x40000"
+
+config ESP32S2_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+endif
+
+comment "General MTD configuration"
+
 config ESP32S2_MTD_OFFSET
 	hex "MTD base address in SPI Flash"
-	default 0x180000
+	default 0x180000 if !ESP32S2_HAVE_OTA_PARTITION
+	default 0x250000 if ESP32S2_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
@@ -639,7 +673,7 @@ config ESP32S2_SPIFLASH_DEBUG
 		Enable this option, read and write of SPI Flash
 		will show input arguments and result.
 
-endmenu # ESP32S2_SPIFLASH
+endmenu # SPI Flash configuration
 
 menu "SPI RAM Config"
 	depends on ESP32S2_SPIRAM
@@ -855,8 +889,114 @@ config ESP32S2_ONESHOT
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
+config ESP32S2_FREERUN
+	bool "Freerun timer wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support freerun timer.
+
 endmenu # Timer/counter Configuration
 endif # ESP32S2_TIMER
+
+config ESP32S2_HAVE_OTA_PARTITION
+	bool
+	default n
+
+menu "Application Image Configuration"
+
+choice
+	prompt "Application Image Format"
+	default ESP32S2_APP_FORMAT_LEGACY
+	---help---
+		Depending on the chosen 2nd stage bootloader, the application may
+		be required to be perform a specific startup routine. Furthermore,
+		the image binary must be formatted according to the definition from
+		the 2nd stage bootloader.
+
+config ESP32S2_APP_FORMAT_LEGACY
+	bool "Legacy format"
+	---help---
+		This is the legacy application image format, as supported by the ESP-IDF
+		2nd stage bootloader.
+
+config ESP32S2_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select ESP32S2_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+	---help---
+		The Espressif port of MCUboot supports the loading of unsegmented firmware
+		images.
+
+comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
+endchoice # Application Image Format
+
+choice
+	prompt "Source for bootloader binaries"
+	default ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
+	---help---
+		Select the action to be taken by the build system for the
+		"make bootloader" target.
+
+config ESP32S2_BOOTLOADER_DOWNLOAD_PREBUILT
+	bool "Download prebuilt binaries"
+	---help---
+		The build system will download the prebuilt binaries from
+		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
+		Application Image Format (ESP32S2_APP_FORMAT_LEGACY or ESP32S2_APP_FORMAT_MCUBOOT)
+
+config ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+	bool "Build binaries from source"
+	---help---
+		The build system will build all the required binaries from source. It will clone
+		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
+		custom bootloader according to the chosen Application Image Format
+		(ESP32S2_APP_FORMAT_LEGACY or ESP32S2_APP_FORMAT_MCUBOOT) and partition information.
+
+endchoice
+
+choice
+	prompt "Target slot for image flashing"
+	default ESP32S2_ESPTOOL_TARGET_PRIMARY
+	depends on ESP32S2_HAVE_OTA_PARTITION
+	---help---
+		Slot to which ESPTOOL will flash the generated binary image.
+
+config ESP32S2_ESPTOOL_TARGET_PRIMARY
+	bool "Application image primary slot"
+	---help---
+		This assumes that the generated image is already pre-validated.
+		This is the recommended option for the initial stages of the
+		application firmware image development.
+
+config ESP32S2_ESPTOOL_TARGET_SECONDARY
+	bool "Application image secondary slot"
+	---help---
+		The application needs to confirm the generated image as valid,
+		otherwise the bootloader may consider it invalid and perform the
+		rollback of the update after a reset.
+		This is the choice most suitable for the development and verification
+		of a secure firmware update workflow.
+
+endchoice
+
+config ESP32S2_APP_MCUBOOT_HEADER_SIZE
+	int "Application image header size (in bytes)"
+	default 32
+	depends on ESP32S2_APP_FORMAT_MCUBOOT
+
+endmenu # Application Image Configuration
+
+if ESP32S2_APP_FORMAT_LEGACY
+
+config ESP32S2_PARTITION
+	bool "ESP32-S2 Partition"
+	default n
+	select ESP32S2_SPIFLASH
+	---help---
+		Decode partition file and initialize partition as MTD.
 
 menu "Partition Configuration"
 	depends on ESP32S2_PARTITION
@@ -869,7 +1009,9 @@ config ESP32S2_PARTITION_MOUNT
 	string "Partition mount point"
 	default "/dev/esp/partition/"
 
-endmenu # ESP32S2_PARTITION
+endmenu # Partition Configuration
+
+endif
 
 menu "AES accelerate"
 	depends on ESP32S2_AES_ACCELERATOR

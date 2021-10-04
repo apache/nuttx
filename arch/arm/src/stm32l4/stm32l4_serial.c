@@ -391,6 +391,14 @@ static const struct uart_ops_s g_uart_dma_ops =
 
 /* I/O buffers */
 
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+static char g_lpuart1rxbuffer[CONFIG_LPUART1_RXBUFSIZE];
+static char g_lpuart1txbuffer[CONFIG_LPUART1_TXBUFSIZE];
+# ifdef CONFIG_LPUART1_RXDMA
+static char g_lpuart1rxfifo[RXDMA_BUFFER_SIZE];
+# endif
+#endif
+
 #ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
 static char g_usart1rxbuffer[CONFIG_USART1_RXBUFSIZE];
 static char g_usart1txbuffer[CONFIG_USART1_TXBUFSIZE];
@@ -431,14 +439,75 @@ static char g_uart5rxfifo[RXDMA_BUFFER_SIZE];
 # endif
 #endif
 
-/* This describes the state of the STM32 USART1 ports. */
+/* This describes the state of the STM32 LPUART1 port. */
+
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+static struct stm32l4_serial_s g_lpuart1priv =
+{
+  .dev =
+    {
+#if CONSOLE_UART == 1
+      .isconsole = true,
+#endif
+      .recv      =
+      {
+        .size    = CONFIG_LPUART1_RXBUFSIZE,
+        .buffer  = g_lpuart1rxbuffer,
+      },
+      .xmit      =
+      {
+        .size    = CONFIG_LPUART1_TXBUFSIZE,
+        .buffer  = g_lpuart1txbuffer,
+      },
+#ifdef CONFIG_LPUART1_RXDMA
+      .ops       = &g_uart_dma_ops,
+#else
+      .ops       = &g_uart_ops,
+#endif
+      .priv      = &g_lpuart1priv,
+    },
+
+  .irq           = STM32L4_IRQ_LPUART1,
+  .parity        = CONFIG_LPUART1_PARITY,
+  .bits          = CONFIG_LPUART1_BITS,
+  .stopbits2     = CONFIG_LPUART1_2STOP,
+  .baud          = CONFIG_LPUART1_BAUD,
+  .apbclock      = STM32L4_PCLK1_FREQUENCY,
+  .usartbase     = STM32L4_LPUART1_BASE,
+  .tx_gpio       = GPIO_LPUART1_TX,
+  .rx_gpio       = GPIO_LPUART1_RX,
+#if defined(CONFIG_SERIAL_OFLOWCONTROL) && defined(CONFIG_LPUART1_OFLOWCONTROL)
+  .oflow         = true,
+  .cts_gpio      = GPIO_LPUART1_CTS,
+#endif
+#if defined(CONFIG_SERIAL_IFLOWCONTROL) && defined(CONFIG_LPUART1_IFLOWCONTROL)
+  .iflow         = true,
+  .rts_gpio      = GPIO_LPUART1_RTS,
+#endif
+#ifdef CONFIG_LPUART1_RXDMA
+  .rxdma_channel = DMAMAP_LPUART1_RX,
+  .rxfifo        = g_lpuart1rxfifo,
+#endif
+
+#ifdef CONFIG_LPUART1_RS485
+  .rs485_dir_gpio = GPIO_LPUART1_RS485_DIR,
+#  if (CONFIG_USART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#  else
+  .rs485_dir_polarity = true,
+#  endif
+#endif
+};
+#endif
+
+/* This describes the state of the STM32 USART1 port. */
 
 #ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
 static struct stm32l4_serial_s g_usart1priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 1
+#if CONSOLE_UART == 2
       .isconsole = true,
 #endif
       .recv      =
@@ -499,7 +568,7 @@ static struct stm32l4_serial_s g_usart2priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 2
+#if CONSOLE_UART == 3
       .isconsole = true,
 #endif
       .recv      =
@@ -560,7 +629,7 @@ static struct stm32l4_serial_s g_usart3priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 3
+#if CONSOLE_UART == 4
       .isconsole = true,
 #endif
       .recv      =
@@ -621,7 +690,7 @@ static struct stm32l4_serial_s g_uart4priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 4
+#if CONSOLE_UART == 5
       .isconsole = true,
 #endif
       .recv      =
@@ -682,7 +751,7 @@ static struct stm32l4_serial_s g_uart5priv =
 {
   .dev =
     {
-#if CONSOLE_UART == 5
+#if CONSOLE_UART == 6
       .isconsole = true,
 #endif
       .recv     =
@@ -739,22 +808,25 @@ static struct stm32l4_serial_s g_uart5priv =
 /* This table lets us iterate over the configured USARTs */
 
 FAR static struct stm32l4_serial_s *
-const g_uart_devs[STM32L4_NUSART + STM32L4_NUART] =
+const g_uart_devs[STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART] =
 {
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+  [0] = &g_lpuart1priv,
+#endif
 #ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
-  [0] = &g_usart1priv,
+  [1] = &g_usart1priv,
 #endif
 #ifdef CONFIG_STM32L4_USART2_SERIALDRIVER
-  [1] = &g_usart2priv,
+  [2] = &g_usart2priv,
 #endif
 #ifdef CONFIG_STM32L4_USART3_SERIALDRIVER
-  [2] = &g_usart3priv,
+  [3] = &g_usart3priv,
 #endif
 #ifdef CONFIG_STM32L4_UART4_SERIALDRIVER
-  [3] = &g_uart4priv,
+  [4] = &g_uart4priv,
 #endif
 #ifdef CONFIG_STM32L4_UART5_SERIALDRIVER
-  [4] = &g_uart5priv,
+  [5] = &g_uart5priv,
 #endif
 };
 
@@ -921,20 +993,16 @@ static int stm32l4serial_dmanextrx(FAR struct stm32l4_serial_s *priv)
 #endif
 
 /****************************************************************************
- * Name: stm32l4serial_setformat
+ * Name: stm32l4serial_setbaud_usart
  *
  * Description:
- *   Set the serial line format and speed.
+ *   Set the serial line baud rate (standard UART and USART).
  *
  ****************************************************************************/
 
 #ifndef CONFIG_SUPPRESS_UART_CONFIG
-static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
+static void stm32l4serial_setbaud_usart(FAR struct stm32l4_serial_s *priv)
 {
-  FAR struct stm32l4_serial_s *priv =
-      (FAR struct stm32l4_serial_s *)dev->priv;
-  uint32_t regval;
-
   /* This first implementation is for U[S]ARTs that support oversampling
    * by 8 in additional to the standard oversampling by 16.
    */
@@ -990,6 +1058,73 @@ static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
 
   stm32l4serial_putreg(priv, STM32L4_USART_CR1_OFFSET, cr1);
   stm32l4serial_putreg(priv, STM32L4_USART_BRR_OFFSET, brr);
+}
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_setbaud_lpuart
+ *
+ * Description:
+ *   Set the serial line baud rate (LPUART only).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+static void stm32l4serial_setbaud_lpuart(FAR struct stm32l4_serial_s *priv)
+{
+  uint32_t brr;
+
+  /* The equation is:
+   *
+   *   baud = 256 * fCK / brr
+   *   brr  = 256 * fCK / baud
+   *
+   * It is forbidden to write values lower than LPUART_BRR_MIN in
+   * the LPUART_BRR register. fCK must range from 3 x baud rate to
+   * 4096 x baud rate.
+   */
+
+  brr = (((uint64_t)priv->apbclock << 8) + (priv->baud >> 1)) / priv->baud;
+  brr &= LPUART_BRR_MASK;
+
+  if (brr < LPUART_BRR_MIN)
+    {
+      brr = LPUART_BRR_MIN;
+    }
+
+  stm32l4serial_putreg(priv, STM32L4_USART_BRR_OFFSET, brr);
+}
+#endif
+#endif
+
+/****************************************************************************
+ * Name: stm32l4serial_setformat
+ *
+ * Description:
+ *   Set the serial line format and speed.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_SUPPRESS_UART_CONFIG
+static void stm32l4serial_setformat(FAR struct uart_dev_s *dev)
+{
+  FAR struct stm32l4_serial_s *priv =
+      (FAR struct stm32l4_serial_s *)dev->priv;
+  uint32_t regval;
+
+  /* Set baud rate */
+
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+  if (priv->usartbase == STM32L4_LPUART1_BASE)
+    {
+      stm32l4serial_setbaud_lpuart(priv);
+    }
+  else
+#endif
+    {
+      stm32l4serial_setbaud_usart(priv);
+    }
 
   /* Configure parity mode */
 
@@ -1215,7 +1350,7 @@ static void stm32l4serial_pm_setsuspend(bool suspend)
 
   g_serialpm.serial_suspended = suspend;
 
-  for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
+  for (n = 0; n < STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART; n++)
     {
       struct stm32l4_serial_s *priv = g_uart_devs[n];
 
@@ -1254,6 +1389,12 @@ static void stm32l4serial_setapbclock(FAR struct uart_dev_s *dev, bool on)
     {
     default:
       return;
+#ifdef CONFIG_STM32L4_LPUART1_SERIALDRIVER
+    case STM32L4_LPUART1_BASE:
+      rcc_en = RCC_APB1ENR2_LPUART1EN;
+      regaddr = STM32L4_RCC_APB1ENR2;
+      break;
+#endif
 #ifdef CONFIG_STM32L4_USART1_SERIALDRIVER
     case STM32L4_USART1_BASE:
       rcc_en = RCC_APB2ENR_USART1EN;
@@ -2885,7 +3026,7 @@ static int stm32l4serial_pmprepare(FAR struct pm_callback_s *cb, int domain,
        * buffers.
        */
 
-      for (n = 0; n < STM32L4_NUSART + STM32L4_NUART; n++)
+      for (n = 0; n < STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART; n++)
         {
           struct stm32l4_serial_s *priv = g_uart_devs[n];
 
@@ -2955,7 +3096,7 @@ void arm_earlyserialinit(void)
 
   /* Disable all USART interrupts */
 
-  for (i = 0; i < STM32L4_NUSART + STM32L4_NUART; i++)
+  for (i = 0; i < STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART; i++)
     {
       if (g_uart_devs[i])
         {
@@ -3024,7 +3165,7 @@ void arm_serialinit(void)
 
   strcpy(devname, "/dev/ttySx");
 
-  for (i = 0; i < STM32L4_NUSART + STM32L4_NUART; i++)
+  for (i = 0; i < STM32L4_NLPUART + STM32L4_NUSART + STM32L4_NUART; i++)
     {
       /* Don't create a device for non-configured ports. */
 
@@ -3067,6 +3208,13 @@ void stm32l4_serial_dma_poll(void)
     irqstate_t flags;
 
     flags = enter_critical_section();
+
+#ifdef CONFIG_LPUART1_RXDMA
+  if (g_lpuart1priv.rxdma != NULL)
+    {
+      stm32l4serial_dmarxcallback(g_lpuart1priv.rxdma, 0, &g_lpuart1priv);
+    }
+#endif
 
 #ifdef CONFIG_USART1_RXDMA
   if (g_usart1priv.rxdma != NULL)

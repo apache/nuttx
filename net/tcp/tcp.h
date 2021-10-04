@@ -54,9 +54,9 @@
  */
 
 #define tcp_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, &(conn)->list)
+  devif_callback_alloc((conn)->dev, &(conn)->list, &(conn)->list_tail)
 #define tcp_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list)
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list, &(conn)->list_tail)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
@@ -164,6 +164,7 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* TCP-specific content follows */
 
@@ -289,6 +290,7 @@ struct tcp_conn_s
    */
 
   FAR struct devif_callback_s *connevents;
+  FAR struct devif_callback_s *connevents_tail;
 
   /* accept() is called when the TCP logic has created a connection
    *
@@ -850,9 +852,12 @@ void tcp_listen_initialize(void);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno, uint8_t domain);
+FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
+                                        uint16_t portno,
+                                        uint8_t domain);
 #else
-FAR struct tcp_conn_s *tcp_findlistener(uint16_t portno);
+FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
+                                        uint16_t portno);
 #endif
 
 /****************************************************************************
@@ -893,9 +898,10 @@ int tcp_listen(FAR struct tcp_conn_s *conn);
  ****************************************************************************/
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-bool tcp_islistener(uint16_t portno, uint8_t domain);
+bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno,
+                    uint8_t domain);
 #else
-bool tcp_islistener(uint16_t portno);
+bool tcp_islistener(FAR union ip_binding_u *uaddr, uint16_t portno);
 #endif
 
 /****************************************************************************

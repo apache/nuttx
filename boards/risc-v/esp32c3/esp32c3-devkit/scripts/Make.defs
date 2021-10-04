@@ -24,7 +24,11 @@ include $(TOPDIR)/tools/esp32c3/Config.mk
 include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
 
 LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
-LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+else
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+endif
 LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)

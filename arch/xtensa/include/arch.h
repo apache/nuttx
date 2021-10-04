@@ -47,6 +47,7 @@
  * Name: up_getsp
  ****************************************************************************/
 
+static inline uint32_t up_getsp(void) inline_function;
 static inline uint32_t up_getsp(void)
 {
   register uint32_t sp;
@@ -142,7 +143,7 @@ void *xtensa_imm_zalloc(size_t size);
  *
  ****************************************************************************/
 
-void xtensa_imm_free(FAR void *mem);
+void xtensa_imm_free(void *mem);
 
 /****************************************************************************
  * Name: xtensa_imm_memalign
@@ -173,7 +174,7 @@ void *xtensa_imm_memalign(size_t alignment, size_t size);
  *
  ****************************************************************************/
 
-bool xtensa_imm_heapmember(FAR void *mem);
+bool xtensa_imm_heapmember(void *mem);
 
 /****************************************************************************
  * Name: xtensa_imm_mallinfo
@@ -184,7 +185,7 @@ bool xtensa_imm_heapmember(FAR void *mem);
  *
  ****************************************************************************/
 
-int xtensa_imm_mallinfo(FAR struct mallinfo *info);
+int xtensa_imm_mallinfo(struct mallinfo *info);
 #endif
 
 #undef EXTERN

@@ -18,6 +18,8 @@
 #
 ############################################################################
 
+include chip/Bootloader.mk
+
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S

@@ -364,6 +364,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       /* There are no clients of the device yet */
 
       dev->d_conncb = NULL;
+      dev->d_conncb_tail = NULL;
       dev->d_devcb = NULL;
 
       /* We need exclusive access for the following operations */

@@ -194,13 +194,6 @@ static void nxsig_abnormal_termination(int signo)
 {
   FAR struct tcb_s *rtcb = (FAR struct tcb_s *)this_task();
 
-  /* Notify the target if the non-cancelable or deferred cancellation set */
-
-  if (nxnotify_cancellation(rtcb))
-    {
-      return;
-    }
-
   /* Careful:  In the multi-threaded task, the signal may be handled on a
    * child pthread.
    */

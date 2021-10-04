@@ -58,23 +58,22 @@ static FAR struct tcb_s *nxsched_nexttcb(FAR struct tcb_s *tcb)
 {
   FAR struct tcb_s *nxttcb = (FAR struct tcb_s *)tcb->flink;
   FAR struct tcb_s *rtrtcb;
-  int cpu = this_cpu();
 
   /* Which task should run next?  It will be either the next tcb in the
    * assigned task list (nxttcb) or a TCB in the g_readytorun list.  We can
    * only select a task from that list if the affinity mask includes the
-   * current CPU.
+   * tcb->cpu.
    *
    * If pre-emption is locked or another CPU is in a critical section,
    * then use the 'nxttcb' which will probably be the IDLE thread.
    */
 
-  if (!nxsched_islocked_global() && !irq_cpu_locked(cpu))
+  if (!nxsched_islocked_global() && !irq_cpu_locked(this_cpu()))
     {
-      /* Search for the highest priority task that can run on this CPU. */
+      /* Search for the highest priority task that can run on tcb->cpu. */
 
       for (rtrtcb = (FAR struct tcb_s *)g_readytorun.head;
-           rtrtcb != NULL && !CPU_ISSET(cpu, &rtrtcb->affinity);
+           rtrtcb != NULL && !CPU_ISSET(tcb->cpu, &rtrtcb->affinity);
            rtrtcb = (FAR struct tcb_s *)rtrtcb->flink);
 
       /* Return the TCB from the readyt-to-run list if it is the next

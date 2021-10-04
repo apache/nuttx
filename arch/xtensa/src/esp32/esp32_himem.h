@@ -32,11 +32,19 @@ extern "C"
 {
 #endif
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 /* Indicates that a mapping will only be read from. Note that this is unused
  * for now.
  */
 
 #define ESP_HIMEM_MAPFLAG_RO 1
+
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
 /* Allocate a block in high memory
  *

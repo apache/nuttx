@@ -134,7 +134,7 @@ static void litex_reload_mtimecmp(void)
  * Name:  litex_timerisr
  ****************************************************************************/
 
-static int litex_timerisr(int irq, void *context, FAR void *arg)
+static int litex_timerisr(int irq, void *context, void *arg)
 {
   litex_reload_mtimecmp();
 

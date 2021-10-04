@@ -81,7 +81,7 @@ struct i2c_master_s *bl602_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int bl602_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int bl602_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #undef EXTERN
 #if defined(__cplusplus)

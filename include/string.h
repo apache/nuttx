@@ -74,6 +74,7 @@ FAR char  *strncpy(FAR char *, FAR const char *, size_t);
 FAR char  *stpncpy(FAR char *, FAR const char *, size_t);
 FAR char  *strpbrk(FAR const char *, FAR const char *);
 FAR char  *strchr(FAR const char *s, int c);
+FAR char  *strchrnul(FAR const char *s, int c);
 FAR char  *strrchr(FAR const char *s, int c);
 size_t     strspn(FAR const char *, FAR const char *);
 size_t     strcspn(FAR const char *, FAR const char *);
