@@ -100,8 +100,54 @@ config ESP32_SECURE_BOOT_INSECURE
 
 endif # ESP32_SECURE_BOOT
 
+comment "Flash Encryption"
+
+config ESP32_SECURE_FLASH_ENC_ENABLED
+	bool "Enable Flash Encryption on boot (READ HELP FIRST)"
+	default n
+	depends on ESP32_APP_FORMAT_MCUBOOT
+	---help---
+		If this option is set, flash contents will be encrypted by the bootloader on first boot.
+
+		Note: After first boot, the system will be permanently encrypted. Re-flashing an encrypted
+		system is complicated and not always possible.
+
+		Read https://docs.espressif.com/projects/esp-idf/en/latest/security/flash-encryption.html
+		before enabling.
+
+if ESP32_SECURE_FLASH_ENC_ENABLED
+
+comment "Flash Encryption support requires building bootloader from source (ESP32_BOOTLOADER_BUILD_FROM_SOURCE)"
+	depends on !ESP32_BOOTLOADER_BUILD_FROM_SOURCE
+
+choice ESP32_SECURE_FLASH_ENCRYPTION_MODE
+	bool "Enable usage mode"
+	default ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		By default, Development mode is enabled which allows ROM download mode to perform Flash Encryption
+		operations (plaintext is sent to the device, and it encrypts it internally and writes ciphertext
+		to flash). This mode is not secure, it's possible for an attacker to write their own chosen plaintext
+		to flash.
+
+		Release mode should always be selected for production or manufacturing. Once enabled it's no longer
+		possible for the device in ROM Download Mode to use the Flash Encryption hardware.
+
+		Refer to the Flash Encryption section of the ESP-IDF Programmer's Guide for details:
+		https://docs.espressif.com/projects/esp-idf/en/latest/esp32/security/flash-encryption.html#flash-encryption-configuration
+
+	config ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+		bool "Development (NOT SECURE)"
+		select ESP32_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+
+	config ESP32_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
+		bool "Release"
+
+endchoice
+
+endif # ESP32_SECURE_FLASH_ENC_ENABLED
+
 menu "Potentially insecure options"
-	visible if ESP32_SECURE_BOOT_INSECURE
+	visible if ESP32_SECURE_BOOT_INSECURE || ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
 
 	# NOTE: Options in this menu NEED to have ESP32_SECURE_BOOT_INSECURE
 	# and/or ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT in "depends on", as the menu
@@ -112,7 +158,7 @@ menu "Potentially insecure options"
 config ESP32_SECURE_BOOT_ALLOW_ROM_BASIC
 	bool "Leave ROM BASIC Interpreter available on reset"
 	default n
-	depends on ESP32_SECURE_BOOT_INSECURE
+	depends on ESP32_SECURE_BOOT_INSECURE || ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
 	---help---
 		By default, the BASIC ROM Console starts on reset if no valid bootloader is
 		read from the flash.
@@ -126,7 +172,7 @@ config ESP32_SECURE_BOOT_ALLOW_ROM_BASIC
 config ESP32_SECURE_BOOT_ALLOW_JTAG
 	bool "Allow JTAG Debugging"
 	default n
-	depends on ESP32_SECURE_BOOT_INSECURE
+	depends on ESP32_SECURE_BOOT_INSECURE || ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
 	---help---
 		If not set (default), the bootloader will permanently disable JTAG (across entire chip) on first boot
 		when either Secure Boot or Flash Encryption is enabled.
@@ -156,12 +202,57 @@ config ESP32_SECURE_BOOT_ALLOW_EFUSE_RD_DIS
 		then it is __NOT__ possible to read/write efuses using espefuse.py utility.
 		However, efuse can be read/written from the application.
 
+config ESP32_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+	bool "Leave UART bootloader encryption enabled"
+	default n
+	depends on ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader encryption access on
+		first boot. If set, the UART bootloader will still be able to access hardware encryption.
+
+		It is recommended to only set this option in testing environments.
+
+config ESP32_SECURE_FLASH_UART_BOOTLOADER_ALLOW_DEC
+	bool "Leave UART bootloader decryption enabled"
+	default n
+	depends on ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader decryption access on
+		first boot. If set, the UART bootloader will still be able to access hardware decryption.
+
+		Only set this option in testing environments. Setting this option allows complete bypass of flash
+		encryption.
+
+config ESP32_SECURE_FLASH_UART_BOOTLOADER_ALLOW_CACHE
+	bool "Leave UART bootloader flash cache enabled"
+	default n
+	depends on ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader flash cache access on
+		first boot. If set, the UART bootloader will still be able to access the flash cache.
+
+		Only set this option in testing environments.
+
+config ESP32_SECURE_FLASH_REQUIRE_ALREADY_ENABLED
+	bool "Require Flash Encryption to be already enabled"
+	default n
+	depends on ESP32_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), and Flash Encryption is not yet enabled in eFuses, the 2nd stage bootloader
+		will enable Flash Encryption: generate the Flash Encryption key and program eFuses.
+		If this option is set, and Flash Encryption is not yet enabled, the bootloader will error out and
+		reboot.
+		If Flash Encryption is enabled in eFuses, this option does not change the bootloader behavior.
+
+		Only use this option in testing environments, to avoid accidentally enabling Flash Encryption on
+		the wrong device. The device needs to have Flash Encryption already enabled using espefuse.py.
+
 endmenu # Potentially insecure options
 
 choice ESP32_SECURE_UART_ROM_DL_MODE
 	bool "UART ROM download mode"
 	default ESP32_SECURE_INSECURE_ALLOW_DL_MODE
-	depends on ESP32_SECURE_BOOT
+	depends on ESP32_SECURE_BOOT || ESP32_SECURE_FLASH_ENC_ENABLED
 
 	config ESP32_SECURE_DISABLE_ROM_DL_MODE
 		bool "Permanently disabled (recommended)"
