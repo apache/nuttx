@@ -49,6 +49,7 @@
 #include "sam_config.h"
 #include "hardware/sam_uart.h"
 
+#include "sam_serial.h"
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -320,6 +321,9 @@
 struct sam_dev_s
 {
   const uint32_t usartbase;     /* Base address of USART registers */
+  CODE void (*boarddisable) (bool disabled); /* call here if there is a board*/
+  /* en- / disable function) */
+  CODE void (*boardinit) (void); /* call here if there is a boardinit  */
   uint32_t baud;                /* Configured baud */
   uint32_t sr;                  /* Saved status bits */
   uint8_t  irq;                 /* IRQ associated with this USART */
@@ -413,6 +417,8 @@ static char g_usart2txbuffer[CONFIG_USART2_TXBUFSIZE];
 static struct sam_dev_s g_uart0priv =
 {
   .usartbase      = SAM_UART0_BASE,
+  .boarddisable   = &sam_board_disable_uart0,
+  .boardinit      = &sam_board_init_uart0,
   .baud           = CONFIG_UART0_BAUD,
   .irq            = SAM_IRQ_UART0,
   .parity         = CONFIG_UART0_PARITY,
@@ -443,6 +449,8 @@ static uart_dev_t g_uart0port =
 static struct sam_dev_s g_uart1priv =
 {
   .usartbase      = SAM_UART1_BASE,
+  .boarddisable   = &sam_board_disable_uart1,
+  .boardinit      = &sam_board_init_uart1,
   .baud           = CONFIG_UART1_BAUD,
   .irq            = SAM_IRQ_UART1,
   .parity         = CONFIG_UART1_PARITY,
@@ -473,6 +481,8 @@ static uart_dev_t g_uart1port =
 static struct sam_dev_s g_uart2priv =
 {
   .usartbase      = SAM_UART2_BASE,
+  .boarddisable   = &sam_board_disable_uart2,
+  .boardinit      = &sam_board_init_uart2,
   .baud           = CONFIG_UART2_BAUD,
   .irq            = SAM_IRQ_UART2,
   .parity         = CONFIG_UART2_PARITY,
@@ -503,6 +513,8 @@ static uart_dev_t g_uart2port =
 static struct sam_dev_s g_uart3priv =
 {
   .usartbase      = SAM_UART3_BASE,
+  .boarddisable   = &sam_board_disable_uart3,
+  .boardinit      = &sam_board_init_uart3,
   .baud           = CONFIG_UART3_BAUD,
   .irq            = SAM_IRQ_UART3,
   .parity         = CONFIG_UART3_PARITY,
@@ -533,6 +545,8 @@ static uart_dev_t g_uart3port =
 static struct sam_dev_s g_uart4priv =
 {
   .usartbase      = SAM_UART4_BASE,
+  .boarddisable   = &sam_board_disable_uart4,
+  .boardinit      = &sam_board_init_uart4,
   .baud           = CONFIG_UART4_BAUD,
   .irq            = SAM_IRQ_UART4,
   .parity         = CONFIG_UART4_PARITY,
@@ -563,6 +577,8 @@ static uart_dev_t g_uart4port =
 static struct sam_dev_s g_usart0priv =
 {
   .usartbase      = SAM_USART0_BASE,
+  .boarddisable   = &sam_board_disable_usart0,
+  .boardinit      = &sam_board_init_usart0,
   .baud           = CONFIG_USART0_BAUD,
   .irq            = SAM_IRQ_USART0,
   .parity         = CONFIG_USART0_PARITY,
@@ -596,6 +612,8 @@ static uart_dev_t g_usart0port =
 static struct sam_dev_s g_usart1priv =
 {
   .usartbase      = SAM_USART1_BASE,
+  .boarddisable   = &sam_board_disable_usart1,
+  .boardinit      = &sam_board_init_usart1,
   .baud           = CONFIG_USART1_BAUD,
   .irq            = SAM_IRQ_USART1,
   .parity         = CONFIG_USART1_PARITY,
@@ -629,6 +647,8 @@ static uart_dev_t g_usart1port =
 static struct sam_dev_s g_usart2priv =
 {
   .usartbase      = SAM_USART2_BASE,
+  .boarddisable   = &sam_board_disable_usart2,
+  .boardinit      = &sam_board_init_usart2,
   .baud           = CONFIG_USART2_BAUD,
   .irq            = SAM_IRQ_USART2,
   .parity         = CONFIG_USART2_PARITY,
@@ -741,6 +761,11 @@ static int sam_setup(struct uart_dev_s *dev)
   /* The shutdown method will put the UART in a known, disabled state */
 
   sam_shutdown(dev);
+
+  /* First call the board init ()
+   *
+   */
+  priv->boardinit ();
 
   /* Set up the mode register.  Start with normal UART mode and the MCK
    * as the timing source
@@ -1048,6 +1073,13 @@ static int sam_ioctl(struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+    case TIOCSBDIS:
+      {
+        struct sam_dev_s *priv;
+        priv = (struct sam_dev_s *)dev->priv;
+        priv->boarddisable((bool)arg);
+        break;
+      }
     case TIOCSLIN:
       {
         /* switch usart to lin mode, set identifier register -> this will

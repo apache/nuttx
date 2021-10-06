@@ -178,9 +178,6 @@
 #  define SER_SINGLEWIRE_PULLDOWN     (2 << SER_SINGLEWIRE_PULL_SHIFT) /* Enable Pull down the RX/TX Line */
 #  define SER_SINGLEWIRE_PUSHPULL     (1 << 3)                         /* Use PUSH/PULL not Open Drain with Single wire */
 
-/* LIN support */
-#define TIOCSLIN  _TIOC(0x0040)       /* issue one lin header */
-
 /* Debugging */
 
 #define TIOCSERGSTRUCT  _TIOC(0x0032) /* Get device TTY structure */
@@ -199,6 +196,15 @@
 #define TIOCGSWAP       _TIOC(0x0036)  /* Get RX/TX Swap */
 
 #define SER_SWAP_ENABLED   (1 << 0) /* Enable/disable RX/TX swap */
+
+/* LIN support */
+#define TIOCSLIN  _TIOC(0x0037)       /* issue one lin header */
+
+/* Board disable support */
+#define TIOCSBDIS  _TIOC(0x0038)       /* call a board disable(bool disable)
+                                          function */
+
+
 
 /****************************************************************************
  * Public Type Definitions
