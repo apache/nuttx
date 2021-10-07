@@ -97,9 +97,11 @@ void __mpfs_start(uint32_t mhartid)
       *dest++ = *src++;
     }
 
-  /* Setup PLL */
+  /* Setup PLL if not already provided */
 
+#ifdef CONFIG_MPFS_BOOTLOADER
   mpfs_clockconfig();
+#endif
 
   /* Configure the UART so we can get debug output */
 
