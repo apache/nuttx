@@ -26,6 +26,12 @@ config MPFS_BOOT_HART
 	---help---
 		The HART number which does the HW initialiization and wakes up the other harts (Default 0, E51 core)
 
+config MPFS_DDR_INIT
+        bool "Initialize DDR"
+        default n
+        ---help---
+                Initializes and performs DDR training on the associated DDR memory.
+
 menu "MPFS Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
