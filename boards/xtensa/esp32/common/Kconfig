@@ -40,22 +40,6 @@ choice ESP32_SPIFLASH_FS
 
 endchoice
 
-config ESP32_SPIFLASH_ENCRYPTION_TEST
-	bool "SPI Flash encryption test"
-	default n
-	depends on ESP32_SPIFLASH
-	select DEBUG_ASSERTIONS
-	---help---
-		Enable SPI Flash encryption test. This option will also select
-		DEBUG_ASSERTIONS to enable kernel assert macro.
-
-config ESP32_SPIFLASH_TEST_ADDRESS
-	hex "SPI Flash test address"
-	default 0x180000
-	depends on ESP32_SPIFLASH_ENCRYPTION_TEST
-	---help---
-		SPI Flash encryption test read/write address.
-
 config ESP32_LCD_OVERCLOCK
 	bool "Run LCD at higher clock speed than allowed"
 	default n
