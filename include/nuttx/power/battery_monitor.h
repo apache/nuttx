@@ -28,6 +28,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/list.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -296,6 +297,8 @@ struct battery_monitor_dev_s
   FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
   sem_t batsem;                                       /* Enforce mutually exclusive access */
 
+  struct list_node flist;
+
   /* Data fields specific to the lower-half driver may follow */
 };
 
@@ -316,6 +319,13 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: battery_monitor_changed
+ ****************************************************************************/
+
+int battery_monitor_changed(FAR struct battery_monitor_dev_s *dev,
+                            uint32_t mask);
 
 /****************************************************************************
  * Name: battery_monitor_register
