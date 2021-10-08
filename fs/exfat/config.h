@@ -1,6 +1,8 @@
 /* libexfat/config.h.  Generated from config.h.in by configure.  */
 /* libexfat/config.h.in.  Generated from configure.ac by autoheader.  */
 
+#include <nuttx/config.h>
+
 /* Name of package */
 #define PACKAGE "exfat"
 
@@ -44,3 +46,7 @@
 
 /* Enable pread() and pwrite(). */
 #define _XOPEN_SOURCE 500
+
+#ifndef CONFIG_LIBC_LOCALTIME
+void tzset(void);
+#endif

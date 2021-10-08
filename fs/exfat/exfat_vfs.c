@@ -221,7 +221,7 @@ static int exfatfs_getpath(FAR struct inode *inode,
     }
 
   path += strlen(path);
-  exfat_get_name(node, path);
+  strcpy(path, node->name);
   if (node->child)
     {
       strcat(path, "/");
@@ -930,7 +930,7 @@ static int exfatfs_readdir(FAR struct inode *mountpt,
           dir->fd_dir.d_type = DTYPE_FILE;
         }
 
-      exfat_get_name(priv->entry, dir->fd_dir.d_name);
+      strcpy(dir->fd_dir.d_name, priv->entry->name);
       node = priv->entry;
       priv->entry = exfat_readdir(&priv->it);
       exfatfs_release_node(&fs->ef, node);
