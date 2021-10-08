@@ -176,7 +176,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_PARTITION
+#ifdef CONFIG_ESP32_PARTITION_TABLE
   ret = esp32_partition_init();
   if (ret < 0)
     {

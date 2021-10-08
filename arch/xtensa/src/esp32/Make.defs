@@ -167,7 +167,7 @@ ifeq ($(CONFIG_ESP32_FREERUN),y)
 CHIP_CSRCS += esp32_freerun.c
 endif
 
-ifeq ($(CONFIG_ESP32_PARTITION),y)
+ifeq ($(CONFIG_ESP32_PARTITION_TABLE),y)
 CHIP_CSRCS += esp32_partition.c
 endif
 

@@ -907,6 +907,23 @@ config ESP32_SPIFLASH_DEBUG
 		Enable this option, read and write of SPI Flash
 		will show input arguments and result.
 
+if ESP32_APP_FORMAT_LEGACY
+
+comment "Partition Table configuration"
+
+config ESP32_PARTITION_TABLE
+	bool "Create MTD partitions from Partition Table"
+	default n
+	---help---
+		Decode partition table and initialize partitions as MTD.
+
+config ESP32_PARTITION_MOUNTPT
+	string "Partition mount point"
+	default "/dev/esp/partition/"
+	depends on ESP32_PARTITION_TABLE
+
+endif
+
 endmenu # ESP32_SPIFLASH
 
 menu "SPI RAM Config"
@@ -1337,32 +1354,12 @@ config ESP32_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32_APP_FORMAT_MCUBOOT
 
-endmenu # Application Image Configuration
-
-if ESP32_APP_FORMAT_LEGACY
-
-config ESP32_PARTITION
-	bool "ESP32 Partition"
-	default n
-	select ESP32_SPIFLASH
-	---help---
-		Decode esp-idf's partition file and initialize
-		partition by nuttx MTD.
-
-menu "Partition Configuration"
-	depends on ESP32_PARTITION
-
-config ESP32_PARTITION_OFFSET
-	hex "Partition offset"
+config ESP32_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
 	default "0x8000"
+	depends on ESP32_APP_FORMAT_LEGACY
 
-config ESP32_PARTITION_MOUNT
-	string "Partition mount point"
-	default "/dev/esp/partition/"
-
-endmenu # Partition Configuration
-
-endif
+endmenu # Application Image Configuration
 
 config ESP32_AUTO_SLEEP
 	bool "Auto-sleep"
