@@ -68,7 +68,8 @@
 #define BATTERY_ONLINE_CHANGED          (1U << 2)
 #define BATTERY_VOLTAGE_CHANGED         (1U << 3)
 #define BATTERY_CURRENT_CHANGED         (1U << 4)
-#define BATTERY_INPUT_CURRENT_CHANGED   (1U << 5)
+#define BATTERY_CAPACITY_CHANGED        (1U << 5)
+#define BATTERY_TEMPERATURE_CHANGED     (1U << 6)
 
 /****************************************************************************
  * Public Types
