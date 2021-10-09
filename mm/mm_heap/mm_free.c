@@ -31,6 +31,7 @@
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
+#include "kasan/kasan.h"
 
 /****************************************************************************
  * Private Functions
@@ -83,8 +84,12 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+  kasan_poison(mem, mm_malloc_size(mem));
+
   if (mm_takesemaphore(heap) == false)
     {
+      kasan_unpoison(mem, mm_malloc_size(mem));
+
       /* We are in IDLE task & can't get sem, or meet -ESRCH return,
        * which means we are in situations during context switching(See
        * mm_takesemaphore() & getpid()). Then add to the delay list.

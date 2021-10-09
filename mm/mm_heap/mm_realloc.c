@@ -32,6 +32,7 @@
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
+#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -123,6 +124,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       if (newsize < oldsize)
         {
           mm_shrinkchunk(heap, oldnode, newsize);
+          kasan_poison((FAR char *)oldnode + oldnode->size,
+                       oldsize - oldnode->size);
         }
 
       /* Then return the original address */
@@ -264,12 +267,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                                     (next->preceding & MM_ALLOC_BIT);
             }
 
-          /* Now we have to move the user contents 'down' in memory.  memcpy
-           * should be safe for this.
-           */
-
           newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
-          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
 
           /* Now we want to return newnode */
 
@@ -335,6 +333,17 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         }
 
       mm_givesemaphore(heap);
+
+      kasan_unpoison(newmem, mm_malloc_size(newmem));
+      if (newmem != oldmem)
+        {
+          /* Now we have to move the user contents 'down' in memory.  memcpy
+           * should be safe for this.
+           */
+
+          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
+        }
+
       return newmem;
     }
 
