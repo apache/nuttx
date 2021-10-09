@@ -930,26 +930,24 @@ int audio_comp_initialize(FAR const char *name, ...)
 {
   FAR struct audio_comp_priv_s *priv;
   va_list ap;
-  va_list cp;
   int ret = -ENOMEM;
   int i;
-
-  va_start(ap, name);
-  va_copy(cp, ap);
 
   priv = kmm_zalloc(sizeof(struct audio_comp_priv_s));
   if (priv == NULL)
     {
-      goto end_va;
+      return ret;
     }
 
   priv->export.ops = &g_audio_comp_ops;
 
+  va_start(ap, name);
   while (va_arg(ap, FAR struct audio_lowerhalf_s *))
     {
       priv->count++;
     }
 
+  va_end(ap);
   priv->lower = kmm_calloc(priv->count,
                            sizeof(FAR struct audio_lowerhalf_s *));
   if (priv->lower == NULL)
@@ -957,31 +955,30 @@ int audio_comp_initialize(FAR const char *name, ...)
       goto free_priv;
     }
 
+  va_start(ap, name);
   for (i = 0; i < priv->count; i++)
     {
       FAR struct audio_lowerhalf_s *tmp;
 
-      tmp = va_arg(cp, FAR struct audio_lowerhalf_s *);
+      tmp = va_arg(ap, FAR struct audio_lowerhalf_s *);
       tmp->upper = audio_comp_callback;
       tmp->priv = priv;
 
       priv->lower[i] = tmp;
     }
 
+  va_end(ap);
   ret = audio_register(name, &priv->export);
   if (ret < 0)
     {
       goto free_lower;
     }
 
-  va_end(ap);
   return OK;
 
 free_lower:
   kmm_free(priv->lower);
 free_priv:
   kmm_free(priv);
-end_va:
-  va_end(ap);
   return ret;
 }
