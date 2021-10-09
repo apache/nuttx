@@ -20,23 +20,12 @@
 
 # Include socket source files
 
-SOCK_CSRCS += bind.c connect.c getsockname.c getpeername.c
-SOCK_CSRCS += recv.c recvfrom.c send.c sendto.c
+SOCK_CSRCS += accept.c bind.c connect.c getsockname.c getpeername.c
+SOCK_CSRCS += listen.c recv.c recvfrom.c send.c sendto.c
 SOCK_CSRCS += socket.c socketpair.c net_close.c
 SOCK_CSRCS += recvmsg.c sendmsg.c
 SOCK_CSRCS += net_dup2.c net_sockif.c net_poll.c net_vfcntl.c
 SOCK_CSRCS += net_fstat.c
-
-# TCP/IP support
-
-ifeq ($(CONFIG_NET_TCP),y)
-SOCK_CSRCS += listen.c accept.c
-
-# Local Unix domain support
-
-else ifeq ($(CONFIG_NET_LOCAL_STREAM),y)
-SOCK_CSRCS += listen.c accept.c
-endif
 
 # Socket options
 
