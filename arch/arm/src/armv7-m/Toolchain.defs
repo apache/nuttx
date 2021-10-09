@@ -75,6 +75,10 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
+
 # Parametrization for ARCHCPUFLAGS
 
 ifeq ($(CONFIG_ARCH_CORTEXM4),y)

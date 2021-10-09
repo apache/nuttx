@@ -67,6 +67,10 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARM_TOOLCHAIN),BUILDROOT)

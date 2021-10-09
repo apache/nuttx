@@ -29,6 +29,15 @@
 #                   reliable code generation.
 #
 
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION := -Os
+endif
+
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
 
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CROSSDEV = xt-
@@ -43,12 +52,6 @@ ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
 endif
 
 ARCHCPUFLAGS =
-
-ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION := -Os
-endif
 
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)

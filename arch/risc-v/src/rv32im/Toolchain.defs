@@ -53,6 +53,10 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
+
 # Generic GNU RVG toolchain
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
