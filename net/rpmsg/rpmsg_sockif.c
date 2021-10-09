@@ -1144,7 +1144,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   ssize_t ret;
 
-  if (psock->s_type == SOCK_DGRAM && _SS_ISBOUND(psock->s_flags)
+  if (psock->s_type != SOCK_STREAM && _SS_ISBOUND(psock->s_flags)
           && !_SS_ISCONNECTED(psock->s_flags))
     {
       ret = rpmsg_socket_connect_internal(psock);
@@ -1161,7 +1161,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
 
   rpmsg_socket_lock(&conn->recvlock);
 
-  if (psock->s_type == SOCK_DGRAM)
+  if (psock->s_type != SOCK_STREAM)
     {
       uint32_t datalen;
 
