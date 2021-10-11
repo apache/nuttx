@@ -58,6 +58,12 @@ int parse_ptable_partition(FAR struct partition_state_s *state,
                            FAR void *arg);
 #endif
 
+#ifdef CONFIG_GPT_PARTITION
+int parse_gpt_partition(FAR struct partition_state_s *state,
+                        partition_handler_t handler,
+                        FAR void *arg);
+#endif
+
 #ifdef CONFIG_MBR_PARTITION
 int parse_mbr_partition(FAR struct partition_state_s *state,
                         partition_handler_t handler,
