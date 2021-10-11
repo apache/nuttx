@@ -92,6 +92,9 @@ endif
 
 ifeq ($(CONFIG_HOST_WINDOWS),y)
   HOSTEXEEXT ?= .exe
+  HOSTDYNEXT ?= .dll
+else ifeq ($(CONFIG_HOST_LINUX),y)
+  HOSTDYNEXT ?= .so
 endif
 
 # This define is passed as EXTRAFLAGS for kernel-mode builds.  It is also passed
