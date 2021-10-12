@@ -316,7 +316,23 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
   if (dev->d_sndlen > 0)
 #else
-  if (dev->d_sndlen > 0 && conn->tx_unacked > 0)
+  if ((result & TCP_REXMIT) != 0 &&
+      dev->d_sndlen > 0 && conn->tx_unacked > 0)
+    {
+      uint32_t saveseq;
+
+      /* According to RFC 6298 (5.4), retransmit the earliest segment
+       * that has not been acknowledged by the TCP receiver.
+       */
+
+      saveseq = tcp_getsequence(conn->sndseq);
+      tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+
+      tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+
+      tcp_setsequence(conn->sndseq, saveseq);
+    }
+  else if (dev->d_sndlen > 0 && conn->tx_unacked > 0)
 #endif
     {
       uint32_t seq;
