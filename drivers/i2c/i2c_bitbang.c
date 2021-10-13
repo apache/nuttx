@@ -269,6 +269,7 @@ static int i2c_bitbang_wait_ack(FAR struct i2c_bitbang_dev_s *priv)
     {
       ret = -EIO;
     }
+#ifndef CONFIG_I2C_BITBANG_NO_DELAY
   else
     {
       int remaining = priv->delay - i;
@@ -278,6 +279,7 @@ static int i2c_bitbang_wait_ack(FAR struct i2c_bitbang_dev_s *priv)
           up_udelay(remaining);
         }
     }
+#endif
 
   return ret;
 }
