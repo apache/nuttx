@@ -67,7 +67,6 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-
 #define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
 #define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
@@ -243,7 +242,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       pstate->snd_sent = pstate->snd_acked;
 
-
       /* Fall through to re-send data from the last that was ACKed */
     }
 
@@ -300,7 +298,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       /* Get the amount of data that we can send in the next packet */
 
       uint32_t sndlen = pstate->snd_buflen - pstate->snd_sent;
-
 
       if (sndlen > conn->mss)
         {
