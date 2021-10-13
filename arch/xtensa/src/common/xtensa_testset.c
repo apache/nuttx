@@ -56,8 +56,9 @@ static inline uint32_t xtensa_compareset(volatile uint32_t *addr,
   __asm__ __volatile__
   (
     "WSR    %2, SCOMPARE1\n" /* Initialize SCOMPARE1 */
-    "S32C1I %0, %1, 0\n"     /* Store id into the lock, if the lock is the
-                              * same as comparel. Otherwise, no write-access */
+    "S32C1I %0, %1, 0\n"     /* Store the compare value into the lock,
+                              * if the lock is the same as compare1.
+                              * Otherwise, no write-access */
     : "=r"(set) : "r"(addr), "r"(compare), "0"(set)
   );
 
@@ -90,36 +91,10 @@ static inline uint32_t xtensa_compareset(volatile uint32_t *addr,
 
 spinlock_t up_testset(volatile spinlock_t *lock)
 {
-  spinlock_t prev;
-
   /* Perform the 32-bit compare and set operation */
 
-  prev = xtensa_compareset((volatile uint32_t *)lock,
+  return xtensa_compareset((volatile uint32_t *)lock,
                            SP_UNLOCKED, SP_LOCKED);
-
-  /* xtensa_compareset() should return either SP_UNLOCKED if the spinlock
-   * was locked or SP_LOCKED or possibly ~SP_UNLOCKED if the spinlock was
-   * not locked:
-   *
-   * "In the RE-2013.0 release and after, there is a slight change in the
-   *  semantics of the S32C1I instruction.  Nothing is changed about the
-   *  operation on memory.  In rare cases the resulting value in register
-   *  at can be different in this and later releases. The rule still holds
-   *  that memory has been written if and only if the register result
-   *  equals SCOMPARE1.
-   *
-   * "The difference is that in some cases where memory has not been
-   *  written, the instruction returns ~SCOMPARE1 instead of the current
-   *  value of memory.  Although this change can, in principle, affect
-   *  the operation of code, scanning all internal Cadence code produced
-   *  no examples where this change would change the operation of the
-   *  code."
-   *
-   * In any case, the return value of SP_UNLOCKED can be trusted and will
-   * always mean that the spinlock was set.
-   */
-
-  return (prev == SP_UNLOCKED) ? SP_UNLOCKED : SP_LOCKED;
 }
 
 #endif /* CONFIG_SPINLOCK */
