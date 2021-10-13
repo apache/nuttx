@@ -59,6 +59,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Used in spiflash_cachestate_s structure even when SMP is disabled. */
+
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS 1
+#endif
+
 #define SPI_FLASH_WRITE_BUF_SIZE    (32)
 #define SPI_FLASH_READ_BUF_SIZE     (64)
 
@@ -165,7 +171,7 @@ struct spiflash_cachestate_s
   int other;
 #endif
   irqstate_t flags;
-  uint32_t val[2];
+  uint32_t val[CONFIG_SMP_NCPUS];
 };
 
 /****************************************************************************
