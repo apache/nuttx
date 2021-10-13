@@ -185,6 +185,14 @@
 #  error "CONFIG_SCHED_EXIT_MAX < 1"
 #endif
 
+#ifdef CONFIG_DEBUG_TCBINFO
+#  define TCB_PID_OFF                (offsetof(struct tcb_s, pid))
+#  define TCB_STATE_OFF              (offsetof(struct tcb_s, task_state))
+#  define TCB_PRI_OFF                (offsetof(struct tcb_s, sched_priority))
+#  define TCB_NAME_OFF               (offsetof(struct tcb_s, name))
+#  define TCB_REG_OFF(reg)           (offsetof(struct tcb_s, xcp.regs[reg]))
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -764,6 +772,32 @@ struct pthread_tcb_s
   FAR void *joininfo;                    /* Detach-able info to support join    */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */
+
+/* struct tcbinfo_s *********************************************************/
+
+/* The structure save key filed offset of tcb_s while can be used by debuggers
+ * to parse the tcb information
+ */
+
+#ifdef CONFIG_DEBUG_TCBINFO
+struct tcbinfo_s
+{
+  uint16_t pid_off;                      /* Offset of tcb.pid               */
+  uint16_t state_off;                    /* Offset of tcb.task_state        */
+  uint16_t pri_off;                      /* Offset of tcb.sched_priority    */
+  uint16_t name_off;                     /* Offset of tcb.name              */
+  uint16_t reg_num;                      /* Num of regs in tcbinfo.reg_offs */
+
+  /* Offsets of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
+   * Please refer:
+   * https://sourceware.org/gdb/current/onlinedocs/gdb/ARM-Features.html
+   * https://sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features.html
+   * value 0: This regsiter was not priovided by NuttX
+   */
+
+  uint16_t reg_offs[XCPTCONTEXT_REGS];
+};
+#endif
 
 /* This is the callback type used by nxsched_foreach() */
 
