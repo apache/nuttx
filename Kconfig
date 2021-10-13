@@ -546,6 +546,14 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config DEBUG_TCBINFO
+	bool "Enable TCBinfo struct for debug"
+	default n
+	---help---
+		Enables tcbinfo struct for debugger infomation.
+		Selecting this option will enable g_tcbinfo in arch and
+		procfs.
+
 config DEBUG_ALERT
 	bool
 	default n
