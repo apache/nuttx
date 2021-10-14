@@ -62,7 +62,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif
 
-define DOWNLOAD
+define FLASH
   $(Q) echo "Download firmware $(1).bin"
   $(Q) st-flash write $(1).bin 0x08000000
 endef
