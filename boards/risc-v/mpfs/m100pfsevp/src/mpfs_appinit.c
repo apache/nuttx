@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_board_spi.c
+ * boards/risc-v/mpfs/m100pfsevp/src/mpfs_appinit.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,76 +24,52 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdio.h>
-#include <debug.h>
+#include <syslog.h>
 #include <errno.h>
 
-#include <nuttx/spi/spi.h>
-#include <nuttx/spi/spi_transfer.h>
+#include <nuttx/board.h>
 
-#include "mpfs_spi.h"
+#include "mpfs.h"
+#include "board_config.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_spi_initialize
+ * Name: board_app_initialize
  *
  * Description:
- *   Initialize and register SPI driver for the defined SPI ports.
+ *   Perform architecture specific initialization
+ *
+ * Input Parameters:
+ *   arg - The boardctl() argument is passed to the board_app_initialize()
+ *         implementation without modification.  The argument has no
+ *         meaning to NuttX; the meaning of the argument is a contract
+ *         between the board-specific initialization logic and the
+ *         matching application logic.  The value could be such things as a
+ *         mode enumeration value, a set of DIP switch switch settings, a
+ *         pointer to configuration data read from a file or serial FLASH,
+ *         or whatever you would like to do with it.  Every implementation
+ *         should accept zero/NULL as a default configuration.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure to indicate the nature of the failure.
  *
  ****************************************************************************/
 
-int mpfs_board_spi_init(void)
+int board_app_initialize(uintptr_t arg)
 {
-  int ret = OK;
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  struct spi_dev_s *spi;
-#ifdef CONFIG_SPI_DRIVER
-  int port = 0;
-#endif /* CONFIG_SPI_DRIVER */
+#ifdef CONFIG_BOARD_LATE_INITIALIZE
+  /* Board initialization already performed by board_late_initialize() */
+
+  return OK;
+#else
+  /* Perform board-specific initialization */
+
+  return mpfs_bringup();
 #endif
-
-  /* Initialize SPI device */
-
-#ifdef CONFIG_MPFS_SPI0
-  spi = mpfs_spibus_initialize(0);
-  if (spi == NULL)
-    {
-      spierr("Failed to initialize SPI0\n");
-      return -ENODEV;
-    }
-
-#ifdef CONFIG_SPI_DRIVER
-  ret = spi_register(spi, port++);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to register /dev/spi0: %d\n", ret);
-
-      mpfs_spibus_uninitialize(spi);
-    }
-#endif /* CONFIG_SPI_DRIVER */
-#endif /* CONFIG_MPFS_SPI0 */
-
-#ifdef CONFIG_MPFS_SPI1
-  spi = mpfs_spibus_initialize(1);
-  if (spi == NULL)
-    {
-      spierr("Failed to initialize SPI1\n");
-      return -ENODEV;
-    }
-
-#ifdef CONFIG_SPI_DRIVER
-  ret = spi_register(spi, port);
-  if (ret < 0)
-    {
-      spierr("Failed to register /dev/spi%d: %d\n", port, ret);
-
-      mpfs_spibus_uninitialize(spi);
-    }
-
-#endif /* CONFIG_SPI_DRIVER */
-#endif /* CONFIG_MPFS_SPI1 */
-  return ret;
 }

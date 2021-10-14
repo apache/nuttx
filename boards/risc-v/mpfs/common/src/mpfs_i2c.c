@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_emmcsd.c
+ * boards/risc-v/mpfs/common/src/mpfs_i2c.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -26,26 +26,20 @@
 
 #include <debug.h>
 #include <errno.h>
-#include <nuttx/mmcsd.h>
+#include <sys/types.h>
+#include <nuttx/i2c/i2c_master.h>
 
-#include "mpfs_emmcsd.h"
-#include "mpfsicicle.h"
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-static FAR struct sdio_dev_s *g_sdio_dev;
+#include "mpfs_i2c.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_emmcsd_init
+ * Name: board_i2c_init
  *
  * Description:
- *   Configure the eMMCSD driver.
+ *   Configure the I2C driver.
  *
  * Returned Value:
  *   Zero (OK) is returned on success; A negated errno value is returned
@@ -53,36 +47,56 @@ static FAR struct sdio_dev_s *g_sdio_dev;
  *
  ****************************************************************************/
 
-int mpfs_board_emmcsd_init(void)
+int mpfs_board_i2c_init(void)
 {
-  int ret;
+  int ret = OK;
 
-  /* Mount the SDIO-based MMC/SD block driver */
+#if defined(CONFIG_MPFS_I2C0) || defined(CONFIG_MPFS_I2C1)
+#ifdef CONFIG_I2C_DRIVER
+  int bus = 0;
+#endif
+  FAR struct i2c_master_s *i2c;
+#endif
 
-  /* First, get an instance of the SDIO interface */
+#ifdef CONFIG_MPFS_I2C0
+  i2c = mpfs_i2cbus_initialize(0);
 
-  finfo("Initializing SDIO slot %d\n", CONFIG_NSH_MMCSDSLOTNO);
-
-  g_sdio_dev = sdio_initialize(CONFIG_NSH_MMCSDSLOTNO);
-  if (!g_sdio_dev)
+  if (i2c == NULL)
     {
-      ferr("ERROR: Failed to initialize SDIO slot %d\n",
-           CONFIG_NSH_MMCSDSLOTNO);
+      i2cerr("ERROR: Failed to init I2C0 interface\n");
       return -ENODEV;
     }
 
-  /* Now bind the SDIO interface to the MMC/SD driver */
-
-  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", CONFIG_NSH_MMCSDMINOR);
-
-  ret = mmcsd_slotinitialize(CONFIG_NSH_MMCSDMINOR, g_sdio_dev);
-  if (ret != OK)
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, bus++);
+  if (ret < 0)
     {
-      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      i2cerr("ERROR: Failed to register I2C0 driver: %d\n", ret);
+      mpfs_i2cbus_uninitialize(i2c);
       return ret;
     }
+#endif
+#endif
 
-  sdio_mediachange(g_sdio_dev, true);
+#ifdef CONFIG_MPFS_I2C1
+  i2c = mpfs_i2cbus_initialize(1);
 
-  return OK;
+  if (i2c == NULL)
+    {
+      i2cerr("ERROR: Failed to init I2C1 interface\n");
+      return -ENODEV;
+    }
+
+#ifdef CONFIG_I2C_DRIVER
+  ret = i2c_register(i2c, bus);
+  if (ret < 0)
+    {
+      i2cerr("ERROR: Failed to register I2C1 driver: %d\n", ret);
+      mpfs_i2cbus_uninitialize(i2c);
+      return ret;
+    }
+#endif
+#endif
+
+  return ret;
 }

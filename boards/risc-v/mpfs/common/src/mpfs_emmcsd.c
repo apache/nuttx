@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_appinit.c
+ * boards/risc-v/mpfs/common/src/mpfs_emmcsd.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,52 +24,72 @@
 
 #include <nuttx/config.h>
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <syslog.h>
+#include <debug.h>
 #include <errno.h>
+#include <nuttx/mmcsd.h>
 
-#include <nuttx/board.h>
-
-#include "mpfs.h"
+#include "mpfs_emmcsd.h"
 #include "board_config.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static FAR struct sdio_dev_s *g_sdio_dev;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_app_initialize
+ * Name: board_emmcsd_init
  *
  * Description:
- *   Perform architecture specific initialization
- *
- * Input Parameters:
- *   arg - The boardctl() argument is passed to the board_app_initialize()
- *         implementation without modification.  The argument has no
- *         meaning to NuttX; the meaning of the argument is a contract
- *         between the board-specific initialization logic and the
- *         matching application logic.  The value could be such things as a
- *         mode enumeration value, a set of DIP switch switch settings, a
- *         pointer to configuration data read from a file or serial FLASH,
- *         or whatever you would like to do with it.  Every implementation
- *         should accept zero/NULL as a default configuration.
+ *   Configure the eMMCSD driver.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int board_app_initialize(uintptr_t arg)
+int mpfs_board_emmcsd_init(void)
 {
-#ifdef CONFIG_BOARD_LATE_INITIALIZE
-  /* Board initialization already performed by board_late_initialize() */
+  int ret;
+
+#ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
+  /* Configure eMMC / SD-card signal GPIO */
+
+  finfo("Configuring EMMCSD MUX GPIO\n");
+  mpfs_configgpio(MPFS_EMMCSD_GPIO);
+  mpfs_gpiowrite(MPFS_EMMCSD_GPIO, false);
+#endif
+
+  /* Mount the SDIO-based MMC/SD block driver */
+
+  /* First, get an instance of the SDIO interface */
+
+  finfo("Initializing SDIO slot %d\n", SDIO_SLOTNO);
+
+  g_sdio_dev = sdio_initialize(SDIO_SLOTNO);
+  if (!g_sdio_dev)
+    {
+      ferr("ERROR: Failed to initialize SDIO slot %d\n", SDIO_SLOTNO);
+      return -ENODEV;
+    }
+
+  /* Now bind the SDIO interface to the MMC/SD driver */
+
+  finfo("Bind SDIO to the MMC/SD driver, minor=%d\n", SDIO_MINOR);
+
+  ret = mmcsd_slotinitialize(SDIO_MINOR, g_sdio_dev);
+  if (ret != OK)
+    {
+      ferr("ERROR: Failed to bind SDIO to the MMC/SD driver: %d\n", ret);
+      return ret;
+    }
+
+  sdio_mediachange(g_sdio_dev, true);
 
   return OK;
-#else
-  /* Perform board-specific initialization */
-
-  return mpfs_bringup();
-#endif
 }
