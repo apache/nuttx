@@ -60,7 +60,7 @@ It's a two step process where the first converts the ELF file into a ESP32-compa
 and the second flashes it to the board.  These steps are included into the build system and you can
 flash your NuttX firmware simply by running::
 
-    $ make download ESPTOOL_PORT=<port>
+    $ make flash ESPTOOL_PORT=<port>
 
 where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
 
@@ -73,7 +73,7 @@ Once you downloaded both binaries, you can flash them by adding an ``ESPTOOL_BIN
 
 .. code-block:: console
 
-   $ make download ESPTOOL_PORT=<port> ESPTOOL_BINDIR=<dir>
+   $ make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=<dir>
 
 .. note:: It is recommended that if this is the first time you are using the board with NuttX that you perform a complete
    SPI FLASH erase.

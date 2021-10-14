@@ -181,12 +181,12 @@ endif
 
 ESPTOOL_BAUD ?= 921600
 
-# DOWNLOAD -- Download binary image via esptool.py
+# FLASH -- Download a binary image via esptool.py
 
-define DOWNLOAD
+define FLASH
 	$(Q) if [ -z $(ESPTOOL_PORT) ]; then \
-		echo "DOWNLOAD error: Missing serial port device argument."; \
-		echo "USAGE: make download ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
+		echo "FLASH error: Missing serial port device argument."; \
+		echo "USAGE: make flash ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
 		exit 1; \
 	fi
 	esptool.py -c esp32s2 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)

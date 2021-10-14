@@ -1546,12 +1546,12 @@ build directory.
     build. (2) The logic in tools/mkexport.sh only supports GCC and, for example,
     explicitly assumes that the archiver is 'ar'
 
-  * `download`
+  * `flash` (or `download` : DEPRECATED)
 
-    This is a helper target that will rebuild NuttX and download it to the target
+    This is a helper target that will rebuild NuttX and flash it to the target
     system in one step.  The operation of this target depends completely upon
-    implementation of the DOWNLOAD command in the user Make.defs file.  It will
-    generate an error an error if the DOWNLOAD command is not defined.
+    implementation of the FLASH command in the user Make.defs file.  It will
+    generate an error if the FLASH command is not defined.
 
 The following targets are used internally by the make logic but can be invoked
 from the command under certain conditions if necessary.
