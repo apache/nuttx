@@ -197,8 +197,7 @@ volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
-FAR struct pidhash_s *g_pidhash;
-
+FAR struct tcb_s **g_pidhash;
 volatile int g_npidhash;
 
 /* This is a table of task lists.  This table is indexed by the task stat
@@ -547,14 +546,8 @@ void nx_start(void)
       g_npidhash <<= 1;
     }
 
-  g_pidhash = kmm_malloc(sizeof(struct pidhash_s) * g_npidhash);
+  g_pidhash = kmm_zalloc(sizeof(*g_pidhash) * g_npidhash);
   DEBUGASSERT(g_pidhash);
-
-  for (i = 0; i < g_npidhash; i++)
-    {
-      g_pidhash[i].tcb = NULL;
-      g_pidhash[i].pid = INVALID_PROCESS_ID;
-    }
 
   /* IDLE Group Initialization **********************************************/
 
@@ -565,9 +558,8 @@ void nx_start(void)
 
       /* Assign the process ID(s) of ZERO to the idle task(s) */
 
-      hashndx                = PIDHASH(i);
-      g_pidhash[hashndx].tcb = &g_idletcb[i].cmn;
-      g_pidhash[hashndx].pid = i;
+      hashndx            = PIDHASH(i);
+      g_pidhash[hashndx] = &g_idletcb[i].cmn;
 
       /* Allocate the IDLE group */
 
@@ -815,7 +807,7 @@ void nx_start(void)
 
           flags = enter_critical_section();
 
-          tcb = g_pidhash[i].tcb;
+          tcb = g_pidhash[i];
           if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
                       > CONFIG_STACK_USAGE_SAFE_PERCENT))
             {
