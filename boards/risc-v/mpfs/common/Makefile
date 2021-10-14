@@ -1,5 +1,5 @@
-############################################################################
-# boards/risc-v/mpfs/icicle/src/Makefile
+#############################################################################
+# boards/risc-v/mpfs/common/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,38 +16,19 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
 include $(TOPDIR)/Make.defs
 
-CSRCS  = mpfs_bringup.c mpfs_boot.c
+include board/Make.defs
+include src/Make.defs
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += mpfs_appinit.c
-endif
-
-ifeq ($(CONFIG_I2C),y)
-CSRCS += mpfs_i2c.c
-endif
-
-ifeq ($(CONFIG_ARCH_LEDS),y)
-CSRCS += mpfs_autoleds.c
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-CSRCS += mpfs_ostest.c
-endif
-
-ifeq ($(CONFIG_SPI),y)
-CSRCS += mpfs_board_spi.c
-endif
-
-ifeq ($(CONFIG_MPFS_HAVE_COREPWM),y)
-CSRCS += mpfs_pwm.c
-endif
-
-ifeq ($(CONFIG_MPFS_EMMCSD),y)
-CSRCS += mpfs_emmcsd.c
-endif
+DEPPATH += --dep-path board
+DEPPATH += --dep-path src
 
 include $(TOPDIR)/boards/Board.mk
+
+ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
+BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(BOARDDIR)$(DELIM)include)
+

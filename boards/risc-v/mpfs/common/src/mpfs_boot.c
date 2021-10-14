@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_ostest.c
+ * boards/risc-v/mpfs/common/src/mpfs_boot.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,69 +24,35 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-#include <string.h>
-#include <syscall.h>
+#include <debug.h>
 
-#include <nuttx/irq.h>
+#include <nuttx/board.h>
+#include <arch/board/board.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#undef HAVE_FPU
-#if defined(CONFIG_ARCH_FPU) && \
-    !defined(CONFIG_TESTING_OSTEST_FPUTESTDISABLE) && \
-    defined(CONFIG_TESTING_OSTEST_FPUSIZE) && \
-    defined(CONFIG_SCHED_WAITPID)
-#    define HAVE_FPU 1
-#endif
-
-#ifdef HAVE_FPU
-
-#if CONFIG_TESTING_OSTEST_FPUSIZE != (8 * FPU_XCPT_REGS)
-#  error "CONFIG_TESTING_OSTEST_FPUSIZE has the wrong size"
-#endif
-
 /****************************************************************************
- * Private Data
+ * Private Functions
  ****************************************************************************/
-
-static uint64_t g_saveregs[XCPTCONTEXT_REGS];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/* Given an array of size CONFIG_TESTING_OSTEST_FPUSIZE, this function will
- * return the current FPU registers.
- */
+/****************************************************************************
+ * Name: mpfs_boardinitialize
+ *
+ * Description:
+ *   All mpfs architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
+ *
+ ****************************************************************************/
 
-void arch_getfpu(FAR uint32_t *fpusave)
+void mpfs_boardinitialize(void)
 {
-  irqstate_t flags;
-
-  /* Take a snapshot of the thread context right now */
-
-  flags = enter_critical_section();
-  riscv_saveusercontext(g_saveregs);
-
-  /* Return only the floating register values */
-
-  memcpy(fpusave, &g_saveregs[INT_XCPT_REGS], (8 * FPU_XCPT_REGS));
-  leave_critical_section(flags);
+  board_autoled_initialize();
 }
-
-/* Given two arrays of size CONFIG_TESTING_OSTEST_FPUSIZE this function
- * will compare them and return true if they are identical.
- */
-
-bool arch_cmpfpu(FAR const uint32_t *fpusave1, FAR const uint32_t *fpusave2)
-{
-  return memcmp(fpusave1, fpusave2, (8 * FPU_XCPT_REGS)) == 0;
-}
-
-#endif /* HAVE_FPU */

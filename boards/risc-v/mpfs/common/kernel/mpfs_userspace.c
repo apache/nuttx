@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/kernel/mpfs_userspace.c
+ * boards/risc-v/mpfs/common/kernel/mpfs_userspace.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

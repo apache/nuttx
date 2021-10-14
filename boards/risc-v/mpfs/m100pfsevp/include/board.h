@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_boot.c
+ * boards/risc-v/mpfs/m100pfsevp/include/board.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,70 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <debug.h>
+#ifndef __ASSEMBLY__
+# include <stdint.h>
+#endif
 
-#include <nuttx/board.h>
-#include <arch/board/board.h>
+#include "mpfs_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
+/* eMMC / SD-card GPIO selection signal */
+#define MPFS_EMMCSD_GPIO (GPIO_BANK0 | GPIO_PIN12 | GPIO_OUTPUT | GPIO_BUFFER_ENABLE)
+#endif
+
+/* TODO: check Clocking */
+
+#define MPFS_MSS_EXT_SGMII_REF_CLK (125000000UL)
+#define MPFS_MSS_COREPLEX_CPU_CLK  (600000000UL)
+#define MPFS_MSS_SYSTEM_CLK        (600000000UL)
+#define MPFS_MSS_RTC_TOGGLE_CLK      (1000000UL)
+#define MPFS_MSS_AXI_CLK           (300000000UL)
+#define MPFS_MSS_APB_AHB_CLK       (150000000UL)
+#define MPFS_FPGA_BCLK               (3000000UL)
+
+/* LED definitions **********************************************************/
+
+/* LED index values for use with board_userled() */
+
+/* Button definitions *******************************************************/
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
  * Name: mpfs_boardinitialize
- *
- * Description:
- *   All mpfs architectures must provide the following entry point.
- *   This entry point is called early in the initialization -- after all
- *   memory has been configured and mapped but before any devices have been
- *   initialized.
- *
  ****************************************************************************/
 
-void mpfs_boardinitialize(void)
-{
-  board_autoled_initialize();
+void mpfs_boardinitialize(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H  */

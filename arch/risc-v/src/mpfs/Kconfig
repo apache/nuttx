@@ -32,6 +32,12 @@ config MPFS_DDR_INIT
         ---help---
                 Initializes and performs DDR training on the associated DDR memory.
 
+config MPFS_EMMCSD_MUX_GPIO
+	bool "GPIO driven EMMCSD mux"
+	default n
+	---help---
+		External mux GPIO between e.MMC and SD-card
+
 menu "MPFS Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available

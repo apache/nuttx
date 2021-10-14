@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/src/mpfs_autoleds.c
+ * boards/risc-v/mpfs/m100pfsevp/src/mpfs_autoleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -44,14 +44,7 @@
 
 void board_autoled_initialize(void)
 {
-  mpfs_configgpio(ICICLE_GPIO_LED1);
-  mpfs_configgpio(ICICLE_GPIO_LED2);
-  mpfs_configgpio(ICICLE_GPIO_LED3);
-  mpfs_configgpio(ICICLE_GPIO_LED4);
-  mpfs_gpiowrite(ICICLE_GPIO_LED1, false);
-  mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-  mpfs_gpiowrite(ICICLE_GPIO_LED3, false);
-  mpfs_gpiowrite(ICICLE_GPIO_LED4, false);
+  /* TODO */
 }
 
 /****************************************************************************
@@ -69,42 +62,7 @@ void board_autoled_on(int led)
 {
   switch (led)
     {
-    case LED_STARTED:
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED4, false);
-      break;
-    case LED_HEAPALLOCATE:
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, true);
-      break;
-    case LED_IRQSENABLED:
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, true);
-      break;
-    case LED_STACKCREATED:
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-      break;
-    case LED_INIRQ:
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, false);
-      break;
-    case LED_SIGNAL:
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-      break;
-    case LED_ASSERTION:
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, true);
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, true);
-      break;
-    case LED_PANIC:
-      mpfs_gpiowrite(ICICLE_GPIO_LED4, true);
-      break;
+      /* TODO */
 
     default:
       break;
@@ -126,20 +84,7 @@ void board_autoled_off(int led)
 {
   switch (led)
     {
-    case LED_INIRQ:
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, false);
-      break;
-    case LED_SIGNAL:
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, false);
-      break;
-    case LED_ASSERTION:
-      mpfs_gpiowrite(ICICLE_GPIO_LED3, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED2, false);
-      mpfs_gpiowrite(ICICLE_GPIO_LED1, false);
-      break;
-    case LED_PANIC:
-      mpfs_gpiowrite(ICICLE_GPIO_LED4, false);
-      break;
+      /* TODO */
 
     default:
       break;
