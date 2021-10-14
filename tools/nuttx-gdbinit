@@ -54,7 +54,7 @@ define _examine_target
   if ($_target_examined == 0x0)
     _examine_arch
 
-    set $_tcb0 = g_pidhash[0].tcb
+    set $_tcb0 = g_pidhash[0]
     set $_xcp_nregs = sizeof($_tcb0->xcp.regs) / sizeof($_tcb0->xcp.regs[0])
     set $_target_has_fpu = 0
 
@@ -385,7 +385,7 @@ define nxthread
   _examine_target
   _save_current_tcb
   set $hash = ($arg0 & ($_target_max_tasks - 1))
-  set $tcb = g_pidhash[$hash].tcb
+  set $tcb = g_pidhash[$hash]
   if ($tcb != 0x0)
     _print_thread $tcb
     if ($argc == 1)
