@@ -679,6 +679,12 @@ struct tcb_s
   FAR struct pthread_mutex_s *mhead;     /* List of mutexes held by thread  */
 #endif
 
+  /* CPU load monitoring support ********************************************/
+
+#ifdef CONFIG_SCHED_CPULOAD
+  uint32_t ticks;                        /* Number of ticks on this thread */
+#endif
+
   /* Pre-emption monitor support ********************************************/
 
 #ifdef CONFIG_SCHED_CRITMONITOR

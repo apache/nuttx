@@ -51,23 +51,20 @@ static void nxsched_releasepid(pid_t pid)
   irqstate_t flags = enter_critical_section();
   int hash_ndx = PIDHASH(pid);
 
+#ifdef CONFIG_SCHED_CPULOAD
+  /* Decrement the total CPU load count held by this thread from the
+   * total for all threads.
+   */
+
+  g_cpuload_total -= g_pidhash[hash_ndx]->ticks;
+#endif
+
   /* Make any pid associated with this hash available.  Note:
    * no special precautions need be taken here because the
    * following action is atomic
    */
 
-  g_pidhash[hash_ndx].tcb   = NULL;
-  g_pidhash[hash_ndx].pid   = INVALID_PROCESS_ID;
-
-#ifdef CONFIG_SCHED_CPULOAD
-  /* Decrement the total CPU load count held by this thread from the
-   * total for all threads.  Then we can reset the count on this
-   * defunct thread to zero.
-   */
-
-  g_cpuload_total          -= g_pidhash[hash_ndx].ticks;
-  g_pidhash[hash_ndx].ticks = 0;
-#endif
+  g_pidhash[hash_ndx] = NULL;
 
   leave_critical_section(flags);
 }

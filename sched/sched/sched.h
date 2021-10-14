@@ -90,26 +90,6 @@
  * Public Type Definitions
  ****************************************************************************/
 
-/* This structure defines the format of the hash table that is used to (1)
- * determine if a task ID is unique, and (2) to map a process ID to its
- * corresponding TCB.
- *
- * NOTE also that CPU load measurement data is retained in his table vs. in
- * the TCB which would seem to be the more logic place.  It is place in the
- * hash table, instead, to facilitate CPU load adjustments on all threads
- * during timer interrupt handling. nxsched_foreach() could do this too, but
- * this would require a little more overhead.
- */
-
-struct pidhash_s
-{
-  FAR struct tcb_s *tcb;       /* TCB assigned to this PID */
-  pid_t pid;                   /* The full PID value */
-#ifdef CONFIG_SCHED_CPULOAD
-  uint32_t ticks;              /* Number of ticks on this thread */
-#endif
-};
-
 /* This structure defines an element of the g_tasklisttable[].  This table
  * is used to map a task_state enumeration to the corresponding task list.
  */
@@ -243,8 +223,7 @@ extern volatile pid_t g_lastpid;
  * 2. Is used to quickly map a process ID into a TCB.
  */
 
-extern FAR struct pidhash_s *g_pidhash;
-
+extern FAR struct tcb_s **g_pidhash;
 extern volatile int g_npidhash;
 
 /* This is a table of task lists.  This table is indexed by the task stat
