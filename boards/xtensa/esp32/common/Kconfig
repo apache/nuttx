@@ -14,6 +14,7 @@ config ESP32_MERGE_BINS
 config ESP32_QEMU_IMAGE
 	bool "ESP32 binary image for QEMU"
 	default n
+	select ESP32_MERGE_BINS
 	---help---
 		Create a binary flash image used for QEMU.
 
