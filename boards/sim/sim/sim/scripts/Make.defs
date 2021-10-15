@@ -51,10 +51,6 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
   ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
-ifeq ($(CONFIG_SIM_SANITIZE),y)
-  ARCHOPTIMIZATION += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
-endif
-
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
 endif
@@ -133,6 +129,14 @@ ifeq ($(CONFIG_LIBCXX),y)
   endif
 endif
 
+ifeq ($(CONFIG_SIM_SANITIZE),y)
+  CFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+  CXXFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+else ifeq ($(CONFIG_MM_KASAN),y)
+  CFLAGS += -fsanitize=kernel-address
+  CXXFLAGS += -fsanitize=kernel-address
+endif
+
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS)
@@ -198,7 +202,8 @@ endif
 
 ifeq ($(CONFIG_SIM_SANITIZE),y)
   CCLINKFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
-  HOSTLDFLAGS += -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
+else ifeq ($(CONFIG_MM_KASAN),y)
+  CCLINKFLAGS += -fsanitize=kernel-address
 endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
