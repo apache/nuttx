@@ -1364,15 +1364,6 @@ endmenu # Partition Configuration
 
 endif
 
-menu "AES accelerate"
-	depends on ESP32_AES_ACCELERATOR
-
-config ESP32_AES_ACCELERATOR_TEST
-	bool "AES driver test"
-	default n
-
-endmenu # ESP32_AES_ACCELERATOR
-
 config ESP32_AUTO_SLEEP
 	bool "Auto-sleep"
 	default n
