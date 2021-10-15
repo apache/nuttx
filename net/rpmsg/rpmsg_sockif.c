@@ -52,6 +52,9 @@
 #define RPMSG_SOCKET_CMD_DATA       2
 #define RPMSG_SOCKET_NAME_PREFIX    "rpmsg-socket"
 
+static_assert(RPMSG_SOCKET_NAME_SIZE + 13 <= RPMSG_NAME_SIZE,
+              "socket name size should NOT bigger then RPMSG_NAME_SIZE");
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -407,7 +410,7 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
                                         FAR void *priv)
 {
   FAR struct rpmsg_socket_conn_s *conn = priv;
-  char buf[RPMSG_SOCKET_NAME_SIZE];
+  char buf[RPMSG_NAME_SIZE];
 
   if (conn->ept.rdev)
     {
@@ -457,7 +460,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   FAR struct rpmsg_socket_conn_s *server = priv;
   FAR struct rpmsg_socket_conn_s *tmp;
   FAR struct rpmsg_socket_conn_s *new;
-  char buf[RPMSG_SOCKET_NAME_SIZE];
+  char buf[RPMSG_NAME_SIZE];
   int cnt = 0;
   int ret;
 
