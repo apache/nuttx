@@ -170,6 +170,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
               conn->lc_psock  = psock;
 #ifdef CONFIG_NET_LOCAL_SCM
               conn->lc_peer   = client;
+              client->lc_peer = conn;
 #endif /* CONFIG_NET_LOCAL_SCM */
 
               strncpy(conn->lc_path, client->lc_path, UNIX_PATH_MAX - 1);
