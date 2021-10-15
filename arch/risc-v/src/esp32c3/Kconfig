@@ -1045,14 +1045,6 @@ endmenu # Partition Configuration
 
 endif
 
-menu "AES accelerator"
-	depends on ESP32C3_AES_ACCELERATOR
-
-config ESP32C3_AES_ACCELERATOR_TEST
-	bool "AES driver test"
-	default n
-
-endmenu # AES accelerator
 menu "SHA accelerator"
 	depends on ESP32C3_SHA_ACCELERATOR
 
