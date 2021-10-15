@@ -78,22 +78,6 @@ config ESP32C3_SPIFLASH_FS_MOUNT_PT
 	depends on ESP32C3_SPIFLASH_LITTLEFS
 	default "/data"
 
-config ESP32C3_SPIFLASH_ENCRYPTION_TEST
-	bool "SPI Flash encryption test"
-	default n
-	depends on ESP32C3_SPIFLASH
-	select DEBUG_ASSERTIONS
-	---help---
-		Enable SPI Flash encryption test. This option will also select
-		DEBUG_ASSERTIONS to enable kernel assert macro.
-
-config ESP32C3_SPIFLASH_TEST_ADDRESS
-	hex "SPI Flash test address"
-	default 0x180000
-	depends on ESP32C3_SPIFLASH_ENCRYPTION_TEST
-	---help---
-		SPI Flash encryption test read/write address.
-
 if LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
 
 config ESP32C3_LCD_RSTPIN
