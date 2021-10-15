@@ -20,7 +20,7 @@
 
 ifeq ($(CONFIG_ESP32C3_BOOTLOADER_BUILD_FROM_SOURCE),y)
 
-CHIPDIR            = $(TOPDIR)/arch/xtensa/src/chip
+CHIPDIR            = $(TOPDIR)/arch/risc-v/src/chip
 
 BOOTLOADER_SRCDIR  = $(CHIPDIR)/esp-nuttx-bootloader
 BOOTLOADER_VERSION = main
