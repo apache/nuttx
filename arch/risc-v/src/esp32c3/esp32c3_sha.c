@@ -251,7 +251,7 @@ static int esp32c3_sha1_block(struct esp32c3_sha1_context_s *ctx,
     {
     }
 
-  for (i = 0; i < 5; i ++)
+  for (i = 0; i < 5; i++)
     {
       ctx->state[i] = getreg32(SHA_H_0_REG + i * 4);
     }
@@ -357,7 +357,7 @@ static int esp32c3_sha256_block(struct esp32c3_sha256_context_s *ctx,
       num_block = 7;
     }
 
-  for (i = 0; i < num_block; i ++)
+  for (i = 0; i < num_block; i++)
     {
       ctx->state[i] = getreg32(SHA_H_0_REG + i * 4);
     }
