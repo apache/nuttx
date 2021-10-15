@@ -1045,15 +1045,6 @@ endmenu # Partition Configuration
 
 endif
 
-menu "SHA accelerator"
-	depends on ESP32C3_SHA_ACCELERATOR
-
-config ESP32C3_SHA_ACCELERATOR_TEST
-	bool "SHA accelerator test"
-	default n
-
-endmenu # ESP32C3_SHA_ACCELERATOR
-
 menu "RSA Accelerate Configuration"
 	depends on ESP32C3_RSA_ACCELERATOR
 
