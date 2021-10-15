@@ -1045,13 +1045,6 @@ endmenu # Partition Configuration
 
 endif
 
-menu "RSA Accelerate Configuration"
-	depends on ESP32C3_RSA_ACCELERATOR
-
-config ESP32C3_RSA_ACCELERATOR_TEST
-	bool "RSA driver test"
-	default n
-
 menu "BIGNUM"
 	depends on ESP32C3_BIGNUM_ACCELERATOR
 
@@ -1060,7 +1053,5 @@ config ESP32C3_BIGNUM_ACCELERATOR_TEST
 	default n
 
 endmenu # ESP32C3_BIGNUM_ACCELERATOR
-
-endmenu # ESP32C3_RSA_ACCELERATOR
 
 endif # ARCH_CHIP_ESP32C3
