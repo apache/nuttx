@@ -1431,7 +1431,7 @@ int esp32c3_mpi_copy(struct esp32c3_mpi_s *X,
         }
     }
 
-  i ++;
+  i++;
 
   X->s = Y->s;
 
