@@ -23,6 +23,11 @@ WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
 USAGE="
 
+case "$OSTYPE" in
+  bsd*) MAKE_CMD="gmake";;
+  *)    MAKE_CMD="make";;
+esac
+
 USAGE: ${0} [-E] [-e] [-l|m|c|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
@@ -173,7 +178,7 @@ fi
 
 if [ -r ${dest_config} ]; then
   if [ "X${enforce_distclean}" = "Xy" ]; then
-    make -C ${TOPDIR} distclean
+    ${MAKE_CMD} -C ${TOPDIR} distclean
   else
     if cmp -s ${src_config} ${backup_config}; then
       echo "No configuration change."
@@ -181,7 +186,7 @@ if [ -r ${dest_config} ]; then
     fi
 
     if [ "X${distclean}" = "Xy" ]; then
-      make -C ${TOPDIR} distclean
+      ${MAKE_CMD} -C ${TOPDIR} distclean
     else
       echo "Already configured!"
       echo "Please 'make distclean' and try again."
