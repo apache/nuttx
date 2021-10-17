@@ -350,10 +350,12 @@ int up_cpu_pause(int cpu)
    * handler from returning until up_cpu_resume() is called; g_cpu_paused
    * is a handshake that will prefent this function from returning until
    * the CPU is actually paused.
+   * Note that we might spin before getting g_cpu_wait, this just means that
+   * the other CPU still hasn't finished responding to the previous resume
+   * request.
    */
 
-  DEBUGASSERT(!spin_islocked(&g_cpu_wait[cpu]) &&
-              !spin_islocked(&g_cpu_paused[cpu]));
+  DEBUGASSERT(!spin_islocked(&g_cpu_paused[cpu]));
 
   spin_lock(&g_cpu_wait[cpu]);
   spin_lock(&g_cpu_paused[cpu]);
