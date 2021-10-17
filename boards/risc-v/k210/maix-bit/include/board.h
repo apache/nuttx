@@ -55,6 +55,11 @@
 #define LED_ASSERTION     6  /* N/C */
 #define LED_PANIC         7  /* blink */
 
+/* GPIO pins used by the GPIO Subsystem */
+
+#define BOARD_NGPIOOUT    2 /* Amount of GPIO Output pins */
+#define BOARD_NGPIOINT    0 /* Amount of GPIO Input */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
