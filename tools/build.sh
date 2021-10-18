@@ -59,7 +59,7 @@ function build_board()
   TOOLCHAIN="gcc"
 
   EXTRAFLAGS=-Wno-cpp
-  if [ $ARCH = "xtensa" ]; then
+  if [ "$ARCH" == "xtensa" ]; then
     export XTENSAD_LICENSE_FILE=28000@10.221.64.91
     EXTRAFLAGS=""
   fi
@@ -76,7 +76,7 @@ function build_board()
     exit 2
   fi
 
-  if [ "${2}" = "distclean" ]; then
+  if [ "${2}" == "distclean" ]; then
     return;
   fi
 
