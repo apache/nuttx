@@ -214,7 +214,7 @@ config XTENSA_TOOLCHAIN_ESP
 
 endchoice
 
-source arch/xtensa/src/lx6/Kconfig
+source "arch/xtensa/src/lx6/Kconfig"
 if ARCH_CHIP_ESP32
 source "arch/xtensa/src/esp32/Kconfig"
 endif
