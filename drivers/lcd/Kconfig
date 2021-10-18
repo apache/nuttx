@@ -569,12 +569,52 @@ config LCD_ST7735
 	default n
 
 if LCD_ST7735
-	config LCD_ST7735_GM00
-		bool "132x162 Display Resolution"
+	choice
+		prompt "LCD Preset Resolutions"
+		optional
+
+		config LCD_ST7735_GM11
+			bool "128x160"
+
+		config LCD_ST7735_GM00
+			bool "132x162"
+
+		config LCD_ST7735_GM01
+			bool "132x132"
+
+	endchoice
+
+if  !LCD_ST7735_GM00 && !LCD_ST7735_GM01 && !LCD_ST7735_GM11
+
+	config LCD_ST7735_XRES
+	int "ST7735 X Resolution"
+	default 128
+	---help---
+		Specifies the X resolution of the LCD.
+
+	config LCD_ST7735_YRES
+	int "ST7735 Y Resolution"
+	default 160
+	---help---
+		Specifies the Y resolution of the LCD.
+
+	config LCD_ST7735_XOFFSET
+	int "ST7735 X Offset"
+	default 0
+	---help---
+		Specifies the X offset of the LCD.
+
+	config LCD_ST7735_YOFFSET
+	int "ST7735 Y Offset"
+	default 0
+	---help---
+		Specifies the Y offset of the LCD.
+
+endif
+
+	config LCD_ST7735_BGR
+		bool "Swap R & B channel"
 		default n
-		---help---
-			Two resolutions are available, either the 132x162 or
-			the 128x160
 
 	config LCD_ST7735_BPP
 		int "Bit Per Pixel (12, 16 or 18)"
@@ -632,6 +672,53 @@ if LCD_ST7789
 		default 1000000
 
 endif # LCD_ST7789
+
+config LCD_GC9A01
+	bool "Galaxycore GC9A01 TFT Controller"
+	default n
+
+if LCD_GC9A01
+	config LCD_GC9A01_XRES
+		int "GC9A01 X Resolution"
+		default 240
+		---help---
+			Specifies the X resolution of the LCD.
+
+	config LCD_GC9A01_YRES
+		int "GC9A01 Y Resolution"
+		default 240
+		---help---
+			Specifies the Y resolution of the LCD.
+
+	config LCD_GC9A01_XOFFSET
+		int "GC9A01 X Offset"
+		default 0
+		---help---
+			Specifies the X offset of the LCD.
+
+	config LCD_GC9A01_YOFFSET
+		int "GC9A01 Y Offset"
+		default 0
+		---help---
+			Specifies the Y offset of the LCD.
+
+	config LCD_GC9A01_BGR
+		bool "Swap R & B channel"
+		default n
+
+	config LCD_GC9A01_BPP
+		int "Bit Per Pixel (12 or 16)"
+		default 16
+
+	config LCD_GC9A01_SPIMODE
+		int "SPI Mode"
+		default 0
+
+	config LCD_GC9A01_FREQUENCY
+		int "SPI Frequency"
+		default 1000000
+
+endif # LCD_GC9A01
 
 config LCD_PCD8544
 	bool "Nokia 5110 LCD Display (Philips PCD8544)"
@@ -1452,12 +1539,12 @@ config LCD_ST7032
 		the ground. So only I2C pins SDA and SCL are used by NuttX.
 
 config LCD_HT16K33
-	bool "Holtek HT16K32 4 Digits 14-Segment Display"
+	bool "Holtek HT16K33 4 Digits 14-Segment Display"
 	default n
 	depends on I2C
 	---help---
 		Enable support for Holtek HT16K33 (and Vinka VK16K33) 4 Digits
-		14-Segment module: 0.54" 14-segment LED HT16K32 Backpack.
+		14-Segment module: 0.54" 14-segment LED HT16K33 Backpack.
 
 if LCD_HT16K33
 config LCD_HT16K33_MULT_MODULE

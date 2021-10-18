@@ -310,6 +310,24 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* QEIOC_SETPOSMAX - Set the maximum encoder position.
+       *   Argument: uint32
+       */
+
+      case QEIOC_SETPOSMAX:
+        {
+          uint32_t maxpos = (uint32_t)arg;
+          if (lower->ops->setposmax != NULL)
+            {
+              ret = lower->ops->setposmax(lower, maxpos);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
        */

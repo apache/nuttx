@@ -257,12 +257,12 @@ static uint8_t g_pktbuf[MAX_NETDEV_PKTSIZE + CONFIG_NET_GUARDSIZE];
 /* TX descriptors list */
 
 static struct gmac_txdesc_s g_txdesc[CONFIG_SAMD5E5_GMAC_NTXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* RX descriptors list */
 
 static struct gmac_rxdesc_s g_rxdesc[CONFIG_SAMD5E5_GMAC_NRXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* Transmit Buffers
  *
@@ -272,12 +272,12 @@ static struct gmac_rxdesc_s g_rxdesc[CONFIG_SAMD5E5_GMAC_NRXBUFFERS]
  */
 
 static uint8_t g_txbuffer[CONFIG_SAMD5E5_GMAC_NTXBUFFERS * GMAC_TX_UNITSIZE]
-               __attribute__((aligned(8)));
+               aligned_data(8);
 
 /* Receive Buffers */
 
 static uint8_t g_rxbuffer[CONFIG_SAMD5E5_GMAC_NRXBUFFERS * GMAC_RX_UNITSIZE]
-               __attribute__((aligned(8)));
+               aligned_data(8);
 #endif
 
 /****************************************************************************

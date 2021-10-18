@@ -229,7 +229,7 @@
  * Horizontal GRAM Address Set, Offset: 0x20
  */
 
-#define ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT (0)   /* Set the initial vaue of adress counter */
+#define ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT (0)   /* Set the initial value of address counter */
 #define ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_MASK  (0xff << ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT)
 #define ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD(n)    (((uint16_t)(n) << ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_SHIFT) & ILI9225_HORIZONTAL_GRAM_ADDR_SET_AD_MASK)
 
@@ -237,7 +237,7 @@
  * Vertical  GRAM Address Set, Offset: 0x21
  */
 
-#define ILI9225_VERTICAL_GRAM_ADDR_SET_AD_SHIFT   (0)  /* Set the initial vaue of adress counter */
+#define ILI9225_VERTICAL_GRAM_ADDR_SET_AD_SHIFT   (0)  /* Set the initial value of address counter */
 #define ILI9225_VERTICAL_GRAM_ADDR_SET_AD_MASK    (0xff << ILI9225_VERTICAL_GRAM_ADDR_SET_AD_SHIFT)
 #define ILI9225_VERTICAL_GRAM_ADDR_SET_AD(n)      (((uint16_t)(n) << ILI9225_VERTICAL_GRAM_ADDR_SET_AD_SHIFT) & ILI9225_VERTICAL_GRAM_ADDR_SET_AD_MASK)
 

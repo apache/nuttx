@@ -29,6 +29,14 @@
 
 #include <syscall.h>
 
+/* SYS call 2:
+ *
+ * void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ */
+
+#define SYS_switch_context        (2)
+
+
 #ifdef CONFIG_LIB_SYSCALL
 
 /****************************************************************************

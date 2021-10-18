@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_MEMMOVE
-#undef memmove
+#undef memmove /* See mm/README.txt */
 FAR void *memmove(FAR void *dest, FAR const void *src, size_t count)
 {
   FAR char *tmp;

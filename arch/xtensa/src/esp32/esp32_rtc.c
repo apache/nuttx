@@ -232,7 +232,7 @@ struct alm_cbinfo_s
 {
   struct rt_timer_s *alarm_hdl;  /* Timer id point to here */
   volatile alm_callback_t ac_cb; /* Client callback function */
-  volatile FAR void *ac_arg;     /* Argument to pass with the callback function */
+  volatile void *ac_arg;         /* Argument to pass with the callback function */
   uint64_t deadline_us;
   uint8_t index;
 };
@@ -266,7 +266,7 @@ static void IRAM_ATTR esp32_rtc_clk_8m_enable(bool clk_8m_en, bool d256_en);
 static uint32_t IRAM_ATTR esp32_rtc_clk_slow_freq_get_hz(void);
 
 #ifdef CONFIG_RTC_DRIVER
-static void IRAM_ATTR esp32_rt_cb_handler(FAR void *arg);
+static void IRAM_ATTR esp32_rt_cb_handler(void *arg);
 #endif
 
 /****************************************************************************
@@ -760,11 +760,11 @@ static void esp32_select_rtc_slow_clk(enum esp32_slow_clk_sel_e slow_clk)
  *
  ****************************************************************************/
 
-static void IRAM_ATTR esp32_rt_cb_handler(FAR void *arg)
+static void IRAM_ATTR esp32_rt_cb_handler(void *arg)
 {
-  FAR struct alm_cbinfo_s *cbinfo = (struct alm_cbinfo_s *)arg;
+  struct alm_cbinfo_s *cbinfo = (struct alm_cbinfo_s *)arg;
   alm_callback_t cb;
-  FAR void *cb_arg;
+  void *cb_arg;
   int alminfo_id;
 
   DEBUGASSERT(cbinfo != NULL);
@@ -777,7 +777,7 @@ static void IRAM_ATTR esp32_rt_cb_handler(FAR void *arg)
       /* Alarm callback */
 
       cb = cbinfo->ac_cb;
-      cb_arg = (FAR void *)cbinfo->ac_arg;
+      cb_arg = (void *)cbinfo->ac_arg;
       cbinfo->ac_cb  = NULL;
       cbinfo->ac_arg = NULL;
       cbinfo->deadline_us = 0;
@@ -1957,7 +1957,7 @@ time_t up_rtc_time(void)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *ts)
+int up_rtc_settime(const struct timespec *ts)
 {
   irqstate_t flags;
   uint64_t now_us;
@@ -2052,7 +2052,7 @@ int up_rtc_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int up_rtc_gettime(struct timespec *tp)
 {
   irqstate_t flags;
   uint64_t time_us;
@@ -2095,10 +2095,10 @@ int up_rtc_gettime(FAR struct timespec *tp)
  *
  ****************************************************************************/
 
-int up_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
+int up_rtc_setalarm(struct alm_setalarm_s *alminfo)
 {
   struct rt_timer_args_s rt_timer_args;
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
   int ret = -EBUSY;
   int id;
@@ -2170,7 +2170,7 @@ int up_rtc_setalarm(FAR struct alm_setalarm_s *alminfo)
 
 int up_rtc_cancelalarm(enum alm_id_e alarmid)
 {
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   irqstate_t flags;
   int ret = -ENODATA;
 
@@ -2217,10 +2217,10 @@ int up_rtc_cancelalarm(enum alm_id_e alarmid)
  *
  ****************************************************************************/
 
-int up_rtc_rdalarm(FAR struct timespec *tp, uint32_t alarmid)
+int up_rtc_rdalarm(struct timespec *tp, uint32_t alarmid)
 {
   irqstate_t flags;
-  FAR struct alm_cbinfo_s *cbinfo;
+  struct alm_cbinfo_s *cbinfo;
   DEBUGASSERT(tp != NULL);
   DEBUGASSERT((RTC_ALARM0 <= alarmid) &&
               (alarmid < RTC_ALARM_LAST));

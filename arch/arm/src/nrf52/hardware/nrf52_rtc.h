@@ -103,6 +103,6 @@
 
 /* CC Register */
 
-#define RTC_CC_MASK                (0x00ffffff)                    /* Bits 0-23: Comapre register */
+#define RTC_CC_MASK                (0x00ffffff)                    /* Bits 0-23: Compare register */
 
 #endif /* __ARCH_ARM_SRC_NRF52_HARDWARE_NRF52_RTC_H */

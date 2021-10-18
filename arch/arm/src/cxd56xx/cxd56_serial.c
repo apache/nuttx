@@ -992,7 +992,7 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -1003,7 +1003,9 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
        * interrupts disabled (note this may recurse).
        */
 
+      spin_unlock_irqrestore(&priv->lock, flags);
       uart_xmitchars(dev);
+      flags = spin_lock_irqsave(&priv->lock);
 #endif
     }
   else
@@ -1012,7 +1014,7 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
       up_serialout(priv, CXD56_UART_IMSC, priv->ier);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************

@@ -54,13 +54,12 @@
 
 /* SMC Version ID Register */
 
-#define SMC_VERID_FEATURE_SHIFT     (0)        /* Bits 0-15: Feature Identification Number */
+#define SMC_VERID_FEATURE_SHIFT     (0)                            /* Bits 0-15: Feature Identification Number */
 #define SMC_VERID_FEATURE_MASK      (0xffff << SMC_VERID_FEATURE_SHIFT)
 #  define SMC_VERID_FEATURE_STD     (1 << SMC_VERID_FEATURE_SHIFT) /* Standard feature set */
-
-#define SMC_VERID_MINOR_SHIFT       (16)       /* Bits 16-23: Minor Version Number */
+#define SMC_VERID_MINOR_SHIFT       (16)                           /* Bits 16-23: Minor Version Number */
 #define SMC_VERID_MINOR_MASK        (0xff << SMC_VERID_MINOR_SHIFT)
-#define SMC_VERID_MAJOR_SHIFT       (24)       /* Bits 24-31: Major Version Number */
+#define SMC_VERID_MAJOR_SHIFT       (24)                           /* Bits 24-31: Major Version Number */
 #define SMC_VERID_MAJOR_MASK        (0xff << SMC_VERID_MAJOR_SHIFT)
 
 /* SMC Parameter Register */
@@ -72,8 +71,10 @@
 
 /* SMC Power Mode Protection register */
 
-#define SMC_PMPROT_AVLP             (1 << 5)  /* Bit 5:  Allow Very-Low-Power Modes */
-#define SMC_PMPROT_AHSRUN           (1 << 7)  /* Bit 7:  Allow High Speed Run mode */
+#define SMC_PMPROT_AVLP_SHIFT       (5)  /* Bit 5:  Allow Very-Low-Power Modes */
+#define SMC_PMPROT_AVLP             (1 << SMC_PMPROT_AVLP_SHIFT)  
+#define SMC_PMPROT_AHSRUN_SHIFT     (7)  /* Bit 7:  Allow High Speed Run mode */
+#define SMC_PMPROT_AHSRUN           (1 << SMC_PMPROT_AHSRUN_SHIFT)  
 
 /* SMC Power Mode Control register */
 

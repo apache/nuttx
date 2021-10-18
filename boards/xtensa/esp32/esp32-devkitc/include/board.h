@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H
-#define __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_INCLUDE_BOARD_H
+#define __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,4 +82,4 @@
 #define BOARD_NGPIOIN     1 /* Amount of GPIO Input without Interruption */
 #define BOARD_NGPIOINT    1 /* Amount of GPIO Input w/ Interruption pins */
 
-#endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_INCLUDE_BOARD_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_INCLUDE_BOARD_H */

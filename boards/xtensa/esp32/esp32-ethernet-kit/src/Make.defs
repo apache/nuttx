@@ -20,8 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-SCRIPTDIR = $(BOARD_DIR)$(DELIM)scripts
-
 CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
 
 CSRCS = esp32_boot.c esp32_bringup.c
@@ -45,13 +43,12 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32_buttons.c
 endif
 
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32.template.ld
-SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32_out.ld
+SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 
 .PHONY = context distclean
 
-$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
+$(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
+	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
 
 context:: $(SCRIPTOUT)
 

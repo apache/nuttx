@@ -185,53 +185,53 @@ struct esp32c3_spi_priv_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int esp32c3_spi_lock(FAR struct spi_dev_s *dev, bool lock);
+static int esp32c3_spi_lock(struct spi_dev_s *dev, bool lock);
 #ifndef CONFIG_ESP32C3_SPI_UDCS
-static void esp32c3_spi_select(FAR struct spi_dev_s *dev,
+static void esp32c3_spi_select(struct spi_dev_s *dev,
                                uint32_t devid, bool selected);
 #endif
-static uint32_t esp32c3_spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t esp32c3_spi_setfrequency(struct spi_dev_s *dev,
                                          uint32_t frequency);
-static void esp32c3_spi_setmode(FAR struct spi_dev_s *dev,
+static void esp32c3_spi_setmode(struct spi_dev_s *dev,
                                 enum spi_mode_e mode);
-static void esp32c3_spi_setbits(FAR struct spi_dev_s *dev, int nbits);
+static void esp32c3_spi_setbits(struct spi_dev_s *dev, int nbits);
 #ifdef CONFIG_SPI_HWFEATURES
-static int esp32c3_spi_hwfeatures(FAR struct spi_dev_s *dev,
+static int esp32c3_spi_hwfeatures(struct spi_dev_s *dev,
                                   spi_hwfeatures_t features);
 #endif
-static uint32_t esp32c3_spi_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void esp32c3_spi_exchange(FAR struct spi_dev_s *dev,
-                                 FAR const void *txbuffer,
-                                 FAR void *rxbuffer, size_t nwords);
+static uint32_t esp32c3_spi_send(struct spi_dev_s *dev, uint32_t wd);
+static void esp32c3_spi_exchange(struct spi_dev_s *dev,
+                                 const void *txbuffer,
+                                 void *rxbuffer, size_t nwords);
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static int esp32c3_spi_interrupt(int irq, void *context, FAR void *arg);
-static int esp32c3_spi_sem_waitdone(FAR struct esp32c3_spi_priv_s *priv);
-static void esp32c3_spi_dma_exchange(FAR struct esp32c3_spi_priv_s *priv,
-                                     FAR const void *txbuffer,
-                                     FAR void *rxbuffer,
+static int esp32c3_spi_interrupt(int irq, void *context, void *arg);
+static int esp32c3_spi_sem_waitdone(struct esp32c3_spi_priv_s *priv);
+static void esp32c3_spi_dma_exchange(struct esp32c3_spi_priv_s *priv,
+                                     const void *txbuffer,
+                                     void *rxbuffer,
                                      uint32_t nwords);
 #else
-static void esp32c3_spi_poll_exchange(FAR struct esp32c3_spi_priv_s *priv,
-                                      FAR const void *txbuffer,
-                                      FAR void *rxbuffer,
+static void esp32c3_spi_poll_exchange(struct esp32c3_spi_priv_s *priv,
+                                      const void *txbuffer,
+                                      void *rxbuffer,
                                       size_t nwords);
 #endif
 #ifndef CONFIG_SPI_EXCHANGE
-static void esp32c3_spi_sndblock(FAR struct spi_dev_s *dev,
-                                 FAR const void *txbuffer,
+static void esp32c3_spi_sndblock(struct spi_dev_s *dev,
+                                 const void *txbuffer,
                                  size_t nwords);
-static void esp32c3_spi_recvblock(FAR struct spi_dev_s *dev,
-                                  FAR void *rxbuffer,
+static void esp32c3_spi_recvblock(struct spi_dev_s *dev,
+                                  void *rxbuffer,
                                   size_t nwords);
 #endif
 #ifdef CONFIG_SPI_TRIGGER
-static int esp32c3_spi_trigger(FAR struct spi_dev_s *dev);
+static int esp32c3_spi_trigger(struct spi_dev_s *dev);
 #endif
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static void esp32c3_spi_dma_init(FAR struct spi_dev_s *dev);
+static void esp32c3_spi_dma_init(struct spi_dev_s *dev);
 #endif
-static void esp32c3_spi_init(FAR struct spi_dev_s *dev);
-static void esp32c3_spi_deinit(FAR struct spi_dev_s *dev);
+static void esp32c3_spi_init(struct spi_dev_s *dev);
+static void esp32c3_spi_deinit(struct spi_dev_s *dev);
 
 /****************************************************************************
  * Private Data
@@ -391,10 +391,10 @@ static inline void esp32c3_spi_clr_regbits(uint32_t addr, uint32_t bits)
  *
  ****************************************************************************/
 
-static int esp32c3_spi_lock(FAR struct spi_dev_s *dev, bool lock)
+static int esp32c3_spi_lock(struct spi_dev_s *dev, bool lock)
 {
   int ret;
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   if (lock)
     {
@@ -423,7 +423,7 @@ static int esp32c3_spi_lock(FAR struct spi_dev_s *dev, bool lock)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static int esp32c3_spi_sem_waitdone(FAR struct esp32c3_spi_priv_s *priv)
+static int esp32c3_spi_sem_waitdone(struct esp32c3_spi_priv_s *priv)
 {
   int ret;
   struct timespec abstime;
@@ -463,11 +463,11 @@ static int esp32c3_spi_sem_waitdone(FAR struct esp32c3_spi_priv_s *priv)
  ****************************************************************************/
 
 #ifndef CONFIG_ESP32C3_SPI_UDCS
-static void esp32c3_spi_select(FAR struct spi_dev_s *dev,
+static void esp32c3_spi_select(struct spi_dev_s *dev,
                                uint32_t devid, bool selected)
 {
 #if SPI_HAVE_SWCS
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
   bool value = selected ? false : true;
 
   esp32c3_gpiowrite(priv->config->cs_pin, value);
@@ -493,11 +493,11 @@ static void esp32c3_spi_select(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static uint32_t esp32c3_spi_setfrequency(FAR struct spi_dev_s *dev,
+static uint32_t esp32c3_spi_setfrequency(struct spi_dev_s *dev,
                                          uint32_t frequency)
 {
   uint32_t reg_val;
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
   const uint32_t duty_cycle = 128;
 
   if (priv->frequency == frequency)
@@ -615,10 +615,10 @@ static uint32_t esp32c3_spi_setfrequency(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_spi_setmode(FAR struct spi_dev_s *dev,
+static void esp32c3_spi_setmode(struct spi_dev_s *dev,
                                 enum spi_mode_e mode)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   spiinfo("mode=%d\n", mode);
 
@@ -684,9 +684,9 @@ static void esp32c3_spi_setmode(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void esp32c3_spi_setbits(struct spi_dev_s *dev, int nbits)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   spiinfo("nbits=%d\n", nbits);
 
@@ -710,7 +710,7 @@ static void esp32c3_spi_setbits(FAR struct spi_dev_s *dev, int nbits)
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_HWFEATURES
-static int esp32c3_spi_hwfeatures(FAR struct spi_dev_s *dev,
+static int esp32c3_spi_hwfeatures(struct spi_dev_s *dev,
                                   spi_hwfeatures_t features)
 {
   /* Other H/W features are not supported */
@@ -741,9 +741,9 @@ static int esp32c3_spi_hwfeatures(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static void esp32c3_spi_dma_exchange(FAR struct esp32c3_spi_priv_s *priv,
-                                     FAR const void *txbuffer,
-                                     FAR void *rxbuffer,
+static void esp32c3_spi_dma_exchange(struct esp32c3_spi_priv_s *priv,
+                                     const void *txbuffer,
+                                     void *rxbuffer,
                                      uint32_t nwords)
 {
   const uint32_t total = nwords * (priv->nbits / 8);
@@ -844,7 +844,7 @@ static void esp32c3_spi_dma_exchange(FAR struct esp32c3_spi_priv_s *priv,
  *
  ****************************************************************************/
 
-static uint32_t esp32c3_spi_poll_send(FAR struct esp32c3_spi_priv_s *priv,
+static uint32_t esp32c3_spi_poll_send(struct esp32c3_spi_priv_s *priv,
                                       uint32_t wd)
 {
   uint32_t val;
@@ -894,9 +894,9 @@ static uint32_t esp32c3_spi_poll_send(FAR struct esp32c3_spi_priv_s *priv,
  *
  ****************************************************************************/
 
-static uint32_t esp32c3_spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t esp32c3_spi_send(struct spi_dev_s *dev, uint32_t wd)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   return esp32c3_spi_poll_send(priv, wd);
 }
@@ -922,9 +922,9 @@ static uint32_t esp32c3_spi_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ****************************************************************************/
 
-static void esp32c3_spi_poll_exchange(FAR struct esp32c3_spi_priv_s *priv,
-                                      FAR const void *txbuffer,
-                                      FAR void *rxbuffer,
+static void esp32c3_spi_poll_exchange(struct esp32c3_spi_priv_s *priv,
+                                      const void *txbuffer,
+                                      void *rxbuffer,
                                       size_t nwords)
 {
   const uint32_t total_bytes = nwords * (priv->nbits / 8);
@@ -1051,12 +1051,12 @@ static void esp32c3_spi_poll_exchange(FAR struct esp32c3_spi_priv_s *priv,
  *
  ****************************************************************************/
 
-static void esp32c3_spi_exchange(FAR struct spi_dev_s *dev,
-                                 FAR const void *txbuffer,
-                                 FAR void *rxbuffer,
+static void esp32c3_spi_exchange(struct spi_dev_s *dev,
+                                 const void *txbuffer,
+                                 void *rxbuffer,
                                  size_t nwords)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
   size_t thld = CONFIG_ESP32C3_SPI2_DMATHRESHOLD;
@@ -1094,8 +1094,8 @@ static void esp32c3_spi_exchange(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_spi_sndblock(FAR struct spi_dev_s *dev,
-                                 FAR const void *txbuffer,
+static void esp32c3_spi_sndblock(struct spi_dev_s *dev,
+                                 const void *txbuffer,
                                  size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
@@ -1123,8 +1123,8 @@ static void esp32c3_spi_sndblock(FAR struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-static void esp32c3_spi_recvblock(FAR struct spi_dev_s *dev,
-                                  FAR void *rxbuffer,
+static void esp32c3_spi_recvblock(struct spi_dev_s *dev,
+                                  void *rxbuffer,
                                   size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
@@ -1150,7 +1150,7 @@ static void esp32c3_spi_recvblock(FAR struct spi_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_SPI_TRIGGER
-static int esp32c3_spi_trigger(FAR struct spi_dev_s *dev)
+static int esp32c3_spi_trigger(struct spi_dev_s *dev)
 {
   return -ENOSYS;
 }
@@ -1171,9 +1171,9 @@ static int esp32c3_spi_trigger(FAR struct spi_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-void esp32c3_spi_dma_init(FAR struct spi_dev_s *dev)
+void esp32c3_spi_dma_init(struct spi_dev_s *dev)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   /* Enable GDMA clock for the SPI peripheral */
 
@@ -1219,9 +1219,9 @@ void esp32c3_spi_dma_init(FAR struct spi_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_spi_init(FAR struct spi_dev_s *dev)
+static void esp32c3_spi_init(struct spi_dev_s *dev)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
   const struct esp32c3_spi_config_s *config = priv->config;
   uint32_t regval;
 
@@ -1312,9 +1312,9 @@ static void esp32c3_spi_init(FAR struct spi_dev_s *dev)
  *
  ****************************************************************************/
 
-static void esp32c3_spi_deinit(FAR struct spi_dev_s *dev)
+static void esp32c3_spi_deinit(struct spi_dev_s *dev)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
   modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, priv->config->dma_clk_bit, 0);
@@ -1346,9 +1346,9 @@ static void esp32c3_spi_deinit(FAR struct spi_dev_s *dev)
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32C3_SPI2_DMA
-static int esp32c3_spi_interrupt(int irq, void *context, FAR void *arg)
+static int esp32c3_spi_interrupt(int irq, void *context, void *arg)
 {
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)arg;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)arg;
 
   esp32c3_spi_clr_regbits(SPI_DMA_INT_RAW_REG, SPI_TRANS_DONE_INT_RAW_M);
   nxsem_post(&priv->sem_isr);
@@ -1371,10 +1371,10 @@ static int esp32c3_spi_interrupt(int irq, void *context, FAR void *arg)
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *esp32c3_spibus_initialize(int port)
+struct spi_dev_s *esp32c3_spibus_initialize(int port)
 {
-  FAR struct spi_dev_s *spi_dev;
-  FAR struct esp32c3_spi_priv_s *priv;
+  struct spi_dev_s *spi_dev;
+  struct esp32c3_spi_priv_s *priv;
   irqstate_t flags;
 
   switch (port)
@@ -1388,7 +1388,7 @@ FAR struct spi_dev_s *esp32c3_spibus_initialize(int port)
         return NULL;
     }
 
-  spi_dev = (FAR struct spi_dev_s *)priv;
+  spi_dev = (struct spi_dev_s *)priv;
 
   flags = enter_critical_section();
 
@@ -1458,10 +1458,10 @@ FAR struct spi_dev_s *esp32c3_spibus_initialize(int port)
  *
  ****************************************************************************/
 
-int esp32c3_spibus_uninitialize(FAR struct spi_dev_s *dev)
+int esp32c3_spibus_uninitialize(struct spi_dev_s *dev)
 {
   irqstate_t flags;
-  FAR struct esp32c3_spi_priv_s *priv = (FAR struct esp32c3_spi_priv_s *)dev;
+  struct esp32c3_spi_priv_s *priv = (struct esp32c3_spi_priv_s *)dev;
 
   DEBUGASSERT(dev);
 

@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <assert.h>
 #include <errno.h>
+#include <semaphore.h>
 
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/compiler.h>
@@ -95,7 +96,9 @@ static struct syslog_channel_s g_rpmsg_channel =
 #endif
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
+#  if defined(CONFIG_ARCH_LOWPUTC)
 static sem_t g_syslog_default_sem = SEM_INITIALIZER(1);
+#  endif
 
 static const struct syslog_channel_ops_s g_default_channel_ops =
 {
@@ -158,14 +161,8 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
-  size_t nwritten;
-
   nxsem_wait(&g_syslog_default_sem);
-  for (nwritten = 0; nwritten < buflen; nwritten++)
-    {
-      up_putc(buffer[nwritten]);
-    }
-
+  up_puts(buffer);
   nxsem_post(&g_syslog_default_sem);
 #endif
 

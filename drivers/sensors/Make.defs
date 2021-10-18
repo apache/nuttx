@@ -108,6 +108,10 @@ ifeq ($(CONFIG_SENSORS_LSM9DS1),y)
   CSRCS += lsm9ds1.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MSA301),y)
+  CSRCS += msa301.c
+endif
+
 ifeq ($(CONFIG_SENSORS_LPS25H),y)
   CSRCS += lps25h.c
 endif
@@ -310,6 +314,12 @@ endif
 
 ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += qencoder.c
+endif
+
+# 3-phase Hall effect sensor upper half
+
+ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
+  CSRCS += hall3ph.c
 endif
 
 # Vishay VEML6070

@@ -293,4 +293,8 @@
 
 #define SNIOC_SELFTEST           _SNIOC(0x0085)
 
+/* IOCTL commands unique to the Hall effect sensor */
+
+#define SNIOC_GET_POSITION         _SNIOC(0x0086)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

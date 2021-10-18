@@ -277,7 +277,7 @@ struct foc_data_b16_s
   dq_frame_b16_t   i_dq_err; /* DQ current error */
 
   dq_frame_b16_t   i_dq_ref; /* Requested current for the FOC
-                              * current controler
+                              * current controller
                               */
 
   pid_controller_b16_t id_pid; /* Current d-axis component PI controller */

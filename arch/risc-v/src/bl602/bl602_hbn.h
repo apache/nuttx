@@ -64,7 +64,7 @@ extern "C"
 #define BL602_HBN_INT_ACOMP0     (20)    /* HBN interrupt type: ACOMP0 */
 #define BL602_HBN_INT_ACOMP1     (22)    /* HBN interrupt type: ACOMP1 */
 
-typedef CODE int (*bl602_hbn_cb_t)(FAR void *arg);
+typedef int (*bl602_hbn_cb_t)(void *arg);
 
 /****************************************************************************
  * Public Function Prototypes

@@ -91,7 +91,7 @@
  *      - BOARD_SDRAM2_SIZE, if defined, declares the size of SDRAM
  *              at address STM32_FMC_BANK6. +1 to CONFIG_MM_REGIONS.
  *
- * - Additionaly, you may use the following options to add one more region
+ * - Additionally, you may use the following options to add one more region
  *      of memory to system heap:
  *
  *      - CONFIG_ARCH_HAVE_HEAP2=y

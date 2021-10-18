@@ -59,13 +59,13 @@ GPIO           Yes
 MMUART         Yes      Uart mode only
 SPI            Yes      
 I2C            Yes      
-Timers         No       
+eMMC SD/SDIO   Yes      eMMC not fully tested
+Timers         No
 Watchdog       No       
 RTC            No       
 CAN            No       
 eNVM           No       
-USB            No       
-eMMC SD/SDIO   No       
+USB            No
 ============   =======  =====
 
 

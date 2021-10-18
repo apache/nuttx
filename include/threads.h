@@ -76,7 +76,7 @@
 
 /* thrd_start_t: function pointer type passed to thrd_create */
 
-typedef CODE int (*thrd_start_t)(FAR void *arg)
+typedef CODE int (*thrd_start_t)(FAR void *arg);
 
 /* mtx_t : mutex identifier */
 
@@ -106,14 +106,14 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
  */
 
 #define thrd_create(thr,func,arg) \
-  pthread_create(thr,NULL,(pthread_startroutine_t)func,arg)
+  pthread_create(thr,NULL,(pthread_startroutine_t)(func),arg)
 
 /* thrd_equal: checks if two identifiers refer to the same thread
  *
  * int thrd_equal(thrd_t lhs, thrd_t rhs);
  */
 
-#define thrd_equal(lhs,rhs) (lhs == rhs)
+#define thrd_equal(lhs,rhs) ((lhs) == (rhs))
 
 /* thrd_current: obtains the current thread identifier
  *
@@ -143,7 +143,7 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
  * _Noreturn void thrd_exit(int res);
  */
 
-#define thrd_exit(res) pthread_exit((pthread_addr_t)res)
+#define thrd_exit(res) pthread_exit((pthread_addr_t)(res))
 
 /* thrd_detach: detaches a thread
  *
@@ -159,7 +159,7 @@ typedef CODE void (*tss_dtor_t)(FAR void *);
 
 static inline int thrd_join(thrd_t thr, int *res)
 {
-  pthread_addr_t *value;
+  pthread_addr_t value;
   int ret = pthread_join(thr, &value);
   if (res)
     {
@@ -183,7 +183,7 @@ static inline int mtx_init(FAR mtx_t *mutex, int type)
 
   if (type & mtx_recursive)
     {
-      pthread_attr_init(&attr);
+      pthread_mutexattr_init(&attr);
       pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
       pattr = &attr;
     }

@@ -168,7 +168,7 @@ void riscv_copyfullstate(uint32_t *dest, uint32_t *src);
 #endif
 
 void riscv_sigdeliver(void);
-int riscv_swint(int irq, FAR void *context, FAR void *arg);
+int riscv_swint(int irq, void *context, void *arg);
 uint32_t riscv_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
@@ -221,7 +221,7 @@ void riscv_exception(uint32_t mcause, uint32_t *regs);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void riscv_stack_color(FAR void *stackbase, size_t nbytes);
+void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

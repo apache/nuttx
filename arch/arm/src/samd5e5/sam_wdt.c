@@ -416,7 +416,7 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
     putreg8(timeout_period, SAM_WDT_CONFIG);
 
   priv->reload = timeout_period;
-  wdinfo("fwdt=%d reload=%d timout=%d\n",
+  wdinfo("fwdt=%d reload=%d timeout=%d\n",
          WDT_FCLK, timeout_period, priv->timeout);
   leave_critical_section(flags);
 

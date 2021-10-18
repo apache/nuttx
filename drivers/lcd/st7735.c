@@ -45,6 +45,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define MAX(a,b)    ((a)>(b)?(a):(b))
+
 /* Verify that all configuration requirements have been met */
 
 #ifndef CONFIG_LCD_ST7735_SPIMODE
@@ -94,23 +96,36 @@
 
 /* Display Resolution */
 
-#ifdef CONFIG_LCD_ST7735_GM00
-#  define CONFIG_ST7735_XRES 132
-#  define CONFIG_ST7735_YRES 162
-#  define ST7735_LUT_SIZE    162
-#else
-#  define CONFIG_ST7735_XRES 128
-#  define CONFIG_ST7735_YRES 160
-#  define ST7735_LUT_SIZE    160
+#if defined(CONFIG_LCD_ST7735_GM00)
+#  define CONFIG_LCD_ST7735_XRES 132
+#  define CONFIG_LCD_ST7735_YRES 162
+#  define CONFIG_LCD_ST7735_XOFFSET 0
+#  define CONFIG_LCD_ST7735_YOFFSET 0
+#elif defined(CONFIG_LCD_ST7735_GM01)
+#  define CONFIG_LCD_ST7735_XRES 132
+#  define CONFIG_LCD_ST7735_YRES 132
+#  define CONFIG_LCD_ST7735_XOFFSET 0
+#  define CONFIG_LCD_ST7735_YOFFSET 0
+#elif defined(CONFIG_LCD_ST7735_GM11)
+#  define CONFIG_LCD_ST7735_XRES 128
+#  define CONFIG_LCD_ST7735_YRES 160
+#  define CONFIG_LCD_ST7735_XOFFSET 0
+#  define CONFIG_LCD_ST7735_YOFFSET 0
 #endif
 
 #if defined(CONFIG_LCD_LANDSCAPE) || defined(CONFIG_LCD_RLANDSCAPE)
-#  define ST7735_XRES       CONFIG_ST7735_YRES
-#  define ST7735_YRES       CONFIG_ST7735_XRES
+#  define ST7735_XRES       CONFIG_LCD_ST7735_YRES
+#  define ST7735_YRES       CONFIG_LCD_ST7735_XRES
+#  define ST7735_XOFFSET    CONFIG_LCD_ST7735_YOFFSET
+#  define ST7735_YOFFSET    CONFIG_LCD_ST7735_XOFFSET
 #else
-#  define ST7735_XRES       CONFIG_ST7735_XRES
-#  define ST7735_YRES       CONFIG_ST7735_YRES
+#  define ST7735_XRES       CONFIG_LCD_ST7735_XRES
+#  define ST7735_YRES       CONFIG_LCD_ST7735_YRES
+#  define ST7735_XOFFSET    CONFIG_LCD_ST7735_XOFFSET
+#  define ST7735_YOFFSET    CONFIG_LCD_ST7735_YOFFSET
 #endif
+
+#define ST7735_LUT_SIZE   MAX(CONFIG_LCD_ST7735_XRES, CONFIG_LCD_ST7735_YRES)
 
 /* Color depth and format */
 
@@ -180,6 +195,7 @@ static void st7735_deselect(FAR struct spi_dev_s *spi);
 static inline void st7735_sendcmd(FAR struct st7735_dev_s *dev, uint8_t cmd);
 static void st7735_sleep(FAR struct st7735_dev_s *dev, bool sleep);
 static void st7735_display(FAR struct st7735_dev_s *dev, bool on);
+static void st7735_setorientation(FAR struct st7735_dev_s *dev);
 static void st7735_setarea(FAR struct st7735_dev_s *dev,
                            uint16_t x0, uint16_t y0,
                            uint16_t x1, uint16_t y1);
@@ -329,6 +345,52 @@ static void st7735_display(FAR struct st7735_dev_s *dev, bool on)
 }
 
 /****************************************************************************
+ * Name: st7735_setorientation
+ *
+ * Description:
+ *   Set screen orientation.
+ *
+ ****************************************************************************/
+
+static void st7735_setorientation(FAR struct st7735_dev_s *dev)
+{
+  /* No need to change the orientation in PORTRAIT mode and RGB panel */
+
+#if !defined(CONFIG_LCD_PORTRAIT) || defined(CONFIG_LCD_ST7735_BGR)
+
+  uint8_t reg = 0x00;
+  st7735_sendcmd(dev, ST7735_MADCTL);
+  st7735_select(dev->spi, 8);
+
+#  if defined(CONFIG_LCD_RLANDSCAPE)
+  /* RLANDSCAPE : MY=1 MV=1 */
+
+  reg = ST7735_MADCTL_MY | ST7735_MADCTL_MV;
+
+#  elif defined(CONFIG_LCD_LANDSCAPE)
+  /* LANDSCAPE : MX=1 MV=1 */
+
+  reg = ST7735_MADCTL_MX | ST7735_MADCTL_MV;
+
+#  elif defined(CONFIG_LCD_RPORTRAIT)
+  /* RPORTRAIT : MX=1 MY=1 */
+
+  reg = ST7735_MADCTL_MX | ST7735_MADCTL_MY;
+
+#  endif
+
+#  if defined(CONFIG_LCD_ST7735_BGR)
+
+  reg |= ST7735_MADCTL_BGR;
+
+#  endif
+
+  SPI_SEND(dev->spi, reg);
+  st7735_deselect(dev->spi);
+#endif
+}
+
+/****************************************************************************
  * Name: st7735_setarea
  *
  * Description:
@@ -343,17 +405,21 @@ static void st7735_setarea(FAR struct st7735_dev_s *dev,
   /* Set row address */
 
   st7735_sendcmd(dev, ST7735_RASET);
-  st7735_select(dev->spi, 16);
-  SPI_SEND(dev->spi, y0);
-  SPI_SEND(dev->spi, y1);
+  st7735_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (y0 + ST7735_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y0 + ST7735_YOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (y1 + ST7735_YOFFSET) >> 8);
+  SPI_SEND(dev->spi, (y1 + ST7735_YOFFSET) & 0xff);
   st7735_deselect(dev->spi);
 
   /* Set column address */
 
   st7735_sendcmd(dev, ST7735_CASET);
-  st7735_select(dev->spi, 16);
-  SPI_SEND(dev->spi, x0);
-  SPI_SEND(dev->spi, x1);
+  st7735_select(dev->spi, 8);
+  SPI_SEND(dev->spi, (x0 + ST7735_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x0 + ST7735_XOFFSET) & 0xff);
+  SPI_SEND(dev->spi, (x1 + ST7735_XOFFSET) >> 8);
+  SPI_SEND(dev->spi, (x1 + ST7735_XOFFSET) & 0xff);
   st7735_deselect(dev->spi);
 }
 
@@ -671,6 +737,7 @@ FAR struct lcd_dev_s *st7735_lcdinitialize(FAR struct spi_dev_s *spi)
 
   st7735_sleep(priv, false);
   st7735_bpp(priv, ST7735_BPP);
+  st7735_setorientation(priv);
   st7735_display(priv, true);
   st7735_fill(priv, 0xffff);
 

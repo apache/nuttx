@@ -9,6 +9,39 @@ config APPSDIR
 	string
 	option env="APPSDIR"
 
+menu "License Setup"
+config ALLOW_BSD_COMPONENTS
+	bool "Use components that have BSD licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have BSD licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
+		NOTE: If this option is not set the following components
+		are not included in the setup menu:
+		Crypto
+		    AES cypher support
+		FS
+		    NFS client file system
+		    SPIFFS File System
+		Wireless
+		    Bluetooth LE support
+
+config ALLOW_GPL_COMPONENTS
+	bool "Use components that have GPL/LGPL licenses"
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have GPL/LGPL licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
+endmenu # License Setup
+
 menu "Build Setup"
 
 config EXPERIMENTAL
@@ -1107,7 +1140,7 @@ comment "Driver Debug Options"
 config DEBUG_LCD
 	bool "Low-level LCD Debug Features"
 	default n
-	depends on LCD
+	depends on LCD || SLCD
 	---help---
 		Enable LCD driver debug features.
 
@@ -1741,6 +1774,38 @@ config DEBUG_MOTOR_INFO
 		Enable motor informational output to SYSLOG.
 
 endif # DEBUG_MOTOR
+
+config DEBUG_VIDEO
+        bool "Video Debug Features"
+        default n
+        depends on DRIVERS_VIDEO
+        ---help---
+                Enable video debug features.
+
+if DEBUG_VIDEO
+
+config DEBUG_VIDEO_ERROR
+        bool "Video Error Output"
+        default n
+        depends on DEBUG_ERROR
+        ---help---
+                Enable video error output to SYSLOG.
+
+config DEBUG_VIDEO_WARN
+        bool "Video Warnings Output"
+        default n
+        depends on DEBUG_WARN
+        ---help---
+                Enable video warning output to SYSLOG.
+
+config DEBUG_VIDEO_INFO
+        bool "Video Informational Output"
+        default n
+        depends on DEBUG_INFO
+        ---help---
+                Enable video informational output to SYSLOG.
+
+endif # DEBUG_VIDEO
 endif # DEBUG_FEATURES
 
 config ARCH_HAVE_STACKCHECK
@@ -1759,14 +1824,16 @@ config STACK_COLORATION
 		Only supported by a few architectures.
 
 config STACK_USAGE_SAFE_PERCENT
-	int "Stack usage safe precent"
+	int "Stack usage safe percent"
 	default 0
 	range 0 100
 	depends on STACK_COLORATION
 	---help---
-		Stack usage precent = up_check_tcbstack() * 100 / tcb->adj_stack_size,
-		this should lower then STACK_USAGE_SAFE_PERCENT.
-		Idle thread will timely check stack usage when this macro value > 0.
+		Stack usage percent = up_check_tcbstack() * 100 / tcb->adj_stack_size,
+		this should be lower than STACK_USAGE_SAFE_PERCENT.
+
+		Idle thread will periodically check stack usage when this macro
+		value > 0.
 
 		N.B. This feature should not be used in production code.
 

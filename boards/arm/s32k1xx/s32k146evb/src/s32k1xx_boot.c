@@ -23,9 +23,6 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/board.h>
 
 #include "s32k146evb.h"
@@ -48,7 +45,7 @@
 void s32k1xx_board_initialize(void)
 {
 #ifdef CONFIG_ARCH_LEDS
-  /* Configure on-board LEDs if LED support has been selected. */
+  /* Configure on-board LEDs if LED support has been selected */
 
   board_autoled_initialize();
 #endif

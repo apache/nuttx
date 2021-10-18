@@ -254,14 +254,6 @@ config ESP32_RT_TIMER
 	default n
 	select ESP32_TIMER0
 
-config ESP32_PARTITION
-	bool "ESP32 Partition"
-	default n
-	select ESP32_SPIFLASH
-	---help---
-		Decode esp-idf's partition file and initialize
-		partition by nuttx MTD.
-
 config ESP32_RUN_IRAM
 	bool "Run from IRAM"
 	default n
@@ -586,6 +578,15 @@ config ESP32_UART0_TXDMA
 	bool "Enable UART0 TX DMA"
 	select ARCH_DMA
 	select UART0_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing RX data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART0
 
@@ -617,6 +618,15 @@ config ESP32_UART1_TXDMA
 	bool "Enable UART1 TX DMA"
 	select ARCH_DMA
 	select UART1_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing rx data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART1
 
@@ -648,6 +658,15 @@ config ESP32_UART2_TXDMA
 	bool "Enable UART2 TX DMA"
 	select ARCH_DMA
 	select UART2_TXDMA
+	depends on EXPERIMENTAL
+	---help---
+		Due to a hardware bug on the DMA used by the UART
+		only TX DMA can be used. RX DMA is not available.
+		And when TX DMA is working, RX can't work properly simultaneously, even
+		without using DMA.
+		So, it's not possible to have full duplex when TX DMA is enabled
+		and for not losing rx data it's recommended to implement the use
+		of flow control while a TX DMA transfer is ongoing.
 
 endif # ESP32_UART2
 
@@ -708,6 +727,14 @@ config ESP32_I2C1_SDAPIN
 	range 0 39
 
 endif # ESP32_I2C1
+
+config ESP32_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+
+config ESP32_I2CTIMEOMS
+	int "Timeout milliseconds"
+	default 500
 
 endmenu # I2C configuration
 
@@ -807,9 +834,50 @@ endmenu # ESP32_SPI
 menu "SPI Flash configuration"
 	depends on ESP32_SPIFLASH
 
+if ESP32_HAVE_OTA_PARTITION
+
+comment "Application Image OTA Update support"
+
+config ESP32_OTA_PRIMARY_SLOT_OFFSET
+	hex "Application image primary slot offset"
+	default "0x10000"
+
+config ESP32_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config ESP32_OTA_SECONDARY_SLOT_OFFSET
+	hex "Application image secondary slot offset"
+	default "0x110000"
+
+config ESP32_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config ESP32_OTA_SLOT_SIZE
+	hex "Application image slot size (in bytes)"
+	default "0x100000"
+
+config ESP32_OTA_SCRATCH_OFFSET
+	hex "Scratch partition offset"
+	default "0x210000"
+
+config ESP32_OTA_SCRATCH_SIZE
+	hex "Scratch partition size"
+	default "0x40000"
+
+config ESP32_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+endif
+
+comment "General MTD configuration"
+
 config ESP32_MTD_OFFSET
 	hex "MTD base address in SPI Flash"
-	default 0x180000
+	default 0x180000 if !ESP32_HAVE_OTA_PARTITION
+	default 0x250000 if ESP32_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
@@ -1029,6 +1097,7 @@ config ESP32_WIFI_SCAN_RESULT_SIZE
 config ESP32_WIFI_SAVE_PARAM
 	bool "Save WiFi Parameters"
 	default n
+	depends on ESP32_SPIFLASH
 	---help---
 		If you enable this option, WiFi adapter parameters will be saved
 		into the file system instead of computing them each time.
@@ -1048,6 +1117,21 @@ config ESP32_WIFI_FS_MOUNTPT
 	depends on ESP32_WIFI_SAVE_PARAM
 	---help---
 		Mount point of WiFi storage file system.
+
+config ESP32_WIFI_MTD_OFFSET
+	hex "Wi-Fi MTD partition offset"
+	default 0x280000 if !ESP32_HAVE_OTA_PARTITION
+	default 0x350000 if ESP32_HAVE_OTA_PARTITION
+	depends on ESP32_WIFI_SAVE_PARAM
+	---help---
+		This is the base address of the Wi-Fi MTD partition.
+
+config ESP32_WIFI_MTD_SIZE
+	hex "Wi-Fi MTD partition size"
+	default 0xb0000
+	depends on ESP32_WIFI_SAVE_PARAM
+	---help---
+		This is the size of the Wi-Fi MTD partition.
 
 config ESP32_WIFI_STA_DISCONNECT_PM
 	bool "Power Management for station when disconnected"
@@ -1126,6 +1210,106 @@ config ESP32_FREERUN
 endmenu # Timer/counter Configuration
 endif # ESP32_TIMER
 
+config ESP32_HAVE_OTA_PARTITION
+	bool
+	default n
+
+menu "Application Image Configuration"
+
+choice
+	prompt "Application Image Format"
+	default ESP32_APP_FORMAT_LEGACY
+	---help---
+		Depending on the chosen 2nd stage bootloader, the application may
+		be required to be perform a specific startup routine. Furthermore,
+		the image binary must be formatted according to the definition from
+		the 2nd stage bootloader.
+
+config ESP32_APP_FORMAT_LEGACY
+	bool "Legacy format"
+	---help---
+		This is the legacy application image format, as supported by the ESP-IDF
+		2nd stage bootloader.
+
+config ESP32_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	select ESP32_HAVE_OTA_PARTITION
+	depends on EXPERIMENTAL
+	---help---
+		The ESP32 port of MCUboot supports the loading of unsegmented firmware
+		images.
+
+comment "MCUboot support depends on CONFIG_EXPERIMENTAL"
+	depends on !EXPERIMENTAL
+
+endchoice # Application Image Format
+
+choice
+	prompt "Source for bootloader binaries"
+	default ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
+	---help---
+		Select the action to be taken by the build system for the
+		"make bootloader" target.
+
+config ESP32_BOOTLOADER_DOWNLOAD_PREBUILT
+	bool "Download prebuilt binaries"
+	---help---
+		The build system will download the prebuilt binaries from
+		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
+		Application Image Format (ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT)
+
+config ESP32_BOOTLOADER_BUILD_FROM_SOURCE
+	bool "Build binaries from source"
+	---help---
+		The build system will build all the required binaries from source. It will clone
+		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
+		custom bootloader according to the chosen Application Image Format
+		(ESP32_APP_FORMAT_LEGACY or ESP32_APP_FORMAT_MCUBOOT) and partition information.
+
+endchoice
+
+choice
+	prompt "Target slot for image flashing"
+	default ESP32_ESPTOOL_TARGET_PRIMARY
+	depends on ESP32_HAVE_OTA_PARTITION
+	---help---
+		Slot to which ESPTOOL will flash the generated binary image.
+
+config ESP32_ESPTOOL_TARGET_PRIMARY
+	bool "Application image primary slot"
+	---help---
+		This assumes that the generated image is already pre-validated.
+		This is the recommended option for the initial stages of the
+		application firmware image development.
+
+config ESP32_ESPTOOL_TARGET_SECONDARY
+	bool "Application image secondary slot"
+	---help---
+		The application needs to confirm the generated image as valid,
+		otherwise the bootloader may consider it invalid and perform the
+		rollback of the update after a reset.
+		This is the choice most suitable for the development and verification
+		of a secure firmware update workflow.
+
+endchoice
+
+config ESP32_APP_MCUBOOT_HEADER_SIZE
+	int "Application image header size (in bytes)"
+	default 32
+	depends on ESP32_APP_FORMAT_MCUBOOT
+
+endmenu # Application Image Configuration
+
+if ESP32_APP_FORMAT_LEGACY
+
+config ESP32_PARTITION
+	bool "ESP32 Partition"
+	default n
+	select ESP32_SPIFLASH
+	---help---
+		Decode esp-idf's partition file and initialize
+		partition by nuttx MTD.
+
 menu "Partition Configuration"
 	depends on ESP32_PARTITION
 
@@ -1137,7 +1321,9 @@ config ESP32_PARTITION_MOUNT
 	string "Partition mount point"
 	default "/dev/esp/partition/"
 
-endmenu # ESP32_PARTITION
+endmenu # Partition Configuration
+
+endif
 
 menu "AES accelerate"
 	depends on ESP32_AES_ACCELERATOR

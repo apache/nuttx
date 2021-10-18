@@ -105,12 +105,12 @@
 /* LEDC timer registers mapping */
 
 #define LEDC_TIMER_REG(r, n)      ((r) + (n) * (LEDC_TIMER1_CONF_REG - \
-                                                LEDC_TIMER2_CONF_REG))
+                                                LEDC_TIMER0_CONF_REG))
 
 /* LEDC timer channel registers mapping */
 
-#define LEDC_CHAN_REG(r, n)       ((r) + (n) * (LEDC_CH0_CONF0_REG - \
-                                                LEDC_CH1_CONF0_REG))
+#define LEDC_CHAN_REG(r, n)       ((r) + (n) * (LEDC_CH1_CONF0_REG - \
+                                                LEDC_CH0_CONF0_REG))
 
 #define SET_TIMER_BITS(t, r, b)   setbits(b, LEDC_TIMER_REG(r, (t)->num));
 #define SET_TIMER_REG(t, r, v)    putreg32(v, LEDC_TIMER_REG(r, (t)->num));
@@ -632,9 +632,17 @@ static int pwm_start(struct pwm_lowerhalf_s *dev,
 
   for (int i = 0; i < channels; i++)
     {
+#ifdef CONFIG_PWM_NCHANNELS
+      if (priv->chans[i].duty != info->channels[i].duty)
+#else
       if (priv->chans[i].duty != info[i].duty)
+#endif
         {
+#ifdef CONFIG_PWM_NCHANNELS
+          priv->chans[i].duty = info->channels[i].duty;
+#else
           priv->chans[i].duty = info[i].duty;
+#endif
           setup_channel(priv, i);
         }
     }

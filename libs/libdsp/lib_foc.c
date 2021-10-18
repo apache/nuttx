@@ -32,10 +32,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: foc_current_controler
+ * Name: foc_current_controller
  *
  * Description:
- *   This function implements FOC current controler algorithm.
+ *   This function implements FOC current controller algorithm.
  *
  * Input Parameters:
  *   foc      - (in/out) pointer to the FOC data
@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-static void foc_current_controler(FAR struct foc_data_f32_s *foc,
+static void foc_current_controller(FAR struct foc_data_f32_s *foc,
                                   FAR dq_frame_f32_t *v_dq_req)
 {
   FAR pid_controller_f32_t *id_pid = &foc->id_pid;
@@ -404,9 +404,9 @@ void foc_current_control(FAR struct foc_data_f32_s *foc,
 
   foc_idq_ref_set(foc, idq_ref);
 
-  /* Run FOC current controler (current dq -> voltage dq) */
+  /* Run FOC current controller (current dq -> voltage dq) */
 
-  foc_current_controler(foc, vdq_ref);
+  foc_current_controller(foc, vdq_ref);
 
   /* DQ voltage compensation */
 
@@ -418,7 +418,7 @@ void foc_current_control(FAR struct foc_data_f32_s *foc,
  * Name: foc_vabmod_get
  *
  * Description:
- *   Get result from the FOC controler (foc_current_control or
+ *   Get result from the FOC controller (foc_current_control or
  *   foc_voltage_control)
  *
  * Input Parameters:

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -77,10 +78,7 @@
 #define SPI_FLASH_ERASED_STATE      (0xff)
 #define SPI_FLASH_SIZE              (4 * 1024 * 1024)
 
-#define ESP32C3_MTD_OFFSET          CONFIG_ESP32C3_MTD_OFFSET
-#define ESP32C3_MTD_SIZE            CONFIG_ESP32C3_MTD_SIZE
-
-#define MTD2PRIV(_dev)              ((FAR struct esp32c3_spiflash_s *)_dev)
+#define MTD2PRIV(_dev)              ((struct esp32c3_spiflash_s *)_dev)
 #define MTD_SIZE(_priv)             ((*(_priv)->data)->chip.chip_size)
 #define MTD_BLKSIZE(_priv)          ((*(_priv)->data)->chip.page_size)
 #define MTD_ERASESIZE(_priv)        ((*(_priv)->data)->chip.sector_size)
@@ -914,28 +912,30 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
  * Name: esp32c3_spiflash_alloc_mtdpart
  *
  * Description:
- *   Allocate SPI Flash MTD.
+ *   Allocate an MTD partition from the ESP32-C3 SPI Flash.
  *
  * Input Parameters:
- *   None
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
  *
  * Returned Value:
  *   SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
+struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                     uint32_t mtd_size)
 {
   struct esp32c3_spiflash_s *priv = &g_esp32c3_spiflash;
   const esp32c3_spiflash_chip_t *chip = &(*priv->data)->chip;
-  FAR struct mtd_dev_s *mtd_part;
+  struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((ESP32C3_MTD_OFFSET + ESP32C3_MTD_SIZE) <= chip->chip_size);
-  ASSERT((ESP32C3_MTD_OFFSET % chip->sector_size) == 0);
-  ASSERT((ESP32C3_MTD_SIZE % chip->sector_size) == 0);
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   finfo("ESP32-C3 SPI Flash information:\n");
   finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
@@ -945,16 +945,19 @@ FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
   finfo("\tSector size = %" PRId32 " KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %" PRId32 " KB\n", chip->block_size / 1024);
 
-#if ESP32C3_MTD_SIZE == 0
-  size = chip->chip_size - ESP32C3_MTD_OFFSET;
-#else
-  size = ESP32C3_MTD_SIZE;
-#endif
+  if (mtd_size == 0)
+    {
+      size = chip->chip_size - mtd_offset;
+    }
+  else
+    {
+      size = mtd_size;
+    }
 
-  finfo("\tMTD offset = 0x%x\n", ESP32C3_MTD_OFFSET);
+  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
   finfo("\tMTD size = 0x%" PRIx32 "\n", size);
 
-  startblock = MTD_SIZE2BLK(priv, ESP32C3_MTD_OFFSET);
+  startblock = MTD_SIZE2BLK(priv, mtd_offset);
   blocks = MTD_SIZE2BLK(priv, size);
 
   mtd_part = mtd_partition(&priv->mtd, startblock, blocks);

@@ -113,10 +113,10 @@ static struct dma_channel_s g_dmach[EFM32_DMA_NCHANNELS];
 #ifdef CONFIG_EFM32_DMA_ALTDSEC
 static struct dma_descriptor_s
   g_descriptors[DESC_TABLE_SIZE + EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(DESC_TABLE_ALIGN)));
+  aligned_data(DESC_TABLE_ALIGN);
 #else
 static struct dma_descriptor_s g_descriptors[EFM32_DMA_NCHANNELS]
-  __attribute__((aligned(DESC_TABLE_ALIGN)));
+  aligned_data(DESC_TABLE_ALIGN);
 #endif
 
 /****************************************************************************

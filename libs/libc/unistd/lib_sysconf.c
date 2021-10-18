@@ -228,9 +228,11 @@ long sysconf(int name)
         return 1;
 #endif
 
-#ifdef CONFIG_CLOCK_MONOTONIC
       case _SC_MONOTONIC_CLOCK:
+#ifdef CONFIG_CLOCK_MONOTONIC
         return 1;
+#else
+        return 0;
 #endif
 
       case _SC_PAGESIZE:

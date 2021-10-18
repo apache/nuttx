@@ -347,7 +347,7 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
       uint8_t t;
 
       binfo("XCHAL_EXCCAUSE_LOAD_STORE_ERROR at %p, pc=%p\n",
-            (FAR void *)regs[REG_EXCVADDR],
+            (void *)regs[REG_EXCVADDR],
             pc);
 
       if (decode_s8i(pc, &imm8, &s, &t))

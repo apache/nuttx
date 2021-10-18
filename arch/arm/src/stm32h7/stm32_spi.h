@@ -75,7 +75,7 @@ FAR struct spi_dev_s *stm32_spibus_initialize(int bus);
  *   bus number
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

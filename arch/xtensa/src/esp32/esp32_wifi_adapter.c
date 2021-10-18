@@ -56,7 +56,7 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "hardware/esp32_soc.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_wifi_adapter.h"
 #include "esp32_rt_timer.h"
 #include "esp32_wifi_utils.h"
@@ -673,7 +673,7 @@ static int32_t wifi_errno_trans(int ret)
  *
  ****************************************************************************/
 
-static int esp_int_adpt_cb(int irq, void *context, FAR void *arg)
+static int esp_int_adpt_cb(int irq, void *context, void *arg)
 {
   struct irq_adpt *adapter = (struct irq_adpt *)arg;
 
@@ -844,7 +844,7 @@ static void esp32_ints_on(uint32_t mask)
 
   wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
 
-  up_enable_irq(irq);
+  up_enable_irq(ESP32_IRQ_MAC);
 }
 
 /****************************************************************************
@@ -867,7 +867,7 @@ static void esp32_ints_off(uint32_t mask)
 
   wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
 
-  up_disable_irq(irq);
+  up_disable_irq(ESP32_IRQ_MAC);
 }
 
 /****************************************************************************
@@ -2094,7 +2094,7 @@ static int esp_event_id_map(int event_id)
  *
  ****************************************************************************/
 
-static void esp_evt_work_cb(FAR void *arg)
+static void esp_evt_work_cb(void *arg)
 {
   int ret;
   irqstate_t flags;
@@ -4787,7 +4787,7 @@ void esp_wifi_free_eb(void *eb)
  *
  ****************************************************************************/
 
-int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
 {
   int id;
   struct wifi_notify *notify;
@@ -6297,8 +6297,16 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      /* Clear the password field and copy the user password to it */
+
       memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
+
+      /* Enable the WPA2 password by default */
+
+      wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+
+      /* Setup the config to the SoftAP */
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)

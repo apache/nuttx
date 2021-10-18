@@ -59,7 +59,7 @@ config SAMA5D27_SDMMC0_MOUNT
 
 config SAMA5D27_SDMMC0_MOUNT_BLKDEV
 	string "SDMMC0 block device name"
-	default mmc0
+	default "mmc0"
 	depends on SAMA5_SDMMC0
 
 config SAMA5D27_SDMMC0_MOUNT_MOUNTPOINT
@@ -97,7 +97,7 @@ config SAMA5D27_SDMMC1_MOUNT
 
 config SAMA5D27_SDMMC1_MOUNT_BLKDEV
 	string "SDMMC1 block device name"
-	default mmc1
+	default "mmc1"
 	depends on SAMA5_SDMMC1
 
 config SAMA5D27_SDMMC1_MOUNT_MOUNTPOINT

@@ -25,7 +25,7 @@ for ESP32 by Espressif.
 
 For flashing firmware, you will need to install ``esptool.py`` by running::
 
-    pip install esptool
+    $ pip install esptool
 
 Building from source
 --------------------
@@ -37,7 +37,7 @@ build the toolchain with crosstool-NG on Linux are as follows
 
   $ git clone https://github.com/espressif/crosstool-NG.git
   $ cd crosstool-NG
-  $ git checkout esp-2019r2
+  $ git checkout esp-2021r1
   $ git submodule update --init
 
   $ ./bootstrap && ./configure --enable-local && make
@@ -49,15 +49,18 @@ build the toolchain with crosstool-NG on Linux are as follows
 
   $ export PATH="crosstool-NG/builds/xtensa-esp32-elf/bin:$PATH"
 
-These steps are given in setup guide in
-`ESP-IDF repository <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
+These steps are given in the setup guide in
+`ESP-IDF documentation <https://docs.espressif.com/projects/esp-idf/en/latest/get-started/linux-setup-scratch.html>`_.
 
 Flashing
 ========
 
-Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. To flash your NuttX firmware simply run::
+Firmware for ESP32 is flashed via the USB/UART interface using the ``esptool.py`` tool. 
+It's a two step process where the first converts the ELF file into a ESP32-compatible binary 
+and the second flashes it to the board.  These steps are included into the build system and you can
+flash your NuttX firmware simply by running::
 
-    make download ESPTOOL_PORT=<port>
+    $ make download ESPTOOL_PORT=<port>
 
 where ``<port>`` is typically ``/dev/ttyUSB0`` or similar. You can change the baudrate by passing ``ESPTOOL_BAUD``.
 
@@ -288,10 +291,10 @@ WiFi
 
 A standard network interface will be configured and can be initialized such as::
 
-    ifup wlan0
-    wapi psk wlan0 mypasswd 1
-    wapi essid wlan0 myssid 1
-    renew wlan0
+    nsh> ifup wlan0
+    nsh> wapi psk wlan0 mypasswd 3
+    nsh> wapi essid wlan0 myssid 1
+    nsh> renew wlan0
 
 In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd`` as
 password. IP address is obtained via DHCP using ``renew`` command. You can check
@@ -299,372 +302,28 @@ the result by running ``ifconfig`` afterwards.
 
 .. tip:: Boards usually expose a ``wapi`` defconfig which enables WiFi
 
+WiFi SoftAP
+===========
+
+It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some
+boards with a ``sta_softap`` which enables this support.
+
+If you are using this board config profile you can run these commands to be able
+to connect your smartphone or laptop to your board::
+
+    nsh> ifup wlan1
+    nsh> dhcpd_start wlan1
+    nsh> wapi psk wlan0 mypasswd 1
+    nsh> wapi essid wlan1 nuttxap 1
+
+In this case, you are creating the access point ``nuttxapp`` in your board and to
+connect to it on your smartphone you will be required to type the password ``mypasswd``.
+The ``dhcpd_start`` is necessary to let your board to associate an IP to your smartphone.
+
 Bluetooth
 =========
 
 Bluetooth is not currently supported.
-
-Debugging with OpenOCD
-======================
-
-First you in need some debug environment which would be a JTAG emulator
-and the ESP32 OpenOCD software which is available here:
-https://github.com/espressif/openocd-esp32
-
-OpenOCD Documentation
----------------------
-
-There is on overview of the use of OpenOCD `here <https://dl.espressif.com/doc/esp-idf/latest/openocd.html>`.
-This document is also available in `ESP-IDF source tree <https://github.com/espressif/esp-idf>`_
-in ``docs`` directory.
-
-OpenOCD Configuration File
---------------------------
-
-A template ESP32 OpenOCD configuration file is provided in
-ESP-IDF ``docs`` directory (``esp32.cfg``).  Since you are not using
-FreeRTOS, you will need to uncomment the line::
-
-  set ESP32_RTOS none
-
-in the OpenOCD configuration file.  You will also need to change
-the source line from::
-
-  find interface/ftdi/tumpa.cfg
-
-to reflect the physical JTAG adapter connected.
-
-A copy of this OpenOCD configuration file available in the NuttX
-source tree at ``nuttx/boards/xtensa/esp32/esp32-devkitc/scripts/esp32.cfg``.
-It has these modifications:
-
-  - The referenced "set ESP32_RTOS none" line has been uncommented
-  - The "find interface/ftdi/tumpa.cfg" was removed. This means that you will
-    need to specify the interface configuration file on the OpenOCD
-    command line.
-
-Another OpenOCD configuration file is available in the NuttX source tree at
-``nuttx/boards/xtensa/esp32/esp32-devkitc/scripts/esp32-ft232h.cfg``.
-It has been tested with:
-
-  - `ESP32-DevKitC V4 <https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html>`_
-
-  - Akizukidenshi's FT232HL, a FT232H based JTAG adapter
-    (http://akizukidenshi.com/catalog/g/gK-06503/) with JP3 and JP4 closed,
-    and connected to ESP32 as:
-
-    +------------------+-------------+
-    | ESP32-DevKitC V4 | FT232HL     |
-    +=======+==========+=============+
-    | J2    |  J3      | J2          |
-    +-------+----------+-------------+
-    | IO13  |          | AD0   (TCK) |
-    +-------+----------+-------------+
-    | IO12  |          | AD1   (TDI) |
-    +-------+----------+-------------+
-    |       |  IO15    | AD2   (TDO) |
-    +-------+----------+-------------+
-    | IO14  |          | AD3   (TMS) |
-    +-------+----------+-------------+
-    | GND   |          | GND         |
-    +-------+----------+-------------+
-
-The following version of OpenOCD from ESP-IDF (macOS version)::
-
-  % openocd --version
-  Open On-Chip Debugger  v0.10.0-esp32-20191114 (2019-11-14-14:19)
-  Licensed under GNU GPL v2
-  For bug reports, read
-          http://openocd.org/doc/doxygen/bugs.html
-
-General OpenOCD build instructions
-----------------------------------
-
-Installing OpenOCD.  The sources for the ESP32-enabled variant of
-OpenOCD are available from Espressifs GitHub. To download the source,
-use the following commands:
-
-.. code-block:: console
-
-   $ git clone https://github.com/espressif/openocd-esp32.git
-   $ cd openocd-esp32
-   $ git submodule init
-   $ git submodule update
-
-Then look at the README and the docs/INSTALL.txt files in the
-openocd-esp32 directory for further instructions.  There area
-separate README files for Linux/Cygwin, macOS, and Windows.  Here
-is what I ended up doing (under Linux):
-
-.. code-block:: console
-
-  $ cd openocd-esp32
-  $ ./bootstrap
-  $ ./configure
-  $ make
-
-If you do not do the install step, then you will have a localhost
-version of the OpenOCD binary at ``openocd-esp32/src``.
-
-Starting the OpenOCD Server
----------------------------
-
-  - cd to openocd-esp32 directory
-  - copy the modified esp32.cfg script to this directory
-
-Then start OpenOCD by executing a command like the following.  Here
-I assume that:
-
-  - You did not install OpenOCD; binaries are available at
-    openocd-esp32/src and interface scripts are in
-    openocd-esp32/tcl/interface
-  - I select the configuration for the Olimex ARM-USB-OCD
-    debugger.
-
-Then the command to start OpenOCD is:
-
-.. code-block:: console
-
-  $ ./src/openocd -s ./tcl -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
-
-I then see::
-
-  Open On-Chip Debugger 0.10.0-dev-g3098897 (2016-11-14-12:19)
-  Licensed under GNU GPL v2
-  For bug reports, read
-          http://openocd.org/doc/doxygen/bugs.html
-  adapter speed: 200 kHz
-  force hard breakpoints
-  Info : clock speed 200 kHz
-  Info : JTAG tap: esp32.cpu0 tap/device found: 0x120034e5 (mfg: 0x272 (Tensilica), part: 0x2003, ver: 0x1)
-  Info : JTAG tap: esp32.cpu1 tap/device found: 0x120034e5 (mfg: 0x272 (Tensilica), part: 0x2003, ver: 0x1)
-  Info : esp32.cpu0: Debug controller was reset (pwrstat=0x5F, after clear 0x0F).
-  Info : esp32.cpu0: Core was reset (pwrstat=0x5F, after clear 0x0F).
-
-Connecting a debugger to OpenOCD
---------------------------------
-
-OpenOCD should now be ready to accept gdb connections. If you have
-compiled the ESP32 toolchain using Crosstool-NG, or if you have
-downloaded a precompiled toolchain from the Espressif website, you
-should already have xtensa-esp32-elf-gdb, a version of gdb that can
-be used for this
-
-First, make sure the project you want to debug is compiled and
-flashed into the ESP32’s SPI flash. Then, in a different console
-than OpenOCD is running in, invoke gdb. For example, for the
-template app, you would do this like such::
-
-.. code-block:: console
-
-  $ cd nuttx
-  $ xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
-
-This should give you a gdb prompt.
-
-Breakpoints
------------
-
-You can set up to 2 hardware breakpoints, which can be anywhere in the
-address space. Also 2 hardware watchpoints.
-
-The openocd esp32.cfg file currently forces gdb to use hardware
-breakpoints, I believe because software breakpoints (or, at least, the
-memory map for automatically choosing them) aren't implemented yet
-(as of 2016-11-14).
-
-JTAG Emulator
--------------
-
-The documentation indicates that you need to use an external JTAG
-like the TIAO USB Multi-protocol Adapter and the Flyswatter2.
-The instructions at http://www.esp32.com/viewtopic.php?t=381 show
-use of an FTDI C232HM-DDHSL-0 USB 2.0 high speed to MPSSE cable.
-
-The ESP32 DevkitC v4 board has no on board JTAG connector.  It will
-be necessary to make a cable or some other board to connect a JTAG
-emulator.  Refer to http://www.esp32.com/viewtopic.php?t=381 "How
-to debug ESP32 with JTAG / OpenOCD / GDB 1st part connect the
-hardware."
-
-Relevant pin-out:
-
-========= =============
-PIN LABEL JTAG FUNCTION
-========= =============
-IO14      TMS
-IO12      TDI
-GND       GND
-IO13      TCK
-x         x
-IO15      TDO
-========= =============
-
-You can find the mapping of JTAG signals to ESP32 GPIO numbers in
-"ESP32 Pin List" document found
-`here <http://espressif.com/en/support/download/documents?keys=&field_type_tid%5B%5D=13>`_.
-
-I put the ESP32 on a prototyping board and used a standard JTAG 20-pin
-connector with an older Olimex JTAG that I had.  Here is how I wired
-the 20-pin connector:
-
-===================== ===============
-20-PIN JTAG CONNECTOR ESP32 PIN LABEL
-===================== ===============
- 1 VREF  INPUT        3V3
- 3 nTRST OUTPUT       N/C
- 5 TDI   OUTPUT       IO12
- 7 TMS   OUTPUT       IO14
- 9 TCLK  OUTPUT       IO13
-11 RTCK  INPUT        N/C
-13 TDO   INPUT        IO15
-15 RESET I/O          N/C
-17 DBGRQ OUTPUT       N/C
-19 5V    OUTPUT       N/C
- 2 VCC   INPUT        3V3
- 4 GND   N/A          GND
- 6 GND   N/A          GND
- 8 GND   N/A          GND
-10 GND   N/A          GND
-12 GND   N/A          GND
-14 GND   N/A          GND
-16 GND   N/A          GND
-18 GND   N/A          GND
-20 GND   N/A          GND
-===================== ===============
-
-Executing and Debugging from FLASH and IRAM
-===========================================
-
-FLASH
------
-
-OpenOCD currently doesn't have a FLASH driver for ESP32, so you can load
-code into IRAM only via JTAG. FLASH-resident sections like .FLASH.rodata
-will fail to load.  The bootloader in ROM doesn't parse ELF, so any image
-which is bootloaded from FLASH has to be converted into a custom image
-format first.
-
-The tool esp-idf uses for flashing is a command line Python tool called
-"esptool.py" which talks to a serial bootloader in ROM.  A version is
-supplied in the esp-idf codebase in components/esptool_py/esptool, the
-"upstream" for that tool is here and now supports ESP32::
-
-  https://github.com/espressif/esptool/
-
-To FLASH an ELF via the command line is a two step process, something like
-this::
-
-  esptool.py --chip esp32 elf2image --flash_mode dio --flash_size 4MB -o nuttx.bin nuttx
-  esptool.py --chip esp32 --port COMx write_flash 0x1000 bootloader.bin 0x8000 partition_table.bin 0x10000 nuttx.bin
-
-The first step converts an ELF image into an ESP32-compatible binary
-image format, and the second step flashes it (along with bootloader image and
-partition table binary.)
-The offset for the partition table may vary, depending on ESP-IDF
-configuration, ``CONFIG_PARTITION_TABLE_OFFSET``, which is by default 0x8000
-as of writing this.
-
-To put the ESP32 into serial flashing mode, it needs to be reset with IO0 held
-low.  On the Core boards this can be accomplished by holding the button marked
-"Boot" and pressing then releasing the button marked "EN".  Actually, esptool.py
-can enter bootloader mode automatically (via RTS/DTR control lines), but
-unfortunately a timing interaction between the Windows CP2012 driver and the
-hardware means this doesn't currently work on Windows.
-
-Secondary Boot Loader / Partition Table
----------------------------------------
-
-See:
-
-  - https://github.com/espressif/esp-idf/tree/master/components/bootloader
-  - https://github.com/espressif/esp-idf/tree/master/components/partition_table .
-
-The secondary boot loader by default programs a RTC watchdog timer.
-As NuttX doesn't know the timer, it reboots every ~9 seconds. You can
-disable the timer by tweaking sdkconfig CONFIG_BOOTLOADER_WDT_ENABLE
-and rebuild the boot loader.
-
-Running from IRAM with OpenOCD
-------------------------------
-
-Running from IRAM is a good debug option.  You should be able to load the
-ELF directly via JTAG in this case, and you may not need the bootloader.
-
-NuttX supports a configuration option, CONFIG_ESP32_DEVKITC_RUN_IRAM, that may be
-selected for execution from IRAM.  This option simply selects the correct
-linker script for IRAM execution.
-
-Skipping the Secondary Bootloader
----------------------------------
-
-It is possible to skip the secondary bootloader and run out of IRAM using
-only the primary bootloader if your application of small enough (< 128KiB code,
-<180KiB data), then you can simplify initial bring-up by avoiding second stage
-bootloader. Your application will be loaded into IRAM using first stage
-bootloader present in ESP32 ROM. To achieve this, you need two things:
-
-  1. Have a linker script which places all code into IRAM and all data into
-     IRAM/DRAM
-
-  2. Use "esptool.py" utility to convert application .elf
-     file into binary format which can be loaded by first stage bootloader.
-
-Again you would need to link the ELF file and convert it to binary format suitable
-for flashing into the board.  The command should to convert ELF file to binary
-image looks as follows::
-
-  esptool.py --chip esp32 elf2image --flash_mode "dio" --flash_freq "40m" --flash_size "2MB" -o nuttx.bin nuttx
-
-To flash binary image to your development board, use the same esptool.py utility::
-
-  esptool.py --chip esp32 --port /dev/ttyUSB0 --baud 921600 write_flash -z --flash_mode dio --flash_freq 40m --flash_size 2MB 0x1000 nuttx.bin
-
-The argument before app.bin (0x1000) indicates the offset in flash where binary
-will be written. ROM bootloader expects to find an application (or second stage
-bootloader) image at offset 0x1000, so we are writing the binary there.
-
-Sample OpenOCD Debug Steps
---------------------------
-
-I did the initial bring-up using the IRAM configuration and OpenOCD.  Here
-is a synopsis of my debug steps:
-
-boards/xtensa/esp32/esp32-devkitc/configs/nsh with::
-
-  CONFIG_DEBUG_ASSERTIONS=y
-  CONFIG_DEBUG_FEATURES=y
-  CONFIG_DEBUG_SYMBOLS=y
-  CONFIG_ESP32_DEVKITC_RUN_IRAM=y
-
-I also made this change configuration which will eliminate all attempts to
-re-configure serial. It will just use the serial settings as they were left
-by the bootloader::
-
-  CONFIG_SUPPRESS_UART_CONFIG=y
-
-Start OpenOCD::
-
-  cd ../openocde-esp32
-  cp ../nuttx/boards/xtensa/esp32/esp32-devkitc/scripts/esp32.cfg .
-  sudo ./src/openocd -s ./tcl/ -f tcl/interface/ftdi/olimex-arm-usb-ocd.cfg -f ./esp32.cfg
-
-Start GDB and load code::
-
-  cd ../nuttx
-  xtensa-esp32-elf-gdb -ex 'target remote localhost:3333' nuttx
-  (gdb) load nuttx
-  (gdb) mon reg pc [value report by load for entry point]
-  (gdb) s
-
-Single stepping works fine for me as do breakpoints::
-
-  Breakpoint 1, up_timer_initialize () at chip/esp32_timerisr.c:172
-  72 {
-  (gdb) n
-  esp32.cpu0: Target halted, pc=0x400835BF
-  187 g_tick_divisor = divisor;
-  (gdb) ...
 
 Using QEMU
 ==========
@@ -703,8 +362,6 @@ Things to Do
    But the performance improvement might be worth the effort.
 
 3. See SMP-related issues above
-
-4. See OpenOCD for the ESP32 above
 
 Supported Boards
 ================

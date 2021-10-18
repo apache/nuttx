@@ -53,7 +53,7 @@
 struct bl602_cbinfo_s
 {
   rtc_alarm_callback_t cb;  /* Callback when the alarm expires */
-  FAR void *priv;           /* Private argument to accompany callback */
+  void *priv;               /* Private argument to accompany callback */
 };
 #endif
 
@@ -67,7 +67,7 @@ struct bl602_lowerhalf_s
    * operations vtable (which may lie in FLASH or ROM)
    */
 
-  FAR const struct rtc_ops_s *ops;
+  const struct rtc_ops_s *ops;
 
   /* Data following is private to this driver and not visible outside of
    * this file.
@@ -98,27 +98,27 @@ struct bl602_lowerhalf_s
 
 /* Prototypes for static methods in struct rtc_ops_s */
 
-static int bl602_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime);
-static int bl602_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime);
-static bool bl602_havesettime(FAR struct rtc_lowerhalf_s *lower);
+static int bl602_rdtime(struct rtc_lowerhalf_s *lower,
+                        struct rtc_time *rtctime);
+static int bl602_settime(struct rtc_lowerhalf_s *lower,
+                         const struct rtc_time *rtctime);
+static bool bl602_havesettime(struct rtc_lowerhalf_s *lower);
 
 #ifdef CONFIG_RTC_ALARM
-static int bl602_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo);
-static int bl602_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                            FAR const struct lower_setrelative_s *alarminfo);
-static int bl602_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
+static int bl602_setalarm(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setalarm_s *alarminfo);
+static int bl602_setrelative(struct rtc_lowerhalf_s *lower,
+                            const struct lower_setrelative_s *alarminfo);
+static int bl602_cancelalarm(struct rtc_lowerhalf_s *lower,
                              int alarmid);
-static int bl602_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct lower_rdalarm_s *alarminfo);
+static int bl602_rdalarm(struct rtc_lowerhalf_s *lower,
+                         struct lower_rdalarm_s *alarminfo);
 #endif
 
 #ifdef CONFIG_RTC_PERIODIC
-static int bl602_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                            FAR const struct lower_setperiodic_s *alarminfo);
-static int bl602_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id);
+static int bl602_setperiodic(struct rtc_lowerhalf_s *lower,
+                            const struct lower_setperiodic_s *alarminfo);
+static int bl602_cancelperiodic(struct rtc_lowerhalf_s *lower, int id);
 #endif
 
 /****************************************************************************
@@ -211,7 +211,7 @@ static int bl602_alarm_callback(void *arg)
   struct bl602_cbinfo_s *cbinfo = &priv->cbinfo;
 
   rtc_alarm_callback_t cb = (rtc_alarm_callback_t)cbinfo->cb;
-  FAR void *p_arg           = (FAR void *)cbinfo->priv;
+  void *p_arg           = (void *)cbinfo->priv;
 
 #ifdef CONFIG_RTC_PERIODIC
   if (priv->periodic_enable)
@@ -264,14 +264,14 @@ static int bl602_alarm_callback(void *arg)
  *
  ****************************************************************************/
 
-static int bl602_rdtime(FAR struct rtc_lowerhalf_s *lower,
-                        FAR struct rtc_time *rtctime)
+static int bl602_rdtime(struct rtc_lowerhalf_s *lower,
+                        struct rtc_time *rtctime)
 {
   struct bl602_lowerhalf_s *priv;
   uint64_t time_stamp_s;
   struct rtc_time tim;
 
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
   time_stamp_s = bl602_rtc_get_timestamp_ms() / 1000;
 
   tim = priv->rtc_base;
@@ -281,8 +281,8 @@ static int bl602_rdtime(FAR struct rtc_lowerhalf_s *lower,
       tim.tm_year -= 1900;
     }
 
-  time_stamp_s += mktime((FAR struct tm *)&tim);
-  gmtime_r((const time_t *)&time_stamp_s, (FAR struct tm *)&rtctime);
+  time_stamp_s += mktime((struct tm *)&tim);
+  gmtime_r((const time_t *)&time_stamp_s, (struct tm *)&rtctime);
 
   return OK;
 }
@@ -303,10 +303,10 @@ static int bl602_rdtime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_settime(FAR struct rtc_lowerhalf_s *lower,
-                         FAR const struct rtc_time *rtctime)
+static int bl602_settime(struct rtc_lowerhalf_s *lower,
+                         const struct rtc_time *rtctime)
 {
-  struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
+  struct bl602_lowerhalf_s *priv = (struct bl602_lowerhalf_s *)lower;
 
   if (rtctime->tm_year < 1900)
     {
@@ -332,9 +332,9 @@ static int bl602_settime(FAR struct rtc_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static bool bl602_havesettime(FAR struct rtc_lowerhalf_s *lower)
+static bool bl602_havesettime(struct rtc_lowerhalf_s *lower)
 {
-  struct bl602_lowerhalf_s *priv = (FAR struct bl602_lowerhalf_s *)lower;
+  struct bl602_lowerhalf_s *priv = (struct bl602_lowerhalf_s *)lower;
 
   return (priv->rtc_base.tm_year != 0);
 }
@@ -357,15 +357,15 @@ static bool bl602_havesettime(FAR struct rtc_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int bl602_setalarm(FAR struct rtc_lowerhalf_s *lower,
-                          FAR const struct lower_setalarm_s *alarminfo)
+static int bl602_setalarm(struct rtc_lowerhalf_s *lower,
+                          const struct lower_setalarm_s *alarminfo)
 {
-  FAR struct bl602_lowerhalf_s *priv;
-  FAR struct bl602_cbinfo_s *cbinfo;
+  struct bl602_lowerhalf_s *priv;
+  struct bl602_cbinfo_s *cbinfo;
   int ret;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->id == 0);
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   ret = nxsem_wait(&priv->devsem);
   if (ret < 0)
@@ -380,7 +380,7 @@ static int bl602_setalarm(FAR struct rtc_lowerhalf_s *lower,
 
       /* Convert the RTC time to a timespec */
 
-      time_stamp_s    = mktime((FAR struct tm *)&alarminfo->time);
+      time_stamp_s    = mktime((struct tm *)&alarminfo->time);
       priv->rtc_alarm = alarminfo->time;
 
       /* Remember the callback information */
@@ -422,16 +422,16 @@ static int bl602_setalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int bl602_setrelative(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setrelative_s *alarminfo)
+static int bl602_setrelative(struct rtc_lowerhalf_s *lower,
+                             const struct lower_setrelative_s *alarminfo)
 {
-  FAR struct bl602_lowerhalf_s *priv;
+  struct bl602_lowerhalf_s *priv;
   struct lower_setalarm_s setalarm;
   struct rtc_time *time;
   time_t seconds;
   int ret = -EINVAL;
 
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
 
@@ -453,7 +453,7 @@ static int bl602_setrelative(FAR struct rtc_lowerhalf_s *lower,
 
       /* And convert the time back to broken out format */
 
-      gmtime_r(&seconds, (FAR struct tm *)&setalarm.time);
+      gmtime_r(&seconds, (struct tm *)&setalarm.time);
 
       /* The set the alarm using this absolute time */
 
@@ -486,14 +486,14 @@ static int bl602_setrelative(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int bl602_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int bl602_cancelalarm(struct rtc_lowerhalf_s *lower, int alarmid)
 {
-  FAR struct bl602_lowerhalf_s *priv;
-  FAR struct bl602_cbinfo_s *cbinfo;
+  struct bl602_lowerhalf_s *priv;
+  struct bl602_cbinfo_s *cbinfo;
 
   DEBUGASSERT(lower != NULL);
   DEBUGASSERT(alarmid == 0);
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   /* Nullify callback information to reduce window for race conditions */
 
@@ -529,13 +529,13 @@ static int bl602_cancelalarm(FAR struct rtc_lowerhalf_s *lower, int alarmid)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_ALARM
-static int bl602_rdalarm(FAR struct rtc_lowerhalf_s *lower,
-                         FAR struct lower_rdalarm_s *alarminfo)
+static int bl602_rdalarm(struct rtc_lowerhalf_s *lower,
+                         struct lower_rdalarm_s *alarminfo)
 {
-  FAR struct bl602_lowerhalf_s *priv;
+  struct bl602_lowerhalf_s *priv;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL && alarminfo->time != NULL);
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   if (alarminfo->id == 0)
     {
@@ -565,14 +565,14 @@ static int bl602_rdalarm(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-static int bl602_setperiodic(FAR struct rtc_lowerhalf_s *lower,
-                             FAR const struct lower_setperiodic_s *alarminfo)
+static int bl602_setperiodic(struct rtc_lowerhalf_s *lower,
+                             const struct lower_setperiodic_s *alarminfo)
 {
-  FAR struct bl602_lowerhalf_s *priv;
+  struct bl602_lowerhalf_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(lower != NULL && alarminfo != NULL);
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   flags = enter_critical_section();
   priv->periodic = *alarminfo;
@@ -601,13 +601,13 @@ static int bl602_setperiodic(FAR struct rtc_lowerhalf_s *lower,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_PERIODIC
-static int bl602_cancelperiodic(FAR struct rtc_lowerhalf_s *lower, int id)
+static int bl602_cancelperiodic(struct rtc_lowerhalf_s *lower, int id)
 {
-  FAR struct bl602_lowerhalf_s *priv;
+  struct bl602_lowerhalf_s *priv;
   irqstate_t flags;
 
   DEBUGASSERT(lower != NULL);
-  priv = (FAR struct bl602_lowerhalf_s *)lower;
+  priv = (struct bl602_lowerhalf_s *)lower;
 
   DEBUGASSERT(id == 0);
 
@@ -677,7 +677,7 @@ int up_rtc_initialize(void)
  *
  ****************************************************************************/
 
-FAR struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void)
+struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void)
 {
   nxsem_init(&g_rtc_lowerhalf.devsem, 0, 1);
 
@@ -689,5 +689,5 @@ FAR struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void)
   g_rtc_lowerhalf.rtc_base.tm_year = 70;
   g_rtc_lowerhalf.rtc_base.tm_mday = 1;
 
-  return (FAR struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
+  return (struct rtc_lowerhalf_s *)&g_rtc_lowerhalf;
 }

@@ -49,8 +49,8 @@
 #define SAMA5_SDMMC_PRSSTAT_OFFSET       0x0024 /* Present State Register */
 #define SAMA5_SDMMC_PROCTL_OFFSET        0x0028 /* Protocol Control Register */
 #define SAMA5_SDMMC_PWRCTL_OFFSET        0x0029 /* Power Control Control Register */
-#define SAMA5_SDMMC_SYSCTL_OFFSET        0x002c /* System Control Register, or Clock Control Register/Timout Control Register */
-#define SAMA5_SDMMC_TCR_OFFSET           0x002e /* Timout Control Register (8 bit) */
+#define SAMA5_SDMMC_SYSCTL_OFFSET        0x002c /* System Control Register, or Clock Control Register/Timeout Control Register */
+#define SAMA5_SDMMC_TCR_OFFSET           0x002e /* Timeout Control Register (8 bit) */
 #define SAMA5_SDMMC_SRR_OFFSET           0x002f /* Software Reset Register (8 bit) */
 #define SAMA5_SDMMC_IRQSTAT_OFFSET       0x0030 /* Interrupt Status Register */
 #define SAMA5_SDMMC_IRQSTATEN_OFFSET     0x0034 /* Interrupt Status Enable Register */

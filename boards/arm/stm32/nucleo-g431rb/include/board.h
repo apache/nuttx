@@ -219,6 +219,11 @@
 
 /* Alternate function pin selections ****************************************/
 
+/* TIM2 input ***************************************************************/
+
+#define GPIO_TIM2_CH1IN (GPIO_TIM2_CH1IN_3 | GPIO_PULLUP) /* PA15 */
+#define GPIO_TIM2_CH2IN (GPIO_TIM2_CH2IN_2 | GPIO_PULLUP) /* PB3 */
+
 /* USART2 (STLINK Virtual COM Port) */
 
 #define GPIO_USART2_TX     GPIO_USART2_TX_1 /* PA2 */

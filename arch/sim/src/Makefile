@@ -187,6 +187,12 @@ endif
 
 ifeq ($(CONFIG_SIM_SPI_LINUX),y)
   HOSTSRCS += up_spilinux.c
+
+  up_spilinux.c: config.h
+
+  config.h: $(TOPDIR)/include/nuttx/config.h
+	@echo "CP:  $<"
+	$(Q) cp $< $@
 endif
 
 ifeq ($(CONFIG_RPTUN),y)
@@ -222,8 +228,8 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 
 ifneq ($(CONFIG_HOST_MACOS),y)
   ARCHSCRIPT += -T nuttx.ld
-  LDSTARTGROUP ?= -Wl,--start-group
-  LDENDGROUP ?= -Wl,--end-group
+  LDSTARTGROUP ?= --start-group
+  LDENDGROUP ?= --end-group
 endif
 
 # Determine which NuttX libraries will need to be linked in
@@ -333,8 +339,6 @@ depend: .depend
 
 context::
 
-clean_context::
-
 clean:
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board clean ; \
@@ -345,7 +349,7 @@ clean:
 	$(call DELFILE, libarch$(LIBEXT))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(Q) if [ -e board/Makefile ]; then \
 		$(MAKE) -C board distclean ; \
 	fi

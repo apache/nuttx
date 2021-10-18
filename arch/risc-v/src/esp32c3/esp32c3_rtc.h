@@ -50,6 +50,14 @@ extern "C"
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Number of cycles to wait from the 32k XTAL oscillator to
+ * consider it running. Larger values increase startup delay.
+ * Smaller values may cause false positive detection
+ * (i.e. oscillator runs for a few cycles and then stops).
+ */
+
+#define SLOW_CLK_CAL_CYCLES         1024
+
 /* Cycles for RTC Timer clock source (internal oscillator) calibrate */
 
 #define RTC_CLK_SRC_CAL_CYCLES           (10)
@@ -144,7 +152,7 @@ struct esp32c3_cpu_freq_config_s
 
 /* The form of an alarm callback */
 
-typedef CODE void (*alm_callback_t)(FAR void *arg, unsigned int alarmid);
+typedef void (*alm_callback_t)(void *arg, unsigned int alarmid);
 
 enum alm_id_e
 {
@@ -160,7 +168,7 @@ struct alm_setalarm_s
   int               as_id;     /* enum alm_id_e */
   struct timespec   as_time;   /* Alarm expiration time */
   alm_callback_t    as_cb;     /* Callback (if non-NULL) */
-  FAR void          *as_arg;   /* Argument for callback */
+  void          *as_arg;       /* Argument for callback */
 };
 
 #endif /* CONFIG_RTC_ALARM */
@@ -543,7 +551,7 @@ time_t up_rtc_time(void);
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *ts);
+int up_rtc_settime(const struct timespec *ts);
 
 /****************************************************************************
  * Name: up_rtc_initialize
@@ -579,7 +587,7 @@ int up_rtc_initialize(void);
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp);
+int up_rtc_gettime(struct timespec *tp);
 #endif
 
 #ifdef CONFIG_RTC_ALARM
@@ -598,7 +606,7 @@ int up_rtc_gettime(FAR struct timespec *tp);
  *
  ****************************************************************************/
 
-int up_rtc_setalarm(FAR struct alm_setalarm_s *alminfo);
+int up_rtc_setalarm(struct alm_setalarm_s *alminfo);
 
 /****************************************************************************
  * Name: up_rtc_cancelalarm
@@ -631,7 +639,7 @@ int up_rtc_cancelalarm(enum alm_id_e alarmid);
  *
  ****************************************************************************/
 
-int up_rtc_rdalarm(FAR struct timespec *tp, uint32_t alarmid);
+int up_rtc_rdalarm(struct timespec *tp, uint32_t alarmid);
 
 #endif /* CONFIG_RTC_ALARM */
 

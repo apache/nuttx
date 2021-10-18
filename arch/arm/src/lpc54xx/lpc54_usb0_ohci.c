@@ -521,21 +521,21 @@ static struct usbhost_connection_s g_usbconn =
 /* Aligned static memory allocations */
 
 static uint8_t g_hcca[LPC54_HCCA_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 static uint8_t g_tdtail_alloc[LPC54_TD_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 static uint8_t g_edctrl_alloc[LPC54_ED_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 static uint8_t g_edfree_alloc[LPC54_EDFREE_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 static uint8_t g_tdfree_alloc[LPC54_TDFREE_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 static uint8_t g_tbfree_alloc[LPC54_TBFREE_SIZE] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 
 #if LPC54_IOBUFFERS > 0
 static uint8_t g_iobuffers[LPC54_IOBUF_ALLOC] \
-  __attribute__ ((aligned(LPC54_ALIGN_SIZE)));
+  aligned_data(LPC54_ALIGN_SIZE);
 #endif
 
 /* This is a free list of EDs and TD buffers */

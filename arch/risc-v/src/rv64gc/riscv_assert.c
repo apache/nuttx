@@ -90,7 +90,7 @@ static void up_stackdump(uint64_t sp, uintptr_t stack_top)
  * Name: up_registerdump
  ****************************************************************************/
 
-static inline void up_registerdump(FAR volatile uintptr_t *regs)
+static inline void up_registerdump(volatile uintptr_t *regs)
 {
   /* Are user registers available from interrupt processing? */
 
@@ -132,7 +132,7 @@ static inline void up_registerdump(FAR volatile uintptr_t *regs)
  ****************************************************************************/
 
 #if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+static void up_taskdump(struct tcb_s *tcb, void *arg)
 {
   /* Dump interesting properties of this task */
 
@@ -319,7 +319,7 @@ static void _up_assert(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -331,7 +331,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return OK;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -365,7 +365,7 @@ void up_assert(const char *filename, int lineno)
 #else
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
-         filename, lineno, rtcb->name);
+         filename, lineno, running_task()->name);
 #else
   _alert("Assertion failed at file:%s line: %d\n",
          filename, lineno);

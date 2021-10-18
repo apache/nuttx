@@ -509,7 +509,7 @@ static const struct usbdev_ops_s g_devops =
 
 #ifdef CONFIG_LPC17_40_USBDEV_DMA
 static uint32_t
-g_udca[LPC17_40_NPHYSENDPOINTS] __attribute__ ((aligned (128)));
+g_udca[LPC17_40_NPHYSENDPOINTS] aligned_data(128);
 static struct
 lpc17_40_dmadesc_s  g_usbddesc[CONFIG_LPC17_40_USBDEV_NDMADESCRIPTORS];
 #endif

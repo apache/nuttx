@@ -32,6 +32,7 @@
  * Public Functions
  ****************************************************************************/
 
+#undef malloc_size /* See mm/README.txt */
 size_t malloc_size(FAR void *mem)
 {
   return mm_malloc_size(mem);

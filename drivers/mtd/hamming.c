@@ -1,13 +1,6 @@
 /****************************************************************************
  * drivers/mtd/hamming.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was taken directly from Atmel sample code with only
- * modifications for better integration with NuttX.  The Atmel sample
- * code has a BSD compatible license that requires this copyright notice:
- *
  *   Copyright (c) 2011, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without

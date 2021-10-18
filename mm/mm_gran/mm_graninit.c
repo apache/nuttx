@@ -55,7 +55,7 @@
  *   attribute to position a DMA heap in memory (logic in the linker script
  *   would assign the section .dmaheap to the DMA memory.
  *
- *   FAR uint32_t g_dmaheap[DMAHEAP_SIZE] __attribute__((section(.dmaheap)));
+ *   FAR uint32_t g_dmaheap[DMAHEAP_SIZE] locate_data(.dmaheap);
  *
  *   The heap is created by calling gran_initialize().  Here the granule size
  *   is set to 64 bytes (2**6) and the alignment to 16 bytes (2**4):

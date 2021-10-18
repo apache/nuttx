@@ -89,8 +89,8 @@
 #define FLASH_PAGE_MASK    (FLASH_PAGE_SIZE - 1)
 #if FLASH_PAGE_SIZE == 2048
 #  define FLASH_PAGE_SHIFT   (11)    /* 2**11  = 2048B */
-#elif FLASH_PAGE_SIZE == 8192
-#  define FLASH_PAGE_SHIFT   (13)    /* 2**13  = 8192B */
+#elif FLASH_PAGE_SIZE == 4096
+#  define FLASH_PAGE_SHIFT   (12)    /* 2**12  = 4096B */
 #else
 #  error Unsupported STM32L4_FLASH_PAGESIZE
 #endif
@@ -186,10 +186,14 @@ static inline void flash_erase(size_t page)
     defined(CONFIG_STM32L4_STM32L4XR)
   if (page <= 0xff)
     {
+      /* Select bank 1 */
+
       modifyreg32(STM32L4_FLASH_CR, FLASH_CR_BKER, 0);
     }
   else
     {
+      /* Select bank 2 */
+
       modifyreg32(STM32L4_FLASH_CR, 0, FLASH_CR_BKER);
     }
 #endif

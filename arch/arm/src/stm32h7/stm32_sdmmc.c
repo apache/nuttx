@@ -372,7 +372,7 @@ struct stm32_dev_s
   struct work_s      cbfifo;          /* Monitor for Lame FIFO */
 #endif
   uint8_t            rxfifo[FIFO_SIZE_IN_BYTES] /* To offload with IDMA */
-                     __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+                     aligned_data(ARMV7M_DCACHE_LINESIZE);
 #if defined(CONFIG_ARMV7M_DCACHE) && defined(CONFIG_STM32H7_SDMMC_IDMA)
   bool               unaligned_rx; /* read buffer is not cache-line aligned */
 #endif
@@ -649,7 +649,7 @@ static struct stm32_sampleregs_s g_sampleregs[DEBUG_NSAMPLES];
 /* Input dma buffer for unaligned transfers */
 #if defined(CONFIG_ARMV7M_DCACHE) && defined(CONFIG_STM32H7_SDMMC_IDMA)
 static uint8_t sdmmc_rxbuffer[SDMMC_MAX_BLOCK_SIZE]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 #endif
 
 /****************************************************************************
@@ -801,19 +801,18 @@ static void stm32_configwaitints(struct stm32_dev_s *priv, uint32_t waitmask,
                                 GPIO_PUPD_MASK);
       pinset |= (GPIO_INPUT | GPIO_EXTI);
 
-      /* Arm the SDMMC_D Ready and install Isr */
+      /* Arm the SDMMC_D0 Ready and install Isr */
 
       stm32_gpiosetevent(pinset, true, false, false,
                          stm32_sdmmc_rdyinterrupt, priv);
     }
 
-  /* Disarm SDMMC_D ready */
+  /* Disarm SDMMC_D0 ready and return it to SDMMC D0 */
 
   if ((wkupevent & SDIOWAIT_WRCOMPLETE) != 0)
     {
       stm32_gpiosetevent(priv->d0_gpio, false, false, false,
                          NULL, NULL);
-      stm32_configgpio(priv->d0_gpio);
     }
 #endif
 

@@ -71,7 +71,7 @@
  */
 
 up_vector_t g_ram_vectors[ARMV6M_VECTAB_SIZE]
-  __attribute__ ((section (".ram_vectors"), aligned (RAMVEC_ALIGN)));
+  locate_data(".ram_vectors") aligned_data(RAMVEC_ALIGN);
 
 /****************************************************************************
  * Public Functions

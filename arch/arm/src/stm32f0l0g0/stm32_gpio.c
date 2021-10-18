@@ -344,10 +344,10 @@ int stm32_configgpio(uint32_t cfgset)
  * Description:
  *   Unconfigure a GPIO pin based on bit-encoded description of the pin, set
  *   it into default HiZ state (and possibly mark it's unused) and unlock it
- *   whether it was previsouly selected as alternative function
+ *   whether it was previously selected as alternative function
  *  (GPIO_ALT|GPIO_CNF_AFPP|...).
  *
- *   This is a safety function and prevents hardware from schocks, as
+ *   This is a safety function and prevents hardware from shocks, as
  *   unexpected write to the Timer Channel Output GPIO to fixed '1' or '0'
  *   while it should operate in PWM mode could produce excessive on-board
  *   currents and trigger over-current/alarm function.

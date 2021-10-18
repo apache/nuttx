@@ -51,6 +51,10 @@ ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
 CSRCS += stm32_foc_ihm16m1.c
 endif
 
+ifeq ($(CONFIG_MATH_CORDIC),y)
+CSRCS += stm32_cordic.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

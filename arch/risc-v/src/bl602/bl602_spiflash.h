@@ -60,7 +60,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void);
+struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void);
 
 /****************************************************************************
  * Name: bl602_spiflash_get_mtd
@@ -76,7 +76,7 @@ FAR struct mtd_dev_s *bl602_spiflash_alloc_mtdpart(void);
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *bl602_spiflash_get_mtd(void);
+struct mtd_dev_s *bl602_spiflash_get_mtd(void);
 
 #ifdef __cplusplus
 }

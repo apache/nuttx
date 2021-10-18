@@ -97,7 +97,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #if XCHAL_CP_NUM > 0
   struct xcptcontext *xcp;
@@ -271,12 +271,12 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes)
+void up_stack_color(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;
   size_t nwords;
-  FAR uint32_t *ptr;
+  uint32_t *ptr;
 
   /* Take extra care that we do not write outside the stack boundaries */
 
@@ -287,7 +287,7 @@ void up_stack_color(FAR void *stackbase, size_t nbytes)
   /* Get the adjusted size based on the top and bottom of the stack */
 
   nwords = (end - start) >> 2;
-  ptr  = (FAR uint32_t *)start;
+  ptr  = (uint32_t *)start;
 
   /* Set the entire stack to the coloration value */
 

@@ -141,6 +141,7 @@ struct esp32c3_wdt_ops_s
  ****************************************************************************/
 
 struct esp32c3_wdt_dev_s *esp32c3_wdt_init(enum esp32c3_wdt_inst_e wdt_id);
+void esp32c3_wdt_early_deinit(void);
 void esp32c3_wdt_deinit(struct esp32c3_wdt_dev_s *dev);
 bool esp32c3_wdt_is_running(struct esp32c3_wdt_dev_s *dev);
 

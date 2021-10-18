@@ -218,7 +218,7 @@ static void nrf52_tim_putreg(FAR struct nrf52_tim_dev_s *dev,
  * Name: nrf52_tim_irq2reg
  *
  * Description:
- *   Get the vaule of the interrupt register corresponding to the given
+ *   Get the value of the interrupt register corresponding to the given
  *   interrupt source
  *
  ****************************************************************************/

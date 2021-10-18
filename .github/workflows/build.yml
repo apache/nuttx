@@ -127,12 +127,12 @@ jobs:
       - name: Docker Login
         uses: azure/docker-login@v1
         with:
-          login-server: docker.pkg.github.com
+          login-server: ghcr.io
           username: ${GITHUB_ACTOR}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
-        run: docker pull docker.pkg.github.com/apache/incubator-nuttx/apache-nuttx-ci-linux
+        run: docker pull ghcr.io/apache/incubator-nuttx/apache-nuttx-ci-linux
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
       - name: Run builds

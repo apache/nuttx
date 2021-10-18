@@ -33,7 +33,7 @@
 
 /* Event frame content */
 
-struct __attribute__((packed)) bcmf_event_s
+begin_packed_struct struct bcmf_event_s
 {
   uint16_t version;       /* Vendor specific type */
   uint16_t flags;
@@ -46,7 +46,7 @@ struct __attribute__((packed)) bcmf_event_s
   char     src_name[16];  /* Event source interface name */
   uint8_t  dst_id;        /* Event destination interface id */
   uint8_t  bss_cfg_id;
-};
+} end_packed_struct;
 
 /* Event callback handler */
 

@@ -2,74 +2,20 @@
  * net/devif/ipv6_input.c
  * Device driver IPv6 packet receipt interface
  *
- *   Copyright (C) 2015, 2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Adapted for NuttX from logic in uIP which also has a BSD-like license:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * uIP is an implementation of the TCP/IP protocol stack intended for
- * small 8-bit and 16-bit microcontrollers.
- *
- * uIP provides the necessary protocols for Internet communication,
- * with a very small code footprint and RAM requirements - the uIP
- * code size is on the order of a few kilobytes and RAM usage is on
- * the order of a few hundred bytes.
- *
- *   Original author Adam Dunkels <adam@dunkels.com>
- *   Copyright () 2001-2003, Adam Dunkels.
- *   All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. The name of the author may not be used to endorse or promote
- *    products derived from this software without specific prior
- *    written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
- * OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
- * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
- * GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- ****************************************************************************/
-
-/****************************************************************************
- * uIP is a small implementation of the IP, UDP and TCP protocols (as
- * well as some basic ICMP stuff). The implementation couples the IP,
- * UDP, TCP and the application layers very tightly. To keep the size
- * of the compiled code down, this code frequently uses the goto
- * statement. While it would be possible to break the ipv6_input()
- * function into many smaller functions, this would increase the code
- * size because of the overhead of parameter passing and the fact that
- * the optimizer would not be as efficient.
- *
- * The principle is that we have a small buffer, called the d_buf,
- * in which the device driver puts an incoming packet. The TCP/IP
- * stack parses the headers in the packet, and calls the
- * application. If the remote host has sent data to the application,
- * this data is present in the d_buf and the application read the
- * data from there. It is up to the application to put this data into
- * a byte stream if needed. The application will not be fed with data
- * that is out of sequence.
- *
- * If the application wishes to send data to the peer, it should put
- * its data into the d_buf. The d_appdata pointer points to the
- * first available byte. The TCP/IP stack will calculate the
- * checksums, and fill in the necessary header fields and finally send
- * the packet back to the peer.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 

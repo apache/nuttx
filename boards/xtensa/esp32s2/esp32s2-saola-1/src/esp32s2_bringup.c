@@ -46,6 +46,14 @@
 #  include <nuttx/input/buttons.h>
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "esp32s2_tim_lowerhalf.h"
+#endif
+
+#ifdef CONFIG_ESP32S2_RT_TIMER
+#  include "esp32s2_rt_timer.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -99,6 +107,76 @@ int esp32s2_bringup(void)
       return ret;
     }
 #endif
+
+  /* Register the timer drivers */
+
+#ifdef CONFIG_TIMER
+
+#if defined(CONFIG_ESP32S2_TIMER0) && !defined(CONFIG_ONESHOT)
+  ret = esp32s2_timer_initialize("/dev/timer0", TIMER0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER1
+  ret = esp32s2_timer_initialize("/dev/timer1", TIMER1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER2
+  ret = esp32s2_timer_initialize("/dev/timer2", TIMER2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_ESP32S2_TIMER3
+  ret = esp32s2_timer_initialize("/dev/timer3", TIMER3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize timer driver: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#endif /* CONFIG_TIMER */
+
+#ifdef CONFIG_ESP32S2_RT_TIMER
+  ret = esp32s2_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+
+#endif
+  /* Now register one oneshot driver */
+
+#if defined(CONFIG_ONESHOT) && defined(CONFIG_ESP32S2_TIMER0)
+
+  ret = board_oneshot_init(ONESHOT_TIMER, ONESHOT_RESOLUTION_US);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: board_oneshot_init() failed: %d\n", ret);
+    }
+
+#endif /* CONFIG_ONESHOT */
 
   /* If we got here then perhaps not all initialization was successful, but
    * at least enough succeeded to bring-up NSH with perhaps reduced

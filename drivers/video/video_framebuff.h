@@ -29,7 +29,7 @@
 #include <nuttx/semaphore.h>
 
 /****************************************************************************
- * Public Functions Definistions
+ * Public Types
  ****************************************************************************/
 
 struct vbuf_container_s
@@ -49,11 +49,15 @@ struct video_framebuff_s
   vbuf_container_t *vbuf_empty;
   vbuf_container_t *vbuf_top;
   vbuf_container_t *vbuf_tail;
-  vbuf_container_t *vbuf_dma;
-  vbuf_container_t *vbuf_next_dma;
+  vbuf_container_t *vbuf_curr;
+  vbuf_container_t *vbuf_next;
 };
 
 typedef struct video_framebuff_s video_framebuff_t;
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
 /* Buffer access interface. */
 
@@ -71,13 +75,13 @@ void              video_framebuff_queue_container
                        (video_framebuff_t *fbuf, vbuf_container_t *tgt);
 vbuf_container_t *video_framebuff_dq_valid_container
                        (video_framebuff_t *fbuf);
-vbuf_container_t *video_framebuff_get_dma_container
+vbuf_container_t *video_framebuff_get_vacant_container
                        (video_framebuff_t *fbuf);
 vbuf_container_t *video_framebuff_pop_curr_container
                        (video_framebuff_t *fbuf);
-void              video_framebuff_dma_done
+void              video_framebuff_capture_done
                        (video_framebuff_t *fbuf);
 void              video_framebuff_change_mode
                        (video_framebuff_t *fbuf, enum v4l2_buf_mode mode);
 
-#endif // __VIDEO_VIDEO_FRAMEBUFF_H__
+#endif  // __VIDEO_VIDEO_FRAMEBUFF_H__

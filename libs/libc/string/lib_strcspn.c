@@ -39,7 +39,7 @@
  *
  ****************************************************************************/
 
-#undef strcspn
+#undef strcspn /* See mm/README.txt */
 size_t strcspn(const char *s, const char *reject)
 {
   size_t i;

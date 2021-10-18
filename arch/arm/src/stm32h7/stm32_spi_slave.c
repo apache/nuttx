@@ -344,10 +344,10 @@ static const struct spi_slave_ctrlrops_s g_ctrlr_ops =
 
 static
 uint8_t SPI_SLAVE_OUTQ(1)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(1)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi1ctrlr = SPI_SLAVE_INIT(1);
 
 #endif
@@ -356,10 +356,10 @@ static struct stm32_spidev_s g_spi1ctrlr = SPI_SLAVE_INIT(1);
 
 static
 uint8_t SPI_SLAVE_OUTQ(2)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(2)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi2ctrlr = SPI_SLAVE_INIT(2);
 
 #endif
@@ -368,10 +368,10 @@ static struct stm32_spidev_s g_spi2ctrlr = SPI_SLAVE_INIT(2);
 
 static
 uint8_t SPI_SLAVE_OUTQ(3)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(3)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi3ctrlr = SPI_SLAVE_INIT(3);
 
 #endif
@@ -380,10 +380,10 @@ static struct stm32_spidev_s g_spi3ctrlr = SPI_SLAVE_INIT(3);
 
 static
 uint8_t SPI_SLAVE_OUTQ(4)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(4)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi4ctrlr = SPI_SLAVE_INIT(4);
 
 #endif
@@ -392,10 +392,10 @@ static struct stm32_spidev_s g_spi4ctrlr = SPI_SLAVE_INIT(4);
 
 static
 uint8_t SPI_SLAVE_OUTQ(5)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(5)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi5ctrlr = SPI_SLAVE_INIT(5);
 
 #endif
@@ -406,10 +406,10 @@ static struct stm32_spidev_s g_spi5ctrlr = SPI_SLAVE_INIT(5);
 
 static
 uint8_t SPI_SLAVE_OUTQ(6)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static
 uint8_t SPI_SLAVE_INQ(6)[DMA_ALIGN_UP(CONFIG_STM32H7_SPI_SLAVE_QSIZE)]
-__attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+aligned_data(ARMV7M_DCACHE_LINESIZE);
 static struct stm32_spidev_s g_spi6ctrlr = SPI_SLAVE_INIT(6);
 
 #endif
@@ -1620,7 +1620,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
    *   Mode 0:                        CFG2.CPHA=0 and CFG2.CPOL=0
    *   Master:                        CFG2.MSTR=1
    *   8-bit:                         CFG1.DSIZE=7
-   *   MSB tranmitted first:          CFG2.LSBFRST=0
+   *   MSB transmitted first:         CFG2.LSBFRST=0
    *   Replace NSS with SSI & SSI=1:  CR1.SSI=1 CFG2.SSM=1 (prevent MODF err)
    *   Two lines full duplex:         CFG2.COMM=0
    */
@@ -1673,7 +1673,7 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
   nxsem_init(&priv->exclsem, 0, 1);
 
 #ifdef CONFIG_STM32H7_SPI_DMA
-  /* DMA will be started in the interrupt handler, syncronized to the master
+  /* DMA will be started in the interrupt handler, synchronized to the master
    * nss
    */
 
@@ -1722,10 +1722,10 @@ static void spi_slave_initialize(struct stm32_spidev_s *priv)
  *   Initialize the selected SPI port(bus) to operate as spi slave
  *
  * Input Parameters:
- *   Port number (for hardware that has mutiple SPI interfaces)
+ *   Port number (for hardware that has multiple SPI interfaces)
  *
  * Returned Value:
- *   Valid SPI device structure reference on succcess; a NULL on failure
+ *   Valid SPI device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 

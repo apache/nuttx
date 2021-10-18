@@ -41,7 +41,7 @@
  * Private Data
  ****************************************************************************/
 
-FAR struct mm_heap_s *g_iheap;
+struct mm_heap_s *g_iheap;
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +60,7 @@ void xtensa_imm_initialize(void)
   void  *start;
   size_t size;
 
-  start = (FAR void *)ESP32_IMEM_START;
+  start = (void *)ESP32_IMEM_START;
   size  = CONFIG_XTENSA_IMEM_REGION_SIZE;
   g_iheap = mm_initialize("esp32-imem", start, size);
 }
@@ -126,7 +126,7 @@ void *xtensa_imm_zalloc(size_t size)
  *
  ****************************************************************************/
 
-void xtensa_imm_free(FAR void *mem)
+void xtensa_imm_free(void *mem)
 {
   mm_free(g_iheap, mem);
 }
@@ -163,7 +163,7 @@ void *xtensa_imm_memalign(size_t alignment, size_t size)
  *
  ****************************************************************************/
 
-bool xtensa_imm_heapmember(FAR void *mem)
+bool xtensa_imm_heapmember(void *mem)
 {
   return mm_heapmember(g_iheap, mem);
 }
@@ -177,7 +177,7 @@ bool xtensa_imm_heapmember(FAR void *mem)
  *
  ****************************************************************************/
 
-int xtensa_imm_mallinfo(FAR struct mallinfo *info)
+int xtensa_imm_mallinfo(struct mallinfo *info)
 {
   return mm_mallinfo(g_iheap, info);
 }

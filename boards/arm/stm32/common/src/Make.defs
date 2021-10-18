@@ -78,6 +78,10 @@ ifeq ($(CONFIG_SENSORS_QENCODER),y)
   CSRCS += stm32_qencoder.c
 endif
 
+ifeq ($(CONFIG_SENSORS_HALL3PHASE),y)
+  CSRCS += board_hall3ph.c
+endif
+
 ifeq ($(CONFIG_SENSORS_INA219),y)
   CSRCS += stm32_ina219.c
 endif

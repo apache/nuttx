@@ -111,7 +111,7 @@ static inline void xtensa_setcompare(uint32_t compare)
  *
  ****************************************************************************/
 
-static int esp32s2_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int esp32s2_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t divisor;
   uint32_t compare;

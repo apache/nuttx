@@ -55,10 +55,10 @@
 
 struct bl602_tim_lowerhalf_s
 {
-  FAR const struct timer_ops_s *ops; /* Lower half operations */
+  const struct timer_ops_s *ops; /* Lower half operations */
 
   tccb_t    callback; /* Current upper half interrupt callback */
-  FAR void *arg;      /* Argument passed to upper half callback */
+  void     *arg;      /* Argument passed to upper half callback */
   bool      started;  /* True: Timer has been started */
   uint8_t   irq;      /* IRQ associated with this UART */
   uint8_t   tim;      /* timer tim 0,1 */
@@ -72,15 +72,15 @@ static int bl602_timer_handler(int irq, void *context, void *arg);
 
 /* "Lower half" driver methods */
 
-static int  bl602_tim_start(FAR struct timer_lowerhalf_s *lower);
-static int  bl602_tim_stop(FAR struct timer_lowerhalf_s *lower);
-static int  bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
-                                FAR struct timer_status_s *   status);
-static int  bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int  bl602_tim_start(struct timer_lowerhalf_s *lower);
+static int  bl602_tim_stop(struct timer_lowerhalf_s *lower);
+static int  bl602_tim_getstatus(struct timer_lowerhalf_s *lower,
+                                struct timer_status_s *   status);
+static int  bl602_tim_settimeout(struct timer_lowerhalf_s *lower,
                                  uint32_t                      timeout);
-static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
+static void bl602_tim_setcallback(struct timer_lowerhalf_s *lower,
                                   tccb_t                        callback,
-                                  FAR void *                    arg);
+                                  void *                    arg);
 
 /****************************************************************************
  * Private Data
@@ -134,8 +134,8 @@ static struct bl602_tim_lowerhalf_s g_tim2_lowerhalf =
 
 static int bl602_timer_handler(int irq, void *context, void *arg)
 {
-  FAR struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)arg;
+  struct bl602_tim_lowerhalf_s *priv =
+    (struct bl602_tim_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
   /* Clear Interrupt Bits */
@@ -205,10 +205,10 @@ static int bl602_timer_handler(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-static int bl602_tim_start(FAR struct timer_lowerhalf_s *lower)
+static int bl602_tim_start(struct timer_lowerhalf_s *lower)
 {
-  FAR struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  struct bl602_tim_lowerhalf_s *priv =
+    (struct bl602_tim_lowerhalf_s *)lower;
 
   if (!priv->started)
     {
@@ -246,10 +246,10 @@ static int bl602_tim_start(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_tim_stop(FAR struct timer_lowerhalf_s *lower)
+static int bl602_tim_stop(struct timer_lowerhalf_s *lower)
 {
-  FAR struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  struct bl602_tim_lowerhalf_s *priv =
+    (struct bl602_tim_lowerhalf_s *)lower;
 
   /* timer disable */
 
@@ -283,11 +283,11 @@ static int bl602_tim_stop(FAR struct timer_lowerhalf_s *lower)
  *
  ****************************************************************************/
 
-static int bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
-                               FAR struct timer_status_s *   status)
+static int bl602_tim_getstatus(struct timer_lowerhalf_s *lower,
+                               struct timer_status_s *   status)
 {
-  FAR struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  struct bl602_tim_lowerhalf_s *priv =
+    (struct bl602_tim_lowerhalf_s *)lower;
   uint32_t current_count;
 
   status->timeout = bl602_timer_getcompvalue(priv->tim, TIMER_COMP_ID_0);
@@ -320,11 +320,11 @@ static int bl602_tim_getstatus(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
+static int bl602_tim_settimeout(struct timer_lowerhalf_s *lower,
                                 uint32_t                      timeout)
 {
-  FAR struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)lower;
+  struct bl602_tim_lowerhalf_s *priv =
+    (struct bl602_tim_lowerhalf_s *)lower;
 
   bl602_timer_setcompvalue(priv->tim, TIMER_COMP_ID_0, timeout);
 
@@ -351,12 +351,12 @@ static int bl602_tim_settimeout(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
+static void bl602_tim_setcallback(struct timer_lowerhalf_s *lower,
                                   tccb_t                        callback,
-                                  FAR void *                    arg)
+                                  void *                    arg)
 {
   struct bl602_tim_lowerhalf_s *priv =
-    (FAR struct bl602_tim_lowerhalf_s *)lower;
+    (struct bl602_tim_lowerhalf_s *)lower;
   irqstate_t flags = enter_critical_section();
 
   /* Save the new callback */
@@ -389,9 +389,9 @@ static void bl602_tim_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-int bl602_timer_initialize(FAR const char *devpath, int timer)
+int bl602_timer_initialize(const char *devpath, int timer)
 {
-  FAR struct bl602_tim_lowerhalf_s *lower;
+  struct bl602_tim_lowerhalf_s *lower;
   struct timer_cfg_s                timstr;
 
   switch (timer)
@@ -443,8 +443,8 @@ int bl602_timer_initialize(FAR const char *devpath, int timer)
    * REVISIT: The returned handle is discard here.
    */
 
-  FAR void *drvr =
-    timer_register(devpath, (FAR struct timer_lowerhalf_s *)lower);
+  void *drvr =
+    timer_register(devpath, (struct timer_lowerhalf_s *)lower);
   if (drvr == NULL)
     {
       /* The actual cause of the failure may have been a failure to allocate

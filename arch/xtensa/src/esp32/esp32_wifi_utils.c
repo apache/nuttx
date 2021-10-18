@@ -442,7 +442,7 @@ void esp_wifi_scan_event_parse(void)
                * in pointer field.
                */
 
-              iwe->u.essid.pointer = (FAR void *)sizeof(iwe->u.essid);
+              iwe->u.essid.pointer = (void *)sizeof(iwe->u.essid);
               memcpy(&iwe->u.essid + 1,
                     ap_list_buffer[bss_count].ssid, essid_len);
               wlinfo("INFO: ssid %s\n", ap_list_buffer[bss_count].ssid);

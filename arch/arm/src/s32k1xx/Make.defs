@@ -67,6 +67,7 @@ endif
 
 ifeq ($(CONFIG_S32K1XX_LPI2C),y)
 CHIP_CSRCS += s32k1xx_lpi2c.c
+CHIP_CSRCS += s32k1xx_lpi2c_slave.c
 endif
 
 ifeq ($(CONFIG_S32K1XX_LPSPI),y)
@@ -91,6 +92,14 @@ endif
 
 ifeq ($(CONFIG_S32K1XX_EEEPROM),y)
 CHIP_CSRCS += s32k1xx_eeeprom.c
+endif
+
+ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
+CHIP_CSRCS += s32k1xx_pminitialize.c
+endif
+
+ifeq ($(CONFIG_RESET_CAUSE_PROC_FS), y)
+CHIP_CSRCS += s32k1xx_resetcause.c
 endif
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family

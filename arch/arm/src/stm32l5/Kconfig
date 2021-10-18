@@ -2845,7 +2845,7 @@ config STM32L5_FLOWCONTROL_BROKEN
 		Enable UART RTS flow control using Software. Because STM
 		Current STM32 have broken HW based RTS behavior (they assert
 		nRTS after every byte received)  Enable this setting workaround
-		this issue by useing software based management of RTS
+		this issue by using software based management of RTS
 
 config STM32L5_USART_BREAKS
 	bool "Add TIOxSBRK to support sending Breaks"
@@ -2989,7 +2989,7 @@ config STM32L5_SDMMC1_DMAPRIO
 	hex "SDMMC1 DMA priority"
 	default 0x00001000
 	---help---
-		Select SDMMC1 DMA prority.
+		Select SDMMC1 DMA priority.
 
 		Options are: 0x00000000 low, 0x00001000 medium,
 		0x00002000 high, 0x00003000 very high.  Default: medium.

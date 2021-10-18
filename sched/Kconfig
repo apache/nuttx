@@ -292,8 +292,7 @@ if SMP
 config SMP_NCPUS
 	int "Number of CPUs"
 	default 4
-	range 1 32 if DEBUG_FEATURES
-	range 2 32 if !DEBUG_FEATURES
+	range 1 32
 	---help---
 		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
@@ -1131,7 +1130,7 @@ config PATH_MAX
 endmenu # Files and I/O
 
 menuconfig PRIORITY_INHERITANCE
-	bool "Enable priority inheritance "
+	bool "Enable priority inheritance"
 	default n
 	---help---
 		Set to enable support for priority inheritance on mutexes and semaphores.

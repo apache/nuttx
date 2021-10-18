@@ -454,17 +454,17 @@ static const uint8_t g_ehci_speed[4] =
 
 /* The head of the asynchronous queue */
 
-static struct sam_qh_s g_asynchead __attribute__ ((aligned(32)));
+static struct sam_qh_s g_asynchead aligned_data(32);
 
 #ifndef CONFIG_USBHOST_INT_DISABLE
 /* The head of the periodic queue */
 
-static struct sam_qh_s g_intrhead   __attribute__ ((aligned(32)));
+static struct sam_qh_s g_intrhead   aligned_data(32);
 
 /* The frame list */
 
 #ifdef CONFIG_SAMA5_EHCI_PREALLOCATE
-static uint32_t g_framelist[FRAME_LIST_SIZE] __attribute__ ((aligned(4096)));
+static uint32_t g_framelist[FRAME_LIST_SIZE] aligned_data(4096);
 #else
 static uint32_t *g_framelist;
 #endif
@@ -478,12 +478,12 @@ static uint32_t *g_framelist;
 /* Queue Head (QH) pool */
 
 static struct sam_qh_s g_qhpool[CONFIG_SAMA5_EHCI_NQHS]
-                       __attribute__ ((aligned(32)));
+                       aligned_data(32);
 
 /* Queue Element Transfer Descriptor (qTD) pool */
 
 static struct sam_qtd_s g_qtdpool[CONFIG_SAMA5_EHCI_NQTDS]
-                        __attribute__ ((aligned(32)));
+                        aligned_data(32);
 
 #else
 /* Pools of dynamically data structures.  These will all be linked into the

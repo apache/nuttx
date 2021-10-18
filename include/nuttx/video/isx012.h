@@ -49,7 +49,7 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-FAR struct video_devops_s *isx012_initialize(void);
+int isx012_initialize(FAR struct i2c_master_s *i2c);
 int isx012_uninitialize(void);
 
 #undef EXTERN

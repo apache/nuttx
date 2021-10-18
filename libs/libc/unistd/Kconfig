@@ -12,14 +12,14 @@ config LIBC_EXECFUNCS
 	---help---
 		Enable support for the exec[l|v] family of functions that can be
 		used to start other programs, terminating the current program and
-		the posix_spawn() familty of functions that can be used start other
+		the posix_spawn() family of functions that can be used to start other
 		programs without terminating the current program.  The typical
 		usage of the exec[l|v] functions is (1) first call vfork() to create
 		a new thread, then (2) call exec[l|v] to replace the new thread with
 		a program from the file system.
 
 		NOTE 1: This two step process start is completely unnecessary in
-		NuttX and is provided only for compatibily with Unix systems.  These
+		NuttX and is provided only for compatibility with Unix systems.  These
 		functions are essentially just wrapper functions that (1) call the
 		non-standard binfmt function 'exec', and then (2) exit(0).  Since
 		the new thread will be terminated by the exec[l|v] call, it really

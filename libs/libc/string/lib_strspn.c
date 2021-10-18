@@ -39,7 +39,7 @@
  *
  ****************************************************************************/
 
-#undef strspn
+#undef strspn /* See mm/README.txt */
 size_t strspn(const char *s, const char *accept)
 {
   size_t i;

@@ -293,7 +293,7 @@ static struct uart_dev_s *const g_uart_devs[] =
  *
  ****************************************************************************/
 
-static int __uart_interrupt(int irq, FAR void *context, FAR void *arg)
+static int __uart_interrupt(int irq, void *context, void *arg)
 {
   uart_dev_t *dev           = (uart_dev_t *)arg;
   struct bl602_uart_s *priv = dev->priv;

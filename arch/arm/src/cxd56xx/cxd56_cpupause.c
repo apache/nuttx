@@ -295,12 +295,12 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
       /* NOTE: Normally, we do not call up_cpu_paused() here because
        * the above enter_critical_setion() would call up_cpu_paused()
        * inside because the caller holds a crtical section.
-       * Howerver, cxd56's remote IRQ control logic also uses this handler
+       * However, cxd56's remote IRQ control logic also uses this handler
        * and a caller might not take a critical section to avoid a deadlock
        * during up_enable_irq() and up_disable_irq(). This is allowed
        * because IRQ control logic does not interact wtih the scheduler.
        * This means that if the request was not handled above, we need
-       * to call up_cpu_puased() here again.
+       * to call up_cpu_paused() here again.
        */
 
       if (up_cpu_pausereq(cpu))

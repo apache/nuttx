@@ -1909,6 +1909,31 @@ config IMXRT_DATA_RISING_EDGE
 
 endmenu # LCD Configuration
 
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config IMXRT_TICKLESS_TIMER
+	int "Tickless hardware timer"
+	default 1
+	range 1 2
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provided the GPT timer needed by the OS.
+
+config IMXRT_TICKLESS_CHANNEL
+	int "Tickless timer channel"
+	default 1
+	range 1 3
+	---help---
+		If the Tickless OS feature is enabled, the one clock must be
+		assigned to provided the free-running timer needed by the OS
+		and one channel on that clock is needed to handle intervals.
+
+endif # SCHED_TICKLESS
+
+endmenu # Timer Configuration
+
 if IMXRT_USBOTG && USBHOST
 
 menu "USB host controller driver (HCD) options"

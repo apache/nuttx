@@ -130,7 +130,7 @@ int up_cpu_paused(int cpu)
 
   arm_savestate(tcb->xcp.regs);
 
-  /* Release the g_cpu_puased spinlock to synchronize with the
+  /* Release the g_cpu_paused spinlock to synchronize with the
    * requesting CPU.
    */
 

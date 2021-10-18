@@ -60,7 +60,7 @@ static GRAN_HANDLE dma_allocator;
  */
 
 static uint8_t g_dma_heap[BOARD_DMA_ALLOC_POOL_SIZE]
-                __attribute__((aligned(64)));
+                aligned_data(64);
 
 /****************************************************************************
  * Public Functions

@@ -50,6 +50,6 @@
  *
  ****************************************************************************/
 
-FAR struct pwm_lowerhalf_s *bl602_pwminitialize(int pwm);
+struct pwm_lowerhalf_s *bl602_pwminitialize(int pwm);
 
 #endif /* __ARCH_RISCV_SRC_BL602_BL602_PWM_LOWERHALF_H */

@@ -267,6 +267,23 @@ void s32k1xx_periphclocks(unsigned int count,
 
 int s32k1xx_get_pclkfreq(enum clock_names_e clkname, uint32_t *frequency);
 
+/****************************************************************************
+ * Name: s32k1xx_pclk_enable
+ *
+ * Description:
+ *   This function enables/disables the clock for a given peripheral.
+ *
+ * Input Parameters:
+ *   clkname - The name of the peripheral clock to be disabled
+ *   enable  - true:  Enable the peripheral clock.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void s32k1xx_pclk_enable(enum clock_names_e clkname, bool enable);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

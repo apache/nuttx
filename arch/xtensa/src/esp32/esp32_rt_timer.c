@@ -93,7 +93,7 @@ static struct esp32_tim_dev_s *s_esp32_tim_dev;
  *
  ****************************************************************************/
 
-static void start_rt_timer(FAR struct rt_timer_s *timer,
+static void start_rt_timer(struct rt_timer_s *timer,
                            uint64_t timeout,
                            bool repeat)
 {
@@ -178,7 +178,7 @@ static void start_rt_timer(FAR struct rt_timer_s *timer,
  *
  ****************************************************************************/
 
-static void stop_rt_timer(FAR struct rt_timer_s *timer)
+static void stop_rt_timer(struct rt_timer_s *timer)
 {
   irqstate_t flags;
   bool ishead;
@@ -252,7 +252,7 @@ static void stop_rt_timer(FAR struct rt_timer_s *timer)
  *
  ****************************************************************************/
 
-static void delete_rt_timer(FAR struct rt_timer_s *timer)
+static void delete_rt_timer(struct rt_timer_s *timer)
 {
   irqstate_t flags;
 
@@ -294,7 +294,7 @@ exit:
  *
  ****************************************************************************/
 
-static int rt_timer_thread(int argc, FAR char *argv[])
+static int rt_timer_thread(int argc, char *argv[])
 {
   int ret;
   irqstate_t flags;
@@ -464,8 +464,8 @@ static int rt_timer_isr(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int rt_timer_create(FAR const struct rt_timer_args_s *args,
-                    FAR struct rt_timer_s **timer_handle)
+int rt_timer_create(const struct rt_timer_args_s *args,
+                    struct rt_timer_s **timer_handle)
 {
   struct rt_timer_s *timer;
 
@@ -503,7 +503,7 @@ int rt_timer_create(FAR const struct rt_timer_args_s *args,
  *
  ****************************************************************************/
 
-void rt_timer_start(FAR struct rt_timer_s *timer,
+void rt_timer_start(struct rt_timer_s *timer,
                     uint64_t timeout,
                     bool repeat)
 {
@@ -526,7 +526,7 @@ void rt_timer_start(FAR struct rt_timer_s *timer,
  *
  ****************************************************************************/
 
-void rt_timer_stop(FAR struct rt_timer_s *timer)
+void rt_timer_stop(struct rt_timer_s *timer)
 {
   stop_rt_timer(timer);
 }
@@ -545,7 +545,7 @@ void rt_timer_stop(FAR struct rt_timer_s *timer)
  *
  ****************************************************************************/
 
-void rt_timer_delete(FAR struct rt_timer_s *timer)
+void rt_timer_delete(struct rt_timer_s *timer)
 {
   delete_rt_timer(timer);
 }

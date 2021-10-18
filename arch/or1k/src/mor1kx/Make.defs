@@ -42,6 +42,7 @@ CMN_CSRCS  = up_initialize.c \
              up_mdelay.c \
              up_idle.c \
              up_irq.c \
+             up_puts.c \
              up_uart.c \
              up_timer.c \
              up_doirq.c \

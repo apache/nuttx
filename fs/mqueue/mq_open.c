@@ -295,9 +295,10 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
        * be created with a reference count of zero.
        */
 
-      ret = nxmq_alloc_msgq(attr, &msgq);
-      if (ret < 0)
+      msgq = (FAR struct mqueue_inode_s *)nxmq_alloc_msgq(attr);
+      if (!msgq)
         {
+          ret = -ENOSPC;
           goto errout_with_inode;
         }
 

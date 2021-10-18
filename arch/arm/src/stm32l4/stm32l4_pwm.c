@@ -3105,6 +3105,13 @@ static int pwm_duty_channels_update(FAR struct pwm_lowerhalf_s *dev,
 #endif
     {
 #ifdef CONFIG_STM32L4_PWM_MULTICHAN
+      /* Break the loop if all following channels are not configured */
+
+      if (info->channels[i].channel == -1)
+        {
+          break;
+        }
+
       duty    = info->channels[i].duty;
       channel = info->channels[i].channel;
 
@@ -3930,6 +3937,13 @@ static int pwm_start(FAR struct pwm_lowerhalf_s *dev,
 
       for (i = 0; ret == OK && i < CONFIG_PWM_NCHANNELS; i++)
         {
+          /* Break the loop if all following channels are not configured */
+
+          if (info->channels[i].channel == -1)
+            {
+              break;
+            }
+
           /* Set output if channel configured */
 
           if (info->channels[i].channel != 0)

@@ -31,7 +31,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_LIBC_ARCH_STRLEN
-#undef strlen
+#undef strlen /* See mm/README.txt */
 size_t strlen(const char *s)
 {
   const char *sc;
