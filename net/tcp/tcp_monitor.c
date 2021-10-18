@@ -129,14 +129,10 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
                                   uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
-  FAR struct devif_callback_s *cb;
-  FAR struct tcp_conn_s *conn;
 
   if (psock != NULL)
     {
       ninfo("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
-
-      conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
       /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
        * NETDEV_DOWN.  All loss-of-connection events.
