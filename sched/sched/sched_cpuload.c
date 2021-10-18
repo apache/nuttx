@@ -184,8 +184,11 @@ void weak_function nxsched_process_cpuload(void)
 
       for (i = 0; i < g_npidhash; i++)
         {
-          g_pidhash[i]->ticks >>= 1;
-          total += g_pidhash[i]->ticks;
+          if (g_pidhash[i])
+            {
+              g_pidhash[i]->ticks >>= 1;
+              total += g_pidhash[i]->ticks;
+            }
         }
 
       /* Save the new total. */
