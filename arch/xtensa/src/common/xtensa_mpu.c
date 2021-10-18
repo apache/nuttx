@@ -94,7 +94,7 @@ void mpu_control(bool enable)
  ****************************************************************************/
 
 void mpu_configure_region(uintptr_t base, size_t size,
-            uint8_t acc, uint16_t memtype)
+                          uint32_t acc, uint32_t memtype)
 {
   unsigned int region = mpu_allocregion();
   uint32_t at;
