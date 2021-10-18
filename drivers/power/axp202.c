@@ -32,6 +32,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/power/battery_charger.h>
+#include <nuttx/power/battery_ioctl.h>
 #include <nuttx/power/axp202.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_AXP202)
