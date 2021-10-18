@@ -48,12 +48,13 @@
 #  define MIN(a, b) ((a) < (b) ? (a) : (b))
 #endif
 
-#define RPMSG_SOCKET_CMD_SYNC       1
-#define RPMSG_SOCKET_CMD_DATA       2
-#define RPMSG_SOCKET_NAME_PREFIX    "rpmsg-socket"
+#define RPMSG_SOCKET_CMD_SYNC           1
+#define RPMSG_SOCKET_CMD_DATA           2
+#define RPMSG_SOCKET_NAME_PREFIX        "rpmsg-socket:"
+#define RPMSG_SOCKET_NAME_PREFIX_LEN    13
 
-static_assert(RPMSG_SOCKET_NAME_SIZE + 13 <= RPMSG_NAME_SIZE,
-              "socket name size should NOT bigger then RPMSG_NAME_SIZE");
+static_assert(RPMSG_SOCKET_NAME_SIZE + RPMSG_SOCKET_NAME_PREFIX_LEN
+              <= RPMSG_NAME_SIZE, "socket name size config error");
 
 /****************************************************************************
  * Private Types
@@ -420,7 +421,7 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(conn->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev)) == 0)
     {
       conn->ept.priv = conn;
-      snprintf(buf, sizeof(buf), "%s:%s", RPMSG_SOCKET_NAME_PREFIX,
+      snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
                conn->rpaddr.rp_name);
 
       rpmsg_create_ept(&conn->ept, rdev, buf,
@@ -464,7 +465,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
   int cnt = 0;
   int ret;
 
-  snprintf(buf, sizeof(buf), "%s:%s", RPMSG_SOCKET_NAME_PREFIX,
+  snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
            server->rpaddr.rp_name);
   if (strncmp(name, buf, strlen(buf)))
     {
@@ -503,7 +504,7 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   strcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev));
-  strcpy(new->rpaddr.rp_name, name);
+  strcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN);
 
   rpmsg_socket_lock(&server->recvlock);
 
@@ -606,17 +607,26 @@ static int rpmsg_socket_bind(FAR struct socket *psock,
 }
 
 static int rpmsg_socket_getsockname(FAR struct socket *psock,
-                                   FAR struct sockaddr *addr,
-                                   FAR socklen_t *addrlen)
+                                    FAR struct sockaddr *addr,
+                                    FAR socklen_t *addrlen)
 {
-  return rpmsg_socket_getaddr(psock->s_conn, addr, addrlen);
+  int ret;
+
+  ret = rpmsg_socket_getaddr(psock->s_conn, addr, addrlen);
+  if (ret >= 0)
+    {
+      strncpy(((struct sockaddr_rpmsg *)addr)->rp_cpu,
+              CONFIG_RPTUN_LOCAL_CPUNAME, RPMSG_SOCKET_CPU_SIZE);
+    }
+
+  return ret;
 }
 
 static int rpmsg_socket_getconnname(FAR struct socket *psock,
                                     FAR struct sockaddr *addr,
                                     FAR socklen_t *addrlen)
 {
-  return rpmsg_socket_getsockname(psock, addr, addrlen);
+  return rpmsg_socket_getaddr(psock->s_conn, addr, addrlen);
 }
 
 static int rpmsg_socket_listen(FAR struct socket *psock, int backlog)
