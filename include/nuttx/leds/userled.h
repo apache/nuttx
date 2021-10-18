@@ -126,6 +126,13 @@ struct userled_lowerhalf_s
 
   CODE void (*ll_setall)(FAR const struct userled_lowerhalf_s *lower,
                          userled_set_t ledset);
+
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+  /* Get the state of all LEDs */
+
+  CODE void (*ll_getall)(FAR const struct userled_lowerhalf_s *lower,
+                         userled_set_t *ledset);
+#endif
 };
 
 /****************************************************************************

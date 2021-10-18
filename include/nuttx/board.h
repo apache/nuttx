@@ -674,6 +674,28 @@ void board_userled_all(uint32_t ledset);
 #endif
 
 /****************************************************************************
+ * Name:  board_userled_getall
+ *
+ * Description:
+ *   This interface may be used by application specific logic to read the
+ *   state of all board LEDs.  Definitions for the led set member
+ *   identification is provided in the board-specific board.h header file
+ *   that may be included like:
+ *
+ *     #included <arch/board/board.h>
+ *
+ *   If CONFIG_ARCH_LEDS is defined, then NuttX will control the on-board
+ *   LEDs.  If CONFIG_ARCH_LEDS is not defined, then this interfaces may be
+ *   available to check the LEDs directly from user board logic or indirectly
+ *   user applications (via the common LED character driver).
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_HAVE_LEDS) && defined(CONFIG_USERLED_LOWER_READSTATE)
+void board_userled_getall(uint32_t *ledset);
+#endif
+
+/****************************************************************************
  * Name: board_button_initialize
  *
  * Description:

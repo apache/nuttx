@@ -454,7 +454,7 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
 
     /* Command:     ULEDIOC_GETALL
-     * Description: Get the state of one LED.
+     * Description: Get the state of all LEDs.
      * Argument:    A write-able pointer to a userled_set_t memory location
      *              in which to return the LED state.
      * Return:      Zero (OK) on success.  Minus one will be returned on
@@ -469,7 +469,13 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (ledset)
           {
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+            lower = priv->lu_lower;
+            DEBUGASSERT(lower != NULL && lower->ll_getall != NULL);
+            lower->ll_getall(lower, ledset);
+#else
             *ledset = priv->lu_ledset;
+#endif
             ret = OK;
           }
       }
