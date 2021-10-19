@@ -52,6 +52,10 @@
 #include "esp32c3_irq.h"
 #include "esp32c3_lowputc.h"
 
+#ifdef CONFIG_ESP32C3_USBSERIAL
+#  include "esp32c3_usbserial.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -72,7 +76,7 @@
  * the console and the corresponding peripheral was also selected.
  */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_UART
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
 #    define CONSOLE_DEV     g_uart0_dev     /* UART0 is console */
 #    define TTYS0_DEV       g_uart0_dev     /* UART0 is ttyS0 */
@@ -82,7 +86,7 @@
 #    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #  endif /* CONFIG_UART0_SERIAL_CONSOLE */
-#else /* No console */
+#else /* No UART console */
 #  undef  CONSOLE_DEV
 #  if defined(CONFIG_ESP32C3_UART0)
 #    define TTYS0_DEV           g_uart0_dev  /* UART0 is ttyS0 */
@@ -91,7 +95,12 @@
 #    define TTYS0_DEV           g_uart1_dev  /* UART1 is ttyS0 */
 #    define UART1_ASSIGNED      1
 #  endif
-#endif /* HAVE_SERIAL_CONSOLE */
+#endif /* CONSOLE_UART */
+
+#ifdef CONFIG_ESP32C3_USBSERIAL
+#  define CONSOLE_DEV           g_uart_usbserial
+#  define TTYACM0_DEV           g_uart_usbserial
+#endif
 
 /* Pick ttys1 */
 
@@ -108,6 +117,8 @@
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_UART
 
 /* Serial driver methods */
 
@@ -127,10 +138,13 @@ static int  esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg);
 static bool esp32c3_rxflowcontrol(struct uart_dev_s *dev,
                                   unsigned int nbuffered, bool upper);
 #endif
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_UART
 
 /* Operations */
 
@@ -219,9 +233,13 @@ static uart_dev_t g_uart1_dev =
 
 #endif
 
+#endif /* CONFIG_ESP32C3_UART */
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_UART
 
 /****************************************************************************
  * Name: uart_interrupt
@@ -992,6 +1010,7 @@ static bool esp32c3_rxflowcontrol(struct uart_dev_s *dev,
   return ret;
 }
 #endif
+#endif /* CONFIG_ESP32C3_UART */
 
 /****************************************************************************
  * Public Functions
@@ -1019,7 +1038,10 @@ void riscv_earlyserialinit(void)
 
   /* Disable all UARTS interrupts */
 
+#ifdef TTYS0_DEV
   esp32c3_lowputc_disable_all_uart_int(TTYS0_DEV.priv, NULL);
+#endif
+
 #ifdef TTYS1_DEV
   esp32c3_lowputc_disable_all_uart_int(TTYS1_DEV.priv, NULL);
 #endif
@@ -1029,7 +1051,7 @@ void riscv_earlyserialinit(void)
    * open.
    */
 
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_UART
   esp32c3_setup(&CONSOLE_DEV);
 #endif
 }
@@ -1051,12 +1073,16 @@ void riscv_serialinit(void)
   uart_register("/dev/console", &CONSOLE_DEV);
 #endif
 
-  /* At least one UART char driver will logically be registered */
-
+#ifdef TTYS0_DEV
   uart_register("/dev/ttyS0", &TTYS0_DEV);
+#endif
 
-#ifdef	TTYS1_DEV
+#ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
+#endif
+
+#ifdef CONFIG_ESP32C3_USBSERIAL
+  uart_register("/dev/ttyACM0", &TTYACM0_DEV);
 #endif
 }
 
@@ -1070,10 +1096,11 @@ void riscv_serialinit(void)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_UART
   uint32_t int_status;
 
   esp32c3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
+#endif
 
   /* Check for LF */
 
@@ -1085,6 +1112,8 @@ int up_putc(int ch)
     }
 
   riscv_lowputc(ch);
+
+#ifdef CONSOLE_UART
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
   return ch;
@@ -1104,10 +1133,11 @@ int up_putc(int ch)
 
 int up_putc(int ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_UART
   uint32_t int_status;
 
   esp32c3_lowputc_disable_all_uart_int(CONSOLE_DEV.priv, &int_status);
+#endif
 
   /* Check for LF */
 
@@ -1119,6 +1149,8 @@ int up_putc(int ch)
     }
 
   riscv_lowputc(ch);
+
+#ifdef CONSOLE_UART
   esp32c3_lowputc_restore_all_uart_int(CONSOLE_DEV.priv, &int_status);
 #endif
   return ch;
