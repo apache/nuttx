@@ -393,4 +393,8 @@ config AUDIO_AW88266A
 	bool "Audio AWINIC88266A chip"
 	default n
 
+config AUDIO_CS35L41B
+	bool "Audio CS35L41B chip"
+	default n
+
 endif # DRIVERS_AUDIO
