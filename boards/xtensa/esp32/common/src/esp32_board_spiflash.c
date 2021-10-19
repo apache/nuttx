@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/esp32-wrover-kit/src/esp32_spiflash.c
+ * boards/xtensa/esp32/common/src/esp32_board_spiflash.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,16 +31,19 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
-#include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
+#include <nuttx/spi/spi.h>
+#ifdef CONFIG_ESP32_SPIFLASH_NXFFS
 #include <nuttx/fs/nxffs.h>
+#endif
 #ifdef CONFIG_BCH
 #include <nuttx/drivers/drivers.h>
 #endif
 
 #include "esp32_spiflash.h"
-#include "esp32-wrover-kit.h"
+#include "esp32_board_spiflash.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,14 +56,12 @@
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32_HAVE_OTA_PARTITION
-
 struct ota_partition_s
 {
   uint32_t    offset;          /* Partition offset from the beginning of MTD */
   uint32_t    size;            /* Partition size in bytes */
   const char *devpath;         /* Partition device path */
 };
-
 #endif
 
 /****************************************************************************
@@ -135,7 +136,6 @@ static int init_ota_partitions(void)
 
   return ret;
 }
-
 #endif
 
 /****************************************************************************
@@ -156,7 +156,7 @@ static int init_ota_partitions(void)
  *
  ****************************************************************************/
 
-#if defined (CONFIG_ESP32_SPIFLASH_SMARTFS)
+#ifdef CONFIG_ESP32_SPIFLASH_SMARTFS
 static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
                          const char *mnt_pt)
 {
@@ -197,7 +197,6 @@ static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
 
   return ret;
 }
-
 #endif
 
 /****************************************************************************
@@ -217,7 +216,7 @@ static int setup_smartfs(int smartn, FAR struct mtd_dev_s *mtd,
  *
  ****************************************************************************/
 
-#if defined (CONFIG_ESP32_SPIFLASH_LITTLEFS)
+#ifdef CONFIG_ESP32_SPIFLASH_LITTLEFS
 static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
                           const char *mnt_pt, int priv)
 {
@@ -246,7 +245,6 @@ static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
 
   return OK;
 }
-
 #endif
 
 /****************************************************************************
@@ -266,7 +264,7 @@ static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
  *
  ****************************************************************************/
 
-#if defined  (CONFIG_ESP32_SPIFLASH_SPIFFS)
+#ifdef CONFIG_ESP32_SPIFLASH_SPIFFS
 static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
                         const char *mnt_pt, int priv)
 {
@@ -291,7 +289,6 @@ static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
 
   return ret;
 }
-
 #endif
 
 /****************************************************************************
@@ -309,7 +306,7 @@ static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
  *
  ****************************************************************************/
 
-#if defined (CONFIG_ESP32_SPIFLASH_NXFFS)
+#ifdef CONFIG_ESP32_SPIFLASH_NXFFS
 static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
 {
   int ret = OK;
@@ -333,8 +330,8 @@ static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
 
   return ret;
 }
-
 #endif
+
 /****************************************************************************
  * Name: init_wifi_partition
  *
@@ -346,7 +343,7 @@ static int setup_nxffs(FAR struct mtd_dev_s *mtd, const char *mnt_pt)
  *
  ****************************************************************************/
 
-#if defined (CONFIG_ESP32_WIFI_SAVE_PARAM)
+#ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
 static int init_wifi_partition(void)
 {
   int ret = OK;
@@ -360,7 +357,7 @@ static int init_wifi_partition(void)
       return ERROR;
     }
 
-#if defined (CONFIG_ESP32_SPIFLASH_SMARTFS)
+#ifdef CONFIG_ESP32_SPIFLASH_SMARTFS
 
   ret = setup_smartfs(1, mtd, CONFIG_ESP32_WIFI_FS_MOUNTPT);
   if (ret < 0)
@@ -369,7 +366,7 @@ static int init_wifi_partition(void)
       return ret;
     }
 
-#elif defined (CONFIG_ESP32_SPIFLASH_LITTLEFS)
+#elif defined(CONFIG_ESP32_SPIFLASH_LITTLEFS)
 
   const char *path = "/dev/mtdblock1";
   ret = setup_littlefs(path, mtd, CONFIG_ESP32_WIFI_FS_MOUNTPT, 0777);
@@ -379,7 +376,7 @@ static int init_wifi_partition(void)
       return ret;
     }
 
-#elif defined (CONFIG_ESP32_SPIFLASH_SPIFFS)
+#elif defined(CONFIG_ESP32_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/mtdblock1";
   ret = setup_spiffs(path, mtd, CONFIG_ESP32_WIFI_FS_MOUNTPT, 0777);
@@ -398,8 +395,8 @@ static int init_wifi_partition(void)
 
   return ret;
 }
-
 #endif
+
 /****************************************************************************
  * Name: init_storage_partition
  *
@@ -424,7 +421,7 @@ static int init_storage_partition(void)
       return ERROR;
     }
 
-#if defined (CONFIG_ESP32_SPIFLASH_SMARTFS)
+#ifdef CONFIG_ESP32_SPIFLASH_SMARTFS
 
   ret = setup_smartfs(0, mtd, NULL);
   if (ret < 0)
@@ -433,7 +430,7 @@ static int init_storage_partition(void)
       return ret;
     }
 
-#elif defined (CONFIG_ESP32_SPIFLASH_NXFFS)
+#elif defined(CONFIG_ESP32_SPIFLASH_NXFFS)
 
   ret = setup_nxffs(mtd, "/mnt");
   if (ret < 0)
@@ -442,7 +439,7 @@ static int init_storage_partition(void)
       return ret;
     }
 
-#elif defined (CONFIG_ESP32_SPIFLASH_LITTLEFS)
+#elif defined(CONFIG_ESP32_SPIFLASH_LITTLEFS)
 
   const char *path = "/dev/esp32flash";
   ret = setup_littlefs(path, mtd, NULL, 0755);
@@ -452,7 +449,7 @@ static int init_storage_partition(void)
       return ret;
     }
 
-#elif defined (CONFIG_ESP32_SPIFLASH_SPIFFS)
+#elif defined(CONFIG_ESP32_SPIFLASH_SPIFFS)
 
   const char *path = "/dev/esp32flash";
   ret = setup_spiffs(path, mtd, NULL, 0755);
@@ -484,7 +481,15 @@ static int init_storage_partition(void)
  * Name: esp32_spiflash_init
  *
  * Description:
- *   Initialize the SPIFLASH and register the MTD device.
+ *   Initialize the SPI Flash and register the MTD.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned
+ *   on failure.
+ *
  ****************************************************************************/
 
 int esp32_spiflash_init(void)
