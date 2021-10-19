@@ -851,6 +851,11 @@ if ESP32_HAVE_OTA_PARTITION
 
 comment "Application Image OTA Update support"
 
+config ESP32_OTA_PARTITION_ENCRYPT
+	bool "Encrypt OTA partitions"
+	default y
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
+
 config ESP32_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
 	default 0x10000
@@ -886,6 +891,11 @@ config ESP32_OTA_SCRATCH_DEVPATH
 endif
 
 comment "General storage MTD configuration"
+
+config ESP32_STORAGE_MTD_ENCRYPT
+	bool "Encrypt Storage MTD partition"
+	default y
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
 config ESP32_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
@@ -1147,6 +1157,11 @@ config ESP32_WIFI_FS_MOUNTPT
 	depends on ESP32_WIFI_SAVE_PARAM
 	---help---
 		Mount point of Wi-Fi storage file system.
+
+config ESP32_WIFI_MTD_ENCRYPT
+	bool "Encrypt Wi-Fi MTD partition"
+	default y
+	depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
 config ESP32_WIFI_MTD_OFFSET
 	hex "Wi-Fi MTD partition offset"
