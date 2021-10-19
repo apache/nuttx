@@ -80,6 +80,14 @@ config XTENSA_HAVE_DCACHE
 	bool
 	default n
 
+config XTENSA_HAVE_ICACHE_LOCK
+	bool
+	default n
+
+config XTENSA_HAVE_DCACHE_LOCK
+	bool
+	default n
+
 config XTENSA_ICACHE
 	bool "Use I-Cache"
 	default n
@@ -95,6 +103,24 @@ config XTENSA_DCACHE
 	select ARCH_DCACHE
 	---help---
 		Enable Xtensa D-Cache
+
+config XTENSA_ICACHE_LOCK
+	bool "Use I-Cache lock & unlock feature"
+	default n
+	depends on XTENSA_HAVE_ICACHE
+	depends on XTENSA_HAVE_ICACHE_LOCK
+	select ARCH_ICACHE_LOCK
+	---help---
+		Enable Xtensa I-Cache lock & unlock feature
+
+config XTENSA_DCACHE_LOCK
+	bool "Use D-Cache lock & unlock feature"
+	default n
+	depends on XTENSA_HAVE_DCACHE
+	depends on XTENSA_HAVE_DCACHE_LOCK
+	select ARCH_DCACHE_LOCK
+	---help---
+		Enable Xtensa D-Cache lock & unlock feature
 
 config ARCH_FAMILY_LX6
 	bool
