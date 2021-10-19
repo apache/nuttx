@@ -402,6 +402,17 @@ static inline void rpmsg_socket_destroy_ept(
   rpmsg_socket_unlock(&conn->recvlock);
 }
 
+static void rpmsg_socket_ns_bound(struct rpmsg_endpoint *ept)
+{
+  FAR struct rpmsg_socket_conn_s *conn = ept->priv;
+  struct rpmsg_socket_sync_s msg;
+
+  msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
+  msg.size = circbuf_size(&conn->recvbuf);
+
+  rpmsg_send(&conn->ept, &msg, sizeof(msg));
+}
+
 static void rpmsg_socket_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
   rpmsg_socket_destroy_ept(ept->priv);
@@ -421,6 +432,7 @@ static void rpmsg_socket_device_created(FAR struct rpmsg_device *rdev,
   if (strcmp(conn->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev)) == 0)
     {
       conn->ept.priv = conn;
+      conn->ept.ns_bound_cb = rpmsg_socket_ns_bound;
       snprintf(buf, sizeof(buf), "%s%s", RPMSG_SOCKET_NAME_PREFIX,
                conn->rpaddr.rp_name);
 
@@ -439,19 +451,6 @@ static void rpmsg_socket_device_destroy(FAR struct rpmsg_device *rdev,
     {
       rpmsg_socket_destroy_ept(conn);
     }
-}
-
-static void rpmsg_socket_device_connect(FAR struct rpmsg_device *rdev,
-                                        FAR void *priv, FAR const char *name,
-                                        uint32_t dest)
-{
-  FAR struct rpmsg_socket_conn_s *conn = priv;
-  struct rpmsg_socket_sync_s msg;
-
-  msg.cmd  = RPMSG_SOCKET_CMD_SYNC;
-  msg.size = circbuf_size(&conn->recvbuf);
-
-  rpmsg_send(&conn->ept, &msg, sizeof(msg));
 }
 
 static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
@@ -502,6 +501,8 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
       rpmsg_socket_free(new);
       return;
     }
+
+  rpmsg_socket_ns_bound(&new->ept);
 
   strcpy(new->rpaddr.rp_cpu, rpmsg_get_cpuname(rdev));
   strcpy(new->rpaddr.rp_name, name + RPMSG_SOCKET_NAME_PREFIX_LEN);
@@ -664,7 +665,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
   ret = rpmsg_register_callback(conn,
                                 rpmsg_socket_device_created,
                                 rpmsg_socket_device_destroy,
-                                rpmsg_socket_device_connect);
+                                NULL);
   if (ret < 0)
     {
       return ret;
@@ -685,7 +686,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
           rpmsg_unregister_callback(conn,
                                     rpmsg_socket_device_created,
                                     rpmsg_socket_device_destroy,
-                                    rpmsg_socket_device_connect);
+                                    NULL);
         }
     }
 
@@ -752,7 +753,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           rpmsg_register_callback(conn,
                                   rpmsg_socket_device_created,
                                   rpmsg_socket_device_destroy,
-                                  rpmsg_socket_device_connect);
+                                  NULL);
 
           if (conn->sendsize == 0)
             {
@@ -1272,7 +1273,7 @@ static int rpmsg_socket_close(FAR struct socket *psock)
       rpmsg_unregister_callback(conn,
                                 rpmsg_socket_device_created,
                                 rpmsg_socket_device_destroy,
-                                rpmsg_socket_device_connect);
+                                NULL);
     }
 
   rpmsg_socket_destroy_ept(conn);
