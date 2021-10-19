@@ -244,8 +244,18 @@ config ARCH_ICACHE
 	bool
 	default n
 
+config ARCH_ICACHE_LOCK
+	bool
+	depends on ARCH_ICACHE
+	default n
+
 config ARCH_DCACHE
 	bool
+	default n
+
+config ARCH_DCACHE_LOCK
+	bool
+	depends on ARCH_DCACHE
 	default n
 
 config ARCH_L2CACHE
