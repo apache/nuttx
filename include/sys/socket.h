@@ -239,7 +239,7 @@
 #ifdef CONFIG_NET_TCPBACKLOG_CONNS
 #  define SOMAXCONN CONFIG_NET_TCPBACKLOG_CONNS
 #else
-#  define SOMAXCONN 0
+#  define SOMAXCONN 8
 #endif
 
 /* Definitions associated with sendmsg/recvmsg */
