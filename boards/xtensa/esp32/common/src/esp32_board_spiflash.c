@@ -226,7 +226,7 @@ static int setup_littlefs(const char *path, FAR struct mtd_dev_s *mtd,
   if (ret < 0)
     {
       ferr("ERROR: Failed to register MTD: %d\n", ret);
-      return ERROR;
+      return -ENOMEM;
     }
 
   if (mnt_pt != NULL)
@@ -274,7 +274,7 @@ static int setup_spiffs(const char *path, FAR struct mtd_dev_s *mtd,
   if (ret < 0)
     {
       ferr("ERROR: Failed to register MTD: %d\n", ret);
-      return ERROR;
+      return -ENOMEM;
     }
 
   if (mnt_pt != NULL)
@@ -354,7 +354,7 @@ static int init_wifi_partition(void)
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
-      return ERROR;
+      return -ENOMEM;
     }
 
 #ifdef CONFIG_ESP32_SPIFLASH_SMARTFS
@@ -418,7 +418,7 @@ static int init_storage_partition(void)
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
-      return ERROR;
+      return -ENOMEM;
     }
 
 #ifdef CONFIG_ESP32_SPIFLASH_SMARTFS
