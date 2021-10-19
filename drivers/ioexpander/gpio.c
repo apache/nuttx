@@ -524,11 +524,10 @@ static int gpio_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor)
 {
   FAR const char *fmt;
-  char devname[16];
+  char devname[32];
   int ret;
 
-  DEBUGASSERT(dev != NULL && dev->gp_ops != NULL &&
-              (unsigned int)minor < 100);
+  DEBUGASSERT(dev != NULL && dev->gp_ops != NULL);
 
   switch (dev->gp_pintype)
     {
