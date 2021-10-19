@@ -229,6 +229,12 @@ config ESP32C3_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32C3_USBSERIAL
+	bool "USB-Serial Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 config ESP32C3_I2C0
 	bool "I2C 0"
 	default n
