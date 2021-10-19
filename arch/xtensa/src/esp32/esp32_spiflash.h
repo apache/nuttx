@@ -64,7 +64,8 @@ extern "C"
  ****************************************************************************/
 
 struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                   uint32_t mtd_size);
+                                               uint32_t mtd_size,
+                                               bool encrypted);
 
 /****************************************************************************
  * Name: esp32_spiflash_get_mtd
