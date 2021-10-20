@@ -2265,7 +2265,7 @@ static time_t time2sub(FAR struct tm *tmp,
   else
     {
       lo = 1;
-      for (i = 1; i < (int)TYPE_BIT(time_t) - 1; ++i)
+      for (i = 0; i < (int)TYPE_BIT(time_t) - 1; ++i)
         {
           lo *= 2;
         }
