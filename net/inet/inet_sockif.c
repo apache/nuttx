@@ -1696,10 +1696,6 @@ int inet_close(FAR struct socket *psock)
               /* No.. Just decrement the reference count */
 
               conn->crefs--;
-
-              /* Stop monitor for this socket only */
-
-              tcp_close_monitor(psock);
             }
 #else
         nwarn("WARNING: SOCK_STREAM support is not available in this "
