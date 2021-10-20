@@ -653,29 +653,6 @@ int tcp_start_monitor(FAR struct socket *psock);
 void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: tcp_close_monitor
- *
- * Description:
- *   One socket in a group of dup'ed sockets has been closed.  We need to
- *   selectively terminate just those things that are waiting of events
- *   from this specific socket.  And also recover any resources that are
- *   committed to monitoring this socket.
- *
- * Input Parameters:
- *   psock - The TCP socket structure that is closed
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The caller holds the network lock (if not, it will be locked momentarily
- *   by this function).
- *
- ****************************************************************************/
-
-void tcp_close_monitor(FAR struct socket *psock);
-
-/****************************************************************************
  * Name: tcp_lost_connection
  *
  * Description:
