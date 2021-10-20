@@ -230,6 +230,20 @@
 #define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_10_11_CR_SD   0x08290829UL
 #define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_12_13_CR_SD   0x08290829UL
 
+/* eMMC IOMUX settings */
+
+#define LIBERO_SETTING_IOMUX1_CR_EMMC                   0x11111111UL
+#define LIBERO_SETTING_IOMUX2_CR_EMMC                   0x00FF1111UL
+#define LIBERO_SETTING_IOMUX6_CR_EMMC                   0x00000000UL
+#define LIBERO_SETTING_MSSIO_BANK4_CFG_CR_EMMC          0x00040A0DUL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_0_1_CR_EMMC   0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_2_3_CR_EMMC   0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_4_5_CR_EMMC   0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_6_7_CR_EMMC   0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_8_9_CR_EMMC   0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_10_11_CR_EMMC 0x09280928UL
+#define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_12_13_CR_EMMC 0x09280928UL
+
 /* eMMC / SD switch address */
 
 #define SDIO_REGISTER_ADDRESS                           0x4f000000
@@ -267,13 +281,13 @@ struct mpfs_dev_s
 {
   struct sdio_dev_s  dev;             /* Standard, base SDIO interface */
 
-  uintptr_t          hw_base;         /* Base address */
-  int                plic_irq;        /* PLIC interrupt */
+  const uintptr_t    hw_base;         /* Base address */
+  const int          plic_irq;        /* PLIC interrupt */
   bool               clk_enabled;     /* Clk state */
 
   /* eMMC / SD and HW parameters */
 
-  bool               emmc;            /* eMMC or SD */
+  const bool         emmc;            /* eMMC or SD */
   int                bus_voltage;     /* Bus voltage */
   int                bus_speed;       /* Bus speed */
   bool               jumpers_3v3;     /* Jumper settings: 1v8 or 3v3 */
@@ -425,10 +439,7 @@ struct mpfs_dev_s g_emmcsd_dev =
   },
   .hw_base           = MPFS_EMMC_SD_BASE,
   .plic_irq          = MPFS_IRQ_MMC_MAIN,
-  .emmc              = false,
-  .bus_voltage       = MPFS_EMMCSD_3_3V_BUS_VOLTAGE,
-  .bus_speed         = MPFS_EMMCSD_MODE_SDR,
-  .jumpers_3v3       = true,
+  .emmc              = false,               /* Set true for emmc operation */
   .blocksize         = 512,
   .onebit            = false,
   .polltransfer      = true,
@@ -1362,6 +1373,44 @@ static void mpfs_sdcard_init(struct mpfs_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: mpfs_emmc_card_init
+ *
+ * Description:
+ *   Sets the IOMUX values properly for the internal eMMC. No need to access
+ *   the SDIO_REGISTER for switching the eMMC/SD because it's zero by
+ *   default.
+ *
+ * Input Parameters:
+ *   priv     - Instance of the eMMCSD private state structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void mpfs_emmc_card_init(struct mpfs_dev_s *priv)
+{
+  putreg32(LIBERO_SETTING_IOMUX1_CR_EMMC, MPFS_SYSREG_IOMUX1);
+  putreg32(LIBERO_SETTING_IOMUX2_CR_EMMC, MPFS_SYSREG_IOMUX2);
+  putreg32(LIBERO_SETTING_IOMUX6_CR_EMMC, MPFS_SYSREG_IOMUX6);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_CFG_CR_EMMC, MPFS_SYSREG_B4_CFG);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_0_1_CR_EMMC,
+           MPFS_SYSREG_B4_0_1);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_2_3_CR_EMMC,
+           MPFS_SYSREG_B4_2_3);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_4_5_CR_EMMC,
+           MPFS_SYSREG_B4_4_5);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_6_7_CR_EMMC,
+           MPFS_SYSREG_B4_6_7);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_8_9_CR_EMMC,
+           MPFS_SYSREG_B4_8_9);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_10_11_CR_EMMC,
+           MPFS_SYSREG_B4_10_11);
+  putreg32(LIBERO_SETTING_MSSIO_BANK4_IO_CFG_12_13_CR_EMMC,
+           MPFS_SYSREG_4_12_13);
+}
+
+/****************************************************************************
  * Name: mpfs_device_reset
  *
  * Description:
@@ -1391,6 +1440,12 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
 
   if (!priv->emmc)
     {
+      /* Apply default HW settings */
+
+      priv->bus_voltage = MPFS_EMMCSD_3_3V_BUS_VOLTAGE;
+      priv->bus_speed   = MPFS_EMMCSD_MODE_SDR;
+      priv->jumpers_3v3 = true;
+
       /* SD card needs FPGA out of reset and FIC3 clks for the eMMC / SD
        * switch. It's OK if these are already out of reset or clk applied.
        */
@@ -1403,6 +1458,21 @@ static bool mpfs_device_reset(struct sdio_dev_s *dev)
                   SYSREG_SUBBLK_CLOCK_CR_FIC3);
 
       mpfs_sdcard_init(priv);
+    }
+  else
+    {
+      /* For the eMMC, use these default values */
+
+      priv->bus_voltage = MPFS_EMMCSD_1_8V_BUS_VOLTAGE;
+      priv->bus_speed   = MPFS_EMMCSD_MODE_HS200;
+      priv->jumpers_3v3 = false;
+
+      /* Apply proper IOMUX values for the eMMC. This is required especially
+       * if this NuttX works as the system bootloader. Otherwise, it's
+       * possible the bootloader has already applied the proper IOMUX values.
+       */
+
+      mpfs_emmc_card_init(priv);
     }
 
   /* Perform system-level reset */
@@ -1744,7 +1814,7 @@ static void mpfs_clock(struct sdio_dev_s *dev, enum sdio_clock_e rate)
     /* Enable normal MMC operation clocking */
 
     case CLOCK_MMC_TRANSFER:
-      clckr = MPFS_MMC_CLOCK_25MHZ;
+      clckr = MPFS_MMC_CLOCK_200MHZ;
       break;
 
     /* SD normal operation clocking (wide 4-bit mode) */
