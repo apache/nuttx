@@ -1090,33 +1090,8 @@ int up_putc(int ch)
   return ch;
 }
 
-#else /* HAVE_UART_DEVICE */
-
-/****************************************************************************
- * Name: riscv_earlyserialinit, riscv_serialinit, and up_putc
- *
- * Description:
- *   Stubs that may be needed.  These stubs will be used if all UARTs are
- *   disabled.  In that case, the logic in common/up_initialize() is not
- *   smart enough to know that there are not UARTs and will still expect
- *   these interfaces to be provided.
- *
- ****************************************************************************/
-
-void riscv_earlyserialinit(void)
-{
-}
-
-void riscv_serialinit(void)
-{
-}
-
-int up_putc(int ch)
-{
-  return ch;
-}
-
 #endif /* HAVE_UART_DEVICE */
+
 #else /* USE_SERIALDRIVER */
 
 /****************************************************************************
