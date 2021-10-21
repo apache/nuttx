@@ -26,6 +26,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef BIT
+#if defined(_ASMLANGUAGE)
+#define BIT(n)  (1 << (n))
+#else
+/**
+ * @brief Unsigned integer with bit position @p n set (signed in
+ * assembly language).
+ */
+#define BIT(n)  (1UL << (n))
+#endif
+#endif
+
 #define BAT_OVP_ALARM       BIT(7)
 #define BAT_OCP_ALARM       BIT(6)
 #define BUS_OVP_ALARM       BIT(5)
