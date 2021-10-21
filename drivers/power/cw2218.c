@@ -82,7 +82,7 @@ static int cw2218_putreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
 static inline int cw2218_getvoltage(FAR struct cw2218_dev_s *priv,
                                     b16_t *voltage);
 static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,
-                                b16_t *soc);
+                                b16_t *soc, ub8_t *soc_h);
 static inline int cw2218_getcurrent(FAR struct cw2218_dev_s *priv,
                                     b16_t *current);
 static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv,
@@ -123,16 +123,16 @@ static const struct battery_gauge_operations_s g_cw2218ops =
 
 static const unsigned char g_config_profile_info[SIZE_OF_PROFILE] =
 {
-  0x46, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  0xb0, 0xbc, 0xc2, 0xc6, 0xc5, 0xc5, 0x8c, 0x4f,
-  0x26, 0xff, 0xff, 0xf3, 0xc9, 0x96, 0x7a, 0x5c,
-  0x4d, 0x45, 0x38, 0x7a, 0xb4, 0xdb, 0xef, 0xca,
-  0xca, 0xce, 0xd1, 0xd0, 0xcd, 0xcb, 0xc6, 0xcb,
-  0xc6, 0xc6, 0xc8, 0xa3, 0x97, 0x8c, 0x85, 0x7b,
-  0x73, 0x76, 0x83, 0x8e, 0xa5, 0x8e, 0x52, 0x4d,
-  0x00, 0x00, 0x57, 0x10, 0x00, 0x82, 0xc6, 0x00,
-  0x00, 0x00, 0x64, 0x10, 0x91, 0xae, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0a,
+  0x50, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0xa1, 0xc3, 0xc9, 0xcc, 0xc8, 0xc4, 0x8f, 0x50,
+  0x29, 0xff, 0xe2, 0xa7, 0x83, 0x68, 0x55, 0x48,
+  0x3e, 0x31, 0x24, 0x55, 0x43, 0xdb, 0xd6, 0xc4,
+  0xc6, 0xce, 0xcf, 0xce, 0xcd, 0xcc, 0xc5, 0xcb,
+  0xca, 0xcb, 0xc2, 0xa2, 0x97, 0x8e, 0x86, 0x7f,
+  0x79, 0x81, 0x87, 0x92, 0xa4, 0x8a, 0x5a, 0xaf,
+  0x00, 0x00, 0x57, 0x10, 0x00, 0x82, 0x98, 0x00,
+  0x00, 0x00, 0x64, 0x11, 0x91, 0x88, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90,
 };
 
 /****************************************************************************
@@ -323,10 +323,9 @@ static inline int cw2218_getvoltage(FAR struct cw2218_dev_s *priv,
  *
  ****************************************************************************/
 
-static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc)
+static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
+                                ub8_t *soc_h)
 {
-  uint8_t soc_h;
-  uint8_t soc_l;
   uint8_t buffer[2];
   int ui_soc;
   int ui_100 = CW2218_UI_FULL;
@@ -335,17 +334,17 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc)
   ret = cw2218_getreg8(priv, CW2218_COMMAND_SOC, buffer, 2);
   if (ret == OK)
     {
-      soc_h = buffer[0];
-      soc_l = buffer[1];
-      ui_soc = ((soc_h * CW2218_SOC_MAGIC_BASE + soc_l) *
+      ui_soc = ((buffer[0] * CW2218_SOC_MAGIC_BASE + buffer[1]) *
         CW2218_SOC_MAGIC_100) / (ui_100 * CW2218_SOC_MAGIC_BASE);
 
       if (ui_soc >= CW2218_SOC_MAGIC_100)
         {
           pwrerr("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
           ui_soc = CW2218_SOC_MAGIC_100;
-          *soc = ui_soc;
         }
+
+      *soc = ui_soc;
+      *soc_h = buffer[0];
     }
 
   return ret;
@@ -676,7 +675,7 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
 
 static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
 {
-  uint8_t soc_h;
+  ub8_t soc_h;
   unsigned char reg_val;
   int count = 0;
   int i;
@@ -726,8 +725,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
     {
       nxsig_usleep(CW2218_SLEEP_100MS);
       cw2218_getvoltage(priv, &voltage);
-      cw2218_getsoc(priv, &soc);
-      soc_h =  ((soc >> 8) & 0xff);
+      cw2218_getsoc(priv, &soc, &soc_h);
 
       if ((voltage != 0) && (soc_h == 0xff))
         {
@@ -745,8 +743,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   for (i = 0; i < CW2218_SLEEP_COUNTS_SOC; i++)
     {
       nxsig_usleep(CW2218_SLEEP_100MS);
-      cw2218_getsoc(priv, &soc);
-      soc_h =  ((soc >> 8) & 0xff);
+      cw2218_getsoc(priv, &soc, &soc_h);
       if (soc_h <= CW2218_SOC_MAGIC_100)
         {
           break;
@@ -863,7 +860,8 @@ static int cw2218_state(struct battery_gauge_dev_s *dev, int *status)
 static int cw2218_capacity(struct battery_gauge_dev_s *dev,  b16_t *capacity)
 {
   FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)dev;
-  return cw2218_getsoc(priv, capacity);
+  ub8_t soc_h;
+  return cw2218_getsoc(priv, capacity, &soc_h);
 }
 
 /****************************************************************************
@@ -988,7 +986,7 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
  *
  * Input Parameters:
  *   i2c - An instance of the I2C interface to use to communicate with the bq
- *   addr - The I2C address of the cw2218 (Better be 0x55).
+ *   addr - The I2C address of the cw2218 (Better be 0x64).
  *   frequency - The I2C frequency
  *
  * Returned Value:

@@ -76,11 +76,10 @@
 #define CW2218_SOC_MAGIC_BASE           256       /* current calculation factor */
 #define CW2218_SOC_MAGIC_100            100       /* current calculation factor */
 
-#define CW2218_SLEEP_4MS                4         /* delay time */
-#define CW2218_SLEEP_20MS               20        /* delat time */
-#define CW2218_SLEEP_10MS               10        /* delay time */
-#define CW2218_SLEEP_100MS              100       /* delay time */
-#define CW2218_SLEEP_200MS              200       /* delay time */
+#define CW2218_SLEEP_20MS               20000     /* delat time */
+#define CW2218_SLEEP_10MS               10000     /* delay time */
+#define CW2218_SLEEP_100MS              100000    /* delay time */
+#define CW2218_SLEEP_200MS              200000    /* delay time */
 
 #define CW2218_NOT_ACTIVE               1         /* cw2218 not active mode flag */
 #define CW2218_PROFILE_NOT_READY        2         /* cw2218 battery profile not ready flag */
