@@ -26,6 +26,7 @@
 
 #include <errno.h>
 #include <debug.h>
+#include <assert.h>
 
 #include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
@@ -42,6 +43,7 @@
 #define SX9373_WHOAMI_VALUE           0x937327 /* Device ID */
 #define SX9373_CHANNEL_NUM            2        /* Number of channel */
 #define SX9373_MAX_RETRY              3        /* Clear interrupt attempts. */
+#define SX9373_POWERON_DELAY          3000     /* Power-on delay time(us). */
 
 /* Interrupt control. */
 
@@ -1041,6 +1043,10 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
   priv->lower.ops = &g_sx9373_ops;
   priv->lower.buffer_number = CONFIG_SENSORS_SX9373_BUFFER_NUMBER;
 
+  /* Wait 3ms for stable power supply. */
+
+  up_udelay(SX9373_POWERON_DELAY);
+
   /* Check Device ID. */
 
   ret = sx9373_checkid(priv);
@@ -1069,7 +1075,7 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
       goto err;
     }
 
-  ioephanle = IOEP_ATTACH(priv->config->ioe, (1 << priv->config->pin),
+  ioephanle = IOEP_ATTACH(priv->config->ioe, priv->config->pin,
                           sx9373_interrupt_handler, priv);
   if (ioephanle == NULL)
     {
