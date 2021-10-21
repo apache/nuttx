@@ -245,7 +245,7 @@ static int sc8551_putreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batwarn("addr: %02x val: %08x\n", regaddr, val);
+  batinfo("addr: %02x val: %08x\n", regaddr, val);
 
   /* Set up a message to send */
 
@@ -275,110 +275,110 @@ static int sc8551_dump_regs(FAR struct sc8551_dev_s * priv)
   uint8_t value = 0;
 
   ret  = sc8551_getreg8(priv, SC8551_REG_00, &value, 1);
-  batinfo("REG#00: 0x%08X\n", value);
+  batwarn("REG#00: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_01, &value, 1);
-  batinfo("REG#01: 0x%08X\n", value);
+  batwarn("REG#01: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_02, &value, 1);
-  batinfo("REG#02: 0x%08X\n", value);
+  batwarn("REG#02: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_03, &value, 1);
-  batinfo("REG#03: 0x%08X\n", value);
+  batwarn("REG#03: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_04, &value, 1);
-  batinfo("REG#04: 0x%08X\n", value);
+  batwarn("REG#04: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_05, &value, 1);
-  batinfo("REG#05: 0x%08X\n", value);
+  batwarn("REG#05: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_06, &value, 1);
-  batinfo("REG#06: 0x%08X\n", value);
+  batwarn("REG#06: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_07, &value, 1);
-  batinfo("REG#07: 0x%08X\n", value);
+  batwarn("REG#07: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_08, &value, 1);
-  batinfo("REG#08: 0x%08X\n", value);
+  batwarn("REG#08: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_09, &value, 1);
-  batinfo("REG#09: 0x%08X\n", value);
+  batwarn("REG#09: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0A, &value, 1);
-  batinfo("REG#0A: 0x%08X\n", value);
+  batwarn("REG#0A: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0B, &value, 1);
-  batinfo("REG#0B: 0x%08X\n", value);
+  batwarn("REG#0B: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0C, &value, 1);
-  batinfo("REG#0C: 0x%08X\n", value);
+  batwarn("REG#0C: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0D, &value, 1);
-  batinfo("REG#0D: 0x%08X\n", value);
+  batwarn("REG#0D: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0E, &value, 1);
-  batinfo("REG#0E: 0x%08X\n", value);
+  batwarn("REG#0E: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0F, &value, 1);
-  batinfo("REG#0F: 0x%08X\n", value);
+  batwarn("REG#0F: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_10, &value, 1);
-  batinfo("REG#10: 0x%08X\n", value);
+  batwarn("REG#10: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_11, &value, 1);
-  batinfo("REG#11: 0x%08X\n", value);
+  batwarn("REG#11: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_12, &value, 1);
-  batinfo("REG#12: 0x%08X\n", value);
+  batwarn("REG#12: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_13, &value, 1);
-  batinfo("REG#13: 0x%08X\n", value);
+  batwarn("REG#13: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_14, &value, 1);
-  batinfo("REG#14: 0x%08X\n", value);
+  batwarn("REG#14: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_15, &value, 1);
-  batinfo("REG#15: 0x%08X\n", value);
+  batwarn("REG#15: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_16, &value, 1);
-  batinfo("REG#16: 0x%08X\n", value);
+  batwarn("REG#16: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_17, &value, 1);
-  batinfo("REG#17: 0x%08X\n", value);
+  batwarn("REG#17: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_18, &value, 1);
-  batinfo("REG#18: 0x%08X\n", value);
+  batwarn("REG#18: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_19, &value, 1);
-  batinfo("REG#19: 0x%08X\n", value);
+  batwarn("REG#19: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1A, &value, 1);
-  batinfo("REG#1A: 0x%08X\n", value);
+  batwarn("REG#1A: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1B, &value, 1);
-  batinfo("REG#1B: 0x%08X\n", value);
+  batwarn("REG#1B: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1C, &value, 1);
-  batinfo("REG#1C: 0x%08X\n", value);
+  batwarn("REG#1C: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1D, &value, 1);
-  batinfo("REG#1D: 0x%08X\n", value);
+  batwarn("REG#1D: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1E, &value, 1);
-  batinfo("REG#1E: 0x%08X\n", value);
+  batwarn("REG#1E: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1F, &value, 1);
-  batinfo("REG#1F: 0x%08X\n", value);
+  batwarn("REG#1F: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_20, &value, 1);
-  batinfo("REG#20: 0x%08X\n", value);
+  batwarn("REG#20: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_21, &value, 1);
-  batinfo("REG#21: 0x%08X\n", value);
+  batwarn("REG#21: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_22, &value, 1);
-  batinfo("REG#22: 0x%08X\n", value);
+  batwarn("REG#22: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_23, &value, 1);
-  batinfo("REG#23: 0x%08X\n", value);
+  batwarn("REG#23: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_24, &value, 1);
-  batinfo("REG#24: 0x%08X\n", value);
+  batwarn("REG#24: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_25, &value, 1);
-  batinfo("REG#25: 0x%08X\n", value);
+  batwarn("REG#25: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_26, &value, 1);
-  batinfo("REG#26: 0x%08X\n", value);
+  batwarn("REG#26: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_27, &value, 1);
-  batinfo("REG#27: 0x%08X\n", value);
+  batwarn("REG#27: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_28, &value, 1);
-  batinfo("REG#28: 0x%08X\n", value);
+  batwarn("REG#28: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_29, &value, 1);
-  batinfo("REG#29: 0x%08X\n", value);
+  batwarn("REG#29: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2A, &value, 1);
-  batinfo("REG#2A: 0x%08X\n", value);
+  batwarn("REG#2A: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2B, &value, 1);
-  batinfo("REG#2B: 0x%08X\n", value);
+  batwarn("REG#2B: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2C, &value, 1);
-  batinfo("REG#2C: 0x%08X\n", value);
+  batwarn("REG#2C: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2D, &value, 1);
-  batinfo("REG#2D: 0x%08X\n", value);
+  batwarn("REG#2D: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2E, &value, 1);
-  batinfo("REG#2E: 0x%08X\n", value);
+  batwarn("REG#2E: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2F, &value, 1);
-  batinfo("REG#2F: 0x%08X\n", value);
+  batwarn("REG#2F: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_30, &value, 1);
-  batinfo("REG#30: 0x%08X\n", value);
+  batwarn("REG#30: 0x%08X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_31, &value, 1);
-  batinfo("REG#31: 0x%08X\n", value);
+  batwarn("REG#31: 0x%08X\n", value);
 
   /* Not reading fault register. */
 
   ret  = sc8551_getreg8(priv, SC8551_REG_34, &value, 1);
-  batinfo("REG#34: 0x%08X\n", value);
+  batwarn("REG#34: 0x%08X\n", value);
 
   return ret;
 }
@@ -890,6 +890,74 @@ static int sc8551_enable_bat_therm(FAR struct sc8551_dev_s *priv,
   return ret;
 }
 
+/****************************************************************************
+ *the input threshold is the raw value that would write to register directly.
+ ****************************************************************************/
+
+static int sc8551_set_bat_therm_th(FAR struct sc8551_dev_s *priv,
+                                   uint8_t threshold)
+{
+  int ret;
+
+  ret = sc8551_putreg8(priv, SC8551_REG_29, threshold);
+
+  return ret;
+}
+
+static int sc8551_enable_bus_therm(FAR struct sc8551_dev_s *priv,
+                                   bool enable)
+{
+  int ret;
+  uint8_t val;
+
+  if (enable)
+    val = SC8551_TSBUS_ENABLE;
+  else
+    val = SC8551_TSBUS_DISABLE;
+
+  val <<= SC8551_TSBUS_DIS_SHIFT;
+
+  ret = sc8551_update_bits(priv, SC8551_REG_0C,
+                  SC8551_TSBUS_DIS_MASK, val);
+
+  return ret;
+}
+
+/****************************************************************************
+ *the input threshold is the raw value that would write to register directly.
+ ****************************************************************************/
+
+static int sc8551_set_bus_therm_th(FAR struct sc8551_dev_s *priv,
+                                   uint8_t threshold)
+{
+  int ret;
+
+  ret = sc8551_putreg8(priv, SC8551_REG_28, threshold);
+
+  return ret;
+}
+
+/****************************************************************************
+ * please be noted that the unit here is degC
+ ****************************************************************************/
+
+static int sc8551_set_die_therm_th(FAR struct sc8551_dev_s *priv,
+                                   uint8_t threshold)
+{
+  int ret;
+  uint8_t val;
+
+  /* BE careful, LSB is here is 1/LSB, so we use multiply here */
+
+  val = (threshold - SC8551_TDIE_ALM_BASE) * 10 / SC8551_TDIE_ALM_LSB;
+  val <<= SC8551_TDIE_ALM_SHIFT;
+
+  ret = sc8551_update_bits(priv, SC8551_REG_2A,
+                  SC8551_TDIE_ALM_MASK, val);
+
+  return ret;
+}
+
 static int sc8551_init_protection(FAR struct sc8551_dev_s *priv)
 {
   int ret;
@@ -1072,6 +1140,24 @@ static int sc8551_set_adc_scan(FAR struct sc8551_dev_s *priv,
   return ret;
 }
 
+static int sc8551_enable_adc(FAR struct sc8551_dev_s *priv, bool enable)
+{
+  int ret;
+  uint8_t val;
+
+  if (enable)
+    val = SC8551_ADC_ENABLE;
+  else
+    val = SC8551_ADC_DISABLE;
+
+  val <<= SC8551_ADC_EN_SHIFT;
+
+  ret = sc8551_update_bits(priv, SC8551_REG_14,
+                    SC8551_ADC_EN_MASK, val);
+
+  return ret;
+}
+
 static int sc8551_init_adc(FAR struct sc8551_dev_s *priv)
 {
   sc8551_set_adc_scanrate(priv, false);
@@ -1085,7 +1171,7 @@ static int sc8551_init_adc(FAR struct sc8551_dev_s *priv)
   sc8551_set_adc_scan(priv, ADC_TDIE, true);
   sc8551_set_adc_scan(priv, ADC_VAC, true);
 
-  sc8551_enable_adc(true);
+  sc8551_enable_adc(priv, true);
 
   return 0;
 }
@@ -1109,7 +1195,7 @@ static int sc8551_init_int_src(FAR struct sc8551_dev_s *priv)
   ret = sc8551_set_alarm_int_mask(priv, ADC_DONE | BAT_OVP_ALARM);   /* | BAT_UCP_ALARM */
   if (ret)
     {
-      baterr("[ SC8551] failed to set alarm mask:%d\r\n", ret);
+      batinfo("[ SC8551] failed to set alarm mask:%d\r\n", ret);
       return ret;
     }
 
@@ -1323,9 +1409,9 @@ static int sc8551_sysoff(FAR struct sc8551_dev_s *priv)
   return ret;
   #endif
 
-  batwarn(" The chip does not support the function of sc8551_sysoff ");
+  batinfo(" The chip does not support the function of sc8551_sysoff ");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1350,9 +1436,9 @@ static int sc8551_syson(FAR struct sc8551_dev_s *priv)
   return ret;
   #endif
 
-  batwarn(" The chip does not support the function of sc8551_syson ");
+  batinfo(" The chip does not support the function of sc8551_syson ");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1377,7 +1463,7 @@ static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state)
       return ret;
     }
 
-  batwarn("en_term: REG05 %02X EN_TERM=%d\n",
+  batinfo("en_term: REG05 %02X EN_TERM=%d\n",
          val, !!(val & SC8551R5_EN_TERM));
 
   /* Clear previous and set new value */
@@ -1401,9 +1487,9 @@ static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state)
   return OK;
   #endif
 
-  batwarn("The chip does not support the function of sc8551_en_term");
+  batinfo("The chip does not support the function of sc8551_en_term");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1428,7 +1514,7 @@ static int sc8551_en_hiz(FAR struct sc8551_dev_s *priv, bool state)
       return ret;
     }
 
-  batwarn("en_hiz: REG00 %02X EN_HIZ=%d\n",
+  batinfo("en_hiz: REG00 %02X EN_HIZ=%d\n",
          val, !!(val & SC8551R1_EN_HIZ));
 
   /* Clear previous and set new value */
@@ -1452,9 +1538,9 @@ static int sc8551_en_hiz(FAR struct sc8551_dev_s *priv, bool state)
   return OK;
   #endif
 
-  batwarn("The chip does not support the function of sc8551_en_hiz ");
+  batinfo("The chip does not support the function of sc8551_en_hiz ");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1478,7 +1564,7 @@ static int sc8551_en_stat(FAR struct sc8551_dev_s *priv, bool state)
       return ret;
     }
 
-  batwarn("int stat: REG07 %02X INT_MASK1=%d INT_MASK0=%d\n", val,
+  batinfo("int stat: REG07 %02X INT_MASK1=%d INT_MASK0=%d\n", val,
          !!(val & SC8551R7_INT_MASK1), !!(val & SC8551R7_INT_MASK0));
 
   /* We always set or clear both interrupts together. */
@@ -1502,9 +1588,9 @@ static int sc8551_en_stat(FAR struct sc8551_dev_s *priv, bool state)
   return OK;
   #endif
 
-  batwarn("The chip does not support the function of sc8551_en_stat ");
+  batinfo("The chip does not support the function of sc8551_en_stat ");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1552,15 +1638,15 @@ static int sc8551_setboost_otg_config(FAR struct sc8551_dev_s *priv,
     }
 
 #define BST_CONFIG_MASK (SC8551R1_CHG_CONFIG | SC8551R1_OTG_CONFIG)
-  batwarn("otg_config: REG01 %02X Boost=%d\n", val,
+  batinfo("otg_config: REG01 %02X Boost=%d\n", val,
       ((SC8551R1_OTG_CONFIG == (val & BST_CONFIG_MASK)) ? 1 : 0));
 
   return OK;
   #endif
 
-  batwarn("The chip does not support the sc8551_setboost_otg_config ");
+  batinfo("The chip does not support the sc8551_setboost_otg_config ");
 
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -1614,8 +1700,8 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
 static int sc8551_health(FAR struct battery_charger_dev_s *dev,
                          FAR int *health)
 {
-  batwarn("The chip does not support the function of sc8551_health ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_health ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1629,8 +1715,8 @@ static int sc8551_health(FAR struct battery_charger_dev_s *dev,
 static int sc8551_online(FAR struct battery_charger_dev_s *dev,
                          FAR bool *status)
 {
-  batwarn("The chip does not support the function of sc8551_online ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_online ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1643,8 +1729,8 @@ static int sc8551_online(FAR struct battery_charger_dev_s *dev,
 
 static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current)
 {
-  batwarn("The chip does not support the function of sc8551_powersupply ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_powersupply ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1657,8 +1743,8 @@ static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current)
 
 static int sc8551_setvolt(FAR struct sc8551_dev_s *priv, int req_volts)
 {
-  batwarn("The chip does not support the function of sc8551_powersupply ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_powersupply ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1672,8 +1758,8 @@ static int sc8551_setvolt(FAR struct sc8551_dev_s *priv, int req_volts)
 static inline int sc8551_setcurr(FAR struct sc8551_dev_s *priv,
                                  int req_current)
 {
-  batwarn("The chip does not support the function of sc8551_setcurr ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_setcurr ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1686,8 +1772,8 @@ static inline int sc8551_setcurr(FAR struct sc8551_dev_s *priv,
 
 static int sc8551_voltage(FAR struct battery_charger_dev_s *dev, int value)
 {
-  batwarn("The chip does not support the function of sc8551_voltage ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_voltage ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1699,8 +1785,8 @@ static int sc8551_voltage(FAR struct battery_charger_dev_s *dev, int value)
 
 static int sc8551_current(FAR struct battery_charger_dev_s *dev, int value)
 {
-  batwarn("The chip does not support the function of sc8551_current ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_current ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1714,8 +1800,8 @@ static int sc8551_current(FAR struct battery_charger_dev_s *dev, int value)
 static int sc8551_input_current(FAR struct battery_charger_dev_s *dev,
                                 int value)
 {
-  batwarn("The chip does not support the function of sc8551_input_current ");
-  return ERROR;
+  batinfo("The chip does not support the function of sc8551_input_current ");
+  return OK;
 }
 
 /****************************************************************************
@@ -1774,7 +1860,7 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
         break;
 
       default:
-        baterr("Unsupported opt: 0x%X\n", op);
+        batinfo("Unsupported opt: 0x%X\n", op);
         ret = -EINVAL;
         break;
     }
