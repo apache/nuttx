@@ -1129,9 +1129,7 @@ static int aw88266a_configure(FAR struct audio_lowerhalf_s *dev,
           priv->bpsamp  = caps->ac_controls.b[2];
           priv->bclk    = caps->ac_controls.hw[0] *
                           (priv->lower->bclk_factor);
-
           aw88266a_set_device(priv, DEFAULT_OUTPUT_SPEAKER);
-
           aw88266a_set_channel(priv, priv->nchannels);
           aw88266a_set_rate(priv, priv->samprate);
           aw88266a_set_width(priv, priv->bpsamp);
@@ -1481,6 +1479,27 @@ aw88266a_initialize(FAR struct i2c_master_s *i2c,
 {
   FAR struct aw88266a_dev_s *priv;
   uint16_t regval;
+  int16_t ret;
+
+  if (lower == NULL)
+    {
+      auderr("ERROR: lower is NULL\n");
+      return NULL;
+    }
+
+  ret = lower->power_en(true);
+  if (ret < 0)
+    {
+      auderr("ERROR: AW88266A power_en\n");
+      return NULL;
+    }
+
+  ret = lower->reset_en(true);
+  if (ret < 0)
+    {
+      auderr("ERROR: AW88266A reset_en\n");
+      return NULL;
+    }
 
   /* Allocate a WM8994 device structure */
 

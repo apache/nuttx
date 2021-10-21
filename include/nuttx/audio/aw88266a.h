@@ -49,6 +49,8 @@ struct aw88266a_lower_s
   aw_i2s_channel_t  channelfmt;       /* IIS channel fmt */
   int bclk_factor;                    /* BCLK factor */
   CODE void (*reset)(FAR const struct aw88266a_lower_s *lower);
+  CODE int (*power_en)(bool flag);
+  CODE int (*reset_en)(bool flag);
 };
 
 /****************************************************************************
@@ -67,4 +69,4 @@ FAR struct audio_lowerhalf_s *
 aw88266a_initialize(FAR struct i2c_master_s *i2c,
                     FAR struct aw88266a_lower_s *lower);
 
-#endif
+#endif /* __INCLUDE_NUTTX_AUDIO_AW88266A_ */
