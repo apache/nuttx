@@ -45,14 +45,14 @@
  ****************************************************************************/
 
 #ifdef CONFIG_SENSORS_MAX86178_I2C
-# define MAX86178_I2C_MAX_FREQ   400000    /* Maximum SCL frequency 400kHz */
-# define MAX86178_I2C_MIN_FREQ   100000    /* Minimum SCL frequency 100kHz */
-# define MAX86178_I2C_ADDR_LEN   7         /* Only support 7bit I2C address */
+# define MAX86178_I2C_MAX_FREQ   400000   /* Maximum SCL frequency 400kHz */
+# define MAX86178_I2C_MIN_FREQ   100000   /* Minimum SCL frequency 100kHz */
+# define MAX86178_I2C_ADDR_LEN   7        /* Only support 7bit I2C address */
 
 #else /* CONFIG_SENSORS_MAX86178_SPI */
-# define MAX86178_SPI_MAX_FREQ   25000000  /* Maximum SCLK frequency 25MHz */
-# define MAX86178_SPI_MIN_FREQ   100000    /* Minimum SCLK frequency 100kHz */
-# define MAX86178_SPI_NBITS      8         /* Only support 8 bits per word */
+# define MAX86178_SPI_MAX_FREQ   25000000 /* Maximum SCLK frequency 25MHz */
+# define MAX86178_SPI_MIN_FREQ   100000   /* Minimum SCLK frequency 100kHz */
+# define MAX86178_SPI_NBITS      8        /* Only support 8 bits per word */
 
 #endif
 
@@ -63,6 +63,11 @@
 #define MAX86178_ECG_IDX         0         /* ECG0 AFE index */
 #define MAX86178_PPG_IDX         1         /* PPG0 (Green) AFE index */
 #define MAX86178_IDX_NUM         2         /* Total AFE number. */
+
+/* Control commands */
+
+#define MAX86178_ECG_CTRL_GAIN   0         /* Set ECG gain. */
+#define MAX86178_PPG_CTRL_LEDPA  0         /* Set PPG LED current. */
 
 /* Default settings */
 
@@ -191,6 +196,8 @@ static int      max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                       FAR unsigned int *period_us);
 static int      max86178_batch(FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned int *latency_us);
+static int      max86178_control(FAR struct sensor_lowerhalf_s *lower,
+                                 int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -212,6 +219,7 @@ static const struct sensor_ops_s g_max86178_ecg_ops =
   .activate     = max86178_activate,
   .set_interval = max86178_set_interval,
   .batch        = max86178_batch,
+  .control      = max86178_control,
 };
 
 static const struct sensor_ops_s g_max86178_ppg_ops =
@@ -219,6 +227,7 @@ static const struct sensor_ops_s g_max86178_ppg_ops =
   .activate     = max86178_activate,
   .set_interval = max86178_set_interval,
   .batch        = max86178_batch,
+  .control      = max86178_control,
 };
 
 /****************************************************************************
@@ -328,10 +337,9 @@ static int max86178_readregs(FAR struct max86178_dev_s *priv,
   if (ret < 0)
     {
       snerr("I2C writeread failed: %d\n", ret);
-      return ret;
     }
 
-  return OK;
+  return ret;
 
 #else /* CONFIG_SENSORS_MAX86178_SPI */
 
@@ -355,22 +363,25 @@ static int max86178_readregs(FAR struct max86178_dev_s *priv,
       return ret;
     }
 
-  /* Set CS to low which selects the device. */
+  /* Selects the device. Set CS (as a GPIO) low. */
 
   SPI_SELECT(priv->config->spi, priv->config->cs, true);
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 0);
 
-  /* First end start address and 0x80(means reading). Then read a block. */
+  /* First send start address and 0x80(means reading). Then sends arbitrary
+   * content (nwords bytes) to read a block of nwords bytes.
+   */
 
-  SPI_EXCHANGE(priv->config->spi, txbuf, NULL, 2);
-  SPI_EXCHANGE(priv->config->spi, NULL, recvbuf, nwords);
+  SPI_EXCHANGE(priv->config->spi, txbuf, txbuf, 2);
+  SPI_EXCHANGE(priv->config->spi, recvbuf, recvbuf, nwords);
 
-  /* Deselect the device and release the SPI bus. */
+  /* Deselect the device, set CS high and release the SPI bus. */
 
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 1);
   SPI_SELECT(priv->config->spi, priv->config->cs, false);
   SPI_LOCK(priv->config->spi, false);
 
   return OK;
-
 #endif
 }
 
@@ -432,10 +443,9 @@ static int max86178_writeregs(FAR struct max86178_dev_s *priv,
   if (ret < 0)
     {
       snerr("I2C write failed: %d\n", ret);
-      return ret;
     }
 
-  return OK;
+  return ret;
 
 #else /* CONFIG_SENSORS_MAX86178_SPI */
 
@@ -459,22 +469,23 @@ static int max86178_writeregs(FAR struct max86178_dev_s *priv,
       return ret;
     }
 
-  /* Set CS to low which selects the device. */
+  /* Selects the device. Set CS (as a GPIO) low. */
 
   SPI_SELECT(priv->config->spi, priv->config->cs, true);
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 0);
 
-  /* First end start address and 0x00(means writing). Then write a block. */
+  /* First send start address and 0x00(means reading). Then write a block. */
 
-  SPI_EXCHANGE(priv->config->spi, txbuf, NULL, 2);
-  SPI_EXCHANGE(priv->config->spi, sendbuf, NULL, nwords);
+  SPI_EXCHANGE(priv->config->spi, txbuf, txbuf, 2);
+  SPI_EXCHANGE(priv->config->spi, sendbuf, sendbuf, nwords);
 
-  /* Deselect the device and release the SPI bus. */
+  /* Deselect the device, set CS high and release the SPI bus. */
 
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 1);
   SPI_SELECT(priv->config->spi, priv->config->cs, false);
   SPI_LOCK(priv->config->spi, false);
 
   return OK;
-
 #endif
 }
 
@@ -795,25 +806,20 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
       max86178_enable(priv, enable);
 
-      /* Disable PPG2 channel */
-
-      max86178_readsingle(priv, MAX86178_REG_PPGCFG2, &regval);
-      regval = regval & (~MAX86178_PPGCFG2_PPG2PWRDN_MASK);
-      regval = regval | MAX86178_PPGCFG2_PPG2PWRDN;
-      max86178_writesingle(priv, MAX86178_REG_PPGCFG2, regval);
-
-      /* MEAS1 selects LED driver A to drive LED1 */
+      /* MEAS1 selects LED driver A to drive LED3 */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1SEL, &regval);
       regval = regval & (~MAX86178_MEASXSEL_DRVA_MASK);
-      regval = regval | MAX86178_MEASXSEL_DRVA_LED1;
+      regval = regval | MAX86178_MEASXSEL_DRVA_LED3;
       max86178_writesingle(priv, MAX86178_REG_MEAS1SEL, regval);
 
-      /* PPG1 selects PD1 */
+      /* PPG1 selects PD1 & PD2. */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1CFG5, &regval);
       regval = regval & (~MAX86178_MEASXCFG5_PD1SEL_MASK);
       regval = regval | MAX86178_MEASXCFG5_PD1SEL_PPG1;
+      regval = regval & (~MAX86178_MEASXCFG5_PD2SEL_MASK);
+      regval = regval | MAX86178_MEASXCFG5_PD2SEL_PPG1;
       max86178_writesingle(priv, MAX86178_REG_MEAS1CFG5, regval);
 
       /* Selects LED current */
@@ -821,7 +827,7 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
       max86178_readsingle(priv, MAX86178_REG_MEAS1CFG4, &regval);
       regval = regval & (~MAX86178_MEASXCFG4_LEDRGE_MASK);
       regval = regval | MAX86178_MEASXCFG4_LEDRGE_32MA;
-      max86178_writesingle(priv, MAX86178_REG_MEAS1LEDA, regval);
+      max86178_writesingle(priv, MAX86178_REG_MEAS1CFG4, regval);
       max86178_readsingle(priv, MAX86178_REG_MEAS1LEDA, &regval);
       regval = 0xff;
       max86178_writesingle(priv, MAX86178_REG_MEAS1LEDA, regval);
@@ -869,22 +875,34 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
 static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
 {
-  struct sensor_event_ecg *temp_ecg;
-  struct sensor_event_ppg *temp_ppg;
+  FAR struct sensor_event_ecg *temp_ecg;
+  FAR struct sensor_event_ppg *temp_ppg;
   FAR uint8_t *fifodata;
+  uint32_t fifosize;
   uint32_t temp_sample;
   uint32_t counter_ecg = 0;
   uint32_t counter_ppg = 0;
   uint16_t num = 0;
   uint8_t temp_num;
   uint16_t i;
+  int ret = OK;
 
-  temp_ecg = kmm_malloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                       * sizeof(struct sensor_event_ecg));
-  temp_ppg = kmm_malloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                       * sizeof(struct sensor_event_ppg));
-  memset(temp_ecg, 0x00, sizeof(temp_ecg));
-  memset(temp_ppg, 0x00, sizeof(temp_ppg));
+  temp_ecg = kmm_zalloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
+                       * sizeof(FAR struct sensor_event_ecg));
+  if (temp_ecg == NULL)
+    {
+      snerr("Failed to allocate space for ECG data.\n");
+      return -ENOMEM;
+    }
+
+  temp_ppg = kmm_zalloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
+                       * sizeof(FAR struct sensor_event_ppg));
+  if (temp_ppg == NULL)
+    {
+      kmm_free(temp_ecg);
+      snerr("Failed to allocate space for PPG data.\n");
+      return -ENOMEM;
+    }
 
   /* Get number of samples in FIFO */
 
@@ -894,21 +912,23 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
       num = 256;
     }
 
-  max86178_readsingle(priv, MAX86178_REG_FIFOCNT1, &temp_num);
+  max86178_readsingle(priv, MAX86178_REG_FIFOCNTLSB, &temp_num);
   num = num + temp_num;
 
   /* Allocate a block for storing FIFO data */
 
-  fifodata = kmm_malloc(priv->fifowtm * MAX86178_FIFO_BYTES_PER_DATA);
+  fifosize = priv->fifowtm * MAX86178_FIFO_BYTES_PER_DATA;
+  fifodata = kmm_malloc(fifosize);
   if (fifodata == NULL)
     {
-      snerr("ERROR: Failed to allocate space to store FIFO data\n");
-      return -ENOMEM;
+      snerr("Failed to allocate space for FIFO data.\n");
+      ret = -ENOMEM;
+      goto exit;
     }
 
   /* Read the FIFO in number of FIFO watermark */
 
-  max86178_readregs(priv, MAX86178_REG_FIFODATA, fifodata, sizeof(fifodata));
+  max86178_readregs(priv, MAX86178_REG_FIFODATA, fifodata, fifosize);
 
   /* Deal each sample in FIFO. The last sample is the newest sample. */
 
@@ -993,7 +1013,7 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
       priv->dev[MAX86178_ECG_IDX].lower.push_event(
             priv->dev[MAX86178_ECG_IDX].lower.priv,
             temp_ecg,
-            sizeof(struct sensor_event_ecg) * counter_ecg);
+            sizeof(FAR struct sensor_event_ecg) * counter_ecg);
     }
 
   if (counter_ppg)
@@ -1001,15 +1021,15 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
       priv->dev[MAX86178_PPG_IDX].lower.push_event(
             priv->dev[MAX86178_PPG_IDX].lower.priv,
             temp_ppg,
-            sizeof(struct sensor_event_ppg) * counter_ppg);
+            sizeof(FAR struct sensor_event_ppg) * counter_ppg);
     }
 
   /* Release ecg and ppg data after push events have been done */
 
+exit:
   kmm_free(temp_ecg);
   kmm_free(temp_ppg);
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1194,11 +1214,109 @@ static int max86178_ecg_setsr(FAR struct max86178_dev_s *priv, float *freq)
 }
 
 /****************************************************************************
+ * Name: max86178_ecg_control
+ *
+ * Description:
+ *   Configure ECG parameters.
+ *
+ * Input Parameters:
+ *   priv - Device struct.
+ *   freq - Disired sample rate (Hz)
+ *
+ * Returned Value:
+ *   0 (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int max86178_ecg_control(FAR struct max86178_dev_s *priv, int cmd,
+                                unsigned long arg)
+{
+  switch (cmd)
+    {
+      /* Set ECG gain */
+
+      case MAX86178_ECG_CTRL_GAIN:
+        {
+          uint8_t regval;
+          uint8_t gaincfg = (uint8_t)arg;
+
+          if (gaincfg > 127)
+            {
+              return -EINVAL;
+            }
+
+          max86178_readsingle(priv, MAX86178_REG_ECGCFG2, &regval);
+          regval = regval & (~MAX86178_ECGCFG2_PGAGAIN_MASK);
+          regval = regval | gaincfg;
+          max86178_writesingle(priv, MAX86178_REG_ECGCFG2, regval);
+        }
+        break;
+
+      default:
+        {
+          snerr("No such command.\n");
+          return -EINVAL;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_setsr
+ *
+ * Description:
+ *   Configure PPG parameters.
+ *
+ * Input Parameters:
+ *   priv - Device struct.
+ *   cmd  - The special cmd for sensor.
+ *   arg  - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   0 (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_control(FAR struct max86178_dev_s *priv, int cmd,
+                                unsigned long arg)
+{
+  switch (cmd)
+    {
+      /* Set PPG LED current */
+
+      case MAX86178_PPG_CTRL_LEDPA:
+        {
+          uint8_t currentrange = (uint8_t)((arg >> 8) & 0xff);
+          uint8_t current = (uint8_t)(arg & 0xff);
+          uint8_t regval;
+
+          max86178_readsingle(priv, MAX86178_REG_MEAS1CFG4, &regval);
+          regval = regval & (~MAX86178_MEASXCFG4_LEDRGE_MASK);
+          regval = regval | (currentrange & MAX86178_MEASXCFG4_LEDRGE_MASK);
+          max86178_writesingle(priv, MAX86178_REG_MEAS1CFG4, regval);
+          max86178_readsingle(priv, MAX86178_REG_MEAS1LEDA, &regval);
+          regval = current;
+          max86178_writesingle(priv, MAX86178_REG_MEAS1LEDA, regval);
+        }
+        break;
+
+      default:
+        {
+          snerr("No such command.\n");
+          return -EINVAL;
+        }
+    }
+
+    return OK;
+}
+
+/****************************************************************************
  * Name: max86178_activate
  *
  * Description:
  *   Enable or disable sensor device. when enable sensor, sensor will
- *   work in  current mode(if not set, use default mode). when disable
+ *   work in current mode(if not set, use default mode). when disable
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
@@ -1223,13 +1341,13 @@ static int max86178_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (lower->type == SENSOR_TYPE_ECG)
     {
-      priv = (struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
       if (sensor->activated != enable)
         {
           ret = max86178_ecg_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable light sensor: %d\n", ret);
+              snerr("Failed to enable ecg sensor: %d\n", ret);
               return ret;
             }
 
@@ -1246,13 +1364,13 @@ static int max86178_activate(FAR struct sensor_lowerhalf_s *lower,
     }
   else if(lower->type == SENSOR_TYPE_PPG)
     {
-      priv = (struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
       if (sensor->activated != enable)
         {
           ret = max86178_ppg_enable(priv, enable);
           if (ret < 0)
             {
-              snerr("Failed to enable light sensor: %d\n", ret);
+              snerr("Failed to enable ppg sensor: %d\n", ret);
               return ret;
             }
 
@@ -1326,9 +1444,9 @@ static int max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
   if (lower->type == SENSOR_TYPE_ECG)
     {
-      priv = (struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
 
-      /* Find the period that matches best.  */
+      /* Find the period that matches best. */
 
       ret = max86178_ecg_setsr(priv, &freq);
       if (ret < 0)
@@ -1340,11 +1458,11 @@ static int max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
       *period_us = MAX86178_ONE_SECOND / freq;
       priv->dev[MAX86178_ECG_IDX].interval = *period_us;
     }
-  else if(lower->type == SENSOR_TYPE_GYROSCOPE)
+  else if(lower->type == SENSOR_TYPE_PPG)
     {
-      priv = (struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
 
-      /* Find the period that matches best.  */
+      /* Find the period that matches best. */
 
       ret = max86178_ppg_setfps(priv, &freq);
       if (ret < 0)
@@ -1389,7 +1507,7 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct max86178_sensor_s *sensor =
                                        (FAR struct max86178_sensor_s *)lower;
-  FAR struct max86178_dev_s * priv;
+  FAR struct max86178_dev_s *priv;
   uint32_t max_latency;
   uint8_t regval;
 
@@ -1416,11 +1534,11 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
       sensor->fifoen = true;
       if (lower->type == SENSOR_TYPE_ECG)
         {
-          priv = (struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
+          priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
         }
       else if(lower->type == SENSOR_TYPE_PPG)
         {
-          priv = (struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
+          priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
         }
       else
         {
@@ -1492,6 +1610,51 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   cmd   - The special cmd for sensor.
+ *   arg   - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
+                            unsigned long arg)
+{
+  FAR struct max86178_sensor_s *sensor =
+                                       (FAR struct max86178_sensor_s *)lower;
+  FAR struct max86178_dev_s * priv;
+
+  DEBUGASSERT(lower != NULL);
+
+  if (lower->type == SENSOR_TYPE_ECG)
+    {
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_ECG_IDX);
+      return max86178_ecg_control(priv, cmd, arg);
+    }
+  else if (lower->type == SENSOR_TYPE_PPG)
+    {
+      priv = (FAR struct max86178_dev_s *)(sensor - MAX86178_PPG_IDX);
+      return max86178_ppg_control(priv, cmd, arg);
+    }
+
+  snerr("Failed to match sensor type.\n");
+  return -EINVAL;
 }
 
 /****************************************************************************
@@ -1613,10 +1776,10 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
 
   /* Initialize the MAX86178 device structure */
 
-  priv = kmm_malloc(sizeof(*priv));
+  priv = kmm_zalloc(sizeof(*priv));
   if (!priv)
     {
-      snerr("ERROR: Failed to allocate instance\n");
+      snerr("Failed to allocate instance.\n");
       return -ENOMEM;
     }
 
@@ -1639,8 +1802,8 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   ret = max86178_checkid(priv);
   if (ret < 0)
     {
-      snerr("ERROR: Device ID doesn't match: %d\n", ret);
-      goto err;
+      snerr("Device ID doesn't match: %d\n", ret);
+      goto err_exit;
     }
 
   /* Device soft-reset */
@@ -1648,25 +1811,25 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   ret = max86178_softreset(priv);
   if (ret < 0)
     {
-      snerr("ERROR: Device can't be reset: %d\n", ret);
-      goto err;
+      snerr("Device can't be reset: %d\n", ret);
+      goto err_exit;
     }
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->intpin,
-                           IOEXPANDER_DIRECTION_IN_PULLDOWN);
+                           IOEXPANDER_DIRECTION_IN_PULLUP);
   if (ret < 0)
     {
       snerr("Failed to set direction: %d\n", ret);
-      goto err;
+      goto err_exit;
     }
 
-  ioehandle = IOEP_ATTACH(priv->config->ioedev, (1 << priv->config->intpin),
+  ioehandle = IOEP_ATTACH(priv->config->ioedev, priv->config->intpin,
                           max86178_interrupt_handler, priv);
   if (ioehandle == 0)
     {
-      snerr("Failed to attach: %d\n", ret);
       ret = -EIO;
-      goto err;
+      snerr("Failed to attach: %d\n", ret);
+      goto err_exit;
     }
 
   ret = IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
@@ -1674,7 +1837,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   if (ret < 0)
     {
       snerr("Failed to set option: %d\n", ret);
-      goto err;
+      goto err_iodetach;
     }
 
   /* Register the character driver */
@@ -1682,22 +1845,24 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   ret = sensor_register((&(priv->dev[MAX86178_ECG_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register ECG driver: %d\n", ret);
-      goto err;
+      snerr("Failed to register ECG driver: %d\n", ret);
+      goto err_iodetach;
     }
 
   ret = sensor_register((&(priv->dev[MAX86178_PPG_IDX].lower)), devno);
   if (ret < 0)
     {
-      snerr("ERROR: Failed to register PPG driver: %d\n", ret);
+      snerr("Failed to register PPG driver: %d\n", ret);
       sensor_unregister((&(priv->dev[MAX86178_ECG_IDX].lower)), devno);
-      goto err;
+      goto err_iodetach;
     }
 
   return ret;
 
-err:
+err_iodetach:
   IOEP_DETACH(priv->config->ioedev, max86178_interrupt_handler);
+
+err_exit:
   kmm_free(priv);
   return ret;
 }

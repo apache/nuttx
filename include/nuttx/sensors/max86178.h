@@ -53,6 +53,7 @@ struct max86178_config_s
 #else /* CONFIG_SENSORS_MAX86178_SPI */
   FAR struct spi_dev_s        *spi;       /* SPI interface instance */
   uint32_t                    cs;         /* SPI CS pin */
+  uint32_t                    gpiocs;     /* SPI CS pin number as GPIO */
 #endif
   FAR struct ioexpander_dev_s *ioedev;    /* Ioexpander device */
 };
