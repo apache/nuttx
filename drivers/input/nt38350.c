@@ -808,7 +808,7 @@ static int nvt_read_pid(FAR struct nt38350_dev_s *priv)
   nvt_pid = (buf[2] << 8) + buf[1];
   priv->nvt_pid = nvt_pid;
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("PID = %04x\n", nvt_pid);
 #endif
 
@@ -840,6 +840,13 @@ info_retry:
   priv->abs_x_max = (uint16_t)((buf[5] << 8) | buf[6]);
   priv->abs_y_max = (uint16_t)((buf[7] << 8) | buf[8]);
   priv->max_button_num = buf[11];
+
+#ifdef CONFIG_NVT_DEBUG
+  iinfo("fw_ver: 0x%02x, x_num: %d, y_num: %d,"
+        "abs_x_max: %d, abs_y_max: %d\n", priv->fw_ver,
+        priv->x_num, priv->y_num, priv->abs_x_max,
+        priv->abs_y_max);
+#endif
 
   if ((buf[1] + buf[2]) != 0xff)
     {
@@ -976,7 +983,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
 
       /* Get Touch IC ID */
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
       iinfo("buf[1]=0x%02x, buf[2]=0x%02x, buf[3]=0x%02x,"
             "buf[4]=0x%02x, buf[5]=0x%02x,buf[6]=0x%02x\n",
             buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
@@ -1016,7 +1023,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
 
           if (found_nvt_chip)
             {
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
               ierr("This NVT touch IC\n");
 #endif
               priv->mmap = g_trim_id_table[list].mmap;
@@ -1115,7 +1122,7 @@ static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
   uint32_t total_sectors_to_check;
 
   total_sectors_to_check = priv->fw_size / NVT_FLASH_SECTOR_SIZE;
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("total_sectors_to_check %d\n", total_sectors_to_check);
 #endif
 
@@ -1127,7 +1134,7 @@ static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
           NVT_FLASH_END_FLAG_LEN], "NVT", NVT_FLASH_END_FLAG_LEN) == 0)
         {
           priv->fw_need_write_size = i * NVT_FLASH_SECTOR_SIZE;
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
           iinfo("fw_need_write_size = %zu(0x%zx)\n",
                 priv->fw_need_write_size,
                 priv->fw_need_write_size);
@@ -2225,7 +2232,7 @@ static int nvt_check_fw_ver(FAR struct nt38350_dev_s *priv,
       return ret;
     }
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("IC FW Ver = 0x%02X, FW Ver Bar = 0x%02X\n", buf[1], buf[2]);
   iinfo("Bin FW Ver = 0x%02X, FW ver Bar = 0x%02X\n",
         data[nvt_fw_bin_ver_offset],
@@ -2369,7 +2376,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   /* buf[3:5] => NVT End Flag */
 
   strncpy(nvt_end_flag, &buf[3], NVT_FLASH_END_FLAG_LEN);
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("nvt_end_flag=%s (%02X %02X %02X)\n",
         nvt_end_flag, buf[3], buf[4], buf[5]);
 #endif
@@ -2572,7 +2579,7 @@ static void nvt_read_mdata(FAR struct nt38350_dev_s *priv,
   loop_cnt = data_len / NVT_BUS_TRANSFER_LENGTH;
   residual_len = data_len % NVT_BUS_TRANSFER_LENGTH;
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("data_len=%d, loop_cnt=%d, residual_len=%d\n",
         data_len, loop_cnt, residual_len);
 #endif
@@ -2747,7 +2754,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
   uint32_t input_x2     = 0;
   uint32_t input_y1     = 0;
   uint32_t input_y2     = 0;
-  char     *csv_file_path = "/mnt/data/NVTLogData.csv";
+  char     *csv_file_path = CONFIG_NVTLOG_PATH;
   FAR struct nt38350_dev_s    *priv = (FAR struct nt38350_dev_s *)arg;
   struct tm tm =
   {
@@ -2837,7 +2844,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
 
   sprintf(fbufp  + 93 + (iarrayindex + 1) * 7 + (y * 2), "\r\n");
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("%s", fbufp);
 #endif
 
@@ -3731,7 +3738,7 @@ static void nt38350_notify(FAR struct nt38350_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
           iinfo("Report events: %02x\n", fds->revents);
 #endif
           nxsem_post(fds->sem);
@@ -3923,10 +3930,10 @@ static void nt38350_data_worker(FAR void *arg)
               if (input_p > NVT_TOUCH_FORCE_NUM)
                   input_p = NVT_TOUCH_FORCE_NUM;
             }
-        else
-        {
-           input_p = (uint32_t)(point_data[position + 5]);
-        }
+          else
+            {
+              input_p = (uint32_t)(point_data[position + 5]);
+            }
 
           if (input_p == 0)
             input_p = 1;
@@ -4218,7 +4225,7 @@ static ssize_t nt38350_read(FAR struct file *filep, FAR char *buffer,
                                 TOUCH_POS_VALID;
     }
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("  id:      %d\n",   report->point[0].id);
   iinfo("  flags:   %02x\n", report->point[0].flags);
   iinfo("  x:       %d\n",   report->point[0].x);
@@ -4416,8 +4423,8 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   FAR struct nt38350_dev_s *priv;
   int ret;
 
-#if NVT_DEBUG
-  iinfo("dev: %p devname: %s \n", dev, devname);
+#ifdef CONFIG_NVT_DEBUG
+  iinfo("devname: %s \n", devname);
 #endif
 
   DEBUGASSERT(config != NULL && devname != NULL);
@@ -4437,7 +4444,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
   priv->fw_path = CONFIG_NT38350_FW_PATH; /* Set up firmware path */
 
-#if NVT_DEBUG
+#ifdef CONFIG_NVT_DEBUG
   iinfo("RST %d IRQ %d %d\n", priv->config->gpio_rst_pin,
         priv->config->gpio_irq_pin, __LINE__);
 #endif
