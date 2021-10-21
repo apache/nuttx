@@ -1129,13 +1129,13 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
       while (ret < 0);
       dev->cd_ntxwaiters--;
 
-      ndx = dev->cd_xmit.tx_head + 1;
+      ndx = dev->cd_xmit.tx_tail + 1;
       if (ndx >= CONFIG_CAN_FIFOSIZE)
         {
           ndx = 0;
         }
 
-      if (ndx != dev->cd_xmit.tx_tail)
+      if (ndx != dev->cd_xmit.tx_head)
         {
           eventset |= fds->events & POLLOUT;
         }
