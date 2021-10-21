@@ -291,6 +291,15 @@ static int exfatfs_open(FAR struct file *filep, FAR const char *relpath,
           goto nodeout;
         }
 
+      /* In append mode, we need to set the file pointer to the end of the
+       * file.
+       */
+
+      if (oflags & O_APPEND)
+        {
+          filep->f_pos = node->size;
+        }
+
       /* If O_TRUNC is specified and the file is opened for writing,
        * then truncate the file.  This operation requires that the file is
        * writeable, but we have already checked that. O_TRUNC without write
