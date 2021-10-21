@@ -131,13 +131,13 @@
 
 /* Factory test instructions. */
 
-#define LSM6DSO_ID_CMD           0x60        /* Read device ID */
-#define LSM6DSO_ST_CMD           0x61        /* Start selftest */
+#define LSM6DSO_SIMPLE_CHECK      0x00       /* Simple check */
+#define LSM6DSO_FULL_CHECK        0x01       /* Full check */
 
 /* Factory test results. */
 
-#define LSM6DSO_FT_SUCCESS        true       /* Factory test success */
-#define LSM6DSO_FT_FAILED         false      /* Factory test failed */
+#define LSM6DSO_ST_PASS           0          /* Pass ST test */
+#define LSM6DSO_ST_FAIL           -1         /* Failed ST test */
 
 /* Self test results. */
 
@@ -592,7 +592,7 @@ static void lsm6dso_spi_write(FAR struct lsm6dso_dev_s *priv,
 /* Lsm6dso handle functions */
 
 static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv);
-static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv, int type);
+static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type);
 static int lsm6dso_reset(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_resetwait(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_seti3c(FAR struct lsm6dso_dev_s *priv, uint8_t value);
@@ -666,21 +666,14 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned int *period_us);
 static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
-static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
-                           int cmd, unsigned long arg);
+static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg);
 
 /* Sensor interrupt functions */
 
 static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
 static void lsm6dso_worker(FAR void *arg);
-
-/* Factory test functions */
-
-static int lsm6dso_factory_readid(FAR struct lsm6dso_dev_s *priv,
-                                  void *arg);
-static int lsm6dso_factory_selftest(FAR struct lsm6dso_dev_s *priv,
-                                    int type, void *arg);
 
 /****************************************************************************
  * Private Data
@@ -691,7 +684,7 @@ static const struct sensor_ops_s g_lsm6dso_xl_ops =
   .activate = lsm6dso_activate,         /* Enable/disable sensor */
   .set_interval = lsm6dso_set_interval, /* Set output data period */
   .batch = lsm6dso_batch,               /* Set maximum report latency */
-  .control = lsm6dso_control            /* Set special config for sensor */
+  .selftest = lsm6dso_selftest          /* Sensor selftest function */
 };
 
 static const struct sensor_ops_s g_lsm6dso_gy_ops =
@@ -699,7 +692,7 @@ static const struct sensor_ops_s g_lsm6dso_gy_ops =
   .activate = lsm6dso_activate,         /* Enable/disable sensor */
   .set_interval = lsm6dso_set_interval, /* Set output data period */
   .batch = lsm6dso_batch,               /* Set maximum report latency */
-  .control = lsm6dso_control            /* Set special config for sensor */
+  .selftest = lsm6dso_selftest          /* Sensor selftest function */
 };
 
 static const struct lsm6dso_odr_s g_lsm6dso_xl_odr[] =
@@ -918,7 +911,7 @@ static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: lsm6dso_selftest
+ * Name: lsm6dso_datatest
  *
  * Description:
  *   Selftesting the sensor.
@@ -935,7 +928,7 @@ static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv)
  *
  ****************************************************************************/
 
-static int lsm6dso_selftest(FAR struct lsm6dso_dev_s *priv, int type)
+static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
 {
   struct sensor_event_accel temp_xl;
   struct sensor_event_gyro temp_gy;
@@ -2793,30 +2786,29 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: lsm6dso_control
+ * Name: lsm6dso_selftest
  *
- * Description:
- *   With this method, the user can set some special config for the sensor,
- *   such as changing the custom mode, setting the custom resolution, reset,
- *   etc, which are all parsed and implemented by lower half driver.
+ * Selftest allows for the testing of the mechanical and electrical
+ * portions of the sensors. When the selftest is activated, the
+ * electronics cause the sensors to be actuated and produce an output
+ * signal. The output signal is used to observe the selftest response.
+ * When the selftest response exceeds the min/max values,
+ * the part is deemed to have failed selftest.
  *
  * Input Parameters:
  *   lower      - The instance of lower half sensor driver.
- *   cmd        - The special cmd for sensor.
- *   arg        - The parameters associated with cmd.
+ *   arg        - The parameters associated with selftest.
  *
  * Returned Value:
  *   Zero (OK) on success; a negated errno value on failure.
- *   -ENOTTY    - The cmd don't support.
- *   -EINVAL    - Failed to match sensor type.
  *
  * Assumptions/Limitations:
  *   none.
  *
  ****************************************************************************/
 
-static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
-                           int cmd, unsigned long arg)
+static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
   FAR struct lsm6dso_dev_s * priv;
@@ -2840,29 +2832,25 @@ static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
 
   /* Process ioctl commands. */
 
-  switch (cmd)
+  switch (arg)
     {
-      case LSM6DSO_ID_CMD:    /* Read device ID cmd tag */
+      case LSM6DSO_SIMPLE_CHECK:    /* Simple check tag */
         {
-          ret = lsm6dso_factory_readid(priv, arg);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to get DeviceID: %d\n", ret);
-            }
+          /* Read device ID. */
+
+          ret = lsm6dso_readdevid(priv);
         }
         break;
 
-      case LSM6DSO_ST_CMD:    /* Start selftest cmd tag */
+      case LSM6DSO_FULL_CHECK:      /* Full check tag */
         {
-          ret = lsm6dso_factory_selftest(priv, lower->type, arg);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to selftest: %d\n", ret);
-            }
+          /* Run selftest. */
+
+          ret = lsm6dso_datatest(priv, lower->type);
         }
         break;
 
-      default:                /* Other cmd tag */
+      default:                      /* Other cmd tag */
         {
           ret = -ENOTTY;
           snerr("ERROR: The cmd don't support: %d\n", ret);
@@ -3002,98 +2990,6 @@ static void lsm6dso_worker(FAR void *arg)
                 sizeof(struct sensor_event_gyro));
         }
     }
-}
-
-/* Factory test functions */
-
-/****************************************************************************
- * Name: lsm6dso_factory_readid
- *
- * Description:
- *   Read device ID in factory test.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   arg   - The parameters associated with cmd.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   none.
- *
- ****************************************************************************/
-
-static int lsm6dso_factory_readid(FAR struct lsm6dso_dev_s *priv, void *arg)
-{
-  bool *buffer = arg;
-  int ret;
-
-  /* Sanity check. */
-
-  DEBUGASSERT(arg != NULL);
-
-  /* Read device ID. */
-
-  ret = lsm6dso_readdevid(priv);
-  if (ret >= 0)
-    {
-      *buffer = LSM6DSO_FT_SUCCESS;  /* Read device ID success */
-    }
-  else
-    {
-      *buffer = LSM6DSO_FT_FAILED;   /* Read device ID failed */
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_factory_selftest
- *
- * Description:
- *   Start selftest in factory test.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   type  - Sensor type.
- *   arg   - The parameters associated with cmd.
- *
- * Returned Value:
- *   Zero (OK) on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   none.
- *
- ****************************************************************************/
-
-static int lsm6dso_factory_selftest(FAR struct lsm6dso_dev_s *priv,
-                                    int type, void *arg)
-{
-  bool *buffer = arg;
-  int ret;
-
-  /* Sanity check. */
-
-  DEBUGASSERT(arg != NULL);
-
-  /* Run selftest. */
-
-  ret = lsm6dso_selftest(priv, type);
-  if (ret == LSM6DSO_ST_PASS)
-    {
-      *buffer = LSM6DSO_FT_SUCCESS;     /* Selftest success */
-    }
-  else if (ret == LSM6DSO_ST_FAIL)
-    {
-      *buffer = LSM6DSO_FT_FAILED;      /* Selftest failed */
-    }
-  else
-    {
-      return ret;
-    }
-
-  return OK;
 }
 
 /****************************************************************************
