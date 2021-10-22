@@ -2004,10 +2004,6 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
 
   chip = priv->chip;
 
-  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
-  ASSERT((mtd_offset % chip->sector_size) == 0);
-  ASSERT((mtd_size % chip->sector_size) == 0);
-
   finfo("ESP32 SPI Flash information:\n");
   finfo("\tID = 0x%x\n", chip->device_id);
   finfo("\tStatus mask = %x\n", chip->status_mask);
@@ -2015,6 +2011,10 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   finfo("\tPage size = %d B\n", chip->page_size);
   finfo("\tSector size = %d KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %d KB\n", chip->block_size / 1024);
+
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   if (mtd_size == 0)
     {
