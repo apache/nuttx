@@ -30,19 +30,19 @@ choice ESP32_SPIFLASH_FS
 
 	config ESP32_SPIFLASH_SMARTFS
 		bool "SmartFS"
-		depends on FS_SMARTFS
+		select FS_SMARTFS
 
 	config ESP32_SPIFLASH_NXFFS
 		bool "NXFFS"
-		depends on FS_NXFFS
+		select FS_NXFFS
 
 	config ESP32_SPIFLASH_SPIFFS
 		bool "SPIFFS"
-		depends on FS_SPIFFS
+		select FS_SPIFFS
 
 	config ESP32_SPIFLASH_LITTLEFS
 		bool "LittleFS"
-		depends on FS_LITTLEFS
+		select FS_LITTLEFS
 
 endchoice
 
