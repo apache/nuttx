@@ -111,6 +111,18 @@ config NVT_DEBUG
 	---help---
 		Say yes here enable NVT debug log.
 
+config NVT_TOUCH_DEFAULT_WIDTH
+	int "NovaTek NT38350 default width"
+	default 480
+	---help---
+		Set up touch panel default width
+
+config NVT_TOUCH_DEFAULT_HEIGHT
+	int "NovaTek NT38350 default height"
+	default 480
+	---help---
+		Set up touch panel default height
+
 config NT38350_NEED_UPGRADE_FW
 	bool "NovaTek NT38350 Firmware Need Upgrade"
 	default n

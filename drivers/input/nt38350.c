@@ -61,6 +61,14 @@
 #  define CONFIG_NT38350_NPOLLWAITERS 2
 #endif
 
+#ifndef CONFIG_NVT_TOUCH_DEFAULT_WIDTH
+# define CONFIG_NVT_TOUCH_DEFAULT_WIDTH 480
+#endif
+
+#ifndef CONFIG_NVT_TOUCH_DEFAULT_HEIGHT
+# define CONFIG_NVT_TOUCH_DEFAULT_HEIGHT 480
+#endif
+
 #define NVT_DEV_FORMAT               "/dev/input%d"
 #define NVT_DEV_NAMELEN              16
 #define NVT_IIC_RETRY_NUM            2
@@ -68,9 +76,9 @@
 #define NVT_I2C_BLDR_ADDRESS         0x01
 #define NVT_I2C_FW_ADDRESS           0x01
 #define NVT_I2C_HW_ADDRESS           0x62
-#define NVT_TOUCH_DEFAULT_MAX_WIDTH  430
-#define NVT_TOUCH_DEFAULT_MAX_HEIGHT 372
-#define NVT_TOUCH_MAX_FINGER_NUM     2
+#define NVT_TOUCH_DEFAULT_MAX_WIDTH  CONFIG_NVT_TOUCH_DEFAULT_WIDTH
+#define NVT_TOUCH_DEFAULT_MAX_HEIGHT CONFIG_NVT_TOUCH_DEFAULT_HEIGHT
+#define NVT_TOUCH_MAX_FINGER_NUM     1
 #define NVT_TOUCH_KEY_NUM            0
 #define NVT_TOUCH_FORCE_NUM          1000
 #define NVT_CHIP_VER_TRIM_ADDR       0x3f004
@@ -221,6 +229,7 @@ struct nt38350_dev_s
   FAR struct                    i2c_master_s *i2c; /* Saved I2C driver instance */
   struct work_s                 work;              /* Supports the interrupt handling "bottom half" */
   struct ts_nt38350_sample_s    sample;            /* Last sampled touch point data */
+  struct ts_nt38350_sample_s    old_sample;        /* Old sampled touch point data */
 
   /* Touch info */
 
@@ -960,7 +969,12 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
   int32_t ret = -1;
   int32_t i;
 
-  nvt_bootloader_reset(priv);
+  ret = nvt_bootloader_reset(priv);
+  if (ret != OK)
+    {
+      ret = -ENODEV;
+      return ret;
+    }
 
   for (retry = 5; retry > 0; retry--)
     {
@@ -3882,6 +3896,16 @@ static void nt38350_data_worker(FAR void *arg)
       ierr("Point data read failed!\n");
     }
 
+#ifdef CONFIG_NVT_DEBUG
+  for (i = 0; i < 1; i++)
+    {
+      iinfo("0x%02x, 0x%02x, 0x%02x, 0x%02x 0x%02x, 0x%02x\n",
+            point_data[1 + i * 6], point_data[2 + i * 6],
+            point_data[3 + i * 6], point_data[4 + i * 6],
+            point_data[5 + i * 6], point_data[6 + i * 6]);
+    }
+#endif
+
 #ifdef CONFIG_NVT_OFFLINE_LOG
   memcpy(priv->point_xdata_temp, (point_data + 1), NVT_POINT_DATA_LEN);
   memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN),
@@ -3897,16 +3921,12 @@ static void nt38350_data_worker(FAR void *arg)
   for (i = 0; i < priv->max_touch_num; i++)
     {
       position = 1 + 6 * i;
-      input_id = (uint8_t)(point_data[position + 0] >> 3);
-      if ((input_id == 0) || (input_id > priv->max_touch_num))
-        continue;
-
       if (((point_data[position] & 0x07) == FINGER_DOWN) ||
           ((point_data[position] & 0x07) == FINGER_MOVE))
         {
           if ((point_data[position] & 0x07) == FINGER_DOWN)
             priv->sample.contact = CONTACT_DOWN;
-          if ((point_data[position] & 0x07) == FINGER_MOVE)
+          else if ((point_data[position] & 0x07) == FINGER_MOVE)
             priv->sample.contact = CONTACT_MOVE;
           input_x = (uint32_t)(point_data[position + 1] << 4) +
                     (uint32_t) (point_data[position + 3] >> 4);
@@ -3938,19 +3958,15 @@ static void nt38350_data_worker(FAR void *arg)
           if (input_p == 0)
             input_p = 1;
           priv->sample.pressure = input_p;
+          priv->old_sample = priv->sample;
         }
       else if (point_data[position] == FINGER_UP)
         {
           priv->sample.contact = CONTACT_UP;
-#ifdef CONFIG_ROTATION
-          priv->sample.x = NVT_TOUCH_DEFAULT_MAX_WIDTH - input_x;
-          priv->sample.y = NVT_TOUCH_DEFAULT_MAX_HEIGHT - input_y;
-#else
-          priv->sample.x = input_x;
-          priv->sample.y = input_y;
-#endif
-          priv->sample.width = input_w;
-          priv->sample.pressure = input_p;
+          priv->sample.x = priv->old_sample.x;
+          priv->sample.y = priv->old_sample.y;
+          priv->sample.width = priv->old_sample.width;
+          priv->sample.pressure = priv->old_sample.pressure;
         }
       else
         {
@@ -4217,7 +4233,7 @@ static ssize_t nt38350_read(FAR struct file *filep, FAR char *buffer,
       report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
                                 TOUCH_POS_VALID;
     }
-  else /* if (sample->contact == CONTACT_MOVE) */
+  else if (sample.contact == CONTACT_MOVE)/* if (sample->contact == CONTACT_MOVE) */
     {
       /* Movement of the same contact */
 
@@ -4318,6 +4334,12 @@ static int nt38350_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 #endif
+      case TSIOC_UPGRADEFW:
+        {
+          FAR int *ptr = (FAR int *)((uintptr_t)arg);
+          *ptr = nvt_boot_update_firmware(priv);
+        }
+        break;
       default:
         ret = -ENOTTY;
         break;
@@ -4513,7 +4535,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
   return OK;
 errout_with_priv:
-  kmm_free(priv);
   nxsem_destroy(&priv->devsem);
+  kmm_free(priv);
   return ret;
 }

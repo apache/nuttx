@@ -57,6 +57,7 @@
 
 #define TSIOC_GETNVTDIFF     _TSIOC(0x0006)  /* arg: Pointer to get struct nvt_diff_s */
 #define TSIOC_SELFTEST       _TSIOC(0x0007)  /* arg: Pointer to int self test value */
+#define TSIOC_UPGRADEFW      _TSIOC(0x0008)  /* arg: Pointer to int upgrade fw value */
 
 /****************************************************************************
  * Public Types
