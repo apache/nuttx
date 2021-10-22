@@ -31,6 +31,7 @@ choice ESP32_SPIFLASH_FS
 	config ESP32_SPIFLASH_SMARTFS
 		bool "SmartFS"
 		select FS_SMARTFS
+		select MTD_SMART
 
 	config ESP32_SPIFLASH_NXFFS
 		bool "NXFFS"
