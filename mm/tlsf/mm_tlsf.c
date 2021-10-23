@@ -38,6 +38,7 @@
 #include <nuttx/mm/mm.h>
 
 #include "tlsf/tlsf.h"
+#include "kasan/kasan.h"
 
 /****************************************************************************
  * Private Types
@@ -323,6 +324,10 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 # define idx 0
 #endif
 
+  /* Register to KASan for access check */
+
+  kasan_register(heapstart, &heapsize);
+
   DEBUGVERIFY(mm_takesemaphore(heap));
 
   minfo("Region %d: base=%p size=%zu\n", idx + 1, heapstart, heapsize);
@@ -511,6 +516,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
       return;
     }
 
+  kasan_poison(mem, mm_malloc_size(mem));
+
   if (mm_takesemaphore(heap))
     {
       /* Pass, return to the tlsf pool */
@@ -520,6 +527,8 @@ void mm_free(FAR struct mm_heap_s *heap, FAR void *mem)
     }
   else
     {
+      kasan_unpoison(mem, mm_malloc_size(mem));
+
       /* Add to the delay list(see the comment in mm_takesemaphore) */
 
       mm_add_delaylist(heap, mem);
@@ -721,6 +730,11 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   ret = tlsf_malloc(heap->mm_tlsf, size);
   mm_givesemaphore(heap);
 
+  if (ret)
+    {
+      kasan_unpoison(ret, size);
+    }
+
   return ret;
 }
 
@@ -751,6 +765,11 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
   DEBUGVERIFY(mm_takesemaphore(heap));
   ret = tlsf_memalign(heap->mm_tlsf, alignment, size);
   mm_givesemaphore(heap);
+
+  if (ret)
+    {
+      kasan_unpoison(ret, size);
+    }
 
   return ret;
 }
@@ -789,9 +808,19 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
+  if (oldmem)
+    {
+      kasan_poison(oldmem, mm_malloc_size(oldmem));
+    }
+
   DEBUGVERIFY(mm_takesemaphore(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
   mm_givesemaphore(heap);
+
+  if (newmem)
+    {
+      kasan_unpoison(newmem, size);
+    }
 
   return newmem;
 }
