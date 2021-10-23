@@ -23,11 +23,7 @@ include $(TOPDIR)/Make.defs
 # Sources and paths
 
 include mm_heap/Make.defs
-ifeq ($(CONFIG_MM_DMALLOC),y)
-include dmalloc/Make.defs
-else
 include umm_heap/Make.defs
-endif
 include kmm_heap/Make.defs
 include mm_gran/Make.defs
 include shm/Make.defs
