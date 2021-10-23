@@ -42,10 +42,12 @@
 struct lps27hhw_config_s
 {
   uint8_t addr;                           /* I2C address */
-  int pin;                                /* Interrupt pin */
   int freq;                               /* I2C frequency */
-  FAR struct i2c_master_s *i2c;           /* I2C interface */
+#ifdef CONFIG_LPS27HHW_MODE_INT
+  int pin;                                /* Interrupt pin */
   FAR struct ioexpander_dev_s *ioedev;    /* Ioexpander device */
+#endif
+  FAR struct i2c_master_s *i2c;           /* I2C interface */
 };
 
 /****************************************************************************

@@ -87,7 +87,11 @@
 #define LPS27HHW_DEFAULT_LATENCY       (10000)   /* Default latency */
 #define LPS27HHW_DEFAULT_FIFOWTM       (1)       /* Default fifo watermark */
 #define LPS27HHW_DEFAULT_BUFFER_NUMBER (1)       /* Default buffer number */
+#ifdef CONFIG_LPS27HHW_MODE_INT
 #define LPS27HHW_FIFO_SLOTS_NUMBER     (128)     /* Default FIFO slots number */
+#else
+#define LPS27HHW_FIFO_SLOTS_NUMBER     (2)       /* Default FIFO slots number */
+#endif
 
 /* Register map */
 
@@ -238,6 +242,10 @@ struct lps27hhw_sensor_s
   uint32_t                  latency;             /* Sensor batch latency */
   uint32_t                  fifowtm;             /* Sensor fifo water marker */
   uint64_t                  timestamp;           /* Units is microseconds */
+#ifdef CONFIG_LPS27HHW_MODE_POLL
+  uint64_t                  start_timestamp;     /* Start timestamp(us) */
+  uint64_t                  sample_count;        /* The count of sampling */
+#endif
 };
 
 /* Device struct */
@@ -323,7 +331,9 @@ static const struct sensor_ops_s g_lps27hhw_ops =
 {
   .activate = lps27hhw_activate,         /* Enable/disable sensor */
   .set_interval = lps27hhw_set_interval, /* Set output data period */
+#ifdef CONFIG_LPS27HHW_MODE_INT
   .batch = lps27hhw_batch                /* Set maximum report latency */
+#endif
 };
 
 /* Sensor ODR */
@@ -685,8 +695,8 @@ static int lps27hhw_setodr(FAR struct lps27hhw_dev_s *priv,
   int ret;
 
   ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL1,
-                         LPS27HHW_MASK_CTRL1_ODR, odr
-                         << LPS27HHW_SHIFT_CTRL1_ODR);
+                           LPS27HHW_MASK_CTRL1_ODR, odr
+                           << LPS27HHW_SHIFT_CTRL1_ODR);
   if (ret < 0)
     {
       snerr("ERROR: Failed to set data rate\n");
@@ -720,8 +730,8 @@ static int lps27hhw_setlpfilter(FAR struct lps27hhw_dev_s *priv,
   int ret;
 
   ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL1,
-                         LPS27HHW_MASK_CTRL1_EN_LPFP, value
-                         << LPS27HHW_SHIFT_CTRL1_EN_LPFP);
+                           LPS27HHW_MASK_CTRL1_EN_LPFP, value
+                           << LPS27HHW_SHIFT_CTRL1_EN_LPFP);
   if (ret < 0)
     {
       snerr("ERROR: Failed to set low-pass filter\n");
@@ -1157,7 +1167,7 @@ static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push)
 
       if (i > LPS27HHW_FIFO_SLOTS_NUMBER)
         {
-          snerr("ERROR: Reading is  over max FIFO slots\n");
+          snerr("ERROR: Reading is  over max FIFO slots: %d\n", i);
           return -EIO;
         }
     }
@@ -1223,6 +1233,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
       return ret;
     }
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
   /* Configure int pin:
    * pulsed, active low and open-drain.
    */
@@ -1265,6 +1276,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
       snerr("ERROR: Failed to set int type: data ready\n");
       return ret;
     }
+#endif /* CONFIG_LPS27HHW_MODE_INT */
 
   /* Set block data update: output registers not updated
    * until MSB and LSB have been read
@@ -1546,18 +1558,37 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
           snerr("ERROR: Failed to set chip powerdown\n");
           return ret;
         }
+
+      work_cancel(HPWORK, &priv->work);
     }
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
   /* Enable/disable interrupt */
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                   IOEXPANDER_OPTION_INTCFG,
                   enable ? IOEXPANDER_VAL_FALLING : IOEXPANDER_VAL_DISABLE);
+#else
+  if (enable)
+    {
+      priv->dev.start_timestamp = sensor_get_timestamp();
+      priv->dev.sample_count = 1;
+
+      work_queue(HPWORK, &priv->work, lps27hhw_worker, priv,
+                 priv->dev.interval / USEC_PER_TICK);
+    }
+  else
+    {
+      work_cancel(HPWORK, &priv->work);
+    }
+#endif
+
   priv->dev.activated = enable;
 
   return ret;
 }
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
 /* Sensor interrupt functions */
 
 /****************************************************************************
@@ -1609,6 +1640,7 @@ static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   return OK;
 }
+#endif /* CONFIG_LPS27HHW_MODE_INT */
 
 /****************************************************************************
  * Name: lps27hhw_worker
@@ -1632,15 +1664,45 @@ static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 static void lps27hhw_worker(FAR void *arg)
 {
   FAR struct lps27hhw_dev_s *priv = arg;
+#ifdef CONFIG_LPS27HHW_MODE_POLL
+  int interval;
+#endif
 
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
   /* Enable interrupt */
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                   IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+
+#else
+  /* Get the timestamp */
+
+  priv->dev.timestamp = sensor_get_timestamp();
+
+  /* Update the number of sampling points. */
+
+  priv->dev.sample_count++;
+
+  /* Get fixed interval */
+
+  interval = priv->dev.start_timestamp +
+             priv->dev.sample_count * priv->dev.interval -
+             priv->dev.timestamp;
+
+  /* If it is negative, need to start immediately to compensate the time */
+
+  if (interval < 0)
+    {
+      interval = 0;
+    }
+
+  work_queue(HPWORK, &priv->work, lps27hhw_worker, priv,
+             interval / USEC_PER_TICK);
+#endif
 
   /* Read the latest sensor data and push to uppe half */
 
@@ -1674,7 +1736,9 @@ static void lps27hhw_worker(FAR void *arg)
 int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
 {
   FAR struct lps27hhw_dev_s *priv;
+#ifdef CONFIG_LPS27HHW_MODE_INT
   void *ioephandle;
+#endif
   int ret;
 
   /* Sanity check */
@@ -1708,6 +1772,7 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
       goto err;
     }
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
   /* Interrupt register */
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->pin,
@@ -1718,7 +1783,7 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
       goto err;
     }
 
-  ioephandle = IOEP_ATTACH(priv->config->ioedev, 1 << (priv->config->pin),
+  ioephandle = IOEP_ATTACH(priv->config->ioedev, priv->config->pin,
                            lps27hhw_interrupt_handler, (void *)priv);
   if (ioephandle == NULL)
     {
@@ -1734,6 +1799,7 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
       snerr("ERROR: Failed to set option: %d\n", ret);
       goto irq_err;
     }
+#endif
 
   /* Register the character driver */
 
@@ -1742,13 +1808,19 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       sensor_unregister(&priv->dev.lower, devno);
+#ifdef CONFIG_LPS27HHW_MODE_INT
       goto irq_err;
+#else
+      goto err;
+#endif
     }
 
   return ret;
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
 irq_err:
   IOEP_DETACH(priv->config->ioedev, lps27hhw_interrupt_handler);
+#endif
 
 err:
   kmm_free(priv);
