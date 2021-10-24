@@ -165,7 +165,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
   FAR struct mqueue_inode_s *msgq;
   FAR struct mq_attr *attr = NULL;
   struct inode_search_s desc;
-  char fullpath[MAX_MQUEUE_PATH];
+  FAR char *fullpath;
   mode_t mode = 0;
   int ret;
 
@@ -204,6 +204,14 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
   while (*mq_name == '/')
     {
       mq_name++;
+    }
+
+  fullpath = (FAR char *)kmm_malloc(MAX_MQUEUE_PATH);
+
+  if (NULL == fullpath)
+    {
+      ret = -ENOMEM;
+      goto errout;
     }
 
   /* Get the full path to the message queue */
@@ -325,6 +333,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
   RELEASE_SEARCH(&desc);
   sched_unlock();
+  kmm_free(fullpath);
   return OK;
 
 errout_with_inode:
@@ -333,6 +342,7 @@ errout_with_inode:
 errout_with_lock:
   RELEASE_SEARCH(&desc);
   sched_unlock();
+  kmm_free(fullpath);
 
 errout:
   return ret;

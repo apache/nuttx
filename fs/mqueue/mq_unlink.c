@@ -98,8 +98,16 @@ int file_mq_unlink(FAR const char *mq_name)
 {
   FAR struct inode *inode;
   struct inode_search_s desc;
-  char fullpath[MAX_MQUEUE_PATH];
+  FAR char *fullpath;
   int ret;
+
+  fullpath = (FAR char *)kmm_malloc(MAX_MQUEUE_PATH);
+
+  if (NULL == fullpath)
+    {
+      ret = -ENOMEM;
+      goto errout;
+    }
 
   /* Get the full path to the message queue */
 
@@ -173,6 +181,7 @@ int file_mq_unlink(FAR const char *mq_name)
   mq_inode_release(inode);
   RELEASE_SEARCH(&desc);
   sched_unlock();
+  kmm_free(fullpath);
   return OK;
 
 errout_with_semaphore:
@@ -184,6 +193,9 @@ errout_with_inode:
 errout_with_search:
   RELEASE_SEARCH(&desc);
   sched_unlock();
+  kmm_free(fullpath);
+
+errout:
   return ret;
 }
 
