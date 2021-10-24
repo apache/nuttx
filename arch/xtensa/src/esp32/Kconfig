@@ -1124,7 +1124,7 @@ config ESP32_WIFI_SAVE_PARAM
 			- Wi-Fi hardware configuration parameters
 
 config ESP32_WIFI_FS_MOUNTPT
-	string "Save Wi-Fi Parameters"
+	string "Wi-Fi parameters mount point"
 	default "/mnt/esp/wifi"
 	depends on ESP32_WIFI_SAVE_PARAM
 	---help---
