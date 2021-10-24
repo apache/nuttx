@@ -884,17 +884,17 @@ config ESP32_OTA_SCRATCH_DEVPATH
 
 endif
 
-comment "General MTD configuration"
+comment "General storage MTD configuration"
 
-config ESP32_MTD_OFFSET
-	hex "MTD base address in SPI Flash"
+config ESP32_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32_HAVE_OTA_PARTITION
 	default 0x250000 if ESP32_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
-config ESP32_MTD_SIZE
-	hex "MTD size in SPI Flash"
+config ESP32_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
 	default 0x100000
 	---help---
 		MTD size in SPI Flash.
