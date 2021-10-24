@@ -513,7 +513,7 @@ void umm_givesemaphore(sem_t *sem);
 #include <stdio.h>
 
 ssize_t umm_write(int fd, FAR const void *buf, size_t nbytes);
-ssize_t umm_fwrite(FAR const void *ptr, size_t size, size_t items, FAR FILE *stream);
+ssize_t umm_fwrite(const void *ptr, size_t size, size_t items, FILE *stream);
 
 #define write umm_write
 #define fwrite umm_fwrite

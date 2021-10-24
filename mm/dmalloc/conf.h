@@ -181,7 +181,7 @@ void *sbrk(intptr_t incr);
  * that later versions of gcc have support for this and maybe other
  * compilers do as well.
  */
-#define CONSTRUCTOR_WORKS 1
+#define CONSTRUCTOR_WORKS 0
 
 /*
  * See whether support exists for the destructor attribute which
@@ -189,7 +189,7 @@ void *sbrk(intptr_t incr);
  * that later versions of gcc have support for this and maybe other
  * compilers do as well.
  */
-#define DESTRUCTOR_WORKS 1
+#define DESTRUCTOR_WORKS 0
 
 /*
  * See if we have the GetEnvironmentVariableA Cygwin function.  This
@@ -245,7 +245,7 @@ void *sbrk(intptr_t incr);
 #define HAVE_MEMALIGN 1
 #define HAVE_VALLOC 1
 
-#ifdef CONFIG_UNWINDER
+#ifdef CONFIG_SCHED_BACKTRACE
 #define HAVE_BACKTRACE 1
 #else
 #define HAVE_BACKTRACE 0

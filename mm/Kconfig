@@ -49,12 +49,12 @@ config MM_DMALLOC_FREED_POINTER_DELAY
 config MM_DMALLOC_MAX_BACKTRACE_DEPTH
 	int "dmalloc max backtrace depth"
 	default 8
-	depends on UNWINDER
+	depends on SCHED_BACKTRACE
 
 config MM_DMALLOC_MAX_TAB_BACKTRACE_DEPTH
 	int "dmalloc max table backtrace depth"
 	default MM_DMALLOC_MAX_BACKTRACE_DEPTH
-	depends on UNWINDER
+	depends on SCHED_BACKTRACE
 
 config MM_DMALLOC_MEMORY_TABLE_TOP_LOG
 	int "dmalloc memory table top size"
