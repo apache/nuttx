@@ -280,7 +280,7 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
  *       * wlan_rx_done
  *       * wlan_tx_done
  *
- *     These functions are called in a WiFi private thread. So we just use
+ *     These functions are called in a Wi-Fi private thread. So we just use
  *     mutex/semaphore instead of disable interrupt, if necessary.
  */
 
@@ -507,7 +507,7 @@ static struct wlan_pktbuf *wlan_txframe(struct wlan_priv_s *priv)
  * Name: wlan_transmit
  *
  * Description:
- *   Try to send all TX packets in TX ready queue to WiFi driver. If this
+ *   Try to send all TX packets in TX ready queue to Wi-Fi driver. If this
  *    sending fails, then breaks loop and returns.
  *
  * Input Parameters:
@@ -544,7 +544,7 @@ static void wlan_transmit(struct wlan_priv_s *priv)
  * Name: wlan_tx_done
  *
  * Description:
- *   WiFi TX done callback function. If this is called, it means sending
+ *   Wi-Fi TX done callback function. If this is called, it means sending
  *   next packet.
  *
  * Input Parameters:
@@ -566,14 +566,14 @@ static void wlan_tx_done(struct wlan_priv_s *priv)
  * Function: wlan_rx_done
  *
  * Description:
- *   WiFi RX done callback function. If this is called, it means receiving
+ *   Wi-Fi RX done callback function. If this is called, it means receiving
  *   packet.
  *
  * Input Parameters:
  *   priv   - Reference to the driver state structure
- *   buffer - WiFi received packet buffer
+ *   buffer - Wi-Fi received packet buffer
  *   len    - Length of received packet
- *   eb     - WiFi receive callback input eb pointer
+ *   eb     - Wi-Fi receive callback input eb pointer
  *
  * Returned Value:
  *   0 on success or a negated errno on failure
@@ -1231,7 +1231,7 @@ static int wlan_ifup(struct net_driver_s *dev)
   if (ret < 0)
     {
       net_unlock();
-      nerr("ERROR: Failed to start WiFi ret=%d\n", ret);
+      nerr("ERROR: Failed to start Wi-Fi ret=%d\n", ret);
       return ret;
     }
 
@@ -1294,7 +1294,7 @@ static int wlan_ifdown(struct net_driver_s *dev)
   ret = priv->ops->stop();
   if (ret < 0)
     {
-      nerr("ERROR: Failed to stop WiFi ret=%d\n", ret);
+      nerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
   net_unlock();
@@ -1708,7 +1708,7 @@ static int esp32_net_initialize(int devno, uint8_t *mac_addr,
 
   priv->ref++;
 
-  ninfo("INFO: Initialize WiFi adapter No.%d success\n", devno);
+  ninfo("INFO: Initialize Wi-Fi adapter No.%d success\n", devno);
 
   return OK;
 }
@@ -1717,13 +1717,13 @@ static int esp32_net_initialize(int devno, uint8_t *mac_addr,
  * Function: wlan_sta_rx_done
  *
  * Description:
- *   WiFi station RX done callback function. If this is called, it means
+ *   Wi-Fi station RX done callback function. If this is called, it means
  *   station receiveing packet.
  *
  * Input Parameters:
- *   buffer - WiFi received packet buffer
+ *   buffer - Wi-Fi received packet buffer
  *   len    - Length of received packet
- *   eb     - WiFi receive callback input eb pointer
+ *   eb     - Wi-Fi receive callback input eb pointer
  *
  * Returned Value:
  *   0 on success or a negated errno on failure
@@ -1742,7 +1742,7 @@ static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
  * Name: wlan_sta_tx_done
  *
  * Description:
- *   WiFi station TX done callback function. If this is called, it means
+ *   Wi-Fi station TX done callback function. If this is called, it means
  *   station sending next packet.
  *
  * Input Parameters:
@@ -1768,13 +1768,13 @@ static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
  * Function: wlan_softap_rx_done
  *
  * Description:
- *   WiFi softAP RX done callback function. If this is called, it means
+ *   Wi-Fi softAP RX done callback function. If this is called, it means
  *   softAP receiveing packet.
  *
  * Input Parameters:
- *   buffer - WiFi received packet buffer
+ *   buffer - Wi-Fi received packet buffer
  *   len    - Length of received packet
- *   eb     - WiFi receive callback input eb pointer
+ *   eb     - Wi-Fi receive callback input eb pointer
  *
  * Returned Value:
  *   0 on success or a negated errno on failure
@@ -1793,7 +1793,7 @@ static int wlan_softap_rx_done(void *buffer, uint16_t len, void *eb)
  * Name: wlan_softap_tx_done
  *
  * Description:
- *   WiFi softAP TX done callback function. If this is called, it means
+ *   Wi-Fi softAP TX done callback function. If this is called, it means
  *   softAP sending next packet.
  *
  * Input Parameters:
@@ -1842,7 +1842,7 @@ int esp32_wlan_sta_initialize(void)
   ret = esp_wifi_adapter_init();
   if (ret < 0)
     {
-      nerr("ERROR: Initialize WiFi adapter error: %d\n", ret);
+      nerr("ERROR: Initialize Wi-Fi adapter error: %d\n", ret);
       return ret;
     }
 
@@ -1853,14 +1853,14 @@ int esp32_wlan_sta_initialize(void)
       return ret;
     }
 
-  ninfo("WiFi station MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+  ninfo("Wi-Fi station MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
 
   ret = esp_wifi_scan_init();
   if (ret < 0)
     {
-      nerr("ERROR: Initialize WiFi scan parameter error: %d\n", ret);
+      nerr("ERROR: Initialize Wi-Fi scan parameter error: %d\n", ret);
       return ret;
     }
 
@@ -1880,7 +1880,7 @@ int esp32_wlan_sta_initialize(void)
 
   esp_wifi_sta_register_txdone_cb(wlan_sta_tx_done);
 
-  ninfo("INFO: Initialize WiFi station success net\n");
+  ninfo("INFO: Initialize Wi-Fi station success net\n");
 
   return OK;
 }
@@ -1909,7 +1909,7 @@ int esp32_wlan_softap_initialize(void)
   ret = esp_wifi_adapter_init();
   if (ret < 0)
     {
-      nerr("ERROR: Initialize WiFi adapter error: %d\n", ret);
+      nerr("ERROR: Initialize Wi-Fi adapter error: %d\n", ret);
       return ret;
     }
 
@@ -1920,14 +1920,14 @@ int esp32_wlan_softap_initialize(void)
       return ret;
     }
 
-  ninfo("WiFi softAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
+  ninfo("Wi-Fi softAP MAC: %02X:%02X:%02X:%02X:%02X:%02X\n",
         eth_mac[0], eth_mac[1], eth_mac[2],
         eth_mac[3], eth_mac[4], eth_mac[5]);
 
   ret = esp_wifi_scan_init();
   if (ret < 0)
     {
-      nerr("ERROR: Initialize WiFi scan parameter error: %d\n", ret);
+      nerr("ERROR: Initialize Wi-Fi scan parameter error: %d\n", ret);
       return ret;
     }
 
@@ -1948,7 +1948,7 @@ int esp32_wlan_softap_initialize(void)
 
   esp_wifi_softap_register_txdone_cb(wlan_softap_tx_done);
 
-  ninfo("INFO: Initialize WiFi softAP net success\n");
+  ninfo("INFO: Initialize Wi-Fi softAP net success\n");
 
   return OK;
 }

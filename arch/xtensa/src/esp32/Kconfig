@@ -1048,11 +1048,11 @@ config ESP32_ETH_PHY_ADDR
 
 endmenu # ESP32_EMAC
 
-menu "WiFi configuration"
+menu "Wi-Fi configuration"
 	depends on ESP32_WIRELESS
 
 choice
-	prompt "ESP32 WiFi mode"
+	prompt "ESP32 Wi-Fi mode"
 	default ESP32_WIFI_STATION
 
 config ESP32_WIFI_STATION
@@ -1064,30 +1064,30 @@ config ESP32_WIFI_SOFTAP
 config ESP32_WIFI_STATION_SOFTAP_COEXISTENCE
 	bool "Station + SoftAP coexistence"
 
-endchoice # ESP32 WiFi mode
+endchoice # ESP32 Wi-Fi mode
 
 config ESP32_WIFI_STATIC_RXBUF_NUM
-	int "WiFi static RX buffer number"
+	int "Wi-Fi static RX buffer number"
 	default 10
 
 config ESP32_WIFI_DYNAMIC_RXBUF_NUM
-	int "WiFi dynamic RX buffer number"
+	int "Wi-Fi dynamic RX buffer number"
 	default 32
 
 config ESP32_WIFI_DYNAMIC_TXBUF_NUM
-	int "WiFi dynamic TX buffer number"
+	int "Wi-Fi dynamic TX buffer number"
 	default 32
 
 config ESP32_WIFI_TX_AMPDU
-	bool "WiFi TX AMPDU"
+	bool "Wi-Fi TX AMPDU"
 	default y
 
 config ESP32_WIFI_RX_AMPDU
-	bool "WiFi RX AMPDU"
+	bool "Wi-Fi RX AMPDU"
 	default y
 
 config ESP32_WIFI_RXBA_AMPDU_WZ
-	int "WiFi RX BA AMPDU windown size"
+	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
 
 config ESP32_WLAN_PKTBUF_NUM
@@ -1107,11 +1107,11 @@ config ESP32_WIFI_SCAN_RESULT_SIZE
 		Maximum scan result buffer size.
 
 config ESP32_WIFI_SAVE_PARAM
-	bool "Save WiFi Parameters"
+	bool "Save Wi-Fi Parameters"
 	default n
 	depends on ESP32_SPIFLASH
 	---help---
-		If you enable this option, WiFi adapter parameters will be saved
+		If you enable this option, Wi-Fi adapter parameters will be saved
 		into the file system instead of computing them each time.
 
 		These parameters mainly contains:
@@ -1121,14 +1121,14 @@ config ESP32_WIFI_SAVE_PARAM
 			- PMK(compute when connecting)
 			- Author mode
 			- MAC address
-			- WiFi hardware configuration parameters
+			- Wi-Fi hardware configuration parameters
 
 config ESP32_WIFI_FS_MOUNTPT
-	string "Save WiFi Parameters"
+	string "Save Wi-Fi Parameters"
 	default "/mnt/esp/wifi"
 	depends on ESP32_WIFI_SAVE_PARAM
 	---help---
-		Mount point of WiFi storage file system.
+		Mount point of Wi-Fi storage file system.
 
 config ESP32_WIFI_MTD_OFFSET
 	hex "Wi-Fi MTD partition offset"

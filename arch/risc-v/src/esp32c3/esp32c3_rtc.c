@@ -281,9 +281,9 @@ struct esp32c3_rtc_sleep_pu_config_s
                              * CPU in sleep
                              */
   uint32_t i2s_fpu : 1;     /* Set to 1 to power UP I2S in sleep */
-  uint32_t bb_fpu : 1;      /* Set to 1 to power UP WiFi in sleep */
-  uint32_t nrx_fpu : 1;     /* Set to 1 to power UP WiFi in sleep */
-  uint32_t fe_fpu : 1;      /* Set to 1 to power UP WiFi in sleep */
+  uint32_t bb_fpu : 1;      /* Set to 1 to power UP Wi-Fi in sleep */
+  uint32_t nrx_fpu : 1;     /* Set to 1 to power UP Wi-Fi in sleep */
+  uint32_t fe_fpu : 1;      /* Set to 1 to power UP Wi-Fi in sleep */
   uint32_t sram_fpu : 1;    /* Set to 1 to power UP SRAM in sleep */
   uint32_t rom_ram_fpu : 1; /* Set to 1 to power UP ROM/IRAM0_DRAM0 in sleep */
 };
@@ -333,7 +333,7 @@ struct esp32c3_rtc_sleep_config_s
   uint32_t rtc_fastmem_pd_en : 1;      /* power down RTC fast memory */
   uint32_t rtc_slowmem_pd_en : 1;      /* power down RTC slow memory */
   uint32_t rtc_peri_pd_en : 1;         /* power down RTC peripherals */
-  uint32_t wifi_pd_en : 1;             /* power down WiFi */
+  uint32_t wifi_pd_en : 1;             /* power down Wi-Fi */
   uint32_t bt_pd_en : 1;               /* power down BT */
   uint32_t cpu_pd_en : 1;              /* power down CPU, but not
                                         * restart when lightsleep.

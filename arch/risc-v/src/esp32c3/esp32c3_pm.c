@@ -1146,12 +1146,12 @@ static void IRAM_ATTR esp32c3_perip_clk_init(void)
   modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, hwcrypto_perip_clk, 0);
   modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, hwcrypto_perip_clk);
 
-  /* Disable WiFi/BT/SDIO clocks. */
+  /* Disable Wi-Fi/BT/SDIO clocks. */
 
   modifyreg32(SYSTEM_WIFI_CLK_EN_REG, wifi_bt_sdio_clk, 0);
   modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_EN);
 
-  /* Set WiFi light sleep clock source to RTC slow clock */
+  /* Set Wi-Fi light sleep clock source to RTC slow clock */
 
   REG_SET_FIELD(SYSTEM_BT_LPCK_DIV_INT_REG, SYSTEM_BT_LPCK_DIV_NUM, 0);
   modifyreg32(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_8M,
