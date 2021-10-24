@@ -212,9 +212,9 @@ config ESP32_XTAL_26MHz
 endchoice # On-board Crystal Frequency
 
 choice ESP32_RTC_CLK_SRC
-    prompt "RTC clock source"
-    default ESP32_RTC_CLK_SRC_INT_RC
-    ---help---
+	prompt "RTC clock source"
+	default ESP32_RTC_CLK_SRC_INT_RC
+	---help---
 		Choose which clock is used as RTC clock source.
 
 		- "Internal 150kHz oscillator" option provides lowest deep sleep current

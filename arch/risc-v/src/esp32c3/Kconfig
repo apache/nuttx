@@ -736,13 +736,13 @@ config ESP32C3_WIFI_SAVE_PARAM
 		into the file system instead of computing them each time.
 
 		These parameters mainly contains:
-		  - SSID
-		  - Password
-		  - BSSID
-		  - PMK(compute when connecting)
-		  - Author mode
-		  - MAC address
-		  - Wi-Fi hardware configuration parameters
+			- SSID
+			- Password
+			- BSSID
+			- PMK(compute when connecting)
+			- Author mode
+			- MAC address
+			- Wi-Fi hardware configuration parameters
 
 config ESP32C3_WIFI_FS_MOUNTPT
 	string "Wi-Fi parameters mount point"
