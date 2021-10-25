@@ -52,17 +52,6 @@
 
 #define NO_DEBUG
 
-/* Debug ********************************************************************/
-#ifdef CONFIG_DEBUG_STWLC38
-#  define baterr  _err
-#  define batdbg  _err
-#  define batinfo _err
-#else
-#  define baterr  _none
-#  define batdbg  _none
-#  define batinfo _none
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/

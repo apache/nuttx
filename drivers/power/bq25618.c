@@ -59,15 +59,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-#ifdef CONFIG_DEBUG_BQ25618
-#  define baterr  _err
-#  define batdbg  _err
-#else
-#  define baterr  _none
-#  define batdbg  _none
-#endif
-
 #define ARRAY_SIZE(a)  (sizeof(a)/sizeof(a[0]))
 
 /****************************************************************************
@@ -246,7 +237,7 @@ static int bq25618_putreg8(FAR struct bq25618_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batdbg("addr: %02x regval: %08x\n", regaddr, regval);
+  batinfo("addr: %02x regval: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -300,31 +291,31 @@ static int (bq25618_dump_regs) (FAR struct bq25618_dev_s * priv)
   uint8_t value = 0;
 
   ret  = bq25618_getreg8(priv, BQ25618_INPUT_CURRENT_LIMIT, &value);
-  batdbg("REG#0: 0x%08X\n", value);
+  batinfo("REG#0: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_0, &value);
-  batdbg("REG#1: 0x%08X\n", value);
+  batinfo("REG#1: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGE_CURRENT_LIMIT, &value);
-  batdbg("REG#2: 0x%08X\n", value);
+  batinfo("REG#2: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_PRECHG_AND_TERM_CURR_LIM, &value);
-  batdbg("REG#3: 0x%08X\n", value);
+  batinfo("REG#3: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_BATTERY_VOLTAGE_LIMIT, &value);
-  batdbg("REG#4: 0x%08X\n", value);
+  batinfo("REG#4: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_1, &value);
-  batdbg("REG#5: 0x%08X\n", value);
+  batinfo("REG#5: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_2, &value);
-  batdbg("REG#6: 0x%08X\n", value);
+  batinfo("REG#6: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_3, &value);
-  batdbg("REG#7: 0x%08X\n", value);
+  batinfo("REG#7: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_0, &value);
-  batdbg("REG#8: 0x%08X\n", value);
+  batinfo("REG#8: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_1, &value);
-  batdbg("REG#9: 0x%08X\n", value);
+  batinfo("REG#9: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_STATUS_2, &value);
-  batdbg("REG#A: 0x%08X\n", value);
+  batinfo("REG#A: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_PART_INFORMATION, &value);
-  batdbg("REG#B: 0x%08X\n", value);
+  batinfo("REG#B: 0x%08X\n", value);
   ret |= bq25618_getreg8(priv, BQ25618_CHARGER_CONTROL_4, &value);
-  batdbg("REG#C: 0x%08X\n", value);
+  batinfo("REG#C: 0x%08X\n", value);
 
   return ret;
 }

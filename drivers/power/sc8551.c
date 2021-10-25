@@ -57,15 +57,6 @@
  ****************************************************************************/
 
 #define NOT_PMIC
-#ifdef CONFIG_DEBUG_SC8551
-#  define baterr  _err
-#  define batwarn  _err
-#  define batinfo _err
-#else
-#  define baterr  _none
-#  define batwarn  _none
-#  define batinfo _none
-#endif
 
 /****************************************************************************
  * Private Types
