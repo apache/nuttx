@@ -154,15 +154,15 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   if (nextsize + prevsize + oldsize >= newsize)
     {
-      size_t needed   = newsize - oldsize;
-      size_t takeprev = 0;
-      size_t takenext = 0;
+      size_t needed = newsize - oldsize;
+      size_t takeprev;
+      size_t takenext;
 
       /* Check if we can extend into the previous chunk and if the
        * previous chunk is smaller than the next chunk.
        */
 
-      if (prevsize > 0 && (nextsize >= prevsize || nextsize < 1))
+      if (nextsize > prevsize)
         {
           /* Can we get everything we need from the previous chunk? */
 
@@ -182,15 +182,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
               takeprev = needed;
               takenext = 0;
             }
-
-          needed = 0;
         }
 
       /* Check if we can extend into the next chunk and if we still need
        * more memory.
        */
 
-      if (nextsize > 0 && needed)
+      else
         {
           /* Can we get everything we need from the next chunk? */
 
@@ -276,7 +274,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
           /* Now we want to return newnode */
 
           oldnode = newnode;
-          oldsize = newnode->size;
         }
 
       /* Extend into the next free chunk */
@@ -306,9 +303,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
           /* Extend the node into the next chunk */
 
-          oldnode->size = oldsize + takenext;
-          newnode       = (FAR struct mm_freenode_s *)
-                          ((FAR char *)oldnode + oldnode->size);
+          oldnode->size += takenext;
 
           /* Did we consume the entire preceding chunk? */
 
@@ -318,6 +313,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                * the free nodelist.
                */
 
+              newnode              = (FAR struct mm_freenode_s *)
+                                     ((FAR char *)oldnode + oldnode->size);
               newnode->size        = nextsize - takenext;
               DEBUGASSERT(newnode->size >= SIZEOF_MM_FREENODE);
               newnode->preceding   = oldnode->size;
@@ -352,7 +349,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      newmem = (FAR void *)mm_malloc(heap, size);
+      newmem = mm_malloc(heap, size);
       if (newmem)
         {
           memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
