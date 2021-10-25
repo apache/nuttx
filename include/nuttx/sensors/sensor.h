@@ -245,9 +245,18 @@
 
 #define SENSOR_TYPE_IMPEDANCE                       27
 
+/* OTS (Optical tracking sensor)
+ * A sensor of this type returns the OTS measurements in counts. It
+ * integrates an optical chip and a LASER light source in a single miniature
+ * package. It provies wide depth of field range on glossy surface, and
+ * design flexibility into a compact device.
+ */
+
+#define SENSOR_TYPE_OTS                             28
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           28
+#define SENSOR_TYPE_COUNT                           29
 
 /****************************************************************************
  * Inline Functions
@@ -459,6 +468,13 @@ struct sensor_event_impd    /* Type: Impedance */
   uint64_t timestamp;       /* Unit is microseconds */
   float real;               /* Real part, unit is Ohm(Ω) */
   float imag;               /* Imaginary part, unit is Ohm(Ω) */
+};
+
+struct sensor_event_ots     /* Type: OTS */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int32_t x;                /* Axis X in counts */
+  int32_t y;                /* Axis Y in counts */
 };
 
 /* The sensor lower half driver interface */
