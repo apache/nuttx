@@ -74,18 +74,6 @@
 #define WR_ADDR(a)  ((a) << 1)
 #define RD_ADDR(a)  (((a) << 1) | 1)
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_BQ769X0
-#  define baterr    _err
-#  define batreg    _err
-#  define batinfo   _info
-#else
-#  define baterr    _none
-#  define batreg    _none
-#  define batinfo   _none
-#endif
-
 /****************************************************************************
  * Private
  ****************************************************************************/
@@ -424,7 +412,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batreg("addr: %02x regval: %02x\n", regaddr, regval);
+  batinfo("addr: %02x regval: %02x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -440,7 +428,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
       crc = crc8ccittpart(&sl_addr, 1, 0);
       crc = crc8ccittpart(buffer, 2, crc);
       buffer[2] = crc;
-      batreg("write crc: %02x\n", crc);
+      batinfo("write crc: %02x\n", crc);
     }
   else
     {

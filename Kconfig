@@ -931,6 +931,37 @@ config DEBUG_POWER_INFO
 
 endif # DEBUG_POWER
 
+config DEBUG_BATTERY
+	bool "Battery-related Debug Features"
+	default n
+	---help---
+		Enable Battery-related debug features.
+
+if DEBUG_BATTERY
+
+config DEBUG_BATTERY_ERROR
+	bool "Battery-related Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable battery-related error output to SYSLOG.
+
+config DEBUG_BATTERY_WARN
+	bool "Battery-related Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable battery-related warning output to SYSLOG.
+
+config DEBUG_BATTERY_INFO
+	bool "Battery-related Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable battery-related informational output to SYSLOG.
+
+endif # DEBUG_BATTERY
+
 config DEBUG_WIRELESS
 	bool "Wireless Debug Features"
 	default n

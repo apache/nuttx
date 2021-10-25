@@ -55,24 +55,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_BQ27426
-#  define baterr  _err
-#  define batdbg  _info
-#  define batinfo _info
-#else
-#  ifdef CONFIG_CPP_HAVE_VARARGS
-#    define baterr(x...)
-#    define batdbg(x...)
-#    define batinfo(x...)
-#  else
-#    define baterr (void)
-#    define batdbg (void)
-#    define batinfo(void)
-#  endif
-#endif
-
 /****************************************************************************
  * Private
  ****************************************************************************/

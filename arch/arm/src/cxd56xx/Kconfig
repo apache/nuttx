@@ -276,16 +276,6 @@ config CXD56_GAUGE
 		Enable battery gauge driver.
 		This is not a lower half of power driver, but compatible with NuttX gauge driver.
 
-if CXD56_GAUGE
-
-config CXD56_GAUGE_DEBUG
-	bool "Battery Gauge Debug"
-	default n
-	---help---
-		Enable battery driver debug messages and debug IO command.
-
-endif
-
 config CXD56_CHARGER
 	bool "CXD5247 battery charger"
 	default n
@@ -303,13 +293,6 @@ config CXD56_CHARGER_TEMP_PRECISE
 		Get temperature precisely. If this option is enabled, driver calculate precisely
 		from register value to degrees Celsius.
 		This option requires libm.
-
-config CXD56_CHARGER_DEBUG
-	bool "Battery Charger Debug"
-	default n
-	---help---
-		Enable battery charger driver debug messages.
-
 endif
 
 comment "Peripheral Support"

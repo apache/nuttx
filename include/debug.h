@@ -250,6 +250,24 @@
 #  define pwrinfo      _none
 #endif
 
+#ifdef CONFIG_DEBUG_BATTERY_ERROR
+#  define baterr       _err
+#else
+#  define baterr       _none
+#endif
+
+#ifdef CONFIG_DEBUG_BATTERY_WARN
+#  define batwarn      _warn
+#else
+#  define batwarn      _none
+#endif
+
+#ifdef CONFIG_DEBUG_BATTERY_INFO
+#  define batinfo      _info
+#else
+#  define batinfo      _none
+#endif
+
 #ifdef CONFIG_DEBUG_WIRELESS_ERROR
 #  define wlerr       _err
 #else
