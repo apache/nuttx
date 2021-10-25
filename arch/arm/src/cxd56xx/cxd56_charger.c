@@ -52,14 +52,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CXD56_CHARGER_DEBUG
-#define baterr(fmt, ...) _err(fmt, ## __VA_ARGS__)
-#else
-#define baterr(fmt, ...)
-#endif
-
 /* Configuration */
 
 #ifdef CONFIG_CXD56_CHARGER_TEMP_PRECISE

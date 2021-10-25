@@ -59,16 +59,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_BQ2425X
-#  define baterr  _err
-#  define batreg  _err
-#else
-#  define baterr  _none
-#  define batreg  _none
-#endif
-
 /****************************************************************************
  * Private
  ****************************************************************************/
@@ -215,7 +205,7 @@ static int bq2425x_putreg8(FAR struct bq2425x_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batreg("addr: %02x regval: %08x\n", regaddr, regval);
+  batinfo("addr: %02x regval: %08x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
