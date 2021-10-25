@@ -104,7 +104,7 @@ config NETDB_DNSCLIENT_LIFESEC
 
 config NETDB_DNSCLIENT_MAXRESPONSE
 	int "Max response size"
-	default 256
+	default NETDB_BUFSIZE
 	---help---
 		This setting determines the maximum size of response message that
 		can be received by the DNS resolver.  The default used to be 96,
