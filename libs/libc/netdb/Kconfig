@@ -95,7 +95,7 @@ config NETDB_DNSCLIENT_ENTRIES
 
 config NETDB_DNSCLIENT_NAMESIZE
 	int "Max size of a cached hostname"
-	default 32
+	default PATH_MAX
 	---help---
 		The size of a hostname string in the DNS resolver cache is fixed.
 		This setting provides the maximum size of a hostname.  Names longer
