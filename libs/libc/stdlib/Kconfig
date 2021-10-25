@@ -29,14 +29,4 @@ config LIBC_TMPDIR
 		files can be created.  This would be a good application of RAM disk:
 		To provide temporary storage for application data.
 
-config LIBC_MAX_TMPFILE
-	int "Maximum size of a temporary file path"
-	default 32
-		---help---
-		If a write-able file system is selected, then temporary file may be
-		supported at the path provided by LIBC_TMPDIR.  The tmpnam() interface
-		keeps a static copy of this last filename produced; this value is the
-		maximum size of that last filename.  This size is the size of the full
-		file path.
-
 endmenu # stdlib Options

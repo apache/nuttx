@@ -76,11 +76,7 @@
 
 /* Maximum size of character array to hold tmpnam() output. */
 
-#ifndef CONFIG_LIBC_MAX_TMPFILE
-#  define CONFIG_LIBC_MAX_TMPFILE 32
-#endif
-
-#define L_tmpnam   CONFIG_LIBC_MAX_TMPFILE
+#define L_tmpnam   _POSIX_NAME_MAX
 
 /* The maximum number of unique temporary file names that can be generated */
 
