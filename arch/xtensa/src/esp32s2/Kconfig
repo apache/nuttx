@@ -987,31 +987,12 @@ config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32S2_APP_FORMAT_MCUBOOT
 
-endmenu # Application Image Configuration
-
-if ESP32S2_APP_FORMAT_LEGACY
-
-config ESP32S2_PARTITION
-	bool "ESP32-S2 Partition"
-	default n
-	select ESP32S2_SPIFLASH
-	---help---
-		Decode partition file and initialize partition as MTD.
-
-menu "Partition Configuration"
-	depends on ESP32S2_PARTITION
-
-config ESP32S2_PARTITION_OFFSET
-	hex "Partition offset"
+config ESP32S2_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
 	default "0x8000"
+	depends on ESP32S2_APP_FORMAT_LEGACY
 
-config ESP32S2_PARTITION_MOUNT
-	string "Partition mount point"
-	default "/dev/esp/partition/"
-
-endmenu # Partition Configuration
-
-endif
+endmenu # Application Image Configuration
 
 menu "AES accelerate"
 	depends on ESP32S2_AES_ACCELERATOR
