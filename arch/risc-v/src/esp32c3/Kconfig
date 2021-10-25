@@ -895,6 +895,23 @@ config ESP32C3_SPIFLASH_DEBUG
 		If this option is enabled, SPI Flash driver read and write functions
 		will output input parameters and return values (if applicable).
 
+if ESP32C3_APP_FORMAT_LEGACY
+
+comment "Partition Table configuration"
+
+config ESP32C3_PARTITION_TABLE
+	bool "Create MTD partitions from Partition Table"
+	default n
+	---help---
+		Decode partition table and initialize partitions as MTD.
+
+config ESP32C3_PARTITION_MOUNTPT
+	string "Partition mount point"
+	default "/dev/esp/partition/"
+	depends on ESP32C3_PARTITION_TABLE
+
+endif
+
 endmenu # SPI Flash configuration
 
 menu "GDMA Configuration"
@@ -1019,30 +1036,11 @@ config ESP32C3_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32C3_APP_FORMAT_MCUBOOT
 
-endmenu # Application Image Configuration
-
-if ESP32C3_APP_FORMAT_LEGACY
-
-config ESP32C3_PARTITION
-	bool "ESP32-C3 Partition"
-	default n
-	select ESP32C3_SPIFLASH
-	---help---
-		Decode partition file and initialize partition as MTD.
-
-menu "Partition Configuration"
-	depends on ESP32C3_PARTITION
-
-config ESP32C3_PARTITION_OFFSET
-	hex "Partition offset"
+config ESP32C3_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
 	default "0x8000"
+	depends on ESP32C3_APP_FORMAT_LEGACY
 
-config ESP32C3_PARTITION_MOUNT
-	string "Partition mount point"
-	default "/dev/esp/partition/"
-
-endmenu # Partition Configuration
-
-endif
+endmenu # Application Image Configuration
 
 endif # ARCH_CHIP_ESP32C3

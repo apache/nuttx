@@ -59,11 +59,11 @@
 
 /* Partition offset in SPI Flash */
 
-#define ESP32C3_PARTITION_OFFSET CONFIG_ESP32C3_PARTITION_OFFSET
+#define PARTITION_TABLE_OFFSET CONFIG_ESP32C3_PARTITION_TABLE_OFFSET
 
 /* Partition MTD device mount point */
 
-#define ESP32C3_PARTITION_MOUNT CONFIG_ESP32C3_PARTITION_MOUNT
+#define PARTITION_MOUNT_POINT CONFIG_ESP32C3_PARTITION_MOUNTPT
 
 /****************************************************************************
  * Private Types
@@ -567,7 +567,7 @@ int esp32c3_partition_init(void)
   struct mtd_dev_priv_s *mtd_priv;
   int ret = 0;
   const int num = PARTITION_MAX_SIZE / sizeof(struct partition_info_priv_s);
-  const char path_base[] = ESP32C3_PARTITION_MOUNT;
+  const char path_base[] = PARTITION_MOUNT_POINT;
   char label[PARTITION_LABEL_LEN + 1];
   char path[PARTITION_LABEL_LEN + sizeof(path_base)];
 
@@ -595,8 +595,7 @@ int esp32c3_partition_init(void)
       goto errout_with_mtd;
     }
 
-  ret = MTD_READ(mtd, ESP32C3_PARTITION_OFFSET,
-                 PARTITION_MAX_SIZE, pbuf);
+  ret = MTD_READ(mtd, PARTITION_TABLE_OFFSET, PARTITION_MAX_SIZE, pbuf);
   if (ret != PARTITION_MAX_SIZE)
     {
       ferr("ERROR: Failed to get read data from MTD\n");

@@ -155,7 +155,7 @@ int esp32c3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32C3_PARTITION
+#ifdef CONFIG_ESP32C3_PARTITION_TABLE
   ret = esp32c3_partition_init();
   if (ret < 0)
     {
