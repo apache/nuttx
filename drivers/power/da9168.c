@@ -1,0 +1,1678 @@
+/****************************************************************************
+ * drivers/power/da9168.c
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/* Lower half driver for DA9168 battery charger
+ *
+ * The DA9168 are Li-Ion Battery Charger with Power-Path Management.
+ * It can be configured to Input Current Limit up to 1.5A.
+ */
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <errno.h>
+#include <debug.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/signal.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/power/battery_charger.h>
+#include <nuttx/power/battery_ioctl.h>
+#include "da9168.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Perform range check and exit with failure if out of range */
+
+#define DA9168_IN_RANGE_OR_FAIL(val, min, max)  \
+do {  \
+     if ((val < min) || (val > max))  \
+       {  \
+         baterr( "'" #val "'" " out of range (%d - %d)\n", min, max);  \
+         return ERROR;  \
+       }  \
+   } while(0)
+
+/****************************************************************************
+ * Convert a real world value to the register field representation.
+ * This will round down to nearest step value if given choice
+ *  isn't in step granularity.
+ ****************************************************************************/
+
+#define __DA9168_VAL_TO_FIELD(val, step, min, field, offset)  \
+        (((((val - min) / step) + offset) << field##_SHIFT) & field##_MASK)
+
+#define DA9168_VAL_TO_FIELD_OFFSET(val, step, min, field)  \
+        __DA9168_VAL_TO_FIELD(val, step, min, field, field##_OFFSET)
+
+#define DA9168_VAL_TO_FIELD(val, step, min, field)  \
+        __DA9168_VAL_TO_FIELD(val, step, min, field, 0)
+
+/* Convert field selector value to correct location in register */
+
+#define DA9168_SEL_TO_FIELD(sel, field)  \
+        ((sel << field##_SHIFT) & field##_MASK)
+
+/****************************************************************************
+ * Private
+ ****************************************************************************/
+
+struct da9168_dev_s
+{
+  /* The common part of the battery driver visible to the upper-half driver */
+
+  struct battery_charger_dev_s dev;  /* Battery charger device */
+
+  /* Data fields specific to the lower half DA9168 driver follow */
+
+  FAR struct i2c_master_s *i2c;      /* I2C interface */
+  uint8_t addr;                      /* I2C address */
+  uint32_t frequency;                /* I2C frequency */
+};
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+/* I2C support */
+
+static int da9168_getreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
+                          FAR uint8_t *regval);
+static int da9168_putreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
+                          uint8_t regval);
+static int da9168_reg_update_bits(FAR struct da9168_dev_s *priv,
+                                  uint8_t regaddr,
+                                  uint8_t mask, uint8_t regval_bits);
+static inline int da9168_get_devid(FAR struct da9168_dev_s *priv,
+                                   uint8_t *id);
+static inline int da9168_getreport(FAR struct da9168_dev_s *priv,
+                                   uint8_t *report, uint8_t regaddr);
+static void da9168_get_state(FAR struct da9168_dev_s *priv,
+                             FAR struct da9168_ic_state_s *state);
+static inline int da9168_reset(FAR struct da9168_dev_s *priv);
+static inline int da9168_watchdog(FAR struct da9168_dev_s *priv,
+                                  bool enable);
+static int da9168_control_charge(FAR struct da9168_dev_s *priv, bool enable);
+static inline int da9168_set_chg_range(FAR struct da9168_dev_s *priv,
+                                       bool chg_range_sel);
+static int da9168_control_hiz(FAR struct da9168_dev_s *priv, bool enable);
+static inline int da9168_powersupply(FAR struct da9168_dev_s *priv,
+                                     int current);
+static inline int da9168_setvolt(FAR struct da9168_dev_s *priv,
+                                 int volts);
+static inline int da9168_set_vbus_ovsel(FAR struct da9168_dev_s *priv,
+                                        int value);
+static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
+                                 int current);
+static inline int da9168_set_pre_iterm_chrg_curr(
+                                          FAR struct da9168_dev_s *priv,
+                                          int pre_current, int term_current,
+                                          bool range_term_sel,
+                                          bool range_pre_sel);
+static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
+                                            bool  rchg_voltage_sel);
+
+/* Battery driver lower half methods */
+
+static int da9168_state(FAR struct battery_charger_dev_s *dev,
+                        FAR int *status);
+static int da9168_health(FAR struct battery_charger_dev_s *dev,
+                         FAR int *health);
+static int da9168_online(FAR struct battery_charger_dev_s *dev,
+                         FAR bool *status);
+static int da9168_voltage(FAR struct battery_charger_dev_s *dev,
+                          int value);
+static int da9168_current(FAR struct battery_charger_dev_s *dev,
+                          int value);
+static int da9168_input_current(FAR struct battery_charger_dev_s *dev,
+                                int value);
+static int da9168_operate(FAR struct battery_charger_dev_s *dev,
+                          uintptr_t param);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct battery_charger_operations_s g_da9168ops =
+{
+  da9168_state,
+  da9168_health,
+  da9168_online,
+  da9168_voltage,
+  da9168_current,
+  da9168_input_current,
+  da9168_operate
+};
+
+#ifdef CONFIG_DEBUG_DA9168
+static int da9168_dump_regs(FAR struct da9168_dev_s *priv);
+#  define da9168_dump_regs(priv) da9168_dump_regs(priv)
+#else
+#  define da9168_dump_regs(priv)
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: da9168_getreg8
+ *
+ * Description:
+ *   Read a 8-bit value from a DA9168 register pair.
+ *
+ *   START <I2C write address> ACK <Reg address> ACK
+ *   REPEATED-START <I2C read address> ACK Data0 ACK Data1 NO-ACK STOP
+ *
+ ****************************************************************************/
+
+static int da9168_getreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
+                          FAR uint8_t *regval)
+{
+  struct i2c_config_s config;
+  uint8_t val;
+  int ret;
+
+  /* Set up the I2C configuration */
+
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  /* Write the register address */
+
+  ret = i2c_write(priv->i2c, &config, &regaddr, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: i2c_write failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Restart and read 8-bits from the register */
+
+  ret = i2c_read(priv->i2c, &config, &val, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: i2c_read failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Copy 8-bit value to be returned */
+
+  *regval = val;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_putreg8
+ *
+ * Description:
+ *   Write a 8-bit value to a DA9168 register pair.
+ *
+ *   START <I2C write address> ACK <Reg address> ACK Data0 ACK Data1 ACK STOP
+ *
+ ****************************************************************************/
+
+static int da9168_putreg8(FAR struct da9168_dev_s *priv, uint8_t regaddr,
+                          uint8_t regval)
+{
+  struct i2c_config_s config;
+  uint8_t buffer[2];
+
+  /* Set up the I2C configuration */
+
+  config.frequency = priv->frequency;
+  config.address   = priv->addr;
+  config.addrlen   = 7;
+
+  /* Set up a 3 byte message to send */
+
+  buffer[0] = regaddr;
+  buffer[1] = regval;
+
+  /* Write the register address followed by the data (no RESTART) */
+
+  return i2c_write(priv->i2c, &config, buffer, 2);
+}
+
+#ifdef CONFIG_DEBUG_DA9168
+
+static int da9168_dump_regs (FAR struct da9168_dev_s * priv)
+{
+  int ret;
+  uint8_t value ;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_00, &value);
+  batinfo("REG#0: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_STATUS_01, &value);
+  batinfo("REG#1: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_STATUS_02, &value);
+  batinfo("REG#2: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_STATUS_03, &value);
+  batinfo("REG#3: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_STATUS_04, &value);
+  batinfo("REG#4: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_EVENT_00, &value);
+  batinfo("REG#5: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_EVENT_01, &value);
+  batinfo("REG#6: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_EVENT_02, &value);
+  batinfo("REG#7: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_EVENT_03, &value);
+  batinfo("REG#8: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_EVENT_04, &value);
+  batinfo("REG#9: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_MASK_00, &value);
+  batinfo("REG#A: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_MASK_01, &value);
+  batinfo("REG#B: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_MASK_02, &value);
+  batinfo("REG#C: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_MASK_03, &value);
+  batinfo("REG#D: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_MASK_04, &value);
+  batinfo("REG#E: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_00, &value);
+  batinfo("REG#F: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_01, &value);
+  batinfo("REG#10: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_02, &value);
+  batinfo("REG#11: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_03, &value);
+  batinfo("REG#12: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_04, &value);
+  batinfo("REG#13: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_05, &value);
+  batinfo("REG#14: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_SYS_06, &value);
+  batinfo("REG#15: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_00, &value);
+  batinfo("REG#16: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_01, &value);
+  batinfo("REG#17: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_02, &value);
+  batinfo("REG#18: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_03, &value);
+  batinfo("REG#19: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_04, &value);
+  batinfo("REG#1a: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_05, &value);
+  batinfo("REG#1b: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_CHG_06, &value);
+  batinfo("REG#1c: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_LDO_00, &value);
+  batinfo("REG#1d: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_LDO_01, &value);
+  batinfo("REG#1e: 0x%08X\n", value);
+  ret |= da9168_getreg8(priv, DA9168_PMC_LDO_02, &value);
+  batinfo("REG#1f: 0x%08X\n", value);
+
+  return ret;
+}
+
+#endif
+
+/****************************************************************************
+ * Name: da9168_reg_update_bits
+ *
+ * Description:
+ *   update da9168 resgister value.
+ *
+ ****************************************************************************/
+
+static int da9168_reg_update_bits(FAR struct da9168_dev_s *priv,
+                                  uint8_t regaddr, uint8_t mask,
+                                  uint8_t regval_bits)
+{
+  uint8_t regval;
+  int ret ;
+
+  ret = da9168_getreg8(priv, regaddr, &regval);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  regval &= ~mask;
+  regval |= regval_bits & mask;
+  ret = da9168_putreg8(priv, regaddr, regval);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_get_devid
+ *
+ * Description:
+ *   Read the ID register.
+ *
+ * Input Parameters:
+ *   priv    - Device struct
+ *   id      - Chip id
+ *
+ * Returned Value:
+ *    Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static inline int da9168_get_devid(FAR struct da9168_dev_s *priv,
+                                   FAR uint8_t *id)
+{
+  uint8_t regval ;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_OTP_DEVICE_ID, &regval);
+  if (ret == OK)
+    {
+     *id = regval;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_getreport
+ *
+ * Description:
+ *   Read the DA9168 Register #1 (status and fault)
+ *
+ ****************************************************************************/
+
+static inline int da9168_getreport(FAR struct da9168_dev_s *priv,
+                                   FAR uint8_t *report, uint8_t regaddr)
+{
+  uint8_t regval;
+  int ret;
+
+  ret = da9168_getreg8(priv, regaddr, &regval);
+  if (ret >= 0)
+    {
+      *report = regval;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_control_shipmode
+ *
+ * Description:
+ *   Return the control state
+ *
+ ****************************************************************************/
+
+int da9168_control_shipmode(
+                       FAR struct da9168_dev_s *priv,
+                       enum da9168_ship_mode_entry_delay_sel entry_delay_sel,
+                       enum da9168_ship_mode_exit_deb_sel exit_deb_sel)
+{
+  int ret;
+  uint8_t regval;
+
+  if ((entry_delay_sel < DA9168_SHIP_MODE_ENTRY_DELAY_2S) ||
+      (entry_delay_sel > DA9168_SHIP_MODE_ENTRY_DELAY_10S))
+    {
+      baterr("Invalid ship mode entry delay\n");
+      return -EINVAL;
+    }
+
+  if ((exit_deb_sel < DA9168_SHIP_MODE_EXIT_DEB_20MS) ||
+      (exit_deb_sel > DA9168_SHIP_MODE_EXIT_DEB_2S))
+    {
+      baterr("Invalid ship mode exit debounce\n");
+      return -EINVAL;
+    }
+
+  regval = DA9168_SEL_TO_FIELD(entry_delay_sel, DA9168_SHIP_DLY);
+  regval |= DA9168_SEL_TO_FIELD(exit_deb_sel, DA9168_RIN_N_SHIP_EXIT_TMR);
+  regval |= DA9168_SHIP_MODE_MASK;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06,
+                               DA9168_SHIP_DLY_MASK |
+                               DA9168_RIN_N_SHIP_EXIT_TMR_MASK |
+                               DA9168_SHIP_MODE_MASK, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_control_charge
+ *
+ * Description:
+ *   Return the control enable and disable charge state
+ *
+ ****************************************************************************/
+
+static int da9168_control_charge(FAR struct da9168_dev_s *priv, bool enable)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_CHG_00, DA9168_CHG_EN_MASK,
+                               (enable) ? DA9168_CHG_EN_MASK : 0);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_control_hiz
+ *
+ * Description:
+ *   Control DA9168 into hiz mode or not
+ *
+ ****************************************************************************/
+
+static int da9168_control_hiz(FAR struct da9168_dev_s *priv, bool enable)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06, DA9168_HIZ_MODE_MASK,
+                               (enable) ? DA9168_HIZ_MODE_MASK : 0);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_chg_get_bat_fault
+ *
+ * Description:
+ *   Get da9168 bat fault
+ *
+ ****************************************************************************/
+
+enum da9168_chg_faults_e da9168_chg_get_bat_fault(
+                                               FAR struct da9168_dev_s *priv)
+{
+  uint8_t status01;
+  uint8_t status02;
+  uint8_t status00;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_01, &status01);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_02, &status02);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_00, &status00);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  if (status00 & DA9168_S_VBAT_OC_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBAT_OC;
+    }
+  else if (status01 & DA9168_S_VBAT_OV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBAT_OV;
+    }
+  else if (status01 & DA9168_S_VBAT_UV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBAT_UV;
+    }
+  else if (status02 & DA9168_S_TS_HOT_MASK)
+    {
+      ret = DA9168_CHG_FAULT_TBAT_HOT;
+    }
+  else if (status02 & DA9168_S_TS_COLD_MASK)
+    {
+      ret = DA9168_CHG_FAULT_TBAT_COLD;
+    }
+  else if (status02 & DA9168_S_TS_WARM_MASK)
+    {
+      ret = DA9168_CHG_FAULT_TBAT_WARM;
+    }
+  else if (status02 & DA9168_S_TS_COOL_MASK)
+    {
+      ret = DA9168_CHG_FAULT_TBAT_COOL;
+    }
+  else
+    {
+      ret = DA9168_CHG_FAULT_NONE;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_chg_get_vsys_fault
+ *
+ * Description:
+ *   Get da9168 vsys fault
+ *
+ ****************************************************************************/
+
+enum da9168_chg_faults_e da9168_chg_get_vsys_fault(
+                                            FAR struct da9168_dev_s *priv)
+{
+  uint8_t status01;
+  uint8_t status04;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_01, &status01);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_04, &status04);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  if (status04 & DA9168_S_VSYS_SHUTDOWN_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VSYS_SHUTDOWN;
+    }
+  else if (status01 & DA9168_S_VSYS_OV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VSYS_OV;
+    }
+  else if (status01 & DA9168_S_VSYS_UV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VSYS_UV;
+    }
+  else
+    {
+      ret = DA9168_CHG_FAULT_NONE;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_chg_get_timer_fault
+ *
+ * Description:
+ *   Get da9168 timer fault
+ *
+ ****************************************************************************/
+
+enum da9168_chg_faults_e da9168_chg_get_timer_fault(
+                                               FAR struct da9168_dev_s *priv)
+{
+  uint8_t status02;
+  uint8_t status03;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_01, &status02);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_02, &status03);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  if (status02 & DA9168_S_WD_TIMER_MASK)
+    {
+      ret = DA9168_CHG_FAULT_WD_TIMER;
+    }
+  else if (status03 & DA9168_S_CHG_TIMER_MASK)
+    {
+      ret = DA9168_CHG_FAULT_CHG_TIMER;
+    }
+  else
+    {
+      ret = DA9168_CHG_FAULT_NONE;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_chg_get_vbus_fault
+ *
+ * Description:
+ *   Get da9168 vbus fault
+ *
+ ****************************************************************************/
+
+enum da9168_chg_faults_e da9168_chg_get_vbus_fault(
+                                              FAR struct da9168_dev_s *priv)
+{
+  uint8_t status00;
+  uint8_t status01;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_00, &status00);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_01, &status01);
+  if (ret < 0)
+    {
+      return DA9168_CHG_FAULT_UNKNOWN;
+    }
+
+  if (status01 & DA9168_S_VBUS_OV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBUS_OV;
+    }
+  else if (status01 & DA9168_S_VBUS_UV_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBUS_UV;
+    }
+  else if (status00 & DA9168_S_VBUS_VINDPM_MASK)
+    {
+      ret = DA9168_CHG_FAULT_VBUS_DPM;
+    }
+  else if (status00 & DA9168_S_VBUS_IINDPM_MASK)
+    {
+      ret = DA9168_CHG_FAULT_IBUS_DPM;
+    }
+  else
+    {
+      ret = DA9168_CHG_FAULT_NONE;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_chg_get_vbus_fault
+ *
+ * Description:
+ *   Get da9168 vbus fault
+ *
+ ****************************************************************************/
+
+enum da9168_chg_phases_e da9168_chg_get_phase(FAR struct da9168_dev_s *priv)
+{
+  uint8_t status03;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_STATUS_03, &status03);
+  if (ret < 0)
+    {
+      return DA9168_CHG_PHASE_UNKNOWN;
+    }
+
+  if (status03 & DA9168_S_CHG_TRICKLE_MASK)
+    {
+      ret = DA9168_CHG_PHASE_TRICKLE;
+    }
+  else if (status03 & DA9168_S_CHG_PRE_MASK)
+    {
+      ret = DA9168_CHG_PHASE_PRE;
+    }
+  else if (status03 & DA9168_S_CHG_CC_MASK)
+    {
+      ret = DA9168_CHG_PHASE_CC;
+    }
+  else if (status03 & DA9168_S_CHG_CV_MASK)
+    {
+      ret = DA9168_CHG_PHASE_CV;
+    }
+  else if (status03 & DA9168_S_CHG_DONE_MASK)
+    {
+      ret = DA9168_CHG_PHASE_FULL;
+    }
+  else
+    {
+      /* If it's not one of the states above then we're not charging */
+
+      ret = DA9168_CHG_PHASE_OFF;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_get_state
+ *
+ * Description:
+ *   Return the da9168 ic state
+ *
+ ****************************************************************************/
+
+static void da9168_get_state(FAR struct da9168_dev_s *priv,
+                             FAR struct da9168_ic_state_s *state)
+{
+  state->vsys_fault = da9168_chg_get_vsys_fault(priv);
+  state->bat_fault = da9168_chg_get_bat_fault(priv);
+  state->timer_fault = da9168_chg_get_timer_fault(priv);
+  state->vbus_fault = da9168_chg_get_vbus_fault(priv);
+  state->chg_stat = da9168_chg_get_phase(priv);
+}
+
+/****************************************************************************
+ * Name: da9168_detect_device
+ *
+ * Description:
+ *   Return the da9168 device info
+ *
+ ****************************************************************************/
+
+static int da9168_detect_device(FAR struct da9168_dev_s *priv)
+{
+  uint8_t regval;
+  int ret;
+
+  ret = da9168_getreg8(priv, DA9168_OTP_DEVICE_ID, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  if (regval != DA9168_DEV_ID)
+    {
+      baterr("detect da9168 ID fail\n");
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_reset
+ *
+ * Description:
+ *   Reset the da9168
+ *
+ ****************************************************************************/
+
+static inline int da9168_reset(FAR struct da9168_dev_s *priv)
+{
+  int ret;
+  uint8_t regval;
+
+  /* Read current register value */
+
+  ret = da9168_getreg8(priv, DA9168_PMC_SYS_03, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  /* Send reset command */
+
+  regval |= DA9168_RST_REG_MASK;
+  ret = da9168_putreg8(priv, DA9168_PMC_SYS_03, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_watchdog
+ *
+ * Description:
+ *   Enable/Disable the DA9168 watchdog
+ *
+ ****************************************************************************/
+
+static inline int da9168_watchdog(FAR struct da9168_dev_s *priv,
+                                  bool enable)
+{
+  int ret;
+  uint8_t regval;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_SYS_03, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  if (enable)
+    {
+      regval |= DA9168_WD_EN_MASK;
+    }
+  else
+    {
+      regval &= ~(DA9168_WD_EN_MASK);
+    }
+
+  ret = da9168_putreg8(priv, DA9168_PMC_SYS_03, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_state
+ *
+ * Description:
+ *   Return the current battery state
+ *
+ ****************************************************************************/
+
+static int da9168_state(FAR struct battery_charger_dev_s *dev,
+                        FAR int *status)
+{
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  FAR struct da9168_ic_state_s state;
+
+  da9168_get_state(priv, &state);
+  if (state.chg_stat == DA9168_CHG_PHASE_OFF)
+    {
+      *status = BATTERY_IDLE;
+    }
+  else if (state.chg_stat ==  DA9168_CHG_PHASE_FULL)
+    {
+      *status = BATTERY_FULL;
+    }
+  else if (state.chg_stat ==  DA9168_CHG_PHASE_TRICKLE ||
+           state.chg_stat ==  DA9168_CHG_PHASE_PRE ||
+           state.chg_stat ==  DA9168_CHG_PHASE_CC ||
+           state.chg_stat ==  DA9168_CHG_PHASE_CV)
+    {
+       *status = BATTERY_CHARGING;
+    }
+  else if (state.vsys_fault || state.vbus_fault || state.bat_fault ||
+      state.timer_fault)
+    {
+      *status = BATTERY_FAULT;
+    }
+  else
+    {
+      *status = BATTERY_UNKNOWN;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_health
+ *
+ * Description:
+ *   Return the current battery health state
+ *
+ * Note: if more than one fault happened the user needs to call this ioctl
+ * again to read a new fault, repeat until receive a BATTERY_HEALTH_GOOD.
+ *
+ ****************************************************************************/
+
+static int da9168_health(FAR struct battery_charger_dev_s *dev,
+                         FAR int *health)
+{
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  FAR struct da9168_ic_state_s state;
+
+  da9168_get_state(priv, &state);
+  if (state.timer_fault)
+    {
+      switch (state.timer_fault)
+        {
+          case DA9168_CHG_FAULT_CHG_TIMER:
+              *health =  BATTERY_HEALTH_SAFE_TMR_EXP;
+              break;
+          case DA9168_CHG_FAULT_WD_TIMER:
+              *health = BATTERY_HEALTH_WD_TMR_EXP;
+              break;
+          default:
+              break;
+        }
+    }
+  else if (state.bat_fault)
+    {
+       switch (state.bat_fault)
+        {
+          case DA9168_CHG_FAULT_VBAT_OC:
+              *health =  BATTERY_HEALTH_OVERCURRENT;
+              break;
+          case DA9168_CHG_FAULT_VBAT_OV:
+              *health = BATTERY_HEALTH_UNDERVOLTAGE;
+              break;
+          case DA9168_CHG_FAULT_VBAT_UV:
+              *health = BATTERY_HEALTH_OVERVOLTAGE;
+              break;
+          case DA9168_CHG_FAULT_TBAT_HOT:
+              *health = BATTERY_HEALTH_UNDERVOLTAGE;
+              break;
+          case DA9168_CHG_FAULT_TBAT_COLD:
+              *health = BATTERY_HEALTH_COLD;
+              break;
+          default:
+              break;
+        }
+    }
+  else if(state.vsys_fault || state.vbus_fault)
+    {
+      *health = BATTERY_HEALTH_UNSPEC_FAIL;
+    }
+  else
+    {
+      *health = BATTERY_HEALTH_UNKNOWN;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_set_vindpm
+ *
+ * Description:
+ *   Set the voltage level to charger. Voltage value in mV.
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_vindpm(FAR struct da9168_dev_s *priv, int value)
+{
+  uint8_t regval;
+  int ret;
+
+  DA9168_IN_RANGE_OR_FAIL(value, DA9168_PCFG_VBUS_DPM_MIN_MV,
+                          DA9168_PCFG_VBUS_DPM_MAX_MV);
+
+  regval = DA9168_VAL_TO_FIELD_OFFSET(value, DA9168_PCFG_VBUS_STEP_MV,
+                                      DA9168_PCFG_VBUS_DPM_MIN_MV,
+                                      DA9168_VINDPM);
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_00, DA9168_VINDPM_MASK,
+                               regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_set_vbus_ovsel
+ *
+ * Description:
+ *   Set the vbus overvoltage setting. Voltage value in mV.
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_vbus_ovsel(FAR struct da9168_dev_s *priv,
+                                        int value)
+{
+  uint8_t regval;
+  int ret;
+
+  regval = DA9168_SEL_TO_FIELD(value, DA9168_VBUS_OVSEL);
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06,
+                                     DA9168_VBUS_OVSEL_MASK, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_setvolt
+ *
+ * Description:
+ *   Set the voltage level to charge the battery. Voltage value in mV.
+ *
+ ****************************************************************************/
+
+static inline int da9168_setvolt(FAR struct da9168_dev_s *priv, int volts)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Verify if voltage is in the acceptable range */
+
+  DA9168_IN_RANGE_OR_FAIL(volts, DA9168_PCFG_CHG_VOLT_CV_MIN_MV,
+                          DA9168_PCFG_CHG_VOLT_CV_MAX_MV);
+
+  regval = DA9168_VAL_TO_FIELD_OFFSET(volts, DA9168_PCFG_CHG_VOLT_CV_STEP_MV,
+                                      DA9168_PCFG_CHG_VOLT_CV_MIN_MV,
+                                      DA9168_CHG_VBATREG);
+  ret = da9168_putreg8(priv, DA9168_PMC_CHG_04, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_set_recharge_level
+ *
+ * Description:
+ *   Set charger recharge threshold offset(mv)
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
+                                            bool rchg_voltage_sel)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_CHG_00,
+                               DA9168_CHG_VRCHG_MASK,
+                               (rchg_voltage_sel << DA9168_CHG_VRCHG_SHIFT));
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_set_chg_range
+ *
+ * Description:
+ *   Set charging current range setting.
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_chg_range(FAR struct da9168_dev_s *priv,
+                                       bool chg_range_sel)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_CHG_03,
+                               DA9168_CHG_RANGE_MASK,
+                               (chg_range_sel << DA9168_CHG_RANGE_SHIFT));
+  if (ret < 0)
+    {
+      return ret;
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_powersupply
+ *
+ * Description:
+ *   Set the Input Current Limit.
+ *
+ ****************************************************************************/
+
+static inline int da9168_powersupply(FAR struct da9168_dev_s *priv,
+                                     int current)
+{
+  int ret;
+  uint8_t regval;
+
+  if (current > DA9168_IBUS_LIM_MAX_MA)
+    {
+      current = DA9168_IBUS_LIM_MAX_MA;
+    }
+
+  regval = DA9168_VAL_TO_FIELD(current, DA9168_IBUS_LIM_STEP_MA,
+                               DA9168_IBUS_LIM_MIN_MA, DA9168_IINDPM);
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_01, DA9168_IINDPM_MASK,
+                               regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_set_prechrg_curr
+ *
+ * Description:
+ *   Set battery pre charge current
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_pre_iterm_chrg_curr(
+                                               FAR struct da9168_dev_s *priv,
+                                               int pre_current,
+                                               int term_current,
+                                               bool range_term_sel,
+                                               bool range_pre_sel)
+{
+  uint8_t regval;
+  int ret;
+
+  /* Range checking  pre_charging current */
+
+  if (range_pre_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      if (pre_current >= DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MIN_MA)
+        {
+          DA9168_IN_RANGE_OR_FAIL(pre_current,
+                         DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MIN_MA,
+                         DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MAX_MA);
+        }
+      else
+        {
+          DA9168_IN_RANGE_OR_FAIL(pre_current,
+                                  DA9168_PCFG_CHG_CURR_PRE_LOW_MIN_MA,
+                                  DA9168_PCFG_CHG_CURR_PRE_LOW_MAX_MA);
+        }
+    }
+  else
+    {
+      if (pre_current >= DA9168_PCFG_CHG_CURR_PRE_HIGH_OFFSET_MIN_MA)
+        {
+          DA9168_IN_RANGE_OR_FAIL(pre_current,
+                         DA9168_PCFG_CHG_CURR_PRE_HIGH_OFFSET_MIN_MA,
+                         DA9168_PCFG_CHG_CURR_PRE_HIGH_OFFSET_MAX_MA);
+        }
+      else
+        {
+          DA9168_IN_RANGE_OR_FAIL(pre_current,
+                                  DA9168_PCFG_CHG_CURR_PRE_HIGH_MIN_MA,
+                                  DA9168_PCFG_CHG_CURR_PRE_HIGH_MAX_MA);
+        }
+    }
+
+  if (range_term_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      DA9168_IN_RANGE_OR_FAIL(term_current,
+                              DA9168_PCFG_CHG_CURR_TERM_LOW_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_TERM_LOW_MAX_MA);
+    }
+  else
+    {
+      DA9168_IN_RANGE_OR_FAIL(term_current,
+                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MAX_MA);
+    }
+
+  /* Pre-charging current */
+
+  regval = DA9168_SEL_TO_FIELD(range_pre_sel, DA9168_CHG_RANGE_PRE);
+  if (range_pre_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      if (pre_current >= DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MIN_MA)
+        {
+          regval |= DA9168_CHG_IPRE_MSB_MASK;
+          regval |= DA9168_VAL_TO_FIELD(pre_current,
+                                 DA9168_PCFG_CHG_CURR_LOW_STEP_MA,
+                                 DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MIN_MA,
+                                 DA9168_CHG_IPRE);
+        }
+      else
+        {
+          regval |= DA9168_VAL_TO_FIELD_OFFSET(pre_current,
+                                        DA9168_PCFG_CHG_CURR_LOW_STEP_MA,
+                                        DA9168_PCFG_CHG_CURR_PRE_LOW_MIN_MA,
+                                        DA9168_CHG_IPRE);
+        }
+    }
+  else
+    {
+      if (pre_current >= DA9168_PCFG_CHG_CURR_PRE_HIGH_OFFSET_MIN_MA)
+        {
+          regval |= DA9168_CHG_IPRE_MSB_MASK;
+          regval |= DA9168_VAL_TO_FIELD(pre_current,
+                               DA9168_PCFG_CHG_CURR_HIGH_STEP_MA,
+                               DA9168_PCFG_CHG_CURR_PRE_HIGH_OFFSET_MIN_MA,
+                               DA9168_CHG_IPRE);
+        }
+      else
+        {
+          regval |= DA9168_VAL_TO_FIELD_OFFSET(pre_current,
+                                        DA9168_PCFG_CHG_CURR_HIGH_STEP_MA,
+                                        DA9168_PCFG_CHG_CURR_PRE_HIGH_MIN_MA,
+                                        DA9168_CHG_IPRE);
+        }
+    }
+
+  /* Charge termination current */
+
+  regval |= DA9168_SEL_TO_FIELD(range_term_sel, DA9168_CHG_RANGE_TERM);
+  if (range_term_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      regval |= DA9168_VAL_TO_FIELD(term_current,
+                                    DA9168_PCFG_CHG_CURR_LOW_STEP_MA,
+                                    DA9168_PCFG_CHG_CURR_TERM_LOW_MIN_MA,
+                                    DA9168_CHG_ITERM);
+    }
+  else
+    {
+      regval |= DA9168_VAL_TO_FIELD(term_current,
+                                    DA9168_PCFG_CHG_CURR_HIGH_STEP_MA,
+                                    DA9168_PCFG_CHG_CURR_TERM_HIGH_MIN_MA,
+                                    DA9168_CHG_ITERM);
+    }
+
+  ret = da9168_putreg8(priv, DA9168_PMC_CHG_02, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_setcurr
+ *
+ * Description:
+ *   Set the current to charge the battery. Current value in mA.
+ *
+ ****************************************************************************/
+
+static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
+                                 int current)
+{
+  uint8_t regval;
+  int ret;
+  bool range_cc_sel;
+
+  ret = da9168_getreg8(priv, DA9168_PMC_CHG_03, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+  else
+    {
+      range_cc_sel  = regval & 0x80;
+    }
+
+  if (range_cc_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      DA9168_IN_RANGE_OR_FAIL(current,
+                              DA9168_PCFG_CHG_CURR_CC_LOW_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_CC_LOW_MAX_MA);
+    }
+  else
+    {
+      DA9168_IN_RANGE_OR_FAIL(current,
+                              DA9168_PCFG_CHG_CURR_CC_HIGH_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_CC_HIGH_MAX_MA);
+    }
+
+  regval = 0;
+  regval = DA9168_SEL_TO_FIELD(range_cc_sel, DA9168_CHG_RANGE);
+  if (range_cc_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      regval |= DA9168_VAL_TO_FIELD_OFFSET(current,
+                                         DA9168_PCFG_CHG_CURR_LOW_STEP_MA,
+                                         DA9168_PCFG_CHG_CURR_CC_LOW_MIN_MA,
+                                         DA9168_CHG_ICHG);
+    }
+  else
+    {
+      regval |= DA9168_VAL_TO_FIELD_OFFSET(current,
+                                         DA9168_PCFG_CHG_CURR_HIGH_STEP_MA,
+                                         DA9168_PCFG_CHG_CURR_CC_HIGH_MIN_MA,
+                                         DA9168_CHG_ICHG);
+    }
+
+  ret = da9168_putreg8(priv, DA9168_PMC_CHG_03, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_online
+ *
+ * Description:
+ *   Return true if the battery is online
+ *
+ ****************************************************************************/
+
+static int da9168_online(FAR struct battery_charger_dev_s *dev,
+                          FAR bool *status)
+{
+  /* There is no concept of online/offline in this driver */
+
+  *status = true;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_voltage
+ *
+ * Description:
+ *   Set battery charger voltage
+ *
+ ****************************************************************************/
+
+static int da9168_voltage(FAR struct battery_charger_dev_s *dev, int value)
+{
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  int ret;
+
+  /* Set voltage to battery charger */
+
+  ret = da9168_setvolt(priv, value);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set DA9168 voltage: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_current
+ *
+ * Description:
+ *   Set the battery charger current rate for charging
+ *
+ ****************************************************************************/
+
+static int da9168_current(FAR struct battery_charger_dev_s *dev, int value)
+{
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  int ret;
+
+  /* Set current to battery charger */
+
+  ret = da9168_setcurr(priv, value);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set DA9168 currrent: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_input_current
+ *
+ * Description:
+ *   Set the input current limit
+ *
+ ****************************************************************************/
+
+static int da9168_input_current(FAR struct battery_charger_dev_s *dev,
+                                 int value)
+{
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  int ret;
+
+  ret = da9168_powersupply(priv, value);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set DA9168 power supply: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_operate
+ *
+ * Description:
+ *   Do miscellaneous battery ioctl()
+ *
+ ****************************************************************************/
+
+static int da9168_operate(FAR struct battery_charger_dev_s *dev,
+                           uintptr_t param)
+{
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_init
+ *
+ * Description:
+ *   init da9168
+ *
+ ****************************************************************************/
+
+static int da9168_init(FAR struct da9168_dev_s *priv, int current)
+{
+  int ret;
+
+  /* set charging current range */
+
+  ret = da9168_set_chg_range(priv, true);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 charging current  \
+             range: %d\n", ret);
+      return ret;
+    }
+
+  /* set charger vindpm 4300mV */
+
+  ret = da9168_set_vindpm(priv, DA9168_VINDPM_DEFAULT_UV);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168  vindpm: %d\n", ret);
+      return ret;
+    }
+
+  /* set vbus overvoltage value 5800mV */
+
+  ret =  da9168_set_vbus_ovsel(priv, DA9168_VUBS_DEFAULT_OV);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 vbus overvoltage: %d\n", ret);
+      return ret;
+    }
+
+  /* default set input current 2400ma */
+
+  ret = da9168_powersupply(priv, current);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 input current: %d\n", ret);
+      return ret;
+    }
+
+  /* set charge current 300ma */
+
+  ret = da9168_setcurr(priv, DA9168_ICHG_DEFAULT_UA);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 charge current: %d\n", ret);
+      return ret;
+    }
+
+  /* set precurr 40ma, iterm current 60ma */
+
+  ret = da9168_set_pre_iterm_chrg_curr(priv, DA9168_PRE_CURR_DEFAULT_UA,
+                                       DA9168_ITERM_DEFAULT_UA, TRUE, TRUE);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 pre current and iterm  \
+             current: %d\n", ret);
+      return ret;
+    }
+
+  /* set vbat 4.2V */
+
+  ret = da9168_setvolt(priv, DA9168_VBAT_DEFAULT_UV);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set DA9168 bat voltage: %d\n", ret);
+      return ret;
+    }
+
+  /* set recharge threshold, 200mv */
+
+  ret = da9168_set_recharge_level(priv, true);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set DA9168 recharge level: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: da9168_initialize
+ *
+ * Description:
+ *   Initialize the DA9168 battery driver and return an instance of the
+ *   lower-half interface that may be used with battery_charger_register().
+ *
+ * Input Parameters:
+ *   i2c       - An instance of the I2C interface to use to communicate with
+ *               the DA9168
+ *   addr      - The I2C address of the DA9168 (Better be 0x68).
+ *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
+ *
+ * Returned Value:
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the DA9168 lower half.
+ *
+ ****************************************************************************/
+
+FAR struct battery_charger_dev_s *
+da9168_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
+                  uint32_t frequency, int current)
+{
+  FAR struct da9168_dev_s *priv;
+  int ret;
+
+  priv = kmm_zalloc(sizeof(struct da9168_dev_s));
+  if (!priv)
+    {
+      baterr("ERROR: Failed to allocate instance\n");
+      goto err;
+    }
+
+  /* Initialize the DA9168 device structure */
+
+  priv->dev.ops   = &g_da9168ops;
+  priv->i2c       = i2c;
+  priv->addr      = addr;
+  priv->frequency = frequency;
+
+  /* Reset the DA9168 */
+
+  ret = da9168_reset(priv);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to reset the DA9168: %d\n", ret);
+      goto err;
+    }
+
+  /* Detect deviceID */
+
+  ret = da9168_detect_device(priv);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to detect_device: %d\n", ret);
+      goto err;
+    }
+
+  /* Disable watchdog */
+
+  ret = da9168_watchdog(priv, false);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to disable DA9168 watchdog: %d\n", ret);
+      goto err;
+    }
+
+  /* enable charge */
+
+  ret = da9168_control_charge(priv, true);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to enable DA9168 charge: %d\n", ret);
+      goto err;
+    }
+
+  /* enable hiz */
+
+  ret = da9168_control_hiz(priv, false);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to enable DA9168 hiz: %d\n", ret);
+      goto err;
+    }
+
+  ret = da9168_init(priv, current);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to init DA9168: %d\n", ret);
+      goto err;
+    }
+
+  return (FAR struct battery_charger_dev_s *)priv;
+
+err:
+  kmm_free(priv);
+  return NULL;
+}

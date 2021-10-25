@@ -119,6 +119,12 @@ ifeq ($(CONFIG_I2C_AXP202),y)
 CSRCS += axp202.c
 endif
 
+# Add the DA9168XX I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_DA9168),y)
+CSRCS += da9168.c
+endif
+
 endif
 
 # Include power support in the build
