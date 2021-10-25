@@ -223,6 +223,8 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   mm_givesemaphore(heap);
 
-  kasan_unpoison((FAR void *)alignedchunk, size);
+  kasan_unpoison((FAR void *)alignedchunk,
+                 mm_malloc_size((FAR void *)alignedchunk));
+
   return (FAR void *)alignedchunk;
 }

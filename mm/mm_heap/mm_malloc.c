@@ -231,7 +231,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
-      kasan_unpoison(ret, size);
+      kasan_unpoison(ret, mm_malloc_size(ret));
 #ifdef CONFIG_MM_FILL_ALLOCATIONS
       memset(ret, 0xaa, size);
 #endif

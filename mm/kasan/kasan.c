@@ -129,9 +129,7 @@ static void kasan_set_poison(uintptr_t addr, size_t size, bool poisoned)
   nbit = KASAN_BITS_PER_WORD - bit % KASAN_BITS_PER_WORD;
   mask = KASAN_FIRST_WORD_MASK(bit);
 
-  size += KASAN_SHADOW_SCALE - 1;
   size /= KASAN_SHADOW_SCALE;
-
   while (size >= nbit)
     {
       if (poisoned)

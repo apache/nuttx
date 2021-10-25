@@ -101,8 +101,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       return NULL;
     }
 
-  kasan_poison(oldmem, mm_malloc_size(oldmem));
-
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
@@ -126,12 +124,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       if (newsize < oldsize)
         {
           mm_shrinkchunk(heap, oldnode, newsize);
+          kasan_poison((FAR char *)oldnode + oldnode->size,
+                       oldsize - oldnode->size);
         }
 
       /* Then return the original address */
 
       mm_givesemaphore(heap);
-      kasan_unpoison(oldmem, size);
       return oldmem;
     }
 
@@ -268,12 +267,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                                     (next->preceding & MM_ALLOC_BIT);
             }
 
-          /* Now we have to move the user contents 'down' in memory.  memcpy
-           * should be safe for this.
-           */
-
           newmem = (FAR void *)((FAR char *)newnode + SIZEOF_MM_ALLOCNODE);
-          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
 
           /* Now we want to return newnode */
 
@@ -339,7 +333,17 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         }
 
       mm_givesemaphore(heap);
-      kasan_unpoison(newmem, size);
+
+      kasan_unpoison(newmem, mm_malloc_size(newmem));
+      if (newmem != oldmem)
+        {
+          /* Now we have to move the user contents 'down' in memory.  memcpy
+          * should be safe for this.
+          */
+
+          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
+        }
+
       return newmem;
     }
 
@@ -354,7 +358,6 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
        */
 
       mm_givesemaphore(heap);
-      kasan_unpoison(oldmem, oldsize);
       newmem = mm_malloc(heap, size);
       if (newmem)
         {
