@@ -177,7 +177,8 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
       goto errout;
     }
 
-  if (strlen(mq_name) > NAME_MAX)
+  if (sizeof(CONFIG_FS_MQUEUE_MPATH) + 1 + strlen(mq_name)
+      >= MAX_MQUEUE_PATH)
     {
       ret = -ENAMETOOLONG;
       goto errout;
