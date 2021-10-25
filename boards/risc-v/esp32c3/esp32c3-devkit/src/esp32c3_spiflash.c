@@ -432,8 +432,8 @@ static int init_storage_partition(void)
   int ret = OK;
   FAR struct mtd_dev_s *mtd;
 
-  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_MTD_OFFSET,
-                                       CONFIG_ESP32C3_MTD_SIZE);
+  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_STORAGE_MTD_OFFSET,
+                                       CONFIG_ESP32C3_STORAGE_MTD_SIZE);
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
