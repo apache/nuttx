@@ -65,14 +65,12 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
                      size_t size)
 {
   FAR struct mm_allocnode_s *oldnode;
-#ifndef CONFIG_MM_KASAN
   FAR struct mm_freenode_s  *prev;
   FAR struct mm_freenode_s  *next;
-  size_t prevsize = 0;
-  size_t nextsize = 0;
-#endif
   size_t newsize;
   size_t oldsize;
+  size_t prevsize = 0;
+  size_t nextsize = 0;
   FAR void *newmem;
 
   /* If oldmem is NULL, then realloc is equivalent to malloc */
@@ -103,13 +101,13 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       return NULL;
     }
 
+  kasan_poison(oldmem, mm_malloc_size(oldmem));
+
   /* Map the memory chunk into an allocated node structure */
 
   oldnode = (FAR struct mm_allocnode_s *)
     ((FAR char *)oldmem - SIZEOF_MM_ALLOCNODE);
-  oldsize = oldnode->size;
 
-#ifndef CONFIG_MM_KASAN
   /* We need to hold the MM semaphore while we muck with the nodelist. */
 
   DEBUGVERIFY(mm_takesemaphore(heap));
@@ -118,6 +116,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Check if this is a request to reduce the size of the allocation. */
 
+  oldsize = oldnode->size;
   if (newsize <= oldsize)
     {
       /* Handle the special case where we are not going to change the size
@@ -132,6 +131,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       /* Then return the original address */
 
       mm_givesemaphore(heap);
+      kasan_unpoison(oldmem, size);
       return oldmem;
     }
 
@@ -342,23 +342,29 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         }
 
       mm_givesemaphore(heap);
+      kasan_unpoison(newmem, size);
       return newmem;
     }
 
-  mm_givesemaphore(heap);
-#endif
-
-  /* The current chunk cannot be extended. Just allocate a new chunk and
-   * copy. On failure, realloc must return NULL but leave the original
-   * memory in place.
+  /* The current chunk cannot be extended.
+   * Just allocate a new chunk and copy
    */
 
-  newmem = (FAR void *)mm_malloc(heap, size);
-  if (newmem)
+  else
     {
-      memcpy(newmem, oldmem, oldsize);
-      mm_free(heap, oldmem);
-    }
+      /* Allocate a new block.  On failure, realloc must return NULL but
+       * leave the original memory in place.
+       */
 
-  return newmem;
+      mm_givesemaphore(heap);
+      kasan_unpoison(oldmem, oldsize);
+      newmem = (FAR void *)mm_malloc(heap, size);
+      if (newmem)
+        {
+          memcpy(newmem, oldmem, oldsize);
+          mm_free(heap, oldmem);
+        }
+
+      return newmem;
+    }
 }
