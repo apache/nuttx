@@ -732,7 +732,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 
   if (ret)
     {
-      kasan_unpoison(ret, size);
+      kasan_unpoison(ret, mm_malloc_size(ret));
     }
 
   return ret;
@@ -768,7 +768,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   if (ret)
     {
-      kasan_unpoison(ret, size);
+      kasan_unpoison(ret, mm_malloc_size(ret));
     }
 
   return ret;
@@ -823,7 +823,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
         }
 
       memcpy(newmem, oldmem, size);
-      mm_free(oldmem);
+      mm_free(heap, oldmem);
     }
 #else
   /* Free the delay list first */
@@ -832,20 +832,10 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 
   /* Allocate from the tlsf pool */
 
-  if (oldmem)
-    {
-      kasan_poison(oldmem, mm_malloc_size(oldmem));
-    }
-
   DEBUGVERIFY(mm_takesemaphore(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
   mm_givesemaphore(heap);
 #endif
-
-  if (newmem)
-    {
-      kasan_unpoison(newmem, size);
-    }
 
   return newmem;
 }
