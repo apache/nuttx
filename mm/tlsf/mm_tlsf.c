@@ -802,6 +802,30 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
 {
   FAR void *newmem;
 
+#ifdef CONFIG_MM_KASAN
+  if (oldmem == NULL)
+    {
+      return mm_malloc(heap, size);
+    }
+
+  if (size == 0)
+    {
+      mm_free(heap, oldmem);
+      return NULL;
+    }
+
+  newmem = mm_malloc(heap, size);
+  if (newmem)
+    {
+      if (size > mm_malloc_size(oldmem))
+        {
+          size = mm_malloc_size(oldmem);
+        }
+
+      memcpy(newmem, oldmem, size);
+      mm_free(oldmem);
+    }
+#else
   /* Free the delay list first */
 
   mm_free_delaylist(heap);
@@ -816,6 +840,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
   DEBUGVERIFY(mm_takesemaphore(heap));
   newmem = tlsf_realloc(heap->mm_tlsf, oldmem, size);
   mm_givesemaphore(heap);
+#endif
 
   if (newmem)
     {
