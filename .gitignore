@@ -7,6 +7,8 @@
 *.dSYM
 *.elf
 *.exe
+*.gcno
+*.gcda
 *.hex
 *.i
 *.ihx
