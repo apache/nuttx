@@ -66,6 +66,10 @@
 #define CT7117_SHOTDOWN_MODE      0x01        /* Control device in shotdown mode. */
 #define CT7117_NORMAL_MODE        0x00        /* Control device in normal mode. */
 
+/* Factory test instructions. */
+
+#define CT7117_SIMPLE_CHECK       0x00        /* Simple communication check. */
+
 #define CT7117_MAKE_S16(u8h, u8l) \
         (int16_t)(((uint16_t)(u8h) << 8) | (uint16_t)(u8l))
 
@@ -149,6 +153,8 @@ static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int ct7117_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                FAR unsigned int *interval_us);
+static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           unsigned long arg);
 
 /* Sensor poll functions. */
 
@@ -169,7 +175,8 @@ static const struct ct7117_odr_s g_ct7117_odr[] =
 static const struct sensor_ops_s g_ct7117_ops =
 {
   .activate = ct7117_activate,              /* Enable/disable snesor. */
-  .set_interval = ct7117_set_interval       /* Set output data period. */
+  .set_interval = ct7117_set_interval,      /* Set output data period. */
+  .selftest = ct7117_selftest               /* Sensor selftest function. */
 };
 
 /****************************************************************************
@@ -503,9 +510,18 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
           snerr("Failed to set normal mode: %d\n", ret);
           return ret;
         }
+
+      priv->start_timestamp = sensor_get_timestamp();
+      priv->sample_count = 1;
+
+      work_queue(LPWORK, &priv->work,
+                 ct7117_worker, priv,
+                 priv->interval / USEC_PER_TICK);
     }
   else
     {
+      work_cancel(LPWORK, &priv->work);
+
       /* Set shotdown mode. */
 
       ret = ct7117_setmode(priv, CT7117_SHOTDOWN_MODE);
@@ -651,23 +667,62 @@ static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
         }
 
       priv->activated = enable;
-
-      if (enable)
-        {
-          priv->start_timestamp = sensor_get_timestamp();
-          priv->sample_count = 1;
-
-          work_queue(LPWORK, &priv->work,
-                     ct7117_worker, priv,
-                     priv->interval / USEC_PER_TICK);
-        }
-      else
-        {
-          work_cancel(LPWORK, &priv->work);
-        }
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: ct7117_selftest
+ *
+ * Description:
+ *   Mainly used in the self-test link, including device ID inspection
+ *   and device functional inspection.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           unsigned long arg)
+{
+  FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands. */
+
+  switch (arg)
+    {
+      case CT7117_SIMPLE_CHECK:      /* Simple communication check. */
+        {
+          ret = ct7117_checkid(priv);
+          if (ret < 0)
+            {
+              snerr("Failed to get DeviceID: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                       /* Other cmd tag. */
+        {
+          ret = -ENOTTY;
+          snerr("The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+    return ret;
 }
 
 /****************************************************************************
