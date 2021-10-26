@@ -62,6 +62,7 @@
 #include "esp32c3_wifi_utils.h"
 #include "esp32c3_wlan.h"
 #include "esp32c3_ble_adapter.h"
+#include "esp32c3_wireless.h"
 #include "esp32c3_clockconfig.h"
 
 #ifdef CONFIG_PM
@@ -314,10 +315,6 @@ static void esp_dport_access_stall_other_cpu_start(void);
 static void esp_dport_access_stall_other_cpu_end(void);
 static void wifi_apb80m_request(void);
 static void wifi_apb80m_release(void);
-static void wifi_phy_disable(void);
-static void wifi_phy_enable(void);
-static void esp_phy_enable_clock(void);
-static void esp_phy_disable_clock(void);
 static int wifi_phy_update_country_info(const char *country);
 static int esp_wifi_read_mac(uint8_t *mac, uint32_t type);
 static void wifi_reset_mac(void);
@@ -393,14 +390,6 @@ static int esp_wifi_sta_connect_wrapper(void);
 static void esp_wifi_set_debug_log(void);
 
 /****************************************************************************
- * Extern Functions declaration
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32C3_BLE
-extern void coex_pti_v2(void);
-#endif
-
-/****************************************************************************
  * Public Functions declaration
  ****************************************************************************/
 
@@ -424,18 +413,6 @@ uint8_t esp_crc8(const uint8_t *p, uint32_t len);
 
 static bool g_wifi_irq_bind;
 
-/* Wi-Fi sleep private data */
-
-static uint32_t g_phy_clk_en_cnt;
-
-/* Reference count of enabling PHY */
-
-static uint8_t g_phy_access_ref;
-
-/* time stamp updated when the PHY/RF is turned on */
-
-static int64_t g_phy_rf_en_ts;
-
 /* Wi-Fi event private data */
 
 static struct work_s g_wifi_evt_work;
@@ -446,14 +423,6 @@ static sem_t g_wifiexcl_sem = SEM_INITIALIZER(1);
 /* Wi-Fi adapter reference */
 
 static int g_wifi_ref = 0;
-
-/* Memory to store PHY digital registers */
-
-static uint32_t *g_phy_digital_regs_mem = NULL;
-
-/* Indicate PHY is calibrated or not */
-
-static bool g_is_phy_calibrated = false;
 
 #ifdef ESP32C3_WLAN_HAS_STA
 
@@ -576,8 +545,8 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
       esp_dport_access_stall_other_cpu_end,
   ._wifi_apb80m_request = wifi_apb80m_request,
   ._wifi_apb80m_release = wifi_apb80m_release,
-  ._phy_disable = wifi_phy_disable,
-  ._phy_enable = wifi_phy_enable,
+  ._phy_disable = esp32c3_phy_disable,
+  ._phy_enable = esp32c3_phy_enable,
   ._phy_update_country_info = wifi_phy_update_country_info,
   ._read_mac = esp_wifi_read_mac,
   ._timer_arm = ets_timer_arm,
@@ -2671,214 +2640,6 @@ static void wifi_apb80m_release(void)
 }
 
 /****************************************************************************
- * Name: phy_digital_regs_store
- *
- * Description:
- *    Store  PHY digital registers.
- *
- ****************************************************************************/
-
-static inline void phy_digital_regs_store(void)
-{
-  if (g_phy_digital_regs_mem == NULL)
-    {
-      g_phy_digital_regs_mem = (uint32_t *)
-                    kmm_malloc(SOC_PHY_DIG_REGS_MEM_SIZE);
-    }
-
-  DEBUGASSERT(g_phy_digital_regs_mem != NULL);
-
-  phy_dig_reg_backup(true, g_phy_digital_regs_mem);
-}
-
-/****************************************************************************
- * Name: phy_digital_regs_load
- *
- * Description:
- *   Load  PHY digital registers.
- *
- ****************************************************************************/
-
-static inline void phy_digital_regs_load(void)
-{
-  if (g_phy_digital_regs_mem != NULL)
-    {
-      phy_dig_reg_backup(false, g_phy_digital_regs_mem);
-    }
-}
-
-/****************************************************************************
- * Name: wifi_phy_disable
- *
- * Description:
- *   Deinitialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void wifi_phy_disable(void)
-{
-  irqstate_t flags;
-  flags = enter_critical_section();
-
-  g_phy_access_ref--;
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Store  PHY digital register. */
-
-      phy_digital_regs_store();
-
-      /* Disable PHY and RF. */
-
-      phy_close_rf();
-
-      phy_xpd_tsens();
-
-      /* Disable Wi-Fi/BT common peripheral clock.
-       * Do not disable clock for hardware RNG.
-       */
-
-      esp_phy_disable_clock();
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: wifi_phy_enable
- *
- * Description:
- *   Initialize PHY hardware
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void wifi_phy_enable(void)
-{
-  static bool debug = false;
-  irqstate_t flags;
-  esp_phy_calibration_data_t *cal_data;
-  char *phy_version = get_phy_version_str();
-  if (debug == false)
-    {
-      debug = true;
-      wlinfo("phy_version %s\n", phy_version);
-    }
-
-  cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
-  if (!cal_data)
-    {
-      wlerr("ERROR: Failed to kmm_zalloc");
-      DEBUGASSERT(0);
-    }
-
-  flags = enter_critical_section();
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Update time stamp */
-
-      g_phy_rf_en_ts = esp_timer_get_time();
-
-      esp_phy_enable_clock();
-      if (g_is_phy_calibrated == false)
-        {
-          register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_FULL);
-          g_is_phy_calibrated = true;
-        }
-      else
-        {
-          phy_wakeup_init();
-          phy_digital_regs_load();
-        }
-
-#ifdef CONFIG_ESP32C3_BLE
-      coex_pti_v2();
-#endif
-    }
-
-  g_phy_access_ref++;
-  leave_critical_section(flags);
-  kmm_free(cal_data);
-}
-
-/****************************************************************************
- * Name: esp_phy_enable_clock
- *
- * Description:
- *   Enable PHY hardware clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_phy_enable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt == 0)
-    {
-      modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0,
-                  SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M);
-    }
-
-  g_phy_clk_en_cnt++;
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: esp_phy_disable_clock
- *
- * Description:
- *   Disable PHY hardware clock
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp_phy_disable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt)
-    {
-      g_phy_clk_en_cnt--;
-      if (!g_phy_clk_en_cnt)
-        {
-          modifyreg32(SYSTEM_WIFI_CLK_EN_REG,
-                      SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M,
-                      0);
-        }
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Name: wifi_phy_update_country_info
  *
  * Description:
@@ -4464,7 +4225,6 @@ static void *wifi_coex_get_schm_curr_phase(void)
 
 static int wifi_coex_set_schm_curr_phase_idx(int idx)
 {
-  return -1;
 #ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
   return coex_schm_curr_phase_idx_set(idx);
 #else
