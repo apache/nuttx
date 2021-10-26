@@ -355,7 +355,7 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       newmem = (FAR void *)mm_malloc(heap, size);
       if (newmem)
         {
-          memcpy(newmem, oldmem, oldsize);
+          memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
           mm_free(heap, oldmem);
         }
 
