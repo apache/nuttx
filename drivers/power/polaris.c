@@ -27,29 +27,28 @@
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-#include <nuttx/config.h>
-
 #include <sys/types.h>
 
-#include <unistd.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <errno.h>
+#include <assert.h>
 #include <debug.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <unistd.h>
 
 #include <nuttx/config.h>
-#include <assert.h>
+#include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
+#include <nuttx/wqueue.h>
 
 #include "polaris.h"
 #include "polaris_nvm.c"
 
 #define PAGE_SIZE 256
-
 #define NO_DEBUG
 
 /****************************************************************************
@@ -70,6 +69,12 @@ static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
                                   int value);
 static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
                             uintptr_t param);
+
+/* Charger rx interrupt functions */
+
+static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg);
+static void stwlc38_worker(FAR void *arg);
 
 static const struct battery_charger_operations_s g_stwlc38ops =
 {
@@ -128,13 +133,17 @@ struct stwlc38_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  struct battery_charger_dev_s dev; /* Battery charger device */
+  struct battery_charger_dev_s dev;   /* Battery charger device */
 
   /* Data fields specific to the lower half STWLC38 driver follow */
 
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* I2C address */
-  uint32_t frequency;           /* I2C frequency */
+  uint8_t addr;                         /* I2C address */
+  uint32_t frequency;                   /* I2C frequency */
+  uint32_t pin;                         /* Interrupt pin */
+  uint32_t current;                     /* rx current */
+  FAR struct i2c_master_s *i2c;         /* I2C interface */
+  FAR struct ioexpander_dev_s *ioedev;  /* Ioexpander device */
+  struct work_s work;                   /* Interrupt handler worker */
 };
 
 static uint8_t type_of_command[CMD_STR_LEN] =
@@ -176,7 +185,7 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
   for (i = 0; i < cmd_length; i++)
     printk(KERN_CONT "%02X ", cmd[i]);
 
-  baterr("[WLC] WR-R: ");
+  batinfo("[WLC] WR-R: ");
   for (i = 0; i < read_count; i++)
     printk(KERN_CONT "%02X ", read_data[i]);
 #endif
@@ -219,7 +228,7 @@ static int hw_i2c_write(FAR struct stwlc38_dev_s *priv, uint32_t addr,
                         uint8_t *data, uint32_t data_length)
 {
   uint8_t *cmd;
-  memset(cmd, 0, (5 + data_length) * sizeof(uint8_t));
+  cmd = kmm_zalloc((5 + data_length) * sizeof(uint8_t));
 
   cmd[0] = OPCODE_WRITE;
   cmd[1] = (uint8_t)((addr >> 24) & 0xff);
@@ -243,7 +252,8 @@ static int fw_i2c_write(FAR struct stwlc38_dev_s *priv, uint16_t addr,
                         uint8_t *data, uint32_t data_length)
 {
   uint8_t *cmd;
-  memset(cmd, 0, (2 + data_length) * sizeof(uint8_t));
+  cmd = kmm_zalloc((2 + data_length) * sizeof(uint8_t));
+
   cmd[0] = (uint8_t)((addr >>  8) & 0xff);
   cmd[1] = (uint8_t)((addr >>  0) & 0xff);
   memcpy(&cmd[2], data, data_length);
@@ -359,7 +369,7 @@ static int polaris_nvm_write_sector(FAR struct stwlc38_dev_s *priv,
   batinfo("[WLC] writing sector %02X\n", sector_index);
   if (data_length > NVM_SECTOR_SIZE_BYTES)
     {
-      baterr("[WLC] sector data bigger than 256 bytes\n");
+      batinfo("[WLC] sector data bigger than 256 bytes\n");
       return E_INVALID_INPUT;
     }
 
@@ -382,7 +392,7 @@ static int polaris_nvm_write_sector(FAR struct stwlc38_dev_s *priv,
 
   for (i = 0; i < 20; i++)
     {
-      sleep(1);
+      usleep(1);
       err = fw_i2c_read(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1);
       if (err != OK) return err;
       if ((reg_value & 0x04) == 0)
@@ -435,11 +445,11 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
 
   err = fw_i2c_read(priv, FWREG_OP_MODE_ADDR, &reg_value, 1);
   if (err != OK) return err;
-  baterr("[WLC] OP MODE %02X\n", reg_value);
+  batinfo("[WLC] OP MODE %02X\n", reg_value);
 
   if (reg_value != FW_OP_MODE_SA)
     {
-      baterr("[WLC] no DC power detected, nvm programming aborted\n");
+      batinfo("[WLC] no DC power detected, nvm programming aborted\n");
       return E_UNEXPECTED_OP_MODE;
     }
 
@@ -448,7 +458,7 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
   reg_value = 0x40;
   if ((err = fw_i2c_write(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1)) != OK)
       return err;
-  sleep(AFTER_SYS_RESET_SLEEP_MS);
+  usleep(AFTER_SYS_RESET_SLEEP_MS);
   reg_value = 0xc5;
   if ((err = fw_i2c_write(priv, FWREG_NVM_PWD_ADDR, &reg_value, 1)) != OK)
       return err;
@@ -464,9 +474,22 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
   /* system reset */
 
   reg_value = 0x01;
+
+  /**************************************************************************
+   * the follow includes a workaround
+   * it should return error when meeting i2c tramsfer failed, but if so, the
+   * procedure logic will meet a difficult.
+   * therefore, print err info and return ok. the workaround is only to hint
+   * the I2C transfer failed, which does not effect normal work behind.
+   **************************************************************************/
+
   if ((err = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1)) != OK)
-      return err;
-  sleep(AFTER_SYS_RESET_SLEEP_MS);
+    batinfo("[WLC] return err");
+
+  /* the reset need 500ms or so, for this workaround, setup 1000ms */
+
+  usleep(AFTER_SYS_RESET_SLEEP_MS);
+
   return OK;
 }
 
@@ -487,7 +510,7 @@ static ssize_t chip_info_show(FAR struct stwlc38_dev_s *priv, char *buf)
 
   if (wlc_i2c_read(dev, cmd, 2, read_buff, 4) < OK)
     {
-      baterr("[WLC] could not read the register\n");
+      batinfo("[WLC] ERROR: could not read the register\n");
       error = snprintf(buf, PAGE_SIZE,
                        "CHIP INFO READ ERROR {%02X}\n", E_BUS_WR);
       return error;
@@ -510,6 +533,7 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
   int patch_id_mismatch = 0;
   struct polaris_chip_info chip_info;
   batinfo("[WLC] NVM Programming started\n");
+
   if (get_polaris_chip_info(priv, &chip_info) < OK)
     {
       baterr("[WLC] Error in reading polaris_chip_info\n");
@@ -518,6 +542,8 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
     }
 
   /* determine what has to be programmed depending on version ids */
+
+  chip_info.cut_id = chip_info.chip_revision; /* TEST: */
 
   batinfo("[WLC] Cut Id: %02X\n", chip_info.cut_id);
   if (chip_info.cut_id != NVM_TARGET_CUT_ID)
@@ -582,10 +608,10 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
     {
       err = E_NVM_DATA_MISMATCH;
       if (chip_info.config_id != NVM_CFG_VERSION_ID)
-          baterr("[WLC] Config Id mismatch after NVM programming\n");
+          batinfo("[WLC] Config Id mismatch after NVM programming\n");
       if (chip_info.nvm_patch_id != NVM_PATCH_VERSION_ID)
-          baterr("[WLC] Patch Id mismatch after NVM programming\n");
-      batinfo("[WLC] NVM Programming failed\n");
+          batinfo("[WLC] Patch Id mismatch after NVM programming\n");
+      baterr("[WLC] NVM Programming failed\n");
     }
 
 exit_0:
@@ -617,7 +643,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                   read_count = ((type_of_command[number_parameters - 2] << 8)
                                | (type_of_command[number_parameters - 1]));
                   batinfo("[WLC] read Count is %d\n", read_count);
-                  memset(read_buff, 0, read_count * sizeof(uint8_t));
+                  read_buff = kmm_zalloc(read_count * sizeof(uint8_t));
                   if (read_buff == NULL)
                     {
                       err = E_MEMORY_ALLOC;
@@ -633,7 +659,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                   else
                     {
                       size += (read_count * sizeof(uint8_t)) * 2;
-                      memset(all_strbuff, 0, size);
+                      all_strbuff = kmm_zalloc(size);
                       if (all_strbuff == NULL)
                         {
                           err = E_MEMORY_ALLOC;
@@ -660,7 +686,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                 }
               else
                 {
-                  baterr("[WLC] Invalid input for Write read operation\n");
+                  batinfo("[WLC] Invalid input for Write read operation\n");
                   err = E_INVALID_INPUT;
                 }
 
@@ -683,7 +709,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                 }
               else
                 {
-                  baterr("[WLC] Invalid input for Write operation\n");
+                  batinfo("[WLC] Invalid input for Write operation\n");
                   err = E_INVALID_INPUT;
                 }
 
@@ -692,7 +718,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
 
           default:
             {
-              baterr("[WLC] Invalid input for i2c bridge\n");
+              batinfo("[WLC] Invalid input for i2c bridge\n");
               err = E_INVALID_INPUT;
               goto cleanup;
             }
@@ -701,7 +727,7 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
   else
     {
        err = E_INVALID_INPUT;
-       baterr("[WLC] Invalid input for write/write_read operation\n");
+       batinfo("[WLC] Invalid input for write/write_read operation\n");
        goto cleanup;
     }
 
@@ -736,15 +762,108 @@ static ssize_t st_polaris_i2c_bridge_store(FAR struct stwlc38_dev_s *priv,
   return count;
 }
 
+/****************************************************************************
+ * Name: stwlc38_interrupt_handler
+ *
+ * Description:
+ *   Handle the rx interrupt.
+ *
+ * Input Parameters:
+ *   dev     - ioexpander device.
+ *   pinset  - Interrupt pin.
+ *   arg     - Device struct.
+ *
+ * Returned Value:
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg)
+{
+  /* This function should be called upon a rising edge on the stwlc38 new
+   * data interrupt pin since it signals that new data has been measured.
+   */
+
+  FAR struct stwlc38_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Task the worker with retrieving the latest sensor data. We should not
+   * do this in a interrupt since it might take too long. Also we cannot lock
+   * the I2C bus from within an interrupt.
+   */
+
+  work_queue(LPWORK, &priv->work, stwlc38_worker, priv, 0);
+  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stwlc38_worker
+ *
+ * Description:
+ *   Task the worker with retrieving the latest sensor data. We should not do
+ *   this in a interrupt since it might take too long. Also we cannot lock
+ *   the I2C bus from within an interrupt.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int stwlc38_readrx(priv)
+{
+  /* to-do */
+
+  return OK;
+}
+
+static void stwlc38_worker(FAR void *arg)
+{
+  FAR struct stwlc38_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+
+  /* Read out the latest rx data */
+
+  if (stwlc38_readrx(priv) == 0)
+    {
+      /* push data to upper half driver */
+
+      return OK;
+    }
+}
+
 FAR struct battery_charger_dev_s *
-  stwlc38_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                    uint32_t frequency, int current)
+  stwlc38_initialize(FAR struct i2c_master_s *i2c,
+                     uint32_t pin,
+                     uint8_t addr,
+                     uint32_t frequency,
+                     uint32_t current,
+                     FAR struct ioexpander_dev_s *dev)
 {
   FAR struct stwlc38_dev_s *priv;
   char *buf;
-  int count;
+  uint8_t count;
+  int ret;
 
-  /* Initialize the SC8551 device structure */
+  /* Initialize the STWLC38 device structure */
 
   priv = kmm_zalloc(sizeof(struct stwlc38_dev_s));
   if (priv)
@@ -753,8 +872,36 @@ FAR struct battery_charger_dev_s *
 
       priv->dev.ops   = &g_stwlc38ops;
       priv->i2c       = i2c;
+      priv->pin       = pin;
       priv->addr      = addr;
+      priv->current   = current;
       priv->frequency = frequency;
+      priv->ioedev    = dev;
+    }
+
+  /* Interrupt register */
+
+  ret = IOEXP_SETDIRECTION(priv->ioedev, priv->pin,
+                           IOEXPANDER_DIRECTION_IN_PULLUP);
+  if (ret < 0)
+    {
+      baterr("Failed to set direction: %d\n", ret);
+    }
+
+  ret = IOEP_ATTACH(priv->ioedev, (1 << priv->pin),
+                          stwlc38_interrupt_handler, priv);
+  if (ret == NULL)
+    {
+      baterr("Failed to attach: %d\n", ret);
+      ret = -EIO;
+    }
+
+  ret = IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->ioedev, stwlc38_interrupt_handler);
     }
 
   count = nvm_program_show(priv, buf);
