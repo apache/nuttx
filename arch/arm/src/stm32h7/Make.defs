@@ -185,6 +185,10 @@ ifeq ($(CONFIG_STM32H7_TIM),y)
 CHIP_CSRCS += stm32_tim.c
 endif
 
+ifeq ($(CONFIG_STM32H7_LPTIM),y)
+CHIP_CSRCS += stm32_lptim.c
+endif
+
 ifeq ($(CONFIG_STM32H7_PWM),y)
 CHIP_CSRCS += stm32_pwm.c
 endif
