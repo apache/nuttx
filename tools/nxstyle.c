@@ -2270,7 +2270,7 @@ int main(int argc, char **argv, char **envp)
                                  endndx++);
                           }
 
-                        n = endndx + 1;
+                        n = endndx;
                       }
                   }
                   break;
