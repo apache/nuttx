@@ -49,6 +49,31 @@
 #  define MIN(a,b) a < b ? a : b
 #endif
 
+#ifndef CONFIG_ARMV7M_DCACHE
+  /*  With Dcache off:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be off
+   */
+#  undef  MPU_RASR_B
+#  define MPU_RASR_B    0
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  0
+#else
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+  /*  With Dcache on:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be on
+   */
+#  define RASR_B_VALUE  MPU_RASR_B
+#  define RASR_C_VALUE  MPU_RASR_C
+
+#  else
+  /*  With Dcache in WRITETHROUGH Bufferable (MPU_RASR_B)
+   * needs to be off, except for FLASH for alignment leniency
+   */
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  MPU_RASR_C
+#  endif
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
