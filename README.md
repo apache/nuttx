@@ -1873,7 +1873,7 @@ into your Web browser:
 
     Documentation/index.html
 
-NuttX documentation is also available online at <https://apache.nuttx.org>.
+NuttX documentation is also available online at <https://nuttx.apache.org/>.
 
 Below is a guide to the available README files in the NuttX source tree:
 
