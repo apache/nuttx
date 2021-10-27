@@ -157,7 +157,7 @@ int parse_mbr_partition(FAR struct partition_state_s *state,
   if (extended)
     {
       uint32_t ebr_block;
-      ebr_block = MBR_LBA_TO_BLOCK(extened->partition_start,
+      ebr_block = MBR_LBA_TO_BLOCK(extended->partition_start,
                                    state->blocksize);
       while (1)
         {
