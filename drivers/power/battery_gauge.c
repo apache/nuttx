@@ -348,6 +348,16 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
+      case BATIOC_CHIPID:
+        {
+          FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->chipid(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;

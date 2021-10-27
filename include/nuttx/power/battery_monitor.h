@@ -100,6 +100,8 @@
  * BATIOC_OPERATE - Perform miscellaneous, device-specific charger operation.
  *   Input value:  An uintptr_t that can hold a pointer to struct
  *   batio_operate_msg_s.
+ * BATIOC_CHIPID -Get the chip id.
+ *   Input value:  A pointer to type unsigned int.
  */
 
 /****************************************************************************
@@ -286,6 +288,10 @@ struct battery_monitor_operations_s
   /* Do device specific operation */
 
   int (*operate)(struct battery_monitor_dev_s *dev, uintptr_t param);
+
+  /* Get chip id */
+
+  int (*chipid)(struct battery_charger_dev_s *dev, unsigned int *value);
 };
 
 /* This structure defines the battery driver state structure */
