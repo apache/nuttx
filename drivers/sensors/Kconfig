@@ -578,13 +578,11 @@ choice
 
 config LPS27HHW_MODE_INT
 	bool "LPS27HHW sample mode using interrupt"
-	default y
 	---help---
 		LPS27HHW sample mode using interrupt.
 
 config LPS27HHW_MODE_POLL
 	bool "LPS27HHW sample mode using polling"
-	default n
 	---help---
 		LPS27HHW sample mode using polling.
 
