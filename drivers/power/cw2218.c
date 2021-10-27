@@ -87,8 +87,8 @@ static inline int cw2218_getcurrent(FAR struct cw2218_dev_s *priv,
                                     b16_t *current);
 static inline int cw2218_gettemp(FAR struct cw2218_dev_s *priv,
                                  b8_t *temp);
-static inline int cw2218_get_devid(FAR struct cw2218_dev_s *priv,
-                                   uint8_t *id);
+static inline int cw2218_get_chipid(FAR struct cw2218_dev_s *priv,
+                                    unsigned int *id);
 
 static int cw2218_active(FAR struct cw2218_dev_s *priv);
 static int cw2218_sleep(FAR struct cw2218_dev_s *priv);
@@ -106,6 +106,8 @@ static int cw2218_voltage(struct battery_gauge_dev_s *dev, b16_t *voltage);
 static int cw2218_current(struct battery_gauge_dev_s *dev, b16_t *current);
 static int cw2218_temp(struct battery_gauge_dev_s *dev, b8_t *temp);
 static int cw2218_capacity(struct battery_gauge_dev_s *dev, b16_t *capacity);
+static int cw2218_chipid(struct battery_gauge_dev_s *dev,
+                         unsigned int *chipid);
 
 /****************************************************************************
  * Private Data
@@ -119,6 +121,7 @@ static const struct battery_gauge_operations_s g_cw2218ops =
   cw2218_capacity,
   cw2218_current,
   cw2218_temp,
+  cw2218_chipid,
 };
 
 static const unsigned char g_config_profile_info[SIZE_OF_PROFILE] =
@@ -177,7 +180,7 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
   ret = i2c_write(priv->i2c, &config, &regaddr, 1);
   if (ret < 0)
     {
-      pwrerr("ERROR: i2c_write failed: %d\n", ret);
+      baterr("ERROR: i2c_write failed: %d\n", ret);
       return ret;
     }
 
@@ -186,7 +189,7 @@ static int cw2218_getreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
   ret = i2c_read(priv->i2c, &config, regval, num_char);
   if (ret < 0)
     {
-      pwrerr("ERROR: i2c_read failed: %d\n", ret);
+      baterr("ERROR: i2c_read failed: %d\n", ret);
       return ret;
     }
 
@@ -236,7 +239,7 @@ static int cw2218_putreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
 }
 
 /****************************************************************************
- * Name: cw2218_get_devid
+ * Name: cw2218_get_chipid
  *
  * Description:
  *   Read the ID register.
@@ -254,8 +257,8 @@ static int cw2218_putreg8(FAR struct cw2218_dev_s *priv, uint8_t regaddr,
  *
  ****************************************************************************/
 
-static inline int cw2218_get_devid(FAR struct cw2218_dev_s *priv,
-                                   uint8_t *id)
+static inline int cw2218_get_chipid(FAR struct cw2218_dev_s *priv,
+                                    unsigned int *id)
 {
   uint8_t regval = 0;
   int ret;
@@ -339,7 +342,7 @@ static inline int cw2218_getsoc(FAR struct cw2218_dev_s *priv,  b16_t *soc,
 
       if (ui_soc >= CW2218_SOC_MAGIC_100)
         {
-          pwrerr("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
+          baterr("CW2018 : UI_SOC = %d larger 100!\n", ui_soc);
           ui_soc = CW2218_SOC_MAGIC_100;
         }
 
@@ -577,7 +580,7 @@ static int cw2218_write_profile(FAR struct cw2218_dev_s *priv,
 
       if (ret < 0)
         {
-          pwrerr("IIC error %d\n", ret);
+          baterr("IIC error %d\n", ret);
           return ret;
         }
     }
@@ -779,26 +782,26 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
 
 static int cw2218_init(FAR struct cw2218_dev_s *priv)
 {
-  uint8_t id = 0;
+  unsigned int  id = 0;
   int ret;
 
-  ret = cw2218_get_devid(priv, &id);
+  ret = cw2218_get_chipid(priv, &id);
   if (ret < 0)
     {
-      pwrerr("IIC read error\n");
+      baterr("IIC read error\n");
       return ret;
     }
 
   if (id != CW2218_DEVICE_ID)
     {
-      pwrerr("not cw2218 device id\n");
+      baterr("not cw2218 device id\n");
       return ERROR;
     }
 
   ret = cw2218_get_state(priv);
   if (ret < 0)
     {
-      pwrerr("iic read write error");
+      baterr("iic read error\n");
       return ret;
     }
 
@@ -938,6 +941,32 @@ static int cw2218_temp(struct battery_gauge_dev_s *dev, b8_t *temp)
 {
   FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)dev;
   return cw2218_gettemp(priv,  temp);
+}
+
+/****************************************************************************
+ * Name: cw2218_chipid
+ *
+ * Description:
+ *   Battery gauge cw2218 chip id.
+ *
+ * Input Parameters:
+ *   priv    - Device struct
+ *   chipid  - id
+ *
+ * Returned Value:
+ *    Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int cw2218_chipid(struct battery_gauge_dev_s *dev,
+                         unsigned int *chipid)
+{
+  FAR struct cw2218_dev_s *priv = (FAR struct cw2218_dev_s *)dev;
+  return cw2218_get_chipid(priv,  chipid);
 }
 
 /****************************************************************************
