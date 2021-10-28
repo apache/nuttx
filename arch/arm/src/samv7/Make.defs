@@ -123,7 +123,9 @@ ifeq ($(CONFIG_SAMV7_SPI_SLAVE),y)
 CHIP_CSRCS += sam_spi_slave.c
 endif
 
-ifeq ($(CONFIG_SAMV7_QSPI),y)
+ifeq ($(CONFIG_SAMV7_QSPI_SPI_MODE),y)
+CHIP_CSRCS += sam_qspi_spi.c
+else ifeq ($(CONFIG_SAMV7_QSPI),y)
 CHIP_CSRCS += sam_qspi.c
 endif
 
