@@ -40,13 +40,12 @@
 #include <nuttx/config.h>
 
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_coproc.h>
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/chip/core-isa.h>
 #include <arch/chip/tie.h>
 #include <arch/chip/tie-asm.h>
-
-#include "xtensa_abi.h"
 
 #if XCHAL_CP_NUM > 0
 

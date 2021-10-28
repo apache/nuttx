@@ -40,10 +40,10 @@
 
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "xtensa.h"
-#include "xtensa_abi.h"
 
 /****************************************************************************
  * Public Functions
