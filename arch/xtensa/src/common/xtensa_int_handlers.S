@@ -61,11 +61,11 @@
 
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "chip.h"
 #include "xtensa.h"
-#include "xtensa_abi.h"
 #include "xtensa_timer.h"
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
