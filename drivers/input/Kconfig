@@ -110,6 +110,10 @@ config NT38350_I2CDEV
 	---help---
 		Set up I2C bus number in here.
 
+config NT38350_TOUCHSCREEN_BUFF_NUMS
+	int "The number of NovaTek NT38350 touchscreen buffer"
+	default 2
+
 config NT38350_FW_PATH
 	string "NovaTek NT38350 Firmware path"
 	default "/data/nt38350_fw.bin"
@@ -139,12 +143,6 @@ config NT38350_NEED_UPGRADE_FW
 	default n
 	---help---
 		Say yes here to enable firmware upgrade
-
-config nt38350_NPOLLWAITERS
-	int "Number NT38350 poll waiters"
-	default 4
-	---help---
-		Maximum number of threads that can be waiting on poll()
 
 config NVT_OFFLINE_LOG
 	bool "NovaTek NT38350 Offline log"

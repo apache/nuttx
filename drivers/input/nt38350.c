@@ -35,6 +35,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/arch.h>
@@ -55,10 +56,8 @@
 
 /* Configuration ***********************************************************/
 
-/* Maximum number of threads than can be waiting for POLL events */
-
-#ifndef CONFIG_NT38350_NPOLLWAITERS
-#  define CONFIG_NT38350_NPOLLWAITERS 2
+#ifndef CONFIG_NT38350_TOUCHSCREEN_BUFF_NUMS
+#  define CONFIG_NT38350_TOUCHSCREEN_BUFF_NUMS 2
 #endif
 
 #ifndef CONFIG_NVT_TOUCH_DEFAULT_WIDTH
@@ -215,14 +214,7 @@ struct nvt_diff_s
 
 struct nt38350_dev_s
 {
-#ifdef CONFIG_NT38350_REFCNT
-  uint8_t                       crefs;             /* Number of times the device has been opened */
-#endif
-  uint8_t                       nwaiters;          /* Number of threads waiting for nt38350 data */
   uint8_t                       id;                /* Current touch point ID */
-  volatile bool                 valid;             /* An True:  New, valid touch data in touch_info */
-  sem_t                         devsem;            /* Manages exclusive access to this structure */
-  sem_t                         waitsem;           /* Used to wait for the availability of data */
   uint32_t                      frequency;
 
   FAR struct nt38350_config_s   *config;           /* Board configuration data */
@@ -230,6 +222,7 @@ struct nt38350_dev_s
   struct work_s                 work;              /* Supports the interrupt handling "bottom half" */
   struct ts_nt38350_sample_s    sample;            /* Last sampled touch point data */
   struct ts_nt38350_sample_s    old_sample;        /* Old sampled touch point data */
+  struct touch_lowerhalf_s      lower;             /* touchscreen device lowerhalf instance */
 
   /* Touch info */
 
@@ -250,22 +243,11 @@ struct nt38350_dev_s
   struct work_s                 nvt_log_wq;
   uint8_t point_xdata_temp[NVT_POINT_DATA_EXBUF_LEN];
 #endif
-
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-  struct pollfd                 *fds[CONFIG_NT38350_NPOLLWAITERS];
 };
 
 /***************************************************************************
  * Private Function Prototypes
  ***************************************************************************/
-
-static void nt38350_notify(FAR struct nt38350_dev_s *priv);
-static int nt38350_sample(FAR struct nt38350_dev_s *priv,
-                          FAR struct ts_nt38350_sample_s *sample);
 
 static int nt38350_i2c_read(FAR struct i2c_master_s *dev,
                             FAR const struct i2c_config_s *config,
@@ -287,32 +269,12 @@ static int nt38350_write_reg(FAR struct nt38350_dev_s *priv,
 
 /* Character driver methods */
 
-static int nt38350_open(FAR struct file *filep);
-static int nt38350_close(FAR struct file *filep);
-static ssize_t nt38350_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len);
-static int nt38350_ioctl(FAR struct file *filep,
-                         int cmd, unsigned long arg);
-static int nt38350_poll(FAR struct file *filep,
-                        struct pollfd *fds,
-                        bool setup);
+static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
+                           int cmd, unsigned long arg);
 
 /***************************************************************************
  * Private Data
  ***************************************************************************/
-
-/* This the vtable that supports the character driver interface */
-
-static const struct file_operations g_nt38350_fops =
-{
-  nt38350_open,
-  nt38350_close,
-  nt38350_read,
-  0,
-  0,
-  nt38350_ioctl,
-  nt38350_poll
-};
 
 static const struct nvt_ts_mem_map_s g_nt38350_memory_map =
 {
@@ -359,7 +321,7 @@ static const uint8_t AIN_X[10] =
   0, 1, 2, 3, 4, 5
 };
 
-static uint8_t AIN_Y[10] =
+static const uint8_t AIN_Y[10] =
 {
   0, 1, 2, 3, 4, 5
 };
@@ -3732,124 +3694,11 @@ static void nvt_selftest(FAR struct nt38350_dev_s *priv,
 }
 #endif
 
-/***************************************************************************
- * Name: nt38350_notify
- ***************************************************************************/
-
-static void nt38350_notify(FAR struct nt38350_dev_s *priv)
-{
-  int i;
-
-  /* If there are threads waiting on poll() for nt38350 data to become
-   * available, then wake them up now.  NOTE: we wake up all waiting threads
-   * because we do not know that they are going to do.  If they all try to
-   * read the data, then some make end up blocking after all.
-   */
-
-  for (i = 0; i < CONFIG_NT38350_NPOLLWAITERS; i++)
-    {
-      struct pollfd *fds = priv->fds[i];
-      if (fds)
-        {
-          fds->revents |= POLLIN;
-#ifdef CONFIG_NVT_DEBUG
-          iinfo("Report events: %02x\n", fds->revents);
-#endif
-          nxsem_post(fds->sem);
-        }
-    }
-
-  /* If there are threads waiting for read data, then signal one of them
-   * that the read data is available.
-   */
-
-  if (priv->nwaiters > 0)
-    {
-      /* After posting this semaphore, we need to exit because the NT38350
-       * is no longer available.
-       */
-
-      nxsem_post(&priv->waitsem);
-    }
-}
-
-/***************************************************************************
- * Name: nt38350_sample
- ***************************************************************************/
-
-static int nt38350_sample(FAR struct nt38350_dev_s *priv,
-                          FAR struct ts_nt38350_sample_s *sample)
-{
-  irqstate_t flags;
-  int ret = - EAGAIN;
-
-  flags = enter_critical_section();
-
-  if (priv->valid)
-    {
-       memcpy(sample, &priv->sample, sizeof(struct ts_nt38350_sample_s));
-
-      if (sample->contact == CONTACT_UP)
-        {
-          priv->sample.contact = CONTACT_NONE;
-          priv->sample.valid   = false;
-          priv->id++;
-        }
-      else if (sample->contact == CONTACT_DOWN)
-        {
-          priv->sample.contact = CONTACT_MOVE;
-        }
-
-       priv->valid = false;
-       ret = OK;
-    }
-
-  leave_critical_section(flags);
-  return ret;
-}
-
-/***************************************************************************
- * Name: nt38350_waitsample
- ***************************************************************************/
-
-static int nt38350_waitsample(FAR struct nt38350_dev_s *priv,
-                              struct ts_nt38350_sample_s *sample)
-{
-  irqstate_t flags;
-  int ret;
-
-  sched_lock();
-  flags = enter_critical_section();
-
-  nxsem_post(&priv->devsem);
-
-  while (nt38350_sample(priv, sample) < 0)
-    {
-      /* Wait for a change in the nt38350 state */
-
-      priv->nwaiters++;
-      ret = nxsem_wait(&priv->waitsem);
-      priv->nwaiters--;
-
-      if (ret < 0)
-        {
-          ierr("ERROR: nxsem_wait: %d\n", ret);
-          goto errout;
-        }
-    }
-
-  ret = nxsem_wait(&priv->devsem);
-
-errout:
-  leave_critical_section(flags);
-  sched_unlock();
-  return ret;
-}
-
 static void nt38350_data_worker(FAR void *arg)
 {
   FAR struct nt38350_dev_s    *priv = (FAR struct nt38350_dev_s *)arg;
   FAR struct nt38350_config_s *config;
+  FAR struct touch_sample_s    sample;
   int      i;
   int      ret;
 #ifdef CONFIG_NVT_OFFLINE_LOG
@@ -3875,14 +3724,6 @@ static void nt38350_data_worker(FAR void *arg)
 
   config = priv->config;
   DEBUGASSERT(config != NULL);
-
-  do
-    {
-      ret = nxsem_wait_uninterruptible(&priv->devsem);
-
-      DEBUGASSERT(ret == OK || ret == -ECANCELED);
-    }
-  while (ret < 0);
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
   ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, point_data,
@@ -3978,14 +3819,35 @@ static void nt38350_data_worker(FAR void *arg)
         }
     }
 
-  priv->sample.valid = true;
-  priv->sample.id = priv->id;
-  priv->valid = true;
+  sample.npoints           = 1;
+  sample.point[0].x        = priv->sample.x;
+  sample.point[0].y        = priv->sample.y;
+  sample.point[0].w        = priv->sample.width;
+  sample.point[0].pressure = priv->sample.pressure;
 
-  nt38350_notify(priv);
+  if (priv->sample.contact == CONTACT_UP)
+    {
+      sample.point[0].flags = TOUCH_UP | TOUCH_ID_VALID |
+                     TOUCH_POS_VALID;
+    }
+  else if (priv->sample.contact == CONTACT_DOWN)
+    {
+      sample.point[0].flags = TOUCH_DOWN | TOUCH_ID_VALID |
+                     TOUCH_POS_VALID;
+    }
+  else if (priv->sample.contact == CONTACT_MOVE)
+    {
+      sample.point[0].flags = TOUCH_MOVE | TOUCH_ID_VALID |
+                     TOUCH_POS_VALID;
+    }
+  else
+    {
+      sample.point[0].flags = TOUCH_UP | TOUCH_ID_VALID;
+    }
+
+  touch_event(priv->lower.priv, &sample);
 
   config->enable(config, true);
-  nxsem_post(&priv->devsem);
 }
 
 /***************************************************************************
@@ -4032,254 +3894,19 @@ static int nt38350_data_interrupt(FAR struct ioexpander_dev_s *dev,
 }
 
 /***************************************************************************
- * Name: nt38350_open
+ * Name: nt38350_control
  ***************************************************************************/
 
-static int nt38350_open(FAR struct file *filep)
+static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
+                           int cmd, unsigned long arg)
 {
-#ifdef CONFIG_NT38350_REFCNT
-  FAR struct inode         *inode;
-  FAR struct nt38350_dev_s *priv;
-  uint8_t                   tmp;
-  int                       ret;
+  FAR struct nt38350_dev_s *priv = container_of(lower,
+                                                struct nt38350_dev_s,
+                                                lower);
+  int ret = 0;
 
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct nt38350_dev_s *)inode->i_private;
-
-  /* Get exclusive access to the driver data structure */
-
-  ret = nxsem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Increment the reference count */
-
-  tmp = priv->crefs + 1;
-  if (tmp == 0)
-    {
-      /* More than 255 opens; uint8_t overflows to zero */
-
-      ret = -EMFILE;
-      goto errout_with_sem;
-    }
-
-  /* When the reference increments to 1, this is the first open event
-   * on the driver.. and an opportunity to do any one-time initialization.
-   */
-
-  /* Save the new open count on success */
-
-  priv->crefs = tmp;
-
-errout_with_sem:
-  nxsem_post(&priv->devsem);
-  return ret;
-#else
-  return OK;
-#endif
-}
-
-/***************************************************************************
- * Name: nt38350_close
- ***************************************************************************/
-
-static int nt38350_close(FAR struct file *filep)
-{
-#ifdef CONFIG_NT38350_REFCNT
-  FAR struct inode         *inode;
-  FAR struct nt38350_dev_s *priv;
-  int                       ret;
-
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct nt38350_dev_s *)inode->i_private;
-
-  /* Get exclusive access to the driver data structure */
-
-  ret = nxsem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  /* Decrement the reference count unless it would decrement a negative
-   * value.  When the count decrements to zero, there are no further
-   * open references to the driver.
-   */
-
-  if (priv->crefs >= 1)
-    {
-      priv->crefs--;
-    }
-
-  nxsem_post(&priv->devsem);
-#endif
-  return OK;
-}
-
-/***************************************************************************
- * Name: nt38350_read
- ***************************************************************************/
-
-static ssize_t nt38350_read(FAR struct file *filep, FAR char *buffer,
-                            size_t len)
-{
-  FAR struct inode           *inode;
-  FAR struct nt38350_dev_s   *priv;
-  FAR struct touch_sample_s  *report;
-  struct ts_nt38350_sample_s sample;
-  int                        ret;
-
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct nt38350_dev_s *)inode->i_private;
-
-  /* Verify that the caller has provided a buffer large enough to receive
-   * the touch data.
-   */
-
-  if (len < SIZEOF_TOUCH_SAMPLE_S(1))
-    {
-      /* We could provide logic to break up a touch report into segments and
-       * handle smaller reads... but why?
-       */
-
-      ierr("ERROR: Unsupported read size: %d\n", len);
-      return -ENOSYS;
-    }
-
-  /* Get exclusive access to the driver data structure */
-
-  ret = nxsem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: nxsem_wait: %d\n", ret);
-      return ret;
-    }
-
-  /* Try to read sample data. */
-
-  ret = nt38350_sample(priv, &sample);
-  if (ret < 0)
-    {
-      /* Sample data is not available now.  We would ave to wait to get
-       * receive sample data.  If the user has specified the O_NONBLOCK
-       * option, then just return an error.
-       */
-
-      if (filep->f_oflags & O_NONBLOCK)
-        {
-          ret = -EAGAIN;
-          goto errout;
-        }
-
-      /* Wait for sample data */
-
-      ret = nt38350_waitsample(priv, &sample);
-      if (ret < 0)
-        {
-          /* We might have been awakened by a signal */
-
-          ierr("ERROR: nt38350_waitsample: %d\n", ret);
-          goto errout;
-        }
-    }
-
-  /* In any event, we now have sampled nt38350 data that we can report
-   * to the caller.
-   */
-
-  report = (FAR struct touch_sample_s *)buffer;
-  memset(report, 0, SIZEOF_TOUCH_SAMPLE_S(1));
-  report->npoints            = 1;
-  report->point[0].id        = sample.id;
-  report->point[0].x         = sample.x;
-  report->point[0].y         = sample.y;
-  report->point[0].w         = sample.width;
-  report->point[0].pressure  = sample.pressure;
-
-  /* Report the appropriate flags */
-
-  if (sample.contact == CONTACT_UP)
-    {
-      /* Pen is now up.  Is the positional data valid?  This is important to
-       * know because the release will be sent to the window based on its
-       * last positional data.
-       */
-
-      if (sample.valid)
-        {
-          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID |
-                                    TOUCH_POS_VALID;
-        }
-      else
-        {
-          report->point[0].flags  = TOUCH_UP | TOUCH_ID_VALID;
-        }
-    }
-  else if (sample.contact == CONTACT_DOWN)
-    {
-      /* First contact */
-
-      report->point[0].flags  = TOUCH_DOWN | TOUCH_ID_VALID |
-                                TOUCH_POS_VALID;
-    }
-  else if (sample.contact == CONTACT_MOVE)/* if (sample->contact == CONTACT_MOVE) */
-    {
-      /* Movement of the same contact */
-
-      report->point[0].flags  = TOUCH_MOVE | TOUCH_ID_VALID |
-                                TOUCH_POS_VALID;
-    }
-
-#ifdef CONFIG_NVT_DEBUG
-  iinfo("  id:      %d\n",   report->point[0].id);
-  iinfo("  flags:   %02x\n", report->point[0].flags);
-  iinfo("  x:       %d\n",   report->point[0].x);
-  iinfo("  y:       %d\n",   report->point[0].y);
-  iinfo("  w:       %d\n",   report->point[0].w);
-  iinfo("  p:       %d\n",   report->point[0].pressure);
-#endif
-  ret = SIZEOF_TOUCH_SAMPLE_S(1);
-
-errout:
-  nxsem_post(&priv->devsem);
-  return ret;
-}
-
-/***************************************************************************
- * Name: nt38350_ioctl
- ***************************************************************************/
-
-static int nt38350_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  FAR struct inode         *inode;
-  FAR struct nt38350_dev_s *priv;
-  int                       ret;
-
-  DEBUGASSERT(filep);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct nt38350_dev_s *)inode->i_private;
-
-  /* Get exclusive access to the driver data structure */
-
-  ret = nxsem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: nxsem_wait failed: %d\n", ret);
-      return ret;
-    }
+  DEBUGASSERT(lower != NULL);
+  DEBUGASSERT(priv != NULL);
 
   /* Process the IOCTL by command */
 
@@ -4345,93 +3972,6 @@ static int nt38350_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         break;
     }
 
-  nxsem_post(&priv->devsem);
-  return ret;
-}
-
-/***************************************************************************
- * Name: nt38350_poll
- ***************************************************************************/
-
-static int nt38350_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                        bool setup)
-{
-  FAR struct nt38350_dev_s *priv;
-  FAR struct inode *inode;
-  int ret;
-  int i;
-
-  DEBUGASSERT(filep && fds);
-  inode = filep->f_inode;
-
-  DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct nt38350_dev_s *)inode->i_private;
-
-  /* Are we setting up the poll?  Or tearing it down? */
-
-  ret = nxsem_wait(&priv->devsem);
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  if (setup)
-    {
-      /* Ignore waits that do not include POLLIN */
-
-      if ((fds->events & POLLIN) == 0)
-        {
-          ret = -EDEADLK;
-          goto errout;
-        }
-
-      /* This is a request to set up the poll.  Find an available
-       * slot for the poll structure reference
-       */
-
-      for (i = 0; i < CONFIG_NT38350_NPOLLWAITERS; i++)
-        {
-          /* Find an available slot */
-
-          if (!priv->fds[i])
-            {
-              /* Bind the poll structure and this slot */
-
-              priv->fds[i] = fds;
-              fds->priv    = &priv->fds[i];
-              break;
-            }
-        }
-
-      if (i >= CONFIG_NT38350_NPOLLWAITERS)
-        {
-          fds->priv    = NULL;
-          ret          = -EBUSY;
-          goto errout;
-        }
-
-      /* Should we immediately notify on any of the requested events? */
-
-      if (priv->valid)
-        {
-          nt38350_notify(priv);
-        }
-    }
-  else if (fds->priv)
-    {
-      /* This is a request to tear down the poll. */
-
-      struct pollfd **slot = (struct pollfd **)fds->priv;
-      DEBUGASSERT(slot != NULL);
-
-      /* Remove all memory of the poll setup */
-
-      *slot                = NULL;
-      fds->priv            = NULL;
-    }
-
-errout:
-  nxsem_post(&priv->devsem);
   return ret;
 }
 
@@ -4466,19 +4006,13 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
   priv->fw_path = CONFIG_NT38350_FW_PATH; /* Set up firmware path */
 
+  priv->lower.maxpoint = NVT_TOUCH_MAX_FINGER_NUM;
+  priv->lower.control  = nt38350_control;
+
 #ifdef CONFIG_NVT_DEBUG
   iinfo("RST %d IRQ %d %d\n", priv->config->gpio_rst_pin,
         priv->config->gpio_irq_pin, __LINE__);
 #endif
-
-  nxsem_init(&priv->devsem,  0, 1); /* Initialize device structure semaphore */
-  nxsem_init(&priv->waitsem, 0, 0); /* Initialize pen event wait semaphore */
-
-  /* The event wait semaphore is used for signaling and, hence, should not
-   * have priority inheritance enabled.
-   */
-
-  nxsem_set_protocol(&priv->waitsem, SEM_PRIO_NONE);
 
   /* Hardware Initial */
 
@@ -4522,20 +4056,23 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
   config->enable(config, true);
 
-  ret = register_driver(devname, &g_nt38350_fops, 0666, priv);
+  ret = touch_register(&(priv->lower), devname,
+                       CONFIG_NT38350_TOUCHSCREEN_BUFF_NUMS);
   if (ret < 0)
     {
-      ierr("ERROR: register_driver() failed: %d\n", ret);
-      config->detach(config, nt38350_data_interrupt);
+      ierr("ERROR: touch_register() failed: %d\n", ret);
       ret = -ENODEV;
-      goto errout_with_priv;
+      goto errout_with_irq;
     }
 
   /* And return success (?) */
 
   return OK;
+
+errout_with_irq:
+  config->detach(config, nt38350_data_interrupt);
+
 errout_with_priv:
-  nxsem_destroy(&priv->devsem);
   kmm_free(priv);
   return ret;
 }
