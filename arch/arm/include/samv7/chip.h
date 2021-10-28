@@ -182,7 +182,8 @@
 #  define SAMV7_NUSART                0             /* No USARTs */
 #  define SAMV7_NUART                 5             /* 5 UARTs */
 #  define SAMV7_NQSPI                 0             /* No Quad SPI */
-#  define SAMV7_NSPI                  1             /* No SPI, QSPI functions in SPI mode only */
+#  define SAMV7_NQSPI_SPI             1             /* QSPI functions in SPI mode only */
+#  define SAMV7_NSPI                  0             /* No SPI */
 #  define SAMV7_NTWIHS                2             /* 2 TWIHS */
 #  define SAMV7_NHSMCI4               0             /* No 4-bit HSMCI port */
 #  define SAMV7_NCAN                  1             /* 1 CAN port */
