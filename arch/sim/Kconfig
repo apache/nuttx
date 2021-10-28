@@ -307,6 +307,12 @@ config SIM_FRAMEBUFFER
 	---help---
 		Emulate a framebuffer
 
+config SIM_VNCSERVER
+	bool "VNC server"
+	depends on VNCSERVER
+	---help---
+		Serve a VNC server
+
 endchoice
 
 if INPUT
