@@ -1122,7 +1122,7 @@ static void imxrt_ep0configure(struct imxrt_usbdev_s *priv)
   g_qh[IMXRT_EP0_OUT].currdesc = DTD_NEXTDESC_INVALID;
   g_qh[IMXRT_EP0_IN].currdesc = DTD_NEXTDESC_INVALID;
 
-  up_flush_dcache((uintptr_t)g_qh,
+  up_clean_dcache((uintptr_t)g_qh,
                   (uintptr_t)g_qh + (sizeof(struct imxrt_dqh_s) * 2));
 
   /* Enable EP0 */
@@ -1207,8 +1207,8 @@ static void imxrt_usbreset(struct imxrt_usbdev_s *priv)
   memset ((void *) g_qh, 0, sizeof (g_qh));
   memset ((void *) g_td, 0, sizeof (g_td));
 
-  up_flush_dcache((uintptr_t)g_qh, (uintptr_t)g_qh + sizeof(g_qh));
-  up_flush_dcache((uintptr_t)g_td, (uintptr_t)g_td + sizeof(g_td));
+  up_clean_dcache((uintptr_t)g_qh, (uintptr_t)g_qh + sizeof(g_qh));
+  up_clean_dcache((uintptr_t)g_td, (uintptr_t)g_td + sizeof(g_td));
 
   /* Set USB address to 0 */
 
@@ -2133,7 +2133,7 @@ static int imxrt_epconfigure(FAR struct usbdev_ep_s *ep,
                     DQH_CAPABILITY_ZLT);
     }
 
-  up_flush_dcache((uintptr_t)dqh,
+  up_clean_dcache((uintptr_t)dqh,
                   (uintptr_t)dqh + sizeof(struct imxrt_dqh_s));
 
   /* Setup Endpoint Control Register */
