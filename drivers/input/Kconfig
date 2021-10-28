@@ -32,7 +32,18 @@ endif # INPUT_MOUSE
 
 config INPUT_TOUCHSCREEN
 	bool
+	select MM_CIRCBUF
 	default n
+
+if INPUT_TOUCHSCREEN
+
+config INPUT_TOUCHSCREEN_NPOLLWAITERS
+	int "Number touchscreen poll waiters"
+	default 4
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # INPUT_TOUCHSCREEN
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
