@@ -2,3 +2,46 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+
+config XTENSA_MEMCPY
+        bool "Enable optimized memcpy() for XTENSA"
+        select LIBC_ARCH_MEMCPY
+        ---help---
+                Enable optimized XTENSA specific memcpy() library function
+
+config XTENSA_MEMMOVE
+        bool "Enable optimized memmove() for XTENSA"
+        select LIBC_ARCH_MEMMOVE
+        ---help---
+                Enable optimized XTENSA specific memmove() library function
+
+config XTENSA_MEMSET
+        bool "Enable optimized memset() for XTENSA"
+        select LIBC_ARCH_MEMSET
+        ---help---
+                Enable optimized XTENSA specific memset() library function
+
+config XTENSA_STRCMP
+        bool "Enable optimized strcmp() for XTENSA"
+        select LIBC_ARCH_STRCMP
+        ---help---
+                Enable optimized XTENSA specific strcmp() library function
+
+config XTENSA_STRCPY
+        bool "Enable optimized strcpy() for XTENSA"
+        select LIBC_ARCH_STRCPY
+        ---help---
+                Enable optimized XTENSA specific strcpy() library function
+
+config XTENSA_STRLEN
+        bool "Enable optimized strlen() for XTENSA"
+        select LIBC_ARCH_STRLEN
+        ---help---
+                Enable optimized XTENSA specific strlen() library function
+
+config XTENSA_STRNCPY
+        bool "Enable optimized strncpy() for XTENSA"
+        select LIBC_ARCH_STRNCPY
+        ---help---
+                Enable optimized XTENSA specific strncpy() library function
+
