@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_hardfault.c
+ * arch/arm/src/phy62xx/phy62xx_hardfault.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,6 +38,7 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 extern uint32_t _stextram;
 extern uint32_t _etextram;
 
@@ -92,8 +93,9 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
 #else
   /* SVCalls are expected only from the base, kernel FLASH region */
 
-  if (((uintptr_t)pc >= (uintptr_t)&_stext && (uintptr_t)pc <  (uintptr_t)&_etext) ||
-		  ((uintptr_t)pc >= (uintptr_t)&_stextram && (uintptr_t)pc <  (uintptr_t)&_etextram))
+  if (((uintptr_t)pc >= (uintptr_t)&_stext && (uintptr_t)pc <
+      (uintptr_t)&_etext) || ((uintptr_t)pc >= (uintptr_t)&_stextram &&
+      (uintptr_t)pc <  (uintptr_t)&_etextram))
 #endif
     {
       /* Fetch the instruction that caused the Hard fault */

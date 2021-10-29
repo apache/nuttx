@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- *********************************335*******************************************/
+ ****************************************************************************/
 
 /****************************************************************************
  * Included Files
@@ -134,30 +134,31 @@ static const struct gpio_operations_s gpint_ops =
  * Private Functions
  ****************************************************************************/
 
-static int phyplus_gpio_interrupt(int irq, void *context, void *arg)
-{
-#if 0
-  FAR struct stm32gpint_dev_s *stm32gpint =
-                        (FAR struct stm32gpint_dev_s *)arg;
-
-  DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
-  gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
-
-  stm32gpint->callback(&stm32gpint->stm32gpio.gpio,
-                       stm32gpint->stm32gpio.id);
-#endif
-
-  FAR struct phyplus_gpio_dev_s *phyplus_gpint =
-                        (FAR struct phyplus_gpio_dev_s *)arg;
-
-  DEBUGASSERT(phyplus_gpint != NULL && phyplus_gpint->callback != NULL);
-  gpioinfo("Interrupt! callback=%p\n", phyplus_gpint->callback);
-
-  phyplus_gpint->callback(&phyplus_gpint->gpio,
-                       phyplus_gpint->idx);
-
-  return 0;
-}
+/*  static int phyplus_gpio_interrupt(int irq, void *context, void *arg)
+ *  {
+ *  #if 0
+ *    FAR struct stm32gpint_dev_s *stm32gpint =
+ *                          (FAR struct stm32gpint_dev_s *)arg;
+ *
+ *    DEBUGASSERT(stm32gpint != NULL && stm32gpint->callback != NULL);
+ *    gpioinfo("Interrupt! callback=%p\n", stm32gpint->callback);
+ *
+ *    stm32gpint->callback(&stm32gpint->stm32gpio.gpio,
+ *                         stm32gpint->stm32gpio.id);
+ *  #endif
+ *
+ *    FAR struct phyplus_gpio_dev_s *phyplus_gpint =
+ *                          (FAR struct phyplus_gpio_dev_s *)arg;
+ *
+ *    DEBUGASSERT(phyplus_gpint != NULL && phyplus_gpint->callback != NULL);
+ *    gpioinfo("Interrupt! callback=%p\n", phyplus_gpint->callback);
+ *
+ *    phyplus_gpint->callback(&phyplus_gpint->gpio,
+ *                         phyplus_gpint->idx);
+ *
+ *    return 0;
+ *  }
+ */
 
 static int phyplus_gpin_read(FAR struct gpio_dev_s *dev, FAR bool *value)
 {
@@ -258,11 +259,12 @@ static int phyplus_gpint_read(FAR struct gpio_dev_s *dev, FAR bool *value)
   return 0;
 }
 
-static pin_interrupt_t phyplus_gpint_callback_register
-                (FAR struct gpio_dev_s *dev, uint8_t pin)
-{
-  return 0;
-}
+/* static pin_interrupt_t phyplus_gpint_callback_register
+ *                (FAR struct gpio_dev_s *dev, uint8_t pin)
+ * {
+ *  return 0;
+ * }
+ */
 
 static int phyplus_gpint_attach(FAR struct gpio_dev_s *dev,
                         pin_interrupt_t callback)
@@ -332,22 +334,22 @@ static int phyplus_gpio_param_check(
 {
   if (phyplus_gpio_param->pin_idx > NUMBER_OF_PINS)
     {
-      return -PPlus_ERR_INVALID_PARAM;      
+      return -PPlus_ERR_INVALID_PARAM;
     }
 
   if (phyplus_gpio_param->mode >  PHYPLUS_GPIO_INTERRUPT)
     {
-      return -PPlus_ERR_INVALID_PARAM;      
+      return -PPlus_ERR_INVALID_PARAM;
     }
 
   if (phyplus_gpio_param->trig_mode > POL_RISING)
     {
-      return -PPlus_ERR_INVALID_PARAM;      
+      return -PPlus_ERR_INVALID_PARAM;
     }
 
   if (phyplus_gpio_param->default_val > PIN_HIGH)
     {
-      return -PPlus_ERR_INVALID_PARAM;      
+      return -PPlus_ERR_INVALID_PARAM;
     }
 
   if (phyplus_gpio_param->pin_pull > GPIO_PULL_DOWN)
@@ -397,7 +399,6 @@ int phyplus_gpio_register(FAR struct phyplus_gpio_param_s
 int phyplus_gpio_unregister(FAR struct phyplus_gpio_param_s
                 *phyplus_gpio_param)
 {
-  int ret;
   gpio_pin_unregister(
                 &g_phyplus_gpio_dev[phyplus_gpio_param->pin_idx].gpio,
                 phyplus_gpio_param->pin_idx);

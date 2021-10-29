@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/phy62xx/phy62xx_irq.c
+ * arch/arm/src/phy62xx/irq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,8 +36,8 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 #include "jump_function.h"
-
-/*#include "phy62xx_irq.h"*/
+#include "bus_dev.h"
+/* #include "phy62xx_irq.h" */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -181,27 +181,30 @@ static inline void phy62xx_clrpend(int irq)
 /****************************************************************************
  * Name: up_irqinitialize
  ****************************************************************************/
+
 extern void exception_common(void);
 extern void exception_common_inline(void);
 
 #define svc(code) asm volatile("svc %[immediate]"::[immediate]"I"(code))
 #define SVC_CALL_WR 0
 
-/*irqid 0~31*/
+/* irqid 0~31 */
+
 int irq_priority(int irqid, uint8_t priority)
 {
 #if 0
-    uint32_t val = (uint32_t)(priority<<6);
-    int idx = (irqid)/4;
-    int idx_mod = irqid % 4;
-    uint32_t regaddr = ARMV6M_NVIC_IPR(idx);
-    uint32_t regval = getreg32(regaddr);
-    regval &= ~(0xffUL << (idx_mod*8));
-    regval |= (val <<  (idx_mod*8));
-    putreg32(regval, regaddr);
+  uint32_t val = (uint32_t)(priority << 6);
+  int idx = (irqid) / 4;
+  int idx_mod = irqid % 4;
+  uint32_t regaddr = ARMV6M_NVIC_IPR(idx);
+  uint32_t regval = getreg32(regaddr);
+  regval &= ~(0xfful << (idx_mod * 8));
+  regval |= (val << (idx_mod * 8));
+  putreg32(regval, regaddr);
 #endif
-    return 0;
+  return 0;
 }
+
 void LL_IRQHandler1(void);
 void TIM1_IRQHandler1(void);
 void TIM3_IRQHandler1(void);
@@ -228,7 +231,8 @@ void up_irqinitialize(void)
       putreg32(DEFPRIORITY32, regaddr);
     }
 
-  /*register jump table irq handler*/
+  /* register jump table irq handler */
+
   JUMP_FUNCTION(NMI_HANDLER) = (uint32_t)&exception_common_inline;
   JUMP_FUNCTION(HARDFAULT_HANDLER) = (uint32_t)&exception_common;
   JUMP_FUNCTION(SVC_HANDLER) = (uint32_t)&exception_common_inline;
@@ -236,41 +240,39 @@ void up_irqinitialize(void)
   JUMP_FUNCTION(SYSTICK_HANDLER) = (uint32_t)&exception_common_inline;
 
   /* Vectors 16 - 47 external irq handler */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 0 ) = (unsigned)&exception_common_inline,  /*16+0   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 1 ) = (unsigned)&exception_common_inline,  /*16+1   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 2 ) = (unsigned)&exception_common_inline,  /*16+2   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 3 ) = (unsigned)&exception_common_inline,  /*16+3   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 4 ) = (unsigned)&exception_common       ,  /*16+4   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 5 ) = (unsigned)&exception_common_inline,  /*16+5   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 6 ) = (unsigned)&exception_common_inline,  /*16+6   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 7 ) = (unsigned)&exception_common_inline,  /*16+7   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 8 ) = (unsigned)&exception_common_inline,  /*16+8   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 9 ) = (unsigned)&exception_common_inline,  /*16+9   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 10) = (unsigned)&exception_common_inline,  /*16+10   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 11) = (unsigned)&exception_common       ,  /*16+11   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 12) = (unsigned)&exception_common_inline,  /*16+12   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 13) = (unsigned)&exception_common_inline,  /*16+13   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 14) = (unsigned)&exception_common_inline,  /*16+14   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 15) = (unsigned)&exception_common_inline,  /*16+15   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 16) = (unsigned)&exception_common       ,  /*16+16   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 17) = (unsigned)&exception_common_inline,  /*16+17   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 18) = (unsigned)&exception_common       ,  /*16+18   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 19) = (unsigned)&exception_common_inline,  /*16+19   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 20) = (unsigned)&exception_common       ,  /*16+20   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 21) = (unsigned)&exception_common       ,  /*16+21   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 22) = (unsigned)&exception_common       ,  /*16+22   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 23) = (unsigned)&exception_common       ,  /*16+23   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 24) = (unsigned)&exception_common_inline,  /*16+24   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 25) = (unsigned)&exception_common_inline,  /*16+25   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 26) = (unsigned)&exception_common_inline,  /*16+26   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 27) = (unsigned)&exception_common_inline,  /*16+27   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 28) = (unsigned)&exception_common_inline,  /*16+28   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 29) = (unsigned)&exception_common_inline,  /*16+29   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 30) = (unsigned)&exception_common_inline,  /*16+30   */
-  JUMP_FUNCTION(V0_IRQ_HANDLER + 31) = (unsigned)&exception_common_inline,  /*16+31   */
 
-
-
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 0) = (unsigned)&exception_common_inline,   /* 16+0  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 1) = (unsigned)&exception_common_inline,   /* 16+1  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 2) = (unsigned)&exception_common_inline,   /* 16+2  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 3) = (unsigned)&exception_common_inline,   /* 16+3  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 4) = (unsigned)&exception_common       ,   /* 16+4  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 5) = (unsigned)&exception_common_inline,   /* 16+5  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 6) = (unsigned)&exception_common_inline,   /* 16+6  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 7) = (unsigned)&exception_common_inline,   /* 16+7  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 8) = (unsigned)&exception_common_inline,   /* 16+8  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 9) = (unsigned)&exception_common_inline,   /* 16+9  */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 10) = (unsigned)&exception_common_inline,  /* 16+10 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 11) = (unsigned)&exception_common       ,  /* 16+11 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 12) = (unsigned)&exception_common_inline,  /* 16+12 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 13) = (unsigned)&exception_common_inline,  /* 16+13 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 14) = (unsigned)&exception_common_inline,  /* 16+14 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 15) = (unsigned)&exception_common_inline,  /* 16+15 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 16) = (unsigned)&exception_common       ,  /* 16+16 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 17) = (unsigned)&exception_common_inline,  /* 16+17 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 18) = (unsigned)&exception_common       ,  /* 16+18 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 19) = (unsigned)&exception_common_inline,  /* 16+19 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 20) = (unsigned)&exception_common       ,  /* 16+20 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 21) = (unsigned)&exception_common       ,  /* 16+21 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 22) = (unsigned)&exception_common       ,  /* 16+22 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 23) = (unsigned)&exception_common       ,  /* 16+23 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 24) = (unsigned)&exception_common_inline,  /* 16+24 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 25) = (unsigned)&exception_common_inline,  /* 16+25 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 26) = (unsigned)&exception_common_inline,  /* 16+26 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 27) = (unsigned)&exception_common_inline,  /* 16+27 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 28) = (unsigned)&exception_common_inline,  /* 16+28 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 29) = (unsigned)&exception_common_inline,  /* 16+29 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 30) = (unsigned)&exception_common_inline,  /* 16+30 */
+  JUMP_FUNCTION(V0_IRQ_HANDLER + 31) = (unsigned)&exception_common_inline,  /* 16+31 */
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
@@ -307,25 +309,30 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  irq_attach(PHY62XX_IRQ_BB_IRQn, LL_IRQHandler1, NULL);
-  irq_attach(PHY62XX_IRQ_TIM1_IRQn, TIM1_IRQHandler1, NULL);
-  irq_attach(PHY62XX_IRQ_TIM3_IRQn, TIM3_IRQHandler1, NULL);
+  irq_attach(PHY62XX_IRQ_BB_IRQn, (xcpt_t)LL_IRQHandler1, NULL);
+  irq_attach(PHY62XX_IRQ_TIM1_IRQn, (xcpt_t)TIM1_IRQHandler1, NULL);
+  irq_attach(PHY62XX_IRQ_TIM3_IRQn, (xcpt_t)TIM3_IRQHandler1, NULL);
   irq_priority((IRQn_Type)BB_IRQn,    IRQ_PRIO_REALTIME);
-  irq_priority((IRQn_Type)TIM1_IRQn,  IRQ_PRIO_HIGH);     //ll_EVT
-  irq_priority((IRQn_Type)TIM2_IRQn,  IRQ_PRIO_HIGH);     //OSAL_TICK
-  irq_priority((IRQn_Type)TIM3_IRQn,  IRQ_PRIO_APP);     //OSAL_TICK
-  irq_priority((IRQn_Type)TIM4_IRQn,  IRQ_PRIO_HIGH);     //LL_EXA_ADV
+  irq_priority((IRQn_Type)TIM1_IRQn,  IRQ_PRIO_HIGH);     /* ll_EVT */
+  irq_priority((IRQn_Type)TIM2_IRQn,  IRQ_PRIO_HIGH);     /* OSAL_TICK */
+  irq_priority((IRQn_Type)TIM3_IRQn,  IRQ_PRIO_APP);      /* OSAL_TICK */
+  irq_priority((IRQn_Type)TIM4_IRQn,  IRQ_PRIO_HIGH);     /* LL_EXA_ADV */
   NVIC_EnableIRQ((IRQn_Type)BB_IRQn);
-  NVIC_EnableIRQ((IRQn_Type)TIM1_IRQn);     //ll_EVT
-  //NVIC_EnableIRQ((IRQn_Type)TIM2_IRQn);     //OSAL_TICK
-  NVIC_EnableIRQ((IRQn_Type)TIM3_IRQn);     //
-  //NVIC_EnableIRQ((IRQn_Type)TIM4_IRQn);     //LL_EXA_ADV
-  //svc(SVC_CALL_WR);
+  NVIC_EnableIRQ((IRQn_Type)TIM1_IRQn);                   /* ll_EVT */
+
+  /* NVIC_EnableIRQ((IRQn_Type)TIM2_IRQn); */
+
+                                                          /* OSAL_TICK */
+
+  NVIC_EnableIRQ((IRQn_Type)TIM3_IRQn);
+
+  /* NVIC_EnableIRQ((IRQn_Type)TIM4_IRQn); */
+
+                                                          /* LL_EXA_ADV */
+
+  /* svc(SVC_CALL_WR); */
+
   up_irq_enable();
-
-
-
-
 
 #endif
 }

@@ -20,7 +20,8 @@
 
 
 CMN_ASRCS  = phy62xx_exception.S phy62xx_start.S arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_switchcontext.S vfork.S
+#CMN_ASRCS += arm_switchcontext.S vfork.S
+CMN_ASRCS += vfork.S
 
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
@@ -32,6 +33,7 @@ CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 #CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 #CMN_CSRCS += arm_etherstub.c
+CMN_CSRCS += arm_switchcontext.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c
@@ -54,7 +56,8 @@ CHIP_CSRCS += pplus_mtd_flash.c
 ifeq ($(CONFIG_PHY6222_BLE),y)
 #CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_hcitl.c 
 #CHIP_CSRCS += phy62xx_ble_patch.c phy62xx_ble_hci_event_patch.c rf_phy_driver.c
-CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_patch.c rf_phy_driver.c
+#CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_patch.c rf_phy_driver.c
+CHIP_CSRCS += phy62xx_ble.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
@@ -72,11 +75,11 @@ CHIP_CSRCS += phyplus_stub.c
 endif
 
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)include)
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)controller)
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)hci)
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)include)
-INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)osal$(DELIM)include)
-
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)controller)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)hci)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)include)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)osal$(DELIM)include)
 
 CFLAGS += -ffunction-sections
 CFLAGS += -DCFG_CP
@@ -92,21 +95,29 @@ CFLAGS += -DUSE_SYS_TICK
 CFLAGS += -DHUGE_MODE=0 
 CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
-#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
+#CFLAGS += -Wimplicit-function-declaration
+#CFLAGS += -Wunused-but-set-variable
+CFLAGS += -DEXTERN_BLE_FUNC=0
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
-LDFLAGS += -Wl,-Map="../../../phyplus_build.map"
-LDFLAGS += -Wl,--gc-sections
+#CFLAGS += -Wstrict-prototypes
+#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
+#LDFLAGS += -Wl,-Map="../../../phyplus_build.map"		# param error
+#LDFLAGS += -Wl,--gc-sections					# param error
 
 .buildlib:
-	$(Q) if [ -d ../../../../../phy62xxble ]; then \
+	$(Q) if [ -d ../../../../phy62xxble ]; then \
 		echo "##############build lib internally##############"; \
-		make -C ../../../../../phy62xxble; \
+		make -C ../../../../phy62xxble; \
 	 else \
-		echo "############download lib form server############"; \
-		curl -L -o libphy62xxble.a http://www.phyplusinc.com/phyplus/libphy62xxble.a; \
-		cp -a libphy62xxble.a ../../../staging; \
+		if [ ! -f libphy62xxble.a ]; then \
+			echo "############download lib form server############"; \
+			curl -L -o libphy62xxble.a http://www.phyplusinc.com/phyplus/libphy62xxble.a; \
+			cp -a libphy62xxble.a ../../../staging; \
+		 else \
+			echo "############file exist############"; \
+		fi \
 	fi
 
-context:: .buildlib	
+context:: .buildlib
 
-
+EXTRA_LIBS += -lphy62xxble

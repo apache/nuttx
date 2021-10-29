@@ -12,16 +12,16 @@ choice
 
 config ARCH_CHIP_PHY6222
 	bool "PHY6222"
-endchoise
+endchoice
 
 config PHY6222_BLE
-	bool "enable ble"
+	bool "Enable ble"
 	default n
 
 config PHYPLUS_STUB
-	bool "enable phyplus stub"
+	bool "Enable phyplus stub"
 	default y
 
 #config PHYPLUS_DOWNLOAD
-#	bool "enable phyplus ble lib file download from server"
+#	bool "Enable phyplus ble lib file download from server"
 #	default n

@@ -54,5 +54,9 @@ struct phyplus_gpio_param_s
  * Public Function Prototypes
  ****************************************************************************/
 
+int phyplus_gpio_register(FAR struct phyplus_gpio_param_s
+                *phyplus_gpio_param);
+int phyplus_gpio_unregister(FAR struct phyplus_gpio_param_s
+                *phyplus_gpio_param);
 #endif
 

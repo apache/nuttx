@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_idle.c
+ * arch/arm/src/phy62xx/idle.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,9 +24,7 @@
 
 #include <arch/board/board.h>
 #include <nuttx/config.h>
-
 #include <nuttx/arch.h>
-
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -81,9 +79,11 @@ void up_idle(void)
  * disabled in order to save power."
  */
 
-//#ifdef CONFIG_STM32F0L0G0_GPDMA
-//  if (g_dma_inprogress == 0)
-//#endif
+/* #ifdef CONFIG_STM32F0L0G0_GPDMA
+ *   if (g_dma_inprogress == 0)
+ * #endif
+ */
+
     {
       /* Sleep until an interrupt occurs in order to save power */
 
