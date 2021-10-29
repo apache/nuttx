@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/phy62xx/phy6222/include/board.h
+ * arch/arm/src/phy62xx/phy62xx_ble.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PHY62xx_PHY6222_INCLUDE_BOARD_H
-#define __BOARDS_ARM_PHY62xx_PHY6222_INCLUDE_BOARD_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_BLE_H
+#define __ARCH_ARM_SRC_PHY62XX_BLE_H
 
 /****************************************************************************
  * Included Files
@@ -27,10 +27,35 @@
 
 #include <nuttx/config.h>
 
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
 #ifndef __ASSEMBLY__
-# include <stdint.h>
+#ifdef __cplusplus
+extern "C"
+{
 #endif
 
-#define HCLK_FREQUENCY    32000000ul       /* HSI48 for USB, only some STM32F0xx */
+/****************************************************************************
+ * Public Functions Prototypes
+ ****************************************************************************/
 
-#endif /* phy62xx */
+typedef uint8 llStatus_t;
+
+int pplus_ble_initialize(void);
+
+extern void osal_bm_free(void *payload_ptr);
+extern uint8 osal_msg_deallocate(uint8 *msg_ptr);
+extern void *HCI_bm_alloc(uint16 size);
+extern llStatus_t LL_TxData(uint16 connId,
+                            uint8 *pBuf,
+                            uint8 pktLen,
+                            uint8 fragFlag);
+
+#ifdef __cplusplus
+}
+#endif
+#endif /* __ASSEMBLY__ */
+
+#endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_START_H */

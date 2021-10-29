@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <signal.h>
 #include <assert.h>
@@ -31,7 +32,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/spinlock.h>52
+#include <nuttx/spinlock.h>
 #include <nuttx/ioexpander/gpio.h>
 #include "phyplus_stub.h"
 #include "phyplus_gpio.h"
@@ -39,6 +40,7 @@
 #include "phyplus_tim.h"
 #include "timer.h"
 #include "mcu_phy_bumbee.h"
+#include "phyplus_gpio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -79,7 +81,8 @@ static const struct file_operations g_stub_drvrops =
   , NULL       /* unlink */
 #endif
 };
-static struct gpio_dev_s stub_dev;
+
+/* static struct gpio_dev_s stub_dev; */
 
 /****************************************************************************
  * Private Functions
@@ -204,7 +207,7 @@ static int phyplus_parse_gpio_param(char *buff,
       return -1;
     }
 
-  while (ptr = strtok(NULL, ","))
+  while ((ptr = strtok(NULL, ",")))
     {
       if (0 == strncmp("idx", ptr, 3))
         {
@@ -633,14 +636,16 @@ static ssize_t phyplus_stub_write(FAR struct file *filep,
               FAR const char *buffer, size_t buflen)
 {
   FAR struct inode *inode;
-  FAR struct gpio_dev_s *dev;
-  int ret;
-  bool val;
+
+  /* FAR struct gpio_dev_s *dev; */
+
+  int ret = 0;
   static int cmd_pos = 0;
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private != NULL);
-  dev = inode->i_private;
+
+  /* dev = inode->i_private; */
 
   /* Verify that a buffer containing data was provided */
 
@@ -665,7 +670,7 @@ static ssize_t phyplus_stub_write(FAR struct file *filep,
         }
     }
 
-  return 0;
+  return ret;
 }
 
 /****************************************************************************
@@ -716,17 +721,17 @@ static int phyplus_stub_ioctl(FAR struct file *filep,
              int cmd, unsigned long arg)
 {
     FAR struct inode *inode;
-    FAR struct gpio_dev_s *dev;
-    irqstate_t flags;
-    pid_t pid;
-    int ret;
-    int i;
-    int j = 0;
+    int ret = 0;
+
+      /* irqstate_t flags;
+       * pid_t pid;
+       * int i;
+       * int j = 0;
+       */
 
     DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
     inode = filep->f_inode;
     DEBUGASSERT(inode->i_private != NULL);
-    dev = inode->i_private;
 
     FAR struct phyplus_gpio_param_s *phyplus_gpio =
             (FAR struct phyplus_gpio_param_s *)arg;
@@ -766,10 +771,10 @@ static int phyplus_stub_ioctl(FAR struct file *filep,
 }
 
 /****************************************************************************
- * Name: gpio_pin_register
+ * Name: phyplus_stub_register
  *
  * Description:
- *   Register GPIO pin device driver.
+ *   Register phyplus stub device driver.
  *
  *   - Input pin types will be registered at /dev/gpinN
  *
@@ -777,19 +782,18 @@ static int phyplus_stub_ioctl(FAR struct file *filep,
  *
  ****************************************************************************/
 
-int phyplus_stub_register(FAR struct gpio_dev_s *dev)
+int phyplus_stub_register(void)
 {
   char devname[16];
-  int ret;
   snprintf(devname, 16, "/dev/phyplus");
-  return register_driver(devname, &g_stub_drvrops, 0666, dev);
+  return register_driver(devname, &g_stub_drvrops, 0666, NULL);
 }
 
 /****************************************************************************
- * Name: gpio_pin_unregister
+ * Name: phyplus_stub_unregister
  *
  * Description:
- *   Unregister GPIO pin device driver.
+ *   Unregister phyplus stub device driver.
  *
  *   - Input pin types will be registered at /dev/gpinN
  *   - Output pin types will be registered at /dev/gpoutN
@@ -800,7 +804,7 @@ int phyplus_stub_register(FAR struct gpio_dev_s *dev)
  *
  ****************************************************************************/
 
-void phyplus_stub_unregister(FAR struct gpio_dev_s *dev)
+void phyplus_stub_unregister(void)
 {
   char devname[16];
   snprintf(devname, 16, "/dev/phyplus");
@@ -810,8 +814,7 @@ void phyplus_stub_unregister(FAR struct gpio_dev_s *dev)
 int phyplus_stub_init(void)
 {
   int ret = 0;
-  struct gpio_dev_s stub_dev;
-  ret = phyplus_stub_register(&stub_dev);
+  phyplus_stub_register();
+
   return ret;
 }
-

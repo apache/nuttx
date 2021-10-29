@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_start.c
+ * arch/arm/src/phy62xx/start.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/init.h>
+#include <nuttx/arch.h>
 #include <arch/board/board.h>
 
 #include "arm_arch.h"
@@ -39,19 +40,20 @@
 #include "flash.h"
 #include "log.h"
 #include "jump_function.h"
-#include "rf_phy_driver.h"
+
+/* #include "rf_phy_driver.h" */
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
 extern const uint32_t _sramscttexts;
 extern const uint32_t _sramscttext;
 extern const uint32_t _eramscttext;
 
 extern const uint32_t _sjtblss;
-extern const uint32_t _sjtbls;
+extern uint32_t _sjtbls;
 extern const uint32_t _ejtbls;
-
 
 #define IDLE_STACK ((uint32_t)&_ebss+CONFIG_IDLETHREAD_STACKSIZE)
 const uintptr_t g_idle_topstack = IDLE_STACK;
@@ -59,8 +61,6 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-
 
 /****************************************************************************
  * Private Functions
@@ -92,25 +92,28 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
  *
  ****************************************************************************/
 
-extern uint32_t* jump_table_base[];
+extern uint32_t *jump_table_base[];
 
 extern volatile sysclk_t g_system_clk;
 void c_start(void)
 {
   const uint32_t *src;
   uint32_t *dest;
+
   /* Configure the uart so that we can get debug output as soon as possible */
 
-  //set stack to main stack point
-  spif_config(SYS_CLK_DLL_64M, 1, 0x801003B, 0, 0);
+  /* set stack to main stack point */
+
+  spif_config(SYS_CLK_DLL_64M, 1, 0x801003b, 0, 0);
 
   HAL_CRITICAL_SECTION_INIT();
 
   g_system_clk = SYS_CLK_DLL_48M;
   clk_init(SYS_CLK_DLL_48M);
-  //clk_init(SYS_CLK_XTAL_16M);
+
+  /* clk_init(SYS_CLK_XTAL_16M); */
 #if 1
-  //stm32_clockconfig();
+  /* stm32_clockconfig(); */
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -121,7 +124,7 @@ void c_start(void)
       *dest++ = 0;
     }
 
-  //showprogress('B');
+  /* showprogress('B'); */
 
   /* Move the initialized data section from his temporary holding spot in
    * FLASH into the correct place in SRAM.  The correct place in SRAM is
@@ -134,21 +137,23 @@ void c_start(void)
       *dest++ = *src++;
     }
 
-  //showprogress('C');
-/*
-  for (src = &_sramscttexts, dest = &_sramscttext; dest < &_eramscttext; )
-  {
-    *dest++ = *src++;
-  }
-*/
-  for (src = &_sjtblss, dest = &_sjtbls; dest < &_ejtbls; )
-  {
-    *dest++ = *src++;
-  }
+  /* showprogress('C'); */
 
-  //showprogress('J');
+  /* for (src = &_sramscttexts, dest = &_sramscttext; dest < &_eramscttext; )
+   * {
+   *   *dest++ = *src++;
+   *  }
+   */
+
+  for (src = &_sjtblss, dest = &_sjtbls; dest < &_ejtbls; )
+    {
+      *dest++ = *src++;
+    }
+
+  /* showprogress('J'); */
 
   /* Perform early serial initialization */
+
   hal_gpio_init();
   LOG_INIT();
   showprogress('A');
@@ -164,13 +169,16 @@ void c_start(void)
    */
 
 #ifdef CONFIG_BUILD_PROTECTED
-  //stm32_userspace();
+
+  /* stm32_userspace(); */
+
   showprogress('E');
 #endif
 
   /* Initialize onboard resources */
 
-  //stm32_boardinitialize();
+  /* stm32_boardinitialize(); */
+
   showprogress('F');
 
   /* Then start NuttX */

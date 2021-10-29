@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/stm32f0l0g0/stm32_start.h
+ * arch/arm/src/phy62xx/start.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_STM32_START_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_STM32_START_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_START_H
+#define __ARCH_ARM_SRC_PHY62XX_START_H
 
 /****************************************************************************
  * Included Files

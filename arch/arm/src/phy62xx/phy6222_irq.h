@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/include/armv6-m/irq.h
+ * arch/arm/src/phy62xx/phy6222_irq.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -89,16 +89,16 @@
  * registers on the stack in this (address) order:
  */
 
-#define REG_DUMMY0          (SW_XCPT_REGS+0) /* DUMMY */
-#define REG_DUMMY1          (SW_XCPT_REGS+1) /* DUMMY */
-#define REG_R0              (SW_XCPT_REGS+0+2) /* R0 */
-#define REG_R1              (SW_XCPT_REGS+1+2) /* R1 */
-#define REG_R2              (SW_XCPT_REGS+2+2) /* R2 */
-#define REG_R3              (SW_XCPT_REGS+3+2) /* R3 */
-#define REG_R12             (SW_XCPT_REGS+4+2) /* R12 */
-#define REG_R14             (SW_XCPT_REGS+5+2) /* R14 = LR */
-#define REG_R15             (SW_XCPT_REGS+6+2) /* R15 = PC */
-#define REG_XPSR            (SW_XCPT_REGS+7+2) /* xPSR */
+#define REG_DUMMY0          (SW_XCPT_REGS + 0)     /* DUMMY */
+#define REG_DUMMY1          (SW_XCPT_REGS + 1)     /* DUMMY */
+#define REG_R0              (SW_XCPT_REGS + 0 + 2) /* R0 */
+#define REG_R1              (SW_XCPT_REGS + 1 + 2) /* R1 */
+#define REG_R2              (SW_XCPT_REGS + 2 + 2) /* R2 */
+#define REG_R3              (SW_XCPT_REGS + 3 + 2) /* R3 */
+#define REG_R12             (SW_XCPT_REGS + 4 + 2) /* R12 */
+#define REG_R14             (SW_XCPT_REGS + 5 + 2) /* R14 = LR */
+#define REG_R15             (SW_XCPT_REGS + 6 + 2) /* R15 = PC */
+#define REG_XPSR            (SW_XCPT_REGS + 7 + 2) /* xPSR */
 
 #define HW_XCPT_REGS        (10)
 #define HW_XCPT_SIZE        (4 * HW_XCPT_REGS)
@@ -249,6 +249,7 @@ static inline void up_irq_disable(void)
 }
 
 /* Save the current primask state & disable IRQs */
+
 typedef void (*gpiowr_t)(int id, unsigned int en);
 #if 0
 static inline irqstate_t up_irq_save(void) inline_function;
@@ -259,7 +260,8 @@ static inline irqstate_t up_irq_save(void)
   /* Return the current value of primask register and set
    * bit 0 of the primask register to disable interrupts
    */
-    ((gpiowr_t)0x0000b319)(12,1);
+
+    ((gpiowr_t)0x0000b319)(12, 1);
 
   __asm__ __volatile__
     (
@@ -295,7 +297,7 @@ static inline void up_irq_restore(irqstate_t flags)
       :
       : "r" (flags)
       : "memory");
-      ((gpiowr_t)0x0000b319)(12,0);
+      ((gpiowr_t)0x0000b319)(12, 0);
 }
 #endif
 /* Get/set IPSR */

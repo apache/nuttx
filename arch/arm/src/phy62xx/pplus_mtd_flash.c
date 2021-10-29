@@ -1,6 +1,5 @@
-
 /****************************************************************************
- * drivers/mtd/n25qxxx.c
+ * arch/arm/src/phy62xx/pplus_mtd_flash.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -44,7 +43,6 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -58,8 +56,8 @@
 struct pplus_fls_dev_s
 {
   struct mtd_dev_s      mtd;          /* MTD interface */
-  uint32_t              offset;       /*offset from flash start address*/
-  uint32_t              size;         /*avaliable size for MTD*/
+  uint32_t              offset;       /* offset from flash start address */
+  uint32_t              size;         /* avaliable size for MTD */
   uint16_t              nsectors;     /* Number of erase sectors */
   uint8_t               sectorshift;  /* Log2 of sector size */
   uint8_t               pageshift;    /* Log2 of page size */
@@ -105,14 +103,15 @@ static int  pplus_fls_ioctl(FAR struct mtd_dev_s *dev,
 
 static inline int pplus_fls_readid(struct pplus_fls_dev_s *priv)
 {
-  //fixed size and flash type
-  //256KB
-  //priv->sectorshift = 12;
-  //priv->pageshift   = 8;
-  //priv->nsectors    = 64;
+  /* fixed size and flash type
+   * 256KB
+   * priv->sectorshift = 12;
+   * priv->pageshift   = 8;
+   * priv->nsectors    = 64;
+   */
+
   return OK;
 }
-
 
 /****************************************************************************
  * Name:  pplus_fls_erase_sector
@@ -121,7 +120,6 @@ static inline int pplus_fls_readid(struct pplus_fls_dev_s *priv)
 static int pplus_fls_erase_sector(struct pplus_fls_dev_s *priv, off_t sector)
 {
   off_t address;
-  uint8_t status;
 
   finfo("sector: %08lx\n", (unsigned long)sector);
 
@@ -139,24 +137,19 @@ static int pplus_fls_erase_sector(struct pplus_fls_dev_s *priv, off_t sector)
 
 static int pplus_fls_erase_chip(struct pplus_fls_dev_s *priv)
 {
-  uint8_t status;
   off_t address = priv->offset;
   int i;
 
   /* Erase the whole chip */
-  
-  for(i = 0; i < priv->nsectors ; i ++)
-  {
-    hal_flash_erase_sector(address);
-    address += (1ul << priv->sectorshift);
-  }
+
+  for (i = 0; i < priv->nsectors; i++)
+    {
+      hal_flash_erase_sector(address);
+      address += (1ul << priv->sectorshift);
+    }
 
   return OK;
 }
-
-
-
-
 
 /****************************************************************************
  * Name: pplus_fls_erase
@@ -171,11 +164,12 @@ static int pplus_fls_erase(FAR struct mtd_dev_s *dev,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
   while (blocksleft-- > 0)
-  {
-    /* Erase each sector */
-    pplus_fls_erase_sector(priv, startblock);
-    startblock++;
-  }
+    {
+      /* Erase each sector */
+
+      pplus_fls_erase_sector(priv, startblock);
+      startblock++;
+    }
 
   return (int)nblocks;
 }
@@ -194,8 +188,16 @@ static ssize_t pplus_fls_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   /* On this device, we can handle the block read just like the byte-oriented
    * read
    */
-  ret = hal_flash_read(priv->offset + (startblock << priv->pageshift), buffer, nblocks << priv->pageshift);
 
+  ret = hal_flash_read(priv->offset + (startblock << priv->pageshift),
+      buffer, nblocks << priv->pageshift);
+
+  if (ret < 0)
+    {
+      ferr("ERROR: pplus_fls_read_byte returned: %d\n", ret);
+
+      /* return (ssize_t)ret; */
+    }
 
   return nblocks;
 }
@@ -211,14 +213,14 @@ static ssize_t pplus_fls_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
-
-  int ret = hal_flash_write(priv->offset + (startblock << priv->pageshift), buffer, nblocks << priv->pageshift);
+  int ret = hal_flash_write(priv->offset + (startblock << priv->pageshift),
+      (uint8_t *)buffer, nblocks << priv->pageshift);
 
   if (ret)
-  {
-    ferr("ERROR: spif_write failed: %d\n", ret);
-    return -ret;
-  }
+    {
+      ferr("ERROR: spif_write failed: %d\n", ret);
+      return -ret;
+    }
 
   return nblocks;
 }
@@ -240,10 +242,10 @@ static ssize_t pplus_fls_read(FAR struct mtd_dev_s *dev,
   ret = hal_flash_read(priv->offset + offset, buffer, nbytes);
 
   if (ret < 0)
-  {
-    ferr("ERROR: pplus_fls_read_byte returned: %d\n", ret);
-    return (ssize_t)ret;
-  }
+    {
+      ferr("ERROR: pplus_fls_read_byte returned: %d\n", ret);
+      return (ssize_t)ret;
+    }
 
   finfo("return nbytes: %d\n", (int)nbytes);
   return (ssize_t)nbytes;
@@ -263,48 +265,48 @@ static int pplus_fls_ioctl(FAR struct mtd_dev_s *dev,
   finfo("cmd: %d \n", cmd);
 
   switch (cmd)
-  {
-    case MTDIOC_GEOMETRY:
     {
-      FAR struct mtd_geometry_s *geo =
-        (FAR struct mtd_geometry_s *)((uintptr_t)arg);
+      case MTDIOC_GEOMETRY:
+        {
+          FAR struct mtd_geometry_s *geo =
+              (FAR struct mtd_geometry_s *)((uintptr_t)arg);
 
-      if (geo)
-      {
-        /* Populate the geometry structure with information need to
-         * know the capacity and how to access the device.
-         *
-         * NOTE:
-         * that the device is treated as though it where just an array
-         * of fixed size blocks.  That is most likely not true, but
-         * the client will expect the device logic to do whatever is
-         * necessary to make it appear so.
-         */
+          if (geo)
+            {
+              /* Populate the geometry structure with information need to
+               * know the capacity and how to access the device.
+               *
+               * NOTE:
+               * that the device is treated as though it where just an array
+               * of fixed size blocks.  That is most likely not true, but
+               * the client will expect the device logic to do whatever is
+               * necessary to make it appear so.
+               */
 
+              geo->blocksize    = (1 << priv->pageshift);
+              geo->erasesize    = (1 << priv->sectorshift);
+              geo->neraseblocks = priv->nsectors;
+              ret               = OK;
 
-        geo->blocksize    = (1 << priv->pageshift);
-        geo->erasesize    = (1 << priv->sectorshift);
-        geo->neraseblocks = priv->nsectors;
-        ret               = OK;
-
-        finfo("blocksize: %" PRId32 " erasesize: %" PRId32
+              finfo("blocksize: %" PRId32 " erasesize: %" PRId32
               " neraseblocks: %" PRId32 "\n",
               geo->blocksize, geo->erasesize, geo->neraseblocks);
-      }
-      break;
-    }
+            }
+          break;
+        }
 
-    case MTDIOC_BULKERASE:
-    {
-      /* Erase the entire device */
-      ret = pplus_fls_erase_chip(priv);
-      break;
-    }
+      case MTDIOC_BULKERASE:
+        {
+          /* Erase the entire device */
 
-    default:
-      ret = -ENOTTY; /* Bad/unsupported command */
-      break;
-  }
+          ret = pplus_fls_erase_chip(priv);
+          break;
+        }
+
+      default:
+          ret = -ENOTTY; /* Bad/unsupported command */
+          break;
+    }
 
   finfo("return %d\n", ret);
   return ret;
@@ -331,7 +333,8 @@ static int pplus_fls_ioctl(FAR struct mtd_dev_s *dev,
 struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size)
 {
   FAR struct pplus_fls_dev_s *priv;
-  int ret;
+
+  /* int ret; */
 
   /* Allocate a state structure (we allocate the structure instead of using
    * a fixed, static allocation so that we can handle multiple FLASH devices.
@@ -344,38 +347,38 @@ struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size)
   priv = (FAR struct pplus_fls_dev_s *)
           kmm_zalloc(sizeof(struct pplus_fls_dev_s));
   if (priv)
-  {
-    /* Initialize the allocated structure (unsupported methods were
-     * nullified by kmm_zalloc).
-     */
+    {
+      /* Initialize the allocated structure (unsupported methods were
+       * nullified by kmm_zalloc).
+       */
 
-    priv->mtd.erase  = pplus_fls_erase;
-    priv->mtd.bread  = pplus_fls_bread;
-    priv->mtd.bwrite = pplus_fls_bwrite;
-    priv->mtd.read   = pplus_fls_read;
-    priv->mtd.ioctl  = pplus_fls_ioctl;
-    priv->mtd.name   = "pplus_nvm";
+      priv->mtd.erase  = pplus_fls_erase;
+      priv->mtd.bread  = pplus_fls_bread;
+      priv->mtd.bwrite = pplus_fls_bwrite;
+      priv->mtd.read   = pplus_fls_read;
+      priv->mtd.ioctl  = pplus_fls_ioctl;
+      priv->mtd.name   = "pplus_nvm";
 
-    priv->offset      = offset;
-    priv->size        = size;
-    priv->sectorshift = 12;
-    priv->pageshift   = 8;
-    priv->nsectors    = 64;
+      priv->offset      = offset;
+      priv->size        = size;
+      priv->sectorshift = 12;
+      priv->pageshift   = 8;
+      priv->nsectors    = 64;
 
+      /* Identify the FLASH chip and get its capacity */
 
+      /* ret = pplus_fls_readid(priv); */
 
-    /* Identify the FLASH chip and get its capacity */
-    ret = pplus_fls_readid(priv);
-
-  }
+      pplus_fls_readid(priv);
+    }
 
   /* Return the implementation-specific state structure as the MTD device */
 
   finfo("Return %p\n", priv);
   return (FAR struct mtd_dev_s *)priv;
 
-errout_with_priv:
+  /* errout_with_priv: */
+
   kmm_free(priv);
   return NULL;
 }
-

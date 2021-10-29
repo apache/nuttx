@@ -1,20 +1,36 @@
+/****************************************************************************
+ * arch/arm/src/phy62xx/core_bumbee_m0.h
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
 
 #ifndef PHY_BUMBEE_M0_H
 #define PHY_BUMBEE_M0_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-
-
-
-
-/* ================================================================================ */
-/* ================      Processor and Core Peripheral Section     ================ */
-/* ================================================================================ */
-
-/* -------  Start of section using anonymous unions and disabling warnings  ------- */
+/* Start of section using anonymous unions and disabling warnings  */
 #if   defined (__CC_ARM)
 #pragma push
 #pragma anon_unions
@@ -36,13 +52,17 @@ extern "C" {
 #warning Not supported compiler type
 #endif
 
+/* Configuration of the Cortex-M0 Processor and Core Peripherals */
 
-/* --------  Configuration of the Cortex-M0 Processor and Core Peripherals  ------- */
-//#define __CM0_REV                 0x0000U   /* Core revision r0p0 */
-//#define __MPU_PRESENT             0U        /* MPU present or not */
-//#define __VTOR_PRESENT            0U        /* no VTOR present*/
+/* #define __CM0_REV                 0x0000U */  /* Core revision r0p0 */
+
+/* #define __MPU_PRESENT             0U  */      /* MPU present or not */
+
+/* #define __VTOR_PRESENT            0U  */      /* no VTOR present */
+
 #define __NVIC_PRIO_BITS          2U        /* Number of Bits used for Priority Levels */
-//#define __Vendor_SysTickConfig    0U        /* Set to 1 if different SysTick Config is used */
+
+/* #define __Vendor_SysTickConfig    0U  */     /* Set to 1 if different SysTick Config is used */
 
 #include "core_cm0.h"                       /* Processor and core peripherals */
 #include "system_ARMCM0.h"                  /* System Header */
@@ -58,8 +78,8 @@ extern "C" {
 #define NVIC_ClearWakeupIRQ(irqn)
 #define NVIC_SetWakeupIRQ(irqn)
 
+/* End of section using anonymous unions and disabling warnings */
 
-/* --------  End of section using anonymous unions and disabling warnings  -------- */
 #if   defined (__CC_ARM)
 #pragma pop
 #elif defined (__ICCARM__)
@@ -77,9 +97,6 @@ extern "C" {
 #else
 #warning Not supported compiler type
 #endif
-
-
-
 
 #ifdef __cplusplus
 }

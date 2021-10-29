@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_buttons.c
+ * boards/arm/phy62xx/phy6222/src/buttons.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,7 +30,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
-
 
 #ifdef CONFIG_ARCH_BUTTONS
 
@@ -64,7 +63,6 @@ static const uint32_t g_buttons[NUM_BUTTONS] =
 
 uint32_t board_button_initialize(void)
 {
-
   return 1;
 }
 
@@ -74,7 +72,6 @@ uint32_t board_button_initialize(void)
 
 uint8_t board_buttons(void)
 {
-
   return 0;
 }
 
@@ -103,7 +100,6 @@ uint8_t board_buttons(void)
 #ifdef CONFIG_ARCH_IRQBUTTONS
 int board_button_irq(int id, xcpt_t irqhandler, FAR void *arg)
 {
-
   return 0;
 }
 #endif

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32f051-discovery.h
+ * boards/arm/phy62xx/phy6222/src/phy6222.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,8 +38,6 @@
 /* Configuration ************************************************************/
 
 /* How many SPI modules does this chip support? */
-
-
 
 /* STM32F0Discovery GPIOs ***************************************************/
 

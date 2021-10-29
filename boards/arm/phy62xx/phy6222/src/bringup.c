@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_bringup.c
+ * boards/arm/phy62xx/phy6222/src/bringup.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -36,7 +36,7 @@
 
 #include "phy6222.h"
 #include "pplus_mtd_flash.h"
-
+#include "phy62xx_ble.h"
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -66,18 +66,21 @@ int phy62xx_bringup(void)
 
   ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
   if (ret < 0)
-  {
+    {
       syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
       return ret;
-  }
+    }
+
 #endif
 
 #ifdef CONFIG_FS_NXFFS
 
-      struct mtd_dev_s* mtd_temp = pplus_fls_initialize(PPLUS_MTD_START_OFFSET, PPLUS_MTD_SIZE);
+      struct mtd_dev_s *mtd_temp =
+          pplus_fls_initialize(PPLUS_MTD_START_OFFSET, PPLUS_MTD_SIZE);
+
       if (!mtd_temp)
         {
-    	  syslog(LOG_ERR, "ERROR: pplus_initialize failed\n");
+          syslog(LOG_ERR, "ERROR: pplus_initialize failed\n");
           return ret;
         }
 
@@ -86,7 +89,7 @@ int phy62xx_bringup(void)
       ret = nxffs_initialize(mtd_temp);
       if (ret < 0)
         {
-    	  syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n", ret);
+          syslog(LOG_ERR, "ERROR: NXFFS initialization failed: %d\n", ret);
         }
 
       /* Mount the file system at /mnt/nxffs */
@@ -94,20 +97,21 @@ int phy62xx_bringup(void)
       ret = nx_mount(NULL, "/mnt/nxffs", "nxffs", 0, NULL);
       if (ret < 0)
         {
-    	  syslog(LOG_ERR, "ERROR: Failed to mount the NXFFS volume: %d\n", ret);
+          syslog(LOG_ERR,
+              "ERROR: Failed to mount the NXFFS volume: %d\n", ret);
           return ret;
         }
 
 #endif
 #ifdef CONFIG_FS_LITTLEFS
 
-      struct mtd_dev_s* mtd = pplus_fls_initialize(PPLUS_MTD_START_OFFSET, PPLUS_MTD_SIZE);
+      struct mtd_dev_s *mtd =
+          pplus_fls_initialize(PPLUS_MTD_START_OFFSET, PPLUS_MTD_SIZE);
       if (!mtd)
         {
-    	  syslog(LOG_ERR, "ERROR: pplus_initialize failed\n");
+          syslog(LOG_ERR, "ERROR: pplus_initialize failed\n");
           return ret;
         }
-
 
       /* Erase the RAM MTD */
 
@@ -116,22 +120,18 @@ int phy62xx_bringup(void)
       ret = register_mtddriver("/dev/mtd", mtd, 0755, NULL);
       if (ret < 0)
         {
-          syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n",
-                 ret);
+          syslog(LOG_ERR, "ERROR: Failed to register MTD driver: %d\n", ret);
         }
 
       /* Mount the LittleFS file system */
 
       ret = nx_mount("/dev/mtd", "/mnt/lfs", "littlefs", 0,
-                     "forceformat");
+                "forceformat");
       if (ret < 0)
         {
           syslog(LOG_ERR,
-                 "ERROR: Failed to mount LittleFS at /mnt/lfs: %d\n",
-                 ret);
+              "ERROR: Failed to mount LittleFS at /mnt/lfs: %d\n", ret);
         }
-
-
 
 #endif
 
@@ -141,8 +141,7 @@ int phy62xx_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR,
-             "ERROR: Failed to init ble device\n",
-             ret);
+          "ERROR: Failed to init ble device\n");
     }
 #endif
 

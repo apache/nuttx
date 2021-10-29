@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/tiva/common/tiva_timerisr.c
+ * arch/arm/src/phy62xx/phyplus_timerisr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,7 +37,7 @@
 
 #include "chip.h"
 
-//#include "irq.h"
+/* #include "irq.h" */
 
 /****************************************************************************
  * Private Functions
@@ -51,7 +51,7 @@
  *   of the systems.
  *
  ****************************************************************************/
-//done...
+
 static int phyplus_timerisr(int irq, uint32_t *regs, void *arg)
 {
   /* Process timer interrupt */
@@ -72,11 +72,12 @@ static int phyplus_timerisr(int irq, uint32_t *regs, void *arg)
  *   interrupt.
  *
  ****************************************************************************/
-//done...
+
 void up_timer_initialize(void)
 {
-//  putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
-//  putreg32(0, NVIC_SYSTICK_CURRENT);
+  /* putreg32(SYSTICK_RELOAD, NVIC_SYSTICK_RELOAD);
+   *  putreg32(0, NVIC_SYSTICK_CURRENT);
+   */
 
   irq_attach(PHY62XX_IRQ_SYSTICK, (xcpt_t)phyplus_timerisr, NULL);
 
@@ -89,10 +90,9 @@ void up_timer_initialize(void)
    *   NVIC_SYSTICK_CTRL_ENABLE      : Enable the counter
    */
 
-//  regval = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
-//  putreg32(regval, NVIC_SYSTICK_CTRL);
+  /* regval = (NVIC_SYSTICK_CTRL_TICKINT | NVIC_SYSTICK_CTRL_ENABLE);
+   * putreg32(regval, NVIC_SYSTICK_CTRL);
+   */
 
   up_enable_irq(PHY62XX_IRQ_SYSTICK);
-  
 }
- 

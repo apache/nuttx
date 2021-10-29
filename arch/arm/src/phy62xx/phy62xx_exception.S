@@ -47,6 +47,9 @@ exception_common:
 
 	/* Complete the context save */
 
+	mrs		r1, msp
+	add		r1, #8
+	msr		msp, r1
 	/* Get the current stack pointer.  The EXC_RETURN value tells us whether
 	 * the context is on the MSP or PSP.
 	 */
@@ -123,9 +126,10 @@ exception_common:
 
 	mov		r2, #SW_XCPT_SIZE		/* R2=Size of software-saved portion of the context array */
 	add		r1, r0, r2			/* R1=Address of HW save area in reg array */
-	add		r1, #8			/* skip dummy */
+	//add		r1, #8				/* skip dummy */
 	ldr		r2, [r0, #(4*REG_SP)]		/* R2=Value of SP before the interrupt */
-	sub		r2, #(HW_XCPT_SIZE-8)		/* R2=Address of HW save area on the return stack and skip dummy */
+	//sub		r2, #(HW_XCPT_SIZE-8)		/* R2=Address of HW save area on the return stack and skip dummy */
+	sub		r2, #(HW_XCPT_SIZE)		/* R2=Address of HW save area on the return stack and skip dummy */	
 	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
 	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
 	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
@@ -157,7 +161,8 @@ exception_common:
 	 */
 
 	ldmia		r1!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
-	mov		r1, #(HW_XCPT_SIZE-8)			/* R1=Size of hardware-saved portion of the context array */
+	//mov		r1, #(HW_XCPT_SIZE-8)			/* R1=Size of hardware-saved portion of the context array */
+	mov		r1, #HW_XCPT_SIZE			/* R1=Size of hardware-saved portion of the context array */
 	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
 	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the
@@ -202,7 +207,7 @@ exception_common_inline:
 	 * the context is on the MSP or PSP.
 	 */
 	mrs		r1, msp					/* R1=The main stack pointer */
-	sub		r1, #8					/* align to normal jumpfunction mode */
+	//sub		r1, #8					/* align to normal jumpfunction mode */
 
 	/* R1 is the current stack pointer.  HW_XCPT_REGS were pushed onto the stack
 	 * when the interrupt was taken so (R1)+HW_XCPT_SIZE is the value of the
@@ -275,9 +280,10 @@ exception_common_inline:
 
 	mov		r2, #SW_XCPT_SIZE		/* R2=Size of software-saved portion of the context array */
 	add		r1, r0, r2			/* R1=Address of HW save area in reg array */
-	add		r1, #8			/* skip dummy */
+	//add		r1, #8			/* skip dummy */
 	ldr		r2, [r0, #(4*REG_SP)]		/* R2=Value of SP before the interrupt */
-	sub		r2, #(HW_XCPT_SIZE-8)		/* R2=Address of HW save area on the return stack and skip dummy */
+	//sub		r2, #(HW_XCPT_SIZE-8)		/* R2=Address of HW save area on the return stack and skip dummy */
+	sub		r2, #(HW_XCPT_SIZE)		/* R2=Address of HW save area on the return stack and skip dummy */
 	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
 	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
 	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
@@ -309,7 +315,8 @@ exception_common_inline:
 	 */
 
 	ldmia		r1!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
-	mov		r1, #(HW_XCPT_SIZE-8)			/* R1=Size of hardware-saved portion of the context array */
+	//mov		r1, #(HW_XCPT_SIZE-8)			/* R1=Size of hardware-saved portion of the context array */
+	mov		r1, #(HW_XCPT_SIZE)			/* R1=Size of hardware-saved portion of the context array */
 	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
 	/* Restore the stack pointer.  The EXC_RETURN value tells us whether the

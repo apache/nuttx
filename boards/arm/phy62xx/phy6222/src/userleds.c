@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32f0l0g0/stm32f051-discovery/src/stm32_userleds.c
+ * boards/arm/phy62xx/phy6222/src/userleds.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,8 +30,6 @@
 
 #include <arch/board/board.h>
 
-
-
 #ifndef CONFIG_ARCH_LEDS
 
 /****************************************************************************
@@ -55,7 +53,6 @@ uint32_t board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-
 }
 
 /****************************************************************************
@@ -64,6 +61,6 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
- }
+}
 
 #endif /* !CONFIG_ARCH_LEDS */
