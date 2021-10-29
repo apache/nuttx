@@ -1446,8 +1446,7 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: lps27hhw_activate
- *
+ * Name: lps27hhw_activate *
  * Description:
  *   Enable or disable sensor device. when enable sensor, sensor will
  *   work in  current mode(if not set, use default mode). when disable
@@ -1484,20 +1483,17 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
       return OK;
     }
 
-  /* If activated flag is updated, readout data register or FIFO.
-   * If enabled, readout but not push is used for clearing data.
-   * If disabled, readout and push to upper before into lowpower mode.
-   */
-
-  ret = lps27hhw_read_push(priv, !enable);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to read push\n");
-      return ret;
-    }
-
   if (enable)
     {
+      /* If enabled, read out but don't push, only used for clearing data */
+
+      ret = lps27hhw_read_push(priv, false);
+      if (ret < 0)
+        {
+          snerr("ERROR: Failed to read push\n");
+          return ret;
+        }
+
       /* If enabled, check interval and latency are updated  */
 
       /* If interval is not updated, set odr */
