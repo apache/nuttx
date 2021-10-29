@@ -1360,6 +1360,8 @@ config ESP32_PARTITION_TABLE_OFFSET
 	default 0x8000
 	depends on ESP32_APP_FORMAT_LEGACY
 
+source "arch/xtensa/src/esp32/Kconfig.security"
+
 endmenu # Application Image Configuration
 
 config ESP32_AUTO_SLEEP
