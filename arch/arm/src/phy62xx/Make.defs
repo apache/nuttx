@@ -20,7 +20,8 @@
 
 
 CMN_ASRCS  = phy62xx_exception.S phy62xx_start.S arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_switchcontext.S vfork.S
+#CMN_ASRCS += arm_switchcontext.S vfork.S
+CMN_ASRCS += vfork.S
 
 CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
 CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
@@ -32,6 +33,7 @@ CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 #CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 #CMN_CSRCS += arm_etherstub.c
+CMN_CSRCS += arm_switchcontext.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c
@@ -94,8 +96,8 @@ CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
 #LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
-LDFLAGS += -Wl,-Map="../../../phyplus_build.map"
-LDFLAGS += -Wl,--gc-sections
+#LDFLAGS += -Wl,-Map="../../../phyplus_build.map"		# param error
+#LDFLAGS += -Wl,--gc-sections					# param error
 
 .buildlib:
 	$(Q) if [ -d ../../../../../phy62xxble ]; then \

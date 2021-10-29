@@ -50,7 +50,11 @@
 #elif defined(CONFIG_ARCH_ARMV8M)
 #  include <arch/armv8-m/irq.h>
 #elif defined(CONFIG_ARCH_ARMV6M)
+#if defined(ARCH_CHIP_PHY6222)
+#  include <arch/phy62xx/armv6-m/irq.h>
+#else
 #  include <arch/armv6-m/irq.h>
+#endif
 #else
 #  include <arch/arm/irq.h>
 #endif

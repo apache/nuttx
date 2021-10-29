@@ -117,6 +117,10 @@ ifeq ($(BOARDMAKE),y)
   LDLIBS += -lboard
 endif
 
+ifeq ($(CONFIG_ARCH_CHIP_PHY6222),y)
+  LDLIBS += -lphy62xxble
+endif  
+
 VPATH += chip
 VPATH += common
 VPATH += $(ARCH_SUBDIR)
