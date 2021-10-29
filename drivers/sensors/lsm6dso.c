@@ -3089,8 +3089,8 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
       goto err;
     }
 
-  ioephandle = IOEP_ATTACH(priv->config->ioedev, (1 << priv->config->pin),
-                          lsm6dso_interrupt_handler, priv);
+  ioephandle = IOEP_ATTACH(priv->config->ioedev, priv->config->pin,
+                           lsm6dso_interrupt_handler, priv);
   if (ioephandle == NULL)
     {
       ret = -EIO;
