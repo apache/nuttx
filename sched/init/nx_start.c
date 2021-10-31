@@ -35,7 +35,6 @@
 #include <nuttx/sched.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/lib/lib.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/mm/mm.h>
 #include <nuttx/mm/shm.h>
@@ -708,12 +707,6 @@ void nx_start(void)
 
   shm_initialize();
 #endif
-
-  /* Initialize the C libraries.  This is done last because the libraries
-   * may depend on the above.
-   */
-
-  lib_initialize();
 
 #ifndef CONFIG_BINFMT_DISABLE
   /* Initialize the binfmt system */
