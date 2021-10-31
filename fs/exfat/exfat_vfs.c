@@ -274,6 +274,13 @@ static int exfatfs_open(FAR struct file *filep, FAR const char *relpath,
   if (ret == OK)
     {
       bool readonly;
+
+      if (node->attrib & EXFAT_ATTRIB_DIR)
+        {
+          ret = -EISDIR;
+          goto nodeout;
+        }
+
       if ((oflags & (O_CREAT | O_EXCL)) == (O_CREAT | O_EXCL))
         {
           /* Already exists -- can't create it exclusively */
