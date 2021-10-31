@@ -32,11 +32,11 @@ CSRCS += lib_libsnoflush.c lib_libvsprintf.c lib_ultoa_invert.c
 ifeq ($(CONFIG_LIBC_FLOATINGPOINT),y)
 CSRCS += lib_dtoa_engine.c lib_dtoa_data.c
 endif
+CSRCS += lib_tempnam.c lib_tmpnam.c
 
 # The remaining sources files depend upon C streams
 
 ifeq ($(CONFIG_FILE_STREAM),y)
-
 CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
 CSRCS += lib_fseek.c lib_fseeko.c lib_ftell.c lib_ftello.c lib_fsetpos.c
 CSRCS += lib_getdelim.c lib_fgetpos.c lib_getc.c lib_getchar.c lib_fgetc.c
@@ -49,13 +49,8 @@ CSRCS += lib_stdsostream.c lib_perror.c lib_feof.c lib_ferror.c
 CSRCS += lib_rawinstream.c lib_rawoutstream.c lib_rawsistream.c
 CSRCS += lib_rawsostream.c lib_remove.c lib_rewind.c lib_clearerr.c
 CSRCS += lib_scanf.c lib_vscanf.c lib_fscanf.c lib_vfscanf.c lib_tmpfile.c
-CSRCS += lib_setbuf.c lib_setvbuf.c
-
+CSRCS += lib_setbuf.c lib_setvbuf.c lib_libstream.c lib_libfilesem.c
 endif
-
-CSRCS += lib_tempnam.c lib_tmpnam.c
-
-# Other support that depends on specific, configured features.
 
 # Add the stdio directory to the build
 
