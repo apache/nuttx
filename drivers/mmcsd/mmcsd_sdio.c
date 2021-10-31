@@ -2758,6 +2758,8 @@ static int mmcsd_read_csd(FAR struct mmcsd_state_s *priv)
   finfo("MMC ext CSD read succsesfully, number of block %" PRId32 "\n",
         priv->nblocks);
 
+  SDIO_GOTEXTCSD(priv->dev, buffer);
+
   /* Return value:  One sector read */
 
   return OK;
