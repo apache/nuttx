@@ -86,6 +86,12 @@ typedef _int64_t           _intmax_t;
 typedef _uint64_t          _uintmax_t;
 #endif
 
+#if defined(__WCHAR_TYPE__)
+typedef __WCHAR_TYPE__     _wchar_t;
+#else
+typedef int                _wchar_t;
+#endif
+
 #if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 /* 64-bit build on 64-bit machine: A size is 8 bytes */
 
