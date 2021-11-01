@@ -1049,6 +1049,7 @@ int opt3007_register(int devno, FAR const struct opt3007_config_s *config)
   priv->devreg = &g_opt3007_devreg;
   priv->lower.ops = &g_opt3007_ops;
   priv->lower.type = SENSOR_TYPE_LIGHT;
+  priv->lower.uncalibrated = true;
   priv->interval = OPT3007_DEFAULT_INTERVAL;
   priv->lower.buffer_number = CONFIG_SENSORS_OPT3007_BUFFER_NUMBER;
 

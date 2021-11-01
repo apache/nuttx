@@ -3039,6 +3039,7 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
 
   priv->dev[LSM6DSO_XL_IDX].lower.ops = &g_lsm6dso_xl_ops;
   priv->dev[LSM6DSO_XL_IDX].lower.type = SENSOR_TYPE_ACCELEROMETER;
+  priv->dev[LSM6DSO_XL_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_XL_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
   priv->dev[LSM6DSO_XL_IDX].lower.buffer_number
                             = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
@@ -3047,6 +3048,7 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
 
   priv->dev[LSM6DSO_GY_IDX].lower.ops = &g_lsm6dso_gy_ops;
   priv->dev[LSM6DSO_GY_IDX].lower.type = SENSOR_TYPE_GYROSCOPE;
+  priv->dev[LSM6DSO_GY_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_GY_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
   priv->dev[LSM6DSO_GY_IDX].lower.buffer_number
                             = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
