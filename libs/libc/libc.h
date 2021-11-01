@@ -77,8 +77,8 @@ extern "C"
 /* Defined in lib_streamsem.c */
 
 #ifdef CONFIG_FILE_STREAM
-void  stream_semtake(FAR struct streamlist *list);
-void  stream_semgive(FAR struct streamlist *list);
+void  lib_stream_semtake(FAR struct streamlist *list);
+void  lib_stream_semgive(FAR struct streamlist *list);
 #endif
 
 /* Defined in lib_dtoa.c */
