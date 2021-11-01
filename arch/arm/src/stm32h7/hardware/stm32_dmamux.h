@@ -135,9 +135,9 @@
 
 #define DMAMUX_CCR_DMAREQID_SHIFT (0)                              /* Bits 0-6: DMA request identification */
 #define DMAMUX_CCR_DMAREQID_MASK  (0x7f << DMAMUX_CCR_DMAREQID_SHIFT)
-#define DMAMUX_CCR_SOIE           (8)                              /* Bit 8: Synchronization overrun interrupt enable */
-#define DMAMUX_CCR_EGE            (9)                              /* Bit 9: Event generation enable */
-#define DMAMUX_CCR_SE             (16)                             /* Bit 16: Synchronization enable */
+#define DMAMUX_CCR_SOIE           (1 << 8)                         /* Bit 8: Synchronization overrun interrupt enable */
+#define DMAMUX_CCR_EGE            (1 << 9)                         /* Bit 9: Event generation enable */
+#define DMAMUX_CCR_SE             (1 << 16)                        /* Bit 16: Synchronization enable */
 #define DMAMUX_CCR_SPOL_SHIFT     (17)                             /* Bits 17-18: Synchronization polarity */
 #define DMAMUX_CCR_SPOL_MASK      (0x3 << DMAMUX_CCR_SPOL_SHIFT)
 #  define DMAMUX_CCR_SPOL_NONE    (0x0 << DMAMUX_CCR_SPOL_SHIFT)   /* No event: No trigger detection or generation */
@@ -164,8 +164,8 @@
                                                                     * DMAMUX1: 3 bits; DMAMUX2: 5 bits
                                                                     */
 #define DMAMUX_RGCR_SIGID_MASK     (0x1f << DMAMUX_RGCR_SIGID_SHIFT)
-#define DMAMUX_RGCR_OIE            (8)                             /* Bit 8: Trigger overrun interrupt enable */
-#define DMAMUX_RGCR_GE             (16)                            /* Bit 16: DMA request generator channel X enable*/
+#define DMAMUX_RGCR_OIE            (1 << 8)                        /* Bit 8: Trigger overrun interrupt enable */
+#define DMAMUX_RGCR_GE             (1 << 16)                       /* Bit 16: DMA request generator channel X enable*/
 #define DMAMUX_RGCR_GPOL_SHIFT     (17)                            /* Bits 17-18: DMA request generator trigger polarity */
 #define DMAMUX_RGCR_GPOL_MASK      (0x3 << DMAMUX_RGCR_GPOL_SHIFT)
 #  define DMAMUX_RGCR_GPOL_NONE    (0x0 << DMAMUX_RGCR_GPOL_SHIFT) /* No event: No trigger detection or generation */
