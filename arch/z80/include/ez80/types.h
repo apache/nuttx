@@ -84,6 +84,12 @@ typedef _int32_t           _intmax_t;
 typedef _uint32_t          _uintmax_t;
 #endif
 
+#if defined(__WCHAR_TYPE__)
+typedef __WCHAR_TYPE__     _wchar_t;
+#else
+typedef int                _wchar_t;
+#endif
+
 /* A pointer is 2 or 3 bytes, depending upon if the ez80 is in z80
  * compatibility mode or not
  *

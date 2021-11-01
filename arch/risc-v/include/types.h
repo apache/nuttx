@@ -72,6 +72,12 @@ typedef unsigned long long _uint64_t;
 typedef _int64_t           _intmax_t;
 typedef _uint64_t          _uintmax_t;
 
+#if defined(__WCHAR_TYPE__)
+typedef __WCHAR_TYPE__     _wchar_t;
+#else
+typedef int                _wchar_t;
+#endif
+
 #ifdef __LP64__
 /* A size is 8 bytes */
 
