@@ -48,6 +48,10 @@ config LIBC_ARCH_ATOMIC
 	bool
 	default n
 
+config LIBC_ARCH_MEMCHR
+	bool
+	default n
+
 config LIBC_ARCH_MEMCPY
 	bool
 	default n
