@@ -31,6 +31,17 @@
 	.global memset
 	.type	memset, %function
 memset:
+#ifdef __ARM_FEATURE_MVE
+	vmov.u8	q0, #0
+	vadd.u8	q0, r1
+	mov	r3, lr
+	mov	r1, r0
+	dlstp.8	lr, r2
+1:
+	vstrb.8	q0, [r1], #16
+	letp	lr, 1b
+	bx	r3
+#else
 	push	{r4, r5, r6}
 	lsls	r4, r0, #30
 	beq	10f
@@ -102,4 +113,5 @@ memset:
 	mov	r4, r1
 	mov	r3, r0
 	b	3b
+#endif
 	.size memset, . - memset
