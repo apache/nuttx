@@ -541,7 +541,8 @@ menu "Memory Configuration"
 
 config ESP32_BT_RESERVE_DRAM
 	int "Reserved BT DRAM"
-	default 65536
+	default 0 if !ESP32_BLE
+	default 65536 if ESP32_BLE
 
 config ESP32_TRACEMEM_RESERVE_DRAM
 	int "Reserved trace memory DRAM"
