@@ -52,7 +52,6 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FILE_STREAM
 void lib_stream_initialize(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
@@ -80,7 +79,6 @@ void lib_stream_initialize(FAR struct task_group_s *group)
   list->sl_std[2].fs_fd = -1;
   lib_sem_initialize(&list->sl_std[2]);
 }
-#endif /* CONFIG_FILE_STREAM */
 
 /****************************************************************************
  * Name: lib_stream_release
@@ -92,7 +90,6 @@ void lib_stream_initialize(FAR struct task_group_s *group)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FILE_STREAM
 void lib_stream_release(FAR struct task_group_s *group)
 {
   FAR struct streamlist *list;
@@ -151,5 +148,26 @@ void lib_stream_release(FAR struct task_group_s *group)
 #endif
 }
 
-#endif /* CONFIG_FILE_STREAM */
 #endif /* CONFIG_BUILD_FLAT || __KERNEL__ */
+
+void lib_stream_semtake(FAR struct streamlist *list)
+{
+  int ret;
+
+  /* Take the semaphore (perhaps waiting) */
+
+  while ((ret = _SEM_WAIT(&list->sl_sem)) < 0)
+    {
+      /* The only case that an error should occr here is if
+       * the wait was awakened by a signal.
+       */
+
+      DEBUGASSERT(_SEM_ERRNO(ret) == EINTR || _SEM_ERRNO(ret) == ECANCELED);
+      UNUSED(ret);
+    }
+}
+
+void lib_stream_semgive(FAR struct streamlist *list)
+{
+  _SEM_POST(&list->sl_sem);
+}
