@@ -58,7 +58,7 @@ int lib_flushall(FAR struct streamlist *list)
 
       /* Process each stream in the thread's stream list */
 
-      stream_semtake(list);
+      lib_stream_semtake(list);
       stream = list->sl_head;
       for (; stream != NULL; stream = stream->fs_next)
         {
@@ -83,7 +83,7 @@ int lib_flushall(FAR struct streamlist *list)
             }
         }
 
-      stream_semgive(list);
+      lib_stream_semgive(list);
     }
 
   /* If any flush failed, return the errorcode of the last failed flush */
