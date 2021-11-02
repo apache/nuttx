@@ -888,7 +888,7 @@ FAR struct battery_charger_dev_s *
       baterr("Failed to set direction: %d\n", ret);
     }
 
-  ret = IOEP_ATTACH(priv->ioedev, (1 << priv->pin),
+  ret = IOEP_ATTACH(priv->ioedev, priv->pin,
                           stwlc38_interrupt_handler, priv);
   if (ret == NULL)
     {
