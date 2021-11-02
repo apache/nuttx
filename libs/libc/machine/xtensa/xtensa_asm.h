@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/xtensa/xtensa-asm.h
+ * libs/libc/machine/xtensa/xtensa_asm.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,41 +18,45 @@
  *
  ****************************************************************************/
 
+/****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
 #include <arch/chip/core-isa.h>
 
 /****************************************************************************
  * Assembly Language Macros
  ****************************************************************************/
 
-	.macro	src_b	r, w0, w1
+  .macro  src_b r, w0, w1
 #if XCHAL_HAVE_BE
-	src	\r, \w0, \w1
+  src \r, \w0, \w1
 #else
-	src	\r, \w1, \w0
+  src \r, \w1, \w0
 #endif
-	.endm
+  .endm
 
-	.macro	ssa8	r
+  .macro  ssa8  r
 #if XCHAL_HAVE_BE
-	ssa8b	\r
+  ssa8b \r
 #else
-	ssa8l	\r
+  ssa8l \r
 #endif
-	.endm
+  .endm
 
 /****************************************************************************
  * Pre-processor Macros
  ****************************************************************************/
 
 #if XCHAL_HAVE_BE
-#  define	MASK0 0xff000000
-#  define	MASK1 0x00ff0000
-#  define	MASK2 0x0000ff00
-#  define	MASK3 0x000000ff
+#  define MASK0 0xff000000
+#  define MASK1 0x00ff0000
+#  define MASK2 0x0000ff00
+#  define MASK3 0x000000ff
 #else
-#  define	MASK0 0x000000ff
-#  define	MASK1 0x0000ff00
-#  define	MASK2 0x00ff0000
-#  define	MASK3 0xff000000
+#  define MASK0 0x000000ff
+#  define MASK1 0x0000ff00
+#  define MASK2 0x00ff0000
+#  define MASK3 0xff000000
 #endif
 
