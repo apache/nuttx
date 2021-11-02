@@ -70,6 +70,17 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN10)
 
+#ifdef CONFIG_SENSORS_HALL3PHASE
+/* GPIO pins used by the 3-phase Hall effect sensor */
+
+#  define GPIO_HALL_PHA (GPIO_INPUT | GPIO_SPEED_5MHz | \
+                         GPIO_PORTB | GPIO_PIN6)
+#  define GPIO_HALL_PHB (GPIO_INPUT | GPIO_SPEED_5MHz | \
+                         GPIO_PORTB | GPIO_PIN7)
+#  define GPIO_HALL_PHC (GPIO_INPUT | GPIO_SPEED_5MHz | \
+                         GPIO_PORTB | GPIO_PIN8)
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

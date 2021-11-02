@@ -34,6 +34,10 @@
 
 #include "hardware/stm32g4xxxx_opamp.h"
 
+#if defined(CONFIG_SENSORS_QENCODER) || defined(CONFIG_SENSORS_HALL3PHASE)
+#  include "hardware/stm32g4xxxx_pwr.h"
+#endif
+
 #include "stm32_foc.h"
 
 #include "arm_arch.h"
@@ -167,6 +171,17 @@
 
 #if CONFIG_STM32_ADC1_RESOLUTION != 0
 #  error
+#endif
+
+/* Qenco configuration - only TIM4 */
+
+#ifdef CONFIG_SENSORS_QENCODER
+#  ifndef CONFIG_STM32_TIM4_QE
+#    error
+#  endif
+#  if CONFIG_STM32_TIM4_QEPSC != 0
+#    error
+#  endif
 #endif
 
 /****************************************************************************
@@ -569,6 +584,12 @@ int stm32_adc_setup(void)
 
   if (initialized == false)
     {
+#if defined(CONFIG_SENSORS_QENCODER) || defined(CONFIG_SENSORS_HALL3PHASE)
+      /* Disable USB Type-C and Power Delivery Dead Battery */
+
+      modifyreg32(STM32_PWR_CR3, 0, PWR_CR3_UCPD1_DBDIS);
+#endif
+
       if (g_foc_dev == NULL)
         {
           mtrerr("Failed to get g_foc_dev device\n");
