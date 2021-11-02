@@ -34,7 +34,7 @@ ifeq ($(CONFIG_XTENSA_MEMSET),y)
 ASRCS += arch_memset.S
 endif
 
-ifeq ($(CONFIG_XTENSA_SETJMP),y)
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp.S
 endif
 

@@ -21,12 +21,6 @@ config XTENSA_MEMSET
         ---help---
                 Enable optimized XTENSA specific memset() library function
 
-config XTENSA_SETJMP
-        bool "Enable optimized setjmp() for XTENSA"
-        select LIBC_ARCH_SETJMP
-        ---help---
-                Enable optimized XTENSA specific setjmp() library function
-
 config XTENSA_STRCMP
         bool "Enable optimized strcmp() for XTENSA"
         select LIBC_ARCH_STRCMP
