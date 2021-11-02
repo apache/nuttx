@@ -8,7 +8,7 @@
  * "License"); you may not use this file except in compliance with the
  * License.  You may obtain a copy of the License at
  *
- *   http:#www.apache.org/licenses/LICENSE-2.0
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
@@ -47,105 +47,12 @@
   .align  4
 
 strcmp:
-.LBB1_strcmp:
-  ENTRY(32)
-  movi  a4,3
-  or  a5,a2,a3
-  movi  a8,0
-  bany  a4,a5,.LBB3_strcmp
-  l32i.n  a7,a3,0
-  l32i  a6,a2,0
-  j .Lt_0_6402
 
-.Lt_0_9986:
-  l32i  a7,a3,0
-  l32i  a6,a2,4
-  addi  a2,a2,4
-
-.Lt_0_6402:
-  cmp4  a9,a6,a8
-  bnez.n  a9,.Lt_0_1282
-  addi  a3,a3,4
-  beq a6,a7,.Lt_0_9986
-  bswp  a4,a7
-  bswp  a2,a6
-  saltu a6,a4,a2
-  saltu a7,a2,a4
-  sub a2,a6,a7
-  RET(16)
-
-.Lt_0_1282:
-  l8ui  a8,a2,0
-  l8ui  a6,a3,0
-  movi  a7,0
-  beqz  a8,.LBB32_strcmp
-  bne a8,a6,.LBB32_strcmp
-  mov.n a6,a3
-  addi  a7,a7,1
-  addi  a6,a6,1
-  addi  a2,a2,1
-
-.L_0_8450:
-  l8ui  a8,a2,0
-  addi  a2,a2,1
-  beqz  a8,.Lt_0_11778
-  l8ui  a9,a6,0
-  addi  a7,a7,1
-  addi  a6,a6,1
-  beq a8,a9,.L_0_8450
-  sub a2,a8,a9
-  RET(16)
-
-.LBB32_strcmp:
-  sub a2,a8,a6
-  RET(16)
-
-.Lt_0_11778:
-  add a2,a7,a3
-  l8ui  a2,a2,0
-  sub a2,a8,a2
-  RET(16)
-
-.LBB3_strcmp:
-  l8ui  a8,a2,0
-  l8ui  a6,a3,0
-  movi  a7,0
-  beqz  a8,.LBB31_strcmp
-  bne a8,a6,.LBB31_strcmp
-  mov.n a6,a3
-
-.L_0_7426:
-  addi  a2,a2,1
-  l8ui  a8,a2,0
-  addi  a7,a7,1
-  addi  a6,a6,1
-  beqz  a8,.Lt_0_11010
-  l8ui  a9,a6,0
-  beq a8,a9,.L_0_7426
-  sub a2,a8,a9
-  RET(16)
-
-.LBB31_strcmp:
-  sub a2,a8,a6
-  RET(16)
-
-.Lt_0_11010:
-  add a2,a7,a3
-  l8ui  a2,a2,0
-  sub a2,a8,a2
-  RET(16)
-
-.L_0_15362:
-
-#else
-
-strcmp:
-
-#if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && __XTENSA_EL__ && XCHAL_HAVE_FLIX3
+#if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && !XCHAL_HAVE_BE && XCHAL_HAVE_FLIX3
 /*  Fast version for FLIX3 Little Endian */
 
 
-  leaf_entry sp, 16
+  ENTRY(16)
   /* a2 = s1, a3 = s2 */
 
   l8ui  a8, a2, 0 # byte 0 from s1
@@ -350,11 +257,11 @@ strcmp:
   RET(16)
 
 #else
-#if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && __XTENSA_EL__ && XCHAL_HAVE_PDX4
+#if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && !XCHAL_HAVE_BE && XCHAL_HAVE_PDX4
 /*  Fast version for FLIX3 Little Endian */
 
 
-  leaf_entry sp, 16
+  ENTRY(16)
   /* a2 = s1, a3 = s2 */
 
   l8ui  a8, a2, 0 # byte 0 from s1
@@ -564,7 +471,7 @@ strcmp:
 
 
 #else /* Not FLIX3 */
-  leaf_entry sp, 16
+  ENTRY(16)
   /* a2 = s1, a3 = s2 */
 
   l8ui  a8, a2, 0 # byte 0 from s1
@@ -851,7 +758,7 @@ strcmp:
   sub a2, a10, a11
   RET(16)
 
-#endif /* !__XTENSA_EB */
+#endif /* !XCHAL_HAVE_BE */
 #endif /* FLIX3 */
 #endif /* FLIX3 */
 

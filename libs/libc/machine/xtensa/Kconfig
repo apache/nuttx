@@ -27,6 +27,12 @@ config XTENSA_SETJMP
         ---help---
                 Enable optimized XTENSA specific setjmp() library function
 
+config XTENSA_STRCMP
+        bool "Enable optimized strcmp() for XTENSA"
+        select LIBC_ARCH_STRCMP
+        ---help---
+                Enable optimized XTENSA specific strcmp() library function
+
 config XTENSA_STRCPY
         bool "Enable optimized strcpy() for XTENSA"
         select LIBC_ARCH_STRCPY

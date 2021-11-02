@@ -50,6 +50,10 @@ ifeq ($(CONFIG_XTENSA_STRNCPY),y)
 ASRCS += arch_strncpy.S
 endif
 
+ifeq ($(CONFIG_XTENSA_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
+
 DEPPATH += --dep-path machine/xtensa
 VPATH += :machine/xtensa
 
