@@ -255,8 +255,12 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
    */
 
   ret = bcmf_read_reg(sbus, 0, SDIO_CCCR_HIGHSPEED, &value);
+  if (ret != OK)
+    {
+      goto exit_error;
+    }
 
-  if (ret & SDIO_CCCR_HIGHSPEED_SHS)
+  if (value & SDIO_CCCR_HIGHSPEED_SHS)
     {
       /* If the chip confirms its High-Speed capability,
        * enable the High-Speed mode.
@@ -264,6 +268,10 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
 
       ret = bcmf_write_reg(sbus, 0, SDIO_CCCR_HIGHSPEED,
                            SDIO_CCCR_HIGHSPEED_EHS);
+      if (ret != OK)
+        {
+          goto exit_error;
+        }
     }
   else
     {
