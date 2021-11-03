@@ -63,6 +63,10 @@
 
 #define OPT3007_CONVERTEND_MODE    0x0c     /* Interrupt when convert end */
 
+/* Factory test instructions. */
+
+#define OPT3007_SIMPLE_CHECK       0x00      /* Simple check */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -165,6 +169,8 @@ static int opt3007_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                 FAR unsigned int *period_us);
 static int opt3007_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
+static int opt3007_selftest(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg);
 
 /* Sensor poll functions */
 
@@ -178,6 +184,7 @@ static const struct sensor_ops_s g_opt3007_ops =
 {
   .activate = opt3007_activate,             /* Enable/disable sensor. */
   .set_interval = opt3007_set_interval,     /* Set output data period. */
+  .selftest = opt3007_selftest              /* Sensor selftest function */
 };
 
 static const opt3007_registers_t g_opt3007_devreg =
@@ -937,6 +944,59 @@ static int opt3007_activate(FAR struct sensor_lowerhalf_s *lower,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: opt3007_selftest
+ *
+ * Selftest allows for the testing of the mechanical and electrical
+ * portions of the sensors. When the selftest is activated, the
+ * electronics cause the sensors to be actuated and produce an output
+ * signal. The output signal is used to observe the selftest response.
+ * When the selftest response exceeds the min/max values,
+ * the part is deemed to have failed selftest.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with selftest.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int opt3007_selftest(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg)
+{
+  FAR struct opt3007_dev_s * priv = (FAR struct opt3007_dev_s *)lower;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands. */
+
+  switch (arg)
+    {
+      case OPT3007_SIMPLE_CHECK:    /* Simple check tag */
+        {
+          /* Read device ID. */
+
+          ret = opt3007_readdevid(priv, priv->devreg);
+        }
+        break;
+
+      default:                      /* Other cmd tag */
+        {
+          ret = -ENOTTY;
+          snerr("ERROR: The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+  return ret;
 }
 
 /* Sensor poll functions */
