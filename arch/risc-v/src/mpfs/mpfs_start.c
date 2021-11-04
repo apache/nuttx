@@ -32,6 +32,7 @@
 #include "mpfs.h"
 #include "mpfs_clockconfig.h"
 #include "mpfs_ddr.h"
+#include "mpfs_cache.h"
 #include "mpfs_userspace.h"
 #include "riscv_arch.h"
 
@@ -124,6 +125,18 @@ void __mpfs_start(uint32_t mhartid)
   /* Do board initialization */
 
   mpfs_boardinitialize();
+
+  /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
+   * functional.  Consider the caches already configured if running without
+   * the CONFIG_MPFS_BOOTLOADER -option.
+   */
+
+#ifdef CONFIG_MPFS_BOOTLOADER
+  if (mhartid == 0)
+    {
+      mpfs_enable_cache();
+    }
+#endif
 
   showprogress('C');
 
