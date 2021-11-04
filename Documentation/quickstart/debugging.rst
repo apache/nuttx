@@ -59,7 +59,7 @@ start ``openocd`` with the following command:
 
 .. code-block:: console
 
-  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg
+  $ openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg
 
 This will start a ``gdb`` server. Then, start ``gdb`` with:
 
@@ -138,7 +138,7 @@ Finally, to enable NuttX integration, you need to supply an additional ``openocd
 
 .. code-block:: console
 
-  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg -c '$_TARGETNAME configure -rtos nuttx'
+  $ openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c '$_TARGETNAME configure -rtos nuttx'
   
 Since ``openocd`` also needs to know the memory layout of certain datastructures, you need to have ``gdb``
 run the following commands once the ``nuttx`` binary is loaded:
