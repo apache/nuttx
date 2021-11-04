@@ -292,9 +292,9 @@ struct imxrt_dqh_s
 #define IMXRT_EPOUTSET               (0x5555)       /* Even phy endpoint numbers are OUT EPs */
 #define IMXRT_EPINSET                (0xaaaa)       /* Odd endpoint numbers are IN EPs */
 #define IMXRT_EPCTRLSET              (0x0003)       /* EP0 IN/OUT are control endpoints */
-#define IMXRT_EPINTRSET              (0xfffc)       /* Interrupt endpoints */
-#define IMXRT_EPBULKSET              (0xfffc)       /* Bulk endpoints */
-#define IMXRT_EPISOCSET              (0xfffc)       /* Isochronous endpoints */
+#define IMXRT_EPINTRSET              (0x000c)       /* Interrupt endpoints */
+#define IMXRT_EPBULKSET              (0x0ff0)       /* Bulk endpoints */
+#define IMXRT_EPISOCSET              (0xf000)       /* Isochronous endpoints */
 
 /* Maximum packet sizes for endpoints */
 
