@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_timespec_subtract.c
+ * libs/libc/sched/clock_timespec_add.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -27,21 +27,20 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "clock/clock.h"
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  clock_timespec_subtract
+ * Name:  clock_timespec_add
  *
  * Description:
- *   Subtract timespec ts2 from to1 and return the result in ts3.
- *   Zero is returned if the time difference is negative.
+ *   Add timespec ts1 to to2 and return the result in ts3
  *
  * Input Parameters:
- *   ts1 and ts2: The two timespecs to be subtracted (ts1 - ts2)
+ *   ts1 and ts2: The two timespecs to be added
  *   ts3: The location to return the result (may be ts1 or ts2)
  *
  * Returned Value:
@@ -49,37 +48,19 @@
  *
  ****************************************************************************/
 
-void clock_timespec_subtract(FAR const struct timespec *ts1,
-                             FAR const struct timespec *ts2,
-                             FAR struct timespec *ts3)
+void clock_timespec_add(FAR const struct timespec *ts1,
+                        FAR const struct timespec *ts2,
+                        FAR struct timespec *ts3)
 {
-  time_t sec;
-  long nsec;
+  time_t sec = ts1->tv_sec + ts2->tv_sec;
+  long nsec  = ts1->tv_nsec + ts2->tv_nsec;
 
-  if (ts1->tv_sec < ts2->tv_sec)
+  if (nsec >= NSEC_PER_SEC)
     {
-      sec  = 0;
-      nsec = 0;
-    }
-  else if (ts1->tv_sec == ts2->tv_sec && ts1->tv_nsec <= ts2->tv_nsec)
-    {
-      sec  = 0;
-      nsec = 0;
-    }
-  else
-    {
-      sec = ts1->tv_sec - ts2->tv_sec;
-      if (ts1->tv_nsec < ts2->tv_nsec)
-        {
-          nsec = (ts1->tv_nsec + NSEC_PER_SEC) - ts2->tv_nsec;
-          sec--;
-        }
-      else
-        {
-          nsec = ts1->tv_nsec - ts2->tv_nsec;
-        }
+      nsec -= NSEC_PER_SEC;
+      sec++;
     }
 
-  ts3->tv_sec = sec;
+  ts3->tv_sec  = sec;
   ts3->tv_nsec = nsec;
 }

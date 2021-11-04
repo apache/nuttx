@@ -21,6 +21,8 @@
 # Add the sched C files to the build
 
 CSRCS += sched_getprioritymax.c sched_getprioritymin.c
+CSRCS += clock_ticks2time.c clock_time2ticks.c
+CSRCS += clock_timespec_add.c clock_timespec_subtract.c
 
 ifneq ($(CONFIG_CANCELLATION_POINTS),y)
 CSRCS += task_setcanceltype.c task_testcancel.c
