@@ -142,6 +142,10 @@
 #define LPS27HHW_MASK_FIFO_WTM         0xff
 #define LPS27HHW_SHIFT_FIFO_WTM        0
 
+#define LPS27HHW_REG_RPDS_L            0x18      /* RPDS_L register */
+
+#define LPS27HHW_REG_RPDS_H            0x19      /* RPDS_H register */
+
 #define LPS27HHW_REG_F_STATUS1         0x25      /* FIFO_STATUS1 register */
 #define LPS27HHW_MASK_F_STATUS1_FSS    0xff
 #define LPS27HHW_SHIFT_F_STATUS1_FSS   0
@@ -163,6 +167,10 @@
 #define LPS27HHW_REG_F_OUT_PRESS_XL    0x78      /* FIFO_DATA_OUT_PRESS_XL register */
 
 #define LPS27HHW_REG_FIFO_OUT_TEMP_L   0x7b      /* FIFO_DATA_OUT_TEMP_L register */
+
+/* Factory test instructions */
+
+#define LPS27HHW_SIMPLE_CHECK          0x00      /* Simple communication check */
 
 /****************************************************************************
  * Private Types
@@ -314,6 +322,10 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned int *period_us);
 static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
+static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg);
+static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                   unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -329,11 +341,13 @@ static void lps27hhw_worker(FAR void *arg);
 
 static const struct sensor_ops_s g_lps27hhw_ops =
 {
-  .activate = lps27hhw_activate,         /* Enable/disable sensor */
-  .set_interval = lps27hhw_set_interval, /* Set output data period */
+  .activate = lps27hhw_activate,            /* Enable/disable sensor */
+  .set_interval = lps27hhw_set_interval,    /* Set output data period */
 #ifdef CONFIG_LPS27HHW_MODE_INT
-  .batch = lps27hhw_batch                /* Set maximum report latency */
+  .batch = lps27hhw_batch,                  /* Set maximum report latency */
 #endif
+  .selftest = lps27hhw_selftest,            /* Sensor selftest */
+  .set_calibvalue = lps27hhw_set_calibvalue /* Sensor set calibvalue */
 };
 
 /* Sensor ODR */
@@ -1580,6 +1594,107 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
 #endif
 
   priv->dev.activated = enable;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lps27hhw_selftest
+ *
+ * Description:
+ *   Mainly used in the self-test link, including device ID inspection
+ *   and device functional inspection.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg)
+{
+  FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
+  int ret = -ENOTTY;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands */
+
+  switch (arg)
+    {
+      case LPS27HHW_SIMPLE_CHECK: /* Simple communication check */
+        {
+          ret = lps27hhw_readdevid(priv);
+        }
+        break;
+
+      default:                    /* Other cmd tag */
+        {
+          snerr("ERROR: Cmd is not supported: %d\n", ret);
+        }
+        break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lps27hhw_set_calibvalue
+ *
+ * Description:
+ * The calibration value to be written in the dedicated registers. At each
+ * power-on, so that the values read from the sensor are already corrected.
+ * When the device is calibrated, the absolute accuracy will be better than
+ * before.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with calibration value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
+                                   unsigned long arg)
+{
+  FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
+  int ret = -ENOTTY;
+  uint8_t low;
+  uint8_t hi;
+
+  DEBUGASSERT(lower != NULL);
+
+  hi = (uint8_t)((int16_t)arg / 256u);
+  low = (uint8_t)((int16_t)arg - hi * 256u);
+
+  /* Set high and low byte of the sensor offset */
+
+  ret = lps27hhw_writereg(priv, LPS27HHW_REG_RPDS_H, hi);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to set offset high byte\n");
+      return ret;
+    }
+
+  ret = lps27hhw_writereg(priv, LPS27HHW_REG_RPDS_L, low);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to set offset low byte\n");
+    }
 
   return ret;
 }
