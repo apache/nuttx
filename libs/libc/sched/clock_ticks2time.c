@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_ticks2time.c
+ * libs/libc/sched/clock_ticks2time.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 
 #include <time.h>
-#include "clock/clock.h"
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Public Functions
