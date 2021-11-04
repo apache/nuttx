@@ -204,6 +204,14 @@ const struct trace_msg_t g_usb_trace_strings_intdecode[] =
 };
 #endif
 
+#if defined(CONFIG_ARMV7M_DCACHE)
+#  define cache_aligned_alloc(s) kmm_memalign(ARMV7M_DCACHE_LINESIZE,(s))
+#  define CACHE_ALIGNED_DATA     aligned_data(ARMV7M_DCACHE_LINESIZE)
+#else
+#  define cache_aligned_alloc kmm_malloc
+#  define CACHE_ALIGNED_DATA
+#endif
+
 /* Hardware interface *******************************************************/
 
 /* This represents a Endpoint Transfer Descriptor - note these must be 32
@@ -358,7 +366,8 @@ struct imxrt_usbdev_s
   /* IMXRTXX-specific fields */
 
   uint8_t                 ep0state;      /* State of certain EP0 operations */
-  uint8_t                 ep0buf[64];    /* buffer for EP0 short transfers */
+                                         /* buffer for EP0 short transfers */
+  uint8_t                 ep0buf[64] CACHE_ALIGNED_DATA;
   uint8_t                 paddr;         /* Address assigned by SETADDRESS */
   uint8_t                 stalled:1;     /* 1: Protocol stalled */
   uint8_t                 selfpowered:1; /* 1: Device is self powered */
@@ -751,7 +760,6 @@ static inline void imxrt_writedtd(struct imxrt_dtd_s *dtd,
                   (uintptr_t)dtd + sizeof(struct imxrt_dtd_s));
   up_flush_dcache((uintptr_t)data,
                   (uintptr_t)data + nbytes);
-
 }
 
 /****************************************************************************
@@ -2327,13 +2335,13 @@ static void *imxrt_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t bytes)
    */
 
   FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  UNUSED(privep);
 
   usbtrace(TRACE_EPALLOCBUFFER, privep->epphy);
-
 #ifdef CONFIG_USBDEV_DMAMEMORY
   return usbdev_dma_alloc(bytes);
 #else
-  return kmm_malloc(bytes);
+  return cache_aligned_alloc(bytes);
 #endif
 }
 #endif
@@ -2350,6 +2358,7 @@ static void *imxrt_epallocbuffer(FAR struct usbdev_ep_s *ep, uint16_t bytes)
 static void imxrt_epfreebuffer(FAR struct usbdev_ep_s *ep, FAR void *buf)
 {
   FAR struct imxrt_ep_s *privep = (FAR struct imxrt_ep_s *)ep;
+  UNUSED(privep);
 
   usbtrace(TRACE_EPFREEBUFFER, privep->epphy);
 
