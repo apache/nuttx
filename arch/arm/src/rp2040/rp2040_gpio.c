@@ -51,6 +51,42 @@ static xcpt_t g_gpio_irq_handlers[RP2040_GPIO_NUM];
 static FAR void *g_gpio_irq_args[RP2040_GPIO_NUM];
 static int g_gpio_irq_modes[RP2040_GPIO_NUM];
 
+/* GPIO pins function assignment */
+
+static int g_gpio_function[RP2040_GPIO_NUM];
+
+/* GPIO pins function mapping table */
+
+static const int g_gpio_function_mapping_spi[2][5] =
+{
+  {  0,  4, 16, 20, -1 },     /* pin numbers assignable to SPI0 */
+  {  8, 12, 24, 28, -1 },     /* pin numbers assignable to SPI1 */
+};
+
+static const int g_gpio_function_mapping_uart[2][5] =
+{
+  {  0, 12, 16, 28, -1 },     /* pin numbers assignable to UART0 */
+  {  4,  8, 20, 24, -1 },     /* pin numbers assignable to UART1 */
+};
+
+static const int g_gpio_function_mapping_i2c[2][9] =
+{
+  {  0,  4,  8, 12, 16, 20, 24, 28, -1 }, /* pin numbers assignable to I2C0 */
+  {  2,  6, 10, 14, 18, 22, 26, -1, -1 }, /* pin numbers assignable to I2C1 */
+};
+
+static const int g_gpio_function_mapping_pwm[8][3] =
+{
+  {  0, 16, -1 },             /* pin numbers assignable to PWM0 */
+  {  2, 18, -1 },             /* pin numbers assignable to PWM1 */
+  {  4, 20, -1 },             /* pin numbers assignable to PWM2 */
+  {  6, 22, -1 },             /* pin numbers assignable to PWM3 */
+  {  8, 24, -1 },             /* pin numbers assignable to PWM4 */
+  { 10, 26, -1 },             /* pin numbers assignable to PWM5 */
+  { 12, 28, -1 },             /* pin numbers assignable to PWM6 */
+  { 14, -1, -1 },             /* pin numbers assignable to PWM7 */
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -116,6 +152,84 @@ static int rp2040_gpio_interrupt(int irq, void *context, FAR void *arg)
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: r2040_gpio_get_function_pin
+ *
+ * Description:
+ *   Get the GPIO pin number to which the specified function is assigned
+ *
+ ****************************************************************************/
+
+int rp2040_gpio_get_function_pin(uint32_t func, uint32_t port)
+{
+  int i;
+  const int *mapping;
+
+  /* Get GPIO pins function mapping table */
+
+  switch (func)
+    {
+      case RP2040_GPIO_FUNC_SPI:
+        if (port >= 2)
+          {
+            return -1;
+          }
+
+        mapping = g_gpio_function_mapping_spi[port];
+        break;
+
+      case RP2040_GPIO_FUNC_UART:
+        if (port >= 2)
+          {
+            return -1;
+          }
+
+        mapping = g_gpio_function_mapping_uart[port];
+        break;
+
+      case RP2040_GPIO_FUNC_I2C:
+        if (port >= 2)
+          {
+            return -1;
+          }
+
+        mapping = g_gpio_function_mapping_i2c[port];
+        break;
+
+      case RP2040_GPIO_FUNC_PWM:
+        if (port >= 8)
+          {
+            return -1;
+          }
+
+        mapping = g_gpio_function_mapping_pwm[port];
+        break;
+
+      default:
+        return -1;
+    }
+
+  /* Find the specified function in the current assignment */
+
+  for (i = 0; mapping[i] >= 0; i++)
+    {
+      if (g_gpio_function[mapping[i]] == func)
+        {
+          return mapping[i];
+        }
+    }
+
+  return -1;
+}
+
+/****************************************************************************
+ * Name: r2040_gpio_set_function
+ *
+ * Description:
+ *   Assign functions to the specified GPIO pin
+ *
+ ****************************************************************************/
+
 void rp2040_gpio_set_function(uint32_t gpio, uint32_t func)
 {
   DEBUGASSERT(gpio < RP2040_GPIO_NUM);
@@ -126,7 +240,17 @@ void rp2040_gpio_set_function(uint32_t gpio, uint32_t func)
 
   putreg32(func & RP2040_IO_BANK0_GPIO_CTRL_FUNCSEL_MASK,
            RP2040_IO_BANK0_GPIO_CTRL(gpio));
+
+  g_gpio_function[gpio] = func;
 }
+
+/****************************************************************************
+ * Name: r2040_gpio_set_pulls
+ *
+ * Description:
+ *   Set pull-up or pull-down to the specified GPIO pin
+ *
+ ****************************************************************************/
 
 void rp2040_gpio_set_pulls(uint32_t gpio, int up, int down)
 {
@@ -137,6 +261,14 @@ void rp2040_gpio_set_pulls(uint32_t gpio, int up, int down)
                 RP2040_PADS_BANK0_GPIO_PUE | RP2040_PADS_BANK0_GPIO_PDE,
                 RP2040_PADS_BANK0_GPIO(gpio));
 }
+
+/****************************************************************************
+ * Name: r2040_gpio_init
+ *
+ * Description:
+ *   Initialize software-controlled GPIO function
+ *
+ ****************************************************************************/
 
 void rp2040_gpio_init(uint32_t gpio)
 {
@@ -227,5 +359,23 @@ void rp2040_gpio_disable_irq(uint32_t gpio)
 
       reg = RP2040_IO_BANK0_PROC_INTE(gpio, 0);
       clrbits_reg32(0xf << ((gpio % 8) * 4), reg);
+    }
+}
+
+/****************************************************************************
+ * Name: r2040_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO function management
+ *
+ ****************************************************************************/
+
+void rp2040_gpio_initialize(void)
+{
+  int i;
+
+  for (i = 0; i < RP2040_GPIO_NUM; i++)
+    {
+      g_gpio_function[i] = RP2040_GPIO_FUNC_NULL;
     }
 }
