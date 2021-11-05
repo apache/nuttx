@@ -57,7 +57,7 @@
 off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 {
   FAR struct inode *inode;
-  int ret;
+  off_t ret;
 
   DEBUGASSERT(filep);
   inode =  filep->f_inode;
@@ -66,7 +66,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 
   if (inode && inode->u.i_ops && inode->u.i_ops->seek)
     {
-      ret = (int)inode->u.i_ops->seek(filep, offset, whence);
+      ret = inode->u.i_ops->seek(filep, offset, whence);
       if (ret < 0)
         {
           return ret;
@@ -123,7 +123,7 @@ off_t file_seek(FAR struct file *filep, off_t offset, int whence)
 off_t nx_seek(int fd, off_t offset, int whence)
 {
   FAR struct file *filep;
-  int ret;
+  off_t ret;
 
   /* Get the file structure corresponding to the file descriptor. */
 
