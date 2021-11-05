@@ -193,7 +193,7 @@ static const struct spi_ops_s mpfs_spi_ops =
     .lock             = mpfs_spi_lock,
     .select           = mpfs_spi_select,
     .setfrequency     = mpfs_spi_setfrequency,
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
     .setdelay         = mpfs_spi_setdelay,
 #endif
     .setmode          = mpfs_spi_setmode,
