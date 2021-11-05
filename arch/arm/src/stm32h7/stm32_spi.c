@@ -313,6 +313,11 @@ static inline void spi_dmatxstart(FAR struct stm32_spidev_s *priv);
 static int         spi_lock(FAR struct spi_dev_s *dev, bool lock);
 static uint32_t    spi_setfrequency(FAR struct spi_dev_s *dev,
                                     uint32_t frequency);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+static int         spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
+                                uint32_t stopdelay, uint32_t csdelay,
+                                uint32_t ifdelay);
+#endif
 static void        spi_setmode(FAR struct spi_dev_s *dev,
                                enum spi_mode_e mode);
 static void        spi_setbits(FAR struct spi_dev_s *dev, int nbits);
@@ -355,6 +360,9 @@ static const struct spi_ops_s g_sp1iops =
   .lock              = spi_lock,
   .select            = stm32_spi1select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -421,6 +429,9 @@ static const struct spi_ops_s g_sp2iops =
   .lock              = spi_lock,
   .select            = stm32_spi2select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -487,6 +498,9 @@ static const struct spi_ops_s g_sp3iops =
   .lock              = spi_lock,
   .select            = stm32_spi3select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -553,6 +567,9 @@ static const struct spi_ops_s g_sp4iops =
   .lock              = spi_lock,
   .select            = stm32_spi4select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -619,6 +636,9 @@ static const struct spi_ops_s g_sp5iops =
   .lock              = spi_lock,
   .select            = stm32_spi5select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -685,6 +705,9 @@ static const struct spi_ops_s g_sp6iops =
   .lock              = spi_lock,
   .select            = stm32_spi6select,
   .setfrequency      = spi_setfrequency,
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  .setdelay          = spi_setdelay,
+#endif
   .setmode           = spi_setmode,
   .setbits           = spi_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
@@ -1539,6 +1562,54 @@ static uint32_t spi_setfrequency(FAR struct spi_dev_s *dev,
 
   return priv->actual;
 }
+
+/****************************************************************************
+ * Name: spi_setdelay
+ *
+ * Description:
+ *   Set the SPI Delays in nanoseconds. Optional.
+ *
+ * Input Parameters:
+ *   dev        - Device-specific state data
+ *   startdelay - The delay between CS active and first CLK
+ *   stopdelay  - The delay between last CLK and CS inactive
+ *   csdelay    - The delay between CS inactive and CS active again
+ *   ifdelay    - The delay between frames
+ *
+ * Returned Value:
+ *   Returns zero (OK) on success; a negated errno value is return on any
+ *   failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DELAY_CONTROL
+static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
+                        uint32_t stopdelay, uint32_t csdelay,
+                         uint32_t ifdelay)
+{
+  FAR struct stm32_spidev_s *priv = (FAR struct stm32_spidev_s *)dev;
+  uint32_t setbits  = 0;
+  uint32_t clrbits  = SPI_CFG2_MSSI_MASK | SPI_CFG2_MIDI_MASK;
+  uint32_t nsperclk = NSEC_PER_SEC / priv->actual;
+
+  startdelay /= nsperclk;
+  ifdelay    /= nsperclk;
+
+  setbits = ((ifdelay << SPI_CFG2_MIDI_SHIFT) & SPI_CFG2_MIDI_MASK) |
+            ((startdelay << SPI_CFG2_MSSI_SHIFT) & SPI_CFG2_MSSI_MASK);
+
+  spi_enable(priv, false);
+
+  /* Change SPI mode */
+
+  spi_modifyreg(priv, STM32_SPI_CFG2_OFFSET, clrbits, setbits);
+
+  /* Re-enable SPI */
+
+  spi_enable(priv, true);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Name: spi_setmode
