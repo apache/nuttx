@@ -72,8 +72,8 @@ int spi_transfer(FAR struct spi_dev_s *spi, FAR struct spi_sequence_s *seq)
 
   SPI_SETFREQUENCY(spi, seq->frequency);
 
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
-  ret = SPI_SETDELAY(spi, seq->a, seq->b, seq->c);
+#ifdef CONFIG_SPI_DELAY_CONTROL
+  ret = SPI_SETDELAY(spi, seq->a, seq->b, seq->c, seq->i);
   if (ret < 0)
     {
       spierr("ERROR: SPI_SETDELAY failed: %d\n", ret);

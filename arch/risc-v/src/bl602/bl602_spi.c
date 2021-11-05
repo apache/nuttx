@@ -196,7 +196,7 @@ static const struct spi_ops_s bl602_spi_ops =
     .lock = bl602_spi_lock,
     .select = bl602_spi_select,
     .setfrequency = bl602_spi_setfrequency,
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
     .setdelay = bl602_spi_setdelay,
 #endif
     .setmode = bl602_spi_setmode,
@@ -518,6 +518,7 @@ static uint32_t bl602_spi_setfrequency(struct spi_dev_s *dev,
  *   startdelay - The delay between CS active and first CLK
  *   stopdelay  - The delay between last CLK and CS inactive
  *   csdelay    - The delay between CS inactive and CS active again
+ *   ifdelay    - The delay between frames
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value is return on any
@@ -525,9 +526,10 @@ static uint32_t bl602_spi_setfrequency(struct spi_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
 static int bl602_spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
-                                uint32_t stopdelay, uint32_t csdelay)
+                                uint32_t stopdelay, uint32_t csdelay,
+                                uint32_t ifdelay)
 {
   spierr("SPI CS delay control not supported\n");
   DEBUGPANIC();
