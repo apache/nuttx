@@ -2332,7 +2332,7 @@ static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t status;
   int32_t timeout;
-  uint32_t waitbits;
+  uint32_t waitbits = 0;
 
   mcinfo("cmd: %08" PRIx32 "\n", cmd);
 
