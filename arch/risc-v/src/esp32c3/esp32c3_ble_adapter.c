@@ -1328,7 +1328,7 @@ static void *malloc_internal_wrapper(size_t size)
 
 static int read_mac_wrapper(uint8_t mac[6])
 {
-  return 0;
+  return esp_read_mac(mac, ESP_MAC_BT);
 }
 
 /****************************************************************************

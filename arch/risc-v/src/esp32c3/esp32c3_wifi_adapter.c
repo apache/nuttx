@@ -84,9 +84,6 @@
 #  error "on_exit() API must be enabled for deallocating Wi-Fi resources"
 #endif
 
-#define MAC_ADDR0_REG (DR_REG_EFUSE_BASE + 0x044)
-#define MAC_ADDR1_REG (DR_REG_EFUSE_BASE + 0x048)
-
 #define PHY_RF_MASK   ((1 << PHY_BT_MODULE) | (1 << PHY_WIFI_MODULE))
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
@@ -2650,66 +2647,6 @@ static void wifi_apb80m_release(void)
 static int wifi_phy_update_country_info(const char *country)
 {
   return -1;
-}
-
-/****************************************************************************
- * Name: esp_read_mac
- *
- * Description:
- *   Read MAC address from efuse
- *
- * Input Parameters:
- *   mac  - MAC address buffer pointer
- *   type - MAC address type
- *
- * Returned Value:
- *   0 if success or -1 if fail
- *
- ****************************************************************************/
-
-esp_err_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
-{
-  uint32_t regval[2];
-  uint8_t tmp;
-  uint8_t *data = (uint8_t *)regval;
-  int i;
-
-  if (type > ESP_MAC_WIFI_SOFTAP)
-    {
-      wlerr("ERROR: Input type is error=%d\n", type);
-      return -1;
-    }
-
-  regval[0] = getreg32(MAC_ADDR0_REG);
-  regval[1] = getreg32(MAC_ADDR1_REG);
-
-  for (i = 0; i < MAC_LEN; i++)
-    {
-      mac[i] = data[5 - i];
-    }
-
-  if (type == ESP_MAC_WIFI_SOFTAP)
-    {
-      tmp = mac[0];
-      for (i = 0; i < 64; i++)
-        {
-          mac[0] = tmp | 0x02;
-          mac[0] ^= i << 2;
-
-          if (mac[0] != tmp)
-            {
-              break;
-            }
-        }
-
-      if (i >= 64)
-        {
-          wlerr("ERROR: Failed to generate softAP MAC\n");
-          return -1;
-        }
-    }
-
-  return 0;
 }
 
 /****************************************************************************
