@@ -70,6 +70,13 @@
 
 #define GPIO_BTN_USER  (GPIO_INPUT|GPIO_FLOAT|GPIO_EXTI|GPIO_PORTC|GPIO_PIN10)
 
+#ifdef CONFIG_SENSORS_QENCODER
+/* Qenco index pin */
+
+#  define QENCODER_TIM4_INDEX_GPIO (GPIO_INPUT | GPIO_FLOAT |\
+                                    GPIO_EXTI | GPIO_PORTB | GPIO_PIN8)
+#endif
+
 #ifdef CONFIG_SENSORS_HALL3PHASE
 /* GPIO pins used by the 3-phase Hall effect sensor */
 
