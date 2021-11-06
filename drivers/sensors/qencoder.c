@@ -328,6 +328,24 @@ static int qe_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      /* QEIOC_SETINDEX - Set the index pin position
+       *   Argument: uint32
+       */
+
+      case QEIOC_SETINDEX:
+        {
+          uint32_t indexpos = (uint32_t)arg;
+          if (lower->ops->setindex != NULL)
+            {
+              ret = lower->ops->setindex(lower, indexpos);
+            }
+          else
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
+
       /* Any unrecognized IOCTL commands might be platform-specific ioctl
        * commands
        */
