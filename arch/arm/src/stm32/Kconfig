@@ -11166,6 +11166,10 @@ config STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
 	default n
 
+config STM32_QENCODER_INDEX_PIN
+	bool "Enable QEncoder timers support for index pin"
+	default n
+
 config STM32_TIM1_QE
 	bool "TIM1 QE"
 	default n
