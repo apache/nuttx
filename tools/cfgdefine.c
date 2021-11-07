@@ -51,7 +51,6 @@ static const char *dequote_list[] =
   "CONFIG_DEBUG_OPTLEVEL",                /* Custom debug level */
   "CONFIG_EXECFUNCS_NSYMBOLS_VAR",        /* Variable holding number of symbols in the table */
   "CONFIG_EXECFUNCS_SYMTAB_ARRAY",        /* Symbol table array used by exec[l|v] */
-  "CONFIG_INIT_ARGS",                     /* Argument list of entry point */
   "CONFIG_INIT_SYMTAB",                   /* Global symbol table */
   "CONFIG_INIT_NEXPORTS",                 /* Global symbol table size */
   "CONFIG_MODLIB_SYMTAB_ARRAY",           /* Symbol table array used by modlib functions */
