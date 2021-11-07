@@ -166,6 +166,10 @@ ifeq ($(CONFIG_SAMV7_MCAN),y)
 CHIP_CSRCS += sam_mcan.c
 endif
 
+ifeq ($(CONFIG_SAMV7_AFEC),y)
+CHIP_CSRCS += sam_afec.c
+endif
+
 ifeq ($(CONFIG_SAMV7_USBDEVHS),y)
 CHIP_CSRCS += sam_usbdevhs.c
 endif

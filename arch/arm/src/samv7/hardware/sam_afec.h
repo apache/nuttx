@@ -222,7 +222,9 @@
 #  define AFEC_EMR_CMPFILTER(n)      ((uint32_t)(n) << AFEC_EMR_CMPFILTER_SHIFT)
 #define AFEC_EMR_RES_SHIFT           (16)      /* Bits 16-18: Resolution */
 #define AFEC_EMR_RES_MASK            (7 << AFEC_EMR_RES_SHIFT)
+#define AFEC_EMR_RES(n)              ((uint32_t)(n) << AFEC_EMR_RES_SHIFT)
 #  define AFEC_EMR_RES_NOAVG         (0 << AFEC_EMR_RES_SHIFT) /* 12-bit resolution, AFEC sample rate is maximum (no averaging) */
+#  define AFEC_EMR_RES_LOWRES        (1 << AFEC_EMR_RES_SHIFT) /* 10-bit resolution, AFEC sample rate is maximum (no averaging) */
 #  define AFEC_EMR_RES_OSR4          (2 << AFEC_EMR_RES_SHIFT) /* 13-bit resolution, AFEC sample rate divided by 4 (averaging) */
 #  define AFEC_EMR_RES_OSR16         (3 << AFEC_EMR_RES_SHIFT) /* 14-bit resolution, AFEC sample rate divided by 16 (averaging) */
 #  define AFEC_EMR_RES_OSR64         (4 << AFEC_EMR_RES_SHIFT) /* 15-bit resolution, AFEC sample rate divided by 64 (averaging) */
@@ -368,10 +370,10 @@
 /* Compare Window Register */
 
 #define AFEC_CWR_LOWTHRES_SHIFT      (0)       /* Bits 0-11: Low Threshold */
-#define AFEC_CWR_LOWTHRES_MASK       (0xfff << AFEC_CWR_LOWTHRES_SHIFT)
+#define AFEC_CWR_LOWTHRES_MASK       (0xffff << AFEC_CWR_LOWTHRES_SHIFT)
 #  define AFEC_CWR_LOWTHRES(n)       ((uint32_t)(n) << AFEC_CWR_LOWTHRES_SHIFT)
 #define AFEC_CWR_HIGHTHRES_SHIFT     (16)      /* Bits 16-27: High Threshold */
-#define AFEC_CWR_HIGHTHRES_MASK      (0xfff << AFEC_CWR_LOWTHRES_SHIFT)
+#define AFEC_CWR_HIGHTHRES_MASK      (0xffff << AFEC_CWR_LOWTHRES_SHIFT)
 #  define AFEC_CWR_HIGHTHRES(n)K     ((uint32_t)(n) << AFEC_CWR_LOWTHRES_SHIFT)
 
 /* Channel Gain Register */
@@ -453,7 +455,7 @@
 /* Channel Selection Register */
 
 #define AFEC_CSELR_CSEL_SHIFT        (0)       /* Bits 0-3: Channel Selection */
-#define AFEC_CSELR_CSEL_MASK         (15 << AFEC_CSELR_CSEL_SHIFT)
+#define AFEC_CSELR_CSEL_MASK         (0xf << AFEC_CSELR_CSEL_SHIFT)
 #  define AFEC_CSELR_CSEL(n)         ((uint32_t)(n) << AFEC_CSELR_CSEL_SHIFT)
 
 /* Channel Data Register */
@@ -462,7 +464,7 @@
 
 /* Channel Offset Compensation Register */
 
-#define AFEC_COCR_MASK               (0x00000fff) /* Bits 0-12: Analog Offset */
+#define AFEC_COCR_MASK               (0x000003ff) /* Bits 0-9: Analog Offset */
 
 /* Temperature Sensor Mode Register */
 
@@ -487,7 +489,7 @@
 
 #define AFEC_ACR_PGA0EN              (1 << 2)  /* Bit 2: PGA0 Enable */
 #define AFEC_ACR_PGA1EN              (1 << 3)  /* Bit 3: PGA1 Enable */
-#define AFEC_ACR_IBCTL_SHIFT         (9)       /* Bits 8-9: AFEC Bias Current Control */
+#define AFEC_ACR_IBCTL_SHIFT         (8)       /* Bits 8-9: AFEC Bias Current Control */
 #define AFEC_ACR_IBCTL_MASK          (3 << AFEC_ACR_IBCTL_SHIFT)
 #  define AFEC_ACR_IBCTL(n)          ((uint32_t)(n) << AFEC_ACR_IBCTL_SHIFT)
 

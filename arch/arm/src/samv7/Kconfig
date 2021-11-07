@@ -196,6 +196,10 @@ config SAMV7_HAVE_MCAN1
 	bool
 	default n
 
+config SAMV7_AFEC
+	bool
+	default n
+
 config SAMV7_DAC
 	bool
 	default n
@@ -313,10 +317,42 @@ config SAMV7_ADC
 config SAMV7_AFEC0
 	bool "Analog Front End 0 (AFEC0)"
 	default n
+	select SAMV7_AFEC
+
+if SAMV7_AFEC0
+
+config SAMV7_AFEC0_RES
+	int "AFEC0 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+endif
 
 config SAMV7_AFEC1
 	bool "Analog Front End 1 (AFEC1)"
 	default n
+	select SAMV7_AFEC
+
+if SAMV7_AFEC1
+
+config SAMV7_AFEC1_RES
+	int "AFEC1 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+endif
 
 config SAMV7_MCAN0
 	bool "CAN controller 0 (MCAN0)"
