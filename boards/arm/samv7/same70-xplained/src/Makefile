@@ -81,6 +81,10 @@ endif
 endif
 endif
 
+ifeq ($(CONFIG_SAMV7_AFEC),y)
+CSRCS += sam_afec.c
+endif
+
 ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
 CSRCS += sam_dac.c
 endif
