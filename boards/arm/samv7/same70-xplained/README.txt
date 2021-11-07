@@ -1311,6 +1311,12 @@ NOTES:
 Configuration sub-directories
 -----------------------------
 
+  adc
+
+    This is a basic nsh configuration (se below) with added example for
+    ADC (AFEC) driver. Data can be read through channel AFE0_AD0 by
+    running application "adc" in NuttShell.
+
   mrf24j40-starhub
 
     This configuration implements a hub node in a 6LoWPAN start network.
