@@ -106,7 +106,7 @@ static char *find_value_end(char *ptr)
     {
       if (*ptr == '"')
         {
-          do ptr++; while (*ptr && *ptr != '"');
+          do ptr++; while (*ptr && (*ptr != '"' || *(ptr - 1) == '\\'));
           if (*ptr) ptr++;
         }
       else
