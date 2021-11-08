@@ -24,10 +24,10 @@ CSRCS = sam_boot.c
 
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_spi.c
-else
-ifeq ($(CONFIG_SAMA5_SPI1),y)
-CSRCS += sam_spi.c
 endif
+
+ifeq ($(CONFIG_SAMA5_FLEXCOM_SPI),y)
+CSRCS += sam_flexcom_spi.c
 endif
 
 ifeq ($(CONFIG_SAMA5_DDRCS),y)
@@ -35,7 +35,7 @@ CSRCS += sam_sdram.c
 endif
 
 
-ifeq ($(CONFIG_MTD_AT25),y)
+ifeq ($(CONFIG_MTD_M25P),y)
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_at25.c
 endif
