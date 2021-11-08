@@ -203,7 +203,6 @@ static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct touch_upperhalf_s *upper = inode->i_private;
-  FAR struct touch_lowerhalf_s *lower = upper->lower;
   int ret;
 
   if (!buffer || !len)
@@ -279,8 +278,7 @@ static int touch_poll(FAR struct file *filep,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct touch_upperhalf_s *upper = inode->i_private;
-  pollevent_t eventset;
-  int semcount;
+  pollevent_t eventset = 0;
   int ret;
   int i;
 
