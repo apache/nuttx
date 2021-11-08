@@ -46,11 +46,11 @@ define _examine_arch
   gdb.execute("set $_target_arch = \"i386:x86-64\"")
 
   # NOTE: we assume that sim has sim_bringup function
-  python if (type(gdb.lookup_global_symbol("sim_bringup")) is gdb.Symbol \
+  python if (type(gdb.lookup_static_symbol("sim_start")) is gdb.Symbol \
              and _target_arch.name() == 'i386') : \
   gdb.execute("set $_target_arch=\"sim:x86\"")
 
-  python if (type(gdb.lookup_global_symbol("sim_bringup")) is gdb.Symbol \
+  python if (type(gdb.lookup_static_symbol("sim_start")) is gdb.Symbol \
              and _target_arch.name() == 'i386:x86-64') : \
   gdb.execute("set $_target_arch=\"sim:x86-64\"")
 end
