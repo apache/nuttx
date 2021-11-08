@@ -38,6 +38,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mm/circbuf.h>
 #include <nuttx/semaphore.h>
+#include <time.h>
 
 #ifdef CONFIG_INPUT
 
@@ -105,13 +106,14 @@
 
 struct touch_point_s
 {
-  uint8_t  id;       /* Unique identifies contact; Same in all reports for the contact */
-  uint8_t  flags;    /* See TOUCH_* definitions above */
-  int16_t  x;        /* X coordinate of the touch point (uncalibrated) */
-  int16_t  y;        /* Y coordinate of the touch point (uncalibrated) */
-  int16_t  h;        /* Height of touch point (uncalibrated) */
-  int16_t  w;        /* Width of touch point (uncalibrated) */
-  uint16_t pressure; /* Touch pressure */
+  uint8_t  id;        /* Unique identifies contact; Same in all reports for the contact */
+  uint8_t  flags;     /* See TOUCH_* definitions above */
+  int16_t  x;         /* X coordinate of the touch point (uncalibrated) */
+  int16_t  y;         /* Y coordinate of the touch point (uncalibrated) */
+  int16_t  h;         /* Height of touch point (uncalibrated) */
+  int16_t  w;         /* Width of touch point (uncalibrated) */
+  uint16_t pressure;  /* Touch pressure */
+  uint64_t timestamp; /* Touch event time stamp, in microseconds */
 };
 
 /* The typical touchscreen driver is a read-only, input character device
@@ -163,6 +165,22 @@ struct touch_lowerhalf_s
   CODE int (*control)(FAR struct touch_lowerhalf_s *lower,
                       int cmd, unsigned long arg);
 };
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline uint64_t touch_get_time(void)
+{
+  struct timespec ts;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+  clock_gettime(CLOCK_REALTIME, &ts);
+#endif
+  return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
+}
 
 /****************************************************************************
  * Public Function Prototypes
