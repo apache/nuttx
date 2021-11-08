@@ -33,9 +33,10 @@
 
 #include <arch/irq.h>
 #include <nuttx/irq.h>
-
+#include "sam_spi.h"
+#include "sam_flexcom_spi.h"
 #include "hardware/sam_pinmap.h"
-#include "sam_pio.h"
+//#include "sam_pio.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -46,9 +47,12 @@
 //#define HAVE_USBHOST    1
 //#define HAVE_USBDEV     1
 //#define HAVE_USBMONITOR 1
-//#define HAVE_AT25		1
+#define HAVE_M25P 1
+#define HAVE_AT25 1
 //#define HAVE_CAN		1
 //#define HAVE_PWM		1
+#define HAVE_EGT 1
+#define HAVE_BLUETOOTH 1
 
 #define BOARD_CRYSTAL_FREQUENCY_12MHZ  0
 #define BOARD_CRYSTAL_FREQUENCY_16MHZ  1
@@ -57,55 +61,61 @@
 
 #define BOARD_CRYSTAL_FREQUENCY BOARD_CRYSTAL_FREQUENCY_24MHZ
 
-/* AT25 Serial FLASH */
+/* M25P Serial FLASH */
 
-/* Can't support the AT25 device if it SPI0 or AT25 support are not enabled */
+/* Can't support the M25P device if SPI0 or M25P support are not enabled */
 
-#if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_AT25)
-#  undef HAVE_AT25
+#if !defined(CONFIG_SAMA5_SPI0) || !defined(CONFIG_MTD_M25P)
+#  undef HAVE_M25P
+#  warning HAVEM25P has been undefined
 #endif
 
-/* Can't support AT25 features if mountpoints are disabled or if we were not
- * asked to mount the AT25 part
+/* Can't support M25P features if mountpoints are disabled or if we were not
+ * asked to mount the M25P part
  */
-
-#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D3XPLAINED_AT25_AUTOMOUNT)
-#  undef HAVE_AT25
+#if 0 /* while I work out what file system!) */
+#if defined(CONFIG_DISABLE_MOUNTPOINT) || !defined(CONFIG_SAMA5D27_M25P_AUTOMOUNT)
+#  undef HAVE_M25P
+#  warning HAVEM25P has been undefined
 #endif
 
-/* If we are going to mount the AT25, then they user must also have told
+/* If we are going to mount the M25P, then they user must also have told
  * us what to do with it by setting one of these.
  */
 
 #ifndef CONFIG_FS_NXFFS
-#  undef CONFIG_SAMA5D3XPLAINED_AT25_NXFFS
+#  undef CONFIG_SAMA5D27_M25P_NXFFS
+#  warning HAVEM25P has been undefined
 #endif
 
-#if !defined(CONFIG_SAMA5D2XULT_AT25_FTL) && !defined(CONFIG_SAMA5D2XULT_AT25_NXFFS)
-#  undef HAVE_AT25
+#if !defined(CONFIG_SAMA5D27_M25P_FTL) && !defined(CONFIG_SAMA5D27_M25P_NXFFS)
+#  undef HAVE_M25P
+#  warning HAVEM25P has been undefined
 #endif
 
-#if defined(CONFIG_SAMA5D2XULT_AT25_FTL) && defined(CONFIG_SAMA5D2XULT_AT25_NXFFS)
-#  warning Both CONFIG_SAMA5D2XULT_AT25_FTL and CONFIG_SAMA5D2XULT_AT25_NXFFS are set
-#  warning Ignoring CONFIG_SAMA5D2XULT_AT25_NXFFS
-#  undef CONFIG_SAMA5D2XULT_AT25_NXFFS
+#if defined(CONFIG_SAMA5D27_M25P_FTL) && defined(CONFIG_SAMA5D27_M25P_NXFFS)
+#  warning Both CONFIG_SAMA5D2XULT_M25P_FTL and CONFIG_SAMA5D2XULT_M25P_NXFFS are set
+#  warning Ignoring CONFIG_SAMA5D2XULT_M25P_NXFFS
+#  undef CONFIG_SAMA5D2XULT_M25P_NXFFS
+#endif
 #endif
 
 /* Assign minor device numbers.  For example, if we also use MINOR number 0
- * for the AT25, it should appear as /dev/mtdblock0
+ * for the M25P, it should appear as /dev/mtdblock0
  */
 
 #define _NAND_MINOR 0
 
 #ifdef HAVE_NAND
 #  define NAND_MINOR  _NAND_MINOR
-#  define _AT25_MINOR (_NAND_MINOR+1)
+#  define _M25P_MINOR (_NAND_MINOR+1)
 #else
-#  define _AT25_MINOR _NAND_MINOR
+#  define _M25P_MINOR _NAND_MINOR
 #endif
 
-#ifdef HAVE_AT25
-#  define AT25_MINOR  _AT25_MINOR
+#ifdef HAVE_M25P
+#  define M25P_MINOR  _M25P_MINOR
+int sam_at25_automount(int minor);
 #endif
 
 
@@ -280,6 +290,52 @@ void board_can_pio_control_initialize(void);
        PIO_CFG_DEFAULT | PIO_OUTPUT_SET | PIO_PORT_PIOA | PIO_PIN13)
 int sam_can_setup(void);
 #endif
+
+#if defined(HAVE_AT25) 
+#define PIO_AT25_NPCS0 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                        PIO_PORT_PIOA | PIO_PIN17)
+#define AT25_PORT       SPI0_CS0
+#endif
+
+#if defined(HAVE_M25P)
+#define PIO_M25P_NPCS1 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
+                        PIO_PORT_PIOA | PIO_PIN18)
+#define M25P_PORT       SPI0_CS1
+#endif
+
+#if defined (HAVE_EGT)
+# if !defined (CONFIG_SAMA5_FLEXCOM4_SPI)
+#   warning CONFIG_SAMA5_FLEXCOM4_SPI was not defined so HAVE_EGT has been undefined
+#   undef HAVE_EGT
+# else
+#   define PIO_FLEXCOM4_SPI_MISO PIO_FLEXCOM4_IO1_1 
+#   define PIO_FLEXCOM4_SPI_MOSI PIO_FLEXCOM4_IO0_1 
+#   define PIO_FLEXCOM4_SPI_SPCK PIO_FLEXCOM4_IO2_1 
+#   define PIO_EGT_NPCS1 PIO_FLEXCOM4_IO4_1 
+
+#   define EGT_PORT FLEXCOM4_SPI_CS1
+# endif
+#endif
+
+#if defined (HAVE_BLUETOOTH)
+# if !defined (CONFIG_SAMA5_FLEXCOM1_SPI)
+#   warning CONFIG_SAMA5_FLEXCOM1_SPI was not defined so HAVE_BLUETOOTH has been undefined
+#   undef HAVE_BLUETOOTH
+# else
+#   define PIO_FLEXCOM1_SPI_MISO PIO_FLEXCOM1_IO1 
+#   define PIO_FLEXCOM1_SPI_MOSI PIO_FLEXCOM1_IO0 
+#   define PIO_FLEXCOM1_SPI_SPCK PIO_FLEXCOM1_IO2 
+#   define PIO_BLUETOOTH_NPCS0 PIO_FLEXCOM1_IO3 
+
+#   define BLUETOOTH_PORT FLEXCOM1_SPI_CS0
+# endif
+#endif
+
+
+void sam_spidev_initialize(void);
+void sam_flexcom_spidev_initialize(void);
+
+
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_SAMA5_JTI_TOUCAN2_SRC_JTI_TOUCAN2_H */
