@@ -85,5 +85,13 @@ struct polaris_chip_info
   uint8_t cut_id;
 };
 
+#define WLC_HEALTH_TEMP_MAX  80
+#define WLC_HEALTH_TEMP_MIN  10
+
+#define WLC_HEALTH_UNKNOWN   -1
+#define WLC_HEALTH_GOOD      0
+#define WLC_HEALTH_OVERHEAT  1
+#define WLC_HEALTH_OVERCOLD  2
+
 #endif /* __POLARIS_H */
 

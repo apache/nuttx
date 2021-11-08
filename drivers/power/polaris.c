@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <unistd.h>
 
 #include <nuttx/config.h>
@@ -47,6 +48,7 @@
 
 #include "polaris.h"
 #include "polaris_nvm.c"
+#include "polaris_reg.h"
 
 #define PAGE_SIZE 256
 #define NO_DEBUG
@@ -75,59 +77,6 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
 static void stwlc38_worker(FAR void *arg);
-
-static const struct battery_charger_operations_s g_stwlc38ops =
-{
-  stwlc38_state,
-  stwlc38_health,
-  stwlc38_online,
-  stwlc38_voltage,
-  stwlc38_current,
-  stwlc38_input_current,
-  stwlc38_operate,
-};
-
-static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
-                          FAR int *status)
-{
-  return ERROR;
-}
-
-static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
-                           FAR int *health)
-{
-  return ERROR;
-}
-
-static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
-                           FAR bool *status)
-{
-  return ERROR;
-}
-
-static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
-                            FAR int value)
-{
-  return ERROR;
-}
-
-static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
-                            FAR int value)
-{
-  return ERROR;
-}
-
-static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
-                                  FAR int value)
-{
-  return ERROR;
-}
-
-static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
-                            uintptr_t param)
-{
-  return ERROR;
-}
 
 struct stwlc38_dev_s
 {
@@ -850,6 +799,155 @@ static void stwlc38_worker(FAR void *arg)
     }
 }
 
+static const struct battery_charger_operations_s g_stwlc38ops =
+{
+  stwlc38_state,
+  stwlc38_health,
+  stwlc38_online,
+  stwlc38_voltage,
+  stwlc38_current,
+  stwlc38_input_current,
+  stwlc38_operate,
+};
+
+static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
+                          FAR int *status)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int err;
+  uint8_t reg_value = 0;
+
+  /* return device operate mode */
+
+  err = fw_i2c_read(priv, FWREG_OP_MODE_ADDR, &reg_value, 1);
+  if (err != OK)
+    {
+      *status = -1;
+      return err;
+    }
+
+  *status = (int)reg_value;
+
+  return OK;
+}
+
+static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
+                           FAR int *health)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int err;
+  uint16_t reg_value = 0;
+  uint16_t temp;
+
+  err = fw_i2c_read(priv, WLC_RX_CHIP_TEMP_REG, &reg_value, 2);
+  if (err != OK)
+    {
+      *health = -1;
+      return err;
+    }
+
+  temp = reg_value / 10;
+
+  if (temp < 0)
+    *health = WLC_HEALTH_UNKNOWN;
+  else if (temp > WLC_HEALTH_TEMP_MAX)
+    *health = WLC_HEALTH_OVERHEAT;
+  else if (temp < WLC_HEALTH_TEMP_MIN)
+    *health = WLC_HEALTH_OVERCOLD;
+  else
+    *health = WLC_HEALTH_GOOD;
+
+  return OK;
+}
+
+static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
+                           FAR bool *status)
+{
+  *status = true;
+  return OK;
+}
+
+static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
+                            FAR int value)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int err;
+  uint16_t reg_value;
+
+  reg_value = (uint16_t)(value / 100 - 5);
+
+  err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2);
+  if (err != OK) return err;
+
+  return OK;
+}
+
+static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
+                            FAR int value)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int err;
+  uint8_t reg_value;
+
+  reg_value = (uint8_t)(value / 100);
+
+  err = fw_i2c_write(priv, WLC_RX_ILIM_SET_REG, &reg_value, 1);
+  if (err != OK) return err;
+
+  return OK;
+}
+
+static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
+                                  FAR int value)
+{
+  return OK;
+}
+
+static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
+                            uintptr_t param)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  FAR struct batio_operate_msg_s *msg =
+    (FAR struct batio_operate_msg_s *) param;
+  int op;
+  int value;
+  int ret = OK;
+  uint8_t reg_value = 0;
+
+  op = msg->operate_type;
+  value = (int)msg->u32;
+  switch (op)
+    {
+      case BATIO_OPRTN_RESET:
+
+        /* FW system reset */
+
+        reg_value = 0x40;
+        ret = fw_i2c_write(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1);
+
+  /**************************************************************************
+   * system reset:
+   * the follow includes a workaround
+   * it should return error when meeting i2c tramsfer failed, but if so, the
+   * procedure logic will meet a difficult.
+   * therefore, print err info and return ok. the workaround is only to hint
+   * the I2C transfer failed, which does not effect normal work behind.
+   **************************************************************************/
+
+        reg_value = 0x01;
+        ret = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1);
+        usleep(AFTER_SYS_RESET_SLEEP_MS);
+        break;
+
+      default:
+        batinfo("Unsupported opt: 0x%X\n", op);
+        ret = -EINVAL;
+        break;
+    }
+
+  return ret;
+}
+
 FAR struct battery_charger_dev_s *
   stwlc38_initialize(FAR struct i2c_master_s *i2c,
                      uint32_t pin,
@@ -868,7 +966,7 @@ FAR struct battery_charger_dev_s *
   priv = kmm_zalloc(sizeof(struct stwlc38_dev_s));
   if (priv)
     {
-      /* Initialize the SC8551 device structure */
+      /* Initialize the STWLC38 device structure */
 
       priv->dev.ops   = &g_stwlc38ops;
       priv->i2c       = i2c;
