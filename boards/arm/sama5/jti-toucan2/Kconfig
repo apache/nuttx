@@ -30,5 +30,36 @@ config SAMA5D27_JTI_TOUCAN2_USBHOST_PRIO
 config SAMA5_SYSTEMRESET
 	bool "Enable system reset - this will enable the nsh reboot command"
 	select BOARDCTL_RESET
+
+config SAMA5D27_M25P_AUTOMOUNT
+	bool "M25P serial FLASH auto-mount"
+	default n
+	depends on NSH_ARCHINIT && SAMA5_SPI0 && MTD_M25P
+	---help---
+		Automatically initialise the M25P SPI FLASH driver when NSH starts
+
+choice
+	prompt "M25P serial FLASH configuration"
+	default SAMA5D27_M25P_NXFFS
+	depends on SAMA5D27_M25P_AUTOMOUNT
+
+config SAMA5D27_M25P_FTL
+	bool "Create M25P Serial FLASH block driver"
+	---help---
+		Create the MTD driver for the M25P and "wrap" the M25P as a standard
+		block driver that could then, for example, be mounted using FAT or
+		any other file system.  Any file system may be used, but there will
+		be no wear-leveling.
+
+config SAMA5D27_M25P_NXFFS
+	bool "Create M25P serial FLASH NXFFS file system"
+	depends on FS_NXFFS
+	---help---
+		Create the MTD driver for the M25P and mount the M25P device as
+		a wear-leveling, NuttX FLASH file system (NXFFS).  The downside of
+		NXFFS is that it can be very slow.
+
+endchoice # M25P serial FLASH configuration
+
 	
 endif # ARCH_BOARD_JTI_TOUCAN2
