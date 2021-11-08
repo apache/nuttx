@@ -1,4 +1,4 @@
-/****************************************************************************
+/***************************************************************************
  * boards/arm/sama5/jti-toucan2/src/sam_spi.c
  *
  *  Licensed to the Apache Software Foundation (ASF) under one or more
@@ -38,28 +38,38 @@
 #include "sam_spi.h"
 #include "jti-toucan2.h"
 
-#if defined(CONFIG_SAMA5_SPI0) || defined(CONFIG_SAMA5_SPI1)
+
+#if defined(CONFIG_SAMA5_SPI1)
+  /* SPI1 not available on this board */
+#undef CONFIG_SAMA5_SPI1
+#endif
+
+
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+#if defined(CONFIG_SAMA5_SPI0)
 /****************************************************************************
  * Name: sam_spidev_initialize
  *
  * Description:
- *   Called to configure SPI chip select PIO pins for the SAMA5D3-Xplained
+ *   Called to configure SPI chip select PIO pins for the SAMA5D27_T2
  *   board.
  *
  ****************************************************************************/
 
-void weak_function sam_spidev_initialize(void)
+void sam_spidev_initialize(void)
 {
-#ifdef CONFIG_SAMA5_SPI0
+#if defined(HAVE_AT25)
+  sam_configpio(PIO_AT25_NPCS0);
 #endif
 
-#ifdef CONFIG_SAMA5_SPI1
+#if defined(CONFIG_HAVE_M25P)
+sam_configpio(PIO_M25P_NPCS1);
 #endif
+
 }
 
 /****************************************************************************
@@ -69,7 +79,7 @@ void weak_function sam_spidev_initialize(void)
  *   These external functions must be provided by board-specific logic.
  *   They include:
  *
- *   o sam_spi[0|1]select is a functions to manage the board-specific chip
+ *   o sam_spi[0|1]select is a functions tomanage the board-specific chip
  *           selects
  *   o sam_spi[0|1]status and sam_spi[0|1]cmddata:
  *     Implementations of the status and cmddata methods of the SPI interface
@@ -123,17 +133,28 @@ void weak_function sam_spidev_initialize(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI0
+
 void sam_spi0select(uint32_t devid, bool selected)
 {
-}
-#endif
+#ifdef HAVE_AT25
+  /* the AT25 serial eeprom using NPCS0 */
 
-#ifdef CONFIG_SAMA5_SPI1
-void sam_spi1select(uint32_t devid, bool selected)
-{
-}
+  if (devid == SPIDEV_FLASH(0))
+    {
+      sam_piowrite(PIO_AT25_NPCS0, !selected);
+    }
 #endif
+#if defined(CONFIG_MTD_M25P)
+  /* SPI  serial NOR flash using NPCS1 */
+
+  if (devid == SPIDEV_FLASH(0))
+    {
+      sam_piowrite(PIO_M25P_NPCS1, !selected);
+    }  
+#endif
+}
+
+
 
 /****************************************************************************
  * Name: sam_spi[0|1]status
@@ -149,18 +170,10 @@ void sam_spi1select(uint32_t devid, bool selected)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SAMA5_SPI0
 uint8_t sam_spi0status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
-#endif
 
-#ifdef CONFIG_SAMA5_SPI0
-uint8_t sam_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
-{
-  return 0;
-}
-#endif
 
-#endif /* CONFIG_SAMA5_SPI0 || CONFIG_SAMA5_SPI1 */
+#endif /* CONFIG_SAMA5_SPI0  */
