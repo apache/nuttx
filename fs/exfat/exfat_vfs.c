@@ -467,6 +467,11 @@ static ssize_t exfatfs_write(FAR struct file *filep, const char *buffer,
       return ret;
     }
 
+  if ((filep->f_oflags & O_APPEND) && filep->f_pos < priv->node->size)
+    {
+      filep->f_pos = priv->node->size;
+    }
+
   ret = exfat_generic_pwrite(&fs->ef, priv->node, buffer,
                              buflen, filep->f_pos);
   if (ret > 0)
