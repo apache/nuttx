@@ -116,6 +116,10 @@ struct battery_charger_operations_s
   /* Do device specific operation */
 
   int (*operate)(struct battery_charger_dev_s *dev, uintptr_t param);
+
+  /* Get the actual output voltage for charging */
+
+  int (*get_voltage)(struct battery_charger_dev_s *dev, int *value);
 };
 
 /* This structure defines the battery driver state structure */
