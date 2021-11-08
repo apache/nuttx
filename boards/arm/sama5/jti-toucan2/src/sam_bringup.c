@@ -38,7 +38,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 #include "arm_arch.h"
 #include "hardware/sam_sfr.h"
-
+#include <nuttx/spi/spi.h>
 #include "jti-toucan2.h"
 
 #ifdef CONFIG_CDCACM
@@ -65,6 +65,21 @@
 
 #if defined (CONFIG_SAMA5_MCAN0) || (CONFIG_SAMA5_MCAN1)
 # include "sam_mcan.h"
+#endif
+
+#if defined(CONFIG_MTD_M25P)
+# include <nuttx/mtd/mtd.h>
+# include <nuttx/fs/fs.h>
+# include <nuttx/fs/nxffs.h>
+#endif
+
+#if defined(HAVE_AT25)
+# include <nuttx/eeprom/spi_xx25xx.h>
+# include <fcntl.h>
+#endif
+
+#if defined (HAVE_EGT)
+#  include <nuttx/sensors/max31855.h>
 #endif
 
 
@@ -156,28 +171,25 @@ int sam_bringup(void)
 {
   int ret;
   
-//#if 0
   /*
-  Initial porting had issues with the 24MHz crystal as u-boot was not setting 
+  There are ssues with the 24MHz crystal as u-boot is not setting 
   the SFR register to indicate the correct crystal frequency
   */
   uint32_t regval;
   /* get UTMI timing register */
   regval = getreg32(SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET);
-  printf("clock reg says %lx\n", regval);
   regval &= 0xFFFFFFFC;
   regval |= BOARD_CRYSTAL_FREQUENCY;
   putreg32(regval, (SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET));
+
  /* Register I2C drivers on behalf of the I2C tool */
- //#endif
+
  
   sam_i2ctool();
 
 
 #ifdef HAVE_AUTOMOUNTER
-  /* Initialize the auto-mounter */
-
-  sam_automount_initialize();
+  #undef HAVE_AUTOMOUNTER
 #endif
 
 #ifdef HAVE_ROMFS
@@ -205,6 +217,117 @@ int sam_bringup(void)
         }
     }
 #endif
+
+#if defined (HAVE_EGT) && defined(CONFIG_SAMA5_FLEXCOM4_SPI)
+FAR struct flexcom_spi_dev_s *flexcom_spi_egt;
+
+flexcom_spi_egt = sam_flexcom_spibus_initialize(EGT_PORT);
+
+if (!flexcom_spi_egt)
+  {
+    syslog(LOG_ERR, "ERROR: Failed to initialize EGT Flexcom SPI port\n");
+  }
+else
+  {
+    syslog(LOG_INFO, "Successfully initialized EGT Flexcom SPI port\n");
+    /* register the sensor interface */
+    if (max31855_register("/dev/temp0", flexcom_spi_egt, 0) < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Error registering MAX31855\n");
+    }
+    else
+    {
+      syslog(LOG_INFO, "Successfully registered MAX31855\n");
+    }
+  }
+#endif  
+  
+#if defined(HAVE_AT25) && defined(CONFIG_SAMA5_SPI0)
+
+FAR struct spi_dev_s *spi_at25;
+spi_at25 = sam_spibus_initialize(AT25_PORT);
+if (!spi_at25)
+  {
+    syslog(LOG_ERR, "ERROR: Failed to initialize AT25 SPI port 1\n");
+  }
+else
+  {
+    syslog(LOG_INFO, "Successfully initialized AT25 SPI port\n");
+  }
+/* Now bind the SPI interface to the AT25  SPI FLASH driver */
+
+ret = ee25xx_initialize(spi_at25, "/dev/AT25", EEPROM_25XX128, O_RDWR);
+if (ret<0)
+  {
+    syslog(LOG_ERR,
+            "ERROR: Failed to initialise the AT25 driver\n");
+
+  }
+else
+  {
+    syslog(LOG_INFO, "Successfully initialised the AT25 driver\n");
+  }
+
+
+#endif
+
+
+#if defined(CONFIG_MTD_M25P) && defined(CONFIG_SAMA5_SPI0)
+FAR struct spi_dev_s *spi_m25p;
+FAR struct mtd_dev_s *mtd_m25p;
+spi_m25p = sam_spibus_initialize(M25P_PORT);
+if (!spi_m25p)
+  {
+    syslog(LOG_ERR, "ERROR: Failed to initialize M25P SPI port 0\n");
+  }
+else
+  {
+    syslog(LOG_INFO, "Successfully initialized M25P SPI\n");
+  /* Now bind the SPI interface to the MT25QL256 SPI FLASH driver */
+
+  mtd_m25p = m25p_initialize(spi_m25p);
+  if (!mtd_m25p)
+    {
+      syslog(LOG_ERR,
+            "ERROR: Failed to bind SPI0 CS1 to the SPI FLASH driver\n");
+    }
+  else
+    {
+      syslog(LOG_INFO, "Successfully bound SPI0 CS1 to the SPI"
+                      " FLASH driver\n");
+      //ret = ftl_initialize(M25P_MINOR, mtd_m25p);
+      //if (ret < 0)
+        //{
+          //syslog(LOG_ERR, "Failed to initialise the FTL layer: %d\n", ret);
+        //}
+      //else
+        {
+          //syslog(LOG_INFO, "FTL layer successfully initialised\n");    
+          //ret = smart_initialize(M25P_MINOR, mtd_m25p, NULL);
+          ret = nxffs_initialize(mtd_m25p);
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "Failed to initialise file system %d\n", ret);
+            }
+          else      
+            {
+              syslog(LOG_INFO, "Successfully initialised NXFSS\n");
+              //ret = nx_mount("/dev/mtdblock0", "/mnt/flash", "nxffs",0, NULL);
+              ret = nx_mount(NULL, "/mnt/flash", "nxffs",0, NULL);
+              if (ret < 0)
+                {
+                  syslog(LOG_ERR, "Failed to mount the NXFSS volume %d\n", ret);
+                }
+              else      
+                {
+                  syslog(LOG_INFO, "Succesfully mounted NXFSS\n");
+                }
+            }
+        }
+    }
+  }
+#endif
+
 
 #ifdef HAVE_USBHOST
   /* Initialize USB host operation.  sam_usbhost_initialize() starts a thread
@@ -281,12 +404,7 @@ int sam_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_AUDIO_NULL
-  /* Configure the NULL audio device */
-
+    }endchoice # CPU Frequency
   ret = sam_audio_null_initialize(0);
   if (ret != OK)
     {
