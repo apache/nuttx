@@ -178,6 +178,10 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_SAMA5_FLEXCOM_SPI), y)
+CHIP_CSRCS += sam_flexcom_spi.c
+endif
+
 ifeq ($(CONFIG_SAMA5_SSC0),y)
 CHIP_CSRCS += sam_ssc.c
 else
