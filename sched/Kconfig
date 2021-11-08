@@ -41,7 +41,8 @@ config DISABLE_PTHREAD
 
 config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
-	default n
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
 
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
