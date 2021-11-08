@@ -84,32 +84,32 @@
 
 #define NSEC_PER_SEC          1000000000L /* Seconds */
 #define USEC_PER_SEC             1000000L
-#define MSEC_PER_SEC                1000L
-#define DSEC_PER_SEC                  10L
-#define HSEC_PER_SEC                   2L
+#define MSEC_PER_SEC                1000
+#define DSEC_PER_SEC                  10
+#define HSEC_PER_SEC                   2
 
 #define NSEC_PER_HSEC          500000000L /* Half seconds */
 #define USEC_PER_HSEC             500000L
-#define MSEC_PER_HSEC                500L
-#define DSEC_PER_HSEC                  5L
+#define MSEC_PER_HSEC                500
+#define DSEC_PER_HSEC                  5
 
 #define NSEC_PER_DSEC          100000000L /* Deciseconds */
 #define USEC_PER_DSEC             100000L
-#define MSEC_PER_DSEC                100L
+#define MSEC_PER_DSEC                100
 
 #define NSEC_PER_MSEC            1000000L /* Milliseconds */
-#define USEC_PER_MSEC               1000L
+#define USEC_PER_MSEC               1000
 
-#define NSEC_PER_USEC               1000L /* Microseconds */
+#define NSEC_PER_USEC               1000  /* Microseconds */
 
-#define SEC_PER_MIN                   60L
+#define SEC_PER_MIN                   60
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
 #define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
 #define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
 #define DSEC_PER_MIN           (DSEC_PER_SEC * SEC_PER_MIN)
 #define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
 
-#define MIN_PER_HOUR                  60L
+#define MIN_PER_HOUR                  60
 #define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
 #define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
@@ -117,7 +117,7 @@
 #define HSEC_PER_HOUR          (HSEC_PER_MIN * MIN_PER_HOUR)
 #define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
 
-#define HOURS_PER_DAY                 24L
+#define HOURS_PER_DAY                 24
 #define SEC_PER_DAY            (HOURS_PER_DAY * SEC_PER_HOUR)
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
