@@ -27,7 +27,7 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-
+//#include "sam_sckc.h"
 #include "jti-toucan2.h"
 
 /****************************************************************************
@@ -67,7 +67,20 @@ void sam_boardinitialize(void)
       sam_usbinitialize();
     }
 #endif
+
   board_can_pio_control_initialize();
+
+  /* Configure SPI chip selects if 1) SPI is enable, and 2) the weak
+   * function sam_spidev_initialize() has been brought into the link.
+   */
+
+#if defined (CONFIG_SAMA5_SPI0)
+  sam_spidev_initialize();
+#endif
+
+#if defined (CONFIG_SAMA5_FLEXCOM_SPI)
+  sam_flexcom_spidev_initialize();
+#endif
 
 }
 /****************************************************************************
