@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_DISABLE_ENVIRON is not set
+# CONFIG_DISABLE_MQUEUE is not set
 # CONFIG_DISABLE_POSIX_TIMERS is not set
 # CONFIG_DISABLE_PSEUDOFS_OPERATIONS is not set
 # CONFIG_NSH_DISABLEBG is not set
