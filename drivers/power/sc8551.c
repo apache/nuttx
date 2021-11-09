@@ -119,6 +119,10 @@ static int sc8551_input_current(FAR struct battery_charger_dev_s *dev,
                                 int value);
 static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
                           uintptr_t param);
+static int sc8551_chipid(FAR struct battery_charger_dev_s *dev,
+                         unsigned int *value);
+static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                 int *value);
 
 #ifdef CONFIG_DEBUG_SC8551
 static int sc8551_dump_regs(FAR struct sc8551_dev_s *priv);
@@ -173,6 +177,8 @@ static const struct battery_charger_operations_s g_sc8551ops =
   sc8551_current,
   sc8551_input_current,
   sc8551_operate,
+  sc8551_chipid,
+  sc8551_get_voltage,
 };
 
 /****************************************************************************
@@ -1866,6 +1872,60 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: sc8551_chipid
+ *
+ * Description:
+ *       Get chip id
+ *
+ ****************************************************************************/
+
+static int sc8551_chipid(FAR struct battery_charger_dev_s *dev,
+                         unsigned int *value)
+{
+  FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
+  int ret;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_13, value, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to Get sc8551 chipid: %d\n", ret);
+      return ERROR;
+    }
+
+  batinfo("the chipid of sc8551 is: %d\n", *value);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sc8551_get_voltage
+ *
+ * Description:
+ *   Get the actual output voltage for charging
+ *
+ ****************************************************************************/
+
+static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                 int *value)
+{
+  FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
+  int ret;
+  uint8_t val[2];
+
+  ret = sc8551_getreg8(priv, SC8551_REG_1C, &val[0], 1);
+  ret = sc8551_getreg8(priv, SC8551_REG_1D, &val[1], 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get output voltage of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  *value = ((val[0] & 0x0f) << 8 | val[1]) * 5 / 4;
+
+  batinfo("The the actual output voltage of sc8551 is %d mv", *value);
+  return OK;
 }
 
 /****************************************************************************
