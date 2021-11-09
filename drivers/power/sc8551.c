@@ -91,17 +91,10 @@ static int sc8551_putreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
                           uint8_t val);
 
 static int sc8551_reset(FAR struct sc8551_dev_s *priv);
+static int sc8551_get_temp(FAR struct sc8551_dev_s *priv);
 static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable);
-static int sc8551_sysoff(FAR struct sc8551_dev_s *priv);
 static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state);
-static int sc8551_en_hiz(FAR struct sc8551_dev_s *priv, bool state);
-static int sc8551_en_stat(FAR struct sc8551_dev_s *priv, bool state);
-static int sc8551_setboost_otg_config(FAR struct sc8551_dev_s *priv,
-                                      bool state);
 static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current);
-static int sc8551_setvolt(FAR struct sc8551_dev_s *priv, int volts);
-static inline int sc8551_setcurr(FAR struct sc8551_dev_s *priv,
-                                 int req_current);
 
 /* Battery driver lower half methods */
 
@@ -1296,6 +1289,35 @@ static int sc8551_init_regulation(FAR struct sc8551_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: sc8551_get_temp
+ *
+ * Description:
+ *   Get the temperature of sc8551
+ *
+ ****************************************************************************/
+
+static int sc8551_get_temp(FAR struct sc8551_dev_s *priv)
+{
+  int ret;
+  int temp = 0;
+  uint8_t value;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_27, &value, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading from SC8551_REG_27! Error = %d\n", ret);
+      return ret;
+    }
+
+  if (value == 0xff)
+    temp == value >> 1;
+  else
+    temp = (value +1) >> 1;
+
+  return temp;
+}
+
+/****************************************************************************
  * Name: sc8551_reset
  *
  * Description:
@@ -1393,61 +1415,6 @@ static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable)
 }
 
 /****************************************************************************
- * Name: sc8551_sysoff
- *
- * Description:
- *   Turn the internal battery FET off in order to reduce the leakage from
- *   the BAT pin. Note that this disconnects the battery from the system.
- *
- ****************************************************************************/
-
-static int sc8551_sysoff(FAR struct sc8551_dev_s *priv)
-{
-  #ifndef NOT_PMIC /* The chip does not support the function */
-  int ret;
-  uint8_t value = 0;
-
-  ret = sc8551_getreg8(priv, SC8551_REG_07, &value, 1);
-  batwarn("REG7 read value: 0x%08X\n", value);
-  value |= SC8551R7_BATFET_DISABLE;
-  ret |= sc8551_putreg8(priv, SC8551_REG_07, value);
-
-  return ret;
-  #endif
-
-  batinfo(" The chip does not support the function of sc8551_sysoff ");
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sc8551_syson
- *
- * Description:
- *   Turn the internal battery FET on.
- *
- ****************************************************************************/
-
-static int sc8551_syson(FAR struct sc8551_dev_s *priv)
-{
-  #ifndef NOT_PMIC /* The chip does not support the function */
-  int ret;
-  uint8_t value = 0;
-
-  ret = sc8551_getreg8(priv, SC8551_REG_07, &value, 1);
-  batwarn("REG7 read value: 0x%08X\n", value);
-  value &= ~SC8551R7_BATFET_DISABLE;
-  ret |= sc8551_putreg8(priv, SC8551_REG_07, value);
-
-  return ret;
-  #endif
-
-  batinfo(" The chip does not support the function of sc8551_syson ");
-
-  return OK;
-}
-
-/****************************************************************************
  * Name: sc8551_en_term
  *
  * Description:
@@ -1458,199 +1425,33 @@ static int sc8551_syson(FAR struct sc8551_dev_s *priv)
 
 static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state)
 {
-  #ifndef NOT_PMIC  /* The chip does not support the function */
   uint8_t val;
   int ret;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_05, &val, 1);
+  ret = sc8551_getreg8(priv, SC8551_REG_14, &val, 1);
   if (ret < 0)
     {
-      baterr("ERROR: Error reading from SC8551 REG5! Error = %d\n", ret);
+      baterr("ERROR: Error reading from SC8551_REG_14! Error = %d\n", ret);
       return ret;
     }
-
-  batinfo("en_term: REG05 %02X EN_TERM=%d\n",
-         val, !!(val & SC8551R5_EN_TERM));
 
   /* Clear previous and set new value */
 
   if (state)
     {
-      val |= SC8551R5_EN_TERM;
+      val |= (SC8551_ADC_DISABLE << SC8551_ADC_EN_SHIFT);
     }
   else
     {
-      val &= ~SC8551R5_EN_TERM;
+      val |= (SC8551_ADC_ENABLE << SC8551_ADC_EN_SHIFT);
     }
 
-  ret = sc8551_putreg8(priv, SC8551_REG_05, val);
+  ret = sc8551_putreg8(priv, SC8551_REG_14, val);
   if (ret < 0)
     {
-      baterr("ERROR: Error writing to SC8551R5! Error = %d\n", ret);
+      baterr("ERROR: Error writing to SC8551_REG_14! Error = %d\n", ret);
       return ret;
     }
-
-  return OK;
-  #endif
-
-  batinfo("The chip does not support the function of sc8551_en_term");
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sc8551_en_hiz
- *
- * Description:
- *   Enable high-impedance mode. Sets the charger IC into low power standby
- *   mode.
- *
- ****************************************************************************/
-
-static int sc8551_en_hiz(FAR struct sc8551_dev_s *priv, bool state)
-{
-  #ifndef NOT_PMIC /* The chip does not support the function */
-  uint8_t val;
-  int ret;
-
-  ret = sc8551_getreg8(priv, SC8551_REG_00, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551 REG0! Error = %d\n", ret);
-      return ret;
-    }
-
-  batinfo("en_hiz: REG00 %02X EN_HIZ=%d\n",
-         val, !!(val & SC8551R1_EN_HIZ));
-
-  /* Clear previous and set new value */
-
-  if (state)
-    {
-      val |= SC8551R1_EN_HIZ;
-    }
-  else
-    {
-      val &= ~SC8551R1_EN_HIZ;
-    }
-
-  ret = sc8551_putreg8(priv, SC8551_REG_00, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551R0! Error = %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-  #endif
-
-  batinfo("The chip does not support the function of sc8551_en_hiz ");
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sc8551_en_stat
- *
- * Description:
- *   Enable interrupts.
- *
- ****************************************************************************/
-
-static int sc8551_en_stat(FAR struct sc8551_dev_s *priv, bool state)
-{
-  #ifndef NOT_PMIC /* The chip does not support the function */
-  uint8_t val;
-  int ret;
-
-  ret = sc8551_getreg8(priv, SC8551_REG_07, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551 REG7! Error = %d\n", ret);
-      return ret;
-    }
-
-  batinfo("int stat: REG07 %02X INT_MASK1=%d INT_MASK0=%d\n", val,
-         !!(val & SC8551R7_INT_MASK1), !!(val & SC8551R7_INT_MASK0));
-
-  /* We always set or clear both interrupts together. */
-
-  if (state)
-    {
-      val |= (SC8551R7_INT_MASK0 | SC8551R7_INT_MASK1);
-    }
-  else
-    {
-      val &= ~(SC8551R7_INT_MASK0 | SC8551R7_INT_MASK1);
-    }
-
-  ret = sc8551_putreg8(priv, SC8551_REG_07, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551R7! Error = %d\n", ret);
-      return ret;
-    }
-
-  return OK;
-  #endif
-
-  batinfo("The chip does not support the function of sc8551_en_stat ");
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: sc8551_setboost_otg_config
- *
- * Description:
- *   Set the device boost mode.
- *
- ****************************************************************************/
-
-static int sc8551_setboost_otg_config(FAR struct sc8551_dev_s *priv,
-                                      bool state)
-{
-  #ifndef NOT_PMIC /* The chip does not support the function */
-  uint8_t val;
-  int ret;
-
-  ret = sc8551_getreg8(priv, SC8551_REG_01, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551! Error = %d\n", ret);
-      return ret;
-    }
-
-  /* Clear previous current and set new value */
-
-  if (state)
-    {
-      /* Set to Boost disable Charge */
-
-      val = SC8551R1_OTG_CONFIG | (val & ~SC8551R1_CHG_CONFIG);
-    }
-  else
-    {
-      /* Set to Charge disable Boost */
-
-      val = SC8551R1_CHG_CONFIG | (val & ~SC8551R1_OTG_CONFIG);
-    }
-
-  ret = sc8551_putreg8(priv, SC8551_REG_01, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551! Error = %d\n", ret);
-      return ret;
-    }
-
-#define BST_CONFIG_MASK (SC8551R1_CHG_CONFIG | SC8551R1_OTG_CONFIG)
-  batinfo("otg_config: REG01 %02X Boost=%d\n", val,
-      ((SC8551R1_OTG_CONFIG == (val & BST_CONFIG_MASK)) ? 1 : 0));
-
-  return OK;
-  #endif
-
-  batinfo("The chip does not support the sc8551_setboost_otg_config ");
 
   return OK;
 }
@@ -1706,7 +1507,19 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
 static int sc8551_health(FAR struct battery_charger_dev_s *dev,
                          FAR int *health)
 {
-  batinfo("The chip does not support the function of sc8551_health ");
+  FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
+  int temp;
+
+  temp = sc8551_get_temp(priv);
+  if (temp < 0)
+    *health = SC8551_HEALTH_UNKNOWN;
+  else if (temp > SC8551_HEALTH_TEMP_MAX)
+    *health = SC8551_HEALTH_OVERHEAT;
+  else if (temp < SC8551_HEALTH_TEMP_MIN)
+    *health = SC8551_HEALTH_OVERCOLD;
+  else
+    *health = SC8551_HEALTH_GOOD;
+
   return OK;
 }
 
@@ -1721,7 +1534,7 @@ static int sc8551_health(FAR struct battery_charger_dev_s *dev,
 static int sc8551_online(FAR struct battery_charger_dev_s *dev,
                          FAR bool *status)
 {
-  batinfo("The chip does not support the function of sc8551_online ");
+  *status = true;
   return OK;
 }
 
@@ -1735,36 +1548,17 @@ static int sc8551_online(FAR struct battery_charger_dev_s *dev,
 
 static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current)
 {
-  batinfo("The chip does not support the function of sc8551_powersupply ");
-  return OK;
-}
+  int ret;
 
-/****************************************************************************
- * Name: sc8551_setvolt
- *
- * Description:
- *   Set the voltage level to charge the battery. Voltage value in mV.
- *
- ****************************************************************************/
+  ret = sc8551_enable_busocp(priv, SC8551_BUS_OCP_ENABLE);
+  ret = sc8551_set_busocp_th(priv, current);
 
-static int sc8551_setvolt(FAR struct sc8551_dev_s *priv, int req_volts)
-{
-  batinfo("The chip does not support the function of sc8551_powersupply ");
-  return OK;
-}
+  if (ret < 0)
+    {
+      baterr("ERROR: Error setting sc8551 bus OCP ! Error = %d\n", ret);
+      return ret;
+    }
 
-/****************************************************************************
- * Name: sc8551_setcurr
- *
- * Description:
- *   Set the current to charge the battery. Current value in mA.
- *
- ****************************************************************************/
-
-static inline int sc8551_setcurr(FAR struct sc8551_dev_s *priv,
-                                 int req_current)
-{
-  batinfo("The chip does not support the function of sc8551_setcurr ");
   return OK;
 }
 
@@ -1791,7 +1585,16 @@ static int sc8551_voltage(FAR struct battery_charger_dev_s *dev, int value)
 
 static int sc8551_current(FAR struct battery_charger_dev_s *dev, int value)
 {
-  batinfo("The chip does not support the function of sc8551_current ");
+  FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
+  int ret;
+
+  ret = sc8551_set_batocp_th(priv, value);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error Set the charger current! Error = %d\n", ret);
+      return ret;
+    }
+
   return OK;
 }
 
@@ -1830,31 +1633,16 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
   value = (int)msg->u32;
   switch (op)
     {
-      case BATIO_OPRTN_BOOST:
-        ret = sc8551_setboost_otg_config(priv, true);
-        break;
-
-      case BATIO_OPRTN_CHARGE:
-        ret = sc8551_setboost_otg_config(priv, false);
-        break;
-
       case BATIO_OPRTN_EN_TERM:
         ret = sc8551_en_term(priv, (bool)value);
         break;
 
-      case BATIO_OPRTN_HIZ:
-        ret = sc8551_en_hiz(priv, (bool)value);
-
-        /* Also need to set to 100mA USB host if the battery above Vbatgd? */
-
-        break;
-
       case BATIO_OPRTN_SYSOFF:
-        ret = sc8551_sysoff(priv);
+        ret = sc8551_en_term(priv, SC8551_ADC_DISABLE);
         break;
 
       case BATIO_OPRTN_SYSON:
-        ret = sc8551_syson(priv);
+        ret = sc8551_en_term(priv, SC8551_ADC_ENABLE);
         break;
 
       case BATIO_OPRTN_RESET:
@@ -1999,16 +1787,6 @@ FAR struct battery_charger_dev_s *
       if (ret < 0)
         {
           baterr("ERROR: Failed to set SC8551 power supply: %d\n", ret);
-          kmm_free(priv);
-          return NULL;
-        }
-
-      /* Disable all interrupts. */
-
-      ret = sc8551_en_stat(priv, false);
-      if (ret < 0)
-        {
-          baterr("ERROR: Failed to disable SC8551 interrupts: %d\n", ret);
           kmm_free(priv);
           return NULL;
         }
