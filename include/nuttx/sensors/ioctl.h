@@ -297,4 +297,14 @@
 
 #define SNIOC_SELFTEST             _SNIOC(0x0086)
 
+/* Command:      SNIOC_SET_CALIBVALUE
+ * Description:  Set calibration value for sensor.
+ * Argument:     A argument of calibration value for sensor.
+ * Note:         If setting calibvalue is failed, return errno, otherwise,
+ *               return OK.
+ *               This cmd is handled by sensor_ops_s::set_calibvalue.
+ */
+
+#define SNIOC_SET_CALIBVALUE       _SNIOC(0x0087)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
