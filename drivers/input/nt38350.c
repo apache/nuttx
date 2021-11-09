@@ -3819,11 +3819,12 @@ static void nt38350_data_worker(FAR void *arg)
         }
     }
 
-  sample.npoints           = 1;
-  sample.point[0].x        = priv->sample.x;
-  sample.point[0].y        = priv->sample.y;
-  sample.point[0].w        = priv->sample.width;
-  sample.point[0].pressure = priv->sample.pressure;
+  sample.npoints            = 1;
+  sample.point[0].x         = priv->sample.x;
+  sample.point[0].y         = priv->sample.y;
+  sample.point[0].w         = priv->sample.width;
+  sample.point[0].pressure  = priv->sample.pressure;
+  sample.point[0].timestamp = touch_get_time();
 
   if (priv->sample.contact == CONTACT_UP)
     {
