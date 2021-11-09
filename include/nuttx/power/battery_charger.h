@@ -407,9 +407,11 @@ FAR struct battery_charger_dev_s *
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
  *               the DA9168
+ *   dev    -  An instance of the ioexpander_dev_s.
  *   addr      - The I2C address of the DA9168 (Better be 0x68).
  *   frequency - The I2C frequency
  *   current   - The input current our power-supply can offer to charger
+ *   int_pin   - The interrput pin
  *
  * Returned Value:
  *   A pointer to the initialized battery driver instance.  A NULL pointer
@@ -420,9 +422,14 @@ FAR struct battery_charger_dev_s *
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_DA9168)
 
 struct i2c_master_s;
-FAR struct battery_charger_dev_s *
-       da9168_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                         uint32_t frequency, int current);
+struct ioexpander_dev_s;
+FAR struct battery_charger_dev_s
+  *da9168_initialize(FAR struct i2c_master_s *i2c,
+                     FAR struct ioexpander_dev_s *dev,
+                     uint8_t addr,
+                     uint32_t frequency,
+                     int current,
+                     int int_pin);
 #endif
 
 #undef EXTERN

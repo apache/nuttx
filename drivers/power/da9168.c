@@ -91,8 +91,10 @@ struct da9168_dev_s
   /* Data fields specific to the lower half DA9168 driver follow */
 
   FAR struct i2c_master_s *i2c;      /* I2C interface */
+  FAR struct ioexpander_dev_s *ioe;  /* Ioexpander device. */
   uint8_t addr;                      /* I2C address */
   uint32_t frequency;                /* I2C frequency */
+  int pin;                           /* Interrupt pin */
 };
 
 /****************************************************************************
@@ -136,6 +138,12 @@ static inline int da9168_set_pre_iterm_chrg_curr(
                                           bool range_pre_sel);
 static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
                                             bool  rchg_voltage_sel);
+static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
+                                          uint8_t regaddr, uint8_t mask,
+                                          uint8_t regval_bits,
+                                          bool int_mask_sel);
+static int da9168_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                    ioe_pinset_t pinset, FAR void *arg);
 
 /* Battery driver lower half methods */
 
@@ -421,6 +429,32 @@ static inline int da9168_getreport(FAR struct da9168_dev_s *priv,
   if (ret >= 0)
     {
       *report = regval;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_enable_interrput
+ *
+ * Description:
+ *   Da9168 enable interrupt event.
+ *
+ ****************************************************************************/
+
+static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
+                                          uint8_t regaddr, uint8_t mask,
+                                          uint8_t regval_bits,
+                                          bool int_mask_sel)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, regaddr, mask,
+                               int_mask_sel << regval_bits);
+  if (ret < 0)
+    {
+      return ret;
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
     }
 
   return ret;
@@ -1011,6 +1045,33 @@ static int da9168_health(FAR struct battery_charger_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: da9168_interrupt_handler
+ *
+ * Description:
+ *   Handle the charger interrupt.
+ *
+ * Input Parameters:
+ *   dev     - ioexpander device.
+ *   pinset  - Interrupt pin.
+ *   arg     - Device struct.
+ *
+ * Returned Value:
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int da9168_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                    ioe_pinset_t pinset, FAR void *arg)
+{
+  batinfo("da9168 interrput handler\n");
+  return OK;
+}
+
+/****************************************************************************
  * Name: da9168_set_vindpm
  *
  * Description:
@@ -1480,7 +1541,32 @@ static int da9168_input_current(FAR struct battery_charger_dev_s *dev,
 static int da9168_operate(FAR struct battery_charger_dev_s *dev,
                            uintptr_t param)
 {
-  return OK;
+  FAR struct da9168_dev_s *priv = (FAR struct da9168_dev_s *)dev;
+  FAR struct batio_operate_msg_s *msg =
+                              (FAR struct batio_operate_msg_s *)param;
+  int ret = OK;
+
+  switch (msg->operate_type)
+    {
+      case BATIO_OPRTN_SHIPMODE:
+        {
+          ret = da9168_control_shipmode(priv,
+                                        DA9168_SHIP_MODE_ENTRY_DELAY_2S,
+                                        DA9168_SHIP_MODE_EXIT_DEB_2S);
+          if (ret < 0)
+            {
+              baterr("ERROR: DA9168 enter shiomode fail: %d\n", ret);
+            }
+        }
+        break;
+
+      default:
+        baterr("Unsupported operate type: %d\n", msg->operate_type);
+        ret = -EINVAL;
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1570,6 +1656,11 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
+  /* enable vus_uv interrput event */
+
+  da9168_enable_interrput(priv, DA9168_PMC_MASK_01, DA9168_M_VBUS_UV_MASK,
+                          DA9168_M_VBUS_UV_SHIFT, false);
+
   return ret;
 }
 
@@ -1587,9 +1678,11 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
  * Input Parameters:
  *   i2c       - An instance of the I2C interface to use to communicate with
  *               the DA9168
+ *   dev    -  An instance of the ioexpander_dev_s.
  *   addr      - The I2C address of the DA9168 (Better be 0x68).
  *   frequency - The I2C frequency
  *   current   - The input current our power-supply can offer to charger
+ *   int_pin   - The interrput pin
  *
  * Returned Value:
  *   A pointer to the initialized battery driver instance.  A NULL pointer
@@ -1598,10 +1691,12 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
  ****************************************************************************/
 
 FAR struct battery_charger_dev_s *
-da9168_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                  uint32_t frequency, int current)
+  da9168_initialize(FAR struct i2c_master_s *i2c,
+                    FAR struct ioexpander_dev_s *dev, uint8_t addr,
+                    uint32_t frequency, int current, int int_pin)
 {
   FAR struct da9168_dev_s *priv;
+  int *ioephanle;
   int ret;
 
   priv = kmm_zalloc(sizeof(struct da9168_dev_s));
@@ -1617,6 +1712,8 @@ da9168_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
   priv->i2c       = i2c;
   priv->addr      = addr;
   priv->frequency = frequency;
+  priv->ioe       = dev;
+  priv->pin       = int_pin;
 
   /* Reset the DA9168 */
 
@@ -1660,6 +1757,34 @@ da9168_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
   if (ret < 0)
     {
       baterr("ERROR: Failed to enable DA9168 hiz: %d\n", ret);
+      goto err;
+    }
+
+  /* Interrupt pin */
+
+  ret = IOEXP_SETDIRECTION(priv->ioe, priv->pin,
+                           IOEXPANDER_DIRECTION_IN);
+  if (ret < 0)
+    {
+      baterr("Failed to set direction: %d\n", ret);
+      goto err;
+    }
+
+  ioephanle = IOEP_ATTACH(priv->ioe, priv->pin,
+                          da9168_interrupt_handler, priv);
+  if (!ioephanle)
+    {
+      baterr("Failed to attach: %d\n", ret);
+      ret = -EIO;
+      goto err;
+    }
+
+  ret = IOEXP_SETOPTION(priv->ioe, priv->pin,
+                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->ioe, da9168_interrupt_handler);
       goto err;
     }
 
