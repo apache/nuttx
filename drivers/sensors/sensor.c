@@ -130,6 +130,7 @@ static const struct sensor_info g_sensor_info[] =
   {sizeof(struct sensor_event_impd),            "impd"},
   {sizeof(struct sensor_event_ots),             "ots"},
   {sizeof(struct sensor_event_gps_satellite),   "gps_satellite"},
+  {sizeof(struct sensor_event_wake_gesture),    "wake_gesture"},
 };
 
 static const struct file_operations g_sensor_fops =

@@ -261,9 +261,18 @@
 
 #define SENSOR_TYPE_GPS_SATELLITE                   29
 
+/* Wake gesture
+ * A sensor enabling waking up the device based on a device specific
+ * motion. 0: the device should sleep, 1: the device should wake up.
+ * Other values ​​are uncalibrated values ​​reported by the driver to
+ * uncalibrated topics.
+ */
+
+#define SENSOR_TYPE_WAKE_GESTURE                    30
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           30
+#define SENSOR_TYPE_COUNT                           31
 
 /****************************************************************************
  * Inline Functions
@@ -526,6 +535,17 @@ struct sensor_event_gps_satellite
 
     uint32_t snr;
   } info[4];
+};
+
+struct sensor_event_wake_gesture     /* Type: Wake gesture */
+{
+  uint64_t timestamp;       /* Units is microseconds */
+
+  /* wake gesture event, 0: sleep, 1: wake,
+   * others: Uncalibrated status value.
+   */
+
+  uint32_t event;
 };
 
 /* The sensor lower half driver interface */

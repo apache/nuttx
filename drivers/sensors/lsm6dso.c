@@ -55,9 +55,10 @@
 
 #define LSM6DSO_XL_IDX            0          /* Accelerator index */
 #define LSM6DSO_GY_IDX            1          /* Gyroscope index */
-#define LSM6DSO_IDX_NUM           2          /* Max index */
+#define LSM6DSO_FSM_IDX           2          /* FSM index */
+#define LSM6DSO_IDX_NUM           3          /* Max index */
 
-/* Self-test mode selection */
+/* Self-testmode selection */
 
 #define LSM6DSO_NORMAL_MODE       0x00       /* Normal mode*/
 #define LSM6DSO_POSIGN_MODE       0x01       /* Positive mode */
@@ -84,6 +85,11 @@
 #define LSM6DSO_GY_ODR_208HZ      0x05       /* Gyroscope ODR 208Hz */
 #define LSM6DSO_GY_ODR_416HZ      0x06       /* Gyroscope ODR 416Hz */
 #define LSM6DSO_GY_ODR_833HZ      0x07       /* Gyroscope ODR 833Hz */
+
+#define LSM6DSO_FSM_ODR_12p5HZ    0x00       /* FSM ODR 12.5Hz */
+#define LSM6DSO_FSM_ODR_26HZ      0x01       /* FSM ODR 26Hz */
+#define LSM6DSO_FSM_ODR_52HZ      0x02       /* FSM ODR 52Hz */
+#define LSM6DSO_FSM_ODR_104HZ     0x03       /* FSM ODR 104Hz */
 
 /* Sensor batch BDR */
 
@@ -114,35 +120,34 @@
 #define LSM6DSO_2G_FACTOR         0.061f     /* Accelerator 2g factor (mg) */
 #define LSM6DSO_4G_FACTOR         0.122f     /* Accelerator 4g factor (mg) */
 #define LSM6DSO_8G_FACTOR         0.244f     /* Accelerator 8g factor (mg) */
-#define LSM6DSO_MG2G_FACTOR       0.001f     /* Convert mg to g factor */
+#define LSM6DSO_MG2MS_FACTOR      0.0098f    /* Convert mg to m/s² factor */
 
-#define LSM6DSO_125DPS            0x01       /* Gyroscope scale 125dpg */
-#define LSM6DSO_250DPS            0x00       /* Gyroscope scale 250dpg */
-#define LSM6DSO_500DPS            0x02       /* Gyroscope scale 500dpg */
-#define LSM6DSO_1000DPS           0x04       /* Gyroscope scale 1000dpg */
-#define LSM6DSO_2000DPS           0x06       /* Gyroscope scale 2000dpg */
+#define LSM6DSO_125DPS            0x01       /* Gyroscope scale 125dps */
+#define LSM6DSO_250DPS            0x00       /* Gyroscope scale 250dps */
+#define LSM6DSO_500DPS            0x02       /* Gyroscope scale 500dps */
+#define LSM6DSO_1000DPS           0x04       /* Gyroscope scale 1000dps */
+#define LSM6DSO_2000DPS           0x06       /* Gyroscope scale 2000dps */
 
-#define LSM6DSO_125DPS_FACTOR     4.375f     /* Gyroscope 125dpg factor (mdps/LSB) */
-#define LSM6DSO_250DPS_FACTOR     8.75f      /* Gyroscope 250dpg factor (mdps/LSB) */
-#define LSM6DSO_500DPS_FACTOR     17.5f      /* Gyroscope 500dpg factor (mdps/LSB) */
-#define LSM6DSO_1000DPS_FACTOR    35.0f      /* Gyroscope 1000dpg factor (mdps/LSB) */
-#define LSM6DSO_2000DPS_FACTOR    70.0f      /* Gyroscope 2000dpg factor (mdps/LSB) */
-#define LSM6DSO_MDPS2DPS_FACTOR   0.001f     /* Convert mdps to dpg factor */
+#define LSM6DSO_125DPS_FACTOR     4.375f     /* Gyroscope 125dps factor (mdps/LSB) */
+#define LSM6DSO_250DPS_FACTOR     8.75f      /* Gyroscope 250dps factor (mdps/LSB) */
+#define LSM6DSO_500DPS_FACTOR     17.5f      /* Gyroscope 500dps factor (mdps/LSB) */
+#define LSM6DSO_1000DPS_FACTOR    35.0f      /* Gyroscope 1000dps factor (mdps/LSB) */
+#define LSM6DSO_2000DPS_FACTOR    70.0f      /* Gyroscope 2000dps factor (mdps/LSB) */
+#define LSM6DSO_MDPS2DPS_FACTOR   0.001f     /* Convert mdps to dps factor */
+
+/* IO control command. */
+
+#define LSM6DSO_FSM_MANAGE_CMD    0xf1        /* Finite state machine manage command */
 
 /* Factory test instructions. */
 
 #define LSM6DSO_SIMPLE_CHECK      0x00       /* Simple check */
 #define LSM6DSO_FULL_CHECK        0x01       /* Full check */
 
-/* Factory test results. */
-
-#define LSM6DSO_ST_PASS           0          /* Pass ST test */
-#define LSM6DSO_ST_FAIL           -1         /* Failed ST test */
-
 /* Self test results. */
 
-#define LSM6DSO_ST_PASS           1          /* Pass ST test */
-#define LSM6DSO_ST_FAIL           0          /* Failed ST test */
+#define LSM6DSO_ST_PASS           0          /* Pass self test */
+#define LSM6DSO_ST_FAIL           -1         /* Failed self test */
 
 /* Self test limits. */
 
@@ -154,7 +159,7 @@
 /* Sensor device info */
 
 #define LSM6DSO_DEVICE_ID         0x6c       /* Device Identification */
-#define LSM6DSO_DEFAULT_INTERVAL  80000      /* Default conversion interval */
+#define LSM6DSO_DEFAULT_INTERVAL  40000      /* Default conversion interval(us) */
 #define LSM6DSO_WAITBOOT_TIME     10         /* Wait Sensor boot time(ms) */
 
 /* I3C status */
@@ -209,6 +214,48 @@
 #define LSM6DSO_GYRO_NC_TAG       0x01       /* Gyro uncompressed data */
 #define LSM6DSO_XL_NC_TAG         0x02       /* Accel uncompressed data */
 
+/* CFG access mode */
+
+#define LSM6DSO_USER_BANK         0x00       /* User bank */
+#define LSM6DSO_SENSOR_HUB_BANK   0x01       /* Sensor hub bank */
+#define LSM6DSO_EMBEDDEDFUNC_BANK 0x02       /* Embedded func bank */
+
+/* Finite state machine define */
+
+#define LSM6DSO_PG_WRITE_ENABLE   0x02       /* Page write enable */
+#define LSM6DSO_PG_WRITE_DISABLE  0x00       /* Page write disable */
+#define LSM6DSO_LONGCNT_RESET     0x00       /* Reset Long Counter */
+#define LSM6DSO_START_FSM_ADD     0x0400     /* FSM start address */
+#define LSM6DSO_FSM_PROGRAMNUM    0x03       /* FSM program number */
+#define LSM6DSO_FSM_ODR_CFG_NU1   0x03       /* FSM odr config register not used bit */
+#define LSM6DSO_FSM_ODR_CFG_NU2   0x02       /* FSM odr config register not used bit */
+#define LSM6DSO_FSM_PAGE_SEL_NU   0x01       /* FSM page sel config register not used bit */
+#define LSM6DSO_DEFAULT_FSM_EN    0x07lu     /* Default FSM enable */
+
+/* Property status */
+
+#define LSM6DSO_PROPERTY_DISABLE  0x00       /* Property disable */
+#define LSM6DSO_PROPERTY_ENABLE   0x01       /* Property enable */
+
+/* Finite state machine index */
+
+#define LSM6DSO_FSM_INDEX1        0x0001     /* Final state machine 1 index */
+#define LSM6DSO_FSM_INDEX2        0x0002     /* Final state machine 2 index */
+#define LSM6DSO_FSM_INDEX3        0x0004     /* Final state machine 3 index */
+#define LSM6DSO_FSM_INDEX4        0x0008     /* Final state machine 4 index */
+#define LSM6DSO_FSM_INDEX5        0x0010     /* Final state machine 5 index */
+#define LSM6DSO_FSM_INDEX6        0x0020     /* Final state machine 6 index */
+#define LSM6DSO_FSM_INDEX7        0x0040     /* Final state machine 7 index */
+#define LSM6DSO_FSM_INDEX8        0x0080     /* Final state machine 8 index */
+#define LSM6DSO_FSM_INDEX9        0x0100     /* Final state machine 9 index */
+#define LSM6DSO_FSM_INDEX10       0x0200     /* Final state machine 10 index */
+#define LSM6DSO_FSM_INDEX11       0x0400     /* Final state machine 11 index */
+#define LSM6DSO_FSM_INDEX12       0x0800     /* Final state machine 12 index */
+#define LSM6DSO_FSM_INDEX13       0x1000     /* Final state machine 13 index */
+#define LSM6DSO_FSM_INDEX14       0x2000     /* Final state machine 14 index */
+#define LSM6DSO_FSM_INDEX15       0x4000     /* Final state machine 15 index */
+#define LSM6DSO_FSM_INDEX16       0x8000     /* Final state machine 16 index */
+
 /* Device Register */
 
 #define LSM6DSO_FIFO_CTRL1        0x07       /* FIFO control register (r/w) */
@@ -217,6 +264,7 @@
 #define LSM6DSO_FIFO_CTRL4        0x0a       /* FIFO control register (r/w) */
 #define LSM6DSO_COUNTER_BDR_REG1  0x0b       /* DataReady configuration register (r/w)*/
 #define LSM6DSO_INT1_CTRL         0x0d       /* INT1 pad control register (r/w) */
+#define LSM6DSO_INT2_CTRL         0x0e       /* INT2 pad control register (r/w). */
 #define LSM6DSO_WHO_AM_I          0x0f       /* Who_AM_I register (r). This register is a read-only register */
 #define LSM6DSO_CTRL1_XL          0x10       /* Linear acceleration sensor control register 1 (r/w) */
 #define LSM6DSO_CTRL3_C           0x12       /* Control register 3 (r/w) */
@@ -259,6 +307,39 @@
 #define LSM6DSO_TIMESTAMP0_REG    0x40       /* Timestamp first (least significant) byte data output register (r) */
 #define LSM6DSO_TIMESTAMP1_REG    0x41       /* Timestamp second byte data output register (r) */
 #define LSM6DSO_TIMESTAMP2_REG    0x42       /* Timestamp third (most significant) byte data output register (r) */
+
+#define LSM6DSO_FUNC_CFG_ACCESS   0x01       /* Enable embedded functions register (r/w) */
+#define LSM6DSO_PAGE_SEL          0x02       /* Enable advanced features dedicated page (r/w) */
+#define LSM6DSO_EMB_FUNC_EN_A     0x04       /* Embedded functions enable register (r/w) */
+#define LSM6DSO_EMB_FUNC_EN_B     0x05       /* Embedded functions enable register (r/w) */
+#define LSM6DSO_PAGE_ADDRESS      0x08       /* Page address register (r/w) */
+#define LSM6DSO_PAGE_VALUE        0x09       /* Page value register (r/w) */
+#define LSM6DSO_EMB_FUNC_INT1     0x0a       /* INT1 pin control register (r/w) */
+#define LSM6DSO_FSM_INT1_A        0x0b       /* INT1 pin control register (r/w) */
+#define LSM6DSO_FSM_INT1_B        0x0c       /* INT1 pin control register (r/w) */
+#define LSM6DSO_EMB_FUNC_INT2     0x0e       /* INT2 pin control register (r/w) */
+#define LSM6DSO_FSM_INT2_A        0x0f       /* INT2 pin control register (r/w) */
+#define LSM6DSO_FSM_INT2_B        0x10       /* INT2 pin control register (r/w) */
+#define LSM6DSO_PAGE_RW           0x17       /* Enable read and write mode of advanced features dedicated page (r/w) */
+#define LSM6DSO_ALL_INT_SRC       0x1a       /* Source register for all interrupts (r) */
+#define LSM6DSO_WAKE_UP_SRC       0x1b       /* Wake-up interrupt source register (r) */
+#define LSM6DSO_TAP_SRC           0x1c       /* Tap source register (r) */
+#define LSM6DSO_D6D_SRC           0x1d       /* Portrait, landscape, face-up and face-down source register (r) */
+#define LSM6DSO_EMB_FUNC_MPSTATUS 0x35       /* Embedded function status register (r) */
+#define LSM6DSO_FSM_MPSTATUS_A    0x36       /* Finite State Machine status register (r) */
+#define LSM6DSO_FSM_MPSTATUS_B    0x37       /* Finite State Machine status register (r) */
+#define LSM6DSO_STATUS_MPMASTER   0x39       /* Sensor hub source register (r)*/
+#define LSM6DSO_TAP_CFG0          0x56       /* Configuration of filtering, and tap recognition functions (r/w) */
+#define LSM6DSO_TAP_CFG2          0x58       /* Enables interrupt and inactivity functions, and tap recognition functions (r/w) */
+#define LSM6DSO_MD1_CFG           0x5e       /* Functions routing on INT1 register (r/w) */
+#define LSM6DSO_MD2_CFG           0x5f       /* Functions routing on INT2 register (r/w) */
+#define LSM6DSO_EMB_FUNC_ODRCFG_B 0x5f       /* Finite State Machine output data rate configuration register (r/w) */
+#define LSM6DSO_INT_OIS           0x6f       /* OIS interrupt configuration register and accelerometer self-test enable setting */
+#define LSM6DSO_FSM_LC_TIMEOUT_L  0x17a      /* FSM long counter timeout register (r/w) */
+#define LSM6DSO_FSM_LC_TIMEOUT_H  0x17b      /* FSM long counter timeout register (r/w) */
+#define LSM6DSO_FSM_PROGRAMS      0x17c      /* FSM number of programs register (r/w) */
+#define LSM6DSO_FSM_START_ADD_L   0x17e      /* FSM start address register (r/w) */
+#define LSM6DSO_FSM_START_ADD_H   0x17f      /* FSM start address register (r/w) */
 
 /****************************************************************************
  * Private Types
@@ -328,6 +409,20 @@ struct lsm6dso_int1_ctrl_s
 };
 
 typedef struct lsm6dso_int1_ctrl_s lsm6dso_int1_ctrl_t;
+
+struct lsm6dso_int2_ctrl_s
+{
+  uint8_t int2_drdy_xl             : 1;
+  uint8_t int2_drdy_g              : 1;
+  uint8_t int2_drdy_temp           : 1;
+  uint8_t int2_fifo_th             : 1;
+  uint8_t int2_fifo_ovr            : 1;
+  uint8_t int2_fifo_full           : 1;
+  uint8_t int2_cnt_bdr             : 1;
+  uint8_t not_used_01              : 1;
+};
+
+typedef struct lsm6dso_int2_ctrl_s lsm6dso_int2_ctrl_t;
 
 struct lsm6dso_ctrl1_xl_s
 {
@@ -521,12 +616,527 @@ struct lsm6dso_fifo_data_out_tag_s
 
 typedef struct lsm6dso_fifo_data_out_tag_s lsm6dso_fifo_data_out_tag_t;
 
+struct lsm6dso_func_cfg_access_s
+{
+  uint8_t not_used_01              : 6;
+  uint8_t reg_access               : 2;
+};
+
+typedef struct lsm6dso_func_cfg_access_s lsm6dso_func_cfg_access_t;
+
+struct lsm6dso_page_sel_s
+{
+  uint8_t not_used_01              : 4;
+  uint8_t page_sel                 : 4;
+};
+
+typedef struct lsm6dso_page_sel_s lsm6dso_page_sel_t;
+
+struct lsm6dso_emb_func_en_a_s
+{
+  uint8_t not_used_01              : 3;
+  uint8_t pedo_en                  : 1;
+  uint8_t tilt_en                  : 1;
+  uint8_t sign_motion_en           : 1;
+  uint8_t not_used_02              : 2;
+};
+
+typedef struct lsm6dso_emb_func_en_a_s lsm6dso_emb_func_en_a_t;
+
+struct lsm6dso_emb_func_en_b_s
+{
+  uint8_t fsm_en                   : 1;
+  uint8_t not_used_01              : 2;
+  uint8_t fifo_compr_en            : 1;
+  uint8_t pedo_adv_en              : 1;
+  uint8_t not_used_02              : 3;
+};
+
+typedef struct lsm6dso_emb_func_en_b_s lsm6dso_emb_func_en_b_t;
+
+struct lsm6dso_page_address_s
+{
+  uint8_t page_addr                : 8;
+};
+
+typedef struct lsm6dso_page_address_s lsm6dso_page_address_t;
+
+struct lsm6dso_emb_func_int1_s
+{
+  uint8_t not_used_01              : 3;
+  uint8_t int1_step_detector       : 1;
+  uint8_t int1_tilt                : 1;
+  uint8_t int1_sig_mot             : 1;
+  uint8_t not_used_02              : 1;
+  uint8_t int1_fsm_lc              : 1;
+};
+
+typedef struct lsm6dso_emb_func_int1_s lsm6dso_emb_func_int1_t;
+
+struct lsm6dso_fsm_int1_a_s
+{
+  uint8_t int1_fsm1                : 1;
+  uint8_t int1_fsm2                : 1;
+  uint8_t int1_fsm3                : 1;
+  uint8_t int1_fsm4                : 1;
+  uint8_t int1_fsm5                : 1;
+  uint8_t int1_fsm6                : 1;
+  uint8_t int1_fsm7                : 1;
+  uint8_t int1_fsm8                : 1;
+};
+
+typedef struct lsm6dso_fsm_int1_a_s lsm6dso_fsm_int1_a_t;
+
+struct lsm6dso_fsm_int1_b_s
+{
+  uint8_t int1_fsm9                : 1;
+  uint8_t int1_fsm10               : 1;
+  uint8_t int1_fsm11               : 1;
+  uint8_t int1_fsm12               : 1;
+  uint8_t int1_fsm13               : 1;
+  uint8_t int1_fsm14               : 1;
+  uint8_t int1_fsm15               : 1;
+  uint8_t int1_fsm16               : 1;
+};
+
+typedef struct lsm6dso_fsm_int1_b_s lsm6dso_fsm_int1_b_t;
+
+struct lsm6dso_emb_func_int2_s
+{
+  uint8_t not_used_01              : 3;
+  uint8_t int2_step_detector       : 1;
+  uint8_t int2_tilt                : 1;
+  uint8_t int2_sig_mot             : 1;
+  uint8_t not_used_02              : 1;
+  uint8_t int2_fsm_lc              : 1;
+};
+
+typedef struct lsm6dso_emb_func_int2_s lsm6dso_emb_func_int2_t;
+
+struct lsm6dso_fsm_int2_a_s
+{
+  uint8_t int2_fsm1                : 1;
+  uint8_t int2_fsm2                : 1;
+  uint8_t int2_fsm3                : 1;
+  uint8_t int2_fsm4                : 1;
+  uint8_t int2_fsm5                : 1;
+  uint8_t int2_fsm6                : 1;
+  uint8_t int2_fsm7                : 1;
+  uint8_t int2_fsm8                : 1;
+};
+
+typedef struct lsm6dso_fsm_int2_a_s lsm6dso_fsm_int2_a_t;
+
+struct lsm6dso_fsm_int2_b_s
+{
+  uint8_t int2_fsm9                : 1;
+  uint8_t int2_fsm10               : 1;
+  uint8_t int2_fsm11               : 1;
+  uint8_t int2_fsm12               : 1;
+  uint8_t int2_fsm13               : 1;
+  uint8_t int2_fsm14               : 1;
+  uint8_t int2_fsm15               : 1;
+  uint8_t int2_fsm16               : 1;
+};
+
+typedef struct lsm6dso_fsm_int2_b_s lsm6dso_fsm_int2_b_t;
+
+struct lsm6dso_page_rw_s
+{
+  uint8_t not_used_01              : 5;
+  uint8_t page_rw                  : 2;  /* page_write + page_read */
+  uint8_t emb_func_lir             : 1;
+};
+
+typedef struct lsm6dso_page_rw_s lsm6dso_page_rw_t;
+
+struct lsm6dso_all_int_src_s
+{
+  uint8_t ff_ia                    : 1;
+  uint8_t wu_ia                    : 1;
+  uint8_t single_tap               : 1;
+  uint8_t double_tap               : 1;
+  uint8_t d6d_ia                   : 1;
+  uint8_t sleep_change_ia          : 1;
+  uint8_t not_used_01              : 1;
+  uint8_t timestamp_endcount       : 1;
+};
+
+typedef struct lsm6dso_all_int_src_s lsm6dso_all_int_src_t;
+
+struct lsm6dso_wake_up_src_s
+{
+  uint8_t z_wu                     : 1;
+  uint8_t y_wu                     : 1;
+  uint8_t x_wu                     : 1;
+  uint8_t wu_ia                    : 1;
+  uint8_t sleep_state              : 1;
+  uint8_t ff_ia                    : 1;
+  uint8_t sleep_change_ia          : 1;
+  uint8_t not_used_01              : 1;
+};
+
+typedef struct lsm6dso_wake_up_src_s lsm6dso_wake_up_src_t;
+
+struct lsm6dso_tap_src_s
+{
+  uint8_t z_tap                    : 1;
+  uint8_t y_tap                    : 1;
+  uint8_t x_tap                    : 1;
+  uint8_t tap_sign                 : 1;
+  uint8_t double_tap               : 1;
+  uint8_t single_tap               : 1;
+  uint8_t tap_ia                   : 1;
+  uint8_t not_used_02              : 1;
+};
+
+typedef struct lsm6dso_tap_src_s lsm6dso_tap_src_t;
+
+struct lsm6dso_d6d_src_s
+{
+  uint8_t xl                       : 1;
+  uint8_t xh                       : 1;
+  uint8_t yl                       : 1;
+  uint8_t yh                       : 1;
+  uint8_t zl                       : 1;
+  uint8_t zh                       : 1;
+  uint8_t d6d_ia                   : 1;
+  uint8_t den_drdy                 : 1;
+};
+
+typedef struct lsm6dso_d6d_src_s lsm6dso_d6d_src_t;
+
+struct lsm6dso_emb_func_mpstatus_s
+{
+  uint8_t not_used_01             : 3;
+  uint8_t is_step_det             : 1;
+  uint8_t is_tilt                 : 1;
+  uint8_t is_sigmot               : 1;
+  uint8_t not_used_02             : 1;
+  uint8_t is_fsm_lc               : 1;
+};
+
+typedef struct lsm6dso_emb_func_mpstatus_s lsm6dso_emb_func_mpstatus_t;
+
+struct lsm6dso_status_mpmaster_s
+{
+  uint8_t sens_hub_endop          : 1;
+  uint8_t not_used_01             : 2;
+  uint8_t slave0_nack             : 1;
+  uint8_t slave1_nack             : 1;
+  uint8_t slave2_nack             : 1;
+  uint8_t slave3_nack             : 1;
+  uint8_t wr_once_done            : 1;
+};
+
+typedef struct lsm6dso_status_mpmaster_s lsm6dso_status_mpmaster_t;
+
+struct lsm6dso_fsm_mpstatus_a_s
+{
+  uint8_t is_fsm1                 : 1;
+  uint8_t is_fsm2                 : 1;
+  uint8_t is_fsm3                 : 1;
+  uint8_t is_fsm4                 : 1;
+  uint8_t is_fsm5                 : 1;
+  uint8_t is_fsm6                 : 1;
+  uint8_t is_fsm7                 : 1;
+  uint8_t is_fsm8                 : 1;
+};
+
+typedef struct lsm6dso_fsm_mpstatus_a_s lsm6dso_fsm_mpstatus_a_t;
+
+struct lsm6dso_fsm_mpstatus_b_s
+{
+  uint8_t is_fsm9                 : 1;
+  uint8_t is_fsm10                : 1;
+  uint8_t is_fsm11                : 1;
+  uint8_t is_fsm12                : 1;
+  uint8_t is_fsm13                : 1;
+  uint8_t is_fsm14                : 1;
+  uint8_t is_fsm15                : 1;
+  uint8_t is_fsm16                : 1;
+};
+
+typedef struct lsm6dso_fsm_mpstatus_b_s lsm6dso_fsm_mpstatus_b_t;
+
+struct lsm6dso_tap_cfg0_s
+{
+  uint8_t lir                      : 1;
+  uint8_t tap_z_en                 : 1;
+  uint8_t tap_y_en                 : 1;
+  uint8_t tap_x_en                 : 1;
+  uint8_t slope_fds                : 1;
+  uint8_t sleep_status_on_int      : 1;
+  uint8_t int_clr_on_read          : 1;
+  uint8_t not_used_01              : 1;
+};
+
+typedef struct lsm6dso_tap_cfg0_s lsm6dso_tap_cfg0_t;
+
+struct lsm6dso_tap_cfg2_s
+{
+  uint8_t tap_ths_y                : 5;
+  uint8_t inact_en                 : 2;
+  uint8_t interrupts_enable        : 1;
+};
+
+typedef struct lsm6dso_tap_cfg2_s lsm6dso_tap_cfg2_t;
+
+struct lsm6dso_md1_cfg_s
+{
+  uint8_t int1_shub                : 1;
+  uint8_t int1_emb_func            : 1;
+  uint8_t int1_6d                  : 1;
+  uint8_t int1_double_tap          : 1;
+  uint8_t int1_ff                  : 1;
+  uint8_t int1_wu                  : 1;
+  uint8_t int1_single_tap          : 1;
+  uint8_t int1_sleep_change        : 1;
+};
+
+typedef struct lsm6dso_md1_cfg_s lsm6dso_md1_cfg_t;
+
+struct lsm6dso_md2_cfg_s
+{
+  uint8_t int2_timestamp           : 1;
+  uint8_t int2_emb_func            : 1;
+  uint8_t int2_6d                  : 1;
+  uint8_t int2_double_tap          : 1;
+  uint8_t int2_ff                  : 1;
+  uint8_t int2_wu                  : 1;
+  uint8_t int2_single_tap          : 1;
+  uint8_t int2_sleep_change        : 1;
+};
+
+typedef struct lsm6dso_md2_cfg_s lsm6dso_md2_cfg_t;
+
+struct lsm6dso_emb_func_odr_cfg_b_s
+{
+  uint8_t not_used_01              : 3;
+  uint8_t fsm_odr                  : 2;
+  uint8_t not_used_02              : 3;
+};
+
+typedef struct lsm6dso_emb_func_odr_cfg_b_s lsm6dso_emb_func_odr_cfg_b_t;
+
+struct lsm6dso_int_ois_s
+{
+  uint8_t st_xl_ois                : 2;
+  uint8_t not_used_01              : 3;
+  uint8_t den_lh_ois               : 1;
+  uint8_t lvl2_ois                 : 1;
+  uint8_t int2_drdy_ois            : 1;
+};
+
+typedef struct lsm6dso_int_ois_s lsm6dso_int_ois_t;
+
+struct lsm6dso_pin_int1_route_s
+{
+  uint8_t drdy_xl       : 1;        /* Accelerometer data ready */
+  uint8_t drdy_g        : 1;        /* Gyroscope data ready */
+  uint8_t drdy_temp     : 1;        /* Temperature data ready (1 = int2 pin disable) */
+  uint8_t boot          : 1;        /* Restoring calibration parameters */
+  uint8_t fifo_th       : 1;        /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1;        /* FIFO overrun */
+  uint8_t fifo_full     : 1;        /* FIFO full */
+  uint8_t fifo_bdr      : 1;        /* FIFO Batch counter threshold reached */
+  uint8_t den_flag      : 1;        /* external trigger level recognition (DEN) */
+  uint8_t sh_endop      : 1;        /* sensor hub end operation */
+  uint8_t timestamp     : 1;        /* timestamp overflow (1 = int2 pin disable) */
+  uint8_t six_d         : 1;        /* orientation change (6D/4D detection) */
+  uint8_t double_tap    : 1;        /* double-tap event */
+  uint8_t free_fall     : 1;        /* free fall event */
+  uint8_t wake_up       : 1;        /* wake up event */
+  uint8_t single_tap    : 1;        /* single-tap event */
+  uint8_t sleep_change  : 1;        /* Act/Inact (or Vice-versa) status changed */
+  uint8_t step_detector : 1;        /* Step detected */
+  uint8_t tilt          : 1;        /* Relative tilt event detected */
+  uint8_t sig_mot       : 1;        /* "significant motion" event detected */
+  uint8_t fsm_lc        : 1;        /* fsm long counter timeout interrupt event */
+  uint8_t fsm1          : 1;        /* fsm 1 interrupt event */
+  uint8_t fsm2          : 1;        /* fsm 2 interrupt event */
+  uint8_t fsm3          : 1;        /* fsm 3 interrupt event */
+  uint8_t fsm4          : 1;        /* fsm 4 interrupt event */
+  uint8_t fsm5          : 1;        /* fsm 5 interrupt event */
+  uint8_t fsm6          : 1;        /* fsm 6 interrupt event */
+  uint8_t fsm7          : 1;        /* fsm 7 interrupt event */
+  uint8_t fsm8          : 1;        /* fsm 8 interrupt event */
+  uint8_t fsm9          : 1;        /* fsm 9 interrupt event */
+  uint8_t fsm10         : 1;        /* fsm 10 interrupt event */
+  uint8_t fsm11         : 1;        /* fsm 11 interrupt event */
+  uint8_t fsm12         : 1;        /* fsm 12 interrupt event */
+  uint8_t fsm13         : 1;        /* fsm 13 interrupt event */
+  uint8_t fsm14         : 1;        /* fsm 14 interrupt event */
+  uint8_t fsm15         : 1;        /* fsm 15 interrupt event */
+  uint8_t fsm16         : 1;        /* fsm 16 interrupt event */
+  uint8_t mlc1          : 1;        /* mlc 1 interrupt event */
+  uint8_t mlc2          : 1;        /* mlc 2 interrupt event */
+  uint8_t mlc3          : 1;        /* mlc 3 interrupt event */
+  uint8_t mlc4          : 1;        /* mlc 4 interrupt event */
+  uint8_t mlc5          : 1;        /* mlc 5 interrupt event */
+  uint8_t mlc6          : 1;        /* mlc 6 interrupt event */
+  uint8_t mlc7          : 1;        /* mlc 7 interrupt event */
+  uint8_t mlc8          : 1;        /* mlc 8 interrupt event */
+};
+
+typedef struct lsm6dso_pin_int1_route_s lsm6dso_pin_int1_route_t;
+
+struct lsm6dso_pin_int2_route_s
+{
+  uint8_t drdy_ois      : 1;         /* OIS chain data ready */
+  uint8_t drdy_xl       : 1;         /* Accelerometer data ready */
+  uint8_t drdy_g        : 1;         /* Gyroscope data ready */
+  uint8_t drdy_temp     : 1;         /* Temperature data ready */
+  uint8_t fifo_th       : 1;         /* FIFO threshold reached */
+  uint8_t fifo_ovr      : 1;         /* FIFO overrun */
+  uint8_t fifo_full     : 1;         /* FIFO full */
+  uint8_t fifo_bdr      : 1;         /* FIFO Batch counter threshold reached */
+  uint8_t timestamp     : 1;         /* timestamp overflow */
+  uint8_t six_d         : 1;         /* orientation change (6D/4D detection) */
+  uint8_t double_tap    : 1;         /* double-tap event */
+  uint8_t free_fall     : 1;         /* free fall event */
+  uint8_t wake_up       : 1;         /* wake up event */
+  uint8_t single_tap    : 1;         /* single-tap event */
+  uint8_t sleep_change  : 1;         /* Act/Inact (or Vice-versa) status changed */
+  uint8_t step_detector : 1;         /* Step detected */
+  uint8_t tilt          : 1;         /* Relative tilt event detected */
+  uint8_t sig_mot       : 1;         /* "significant motion" event detected */
+  uint8_t fsm_lc        : 1;         /* fsm long counter timeout interrupt event */
+  uint8_t fsm1          : 1;         /* fsm 1 interrupt event */
+  uint8_t fsm2          : 1;         /* fsm 2 interrupt event */
+  uint8_t fsm3          : 1;         /* fsm 3 interrupt event */
+  uint8_t fsm4          : 1;         /* fsm 4 interrupt event */
+  uint8_t fsm5          : 1;         /* fsm 5 interrupt event */
+  uint8_t fsm6          : 1;         /* fsm 6 interrupt event */
+  uint8_t fsm7          : 1;         /* fsm 7 interrupt event */
+  uint8_t fsm8          : 1;         /* fsm 8 interrupt event */
+  uint8_t fsm9          : 1;         /* fsm 9 interrupt event */
+  uint8_t fsm10         : 1;         /* fsm 10 interrupt event */
+  uint8_t fsm11         : 1;         /* fsm 11 interrupt event */
+  uint8_t fsm12         : 1;         /* fsm 12 interrupt event */
+  uint8_t fsm13         : 1;         /* fsm 13 interrupt event */
+  uint8_t fsm14         : 1;         /* fsm 14 interrupt event */
+  uint8_t fsm15         : 1;         /* fsm 15 interrupt event */
+  uint8_t fsm16         : 1;         /* fsm 16 interrupt event */
+  uint8_t mlc1          : 1;         /* mlc 1 interrupt event */
+  uint8_t mlc2          : 1;         /* mlc 2 interrupt event */
+  uint8_t mlc3          : 1;         /* mlc 3 interrupt event */
+  uint8_t mlc4          : 1;         /* mlc 4 interrupt event */
+  uint8_t mlc5          : 1;         /* mlc 5 interrupt event */
+  uint8_t mlc6          : 1;         /* mlc 6 interrupt event */
+  uint8_t mlc7          : 1;         /* mlc 7 interrupt event */
+  uint8_t mlc8          : 1;         /* mlc 8 interrupt event */
+};
+
+typedef struct lsm6dso_pin_int2_route_s lsm6dso_pin_int2_route_t;
+
+struct lsm6dso_all_sources_s
+{
+  uint8_t drdy_xl          : 1;      /* Accelerometer data ready */
+  uint8_t drdy_g           : 1;      /* Gyroscope data ready */
+  uint8_t drdy_temp        : 1;      /* Temperature data ready */
+  uint8_t den_flag         : 1;      /* external trigger level recognition (DEN) */
+  uint8_t timestamp        : 1;      /* timestamp overflow (1 = int2 pin disable) */
+  uint8_t free_fall        : 1;      /* free fall event */
+  uint8_t wake_up          : 1;      /* wake up event */
+  uint8_t wake_up_z        : 1;      /* wake up on Z axis event */
+  uint8_t wake_up_y        : 1;      /* wake up on Y axis event */
+  uint8_t wake_up_x        : 1;      /* wake up on X axis event */
+  uint8_t single_tap       : 1;      /* single-tap event */
+  uint8_t double_tap       : 1;      /* double-tap event */
+  uint8_t tap_z            : 1;      /* single-tap on Z axis event */
+  uint8_t tap_y            : 1;      /* single-tap on Y axis event */
+  uint8_t tap_x            : 1;      /* single-tap on X axis event */
+  uint8_t tap_sign         : 1;      /* sign of tap event (0-pos / 1-neg) */
+  uint8_t six_d            : 1;      /* orientation change (6D/4D detection) */
+  uint8_t six_d_xl         : 1;      /* X-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_xh         : 1;      /* X-axis high 6D/4D event (over threshold) */
+  uint8_t six_d_yl         : 1;      /* Y-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_yh         : 1;      /* Y-axis high 6D/4D event (over threshold) */
+  uint8_t six_d_zl         : 1;      /* Z-axis low 6D/4D event (under threshold) */
+  uint8_t six_d_zh         : 1;      /* Z-axis high 6D/4D event (over threshold) */
+  uint8_t sleep_change     : 1;      /* Act/Inact (or Vice-versa) status changed */
+  uint8_t sleep_state      : 1;      /* Act/Inact status flag (0-Act / 1-Inact) */
+  uint8_t step_detector    : 1;      /* Step detected */
+  uint8_t tilt             : 1;      /* Relative tilt event detected */
+  uint8_t sig_mot          : 1;      /* "significant motion" event detected */
+  uint8_t fsm_lc           : 1;      /* fsm long counter timeout interrupt event */
+  uint8_t fsm1             : 1;      /* fsm 1 interrupt event */
+  uint8_t fsm2             : 1;      /* fsm 2 interrupt event */
+  uint8_t fsm3             : 1;      /* fsm 3 interrupt event */
+  uint8_t fsm4             : 1;      /* fsm 4 interrupt event */
+  uint8_t fsm5             : 1;      /* fsm 5 interrupt event */
+  uint8_t fsm6             : 1;      /* fsm 6 interrupt event */
+  uint8_t fsm7             : 1;      /* fsm 7 interrupt event */
+  uint8_t fsm8             : 1;      /* fsm 8 interrupt event */
+  uint8_t fsm9             : 1;      /* fsm 9 interrupt event */
+  uint8_t fsm10            : 1;      /* fsm 10 interrupt event */
+  uint8_t fsm11            : 1;      /* fsm 11 interrupt event */
+  uint8_t fsm12            : 1;      /* fsm 12 interrupt event */
+  uint8_t fsm13            : 1;      /* fsm 13 interrupt event */
+  uint8_t fsm14            : 1;      /* fsm 14 interrupt event */
+  uint8_t fsm15            : 1;      /* fsm 15 interrupt event */
+  uint8_t fsm16            : 1;      /* fsm 16 interrupt event */
+  uint8_t mlc1             : 1;      /* mlc 1 interrupt event */
+  uint8_t mlc2             : 1;      /* mlc 2 interrupt event */
+  uint8_t mlc3             : 1;      /* mlc 3 interrupt event */
+  uint8_t mlc4             : 1;      /* mlc 4 interrupt event */
+  uint8_t mlc5             : 1;      /* mlc 5 interrupt event */
+  uint8_t mlc6             : 1;      /* mlc 6 interrupt event */
+  uint8_t mlc7             : 1;      /* mlc 7 interrupt event */
+  uint8_t mlc8             : 1;      /* mlc 8 interrupt event */
+  uint8_t sh_endop         : 1;      /* sensor hub end operation */
+  uint8_t sh_slave0_nack   : 1;      /* Not acknowledge on sensor hub slave 0 */
+  uint8_t sh_slave1_nack   : 1;      /* Not acknowledge on sensor hub slave 1 */
+  uint8_t sh_slave2_nack   : 1;      /* Not acknowledge on sensor hub slave 2 */
+  uint8_t sh_slave3_nack   : 1;      /* Not acknowledge on sensor hub slave 3 */
+  uint8_t sh_wr_once       : 1;      /* "WRITE_ONCE" end on sensor hub slave 0 */
+  uint16_t fifo_diff       : 10;     /* Number of unread sensor data in FIFO */
+  uint8_t fifo_ovr_latched : 1;      /* Latched FIFO overrun status */
+  uint8_t fifo_bdr         : 1;      /* FIFO Batch counter threshold reached */
+  uint8_t fifo_full        : 1;      /* FIFO full */
+  uint8_t fifo_ovr         : 1;      /* FIFO overrun */
+  uint8_t fifo_th          : 1;      /* FIFO threshold reached */
+};
+
+typedef struct lsm6dso_all_sources_s lsm6dso_all_sources_t;
+
+struct lsm6dso_emb_sens_s
+{
+  uint8_t sig_mot       : 1;         /* significant motion */
+  uint8_t tilt          : 1;         /* tilt detection  */
+  uint8_t step          : 1;         /* step counter/detector */
+  uint8_t step_adv      : 1;         /* step counter advanced mode */
+  uint8_t fsm           : 1;         /* finite state machine */
+  uint8_t fifo_compr    : 1;         /* FIFO compression */
+};
+
+typedef struct lsm6dso_emb_sens_s lsm6dso_emb_sens_t;
+
+enum lsm6dso_lir_e
+{
+  LSM6DSO_ALL_INT_PULSED          = 0,
+  LSM6DSO_BASE_LATCHED_EMB_PULSED = 1,
+  LSM6DSO_BASE_PULSED_EMB_LATCHED = 2,
+  LSM6DSO_ALL_INT_LATCHED         = 3,
+};
+
+typedef enum lsm6dso_lir_e lsm6dso_lir_t;
+
+struct lsm6dso_emb_fsm_enable_s
+{
+  lsm6dso_fsm_enable_a_t fsm_enable_a;
+  lsm6dso_fsm_enable_b_t fsm_enable_b;
+};
+
+typedef struct lsm6dso_emb_fsm_enable_s lsm6dso_emb_fsm_enable_t;
+
 /* Convert data */
 
 union axis3bit16_u
 {
-  int16_t i16bit[3];                /* 16 bit int data */
-  uint8_t u8bit[6];                 /* 8 bit unsigned int data */
+  int16_t i16bit[3];                                /* 16 bit int data */
+  uint8_t u8bit[6];                                 /* 8 bit unsigned int data */
 };
 
 typedef union axis3bit16_u axis3bit16_t;
@@ -535,14 +1145,14 @@ typedef union axis3bit16_u axis3bit16_t;
 
 struct lsm6dso_sensor_s
 {
-  struct sensor_lowerhalf_s lower;              /* Lower half sensor driver */
-  unsigned int              interval;           /* Sensor interval */
-  unsigned int              batch;              /* Sensor bat */
-  unsigned int              fifowtm;            /* Sensor fifo water marker */
-  unsigned int              last_update;        /* Last update flag */
-  float                     factor;             /* Data factor */
-  bool                      fifoen;             /* Sensor fifo enable */
-  bool                      activated;          /* Sensor working state */
+  struct sensor_lowerhalf_s lower;                  /* Lower half sensor driver */
+  unsigned int              interval;               /* Sensor interval */
+  unsigned int              batch;                  /* Sensor bat */
+  unsigned int              fifowtm;                /* Sensor fifo water marker */
+  unsigned int              last_update;            /* Last update flag */
+  float                     factor;                 /* Data factor */
+  bool                      fifoen;                 /* Sensor fifo enable */
+  bool                      activated;              /* Sensor working state */
 };
 
 /* Device struct */
@@ -551,9 +1161,10 @@ struct lsm6dso_dev_s
 {
   struct lsm6dso_sensor_s     dev[LSM6DSO_IDX_NUM]; /* Sensor struct */
   uint64_t                    timestamp;            /* Units is microseconds */
-  unsigned int                fifowtm;              /* fifo water marker */
   FAR struct lsm6dso_config_s *config;              /* The board config */
   struct work_s               work;                 /* Interrupt handler */
+  unsigned int                fifowtm;              /* fifo water marker */
+  unsigned int                fsmen;                /* FSM enable */
   bool                        fifoen;               /* Sensor fifo enable */
 };
 
@@ -561,16 +1172,16 @@ struct lsm6dso_dev_s
 
 struct lsm6dso_odr_s
 {
-  uint8_t regval;                  /* the data of register */
-  float odr;                       /* the unit is Hz */
+  uint8_t regval;                                   /* the data of register */
+  float odr;                                        /* the unit is Hz */
 };
 
 /* Batch BDR */
 
 struct lsm6dso_bdr_s
 {
-  uint8_t regval;                   /* the data of register */
-  float   bdr;                      /* the unit is Hz */
+  uint8_t regval;                                   /* the data of register */
+  float   bdr;                                      /* the unit is Hz */
 };
 
 /****************************************************************************
@@ -597,10 +1208,19 @@ static int lsm6dso_reset(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_resetwait(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_seti3c(FAR struct lsm6dso_dev_s *priv, uint8_t value);
 static int lsm6dso_setupdate(FAR struct lsm6dso_dev_s *priv, uint8_t value);
+static int lsm6dso_embedded_setsens(FAR struct lsm6dso_dev_s *priv,
+                                    FAR lsm6dso_emb_sens_t *value);
+static void lsm6dso_copybyte(FAR uint8_t *target, FAR uint8_t *source);
+static int lsm6dso_mem_setbank(FAR struct lsm6dso_dev_s *priv,
+                               uint8_t value);
+static int lsm6dso_pg_writelnbyte(FAR struct lsm6dso_dev_s *priv,
+                                  uint16_t address, FAR uint8_t *value);
+static int lsm6dso_pg_writeln(FAR struct lsm6dso_dev_s *priv,
+                              uint16_t address, FAR uint8_t *buf,
+                              uint8_t len);
 
 /* Accelerator handle functions */
 
-static int lsm6dso_xl_setint1(FAR struct lsm6dso_dev_s *priv, uint8_t value);
 static int lsm6dso_xl_setselftest(FAR struct lsm6dso_dev_s *priv,
                                   uint8_t value);
 static int lsm6dso_xl_findodr(FAR float *freq);
@@ -621,7 +1241,6 @@ static int lsm6dso_xl_setlp2filter(FAR struct lsm6dso_dev_s *priv,
 
 /* Gyroscope handle functions */
 
-static int lsm6dso_gy_setint1(FAR struct lsm6dso_dev_s *priv, uint8_t value);
 static int lsm6dso_gy_setselftest(FAR struct lsm6dso_dev_s *priv,
                                   uint8_t value);
 static int lsm6dso_gy_findodr(FAR float *freq);
@@ -638,10 +1257,6 @@ static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
 
 /* FIFO handle functions */
 
-static int lsm6dso_fifo_setint1(FAR struct lsm6dso_dev_s *priv,
-                                uint8_t value);
-static int lsm6dso_fifo_iswtm(FAR struct lsm6dso_dev_s *priv,
-                              FAR uint8_t *value);
 static int lsm6dso_fifo_setmode(FAR struct lsm6dso_dev_s *priv,
                                 uint8_t value);
 static int lsm6dso_fifo_setwatermark(FAR struct lsm6dso_dev_s *priv,
@@ -658,6 +1273,23 @@ static int lsm6dso_fifo_gettag(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_fifo_flushdata(FAR struct lsm6dso_dev_s *priv);
 static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv);
 
+/* Finite state machine handle functions */
+
+static int lsm6dso_fsm_enable(FAR struct lsm6dso_dev_s *priv,
+                              bool enable);
+static int lsm6dso_fsm_manage(FAR struct lsm6dso_dev_s *priv);
+static int lsm6dso_fsm_findodr(FAR float *freq);
+static int lsm6dso_fsm_setstartaddr(FAR struct lsm6dso_dev_s *priv,
+                                    uint16_t value);
+static int lsm6dso_fsm_setprogramnum(FAR struct lsm6dso_dev_s *priv,
+                                     uint8_t value);
+static int lsm6dso_fsm_setenable(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_emb_fsm_enable_t *value);
+static int lsm6dso_fsm_setodr(FAR struct lsm6dso_dev_s *priv,
+                              uint8_t value);
+static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
+                               FAR lsm6dso_all_sources_t *status);
+
 /* Sensor ops functions */
 
 static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
@@ -668,9 +1300,23 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg);
+static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+                           int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
 
+static int lsm6dso_int1_getroute(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_pin_int1_route_t *value);
+static int lsm6dso_int1_setroute(FAR struct lsm6dso_dev_s *priv,
+                                 lsm6dso_pin_int1_route_t value);
+static int lsm6dso_int2_getroute(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_pin_int2_route_t *value);
+static int lsm6dso_int_setnotification(FAR struct lsm6dso_dev_s *priv,
+                                       lsm6dso_lir_t value);
+static int lsm6dso_int_setlongcnt(FAR struct lsm6dso_dev_s *priv,
+                                  uint16_t value);
+static int lsm6dso_int_getall(FAR struct lsm6dso_dev_s *priv,
+                              FAR lsm6dso_all_sources_t *value);
 static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
 static void lsm6dso_worker(FAR void *arg);
@@ -695,48 +1341,97 @@ static const struct sensor_ops_s g_lsm6dso_gy_ops =
   .selftest = lsm6dso_selftest          /* Sensor selftest function */
 };
 
+static const struct sensor_ops_s g_lsm6dso_fsm_ops =
+{
+  .activate = lsm6dso_activate,         /* Enable/disable sensor */
+  .set_interval = lsm6dso_set_interval, /* Set output data period */
+  .control = lsm6dso_control            /* Set special config for sensor */
+};
+
 static const struct lsm6dso_odr_s g_lsm6dso_xl_odr[] =
 {
-  {LSM6DSO_XL_ODR_12p5HZ, 12.5},   /* Sampling interval is 80ms */
-  {LSM6DSO_XL_ODR_26HZ,   26},     /* Sampling interval is about 38.462ms */
-  {LSM6DSO_XL_ODR_52HZ,   52},     /* Sampling interval is about 19.231ms */
-  {LSM6DSO_XL_ODR_104HZ,  104},    /* Sampling interval is about 9.616ms */
-  {LSM6DSO_XL_ODR_208HZ,  208},    /* Sampling interval is about 4.808ms */
-  {LSM6DSO_XL_ODR_416HZ,  416},    /* Sampling interval is about 2.404ms */
-  {LSM6DSO_XL_ODR_833HZ,  833},    /* Sampling interval is about 1.201ms */
+  {LSM6DSO_XL_ODR_12p5HZ, 12.5},        /* Sampling interval is 80ms */
+  {LSM6DSO_XL_ODR_26HZ,   26},          /* Sampling interval is about 38.462ms */
+  {LSM6DSO_XL_ODR_52HZ,   52},          /* Sampling interval is about 19.231ms */
+  {LSM6DSO_XL_ODR_104HZ,  104},         /* Sampling interval is about 9.616ms */
+  {LSM6DSO_XL_ODR_208HZ,  208},         /* Sampling interval is about 4.808ms */
+  {LSM6DSO_XL_ODR_416HZ,  416},         /* Sampling interval is about 2.404ms */
+  {LSM6DSO_XL_ODR_833HZ,  833},         /* Sampling interval is about 1.201ms */
 };
 
 static const struct lsm6dso_odr_s g_lsm6dso_gy_odr[] =
 {
-  {LSM6DSO_GY_ODR_12p5HZ, 12.5},    /* Sampling interval is 80ms */
-  {LSM6DSO_GY_ODR_26HZ,   26},      /* Sampling interval is about 38.462ms */
-  {LSM6DSO_GY_ODR_52HZ,   52},      /* Sampling interval is about 19.231ms */
-  {LSM6DSO_GY_ODR_104HZ,  104},     /* Sampling interval is about 9.616ms */
-  {LSM6DSO_GY_ODR_208HZ,  208},     /* Sampling interval is about 4.808ms */
-  {LSM6DSO_GY_ODR_416HZ,  416},     /* Sampling interval is about 2.404ms */
-  {LSM6DSO_GY_ODR_833HZ,  833},     /* Sampling interval is about 1.201ms */
+  {LSM6DSO_GY_ODR_12p5HZ, 12.5},        /* Sampling interval is 80ms */
+  {LSM6DSO_GY_ODR_26HZ,   26},          /* Sampling interval is about 38.462ms */
+  {LSM6DSO_GY_ODR_52HZ,   52},          /* Sampling interval is about 19.231ms */
+  {LSM6DSO_GY_ODR_104HZ,  104},         /* Sampling interval is about 9.616ms */
+  {LSM6DSO_GY_ODR_208HZ,  208},         /* Sampling interval is about 4.808ms */
+  {LSM6DSO_GY_ODR_416HZ,  416},         /* Sampling interval is about 2.404ms */
+  {LSM6DSO_GY_ODR_833HZ,  833},         /* Sampling interval is about 1.201ms */
+};
+
+static const struct lsm6dso_odr_s g_lsm6dso_fsm_odr[] =
+{
+  {LSM6DSO_FSM_ODR_12p5HZ, 12.5},       /* FSM interval is 80ms */
+  {LSM6DSO_FSM_ODR_26HZ,   26},         /* FSM interval is about 38.462ms */
+  {LSM6DSO_FSM_ODR_52HZ,   52},         /* FSM interval is about 19.231ms */
+  {LSM6DSO_FSM_ODR_104HZ,  104},        /* FSM interval is about 9.616ms */
 };
 
 static const struct lsm6dso_bdr_s g_lsm6dso_xl_bdr[] =
 {
-  {LSM6DSO_XL_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms */
-  {LSM6DSO_XL_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms */
-  {LSM6DSO_XL_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms */
-  {LSM6DSO_XL_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms */
-  {LSM6DSO_XL_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms */
-  {LSM6DSO_XL_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms */
-  {LSM6DSO_XL_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms */
+  {LSM6DSO_XL_BDR_12p5Hz, 12.5},        /* Sampling interval is 80ms */
+  {LSM6DSO_XL_BDR_26Hz,   26},          /* Sampling interval is about 38.462ms */
+  {LSM6DSO_XL_BDR_52Hz,   52},          /* Sampling interval is about 19.231ms */
+  {LSM6DSO_XL_BDR_104Hz,  104},         /* Sampling interval is about 9.616ms */
+  {LSM6DSO_XL_BDR_208Hz,  208},         /* Sampling interval is about 4.808ms */
+  {LSM6DSO_XL_BDR_417Hz,  417},         /* Sampling interval is about 2.398ms */
+  {LSM6DSO_XL_BDR_833Hz,  833},         /* Sampling interval is about 1.201ms */
 };
 
 static const struct lsm6dso_bdr_s g_lsm6dso_gy_bdr[] =
 {
-  {LSM6DSO_GY_BDR_12p5Hz, 12.5},    /* Sampling interval is 80ms */
-  {LSM6DSO_GY_BDR_26Hz,   26},      /* Sampling interval is about 38.462ms */
-  {LSM6DSO_GY_BDR_52Hz,   52},      /* Sampling interval is about 19.231ms */
-  {LSM6DSO_GY_BDR_104Hz,  104},     /* Sampling interval is about 9.616ms */
-  {LSM6DSO_GY_BDR_208Hz,  208},     /* Sampling interval is about 4.808ms */
-  {LSM6DSO_GY_BDR_417Hz,  417},     /* Sampling interval is about 2.398ms */
-  {LSM6DSO_GY_BDR_833Hz,  833},     /* Sampling interval is about 1.201ms */
+  {LSM6DSO_GY_BDR_12p5Hz, 12.5},        /* Sampling interval is 80ms */
+  {LSM6DSO_GY_BDR_26Hz,   26},          /* Sampling interval is about 38.462ms */
+  {LSM6DSO_GY_BDR_52Hz,   52},          /* Sampling interval is about 19.231ms */
+  {LSM6DSO_GY_BDR_104Hz,  104},         /* Sampling interval is about 9.616ms */
+  {LSM6DSO_GY_BDR_208Hz,  208},         /* Sampling interval is about 4.808ms */
+  {LSM6DSO_GY_BDR_417Hz,  417},         /* Sampling interval is about 2.398ms */
+  {LSM6DSO_GY_BDR_833Hz,  833},         /* Sampling interval is about 1.201ms */
+};
+
+/* Programs can be extracted from ".ucf" configuration file generated
+ * by Unico / Unicleo tool.
+ */
+
+/* Program: wrist tilt(only xl) */
+
+const uint8_t g_lsm6so_prg_wrist_tilt_xl[] =
+{
+  0x52, 0x00, 0x14, 0x00, 0x0d, 0x00, 0x8e, 0x31, 0x20, 0x00, 0x00, 0x0d,
+  0x06, 0x23, 0x00, 0x53, 0x33, 0x74, 0x44, 0x22
+};
+
+/* Program: wrist tilt (left) */
+
+const uint8_t g_lsm6so_prg_wrist_tilt_left[] =
+{
+  0xb1, 0x30, 0x34, 0x00, 0x1d, 0x00, 0x96, 0x31, 0x00, 0xb8, 0x80, 0x00,
+  0x20, 0x00, 0x80, 0x00, 0xec, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x08, 0x00, 0x66, 0xaa, 0x96, 0x31, 0x23, 0x01, 0xa5,
+  0xff, 0x42, 0x0a, 0xaa, 0x96, 0x39, 0x23, 0x07, 0xa5, 0x23, 0x00, 0x77,
+  0x83, 0x88, 0x86, 0x22
+};
+
+/* Program: wrist tilt (right) */
+
+const uint8_t g_lsm6so_prg_wrist_tilt_right[] =
+{
+  0xb1, 0x30, 0x34, 0x00, 0x1d, 0x00, 0x96, 0x31, 0x00, 0xb8, 0x80, 0x00,
+  0x20, 0x00, 0x40, 0x00, 0xec, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x08, 0x00, 0x66, 0xaa, 0x96, 0x31, 0x23, 0x01, 0xa5,
+  0xff, 0x42, 0x0a, 0xaa, 0x96, 0x39, 0x23, 0x07, 0xa5, 0x23, 0x00, 0x77,
+  0x83, 0x88, 0x86, 0x22
 };
 
 /****************************************************************************
@@ -1176,6 +1871,19 @@ static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
 
       up_mdelay(LSM6DSO_SET_DELAY);               /* 100ms */
 
+      /* Check if new value available. */
+
+      do
+        {
+          up_mdelay(LSM6DSO_READ_DELAY);
+          lsm6dso_gy_isready(priv, &drdy);
+        }
+      while (!drdy);
+
+      /* Read dummy data and discard it. */
+
+      lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+
       /* Read 5 sample and get the average vale for each axis. */
 
       memset(val_st_on, 0x00, sizeof(val_st_on));
@@ -1220,6 +1928,8 @@ static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
 
       /* Check self test limit. */
 
+      st_result = LSM6DSO_ST_PASS;
+
       for (i = 0; i < 3; i++)
         {
           if ((LSM6DSO_MIN_ST_LIMIT_MDPS > test_val[i])
@@ -1240,20 +1950,20 @@ static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
       /* Disable sensor. */
 
       lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_OFF);
-
-      if (st_result == LSM6DSO_ST_PASS)
-        {
-          sninfo("Self Test - PASS\n");
-        }
-      else
-        {
-          sninfo("Self Test - FAIL\n");
-        }
     }
   else
     {
       snerr("Failed to match sensor type.\n");
       return -EINVAL;
+    }
+
+  if (st_result == LSM6DSO_ST_PASS)
+    {
+      sninfo("Self Test - PASS\n");
+    }
+  else
+    {
+      sninfo("Self Test - FAIL\n");
     }
 
   return st_result;
@@ -1320,7 +2030,7 @@ static int lsm6dso_resetwait(FAR struct lsm6dso_dev_s *priv)
 
   if (maxcount == 0)
     {
-      sninfo("lsm6dso reset wait timeout!\n");
+      snerr("lsm6dso reset wait timeout!\n");
     }
 
   return OK;
@@ -1399,14 +2109,14 @@ static int lsm6dso_setupdate(FAR struct lsm6dso_dev_s *priv, uint8_t value)
 }
 
 /****************************************************************************
- * Name: lsm6dso_xl_setint1
+ * Name: lsm6dso_embedded_setsens
  *
  * Description:
- *   Set interrupt for accelerometer.
+ *   Embedded functions.
  *
  * Input Parameters:
- *   priv  - Device struct.
- *   value - INT state.
+ *   priv    - Device struct.
+ *   value   - Change the values of registers.
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on failure.
@@ -1416,16 +2126,256 @@ static int lsm6dso_setupdate(FAR struct lsm6dso_dev_s *priv, uint8_t value)
  *
  ****************************************************************************/
 
-static int lsm6dso_xl_setint1(FAR struct lsm6dso_dev_s *priv, uint8_t value)
+static int lsm6dso_embedded_setsens(FAR struct lsm6dso_dev_s *priv,
+                                    FAR lsm6dso_emb_sens_t *value)
 {
-  lsm6dso_int1_ctrl_t reg;
+  lsm6dso_emb_func_en_a_t emb_func_en_a;
+  lsm6dso_emb_func_en_b_t emb_func_en_b;
+  int ret;
 
-  lsm6dso_spi_read(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg, 1);
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+            ret);
+      return ret;
+    }
 
-  reg.int1_drdy_xl = value;
-  lsm6dso_spi_write(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg);
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_EN_A,
+                   (FAR uint8_t *)&emb_func_en_a, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_EN_B,
+                   (FAR uint8_t *)&emb_func_en_b, 1);
+  emb_func_en_b.fsm_en = value->fsm;
+  emb_func_en_a.tilt_en = value->tilt;
+  emb_func_en_a.pedo_en = value->step;
+  emb_func_en_b.pedo_adv_en = value->step_adv;
+  emb_func_en_a.sign_motion_en = value->sig_mot;
+  emb_func_en_b.fifo_compr_en = value->fifo_compr;
+  lsm6dso_spi_write(priv, LSM6DSO_EMB_FUNC_EN_A,
+                    (FAR uint8_t *)&emb_func_en_a);
+  lsm6dso_spi_write(priv, LSM6DSO_EMB_FUNC_EN_B,
+                    (FAR uint8_t *)&emb_func_en_b);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+            ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_copybyte
+ *
+ * Description:
+ *   Copy a byte from source to target.
+ *
+ * Input Parameters:
+ *   target   - Target address.
+ *   source   - Source address.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void lsm6dso_copybyte(FAR uint8_t *target, FAR uint8_t *source)
+{
+  if ((target != NULL) && (source != NULL))
+    {
+      *target = *source;
+    }
+}
+
+/****************************************************************************
+ * Name: lsm6dso_mem_setbank
+ *
+ * Description:
+ *   Enable access to the embedded functions/sensor hub
+ *   configuration registers.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - Change the values of reg_access.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_mem_setbank(FAR struct lsm6dso_dev_s *priv,
+                               uint8_t value)
+{
+  lsm6dso_func_cfg_access_t reg;
+
+  lsm6dso_spi_read(priv, LSM6DSO_FUNC_CFG_ACCESS, (FAR uint8_t *)&reg, 1);
+
+  reg.reg_access = (uint8_t)value;
+  lsm6dso_spi_write(priv, LSM6DSO_FUNC_CFG_ACCESS, (FAR uint8_t *)&reg);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_pg_writelnbyte
+ *
+ * Description:
+ *   Write a line(byte) in a page.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   address - page line address.
+ *   value   - value to write.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_pg_writelnbyte(FAR struct lsm6dso_dev_s *priv,
+                                  uint16_t address, FAR uint8_t *value)
+{
+  lsm6dso_page_rw_t page_rw;
+  lsm6dso_page_sel_t page_sel;
+  lsm6dso_page_address_t page_address;
+  int ret;
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+            ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw, 1);
+  page_rw.page_rw = LSM6DSO_PG_WRITE_ENABLE;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw);
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_SEL, (FAR uint8_t *)&page_sel, 1);
+  page_sel.page_sel = ((uint8_t)(address >> 8) & 0x0fu);
+  page_sel.not_used_01 = 1;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_SEL, (FAR uint8_t *)&page_sel);
+
+  page_address.page_addr = (uint8_t)address & 0xffu;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_ADDRESS,
+                    (FAR uint8_t *)&page_address);
+
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_VALUE, value);
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw, 1);
+  page_rw.page_rw = LSM6DSO_PG_WRITE_DISABLE;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+            ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_pg_writeln
+ *
+ * Description:
+ *   Write buffer in a page.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   address - page line address.
+ *   buf   - buffer to write.
+ *   len   - buffer len.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_pg_writeln(FAR struct lsm6dso_dev_s *priv,
+                              uint16_t address, FAR uint8_t *buf,
+                              uint8_t len)
+{
+  lsm6dso_page_rw_t page_rw;
+  lsm6dso_page_sel_t page_sel;
+  lsm6dso_page_address_t  page_address;
+  uint16_t addr_pointed;
+  int ret;
+  uint8_t i ;
+
+  addr_pointed = address;
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+            ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw, 1);
+  page_rw.page_rw = LSM6DSO_PG_WRITE_ENABLE;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw);
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_SEL, (FAR uint8_t *)&page_sel, 1);
+  page_sel.page_sel = ((uint8_t)(addr_pointed >> 8) & 0x0fu);
+  page_sel.not_used_01 = LSM6DSO_FSM_PAGE_SEL_NU;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_SEL, (FAR uint8_t *)&page_sel);
+
+  page_address.page_addr = (uint8_t)(addr_pointed & 0x00ffu);
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_ADDRESS,
+                    (FAR uint8_t *)&page_address);
+
+  for (i = 0; i < len; i++)
+    {
+      lsm6dso_spi_write(priv, LSM6DSO_PAGE_VALUE, &buf[i]);
+      addr_pointed++;
+
+      /* Check if page wrap */
+
+      if (addr_pointed % 0x0100u == 0x00u && ret == 0)
+        {
+          lsm6dso_spi_read(priv, LSM6DSO_PAGE_SEL,
+                           (FAR uint8_t *)&page_sel, 1);
+          page_sel.page_sel = ((uint8_t)(addr_pointed >> 8) & 0x0fu);
+          page_sel.not_used_01 = LSM6DSO_FSM_PAGE_SEL_NU;
+          lsm6dso_spi_write(priv, LSM6DSO_PAGE_SEL,
+                            (FAR uint8_t *)&page_sel);
+        }
+    }
+
+  page_sel.page_sel = 0;
+  page_sel.not_used_01 = LSM6DSO_FSM_PAGE_SEL_NU;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_SEL, (FAR uint8_t *)&page_sel);
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw, 1);
+  page_rw.page_rw = LSM6DSO_PG_WRITE_DISABLE;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1577,6 +2527,18 @@ static int lsm6dso_xl_setfullscale(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
                              bool enable)
 {
+  lsm6dso_pin_int1_route_t pin_int1_route;
+  int ret;
+
+  /* Get all interrupt setting. */
+
+  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
+  if (ret < 0)
+    {
+      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
+      return ret;
+    }
+
   if (enable)
     {
       /* Accelerometer config registers:
@@ -1585,7 +2547,7 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
 
       lsm6dso_xl_setfullscale(priv, LSM6DSO_2G);
       priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
-                                       * LSM6DSO_MG2G_FACTOR;
+                                       * LSM6DSO_MG2MS_FACTOR;
 
       /* Configure filtering chain(No aux interface)
        * Accelerometer - LPF1 + LPF2 path.
@@ -1598,11 +2560,11 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
 
       if (priv->dev[LSM6DSO_XL_IDX].fifoen)
         {
-          lsm6dso_xl_setint1(priv, LSM6DSO_XL_INT_DISABLE);
+          pin_int1_route.drdy_xl = LSM6DSO_XL_INT_DISABLE;
         }
       else
         {
-          lsm6dso_xl_setint1(priv, LSM6DSO_XL_INT_ENABLE);
+          pin_int1_route.drdy_xl = LSM6DSO_XL_INT_ENABLE;
         }
     }
   else
@@ -1610,8 +2572,12 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
       /* Set to Shut Down. */
 
       lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_OFF);
-      lsm6dso_xl_setint1(priv, LSM6DSO_XL_INT_DISABLE);
+      pin_int1_route.drdy_xl = LSM6DSO_XL_INT_DISABLE;
     }
+
+  /* Set interrupt route. */
+
+  lsm6dso_int1_setroute(priv, pin_int1_route);
 
   return OK;
 }
@@ -1739,36 +2705,6 @@ static int lsm6dso_xl_setlp2filter(FAR struct lsm6dso_dev_s *priv,
 
   reg.lpf2_xl_en = value;
   lsm6dso_spi_write(priv, LSM6DSO_CTRL1_XL, (FAR uint8_t *)&reg);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_gy_setint1
- *
- * Description:
- *   Set interrupt for gyroscope.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - INT state.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lsm6dso_gy_setint1(FAR struct lsm6dso_dev_s *priv, uint8_t value)
-{
-  lsm6dso_int1_ctrl_t reg;
-
-  lsm6dso_spi_read(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg, 1);
-
-  reg.int1_drdy_g = value;
-  lsm6dso_spi_write(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg);
 
   return OK;
 }
@@ -1922,6 +2858,18 @@ static int lsm6dso_gy_setfullscale(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
                              bool enable)
 {
+  lsm6dso_pin_int1_route_t pin_int1_route;
+  int ret;
+
+  /* Get all interrupt setting. */
+
+  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
+  if (ret < 0)
+    {
+      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
+      return ret;
+    }
+
   if (enable)
     {
       /* Gyro config registers Turn on the gyro: FS=2000dps.
@@ -1936,11 +2884,11 @@ static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
 
       if (priv->dev[LSM6DSO_GY_IDX].fifoen)
         {
-          lsm6dso_gy_setint1(priv, LSM6DSO_GY_INT_DISABLE);
+          pin_int1_route.drdy_g = LSM6DSO_GY_INT_DISABLE;
         }
       else
         {
-          lsm6dso_gy_setint1(priv, LSM6DSO_GY_INT_ENABLE);
+          pin_int1_route.drdy_g = LSM6DSO_GY_INT_ENABLE;
         }
     }
   else
@@ -1948,8 +2896,12 @@ static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
       /* Set to Shut Down */
 
       lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_OFF);
-      lsm6dso_gy_setint1(priv, LSM6DSO_GY_INT_DISABLE);
+      pin_int1_route.drdy_g = LSM6DSO_GY_INT_DISABLE;
     }
+
+  /* Set interrupt route. */
+
+  lsm6dso_int1_setroute(priv, pin_int1_route);
 
   return OK;
 }
@@ -2013,68 +2965,6 @@ static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
   value->x = temp.i16bit[0] * priv->dev[LSM6DSO_GY_IDX].factor;
   value->y = temp.i16bit[1] * priv->dev[LSM6DSO_GY_IDX].factor;
   value->z = temp.i16bit[2] * priv->dev[LSM6DSO_GY_IDX].factor;
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_fifo_setint1
- *
- * Description:
- *   Set interrupt for FIFO.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - INT state.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lsm6dso_fifo_setint1(FAR struct lsm6dso_dev_s *priv,
-                                uint8_t value)
-{
-  lsm6dso_int1_ctrl_t reg;
-
-  lsm6dso_spi_read(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg, 1);
-
-  reg.int1_fifo_full = value;
-  reg.int1_fifo_ovr = value;
-  reg.int1_fifo_th = value;
-  lsm6dso_spi_write(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&reg);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_fifo_iswtm
- *
- * Description:
- *   Read the FIFO watermark status.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - INT state.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lsm6dso_fifo_iswtm(FAR struct lsm6dso_dev_s *priv,
-                              FAR uint8_t *value)
-{
-  lsm6dso_fifo_status2_t reg;
-
-  lsm6dso_spi_read(priv, LSM6DSO_FIFO_STATUS2, (FAR uint8_t *)&reg, 1);
-  *value = reg.fifo_wtm_ia;
 
   return OK;
 }
@@ -2478,6 +3368,462 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
   return ret;
 }
 
+/* Finite state machine handle functions */
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_enable
+ *
+ * Description:
+ *   Start/stop finite state machine.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - fsm state.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_enable(FAR struct lsm6dso_dev_s *priv,
+                              bool enable)
+{
+  lsm6dso_emb_sens_t emb_sens;
+  uint16_t fsm_addr;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Check the sensor is setting to active. */
+
+  if (enable
+      && priv->dev[LSM6DSO_XL_IDX].activated == false
+      && priv->dev[LSM6DSO_GY_IDX].activated == false)
+    {
+      snerr("Sensor is not activated: %d\n", -ENXIO);
+      return -ENXIO;
+    }
+  else if (!enable)
+    {
+      priv->fsmen = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  /* Set interrupt and finite state machine state. */
+
+  ret = lsm6dso_fsm_manage(priv);
+  if (ret < 0)
+    {
+      snerr("Failed to set finite state machine: %d\n", ret);
+      return ret;
+    }
+
+  /* Disable finite state machine. */
+
+  if (!enable)
+    {
+      return ret;
+    }
+
+  /* Set the first address where the programs are written. */
+
+  lsm6dso_fsm_setstartaddr(priv, LSM6DSO_START_FSM_ADD);
+
+  /* Set the number of the programs. */
+
+  lsm6dso_fsm_setprogramnum(priv, LSM6DSO_FSM_PROGRAMNUM);
+
+  /* Set finite state machine data rate. */
+
+  lsm6dso_fsm_setodr(priv, LSM6DSO_FSM_ODR_26HZ);
+
+  /* Write programs. */
+
+  fsm_addr = LSM6DSO_START_FSM_ADD;
+
+  /* Wrist tilt xl. */
+
+  lsm6dso_pg_writeln(priv, fsm_addr,
+                     (FAR uint8_t *)g_lsm6so_prg_wrist_tilt_xl,
+                     sizeof(g_lsm6so_prg_wrist_tilt_xl));
+  fsm_addr += sizeof(g_lsm6so_prg_wrist_tilt_xl);
+
+  /* Wrist tilt left. */
+
+  lsm6dso_pg_writeln(priv, fsm_addr,
+                     (FAR uint8_t *)g_lsm6so_prg_wrist_tilt_left,
+                     sizeof(g_lsm6so_prg_wrist_tilt_left));
+  fsm_addr += sizeof(g_lsm6so_prg_wrist_tilt_left);
+
+  /* Wrist tilt right. */
+
+  lsm6dso_pg_writeln(priv, fsm_addr,
+                     (FAR uint8_t *)g_lsm6so_prg_wrist_tilt_right,
+                     sizeof(g_lsm6so_prg_wrist_tilt_right));
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_manage
+ *
+ * Description:
+ *   Manage finite state machine. Control which finite state
+ *   machines are started.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_manage(FAR struct lsm6dso_dev_s *priv)
+{
+  lsm6dso_pin_int1_route_t pin_int1_route;
+  lsm6dso_emb_fsm_enable_t fsm_enable;
+  lsm6dso_emb_sens_t emb_sens;
+  int ret;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Route signals on interrupt pin 1. */
+
+  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
+  if (ret < 0)
+    {
+      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
+      return ret;
+    }
+
+  pin_int1_route.fsm1  = priv->fsmen & LSM6DSO_FSM_INDEX1;
+  pin_int1_route.fsm2  = priv->fsmen & LSM6DSO_FSM_INDEX2;
+  pin_int1_route.fsm3  = priv->fsmen & LSM6DSO_FSM_INDEX3;
+  pin_int1_route.fsm4  = priv->fsmen & LSM6DSO_FSM_INDEX4;
+  pin_int1_route.fsm5  = priv->fsmen & LSM6DSO_FSM_INDEX5;
+  pin_int1_route.fsm6  = priv->fsmen & LSM6DSO_FSM_INDEX6;
+  pin_int1_route.fsm7  = priv->fsmen & LSM6DSO_FSM_INDEX7;
+  pin_int1_route.fsm8  = priv->fsmen & LSM6DSO_FSM_INDEX8;
+  pin_int1_route.fsm9  = priv->fsmen & LSM6DSO_FSM_INDEX9;
+  pin_int1_route.fsm10 = priv->fsmen & LSM6DSO_FSM_INDEX10;
+  pin_int1_route.fsm11 = priv->fsmen & LSM6DSO_FSM_INDEX11;
+  pin_int1_route.fsm12 = priv->fsmen & LSM6DSO_FSM_INDEX12;
+  pin_int1_route.fsm13 = priv->fsmen & LSM6DSO_FSM_INDEX13;
+  pin_int1_route.fsm14 = priv->fsmen & LSM6DSO_FSM_INDEX14;
+  pin_int1_route.fsm15 = priv->fsmen & LSM6DSO_FSM_INDEX15;
+  pin_int1_route.fsm16 = priv->fsmen & LSM6DSO_FSM_INDEX16;
+
+  lsm6dso_int1_setroute(priv, pin_int1_route);
+
+  /* Configure interrupt pin mode notification. */
+
+  lsm6dso_int_setnotification(priv, LSM6DSO_BASE_PULSED_EMB_LATCHED);
+
+  /* Enable final state machine */
+
+  fsm_enable.fsm_enable_a.fsm1_en  = priv->fsmen & LSM6DSO_FSM_INDEX1;
+  fsm_enable.fsm_enable_a.fsm2_en  = priv->fsmen & LSM6DSO_FSM_INDEX2;
+  fsm_enable.fsm_enable_a.fsm3_en  = priv->fsmen & LSM6DSO_FSM_INDEX3;
+  fsm_enable.fsm_enable_a.fsm4_en  = priv->fsmen & LSM6DSO_FSM_INDEX4;
+  fsm_enable.fsm_enable_a.fsm5_en  = priv->fsmen & LSM6DSO_FSM_INDEX5;
+  fsm_enable.fsm_enable_a.fsm6_en  = priv->fsmen & LSM6DSO_FSM_INDEX6;
+  fsm_enable.fsm_enable_a.fsm7_en  = priv->fsmen & LSM6DSO_FSM_INDEX7;
+  fsm_enable.fsm_enable_a.fsm8_en  = priv->fsmen & LSM6DSO_FSM_INDEX8;
+  fsm_enable.fsm_enable_b.fsm9_en  = priv->fsmen & LSM6DSO_FSM_INDEX9;
+  fsm_enable.fsm_enable_b.fsm10_en = priv->fsmen & LSM6DSO_FSM_INDEX10;
+  fsm_enable.fsm_enable_b.fsm11_en = priv->fsmen & LSM6DSO_FSM_INDEX11;
+  fsm_enable.fsm_enable_b.fsm12_en = priv->fsmen & LSM6DSO_FSM_INDEX12;
+  fsm_enable.fsm_enable_b.fsm13_en = priv->fsmen & LSM6DSO_FSM_INDEX13;
+  fsm_enable.fsm_enable_b.fsm14_en = priv->fsmen & LSM6DSO_FSM_INDEX14;
+  fsm_enable.fsm_enable_b.fsm15_en = priv->fsmen & LSM6DSO_FSM_INDEX15;
+  fsm_enable.fsm_enable_b.fsm16_en = priv->fsmen & LSM6DSO_FSM_INDEX16;
+
+  lsm6dso_fsm_setenable(priv, &fsm_enable);
+
+  /* Disable Finite State Machine */
+
+  if (priv->fsmen == LSM6DSO_PROPERTY_DISABLE)
+    {
+      emb_sens.fsm = LSM6DSO_PROPERTY_DISABLE;
+    }
+  else
+    {
+      /* Reset Long Counter. */
+
+      lsm6dso_int_setlongcnt(priv, LSM6DSO_LONGCNT_RESET);
+      emb_sens.fsm = LSM6DSO_PROPERTY_ENABLE;
+    }
+
+  lsm6dso_embedded_setsens(priv, &emb_sens);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_findodr
+ *
+ * Description:
+ *   Find the best matching odr for FSM.
+ *
+ * Input Parameters:
+ *   freq  - Desired frequency.
+ *
+ * Returned Value:
+ *   Index of the best fit ODR.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_findodr(FAR float *freq)
+{
+  int i;
+  int num = sizeof(g_lsm6dso_fsm_odr) / sizeof(struct lsm6dso_odr_s);
+
+  for (i = 0; i < num; i++)
+    {
+      if (*freq < g_lsm6dso_fsm_odr[i].odr
+         || *freq == g_lsm6dso_fsm_odr[i].odr)
+        {
+          *freq = g_lsm6dso_fsm_odr[i].odr;
+          return i;
+        }
+    }
+
+  return num - 1;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_setstartaddr
+ *
+ * Description:
+ *   FSM start address register (r/w).
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   value   - The value of start address
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_setstartaddr(FAR struct lsm6dso_dev_s *priv,
+                                    uint16_t value)
+{
+  int ret;
+  uint8_t buff[2];
+
+  buff[1] = (uint8_t)(value / 256U);
+  buff[0] = (uint8_t)(value - (buff[1] * 256U));
+  ret = lsm6dso_pg_writelnbyte(priv, LSM6DSO_FSM_START_ADD_L, &buff[0]);
+
+  if (ret == 0)
+    {
+      ret = lsm6dso_pg_writelnbyte(priv, LSM6DSO_FSM_START_ADD_H,
+                                   &buff[1]);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_setprogramnum
+ *
+ * Description:
+ *   FSM number of programs register.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   value   - Value to write.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_setprogramnum(FAR struct lsm6dso_dev_s *priv,
+                                     uint8_t value)
+{
+  return lsm6dso_pg_writelnbyte(priv, LSM6DSO_FSM_PROGRAMS, &value);
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_setenable
+ *
+ * Description:
+ *   Final State Machine enable.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   value   - Union of registers from FSM_ENABLE_A to FSM_ENABLE_B.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_setenable(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_emb_fsm_enable_t *value)
+{
+  int ret;
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_write(priv, LSM6DSO_FSM_ENABLE_A,
+                    (FAR uint8_t *)&value->fsm_enable_a);
+  lsm6dso_spi_write(priv, LSM6DSO_FSM_ENABLE_B,
+                    (FAR uint8_t *)&value->fsm_enable_b);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_setodr
+ *
+ * Description:
+ *   Finite State Machine ODR configuration.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   value   - Change the values of fsm_odr in reg EMB_FUNC_ODR_CFG_B.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_setodr(FAR struct lsm6dso_dev_s *priv,
+                              uint8_t value)
+{
+  lsm6dso_emb_func_odr_cfg_b_t reg;
+  int ret;
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_ODRCFG_B,
+                   (FAR uint8_t *)&reg, 1);
+  reg.not_used_01 = LSM6DSO_FSM_ODR_CFG_NU1;
+  reg.not_used_02 = LSM6DSO_FSM_ODR_CFG_NU2;
+  reg.fsm_odr = value;
+  lsm6dso_spi_write(priv, LSM6DSO_EMB_FUNC_ODRCFG_B,
+                    (FAR uint8_t *)&reg);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_fsm_handler
+ *
+ * Description:
+ *   Finite state machine result handler.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   status  - All interrupt status.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
+                               lsm6dso_all_sources_t *status)
+{
+  struct sensor_event_wake_gesture temp_fsm;
+  int ret = 0;
+
+  temp_fsm.timestamp = priv->timestamp;
+
+  /* TODO: Waiting for the system API. */
+
+  if (status->fsm1)
+    {
+      temp_fsm.event = LSM6DSO_FSM_INDEX1;
+
+      /* push data to upper half driver. */
+
+      priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
+            priv->dev[LSM6DSO_FSM_IDX].lower.priv,
+            &temp_fsm,
+            sizeof(struct sensor_event_wake_gesture));
+    }
+
+  if (status->fsm2)
+    {
+      temp_fsm.event = LSM6DSO_FSM_INDEX2;
+
+      /* push data to upper half driver. */
+
+      priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
+            priv->dev[LSM6DSO_FSM_IDX].lower.priv,
+            &temp_fsm,
+            sizeof(struct sensor_event_wake_gesture));
+    }
+
+  if (status->fsm3)
+    {
+      temp_fsm.event = LSM6DSO_FSM_INDEX3;
+
+      /* push data to upper half driver. */
+
+      priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
+            priv->dev[LSM6DSO_FSM_IDX].lower.priv,
+            &temp_fsm,
+            sizeof(struct sensor_event_wake_gesture));
+    }
+
+  return ret;
+}
+
 /* Sensor ops functions */
 
 /****************************************************************************
@@ -2503,9 +3849,11 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
                          FAR unsigned int *latency_us)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
+  lsm6dso_pin_int1_route_t pin_int1_route;
   FAR struct lsm6dso_dev_s * priv;
   uint32_t max_latency;
   int idx;
+  int ret;
 
   /* Sanity check. */
 
@@ -2569,6 +3917,15 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
       sensor->fifoen = false;
     }
 
+  /* Get all interrupt setting. */
+
+  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
+  if (ret < 0)
+    {
+      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
+      return ret;
+    }
+
   if (priv->dev[LSM6DSO_XL_IDX].fifoen == false
       && priv->dev[LSM6DSO_GY_IDX].fifoen == false)
     {
@@ -2580,13 +3937,17 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
         }
 
       priv->fifoen = false;
-      lsm6dso_fifo_setint1(priv, LSM6DSO_FIFO_INT_DISABLE);
+      pin_int1_route.fifo_full = LSM6DSO_FIFO_INT_DISABLE;
+      pin_int1_route.fifo_ovr = LSM6DSO_FIFO_INT_DISABLE;
+      pin_int1_route.fifo_th = LSM6DSO_FIFO_INT_DISABLE;
       lsm6dso_fifo_setmode(priv, LSM6DSO_BYPASS_MODE);
     }
   else
     {
       priv->fifoen = true;
-      lsm6dso_fifo_setint1(priv, LSM6DSO_FIFO_INT_ENABLE);
+      pin_int1_route.fifo_full = LSM6DSO_FIFO_INT_ENABLE;
+      pin_int1_route.fifo_ovr = LSM6DSO_FIFO_INT_ENABLE;
+      pin_int1_route.fifo_th = LSM6DSO_FIFO_INT_ENABLE;
 
       if (priv->dev[LSM6DSO_XL_IDX].fifowtm
           > priv->dev[LSM6DSO_XL_IDX].lower.batch_number)
@@ -2608,6 +3969,10 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
       lsm6dso_fifo_setwatermark(priv, priv->fifowtm);
       lsm6dso_fifo_setmode(priv, LSM6DSO_STREAM_MODE);
     }
+
+  /* Set interrupt route. */
+
+  lsm6dso_int1_setroute(priv, pin_int1_route);
 
   return OK;
 }
@@ -2682,10 +4047,36 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
       *period_us = LSM6DSO_UNIT_TIME / freq;
       priv->dev[LSM6DSO_GY_IDX].interval = *period_us;
     }
+  else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_FSM_IDX);
+
+      /* Find the period that matches best.  */
+
+      idx = lsm6dso_fsm_findodr(&freq);
+      ret = lsm6dso_fsm_setodr(priv, g_lsm6dso_fsm_odr[idx].regval);
+      if (ret < 0)
+        {
+          snerr("Failed to set interval: %d\n", ret);
+          return ret;
+        }
+
+      *period_us = LSM6DSO_UNIT_TIME / freq;
+      priv->dev[LSM6DSO_FSM_IDX].interval = *period_us;
+    }
   else
     {
-      snerr("Failed to match sensor type.\n");
       ret = -EINVAL;
+      snerr("Failed to match sensor type: %d\n", ret);
+    }
+
+  if ((priv->dev[LSM6DSO_FSM_IDX].interval
+      < priv->dev[LSM6DSO_XL_IDX].interval)
+      && (priv->dev[LSM6DSO_FSM_IDX].interval
+      < priv->dev[LSM6DSO_GY_IDX].interval))
+    {
+      ret = -EINVAL;
+      snerr("FSM odr should not be larger than the sensor: %d\n", ret);
     }
 
   return ret;
@@ -2758,6 +4149,29 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
             }
 
           ret = lsm6dso_gy_enable(priv, enable);
+          if (ret < 0)
+            {
+              snerr("Failed to enable light sensor: %d\n", ret);
+              return ret;
+            }
+
+          sensor->activated = enable;
+        }
+    }
+  else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_FSM_IDX);
+      if (sensor->activated != enable)
+        {
+          if (enable)
+            {
+              IOEXP_SETOPTION(priv->config->ioedev,
+                              priv->config->pin,
+                              IOEXPANDER_OPTION_INTCFG,
+                              IOEXPANDER_VAL_RISING);
+            }
+
+          ret = lsm6dso_fsm_enable(priv, enable);
           if (ret < 0)
             {
               snerr("Failed to enable light sensor: %d\n", ret);
@@ -2861,7 +4275,708 @@ static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
     return ret;
 }
 
+/****************************************************************************
+ * Name: lsm6dso_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   cmd        - The special cmd for sensor.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *   -EINVAL    - Failed to match sensor type.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
+                           int cmd, unsigned long arg)
+{
+  FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
+  FAR struct lsm6dso_dev_s * priv;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  if (lower->type == SENSOR_TYPE_ACCELEROMETER)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
+    }
+  else if (lower->type == SENSOR_TYPE_GYROSCOPE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
+    }
+  else if (lower->type == SENSOR_TYPE_WAKE_GESTURE)
+    {
+      priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_FSM_IDX);
+    }
+  else
+    {
+      snerr("Failed to match sensor type.\n");
+      return -EINVAL;
+    }
+
+  /* Process ioctl commands. */
+
+  switch (cmd)
+    {
+      case LSM6DSO_FSM_MANAGE_CMD:    /* Finite state machine cmd tag */
+        {
+          priv->fsmen = (unsigned int)arg;
+          ret = lsm6dso_fsm_manage(priv);
+          if (ret < 0)
+            {
+              snerr("ERROR: Failed to selftest: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                        /* Other cmd tag */
+        {
+          ret = -ENOTTY;
+          snerr("ERROR: The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+    return ret;
+}
+
 /* Sensor interrupt functions */
+
+/****************************************************************************
+ * Name: lsm6dso_int1_getroute
+ *
+ * Description:
+ *   Route interrupt signals on int1 pin.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - The signals that are routed on int1 pin.
+ *   type  - Init type.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int1_getroute(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_pin_int1_route_t *value)
+{
+  lsm6dso_emb_func_int1_t emb_func_int1;
+  lsm6dso_fsm_int1_a_t fsm_int1_a;
+  lsm6dso_fsm_int1_b_t fsm_int1_b;
+  lsm6dso_int1_ctrl_t int1_ctrl;
+  lsm6dso_int2_ctrl_t int2_ctrl;
+  lsm6dso_md1_cfg_t md1_cfg;
+  lsm6dso_md2_cfg_t md2_cfg;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  int ret;
+
+  /* Get all interrupt status */
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_INT1,
+                   (FAR uint8_t *)&emb_func_int1, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_FSM_INT1_A,
+                   (FAR uint8_t *)&fsm_int1_a, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_FSM_INT1_B,
+                   (FAR uint8_t *)&fsm_int1_b, 1);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_INT1_CTRL,
+                   (FAR uint8_t *)&int1_ctrl, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_MD1_CFG,
+                   (FAR uint8_t *)&md1_cfg, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_CTRL4_C,
+                   (FAR uint8_t *)&ctrl4_c, 1);
+
+  if (ctrl4_c.int2_on_int1 == LSM6DSO_PROPERTY_ENABLE)
+    {
+      lsm6dso_spi_read(priv, LSM6DSO_INT2_CTRL,
+                       (FAR uint8_t *)&int2_ctrl, 1);
+      value->drdy_temp = int2_ctrl.int2_drdy_temp;
+      lsm6dso_spi_read(priv, LSM6DSO_MD2_CFG,
+                       (FAR uint8_t *)&int2_ctrl, 1);
+      value->timestamp = md2_cfg.int2_timestamp;
+    }
+  else
+    {
+      value->drdy_temp = LSM6DSO_PROPERTY_DISABLE;
+      value->timestamp = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  value->drdy_xl       = int1_ctrl.int1_drdy_xl;
+  value->drdy_g        = int1_ctrl.int1_drdy_g;
+  value->boot          = int1_ctrl.int1_boot;
+  value->fifo_th       = int1_ctrl.int1_fifo_th;
+  value->fifo_ovr      = int1_ctrl.int1_fifo_ovr;
+  value->fifo_full     = int1_ctrl.int1_fifo_full;
+  value->fifo_bdr      = int1_ctrl.int1_cnt_bdr;
+  value->den_flag      = int1_ctrl.den_drdy_flag;
+  value->sh_endop      = md1_cfg.int1_shub;
+  value->six_d         = md1_cfg.int1_6d;
+  value->double_tap    = md1_cfg.int1_double_tap;
+  value->free_fall     = md1_cfg.int1_ff;
+  value->wake_up       = md1_cfg.int1_wu;
+  value->single_tap    = md1_cfg.int1_single_tap;
+  value->sleep_change  = md1_cfg.int1_sleep_change;
+  value->step_detector = emb_func_int1.int1_step_detector;
+  value->tilt          = emb_func_int1.int1_tilt;
+  value->sig_mot       = emb_func_int1.int1_sig_mot;
+  value->fsm_lc        = emb_func_int1.int1_fsm_lc;
+  value->fsm1          = fsm_int1_a.int1_fsm1;
+  value->fsm2          = fsm_int1_a.int1_fsm2;
+  value->fsm3          = fsm_int1_a.int1_fsm3;
+  value->fsm4          = fsm_int1_a.int1_fsm4;
+  value->fsm5          = fsm_int1_a.int1_fsm5;
+  value->fsm6          = fsm_int1_a.int1_fsm6;
+  value->fsm7          = fsm_int1_a.int1_fsm7;
+  value->fsm8          = fsm_int1_a.int1_fsm8;
+  value->fsm9          = fsm_int1_b.int1_fsm9;
+  value->fsm10         = fsm_int1_b.int1_fsm10;
+  value->fsm11         = fsm_int1_b.int1_fsm11;
+  value->fsm12         = fsm_int1_b.int1_fsm12;
+  value->fsm13         = fsm_int1_b.int1_fsm13;
+  value->fsm14         = fsm_int1_b.int1_fsm14;
+  value->fsm15         = fsm_int1_b.int1_fsm15;
+  value->fsm16         = fsm_int1_b.int1_fsm16;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_int1_setroute
+ *
+ * Description:
+ *   Route interrupt signals on int1 pin.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - The signals to route on int1 pin.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int1_setroute(FAR struct lsm6dso_dev_s *priv,
+                                 lsm6dso_pin_int1_route_t value)
+{
+  lsm6dso_pin_int2_route_t pin_int2_route;
+  lsm6dso_emb_func_int1_t emb_func_int1;
+  lsm6dso_fsm_int1_a_t fsm_int1_a;
+  lsm6dso_fsm_int1_b_t fsm_int1_b;
+  lsm6dso_int1_ctrl_t int1_ctrl;
+  lsm6dso_int2_ctrl_t int2_ctrl;
+  lsm6dso_tap_cfg2_t tap_cfg2;
+  lsm6dso_md2_cfg_t md2_cfg;
+  lsm6dso_md1_cfg_t md1_cfg;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  int ret;
+
+  int1_ctrl.int1_drdy_xl           = value.drdy_xl;
+  int1_ctrl.int1_drdy_g            = value.drdy_g;
+  int1_ctrl.int1_boot              = value.boot;
+  int1_ctrl.int1_fifo_th           = value.fifo_th;
+  int1_ctrl.int1_fifo_ovr          = value.fifo_ovr;
+  int1_ctrl.int1_fifo_full         = value.fifo_full;
+  int1_ctrl.int1_cnt_bdr           = value.fifo_bdr;
+  int1_ctrl.den_drdy_flag          = value.den_flag;
+  md1_cfg.int1_shub                = value.sh_endop;
+  md1_cfg.int1_6d                  = value.six_d;
+  md1_cfg.int1_double_tap          = value.double_tap;
+  md1_cfg.int1_ff                  = value.free_fall;
+  md1_cfg.int1_wu                  = value.wake_up;
+  md1_cfg.int1_single_tap          = value.single_tap;
+  md1_cfg.int1_sleep_change        = value.sleep_change;
+  emb_func_int1.not_used_01        = 0;
+  emb_func_int1.int1_step_detector = value.step_detector;
+  emb_func_int1.int1_tilt          = value.tilt;
+  emb_func_int1.int1_sig_mot       = value.sig_mot;
+  emb_func_int1.not_used_02        = 0;
+  emb_func_int1.int1_fsm_lc        = value.fsm_lc;
+  fsm_int1_a.int1_fsm1             = value.fsm1;
+  fsm_int1_a.int1_fsm2             = value.fsm2;
+  fsm_int1_a.int1_fsm3             = value.fsm3;
+  fsm_int1_a.int1_fsm4             = value.fsm4;
+  fsm_int1_a.int1_fsm5             = value.fsm5;
+  fsm_int1_a.int1_fsm6             = value.fsm6;
+  fsm_int1_a.int1_fsm7             = value.fsm7;
+  fsm_int1_a.int1_fsm8             = value.fsm8;
+  fsm_int1_b.int1_fsm9             = value.fsm9;
+  fsm_int1_b.int1_fsm10            = value.fsm10;
+  fsm_int1_b.int1_fsm11            = value.fsm11;
+  fsm_int1_b.int1_fsm12            = value.fsm12;
+  fsm_int1_b.int1_fsm13            = value.fsm13;
+  fsm_int1_b.int1_fsm14            = value.fsm14;
+  fsm_int1_b.int1_fsm15            = value.fsm15;
+  fsm_int1_b.int1_fsm16            = value.fsm16;
+
+  lsm6dso_spi_read(priv, LSM6DSO_CTRL4_C, (FAR uint8_t *)&ctrl4_c, 1);
+
+  if ((value.drdy_temp | value.timestamp) != LSM6DSO_PROPERTY_ENABLE)
+    {
+      ctrl4_c.int2_on_int1 = LSM6DSO_PROPERTY_ENABLE;
+    }
+  else
+    {
+      ctrl4_c.int2_on_int1 = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  lsm6dso_spi_write(priv, LSM6DSO_CTRL4_C, (FAR uint8_t *)&ctrl4_c);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_write(priv, LSM6DSO_EMB_FUNC_INT1,
+                    (FAR uint8_t *)&emb_func_int1);
+  lsm6dso_spi_write(priv, LSM6DSO_FSM_INT1_A, (FAR uint8_t *)&fsm_int1_a);
+  lsm6dso_spi_write(priv, LSM6DSO_FSM_INT1_B, (FAR uint8_t *)&fsm_int1_b);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  if ((emb_func_int1.int1_fsm_lc
+      | emb_func_int1.int1_sig_mot
+      | emb_func_int1.int1_step_detector
+      | emb_func_int1.int1_tilt
+      | fsm_int1_a.int1_fsm1
+      | fsm_int1_a.int1_fsm2
+      | fsm_int1_a.int1_fsm3
+      | fsm_int1_a.int1_fsm4
+      | fsm_int1_a.int1_fsm5
+      | fsm_int1_a.int1_fsm6
+      | fsm_int1_a.int1_fsm7
+      | fsm_int1_a.int1_fsm8
+      | fsm_int1_b.int1_fsm9
+      | fsm_int1_b.int1_fsm10
+      | fsm_int1_b.int1_fsm11
+      | fsm_int1_b.int1_fsm12
+      | fsm_int1_b.int1_fsm13
+      | fsm_int1_b.int1_fsm14
+      | fsm_int1_b.int1_fsm15
+      | fsm_int1_b.int1_fsm16) != LSM6DSO_PROPERTY_ENABLE)
+    {
+      md1_cfg.int1_emb_func = LSM6DSO_PROPERTY_ENABLE;
+    }
+  else
+    {
+      md1_cfg.int1_emb_func = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  lsm6dso_spi_write(priv, LSM6DSO_INT1_CTRL, (FAR uint8_t *)&int1_ctrl);
+  lsm6dso_spi_write(priv, LSM6DSO_MD1_CFG, (FAR uint8_t *)&md1_cfg);
+
+  lsm6dso_spi_read(priv, LSM6DSO_INT2_CTRL, (FAR uint8_t *)&int2_ctrl, 1);
+  int2_ctrl.int2_drdy_temp = value.drdy_temp;
+  lsm6dso_spi_write(priv, LSM6DSO_INT2_CTRL, (FAR uint8_t *)&int2_ctrl);
+
+  lsm6dso_spi_read(priv, LSM6DSO_MD2_CFG, (FAR uint8_t *)&md2_cfg, 1);
+  md2_cfg.int2_timestamp = value.timestamp;
+  lsm6dso_spi_write(priv, LSM6DSO_MD2_CFG, (FAR uint8_t *)&md2_cfg);
+
+  lsm6dso_spi_read(priv, LSM6DSO_TAP_CFG2, (FAR uint8_t *)&tap_cfg2, 1);
+
+  ret = lsm6dso_int2_getroute(priv, &pin_int2_route);
+  if (ret < 0)
+    {
+      snerr("Failed to get int2 route.\n");
+      return ret;
+    }
+
+  if ((pin_int2_route.fifo_bdr
+      | pin_int2_route.drdy_g
+      | pin_int2_route.drdy_temp
+      | pin_int2_route.drdy_xl
+      | pin_int2_route.fifo_full
+      | pin_int2_route.fifo_ovr
+      | pin_int2_route.fifo_th
+      | pin_int2_route.six_d
+      | pin_int2_route.double_tap
+      | pin_int2_route.free_fall
+      | pin_int2_route.wake_up
+      | pin_int2_route.single_tap
+      | pin_int2_route.sleep_change
+      | int1_ctrl.den_drdy_flag
+      | int1_ctrl.int1_boot
+      | int1_ctrl.int1_cnt_bdr
+      | int1_ctrl.int1_drdy_g
+      | int1_ctrl.int1_drdy_xl
+      | int1_ctrl.int1_fifo_full
+      | int1_ctrl.int1_fifo_ovr
+      | int1_ctrl.int1_fifo_th
+      | md1_cfg.int1_shub
+      | md1_cfg.int1_6d
+      | md1_cfg.int1_double_tap
+      | md1_cfg.int1_ff
+      | md1_cfg.int1_wu
+      | md1_cfg.int1_single_tap
+      | md1_cfg.int1_sleep_change) != LSM6DSO_PROPERTY_DISABLE)
+    {
+      tap_cfg2.interrupts_enable = LSM6DSO_PROPERTY_ENABLE;
+    }
+  else
+    {
+      tap_cfg2.interrupts_enable = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  lsm6dso_spi_write(priv, LSM6DSO_TAP_CFG2, (FAR uint8_t *)&tap_cfg2);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_int2_getroute
+ *
+ * Description:
+ *   Route interrupt signals on int2 pin.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - The signals that are routed on int2 pin.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int2_getroute(FAR struct lsm6dso_dev_s *priv,
+                                 FAR lsm6dso_pin_int2_route_t *value)
+{
+  lsm6dso_emb_func_int2_t emb_func_int2;
+  lsm6dso_fsm_int2_a_t fsm_int2_a;
+  lsm6dso_fsm_int2_b_t fsm_int2_b;
+  lsm6dso_int2_ctrl_t int2_ctrl;
+  lsm6dso_md2_cfg_t md2_cfg;
+  lsm6dso_ctrl4_c_t ctrl4_c;
+  lsm6dso_int_ois_t int_ois;
+  int ret;
+
+  lsm6dso_spi_read(priv, LSM6DSO_INT_OIS, (FAR uint8_t *)&int_ois, 1);
+  value->drdy_ois = int_ois.int2_drdy_ois;
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_INT2,
+                   (FAR uint8_t *)&emb_func_int2, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_FSM_INT2_A, (FAR uint8_t *)&fsm_int2_a, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_FSM_INT2_B, (FAR uint8_t *)&fsm_int2_b, 1);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_INT2_CTRL, (FAR uint8_t *)&int2_ctrl, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_MD2_CFG, (FAR uint8_t *)&md2_cfg, 1);
+  lsm6dso_spi_read(priv, LSM6DSO_CTRL4_C, (FAR uint8_t *)&ctrl4_c, 1);
+
+  if (ctrl4_c.int2_on_int1 == LSM6DSO_PROPERTY_DISABLE)
+    {
+      lsm6dso_spi_read(priv, LSM6DSO_INT2_CTRL,
+                       (FAR uint8_t *)&int2_ctrl, 1);
+      value->drdy_temp = int2_ctrl.int2_drdy_temp;
+
+      lsm6dso_spi_read(priv, LSM6DSO_MD2_CFG,
+                       (FAR uint8_t *)&md2_cfg, 1);
+      value->timestamp = md2_cfg.int2_timestamp;
+    }
+  else
+    {
+      value->drdy_temp = LSM6DSO_PROPERTY_DISABLE;
+      value->timestamp = LSM6DSO_PROPERTY_DISABLE;
+    }
+
+  value->drdy_xl       = int2_ctrl.int2_drdy_xl;
+  value->drdy_g        = int2_ctrl.int2_drdy_g;
+  value->drdy_temp     = int2_ctrl.int2_drdy_temp;
+  value->fifo_th       = int2_ctrl.int2_fifo_th;
+  value->fifo_ovr      = int2_ctrl.int2_fifo_ovr;
+  value->fifo_full     = int2_ctrl.int2_fifo_full;
+  value->fifo_bdr      = int2_ctrl.int2_cnt_bdr;
+  value->timestamp     = md2_cfg.int2_timestamp;
+  value->six_d         = md2_cfg.int2_6d;
+  value->double_tap    = md2_cfg.int2_double_tap;
+  value->free_fall     = md2_cfg.int2_ff;
+  value->wake_up       = md2_cfg.int2_wu;
+  value->single_tap    = md2_cfg.int2_single_tap;
+  value->sleep_change  = md2_cfg.int2_sleep_change;
+  value->step_detector = emb_func_int2. int2_step_detector;
+  value->tilt          = emb_func_int2.int2_tilt;
+  value->fsm_lc        = emb_func_int2.int2_fsm_lc;
+  value->fsm1          = fsm_int2_a.int2_fsm1;
+  value->fsm2          = fsm_int2_a.int2_fsm2;
+  value->fsm3          = fsm_int2_a.int2_fsm3;
+  value->fsm4          = fsm_int2_a.int2_fsm4;
+  value->fsm5          = fsm_int2_a.int2_fsm5;
+  value->fsm6          = fsm_int2_a.int2_fsm6;
+  value->fsm7          = fsm_int2_a.int2_fsm7;
+  value->fsm8          = fsm_int2_a.int2_fsm8;
+  value->fsm9          = fsm_int2_b.int2_fsm9;
+  value->fsm10         = fsm_int2_b.int2_fsm10;
+  value->fsm11         = fsm_int2_b.int2_fsm11;
+  value->fsm12         = fsm_int2_b.int2_fsm12;
+  value->fsm13         = fsm_int2_b.int2_fsm13;
+  value->fsm14         = fsm_int2_b.int2_fsm14;
+  value->fsm15         = fsm_int2_b.int2_fsm15;
+  value->fsm16         = fsm_int2_b.int2_fsm16;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_int_setnotification
+ *
+ * Description:
+ *   Interrupt notification mode.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - Int notification value.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int_setnotification(FAR struct lsm6dso_dev_s *priv,
+                                       lsm6dso_lir_t value)
+{
+  lsm6dso_tap_cfg0_t tap_cfg0;
+  lsm6dso_page_rw_t page_rw;
+  int ret;
+
+  lsm6dso_spi_read(priv, LSM6DSO_TAP_CFG0, (FAR uint8_t *)&tap_cfg0, 1);
+  tap_cfg0.lir = (uint8_t)value & 0x01u;
+  tap_cfg0.int_clr_on_read = (uint8_t)value & 0x01u;
+  lsm6dso_spi_write(priv, LSM6DSO_TAP_CFG0, (FAR uint8_t *)&tap_cfg0);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_EMBEDDEDFUNC_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+      return ret;
+    }
+
+  lsm6dso_spi_read(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw, 1);
+  page_rw.emb_func_lir = ((uint8_t)value & 0x02u) >> 1;
+  lsm6dso_spi_write(priv, LSM6DSO_PAGE_RW, (FAR uint8_t *)&page_rw);
+
+  ret = lsm6dso_mem_setbank(priv, LSM6DSO_USER_BANK);
+  if (ret < 0)
+    {
+      snerr("Failed to get access to the embedded functions/sensorhub: %d\n",
+      ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_int_setlongcnt
+ *
+ * Description:
+ *   FSM long counter timeout register (r/w). The long counter
+ *   timeout value is an unsigned integer value (16-bit format).
+ *   When the long counter value reached this value,
+ *   the FSM generates an interrupt.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *   value - The value of long counter.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int_setlongcnt(FAR struct lsm6dso_dev_s *priv,
+                                  uint16_t value)
+{
+  int ret;
+  uint8_t buff[2];
+
+  buff[1] = (uint8_t)(value / 256U);
+  buff[0] = (uint8_t)(value - (buff[1] * 256U));
+  ret = lsm6dso_pg_writelnbyte(priv, LSM6DSO_FSM_LC_TIMEOUT_L, &buff[0]);
+  if (ret == 0)
+    {
+      ret = lsm6dso_pg_writelnbyte(priv, LSM6DSO_FSM_LC_TIMEOUT_H, &buff[1]);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_int_getall
+ *
+ * Description:
+ *   Get the status of all the interrupt sources.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *   value   - The status of all the interrupt sources.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_int_getall(FAR struct lsm6dso_dev_s *priv,
+                              FAR lsm6dso_all_sources_t *value)
+{
+  lsm6dso_emb_func_mpstatus_t emb_func_status_mainpage;
+  lsm6dso_status_mpmaster_t status_master_mainpage;
+  lsm6dso_fsm_mpstatus_a_t fsm_status_a_mainpage;
+  lsm6dso_fsm_mpstatus_b_t fsm_status_b_mainpage;
+  lsm6dso_fifo_status1_t fifo_status1;
+  lsm6dso_fifo_status2_t fifo_status2;
+  lsm6dso_all_int_src_t all_int_src;
+  lsm6dso_wake_up_src_t wake_up_src;
+  lsm6dso_status_reg_t status_reg;
+  lsm6dso_tap_src_t tap_src;
+  lsm6dso_d6d_src_t d6d_src;
+  uint8_t reg[5];
+
+  lsm6dso_spi_read(priv, LSM6DSO_ALL_INT_SRC, (FAR uint8_t *)&reg, 5);
+  lsm6dso_copybyte((uint8_t *)&all_int_src, &reg[0]);
+  lsm6dso_copybyte((uint8_t *)&wake_up_src, &reg[1]);
+  lsm6dso_copybyte((uint8_t *)&tap_src, &reg[2]);
+  lsm6dso_copybyte((uint8_t *)&d6d_src, &reg[3]);
+  lsm6dso_copybyte((uint8_t *)&status_reg, &reg[4]);
+  value->timestamp        = all_int_src.timestamp_endcount;
+  value->wake_up_z        = wake_up_src.z_wu;
+  value->wake_up_y        = wake_up_src.y_wu;
+  value->wake_up_x        = wake_up_src.x_wu;
+  value->wake_up          = wake_up_src.wu_ia;
+  value->sleep_state      = wake_up_src.sleep_state;
+  value->free_fall        = wake_up_src.ff_ia;
+  value->sleep_change     = wake_up_src.sleep_change_ia;
+  value->tap_x            = tap_src.x_tap;
+  value->tap_y            = tap_src.y_tap;
+  value->tap_z            = tap_src.z_tap;
+  value->tap_sign         = tap_src.tap_sign;
+  value->double_tap       = tap_src.double_tap;
+  value->single_tap       = tap_src.single_tap;
+  value->six_d_xl         = d6d_src.xl;
+  value->six_d_xh         = d6d_src.xh;
+  value->six_d_yl         = d6d_src.yl;
+  value->six_d_yh         = d6d_src.yh;
+  value->six_d_zl         = d6d_src.zl;
+  value->six_d_zh         = d6d_src.zh;
+  value->six_d            = d6d_src.d6d_ia;
+  value->den_flag         = d6d_src.den_drdy;
+  value->drdy_xl          = status_reg.xlda;
+  value->drdy_g           = status_reg.gda;
+  value->drdy_temp        = status_reg.tda;
+
+  lsm6dso_spi_read(priv, LSM6DSO_EMB_FUNC_MPSTATUS, (FAR uint8_t *)&reg, 3);
+  lsm6dso_copybyte((uint8_t *)&emb_func_status_mainpage, &reg[0]);
+  lsm6dso_copybyte((uint8_t *)&fsm_status_a_mainpage, &reg[1]);
+  lsm6dso_copybyte((uint8_t *)&fsm_status_b_mainpage, &reg[2]);
+  value->step_detector    = emb_func_status_mainpage.is_step_det;
+  value->tilt             = emb_func_status_mainpage.is_tilt;
+  value->sig_mot          = emb_func_status_mainpage.is_sigmot;
+  value->fsm_lc           = emb_func_status_mainpage.is_fsm_lc;
+  value->fsm1             = fsm_status_a_mainpage.is_fsm1;
+  value->fsm2             = fsm_status_a_mainpage.is_fsm2;
+  value->fsm3             = fsm_status_a_mainpage.is_fsm3;
+  value->fsm4             = fsm_status_a_mainpage.is_fsm4;
+  value->fsm5             = fsm_status_a_mainpage.is_fsm5;
+  value->fsm6             = fsm_status_a_mainpage.is_fsm6;
+  value->fsm7             = fsm_status_a_mainpage.is_fsm7;
+  value->fsm8             = fsm_status_a_mainpage.is_fsm8;
+  value->fsm9             = fsm_status_b_mainpage.is_fsm9;
+  value->fsm10            = fsm_status_b_mainpage.is_fsm10;
+  value->fsm11            = fsm_status_b_mainpage.is_fsm11;
+  value->fsm12            = fsm_status_b_mainpage.is_fsm12;
+  value->fsm13            = fsm_status_b_mainpage.is_fsm13;
+  value->fsm14            = fsm_status_b_mainpage.is_fsm14;
+  value->fsm15            = fsm_status_b_mainpage.is_fsm15;
+  value->fsm16            = fsm_status_b_mainpage.is_fsm16;
+
+  lsm6dso_spi_read(priv, LSM6DSO_STATUS_MPMASTER, (FAR uint8_t *)&reg, 3);
+  lsm6dso_copybyte((uint8_t *)&status_master_mainpage, &reg[0]);
+  lsm6dso_copybyte((uint8_t *)&fifo_status1, &reg[1]);
+  lsm6dso_copybyte((uint8_t *)&fifo_status2, &reg[2]);
+  value->sh_endop         = status_master_mainpage.sens_hub_endop;
+  value->sh_slave0_nack   = status_master_mainpage.slave0_nack;
+  value->sh_slave1_nack   = status_master_mainpage.slave1_nack;
+  value->sh_slave2_nack   = status_master_mainpage.slave2_nack;
+  value->sh_slave3_nack   = status_master_mainpage.slave3_nack;
+  value->sh_wr_once       = status_master_mainpage.wr_once_done;
+  value->fifo_diff        = (256U * fifo_status2.diff_fifo)
+                          + fifo_status1.diff_fifo;
+  value->fifo_ovr_latched = fifo_status2.over_run_latched;
+  value->fifo_bdr         = fifo_status2.counter_bdr_ia;
+  value->fifo_full        = fifo_status2.fifo_full_ia;
+  value->fifo_ovr         = fifo_status2.fifo_ovr_ia;
+  value->fifo_th          = fifo_status2.fifo_wtm_ia;
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: lsm6dso_interrupt_handler
@@ -2906,7 +5021,7 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   work_queue(LPWORK, &priv->work, lsm6dso_worker, priv, 0);
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -2935,61 +5050,77 @@ static void lsm6dso_worker(FAR void *arg)
   FAR struct lsm6dso_dev_s *priv = arg;
   struct sensor_event_accel temp_xl;
   struct sensor_event_gyro temp_gy;
-  uint8_t drdy;
+  lsm6dso_all_sources_t status;
+  int ret;
 
   /* Sanity check. */
 
   DEBUGASSERT(priv != NULL);
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_RISING);
+                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_RISING);
 
-  if (priv->fifoen)
+  /* Get all interrupt flag. */
+
+  ret = lsm6dso_int_getall(priv, &status);
+  if (ret < 0)
     {
-      lsm6dso_fifo_iswtm(priv, &drdy);
-      if (drdy)
-        {
-          lsm6dso_fifo_readdata(priv);
-        }
+      snerr("Failed to get interrupt source registers: %d\n", ret);
+      return ret;
     }
-  else
+
+  /* Get sensor data. */
+
+  if (status.drdy_xl)
     {
-      /* Check if new value available. */
+      /* Read out the latest sensor data. */
 
-      lsm6dso_xl_isready(priv, &drdy);
-      if (drdy)
-        {
-          /* Read out the latest sensor data. */
+      lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+      temp_xl.timestamp = priv->timestamp;
 
-          lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
-          temp_xl.timestamp = priv->timestamp;
+      /* push data to upper half driver. */
 
-          /* push data to upper half driver. */
-
-          priv->dev[LSM6DSO_XL_IDX].lower.push_event(
-                priv->dev[LSM6DSO_XL_IDX].lower.priv,
-                &temp_xl,
-                sizeof(struct sensor_event_accel));
-        }
-
-      /* Check if new value available. */
-
-      lsm6dso_gy_isready(priv, &drdy);
-      if (drdy)
-        {
-          /* Read out the latest sensor data. */
-
-          lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
-          temp_gy.timestamp = priv->timestamp;
-
-          /* push data to upper half driver. */
-
-          priv->dev[LSM6DSO_GY_IDX].lower.push_event(
-                priv->dev[LSM6DSO_GY_IDX].lower.priv,
-                &temp_gy,
-                sizeof(struct sensor_event_gyro));
-        }
+      priv->dev[LSM6DSO_XL_IDX].lower.push_event(
+            priv->dev[LSM6DSO_XL_IDX].lower.priv,
+            &temp_xl,
+            sizeof(struct sensor_event_accel));
     }
+
+  if (status.drdy_g)
+    {
+      /* Read out the latest sensor data. */
+
+      lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+      temp_gy.timestamp = priv->timestamp;
+
+      /* push data to upper half driver. */
+
+      priv->dev[LSM6DSO_GY_IDX].lower.push_event(
+            priv->dev[LSM6DSO_GY_IDX].lower.priv,
+            &temp_gy,
+            sizeof(struct sensor_event_gyro));
+    }
+
+  /* Get sensor FIFO data. */
+
+  if (status.fifo_th || status.fifo_full || status.fifo_ovr)
+    {
+      if (status.fifo_full)
+        {
+          snwarn("FIFO is full.\n");
+        }
+
+      if (status.fifo_ovr)
+        {
+          snwarn("FIFO is overflow.\n");
+        }
+
+      lsm6dso_fifo_readdata(priv);
+    }
+
+  /* Get finite state machine result. */
+
+  lsm6dso_fsm_handler(priv, &status);
 }
 
 /****************************************************************************
@@ -3055,6 +5186,16 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_GY_IDX].lower.batch_number
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
+  priv->fsmen = LSM6DSO_DEFAULT_FSM_EN;
+  priv->dev[LSM6DSO_FSM_IDX].lower.ops = &g_lsm6dso_fsm_ops;
+  priv->dev[LSM6DSO_FSM_IDX].lower.type = SENSOR_TYPE_WAKE_GESTURE;
+  priv->dev[LSM6DSO_FSM_IDX].lower.uncalibrated = true;
+  priv->dev[LSM6DSO_FSM_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
+  priv->dev[LSM6DSO_FSM_IDX].lower.buffer_number
+                            = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
+  priv->dev[LSM6DSO_FSM_IDX].lower.batch_number
+                            = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
+
   /* Wait sensor boot time. */
 
   up_mdelay(LSM6DSO_WAITBOOT_TIME);
@@ -3105,8 +5246,7 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   if (ret < 0)
     {
       snerr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
-      goto err;
+      goto err_detach;
     }
 
   /* Register the character driver. */
@@ -3115,21 +5255,27 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
-      sensor_unregister((&(priv->dev[LSM6DSO_XL_IDX].lower)), devno);
-      goto err;
+      goto err_detach;
     }
 
   ret = sensor_register((&(priv->dev[LSM6DSO_GY_IDX].lower)), devno);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
-      IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
-      sensor_unregister((&(priv->dev[LSM6DSO_GY_IDX].lower)), devno);
-      goto err;
+      goto err_detach;
+    }
+
+  ret = sensor_register((&(priv->dev[LSM6DSO_FSM_IDX].lower)), devno);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to register driver: %d\n", ret);
+      goto err_detach;
     }
 
   return ret;
+
+err_detach:
+  IOEP_DETACH(priv->config->ioedev, lsm6dso_interrupt_handler);
 
 err:
   kmm_free(priv);
