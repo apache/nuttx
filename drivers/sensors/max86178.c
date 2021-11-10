@@ -806,6 +806,13 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
       max86178_enable(priv, enable);
 
+      /* Disable PPG2 channel */
+
+      max86178_readsingle(priv, MAX86178_REG_PPGCFG2, &regval);
+      regval = regval & (~MAX86178_PPGCFG2_PPG2PWRDN_MASK);
+      regval = regval | MAX86178_PPGCFG2_PPG2PWRDN;
+      max86178_writesingle(priv, MAX86178_REG_PPGCFG2, regval);
+
       /* MEAS1 selects LED driver A to drive LED3 */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1SEL, &regval);
