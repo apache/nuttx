@@ -179,8 +179,8 @@ static int audio_comp_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
   int i;
 
   caps->ac_channels   = 0;
-  caps->ac_format.hw  = 0;
-  caps->ac_controls.w = 0;
+  caps->ac_format.hw  = UINT16_MAX;
+  caps->ac_controls.w = UINT32_MAX;
 
   for (i = 0; i < priv->count; i++)
     {
@@ -205,8 +205,8 @@ static int audio_comp_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
               caps->ac_channels = dup.ac_channels;
             }
 
-          caps->ac_format.hw   |= dup.ac_format.hw;
-          caps->ac_controls.w  |= dup.ac_controls.w;
+          caps->ac_format.hw   &= dup.ac_format.hw;
+          caps->ac_controls.w  &= dup.ac_controls.w;
         }
     }
 
