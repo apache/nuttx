@@ -32,9 +32,9 @@
  ****************************************************************************/
 
 #ifndef CONFIG_MM_KASAN
-#  define kasan_poison(addr, size)   void
-#  define kasan_unpoison(addr, size) void
-#  define kasan_register(addr, size) void
+#  define kasan_poison(addr, size)
+#  define kasan_unpoison(addr, size)
+#  define kasan_register(addr, size)
 #endif
 
 /****************************************************************************
