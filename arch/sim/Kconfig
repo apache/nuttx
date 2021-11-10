@@ -323,6 +323,7 @@ choice
 
 config SIM_TOUCHSCREEN
 	bool "X11 mouse-based touchscreen emulation"
+	select INPUT_TOUCHSCREEN
 	depends on SIM_X11FB
 	---help---
 		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
