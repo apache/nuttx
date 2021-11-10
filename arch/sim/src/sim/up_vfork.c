@@ -82,7 +82,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SIM_SANITIZE
+#ifdef CONFIG_SIM_ASAN
 __attribute__((no_sanitize_address))
 #endif
 pid_t up_vfork(const xcpt_reg_t *context)
