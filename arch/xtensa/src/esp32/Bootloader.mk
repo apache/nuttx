@@ -31,6 +31,11 @@ BOOTLOADER_CONFIG  = $(CHIPDIR)/bootloader.conf
 $(BOOTLOADER_SRCDIR):
 	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
 
+# Helpers for creating the configuration file
+
+cfg_en  = echo "$(1)=$(if $(CONFIG_ESP32_APP_FORMAT_MCUBOOT),1,y)";
+cfg_val = echo "$(1)=$(2)";
+
 # Commands for colored and formatted output
 
 RED    = \033[1;31m
@@ -49,75 +54,45 @@ ifeq ($(CONFIG_ESP32_SECURE_BOOT),y)
 	fi
 endif
 	$(Q) echo "Creating Bootloader configuration"
-	$(Q) {                                                                                              \
-		$(if $(CONFIG_ESP32_FLASH_2M),        echo "CONFIG_ESPTOOLPY_FLASHSIZE_2MB=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_4M),        echo "CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_8M),        echo "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_16M),       echo "CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y";)                \
-		$(if $(CONFIG_ESP32_FLASH_MODE_DIO),  echo "CONFIG_ESPTOOLPY_FLASHMODE_DIO=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_MODE_DOUT), echo "CONFIG_ESPTOOLPY_FLASHMODE_DOUT=y";)                \
-		$(if $(CONFIG_ESP32_FLASH_MODE_QIO),  echo "CONFIG_ESPTOOLPY_FLASHMODE_QIO=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_MODE_QOUT), echo "CONFIG_ESPTOOLPY_FLASHMODE_QOUT=y";)                \
-		$(if $(CONFIG_ESP32_FLASH_FREQ_80M),  echo "CONFIG_ESPTOOLPY_FLASHFREQ_80M=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_FREQ_40M),  echo "CONFIG_ESPTOOLPY_FLASHFREQ_40M=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_FREQ_26M),  echo "CONFIG_ESPTOOLPY_FLASHFREQ_26M=y";)                 \
-		$(if $(CONFIG_ESP32_FLASH_FREQ_20M),  echo "CONFIG_ESPTOOLPY_FLASHFREQ_20M=y";)                 \
+	$(Q) { \
+		$(if $(CONFIG_ESP32_FLASH_2M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_2MB)) \
+		$(if $(CONFIG_ESP32_FLASH_4M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_4MB)) \
+		$(if $(CONFIG_ESP32_FLASH_8M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_8MB)) \
+		$(if $(CONFIG_ESP32_FLASH_16M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHSIZE_16MB)) \
+		$(if $(CONFIG_ESP32_FLASH_MODE_DIO),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_DIO)) \
+		$(if $(CONFIG_ESP32_FLASH_MODE_DOUT),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_DOUT)) \
+		$(if $(CONFIG_ESP32_FLASH_MODE_QIO),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_QIO)) \
+		$(if $(CONFIG_ESP32_FLASH_MODE_QOUT),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHMODE_QOUT)) \
+		$(if $(CONFIG_ESP32_FLASH_FREQ_80M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_80M)) \
+		$(if $(CONFIG_ESP32_FLASH_FREQ_40M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_40M)) \
+		$(if $(CONFIG_ESP32_FLASH_FREQ_26M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_26M)) \
+		$(if $(CONFIG_ESP32_FLASH_FREQ_20M),$(call cfg_en,CONFIG_ESPTOOLPY_FLASHFREQ_20M)) \
 	} > $(BOOTLOADER_CONFIG)
 ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-	$(eval KEYDIR := $(TOPDIR)/$(ESPSEC_KEYDIR))
-	$(eval APP_SIGN_KEY := $(abspath $(KEYDIR)/$(subst ",,$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY))))
-	$(Q) {                                                                                              \
-		$(if $(CONFIG_ESP32_SECURE_BOOT),                                                               \
-			echo "CONFIG_SECURE_BOOT=y";                                                                \
-			echo "CONFIG_SECURE_BOOT_V2_ENABLED=y";                                                     \
-			echo "CONFIG_ESP_SIGN_KEY_FILE=$(APP_SIGN_KEY)";                                            \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_RSA_2048),                                        \
-			echo "CONFIG_ESP_USE_MBEDTLS=y";                                                            \
-			echo "CONFIG_ESP_SIGN_RSA=y";                                                               \
-			echo "CONFIG_ESP_SIGN_RSA_LEN=2048";                                                        \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_RSA_3072),                                        \
-			echo "CONFIG_ESP_USE_MBEDTLS=y";                                                            \
-			echo "CONFIG_ESP_SIGN_RSA=y";                                                               \
-			echo "CONFIG_ESP_SIGN_RSA_LEN=3072";                                                        \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_ECDSA_P256),                                      \
-			echo "CONFIG_ESP_USE_TINYCRYPT=y";                                                          \
-			echo "CONFIG_ESP_SIGN_EC256=y";                                                             \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_ED25519),                                         \
-			echo "CONFIG_ESP_USE_TINYCRYPT=y";                                                          \
-			echo "CONFIG_ESP_SIGN_ED25519=y";                                                           \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_ROM_BASIC),                                               \
-			echo "CONFIG_SECURE_BOOT_ALLOW_ROM_BASIC=y";                                                \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_JTAG),                                                    \
-			echo "CONFIG_SECURE_BOOT_ALLOW_JTAG=y";                                                     \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_EFUSE_RD_DIS),                                            \
-			echo "CONFIG_SECURE_BOOT_V2_ALLOW_EFUSE_RD_DIS=y";                                          \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_DISABLE_ROM_DL_MODE),                                                \
-			echo "CONFIG_SECURE_DISABLE_ROM_DL_MODE=y";                                                 \
-		)                                                                                               \
-		$(if $(CONFIG_ESP32_SECURE_INSECURE_ALLOW_DL_MODE),                                             \
-			echo "CONFIG_SECURE_INSECURE_ALLOW_DL_MODE=y";                                              \
-		)                                                                                               \
-		echo "CONFIG_ESP_BOOTLOADER_SIZE=0xF000";                                                       \
-		echo "CONFIG_ESP_APPLICATION_PRIMARY_START_ADDRESS=$(CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET)";    \
-		echo "CONFIG_ESP_APPLICATION_SIZE=$(CONFIG_ESP32_OTA_SLOT_SIZE)";                               \
-		echo "CONFIG_ESP_APPLICATION_SECONDARY_START_ADDRESS=$(CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET)";\
-		echo "CONFIG_ESP_MCUBOOT_WDT_ENABLE=y";                                                         \
-		echo "CONFIG_ESP_SCRATCH_OFFSET=$(CONFIG_ESP32_OTA_SCRATCH_OFFSET)";                            \
-		echo "CONFIG_ESP_SCRATCH_SIZE=$(CONFIG_ESP32_OTA_SCRATCH_SIZE)";                                \
+	$(Q) { \
+		$(if $(CONFIG_ESP32_SECURE_BOOT),$(call cfg_en,CONFIG_SECURE_BOOT)$(call cfg_en,CONFIG_SECURE_BOOT_V2_ENABLED)$(call cfg_val,CONFIG_ESP_SIGN_KEY_FILE,$(abspath $(TOPDIR)/$(ESPSEC_KEYDIR)/$(subst ",,$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY))))) \
+		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_RSA_2048),$(call cfg_en,CONFIG_ESP_USE_MBEDTLS)$(call cfg_en,CONFIG_ESP_SIGN_RSA)$(call cfg_val,CONFIG_ESP_SIGN_RSA_LEN,2048)) \
+		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_RSA_3072),$(call cfg_en,CONFIG_ESP_USE_MBEDTLS)$(call cfg_en,CONFIG_ESP_SIGN_RSA)$(call cfg_val,CONFIG_ESP_SIGN_RSA_LEN,3072)) \
+		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_ECDSA_P256),$(call cfg_en,CONFIG_ESP_USE_TINYCRYPT)$(call cfg_en,CONFIG_ESP_SIGN_EC256)) \
+		$(if $(CONFIG_ESP32_SECURE_SIGNED_APPS_SCHEME_ED25519),$(call cfg_en,CONFIG_ESP_USE_TINYCRYPT)$(call cfg_en,CONFIG_ESP_SIGN_ED25519)) \
+		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_ROM_BASIC),$(call cfg_en,CONFIG_SECURE_BOOT_ALLOW_ROM_BASIC)) \
+		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_JTAG),$(call cfg_en,CONFIG_SECURE_BOOT_ALLOW_JTAG)) \
+		$(if $(CONFIG_ESP32_SECURE_BOOT_ALLOW_EFUSE_RD_DIS),$(call cfg_en,CONFIG_SECURE_BOOT_V2_ALLOW_EFUSE_RD_DIS)) \
+		$(if $(CONFIG_ESP32_SECURE_DISABLE_ROM_DL_MODE),$(call cfg_en,CONFIG_SECURE_DISABLE_ROM_DL_MODE)) \
+		$(if $(CONFIG_ESP32_SECURE_INSECURE_ALLOW_DL_MODE),$(call cfg_en,CONFIG_SECURE_INSECURE_ALLOW_DL_MODE)) \
+		$(call cfg_val,CONFIG_ESP_BOOTLOADER_SIZE,0xF000) \
+		$(call cfg_val,CONFIG_ESP_APPLICATION_PRIMARY_START_ADDRESS,$(CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET)) \
+		$(call cfg_val,CONFIG_ESP_APPLICATION_SIZE,$(CONFIG_ESP32_OTA_SLOT_SIZE)) \
+		$(call cfg_val,CONFIG_ESP_APPLICATION_SECONDARY_START_ADDRESS,$(CONFIG_ESP32_OTA_SECONDARY_SLOT_OFFSET)) \
+		$(call cfg_en,CONFIG_ESP_MCUBOOT_WDT_ENABLE) \
+		$(call cfg_val,CONFIG_ESP_SCRATCH_OFFSET,$(CONFIG_ESP32_OTA_SCRATCH_OFFSET)) \
+		$(call cfg_val,CONFIG_ESP_SCRATCH_SIZE,$(CONFIG_ESP32_OTA_SCRATCH_SIZE)) \
 	} >> $(BOOTLOADER_CONFIG)
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-	$(Q) {                                                                                              \
-		echo "CONFIG_PARTITION_TABLE_CUSTOM=y";                                                         \
-		echo "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions.csv\"";                               \
-		echo "CONFIG_PARTITION_TABLE_OFFSET=$(CONFIG_ESP32_PARTITION_TABLE_OFFSET)";                    \
+	$(Q) { \
+		$(call cfg_en,CONFIG_PARTITION_TABLE_CUSTOM) \
+		$(call cfg_val,CONFIG_PARTITION_TABLE_CUSTOM_FILENAME,\"partitions.csv\") \
+		$(call cfg_val,CONFIG_PARTITION_TABLE_OFFSET,$(CONFIG_ESP32_PARTITION_TABLE_OFFSET)) \
 	} >> $(BOOTLOADER_CONFIG)
 endif
 
@@ -156,24 +131,24 @@ endif
 endif
 
 clean_bootloader:
-	$(call DELDIR, $(BOOTLOADER_SRCDIR))
-	$(call DELFILE, $(BOOTLOADER_CONFIG))
-	$(call DELFILE, $(BOOTLOADER_BIN))
-	$(if $(CONFIG_ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES), $(call DELFILE, $(BOOTLOADER_SIGNED_BIN)))
+	$(call DELDIR,$(BOOTLOADER_SRCDIR))
+	$(call DELFILE,$(BOOTLOADER_CONFIG))
+	$(call DELFILE,$(BOOTLOADER_BIN))
+	$(if $(CONFIG_ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES),$(call DELFILE,$(BOOTLOADER_SIGNED_BIN)))
 
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 
 bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader binaries"
 	$(Q) $(BOOTLOADER_SRCDIR)/build_idfboot.sh -c esp32 -s -f $(BOOTLOADER_CONFIG)
-	$(call COPYFILE, $(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/bootloader-esp32.bin, $(TOPDIR))
-	$(call COPYFILE, $(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/partition-table-esp32.bin, $(TOPDIR))
+	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/bootloader-esp32.bin,$(TOPDIR))
+	$(call COPYFILE,$(BOOTLOADER_SRCDIR)/$(BOOTLOADER_OUTDIR)/partition-table-esp32.bin,$(TOPDIR))
 
 clean_bootloader:
-	$(call DELDIR, $(BOOTLOADER_SRCDIR))
-	$(call DELFILE, $(BOOTLOADER_CONFIG))
-	$(call DELFILE, $(TOPDIR)/bootloader-esp32.bin)
-	$(call DELFILE, $(TOPDIR)/partition-table-esp32.bin)
+	$(call DELDIR,$(BOOTLOADER_SRCDIR))
+	$(call DELFILE,$(BOOTLOADER_CONFIG))
+	$(call DELFILE,$(TOPDIR)/bootloader-esp32.bin)
+	$(call DELFILE,$(TOPDIR)/partition-table-esp32.bin)
 
 endif
 
@@ -189,7 +164,7 @@ bootloader:
 	$(Q) curl -L $(BOOTLOADER_URL)/mcuboot-esp32.bin -o $(TOPDIR)/mcuboot-esp32.bin
 
 clean_bootloader:
-	$(call DELFILE, $(TOPDIR)/mcuboot-esp32.bin)
+	$(call DELFILE,$(TOPDIR)/mcuboot-esp32.bin)
 
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
 
@@ -199,8 +174,8 @@ bootloader:
 	$(Q) curl -L $(BOOTLOADER_URL)/partition-table-esp32.bin -o $(TOPDIR)/partition-table-esp32.bin
 
 clean_bootloader:
-	$(call DELFILE, $(TOPDIR)/bootloader-esp32.bin)
-	$(call DELFILE, $(TOPDIR)/partition-table-esp32.bin)
+	$(call DELFILE,$(TOPDIR)/bootloader-esp32.bin)
+	$(call DELFILE,$(TOPDIR)/partition-table-esp32.bin)
 
 endif
 
