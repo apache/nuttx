@@ -108,6 +108,10 @@ else
   STDLIBS += -lrt
 endif
 
+ifneq ($(CONFIG_LIBM),y)
+  STDLIBS += -lm
+endif
+
 ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += sim_checkstack.c
 endif
