@@ -119,6 +119,24 @@ YELLOW = \033[1;33m
 BOLD   = \033[1m
 RST    = \033[0m
 
+# Functions for printing help messages
+
+define HELP_SIGN_APP
+	$(Q) echo ""
+	$(Q) echo "$(YELLOW)Application not signed. Sign the application before flashing.$(RST)"
+	$(Q) echo "To sign the application, you can use this command:"
+	$(Q) echo "    imgtool sign -k $(ESPSEC_KEYDIR)/$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY) --public-key-format hash --pad $(VERIFIED) --align 4 -v 0 -s auto -H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header -S $(CONFIG_ESP32_OTA_SLOT_SIZE) nuttx.hex nuttx.signed.bin"
+	$(Q) echo ""
+endef
+
+define HELP_FLASH_BOOTLOADER
+	$(Q) echo ""
+	$(Q) echo "$(YELLOW)Secure boot enabled, so bootloader not flashed automatically.$(RST)"
+	$(Q) echo "Use the following command to flash the bootloader:"
+	$(Q) echo "    esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
+	$(Q) echo ""
+endef
+
 # MERGEBIN -- Merge raw binary files into a single file
 
 define MERGEBIN
@@ -149,7 +167,6 @@ endef
 
 # SIGNBIN -- Create the signed binary image file for Secure Boot
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 define SIGNBIN
 	$(Q) echo "SIGNBIN: ESP32 signed binary"
 	$(Q) if ! imgtool version 1>/dev/null 2>&1; then \
@@ -184,12 +201,16 @@ define SIGNBIN
 	$(Q) echo nuttx.signed.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
 endef
-endif
 
-# ELF2IMAGE -- Convert an ELF file into a compatible binary file
+# MKIMAGE -- Convert an ELF file into a compatible binary file
 
+ifeq ($(CONFIG_ESP32_SECURE_BOOT),y)
+define MKIMAGE
+	$(if $(CONFIG_ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES),$(call SIGNBIN),$(call HELP_SIGN_APP))
+endef
+else
 ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-define ELF2IMAGE
+define MKIMAGE
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! esptool.py version 1>/dev/null 2>&1; then \
 		echo ""; \
@@ -205,14 +226,14 @@ define ELF2IMAGE
 	esptool.py -c esp32 elf2image $(ESPTOOL_FLASH_OPTS) -o nuttx.bin nuttx
 	$(Q) echo "Generated: nuttx.bin (ESP32 compatible)"
 endef
-else
-define ELF2IMAGE
+else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
+define MKIMAGE
 	$(Q) echo "MKIMAGE: ESP32 binary"
 	$(Q) if ! imgtool version 1>/dev/null 2>&1; then \
 		echo ""; \
 		echo "imgtool not found.  Please run: \"pip install imgtool\""; \
 		echo ""; \
-		echo "Run make again to create the nuttx.signed.bin image."; \
+		echo "Run make again to create the nuttx.bin image."; \
 		exit 1; \
 	fi
 	imgtool sign --pad $(VERIFIED) --align 4 -v 0 -s auto \
@@ -222,42 +243,14 @@ define ELF2IMAGE
 	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
 endef
 endif
-
-define HELP_SIGN_APP
-	$(Q) echo ""
-	$(Q) echo "$(YELLOW)Application not signed. Sign the application before flashing.$(RST)"
-	$(Q) echo "To sign the application, you can use this command:"
-	$(Q) echo "    imgtool sign -k $(ESPSEC_KEYDIR)/$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY) --public-key-format hash --pad $(VERIFIED) --align 4 -v 0 -s auto -H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header -S $(CONFIG_ESP32_OTA_SLOT_SIZE) nuttx.hex nuttx.signed.bin"
-	$(Q) echo ""
-endef
-
-define HELP_FLASH_BOOTLOADER
-	$(Q) echo ""
-	$(Q) echo "$(YELLOW)Secure boot enabled, so bootloader not flashed automatically.$(RST)"
-	$(Q) echo "Use the following command to flash the bootloader:"
-	$(Q) echo "    esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
-	$(Q) echo ""
-endef
+endif
 
 # POSTBUILD -- Perform post build operations
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 define POSTBUILD
-	$(if $(CONFIG_ESP32_SECURE_BOOT),                                                                    \
-		$(if $(CONFIG_ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES),                                          \
-			$(call SIGNBIN),                                                                             \
-			$(call HELP_SIGN_APP)                                                                        \
-		),                                                                                               \
-		$(call ELF2IMAGE)                                                                                \
-	)
+	$(call MKIMAGE)
 	$(if $(CONFIG_ESP32_MERGE_BINS),$(call MERGEBIN))
 endef
-else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-define POSTBUILD
-	$(call ELF2IMAGE)
-	$(if $(CONFIG_ESP32_MERGE_BINS),$(call MERGEBIN))
-endef
-endif
 
 # ESPTOOL_BAUD -- Serial port baud rate used when flashing/reading via esptool.py
 
