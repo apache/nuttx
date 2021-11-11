@@ -580,7 +580,7 @@ static int cw2218_write_profile(FAR struct cw2218_dev_s *priv,
 
       if (ret < 0)
         {
-          baterr("IIC error %d\n", ret);
+          baterr("ERROR: CW2218 wirte profile error, Error = %d\n", ret);
           return ret;
         }
     }
@@ -616,6 +616,7 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
   ret = cw2218_getreg8(priv, CW2218_COMMAND_CONFIG, &reg_val, 1);
   if (ret < 0)
     {
+      baterr("Error: Get CW2218 command config failed, Error = %d\n", ret);
       return ret;
     }
 
@@ -627,6 +628,7 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
   ret = cw2218_getreg8(priv, CW2218_COMMAND_SOC_ALERT, &reg_val, 1);
   if (ret < 0)
     {
+      baterr("Error: get CW2218 command soc alert failed\n");
       return ret;
     }
 
@@ -649,7 +651,7 @@ static int cw2218_get_state(FAR struct cw2218_dev_s *priv)
         }
     }
 
-  if (i != CW2218_COMMAND_BATINFO)
+  if (i != SIZE_OF_PROFILE)
     {
       return CW2218_PROFILE_NEED_UPDATE;
     }
@@ -682,13 +684,14 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   unsigned char reg_val;
   int count = 0;
   int i;
-  int ret;
+  int ret = 0;
   b16_t voltage;
   b16_t soc;
 
   ret = cw2218_sleep(priv);
   if (ret < 0)
     {
+      baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
       return ret;
     }
 
@@ -697,6 +700,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   ret = cw2218_write_profile(priv, g_config_profile_info);
   if (ret < 0)
     {
+      baterr("ERROR: CW2218 write profile error, Error = %d\n", ret);
       return ret;
     }
 
@@ -706,6 +710,7 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_SOC_ALERT, reg_val);
   if (ret < 0)
     {
+      baterr("ERROR: CW2218 update value error, Error = %d\n", ret);
       return ret;
     }
 
@@ -715,20 +720,33 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   ret = cw2218_putreg8(priv, CW2218_COMMAND_INT_CONFIG, reg_val);
   if (ret < 0)
     {
+      baterr("ERROR: CW2218 close interruptes error, Error = %d\n", ret);
       return ret;
     }
 
   ret = cw2218_active(priv);
   if (ret < 0)
     {
+      baterr("ERROR: CW2218 active error, Error = %d\n", ret);
       return ret;
     }
 
   while (1)
     {
       nxsig_usleep(CW2218_SLEEP_100MS);
-      cw2218_getvoltage(priv, &voltage);
-      cw2218_getsoc(priv, &soc, &soc_h);
+      ret = cw2218_getvoltage(priv, &voltage);
+      if (ret < 0)
+        {
+          baterr("ERROR: CW2218 get voltage error, Error = %d\n", ret);
+          return ret;
+        }
+
+      ret = cw2218_getsoc(priv, &soc, &soc_h);
+      if (ret < 0)
+        {
+          baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+          return ret;
+        }
 
       if ((voltage != 0) && (soc_h == 0xff))
         {
@@ -738,15 +756,27 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
       count++;
       if (count >= CW2218_SLEEP_COUNTS)
         {
-          cw2218_sleep(priv);
-          return ERROR;
+          ret = cw2218_sleep(priv);
+          if (ret < 0)
+            {
+              baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
+              return ret;
+            }
+
+          return -CW2218_NOT_ACTIVE;
         }
     }
 
   for (i = 0; i < CW2218_SLEEP_COUNTS_SOC; i++)
     {
       nxsig_usleep(CW2218_SLEEP_100MS);
-      cw2218_getsoc(priv, &soc, &soc_h);
+      ret = cw2218_getsoc(priv, &soc, &soc_h);
+      if (ret < 0)
+        {
+          baterr("ERROR: CW2218 get soc error, Error = %d\n", ret);
+          return ret;
+        }
+
       if (soc_h <= CW2218_SOC_MAGIC_100)
         {
           break;
@@ -756,10 +786,16 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
   if (i >= CW2218_SLEEP_COUNTS_SOC)
     {
       cw2218_sleep(priv);
-      return ERROR;
+      if (ret < 0)
+        {
+          baterr("ERROR: CW2218 sleep error, Error = %d\n", ret);
+          return ret;
+        }
+
+      return -CW2218_NOT_ACTIVE;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -782,34 +818,36 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
 
 static int cw2218_init(FAR struct cw2218_dev_s *priv)
 {
-  unsigned int  id = 0;
+  unsigned int id = 0;
   int ret;
 
   ret = cw2218_get_chipid(priv, &id);
   if (ret < 0)
     {
-      baterr("IIC read error\n");
+      baterr("ERROR: CW2218 read iic error, Error = %d\n", ret);
       return ret;
     }
 
   if (id != CW2218_DEVICE_ID)
     {
-      baterr("not cw2218 device id\n");
+      baterr("ERROR: Not CW2218 device id\n");
       return ERROR;
     }
 
   ret = cw2218_get_state(priv);
   if (ret < 0)
     {
-      baterr("iic read error\n");
+      baterr("ERROR: CW2218 get state error! Error = %d\n", ret);
       return ret;
     }
 
-  if (ret != 0)
+  if ((ret == CW2218_NOT_ACTIVE) || (ret == CW2218_PROFILE_NOT_READY) \
+      || (ret == CW2218_PROFILE_NEED_UPDATE))
     {
       ret = cw2218_config_start_ic(priv);
       if (ret < 0)
         {
+          baterr("ERROR: CW2218 config start ic failed, Error = %d\n", ret);
           return ret;
         }
     }
@@ -1030,24 +1068,36 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
                                                 uint32_t frequency)
 {
   FAR struct cw2218_dev_s *priv;
+  int ret;
 
   /* Initialize the cw2218 device structure */
 
-  priv = (FAR struct cw2218_dev_s *)kmm_zalloc(sizeof(
-                                                      struct cw2218_dev_s));
-  if (priv)
+  priv = (FAR struct cw2218_dev_s *)kmm_zalloc(sizeof(struct cw2218_dev_s));
+  if (!priv)
     {
-      /* Initialize the cw2218 device structure */
-
-      priv->dev.ops   = &g_cw2218ops;
-      priv->i2c       = i2c;
-      priv->addr      = addr;
-      priv->frequency = frequency;
+      baterr("ERROR: Failed to allocate instance\n");
+      goto err;
     }
 
-  cw2218_init(priv);
+  priv->dev.ops   = &g_cw2218ops;
+  priv->i2c       = i2c;
+  priv->addr      = addr;
+  priv->frequency = frequency;
+
+  ret = cw2218_init(priv);
+    {
+      if (ret < 0)
+        {
+          baterr("ERROR: Failed to init CW2218, Error = %d\n", ret);
+          goto err;
+        }
+    }
 
   return (FAR struct battery_gauge_dev_s *)priv;
+
+err:
+  kmm_free(priv);
+  return NULL;
 }
 
 #endif /* CONFIG_BATTERY && CONFIG_I2C && CONFIG_CW2218 */
