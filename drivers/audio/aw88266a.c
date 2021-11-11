@@ -929,6 +929,8 @@ static int aw88266a_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
               caps->ac_controls.b[0] =
                 AUDIO_TYPE_OUTPUT | AUDIO_TYPE_FEATURE |
                 AUDIO_TYPE_PROCESSING;
+
+              caps->ac_format.hw = (1 << (AUDIO_FMT_PCM - 1));
               break;
 
             case AUDIO_FMT_MIDI:
