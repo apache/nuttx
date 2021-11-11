@@ -294,7 +294,7 @@ void mpu_configure_region(uintptr_t base, size_t size,
       /* The configure the region */ \
       mpu_configure_region(base, size,\
                           MPU_AR_RWX, \
-                          MPU_MEM_WRITETHRU);\
+                          MPU_MEM_WRITEBACK);\
     } while (0)
 
 /****************************************************************************
@@ -311,7 +311,7 @@ void mpu_configure_region(uintptr_t base, size_t size,
       /* The configure the region */ \
       mpu_configure_region(base, size, \
                           MPU_AR_RWXrwx, \
-                          MPU_MEM_WRITETHRU);\
+                          MPU_MEM_WRITEBACK);\
     } while (0)
 
 /****************************************************************************
@@ -328,7 +328,7 @@ void mpu_configure_region(uintptr_t base, size_t size,
       /* The configure the region */ \
       mpu_configure_region(base, size,  \
                           MPU_AR_RWX, \
-                          MPU_MEM_WRITETHRU);\
+                          MPU_MEM_WRITEBACK);\
     } while (0)
 
 /****************************************************************************
