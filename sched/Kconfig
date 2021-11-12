@@ -948,7 +948,7 @@ config SCHED_INSTRUMENTATION
 			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 
-		NOTE: These are internal OS interfaces and are called at at very
+		NOTE: These are internal OS interfaces and are called at very
 		critical locations in the OS. There is very little that can be
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
@@ -964,7 +964,7 @@ config SCHED_INSTRUMENTATION_EXTERNAL
 		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
 		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
 		these callbacks and packet the arguments into note_ struct. Then the board
-		-specific logic just need to implement one callback:
+		-specific logic just needs to implement one callback:
 
 		  void sched_note_add(FAR const void *note, size_t notelen);
 
