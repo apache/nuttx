@@ -1137,7 +1137,7 @@ config NFILE_DESCRIPTORS_PER_BLOCK
 
 config FILE_STREAM
 	bool "Enable FILE stream"
-	default y
+	default !DEFAULT_SMALL
 	---help---
 		Enable the standard buffered input/output support
 
