@@ -30,6 +30,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
+#include "esp32c3_systemreset.h"
+
 #ifdef CONFIG_BOARDCTL_RESET
 
 /****************************************************************************
@@ -58,7 +60,6 @@
 
 int board_reset(int status)
 {
-#ifdef CONFIG_BOARD_ASSERT_RESET_VALUE
   syslog(LOG_INFO, "reboot status=%d\n", status);
 
   switch (status)
@@ -71,9 +72,6 @@ int board_reset(int status)
       default:
         break;
     }
-#else
-  up_shutdown_handler();
-#endif
 
   up_systemreset();
 

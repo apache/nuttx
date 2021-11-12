@@ -3369,7 +3369,7 @@ config BOARD_RESET_ON_ASSERT
 
 config BOARD_ASSERT_RESET_VALUE
 	int "Board reset argument"
-	default 0
+	default 1
 	depends on BOARDCTL_RESET
 	---help---
 		Parameter that will be passed to board_reset() by when an
