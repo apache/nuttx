@@ -1936,17 +1936,20 @@ rom_pll_vol_cal = 0x40001b28;
 
 memset = 0x40000354;
 memcpy = 0x40000358;
+memccpy = 0x400003c4;
 memmove = 0x4000035c;
 memcmp = 0x40000360;
-memccpy = 0x400003c4;
 memchr = 0x400003c8;
 memrchr = 0x400003cc;
 strcpy = 0x40000364;
 strncpy = 0x40000368;
+strlcpy = 0x400003f0;
 strcmp = 0x4000036c;
 strncmp = 0x40000370;
 strlen = 0x40000374;
+strnlen = 0x40000404;
 strstr = 0x40000378;
+strchr = 0x400003e0;
 bzero = 0x4000037c;
 
 /***************************************
