@@ -31,8 +31,6 @@
 # include <stdint.h>
 #endif
 
-
 #define HCLK_FREQUENCY    32000000ul       /* HSI48 for USB, only some STM32F0xx */
-
 
 #endif /* phy62xx */

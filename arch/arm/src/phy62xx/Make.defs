@@ -94,8 +94,11 @@ CFLAGS += -DUSE_SYS_TICK
 CFLAGS += -DHUGE_MODE=0 
 CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
-#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
+CFLAGS += -Wimplicit-function-declaration
+CFLAGS += -Wparentheses
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
+#CFLAGS += -Wstrict-prototypes
+#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
 #LDFLAGS += -Wl,-Map="../../../phyplus_build.map"		# param error
 #LDFLAGS += -Wl,--gc-sections					# param error
 

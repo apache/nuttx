@@ -100,14 +100,14 @@ struct phyplus_tim_ops_s
   void (*start)(FAR struct phyplus_tim_dev_s *dev);
   void (*stop)(FAR struct phyplus_tim_dev_s *dev);
   void (*clear)(FAR struct phyplus_tim_dev_s *dev);
-  int  (*setmode)(FAR struct phyplus_tim_dev_s *dev, phyplus_tim_mode_t mode);
+  int (*setmode)(FAR struct phyplus_tim_dev_s *dev, phyplus_tim_mode_t mode);
   void (*getcounter)(FAR struct phyplus_tim_dev_s *dev, uint32_t *value);
   void (*setcounter)(FAR struct phyplus_tim_dev_s *dev, uint32_t *value);
-  int  (*setisr)(FAR struct phyplus_tim_dev_s *dev, xcpt_t handler, void *arg);
+  int (*setisr)(FAR struct phyplus_tim_dev_s *dev, xcpt_t handler,
+      void *arg);
   void (*enableint)(FAR struct phyplus_tim_dev_s *dev);
   void (*disableint)(FAR struct phyplus_tim_dev_s *dev);
   void (*ackint)(FAR struct phyplus_tim_dev_s *dev);
-
 };
 
 /****************************************************************************
