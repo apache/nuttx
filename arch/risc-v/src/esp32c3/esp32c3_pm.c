@@ -1579,7 +1579,6 @@ void esp32c3_pmstandby(uint64_t time_in_us)
 
   /* don't power down XTAL — powering it up takes different time on. */
 
-  fflush(stdout);
   esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
 #ifdef CONFIG_ESP32C3_RT_TIMER
   /* Get rt-timer timestamp before entering sleep */
@@ -1665,7 +1664,6 @@ void IRAM_ATTR esp32c3_deep_sleep_start(void)
 
 void esp32c3_pmsleep(uint64_t time_in_us)
 {
-  fflush(stdout);
   esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
   esp32c3_deep_sleep_start();
 }
