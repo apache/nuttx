@@ -22,13 +22,101 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "libc.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: lib_getoffset
+ *
+ * Description:
+ *   It is insufficient to simply use the file offset; we must also account
+ *   for the data offset in the any buffered data.  This function calculates
+ *   that offset.
+ *
+ * Returned Value:
+ *   The file position offset due to buffered data.
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+static off_t lib_getoffset(FAR FILE *stream)
+{
+  off_t offset = 0;
+  lib_take_semaphore(stream);
+
+  if (stream->fs_bufstart !=
+      NULL && stream->fs_bufread !=
+      stream->fs_bufstart)
+    {
+#if CONFIG_NUNGET_CHARS > 0
+      offset = stream->fs_bufread - stream->fs_bufpos +
+                 stream->fs_nungotten;
+#else
+      offset = stream->fs_bufread - stream->fs_bufpos;
+#endif
+    }
+  else
+    {
+      offset = -(stream->fs_bufpos - stream->fs_bufstart);
+    }
+
+  lib_give_semaphore(stream);
+  return offset;
+}
+#else
+#  define lib_getoffset(stream) (0)
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: ftello
+ *
+ * Description:
+ *   ftello() returns the current value of the file position indicator for
+ *   the stream pointed to by stream.
+ *
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set appropriately.
+ *
+ ****************************************************************************/
+
 off_t ftello(FAR FILE *stream)
 {
-  return ftell(stream);
+  off_t position;
+
+  /* Verify that we were provided with a stream */
+
+  if (!stream)
+    {
+      set_errno(EBADF);
+      return ERROR;
+    }
+
+  /* Perform the lseek to the current position.  This will not move the
+   * file pointer, but will return its current setting
+   */
+
+  position = lseek(stream->fs_fd, 0, SEEK_CUR);
+  if (position != (off_t)-1)
+    {
+      return position - lib_getoffset(stream);
+    }
+  else
+    {
+      return ERROR;
+    }
 }
