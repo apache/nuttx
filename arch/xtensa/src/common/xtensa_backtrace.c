@@ -234,9 +234,9 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size)
 #endif
           xtensa_window_spill();
 
-          ret = bactrace_stack((void *)istackbase,
-                          (void *)((uint32_t)&g_intstackalloc +
-                                       CONFIG_ARCH_INTERRUPTSTACK),
+          ret = backtrace_stack((void *)istackbase,
+                          (void *)(istackbase +
+                                   CONFIG_ARCH_INTERRUPTSTACK),
                           (void *)up_getsp(), NULL, buffer, size);
 #else
           ret = backtrace_stack(rtcb->stack_base_ptr,
