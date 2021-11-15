@@ -144,6 +144,11 @@ static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
                                           bool int_mask_sel);
 static int da9168_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                     ioe_pinset_t pinset, FAR void *arg);
+int da9168_config_shipmode(
+                       FAR struct da9168_dev_s *priv,
+                       enum da9168_ship_mode_entry_delay_sel entry_delay_sel,
+                       enum da9168_ship_mode_exit_deb_sel exit_deb_sel);
+int da9168_enable_shipmode(FAR struct da9168_dev_s *priv);
 
 /* Battery driver lower half methods */
 
@@ -461,14 +466,38 @@ static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: da9168_control_shipmode
+ * Name: da9168_enable_shipmode
  *
  * Description:
- *   Return the control state
+ *   Make da9168 into shipmode
  *
  ****************************************************************************/
 
-int da9168_control_shipmode(
+int da9168_enable_shipmode(FAR struct da9168_dev_s *priv)
+{
+  int ret;
+  uint8_t regval;
+
+  regval = DA9168_SHIP_MODE_MASK;
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06,
+                               DA9168_SHIP_MODE_MASK, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: da9168_config_shipmode
+ *
+ * Description:
+ *   Config da9168 into shipmode delay time and exit shipmode dealy time.
+ *
+ ****************************************************************************/
+
+int da9168_config_shipmode(
                        FAR struct da9168_dev_s *priv,
                        enum da9168_ship_mode_entry_delay_sel entry_delay_sel,
                        enum da9168_ship_mode_exit_deb_sel exit_deb_sel)
@@ -492,12 +521,10 @@ int da9168_control_shipmode(
 
   regval = DA9168_SEL_TO_FIELD(entry_delay_sel, DA9168_SHIP_DLY);
   regval |= DA9168_SEL_TO_FIELD(exit_deb_sel, DA9168_RIN_N_SHIP_EXIT_TMR);
-  regval |= DA9168_SHIP_MODE_MASK;
 
   ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06,
                                DA9168_SHIP_DLY_MASK |
-                               DA9168_RIN_N_SHIP_EXIT_TMR_MASK |
-                               DA9168_SHIP_MODE_MASK, regval);
+                               DA9168_RIN_N_SHIP_EXIT_TMR_MASK, regval);
   if (ret < 0)
     {
       baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
@@ -1550,9 +1577,7 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
     {
       case BATIO_OPRTN_SHIPMODE:
         {
-          ret = da9168_control_shipmode(priv,
-                                        DA9168_SHIP_MODE_ENTRY_DELAY_2S,
-                                        DA9168_SHIP_MODE_EXIT_DEB_2S);
+          ret = da9168_enable_shipmode(priv);
           if (ret < 0)
             {
               baterr("ERROR: DA9168 enter shiomode fail: %d\n", ret);
@@ -1661,6 +1686,10 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   da9168_enable_interrput(priv, DA9168_PMC_MASK_01, DA9168_M_VBUS_UV_MASK,
                           DA9168_M_VBUS_UV_SHIFT, false);
 
+  /* config shiomode parameter */
+
+  da9168_config_shipmode(priv, DA9168_SHIP_MODE_ENTRY_DELAY_2S,
+                         DA9168_SHIP_MODE_EXIT_DEB_2S);
   return ret;
 }
 
