@@ -112,7 +112,6 @@ struct foc_dev_s
 {
   /* Fields managed by common upper-half FOC logic **************************/
 
-  uint8_t                    devno;      /* FOC device instance number */
   uint8_t                    ocount;     /* The number of times the device
                                           * has been opened
                                           */
