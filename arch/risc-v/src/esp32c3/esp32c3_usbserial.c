@@ -99,6 +99,7 @@ static struct esp32c3_priv_s g_usbserial_priv =
 {
   .periph = ESP32C3_PERIPH_USB,
   .irq    = ESP32C3_IRQ_USB,
+  .cpuint = -ENOMEM,
 };
 
 static struct uart_ops_s g_uart_ops =
