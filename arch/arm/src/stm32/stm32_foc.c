@@ -2037,15 +2037,6 @@ static int stm32_foc_bind(FAR struct foc_dev_s *dev,
   DEBUGASSERT(cb);
   DEBUGASSERT(priv);
 
-  /* Do we support given FOC instance? */
-
-  if (dev->devno > CONFIG_MOTOR_FOC_INST)
-    {
-      mtrerr("Unsupported STM32 FOC instance %d\n", dev->devno);
-      ret = -EINVAL;
-      goto errout;
-    }
-
   /* Validate callbacks */
 
   DEBUGASSERT(cb->notifier);
@@ -2053,8 +2044,6 @@ static int stm32_foc_bind(FAR struct foc_dev_s *dev,
   /* Bind upper-half FOC device callbacks */
 
   priv->cb = cb;
-
-errout:
   return ret;
 }
 
