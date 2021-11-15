@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_MOTOR_MOTOR_H
-#define __INCLUDE_NUTTX_DRIVERS_MOTOR_MOTOR_H
+#ifndef __INCLUDE_NUTTX_MOTOR_MOTOR_H
+#define __INCLUDE_NUTTX_MOTOR_MOTOR_H
 
 /* The motor driver is split into two parts:
  *
