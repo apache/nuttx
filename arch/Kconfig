@@ -339,6 +339,11 @@ config ARCH_HAVE_PROGMEM_READ
 	default n
 	depends on ARCH_HAVE_PROGMEM
 
+config ARCH_HAVE_PROGMEM_ERASESTATE
+	bool
+	default n
+	depends on ARCH_HAVE_PROGMEM
+
 config ARCH_HAVE_RESET
 	bool
 	default n

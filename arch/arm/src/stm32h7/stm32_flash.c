@@ -971,3 +971,8 @@ ssize_t up_progmem_write(size_t addr, const void *buf, size_t count)
   stm32h7_flash_sem_unlock(priv);
   return written;
 }
+
+ssize_t up_progmem_erasestate(void)
+{
+  return FLASH_ERASEDVALUE;
+}
