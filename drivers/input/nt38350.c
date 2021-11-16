@@ -1172,6 +1172,8 @@ static int nvt_init_bootloader(FAR struct nt38350_dev_s *priv)
           return ret;
         }
 
+      usleep(NVT_DELAY_10MS);
+
       if (buf[1] == 0xaa)
         {
           break;
@@ -1234,6 +1236,8 @@ static int nvt_resume_pd(FAR struct nt38350_dev_s *priv)
           ierr("ERROR: Check 0xAA (Resume Command) error!!(%d)\n", ret);
           return ret;
         }
+
+      usleep(NVT_DELAY_10MS);
 
       if (buf[1] == 0xaa)
         {
