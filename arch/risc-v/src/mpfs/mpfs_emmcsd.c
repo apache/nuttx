@@ -2332,7 +2332,6 @@ static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t status;
   int32_t timeout;
-  uint32_t waitbits = 0;
 
   mcinfo("cmd: %08" PRIx32 "\n", cmd);
 
@@ -2363,22 +2362,17 @@ static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  if (cmd & MMCSD_DATAXFR_MASK)
-    {
-      waitbits = MPFS_EMMCSD_SRS12_CC;
-    }
-
   do
     {
       status = getreg32(MPFS_EMMCSD_SRS12);
     }
-  while (!(status & (waitbits | MPFS_EMMCSD_SRS12_EINT))
+  while (!(status & (MPFS_EMMCSD_SRS12_CC | MPFS_EMMCSD_SRS12_EINT))
          && --timeout);
 
   if (timeout == 0 || (status & MPFS_EMMCSD_SRS12_ECT))
     {
-      mcerr("ERROR: Timeout cmd: %08" PRIx32 " stat: %08" PRIx32 " wb: %08"
-            PRIx32 "\n", cmd, status, waitbits);
+      mcerr("ERROR: Timeout cmd: %08" PRIx32 " stat: %08" PRIx32 "\n", cmd,
+            status);
       return -EBUSY;
     }
 
