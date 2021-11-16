@@ -62,7 +62,8 @@ enum motor_opmode_e
   MOTOR_OPMODE_POSITION  = 1,   /* Position control mode */
   MOTOR_OPMODE_SPEED     = 2,   /* Speed control mode */
   MOTOR_OPMODE_TORQUE    = 3,   /* Torque control mode */
-  MOTOR_OPMODE_FORCE     = 4    /* Force control mode */
+  MOTOR_OPMODE_FORCE     = 4,   /* Force control mode */
+  MOTOR_OPMODE_PATTERN   = 5    /* Pattern control mode */
 };
 
 /* Motor driver state */
@@ -209,6 +210,7 @@ struct motor_params_s
 #ifdef CONFIG_MOTOR_UPPER_HAVE_DECELERATION
   float deceleration;                /* Motor deceleration */
 #endif
+  FAR void *privdata;                /* out of band data */
 };
 
 /* Motor operations used to call from the upper-half, generic motor driver
