@@ -57,6 +57,10 @@ config MOTOR_UPPER_HAVE_INPUT_POWER
 	bool "Have input power protection"
 	default n
 
+config MOTOR_UPPER_HAVE_PATTERN
+	bool "Have pattern control (linear motors)"
+	default n
+
 endif
 
 source "drivers/motor/foc/Kconfig"

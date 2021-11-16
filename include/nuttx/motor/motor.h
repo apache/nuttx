@@ -62,7 +62,8 @@ enum motor_opmode_e
   MOTOR_OPMODE_POSITION  = 1,   /* Position control mode */
   MOTOR_OPMODE_SPEED     = 2,   /* Speed control mode */
   MOTOR_OPMODE_TORQUE    = 3,   /* Torque control mode */
-  MOTOR_OPMODE_FORCE     = 4    /* Force control mode */
+  MOTOR_OPMODE_FORCE     = 4,   /* Force control mode */
+  MOTOR_OPMODE_PATTERN   = 5    /* Pattern control mode */
 };
 
 /* Motor driver state */
@@ -177,6 +178,14 @@ struct motor_limits_s
  * NOTE: All parameters require not negative value.
  */
 
+#ifdef CONFIG_MOTOR_UPPER_HAVE_PATTERN
+struct motor_patten_s
+{
+  uint8_t patternid;
+  float strength;
+};
+#endif
+
 struct motor_params_s
 {
   bool  lock;                        /* Lock this structure. Set this bit
@@ -208,6 +217,9 @@ struct motor_params_s
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_DECELERATION
   float deceleration;                /* Motor deceleration */
+#endif
+#ifdef CONFIG_MOTOR_UPPER_HAVE_PATTERN
+  struct motor_patten_s pattern;     /* Motor pattern setting */
 #endif
 };
 
