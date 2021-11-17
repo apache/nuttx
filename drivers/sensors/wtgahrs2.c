@@ -329,7 +329,7 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
     {
       rtdata->gps_mask = 0;
       lower->push_event(lower->priv, &rtdata->gps, sizeof(rtdata->gps));
-      sninfo("Time : %llu utc_time: %llu\n",
+      sninfo("Time : %" PRIu64 " utc_time: %" PRIu64 "\n",
              rtdata->gps.timestamp, rtdata->gps.time_utc);
       sninfo("GPS longitude : %fdegree, latitude:%fdegree\n",
               rtdata->gps.longitude, rtdata->gps.latitude);
