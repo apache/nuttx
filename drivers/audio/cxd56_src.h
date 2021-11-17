@@ -29,6 +29,7 @@
 #include <mqueue.h>
 
 #include <nuttx/audio/audio.h>
+#include <nuttx/audio/samplerate.h>
 #include <nuttx/config.h>
 
 #ifdef CONFIG_AUDIO
@@ -45,51 +46,7 @@
 #  define CONFIG_CXD56_SRC_MSG_PRIO  1
 #endif
 
-#ifndef SRC_SINC_BEST_QUALITY
-#  define SRC_SINC_BEST_QUALITY     0
-#endif
-
-#ifndef SRC_SINC_MEDIUM_QUALITY
-#  define SRC_SINC_MEDIUM_QUALITY   1
-#endif
-
-#ifndef SRC_SINC_FASTEST
-#  define SRC_SINC_FASTEST          2
-#endif
-
-#ifndef SRC_ZERO_ORDER_HOLD
-#  define SRC_ZERO_ORDER_HOLD       3
-#endif
-
-#ifndef SRC_LINEAR
-#  define SRC_LINEAR                4
-#endif
-
 #define AUDIO_APB_SRC_FINAL  (1 << 4) /* Last buffer in SRC processing */
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-typedef struct SRC_STATE_TAG SRC_STATE;
-
-typedef struct
-{
-  const float *data_in;
-  float       *data_out;
-  long        input_frames;
-  long        output_frames;
-  long        input_frames_used;
-  long        output_frames_gen;
-  int         end_of_input;
-  double      src_ratio;
-} SRC_DATA;
-
-SRC_STATE *src_new (int converter_type, int channels, int *error);
-
-SRC_STATE *src_delete (SRC_STATE *state);
-
-int src_process (SRC_STATE *state, SRC_DATA *data);
 
 /****************************************************************************
  * Public Function Prototypes
