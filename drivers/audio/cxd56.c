@@ -1320,7 +1320,7 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
         {
           struct ap_buffer_s *apb;
 
-          apb = dq_get(&dev->up_runq);
+          apb = (struct ap_buffer_s *) dq_get(&dev->up_runq);
           spin_unlock_irqrestore(&dev->lock, flags);
           dev->dev.upper(dev->dev.priv, AUDIO_CALLBACK_DEQUEUE, apb, OK);
           flags = spin_lock_irqsave(&dev->lock);
