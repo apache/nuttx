@@ -3267,11 +3267,14 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
           if (dev->state != CXD56_DEV_STATE_STARTED)
             {
-              /* Turn on amplifier */
+              if (dev->dma_handle == CXD56_AUDIO_DMA_I2S0_DOWN)
+                {
+                  /* Turn on amplifier */
 
-              spin_unlock_irqrestore(&dev->lock, flags);
-              board_external_amp_mute_control(false);
-              flags = spin_lock_irqsave(&dev->lock);
+                  spin_unlock_irqrestore(&dev->lock, flags);
+                  board_external_amp_mute_control(false);
+                  flags = spin_lock_irqsave(&dev->lock);
+                }
 
               /* Mask interrupts */
 
