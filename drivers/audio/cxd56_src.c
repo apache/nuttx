@@ -529,6 +529,8 @@ int cxd56_src_deinit(void)
     file_close(&dump_file_post);
 #endif
 
+  file_mq_close(&g_src.mq);
+
   return OK;
 }
 
