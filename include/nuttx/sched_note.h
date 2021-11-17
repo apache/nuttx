@@ -147,6 +147,11 @@ enum note_type_e
   NOTE_IRQ_ENTER       = 20,
   NOTE_IRQ_LEAVE       = 21
 #endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+  ,
+  NOTE_DUMP_STRING     = 22,
+  NOTE_DUMP_BINARY     = 23
+#endif
 };
 
 /* This structure provides the common header of each note */
@@ -318,6 +323,29 @@ struct note_irqhandler_s
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+struct note_string_s
+{
+  struct note_common_s nst_cmn; /* Common note parameters */
+  char nst_data[1];             /* String data terminated by '\0' */
+};
+
+#define SIZEOF_NOTE_STRING(n) (sizeof(struct note_string_s) + \
+                               (n) * sizeof(char))
+
+struct note_binary_s
+{
+  struct note_common_s nbi_cmn; /* Common note parameters */
+  uint32_t nbi_module;          /* Module number */
+  uint8_t  nbi_event;           /* Event number */
+  uint8_t  nbi_data[1];         /* Binary data */
+};
+
+#define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
+                               ((n) - 1) * sizeof(uint8_t))
+
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
@@ -438,6 +466,25 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #else
 #  define sched_note_irqhandler(i,h,e)
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+void sched_note_string(FAR const char *buf);
+void sched_note_dump(uint32_t module, uint8_t event,
+                     FAR const void *buf, size_t len);
+void sched_note_vprintf(FAR const char *fmt, va_list va) printflike(1, 0);
+void sched_note_vbprintf(uint32_t module, uint8_t event,
+                         FAR const char *fmt, va_list va) printflike(3, 0);
+void sched_note_printf(FAR const char *fmt, ...) printflike(1, 2);
+void sched_note_bprintf(uint32_t module, uint8_t event,
+                        FAR const char *fmt, ...) printflike(3, 4);
+#else
+#  define sched_note_string(b)
+#  define sched_note_dump(m,e,b,l)
+#  define sched_note_vprintf(f,v)
+#  define sched_note_vbprintf(m,e,f,v)
+#  define sched_note_printf(f...)
+#  define sched_note_bprintf(m,e,f...)
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
@@ -561,6 +608,12 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 #  define sched_note_syscall_enter(n,a...)
 #  define sched_note_syscall_leave(n,r)
 #  define sched_note_irqhandler(i,h,e)
+#  define sched_note_string(b)
+#  define sched_note_dump(m,e,b,l)
+#  define sched_note_vprintf(f,v)
+#  define sched_note_vbprintf(m,e,f,v)
+#  define sched_note_printf(f...)
+#  define sched_note_bprintf(m,e,f...)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
