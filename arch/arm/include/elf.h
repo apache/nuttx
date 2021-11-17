@@ -248,4 +248,13 @@
 #define DT_ARM_PREEMPTMAP        0x70000002
 #define DT_ARM_RESERVED2         0x70000003
 
+/* ELF register definitions */
+
+/* Holds the general purpose registers $a1 * through to $pc
+ * at indices 0 to 15.  At index 16 the program status register.
+ * Index 17 should be set to zero.
+ */
+
+typedef unsigned long elf_gregset_t[18];
+
 #endif /* __ARCH_ARM_INCLUDE_ELF_H */
