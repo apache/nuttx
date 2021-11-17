@@ -32,17 +32,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Some environments may return CR as end-of-line, others LF, and others
- * both.  Because of the definition of the getline() function, it can handle
- * only single character line terminators.
- */
-
-#undef HAVE_GETLINE
-#if defined(CONFIG_EOL_IS_CR)
-#  define HAVE_GETLINE 1
+#ifdef CONFIG_EOL_IS_CR
 #  define EOLCH        '\r'
-#elif defined(CONFIG_EOL_IS_LF)
-#  define HAVE_GETLINE 1
+#else
 #  define EOLCH        '\n'
 #endif
 
@@ -210,6 +202,17 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
     }
   while (ch != delimiter);
 
+#ifndef CONFIG_EOL_IS_CR
+  /* Convert \r\n to \n */
+
+  if (dest - *lineptr >= 2 && *(dest -2) == '\r' && *(dest - 1) == '\n')
+    {
+      *(dest - 2) = '\n';
+      ncopied--;
+      dest--;
+    }
+#endif
+
   /* Add a NUL terminator character (but don't report this in the number of
    * bytes transferred).
    */
@@ -240,9 +243,7 @@ errout:
  *
  ****************************************************************************/
 
-#ifdef HAVE_GETLINE
 ssize_t getline(FAR char **lineptr, size_t *n, FAR FILE *stream)
 {
   return getdelim(lineptr, n, EOLCH, stream);
 }
-#endif

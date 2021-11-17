@@ -106,27 +106,12 @@ config LIBC_SCANSET
 	---help---
 		Add scanset support to sscanf().
 
-choice
-	prompt "Newline Options"
-	default EOL_IS_EITHER_CRLF
+config EOL_IS_CR
+	bool "EOL is CR"
 	---help---
 		This selection determines the line terminating character that is used.
 		Some environments may return CR as end-of-line, others LF, and others
-		both.  If not specified, the default is either CR or LF (but not both)
-		as the line terminating character.
-
-config EOL_IS_CR
-	bool "EOL is CR"
-
-config EOL_IS_LF
-	bool "EOL is LF"
-
-config EOL_IS_BOTH_CRLF
-	bool "EOL is CR and LF"
-
-config EOL_IS_EITHER_CRLF
-	bool "EOL is CR or LF"
-
-endchoice
+		both.  If not specified, the default is LF or CR and LF as the line
+		terminating character.
 
 endmenu #Standard C I/O

@@ -35,38 +35,6 @@
 #include "libc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* Some environments may return CR as end-of-line, others LF, and others
- * both.  If not specified, the logic here assumes either (but not both) as
- * the default.
- */
-
-#if defined(CONFIG_EOL_IS_CR)
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_LF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_BOTH_CRLF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_EITHER_CRLF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#else
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  define CONFIG_EOL_IS_EITHER_CRLF 1
-#endif
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -90,12 +58,10 @@ static void consume_eol(FILE *stream, bool consume)
         {
           ch = fgetc(stream);
         }
-#if  defined(CONFIG_EOL_IS_LF) || defined(CONFIG_EOL_IS_BOTH_CRLF)
-      while (ch != EOF && ch != '\n');
-#elif defined(CONFIG_EOL_IS_CR)
+#ifdef CONFIG_EOL_IS_CR
       while (ch != EOF && ch != '\r');
-#else /* elif defined(CONFIG_EOL_IS_EITHER_CRLF) */
-      while (ch != EOF && ch != '\n' && ch != '\r');
+#else
+      while (ch != EOF && ch != '\n');
 #endif
     }
 }
@@ -174,14 +140,21 @@ FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
        * others both.
        */
 
-#if  defined(CONFIG_EOL_IS_LF) || defined(CONFIG_EOL_IS_BOTH_CRLF)
-      if (ch == '\n')
-#elif defined(CONFIG_EOL_IS_CR)
+#ifdef CONFIG_EOL_IS_CR
       if (ch == '\r')
-#else /* elif defined(CONFIG_EOL_IS_EITHER_CRLF) */
-      if (ch == '\n' || ch == '\r')
+#else
+      if (ch == '\n')
 #endif
         {
+#ifndef CONFIG_EOL_IS_CR
+          /* Convert \r\n to \n */
+
+          if (nch && buf[nch - 1] == '\r')
+            {
+              --nch;
+            }
+#endif
+
           if (keepnl)
             {
               /* Store newline is stored in the buffer */
