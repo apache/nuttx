@@ -125,8 +125,9 @@
 #define SENSOR_TYPE_IR                              11
 
 /* GPS
- * A sensor of this type returns gps data. Include year, month, day,
- * hour, minutes, seconds, altitude, longitude, latitude.
+ * A sensor of this type returns gps data. Include latitude, longitude,
+ * altitude, horizontal position accuracy, vertical position accuracy,
+ * horizontal dilution of precision, vertical dilution of precision...
  */
 
 #define SENSOR_TYPE_GPS                             12
@@ -254,9 +255,15 @@
 
 #define SENSOR_TYPE_OTS                             28
 
+/* Sensor of gps satellite
+ * A sensor of this type returns the gps satellite information.
+ */
+
+#define SENSOR_TYPE_GPS_SATELLITE                   29
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           29
+#define SENSOR_TYPE_COUNT                           30
 
 /****************************************************************************
  * Inline Functions
@@ -364,19 +371,35 @@ struct sensor_event_ir      /* Type: Infrared Ray */
 
 struct sensor_event_gps     /* Type: Gps */
 {
-  int year;                 /* Time */
-  int month;
-  int day;
-  int hour;
-  int min;
-  int sec;
-  int msec;
+  uint64_t timestamp;       /* Time since system start, Units is microseconds */
 
-  float yaw;                /* Unit is Si degrees */
-  float height;             /* Unit is SI m */
-  float speed;              /* Unit is m/s */
+  /* This is the timestamp which comes from the gps module. It might be
+   * unavailable right after cold start, indicated by a value of 0,
+   * Units is microseconds
+   */
+
+  uint64_t time_utc;
+
   float latitude;           /* Unit is degrees */
   float longitude;          /* Unit is degrees */
+  float altitude;           /* Altitude above MSL(mean seal level), Unit is SI m */
+  float altitude_ellipsoid; /* Altitude bove Ellipsoid, Unit is SI m */
+
+  float eph;                /* GPS horizontal position accuracy (metres) */
+  float epv;                /* GPS vertical position accuracy (metres) */
+
+  float hdop;               /* Horizontal dilution of precision */
+  float vdop;               /* Vertical dilution of precision */
+
+  float ground_speed;       /* GPS ground speed, Unit is m/s */
+
+  /* Course over ground (NOT heading, but direction of movement),
+   * Unit is Si degrees
+   */
+
+  float course;
+
+  uint32_t satellites_used; /* Number of satellites used */
 };
 
 struct sensor_event_uv      /* Type: Ultraviolet Light */
@@ -475,6 +498,35 @@ struct sensor_event_ots     /* Type: OTS */
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t x;                /* Axis X in counts */
   int32_t y;                /* Axis Y in counts */
+};
+
+struct sensor_event_gps_satellite
+{
+  uint64_t timestamp;       /* Time since system start, Units is microseconds */
+  uint32_t count;           /* Total number of messages of satellites visible */
+  uint32_t satellites;      /* Total number of satellites in view */
+
+  struct satellite
+  {
+    uint32_t svid;          /* Space vehicle ID */
+
+  /* Elevation (0: right on top of receiver,
+   * 90: on the horizon) of satellite
+   */
+
+    uint32_t elevation;
+
+    /* Direction of satellite, 0: 0 deg, 255: 360 deg. */
+
+    uint32_t azimuth;
+
+  /* dBHz, Signal to noise ratio of satellite C/N0, range 0..99,
+   * zero when not tracking this satellite
+   */
+
+    uint32_t snr;
+  }
+  info[4];
 };
 
 /* The sensor lower half driver interface */
