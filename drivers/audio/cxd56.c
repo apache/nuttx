@@ -1265,7 +1265,7 @@ static void cxd56_reset_channel_sel(cxd56_dmahandle_t handle)
     }
 }
 
-#ifdef CONFIG_CXD56_AUCIO_SRC
+#ifdef CONFIG_AUDIO_CXD56_SRC
 static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
 {
   struct audio_msg_s msg;
@@ -1504,7 +1504,7 @@ static void cxd56_dma_int_handler(void)
 
   if (err_code != CXD56_AUDIO_ECODE_DMA_HANDLE_INV)
     {
-#ifdef CONFIG_CXD56_AUCIO_SRC
+#ifdef CONFIG_AUDIO_CXD56_SRC
     _process_audio_with_src(hdl, err_code);
 #else
     _process_audio(hdl, err_code);
