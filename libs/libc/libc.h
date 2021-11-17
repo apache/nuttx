@@ -97,6 +97,11 @@ ssize_t lib_fwrite(FAR const void *ptr, size_t count, FAR FILE *stream);
 
 ssize_t lib_fread(FAR void *ptr, size_t count, FAR FILE *stream);
 
+/* Defined in lib_libgets.c */
+
+FAR char *lib_dgets(FAR char *buf, size_t buflen, int fd,
+                    bool keepnl, bool consume);
+
 /* Defined in lib_libfgets.c */
 
 FAR char *lib_fgets(FAR char *buf, size_t buflen, FILE *stream,
