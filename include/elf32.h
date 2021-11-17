@@ -135,6 +135,15 @@ typedef struct
   Elf32_Word   p_align;
 } Elf32_Phdr;
 
+/* Figure 5-7: Note Information */
+
+typedef struct
+{
+  Elf32_Word   n_namesz; /* Length of the note's name.  */
+  Elf32_Word   n_descsz; /* Length of the note's descriptor.  */
+  Elf32_Word   n_type;   /* Type of the note.  */
+} Elf32_Nhdr;
+
 /* Figure 5-9: Dynamic Structure */
 
 typedef struct
@@ -151,6 +160,8 @@ typedef Elf32_Addr  Elf_Addr;
 typedef Elf32_Ehdr  Elf_Ehdr;
 typedef Elf32_Rel   Elf_Rel;
 typedef Elf32_Rela  Elf_Rela;
+typedef Elf32_Nhdr  Elf_Nhdr;
+typedef Elf32_Phdr  Elf_Phdr;
 typedef Elf32_Sym   Elf_Sym;
 typedef Elf32_Shdr  Elf_Shdr;
 typedef Elf32_Word  Elf_Word;
