@@ -25,6 +25,7 @@ CSRCS += lib_fileno.c lib_printf.c lib_sprintf.c lib_asprintf.c
 CSRCS += lib_snprintf.c lib_libsprintf.c lib_vsprintf.c lib_vasprintf.c
 CSRCS += lib_vsnprintf.c lib_dprintf.c lib_vdprintf.c lib_vprintf.c
 CSRCS += lib_perror.c lib_putchar.c lib_getchar.c lib_puts.c
+CSRCS += lib_gets_s.c lib_gets.c lib_libdgets.c
 CSRCS += lib_sscanf.c lib_vsscanf.c lib_libvscanf.c lib_libvsprintf.c
 CSRCS += lib_remove.c lib_tempnam.c lib_tmpnam.c lib_ultoa_invert.c
 CSRCS += lib_renameat.c
@@ -39,7 +40,7 @@ ifeq ($(CONFIG_FILE_STREAM),y)
 CSRCS += lib_fopen.c lib_freopen.c lib_fclose.c lib_fread.c lib_libfread.c
 CSRCS += lib_fseek.c lib_fseeko.c lib_ftell.c lib_ftello.c lib_fsetpos.c
 CSRCS += lib_getdelim.c lib_fgetpos.c lib_getc.c lib_fgetc.c
-CSRCS += lib_fgets.c lib_gets_s.c lib_gets.c lib_libfgets.c lib_fwrite.c
+CSRCS += lib_fgets.c lib_libfgets.c lib_fwrite.c
 CSRCS += lib_libfwrite.c lib_fflush.c lib_libflushall.c lib_libfflush.c
 CSRCS += lib_rdflush.c lib_wrflush.c lib_putc.c lib_fputc.c
 CSRCS += lib_fputs.c lib_ungetc.c lib_fprintf.c lib_vfprintf.c
