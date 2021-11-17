@@ -1291,8 +1291,9 @@ static void _process_audio_with_src(cxd56_dmahandle_t hdl, uint16_t err_code)
     {
       /* Notify end of data */
 
-      if (dev->state != CXD56_DEV_STATE_PAUSED
-          && dq_count(&dev->down_pendq) == 0)
+      if (dev->state != CXD56_DEV_STATE_PAUSED &&
+          dev->state != CXD56_DEV_STATE_STOPPED &&
+          dq_count(&dev->down_pendq) == 0)
         {
           msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
@@ -1393,7 +1394,8 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
     {
       /* Notify end of data */
 
-      if (dev->state != CXD56_DEV_STATE_PAUSED)
+      if (dev->state != CXD56_DEV_STATE_PAUSED &&
+          dev->state != CXD56_DEV_STATE_STOPPED)
         {
           audinfo("DMA_TRANS up_pendq=%d \n",
                  dq_count(&dev->up_pendq));
