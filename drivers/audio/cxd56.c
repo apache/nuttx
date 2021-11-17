@@ -80,6 +80,7 @@
 
 /* Samplerates field is split into low and high byte */
 
+#ifdef CONFIG_AUDIO_CXD56_SRC
 #define CXD56_SUPP_RATES_L  (AUDIO_SAMP_RATE_8K  | AUDIO_SAMP_RATE_11K | \
                              AUDIO_SAMP_RATE_16K | AUDIO_SAMP_RATE_22K | \
                              AUDIO_SAMP_RATE_32K | AUDIO_SAMP_RATE_44K | \
@@ -87,6 +88,12 @@
 #define CXD56_SUPP_RATES_H  ((AUDIO_SAMP_RATE_96K  | AUDIO_SAMP_RATE_128K | \
                               AUDIO_SAMP_RATE_192K) >> 8)
 #define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#else
+/* No sample rate converter, only support system rate of 48kHz */
+#define CXD56_SUPP_RATES_L  AUDIO_SAMP_RATE_48K
+#define CXD56_SUPP_RATES_H  0x0
+#define CXD56_SUPP_RATES    (CXD56_SUPP_RATES_L | CXD56_SUPP_RATES_H)
+#endif
 
 /* Mic setting definitions */
 
