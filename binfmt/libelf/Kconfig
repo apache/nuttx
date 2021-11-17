@@ -62,3 +62,14 @@ config ELF_SYMBOL_CACHECOUNT
 	---help---
 		This is a cache that is used to store elf symbol table to
 		reduce access fs. Default: 256
+
+config ELF_COREDUMP
+	bool "ELF Coredump"
+	select DEBUG_TCBINFO
+	default n
+	---help---
+		Generate ELF core dump to provide information about the CPU state and the
+		memory state of program.
+		The memory state embeds a snapshot of all segments mapped in the
+		memory space of the program. The CPU state contains register values
+		when the core dump has been generated.
