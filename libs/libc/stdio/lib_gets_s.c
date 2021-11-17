@@ -41,7 +41,7 @@
  *   either a terminating newline or EOF, which it replaces with '\0'.  Reads
  *   at most n-1 characters from stdin into the array pointed to by str until
  *   new-line character, end-of-file condition, or read error.   The newline
- *   character, if encountered, is not saved in the arraay.  A NUL character
+ *   character, if encountered, is not saved in the array.  A NUL character
  *   is written immediately after the last character read into the array, or
  *   to str[0] if no characters were read.
  *
@@ -69,5 +69,5 @@ FAR char *gets_s(FAR char *s, rsize_t n)
 
   /* Then let lib_fgets() do the heavy lifting */
 
-  return lib_fgets(s, (size_t)n, stdin, false, true);
+  return lib_fgets(s, n, stdin, false, true);
 }
