@@ -26,6 +26,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "libc.h"
 
@@ -58,5 +59,9 @@ FAR char *gets(FAR char *s)
 {
   /* Let lib_fgets() do the heavy lifting */
 
+#ifdef CONFIG_FILE_STREAM
   return lib_fgets(s, SIZE_MAX, stdin, false, false);
+#else
+  return lib_dgets(s, SIZE_MAX, STDIN_FILENO, false, false);
+#endif
 }
