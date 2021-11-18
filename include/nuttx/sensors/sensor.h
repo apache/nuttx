@@ -676,7 +676,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*selftest)(FAR struct sensor_lowerhalf_s *lower,
-                        unsigned long arg);
+                       unsigned long arg);
 
   /**************************************************************************
    * Name: set_calibvalue
