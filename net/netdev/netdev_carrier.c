@@ -94,6 +94,7 @@ int netdev_carrier_off(FAR struct net_driver_s *dev)
       /* Notify clients that the network has been taken down */
 
       devif_dev_event(dev, NULL, NETDEV_DOWN);
+      arp_cleanup(dev);
 
       return OK;
     }
