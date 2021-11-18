@@ -143,7 +143,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
  * - The caller has already removed the input rtcb from whatever list it
  *   was in.
  * - The caller handles the condition that occurs if the head of the
- *   ready-to-run list is changed.
+ *   ready-to-run list has changed.
  *
  ****************************************************************************/
 
@@ -162,7 +162,7 @@ bool nxsched_add_readytorun(FAR struct tcb_s *btcb)
 
   if ((btcb->flags & TCB_FLAG_CPU_LOCKED) != 0)
     {
-      /* Yes.. that that is the CPU we must use */
+      /* Yes.. that is the CPU we must use */
 
       cpu  = btcb->cpu;
     }
