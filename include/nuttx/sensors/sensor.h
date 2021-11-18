@@ -679,6 +679,26 @@ struct sensor_ops_s
                         unsigned long arg);
 
   /**************************************************************************
+   * Name: set_calibvalue
+   *
+   * The calibration value to be written in or the non-volatile memory of the
+   * sensor or dedicated registers. At each power-on, so that the values read
+   * from the sensor are already corrected. When the device is calibrated,
+   * the absolute accuracy will be better than before.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   arg        - The parameters associated with calibration value.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*set_calibvalue)(FAR struct sensor_lowerhalf_s *lower,
+                             unsigned long arg);
+
+  /**************************************************************************
    * Name: control
    *
    * With this method, the user can set some special config for the sensor,
