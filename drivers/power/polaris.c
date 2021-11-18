@@ -116,7 +116,7 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
   msg[0].addr = priv->addr;
   msg[0].buffer = cmd;
   msg[0].length = cmd_length;
-  msg[0].flags = 0;
+  msg[0].flags = I2C_M_NOSTOP;
 
   msg[1].addr = priv->addr;
   msg[1].buffer = read_data;
@@ -156,7 +156,7 @@ static int wlc_i2c_write(FAR struct stwlc38_dev_s *priv,
   msg[0].addr = priv->addr;
   msg[0].buffer = cmd;
   msg[0].length = cmd_length;
-  msg[0].flags = 0;
+  msg[0].flags = I2C_M_NOSTOP;
 
 #ifdef DEBUG
   batinfo("[WLC] W: ");
@@ -413,9 +413,12 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
       return err;
   batinfo("[WLC] RRAM Programming.. \n");
 
+  batinfo("[WLC] RRAM Programming to write FW_data.. \n");
   err = polaris_nvm_write_bulk(priv, patch_data, NVM_PATCH_SIZE,
                                NVM_PATCH_START_SECTOR_INDEX);
   if (err != OK) return err;
+
+  batinfo("[WLC] RRAM Programming to write cfg_data.. \n");
   err = polaris_nvm_write_bulk(priv, cfg_data, NVM_CFG_SIZE,
                                NVM_CFG_START_SECTOR_INDEX);
   if (err != OK) return err;
@@ -491,8 +494,6 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
     }
 
   /* determine what has to be programmed depending on version ids */
-
-  chip_info.cut_id = chip_info.chip_revision; /* TEST: */
 
   batinfo("[WLC] Cut Id: %02X\n", chip_info.cut_id);
   if (chip_info.cut_id != NVM_TARGET_CUT_ID)
