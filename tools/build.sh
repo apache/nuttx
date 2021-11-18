@@ -41,7 +41,8 @@ function build_board()
   echo -e "  make -C ${NUTTXDIR} EXTRAFLAGS=[-Wno-cpp] ${@:2}"
   echo -e "  make -C ${NUTTXDIR} savedefconfig"
 
-  if [ ! -f "${ROOTDIR}/prebuilts/kconfig-frontends/bin/kconfig-conf" ]; then
+  if [ ! -f "${ROOTDIR}/prebuilts/kconfig-frontends/bin/kconfig-conf" ] &&
+     [ ! -x "$(command -v kconfig-conf)" ]; then
     pushd ${ROOTDIR}/prebuilts/kconfig-frontends
     ./configure --prefix=${ROOTDIR}/prebuilts/kconfig-frontends 1>/dev/null
     touch aclocal.m4 Makefile.in
