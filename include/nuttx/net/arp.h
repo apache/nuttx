@@ -85,7 +85,6 @@ struct arp_entry_s
   in_addr_t         at_ipaddr;   /* IP address */
   struct ether_addr at_ethaddr;  /* Hardware address */
   clock_t           at_time;     /* Time of last usage */
-  char              at_ifname[IFNAMSIZ]; /* Interface name */
 };
 
 /****************************************************************************
