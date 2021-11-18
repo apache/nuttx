@@ -370,14 +370,6 @@ unsigned int wd_timer(int ticks, bool noswitches)
   wdog = (FAR struct wdog_s *)g_wdactivelist.head;
   while (wdog != NULL && ticks > 0)
     {
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-      /* There is logic to handle the case where ticks is greater than
-       * the watchdog lag, but if the scheduling is working properly
-       * that should never happen.
-       */
-
-      DEBUGASSERT(ticks <= wdog->lag);
-#endif
       /* Decrement the lag for this watchdog. */
 
       decr = MIN(wdog->lag, ticks);
