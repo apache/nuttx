@@ -61,7 +61,9 @@ function build_board()
 
   EXTRAFLAGS=-Wno-cpp
   if [ "$ARCH" == "xtensa" ]; then
-    export XTENSAD_LICENSE_FILE=28000@10.221.64.91
+    if [ "$XTENSAD_LICENSE_FILE" == "" ]; then
+      export XTENSAD_LICENSE_FILE=28000@10.221.64.91
+    fi
     EXTRAFLAGS=""
   fi
 
