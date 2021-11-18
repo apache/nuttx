@@ -546,14 +546,6 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
-config DEBUG_TCBINFO
-	bool "Enable TCBinfo struct for debug"
-	default n
-	---help---
-		Enables tcbinfo struct for debugger infomation.
-		Selecting this option will enable g_tcbinfo in arch and
-		procfs.
-
 config DEBUG_ALERT
 	bool
 	default n
@@ -1846,6 +1838,14 @@ config DEBUG_VIDEO_INFO
 
 endif # DEBUG_VIDEO
 endif # DEBUG_FEATURES
+
+config DEBUG_TCBINFO
+	bool "Enable TCBinfo struct for debug"
+	default n
+	---help---
+		Enables tcbinfo struct for debugger infomation.
+		Selecting this option will enable g_tcbinfo in arch and
+		procfs.
 
 config ARCH_HAVE_STACKCHECK
 	bool
