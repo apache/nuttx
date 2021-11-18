@@ -564,9 +564,9 @@ void up_disable_irq(int irq)
 #ifdef CONFIG_SMP
       /* The APP's CPU GPIO is a special case. See esp32/irq.h */
 
-      if (periph == ESP32_IRQ_APPCPU_GPIO)
+      if (irq == ESP32_IRQ_APPCPU_GPIO)
         {
-          periph = ESP32_IRQ_CPU_GPIO;
+          periph = ESP32_PERIPH_CPU_GPIO;
         }
 #endif
 #endif
@@ -619,9 +619,9 @@ void up_enable_irq(int irq)
 #ifdef CONFIG_SMP
       /* The APP's CPU GPIO is a special case. See esp32/irq.h */
 
-      if (periph == ESP32_IRQ_APPCPU_GPIO)
+      if (irq == ESP32_IRQ_APPCPU_GPIO)
         {
-          periph = ESP32_IRQ_CPU_GPIO;
+          periph = ESP32_PERIPH_CPU_GPIO;
         }
 #endif
 #endif
@@ -818,6 +818,15 @@ int esp32_setup_irq(int cpu, int periphid, int priority, int type)
     }
 
   irq = ESP32_PERIPH2IRQ(periphid);
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_SMP
+  if (cpu == 1 && periphid == ESP32_PERIPH_CPU_GPIO)
+    {
+      irq = ESP32_IRQ_APPCPU_GPIO;
+    }
+#endif
+#endif
 
   DEBUGASSERT(periphid >= 0 && periphid < ESP32_NPERIPHERALS);
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
