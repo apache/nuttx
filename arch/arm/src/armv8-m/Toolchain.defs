@@ -102,7 +102,7 @@ else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m55
-  ifeq ($(CONFIG_ARM_HAVE_NEON),y)
+  ifeq ($(CONFIG_ARM_HAVE_MVE),y)
     TOOLCHAIN_MARCH    := -march=armv8.1-m.main+mve.fp+fp.dp
   else
     TOOLCHAIN_MARCH    := -march=armv8.1-m.main+dsp

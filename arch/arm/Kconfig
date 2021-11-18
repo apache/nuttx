@@ -852,6 +852,12 @@ config ARM_HAVE_NEON
 	---help---
 		Decide whether support NEON instruction
 
+config ARM_HAVE_MVE
+	bool
+	default n
+	---help---
+		Decide whether support MVE instruction
+
 config ARM_HAVE_MPU_UNIFIED
 	bool
 	default n
