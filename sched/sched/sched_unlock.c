@@ -263,7 +263,7 @@ int sched_unlock(void)
            * NOTE: This operation has a very high likelihood of causing
            * this task to be switched out!
            *
-           * In the single CPU case, decrementing irqcount to zero is
+           * In the single CPU case, decrementing lockcount to zero is
            * sufficient to release the pending tasks.  Further, in that
            * configuration, critical sections and pre-emption can operate
            * fully independently.
@@ -277,7 +277,7 @@ int sched_unlock(void)
 #if CONFIG_RR_INTERVAL > 0
           /* If (1) the task that was running supported round-robin
            * scheduling and (2) if its time slice has already expired, but
-           * (3) it could not slice out because pre-emption was disabled,
+           * (3) it could not be sliced out because pre-emption was disabled,
            * then we need to swap the task out now and reassess the interval
            * timer for the next time slice.
            */
@@ -285,7 +285,7 @@ int sched_unlock(void)
           if ((rtcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR &&
               rtcb->timeslice == 0)
             {
-              /* Yes.. that is the situation.  But one more thing.  The call
+              /* Yes.. that is the situation.  But one more thing:  The call
                * to up_release_pending() above may have actually replaced
                * the task at the head of the ready-to-run list.  In that
                * case, we need only to reset the timeslice value back to the
