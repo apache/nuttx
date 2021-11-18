@@ -901,6 +901,12 @@ config ARM_HAVE_NEON
 	---help---
 		Decide whether support NEON instruction
 
+config ARM_HAVE_MVE
+	bool
+	default n
+	---help---
+		Decide whether support MVE instruction
+
 config ARM_FPU_ABI_SOFT
 	bool "Soft Float ABI"
 	default n
