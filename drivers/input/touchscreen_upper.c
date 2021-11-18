@@ -81,6 +81,11 @@ static int     touch_ioctl(FAR struct file *filep, int cmd,
 static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup);
 
+#ifdef CONFIG_INPUT_UINPUT
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -90,7 +95,11 @@ static const struct file_operations g_touch_fops =
   touch_open,     /* open */
   touch_close,    /* close */
   touch_read,     /* read */
+#ifdef CONFIG_INPUT_UINPUT
+  touch_write,    /* write */
+#else
   NULL,           /* write */
+#endif
   NULL,           /* seek */
   touch_ioctl,    /* ioctl */
   touch_poll      /* poll */
@@ -196,6 +205,27 @@ static int touch_close(FAR struct file *filep)
   nxsem_post(&upper->exclsem);
   return ret;
 }
+
+/****************************************************************************
+ * Name: touch_write
+ ****************************************************************************/
+
+#ifdef CONFIG_INPUT_UINPUT
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
+                          size_t buflen)
+{
+  FAR struct inode *inode             = filep->f_inode;
+  FAR struct touch_upperhalf_s *upper = inode->i_private;
+  FAR struct touch_lowerhalf_s *lower = upper->lower;
+
+  if (!lower->write)
+    {
+      return -ENOSYS;
+    }
+
+  return lower->write(lower, buffer, buflen);
+}
+#endif
 
 /****************************************************************************
  * Name: touch_read
