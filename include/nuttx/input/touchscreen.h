@@ -106,14 +106,14 @@
 
 struct touch_point_s
 {
-  uint8_t  id;       /* Unique identifies contact; Same in all reports for the contact */
-  uint8_t  flags;    /* See TOUCH_* definitions above */
-  int16_t  x;        /* X coordinate of the touch point (uncalibrated) */
-  int16_t  y;        /* Y coordinate of the touch point (uncalibrated) */
-  int16_t  h;        /* Height of touch point (uncalibrated) */
-  int16_t  w;        /* Width of touch point (uncalibrated) */
-  uint16_t pressure; /* Touch pressure */
-  uint64_t timestamp;/* Touch event time stamp, in microseconds */
+  uint8_t  id;        /* Unique identifies contact; Same in all reports for the contact */
+  uint8_t  flags;     /* See TOUCH_* definitions above */
+  int16_t  x;         /* X coordinate of the touch point (uncalibrated) */
+  int16_t  y;         /* Y coordinate of the touch point (uncalibrated) */
+  int16_t  h;         /* Height of touch point (uncalibrated) */
+  int16_t  w;         /* Width of touch point (uncalibrated) */
+  uint16_t pressure;  /* Touch pressure */
+  uint64_t timestamp; /* Touch event time stamp, in microseconds */
 };
 
 /* The typical touchscreen driver is a read-only, input character device
@@ -164,6 +164,25 @@ struct touch_lowerhalf_s
 
   CODE int (*control)(FAR struct touch_lowerhalf_s *lower,
                       int cmd, unsigned long arg);
+
+  /**************************************************************************
+   * Name: write
+   *
+   * Description:
+   *   Users can use this interface to implement custom write.
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *   buffer  - User defined specific buffer.
+   *   buflen  - User defined specific buffer size.
+   *
+   * Return Value:
+   *   Number of bytes written；a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE ssize_t (*write)(FAR struct touch_lowerhalf_s *lower,
+                        FAR const char *buffer, size_t buflen);
 };
 
 /****************************************************************************
