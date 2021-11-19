@@ -45,6 +45,13 @@ config INPUT_TOUCHSCREEN_NPOLLWAITERS
 
 endif # INPUT_TOUCHSCREEN
 
+config INPUT_UINPUT
+	bool "Enable uinput"
+	select INPUT_TOUCHSCREEN
+	default n
+	---help---
+		Enable support virtual input device driver
+
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
 	default n
