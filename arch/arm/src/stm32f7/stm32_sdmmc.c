@@ -412,6 +412,8 @@ struct stm32_dev_s
   volatile uint8_t   xfrflags;        /* Used to synchronize SDMMC and DMA completion events */
   bool               dmamode;         /* true: DMA mode transfer */
   DMA_HANDLE         dma;             /* Handle for DMA channel */
+  uint8_t           *rxbuffer;        /* Address of read DMA operation for dcahe maintenance */
+  uint8_t           *rxend;           /* last byte of buffer for dcahe maintenance */
 #endif
 
   #ifdef HAVE_SDMMC_SDIO_MODE
@@ -1565,6 +1567,15 @@ static void stm32_endtransfer(struct stm32_dev_s *priv,
        */
 
       stm32_dmastop(priv->dma);
+
+      /* Force RAM re-read */
+
+      if (priv->rxbuffer)
+        {
+          up_invalidate_dcache((uintptr_t)priv->rxbuffer,
+                               (uintptr_t)priv->rxend);
+          priv->rxbuffer = 0;
+        }
     }
 #endif
 
@@ -1929,6 +1940,8 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   priv->widebus     = false;  /* Required for DMA support */
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   priv->dmamode     = false;  /* true: DMA mode transfer */
+  priv->rxbuffer    = 0;
+  priv->rxend       = 0;
 #endif
 
   /* Configure the SDIO peripheral */
@@ -2265,6 +2278,7 @@ static int stm32_recvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
   priv->remaining = nbytes;
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   priv->dmamode   = false;
+  priv->rxbuffer  = 0;
 #endif
 
   /* Then set up the SDIO data path */
@@ -2321,6 +2335,7 @@ static int stm32_sendsetup(FAR struct sdio_dev_s *dev, FAR const
   priv->remaining = nbytes;
 #ifdef CONFIG_STM32F7_SDMMC_DMA
   priv->dmamode   = false;
+  priv->rxbuffer  = 0;
 #endif
 
   /* Then set up the SDIO data path */
@@ -3074,6 +3089,7 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
   priv->dmamode   = true;
+  priv->rxbuffer  = 0;
 
   /* Then set up the SDIO data path */
 
@@ -3092,12 +3108,13 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
                  (uint32_t)buffer, (buflen + 3) >> 2,
                  SDMMC_RXDMA32_CONFIG | priv->dmapri);
 
-  /* Force RAM reread */
+  /* Force deferred RAM reread */
 
   if ((uintptr_t)buffer < DTCM_START ||
       (uintptr_t)buffer + buflen > DTCM_END)
     {
-      up_invalidate_dcache((uintptr_t)buffer, (uintptr_t)buffer + buflen);
+      priv->rxbuffer = buffer;
+      priv->rxend    = buffer + buflen;
     }
 
   /* Start the DMA */
@@ -3178,6 +3195,7 @@ static int stm32_dmasendsetup(FAR struct sdio_dev_s *dev,
   priv->buffer    = (uint32_t *)buffer;
   priv->remaining = buflen;
   priv->dmamode   = true;
+  priv->rxbuffer  = 0;
 
   /* Then set up the SDIO data path */
 
