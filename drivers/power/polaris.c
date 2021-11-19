@@ -427,18 +427,12 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
 
   reg_value = 0x01;
 
-  /**************************************************************************
-   * the follow includes a workaround
-   * it should return error when meeting i2c tramsfer failed, but if so, the
-   * procedure logic will meet a difficult.
-   * therefore, print err info and return ok. the workaround is only to hint
-   * the I2C transfer failed, which does not effect normal work behind.
-   **************************************************************************/
-
-  if ((err = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1)) != OK)
-    batinfo("[WLC] return err");
-
-  /* the reset need 500ms or so, for this workaround, setup 1000ms */
+  err = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1);
+  if (err != OK)
+    {
+      batinfo("[WLC] return err");
+      return err;
+    }
 
   usleep(AFTER_SYS_RESET_SLEEP_MS);
 
