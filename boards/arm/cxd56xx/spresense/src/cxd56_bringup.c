@@ -373,7 +373,7 @@ int cxd56_bringup(void)
 #endif
 
 #ifdef CONFIG_VIDEO_ISX012
-  ret = board_isx012_initialize(IMAGER_I2C);
+  ret = isx012_initialize();
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize ISX012 board. %d\n", errno);

@@ -1241,6 +1241,10 @@ static int isx012_init(void)
   FAR struct isx012_dev_s *priv = &g_isx012_private;
   int ret = 0;
 
+  priv->i2c      = board_isx012_initialize();
+  priv->i2c_addr = ISX012_I2C_SLV_ADDR;
+  priv->i2c_freq = I2CFREQ_STANDARD;
+
   ret = board_isx012_power_on();
   if (ret < 0)
     {
@@ -1279,6 +1283,8 @@ static int isx012_uninit(void)
       verr("Failed to power off %d\n", ret);
       return ret;
     }
+
+  board_isx012_uninitialize(priv->i2c);
 
   priv->i2c_freq = I2CFREQ_STANDARD;
   priv->state    = STATE_ISX012_POWEROFF;
@@ -2877,15 +2883,9 @@ static int isx012_set_shd(FAR isx012_dev_t *priv)
  * Public Functions
  ****************************************************************************/
 
-int isx012_initialize(FAR struct i2c_master_s *i2c)
+int isx012_initialize(void)
 {
   FAR struct isx012_dev_s *priv = &g_isx012_private;
-
-  /* Save i2c information */
-
-  priv->i2c        = i2c;
-  priv->i2c_addr   = ISX012_I2C_SLV_ADDR;
-  priv->i2c_freq   = I2CFREQ_STANDARD;
 
   /* Regiser image sensor operations variable */
 
