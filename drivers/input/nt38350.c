@@ -45,6 +45,7 @@
 #include <nuttx/wqueue.h>
 #include <nuttx/random.h>
 #include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/power/pm.h>
 
 #include <nuttx/signal.h>
 #include <nuttx/input/touchscreen.h>
@@ -119,6 +120,31 @@
                                           */
 #define NVT_FW_FRAME_CNT_LEN         2   /* Event buffer offset 0x6F~0x70 */
 #define NVT_POINT_DATA_EXBUF_LEN     113
+#endif
+
+#define TP_PM_DOMAIN                 7
+#define FACTEST_DOMAIN               2
+
+#ifdef CONFIG_WAKEUP_GESTURE
+#define GESTURE_WORD_C               12
+#define GESTURE_WORD_W               13
+#define GESTURE_WORD_V               14
+#define GESTURE_DOUBLE_CLICK         15
+#define GESTURE_WORD_Z               16
+#define GESTURE_WORD_M               17
+#define GESTURE_WORD_O               18
+#define GESTURE_WORD_E               19
+#define GESTURE_WORD_S               20
+#define GESTURE_SLIDE_UP             21
+#define GESTURE_SLIDE_DOWN           22
+#define GESTURE_SLIDE_LEFT           23
+#define GESTURE_SLIDE_RIGHT          24
+#define GESTURE_PALM                 25
+
+#define DATA_PROTOCOL                30 /* customized gesture id */
+
+/* function page definition */
+#define FUNCPAGE_GESTURE             1
 #endif
 
 #ifndef max
@@ -216,6 +242,9 @@ struct nt38350_dev_s
   struct ts_nt38350_sample_s    sample;            /* Last sampled touch point data */
   struct ts_nt38350_sample_s    old_sample;        /* Old sampled touch point data */
   struct touch_lowerhalf_s      lower;             /* touchscreen device lowerhalf instance */
+#if CONFIG_PM
+  struct pm_callback_s          pm;
+#endif
 
   /* Touch info */
 
@@ -232,6 +261,8 @@ struct nt38350_dev_s
   uint32_t                      fw_size;
   const struct nvt_ts_mem_map_s *mmap;
   size_t                        fw_need_write_size;
+  uint8_t                       touch_awake;
+  bool                          idle_mode;
 #ifdef CONFIG_NVT_OFFLINE_LOG
   struct work_s                 nvt_log_wq;
   uint8_t point_xdata_temp[NVT_POINT_DATA_EXBUF_LEN];
@@ -3696,6 +3727,64 @@ static void nvt_selftest(FAR struct nt38350_dev_s *priv,
 }
 #endif
 
+#ifdef CONFIG_WAKEUP_GESTURE
+void nvt_ts_wakeup_gesture_report(FAR struct nt38350_dev_s *priv,
+                                  uint8_t gesture_id, uint8_t *data)
+{
+  uint8_t func_type = data[2];
+  uint8_t func_id = data[3];
+  struct touch_sample_s    sample;
+
+  /* support fw specifal data protocol */
+
+  memset(&sample, 0, sizeof(struct touch_sample_s));
+
+  if ((gesture_id == DATA_PROTOCOL) && (func_type == FUNCPAGE_GESTURE))
+    {
+      gesture_id = func_id;
+    }
+  else if (gesture_id > DATA_PROTOCOL)
+    {
+      ierr("gesture_id %d is invalid, func_type=%d, func_id=%d\n",
+           gesture_id, func_type, func_id);
+      return;
+    }
+
+#ifdef CONFIG_NVT_DEBUG
+  iinfo("gesture_id = %d\n", gesture_id);
+#endif
+
+  sample.npoints = 1;
+  sample.point[0].flags = TOUCH_GESTURE_VALID;
+
+  switch (gesture_id)
+    {
+      case GESTURE_DOUBLE_CLICK:
+        sample.point[0].gesture = TOUCH_DOUBLE_CLICK;
+        break;
+      case GESTURE_SLIDE_UP:
+        sample.point[0].gesture = TOUCH_SLIDE_UP;
+        break;
+      case GESTURE_SLIDE_DOWN:
+        sample.point[0].gesture = TOUCH_SLIDE_DOWN;
+        break;
+      case GESTURE_SLIDE_LEFT:
+        sample.point[0].gesture = TOUCH_SLIDE_LEFT;
+        break;
+      case GESTURE_SLIDE_RIGHT:
+        sample.point[0].gesture = TOUCH_SLIDE_RIGHT;
+        break;
+      case GESTURE_PALM:
+        sample.point[0].gesture = TOUCH_PALM;
+        break;
+      default:
+        break;
+    }
+
+  touch_event(priv->lower.priv, &sample);
+}
+#endif
+
 static void nt38350_data_worker(FAR void *arg)
 {
   FAR struct nt38350_dev_s    *priv = (FAR struct nt38350_dev_s *)arg;
@@ -3761,6 +3850,17 @@ static void nt38350_data_worker(FAR void *arg)
   work_queue(LPWORK, &priv->nvt_log_wq, nvt_log_data_to_csv, priv, 100);
 #endif
 
+#ifdef CONFIG_WAKEUP_GESTURE
+  if ((priv->touch_awake == 0) || (priv->idle_mode))
+    {
+      input_id = (uint8_t)(point_data[1] >> 3);
+      nvt_ts_wakeup_gesture_report(priv, input_id, point_data);
+      config->enable(config, true);
+      return;
+    }
+
+#endif
+
   for (i = 0; i < priv->max_touch_num; i++)
     {
       position = 1 + 6 * i;
@@ -3822,6 +3922,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
 
   sample.npoints            = 1;
+  sample.point[0].gesture   = 0xff;
   sample.point[0].x         = priv->sample.x;
   sample.point[0].y         = priv->sample.y;
   sample.point[0].w         = priv->sample.width;
@@ -3895,6 +3996,87 @@ static int nt38350_data_interrupt(FAR struct ioexpander_dev_s *dev,
   config->clear(config);
   return OK;
 }
+
+#if CONFIG_PM
+static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
+{
+  int ret;
+  FAR struct nt38350_config_s *config;
+
+  config = dev->config;
+  DEBUGASSERT(config != NULL);
+
+  ret = nvt_check_fw_reset_state(dev, RESET_STATE_REK);
+  if (ret)
+    {
+      iinfo("FW is not ready! Try to bootloader reset...\n");
+      nvt_bootloader_reset(dev);
+      nvt_check_fw_reset_state(dev, RESET_STATE_REK);
+    }
+
+  dev->touch_awake = 1;
+  dev->idle_mode   = false;
+
+  return ret;
+}
+#endif
+
+#if CONFIG_PM
+static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev)
+{
+  FAR struct nt38350_config_s *config;
+  uint8_t buf[2];
+
+  config = dev->config;
+  DEBUGASSERT(config != NULL);
+
+  buf[0] = EVENT_MAP_HOST_CMD;
+  buf[1] = 0x13;
+  nt38350_write_reg(dev, NVT_I2C_FW_ADDRESS, buf, 2);
+
+  dev->touch_awake = 0;
+
+  return 0;
+}
+#endif
+
+#if CONFIG_PM
+static int nt38350_pm_prepare(FAR struct pm_callback_s *cb, int domain,
+                              enum pm_state_e pmstate)
+{
+  return OK;
+}
+#endif
+
+#if CONFIG_PM
+static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
+                              int domain, enum pm_state_e pmstate)
+{
+  FAR struct nt38350_dev_s *dev = container_of(cb,
+                                               struct nt38350_dev_s, pm);
+
+  if (domain == TP_PM_DOMAIN || domain == FACTEST_DOMAIN)
+    {
+      switch (pmstate)
+        {
+        case PM_RESTORE:
+        case PM_NORMAL:
+          nt38350_ts_resume(dev);
+          break;
+        case PM_STANDBY:
+        case PM_SLEEP:
+          nt38350_ts_suspend(dev);
+          break;
+        case PM_IDLE:
+          dev->idle_mode = true;
+          dev->touch_awake = 0;
+          break;
+        default:
+          break;
+        }
+    }
+}
+#endif
 
 /***************************************************************************
  * Name: nt38350_control
@@ -4058,6 +4240,15 @@ int nt38350_register(FAR struct nt38350_config_s *config,
     }
 
   config->enable(config, true);
+  priv->touch_awake = 1;
+  priv->idle_mode   = false;
+
+#if CONFIG_PM
+  extern int lcdc_pmcb_early_register(struct pm_callback_s *cb);
+  priv->pm.prepare = nt38350_pm_prepare;
+  priv->pm.notify  = nt38350_pm_notify;
+  lcdc_pmcb_early_register(&priv->pm);
+#endif
 
   ret = touch_register(&(priv->lower), devname,
                        CONFIG_NT38350_TOUCHSCREEN_BUFF_NUMS);

@@ -133,6 +133,10 @@ config NVT_DEBUG
 	---help---
 		Say yes here enable NVT debug log.
 
+config WAKEUP_GESTURE
+	bool "Enable NovaTek NT38350 gesture wakeup feature."
+	default y
+
 config NVT_TOUCH_DEFAULT_WIDTH
 	int "NovaTek NT38350 default width"
 	default 480
