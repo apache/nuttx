@@ -1797,9 +1797,16 @@ endmenu # Work Queue Support
 
 menu "Stack and heap information"
 
+config ARCH_STACKSIZE_ADJUSTMENT
+	int "The adjustment of stack size for different arch"
+	default 65536 if ARCH_SIM
+	default 0 if !ARCH_SIM
+	---help---
+		The adjustment of stack size for different arch. When the task is
+		created, the stack size enpands automatically depending on the arch.
+
 config DEFAULT_TASK_STACKSIZE
 	int "The default stack size for tasks"
-	default 65536 if ARCH_SIM
 	default 2048
 	---help---
 		The default stack size for tasks.
