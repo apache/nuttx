@@ -133,18 +133,18 @@ function check_nuttx_apps() {
     check_required_files "$RELEASE_DIR"
 }
 
-function check_sim_nsh_build() {
+function check_sim_asan_build() {
     RELEASE_DIR="nuttx"
-    echo "Trying to build $RELEASE_DIR sim:nsh..."
+    echo "Trying to build $RELEASE_DIR sim:asan..."
     cd "$RELEASE_DIR"
-    output=$(make distclean; ./tools/configure.sh sim:nsh; make) 2>&1
+    output=$(make distclean; ./tools/configure.sh sim:asan; make) 2>&1
     return_value=$?
     if [ $return_value -eq 0 ]; then
-      echo " OK: we were able to build sim:nsh."
+      echo " OK: we were able to build sim:asan."
     else
       RETURN_CODE=1
       echo "$output"
-      echo " - Error building sim:nsh."
+      echo " - Error building sim:asan."
     fi
     echo
 }
@@ -154,7 +154,7 @@ function usage() {
     echo "   Given release full URL, release name, or a local directory, downloads or copies"
     echo "   all files in that directory (which for a release should include nuttx and nuttx-apps, sha512, "
     echo "   asc, and tar.gz files), checks the release SHA512 and GPG signatures, checks the unpacked "
-    echo "   directories for required files, and tries to build NuttX for sim:nsh."
+    echo "   directories for required files, and tries to build NuttX for sim:asan."
     echo
     echo "   If tempdir is specified, it will be removed and recreated; if it is not specified, /tmp/nuttx-checkrelease"
     echo "   is used."
@@ -212,6 +212,6 @@ download_release
 import_key
 check_nuttx
 check_nuttx_apps
-check_sim_nsh_build
+check_sim_asan_build
 
 exit $RETURN_CODE
