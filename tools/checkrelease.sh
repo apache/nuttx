@@ -133,10 +133,11 @@ function check_nuttx_apps() {
     check_required_files "$RELEASE_DIR"
 }
 
-function check_sim_asan_build() {
+function check_sim_asan() {
     RELEASE_DIR="nuttx"
-    echo "Trying to build $RELEASE_DIR sim:asan..."
     cd "$RELEASE_DIR"
+
+    echo "Trying to build $RELEASE_DIR sim:asan..."
     output=$(make distclean; ./tools/configure.sh sim:asan; make) 2>&1
     return_value=$?
     if [ $return_value -eq 0 ]; then
@@ -145,6 +146,18 @@ function check_sim_asan_build() {
       RETURN_CODE=1
       echo "$output"
       echo " - Error building sim:asan."
+    fi
+    echo
+
+    echo "Trying to run $RELEASE_DIR sim:asan..."
+    output=$(./nuttx) 2>&1
+    return_value=$?
+    if [ $return_value -eq 0 ]; then
+      echo " OK: ostest with ASAN pass."
+    else
+      RETURN_CODE=1
+      echo "$output"
+      echo " - Error running sim:asan."
     fi
     echo
 }
@@ -212,6 +225,6 @@ download_release
 import_key
 check_nuttx
 check_nuttx_apps
-check_sim_asan_build
+check_sim_asan
 
 exit $RETURN_CODE
