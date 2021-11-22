@@ -6,7 +6,7 @@ The Tiva architecture is a combination of the Luminary Micro Stellaris chips
 and the TI Tiva variants.  There are both M3 and M4 Arm cores in this family.
 
 Supported MCUs
-=============
+==============
 
 The following list includes MCUs from Tiva C series supported in NuttX
 
