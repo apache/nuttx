@@ -305,7 +305,7 @@ struct imgsensor_ops_s
 {
   CODE int (*init)(void);
   CODE int (*uninit)(void);
-
+  CODE const char * (*get_driver_name)(void);
   CODE int (*validate_frame_setting)(imgsensor_stream_type_t type,
                                      uint8_t nr_datafmts,
                                      FAR imgsensor_format_t *datafmts,
