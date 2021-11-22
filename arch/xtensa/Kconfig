@@ -221,6 +221,16 @@ config XTENSA_EXTMEM_BSS
 		Adds a section and an attribute that allows to force variables into
 		the external memory.
 
+if CONFIG_FS_HOSTFS
+
+config XTENSA_HOSTFS_CACHE_COHERENCE
+	bool "Cache coherence in semihosting hostfs"
+	depends on ARCH_DCACHE
+	---help---
+		Flush & Invalidte cache before & after bkpt instruction.
+
+endif
+
 choice
 	prompt "Toolchain Selection"
 	default XTENSA_TOOLCHAIN_ESP
