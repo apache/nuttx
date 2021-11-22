@@ -93,7 +93,7 @@ static int sc8551_putreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
 static int sc8551_reset(FAR struct sc8551_dev_s *priv);
 static int sc8551_get_temp(FAR struct sc8551_dev_s *priv);
 static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable);
-static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state);
+static int sc8551_en_adc(FAR struct sc8551_dev_s *priv, bool state);
 static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current);
 
 /* Battery driver lower half methods */
@@ -1415,15 +1415,14 @@ static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable)
 }
 
 /****************************************************************************
- * Name: sc8551_en_term
+ * Name: sc8551_en_adc
  *
  * Description:
- *   Enable charger termination.  When termination is disabled, there are no
- *   indications of the charger terminating (i.e. STAT pin or registers).
+ *   Enable charger adc.  When adc is disabled, there are no charger current.
  *
  ****************************************************************************/
 
-static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state)
+static int sc8551_en_adc(FAR struct sc8551_dev_s *priv, bool state)
 {
   uint8_t val;
   int ret;
@@ -1439,11 +1438,11 @@ static int sc8551_en_term(FAR struct sc8551_dev_s *priv, bool state)
 
   if (state)
     {
-      val |= (SC8551_ADC_DISABLE << SC8551_ADC_EN_SHIFT);
+      val |= (SC8551_ADC_ENABLE << SC8551_ADC_EN_SHIFT);
     }
   else
     {
-      val |= (SC8551_ADC_ENABLE << SC8551_ADC_EN_SHIFT);
+      val |= (SC8551_ADC_DISABLE << SC8551_ADC_EN_SHIFT);
     }
 
   ret = sc8551_putreg8(priv, SC8551_REG_14, val);
@@ -1634,15 +1633,15 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
   switch (op)
     {
       case BATIO_OPRTN_EN_TERM:
-        ret = sc8551_en_term(priv, (bool)value);
+        ret = sc8551_en_adc(priv, (bool)value);
         break;
 
       case BATIO_OPRTN_SYSOFF:
-        ret = sc8551_en_term(priv, SC8551_ADC_DISABLE);
+        ret = sc8551_en_adc(priv, SC8551_ADC_DISABLE);
         break;
 
       case BATIO_OPRTN_SYSON:
-        ret = sc8551_en_term(priv, SC8551_ADC_ENABLE);
+        ret = sc8551_en_adc(priv, SC8551_ADC_ENABLE);
         break;
 
       case BATIO_OPRTN_RESET:
