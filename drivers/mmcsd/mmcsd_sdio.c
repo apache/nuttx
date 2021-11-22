@@ -3266,6 +3266,7 @@ static int mmcsd_cardidentify(FAR struct mmcsd_state_s *priv)
 
   if (elapsed >= TICK_PER_SEC || priv->type == MMCSD_CARDTYPE_UNKNOWN)
     {
+      priv->type = MMCSD_CARDTYPE_UNKNOWN;
       ferr("ERROR: Failed to identify card\n");
       return -EIO;
     }
