@@ -87,8 +87,6 @@ static int     tcbinfo_stat(FAR const char *relpath, FAR struct stat *buf);
  * Public Data
  ****************************************************************************/
 
-extern struct tcbinfo_s g_tcbinfo;
-
 /* See fs_mount.c -- this structure is explicitly externed there.
  * We use the old-fashioned kind of initializers so that this will compile
  * with any compiler.
