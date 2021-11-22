@@ -10,7 +10,7 @@ SimpleLink Sub-1 GHz CC1310 wireless MCU LaunchPad development kit
 Serial Console
 ==============
 
-The on-board XDS110 Debugger provide a USB virtual serial console using
+The on-board XDS110 Debugger provides a USB virtual serial console using
 UART0 (PA0/U0RX and PA1/U0TX).
 
 A J-Link debugger is used (see below), then the RXD/TXD jumper pins can
