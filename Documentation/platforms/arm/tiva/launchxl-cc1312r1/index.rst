@@ -87,7 +87,7 @@ Running from SRAM
 
 The LaunchXL-CC1312R1 port supports execution from RAM.  Execution from
 SRAM as a "safe" way to bring up a new board port without concern about
-borking the board because of a bad FLASH image.
+bricking the board because of a bad FLASH image.
 
 if CONFIG_BOOT_RUNFROMFLASH=y is set in the configuration, then the code
 will build to run from FLASH.  Otherwise (presumably CONFIG_BOOT_RUNFROMSRAM=y)
