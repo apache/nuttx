@@ -37,41 +37,46 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: rawoutstream_puts
+ ****************************************************************************/
+
+static int rawoutstream_puts(FAR struct lib_outstream_s *this,
+                             FAR const void *buf, int len)
+{
+  FAR struct lib_rawoutstream_s *rthis =
+                                (FAR struct lib_rawoutstream_s *)this;
+  int nwritten = 0;
+  int ret = 0;
+
+  while (nwritten != len)
+    {
+      ret = _NX_WRITE(rthis->fd, (FAR const char *)buf + nwritten,
+                      len - nwritten);
+      if (ret <= 0)
+        {
+          if (_NX_GETERRNO(ret) == EINTR)
+            {
+              continue;
+            }
+
+          break;
+        }
+
+      this->nput += ret;
+      nwritten   += ret;
+    }
+
+  return nwritten > 0 ? nwritten : ret;
+}
+
+/****************************************************************************
  * Name: rawoutstream_putc
  ****************************************************************************/
 
 static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_rawoutstream_s *rthis =
-                                (FAR struct lib_rawoutstream_s *)this;
-  char buffer = ch;
-  int nwritten;
-  int errcode;
-
-  DEBUGASSERT(this && rthis->fd >= 0);
-
-  /* Loop until the character is successfully transferred or until an
-   * irrecoverable error occurs.
-   */
-
-  do
-    {
-      nwritten = _NX_WRITE(rthis->fd, &buffer, 1);
-      if (nwritten == 1)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* The only expected error is EINTR, meaning that the write operation
-       * was awakened by a signal.  Zero or values > 1 would not be valid
-       * return values from _NX_WRITE().
-       */
-
-      errcode = _NX_GETERRNO(nwritten);
-      DEBUGASSERT(nwritten < 0);
-    }
-  while (errcode == EINTR);
+  char tmp = ch;
+  (void)rawoutstream_puts(this, &tmp, 1);
 }
 
 /****************************************************************************
@@ -98,6 +103,7 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd)
 {
   outstream->public.put   = rawoutstream_putc;
+  outstream->public.puts  = rawoutstream_puts;
   outstream->public.flush = lib_noflush;
   outstream->public.nput  = 0;
   outstream->fd           = fd;
