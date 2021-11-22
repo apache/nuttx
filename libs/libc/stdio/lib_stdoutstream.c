@@ -33,35 +33,48 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: stdoutstream_puts
+ ****************************************************************************/
+
+static int stdoutstream_puts(FAR struct lib_outstream_s *this,
+                             FAR const void *buf, int len)
+{
+  FAR struct lib_stdoutstream_s *sthis =
+                               (FAR struct lib_stdoutstream_s *)this;
+  int nwritten = 0;
+  int ret;
+
+  DEBUGASSERT(this && sthis->stream);
+
+  while (1)
+    {
+      ret = fwrite((FAR char *)buf + nwritten,
+                    len - nwritten, 1, sthis->stream);
+      if (ret <= 0)
+        {
+          if (_NX_GETERRNO(ret) == EINTR)
+            {
+              continue;
+            }
+
+          break;
+        }
+
+      this->nput += ret;
+      nwritten   += ret;
+    }
+
+  return nwritten > 0 ? nwritten : ret;
+}
+
+/****************************************************************************
  * Name: stdoutstream_putc
  ****************************************************************************/
 
 static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_stdoutstream_s *sthis =
-                               (FAR struct lib_stdoutstream_s *)this;
-  int result;
-
-  DEBUGASSERT(this && sthis->stream);
-
-  /* Loop until the character is successfully transferred or an irrecoverable
-   * error occurs.
-   */
-
-  do
-    {
-      result = fputc(ch, sthis->stream);
-      if (result != EOF)
-        {
-          this->nput++;
-          return;
-        }
-
-      /* EINTR (meaning that fputc was interrupted by a signal) is the only
-       * recoverable error.
-       */
-    }
-  while (get_errno() == EINTR);
+  char tmp = ch;
+  (void)stdoutstream_puts(this, &tmp, 1);
 }
 
 /****************************************************************************
@@ -105,7 +118,8 @@ void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
 {
   /* Select the put operation */
 
-  outstream->public.put = stdoutstream_putc;
+  outstream->public.put  = stdoutstream_putc;
+  outstream->public.puts = stdoutstream_puts;
 
   /* Select the correct flush operation.  This flush is only called when
    * a newline is encountered in the output stream.  However, we do not
