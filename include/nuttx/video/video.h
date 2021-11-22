@@ -172,6 +172,12 @@ extern "C"
 
 #define V4SIOC_S_EXT_CTRLS_SCENE      _VIDIOC(0x001a)
 
+/* Query device capability
+ * Address pointing to struct v4l2_capability
+ */
+
+#define VIDIOC_QUERYCAP               _VIDIOC(0x001b)
+
 #define VIDEO_HSIZE_QVGA        (320)   /* QVGA    horizontal size */
 #define VIDEO_VSIZE_QVGA        (240)   /* QVGA    vertical   size */
 #define VIDEO_HSIZE_VGA         (640)   /* VGA     horizontal size */
@@ -237,6 +243,20 @@ extern "C"
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* V4L2 device capabilities for VIDIOC_QUERYCAP.
+ * Currently, only member "driver" is supported.
+ */
+
+struct v4l2_capability
+{
+  uint8_t  driver[16];   /* name of driver module(e.g. "bttv" */
+  uint8_t  card[32];     /* name of the card(e.g. "Yoyodyne TV/FM" */
+  uint8_t  bus_info[32]; /* name of the bus(e.g. "PCI:0000:05:06.0" */
+  uint32_t version;      /* version number of the driver */
+  uint32_t capabilities; /* Available capabilities of the physical device */
+  uint32_t device_caps;  /* Device capabilities of the opened device */
+};
 
 /* Buffer type.
  *  Currently, support only V4L2_BUF_TYPE_VIDEO_CAPTURE and

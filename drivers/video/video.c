@@ -218,6 +218,7 @@ static int video_complete_capture(uint8_t  err_code, uint32_t datasize);
 
 /* internal function for each cmds of ioctl */
 
+static int video_querycap(FAR struct v4l2_capability *cap);
 static int video_reqbufs(FAR struct video_mng_s *vmng,
                          FAR struct v4l2_requestbuffers *reqbufs);
 static int video_qbuf(FAR struct video_mng_s *vmng,
@@ -987,6 +988,33 @@ static int video_close(FAR struct file *filep)
   video_unlock(&priv->lock_open_num);
 
   return ret;
+}
+
+static int video_querycap(FAR struct v4l2_capability *cap)
+{
+  FAR const char *name;
+
+  ASSERT(g_video_sensor_ops);
+
+  if (cap == NULL)
+    {
+      return -EINVAL;
+    }
+
+  if (g_video_sensor_ops->get_driver_name == NULL)
+    {
+      return -ENOTTY;
+    }
+
+  name = g_video_sensor_ops->get_driver_name();
+
+  memset(cap, 0, sizeof(struct v4l2_capability));
+
+  /* cap->driver needs to be NULL-terminated. */
+
+  strlcpy((FAR char *)cap->driver, name, sizeof(cap->driver));
+
+  return OK;
 }
 
 static int video_reqbufs(FAR struct video_mng_s         *vmng,
@@ -2657,6 +2685,11 @@ static int video_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   switch (cmd)
     {
+      case VIDIOC_QUERYCAP:
+        ret = video_querycap((FAR struct v4l2_capability *)arg);
+
+        break;
+
       case VIDIOC_REQBUFS:
         ret = video_reqbufs(priv, (FAR struct v4l2_requestbuffers *)arg);
 
