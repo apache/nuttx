@@ -33,8 +33,17 @@
 #define __INCLUDE_LZF_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <sys/types.h>
+#include <stdint.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_LIBC_LZF
 
 #define LZF_VERSION 0x0105 /* 1.5, API version */
 #define HLOG        CONFIG_LIBC_LZF_HLOG
@@ -151,4 +160,5 @@ unsigned int lzf_decompress(FAR const void *const in_data,
                             unsigned int in_len, FAR void *out_data,
                             unsigned int out_len);
 
+#endif /* CONFIG_LIBC_LZF */
 #endif /* __INCLUDE_LZF_H */
