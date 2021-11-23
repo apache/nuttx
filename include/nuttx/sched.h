@@ -832,7 +832,7 @@ EXTERN uint32_t g_crit_max[1];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 #ifdef CONFIG_DEBUG_TCBINFO
-EXTERN struct tcbinfo_s g_tcbinfo;
+EXTERN const struct tcbinfo_s g_tcbinfo;
 #endif
 
 /****************************************************************************
