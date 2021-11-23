@@ -46,8 +46,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/signal.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
+#include <nuttx/wqueue.h>
 
 #include "sc8551_reg.h"
 #include "sc8551.h"
@@ -70,9 +72,13 @@ struct sc8551_dev_s
 
   /* Data fields specific to the lower half SC8551 driver follow */
 
-  FAR struct i2c_master_s *i2c; /* I2C interface */
-  uint8_t addr;                 /* I2C address */
-  uint32_t frequency;           /* I2C frequency */
+  uint8_t addr;                         /* I2C address */
+  uint32_t frequency;                   /* I2C frequency */
+  uint32_t pin;                         /* Interrupt pin */
+  uint32_t current;                     /* pump current */
+  FAR struct i2c_master_s *i2c;         /* I2C interface */
+  FAR struct ioexpander_dev_s *ioedev;  /* Ioexpander device */
+  struct work_s work;                   /* Interrupt handler worker */
 
   /* status fields specific to the current status */
 
@@ -116,6 +122,12 @@ static int sc8551_chipid(FAR struct battery_charger_dev_s *dev,
                          unsigned int *value);
 static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
                                  int *value);
+
+/* Charger pump interrupt functions */
+
+static int sc8551_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg);
+static void sc8551_worker(FAR void *arg);
 
 #ifdef CONFIG_DEBUG_SC8551
 static int sc8551_dump_regs(FAR struct sc8551_dev_s *priv);
@@ -1456,6 +1468,94 @@ static int sc8551_en_adc(FAR struct sc8551_dev_s *priv, bool state)
 }
 
 /****************************************************************************
+ * Name: sc8551_interrupt_handler
+ *
+ * Description:
+ *   Handle the pump interrupt.
+ *
+ * Input Parameters:
+ *   dev     - ioexpander device.
+ *   pinset  - Interrupt pin.
+ *   arg     - Device struct.
+ *
+ * Returned Value:
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sc8551_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                     ioe_pinset_t pinset, FAR void *arg)
+{
+  /* This function should be called upon a rising edge on the sc8551 new
+   * data interrupt pin since it signals that new data has been measured.
+   */
+
+  FAR struct sc8551_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Task the worker with retrieving the latest sensor data. We should not
+   * do this in a interrupt since it might take too long. Also we cannot lock
+   * the I2C bus from within an interrupt.
+   */
+
+  work_queue(LPWORK, &priv->work, sc8551_worker, priv, 0);
+  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: sc8551_worker
+ *
+ * Description:
+ *   Task the worker with retrieving the latest sensor data. We should not do
+ *   this in a interrupt since it might take too long. Also we cannot lock
+ *   the I2C bus from within an interrupt.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sc8551_readpump(priv)
+{
+  /* to-do */
+
+  return OK;
+}
+
+static void sc8551_worker(FAR void *arg)
+{
+  FAR struct sc8551_dev_s *priv = arg;
+
+  DEBUGASSERT(priv != NULL);
+
+  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+
+  /* Read out the latest pump data */
+
+  if (sc8551_readpump(priv) == 0)
+    {
+      /* push data to upper half driver */
+
+      return OK;
+    }
+}
+
+/****************************************************************************
  * Name: sc8551_state
  *
  * Description:
@@ -1742,8 +1842,12 @@ static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
  ****************************************************************************/
 
 FAR struct battery_charger_dev_s *
-  sc8551_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                    uint32_t frequency, int current)
+  sc8551_initialize(FAR struct i2c_master_s *i2c,
+                    uint32_t pin,
+                    uint8_t addr,
+                    uint32_t frequency,
+                    int current,
+                    FAR struct ioexpander_dev_s *dev)
 {
   FAR struct sc8551_dev_s *priv;
   int ret;
@@ -1757,8 +1861,36 @@ FAR struct battery_charger_dev_s *
 
       priv->dev.ops   = &g_sc8551ops;
       priv->i2c       = i2c;
+      priv->pin       = pin;
       priv->addr      = addr;
+      priv->current   = current;
       priv->frequency = frequency;
+      priv->ioedev    = dev;
+
+      /* Interrupt register */
+
+      ret = IOEXP_SETDIRECTION(priv->ioedev, priv->pin,
+                               IOEXPANDER_DIRECTION_IN_PULLUP);
+      if (ret < 0)
+        {
+          baterr("Failed to set direction: %d\n", ret);
+        }
+
+      ret = IOEP_ATTACH(priv->ioedev, priv->pin,
+                              sc8551_interrupt_handler, priv);
+      if (ret == NULL)
+        {
+          baterr("Failed to attach: %d\n", ret);
+          ret = -EIO;
+        }
+
+      ret = IOEXP_SETOPTION(priv->ioedev, priv->pin,
+                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+      if (ret < 0)
+        {
+          baterr("Failed to set option: %d\n", ret);
+          IOEP_DETACH(priv->ioedev, sc8551_interrupt_handler);
+        }
 
       /* Reset the SC8551 */
 

@@ -344,8 +344,12 @@ FAR struct battery_charger_dev_s *bq25618_initialize(
 
 struct i2c_master_s;
 FAR struct battery_charger_dev_s *
-  sc8551_initialize(FAR struct i2c_master_s *i2c, uint8_t addr,
-                    uint32_t frequency, int current);
+  sc8551_initialize(FAR struct i2c_master_s *i2c,
+                    uint32_t pin,
+                    uint8_t addr,
+                    uint32_t frequency,
+                    int current,
+                    FAR struct ioexpander_dev_s *dev);
 #endif
 
 /****************************************************************************
