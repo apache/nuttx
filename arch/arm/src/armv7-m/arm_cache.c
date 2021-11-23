@@ -404,8 +404,14 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
    *   (ssize - 1)  = 0x007f : Mask of the set field
    */
 
-  start &= ~(ssize - 1);
   ARM_DSB();
+
+  if (start & (ssize - 1))
+    {
+      start &= ~(ssize - 1);
+      putreg32(start, NVIC_DCCIMVAC);
+      start += ssize;
+    }
 
   do
     {
@@ -422,7 +428,12 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
       start += ssize;
     }
-  while (start < end);
+  while (start + ssize <= end);
+
+  if (start != end)
+    {
+      putreg32(start, NVIC_DCCIMVAC);
+    }
 
   ARM_DSB();
   ARM_ISB();

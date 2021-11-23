@@ -116,11 +116,11 @@ void up_invalidate_icache(uintptr_t start, uintptr_t end)
 {
   /* align to XCHAL_ICACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_ICACHE_LINESIZE - 1));
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_ICACHE_LINESIZE)
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("ihi %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("ihi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("isync\n");
@@ -175,11 +175,11 @@ void up_lock_icache(uintptr_t start, uintptr_t end)
 {
   /* align to XCHAL_ICACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_ICACHE_LINESIZE - 1));
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_ICACHE_LINESIZE)
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("ipfl %0, 0\n": : "r"(addr));
+      __asm__ __volatile__ ("ipfl %0, 0\n": : "r"(start));
     };
 
   __asm__ __volatile__ ("isync\n");
@@ -206,11 +206,11 @@ void up_unlock_icache(uintptr_t start, uintptr_t end)
 {
   /* align to XCHAL_ICACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_ICACHE_LINESIZE - 1));
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_ICACHE_LINESIZE)
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("ihu %0, 0\n": : "r"(addr));
+      __asm__ __volatile__ ("ihu %0, 0\n": : "r"(start));
     };
 
   __asm__ __volatile__ ("isync\n");
@@ -335,13 +335,24 @@ void up_disable_dcache(void)
 #ifdef CONFIG_XTENSA_DCACHE
 void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
-  /* Align to XCHAL_DCACHE_LINESIZE */
-
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
-
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  if (start & (XCHAL_DCACHE_LINESIZE - 1))
     {
-      __asm__ __volatile__ ("dhi %0, 0\n" : : "r"(addr));
+      /* Align to XCHAL_DCACHE_LINESIZE */
+
+      start &= ~(XCHAL_DCACHE_LINESIZE - 1);
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
+      start += XCHAL_DCACHE_LINESIZE;
+    }
+
+  for (; start + XCHAL_DCACHE_LINESIZE <= end;
+       start += XCHAL_DCACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("dhi %0, 0\n" : : "r"(start));
+    }
+
+  if (start != end)
+    {
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -405,11 +416,11 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
   /* Align to XCHAL_DCACHE_SIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -482,11 +493,11 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
   /* Align to XCHAL_DCACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -549,11 +560,11 @@ void up_lock_dcache(uintptr_t start, uintptr_t end)
 {
   /* align to XCHAL_DCACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dpfl %0, 0\n": : "r"(addr));
+      __asm__ __volatile__ ("dpfl %0, 0\n": : "r"(start));
     };
 
   __asm__ __volatile__ ("dsync\n");
@@ -580,11 +591,11 @@ void up_unlock_dcache(uintptr_t start, uintptr_t end)
 {
   /* align to XCHAL_DCACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dhu %0, 0\n": : "r"(addr));
+      __asm__ __volatile__ ("dhu %0, 0\n": : "r"(start));
     };
 
   __asm__ __volatile__ ("dsync\n");
