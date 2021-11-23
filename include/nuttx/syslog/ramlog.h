@@ -67,7 +67,7 @@
  */
 
 #if defined(CONFIG_RAMLOG_SYSLOG) && !defined(CONFIG_SYSLOG_DEVPATH)
-#  define CONFIG_SYSLOG_DEVPATH "/dev/ramlog"
+#  define CONFIG_SYSLOG_DEVPATH "/dev/kmsg"
 #endif
 
 #ifndef CONFIG_RAMLOG_NPOLLWAITERS
