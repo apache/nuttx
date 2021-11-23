@@ -34,6 +34,10 @@ CSRCS += lib_stdinstream.c lib_stdoutstream.c lib_stdsistream.c
 CSRCS += lib_stdsostream.c
 endif
 
+ifeq ($(CONFIG_LIBC_LZF),y)
+CSRCS += lib_lzfcompress.c
+endif
+
 # Add the stdio directory to the build
 
 DEPPATH += --dep-path stream

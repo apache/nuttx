@@ -26,7 +26,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <lzf.h>
 #include <stdio.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_LZF
+#define LZF_STREAM_BLOCKSIZE  ((1 << CONFIG_STREAM_LZF_BLOG) - 1)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -172,6 +182,20 @@ struct lib_rawsostream_s
   struct lib_sostream_s  public;
   int                    fd;
 };
+
+/* LZF compressed stream pipeline */
+
+#ifdef CONFIG_LIBC_LZF
+struct lib_lzfoutstream_s
+{
+  struct lib_outstream_s      public;
+  FAR struct lib_outstream_s *backend;
+  lzf_state_t                 state;
+  size_t                      offset;
+  char                        in[LZF_STREAM_BLOCKSIZE];
+  char                        out[LZF_MAX_HDR_SIZE + LZF_STREAM_BLOCKSIZE];
+};
+#endif
 
 /****************************************************************************
  * Public Data
@@ -328,6 +352,27 @@ void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
 void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream);
 void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
+
+/****************************************************************************
+ * Name: lib_lzfoutstream
+ *
+ * Description:
+ *  LZF compressed pipeline stream
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_lzfoutstream_s to be initialized.
+ *   backend - Stream backend port.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_LZF
+void lib_lzfoutstream(FAR struct lib_lzfoutstream_s *stream,
+                      FAR struct lib_outstream_s *backend);
+#endif
 
 /****************************************************************************
  * Name: lib_noflush
