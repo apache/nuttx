@@ -38,7 +38,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_NVT_TOUCH_MP
 #define NVT_FREQ_HOP_DISABLE         0x66
 #define NVT_FREQ_HOP_ENABLE          0x65
 #define NVT_MP_MODE_CC               0x41
@@ -51,7 +50,6 @@
 #define NVT_RESULT_BUFSIZE           (NVT_IC_X_CFG_SIZE * NVT_IC_Y_CFG_SIZE + NVT_IC_KEY_CFG_SIZE)
 #define NVT_RAWDATA_BUFSIZE          ((NVT_RESULT_BUFSIZE) * sizeof(int32_t))
 #define PS_CONFIG_DIFF_TEST_FRAME    50
-#endif
 
 /* Specific IOCTL commands for NT38350 */
 
@@ -112,6 +110,15 @@ struct nt38350_config_s
   void (*nreset)(FAR const struct nt38350_config_s *config,
                  bool state);
 };
+
+#ifdef CONFIG_NVT_OFFLINE_LOG
+struct nvt_diff_s
+{
+  uint8_t x_num;
+  uint8_t y_num;
+  int32_t data[NVT_RESULT_BUFSIZE];
+};
+#endif
 
 #ifdef CONFIG_NVT_TOUCH_MP
 struct nvt_mp_test_s

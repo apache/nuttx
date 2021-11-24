@@ -203,13 +203,6 @@ struct ts_nt38350_sample_s
   uint16_t   width;
 };
 
-struct nvt_diff_s
-{
-  uint8_t x_num;
-  uint8_t y_num;
-  int16_t data[30]
-};
-
 /* This structure describes the state of one nt38350 driver instance */
 
 struct nt38350_dev_s
@@ -554,8 +547,8 @@ static void u8toi16(const uint8_t *stream, int32_t *data, uint32_t len)
 
   for (i = 0; i < len / 2; i++)
     {
-      data[i] = ((int32_t)stream[i * 2] +
-                 (((int32_t)stream[i * 2 + 1]) << 8));
+      data[i] = (int16_t)(stream[i * 2] +
+                 256 * stream[i * 2 + 1]);
     }
 }
 
@@ -2578,8 +2571,9 @@ static void nvt_read_mdata(FAR struct nt38350_dev_s *priv,
       buf[0] = ((xdata_addr + i * NVT_BUS_TRANSFER_LENGTH) & 0xff);
       nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf,
              NVT_BUS_TRANSFER_LENGTH + 1);
-      u8toi16((buf + 1 + i * NVT_BUS_TRANSFER_LENGTH),
-               data, NVT_BUS_TRANSFER_LENGTH);
+      u8toi16(buf + 1,
+              data + i * NVT_BUS_TRANSFER_LENGTH / 2,
+              NVT_BUS_TRANSFER_LENGTH);
     }
 
   /* read residual xdata : step2 */
@@ -2597,8 +2591,8 @@ static void nvt_read_mdata(FAR struct nt38350_dev_s *priv,
                  loop_cnt * NVT_BUS_TRANSFER_LENGTH) & 0xff);
       nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf,
                        residual_len + 1);
-      u8toi16((buf + 1 + loop_cnt * NVT_BUS_TRANSFER_LENGTH),
-               data, data_len);
+      u8toi16(buf + 1,
+              data + loop_cnt * NVT_BUS_TRANSFER_LENGTH / 2, residual_len);
     }
 
 #if NVT_TOUCH_KEY_NUM > 0
@@ -2638,6 +2632,7 @@ static void nvt_read_mdata(FAR struct nt38350_dev_s *priv,
  *      Executive outcomes. 0---succeed. negative---failed.
  ***************************************************************************/
 
+#ifdef CONFIG_NVT_OFFLINE_LOG
 static int nvt_diff_get(FAR struct nt38350_dev_s *priv, int32_t *data)
 {
   irqstate_t flags;
@@ -2671,12 +2666,12 @@ static int nvt_diff_get(FAR struct nt38350_dev_s *priv, int32_t *data)
 
   if (nvt_get_fw_pipe(priv) == 0)
     {
-      nvt_read_mdata(priv, priv->mmap->raw_pipe0_addr,
+      nvt_read_mdata(priv, priv->mmap->diff_pipe0_addr,
            priv->mmap->diff_btn_pipe0_addr, data);
     }
   else
     {
-      nvt_read_mdata(priv, priv->mmap->raw_pipe1_addr,
+      nvt_read_mdata(priv, priv->mmap->diff_pipe1_addr,
            priv->mmap->diff_btn_pipe1_addr, data);
     }
 
@@ -2689,13 +2684,15 @@ err:
   leave_critical_section(flags);
   return ret;
 }
+#endif
 
+#ifdef CONFIG_NVT_OFFLINE_LOG
 static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
                          FAR struct nvt_diff_s *diff)
 {
   int ret;
   int data_len = priv->x_num * priv->y_num;
-  int32_t read_bufx[30] =
+  int32_t read_bufx[NVT_RESULT_BUFSIZE] =
   {
     0
   };
@@ -2706,7 +2703,7 @@ static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
   ret = nvt_diff_get(priv, read_bufx);
   if (ret == 0)
     {
-      memcpy(diff->data, read_bufx, data_len);
+      memcpy(diff->data, read_bufx, data_len * sizeof(int32_t));
     }
   else
     {
@@ -2716,6 +2713,7 @@ static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
 
   return 0;
 }
+#endif
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
 static void nvt_log_data_to_csv(FAR void *arg)
