@@ -29,13 +29,8 @@
 #include <errno.h>
 
 #include <nuttx/ascii.h>
-
-#define XK_MISCELLANY 1 /* Select X11 character set */
-#define XK_LATIN1     1
-#define XK_XKB_KEYS   1
-
 #include <nuttx/video/vnc.h>
-#include <nuttx/input/x11_keysymdef.h>
+#include <nuttx/input/x11_keysym.h>
 #include <nuttx/input/kbd_codec.h>
 
 #include "vnc_server.h"
