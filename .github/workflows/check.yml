@@ -32,7 +32,7 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v4
         with:
-          repository: apache/nuttx
+          repository: tiiuae/nuttx
           path: nuttx
           fetch-depth: 0
 

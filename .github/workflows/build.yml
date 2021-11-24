@@ -21,6 +21,7 @@ on:
     paths-ignore:
       - 'Documentation/**'
     branches:
+      - master
       - 'releases/*'
     tags:
 
@@ -32,8 +33,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-
-  # Fetch the source from nuttx and nuttx-apps repos
   Fetch-Source:
     runs-on: ubuntu-latest
     steps:
@@ -68,13 +67,13 @@ jobs:
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
-              "apache/nuttx")
+              "tiiuae/nuttx")
                 # OS
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
 
-              "apache/nuttx-apps" )
+              "tiiuae/incubator-nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -86,13 +85,13 @@ jobs:
             esac
           fi
 
-          echo "os_ref=$OS_REF" >> $GITHUB_OUTPUT
-          echo "apps_ref=$APPS_REF" >> $GITHUB_OUTPUT
+          echo "name=$OS_REF" >> $GITHUB_OUTPUT
+          echo "app_ref=$APPS_REF" >> $GITHUB_OUTPUT
 
       - name: Checkout nuttx repo
         uses: actions/checkout@v4
         with:
-          repository: apache/nuttx
+          repository: tiiuae/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
@@ -102,7 +101,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v4
         with:
-          repository: apache/nuttx-apps
+          repository: tiiuae/incubator-nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -116,27 +115,8 @@ jobs:
           name: source-bundle
           path: sources.tar.gz
 
-  # Select the Linux Builds based on PR Arch Label
-  Linux-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
-    needs: Fetch-Source
-    with:
-      os: Linux
-      boards: |
-        [
-          "arm-01", "risc-v-01", "sim-01", "xtensa-01", "arm64-01", "x86_64-01", "other",
-          "arm-02", "risc-v-02", "sim-02", "xtensa-02",
-          "arm-03", "risc-v-03", "sim-03",
-          "arm-04", "risc-v-04",
-          "arm-05", "risc-v-05",
-          "arm-06", "risc-v-06",
-          "arm-07", "arm-08", "arm-09", "arm-10", "arm-11", "arm-12", "arm-13", "arm-14"
-        ]
-
-  # Run the selected Linux Builds
   Linux:
-    needs: Linux-Arch
-    if: ${{ needs.Linux-Arch.outputs.skip_all_builds != '1' }}
+    needs: Fetch-Source
     runs-on: ubuntu-latest
     env:
       DOCKER_BUILDKIT: 1
@@ -144,10 +124,9 @@ jobs:
     strategy:
       max-parallel: 12
       matrix:
-        boards: ${{ fromJSON(needs.Linux-Arch.outputs.selected_builds) }}
+        boards: [arm-12, risc-v]
 
     steps:
-
       - name: Download Source Artifact
         uses: actions/download-artifact@v4
         with:
@@ -184,7 +163,6 @@ jobs:
             if [ "X${{matrix.boards}}" = "Xcodechecker" ]; then
                 ./cibuild.sh -c -A -N -R --codechecker testlist/${{matrix.boards}}.dat
             else
-                ( sleep 7200 ; echo Killing pytest after timeout... ; pkill -f pytest )&
                 ./cibuild.sh -c -A -N -R -S testlist/${{matrix.boards}}.dat
             fi
 
@@ -195,26 +173,15 @@ jobs:
           path: buildartifacts/
         continue-on-error: true
 
-  # Select the macOS Builds based on PR Arch Label
-  macOS-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
-    needs: Fetch-Source
-    with:
-      os: macOS
-      boards: |
-        ["macos", "sim-01", "sim-02", "sim-03"]
-
-  # Run the selected macOS Builds
   macOS:
     permissions:
       contents: none
     runs-on: macos-13
-    needs: macOS-Arch
-    if: ${{ needs.macOS-Arch.outputs.skip_all_builds != '1' }}
+    needs: Fetch-Source
     strategy:
       max-parallel: 2
       matrix:
-        boards: ${{ fromJSON(needs.macOS-Arch.outputs.selected_builds) }}
+        boards: [macos, sim-01, sim-02]
     steps:
       - name: Download Source Artifact
         uses: actions/download-artifact@v4
@@ -255,25 +222,14 @@ jobs:
           path: buildartifacts/
         continue-on-error: true
 
-  # Select the msys2 Builds based on PR Arch Label
-  msys2-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
-    needs: Fetch-Source
-    with:
-      os: msys2
-      boards: |
-        ["msys2"]
-
-  # Run the selected msys2 Builds
   msys2:
-    needs: msys2-Arch
-    if: ${{ needs.msys2-Arch.outputs.skip_all_builds != '1' }}
+    needs: Fetch-Source
     runs-on: windows-latest
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        boards: ${{ fromJSON(needs.msys2-Arch.outputs.selected_builds) }}
+        boards: [msys2]
 
     defaults:
       run:
@@ -284,7 +240,6 @@ jobs:
         with:
           msystem: MSYS
           update: false
-          cache: false
           install: >-
             base-devel
             gcc
@@ -334,56 +289,5 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: msys2-${{matrix.boards}}-builds
-          path: buildartifacts/
-        continue-on-error: true
-
-  # Select the msvc Builds based on PR Arch Label
-  msvc-Arch:
-    uses: apache/nuttx/.github/workflows/arch.yml@master
-    needs: Fetch-Source
-    with:
-      os: msvc
-      boards: |
-        ["msvc_placeholder_with_sim_keyword"]
-
-  # Build with MSVC in Windows native
-  msvc:
-    needs: msvc-Arch
-    if: ${{ needs.msvc-Arch.outputs.skip_all_builds != '1' }}
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      # Set up Python environment and install kconfiglib
-      - name: Set up Python and install kconfiglib
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-      - name: Install kconfiglib
-        run: |
-          pip install kconfiglib
-
-      - run: git config --global core.autocrlf false
-
-      - name: Download Source Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: source-bundle
-          path: .
-
-      - name: Extract sources
-        run: |
-          7z x sources.tar.gz -y
-          7z x sources.tar -y
-
-      # Build the project using the given CMake commands
-      - name: Configure and build with CMake
-        run: |
-          cd sources/nuttx
-          cmake -B vs2022 -DBOARD_CONFIG=sim/windows -G"Visual Studio 17 2022" -A Win32
-          cmake --build vs2022
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: msvc-builds
           path: buildartifacts/
         continue-on-error: true
