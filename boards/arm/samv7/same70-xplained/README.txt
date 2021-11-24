@@ -1698,3 +1698,40 @@ Configuration sub-directories
          most of the issues.  Things look good on real, local hardware
          (see boards/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
          enough for this kind of usage at this time.
+
+  mcuboot-loader:
+    This configuration exercises the port of MCUboot loader to NuttX.
+
+    In this configuration both primary, secondary and scratch partitions are
+    mapped into the internal flash.
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_BOOTLOADER=y
+      CONFIG_MCUBOOT_ENABLE_LOGGING=y
+
+      CONFIG_SAME70XPLAINED_APP_FORMAT_MCUBOOT=y
+      CONFIG_SAME70XPLAINED_MCUBOOT_BOOTLOADER=y
+      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+
+  mcuboot-confirm:
+    This configuration exercises the MCUboot compatible application slot
+    confirm example.
+
+    Generate signed binaries for MCUboot compatible application:
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin signed_app_1_0_0.bin
+
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+
+      CONFIG_SAME70XPLAINED_APP_FORMAT_MCUBOOT=y
+      CONFIG_USER_ENTRYPOINT="mcuboot_confirm_main"

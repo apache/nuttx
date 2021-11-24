@@ -90,4 +90,65 @@ config SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY
 
 endif # SAME70XPLAINED_HSMCI0_AUTOMOUNT
 
+config SAME70XPLAINED_PROGMEM_OTA_PARTITION
+	bool
+	default n
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
+	select MTD_PROGMEM
+	select MTD_PROGMEM_ERASESTATE
+
+menuconfig SAME70XPLAINED_APP_FORMAT_MCUBOOT
+	bool "MCUboot-bootable format"
+	default n
+	select SAME70XPLAINED_PROGMEM_OTA_PARTITION
+	---help---
+		The MCUboot support of loading the firmware images.
+
+if SAME70XPLAINED_APP_FORMAT_MCUBOOT
+
+config SAME70XPLAINED_MCUBOOT_BOOTLOADER
+	bool "MCUboot bootloader application"
+	default n
+	---help---
+		This switch between linker scripts to allow an application be
+		built to another entry point address.
+
+comment "MCUboot Application Image OTA Update support"
+
+config SAME70XPLAINED_OTA_PRIMARY_SLOT_OFFSET
+	hex "MCUboot application image primary slot offset"
+	default "0x20000"
+
+config SAME70XPLAINED_OTA_PRIMARY_SLOT_DEVPATH
+	string "Application image primary slot device path"
+	default "/dev/ota0"
+
+config SAME70XPLAINED_OTA_SECONDARY_SLOT_OFFSET
+	hex "MCUboot application image secondary slot offset"
+	default "0x100000"
+
+config SAME70XPLAINED_OTA_SECONDARY_SLOT_DEVPATH
+	string "Application image secondary slot device path"
+	default "/dev/ota1"
+
+config SAME70XPLAINED_OTA_SLOT_SIZE
+	hex "MCUboot application image slot size (in bytes)"
+	default "0xe0000"
+
+config SAME70XPLAINED_OTA_SCRATCH_OFFSET
+	hex "MCUboot scratch partition offset"
+	default "0x1e0000"
+
+config SAME70XPLAINED_OTA_SCRATCH_DEVPATH
+	string "Scratch partition device path"
+	default "/dev/otascratch"
+
+config SAME70XPLAINED_OTA_SCRATCH_SIZE
+	hex "MCUboot scratch partition size (in bytes)"
+	default "0x20000"
+
+endif # SAME70XPLAINED_APP_FORMAT_MCUBOOT
+
 endif # ARCH_BOARD_SAME70_XPLAINED

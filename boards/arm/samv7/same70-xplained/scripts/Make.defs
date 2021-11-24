@@ -22,10 +22,26 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_ARMV7M_DTCM),y)
-  LDSCRIPT = flash-dtcm.ld
+ifeq ($(CONFIG_SAME70XPLAINED_APP_FORMAT_MCUBOOT),y)
+ifeq ($(CONFIG_SAME70XPLAINED_MCUBOOT_BOOTLOADER),y)
+  ifeq ($(CONFIG_ARMV7M_DTCM),y)
+    LDSCRIPT = flash-dtcm-mcuboot-loader.ld
+  else
+    LDSCRIPT = flash-sram-mcuboot-loader.ld
+  endif
 else
-  LDSCRIPT = flash-sram.ld
+  ifeq ($(CONFIG_ARMV7M_DTCM),y)
+    LDSCRIPT = flash-dtcm-mcuboot-app.ld
+  else
+    LDSCRIPT = flash-sram-mcuboot-app.ld
+  endif
+endif
+else
+  ifeq ($(CONFIG_ARMV7M_DTCM),y)
+    LDSCRIPT = flash-dtcm.ld
+  else
+    LDSCRIPT = flash-sram.ld
+  endif
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
