@@ -137,6 +137,8 @@
 #define SAMV7_PROGMEM_ENDSEC     (SAMV7_TOTAL_NSECTORS)
 #define SAMV7_PROGMEM_STARTSEC   (SAMV7_PROGMEM_ENDSEC - CONFIG_SAMV7_PROGMEM_NSECTORS)
 
+#define SAMV7_PROGMEM_ERASEDVAL  (0xff)
+
 /* Misc stuff */
 
 #ifndef MIN
@@ -445,13 +447,13 @@ ssize_t up_progmem_ispageerased(size_t cluster)
   address = (cluster << SAMV7_CLUSTER_SHIFT) + SAMV7_PROGMEM_START;
   up_flush_dcache(address, address + SAMV7_CLUSTER_SIZE);
 
-  /* Verify that the cluster is erased (i.e., all 0xff) */
+  /* Verify that the cluster is erased (i.e., all SAMV7_PROGMEM_ERASEDVAL) */
 
   for (nleft = SAMV7_CLUSTER_SIZE, nwritten = 0;
        nleft > 0;
        nleft--, address++)
     {
-      if (getreg8(address) != 0xff)
+      if (getreg8(address) != SAMV7_PROGMEM_ERASEDVAL)
         {
           nwritten++;
         }
@@ -469,7 +471,7 @@ ssize_t up_progmem_ispageerased(size_t cluster)
  * Input Parameters:
  *   address - Address with or without flash offset
  *   buffer  - Pointer to buffer
- *   buflen   - Number of bytes to write
+ *   buflen  - Number of bytes to write
  *
  * Returned Value:
  *   Bytes written or negative value on error.  The following errors are
@@ -607,4 +609,17 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   page_buffer_unlock();
   return written;
+}
+
+/****************************************************************************
+ * Name: up_progmem_erasestate
+ *
+ * Description:
+ *   Return a byte that represents flash erased value state
+ *
+ ****************************************************************************/
+
+ssize_t up_progmem_erasestate(void)
+{
+  return SAMV7_PROGMEM_ERASEDVAL;
 }

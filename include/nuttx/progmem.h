@@ -238,7 +238,7 @@ ssize_t up_progmem_read(size_t addr, FAR void *buf, size_t count);
  * Name: up_progmem_erasestate
  *
  * Description:
- *   Return value of erease state.
+ *   Return value of erase state.
  *
  ****************************************************************************/
 
