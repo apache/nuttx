@@ -46,9 +46,9 @@ static int rawoutstream_puts(FAR struct lib_outstream_s *this,
   FAR struct lib_rawoutstream_s *rthis =
                                 (FAR struct lib_rawoutstream_s *)this;
   int nwritten = 0;
-  int ret;
+  int ret = 0;
 
-  while (1)
+  while (nwritten != len)
     {
       ret = _NX_WRITE(rthis->fd, (FAR const char *)buf + nwritten,
                       len - nwritten);
