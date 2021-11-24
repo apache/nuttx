@@ -239,6 +239,10 @@
 #define SX9373_EXIT_CONTROL           0x000c   /* Exit control opcode. */
 #define SX9373_RESET_CONTROL          0x00de   /* Reset control opcode. */
 
+/* Factory test instructions. */
+
+#define SX9373_SIMPLE_CHECK           0x00     /* Simple communication check. */
+
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
@@ -351,6 +355,8 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv);
 
 static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
+static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           unsigned long arg);
 
 /* Sensor interrupt functions. */
 
@@ -364,7 +370,8 @@ static void sx9373_worker(FAR void *arg);
 
 static const struct sensor_ops_s g_sx9373_ops =
 {
-  .activate = sx9373_activate,
+  .activate = sx9373_activate,     /* Enable/disable snesor. */
+  .selftest = sx9373_selftest      /* Sensor selftest function. */
 };
 
 /****************************************************************************
@@ -893,6 +900,58 @@ static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: sx9373_selftest
+ *
+ * Description:
+ *   Mainly used in the self-test link, including device ID inspection
+ *   and device functional inspection.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
+                           unsigned long arg)
+{
+  FAR struct sx9373_dev_s *priv = (FAR struct sx9373_dev_s *)lower;
+  int ret = -ENOTTY;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands. */
+
+  switch (arg)
+    {
+      case SX9373_SIMPLE_CHECK:      /* Simple communication check. */
+        {
+          ret = sx9373_checkid(priv);
+          if (ret < 0)
+            {
+              snerr("Failed to get DeviceID: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                       /* Other cmd tag. */
+        {
+          snerr("The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+    return ret;
 }
 
 /* Sensor interrupt functions */
