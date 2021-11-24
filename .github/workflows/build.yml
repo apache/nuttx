@@ -63,13 +63,13 @@ jobs:
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
-              "apache/incubator-nuttx")
+              "tiiuae/nuttx")
                 # OS
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
 
-              "apache/incubator-nuttx-apps" )
+              "tiiuae/incubator-nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -87,7 +87,7 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v2
         with:
-          repository: apache/incubator-nuttx
+          repository: tiiuae/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
@@ -97,7 +97,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v2
         with:
-          repository: apache/incubator-nuttx-apps
+          repository: tiiuae/incubator-nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -119,7 +119,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa]
+        boards: [arm-12, risc-v]
 
     steps:
       - name: Download Source Artifact
@@ -161,49 +161,5 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: linux-builds
-          path: buildartifacts/
-        continue-on-error: true
-
-  macOS:
-    runs-on: macos-10.15
-    needs: Fetch-Source
-    strategy:
-      matrix:
-        boards: [macos, sim-01, sim-02]
-    steps:
-      - name: Download Source Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: source-bundle
-          path: .
-
-      - name: Extract sources
-        run: tar zxf sources.tar.gz
-
-      - name: Restore Tools Cache
-        id: cache-tools
-        uses: actions/cache@v2
-        env:
-          cache-name: ${{ runner.os }}-cache-tools
-        with:
-          path: prebuilt
-          key: ${{ runner.os }}-tools-${{ hashFiles('./sources/nuttx/tools/ci/cibuild.sh') }}
-
-      - name: Export NuttX Repo SHA
-        run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
-
-      - name: Run Builds
-        run: |
-          echo "::add-matcher::sources/nuttx/.github/gcc.json"
-          export CCACHE_DIR=`pwd`/ccache
-          mkdir $CCACHE_DIR
-          export ARTIFACTDIR=`pwd`/buildartifacts
-          cd sources/nuttx/tools/ci
-          ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
-          ccache -s
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: macos-builds
           path: buildartifacts/
         continue-on-error: true
