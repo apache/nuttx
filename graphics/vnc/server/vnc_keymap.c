@@ -36,7 +36,7 @@
 
 #include <nuttx/nx/nx.h>
 #include <nuttx/video/vnc.h>
-#include <nuttx/input/x11_keysymdef.h>
+#include <nuttx/input/x11_keysym.h>
 #include <nuttx/input/kbd_codec.h>
 
 #include "vnc_server.h"
