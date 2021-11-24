@@ -501,6 +501,17 @@ int sam_hsmci_initialize(int slot, int minor);
 #endif
 
 /****************************************************************************
+ * Name: sam_progmem_init
+ *
+ * Description:
+ *   Initialize the FLASH and register the MTD device.
+ ****************************************************************************/
+
+#ifdef HAVE_PROGMEM_CHARDEV
+int sam_progmem_init(void);
+#endif
+
+/****************************************************************************
  * Name:  sam_usbinitialize
  *
  * Description:

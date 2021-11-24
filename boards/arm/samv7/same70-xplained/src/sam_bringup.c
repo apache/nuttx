@@ -45,11 +45,6 @@
 #include "sam_twihs.h"
 #include "same70-xplained.h"
 
-#ifdef HAVE_PROGMEM_CHARDEV
-#  include <nuttx/mtd/mtd.h>
-#  include "sam_progmem.h"
-#endif
-
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
 #endif
@@ -137,13 +132,6 @@ static void sam_i2ctool(void)
 
 int sam_bringup(void)
 {
-#ifdef HAVE_PROGMEM_CHARDEV
-  FAR struct mtd_dev_s *mtd;
-#if defined(CONFIG_BCH)
-  char blockdev[18];
-  char chardev[12];
-#endif /* defined(CONFIG_BCH) */
-#endif
   int ret;
 
   /* Register I2C drivers on behalf of the I2C tool */
@@ -252,42 +240,12 @@ int sam_bringup(void)
 #ifdef HAVE_PROGMEM_CHARDEV
   /* Initialize the SAME70 FLASH programming memory library */
 
-  sam_progmem_initialize();
-
-  /* Create an instance of the SAME70 FLASH program memory device driver */
-
-  mtd = progmem_initialize();
-  if (!mtd)
-    {
-      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
-    }
-
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(PROGMEM_MTD_MINOR, mtd);
+  ret = sam_progmem_init();
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-             ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize progmem: %d\n", ret);
       return ret;
     }
-
-#if defined(CONFIG_BCH)
-  /* Use the minor number to create device paths */
-
-  snprintf(blockdev, 18, "/dev/mtdblock%d", PROGMEM_MTD_MINOR);
-  snprintf(chardev, 12, "/dev/mtd%d", PROGMEM_MTD_MINOR);
-
-  /* Now create a character device on the block device */
-
-  ret = bchdev_register(blockdev, chardev, false);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
-             chardev, ret);
-      return ret;
-    }
-#endif /* defined(CONFIG_BCH) */
 #endif
 
 #ifdef HAVE_USBHOST
