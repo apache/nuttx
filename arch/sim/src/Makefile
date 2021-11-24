@@ -208,8 +208,7 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   STDLIBS += -lasound
 endif
 
-ifeq ($(CONFIG_FS_HOSTFS),y)
-ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
+ifeq ($(CONFIG_SIM_HOSTFS),y)
   HOSTSRCS += up_hostfs.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
@@ -217,7 +216,6 @@ hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	$(Q) cp $< $@
 
 up_hostfs.c: hostfs.h
-endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
