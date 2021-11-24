@@ -64,7 +64,7 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CMN_CSRCS += xtensa_checkstack.c
 endif
 
-ifeq ($(CONFIG_FS_HOSTFS),y)
+ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
   CMN_ASRCS += xtensa_simcall.S
   CMN_CSRCS += xtensa_hostfs.c
 endif
