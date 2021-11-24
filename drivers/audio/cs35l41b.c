@@ -103,6 +103,9 @@ static int cs35l41b_set_gain(FAR struct cs35l41b_dev_s *priv,
 static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                           uint8_t state);
 
+static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
+                         bool state);
+
 static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *caps);
 
@@ -642,6 +645,12 @@ static int cs35l41b_shutdown(FAR struct audio_lowerhalf_s *dev)
 
   audinfo("cs35l41b shutdown\n");
 
+  if (cs35l41b_mute(priv, true) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
+    }
+
   if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
     {
       return ERROR;
@@ -676,9 +685,15 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
-  if (cs35l41b_dsp_process(priv) == 0)
+  if (cs35l41b_is_dsp_processing(priv) == ERROR)
     {
-      auderr("dsp process failed\n");
+      auderr("dsp do not work!\n");
+      return ERROR;
+    }
+
+  if (cs35l41b_mute(priv, false) == ERROR)
+    {
+      auderr("dsp mute failed\n");
       return ERROR;
     }
 
@@ -705,6 +720,12 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
+
+  if (cs35l41b_mute(priv, true) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
+    }
 
   if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
     {
@@ -1252,6 +1273,14 @@ static bool cs35l41_is_mbox_status_correct(uint32_t cmd, uint32_t status)
     }
 }
 
+/****************************************************************************
+ * Name: cs35l41b_power
+ *
+ * Description:
+ *   cs35l41b power process
+ *
+ ****************************************************************************/
+
 static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                           uint8_t state)
 {
@@ -1669,6 +1698,46 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
   if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
     {
       auderr("write 0x00004c00 error\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_mute
+ *
+ * Description:
+ *   cs35l41b mute options
+ *
+ ****************************************************************************/
+
+static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
+                         bool state)
+{
+  uint32_t regval;
+
+  regval = cs35l41b_read_register(priv, CS35L41B_GLOBAL_SYNC_REG);
+  if (regval < 0)
+    {
+      auderr("cs35l41b read CS35L41B_GLOBAL_SYNC_REG  error\n");
+      return ERROR;
+    }
+
+  if (state)
+    {
+      regval |= CS35L41B_GLOBAL_AMP_MUTE;
+    }
+  else
+    {
+      regval &= ~CS35L41B_GLOBAL_AMP_MUTE;
+    }
+
+  if (cs35l41b_write_register(priv,
+                              CS35L41B_GLOBAL_SYNC_REG,
+                              regval) == ERROR)
+    {
+      auderr("write CS35L41B_GLOBAL_SYNC_REG error\n");
       return ERROR;
     }
 

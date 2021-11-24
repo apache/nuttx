@@ -736,12 +736,11 @@ cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
  *
  ****************************************************************************/
 
-int cs35l41b_dsp_process(FAR struct cs35l41b_dev_s *priv)
+int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t  i;
   int32_t   regval;
   uint32_t  times;
-  int       ret;
 
   for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
     {
@@ -793,21 +792,12 @@ int cs35l41b_dsp_process(FAR struct cs35l41b_dev_s *priv)
         }
     }
 
-  /* reset ret value */
-
-  ret = 0;
-
   if (g_dsp_status.is_hb_inc)
     {
-      ret |= FW_SYMBOL_HEARTBEAT_INC;
+      return OK;
     }
 
-  if (g_dsp_status.is_temp_changed)
-    {
-      ret |= FW_SYMBOL_TEMPUATURE_CHANGED;
-    }
-
-  return ret;
+  return ERROR;
 }
 
 /****************************************************************************

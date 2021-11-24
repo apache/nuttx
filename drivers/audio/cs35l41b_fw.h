@@ -22,17 +22,10 @@
 #define __DRIVERS_AUDIO_CS35L41B_FW_H__
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define FW_SYMBOL_HEARTBEAT_INC               (1 << 1)
-#define FW_SYMBOL_TEMPUATURE_CHANGED          (1 << 4)
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv);
-int cs35l41b_dsp_process(FAR struct cs35l41b_dev_s *priv);
+int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv);
 
 #endif

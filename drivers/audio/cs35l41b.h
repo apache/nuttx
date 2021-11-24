@@ -32,8 +32,6 @@
 #define CS35L41_OTP_SIZE_BYTES                            (32 * 4)
 #define CS35L41_OTP_MAP_BIT_OFFSET                        (80)
 
-#define CS35L41_DSP_STATUS_WORDS_TOTAL                    (9)
-
 /* Software Reset and Hardware ID */
 
 /* device id register */
@@ -910,6 +908,16 @@
         (1 << CS35L41B_GLOBAL_EN_SHIFT)
 #define CS35L41B_GLOBAL_EN_DISABLE                        \
         (0 << CS35L41B_GLOBAL_EN_SHIFT)
+
+/* global sync register */
+
+#define CS35L41B_GLOBAL_SYNC_REG                          0x00002024
+#define CS35L41B_GLOBAL_SYNC_CLK_PHASE                    1
+#define CS35L41B_GLOBAL_AMP_MUTE_SHIFT                    4
+#define CS35L41B_GLOBAL_AMP_MUTE                          \
+        (1 << CS35L41B_GLOBAL_AMP_MUTE_SHIFT)
+#define CS35L41B_GLOBAL_AMP_UNMUTE                        \
+        (0 << CS35L41B_GLOBAL_AMP_MUTE_SHIFT)
 
 /****************************************************************************
  * Public Types
