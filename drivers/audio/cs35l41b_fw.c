@@ -51,32 +51,50 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define CHECK_DSP_PROCESS_TIMES               5
+#define CHECK_DSP_PROCESS_TIMES                         5
 
-#define FW_IMG_BLOCK_SIZE                     512
-#define FW_IMG_MODVAL                         ((1 << 16) - 1)
+#define FW_IMG_BLOCK_SIZE                               512
+#define FW_IMG_MODVAL                                   ((1 << 16) - 1)
 
-#define FW_PREHEADER_SIZE                     8
-#define FW_PREHEADER_OFFSET                   0
-#define FW_HEADER_SIZE                        32
-#define FW_HEADER_OFFSET                      8
+#define FW_PREHEADER_SIZE                               8
+#define FW_PREHEADER_OFFSET                             0
+#define FW_HEADER_SIZE                                  32
+#define FW_HEADER_OFFSET                                8
 
-#define FW_SYM_TABLE_OFFSET                   40
+#define FW_SYM_TABLE_OFFSET                             40
 
-#define FW_DATA_HEADER_SIZE                   8
-#define FW_DATA_HEADER_BLOCK_SIZE_OFFSET      0
-#define FW_DATA_HEADER_BLOCK_ADDRESS_OFFSET   4
+#define FW_DATA_HEADER_SIZE                             8
+#define FW_DATA_HEADER_BLOCK_SIZE_OFFSET                0
+#define FW_DATA_HEADER_BLOCK_ADDRESS_OFFSET             4
 
-#define FW_IMG_MODVAL                         ((1 << 16) - 1)
+#define FW_IMG_MODVAL                                   ((1 << 16) - 1)
 
-#define FW_PREHEADER_TYPE                     0
-#define FW_HEADER_TYPE                        1
-#define FW_SYM_TABLE_TYPE                     2
-#define FW_ALGORITHM_ID_LIST_TYPE             3
-#define FW_DATA_HEADER_TYPE                   4
-#define FW_DATA_TYPE                          5
-#define FW_MAGIC2_TYPE                        6
-#define FW_CHECKSUM_TYPE                      7
+#define FW_PREHEADER_TYPE                               0
+#define FW_HEADER_TYPE                                  1
+#define FW_SYM_TABLE_TYPE                               2
+#define FW_ALGORITHM_ID_LIST_TYPE                       3
+#define FW_DATA_HEADER_TYPE                             4
+#define FW_DATA_TYPE                                    5
+#define FW_MAGIC2_TYPE                                  6
+#define FW_CHECKSUM_TYPE                                7
+
+#define CS35L41_DSP_STATUS_WORDS_TOTAL                  9
+
+/* FIRMWARE_HALO_CSPL */
+
+#define CS35L41_SYM_FIRMWARE_HALO_CSPL_HALO_STATE       (0x1)
+#define CS35L41_SYM_FIRMWARE_HALO_CSPL_HALO_HEARTBEAT   (0x2)
+
+/* CSPL */
+
+#define CS35L41_SYM_CSPL_CSPL_STATE                     (0x3)
+#define CS35L41_SYM_CSPL_CSPL_TEMPERATURE               (0x4)
+#define CS35L41_SYM_CSPL_CAL_R                          (0x5)
+#define CS35L41_SYM_CSPL_CAL_AMBIENT                    (0x6)
+#define CS35L41_SYM_CSPL_CAL_STATUS                     (0x7)
+#define CS35L41_SYM_CSPL_CAL_CHECKSUM                   (0x8)
+#define CS35L41_SYM_CSPL_CAL_R_SELECTED                 (0x9)
+#define CS35L41_SYM_CSPL_CAL_SET_STATUS                 (0xa)
 
 /****************************************************************************
  * Private Type Declarations
@@ -170,6 +188,20 @@ static const uint32_t g_cs35l41_post_boot_config[] =
   CS35L41_MIXER_DSP1RX6_INPUT_REG, CS35L41_INPUT_SRC_CLASSH,
   CS35L41_MIXER_DSP1RX7_INPUT_REG, CS35L41_INPUT_SRC_TEMPMON,
   CS35L41_MIXER_DSP1RX8_INPUT_REG, CS35L41_INPUT_SRC_RSVD
+};
+
+static const uint32_t
+g_cs35l41_dsp_status_controls[CS35L41_DSP_STATUS_WORDS_TOTAL] =
+{
+  CS35L41_SYM_FIRMWARE_HALO_CSPL_HALO_STATE,
+  CS35L41_SYM_FIRMWARE_HALO_CSPL_HALO_HEARTBEAT,
+  CS35L41_SYM_CSPL_CSPL_STATE,
+  CS35L41_SYM_CSPL_CAL_SET_STATUS,
+  CS35L41_SYM_CSPL_CAL_R_SELECTED,
+  CS35L41_SYM_CSPL_CAL_R,
+  CS35L41_SYM_CSPL_CAL_STATUS,
+  CS35L41_SYM_CSPL_CAL_CHECKSUM,
+  CS35L41_SYM_CSPL_CSPL_TEMPERATURE,
 };
 
 /****************************************************************************
@@ -711,10 +743,10 @@ int cs35l41b_dsp_process(FAR struct cs35l41b_dev_s *priv)
   uint32_t  times;
   int       ret;
 
-  for (i = 0; i < g_fw_info.header.sym_table_size; i++)
+  for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
     {
       g_dsp_status.data.words[i] =
-      cs35l41b_read_register(priv, g_fw_info.sym_table[i].address);
+      cs35l41b_read_register(priv, g_cs35l41_dsp_status_controls[i]);
 
       if (g_dsp_status.data.words[i] < 0)
         {
@@ -729,10 +761,10 @@ int cs35l41b_dsp_process(FAR struct cs35l41b_dev_s *priv)
 
   while (times--)
     {
-      for (i = 0; i < g_fw_info.header.sym_table_size; i++)
+      for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
         {
           regval = cs35l41b_read_register(priv,
-                                          g_fw_info.sym_table[i].address);
+                                          g_cs35l41_dsp_status_controls[i]);
           if (regval < 0)
             {
               auderr("cs35l41b read register failed\n");
