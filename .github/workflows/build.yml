@@ -66,13 +66,13 @@ jobs:
             # Determine the repo and leave that unset to use the normal checkout behavior
             # of using the merge commit instead of HEAD
             case $GITHUB_REPOSITORY in
-              "apache/nuttx")
+              "tiiuae/nuttx")
                 # OS
                 echo "Triggered by change in OS"
                 APPS_REF=$REF_NAME
                 ;;
 
-              "apache/nuttx-apps" )
+              "tiiuae/incubator-nuttx-apps" )
                 # APPS
                 OS_REF=$REF_NAME
                 echo "Triggered by change in APPS"
@@ -90,7 +90,7 @@ jobs:
       - name: Checkout nuttx repo
         uses: actions/checkout@v3
         with:
-          repository: apache/nuttx
+          repository: tiiuae/nuttx
           ref: ${{ steps.gittargets.outputs.os_ref }}
           path: sources/nuttx
           fetch-depth: 1
@@ -100,7 +100,7 @@ jobs:
       - name: Checkout apps repo
         uses: actions/checkout@v3
         with:
-          repository: apache/nuttx-apps
+          repository: tiiuae/incubator-nuttx-apps
           ref: ${{ steps.gittargets.outputs.apps_ref }}
           path: sources/apps
           fetch-depth: 1
@@ -122,7 +122,7 @@ jobs:
 
     strategy:
       matrix:
-        boards: [arm-01, arm-02, arm-03, arm-04, arm-05, arm-06, arm-07, arm-08, arm-09, arm-10, arm-11, arm-12, arm-13, other, risc-v, sim-01, sim-02, xtensa, codechecker]
+        boards: [arm-12, risc-v]
 
     steps:
       - name: Download Source Artifact
