@@ -343,6 +343,14 @@ menuconfig POWER
 
 if POWER
 
+config REGULATOR
+	bool "Regulator core driver support"
+	default n
+	---help---
+		The regulator core driver implements the uper layer framework that the lower
+		layer driver can register with, and the common regulator APIs that are easy
+		for other drivers to call for the control of their power supply.
+
 config BATTERY_CHARGER
 	bool "Battery Charger support"
 	default n
