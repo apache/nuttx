@@ -1243,7 +1243,8 @@ static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
 {
   FAR struct arpreq *req = arg;
   FAR struct sockaddr_in *addr = (FAR struct sockaddr_in *)&req->arp_pa;
-  if (strncmp(dev->d_ifname, req->arp_dev, sizeof(dev->d_ifname)))
+  if (strncmp(dev->d_ifname, (FAR const char *)req->arp_dev,
+       sizeof(dev->d_ifname)))
     {
       return 0;
     }

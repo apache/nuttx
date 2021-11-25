@@ -37,6 +37,7 @@
 
 #include "netdev/netdev.h"
 #include "netlink/netlink.h"
+#include "arp/arp.h"
 
 /****************************************************************************
  * Public Functions
