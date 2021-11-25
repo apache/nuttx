@@ -83,14 +83,14 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
           FAR int *nonblock = (FAR int *)(uintptr_t)arg;
           if (nonblock && *nonblock)
             {
-              ret = file_fcntl(filep, F_SETFL,
-                              file_fcntl(filep, F_GETFL) | O_NONBLOCK);
+              filep->f_oflags |= O_NONBLOCK;
             }
           else
             {
-              ret = file_fcntl(filep, F_SETFL,
-                              file_fcntl(filep, F_GETFL) & ~O_NONBLOCK);
+              filep->f_oflags &= ~O_NONBLOCK;
             }
+
+          ret = OK;
         }
         break;
 
