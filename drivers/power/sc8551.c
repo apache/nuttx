@@ -525,6 +525,47 @@ static int sc8551_update_bits(FAR struct sc8551_dev_s *priv,
   return 0;
 }
 
+static int sc8551_enable_charge(FAR struct sc8551_dev_s *priv, bool enable)
+{
+  int ret;
+  uint8_t val;
+
+  if (enable)
+    {
+      val = SC8551_CHG_ENABLE;
+    }
+  else
+    {
+      val = SC8551_CHG_DISABLE;
+    }
+
+  val <<= SC8551_CHG_EN_SHIFT;
+  ret = sc8551_update_bits(priv, SC8551_REG_0C,
+                           SC8551_CHG_EN_MASK, val);
+
+  return ret;
+}
+
+static int sc8551_check_charge_enabled(FAR struct sc8551_dev_s *priv,
+                                       bool *enabled)
+{
+  int ret;
+  uint8_t val;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_0C, &val, 1);
+  if (ret < 0)
+    {
+      return -1;
+    }
+
+  if (val & SC8551_CHG_EN_MASK)
+    *enabled = true;
+  else
+    *enabled = false;
+
+  return OK;
+}
+
 static int sc8551_enable_batovp(FAR struct sc8551_dev_s *priv, bool enable)
 {
   int ret;
@@ -1721,7 +1762,7 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
 {
   FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
   FAR struct batio_operate_msg_s *msg =
-    (FAR struct batio_operate_msg_s *) param;
+                        (FAR struct batio_operate_msg_s *) param;
   int op;
   int value;
   int ret = OK;
@@ -1737,11 +1778,11 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
         break;
 
       case BATIO_OPRTN_SYSOFF:
-        ret = sc8551_en_adc(priv, SC8551_ADC_DISABLE);
+        ret = sc8551_enable_charge(priv, false);
         break;
 
       case BATIO_OPRTN_SYSON:
-        ret = sc8551_en_adc(priv, SC8551_ADC_ENABLE);
+        ret = sc8551_enable_charge(priv, true);
         break;
 
       case BATIO_OPRTN_RESET:
