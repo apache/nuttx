@@ -679,6 +679,11 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
 
   audinfo("cs35l41b start!\n");
 
+  if (!priv->done)
+    {
+      return -EBUSY;
+    }
+
   if (cs35l41b_power(priv, POWER_UP) == ERROR)
     {
       auderr("power process failed\n");
@@ -1972,6 +1977,40 @@ int cs35l41b_write_block(FAR struct cs35l41b_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: cs35l41b_load_fw_worker
+ *
+ * Description:
+ *   load the firmware
+ *
+ * Input Parameters
+ *
+ * Returned Value
+ *    None
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void cs35l41b_load_fw_worker(FAR void *arg)
+{
+  FAR struct cs35l41b_dev_s *priv = arg;
+
+  audinfo("cs35l41b reset start!\n");
+
+  if (cs35l41b_reset(priv) == OK)
+    {
+      priv->done = true;
+    }
+  else
+    {
+      auderr("ERROR: cs35l41b reset failed!\n");
+    }
+
+  audinfo("cs35l41b reset finish!\n");
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -2037,11 +2076,7 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
           goto errout_with_dev;
         }
 
-      if (cs35l41b_reset(priv) != OK)
-        {
-          auderr("cs35l41b reset failed!\n");
-          goto errout_with_dev;
-        }
+      work_queue(LPWORK, &priv->work, cs35l41b_load_fw_worker, priv, 0);
 
       return &priv->dev;
     }

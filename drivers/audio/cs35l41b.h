@@ -22,6 +22,12 @@
 #define __DRIVERS_AUDIO_CS35L41B_H__
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/wqueue.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
@@ -953,7 +959,8 @@ struct cs35l41b_dev_s
   uint8_t                 nchannels; /* Number of channels (1 or 2) */
   uint8_t                 bpsamp;    /* Bits per sample (8 or 16) */
   uint32_t                bclk;      /* IIS BCLK */
-
+  struct work_s           work;      /* Work queue for load firmware */
+  bool                    done;      /* Load firmware done */
   uint8_t otp_contents[128];         /* Cache storage for OTP contents */
 };
 
