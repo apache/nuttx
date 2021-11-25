@@ -184,6 +184,10 @@
 #define PAT9126JA_REG_FEATURE3          0x2d    /* Feature3 register */
 #define PAT9126JA_FEATURE3_VALUE        0x00
 
+/* Factory test instructions */
+
+#define PAT9126JA_SIMPLE_CHECK          0x00      /* Simple communication check */
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -254,6 +258,8 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv);
 
 static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
                               bool enable);
+static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
+                              unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -270,6 +276,7 @@ static void pat9126ja_worker(FAR void *arg);
 static const struct sensor_ops_s g_pat9126ja_ops =
 {
   .activate = pat9126ja_activate, /* Enable/disable sensor */
+  .selftest = pat9126ja_selftest, /* Sensor selftest */
 };
 
 /****************************************************************************
@@ -1071,6 +1078,54 @@ static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
                   IOEXPANDER_OPTION_INTCFG,
                   enable ? IOEXPANDER_VAL_FALLING : IOEXPANDER_VAL_DISABLE);
   priv->dev.activated = enable;
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pat9126ja_selftest
+ *
+ * Description:
+ *   Mainly used in the self-test link, including device ID inspection
+ *   and device functional inspection.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
+                              unsigned long arg)
+{
+  FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
+  int ret = -ENOTTY;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Process ioctl commands */
+
+  switch (arg)
+    {
+      case PAT9126JA_SIMPLE_CHECK: /* Simple communication check */
+        {
+          ret = pat9126ja_readdevid(priv);
+        }
+        break;
+
+      default:                     /* Other cmd tag */
+        {
+          snerr("ERROR: Cmd is not supported: %d\n", ret);
+        }
+        break;
+    }
 
   return ret;
 }
