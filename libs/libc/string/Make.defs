@@ -69,6 +69,10 @@ ifneq ($(CONFIG_LIBC_ARCH_STRCPY),y)
 CSRCS += lib_strcpy.c
 endif
 
+ifneq ($(CONFIG_LIBC_ARCH_STRLCAT),y)
+CSRCS += lib_strlcat.c
+endif
+
 ifneq ($(CONFIG_LIBC_ARCH_STRLCPY),y)
 CSRCS += lib_strlcpy.c
 endif
