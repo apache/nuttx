@@ -80,6 +80,10 @@ config LIBC_ARCH_STRCPY
 	bool
 	default n
 
+config LIBC_ARCH_STRLCAT
+	bool
+	default n
+
 config LIBC_ARCH_STRLCPY
 	bool
 	default n
