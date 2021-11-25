@@ -152,6 +152,42 @@ struct regulator_dev *regulator_register(const struct regulator_desc *desc,
 
 void regulator_unregister(struct regulator_dev *rdev);
 
+#if defined(CONFIG_REGULATOR_RPMSG)
+
+/****************************************************************************
+ * Name: regulator_rpmsg_get
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ *   name - the name for register the rpmsg regulator dev
+ *
+ * Returned Value:
+ *
+ *   Regulator dev pointer
+ *
+ ****************************************************************************/
+
+struct regulator_dev *regulator_rpmsg_get(const char *name);
+
+/****************************************************************************
+ * Name: regulator_rpmsg_init
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ * Returned Value:
+ *
+ *   Zero (OK) on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+int regulator_rpmsg_init(void);
+
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }

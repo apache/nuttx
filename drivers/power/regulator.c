@@ -161,6 +161,13 @@ static struct regulator_dev *regulator_dev_lookup(const char *supply)
 
   nxsem_post(&g_reg_sem);
 
+#if defined(CONFIG_REGULATOR_RPMSG)
+  if (rdev_found == NULL)
+    {
+      rdev_found = regulator_rpmsg_get(supply);
+    }
+#endif
+
   return rdev_found;
 }
 
