@@ -36,9 +36,24 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/kmalloc.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/motor/motor.h>
 
 #include <nuttx/irq.h>
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/* This structure describes the state of the upper half driver */
+
+struct motor_upperhalf_s
+{
+  FAR struct motor_lowerhalf_s *lower; /* the handle of lower half driver */
+  uint8_t ocount;                      /* The number of times the device has been opened */
+  sem_t closesem;                      /* Locks out new opens while close is in progress */
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -85,14 +100,15 @@ static const struct file_operations motor_fops =
 
 static int motor_open(FAR struct file *filep)
 {
-  FAR struct inode       *inode = filep->f_inode;
-  FAR struct motor_dev_s *dev   = inode->i_private;
-  uint8_t                 tmp;
-  int                     ret;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct motor_upperhalf_s *upper = inode->i_private;
+  FAR struct motor_lowerhalf_s *lower = upper->lower;
+  uint8_t tmp;
+  int ret;
 
   /* If the port is the middle of closing, wait until the close is finished */
 
-  ret = nxsem_wait(&dev->closesem);
+  ret = nxsem_wait(&upper->closesem);
   if (ret >= 0)
     {
       /* Increment the count of references to the device.  If this the first
@@ -100,7 +116,7 @@ static int motor_open(FAR struct file *filep)
        * initialize the device.
        */
 
-      tmp = dev->ocount + 1;
+      tmp = upper->ocount + 1;
       if (tmp == 0)
         {
           /* More than 255 opens; uint8_t overflows to zero */
@@ -117,20 +133,17 @@ static int motor_open(FAR struct file *filep)
             {
               /* Yes.. perform one time hardware initialization. */
 
-              irqstate_t flags = enter_critical_section();
-              ret = dev->ops->setup(dev);
+              ret = lower->ops->setup(lower);
               if (ret == OK)
                 {
                   /* Save the new open count on success */
 
-                  dev->ocount = tmp;
+                  upper->ocount = tmp;
                 }
-
-              leave_critical_section(flags);
             }
         }
 
-      nxsem_post(&dev->closesem);
+      nxsem_post(&upper->closesem);
     }
 
   return OK;
@@ -146,36 +159,33 @@ static int motor_open(FAR struct file *filep)
 
 static int motor_close(FAR struct file *filep)
 {
-  FAR struct inode      *inode  = filep->f_inode;
-  FAR struct motor_dev_s *dev   = inode->i_private;
-  irqstate_t             flags;
-  int                    ret;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct motor_upperhalf_s *upper = inode->i_private;
+  FAR struct motor_lowerhalf_s *lower = upper->lower;
+  int ret;
 
-  ret = nxsem_wait(&dev->closesem);
+  ret = nxsem_wait(&upper->closesem);
   if (ret >= 0)
     {
       /* Decrement the references to the driver.  If the reference count will
        * decrement to 0, then uninitialize the driver.
        */
 
-      if (dev->ocount > 1)
+      if (upper->ocount > 1)
         {
-          dev->ocount--;
-          nxsem_post(&dev->closesem);
+          upper->ocount--;
+          nxsem_post(&upper->closesem);
         }
       else
         {
           /* There are no more references to the port */
 
-          dev->ocount = 0;
+          upper->ocount = 0;
 
           /* Free the IRQ and disable the motor device */
 
-          flags = enter_critical_section();      /* Disable interrupts */
-          dev->ops->shutdown(dev);               /* Disable the motor */
-          leave_critical_section(flags);
-
-          nxsem_post(&dev->closesem);
+          lower->ops->shutdown(lower);           /* Disable the motor */
+          nxsem_post(&upper->closesem);
         }
     }
 
@@ -208,9 +218,9 @@ static ssize_t motor_write(FAR struct file *filep, FAR const char *buffer,
 
 static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode       *inode = filep->f_inode;
-  FAR struct motor_dev_s *dev   = inode->i_private;
-  FAR struct motor_s     *motor = (FAR struct motor_s *)dev->priv;
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct motor_upperhalf_s *upper = inode->i_private;
+  FAR struct motor_lowerhalf_s *lower = upper->lower;
   int ret;
 
   switch (cmd)
@@ -221,28 +231,28 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
            * and structure is locked.
            */
 
-          if ((motor->limits.lock == false) ||
+          if ((lower->limits.lock == false) ||
               (
 #ifdef CONFIG_MOTOR_UPPER_HAVE_POSITION
-                motor->limits.position <= 0.0 &&
+                lower->limits.position <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_SPEED
-               motor->limits.speed <= 0.0 &&
+                lower->limits.speed <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_TORQUE
-               motor->limits.torque <= 0.0 &&
+                lower->limits.torque <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_FORCE
-                motor->limits.force <= 0.0 &&
+                lower->limits.force <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_VOLTAGE
-               motor->limits.v_in <= 0.0 &&
+                lower->limits.v_in <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_CURRENT
-               motor->limits.i_in <= 0.0 &&
+                lower->limits.i_in <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_POWER
-               motor->limits.p_in <= 0.0 &&
+                lower->limits.p_in <= 0.0 &&
 #endif
                 1))
             {
@@ -255,7 +265,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Check motor mode */
 
-          if (motor->opmode == MOTOR_OPMODE_INIT)
+          if (lower->opmode == MOTOR_OPMODE_INIT)
             {
               mtrerr("Motor operation mode not specified\n");
 
@@ -267,7 +277,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* Finally, call start from lower-half driver */
 
-          ret = dev->ops->start(dev);
+          ret = lower->ops->start(lower);
           if (ret != OK)
             {
               mtrerr("MTRIOC_START failed %d\n", ret);
@@ -279,7 +289,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           /* Call stop from lower-half driver */
 
-          ret = dev->ops->stop(dev);
+          ret = lower->ops->stop(lower);
           if (ret != OK)
             {
               mtrerr("MTRIOC_STOP failed %d\n", ret);
@@ -291,7 +301,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           uint8_t mode = ((uint8_t)arg);
 
-          ret = dev->ops->mode_set(dev, mode);
+          ret = lower->ops->mode_set(lower, mode);
           if (ret != OK)
             {
               mtrerr("MTRIOC_SET_MODE failed %d\n", ret);
@@ -304,7 +314,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct motor_limits_s *limits =
             (FAR struct motor_limits_s *)((uintptr_t)arg);
 
-          if (motor->limits.lock == true)
+          if (lower->limits.lock == true)
             {
               mtrerr("Motor limits locked!\n");
 
@@ -314,7 +324,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           /* NOTE: this call must set the motor_limits_s structure */
 
-          ret = dev->ops->limits_set(dev, limits);
+          ret = lower->ops->limits_set(lower, limits);
           if (ret != OK)
             {
               mtrerr("MTRIOC_SET_LIMITS failed %d\n", ret);
@@ -327,7 +337,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct motor_state_s *state =
             (FAR struct motor_state_s *)((uintptr_t)arg);
 
-          ret = dev->ops->state_get(dev, state);
+          ret = lower->ops->state_get(lower, state);
           if (ret != OK)
             {
               mtrerr("MTRIOC_GET_STATE failed %d\n", ret);
@@ -339,7 +349,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           uint8_t fault = ((uint8_t)arg);
 
-          ret = dev->ops->fault_set(dev, fault);
+          ret = lower->ops->fault_set(lower, fault);
           if (ret != OK)
             {
               mtrerr("MTRIOC_SET_FAULT failed %d\n", ret);
@@ -351,7 +361,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           FAR uint8_t *fault = ((FAR uint8_t *)arg);
 
-          ret = dev->ops->fault_get(dev, fault);
+          ret = lower->ops->fault_get(lower, fault);
           if (ret != OK)
             {
               mtrerr("MTRIOC_GET_FAULT failed %d\n", ret);
@@ -363,7 +373,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           uint8_t fault = ((uint8_t)arg);
 
-          ret = dev->ops->fault_clear(dev, fault);
+          ret = lower->ops->fault_clear(lower, fault);
           if (ret != OK)
             {
               mtrerr("MTRIOC_CLEAR_FAULT failed %d\n", ret);
@@ -376,7 +386,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           FAR struct motor_params_s *params =
             (FAR struct motor_params_s *)((uintptr_t)arg);
 
-          if (motor->param.lock == true)
+          if (lower->param.lock == true)
             {
               mtrerr("Motor params locked!\n");
 
@@ -384,28 +394,28 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               goto errout;
             }
 
-          if ((motor->limits.lock == false) ||
+          if ((lower->limits.lock == false) ||
               (
 #ifdef CONFIG_MOTOR_UPPER_HAVE_POSITION
-                motor->limits.position <= 0.0 &&
+                lower->limits.position <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_SPEED
-                motor->limits.speed <= 0.0 &&
+                lower->limits.speed <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_TORQUE
-                motor->limits.torque <= 0.0 &&
+                lower->limits.torque <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_FORCE
-                motor->limits.force <= 0.0 &&
+                lower->limits.force <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_VOLTAGE
-                motor->limits.v_in <= 0.0 &&
+                lower->limits.v_in <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_CURRENT
-                motor->limits.i_in <= 0.0 &&
+                lower->limits.i_in <= 0.0 &&
 #endif
 #ifdef CONFIG_MOTOR_UPPER_HAVE_INPUT_POWER
-                motor->limits.p_in <= 0.0 &&
+                lower->limits.p_in <= 0.0 &&
 #endif
                 1))
             {
@@ -433,11 +443,11 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           /* Check position configuration */
 
           if (params->position < 0.0 ||
-              params->position > motor->limits.position)
+              params->position > lower->limits.position)
             {
               mtrerr("params->position > limits.position: "
                      "%.2f > %.2f\n",
-                     params->position, motor->limits.position);
+                     params->position, lower->limits.position);
 
               ret = -EPERM;
               goto errout;
@@ -447,11 +457,11 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_UPPER_HAVE_SPEED
           /* Check speed configuration */
 
-          if (motor->limits.speed > 0.0 &&
-              params->speed > motor->limits.speed)
+          if (lower->limits.speed > 0.0 &&
+              params->speed > lower->limits.speed)
             {
               mtrerr("params->speed > limits.speed: %.2f > %.2f\n",
-                     params->speed, motor->limits.speed);
+                     params->speed, lower->limits.speed);
 
               ret = -EPERM;
               goto errout;
@@ -461,11 +471,11 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_UPPER_HAVE_TORQUE
           /* Check torque configuration */
 
-          if (motor->limits.torque > 0.0 &&
-              params->torque > motor->limits.torque)
+          if (lower->limits.torque > 0.0 &&
+              params->torque > lower->limits.torque)
             {
               mtrerr("params->torque > limits.torque: %.2f > %.2f\n",
-                     params->torque, motor->limits.torque);
+                     params->torque, lower->limits.torque);
 
               ret = -EPERM;
               goto errout;
@@ -475,18 +485,18 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_MOTOR_UPPER_HAVE_FORCE
           /* Check force configuration */
 
-          if (motor->limits.force > 0.0 &&
-              params->force > motor->limits.force)
+          if (lower->limits.force > 0.0 &&
+              params->force > lower->limits.force)
             {
               mtrerr("params->force > limits.force: %.2f > %.2f\n",
-                     params->force, motor->limits.force);
+                     params->force, lower->limits.force);
 
               ret = -EPERM;
               goto errout;
             }
 #endif
 
-          ret = dev->ops->params_set(dev, params);
+          ret = lower->ops->params_set(lower, params);
           if (ret != OK)
             {
               mtrerr("MTRIOC_SET_PARAMS failed %d\n", ret);
@@ -497,7 +507,7 @@ static int motor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       default:
         {
           mtrinfo("Forwarding unrecognized cmd: %d arg: %ld\n", cmd, arg);
-          ret = dev->ops->ioctl(dev, cmd, arg);
+          ret = lower->ops->ioctl(lower, cmd, arg);
           break;
         }
     }
@@ -512,15 +522,34 @@ errout:
 
 /****************************************************************************
  * Name: motor_register
+ *
+ * Description:
+ *   This function binds an instance of a "lower half" motor driver with the
+ *   "upper half" motor device and registers that device so that can be used
+ *   by application code.
+ *
+ *   We will register the chararter device with specified path.
+ *
+ * Input Parameters:
+ *   path  - The user specifies path name.
+ *   lower - A pointer to an instance of lower half motor driver. This
+ *           instance is bound to the motor driver and must persists as long
+ *           as the driver persists.
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
  ****************************************************************************/
 
-int motor_register(FAR const char *path, FAR struct motor_dev_s *dev,
-                   FAR void *lower)
+int motor_register(FAR const char *path,
+                   FAR struct motor_lowerhalf_s *lower)
 {
+  FAR struct motor_upperhalf_s *upper;
   int ret;
 
-  DEBUGASSERT(path != NULL && dev != NULL && lower != NULL);
-  DEBUGASSERT(dev->ops != NULL);
+  DEBUGASSERT(path != NULL && lower != NULL);
+  DEBUGASSERT(lower->ops != NULL);
 
   /* For safety reason, when some necessary low-level logic is not provided,
    * system should fail before low-level hardware initialization, so:
@@ -528,37 +557,43 @@ int motor_register(FAR const char *path, FAR struct motor_dev_s *dev,
    *   - all ops must be provided, even if not used
    */
 
-  DEBUGASSERT(dev->ops->setup != NULL);
-  DEBUGASSERT(dev->ops->shutdown != NULL);
-  DEBUGASSERT(dev->ops->stop != NULL);
-  DEBUGASSERT(dev->ops->start != NULL);
-  DEBUGASSERT(dev->ops->params_set != NULL);
-  DEBUGASSERT(dev->ops->mode_set != NULL);
-  DEBUGASSERT(dev->ops->limits_set != NULL);
-  DEBUGASSERT(dev->ops->fault_set != NULL);
-  DEBUGASSERT(dev->ops->state_get != NULL);
-  DEBUGASSERT(dev->ops->fault_get != NULL);
-  DEBUGASSERT(dev->ops->fault_clear != NULL);
-  DEBUGASSERT(dev->ops->ioctl != NULL);
+  DEBUGASSERT(lower->ops->setup != NULL);
+  DEBUGASSERT(lower->ops->shutdown != NULL);
+  DEBUGASSERT(lower->ops->stop != NULL);
+  DEBUGASSERT(lower->ops->start != NULL);
+  DEBUGASSERT(lower->ops->params_set != NULL);
+  DEBUGASSERT(lower->ops->mode_set != NULL);
+  DEBUGASSERT(lower->ops->limits_set != NULL);
+  DEBUGASSERT(lower->ops->fault_set != NULL);
+  DEBUGASSERT(lower->ops->state_get != NULL);
+  DEBUGASSERT(lower->ops->fault_get != NULL);
+  DEBUGASSERT(lower->ops->fault_clear != NULL);
+  DEBUGASSERT(lower->ops->ioctl != NULL);
 
-  /* Initialize the motor device structure */
+  /* Allocate the upper-half data structure */
 
-  dev->ocount = 0;
+  upper = kmm_zalloc(sizeof(struct motor_upperhalf_s));
+  if (!upper)
+    {
+      mtrerr("ERROR: Allocation failed\n");
+      return -ENOMEM;
+    }
 
   /* Initialize semaphores */
 
-  nxsem_init(&dev->closesem, 0, 1);
+  nxsem_init(&upper->closesem, 0, 1);
 
   /* Connect motor driver with lower level interface */
 
-  dev->lower = lower;
+  upper->lower = lower;
 
   /* Register the motor character driver */
 
-  ret = register_driver(path, &motor_fops, 0444, dev);
+  ret = register_driver(path, &motor_fops, 0444, upper);
   if (ret < 0)
     {
-      nxsem_destroy(&dev->closesem);
+      nxsem_destroy(&upper->closesem);
+      kmm_free(upper);
     }
 
   return ret;

@@ -854,13 +854,13 @@ static void esp32_ints_on(uint32_t mask)
  * Name: is_wifi_clk_peripheral
  *
  * Description:
- *     Checks if the peripheral module needs WiFi Clock.
+ *     Checks if the peripheral module needs Wi-Fi Clock.
  *
  * Input Parameters:
  *     periph - The peripheral module
  *
  * Returned Value:
- *    true if it depends on WiFi clock or false otherwise.
+ *    true if it depends on Wi-Fi clock or false otherwise.
  *
  ****************************************************************************/
 
@@ -2813,7 +2813,7 @@ static void async_wakeup_request_end(int event)
  * Name: coex_bt_wakeup_request
  *
  * Description:
- *   Request a WiFi/BLE Coex wakeup request
+ *   Request a Wi-Fi/BLE Coex wakeup request
  *
  * Input Parameters:
  *   none
@@ -2832,7 +2832,7 @@ static bool coex_bt_wakeup_request(void)
  * Name: coex_bt_wakeup_request_end
  *
  * Description:
- *   Finish WiFi/BLE Coex wakeup request
+ *   Finish Wi-Fi/BLE Coex wakeup request
  *
  * Input Parameters:
  *   none

@@ -303,22 +303,15 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
     {
       case WTGAHRS2_GPS0_INFO:
         rtdata->gps_mask |= WTGAHRS2_GPS0_MASK;
-        rtdata->gps.year = 2000 + buffer[0];
-        rtdata->gps.month = buffer[1];
-        rtdata->gps.day = buffer[2];
-        rtdata->gps.hour = buffer[3];
-        rtdata->gps.min = buffer[4];
-        rtdata->gps.sec = buffer[5];
-        rtdata->gps.msec = (buffer[7] << 8) | buffer[6];
         break;
 
       case WTGAHRS2_GPS1_INFO:
         rtdata->gps_mask |= WTGAHRS2_GPS1_MASK;
-        rtdata->gps.longitude = (long)(buffer[3] << 8
+        rtdata->gps.longitude = (buffer[3] << 8
                                 | buffer[2] << 8
                                 | buffer[1] << 8
                                 | buffer[0]) / 10000000.0f;
-        rtdata->gps.latitude = (long)(buffer[7] << 8
+        rtdata->gps.latitude = (buffer[7] << 8
                                | buffer[6] << 8
                                | buffer[5] << 8
                                | buffer[4]) / 10000000.0f;
@@ -326,9 +319,8 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
 
       case WTGAHRS2_GPS2_INFO:
         rtdata->gps_mask |= WTGAHRS2_GPS2_MASK;
-        rtdata->gps.height = (short)(buffer[1] << 8 | buffer[0]) / 10.0f;
-        rtdata->gps.yaw = (short)(buffer[3] << 8 | buffer[2]) / 10.0f;
-        rtdata->gps.speed = (long)(buffer[7] << 8 | buffer[6] << 8
+        rtdata->gps.altitude = (float)(buffer[1] << 8 | buffer[0]) / 10.0f;
+        rtdata->gps.ground_speed = (float)(buffer[7] << 8 | buffer[6] << 8
                     | buffer[5] << 8 | buffer[4]) / 3600.0f;
         break;
     }
@@ -337,13 +329,12 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
     {
       rtdata->gps_mask = 0;
       lower->push_event(lower->priv, &rtdata->gps, sizeof(rtdata->gps));
-      sninfo("Time : %d/%d/%d-%d:%d:%d\n", rtdata->gps.year,
-              rtdata->gps.month, rtdata->gps.day, rtdata->gps.hour,
-              rtdata->gps.min, rtdata->gps.sec);
+      sninfo("Time : %" PRIu64 " utc_time: %" PRIu64 "\n",
+             rtdata->gps.timestamp, rtdata->gps.time_utc);
       sninfo("GPS longitude : %fdegree, latitude:%fdegree\n",
               rtdata->gps.longitude, rtdata->gps.latitude);
-      sninfo("GPS speed: %fm/s, yaw:%fdegrees, height:%fm \n",
-              rtdata->gps.speed, rtdata->gps.yaw, rtdata->gps.height);
+      sninfo("GPS speed: %fm/s, altitude: %fm \n",
+              rtdata->gps.ground_speed, rtdata->gps.altitude);
     }
 }
 

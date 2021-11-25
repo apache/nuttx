@@ -153,6 +153,8 @@ int esp_wifi_start_scan(struct iwreq *iwr)
         {
           /* Scan specific ESSID */
 
+          config->show_hidden = true;
+          config->bssid = NULL;
           memcpy(&target_ssid[0], req->essid, req->essid_len);
           config->ssid = &target_ssid[0];
           config->ssid[req->essid_len] = '\0';
@@ -195,10 +197,8 @@ int esp_wifi_start_scan(struct iwreq *iwr)
     }
 
   esp_wifi_start();
-
-  esp_wifi_scan_stop();
-
   ret = esp_wifi_scan_start(config, false);
+  g_scan_priv.scan_status = ESP_SCAN_RUN;
   if (ret != OK)
     {
       wlerr("ERROR: Scan error, ret: %d\n", ret);
@@ -228,8 +228,6 @@ int esp_wifi_start_scan(struct iwreq *iwr)
       config = NULL;
       wlinfo("INFO: start scan\n");
     }
-
-  g_scan_priv.scan_status = ESP_SCAN_RUN;
 
   return ret;
 }
@@ -274,6 +272,10 @@ int esp_wifi_get_scan_results(struct iwreq *iwr)
           ret = -EINVAL;
           goto exit_failed;
         }
+    }
+  else if (g_scan_priv.scan_status == ESP_SCAN_DISABLED)
+    {
+      return -EINVAL;
     }
 
   if ((iwr == NULL) || (g_scan_priv.scan_status != ESP_SCAN_DONE))
@@ -357,6 +359,11 @@ void esp_wifi_scan_event_parse(void)
   uint16_t bss_total = 0;
   uint8_t bss_count = 0;
   bool parse_done = false;
+
+  if (priv->scan_status != ESP_SCAN_RUN)
+    {
+      return;
+    }
 
   esp_wifi_scan_get_ap_num(&bss_total);
   if (bss_total == 0)

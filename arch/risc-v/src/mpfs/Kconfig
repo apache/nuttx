@@ -13,6 +13,31 @@ config MPFS_ENABLE_DPFPU
 	---help---
 		Enable the RISC-V Double-Precision Floating Point Unit (DP-FPU).
 
+config MPFS_BOOTLOADER
+	bool "Initialize HW"
+	default n
+	---help---
+		This NuttX image is used as a bootloader, which will boot only on one hart, putting the others in WFI
+
+config MPFS_BOOT_HART
+	int "HART used for booting"
+        depends on MPFS_BOOTLOADER
+	default 0
+	---help---
+		The HART number which does the HW initialiization and wakes up the other harts (Default 0, E51 core)
+
+config MPFS_DDR_INIT
+        bool "Initialize DDR"
+        default n
+        ---help---
+                Initializes and performs DDR training on the associated DDR memory.
+
+config MPFS_EMMCSD_MUX_GPIO
+	bool "GPIO driven EMMCSD mux"
+	default n
+	---help---
+		External mux GPIO between e.MMC and SD-card
+
 menu "MPFS Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available

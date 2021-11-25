@@ -63,9 +63,8 @@
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
 #include <arch/chip/tie.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
-
-#include "xtensa_abi.h"
 
 /****************************************************************************
  * Public Functions

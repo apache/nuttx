@@ -70,6 +70,7 @@ extern const struct procfs_operations iobinfo_operations;
 extern const struct procfs_operations module_operations;
 extern const struct procfs_operations uptime_operations;
 extern const struct procfs_operations version_operations;
+extern const struct procfs_operations tcbinfo_operations;
 
 /* This is not good.  These are implemented in other sub-systems.  Having to
  * deal with them here is not a good coupling. What is really needed is a
@@ -164,6 +165,10 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #if !defined(CONFIG_FS_PROCFS_EXCLUDE_VERSION)
   { "version",       &version_operations,         PROCFS_FILE_TYPE   },
+#endif
+
+#if defined(CONFIG_DEBUG_TCBINFO) && !defined(CONFIG_FS_PROCFS_EXCLUDE_TCBINFO)
+  { "tcbinfo",       &tcbinfo_operations,         PROCFS_FILE_TYPE   },
 #endif
 };
 

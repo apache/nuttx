@@ -46,11 +46,18 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RESET
 	select LIBC_ARCH_ATOMIC
-	select LIBC_ARCH_MEMCHR
-	select LIBC_ARCH_MEMCMP
-	select LIBC_ARCH_MEMCCMP
-	select LIBC_ARCH_MEMMOVE
 	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
 	select ARCH_HAVE_TEXT_HEAP
 	select ARCH_HAVE_BOOTLOADER
 	---help---
@@ -68,6 +75,7 @@ config ARCH_CHIP_MPFS
         select ARCH_RV64GC
         select ARCH_HAVE_MPU
         select ARCH_HAVE_RESET
+        select ARCH_HAVE_SPI_CS_CONTROL
         select ARCH_HAVE_PWM_MULTICHAN
         ---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).

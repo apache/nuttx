@@ -47,6 +47,7 @@
 #include "esp32c3_wlan.h"
 #include "esp32c3_wifi_utils.h"
 #include "esp32c3_wifi_adapter.h"
+#include "esp32c3_systemreset.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -88,8 +89,10 @@
 
 #ifdef CONFIG_MM_IOB
 #  define IOBBUF_SIZE             (CONFIG_IOB_NBUFFERS * CONFIG_IOB_BUFSIZE)
-#  if (IOBBUF_SIZE) > (WLAN_BUF_SIZE + 1)
+#  if (WLAN_PKTBUF_NUM) > (CONFIG_IOB_BUFSIZE + 1)
 #    define WLAN_RX_THRESHOLD     (IOBBUF_SIZE - WLAN_BUF_SIZE + 1)
+#   else
+#    define WLAN_RX_THRESHOLD     (WLAN_PKTBUF_NUM - 1) * WLAN_BUF_SIZE
 #  endif
 #endif
 
@@ -176,6 +179,10 @@ struct wlan_priv_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Reference count of register Wi-Fi handler */
+
+static uint8_t g_callback_register_ref = 0;
 
 static struct wlan_priv_s g_wlan_priv[ESP32C3_WLAN_DEVS];
 
@@ -526,7 +533,7 @@ static void wlan_transmit(struct wlan_priv_s *priv)
   while ((pktbuf = wlan_txframe(priv)) != NULL)
     {
       ret = priv->ops->send(pktbuf->buffer, pktbuf->len);
-      if (ret < 0)
+      if (ret == -ENOMEM)
         {
           wlan_add_txpkt_head(priv, pktbuf);
           wd_start(&priv->txtimeout, WLAN_TXTOUT,
@@ -535,6 +542,11 @@ static void wlan_transmit(struct wlan_priv_s *priv)
         }
       else
         {
+          if (ret < 0)
+            {
+              nwarn("WARN: Failed to send pkt, ret: %d\n", ret);
+            }
+
           wlan_free_buffer(priv, pktbuf->buffer);
         }
     }
@@ -1066,7 +1078,7 @@ static void wlan_txtimeout_expiry(wdparm_t arg)
 
 static void wlan_poll_work(void *arg)
 {
-  int32_t delay = WLAN_WDDELAY;
+  int32_t delay_tick = WLAN_WDDELAY;
   struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
   struct net_driver_s *dev = &priv->dev;
   struct wlan_pktbuf_s *pktbuf;
@@ -1082,7 +1094,14 @@ static void wlan_poll_work(void *arg)
   pktbuf = wlan_alloc_buffer(priv);
   if (pktbuf == NULL)
     {
-      delay = 1;
+      /* Delay 10ms */
+
+      delay_tick = MSEC2TICK(10);
+      if (delay_tick == 0)
+        {
+          delay_tick = 1;
+        }
+
       goto exit;
     }
 
@@ -1098,7 +1117,7 @@ static void wlan_poll_work(void *arg)
 
   /* Update TCP timing states and poll the network for new XMIT data. */
 
-  devif_timer(&priv->dev, delay, wlan_txpoll);
+  devif_timer(&priv->dev, delay_tick, wlan_txpoll);
 
   if (dev->d_buf != NULL)
     {
@@ -1113,7 +1132,7 @@ static void wlan_poll_work(void *arg)
   wlan_transmit(priv);
 
 exit:
-  wd_start(&priv->txpoll, delay, wlan_poll_expiry, (wdparm_t)priv);
+  wd_start(&priv->txpoll, delay_tick, wlan_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1249,7 +1268,16 @@ static int wlan_ifup(struct net_driver_s *dev)
   wd_start(&priv->txpoll, WLAN_WDDELAY, wlan_poll_expiry, (wdparm_t)priv);
 
   priv->ifup = true;
+  if (g_callback_register_ref == 0)
+    {
+      ret = esp32c3_register_shutdown_handler(esp_wifi_stop_callback);
+      if (ret < 0)
+        {
+          nwarn("WARN: Failed to register handler ret=%d\n", ret);
+        }
+    }
 
+  ++g_callback_register_ref;
   net_unlock();
 
   return OK;
@@ -1295,6 +1323,16 @@ static int wlan_ifdown(struct net_driver_s *dev)
   if (ret < 0)
     {
       nerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+
+  --g_callback_register_ref;
+  if (g_callback_register_ref == 0)
+    {
+      ret = esp32c3_unregister_shutdown_handler(esp_wifi_stop_callback);
+      if (ret < 0)
+        {
+          nwarn("WARN: Failed to unregister handler ret=%d\n", ret);
+        }
     }
 
   net_unlock();
@@ -1484,6 +1522,10 @@ static int wlan_ioctl(struct net_driver_s *dev,
   struct iwreq *iwr = (struct iwreq *)arg;
   struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
   const struct wlan_ops_s *ops = priv->ops;
+  const uint8_t mac_zero[MAC_LEN] =
+    {
+      0x0
+    };
 
   /* Decode and dispatch the driver-specific IOCTL command */
 
@@ -1550,9 +1592,7 @@ static int wlan_ioctl(struct net_driver_s *dev,
         break;
 
       case SIOCSIWAP:       /* Set access point MAC addresses */
-        if (iwr->u.ap_addr.sa_data[0] != 0 &&
-            iwr->u.ap_addr.sa_data[1] != 0 &&
-            iwr->u.ap_addr.sa_data[2] != 0)
+        if (memcmp(iwr->u.ap_addr.sa_data, mac_zero, MAC_LEN) != 0)
           {
             ret = ops->bssid(iwr, true);
             if (ret < 0)

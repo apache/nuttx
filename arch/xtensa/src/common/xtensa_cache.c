@@ -112,15 +112,15 @@ void up_disable_icache(void)
  ****************************************************************************/
 
 #ifdef CONFIG_XTENSA_ICACHE
-void up_invalidate_icache(uint32_t start, uint32_t end)
+void up_invalidate_icache(uintptr_t start, uintptr_t end)
 {
-  /* align to XCHAL_ICACHE_SIZE */
+  /* align to XCHAL_ICACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_ICACHE_LINESIZE - 1));
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_ICACHE_LINESIZE)
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("ihi %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("ihi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("isync\n");
@@ -149,6 +149,96 @@ void up_invalidate_icache_all(void)
   for (index = 0; index < XCHAL_ICACHE_SIZE; index += XCHAL_ICACHE_LINESIZE)
     {
       __asm__ __volatile__ ("iii %0, 0\n": : "r"(index));
+    };
+
+  __asm__ __volatile__ ("isync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_lock_icache
+ *
+ * Description:
+ *   Prefetch and lock the instruction cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_ICACHE_LOCK
+void up_lock_icache(uintptr_t start, uintptr_t end)
+{
+  /* align to XCHAL_ICACHE_LINESIZE */
+
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
+
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("ipfl %0, 0\n": : "r"(start));
+    };
+
+  __asm__ __volatile__ ("isync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_icache
+ *
+ * Description:
+ *   Unlock the instruction cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_ICACHE_LOCK
+void up_unlock_icache(uintptr_t start, uintptr_t end)
+{
+  /* align to XCHAL_ICACHE_LINESIZE */
+
+  start &= ~(XCHAL_ICACHE_LINESIZE - 1);
+
+  for (; start < end; start += XCHAL_ICACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("ihu %0, 0\n": : "r"(start));
+    };
+
+  __asm__ __volatile__ ("isync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_icache_all
+ *
+ * Description:
+ *   Unlock the entire contents of instruction cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_ICACHE_LOCK
+void up_unlock_icache_all(void)
+{
+  uint32_t index;
+
+  for (index = 0; index < XCHAL_ICACHE_SIZE; index += XCHAL_ICACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("iiu %0, 0\n": : "r"(index));
     };
 
   __asm__ __volatile__ ("isync\n");
@@ -245,13 +335,24 @@ void up_disable_dcache(void)
 #ifdef CONFIG_XTENSA_DCACHE
 void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 {
-  /* Align to XCHAL_DCACHE_LINESIZE */
-
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
-
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  if (start & (XCHAL_DCACHE_LINESIZE - 1))
     {
-      __asm__ __volatile__ ("dhi %0, 0\n" : : "r"(addr));
+      /* Align to XCHAL_DCACHE_LINESIZE */
+
+      start &= ~(XCHAL_DCACHE_LINESIZE - 1);
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
+      start += XCHAL_DCACHE_LINESIZE;
+    }
+
+  for (; start + XCHAL_DCACHE_LINESIZE <= end;
+       start += XCHAL_DCACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("dhi %0, 0\n" : : "r"(start));
+    }
+
+  if (start != end)
+    {
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -315,11 +416,11 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
   /* Align to XCHAL_DCACHE_SIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -392,11 +493,11 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
   /* Align to XCHAL_DCACHE_LINESIZE */
 
-  uint32_t addr = start - (start & (XCHAL_DCACHE_LINESIZE - 1));
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
-  for (; addr < end; addr += XCHAL_DCACHE_LINESIZE)
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
-      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(addr));
+      __asm__ __volatile__ ("dhwbi %0, 0\n" : : "r"(start));
     }
 
   __asm__ __volatile__ ("dsync\n");
@@ -433,6 +534,96 @@ void up_flush_dcache_all(void)
   for (index = 0; index < XCHAL_DCACHE_SIZE; index += XCHAL_DCACHE_LINESIZE)
     {
       __asm__ __volatile__ ("diwbi %0, 0\n" : : "r"(index));
+    };
+
+  __asm__ __volatile__ ("dsync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_lock_dcache
+ *
+ * Description:
+ *   Prefetch and lock the data cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_DCACHE_LOCK
+void up_lock_dcache(uintptr_t start, uintptr_t end)
+{
+  /* align to XCHAL_DCACHE_LINESIZE */
+
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
+
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("dpfl %0, 0\n": : "r"(start));
+    };
+
+  __asm__ __volatile__ ("dsync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_dcache
+ *
+ * Description:
+ *   Unlock the data cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_DCACHE_LOCK
+void up_unlock_dcache(uintptr_t start, uintptr_t end)
+{
+  /* align to XCHAL_DCACHE_LINESIZE */
+
+  start &= ~(XCHAL_DCACHE_LINESIZE - 1);
+
+  for (; start < end; start += XCHAL_DCACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("dhu %0, 0\n": : "r"(start));
+    };
+
+  __asm__ __volatile__ ("dsync\n");
+}
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_dcache_all
+ *
+ * Description:
+ *   Unlock the entire contents of data cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_XTENSA_DCACHE_LOCK
+void up_unlock_dcache_all(void)
+{
+  uint32_t index;
+
+  for (index = 0; index < XCHAL_DCACHE_SIZE; index += XCHAL_DCACHE_LINESIZE)
+    {
+      __asm__ __volatile__ ("diu %0, 0\n" : : "r"(index));
     };
 
   __asm__ __volatile__ ("dsync\n");

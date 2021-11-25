@@ -94,7 +94,7 @@ uint32_t IRAM_ATTR esp_random(void)
 {
   /* The PRNG which implements WDEV_RANDOM register gets 2 bits
    * of extra entropy from a hardware randomness source every APB clock cycle
-   * (provided WiFi or BT are enabled). To make sure entropy is not drained
+   * (provided Wi-Fi or BT are enabled). To make sure entropy is not drained
    * faster than it is added, this function needs to wait for at least 16 APB
    * clock cycles after reading previous word. This implementation may
    * actually wait a bit longer due to extra time spent in arithmetic and

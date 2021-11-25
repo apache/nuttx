@@ -290,7 +290,7 @@ static int IRAM_ATTR esp32c3_mmap(struct spiflash_map_req_s *req)
     }
 
   flash_page = MMU_ADDR2PAGE(req->src_addr);
-  page_cnt   = MMU_BYTES2PAGES(req->size);
+  page_cnt   = MMU_BYTES2PAGES(MMU_ADDR2OFF(req->src_addr) + req->size);
 
   if (start_page + page_cnt < DROM0_PAGES_END)
     {

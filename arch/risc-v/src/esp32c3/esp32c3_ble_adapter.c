@@ -55,6 +55,7 @@
 #include "esp32c3_irq.h"
 #include "esp32c3_rt_timer.h"
 #include "esp32c3_ble_adapter.h"
+#include "esp32c3_wireless.h"
 
 #ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
 #  include "esp_coexist_internal.h"
@@ -406,9 +407,6 @@ static DRAM_ATTR esp_timer_handle_t g_btdm_slp_tmr;
 
 static bool g_ble_irq_bind;
 static irqstate_t g_inter_flags;
-static uint32_t g_phy_clk_en_cnt;
-static int64_t g_phy_rf_en_ts;
-static uint8_t g_phy_access_ref;
 
 /****************************************************************************
  * Public Data
@@ -1684,69 +1682,6 @@ int phy_printf(const char *format, ...)
 #endif
 
 /****************************************************************************
- * Name: bt_phy_enable_clock
- *
- * Description:
- *    Enable BT clock.
- * Input Parameters:
- *    None
- *
- * Returned Value:
- *    None
- *
- ****************************************************************************/
-
-static void bt_phy_enable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt == 0)
-    {
-      modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0,
-                  SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M);
-    }
-
-  g_phy_clk_en_cnt++;
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: bt_phy_disable_clock
- *
- * Description:
- *    Disable BT clock.
- * Input Parameters:
- *    None
- *
- * Returned Value:
- *    None
- *
- ****************************************************************************/
-
-static void bt_phy_disable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt)
-    {
-      g_phy_clk_en_cnt--;
-      if (!g_phy_clk_en_cnt)
-        {
-          modifyreg32(SYSTEM_WIFI_CLK_EN_REG,
-                      SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M,
-                      0);
-        }
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Name: bt_phy_disable
  *
  * Description:
@@ -1761,25 +1696,7 @@ static void bt_phy_disable_clock(void)
 
 static void bt_phy_disable(void)
 {
-  irqstate_t flags;
-  flags = enter_critical_section();
-
-  g_phy_access_ref--;
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Disable PHY and RF. */
-
-      phy_close_rf();
-
-      /* Disable Wi-Fi/BT common peripheral clock.
-       * Do not disable clock for hardware RNG.
-       */
-
-      bt_phy_disable_clock();
-    }
-
-  leave_critical_section(flags);
+  esp32c3_phy_disable();
 }
 
 /****************************************************************************
@@ -1797,35 +1714,16 @@ static void bt_phy_disable(void)
 
 static void bt_phy_enable(void)
 {
-  irqstate_t flags;
-  esp_phy_calibration_data_t *cal_data;
-
-  cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
-  if (!cal_data)
-    {
-      wlerr("Failed to kmm_zalloc");
-      DEBUGASSERT(0);
-    }
-
-  flags = enter_critical_section();
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Update time stamp */
-
-      g_phy_rf_en_ts = (int64_t)rt_timer_time_us();
-
-      bt_phy_enable_clock();
-      phy_set_wifi_mode_only(0);
-      register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
-      extern void coex_pti_v2(void);
-      coex_pti_v2();
-    }
-
-  g_phy_access_ref++;
-  leave_critical_section(flags);
-  kmm_free(cal_data);
+  esp32c3_phy_enable();
 }
+
+/****************************************************************************
+ * Name: coex_wifi_sleep_set_hook
+ *
+ * Description:
+ *   Don't support
+ *
+ ****************************************************************************/
 
 static void coex_wifi_sleep_set_hook(bool sleep)
 {

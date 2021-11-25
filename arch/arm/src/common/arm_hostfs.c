@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/cache.h>
 #include <nuttx/fs/hostfs.h>
 
 #include <errno.h>
@@ -49,8 +50,12 @@
  * Private Functions
  ****************************************************************************/
 
-static long host_call(unsigned int nbr, void *parm)
+static long host_call(unsigned int nbr, void *parm, size_t size)
 {
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_clean_dcache(parm, parm + size);
+#endif
+
   long ret = smh_call(nbr, parm);
   if (ret < 0)
     {
@@ -66,7 +71,7 @@ static long host_call(unsigned int nbr, void *parm)
 
 static ssize_t host_flen(long fd)
 {
-  return host_call(HOST_FLEN, &fd);
+  return host_call(HOST_FLEN, &fd, sizeof(long));
 }
 
 static int host_flags_to_mode(int flags)
@@ -118,13 +123,17 @@ int host_open(const char *pathname, int flags, int mode)
     .len = strlen(pathname),
   };
 
-  return host_call(HOST_OPEN, &open);
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_clean_dcache(pathname, pathname + open.len + 1);
+#endif
+
+  return host_call(HOST_OPEN, &open, sizeof(open));
 }
 
 int host_close(int fd_)
 {
   long fd = fd_;
-  return host_call(HOST_CLOSE, &fd);
+  return host_call(HOST_CLOSE, &fd, sizeof(long));
 }
 
 ssize_t host_read(int fd, void *buf, size_t count)
@@ -141,7 +150,14 @@ ssize_t host_read(int fd, void *buf, size_t count)
     .count = count,
   };
 
-  ssize_t ret = host_call(HOST_READ, &read);
+  ssize_t ret;
+
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_invalidate_dcache(buf, buf + count);
+#endif
+
+  ret = host_call(HOST_READ, &read, sizeof(read));
+
   return ret < 0 ? ret : count - ret;
 }
 
@@ -159,7 +175,13 @@ ssize_t host_write(int fd, const void *buf, size_t count)
     .count = count,
   };
 
-  ssize_t ret = host_call(HOST_WRITE, &write);
+  ssize_t ret;
+
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_clean_dcache(buf, buf + count);
+#endif
+
+  ret = host_call(HOST_WRITE, &write, sizeof(write));
   return ret < 0 ? ret : count - ret;
 }
 
@@ -189,7 +211,7 @@ off_t host_lseek(int fd, off_t offset, int whence)
         .pos = offset,
       };
 
-      ret = host_call(HOST_SEEK, &seek);
+      ret = host_call(HOST_SEEK, &seek, sizeof(seek));
       if (ret >= 0)
         {
             ret = offset;
@@ -267,7 +289,12 @@ int host_unlink(const char *pathname)
     .pathname_len = strlen(pathname),
   };
 
-  return host_call(HOST_REMOVE, &remove);
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_clean_dcache(pathname, pathname +
+                  remove.pathname_len + 1);
+#endif
+
+  return host_call(HOST_REMOVE, &remove, sizeof(remove));
 }
 
 int host_mkdir(const char *pathname, mode_t mode)
@@ -296,7 +323,12 @@ int host_rename(const char *oldpath, const char *newpath)
     .newpath_len = strlen(newpath),
   };
 
-  return host_call(HOST_RENAME, &rename);
+#ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+  up_clean_dcache(oldpath, oldpath + rename.oldpath_len + 1);
+  up_clean_dcache(newpath, newpath + rename.newpath_len + 1);
+#endif
+
+  return host_call(HOST_RENAME, &rename, sizeof(rename));
 }
 
 int host_stat(const char *path, struct stat *buf)

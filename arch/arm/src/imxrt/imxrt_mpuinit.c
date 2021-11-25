@@ -49,6 +49,31 @@
 #  define MIN(a,b) a < b ? a : b
 #endif
 
+#ifndef CONFIG_ARMV7M_DCACHE
+  /*  With Dcache off:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be off
+   */
+#  undef  MPU_RASR_B
+#  define MPU_RASR_B    0
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  0
+#else
+#  ifndef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+  /*  With Dcache on:
+   *  Cacheable (MPU_RASR_C) and Bufferable (MPU_RASR_B) needs to be on
+   */
+#  define RASR_B_VALUE  MPU_RASR_B
+#  define RASR_C_VALUE  MPU_RASR_C
+
+#  else
+  /*  With Dcache in WRITETHROUGH Bufferable (MPU_RASR_B)
+   * needs to be off, except for FLASH for alignment leniency
+   */
+#  define RASR_B_VALUE  0
+#  define RASR_C_VALUE  MPU_RASR_C
+#  endif
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -118,57 +143,49 @@ void imxrt_mpu_initialize(void)
                                             * Instruction access */
 
   mpu_configure_region(IMXRT_FLEXCIPHER_BASE, 8 * 1024 * 1024,
-                       MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                       RASR_C_VALUE      | /* Cacheable          */
                        MPU_RASR_B        | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RORO);  /* P:RO   U:RO
                                             * Instruction access */
 
-  mpu_configure_region(0x00000000,  1024 * 1024 * 1024,
-                       MPU_RASR_TEX_DEV  | /* Device
-                                            * Not Cacheable
-                                            * Not Bufferable
-                                            * Not Shareable      */
-                       MPU_RASR_AP_RWRW);  /* P:RW   U:RW
-                                            * Instruction access */
-
   mpu_configure_region(IMXRT_ITCM_BASE,  128 * 1024,
-                       MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
-                       MPU_RASR_B        | /* Bufferable
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                       RASR_C_VALUE      | /* Cacheable          */
+                       RASR_B_VALUE      | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */
 
   mpu_configure_region(IMXRT_DTCM_BASE,  128 * 1024,
-                       MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
-                       MPU_RASR_B        | /* Bufferable
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                       RASR_C_VALUE      | /* Cacheable          */
+                       RASR_B_VALUE      | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */
 
   mpu_configure_region(IMXRT_OCRAM2_BASE,  512 * 1024,
-                       MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
-                       MPU_RASR_B        | /* Bufferable
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                       RASR_C_VALUE      | /* Cacheable          */
+                       RASR_B_VALUE      | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */
 
   mpu_configure_region(IMXRT_OCRAM_BASE,  512 * 1024,
-                       MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
-                       MPU_RASR_B        | /* Bufferable
+                       MPU_RASR_TEX_NOR  | /* Normal             */
+                       RASR_C_VALUE      | /* Cacheable          */
+                       RASR_B_VALUE      | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */
 
   mpu_configure_region(IMXRT_EXTMEM_BASE,  32 * 1024 * 1024,
                        MPU_RASR_TEX_SO   | /* Ordered            */
-                       MPU_RASR_C        | /* Cacheable          */
-                       MPU_RASR_B        | /* Bufferable
+                       RASR_C_VALUE      | /* Cacheable          */
+                       RASR_B_VALUE      | /* Bufferable
                                             * Not Shareable      */
                        MPU_RASR_AP_RWRW);  /* P:RW   U:RW
                                             * Instruction access */

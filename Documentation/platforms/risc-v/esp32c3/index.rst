@@ -101,9 +101,9 @@ Peripheral Support
 
 The following list indicates the state of peripherals' support in NuttX:
 
-========== ======= =====
-Peripheral Support NOTES
-========== ======= =====
+=========== ======= =====
+Peripheral  Support NOTES
+=========== ======= =====
 GPIO         Yes       
 UART         Yes
 SPI          Yes       
@@ -122,6 +122,14 @@ Bluetooth    Yes
 LED_PWM      Yes
 SHA          Yes
 RSA          Yes
+CDC Console  Yes    Rev.3
 ========== ======= =====
 
+Supported Boards
+================
 
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

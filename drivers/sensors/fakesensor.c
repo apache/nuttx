@@ -204,7 +204,10 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
       gps.longitude = -gps.longitude;
     }
 
-  gps.height = altitude;
+  gps.latitude /= 100.0f;
+  gps.longitude /= 100.0f;
+
+  gps.altitude = altitude;
 
   sensor->lower.push_event(sensor->lower.priv, &gps,
                            sizeof(struct sensor_event_gps));

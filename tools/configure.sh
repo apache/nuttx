@@ -21,9 +21,10 @@ set -e
 
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 TOPDIR="${WD}/.."
+MAKECMD="make"
 USAGE="
 
-USAGE: ${0} [-E] [-e] [-l|m|c|g|n] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
+USAGE: ${0} [-E] [-e] [-l|m|c|g|n|B] [L] [-a <app-dir>] <board-name>:<config-name> [make-opts]
 
 Where:
   -E enforces distclean if already configured.
@@ -33,6 +34,7 @@ Where:
   -c selects the Windows host and Cygwin (c) environment.
   -g selects the Windows host and MinGW/MSYS environment.
   -n selects the Windows host and Windows native (n) environment.
+  -B selects the *BSD (B) host environment.
   Default: Use host setup in the defconfig file
   Default Windows: Cygwin
   -L  Lists all available configurations.
@@ -85,6 +87,11 @@ while [ ! -z "$1" ]; do
   -n )
     winnative=y
     host+=" $1"
+    ;;
+  -B )
+    winnative=n
+    host+=" $1"
+    MAKECMD="gmake"
     ;;
   -E )
     enforce_distclean=y
@@ -173,7 +180,7 @@ fi
 
 if [ -r ${dest_config} ]; then
   if [ "X${enforce_distclean}" = "Xy" ]; then
-    make -C ${TOPDIR} distclean
+    ${MAKECMD} -C ${TOPDIR} distclean
   else
     if cmp -s ${src_config} ${backup_config}; then
       echo "No configuration change."
@@ -181,7 +188,7 @@ if [ -r ${dest_config} ]; then
     fi
 
     if [ "X${distclean}" = "Xy" ]; then
-      make -C ${TOPDIR} distclean
+      ${MAKECMD} -C ${TOPDIR} distclean
     else
       echo "Already configured!"
       echo "Please 'make distclean' and try again."

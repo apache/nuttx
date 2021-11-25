@@ -20,23 +20,13 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_stream.c lib_umask.c lib_utsname.c
+CSRCS += lib_umask.c lib_utsname.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
-
-ifneq ($(CONFIG_STDIO_DISABLE_BUFFERING),y)
-CSRCS += lib_filesem.c
-endif
 
 # Support for platforms that do not have long long types
 
 CSRCS += lib_umul32.c lib_umul64.c lib_umul32x64.c
 CSRCS += lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c
-
-# Add C files that depend on file OR socket descriptors
-
-ifeq ($(CONFIG_FILE_STREAM),y)
-CSRCS += lib_streamsem.c
-endif
 
 ifeq ($(CONFIG_PIPES),y)
 CSRCS += lib_mkfifo.c

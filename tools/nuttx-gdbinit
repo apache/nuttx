@@ -46,7 +46,12 @@ define _examine_arch
   gdb.execute("set $_target_arch = \"i386:x86-64\"")
 
   # NOTE: we assume that sim has sim_bringup function
-  python if (type(gdb.lookup_global_symbol("sim_bringup")) is gdb.Symbol) : \
+  python if (type(gdb.lookup_static_symbol("sim_start")) is gdb.Symbol \
+             and _target_arch.name() == 'i386') : \
+  gdb.execute("set $_target_arch=\"sim:x86\"")
+
+  python if (type(gdb.lookup_static_symbol("sim_start")) is gdb.Symbol \
+             and _target_arch.name() == 'i386:x86-64') : \
   gdb.execute("set $_target_arch=\"sim:x86-64\"")
 end
 
@@ -133,6 +138,9 @@ define _save_tcb
   if ($_streq($_target_arch, "sim:x86-64") == 1)
     _save_tcb_simx86-64 $tcb
   end
+  if ($_streq($_target_arch, "sim:x86") == 1)
+    _save_tcb_simx86 $tcb
+  end
 end
 
 define _save_current_tcb
@@ -176,6 +184,9 @@ define _switch_tcb
   end
   if ($_streq($_target_arch, "sim:x86-64") == 1)
     _switch_tcb_simx86-64 $tcb
+  end
+  if ($_streq($_target_arch, "sim:x86") == 1)
+    _switch_tcb_simx86 $tcb
   end
 
   # update _current_tcb
@@ -379,6 +390,29 @@ define _switch_tcb_simx86-64
   set $r14 = $tcb.xcp.regs[5]
   set $r15 = $tcb.xcp.regs[6]
   set $rip = $tcb.xcp.regs[7]
+end
+
+# see nuttx/arch/sim/src/sim/up_internal.h
+define _save_tcb_simx86
+  set $tcb = (struct tcb_s *)$arg0
+  set $tcb.xcp.regs[0] = $ebx
+  set $tcb.xcp.regs[1] = $esi
+  set $tcb.xcp.regs[2] = $edi
+  set $tcb.xcp.regs[3] = $ebp
+  set $tcb.xcp.regs[4] = $sp
+  set $tcb.xcp.regs[5] = $pc
+
+  set $_pc_reg_idx = 5
+end
+
+define _switch_tcb_simx86
+  set $tcb = (struct tcb_s *)$arg0
+  set $ebx = $tcb.xcp.regs[0]
+  set $esi = $tcb.xcp.regs[1]
+  set $edi = $tcb.xcp.regs[2]
+  set $ebp = $tcb.xcp.regs[3]
+  set $sp  = $tcb.xcp.regs[4]
+  set $pc  = $tcb.xcp.regs[5]
 end
 
 define nxthread

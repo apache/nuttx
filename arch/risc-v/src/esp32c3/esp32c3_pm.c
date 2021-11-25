@@ -1146,12 +1146,12 @@ static void IRAM_ATTR esp32c3_perip_clk_init(void)
   modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, hwcrypto_perip_clk, 0);
   modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, hwcrypto_perip_clk);
 
-  /* Disable WiFi/BT/SDIO clocks. */
+  /* Disable Wi-Fi/BT/SDIO clocks. */
 
   modifyreg32(SYSTEM_WIFI_CLK_EN_REG, wifi_bt_sdio_clk, 0);
   modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_EN);
 
-  /* Set WiFi light sleep clock source to RTC slow clock */
+  /* Set Wi-Fi light sleep clock source to RTC slow clock */
 
   REG_SET_FIELD(SYSTEM_BT_LPCK_DIV_INT_REG, SYSTEM_BT_LPCK_DIV_NUM, 0);
   modifyreg32(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_8M,
@@ -1579,7 +1579,6 @@ void esp32c3_pmstandby(uint64_t time_in_us)
 
   /* don't power down XTAL — powering it up takes different time on. */
 
-  fflush(stdout);
   esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
 #ifdef CONFIG_ESP32C3_RT_TIMER
   /* Get rt-timer timestamp before entering sleep */
@@ -1665,7 +1664,6 @@ void IRAM_ATTR esp32c3_deep_sleep_start(void)
 
 void esp32c3_pmsleep(uint64_t time_in_us)
 {
-  fflush(stdout);
   esp32c3_sleep_enable_rtc_timer_wakeup(time_in_us);
   esp32c3_deep_sleep_start();
 }

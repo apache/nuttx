@@ -454,16 +454,6 @@ config BQ27426
 		It can be interrogated by a system processor to provide cell information,
 		such as state-of-charge (SOC).
 
-if BQ27426
-
-config DEBUG_BQ27426
-	bool "BQ27426 Debug Features"
-	default n
-	---help---
-		Enable BQ27426 battery management debug features.
-
-endif # BQ27426
-
 config I2C_BQ2425X
 	bool
 	default y if BQ2425X
@@ -499,10 +489,6 @@ config I2C_BQ769X0
 	default y if BQ769X0
 
 if BQ769X0
-	config DEBUG_BQ769X0
-		bool "BQ769X0 debug features"
-		default n
-
 	config BQ769X0_USE_INTERNAL_TS
 		bool "Use internal temperature sensor on BQ769X0"
 		default n

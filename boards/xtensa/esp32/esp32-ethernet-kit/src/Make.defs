@@ -35,10 +35,6 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += esp32_mmcsd.c
 endif
 
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CSRCS += esp32_spiflash.c
-endif
-
 ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32_buttons.c
 endif

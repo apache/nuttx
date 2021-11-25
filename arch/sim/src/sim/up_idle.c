@@ -90,6 +90,10 @@ void up_idle(void)
   netdriver_loop();
 #endif
 
+#ifdef CONFIG_SIM_NETUSRSOCK
+  usrsock_loop();
+#endif
+
 #ifdef CONFIG_RPTUN
   up_rptun_loop();
 #endif

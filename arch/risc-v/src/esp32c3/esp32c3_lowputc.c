@@ -45,6 +45,7 @@
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_config.h"
 #include "esp32c3_gpio.h"
+#include "esp32c3_usbserial.h"
 
 #include "esp32c3_lowputc.h"
 
@@ -800,7 +801,7 @@ void esp32c3_lowputc_restore_pins(const struct esp32c3_uart_s *priv)
 
 void riscv_lowputc(char ch)
 {
-#ifdef HAVE_SERIAL_CONSOLE
+#ifdef CONSOLE_UART
 
 #  if defined(CONFIG_UART0_SERIAL_CONSOLE)
   struct esp32c3_uart_s *priv = &g_uart0_config;
@@ -816,7 +817,9 @@ void riscv_lowputc(char ch)
 
   esp32c3_lowputc_send_byte(priv, ch);
 
-#endif /* HAVE_CONSOLE */
+#elif defined (CONFIG_ESP32C3_USBSERIAL)
+  esp32c3_usbserial_write(ch);
+#endif /* CONSOLE_UART */
 }
 
 /****************************************************************************

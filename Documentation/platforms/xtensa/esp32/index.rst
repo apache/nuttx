@@ -4,7 +4,7 @@ Espressif ESP32
 
 The ESP32 is a series of single and dual-core SoCs from Espressif
 based on Harvard architecture Xtensa LX6 CPUs and with on-chip support
-for Bluetooth and WiFi.
+for Bluetooth and Wi-Fi.
 
 All embedded memory, external memory and peripherals are located on the
 data bus and/or the instruction bus of these CPUs. With some minor
@@ -286,7 +286,7 @@ Open Issues
 
   2. Assertions.  On a fatal assertions, other CPUs need to be stopped.
 
-WiFi
+Wi-Fi
 ====
 
 A standard network interface will be configured and can be initialized such as::
@@ -300,9 +300,9 @@ In this case a connection to AP with SSID ``myssid`` is done, using ``mypasswd``
 password. IP address is obtained via DHCP using ``renew`` command. You can check
 the result by running ``ifconfig`` afterwards.
 
-.. tip:: Boards usually expose a ``wapi`` defconfig which enables WiFi
+.. tip:: Boards usually expose a ``wapi`` defconfig which enables Wi-Fi
 
-WiFi SoftAP
+Wi-Fi SoftAP
 ===========
 
 It is possible to use ESP32 as an Access Point (SoftAP). Actually there are some

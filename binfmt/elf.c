@@ -72,6 +72,10 @@ static int elf_loadbinary(FAR struct binary_s *binp,
                           FAR const char *filename,
                           FAR const struct symtab_s *exports,
                           int nexports);
+#ifdef CONFIG_ELF_COREDUMP
+static int elf_dumpbinary(FAR struct memory_region_s *regions,
+                          FAR struct lib_outstream_s *stream);
+#endif
 #if defined(CONFIG_DEBUG_FEATURES) && defined(CONFIG_DEBUG_BINFMT)
 static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo);
 #endif
@@ -85,6 +89,9 @@ static struct binfmt_s g_elfbinfmt =
   NULL,             /* next */
   elf_loadbinary,   /* load */
   NULL,             /* unload */
+#ifdef CONFIG_ELF_COREDUMP
+  elf_dumpbinary,   /* coredump */
+#endif
 };
 
 /****************************************************************************
@@ -294,6 +301,30 @@ errout_with_init:
   elf_uninit(&loadinfo);
   return ret;
 }
+
+/****************************************************************************
+ * Name: elf_dumpbinary
+ *
+ * Description:
+ *   Generat the core dump stream as ELF structure.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ELF_COREDUMP
+static int elf_dumpbinary(FAR struct memory_region_s *regions,
+                          FAR struct lib_outstream_s *stream)
+{
+  struct elf_dumpinfo_s dumpinfo;
+
+  dumpinfo.regions = regions;
+  dumpinfo.stream  = stream;
+
+  return elf_coredump(&dumpinfo);
+}
+#endif
 
 /****************************************************************************
  * Public Functions

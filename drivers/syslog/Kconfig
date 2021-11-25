@@ -330,7 +330,7 @@ config SYSLOG_DEVPATH
 	depends on SYSLOG_CHAR
 	---help---
 		The full path to the system logging device.  For the RAMLOG SYSLOG device,
-		this is normally "/dev/ramlog".  For character SYSLOG devices, it should be
+		this is normally "/dev/kmsg".  For character SYSLOG devices, it should be
 		some other existing character device (or file) supported by the configuration
 		(such as "/dev/ttyS1")/
 
@@ -338,7 +338,7 @@ config SYSLOG_CHARDEV
 	bool "SYSLOG character device"
 	default n
 	---help---
-		Enables support for a simple character driver at /dev/syslog whose
+		Enables support for a simple character driver at /dev/log whose
 		write() method will transfer data to the SYSLOG device.  This can be
 		useful if, for example, you want to redirect the output of a program
 		to the SYSLOG.

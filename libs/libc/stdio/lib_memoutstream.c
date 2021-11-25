@@ -31,13 +31,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: memoutstream_putc
+ * Name: memoutstream_puts
  ****************************************************************************/
 
-static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static int memoutstream_puts(FAR struct lib_outstream_s *this,
+                             FAR const void *buf, int len)
 {
   FAR struct lib_memoutstream_s *mthis =
                                 (FAR struct lib_memoutstream_s *)this;
+  int ncopy;
 
   DEBUGASSERT(this);
 
@@ -46,12 +48,26 @@ static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
    * created so it is okay to write past the end of the buflen by one.
    */
 
-  if (this->nput < mthis->buflen)
+  ncopy = mthis->buflen - this->nput >= len ?
+          len : mthis->buflen - this->nput;
+  if (ncopy > 0)
     {
-      mthis->buffer[this->nput] = ch;
-      this->nput++;
+      memcpy(mthis->buffer + this->nput, buf, ncopy);
+      this->nput += ncopy;
       mthis->buffer[this->nput] = '\0';
     }
+
+  return ncopy;
+}
+
+/****************************************************************************
+ * Name: memoutstream_putc
+ ****************************************************************************/
+
+static void memoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+{
+  char tmp = ch;
+  (void)memoutstream_puts(this, &tmp, 1);
 }
 
 /****************************************************************************
@@ -79,6 +95,7 @@ void lib_memoutstream(FAR struct lib_memoutstream_s *outstream,
                       FAR char *bufstart, int buflen)
 {
   outstream->public.put   = memoutstream_putc;
+  outstream->public.puts  = memoutstream_puts;
   outstream->public.flush = lib_noflush;
   outstream->public.nput  = 0;          /* Will be buffer index */
   outstream->buffer       = bufstart;   /* Start of buffer */

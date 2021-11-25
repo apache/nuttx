@@ -40,7 +40,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
 
-#include "esp32_spiflash.h"
 #include "esp32_partition.h"
 
 #include <arch/board/board.h>
@@ -59,6 +58,10 @@
 
 #ifdef CONFIG_WATCHDOG
 #  include "esp32_board_wdt.h"
+#endif
+
+#ifdef CONFIG_ESP32_SPIFLASH
+#  include "esp32_board_spiflash.h"
 #endif
 
 #ifdef CONFIG_ESP32_BLE
@@ -182,7 +185,7 @@ int esp32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32_PARTITION
+#ifdef CONFIG_ESP32_PARTITION_TABLE
   ret = esp32_partition_init();
   if (ret < 0)
     {

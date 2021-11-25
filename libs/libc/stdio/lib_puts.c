@@ -23,6 +23,9 @@
  ****************************************************************************/
 
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/uio.h>
+
 #include "libc.h"
 
 /****************************************************************************
@@ -39,6 +42,7 @@
 
 int puts(FAR const IPTR char *s)
 {
+#ifdef CONFIG_FILE_STREAM
   FILE *stream = stdout;
   int nwritten;
   int nput = EOF;
@@ -78,4 +82,15 @@ int puts(FAR const IPTR char *s)
 
   lib_give_semaphore(stdout);
   return nput;
+#else
+  size_t len = strlen(s);
+  struct iovec iov[2];
+
+  iov[0].iov_base = (FAR void *)s;
+  iov[0].iov_len  = len;
+  iov[1].iov_base = "\n";
+  iov[1].iov_len  = 1;
+
+  return writev(STDOUT_FILENO, iov, 2) == ++len ? len : EOF;
+#endif
 }

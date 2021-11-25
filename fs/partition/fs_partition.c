@@ -52,6 +52,15 @@ static const partition_parser_t g_parser[] =
 #ifdef CONFIG_PTABLE_PARTITION
   parse_ptable_partition,
 #endif
+
+#ifdef CONFIG_GPT_PARTITION
+  parse_gpt_partition,
+#endif
+
+#ifdef CONFIG_MBR_PARTITION
+  parse_mbr_partition,
+#endif
+
   NULL
 };
 

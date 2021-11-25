@@ -28,6 +28,14 @@ ifeq ($(CONFIG_PTABLE_PARTITION),y)
 CSRCS += fs_ptable.c
 endif
 
+ifeq ($(CONFIG_MBR_PARTITION),y)
+CSRCS += fs_mbr.c
+endif
+
+ifeq ($(CONFIG_GPT_PARTITION),y)
+CSRCS += fs_gpt.c
+endif
+
 # Include partition build support
 
 DEPPATH += --dep-path partition

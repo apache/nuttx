@@ -346,6 +346,11 @@ int pipecommon_close(FAR struct file *filep)
                   /* Inform poll writers that other end closed. */
 
                   pipecommon_pollnotify(dev, POLLERR);
+                  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0
+                         && sval < 0)
+                    {
+                      nxsem_post(&dev->d_wrsem);
+                    }
                 }
             }
         }
@@ -653,6 +658,11 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
           nxsem_post(&dev->d_bfsem);
           ret = nxsem_wait(&dev->d_wrsem);
           sched_unlock();
+
+          if (dev->d_nreaders <= 0)
+            {
+              ret = -EPIPE;
+            }
 
           if (ret < 0 || (ret = nxsem_wait(&dev->d_bfsem)) < 0)
             {

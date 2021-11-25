@@ -81,3 +81,11 @@ endif
 ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)
 CHIP_CSRCS += mpfs_corepwm.c
 endif
+
+ifeq (${CONFIG_MPFS_DDR_INIT},y)
+CHIP_CSRCS += mpfs_ddr.c
+endif
+
+ifeq (${CONFIG_MPFS_BOOTLOADER},y)
+CHIP_CSRCS += mpfs_cache.c
+endif

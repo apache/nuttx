@@ -89,6 +89,10 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  STDLIBS += -lgcov
+endif
+
 ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
 endif
@@ -168,6 +172,11 @@ else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   HOSTSRCS += up_vpnkit.c
   VPATH += :sim/vpnkit
   HOSTSRCS += protocol.c negotiate.c
+endif
+
+ifeq ($(CONFIG_SIM_NETUSRSOCK),y)
+  HOSTSRCS += up_usrsock_host.c
+  CSRCS += up_usrsock.c
 endif
 
 ifeq ($(CONFIG_SIM_HCISOCKET),y)

@@ -95,3 +95,17 @@ To test it, just run the following command::
   nsh> watcher
   nsh> watched
 
+usbconsole
+==========
+
+This configuration tests the built-in USB-to-serial converter found in ESP32-C3 (revision 3).
+`esptool` can be used to check the version of the chip and if this feature is
+supported.  Running `esptool.py -p <port> chip_id` should have `Chip is
+ESP32-C3 (revision 3)` in its output.  
+When connecting the board a new device should appear, a `/dev/ttyACMX` on Linux
+or a `/dev/cu.usbmodemXXX` om macOS.  
+This can be used to flash and monitor the device with the usual commands::
+
+    make download ESPTOOL_PORT=/dev/ttyACM0
+    minicom -D /dev/ttyACM0
+

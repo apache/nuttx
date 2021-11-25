@@ -19,10 +19,41 @@
 ############################################################################
 
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
-
 CSRCS += arch_elf.c
+endif
+
+ifeq ($(CONFIG_XTENSA_MEMCPY),y)
+ASRCS += arch_memcpy.S
+endif
+
+ifeq ($(CONFIG_XTENSA_MEMMOVE),y)
+ASRCS += arch_memmove.S
+endif
+
+ifeq ($(CONFIG_XTENSA_MEMSET),y)
+ASRCS += arch_memset.S
+endif
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRCPY),y)
+ASRCS += arch_strcpy.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRLEN),y)
+ASRCS += arch_strlen.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRNCPY),y)
+ASRCS += arch_strncpy.S
+endif
+
+ifeq ($(CONFIG_XTENSA_STRCMP),y)
+ASRCS += arch_strcmp.S
+endif
 
 DEPPATH += --dep-path machine/xtensa
 VPATH += :machine/xtensa
 
-endif

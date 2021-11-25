@@ -62,6 +62,7 @@ else ifeq ($(CONFIG_ESP32S2_APP_FORMAT_LEGACY),y)
 	$(Q) {                                                                                                \
 		echo "CONFIG_PARTITION_TABLE_CUSTOM=y";                                                           \
 		echo "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions.csv\"";                                 \
+		echo "CONFIG_PARTITION_TABLE_OFFSET=$(CONFIG_ESP32S2_PARTITION_TABLE_OFFSET)";                    \
 	} >> $(BOOTLOADER_CONFIG)
 endif
 

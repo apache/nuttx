@@ -84,8 +84,5 @@ void weak_function clock_timer(void);
 int  clock_abstime2ticks(clockid_t clockid,
                          FAR const struct timespec *abstime,
                          FAR sclock_t *ticks);
-int  clock_time2ticks(FAR const struct timespec *reltime,
-                      FAR sclock_t *ticks);
-int  clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
 
 #endif /* __SCHED_CLOCK_CLOCK_H */

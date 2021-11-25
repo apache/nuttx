@@ -19,25 +19,31 @@ config ESP32_QEMU_IMAGE
 		Create a binary flash image used for QEMU.
 
 choice ESP32_SPIFLASH_FS
-	prompt "SPIFLASH File System"
+	prompt "Mount SPI Flash MTD on bring-up"
 	default ESP32_SPIFLASH_SMARTFS
 	depends on ESP32_SPIFLASH
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
 
 	config ESP32_SPIFLASH_SMARTFS
 		bool "SmartFS"
-		depends on FS_SMARTFS
+		select FS_SMARTFS
+		select MTD_SMART
 
 	config ESP32_SPIFLASH_NXFFS
 		bool "NXFFS"
-		depends on FS_NXFFS
+		select FS_NXFFS
 
 	config ESP32_SPIFLASH_SPIFFS
 		bool "SPIFFS"
-		depends on FS_SPIFFS
+		select FS_SPIFFS
 
 	config ESP32_SPIFLASH_LITTLEFS
 		bool "LittleFS"
-		depends on FS_LITTLEFS
+		select FS_LITTLEFS
 
 endchoice
 

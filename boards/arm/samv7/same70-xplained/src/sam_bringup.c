@@ -342,6 +342,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SAMV7_AFEC
+  /* Initialize AFEC and register the ADC driver. */
+
+  ret = sam_afec_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_afec_initialize failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_SAMV7_DAC0) || defined(CONFIG_SAMV7_DAC1)
   ret = sam_dacdev_initialize();
   if (ret < 0)

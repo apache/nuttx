@@ -58,13 +58,20 @@ config SIM_CYGWIN_DECORATED
 		run:  It will crash early, probably in some function due to the failure to
 		allocate memory.
 
-config SIM_SANITIZE
+config SIM_ASAN
 	bool "Address Sanitizer"
 	default n
 	depends on MM_CUSTOMIZE_MANAGER
 	---help---
 		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
 		bugs in native code.
+
+config SIM_UBSAN
+	bool "Undefined Behaviour Sanitizer"
+	default n
+	---help---
+		Compile-time instrumentation is used to detect various undefined behaviours
+		at runtime.
 
 choice
 	prompt "X64_64 ABI"
@@ -127,14 +134,27 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+choice
+	prompt "Simulated Network Interface"
+	default SIM_NETDEV
+	depends on NET
+	optional
+
 config SIM_NETDEV
 	bool "Simulated Network Device"
-	default y
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	depends on NET_ETHERNET
+	select NET_ETHERNET
 	---help---
 		Build in support for a simulated network device.
+
+config SIM_NETUSRSOCK
+	bool "Simulated Network Device with Native Stack via usrsock"
+	select NET_USRSOCK
+	---help---
+		Built-in support for a simulated network device using native stack via usrsock
+
+endchoice
 
 if SIM_NETDEV
 
@@ -525,7 +545,7 @@ config SIM_QSPIFLASH_PAGESIZE
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
 	default false
-	depends on (WIRELESS_BLUETOOTH && HOST_LINUX)
+	depends on HOST_LINUX
 	---help---
 		Attached the local bluetooth device to the simulation
 		target via HCI_CHANNEL_USER. This gives NuttX full

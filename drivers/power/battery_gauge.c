@@ -328,6 +328,26 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
+        case BATIOC_CURRENT:
+        {
+          FAR b16_t *ptr = (FAR b16_t *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->current(dev, ptr);
+            }
+        }
+        break;
+
+        case BATIOC_TEMPERATURE:
+        {
+          FAR b8_t *ptr = (FAR b8_t *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->temp(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
