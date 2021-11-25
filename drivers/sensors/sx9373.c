@@ -321,11 +321,11 @@ static struct sx9373_channel_s g_sx9373_channel[SX9373_CHANNEL_NUM] =
 
 struct sx9373_dev_s
 {
-  struct sensor_lowerhalf_s lower;      /* The struct of lower half driver. */
-  FAR struct sx9373_config_s *config;   /* Pointer to the configuration of the SX9373 sensor. */
-  uint64_t timestamp;                   /* Units is microseconds. */
-  bool activated;                       /* Sensor working state. */
-  struct work_s work;                   /* Work queue. */
+  struct sensor_lowerhalf_s lower;          /* Lower half driver. */
+  FAR const struct sx9373_config_s *config; /* Pointer to the cfg struct. */
+  uint64_t timestamp;                       /* Units is microseconds. */
+  bool activated;                           /* Sensor working state. */
+  struct work_s work;                       /* Work queue. */
 };
 
 /****************************************************************************
@@ -654,7 +654,8 @@ static int sx9373_suspend(FAR struct sx9373_dev_s *priv)
     }
 
   IOEXP_SETOPTION(priv->config->ioe, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_DISABLE);
 
   return ret;
 }
@@ -682,7 +683,8 @@ static int sx9373_resume(FAR struct sx9373_dev_s *priv)
   int ret;
 
   IOEXP_SETOPTION(priv->config->ioe, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_FALLING);
 
   ret = sx9373_i2c_write(priv, SX9373_COMMAND,
                          SX9373_EXIT_CONTROL);
@@ -997,7 +999,8 @@ static int sx9373_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    */
 
   IOEXP_SETOPTION(priv->config->ioe, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_DISABLE);
 
   work_queue(LPWORK, &priv->work, sx9373_worker, priv, 0);
 
@@ -1044,7 +1047,8 @@ static void sx9373_worker(FAR void *arg)
   DEBUGASSERT(cnt != SX9373_MAX_RETRY);
 
   IOEXP_SETOPTION(priv->config->ioe, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_FALLING);
 
   if (sx9373_readstate(priv) >= 0)
     {
@@ -1080,7 +1084,7 @@ static void sx9373_worker(FAR void *arg)
 int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
 {
   FAR struct sx9373_dev_s *priv;
-  int ioephanle;
+  FAR void *ioephanle;
   int ret;
 
   /* Sanity check. */
@@ -1144,7 +1148,8 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
     }
 
   ret = IOEXP_SETOPTION(priv->config->ioe, priv->config->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                        IOEXPANDER_OPTION_INTCFG,
+                        (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
       snerr("Failed to set option: %d\n", ret);

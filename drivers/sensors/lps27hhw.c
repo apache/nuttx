@@ -296,7 +296,7 @@ static int lps27hhw_updatereg(FAR struct lps27hhw_dev_s *priv,
 static int lps27hhw_readdevid(FAR struct lps27hhw_dev_s *priv);
 static int lps27hhw_reset(FAR struct lps27hhw_dev_s *priv);
 static uint8_t lps27hhw_findodr(FAR struct lps27hhw_dev_s *priv,
-                                FAR unsigned int *interval);
+                                FAR uint32_t *interval);
 static int lps27hhw_setodr(FAR struct lps27hhw_dev_s *priv,
                            enum lps27hhw_odr_e odr);
 static int lps27hhw_setlpfilter(FAR struct lps27hhw_dev_s *priv,
@@ -316,8 +316,10 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv);
 
 /* Sensor ops functions */
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
 static int lps27hhw_batch(FAR struct sensor_lowerhalf_s *lower,
                           FAR unsigned int *latency_us);
+#endif
 static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned int *period_us);
 static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
@@ -329,8 +331,10 @@ static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 
 /* Sensor interrupt functions */
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
 static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                       ioe_pinset_t pinset, FAR void *arg);
+#endif
 static void lps27hhw_worker(FAR void *arg);
 
 /****************************************************************************
@@ -669,7 +673,7 @@ static int lps27hhw_reset(FAR struct lps27hhw_dev_s *priv)
  ****************************************************************************/
 
 static uint8_t lps27hhw_findodr(FAR struct lps27hhw_dev_s *priv,
-                                FAR unsigned int *interval)
+                                FAR uint32_t *interval)
 {
   uint8_t idx;
 
@@ -1337,6 +1341,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_LPS27HHW_MODE_INT
 static int lps27hhw_batch(FAR struct sensor_lowerhalf_s *lower,
                           FAR unsigned int *latency_us)
 {
@@ -1400,6 +1405,8 @@ static int lps27hhw_batch(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 }
 
+#endif    /* CONFIG_LPS27HHW_MODE_INT */
+
 /****************************************************************************
  * Name: lps27hhw_set_interval
  *
@@ -1435,7 +1442,7 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
   /* Find best matching interval */
 
-  idx = lps27hhw_findodr(priv, period_us);
+  idx = lps27hhw_findodr(priv, (FAR uint32_t *)period_us);
 
   /* Check interval is updated */
 
@@ -1848,7 +1855,7 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
 {
   FAR struct lps27hhw_dev_s *priv;
 #ifdef CONFIG_LPS27HHW_MODE_INT
-  void *ioephandle;
+  FAR void *ioephandle;
 #endif
   int ret;
 
@@ -1895,7 +1902,7 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
     }
 
   ioephandle = IOEP_ATTACH(priv->config->ioedev, priv->config->pin,
-                           lps27hhw_interrupt_handler, (void *)priv);
+                           lps27hhw_interrupt_handler, (FAR void *)priv);
   if (ioephandle == NULL)
     {
       ret = -EIO;

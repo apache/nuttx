@@ -41,27 +41,27 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define OPT3007_DEFAULT_INTERVAL   100000   /* Default conversion interval */
-#define OPT3007_AUTOSCALE_MODE     0x0c     /* Automatic Full-Scale Mode */
-#define OPT3007_MF_ID              0x5449   /* Manufacturer ID */
-#define OPT3007_DEVICE_ID          0x3001   /* Device ID */
+#define OPT3007_DEFAULT_INTERVAL   100000    /* Default conversion interval */
+#define OPT3007_AUTOSCALE_MODE     0x0c      /* Automatic Full-Scale Mode */
+#define OPT3007_MF_ID              0x5449    /* Manufacturer ID */
+#define OPT3007_DEVICE_ID          0x3001    /* Device ID */
 
 /* Mode of conversion operation */
 
-#define OPT3007_SHUTDOWN_MODE      0x00     /* Shutdown mode(default) */
-#define OPT3007_SINGLESHOT_MODE    0x01     /* Single-shot mode */
-#define OPT3007_CONTINUOUS_MODE    0x02     /* Continuous conversions */
+#define OPT3007_SHUTDOWN_MODE      0x00      /* Shutdown mode(default) */
+#define OPT3007_SINGLESHOT_MODE    0x01      /* Single-shot mode */
+#define OPT3007_CONTINUOUS_MODE    0x02      /* Continuous conversions */
 
 /* Conversiontime */
 
-#define OPT3007_CONVERSION_100MS   0x00     /* Conversion time 100ms */
-#define OPT3007_CONVERSION_800MS   0x01     /* Conversion time 800ms */
-#define OPT3007_INTERVAL_100MS     100000   /* Interval time 100ms in us*/
-#define OPT3007_INTERVAL_800MS     800000   /* Interval time 800ms in us*/
+#define OPT3007_CONVERSION_100MS   0x00      /* Conversion time 100ms */
+#define OPT3007_CONVERSION_800MS   0x01      /* Conversion time 800ms */
+#define OPT3007_INTERVAL_100MS     100000    /* Interval time 100ms in us */
+#define OPT3007_INTERVAL_800MS     800000    /* Interval time 800ms in us */
 
 /* Interrupt mode */
 
-#define OPT3007_CONVERTEND_MODE    0x0c     /* Interrupt when convert end */
+#define OPT3007_CONVERTEND_MODE    0x0c      /* Interrupt when convert end */
 
 /* Factory test instructions. */
 
@@ -73,34 +73,34 @@
 
 struct opt3007_devreg_s
 {
-  uint8_t msb;                              /* Register segment start bit */
-  uint8_t lsb;                              /* Register segment end bit */
-  uint8_t address;                          /* Register address */
+  uint8_t msb;                               /* Register segment start bit */
+  uint8_t lsb;                               /* Register segment end bit */
+  uint8_t address;                           /* Register address */
 };
 
 typedef struct opt3007_devreg_s opt3007_devreg_t;
 
 struct opt3007_registers_s
 {
-  opt3007_devreg_t r;                       /* Result */
-  opt3007_devreg_t e;                       /* Exponent bits */
-  opt3007_devreg_t rn;                      /* Range number field */
-  opt3007_devreg_t ct;                      /* Conversion time field */
-  opt3007_devreg_t m;                       /* Conversion operation mode */
-  opt3007_devreg_t ovf;                     /* Overflow flag field */
-  opt3007_devreg_t crf;                     /* Conversion ready field */
-  opt3007_devreg_t fh;                      /* Flag high field */
-  opt3007_devreg_t fl;                      /* Flag low field */
-  opt3007_devreg_t l;                       /* Latch field */
-  opt3007_devreg_t pol;                     /* Polarity field */
-  opt3007_devreg_t me;                      /* Mask exponent field */
-  opt3007_devreg_t fc;                      /* Fault count field */
-  opt3007_devreg_t le;                      /* Low-Limit exponent bits */
-  opt3007_devreg_t tl;                      /* Low-Limit result */
-  opt3007_devreg_t he;                      /* High-Limit exponent bits */
-  opt3007_devreg_t th;                      /* High-Limit result */
-  opt3007_devreg_t id;                      /* Manufacturer ID (5449h) */
-  opt3007_devreg_t did;                     /* Device ID (3001h) */
+  opt3007_devreg_t r;                        /* Result */
+  opt3007_devreg_t e;                        /* Exponent bits */
+  opt3007_devreg_t rn;                       /* Range number field */
+  opt3007_devreg_t ct;                       /* Conversion time field */
+  opt3007_devreg_t m;                        /* Conversion operation mode */
+  opt3007_devreg_t ovf;                      /* Overflow flag field */
+  opt3007_devreg_t crf;                      /* Conversion ready field */
+  opt3007_devreg_t fh;                       /* Flag high field */
+  opt3007_devreg_t fl;                       /* Flag low field */
+  opt3007_devreg_t l;                        /* Latch field */
+  opt3007_devreg_t pol;                      /* Polarity field */
+  opt3007_devreg_t me;                       /* Mask exponent field */
+  opt3007_devreg_t fc;                       /* Fault count field */
+  opt3007_devreg_t le;                       /* Low-Limit exponent bits */
+  opt3007_devreg_t tl;                       /* Low-Limit result */
+  opt3007_devreg_t he;                       /* High-Limit exponent bits */
+  opt3007_devreg_t th;                       /* High-Limit result */
+  opt3007_devreg_t id;                       /* Manufacturer ID (5449h) */
+  opt3007_devreg_t did;                      /* Device ID (3001h) */
 };
 
 typedef struct opt3007_registers_s opt3007_registers_t;
@@ -109,14 +109,14 @@ struct opt3007_dev_s
 {
   /* sensor_lowerhalf_s must be in the first line. */
 
-  struct sensor_lowerhalf_s lower;          /* Lower half sensor driver */
-  bool activated;                           /* Sensor working state */
-  uint64_t start_timestamp;                 /* Start timestamp(us). */
-  uint64_t sample_count;                    /* The count of sampling */
-  unsigned int interval;                    /* Sensor acquisition interval */
-  FAR struct opt3007_config_s *config;      /* The board config function */
-  FAR opt3007_registers_t *devreg;          /* opt3007 device register */
-  struct work_s work;                       /* Interrupt handler worker */
+  struct sensor_lowerhalf_s lower;           /* Lower half sensor driver */
+  bool activated;                            /* Sensor working state */
+  uint64_t start_timestamp;                  /* Start timestamp(us). */
+  uint64_t sample_count;                     /* The count of sampling */
+  unsigned int interval;                     /* Sensor acquisition interval */
+  FAR const struct opt3007_config_s *config; /* The board config function */
+  FAR const opt3007_registers_t *devreg;     /* opt3007 device register */
+  struct work_s work;                        /* Interrupt handler worker */
 };
 
 /****************************************************************************
@@ -134,33 +134,33 @@ static int opt3007_i2c_write(FAR struct opt3007_dev_s *priv,
 /* Sensor handle functions */
 
 static int opt3007_readmfid(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_registers_t *devreg);
+                            FAR const opt3007_registers_t *devreg);
 static int opt3007_readdevid(FAR struct opt3007_dev_s *priv,
-                             FAR opt3007_registers_t *devreg);
+                             FAR const opt3007_registers_t *devreg);
 static int opt3007_enable(FAR struct opt3007_dev_s *priv,
                           bool enable);
 static void opt3007_findodr(FAR unsigned int *expect_period_us);
 static int opt3007_setrange(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_registers_t *devreg,
+                            FAR const opt3007_registers_t *devreg,
                             uint16_t value);
 static int opt3007_setoperation(FAR struct opt3007_dev_s *priv,
-                                FAR opt3007_registers_t *devreg,
+                                FAR const opt3007_registers_t *devreg,
                                 uint16_t value);
 static int opt3007_setconversiontime(FAR struct opt3007_dev_s *priv,
-                                     FAR opt3007_registers_t *devreg,
+                                     FAR const opt3007_registers_t *devreg,
                                      uint16_t value);
 static int opt3007_setintmode(FAR struct opt3007_dev_s *priv,
-                              FAR opt3007_registers_t *devreg);
+                              FAR const opt3007_registers_t *devreg);
 static int opt3007_readlux(FAR struct opt3007_dev_s *priv,
                            FAR float *lux);
 
 /* Host control functions */
 
 static int opt3007_writereg(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_devreg_t *devreg,
+                            FAR const opt3007_devreg_t *devreg,
                             uint16_t regval);
 static int opt3007_readreg(FAR struct opt3007_dev_s *priv,
-                           FAR opt3007_devreg_t *devreg,
+                           FAR const opt3007_devreg_t *devreg,
                            FAR uint16_t *regval);
 
 /* Sensor ops functions */
@@ -400,7 +400,7 @@ static int opt3007_i2c_write(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_readmfid(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_registers_t *devreg)
+                            FAR const opt3007_registers_t *devreg)
 {
   int ret;
   uint16_t regval;
@@ -435,7 +435,7 @@ static int opt3007_readmfid(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_readdevid(FAR struct opt3007_dev_s *priv,
-                             FAR opt3007_registers_t *devreg)
+                             FAR const opt3007_registers_t *devreg)
 {
   int ret;
   uint16_t regval;
@@ -580,7 +580,7 @@ static void opt3007_findodr(FAR unsigned int *expect_period_us)
  ****************************************************************************/
 
 static int opt3007_setrange(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_registers_t *devreg,
+                            FAR const opt3007_registers_t *devreg,
                             uint16_t value)
 {
   return opt3007_writereg(priv, &devreg->rn, value);
@@ -609,7 +609,7 @@ static int opt3007_setrange(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_setoperation(FAR struct opt3007_dev_s *priv,
-                                FAR opt3007_registers_t *devreg,
+                                FAR const opt3007_registers_t *devreg,
                                 uint16_t value)
 {
   return opt3007_writereg(priv, &devreg->m, value);
@@ -637,7 +637,7 @@ static int opt3007_setoperation(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_setconversiontime(FAR struct opt3007_dev_s *priv,
-                                     FAR opt3007_registers_t *devreg,
+                                     FAR const opt3007_registers_t *devreg,
                                      uint16_t value)
 {
   return opt3007_writereg(priv, &devreg->ct, value);
@@ -663,7 +663,7 @@ static int opt3007_setconversiontime(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_setintmode(FAR struct opt3007_dev_s *priv,
-                              FAR opt3007_registers_t *devreg)
+                              FAR const opt3007_registers_t *devreg)
 {
   return opt3007_writereg(priv, &devreg->le, OPT3007_CONVERTEND_MODE);
 }
@@ -747,7 +747,7 @@ static int opt3007_readlux(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_writereg(FAR struct opt3007_dev_s *priv,
-                            FAR opt3007_devreg_t *devreg,
+                            FAR const opt3007_devreg_t *devreg,
                             uint16_t regval)
 {
   int ret;
@@ -806,7 +806,7 @@ static int opt3007_writereg(FAR struct opt3007_dev_s *priv,
  ****************************************************************************/
 
 static int opt3007_readreg(FAR struct opt3007_dev_s *priv,
-                           FAR opt3007_devreg_t *devreg,
+                           FAR const opt3007_devreg_t *devreg,
                            FAR uint16_t *regval)
 {
   uint16_t regmask;
@@ -1090,7 +1090,6 @@ int opt3007_register(int devno, FAR const struct opt3007_config_s *config)
 {
   FAR struct opt3007_dev_s *priv;
   int ret;
-  int ioephanle;
 
   /* Sanity check */
 

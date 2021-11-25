@@ -1135,8 +1135,8 @@ typedef struct lsm6dso_emb_fsm_enable_s lsm6dso_emb_fsm_enable_t;
 
 union axis3bit16_u
 {
-  int16_t i16bit[3];                                /* 16 bit int data */
-  uint8_t u8bit[6];                                 /* 8 bit unsigned int data */
+  int16_t i16bit[3];                            /* 16 bit int data */
+  uint8_t u8bit[6];                             /* 8 bit unsigned int data */
 };
 
 typedef union axis3bit16_u axis3bit16_t;
@@ -1145,43 +1145,43 @@ typedef union axis3bit16_u axis3bit16_t;
 
 struct lsm6dso_sensor_s
 {
-  struct sensor_lowerhalf_s lower;                  /* Lower half sensor driver */
-  unsigned int              interval;               /* Sensor interval */
-  unsigned int              batch;                  /* Sensor bat */
-  unsigned int              fifowtm;                /* Sensor fifo water marker */
-  unsigned int              last_update;            /* Last update flag */
-  float                     factor;                 /* Data factor */
-  bool                      fifoen;                 /* Sensor fifo enable */
-  bool                      activated;              /* Sensor working state */
+  struct sensor_lowerhalf_s lower;              /* Lower half sensor driver */
+  unsigned int              interval;           /* Sensor interval */
+  unsigned int              batch;              /* Sensor bat */
+  unsigned int              fifowtm;            /* Sensor fifo water marker */
+  unsigned int              last_update;        /* Last update flag */
+  float                     factor;             /* Data factor */
+  bool                      fifoen;             /* Sensor fifo enable */
+  bool                      activated;          /* Sensor working state */
 };
 
 /* Device struct */
 
 struct lsm6dso_dev_s
 {
-  struct lsm6dso_sensor_s     dev[LSM6DSO_IDX_NUM]; /* Sensor struct */
-  uint64_t                    timestamp;            /* Units is microseconds */
-  FAR struct lsm6dso_config_s *config;              /* The board config */
-  struct work_s               work;                 /* Interrupt handler */
-  unsigned int                fifowtm;              /* fifo water marker */
-  unsigned int                fsmen;                /* FSM enable */
-  bool                        fifoen;               /* Sensor fifo enable */
+  struct lsm6dso_sensor_s dev[LSM6DSO_IDX_NUM]; /* Sensor struct */
+  uint64_t timestamp;                           /* Units is microseconds */
+  FAR const struct lsm6dso_config_s *config;    /* The board config */
+  struct work_s work;                           /* Interrupt handler */
+  unsigned int fifowtm;                         /* fifo water marker */
+  unsigned int fsmen;                           /* FSM enable */
+  bool fifoen;                                  /* Sensor fifo enable */
 };
 
 /* Sensor ODR */
 
 struct lsm6dso_odr_s
 {
-  uint8_t regval;                                   /* the data of register */
-  float odr;                                        /* the unit is Hz */
+  uint8_t regval;                               /* the data of register */
+  float odr;                                    /* the unit is Hz */
 };
 
 /* Batch BDR */
 
 struct lsm6dso_bdr_s
 {
-  uint8_t regval;                                   /* the data of register */
-  float   bdr;                                      /* the unit is Hz */
+  uint8_t regval;                               /* the data of register */
+  float   bdr;                                  /* the unit is Hz */
 };
 
 /****************************************************************************
@@ -1634,7 +1634,6 @@ static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
   uint8_t valuezero;
   uint8_t drdy;
   uint8_t i;
-  uint8_t j;
 
   /* Ensure these registers set to zero. */
 
@@ -3391,7 +3390,6 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
 static int lsm6dso_fsm_enable(FAR struct lsm6dso_dev_s *priv,
                               bool enable)
 {
-  lsm6dso_emb_sens_t emb_sens;
   uint16_t fsm_addr;
   int ret;
 
@@ -3548,6 +3546,7 @@ static int lsm6dso_fsm_manage(FAR struct lsm6dso_dev_s *priv)
 
   /* Disable Finite State Machine */
 
+  memset(&emb_sens, 0, sizeof(emb_sens));
   if (priv->fsmen == LSM6DSO_PROPERTY_DISABLE)
     {
       emb_sens.fsm = LSM6DSO_PROPERTY_DISABLE;
@@ -4066,8 +4065,8 @@ static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
-      ret = -EINVAL;
-      snerr("Failed to match sensor type: %d\n", ret);
+      snerr("Failed to match sensor type: %d\n", -EINVAL);
+      return -EINVAL;
     }
 
   if ((priv->dev[LSM6DSO_FSM_IDX].interval
@@ -4108,7 +4107,7 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
   FAR struct lsm6dso_dev_s * priv;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(lower != NULL);
 
@@ -4119,10 +4118,9 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
         {
           if (enable)
             {
-              IOEXP_SETOPTION(priv->config->ioedev,
-                              priv->config->pin,
+              IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                               IOEXPANDER_OPTION_INTCFG,
-                              IOEXPANDER_VAL_RISING);
+                              (FAR void *)IOEXPANDER_VAL_RISING);
             }
 
           ret = lsm6dso_xl_enable(priv, enable);
@@ -4142,10 +4140,9 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
         {
           if (enable)
             {
-              IOEXP_SETOPTION(priv->config->ioedev,
-                              priv->config->pin,
+              IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                               IOEXPANDER_OPTION_INTCFG,
-                              IOEXPANDER_VAL_RISING);
+                              (FAR void *)IOEXPANDER_VAL_RISING);
             }
 
           ret = lsm6dso_gy_enable(priv, enable);
@@ -4165,10 +4162,9 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
         {
           if (enable)
             {
-              IOEXP_SETOPTION(priv->config->ioedev,
-                              priv->config->pin,
+              IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                               IOEXPANDER_OPTION_INTCFG,
-                              IOEXPANDER_VAL_RISING);
+                              (FAR void *)IOEXPANDER_VAL_RISING);
             }
 
           ret = lsm6dso_fsm_enable(priv, enable);
@@ -4190,10 +4186,9 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
   if (priv->dev[LSM6DSO_XL_IDX].activated == false
       && priv->dev[LSM6DSO_GY_IDX].activated == false)
     {
-      IOEXP_SETOPTION(priv->config->ioedev,
-                      priv->config->pin,
+      IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                       IOEXPANDER_OPTION_INTCFG,
-                      IOEXPANDER_VAL_DISABLE);
+                      (FAR void *)IOEXPANDER_VAL_DISABLE);
     }
 
   return ret;
@@ -4423,7 +4418,7 @@ static int lsm6dso_int1_getroute(FAR struct lsm6dso_dev_s *priv,
                        (FAR uint8_t *)&int2_ctrl, 1);
       value->drdy_temp = int2_ctrl.int2_drdy_temp;
       lsm6dso_spi_read(priv, LSM6DSO_MD2_CFG,
-                       (FAR uint8_t *)&int2_ctrl, 1);
+                       (FAR uint8_t *)&md2_cfg, 1);
       value->timestamp = md2_cfg.int2_timestamp;
     }
   else
@@ -5021,7 +5016,8 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 
   work_queue(LPWORK, &priv->work, lsm6dso_worker, priv, 0);
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -5058,7 +5054,8 @@ static void lsm6dso_worker(FAR void *arg)
   DEBUGASSERT(priv != NULL);
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_RISING);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_RISING);
 
   /* Get all interrupt flag. */
 
@@ -5066,7 +5063,7 @@ static void lsm6dso_worker(FAR void *arg)
   if (ret < 0)
     {
       snerr("Failed to get interrupt source registers: %d\n", ret);
-      return ret;
+      return;
     }
 
   /* Get sensor data. */
@@ -5150,7 +5147,7 @@ static void lsm6dso_worker(FAR void *arg)
 int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
 {
   FAR struct lsm6dso_dev_s *priv;
-  void *ioephandle;
+  FAR void *ioephandle;
   int ret;
 
   /* Sanity check. */
@@ -5242,7 +5239,8 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
     }
 
   ret = IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                        IOEXPANDER_OPTION_INTCFG,
+                        (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
       snerr("Failed to set option: %d\n", ret);

@@ -113,13 +113,13 @@ struct ct7117_odr_s
 
 struct ct7117_dev_s
 {
-  struct sensor_lowerhalf_s lower;      /* The struct of lower half driver. */
-  FAR struct ct7117_config_s *config;   /* The board config function. */
-  uint64_t start_timestamp;             /* Start timestamp(us). */
-  uint64_t sample_count;                /* The count of sampling */
-  bool activated;                       /* Sensor working state. */
-  unsigned int interval;                /* Sensor acquisition interval. */
-  struct work_s work;                   /* Work queue for reading data. */
+  struct sensor_lowerhalf_s lower;          /* Lower half driver. */
+  FAR const struct ct7117_config_s *config; /* The board config function. */
+  uint64_t start_timestamp;                 /* Start timestamp(us). */
+  uint64_t sample_count;                    /* The count of sampling */
+  bool activated;                           /* Sensor working state. */
+  unsigned int interval;                    /* Sensor acquisition interval. */
+  struct work_s work;                       /* Work queue for reading data. */
 };
 
 /****************************************************************************
@@ -695,7 +695,7 @@ static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
 static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg)
 {
-  FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
+  FAR struct ct7117_dev_s *priv = (FAR struct ct7117_dev_s *)lower;
   int ret;
 
   DEBUGASSERT(lower != NULL);
@@ -823,6 +823,7 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   priv->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
   priv->lower.buffer_number = CONFIG_SENSORS_CT7117_BUFFER_NUMBER;
   priv->lower.ops = &g_ct7117_ops;
+  priv->lower.uncalibrated = true;
   priv->interval = CT7117_DEFAULT_ODR;
 
   /* Check Device ID. */

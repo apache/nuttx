@@ -227,8 +227,6 @@ struct pat9126ja_dev_s
 
 /* I2C functions */
 
-static int pat9126ja_read(FAR struct pat9126ja_dev_s *priv, uint8_t regaddr,
-                          FAR uint8_t *value, uint8_t len);
 static int pat9126ja_readreg(FAR struct pat9126ja_dev_s *priv,
                              uint8_t regaddr, FAR uint8_t *regval);
 static int pat9126ja_writereg(FAR struct pat9126ja_dev_s *priv,
@@ -288,44 +286,6 @@ static const struct sensor_ops_s g_pat9126ja_ops =
  ****************************************************************************/
 
 /* I2C functions */
-
-/****************************************************************************
- * Name: pat9126ja_read
- *
- * Description:
- *   Read data.
- *
- * Input Parameters:
- *   priv    - Device struct.
- *   regaddr - Register address.
- *   value   - Burst read value.
- *   len     - Burst read length.
- *
- * Returned Value:
- *   Return 0 if the driver was success; A negated errno
- *   value is returned on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int pat9126ja_read(FAR struct pat9126ja_dev_s *priv, uint8_t regaddr,
-                          FAR uint8_t *value, uint8_t len)
-{
-  struct i2c_config_s config;
-
-  /* Set up the I2C configuration */
-
-  config.frequency = priv->config->freq;
-  config.address   = priv->config->addr;
-  config.addrlen   = PAT9126JA_I2C_ADDR_LEN;
-
-  /* I2c read bytes */
-
-  return i2c_writeread(priv->config->i2c, &config, &regaddr,
-                       sizeof(regaddr), value, len);
-}
 
 /****************************************************************************
  * Name: lps27hhw_readreg
@@ -766,11 +726,11 @@ static int pat9126ja_isready(FAR struct pat9126ja_dev_s *priv,
 static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
                              FAR struct sensor_event_ots *ots)
 {
-  int16_t x_low;
-  int16_t y_low;
+  uint8_t x_low;
+  uint8_t y_low;
+  uint8_t xy_hi;
   int16_t x_hi;
   int16_t y_hi;
-  int16_t xy_hi;
   int ret;
 
   ret = pat9126ja_readreg(priv, PAT9126JA_REG_DELTA_X_LO, &x_low);
@@ -794,13 +754,13 @@ static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
       return ret;
     }
 
-  x_hi = (xy_hi << 4) & 0xf00;
+  x_hi = ((int16_t)xy_hi << 4) & 0xf00;
   if (x_hi & 0x800)
     {
       x_hi |= 0xf000;
     }
 
-  y_hi = (xy_hi << 8) & 0xf00;
+  y_hi = ((int16_t)xy_hi << 8) & 0xf00;
   if (y_hi & 0x800)
     {
       y_hi |= 0xf000;
@@ -958,7 +918,7 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
                            PAT9126JA_DATAFORMAT_12_BIT);
   if (ret < 0)
     {
-      snerr("Failed to set 12-bit X/Y data format\n", ret);
+      snerr("Failed to set 12-bit X/Y data format: %d\n", ret);
       return ret;
     }
 
@@ -1037,7 +997,7 @@ static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (priv->dev.activated == enable)
     {
-      return ret;
+      return OK;
     }
 
   if (enable)
@@ -1076,7 +1036,8 @@ static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                   IOEXPANDER_OPTION_INTCFG,
-                  enable ? IOEXPANDER_VAL_FALLING : IOEXPANDER_VAL_DISABLE);
+                  enable ? (FAR void *)IOEXPANDER_VAL_FALLING :
+                  (FAR void *)IOEXPANDER_VAL_DISABLE);
   priv->dev.activated = enable;
 
   return ret;
@@ -1180,7 +1141,8 @@ static int pat9126ja_interrupt_handler(FAR struct ioexpander_dev_s *dev,
   /* Disable interrupt */
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_DISABLE);
 
   return OK;
 }
@@ -1247,7 +1209,8 @@ static void pat9126ja_worker(FAR void *arg)
           /* Enable interrupt */
 
           IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                          IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+                          IOEXPANDER_OPTION_INTCFG,
+                          (FAR void *)IOEXPANDER_VAL_FALLING);
         }
     }
 }
@@ -1330,7 +1293,8 @@ int pat9126ja_register(int devno,
     }
 
   ret = IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                        IOEXPANDER_OPTION_INTCFG,
+                        (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
       snerr("ERROR: Failed to set option: %d\n", ret);

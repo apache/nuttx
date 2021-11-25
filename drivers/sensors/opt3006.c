@@ -55,8 +55,8 @@
 
 #define OPT3006_CONVERSION_100MS   0x00     /* Conversion time 100ms */
 #define OPT3006_CONVERSION_800MS   0x01     /* Conversion time 800ms */
-#define OPT3006_INTERVAL_100MS     100000   /* Interval time 100ms in us*/
-#define OPT3006_INTERVAL_800MS     800000   /* Interval time 800ms in us*/
+#define OPT3006_INTERVAL_100MS     100000   /* Interval time 100ms in us */
+#define OPT3006_INTERVAL_800MS     800000   /* Interval time 800ms in us */
 
 /* Interrupt mode */
 

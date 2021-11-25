@@ -149,53 +149,53 @@ while(0)                                         \
 
 struct ak09919c_dev_s
 {
-  struct sensor_lowerhalf_s lower;        /* The struct of lower half driver. */
-  FAR struct ak09919c_config_s *config;   /* The board config function. */
-  uint64_t start_timestamp;               /* Start timestamp(us). */
-  uint64_t sample_count;                  /* The count of sampling */
-  bool activated;                         /* Sensor working state. */
-  unsigned int interval;                  /* Sensor acquisition interval. */
-  uint8_t workmode;                       /* Sensor work mode. */
-  struct work_s work;                     /* Work queue for reading data. */
+  struct sensor_lowerhalf_s lower;            /* The lower half driver. */
+  FAR const struct ak09919c_config_s *config; /* The board config function. */
+  uint64_t start_timestamp;                   /* Start timestamp(us). */
+  uint64_t sample_count;                      /* The count of sampling */
+  bool activated;                             /* Sensor working state. */
+  unsigned int interval;                      /* Sensor sample interval. */
+  uint8_t workmode;                           /* Sensor work mode. */
+  struct work_s work;                         /* Work queue for reading. */
 };
 
 /* Structure for ak09919C odr. */
 
 struct ak09919c_odr_s
 {
-  uint8_t regval;                         /* the data of register. */
-  unsigned int odr;                       /* the unit is us. */
+  uint8_t regval;                             /* the data of register. */
+  unsigned int odr;                           /* the unit is us. */
 };
 
 /* Structure for ak09919c data threshold. */
 
 struct ak09919c_threshold_s
 {
-  uint8_t st1_lolimit;                    /* low limit of st1. */
-  uint8_t st1_hilimit;                    /* high limit of st1. */
-  uint8_t st2_lolimit;                    /* low limit of st2. */
-  uint8_t st2_hilimit;                    /* high limit of st2. */
-  int xdata_lolimit;                      /* low limit of x-axis data. */
-  int xdata_hilimit;                      /* high limit of x-axis data. */
-  int ydata_lolimit;                      /* low limit of y-axis data. */
-  int ydata_hilimit;                      /* high limit of y-axis data. */
-  int zdata_lolimit;                      /* low limit of z-axis data. */
-  int zdata_hilimit;                      /* high limit of z-axis data. */
+  uint8_t st1_lolimit;                        /* low limit of st1. */
+  uint8_t st1_hilimit;                        /* high limit of st1. */
+  uint8_t st2_lolimit;                        /* low limit of st2. */
+  uint8_t st2_hilimit;                        /* high limit of st2. */
+  int xdata_lolimit;                          /* low limit of x-axis data. */
+  int xdata_hilimit;                          /* high limit of x-axis data. */
+  int ydata_lolimit;                          /* low limit of y-axis data. */
+  int ydata_hilimit;                          /* high limit of y-axis data. */
+  int zdata_lolimit;                          /* low limit of z-axis data. */
+  int zdata_hilimit;                          /* high limit of z-axis data. */
 };
 
 /* Structure for ak09919c data. */
 
 struct ak09919c_magdata_s
 {
-  uint8_t st1;                            /* data of AK09919C_REG_ST1. */
-  uint8_t xdata_hi;                       /* data of AK09919C_REG_HXH. */
-  uint8_t xdata_lo;                       /* data of AK09919C_REG_HXL. */
-  uint8_t ydata_hi;                       /* data of AK09919C_REG_HYH. */
-  uint8_t ydata_lo;                       /* data of AK09919C_REG_HYL. */
-  uint8_t zdata_hi;                       /* data of AK09919C_REG_HZH. */
-  uint8_t zdata_lo;                       /* data of AK09919C_REG_HZL. */
-  uint8_t res;                            /* data of AK09919C_REG_TMPS. */
-  uint8_t st2;                            /* data of AK09919C_REG_ST2. */
+  uint8_t st1;                                /* data of AK09919C_REG_ST1. */
+  uint8_t xdata_hi;                           /* data of AK09919C_REG_HXH. */
+  uint8_t xdata_lo;                           /* data of AK09919C_REG_HXL. */
+  uint8_t ydata_hi;                           /* data of AK09919C_REG_HYH. */
+  uint8_t ydata_lo;                           /* data of AK09919C_REG_HYL. */
+  uint8_t zdata_hi;                           /* data of AK09919C_REG_HZH. */
+  uint8_t zdata_lo;                           /* data of AK09919C_REG_HZL. */
+  uint8_t res;                                /* data of AK09919C_REG_TMPS. */
+  uint8_t st2;                                /* data of AK09919C_REG_ST2. */
 };
 
 /****************************************************************************
@@ -226,7 +226,8 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
 static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv);
 static int ak09919c_findodr(FAR unsigned int *expect_period_us);
 static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
-                                FAR struct ak09919c_threshold_s *threshold);
+                                FAR const struct ak09919c_threshold_s
+                                *threshold);
 
 /* Sensor ops functions. */
 
@@ -572,7 +573,7 @@ static int ak09919c_checkid(FAR struct ak09919c_dev_s *priv)
   uint16_t devid;
 
   ret = ak09919c_i2c_read(priv, AK09919C_REG_WIA1, (uint8_t *)&devid, 2);
-  if (ret < 0 )
+  if (ret < 0)
     {
       snerr("Failed to read device id: %d\n", ret);
       return ret;
@@ -643,7 +644,8 @@ static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv)
  ****************************************************************************/
 
 static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
-                                FAR struct ak09919c_threshold_s *threshold)
+                                FAR const struct ak09919c_threshold_s
+                                *threshold)
 {
   int xdata;
   int ydata;
