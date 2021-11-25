@@ -63,6 +63,7 @@ int        strerror_r(int, FAR char *, size_t);
 size_t     strlen(FAR const char *);
 size_t     strnlen(FAR const char *, size_t);
 FAR char  *strcat(FAR char *, FAR const char *);
+size_t     strlcat(FAR char *, FAR const char *, size_t);
 FAR char  *strncat(FAR char *, FAR const char *, size_t);
 int        strcmp(FAR const char *, FAR const char *);
 int        strncmp(FAR const char *, FAR const char *, size_t);
