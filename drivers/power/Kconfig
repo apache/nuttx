@@ -351,6 +351,15 @@ config REGULATOR
 		layer driver can register with, and the common regulator APIs that are easy
 		for other drivers to call for the control of their power supply.
 
+config REGULATOR_RPMSG
+	bool "Regulator rpmsg driver support"
+	default n
+	---help---
+		The rpmsg regulator driver implements the common regulator APIs, inside which
+		the regulator operations are sent from the client to the remote device via
+		the rpmsg channel. The remote device(namely server) is responsible for
+		the parse and the completion.
+
 config BATTERY_CHARGER
 	bool "Battery Charger support"
 	default n
