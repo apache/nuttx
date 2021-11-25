@@ -56,6 +56,8 @@
 #include "devif/devif.h"
 #include "utils/utils.h"
 #include "udp/udp.h"
+#include "icmp/icmp.h"
+#include "icmpv6/icmpv6.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -230,7 +232,33 @@ static int udp_input(FAR struct net_driver_s *dev, unsigned int iplen)
       else
         {
           nwarn("WARNING: No listener on UDP port\n");
+
+          /* No match was found, send ICMP destination port unreachable
+           * unless destination address was broadcast/multicast.
+           */
+
+#if defined(CONFIG_NET_ICMP) || defined(CONFIG_NET_ICMPv6)
+#  ifdef CONFIG_NET_ICMPv6
+#    ifdef CONFIG_NET_ICMP
+          if (IFF_IS_IPv6(dev->d_flags))
+#    endif
+            {
+              icmpv6_reply(dev, ICMPv6_DEST_UNREACHABLE,
+                           ICMPv6_PORT_UNREACH, 0);
+            }
+#  endif /* CONFIG_NET_ICMPv6 */
+
+#  ifdef CONFIG_NET_ICMP
+#    ifdef CONFIG_NET_ICMPv6
+          else
+#    endif
+            {
+              icmp_reply(dev, ICMP_DEST_UNREACHABLE, ICMP_PORT_UNREACH);
+            }
+#  endif /* CONFIG_NET_ICMP */
+#else
           dev->d_len = 0;
+#endif /* CONFIG_NET_ICMP || CONFIG_NET_ICMPv6 */
         }
     }
 
