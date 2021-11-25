@@ -94,6 +94,26 @@
 #define ICMP_HDRLEN    8                           /* Size of ICMP header */
 #define IPICMP_HDRLEN  (ICMP_HDRLEN + IPv4_HDRLEN) /* Size of IPv4 + ICMP header */
 
+/* Codes for UNREACH. */
+
+#define ICMP_NET_UNREACH             0    /* Network Unreachable    */
+#define ICMP_HOST_UNREACH            1    /* Host Unreachable   */
+#define ICMP_PROT_UNREACH            2    /* Protocol Unreachable   */
+#define ICMP_PORT_UNREACH            3    /* Port Unreachable   */
+#define ICMP_FRAG_NEEDED             4    /* Fragmentation Needed/DF set  */
+#define ICMP_SR_FAILED               5    /* Source Route failed    */
+#define ICMP_NET_UNKNOWN             6
+#define ICMP_HOST_UNKNOWN            7
+#define ICMP_HOST_ISOLATED           8
+#define ICMP_NET_ANO                 9
+#define ICMP_HOST_ANO                10
+#define ICMP_NET_UNR_TOS             11
+#define ICMP_HOST_UNR_TOS            12
+#define ICMP_PKT_FILTERED            13   /* Packet filtered */
+#define ICMP_PREC_VIOLATION          14   /* Precedence violation */
+#define ICMP_PREC_CUTOFF             15   /* Precedence cut off */
+#define NR_ICMP_UNREACH              15   /* instead of hardcoding immediate value */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -113,8 +133,16 @@ struct icmp_hdr_s
 
   /* ICMP_ECHO_REQUEST and ICMP_ECHO_REPLY data */
 
-  uint16_t id;               /* Used to match requests with replies */
-  uint16_t seqno;            /* "  " "" "   " "      " "  " "     " */
+  union
+    {
+      struct
+        {
+          uint16_t id;      /* Used to match requests with replies */
+          uint16_t seqno;   /* "  " "" "   " "      " "  " "     " */
+        };
+
+      uint32_t data;
+    };
 };
 
 /* The structure holding the ICMP statistics that are gathered if
