@@ -881,6 +881,13 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               ret = file_ioctl(&dev->pd_sink, cmd, arg);
             }
+
+          /* Let the default handler set O_NONBLOCK flags for us. */
+
+          if (ret >= 0)
+            {
+              ret = -ENOTTY;
+            }
         }
         break;
 
