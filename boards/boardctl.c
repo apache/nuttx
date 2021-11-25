@@ -58,6 +58,10 @@
 #  include <nuttx/lib/builtin.h>
 #endif
 
+#ifdef CONFIG_BOARDCTL_FATDMAMEMORY
+#  include <nuttx/fs/fat.h>
+#endif
+
 #ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
@@ -777,6 +781,41 @@ int boardctl(unsigned int cmd, uintptr_t arg)
         break;
 #endif
 
+#ifdef CONFIG_BOARDCTL_FATDMAMEMORY
+        /* CMD:           BOARDIOC_FATDMAMEM
+         * DESCRIPTION:   Allocate or free a DMA capable buffer.
+         * ARG:           A pointer to an boardioc_dmafatmemory_ioctl_s
+         *                object.
+         *                If the pmemory is NULL an allocation of size is
+         *                returned in pmemory.
+         *                If the pmemory is non-NULL the block is freed.
+         * CONFIGURATION: CONFIG_BOARDCTL_FATDMAMEMORY
+         * DEPENDENCIES:  Board specific logic provides
+         *                   void *fat_dma_alloc(size_t size)
+         *                   void fat_dma_free(FAR void *memory, size_t size)
+         */
+
+        case BOARDIOC_FATDMAMEM:
+          {
+            FAR struct boardioc_dmafatmemory_ioctl_s *req =
+                     (FAR struct boardioc_dmafatmemory_ioctl_s *)arg;
+
+            if (req == NULL || req->size == 0)
+              {
+                ret = -EINVAL;
+              }
+            else if (req->pmemory == NULL)
+              {
+                req->pmemory = fat_dma_alloc(req->size);
+              }
+            else
+              {
+                fat_dma_free(req->pmemory, req->size);
+                req->pmemory = NULL;
+              }
+          }
+          break;
+#endif
        default:
          {
 #ifdef CONFIG_BOARDCTL_IOCTL

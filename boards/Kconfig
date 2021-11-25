@@ -3484,6 +3484,15 @@ config BOARDCTL_TESTSET
 		Enables support for the BOARDIOC_SPINLOCK boardctl() command.
 		Architecture specific logic must provide up_testset() interface.
 
+config BOARDCTL_FATDMAMEMORY
+	bool "Architecture-specific fat DMA allocation"
+	default n
+	depends on FAT_DMAMEMORY
+	---help---
+		Enables support for the BOARDCTL_FATDMAMEMORY boardctl() command.
+		Architecture specific logic must provide fat_dma_alloc() and
+		fat_dma_free() interfaces;
+
 config BOARDCTL_IOCTL
 	bool "Board-specific boardctl() commands"
 	default n
