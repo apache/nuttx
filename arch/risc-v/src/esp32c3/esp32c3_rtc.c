@@ -2464,8 +2464,7 @@ int up_rtc_gettime(struct timespec *tp)
     }
   else
     {
-      time_us = = esp32c3_rtc_get_time_us() +
-                    esp32c3_rtc_get_boot_time();
+      time_us = esp32c3_rtc_get_time_us() + esp32c3_rtc_get_boot_time();
     }
 
   tp->tv_sec  = time_us / USEC_PER_SEC;
