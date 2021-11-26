@@ -1317,6 +1317,10 @@ Configuration sub-directories
     ADC (AFEC) driver. Data can be read through channel AFE0_AD0 by
     running application "adc" in NuttShell.
 
+    The ADC is triggered by Timer/counter at 1 kHz frequency and uses
+    DMA to transfer samples. Number of transfered samples can be set
+    by configuring CONFIG_SAMV7_AFEC_DMASAMPLES.
+
   mrf24j40-starhub
 
     This configuration implements a hub node in a 6LoWPAN start network.
