@@ -29,6 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
+#include "clock/clock.h"
+
 #include "riscv_arch.h"
 
 #include "hardware/esp32c3_rtccntl.h"
@@ -47,10 +49,11 @@
 #include "hardware/extmem_reg.h"
 #include "hardware/spi_mem_reg.h"
 
-#include "esp32c3_rtc.h"
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_attr.h"
 #include "esp32c3_rt_timer.h"
+
+#include "esp32c3_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
