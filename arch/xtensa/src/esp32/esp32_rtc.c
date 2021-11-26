@@ -29,7 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
-#include "esp32_rtc.h"
+#include "clock/clock.h"
+
 #include "esp32_clockconfig.h"
 #include "esp32_rt_timer.h"
 
@@ -39,6 +40,8 @@
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
+
+#include "esp32_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
