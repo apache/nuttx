@@ -136,6 +136,10 @@ ifeq ($(CONFIG_SENSORS_OPT3007),y)
   CSRCS += opt3007.c
 endif
 
+ifeq ($(CONFIG_SENSORS_STK31850),y)
+  CSRCS += stk31850.c
+endif
+
 ifeq ($(CONFIG_SENSORS_PAT9126JA),y)
   CSRCS += pat9126ja.c
 endif
