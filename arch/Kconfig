@@ -106,6 +106,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
