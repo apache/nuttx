@@ -384,15 +384,24 @@ FAR struct battery_charger_dev_s *
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_STWLC38)
 
+struct stwlc38_lower_s
+{
+  uint8_t  addr;                           /* I2C device address */
+  uint32_t frequency;                      /* I2C frequency */
+  uint32_t current;                        /* Power supply capability */
+  uint32_t sleep_pin;
+  uint32_t detect_pin;
+  uint32_t int_pin;                        /* Interrupt pin */
+  uint32_t enb_pin;
+};
+
 struct i2c_master_s;
 
 FAR struct battery_charger_dev_s *
   stwlc38_initialize(FAR struct i2c_master_s *i2c,
-                     uint32_t pin,
-                     uint8_t addr,
-                     uint32_t frequency,
-                     uint32_t current,
-                     FAR struct ioexpander_dev_s *dev);
+                     FAR struct stwlc38_lower_s *lower,
+                     FAR struct ioexpander_dev_s *rpmsg_dev,
+                     FAR struct ioexpander_dev_s *io_dev);
 #endif
 
 /****************************************************************************

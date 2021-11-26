@@ -51,6 +51,8 @@
 #include "polaris_reg.h"
 
 #define PAGE_SIZE 256
+#define ON        (bool)0
+#define OFF       (bool)1
 #define NO_DEBUG
 
 /****************************************************************************
@@ -86,13 +88,11 @@ struct stwlc38_dev_s
 
   /* Data fields specific to the lower half STWLC38 driver follow */
 
-  uint8_t addr;                         /* I2C address */
-  uint32_t frequency;                   /* I2C frequency */
-  uint32_t pin;                         /* Interrupt pin */
-  uint32_t current;                     /* rx current */
-  FAR struct i2c_master_s *i2c;         /* I2C interface */
-  FAR struct ioexpander_dev_s *ioedev;  /* Ioexpander device */
-  struct work_s work;                   /* Interrupt handler worker */
+  FAR struct stwlc38_lower_s *lower;
+  FAR struct i2c_master_s *i2c;             /* I2C interface */
+  FAR struct ioexpander_dev_s *rpmsg_dev;   /* Ioexpander device */
+  FAR struct ioexpander_dev_s *io_dev;      /* Ioexpander device */
+  struct work_s work;                       /* Interrupt handler worker */
 };
 
 static uint8_t type_of_command[CMD_STR_LEN] =
@@ -113,12 +113,12 @@ static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
   int i = 0;
 #endif
 
-  msg[0].addr = priv->addr;
+  msg[0].addr = priv->lower->addr;
   msg[0].buffer = cmd;
   msg[0].length = cmd_length;
   msg[0].flags = I2C_M_NOSTOP;
 
-  msg[1].addr = priv->addr;
+  msg[1].addr = priv->lower->addr;
   msg[1].buffer = read_data;
   msg[1].length = read_count;
   msg[1].flags = I2C_M_READ;
@@ -153,7 +153,7 @@ static int wlc_i2c_write(FAR struct stwlc38_dev_s *priv,
   int i = 0;
 #endif
 
-  msg[0].addr = priv->addr;
+  msg[0].addr = priv->lower->addr;
   msg[0].buffer = cmd;
   msg[0].length = cmd_length;
   msg[0].flags = 0;
@@ -747,6 +747,32 @@ static ssize_t st_polaris_i2c_bridge_store(FAR struct stwlc38_dev_s *priv,
   return count;
 }
 
+static int stwlc38_onoff_ldo_output(FAR struct stwlc38_dev_s *priv,
+                                     bool onoff)
+{
+  int ret;
+
+  /* Turn on vout ldo output when gpio2 input low */
+
+  ret = IOEXP_SETDIRECTION(priv->rpmsg_dev, priv->lower->sleep_pin,
+                   IOEXPANDER_DIRECTION_OUT);
+  if (ret < 0)
+    {
+      baterr("Failed to set sleep_pin as output: %d\n", ret);
+      return ret;
+    }
+
+  ret = IOEXP_WRITEPIN(priv->rpmsg_dev, priv->lower->sleep_pin, onoff);
+  if (ret < 0)
+    {
+      baterr("Failed to write sleep_pin as %s, error: %d\n",
+             onoff ? "OFF" : "ON" , ret);
+      return ret;
+    }
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: stwlc38_interrupt_handler
  *
@@ -784,7 +810,7 @@ static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    */
 
   work_queue(LPWORK, &priv->work, stwlc38_worker, priv, 0);
-  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
                       IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
   return OK;
@@ -822,7 +848,7 @@ static void stwlc38_worker(FAR void *arg)
 
   DEBUGASSERT(priv != NULL);
 
-  IOEXP_SETOPTION(priv->ioedev, priv->pin,
+  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
                       IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
 
   /* Read out the latest rx data */
@@ -850,19 +876,25 @@ static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
                           FAR int *status)
 {
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
-  int err;
-  uint8_t reg_value = 0;
+  bool wpc_det = 0;
+  int  ret;
 
-  /* return device operate mode */
+  /* Check WPC_DET, output High when SS package sent */
 
-  err = fw_i2c_read(priv, FWREG_OP_MODE_ADDR, &reg_value, 1);
-  if (err != OK)
+  ret = IOEXP_SETDIRECTION(priv->rpmsg_dev, priv->lower->detect_pin,
+                           IOEXPANDER_DIRECTION_IN);
+  if (ret < 0)
     {
-      *status = -1;
-      return err;
+      baterr("Failed to set direction (wpc_det): %d\n", ret);
     }
 
-  *status = (int)reg_value;
+  ret = IOEXP_READPIN(priv->rpmsg_dev, priv->lower->detect_pin, &wpc_det);
+  if (ret < 0)
+    {
+      baterr("Failed to read pin (wpc_det): %d\n", ret);
+    }
+
+  *status = (int)wpc_det;
 
   return OK;
 }
@@ -992,6 +1024,28 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
         usleep(AFTER_SYS_RESET_SLEEP_MS);
         break;
 
+      case BATIO_OPRTN_SYSON:
+
+        /* Turn on vout ldo output when gpio2 input low */
+
+        ret = stwlc38_onoff_ldo_output(priv, ON);
+        if (ret < 0)
+          {
+            baterr("Failed to trun ON wpc ldo output: %d\n", ret);
+          }
+          break;
+
+      case BATIO_OPRTN_SYSOFF:
+
+        /* Turn off vout ldo output when gpio2 input high */
+
+        ret = stwlc38_onoff_ldo_output(priv, OFF);
+        if (ret < 0)
+          {
+            baterr("Failed to trun OFF wpc ldo output: %d\n", ret);
+          }
+          break;
+
       default:
         batinfo("Unsupported opt: 0x%X\n", op);
         ret = -EINVAL;
@@ -1001,13 +1055,41 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
   return ret;
 }
 
+static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
+{
+  int ret;
+
+  ret = IOEXP_SETDIRECTION(priv->io_dev, priv->lower->int_pin,
+                           IOEXPANDER_DIRECTION_IN_PULLUP);
+  if (ret < 0)
+    {
+      baterr("Failed to set direction: %d\n", ret);
+    }
+
+  ret = IOEP_ATTACH(priv->io_dev, priv->lower->int_pin,
+                          stwlc38_interrupt_handler, priv);
+  if (ret == NULL)
+    {
+      baterr("Failed to attach: %d\n", ret);
+      ret = -EIO;
+    }
+
+  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
+                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->io_dev, stwlc38_interrupt_handler);
+    }
+
+  return ret;
+}
+
 FAR struct battery_charger_dev_s *
   stwlc38_initialize(FAR struct i2c_master_s *i2c,
-                     uint32_t pin,
-                     uint8_t addr,
-                     uint32_t frequency,
-                     uint32_t current,
-                     FAR struct ioexpander_dev_s *dev)
+                     FAR struct stwlc38_lower_s *lower,
+                     FAR struct ioexpander_dev_s *rpmsg_dev,
+                     FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct stwlc38_dev_s *priv;
   char *buf;
@@ -1023,36 +1105,27 @@ FAR struct battery_charger_dev_s *
 
       priv->dev.ops   = &g_stwlc38ops;
       priv->i2c       = i2c;
-      priv->pin       = pin;
-      priv->addr      = addr;
-      priv->current   = current;
-      priv->frequency = frequency;
-      priv->ioedev    = dev;
+      priv->lower     = lower;
+      priv->rpmsg_dev = rpmsg_dev;
+      priv->io_dev    = io_dev;
+    }
+  else
+    {
+      return NULL;
     }
 
-  /* Interrupt register */
-
-  ret = IOEXP_SETDIRECTION(priv->ioedev, priv->pin,
-                           IOEXPANDER_DIRECTION_IN_PULLUP);
+  ret = stwlc38_init_interrupt(priv);
   if (ret < 0)
     {
-      baterr("Failed to set direction: %d\n", ret);
+      baterr("Failed to init_interrupt: %d\n", ret);
     }
 
-  ret = IOEP_ATTACH(priv->ioedev, priv->pin,
-                          stwlc38_interrupt_handler, priv);
-  if (ret == NULL)
-    {
-      baterr("Failed to attach: %d\n", ret);
-      ret = -EIO;
-    }
+  /* Turn on vout ldo output when gpio2 input low */
 
-  ret = IOEXP_SETOPTION(priv->ioedev, priv->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+  ret = stwlc38_onoff_ldo_output(priv, ON);
   if (ret < 0)
     {
-      baterr("Failed to set option: %d\n", ret);
-      IOEP_DETACH(priv->ioedev, stwlc38_interrupt_handler);
+      baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
 
   count = nvm_program_show(priv, buf);
