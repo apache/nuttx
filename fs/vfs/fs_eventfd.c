@@ -487,7 +487,7 @@ static int eventfd_do_ioctl(FAR struct file *filep, int cmd,
       return OK;
     }
 
-  return -ENOSYS;
+  return -ENOTTY;
 }
 
 #ifdef CONFIG_EVENT_FD_POLL
