@@ -134,6 +134,12 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+config SIM_HOSTFS
+	bool "Simulated HostFS"
+	depends on FS_HOSTFS
+	---help---
+		Access host filesystem through HostFS.
+
 choice
 	prompt "Simulated Network Interface"
 	default SIM_NETDEV
