@@ -28,6 +28,7 @@ include analog/Make.defs
 include audio/Make.defs
 include bch/Make.defs
 include can/Make.defs
+include clk/Make.defs
 include crypto/Make.defs
 include math/Make.defs
 include motor/Make.defs

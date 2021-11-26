@@ -1,0 +1,18 @@
+menuconfig CLK
+	bool "Clock management (CLK) driver interfaces"
+	default n
+	---help---
+		The base clock drivers and clock management sets. These interfaces are used
+		to enable/disable clocks and set clock rate for drivers
+
+if CLK
+
+config CLK_RPMSG
+	bool "rpmsg clk driver"
+	default n
+	depends on OPENAMP
+	---help---
+		Rpmsg clk are proxy/master pairs clock that operate clks between client and
+		server processor.
+
+endif
