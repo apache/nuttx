@@ -601,6 +601,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
       dest     = (FAR uint32_t *)address;
       buffer   = (FAR void *)((uintptr_t)buffer + xfrsize);
       buflen  -= xfrsize;
+      offset   = 0;
       page++;
     }
 
