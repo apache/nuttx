@@ -539,7 +539,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
   /* Loop until all of the data has been written */
 
-  dest    = (FAR uint32_t *)address;
+  dest    = (FAR uint32_t *)(address & ~SAMV7_PAGE_MASK);
   written = 0;
 
   while (buflen > 0)
@@ -579,15 +579,15 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
       /* Write the page */
 
-      for (i = 0; i < (SAMV7_PAGE_SIZE / sizeof(uint32_t)); i++)
+      for (i = 0; i < SAMV7_PAGE_WORDS; i++)
         {
           *dest++ = *src++;
-           ARM_DMB();
         }
 
       /* Flush the data cache to memory */
 
-      up_clean_dcache(address, address + SAMV7_PAGE_SIZE);
+      up_clean_dcache(address & ~SAMV7_PAGE_MASK,
+        (address & ~SAMV7_PAGE_MASK) + SAMV7_PAGE_SIZE);
 
       /* Send the write command */
 
