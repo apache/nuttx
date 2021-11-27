@@ -136,7 +136,7 @@ static int sporadic_set_lowpriority(FAR struct tcb_s *tcb)
        * state.
        */
 
-      tcb->base_priority = tcb->low_priority;
+      tcb->base_priority = sporadic->low_priority;
     }
   else
 #endif
