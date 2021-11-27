@@ -92,17 +92,17 @@ static bool sam_inserted(FAR const struct automount_lower_s *lower);
  * Private Data
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
+#ifdef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
 static struct sam_automount_state_s g_hsmci0state;
 static const struct sam_automount_config_s g_hsmci0config =
 {
   .lower        =
   {
-    .fstype     = CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_FSTYPE,
-    .blockdev   = CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_BLKDEV,
-    .mountpoint = CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT,
-    .ddelay     = MSEC2TICK(CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_DDELAY),
-    .udelay     = MSEC2TICK(CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY),
+    .fstype     = CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_FSTYPE,
+    .blockdev   = CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_BLKDEV,
+    .mountpoint = CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_MOUNTPOINT,
+    .ddelay     = MSEC2TICK(CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_DDELAY),
+    .udelay     = MSEC2TICK(CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY),
     .attach     = sam_attach,
     .enable     = sam_enable,
     .inserted   = sam_inserted
@@ -256,7 +256,7 @@ void sam_automount_initialize(void)
 
   finfo("Initializing automounter(s)\n");
 
-#ifdef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
+#ifdef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
   /* Initialize the HSMCI0 auto-mounter */
 
   handle = automount_initialize(&g_hsmci0config.lower);
@@ -298,7 +298,7 @@ void sam_automount_event(int slotno, bool inserted)
   FAR const struct sam_automount_config_s *config;
   FAR struct sam_automount_state_s *state;
 
-#ifdef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
+#ifdef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
   /* Is this a change in the HSMCI0 insertion state? */
 
   if (slotno == HSMCI0_SLOTNO)
