@@ -2079,6 +2079,8 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |   `- metro-m4/
      |   |   |      `- README.txt
      |   |   |- samv7/
+     |   |   |   |- same70-qmtech/
+     |   |   |   |   `- README.txt
      |   |   |   |- same70-xplained/
      |   |   |   |   `- README.txt
      |   |   |   `- samv71-xult/
