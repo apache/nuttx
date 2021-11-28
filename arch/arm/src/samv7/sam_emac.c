@@ -402,7 +402,7 @@
 
 /* PHY read/write delays in loop counts */
 
-#define PHY_RETRY_MAX       10000 /* reduced by 100, because oussama's board has no phy... */
+#define PHY_RETRY_MAX       1000000
 
 /* Helpers ******************************************************************/
 
