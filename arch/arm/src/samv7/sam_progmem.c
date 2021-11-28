@@ -546,7 +546,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
     {
       /* How much can we write into this page? */
 
-      xfrsize = MIN((size_t)SAMV7_PAGE_SIZE - offset, buflen) ;
+      xfrsize = MIN((size_t)SAMV7_PAGE_SIZE - offset, buflen);
 
       /* Do we need to use the intermediate buffer? */
 
