@@ -70,7 +70,7 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
   int i;
   int j;
 
-  sinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sinfo("  TCB=%p name=%s\n", tcb, tcb->name);
   sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
   filelist = tcb->group->tg_filelist;
