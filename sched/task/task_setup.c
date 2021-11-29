@@ -612,7 +612,7 @@ static int nxtask_setup_stackargs(FAR struct task_tcb_s *tcb,
    */
 
   stackargv[argc + 1] = NULL;
-  tcb->argv = stackargv;
+  tcb->cmn.group->tg_info->argv = stackargv;
 
   return OK;
 }

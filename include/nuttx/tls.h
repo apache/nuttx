@@ -27,9 +27,8 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
-#include <nuttx/arch.h>
 #include <sys/types.h>
+#include <pthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -102,6 +101,7 @@ struct getopt_s
 struct task_info_s
 {
   sem_t           ta_sem;
+  FAR char      **argv;                         /* Name+start-up parameters     */
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t    ta_tlsset;                    /* Set of TLS indexes allocated */
   tls_dtor_t      ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
@@ -114,6 +114,18 @@ struct task_info_s
 #  endif
 #endif
 };
+
+/* struct pthread_cleanup_s *************************************************/
+
+/* This structure describes one element of the pthread cleanup stack */
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+struct pthread_cleanup_s
+{
+  pthread_cleanup_t pc_cleaner;     /* Cleanup callback address */
+  FAR void *pc_arg;                 /* Argument that accompanies the callback */
+};
+#endif
 
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
