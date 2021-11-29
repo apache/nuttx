@@ -303,27 +303,28 @@ typedef union imgsensor_value_u
 
 struct imgsensor_ops_s
 {
-  CODE int (*init)(void);
-  CODE int (*uninit)(void);
+  CODE bool (*is_available)(void);
+  CODE int  (*init)(void);
+  CODE int  (*uninit)(void);
   CODE const char * (*get_driver_name)(void);
-  CODE int (*validate_frame_setting)(imgsensor_stream_type_t type,
-                                     uint8_t nr_datafmts,
-                                     FAR imgsensor_format_t *datafmts,
-                                     FAR imgsensor_interval_t *interval);
-  CODE int (*start_capture)(imgsensor_stream_type_t type,
-                            uint8_t nr_datafmts,
-                            FAR imgsensor_format_t *datafmts,
-                            FAR imgsensor_interval_t *interval);
-  CODE int (*stop_capture)(imgsensor_stream_type_t type);
+  CODE int  (*validate_frame_setting)(imgsensor_stream_type_t type,
+                                      uint8_t nr_datafmts,
+                                      FAR imgsensor_format_t *datafmts,
+                                      FAR imgsensor_interval_t *interval);
+  CODE int  (*start_capture)(imgsensor_stream_type_t type,
+                             uint8_t nr_datafmts,
+                             FAR imgsensor_format_t *datafmts,
+                             FAR imgsensor_interval_t *interval);
+  CODE int  (*stop_capture)(imgsensor_stream_type_t type);
 
-  CODE int (*get_supported_value)(uint32_t id,
-                                  FAR imgsensor_supported_value_t *value);
-  CODE int (*get_value)(uint32_t id,
-                        uint32_t size,
-                        FAR imgsensor_value_t *value);
-  CODE int (*set_value)(uint32_t id,
-                        uint32_t size,
-                        imgsensor_value_t value);
+  CODE int  (*get_supported_value)(uint32_t id,
+                                   FAR imgsensor_supported_value_t *value);
+  CODE int  (*get_value)(uint32_t id,
+                         uint32_t size,
+                         FAR imgsensor_value_t *value);
+  CODE int  (*set_value)(uint32_t id,
+                         uint32_t size,
+                         imgsensor_value_t value);
 };
 
 #ifdef __cplusplus
@@ -340,7 +341,7 @@ extern "C"
 
 /* Register image sensor operations. */
 
-void imgsensor_register(FAR const struct imgsensor_ops_s *ops);
+int imgsensor_register(FAR const struct imgsensor_ops_s *ops);
 
 #undef EXTERN
 #ifdef __cplusplus
