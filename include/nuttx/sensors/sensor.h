@@ -227,13 +227,11 @@
 #define SENSOR_TYPE_ECG                             25
 
 /* PPG (Photoplethysmography)
- * A sensor of this type returns the PPG measurements in counts. The PPG
- * measurements come from photodiode and following current amplifiers, where
- * the photodiode switches reflected light intensity to current. Here the PPG
- * value means the ADC counts, since the LED lightness, the photodiode model,
- * the reflect-ratio, and the integration time of ADC varies with different
- * measurements, while the useful information of PPG is the not the magnitude
- * but the shape of the waveform.
+ * A sensor of this type returns the 2 channels PPG measurements in ADC
+ * counts and their corresponding LED current. The PPG measurements come from
+ * photodiodes and following current amplifiers and ADC, where the photodiode
+ * switches reflected light intensity to current. The LED current decides the
+ * lightness of LED, which is the input of PPG measurements.
  */
 
 #define SENSOR_TYPE_PPG                             26
@@ -492,7 +490,9 @@ struct sensor_event_ecg     /* Type: ECG */
 struct sensor_event_ppg     /* Type: PPG */
 {
   uint64_t timestamp;       /* Unit is microseconds */
-  uint32_t ppg;             /* Unit is ADC counts */
+  uint32_t ppg1;            /* PPG channel 1. Unit is ADC counts. */
+  uint32_t ppg2;            /* PPG channel 2. Unit is ADC counts. */
+  uint32_t current;         /* LED current. Unit is uA. */
 };
 
 struct sensor_event_impd    /* Type: Impedance */
