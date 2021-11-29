@@ -54,7 +54,7 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(SAME70XPLAINED_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAME70XPLAINED_PROGMEM_OTA_PARTITION)
 
 struct ota_partition_s
 {
@@ -69,7 +69,7 @@ struct ota_partition_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(SAME70XPLAINED_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAME70XPLAINED_PROGMEM_OTA_PARTITION)
 static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
                                                    uint32_t mtd_size);
 static int init_ota_partitions(void);
@@ -81,7 +81,7 @@ static int init_ota_partitions(void);
 
 static FAR struct mtd_dev_s *g_samv7_progmem_mtd;
 
-#if defined(SAME70XPLAINED_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAME70XPLAINED_PROGMEM_OTA_PARTITION)
 static const struct ota_partition_s g_ota_partition_table[] =
 {
   {
@@ -106,7 +106,7 @@ static const struct ota_partition_s g_ota_partition_table[] =
  * Private Functions
  ****************************************************************************/
 
-#if defined(SAME70XPLAINED_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAME70XPLAINED_PROGMEM_OTA_PARTITION)
 
 /****************************************************************************
  * Name: sam_progmem_alloc_mtdpart
@@ -225,7 +225,7 @@ int sam_progmem_init(void)
       return -EFAULT;
     }
 
-#if defined(SAME70XPLAINED_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAME70XPLAINED_PROGMEM_OTA_PARTITION)
   ret = init_ota_partitions();
   if (ret < 0)
     {
