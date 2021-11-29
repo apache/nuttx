@@ -505,11 +505,5 @@ int poll(FAR struct pollfd *fds, nfds_t nfds, int timeout)
     }
 
   leave_cancellation_point();
-
-  if (ret > 0 && gettid() != 0)
-    {
-      usleep(1);
-    }
-
   return ret;
 }
