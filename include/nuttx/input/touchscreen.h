@@ -236,7 +236,7 @@ void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample);
  * Arguments:
  *   lower     - A pointer of lower half instance.
  *   path      - The path of touchscreen device. such as "/dev/input0"
- *   buff_nums - Number of the touch points structure.
+ *   nums      - Number of the touch points structure.
  *
  * Return:
  *   OK if the driver was successfully registered; A negated errno value is
@@ -245,7 +245,7 @@ void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample);
  ****************************************************************************/
 
 int touch_register(FAR struct touch_lowerhalf_s *lower,
-                   FAR const char *path, uint8_t buff_nums);
+                   FAR const char *path, uint8_t nums);
 
 /****************************************************************************
  * Name: touch_unregister

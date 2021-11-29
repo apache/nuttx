@@ -35,16 +35,6 @@ config INPUT_TOUCHSCREEN
 	select MM_CIRCBUF
 	default n
 
-if INPUT_TOUCHSCREEN
-
-config INPUT_TOUCHSCREEN_NPOLLWAITERS
-	int "Number touchscreen poll waiters"
-	default 4
-	---help---
-		Maximum number of threads that can be waiting on poll()
-
-endif # INPUT_TOUCHSCREEN
-
 config INPUT_UINPUT
 	bool "Enable uinput"
 	select INPUT_TOUCHSCREEN
