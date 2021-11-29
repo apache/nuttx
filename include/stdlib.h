@@ -265,6 +265,10 @@ FAR void  *bsearch(FAR const void *key, FAR const void *base, size_t nel,
                    size_t width, CODE int (*compar)(FAR const void *,
                    FAR const void *));
 
+/* Current program name manipulation */
+
+FAR const char *getprogname(void);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
