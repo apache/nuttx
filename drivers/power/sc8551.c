@@ -152,18 +152,18 @@ const struct sc8551_cfg_s g_sc8551_cfg =
   .bat_ocp_alm_disable = true,
   .bat_ovp_th = 4500,
   .bat_ovp_alm_th = 4350,
-  .bat_ocp_th = 8500,
-  .bat_ocp_alm_th = 8000,
+  .bat_ocp_th = 2500,
+  .bat_ocp_alm_th = 2000,
   .bus_ovp_alm_disable = true,
   .bus_ocp_disable = false,
   .bus_ocp_alm_disable = true,
-  .bus_ovp_th = 11000,
+  .bus_ovp_th = 12350,
   .bus_ovp_alm_th = 10500,
-  .bus_ocp_th = 4000,
+  .bus_ocp_th = 1250,
   .bus_ocp_alm_th = 3800,
   .bat_ucp_alm_disable = false,
   .bat_ucp_alm_th = 2600,
-  .ac_ovp_th = 300,
+  .ac_ovp_th = 130,
   .bat_therm_disable = true,
   .bus_therm_disable = true,
   .die_therm_disable = false,
@@ -268,6 +268,34 @@ static int sc8551_putreg8(FAR struct sc8551_dev_s *priv, uint8_t regaddr,
   return i2c_write(priv->i2c, &config, buffer, 2);
 }
 
+static int sc8551_update_bits(FAR struct sc8551_dev_s *priv,
+                                  uint8_t reg,
+                                  uint8_t mask,
+                                  uint8_t val)
+{
+  int ret;
+  uint8_t val_r;
+
+  ret = sc8551_getreg8(priv, reg, &val_r, 1);
+  if (ret < 0)
+    {
+      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
+      return -1;
+    }
+
+  val_r &= ~mask;
+  val_r |= val & mask;
+
+  ret = sc8551_putreg8(priv, reg, val_r);
+  if (ret < 0)
+    {
+      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
+      return -1;
+    }
+
+  return 0;
+}
+
 #ifdef CONFIG_DEBUG_SC8551
 static void sc8551_show_registers(FAR struct sc8551_dev_s * priv)
 {
@@ -286,110 +314,57 @@ static int sc8551_dump_regs(FAR struct sc8551_dev_s * priv)
   uint8_t value = 0;
 
   ret  = sc8551_getreg8(priv, SC8551_REG_00, &value, 1);
-  batwarn("REG#00: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_01, &value, 1);
-  batwarn("REG#01: 0x%08X\n", value);
+  batwarn("REG#00: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_02, &value, 1);
-  batwarn("REG#02: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_03, &value, 1);
-  batwarn("REG#03: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_04, &value, 1);
-  batwarn("REG#04: 0x%08X\n", value);
+  batwarn("REG#02: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_05, &value, 1);
-  batwarn("REG#05: 0x%08X\n", value);
+  batwarn("REG#05: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_06, &value, 1);
-  batwarn("REG#06: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_07, &value, 1);
-  batwarn("REG#07: 0x%08X\n", value);
+  batwarn("REG#06: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_08, &value, 1);
-  batwarn("REG#08: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_09, &value, 1);
-  batwarn("REG#09: 0x%08X\n", value);
+  batwarn("REG#08: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0A, &value, 1);
-  batwarn("REG#0A: 0x%08X\n", value);
+  batwarn("REG#0A: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0B, &value, 1);
-  batwarn("REG#0B: 0x%08X\n", value);
+  batwarn("REG#0B: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0C, &value, 1);
-  batwarn("REG#0C: 0x%08X\n", value);
+  batwarn("REG#0C: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0D, &value, 1);
-  batwarn("REG#0D: 0x%08X\n", value);
+  batwarn("REG#0D: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_0E, &value, 1);
-  batwarn("REG#0E: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_0F, &value, 1);
-  batwarn("REG#0F: 0x%08X\n", value);
+  batwarn("REG#0E: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_10, &value, 1);
-  batwarn("REG#10: 0x%08X\n", value);
+  batwarn("REG#10: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_11, &value, 1);
-  batwarn("REG#11: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_12, &value, 1);
-  batwarn("REG#12: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_13, &value, 1);
-  batwarn("REG#13: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_14, &value, 1);
-  batwarn("REG#14: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_15, &value, 1);
-  batwarn("REG#15: 0x%08X\n", value);
+  batwarn("REG#11: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_16, &value, 1);
-  batwarn("REG#16: 0x%08X\n", value);
+  batwarn("REG#16: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_17, &value, 1);
-  batwarn("REG#17: 0x%08X\n", value);
+  batwarn("REG#17: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_18, &value, 1);
-  batwarn("REG#18: 0x%08X\n", value);
+  batwarn("REG#18: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_19, &value, 1);
-  batwarn("REG#19: 0x%08X\n", value);
+  batwarn("REG#19: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1A, &value, 1);
-  batwarn("REG#1A: 0x%08X\n", value);
+  batwarn("REG#1A: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1B, &value, 1);
-  batwarn("REG#1B: 0x%08X\n", value);
+  batwarn("REG#1B: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1C, &value, 1);
-  batwarn("REG#1C: 0x%08X\n", value);
+  batwarn("REG#1C: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1D, &value, 1);
-  batwarn("REG#1D: 0x%08X\n", value);
+  batwarn("REG#1D: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1E, &value, 1);
-  batwarn("REG#1E: 0x%08X\n", value);
+  batwarn("REG#1E: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_1F, &value, 1);
-  batwarn("REG#1F: 0x%08X\n", value);
+  batwarn("REG#1F: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_20, &value, 1);
-  batwarn("REG#20: 0x%08X\n", value);
+  batwarn("REG#20: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_21, &value, 1);
-  batwarn("REG#21: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_22, &value, 1);
-  batwarn("REG#22: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_23, &value, 1);
-  batwarn("REG#23: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_24, &value, 1);
-  batwarn("REG#24: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_25, &value, 1);
-  batwarn("REG#25: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_26, &value, 1);
-  batwarn("REG#26: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_27, &value, 1);
-  batwarn("REG#27: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_28, &value, 1);
-  batwarn("REG#28: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_29, &value, 1);
-  batwarn("REG#29: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_2A, &value, 1);
-  batwarn("REG#2A: 0x%08X\n", value);
+  batwarn("REG#21: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2B, &value, 1);
-  batwarn("REG#2B: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_2C, &value, 1);
-  batwarn("REG#2C: 0x%08X\n", value);
+  batwarn("REG#2B: 0x%02X\n", value);
   ret  = sc8551_getreg8(priv, SC8551_REG_2D, &value, 1);
-  batwarn("REG#2D: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_2E, &value, 1);
-  batwarn("REG#2E: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_2F, &value, 1);
-  batwarn("REG#2F: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_30, &value, 1);
-  batwarn("REG#30: 0x%08X\n", value);
-  ret  = sc8551_getreg8(priv, SC8551_REG_31, &value, 1);
-  batwarn("REG#31: 0x%08X\n", value);
-
-  /* Not reading fault register. */
-
-  ret  = sc8551_getreg8(priv, SC8551_REG_34, &value, 1);
-  batwarn("REG#34: 0x%08X\n", value);
+  batwarn("REG#2D: 0x%02X\n", value);
 
   return ret;
 }
@@ -424,7 +399,6 @@ static int sc8551_set_ss_timeout(FAR struct sc8551_dev_s *priv, int timeout)
 {
   int ret;
   uint8_t val;
-  uint8_t val_r;
 
   switch (timeout)
     {
@@ -458,24 +432,17 @@ static int sc8551_set_ss_timeout(FAR struct sc8551_dev_s *priv, int timeout)
     }
 
   val <<= SC8551_SS_TIMEOUT_SET_SHIFT;
-  val &= SC8551_SS_TIMEOUT_SET_MASK;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_2B, &val_r, 1);
-  val |= val_r;
-
-  ret = sc8551_putreg8(priv, SC8551_REG_2B, val);
-
+  ret = sc8551_update_bits(priv, SC8551_REG_2B,
+                      SC8551_SS_TIMEOUT_SET_MASK, val);
   return ret;
 }
-
-/**/
 
 static int sc8551_set_sense_resistor(FAR struct sc8551_dev_s *priv,
                                          int r_mohm)
 {
   int ret;
   uint8_t val;
-  uint8_t val_r;
 
   if (r_mohm == 2)
     val = SC8551_SET_IBAT_SNS_RES_2MHM;
@@ -487,42 +454,11 @@ static int sc8551_set_sense_resistor(FAR struct sc8551_dev_s *priv,
     }
 
   val <<= SC8551_SET_IBAT_SNS_RES_SHIFT;
-  val &= SC8551_SET_IBAT_SNS_RES_MASK;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_2B, &val_r, 1);
-  val |= val_r;
-
-  ret = sc8551_putreg8(priv, SC8551_REG_2B, val);
+  ret = sc8551_update_bits(priv, SC8551_REG_2B,
+                    SC8551_SET_IBAT_SNS_RES_MASK, val);
 
   return ret;
-}
-
-static int sc8551_update_bits(FAR struct sc8551_dev_s *priv,
-                                  uint8_t reg,
-                                  uint8_t mask,
-                                  uint8_t val)
-{
-  int ret;
-  uint8_t val_r;
-
-  ret = sc8551_getreg8(priv, reg, &val_r, 1);
-  if (ret < 0)
-    {
-      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
-      return -1;
-    }
-
-  val &= mask;
-  val |= val_r;
-
-  ret = sc8551_putreg8(priv, reg, val);
-  if (ret < 0)
-    {
-      baterr("[ SC8551] Failed: reg=%02X\r\n", reg);
-      return -1;
-    }
-
-  return 0;
 }
 
 static int sc8551_enable_charge(FAR struct sc8551_dev_s *priv, bool enable)
@@ -925,15 +861,15 @@ static int sc8551_set_vdrop_deglitch(FAR struct sc8551_dev_s *priv, int us)
 }
 
 static int sc8551_enable_bat_therm(FAR struct sc8551_dev_s *priv,
-                                   bool enable)
+                                   bool disable)
 {
   int ret;
   uint8_t val;
 
-  if (enable)
-    val = SC8551_TSBAT_ENABLE;
-  else
+  if (disable)
     val = SC8551_TSBAT_DISABLE;
+  else
+    val = SC8551_TSBAT_ENABLE;
 
   val <<= SC8551_TSBAT_DIS_SHIFT;
 
@@ -1383,44 +1319,17 @@ static int sc8551_reset(FAR struct sc8551_dev_s *priv)
   int ret;
   uint8_t val;
 
-  /* Read current register value */
+  val = SC8551_REG_RST_ENABLE;
+  val <<= SC8551_REG_RST_SHIFT;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_0B, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551! Error = %d\n", ret);
-      return ret;
-    }
-
-  /* Send reset command */
-
-  val |= SC8551_REG_RST_ENABLE;
-  ret = sc8551_putreg8(priv, SC8551_REG_0B, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551! Error = %d\n", ret);
-      return ret;
-    }
+  ret = sc8551_update_bits(priv, SC8551_REG_0B,
+                           SC8551_REG_RST_MASK, val);
 
   /* Wait a little bit to clear registers */
 
   nxsig_usleep(500);
 
-#ifndef NOT_PMIC
-  /* Inherit from BQ2429, unknown useness for SC8551 */
-
-  /* Maybe there is a BUG in SC8551 */
-
-  val &= ~(SC8551_REG_RST_MASK);
-  ret = sc8551_putreg8(priv, SC8551_REG_01, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551! Error = %d\n", ret);
-      return ret;
-    }
-#endif
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1436,35 +1345,21 @@ static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable)
   int ret;
   uint8_t val;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_0B, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551! Error = %d\n", ret);
-      return ret;
-    }
-
   if (enable)
     {
-      /* Hw Default is 40Sec so use that for time being */
-
-      val &= ~(SC8551_WATCHDOG_MASK);
-      val |= SC8551_WATCHDOG_30S;
+      val = SC8551_WATCHDOG_ENABLE;
     }
   else
     {
-      /* 0 is disable */
-
-      val &= ~(SC8551_WATCHDOG_DIS_MASK);
+      val = SC8551_WATCHDOG_DISABLE;
     }
 
-  ret = sc8551_putreg8(priv, SC8551_REG_0B, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551! Error = %d\n", ret);
-      return ret;
-    }
+  val <<= SC8551_WATCHDOG_DIS_SHIFT;
 
-  return OK;
+  ret = sc8551_update_bits(priv, SC8551_REG_0B,
+                      SC8551_WATCHDOG_DIS_MASK, val);
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1475,37 +1370,21 @@ static int sc8551_watchdog(FAR struct sc8551_dev_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int sc8551_en_adc(FAR struct sc8551_dev_s *priv, bool state)
+static int sc8551_en_adc(FAR struct sc8551_dev_s *priv, bool enable)
 {
   uint8_t val;
   int ret;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_14, &val, 1);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error reading from SC8551_REG_14! Error = %d\n", ret);
-      return ret;
-    }
-
-  /* Clear previous and set new value */
-
-  if (state)
-    {
-      val |= (SC8551_ADC_ENABLE << SC8551_ADC_EN_SHIFT);
-    }
+  if (enable)
+    val = SC8551_ADC_ENABLE;
   else
-    {
-      val |= (SC8551_ADC_DISABLE << SC8551_ADC_EN_SHIFT);
-    }
+    val = SC8551_ADC_DISABLE;
 
-  ret = sc8551_putreg8(priv, SC8551_REG_14, val);
-  if (ret < 0)
-    {
-      baterr("ERROR: Error writing to SC8551_REG_14! Error = %d\n", ret);
-      return ret;
-    }
+  val <<= SC8551_ADC_EN_SHIFT;
 
-  return OK;
+  ret = sc8551_update_bits(priv, SC8551_REG_14,
+                           SC8551_ADC_EN_MASK, val);
+  return ret;
 }
 
 /****************************************************************************
@@ -1945,7 +1824,7 @@ FAR struct battery_charger_dev_s *
 
       /* Disable watchdog otherwise SC8551 returns to StandAlone mode */
 
-      ret = sc8551_watchdog(priv, false);
+      ret = sc8551_watchdog(priv, true);
       if (ret < 0)
         {
           baterr("ERROR: Failed to disable SC8551 watchdog: %d\n", ret);
@@ -1985,7 +1864,7 @@ FAR struct battery_charger_dev_s *
 
       /* Adjust timeout to rise to threshold */
 
-      ret = sc8551_set_ss_timeout(priv, 100000);
+      ret = sc8551_set_ss_timeout(priv, 0);
       if (ret < 0)
         {
           baterr("ERROR: Failed to Adjust timeout to \
@@ -2034,6 +1913,8 @@ FAR struct battery_charger_dev_s *
           return NULL;
         }
     }
+
+  sc8551_dump_regs(priv);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }

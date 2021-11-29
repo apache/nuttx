@@ -180,8 +180,8 @@
 
 #define SC8551_AC_OVP_MASK                  0x07
 #define SC8551_AC_OVP_SHIFT                 0
-#define SC8551_AC_OVP_BASE                  11
-#define SC8551_AC_OVP_LSB                   1
+#define SC8551_AC_OVP_BASE                  110
+#define SC8551_AC_OVP_LSB                   10
 #define SC8551_AC_OVP_6P5V                  65
 
 /* Register 06h */
