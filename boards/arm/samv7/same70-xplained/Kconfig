@@ -99,14 +99,14 @@ config SAME70XPLAINED_PROGMEM_OTA_PARTITION
 	select MTD_PROGMEM
 	select MTD_PROGMEM_ERASESTATE
 
-menuconfig SAME70XPLAINED_APP_FORMAT_MCUBOOT
+menuconfig SAME70XPLAINED_FORMAT_MCUBOOT
 	bool "MCUboot-bootable format"
 	default n
 	select SAME70XPLAINED_PROGMEM_OTA_PARTITION
 	---help---
 		The MCUboot support of loading the firmware images.
 
-if SAME70XPLAINED_APP_FORMAT_MCUBOOT
+if SAME70XPLAINED_FORMAT_MCUBOOT
 
 config SAME70XPLAINED_MCUBOOT_BOOTLOADER
 	bool "MCUboot bootloader application"
@@ -149,6 +149,6 @@ config SAME70XPLAINED_OTA_SCRATCH_SIZE
 	hex "MCUboot scratch partition size (in bytes)"
 	default "0x20000"
 
-endif # SAME70XPLAINED_APP_FORMAT_MCUBOOT
+endif # SAME70XPLAINED_FORMAT_MCUBOOT
 
 endif # ARCH_BOARD_SAME70_XPLAINED
