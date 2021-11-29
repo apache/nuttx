@@ -140,6 +140,9 @@
                                               (((val - min) % step) == 0) ? \
                                               OK : -EINVAL))
 
+#define ISX012_CHIPID_L (0x0000c460)
+#define ISX012_CHIPID_H (0x00005516)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -215,6 +218,7 @@ static bool is_movie_needed(uint8_t fmt, uint8_t fps);
 
 /* image sensor device operations interface */
 
+static bool isx012_is_available(void);
 static int isx012_init(void);
 static int isx012_uninit(void);
 static const char *isx012_get_driver_name(void);
@@ -615,6 +619,7 @@ static uint8_t g_isx012_iso_regval[] =
 
 static struct imgsensor_ops_s g_isx012_ops =
 {
+  isx012_is_available,                  /* is HW available */
   isx012_init,                          /* init */
   isx012_uninit,                        /* uninit */
   isx012_get_driver_name,               /* get driver name */
@@ -1232,6 +1237,45 @@ int init_isx012(FAR struct isx012_dev_s *priv)
       board_isx012_set_reset();
       return ret;
     }
+
+  return ret;
+}
+
+static void get_chipid(uint32_t *l, uint32_t *h)
+{
+  uint16_t l1;
+  uint16_t l2;
+  uint16_t h1;
+  uint16_t h2;
+
+  ASSERT(l && h);
+
+  l1 = isx012_getreg(&g_isx012_private, OTP_CHIPID_L, 2);
+  l2 = isx012_getreg(&g_isx012_private, OTP_CHIPID_L + 2, 2);
+
+  h1 = isx012_getreg(&g_isx012_private, OTP_CHIPID_H, 2);
+  h2 = isx012_getreg(&g_isx012_private, OTP_CHIPID_H + 2, 2);
+
+  *l = (l2 << 16) | l1;
+  *h = (h2 << 16) | h1;
+}
+
+static bool isx012_is_available(void)
+{
+  bool ret = false;
+  uint32_t l;
+  uint32_t h;
+
+  isx012_init();
+
+  get_chipid(&l, &h);
+
+  if ((l == ISX012_CHIPID_L) && (h == ISX012_CHIPID_H))
+    {
+      ret = true;
+    }
+
+  isx012_uninit();
 
   return ret;
 }
@@ -2885,11 +2929,17 @@ static int isx012_set_shd(FAR isx012_dev_t *priv)
 
 int isx012_initialize(void)
 {
+  int ret;
   FAR struct isx012_dev_s *priv = &g_isx012_private;
 
   /* Regiser image sensor operations variable */
 
-  imgsensor_register(&g_isx012_ops);
+  ret = imgsensor_register(&g_isx012_ops);
+  if (ret != OK)
+    {
+      verr("Failed to register ops to video driver.\n");
+      return ret;
+    }
 
   /* Initialize other information */
 

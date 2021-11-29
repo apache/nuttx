@@ -398,6 +398,8 @@ static video_parameter_name_t g_video_parameter_name[] =
 };
 
 static FAR void *video_handler;
+static FAR const struct imgsensor_ops_s **g_video_registered_sensor;
+static int g_video_registered_sensor_num;
 static FAR const struct imgsensor_ops_s *g_video_sensor_ops;
 static FAR const struct imgdata_ops_s *g_video_data_ops;
 
@@ -930,6 +932,24 @@ static bool is_sem_waited(FAR sem_t *sem)
     }
 }
 
+static FAR const struct imgsensor_ops_s *get_connected_imgsensor(void)
+{
+  int i;
+  FAR const struct imgsensor_ops_s *ops = NULL;
+
+  for (i = 0; i < g_video_registered_sensor_num; i++)
+    {
+      if (g_video_registered_sensor[i] &&
+          g_video_registered_sensor[i]->is_available())
+        {
+          ops = g_video_registered_sensor[i];
+          break;
+        }
+    }
+
+  return ops;
+}
+
 static int video_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
@@ -941,14 +961,22 @@ static int video_open(FAR struct file *filep)
     {
       /* Only in first execution, open device */
 
-      ret = g_video_sensor_ops->init();
-      if (ret == OK)
+      g_video_sensor_ops = get_connected_imgsensor();
+      if (g_video_sensor_ops)
         {
-          ret = g_video_data_ops->init();
+          ret = g_video_sensor_ops->init();
           if (ret == OK)
             {
-              initialize_resources(priv);
+              ret = g_video_data_ops->init();
+              if (ret == OK)
+                {
+                  initialize_resources(priv);
+                }
             }
+        }
+      else
+        {
+          ret = -ENODEV;
         }
     }
 
@@ -3018,9 +3046,21 @@ int video_uninitialize(void)
   return OK;
 }
 
-void imgsensor_register(FAR const struct imgsensor_ops_s *ops)
+int imgsensor_register(FAR const struct imgsensor_ops_s *ops)
 {
-  g_video_sensor_ops = ops;
+  int ret = -ENOMEM;
+  FAR const struct imgsensor_ops_s **new_addr;
+
+  new_addr = realloc(g_video_registered_sensor,
+                     sizeof(ops) * (g_video_registered_sensor_num + 1));
+  if (new_addr)
+    {
+      new_addr[g_video_registered_sensor_num++] = ops;
+      g_video_registered_sensor = new_addr;
+      ret = OK;
+    }
+
+  return ret;
 }
 
 void imgdata_register(FAR const struct imgdata_ops_s *ops)
