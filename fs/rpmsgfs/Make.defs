@@ -1,5 +1,5 @@
 ############################################################################
-# fs/hostfs/Make.defs
+# fs/rpmsgfs/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,11 +18,11 @@
 #
 ############################################################################
 
-# Include HOSTFS build support
+# Include RPSMGFS build support
 
-DEPPATH += --dep-path hostfs
-VPATH += :hostfs
+DEPPATH += --dep-path rpmsgfs
+VPATH += :rpmsgfs
 
-ifeq ($(CONFIG_FS_HOSTFS),y)
-CSRCS += hostfs.c
+ifeq ($(CONFIG_FS_RPMSGFS),y)
+CSRCS += rpmsgfs.c rpmsgfs_client.c rpmsgfs_server.c
 endif
