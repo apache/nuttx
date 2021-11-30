@@ -3336,7 +3336,7 @@ void esp_fill_random(void *buf, size_t len)
 
   while (len > 0)
     {
-      tmp = random();
+      tmp = esp_random();
       n = len < 4 ? len : 4;
 
       memcpy(p, &tmp, n);
@@ -6781,3 +6781,32 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set)
 }
 
 #endif
+
+/****************************************************************************
+ * Name: esp_wifi_stop_callback
+ *
+ * Description:
+ *   Callback to stop Wi-Fi
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_stop_callback(void)
+{
+  wlinfo("INFO: Try to stop Wi-Fi\n");
+
+  int ret = esp_wifi_stop();
+  if (ret)
+    {
+      wlerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+  else
+    {
+      nxsig_sleep(1);
+    }
+}
