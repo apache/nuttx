@@ -586,6 +586,55 @@
 #define NVIC_SYSHCON_BUSFAULTENA        (1 << 17) /* Bit 17: BusFault enabled */
 #define NVIC_SYSHCON_USGFAULTENA        (1 << 18) /* Bit 18: UsageFault enabled */
 
+/* SCB Configurable Fault Status Register Definitions */
+
+#define NVIC_CFAULTS_MEMFAULTSR_MASK    (0xff)    /* Memory Manage Fault Status Register Mask */
+#define NVIC_CFAULTS_BUSFAULTSR_MASK    (0xff << 8)
+                                                  /* Bus Fault Status Register Mask */
+#define NVIC_CFAULTS_USGFAULTSR_MASK    (0xffff << 16)
+                                                  /* Usage Fault Status Register Mask */
+
+/* MemManage Fault Status Register
+ * (part of SCB Configurable Fault Status Register)
+ */
+
+#define NVIC_CFAULTS_IACCVIOL           (1 << 0)  /* Bit 0:  IACCVIOL Mask */
+#define NVIC_CFAULTS_DACCVIOL           (1 << 1)  /* Bit 1:  DACCVIOL Mask */
+#define NVIC_CFAULTS_MUNSTKERR          (1 << 3)  /* Bit 3:  MUNSTKERR Mask */
+#define NVIC_CFAULTS_MSTKERR            (1 << 4)  /* Bit 4:  MSTKERR Mask */
+#define NVIC_CFAULTS_MLSPERR            (1 << 5)  /* Bit 5:  MLSPERR Mask */
+#define NVIC_CFAULTS_MMARVALID          (1 << 7)  /* Bit 7:  MMARVALID Mask */
+
+/* BusFault Status Register
+ * (part of SCB Configurable Fault Status Register)
+ */
+
+#define NVIC_CFAULTS_IBUSERR            (1 << 8)  /* Bit 8:  IBUSERR Mask */
+#define NVIC_CFAULTS_PRECISERR          (1 << 9)  /* Bit 9:  PRECISERR Mask */
+#define NVIC_CFAULTS_IMPRECISERR        (1 << 10) /* Bit 10: IMPRECISERR Mask */
+#define NVIC_CFAULTS_UNSTKERR           (1 << 11) /* Bit 11: UNSTKERR Mask */
+#define NVIC_CFAULTS_STKERR             (1 << 12) /* Bit 12: STKERR Mask */
+#define NVIC_CFAULTS_LSPERR             (1 << 13) /* Bit 13: LSPERR Mask */
+#define NVIC_CFAULTS_BFARVALID          (1 << 15) /* Bit 15: BFARVALID Mask */
+
+/* UsageFault Status Register
+ * (part of SCB Configurable Fault Status Register)
+ */
+
+#define NVIC_CFAULTS_UNDEFINSTR         (1 << 16) /* Bit 16: UNDEFINSTR Mask */
+#define NVIC_CFAULTS_INVSTATE           (1 << 17) /* Bit 17: INVSTATE Mask */
+#define NVIC_CFAULTS_INVPC              (1 << 18) /* Bit 18: INVPC Mask */
+#define NVIC_CFAULTS_NOCP               (1 << 19) /* Bit 19: NOCP Mask */
+#define NVIC_CFAULTS_STKOF              (1 << 20) /* Bit 20: STKOF Mask */
+#define NVIC_CFAULTS_UNALIGNED          (1 << 24) /* Bit 24: UNALIGNED Mask */
+#define NVIC_CFAULTS_DIVBYZERO          (1 << 25) /* Bit 25: DIVBYZERO Mask */
+
+/* SCB Hard Fault Status Register Definitions */
+
+#define NVIC_HFAULTS_VECTTBL            (1 << 1)  /* Bit 1:  VECTTBL Mask */
+#define NVIC_HFAULTS_FORCED             (1 << 30) /* Bit 30: FORCED Mask */
+#define NVIC_HFAULTS_DEBUGEVT           (1 << 31) /* Bit 31: DEBUGEVT Mask */
+
 /* Cache Level ID register (Cortex-M7) */
 
 #define NVIC_CLIDR_L1CT_SHIFT           (0)      /* Bits 0-2: Level 1 cache type */
