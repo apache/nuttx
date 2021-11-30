@@ -970,14 +970,30 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 static int hostfs_rewinddir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
+  FAR struct hostfs_mountpt_s *fs;
+  int ret;
+
   /* Sanity checks */
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  fs = mountpt->i_private;
+
+  /* Take the semaphore */
+
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host and let it do all the work */
 
   host_rewinddir(dir->u.hostfs.fs_dir);
 
+  hostfs_semgive(fs);
   return OK;
 }
 
@@ -997,7 +1013,8 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 {
   FAR struct hostfs_mountpt_s  *fs;
   FAR char *options;
-  char *ptr, *saveptr;
+  char *saveptr;
+  char *ptr;
   int len;
   int ret;
 
