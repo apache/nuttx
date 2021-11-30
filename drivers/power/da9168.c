@@ -131,11 +131,10 @@ static inline int da9168_set_vbus_ovsel(FAR struct da9168_dev_s *priv,
                                         int value);
 static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
                                  int current);
-static inline int da9168_set_pre_iterm_chrg_curr(
-                                          FAR struct da9168_dev_s *priv,
-                                          int pre_current, int term_current,
-                                          bool range_term_sel,
-                                          bool range_pre_sel);
+static inline int da9168_set_pre_curr(FAR struct da9168_dev_s *priv,
+                                      int pre_current, bool range_pre_sel);
+static inline int da9168_set_iterm_curr(FAR struct da9168_dev_s *priv,
+                                    int term_current, bool range_term_sel);
 static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
                                             bool  rchg_voltage_sel);
 static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
@@ -1225,7 +1224,7 @@ static inline int da9168_set_chg_range(FAR struct da9168_dev_s *priv,
 
   ret = da9168_reg_update_bits(priv, DA9168_PMC_CHG_03,
                                DA9168_CHG_RANGE_MASK,
-                               (chg_range_sel << DA9168_CHG_RANGE_SHIFT));
+                               (chg_range_sel ? DA9168_CHG_RANGE_MASK : 0));
   if (ret < 0)
     {
       return ret;
@@ -1269,19 +1268,15 @@ static inline int da9168_powersupply(FAR struct da9168_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: da9168_set_prechrg_curr
+ * Name: da9168_set_pre_curr
  *
  * Description:
  *   Set battery pre charge current
  *
  ****************************************************************************/
 
-static inline int da9168_set_pre_iterm_chrg_curr(
-                                               FAR struct da9168_dev_s *priv,
-                                               int pre_current,
-                                               int term_current,
-                                               bool range_term_sel,
-                                               bool range_pre_sel)
+static inline int da9168_set_pre_curr(FAR struct da9168_dev_s *priv,
+                                      int pre_current, bool range_pre_sel)
 {
   uint8_t regval;
   int ret;
@@ -1319,22 +1314,15 @@ static inline int da9168_set_pre_iterm_chrg_curr(
         }
     }
 
-  if (range_term_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+  ret = da9168_getreg8(priv, DA9168_PMC_CHG_02, &regval);
+  if (ret < 0)
     {
-      DA9168_IN_RANGE_OR_FAIL(term_current,
-                              DA9168_PCFG_CHG_CURR_TERM_LOW_MIN_MA,
-                              DA9168_PCFG_CHG_CURR_TERM_LOW_MAX_MA);
-    }
-  else
-    {
-      DA9168_IN_RANGE_OR_FAIL(term_current,
-                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MIN_MA,
-                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MAX_MA);
+      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      return ret;
     }
 
-  /* Pre-charging current */
-
-  regval = DA9168_SEL_TO_FIELD(range_pre_sel, DA9168_CHG_RANGE_PRE);
+  regval &= ~(DA9168_CHG_RANGE_PRE_MASK | DA9168_CHG_IPRE_MASK);
+  regval |= DA9168_SEL_TO_FIELD(range_pre_sel, DA9168_CHG_RANGE_PRE);
   if (range_pre_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
     {
       if (pre_current >= DA9168_PCFG_CHG_CURR_PRE_LOW_OFFSET_MIN_MA)
@@ -1372,19 +1360,65 @@ static inline int da9168_set_pre_iterm_chrg_curr(
         }
     }
 
+  ret = da9168_putreg8(priv, DA9168_PMC_CHG_02, regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error writing to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_set_iterm_curr
+ *
+ * Description:
+ *   Set battery iterm charge current
+ *
+ ****************************************************************************/
+
+static inline int da9168_set_iterm_curr(FAR struct da9168_dev_s *priv,
+                                      int term_current, bool range_term_sel)
+{
+  uint8_t regval;
+  int ret;
+
+  if (range_term_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
+    {
+      DA9168_IN_RANGE_OR_FAIL(term_current,
+                              DA9168_PCFG_CHG_CURR_TERM_LOW_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_TERM_LOW_MAX_MA);
+    }
+  else
+    {
+      DA9168_IN_RANGE_OR_FAIL(term_current,
+                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MIN_MA,
+                              DA9168_PCFG_CHG_CURR_TERM_HIGH_MAX_MA);
+    }
+
+  ret = da9168_getreg8(priv, DA9168_PMC_CHG_02, &regval);
+  if (ret < 0)
+    {
+      baterr("ERROR: Error reading to DA9168! Error = %d\n", ret);
+      return ret;
+    }
+
+  regval &= ~(DA9168_CHG_ITERM_MASK | DA9168_CHG_RANGE_TERM_MASK);
+
   /* Charge termination current */
 
   regval |= DA9168_SEL_TO_FIELD(range_term_sel, DA9168_CHG_RANGE_TERM);
   if (range_term_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
     {
-      regval |= DA9168_VAL_TO_FIELD(term_current,
+      regval |= DA9168_VAL_TO_FIELD_OFFSET(term_current,
                                     DA9168_PCFG_CHG_CURR_LOW_STEP_MA,
                                     DA9168_PCFG_CHG_CURR_TERM_LOW_MIN_MA,
                                     DA9168_CHG_ITERM);
     }
   else
     {
-      regval |= DA9168_VAL_TO_FIELD(term_current,
+      regval |= DA9168_VAL_TO_FIELD_OFFSET(term_current,
                                     DA9168_PCFG_CHG_CURR_HIGH_STEP_MA,
                                     DA9168_PCFG_CHG_CURR_TERM_HIGH_MIN_MA,
                                     DA9168_CHG_ITERM);
@@ -1423,7 +1457,14 @@ static inline int da9168_setcurr(FAR struct da9168_dev_s *priv,
     }
   else
     {
-      range_cc_sel  = regval & 0x80;
+      if ((regval & 0x80) == 0x80)
+        {
+          range_cc_sel  = true;
+        }
+      else
+        {
+          range_cc_sel = false;
+        }
     }
 
   if (range_cc_sel == DA9168_PCFG_CHG_RANGE_STEPS_5MA)
@@ -1616,18 +1657,18 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set charger vindpm 4300mV */
+  /* set charger vindpm 4700mV */
 
-  ret = da9168_set_vindpm(priv, DA9168_VINDPM_DEFAULT_UV);
+  ret = da9168_set_vindpm(priv, 4700);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set da9168  vindpm: %d\n", ret);
       return ret;
     }
 
-  /* set vbus overvoltage value 5800mV */
+  /* set vbus overvoltage value 10500mV */
 
-  ret =  da9168_set_vbus_ovsel(priv, DA9168_VUBS_DEFAULT_OV);
+  ret =  da9168_set_vbus_ovsel(priv, 10500);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set da9168 vbus overvoltage: %d\n", ret);
@@ -1652,20 +1693,27 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set precurr 40ma, iterm current 60ma */
+  /* set precurr 40ma */
 
-  ret = da9168_set_pre_iterm_chrg_curr(priv, DA9168_PRE_CURR_DEFAULT_UA,
-                                       DA9168_ITERM_DEFAULT_UA, TRUE, TRUE);
+  ret = da9168_set_pre_curr(priv, DA9168_PRE_CURR_DEFAULT_UA, TRUE);
   if (ret < 0)
     {
-      baterr("ERROR: Failed to set da9168 pre current and iterm  \
-             current: %d\n", ret);
+      baterr("ERROR: Failed to set da9168 pre current, Error = %d\n", ret);
       return ret;
     }
 
-  /* set vbat 4.2V */
+  /* set iterm current 30ma */
 
-  ret = da9168_setvolt(priv, DA9168_VBAT_DEFAULT_UV);
+  ret = da9168_set_iterm_curr(priv, 30, TRUE);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set da9168 iterm current, Error = %d\n", ret);
+      return ret;
+    }
+
+  /* set vbat 4440V */
+
+  ret = da9168_setvolt(priv, 4440);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set DA9168 bat voltage: %d\n", ret);
