@@ -261,7 +261,7 @@ void esp32_phy_enable(void)
       esp32_phy_enable_clock();
       if (g_is_phy_calibrated == false)
         {
-          register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+          register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_FULL);
           g_is_phy_calibrated = true;
         }
       else

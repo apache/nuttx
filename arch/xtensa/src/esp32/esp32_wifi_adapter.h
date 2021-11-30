@@ -852,6 +852,22 @@ int esp32_wifi_bt_coexist_init(void);
 void coex_dbg_set_log_level(int level);
 #endif
 
+/****************************************************************************
+ * Name: esp_wifi_stop_callback
+ *
+ * Description:
+ *   Callback to stop Wi-Fi
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_stop_callback(void);
+
 #ifdef __cplusplus
 }
 #endif
