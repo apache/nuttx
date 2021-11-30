@@ -141,7 +141,15 @@ ssize_t exfat_read(FAR struct exfat_dev *dev, FAR void *buffer, size_t size)
 ssize_t exfat_write(FAR struct exfat_dev *dev, FAR const void *buffer,
                     size_t size)
 {
-  return file_write(&dev->file, buffer, size);
+  ssize_t ret;
+
+  ret = file_write(&dev->file, buffer, size);
+  if (ret >= 0)
+    {
+      exfat_fsync(dev);
+    }
+
+  return ret;
 }
 
 ssize_t exfat_pread(FAR struct exfat_dev *dev, FAR void *buffer, size_t size,
@@ -153,5 +161,13 @@ ssize_t exfat_pread(FAR struct exfat_dev *dev, FAR void *buffer, size_t size,
 ssize_t exfat_pwrite(FAR struct exfat_dev *dev, FAR const void *buffer,
                      size_t size, off_t offset)
 {
-  return file_pwrite(&dev->file, buffer, size, offset);
+  ssize_t ret;
+
+  ret = file_pwrite(&dev->file, buffer, size, offset);
+  if (ret >= 0)
+    {
+      exfat_fsync(dev);
+    }
+
+  return ret;
 }
