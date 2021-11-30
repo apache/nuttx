@@ -229,6 +229,11 @@
 #define GPIO_TIM1_CH2NOUT  GPIO_TIM1_CH2NOUT_1 /* TIM1 CH2N - PA12 - V low */
 #define GPIO_TIM1_CH3NOUT  GPIO_TIM1_CH3NOUT_3 /* TIM1 CH3N - PB15 - W low */
 
+/* TIM4 QE configuration ****************************************************/
+
+#define GPIO_TIM4_CH1IN  GPIO_TIM4_CH1IN_2 /* TIM4 CH1 - PB6 */
+#define GPIO_TIM4_CH2IN  GPIO_TIM4_CH2IN_2 /* TIM4 CH2 - PB7 */
+
 /* DMA channels *************************************************************/
 
 /* ADC */

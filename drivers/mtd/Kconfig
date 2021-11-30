@@ -136,6 +136,17 @@ config MTD_PROGMEM
 		using the interfaces defined in include/nuttx/progmem.  Those
 		interfaces must be exported by chip-specific logic.
 
+if MTD_PROGMEM
+
+config MTD_PROGMEM_ERASESTATE
+	bool "Enable FLASH MTD device erasestate"
+	depends on ARCH_HAVE_PROGMEM_ERASESTATE
+	---help---
+		Enable the ioctl MTDIOCTL_PROGMEM_ERASESTATE command in the on-chip
+		FLASH interface.
+		
+endif #MTD_PROGMEM
+
 config MTD_CONFIG
 	bool "Enable Dev Config (MTD based) device"
 	default n
@@ -866,22 +877,6 @@ config MTD_RAMTRON
 		SPI-based RAMTRON NVRAM Devices FM25V10
 
 if MTD_RAMTRON
-
-config RAMTRON_WRITEWAIT
-	bool "Wait after write"
-	default n
-	---help---
-		Wait after performing a RAMTRON write operation to assure that the
-		write completed error-free.  The default behavior is to wait for the
-		previous write to complete BEFORE starting the next write.  This
-		option, if selected, forces the driver to wait for the write to
-		complete AFTER each write.  This is a tradoeff:  Selecting this
-		option will significantly reduce RAMTRON performance but has the
-		advantage that it will correctly associate a write failure with a
-		specific write operation.
-
-		One RAMTRON read operations, this option also enables some additional
-		status checking to check for device failures during the read.
 
 config RAMTRON_SETSPEED
 	bool "Adjustable bus speed"

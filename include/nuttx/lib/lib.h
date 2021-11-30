@@ -101,10 +101,6 @@ extern "C"
  * Public Function Prototypes
  ****************************************************************************/
 
-/* Hook for library initialization.  No is needed now, however */
-
-#define lib_initialize()
-
 /* Functions contained in lib_streams.c *************************************/
 
 #ifdef CONFIG_FILE_STREAM

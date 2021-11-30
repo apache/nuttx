@@ -30,7 +30,7 @@
 
 #include "hardware/sam_memorymap.h"
 
-#if SAMV7_NQSPI > 0
+#if SAMV7_NQSPI > 0 || SAMV7_NQSPI_SPI > 0
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -112,6 +112,7 @@
 
 /* QSPI Mode Register */
 
+#define QSPI_MR_SPI                (0 << 0)  /* Bit 0:  SPI Master Mode */
 #define QSPI_MR_SMM                (1 << 0)  /* Bit 0:  Serial Memory Mode */
 #define QSPI_MR_LLB                (1 << 1)  /* Bit 1:  Local Loopback Enable */
 #define QSPI_MR_WDRBT              (1 << 2)  /* Bit 2:  Wait Data Read Before Transfer */

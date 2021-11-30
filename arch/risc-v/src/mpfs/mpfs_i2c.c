@@ -89,8 +89,21 @@ typedef enum mpfs_i2c_clock_divider
   MPFS_I2C_PCLK_DIV_960,
   MPFS_I2C_PCLK_DIV_120,
   MPFS_I2C_PCLK_DIV_60,
-  MPFS_I2C_BCLK_DIV_8
+  MPFS_I2C_BCLK_DIV_8, /* FPGA generated BCLK */
+  MPFS_I2C_NUMBER_OF_DIVIDERS
 } mpfs_i2c_clk_div_t;
+
+static const uint32_t mpfs_i2c_frequencies[MPFS_I2C_NUMBER_OF_DIVIDERS] =
+{
+  MPFS_MSS_APB_AHB_CLK / 256,
+  MPFS_MSS_APB_AHB_CLK / 224,
+  MPFS_MSS_APB_AHB_CLK / 192,
+  MPFS_MSS_APB_AHB_CLK / 160,
+  MPFS_MSS_APB_AHB_CLK / 960,
+  MPFS_MSS_APB_AHB_CLK / 120,
+  MPFS_MSS_APB_AHB_CLK / 60,
+  MPFS_FPGA_BCLK / 8
+};
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
                              struct i2c_msg_s *msgs,
@@ -115,7 +128,7 @@ struct mpfs_i2c_priv_s
   uintptr_t              hw_base;     /* I2C bus base address */
   uint16_t               plic_irq;    /* Platform PLIC irq */
   struct i2c_msg_s       *msgv;       /* Message list */
-  mpfs_i2c_clk_div_t     bus_divider; /* Bus divider */
+  uint32_t               frequency;   /* Current I2C frequency */
 
   uint8_t                msgid;       /* Current message ID */
   ssize_t                bytes;       /* Processed data bytes */
@@ -135,6 +148,8 @@ struct mpfs_i2c_priv_s
   uint16_t               rx_idx;      /* Currently accessed index */
 
   mpfs_i2c_status_t      status;      /* Bus driver status */
+
+  bool                   initialized; /* Bus initialization status */
 };
 
 #ifdef CONFIG_MPFS_I2C0
@@ -145,7 +160,7 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
   .hw_base        = MPFS_I2C0_LO_BASE,
   .plic_irq       = MPFS_IRQ_I2C0_MAIN,
   .msgv           = NULL,
-  .bus_divider    = MPFS_I2C_PCLK_DIV_256,
+  .frequency      = 0,
   .ser_address    = 0x21,
   .target_addr    = 0,
   .refs           = 0,
@@ -153,7 +168,8 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c0_lo_priv =
   .tx_idx         = 0,
   .rx_size        = 0,
   .rx_idx         = 0,
-  .status         = MPFS_I2C_SUCCESS
+  .status         = MPFS_I2C_SUCCESS,
+  .initialized    = false
 };
 #endif /* CONFIG_MPFS_I2C0 */
 
@@ -165,7 +181,7 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
   .hw_base        = MPFS_I2C1_LO_BASE,
   .plic_irq       = MPFS_IRQ_I2C1_MAIN,
   .msgv           = NULL,
-  .bus_divider    = MPFS_I2C_PCLK_DIV_256,
+  .frequency      = 0,
   .ser_address    = 0x21,
   .target_addr    = 0,
   .refs           = 0,
@@ -173,9 +189,13 @@ static struct mpfs_i2c_priv_s g_mpfs_i2c1_lo_priv =
   .tx_idx         = 0,
   .rx_size        = 0,
   .rx_idx         = 0,
-  .status         = MPFS_I2C_SUCCESS
+  .status         = MPFS_I2C_SUCCESS,
+  .initialized    = false
 };
 #endif /* CONFIG_MPFS_I2C1 */
+
+static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
+                                  uint32_t frequency);
 
 /****************************************************************************
  * Private Functions
@@ -224,56 +244,62 @@ static void mpfs_restore_interrupts(irqstate_t primask)
  * Parameters:
  *   priv          - Pointer to the internal driver state structure.
  *
+ * Returned Value:
+ *   Zero (OK) is returned on success. A negated errno value is returned on
+ *   failure.
+ *
  ****************************************************************************/
 
-static void mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
+static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
-  uint32_t clock_speed;
   uint32_t primask;
 
-  primask = mpfs_disable_interrupts();
-
-  if (priv->id == 0)
+  if (!priv->initialized)
     {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_I2C0);
+      primask = mpfs_disable_interrupts();
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_I2C0, 0);
+      if (priv->id == 0)
+        {
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      0, SYSREG_SOFT_RESET_CR_I2C0);
 
-      modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  SYSREG_SUBBLK_CLOCK_CR_I2C0);
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      SYSREG_SOFT_RESET_CR_I2C0, 0);
+
+          modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
+                      0, SYSREG_SUBBLK_CLOCK_CR_I2C0);
+        }
+      else
+        {
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      0, SYSREG_SOFT_RESET_CR_I2C1);
+
+          modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
+                      SYSREG_SOFT_RESET_CR_I2C1, 0);
+
+          modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR,
+                      0, SYSREG_SUBBLK_CLOCK_CR_I2C1);
+        }
+
+      /* Divider is zero after I2C reset */
+
+      priv->frequency = mpfs_i2c_frequencies[0];
+
+      /* This is our own address, not the target chip */
+
+      putreg32(priv->ser_address, MPFS_I2C_ADDR);
+
+      /* Enable i2c bus */
+
+      modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
+                  MPFS_I2C_CTRL_ENS1_MASK);
+
+      priv->initialized = true;
+
+      mpfs_restore_interrupts(primask);
     }
-  else
-    {
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_I2C1);
 
-      modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_I2C1, 0);
-
-      modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-                  SYSREG_SUBBLK_CLOCK_CR_I2C1);
-    }
-
-  clock_speed = priv->bus_divider;
-
-  /* Update the clock divider */
-
-  modifyreg32(MPFS_I2C_CTRL,
-              MPFS_I2C_CTRL_CR2_MASK |
-              MPFS_I2C_CTRL_CR1_MASK |
-              MPFS_I2C_CTRL_CR0_MASK,
-              (((clock_speed >> 2u) & 0x01u) << MPFS_I2C_CTRL_CR2) |
-              (((clock_speed >> 1u) & 0x01u) << MPFS_I2C_CTRL_CR1) |
-              (((clock_speed & 0x01u) << MPFS_I2C_CTRL_CR0)));
-
-  /* This is our own address, not the target chip */
-
-  putreg32(priv->ser_address, MPFS_I2C_ADDR);
-
-  /* Enable i2c bus */
-
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
-              MPFS_I2C_CTRL_ENS1_MASK);
-
-  mpfs_restore_interrupts(primask);
+  return OK;
 }
 
 /****************************************************************************
@@ -291,6 +317,11 @@ static void mpfs_i2c_deinit(struct mpfs_i2c_priv_s *priv)
 {
   up_disable_irq(priv->plic_irq);
   irq_detach(priv->plic_irq);
+
+  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_ENS1_MASK,
+              ~MPFS_I2C_CTRL_ENS1_MASK);
+
+  priv->initialized = false;
 }
 
 /****************************************************************************
@@ -662,6 +693,12 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
             }
         }
 
+      ret = mpfs_i2c_setfrequency(priv, msgs[i].frequency);
+      if (ret != OK)
+        {
+          break;
+        }
+
       i2cinfo("Sending message %" PRIu8 "...\n", priv->msgid);
 
       mpfs_i2c_sendstart(priv);
@@ -713,11 +750,20 @@ static int mpfs_i2c_transfer(struct i2c_master_s *dev,
 static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
 
   up_disable_irq(priv->plic_irq);
-  mpfs_i2c_init(priv);
+
+  priv->initialized = false;
+
+  ret = mpfs_i2c_init(priv);
+  if (ret != OK)
+    {
+      up_enable_irq(priv->plic_irq);
+      return ret;
+    }
 
   priv->tx_size = 0;
   priv->tx_idx  = 0;
@@ -729,6 +775,69 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   return OK;
 }
 #endif
+
+/****************************************************************************
+ * Name: mpfs_i2c_setfrequency
+ *
+ * Description:
+ *   Sets the closest possible frequency for the next transfers.
+ *
+ * Input Parameters:
+ *   priv      - Pointer to the internal driver state structure.
+ *   frequency - Requested frequency
+ *
+ * Returned Value:
+ *   Zero (OK) on success;
+ *
+ ****************************************************************************/
+
+static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
+                                  uint32_t frequency)
+{
+  uint32_t new_freq = 0;
+  uint32_t clock_div = 0;
+
+  if (priv->frequency != frequency)
+    {
+      /* Select the closest possible frequency
+       * which is smaller than or equal to requested
+       */
+
+      for (uint8_t i = 0; i < MPFS_I2C_NUMBER_OF_DIVIDERS; i++)
+        {
+          if (frequency >= mpfs_i2c_frequencies[i]
+              && mpfs_i2c_frequencies[i] > new_freq)
+            {
+              new_freq = mpfs_i2c_frequencies[i];
+              clock_div = i;
+            }
+        }
+
+      if (new_freq == 0)
+        {
+          i2cerr("ERROR: Requested frequency %" PRIu32 " for I2C bus %" PRIu8
+                 " is not supported by hardware.\n", frequency, priv->id);
+          return -EINVAL;
+        }
+
+      i2cinfo("Changing I2Cbus %" PRIu8 " clock speed to %" PRIu32
+              " (div %" PRIx32 ")\n", priv->id, new_freq, clock_div);
+
+      /* Update the clock divider */
+
+      modifyreg32(MPFS_I2C_CTRL,
+                  MPFS_I2C_CTRL_CR2_MASK |
+                  MPFS_I2C_CTRL_CR1_MASK |
+                  MPFS_I2C_CTRL_CR0_MASK,
+                  (((clock_div >> 2u) & 0x01u) << MPFS_I2C_CTRL_CR2) |
+                  (((clock_div >> 1u) & 0x01u) << MPFS_I2C_CTRL_CR1) |
+                  (((clock_div & 0x01u) << MPFS_I2C_CTRL_CR0)));
+
+      priv->frequency = frequency;
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Public Functions
@@ -794,7 +903,12 @@ struct i2c_master_s *mpfs_i2cbus_initialize(int port)
     }
 
   mpfs_i2c_sem_init(priv);
-  mpfs_i2c_init(priv);
+  ret = mpfs_i2c_init(priv);
+  if (ret != OK)
+    {
+      leave_critical_section(flags);
+      return NULL;
+    }
 
   leave_critical_section(flags);
 

@@ -33,7 +33,7 @@
  * sprintf
  ****************************************************************************/
 
-int sprintf (FAR char *buf, FAR const IPTR char *fmt, ...)
+int sprintf(FAR char *buf, FAR const IPTR char *fmt, ...)
 {
   struct lib_memoutstream_s memoutstream;
   va_list ap;

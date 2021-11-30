@@ -117,7 +117,7 @@
  * Private Types
  ****************************************************************************/
 
-/* WiFi Station state */
+/* Wi-Fi Station state */
 
 enum wifi_sta_state
 {
@@ -128,7 +128,7 @@ enum wifi_sta_state
   WIFI_STA_STATE_STOP
 };
 
-/* WiFi SoftAP state */
+/* Wi-Fi SoftAP state */
 
 enum wifi_softap_state
 {
@@ -137,7 +137,7 @@ enum wifi_softap_state
   WIFI_SOFTAP_STATE_STOP
 };
 
-/* WiFi interrupt adapter private data */
+/* Wi-Fi interrupt adapter private data */
 
 struct irq_adpt
 {
@@ -145,7 +145,7 @@ struct irq_adpt
   void *arg;                /* Interrupt private data */
 };
 
-/* WiFi message queue private data */
+/* Wi-Fi message queue private data */
 
 struct mq_adpt
 {
@@ -154,7 +154,7 @@ struct mq_adpt
   char        name[16];     /* Message queue name */
 };
 
-/* WiFi time private data */
+/* Wi-Fi time private data */
 
 struct time_adpt
 {
@@ -162,7 +162,7 @@ struct time_adpt
   suseconds_t usec;         /* Micro second value */
 };
 
-/* WiFi timer private data */
+/* Wi-Fi timer private data */
 
 struct timer_adpt
 {
@@ -177,7 +177,7 @@ struct timer_adpt
   void          *priv;      /* Timer private data */
 };
 
-/* WiFi event private data */
+/* Wi-Fi event private data */
 
 struct evt_adpt
 {
@@ -186,7 +186,7 @@ struct evt_adpt
   uint8_t buf[0];           /* Event private data */
 };
 
-/* WiFi event notification private data */
+/* Wi-Fi event notification private data */
 
 struct wifi_notify
 {
@@ -196,7 +196,7 @@ struct wifi_notify
   struct sigwork_s work;    /* Signal work private data */
 };
 
-/* WiFi NVS private data */
+/* Wi-Fi NVS private data */
 
 struct nvs_adpt
 {
@@ -349,6 +349,8 @@ static void *wifi_coex_get_schm_curr_phase(void);
 static int wifi_coex_set_schm_curr_phase_idx(int idx);
 static int wifi_coex_get_schm_curr_phase_idx(void);
 
+extern void coex_bt_high_prio(void);
+
 /****************************************************************************
  * Public Functions declaration
  ****************************************************************************/
@@ -364,12 +366,12 @@ void intr_matrix_set(int cpu_no, uint32_t model_num, uint32_t intr_num);
  * Private Data
  ****************************************************************************/
 
-/* WiFi thread private data */
+/* Wi-Fi thread private data */
 
 static pthread_key_t g_wifi_thread_key;
 static bool g_wifi_tkey_init;
 
-/* WiFi sleep private data */
+/* Wi-Fi sleep private data */
 
 static uint32_t g_phy_clk_en_cnt;
 
@@ -383,18 +385,18 @@ static int64_t g_phy_rf_en_ts;
 
 static uint32_t g_common_clock_disable_time;
 
-/* WiFi event private data */
+/* Wi-Fi event private data */
 
 static struct work_s g_wifi_evt_work;
 static sq_queue_t g_wifi_evt_queue;
 static struct wifi_notify g_wifi_notify[WIFI_ADPT_EVT_MAX];
 static sem_t g_wifiexcl_sem = SEM_INITIALIZER(1);
 
-/* Callback function to update WiFi MAC time */
+/* Callback function to update Wi-Fi MAC time */
 
 wifi_mac_time_update_cb_t g_wifi_mac_time_update_cb;
 
-/* WiFi adapter reference */
+/* Wi-Fi adapter reference */
 
 static int g_wifi_ref;
 
@@ -404,35 +406,39 @@ static int g_wifi_ref;
 
 static bool g_sta_reconnect;
 
-/* If WiFi sta starts */
+/* If Wi-Fi sta starts */
 
 static bool g_sta_started;
 
-/* If WiFi sta connected */
+/* If Wi-Fi sta connected */
 
 static bool g_sta_connected;
 
-/* WiFi station TX done callback function */
+/* Wi-Fi station TX done callback function */
 
 static wifi_txdone_cb_t g_sta_txdone_cb;
 #endif
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
 
-/* If WiFi SoftAP starts */
+/* If Wi-Fi SoftAP starts */
 
 static bool g_softap_started;
 
-/* WiFi SoftAP TX done callback function */
+/* Wi-Fi SoftAP TX done callback function */
 
 static wifi_txdone_cb_t g_softap_txdone_cb;
 #endif
+
+/* Device specific lock */
+
+static spinlock_t g_lock;
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-/* WiFi OS adapter data */
+/* Wi-Fi OS adapter data */
 
 wifi_osi_funcs_t g_wifi_osi_funcs =
 {
@@ -557,11 +563,11 @@ wifi_osi_funcs_t g_wifi_osi_funcs =
   ._magic = ESP_WIFI_OS_ADAPTER_MAGIC,
 };
 
-/* WiFi feature capacity data */
+/* Wi-Fi feature capacity data */
 
 uint64_t g_wifi_feature_caps = CONFIG_FEATURE_WPA3_SAE_BIT;
 
-/* WiFi TAG string data */
+/* Wi-Fi TAG string data */
 
 ESP_EVENT_DEFINE_BASE(WIFI_EVENT);
 
@@ -573,13 +579,13 @@ ESP_EVENT_DEFINE_BASE(WIFI_EVENT);
  * Name: osi_errno_trans
  *
  * Description:
- *   Transform from nuttx Os error code to WiFi adapter error code
+ *   Transform from nuttx Os error code to Wi-Fi adapter error code
  *
  * Input Parameters:
  *   ret - NuttX error code
  *
  * Returned Value:
- *   WiFi adapter error code
+ *   Wi-Fi adapter error code
  *
  ****************************************************************************/
 
@@ -599,10 +605,10 @@ static inline int32_t osi_errno_trans(int ret)
  * Name: osi_errno_trans
  *
  * Description:
- *   Transform from ESP WiFi error code to NuttX error code
+ *   Transform from ESP Wi-Fi error code to NuttX error code
  *
  * Input Parameters:
- *   ret - ESP WiFi error code
+ *   ret - ESP Wi-Fi error code
  *
  * Returned Value:
  *   NuttX error code
@@ -663,7 +669,7 @@ static int32_t wifi_errno_trans(int ret)
  * Name: esp_int_adpt_cb
  *
  * Description:
- *   WiFi interrupt adapter callback function
+ *   Wi-Fi interrupt adapter callback function
  *
  * Input Parameters:
  *   arg - interrupt adapter private data
@@ -755,7 +761,7 @@ static int esp_wifi_lock(bool lock)
       ret = nxsem_wait_uninterruptible(&g_wifiexcl_sem);
       if (ret < 0)
         {
-          wlinfo("Failed to lock WiFi ret=%d\n", ret);
+          wlinfo("Failed to lock Wi-Fi ret=%d\n", ret);
         }
     }
   else
@@ -763,7 +769,7 @@ static int esp_wifi_lock(bool lock)
       ret = nxsem_post(&g_wifiexcl_sem);
       if (ret < 0)
         {
-          wlinfo("Failed to unlock WiFi ret=%d\n", ret);
+          wlinfo("Failed to unlock Wi-Fi ret=%d\n", ret);
         }
     }
 
@@ -828,7 +834,7 @@ static void esp_set_isr(int32_t n, void *f, void *arg)
  * Name: esp32_ints_on
  *
  * Description:
- *   Enable WiFi interrupt
+ *   Enable Wi-Fi interrupt
  *
  * Input Parameters:
  *   mask - No mean
@@ -851,7 +857,7 @@ static void esp32_ints_on(uint32_t mask)
  * Name: esp32_ints_off
  *
  * Description:
- *   Disable WiFi interrupt
+ *   Disable Wi-Fi interrupt
  *
  * Input Parameters:
  *   mask - No mean
@@ -969,11 +975,7 @@ static uint32_t IRAM_ATTR esp_wifi_int_disable(void *wifi_int_mux)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
-
-#ifdef CONFIG_SMP
-  spin_lock((volatile spinlock_t *)wifi_int_mux);
-#endif
+  flags = spin_lock_irqsave((spinlock_t *)wifi_int_mux);
 
   return (uint32_t)flags;
 }
@@ -998,11 +1000,7 @@ static void IRAM_ATTR esp_wifi_int_restore(void *wifi_int_mux, uint32_t tmp)
 {
   irqstate_t flags = (irqstate_t)tmp;
 
-#ifdef CONFIG_SMP
-  spin_unlock((volatile spinlock_t *)wifi_int_mux);
-#endif
-
-  leave_critical_section(flags);
+  spin_unlock_irqrestore((spinlock_t *)wifi_int_mux, flags);
 }
 
 /****************************************************************************
@@ -1490,7 +1488,7 @@ static int32_t esp_queue_send_generic(void *queue, void *item,
 
   if (ticks == OSI_FUNCS_TIME_BLOCKING || ticks == 0)
     {
-      /* WiFi interrupt function will call this adapter function to send
+      /* Wi-Fi interrupt function will call this adapter function to send
        * message to message queue, so here we should call kernel API
        * instead of application API
        */
@@ -2032,13 +2030,13 @@ static void esp_free(void *ptr)
  * Name: esp_event_id_map
  *
  * Description:
- *   Transform from esp-idf event ID to WiFi adapter event ID
+ *   Transform from esp-idf event ID to Wi-Fi adapter event ID
  *
  * Input Parameters:
  *   event_id - esp-idf event ID
  *
  * Returned Value:
- *   WiFi adapter event ID
+ *   Wi-Fi adapter event ID
  *
  ****************************************************************************/
 
@@ -2103,9 +2101,9 @@ static void esp_evt_work_cb(void *arg)
 
   while (1)
     {
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_lock);
       evt_adpt = (struct evt_adpt *)sq_remfirst(&g_wifi_evt_queue);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
       if (!evt_adpt)
         {
           break;
@@ -2121,7 +2119,7 @@ static void esp_evt_work_cb(void *arg)
 
 #ifdef ESP32_WLAN_HAS_STA
           case WIFI_ADPT_EVT_STA_START:
-            wlinfo("WiFi sta start\n");
+            wlinfo("Wi-Fi sta start\n");
             g_sta_connected = false;
             ret = esp_wifi_set_ps(DEFAULT_PS_MODE);
             if (ret)
@@ -2131,12 +2129,12 @@ static void esp_evt_work_cb(void *arg)
             break;
 
           case WIFI_ADPT_EVT_STA_CONNECT:
-            wlinfo("WiFi sta connect\n");
+            wlinfo("Wi-Fi sta connect\n");
             g_sta_connected = true;
             break;
 
           case WIFI_ADPT_EVT_STA_DISCONNECT:
-            wlinfo("WiFi sta disconnect\n");
+            wlinfo("Wi-Fi sta disconnect\n");
             g_sta_connected = false;
             if (g_sta_reconnect)
               {
@@ -2149,7 +2147,7 @@ static void esp_evt_work_cb(void *arg)
             break;
 
           case WIFI_ADPT_EVT_STA_STOP:
-            wlinfo("WiFi sta stop\n");
+            wlinfo("Wi-Fi sta stop\n");
             g_sta_connected = false;
             break;
 #endif
@@ -2217,7 +2215,7 @@ static void wifi_set_intr(int32_t cpu_no, uint32_t intr_source,
          ", intr_num=%" PRIu32 ", intr_prio=%" PRId32 "\n",
          cpu_no, intr_source, intr_num, intr_prio);
 
-  /* Force to bind WiFi interrupt to CPU0 */
+  /* Force to bind Wi-Fi interrupt to CPU0 */
 
   intr_matrix_set(0, intr_source, intr_num);
 }
@@ -2285,9 +2283,9 @@ int32_t esp_event_post(esp_event_base_t event_base,
   evt_adpt->id = id;
   memcpy(evt_adpt->buf, event_data, event_data_size);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
   sq_addlast(&evt_adpt->entry, &g_wifi_evt_queue);
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   work_queue(LPWORK, &g_wifi_evt_work, esp_evt_work_cb, NULL, 0);
 
@@ -2380,7 +2378,7 @@ static void wifi_apb80m_release(void)
  * Name: phy_update_wifi_mac_time
  *
  * Description:
- *   Update WiFi mac timer.
+ *   Update Wi-Fi mac timer.
  *
  * Input Parameters:
  *   en_clock_stopped - Check if clock is stopped
@@ -2439,13 +2437,13 @@ static void wifi_phy_disable(void)
 
       phy_close_rf();
 
-      /* Update WiFi MAC time before disabling it.
-       * WiFi/BT common peripheral clock.
+      /* Update Wi-Fi MAC time before disabling it.
+       * Wi-Fi/BT common peripheral clock.
        */
 
       phy_update_wifi_mac_time(true, esp_timer_get_time());
 
-      /* Disable WiFi/BT common peripheral clock.
+      /* Disable Wi-Fi/BT common peripheral clock.
        * Do not disable clock for hardware RNG.
        */
 
@@ -2489,12 +2487,13 @@ static void wifi_phy_enable(void)
 
       g_phy_rf_en_ts = esp_timer_get_time();
 
-      /* Update WiFi MAC time before WiFi/BT common clock is enabled */
+      /* Update Wi-Fi MAC time before Wi-Fi/BT common clock is enabled */
 
       phy_update_wifi_mac_time(false, g_phy_rf_en_ts);
       esp_phy_enable_clock();
       phy_set_wifi_mode_only(0);
       register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+      coex_bt_high_prio();
     }
 
   g_phy_access_ref++;
@@ -2520,7 +2519,7 @@ void esp_phy_enable_clock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (g_phy_clk_en_cnt == 0)
     {
@@ -2530,7 +2529,7 @@ void esp_phy_enable_clock(void)
 
   g_phy_clk_en_cnt++;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -2551,7 +2550,7 @@ void esp_phy_disable_clock(void)
 {
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&g_lock);
 
   if (g_phy_clk_en_cnt)
     {
@@ -2564,7 +2563,7 @@ void esp_phy_disable_clock(void)
         }
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 }
 
 /****************************************************************************
@@ -2603,7 +2602,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   uint8_t crc;
   int i;
 
-  if (type > ESP_MAC_WIFI_SOFTAP)
+  if (type > ESP_MAC_BT)
     {
       wlerr("Input type is error=%d\n", type);
       return -1;
@@ -2643,6 +2642,22 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
           wlerr("Failed to generate SoftAP MAC\n");
           return -1;
         }
+    }
+
+  if (type == ESP_MAC_BT)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+      mac[5] += 1;
     }
 
   return 0;
@@ -2838,7 +2853,7 @@ static void esp_timer_arm_us(void *ptimer, uint32_t us, bool repeat)
  * Name: wifi_reset_mac
  *
  * Description:
- *   Reset WiFi hardware MAC
+ *   Reset Wi-Fi hardware MAC
  *
  * Input Parameters:
  *   None
@@ -3821,14 +3836,14 @@ static void *esp_wifi_zalloc(size_t size)
  * Name: esp_wifi_create_queue
  *
  * Description:
- *   Create WiFi static message queue
+ *   Create Wi-Fi static message queue
  *
  * Input Parameters:
  *   queue_len - queue message number
  *   item_size - message size
  *
  * Returned Value:
- *   WiFi static message queue data pointer
+ *   Wi-Fi static message queue data pointer
  *
  ****************************************************************************/
 
@@ -3858,10 +3873,10 @@ static void *esp_wifi_create_queue(int32_t queue_len, int32_t item_size)
  * Name: esp_wifi_delete_queue
  *
  * Description:
- *   Delete WiFi static message queue
+ *   Delete Wi-Fi static message queue
  *
  * Input Parameters:
- *   queue - WiFi static message queue data pointer
+ *   queue - Wi-Fi static message queue data pointer
  *
  * Returned Value:
  *   None
@@ -4137,7 +4152,7 @@ static unsigned long esp_random_ulong(void)
  * Name: esp_wifi_tx_done_cb
  *
  * Description:
- *   WiFi TX done callback function.
+ *   Wi-Fi TX done callback function.
  *
  ****************************************************************************/
 
@@ -4273,13 +4288,13 @@ static int esp_wifi_cipher_trans(uint32_t wifi_cipher)
  * Name: esp_freq_to_channel
  *
  * Description:
- *   Converts WiFi frequency to channel.
+ *   Converts Wi-Fi frequency to channel.
  *
  * Input Parameters:
- *   freq - WiFi frequency
+ *   freq - Wi-Fi frequency
  *
  * Returned Value:
- *   WiFi channel
+ *   Wi-Fi channel
  *
  ****************************************************************************/
 
@@ -4686,7 +4701,7 @@ int32_t esp_event_send_internal(esp_event_base_t event_base,
  * Name: esp_wifi_init
  *
  * Description:
- *   Initialize WiFi
+ *   Initialize Wi-Fi
  *
  * Input Parameters:
  *   config - Initialization config parameters
@@ -4703,7 +4718,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
   ret = esp_wifi_init_internal(config);
   if (ret)
     {
-      wlerr("Failed to initialize WiFi error=%d\n", ret);
+      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
       return ret;
     }
 
@@ -4722,7 +4737,7 @@ int32_t esp_wifi_init(const wifi_init_config_t *config)
  * Name: esp_wifi_deinit
  *
  * Description:
- *   Deinitialize WiFi and free resource
+ *   Deinitialize Wi-Fi and free resource
  *
  * Input Parameters:
  *   None
@@ -4746,7 +4761,7 @@ int32_t esp_wifi_deinit(void)
   ret = esp_wifi_deinit_internal();
   if (ret != 0)
     {
-      wlerr("Failed to deinitialize WiFi\n");
+      wlerr("Failed to deinitialize Wi-Fi\n");
       return ret;
     }
 
@@ -4757,10 +4772,10 @@ int32_t esp_wifi_deinit(void)
  * Name: esp_wifi_free_eb
  *
  * Description:
- *   Free WiFi receive callback input eb pointer
+ *   Free Wi-Fi receive callback input eb pointer
  *
  * Input Parameters:
- *   eb - WiFi receive callback input eb pointer
+ *   eb - Wi-Fi receive callback input eb pointer
  *
  * Returned Value:
  *   None
@@ -4867,7 +4882,7 @@ int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
  * Name: esp_wifi_adapter_init
  *
  * Description:
- *   Initialize ESP32 WiFi adapter
+ *   Initialize ESP32 Wi-Fi adapter
  *
  * Input Parameters:
  *   None
@@ -4886,7 +4901,7 @@ int esp_wifi_adapter_init(void)
 
   if (g_wifi_ref)
     {
-      wlinfo("WiFi adapter is already initialized\n");
+      wlinfo("Wi-Fi adapter is already initialized\n");
       g_wifi_ref++;
       esp_wifi_lock(false);
       return OK;
@@ -4926,7 +4941,7 @@ int esp_wifi_adapter_init(void)
   ret = esp_wifi_init(&wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to initialize WiFi error=%d\n", ret);
+      wlerr("Failed to initialize Wi-Fi error=%d\n", ret);
       ret = wifi_errno_trans(ret);
       goto errout_init_wifi;
     }
@@ -4941,7 +4956,7 @@ int esp_wifi_adapter_init(void)
 
   g_wifi_ref++;
 
-  wlinfo("OK to initialize WiFi adapter\n");
+  wlinfo("OK to initialize Wi-Fi adapter\n");
 
   esp_wifi_lock(false);
 
@@ -4965,7 +4980,7 @@ errout_init_wifi:
  * Name: esp_wifi_sta_start
  *
  * Description:
- *   Start WiFi station.
+ *   Start Wi-Fi station.
  *
  * Input Parameters:
  *   None
@@ -4986,7 +5001,7 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
 #ifdef ESP32_WLAN_HAS_SOFTAP
@@ -5001,7 +5016,7 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
-      wlerr("Failed to set WiFi mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
@@ -5009,14 +5024,14 @@ int esp_wifi_sta_start(void)
   ret = esp_wifi_start();
   if (ret)
     {
-      wlerr("Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
 
   g_sta_started = true;
 
-  wlinfo("OK to start WiFi station\n");
+  wlinfo("OK to start Wi-Fi station\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -5030,7 +5045,7 @@ errout_set_mode:
  * Name: esp_wifi_sta_stop
  *
  * Description:
- *   Stop WiFi station.
+ *   Stop Wi-Fi station.
  *
  * Input Parameters:
  *   None
@@ -5050,7 +5065,7 @@ int esp_wifi_sta_stop(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
   g_sta_started = false;
@@ -5061,7 +5076,7 @@ int esp_wifi_sta_stop(void)
       ret = esp_wifi_set_mode(WIFI_MODE_AP);
       if (ret)
         {
-          wlerr("Failed to set WiFi AP mode ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
@@ -5069,14 +5084,14 @@ int esp_wifi_sta_stop(void)
       ret = esp_wifi_start();
       if (ret)
         {
-          wlerr("Failed to start WiFi AP ret=%d\n", ret);
+          wlerr("Failed to start Wi-Fi AP ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
     }
 #endif
 
-  wlinfo("OK to stop WiFi station\n");
+  wlinfo("OK to stop Wi-Fi station\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -5092,7 +5107,7 @@ errout_set_mode:
  * Name: esp_wifi_sta_send_data
  *
  * Description:
- *   Use WiFi station interface to send 802.3 frame
+ *   Use Wi-Fi station interface to send 802.3 frame
  *
  * Input Parameters:
  *   pbuf - Packet buffer pointer
@@ -5117,7 +5132,7 @@ int esp_wifi_sta_send_data(void *pbuf, uint32_t len)
  * Name: esp_wifi_sta_register_recv_cb
  *
  * Description:
- *   Register WiFi station receive packet callback function
+ *   Register Wi-Fi station receive packet callback function
  *
  * Input Parameters:
  *   recv_cb - Receive callback function
@@ -5181,7 +5196,7 @@ int esp_wifi_sta_read_mac(uint8_t *mac)
  * Name: esp_wifi_set_password
  *
  * Description:
- *   Set/Get WiFi station password
+ *   Set/Get Wi-Fi station password
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -5218,7 +5233,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5233,7 +5248,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5296,7 +5311,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("WiFi station password=%s len=%d\n", buf, len);
+  wlinfo("Wi-Fi station password=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -5306,7 +5321,7 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
  * Name: esp_wifi_sta_essid
  *
  * Description:
- *   Set/Get WiFi station ESSID
+ *   Set/Get Wi-Fi station ESSID
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -5343,7 +5358,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5355,7 +5370,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5385,7 +5400,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("WiFi station ssid=%s len=%d\n", buf, len);
+  wlinfo("Wi-Fi station ssid=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -5395,7 +5410,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
  * Name: esp_wifi_sta_bssid
  *
  * Description:
- *   Set/Get WiFi station BSSID
+ *   Set/Get Wi-Fi station BSSID
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -5417,7 +5432,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -5432,7 +5447,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5448,7 +5463,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
  * Name: esp_wifi_sta_connect
  *
  * Description:
- *   Trigger WiFi station connection action
+ *   Trigger Wi-Fi station connection action
  *
  * Input Parameters:
  *   None
@@ -5468,7 +5483,7 @@ int esp_wifi_sta_connect(void)
 
   if (g_sta_connected)
     {
-      wlinfo("WiFi has connected AP\n");
+      wlinfo("Wi-Fi has connected AP\n");
       esp_wifi_lock(false);
       return OK;
     }
@@ -5516,7 +5531,7 @@ errout_wifi_connect:
  * Name: esp_wifi_sta_disconnect
  *
  * Description:
- *   Trigger WiFi station disconnection action
+ *   Trigger Wi-Fi station disconnection action
  *
  * Input Parameters:
  *   None
@@ -5543,7 +5558,7 @@ int esp_wifi_sta_disconnect(void)
     }
   else
     {
-      wlinfo("OK to disconnect WiFi station\n");
+      wlinfo("OK to disconnect Wi-Fi station\n");
     }
 
   esp_wifi_lock(false);
@@ -5554,7 +5569,7 @@ int esp_wifi_sta_disconnect(void)
  * Name: esp_wifi_sta_mode
  *
  * Description:
- *   Set/Get WiFi Station mode code.
+ *   Set/Get Wi-Fi Station mode code.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -5675,7 +5690,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to get WiFi config data ret=%d\n", ret);
+          wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -5683,7 +5698,7 @@ int esp_wifi_sta_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -5981,7 +5996,7 @@ int esp_wifi_sta_country(struct iwreq *iwr, bool set)
  * Name: esp_wifi_sta_rssi
  *
  * Description:
- *   Get WiFi sensitivity (dBm).
+ *   Get Wi-Fi sensitivity (dBm).
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -6034,7 +6049,7 @@ int esp_wifi_sta_rssi(struct iwreq *iwr, bool set)
  * Name: esp_wifi_softap_start
  *
  * Description:
- *   Start WiFi SoftAP.
+ *   Start Wi-Fi SoftAP.
  *
  * Input Parameters:
  *   None
@@ -6055,7 +6070,7 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
 #ifdef ESP32_WLAN_HAS_STA
@@ -6070,7 +6085,7 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_set_mode(mode);
   if (ret)
     {
-      wlerr("Failed to set WiFi mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to set Wi-Fi mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
@@ -6078,14 +6093,14 @@ int esp_wifi_softap_start(void)
   ret = esp_wifi_start();
   if (ret)
     {
-      wlerr("Failed to start WiFi with mode=%d ret=%d\n", mode, ret);
+      wlerr("Failed to start Wi-Fi with mode=%d ret=%d\n", mode, ret);
       ret = wifi_errno_trans(ret);
       goto errout_set_mode;
     }
 
   g_softap_started = true;
 
-  wlinfo("OK to start WiFi SoftAP\n");
+  wlinfo("OK to start Wi-Fi SoftAP\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -6099,7 +6114,7 @@ errout_set_mode:
  * Name: esp_wifi_softap_stop
  *
  * Description:
- *   Stop WiFi SoftAP.
+ *   Stop Wi-Fi SoftAP.
  *
  * Input Parameters:
  *   None
@@ -6119,7 +6134,7 @@ int esp_wifi_softap_stop(void)
   ret = esp_wifi_stop();
   if (ret)
     {
-      wlinfo("Failed to stop WiFi ret=%d\n", ret);
+      wlinfo("Failed to stop Wi-Fi ret=%d\n", ret);
     }
 
   g_softap_started = false;
@@ -6130,7 +6145,7 @@ int esp_wifi_softap_stop(void)
       ret = esp_wifi_set_mode(WIFI_MODE_STA);
       if (ret)
         {
-          wlerr("Failed to set WiFi AP mode ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi AP mode ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
@@ -6138,14 +6153,14 @@ int esp_wifi_softap_stop(void)
       ret = esp_wifi_start();
       if (ret)
         {
-          wlerr("Failed to start WiFi AP ret=%d\n", ret);
+          wlerr("Failed to start Wi-Fi AP ret=%d\n", ret);
           ret = wifi_errno_trans(ret);
           goto errout_set_mode;
         }
     }
 #endif
 
-  wlinfo("OK to stop WiFi SoftAP\n");
+  wlinfo("OK to stop Wi-Fi SoftAP\n");
 
   esp_wifi_lock(false);
   return OK;
@@ -6161,7 +6176,7 @@ errout_set_mode:
  * Name: esp_wifi_softap_send_data
  *
  * Description:
- *   Use WiFi SoftAP interface to send 802.3 frame
+ *   Use Wi-Fi SoftAP interface to send 802.3 frame
  *
  * Input Parameters:
  *   pbuf - Packet buffer pointer
@@ -6186,7 +6201,7 @@ int esp_wifi_softap_send_data(void *pbuf, uint32_t len)
  * Name: esp_wifi_softap_register_recv_cb
  *
  * Description:
- *   Register WiFi SoftAP receive packet callback function
+ *   Register Wi-Fi SoftAP receive packet callback function
  *
  * Input Parameters:
  *   recv_cb - Receive callback function
@@ -6250,7 +6265,7 @@ int esp_wifi_softap_read_mac(uint8_t *mac)
  * Name: esp_wifi_softap_password
  *
  * Description:
- *   Set/Get WiFi SoftAP password
+ *   Set/Get Wi-Fi SoftAP password
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -6287,7 +6302,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6311,7 +6326,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6332,7 +6347,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("WiFi SoftAP password=%s len=%d\n", buf, len);
+  wlinfo("Wi-Fi SoftAP password=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -6342,7 +6357,7 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
  * Name: esp_wifi_softap_essid
  *
  * Description:
- *   Set/Get WiFi SoftAP ESSID
+ *   Set/Get Wi-Fi SoftAP ESSID
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -6379,7 +6394,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6391,7 +6406,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6412,7 +6427,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 #ifdef CONFIG_DEBUG_WIRELESS_INFO
   memcpy(buf, pdata, len);
   buf[len] = 0;
-  wlinfo("WiFi SoftAP ssid=%s len=%d\n", buf, len);
+  wlinfo("Wi-Fi SoftAP ssid=%s len=%d\n", buf, len);
 #endif
 
   return OK;
@@ -6422,7 +6437,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
  * Name: esp_wifi_softap_bssid
  *
  * Description:
- *   Set/Get WiFi softAP BSSID
+ *   Set/Get Wi-Fi softAP BSSID
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -6443,7 +6458,7 @@ int esp_wifi_softap_bssid(struct iwreq *iwr, bool set)
  * Name: esp_wifi_softap_connect
  *
  * Description:
- *   Trigger WiFi SoftAP accept connection action
+ *   Trigger Wi-Fi SoftAP accept connection action
  *
  * Input Parameters:
  *   None
@@ -6463,7 +6478,7 @@ int esp_wifi_softap_connect(void)
  * Name: esp_wifi_softap_disconnect
  *
  * Description:
- *   Trigger WiFi SoftAP drop connection action
+ *   Trigger Wi-Fi SoftAP drop connection action
  *
  * Input Parameters:
  *   None
@@ -6483,7 +6498,7 @@ int esp_wifi_softap_disconnect(void)
  * Name: esp_wifi_softap_mode
  *
  * Description:
- *   Set/Get WiFi SoftAP mode code.
+ *   Set/Get Wi-Fi SoftAP mode code.
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd
@@ -6531,7 +6546,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
       ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to get WiFi config data ret=%d\n", ret);
+          wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
 
@@ -6609,7 +6624,7 @@ int esp_wifi_softap_auth(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6645,7 +6660,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
   ret = esp_wifi_get_config(WIFI_IF_AP, &wifi_cfg);
   if (ret)
     {
-      wlerr("Failed to get WiFi config data ret=%d\n", ret);
+      wlerr("Failed to get Wi-Fi config data ret=%d\n", ret);
       return wifi_errno_trans(ret);
     }
 
@@ -6658,7 +6673,7 @@ int esp_wifi_softap_freq(struct iwreq *iwr, bool set)
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
         {
-          wlerr("Failed to set WiFi config data ret=%d\n", ret);
+          wlerr("Failed to set Wi-Fi config data ret=%d\n", ret);
           return wifi_errno_trans(ret);
         }
     }
@@ -6760,7 +6775,7 @@ int esp_wifi_softap_country(struct iwreq *iwr, bool set)
  * Name: esp_wifi_softap_rssi
  *
  * Description:
- *   Get WiFi sensitivity (dBm).
+ *   Get Wi-Fi sensitivity (dBm).
  *
  * Input Parameters:
  *   iwr - The argument of the ioctl cmd

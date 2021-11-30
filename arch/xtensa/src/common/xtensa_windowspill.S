@@ -41,10 +41,9 @@
 
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/xtensa/xtensa_corebits.h>
-
-#include "xtensa_abi.h"
 
 /****************************************************************************
  * Public Functions

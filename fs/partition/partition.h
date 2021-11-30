@@ -44,6 +44,32 @@ struct partition_state_s
   size_t erasesize;
 };
 
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+int read_partition_block(FAR struct partition_state_s *state,
+                         FAR void *buffer, size_t startblock,
+                         size_t nblocks);
+
+#ifdef CONFIG_PTABLE_PARTITION
+int parse_ptable_partition(FAR struct partition_state_s *state,
+                           partition_handler_t handler,
+                           FAR void *arg);
+#endif
+
+#ifdef CONFIG_GPT_PARTITION
+int parse_gpt_partition(FAR struct partition_state_s *state,
+                        partition_handler_t handler,
+                        FAR void *arg);
+#endif
+
+#ifdef CONFIG_MBR_PARTITION
+int parse_mbr_partition(FAR struct partition_state_s *state,
+                        partition_handler_t handler,
+                        FAR void *arg);
+#endif
+
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
 #endif /* __FS_PARTITION_PARTITION_H */

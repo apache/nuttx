@@ -35,10 +35,6 @@ ifeq ($(CONFIG_MMCSD),y)
 CSRCS += esp32_mmcsd.c
 endif
 
-ifeq ($(CONFIG_ESP32_SPIFLASH),y)
-CSRCS += esp32_spiflash.c
-endif
-
 ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32_gpio.c
 endif
@@ -62,7 +58,6 @@ context:: $(SCRIPTOUT)
 
 distclean::
 	$(call DELFILE, $(SCRIPTOUT))
-	$(call DELFILE, $(TOPDIR)/esp32_qemu_img.bin)
 
 DEPPATH += --dep-path board
 VPATH += :board

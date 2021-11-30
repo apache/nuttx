@@ -155,7 +155,12 @@ int file_truncate(FAR struct file *filep, off_t length)
 int ftruncate(int fd, off_t length)
 {
   FAR struct file *filep;
-  int ret;
+  int ret = -EINVAL;
+
+  if (length < 0)
+    {
+      goto errout;
+    }
 
   /* Get the file structure corresponding to the file descriptor. */
 

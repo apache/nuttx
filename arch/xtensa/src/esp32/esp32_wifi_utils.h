@@ -99,7 +99,7 @@ void esp_wifi_scan_event_parse(void);
  * Name: esp_wifi_scan_para
  *
  * Description:
- *   Initialize ESP32 WiFi scan parameter.
+ *   Initialize ESP32 Wi-Fi scan parameter.
  *
  * Input Parameters:
  *   None

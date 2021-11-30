@@ -40,13 +40,12 @@
 #include <nuttx/config.h>
 
 #include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_coproc.h>
 #include <arch/xtensa/xtensa_specregs.h>
 #include <arch/chip/core-isa.h>
 #include <arch/chip/tie.h>
 #include <arch/chip/tie-asm.h>
-
-#include "xtensa_abi.h"
 
 #if XCHAL_CP_NUM > 0
 
@@ -128,7 +127,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
 	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_ncp_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -327,7 +326,7 @@ _xtensa_coproc_restorestate:
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
 	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_ncp_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 

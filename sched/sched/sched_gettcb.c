@@ -56,6 +56,8 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   irqstate_t flags;
   int hash_ndx;
 
+  flags = enter_critical_section();
+
   /* Verify whether g_pidhash hash table has already been allocated and
    * whether the PID is within range.
    */
@@ -68,23 +70,21 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
        * terminating asynchronously.
        */
 
-      flags = enter_critical_section();
-
       /* Get the hash_ndx associated with the pid */
 
       hash_ndx = PIDHASH(pid);
 
       /* Verify that the correct TCB was found. */
 
-      if (pid == g_pidhash[hash_ndx].pid)
+      if (g_pidhash[hash_ndx] != NULL && pid == g_pidhash[hash_ndx]->pid)
         {
           /* Return the TCB associated with this pid (if any) */
 
-          ret = g_pidhash[hash_ndx].tcb;
+          ret = g_pidhash[hash_ndx];
         }
-
-      leave_critical_section(flags);
     }
+
+  leave_critical_section(flags);
 
   /* Return the TCB. */
 

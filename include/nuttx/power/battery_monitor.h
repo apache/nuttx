@@ -28,6 +28,7 @@
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/list.h>
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -99,6 +100,8 @@
  * BATIOC_OPERATE - Perform miscellaneous, device-specific charger operation.
  *   Input value:  An uintptr_t that can hold a pointer to struct
  *   batio_operate_msg_s.
+ * BATIOC_CHIPID -Get the chip id.
+ *   Input value:  A pointer to type unsigned int.
  */
 
 /****************************************************************************
@@ -285,6 +288,10 @@ struct battery_monitor_operations_s
   /* Do device specific operation */
 
   int (*operate)(struct battery_monitor_dev_s *dev, uintptr_t param);
+
+  /* Get chip id */
+
+  int (*chipid)(struct battery_charger_dev_s *dev, unsigned int *value);
 };
 
 /* This structure defines the battery driver state structure */
@@ -295,6 +302,8 @@ struct battery_monitor_dev_s
 
   FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
   sem_t batsem;                                       /* Enforce mutually exclusive access */
+
+  struct list_node flist;
 
   /* Data fields specific to the lower-half driver may follow */
 };
@@ -316,6 +325,13 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: battery_monitor_changed
+ ****************************************************************************/
+
+int battery_monitor_changed(FAR struct battery_monitor_dev_s *dev,
+                            uint32_t mask);
 
 /****************************************************************************
  * Name: battery_monitor_register

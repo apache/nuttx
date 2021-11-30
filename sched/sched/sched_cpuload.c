@@ -110,20 +110,11 @@ volatile uint32_t g_cpuload_total;
 
 static inline void nxsched_cpu_process_cpuload(int cpu)
 {
-  FAR struct tcb_s *rtcb  = current_task(cpu);
-  int hash_index;
+  FAR struct tcb_s *rtcb = current_task(cpu);
 
-  /* Increment the count on the currently executing thread
-   *
-   * NOTE also that CPU load measurement data is retained in the g_pidhash
-   * table vs. in the TCB which would seem to be the more logic place.  It
-   * is place in the hash table, instead, to facilitate CPU load adjustments
-   * on all threads during timer interrupt handling. nxsched_foreach() could
-   * do this too, but this would require a little more overhead.
-   */
+  /* Increment the count on the currently executing thread */
 
-  hash_index = PIDHASH(rtcb->pid);
-  g_pidhash[hash_index].ticks++;
+  rtcb->ticks++;
 
   /* Increment tick count.  NOTE that the count is increment once for each
    * CPU on each sample interval.
@@ -193,8 +184,11 @@ void weak_function nxsched_process_cpuload(void)
 
       for (i = 0; i < g_npidhash; i++)
         {
-          g_pidhash[i].ticks >>= 1;
-          total += g_pidhash[i].ticks;
+          if (g_pidhash[i])
+            {
+              g_pidhash[i]->ticks >>= 1;
+              total += g_pidhash[i]->ticks;
+            }
         }
 
       /* Save the new total. */
@@ -254,10 +248,10 @@ int clock_cpuload(int pid, FAR struct cpuload_s *cpuload)
    * do this too, but this would require a little more overhead.
    */
 
-  if (g_pidhash[hash_index].tcb && g_pidhash[hash_index].pid == pid)
+  if (g_pidhash[hash_index] && g_pidhash[hash_index]->pid == pid)
     {
       cpuload->total  = g_cpuload_total;
-      cpuload->active = g_pidhash[hash_index].ticks;
+      cpuload->active = g_pidhash[hash_index]->ticks;
       ret = OK;
     }
 

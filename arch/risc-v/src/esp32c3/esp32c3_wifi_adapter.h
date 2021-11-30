@@ -836,6 +836,22 @@ int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
 int esp32c3_wifi_bt_coexist_init(void);
 #endif
 
+/****************************************************************************
+ * Name: esp_wifi_stop_callback
+ *
+ * Description:
+ *   Callback to stop Wi-Fi
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_stop_callback(void);
+
 #ifdef __cplusplus
 }
 #endif

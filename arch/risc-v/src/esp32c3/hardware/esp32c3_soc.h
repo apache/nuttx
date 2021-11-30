@@ -73,6 +73,7 @@
 #define DR_REG_TWAI_BASE                        0x6002B000
 #define DR_REG_I2S0_BASE                        0x6002D000
 #define DR_REG_APB_SARADC_BASE                  0x60040000
+#define DR_REG_USB_SERIAL_JTAG_BASE             0x60043000
 #define DR_REG_AES_XTS_BASE                     0x600CC000
 
 /* Registers Operation */
@@ -303,6 +304,10 @@
 
 #define SOC_SYSTIMER_BIT_WIDTH_LO (32) /* Bit width of systimer low part */
 #define SOC_SYSTIMER_BIT_WIDTH_HI (20) /* Bit width of systimer high part */
+
+/*  phy registers and memory size */
+
+#define SOC_PHY_DIG_REGS_MEM_SIZE (21*4)
 
 /****************************************************************************
  * Inline Functions

@@ -288,4 +288,23 @@
 
 #define SNIOC_GET_POSITION         _SNIOC(0x0085)
 
+/* Command:      SNIOC_SELFTEST
+ * Description:  Take a selftest for sensor.
+ * Argument:     A argument of selftest for sensor.
+ * Note:         If selftest is failed, return errno, otherwise, return OK.
+ *               This cmd is handled by sensor_ops_s::selftest.
+ */
+
+#define SNIOC_SELFTEST             _SNIOC(0x0086)
+
+/* Command:      SNIOC_SET_CALIBVALUE
+ * Description:  Set calibration value for sensor.
+ * Argument:     Calibration value for the sensor.
+ * Note:         If setting calibvalue failed, a negated errno value is
+ *               returned, otherwise, OK is returned.
+ *               This cmd is handled by sensor_ops_s::set_calibvalue.
+ */
+
+#define SNIOC_SET_CALIBVALUE       _SNIOC(0x0087)
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */

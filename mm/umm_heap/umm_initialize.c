@@ -102,6 +102,7 @@ void umm_initialize(FAR void *heap_start, size_t heap_size)
 void umm_try_initialize(void)
 {
   uintptr_t allocbase;
+  size_t npages = 1;
 
   /* Return if the user heap is already initialized. */
 
@@ -110,16 +111,22 @@ void umm_try_initialize(void)
       return;
     }
 
-  /* Allocate one page. If we provide a zero brkaddr to pgalloc(),
+#ifdef CONFIG_MM_KASAN
+  /* we have to commit all memory for the shadow region */
+
+  npages = CONFIG_ARCH_HEAP_NPAGES;
+#endif
+
+  /* If we provide a zero brkaddr to pgalloc(),
    * it will create the first block in the correct virtual address
    * space and return the start address of that block.
    */
 
-  allocbase = pgalloc(0, 1);
+  allocbase = pgalloc(0, npages);
   DEBUGASSERT(allocbase != 0);
 
   /* Let umm_initialize do the real work. */
 
-  umm_initialize((FAR void *)allocbase, CONFIG_MM_PGSIZE);
+  umm_initialize((FAR void *)allocbase, npages * CONFIG_MM_PGSIZE);
 }
 #endif

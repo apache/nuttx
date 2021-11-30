@@ -107,7 +107,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
 
   if (lineptr == NULL || n == NULL || stream == NULL)
     {
-      ret = -EINVAL;
+      ret = EINVAL;
       goto errout;
     }
 
@@ -138,7 +138,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       dest = (FAR char *)lib_malloc(bufsize);
       if (dest == NULL)
         {
-          ret = -ENOMEM;
+          ret = ENOMEM;
           goto errout;
         }
 
@@ -188,13 +188,9 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
       ch = fgetc(stream);
       if (ch == EOF)
         {
-#ifdef __KERNEL_
-          return -ENODATA;
-#else
           /* errno is not set in this case */
 
           return -1;
-#endif
         }
 
       /* Save the character in the user buffer and increment the number of
@@ -218,12 +214,8 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
   return ncopied;
 
 errout:
-#ifdef __KERNEL_
-  return ret;
-#else
-  set_errno(-ret);
+  set_errno(ret);
   return -1;
-#endif
 }
 
 /****************************************************************************

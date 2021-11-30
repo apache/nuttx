@@ -1,4 +1,4 @@
-/************************************************************************************
+/****************************************************************************
  * include/nuttx/input/touchscreen.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -16,7 +16,7 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 /* The TOUCHSCREEN driver exports a standard character driver interface. By
  * convention, the touchscreen driver is registers as an input device at
@@ -30,20 +30,23 @@
 #ifndef __INCLUDE_NUTTX_INPUT_TOUCHSCREEN_H
 #define __INCLUDE_NUTTX_INPUT_TOUCHSCREEN_H
 
-/************************************************************************************
+/****************************************************************************
  * Included Files
- ************************************************************************************/
+ ****************************************************************************/
 
 #include <nuttx/config.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/mm/circbuf.h>
+#include <nuttx/semaphore.h>
+#include <time.h>
 
 #ifdef CONFIG_INPUT
 
-/************************************************************************************
+/****************************************************************************
  * Pre-processor Definitions
- ************************************************************************************/
+ ****************************************************************************/
 
-/* IOCTL Commands *******************************************************************/
+/* IOCTL Commands ***********************************************************/
 
 /* Common TSC IOCTL commands */
 
@@ -56,28 +59,29 @@
 #define TSC_FIRST            0x0001          /* First common command */
 #define TSC_NCMDS            5               /* Five common commands */
 
-/* User defined ioctl commands are also supported.  However, the TSC driver must
- * reserve a block of commands as follows in order prevent IOCTL command numbers
- * from overlapping.
+/* User defined ioctl commands are also supported.  However, the
+ * TSC driver must reserve a block of commands as follows in order
+ * prevent IOCTL command numbers from overlapping.
  *
- * This is generally done as follows.  The first reservation for TSC driver A would
- * look like:
+ * This is generally done as follows.  The first reservation for
+ * TSC driver A would look like:
  *
- *   TSC_A_FIRST                 (TSC_FIRST + TSC_NCMDS)     <- First command
- *   TSC_A_NCMDS                 42                          <- Number of commands
+ *   TSC_A_FIRST         (TSC_FIRST + TSC_NCMDS)     <- First command
+ *   TSC_A_NCMDS         42                          <- Number of commands
  *
- * IOCTL commands for TSC driver A would then be defined in a TSC A header file like:
+ * IOCTL commands for TSC driver A would then be defined in a
+ * TSC A header file like:
  *
- *   TSCIOC_A_CMD1               _TSIOC(TSC_A_FIRST + 0)
- *   TSCIOC_A_CMD2               _TSIOC(TSC_A_FIRST + 1)
- *   TSCIOC_A_CMD3               _TSIOC(TSC_A_FIRST + 2)
+ *   TSCIOC_A_CMD1       _TSIOC(TSC_A_FIRST + 0)
+ *   TSCIOC_A_CMD2       _TSIOC(TSC_A_FIRST + 1)
+ *   TSCIOC_A_CMD3       _TSIOC(TSC_A_FIRST + 2)
  *   ...
- *   TSCIOC_A_CMD42              _TSIOC(TSC_A_FIRST + 41)
+ *   TSCIOC_A_CMD42      _TSIOC(TSC_A_FIRST + 41)
  *
  * The next reservation would look like:
  *
- *   TSC_B_FIRST                 (TSC_A_FIRST + TSC_A_NCMDS) <- Next command
- *   TSC_B_NCMDS                 77                          <- Number of commands
+ *   TSC_B_FIRST         (TSC_A_FIRST + TSC_A_NCMDS) <- Next command
+ *   TSC_B_NCMDS         77                          <- Number of commands
  */
 
 /* These definitions provide the meaning of all of the bits that may be
@@ -92,9 +96,9 @@
 #define TOUCH_PRESSURE_VALID (1 << 5) /* Hardware provided a valid pressure */
 #define TOUCH_SIZE_VALID     (1 << 6) /* Hardware provided a valid H/W contact size */
 
-/************************************************************************************
+/****************************************************************************
  * Public Types
- ************************************************************************************/
+ ****************************************************************************/
 
 /* This structure contains information about a single touch point.
  * Positional units are device specific.
@@ -102,18 +106,19 @@
 
 struct touch_point_s
 {
-  uint8_t  id;       /* Unique identifies contact; Same in all reports for the contact */
-  uint8_t  flags;    /* See TOUCH_* definitions above */
-  int16_t  x;        /* X coordinate of the touch point (uncalibrated) */
-  int16_t  y;        /* Y coordinate of the touch point (uncalibrated) */
-  int16_t  h;        /* Height of touch point (uncalibrated) */
-  int16_t  w;        /* Width of touch point (uncalibrated) */
-  uint16_t pressure; /* Touch pressure */
+  uint8_t  id;        /* Unique identifies contact; Same in all reports for the contact */
+  uint8_t  flags;     /* See TOUCH_* definitions above */
+  int16_t  x;         /* X coordinate of the touch point (uncalibrated) */
+  int16_t  y;         /* Y coordinate of the touch point (uncalibrated) */
+  int16_t  h;         /* Height of touch point (uncalibrated) */
+  int16_t  w;         /* Width of touch point (uncalibrated) */
+  uint16_t pressure;  /* Touch pressure */
+  uint64_t timestamp; /* Touch event time stamp, in microseconds */
 };
 
-/* The typical touchscreen driver is a read-only, input character device driver.
- * the driver write() method is not supported and any attempt to open the
- * driver in any mode other than read-only will fail.
+/* The typical touchscreen driver is a read-only, input character device
+ * driver.the driver write() method is not supported and any attempt to
+ * open the driver in any mode other than read-only will fail.
  *
  * Data read from the touchscreen device consists only of touch events and
  * touch sample data.  This is reflected by struct touch_sample_s.  This
@@ -121,8 +126,8 @@ struct touch_point_s
  *
  * On some devices, multiple touchpoints may be supported. So this top level
  * data structure is a struct touch_sample_s that "contains" a set of touch
- * points.  Each touch point is managed individually using an ID that identifies
- * a touch from first contact until the end of the contact.
+ * points.  Each touch point is managed individually using an ID that
+ * identifies a touch from first contact until the end of the contact.
  */
 
 struct touch_sample_s
@@ -134,9 +139,102 @@ struct touch_sample_s
 #define SIZEOF_TOUCH_SAMPLE_S(n) \
   (sizeof(struct touch_sample_s) + ((n) - 1) * sizeof(struct touch_point_s))
 
-/************************************************************************************
+/* This structure is for touchscreen lower half driver */
+
+struct touch_lowerhalf_s
+{
+  uint8_t       maxpoint;       /* Maximal point supported by the touchscreen */
+  FAR void      *priv;          /* Save the upper half pointer */
+
+  /**************************************************************************
+   * Name: control
+   *
+   * Description:
+   *   Users can use this interface to implement custom IOCTL.
+   *
+   * Arguments:
+   *   lower   - The instance of lower half of touchscreen device.
+   *   cmd     - User defined specific command.
+   *   arg     - Argument of the specific command.
+   *
+   * Return Value:
+   *   Zero(OK) on success; a negated errno value on failure.
+   *   -ENOTTY - The command is not supported.
+   **************************************************************************/
+
+  CODE int (*control)(FAR struct touch_lowerhalf_s *lower,
+                      int cmd, unsigned long arg);
+};
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+static inline uint64_t touch_get_time(void)
+{
+  struct timespec ts;
+
+#ifdef CONFIG_CLOCK_MONOTONIC
+  clock_gettime(CLOCK_MONOTONIC, &ts);
+#else
+  clock_gettime(CLOCK_REALTIME, &ts);
+#endif
+  return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
+}
+
+/****************************************************************************
  * Public Function Prototypes
- ************************************************************************************/
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: touch_event
+ *
+ * Description:
+ *   The lower half driver pushes touchscreen events through this interface,
+ *   provided by touchscreen upper half.
+ *
+ * Arguments:
+ *   priv    - Upper half driver handle.
+ *   sample  - pointer to data of touch point event.
+ ****************************************************************************/
+
+void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample);
+
+/****************************************************************************
+ * Name: touch_register
+ *
+ * Description:
+ *   This function registers a touchscreen device, the upper half binds
+ *   with hardware device through the lower half instance.
+ *
+ * Arguments:
+ *   lower     - A pointer of lower half instance.
+ *   path      - The path of touchscreen device. such as "/dev/input0"
+ *   buff_nums - Number of the touch points structure.
+ *
+ * Return:
+ *   OK if the driver was successfully registered; A negated errno value is
+ *   returned on any failure.
+ *
+ ****************************************************************************/
+
+int touch_register(FAR struct touch_lowerhalf_s *lower,
+                   FAR const char *path, uint8_t buff_nums);
+
+/****************************************************************************
+ * Name: touch_unregister
+ *
+ * Description:
+ *   This function is used to touchscreen driver to unregister and
+ *   release the occupied resources.
+ *
+ * Arguments:
+ *   lower     - A pointer to an insatnce of touchscreen lower half driver.
+ *   path      - The path of touchscreen device. such as "/dev/input0"
+ ****************************************************************************/
+
+void touch_unregister(FAR struct touch_lowerhalf_s *lower,
+                      FAR const char *path);
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

@@ -103,6 +103,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
@@ -217,6 +218,14 @@ config ARCH_SIZET_LONG
 		C++ library routines because the NuttX size_t might not have
 		the same underlying type as your toolchain's size_t.
 
+config ARCH_COVERAGE
+	bool "Enable code coverage analysis"
+	select HAVE_CXX
+	select HAVE_CXXINITIALIZE
+	default n
+	---help---
+		Generate code coverage
+
 comment "Architecture Options"
 
 config ARCH_NOINTC
@@ -244,8 +253,18 @@ config ARCH_ICACHE
 	bool
 	default n
 
+config ARCH_ICACHE_LOCK
+	bool
+	depends on ARCH_ICACHE
+	default n
+
 config ARCH_DCACHE
 	bool
+	default n
+
+config ARCH_DCACHE_LOCK
+	bool
+	depends on ARCH_DCACHE
 	default n
 
 config ARCH_L2CACHE
@@ -316,6 +335,11 @@ config ARCH_HAVE_PROGMEM
 	default n
 
 config ARCH_HAVE_PROGMEM_READ
+	bool
+	default n
+	depends on ARCH_HAVE_PROGMEM
+
+config ARCH_HAVE_PROGMEM_ERASESTATE
 	bool
 	default n
 	depends on ARCH_HAVE_PROGMEM

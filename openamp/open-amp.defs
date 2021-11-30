@@ -36,6 +36,8 @@ open-amp.zip:
 	$(Q) patch -p0 < 0001-ns-acknowledge-the-received-creation-message.patch
 	$(Q) patch -p0 < 0002-Negotiate-individual-buffer-size-dynamically.patch
 	$(Q) patch -p0 < 0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
+	$(Q) patch -p0 < 0004-openamp-add-ns_unbind_notify-support.patch
+	$(Q) patch -p0 < 0005-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
 
 .openamp_headers: open-amp.zip
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))

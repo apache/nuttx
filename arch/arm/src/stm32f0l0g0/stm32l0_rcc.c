@@ -469,7 +469,7 @@ static inline bool stm32_rcc_enablehse(void)
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARCH_BOARD_STM32_CUSTOM_CLOCKCONFIG
+#ifndef CONFIG_ARCH_BOARD_STM32F0G0L0_CUSTOM_CLOCKCONFIG
 static void stm32_stdclockconfig(void)
 {
   uint32_t regval;

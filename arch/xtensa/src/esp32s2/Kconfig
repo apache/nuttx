@@ -180,7 +180,7 @@ config ESP32S2_RUN_IRAM
 	bool "Run from IRAM"
 	default n
 	---help---
-		This loads all of NuttX inside IRAM.  Used to test somewhat small
+		This loads all of NuttX inside IRAM. Used to test somewhat small
 		images that can fit entirely in IRAM.
 
 menu "ESP32-S2 Peripheral Selection"
@@ -650,17 +650,17 @@ config ESP32S2_OTA_SCRATCH_DEVPATH
 
 endif
 
-comment "General MTD configuration"
+comment "General storage MTD configuration"
 
-config ESP32S2_MTD_OFFSET
-	hex "MTD base address in SPI Flash"
+config ESP32S2_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32S2_HAVE_OTA_PARTITION
 	default 0x250000 if ESP32S2_HAVE_OTA_PARTITION
 	---help---
 		MTD base address in SPI Flash.
 
-config ESP32S2_MTD_SIZE
-	hex "MTD size in SPI Flash"
+config ESP32S2_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
 	default 0x100000
 	---help---
 		MTD size in SPI Flash.
@@ -703,7 +703,7 @@ choice ESP32S2_SPIRAM_SPEED
 	prompt "Set RAM clock speed"
 	default ESP32S2_SPIRAM_SPEED_40M
 	---help---
-	    Select the speed for the SPI RAM chip.
+		Select the speed for the SPI RAM chip.
 
 config ESP32S2_SPIRAM_SPEED_40M
 	bool "40MHz clock speed"
@@ -718,33 +718,33 @@ config ESP32S2_SPIRAM_BOOT_INIT
 	depends on ESP32S2_SPIRAM
 	default "y"
 	---help---
-	    If this is enabled, the SPI RAM will be enabled during initial
-	    boot. Unless you have specific requirements, you'll want to leave
-	    this enabled so memory allocated during boot-up can also be
-	    placed in SPI RAM.
+		If this is enabled, the SPI RAM will be enabled during initial
+		boot. Unless you have specific requirements, you'll want to leave
+		this enabled so memory allocated during boot-up can also be
+		placed in SPI RAM.
 
 config ESP32S2_SPIRAM_IGNORE_NOTFOUND
 	bool "Ignore PSRAM when not found"
 	default "n"
 	depends on ESP32S2_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
 	---help---
-	    Normally, if psram initialization is enabled during compile time
-	    but not found at runtime, it is seen as an error making the CPU
-	    panic. If this is enabled, booting will complete but no PSRAM
-	    will be available.
+		Normally, if psram initialization is enabled during compile time
+		but not found at runtime, it is seen as an error making the CPU
+		panic. If this is enabled, booting will complete but no PSRAM
+		will be available.
 
 config ESP32S2_SPIRAM_2T_MODE
 	bool "Enable SPI PSRAM 2T mode"
 	depends on ESP32S2_SPIRAM
 	default "n"
 	---help---
-	    Enable this option to fix single bit errors inside 64Mbit PSRAM.
-	    Some 64Mbit PSRAM chips have a hardware issue in the RAM which
-	    causes bit errors at multiple fixed bit positions.
-	    Note: If this option is enabled, the 64Mbit PSRAM chip will appear
-	    to be 32Mbit in size.
-	    Applications will not be affected unless the use the esp_himem
-	    APIs, which are not supported in 2T mode.
+		Enable this option to fix single bit errors inside 64Mbit PSRAM.
+		Some 64Mbit PSRAM chips have a hardware issue in the RAM which
+		causes bit errors at multiple fixed bit positions.
+		Note: If this option is enabled, the 64Mbit PSRAM chip will appear
+		to be 32Mbit in size.
+		Applications will not be affected unless the use the esp_himem
+		APIs, which are not supported in 2T mode.
 
 config ESP32S2_SPIRAM_BANKSWITCH_ENABLE
 	bool "Enable bank switching for >4MiB external RAM"
@@ -779,11 +779,11 @@ config SPIRAM_BANKSWITCH_RESERVE
 
 endmenu #SPI RAM Config
 
-menu "WiFi configuration"
+menu "Wi-Fi configuration"
 	depends on ESP32S2_WIRELESS
 
 choice
-	prompt "ESP32-S2 WiFi mode"
+	prompt "ESP32-S2 Wi-Fi mode"
 	default ESP32S2_WIFI_STATION
 
 config ESP32S2_WIFI_STATION
@@ -795,30 +795,30 @@ config ESP32S2_WIFI_SOFTAP
 config ESP32S2_WIFI_STATION_SOFTAP_COEXISTENCE
 	bool "Station + SoftAP coexistence"
 
-endchoice # ESP32S2 WiFi mode
+endchoice # ESP32S2 Wi-Fi mode
 
 config ESP32S2_WIFI_STATIC_RXBUF_NUM
-    int "WiFi static RX buffer number"
+	int "Wi-Fi static RX buffer number"
 	default 10
 
 config ESP32S2_WIFI_DYNAMIC_RXBUF_NUM
-    int "WiFi dynamic RX buffer number"
+	int "Wi-Fi dynamic RX buffer number"
 	default 32
 
 config ESP32S2_WIFI_DYNAMIC_TXBUF_NUM
-    int "WiFi dynamic TX buffer number"
+	int "Wi-Fi dynamic TX buffer number"
 	default 32
 
 config ESP32S2_WIFI_TX_AMPDU
-	bool "WiFi TX AMPDU"
+	bool "Wi-Fi TX AMPDU"
 	default y
 
 config ESP32S2_WIFI_RX_AMPDU
-	bool "WiFi RX AMPDU"
+	bool "Wi-Fi RX AMPDU"
 	default y
 
 config ESP32S2_WIFI_RXBA_AMPDU_WZ
-    int "WiFi RX BA AMPDU windown size"
+	int "Wi-Fi RX BA AMPDU windown size"
 	default 6
 
 config ESP32S2_WLAN_PKTBUF_NUM
@@ -838,27 +838,27 @@ config ESP32S2_WIFI_SCAN_RESULT_SIZE
 		Maximum scan result buffer size.
 
 config ESP32S2_WIFI_SAVE_PARAM
-	bool "Save WiFi Parameters"
+	bool "Save Wi-Fi Parameters"
 	default n
 	---help---
-		If you enable this option, WiFi adapter parameters will be saved
+		If you enable this option, Wi-Fi adapter parameters will be saved
 		into the file system instead of computing them each time.
 
 		These parameters mainly contains:
-		  - SSID
-		  - Password
-		  - BSSID
-		  - PMK(compute when connecting)
-		  - Author mode
-		  - MAC address
-		  - WiFi hardware configuration parameters
+			- SSID
+			- Password
+			- BSSID
+			- PMK(compute when connecting)
+			- Author mode
+			- MAC address
+			- Wi-Fi hardware configuration parameters
 
 config ESP32S2_WIFI_FS_MOUNTPT
-	string "Save WiFi Parameters"
+	string "Wi-Fi parameters mount point"
 	default "/mnt/esp/wifi"
 	depends on ESP32S2_WIFI_SAVE_PARAM
 	---help---
-		Mount point of WiFi storage file system.
+		Mount point of Wi-Fi storage file system.
 
 endmenu # ESP32S2_WIRELESS
 
@@ -987,31 +987,12 @@ config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 	default 32
 	depends on ESP32S2_APP_FORMAT_MCUBOOT
 
-endmenu # Application Image Configuration
-
-if ESP32S2_APP_FORMAT_LEGACY
-
-config ESP32S2_PARTITION
-	bool "ESP32-S2 Partition"
-	default n
-	select ESP32S2_SPIFLASH
-	---help---
-		Decode partition file and initialize partition as MTD.
-
-menu "Partition Configuration"
-	depends on ESP32S2_PARTITION
-
-config ESP32S2_PARTITION_OFFSET
-	hex "Partition offset"
+config ESP32S2_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
 	default "0x8000"
+	depends on ESP32S2_APP_FORMAT_LEGACY
 
-config ESP32S2_PARTITION_MOUNT
-	string "Partition mount point"
-	default "/dev/esp/partition/"
-
-endmenu # Partition Configuration
-
-endif
+endmenu # Application Image Configuration
 
 menu "AES accelerate"
 	depends on ESP32S2_AES_ACCELERATOR

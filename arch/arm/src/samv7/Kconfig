@@ -196,6 +196,10 @@ config SAMV7_HAVE_MCAN1
 	bool
 	default n
 
+config SAMV7_AFEC
+	bool
+	default n
+
 config SAMV7_DAC
 	bool
 	default n
@@ -310,13 +314,155 @@ config SAMV7_ADC
 	bool "12-bit ADC Controller (ADC)"
 	default n
 
-config SAMV7_AFEC0
-	bool "Analog Front End 0 (AFEC0)"
+config SAMV7_AFEC_TIOATRIG
+	bool
 	default n
 
-config SAMV7_AFEC1
+menuconfig SAMV7_AFEC0
+	bool "Analog Front End 0 (AFEC0)"
+	default n
+	select SAMV7_AFEC
+	---help---
+		Support for AFEC0 (ADC) driver.
+
+if SAMV7_AFEC0
+
+config SAMV7_AFEC0_RES
+	int "AFEC0 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+
+config SAMV7_AFEC_DMA
+	bool "DMA Support"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Enables transfer of converted data over DMA.
+
+config SAMV7_AFEC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMV7_AFEC_DMA
+	---help---
+		Number of DMA samples to be transfered. Number of samples less than
+		2 might be inneficient.
+
+choice
+	prompt "AFEC Trigger mode"
+	default SAMV7_AFEC0_TIOATRIG
+
+config SAMV7_AFEC0_TIOATRIG
+	bool "Timer/counter trigger"
+	select SAMV7_AFEC_TIOATRIG
+	---help---
+		Use output of Timer/Counter as a trigger.
+
+config SAMV7_AFEC0_SWTRIG
+	bool "Software trigger"
+	---help---
+		Use software trigger.
+
+endchoice
+
+if SAMV7_AFEC0_TIOATRIG
+
+config SAMV7_AFEC0_TIOAFREQ
+	int "AFEC sampling frequency"
+	default 1000
+	---help---
+		This setting provides the rate at which the timer will driver AFEC
+		sampling.
+
+config SAMV7_AFEC0_TIOACHAN
+	int "Timer/counter channel number"
+	default 0
+	range 0 2
+	---help---
+		Number of TC channel to trigger the AFEC conversion.
+
+endif #SAMV7_AFEC0_TIOATRIG
+
+endif # SAMV7_AFEC0
+
+menuconfig SAMV7_AFEC1
 	bool "Analog Front End 1 (AFEC1)"
 	default n
+	select SAMV7_AFEC
+	---help---
+		Support for AFEC1 (ADC) driver.
+
+if SAMV7_AFEC1
+
+config SAMV7_AFEC1_RES
+	int "AFEC1 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+
+config SAMV7_AFEC_DMA
+	bool "DMA Support"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Enables transfer of converted data over DMA.
+
+config SAMV7_AFEC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMV7_AFEC_DMA
+	---help---
+		Number of DMA samples to be transfered. Number of samples less than
+		2 might be inneficient.
+
+choice
+	prompt "AFEC Trigger mode"
+	default SAMV7_AFEC1_TIOATRIG
+
+config SAMV7_AFEC1_TIOATRIG
+	bool "Timer/counter trigger"
+	select SAMV7_AFEC_TIOATRIG
+	---help---
+		Use output of Timer/Counter as a trigger.
+
+config SAMV7_AFEC1_SWTRIG
+	bool "Software trigger"
+	---help---
+		Use software trigger.
+
+endchoice
+
+if SAMV7_AFEC1_TIOATRIG
+
+config SAMV7_AFEC1_TIOAFREQ
+	int "AFEC sampling frequency"
+	default 1000
+	---help---
+		This setting provides the rate at which the timer will driver ADC
+		sampling.
+
+config SAMV7_AFEC1_TIOACHAN
+	int "Timer/counter channel number"
+	default 3
+	range 3 5
+	---help---
+		Number of TC channel to trigger the AFEC conversion.
+
+endif #SAMV7_AFEC1_TIOATRIG
+
+endif # SAMV7_AFEC1
 
 config SAMV7_MCAN0
 	bool "CAN controller 0 (MCAN0)"
@@ -393,6 +539,17 @@ config SAMV7_QSPI
 	default n
 	select ARCH_USE_MPU
 	select ARM_MPU
+
+if SAMV7_QSPI
+
+config SAMV7_QSPI_SPI_MODE
+	bool "SPI Mode"
+	default n
+	depends on SAMV7_QSPI_IS_SPI
+	---help---
+					Use Quad SPI in SPI mode
+
+endif
 
 config SAMV7_RTC
 	bool "Real Time Clock (RTC)"
@@ -768,6 +925,13 @@ config SAMV7_PROGMEM_NSECTORS
 		This is the number of 128KB FLASH sectors at the end of the program
 		flash memory that will be reserved for use with by the interfaces
 		prototyped in include/nuttx/progmem.h
+
+config SAMV7_PROGMEM_ERASESTATE
+	bool "Flash progmem erasestate ioctl support"
+	default y
+	select ARCH_HAVE_PROGMEM_ERASESTATE
+	---help---
+		Add progmem erasestate ioctl command.
 
 endif # SAMV7_PROGMEM
 

@@ -29,12 +29,22 @@
 
 #include <nuttx/board.h>
 
+#include <stm32.h>
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
 #endif
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+#  include "board_qencoder.h"
+#endif
+
+#ifdef CONFIG_SENSORS_HALL3PHASE
+#  include "board_hall3ph.h"
 #endif
 
 #include "b-g431b-esc1.h"
@@ -109,6 +119,33 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: stm32_adc_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_QENCODER
+  /* Initialize and register the qencoder driver - TIM4 */
+
+  ret = board_qencoder_initialize(0, 4);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_HALL3PHASE
+  /* Initialize and register the 3-phase Hall effect sensor driver */
+
+  ret = board_hall3ph_initialize(0, GPIO_HALL_PHA, GPIO_HALL_PHB,
+                                 GPIO_HALL_PHC);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the hall : %d\n",
+             ret);
+      return ret;
     }
 #endif
 

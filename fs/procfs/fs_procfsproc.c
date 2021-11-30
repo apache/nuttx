@@ -498,8 +498,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   DEBUGASSERT(group != NULL);
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "%-12s%d\n", "PPID:",
-                               group->tg_ppid);
+                               "%-12s%d\n",
+                               "Group:", group->tg_pid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -983,6 +983,20 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
                                "Main task:", group->tg_pid);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                             remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Parent:", group->tg_ppid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 

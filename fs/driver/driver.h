@@ -94,7 +94,7 @@ int find_blockdriver(FAR const char *pathname, int mountflags,
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int block_proxy(FAR struct file *filep, FAR const char *blkdev, int oflags);
 #endif
 
@@ -142,7 +142,7 @@ int mtd_proxy(FAR const char *mtddev, int mountflags,
  *
  ****************************************************************************/
 
-#if defined(CONFIG_MTD) && !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 int find_mtddriver(FAR const char *pathname, FAR struct inode **ppinode);
 #endif
 

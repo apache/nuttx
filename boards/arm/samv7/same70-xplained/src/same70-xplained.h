@@ -451,6 +451,18 @@ int sam_bringup(void);
 #endif
 
 /****************************************************************************
+ * Name: sam_afec_initialize
+ *
+ * Description:
+ *   Initialize and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_AFEC
+int sam_afec_setup(void);
+#endif
+
+/****************************************************************************
  * Name: sam_dacdev_initialize
  *
  * Description:
@@ -486,6 +498,17 @@ void sam_spidev_initialize(void);
 int sam_hsmci_initialize(int slot, int minor);
 #else
 # define sam_hsmci_initialize(s,m) (-ENOSYS)
+#endif
+
+/****************************************************************************
+ * Name: sam_progmem_init
+ *
+ * Description:
+ *   Initialize the FLASH and register the MTD device.
+ ****************************************************************************/
+
+#ifdef HAVE_PROGMEM_CHARDEV
+int sam_progmem_init(void);
 #endif
 
 /****************************************************************************

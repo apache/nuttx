@@ -362,6 +362,30 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
 
+/****************************************************************************
+ * Name: icmp_reply
+ *
+ * Description:
+ *   Send an ICMP message in response to a situation
+ *   RFC 1122: 3.2.2 MUST send at least the IP header and 8 bytes of header.
+ *       MAY send more (we do).
+ *       MUST NOT change this header information.
+ *       MUST NOT reply to a multicast/broadcast IP address.
+ *       MUST NOT reply to a multicast/broadcast MAC address.
+ *       MUST reply to only the first fragment.
+ *
+ * Input Parameters:
+ *   dev   - The device driver structure containing the received packet
+ *   type  - ICMP Message Type, eg. ICMP_DEST_UNREACHABLE
+ *   code  - ICMP Message Code, eg. ICMP_PORT_UNREACH
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void icmp_reply(FAR struct net_driver_s *dev, int type, int code);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

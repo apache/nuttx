@@ -133,6 +133,71 @@ void up_invalidate_icache_all(void);
 #endif
 
 /****************************************************************************
+ * Name: up_lock_icache
+ *
+ * Description:
+ *   Prefetch and lock the instruction cache within the specified region.
+ *   If the specified address if not present in the instruction cache,
+ *   some architectures transfer the line from memory, others wait the
+ *   address be read from memory, and then lock.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ICACHE_LOCK
+void up_lock_icache(uintptr_t start, uintptr_t end);
+#else
+#  define up_lock_icache()
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_icache
+ *
+ * Description:
+ *   Unlock the instruction cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ICACHE_LOCK
+void up_unlock_icache(uintptr_t start, uintptr_t end);
+#else
+#  define up_unlock_icache()
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_icache_all
+ *
+ * Description:
+ *   Unlock the entire contents of instruction cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ICACHE_LOCK
+void up_unlock_icache_all(void);
+#else
+#  define up_unlock_icache_all()
+#endif
+
+/****************************************************************************
  * Name: up_enable_dcache
  *
  * Description:
@@ -301,6 +366,71 @@ void up_flush_dcache(uintptr_t start, uintptr_t end);
 void up_flush_dcache_all(void);
 #else
 #  define up_flush_dcache_all()
+#endif
+
+/****************************************************************************
+ * Name: up_lock_dcache
+ *
+ * Description:
+ *   Prefetch and lock the data cache within the specified region.
+ *   If the specified address is not present in the data cache,
+ *   some architectures transfer the line from memory, others wait the
+ *   address be read from memory, and then lock.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DCACHE_LOCK
+void up_lock_dcache(uintptr_t start, uintptr_t end);
+#else
+#  define up_lock_dcache()
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_dcache
+ *
+ * Description:
+ *   Unlock the data cache within the specified region.
+ *
+ * Input Parameters:
+ *   start - virtual start address of region
+ *   end   - virtual end address of region + 1
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DCACHE_LOCK
+void up_unlock_dcache(uintptr_t start, uintptr_t end);
+#else
+#  define up_unlock_dcache()
+#endif
+
+/****************************************************************************
+ * Name: up_unlock_dcache_all
+ *
+ * Description:
+ *   Unlock the entire contents of data cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_DCACHE_LOCK
+void up_unlock_dcache_all(void);
+#else
+#  define up_unlock_dcache_all()
 #endif
 
 /****************************************************************************

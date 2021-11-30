@@ -26,16 +26,29 @@ BOOTLOADER_SRCDIR  = $(CHIPDIR)/esp-nuttx-bootloader
 BOOTLOADER_VERSION = main
 BOOTLOADER_URL     = https://github.com/espressif/esp-nuttx-bootloader
 BOOTLOADER_OUTDIR  = out
+BOOTLOADER_CONFIG  = $(CHIPDIR)/bootloader.conf
 
 $(BOOTLOADER_SRCDIR):
 	$(Q) git clone $(BOOTLOADER_URL) $(BOOTLOADER_SRCDIR) -b $(BOOTLOADER_VERSION)
 
-ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-
-BOOTLOADER_CONFIG = $(CHIPDIR)/mcuboot.conf
-
 $(BOOTLOADER_CONFIG): $(TOPDIR)/.config
 	$(Q) echo "Creating Bootloader configuration"
+	$(Q) {                                                                                              \
+		[ "$(CONFIG_ESP32_FLASH_2M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_2MB=y";         \
+		[ "$(CONFIG_ESP32_FLASH_4M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y";         \
+		[ "$(CONFIG_ESP32_FLASH_8M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y";         \
+		[ "$(CONFIG_ESP32_FLASH_16M)"       = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y";        \
+		[ "$(CONFIG_ESP32_FLASH_MODE_DIO)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_DIO=y";         \
+		[ "$(CONFIG_ESP32_FLASH_MODE_DOUT)" = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_DOUT=y";        \
+		[ "$(CONFIG_ESP32_FLASH_MODE_QIO)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_QIO=y";         \
+		[ "$(CONFIG_ESP32_FLASH_MODE_QOUT)" = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_QOUT=y";        \
+		[ "$(CONFIG_ESP32_FLASH_FREQ_80M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_80M=y";         \
+		[ "$(CONFIG_ESP32_FLASH_FREQ_40M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_40M=y";         \
+		[ "$(CONFIG_ESP32_FLASH_FREQ_26M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_26M=y";         \
+		[ "$(CONFIG_ESP32_FLASH_FREQ_20M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_20M=y";         \
+		true;                                                                                           \
+	} > $(BOOTLOADER_CONFIG)
+ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 	$(Q) {                                                                                              \
 		echo "CONFIG_ESP_BOOTLOADER_SIZE=0xF000";                                                       \
 		echo "CONFIG_ESP_APPLICATION_PRIMARY_START_ADDRESS=$(CONFIG_ESP32_OTA_PRIMARY_SLOT_OFFSET)";    \
@@ -44,7 +57,16 @@ $(BOOTLOADER_CONFIG): $(TOPDIR)/.config
 		echo "CONFIG_ESP_MCUBOOT_WDT_ENABLE=y";                                                         \
 		echo "CONFIG_ESP_SCRATCH_OFFSET=$(CONFIG_ESP32_OTA_SCRATCH_OFFSET)";                            \
 		echo "CONFIG_ESP_SCRATCH_SIZE=$(CONFIG_ESP32_OTA_SCRATCH_SIZE)";                                \
-	} > $(BOOTLOADER_CONFIG)
+	} >> $(BOOTLOADER_CONFIG)
+else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
+	$(Q) {                                                                                              \
+		echo "CONFIG_PARTITION_TABLE_CUSTOM=y";                                                         \
+		echo "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions.csv\"";                               \
+		echo "CONFIG_PARTITION_TABLE_OFFSET=$(CONFIG_ESP32_PARTITION_TABLE_OFFSET)";                    \
+	} >> $(BOOTLOADER_CONFIG)
+endif
+
+ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 
 bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader binaries"
@@ -57,27 +79,6 @@ clean_bootloader:
 	$(call DELFILE, $(TOPDIR)/mcuboot-esp32.bin)
 
 else ifeq ($(CONFIG_ESP32_APP_FORMAT_LEGACY),y)
-
-BOOTLOADER_CONFIG = $(CHIPDIR)/sdkconfig
-
-$(BOOTLOADER_CONFIG): $(TOPDIR)/.config
-	$(Q) echo "Creating Bootloader configuration"
-	$(Q) {                                                                                       \
-		[ "$(CONFIG_ESP32_FLASH_2M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_2MB=y";  \
-		[ "$(CONFIG_ESP32_FLASH_4M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_4MB=y";  \
-		[ "$(CONFIG_ESP32_FLASH_8M)"        = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y";  \
-		[ "$(CONFIG_ESP32_FLASH_16M)"       = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y"; \
-		[ "$(CONFIG_ESP32_FLASH_MODE_DIO)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_DIO=y";  \
-		[ "$(CONFIG_ESP32_FLASH_MODE_DOUT)" = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_DOUT=y"; \
-		[ "$(CONFIG_ESP32_FLASH_MODE_QIO)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_QIO=y";  \
-		[ "$(CONFIG_ESP32_FLASH_MODE_QOUT)" = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHMODE_QOUT=y"; \
-		[ "$(CONFIG_ESP32_FLASH_FREQ_80M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_80M=y";  \
-		[ "$(CONFIG_ESP32_FLASH_FREQ_40M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_40M=y";  \
-		[ "$(CONFIG_ESP32_FLASH_FREQ_26M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_26M=y";  \
-		[ "$(CONFIG_ESP32_FLASH_FREQ_20M)"  = "y" ] && echo "CONFIG_ESPTOOLPY_FLASHFREQ_20M=y";  \
-		echo "CONFIG_PARTITION_TABLE_CUSTOM=y";                                                  \
-		echo "CONFIG_PARTITION_TABLE_CUSTOM_FILENAME=\"partitions.csv\"";                        \
-	} > $(BOOTLOADER_CONFIG)
 
 bootloader: $(BOOTLOADER_SRCDIR) $(BOOTLOADER_CONFIG)
 	$(Q) echo "Building Bootloader binaries"

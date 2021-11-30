@@ -163,14 +163,20 @@ config SPI_BITORDER
 		Enables capability to select MSB- or LSB-first hardware feature for
 		data transfers.
 
-config SPI_CS_DELAY_CONTROL
-	bool "SPI CS Delay Control"
+config SPI_DELAY_CONTROL
+	bool "SPI Delay Control"
 	default n
 	---help---
-		Enables possibilities to define the SPI-ChipSelect-Delays like
-		time between ChipSelect assertion and first Data-Bit, the time
-		between the last Data-Bit and the de-assertion and the minimum
-		delay between two ChipSelects.
+		Enables possibilities to define the SPI Delays such as
+		SPI-ChipSelect-Delays and inter frame delays.
+
+		SPI-ChipSelect-Delays: are the delay between ChipSelect assertion
+		and first Data-Bit, the delay between the last Data-Bit and the
+		de-assertion and the minimum delay between two ChipSelects.
+
+		The inter-frame delays also know as Inter-Data Idleness, controls the
+		delay between frames. (one transaction of nbits as configured with
+		SPI_SETBITS).
 
 		This option enables the setdelay() interface method.
 

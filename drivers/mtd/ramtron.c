@@ -95,19 +95,16 @@
 
 /* Status register bit definitions */
 
-#define RAMTRON_SR_WIP          (1 << 0)                   /* Bit 0: Write in progress bit */
+/*                                                            Bit 0: Res 0 */
 #define RAMTRON_SR_WEL          (1 << 1)                   /* Bit 1: Write enable latch bit */
 #define RAMTRON_SR_BP_SHIFT     (2)                        /* Bits 2-4: Block protect bits */
-#define RAMTRON_SR_BP_MASK      (7 << RAMTRON_SR_BP_SHIFT)
+#define RAMTRON_SR_BP_MASK      (3 << RAMTRON_SR_BP_SHIFT)
 #define RAMTRON_SR_BP_NONE      (0 << RAMTRON_SR_BP_SHIFT) /* Unprotected */
-#define RAMTRON_SR_BP_UPPER64th (1 << RAMTRON_SR_BP_SHIFT) /* Upper 64th */
-#define RAMTRON_SR_BP_UPPER32nd (2 << RAMTRON_SR_BP_SHIFT) /* Upper 32nd */
-#define RAMTRON_SR_BP_UPPER16th (3 << RAMTRON_SR_BP_SHIFT) /* Upper 16th */
-#define RAMTRON_SR_BP_UPPER8th  (4 << RAMTRON_SR_BP_SHIFT) /* Upper 8th */
-#define RAMTRON_SR_BP_UPPERQTR  (5 << RAMTRON_SR_BP_SHIFT) /* Upper quarter */
-#define RAMTRON_SR_BP_UPPERHALF (6 << RAMTRON_SR_BP_SHIFT) /* Upper half */
-#define RAMTRON_SR_BP_ALL       (7 << RAMTRON_SR_BP_SHIFT) /* All sectors */
-#define RAMTRON_SR_SRWD         (1 << 7)                   /* Bit 7: Status register write protect */
+#define RAMTRON_SR_BP_UPPERQTR  (1 << RAMTRON_SR_BP_SHIFT) /* Upper quarter */
+#define RAMTRON_SR_BP_UPPERHALF (2 << RAMTRON_SR_BP_SHIFT) /* Upper half */
+#define RAMTRON_SR_BP_ALL       (3 << RAMTRON_SR_BP_SHIFT) /* All sectors */
+#define RAMTRON_SR_BP_SHIFT     (2)                        /* Bits 4-6: Reserved Always 0 */
+#define RAMTRON_SR_WPEN         (1 << 7)                   /* Bit 7: Status register write protect */
 
 #define RAMTRON_DUMMY     0xa5
 
@@ -363,7 +360,6 @@ static const struct ramtron_parts_s g_ramtron_parts[] =
 static void ramtron_lock(FAR struct ramtron_dev_s *priv);
 static inline void ramtron_unlock(FAR struct spi_dev_s *dev);
 static inline int ramtron_readid(struct ramtron_dev_s *priv);
-static int ramtron_waitwritecomplete(struct ramtron_dev_s *priv);
 static void ramtron_writeenable(struct ramtron_dev_s *priv);
 static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
                                     FAR const uint8_t *buffer,
@@ -527,58 +523,6 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: ramtron_waitwritecomplete
- ****************************************************************************/
-
-static int ramtron_waitwritecomplete(struct ramtron_dev_s *priv)
-{
-  uint8_t status;
-  int retries = CONFIG_MTD_RAMTRON_WRITEWAIT_COUNT;
-
-  /* Select this FLASH part */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
-
-  /* Send "Read Status Register (RDSR)" command */
-
-  SPI_SEND(priv->dev, RAMTRON_RDSR);
-
-  /* Loop as long as the memory is busy with a write cycle, but limit the
-   * cycles.
-   *
-   * RAMTRON FRAM is never busy per spec compared to flash, and so anything
-   * exceeding the default timeout number is highly suspicious.
-   */
-
-  do
-    {
-      /* Send a dummy byte to generate the clock needed to shift out the
-       * status
-       */
-
-      status = SPI_SEND(priv->dev, RAMTRON_DUMMY);
-    }
-  while ((status & RAMTRON_SR_WIP) != 0 && retries-- > 0);
-
-  /* Deselect the FLASH */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
-
-  if (retries > 0)
-    {
-      finfo("Complete\n");
-      retries = OK;
-    }
-  else
-    {
-      ferr("ERROR: timeout waiting for write completion\n");
-      retries = -EAGAIN;
-    }
-
-  return retries;
-}
-
-/****************************************************************************
  * Name:  ramtron_writeenable
  ****************************************************************************/
 
@@ -628,16 +572,6 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
 
   finfo("page: %08lx offset: %08lx\n", (long)page, (long)offset);
 
-#ifndef CONFIG_RAMTRON_WRITEWAIT
-  /* Wait for any preceding write to complete.  We could simplify things by
-   * perform this wait at the end of each write operation (rather than at
-   * the beginning of ALL operations), but have the wait first will slightly
-   * improve performance.
-   */
-
-  ramtron_waitwritecomplete(priv);
-#endif
-
   /* Enable the write access to the FLASH */
 
   ramtron_writeenable(priv);
@@ -663,16 +597,7 @@ static inline int ramtron_pagewrite(struct ramtron_dev_s *priv,
   SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
   finfo("Written\n");
 
-#ifdef CONFIG_RAMTRON_WRITEWAIT
-  /* Wait for write completion now so we can report any errors to the caller.
-   * Thus the caller will know whether or not if the data is on stable
-   * storage
-   */
-
-  return ramtron_waitwritecomplete(priv);
-#else
   return OK;
-#endif
 }
 
 /****************************************************************************
@@ -846,9 +771,6 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev,
                             FAR uint8_t *buffer)
 {
   FAR struct ramtron_dev_s *priv = (FAR struct ramtron_dev_s *)dev;
-#ifdef CONFIG_RAMTRON_WRITEWAIT
-  uint8_t status;
-#endif
 
   finfo("offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
 
@@ -857,16 +779,6 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev,
    */
 
   ramtron_lock(priv);
-
-#ifndef CONFIG_RAMTRON_WRITEWAIT
-  /* Wait for any preceding write to complete.  We could simplify things by
-   * perform this wait at the end of each write operation (rather than at
-   * the beginning of ALL operations), but have the wait first will slightly
-   * improve performance.
-   */
-
-  ramtron_waitwritecomplete(priv);
-#endif
 
   /* Select this FLASH part */
 
@@ -883,25 +795,6 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev,
   /* Then read all of the requested bytes */
 
   SPI_RECVBLOCK(priv->dev, buffer, nbytes);
-
-#ifdef CONFIG_RAMTRON_WRITEWAIT
-  /* Read the status register. This isn't strictly needed, but it gives us a
-   * chance to detect if SPI transactions are operating correctly, which
-   * allows us to catch complete device failures in the read path. We expect
-   * the status register to just have the write enable bit set to the write
-   * enable state
-   */
-
-  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
-  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
-  SPI_SEND(priv->dev, RAMTRON_RDSR);
-  status = SPI_SEND(priv->dev, RAMTRON_DUMMY);
-  if ((status & ~RAMTRON_SR_SRWD) == 0)
-    {
-      ferr("ERROR: read status failed - got 0x%02x\n", (unsigned)status);
-      nbytes = -EIO;
-    }
-#endif
 
   /* Deselect the FLASH and unlock the SPI bus */
 

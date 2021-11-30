@@ -50,26 +50,32 @@ config ESP32C3_MERGE_BINS
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
 
-choice
-  prompt "SPIFLASH File System"
-  default ESP32C3_SPIFLASH_SMARTFS
-  depends on ESP32C3_SPIFLASH
+choice ESP32C3_SPIFLASH_FS
+	prompt "Mount SPI Flash MTD on bring-up"
+	default ESP32C3_SPIFLASH_SMARTFS
+	depends on ESP32C3_SPIFLASH
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
 
-  config ESP32C3_SPIFLASH_SMARTFS
-	bool "SmartFS"
-	depends on FS_SMARTFS
+	config ESP32C3_SPIFLASH_SMARTFS
+		bool "SmartFS"
+		select FS_SMARTFS
+		select MTD_SMART
 
-  config ESP32C3_SPIFLASH_NXFFS
-	bool "NXFFS"
-	depends on FS_NXFFS
+	config ESP32C3_SPIFLASH_NXFFS
+		bool "NXFFS"
+		select FS_NXFFS
 
-  config ESP32C3_SPIFLASH_SPIFFS
-	bool "SPIFFS"
-	depends on FS_SPIFFS
+	config ESP32C3_SPIFLASH_SPIFFS
+		bool "SPIFFS"
+		select FS_SPIFFS
 
-  config ESP32C3_SPIFLASH_LITTLEFS
-	bool "LittleFS"
-	depends on FS_LITTLEFS
+	config ESP32C3_SPIFLASH_LITTLEFS
+		bool "LittleFS"
+		select FS_LITTLEFS
 
 endchoice
 
@@ -77,22 +83,6 @@ config ESP32C3_SPIFLASH_FS_MOUNT_PT
 	string "File-system Mount Point"
 	depends on ESP32C3_SPIFLASH_LITTLEFS
 	default "/data"
-
-config ESP32C3_SPIFLASH_ENCRYPTION_TEST
-	bool "SPI Flash encryption test"
-	default n
-	depends on ESP32C3_SPIFLASH
-	select DEBUG_ASSERTIONS
-	---help---
-		Enable SPI Flash encryption test. This option will also select
-		DEBUG_ASSERTIONS to enable kernel assert macro.
-
-config ESP32C3_SPIFLASH_TEST_ADDRESS
-	hex "SPI Flash test address"
-	default 0x180000
-	depends on ESP32C3_SPIFLASH_ENCRYPTION_TEST
-	---help---
-		SPI Flash encryption test read/write address.
 
 if LCD_ST7735 || LCD_ST7789 || LCD_GC9A01
 

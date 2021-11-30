@@ -53,7 +53,7 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARM_MPU),y)
+ifneq ($(filter y,$(CONFIG_ARM_MPU) $(CONFIG_ARM_MPU_EARLY_RESET)),)
 CMN_CSRCS += arm_mpu.c
 endif
 

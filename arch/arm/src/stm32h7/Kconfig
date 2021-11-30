@@ -333,6 +333,14 @@ config STM32H7_PROGMEM
 		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
 
+config STM32H7_PROGMEM_ERASESTATE
+	bool "Flash progmem erasestate ioctl support"
+	depends on STM32H7_PROGMEM
+	default y
+	select ARCH_HAVE_PROGMEM_ERASESTATE
+	---help---
+		Add progmem erasestate ioctl command.
+
 menu "STM32H7 Peripheral Selection"
 
 # These "hidden" settings determine whether a peripheral option is available
@@ -402,6 +410,10 @@ config STM32H7_SPI
 	default n
 
 config STM32H7_TIM
+	bool
+	default n
+
+config STM32H7_LPTIM
 	bool
 	default n
 
@@ -708,6 +720,35 @@ config STM32H7_TIM17
 	bool "TIM17"
 	default n
 	select STM32H7_TIM
+
+endmenu # STM32H7 Timer Selection
+
+menu "STM32H7 Low-power Timer Selection"
+
+config STM32H7_LPTIM1
+	bool "LPTIM1"
+	default n
+	select STM32H7_LPTIM
+
+config STM32H7_LPTIM2
+	bool "LPTIM2"
+	default n
+	select STM32H7_LPTIM
+
+config STM32H7_LPTIM3
+	bool "LPTIM3"
+	default n
+	select STM32H7_LPTIM
+
+config STM32H7_LPTIM4
+	bool "LPTIM4"
+	default n
+	select STM32H7_LPTIM
+
+config STM32H7_LPTIM5
+	bool "LPTIM5"
+	default n
+	select STM32H7_LPTIM
 
 endmenu # STM32H7 Timer Selection
 

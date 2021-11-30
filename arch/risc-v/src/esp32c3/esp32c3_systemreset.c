@@ -31,10 +31,106 @@
 
 #include "hardware/esp32c3_rtccntl.h"
 #include "esp32c3.h"
+#include "esp32c3_systemreset.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SHUTDOWN_HANDLERS_NO 4
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static shutdown_handler_t shutdown_handlers[SHUTDOWN_HANDLERS_NO];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_register_shutdown_handler
+ *
+ * Description:
+ *   This function allows you to register a handler that gets invoked before
+ *   the application is restarted.
+ *
+ * Input Parameters:
+ *   handler - Function to execute on restart
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp32c3_register_shutdown_handler(shutdown_handler_t handler)
+{
+  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
+    {
+      if (shutdown_handlers[i] == handler)
+        {
+          return -EEXIST;
+        }
+      else if (shutdown_handlers[i] == NULL)
+        {
+          shutdown_handlers[i] = handler;
+          return OK;
+        }
+    }
+
+  return -ENOMEM;
+}
+
+/****************************************************************************
+ * Name: esp32c3_unregister_shutdown_handler
+ *
+ * Description:
+ *   This function allows you to unregister a handler which was previously
+ *   registered using esp32c3_register_shutdown_handler function.
+ *
+ * Input Parameters:
+ *   handler - Function to execute on restart
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+int esp32c3_unregister_shutdown_handler(shutdown_handler_t handler)
+{
+  for (int i = 0; i < SHUTDOWN_HANDLERS_NO; i++)
+    {
+      if (shutdown_handlers[i] == handler)
+        {
+          shutdown_handlers[i] = NULL;
+          return OK;
+        }
+    }
+
+  return -EINVAL;
+}
+
+/****************************************************************************
+ * Name: up_shutdown_handler
+ *
+ * Description:
+ *   Process all registered shutdown callback functions.
+ *
+ ****************************************************************************/
+
+void up_shutdown_handler(void)
+{
+  for (int i = SHUTDOWN_HANDLERS_NO - 1; i >= 0; i--)
+    {
+      if (shutdown_handlers[i])
+        {
+          shutdown_handlers[i]();
+        }
+    }
+}
 
 /****************************************************************************
  * Name: up_systemreset

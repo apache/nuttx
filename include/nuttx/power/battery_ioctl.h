@@ -54,12 +54,26 @@
 #define BATIOC_CHGDSG        _BATIOC(0x000E)
 #define BATIOC_CLEARFAULTS   _BATIOC(0x000F)
 #define BATIOC_COULOMBS      _BATIOC(0x0010)
+#define BATIOC_CHIPID        _BATIOC(0x0011)
+#define BATIOC_GET_VOLTAGE   _BATIOC(0x0012)
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
  * be supported by lower-half driver:
  */
 
 #define BATTERY_INPUT_CURRENT_EXT_LIM   (-1) /* External input current limit */
+
+/* The change mask definition used to set the mask. */
+
+#define BATTERY_STATE_CHANGED           (1U << 0)
+#define BATTERY_HEALTH_CHANGED          (1U << 1)
+#define BATTERY_ONLINE_CHANGED          (1U << 2)
+#define BATTERY_VOLTAGE_CHANGED         (1U << 3)
+#define BATTERY_CURRENT_CHANGED         (1U << 4)
+#define BATTERY_CAPACITY_CHANGED        (1U << 5)
+#define BATTERY_CELLVOLTAGE_CHANGED     (1U << 6)
+#define BATTERY_TEMPERATURE_CHANGED     (1U << 7)
+#define BATTERY_COULOMBS_CHANGED        (1U << 8)
 
 /****************************************************************************
  * Public Types
@@ -108,7 +122,6 @@ struct batio_operate_msg_s
   };
 };
 
-#if defined(CONFIG_I2C_BQ2429X)
 enum batio_operate_e
 {
   BATIO_OPRTN_NOP = 0,
@@ -122,6 +135,5 @@ enum batio_operate_e
   BATIO_OPRTN_WDOG,
   BATIO_OPRTN_END
 };
-#endif
 
 #endif /* __INCLUDE_NUTTX_POWER_BATTERY_IOCTL_H */

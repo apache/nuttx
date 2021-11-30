@@ -85,7 +85,7 @@ int fclose(FAR FILE *stream)
       /* Remove FILE structure from the stream list */
 
       slist = nxsched_get_streams();
-      stream_semtake(slist);
+      lib_stream_semtake(slist);
 
       for (next = slist->sl_head; next; prev = next, next = next->fs_next)
         {
@@ -109,7 +109,7 @@ int fclose(FAR FILE *stream)
             }
         }
 
-      stream_semgive(slist);
+      lib_stream_semgive(slist);
 
       /* Check that the underlying file descriptor corresponds to an an open
        * file.

@@ -59,11 +59,11 @@
 
 /* Partition offset in SPI Flash */
 
-#define ESP32_PARTITION_OFFSET CONFIG_ESP32_PARTITION_OFFSET
+#define PARTITION_TABLE_OFFSET CONFIG_ESP32_PARTITION_TABLE_OFFSET
 
 /* Partition MTD device mount point */
 
-#define ESP32_PARTITION_MOUNT CONFIG_ESP32_PARTITION_MOUNT
+#define PARTITION_MOUNT_POINT CONFIG_ESP32_PARTITION_MOUNTPT
 
 /****************************************************************************
  * Private Types
@@ -495,12 +495,6 @@ static int esp32_part_ioctl(struct mtd_dev_s *dev, int cmd,
 
   finfo("INFO: cmd=%d(%x) arg=%x\n", cmd, cmd, arg);
 
-  if (!_MTDIOCVALID(cmd))
-    {
-      finfo("INFO: cmd=%d(%x) is error\n", cmd, cmd);
-      return -ENOTTY;
-    }
-
   switch (_IOC_NR(cmd))
     {
       case OTA_IMG_GET_BOOT:
@@ -566,7 +560,7 @@ int esp32_partition_init(void)
   struct mtd_dev_priv *mtd_priv;
   int ret = 0;
   const int num = PARTITION_MAX_SIZE / sizeof(struct partition_info_priv);
-  const char path_base[] = ESP32_PARTITION_MOUNT;
+  const char path_base[] = PARTITION_MOUNT_POINT;
   char label[PARTITION_LABEL_LEN + 1];
   char path[PARTITION_LABEL_LEN + sizeof(path_base)];
 
@@ -594,8 +588,7 @@ int esp32_partition_init(void)
       goto errout_with_mtd;
     }
 
-  ret = MTD_READ(mtd, ESP32_PARTITION_OFFSET,
-                 PARTITION_MAX_SIZE, pbuf);
+  ret = MTD_READ(mtd, PARTITION_TABLE_OFFSET, PARTITION_MAX_SIZE, pbuf);
   if (ret != PARTITION_MAX_SIZE)
     {
       ferr("ERROR: Failed to get read data from MTD\n");

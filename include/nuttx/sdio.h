@@ -78,8 +78,8 @@
  *
  * ---- ---- ---- ---- ---T TTRR RRCC CCCC
  *
- * CCCCCC - Bits  0-5:  6-bit command index (Range 9-63)
- * RRRR   - Bits  6-9:  4-bit response code (R1, R1B, R2-5)
+ * CCCCCC - Bits  0-5:  6-bit command index (Range 0-63)
+ * RRRR   - Bits  6-9:  4-bit response code (R1, R1B, R2-7)
  * TTT    - Bits 10-12: Data transfer type
  */
 
@@ -92,45 +92,57 @@
 #  define MMC_CMDIDX1      1  /* SEND_OP_COND: Sends capacity support information
                                * -Broadcast, R3 response, 31:0=OCR */
 #  define MMCSD_CMDIDX2    2  /* ALL_SEND_CID
-                               * -Broadcast, R2 response */
+                               * -Broadcast, R2 response, 31:0=CID */
 #  define MMC_CMDIDX3      3  /* SET_RELATIVE_ADDR
                                * -Addressed Command, R1 response 31:16=RCA */
 #  define SD_CMDIDX3       3  /* SEND_RELATIVE_ADDR
-                               * -Addressed Command, R6 response 31:16=RCA */
+                               * -Broadcast Command, R6 response 31:16=RCA */
 #  define MMCSD_CMDIDX4    4  /* SET_DSR
-                               * -Broadcast command, no response 31:16=RCA */
+                               * -Broadcast command, no response 31:16=DSR */
+#  define MMC_CMDIDX5      5  /* SLEEP_AWAKE
+                               * -Addressed Command, R1b response 31:16=RCA */
 #  define SDIO_CMDIDX5     5  /* SDIO_SEND_OP_COND
                                * -Addressed Command, R4 response 47:16=IO_OCR */
 #  define MMCSD_CMDIDX6    6  /* HS_SWITCH: Checks switchable function */
 #  define MMCSD_CMDIDX7    7  /* SELECT/DESELECT CARD
                                * -Addressed Command, R1 response 31:16=RCA */
-#  define MMCSD_CMDIDX8    8  /* SD:  IF_COND: Sends SD Memory Card interface condition
-                               *      R7 response;
-                               * MMC: get extended CSD register 512 bytes R1 response */
-#  define MMCSD_CMDIDX9    9  /* SEND_CSD: Asks  card to send its card specific data (CSD)
+#  define MMC_CMDIDX8      8  /* SEND_EXT_CSD: get extended CSD register 512 bytes R1 response */
+#  define SD_CMDIDX8       8  /* SEND_IF_COND: Sends SD Memory Card interface condition
+                               * R7 response */
+#  define MMCSD_CMDIDX9    9  /* SEND_CSD: Asks card to send its card specific data (CSD)
                                * -Addressed Command, R2 response 31:16=RCA */
 #  define MMCSD_CMDIDX10  10  /* SEND_CID: Asks card to send its card identification (CID)
                                * -Addressed Command, R2 response 31:16=RCA */
 #  define MMC_CMDIDX11    11  /* READ_DAT_UNTIL_STOP
                                * -Addressed data transfer command, R1 response 31:0=DADR */
+#  define SD_CMDIDX11     11  /* VOLTAGE_SWITCH
+                               * -Addressed command, R1 response */
 #  define MMCSD_CMDIDX12  12  /* STOP_TRANSMISSION: Forces the card to stop transmission
                                * -Addressed Command, R1b response */
 #  define MMCSD_CMDIDX13  13  /* SEND_STATUS: Asks card to send its status register
                                * -Addressed Command, R1 response 31:16=RCA */
 #  define MMCSD_CMDIDX14  14  /* HS_BUSTEST_READ: */
 #  define MMCSD_CMDIDX15  15  /* GO_INACTIVE_STATE
-                               * Addressed Command, Response 31:16=RCA */
+                               * Addressed Command, no response 31:16=RCA */
 #  define MMCSD_CMDIDX16  16  /* SET_BLOCKLEN: Sets a block length (in bytes)
                                * -Addressed Command, R1 response 31:0=BLEN */
 #  define MMCSD_CMDIDX17  17  /* READ_SINGLE_BLOCK: Reads a block of the selected size
                                * -Addressed data transfer command, R1 response 31:0=DADR */
 #  define MMCSD_CMDIDX18  18  /* READ_MULTIPLE_BLOCK: Continuously transfers blocks from card to host
                                * -Addressed data transfer command, R1 response 31:0=DADR */
-#  define MMCSD_CMDIDX19  19  /* HS_BUSTEST_WRITE: */
+#  define MMC_CMDIDX19    19  /* HS_BUSTEST_WRITE: */
+#  define SD_CMDIDX19     19  /* SEND_TUNING_BLOCK:
+                               * -Addressed data transfer command, R1 response */
 #  define MMC_CMDIDX20    20  /* WRITE_DAT_UNTIL_STOP: (MMC)
-                               * -Addressed data transfer command, R1 response 31:0=DADR R1 */
-#  define MMC_CMDIDX23    23  /* SET_BLOCK_COUNT: (MMC)
-                               * -Addressed command, R1 response 31:0=DADR */
+                               * -Addressed data transfer command, R1 response 31:0=DADR */
+#  define SD_CMDIDX20     20  /* SPEED_CLASS_CONTROL: (SD)
+                               * -Addressed command, R1b response */
+#  define MMC_CMDIDX21    21  /* SEND_TUNING_BLOCK: (MMC)
+                               * -Addressed data transfer command, R1 response */
+#  define SD_CMDIDX22     22  /* ADDRESS_EXTENSION: (SD)
+                               * -Addressed command, R1 response */
+#  define MMCSD_CMDIDX23  23  /* SET_BLOCK_COUNT: Sets the block count for read/write
+                               * -Addressed command, R1 response 31:0=BCNT */
 #  define MMCSD_CMDIDX24  24  /* WRITE_BLOCK: Writes a block of the selected size
                                * -Addressed data transfer command, R1 response 31:0=DADR */
 #  define MMCSD_CMDIDX25  25  /* WRITE_MULTIPLE_BLOCK: Continuously writes blocks of data
@@ -144,6 +156,8 @@
 #  define MMCSD_CMDIDX29  29  /* CLR_WRITE_PROT: Clears the write protection bit of group
                                * -Addressed Command, R1b response 31:0=DADR */
 #  define MMCSD_CMDIDX30  30  /* SEND_WRITE_PROT: Asks card to send state of write protection bits
+                               * -Addressed data transfer command, R1 response 31:0=WADR */
+#  define MMC_CMDIDX31    31  /* SEND_WRITE_PROT_TYPE: Asks card to send state of write protection type bits
                                * -Addressed data transfer command, R1 response 31:0=WADR */
 #  define SD_CMDIDX32     32  /* ERASE_GRP_START: Sets address of first block to erase (SD)
                                * -Addressed Command, R1 response 31:0=DADR */
@@ -163,8 +177,30 @@
                                * -Addressed Command, R4 response (Complex) */
 #  define MMC_CMDIDX40    40  /* GO_IRQ_STATE: (MMC)
                                * -Broadcast command, R5 response */
+#  define SD_CMDIDX40     40  /* DPS: (SD)
+                               * -Addressed data transfer command, R1 response */
 #  define MMCSD_CMDIDX42  42  /* LOCK_UNLOCK: Used to Set/Reset the Password or lock/unlock card
-                               * -Addressed data transfer command, R1b response */
+                               * -Addressed data transfer command, R1 response */
+#  define MMC_CMDIDX44    44  /* QUEUED_TASK_PARAMS: (MMC)
+                               * -Addressed Command, R1 response */
+#  define MMC_CMDIDX45    45  /* QUEUED_TASK_ADDRESS: (MMC)
+                               * -Addressed Command, R1 response */
+#  define MMC_CMDIDX46    46  /* EXECUTE_READ_TASK: (MMC)
+                               * -Addressed data transfer command, R1 response */
+#  define MMC_CMDIDX47    47  /* EXECUTE_WRITE_TASK: (MMC)
+                               * -Addressed data transfer command, R1 response */
+#  define MMC_CMDIDX48    48  /* CMDQ_TASK_MGMT: (MMC)
+                               * -Addressed Command, R1b response */
+#  define MMC_CMDIDX49    49  /* SET_TIME: (MMC)
+                               * -Addressed data transfer command, R1 response */
+#  define SDIO_CMDIDX52   52  /* IO_RW_DIRECT: (SDIO)
+                               * -Addressed command, R5 response */
+#  define MMC_CMDIDX53    53  /* PROTOCOL_RD: (MMC)
+                               * -Addressed data transfer command, R1 response */
+#  define SDIO_CMDIDX53   53  /* IO_RW_EXTENDED: (SDIO)
+                               * -Addressed data transfer command, R5 response */
+#  define MMC_CMDIDX54    54  /* PROTOCOL_WR: (MMC)
+                               * -Addressed data transfer command, R1 response */
 #  define SD_CMDIDX55     55  /* APP_CMD: Tells card that the next command is an application specific command
                                * - Addressed Command, R1 response 31:16=RCA */
 #  define MMCSD_CMDIDX56  56  /* GEN_CMD: Used transfer a block to or get block from card
@@ -203,12 +239,12 @@
 
 /* Response Encodings:
  *
- * xxxx xxxx xxxx xxxx OSMX XXRR RRCC CCCC
+ * xxxx xxxx xxxx xxxD OSMT TTRR RRCC CCCC
  *
  * x - Bit not used
  * C - Bits 0-5:   Command index
  * R - Bits 6-9:   Response type
- * X - Bits 10-12: Data transfer type
+ * T - Bits 10-12: Data transfer type
  * M - Bit 13:     MMC Multiblock transfer
  * S - Bit 14:     Stop data transfer
  * O - Bit 15:     Open drain
@@ -252,37 +288,44 @@
 /* Fully decorated MMC, SD, SDIO commands */
 
 #define MMCSD_CMD0      (MMCSD_CMDIDX0 |MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)
-#define MMC_CMD1        (MMC_CMDIDX1   |MMCSD_R3_RESPONSE |MMCSD_NODATAXFR |MMCSD_OPENDRAIN)
+#define MMC_CMD1        (MMC_CMDIDX1   |MMCSD_R3_RESPONSE |MMCSD_NODATAXFR|MMCSD_OPENDRAIN)
 #define MMCSD_CMD2      (MMCSD_CMDIDX2 |MMCSD_R2_RESPONSE |MMCSD_NODATAXFR)
 #define MMC_CMD3        (MMC_CMDIDX3   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define SD_CMD3         (SD_CMDIDX3    |MMCSD_R6_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD4      (MMCSD_CMDIDX4 |MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)
+#define MMC_CMD5        (MMC_CMDIDX5   |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define SDIO_CMD5       (SDIO_CMDIDX5  |MMCSD_R4_RESPONSE |MMCSD_NODATAXFR)
-#define MMCSD_CMD6      (MMCSD_CMDIDX6 |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMCSD_CMD6      (MMCSD_CMDIDX6 |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD7S     (MMCSD_CMDIDX7 |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD7D     (MMCSD_CMDIDX7 |MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)  /* No response when de-selecting card */
-#define SD_CMD8         (MMCSD_CMDIDX8 |MMCSD_R7_RESPONSE |MMCSD_NODATAXFR)
-#define MMC_CMD8        (MMCSD_CMDIDX8 |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMC_CMD8        (MMC_CMDIDX8   |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define SD_CMD8         (SD_CMDIDX8    |MMCSD_R7_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD9      (MMCSD_CMDIDX9 |MMCSD_R2_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD10     (MMCSD_CMDIDX10|MMCSD_R2_RESPONSE |MMCSD_NODATAXFR)
 #define MMC_CMD11       (MMC_CMDIDX11  |MMCSD_R1_RESPONSE |MMCSD_RDSTREAM )
-#define MMCSD_CMD12     (MMCSD_CMDIDX12|MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR |MMCSD_STOPXFR)
+#define SD_CMD11        (SD_CMDIDX11   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMCSD_CMD12     (MMCSD_CMDIDX12|MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR|MMCSD_STOPXFR)
 #define MMCSD_CMD13     (MMCSD_CMDIDX13|MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
-#define MMCSD_CMD14     (MMCSD_CMDIDX14|MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMCSD_CMD14     (MMCSD_CMDIDX14|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
 #define MMCSD_CMD15     (MMCSD_CMDIDX15|MMCSD_NO_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD16     (MMCSD_CMDIDX16|MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD17     (MMCSD_CMDIDX17|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
-#define MMCSD_CMD18     (MMCSD_CMDIDX18|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR |MMCSD_MULTIBLOCK)
-#define MMCSD_CMD19     (MMCSD_CMDIDX19|MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
-#define MMC_CMD20       (MMC_CMDIDX20  |MMCSD_R1B_RESPONSE|MMCSD_WRSTREAM )
-#define MMC_CMD23       (MMC_CMDIDX23  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMCSD_CMD18     (MMCSD_CMDIDX18|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR|MMCSD_MULTIBLOCK)
+#define MMC_CMD19       (MMC_CMDIDX19  |MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
+#define SD_CMD19        (SD_CMDIDX19   |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMC_CMD20       (MMC_CMDIDX20  |MMCSD_R1_RESPONSE |MMCSD_WRSTREAM )
+#define SD_CMD20        (SD_CMDIDX20   |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
+#define MMC_CMD21       (MMC_CMDIDX21  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define SD_CMD22        (SD_CMDIDX22   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMCSD_CMD23     (MMCSD_CMDIDX23|MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define MMCSD_CMD24     (MMCSD_CMDIDX24|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
-#define MMCSD_CMD25     (MMCSD_CMDIDX25|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR |MMCSD_MULTIBLOCK)
+#define MMCSD_CMD25     (MMCSD_CMDIDX25|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR|MMCSD_MULTIBLOCK)
 #define MMCSD_CMD26     (MMCSD_CMDIDX26|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
 #define MMCSD_CMD27     (MMCSD_CMDIDX27|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
 #define MMCSD_CMD28     (MMCSD_CMDIDX28|MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD29     (MMCSD_CMDIDX29|MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMCSD_CMD30     (MMCSD_CMDIDX30|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMC_CMD31       (MMC_CMDIDX31  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
 #define SD_CMD32        (SD_CMDIDX32   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define SD_CMD33        (SD_CMDIDX33   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
 #define MMC_CMD34       (MMC_CMDIDX34  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
@@ -292,9 +335,22 @@
 #define MMCSD_CMD38     (MMCSD_CMDIDX38|MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
 #define MMC_CMD39       (MMC_CMDIDX39  |MMCSD_R4_RESPONSE |MMCSD_NODATAXFR)
 #define MMC_CMD40       (MMC_CMDIDX40  |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
-#define MMCSD_CMD42     (MMCSD_CMDIDX42|MMCSD_R1B_RESPONSE|MMCSD_WRDATAXFR)
+#define SD_CMD40        (SD_CMDIDX40   |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMCSD_CMD42     (MMCSD_CMDIDX42|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
+#define MMC_CMD44       (MMC_CMDIDX44  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMC_CMD45       (MMC_CMDIDX45  |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
+#define MMC_CMD46       (MMC_CMDIDX46  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR|MMCSD_MULTIBLOCK)
+#define MMC_CMD47       (MMC_CMDIDX47  |MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR|MMCSD_MULTIBLOCK)
+#define MMC_CMD48       (MMC_CMDIDX48  |MMCSD_R1B_RESPONSE|MMCSD_NODATAXFR)
+#define MMC_CMD49       (MMC_CMDIDX49  |MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
+#define SDIO_CMD52      (SDIO_CMDIDX52 |MMCSD_R5_RESPONSE |MMCSD_NODATAXFR)
+#define MMC_CMD53       (MMC_CMDIDX53  |MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR|MMCSD_MULTIBLOCK)
+#define SDIO_CMD53RD    (SDIO_CMDIDX53 |MMCSD_R5_RESPONSE |MMCSD_RDDATAXFR)
+#define SDIO_CMD53WR    (SDIO_CMDIDX53 |MMCSD_R5_RESPONSE |MMCSD_WRDATAXFR)
+#define MMC_CMD54       (MMC_CMDIDX54  |MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR|MMCSD_MULTIBLOCK)
 #define SD_CMD55        (SD_CMDIDX55   |MMCSD_R1_RESPONSE |MMCSD_NODATAXFR)
-#define MMCSD_CMD56     (MMCSD_CMDIDX56|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMCSD_CMD56RD   (MMCSD_CMDIDX56|MMCSD_R1_RESPONSE |MMCSD_RDDATAXFR)
+#define MMCSD_CMD56WR   (MMCSD_CMDIDX56|MMCSD_R1_RESPONSE |MMCSD_WRDATAXFR)
 
 /* SD/SDIO APP commands (must be preceded by CMD55) */
 
@@ -343,12 +399,17 @@
 #define SDIO_CCCR_FN0_BLKSIZE_1          0x11 /* FN0 Block Size            */
 #define SDIO_CCCR_POWER                  0x12 /* Power Control             */
 #define SDIO_CCCR_HIGHSPEED              0x13 /* High-Speed                */
-#define SDIO_CCCR_RFU                    0x14 /* Reserved for future use   */
+#define SDIO_CCCR_UHSI                   0x14 /* UHS-I Support             */
+#define SDIO_CCCR_DRIVER                 0x15 /* Driver Strength           */
+#define SDIO_CCCR_INTEXT                 0x16 /* Interrupt Extension       */
 #define SDIO_CCCR_VENDOR                 0xF0 /* Reserved for Vendors      */
 
 #define SDIO_CCCR_BUS_IF_WIDTH_MASK      0x03 /* Bus width configuration   */
 #define SDIO_CCCR_BUS_IF_1_BIT           0x01 /* 1 bit bus width setting   */
 #define SDIO_CCCR_BUS_IF_4_BITS          0x02 /* 4 bits bus width setting  */
+
+#define SDIO_CCCR_HIGHSPEED_SHS          0x01 /* High-Speed mode capability */
+#define SDIO_CCCR_HIGHSPEED_EHS          0x02 /* Enable High-Speed mode    */
 
 #define SDIO_FBR_SHIFT   8                     /* FBR bit shift            */
 #define SDIO_FN1_BR_BASE (1 << SDIO_FBR_SHIFT) /* Func 1 registers base    */
@@ -375,7 +436,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_LOCK(dev,state)  ((dev)->lock(dev,state))
+#define SDIO_LOCK(dev,state) ((dev)->lock(dev,state))
 
 /****************************************************************************
  * Name: SDIO_RESET
@@ -503,7 +564,6 @@
  *   dev  - An instance of the SDIO device interface
  *   cmd  - The command to send.  See 32-bit command definitions above.
  *   arg  - 32-bit argument required with some commands
- *   data - A reference to data required with some commands
  *
  * Returned Value:
  *   None
@@ -656,7 +716,7 @@
  *   Enable/disable of a set of SDIO wait events.  This is part of the
  *   the SDIO_WAITEVENT sequence.  The set of to-be-waited-for events is
  *   configured before calling either calling SDIO_DMARECVSETUP,
- *   SDIO_DMASENDSETUP, or or SDIO_WAITEVENT.  This is the recommended
+ *   SDIO_DMASENDSETUP, or SDIO_WAITEVENT.  This is the recommended
  *   ordering:
  *
  *     SDIO_WAITENABLE:    Discard any pending interrupts, enable event(s)
@@ -678,13 +738,16 @@
  *   dev      - An instance of the SDIO device interface
  *   eventset - A bitset of events to enable or disable (see SDIOWAIT_*
  *              definitions). 0=disable; 1=enable.
+ *   timeout  - Maximum time in milliseconds to wait.  Zero means immediate
+ *              timeout with no wait.  The timeout value is ignored if
+ *              SDIOWAIT_TIMEOUT is not included in the waited-for eventset.
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-#define SDIO_WAITENABLE(dev,eventset,timeout)  ((dev)->waitenable(dev,eventset,timeout))
+#define SDIO_WAITENABLE(dev,eventset,timeout) ((dev)->waitenable(dev,eventset,timeout))
 
 /****************************************************************************
  * Name: SDIO_EVENTWAIT
@@ -696,10 +759,7 @@
  *   can be used again.
  *
  * Input Parameters:
- *   dev     - An instance of the SDIO device interface
- *   timeout - Maximum time in milliseconds to wait.  Zero means immediate
- *             timeout with no wait.  The timeout value is ignored if
- *             SDIOWAIT_TIMEOUT is not included in the waited-for eventset.
+ *   dev - An instance of the SDIO device interface
  *
  * Returned Value:
  *   Event set containing the event(s) that ended the wait.  Should always
@@ -707,7 +767,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_EVENTWAIT(dev)  ((dev)->eventwait(dev))
+#define SDIO_EVENTWAIT(dev) ((dev)->eventwait(dev))
 
 /****************************************************************************
  * Name: SDIO_CALLBACKENABLE
@@ -731,7 +791,7 @@
  *
  ****************************************************************************/
 
-#define SDIO_CALLBACKENABLE(dev,eventset)  ((dev)->callbackenable(dev,eventset))
+#define SDIO_CALLBACKENABLE(dev,eventset) ((dev)->callbackenable(dev,eventset))
 
 /****************************************************************************
  * Name: SDIO_REGISTERCALLBACK

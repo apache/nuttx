@@ -295,9 +295,9 @@
  * This table is decided by hardware, don't touch this.
  */
 
-#define ETS_WIFI_MAC_INTR_SOURCE                0  /* Interrupt of WiFi MAC, level */
-#define ETS_WIFI_MAC_NMI_SOURCE                 1  /* Interrupt of WiFi MAC, NMI, use if MAC have bug to fix in NMI */
-#define ETS_WIFI_BB_INTR_SOURCE                 2  /* Interrupt of WiFi BB, level, we can do some calibartion */
+#define ETS_WIFI_MAC_INTR_SOURCE                0  /* Interrupt of Wi-Fi MAC, level */
+#define ETS_WIFI_MAC_NMI_SOURCE                 1  /* Interrupt of Wi-Fi MAC, NMI, use if MAC have bug to fix in NMI */
+#define ETS_WIFI_BB_INTR_SOURCE                 2  /* Interrupt of Wi-Fi BB, level, we can do some calibartion */
 #define ETS_BT_MAC_INTR_SOURCE                  3  /* will be cancelled */
 #define ETS_BT_BB_INTR_SOURCE                   4  /* Interrupt of BT BB, level */
 #define ETS_BT_BB_NMI_SOURCE                    5  /* Interrupt of BT BB, NMI, use if BB have bug to fix in NMI */
@@ -738,7 +738,7 @@ extern int rom_i2c_writereg(int block, int block_id, int reg_add,
 #define BB_DC_EST_FORCE_PD_V        1
 #define BB_DC_EST_FORCE_PD_S        0
 
-/* Some of the WiFi RX control registers.
+/* Some of the Wi-Fi RX control registers.
  * PU/PD fields defined here are used in sleep related functions.
  */
 

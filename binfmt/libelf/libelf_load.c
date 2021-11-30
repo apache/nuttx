@@ -37,7 +37,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/addrenv.h>
 #include <nuttx/elf.h>
-#include <nuttx/mm/mm.h>
 #include <nuttx/binfmt/elf.h>
 
 #include "libelf.h"
@@ -291,13 +290,6 @@ int elf_load(FAR struct elf_loadinfo_s *loadinfo)
       berr("ERROR: elf_addrenv_select() failed: %d\n", ret);
       goto errout_with_buffers;
     }
-
-#ifdef CONFIG_BUILD_KERNEL
-  /* Initialize the user heap */
-
-  umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE,
-                 up_addrenv_heapsize(&loadinfo->addrenv));
-#endif
 #endif
 
   /* Load ELF section data into memory */
