@@ -1027,6 +1027,17 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
             }
             break;
 
+          case MAX86178_FIFOTAG_PRE_EXP_OVF:     /* PPG exposure overflow. */
+            {
+              temp_ppg[counter_ppg].ppg = MAX86178_ABS_PPG_MAX;
+              temp_ppg[counter_ppg].timestamp = priv->timestamp
+                                   - priv->sensor[MAX86178_PPG_IDX].interval
+                                   * (priv->sensor[MAX86178_PPG_IDX].fifowtm
+                                   - counter_ppg - 1);
+              counter_ppg++;
+            }
+            break;
+
           case MAX86178_FIFOTAG_PRE_ECG:         /* ECG data tag. */
             {
               temp_ecg[counter_ecg].ecg =

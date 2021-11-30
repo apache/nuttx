@@ -1613,12 +1613,16 @@
 
 /* Native attributes of registers */
 
-#define MAX86178_FIFO_BYTES_PER_DATA    3        /* Bytes per data in FIFO */
-#define MAX86178_FIFO_SIZE              256      /* Max samples in FIFO */
-#define MAX86178_PLL_FREQ_LOCK_TIME     4        /* Unit in ms (max.) */
-#define MAX86178_PLL_PHASE_LOCK_TIME    9        /* Unit in ms (max.) */
-#define MAX86178_FRCLKDIV_MAX           32766    /* Max. FR_CLK_DIV */
-#define MAX86178_FRCLKDIV_MIN           16       /* Min. FR_CLK_DIV */
+#define MAX86178_FIFO_BYTES_PER_DATA    3          /* Bytes/data in FIFO */
+#define MAX86178_FIFO_SIZE              256        /* Max samples in FIFO */
+#define MAX86178_PLL_FREQ_LOCK_TIME     4          /* Unit in ms (max.) */
+#define MAX86178_PLL_PHASE_LOCK_TIME    9          /* Unit in ms (max.) */
+#define MAX86178_FRCLKDIV_MAX           32766      /* Max. FR_CLK_DIV */
+#define MAX86178_FRCLKDIV_MIN           16         /* Min. FR_CLK_DIV */
+
+/* Absolute parameters */
+
+#define MAX86178_ABS_PPG_MAX            0x0fffff   /* Max PPG value */
 
 /****************************************************************************
  * Public Types
