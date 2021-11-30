@@ -803,8 +803,8 @@ FAR struct mtd_dev_s *mtd_partition(FAR struct mtd_dev_s *mtd,
    * beyond the sub-region.
    */
 
-  erasestart =(firstblock + blkpererase - 1) / blkpererase; /* included */
-  eraseend   =(firstblock + nblocks        ) / blkpererase; /* excluded */
+  erasestart = ( firstblock + blkpererase - 1 ) / blkpererase; /* included */
+  eraseend   = ( firstblock + nblocks         ) / blkpererase; /* excluded */
 
   if (erasestart >= eraseend)
     {
