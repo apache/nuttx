@@ -178,6 +178,9 @@ extern const struct mountpt_operations cromfs_operations;
 #ifdef CONFIG_FS_UNIONFS
 extern const struct mountpt_operations unionfs_operations;
 #endif
+#ifdef CONFIG_FS_RPMSGFS
+extern const struct mountpt_operations rpmsgfs_operations;
+#endif
 
 static const struct fsmap_t g_nonbdfsmap[] =
 {
@@ -207,6 +210,9 @@ static const struct fsmap_t g_nonbdfsmap[] =
 #endif
 #ifdef CONFIG_FS_UNIONFS
     { "unionfs", &unionfs_operations },
+#endif
+#ifdef CONFIG_FS_RPMSGFS
+    { "rpmsgfs", &rpmsgfs_operations },
 #endif
     { NULL, NULL },
 };

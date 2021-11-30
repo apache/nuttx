@@ -36,23 +36,3 @@ config FS_HOSTFS
 		option to enable the handling of the trap.
 		Theoretically, it can work for other environments as well.
 		E.g. a real hardware + JTAG + OpenOCD.
-
-config FS_HOSTFS_RPMSG
-	bool "Host File System Rpmsg"
-	default n
-	depends on FS_HOSTFS
-	depends on OPENAMP
-	---help---
-		Use Host file system to mount directories through rpmsg.
-		This is the driver that sending the message.
-
-		This effectively replaces the ordinary hostfs backend.
-		Right now, there is no way to enable both backends.
-
-config FS_HOSTFS_RPMSG_SERVER
-	bool "Host File System Rpmsg Server"
-	default n
-	depends on OPENAMP
-	---help---
-		Use Host file system to mount directories through rpmsg.
-		This is the driver that receiving the message.
