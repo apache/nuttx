@@ -69,8 +69,7 @@ void sched_dumpstack(pid_t tid)
                       DUMP_FORMAT, DUMP_WIDTH, address[i]);
       if (i == size - 1 || ret % DUMP_LINESIZE == 0)
         {
-          syslog(LOG_INFO, "[BackTrace|%2d|%d]: %s\n",
-                           tid, i / DUMP_NITEM, line);
+          syslog(LOG_EMERG, "backtrace|%2d: %s\n", tid, line);
           ret = 0;
         }
     }
