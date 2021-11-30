@@ -124,5 +124,24 @@
 
 int stm32_qeinitialize(FAR const char *devpath, int tim);
 
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+/****************************************************************************
+ * Name: stm32_qe_index_init
+ *
+ * Description:
+ *   Register the encoder index pin to a given Qencoder timer
+ *
+ * Input Parameters:
+ *   tim  - The qenco timer number
+ *   gpio - gpio pin configuration
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int stm32_qe_index_init(int tim, uint32_t gpio);
+#endif
+
 #endif /* CONFIG_SENSORS_QENCODER */
 #endif /* __ARCH_ARM_SRC_STM32_STM32_QENCODER_H */

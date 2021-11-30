@@ -178,4 +178,12 @@ config MM_CIRCBUF
 	---help---
 		Build in support for the circular buffer management.
 
+config MM_KASAN
+	bool "Kernel Address Sanitizer"
+	default n
+	---help---
+		KASan is a fast compiler-based tool for detecting memory
+		bugs in native code. After turn on this option, Please
+		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
+
 source "mm/iob/Kconfig"

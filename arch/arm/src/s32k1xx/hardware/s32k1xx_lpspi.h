@@ -299,6 +299,7 @@
 #    define LPSPI_TCR_MSBF             (0 << 23) /* MSB First */
 #define LPSPI_TCR_PCS_SHIFT            (24)      /* Bits 24-25: Peripheral Chip Select */
 #define LPSPI_TCR_PCS_MASK             (3 << LPSPI_TCR_PCS_SHIFT)
+#    define LPSPI_TCR_PCS(n)           (((n) << LPSPI_TCR_PCS_SHIFT) & LPSPI_TCR_PCS_MASK)
 #    define LPSPI_TCR_PCS_0            (0 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[0] */
 #    define LPSPI_TCR_PCS_1            (1 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[1] */
 #    define LPSPI_TCR_PCS_2            (2 << LPSPI_TCR_PCS_SHIFT)  /* Transfer using LPSPI_PCS[2] */

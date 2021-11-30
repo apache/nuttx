@@ -121,6 +121,36 @@ extern "C"
 #endif
 
 /****************************************************************************
+ * Name: mpu_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled during
+ *   MPU initialization.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MPU_RESET)
+void mpu_reset(void);
+#else
+#  define mpu_reset() do { } while (0)
+#endif
+
+/****************************************************************************
+ * Name: mpu_early_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled immediately
+ *   after reset.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARM_MPU_EARLY_RESET)
+void mpu_early_reset(void);
+#else
+#  define mpu_early_reset() do { } while (0)
+#endif
+
+/****************************************************************************
  * Name: mpu_allocregion
  *
  * Description:

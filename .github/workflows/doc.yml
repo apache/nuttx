@@ -19,14 +19,14 @@ jobs:
   build-html:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
           python-version: '3.8'
       - name: Generate Documentation
         run: |
           cd Documentation/
-          pip3 install pipenv
+          pip3 install pipenv==2021.5.29
           pipenv install
           pipenv run make html
       - uses: actions/upload-artifact@v2

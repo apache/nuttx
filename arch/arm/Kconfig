@@ -231,6 +231,7 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_WFE_SEV
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
@@ -297,6 +298,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_PROGMEM
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_I2CRESET
@@ -821,11 +823,9 @@ config ARCH_TRUSTZONE_SECURE
 
 config ARCH_TRUSTZONE_NONSECURE
 	bool "All CPUs operate non-secure state"
-	depends on EXPERIMENTAL
 
 config ARCH_TRUSTZONE_BOTH
 	bool "CPUs operate in both secure and non-secure states"
-	depends on EXPERIMENTAL
 
 endchoice # TrustZone Configuration
 
@@ -878,6 +878,34 @@ config ARM_MPU_NREGIONS
 	depends on ARM_MPU
 	---help---
 		This is the number of protection regions supported by the MPU.
+
+config ARM_MPU_RESET
+	bool "MPU Reset before MPU initialization"
+	default n
+	depends on ARM_MPU
+	---help---
+		Configures the MPU initialization sequence to disable the MPU
+		before configuring it.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This may be all that is
+		needed to allow booting if the previous MPU configuration allow
+		the system to execute the MPU initialization code. If not use
+		ARM_MPU_EARLY_RESET.
+
+config ARM_MPU_EARLY_RESET
+	bool "MPU Early Reset"
+	default n
+	depends on ARCH_HAVE_MPU
+	---help---
+		Configures the early system initialization sequence to disable the MPU.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This is useful if the system
+		faults during bbs, or data initialization or before the
+		stm32_mpuinitialize can be called.
+
+		Note: This can be used without MPU Support enabled.
 
 config ARCH_HAVE_LOWVECTORS
 	bool
@@ -947,6 +975,16 @@ config ARM_SEMIHOSTING_HOSTFS
 
 		This doesn't support some directory operations like readdir because
 		of the limitations of semihosting mechanism.
+
+if ARM_SEMIHOSTING_HOSTFS
+
+config ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
+	bool "Cache coherence in semihosting hostfs"
+	depends on ARCH_DCACHE
+	---help---
+		Flush & Invalidte cache before & after bkpt instruction.
+
+endif
 
 if ARCH_ARMV6M
 source "arch/arm/src/armv6-m/Kconfig"

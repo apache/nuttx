@@ -108,7 +108,7 @@
 
 #define INT8_C(x)   x
 #define INT16_C(x)  x
-#define INT32_C(x)  x
+#define INT32_C(x)  x ## l
 #define INT64_C(x)  x ## ll
 
 #define UINT8_C(x)  x

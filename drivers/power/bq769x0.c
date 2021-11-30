@@ -74,18 +74,6 @@
 #define WR_ADDR(a)  ((a) << 1)
 #define RD_ADDR(a)  (((a) << 1) | 1)
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_DEBUG_BQ769X0
-#  define baterr    _err
-#  define batreg    _err
-#  define batinfo   _info
-#else
-#  define baterr    _none
-#  define batreg    _none
-#  define batinfo   _none
-#endif
-
 /****************************************************************************
  * Private
  ****************************************************************************/
@@ -94,8 +82,7 @@ struct bq769x0_dev_s
 {
   /* The common part of the battery driver visible to the upper-half driver */
 
-  FAR const struct battery_monitor_operations_s *ops; /* Battery operations */
-  sem_t batsem;                                       /* Enforce mutually exclusive access */
+  struct battery_monitor_dev_s dev; /* Battery monitor device */
 
   /* Data fields specific to the lower half BQ769x0 driver follow */
 
@@ -425,7 +412,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
   config.address   = priv->addr;
   config.addrlen   = 7;
 
-  batreg("addr: %02x regval: %02x\n", regaddr, regval);
+  batinfo("addr: %02x regval: %02x\n", regaddr, regval);
 
   /* Set up a 3 byte message to send */
 
@@ -441,7 +428,7 @@ static int bq769x0_putreg8(FAR struct bq769x0_dev_s *priv, uint8_t regaddr,
       crc = crc8ccittpart(&sl_addr, 1, 0);
       crc = crc8ccittpart(buffer, 2, crc);
       buffer[2] = crc;
-      batreg("write crc: %02x\n", crc);
+      batinfo("write crc: %02x\n", crc);
     }
   else
     {
@@ -2096,8 +2083,7 @@ FAR struct battery_monitor_dev_s *
     {
       /* Initialize the BQ769x0 device structure */
 
-      nxsem_init(&priv->batsem, 0, 1);
-      priv->ops         = &g_bq769x0ops;
+      priv->dev.ops     = &g_bq769x0ops;
       priv->i2c         = i2c;
       priv->addr        = addr;
       priv->frequency   = frequency;

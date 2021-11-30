@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 #include <mpfs_gpio.h>
-#include "mpfsicicle.h"
+#include "board_config.h"
 
 /****************************************************************************
  * Public Functions

@@ -79,7 +79,8 @@ endif
 
 ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MCPU     := -mcpu=cortex-m4
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
+  TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16 -mfloat-abi=hard
   else
@@ -87,7 +88,8 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
-  TOOLCHAIN_MCPU     := -mcpu=cortex-m7
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
+  TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
   ifeq ($(CONFIG_ARCH_DPFPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
@@ -99,7 +101,8 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   endif
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
   TOOLCHAIN_ARM7EM   := n
-  TOOLCHAIN_MCPU     := -mcpu=cortex-m3
+  TOOLCHAIN_MTUNE    := -mtune=cortex-m3
+  TOOLCHAIN_MARCH    := -march=armv7-m
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
 endif
 
@@ -108,10 +111,10 @@ endif
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),BUILDROOT)
 ifeq ($(CONFIG_ARMV7M_OABI_TOOLCHAIN),y)
   CROSSDEV ?= arm-nuttx-elf-
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
 else
   CROSSDEV ?= arm-nuttx-eabi-
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 endif
 
@@ -119,14 +122,14 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
 # Clang toolchain
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
-  ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
+  ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) $(TOOLCHAIN_MFLOAT)
   CC = clang
   CXX = clang++
   CPP = clang -E -P -x c

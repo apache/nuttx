@@ -212,10 +212,21 @@
                                      STM32_SDMMC_CLKCR_EDGE       |     \
                                      STM32_SDMMC_CLKCR_PWRSAV     |     \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
-#define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
-                                     STM32_SDMMC_CLKCR_EDGE       |     \
-                                     STM32_SDMMC_CLKCR_PWRSAV     |     \
-                                     STM32_SDMMC_CLKCR_WIDBUS_D4)
+#ifdef HAVE_SDMMC_SDIO_MODE
+/* Do not enable power saving configuration bit (in SD 4-bit mode) because
+ * the SDIO clock is not enabled when the bus goes to the idle state.
+ * This condition breaks interrupts delivering mechanism over DAT[1]/IRQ
+ * SDIO line to the host.
+ */
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
+                                       STM32_SDMMC_CLKCR_EDGE       |     \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#else
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
+                                       STM32_SDMMC_CLKCR_EDGE       |     \
+                                       STM32_SDMMC_CLKCR_PWRSAV     |     \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#endif
 
 /* Timing */
 
@@ -1981,6 +1992,10 @@ static void stm32_reset(FAR struct sdio_dev_s *dev)
   priv->remaining  = 0;      /* Number of bytes remaining in the transfer */
   priv->xfrmask    = 0;      /* Interrupt enables for data transfer */
 
+#ifdef HAVE_SDMMC_SDIO_MODE
+  priv->sdiointmask = 0;     /* SDIO card in-band interrupt mask */
+#endif
+
   priv->widebus    = false;
 
   /* Configure the SDIO peripheral */
@@ -3623,4 +3638,44 @@ void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect)
   mcinfo("cdstatus: %02" PRIx8 "\n", priv->cdstatus);
   leave_critical_section(flags);
 }
+
+/****************************************************************************
+ * Name: sdio_set_sdio_card_isr
+ *
+ * Description:
+ *   SDIO card generates interrupt via SDIO_DATA_1 pin.
+ *   Called by board-specific logic to register an ISR for SDIO card.
+ *
+ * Input Parameters:
+ *   func      - callback function.
+ *   arg       - arg to be passed to the function.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef HAVE_SDMMC_SDIO_MODE
+void sdio_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
+                            int (*func)(void *), void *arg)
+{
+  struct stm32_dev_s *priv = (struct stm32_dev_s *)dev;
+
+  priv->do_sdio_card = func;
+
+  if (func != NULL)
+    {
+      priv->sdiointmask = STM32_SDMMC_MASK_SDIOITIE;
+      priv->do_sdio_arg = arg;
+    }
+  else
+    {
+      priv->sdiointmask = 0;
+    }
+
+  sdmmc_putreg32(priv, priv->xfrmask | priv->waitmask | priv->sdiointmask,
+                 STM32_SDMMC_MASK_OFFSET);
+}
+#endif
+
 #endif /* CONFIG_STM32H7_SDMMC1 || CONFIG_STM32H7_SDMMC2 */

@@ -163,7 +163,7 @@ FAR struct syslog_channel_s *syslog_console_channel(void);
  * Name: syslog_register
  *
  * Description:
- *   Register a simple character driver at /dev/syslog whose write() method
+ *   Register a simple character driver at /dev/log whose write() method
  *   will transfer data to the SYSLOG device.  This can be useful if, for
  *   example, you want to redirect the output of a program to the SYSLOG.
  *

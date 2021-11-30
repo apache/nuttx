@@ -45,6 +45,7 @@
 #include <nuttx/config.h>
 #if defined(CONFIG_NET) && defined(CONFIG_NET_UDP)
 
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/net/netconfig.h>
@@ -73,11 +74,21 @@
  *
  * Assumptions:
  *   The network is locked.
+ *   dev is not NULL.
+ *   conn is not NULL.
+ *   The connection (conn) is bound to the polling device (dev) in case of
+ *   enabled CONFIG_NET_UDP_WRITE_BUFFERS option.
  *
  ****************************************************************************/
 
 void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn)
 {
+  DEBUGASSERT(dev != NULL && conn != NULL);
+
+#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
+  DEBUGASSERT(dev == conn->dev);
+#endif
+
   /* Verify that the UDP connection is valid */
 
   if (conn->lport != 0)

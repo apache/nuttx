@@ -38,6 +38,10 @@
 #include "hardware/esp32c3_cache_memory.h"
 #include "hardware/extmem_reg.h"
 
+#ifdef CONFIG_ESP32C3_BROWNOUT_DET
+#  include "esp32c3_brownout.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -239,6 +243,12 @@ void __esp32c3_start(void)
   /* Set CPU frequency */
 
   esp32c3_clockconfig();
+
+#ifdef CONFIG_ESP32C3_BROWNOUT_DET
+  /* Initialize hardware brownout check and reset */
+
+  esp32c3_brownout_init();
+#endif
 
   /* Configure the UART so we can get debug output */
 

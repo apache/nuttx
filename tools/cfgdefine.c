@@ -86,7 +86,7 @@ static const char *dequote_list[] =
 
 static char *skip_space(char *ptr)
 {
-  while (*ptr && isspace((int)*ptr)) ptr++;
+  while (*ptr && isspace(*ptr)) ptr++;
   return ptr;
 }
 
@@ -94,7 +94,7 @@ static char *skip_space(char *ptr)
 
 static char *find_name_end(char *ptr)
 {
-  while (*ptr && (isalnum((int)*ptr) || *ptr == '_')) ptr++;
+  while (*ptr && (isalnum(*ptr) || *ptr == '_')) ptr++;
   return ptr;
 }
 
@@ -102,16 +102,16 @@ static char *find_name_end(char *ptr)
 
 static char *find_value_end(char *ptr)
 {
-  while (*ptr && !isspace((int)*ptr))
+  while (*ptr && !isspace(*ptr))
     {
       if (*ptr == '"')
         {
-          do ptr++; while (*ptr && *ptr != '"');
+          do ptr++; while (*ptr && (*ptr != '"' || *(ptr - 1) == '\\'));
           if (*ptr) ptr++;
         }
       else
         {
-          do ptr++; while (*ptr && !isspace((int)*ptr) && *ptr != '"');
+          do ptr++; while (*ptr && !isspace(*ptr) && *ptr != '"');
         }
     }
 
@@ -148,13 +148,7 @@ static char *read_line(FILE *stream)
 
 static void parse_line(char *ptr, char **varname, char **varval)
 {
-  /* Skip over any leading spaces */
-
-  ptr = skip_space(ptr);
-
-  /* The first no-space is the beginning of the variable name */
-
-  *varname = skip_space(ptr);
+  *varname = ptr;
   *varval = NULL;
 
   /* Parse to the end of the variable name */

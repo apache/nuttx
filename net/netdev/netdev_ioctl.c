@@ -1223,6 +1223,40 @@ static int netdev_imsf_ioctl(FAR struct socket *psock, int cmd,
 #endif
 
 /****************************************************************************
+ * Name: netdev_arp_callback
+ *
+ * Description:
+ *   This is a callback that checks if the Ethernet network device has the
+ *   indicated name
+ *
+ * Input Parameters:
+ *   dev    Ethernet driver device structure
+ *   req    The argument of the ioctl cmd
+ *
+ * Returned Value:
+ *   1 on success
+ *   0 on error
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ARP
+static int netdev_arp_callback(FAR struct net_driver_s *dev, FAR void *arg)
+{
+  FAR struct arpreq *req = arg;
+  FAR struct sockaddr_in *addr = (FAR struct sockaddr_in *)&req->arp_pa;
+
+  if (strncmp(dev->d_ifname, (FAR const char *)req->arp_dev,
+              sizeof(dev->d_ifname)))
+    {
+      return 0;
+    }
+
+  arp_update(dev, addr->sin_addr.s_addr,
+             (FAR uint8_t *)req->arp_ha.sa_data);
+  return 1;
+}
+#endif
+
+/****************************************************************************
  * Name: netdev_arp_ioctl
  *
  * Description:
@@ -1256,15 +1290,11 @@ static int netdev_arp_ioctl(FAR struct socket *psock, int cmd,
               req->arp_pa.sa_family == AF_INET &&
               req->arp_ha.sa_family == ARPHRD_ETHER)
             {
-              FAR struct sockaddr_in *addr =
-                (FAR struct sockaddr_in *)&req->arp_pa;
-
               /* Update any existing ARP table entry for this protocol
                * address -OR- add a new ARP table entry if there is not.
                */
 
-              ret = arp_update(addr->sin_addr.s_addr,
-                               (FAR uint8_t *)req->arp_ha.sa_data);
+              ret = netdev_foreach(netdev_arp_callback, req) ? OK : -EINVAL;
             }
           else
             {

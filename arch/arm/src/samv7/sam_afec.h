@@ -1,5 +1,9 @@
 /****************************************************************************
+<<<<<<< HEAD
  * arch/arm/src/samd2l2/sam_adc.h
+=======
+ * arch/arm/src/samv7/sam_afec.h
+>>>>>>> d4a50033761a90a487eec7e191f02559a4d31359
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +22,13 @@
  *
  ****************************************************************************/
 
+<<<<<<< HEAD
 #ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
 #define __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
+=======
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H
+>>>>>>> d4a50033761a90a487eec7e191f02559a4d31359
 
 /****************************************************************************
  * Included Files
@@ -27,6 +36,7 @@
 
 #include <nuttx/config.h>
 
+<<<<<<< HEAD
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -35,6 +45,28 @@
 
 #include "hardware/sam_afec.h"
 
+=======
+#include "chip.h"
+#include "hardware/sam_afec.h"
+
+#if defined(CONFIG_ADC) && (defined(CONFIG_SAMV7_AFEC0) || \
+    defined(CONFIG_SAMV7_AFEC1))
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Port numbers for use with sam_mcan_initialize() */
+
+#define AFEC0 0
+#define AFEC1 1
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+>>>>>>> d4a50033761a90a487eec7e191f02559a4d31359
 
 /****************************************************************************
  * Public Function Prototypes
@@ -50,6 +82,7 @@ extern "C"
 #endif
 
 /****************************************************************************
+<<<<<<< HEAD
  * Name: sam_adcinitialize
  *
  * Description:
@@ -65,9 +98,36 @@ extern "C"
 
 struct adc_dev_s;
 struct adc_dev_s *sam_adcinitialize(int genclk);
+=======
+ * Name: sam_afec_initialize
+ *
+ * Description:
+ *   Initialize the adc
+ *
+ * Input Parameters:
+ *   intf      - ADC number (1 or 2)
+ *   chanlist  - The list of channels
+ *   nchannels - Number of channels
+ *
+ * Returned Value:
+ *   Valid can device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct adc_dev_s *sam_afec_initialize(int intf,
+                                          FAR const uint8_t *chanlist,
+                                          int nchannels);
+>>>>>>> d4a50033761a90a487eec7e191f02559a4d31359
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
+<<<<<<< HEAD
 #endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
+=======
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_ADC && (CONFIG_SAMV7_AFEC0 || CONFIG_SAMV7_AFEC1) */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H */
+>>>>>>> d4a50033761a90a487eec7e191f02559a4d31359

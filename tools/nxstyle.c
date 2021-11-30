@@ -276,6 +276,15 @@ static const char *g_white_list[] =
   "SETATTR3resok",
   "FS3args",
 
+  /* Ref:
+   * mm/kasan/kasan.c
+   */
+
+  "__asan_loadN",
+  "__asan_storeN",
+  "__asan_loadN_noabort",
+  "__asan_storeN_noabort",
+
   NULL
 };
 
@@ -2270,7 +2279,7 @@ int main(int argc, char **argv, char **envp)
                                  endndx++);
                           }
 
-                        n = endndx + 1;
+                        n = endndx;
                       }
                   }
                   break;
@@ -2460,7 +2469,7 @@ int main(int argc, char **argv, char **envp)
                     {
                       /* REVISIT: This gives false alarms on syntax like *--ptr */
 
-                      if (line[n - 1] != ' ')
+                      if (line[n - 1] != ' ' && line[n - 1] != '(')
                         {
                            ERROR("Operator/assignment must be preceded "
                                   "with whitespace", lineno, n);

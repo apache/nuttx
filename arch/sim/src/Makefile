@@ -89,6 +89,10 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
   CSRCS += up_checkstack.c
 endif
 
+ifeq ($(CONFIG_ARCH_COVERAGE),y)
+  STDLIBS += -lgcov
+endif
+
 ifeq ($(CONFIG_SPINLOCK),y)
   HOSTSRCS += up_testset.c
 endif
@@ -170,6 +174,11 @@ else ifeq ($(CONFIG_SIM_NETDEV_VPNKIT),y)
   HOSTSRCS += protocol.c negotiate.c
 endif
 
+ifeq ($(CONFIG_SIM_NETUSRSOCK),y)
+  HOSTSRCS += up_usrsock_host.c
+  CSRCS += up_usrsock.c
+endif
+
 ifeq ($(CONFIG_SIM_HCISOCKET),y)
   HOSTSRCS += up_hcisocket_host.c
   CSRCS += up_hcisocket.c
@@ -198,8 +207,7 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   STDLIBS += -lasound
 endif
 
-ifeq ($(CONFIG_FS_HOSTFS),y)
-ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
+ifeq ($(CONFIG_SIM_HOSTFS),y)
   HOSTSRCS += up_hostfs.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
@@ -207,7 +215,6 @@ hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 	$(Q) cp $< $@
 
 up_hostfs.c: hostfs.h
-endif
 endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))

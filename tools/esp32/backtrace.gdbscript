@@ -110,7 +110,7 @@ end
 
 define esp32_bt_pid
     set $_pid = $arg0
-    set $_tcb = g_pidhash[$_pid].tcb
+    set $_tcb = g_pidhash[$_pid]
     if ($_tcb->pid == $_pid)
         set $_regs = $_tcb->xcp.regs
         printf "PID %d NAME %s\n", $_pid, $_tcb.name

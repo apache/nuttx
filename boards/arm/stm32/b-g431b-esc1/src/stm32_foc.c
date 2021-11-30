@@ -34,7 +34,15 @@
 
 #include "hardware/stm32g4xxxx_opamp.h"
 
+#if defined(CONFIG_SENSORS_QENCODER) || defined(CONFIG_SENSORS_HALL3PHASE)
+#  include "hardware/stm32g4xxxx_pwr.h"
+#endif
+
 #include "stm32_foc.h"
+
+#ifdef CONFIG_SENSORS_QENCODER
+#  include "stm32_qencoder.h"
+#endif
 
 #include "arm_arch.h"
 
@@ -167,6 +175,17 @@
 
 #if CONFIG_STM32_ADC1_RESOLUTION != 0
 #  error
+#endif
+
+/* Qenco configuration - only TIM4 */
+
+#ifdef CONFIG_SENSORS_QENCODER
+#  ifndef CONFIG_STM32_TIM4_QE
+#    error
+#  endif
+#  if CONFIG_STM32_TIM4_QEPSC != 0
+#    error
+#  endif
 #endif
 
 /****************************************************************************
@@ -520,6 +539,24 @@ int stm32_foc_setup(void)
 
   if (g_foc_dev == NULL)
     {
+#if defined(CONFIG_SENSORS_QENCODER) || defined(CONFIG_SENSORS_HALL3PHASE)
+      /* Disable USB Type-C and Power Delivery Dead Battery */
+
+      modifyreg32(STM32_PWR_CR3, 0, PWR_CR3_UCPD1_DBDIS);
+#endif
+
+#if defined(CONFIG_SENSORS_QENCODER) && defined(CONFIG_STM32_QENCODER_INDEX_PIN)
+      /* Configure encoder index GPIO */
+
+      ret = stm32_qe_index_init(4, QENCODER_TIM4_INDEX_GPIO);
+      if (ret < 0)
+        {
+          mtrerr("Failed to register encoder index pin %d\n", ret);
+          ret = -EACCES;
+          goto errout;
+        }
+#endif
+
       /* Initialize arch specific FOC lower-half */
 
       foc = stm32_foc_initialize(0, &g_stm32_foc_board);

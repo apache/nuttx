@@ -85,10 +85,10 @@
  *    This assures that the scheduler does enforce the critical section.
  *    NOTE: Because of this spinlock, there should never be more than one
  *    bit set in 'g_cpu_lockset'; attempts to set additional bits should
- *    be cause the CPU to block on the spinlock.  However, additional bits
+ *    cause the CPU to block on the spinlock.  However, additional bits
  *    could get set in 'g_cpu_lockset' due to the context switches on the
  *    various CPUs.
- * 5. Each the time the head of a g_assignedtasks[] list changes and the
+ * 5. Each time the head of a g_assignedtasks[] list changes and the
  *    scheduler modifies 'g_cpu_lockset', it must also set 'g_cpu_schedlock'
  *    depending on the new state of 'g_cpu_lockset'.
  * 5. Logic that currently uses the currently running tasks lockcount

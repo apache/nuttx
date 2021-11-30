@@ -93,7 +93,6 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
   buf = (FAR char *)lib_malloc(nulloutstream.nput + 1);
   if (!buf)
     {
-      va_end(ap);
 #ifdef va_copy
       va_end(ap2);
 #endif
@@ -118,8 +117,6 @@ int vasprintf(FAR char **ptr, FAR const IPTR char *fmt, va_list ap)
   nbytes = lib_vsprintf((FAR struct lib_outstream_s *)&memoutstream.public,
                         fmt, ap);
 #endif
-
-  va_end(ap);
 
   /* Return a pointer to the string to the caller.  NOTE: the memstream put()
    * method has already added the NUL terminator to the end of the string

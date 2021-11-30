@@ -135,6 +135,18 @@ struct elf_loadinfo_s
   struct file        file;       /* Descriptor for the file being loaded */
 };
 
+/* This struct provides a description of the dump information of
+ * memory regions.
+ */
+
+#ifdef CONFIG_ELF_COREDUMP
+struct elf_dumpinfo_s
+{
+  FAR struct memory_region_s *regions;
+  FAR struct lib_outstream_s *stream;
+};
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -254,6 +266,24 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 int elf_unload(struct elf_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: elf_coredump
+ *
+ * Description:
+ *   Generat the core dump stream as ELF structure.
+ *
+ * Input Parameters:
+ *   dumpinfo - elf coredump informations
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ELF_COREDUMP
+int elf_coredump(FAR struct elf_dumpinfo_s *dumpinfo);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

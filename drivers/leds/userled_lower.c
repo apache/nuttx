@@ -40,10 +40,14 @@
 
 static userled_set_t
 userled_supported(FAR const struct userled_lowerhalf_s *lower);
-static void userled_led(FAR const struct userled_lowerhalf_s *lower,
-                        int led, bool ledon);
-static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
+static void userled_setled(FAR const struct userled_lowerhalf_s *lower,
+                           int led, bool ledon);
+static void userled_setall(FAR const struct userled_lowerhalf_s *lower,
                            userled_set_t ledset);
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+static void userled_getall(FAR const struct userled_lowerhalf_s *lower,
+                           userled_set_t *ledset);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -56,8 +60,11 @@ static uint32_t g_lednum;
 static const struct userled_lowerhalf_s g_userled_lower =
 {
   .ll_supported = userled_supported,
-  .ll_led       = userled_led,
-  .ll_ledset    = userled_ledset,
+  .ll_setled    = userled_setled,
+  .ll_setall    = userled_setall,
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+  .ll_getall    = userled_getall,
+#endif
 };
 
 /****************************************************************************
@@ -80,32 +87,48 @@ userled_supported(FAR const struct userled_lowerhalf_s *lower)
 }
 
 /****************************************************************************
- * Name: userled_led
+ * Name: userled_setled
  *
  * Description:
  *   Set the current state of one LED
  *
  ****************************************************************************/
 
-static void userled_led(FAR const struct userled_lowerhalf_s *lower,
-                        int led, bool ledon)
+static void userled_setled(FAR const struct userled_lowerhalf_s *lower,
+                           int led, bool ledon)
 {
   board_userled(led, ledon);
 }
 
 /****************************************************************************
- * Name: userled_led
+ * Name: userled_setall
  *
  * Description:
  *   Set the state of all LEDs
  *
  ****************************************************************************/
 
-static void userled_ledset(FAR const struct userled_lowerhalf_s *lower,
+static void userled_setall(FAR const struct userled_lowerhalf_s *lower,
                            userled_set_t ledset)
 {
   board_userled_all(ledset);
 }
+
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+/****************************************************************************
+ * Name: userled_getall
+ *
+ * Description:
+ *   Get the state of all LEDs
+ *
+ ****************************************************************************/
+
+static void userled_getall(FAR const struct userled_lowerhalf_s *lower,
+                           userled_set_t *ledset)
+{
+  board_userled_getall(ledset);
+}
+#endif
 
 /****************************************************************************
  * Public Functions

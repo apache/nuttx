@@ -29,6 +29,7 @@ include mm_gran/Make.defs
 include shm/Make.defs
 include iob/Make.defs
 include circbuf/Make.defs
+include kasan/Make.defs
 
 BINDIR ?= bin
 

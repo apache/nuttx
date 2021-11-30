@@ -102,33 +102,6 @@ int esp32_bringup(void);
 int esp32_mmcsd_initialize(int minor);
 
 /****************************************************************************
- * Name: esp32_spiflash_init
- *
- * Description:
- *   Initialize the SPIFLASH and register the MTD device.
- ****************************************************************************/
-
-int esp32_spiflash_init(void);
-
-/****************************************************************************
- * Name: esp32_spiflash_encrypt_test
- *
- * Description:
- *   Test ESP32 SPI Flash driver read/write with encryption.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
-void esp32_spiflash_encrypt_test(void);
-#endif
-
-/****************************************************************************
  * Name: esp32_gpio_init
  ****************************************************************************/
 

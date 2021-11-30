@@ -19,25 +19,31 @@
  ****************************************************************************/
 
 /****************************************************************************
- * The external functions, s32k1xx_lpspi0/1/2select and
- * s32k1xx_lpspi0/1/2status must be provided by board-specific logic.  They
- * are implementations of the select and status methods of the SPI interface
- * defined by struct s32k1xx_lpspi_ops_s (see include/nuttx/spi/spi.h).
- * All other methods (including s32k1xx_lpspibus_initialize()) are provided
- * by common S32K1XX logic.  To use this common SPI logic on your board:
+ * The external functions, s32k1xx_lpspiNselect* and s32k1xx_lpspiNstatus
+ * must be provided by board-specific logic.  They are implementations of the
+ * select and status methods of the SPI interface defined by struct
+ * s32k1xx_lpspi_ops_s (see include/nuttx/spi/spi.h).  All other methods
+ * (including s32k1xx_lpspibus_initialize()) are provided by common S32K1XX
+ * logic.  To use this common SPI logic on your board:
  *
  *   1. Provide logic in s32k1xx_boardinitialize() to configure SPI chip
  *      select pins.
- *   2. Provide s32k1xx_lpspi0/1/2select() and s32k1xx_lpspi0/1/2status()
- *      functions in your board-specific logic.  These functions will perform
- *      chip selection and status operations using GPIOs in the way your
- *      board is configured.
+ *   2. Provide s32k1xx_lpspiNselect() and s32k1xx_lpspiNstatus() functions
+ *      in your board-specific logic.  These functions will perform chip
+ *      selection and status operations using GPIOs in the way your board is
+ *      configured.
  *   3. Add a calls to s32k1xx_lpspibus_initialize() in your low level
  *      application initialization logic
  *   4. The handle returned by s32k1xx_lpspibus_initialize() may then be
  *      used to bind the SPI driver to higher level logic (e.g., calling
  *      mmcsd_lpspislotinitialize(), for example, will bind the SPI driver
  *      to the SPI MMC/SD driver).
+ *
+ * NOTE*: If CONFIG_S32K1XX_LPSPI_HWPCS is selected, s32k1xx_lpspiNselect()
+ *        does NOT need to provided by board-specific logic.  In this case a
+ *        generic implementation is used that switches between native
+ *        hardware chip select pins.  It is important that all pins are
+ *        configured when the SPI bus is initialized.
  *
  ****************************************************************************/
 
@@ -135,6 +141,9 @@ struct s32k1xx_lpspidev_s
   uint32_t actual;            /* Actual clock frequency */
   int8_t nbits;               /* Width of word in bits */
   uint8_t mode;               /* Mode 0,1,2,3 */
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+  uint32_t pcs;               /* Peripheral Chip Select currently used */
+#endif
 };
 
 enum s32k1xx_delay_e
@@ -176,6 +185,10 @@ void s32k1xx_lpspi_set_delay_scaler(FAR struct s32k1xx_lpspidev_s *priv,
 /* SPI methods */
 
 static int s32k1xx_lpspi_lock(FAR struct spi_dev_s *dev, bool lock);
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+static void s32k1xx_lpspi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                                 bool selected);
+#endif
 static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
               uint32_t frequency);
 static void s32k1xx_lpspi_setmode(FAR struct spi_dev_s *dev,
@@ -216,7 +229,11 @@ s32k1xx_lpspi_bus_initialize(FAR struct s32k1xx_lpspidev_s *priv);
 static const struct spi_ops_s g_spi0ops =
 {
   .lock         = s32k1xx_lpspi_lock,
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+  .select       = s32k1xx_lpspi_select,
+#else
   .select       = s32k1xx_lpspi0select,
+#endif
   .setfrequency = s32k1xx_lpspi_setfrequency,
   .setmode      = s32k1xx_lpspi_setmode,
   .setbits      = s32k1xx_lpspi_setbits,
@@ -262,7 +279,11 @@ static struct s32k1xx_lpspidev_s g_lpspi0dev =
 static const struct spi_ops_s g_spi1ops =
 {
   .lock         = s32k1xx_lpspi_lock,
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+  .select       = s32k1xx_lpspi_select,
+#else
   .select       = s32k1xx_lpspi1select,
+#endif
   .setfrequency = s32k1xx_lpspi_setfrequency,
   .setmode      = s32k1xx_lpspi_setmode,
   .setbits      = s32k1xx_lpspi_setbits,
@@ -308,7 +329,11 @@ static struct s32k1xx_lpspidev_s g_lpspi1dev =
 static const struct spi_ops_s g_spi2ops =
 {
   .lock         = s32k1xx_lpspi_lock,
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+  .select       = s32k1xx_lpspi_select,
+#else
   .select       = s32k1xx_lpspi2select,
+#endif
   .setfrequency = s32k1xx_lpspi_setfrequency,
   .setmode      = s32k1xx_lpspi_setmode,
   .setbits      = s32k1xx_lpspi_setbits,
@@ -944,6 +969,48 @@ static int s32k1xx_lpspi_lock(FAR struct spi_dev_s *dev, bool lock)
   return ret;
 }
 
+#ifdef CONFIG_S32K1XX_LPSPI_HWPCS
+/****************************************************************************
+ * Name: s32k1xx_lpspi_select
+ *
+ * Description:
+ *   Change to another SPI chip select (hardware/native, not emulated with
+ *   GPIO) to select another device.  The hardware itself controls when
+ *   the chip select is enabled or disabled.
+ *
+ * Input Parameters:
+ *   dev -      Device-specific state data
+ *   devid -    Identifies the device to select
+ *   selected - Ignored, selection is controlled by hardware
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void s32k1xx_lpspi_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                                 bool selected)
+{
+  FAR struct s32k1xx_lpspidev_s *priv = (FAR struct s32k1xx_lpspidev_s *)dev;
+
+  /* LPSPI on S32K1XX supports PCS 0-3 */
+
+  DEBUGASSERT(SPIDEVID_INDEX(devid) <= 3);
+
+  /* Has the Peripheral Chip Select changed? */
+
+  if (devid != priv->pcs)
+    {
+      s32k1xx_lpspi_modifyreg32(priv, S32K1XX_LPSPI_TCR_OFFSET,
+                                LPSPI_TCR_PCS_MASK,
+                                LPSPI_TCR_PCS(SPIDEVID_INDEX(devid)));
+      priv->pcs = devid;
+    }
+
+  spiinfo("devid: %" PRId32 ", CS: hardware-controlled\n", devid);
+}
+#endif /* CONFIG_S32K1XX_LPSPI HWPCS */
+
 /****************************************************************************
  * Name: s32k1xx_lpspi_setfrequency
  *
@@ -1071,7 +1138,7 @@ static uint32_t s32k1xx_lpspi_setfrequency(FAR struct spi_dev_s *dev,
  *   mode - The SPI mode requested
  *
  * Returned Value:
- *   Returns the actual frequency selected
+ *   none
  *
  ****************************************************************************/
 

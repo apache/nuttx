@@ -35,7 +35,8 @@ all: b16$(HOSTEXEEXT) bdf-converter$(HOSTEXEEXT) cmpconfig$(HOSTEXEEXT) \
     mksymtab$(HOSTEXEEXT)  mksyscall$(HOSTEXEEXT) mkversion$(HOSTEXEEXT) \
     cnvwindeps$(HOSTEXEEXT) nxstyle$(HOSTEXEEXT) initialconfig$(HOSTEXEEXT) \
     gencromfs$(HOSTEXEEXT) convert-comments$(HOSTEXEEXT) lowhex$(HOSTEXEEXT) \
-    detab$(HOSTEXEEXT) rmcr$(HOSTEXEEXT) incdir$(HOSTEXEEXT)
+    detab$(HOSTEXEEXT) rmcr$(HOSTEXEEXT) incdir$(HOSTEXEEXT) \
+    jlink-nuttx$(HOSTDYNEXT)
 default: mkconfig$(HOSTEXEEXT) mksyscall$(HOSTEXEEXT) mkdeps$(HOSTEXEEXT) \
     cnvwindeps$(HOSTEXEEXT) incdir$(HOSTEXEEXT)
 
@@ -43,9 +44,11 @@ ifdef HOSTEXEEXT
 .PHONY: b16 bdf-converter cmpconfig clean configure kconfig2html mkconfig \
     mkdeps mksymtab mksyscall mkversion cnvwindeps nxstyle initialconfig \
     gencromfs convert-comments lowhex detab rmcr incdir
-else
-.PHONY: clean
 endif
+ifdef HOSTDYNEXT
+.PHONY: jlink-nuttx
+endif
+.PHONY: clean
 
 # b16 - Fixed precision math conversion tool
 
@@ -222,6 +225,15 @@ ifdef HOSTEXEEXT
 mkdeps: mkdeps$(HOSTEXEEXT)
 endif
 
+# jlink-nuttx - Create jlink GDBServer nuttx plugin
+
+jlink-nuttx$(HOSTDYNEXT): jlink-nuttx.c
+	$(Q) $(HOSTCC) $(HOSTCFLAGS) -shared jlink-nuttx.c -o jlink-nuttx$(HOSTDYNEXT)
+
+ifdef HOSTDYNEXT
+jlink-nuttx: jlink-nuttx$(HOSTDYNEXT)
+endif
+
 clean:
 	$(call DELFILE, b16)
 	$(call DELFILE, b16.exe)
@@ -258,6 +270,8 @@ clean:
 	$(call DELFILE, nxstyle.exe)
 	$(call DELFILE, rmcr)
 	$(call DELFILE, rmcr.exe)
+	$(call DELFILE, jlink-nuttx.so)
+	$(call DELFILE, jlink-nuttx.dll)
 ifneq ($(CONFIG_WINDOWS_NATIVE),y)
 	$(Q) rm -rf *.dSYM
 endif

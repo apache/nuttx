@@ -58,14 +58,14 @@ The `esptool.py` command to flash all the binaries is::
 
 However, this is also included in the build process and we can build and flash with::
 
-   make download ESPTOOL_PORT=<port> ESPTOOL_BINDIR=../esp-bins
+   make flash ESPTOOL_PORT=<port> ESPTOOL_BINDIR=../esp-bins
 
 Where ``<port>`` is typically ``/dev/ttyUSB0`` or similar and ``../esp-bins`` is 
 the path to the folder containing the bootloader and the partition table
 for the ESP32-C3 as explained above.
 Note that this step is required only one time.  Once the bootloader and partition
 table are flashed, we don't need to flash them again.  So subsequent builds
-would just require: ``make download ESPTOOL_PORT=/dev/ttyUSBXX``
+would just require: ``make flash ESPTOOL_PORT=/dev/ttyUSBXX``
 
 Debugging with OpenOCD
 ======================
@@ -101,9 +101,9 @@ Peripheral Support
 
 The following list indicates the state of peripherals' support in NuttX:
 
-========== ======= =====
-Peripheral Support NOTES
-========== ======= =====
+=========== ======= =====
+Peripheral  Support NOTES
+=========== ======= =====
 GPIO         Yes       
 UART         Yes
 SPI          Yes       
@@ -122,6 +122,14 @@ Bluetooth    Yes
 LED_PWM      Yes
 SHA          Yes
 RSA          Yes
+CDC Console  Yes    Rev.3
 ========== ======= =====
 
+Supported Boards
+================
 
+.. toctree::
+   :glob:
+   :maxdepth: 1
+
+   boards/*/*

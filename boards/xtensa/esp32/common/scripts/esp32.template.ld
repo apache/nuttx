@@ -34,6 +34,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include "esp32_aliases.ld"
 
 #ifdef CONFIG_ESP32_FLASH_2M
 #  define FLASH_SIZE 0x200000

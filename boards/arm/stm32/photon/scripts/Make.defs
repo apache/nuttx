@@ -71,7 +71,7 @@ endif
 
 ifeq ($(CONFIG_DFU_BINARY),y)
 
-define DOWNLOAD
+define FLASH
   $(Q) echo "DFUSUFFIX: $(1).dfu"
   $(Q) $(OBJCOPY) $(OBJCOPYARGS) -O binary $(1) $(1).dfu
   $(Q) $(DFUSUFFIX) -v $(subst 0x,,$(CONFIG_DFU_VID)) -p $(subst 0x,,$(CONFIG_DFU_PID)) -a $(1).dfu
@@ -80,7 +80,7 @@ endef
 
 else
 
-define DOWNLOAD
+define FLASH
   $(Q) $(ECHO) "Photon firmware upload through JTAG is not supported"
 endef
 

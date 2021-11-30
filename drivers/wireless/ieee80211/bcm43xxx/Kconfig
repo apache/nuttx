@@ -116,4 +116,11 @@ config IEEE80211_BROADCOM_FRAME_POOL_SIZE
 		This parameter sets the size of the shared SDPCM frame pool
 		used for both RX and TX transfers.
 
+config IEEE80211_BROADCOM_SDIO_EHS_MODE
+	bool "High-Speed Mode over SDIO"
+	default n
+	---help---
+		This selection enables High-Speed timing mode
+		with a clock rate up to 50MHz.
+
 endif # IEEE80211_BROADCOM_FULLMAC

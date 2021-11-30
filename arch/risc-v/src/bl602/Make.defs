@@ -84,7 +84,7 @@ CHIP_CSRCS += bl602_glb.c bl602_gpio.c bl602_hbn.c bl602_systemreset.c
 
 ifeq ($(CONFIG_BL602_WIRELESS),y)
 WIRELESS_DRV_UNPACK  = bl_blob
-WIRELESS_DRV_VERSION = 1.9.1-dev
+WIRELESS_DRV_VERSION = 1.9.1-ble-test
 WIRELESS_DRV_ZIP     = v$(WIRELESS_DRV_VERSION).zip
 WIRELESS_DRV_URL     = https://github.com/bouffalolab/bl_blob/archive/refs/heads
 

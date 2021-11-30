@@ -86,10 +86,12 @@ static struct note_filter_s g_note_filter =
     }
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 #ifdef CONFIG_SMP
 static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 #else
 static unsigned int g_note_disabled_irq_nest[1];
+#endif
 #endif
 #endif
 

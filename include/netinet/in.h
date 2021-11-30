@@ -132,9 +132,31 @@
 #define MCAST_EXCLUDE         0
 #define MCAST_INCLUDE         1
 
+/* Definitions of the bits in an Internet address integer.
+ * On subnets, host and network parts are found according to
+ * the subnet mask, not these masks.
+ */
+
+#define IN_CLASSA(a)          ((((in_addr_t)(a)) & 0x80000000) == 0)
+#define IN_CLASSA_NET         0xff000000
+#define IN_CLASSA_NSHIFT      24
+#define IN_CLASSA_HOST        (0xffffffff & ~IN_CLASSA_NET)
+#define IN_CLASSA_MAX         128
+
+#define IN_CLASSB(a)          ((((in_addr_t)(a)) & 0xc0000000) == 0x80000000)
+#define IN_CLASSB_NET         0xffff0000
+#define IN_CLASSB_NSHIFT      16
+#define IN_CLASSB_HOST        (0xffffffff & ~IN_CLASSB_NET)
+#define IN_CLASSB_MAX         65536
+
+#define IN_CLASSC(a)          ((((in_addr_t)(a)) & 0xe0000000) == 0xc0000000)
+#define IN_CLASSC_NET         0xffffff00
+#define IN_CLASSC_NSHIFT      8
+#define IN_CLASSC_HOST        (0xffffffff & ~IN_CLASSC_NET)
+
 /* Test if an IPv4 address is a multicast address */
 
-#define IN_CLASSD(i)          (((uint32_t)(i) & 0xf0000000) == 0xe0000000)
+#define IN_CLASSD(i)          (((in_addr_t)(i) & 0xf0000000) == 0xe0000000)
 #define IN_MULTICAST(i)       IN_CLASSD(i)
 
 /* Special values of in_addr_t */

@@ -7,7 +7,8 @@ menu "Socket Support"
 
 config NET_NACTIVESOCKETS
 	int "Max socket operations"
-	default 16
+	default 16 if !DEFAULT_SMALL
+	default 4 if DEFAULT_SMALL
 	---help---
 		Maximum number of concurrent socket operations (recv, send,
 		connection monitoring, etc.). Default: 16

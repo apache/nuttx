@@ -726,6 +726,32 @@ int icmpv6_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 
 void icmpv6_linkipaddr(FAR struct net_driver_s *dev, net_ipv6addr_t ipaddr);
 
+/****************************************************************************
+ * Name: icmpv6_reply
+ *
+ * Description:
+ *   Send an ICMPv6 message in response to a situation
+ *   RFC 1122: 3.2.2 MUST send at least the IP header and 8 bytes of header.
+ *       MAY send more (we do).
+ *       MUST NOT change this header information.
+ *       MUST NOT reply to a multicast/broadcast IP address.
+ *       MUST NOT reply to a multicast/broadcast MAC address.
+ *       MUST reply to only the first fragment.
+ *
+ * Input Parameters:
+ *   dev   - The device driver structure containing the received packet
+ *   type  - ICMPv6 Message Type, eg. ICMPv6_DEST_UNREACHABLE
+ *   code  - ICMPv6 Message Code, eg. ICMPv6_PORT_UNREACH
+ *   data  - Additional 32-bit parameter in the ICMPv6 header
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void icmpv6_reply(FAR struct net_driver_s *dev,
+                  int type, int code, int data);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

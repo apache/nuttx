@@ -90,7 +90,7 @@ void arp_ipin(FAR struct net_driver_s *dev)
   srcipaddr = net_ip4addr_conv32(IPBUF->eh_srcipaddr);
   if (net_ipv4addr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
     {
-      arp_hdr_update(IPBUF->eh_srcipaddr, ETHBUF->src);
+      arp_hdr_update(dev, IPBUF->eh_srcipaddr, ETHBUF->src);
     }
 }
 

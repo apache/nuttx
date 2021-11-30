@@ -39,6 +39,8 @@ typedef CODE int  (*lib_getc_t)(FAR struct lib_instream_s *this);
 
 struct lib_outstream_s;
 typedef CODE void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
+typedef CODE int  (*lib_puts_t)(FAR struct lib_outstream_s *this,
+                                FAR const void *buf, int len);
 typedef CODE int  (*lib_flush_t)(FAR struct lib_outstream_s *this);
 
 struct lib_instream_s
@@ -51,6 +53,7 @@ struct lib_instream_s
 struct lib_outstream_s
 {
   lib_putc_t             put;     /* Put one character to the outstream */
+  lib_puts_t             puts;    /* Writes the string to the outstream */
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */

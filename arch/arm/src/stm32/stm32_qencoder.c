@@ -311,7 +311,12 @@ struct stm32_lowerhalf_s
 
   FAR const struct stm32_qeconfig_s *config; /* static configuration */
 
-  bool             inuse;    /* True: The lower-half driver is in-use */
+  bool             inuse;        /* True: The lower-half driver is in-use */
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+  uint32_t         index_pin;    /* Index pin GPIO */
+  bool             index_use;    /* True: Index pin is configured */
+  int32_t          index_offset; /* Index pin offset */
+#endif
 
 #ifndef CONFIG_STM32_QENCODER_DISABLE_EXTEND16BTIMERS
   volatile int32_t position; /* The current position offset */
@@ -356,6 +361,7 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower,
                           FAR int32_t *pos);
 static int stm32_setposmax(FAR struct qe_lowerhalf_s *lower, uint32_t pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
+static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos);
 static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
                        unsigned long arg);
 
@@ -372,6 +378,7 @@ static const struct qe_ops_s g_qecallbacks =
   .position  = stm32_position,
   .setposmax = stm32_setposmax,
   .reset     = stm32_reset,
+  .setindex  = stm32_setindex,
   .ioctl     = stm32_ioctl,
 };
 
@@ -761,6 +768,43 @@ static int stm32_interrupt(int irq, FAR void *context, FAR void *arg)
 }
 #endif
 
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+/****************************************************************************
+ * Name: stm32_qe_index_irq
+ *
+ * Description:
+ *   Common encoder index pin interrupt.
+ *
+ ****************************************************************************/
+
+static int stm32_qe_index_irq(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct stm32_lowerhalf_s *priv;
+  bool valid = false;
+
+  DEBUGASSERT(arg);
+
+  /* Get QE data */
+
+  priv = (FAR struct stm32_lowerhalf_s *)arg;
+
+  /* Get pin state */
+
+  valid = stm32_gpioread(priv->index_pin);
+
+  /* Only if pin still high to avoid noises */
+
+  if (valid == true)
+    {
+      /* Force postion to index offset */
+
+      stm32_putreg32(priv, STM32_GTIM_CNT_OFFSET, priv->index_offset);
+    }
+
+  return OK;
+}
+#endif
+
 /****************************************************************************
  * Name: stm32_setup
  *
@@ -992,6 +1036,12 @@ static int stm32_setup(FAR struct qe_lowerhalf_s *lower)
       dier |= GTIM_DIER_UIE;
       stm32_putreg16(priv, STM32_GTIM_DIER_OFFSET, dier);
     }
+#endif
+
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+  /* At default index pin offset is 0 */
+
+  priv->index_offset = 0;
 #endif
 
   /* Enable the TIM Counter */
@@ -1243,6 +1293,45 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
 }
 
 /****************************************************************************
+ * Name: stm32_setindex
+ *
+ * Description:
+ *   Set the index pin postion
+ *
+ ****************************************************************************/
+
+static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
+{
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+  FAR struct stm32_lowerhalf_s *priv = (FAR struct stm32_lowerhalf_s *)lower;
+  int ret = OK;
+
+  sninfo("Set QE TIM%d the index pin positon %" PRIx32 "\n",
+         priv->config->timid, pos);
+  DEBUGASSERT(lower && priv->inuse);
+
+  /* Only if index pin configured */
+
+  if (priv->index_use == false)
+    {
+      snerr("ERROR: QE TIM%d index not registered \n",
+            priv->config->timid);
+      ret = -EPERM;
+      goto errout;
+    }
+
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+  priv->index_offset = pos;
+#endif
+
+errout:
+  return ret;
+#else
+  return -ENOTTY;
+#endif
+}
+
+/****************************************************************************
  * Name: stm32_ioctl
  *
  * Description:
@@ -1323,5 +1412,69 @@ int stm32_qeinitialize(FAR const char *devpath, int tim)
   priv->inuse = true;
   return OK;
 }
+
+#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
+/****************************************************************************
+ * Name: stm32_qe_index_init
+ *
+ * Description:
+ *   Register the encoder index pin to a given Qencoder timer
+ *
+ * Input Parameters:
+ *   tim  - The qenco timer number
+ *   gpio - gpio pin configuration
+ *
+ * Returned Value:
+ *   Zero on success; A negated errno value is returned on failure.
+ *
+ ****************************************************************************/
+
+int stm32_qe_index_init(int tim, uint32_t gpio)
+{
+  FAR struct stm32_lowerhalf_s *priv;
+  int ret = OK;
+
+  /* Find the pre-allocated timer state structure corresponding to this
+   * timer
+   */
+
+  priv = stm32_tim2lower(tim);
+  if (!priv)
+    {
+      snerr("ERROR: TIM%d support not configured\n", tim);
+      return -ENXIO;
+    }
+
+  /* Make sure that it is available */
+
+  if (priv->inuse == false)
+    {
+      snerr("ERROR: TIM%d is not in-use\n", tim);
+      ret = -EINVAL;
+    }
+
+  /* Configure QE index pin */
+
+  priv->index_pin = gpio;
+  stm32_configgpio(priv->index_pin);
+
+  /* Register interrupt */
+
+  ret = stm32_gpiosetevent(gpio, true, false, true,
+                           stm32_qe_index_irq, priv);
+  if (ret < 0)
+    {
+      snerr("ERROR: QE TIM%d failed register irq \n", tim);
+      goto errout;
+    }
+
+  /* Set flag */
+
+  priv->index_use = true;
+
+errout:
+  return ret;
+}
+#endif
 
 #endif /* CONFIG_SENSORS_QENCODER */

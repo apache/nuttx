@@ -272,7 +272,14 @@
 #  define TUN_UDP_MSS(h)           (CONFIG_NET_TUN_PKTSIZE - __UDP_HDRLEN - (h))
 #endif
 
+#ifdef CONFIG_NET_USRSOCK
+#  define __MIN_UDP_MSS(h)         INT_MAX
+#  define __MAX_UDP_MSS(h)         0
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
+#  undef  __MIN_UDP_MSS
+#  undef  __MAX_UDP_MSS
 #  define __MIN_UDP_MSS(h)         ETH_UDP_MSS(h)
 #  define __MAX_UDP_MSS(h)         ETH_UDP_MSS(h)
 #  define __ETH_MIN_UDP_MSS(h)     ETH_UDP_MSS(h)
@@ -452,7 +459,14 @@
 #  define TUN_TCP_MSS(h)        (CONFIG_NET_TUN_PKTSIZE - __TCP_HDRLEN - (h))
 #endif
 
+#ifdef CONFIG_NET_USRSOCK
+#  define __MIN_TCP_MSS(h)         INT_MAX
+#  define __MAX_TCP_MSS(h)         0
+#endif
+
 #ifdef CONFIG_NET_ETHERNET
+#  undef  __MIN_TCP_MSS
+#  undef  __MAX_TCP_MSS
 #  define __MIN_TCP_MSS(h)         ETH_TCP_MSS(h)
 #  define __MAX_TCP_MSS(h)         ETH_TCP_MSS(h)
 #  define __ETH_MIN_TCP_MSS(h)     ETH_TCP_MSS(h)

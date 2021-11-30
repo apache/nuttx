@@ -84,9 +84,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ESP32C3_MTD_OFFSET            CONFIG_ESP32C3_MTD_OFFSET
-#define ESP32C3_MTD_SIZE              CONFIG_ESP32C3_MTD_SIZE
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -148,11 +145,6 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
-
-#  ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
-  esp32c3_spiflash_encrypt_test();
-#  endif
-
   ret = esp32c3_spiflash_init();
   if (ret)
     {
@@ -160,7 +152,7 @@ int esp32c3_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_ESP32C3_PARTITION
+#ifdef CONFIG_ESP32C3_PARTITION_TABLE
   ret = esp32c3_partition_init();
   if (ret < 0)
     {

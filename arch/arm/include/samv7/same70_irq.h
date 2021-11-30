@@ -179,7 +179,7 @@
 #define SAM_IRQ_CCF           (SAM_IRQ_EXTINT+SAM_PID_CCF)    /* ARM Cache ECC Fault */
 #define SAM_IRQ_EMACQ1        (SAM_IRQ_EXTINT+SAM_PID_EMACQ1) /* EMAC Queue 1 Interrupt */
 #define SAM_IRQ_EMACQ2        (SAM_IRQ_EXTINT+SAM_PID_EMACQ2) /* EMAC Queue 2 Interrupt */
-#define SAM_IRQ_FPIXC         (SAM_IRQ_EXTINTSAM_PID_FPIXC+)  /* ARM Cache ECC Warning */
+#define SAM_IRQ_FPIXC         (SAM_IRQ_EXTINT+SAM_PID_FPIXC)  /* ARM Cache ECC Warning */
 
 #define SAM_IRQ_NEXTINT       NR_PIDS                         /* Total number of external interrupt numbers */
 #define SAM_IRQ_NIRQS         (SAM_IRQ_EXTINT+NR_PIDS)        /* The number of real IRQs */

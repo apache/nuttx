@@ -22,7 +22,11 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/risc-v/src/rv64gc/Toolchain.defs
 
-LDSCRIPT = ld.script
+ifeq ($(CONFIG_MPFS_BOOTLOADER),y)
+  LDSCRIPT = ld-envm.script
+else
+  LDSCRIPT = ld.script
+endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"

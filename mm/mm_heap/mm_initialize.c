@@ -31,6 +31,7 @@
 #include <nuttx/mm/mm.h>
 
 #include "mm_heap/mm.h"
+#include "kasan/kasan.h"
 
 /****************************************************************************
  * Public Functions
@@ -85,6 +86,10 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   DEBUGASSERT(heapsize <= MMSIZE_MAX + 1);
 #endif
+
+  /* Register to KASan for access check */
+
+  kasan_register(heapstart, &heapsize);
 
   DEBUGVERIFY(mm_takesemaphore(heap));
 

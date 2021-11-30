@@ -170,13 +170,13 @@ static inline void wd_expiration(void)
  *
  ****************************************************************************/
 
-int wd_start(FAR struct wdog_s *wdog, int32_t delay,
+int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg)
 {
   FAR struct wdog_s *curr;
   FAR struct wdog_s *prev;
   FAR struct wdog_s *next;
-  int32_t now;
+  sclock_t now;
   irqstate_t flags;
 
   /* Verify the wdog and setup parameters */
@@ -370,14 +370,6 @@ unsigned int wd_timer(int ticks, bool noswitches)
   wdog = (FAR struct wdog_s *)g_wdactivelist.head;
   while (wdog != NULL && ticks > 0)
     {
-#ifndef CONFIG_SCHED_TICKLESS_ALARM
-      /* There is logic to handle the case where ticks is greater than
-       * the watchdog lag, but if the scheduling is working properly
-       * that should never happen.
-       */
-
-      DEBUGASSERT(ticks <= wdog->lag);
-#endif
       /* Decrement the lag for this watchdog. */
 
       decr = MIN(wdog->lag, ticks);

@@ -44,16 +44,6 @@ static int parse_partition(FAR struct partition_state_s *state,
                            FAR void *arg);
 
 /****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_PTABLE_PARTITION
-int parse_ptable_partition(FAR struct partition_state_s *state,
-                           partition_handler_t handler,
-                           FAR void *arg);
-#endif
-
-/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -62,6 +52,15 @@ static const partition_parser_t g_parser[] =
 #ifdef CONFIG_PTABLE_PARTITION
   parse_ptable_partition,
 #endif
+
+#ifdef CONFIG_GPT_PARTITION
+  parse_gpt_partition,
+#endif
+
+#ifdef CONFIG_MBR_PARTITION
+  parse_mbr_partition,
+#endif
+
   NULL
 };
 
@@ -107,6 +106,21 @@ static int parse_partition(FAR struct partition_state_s *state,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+int read_partition_block(FAR struct partition_state_s *state,
+                         FAR void *buffer, size_t startblock,
+                         size_t nblocks)
+{
+  if (state->blk)
+    {
+      return state->blk->u.i_bops->read(state->blk,
+                                        buffer, startblock, nblocks);
+    }
+  else
+    {
+      return state->mtd->bread(state->mtd, startblock, nblocks, buffer);
+    }
+}
 
 /****************************************************************************
  * Name: parse_block_partition

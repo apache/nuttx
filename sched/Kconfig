@@ -41,7 +41,8 @@ config DISABLE_PTHREAD
 
 config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
-	default n
+	default y if DEFAULT_SMALL
+	default n if !DEFAULT_SMALL
 
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
@@ -219,7 +220,8 @@ config START_DAY
 
 config PREALLOC_TIMERS
 	int "Number of pre-allocated POSIX timers"
-	default 8
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		The number of pre-allocated POSIX timer structures.  The system manages a
 		pool of preallocated timer structures to minimize dynamic allocations.  Set to
@@ -250,7 +252,8 @@ if IRQCHAIN
 
 config PREALLOC_IRQCHAIN
 	int "Number of pre-allocated irq chains"
-	default 8
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		The number of pre-allocated irq chain structures.  The system manages
 		a pool of preallocated irq chain structures to minimize dynamic
@@ -946,7 +949,7 @@ config SCHED_INSTRUMENTATION
 			void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 			void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 
-		NOTE: These are internal OS interfaces and are called at at very
+		NOTE: These are internal OS interfaces and are called at very
 		critical locations in the OS. There is very little that can be
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
@@ -962,7 +965,7 @@ config SCHED_INSTRUMENTATION_EXTERNAL
 		SCHED_INSTRUMENTATION_SPINLOCKS, SCHED_INSTRUMENTATION_SYSCALL and
 		SCHED_INSTRUMENTATION_IRQHANDLER. Otherwise the common code will implement
 		these callbacks and packet the arguments into note_ struct. Then the board
-		-specific logic just need to implement one callback:
+		-specific logic just needs to implement one callback:
 
 		  void sched_note_add(FAR const void *note, size_t notelen);
 
@@ -1154,7 +1157,8 @@ if PRIORITY_INHERITANCE
 
 config SEM_PREALLOCHOLDERS
 	int "Number of pre-allocated holders"
-	default 16
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		This setting is only used if priority inheritance is enabled.
 		It defines the maximum number of different threads (minus one) that
@@ -1348,7 +1352,8 @@ menu "Signal Configuration"
 
 config SIG_PREALLOC_IRQ_ACTIONS
 	int "Number of pre-allocated irq actions"
-	default 8
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		The number of pre-allocated irq action structures.
 
@@ -1575,14 +1580,16 @@ menu "POSIX Message Queue Options"
 
 config PREALLOC_MQ_MSGS
 	int "Number of pre-allocated messages"
-	default 4
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		The number of pre-allocated message structures.  The system manages
 		a pool of preallocated message structures to minimize dynamic allocations
 
 config PREALLOC_MQ_IRQ_MSGS
 	int "Number of pre-allocated irq messages"
-	default 8
+	default 4 if DEFAULT_SMALL
+	default 8 if !DEFAULT_SMALL
 	---help---
 		The number of pre-allocated irq message structures.
 

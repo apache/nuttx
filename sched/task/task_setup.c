@@ -79,7 +79,7 @@ static const char g_noname[] = "<noname>";
 
 static int nxtask_assign_pid(FAR struct tcb_s *tcb)
 {
-  FAR struct pidhash_s *pidhash;
+  FAR struct tcb_s **pidhash;
   pid_t next_pid;
   int   hash_ndx;
   int   i;
@@ -117,15 +117,11 @@ retry:
 
       /* Check if there is a (potential) duplicate of this pid */
 
-      if (!g_pidhash[hash_ndx].tcb)
+      if (!g_pidhash[hash_ndx])
         {
           /* Assign this PID to the task */
 
-          g_pidhash[hash_ndx].tcb   = tcb;
-          g_pidhash[hash_ndx].pid   = next_pid;
-#ifdef CONFIG_SCHED_CPULOAD
-          g_pidhash[hash_ndx].ticks = 0;
-#endif
+          g_pidhash[hash_ndx] = tcb;
           tcb->pid = next_pid;
           g_lastpid = next_pid;
 
@@ -141,7 +137,7 @@ retry:
    * expand space.
    */
 
-  pidhash = kmm_malloc(g_npidhash * 2 * sizeof(struct pidhash_s));
+  pidhash = kmm_zalloc(g_npidhash * 2 * sizeof(*pidhash));
   if (pidhash == NULL)
     {
       leave_critical_section(flags);
@@ -150,24 +146,15 @@ retry:
 
   g_npidhash *= 2;
 
-  /* Reset the new hash table to the initial state */
-
-  for (i = 0; i < g_npidhash; i++)
-    {
-      pidhash[i].tcb = NULL;
-      pidhash[i].pid = INVALID_PROCESS_ID;
-    }
-
   /* All original pid and hash_ndx are mismatch,
    * so we need to rebuild their relationship
    */
 
   for (i = 0; i < g_npidhash / 2; i++)
     {
-      hash_ndx = PIDHASH(g_pidhash[i].pid);
-      DEBUGASSERT(pidhash[hash_ndx].tcb == NULL);
-      pidhash[hash_ndx].tcb = g_pidhash[i].tcb;
-      pidhash[hash_ndx].pid = g_pidhash[i].pid;
+      hash_ndx = PIDHASH(g_pidhash[i]->pid);
+      DEBUGASSERT(pidhash[hash_ndx] == NULL);
+      pidhash[hash_ndx] = g_pidhash[i];
     }
 
   /* Release resource for original g_pidhash, using new g_pidhash */
