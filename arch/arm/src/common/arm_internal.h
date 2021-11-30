@@ -343,6 +343,7 @@ int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
 int  arm_memfault(int irq, FAR void *context, FAR void *arg);
+int  arm_busfault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
