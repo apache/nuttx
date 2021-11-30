@@ -141,6 +141,12 @@ FAR const char *fs_gettype(FAR struct statfs *statbuf)
         break;
 #endif
 
+#ifdef CONFIG_FS_RPMSGFS
+      case RPMSGFS_MAGIC:
+        fstype = "rpmsgfs";
+        break;
+#endif
+
 #ifdef CONFIG_FS_USERFS
       case USERFS_MAGIC:
         fstype = "userfs";

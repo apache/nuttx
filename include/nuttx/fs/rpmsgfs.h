@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/nuttx/fs/hostfs_rpmsg.h
+ * include/nuttx/fs/rpmsgfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,12 +33,8 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#ifdef CONFIG_FS_HOSTFS_RPMSG
-int hostfs_rpmsg_init(FAR const char *cpu_name);
-#endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
-int hostfs_rpmsg_server_init(void);
+#ifdef CONFIG_FS_RPMSGFS
+int rpmsgfs_server_init(void);
 #endif
 
 #undef EXTERN
