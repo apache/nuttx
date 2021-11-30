@@ -73,6 +73,9 @@
 
 int arm_hardfault(int irq, FAR void *context, FAR void *arg)
 {
+  uint32_t hfsr = getreg32(NVIC_HFAULTS);
+  uint32_t cfsr = getreg32(NVIC_CFAULTS);
+
   /* Get the value of the program counter where the fault occurred */
 
 #ifndef CONFIG_ARMV8M_USEBASEPRI
@@ -117,20 +120,52 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
     }
 #endif
 
+  if (hfsr & NVIC_HFAULTS_FORCED)
+    {
+      hfalert("Hard Fault escalation:\n");
+
+#ifdef CONFIG_ARCH_HAVE_MEMFAULT_DEBUG
+      if (cfsr & NVIC_CFAULTS_MEMFAULTSR_MASK)
+        {
+          return arm_memfault(irq, context, arg);
+        }
+#endif /* CONFIG_ARCH_HAVE_MEMFAULT_DEBUG */
+#ifdef CONFIG_ARCH_HAVE_BUSFAULT_DEBUG
+      if (cfsr & NVIC_CFAULTS_BUSFAULTSR_MASK)
+        {
+          return arm_busfault(irq, context, arg);
+        }
+#endif /* CONFIG_ARCH_HAVE_BUSFAULT_DEBUG */
+#ifdef CONFIG_ARCH_HAVE_USAGEFAULT_DEBUG
+      if (cfsr & NVIC_CFAULTS_USGFAULTSR_MASK)
+        {
+          return arm_usagefault(irq, context, arg);
+        }
+#endif /* CONFIG_ARCH_HAVE_USAGEFAULT_DEBUG */
+    }
+
   /* Dump some hard fault info */
 
-  hfalert("Hard Fault:\n");
-  hfalert("  IRQ: %d regs: %p\n", irq, context);
-  hfalert("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+  hfalert("PANIC!!! Hard Fault!:");
+  hfalert("\tIRQ: %d regs: %p\n", irq, context);
+  hfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  hfalert("  CFAULTS: %08x HFAULTS: %08x DFAULTS: %08x BFAULTADDR: %08x "
-          "AFAULTS: %08x\n",
-          getreg32(NVIC_CFAULTS), getreg32(NVIC_HFAULTS),
-          getreg32(NVIC_DFAULTS), getreg32(NVIC_BFAULT_ADDR),
-          getreg32(NVIC_AFAULTS));
+  hfalert("\tcfsr: %08x hfsr: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
+          cfsr, hfsr, getreg32(NVIC_DFAULTS),
+          getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
+
+  hfalert("Hard Fault Reason:\n");
+
+  if (hfsr & NVIC_HFAULTS_VECTTBL)
+    {
+      hfalert("\tBusFault on a vector table read\n");
+    }
+  else if (hfsr & NVIC_HFAULTS_DEBUGEVT)
+    {
+      hfalert("\tDebug event\n");
+    }
 
   up_irq_save();
-  _alert("PANIC!!! Hard fault: %08x\n", getreg32(NVIC_HFAULTS));
   PANIC();
   return OK;
 }
