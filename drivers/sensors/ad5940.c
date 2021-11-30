@@ -4019,7 +4019,6 @@ static int ad5940_biadataprocess(FAR struct ad5940_dev_s *priv,
 
   priv->lower.push_event(priv->lower.priv, pout,
                          imprescnt * sizeof(struct sensor_event_impd));
-  kmm_free(pout);
 
   /* Calculate next frequency point */
 
@@ -5651,9 +5650,9 @@ static void ad5940_worker(FAR void *arg)
           goto exit;
         }
 
-      if (fifocnt > AD5940_FIFOSLOTS_MAX);
+      if (fifocnt > AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS);
         {
-          fifocnt = AD5940_FIFOSLOTS_MAX;
+          fifocnt = AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS;
         }
 
       /* Read data out and clear the interrupt flag. */
