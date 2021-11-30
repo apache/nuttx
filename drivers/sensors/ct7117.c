@@ -823,7 +823,6 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
   priv->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
   priv->lower.buffer_number = CONFIG_SENSORS_CT7117_BUFFER_NUMBER;
   priv->lower.ops = &g_ct7117_ops;
-  priv->lower.uncalibrated = true;
   priv->interval = CT7117_DEFAULT_ODR;
 
   /* Check Device ID. */
