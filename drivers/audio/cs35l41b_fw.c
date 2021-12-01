@@ -796,8 +796,8 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
 
   for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
     {
-      g_dsp_status.data.words[i] =
-      cs35l41b_read_register(priv, g_cs35l41_dsp_status_controls[i]);
+      g_dsp_status.data.words[i] = cs35l41b_read_register(priv,
+      get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
 
       if (g_dsp_status.data.words[i] < 0)
         {
@@ -815,7 +815,7 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
       for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
         {
           regval = cs35l41b_read_register(priv,
-                                          g_cs35l41_dsp_status_controls[i]);
+          get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
           if (regval < 0)
             {
               auderr("cs35l41b read register failed\n");
@@ -829,6 +829,8 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
           if ((i == 1) && (regval != g_dsp_status.data.words[i]))
             {
               g_dsp_status.is_hb_inc = true;
+              auderr("times:%d\n", times);
+              goto done;
             }
 
           /* If the current field is CSPL_TEMPERATURE,
@@ -844,6 +846,7 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
         }
     }
 
+done:
   if (g_dsp_status.is_hb_inc)
     {
       return OK;
@@ -890,7 +893,6 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv,
 {
   uint32_t address;
   uint32_t val;
-  int ret;
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
   val = cs35l41b_read_register(priv, address);
@@ -958,7 +960,7 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t address;
   int ret;
-  int value;
+  uint32_t value;
 
   if (!priv->lower->get_caliberate_result)
     {
@@ -968,13 +970,13 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
 
   if (priv->lower->get_caliberate_result(&value) == OK)
     {
-      audwarn("caliberate value:0x%08lx\n", value);
+      audwarn("caliberate value:0x%08ux\n", value);
 
       address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
       ret = cs35l41b_write_register(priv, address, value);
       if (ret == ERROR)
         {
-          printf("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
+          auderr("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
           return ERROR;
         }
 
@@ -983,7 +985,7 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
                                     CS35L41_CAL_STATUS_CALIB_SUCCESS);
       if (ret == ERROR)
         {
-          printf("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+          auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
           return ERROR;
         }
 
@@ -992,7 +994,7 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
             (value + CS35L41_CAL_STATUS_CALIB_SUCCESS));
       if (ret == ERROR)
         {
-          printf("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+          auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
           return ERROR;
         }
     }

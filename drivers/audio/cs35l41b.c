@@ -357,6 +357,25 @@ static const cs35l41_otp_packed_entry_t g_otp_map[] =
   {0x00017044,    0,      24},    /* LOT_NUMBER */
 };
 
+static const uint32_t g_cs35l41_hibernate_patch[] =
+{
+  IRQ1_IRQ1_MASK_1_REG,                      0xFFFFFFFF,
+  IRQ2_IRQ2_EINT_2_REG,                      (1 << 20),
+  IRQ1_IRQ1_EINT_2_REG,                      (1 << 21),
+  PWRMGT_WAKESRC_CTL,                        0x0044,
+  PWRMGT_WAKESRC_CTL,                        0x0144,
+  DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG, CS35L41_DSP_MBOX_CMD_HIBERNATE,
+};
+
+static const uint32_t g_cs35l41_pdn_patch[] =
+{
+  CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_UNLOCK_1,
+  CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_UNLOCK_2,
+  0x00002084,                          0x002F1AA3,
+  CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_1,
+  CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_2,
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -418,6 +437,20 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
           case IO_SET_CALIBRATED:
             priv->is_calibrating = true;
             audio_msg->msg_id = IO_SET_CALIBRATED;
+
+            /* pa is hibernate, wake up first */
+
+            if (priv->is_calibrating)
+            {
+              if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
+                {
+                  auderr("power wake up error\n");
+                  return ERROR;
+                }
+            }
+
+            /* reload caliberate fw */
+
             if (cs35l41b_reset(priv) == ERROR)
               {
                 audio_msg->u.data = CALIBRATED_STATUS_ERROR;
@@ -677,7 +710,7 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
 
               default:
                 {
-                  auderr("ERROR: Unrecognized feature unit:0x%x\n",
+                  audinfo("Unrecognized feature unit:0x%x\n",
                         caps->ac_format.hw);
                 }
                 break;
@@ -700,6 +733,20 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
           priv->bpsamp  = caps->ac_controls.b[2];
           priv->bclk    = caps->ac_controls.hw[0] *
                           (priv->lower->bclk_factor);
+
+          /* if calibrate processing, cs35l41b_configure should not call
+           * power wake up, cs35l41b_ioctl will call power wake up before
+           * cs35l41b_configure
+           */
+
+          if (!priv->is_calibrating)
+            {
+              if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
+                {
+                  auderr("power wake up error\n");
+                  return ERROR;
+                }
+            }
 
           if (cs35l41b_set_channel(priv, CHANNEL_LEFT_RIGHT) == ERROR)
             {
@@ -776,6 +823,12 @@ static int cs35l41b_shutdown(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
+  if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+    {
+      auderr("power hibernate error!\n");
+      return ERROR;
+    }
+
   return OK;
 }
 
@@ -797,7 +850,6 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
-  audinfo("cs35l41b start!\n");
 
   if (!priv->done)
     {
@@ -807,12 +859,6 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
   if (cs35l41b_power(priv, POWER_UP) == ERROR)
     {
       auderr("power process failed\n");
-      return ERROR;
-    }
-
-  if (cs35l41b_is_dsp_processing(priv) == ERROR)
-    {
-      auderr("dsp do not work!\n");
       return ERROR;
     }
 
@@ -866,14 +912,58 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
-  if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
-    {
-      return ERROR;
-    }
+  /**
+   * if calibrate processing, just calibrate cs35l41b.
+   * after calibration, ca35l41b_ioctl will call cs35l41b_reset to reload FW
+   * therefore, cs35l41b_stop does not require call hibernate
+  */
 
   if (priv->is_calibrating)
     {
       cs35l41b_calibrate(priv, val);
+    }
+  else
+    {
+      if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+        {
+          return ERROR;
+        }
+
+      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+        {
+          auderr("power hibernate error!\n");
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41_write_errata
+ *
+ * Description:
+ *   cs35l41 write otp errata
+ *
+ ****************************************************************************/
+
+static int cs35l41_write_errata(FAR struct cs35l41b_dev_s *priv)
+{
+  int i;
+  int ret;
+
+  /* write revb2 errata data */
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_revb2_errata_patch) / 2; i++)
+    {
+      ret = cs35l41b_write_register(priv,
+                                    g_cs35l41_revb2_errata_patch[2 * i],
+                                    g_cs35l41_revb2_errata_patch[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_revb2_errata_patch[%ld] error\n", 2 * i);
+          return ERROR;
+        }
     }
 
   return OK;
@@ -1443,6 +1533,673 @@ static bool cs35l41_is_mbox_status_correct(uint32_t cmd, uint32_t status)
 }
 
 /****************************************************************************
+ * Name: cs35l41_hibernate
+ *
+ * Description:
+ *   cs35l41b power hibernate mode
+ *
+ ****************************************************************************/
+
+static int cs35l41_hibernate(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret;
+  int i;
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_hibernate_patch) / 2; i++)
+    {
+      ret = cs35l41b_write_register(priv,
+                                    g_cs35l41_hibernate_patch[2 * i],
+                                    g_cs35l41_hibernate_patch[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_hibernate_patch[%ld] error\n", 2 * i);
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41_wait_for_pwrmgt_sts
+ *
+ * Description:
+ *   cs35l41b wait pwrmgt status
+ *
+ ****************************************************************************/
+
+static int cs35l41_wait_for_pwrmgt_sts(FAR struct cs35l41b_dev_s *priv)
+{
+  uint32_t i;
+  uint32_t wrpend_sts = 0x2;
+
+  for (i = 0;
+       (i < 10) && (wrpend_sts & PWRMGT_PWRMGT_STS_WR_PENDSTS_BITMASK);
+       i++)
+    {
+      wrpend_sts = cs35l41b_read_register(priv, PWRMGT_PWRMGT_STS);
+      if (wrpend_sts < 0)
+        {
+          auderr("read PWRMGT_PWRMGT_STS error\n", 2 * i);
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41_wake
+ *
+ * Description:
+ *   cs35l41b wake up from hibernate
+ *
+ ****************************************************************************/
+
+static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret;
+  int retries;
+  uint32_t retval;
+  uint32_t timeout;
+  uint32_t mbox_cmd_drv_shift = 1 << 20;
+  uint32_t mbox_cmd_fw_shift = 1 << 21;
+
+  for (retries = 0; retries < 5; retries++)
+    {
+      timeout = 10;
+
+      do
+        {
+          ret = cs35l41b_write_register(
+                priv,
+                DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG,
+                CS35L41_DSP_MBOX_CMD_OUT_OF_HIBERNATE);
+
+          if (ret == ERROR)
+            {
+              auderr("write mbox dsp virtual 1 register error\n");
+              return ERROR;
+            }
+
+          retval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
+          if (retval < 0)
+            {
+              auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
+              return ERROR;
+            }
+
+          nxsig_usleep(1000 * 2);
+        } while (retval != CS35L41_DSP_MBOX_STATUS_PAUSED && --timeout);
+
+      if (timeout != 0)
+        {
+          break;
+        }
+
+      ret = cs35l41_wait_for_pwrmgt_sts(priv);
+      if (ret == ERROR)
+        {
+          auderr("cs35l41_wait_for_pwrmgt_sts error\n");
+          return ERROR;
+        }
+
+      ret = cs35l41b_write_register(priv, PWRMGT_WAKESRC_CTL, 0x0044);
+      if (ret == ERROR)
+        {
+          auderr("write PWRMGT_WAKESRC_CTL error\n");
+          return ERROR;
+        }
+
+      ret = cs35l41_wait_for_pwrmgt_sts(priv);
+      if (ret == ERROR)
+        {
+          auderr("cs35l41_wait_for_pwrmgt_sts error\n");
+          return ERROR;
+        }
+
+      ret = cs35l41b_write_register(priv, PWRMGT_WAKESRC_CTL, 0x0144);
+      if (ret == ERROR)
+        {
+          auderr("write PWRMGT_WAKESRC_CTL error\n");
+          return ERROR;
+        }
+
+      ret = cs35l41_wait_for_pwrmgt_sts(priv);
+      if (ret == ERROR)
+        {
+          auderr("cs35l41_wait_for_pwrmgt_sts error\n");
+          return ERROR;
+        }
+
+      ret = cs35l41b_write_register(priv, PWRMGT_PWRMGT_CTL, 0x03);
+      if (ret == ERROR)
+        {
+          auderr("write PWRMGT_PWRMGT_CTL error\n");
+          return ERROR;
+        }
+    }
+
+  ret = cs35l41b_write_register(priv,
+                                IRQ2_IRQ2_EINT_2_REG,
+                                mbox_cmd_drv_shift);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  ret = cs35l41b_write_register(priv,
+                                IRQ1_IRQ1_EINT_2_REG,
+                                mbox_cmd_fw_shift);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  ret = cs35l41_write_errata(priv);
+  if (ret == ERROR)
+    {
+      auderr("cs35l41_write_errata error\n");
+      return ERROR;
+    }
+
+  ret = cs35l41_otp_unpack(priv);
+  if (ret == ERROR)
+    {
+      auderr("cs35l41_otp_unpack error\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41_power_down
+ *
+ * Description:
+ *   cs35l41b power down mode
+ *
+ ****************************************************************************/
+
+static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
+{
+  int ret;
+  uint32_t regval;
+  int i;
+
+  /* clear HALO DSP Virtual MBOX 1 IRQ flag */
+
+  ret = cs35l41b_write_register(
+        priv,
+        IRQ2_IRQ2_EINT_2_REG,
+        IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
+
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Clear HALO DSP Virtual MBOX 2 IRQ flag */
+
+  ret = cs35l41b_write_register(
+        priv,
+        IRQ1_IRQ1_EINT_2_REG,
+        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+
+  if (ret == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* read IRQ2 mask register */
+
+  regval = cs35l41b_read_register(
+           priv,
+           IRQ2_IRQ2_MASK_2_REG);
+
+  if (regval < 0)
+    {
+      auderr("read IRQ2_IRQ2_MASK_2_REG error:0x%08lx\n", regval);
+      return ERROR;
+    }
+
+  /* Clear HALO DSP Virtual MBOX 1 IRQ mask */
+
+  regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
+  ret = cs35l41b_write_register(priv,
+                                IRQ2_IRQ2_MASK_2_REG,
+                                regval);
+
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  /* send HALO DSP MBOX 'Pause' Command */
+
+  ret = cs35l41b_write_register(priv,
+                                DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG,
+                                CS35L41_DSP_MBOX_CMD_PAUSE);
+
+  if (regval == ERROR)
+    {
+      auderr("write DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG error\n");
+      return ERROR;
+    }
+
+  for (i = 0; i < 5; i++)
+    {
+      /* read IRQ2 mask register */
+
+      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_2_REG);
+
+      if (regval < 0)
+        {
+          auderr("read IRQ1_IRQ1_EINT_2_REG error\n");
+          return ERROR;
+        }
+
+      if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
+        {
+          break;
+        }
+
+      /* wait for at least 2ms */
+
+      nxsig_usleep(1000 * 2);
+    }
+
+  if (i == 5)
+    {
+      auderr("read IRQ2 mask register 5 times error\n");
+      return ERROR;
+    }
+
+  /* Clear MBOX IRQ flag */
+
+  ret = cs35l41b_write_register(
+        priv,
+        IRQ1_IRQ1_EINT_2_REG,
+        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+
+  if (regval == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* read IRQ2 Mask register to re-mask HALO DSP Virtual MBOX 1 IRQ */
+
+  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
+
+  if (regval < 0)
+    {
+      auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Re-mask HALO DSP Virtual MBOX 1 IRQ */
+
+  regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Read the MBOX status */
+
+  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
+
+  if (regval < 0)
+    {
+      auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
+      return ERROR;
+    }
+
+  if (cs35l41_is_mbox_status_correct(CS35L41_DSP_MBOX_CMD_PAUSE, regval))
+    {
+      audwarn("cs35l41b mbox pause status is ok\n");
+    }
+  else
+    {
+      auderr("cs35l41b mbox pause status is error\n");
+      return ERROR;
+    }
+
+  /* Read GLOBAL_EN register in order to clear GLOBAL_EN */
+
+  regval = cs35l41b_read_register(priv, MSM_GLOBAL_ENABLES_REG);
+
+  if (regval < 0)
+    {
+      auderr("read MSM_GLOBAL_ENABLES_REG error\n");
+      return ERROR;
+    }
+
+  /* clear global enable */
+
+  regval &= ~(MSM_GLOBAL_ENABLES_GLOBAL_EN_BITMASK);
+  ret = cs35l41b_write_register(priv, MSM_GLOBAL_ENABLES_REG, regval);
+  if (ret == ERROR)
+    {
+      auderr("write MSM_GLOBAL_ENABLES_REG error\n");
+      return ERROR;
+    }
+
+  /* Read IRQ1 flag register to poll MSM_PDN_DONE bit */
+
+  for (i = 0; i < 100; i++)
+    {
+      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_1_REG);
+
+      if (regval < 0)
+        {
+          auderr("read IRQ1_IRQ1_EINT_1_REG error\n");
+          return ERROR;
+        }
+
+      if (regval & IRQ1_IRQ1_EINT_1_MSM_PDN_DONE_EINT1_BITMASK)
+        {
+          break;
+        }
+
+      /* wait for at least 1ms */
+
+      nxsig_usleep(1000 * 2);
+    }
+
+  if (i == 100)
+    {
+      auderr("read IRQ1 flag register to poll MSM_PDN_DONE bit error\n");
+      return ERROR;
+    }
+
+  /* Clear MSM_PDN_DONE IRQ flag */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_1_REG,
+        IRQ1_IRQ1_EINT_1_MSM_PDN_DONE_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_1_REG error\n");
+      return ERROR;
+    }
+
+  /* send power down patch set */
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_pdn_patch) / 2; i++)
+    {
+      ret = cs35l41b_write_register(priv,
+                                    g_cs35l41_pdn_patch[2 * i],
+                                    g_cs35l41_pdn_patch[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_pdn_patch[%ld] error\n", 2 * i);
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41_power_up
+ *
+ * Description:
+ *   cs35l41b power up mode
+ *
+ ****************************************************************************/
+
+static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
+{
+  uint32_t regval;
+  uint32_t i;
+  int      ret = OK;
+  uint32_t mbox_cmd = CS35L41_DSP_MBOX_CMD_NONE;
+
+  /* send HALO DSP memory lock sequence */
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_mem_lock) / 2; i++)
+    {
+      ret = cs35l41b_write_register(priv, g_cs35l41_mem_lock[2 * i],
+                                    g_cs35l41_mem_lock[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_mem_lock[%ld] error\n", 2 * i);
+          return ERROR;
+        }
+    }
+
+  /* Set next HALO DSP Sample Rate register to G1R2 */
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_frame_sync_regs); i++)
+    {
+      ret = cs35l41b_write_register(priv, g_cs35l41_frame_sync_regs[i],
+                                    CS35L41_DSP1_SAMPLE_RATE_G1R2);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_frame_sync_regs[%ld] error\n", i);
+          return ERROR;
+        }
+    }
+
+  /* Read the HALO DSP CCM control register and
+   * enable clocks to HALO DSP core
+   */
+
+  regval = cs35l41b_read_register(priv,
+           XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG);
+  if (regval < 0)
+    {
+      auderr("read XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
+      return ERROR;
+    }
+
+  regval |=
+  XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_DSP1_CCM_CORE_EN_BITMASK;
+  ret = cs35l41b_write_register(priv,
+        XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, regval);
+  if (ret == ERROR)
+    {
+      auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
+      return ERROR;
+    }
+
+  /* Send Power Up Patch */
+
+  for (i = 0; i < ARRAY_SIZE(g_cs35l41_pup_patch) / 2; i++)
+    {
+      ret = cs35l41b_write_register(priv, g_cs35l41_pup_patch[2 * i],
+                                    g_cs35l41_pup_patch[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          auderr("write g_cs35l41_pup_patch[%ld] error\n", 2 * i);
+          return ERROR;
+        }
+    }
+
+  /* set global enable */
+
+  regval = cs35l41b_read_register(priv, MSM_GLOBAL_ENABLES_REG);
+  if (regval < 0)
+    {
+      auderr("read MSM_GLOBAL_ENABLES_REG error\n");
+      return ERROR;
+    }
+
+  regval |= MSM_GLOBAL_ENABLES_GLOBAL_EN_BITMASK;
+  ret = cs35l41b_write_register(priv, MSM_GLOBAL_ENABLES_REG, regval);
+  if (ret == ERROR)
+    {
+      auderr("write MSM_GLOBAL_ENABLES_REG error\n");
+      return ERROR;
+    }
+
+  /* wait for 1ms */
+
+  nxsig_usleep(1000 * 1);
+
+  /* clear HALO DSP virtual MBOX 1 IRQ */
+
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_EINT_2_REG,
+        IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* clear HALO DSP virtual MBOX 2 IRQ */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Read IRQ2 Mask register and
+   * unmask IRQ for HALO DSP virtual MBOX 1
+   */
+
+  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
+  if (regval < 0)
+    {
+      auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
+       return ERROR;
+    }
+
+  regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Read HALO DSP MBOX Space 2 register */
+
+  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
+  if (regval < 0)
+    {
+      auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
+      return ERROR;
+    }
+
+  switch (regval)
+    {
+      case CS35L41_DSP_MBOX_STATUS_RDY_FOR_REINIT:
+        mbox_cmd = CS35L41_DSP_MBOX_CMD_REINIT;
+        break;
+
+      case CS35L41_DSP_MBOX_STATUS_PAUSED:
+      case CS35L41_DSP_MBOX_STATUS_RUNNING:
+        mbox_cmd = CS35L41_DSP_MBOX_CMD_RESUME;
+        break;
+
+      default:
+        break;
+    }
+
+  if (mbox_cmd == CS35L41_DSP_MBOX_CMD_NONE)
+    {
+      auderr("mbox cmd failed!!!!!\n");
+      return ERROR;
+    }
+
+  /* Write MBOX command */
+
+  ret = cs35l41b_write_register(priv,
+        DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG, mbox_cmd);
+  if (ret == ERROR)
+    {
+      auderr("write dsp virtual mbox 1 register error\n");
+      return ERROR;
+    }
+
+  for (i = 0; i < 5; i++)
+    {
+      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_2_REG);
+      if (regval < 0)
+        {
+          auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+          return ERROR;
+        }
+
+      /* wait for 1ms */
+
+      nxsig_usleep(1000 * 1);
+
+      if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
+        {
+          break;
+        }
+    }
+
+  if (i == 5)
+    {
+      auderr("read IRQ1_IRQ1_EINT_2_REG error!!\n");
+      return ERROR;
+    }
+
+  /* Clear MBOX IRQ */
+
+  ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Read IRQ2 Mask register to next re-mask the MBOX IRQ */
+
+  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
+  if (regval < 0)
+    {
+      auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
+  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+  if (ret == ERROR)
+    {
+      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+      return ERROR;
+    }
+
+  /* Read the HALO DSP MBOX status */
+
+  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
+  if (regval < 0)
+    {
+      auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
+      return ERROR;
+    }
+
+  if (cs35l41_is_mbox_status_correct(mbox_cmd, regval))
+    {
+      audinfo("cs35l41b mbox status is ok\n");
+    }
+  else
+    {
+      auderr("cs35l41b mbox status is error\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: cs35l41b_power
  *
  * Description:
@@ -1453,286 +2210,86 @@ static bool cs35l41_is_mbox_status_correct(uint32_t cmd, uint32_t status)
 static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                           uint8_t state)
 {
-  uint32_t regval;
-  uint32_t i;
-  int      ret = OK;
-  uint32_t mbox_cmd = CS35L41_DSP_MBOX_CMD_NONE;
+  int ret;
 
   switch (state)
     {
       case POWER_UP:
 
-        /* send HALO DSP memory lock sequence */
-
-        for (i = 0; i < ARRAY_SIZE(g_cs35l41_mem_lock) / 2; i++)
+        if (priv->power_state != CS35L41_STATE_STANDBY &&
+            priv->power_state != CS35L41_STATE_DSP_STANDBY)
           {
-            ret = cs35l41b_write_register(priv, g_cs35l41_mem_lock[2 * i],
-                                          g_cs35l41_mem_lock[2 * i + 1]);
-            if (ret == ERROR)
-              {
-                auderr("write g_cs35l41_mem_lock[%ld] error\n", 2 * i);
-                goto error_flags;
-              }
+            auderr("power status is not standby or dsp_standby!\n");
+            return ERROR;
           }
 
-        /* Set next HALO DSP Sample Rate register to G1R2 */
-
-        for (i = 0; i < ARRAY_SIZE(g_cs35l41_frame_sync_regs); i++)
+        if (priv->power_state == CS35L41_STATE_STANDBY)
           {
-            ret = cs35l41b_write_register(priv, g_cs35l41_frame_sync_regs[i],
-                                          CS35L41_DSP1_SAMPLE_RATE_G1R2);
-            if (ret == ERROR)
-              {
-                auderr("write g_cs35l41_frame_sync_regs[%ld] error\n", i);
-                goto error_flags;
-              }
-          }
-
-        /* Read the HALO DSP CCM control register and
-         * enable clocks to HALO DSP core
-         */
-
-        regval = cs35l41b_read_register(priv,
-                 XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG);
-        if (regval < 0)
-          {
-            auderr("read XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        regval |=
-        XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_DSP1_CCM_CORE_EN_BITMASK;
-        ret = cs35l41b_write_register
-              (priv,
-               XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG,
-               regval);
-        if (ret == ERROR)
-          {
-            auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
-            goto error_flags;
-          }
-
-        /* Send Power Up Patch */
-
-        for (i = 0; i < ARRAY_SIZE(g_cs35l41_pup_patch) / 2; i++)
-          {
-            ret = cs35l41b_write_register(priv, g_cs35l41_pup_patch[2 * i],
-                                          g_cs35l41_pup_patch[2 * i + 1]);
-            if (ret == ERROR)
-              {
-                auderr("write g_cs35l41_pup_patch[%ld] error\n", 2 * i);
-                goto error_flags;
-              }
-          }
-
-        /* set global enable */
-
-        regval = cs35l41b_read_register(priv, MSM_GLOBAL_ENABLES_REG);
-        if (regval < 0)
-          {
-            auderr("read MSM_GLOBAL_ENABLES_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        regval |= MSM_GLOBAL_ENABLES_GLOBAL_EN_BITMASK;
-        ret = cs35l41b_write_register(priv, MSM_GLOBAL_ENABLES_REG, regval);
-        if (ret == ERROR)
-          {
-            auderr("write MSM_GLOBAL_ENABLES_REG error\n");
-            goto error_flags;
-          }
-
-        /* wait for 1ms */
-
-        nxsig_usleep(1000 * 1);
-
-        /* clear HALO DSP virtual MBOX 1 IRQ */
-
-        ret = cs35l41b_write_register(priv, IRQ2_IRQ2_EINT_2_REG,
-              IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
-        if (ret == ERROR)
-          {
-            auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
-            goto error_flags;
-          }
-
-        /* clear HALO DSP virtual MBOX 2 IRQ */
-
-        ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
-              IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
-        if (ret == ERROR)
-          {
-            auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
-            goto error_flags;
-          }
-
-        /* Read IRQ2 Mask register and
-         * unmask IRQ for HALO DSP virtual MBOX 1
-         */
-
-        regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
-        if (regval < 0)
-          {
-            auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
-        ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
-        if (ret == ERROR)
-          {
-            auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
-            goto error_flags;
-          }
-
-        /* Read HALO DSP MBOX Space 2 register */
-
-        regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
-        if (regval < 0)
-          {
-            auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        switch (regval)
-        {
-          case CS35L41_DSP_MBOX_STATUS_RDY_FOR_REINIT:
-            mbox_cmd = CS35L41_DSP_MBOX_CMD_REINIT;
-            break;
-
-          case CS35L41_DSP_MBOX_STATUS_PAUSED:
-          case CS35L41_DSP_MBOX_STATUS_RUNNING:
-            mbox_cmd = CS35L41_DSP_MBOX_CMD_RESUME;
-            break;
-
-          default:
-            break;
-        }
-
-        if (mbox_cmd == CS35L41_DSP_MBOX_CMD_NONE)
-          {
-            auderr("mbox cmd failed!!!!!\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        /* Write MBOX command */
-
-        ret = cs35l41b_write_register
-              (priv,
-               DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG,
-               mbox_cmd);
-        if (ret == ERROR)
-          {
-            auderr("write dsp virtual mbox 1 register error\n");
-            goto error_flags;
-          }
-
-        for (i = 0; i < 5; i++)
-          {
-            regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_2_REG);
-            if (regval < 0)
-              {
-                auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
-                ret = ERROR;
-                goto error_flags;
-              }
-
-            /* wait for 1ms */
-
-            nxsig_usleep(1000 * 1);
-
-            if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
-              {
-                break;
-              }
-          }
-
-        if (i == 5)
-          {
-            auderr("read IRQ1_IRQ1_EINT_2_REG error!!\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        /* Clear MBOX IRQ */
-
-        ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
-              IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
-        if (ret == ERROR)
-          {
-            auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
-            goto error_flags;
-          }
-
-        /* Read IRQ2 Mask register to next re-mask the MBOX IRQ */
-
-        regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
-        if (regval < 0)
-          {
-            auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
-        ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
-        if (ret == ERROR)
-          {
-            auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
-            goto error_flags;
-          }
-
-        /* Read the HALO DSP MBOX status */
-
-        regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
-        if (regval < 0)
-          {
-            auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
-            ret = ERROR;
-            goto error_flags;
-          }
-
-        if (cs35l41_is_mbox_status_correct(mbox_cmd, regval))
-          {
-            audinfo("cs35l41b mbox status is ok\n");
+            priv->power_state = CS35L41_STATE_POWER_UP;
           }
         else
           {
-            auderr("cs35l41b mbox status is error\n");
-            ret = ERROR;
-            goto error_flags;
+            priv->power_state = CS35L41_STATE_DSP_POWER_UP;
+          }
+
+        if (cs35l41_power_up(priv) == ERROR)
+          {
+            auderr("cs35l41b power up failed!\n");
+            return ERROR;
           }
         break;
 
       case POWER_DOWN:
-        regval = CS35L41B_GLOBAL_EN_DISABLE;
-        ret = cs35l41b_write_register(priv, CS35L41B_GLOBAL_ENABLES_REG,
-                                      regval);
-        if (ret == ERROR)
+        if (priv->power_state != CS35L41_STATE_POWER_UP &&
+            priv->power_state != CS35L41_STATE_DSP_POWER_UP)
           {
-            auderr("write CS35L41B_GLOBAL_ENABLES_REG error\n");
-            goto error_flags;
+            auderr("power status is not power up or dsp_power_up!\n");
+            return ERROR;
           }
 
+          if (cs35l41_power_down(priv) == ERROR)
+            {
+              auderr("power down failed!\n");
+              return ERROR;
+            }
+
+          priv->power_state = CS35L41_STATE_DSP_STANDBY;
         break;
 
       case POWER_HIBERNATE:
+        if (priv->power_state == CS35L41_STATE_DSP_STANDBY)
+          {
+            ret = cs35l41_hibernate(priv);
+            if (ret == ERROR)
+              {
+                auderr("cs35l41b hibernate failed!\n");
+                return ERROR;
+              }
+            priv->power_state = CS35L41_STATE_HIBERNATE;
+          }
+        else
+          {
+            auderr("power status is not dsp standby!\n");
+            return ERROR;
+          }
         break;
 
       case POWER_WAKEUP:
+        if (priv->power_state == CS35L41_STATE_HIBERNATE)
+          {
+            if (cs35l41_wake(priv) == ERROR)
+              {
+                auderr("cs35l41b wake up failed!\n");
+                return ERROR;
+              }
+            priv->power_state = CS35L41_STATE_DSP_STANDBY;
+          }
+        else
+          {
+            auderr("power status is not hibernate!\n");
+            return ERROR;
+          }
         break;
-    }
-
-error_flags:
-  if (ret == ERROR)
-    {
-      auderr("ca35l41b power process failed\n");
-      return ERROR;
     }
 
   return OK;
@@ -1881,6 +2438,38 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
       auderr("write 0x00006000 error\n");
       return ERROR;
     }
+
+  priv->power_state = CS35L41_STATE_DSP_STANDBY;
+
+  /* if calibrate processing, should not enter hibernate mode */
+  if (!priv->is_calibrating)
+  {
+    if (cs35l41b_mute(priv, true) == ERROR)
+      {
+        auderr("dsp mute failed\n");
+        return ERROR;
+      }
+
+    if (cs35l41b_power(priv, POWER_UP) == ERROR)
+      {
+        auderr("power process failed\n");
+        return ERROR;
+      }
+
+    priv->power_state = CS35L41_STATE_DSP_POWER_UP;
+
+    if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+      {
+        auderr("cs45l41b power down failed!\n");
+        return ERROR;
+      }
+
+    if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+      {
+        auderr("cs45l41b power hibernate failed!\n");
+        return ERROR;
+      }
+  }
 
   return OK;
 }

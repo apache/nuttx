@@ -925,6 +925,30 @@
 #define CS35L41B_GLOBAL_AMP_UNMUTE                        \
         (0 << CS35L41B_GLOBAL_AMP_MUTE_SHIFT)
 
+/* Hibernation Power Management */
+
+/* PWRMGT_CTL register */
+
+#define PWRMGT_PWRMGT_CTL                                 (0x2900)
+
+/* WAKESRC_CTL register */
+
+#define PWRMGT_WAKESRC_CTL                                (0x2904)
+
+/*  PWRMGT_STS register */
+
+#define PWRMGT_PWRMGT_STS                                 (0x2908)
+#define PWRMGT_PWRMGT_STS_WR_PENDSTS_BITMASK              (0x00000002)
+
+#define CS35L41_STATE_UNCONFIGURED                        (0)
+#define CS35L41_STATE_CONFIGURED                          (1)
+#define CS35L41_STATE_STANDBY                             (2)
+#define CS35L41_STATE_POWER_UP                            (3)
+#define CS35L41_STATE_ERROR                               (4)
+#define CS35L41_STATE_DSP_POWER_UP                        (5)
+#define CS35L41_STATE_DSP_STANDBY                         (6)
+#define CS35L41_STATE_HIBERNATE                           (7)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -965,6 +989,7 @@ struct cs35l41b_dev_s
   /* set pa bypassed */
 
   bool                    is_bypassed;
+  uint8_t                 power_state;
 
   /* set pa calibration */
 
