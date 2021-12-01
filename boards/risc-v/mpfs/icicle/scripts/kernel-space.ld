@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/icicle/scripts/user-space.ld
+ * boards/risc-v/mpfs/icicle/scripts/ld.script
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -21,27 +21,22 @@
 /* NOTE:  This depends on the memory.ld script having been included prior to
  * this script.
  */
-
+ 
 OUTPUT_ARCH("riscv")
 
+/* Provide these so there is no need for using config files for this */
+__uflash_start = ORIGIN(uflash);
+__uflash_size = LENGTH(uflash);
+__usram_start = ORIGIN(usram);
+__usram_size = LENGTH(usram);
+    
+ENTRY(_stext)
+EXTERN(_vectors)
 SECTIONS
 {
-    /* section info */
-
-    __ld_uflash_start = ORIGIN(uflash);
-    __ld_uflash_end = ORIGIN(uflash)+ LENGTH(uflash);
-    __ld_uflash_size = LENGTH(uflash);
-
-    __ld_usram_start = ORIGIN(usram);
-    __ld_usram_end = ORIGIN(usram)+ LENGTH(usram);
-    __ld_usram_size = LENGTH(usram);
-
-    .userspace : {
-        *(.userspace)
-    } > uflash
-
     .text : {
         _stext = ABSOLUTE(.);
+        *(.vectors)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -53,41 +48,43 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > uflash
+    } > kflash
 
-    .init_section : {
+    .init_section : ALIGN(4) {
         _sinit = ABSOLUTE(.);
         KEEP(*(.init_array .init_array.*))
         _einit = ABSOLUTE(.);
-    } > uflash
-
-    __exidx_start = ABSOLUTE(.);
-
-    __exidx_end = ABSOLUTE(.);
+    } > kflash
 
     _eronly = ABSOLUTE(.);
 
-    .data : {
+    .data : ALIGN(4) {
         _sdata = ABSOLUTE(.);
         *(.data .data.*)
         *(.sdata .sdata.* .sdata2.*)
         *(.gnu.linkonce.d.*)
+        *(.gnu.linkonce.s.*)
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > usram AT > uflash
+    } > ksram AT > kflash
 
-    .bss : {
+    PROVIDE(__global_pointer$ = _sdata + ((_edata - _sdata) / 2));
+
+    .bss : ALIGN(4) {
         _sbss = ABSOLUTE(.);
         *(.bss .bss.*)
         *(.sbss .sbss.*)
         *(.gnu.linkonce.b.*)
+        *(.gnu.linkonce.sb.*)
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > usram
+        . = ALIGN(32);
+        _default_stack_limit = ABSOLUTE(.);
+    } > ksram
 
-    /* Stabs debugging sections */
+    /* Stabs debugging sections. */
 
     .stab 0 : { *(.stab) }
     .stabstr 0 : { *(.stabstr) }
