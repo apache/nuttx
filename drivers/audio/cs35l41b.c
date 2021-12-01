@@ -2017,6 +2017,10 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
       return NULL;
     }
 
+  /* wait 2 ms for stable */
+
+  up_mdelay(2);
+
   /* Allocate a CS35L41B device structure */
 
   priv = kmm_zalloc(sizeof(struct cs35l41b_dev_s));
