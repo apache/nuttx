@@ -55,6 +55,7 @@
  *  - Input with irq level low
  *  - Input with irq edge positive
  *  - Input with irq edge negative
+ *  - Alternate Function IO (pad) mux
  *
  * 16-bit Encoding:       1111 1100 0000 0000
  *                        5432 1098 7654 3210
@@ -70,11 +71,27 @@
  * MM.. .... .... ....
  */
 
-#define GPIO_MODE_SHIFT  (14) /* Bit 14-15: IO Mode */
-#define GPIO_MODE_MASK   (3 << GPIO_MODE_SHIFT)
-#  define GPIO_NOINOUT   (0 << GPIO_MODE_SHIFT)  /* No input or output */
-#  define GPIO_INPUT     (1 << GPIO_MODE_SHIFT)  /* Input Enable */
-#  define GPIO_OUTPUT    (2 << GPIO_MODE_SHIFT)  /* Output Enable */
+#define GPIO_EC_SHIFT        (20) /* Bits 20-31 Electrical Configuration */
+#define GPIO_EC_MASK         (0xFFF << GPIO_EC_SHIFT)
+#define GPIO_EC_PUPD_SHIFT   (30) /* Bit 30-31 Electrical Configuration PUPD */
+#define GPIO_EC_PUPD_MASK    (3 << GPIO_EC_PUPD_SHIFT)
+#define GPIO_EC_LOCKDN_SHIFT (29) /* Bit 29 Electrical Configuration Lockdn */
+#define GPIO_EC_LOCKDN_MASK  (1 << GPIO_EC_LOCKDN_SHIFT)
+#define GPIO_EC_ENHYST_SHIFT (28) /* Bit 28 Electrical Configuration Hyst */
+#define GPIO_EC_ENHYST_MASK  (1 << GPIO_EC_ENHYST_SHIFT)
+#define GPIO_CLAMP_SHIFT     (27) /* Bit 27 Electrical Configuration Clamp */
+#define GPIO_EC_CLAMP_MASK   (1 << GPIO_CLAMP_SHIFT)
+#define GPIO_EC_DRVSTR_SHIFT (23) /* Bit 23-26 Electrical Configuration drive strength */
+#define GPIO_EC_DRVSTR_MASK  (0xF << GPIO_EC_SHIFT)
+#define GPIO_EC_BUFM_SHIFT   (20) /* Bit 20-22 Electrical Configuration Buffer Mode*/
+#define GPIO_EC_BUFM_MASK    (0x7 << GPIO_EC_BUFM_SHIFT)
+#define GPIO_AF_SHIFT        (16) /* Bit 16-19 Alternate Function */
+#define GPIO_AF_MASK         (15 << GPIO_AF_SHIFT)
+#define GPIO_MODE_SHIFT      (14) /* Bit 14-15: IO Mode */
+#define GPIO_MODE_MASK       (3 << GPIO_MODE_SHIFT)
+#  define GPIO_NOINOUT       (0 << GPIO_MODE_SHIFT)  /* No input or output */
+#  define GPIO_INPUT         (1 << GPIO_MODE_SHIFT)  /* Input Enable */
+#  define GPIO_OUTPUT        (2 << GPIO_MODE_SHIFT)  /* Output Enable */
 
 /* Output buffer:
  *
@@ -170,7 +187,7 @@
 
 /* The smallest integer type that can hold the GPIO encoding */
 
-typedef uint16_t gpio_pinset_t;
+typedef uint32_t gpio_pinset_t;
 
 /****************************************************************************
  * Public Data
