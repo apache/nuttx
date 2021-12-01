@@ -63,6 +63,8 @@ int mpfs_configgpio(gpio_pinset_t cfgset)
   uint8_t pin = (cfgset & GPIO_PIN_MASK) >> GPIO_PIN_SHIFT;
   uint8_t bank = (cfgset & GPIO_BANK_MASK) >> GPIO_BANK_SHIFT;
   uint8_t irq_mode = (cfgset & GPIO_IRQ_MASK) >> GPIO_IRQ_SHIFT;
+  uint8_t mux = (cfgset & GPIO_AF_MASK) >> GPIO_AF_SHIFT;
+  uint16_t ec = (cfgset & GPIO_EC_MASK) >> GPIO_EC_SHIFT;
 
   if (bank == 3)
     {
@@ -74,6 +76,25 @@ int mpfs_configgpio(gpio_pinset_t cfgset)
    * bank1  0 - 23
    * bank2  0 - 31
    */
+
+  if (bank == 0 || bank == 1)
+    {
+      /* Mux the relevant GPIO to IO PAD */
+
+      baseaddr = MPFS_SYSREG_BASE + MSSIO_MUX_BANK_REG_OFFSET(bank, pin);
+      modifyreg32(baseaddr, MSSIO_MUX_MASK(pin),
+                  mux << MSSIO_MUX_SHIFT(pin));
+
+      /* Set EC configuration for MSSIO pin */
+
+      baseaddr = MSSIO_IO_CFG_CR(bank, pin);
+      modifyreg32(baseaddr, MSSIO_IO_CFG_CR_MASK(pin),
+                  ec << MSSIO_IO_CFG_CR_SHIFT(pin));
+    }
+  else
+    {
+      /* TODO: Always enable to fabric */
+    }
 
   baseaddr = g_gpio_base[bank] + (pin * sizeof(uint32_t));
 

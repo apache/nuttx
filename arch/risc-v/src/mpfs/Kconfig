@@ -5,6 +5,33 @@
 
 comment "Polarfire Configuration Options"
 
+choice
+	prompt "MPFS Chip Selection"
+	default ARCH_CHIP_MPFS250T_FCVG484
+	depends on ARCH_CHIP_MPFS
+
+config ARCH_CHIP_MPFS250T_FCVG484
+	bool "MPFS250T_FCVG484"
+	---help---
+		MPFS250T 484, 19x19x0.8 mm package
+
+config CONFIG_ARCH_CHIP_MPFS250T_FCG484
+	bool "MPFS250T_FCG484"
+	---help---
+		MPFS250T 484, 23x23x1 mm package
+
+config CONFIG_ARCH_CHIP_MPFS250T_FCSG325
+	bool "MPFS250T_FCSG325"
+	---help---
+		MPFS250T 325, 11x11 / 11x14.5, 0.5 mm package
+
+config CONFIG_ARCH_CHIP_MPFS250T_FCSG536
+	bool "MPFS250T_FCSG536"
+	---help---
+		MPFS250T 536, 16x16x0.5 mm package
+
+endchoice # MPFS Chip Selection
+
 config MPFS_ENABLE_DPFPU
 	bool "MPFS DP_FPU Support"
 	default n
