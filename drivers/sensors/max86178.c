@@ -82,7 +82,7 @@
 
 #define MAX86178_ECG_INTVL_DFT   4000       /* Default ECG interval = 4 ms */
 #define MAX86178_PPG_INTVL_DFT   4000       /* Default PPG interval = 4 ms */
-#define MAX86178_PPG_LEDPA_DFT   0x0ff      /* Default PPG LED PA config */
+#define MAX86178_PPG_CURRENT_DFT 32000      /* Default PPG current=32000uA */
 #define MAX86178_MDIV_DFT        250        /* Default MDIV for PLL = 8 MHz */
 #define MAX86178_REF_CLK_DFT     32000      /* Default REF_CLK = 32kHz */
 #define MAX86178_FIFOWTM_DFT     1          /* Default FIFO watermark = 1 */
@@ -113,9 +113,9 @@
 #define MAX86178_ECG_ADC_CLK_MAX 32768      /* ECG_ADC_CLK = 32768 Hz max. */
 #define MAX86178_ECG_ADC_CLK_MIN 19000      /* ECG_ADC_CLK = 19.0kHz min. */
 #define MAX86178_ECG_DECRATE_NUM 6          /* ECG_DEC_RATE has 6 choices. */
-#define MAX86178_PPG_LEDPASTEP   32.0f      /* PPG LED PA range step=32mA */
-#define MAX86178_PPG_LEDLSBSTEP  0.125f     /* PPG LED PA LSB step=0.125mA */
-#define MAX86178_PPG_LEDPAMAX    127.5f     /* PPG LED PA range step=32mA */
+#define MAX86178_PPG_LEDPASTEP   32000u     /* PPG LED PA range step=32mA */
+#define MAX86178_PPG_LEDPAMAX    127500u    /* PPG LED PA <= 127500uA */
+#define MAX86178_PPG_LEDLSBSTEP  125u       /* PPG LED PA LSB step = 125uA */
 
 #define MAX86178_ONE_SECOND      1000000.0f /* 1 second = 1000000 us */
 
@@ -137,7 +137,7 @@ struct max86178_sensor_s
   unsigned int              batch_latency;  /* Sensor batch latency */
   unsigned int              fifowtm;        /* Sensor fifo water marker */
   float                     factor;         /* Readouts * factor = inputs */
-  uint16_t                  ledpacfg;       /* LED PA configuration */
+  uint32_t                  current;        /* LED driver current (uA) */
   bool                      fifoen;         /* Sensor fifo enable */
   bool                      activated;      /* Sensor working state */
 };
@@ -146,12 +146,17 @@ struct max86178_sensor_s
 
 struct max86178_dev_s
 {
-  FAR struct max86178_sensor_s
+  struct max86178_sensor_s
                  sensor[MAX86178_IDX_NUM];  /* Sensor struct */
   uint64_t       timestamp;                 /* Units is us */
   FAR const struct max86178_config_s
                  *config;                   /* The board config */
   struct work_s  work;                      /* Interrupt handler */
+  struct sensor_event_ppg
+                 ppgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
+  struct sensor_event_ecg
+                 ecgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
+  uint8_t        fifobuf[MAX86178_FIFO_SIZE * MAX86178_FIFO_BYTES_PER_DATA];
   uint16_t       fifowtm;                   /* fifo water marker */
   bool           fifoen;                    /* Sensor fifo enable */
   bool           activated;                 /* Device state */
@@ -194,9 +199,8 @@ static uint32_t max86178_ppg_calcudata(FAR struct max86178_dev_s *priv,
                                        uint32_t sample);
 static float    max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
                                        uint32_t sample);
-static int      max86178_ppg_ledpa_calc(FAR struct max86178_dev_s *priv,
-                                        float *current);
-static void     max86178_ppg_ledpa_set(FAR struct max86178_dev_s *priv);
+static void     max86178_ppg_set_current(FAR struct max86178_dev_s *priv,
+                                         FAR uint32_t *current);
 static int      max86178_ppg_setfps(FAR struct max86178_dev_s *priv,
                                     float *freq);
 static int      max86178_ecg_setsr(FAR struct max86178_dev_s *priv,
@@ -779,7 +783,7 @@ static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable)
       max86178_readsingle(priv, MAX86178_REG_PLLCFG6, &regval);
       regval = regval & (~MAX86178_PLLCFG6_CLKFRQSEL_MASK);
       regval = regval | MAX86178_PLLCFG6_REFCLK_32K;
-      max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
+      max86178_writesingle(priv, MAX86178_REG_PLLCFG6, regval);
       regval = MAX86178_MDIV_DFT;
       max86178_writesingle(priv, MAX86178_REG_MDIVLSB, regval);
 
@@ -879,13 +883,6 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
       max86178_enable(priv, enable);
 
-      /* Disable PPG2 channel */
-
-      max86178_readsingle(priv, MAX86178_REG_PPGCFG2, &regval);
-      regval = regval & (~MAX86178_PPGCFG2_PPG2PWRDN_MASK);
-      regval = regval | MAX86178_PPGCFG2_PPG2PWRDN;
-      max86178_writesingle(priv, MAX86178_REG_PPGCFG2, regval);
-
       /* MEAS1 selects LED driver A to drive LED3 */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1SEL, &regval);
@@ -893,18 +890,30 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
       regval = regval | MAX86178_MEASXSEL_DRVA_LED3;
       max86178_writesingle(priv, MAX86178_REG_MEAS1SEL, regval);
 
-      /* PPG1 selects PD1 & PD2. */
+      /* PPG1 selects PD1 & PD3， PPG2 selects PD2 & PD4. */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1CFG5, &regval);
-      regval = regval & (~MAX86178_MEASXCFG5_PD1SEL_MASK);
-      regval = regval | MAX86178_MEASXCFG5_PD1SEL_PPG1;
-      regval = regval & (~MAX86178_MEASXCFG5_PD2SEL_MASK);
-      regval = regval | MAX86178_MEASXCFG5_PD2SEL_PPG1;
+      regval = regval & (~(MAX86178_MEASXCFG5_PD1SEL_MASK |
+                           MAX86178_MEASXCFG5_PD2SEL_MASK |
+                           MAX86178_MEASXCFG5_PD3SEL_MASK |
+                           MAX86178_MEASXCFG5_PD4SEL_MASK));
+      regval = regval | MAX86178_MEASXCFG5_PD1SEL_PPG1 |
+                        MAX86178_MEASXCFG5_PD3SEL_PPG1 |
+                        MAX86178_MEASXCFG5_PD2SEL_PPG2 |
+                        MAX86178_MEASXCFG5_PD4SEL_PPG2;
       max86178_writesingle(priv, MAX86178_REG_MEAS1CFG5, regval);
+
+      /* Set PPG frame clock. */
+
+      max86178_readsingle(priv, MAX86178_REG_PLLCFG6, &regval);
+      regval = regval & (~MAX86178_PLLCFG6_CLKFRQSEL_MASK);
+      regval = regval | MAX86178_PLLCFG6_REFCLK_32K;
+      max86178_writesingle(priv, MAX86178_REG_PLLCFG6, regval);
 
       /* Set LED current. */
 
-      max86178_ppg_ledpa_set(priv);
+      max86178_ppg_set_current(priv,
+                               &priv->sensor[MAX86178_PPG_IDX].current);
 
       /* Enable PPG MEAS1. */
 
@@ -949,34 +958,14 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
 static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
 {
-  FAR struct sensor_event_ecg *temp_ecg;
-  FAR struct sensor_event_ppg *temp_ppg;
-  FAR uint8_t *fifodata;
-  uint32_t fifosize;
+  uint32_t fifobytes;
   uint32_t temp_sample;
   uint32_t counter_ecg = 0;
   uint32_t counter_ppg = 0;
   uint16_t num = 0;
   uint8_t temp_num;
+  uint8_t toggle_ppgch = 1;
   uint16_t i;
-  int ret = OK;
-
-  temp_ecg = kmm_zalloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                        * sizeof(FAR struct sensor_event_ecg));
-  if (temp_ecg == NULL)
-    {
-      snerr("Failed to allocate space for ECG data.\n");
-      return -ENOMEM;
-    }
-
-  temp_ppg = kmm_zalloc(CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                        * sizeof(FAR struct sensor_event_ppg));
-  if (temp_ppg == NULL)
-    {
-      kmm_free(temp_ecg);
-      snerr("Failed to allocate space for PPG data.\n");
-      return -ENOMEM;
-    }
 
   /* Get number of samples in FIFO. */
 
@@ -989,63 +978,76 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
   max86178_readsingle(priv, MAX86178_REG_FIFOCNTLSB, &temp_num);
   num = num + temp_num;
 
-  /* Allocate a block for storing FIFO data */
+  /* Calculate how many bytes are in FIFO. */
 
-  fifosize = num * MAX86178_FIFO_BYTES_PER_DATA;
-  fifodata = kmm_malloc(fifosize);
-  if (fifodata == NULL)
-    {
-      snerr("Failed to allocate space for FIFO data.\n");
-      ret = -ENOMEM;
-      goto exit;
-    }
+  fifobytes = num * MAX86178_FIFO_BYTES_PER_DATA;
 
   /* Read the FIFO in number of FIFO watermark */
 
-  max86178_readregs(priv, MAX86178_REG_FIFODATA, fifodata, fifosize);
+  max86178_readregs(priv, MAX86178_REG_FIFODATA, priv->fifobuf, fifobytes);
 
   /* Deal each sample in FIFO. The last sample is the newest sample. */
 
   for (i = 0 ; i < num; i++)
     {
       temp_sample =
-            (fifodata[i * MAX86178_FIFO_BYTES_PER_DATA] << 16) |
-            (fifodata[i * MAX86178_FIFO_BYTES_PER_DATA + 1] << 8) |
-            (fifodata[i * MAX86178_FIFO_BYTES_PER_DATA + 2]);
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA] << 16) |
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA + 1] << 8) |
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA + 2]);
 
       switch (temp_sample & MAX86178_FIFOTAG_MASK_PRE)
         {
           case MAX86178_FIFOTAG_PRE_MEAS1:       /* PPG MEAS1 data tag. */
             {
-              temp_ppg[counter_ppg].ppg =
-                                   max86178_ppg_calcudata(priv, temp_sample);
-              temp_ppg[counter_ppg].timestamp = priv->timestamp
-                                   - priv->sensor[MAX86178_PPG_IDX].interval
-                                   * (priv->sensor[MAX86178_PPG_IDX].fifowtm
-                                   - counter_ppg - 1);
-              counter_ppg++;
+              priv->ppgdata[counter_ppg].timestamp = priv->timestamp
+                - priv->sensor[MAX86178_PPG_IDX].interval
+                * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg - 1);
+              priv->ppgdata[counter_ppg].current =
+                priv->sensor[MAX86178_PPG_IDX].current;
+              if (toggle_ppgch == 1)
+                {
+                  priv->ppgdata[counter_ppg].ppg1 =
+                    max86178_ppg_calcudata(priv, temp_sample);
+                  toggle_ppgch = 2;
+                }
+              else
+                {
+                  priv->ppgdata[counter_ppg].ppg2 =
+                    max86178_ppg_calcudata(priv, temp_sample);
+                  toggle_ppgch = 1;
+                  counter_ppg++;
+                }
             }
             break;
 
           case MAX86178_FIFOTAG_PRE_EXP_OVF:     /* PPG exposure overflow. */
             {
-              temp_ppg[counter_ppg].ppg = MAX86178_ABS_PPG_MAX;
-              temp_ppg[counter_ppg].timestamp = priv->timestamp
-                                   - priv->sensor[MAX86178_PPG_IDX].interval
-                                   * (priv->sensor[MAX86178_PPG_IDX].fifowtm
-                                   - counter_ppg - 1);
-              counter_ppg++;
+              priv->ppgdata[counter_ppg].timestamp = priv->timestamp
+                - priv->sensor[MAX86178_PPG_IDX].interval
+                * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg - 1);
+              priv->ppgdata[counter_ppg].current =
+                priv->sensor[MAX86178_PPG_IDX].current;
+              if (toggle_ppgch == 1)
+                {
+                  priv->ppgdata[counter_ppg].ppg1 = MAX86178_ABS_PPG_MAX;
+                  toggle_ppgch = 2;
+                }
+              else
+                {
+                  priv->ppgdata[counter_ppg].ppg2 = MAX86178_ABS_PPG_MAX;
+                  toggle_ppgch = 1;
+                  counter_ppg++;
+                }
             }
             break;
 
           case MAX86178_FIFOTAG_PRE_ECG:         /* ECG data tag. */
             {
-              temp_ecg[counter_ecg].ecg =
-                                  max86178_ecg_calcudata(priv, temp_sample);
-              temp_ecg[counter_ecg].timestamp = priv->timestamp
-                                   - priv->sensor[MAX86178_ECG_IDX].interval
-                                   * (priv->sensor[MAX86178_ECG_IDX].fifowtm
-                                   - counter_ecg - 1);
+              priv->ecgdata[counter_ecg].ecg =
+                max86178_ecg_calcudata(priv, temp_sample);
+              priv->ecgdata[counter_ecg].timestamp = priv->timestamp
+                - priv->sensor[MAX86178_ECG_IDX].interval
+                * (priv->sensor[MAX86178_ECG_IDX].fifowtm - counter_ecg - 1);
               counter_ecg++;
             }
             break;
@@ -1060,61 +1062,48 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
         }
     }
 
-  /* Release fifodata after dealing is done */
-
-  kmm_free(fifodata);
-
   /* Since sometimes some extra special samples are saved in FIFO, the ECG
    * and PPG samples might not reach the watermark when the total samples
    * reached the total watermark. In this case, timestamp should be modified.
    */
 
-  if (counter_ecg < CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER)
+  if (counter_ecg < priv->sensor[MAX86178_ECG_IDX].fifowtm)
     {
-       for (i = 0; i < counter_ecg; i++)
-         {
-           temp_ecg[i].timestamp =
-                       temp_ecg[i].timestamp
-                       + priv->sensor[MAX86178_ECG_IDX].interval
-                       * (CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                       - counter_ecg);
+      for (i = 0; i < counter_ecg; i++)
+        {
+          priv->ecgdata[i].timestamp = priv->ecgdata[i].timestamp
+            + priv->sensor[MAX86178_ECG_IDX].interval
+            * (priv->sensor[MAX86178_ECG_IDX].fifowtm - counter_ecg);
          }
     }
 
-  if (counter_ppg < CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER)
+  if (counter_ppg < priv->sensor[MAX86178_PPG_IDX].fifowtm)
     {
-       for (i = 0; i < counter_ppg; i++)
-         {
-           temp_ppg[i].timestamp =
-                       temp_ppg[i].timestamp
-                       + priv->sensor[MAX86178_PPG_IDX].interval
-                       * (CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-                       - counter_ppg);
+      for (i = 0; i < counter_ppg; i++)
+        {
+          priv->ppgdata[i].timestamp = priv->ppgdata[i].timestamp
+            + priv->sensor[MAX86178_PPG_IDX].interval
+            * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg);
          }
     }
 
   if (counter_ecg > 0)
     {
       priv->sensor[MAX86178_ECG_IDX].lower.push_event(
-            priv->sensor[MAX86178_ECG_IDX].lower.priv,
-            temp_ecg,
+            priv->sensor[MAX86178_ECG_IDX].lower.priv, priv->ecgdata,
             sizeof(FAR struct sensor_event_ecg) * counter_ecg);
     }
 
   if (counter_ppg > 0)
     {
       priv->sensor[MAX86178_PPG_IDX].lower.push_event(
-            priv->sensor[MAX86178_PPG_IDX].lower.priv,
-            temp_ppg,
+            priv->sensor[MAX86178_PPG_IDX].lower.priv, priv->ppgdata,
             sizeof(FAR struct sensor_event_ppg) * counter_ppg);
     }
 
   /* Release ecg and ppg data after push events have been done */
 
-exit:
-  kmm_free(temp_ecg);
-  kmm_free(temp_ppg);
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -1229,36 +1218,30 @@ static float max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: max86178_ppg_ledpa_calc
+ * Name: max86178_ppg_set_current
  *
  * Description:
- *   Calculate the PPG LED PA configuration for desired LED current.
+ *   Set the PPG LED driver current.
  *
  * Input Parameters:
  *   priv    - Device struct.
- *   current - Disired LED current (mA)
+ *   current - Pointer to the desired current value (uA).
  *
  * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *   None.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-static int max86178_ppg_ledpa_calc(FAR struct max86178_dev_s *priv,
-                                   float *current)
+static void max86178_ppg_set_current(FAR struct max86178_dev_s *priv,
+                                     FAR uint32_t *current)
 {
-  uint16_t range;
-  uint16_t cnt;
-  float lsb;
-
-  if (*current < 0)
-    {
-      /* Current can't be a negative. */
-
-      return -EINVAL;
-    }
+  uint32_t range;
+  uint32_t cnt;
+  uint32_t lsb;
+  uint8_t regval;
 
   /* If current exceeds 128mA (RGE3), it's limited to 128mA. */
 
@@ -1267,62 +1250,35 @@ static int max86178_ppg_ledpa_calc(FAR struct max86178_dev_s *priv,
       *current = MAX86178_PPG_LEDPAMAX;
     }
 
-  /*   current(i)  | result |               range                |   LSB
-   * 0 <= i < 32   |   0    | MAX86178_MEASXCFG4_LEDRGE_32MA(0)  | 0.125*1
-   * 32 <= i < 64  |   1    | MAX86178_MEASXCFG4_LEDRGE_64MA(1)  | 0.125*2
-   * 64 <= i < 96  |   2    | MAX86178_MEASXCFG4_LEDRGE_96MA(2)  | 0.125*3
-   * 96 <= i < 128 |   3    | MAX86178_MEASXCFG4_LEDRGE_128MA(3) | 0.125*4
+  /*   current(uA)     | result |               range                |  LSB
+   * 0 <= i < 32000    |   0    | MAX86178_MEASXCFG4_LEDRGE_32MA(0)  |  125
+   * 32000<= i <64000  |   1    | MAX86178_MEASXCFG4_LEDRGE_64MA(1)  | 125*2
+   * 64000<= i <96000  |   2    | MAX86178_MEASXCFG4_LEDRGE_96MA(2)  | 125*3
+   * 96000<= i <128000 |   3    | MAX86178_MEASXCFG4_LEDRGE_128MA(3) | 125*4
    */
 
-  range = (uint16_t)(*current / MAX86178_PPG_LEDPASTEP);
+  range = *current / MAX86178_PPG_LEDPASTEP;
   lsb = MAX86178_PPG_LEDLSBSTEP * (range + 1);
 
   /* Calculate how many LSB current has (255 max.). Select the closest one. */
 
-  cnt = (uint16_t)roundf(*current / lsb);
+  cnt = (*current + (lsb >> 1)) / lsb;
   if (cnt > 255)
     {
       cnt = 255;
     }
 
-  priv->sensor[MAX86178_PPG_IDX].ledpacfg = (range << 8) | cnt;
+  *current = lsb * cnt;
+  priv->sensor[MAX86178_PPG_IDX].current = *current;
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: max86178_ppg_ledpa_set
- *
- * Description:
- *   Set the PPG LED PA configuration into device.
- *
- * Input Parameters:
- *   priv    - Device struct.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void max86178_ppg_ledpa_set(FAR struct max86178_dev_s *priv)
-{
-  uint8_t range;
-  uint8_t pacnts;
-  uint8_t regval;
-
-  range = (uint8_t)((priv->sensor[MAX86178_PPG_IDX].ledpacfg >> 8)
-                    & 0xff);
-  pacnts = (uint8_t)(priv->sensor[MAX86178_PPG_IDX].ledpacfg & 0xff);
+  /* Write configuration into registers. */
 
   max86178_readsingle(priv, MAX86178_REG_MEAS1CFG4, &regval);
   regval = regval & (~MAX86178_MEASXCFG4_LEDRGE_MASK);
-  regval = regval | (range & MAX86178_MEASXCFG4_LEDRGE_MASK);
+  regval = regval | (uint8_t)(range & MAX86178_MEASXCFG4_LEDRGE_MASK);
   max86178_writesingle(priv, MAX86178_REG_MEAS1CFG4, regval);
   max86178_readsingle(priv, MAX86178_REG_MEAS1LEDA, &regval);
-  regval = pacnts;
+  regval = (uint8_t)cnt;
   max86178_writesingle(priv, MAX86178_REG_MEAS1LEDA, regval);
 }
 
@@ -1529,27 +1485,18 @@ static int max86178_ecg_control(FAR struct max86178_dev_s *priv, int cmd,
 static int max86178_ppg_control(FAR struct max86178_dev_s *priv,
                                 int cmd, unsigned long arg)
 {
-  int ret;
-
   switch (cmd)
     {
       /* Set PPG LED current */
 
       case MAX86178_PPG_CTRL_LEDPA:
         {
-          uint32_t *pledci = (uint32_t *)arg;
-          float ledcf;
+          FAR uint32_t *current = (FAR uint32_t *)arg;
 
-          ledcf = *pledci * MAX86178_PPG_LEDLSBSTEP;
-          ret = max86178_ppg_ledpa_calc(priv, &ledcf);
-          if (ret < 0)
-            {
-              snerr("Wrong current paramenter: %d\n", ret);
-              return ret;
-            }
-
-          max86178_ppg_ledpa_set(priv);
-          *pledci = (uint32_t)(ledcf * 8);
+          if (*current != priv->sensor[MAX86178_PPG_IDX].current)
+          {
+            max86178_ppg_set_current(priv, current);
+          }
         }
         break;
 
@@ -1807,11 +1754,11 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
       priv->fifoen = true;
 
       /* ECG and all PPG chanels share the FIFO, the watermark of the device
-       * is the sum of them.
+       * is the sum of them. 1 PPG measurement has 2 data from 2 channels.
        */
 
       priv->fifowtm = priv->sensor[MAX86178_ECG_IDX].fifowtm
-                    + priv->sensor[MAX86178_PPG_IDX].fifowtm;
+                    + priv->sensor[MAX86178_PPG_IDX].fifowtm * 2;
     }
 
   return OK;
@@ -2062,7 +2009,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   priv->sensor[MAX86178_PPG_IDX].lower.batch_number =
                               CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER;
   priv->sensor[MAX86178_PPG_IDX].interval = MAX86178_PPG_INTVL_DFT;
-  priv->sensor[MAX86178_PPG_IDX].ledpacfg = MAX86178_PPG_LEDPA_DFT;
+  priv->sensor[MAX86178_PPG_IDX].current = MAX86178_PPG_CURRENT_DFT;
   priv->sensor[MAX86178_PPG_IDX].dev = priv;
 
   /* Check the part ID */
