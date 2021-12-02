@@ -70,6 +70,16 @@
 
 /* Some lib constants *******************************************************/
 
+/* These are defined only in the NuttX math library */
+
+#ifndef M_PI_F
+#define M_PI_F    ((float)M_PI)
+#endif
+
+#ifndef M_PI_2_F
+#define M_PI_2_F  ((float)M_PI_2)
+#endif
+
 /* Motor electrical angle is in range 0.0 to 2*PI */
 
 #define MOTOR_ANGLE_E_MAX    (2.0f*M_PI_F)
