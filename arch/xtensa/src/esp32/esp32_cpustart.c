@@ -164,7 +164,9 @@ void xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Handle interlock */
+  /* Release the spinlock to signal to the PRO CPU that the APP CPU has
+   * started.
+   */
 
   g_appcpu_started = true;
   spin_unlock(&g_appcpu_interlock);
@@ -268,8 +270,9 @@ int up_cpu_start(int cpu)
       sched_note_cpu_start(this_task(), cpu);
 #endif
 
-      /* The waitsem semaphore is used for signaling and, hence, should not
-       * have priority inheritance enabled.
+      /* This spinlock will be used as a handshake between the two CPUs.
+       * It's first initialized to its locked state, later the PRO CPU will
+       * try to lock it but spins until the APP CPU starts and unlocks it.
        */
 
       spin_initialize(&g_appcpu_interlock, SP_LOCKED);
@@ -313,7 +316,7 @@ int up_cpu_start(int cpu)
 
       ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
 
-      /* And wait for the initial task to run on CPU1 */
+      /* And wait until the APP CPU starts and releases the spinlock. */
 
       spin_lock(&g_appcpu_interlock);
       DEBUGASSERT(g_appcpu_started);
