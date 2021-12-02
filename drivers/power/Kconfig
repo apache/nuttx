@@ -360,6 +360,17 @@ config REGULATOR_RPMSG
 		the rpmsg channel. The remote device(namely server) is responsible for
 		the parse and the completion.
 
+if REGULATOR
+
+config REGULATOR_GPIO
+	bool "Regulator gpio driver support"
+	default n
+	---help---
+		The regulator gpio driver implements the lower regulator ops that use gpio to
+		control to regulator.
+
+endif
+
 config BATTERY_CHARGER
 	bool "Battery Charger support"
 	default n
