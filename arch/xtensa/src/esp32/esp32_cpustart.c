@@ -46,8 +46,6 @@
 #include "esp32_smp.h"
 #include "esp32_gpio.h"
 
-#ifdef CONFIG_SMP
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -88,7 +86,6 @@ static inline void xtensa_registerdump(struct tcb_s *tcb)
  * Name: xtensa_attach_fromcpu0_interrupt
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 static inline void xtensa_attach_fromcpu0_interrupt(void)
 {
   int cpuint;
@@ -106,7 +103,6 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
   up_enable_irq(ESP32_IRQ_CPU_CPU0);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -191,11 +187,9 @@ void xtensa_appcpu_start(void)
 
   /* Attach and enable internal interrupts */
 
-#ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */
 
   xtensa_attach_fromcpu0_interrupt();
-#endif
 
 #if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
 #if XTENSA_CP_ALLSET != 0
@@ -328,4 +322,3 @@ int up_cpu_start(int cpu)
   return OK;
 }
 
-#endif /* CONFIG_SMP */
