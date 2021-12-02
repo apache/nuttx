@@ -656,7 +656,6 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
   struct littlefs_attr_s attr;
-  char path[LFS_NAME_MAX];
   int ret;
 
   memset(buf, 0, sizeof(*buf));
@@ -721,7 +720,6 @@ static int littlefs_fchstat(FAR const struct file *filep,
   FAR struct littlefs_file_s *priv;
   FAR struct inode *inode;
   struct littlefs_attr_s attr;
-  char path[LFS_NAME_MAX];
   int ret;
 
   /* Recover our private data from the struct file instance */
