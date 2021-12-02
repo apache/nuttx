@@ -201,6 +201,13 @@ static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
 
           break;
         }
+      else if (INSTR_IS(ins16, T_PUSH_LO))
+        {
+          offset += __builtin_popcount(ins16 & 0xff);
+          frame  += offset - 1;
+
+          break;
+        }
 
       ins32  = ins16 << 16;
       ins32 |= *(FAR uint16_t *)(pc - i + 2);
