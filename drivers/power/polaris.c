@@ -156,7 +156,7 @@ static int wlc_i2c_write(FAR struct stwlc38_dev_s *priv,
   msg[0].addr = priv->addr;
   msg[0].buffer = cmd;
   msg[0].length = cmd_length;
-  msg[0].flags = I2C_M_NOSTOP;
+  msg[0].flags = 0;
 
 #ifdef DEBUG
   batinfo("[WLC] W: ");
@@ -389,6 +389,7 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
 {
   int err = 0;
   uint8_t reg_value = 0;
+  uint8_t count = 5;
 
   /* check if OP MODE = DC POWER */
 
@@ -404,13 +405,47 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
 
   /* FW system reset */
 
-  reg_value = 0x40;
-  if ((err = fw_i2c_write(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1)) != OK)
-      return err;
-  usleep(AFTER_SYS_RESET_SLEEP_MS);
-  reg_value = 0xc5;
-  if ((err = fw_i2c_write(priv, FWREG_NVM_PWD_ADDR, &reg_value, 1)) != OK)
-      return err;
+  while (count)
+    {
+      batinfo("[WLC] the left %d time to try i2c0 status.. \n", count);
+      count--;
+      reg_value = 0x40;
+      err = fw_i2c_write(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1);
+      if (err != OK)
+        {
+          if (count == 0)
+            {
+              return err;
+            }
+          else
+            {
+              usleep(AFTER_SYS_RESET_SLEEP_MS);
+              continue;
+            }
+        }
+
+      usleep(AFTER_SYS_RESET_SLEEP_MS * 1000);
+      reg_value = 0xc5;
+      err = fw_i2c_write(priv, FWREG_NVM_PWD_ADDR, &reg_value, 1);
+      if (err != OK)
+        {
+          if (count == 0)
+            {
+              return err;
+            }
+          else
+            {
+              usleep(AFTER_SYS_RESET_SLEEP_MS);
+              continue;
+            }
+        }
+      else
+        {
+          batinfo("[WLC] i2c0 status is ok \n");
+          break;
+        }
+    }
+
   batinfo("[WLC] RRAM Programming.. \n");
 
   batinfo("[WLC] RRAM Programming to write FW_data.. \n");
@@ -427,14 +462,20 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
 
   reg_value = 0x01;
 
-  err = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1);
-  if (err != OK)
-    {
-      batinfo("[WLC] return err");
-      return err;
-    }
+  /**************************************************************************
+   * the follow includes a workaround
+   * it should return error when meeting i2c tramsfer failed, but if so, the
+   * procedure logic will meet a difficult.
+   * therefore, print err info and return ok. the workaround is only to hint
+   * the I2C transfer failed, which does not effect normal work behind.
+   **************************************************************************/
 
-  usleep(AFTER_SYS_RESET_SLEEP_MS);
+  if ((err = hw_i2c_write(priv, HWREG_HW_SYS_RST_ADDR, &reg_value, 1)) != OK)
+    batinfo("[WLC] return err");
+
+  /* the reset need 500ms or so, for this workaround, setup 1000ms */
+
+  usleep(AFTER_SYS_RESET_SLEEP_MS * 1000);
 
   return OK;
 }
@@ -868,11 +909,28 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
   int err;
   uint16_t reg_value;
+  uint8_t count = 5;
 
   reg_value = (uint16_t)(value / 100 - 5);
 
-  err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2);
-  if (err != OK) return err;
+  while (count)
+    {
+      batinfo("[WLC] the left %d time to try i2c0 status.. \n", count);
+      count--;
+      err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2);
+      if (err != OK)
+        {
+          if (count == 0)
+            {
+              return err;
+            }
+          else
+            {
+              usleep(AFTER_SYS_RESET_SLEEP_MS);
+              continue;
+            }
+        }
+    }
 
   return OK;
 }
