@@ -98,6 +98,9 @@ static FAR void **g_backtrace_code_regions;
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static int getlroffset(FAR uint8_t *lr)
 {
   lr = (FAR uint8_t *)((uintptr_t)lr & 0xfffffffe);
@@ -126,6 +129,9 @@ static int getlroffset(FAR uint8_t *lr)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static bool in_code_region(FAR void *pc)
 {
   int i = 0;
@@ -176,6 +182,9 @@ static bool in_code_region(FAR void *pc)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
 {
   FAR uint8_t *sp = *psp;
@@ -310,6 +319,9 @@ static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static int backtrace_push(FAR void *limit, FAR void **sp,
                           FAR void *pc, FAR void **buffer, int size)
 {
@@ -344,6 +356,9 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static int backtrace_branch(FAR void *limit, FAR void *sp,
                             FAR void **buffer, int size)
 {
@@ -419,6 +434,9 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 void arm_backtrace_init_code_regions(FAR void **regions)
 {
   g_backtrace_code_regions = regions;
@@ -448,6 +466,9 @@ void arm_backtrace_init_code_regions(FAR void **regions)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 {
   FAR struct tcb_s *rtcb = running_task();
