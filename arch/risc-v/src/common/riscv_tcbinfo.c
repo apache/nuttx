@@ -38,7 +38,9 @@ const struct tcbinfo_s g_tcbinfo =
   TCB_PID_OFF,
   TCB_STATE_OFF,
   TCB_PRI_OFF,
+#if CONFIG_TASK_NAME_SIZE > 0
   TCB_NAME_OFF,
+#endif
 
   XCPTCONTEXT_REGS,
 
@@ -116,3 +118,8 @@ const struct tcbinfo_s g_tcbinfo =
 };
 
 #endif
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
