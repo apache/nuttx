@@ -1161,6 +1161,7 @@ struct lsm6dso_dev_s
 {
   struct lsm6dso_sensor_s dev[LSM6DSO_IDX_NUM]; /* Sensor struct */
   uint64_t timestamp;                           /* Units is microseconds */
+  uint64_t timestamp_fifolast;                  /* FIFO last timestamp, Units is microseconds */
   FAR const struct lsm6dso_config_s *config;    /* The board config */
   struct work_s work;                           /* Interrupt handler */
   unsigned int fifowtm;                         /* fifo water marker */
@@ -3275,6 +3276,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
          temp_gy[CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER];
   unsigned int counter_xl = 0;
   unsigned int counter_gy = 0;
+  unsigned int fifo_interval;
   unsigned int num;
   int ret;
   int i;
@@ -3324,45 +3326,53 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
         }
     }
 
-    if (counter_xl)
-      {
-        /* Inferred data timestamp. */
+  if (counter_xl)
+    {
+      /* Inferred data timestamp. */
 
-        for (i = 0; i < counter_xl; i++)
-          {
-            temp_xl[i].timestamp
-              = priv->timestamp
-              - priv->dev[LSM6DSO_XL_IDX].interval
-              * (counter_xl - i - 1);
-          }
+      fifo_interval = (priv->timestamp - priv->timestamp_fifolast)
+                    / counter_xl;
 
-        /* Push data to the upper layer. */
+      for (i = 0; i < counter_xl; i++)
+        {
+          temp_xl[i].timestamp
+            = priv->timestamp
+            - fifo_interval
+            * (counter_xl - i - 1);
+        }
 
-        priv->dev[LSM6DSO_XL_IDX].lower.push_event(
-              priv->dev[LSM6DSO_XL_IDX].lower.priv,
-              temp_xl,
-              sizeof(struct sensor_event_accel) * counter_xl);
-      }
+      /* Push data to the upper layer. */
 
-    if (counter_gy)
-      {
-        /* Inferred data timestamp. */
+      priv->dev[LSM6DSO_XL_IDX].lower.push_event(
+            priv->dev[LSM6DSO_XL_IDX].lower.priv,
+            temp_xl,
+            sizeof(struct sensor_event_accel) * counter_xl);
+    }
 
-        for (i = 0; i < counter_gy; i++)
-          {
-            temp_gy[i].timestamp
-              = priv->timestamp
-              - priv->dev[LSM6DSO_GY_IDX].interval
-              * (counter_gy - i - 1);
-          }
+  if (counter_gy)
+    {
+      /* Inferred data timestamp. */
 
-        /* Push data to the upper layer. */
+      fifo_interval = (priv->timestamp - priv->timestamp_fifolast)
+                    / counter_gy;
 
-        priv->dev[LSM6DSO_GY_IDX].lower.push_event(
-              priv->dev[LSM6DSO_GY_IDX].lower.priv,
-              temp_gy,
-              sizeof(struct sensor_event_gyro) * counter_gy);
-      }
+      for (i = 0; i < counter_gy; i++)
+        {
+          temp_gy[i].timestamp
+            = priv->timestamp
+            - fifo_interval
+            * (counter_gy - i - 1);
+        }
+
+      /* Push data to the upper layer. */
+
+      priv->dev[LSM6DSO_GY_IDX].lower.push_event(
+            priv->dev[LSM6DSO_GY_IDX].lower.priv,
+            temp_gy,
+            sizeof(struct sensor_event_gyro) * counter_gy);
+    }
+
+  priv->timestamp_fifolast = priv->timestamp;
 
   return ret;
 }
@@ -3782,8 +3792,6 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
 
   temp_fsm.timestamp = priv->timestamp;
 
-  /* TODO: Waiting for the system API. */
-
   if (status->fsm1)
     {
       temp_fsm.event = LSM6DSO_FSM_INDEX1;
@@ -3896,6 +3904,10 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
           snerr("Failed to match bdr.\n");
           return -EINVAL;
         }
+
+      /* Get the fifo start timestamp. */
+
+      priv->timestamp_fifolast = sensor_get_timestamp();
 
       if (lower->type == SENSOR_TYPE_ACCELEROMETER)
         {
@@ -5068,7 +5080,7 @@ static void lsm6dso_worker(FAR void *arg)
 
   /* Get sensor data. */
 
-  if (status.drdy_xl)
+  if (status.drdy_xl && !priv->dev[LSM6DSO_XL_IDX].fifoen)
     {
       /* Read out the latest sensor data. */
 
@@ -5083,7 +5095,7 @@ static void lsm6dso_worker(FAR void *arg)
             sizeof(struct sensor_event_accel));
     }
 
-  if (status.drdy_g)
+  if (status.drdy_g && !priv->dev[LSM6DSO_GY_IDX].fifoen)
     {
       /* Read out the latest sensor data. */
 
