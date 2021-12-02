@@ -961,6 +961,11 @@ struct cs35l41b_dev_s
   uint32_t                bclk;      /* IIS BCLK */
   struct work_s           work;      /* Work queue for load firmware */
   bool                    done;      /* Load firmware done */
+
+  /* set pa bypassed */
+
+  bool                    is_bypassed;
+
   uint8_t otp_contents[128];         /* Cache storage for OTP contents */
 };
 

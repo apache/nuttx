@@ -61,6 +61,10 @@
 #define CHANNEL_RIGHT               1
 #define CHANNEL_LEFT_RIGHT          2
 
+#define IO_SET_BYPASS               1
+#define IO_CANCEL_BYPASS            2
+#define IO_GET_CHIP_ID              3
+
 /* Delay in ms between polling OTP_BOOT_DONE */
 
 #define CS35L41_POLL_OTP_BOOT_DONE_MS                     (10)
@@ -78,6 +82,12 @@ typedef struct
   uint8_t shift;  /* Bitwise shift of register bitfield */
   uint8_t size;   /* Bitwise size of register bitfield */
 } cs35l41_otp_packed_entry_t;
+
+typedef struct
+{
+  unsigned long cmd;  /* Command */
+  unsigned long data; /* Data */
+} cs35l41b_io_t;
 
 /****************************************************************************
  * Private Function Prototypes
@@ -136,6 +146,9 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev);
 #  endif
 #endif
 
+static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
+                          int cmd, unsigned long arg);
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -149,6 +162,7 @@ static const struct audio_ops_s g_audioops =
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
   .stop           = cs35l41b_stop,
 #endif
+  .ioctl          = cs35l41b_ioctl,
 };
 
 static const uint32_t g_cs35l41_revb2_errata_patch[] =
@@ -341,6 +355,71 @@ static const cs35l41_otp_packed_entry_t g_otp_map[] =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: cs35l41b_ioctl
+ *
+ * Description:
+ *   audio driver of ioctl
+ *
+ ****************************************************************************/
+
+static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
+                          int cmd, unsigned long arg)
+{
+  FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
+  unsigned long paramter = *(FAR unsigned long *) arg;
+  cs35l41b_io_t io_param;
+
+  if (cmd == AUDIOIOC_SETPARAMTER)
+    {
+      switch (paramter)
+        {
+          case IO_SET_BYPASS:
+            if (cs35l41b_write_register(priv,
+                                        CS35L41_MIXER_DACPCM1_INPUT_REG,
+                                        0x08) == ERROR)
+              {
+                auderr("write CS35L41_MIXER_DACPCM1_INPUT_REG error\n");
+                return ERROR;
+              }
+
+            if (cs35l41b_set_gain(priv,
+                                  CS35L41B_AMP_GAIN_PCM_10P5DB) == ERROR)
+              {
+                auderr("cs35l41b_set_gain error\n");
+                return ERROR;
+              }
+
+            priv->is_bypassed = true;
+            break;
+
+          case IO_CANCEL_BYPASS:
+            priv->is_bypassed = false;
+            if (cs35l41b_write_register(priv,
+                                        CS35L41_MIXER_DACPCM1_INPUT_REG,
+                                        0x32) == ERROR)
+              {
+                auderr("write CS35L41_MIXER_DACPCM1_INPUT_REG error\n");
+                return ERROR;
+              }
+            break;
+
+          case IO_GET_CHIP_ID:
+            io_param.cmd = IO_GET_CHIP_ID;
+            io_param.data = CS35L41_DEVID;
+            *(FAR cs35l41b_io_t *)arg = io_param;
+            break;
+
+          default:
+            auderr("paramter invaild!\n");
+            return ERROR;
+            break;
+        }
+    }
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: cs35l41b_getcaps
@@ -612,10 +691,16 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
               return ERROR;
             }
 
-          if (cs35l41b_set_gain(priv, CS35L41B_AMP_GAIN_PCM_5P5DB) == ERROR)
+          /* if set bypass,the gain modify of ioctl */
+
+          if (!priv->is_bypassed)
             {
-              auderr("cs35l41b_set_gain error\n");
-              return ERROR;
+              if (cs35l41b_set_gain(priv,
+                                    CS35L41B_AMP_GAIN_PCM_5P5DB) == ERROR)
+                {
+                  auderr("cs35l41b_set_gain error\n");
+                  return ERROR;
+                }
             }
         }
         break;
