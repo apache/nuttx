@@ -69,7 +69,7 @@ static void up_stackdump(uint64_t sp, uint64_t stack_top)
 {
   uint64_t stack;
 
-  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",

@@ -75,7 +75,7 @@ static void up_stackdump(uint64_t sp, uintptr_t stack_top)
 {
   uintptr_t stack;
 
-  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08" PRIxPTR ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
