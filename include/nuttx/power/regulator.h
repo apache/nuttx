@@ -153,6 +153,28 @@ regulator_register(FAR const struct regulator_desc_s *desc,
 
 void regulator_unregister(FAR struct regulator_dev_s *rdev);
 
+/****************************************************************************
+ * Name: regulator_gpio_init
+ *
+ * Description:
+ *
+ * Input Parameters:
+ *
+ *   iodev  - The ioexpander dev pointer.
+ *   desc   - The regulator desc pointer, must contain follow section
+ *            name          - The regulator name.
+ *            enable_reg    - The regulator gpio pin number.
+ *            enable_mask   -
+ *                            true : enable is high, disable is low
+ *                            false: enable is low,  disable is high
+ *
+ * Returned Value:
+ *
+ ****************************************************************************/
+
+int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
+                        FAR const struct regulator_desc_s *desc);
+
 #if defined(CONFIG_REGULATOR_RPMSG)
 
 /****************************************************************************
