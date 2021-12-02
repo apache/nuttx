@@ -66,7 +66,7 @@ int arm_busfault(int irq, FAR void *context, FAR void *arg)
   bfalert("\tIRQ: %d regs: %p\n", irq, context);
   bfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  bfalert("\tcfsr: %08x HFSR: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
+  bfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
           cfsr, getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS),
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
 

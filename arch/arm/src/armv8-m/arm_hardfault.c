@@ -124,24 +124,24 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
     {
       hfalert("Hard Fault escalation:\n");
 
-#ifdef CONFIG_ARCH_HAVE_MEMFAULT_DEBUG
+#ifdef CONFIG_DEBUG_MEMFAULT
       if (cfsr & NVIC_CFAULTS_MEMFAULTSR_MASK)
         {
           return arm_memfault(irq, context, arg);
         }
-#endif /* CONFIG_ARCH_HAVE_MEMFAULT_DEBUG */
-#ifdef CONFIG_ARCH_HAVE_BUSFAULT_DEBUG
+#endif /* CONFIG_DEBUG_MEMFAULT */
+#ifdef CONFIG_DEBUG_BUSFAULT
       if (cfsr & NVIC_CFAULTS_BUSFAULTSR_MASK)
         {
           return arm_busfault(irq, context, arg);
         }
-#endif /* CONFIG_ARCH_HAVE_BUSFAULT_DEBUG */
-#ifdef CONFIG_ARCH_HAVE_USAGEFAULT_DEBUG
+#endif /* CONFIG_DEBUG_BUSFAULT */
+#ifdef CONFIG_DEBUG_USAGEFAULT
       if (cfsr & NVIC_CFAULTS_USGFAULTSR_MASK)
         {
           return arm_usagefault(irq, context, arg);
         }
-#endif /* CONFIG_ARCH_HAVE_USAGEFAULT_DEBUG */
+#endif /* CONFIG_DEBUG_USAGEFAULT */
     }
 
   /* Dump some hard fault info */
@@ -150,7 +150,7 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
   hfalert("\tIRQ: %d regs: %p\n", irq, context);
   hfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
-  hfalert("\tcfsr: %08x hfsr: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
+  hfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x BFAR: %08x AFSR: %08x\n",
           cfsr, hfsr, getreg32(NVIC_DFAULTS),
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS));
 

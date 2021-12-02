@@ -66,7 +66,7 @@ int arm_memfault(int irq, FAR void *context, FAR void *arg)
 
   mfalert("PANIC!!! Memory Management Fault:\n");
   mfalert("\tIRQ: %d context: %p\n", irq, context);
-  mfalert("\tcfsr: %08x MMFAR: %08x\n",
+  mfalert("\tCFSR: %08x MMFAR: %08x\n",
           getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
   mfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
           getbasepri(), getprimask(), getipsr(), getcontrol());
