@@ -176,15 +176,6 @@
 #define LSM6DSO_TIMESTAMP_DISABLE 0x00       /* Disabled timestamp */
 #define LSM6DSO_TIMESTAMP_ENABLE  0x01       /* Enable timestamp */
 
-/* Accelerometer LP f2 enable */
-
-#define LSM6DSO_LPF2_DISABLE      0x00       /* Disabled LPF2 */
-#define LSM6DSO_LPF2_ENABLE       0x01       /* Enable LPF2 */
-
-/* Accelerometer HP filter */
-
-#define LSM6DSO_LPODR_DIV100      0x04       /* Accelerometer bandwidth 100 */
-
 /* High-performance operating mode disable for accelerometer */
 
 #define LSM6DSO_HIGHT_ENABLE      0x00       /* High-performance enable */
@@ -1235,10 +1226,6 @@ static int lsm6dso_xl_isready(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
                               FAR struct sensor_event_accel *value);
-static int lsm6dso_xl_sethpfilter(FAR struct lsm6dso_dev_s *priv,
-                                  uint8_t value);
-static int lsm6dso_xl_setlp2filter(FAR struct lsm6dso_dev_s *priv,
-                                   uint8_t value);
 
 /* Gyroscope handle functions */
 
@@ -2549,13 +2536,6 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
       priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
                                        * LSM6DSO_MG2MS_FACTOR;
 
-      /* Configure filtering chain(No aux interface)
-       * Accelerometer - LPF1 + LPF2 path.
-       */
-
-      lsm6dso_xl_sethpfilter(priv, LSM6DSO_LPODR_DIV100);
-      lsm6dso_xl_setlp2filter(priv, LSM6DSO_LPF2_ENABLE);
-
       /* Set interrupt for accelerometer. */
 
       if (priv->dev[LSM6DSO_XL_IDX].fifoen)
@@ -2641,70 +2621,6 @@ static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
   value->x = temp.i16bit[0] *priv->dev[LSM6DSO_XL_IDX].factor;
   value->y = temp.i16bit[1] *priv->dev[LSM6DSO_XL_IDX].factor;
   value->z = temp.i16bit[2] *priv->dev[LSM6DSO_XL_IDX].factor;
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_xl_sethpfilter
- *
- * Description:
- *   Accelerometer slope filter / high-pass filter selection on output.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - Set value.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lsm6dso_xl_sethpfilter(FAR struct lsm6dso_dev_s *priv,
-                                  uint8_t value)
-{
-  lsm6dso_ctrl8_xl_t reg;
-
-  lsm6dso_spi_read(priv, LSM6DSO_CTRL8_XL, (FAR uint8_t *)&reg, 1);
-
-  reg.hp_slope_xl_en = (value & 0x10) >> 4;
-  reg.hp_ref_mode_xl = (value & 0x20) >> 5;
-  reg.hpcf_xl = value & 0x07;
-  lsm6dso_spi_write(priv, LSM6DSO_CTRL8_XL, (FAR uint8_t *)&reg);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dso_xl_setlp2filter
- *
- * Description:
- *   Accelerometer output from LPF2 filtering stage selection.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - Set value.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lsm6dso_xl_setlp2filter(FAR struct lsm6dso_dev_s *priv,
-                                   uint8_t value)
-{
-  lsm6dso_ctrl1_xl_t reg;
-
-  lsm6dso_spi_read(priv, LSM6DSO_CTRL1_XL, (FAR uint8_t *)&reg, 1);
-
-  reg.lpf2_xl_en = value;
-  lsm6dso_spi_write(priv, LSM6DSO_CTRL1_XL, (FAR uint8_t *)&reg);
 
   return OK;
 }
