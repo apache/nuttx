@@ -73,6 +73,10 @@
 #  include "esp32_board_wlan.h"
 #endif
 
+#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#  include "esp32_wifi_adapter.h"
+#endif
+
 #ifdef CONFIG_ESP32_I2C
 #  include "esp32_board_i2c.h"
 #endif
@@ -220,6 +224,15 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+  ret = esp32_wifi_bt_coexist_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT "
+             "coexistence support\n");
     }
 #endif
 
