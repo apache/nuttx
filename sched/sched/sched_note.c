@@ -451,6 +451,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_stop_s));
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
@@ -488,6 +489,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   sched_note_add(&note, sizeof(struct note_resume_s));
 }
+#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
@@ -529,6 +531,7 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_cpu_started_s));
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
@@ -606,6 +609,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   sched_note_add(&note, sizeof(struct note_cpu_resumed_s));
 }
+#endif
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
