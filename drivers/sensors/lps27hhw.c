@@ -84,14 +84,7 @@
 /* Device default macros */
 
 #define LPS27HHW_DEFAULT_INTERVAL      (10000)   /* Default interval */
-#define LPS27HHW_DEFAULT_LATENCY       (10000)   /* Default latency */
-#define LPS27HHW_DEFAULT_FIFOWTM       (1)       /* Default fifo watermark */
 #define LPS27HHW_DEFAULT_BUFFER_NUMBER (1)       /* Default buffer number */
-#ifdef CONFIG_LPS27HHW_MODE_INT
-#define LPS27HHW_FIFO_SLOTS_NUMBER     (128)     /* Default FIFO slots number */
-#else
-#define LPS27HHW_FIFO_SLOTS_NUMBER     (2)       /* Default FIFO slots number */
-#endif
 
 /* Register map */
 
@@ -138,17 +131,9 @@
 #define LPS27HHW_MASK_FCTRL_F_MODE     (LPS27HHW_BIT(1) | LPS27HHW_BIT(0))
 #define LPS27HHW_SHIFT_FCTRL_F_MODE    0
 
-#define LPS27HHW_REG_FIFO_WTM          0x14      /* FIFO_WTM register */
-#define LPS27HHW_MASK_FIFO_WTM         0xff
-#define LPS27HHW_SHIFT_FIFO_WTM        0
-
 #define LPS27HHW_REG_RPDS_L            0x18      /* RPDS_L register */
 
 #define LPS27HHW_REG_RPDS_H            0x19      /* RPDS_H register */
-
-#define LPS27HHW_REG_F_STATUS1         0x25      /* FIFO_STATUS1 register */
-#define LPS27HHW_MASK_F_STATUS1_FSS    0xff
-#define LPS27HHW_SHIFT_F_STATUS1_FSS   0
 
 #define LPS27HHW_REG_STATUS            0x27      /* STATUS register */
 #define LPS27HHW_MASK_STATUS_T_OR      LPS27HHW_BIT(5)
@@ -163,10 +148,6 @@
 #define LPS27HHW_REG_PRESS_OUT_XL      0x28      /* PRESS_OUT_XL register */
 
 #define LPS27HHW_REG_TEMP_OUT_L        0x2b      /* TEMP_OUT_L register */
-
-#define LPS27HHW_REG_F_OUT_PRESS_XL    0x78      /* FIFO_DATA_OUT_PRESS_XL register */
-
-#define LPS27HHW_REG_FIFO_OUT_TEMP_L   0x7b      /* FIFO_DATA_OUT_TEMP_L register */
 
 /* Factory test instructions */
 
@@ -190,16 +171,6 @@ enum lps27hhw_odr_e
   LPS27HHW_200_Hz                                /* Sampling freq is 200hz */
 };
 
-/* Sensor INT type enum */
-
-enum lps27hhw_int_e
-{
-  LPS27HHW_INT_F_FULL,                           /* FIFO full int type */
-  LPS27HHW_INT_F_WTM,                            /* FIFO watermark int type */
-  LPS27HHW_INT_F_OVR,                            /* FIFO overrun int type */
-  LPS27HHW_INT_DRDY                              /* Date ready int type */
-};
-
 /* Sensor mode enum */
 
 enum lps27hhw_mode_e
@@ -213,47 +184,14 @@ enum lps27hhw_mode_e
   LPS27HHW_MODE_POWER_DOWN                       /* Powerdown mode */
 };
 
-/* Sensor INT polarity enum */
-
-enum lps27hhw_polarity_e
-{
-  LPS27HHW_ACTIVE_HIGH,                          /* Int pin active-high */
-  LPS27HHW_ACTIVE_LOW                            /* Int pin active-low */
-};
-
-/* Sensor INT latch enum */
-
-enum lps27hhw_lir_e
-{
-  LPS27HHW_INT_PULSED,                           /* Int request pulsed */
-  LPS27HHW_INT_LATCHED                           /* Int request latched */
-};
-
-/* Sensor PP_OD enum */
-
-enum lps27hhw_ppod_e
-{
-  LPS27HHW_PUSH_PULL,                            /* Int pad push-pull */
-  LPS27HHW_OPEN_DRAIN                            /* Int pad open-drain */
-};
-
 /* Sensor struct */
 
 struct lps27hhw_sensor_s
 {
   struct sensor_lowerhalf_s lower;               /* Lower half sensor driver */
-  bool                      fifoen;              /* Sensor fifo enable */
   bool                      activated;           /* Sensor working state */
-  bool                      interval_updated;    /* Sensor interval updated flag */
-  bool                      latency_updated;     /* Sensor latency updated flag */
   uint32_t                  interval;            /* Sensor interval */
-  uint32_t                  latency;             /* Sensor batch latency */
-  uint32_t                  fifowtm;             /* Sensor fifo water marker */
   uint64_t                  timestamp;           /* Units is microseconds */
-#ifdef CONFIG_LPS27HHW_MODE_POLL
-  uint64_t                  start_timestamp;     /* Start timestamp(us) */
-  uint64_t                  sample_count;        /* The count of sampling */
-#endif
 };
 
 /* Device struct */
@@ -303,12 +241,8 @@ static int lps27hhw_setlpfilter(FAR struct lps27hhw_dev_s *priv,
                                 uint8_t value);
 static int lps27hhw_setupdate(FAR struct lps27hhw_dev_s *priv,
                               uint8_t value);
-static int lps27hhw_setint(FAR struct lps27hhw_dev_s *priv,
-                           enum lps27hhw_int_e type);
 static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
                             enum lps27hhw_mode_e mode);
-static int lps27hhw_isready(FAR struct lps27hhw_dev_s *priv,
-                            FAR uint8_t *value);
 static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
                             FAR struct sensor_event_baro *baro);
 static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push);
@@ -316,10 +250,6 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv);
 
 /* Sensor ops functions */
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-static int lps27hhw_batch(FAR struct sensor_lowerhalf_s *lower,
-                          FAR unsigned int *latency_us);
-#endif
 static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
                                  FAR unsigned int *period_us);
 static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
@@ -329,12 +259,8 @@ static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
 static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
                                    unsigned long arg);
 
-/* Sensor interrupt functions */
+/* Sensor poll functions */
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
-                                      ioe_pinset_t pinset, FAR void *arg);
-#endif
 static void lps27hhw_worker(FAR void *arg);
 
 /****************************************************************************
@@ -347,9 +273,6 @@ static const struct sensor_ops_s g_lps27hhw_ops =
 {
   .activate = lps27hhw_activate,            /* Enable/disable sensor */
   .set_interval = lps27hhw_set_interval,    /* Set output data period */
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  .batch = lps27hhw_batch,                  /* Set maximum report latency */
-#endif
   .selftest = lps27hhw_selftest,            /* Sensor selftest */
   .set_calibvalue = lps27hhw_set_calibvalue /* Sensor set calibvalue */
 };
@@ -795,131 +718,6 @@ static int lps27hhw_setupdate(FAR struct lps27hhw_dev_s *priv, uint8_t value)
 }
 
 /****************************************************************************
- * Name: lps27hhw_setint
- *
- * Description:
- *   Set interrupt type for the sensor.
- *
- * Input Parameters:
- *   priv - Device struct.
- *   type - INT type.
- *
- * Returned Value:
- *   Return 0 if the driver succeeded; A negated errno
- *   value is returned on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lps27hhw_setint(FAR struct lps27hhw_dev_s *priv,
-                           enum lps27hhw_int_e type)
-{
-  int ret;
-
-  /* Clear int types beforing setting */
-
-  ret = lps27hhw_writereg(priv, LPS27HHW_REG_CTRL3, 0x00);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to clear int types\n");
-      return ret;
-    }
-
-  /* Set interrupt type */
-
-  switch (type)
-    {
-      case LPS27HHW_INT_F_FULL:
-        {
-          ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL3,
-                                   LPS27HHW_MASK_CTRL3_INT_FFULL,
-                                   LPS27HHW_ENABLE
-                                   << LPS27HHW_SHIFT_CTRL3_INT_FFULL);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set full FIFO int\n");
-              return ret;
-            }
-        }
-        break;
-
-      case LPS27HHW_INT_F_WTM:
-        {
-          ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL3,
-                                   LPS27HHW_MASK_CTRL3_INT_FWTM,
-                                   LPS27HHW_ENABLE
-                                   << LPS27HHW_SHIFT_CTRL3_INT_FWTM);
-          if (ret < 0)
-           {
-              snerr("ERROR: Failed to set FIFO watermark int\n");
-              return ret;
-            }
-        }
-        break;
-
-      case LPS27HHW_INT_F_OVR:
-        {
-          ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL3,
-                                   LPS27HHW_MASK_CTRL3_INT_FOVER,
-                                   LPS27HHW_ENABLE
-                                   << LPS27HHW_SHIFT_CTRL3_INT_FOVER);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set fifo overflow int\n");
-              return ret;
-            }
-        }
-        break;
-
-      case LPS27HHW_INT_DRDY:
-        {
-          ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL3,
-                                   LPS27HHW_MASK_CTRL3_DRDY,
-                                   LPS27HHW_ENABLE
-                                   << LPS27HHW_SHIFT_CTRL3_DRDY);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set data ready int\n");
-              return ret;
-            }
-        }
-        break;
-
-      default:
-        {
-          snerr("ERROR: Int type is not supported\n");
-          return -EINVAL;
-        }
-    }
-
-  /* Configure FIFO watermark settings related to int type */
-
-  ret = lps27hhw_updatereg(priv, LPS27HHW_REG_FCTRL,
-                           LPS27HHW_MASK_FCTRL_STOP_WTM,
-                           priv->dev.fifoen
-                           << LPS27HHW_SHIFT_FCTRL_STOP_WTM);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to enable/disable FIFO watermark\n");
-      return ret;
-    }
-
-  ret = lps27hhw_updatereg(priv, LPS27HHW_REG_FIFO_WTM,
-                           LPS27HHW_MASK_FIFO_WTM,
-                           priv->dev.fifowtm
-                           << LPS27HHW_SHIFT_FIFO_WTM);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to set FIFO watermark\n");
-      return ret;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: lsp27hhw_setmode
  *
  * Description:
@@ -945,22 +743,15 @@ static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
 
   switch (mode)
     {
-      case LPS27HHW_MODE_BYPASS:           /* Share the same setting */
-      case LPS27HHW_MODE_FIFO:             /* Share the same setting */
-      case LPS27HHW_MODE_STREAM:           /* Share the same setting */
-      case LPS27HHW_MODE_BYPASS_TO_FIFO:   /* Share the same setting */
-      case LPS27HHW_MODE_BYPASS_TO_STREAM: /* Share the same setting */
-      case LPS27HHW_MODE_STREAM_TO_FIFO:   /* Share the same setting */
+      case LPS27HHW_MODE_BYPASS:
         {
-          /* FIFO mode selection */
-
           ret = lps27hhw_updatereg(priv, LPS27HHW_REG_FCTRL,
                                    LPS27HHW_MASK_FCTRL_F_MODE |
                                    LPS27HHW_MASK_FCTRL_TRIG_MODE, mode
                                    << LPS27HHW_SHIFT_FCTRL_F_MODE);
           if (ret < 0)
             {
-              snerr("ERROR: Failed to set fifo mode\n");
+              snerr("ERROR: Failed to set mode\n");
               return ret;
             }
         }
@@ -973,7 +764,7 @@ static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
           ret = lps27hhw_setodr(priv, LPS27HHW_ONE_SHOT);
           if (ret < 0)
             {
-              snerr("ERROR: Failed to set powwerdown mode\n");
+              snerr("ERROR: Failed to set powerdown mode\n");
               return ret;
             }
         }
@@ -984,66 +775,6 @@ static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
           snerr("ERROR: Mode type is not supported\n");
           return -EINVAL;
         }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: lps27hhw_isready
- *
- * Description:
- *   Read the sensor data ready flag.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *   value - Data ready flag.
- *
- * Returned Value:
- *   Return 0 if the driver succeeded; A negated errno
- *   value is returned on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int lps27hhw_isready(FAR struct lps27hhw_dev_s *priv,
-                            FAR uint8_t *value)
-{
-  uint8_t status;
-  int ret;
-
-  if (priv->dev.fifoen)
-    {
-      ret = lps27hhw_readreg(priv, LPS27HHW_REG_F_STATUS1, &status);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to read fifo status1\n");
-          return ret;
-        }
-
-      *value = (status & LPS27HHW_MASK_F_STATUS1_FSS)
-               >> LPS27HHW_SHIFT_F_STATUS1_FSS;
-    }
-  else
-    {
-      ret = lps27hhw_readreg(priv, LPS27HHW_REG_STATUS, &status);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to read status\n");
-          return ret;
-        }
-
-      *value = (((status & LPS27HHW_MASK_STATUS_T_DA)
-               >> LPS27HHW_SHIFT_STATUS_T_DA)
-               || ((status & LPS27HHW_MASK_STATUS_T_OR)
-               >> LPS27HHW_SHIFT_STATUS_T_OR)
-               || ((status & LPS27HHW_MASK_STATUS_P_DA)
-               >> LPS27HHW_SHIFT_STATUS_P_DA)
-               || ((status & LPS27HHW_MASK_STATUS_P_OR)
-               >> LPS27HHW_SHIFT_STATUS_P_OR))
-               ? LPS27HHW_ENABLE : LPS27HHW_DISABLE;
     }
 
   return ret;
@@ -1077,41 +808,20 @@ static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
   int32_t temperature;
   int ret;
 
-  if (true == priv->dev.fifoen)
+  ret = lps27hhw_read(priv, LPS27HHW_REG_PRESS_OUT_XL,
+                      pressure_buff, LPS27HHW_PRESSURE_WIDTH);
+  if (ret < 0)
     {
-      ret = lps27hhw_read(priv, LPS27HHW_REG_F_OUT_PRESS_XL,
-                          pressure_buff, LPS27HHW_PRESSURE_WIDTH);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to get pressure\n");
-          return ret;
-        }
-
-      ret = lps27hhw_read(priv, LPS27HHW_REG_FIFO_OUT_TEMP_L,
-                          temperature_buff, LPS27HHW_TEMP_WIDTH);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to get temperature\n");
-          return ret;
-        }
+      snerr("ERROR: Failed to get pressure\n");
+      return ret;
     }
-  else
-    {
-      ret = lps27hhw_read(priv, LPS27HHW_REG_PRESS_OUT_XL,
-                          pressure_buff, LPS27HHW_PRESSURE_WIDTH);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to get fifo pressure\n");
-          return ret;
-        }
 
-      ret = lps27hhw_read(priv, LPS27HHW_REG_TEMP_OUT_L,
-                          temperature_buff, LPS27HHW_TEMP_WIDTH);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to get fifo temperature\n");
-          return ret;
-        }
+  ret = lps27hhw_read(priv, LPS27HHW_REG_TEMP_OUT_L,
+                      temperature_buff, LPS27HHW_TEMP_WIDTH);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to get temperature\n");
+      return ret;
     }
 
   pressure = (pressure_buff[0] & 0x000000ff) | ((pressure_buff[1] << 8)
@@ -1147,57 +857,24 @@ static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
 
 static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push)
 {
-  struct sensor_event_baro baro[LPS27HHW_FIFO_SLOTS_NUMBER];
-  uint8_t status;
-  int i = 0;
+  struct sensor_event_baro baro;
   int ret;
 
-  do
+  /* Get data */
+
+  ret = lps27hhw_getdata(priv, &baro);
+  if (ret < 0)
     {
-      /* Check data is ready */
-
-      ret = lps27hhw_isready(priv, &status);
-      if (ret < 0)
-        {
-          snerr("ERROR: Failed to check is ready\n");
-          return ret;
-        }
-
-      /* If ready, get data */
-
-      if (status)
-        {
-          ret = lps27hhw_getdata(priv,
-                                 (FAR struct sensor_event_baro *)
-                                 &baro[i]);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to get data\n");
-              return ret;
-            }
-
-          baro[i].timestamp = priv->dev.timestamp -
-                              (status - 1) * priv->dev.interval;
-          i++;
-        }
-
-      /* Check reading is over FIFO watermark */
-
-      if (i > LPS27HHW_FIFO_SLOTS_NUMBER)
-        {
-          snerr("ERROR: Reading is  over max FIFO slots: %d\n", i);
-          return -EIO;
-        }
+      snerr("ERROR: Failed to get data\n");
+      return ret;
     }
-  while (status);
 
-  /* If there is any data, check the data is needed pushing to upper */
+  baro.timestamp = priv->dev.timestamp;
 
-  if (push && (i > 0))
-    {
-      priv->dev.lower.push_event(priv->dev.lower.priv, baro,
-                                 i * sizeof(struct sensor_event_baro));
-    }
+  /* Push data to upper half driver */
+
+  priv->dev.lower.push_event(priv->dev.lower.priv, &baro,
+                             sizeof(struct sensor_event_baro));
 
   return ret;
 }
@@ -1251,51 +928,6 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
       return ret;
     }
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  /* Configure int pin:
-   * pulsed, active low and open-drain.
-   */
-
-  ret = lps27hhw_updatereg(priv, LPS27HHW_REG_INT_CFG,
-                           LPS27HHW_MASK_INT_CFG_LIR,
-                           LPS27HHW_INT_PULSED
-                           << LPS27HHW_SHIFT_INT_CFG_LIR);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to set int pin: puslsed\n");
-      return ret;
-    }
-
-  ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL2,
-                           LPS27HHW_MASK_CTRL2_INT_HL,
-                           LPS27HHW_ACTIVE_LOW
-                           << LPS27HHW_SHIFT_CTRL2_INT_HL);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to configure int pint polarity\n");
-      return ret;
-    }
-
-  ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL2,
-                           LPS27HHW_MASK_CTRL2_PP_OD,
-                           LPS27HHW_OPEN_DRAIN
-                           << LPS27HHW_SHIFT_CTRL2_PP_OD);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to configure int pint mode\n");
-      return ret;
-    }
-
-  /* Set interrupt type: data ready */
-
-  ret = lps27hhw_setint(priv, LPS27HHW_INT_DRDY);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to set int type: data ready\n");
-      return ret;
-    }
-#endif /* CONFIG_LPS27HHW_MODE_INT */
-
   /* Set block data update: output registers not updated
    * until MSB and LSB have been read
    */
@@ -1320,92 +952,6 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
 }
 
 /* Sensor ops functions */
-
-/****************************************************************************
- * Name: lps27hhw_batch
- *
- * Description:
- *   Set sensor's maximum report latency in microseconds.
- *
- * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   latency_us - the time between batch data, in us. It may by overwrite
- *                by lower half driver.
- *
- * Returned Value:
- *   Return 0 if the driver succeeded; A negated errno
- *   value is returned on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_LPS27HHW_MODE_INT
-static int lps27hhw_batch(FAR struct sensor_lowerhalf_s *lower,
-                          FAR unsigned int *latency_us)
-{
-  FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
-  uint32_t max_latency;
-  int ret;
-
-  /* Sanity check */
-
-  DEBUGASSERT(priv != NULL && latency_us != NULL);
-
-  /* Verify batch latency */
-
-  max_latency = priv->dev.lower.batch_number * priv->dev.interval;
-  if (*latency_us > max_latency)
-    {
-      *latency_us = max_latency;
-    }
-  else if ((*latency_us < priv->dev.interval) && *latency_us > 0)
-    {
-      *latency_us = priv->dev.interval;
-    }
-
-  /* Find best matching FIFO watermark */
-
-  priv->dev.fifowtm = LPS27HHW_ROUNDUP(*latency_us, priv->dev.interval)
-                      / priv->dev.interval;
-  *latency_us = priv->dev.fifowtm * priv->dev.interval;
-
-  /* Check latency is updated */
-
-  if (priv->dev.latency == *latency_us)
-    {
-      priv->dev.latency_updated = false;
-      return OK;
-    }
-
-  /* If latency is updated, renew chip mode and int type */
-
-  priv->dev.latency_updated = true;
-  priv->dev.latency = *latency_us;
-  priv->dev.fifoen = priv->dev.fifowtm > 1 ? true : false;
-
-  ret = lps27hhw_setmode(priv, priv->dev.fifoen
-                         ? LPS27HHW_MODE_STREAM
-                         : LPS27HHW_MODE_BYPASS);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to renew chip mode\n");
-      return ret;
-    }
-
-  ret = lps27hhw_setint(priv, priv->dev.fifoen
-                        ? LPS27HHW_INT_F_WTM :
-                        LPS27HHW_INT_DRDY);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to renew int type\n");
-    }
-
-  return ret;
-}
-
-#endif    /* CONFIG_LPS27HHW_MODE_INT */
 
 /****************************************************************************
  * Name: lps27hhw_set_interval
@@ -1443,18 +989,6 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
   /* Find best matching interval */
 
   idx = lps27hhw_findodr(priv, (FAR uint32_t *)period_us);
-
-  /* Check interval is updated */
-
-  if (priv->dev.interval == g_lps27hhw_odr[idx].interval)
-    {
-      priv->dev.interval_updated = false;
-      return OK;
-    }
-
-  /* If interval is updated, renew odr */
-
-  priv->dev.interval_updated = true;
   priv->dev.interval = g_lps27hhw_odr[idx].interval;
 
   ret = lps27hhw_setodr(priv, g_lps27hhw_odr[idx].regval);
@@ -1467,10 +1001,10 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
 }
 
 /****************************************************************************
- * Name: lps27hhw_activate *
+ * Name: lps27hhw_activate
  * Description:
  *   Enable or disable sensor device. when enable sensor, sensor will
- *   work in  current mode(if not set, use default mode). when disable
+ *   work in current mode(if not set, use default mode). When disable
  *   sensor, it will disable sense path and stop convert.
  *
  * Input Parameters:
@@ -1490,7 +1024,6 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
-  uint8_t idx;
   int ret;
 
   /* Sanity check */
@@ -1506,64 +1039,27 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (enable)
     {
-      /* If enabled, read out but don't push, only used for clearing data */
+      /* If enabled, check interval and latency are updated  */
 
-      ret = lps27hhw_read_push(priv, false);
+      ret = lps27hhw_setmode(priv, LPS27HHW_MODE_BYPASS);
       if (ret < 0)
         {
-          snerr("ERROR: Failed to read push\n");
+          snerr("ERROR: Failed to renew chip mode\n");
           return ret;
         }
 
-      /* If enabled, check interval and latency are updated  */
-
-      /* If interval is not updated, set odr */
-
-      if (!priv->dev.interval_updated)
+      ret = lps27hhw_updatereg(priv, LPS27HHW_REG_CTRL3,
+                               LPS27HHW_MASK_CTRL3_DRDY,
+                               LPS27HHW_ENABLE
+                               << LPS27HHW_SHIFT_CTRL3_DRDY);
+      if (ret < 0)
         {
-          idx = lps27hhw_findodr(priv, &(priv->dev.interval));
-          ret = lps27hhw_setodr(priv, g_lps27hhw_odr[idx].regval);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to set odr\n");
-              return ret;
-            }
-        }
-      else
-        {
-          /* If interval is updated, Clear flag */
-
-          priv->dev.interval_updated = false;
+          snerr("ERROR: Failed to set data ready int\n");
+          return ret;
         }
 
-      /* If latency is not updated, set chip mode and int type */
-
-      if (!(priv->dev.latency_updated))
-        {
-          ret = lps27hhw_setmode(priv, priv->dev.fifoen
-                                 ? LPS27HHW_MODE_STREAM
-                                 : LPS27HHW_MODE_BYPASS);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to renew chip mode\n");
-              return ret;
-            }
-
-          ret = lps27hhw_setint(priv, priv->dev.fifoen
-                                ? LPS27HHW_INT_F_WTM :
-                                LPS27HHW_INT_DRDY);
-          if (ret < 0)
-            {
-              snerr("ERROR: Failed to renew int type\n");
-              return ret;
-            }
-        }
-      else
-        {
-          /* If latency is updated, Clear flag */
-
-          priv->dev.latency_updated = false;
-        }
+      work_queue(HPWORK, &priv->work, lps27hhw_worker, priv,
+                 priv->dev.interval / USEC_PER_TICK);
     }
   else
     {
@@ -1578,27 +1074,6 @@ static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
 
       work_cancel(HPWORK, &priv->work);
     }
-
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  /* Enable/disable interrupt */
-
-  IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG,
-                  enable ? IOEXPANDER_VAL_FALLING : IOEXPANDER_VAL_DISABLE);
-#else
-  if (enable)
-    {
-      priv->dev.start_timestamp = sensor_get_timestamp();
-      priv->dev.sample_count = 1;
-
-      work_queue(HPWORK, &priv->work, lps27hhw_worker, priv,
-                 priv->dev.interval / USEC_PER_TICK);
-    }
-  else
-    {
-      work_cancel(HPWORK, &priv->work);
-    }
-#endif
 
   priv->dev.activated = enable;
 
@@ -1706,60 +1181,6 @@ static int lps27hhw_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
   return ret;
 }
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-/* Sensor interrupt functions */
-
-/****************************************************************************
- * Name: lps27hhw_interrupt_handler
- *
- * Description:
- *   Handle the sensor interrupt.
- *
- * Input Parameters:
- *   dev     - ioexpander device.
- *   pinset  - Interrupt pin.
- *   arg     - Device struct.
- *
- * Returned Value:
- *   Return 0 if the driver succeeded; A negated errno
- *   value is returned on any failure.
- *
- * Assumptions/Limitations:
- *   none.
- *
- ****************************************************************************/
-
-static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
-                                      ioe_pinset_t pinset, FAR void *arg)
-{
-  /* This function should be called upon a rising edge on the LSM6DSO
-   * new data interrupt pin since it signals that new data has
-   * been measured.
-   */
-
-  FAR struct lps27hhw_dev_s *priv = arg;
-
-  DEBUGASSERT(priv != NULL);
-
-  /* Get the timestamp */
-
-  priv->dev.timestamp = sensor_get_timestamp();
-
-  /* Task the worker with retrieving the latest sensor data. We should not
-   * do this in a interrupt since it might take too long. Also we cannot lock
-   * the I2C bus from within an interrupt.
-   */
-
-  DEBUGASSERT(priv->work.worker == NULL);
-  work_queue(LPWORK, &priv->work, lps27hhw_worker, priv, 0);
-
-  IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
-
-  return OK;
-}
-#endif /* CONFIG_LPS27HHW_MODE_INT */
-
 /****************************************************************************
  * Name: lps27hhw_worker
  *
@@ -1782,45 +1203,17 @@ static int lps27hhw_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 static void lps27hhw_worker(FAR void *arg)
 {
   FAR struct lps27hhw_dev_s *priv = arg;
-#ifdef CONFIG_LPS27HHW_MODE_POLL
-  int interval;
-#endif
 
   /* Sanity check */
 
   DEBUGASSERT(priv != NULL && priv->config != NULL);
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  /* Enable interrupt */
-
-  IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
-
-#else
   /* Get the timestamp */
 
   priv->dev.timestamp = sensor_get_timestamp();
 
-  /* Update the number of sampling points. */
-
-  priv->dev.sample_count++;
-
-  /* Get fixed interval */
-
-  interval = priv->dev.start_timestamp +
-             priv->dev.sample_count * priv->dev.interval -
-             priv->dev.timestamp;
-
-  /* If it is negative, need to start immediately to compensate the time */
-
-  if (interval < 0)
-    {
-      interval = 0;
-    }
-
   work_queue(HPWORK, &priv->work, lps27hhw_worker, priv,
-             interval / USEC_PER_TICK);
-#endif
+             priv->dev.interval / USEC_PER_TICK);
 
   /* Read the latest sensor data and push to uppe half */
 
@@ -1854,9 +1247,6 @@ static void lps27hhw_worker(FAR void *arg)
 int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
 {
   FAR struct lps27hhw_dev_s *priv;
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  FAR void *ioephandle;
-#endif
   int ret;
 
   /* Sanity check */
@@ -1874,11 +1264,8 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
 
   priv->dev.lower.type          = SENSOR_TYPE_BAROMETER;
   priv->dev.lower.buffer_number = LPS27HHW_DEFAULT_BUFFER_NUMBER;
-  priv->dev.lower.batch_number  = LPS27HHW_FIFO_SLOTS_NUMBER;
   priv->dev.lower.ops           = &g_lps27hhw_ops;
   priv->dev.interval            = LPS27HHW_DEFAULT_INTERVAL;
-  priv->dev.latency             = LPS27HHW_DEFAULT_LATENCY;
-  priv->dev.fifowtm             = LPS27HHW_DEFAULT_FIFOWTM;
   priv->config                  = config;
 
   /* Initialize chip and enter into lowpower mode */
@@ -1890,35 +1277,6 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
       goto err;
     }
 
-#ifdef CONFIG_LPS27HHW_MODE_INT
-  /* Interrupt register */
-
-  ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->pin,
-                           IOEXPANDER_DIRECTION_IN_PULLUP);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to set direction: %d\n", ret);
-      goto err;
-    }
-
-  ioephandle = IOEP_ATTACH(priv->config->ioedev, priv->config->pin,
-                           lps27hhw_interrupt_handler, (FAR void *)priv);
-  if (ioephandle == NULL)
-    {
-      ret = -EIO;
-      snerr("ERROR: Failed to attach: %d\n", ret);
-      goto err;
-    }
-
-  ret = IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
-  if (ret < 0)
-    {
-      snerr("ERROR: Failed to set option: %d\n", ret);
-      goto irq_err;
-    }
-#endif
-
   /* Register the character driver */
 
   ret = sensor_register(&priv->dev.lower, devno);
@@ -1926,19 +1284,10 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
     {
       snerr("ERROR: Failed to register driver: %d\n", ret);
       sensor_unregister(&priv->dev.lower, devno);
-#ifdef CONFIG_LPS27HHW_MODE_INT
-      goto irq_err;
-#else
       goto err;
-#endif
     }
 
   return ret;
-
-#ifdef CONFIG_LPS27HHW_MODE_INT
-irq_err:
-  IOEP_DETACH(priv->config->ioedev, lps27hhw_interrupt_handler);
-#endif
 
 err:
   kmm_free(priv);

@@ -585,26 +585,6 @@ config SENSORS_LPS27HHW
 	---help---
 		Enable driver support for the STMicro LPS27HHW barometer sensor.
 
-if SENSORS_LPS27HHW
-
-choice
-	prompt "LPS27HHW sample mode"
-	default LPS27HHW_MODE_POLL
-
-config LPS27HHW_MODE_INT
-	bool "LPS27HHW sample mode using interrupt"
-	---help---
-		LPS27HHW sample mode using interrupt.
-
-config LPS27HHW_MODE_POLL
-	bool "LPS27HHW sample mode using polling"
-	---help---
-		LPS27HHW sample mode using polling.
-
-endchoice
-
-endif
-
 config SENSORS_LTC4151
 	bool "LTC4151 current and voltage monitor"
 	default n
