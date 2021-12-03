@@ -76,6 +76,10 @@ ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)
 CMN_CSRCS += arm_itm_syslog.c
 endif
 
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+CMN_CSRCS += arm_tls.c
+endif
+
 CHIP_CSRCS  = stm32_allocateheap.c stm32_start.c stm32_rcc.c stm32_lse.c
 CHIP_CSRCS += stm32_lsi.c stm32_gpio.c stm32_exti_gpio.c stm32_flash.c
 CHIP_CSRCS += stm32_irq.c stm32_lowputc.c

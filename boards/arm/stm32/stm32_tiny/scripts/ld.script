@@ -68,6 +68,18 @@ SECTIONS
         __exidx_end = ABSOLUTE(.);
     } > flash
 
+    .tdata : {
+        _stdata = ABSOLUTE(.);
+        *(.tdata .tdata.* .gnu.linkonce.td.*);
+        _etdata = ABSOLUTE(.);
+    } > flash
+
+    .tbss : {
+        _stbss = ABSOLUTE(.);
+        *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        _etbss = ABSOLUTE(.);
+    } > flash
+
     _eronly = ABSOLUTE(.);
 
     /* The STM32F103C8T6 has 20Kb of SRAM beginning at the following address */

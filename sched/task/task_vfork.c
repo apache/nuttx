@@ -173,7 +173,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Setup thread local storage */
 
-  info = up_stack_frame(&child->cmn, sizeof(struct tls_info_s));
+  info = up_stack_frame(&child->cmn, up_tls_size());
   if (info == NULL)
     {
       ret = -ENOMEM;
@@ -183,6 +183,8 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
   DEBUGASSERT(info == child->cmn.stack_alloc_ptr);
   memcpy(info, parent->cmn.stack_alloc_ptr, sizeof(struct tls_info_s));
   info->tl_task = child->cmn.group->tg_info;
+
+  up_tls_initialize(info);
 
   /* Get the priority of the parent task */
 

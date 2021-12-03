@@ -68,6 +68,18 @@ SECTIONS
     } > flash
     __exidx_end = ABSOLUTE(.);
 
+    .tdata : {
+        _stdata = ABSOLUTE(.);
+        *(.tdata .tdata.* .gnu.linkonce.td.*);
+        _etdata = ABSOLUTE(.);
+    } > flash
+
+    .tbss : {
+        _stbss = ABSOLUTE(.);
+        *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        _etbss = ABSOLUTE(.);
+    } > flash
+
     _eronly = ABSOLUTE(.);
 
     /* The STM32F103Z has 64Kb of SRAM beginning at the following address */

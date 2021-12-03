@@ -16,6 +16,7 @@ config ARCH_ARM
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_THREAD_LOCAL
 	---help---
 		The ARM architectures
 
@@ -344,6 +345,10 @@ config ARCH_HAVE_RESET
 	default n
 
 config ARCH_HAVE_TESTSET
+	bool
+	default n
+
+config ARCH_HAVE_THREAD_LOCAL
 	bool
 	default n
 

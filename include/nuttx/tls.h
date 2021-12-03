@@ -151,6 +151,9 @@ struct tls_info_s
 #endif
 
   int tl_errno;                        /* Per-thread error number */
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  uint8_t tl_data[0];
+#endif
 };
 
 /****************************************************************************
