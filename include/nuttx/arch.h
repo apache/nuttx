@@ -85,6 +85,7 @@
 #include <nuttx/compiler.h>
 #include <nuttx/cache.h>
 #include <nuttx/sched.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -1801,6 +1802,40 @@ int up_timer_start(FAR const struct timespec *ts);
 #  else
 #    define up_tls_info() tls_get_info()
 #  endif
+#endif
+
+/****************************************************************************
+ * Name: up_tls_size
+ *
+ * Description:
+ *   Get TLS (sizeof(struct tls_info_s) + tdata + tbss) section size.
+ *
+ * Returned Value:
+ *   Size of (sizeof(struct tls_info_s) + tdata + tbss).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+int up_tls_size(void);
+#else
+#define up_tls_size() sizeof(struct tls_info_s) 
+#endif
+
+/****************************************************************************
+ * Name: up_tls_initialize
+ *
+ * Description:
+ *   Initialize thread local region
+ *
+ * Input Parameters:
+ *   tls_data - The memory region to initialize
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+void up_tls_initialize(FAR struct tls_info_s *info);
+#else
+#define up_tls_initialize(x)
 #endif
 
 /****************************************************************************
