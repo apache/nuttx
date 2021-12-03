@@ -31,6 +31,7 @@
 #include <semaphore.h>
 
 #include <nuttx/list.h>
+#include <nuttx/wqueue.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,6 +45,7 @@ struct regulator_dev_s;
 
 struct regulator_s
 {
+  struct work_s disable_work;
   int min_uv;
   int max_uv;
   struct list_node list;

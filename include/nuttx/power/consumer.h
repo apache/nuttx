@@ -61,7 +61,9 @@ FAR struct regulator_s *regulator_get(const char *id);
 void regulator_put(FAR struct regulator_s *regulator);
 int regulator_is_enabled(FAR struct regulator_s *regulator);
 int regulator_enable(FAR struct regulator_s *regulator);
+int regulator_enable_delay(FAR struct regulator_s *regulator, int ms);
 int regulator_disable(FAR struct regulator_s *regulator);
+int regulator_disable_deferred(FAR struct regulator_s *regulator, int ms);
 int regulator_set_voltage(FAR struct regulator_s *regulator, int min_uv,
                           int max_uv);
 int regulator_get_voltage(FAR struct regulator_s *regulator);
