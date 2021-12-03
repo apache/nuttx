@@ -937,6 +937,21 @@ config SCHED_INSTRUMENTATION
 
 			void sched_note_start(FAR struct tcb_s *tcb);
 			void sched_note_stop(FAR struct tcb_s *tcb);
+
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_started(FAR struct tcb_s *tcb);
+
+if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_SWITCH
+	bool "Use note switch for instrumentation"
+	default n
+	---help---
+		Use note switch for instrumentation.
+
 			void sched_note_suspend(FAR struct tcb_s *tcb);
 			void sched_note_resume(FAR struct tcb_s *tcb);
 
@@ -952,8 +967,6 @@ config SCHED_INSTRUMENTATION
 		critical locations in the OS. There is very little that can be
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
-
-if SCHED_INSTRUMENTATION
 
 config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
