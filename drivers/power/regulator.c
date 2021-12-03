@@ -33,6 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/power/regulator.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -526,14 +527,44 @@ int regulator_enable(FAR struct regulator_s *regulator)
       ret = _regulator_do_enable(rdev);
       if (ret < 0)
         {
-          return ret;
+          goto err;
         }
     }
 
   rdev->use_count++;
+
+err:
   nxsem_post(&rdev->regulator_sem);
 
-  return 0;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: regulator_enable_delay
+ *
+ * Description:
+ *   Enable the regulator output.
+ *
+ * Input parameters:
+ *   regulator - The regulator consumer representative
+ *   ms        - The delay ms after regulator enable
+ *
+ * Returned value:
+ *   Zero on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int regulator_enable_delay(FAR struct regulator_s *regulator, int ms)
+{
+  int ret;
+
+  ret = regulator_enable(regulator);
+  if (!ret)
+    {
+      nxsig_usleep(1000 * ms);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -586,7 +617,30 @@ err:
   return ret;
 }
 
-  return 0;
+/****************************************************************************
+ * Name: regulator_disable_deferred
+ *
+ * Description:
+ *   Disable the regulator after ms.
+ *
+ * Input parameters:
+ *   regulator - The regulator consumer representative
+ *   ms        - The delay ms before disable regulator
+ *
+ * Returned value:
+ *   Zero on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int regulator_disable_deferred(FAR struct regulator_s *regulator, int ms)
+{
+  if (!regulator)
+    {
+      return -EINVAL;
+    }
+
+  return work_queue(LPWORK, (FAR struct work_s *)&regulator,
+                   (worker_t)regulator_disable, regulator, MSEC2TICK(ms));
 }
 
 /****************************************************************************
