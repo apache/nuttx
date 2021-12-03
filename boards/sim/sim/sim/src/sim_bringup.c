@@ -34,7 +34,7 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/fs/hostfs_rpmsg.h>
+#include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
@@ -462,12 +462,10 @@ int sim_bringup(void)
   up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
 #endif
 
-#ifdef CONFIG_FS_HOSTFS_RPMSG
-  hostfs_rpmsg_init("server");
+#ifdef CONFIG_FS_RPMSGFS
+#ifdef CONFIG_SIM_RPTUN_MASTER
+  rpmsgfs_server_init();
 #endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
-  hostfs_rpmsg_server_init();
 #endif
 #endif
 
