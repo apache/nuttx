@@ -580,7 +580,9 @@ void nx_start(void)
 
       up_initial_state(&g_idletcb[i].cmn);
 
-      /* Initialize the thread local storage */
+      /* Initialize the thread local storage
+       * Note: Don't copy tdata and tss for idle task to improve footprint
+       */
 
       info = up_stack_frame(&g_idletcb[i].cmn, sizeof(struct tls_info_s));
       DEBUGASSERT(info == g_idletcb[i].cmn.stack_alloc_ptr);

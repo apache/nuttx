@@ -600,6 +600,14 @@ config SCHED_USER_IDENTITY
 		Those can then be managed using the interfaces.  Child tasks will
 		inherit the UID and GID of its parent.
 
+config SCHED_THREAD_LOCAL
+	bool "Support __thread/thread_local keyword"
+	default n
+	depends on ARCH_HAVE_THREAD_LOCAL
+	---help---
+		This option enables architecture-sepecific TLS supports (__thread/thread_local keyword)
+		Note: Toolchain must be compiled with '--enable-tls' enabled
+
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
