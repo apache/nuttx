@@ -33,6 +33,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/power/regulator.h>
+#include <nuttx/signal.h>
 
 /****************************************************************************
  * Private Function Prototypes
@@ -526,14 +527,44 @@ int regulator_enable(struct regulator *regulator)
       ret = _regulator_do_enable(rdev);
       if (ret < 0)
         {
-          return ret;
+          goto err;
         }
     }
 
   rdev->use_count++;
+
+err:
   nxsem_post(&rdev->regulator_sem);
 
-  return 0;
+  return ret;
+}
+
+/****************************************************************************
+ * Name: regulator_enable_delay
+ *
+ * Description:
+ *   Enable the regulator output.
+ *
+ * Input parameters:
+ *   regulator - The regulator consumer representative
+ *   ms        - The delay ms after regulator enable
+ *
+ * Returned value:
+ *   Zero on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int regulator_enable_delay(struct regulator *regulator, int ms)
+{
+  int ret;
+
+  ret = regulator_enable(regulator);
+  if (!ret)
+    {
+      nxsig_usleep(1000 * ms);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -566,8 +597,8 @@ int regulator_disable(struct regulator *regulator)
   nxsem_wait_uninterruptible(&rdev->regulator_sem);
   if (rdev->use_count <= 0)
     {
-      pwrerr("unbalanced disable for %s\n", rdev->desc->name);
-      return -EIO;
+      ret = -EIO;
+      goto err;
     }
 
   if (rdev->use_count == 1)
@@ -575,14 +606,41 @@ int regulator_disable(struct regulator *regulator)
       ret = _regulator_do_disable(rdev);
       if (ret < 0)
         {
-          return ret;
+          goto err;
         }
     }
 
   rdev->use_count--;
-  nxsem_post(&rdev->regulator_sem);
 
-  return 0;
+err:
+  nxsem_post(&rdev->regulator_sem);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: regulator_disable_deferred
+ *
+ * Description:
+ *   Disable the regulator after ms.
+ *
+ * Input parameters:
+ *   regulator - The regulator consumer representative
+ *   ms        - The delay ms before disable regulator
+ *
+ * Returned value:
+ *   Zero on success or a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+int regulator_disable_deferred(struct regulator *regulator, int ms)
+{
+  if (!regulator)
+    {
+      return -EINVAL;
+    }
+
+  return work_queue(LPWORK, (FAR struct work_s *)&regulator,
+                   (worker_t)regulator_disable, regulator, MSEC2TICK(ms));
 }
 
 /****************************************************************************
@@ -763,7 +821,7 @@ void regulator_unregister(struct regulator_dev *rdev)
   nxsem_wait_uninterruptible(&g_reg_sem);
   if (rdev->open_count)
     {
-      pwrerr("unregister, open %d\n", rdev->open_count);
+      pwrerr("unregister, open %PRIu32\n", rdev->open_count);
       nxsem_post(&g_reg_sem);
       return;
     }
