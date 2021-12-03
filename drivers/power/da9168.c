@@ -1613,7 +1613,9 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
   FAR struct batio_operate_msg_s *msg =
                               (FAR struct batio_operate_msg_s *)param;
   int ret = OK;
+  int value;
 
+  value =  msg->u32;
   switch (msg->operate_type)
     {
       case BATIO_OPRTN_SHIPMODE:
@@ -1624,6 +1626,18 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
               baterr("ERROR: DA9168 enter shiomode fail: %d\n", ret);
             }
         }
+
+        break;
+
+      case BATIO_OPRTN_CHARGE:
+        {
+          ret = da9168_control_charge(priv, value);
+          if (ret < 0)
+            {
+              baterr("ERROR: Failed to enable DA9168 charge: %d\n", ret);
+             }
+        }
+
         break;
 
       default:
@@ -1668,7 +1682,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
 
   /* set vbus overvoltage value 10500mV */
 
-  ret =  da9168_set_vbus_ovsel(priv, 10500);
+  ret =  da9168_set_vbus_ovsel(priv, 0x03);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set da9168 vbus overvoltage: %d\n", ret);
