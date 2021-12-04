@@ -77,6 +77,17 @@
 
 #define NUCLEOF302R8_PWMTIMER   1
 
+#ifdef CONFIG_SENSORS_HALL3PHASE
+/* GPIO pins used by the 3-phase Hall effect sensor */
+
+#  define GPIO_HALL_PHA (GPIO_INPUT | GPIO_SPEED_2MHz | \
+                         GPIO_PORTA | GPIO_PIN15)
+#  define GPIO_HALL_PHB (GPIO_INPUT | GPIO_SPEED_2MHz | \
+                         GPIO_PORTB | GPIO_PIN3)
+#  define GPIO_HALL_PHC (GPIO_INPUT | GPIO_SPEED_2MHz | \
+                         GPIO_PORTB | GPIO_PIN10)
+#endif
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
