@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/src/sam_progmem.c
+ * boards/arm/samv7/common/src/sam_progmem_common.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -40,40 +40,25 @@
 #endif
 
 #include "sam_progmem.h"
-#include "same70-xplained.h"
-
-#ifdef HAVE_PROGMEM_CHARDEV
+#include "sam_progmem_common.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
+#define PROGMEM_MTD_MINOR           0
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-
-struct ota_partition_s
+struct mcuboot_partition_s
 {
   uint32_t    offset;          /* Partition offset from the beginning of MTD */
   uint32_t    size;            /* Partition size in bytes */
   const char *devpath;         /* Partition device path */
 };
-
-#endif
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
-                                                   uint32_t mtd_size);
-static int init_ota_partitions(void);
-#endif
 
 /****************************************************************************
  * Private Data
@@ -82,7 +67,7 @@ static int init_ota_partitions(void);
 static FAR struct mtd_dev_s *g_samv7_progmem_mtd;
 
 #if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-static const struct ota_partition_s g_ota_partition_table[] =
+static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
 {
   {
     .offset  = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
@@ -100,13 +85,10 @@ static const struct ota_partition_s g_ota_partition_table[] =
     .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
   }
 };
-#endif
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 
 /****************************************************************************
  * Name: sam_progmem_alloc_mtdpart
@@ -149,10 +131,10 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
 }
 
 /****************************************************************************
- * Name: init_ota_partitions
+ * Name: init_mcuboot_partitions
  *
  * Description:
- *   Initialize partitions that are dedicated to firmware OTA update.
+ *   Initialize partitions that are dedicated to firmware MCUBOOT update.
  *
  * Input Parameters:
  *   None.
@@ -162,7 +144,7 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
  *
  ****************************************************************************/
 
-static int init_ota_partitions(void)
+static int init_mcuboot_partitions(void)
 {
   FAR struct mtd_dev_s *mtd;
 #ifdef CONFIG_BCH
@@ -170,10 +152,16 @@ static int init_ota_partitions(void)
 #endif
   int ret = OK;
 
-  for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
+  for (int i = 0; i < ARRAYSIZE(g_mcuboot_partition_table); ++i)
     {
-      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      const struct mcuboot_partition_s *part = &g_mcuboot_partition_table[i];
       mtd = sam_progmem_alloc_mtdpart(part->offset, part->size);
+
+      if (!mtd)
+        {
+          ferr("ERROR: create MTD OTA partition %s", part->devpath);
+          continue;
+        }
 
       ret = ftl_initialize(i, mtd);
       if (ret < 0)
@@ -196,7 +184,7 @@ static int init_ota_partitions(void)
 
   return ret;
 }
-#endif
+#endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
 
 /****************************************************************************
  * Public Functions
@@ -209,15 +197,15 @@ static int init_ota_partitions(void)
  *   Initialize the FLASH and register the MTD device.
  ****************************************************************************/
 
-int sam_progmem_init(void)
+int sam_progmem_common_initialize(void)
 {
   int ret = OK;
 
-  /* Initialize the SAME70 FLASH programming memory library */
+  /* Initialize the SAMV7 FLASH programming memory library */
 
   sam_progmem_initialize();
 
-  /* Create an instance of the SAME70 FLASH program memory device driver */
+  /* Create an instance of the SAMV7 FLASH program memory device driver */
 
   g_samv7_progmem_mtd = progmem_initialize();
   if (g_samv7_progmem_mtd == NULL)
@@ -226,7 +214,7 @@ int sam_progmem_init(void)
     }
 
 #if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-  ret = init_ota_partitions();
+  ret = init_mcuboot_partitions();
   if (ret < 0)
     {
       return ret;
@@ -265,4 +253,3 @@ int sam_progmem_init(void)
 
   return ret;
 }
-#endif /* HAVE_PROGMEM_CHARDEV */
