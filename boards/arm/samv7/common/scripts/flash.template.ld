@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-qmtech/scripts/flash-sram-mcuboot-loader.ld
+ * boards/arm/samv7/common/scripts/samv7-mem.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,18 +18,49 @@
  *
  ****************************************************************************/
 
-/* The SAME70N19 has 512Kb of FLASH beginning at address 0x0040:0000 and
- * 256Kb of SRAM beginining at 0x2040:0000
- *
- * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
- * where the code expects to begin execution by jumping to the entry point in
- * the 0x0400:0000 address range (Assuming that ITCM is not enable).
- */
+#include <nuttx/config.h>
+
+#define FLASH_START_ADDR        0x00400000
+#define MCUBOOT_HEADER_SIZE     0x200
+
+#ifdef CONFIG_ARMV7M_DTCM
+#  define SRAM_START_ADDR       0x20000000
+#else
+#  define SRAM_START_ADDR       0x20400000
+#endif
+
+#ifdef CONFIG_SAMV7_MEM_FLASH_512
+#  define FLASH_MAX_SIZE        512K
+#elif  CONFIG_SAMV7_MEM_FLASH_1024
+#  define FLASH_MAX_SIZE        1024K
+#else
+#  define FLASH_MAX_SIZE        2048K
+#endif
+
+#ifdef CONFIG_SAMV7_MEM_RAM_256
+#  define SRAM_MAX_SIZE         256K
+#else
+#  define SRAM_MAX_SIZE         384K
+#endif
+
+#ifdef CONFIG_SAMV7_FORMAT_MCUBOOT
+#  ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+#    define FLASH_OFFSET        0
+#    define FLASH_IMG_SIZE      CONFIG_SAMV7_MCUBOOT_PRIMARY_SLOT_OFFSET
+#  else
+#    define FLASH_OFFSET        (CONFIG_SAMV7_MCUBOOT_PRIMARY_SLOT_OFFSET + MCUBOOT_HEADER_SIZE)
+#    define FLASH_IMG_SIZE      (CONFIG_SAMV7_MCUBOOT_SLOT_SIZE - MCUBOOT_HEADER_SIZE)
+#  endif
+#else
+#  define FLASH_OFFSET          0
+#  define FLASH_IMG_SIZE        FLASH_MAX_SIZE
+#endif
+#define SRAM_IMG_SIZE           SRAM_MAX_SIZE
 
 MEMORY
 {
-  flash (rx) : ORIGIN = 0x00400000, LENGTH = 128K
-  sram (rwx) : ORIGIN = 0x20400000, LENGTH = 256K
+  flash (rx) : ORIGIN = FLASH_START_ADDR + FLASH_OFFSET, LENGTH = FLASH_IMG_SIZE
+  sram (rwx) : ORIGIN = SRAM_START_ADDR, LENGTH = SRAM_IMG_SIZE
 }
 
 OUTPUT_ARCH(arm)

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/scripts/flash-dtcm-mcuboot-loader.ld
+ * boards/arm/samv7/common/scripts/user-space.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,32 +18,32 @@
  *
  ****************************************************************************/
 
-/* The SAME70Q21 has 2048Kb of FLASH beginning at address 0x0040:0000 and
- * 384Kb of SRAM beginining at 0x2040:0000
- *
- * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
- * where the code expects to begin execution by jumping to the entry point in
- * the 0x0400:0000 address range (Assuming that ITCM is not enable).
- *
- * NOTE: that the DTCM address of 0x2000:0000 is used for SRAM.  If DTCM is
- * disabled, then the accesses will actually occur on the AHB bus.
+/* NOTE:  This depends on the memory.ld script having been included prior to
+ * this script.
  */
 
-MEMORY
-{
-  flash (rx) : ORIGIN = 0x00400000, LENGTH = 128K
-  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
-}
+/* Make sure that the critical memory management functions are in user-space.
+ * the user heap memory manager will reside in user-space but be usable both
+ * by kernel- and user-space code
+ */
+
+EXTERN(umm_initialize)
+EXTERN(umm_addregion)
+
+EXTERN(malloc)
+EXTERN(realloc)
+EXTERN(zalloc)
+EXTERN(free)
 
 OUTPUT_ARCH(arm)
-EXTERN(_vectors)
-ENTRY(_stext)
-
 SECTIONS
 {
+    .userspace : {
+        *(.userspace)
+    } > uflash
+
     .text : {
         _stext = ABSOLUTE(.);
-        *(.vectors)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -55,22 +55,23 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > flash
+    } > uflash
 
     .init_section : {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
-    } > flash
+    } > uflash
 
     .ARM.extab : {
         *(.ARM.extab*)
-    } > flash
+    } > uflash
 
     __exidx_start = ABSOLUTE(.);
     .ARM.exidx : {
         *(.ARM.exidx*)
-    } > flash
+    } > uflash
+
     __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
@@ -82,15 +83,7 @@ SECTIONS
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > sram AT > flash
-
-    .ramfunc ALIGN(4): {
-        _sramfuncs = ABSOLUTE(.);
-        *(.ramfunc  .ramfunc.*)
-        _eramfuncs = ABSOLUTE(.);
-    } > sram AT > flash
-
-    _framfuncs = LOADADDR(.ramfunc);
+    } > usram AT > uflash
 
     .bss : {
         _sbss = ABSOLUTE(.);
@@ -99,9 +92,10 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > sram
+    } > usram
 
-    /* Stabs debugging sections. */
+    /* Stabs debugging sections */
+
     .stab 0 : { *(.stab) }
     .stabstr 0 : { *(.stabstr) }
     .stab.excl 0 : { *(.stab.excl) }
