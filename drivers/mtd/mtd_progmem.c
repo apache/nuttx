@@ -371,7 +371,6 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
       case MTDIOC_ERASESTATE:
         {
           FAR uint8_t *result = (FAR uint8_t *)arg;
-
           *result = up_progmem_erasestate();
 
           ret = OK;

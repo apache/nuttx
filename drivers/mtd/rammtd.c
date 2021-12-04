@@ -315,14 +315,21 @@ static ssize_t ram_byteread(FAR struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, FAR uint8_t *buf)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
+  off_t maxoffset;
 
   DEBUGASSERT(dev && buf);
 
-  /* Don't let read read past end of buffer */
+  /* Don't let the read exceed the size of the ram buffer */
 
-  if (offset + nbytes > priv->nblocks * CONFIG_RAMMTD_ERASESIZE)
+  maxoffset = priv->nblocks * CONFIG_RAMMTD_ERASESIZE;
+  if (offset >= maxoffset)
     {
       return 0;
+    }
+
+  if (offset + nbytes > maxoffset)
+    {
+      nbytes = maxoffset - offset;
     }
 
   ram_read(buf, &priv->start[offset], nbytes);
@@ -338,16 +345,21 @@ static ssize_t ram_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
                              size_t nbytes, FAR const uint8_t *buf)
 {
   FAR struct ram_dev_s *priv = (FAR struct ram_dev_s *)dev;
-  off_t maxaddr;
+  off_t maxoffset;
 
   DEBUGASSERT(dev && buf);
 
   /* Don't let the write exceed the size of the ram buffer */
 
-  maxaddr = priv->nblocks * CONFIG_RAMMTD_ERASESIZE;
-  if (offset + nbytes > maxaddr)
+  maxoffset = priv->nblocks * CONFIG_RAMMTD_ERASESIZE;
+  if (offset >= maxoffset)
     {
       return 0;
+    }
+
+  if (offset + nbytes > maxoffset)
+    {
+      nbytes = maxoffset - offset;
     }
 
   /* Then write the data to RAM */
@@ -480,6 +492,7 @@ FAR struct mtd_dev_s *rammtd_initialize(FAR uint8_t *start, size_t size)
   if (nblocks < 1)
     {
       ferr("ERROR: Need to provide at least one full erase block\n");
+      kmm_free(priv);
       return NULL;
     }
 

@@ -252,8 +252,8 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
    * in logical block numbers
    */
 
-  startblock *= FILEMTD_BLKPER;
-  nblocks    *= FILEMTD_BLKPER;
+  startblock *= (priv->erasesize / priv->blocksize);
+  nblocks    *= (priv->erasesize / priv->blocksize);
 
   /* Get the offset corresponding to the first block and the size
    * corresponding to the number of blocks.
@@ -291,7 +291,7 @@ static ssize_t filemtd_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Don't let the read exceed the original size of the file */
 
-  maxblock = priv->nblocks * FILEMTD_BLKPER;
+  maxblock = priv->nblocks * (priv->erasesize / priv->blocksize);
   if (startblock >= maxblock)
     {
       return 0;
@@ -331,7 +331,7 @@ static ssize_t filemtd_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Don't let the write exceed the original size of the file */
 
-  maxblock = priv->nblocks * FILEMTD_BLKPER;
+  maxblock = priv->nblocks * (priv->erasesize / priv->blocksize);
   if (startblock >= maxblock)
     {
       return 0;
@@ -363,14 +363,21 @@ static ssize_t filemtd_byteread(FAR struct mtd_dev_s *dev, off_t offset,
                                 size_t nbytes, FAR uint8_t *buf)
 {
   FAR struct file_dev_s *priv = (FAR struct file_dev_s *)dev;
+  off_t maxoffset;
 
   DEBUGASSERT(dev && buf);
 
-  /* Don't let read read past end of buffer */
+  /* Don't let the read exceed the original size of the file */
 
-  if (offset + nbytes > priv->nblocks * priv->erasesize)
+  maxoffset = priv->nblocks * priv->erasesize;
+  if (offset >= maxoffset)
     {
       return 0;
+    }
+
+  if (offset + nbytes > maxoffset)
+    {
+      nbytes = maxoffset - offset;
     }
 
   filemtd_read(priv, buf, offset, nbytes);
@@ -396,6 +403,11 @@ static ssize_t file_bytewrite(FAR struct mtd_dev_s *dev, off_t offset,
   if (offset + nbytes > maxoffset)
     {
       return 0;
+    }
+
+  if (offset + nbytes > maxoffset)
+    {
+      nbytes = maxoffset - offset;
     }
 
   /* Then write the data to the file */
@@ -456,8 +468,7 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         {
           /* Erase the entire device */
 
-          filemtd_erase(dev, 0, priv->nblocks);
-          ret = OK;
+          ret = filemtd_erase(dev, 0, priv->nblocks);
         }
         break;
 
@@ -548,6 +559,15 @@ FAR struct mtd_dev_s *blockmtd_initialize(FAR const char *path,
   else
     {
       priv->erasesize = erasesize;
+    }
+
+  if ((priv->erasesize / priv->blocksize) * priv->blocksize
+      != priv->erasesize)
+    {
+      ferr("ERROR: erasesize must be an even multiple of sectsize\n");
+      file_close(&priv->mtdfile);
+      kmm_free(priv);
+      return NULL;
     }
 
   /* Force the size to be an even number of the erase block size */
