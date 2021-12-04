@@ -2572,3 +2572,44 @@ Configuration sub-directories
          probably means some kind of memory corruption.
 
        2017-01-30: knsh configuration does not yet run correctly.
+
+  mcuboot-loader:
+    This configuration exercises the port of MCUboot loader to NuttX.
+
+    In this configuration both primary, secondary and scratch partitions are
+    mapped into the internal flash.
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_BOOTLOADER=y
+      CONFIG_MCUBOOT_PRIMARY_SLOT_PATH="/dev/mcuboot0"
+      CONFIG_MCUBOOT_SECONDARY_SLOT_PATH="/dev/mcuboot1"
+      CONFIG_MCUBOOT_SCRATCH_PATH="/dev/mcubootS"
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_SAMV7_PROGMEM_NSECTORS=16
+      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+
+  mcuboot-nsh:
+    This configuration exercises the MCUboot compatible application slot
+    example. The application is NuttX nsh with some special commands.
+
+    Generate signed binaries for MCUboot compatible application:
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v1.bin
+
+    Relevant configuration settings:
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+      CONFIG_MCUBOOT_PRIMARY_SLOT_PATH="/dev/mcuboot0"
+      CONFIG_MCUBOOT_SECONDARY_SLOT_PATH="/dev/mcuboot1"
+      CONFIG_MCUBOOT_SCRATCH_PATH="/dev/mcubootS"
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_SAMV7_PROGMEM_NSECTORS=16
+      CONFIG_USER_ENTRYPOINT="nsh_main"
