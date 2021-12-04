@@ -16,74 +16,110 @@ choice
 config ARCH_CHIP_SAME70Q19
 	bool "SAME70Q19"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70Q20
 	bool "SAME70Q20"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70Q21
 	bool "SAME70Q21"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70N19
 	bool "SAME70N19"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70N20
 	bool "SAME70N20"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70N21
 	bool "SAME70N21"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70J19
 	bool "SAME70J10"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70J20
 	bool "SAME70J20"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70J21
 	bool "SAME70J21"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71Q19
 	bool "SAMV71Q19"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71Q20
 	bool "SAMV71Q20"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71Q21
 	bool "SAMV71Q21"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71N19
 	bool "SAMV71N19"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71N20
 	bool "SAMV71N20"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71N21
 	bool "SAMV71N21"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71J19
 	bool "SAMV71J19"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71J20
 	bool "SAMV71J20"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71J21
 	bool "SAMV71J21"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 endchoice # Atmel SAMV7 Chip Selection
 
@@ -187,6 +223,37 @@ config ARCH_CHIP_SAMV71J
 	select SAMV7_HAVE_ISI8
 
 # Chip Capabilities
+
+config SAMV7_MEM_FLASH_512
+	bool
+	default n
+
+config SAMV7_MEM_FLASH_1024
+	bool
+	default n
+
+config SAMV7_MEM_FLASH_2048
+	bool
+	default n
+
+config ARCH_CHIP_SAMV7_MEM_FLASH
+	hex
+	default 0x80000  if SAMV7_MEM_FLASH_512
+	default 0x100000 if SAMV7_MEM_FLASH_1024
+	default 0x200000 if SAMV7_MEM_FLASH_2048
+
+config SAMV7_MEM_RAM_256
+	bool
+	default n
+
+config SAMV7_MEM_RAM_384
+	bool
+	default n
+
+config ARCH_CHIP_SAMV7_MEM_RAM
+	hex
+	default 0x40000 if SAMV7_MEM_RAM_256
+	default 0x60000 if SAMV7_MEM_RAM_384
 
 config SAMV7_MCAN
 	bool
@@ -919,7 +986,9 @@ if SAMV7_PROGMEM
 
 config SAMV7_PROGMEM_NSECTORS
 	int "Number of 128KB sectors"
-	default 4
+	default 4  if SAMV7_MEM_FLASH_512
+	default 8  if SAMV7_MEM_FLASH_1024
+	default 16 if SAMV7_MEM_FLASH_2048
 	range 1 16
 	---help---
 		This is the number of 128KB FLASH sectors at the end of the program
