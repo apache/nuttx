@@ -2572,3 +2572,83 @@ Configuration sub-directories
          probably means some kind of memory corruption.
 
        2017-01-30: knsh configuration does not yet run correctly.
+
+  mcuboot-loader:
+    This configuration exercises the port of MCUboot loader to NuttX.
+
+    In this configuration both primary, secondary and scratch partitions are
+    mapped into the internal flash.
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_BOOTLOADER=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+
+      Flash bootloader using embedded debugger:
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program nuttx.bin 0x400000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+  mcuboot-nsh:
+    This configuration exercises the MCUboot compatible application slot
+    example. The application is NuttX nsh with some special commands.
+
+    Generate signed binaries for MCUboot compatible application:
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v1.bin
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 2.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v2.bin
+
+      Flash application version 1.0.0 at MCUboot Slot-0:
+
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v1.bin 0x420000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+      Flash version 2.0.0 at MCUboot Slot-1:
+
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v2.bin 0x500000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+    Relevant configuration settings:
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_USER_ENTRYPOINT="nsh_main"
