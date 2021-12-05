@@ -513,7 +513,7 @@ static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv,
                                                int offset)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
-  return *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset);
+  return *((FAR volatile uart_datawidth_t *)priv->uartbase + offset);
 #else
   return uart_getreg(priv->uartbase, offset);
 #endif
@@ -527,7 +527,7 @@ static inline void u16550_serialout(FAR struct u16550_s *priv, int offset,
                                     uart_datawidth_t value)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
-  *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset) = value;
+  *((FAR volatile uart_datawidth_t *)priv->uartbase + offset) = value;
 #else
   uart_putreg(priv->uartbase, offset, value);
 #endif
