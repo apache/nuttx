@@ -28,6 +28,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/sched.h>
+#include <nuttx/arch.h>
 #include <nuttx/lib/getopt.h>
 #include <sys/types.h>
 
