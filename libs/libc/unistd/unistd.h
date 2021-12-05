@@ -26,11 +26,10 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/tls.h>
 
 #include <stdbool.h>
 #include <getopt.h>
-
-#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
  * Public Data

@@ -29,7 +29,6 @@
 
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
-#include <nuttx/lib/getopt.h>
 #include <sys/types.h>
 
 /****************************************************************************
@@ -82,6 +81,23 @@
 typedef CODE void (*tls_dtor_t)(FAR void *);
 
 #endif
+
+/* This structure encapsulates all variables associated with getopt(). */
+
+struct getopt_s
+{
+  /* Part of the implementation of the public getopt() interface */
+
+  FAR char *go_optarg;       /* Optional argument following option */
+  int       go_opterr;       /* Print error message */
+  int       go_optind;       /* Index into argv */
+  int       go_optopt;       /* unrecognized option character */
+
+  /* Internal getopt() state */
+
+  FAR char *go_optptr;       /* Current parsing location */
+  bool      go_binitialized; /* true:  getopt() has been initialized */
+};
 
 struct task_info_s
 {
