@@ -27,7 +27,7 @@
 #include <sched.h>
 #include <errno.h>
 
-#include <arch/tls.h>
+#include <nuttx/tls.h>
 
 /****************************************************************************
  * Private Data
