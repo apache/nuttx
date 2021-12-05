@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menuconfig FS_FATFS
+	bool "FATFS File System"
+	default n
+	depends on !DISABLE_MOUNTPOINT
+	---help---
+		Build the FATFS file system. http://elm-chan.org/fsw/ff/00index_e.html

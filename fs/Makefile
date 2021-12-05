@@ -58,6 +58,7 @@ include hostfs/Make.defs
 include littlefs/Make.defs
 include exfat/Make.defs
 include rpmsgfs/Make.defs
+include fatfs/Make.defs
 
 endif
 
