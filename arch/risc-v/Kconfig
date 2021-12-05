@@ -86,6 +86,12 @@ config ARCH_CHIP_RV32M1
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
+config ARCH_CHIP_QEMU_RV32
+	bool "QEMU RV32"
+	select ARCH_RV32IM
+	---help---
+		QEMU Generic RV32 processor
+
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
 	select ARCH_CHIP_CUSTOM
@@ -125,6 +131,7 @@ config ARCH_CHIP
 	default "c906"		if ARCH_CHIP_C906
 	default "mpfs"		if ARCH_CHIP_MPFS
 	default "rv32m1"	if ARCH_CHIP_RV32M1
+	default "qemu-rv32"	if ARCH_CHIP_QEMU_RV32
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
@@ -170,5 +177,8 @@ source "arch/risc-v/src/mpfs/Kconfig"
 endif
 if ARCH_CHIP_RV32M1
 source "arch/risc-v/src/rv32m1/Kconfig"
+endif
+if ARCH_CHIP_QEMU_RV32
+source "arch/risc-v/src/qemu-rv32/Kconfig"
 endif
 endif
