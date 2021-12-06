@@ -413,6 +413,9 @@ _conv_num(const unsigned char **buf, int *dest, int llim, int ulim)
     int result = 0;
     int rulim = ulim;
 
+    while (ispace(**buf))
+        *buf++;
+
     if (**buf < '0' || **buf > '9')
         return (0);
 
