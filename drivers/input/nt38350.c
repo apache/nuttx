@@ -177,6 +177,7 @@ enum nt38350_contact_e
   CONTACT_NONE = 0,
   CONTACT_DOWN,
   CONTACT_MOVE,
+  CONTACT_PALM,
   CONTACT_UP
 };
 
@@ -337,6 +338,11 @@ static const struct nvt_ts_trim_id_table_s g_trim_id_table[] =
     .mmap   = &g_nt38350_memory_map,
     .hwinfo = &g_nt38350_hw_info
   },
+};
+
+static const uint8_t lighting_palm[3] =
+{
+  0xf0, 0x04, 0x01
 };
 
 #ifdef CONFIG_NVT_TOUCH_MP
@@ -3816,6 +3822,8 @@ static void nt38350_data_worker(FAR void *arg)
   config = priv->config;
   DEBUGASSERT(config != NULL);
 
+  memset(&priv->sample, 0, sizeof(struct ts_nt38350_sample_s));
+
 #ifdef CONFIG_NVT_OFFLINE_LOG
   ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, point_data,
                   NVT_POINT_DATA_EXBUF_LEN + 1);
@@ -3903,6 +3911,12 @@ static void nt38350_data_worker(FAR void *arg)
           priv->sample.pressure = input_p;
           priv->old_sample = priv->sample;
         }
+      else if ((point_data[position] == lighting_palm[0]) &&
+               (point_data[position + 1] == lighting_palm[1]) &&
+               (point_data[position + 2] == lighting_palm[2]))
+        {
+          priv->sample.contact = CONTACT_PALM;
+        }
       else if (point_data[position] == FINGER_UP)
         {
           priv->sample.contact = CONTACT_UP;
@@ -3943,6 +3957,11 @@ static void nt38350_data_worker(FAR void *arg)
     {
       sample.point[0].flags = TOUCH_MOVE | TOUCH_ID_VALID |
                      TOUCH_POS_VALID;
+    }
+  else if (priv->sample.contact == CONTACT_PALM)
+    {
+      sample.point[0].flags   = TOUCH_GESTURE_VALID | TOUCH_ID_VALID;
+      sample.point[0].gesture = TOUCH_PALM;
     }
   else
     {
