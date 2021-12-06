@@ -370,6 +370,172 @@ static int sc8551_dump_regs(FAR struct sc8551_dev_s * priv)
 }
 #endif
 
+static uint16_t sc8551_get_vbus(FAR struct sc8551_dev_s * priv,
+                                uint16_t *vbus)
+{
+  uint8_t vbus_reg[2];
+  int ret;
+
+  ret  = sc8551_getreg8(priv, SC8551_REG_18, &vbus_reg[0], 1);
+  ret  = sc8551_getreg8(priv, SC8551_REG_19, &vbus_reg[1], 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get vbus voltage of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  *vbus = (((vbus_reg[0] & SC8551_IBUS_POL_H_MASK) << 8)
+         | (vbus_reg[1] & SC8551_VBUS_POL_L_MASK))
+         * SC8551_VBUS_ADC_LSB;
+
+  return ret;
+}
+
+static int sc8551_get_vout(FAR struct sc8551_dev_s * priv, uint16_t *vout)
+{
+  uint8_t vout_reg[2];
+  int ret;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_1C, &vout_reg[0], 1);
+  ret = sc8551_getreg8(priv, SC8551_REG_1D, &vout_reg[1], 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get output voltage of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  *vout = (((vout_reg[0] & SC8551_VOUT_POL_H_MASK) << 8
+           | (vout_reg[1] & SC8551_VOUT_POL_L_MASK)))
+           * SC8551_VOUT_ADC_LSB;
+
+  return ret;
+}
+
+static int sc8551_get_flt_stat(FAR struct sc8551_dev_s * priv,
+                                bool *vbat_ovp,
+                                bool *ibat_ocp,
+                                bool *vbus_ovp,
+                                bool *ibus_ocp)
+{
+  uint8_t flt_reg;
+  int ret;
+
+  ret  = sc8551_getreg8(priv, SC8551_REG_10, &flt_reg, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  if (flt_reg & SC8551_BAT_OVP_FLT_STAT_MASK) *vbat_ovp = true;
+  if (flt_reg & SC8551_BAT_OCP_FLT_STAT_MASK) *ibat_ocp = true;
+  if (flt_reg & SC8551_BUS_OVP_FLT_STAT_MASK) *vbus_ovp = true;
+  if (flt_reg & SC8551_BUS_OCP_FLT_STAT_MASK) *ibus_ocp = true;
+
+  return ret;
+}
+
+static int sc8551_get_int_stat(FAR struct sc8551_dev_s * priv,
+                               bool *adapter_insert,
+                               bool *vbat_insert,
+                               bool *adc_done)
+{
+  uint8_t int_reg;
+  int ret;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_0D, &int_reg, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  if (int_reg & VBUS_INSERT) *adapter_insert = true;
+  if (int_reg & VBAT_INSERT) *vbat_insert = true;
+  if (int_reg & ADC_DONE) *adc_done = true;
+
+  return ret;
+}
+
+static int sc8551_get_converse_stat(FAR struct sc8551_dev_s * priv,
+                                    bool *vbus_errorlo_stat,
+                                    bool *vbus_errorhi_stat,
+                                    bool *cp_switching_stat)
+{
+  uint8_t conv_reg;
+  int ret;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_0A, &conv_reg, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  if (conv_reg & SC8551_VBUS_ERRORLO_STAT_MASK) *vbus_errorlo_stat = true;
+  if (conv_reg & SC8551_VBUS_ERRORHI_STAT_MASK) *vbus_errorhi_stat = true;
+  if (conv_reg & SC8551_CONV_SWITCHING_STAT_MASK) *cp_switching_stat = true;
+
+  return ret;
+}
+
+static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
+                            FAR struct sc8551_key_state_s *sc8551_key_state)
+{
+  int ret;
+
+  ret = sc8551_get_vbus(priv,
+                       &(sc8551_key_state->vbus));
+  ret = sc8551_get_vout(priv,
+                       &(sc8551_key_state->vout));
+  ret = sc8551_get_flt_stat(priv,
+                           &(sc8551_key_state->vbus_ovp),
+                           &(sc8551_key_state->ibus_ocp),
+                           &(sc8551_key_state->vbat_ovp),
+                           &(sc8551_key_state->ibat_ocp));
+  ret = sc8551_get_int_stat(priv,
+                           &(sc8551_key_state->adapter_insert),
+                           &(sc8551_key_state->vbat_insert),
+                           &(sc8551_key_state->adc_done));
+  ret = sc8551_get_converse_stat(priv,
+                                 &(sc8551_key_state->vbus_errorlo_stat),
+                                 &(sc8551_key_state->vbus_errorhi_stat),
+                                 &(sc8551_key_state->cp_switching_stat));
+  if (ret < 0)
+    {
+      baterr("ERROR: !!! Failed to get key_state of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+#ifdef CONFIG_DEBUG_SC8551
+  batinfo("INFO: sc8551_key_state: \n");
+  batinfo("  vbus = %d\n", sc8551_key_state->vbus);
+  batinfo("  vout = %d\n", sc8551_key_state->vout);
+  batinfo("  vbat_ovp = %s\n",
+          sc8551_key_state->vbat_ovp ? "true" : "false");
+  batinfo("  ibat_ocp = %s\n",
+          sc8551_key_state->ibat_ocp ? "true" : "false");
+  batinfo("  vbus_ovp = %s\n",
+          sc8551_key_state->vbus_ovp ? "true" : "false");
+  batinfo("  ibus_ocp = %s\n",
+          sc8551_key_state->ibus_ocp ? "true" : "false");
+  batinfo("  adapter_insert = %s\n",
+          sc8551_key_state->adapter_insert ? "true" : "false");
+  batinfo("  vbat_insert = %s\n",
+          sc8551_key_state->vbat_insert ? "true" : "false");
+  batinfo("  adc_done = %s\n",
+          sc8551_key_state->adc_done ? "true" : "false");
+  batinfo("  vbus_errorlo_stat = %s\n",
+          sc8551_key_state->vbus_errorlo_stat ? "true" : "false");
+  batinfo("  vbus_errorhi_stat = %s\n",
+          sc8551_key_state->vbus_errorhi_stat ? "true" : "false");
+  batinfo("  cp_switching_stat = %s\n",
+          sc8551_key_state->cp_switching_stat ? "true" : "false");
+#endif
+
+  return ret;
+}
+
 /****************************************************************************
  * Name: sc8551_detect_device
  *
@@ -1487,27 +1653,22 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
                         FAR int *status)
 {
   FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
+  FAR struct sc8551_key_state_s sc8551_key_state;
   uint8_t val;
   bool isfault = false;
   int ret;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_0D, &val, 1);
+  memset(&sc8551_key_state, 0, sizeof(sc8551_key_state));
+  ret = sc8551_get_key_state(priv, &sc8551_key_state);
   if (ret < 0)
     {
+      baterr("ERROR: Error sc8551_get_key_state! Error = %d\n", ret);
       *status = BATTERY_UNKNOWN;
       return ret;
     }
 
-  if (ret & VBUS_INSERT)
-    {
-      priv->stat.vbus_present = true;
-      *status = BATTERY_CHARGING;
-    }
-  else
-    {
-      priv->stat.vbus_present = false;
-      *status = BATTERY_IDLE;
-    }
+  *status = sc8551_key_state.adapter_insert
+            ? BATTERY_CHARGING : BATTERY_IDLE;
 
   return OK;
 }
@@ -1770,6 +1931,7 @@ FAR struct battery_charger_dev_s *
                     FAR struct ioexpander_dev_s *dev)
 {
   FAR struct sc8551_dev_s *priv;
+  FAR struct sc8551_key_state_s sc8551_key_state;
   int ret;
 
   /* Initialize the SC8551 device structure */
@@ -1914,7 +2076,16 @@ FAR struct battery_charger_dev_s *
         }
     }
 
-  sc8551_dump_regs(priv);
+  /* Get key states of sc8551 */
+
+  memset(&sc8551_key_state, 0, sizeof(sc8551_key_state));
+  ret = sc8551_get_key_state(priv, &sc8551_key_state);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to sc8551_get_key_state: %d\n", ret);
+      kmm_free(priv);
+      return NULL;
+    }
 
   return (FAR struct battery_charger_dev_s *)priv;
 }
