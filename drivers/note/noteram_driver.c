@@ -412,7 +412,6 @@ static unsigned int noteram_unread_length(void)
 
 static void noteram_remove(void)
 {
-  FAR struct note_common_s *note;
   unsigned int tail;
   unsigned int length;
 
@@ -423,18 +422,27 @@ static void noteram_remove(void)
 
   /* Get the length of the note at the tail index */
 
-  note   = (FAR struct note_common_s *)&g_noteram_info.ni_buffer[tail];
-  length = note->nc_length;
+  length = g_noteram_info.ni_buffer[tail];
   DEBUGASSERT(length <= noteram_length());
 
 #if CONFIG_DRIVER_NOTERAM_TASKNAME_BUFSIZE > 0
-  if (note->nc_type == NOTE_STOP)
+  if (g_noteram_info.ni_buffer[noteram_next(tail, 1)] == NOTE_STOP)
     {
+      uint8_t nc_pid[2];
+
       /* The name of the task is no longer needed because the task is deleted
        * and the corresponding notes are lost.
        */
 
-      noteram_remove_taskname(note->nc_pid[0] + (note->nc_pid[1] << 8));
+#ifdef CONFIG_SMP
+      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
+      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 5)];
+#else
+      nc_pid[0] = g_noteram_info.ni_buffer[noteram_next(tail, 3)];
+      nc_pid[1] = g_noteram_info.ni_buffer[noteram_next(tail, 4)];
+#endif
+
+      noteram_remove_taskname(nc_pid[0] + (nc_pid[1] << 8));
     }
 #endif
 
