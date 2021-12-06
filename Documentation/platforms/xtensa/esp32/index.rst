@@ -271,21 +271,6 @@ following in ``scripts/esp32.cfg``::
   # Only configure the APP CPU
   #set ESP32_ONLYCPU 2
 
-Open Issues
------------
-
-  1. Cache Issues.  I have not thought about this yet, but certainly caching is
-     an issue in an SMP system:
-
-     - Cache coherency.  Are there separate caches for each CPU?  Or a single
-       shared cache?  If the are separate then keep the caches coherent will
-       be an issue.
-     - Caching MAY interfere with spinlocks as they are currently implemented.
-       Waiting on a cached copy of the spinlock may result in a hang or a
-       failure to wait.
-
-  2. Assertions.  On a fatal assertions, other CPUs need to be stopped.
-
 Wi-Fi
 ====
 
