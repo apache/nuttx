@@ -2995,7 +2995,7 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
   uint32_t output_len = 0;
   struct file *fp = NULL;
 
-  fbufp = (char *)kmm_zalloc(8192);
+  fbufp = (char *)kmm_zalloc(1024);
   if (!fbufp)
     {
       ierr("ERROR: kzalloc for fbufp failed!\n");
