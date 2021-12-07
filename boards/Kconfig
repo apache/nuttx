@@ -2259,6 +2259,12 @@ config ARCH_BOARD_SPRESENSE
 	---help---
 		none
 
+config ARCH_BOARD_PHY6222
+	bool "Phyplus PHY6222 EVB Board"
+	depends on ARCH_CHIP_PHY62XX
+	---help---
+		none
+		
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
@@ -2564,6 +2570,7 @@ config ARCH_BOARD
 	default "z8f64200100kit"           if ARCH_BOARD_Z8F64200100KIT
 	default "zp214xpa"                 if ARCH_BOARD_ZP214XPA
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
+	default "phy6222"                  if ARCH_BOARD_PHY6222
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
 	default "spresense"                if ARCH_BOARD_SPRESENSE
@@ -3301,6 +3308,9 @@ source "boards/z80/z80/z80sim/Kconfig"
 endif
 if ARCH_BOARD_BL602EVB
 source "boards/risc-v/bl602/bl602evb/Kconfig"
+endif
+if ARCH_BOARD_PHY6222
+source "boards/arm/phy62xx/phy6222/Kconfig"
 endif
 
 comment "Board-Common Options"

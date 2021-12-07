@@ -29,7 +29,6 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
 
 #ifndef CONFIG_TLS_ALIGNED
 

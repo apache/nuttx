@@ -27,6 +27,8 @@
 #include <sys/types.h>
 #include <syslog.h>
 
+#include <stm32.h>
+
 #include <nuttx/board.h>
 
 #ifdef CONFIG_USERLED
@@ -39,6 +41,10 @@
 
 #ifdef CONFIG_SENSORS_QENCODER
 #  include "board_qencoder.h"
+#endif
+
+#ifdef CONFIG_SENSORS_HALL3PHASE
+#  include "board_hall3ph.h"
 #endif
 
 #include "nucleo-f302r8.h"
@@ -139,6 +145,20 @@ int stm32_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Failed to register the qencoder: %d\n",
+             ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_HALL3PHASE
+  /* Initialize and register the 3-phase Hall effect sensor driver */
+
+  ret = board_hall3ph_initialize(0, GPIO_HALL_PHA, GPIO_HALL_PHB,
+                                 GPIO_HALL_PHC);
+  if (ret != OK)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the hall : %d\n",
              ret);
       return ret;
     }

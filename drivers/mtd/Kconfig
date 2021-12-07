@@ -316,11 +316,11 @@ config FILEMTD
 if FILEMTD
 
 config FILEMTD_BLOCKSIZE
-	int "File MTD block size"
+	int "File MTD default block size"
 	default 512
 
 config FILEMTD_ERASESIZE
-	int "File MTD erase block size"
+	int "File MTD default erase block size"
 	default 4096
 
 config FILEMTD_ERASESTATE
@@ -328,6 +328,29 @@ config FILEMTD_ERASESTATE
 	default 0xff
 
 endif # FILEMTD
+
+config NULLMTD
+	bool "MTD null driver"
+	default n
+	---help---
+		Build support for a MTD null driver.  It simulates an always erased
+		MTD device.
+
+if NULLMTD
+
+config NULLMTD_BLOCKSIZE
+	int "MTD null default block size"
+	default 512
+
+config NULLMTD_ERASESIZE
+	int "MTD null detault erase block size"
+	default 4096
+
+config NULLMTD_ERASESTATE
+	hex "Simulated erase state"
+	default 0xff
+
+endif # NULLMTD
 
 config MTD_AT24XX
 	bool "I2C-based AT24xx eeprom"

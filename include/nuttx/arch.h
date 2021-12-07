@@ -1791,9 +1791,17 @@ int up_timer_start(FAR const struct timespec *ts);
 /* struct tls_info_s;
  * FAR struct tls_info_s *up_tls_info(void);
  *
- * The actual declaration or definition is provided in arch/tls.h.  The
- * actual implementation may be a MACRO or an inline function.
+ * The actual definition is provided in arch/arch.h as a macro. The default
+ * implementation provided here assume the arch has a "push down" stack.
  */
+
+#ifndef up_tls_info
+#  ifdef CONFIG_TLS_ALIGNED
+#    define up_tls_info() TLS_INFO((uintptr_t)up_getsp())
+#  else
+#    define up_tls_info() tls_get_info()
+#  endif
+#endif
 
 /****************************************************************************
  * Multiple CPU support

@@ -31,7 +31,19 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define EXTMEM_ICACHE_CTRL_REG              (DR_REG_EXTMEM_BASE + 0x000)
+
+/* EXTMEM_ICACHE_ENABLE : R/W ;bitpos:[0] ;default: 1'b0.
+ * The bit is used to activate the data cache. 0: disable  1: enable
+ */
+
+#define EXTMEM_ICACHE_ENABLE            (BIT(0))
+#define EXTMEM_ICACHE_ENABLE_M          (BIT(0))
+#define EXTMEM_ICACHE_ENABLE_V          0x1
+#define EXTMEM_ICACHE_ENABLE_S          0
+
 #define EXTMEM_ICACHE_CTRL1_REG             (DR_REG_EXTMEM_BASE + 0x004)
+
 #define EXTMEM_ICACHE_TAG_POWER_CTRL_REG    (DR_REG_EXTMEM_BASE + 0x008)
 #define EXTMEM_CACHE_MMU_POWER_CTRL_REG     (DR_REG_EXTMEM_BASE + 0x0ac)
 

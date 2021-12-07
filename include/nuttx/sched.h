@@ -189,7 +189,9 @@
 #  define TCB_PID_OFF                (offsetof(struct tcb_s, pid))
 #  define TCB_STATE_OFF              (offsetof(struct tcb_s, task_state))
 #  define TCB_PRI_OFF                (offsetof(struct tcb_s, sched_priority))
+#if CONFIG_TASK_NAME_SIZE > 0
 #  define TCB_NAME_OFF               (offsetof(struct tcb_s, name))
+#endif
 #  define TCB_REG_OFF(reg)           (offsetof(struct tcb_s, xcp.regs[reg]))
 #endif
 
@@ -833,7 +835,7 @@ EXTERN uint32_t g_crit_max[1];
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 #ifdef CONFIG_DEBUG_TCBINFO
-EXTERN struct tcbinfo_s g_tcbinfo;
+EXTERN const struct tcbinfo_s g_tcbinfo;
 #endif
 
 /****************************************************************************

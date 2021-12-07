@@ -2397,6 +2397,7 @@ libs/libc/math/lib_copysignf.c
 drivers/wireless/bluetooth/bt_uart.c
 drivers/wireless/bluetooth/bt_uart.h
 wireless/bluetooth
+tools/size_report
 ===========================
    Copyright (c) 2016, Intel Corporation
    All rights reserved.

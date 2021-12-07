@@ -95,6 +95,7 @@ config SPECIFIC_DRIVERS
 source "drivers/crypto/Kconfig"
 source "drivers/loop/Kconfig"
 source "drivers/can/Kconfig"
+source "drivers/clk/Kconfig"
 source "drivers/i2c/Kconfig"
 source "drivers/spi/Kconfig"
 source "drivers/i2s/Kconfig"

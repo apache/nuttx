@@ -128,7 +128,6 @@
 #define MII_KSZ8061_OP_MODE            0x16   /* Operation Mode */
 #define MII_KSZ8061_OP_MODE_STRAP_STAT 0x17   /* Operation Mode Strap Status */
 #define MII_KSZ8061_EXP_CTRL           0x18   /* Expanded Control */
-//#define MII_KSZ8061_RESERVED         0x19   /* - 1Ah Reserved */
 #define MII_KSZ8061_INTR_CTRL_STAT     0x1B   /* Interrupt Control/Status */
 #define MII_KSZ8061_FUNC_CTRL          0x1C   /* Function Control */
 #define MII_KSZ8061_LINKMD_CTRL_STAT   0x1D   /* LinkMD® Control/Status */

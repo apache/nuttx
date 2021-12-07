@@ -36,6 +36,8 @@ SECTIONS
     *(.iram1)
     *(.iram1.*)
 
+    *libsched.a:irq_dispatch.*(.text .text.* .literal .literal.*)
+
     *(.wifi0iram .wifi0iram.*)
     *(.wifirxiram .wifirxiram.*)
     *(.wifislpiram .wifislpiram.*)

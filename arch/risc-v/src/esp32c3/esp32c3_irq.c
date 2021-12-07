@@ -38,6 +38,7 @@
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_interrupt.h"
+#include "rom/esp32c3_spiflash.h"
 
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
@@ -376,7 +377,24 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
 {
   int irq;
 
-  DEBUGASSERT(g_current_regs == NULL);
+  if (((MCAUSE_INTERRUPT & mcause) == 0) &&
+      (mcause != MCAUSE_ECALL_M))
+    {
+#ifdef CONFIG_ESP32C3_EXCEPTION_ENABLE_CACHE
+      if (!spi_flash_cache_enabled())
+        {
+          spi_flash_enable_cache(0);
+          _err("ERROR: Cache was disabled and re-enabled\n");
+        }
+#endif
+    }
+  else
+    {
+      /* Check "g_current_regs" only in interrupt or ecall */
+
+      DEBUGASSERT(g_current_regs == NULL);
+    }
+
   g_current_regs = regs;
 
   irqinfo("INFO: mcause=%08" PRIX32 "\n", mcause);
@@ -404,7 +422,7 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
 
       /* Toggle the bit back to zero. */
 
-      resetbits(1 << cpuint, INTERRUPT_CPU_INT_CLEAR_REG);
+      putreg32(0, INTERRUPT_CPU_INT_CLEAR_REG);
     }
   else
     {

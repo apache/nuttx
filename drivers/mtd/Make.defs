@@ -64,6 +64,10 @@ ifeq ($(CONFIG_FILEMTD),y)
 CSRCS += filemtd.c
 endif
 
+ifeq ($(CONFIG_NULLMTD),y)
+CSRCS += nullmtd.c
+endif
+
 ifeq ($(CONFIG_MTD_AT24XX),y)
 CSRCS += at24xx.c
 endif
