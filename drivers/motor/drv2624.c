@@ -259,8 +259,12 @@ static int drv2624_set_go_bit(FAR struct drv2624_dev_s *priv, uint8_t val);
 static int drv2624_reg_dump(FAR struct drv2624_dev_s *priv,
                             uint8_t start_addr, uint8_t end_addr);
 static int drv2624_start_auto_calibrate(FAR struct drv2624_dev_s *priv);
-static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv);
-static int drv2624_calibration(FAR struct drv2624_dev_s *priv);
+static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv,
+                                          unsigned long arg);
+static int drv2624_calibration(FAR struct drv2624_dev_s *priv,
+                               unsigned long arg);
+static int drv2624_set_calib_param(FAR struct drv2624_dev_s *priv,
+                                   unsigned long arg);
 static int drv2624_start_auto_diagnose(FAR struct drv2624_dev_s *priv);
 static int drv2624_get_diag_result(FAR struct drv2624_dev_s *priv);
 static int drv2624_ram_init(FAR struct drv2624_dev_s *priv);
@@ -702,10 +706,14 @@ static int drv2624_start_auto_calibrate(FAR struct drv2624_dev_s *priv)
  *
  ****************************************************************************/
 
-static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv)
+static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv,
+                                          unsigned long arg)
 {
   int ret;
   uint8_t val;
+  FAR char *calibdata = (FAR char *)arg;
+
+  DEBUGASSERT(priv != NULL && calibdata != NULL);
 
   ret = drv2624_i2c_readreg(priv, DRV2624_R0X01_STATUS, &val);
   if (ret < 0)
@@ -713,7 +721,7 @@ static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv)
       return ret;
     }
 
-  if (val & DRV2624_R0X01_STATUS_PROCESS_DONE_MSK == 0)
+  if ((val & DRV2624_R0X01_STATUS_PROCESS_DONE_MSK) == 0)
     {
       mtrerr("calibration fail, process not finish,need wait more time\n");
       return -EAGAIN;
@@ -765,14 +773,21 @@ static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv)
           100000000 / ((priv->data.calidata.lra_msb << 8 |
                         priv->data.calidata.lra_lsb) * 2439);
 
-      mtrinfo("drv2624 cali data 0x21 = 0x%x, 0x22 = 0x%x, 0x23 = 0x%x, "
+      mtrinfo("reg 0x21 = 0x%x, 0x22 = 0x%x, 0x23 = 0x%x, "
               "calibrated f0 = %d\n",
-                priv->data.calidata.calcomp,
-                priv->data.calidata.calbemf,
-                priv->data.calidata.calgain,
-                priv->data.calidata.calibrated_f0);
+              priv->data.calidata.calcomp,
+              priv->data.calidata.calbemf,
+              priv->data.calidata.calgain,
+              priv->data.calidata.calibrated_f0);
 
       priv->data.calidata.finished = 1;
+
+      sprintf(calibdata, "%03d,%03d,%03d,%03d\n",
+              priv->data.calidata.finished,
+              priv->data.calidata.calcomp,
+              priv->data.calidata.calbemf,
+              priv->data.calidata.calgain);
+
       return ret;
     }
 }
@@ -785,7 +800,8 @@ static int drv2624_get_calibration_result(FAR struct drv2624_dev_s *priv)
  *
  ****************************************************************************/
 
-static int drv2624_calibration(FAR struct drv2624_dev_s *priv)
+static int drv2624_calibration(FAR struct drv2624_dev_s *priv,
+                               unsigned long arg)
 {
   int ret;
 
@@ -798,13 +814,47 @@ static int drv2624_calibration(FAR struct drv2624_dev_s *priv)
 
   usleep(DRV2624_CALIB_PROCESS_WAITTIME);
 
-  ret = drv2624_get_calibration_result(priv);
+  ret = drv2624_get_calibration_result(priv, arg);
   if (ret < 0)
     {
       mtrerr("get calibration result err ret=%d\n", ret);
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: drv2624_set_calib_param
+ *
+ * Description:
+ *   rewrite calibration data into reg if calibration succeed
+ *
+ ****************************************************************************/
+
+static int drv2624_set_calib_param(FAR struct drv2624_dev_s *priv,
+                                   unsigned long arg)
+{
+  FAR char *calibdata = (FAR char *)arg;
+  struct drv2624_calib_s pdata;
+
+  DEBUGASSERT(priv != NULL && calibdata != NULL);
+
+  pdata.finished = atoi(&calibdata[0]);
+  pdata.calcomp = atoi(&calibdata[4]);
+  pdata.calbemf = atoi(&calibdata[8]) ;
+  pdata.calgain = atoi(&calibdata[12]);
+
+  mtrinfo("finish = %d, reg 0x21 = 0x%x, 0x22 = 0x%x, 0x23 = 0x%x\n",
+          pdata.finished, pdata.calcomp, pdata.calbemf, pdata.calgain);
+
+  if (pdata.finished == 1)
+    {
+      drv2624_i2c_writereg(priv, DRV2624_R0X21_CAL_COMP, pdata.calcomp);
+      drv2624_i2c_writereg(priv, DRV2624_R0X22_CAL_BEMF, pdata.calbemf);
+      drv2624_i2c_writereg(priv, DRV2624_R0X23_CAL_GAIN, pdata.calgain);
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1259,9 +1309,15 @@ static int drv2624_ioctl(FAR struct motor_lowerhalf_s *dev, int cmd,
           break;
         }
 
+      case MTRIOC_SET_CALIBDATA:
+        {
+          ret = drv2624_set_calib_param(priv, arg);
+          break;
+        }
+
       case MTRIOC_CALIBRATE:
         {
-          ret = drv2624_calibration(priv);
+          ret = drv2624_calibration(priv, arg);
           break;
         }
 
