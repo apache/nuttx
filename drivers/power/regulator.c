@@ -39,18 +39,18 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int _regulator_is_enabled(struct regulator_dev *rdev);
-static int _regulator_do_enable(struct regulator_dev *rdev);
-static int _regulator_do_disable(struct regulator_dev *rdev);
-static int regulator_check_consumers(struct regulator_dev *rdev,
-                                     int *min_uv, int *max_uv);
-static struct regulator_dev *regulator_dev_lookup(const char *supply);
-static int regulator_map_voltage_iterate(struct regulator_dev *rdev,
+static int _regulator_is_enabled(FAR struct regulator_dev_s *rdev);
+static int _regulator_do_enable(FAR struct regulator_dev_s *rdev);
+static int _regulator_do_disable(FAR struct regulator_dev_s *rdev);
+static int regulator_check_consumers(FAR struct regulator_dev_s *rdev,
+                                     FAR int *min_uv, FAR int *max_uv);
+static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply);
+static int regulator_map_voltage_iterate(FAR struct regulator_dev_s *rdev,
                                          int min_uv, int max_uv);
-static int _regulator_get_voltage(struct regulator_dev *rdev);
-static int _regulator_do_set_voltage(struct regulator_dev *rdev,
+static int _regulator_get_voltage(FAR struct regulator_dev_s *rdev);
+static int _regulator_do_set_voltage(FAR struct regulator_dev_s *rdev,
                                      int min_uv, int max_uv);
-static int _regulator_set_voltage_unlocked(struct regulator *regulator,
+static int _regulator_set_voltage_unlocked(FAR struct regulator_s *regulator,
                                            int min_uv, int max_uv);
 
 /****************************************************************************
@@ -64,7 +64,7 @@ static sem_t g_reg_sem             = SEM_INITIALIZER(1);
  * Private Functions
  ****************************************************************************/
 
-static int _regulator_is_enabled(struct regulator_dev *rdev)
+static int _regulator_is_enabled(FAR struct regulator_dev_s *rdev)
 {
   if (!rdev->ops->is_enabled)
     {
@@ -74,7 +74,7 @@ static int _regulator_is_enabled(struct regulator_dev *rdev)
   return rdev->ops->is_enabled(rdev);
 }
 
-static int _regulator_do_enable(struct regulator_dev *rdev)
+static int _regulator_do_enable(FAR struct regulator_dev_s *rdev)
 {
   int ret = 0;
 
@@ -96,7 +96,7 @@ static int _regulator_do_enable(struct regulator_dev *rdev)
   return ret;
 }
 
-static int _regulator_do_disable(struct regulator_dev *rdev)
+static int _regulator_do_disable(FAR struct regulator_dev_s *rdev)
 {
   int ret = 0;
 
@@ -112,13 +112,13 @@ static int _regulator_do_disable(struct regulator_dev *rdev)
   return ret;
 }
 
-static int regulator_check_consumers(struct regulator_dev *rdev,
-                                     int *min_uv, int *max_uv)
+static int regulator_check_consumers(FAR struct regulator_dev_s *rdev,
+                                     FAR int *min_uv, FAR int *max_uv)
 {
-  struct regulator *regulator;
+  FAR struct regulator_s *regulator;
 
   list_for_every_entry(&rdev->consumer_list, regulator,
-                       struct regulator, list)
+                       struct regulator_s, list)
     {
       if (!regulator->min_uv && !regulator->max_uv)
         {
@@ -145,13 +145,13 @@ static int regulator_check_consumers(struct regulator_dev *rdev,
   return 0;
 }
 
-static struct regulator_dev *regulator_dev_lookup(const char *supply)
+static FAR struct regulator_dev_s *regulator_dev_lookup(const char *supply)
 {
-  struct regulator_dev *rdev;
-  struct regulator_dev *rdev_found = NULL;
+  FAR struct regulator_dev_s *rdev;
+  FAR struct regulator_dev_s *rdev_found = NULL;
 
   nxsem_wait_uninterruptible(&g_reg_sem);
-  list_for_every_entry(&g_reg_list, rdev, struct regulator_dev, list)
+  list_for_every_entry(&g_reg_list, rdev, struct regulator_dev_s, list)
     {
       if (rdev->desc->name && strcmp(rdev->desc->name, supply) == 0)
         {
@@ -172,7 +172,7 @@ static struct regulator_dev *regulator_dev_lookup(const char *supply)
   return rdev_found;
 }
 
-static int regulator_map_voltage_iterate(struct regulator_dev *rdev,
+static int regulator_map_voltage_iterate(FAR struct regulator_dev_s *rdev,
                                          int min_uv, int max_uv)
 {
   int best_val = INT_MAX;
@@ -205,7 +205,7 @@ static int regulator_map_voltage_iterate(struct regulator_dev *rdev,
     }
 }
 
-static int _regulator_get_voltage(struct regulator_dev *rdev)
+static int _regulator_get_voltage(FAR struct regulator_dev_s *rdev)
 {
   int sel;
   int ret;
@@ -236,10 +236,10 @@ static int _regulator_get_voltage(struct regulator_dev *rdev)
   return ret;
 }
 
-static int _regulator_do_set_voltage(struct regulator_dev *rdev,
+static int _regulator_do_set_voltage(FAR struct regulator_dev_s *rdev,
                                      int min_uv, int max_uv)
 {
-  const struct regulator_ops *ops = rdev->ops;
+  FAR const struct regulator_ops_s *ops = rdev->ops;
   unsigned int selector;
   int new_uv = 0;
   int old_uv = _regulator_get_voltage(rdev);
@@ -299,11 +299,11 @@ static int _regulator_do_set_voltage(struct regulator_dev *rdev,
   return ret;
 }
 
-static int _regulator_set_voltage_unlocked(struct regulator *regulator,
+static int _regulator_set_voltage_unlocked(FAR struct regulator_s *regulator,
                                            int min_uv, int max_uv)
 {
-  struct regulator_dev *rdev = regulator->rdev;
-  const struct regulator_ops *ops = rdev->ops;
+  FAR struct regulator_dev_s *rdev = regulator->rdev;
+  FAR const struct regulator_ops_s *ops = rdev->ops;
   int old_min_uv;
   int old_max_uv;
   int ret = 0;
@@ -384,14 +384,14 @@ out2:
  *   id - Supply name or the regulator ID.
  *
  * Returned value:
- *    A struct regulator pointer on success or NULL on failure
+ *    A struct regulator_s pointer on success or NULL on failure
  *
  ****************************************************************************/
 
-struct regulator *regulator_get(const char *id)
+FAR struct regulator_s *regulator_get(FAR const char *id)
 {
-  struct regulator_dev *rdev;
-  struct regulator *regulator = NULL;
+  FAR struct regulator_dev_s *rdev;
+  FAR struct regulator_s *regulator = NULL;
 
   if (id == NULL)
     {
@@ -406,7 +406,7 @@ struct regulator *regulator_get(const char *id)
       return NULL;
     }
 
-  regulator = kmm_zalloc(sizeof(struct regulator));
+  regulator = kmm_zalloc(sizeof(struct regulator_s));
   if (regulator == NULL)
     {
       pwrerr("failed to get memory\n");
@@ -437,9 +437,9 @@ struct regulator *regulator_get(const char *id)
  *
  ****************************************************************************/
 
-void regulator_put(struct regulator *regulator)
+void regulator_put(FAR struct regulator_s *regulator)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
 
   if (regulator == NULL)
     {
@@ -474,9 +474,9 @@ void regulator_put(struct regulator *regulator)
  *
  ****************************************************************************/
 
-int regulator_is_enabled(struct regulator *regulator)
+int regulator_is_enabled(FAR struct regulator_s *regulator)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
   int ret = 0;
 
   if (regulator == NULL)
@@ -508,9 +508,9 @@ int regulator_is_enabled(struct regulator *regulator)
  *
  ****************************************************************************/
 
-int regulator_enable(struct regulator *regulator)
+int regulator_enable(FAR struct regulator_s *regulator)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
   int ret = 0;
 
   if (regulator == NULL)
@@ -554,7 +554,7 @@ err:
  *
  ****************************************************************************/
 
-int regulator_enable_delay(struct regulator *regulator, int ms)
+int regulator_enable_delay(FAR struct regulator_s *regulator, int ms)
 {
   int ret;
 
@@ -581,9 +581,9 @@ int regulator_enable_delay(struct regulator *regulator, int ms)
  *
  ****************************************************************************/
 
-int regulator_disable(struct regulator *regulator)
+int regulator_disable(FAR struct regulator_s *regulator)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
   int ret = 0;
 
   if (regulator == NULL)
@@ -632,7 +632,7 @@ err:
  *
  ****************************************************************************/
 
-int regulator_disable_deferred(struct regulator *regulator, int ms)
+int regulator_disable_deferred(FAR struct regulator_s *regulator, int ms)
 {
   if (!regulator)
     {
@@ -659,10 +659,10 @@ int regulator_disable_deferred(struct regulator *regulator, int ms)
  *
  ****************************************************************************/
 
-int regulator_set_voltage(struct regulator *regulator,
+int regulator_set_voltage(FAR struct regulator_s *regulator,
                           int min_uv, int max_uv)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
   int ret = 0;
 
   if (regulator == NULL)
@@ -694,9 +694,9 @@ int regulator_set_voltage(struct regulator *regulator,
  *
  ****************************************************************************/
 
-int regulator_get_voltage(struct regulator *regulator)
+int regulator_get_voltage(FAR struct regulator_s *regulator)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
   int ret = 0;
 
   if (regulator == NULL)
@@ -723,12 +723,12 @@ int regulator_get_voltage(struct regulator *regulator)
  *
  ****************************************************************************/
 
-struct regulator_dev*
-regulator_register(const struct regulator_desc *regulator_desc,
-                   const struct regulator_ops *regulator_ops,
+FAR struct regulator_dev_s *
+regulator_register(const FAR struct regulator_desc_s *regulator_desc,
+                   const struct regulator_ops_s *regulator_ops,
                    void *priv)
 {
-  struct regulator_dev *rdev;
+  FAR struct regulator_dev_s *rdev;
 
   if (regulator_desc == NULL)
     {
@@ -766,7 +766,7 @@ regulator_register(const struct regulator_desc *regulator_desc,
       return NULL;
     }
 
-  rdev = kmm_zalloc(sizeof(struct regulator_dev));
+  rdev = kmm_zalloc(sizeof(struct regulator_dev_s));
   if (rdev == NULL)
     {
       pwrerr("failed to get memory\n");
@@ -811,7 +811,7 @@ regulator_register(const struct regulator_desc *regulator_desc,
  *
  ****************************************************************************/
 
-void regulator_unregister(struct regulator_dev *rdev)
+void regulator_unregister(FAR struct regulator_dev_s *rdev)
 {
   if (rdev == NULL)
     {

@@ -41,37 +41,35 @@
  * Public Types
  ****************************************************************************/
 
-struct regulator_dev;
+struct regulator_dev_s;
 
-struct regulator
+struct regulator_s
 {
   struct work_s disable_work;
   int min_uv;
   int max_uv;
   struct list_node list;
-  struct regulator_dev *rdev;
-  uint64_t id;
+  struct regulator_dev_s *rdev;
 };
 
-struct regulator_ops
+struct regulator_ops_s
 {
-  int (*list_voltage)(struct regulator_dev *rdev, unsigned selector);
-  int (*set_voltage)(struct regulator_dev *rdev, int min_uv,
-                     int max_uv, unsigned *selector);
-  int (*set_voltage_sel)(struct regulator_dev *rdev, unsigned selector);
-  int (*get_voltage)(struct regulator_dev *rdev);
-  int (*get_voltage_sel)(struct regulator_dev *rdev);
-  int (*enable)(struct regulator_dev *rdev);
-  int (*is_enabled)(struct regulator_dev *rdev);
-  int (*disable)(struct regulator_dev *rdev);
+  CODE int (*list_voltage)(FAR struct regulator_dev_s *rdev, unsigned selector);
+  CODE int (*set_voltage)(FAR struct regulator_dev_s *rdev, int min_uv,
+                          int max_uv, FAR unsigned *selector);
+  CODE int (*set_voltage_sel)(FAR struct regulator_dev_s *rdev, unsigned selector);
+  CODE int (*get_voltage)(FAR struct regulator_dev_s *rdev);
+  CODE int (*get_voltage_sel)(FAR struct regulator_dev_s *rdev);
+  CODE int (*enable)(FAR struct regulator_dev_s *rdev);
+  CODE int (*is_enabled)(FAR struct regulator_dev_s *rdev);
+  CODE int (*disable)(FAR struct regulator_dev_s *rdev);
 };
 
 /* This structure defines the regulator state structure */
 
-struct regulator_desc
+struct regulator_desc_s
 {
   const char *name;
-  int id;
   unsigned int n_voltages;
   unsigned int vsel_reg;
   unsigned int vsel_mask;
@@ -86,17 +84,17 @@ struct regulator_desc
   bool boot_on;
 };
 
-struct regulator_dev
+struct regulator_dev_s
 {
-  const struct regulator_desc *desc;
-  const struct regulator_ops *ops;
+  FAR const struct regulator_desc_s *desc;
+  FAR const struct regulator_ops_s *ops;
   uint32_t use_count;
   uint32_t open_count;
   sem_t regulator_sem;
   struct list_node list;
   struct list_node consumer_list;
 
-  void *priv;
+  FAR void *priv;
 };
 
 /****************************************************************************
@@ -129,13 +127,13 @@ extern "C"
  *   ops  - The regulator operations pointer
  *
  * Returned value:
- *    The pointer to struct regulator_dev on success or NULL on failure.
+ *    The pointer to struct regulator_dev_s on success or NULL on failure.
  *
  ****************************************************************************/
 
-struct regulator_dev *regulator_register(const struct regulator_desc *desc,
-                                         const struct regulator_ops *ops,
-                                         void *priv);
+struct regulator_dev_s *regulator_register(FAR const struct regulator_desc_s *desc,
+                                           FAR const struct regulator_ops_s *ops,
+                                           FAR void *priv);
 
 /****************************************************************************
  * Name: regulator_unregister
@@ -152,8 +150,7 @@ struct regulator_dev *regulator_register(const struct regulator_desc *desc,
  *
  ****************************************************************************/
 
-void regulator_unregister(struct regulator_dev *rdev);
-
+void regulator_unregister(FAR struct regulator_dev_s *rdev);
 
 /****************************************************************************
  * Name: regulator_gpio_init
@@ -174,8 +171,8 @@ void regulator_unregister(struct regulator_dev *rdev);
  *
  ****************************************************************************/
 
-int regulator_gpio_init(struct ioexpander_dev_s *iodev,
-                        const struct regulator_desc *desc);
+int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
+                        FAR const struct regulator_desc_s *desc);
 
 #if defined(CONFIG_REGULATOR_RPMSG)
 
@@ -194,7 +191,7 @@ int regulator_gpio_init(struct ioexpander_dev_s *iodev,
  *
  ****************************************************************************/
 
-struct regulator_dev *regulator_rpmsg_get(const char *name);
+FAR struct regulator_dev_s *regulator_rpmsg_get(FAR const char *name);
 
 /****************************************************************************
  * Name: regulator_rpmsg_init

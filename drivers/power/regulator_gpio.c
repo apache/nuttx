@@ -40,23 +40,23 @@
 
 struct regulator_gpio_priv
 {
-  struct ioexpander_dev_s *iodev;
-  struct regulator_dev    *rdev;
+  FAR struct ioexpander_dev_s *iodev;
+  FAR struct regulator_dev_s  *rdev;
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static int regulator_gpio_enable(struct regulator_dev *rdev);
-static int regulator_gpio_disable(struct regulator_dev *rdev);
-static int regulator_gpio_is_enabled(struct regulator_dev *rdev);
+static int regulator_gpio_enable(FAR struct regulator_dev_s *rdev);
+static int regulator_gpio_disable(FAR struct regulator_dev_s *rdev);
+static int regulator_gpio_is_enabled(FAR struct regulator_dev_s *rdev);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct regulator_ops g_regulator_gpio_ops =
+static const struct regulator_ops_s g_regulator_gpio_ops =
 {
   .enable      = regulator_gpio_enable,
   .disable     = regulator_gpio_disable,
@@ -67,25 +67,25 @@ static const struct regulator_ops g_regulator_gpio_ops =
  * Private Functions
  ****************************************************************************/
 
-static int regulator_gpio_enable(struct regulator_dev *rdev)
+static int regulator_gpio_enable(FAR struct regulator_dev_s *rdev)
 {
-  struct regulator_gpio_priv *priv = rdev->priv;
+  FAR struct regulator_gpio_priv *priv = rdev->priv;
 
   return IOEXP_WRITEPIN(priv->iodev, rdev->desc->enable_reg,
                         !!rdev->desc->enable_mask);
 }
 
-static int regulator_gpio_disable(struct regulator_dev *rdev)
+static int regulator_gpio_disable(FAR struct regulator_dev_s *rdev)
 {
-  struct regulator_gpio_priv *priv = rdev->priv;
+  FAR struct regulator_gpio_priv *priv = rdev->priv;
 
   return IOEXP_WRITEPIN(priv->iodev, rdev->desc->enable_reg,
                         !rdev->desc->enable_mask);
 }
 
-static int regulator_gpio_is_enabled(struct regulator_dev *rdev)
+static int regulator_gpio_is_enabled(FAR struct regulator_dev_s *rdev)
 {
-  struct regulator_gpio_priv *priv = rdev->priv;
+  FAR struct regulator_gpio_priv *priv = rdev->priv;
   bool val;
 
   if (!IOEXP_READPIN(priv->iodev, rdev->desc->enable_reg, &val))
@@ -121,11 +121,10 @@ static int regulator_gpio_is_enabled(struct regulator_dev *rdev)
  *
  ****************************************************************************/
 
-int regulator_gpio_init(struct ioexpander_dev_s *iodev,
-                        const struct regulator_desc *desc)
+int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
+                        FAR const struct regulator_desc_s *desc)
 {
-  struct regulator_gpio_priv *priv;
-  int i;
+  FAR struct regulator_gpio_priv *priv;
 
   if (!iodev || !desc)
     {
