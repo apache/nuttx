@@ -250,6 +250,14 @@ config SYSLOG_RPMSG_WORK_DELAY
 	default 100
 	depends on SYSLOG_RPMSG
 
+config SYSLOG_RPMSG_OVERWRITE
+	bool "SYSLOG RPMSG overwrite"
+	default n
+	depends on SYSLOG_RPMSG
+	---help---
+		Allow syslog rpmsg overwrite, maybe caused syslog lost.
+		Set 'n' if you don't want lost logs, but may harmful to preformance.
+
 config SYSLOG_RPMSG_SERVER
 	bool "Enable RPMSG server for SYSLOG"
 	default n
