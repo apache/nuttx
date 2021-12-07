@@ -41,6 +41,7 @@
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
+#include <nuttx/wqueue.h>
 #include "da9168.h"
 
 /****************************************************************************
@@ -95,6 +96,7 @@ struct da9168_dev_s
   uint8_t addr;                      /* I2C address */
   uint32_t frequency;                /* I2C frequency */
   int pin;                           /* Interrupt pin */
+  struct work_s work;                /* Work queue for reading data. */
 };
 
 /****************************************************************************
@@ -1650,6 +1652,45 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 }
 
 /****************************************************************************
+* Name: da9168_worker
+*
+* Description:
+*   Polling the battery charge data, according to 2s Frequency
+*
+* Input Parameters
+*   priv    - Device struct
+*
+* Returned Value
+*   Return 0 if the driver was success; A negated errno
+*   value is returned on any failure;
+*
+* Assumptions/Limitations:
+*   None.
+*
+****************************************************************************/
+
+static void da9168_worker(FAR void *arg)
+{
+  FAR struct da9168_dev_s *priv = arg;
+  static uint8_t last_state = DA9168_CHG_PHASE_MAX;
+  uint8_t state;
+
+  state = da9168_chg_get_phase(priv);
+  if (state != DA9168_CHG_PHASE_UNKNOWN)
+    {
+      if (state != last_state)
+        {
+          last_state = state;
+          battery_charger_changed((FAR struct battery_charger_dev_s *)priv,
+                                   BATTERY_STATE_CHANGED);
+        }
+    }
+
+  work_queue(HPWORK, &priv->work, da9168_worker, priv,
+             DA9168_WORK_POLL_TIME);
+}
+
+/****************************************************************************
  * Name: da9168_init
  *
  * Description:
@@ -1752,6 +1793,10 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
 
   da9168_config_shipmode(priv, DA9168_SHIP_MODE_ENTRY_DELAY_2S,
                          DA9168_SHIP_MODE_EXIT_DEB_2S);
+
+  work_queue(HPWORK, &priv->work, da9168_worker, priv,
+             DA9168_WORK_POLL_TIME);
+
   return ret;
 }
 

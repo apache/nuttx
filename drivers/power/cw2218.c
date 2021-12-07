@@ -35,8 +35,10 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/power/battery_gauge.h>
+#include <nuttx/power/battery_ioctl.h>
 #include <nuttx/signal.h>
 #include "cw2218.h"
+#include <nuttx/wqueue.h>
 
 /* This driver requires:
  *
@@ -67,6 +69,7 @@ struct cw2218_dev_s
   FAR struct i2c_master_s *i2c;                      /* I2C interface */
   uint8_t addr;                                      /* I2C address */
   uint32_t frequency;                                /* I2C frequency */
+  struct work_s work;                                /* Work queue for reading data. */
 };
 
 /****************************************************************************
@@ -799,6 +802,50 @@ static int cw2218_config_start_ic(FAR struct cw2218_dev_s *priv)
 }
 
 /****************************************************************************
+* Name: cw2218_worker
+*
+* Description:
+*   Polling the battery gauge data, according to 5s Frequency
+*
+* Input Parameters
+*   priv    - Device struct
+*
+* Returned Value
+*   Return 0 if the driver was success; A negated errno
+*   value is returned on any failure;
+*
+* Assumptions/Limitations:
+*   None.
+*
+****************************************************************************/
+
+static void cw2218_worker(FAR void *arg)
+{
+  FAR struct cw2218_dev_s *priv = arg;
+  static int last_cap = 0;
+  int ret;
+  int capacity;
+  b16_t cap;
+
+  ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 work get capaity failed, Error = %d\n", ret);
+    }
+
+  capacity = cap;
+  if (capacity != last_cap)
+    {
+      last_cap = capacity;
+      battery_gauge_changed((FAR struct battery_gauge_dev_s *)priv,
+                             BATTERY_CAPACITY_CHANGED);
+    }
+
+  work_queue(HPWORK, &priv->work, cw2218_worker, priv,
+             CW2218_WORK_POLL_TIME);
+}
+
+/****************************************************************************
  * Name: cw2218_init
  *
  * Description:
@@ -851,6 +898,9 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
           return ret;
         }
     }
+
+  work_queue(HPWORK, &priv->work, cw2218_worker, priv,
+             CW2218_WORK_POLL_TIME);
 
   return OK;
 }
