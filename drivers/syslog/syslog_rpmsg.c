@@ -63,6 +63,8 @@ struct syslog_rpmsg_s
   bool                  suspend;
   bool                  transfer;     /* The transfer flag */
   ssize_t               trans_len;    /* The data length when transfer */
+
+  sem_t                 sem;
 };
 
 /****************************************************************************
@@ -147,31 +149,52 @@ static void syslog_rpmsg_work(FAR void *priv_)
 static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
                                  bool last)
 {
+  size_t next;
+
+  while (1)
+    {
+      next = priv->head + 1;
+      if (next >= priv->size)
+        {
+          next = 0;
+        }
+
+      if (next == priv->tail)
+        {
+#ifndef SYSLOG_RPMSG_OVERWRITE
+          if (!up_interrupt_context() && !sched_idletask())
+            {
+              nxsem_wait(&priv->sem);
+            }
+          else
+#endif
+            {
+              /* Overwrite */
+
+              priv->buffer[priv->tail] = 0;
+              priv->tail += 1;
+
+              if (priv->tail >= priv->size)
+                {
+                  priv->tail = 0;
+                }
+
+              if (priv->transfer)
+                {
+                  priv->trans_len--;
+                }
+
+              break;
+            }
+        }
+      else
+        {
+          break;
+        }
+    }
+
   priv->buffer[priv->head] = ch & 0xff;
-
-  priv->head += 1;
-  if (priv->head >= (priv->size))
-    {
-      priv->head = 0;
-    }
-
-  /* Allow overwrite */
-
-  if (priv->head == (priv->tail))
-    {
-      priv->buffer[priv->tail] = 0;
-
-      priv->tail += 1;
-      if (priv->tail >= priv->size)
-        {
-          priv->tail = 0;
-        }
-
-      if (priv->transfer)
-        {
-          priv->trans_len--;
-        }
-    }
+  priv->head = next;
 
   if (last && !priv->suspend && !priv->transfer &&
           is_rpmsg_ept_ready(&priv->ept))
@@ -246,6 +269,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       irqstate_t flags;
       ssize_t len_end;
+      int sval;
 
       flags = enter_critical_section();
 
@@ -267,6 +291,12 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
           if (priv->tail >= priv->size)
             {
               priv->tail -= priv->size;
+            }
+
+          nxsem_get_value(&priv->sem, &sval);
+          while (sval++ < 0)
+            {
+              nxsem_post(&priv->sem);
             }
         }
 
@@ -337,6 +367,9 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   char prev;
   char cur;
   size_t i;
+
+  nxsem_init(&priv->sem, 0, 0);
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   priv->buffer  = buffer;
   priv->size    = size;
