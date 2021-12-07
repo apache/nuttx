@@ -47,6 +47,7 @@
 
 #include <nuttx/config.h>
 
+#include <debug.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
