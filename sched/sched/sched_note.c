@@ -864,7 +864,10 @@ void sched_note_dump(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  note->nbi_module = module;
+  note->nbi_module[0] = (uint8_t)(module         & 0xff);
+  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
+  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
+  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
   note->nbi_event = event;
   memcpy(note->nbi_data, buf, length - sizeof(struct note_binary_s) + 1);
 
@@ -1100,7 +1103,10 @@ void sched_note_vbprintf(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  note->nbi_module = module;
+  note->nbi_module[0] = (uint8_t)(module         & 0xff);
+  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
+  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
+  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
   note->nbi_event = event;
 
   /* Add the note to circular buffer */
