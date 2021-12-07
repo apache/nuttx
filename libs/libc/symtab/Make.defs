@@ -22,6 +22,12 @@
 
 CSRCS += symtab_findbyname.c symtab_findbyvalue.c symtab_sortbyname.c
 
+# Symbolic information support
+
+ifeq ($(CONFIG_ALLSYMS),y)
+CSRCS += symtab_allsyms.c
+endif
+
 # Add the symtab directory to the build
 
 DEPPATH += --dep-path symtab
