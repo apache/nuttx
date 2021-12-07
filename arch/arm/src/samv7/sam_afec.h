@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/samd2l2/sam_adc.h
+ * arch/arm/src/samv7/sam_afec.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
-#define __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H
 
 /****************************************************************************
  * Included Files
@@ -27,14 +27,26 @@
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-#include <stdbool.h>
-
-#include "sam_config.h"
-
-
+#include "chip.h"
 #include "hardware/sam_afec.h"
 
+#if defined(CONFIG_ADC) && (defined(CONFIG_SAMV7_AFEC0) || \
+    defined(CONFIG_SAMV7_AFEC1))
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Port numbers for use with sam_mcan_initialize() */
+
+#define AFEC0 0
+#define AFEC1 1
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Function Prototypes
@@ -50,24 +62,30 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Name: sam_adcinitialize
+ * Name: sam_afec_initialize
  *
  * Description:
- *   Initialize the ADC. See sam_adc.c for more details.
+ *   Initialize the adc
  *
  * Input Parameters:
- *   genclk      - Number of the Clock Generator to use.
+ *   intf      - ADC number (1 or 2)
+ *   chanlist  - The list of channels
+ *   nchannels - Number of channels
  *
  * Returned Value:
- *   Valid ADC device structure reference on success; a NULL on failure
+ *   Valid can device structure reference on success; a NULL on failure
  *
  ****************************************************************************/
 
-struct adc_dev_s;
-struct adc_dev_s *sam_adcinitialize(int genclk);
+FAR struct adc_dev_s *sam_afec_initialize(int intf,
+                                          FAR const uint8_t *chanlist,
+                                          int nchannels);
 
 #undef EXTERN
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __ARCH_ARM_SRC_SAMD2L2_SAM_ADC_H */
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_ADC && (CONFIG_SAMV7_AFEC0 || CONFIG_SAMV7_AFEC1) */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_AFEC_H */
