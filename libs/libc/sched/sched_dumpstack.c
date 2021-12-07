@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/allsyms.h>
 
 #include <sys/types.h>
 
@@ -52,8 +53,10 @@
 void sched_dumpstack(pid_t tid)
 {
   FAR void *address[DUMP_DEPTH];
+#ifndef CONFIG_ALLSYMS
   char line[DUMP_LINESIZE + 1];
   int ret = 0;
+#endif
   int size;
   int i;
 
@@ -63,6 +66,7 @@ void sched_dumpstack(pid_t tid)
       return;
     }
 
+#ifndef CONFIG_ALLSYMS
   for (i = 0; i < size; i++)
     {
       ret += snprintf(line + ret, sizeof(line) - ret,
@@ -73,4 +77,12 @@ void sched_dumpstack(pid_t tid)
           ret = 0;
         }
     }
+#else
+  syslog(LOG_EMERG, "backtrace:\n");
+  for (i = 0; i < size; i++)
+    {
+      syslog(LOG_EMERG, "[%2d] [<%p>] %pS\n",
+                         tid, address[i], address[i]);
+    }
+#endif
 }
