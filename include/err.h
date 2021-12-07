@@ -29,19 +29,13 @@
 #include <nuttx/compiler.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Type Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef CONFIG_LIBC_ERR
+
 /* Print "pid: ", FORMAT, ": ", the standard error string for errno,
- *  and a newline, on stderr.
+ * and a newline, on stderr.
  */
 
 void warn(FAR const char *fmt, ...);
@@ -59,4 +53,5 @@ void verr(int status, FAR const char *fmt, va_list ap);
 void errx(int status, FAR const char *fmt, ...);
 void verrx(int status, FAR const char *, va_list ap);
 
+#endif /* CONFIG_LIBC_ERR */
 #endif /* __INCLUDE_ERR_H */

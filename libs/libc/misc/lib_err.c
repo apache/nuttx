@@ -31,13 +31,14 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define VA(call)         \
-{                        \
-  va_list ap;            \
-  va_start(ap, fmt);     \
-  call;                  \
-  va_end(ap);            \
-}
+#define VA(call)           \
+do                         \
+{                          \
+    va_list ap;            \
+    va_start(ap, fmt);     \
+    call;                  \
+    va_end(ap);            \
+} while(0)
 
 /****************************************************************************
  * Public Functions
@@ -51,10 +52,24 @@ void vwarn(FAR const char *fmt, va_list ap)
 {
   int error = errno;
   struct va_format vaf;
-  vaf.fmt = fmt;
-  vaf.va = &ap;
 
+#ifdef va_copy
+  va_list copy;
+
+  va_copy(copy, ap);
+
+  vaf.fmt = fmt;
+  vaf.va  = &copy;
+#else
+  vaf.fmt = fmt;
+  vaf.va  = &ap;
+#endif
+
+#ifdef CONFIG_FILE_STREAM
   fprintf(stderr, "%d: %pV: %s\n", getpid(), &vaf, strerror(error));
+#else
+  dprintf(STDERR_FILENO, "%d: %pV: %s\n", getpid(), &vaf, strerror(error));
+#endif
 }
 
 /****************************************************************************
@@ -64,10 +79,24 @@ void vwarn(FAR const char *fmt, va_list ap)
 void vwarnx(FAR const char *fmt, va_list ap)
 {
   struct va_format vaf;
-  vaf.fmt = fmt;
-  vaf.va = &ap;
 
+#ifdef va_copy
+  va_list copy;
+
+  va_copy(copy, ap);
+
+  vaf.fmt = fmt;
+  vaf.va  = &copy;
+#else
+  vaf.fmt = fmt;
+  vaf.va  = &ap;
+#endif
+
+#ifdef CONFIG_FILE_STREAM
   fprintf(stderr, "%d: %pV\n", getpid(), &vaf);
+#else
+  dprintf(STDERR_FILENO, "%d: %pV\n", getpid(), &vaf);
+#endif
 }
 
 /****************************************************************************
@@ -76,7 +105,7 @@ void vwarnx(FAR const char *fmt, va_list ap)
 
 void warn(FAR const char *fmt, ...)
 {
-  VA(vwarn(fmt, ap))
+  VA(vwarn(fmt, ap));
 }
 
 /****************************************************************************
@@ -85,7 +114,7 @@ void warn(FAR const char *fmt, ...)
 
 void warnx(FAR const char *fmt, ...)
 {
-  VA(vwarnx(fmt, ap))
+  VA(vwarnx(fmt, ap));
 }
 
 /****************************************************************************
@@ -114,7 +143,7 @@ void verrx(int status, FAR const char *fmt, va_list ap)
 
 void err(int status, FAR const char *fmt, ...)
 {
-  VA(verr(status, fmt, ap))
+  VA(verr(status, fmt, ap));
 }
 
 /****************************************************************************
@@ -123,5 +152,5 @@ void err(int status, FAR const char *fmt, ...)
 
 void errx(int status, FAR const char *fmt, ...)
 {
-  VA(verrx(status, fmt, ap))
+  VA(verrx(status, fmt, ap));
 }
