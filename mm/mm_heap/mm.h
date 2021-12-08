@@ -63,8 +63,8 @@
  * REVISIT: We could do better on machines with 16-bit addressing.
  */
 
-#  define MM_MIN_SHIFT   B2C_SHIFT( 4)  /* 16 bytes */
-#  define MM_MAX_SHIFT   B2C_SHIFT(15)  /* 32 Kb */
+#  define MM_MIN_SHIFT   ( 4)  /* 16 bytes */
+#  define MM_MAX_SHIFT   (15)  /* 32 Kb */
 
 #elif defined(CONFIG_HAVE_LONG_LONG)
 /* Four byte offsets; Pointers may be 4 or 8 bytes
@@ -72,19 +72,19 @@
  */
 
 #  if UINTPTR_MAX <= UINT32_MAX
-#    define MM_MIN_SHIFT B2C_SHIFT( 4)  /* 16 bytes */
+#    define MM_MIN_SHIFT ( 4)  /* 16 bytes */
 #  elif UINTPTR_MAX <= UINT64_MAX
-#    define MM_MIN_SHIFT B2C_SHIFT( 5)  /* 32 bytes */
+#    define MM_MIN_SHIFT ( 5)  /* 32 bytes */
 #  endif
-#  define MM_MAX_SHIFT   B2C_SHIFT(22)  /*  4 Mb */
+#  define MM_MAX_SHIFT   (22)  /*  4 Mb */
 
 #else
 /* Four byte offsets; Pointers must be 4 bytes.
  * sizeof(struct mm_freenode_s) is 16 bytes.
  */
 
-#  define MM_MIN_SHIFT   B2C_SHIFT( 4)  /* 16 bytes */
-#  define MM_MAX_SHIFT   B2C_SHIFT(22)  /*  4 Mb */
+#  define MM_MIN_SHIFT   ( 4)  /* 16 bytes */
+#  define MM_MAX_SHIFT   (22)  /*  4 Mb */
 #endif
 
 /* All other definitions derive from these two */
@@ -137,9 +137,9 @@ struct mm_allocnode_s
 /* What is the size of the allocnode? */
 
 #ifdef CONFIG_MM_SMALL
-# define SIZEOF_MM_ALLOCNODE   B2C(4)
+# define SIZEOF_MM_ALLOCNODE   (4)
 #else
-# define SIZEOF_MM_ALLOCNODE   B2C(8)
+# define SIZEOF_MM_ALLOCNODE   (8)
 #endif
 
 #define CHECK_ALLOCNODE_SIZE \
