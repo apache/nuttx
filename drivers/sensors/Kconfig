@@ -917,12 +917,6 @@ config SENSORS_MAX86178_I2C
 
 endchoice
 
-config SENSORS_MAX86178_FIFO_SLOTS_NUMBER
-	int "The number of fifo slots for sensor MAX86178"
-	default 100
-	---help---
-		The number of fifo slots for sensor MAX86178.
-
 endif # SENSORS_MAX86178
 
 config SENSORS_LIS3MDL

@@ -835,16 +835,17 @@
 /* Select the positive full-scale range of the PPG ADC on channel 1/2 */
 
 #define MAX86178_MEASXCFG2_PPG2RGE_MASK (3 << 4) /* Mask */
+#define MAX86178_MEASXCFG2_PPG2RGE_OFST 4        /* Bit offset */
 #define MAX86178_MEASXCFG2_PPG2RGE_4UA  (0 << 4) /* Full-scale = 4.0 uA */
 #define MAX86178_MEASXCFG2_PPG2RGE_8UA  (1 << 4) /* Full-scale = 8.0 uA */
 #define MAX86178_MEASXCFG2_PPG2RGE_16UA (2 << 4) /* Full-scale = 16.0 uA */
 #define MAX86178_MEASXCFG2_PPG2RGE_32UA (3 << 4) /* Full-scale = 32.0 uA */
 
-#define MAX86178_MEASXCFG2_PPG1RGE_MASK (3 << 4) /* Mask */
-#define MAX86178_MEASXCFG2_PPG1RGE_4UA  (0 << 4) /* Full-scale = 4.0 uA */
-#define MAX86178_MEASXCFG2_PPG1RGE_8UA  (1 << 4) /* Full-scale = 8.0 uA */
-#define MAX86178_MEASXCFG2_PPG1RGE_16UA (2 << 4) /* Full-scale = 16.0 uA */
-#define MAX86178_MEASXCFG2_PPG1RGE_32UA (3 << 4) /* Full-scale = 32.0 uA */
+#define MAX86178_MEASXCFG2_PPG1RGE_MASK (3 << 0) /* Mask */
+#define MAX86178_MEASXCFG2_PPG1RGE_4UA  (0 << 0) /* Full-scale = 4.0 uA */
+#define MAX86178_MEASXCFG2_PPG1RGE_8UA  (1 << 0) /* Full-scale = 8.0 uA */
+#define MAX86178_MEASXCFG2_PPG1RGE_16UA (2 << 0) /* Full-scale = 16.0 uA */
+#define MAX86178_MEASXCFG2_PPG1RGE_32UA (3 << 0) /* Full-scale = 32.0 uA */
 
 /* MEASxCFG3 bits masks and functions */
 
@@ -882,10 +883,10 @@
  */
 
 #define MAX86178_MEASXCFG4_LEDSETT_MASK (3 << 2) /* Mask */
-#define MAX86178_MEASXCFG4_LEDSETT_7p7  (3 << 6) /* Settling time = 7.7 us */
-#define MAX86178_MEASXCFG4_LEDSETT_11p7 (3 << 6) /* Settling time = 11.7 us */
-#define MAX86178_MEASXCFG4_LEDSETT_15p7 (3 << 6) /* Settling time = 15.7 us */
-#define MAX86178_MEASXCFG4_LEDSETT_23p7 (3 << 6) /* Settling time = 23.7 us */
+#define MAX86178_MEASXCFG4_LEDSETT_7p7  (3 << 2) /* Settling time = 7.7 us */
+#define MAX86178_MEASXCFG4_LEDSETT_11p7 (3 << 2) /* Settling time = 11.7 us */
+#define MAX86178_MEASXCFG4_LEDSETT_15p7 (3 << 2) /* Settling time = 15.7 us */
+#define MAX86178_MEASXCFG4_LEDSETT_23p7 (3 << 2) /* Settling time = 23.7 us */
 
 /* Select the drive current range for both LED current drivers. */
 
@@ -1613,8 +1614,9 @@
 
 /* Native attributes of registers */
 
-#define MAX86178_FIFO_BYTES_PER_DATA    3          /* Bytes/data in FIFO */
-#define MAX86178_FIFO_SIZE              256        /* Max samples in FIFO */
+#define MAX86178_FIFO_BYTES_PER_SAMPLE  3          /* Bytes/data in FIFO */
+#define MAX86178_FIFO_SIZE_SAMPLES      256        /* Max samples in FIFO */
+#define MAX86178_FIFO_SIZE_BYTES        768        /* Max bytes in FIFO */
 #define MAX86178_PLL_FREQ_LOCK_TIME     4          /* Unit in ms (max.) */
 #define MAX86178_PLL_PHASE_LOCK_TIME    9          /* Unit in ms (max.) */
 #define MAX86178_FRCLKDIV_MAX           32766      /* Max. FR_CLK_DIV */

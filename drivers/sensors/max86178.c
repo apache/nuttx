@@ -44,6 +44,36 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configurations */
+
+#define MAX86178_FIFO_SLOTS_PPG  56         /* Maximum slots for PPG (2-ch) */
+#define MAX86178_FIFO_SLOTS_ECG  28         /* Maximum slots for ECG */
+#define MAX86178_INIT_TABLE_SIZE 11         /* Size of initializing table */
+
+/* PPG optimization */
+
+#define MAX86178_PPG_OP_HIGH0    983040     /* Upper. ADC range0 (4uA) */
+#define MAX86178_PPG_OP_MID0     950272     /* Middle. ADC range0 (4uA) */
+#define MAX86178_PPG_OP_SPAN0    24576      /* Span. ADC range0 (4uA) */
+#define MAX86178_PPG_OP_LOW0     917504     /* Lower. ADC range0 (4uA) */
+#define MAX86178_PPG_OP_HIGH1    983040     /* Upper. ADC range1 (8uA) */
+#define MAX86178_PPG_OP_MID1     786432     /* Middle. ADC range1 (8uA) */
+#define MAX86178_PPG_OP_SPAN1    65536      /* Span. ADC range1 (8uA) */
+#define MAX86178_PPG_OP_LOW1     524288     /* Lower. ADC range1 (8uA) */
+#define MAX86178_PPG_OP_HIGH2    524288     /* Upper. ADC range1 (16uA) */
+#define MAX86178_PPG_OP_MID2     393216     /* Middle. ADC range2 (16uA) */
+#define MAX86178_PPG_OP_SPAN2    32768      /* Span. ADC range1 (16uA) */
+#define MAX86178_PPG_OP_LOW2     262144     /* Lower. ADC range2 (16uA) */
+#define MAX86178_PPG_OP_HIGH3    262144     /* Upper. ADC range2 (32uA) */
+#define MAX86178_PPG_OP_MID3     196608     /* Middle. ADC range1 (32uA) */
+#define MAX86178_PPG_OP_SPAN3    16384      /* Span. ADC range1 (32uA) */
+#define MAX86178_PPG_OP_LOW3     131072     /* Lower. ADC range1 (32uA) */
+#define MAX86178_PPG_OP_TRIG     10         /* PPG optimization trigger */
+#define MAX86178_PPG_OP_WINDOW   5          /* PPG optimization slide size */
+#define MAX86178_PPG_OP_TIMES    10         /* Max optimization try times */
+
+/* Digital interface parameters */
+
 #ifdef CONFIG_SENSORS_MAX86178_I2C
 # define MAX86178_I2C_MAX_FREQ   400000     /* Maximum SCL frequency 400kHz */
 # define MAX86178_I2C_MIN_FREQ   100000     /* Minimum SCL frequency 100kHz */
@@ -57,18 +87,23 @@
 #endif
 
 /* MAX86178 AFE contains ECG, PPG and BioZ AFE. CUrrently ECG and PPG is
- * used. Perhaps we will add BioZ AFE in the furture.
+ * used. ECG has only one channel, while PPG has 4 different measurements and
+ * each one should be a sensor node.
  */
 
-#define MAX86178_ECG_IDX         0          /* ECG0 AFE index */
-#define MAX86178_PPG_IDX         1          /* PPG0 (Green) AFE index */
-#define MAX86178_IDX_NUM         2          /* Total AFE number. */
+#define MAX86178_PPG0_SENSOR_IDX 0          /* PPG0 (green) sensor index. */
+#define MAX86178_PPG1_SENSOR_IDX 1          /* PPG1 (red) sensor index. */
+#define MAX86178_PPG2_SENSOR_IDX 2          /* PPG2 (IR sensor index. */
+#define MAX86178_PPG3_SENSOR_IDX 3          /* PPG3 (dark) sensor index. */
+#define MAX86178_PPG_SENSOR_NUM  4          /* Total PPG sensors number. */
 
 /* Control commands */
 
 #define MAX86178_CTRL_CHECKID    0          /* Check device ID. */
 #define MAX86178_ECG_CTRL_GAIN   0x90       /* Set ECG gain. */
 #define MAX86178_PPG_CTRL_LEDPA  0x90       /* Set PPG LED current. */
+#define MAX86178_PPG_CTRL_GAIN1  0x91       /* Set PPG ADC1's gain. */
+#define MAX86178_PPG_CTRL_GAIN2  0x92       /* Set PPG ADC2's gain. */
 
 /* Default settings */
 
@@ -81,22 +116,24 @@
  */
 
 #define MAX86178_ECG_INTVL_DFT   4000       /* Default ECG interval = 4 ms */
-#define MAX86178_PPG_INTVL_DFT   4000       /* Default PPG interval = 4 ms */
-#define MAX86178_PPG_CURRENT_DFT 32000      /* Default PPG current=32000uA */
-#define MAX86178_MDIV_DFT        250        /* Default MDIV for PLL = 8 MHz */
-#define MAX86178_REF_CLK_DFT     32000      /* Default REF_CLK = 32kHz */
-#define MAX86178_FIFOWTM_DFT     1          /* Default FIFO watermark = 1 */
+#define MAX86178_PPG_INTVL_DFT   40000      /* Default PPG interval = 40 ms */
+#define MAX86178_PPG_FRDIV_DFT   1280       /* FRDIV = 12800 i.e. FPS=25Hz */
+#define MAX86178_PPG_GLEDPA_DFT  80         /* Green LED 80*0.125=10mA */
+#define MAX86178_PPG_RLEDPA_DFT  200        /* Red LED 200*0.25=50mA */
+#define MAX86178_PPG_IRLEDPA_DFT 160        /* IR LED 160*0.25=40mA */
+#define MAX86178_PPG_GLEDC_DFT   10000      /* Green LED current=10000uA */
+#define MAX86178_PPG_RLEDC_DFT   50000      /* Red LED current=50000uA */
+#define MAX86178_PPG_IRLEDC_DFT  40000      /* IR LED current=40000uA */
+#define MAX86178_PPG_ADCRGE_DFT  2          /* ADC range2 16uA i.e. gain=2 */
+#define MAX86178_PPG_GAIN_DFT    2          /* Gain=2, i.e. ADC range2 16uA */
+#define MAX86178_MDIV_DFT        125        /* Default MDIV for PLL = 4 MHz */
+#define MAX86178_REF_CLK_DFT     32000.0f   /* Default REF_CLK = 32kHz */
 
 /* Default for ECG_PLL = 4 MHz */
 
-#define MAX86178_ECG_FDIV_DFT    MAX86178_PLLCFG4_ECGFDIV_2
 #define MAX86178_ECG_NDIV_DFT    125        /* ECG_ADC_CLK = 32kHz */
-#define MAX86178_ECG_PLL_DFT     4000000    /* ECG_PLL_CLK = 4MHz */
-
-/* Default ratio for divide ECG_ADC_CLK of 32 kHz to 250Hz sample rate */
-
-#define MAX86178_ECG_DEC_DFT     MAX86178_ECGCFG1_DEC_RATE_128
-#define MAX86178_PPG_DIV_DFT     128        /* For REF_CLK->FR_CLK = 250Hz */
+#define MAX86178_ECG_FDIV_DFT    1          /* ECG_PLL_CLK = PLL_CLK */
+#define MAX86178_ECG_PLL_DFT     4000000.0f /* ECG_PLL_CLK = 4MHz */
 
 /* The ECG range settings should vary with practices according to the
  * hardware design, and is determined through experiments.
@@ -105,14 +142,16 @@
 #define MAX86178_ECG_INARGE_DFT  MAX86178_ECGCFG2_INARGE_0
 #define MAX86178_ECG_INAGAIN_DFT MAX86178_ECGCFG2_INAGAIN_1
 #define MAX86178_ECG_PGAGAIN_DFT MAX86178_ECGCFG2_PGAGAIN_4
+#define MAX86178_ECG_GAIN_DFT    0.095367431640625f
 
 /* Constant parameters */
 
-#define MAX86178_ECG_SR_MAX      2048       /* ECG sample rate = 2048 max. */
-#define MAX86178_ECG_SR_MIN      64         /* ECG sample rate = 64 min. */
+#define MAX86178_ECG_SR_MAX      2048       /* ECG sample rate <= 2048Hz. */
+#define MAX86178_ECG_SR_MIN      250        /* ECG sample rate >= 250Hz. */
 #define MAX86178_ECG_ADC_CLK_MAX 32768      /* ECG_ADC_CLK = 32768 Hz max. */
 #define MAX86178_ECG_ADC_CLK_MIN 19000      /* ECG_ADC_CLK = 19.0kHz min. */
 #define MAX86178_ECG_DECRATE_NUM 6          /* ECG_DEC_RATE has 6 choices. */
+#define MAX86178_ECG_NEGATIVE    0xfffc0000 /* Prefix for negative ECG */
 #define MAX86178_PPG_LEDPASTEP   32000u     /* PPG LED PA range step=32mA */
 #define MAX86178_PPG_LEDPAMAX    127500u    /* PPG LED PA <= 127500uA */
 #define MAX86178_PPG_LEDLSBSTEP  125u       /* PPG LED PA LSB step = 125uA */
@@ -125,41 +164,119 @@
  * Private Types
  ****************************************************************************/
 
-/* Sensor struct */
+/* MAX86178 register address and values struct. */
 
-struct max86178_sensor_s
+struct max86178_reg_table_s
+{
+  uint8_t regaddr;                       /* Register address */
+  uint8_t regval;                        /* Register value */
+};
+
+/* PPG optimization struct */
+
+struct max86178_ppg_optim_s
+{
+  uint32_t total;
+  uint8_t up_trigger;
+  uint8_t low_trigger;
+  uint8_t adc_range;
+  uint8_t cnt;
+  uint8_t times;
+  bool trigger;
+};
+
+/* PPG optimization aimed parameters struct */
+
+struct max86178_ppg_optim_param_s
+{
+  uint32_t upper;
+  uint32_t lower;
+  uint32_t middle;
+  uint32_t span;
+};
+
+/* ECG sensor struct */
+
+struct max86178_ecg_sensor_s
 {
   /* sensor_lowerhalf_s must be in the first line. */
 
-  struct sensor_lowerhalf_s lower;          /* Lower half sensor driver */
-  FAR struct max86178_dev_s *dev;           /* Point to the device struct */
-  unsigned int              interval;       /* Sensor interval */
-  unsigned int              batch_latency;  /* Sensor batch latency */
-  unsigned int              fifowtm;        /* Sensor fifo water marker */
-  float                     factor;         /* Readouts * factor = inputs */
-  uint32_t                  current;        /* LED driver current (uA) */
-  bool                      fifoen;         /* Sensor fifo enable */
-  bool                      activated;      /* Sensor working state */
+  struct sensor_lowerhalf_s lower;       /* Lower half sensor driver */
+  FAR struct max86178_dev_s *dev;        /* Point to the device struct */
+  uint32_t interval_desired;             /* Desired sample interval(us) */
+  uint32_t batch_desired;                /* Desired batch latency (us) */
+  float factor;                          /* ECG = ADC counts * factor */
+  uint16_t ndiv;                         /* Sample rate=PLL/(ndiv*decrate) */
+  uint8_t decrate;                       /* Sample rate=PLL/(ndiv*decrate) */
+  bool activating;                       /* If it will be activated soon */
+  bool inactivating;                     /* If it will be inactivated soon */
+  bool activated;                        /* If it's activated now. */
+};
+
+/* Sensor struct */
+
+struct max86178_ppg_sensor_s
+{
+  /* sensor_lowerhalf_s must be in the first line. */
+
+  struct sensor_lowerhalf_s lower;       /* Lower half sensor driver */
+  FAR struct max86178_dev_s *dev;        /* Point to the device struct */
+  struct max86178_ppg_optim_s optm1;     /* For PPG ADC1 optimization */
+  struct max86178_ppg_optim_s optm2;     /* For PPG ADC2 optimization */
+  uint32_t interval_desired;             /* Desired sensor interval */
+  uint32_t batch_desired;                /* Desired sensor batch latency */
+  uint32_t current;                      /* LED driver current (uA) */
+  uint16_t frdiv;                        /* PPG fps = ppg_ref_clk / frdiv */
+  uint16_t samples_per_meas;             /* N samples in a measurement */
+  uint8_t gain1;                         /* PPG ADC1 gain */
+  uint8_t gain2;                         /* PPG ADC2 gain */
+  uint8_t chidx;                         /* PPG channel index */
+  bool activating;                       /* If it will be activated soon. */
+  bool inactivating;                     /* If it will be inactivated soon. */
+  bool activated;                        /* If it's activated now. */
+  bool auto_optimize;                    /* If auto-optimization is used. */
 };
 
 /* Device struct */
 
 struct max86178_dev_s
 {
-  struct max86178_sensor_s
-                 sensor[MAX86178_IDX_NUM];  /* Sensor struct */
-  uint64_t       timestamp;                 /* Units is us */
-  FAR const struct max86178_config_s
-                 *config;                   /* The board config */
-  struct work_s  work;                      /* Interrupt handler */
-  struct sensor_event_ppgd
-                 ppgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
-  struct sensor_event_ecg
-                 ecgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
-  uint8_t        fifobuf[MAX86178_FIFO_SIZE * MAX86178_FIFO_BYTES_PER_DATA];
-  uint16_t       fifowtm;                   /* fifo water marker */
-  bool           fifoen;                    /* Sensor fifo enable */
-  bool           activated;                 /* Device state */
+  /* PPG sensors structures. */
+
+  struct max86178_ppg_sensor_s ppg_sensor[MAX86178_PPG_SENSOR_NUM];
+
+  /* ECG sensor structure */
+
+  struct max86178_ecg_sensor_s ecg_sensor;
+  uint64_t timestamp;                    /* Current timestamp (us) */
+  uint64_t timestamp_prev;               /* Last timestampe (us) */
+  struct work_s work_intrpt;             /* Interrupt worker */
+  struct work_s work_poll;               /* Polling worker */
+
+  /* Device configuration struct pointer. */
+
+  FAR const struct max86178_config_s *config;
+
+  /* Buffer to store PPGs data for pushing. */
+
+  struct sensor_event_ppgd ppgdata[MAX86178_PPG_SENSOR_NUM]
+                                  [MAX86178_FIFO_SLOTS_PPG];
+
+  /* Buffer to store ECG data for pushing. */
+
+  struct sensor_event_ecg ecgdata[MAX86178_FIFO_SLOTS_ECG];
+
+  /* Buffer for reading FIFO. MAX86178 has a 256-sample (3Byte/sample) FIFO */
+
+  uint8_t fifobuf[MAX86178_FIFO_SIZE_BYTES];
+  uint32_t interval;                     /* Device's sample interval */
+  uint32_t batch;                        /* Device's batch latency */
+  uint32_t fifowtm;                      /* Total FIFO water marker */
+  uint8_t ppg_activated;                 /* How many PPGs are activated */
+  bool update_interval;                  /* Any sensor is updating interval */
+  bool update_batch;                     /* Any sensor is updating batch */
+  bool update_activate;                  /* Any sensor is updating activate */
+  bool activated;                        /* If any sensor is activated */
 };
 
 /****************************************************************************
@@ -169,7 +286,7 @@ struct max86178_dev_s
 /* Interface (I2C/SPI) functions */
 
 #ifdef CONFIG_SENSORS_MAX86178_SPI
-static int  max86178_configspi(FAR struct max86178_dev_s *priv);
+static int max86178_configspi(FAR struct max86178_dev_s *priv);
 #endif
 static int max86178_readregs(FAR struct max86178_dev_s *priv,
                              uint8_t startaddr, FAR uint8_t *recvbuf,
@@ -182,77 +299,228 @@ static int max86178_readsingle(FAR struct max86178_dev_s *priv,
 static int max86178_writesingle(FAR struct max86178_dev_s *priv,
                                 uint8_t regaddr, uint8_t regval);
 
-/* MAX86178 handle functions */
+/* MAX86178 common handle functions */
 
-static int      max86178_checkid(FAR struct max86178_dev_s *priv);
-static void     max86178_shutdown(FAR struct max86178_dev_s *priv);
-static int      max86178_softreset(FAR struct max86178_dev_s *priv);
-static void     max86178_enable(FAR struct max86178_dev_s *priv,
-                                bool enable);
-static int      max86178_ecg_enable(FAR struct max86178_dev_s *priv,
-                                    bool enable);
-static int      max86178_ppg_enable(FAR struct max86178_dev_s *priv,
-                                    bool enable);
-static int      max86178_fifo_read(FAR struct max86178_dev_s *priv);
-static void     max86178_set_fifoint(FAR struct max86178_dev_s *priv);
-static uint32_t max86178_ppg_calcudata(FAR struct max86178_dev_s *priv,
-                                       uint32_t sample);
-static float    max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
-                                       uint32_t sample);
-static void     max86178_ppg_set_current(FAR struct max86178_dev_s *priv,
-                                         FAR uint32_t *current);
-static int      max86178_ppg_setfps(FAR struct max86178_dev_s *priv,
-                                    float *freq);
-static int      max86178_ecg_setsr(FAR struct max86178_dev_s *priv,
-                                   float *freq);
-static int      max86178_ecg_control(FAR struct max86178_dev_s *priv,
-                                     int cmd, unsigned long arg);
-static int      max86178_ppg_control(FAR struct max86178_dev_s *priv,
-                                     int cmd, unsigned long arg);
-
-/* Sensor ops functions */
-
-static int  max86178_activate(FAR struct sensor_lowerhalf_s *lower,
-                              bool enable);
-static int  max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                  FAR unsigned int *period_us);
-static int  max86178_batch(FAR struct sensor_lowerhalf_s *lower,
-                           FAR unsigned int *latency_us);
-static int  max86178_selftest(FAR struct sensor_lowerhalf_s *lower,
-                              unsigned long arg);
-static int  max86178_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
+static void max86178_batch_calcu(FAR struct max86178_dev_s *priv,
+                                 FAR unsigned int *latency_us,
+                                 uint32_t batch_number, uint32_t interval);
+static int max86178_checkid(FAR struct max86178_dev_s *priv);
+static void max86178_enable(FAR struct max86178_dev_s *priv, bool enable);
+static void max86178_fifo_flush(FAR struct max86178_dev_s *priv);
+static int max86178_fifo_read(FAR struct max86178_dev_s *priv);
+static void max86178_fifo_set(FAR struct max86178_dev_s *priv);
+static void max86178_init(FAR struct max86178_dev_s *priv);
+static int max86178_selftest(FAR struct max86178_dev_s *priv,
                              unsigned long arg);
+static void max86178_shutdown(FAR struct max86178_dev_s *priv);
+static void max86178_softreset(FAR struct max86178_dev_s *priv);
+static void max86178_update_sensors(FAR struct max86178_dev_s *priv);
+
+/* MAX86178 ECG handle functions */
+
+static void max86178_ecg_calcu_clk(FAR struct max86178_ecg_sensor_s *sensor,
+                                   FAR uint32_t *interval);
+static float max86178_ecg_calcudata(FAR struct max86178_ecg_sensor_s *sensor,
+                                    uint32_t sample);
+static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable);
+static void max86178_ecg_set_sr(FAR struct max86178_dev_s *priv,
+                                uint8_t decrate, uint16_t ndiv);
+
+/* MAX86178 PPG handle functions */
+
+static uint32_t max86178_ppg_calcudata(uint32_t sample);
+static uint16_t max86178_ppg_calcu_frdiv(uint32_t interval);
+static void max86178_ppg_dealsample(FAR struct max86178_dev_s *priv,
+                                    uint8_t chidx, uint32_t sample,
+                                    FAR uint32_t *count,
+                                    FAR uint8_t *toggle);
+static void max86178_ppg_enable(FAR struct max86178_dev_s *priv,
+                                uint8_t chidx, bool enable);
+static void max86178_ppg_optimize(FAR struct max86178_ppg_sensor_s *sensor);
+static void max86178_ppg_optim_record(FAR struct max86178_ppg_optim_s *optim,
+                                      uint32_t ppg);
+static void max86178_ppg_set_current(FAR struct max86178_ppg_sensor_s
+                                     *sensor, FAR uint32_t *current);
+static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
+                                 uint16_t frdiv);
+
+/* ECG sensor ops functions */
+
+static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 bool enable);
+static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                     FAR unsigned int *period_us);
+static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
+                              FAR unsigned int *latency_us);
+static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
+                                 unsigned long arg);
+static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
+                                int cmd, unsigned long arg);
+
+/* PPG sensor ops functions */
+
+static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 bool enable);
+static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                     FAR unsigned int *period_us);
+static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
+                              FAR unsigned int *latency_us);
+static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
+                                 unsigned long arg);
+static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
+                                int cmd, unsigned long arg);
 
 /* Sensor interrupt functions */
 
 static int  max86178_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                        ioe_pinset_t pinset, FAR void *arg);
-static void max86178_worker(FAR void *arg);
+static void max86178_worker_intrpt(FAR void *arg);
+static void max86178_worker_poll(FAR void *arg);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+/* Register address and values for initializing. */
+
+static const struct max86178_reg_table_s
+  max86178_init_table[MAX86178_INIT_TABLE_SIZE] =
+  {
+    /* MEAS1 selects LED driver A to drive LED3(green) for PPG ch0. */
+
+    {
+      MAX86178_REG_MEAS1SEL, MAX86178_MEASXSEL_DRVA_LED3
+    },
+
+    /* MEAS2 selects LED driver A to drive LED2(red) for PPG ch1. */
+
+    {
+      MAX86178_REG_MEAS2SEL, MAX86178_MEASXSEL_DRVA_LED2
+    },
+
+    /* MEAS3 selects LED driver B to drive LED1(IR) for PPG ch2. */
+
+    {
+      MAX86178_REG_MEAS3SEL, MAX86178_MEASXSEL_DRVB_LED1
+    },
+
+    /* MEAS4 works in direct ambient mode for PPG ch3. */
+
+    {
+      MAX86178_REG_MEAS4SEL, MAX86178_MEASXSEL_AMB_EN
+    },
+
+    /* For MEAS1(PPG ch0), PPG1 selects PD1&3， PPG2 selects PD2&4. */
+
+    {
+      MAX86178_REG_MEAS1CFG5, MAX86178_MEASXCFG5_PD1SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD3SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD2SEL_PPG2 |
+                              MAX86178_MEASXCFG5_PD4SEL_PPG2
+    },
+
+    /* For MEAS2(PPG ch1), PPG1 selects PD1&3， PPG2 selects PD2&4. */
+
+    {
+      MAX86178_REG_MEAS2CFG5, MAX86178_MEASXCFG5_PD1SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD3SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD2SEL_PPG2 |
+                              MAX86178_MEASXCFG5_PD4SEL_PPG2
+    },
+
+    /* For MEAS3(PPG ch2), PPG1 selects PD1&3， PPG2 selects PD2&4. */
+
+    {
+      MAX86178_REG_MEAS3CFG5, MAX86178_MEASXCFG5_PD1SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD3SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD2SEL_PPG2 |
+                              MAX86178_MEASXCFG5_PD4SEL_PPG2
+    },
+
+    /* For MEAS4(PPG ch3), PPG1 selects PD1&3， PPG2 selects PD2&4. */
+
+    {
+      MAX86178_REG_MEAS4CFG5, MAX86178_MEASXCFG5_PD1SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD3SEL_PPG1 |
+                              MAX86178_MEASXCFG5_PD2SEL_PPG2 |
+                              MAX86178_MEASXCFG5_PD4SEL_PPG2
+    },
+
+    /* ECG_PLL_CLK = PLL_CLK. */
+
+    {
+      MAX86178_REG_PLLCFG4, MAX86178_ECG_FDIV_DFT
+    },
+
+    /* REF CLK comes from internal 32.0kHz OSC. */
+
+    {
+      MAX86178_REG_PLLCFG6, MAX86178_PLLCFG6_REFCLK_32K
+    },
+
+    /* FIFO rolls over and FIFO interrupt cleared by status or FIFO reading */
+
+    {
+      MAX86178_REG_FIFOCFG2, MAX86178_FIFOCFG2_STATCLR |
+                             MAX86178_FIFOCFG2_ROLL
+    }
+  };
+
+/* PPG optimization parameters for 4 ADC ranges */
+
+static const struct max86178_ppg_optim_param_s
+  max86178_ppg_optim_param_table[4] =
+  {
+    /* ADC range0 (4uA) */
+
+    {
+      MAX86178_PPG_OP_HIGH0, MAX86178_PPG_OP_LOW0, MAX86178_PPG_OP_MID0,
+      MAX86178_PPG_OP_SPAN0
+    },
+
+    /* ADC range1 (8uA) */
+
+    {
+      MAX86178_PPG_OP_HIGH1, MAX86178_PPG_OP_LOW1, MAX86178_PPG_OP_MID1,
+      MAX86178_PPG_OP_SPAN1
+    },
+
+    /* ADC range2 (16uA) */
+
+    {
+      MAX86178_PPG_OP_HIGH2, MAX86178_PPG_OP_LOW2, MAX86178_PPG_OP_MID2,
+      MAX86178_PPG_OP_SPAN2
+    },
+
+    /* ADC range3 (32uA) */
+
+    {
+      MAX86178_PPG_OP_HIGH3, MAX86178_PPG_OP_LOW3, MAX86178_PPG_OP_MID3,
+      MAX86178_PPG_OP_SPAN3
+    }
+  };
 
 static const struct sensor_ops_s g_max86178_ecg_ops =
 {
-  .activate     = max86178_activate,
-  .set_interval = max86178_set_interval,
-  .batch        = max86178_batch,
-  .control      = max86178_control,
+  .activate     = max86178_ecg_activate,
+  .set_interval = max86178_ecg_set_interval,
+  .batch        = max86178_ecg_batch,
+  .selftest     = max86178_ecg_selftest,
+  .control      = max86178_ecg_control,
 };
 
 static const struct sensor_ops_s g_max86178_ppg_ops =
 {
-  .activate     = max86178_activate,
-  .set_interval = max86178_set_interval,
-  .batch        = max86178_batch,
-  .selftest     = max86178_selftest,
-  .control      = max86178_control,
+  .activate     = max86178_ppg_activate,
+  .set_interval = max86178_ppg_set_interval,
+  .batch        = max86178_ppg_batch,
+  .selftest     = max86178_ppg_selftest,
+  .control      = max86178_ppg_control,
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -297,7 +565,7 @@ static int max86178_configspi(FAR struct max86178_dev_s *priv)
       return -EIO;
     }
 
-  /* MAX86178 SPI supports only mode0 and mode3. */
+  /* MAX86178 SPI supports only mode0. */
 
   SPI_SETMODE(priv->config->spi, SPIDEV_MODE0);
 
@@ -427,7 +695,7 @@ static int max86178_readregs(FAR struct max86178_dev_s *priv,
  * Input Parameters:
  *   priv      - Device struct.
  *   startaddr - Address of the 1st register to be written.
- *   recvbuf   - A pointer to the buffer which stores data to be written.
+ *   sendbuf   - A pointer to the buffer which stores data to be written.
  *   nwords    - The numbers of word (8bits per word) to be written.
  *
  * Returned Value:
@@ -573,6 +841,51 @@ static int max86178_writesingle(FAR struct max86178_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: max86178_batch_calcu
+ *
+ * Description:
+ *   Calculate reasonable batch latency and fifo watermark according to the
+ *   sample interval and maximum batch number.
+ *
+ * Input Parameters:
+ *   priv         - Device struct
+ *   latency_us   - The time between batch data, in us.
+ *   batch_number - Maximum number or batch data one time.
+ *   interval     - Sample interval in us.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_batch_calcu(FAR struct max86178_dev_s *priv,
+                                 FAR unsigned int *latency_us,
+                                 uint32_t batch_number, uint32_t interval)
+{
+  uint32_t max_latency;
+  uint32_t fifowtm;
+
+  if (*latency_us > 0)
+    {
+      max_latency = batch_number * interval;
+      if (*latency_us > max_latency)
+        {
+          *latency_us = max_latency;
+        }
+      else if (*latency_us < interval)
+        {
+          *latency_us = interval;
+        }
+
+      fifowtm = MAX86178_CEILING(*latency_us, interval);
+      *latency_us = fifowtm * interval;
+    }
+}
+
+/****************************************************************************
  * Name: max86178_checkid
  *
  * Description:
@@ -609,86 +922,10 @@ static int max86178_checkid(FAR struct max86178_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: max86178_shutdown
- *
- * Description:
- *   MAX86178 enter shutdown mode.
- *
- * Input Parameters:
- *   priv   - Device struct.
- *   enable - true(enter normal mode) and false(enter shutdown mode).
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void max86178_shutdown(FAR struct max86178_dev_s *priv)
-{
-  uint8_t regval;
-
-  /* Read and write PLLCFG_PLL_EN to disable PLL if it's on. */
-
-  max86178_readsingle(priv, MAX86178_REG_PLLCFG1, &regval);
-  if (regval & MAX86178_PLLCFG1_PLL_EN_MASK)
-    {
-      regval = regval & (~MAX86178_PLLCFG1_PLL_EN_MASK);
-      regval = regval | MAX86178_PLLCFG1_PLL_DIS;
-      max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
-    }
-
-  /* Read and write MAX86178_SYSCFG1_NORMAL to enter shutdown mode. */
-
-  max86178_readsingle(priv, MAX86178_REG_SYSCFG1, &regval);
-  regval = regval & (~MAX86178_SYSCFG1_SHDN_MASK);
-  regval = regval | MAX86178_SYSCFG1_SHDN;
-  max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
-}
-
-/****************************************************************************
- * Name: max86178_softreset
- *
- * Description:
- *   All registers valuse will be set to power-on-reset state.
- *
- * Input Parameters:
- *   priv    - Device struct.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int max86178_softreset(FAR struct max86178_dev_s *priv)
-{
-  uint8_t regval;
-
-  /* Disable PLL */
-
-  max86178_readsingle(priv, MAX86178_REG_PLLCFG1, &regval);
-  regval = regval & (~MAX86178_PLLCFG1_PLL_EN);
-  max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
-
-  /* Whatever the other bits in MAX86178_REG_SYSCFG1 are, they will be 0
-   * (default) after softreset. Thus there's no need to read them out.
-   */
-
-  regval = MAX86178_SYSCFG1_RESET;
-
-  return max86178_writesingle(priv, MAX86178_REG_SYSCFG1, regval);
-}
-
-/****************************************************************************
  * Name: max86178_enable
  *
  * Description:
- *   MAX86178 enter normal mode with PLL on, or shutdown mode with PLL off.
+ *   MAX86178 enter normal mode or shutdown mode.
  *
  * Input Parameters:
  *   priv   - Device struct.
@@ -723,13 +960,11 @@ static void max86178_enable(FAR struct max86178_dev_s *priv, bool enable)
           regval = regval | MAX86178_SYSCFG1_NORMAL;
           max86178_writesingle(priv, MAX86178_REG_SYSCFG1, regval);
 
-          /* Set FIFO watermark (=priv->fifowtm) and interrupt. If it's not
-           * in batch mode, the FIFO and interrupt are enabled with watermark
-           * = 1, since the device only support to read from FIFO.
+          /* Initialize the device when it's enabled, since the device may be
+           * powered down when inactivated.
            */
 
-          max86178_set_fifoint(priv);
-
+          max86178_init(priv);
           priv->activated = true;
         }
     }
@@ -747,6 +982,797 @@ static void max86178_enable(FAR struct max86178_dev_s *priv, bool enable)
           priv->activated = false;
         }
     }
+}
+
+/****************************************************************************
+ * Name: max86178_fifo_flush
+ *
+ * Description:
+ *   Flush FIFO. The contents will be discarded.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_fifo_flush(FAR struct max86178_dev_s *priv)
+{
+  uint8_t regval;
+
+  max86178_readsingle(priv, MAX86178_REG_FIFOCFG2, &regval);
+  regval |= MAX86178_FIFOCFG2_FLUSH;
+  max86178_writesingle(priv, MAX86178_REG_FIFOCFG2, regval);
+}
+
+/****************************************************************************
+ * Name: max86178_fifo_read
+ *
+ * Description:
+ *   Read all available data in FIFO.
+ *
+ * Input Parameters:
+ *   priv  - Device struct.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   1. ECG and PPG are synchronous sampled. Asynchronous sampling need
+ *      timing data to determine the timestamp, and will be implented later.
+ *   2. One of two PPG channels works at the same time. Perhaps we will add
+ *      procession for 2 channels working the same time. Currently, only 1
+ *      channel working at the same time is enough.
+ *
+ ****************************************************************************/
+
+static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
+{
+  uint32_t fifobytes;
+  uint32_t temp_sample;
+  uint32_t data_per_sample;
+  uint32_t counter_ecg = 0;
+  uint32_t counter_ppg[MAX86178_PPG_SENSOR_NUM] =
+    {
+      0, 0, 0, 0
+    };
+
+  uint16_t num = 0;
+  uint16_t i;
+  uint16_t j;
+  uint8_t temp_num;
+  uint8_t chidx = MAX86178_PPG_SENSOR_NUM - 1;
+  uint8_t toggle_ppg[MAX86178_PPG_SENSOR_NUM] =
+    {
+      1, 1, 1, 1
+    };
+
+  /* Get number of samples in FIFO. */
+
+  max86178_readsingle(priv, MAX86178_REG_FIFOCNT1, &temp_num);
+  if (temp_num & MAX86178_FIFOCNT1_CNT_MSB_MASK)
+    {
+      num = 256;
+    }
+
+  max86178_readsingle(priv, MAX86178_REG_FIFOCNTLSB, &temp_num);
+  data_per_sample = priv->ecg_sensor.activated ? 1 : 0;
+  data_per_sample = data_per_sample + priv->ppg_activated * 2;
+  num = (num + temp_num);
+  if (data_per_sample > 1)
+    {
+      num = num / data_per_sample * data_per_sample;
+    }
+
+  /* If there's no data to read, return. */
+
+  if (num == 0)
+    {
+      return -ENODATA;
+    }
+
+  /* Calculate how many bytes are in FIFO. */
+
+  fifobytes = num * MAX86178_FIFO_BYTES_PER_SAMPLE;
+
+  /* Read the FIFO in number of FIFO watermark */
+
+  max86178_readregs(priv, MAX86178_REG_FIFODATA, priv->fifobuf, fifobytes);
+
+  /* Deal each sample in FIFO. The last sample is the newest sample. */
+
+  for (i = 0 ; i < num; i++)
+    {
+      temp_sample =
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_SAMPLE] << 16) |
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_SAMPLE + 1] << 8) |
+            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_SAMPLE + 2]);
+
+      switch (temp_sample & MAX86178_FIFOTAG_MASK_PRE)
+        {
+          case MAX86178_FIFOTAG_PRE_MEAS1:       /* PPG MEAS1 data tag. */
+            {
+              chidx = 0;
+              max86178_ppg_dealsample(priv, 0, temp_sample, counter_ppg,
+                                      toggle_ppg);
+            }
+            break;
+
+          case MAX86178_FIFOTAG_PRE_MEAS2:       /* PPG MEAS1 data tag. */
+            {
+              chidx = 1;
+              max86178_ppg_dealsample(priv, 1, temp_sample, &counter_ppg[1],
+                                      &toggle_ppg[1]);
+            }
+            break;
+
+          case MAX86178_FIFOTAG_PRE_MEAS3:       /* PPG MEAS1 data tag. */
+            {
+              chidx = 2;
+              max86178_ppg_dealsample(priv, 2, temp_sample, &counter_ppg[2],
+                                      &toggle_ppg[2]);
+            }
+            break;
+
+          case MAX86178_FIFOTAG_PRE_MEAS4:       /* PPG MEAS1 data tag. */
+            {
+              chidx = 3;
+              max86178_ppg_dealsample(priv, 3, temp_sample, &counter_ppg[3],
+                                      &toggle_ppg[3]);
+            }
+            break;
+
+          case MAX86178_FIFOTAG_PRE_EXP_OVF:     /* PPG exposure overflow. */
+            {
+              /* If the overflow data appears after a PPG channel's data end
+               * when next channel's data comes, search for the next enabled
+               * PPG channel. If it's the first data during this FIFO
+               * reading, search from PPG ch0(chidx's initial value if the
+               * last PPG channel index).
+               * Otherwise the overflow data appears when a PPG channel's
+               * data was dealing, the overflow data belongs to it.
+               */
+
+              if (toggle_ppg[chidx] == 1)
+                {
+                  do
+                    {
+                      chidx++;
+                      if (chidx == MAX86178_PPG_SENSOR_NUM)
+                        {
+                          chidx = 0;
+                        }
+                    }
+                  while (priv->ppg_sensor[chidx].activated == false);
+                }
+
+              max86178_ppg_dealsample(priv, chidx, MAX86178_ABS_PPG_MAX,
+                                      &counter_ppg[chidx],
+                                      &toggle_ppg[chidx]);
+            }
+            break;
+
+          case MAX86178_FIFOTAG_PRE_ECG:         /* ECG data tag. */
+            {
+              priv->ecgdata[counter_ecg].ecg =
+                max86178_ecg_calcudata(&priv->ecg_sensor, temp_sample);
+              counter_ecg++;
+            }
+            break;
+
+          default:                               /* Other data tags. */
+            {
+              /* Corresponding procession for the other tags will be added in
+               * future.
+               */
+            }
+            break;
+        }
+    }
+
+  if (counter_ecg > 0)
+    {
+      /* Calculate each timestamp from the last one. */
+
+      for (i = 0; i < counter_ecg; i++)
+        {
+          priv->ecgdata[i].timestamp = priv->timestamp -
+            priv->interval * (counter_ecg - i + 1);
+        }
+
+      priv->ecg_sensor.lower.push_event(priv->ecg_sensor.lower.priv,
+                                        priv->ecgdata,
+                                        sizeof(FAR struct sensor_event_ecg) *
+                                        counter_ecg);
+    }
+
+  for (i = 0; i < MAX86178_PPG_SENSOR_NUM; i++)
+  {
+    /* Calculate each timestamp from the last one. */
+
+    if (counter_ppg[i] > 0 && priv->ppg_sensor[i].inactivating == false)
+      {
+        for (j = 0; j < counter_ppg[i]; j++)
+          {
+            priv->ppgdata[i][j].timestamp = priv->timestamp -
+              priv->interval * (counter_ppg[i] - j - 1);
+          }
+
+        priv->ppg_sensor[i].lower.push_event(priv->ppg_sensor[i].lower.priv,
+          priv->ppgdata[i],
+          sizeof(FAR struct sensor_event_ppgd) * counter_ppg[i]);
+      }
+
+    /* Optimize PPG0~2 (dark channel need no optimization) if needed. */
+
+    if (priv->ppg_sensor[i].auto_optimize == true &&
+        i != MAX86178_PPG3_SENSOR_IDX)
+      {
+        max86178_ppg_optimize(&priv->ppg_sensor[i]);
+      }
+  }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_fifo_set
+ *
+ * Description:
+ *   Set MAX86178's FIFO watermark and its interrupt, or disable them.
+ *
+ * Input Parameters:
+ *   priv   - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_fifo_set(FAR struct max86178_dev_s *priv)
+{
+  uint8_t regval;
+
+  /* Set water mark. STAT1_FIFOAFULL is set when FIFO reach 256 - FIFOAFULL,
+   * where 256 is the FIFO size (uint in samples, 3Bytes per sample).
+   */
+
+  if (priv->fifowtm > 0)
+    {
+      regval = MAX86178_FIFO_SIZE_SAMPLES - priv->fifowtm;
+      max86178_writesingle(priv, MAX86178_REG_FIFOAFULL, regval);
+
+      /* Set interrupt pin of MAX86178. */
+
+      max86178_readsingle(priv, MAX86178_REG_PINFUNC, &regval);
+      regval = regval & (~MAX86178_PINFUNC_INT1_FCFG_MASK);
+      regval = regval | MAX86178_PINFUNC_INT1_RDCLR;
+      max86178_writesingle(priv, MAX86178_REG_PINFUNC, regval);
+
+      max86178_readsingle(priv, MAX86178_REG_PINCFG, &regval);
+      regval = regval & (~MAX86178_PINCFG_INT1_OCFG_MASK);
+      regval = regval | MAX86178_PINCFG_INT1_PP_HIGH;
+      max86178_writesingle(priv, MAX86178_REG_PINCFG, regval);
+
+      /* Enable FIFO_A_FULL interrupt. */
+
+      max86178_readsingle(priv, MAX86178_REG_INT1EN1, &regval);
+      regval = regval | MAX86178_INTXEN1_AFULL_EN;
+      max86178_writesingle(priv, MAX86178_REG_INT1EN1, regval);
+    }
+  else
+    {
+      /* Disable interrupt pin of MAX86178. */
+
+      max86178_readsingle(priv, MAX86178_REG_PINFUNC, &regval);
+      regval = regval & (~MAX86178_PINFUNC_INT1_FCFG_MASK);
+      regval = regval | MAX86178_PINFUNC_INT1_DISABLE;
+      max86178_writesingle(priv, MAX86178_REG_PINFUNC, regval);
+
+      /* Disable FIFO_A_FULL interrupt. */
+
+      max86178_readsingle(priv, MAX86178_REG_INT1EN1, &regval);
+      regval = regval & (~MAX86178_INTXEN1_AFULL_EN);
+      max86178_writesingle(priv, MAX86178_REG_INT1EN1, regval);
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_init
+ *
+ * Description:
+ *   Initialize the MAX86178 into default status.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_init(FAR struct max86178_dev_s *priv)
+{
+  int i;
+
+  for (i = 0; i < MAX86178_INIT_TABLE_SIZE; i++)
+    {
+      max86178_writesingle(priv, max86178_init_table[i].regaddr,
+                           max86178_init_table[i].regval);
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_selftest
+ *
+ * Description:
+ *   MAX86178 has no specailized self-testing function. Currently only
+ *   checking device ID is supported.
+ *
+ * Input Parameters:
+ *   priv - The device struct.
+ *   arg  - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *   -ENOTTY - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_selftest(FAR struct max86178_dev_s *priv,
+                             unsigned long arg)
+{
+  switch (arg)
+    {
+      case MAX86178_CTRL_CHECKID:           /* Check ID command. */
+        {
+          return max86178_checkid(priv);
+        }
+
+      /* In the case above, function has returned thus no break is need. */
+
+      default:                              /* Other cmd tag */
+        {
+          snerr("The cmd was not supported: %d\n", -ENOTTY);
+          return -ENOTTY;
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_shutdown
+ *
+ * Description:
+ *   MAX86178 enter shutdown mode. SPI is available during shutdown mode.
+ *
+ * Input Parameters:
+ *   priv   - Device struct.
+ *   enable - true(enter normal mode) and false(enter shutdown mode).
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_shutdown(FAR struct max86178_dev_s *priv)
+{
+  uint8_t regval;
+
+  /* Read and write PLLCFG_PLL_EN to disable PLL if it's on. */
+
+  max86178_readsingle(priv, MAX86178_REG_PLLCFG1, &regval);
+  if (regval & MAX86178_PLLCFG1_PLL_EN_MASK)
+    {
+      regval = regval & (~MAX86178_PLLCFG1_PLL_EN_MASK);
+      regval = regval | MAX86178_PLLCFG1_PLL_DIS;
+      max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
+    }
+
+  /* Put interrupt pin of MAX86178 in open-drain to avoid current leakage. */
+
+  max86178_readsingle(priv, MAX86178_REG_PINCFG, &regval);
+  regval = regval & (~MAX86178_PINCFG_INT1_OCFG_MASK);
+  regval = regval | MAX86178_PINCFG_INT1_OD;
+  max86178_writesingle(priv, MAX86178_REG_PINCFG, regval);
+
+  /* Read and write MAX86178_SYSCFG1_NORMAL to enter shutdown mode. */
+
+  max86178_readsingle(priv, MAX86178_REG_SYSCFG1, &regval);
+  regval = regval & (~MAX86178_SYSCFG1_SHDN_MASK);
+  regval = regval | MAX86178_SYSCFG1_SHDN;
+  max86178_writesingle(priv, MAX86178_REG_SYSCFG1, regval);
+}
+
+/****************************************************************************
+ * Name: max86178_softreset
+ *
+ * Description:
+ *   All registers valuse will be set to power-on-reset state.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_softreset(FAR struct max86178_dev_s *priv)
+{
+  uint8_t regval;
+
+  /* Disable PLL */
+
+  max86178_readsingle(priv, MAX86178_REG_PLLCFG1, &regval);
+  regval = regval & (~MAX86178_PLLCFG1_PLL_EN);
+  max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
+
+  /* Whatever the other bits in MAX86178_REG_SYSCFG1 are, they will be 0
+   * (default) after softreset. Thus there's no need to read them out.
+   */
+
+  regval = MAX86178_SYSCFG1_RESET;
+  max86178_writesingle(priv, MAX86178_REG_SYSCFG1, regval);
+}
+
+/****************************************************************************
+ * Name: max86178_update_sensors
+ *
+ * Description:
+ *   Update current activated sensors' interval and batch, or activate new
+ *   sensors after FIFO reading.
+ *
+ * Input Parameters:
+ *   priv    - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   If activated, ECG's sample interval must be equal to PPG's. If ECG is
+ *   not actiaved, PPG's sample interval is generally greater than ECG's.
+ *
+ ****************************************************************************/
+
+static void max86178_update_sensors(FAR struct max86178_dev_s *priv)
+{
+  uint32_t intrvl_min;
+  uint32_t batch_min;
+  uint32_t fifowtm = 0;
+  uint16_t ppg_frdiv;
+  uint8_t ppg_activating;
+  uint8_t ecg_activating = 0;
+  uint8_t ppg_chidx;
+
+  /* Step 1. Modify device's interval if needed. */
+
+  if (priv->update_interval || priv->update_activate)
+    {
+      /* Find the activating(will be activated soon below) or activated with
+       * no inactivating(will not be inactivated below) PPG sensor with the
+       * minimum interval.
+       */
+
+      intrvl_min = 0xffffffff;
+      for (ppg_chidx = 0; ppg_chidx < MAX86178_PPG_SENSOR_NUM; ppg_chidx++)
+        {
+          if (((priv->ppg_sensor[ppg_chidx].activated == true &&
+              priv->ppg_sensor[ppg_chidx].inactivating == false) ||
+              priv->ppg_sensor[ppg_chidx].activating) &&
+              priv->ppg_sensor[ppg_chidx].interval_desired < intrvl_min)
+            {
+              intrvl_min = priv->ppg_sensor[ppg_chidx].interval_desired;
+            }
+        }
+
+      /* ECG and PPG shall sample synchronously. If ECG has had or will have
+       * a less interval, device interval should use it, or it will use the
+       * minium of PPGs'.
+       */
+
+      if ((priv->ecg_sensor.activated == true &&
+          priv->ecg_sensor.inactivating == false) ||
+          priv->ecg_sensor.activating == true)
+        {
+          if (priv->ecg_sensor.interval_desired < intrvl_min)
+            {
+              intrvl_min = priv->ecg_sensor.interval_desired;
+            }
+        }
+
+      /* If minimum interval has changed, some sensors will be activated. Set
+       * new PPG FPS and ECG SR then. Otherwise do nothing since no sensor
+       * will be activated or the interval will not change.
+       */
+
+      if (intrvl_min != 0xffffffff && intrvl_min != priv->interval)
+        {
+          ppg_frdiv = max86178_ppg_calcu_frdiv(intrvl_min);
+          max86178_ppg_set_fps(priv, ppg_frdiv);
+          max86178_ecg_calcu_clk(&priv->ecg_sensor, &intrvl_min);
+          max86178_ecg_set_sr(priv, priv->ecg_sensor.decrate,
+                              priv->ecg_sensor.ndiv);
+          priv->interval = intrvl_min;
+
+          /* FIFO watermark shall be modified for new sample interval if
+           * interrupt reading is used. There's nothing to do for polling
+           * reading, the new interval will take effect when queuing next
+           * polling worker.
+           */
+
+          if (priv->fifowtm > 0)
+            {
+              priv->update_batch = true;
+            }
+        }
+
+      /* Flag is cleared after updating PPG interval is completed. */
+
+      priv->update_interval = false;
+    }
+
+  /* Step 2. Modify the FIFO watermark if any sensor's batch has changed or
+   * any sensor is to be activate or inactivate.
+   */
+
+  if (priv->update_batch || priv->update_activate)
+    {
+      /* Find the minimum batch latency among all activating(will be
+       * activated soon below) and activated with no inactivating(will not be
+       * inactivated below) PPG sensors. And count the number of PPG sensors
+       * that will be or remain activated.
+       */
+
+      batch_min = 0xffffffff;
+      ppg_activating = 0;
+      for (ppg_chidx = 0; ppg_chidx < MAX86178_PPG_SENSOR_NUM; ppg_chidx++)
+        {
+          if ((priv->ppg_sensor[ppg_chidx].activated == true &&
+              priv->ppg_sensor[ppg_chidx].inactivating == false) ||
+              priv->ppg_sensor[ppg_chidx].activating)
+            {
+              batch_min = priv->ppg_sensor[ppg_chidx].batch_desired;
+              ppg_activating++;
+            }
+        }
+
+      /* ECG and PPG shall use the same batch latency. */
+
+      if ((priv->ecg_sensor.activated == true &&
+          priv->ecg_sensor.inactivating == false) ||
+          priv->ecg_sensor.activating == true)
+        {
+          ecg_activating = 1;
+          if (priv->ecg_sensor.batch_desired < batch_min)
+            {
+              batch_min = priv->ecg_sensor.batch_desired;
+            }
+        }
+
+      /* If some sensor will be or remain activated, calculate new FIFO
+       * watermark. Otherwise do nothing since no sensor will be activated or
+       * FIFO is not needed.
+       */
+
+      if (batch_min != 0xffffffff && batch_min != 0)
+        {
+          fifowtm = batch_min / priv->interval *
+                    (2 * ppg_activating + ecg_activating);
+        }
+
+      /* Set new FIFO watermark if it's different from current one. Switch
+       * between polling and interrupt if needed.
+       */
+
+      if (batch_min != 0xffffffff && fifowtm != priv->fifowtm)
+        {
+          if (priv->activated == true)
+            {
+              if (fifowtm > 0 && priv->fifowtm == 0)
+                {
+                  work_cancel(HPWORK, &priv->work_poll);
+                  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                                  IOEXPANDER_OPTION_INTCFG,
+                                  (FAR void *)IOEXPANDER_VAL_RISING);
+                }
+              else if (fifowtm == 0 && priv->fifowtm > 0)
+                {
+                  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                                  IOEXPANDER_OPTION_INTCFG,
+                                  (FAR void *)IOEXPANDER_VAL_DISABLE);
+                  work_queue(HPWORK, &priv->work_poll, max86178_worker_poll,
+                             priv, priv->interval / USEC_PER_TICK);
+                }
+            }
+
+          priv->fifowtm = fifowtm;
+          max86178_fifo_flush(priv);
+          max86178_fifo_set(priv);
+        }
+
+      /* Complete the batch modification. */
+
+      priv->update_batch = false;
+    }
+
+  /* Step 3. If need to activate or inactivate some sensors. */
+
+  if (priv->update_activate)
+    {
+      if (priv->ecg_sensor.activating == true)
+        {
+          max86178_ecg_enable(priv, true);
+        }
+      else if (priv->ecg_sensor.inactivating == true)
+        {
+          max86178_ecg_enable(priv, false);
+        }
+
+      for (ppg_chidx = 0; ppg_chidx < MAX86178_PPG_SENSOR_NUM; ppg_chidx++)
+        {
+          if (priv->ppg_sensor[ppg_chidx].activating)
+            {
+              max86178_ppg_enable(priv, ppg_chidx, true);
+            }
+          else if (priv->ppg_sensor[ppg_chidx].inactivating)
+            {
+              max86178_ppg_enable(priv, ppg_chidx, false);
+            }
+        }
+
+      priv->update_activate = false;
+    }
+
+  /* Step 4. If no sensor is activated, shut down and disable reading. */
+
+  if (priv->ecg_sensor.activated == false && priv->ppg_activated == 0)
+    {
+      if (priv->fifowtm > 0)
+        {
+          IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                          IOEXPANDER_OPTION_INTCFG,
+                          (FAR void *)IOEXPANDER_VAL_DISABLE);
+        }
+      else
+        {
+          work_cancel(HPWORK, &priv->work_poll);
+        }
+
+      max86178_enable(priv, false);
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_ecg_calcu_batch
+ *
+ * Description:
+ *   Calculate ECG clock parameters according to the sample interval.
+ *
+ * Input Parameters:
+ *   sensor   - ECG sensor struct.
+ *   interval - Sample interval in us.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_ecg_calcu_clk(FAR struct max86178_ecg_sensor_s *sensor,
+                                   FAR uint32_t *interval)
+{
+  float freq;
+  uint16_t decrate;
+  uint16_t ndiv;
+  uint8_t decrate_options[MAX86178_ECG_DECRATE_NUM] = {
+    MAX86178_ECGCFG1_DEC_RATE_16, MAX86178_ECGCFG1_DEC_RATE_32,
+    MAX86178_ECGCFG1_DEC_RATE_64, MAX86178_ECGCFG1_DEC_RATE_128,
+    MAX86178_ECGCFG1_DEC_RATE_256, MAX86178_ECGCFG1_DEC_RATE_512,
+    };
+
+  uint16_t decratelist[MAX86178_ECG_DECRATE_NUM] = {
+    MAX86178_ECG_DEC_RATE_16, MAX86178_ECG_DEC_RATE_32,
+    MAX86178_ECG_DEC_RATE_64, MAX86178_ECG_DEC_RATE_128,
+    MAX86178_ECG_DEC_RATE_256, MAX86178_ECG_DEC_RATE_512,
+    };
+
+  uint8_t i;
+
+  /* Find the period that matches best. */
+
+  freq = MAX86178_ONE_SECOND / *interval;
+  if (freq < MAX86178_ECG_SR_MIN)
+    {
+      freq = MAX86178_ECG_SR_MIN;
+    }
+  else if (freq > MAX86178_ECG_SR_MAX)
+    {
+      freq = MAX86178_ECG_SR_MAX;
+    }
+
+  /* From little one to great one, the first DEC_RATE which makes ECG_ADC_CLK
+   * greater than MAX86178_ECG_ADC_CLK_MIN, is the only DEC_RATE which can
+   * make ECG_ADC_CLK to be in range of [MAX86178_ECG_ADC_CLK_MIN,
+   * MAX86178_ECG_ADC_CLK_MAX].
+   */
+
+  decrate = decratelist[0];
+  for (i = 0; i < MAX86178_ECG_DECRATE_NUM; i++)
+    {
+      if (freq * decratelist[i] > MAX86178_ECG_ADC_CLK_MIN)
+        {
+          decrate = decratelist[i];
+          break;
+        }
+    }
+
+  ndiv = MAX86178_ECG_PLL_DFT / (freq * decrate);
+  freq = MAX86178_ECG_PLL_DFT / (ndiv * decrate);
+  *interval = (unsigned int)(MAX86178_ONE_SECOND / freq);
+  sensor->ndiv = ndiv;
+  sensor->decrate = decrate_options[i];
+}
+
+/****************************************************************************
+ * Name: max86178_ecg_calcudata
+ *
+ * Description:
+ *   Calculate ECG value from origin sample data.
+ *
+ * Input Parameters:
+ *   sensor - ECG sensor struct.
+ *   sample - Origin ECG sample data from FIFO
+ *
+ * Returned Value:
+ *   Calculated ECG value.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static float max86178_ecg_calcudata(FAR struct max86178_ecg_sensor_s *sensor,
+                                    uint32_t sample)
+{
+  float temp_float;
+  int temp_int;
+
+  /* ECG value is a 2's complement code 18bits number. The MSB 6bits are tag.
+   * The 17th bit is the sign bit.
+   */
+
+  sample = sample & (~MAX86178_FIFOTAG_MASK_POST);
+  if (sample & MAX86178_ECG_SIGN_MASK)
+    {
+      sample = sample | MAX86178_ECG_NEGATIVE;
+    }
+
+  temp_int = sample;
+  temp_float = (float)temp_int;
+
+  return (temp_float * sensor->factor);
 }
 
 /****************************************************************************
@@ -778,7 +1804,7 @@ static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable)
 
       max86178_enable(priv, enable);
 
-      /* Read and write PLL settings (PLL CLK = 8 MHz) */
+      /* Read and write PLL settings (PLL CLK = 4 MHz) */
 
       max86178_readsingle(priv, MAX86178_REG_PLLCFG6, &regval);
       regval = regval & (~MAX86178_PLLCFG6_CLKFRQSEL_MASK);
@@ -827,13 +1853,14 @@ static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable)
       regval = regval & (~MAX86178_ECGCFG3_MUXSEL_MASK);
       regval = regval | MAX86178_ECGCFG3_MUXSEL_EL123;
       max86178_writesingle(priv, MAX86178_REG_ECGCFG3, regval);
+      max86178_writesingle(priv, MAX86178_REG_ECGCALCFG3, 0);
 
       /* Enable ECG */
 
       max86178_readsingle(priv, MAX86178_REG_ECGCFG1, &regval);
       regval = regval & (~MAX86178_ECGCFG1_ECG_EN_MASK);
       regval = regval | MAX86178_ECGCFG1_ECG_EN;
-      max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
+      max86178_writesingle(priv, MAX86178_REG_ECGCFG1, regval);
     }
   else
     {
@@ -849,271 +1876,26 @@ static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable)
       max86178_readsingle(priv, MAX86178_REG_ECGCFG1, &regval);
       regval = regval & (~MAX86178_ECGCFG1_ECG_EN_MASK);
       regval = regval | MAX86178_ECGCFG1_ECG_DIS;
-      max86178_writesingle(priv, MAX86178_REG_PLLCFG1, regval);
+      max86178_writesingle(priv, MAX86178_REG_ECGCFG1, regval);
     }
+
+  priv->ecg_sensor.activated = enable;
+  priv->ecg_sensor.activating = false;
+  priv->ecg_sensor.inactivating = false;
 
   return OK;
 }
 
 /****************************************************************************
- * Name: max86178_ppg_enable
+ * Name: max86178_ecg_set_sr
  *
  * Description:
- *   Enable or disable sensor device.
+ *   Set the ECG SR(sample rate).
  *
  * Input Parameters:
- *   priv   - Device struct.
- *   enable - true(enable) and false(disable).
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   none.
- *
- ****************************************************************************/
-
-static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
-{
-  uint8_t regval;
-
-  if (enable)
-    {
-      /* To enable PPG, ensure the MAX86178 is enabled. */
-
-      max86178_enable(priv, enable);
-
-      /* MEAS1 selects LED driver A to drive LED3 */
-
-      max86178_readsingle(priv, MAX86178_REG_MEAS1SEL, &regval);
-      regval = regval & (~MAX86178_MEASXSEL_DRVA_MASK);
-      regval = regval | MAX86178_MEASXSEL_DRVA_LED3;
-      max86178_writesingle(priv, MAX86178_REG_MEAS1SEL, regval);
-
-      /* PPG1 selects PD1 & PD3， PPG2 selects PD2 & PD4. */
-
-      max86178_readsingle(priv, MAX86178_REG_MEAS1CFG5, &regval);
-      regval = regval & (uint8_t)(~(MAX86178_MEASXCFG5_PD1SEL_MASK |
-                                    MAX86178_MEASXCFG5_PD2SEL_MASK |
-                                    MAX86178_MEASXCFG5_PD3SEL_MASK |
-                                    MAX86178_MEASXCFG5_PD4SEL_MASK));
-      regval = regval | MAX86178_MEASXCFG5_PD1SEL_PPG1 |
-                        MAX86178_MEASXCFG5_PD3SEL_PPG1 |
-                        MAX86178_MEASXCFG5_PD2SEL_PPG2 |
-                        MAX86178_MEASXCFG5_PD4SEL_PPG2;
-      max86178_writesingle(priv, MAX86178_REG_MEAS1CFG5, regval);
-
-      /* Set PPG frame clock. */
-
-      max86178_readsingle(priv, MAX86178_REG_PLLCFG6, &regval);
-      regval = regval & (~MAX86178_PLLCFG6_CLKFRQSEL_MASK);
-      regval = regval | MAX86178_PLLCFG6_REFCLK_32K;
-      max86178_writesingle(priv, MAX86178_REG_PLLCFG6, regval);
-
-      /* Set LED current. */
-
-      max86178_ppg_set_current(priv,
-                               &priv->sensor[MAX86178_PPG_IDX].current);
-
-      /* Enable PPG MEAS1. */
-
-      max86178_readsingle(priv, MAX86178_REG_PPGCFG1, &regval);
-      regval = regval & (~MAX86178_PPGCFG1_MEAS1EN_MASK);
-      regval = regval | MAX86178_PPGCFG1_MEAS1EN;
-      max86178_writesingle(priv, MAX86178_REG_PPGCFG1, regval);
-    }
-  else
-    {
-      /* Disable PPG MEAS1. */
-
-      max86178_readsingle(priv, MAX86178_REG_PPGCFG1, &regval);
-      regval = regval & (~MAX86178_PPGCFG1_MEAS1EN_MASK);
-      regval = regval | MAX86178_PPGCFG1_MEAS1DIS;
-      max86178_writesingle(priv, MAX86178_REG_PPGCFG1, regval);
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: max86178_fifo_read
- *
- * Description:
- *   Read all available data in FIFO.
- *
- * Input Parameters:
- *   priv  - Device struct.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   1. ECG and PPG are synchronous sampled. Asynchronous sampling need
- *      timing data to determine the timestamp, and will be implented later.
- *   2. One of two PPG channels works at the same time. Perhaps we will add
- *      procession for 2 channels working the same time. Currently, only 1
- *      channel working at the same time is enough.
- *
- ****************************************************************************/
-
-static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
-{
-  uint32_t fifobytes;
-  uint32_t temp_sample;
-  uint32_t counter_ecg = 0;
-  uint32_t counter_ppg = 0;
-  uint16_t num = 0;
-  uint8_t temp_num;
-  uint8_t toggle_ppgch = 1;
-  uint16_t i;
-
-  /* Get number of samples in FIFO. */
-
-  max86178_readsingle(priv, MAX86178_REG_FIFOCNT1, &temp_num);
-  if (temp_num & MAX86178_FIFOCNT1_CNT_MSB_MASK)
-    {
-      num = 256;
-    }
-
-  max86178_readsingle(priv, MAX86178_REG_FIFOCNTLSB, &temp_num);
-  num = num + temp_num;
-
-  /* Calculate how many bytes are in FIFO. */
-
-  fifobytes = num * MAX86178_FIFO_BYTES_PER_DATA;
-
-  /* Read the FIFO in number of FIFO watermark */
-
-  max86178_readregs(priv, MAX86178_REG_FIFODATA, priv->fifobuf, fifobytes);
-
-  /* Deal each sample in FIFO. The last sample is the newest sample. */
-
-  for (i = 0 ; i < num; i++)
-    {
-      temp_sample =
-            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA] << 16) |
-            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA + 1] << 8) |
-            (priv->fifobuf[i * MAX86178_FIFO_BYTES_PER_DATA + 2]);
-
-      switch (temp_sample & MAX86178_FIFOTAG_MASK_PRE)
-        {
-          case MAX86178_FIFOTAG_PRE_MEAS1:       /* PPG MEAS1 data tag. */
-            {
-              priv->ppgdata[counter_ppg].timestamp = priv->timestamp
-                - priv->sensor[MAX86178_PPG_IDX].interval
-                * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg - 1);
-              priv->ppgdata[counter_ppg].current =
-                priv->sensor[MAX86178_PPG_IDX].current;
-              if (toggle_ppgch == 1)
-                {
-                  priv->ppgdata[counter_ppg].ppg[0] =
-                    max86178_ppg_calcudata(priv, temp_sample);
-                  toggle_ppgch = 2;
-                }
-              else
-                {
-                  priv->ppgdata[counter_ppg].ppg[1] =
-                    max86178_ppg_calcudata(priv, temp_sample);
-                  toggle_ppgch = 1;
-                  counter_ppg++;
-                }
-            }
-            break;
-
-          case MAX86178_FIFOTAG_PRE_EXP_OVF:     /* PPG exposure overflow. */
-            {
-              priv->ppgdata[counter_ppg].timestamp = priv->timestamp
-                - priv->sensor[MAX86178_PPG_IDX].interval
-                * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg - 1);
-              priv->ppgdata[counter_ppg].current =
-                priv->sensor[MAX86178_PPG_IDX].current;
-              if (toggle_ppgch == 1)
-                {
-                  priv->ppgdata[counter_ppg].ppg[0] = MAX86178_ABS_PPG_MAX;
-                  toggle_ppgch = 2;
-                }
-              else
-                {
-                  priv->ppgdata[counter_ppg].ppg[1] = MAX86178_ABS_PPG_MAX;
-                  toggle_ppgch = 1;
-                  counter_ppg++;
-                }
-            }
-            break;
-
-          case MAX86178_FIFOTAG_PRE_ECG:         /* ECG data tag. */
-            {
-              priv->ecgdata[counter_ecg].ecg =
-                max86178_ecg_calcudata(priv, temp_sample);
-              priv->ecgdata[counter_ecg].timestamp = priv->timestamp
-                - priv->sensor[MAX86178_ECG_IDX].interval
-                * (priv->sensor[MAX86178_ECG_IDX].fifowtm - counter_ecg - 1);
-              counter_ecg++;
-            }
-            break;
-
-          default:                               /* Other data tags. */
-            {
-              /* Corresponding procession for the other tags will be added in
-               * future.
-               */
-            }
-            break;
-        }
-    }
-
-  /* Since sometimes some extra special samples are saved in FIFO, the ECG
-   * and PPG samples might not reach the watermark when the total samples
-   * reached the total watermark. In this case, timestamp should be modified.
-   */
-
-  if (counter_ecg < priv->sensor[MAX86178_ECG_IDX].fifowtm)
-    {
-      for (i = 0; i < counter_ecg; i++)
-        {
-          priv->ecgdata[i].timestamp = priv->ecgdata[i].timestamp
-            + priv->sensor[MAX86178_ECG_IDX].interval
-            * (priv->sensor[MAX86178_ECG_IDX].fifowtm - counter_ecg);
-         }
-    }
-
-  if (counter_ppg < priv->sensor[MAX86178_PPG_IDX].fifowtm)
-    {
-      for (i = 0; i < counter_ppg; i++)
-        {
-          priv->ppgdata[i].timestamp = priv->ppgdata[i].timestamp
-            + priv->sensor[MAX86178_PPG_IDX].interval
-            * (priv->sensor[MAX86178_PPG_IDX].fifowtm - counter_ppg);
-         }
-    }
-
-  if (counter_ecg > 0)
-    {
-      priv->sensor[MAX86178_ECG_IDX].lower.push_event(
-            priv->sensor[MAX86178_ECG_IDX].lower.priv, priv->ecgdata,
-            sizeof(FAR struct sensor_event_ecg) * counter_ecg);
-    }
-
-  if (counter_ppg > 0)
-    {
-      priv->sensor[MAX86178_PPG_IDX].lower.push_event(
-            priv->sensor[MAX86178_PPG_IDX].lower.priv, priv->ppgdata,
-            sizeof(FAR struct sensor_event_ppgd) * counter_ppg);
-    }
-
-  /* Release ecg and ppg data after push events have been done */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: max86178__set_fifoint
- *
- * Description:
- *   Set MAX86178's FIFO watermark and its interrupt.
- *
- * Input Parameters:
- *   priv   - Device struct.
+ *   priv    - Device struct.
+ *   decrate - Decimal rate for ECG ADC.
+ *   ndiv    - NDIV divide ratio for ECG clock
  *
  * Returned Value:
  *   None.
@@ -1123,34 +1905,22 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
  *
  ****************************************************************************/
 
-static void max86178_set_fifoint(FAR struct max86178_dev_s *priv)
+static void max86178_ecg_set_sr(FAR struct max86178_dev_s *priv,
+                                uint8_t decrate, uint16_t ndiv)
 {
   uint8_t regval;
 
-  /* Set water mark. STAT1_FIFOAFULL is set when FIFO reach 256 - FIFOAFULL,
-   * where 256 is the FIFO size (uint in samples, 3Bytes per sample).
-   */
+  max86178_readsingle(priv, MAX86178_REG_ECGCFG1, &regval);
+  regval = regval & (~MAX86178_ECGCFG1_DEC_RATE_MASK);
+  regval = regval | decrate;
+  max86178_writesingle(priv, MAX86178_REG_ECGCFG1, regval);
 
-  regval = MAX86178_FIFO_SIZE - priv->fifowtm;
-  max86178_writesingle(priv, MAX86178_REG_FIFOAFULL, regval);
-
-  /* Set interrupt pin of MAX86178. */
-
-  max86178_readsingle(priv, MAX86178_REG_PINFUNC, &regval);
-  regval = regval & (~MAX86178_PINFUNC_INT1_FCFG_MASK);
-  regval = regval | MAX86178_PINFUNC_INT1_RDCLR;
-  max86178_writesingle(priv, MAX86178_REG_PINFUNC, regval);
-
-  max86178_readsingle(priv, MAX86178_REG_PINCFG, &regval);
-  regval = regval & (~MAX86178_PINCFG_INT1_OCFG_MASK);
-  regval = regval | MAX86178_PINCFG_INT1_OD;
-  max86178_writesingle(priv, MAX86178_REG_PINCFG, regval);
-
-  /* Enable FIFO_A_FULL interrupt. */
-
-  max86178_readsingle(priv, MAX86178_REG_INT1EN1, &regval);
-  regval = regval | MAX86178_INTXEN1_AFULL_EN;
-  max86178_writesingle(priv, MAX86178_REG_INT1EN1, regval);
+  max86178_readsingle(priv, MAX86178_REG_PLLCFG4, &regval);
+  regval = regval & (~MAX86178_PLLCFG4_ECGNDIVH_MASK);
+  regval = regval | (uint8_t)((ndiv >> 8) << MAX86178_PLLCFG4_ECGNDIVH_OFST);
+  max86178_writesingle(priv, MAX86178_REG_PLLCFG4, regval);
+  regval = (uint8_t)ndiv;
+  max86178_writesingle(priv, MAX86178_REG_ECGNDIVLSB, regval);
 }
 
 /****************************************************************************
@@ -1160,8 +1930,7 @@ static void max86178_set_fifoint(FAR struct max86178_dev_s *priv)
  *   Calculate PPG value from origin sample data.
  *
  * Input Parameters:
- *   priv   - Device struct.
- *   sample - Origin PPG sample data from FIFO
+ *   sample - Origin PPG sample data from FIFO.
  *
  * Returned Value:
  *   Calculated PPG value.
@@ -1171,50 +1940,350 @@ static void max86178_set_fifoint(FAR struct max86178_dev_s *priv)
  *
  ****************************************************************************/
 
-static uint32_t max86178_ppg_calcudata(FAR struct max86178_dev_s *priv,
-                                       uint32_t sample)
+static uint32_t max86178_ppg_calcudata(uint32_t sample)
 {
   return sample & (~MAX86178_FIFOTAG_MASK_PRE);
 }
 
 /****************************************************************************
- * Name: max86178_ecg_calcudata
+ * Name: max86178_ppg_calu_frdiv
  *
  * Description:
- *   Calculate ECG value from origin sample data.
+ *   Calculate PPG frame clock FRDIV.
  *
  * Input Parameters:
- *   priv  - Device struct.
- *   sample - Origin ECG sample data from FIFO
+ *   interval - PPG sample interval(us).
  *
  * Returned Value:
- *   Calculated ECG value.
+ *   Calculated PPG frame clock FRDIV.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-static float max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
-                                    uint32_t sample)
+static uint16_t max86178_ppg_calcu_frdiv(uint32_t interval)
 {
-  float temp_float;
-  int temp_int;
+  float freq;
+  uint16_t frdiv;
 
-  /* ECG value is a 2's complement code 18bits number. The MSB 6bits are tag.
-   * The 17th bit is the sign bit.
-   */
-
-  sample = sample & (~MAX86178_FIFOTAG_MASK_POST);
-  if (sample & MAX86178_ECG_SIGN_MASK)
+  freq = MAX86178_ONE_SECOND / interval;
+  frdiv = (uint16_t)(MAX86178_REF_CLK_DFT / freq);
+  if (frdiv < MAX86178_FRCLKDIV_MIN)
     {
-      sample = sample | MAX86178_FIFOTAG_MASK_POST;
+      frdiv = MAX86178_FRCLKDIV_MIN;
+    }
+  else if (frdiv > MAX86178_FRCLKDIV_MAX)
+    {
+      frdiv = MAX86178_FRCLKDIV_MAX;
     }
 
-  temp_int = sample;
-  temp_float = (float)temp_int;
+  return frdiv;
+}
 
-  return (temp_float * priv->sensor[MAX86178_ECG_IDX].factor);
+/****************************************************************************
+ * Name: max86178_ppg_dealsample
+ *
+ * Description:
+ *   Deal the sample data from FIFO - store it in the buffer for push_event,
+ *   modify the count and toggle flag.
+ *
+ * Input Parameters:
+ *   priv   - Device struct.
+ *   chidx  - The channel index of the PPG sensor to be operated.
+ *   sample - The sample data from FIFO.
+ *   count  - Count of the samples in result buffer.
+ *   toggle - A flag indicate which PPG ADC is operating.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_ppg_dealsample(FAR struct max86178_dev_s *priv,
+                                    uint8_t chidx, uint32_t sample,
+                                    FAR uint32_t *count, FAR uint8_t *toggle)
+{
+  uint32_t ppg;
+
+  ppg = max86178_ppg_calcudata(sample);
+  priv->ppgdata[chidx][*count].current = priv->ppg_sensor[chidx].current;
+  if (*toggle == 1)
+    {
+      priv->ppgdata[chidx][*count].ppg[0] = ppg;
+      priv->ppgdata[chidx][*count].gain[0] = priv->ppg_sensor[chidx].gain1;
+      *toggle = 2;
+
+      /* Record for optimization */
+
+      max86178_ppg_optim_record(&priv->ppg_sensor[chidx].optm1, ppg);
+    }
+  else
+    {
+      priv->ppgdata[chidx][*count].ppg[1] = ppg;
+      priv->ppgdata[chidx][*count].gain[1] = priv->ppg_sensor[chidx].gain2;
+      *toggle = 1;
+      *count = *count + 1;
+
+      /* Record for optimization */
+
+      max86178_ppg_optim_record(&priv->ppg_sensor[chidx].optm2, ppg);
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_optimze
+ *
+ * Description:
+ *   Modify PPG's parameters to make PPG's ouput in optimum range. The LED
+ *   current and ADC input range (which will affect ADC gain) will be
+ *   modified.
+ *
+ * Input Parameters:
+ *   sensor - PPG sensor struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_ppg_optimize(FAR struct max86178_ppg_sensor_s *sensor)
+{
+  uint32_t avg = 0;
+
+  /* If PPG1, which should have higher SNR than PPG2, shall be optimized. */
+
+  if (sensor->optm1.trigger)
+    {
+      if (sensor->optm1.up_trigger >= MAX86178_PPG_OP_TRIG)
+        {
+          if (sensor->current > MAX86178_PPG_LEDLSBSTEP)
+            {
+              avg = sensor->optm1.total / sensor->optm1.up_trigger;
+            }
+
+          sensor->optm1.up_trigger = 0;
+        }
+      else
+        {
+          if (sensor->current < MAX86178_PPG_LEDPAMAX)
+            {
+              avg = sensor->optm1.total / sensor->optm1.low_trigger;
+            }
+
+          sensor->optm1.low_trigger = 0;
+        }
+
+      if (avg != 0)
+        {
+          sensor->current = (uint32_t)((uint64_t)sensor->current * (uint64_t)
+            max86178_ppg_optim_param_table[sensor->optm1.adc_range].middle /
+            (uint64_t)avg);
+          max86178_ppg_set_current(sensor, &sensor->current);
+          sensor->optm1.total = 0;
+          sensor->optm1.cnt = 0;
+          sensor->optm1.times = 1;
+        }
+
+      sensor->optm1.trigger = false;
+    }
+
+  /* If driver is optimizing PPG1 */
+
+  if (sensor->optm1.times > 0 && sensor->optm1.cnt > MAX86178_PPG_OP_WINDOW)
+    {
+      avg = sensor->optm1.total / sensor->optm1.cnt;
+      if (avg <=
+          max86178_ppg_optim_param_table[sensor->optm1.adc_range].middle +
+          max86178_ppg_optim_param_table[sensor->optm1.adc_range].span &&
+          avg >=
+          max86178_ppg_optim_param_table[sensor->optm1.adc_range].middle -
+          max86178_ppg_optim_param_table[sensor->optm1.adc_range].span)
+        {
+          sensor->optm1.times = 0;
+        }
+      else
+        {
+          sensor->current = (uint32_t)((uint64_t)sensor->current * (uint64_t)
+            max86178_ppg_optim_param_table[sensor->optm1.adc_range].middle /
+            (uint64_t)avg);
+          max86178_ppg_set_current(sensor, &sensor->current);
+          sensor->optm1.times++;
+          if (sensor->optm1.times > MAX86178_PPG_OP_TIMES)
+            {
+              sensor->optm1.times = 0;
+            }
+        }
+
+      if (sensor->optm1.times == 0)
+        {
+          sensor->optm2.low_trigger = 0;
+          sensor->optm2.up_trigger = 0;
+          sensor->optm2.total = 0;
+          sensor->optm2.cnt = 0;
+          sensor->optm2.trigger = false;
+        }
+
+      sensor->optm1.total = 0;
+      sensor->optm1.cnt = 0;
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_optim_record
+ *
+ * Description:
+ *   Record data for PPG optimization.
+ *
+ * Input Parameters:
+ *   optim - Pointer to PPG optimization struct.
+ *   ppg   - PPG value to be recorded.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_ppg_optim_record(FAR struct max86178_ppg_optim_s *optim,
+                                      uint32_t ppg)
+{
+  /* If optimization didn't start, record and check if PPG exceed the range.
+   * If optimization has started, only record the PPG value.
+   */
+
+  if (optim->times == 0)
+    {
+      /* If PPG value exceeds the range, record it. Otherwise clear the
+       * counters. Thus only either continuously too great or continuously
+       * too little PPG values will trigger an optimization.
+       */
+
+      if (ppg > max86178_ppg_optim_param_table[optim->adc_range].upper)
+        {
+          /* If PPG was less than lower bound before but not reach the
+           * threshold to trigger optimization, clear its counter and start
+           * upper counter. Otherwise increase the upper counter and record
+           * the PPG value.
+           */
+
+          if (optim->low_trigger > 0 && optim->trigger == false)
+            {
+              optim->low_trigger = 0;
+              optim->up_trigger = 1;
+              optim->total = ppg;
+            }
+          else if (optim->low_trigger == 0)
+            {
+              optim->up_trigger++;
+              optim->total = optim->total + ppg;
+            }
+        }
+      else if (ppg < max86178_ppg_optim_param_table[optim->adc_range].lower)
+        {
+          /* If PPG was greater than upper bound before but not reach the
+           * threshold to trigger optimization, clear its counter and start
+           * lower counter. Otherwise increase the lower counter and record
+           * the PPG value.
+           */
+
+          if (optim->up_trigger > 0 && optim->trigger == false)
+            {
+              optim->up_trigger = 0;
+              optim->low_trigger = 1;
+              optim->total = ppg;
+            }
+          else if (optim->up_trigger == 0)
+            {
+              optim->low_trigger++;
+              optim->total = optim->total + ppg;
+            }
+        }
+      else
+        {
+          /* If optimization will not be triggered, normal PPG value will
+           * clear the triggers.
+           */
+
+          if (optim->trigger == false)
+            {
+              optim->up_trigger = 0;
+              optim->low_trigger = 0;
+              optim->total = 0;
+            }
+        }
+
+      /* If either counter reach the threshold, change the flag. */
+
+      if (optim->up_trigger >= MAX86178_PPG_OP_TRIG ||
+          optim->low_trigger >= MAX86178_PPG_OP_TRIG)
+        {
+          optim->trigger = true;
+        }
+    }
+  else
+    {
+      optim->total = optim->total + ppg;
+      optim->cnt++;
+    }
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_enable
+ *
+ * Description:
+ *   Enable or disable the PPG measurement according to the channel index.
+ *
+ * Input Parameters:
+ *   priv     - Device struct.
+ *   chidx - The channel index of the PPG sensor to be operated.
+ *   enable - True: enable the PPG measurement.
+ *            False: disable the PPG measurement.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_ppg_enable(FAR struct max86178_dev_s *priv,
+                                uint8_t chidx, bool enable)
+{
+  uint8_t regval;
+
+  /* To enable ECG, ensure the MAX86178 is enabled. */
+
+  max86178_enable(priv, enable);
+  max86178_readsingle(priv, MAX86178_REG_PPGCFG1, &regval);
+  if (enable)
+    {
+      /* If activating, set LED driver current */
+
+      max86178_ppg_set_current(&priv->ppg_sensor[chidx],
+                               &priv->ppg_sensor[chidx].current);
+      regval = regval | (1 << chidx);
+      priv->ppg_activated++;
+    }
+  else
+    {
+      regval = regval & (~(1 << chidx));
+      priv->ppg_activated--;
+    }
+
+  max86178_writesingle(priv, MAX86178_REG_PPGCFG1, regval);
+  priv->ppg_sensor[chidx].activated = enable;
+  priv->ppg_sensor[chidx].activating = false;
+  priv->ppg_sensor[chidx].inactivating = false;
 }
 
 /****************************************************************************
@@ -1224,7 +2293,7 @@ static float max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
  *   Set the PPG LED driver current.
  *
  * Input Parameters:
- *   priv    - Device struct.
+ *   sensor  - PPG sensor struct.
  *   current - Pointer to the desired current value (uA).
  *
  * Returned Value:
@@ -1235,13 +2304,37 @@ static float max86178_ecg_calcudata(FAR struct max86178_dev_s *priv,
  *
  ****************************************************************************/
 
-static void max86178_ppg_set_current(FAR struct max86178_dev_s *priv,
-                                     FAR uint32_t *current)
+static void max86178_ppg_set_current(FAR struct max86178_ppg_sensor_s
+                                     *sensor, FAR uint32_t *current)
 {
+  FAR struct max86178_dev_s *priv;
+
+  /* Address of register that contains the LED driver current range, for
+   * PPG ch0~2. PPG ch3 is not configurable.
+   */
+
+  uint8_t ledrge_regaddr_table[MAX86178_PPG_SENSOR_NUM - 1] =
+    {
+      MAX86178_REG_MEAS1CFG4, MAX86178_REG_MEAS2CFG4, MAX86178_REG_MEAS3CFG4
+    };
+
+  /* Address of register that contains the LED driver current counts, for
+   * PPG ch0~2. PPG ch3 is not configurable.
+   */
+
+  uint8_t ledpa_regaddr_table[MAX86178_PPG_SENSOR_NUM - 1] =
+    {
+      MAX86178_REG_MEAS1LEDA, MAX86178_REG_MEAS2LEDA, MAX86178_REG_MEAS3LEDB
+    };
+
   uint32_t range;
   uint32_t cnt;
   uint32_t lsb;
   uint8_t regval;
+
+  DEBUGASSERT(sensor->dev != NULL);
+
+  priv = sensor->dev;
 
   /* If current exceeds 128mA (RGE3), it's limited to 128mA. */
 
@@ -1269,249 +2362,57 @@ static void max86178_ppg_set_current(FAR struct max86178_dev_s *priv,
     }
 
   *current = lsb * cnt;
-  priv->sensor[MAX86178_PPG_IDX].current = *current;
+  sensor->current = *current;
 
   /* Write configuration into registers. */
 
-  max86178_readsingle(priv, MAX86178_REG_MEAS1CFG4, &regval);
-  regval = regval & (~MAX86178_MEASXCFG4_LEDRGE_MASK);
-  regval = regval | (uint8_t)(range & MAX86178_MEASXCFG4_LEDRGE_MASK);
-  max86178_writesingle(priv, MAX86178_REG_MEAS1CFG4, regval);
-  max86178_readsingle(priv, MAX86178_REG_MEAS1LEDA, &regval);
-  regval = (uint8_t)cnt;
-  max86178_writesingle(priv, MAX86178_REG_MEAS1LEDA, regval);
+  max86178_readsingle(priv, ledrge_regaddr_table[sensor->chidx], &regval);
+  if ((regval & MAX86178_MEASXCFG4_LEDRGE_MASK) != range)
+    {
+      regval = regval & (~MAX86178_MEASXCFG4_LEDRGE_MASK);
+      regval = regval | (uint8_t)(range & MAX86178_MEASXCFG4_LEDRGE_MASK);
+      max86178_writesingle(priv, ledrge_regaddr_table[sensor->chidx],
+                           regval);
+    }
+
+  max86178_readsingle(priv, ledpa_regaddr_table[sensor->chidx], &regval);
+  if (regval != (uint8_t)cnt)
+    {
+      regval = (uint8_t)cnt;
+      max86178_writesingle(priv, ledpa_regaddr_table[sensor->chidx], regval);
+    }
 }
 
 /****************************************************************************
- * Name: max86178_ppg_setfps
+ * Name: max86178_ppg_set_fps
  *
  * Description:
- *   Calculate and set the divide ratio for disired ECG sample rate.
+ *   Set the PPG FPS(frame per second).
  *
  * Input Parameters:
- *   priv - Device struct.
- *   freq - Disired sample rate (Hz)
+ *   priv     - Device struct.
+ *   interval - Frame interval(us). FPS = 1000000(us)/interval
  *
  * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *   None.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-static int max86178_ppg_setfps(FAR struct max86178_dev_s *priv, float *freq)
+static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
+                                 uint16_t frdiv)
 {
-  uint16_t frdiv;
   uint8_t frdivregs[2];
 
-  /* Currently timing data is disabled, then the FR_CLK comes from REF_CLK.
-   * Enable any timing data will make the FR_CLK comes indirectly from PLL,
-   * when the calculation shall be much more complex. If someday we need to
-   * sample combined ECG and PPG asynchronously in case, we will consider
-   * this confusing suitation.
-   */
-
-  frdiv = MAX86178_REF_CLK_DFT / *freq;
-  if (frdiv < MAX86178_FRCLKDIV_MIN)
-    {
-      *freq = MAX86178_FRCLKDIV_MIN;
-    }
-  else if (frdiv > MAX86178_FRCLKDIV_MAX)
-    {
-      *freq = MAX86178_FRCLKDIV_MAX;
-    }
-
-  *freq = MAX86178_REF_CLK_DFT / frdiv;
-  frdivregs[0] = frdiv >> 8;
-  frdivregs[1] = frdiv;
-
-  return max86178_writeregs(priv, MAX86178_REG_FRCLKDIVH, frdivregs, 2);
+  frdivregs[0] = (uint8_t)(frdiv >> 8);
+  frdivregs[1] = (uint8_t)frdiv;
+  max86178_writeregs(priv, MAX86178_REG_FRCLKDIVH, frdivregs, 2);
 }
 
 /****************************************************************************
- * Name: max86178_ecg_setsr
- *
- * Description:
- *   Calculate and set the divide ratio for disired PPG frame rate.
- *
- * Input Parameters:
- *   priv - Device struct.
- *   freq - Disired sample rate (Hz)
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int max86178_ecg_setsr(FAR struct max86178_dev_s *priv, float *freq)
-{
-  uint16_t decrate;
-  uint16_t ndiv;
-  uint8_t decrate_options[MAX86178_ECG_DECRATE_NUM] = {
-    MAX86178_ECGCFG1_DEC_RATE_16, MAX86178_ECGCFG1_DEC_RATE_32,
-    MAX86178_ECGCFG1_DEC_RATE_64, MAX86178_ECGCFG1_DEC_RATE_128,
-    MAX86178_ECGCFG1_DEC_RATE_256, MAX86178_ECGCFG1_DEC_RATE_512,
-    };
-
-  uint16_t decratelist[MAX86178_ECG_DECRATE_NUM] = {
-    MAX86178_ECG_DEC_RATE_16, MAX86178_ECG_DEC_RATE_32,
-    MAX86178_ECG_DEC_RATE_64, MAX86178_ECG_DEC_RATE_128,
-    MAX86178_ECG_DEC_RATE_256, MAX86178_ECG_DEC_RATE_512,
-    };
-
-  uint8_t regval;
-  uint8_t i;
-
-  if (*freq < MAX86178_ECG_SR_MIN)
-    {
-      *freq = MAX86178_ECG_SR_MIN;
-    }
-  else if (*freq > MAX86178_ECG_SR_MAX)
-    {
-      *freq = MAX86178_ECG_SR_MAX;
-    }
-
-  /* From little one to great one, the first DEC_RATE which makes ECG_ADC_CLK
-   * greater than MAX86178_ECG_ADC_CLK_MIN, is the only DEC_RATE which can
-   * make ECG_ADC_CLK to be in range of [MAX86178_ECG_ADC_CLK_MIN,
-   * MAX86178_ECG_ADC_CLK_MAX].
-   */
-
-  for (i = 0; i < MAX86178_ECG_DECRATE_NUM; i++)
-    {
-      if (*freq * decratelist[i] > MAX86178_ECG_ADC_CLK_MIN)
-        {
-          break;
-        }
-    }
-
-  decrate = decratelist[i];
-
-  ndiv = MAX86178_ECG_PLL_DFT / (*freq * decrate);
-  *freq = MAX86178_ECG_PLL_DFT / (ndiv * decrate);
-
-  /* Set the registers */
-
-  max86178_readsingle(priv, MAX86178_REG_ECGCFG1, &regval);
-  regval = regval & (~MAX86178_ECGCFG1_DEC_RATE_MASK);
-  regval = regval | decrate_options[i];
-  max86178_writesingle(priv, MAX86178_REG_ECGCFG1, regval);
-
-  max86178_readsingle(priv, MAX86178_REG_PLLCFG4, &regval);
-  regval = regval & (~MAX86178_PLLCFG4_ECGNDIVH_MASK);
-  regval = regval | ((ndiv >> 8) << MAX86178_PLLCFG4_ECGNDIVH_OFST);
-  max86178_writesingle(priv, MAX86178_REG_PLLCFG4, regval);
-  regval = ndiv;
-  max86178_writesingle(priv, MAX86178_REG_ECGNDIVLSB, regval);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: max86178_ecg_control
- *
- * Description:
- *   Configure ECG parameters.
- *
- * Input Parameters:
- *   priv - Device struct.
- *   freq - Disired sample rate (Hz)
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int max86178_ecg_control(FAR struct max86178_dev_s *priv, int cmd,
-                                unsigned long arg)
-{
-  switch (cmd)
-    {
-      /* Set ECG gain */
-
-      case MAX86178_ECG_CTRL_GAIN:
-        {
-          uint8_t regval;
-          uint8_t gaincfg = (uint8_t)arg;
-
-          if (gaincfg > 127)
-            {
-              return -EINVAL;
-            }
-
-          max86178_readsingle(priv, MAX86178_REG_ECGCFG2, &regval);
-          regval = regval & (~MAX86178_ECGCFG2_PGAGAIN_MASK);
-          regval = regval | gaincfg;
-          max86178_writesingle(priv, MAX86178_REG_ECGCFG2, regval);
-        }
-        break;
-
-      default:
-        {
-          snerr("No such command.\n");
-          return -EINVAL;
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: max86178_ppg_control
- *
- * Description:
- *   Configure PPG parameters.
- *
- * Input Parameters:
- *   priv - Device struct.
- *   cmd  - The special cmd for sensor.
- *   arg  - The parameters associated with cmd.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int max86178_ppg_control(FAR struct max86178_dev_s *priv,
-                                int cmd, unsigned long arg)
-{
-  switch (cmd)
-    {
-      /* Set PPG LED current */
-
-      case MAX86178_PPG_CTRL_LEDPA:
-        {
-          FAR uint32_t *current = (FAR uint32_t *)arg;
-
-          if (*current != priv->sensor[MAX86178_PPG_IDX].current)
-          {
-            max86178_ppg_set_current(priv, current);
-          }
-        }
-        break;
-
-      default:
-        {
-          snerr("No such command.\n");
-          return -EINVAL;
-        }
-    }
-
-    return OK;
-}
-
-/****************************************************************************
- * Name: max86178_activate
+ * Name: max86178_ecg_activate
  *
  * Description:
  *   Enable or disable sensor device. when enable sensor, sensor will
@@ -1530,13 +2431,12 @@ static int max86178_ppg_control(FAR struct max86178_dev_s *priv,
  *
  ****************************************************************************/
 
-static int max86178_activate(FAR struct sensor_lowerhalf_s *lower,
-                             bool enable)
+static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 bool enable)
 {
-  FAR struct max86178_sensor_s *sensor =
-                               (FAR struct max86178_sensor_s *)lower;
+  FAR struct max86178_ecg_sensor_s *sensor =
+    (FAR struct max86178_ecg_sensor_s *)lower;
   FAR struct max86178_dev_s *priv;
-  int ret;
 
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
@@ -1548,139 +2448,79 @@ static int max86178_activate(FAR struct sensor_lowerhalf_s *lower,
 
   if (sensor->activated != enable)
     {
-      if (lower->type == SENSOR_TYPE_ECG)
+      if (enable)
         {
-          ret = max86178_ecg_enable(priv, enable);
-          if (ret < 0)
+          /* If there's no activated sensor thus the device is shut-down, set
+           * the ECG clock and FIFO settings, then activate ECG sensor. If
+           * there has been any activated sensor, record the new activating,
+           * and it will be activated with its settings when the next FIFO
+           * reading comes.
+           */
+
+          if (priv->ppg_activated == 0)
             {
-              snerr("Failed to enable ecg sensor: %d\n", ret);
-              return ret;
+              /* Enable the device first. */
+
+              max86178_enable(priv, enable);
+
+              /* Set ECG clock to satisfy its interval. */
+
+              max86178_ecg_calcu_clk(sensor, &sensor->interval_desired);
+              max86178_ecg_set_sr(priv, sensor->decrate, sensor->ndiv);
+              priv->interval = sensor->interval_desired;
+
+              /* Set interrupt and FIFO watermark. */
+
+              priv->batch = sensor->batch_desired;
+              priv->fifowtm = priv->batch / priv->interval;
+              max86178_fifo_set(priv);
+
+              /* Start ECG measurement. Status and flags will be updated. If
+               * use interrupt reading, the interrupt should be enabled first
+               * to avoid missing first edge. If use polling, the first
+               * polling must comes after ECG enabled or the polling will
+               * stop after one time.
+               */
+
+              if (priv->fifowtm > 0)
+                {
+                  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                                  IOEXPANDER_OPTION_INTCFG,
+                                  (FAR void *)IOEXPANDER_VAL_RISING);
+                  max86178_ecg_enable(priv, true);
+                }
+              else
+                {
+                  max86178_ecg_enable(priv, true);
+                  work_queue(HPWORK, &priv->work_poll, max86178_worker_poll,
+                             priv, priv->interval / USEC_PER_TICK);
+                }
             }
-        }
-      else if(lower->type == SENSOR_TYPE_PPGD)
-        {
-          ret = max86178_ppg_enable(priv, enable);
-          if (ret < 0)
+          else
             {
-              snerr("Failed to enable ppg sensor: %d\n", ret);
-              return ret;
+              sensor->activating = true;
+              priv->update_activate = true;
             }
         }
       else
         {
-          snerr("Failed to match sensor type.\n");
-          return -EINVAL;
-        }
-
-      sensor->activated = enable;
-      if (enable)
-        {
-          /* Set FIFO watermark and interrupt. If it's not in batch mode, the
-           * FIFO and interrupt are enabled with watermark = 1, since the
-           * device only support to read from FIFO.
+          /* If it's going to be inactivated, it will take effect when next
+           * FIFO reading completes.
            */
 
-          IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                          IOEXPANDER_OPTION_INTCFG,
-                          (FAR void *)IOEXPANDER_VAL_FALLING);
+          sensor->inactivating = true;
+          priv->update_activate = true;
         }
-    }
-
-  /* MAX86178 will be disabled if ECG and PPG are both disabled */
-
-  if (priv->sensor[MAX86178_ECG_IDX].activated == false
-      && priv->sensor[MAX86178_PPG_IDX].activated == false)
-    {
-      IOEXP_SETOPTION(priv->config->ioedev,
-                      priv->config->intpin,
-                      IOEXPANDER_OPTION_INTCFG,
-                      (FAR void *)IOEXPANDER_VAL_DISABLE);
-      max86178_enable(priv, false);
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: max86178_set_interval
+ * Name: max86178_ecg_batch
  *
  * Description:
- *   Set the sensor output data period in microseconds for a given sensor.
- *   If *period_us > max_delay it will be truncated to max_delay and if
- *   *period_us < min_delay it will be replaced by min_delay.
- *
- * Input Parameters:
- *   lower      - The instance of lower half sensor driver.
- *   period_us  - The time between report data, in us. It may by overwrite
- *                by lower half driver.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static int max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us)
-{
-  FAR struct max86178_sensor_s *sensor =
-                                       (FAR struct max86178_sensor_s *)lower;
-  FAR struct max86178_dev_s *priv;
-  float freq;
-  int ret;
-
-  /* Sanity check */
-
-  DEBUGASSERT(sensor != NULL && sensor->dev != NULL && period_us != NULL);
-
-  priv = sensor->dev;
-
-  freq = MAX86178_ONE_SECOND / *period_us;
-
-  if (lower->type == SENSOR_TYPE_ECG)
-    {
-      /* Find the period that matches best. */
-
-      ret = max86178_ecg_setsr(priv, &freq);
-      if (ret < 0)
-        {
-          snerr("Failed to set interval: %d\n", ret);
-          return ret;
-        }
-
-      *period_us = MAX86178_ONE_SECOND / freq;
-      priv->sensor[MAX86178_ECG_IDX].interval = *period_us;
-    }
-  else if(lower->type == SENSOR_TYPE_PPGD)
-    {
-      /* Find the period that matches best. */
-
-      ret = max86178_ppg_setfps(priv, &freq);
-      if (ret < 0)
-        {
-          snerr("Failed to set interval: %d\n", ret);
-          return ret;
-        }
-
-      *period_us = MAX86178_ONE_SECOND / freq;
-      priv->sensor[MAX86178_PPG_IDX].interval = *period_us;
-    }
-  else
-    {
-      snerr("Failed to match sensor type.\n");
-      ret = -EINVAL;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: max86178_batch
- *
- * Description:
- *   Set sensor's maximum report latency in microseconds.
+ *   Set ECG sensor's maximum report latency in microseconds.
  *
  * Input Parameters:
  *   lower      - The instance of lower half sensor driver.
@@ -1695,13 +2535,12 @@ static int max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
-                          FAR unsigned int *latency_us)
+static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
+                              FAR unsigned int *latency_us)
 {
-  FAR struct max86178_sensor_s *sensor =
-                                       (FAR struct max86178_sensor_s *)lower;
+  FAR struct max86178_ecg_sensor_s *sensor =
+    (FAR struct max86178_ecg_sensor_s *)lower;
   FAR struct max86178_dev_s *priv;
-  uint32_t max_latency;
 
   /* Sanity check */
 
@@ -1711,65 +2550,87 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
 
   priv = sensor->dev;
 
-  /* If latency_us > 0, enable FIFO to enter batch mode. Otherwise, disable
-   * FIFO to exit btach mode.
+  /* Calculate the batch latency and record it if different from current
+   * latency. New latency setting will not be congifured into MAX86178 now.
+   * If sensor has been activated, the new latency will take effect when next
+   * FIFO reading comes. If has not been activated, it will take effect when
+   * being activated.
    */
 
-  sensor->fifoen = *latency_us > 0 ? true : false;
-
-  /* Latency is modified to reasonable value. */
-
-  max_latency = sensor->lower.batch_number * sensor->interval;
-  if (*latency_us > max_latency)
+  max86178_batch_calcu(priv, latency_us, sensor->lower.batch_number,
+                       sensor->interval_desired);
+  if (*latency_us != sensor->batch_desired)
     {
-      *latency_us = max_latency;
-    }
-  else if (*latency_us < sensor->interval && *latency_us > 0)
-    {
-      *latency_us = sensor->interval;
-    }
-
-  sensor->fifowtm = MAX86178_CEILING(*latency_us, sensor->interval);
-  *latency_us = sensor->fifowtm * sensor->interval;
-  sensor->batch_latency = *latency_us;
-
-  if (priv->sensor[MAX86178_ECG_IDX].fifoen == false
-      && priv->sensor[MAX86178_PPG_IDX].fifoen == false)
-    {
-      /* When exit batch mode, read and push the remaining FIFO data. */
-
-      if (priv->fifoen)
-        {
-          max86178_fifo_read(priv);
-        }
-
-      priv->fifoen = false;
-
-      /* Set water mark to 1 to let each result cause a interrupt. */
-
-      priv->fifowtm = 1;
-    }
-  else
-    {
-      priv->fifoen = true;
-
-      /* ECG and all PPG chanels share the FIFO, the watermark of the device
-       * is the sum of them. 1 PPG measurement has 2 data from 2 channels.
-       */
-
-      priv->fifowtm = priv->sensor[MAX86178_ECG_IDX].fifowtm
-                    + priv->sensor[MAX86178_PPG_IDX].fifowtm * 2;
+      sensor->batch_desired = (uint32_t)*latency_us;
+      priv->update_batch = true;
     }
 
   return OK;
 }
 
 /****************************************************************************
- * Name: max86178_selftest
+ * Name: max86178_ecg_set_interval
  *
  * Description:
- *   MAX86178 has no specailized self-testing function. Currently only
- *   checking device ID is supported.
+ *   Set the sensor output data period in microseconds for a given sensor.
+ *   If *period_us > max_interval it will be truncated to max_interval and
+ *   if *period_us < min_interval it will be replaced by min_interval. The
+ *   new interval will take effect when activating or reading FIFO.
+ *
+ * Input Parameters:
+ *   lower     - The instance of lower half sensor driver.
+ *   period_us - The time between report data, in us. It may by overwrite
+ *               by lower half driver.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                     FAR unsigned int *period_us)
+{
+  FAR struct max86178_ecg_sensor_s *sensor =
+    (FAR struct max86178_ecg_sensor_s *)lower;
+  FAR struct max86178_dev_s *priv;
+  uint32_t interval;
+
+  /* Sanity check */
+
+  DEBUGASSERT(sensor != NULL && sensor->dev != NULL && period_us != NULL);
+
+  /* Get the pointer of the device from sensor. */
+
+  priv = sensor->dev;
+
+  /* Find the best matched period and correspoing clock parameters. Record
+   * them if the new period is different from current interval. New interval
+   * setting will not be congifured into MAX86178 immediately. If any sensor
+   * has been activated, the new latency will take effect when next FIFO
+   * reading comes. If has not been activated, it will take effect when being
+   * activated.
+   */
+
+  interval = (uint32_t)*period_us;
+  max86178_ecg_calcu_clk(sensor, &interval);
+  *period_us = (unsigned int)interval;
+  if (sensor->interval_desired != interval)
+    {
+      sensor->interval_desired = interval;
+      priv->update_interval = true;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ecg_selftest
+ *
+ * Description:
+ *   Selftest of ECG sensor, i.e. the selftest of MAX86178.
  *
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
@@ -1777,43 +2638,25 @@ static int max86178_batch(FAR struct sensor_lowerhalf_s *lower,
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on any failure.
- *   -ENOTTY - The cmd don't support.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-static int max86178_selftest(FAR struct sensor_lowerhalf_s *lower,
-                             unsigned long arg)
+static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
+                                 unsigned long arg)
 {
-  FAR struct max86178_sensor_s *sensor =
-                                       (FAR struct max86178_sensor_s *)lower;
-  FAR struct max86178_dev_s *priv;
+  FAR struct max86178_ecg_sensor_s *sensor =
+    (FAR struct max86178_ecg_sensor_s *)lower;
 
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
-  priv = sensor->dev;
-
-  switch (arg)
-    {
-      case MAX86178_CTRL_CHECKID:           /* Check ID command. */
-        {
-          return max86178_checkid(priv);
-        }
-
-      /* In the case above, function has returned thus no break is need. */
-
-      default:                              /* Other cmd tag */
-        {
-          snerr("The cmd was not supported: %d\n", -ENOTTY);
-          return -ENOTTY;
-        }
-    }
+  return max86178_selftest(sensor->dev, arg);
 }
 
 /****************************************************************************
- * Name: max86178_control
+ * Name: max86178_ecg_control
  *
  * Description:
  *   With this method, the user can set some special config for the sensor,
@@ -1833,28 +2676,349 @@ static int max86178_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int max86178_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
-                            unsigned long arg)
+static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
+                                int cmd, unsigned long arg)
 {
-  FAR struct max86178_sensor_s *sensor =
-                                       (FAR struct max86178_sensor_s *)lower;
+  FAR struct max86178_ecg_sensor_s *sensor =
+    (FAR struct max86178_ecg_sensor_s *)lower;
   FAR struct max86178_dev_s *priv;
 
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
   priv = sensor->dev;
 
-  if (lower->type == SENSOR_TYPE_ECG)
+  switch (cmd)
     {
-      return max86178_ecg_control(priv, cmd, arg);
-    }
-  else if (lower->type == SENSOR_TYPE_PPGD)
-    {
-      return max86178_ppg_control(priv, cmd, arg);
+      case MAX86178_ECG_CTRL_GAIN:     /* Set ECG gain. */
+        {
+          uint8_t regval;
+          uint8_t gaincfg = (uint8_t)arg;
+
+          if (gaincfg > 127)
+            {
+              return -EINVAL;
+            }
+
+          max86178_readsingle(priv, MAX86178_REG_ECGCFG2, &regval);
+          regval = regval & (~MAX86178_ECGCFG2_PGAGAIN_MASK);
+          regval = regval | gaincfg;
+          max86178_writesingle(priv, MAX86178_REG_ECGCFG2, regval);
+        }
+        break;
+
+      default:                         /* Invalid command. */
+        {
+          snerr("No such command.\n");
+          return -EINVAL;
+        }
     }
 
-  snerr("Failed to match sensor type.\n");
-  return -EINVAL;
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_activate
+ *
+ * Description:
+ *   Enable or disable sensor device. when enable sensor, sensor will
+ *   work in current mode(if not set, use default mode). when disable
+ *   sensor, it will disable sense path and stop convert.
+ *
+ * Input Parameters:
+ *   lower  - The instance of lower half sensor driver
+ *   enable - true(enable) and false(disable)
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
+                                 bool enable)
+{
+  FAR struct max86178_ppg_sensor_s *sensor =
+    (FAR struct max86178_ppg_sensor_s *)lower;
+  FAR struct max86178_dev_s *priv;
+
+  DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
+
+  /* Get the pointer of the device from sensor. */
+
+  priv = sensor->dev;
+
+  /* Operate only if the activated status will change. */
+
+  if (sensor->activated != enable)
+    {
+      if (enable)
+        {
+          /* If there's no activated sensor thus the device is shut-down, set
+           * the PPG frame clock and FIFO settings, then activate this PPG
+           * sensor. If there has been any activated sensor, record the new
+           * activating, and it will be activated with its settings when the
+           * next FIFO reading comes.
+           */
+
+          if (priv->ppg_activated == 0 &&
+              priv->ecg_sensor.activated == false)
+            {
+              /* Enable the device first. */
+
+              max86178_enable(priv, enable);
+
+              /* Set PPG frame clock to satisfy its interval. */
+
+              max86178_ppg_set_fps(priv, sensor->frdiv);
+              priv->interval = sensor->interval_desired;
+
+              /* Set interrupt and FIFO watermark. */
+
+              priv->batch = sensor->batch_desired;
+              priv->fifowtm = priv->batch / priv->interval * 2;
+              max86178_fifo_set(priv);
+
+              /* Start PPG measurement. Status and flags will be updated. If
+               * use interrupt reading, the interrupt should be enabled first
+               * to avoid missing first edge. If use polling, the first
+               * polling must comes after ECG enabled or the polling will
+               * stop after one time.
+               */
+
+              if (priv->fifowtm > 0)
+                {
+                  IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                                  IOEXPANDER_OPTION_INTCFG,
+                                  (FAR void *)IOEXPANDER_VAL_RISING);
+                  max86178_ppg_enable(priv, sensor->chidx, true);
+                }
+              else
+                {
+                  max86178_ppg_enable(priv, sensor->chidx, true);
+                  work_queue(HPWORK, &priv->work_poll, max86178_worker_poll,
+                             priv, priv->interval / USEC_PER_TICK);
+                }
+            }
+          else
+            {
+              sensor->activating = true;
+              priv->update_activate = true;
+            }
+        }
+      else
+        {
+          sensor->inactivating = true;
+          priv->update_activate = true;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_batch
+ *
+ * Description:
+ *   Set PPG sensor's maximum report latency in microseconds.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   latency_us - the time between batch data, in us. It may by overwrite
+ *                by lower half driver.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
+                              FAR unsigned int *latency_us)
+{
+  FAR struct max86178_ppg_sensor_s *sensor =
+    (FAR struct max86178_ppg_sensor_s *)lower;
+  FAR struct max86178_dev_s *priv;
+
+  /* Sanity check */
+
+  DEBUGASSERT(sensor != NULL && sensor->dev != NULL && latency_us != NULL);
+
+  /* Get the pointer of the device from sensor. */
+
+  priv = sensor->dev;
+
+  /* Calculate the batch latency and record it if different from current
+   * latency. New latency setting will not be congifured into MAX86178 now.
+   * If sensor has been activated, the new latency will take effect when next
+   * FIFO reading comes. If has not been activated, it will take effect when
+   * being activated.
+   */
+
+  max86178_batch_calcu(priv, latency_us, sensor->lower.batch_number,
+                       sensor->interval_desired);
+  if (*latency_us != sensor->batch_desired)
+    {
+      sensor->batch_desired = (uint32_t)*latency_us;
+      priv->update_batch = true;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_set_interval
+ *
+ * Description:
+ *   Set the sensor output data period in microseconds for a given sensor.
+ *   If *period_us > max_interval it will be truncated to max_interval and
+ *   if *period_us < min_interval it will be replaced by min_interval. The
+ *   new interval will take effect when activating or reading FIFO.
+ *
+ * Input Parameters:
+ *   lower     - The instance of lower half sensor driver.
+ *   period_us - The time between report data, in us. It may by overwrite
+ *               by lower half driver.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   Currently timing data is disabled, then the FR_CLK comes from REF_CLK or
+ *   ECG_ADC_CLK, which are both 32000Hz.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
+                                     FAR unsigned int *period_us)
+{
+  FAR struct max86178_ppg_sensor_s *sensor =
+    (FAR struct max86178_ppg_sensor_s *)lower;
+  FAR struct max86178_dev_s *priv;
+  float freq;
+  uint16_t frdiv;
+
+  /* Sanity check */
+
+  DEBUGASSERT(sensor != NULL && sensor->dev != NULL && period_us != NULL);
+
+  /* Get the pointer of the device from sensor. */
+
+  priv = sensor->dev;
+
+  /* Find the best matched period and record it if different from current
+   * interval. New interval setting will not be congifured into MAX86178 now.
+   * If any sensor has been activated, the new latency will take effect when
+   * next FIFO reading comes. If has not been activated, it will take effect
+   * when being activated.
+   */
+
+  frdiv = max86178_ppg_calcu_frdiv(*period_us);
+  freq = MAX86178_REF_CLK_DFT / frdiv;
+  *period_us = (unsigned int)(MAX86178_ONE_SECOND / freq);
+  sensor->frdiv = frdiv;
+  if (sensor->interval_desired != (uint32_t)*period_us)
+    {
+      sensor->interval_desired = (uint32_t)*period_us;
+      priv->update_interval = true;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_selftest
+ *
+ * Description:
+ *   Selftest of PPG sensor, i.e. the selftest of MAX86178.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
+                                 unsigned long arg)
+{
+  FAR struct max86178_ppg_sensor_s *sensor =
+    (FAR struct max86178_ppg_sensor_s *)lower;
+
+  DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
+
+  return max86178_selftest(sensor->dev, arg);
+}
+
+/****************************************************************************
+ * Name: max86178_ppg_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   cmd   - The special cmd for sensor.
+ *   arg   - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
+                                int cmd, unsigned long arg)
+{
+  FAR struct max86178_ppg_sensor_s *sensor =
+    (FAR struct max86178_ppg_sensor_s *)lower;
+
+  DEBUGASSERT(sensor != NULL);
+
+  switch (cmd)
+    {
+      case MAX86178_PPG_CTRL_LEDPA:  /* Set PPG LED current */
+        {
+          FAR uint32_t *current = (FAR uint32_t *)arg;
+
+          if (sensor->chidx < MAX86178_PPG3_SENSOR_IDX)
+            {
+              if (*current != sensor->current)
+                {
+                  max86178_ppg_set_current(sensor, current);
+                }
+            }
+          else
+            {
+              /* For PPG3 (dark) channel, current configurations will be
+               * ignored. It seems to be always 0uA from APP's sight.
+               */
+
+              *current = 0;
+            }
+        }
+        break;
+
+      default:                       /* Invalid command. */
+        {
+          snerr("No such command.\n");
+          return -EINVAL;
+        }
+    }
+
+  return OK;
 }
 
 /****************************************************************************
@@ -1896,7 +3060,7 @@ static int max86178_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    * lock the I2C/SPI bus within an interrupt.
    */
 
-  work_queue(HPWORK, &priv->work, max86178_worker, priv, 0);
+  work_queue(HPWORK, &priv->work_intrpt, max86178_worker_intrpt, priv, 0);
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
                   IOEXPANDER_OPTION_INTCFG,
                   (FAR void *)IOEXPANDER_VAL_DISABLE);
@@ -1905,7 +3069,7 @@ static int max86178_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: max86178_worker
+ * Name: max86178_worker_intrpt
  *
  * Description:
  *   Task the worker with retrieving the latest sensor data. We should not do
@@ -1923,7 +3087,7 @@ static int max86178_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static void max86178_worker(FAR void *arg)
+static void max86178_worker_intrpt(FAR void *arg)
 {
   FAR struct max86178_dev_s *priv = arg;
   uint8_t status[5];
@@ -1934,7 +3098,7 @@ static void max86178_worker(FAR void *arg)
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
                   IOEXPANDER_OPTION_INTCFG,
-                  (FAR void *)IOEXPANDER_VAL_FALLING);
+                  (FAR void *)IOEXPANDER_VAL_RISING);
 
   /* Read registers from STAT1 to STAT5, where all interrupts come from. */
 
@@ -1947,9 +3111,46 @@ static void max86178_worker(FAR void *arg)
   if ((status[0] & MAX86178_STAT1_FIFOAFULL) != 0)
     {
       max86178_fifo_read(priv);
+      max86178_update_sensors(priv);
     }
 
   /* Procession for the other types of interrupt will be added later. */
+}
+
+/****************************************************************************
+ * Name: max86178_worker_poll
+ *
+ * Description:
+ *   Task the worker with polling the latest sensor data.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void max86178_worker_poll(FAR void *arg)
+{
+  FAR struct max86178_dev_s *priv = arg;
+
+  /* Sanity check */
+
+  DEBUGASSERT(priv != NULL);
+
+  priv->timestamp = sensor_get_timestamp();
+  if (priv->activated && priv->fifowtm == 0)
+    {
+      work_queue(HPWORK, &priv->work_poll, max86178_worker_poll, priv,
+                 priv->interval / USEC_PER_TICK);
+    }
+
+  max86178_fifo_read(priv);
+  max86178_update_sensors(priv);
 }
 
 /****************************************************************************
@@ -1979,6 +3180,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
 {
   FAR struct max86178_dev_s *priv;
   FAR void *ioehandle;
+  int idx;
   int ret;
 
   /* Sanity check */
@@ -1995,22 +3197,38 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
     }
 
   priv->config = config;
-  priv->fifowtm = MAX86178_FIFOWTM_DFT;
 
-  priv->sensor[MAX86178_ECG_IDX].lower.ops = &g_max86178_ecg_ops;
-  priv->sensor[MAX86178_ECG_IDX].lower.type = SENSOR_TYPE_ECG;
-  priv->sensor[MAX86178_ECG_IDX].lower.batch_number =
-                              CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER;
-  priv->sensor[MAX86178_ECG_IDX].interval = MAX86178_ECG_INTVL_DFT;
-  priv->sensor[MAX86178_ECG_IDX].dev = priv;
+  /* Configure ECG sensor. */
 
-  priv->sensor[MAX86178_PPG_IDX].lower.ops = &g_max86178_ppg_ops;
-  priv->sensor[MAX86178_PPG_IDX].lower.type = SENSOR_TYPE_PPGD;
-  priv->sensor[MAX86178_PPG_IDX].lower.batch_number =
-                              CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER;
-  priv->sensor[MAX86178_PPG_IDX].interval = MAX86178_PPG_INTVL_DFT;
-  priv->sensor[MAX86178_PPG_IDX].current = MAX86178_PPG_CURRENT_DFT;
-  priv->sensor[MAX86178_PPG_IDX].dev = priv;
+  priv->ecg_sensor.lower.ops = &g_max86178_ecg_ops;
+  priv->ecg_sensor.lower.type = SENSOR_TYPE_ECG;
+  priv->ecg_sensor.lower.batch_number = MAX86178_FIFO_SLOTS_ECG;
+  priv->ecg_sensor.dev = priv;
+  priv->ecg_sensor.interval_desired = MAX86178_ECG_INTVL_DFT;
+  priv->ecg_sensor.ndiv = MAX86178_ECG_NDIV_DFT;
+  priv->ecg_sensor.factor = MAX86178_ECG_GAIN_DFT;
+
+  /* Configure PPG sensors. */
+
+  for (idx = 0; idx < MAX86178_PPG_SENSOR_NUM; idx++)
+    {
+      priv->ppg_sensor[idx].lower.ops = &g_max86178_ppg_ops;
+      priv->ppg_sensor[idx].lower.type = SENSOR_TYPE_PPGD;
+      priv->ppg_sensor[idx].lower.batch_number = MAX86178_FIFO_SLOTS_PPG;
+      priv->ppg_sensor[idx].dev = priv;
+      priv->ppg_sensor[idx].optm1.adc_range = MAX86178_PPG_ADCRGE_DFT;
+      priv->ppg_sensor[idx].optm2.adc_range = MAX86178_PPG_ADCRGE_DFT;
+      priv->ppg_sensor[idx].interval_desired = MAX86178_PPG_INTVL_DFT;
+      priv->ppg_sensor[idx].frdiv = MAX86178_PPG_FRDIV_DFT;
+      priv->ppg_sensor[idx].gain1 = MAX86178_PPG_GAIN_DFT;
+      priv->ppg_sensor[idx].gain2 = MAX86178_PPG_GAIN_DFT;
+      priv->ppg_sensor[idx].chidx = (uint8_t)idx;
+      priv->ppg_sensor[idx].auto_optimize = true;
+    }
+
+  priv->ppg_sensor[0].current = MAX86178_PPG_GLEDC_DFT;
+  priv->ppg_sensor[1].current = MAX86178_PPG_RLEDC_DFT;
+  priv->ppg_sensor[2].current = MAX86178_PPG_IRLEDC_DFT;
 
   /* Check the part ID */
 
@@ -2023,20 +3241,16 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
 
   /* Device soft-reset and enter shutdown mode. */
 
-  ret = max86178_softreset(priv);
-  if (ret < 0)
-    {
-      snerr("Device can't be reset: %d\n", ret);
-      goto err_exit;
-    }
-
+  max86178_softreset(priv);
   max86178_shutdown(priv);
 
+  /* Configure interrupt pin */
+
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->intpin,
-                           IOEXPANDER_DIRECTION_IN_PULLUP);
+                           IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
-      snerr("Failed to set direction: %d\n", ret);
+      snerr("Failed to set IO direction: %d\n", ret);
       goto err_exit;
     }
 
@@ -2045,7 +3259,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   if (ioehandle == NULL)
     {
       ret = -EIO;
-      snerr("Failed to attach: %d\n", ret);
+      snerr("Failed to attach IO: %d\n", ret);
       goto err_exit;
     }
 
@@ -2054,25 +3268,39 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
                         (FAR void *)IOEXPANDER_VAL_DISABLE);
   if (ret < 0)
     {
-      snerr("Failed to set option: %d\n", ret);
+      snerr("Failed to set IO option: %d\n", ret);
       goto err_iodetach;
     }
 
   /* Register the character driver */
 
-  ret = sensor_register((&(priv->sensor[MAX86178_ECG_IDX].lower)), devno);
+  ret = sensor_register((&(priv->ecg_sensor.lower)), devno);
   if (ret < 0)
     {
       snerr("Failed to register ECG driver: %d\n", ret);
       goto err_iodetach;
     }
 
-  ret = sensor_register((&(priv->sensor[MAX86178_PPG_IDX].lower)), devno);
-  if (ret < 0)
+  for (idx = 0; idx < MAX86178_PPG_SENSOR_NUM; idx++)
     {
-      snerr("Failed to register PPG driver: %d\n", ret);
-      sensor_unregister((&(priv->sensor[MAX86178_ECG_IDX].lower)), devno);
-      goto err_iodetach;
+      ret = sensor_register((&(priv->ppg_sensor[idx].lower)),
+                            devno * MAX86178_PPG_SENSOR_NUM + idx);
+      if (ret < 0)
+        {
+          snerr("Failed to register PPG%d driver: %d\n", idx, ret);
+
+          /* Unregister ecg sensor and all registered ppg sensors */
+
+          sensor_unregister((&(priv->ecg_sensor.lower)), devno);
+          idx--;
+          for (; idx >= 0; idx--)
+            {
+              sensor_unregister((&(priv->ppg_sensor[idx].lower)),
+                                devno * MAX86178_PPG_SENSOR_NUM + idx);
+            }
+
+          goto err_iodetach;
+        }
     }
 
   return ret;
