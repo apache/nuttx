@@ -44,9 +44,7 @@
 
 #define SYSLOG_RPMSG_WORK_DELAY         MSEC2TICK(CONFIG_SYSLOG_RPMSG_WORK_DELAY)
 
-#define SYSLOG_RPMSG_COUNT(h, t, size)  ((B2C_OFF(h)>=(t)) ? \
-                                          B2C_OFF(h)-(t) : \
-                                          (size)-((t)-B2C_OFF(h)))
+#define SYSLOG_RPMSG_COUNT(h, t, size)  (((h)>=(t)) ? (h)-(t) : (size)-((t)-(h)))
 #define SYSLOG_RPMSG_SPACE(h, t, size)  ((size) - 1 - SYSLOG_RPMSG_COUNT(h, t, size))
 
 /****************************************************************************
@@ -117,11 +115,6 @@ static void syslog_rpmsg_work(FAR void *priv_)
 
   flags = enter_critical_section();
 
-  if (B2C_REM(priv->head))
-    {
-      priv->head += C2B(1) - B2C_REM(priv->head);
-    }
-
   space  -= sizeof(*msg);
   len     = SYSLOG_RPMSG_COUNT(priv->head, priv->tail, priv->size);
   len_end = priv->size - priv->tail;
@@ -147,30 +140,24 @@ static void syslog_rpmsg_work(FAR void *priv_)
   leave_critical_section(flags);
 
   msg->header.command = SYSLOG_RPMSG_TRANSFER;
-  msg->count          = C2B(len);
+  msg->count          = len;
   rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
 }
 
 static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
                                  bool last)
 {
-  if (B2C_REM(priv->head) == 0)
-    {
-      priv->buffer[B2C_OFF(priv->head)] = 0;
-    }
-
-  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) <<
-                                       (8 * B2C_REM(priv->head));
+  priv->buffer[priv->head] = ch & 0xff;
 
   priv->head += 1;
-  if (priv->head >= C2B(priv->size))
+  if (priv->head >= (priv->size))
     {
       priv->head = 0;
     }
 
   /* Allow overwrite */
 
-  if (priv->head == C2B(priv->tail))
+  if (priv->head == (priv->tail))
     {
       priv->buffer[priv->tail] = 0;
 
@@ -370,7 +357,7 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
             }
           else if (prev && !cur)
             {
-              priv->head = C2B(i) + j;
+              priv->head = (i) + j;
             }
           else if (!prev && cur)
             {

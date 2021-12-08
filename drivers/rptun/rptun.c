@@ -538,8 +538,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       metal_phys_addr_t pa0;
       metal_phys_addr_t pa1;
 
-      align0 = B2C(rsc->rpmsg_vring0.align);
-      align1 = B2C(rsc->rpmsg_vring1.align);
+      align0 = rsc->rpmsg_vring0.align;
+      align1 = rsc->rpmsg_vring1.align;
 
       tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
