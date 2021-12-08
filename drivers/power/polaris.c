@@ -250,24 +250,6 @@ static int fw_i2c_read(FAR struct stwlc38_dev_s *priv, uint16_t addr,
   return OK;
 }
 
-char *print_hex(char *label, uint8_t *buff, int count, uint8_t *result)
-{
-  int i;
-  int offset;
-  offset = strlen(label) + 1;
-  strlcpy(result, label, offset); /* +1 for terminator char */
-  for (i = 0; i < count; i++)
-    {
-      snprintf(&result[offset], 4, "%02X ", buff[i]);
-
-      /* this append automatically a null terminator char */
-
-      offset += 3;
-    }
-
-  return result;
-}
-
 static int get_polaris_chip_info(FAR struct stwlc38_dev_s *priv,
                                  struct polaris_chip_info *info)
 {
@@ -480,42 +462,9 @@ static int polaris_nvm_write(FAR struct stwlc38_dev_s *priv)
   return OK;
 }
 
-static ssize_t chip_info_show(FAR struct stwlc38_dev_s *priv, char *buf)
+static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv)
 {
-  int error;
-  char temp[100];
-  uint8_t read_buff[4];
-  uint8_t cmd[2];
-  FAR struct i2c_master_s *dev = priv->i2c;
-
-  memset(read_buff, 0, 4);
-  memset(cmd, 0, 2);
-
-  cmd[0] = (WLC_CHIPID_LOW_REG & 0xff00) >> 8;
-  cmd[1] = (WLC_CHIPID_LOW_REG & 0xff);
-  batinfo("[WLC] Chip Id Command: %02X %02X\n", cmd[0], cmd[1]);
-
-  if (wlc_i2c_read(dev, cmd, 2, read_buff, 4) < OK)
-    {
-      batinfo("[WLC] ERROR: could not read the register\n");
-      error = snprintf(buf, PAGE_SIZE,
-                       "CHIP INFO READ ERROR {%02X}\n", E_BUS_WR);
-      return error;
-    }
-
-  batinfo("[WLC] Chip Id : 0x%04X\n", (read_buff[0] | (read_buff[1] << 8)));
-  batinfo("[WLC] Chip Revision : 0x%02X\n", read_buff[2]);
-  error = snprintf(buf, PAGE_SIZE, "%s\n", print_hex("Chip Info: ",
-                   read_buff, 3, temp));
-
-  return error;
-}
-
-static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
-{
-  int err = 0;
-  FAR struct i2c_master_s *dev = priv->i2c;
-  int count = 0;
+  int err = OK;
   int config_id_mismatch = 0;
   int patch_id_mismatch = 0;
   struct polaris_chip_info chip_info;
@@ -601,16 +550,13 @@ static ssize_t nvm_program_show(FAR struct stwlc38_dev_s *priv, char *buf)
 
 exit_0:
   batinfo("[WLC] NVM programming exited\n");
-  count = snprintf(buf, PAGE_SIZE, "{ %08X }\n", err);
-
-  return count;
+  return err;
 }
 
 static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                                           char *buf)
 {
   int err = 0;
-  FAR struct i2c_master_s *dev = priv->i2c;
   uint8_t *read_buff = NULL;
   uint8_t *all_strbuff = NULL;
   int read_count = 0;
@@ -652,15 +598,15 @@ static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
                         }
 
                       err = OK;
-                      snprintf(&all_strbuff[index], 11, "{ %08X", err);
+                      snprintf((char *)all_strbuff, 11, "{ %08X", err);
                       index += 10;
                       for (i = 0; i < read_count; i++)
                         {
-                          snprintf(&all_strbuff[index], 3, "%02X",
+                          snprintf((char *)all_strbuff, 3, "%02X",
                                    read_buff[i]);
                           index += 2;
                         }
-                      snprintf(&all_strbuff[index], 3, " }");
+                      snprintf((char *)all_strbuff, 3, " }");
                       index += 2;
                       err = snprintf(buf, PAGE_SIZE, "%s\n", all_strbuff);
                       number_parameters = 0;
@@ -835,7 +781,7 @@ static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stwlc38_readrx(priv)
+static int stwlc38_readrx(FAR struct stwlc38_dev_s *priv)
 {
   /* to-do */
 
@@ -845,11 +791,17 @@ static int stwlc38_readrx(priv)
 static void stwlc38_worker(FAR void *arg)
 {
   FAR struct stwlc38_dev_s *priv = arg;
+  int ret;
 
   DEBUGASSERT(priv != NULL);
 
-  IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+  ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
+                  IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      baterr("Failed to set option: %d\n", ret);
+      IOEP_DETACH(priv->io_dev, stwlc38_interrupt_handler);
+    }
 
   /* Read out the latest rx data */
 
@@ -857,8 +809,10 @@ static void stwlc38_worker(FAR void *arg)
     {
       /* push data to upper half driver */
 
-      return OK;
+      batinfo("SUCCESS: stwlc38_readrx\n");
     }
+
+  return;
 }
 
 static const struct battery_charger_operations_s g_stwlc38ops =
@@ -907,7 +861,7 @@ static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
   uint16_t reg_value = 0;
   uint16_t temp;
 
-  err = fw_i2c_read(priv, WLC_RX_CHIP_TEMP_REG, &reg_value, 2);
+  err = fw_i2c_read(priv, WLC_RX_CHIP_TEMP_REG, (uint8_t *)&reg_value, 2);
   if (err != OK)
     {
       *health = -1;
@@ -949,7 +903,8 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
     {
       batinfo("[WLC] the left %d time to try i2c0 status.. \n", count);
       count--;
-      err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2);
+      err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG,
+                         (uint8_t *)&reg_value, 2);
       if (err != OK)
         {
           if (count == 0)
@@ -995,12 +950,10 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
   FAR struct batio_operate_msg_s *msg =
     (FAR struct batio_operate_msg_s *) param;
   int op;
-  int value;
   int ret = OK;
   uint8_t reg_value = 0;
 
   op = msg->operate_type;
-  value = (int)msg->u32;
   switch (op)
     {
       case BATIO_OPRTN_RESET:
@@ -1009,6 +962,11 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
 
         reg_value = 0x40;
         ret = fw_i2c_write(priv, FWREG_SYS_CMD_ADDR, &reg_value, 1);
+        if (ret < 0)
+          {
+            baterr("Failed to FW system reset, Error: %d\n", ret);
+            ret = -EINVAL;
+          }
 
   /**************************************************************************
    * system reset:
@@ -1031,7 +989,8 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
         ret = stwlc38_onoff_ldo_output(priv, ON);
         if (ret < 0)
           {
-            baterr("Failed to trun ON wpc ldo output: %d\n", ret);
+            baterr("Failed to trun ON wpc ldo output, Error: %d\n", ret);
+            ret = -EINVAL;
           }
           break;
 
@@ -1042,7 +1001,8 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
         ret = stwlc38_onoff_ldo_output(priv, OFF);
         if (ret < 0)
           {
-            baterr("Failed to trun OFF wpc ldo output: %d\n", ret);
+            baterr("Failed to trun OFF wpc ldo output, Error: %d\n", ret);
+            ret = -EINVAL;
           }
           break;
 
@@ -1058,6 +1018,7 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
 {
   int ret;
+  void *ioepattach;
 
   ret = IOEXP_SETDIRECTION(priv->io_dev, priv->lower->int_pin,
                            IOEXPANDER_DIRECTION_IN_PULLUP);
@@ -1066,11 +1027,11 @@ static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
       baterr("Failed to set direction: %d\n", ret);
     }
 
-  ret = IOEP_ATTACH(priv->io_dev, priv->lower->int_pin,
+  ioepattach = IOEP_ATTACH(priv->io_dev, priv->lower->int_pin,
                           stwlc38_interrupt_handler, priv);
-  if (ret == NULL)
+  if (ioepattach == NULL)
     {
-      baterr("Failed to attach: %d\n", ret);
+      baterr("Failed to attach stwlc38_interrupt_handler");
       ret = -EIO;
     }
 
@@ -1092,8 +1053,6 @@ FAR struct battery_charger_dev_s *
                      FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct stwlc38_dev_s *priv;
-  char *buf;
-  uint8_t count;
   int ret;
 
   /* Initialize the STWLC38 device structure */
@@ -1128,9 +1087,10 @@ FAR struct battery_charger_dev_s *
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
 
-  count = nvm_program_show(priv, buf);
+  ret = nvm_program_show(priv);
+  if (ret != OK)
+    baterr("Failed to [WLC] NVM programming exited, Error: %d\n", ret);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }
-
 #endif /* __POLARIS_C */

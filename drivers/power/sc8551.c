@@ -1465,7 +1465,7 @@ static int sc8551_get_temp(FAR struct sc8551_dev_s *priv)
     }
 
   if (value == 0xff)
-    temp == value >> 1;
+    temp = value >> 1;
   else
     temp = (value +1) >> 1;
 
@@ -1615,7 +1615,7 @@ static int sc8551_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static int sc8551_readpump(priv)
+static int sc8551_readpump(FAR struct sc8551_dev_s *priv)
 {
   /* to-do */
 
@@ -1624,21 +1624,31 @@ static int sc8551_readpump(priv)
 
 static void sc8551_worker(FAR void *arg)
 {
+  int ret;
   FAR struct sc8551_dev_s *priv = arg;
 
   DEBUGASSERT(priv != NULL);
 
-  IOEXP_SETOPTION(priv->ioedev, priv->pin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+  ret = IOEXP_SETOPTION(priv->ioedev, priv->pin,
+              IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
+  if (ret < 0)
+    {
+      baterr("ERROR: setting IOEXPANDER_OPTION_INTCFG! Error = %d\n", ret);
+      return;
+    }
 
   /* Read out the latest pump data */
 
-  if (sc8551_readpump(priv) == 0)
+  ret = sc8551_readpump(priv);
+
+  if (ret == 0)
     {
       /* push data to upper half driver */
 
-      return OK;
+      baterr("SUCCESS: sc8551_readpump!");
     }
+
+  return;
 }
 
 /****************************************************************************
@@ -1654,8 +1664,6 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
 {
   FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
   FAR struct sc8551_key_state_s sc8551_key_state;
-  uint8_t val;
-  bool isfault = false;
   int ret;
 
   memset(&sc8551_key_state, 0, sizeof(sc8551_key_state));
@@ -1856,7 +1864,7 @@ static int sc8551_chipid(FAR struct battery_charger_dev_s *dev,
   FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
   int ret;
 
-  ret = sc8551_getreg8(priv, SC8551_REG_13, value, 1);
+  ret = sc8551_getreg8(priv, SC8551_REG_13, (uint8_t *)value, 1);
   if (ret < 0)
     {
       baterr("ERROR: Failed to Get sc8551 chipid: %d\n", ret);
@@ -1933,6 +1941,7 @@ FAR struct battery_charger_dev_s *
   FAR struct sc8551_dev_s *priv;
   FAR struct sc8551_key_state_s sc8551_key_state;
   int ret;
+  void *ioepattach;
 
   /* Initialize the SC8551 device structure */
 
@@ -1958,11 +1967,11 @@ FAR struct battery_charger_dev_s *
           baterr("Failed to set direction: %d\n", ret);
         }
 
-      ret = IOEP_ATTACH(priv->ioedev, priv->pin,
+      ioepattach = IOEP_ATTACH(priv->ioedev, priv->pin,
                               sc8551_interrupt_handler, priv);
-      if (ret == NULL)
+      if (ioepattach == NULL)
         {
-          baterr("Failed to attach: %d\n", ret);
+          baterr("Failed to attach sc8551_interrupt_handler");
           ret = -EIO;
         }
 
