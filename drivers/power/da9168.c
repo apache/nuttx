@@ -97,6 +97,7 @@ struct da9168_dev_s
   uint32_t frequency;                /* I2C frequency */
   int pin;                           /* Interrupt pin */
   struct work_s work;                /* Work queue for reading data. */
+  uint8_t last_state;                /* charge state change */
 };
 
 /****************************************************************************
@@ -1736,17 +1737,15 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 static void da9168_worker(FAR void *arg)
 {
   FAR struct da9168_dev_s *priv = arg;
-  static uint8_t last_state = DA9168_CHG_PHASE_MAX;
   uint8_t state;
 
   state = da9168_chg_get_phase(priv);
   if (state != DA9168_CHG_PHASE_UNKNOWN)
     {
-      if (state != last_state)
+      if (state != priv->last_state)
         {
-          last_state = state;
-          battery_charger_changed((FAR struct battery_charger_dev_s *)priv,
-                                   BATTERY_STATE_CHANGED);
+          priv->last_state = state;
+          battery_charger_changed(&priv->dev,BATTERY_STATE_CHANGED);
         }
     }
 
@@ -1943,6 +1942,7 @@ FAR struct battery_charger_dev_s *
   priv->frequency = frequency;
   priv->ioe       = dev;
   priv->pin       = int_pin;
+  priv->last_state = DA9168_CHG_PHASE_MAX;
 
   /* Reset the DA9168 */
 
