@@ -71,6 +71,7 @@
 int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
   clock_t elapsed;
   int ret;
 
@@ -113,6 +114,10 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   delay -= elapsed;
 
+  /* Disable interrupts to avoid race conditions */
+
+  flags = enter_critical_section();
+
   /* Start the watchdog with interrupts still disabled */
 
   wd_start(&rtcb->waitdog, delay, nxsem_timeout, getpid());
@@ -124,6 +129,10 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
   /* Stop the watchdog timer */
 
   wd_cancel(&rtcb->waitdog);
+
+  /* Interrupts may now be enabled. */
+
+  leave_critical_section(flags);
 
 out:
 
