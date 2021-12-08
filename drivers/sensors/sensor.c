@@ -370,6 +370,13 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
           if (ret >= 0)
             {
               upper->enabled = !!arg;
+              if (!upper->enabled)
+                {
+                  upper->interval = 0;
+                  upper->latency = 0;
+                  ret = circbuf_resize(&upper->buffer, lower->buffer_number *
+                                                       upper->esize);
+                }
             }
         }
         break;
