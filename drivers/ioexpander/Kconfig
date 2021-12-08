@@ -14,6 +14,23 @@ config IOEXPANDER
 
 if IOEXPANDER
 
+config IOEXPANDER_RPMSG
+	bool "IO expander rpmsg server and client"
+	default n
+	---help---
+		This settings enable ioexpander rpmsg server and client.
+
+if IOEXPANDER_RPMSG
+
+config IOEXPANDER_RPMSG_INT_NCALLBACKS
+	int "number of ioexpander rpmsg interrupt callbacks"
+	default 32
+	depends on IOEXPANDER_INT_ENABLE
+	---help---
+		This set the IO expander number in interrupt callbacks.
+
+endif # IOEXPANDER_RPMSG
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n
