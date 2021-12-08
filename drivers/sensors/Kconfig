@@ -601,6 +601,13 @@ config SENSORS_LPS27HHW
 	---help---
 		Enable driver support for the STMicro LPS27HHW barometer sensor.
 
+config SENSORS_ICP10125
+	bool "InvenSense ICP10125 barometer sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the InvenSense ICP10125 barometer sensor.
+
 config SENSORS_LTC4151
 	bool "LTC4151 current and voltage monitor"
 	default n
