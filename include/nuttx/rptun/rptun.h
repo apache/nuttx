@@ -265,7 +265,7 @@ struct rptun_addrenv_s
   size_t    size;
 };
 
-struct aligned_data(B2C(8)) rptun_rsc_s
+struct aligned_data(8) rptun_rsc_s
 {
   struct resource_table    rsc_tbl_hdr;
   unsigned int             offset[2];
