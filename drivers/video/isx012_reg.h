@@ -1401,4 +1401,6 @@
 
 #define REGVAL_INTCLR0_ALLCLEAR     (0x3F)
 
+#define DEVICESTS_SLEEP             (2)
+
 #endif /* __INCLUDE_NUTTX_VIDEO_ISX012_REG_H */
