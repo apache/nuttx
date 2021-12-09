@@ -57,15 +57,15 @@ GPIO9 as an interrupt pin.
 
 At the nsh, we can turn the outputs on and off with the following::
 
-  nsh> gpio -o 1 /dev/gpout0
-  nsh> gpio -o 1 /dev/gpout1
+  nsh> gpio -o 1 /dev/gpio0
+  nsh> gpio -o 1 /dev/gpio1
 
-  nsh> gpio -o 0 /dev/gpout0
-  nsh> gpio -o 0 /dev/gpout1
+  nsh> gpio -o 0 /dev/gpio0
+  nsh> gpio -o 0 /dev/gpio1
 
 We can use the interrupt pin to send a signal when the interrupt fires::
 
-    nsh> gpio -w 14 /dev/gpint2
+    nsh> gpio -w 14 /dev/gpio2
 
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
