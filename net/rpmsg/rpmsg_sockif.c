@@ -34,6 +34,7 @@
 #include <nuttx/mm/circbuf.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/fs/ioctl.h>
 
 #include <netinet/in.h>
 #include <netpacket/rpmsg.h>
@@ -144,6 +145,8 @@ static ssize_t    rpmsg_socket_sendmsg(FAR struct socket *psock,
 static ssize_t    rpmsg_socket_recvmsg(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
 static int        rpmsg_socket_close(FAR struct socket *psock);
+static int        rpmsg_socket_ioctl(FAR struct socket *psock, int cmd,
+                                     FAR void *arg, size_t arglen);
 
 /****************************************************************************
  * Public Data
@@ -163,7 +166,8 @@ const struct sock_intf_s g_rpmsg_sockif =
   rpmsg_socket_poll,        /* si_poll */
   rpmsg_socket_sendmsg,     /* si_sendmsg */
   rpmsg_socket_recvmsg,     /* si_recvmsg */
-  rpmsg_socket_close        /* si_close */
+  rpmsg_socket_close,       /* si_close */
+  rpmsg_socket_ioctl,       /* si_ioctl */
 };
 
 /****************************************************************************
@@ -1276,4 +1280,40 @@ static int rpmsg_socket_close(FAR struct socket *psock)
   rpmsg_socket_destroy_ept(conn);
   rpmsg_socket_free(conn);
   return 0;
+}
+
+static int rpmsg_socket_ioctl(FAR struct socket *psock, int cmd,
+                              FAR void *arg, size_t arglen)
+{
+  FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
+  int ret = OK;
+
+  switch (cmd)
+    {
+      case FIONREAD:
+        if (arglen != sizeof(int))
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        *(FAR int *)((uintptr_t)arg) = circbuf_used(&conn->recvbuf);
+
+        break;
+      case FIONSPACE:
+        if (arglen != sizeof(int))
+          {
+            ret = -EINVAL;
+            break;
+          }
+
+        *(FAR int *)((uintptr_t)arg) = rpmsg_socket_get_space(conn);
+
+        break;
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
 }
