@@ -206,40 +206,6 @@ static int mpfs_i2c_setfrequency(struct mpfs_i2c_priv_s *priv,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_disable_interrupts
- *
- * Description:
- *   Disable all interrupts.
- *
- * Returned Value:
- *   primask (current interrupt status)
- *
- ****************************************************************************/
-
-static irqstate_t mpfs_disable_interrupts(void)
-{
-  irqstate_t primask;
-  primask = up_irq_save();
-  return primask;
-}
-
-/****************************************************************************
- * Name: mpfs_restore_interrupts
- *
- * Description:
- *   Restore interrupts.
- *
- * Parameters:
- *   primask       - Earlier stored irqstate
- *
- ****************************************************************************/
-
-static void mpfs_restore_interrupts(irqstate_t primask)
-{
-  up_irq_restore(primask);
-}
-
-/****************************************************************************
  * Name: mpfs_i2c_init
  *
  * Description:
@@ -256,12 +222,8 @@ static void mpfs_restore_interrupts(irqstate_t primask)
 
 static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
 {
-  uint32_t primask;
-
   if (!priv->initialized)
     {
-      primask = mpfs_disable_interrupts();
-
       if (priv->id == 0)
         {
           modifyreg32(MPFS_SYSREG_SOFT_RESET_CR,
@@ -299,8 +261,6 @@ static int mpfs_i2c_init(struct mpfs_i2c_priv_s *priv)
                   MPFS_I2C_CTRL_ENS1_MASK);
 
       priv->initialized = true;
-
-      mpfs_restore_interrupts(primask);
     }
 
   return OK;
@@ -501,6 +461,12 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
         priv->status = MPFS_I2C_SUCCESS;
         break;
 
+      case MPFS_I2C_ST_IDLE:
+
+        /* No activity, bus idle */
+
+        break;
+
       case MPFS_I2C_ST_RESET_ACTIVATED:
       case MPFS_I2C_ST_BUS_ERROR: /* Bus errors */
       default:
@@ -549,15 +515,8 @@ static int mpfs_i2c_irq(int cpuint, void *context, void *arg)
 
 static void mpfs_i2c_sendstart(struct mpfs_i2c_priv_s *priv)
 {
-  uint32_t primask;
-
-  primask = mpfs_disable_interrupts();
-
-  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
-
   up_enable_irq(priv->plic_irq);
-
-  mpfs_restore_interrupts(primask);
+  modifyreg32(MPFS_I2C_CTRL, MPFS_I2C_CTRL_STA_MASK, MPFS_I2C_CTRL_STA_MASK);
 }
 
 static int mpfs_i2c_transfer(struct i2c_master_s *dev,
@@ -677,8 +636,15 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
 {
   struct mpfs_i2c_priv_s *priv = (struct mpfs_i2c_priv_s *)dev;
   int ret;
+  irqstate_t flags;
 
   DEBUGASSERT(priv != NULL);
+
+  flags = enter_critical_section();
+
+  /* Disabling I2C interrupts.
+   * NOTE: up_enable_irq() will be called at mpfs_i2c_sendstart()
+   */
 
   up_disable_irq(priv->plic_irq);
 
@@ -687,7 +653,7 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   ret = mpfs_i2c_init(priv);
   if (ret != OK)
     {
-      up_enable_irq(priv->plic_irq);
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -696,7 +662,7 @@ static int mpfs_i2c_reset(struct i2c_master_s *dev)
   priv->rx_size = 0;
   priv->rx_idx  = 0;
 
-  /* up_enable_irq() will be called at mpfs_i2c_sendstart() */
+  leave_critical_section(flags);
 
   return OK;
 }
