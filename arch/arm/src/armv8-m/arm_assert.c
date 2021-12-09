@@ -230,7 +230,8 @@ static void up_dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
 
 static inline void up_showtasks(void)
 {
-#ifdef CONFIG_STACK_COLORATION
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#  ifdef CONFIG_STACK_COLORATION
   uint32_t stack_used = up_check_intstack();
   uint32_t stack_filled = 0;
 
@@ -241,6 +242,7 @@ static inline void up_showtasks(void)
       stack_filled = 10 * 100 *
                      stack_used / (CONFIG_ARCH_INTERRUPTSTACK & ~7);
     }
+#  endif
 #endif
 
   /* Dump interesting properties of each task in the crash environment */
