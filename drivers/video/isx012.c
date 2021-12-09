@@ -1241,39 +1241,18 @@ int init_isx012(FAR struct isx012_dev_s *priv)
   return ret;
 }
 
-static void get_chipid(uint32_t *l, uint32_t *h)
-{
-  uint16_t l1;
-  uint16_t l2;
-  uint16_t h1;
-  uint16_t h2;
-
-  ASSERT(l && h);
-
-  l1 = isx012_getreg(&g_isx012_private, OTP_CHIPID_L, 2);
-  l2 = isx012_getreg(&g_isx012_private, OTP_CHIPID_L + 2, 2);
-
-  h1 = isx012_getreg(&g_isx012_private, OTP_CHIPID_H, 2);
-  h2 = isx012_getreg(&g_isx012_private, OTP_CHIPID_H + 2, 2);
-
-  *l = (l2 << 16) | l1;
-  *h = (h2 << 16) | h1;
-}
-
 static bool isx012_is_available(void)
 {
-  bool ret = false;
-  uint32_t l;
-  uint32_t h;
+  bool ret;
 
   isx012_init();
 
-  get_chipid(&l, &h);
+  /* Try to access via I2C.
+   * Select DEVICESTS register, which has positive value.
+   */
 
-  if ((l == ISX012_CHIPID_L) && (h == ISX012_CHIPID_H))
-    {
-      ret = true;
-    }
+  ret = (isx012_getreg(&g_isx012_private, DEVICESTS, 1) == DEVICESTS_SLEEP);
+
 
   isx012_uninit();
 
