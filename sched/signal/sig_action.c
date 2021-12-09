@@ -33,10 +33,17 @@
 #include <errno.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 
 #include "sched/sched.h"
 #include "group/group.h"
 #include "signal/signal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_sigaction_spin;
 
 /****************************************************************************
  * Private Functions
@@ -62,14 +69,14 @@ static void nxsig_alloc_actionblock(void)
   sigact = kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
   if (sigact != NULL)
     {
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_sigaction_spin);
 
       for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
         {
           sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
         }
 
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_sigaction_spin, flags);
     }
 }
 
@@ -88,9 +95,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
   /* Try to get the signal action structure from the free list */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_sigaction_spin);
   sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_sigaction_spin, flags);
 
   /* Check if we got one. */
 
@@ -102,9 +109,9 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
       /* And try again */
 
-      flags = spin_lock_irqsave(NULL);
+      flags = spin_lock_irqsave(&g_sigaction_spin);
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
-      spin_unlock_irqrestore(NULL, flags);
+      spin_unlock_irqrestore(&g_sigaction_spin, flags);
       DEBUGASSERT(sigact);
     }
 
@@ -403,7 +410,7 @@ void nxsig_release_action(FAR sigactq_t *sigact)
 
   /* Just put it back on the free list */
 
-  flags = spin_lock_irqsave(NULL);
+  flags = spin_lock_irqsave(&g_sigaction_spin);
   sq_addlast((FAR sq_entry_t *)sigact, &g_sigfreeaction);
-  spin_unlock_irqrestore(NULL, flags);
+  spin_unlock_irqrestore(&g_sigaction_spin, flags);
 }
