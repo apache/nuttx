@@ -111,8 +111,6 @@ struct opt3007_dev_s
 
   struct sensor_lowerhalf_s lower;           /* Lower half sensor driver */
   bool activated;                            /* Sensor working state */
-  uint64_t start_timestamp;                  /* Start timestamp(us). */
-  uint64_t sample_count;                     /* The count of sampling */
   unsigned int interval;                     /* Sensor acquisition interval */
   FAR const struct opt3007_config_s *config; /* The board config function */
   FAR const opt3007_registers_t *devreg;     /* opt3007 device register */
@@ -503,9 +501,6 @@ static int opt3007_enable(FAR struct opt3007_dev_s *priv,
           snerr("Failed set operation: %d\n", ret);
           return ret;
         }
-
-      priv->start_timestamp = sensor_get_timestamp();
-      priv->sample_count = 1;
 
       work_queue(HPWORK, &priv->work,
                  opt3007_worker, priv,
@@ -1032,25 +1027,10 @@ static void opt3007_worker(FAR void *arg)
 
   light.timestamp = sensor_get_timestamp();
 
-  /* Update the number of sampling points. */
+  /* Set work queue. */
 
-  priv->sample_count++;
-
-  /* Get fixed interval. */
-
-  interval = priv->start_timestamp +
-             priv->sample_count * priv->interval -
-             light.timestamp;
-
-  /* If it is negative, need to start immediately to compensate the time. */
-
-  if (interval < 0)
-    {
-      interval = 0;
-    }
-
-  work_queue(HPWORK, &priv->work, opt3007_worker,
-             priv, interval / USEC_PER_TICK);
+  work_queue(HPWORK, &priv->work, opt3007_worker, priv,
+             priv->interval / USEC_PER_TICK);
 
   /* Read out the latest sensor data */
 
