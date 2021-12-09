@@ -916,7 +916,7 @@ static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
 
 static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
                                             FAR const struct iovec *buf,
-                                            size_t iovcnt)
+                                            size_t iovcnt, int nonblock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
@@ -937,7 +937,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
 
       if (block == 0)
         {
-          if (!_SS_ISNONBLOCK(psock->s_flags))
+          if (!nonblock)
             {
               ret = net_timedwait(&conn->sendsem,
                                   _SO_TIMEOUT(psock->s_sndtimeo));
@@ -1009,7 +1009,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
 
 static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
                                         FAR const struct iovec *buf,
-                                        size_t iovcnt)
+                                        size_t iovcnt, int nonblock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR struct rpmsg_socket_data_s *msg;
@@ -1035,7 +1035,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
       if (space >= total - sizeof(*msg))
           break;
 
-      if (!_SS_ISNONBLOCK(psock->s_flags))
+      if (!nonblock)
         {
           ret = net_timedwait(&conn->sendsem,
                               _SO_TIMEOUT(psock->s_sndtimeo));
@@ -1101,36 +1101,15 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
   return ret > 0 ? len : ret;
 }
 
-static ssize_t rpmsg_socket_send_internal(FAR struct socket *psock,
-                                          FAR const void *buf,
-                                          size_t len, int flags)
-{
-  FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
-
-  if (!conn->ept.rdev)
-    {
-      /* return ECONNRESET if lower IPC closed */
-
-      return -ECONNRESET;
-    }
-
-  if (psock->s_type == SOCK_STREAM)
-    {
-      return rpmsg_socket_send_continuous(psock, buf, len);
-    }
-  else
-    {
-      return rpmsg_socket_send_single(psock, buf, len);
-    }
-}
-
 static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
                                     FAR struct msghdr *msg, int flags)
 {
+  FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR const struct iovec *buf = msg->msg_iov;
   size_t len = msg->msg_iovlen;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
+  int nonblock;
   ssize_t ret;
 
   if (!_SS_ISCONNECTED(psock->s_flags))
@@ -1147,7 +1126,23 @@ static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
         }
     }
 
-  return rpmsg_socket_send_internal(psock, buf, len, flags);
+  if (!conn->ept.rdev)
+    {
+      /* return ECONNRESET if lower IPC closed */
+
+      return -ECONNRESET;
+    }
+
+  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT);
+
+  if (psock->s_type == SOCK_STREAM)
+    {
+      return rpmsg_socket_send_continuous(psock, buf, len, nonblock);
+    }
+  else
+    {
+      return rpmsg_socket_send_single(psock, buf, len, nonblock);
+    }
 }
 
 static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
@@ -1212,7 +1207,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
       goto out;
     }
 
-  if (_SS_ISNONBLOCK(psock->s_flags))
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT))
     {
       ret = -EAGAIN;
       goto out;
