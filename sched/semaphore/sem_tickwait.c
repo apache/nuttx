@@ -71,15 +71,21 @@
 int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
   clock_t elapsed;
   int ret;
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
 
-  /* NOTE: We do not need a critical section here, because
-   * nxsem_wait() and nxsem_timeout() use a critical section
-   * in the functions.
+  /* We will disable interrupts until we have completed the semaphore
+   * wait.  We need to do this (as opposed to just disabling pre-emption)
+   * because there could be interrupt handlers that are asynchronously
+   * posting semaphores and to prevent race conditions with watchdog
+   * timeout.  This is not too bad because interrupts will be re-
+   * enabled while we are blocked waiting for the semaphore.
    */
+
+  flags = enter_critical_section();
 
   /* Try to take the semaphore without waiting. */
 
@@ -88,7 +94,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
     {
       /* We got it! */
 
-      goto out;
+      goto success_with_irqdisabled;
     }
 
   /* We will have to wait for the semaphore.  Make sure that we were provided
@@ -99,7 +105,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
     {
       /* Return the errno from nxsem_trywait() */
 
-      goto out;
+      goto errout_with_irqdisabled;
     }
 
   /* Adjust the delay for any time since the delay was calculated */
@@ -108,7 +114,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
   if (/* elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
     {
       ret = -ETIMEDOUT;
-      goto out;
+      goto errout_with_irqdisabled;
     }
 
   delay -= elapsed;
@@ -125,8 +131,21 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   wd_cancel(&rtcb->waitdog);
 
-out:
+  if (ret < 0)
+    {
+      goto errout_with_irqdisabled;
+    }
 
+  /* We can now restore interrupts */
+
+  /* Success exits */
+
+success_with_irqdisabled:
+
+  /* Error exits */
+
+errout_with_irqdisabled:
+  leave_critical_section(flags);
   return ret;
 }
 
