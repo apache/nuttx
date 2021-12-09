@@ -43,10 +43,6 @@
 
 void riscv_pminitialize(void)
 {
-  /* Initialize RTC parameters */
-
-  esp32c3_pminit();
-
   /* Then initialize the NuttX power management subsystem proper */
 
   pm_initialize();

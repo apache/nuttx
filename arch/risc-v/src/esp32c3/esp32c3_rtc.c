@@ -48,6 +48,7 @@
 #include "hardware/regi2c_ctrl.h"
 #include "hardware/extmem_reg.h"
 #include "hardware/spi_mem_reg.h"
+#include "hardware/esp32c3_efuse.h"
 
 #include "esp32c3_clockconfig.h"
 #include "esp32c3_attr.h"
@@ -222,6 +223,43 @@
   .cali_ocode = 0\
 }
 
+/* The following value is used to get a reasonable rtc voltage dbias value
+ * according to digital dbias & some other value storing in efuse
+ * (based on ATE 5k ECO3 chips)
+ */
+
+#define K_RTC_MID_MUL10000     (215)
+#define K_DIG_MID_MUL10000     (213)
+#define V_RTC_MID_MUL10000     (10800)
+#define V_DIG_MID_MUL10000     (10860)
+
+#define BLOCK1_VERSION         EFUSE_RD_MAC_SPI_SYS_0_REG
+#define BLOCK2_VERSION         EFUSE_RD_SYS_DATA_PART1_0_REG
+
+#define DIG_DBIAS_HVT_OFFSET   (165)
+#define DIG_DBIAS_HVT_LEN      (5)
+
+#define K_RTC_LDO_OFFSET       (135)
+#define K_RTC_LDO_LEN          (7)
+
+#define K_DIG_LDO_OFFSET       (142)
+#define K_DIG_LDO_LEN          (7)
+
+#define V_RTC_DBIAS20_OFFSET   (149)
+#define V_RTC_DBIAS20_LEN      (8)
+
+#define V_DIG_DBIAS20_OFFSET   (157)
+#define V_DIG_DBIAS20_LEN      (8)
+
+#define RTC_CALIB_OFFSET       (128)
+#define RTC_CALIB_LEN          (3)
+
+#define OCODE_OFFSET           (140)
+#define OCODE_LEN              (8)
+
+#define CHIP_VERSION_OFFSET    (114)
+#define CHIP_VERSION_LEN       (3)
+
 #ifdef CONFIG_RTC_DRIVER
 /* The magic data for the struct esp32c3_rtc_backup_s that is in RTC slow
  * memory.
@@ -256,6 +294,26 @@ enum esp32c3_slow_clk_sel_e
   /* External 32k oscillator connected to 32K_XP pin */
 
   SLOW_CLK_32K_EXT_OSC = RTC_SLOW_FREQ_32K_XTAL | EXT_OSC_FLAG
+};
+
+enum reset_reason_e
+{
+  NO_MEAN                =  0,
+  POWERON_RESET          =  1,  /* Vbat power on reset */
+  RTC_SW_SYS_RESET       =  3,  /* Software reset digital core */
+  DEEPSLEEP_RESET        =  5,  /* Deep Sleep reset digital core */
+  SDIO_RESET             =  6,  /* Reset by SLC module, reset digital core */
+  TG0WDT_SYS_RESET       =  7,  /* Timer Group0 Watch dog reset digital core */
+  TG1WDT_SYS_RESET       =  8,  /* Timer Group1 Watch dog reset digital core */
+  RTCWDT_SYS_RESET       =  9,  /* RTC Watch dog Reset digital core */
+  INTRUSION_RESET        = 10,  /* Instrusion tested to reset CPU */
+  TG0WDT_CPU_RESET       = 11,  /* Time Group0 reset CPU */
+  RTC_SW_CPU_RESET       = 12,  /* Software reset CPU */
+  RTCWDT_CPU_RESET       = 13,  /* RTC Watch dog Reset CPU */
+  RTCWDT_BROWN_OUT_RESET = 15,  /* Reset when the vdd voltage is not stable */
+  RTCWDT_RTC_RESET       = 16,  /* RTC Watch dog reset digital core and rtc module */
+  TG1WDT_CPU_RESET       = 17,  /* Time Group1 reset CPU */
+  SUPER_WDT_RESET        = 18,  /* super watchdog reset digital core and rtc module */
 };
 
 /* RTC FAST_CLK frequency values */
@@ -400,6 +458,11 @@ static bool g_rt_timer_enabled = false;
 
 #endif
 
+static uint8_t ref_counts[PERIPH_MODULE_MAX] =
+{
+  0
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -423,7 +486,6 @@ static void IRAM_ATTR esp32c3_rtc_clk_apb_freq_update(uint32_t apb_freq);
 static void IRAM_ATTR esp32c3_wait_dig_dbias_valid(uint64_t rtc_cycles);
 static void IRAM_ATTR esp32c3_rtc_update_to_xtal(int freq, int div);
 static void IRAM_ATTR esp32c3_rtc_clk_bbpll_disable(void);
-static void IRAM_ATTR esp32c3_rtc_clk_set_xtal_wait(void);
 static void IRAM_ATTR esp32c3_rtc_bbpll_configure(
                      enum esp32c3_rtc_xtal_freq_e xtal_freq, int pll_freq);
 static void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_to_8m(void);
@@ -433,6 +495,23 @@ static void IRAM_ATTR esp32c3_rtc_clk_cpu_freq_to_pll_mhz(
 #ifdef CONFIG_RTC_DRIVER
 static void IRAM_ATTR esp32c3_rt_cb_handler(void *arg);
 #endif
+
+static void esp32c3_periph_module_enable(
+            enum esp32c3_periph_module_e periph);
+static uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_reg(
+                            enum esp32c3_periph_module_e periph);
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_mask(
+                            enum esp32c3_periph_module_e periph);
+static uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_reg(
+                            enum esp32c3_periph_module_e periph);
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_mask
+              (enum esp32c3_periph_module_e periph, bool enable);
+static uint32_t esp32c3_get_rtc_dbias_by_efuse(uint8_t chip_version,
+                                               uint32_t dig_dbias);
+static uint32_t esp32c3_read_efuse(uint32_t addr, uint32_t b_off,
+                                                uint32_t b_size);
+static void esp32c3_set_rtc_dig_dbias(void);
+static void esp32c3_rtc_calibrate_ocode(void);
 
 /****************************************************************************
  * Public Data
@@ -455,6 +534,10 @@ extern void esp_rom_delay_us(uint32_t us);
  */
 
 extern void ets_update_cpu_frequency(uint32_t ticks_per_us);
+
+/* Get the reset reason for CPU. */
+
+extern enum reset_reason_e rtc_get_reset_reason(int cpu_no);
 
 /****************************************************************************
  * Name: esp32c3_rtc_sleep_pu
@@ -1055,50 +1138,6 @@ static void IRAM_ATTR esp32c3_rtc_clk_bbpll_disable(void)
 }
 
 /****************************************************************************
- * Name: esp32c3_rtc_clk_set_xtal_wait
- *
- * Description:
- *   Set XTAL wait cycles by RTC slow clock's period
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static void IRAM_ATTR esp32c3_rtc_clk_set_xtal_wait(void)
-{
-  uint32_t slow_clk_period;
-
-  /* the `xtal_wait` time need 1ms, so we need calibrate slow clk period,
-   * and `RTC_CNTL_XTL_BUF_WAIT` depend on it.
-   */
-
-  uint32_t xtal_wait_1ms = 100;
-  enum esp32c3_rtc_slow_freq_e slow_clk_freq =
-                                      esp32c3_rtc_clk_slow_freq_get();
-  enum esp32c3_rtc_cal_sel_e cal_clk = RTC_CAL_RTC_MUX;
-  if (slow_clk_freq == RTC_SLOW_FREQ_32K_XTAL)
-    {
-      cal_clk = RTC_CAL_32K_XTAL;
-    }
-  else if (slow_clk_freq == RTC_SLOW_FREQ_8MD256)
-    {
-      cal_clk  = RTC_CAL_8MD256;
-    }
-
-  slow_clk_period = esp32c3_rtc_clk_cal(cal_clk, 2000);
-  if (slow_clk_period)
-    {
-      xtal_wait_1ms = (1000 << RTC_CLK_CAL_FRACT) / slow_clk_period;
-    }
-
-  REG_SET_FIELD(RTC_CNTL_TIMER1_REG, RTC_CNTL_XTL_BUF_WAIT, xtal_wait_1ms);
-}
-
-/****************************************************************************
  * Name: esp32c3_rtc_bbpll_configure
  *
  * Description:
@@ -1370,8 +1409,618 @@ static void IRAM_ATTR esp32c3_rt_cb_handler(void *arg)
 #endif /* CONFIG_RTC_DRIVER */
 
 /****************************************************************************
+ * Name: esp32c3_rtc_calibrate_ocode
+ *
+ * Description:
+ *   Calibrate o-code by software
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32c3_rtc_calibrate_ocode(void)
+{
+  uint64_t cycle0;
+  uint64_t timeout_cycle;
+  uint32_t slow_clk_period;
+  uint64_t max_delay_cycle;
+  bool odone_flag = 0;
+  bool bg_odone_flag = 0;
+  uint64_t cycle1 = 0;
+  uint64_t max_delay_time_us = 10000;
+  struct esp32c3_cpu_freq_config_s freq_config;
+
+  /* Bandgap output voltage is not precise when calibrate o-code by hardware
+   * sometimes, so need software o-code calibration (must turn off PLL).
+   * Method:
+   * 1. read current cpu config, save in old_config
+   * 2. switch cpu to xtal because PLL will be closed when o-code calibration
+   * 3. begin o-code calibration
+   * 4. wait o-code calibration done flag or timeout
+   * 5. set cpu to old-config
+   */
+
+  enum esp32c3_rtc_slow_freq_e slow_clk_freq =
+                               esp32c3_rtc_clk_slow_freq_get();
+  enum esp32c3_rtc_slow_freq_e rtc_slow_freq_x32k =
+                                         RTC_SLOW_FREQ_32K_XTAL;
+  enum esp32c3_rtc_slow_freq_e rtc_slow_freq_8md256 =
+                                         RTC_SLOW_FREQ_8MD256;
+  enum esp32c3_rtc_cal_sel_e cal_clk = RTC_CAL_RTC_MUX;
+  if (slow_clk_freq == rtc_slow_freq_x32k)
+    {
+      cal_clk = RTC_CAL_32K_XTAL;
+    }
+  else if (slow_clk_freq == rtc_slow_freq_8md256)
+    {
+      cal_clk  = RTC_CAL_8MD256;
+    }
+
+  slow_clk_period = esp32c3_rtc_clk_cal(cal_clk, 100);
+  max_delay_cycle = esp32c3_rtc_time_us_to_slowclk(max_delay_time_us,
+                                                   slow_clk_period);
+  cycle0 = esp32c3_rtc_time_get();
+  timeout_cycle = cycle0 + max_delay_cycle;
+
+  esp32c3_rtc_clk_cpu_freq_get_config(&freq_config);
+  esp32c3_rtc_cpu_freq_set_xtal();
+  REGI2C_WRITE_MASK(I2C_ULP, I2C_ULP_IR_RESETB, 0);
+  REGI2C_WRITE_MASK(I2C_ULP, I2C_ULP_IR_RESETB, 1);
+  while (1)
+    {
+      odone_flag = REGI2C_READ_MASK(I2C_ULP, I2C_ULP_O_DONE_FLAG);
+      bg_odone_flag = REGI2C_READ_MASK(I2C_ULP, I2C_ULP_BG_O_DONE_FLAG);
+      cycle1 = esp32c3_rtc_time_get();
+      if (odone_flag && bg_odone_flag)
+        {
+          break;
+        }
+
+      if (cycle1 >= timeout_cycle)
+        {
+          break;
+        }
+    }
+
+  esp32c3_rtc_clk_cpu_freq_set_config(&freq_config);
+}
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_get_clk_en_reg
+ *
+ * Description:
+ *   Get module clock register through periph module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   Module clock register
+ *
+ ****************************************************************************/
+
+static uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_reg(
+                             enum esp32c3_periph_module_e periph)
+{
+  switch (periph)
+    {
+      case PERIPH_RNG_MODULE:
+      case PERIPH_WIFI_MODULE:
+      case PERIPH_BT_MODULE:
+      case PERIPH_WIFI_BT_COMMON_MODULE:
+      case PERIPH_BT_BASEBAND_MODULE:
+      case PERIPH_BT_LC_MODULE:
+        return SYSTEM_WIFI_CLK_EN_REG;
+
+      case PERIPH_HMAC_MODULE:
+      case PERIPH_DS_MODULE:
+      case PERIPH_AES_MODULE:
+      case PERIPH_RSA_MODULE:
+      case PERIPH_SHA_MODULE:
+      case PERIPH_GDMA_MODULE:
+        return SYSTEM_PERIP_CLK_EN1_REG;
+
+      default:
+        return SYSTEM_PERIP_CLK_EN0_REG;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_get_clk_en_mask
+ *
+ * Description:
+ *   Get module clock bit through periph module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   Module clock bit
+ *
+ ****************************************************************************/
+
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_clk_en_mask(
+                               enum esp32c3_periph_module_e periph)
+{
+  switch (periph)
+    {
+      case PERIPH_SARADC_MODULE:
+        return SYSTEM_APB_SARADC_CLK_EN;
+
+      case PERIPH_RMT_MODULE:
+        return SYSTEM_RMT_CLK_EN;
+
+      case PERIPH_LEDC_MODULE:
+        return SYSTEM_LEDC_CLK_EN;
+
+      case PERIPH_UART0_MODULE:
+        return SYSTEM_UART_CLK_EN;
+
+      case PERIPH_UART1_MODULE:
+        return SYSTEM_UART1_CLK_EN;
+
+      case PERIPH_I2C0_MODULE:
+        return SYSTEM_I2C_EXT0_CLK_EN;
+
+      case PERIPH_I2S1_MODULE:
+        return SYSTEM_I2S1_CLK_EN;
+
+      case PERIPH_TIMG0_MODULE:
+        return SYSTEM_TIMERGROUP_CLK_EN;
+
+      case PERIPH_TIMG1_MODULE:
+        return SYSTEM_TIMERGROUP1_CLK_EN;
+
+      case PERIPH_UHCI0_MODULE:
+        return SYSTEM_UHCI0_CLK_EN;
+
+      case PERIPH_SYSTIMER_MODULE:
+        return SYSTEM_SYSTIMER_CLK_EN;
+
+      case PERIPH_SPI_MODULE:
+        return SYSTEM_SPI01_CLK_EN;
+
+      case PERIPH_SPI2_MODULE:
+        return SYSTEM_SPI2_CLK_EN;
+
+      case PERIPH_TWAI_MODULE:
+        return SYSTEM_TWAI_CLK_EN;
+
+      case PERIPH_GDMA_MODULE:
+        return SYSTEM_DMA_CLK_EN;
+
+      case PERIPH_AES_MODULE:
+        return SYSTEM_CRYPTO_AES_CLK_EN;
+
+      case PERIPH_SHA_MODULE:
+        return SYSTEM_CRYPTO_SHA_CLK_EN;
+
+      case PERIPH_RSA_MODULE:
+        return SYSTEM_CRYPTO_RSA_CLK_EN;
+
+      case PERIPH_HMAC_MODULE:
+        return SYSTEM_CRYPTO_HMAC_CLK_EN;
+
+      case PERIPH_DS_MODULE:
+        return SYSTEM_CRYPTO_DS_CLK_EN;
+
+      case PERIPH_RNG_MODULE:
+        return SYSTEM_WIFI_CLK_RNG_EN;
+
+      case PERIPH_WIFI_MODULE:
+        return SYSTEM_WIFI_CLK_WIFI_EN_M;
+
+      case PERIPH_BT_MODULE:
+        return SYSTEM_WIFI_CLK_BT_EN_M;
+
+      case PERIPH_WIFI_BT_COMMON_MODULE:
+        return SYSTEM_WIFI_CLK_WIFI_BT_COMMON_M;
+
+      case PERIPH_BT_BASEBAND_MODULE:
+        return SYSTEM_BT_BASEBAND_EN;
+
+      case PERIPH_BT_LC_MODULE:
+        return SYSTEM_BT_LC_EN;
+
+      default:
+        return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_get_rst_en_reg
+ *
+ * Description:
+ *   Get system reset register through periph module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   System reset register
+ *
+ ****************************************************************************/
+
+static uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_reg(
+                            enum esp32c3_periph_module_e periph)
+{
+  switch (periph)
+    {
+      case PERIPH_RNG_MODULE:
+      case PERIPH_WIFI_MODULE:
+      case PERIPH_BT_MODULE:
+      case PERIPH_WIFI_BT_COMMON_MODULE:
+      case PERIPH_BT_BASEBAND_MODULE:
+      case PERIPH_BT_LC_MODULE:
+        return SYSTEM_WIFI_RST_EN_REG;
+
+      case PERIPH_HMAC_MODULE:
+      case PERIPH_DS_MODULE:
+      case PERIPH_AES_MODULE:
+      case PERIPH_RSA_MODULE:
+      case PERIPH_SHA_MODULE:
+      case PERIPH_GDMA_MODULE:
+        return SYSTEM_PERIP_RST_EN1_REG;
+
+      default:
+        return SYSTEM_PERIP_RST_EN0_REG;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_get_rst_en_mask
+ *
+ * Description:
+ *   Get system reset bit through periph module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *   enable - Whether hardware acceleration is enabled
+ *
+ * Returned Value:
+ *   System reset bit
+ *
+ ****************************************************************************/
+
+static inline uint32_t IRAM_ATTR esp32c3_periph_ll_get_rst_en_mask
+              (enum esp32c3_periph_module_e periph, bool enable)
+{
+  switch (periph)
+    {
+      case PERIPH_SARADC_MODULE:
+        return SYSTEM_APB_SARADC_RST;
+
+      case PERIPH_RMT_MODULE:
+        return SYSTEM_RMT_RST;
+
+      case PERIPH_LEDC_MODULE:
+        return SYSTEM_LEDC_RST;
+
+      case PERIPH_UART0_MODULE:
+        return SYSTEM_UART_RST;
+
+      case PERIPH_UART1_MODULE:
+        return SYSTEM_UART1_RST;
+
+      case PERIPH_I2C0_MODULE:
+        return SYSTEM_I2C_EXT0_RST;
+
+      case PERIPH_I2S1_MODULE:
+        return SYSTEM_I2S1_RST;
+
+      case PERIPH_TIMG0_MODULE:
+        return SYSTEM_TIMERGROUP_RST;
+
+      case PERIPH_TIMG1_MODULE:
+        return SYSTEM_TIMERGROUP1_RST;
+
+      case PERIPH_UHCI0_MODULE:
+        return SYSTEM_UHCI0_RST;
+
+      case PERIPH_SYSTIMER_MODULE:
+        return SYSTEM_SYSTIMER_RST;
+
+      case PERIPH_GDMA_MODULE:
+        return SYSTEM_DMA_RST;
+
+      case PERIPH_SPI_MODULE:
+        return SYSTEM_SPI01_RST;
+
+      case PERIPH_SPI2_MODULE:
+        return SYSTEM_SPI2_RST;
+
+      case PERIPH_TWAI_MODULE:
+        return SYSTEM_TWAI_RST;
+
+      case PERIPH_HMAC_MODULE:
+        return SYSTEM_CRYPTO_HMAC_RST;
+
+      case PERIPH_AES_MODULE:
+        if (enable == true)
+          {
+            /* Clear reset on digital signature,
+              * otherwise AES unit is held in reset also.
+              */
+
+            return (SYSTEM_CRYPTO_AES_RST | SYSTEM_CRYPTO_DS_RST);
+          }
+
+        /* Don't return other units to reset,
+         * as this pulls reset on RSA & SHA units, respectively.
+         */
+
+        return SYSTEM_CRYPTO_AES_RST;
+
+      case PERIPH_SHA_MODULE:
+        if (enable == true)
+          {
+            /* Clear reset on digital signature and HMAC,
+             * otherwise SHA is held in reset
+             */
+
+            return (SYSTEM_CRYPTO_SHA_RST |
+                    SYSTEM_CRYPTO_DS_RST | SYSTEM_CRYPTO_HMAC_RST);
+          }
+
+        /* Don't assert reset on secure boot,
+         * otherwise AES is held in reset
+         */
+
+        return SYSTEM_CRYPTO_SHA_RST;
+
+      case PERIPH_RSA_MODULE:
+        if (enable == true)
+          {
+          /* also clear reset on digital signature,
+           * otherwise RSA is held in reset
+           */
+
+            return (SYSTEM_CRYPTO_RSA_RST | SYSTEM_CRYPTO_DS_RST);
+          }
+
+        /* don't reset digital signature unit,
+         * as this resets AES also.
+         */
+
+        return SYSTEM_CRYPTO_RSA_RST;
+
+      case PERIPH_DS_MODULE:
+        return SYSTEM_CRYPTO_DS_RST;
+
+      default:
+        return 0;
+    }
+}
+
+/****************************************************************************
+ * Name: esp32c3_periph_module_enable
+ *
+ * Description:
+ *   Enable peripheral module
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32c3_periph_module_enable(enum esp32c3_periph_module_e periph)
+{
+  irqstate_t flags = enter_critical_section();
+
+  ASSERT(periph < PERIPH_MODULE_MAX);
+  if (ref_counts[periph] == 0)
+    {
+      modifyreg32(esp32c3_periph_ll_get_clk_en_reg(periph), 0,
+                  esp32c3_periph_ll_get_clk_en_mask(periph));
+      modifyreg32(esp32c3_periph_ll_get_rst_en_reg(periph),
+                  esp32c3_periph_ll_get_rst_en_mask(periph, true), 0);
+    }
+
+  ref_counts[periph]++;
+
+  leave_critical_section(flags);
+}
+
+/****************************************************************************
+ * Name: esp32c3_read_efuse
+ *
+ * Description:
+ *   Read Efuse data.
+ *
+ * Input Parameters:
+ *   addr   - register address
+ *   b_off  - bit offset
+ *   b_size - bit size
+ *
+ * Returned Value:
+ *  Efuse data.
+ *
+ ****************************************************************************/
+
+static uint32_t esp32c3_read_efuse(uint32_t addr, uint32_t b_off,
+                                                 uint32_t b_size)
+{
+  uint32_t data;
+  uint32_t regval;
+  uint32_t shift = 32 - b_size;
+  uint32_t mask = UINT32_MAX >> shift;
+  uint32_t res = b_off % 32;
+  uint32_t regaddr = addr + (b_off / 32 * 4);
+
+  regval = getreg32(regaddr);
+  data = regval >> res;
+  if (res <= shift)
+    {
+      data &= mask;
+    }
+  else
+    {
+      shift = 32 - res;
+
+      regval = getreg32(regaddr + 4);
+      data |= (regval & (mask >> shift)) << shift;
+    }
+
+  return data;
+}
+
+/****************************************************************************
+ * Name: esp32c3_get_rtc_dbias_by_efuse
+ *
+ * Description:
+ *   Get RTC voltage from efuse
+ *
+ * Input Parameters:
+ *   chip_version - Chip version
+ *   dig_dbias    - Digital voltage
+ *
+ * Returned Value:
+ *   RTC voltage
+ *
+ ****************************************************************************/
+
+static uint32_t esp32c3_get_rtc_dbias_by_efuse(uint8_t chip_version,
+                                                 uint32_t dig_dbias)
+{
+  ASSERT(chip_version >= 3);
+  int k_rtc_ldo_real_mul10000;
+  int k_dig_ldo_real_mul10000;
+  uint32_t rtc_dbias = 0;
+  uint32_t v_rtc_dbias20_real_mul10000;
+  uint32_t v_dig_dbias20_real_mul10000;
+  uint32_t v_dig_nearest_1v15_mul10000;
+  uint32_t v_rtc_nearest_1v15_mul10000 = 0;
+  int k_rtc_ldo = esp32c3_read_efuse(BLOCK1_VERSION, K_RTC_LDO_OFFSET,
+                                     K_RTC_LDO_LEN);
+  int k_dig_ldo = esp32c3_read_efuse(BLOCK1_VERSION, K_DIG_LDO_OFFSET,
+                                     K_DIG_LDO_LEN);
+  int v_rtc_bias20 = esp32c3_read_efuse(BLOCK1_VERSION, V_RTC_DBIAS20_OFFSET,
+                                     V_RTC_DBIAS20_LEN);
+  int v_dig_bias20 = esp32c3_read_efuse(BLOCK1_VERSION, V_DIG_DBIAS20_OFFSET,
+                                     V_DIG_DBIAS20_LEN);
+  k_rtc_ldo =  ((k_rtc_ldo & BIT(6)) != 0) ?
+               -(k_rtc_ldo & 0x3f): k_rtc_ldo;
+  k_dig_ldo =  ((k_dig_ldo & BIT(6)) != 0) ?
+               -(k_dig_ldo & 0x3f): (uint8_t)k_dig_ldo;
+  v_rtc_bias20 =  ((v_rtc_bias20 & BIT(7)) != 0) ?
+                  -(v_rtc_bias20 & 0x7f): (uint8_t)v_rtc_bias20;
+  v_dig_bias20 =  ((v_dig_bias20 & BIT(7)) != 0) ?
+                  -(v_dig_bias20 & 0x7f): (uint8_t)v_dig_bias20;
+  v_rtc_dbias20_real_mul10000 = V_RTC_MID_MUL10000 +
+                              v_rtc_bias20 * 10000 / 500;
+  v_dig_dbias20_real_mul10000 = V_DIG_MID_MUL10000 +
+                              v_dig_bias20 * 10000 / 500;
+  k_rtc_ldo_real_mul10000 = K_RTC_MID_MUL10000 + k_rtc_ldo;
+  k_dig_ldo_real_mul10000 = K_DIG_MID_MUL10000 + k_dig_ldo;
+  v_dig_nearest_1v15_mul10000 = v_dig_dbias20_real_mul10000 +
+                    k_dig_ldo_real_mul10000 * (dig_dbias - 20);
+  for (rtc_dbias = 15; rtc_dbias < 31; rtc_dbias++)
+    {
+      v_rtc_nearest_1v15_mul10000 = v_rtc_dbias20_real_mul10000 +
+                          k_rtc_ldo_real_mul10000 * (rtc_dbias - 20);
+      if (v_rtc_nearest_1v15_mul10000 >= v_dig_nearest_1v15_mul10000 - 250)
+        {
+          break;
+        }
+    }
+
+  return rtc_dbias;
+}
+
+/****************************************************************************
+ * Name: esp32c3_set_rtc_dig_dbias
+ *
+ * Description:
+ *   Configure RTC and digital voltage.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void esp32c3_set_rtc_dig_dbias(void)
+{
+  /* A reasonable dig_dbias which by scaning pvt to make 160 CPU run
+   * successful stored in efuse, we store some value in efuse, include:
+   * k_rtc_ldo (slope of rtc voltage & rtc_dbias);
+   * k_dig_ldo (slope of digital voltage & digital_dbias);
+   * v_rtc_bias20 (rtc voltage when rtc dbais is 20);
+   * v_dig_bias20 (digital voltage when digital dbais is 20).
+   * a reasonable rtc_dbias can be calculated by a certion formula.
+   */
+
+  uint32_t rtc_dbias = 28;
+  uint32_t dig_dbias = 28;
+  uint32_t chip_version = esp32c3_read_efuse(BLOCK1_VERSION,
+                              CHIP_VERSION_OFFSET, CHIP_VERSION_LEN);
+  if (chip_version >= 3)
+    {
+      /* Get digital voltage from efuse */
+
+      dig_dbias = esp32c3_read_efuse(BLOCK1_VERSION, DIG_DBIAS_HVT_OFFSET,
+                                     DIG_DBIAS_HVT_LEN);
+      if (dig_dbias != 0)
+        {
+          if (dig_dbias + 4 > 28)
+            {
+              dig_dbias = 28;
+            }
+          else
+            {
+              dig_dbias += 4;
+            }
+
+          /* Get RTC voltage from efuse */
+
+          rtc_dbias = esp32c3_get_rtc_dbias_by_efuse(chip_version,
+                                                     dig_dbias);
+        }
+      else
+        {
+          dig_dbias = 28;
+        }
+    }
+
+  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG, rtc_dbias);
+  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_DIG_DREG, dig_dbias);
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_periph_enabled
+ *
+ * Description:
+ *   Whether the current Periph module is enabled
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   Periph module is enabled or not
+ *
+ ****************************************************************************/
+
+bool IRAM_ATTR esp32c3_periph_ll_periph_enabled(
+                                     enum esp32c3_periph_module_e periph)
+{
+  return ((getreg32(esp32c3_periph_ll_get_rst_en_reg(periph)) &
+           esp32c3_periph_ll_get_rst_en_mask(periph, false)) == 0) &&
+         ((getreg32(esp32c3_periph_ll_get_clk_en_reg(periph)) &
+           esp32c3_periph_ll_get_clk_en_mask(periph)) != 0);
+}
 
 /****************************************************************************
  * Name: esp32c3_rtc_clk_xtal_freq_get
@@ -1433,7 +2082,6 @@ void IRAM_ATTR esp32c3_rtc_clk_slow_freq_set(
 
   REG_SET_FIELD(RTC_CNTL_CLK_CONF_REG, RTC_CNTL_CK8M_FORCE_PU,
                (slow_freq == RTC_SLOW_FREQ_8MD256) ? 1 : 0);
-  esp32c3_rtc_clk_set_xtal_wait();
   esp_rom_delay_us(DELAY_SLOW_CLK_SWITCH);
 }
 
@@ -1508,6 +2156,7 @@ uint32_t IRAM_ATTR esp32c3_rtc_clk_cal(enum esp32c3_rtc_cal_sel_e cal_clk,
 
 void esp32c3_rtc_clk_set(void)
 {
+  ASSERT(esp32c3_rtc_clk_xtal_freq_get() == RTC_XTAL_FREQ_40M);
   esp32c3_rtc_clk_fast_freq_set(RTC_FAST_FREQ_8M);
   esp32c3_select_rtc_slow_clk(RTC_SLOW_FREQ_RTC);
 }
@@ -1538,10 +2187,14 @@ void IRAM_ATTR esp32c3_rtc_init(void)
    */
 
   struct esp32c3_rtc_sleep_pu_config_s pu_cfg = RTC_SLEEP_PU_CONFIG_ALL(0);
+  if (rtc_get_reset_reason(0) == POWERON_RESET)
+    {
+      cfg.cali_ocode = 1;
+    }
+
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_DIG_REG, 0);
   REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_XPD_RTC_REG, 0);
   modifyreg32(RTC_CNTL_ANA_CONF_REG, RTC_CNTL_PVTMON_PU, 0);
-  esp32c3_rtc_clk_set_xtal_wait();
   REG_SET_FIELD(RTC_CNTL_TIMER1_REG, RTC_CNTL_PLL_BUF_WAIT, cfg.pll_wait);
   REG_SET_FIELD(RTC_CNTL_TIMER1_REG, RTC_CNTL_CK8M_WAIT, cfg.ck8m_wait);
   REG_SET_FIELD(RTC_CNTL_TIMER5_REG, RTC_CNTL_MIN_SLP_VAL,
@@ -1570,12 +2223,26 @@ void IRAM_ATTR esp32c3_rtc_init(void)
   REG_SET_FIELD(RTC_CNTL_TIMER6_REG, RTC_CNTL_DG_PERI_WAIT_TIMER,
                 rtc_init_cfg.dg_peri_wait_cycles);
 
-  /* Reset RTC bias to default value (needed if waking up from deep sleep) */
+  if (cfg.cali_ocode)
+    {
+      uint32_t rtc_calib_version = esp32c3_read_efuse(BLOCK2_VERSION,
+                                       RTC_CALIB_OFFSET, RTC_CALIB_LEN);
+      if (rtc_calib_version == 1)
+        {
+          /* use efuse ocode */
 
-  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG_SLEEP,
-                    RTC_CNTL_DBIAS_1V10);
-  REGI2C_WRITE_MASK(I2C_DIG_REG, I2C_DIG_REG_EXT_RTC_DREG,
-                    RTC_CNTL_DBIAS_1V10);
+          uint32_t ocode = esp32c3_read_efuse(BLOCK2_VERSION, OCODE_OFFSET,
+                                              OCODE_LEN);
+          REGI2C_WRITE_MASK(I2C_ULP, I2C_ULP_EXT_CODE, ocode);
+          REGI2C_WRITE_MASK(I2C_ULP, I2C_ULP_IR_FORCE_CODE, 1);
+        }
+      else
+        {
+          esp32c3_rtc_calibrate_ocode();
+        }
+    }
+
+  esp32c3_set_rtc_dig_dbias();
   if (cfg.clkctl_init)
     {
       /* clear CMMU clock force on */
@@ -1682,6 +2349,102 @@ void IRAM_ATTR esp32c3_rtc_init(void)
       modifyreg32(RTC_CNTL_DIG_ISO_REG, RTC_CNTL_DG_PAD_FORCE_UNHOLD |
                   RTC_CNTL_DG_PAD_FORCE_NOISO, 0);
     }
+
+  putreg32(0, RTC_CNTL_INT_ENA_REG);
+  putreg32(UINT32_MAX, RTC_CNTL_INT_CLR_REG);
+}
+
+/****************************************************************************
+ * Name:  esp32c3_perip_clk_init
+ *
+ * Description:
+ *   This function disables clock of useless peripherals when cpu starts.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void IRAM_ATTR esp32c3_perip_clk_init(void)
+{
+  uint32_t common_perip_clk1 = 0;
+  uint32_t common_perip_clk;
+  uint32_t hwcrypto_perip_clk;
+  uint32_t wifi_bt_sdio_clk;
+  enum reset_reason_e rst_reas = rtc_get_reset_reason(0);
+
+  /* Reset the communication peripherals like I2C, SPI,
+   * UART, I2S and bring them to known state.
+   */
+
+  if ((rst_reas >= TG0WDT_CPU_RESET &&
+       rst_reas <= TG0WDT_CPU_RESET &&
+       rst_reas != RTCWDT_BROWN_OUT_RESET))
+    {
+      common_perip_clk = ~getreg32(SYSTEM_PERIP_CLK_EN0_REG);
+      hwcrypto_perip_clk = ~getreg32(SYSTEM_PERIP_CLK_EN1_REG);
+      wifi_bt_sdio_clk = ~getreg32(SYSTEM_WIFI_CLK_EN_REG);
+    }
+  else
+    {
+      common_perip_clk = SYSTEM_WDG_CLK_EN |
+                            SYSTEM_LEDC_CLK_EN |
+                            SYSTEM_TIMERGROUP1_CLK_EN |
+                            SYSTEM_TWAI_CLK_EN;
+      hwcrypto_perip_clk = SYSTEM_CRYPTO_AES_CLK_EN |
+                            SYSTEM_CRYPTO_SHA_CLK_EN |
+                            SYSTEM_CRYPTO_RSA_CLK_EN;
+      wifi_bt_sdio_clk = SYSTEM_WIFI_CLK_WIFI_EN |
+                          SYSTEM_WIFI_CLK_BT_EN_M |
+                          SYSTEM_WIFI_CLK_UNUSED_BIT5 |
+                          SYSTEM_WIFI_CLK_UNUSED_BIT12;
+    }
+
+  common_perip_clk |= SYSTEM_I2S0_CLK_EN |
+                        SYSTEM_UART1_CLK_EN |
+                        SYSTEM_UART2_CLK_EN |
+                        SYSTEM_SPI2_CLK_EN |
+                        SYSTEM_I2C_EXT0_CLK_EN |
+                        SYSTEM_UHCI0_CLK_EN |
+                        SYSTEM_RMT_CLK_EN |
+                        SYSTEM_UHCI1_CLK_EN |
+                        SYSTEM_SPI3_CLK_EN |
+                        SYSTEM_SPI4_CLK_EN |
+                        SYSTEM_I2C_EXT1_CLK_EN |
+                        SYSTEM_I2S1_CLK_EN |
+                        SYSTEM_SPI2_DMA_CLK_EN |
+                        SYSTEM_SPI3_DMA_CLK_EN;
+
+  /* Disable some peripheral clocks. */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, common_perip_clk, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN0_REG, 0, common_perip_clk);
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, common_perip_clk1, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, common_perip_clk1);
+
+  /* Disable hardware crypto clocks. */
+
+  modifyreg32(SYSTEM_PERIP_CLK_EN1_REG, hwcrypto_perip_clk, 0);
+  modifyreg32(SYSTEM_PERIP_RST_EN1_REG, 0, hwcrypto_perip_clk);
+
+  /* Disable WiFi/BT/SDIO clocks. */
+
+  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, wifi_bt_sdio_clk, 0);
+  modifyreg32(SYSTEM_WIFI_CLK_EN_REG, 0, SYSTEM_WIFI_CLK_EN);
+
+  /* Set WiFi light sleep clock source to RTC slow clock */
+
+  REG_SET_FIELD(SYSTEM_BT_LPCK_DIV_INT_REG, SYSTEM_BT_LPCK_DIV_NUM, 0);
+  modifyreg32(SYSTEM_BT_LPCK_DIV_FRAC_REG, SYSTEM_LPCLK_SEL_8M,
+              SYSTEM_LPCLK_SEL_RTC_SLOW);
+
+  /* Enable RNG clock. */
+
+  esp32c3_periph_module_enable(PERIPH_RNG_MODULE);
 }
 
 /****************************************************************************
@@ -2407,13 +3170,6 @@ int up_rtc_settime(const struct timespec *ts)
 
 int up_rtc_initialize(void)
 {
-#ifndef CONFIG_PM
-  /* Initialize RTC controller parameters */
-
-  esp32c3_rtc_init();
-  esp32c3_rtc_clk_set();
-#endif
-
   g_rtc_save = &rtc_saved_data;
 
   /* If saved data is invalid, clear offset information */
