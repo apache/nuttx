@@ -302,8 +302,13 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       rpmsg_socket_lock(&conn->recvlock);
       conn->sendsize = head->size;
-      conn->psock->s_flags |= _SF_CONNECTED;
-      _SO_SETERRNO(conn->psock, OK);
+
+      if (conn->psock)
+        {
+          conn->psock->s_flags |= _SF_CONNECTED;
+          _SO_SETERRNO(conn->psock, OK);
+        }
+
       rpmsg_socket_unlock(&conn->recvlock);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_pollnotify(conn, POLLOUT);
@@ -527,7 +532,6 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
     }
 
   tmp->next = new;
-  new->psock = server->psock;
 
   rpmsg_socket_unlock(&server->recvlock);
 
@@ -770,6 +774,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
           newsock->s_sockif = psock->s_sockif;
           newsock->s_type   = SOCK_STREAM;
           newsock->s_conn   = conn;
+          conn->psock       = newsock;
 
           rpmsg_socket_getaddr(conn, addr, addrlen);
 
