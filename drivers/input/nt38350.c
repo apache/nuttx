@@ -50,7 +50,9 @@
 #include <nuttx/signal.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/nt38350.h>
-
+#ifdef CONFIG_PM
+#include <arch/board/pm_domain.h>
+#endif
 /***************************************************************************
  * Pre-processor Definitions
  ***************************************************************************/
@@ -122,9 +124,6 @@
 #define NVT_POINT_DATA_EXBUF_LEN     113
 #endif
 
-#define TP_PM_DOMAIN                 7
-#define FACTEST_DOMAIN               2
-
 #ifdef CONFIG_WAKEUP_GESTURE
 #define GESTURE_WORD_C               12
 #define GESTURE_WORD_W               13
@@ -188,6 +187,13 @@ enum nvt_finger_contact_e
   FINGER_UP   = 0xff
 };
 
+enum nvt_pm_e
+{
+  NVT_PM_DPSTDBY = 0x11,  /* Deep Standby mode*/
+  NVT_PM_PD      = 0x12,  /* Power down mode, not recommend*/
+  NVT_PM_FDM     = 0x13   /* Finger detect mode */
+};
+
 struct nvt_ts_mem_map_s
 {
   uint32_t event_buf_addr;
@@ -245,6 +251,7 @@ struct nt38350_dev_s
   struct touch_lowerhalf_s      lower;             /* touchscreen device lowerhalf instance */
 #if CONFIG_PM
   struct pm_callback_s          pm;
+  enum pm_state_e               current_state;
 #endif
 
   /* Touch info */
@@ -4041,7 +4048,7 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
 #endif
 
 #if CONFIG_PM
-static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev)
+static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev, uint8_t cmd)
 {
   FAR struct nt38350_config_s *config;
   uint8_t buf[2];
@@ -4050,7 +4057,7 @@ static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev)
   DEBUGASSERT(config != NULL);
 
   buf[0] = EVENT_MAP_HOST_CMD;
-  buf[1] = 0x13;
+  buf[1] = cmd;
   nt38350_write_reg(dev, NVT_I2C_FW_ADDRESS, buf, 2);
 
   dev->touch_awake = 0;
@@ -4074,17 +4081,27 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
   FAR struct nt38350_dev_s *dev = container_of(cb,
                                                struct nt38350_dev_s, pm);
 
-  if (domain == TP_PM_DOMAIN || domain == FACTEST_DOMAIN)
+  if (domain == PM_DOMAIN_FACTEST || domain == PM_DOMAIN_OLED_TP)
     {
       switch (pmstate)
         {
         case PM_RESTORE:
         case PM_NORMAL:
+          if (dev->current_state == PM_NORMAL)
+            return;
           nt38350_ts_resume(dev);
           break;
         case PM_STANDBY:
+          if (dev->current_state == PM_STANDBY ||
+              dev->current_state == PM_SLEEP)
+            return;
+          nt38350_ts_suspend(dev, NVT_PM_FDM);
+          break;
         case PM_SLEEP:
-          nt38350_ts_suspend(dev);
+          if (dev->current_state == PM_STANDBY ||
+              dev->current_state == PM_SLEEP)
+            return;
+          nt38350_ts_suspend(dev, NVT_PM_DPSTDBY);
           break;
         case PM_IDLE:
           dev->idle_mode = true;
@@ -4093,6 +4110,7 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
         default:
           break;
         }
+      dev->current_state = pmstate;
     }
 }
 #endif
@@ -4264,6 +4282,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
 
 #if CONFIG_PM
   extern int lcdc_pmcb_early_register(struct pm_callback_s *cb);
+  priv->current_state = PM_NORMAL;
   priv->pm.prepare = nt38350_pm_prepare;
   priv->pm.notify  = nt38350_pm_notify;
   lcdc_pmcb_early_register(&priv->pm);
