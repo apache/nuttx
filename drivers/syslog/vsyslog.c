@@ -200,7 +200,7 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 #if defined(CONFIG_SYSLOG_PREFIX)
   /* Prepend the prefix, if available */
 
-  ret += lib_sprintf(&stream.public, "%s", CONFIG_SYSLOG_PREFIX_STRING);
+  ret += lib_sprintf(&stream.public, "[%s] ", CONFIG_SYSLOG_PREFIX_STRING);
 #endif
 
 #if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_SYSLOG_PROCESS_NAME)
