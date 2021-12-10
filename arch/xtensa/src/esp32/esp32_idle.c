@@ -85,7 +85,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idlepm
+ * Name: esp32_idlepm
  *
  * Description:
  *   Perform IDLE state power management.
@@ -93,7 +93,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_idlepm(void)
+static void esp32_idlepm(void)
 {
   irqstate_t flags;
 
@@ -232,7 +232,7 @@ static void up_idlepm(void)
 #endif
 }
 #else
-#  define up_idlepm()
+#  define esp32_idlepm()
 #endif
 
 /****************************************************************************
@@ -272,7 +272,7 @@ void up_idle(void)
 
   /* Perform IDLE mode power management */
 
-  up_idlepm();
+  esp32_idlepm();
 
 #endif
 }
