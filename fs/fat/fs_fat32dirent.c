@@ -1233,7 +1233,7 @@ static int fat_findsfnentry(FAR struct fat_mountpt_s *fs,
 static bool fat_cmplfnchunk(FAR uint8_t *chunk, FAR const lfnchar *substr,
                             int nchunk)
 {
-  wchar_t wch;
+  uint16_t wch;
   lfnchar ch;
   int     i;
 
@@ -1259,11 +1259,11 @@ static bool fat_cmplfnchunk(FAR uint8_t *chunk, FAR const lfnchar *substr,
        * should match the ASCII code.
        */
 
-      wch = (wchar_t)fat_getuint16((FAR uint8_t *)chunk);
+      wch = fat_getuint16((FAR uint8_t *)chunk);
 #  ifdef CONFIG_FAT_LFN_UTF8
       if (wch != ch)
 #  else
-      if ((wch & 0xff) != (wchar_t)ch)
+      if ((wch & 0xff) != (uint16_t)ch)
 #  endif
         {
           return false;
@@ -1280,7 +1280,7 @@ static bool fat_cmplfnchunk(FAR uint8_t *chunk, FAR const lfnchar *substr,
 
       /* Try the next character from the directory entry. */
 
-      chunk += sizeof(wchar_t);
+      chunk += sizeof(uint16_t);
     }
 
   /* All of the characters in the chunk match.. Return success */
@@ -1926,7 +1926,7 @@ static inline int fat_getsfname(FAR uint8_t *direntry, FAR char *buffer,
 static void fat_getlfnchunk(FAR uint8_t *chunk, FAR lfnchar *dest,
                             int nchunk)
 {
-  wchar_t wch;
+  uint16_t wch;
   int i;
 
   /* Copy bytes 1-nchunk */
@@ -1938,13 +1938,13 @@ static void fat_getlfnchunk(FAR uint8_t *chunk, FAR lfnchar *dest,
        * should match the ASCII code.
        */
 
-      wch = (wchar_t)fat_getuint16(chunk);
+      wch = fat_getuint16(chunk);
 #  ifdef CONFIG_FAT_LFN_UTF8
       *dest++ = wch;
 #  else
       *dest++ = (uint8_t)(wch & 0xff);
 #  endif
-      chunk += sizeof(wchar_t);
+      chunk += sizeof(uint16_t);
     }
 }
 #endif
@@ -2214,7 +2214,7 @@ static void fat_initlfname(FAR uint8_t *chunk, int nchunk)
       /* The write the 16-bit 0xffff character into the directory entry. */
 
       fat_putuint16((FAR uint8_t *)chunk, (uint16_t)0xffff);
-      chunk += sizeof(wchar_t);
+      chunk += sizeof(uint16_t);
     }
 }
 #endif
@@ -2247,7 +2247,7 @@ static void fat_putlfnchunk(FAR uint8_t *chunk, FAR const lfnchar *src,
 
       wch = (uint16_t)*src++;
       fat_putuint16(chunk, wch);
-      chunk += sizeof(wchar_t);
+      chunk += sizeof(uint16_t);
     }
 }
 #endif
