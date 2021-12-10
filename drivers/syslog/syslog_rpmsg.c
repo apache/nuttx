@@ -161,7 +161,7 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
 
       if (next == priv->tail)
         {
-#ifndef SYSLOG_RPMSG_OVERWRITE
+#ifndef CONFIG_SYSLOG_RPMSG_OVERWRITE
           if (!up_interrupt_context() && !sched_idletask())
             {
               nxsem_wait(&priv->sem);
