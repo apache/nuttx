@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/samv7/same70-xplained/src/Makefile
+# boards/arm/samv7/samv71-xult/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -27,15 +27,12 @@ CSRCS += sam_sdram.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_appinit.c sam_bringup.c sam_progmem.c
+CSRCS += sam_appinit.c sam_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += sam_reset.c
 endif
-ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
-CSRCS += sam_boot_image.c
-endif
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += sam_bringup.c sam_progmem.c
+CSRCS += sam_bringup.c
 endif
 
 ifeq ($(CONFIG_ARCH_LEDS),y)
@@ -72,8 +69,24 @@ ifeq ($(CONFIG_USBMSC),y)
 CSRCS += sam_usbmsc.c
 endif
 
+ifeq ($(CONFIG_USBDEV_COMPOSITE),y)
+CSRCS += sam_composite.c
+endif
+
 ifeq ($(CONFIG_SAMV7_MCAN),y)
 CSRCS += sam_mcan.c
+endif
+
+ifeq ($(CONFIG_AUDIO_WM8904),y)
+ifeq ($(CONFIG_SAMV7_TWIHS0),y)
+ifeq ($(CONFIG_SAMV7_SSC0),y)
+CSRCS += sam_wm8904.c
+endif
+endif
+endif
+
+ifeq ($(CONFIG_AUDIO_NULL),y)
+CSRCS += sam_audio_null.c
 endif
 
 ifeq ($(CONFIG_MTD_CONFIG),y)
@@ -84,32 +97,35 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_SAMV7_AFEC),y)
-CSRCS += sam_afec.c
+ifeq ($(CONFIG_SAMV71XULT_MXTXPLND),y)
+ifeq ($(CONFIG_LCD),y)
+CSRCS += sam_ili9488.c
 endif
-
-ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
-CSRCS += sam_dac.c
+ifeq ($(CONFIG_INPUT_MXT),y)
+CSRCS += sam_maxtouch.c sam_atmxtconfig.c
+endif
 endif
 
 ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 CSRCS += sam_mrf24j40.c
 endif
 
-ifeq ($(CONFIG_IEEE802154_XBEE),y)
-CSRCS += sam_xbee.c
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += sam_st7789.c
 endif
 
-SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)samv7.ld
+SCRIPTOUT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld
 
 .PHONY = context distclean
 
 $(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
+	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_COMMON_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
 
 context:: $(SCRIPTOUT)
 
 distclean::
 	$(call DELFILE, $(SCRIPTOUT))
 
-include $(TOPDIR)/boards/Board.mk
+DEPPATH += --dep-path board
+VPATH += :board
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

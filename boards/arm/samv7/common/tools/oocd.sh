@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #
-# See boards/atmel_same70_qmtech.cfg/README.txt for information about
-# this file.
+# See boards README.txt for information about this file.
 
 TOPDIR=$1
 USAGE="$0 <TOPDIR> [-d]"
@@ -28,7 +27,7 @@ TARGET_PATH="/usr/local/share/openocd/scripts"
 #OPENOCD_EXE=openocd.exe
 OPENOCD_EXE=openocd
 
-OPENOCD_CFG="${TOPDIR}/boards/arm/samv7/same70-qmtech/tools/atmel_same70_qmtech.cfg"
+OPENOCD_CFG="${TOPDIR}/boards/arm/samv7/common/tools/atmel-${TARGET_BOARD}.cfg"
 OPENOCD_ARGS="-f ${OPENOCD_CFG} -s ${TARGET_PATH}"
 
 if [ "X$2" = "X-d" ]; then

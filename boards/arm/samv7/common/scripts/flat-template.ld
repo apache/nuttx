@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/scripts/flash.template.ld
+ * boards/arm/samv7/common/scripts/flat-template.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,14 +28,14 @@
 #  define SRAM_START_ADDR       0x20400000
 #endif
 
-#ifdef CONFIG_SAME70XPLAINED_FORMAT_MCUBOOT
-#  define MCUBOOT_HEADER_SIZE   0x200
+#ifdef CONFIG_SAMV7_FORMAT_MCUBOOT
+#  define MCUBOOT_HEADER_SIZE   CONFIG_SAMV7_MCUBOOT_HEADER_SIZE
 #  ifdef CONFIG_BOARDCTL_BOOT_IMAGE
 #    define FLASH_OFFSET        0
-#    define FLASH_IMG_SIZE      CONFIG_SAME70XPLAINED_OTA_PRIMARY_SLOT_OFFSET
+#    define FLASH_IMG_SIZE      CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET
 #  else
-#    define FLASH_OFFSET        (CONFIG_SAME70XPLAINED_OTA_PRIMARY_SLOT_OFFSET + MCUBOOT_HEADER_SIZE)
-#    define FLASH_IMG_SIZE      (CONFIG_SAME70XPLAINED_OTA_SLOT_SIZE - MCUBOOT_HEADER_SIZE)
+#    define FLASH_OFFSET        (CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET + MCUBOOT_HEADER_SIZE)
+#    define FLASH_IMG_SIZE      (CONFIG_SAMV7_OTA_SLOT_SIZE - MCUBOOT_HEADER_SIZE)
 #  endif
 #else
 #  define FLASH_OFFSET          0

@@ -1,5 +1,5 @@
 ############################################################################
-# boards/arm/samv7/same70-xplained/scripts/Make.defs
+# boards/arm/samv7/common/scripts/flat.memory
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,4 +18,14 @@
 #
 ############################################################################
 
-include $(TOPDIR)/boards/arm/samv7/common/scripts/flat.memory
+include $(TOPDIR)/.config
+include $(TOPDIR)/tools/Config.mk
+include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld}"
+else
+  ARCHSCRIPT = -T$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld
+endif
+
+include $(BOARD_COMMON_DIR)/scripts/Make.defs

@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-qmtech/scripts/kernel-space.ld
+ * boards/arm/samv7/common/scripts/user-space.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,15 +22,28 @@
  * this script.
  */
 
-OUTPUT_ARCH(arm)
-EXTERN(_vectors)
-ENTRY(_stext)
+/* Make sure that the critical memory management functions are in user-space.
+ * the user heap memory manager will reside in user-space but be usable both
+ * by kernel- and user-space code
+ */
 
+EXTERN(umm_initialize)
+EXTERN(umm_addregion)
+
+EXTERN(malloc)
+EXTERN(realloc)
+EXTERN(zalloc)
+EXTERN(free)
+
+OUTPUT_ARCH(arm)
 SECTIONS
 {
+    .userspace : {
+        *(.userspace)
+    } > uflash
+
     .text : {
         _stext = ABSOLUTE(.);
-        *(.vectors)
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
@@ -42,22 +55,22 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > kflash
+    } > uflash
 
     .init_section : {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
-    } > kflash
+    } > uflash
 
     .ARM.extab : {
         *(.ARM.extab*)
-    } > kflash
+    } > uflash
 
     __exidx_start = ABSOLUTE(.);
     .ARM.exidx : {
         *(.ARM.exidx*)
-    } > kflash
+    } > uflash
 
     __exidx_end = ABSOLUTE(.);
 
@@ -70,15 +83,7 @@ SECTIONS
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > ksram AT > kflash
-
-    .ramfunc ALIGN(4): {
-        _sramfuncs = ABSOLUTE(.);
-        *(.ramfunc  .ramfunc.*)
-        _eramfuncs = ABSOLUTE(.);
-    } > ksram AT > kflash
-
-    _framfuncs = LOADADDR(.ramfunc);
+    } > usram AT > uflash
 
     .bss : {
         _sbss = ABSOLUTE(.);
@@ -87,7 +92,7 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > ksram
+    } > usram
 
     /* Stabs debugging sections */
 

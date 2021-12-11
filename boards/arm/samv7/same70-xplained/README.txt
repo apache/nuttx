@@ -1159,7 +1159,7 @@ Using OpenOCD and GDB to flash via the EDBG chip
 
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_same70_xplained.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -1175,15 +1175,15 @@ Using OpenOCD and GDB to flash via the EDBG chip
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
 
-    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - Possibly the value of OPENOCD_PATH, TARGET_PATH and TARGET_BOARD
     - It assumes that the correct script to use is the one at
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_${TARGET_BOARD}.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/arm/samv7/same70-xplained/tools/oocd.sh $PWD
+      boards/arm/samv7/common/tools/oocd.sh $PWD
 
   Connecting GDB
 
@@ -1716,8 +1716,7 @@ Configuration sub-directories
       CONFIG_MCUBOOT_BOOTLOADER=y
       CONFIG_MCUBOOT_ENABLE_LOGGING=y
 
-      CONFIG_SAME70XPLAINED_FORMAT_MCUBOOT=y
-      CONFIG_SAME70XPLAINED_MCUBOOT_BOOTLOADER=y
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
 
   mcuboot-confirm:

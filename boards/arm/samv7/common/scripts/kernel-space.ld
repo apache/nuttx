@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/samv71-xult/scripts/flash.template.ld
+ * boards/arm/samv7/common/scripts/kernel-space.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,24 +18,9 @@
  *
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#define FLASH_START_ADDR        0x00400000
-
-#ifdef CONFIG_ARMV7M_DTCM
-#  define SRAM_START_ADDR       0x20000000
-#else
-#  define SRAM_START_ADDR       0x20400000
-#endif
-
-#define FLASH_OFFSET            0
-#define FLASH_IMG_SIZE          CONFIG_ARCH_CHIP_SAMV7_MEM_FLASH
-
-MEMORY
-{
-  flash (rx) : ORIGIN = FLASH_START_ADDR + FLASH_OFFSET, LENGTH = FLASH_IMG_SIZE
-  sram (rwx) : ORIGIN = SRAM_START_ADDR, LENGTH = CONFIG_ARCH_CHIP_SAMV7_MEM_RAM
-}
+/* NOTE:  This depends on the memory.ld script having been included prior to
+ * this script.
+ */
 
 OUTPUT_ARCH(arm)
 EXTERN(_vectors)
@@ -57,22 +42,23 @@ SECTIONS
         *(.gcc_except_table)
         *(.gnu.linkonce.r.*)
         _etext = ABSOLUTE(.);
-    } > flash
+    } > kflash
 
     .init_section : {
         _sinit = ABSOLUTE(.);
         *(.init_array .init_array.*)
         _einit = ABSOLUTE(.);
-    } > flash
+    } > kflash
 
     .ARM.extab : {
         *(.ARM.extab*)
-    } > flash
+    } > kflash
 
     __exidx_start = ABSOLUTE(.);
     .ARM.exidx : {
         *(.ARM.exidx*)
-    } > flash
+    } > kflash
+
     __exidx_end = ABSOLUTE(.);
 
     _eronly = ABSOLUTE(.);
@@ -84,13 +70,13 @@ SECTIONS
         CONSTRUCTORS
         . = ALIGN(4);
         _edata = ABSOLUTE(.);
-    } > sram AT > flash
+    } > ksram AT > kflash
 
     .ramfunc ALIGN(4): {
         _sramfuncs = ABSOLUTE(.);
         *(.ramfunc  .ramfunc.*)
         _eramfuncs = ABSOLUTE(.);
-    } > sram AT > flash
+    } > ksram AT > kflash
 
     _framfuncs = LOADADDR(.ramfunc);
 
@@ -101,9 +87,10 @@ SECTIONS
         *(COMMON)
         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
-    } > sram
+    } > ksram
 
-    /* Stabs debugging sections. */
+    /* Stabs debugging sections */
+
     .stab 0 : { *(.stab) }
     .stabstr 0 : { *(.stabstr) }
     .stab.excl 0 : { *(.stab.excl) }

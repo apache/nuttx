@@ -3326,6 +3326,9 @@ endif
 
 comment "Board-Common Options"
 
+if ARCH_CHIP_SAMV7
+source "boards/arm/samv7/common/Kconfig"
+endif
 if ARCH_CHIP_STM32
 source "boards/arm/stm32/common/Kconfig"
 endif
