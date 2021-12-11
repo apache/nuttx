@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/scripts/flash-dtcm.ld
+ * boards/arm/samv7/samv71-xult/scripts/flash.template.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,21 +18,23 @@
  *
  ****************************************************************************/
 
-/* The SAME70Q21 has 2048Kb of FLASH beginning at address 0x0040:0000 and
- * 384Kb of SRAM beginining at 0x2040:0000
- *
- * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
- * where the code expects to begin execution by jumping to the entry point in
- * the 0x0400:0000 address range (Assuming that ITCM is not enable).
- *
- * NOTE: that the DTCM address of 0x2000:0000 is used for SRAM.  If DTCM is
- * disabled, then the accesses will actually occur on the AHB bus.
- */
+#include <nuttx/config.h>
+
+#define FLASH_START_ADDR        0x00400000
+
+#ifdef CONFIG_ARMV7M_DTCM
+#  define SRAM_START_ADDR       0x20000000
+#else
+#  define SRAM_START_ADDR       0x20400000
+#endif
+
+#define FLASH_OFFSET            0
+#define FLASH_IMG_SIZE          CONFIG_ARCH_CHIP_SAMV7_MEM_FLASH
 
 MEMORY
 {
-  flash (rx) : ORIGIN = 0x00400000, LENGTH = 2048K
-  sram (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
+  flash (rx) : ORIGIN = FLASH_START_ADDR + FLASH_OFFSET, LENGTH = FLASH_IMG_SIZE
+  sram (rwx) : ORIGIN = SRAM_START_ADDR, LENGTH = CONFIG_ARCH_CHIP_SAMV7_MEM_RAM
 }
 
 OUTPUT_ARCH(arm)

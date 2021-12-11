@@ -68,4 +68,16 @@ ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
 CSRCS += sam_dac.c
 endif
 
+SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)samv7.ld
+
+.PHONY = context distclean
+
+$(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
+	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
+
+context:: $(SCRIPTOUT)
+
+distclean::
+	$(call DELFILE, $(SCRIPTOUT))
+
 include $(TOPDIR)/boards/Board.mk
