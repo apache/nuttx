@@ -32,7 +32,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <arch/irq.h>
+#include <arch/board/board.h>
 
 #include "xtensa.h"
 
@@ -922,6 +924,10 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
   int bit;
 #ifdef CONFIG_SMP
   int cpu;
+#endif
+
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  board_autoled_on(LED_CPU);
 #endif
 
 #ifdef CONFIG_SMP
