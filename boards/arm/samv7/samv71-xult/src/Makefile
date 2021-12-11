@@ -114,4 +114,16 @@ ifeq ($(CONFIG_LCD_ST7789),y)
 CSRCS += sam_st7789.c
 endif
 
+SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)samv7.ld
+
+.PHONY = context distclean
+
+$(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
+	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_DIR)$(DELIM)scripts -C -P -x c -E $(LDSCRIPT_TEMPLATE) -o $@
+
+context:: $(SCRIPTOUT)
+
+distclean::
+	$(call DELFILE, $(SCRIPTOUT))
+
 include $(TOPDIR)/boards/Board.mk
