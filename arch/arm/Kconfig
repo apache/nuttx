@@ -232,6 +232,7 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TESTSET
 	select ARM_HAVE_WFE_SEV
+	select LIBC_ARCH_ATOMIC
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 
