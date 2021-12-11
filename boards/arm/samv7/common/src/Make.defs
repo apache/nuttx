@@ -1,5 +1,5 @@
-############################################################################
-# boards/arm/samv7/same70-xplained/scripts/Make.defs
+#############################################################################
+# boards/arm/samv7/common/src/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +16,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-############################################################################
+#############################################################################
 
-include $(TOPDIR)/boards/arm/samv7/common/scripts/flat.memory
+DEPPATH += --dep-path src
+VPATH += :src
+CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)

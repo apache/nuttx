@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-xplained/scripts/gnu-elf.ld
+ * boards/arm/samv7/common/scripts/gnu-elf.ld
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -95,6 +95,7 @@ SECTIONS
       *(.sbss.*)
       *(.gnu.linkonce.b*)
       *(COMMON)
+      . = ALIGN(4);
       _ebss = . ;
     }
 

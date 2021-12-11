@@ -54,7 +54,7 @@
  * Private Types
  ****************************************************************************/
 
-#if defined(CONFIG_SAME70QMTECH_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 
 struct ota_partition_s
 {
@@ -69,7 +69,7 @@ struct ota_partition_s
  * Private Function Prototypes
  ****************************************************************************/
 
-#if defined(CONFIG_SAME70QMTECH_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
                                                    uint32_t mtd_size);
 static int init_ota_partitions(void);
@@ -81,23 +81,23 @@ static int init_ota_partitions(void);
 
 static FAR struct mtd_dev_s *g_samv7_progmem_mtd;
 
-#if defined(CONFIG_SAME70QMTECH_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 static const struct ota_partition_s g_ota_partition_table[] =
 {
   {
-    .offset  = CONFIG_SAME70QMTECH_OTA_PRIMARY_SLOT_OFFSET,
-    .size    = CONFIG_SAME70QMTECH_OTA_SLOT_SIZE,
-    .devpath = CONFIG_SAME70QMTECH_OTA_PRIMARY_SLOT_DEVPATH
+    .offset  = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_PRIMARY_SLOT_DEVPATH
   },
   {
-    .offset  = CONFIG_SAME70QMTECH_OTA_SECONDARY_SLOT_OFFSET,
-    .size    = CONFIG_SAME70QMTECH_OTA_SLOT_SIZE,
-    .devpath = CONFIG_SAME70QMTECH_OTA_SECONDARY_SLOT_DEVPATH
+    .offset  = CONFIG_SAMV7_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_SECONDARY_SLOT_DEVPATH
   },
   {
-    .offset  = CONFIG_SAME70QMTECH_OTA_SCRATCH_OFFSET,
-    .size    = CONFIG_SAME70QMTECH_OTA_SCRATCH_SIZE,
-    .devpath = CONFIG_SAME70QMTECH_OTA_SCRATCH_DEVPATH
+    .offset  = CONFIG_SAMV7_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_SAMV7_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
   }
 };
 #endif
@@ -106,7 +106,7 @@ static const struct ota_partition_s g_ota_partition_table[] =
  * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_SAME70QMTECH_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 
 /****************************************************************************
  * Name: sam_progmem_alloc_mtdpart
@@ -225,7 +225,7 @@ int sam_progmem_init(void)
       return -EFAULT;
     }
 
-#if defined(CONFIG_SAME70QMTECH_PROGMEM_OTA_PARTITION)
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
   ret = init_ota_partitions();
   if (ret < 0)
     {
