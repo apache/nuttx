@@ -53,6 +53,18 @@ SECTIONS
       _erodata = . ;
     }
 
+  .tdata : {
+      _stdata = ABSOLUTE(.);
+      *(.tdata .tdata.* .gnu.linkonce.td.*);
+      _etdata = ABSOLUTE(.);
+  }
+
+  .tbss : {
+      _stbss = ABSOLUTE(.);
+      *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+      _etbss = ABSOLUTE(.);
+  }
+
   _eronly = ABSOLUTE(.);
 
   .data :
