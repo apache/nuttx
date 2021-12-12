@@ -92,6 +92,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
   FAR uint8_t *stack_alloc_ptr;
   int ret = ERROR;
 
+  stack_size += CONFIG_SIM_STACKSIZE_ADJUSTMENT;
+
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
