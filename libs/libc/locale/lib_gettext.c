@@ -76,7 +76,7 @@ static FAR const char *g_catname[] =
 static sem_t g_sem = SEM_INITIALIZER(1);
 static FAR struct mofile_s *g_mofile;
 
-#ifndef CONFIG_BUILD_KERNEL
+#ifdef CONFIG_BUILD_KERNEL
 static FAR char g_domain[NAME_MAX];
 #endif
 
@@ -88,12 +88,12 @@ static FAR char *gettextdomain(void)
 {
   FAR char *domain;
 #ifdef CONFIG_BUILD_KERNEL
+  domain = g_domain;
+#else
   FAR struct task_info_s *info;
 
   info = task_get_info();
   domain = info->ta_domain;
-#else
-  domain = g_domain;
 #endif
 
   return domain;
