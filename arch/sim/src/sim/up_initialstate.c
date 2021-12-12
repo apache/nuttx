@@ -57,9 +57,11 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == 0)
     {
       tcb->stack_alloc_ptr = (void *)(up_getsp() -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
+                                      CONFIG_IDLETHREAD_STACKSIZE -
+                                      CONFIG_SIM_STACKSIZE_ADJUSTMENT);
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE +
+                             CONFIG_SIM_STACKSIZE_ADJUSTMENT;
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
