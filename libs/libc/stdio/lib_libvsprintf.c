@@ -514,8 +514,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                   FAR void *addr = va_arg(ap, FAR void *);
                   size_t symbolsize;
 
-                  symbol = allsyms_findbyvalue(addr,
-                                               &symbolsize);
+                  symbol = allsyms_findbyvalue(addr, &symbolsize);
                   if (symbol)
                     {
                       pnt = symbol->sym_name;

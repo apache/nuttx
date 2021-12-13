@@ -21,7 +21,7 @@
 
 export LC_ALL=C
 
-usage="Usage: $0 <elfpath> <CROSSDEV>"
+usage="Usage: $0 <ELFBIN> <CROSSDEV>"
 
 # Get the symbol table
 
@@ -33,13 +33,13 @@ usage="Usage: $0 <elfpath> <CROSSDEV>"
 # any kind of checking for function vs. data objects, then this could
 # failed
 
-if [ ! -f "${1}" ];then
-  exit 1
-fi
-
 nm="${2}nm"
 filt="${2}c++filt"
-count=`${nm} -n ${1} | grep -E " [T|t] "  | uniq | wc -l`
+if [ -f "${1}" ];then
+  count=`${nm} -n ${1} | grep -E " [T|t] "  | uniq | wc -l`
+else
+  count=0
+fi
 
 echo "#include <nuttx/compiler.h>"
 echo "#include <nuttx/symtab.h>"
@@ -50,16 +50,18 @@ echo "{"
 
 # Add start address boundary
 
-echo "  { \"Unknown\", 0x00000000 },"
+echo "  { \"Unknown\", (FAR const void *)0x00000000 },"
 
-${nm} -n ${1} | grep -E " [T|t] "  | uniq | \
-while read addr type name
-do
-  echo "  { \"`${filt} -p $name`\", 0x$addr },"
-done
+if [ -f "${1}" ];then
+  ${nm} -n ${1} | grep -E " [T|t] "  | uniq | \
+  while read addr type name
+  do
+    echo "  { \"`${filt} -p $name`\", (FAR const void *)0x$addr },"
+  done
+fi
 
 # Add end address boundary
 
-echo "  { \"Unknown\", 0xffffffff },"
+echo "  { \"Unknown\", (FAR const void *)0xffffffff },"
 
 echo "};"

@@ -28,8 +28,8 @@
  * Public Data
  ****************************************************************************/
 
-const struct symtab_s weak_data g_allsyms[1];
-const int             weak_data g_nallsyms;
+extern const struct symtab_s g_allsyms[1];
+extern const int             g_nallsyms;
 
 /****************************************************************************
  * Name: allsyms_lookup
