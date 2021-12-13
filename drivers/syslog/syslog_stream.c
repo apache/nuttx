@@ -24,12 +24,9 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/streams.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/syslog/syslog.h>
 
