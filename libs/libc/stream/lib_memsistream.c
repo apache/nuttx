@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_rawsistream.c
+ * libs/libc/stream/lib_memsistream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <unistd.h>
 #include <assert.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -37,46 +31,73 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawsistream_getc
+ * Name: memsistream_getc
  ****************************************************************************/
 
-static int rawsistream_getc(FAR struct lib_sistream_s *this)
+static int memsistream_getc(FAR struct lib_sistream_s *this)
 {
-  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
-  int nread;
-  char ch;
+  FAR struct lib_memsistream_s *mthis = (FAR struct lib_memsistream_s *)this;
+  int ret;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(this);
 
-  /* Attempt to read one character */
+  /* Get the next character (if any) from the buffer */
 
-  nread = _NX_READ(rthis->fd, &ch, 1);
-  if (nread == 1)
+  if (mthis->offset < mthis->buflen)
     {
+      ret = mthis->buffer[mthis->offset];
+      mthis->offset++;
       this->nget++;
-      return ch;
+    }
+  else
+    {
+      ret = EOF;
     }
 
-  /* Return EOF on any failure to read from the incoming byte stream. The
-   * only expected error is EINTR meaning that the read was interrupted
-   * by a signal.  A Zero return value would indicated an end-of-file
-   * confition.
-   */
-
-  return EOF;
+  return ret;
 }
 
 /****************************************************************************
- * Name: rawsistream_seek
+ * Name: memsistream_seek
  ****************************************************************************/
 
-static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+static off_t memsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
                               int whence)
 {
-  FAR struct lib_rawsistream_s *mthis = (FAR struct lib_rawsistream_s *)this;
+  FAR struct lib_memsistream_s *mthis = (FAR struct lib_memsistream_s *)this;
+  off_t newpos;
 
   DEBUGASSERT(this);
-  return _NX_SEEK(mthis->fd, offset, whence);
+
+  switch (whence)
+    {
+      case SEEK_CUR:
+        newpos = (off_t)mthis->offset + offset;
+        break;
+
+      case SEEK_SET:
+        newpos = offset;
+        break;
+
+      case SEEK_END:
+        newpos = (off_t)mthis->buflen + offset;
+        break;
+
+      default:
+        return (off_t)ERROR;
+    }
+
+  /* Make sure that the new position is within range */
+
+  if (newpos < 0 || newpos >= (off_t)mthis->buflen)
+    {
+      return (off_t)ERROR;
+    }
+
+  /* Return the new position */
+
+  mthis->offset = (size_t)newpos;
+  return newpos;
 }
 
 /****************************************************************************
@@ -84,26 +105,29 @@ static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawsistream
+ * Name: lib_memsistream
  *
  * Description:
- *   Initializes a stream for use with a file descriptor.
+ *   Initializes a stream for use with a fixed-size memory buffer.
  *
  * Input Parameters:
- *   instream - User allocated, uninitialized instance of struct
- *              lib_rawsistream_s to be initialized.
- *   fd       - User provided file/socket descriptor (must have been opened
- *              for the correct access).
+ *   instream    - User allocated, uninitialized instance of struct
+ *                 lib_memsistream_s to be initialized.
+ *   bufstart    - Address of the beginning of the fixed-size memory buffer
+ *   buflen      - Size of the fixed-sized memory buffer in bytes
  *
  * Returned Value:
- *   None (User allocated instance initialized).
+ *   None (instream initialized).
  *
  ****************************************************************************/
 
-void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
+void lib_memsistream(FAR struct lib_memsistream_s *instream,
+                     FAR const char *bufstart, int buflen)
 {
-  instream->public.get  = rawsistream_getc;
-  instream->public.seek = rawsistream_seek;
-  instream->public.nget = 0;
-  instream->fd          = fd;
+  instream->public.get  = memsistream_getc;
+  instream->public.seek = memsistream_seek;
+  instream->public.nget = 0;          /* Total number of characters read */
+  instream->buffer      = bufstart;   /* Start of buffer */
+  instream->offset      = 0;          /* Will be the buffer index */
+  instream->buflen      = buflen;     /* Length of the buffer */
 }

@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libnoflush.c
+ * libs/libc/stream/lib_nullinstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,35 +22,42 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdbool.h>
 #include <stdio.h>
-#include <fcntl.h>
 #include <errno.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/streams.h>
-
 #include "libc.h"
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int nullinstream_getc(FAR struct lib_instream_s *this)
+{
+  return EOF;
+}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_noflush
+ * Name: lib_nullinstream
  *
  * Description:
- *  lib_noflush() provides a common, dummy flush method for output streams
- *  that are not flushable.
+ *   Initializes a NULL stream. The initialized stream will  will return only
+ *   EOF.
+ *
+ * Input Parameters:
+ *   nullinstream  - User allocated, uninitialized instance of struct
+ *                   lib_instream_s to be initialized.
  *
  * Returned Value:
- *  Always returns OK
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-int lib_noflush(FAR struct lib_outstream_s *this)
+void lib_nullinstream(FAR struct lib_instream_s *nullinstream)
 {
-  return OK;
+  nullinstream->get  = nullinstream_getc;
+  nullinstream->nget = 0;
 }

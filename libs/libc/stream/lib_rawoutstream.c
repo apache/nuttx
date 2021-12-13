@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_memsostream.c
+ * libs/libc/stream/lib_rawoutstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,13 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <unistd.h>
 #include <assert.h>
+#include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -31,70 +37,53 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: memsostream_putc
+ * Name: rawsostream_putc
  ****************************************************************************/
 
-static void memsostream_putc(FAR struct lib_sostream_s *this, int ch)
+static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
 {
-  FAR struct lib_memsostream_s *mthis = (FAR struct lib_memsostream_s *)this;
+  FAR struct lib_rawsostream_s *rthis = (FAR struct lib_rawsostream_s *)this;
+  char buffer = ch;
+  int nwritten;
+  int errcode;
 
-  DEBUGASSERT(this);
+  DEBUGASSERT(this && rthis->fd >= 0);
 
-  /* If this will not overrun the buffer, then write the character to the
-   * buffer.  Not that buflen was pre-decremented when the stream was
-   * created so it is okay to write past the end of the buflen by one.
+  /* Loop until the character is successfully transferred or until an
+   * irrecoverable error occurs.
    */
 
-  if (mthis->offset < mthis->buflen)
+  do
     {
-      mthis->buffer[mthis->offset] = ch;
-      mthis->offset++;
-      this->nput++;
-      mthis->buffer[mthis->offset] = '\0';
+      nwritten = _NX_WRITE(rthis->fd, &buffer, 1);
+      if (nwritten == 1)
+        {
+          this->nput++;
+          return;
+        }
+
+      /* The only expected error is EINTR, meaning that the write operation
+       * was awakened by a signal.  Zero would not be a valid return value
+       * from _NX_WRITE().
+       */
+
+      errcode = _NX_GETERRNO(nwritten);
+      DEBUGASSERT(nwritten < 0);
     }
+  while (errcode == EINTR);
 }
 
 /****************************************************************************
- * Name: memsostream_seek
+ * Name: rawsostream_seek
  ****************************************************************************/
 
-static off_t memsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
+static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
                               int whence)
 {
-  FAR struct lib_memsostream_s *mthis = (FAR struct lib_memsostream_s *)this;
-  off_t newpos;
+  FAR struct lib_rawsostream_s *mthis = (FAR struct lib_rawsostream_s *)this;
 
   DEBUGASSERT(this);
-
-  switch (whence)
-    {
-      case SEEK_CUR:
-        newpos = (off_t)mthis->offset + offset;
-        break;
-
-      case SEEK_SET:
-        newpos = offset;
-        break;
-
-      case SEEK_END:
-        newpos = (off_t)mthis->buflen + offset;
-        break;
-
-      default:
-        return (off_t)ERROR;
-    }
-
-  /* Make sure that the new position is within range */
-
-  if (newpos < 0 || newpos >= (off_t)mthis->buflen)
-    {
-      return (off_t)ERROR;
-    }
-
-  /* Return the new position */
-
-  mthis->offset = (size_t)newpos;
-  return newpos;
+  return _NX_SEEK(mthis->fd, offset, whence);
 }
 
 /****************************************************************************
@@ -102,31 +91,27 @@ static off_t memsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_memsostream
+ * Name: lib_rawsostream
  *
  * Description:
- *   Initializes a stream for use with a fixed-size memory buffer.
+ *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
- *                  lib_memsostream_s to be initialized.
- *   bufstart     - Address of the beginning of the fixed-size memory buffer
- *   buflen       - Size of the fixed-sized memory buffer in bytes
+ *               lib_rawsostream_s to be initialized.
+ *   fd        - User provided file/socket descriptor (must have been opened
+ *               for write access).
  *
  * Returned Value:
- *   None (outstream initialized).
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_memsostream(FAR struct lib_memsostream_s *outstream,
-                     FAR char *bufstart, int buflen)
+void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
 {
-  outstream->public.put   = memsostream_putc;
+  outstream->public.put   = rawsostream_putc;
   outstream->public.flush = lib_snoflush;
-  outstream->public.seek  = memsostream_seek;
-  outstream->public.nput  = 0;          /* Total number of characters written */
-  outstream->buffer       = bufstart;   /* Start of buffer */
-  outstream->offset       = 0;          /* Will be the buffer index */
-  outstream->buflen       = buflen - 1; /* Save space for null terminator */
-  outstream->buffer[0]    = '\0';       /* Start with an empty string */
+  outstream->public.seek  = rawsostream_seek;
+  outstream->public.nput  = 0;
+  outstream->fd           = fd;
 }

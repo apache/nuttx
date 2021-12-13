@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_libsnoflush.c
+ * libs/libc/stream/lib_libnoflush.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -30,6 +30,7 @@
 #include <errno.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/streams.h>
 
 #include "libc.h"
 
@@ -38,18 +39,18 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_snoflush
+ * Name: lib_noflush
  *
  * Description:
- *  lib_snoflush() provides a common, dummy flush method for seekable output
- *  streams that are not flushable.
+ *  lib_noflush() provides a common, dummy flush method for output streams
+ *  that are not flushable.
  *
  * Returned Value:
  *  Always returns OK
  *
  ****************************************************************************/
 
-int lib_snoflush(FAR struct lib_sostream_s *this)
+int lib_noflush(FAR struct lib_outstream_s *this)
 {
   return OK;
 }

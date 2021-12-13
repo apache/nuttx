@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_rawsostream.c
+ * libs/libc/stream/lib_stdsistream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <unistd.h>
 #include <assert.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -37,46 +31,38 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawoutstream_puts
+ * Name: stdsistream_getc
  ****************************************************************************/
 
-static int rawoutstream_puts(FAR struct lib_outstream_s *this,
-                             FAR const void *buf, int len)
+static int stdsistream_getc(FAR struct lib_sistream_s *this)
 {
-  FAR struct lib_rawoutstream_s *rthis =
-                                (FAR struct lib_rawoutstream_s *)this;
-  int nwritten = 0;
-  int ret = 0;
+  FAR struct lib_stdsistream_s *sthis = (FAR struct lib_stdsistream_s *)this;
+  int ret;
 
-  while (nwritten != len)
+  DEBUGASSERT(this);
+
+  /* Get the next character from the incoming stream */
+
+  ret = getc(sthis->stream);
+  if (ret != EOF)
     {
-      ret = _NX_WRITE(rthis->fd, (FAR const char *)buf + nwritten,
-                      len - nwritten);
-      if (ret <= 0)
-        {
-          if (_NX_GETERRNO(ret) == EINTR)
-            {
-              continue;
-            }
-
-          break;
-        }
-
-      this->nput += ret;
-      nwritten   += ret;
+      this->nget++;
     }
 
-  return nwritten > 0 ? nwritten : ret;
+  return ret;
 }
 
 /****************************************************************************
- * Name: rawoutstream_putc
+ * Name: stdsistream_seek
  ****************************************************************************/
 
-static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static off_t stdsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+                              int whence)
 {
-  char tmp = ch;
-  (void)rawoutstream_puts(this, &tmp, 1);
+  FAR struct lib_stdsistream_s *mthis = (FAR struct lib_stdsistream_s *)this;
+
+  DEBUGASSERT(this);
+  return fseek(mthis->stream, offset, whence);
 }
 
 /****************************************************************************
@@ -84,27 +70,27 @@ static void rawoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawoutstream
+ * Name: lib_stdsistream
  *
  * Description:
- *   Initializes a stream for use with a file descriptor.
+ *   Initializes a stream for use with a FILE instance.
  *
  * Input Parameters:
- *   outstream - User allocated, uninitialized instance of struct
- *               lib_rawoutstream_s to be initialized.
- *   fd        - User provided file/socket descriptor (must have been opened
- *               for write access).
+ *   instream - User allocated, uninitialized instance of struct
+ *              lib_stdsistream_s to be initialized.
+ *   stream   - User provided stream instance (must have been opened for
+ *              read access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawoutstream(FAR struct lib_rawoutstream_s *outstream, int fd)
+void lib_stdsistream(FAR struct lib_stdsistream_s *instream,
+                     FAR FILE *stream)
 {
-  outstream->public.put   = rawoutstream_putc;
-  outstream->public.puts  = rawoutstream_puts;
-  outstream->public.flush = lib_noflush;
-  outstream->public.nput  = 0;
-  outstream->fd           = fd;
+  instream->public.get  = stdsistream_getc;
+  instream->public.seek = stdsistream_seek;
+  instream->public.nget = 0;
+  instream->stream      = stream;
 }

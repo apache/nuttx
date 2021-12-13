@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_stdsostream.c
+ * libs/libc/stream/lib_stdsostream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -143,5 +143,5 @@ void lib_stdsostream(FAR struct lib_stdsostream_s *outstream,
   /* Set the number of bytes put to zero and remember the stream */
 
   outstream->public.nput = 0;
-  outstream->stream     = stream;
+  outstream->stream      = stream;
 }

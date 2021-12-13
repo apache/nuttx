@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_nulloutstream.c
+ * libs/libc/stream/lib_rawinstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,9 +22,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdio.h>
+#include <nuttx/config.h>
+
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -32,10 +36,34 @@
  * Private Functions
  ****************************************************************************/
 
-static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
+/****************************************************************************
+ * Name: rawinstream_getc
+ ****************************************************************************/
+
+static int rawinstream_getc(FAR struct lib_instream_s *this)
 {
-  DEBUGASSERT(this);
-  this->nput++;
+  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
+  int nread;
+  char ch;
+
+  DEBUGASSERT(this && rthis->fd >= 0);
+
+  /* Attempt to read one character */
+
+  nread = _NX_READ(rthis->fd, &ch, 1);
+  if (nread == 1)
+    {
+      this->nget++;
+      return ch;
+    }
+
+  /* Return EOF on any failure to read from the incoming byte stream. The
+   * only expected error is EINTR meaning that the read was interrupted
+   * by a signal.  A Zero return value would indicate an end-of-file
+   * condition.
+   */
+
+  return EOF;
 }
 
 /****************************************************************************
@@ -43,24 +71,25 @@ static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_nulloutstream
+ * Name: lib_rawinstream
  *
  * Description:
- *   Initializes a NULL streams. The initialized stream will write all data
- *   to the bit-bucket.
+ *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
- *   nulloutstream - User allocated, uninitialized instance of struct
- *                   lib_outstream_s to be initialized.
+ *   instream - User allocated, uninitialized instance of struct
+ *              lib_rawinstream_s to be initialized.
+ *   fd       - User provided file/socket descriptor (must have been opened
+ *              for the correct access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream)
+void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd)
 {
-  nulloutstream->put   = nulloutstream_putc;
-  nulloutstream->flush = lib_noflush;
-  nulloutstream->nput  = 0;
+  instream->public.get  = rawinstream_getc;
+  instream->public.nget = 0;
+  instream->fd          = fd;
 }

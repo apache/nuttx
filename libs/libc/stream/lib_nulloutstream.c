@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_stdinstream.c
+ * libs/libc/stream/lib_nulloutstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,9 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "libc.h"
 
@@ -30,26 +32,10 @@
  * Private Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: stdinstream_getc
- ****************************************************************************/
-
-static int stdinstream_getc(FAR struct lib_instream_s *this)
+static void nulloutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
-  int ret;
-
   DEBUGASSERT(this);
-
-  /* Get the next character from the incoming stream */
-
-  ret = getc(sthis->stream);
-  if (ret != EOF)
-    {
-      this->nget++;
-    }
-
-  return ret;
+  this->nput++;
 }
 
 /****************************************************************************
@@ -57,26 +43,24 @@ static int stdinstream_getc(FAR struct lib_instream_s *this)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_stdinstream
+ * Name: lib_nulloutstream
  *
  * Description:
- *   Initializes a stream for use with a FILE instance.
+ *   Initializes a NULL streams. The initialized stream will write all data
+ *   to the bit-bucket.
  *
  * Input Parameters:
- *   instream - User allocated, uninitialized instance of struct
- *              lib_stdinstream_s to be initialized.
- *   stream   - User provided stream instance (must have been opened for
- *              read access).
+ *   nulloutstream - User allocated, uninitialized instance of struct
+ *                   lib_outstream_s to be initialized.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
-                     FAR FILE *stream)
+void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream)
 {
-  instream->public.get  = stdinstream_getc;
-  instream->public.nget = 0;
-  instream->stream      = stream;
+  nulloutstream->put   = nulloutstream_putc;
+  nulloutstream->flush = lib_noflush;
+  nulloutstream->nput  = 0;
 }

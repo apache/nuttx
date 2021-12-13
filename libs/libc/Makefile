@@ -52,6 +52,7 @@ include signal/Make.defs
 include spawn/Make.defs
 include stdio/Make.defs
 include stdlib/Make.defs
+include stream/Make.defs
 include string/Make.defs
 include symtab/Make.defs
 include syslog/Make.defs
