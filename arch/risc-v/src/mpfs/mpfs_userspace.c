@@ -31,6 +31,7 @@
 
 #include "mpfs_userspace.h"
 #include "riscv_internal.h"
+#include "riscv_mmu.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
 
@@ -38,18 +39,79 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
+
+#define PGT_BASE_PADDR      (uint64_t)&m_l1_pgtable
+#define PGT_L2_PBASE        (uint64_t)&m_l2_pgtable
+#define PGT_L3_PBASE        (uint64_t)&m_l3_pgtable
+#define PGT_L2_VBASE        PGT_L2_PBASE
+#define PGT_L3_VBASE        PGT_L3_PBASE
+
+/* Flags for user FLASH (RX) and user RAM (RW) */
+
+#define MMU_UFLASH_FLAGS    (PTE_R | PTE_X | PTE_U | PTE_G)
+#define MMU_USRAM_FLAGS     (PTE_R | PTE_W | PTE_U | PTE_G)
+
 /****************************************************************************
- * Public Functions
+ * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: configure_mpu
+ *
+ * Description:
+ *   This function configures the MPU for for kernel- / userspace separation.
+ *   It will also grant access to the page table memory for the supervisor.
+ *
+ ****************************************************************************/
+
+static void configure_mpu(void);
+
+/****************************************************************************
+ * Name: configure_mmu
+ *
+ * Description:
+ *   This function configures the MMU and page tables for kernel- / userspace
+ *   separation.
+ *
+ ****************************************************************************/
+
+static void configure_mmu(void);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* With a 3 level page table setup the total available memory is 512GB.
+ * However, this is overkill. A single L3 page table can map 2MB of memory,
+ * and for MPFS, this user space is plenty enough. If more memory is needed,
+ * simply increase the size of the L3 page table (n * 512), where each 'n'
+ * provides 2MB of memory.
+ */
+
+/* L1-L3 tables must be in memory always for this to work */
+
+static uint64_t             m_l1_pgtable[512] locate_data(".pgtables");
+static uint64_t             m_l2_pgtable[512] locate_data(".pgtables");
+static uint64_t             m_l3_pgtable[512] locate_data(".pgtables");
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
 
-extern uintptr_t __uflash_start;
-extern uintptr_t __uflash_size;
-extern uintptr_t __usram_start;
-extern uintptr_t __usram_size;
+extern uintptr_t            __uflash_start;
+extern uintptr_t            __uflash_size;
+extern uintptr_t            __usram_start;
+extern uintptr_t            __usram_size;
+
+/* Needed to allow access to the page tables, which reside in kernel RAM */
+
+extern uintptr_t            __ksram_start;
+extern uintptr_t            __ksram_size;
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Name: mpfs_userspace
@@ -96,6 +158,23 @@ void mpfs_userspace(void)
       *dest++ = *src++;
     }
 
+  /* Configure MPU / PMP to grant access to the userspace */
+
+  configure_mpu();
+  configure_mmu();
+}
+
+/****************************************************************************
+ * Name: configure_mpu
+ *
+ * Description:
+ *   This function configures the MPU for for kernel- / userspace separation.
+ *   It will also grant access to the page table memory for the supervisor.
+ *
+ ****************************************************************************/
+
+static void configure_mpu(void)
+{
   /* Configure the PMP to permit user-space access to its ROM and RAM.
    *
    * Note: PMP by default revokes access, thus if different privilege modes
@@ -126,6 +205,47 @@ void mpfs_userspace(void)
   riscv_config_pmp_region(1, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
                           (uintptr_t)&__usram_start,
                           (uintptr_t)&__usram_size);
+
+  /* The supervisor must have access to the page tables */
+
+  riscv_config_pmp_region(2, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
+                          (uintptr_t)&__ksram_start,
+                          (uintptr_t)&__ksram_size);
+}
+
+/****************************************************************************
+ * Name: configure_mmu
+ *
+ * Description:
+ *   This function configures the MMU and page tables for kernel- / userspace
+ *   separation.
+ *
+ ****************************************************************************/
+
+static void configure_mmu(void)
+{
+  /* Setup MMU for user */
+
+  /* Setup the L3 references for executable memory */
+
+  mmu_ln_map_region(3, PGT_L3_VBASE, (uintptr_t)&__uflash_start,
+                    (uintptr_t)&__uflash_start, (uintptr_t)&__uflash_size,
+                    MMU_UFLASH_FLAGS);
+
+  /* Setup the L3 references for data memory */
+
+  mmu_ln_map_region(3, PGT_L3_VBASE, (uintptr_t)&__usram_start,
+                    (uintptr_t)&__usram_start, (uintptr_t)&__usram_size,
+                    MMU_USRAM_FLAGS);
+
+  /* Setup the L2 and L1 references */
+
+  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, PGT_L3_VBASE, PTE_G);
+  mmu_ln_setentry(1, PGT_BASE_PADDR, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
+
+  /* Enable MMU */
+
+  mmu_enable(PGT_BASE_PADDR, 0);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
