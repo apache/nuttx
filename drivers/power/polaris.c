@@ -785,16 +785,46 @@ static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static int stwlc38_readrx(FAR struct stwlc38_dev_s *priv)
+static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
+                          FAR struct rx_int_state_s *rx_int_state)
 {
-  /* to-do */
+  int ret;
+  uint32_t reg_value;
 
-  return OK;
+  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, &reg_value, 4);
+  if (ret != OK)
+    {
+      baterr("[WLC] failed to read INTR states !!!\n");
+      return ret;
+    }
+
+  rx_int_state->wlc_rx_int_otp       = (reg_value & WLC_RX_OTP_INT_MASK);
+  rx_int_state->wlc_rx_int_ocp       = (reg_value & WLC_RX_OCP_INT_MASK);
+  rx_int_state->wlc_rx_int_ovp       = (reg_value & WLC_RX_OVP_INT_MASK);
+  rx_int_state->wlc_rx_int_scp       = (reg_value & WLC_RX_SCP_INT_MASK);
+  rx_int_state->wlc_rx_int_ss_tx     = (reg_value & WLC_RX_SS_TX_INT_MASK);
+  rx_int_state->wlc_rx_int_output_on =
+                                  (reg_value & WLC_RX_OUTPUT_OFF_INT_MASK);
+  rx_int_state->wlc_rx_int_uvp       = (reg_value & WLC_RX_UVP_INT_MASK);
+
+  /* CLR int register */
+
+  batinfo("[WLC] start to CLR INTR states !!!\n");
+  reg_value = 0x00;
+  ret = fw_i2c_write(priv, WLC_RX_INTR_CLR_REG, &reg_value, 4);
+  if (ret != OK)
+    {
+      baterr("[WLC] failed to CLR INTR states !!!\n");
+      return ret;
+    }
+
+  return ret;
 }
 
 static void stwlc38_worker(FAR void *arg)
 {
   FAR struct stwlc38_dev_s *priv = arg;
+  FAR struct rx_int_state_s *rx_int_state;
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -809,11 +839,28 @@ static void stwlc38_worker(FAR void *arg)
 
   /* Read out the latest rx data */
 
-  if (stwlc38_readrx(priv) == 0)
+  rx_int_state = kmm_zalloc(sizeof(struct rx_int_state_s));
+  if (stwlc38_check_intr(priv, rx_int_state) == 0)
     {
       /* push data to upper half driver */
 
-      batinfo("SUCCESS: stwlc38_readrx\n");
+      batinfo("SUCCESS: stwlc38_check_intr\n");
+      batinfo("  rx_int_state->wlc_rx_int_otp       = %s\n",
+               rx_int_state->wlc_rx_int_otp ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_ocp       = %s\n",
+               rx_int_state->wlc_rx_int_ocp ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_ovp       = %s\n",
+               rx_int_state->wlc_rx_int_ovp ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_scp       = %s\n",
+               rx_int_state->wlc_rx_int_scp ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_ss_tx     = %s\n",
+               rx_int_state->wlc_rx_int_ss_tx ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_output_on = %s\n",
+               rx_int_state->wlc_rx_int_output_on ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_output_off = %s\n",
+               rx_int_state->wlc_rx_int_output_off ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_int_uvp       = %s\n",
+               rx_int_state->wlc_rx_int_uvp ? "true" : "false");
     }
 
   return;
@@ -1112,7 +1159,7 @@ static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
     }
 
   ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
+                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
   if (ret < 0)
     {
       baterr("Failed to set option: %d\n", ret);

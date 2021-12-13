@@ -85,6 +85,18 @@ struct polaris_chip_info
   uint8_t cut_id;
 };
 
+struct rx_int_state_s
+{
+  bool wlc_rx_int_otp;
+  bool wlc_rx_int_ocp;
+  bool wlc_rx_int_ovp;
+  bool wlc_rx_int_scp;
+  bool wlc_rx_int_ss_tx;
+  bool wlc_rx_int_output_on;
+  bool wlc_rx_int_output_off;
+  bool wlc_rx_int_uvp;
+};
+
 #define WLC_HEALTH_TEMP_MAX  80
 #define WLC_HEALTH_TEMP_MIN  10
 
