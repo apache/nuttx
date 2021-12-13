@@ -65,7 +65,7 @@ int up_tls_size(void)
 
 void up_tls_initialize(FAR struct tls_info_s *info)
 {
-  FAR uint8_t *tls_data = info->tl_data;
+  FAR uint8_t *tls_data = (FAR uint8_t *)(info + 1);
 
   uint32_t tdata_len = sizeof(uint32_t) * (_END_TDATA - _START_TDATA);
   uint32_t tbss_len = sizeof(uint32_t) * (_END_TBSS - _START_TBSS);
@@ -86,5 +86,5 @@ void up_tls_initialize(FAR struct tls_info_s *info)
 
 void *__aeabi_read_tp(void)
 {
-  return tls_get_info()->tl_data;
+  return (void *)(tls_get_info() + 1);
 }
