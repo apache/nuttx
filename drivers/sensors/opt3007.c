@@ -1000,9 +1000,7 @@ static int opt3007_selftest(FAR struct sensor_lowerhalf_s *lower,
  * Name: opt3007_worker
  *
  * Description:
- *   Task the worker with retrieving the latest sensor data. We should not do
- *   this in a interrupt since it might take too long. Also we cannot lock
- *   the I2C bus from within an interrupt.
+ *   Task the worker with retrieving the latest sensor data.
  *
  * Input Parameters:
  *   arg    - Device struct.
@@ -1019,7 +1017,6 @@ static void opt3007_worker(FAR void *arg)
 {
   FAR struct opt3007_dev_s *priv = arg;
   struct sensor_event_light light;
-  int interval;
 
   DEBUGASSERT(priv != NULL);
 

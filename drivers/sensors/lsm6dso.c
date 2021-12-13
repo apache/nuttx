@@ -1137,6 +1137,7 @@ typedef union axis3bit16_u axis3bit16_t;
 struct lsm6dso_sensor_s
 {
   struct sensor_lowerhalf_s lower;              /* Lower half sensor driver */
+  struct work_s             work;               /* Sensor handler */
   unsigned int              interval;           /* Sensor interval */
   unsigned int              batch;              /* Sensor bat */
   unsigned int              fifowtm;            /* Sensor fifo water marker */
@@ -1226,6 +1227,7 @@ static int lsm6dso_xl_isready(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
                               FAR struct sensor_event_accel *value);
+static void lsm6dso_xl_worker(FAR void *arg);
 
 /* Gyroscope handle functions */
 
@@ -1242,6 +1244,7 @@ static int lsm6dso_gy_isready(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
                               FAR struct sensor_event_gyro *value);
+static void lsm6dso_gy_worker(FAR void *arg);
 
 /* FIFO handle functions */
 
@@ -2514,18 +2517,6 @@ static int lsm6dso_xl_setfullscale(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
                              bool enable)
 {
-  lsm6dso_pin_int1_route_t pin_int1_route;
-  int ret;
-
-  /* Get all interrupt setting. */
-
-  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
-  if (ret < 0)
-    {
-      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
-      return ret;
-    }
-
   if (enable)
     {
       /* Accelerometer config registers:
@@ -2536,28 +2527,26 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
       priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
                                        * LSM6DSO_MG2MS_FACTOR;
 
-      /* Set interrupt for accelerometer. */
+      /* Set worker for accelerometer. */
 
       if (priv->dev[LSM6DSO_XL_IDX].fifoen)
         {
-          pin_int1_route.drdy_xl = LSM6DSO_XL_INT_DISABLE;
+          work_cancel(HPWORK, &priv->dev[LSM6DSO_XL_IDX].work);
         }
       else
         {
-          pin_int1_route.drdy_xl = LSM6DSO_XL_INT_ENABLE;
+          work_queue(HPWORK, &priv->dev[LSM6DSO_XL_IDX].work,
+                     lsm6dso_xl_worker, priv,
+                     priv->dev[LSM6DSO_XL_IDX].interval / USEC_PER_TICK);
         }
     }
   else
     {
       /* Set to Shut Down. */
 
+      work_cancel(HPWORK, &priv->dev[LSM6DSO_XL_IDX].work);
       lsm6dso_xl_setodr(priv, LSM6DSO_XL_ODR_OFF);
-      pin_int1_route.drdy_xl = LSM6DSO_XL_INT_DISABLE;
     }
-
-  /* Set interrupt route. */
-
-  lsm6dso_int1_setroute(priv, pin_int1_route);
 
   return OK;
 }
@@ -2623,6 +2612,53 @@ static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
   value->z = temp.i16bit[2] *priv->dev[LSM6DSO_XL_IDX].factor;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_xl_worker
+ *
+ * Description:
+ *   Task the worker with retrieving the latest sensor data.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static void lsm6dso_xl_worker(FAR void *arg)
+{
+  FAR struct lsm6dso_dev_s *priv = arg;
+  struct sensor_event_accel temp_xl;
+
+  /* Sanity check. */
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Get the timestamp. */
+
+  temp_xl.timestamp = sensor_get_timestamp();
+
+  /* Set work queue. */
+
+  work_queue(HPWORK, &priv->dev[LSM6DSO_XL_IDX].work, lsm6dso_xl_worker,
+             priv, priv->dev[LSM6DSO_XL_IDX].interval / USEC_PER_TICK);
+
+  /* Read out the latest sensor data. */
+
+  lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+
+  /* push data to upper half driver. */
+
+  priv->dev[LSM6DSO_XL_IDX].lower.push_event(
+        priv->dev[LSM6DSO_XL_IDX].lower.priv,
+        &temp_xl,
+        sizeof(struct sensor_event_accel));
 }
 
 /****************************************************************************
@@ -2774,18 +2810,6 @@ static int lsm6dso_gy_setfullscale(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
                              bool enable)
 {
-  lsm6dso_pin_int1_route_t pin_int1_route;
-  int ret;
-
-  /* Get all interrupt setting. */
-
-  ret = lsm6dso_int1_getroute(priv, &pin_int1_route);
-  if (ret < 0)
-    {
-      snerr("Failed to route signals on interrupt pin 1: %d\n", ret);
-      return ret;
-    }
-
   if (enable)
     {
       /* Gyro config registers Turn on the gyro: FS=2000dps.
@@ -2800,24 +2824,22 @@ static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
 
       if (priv->dev[LSM6DSO_GY_IDX].fifoen)
         {
-          pin_int1_route.drdy_g = LSM6DSO_GY_INT_DISABLE;
+          work_cancel(HPWORK, &priv->dev[LSM6DSO_GY_IDX].work);
         }
       else
         {
-          pin_int1_route.drdy_g = LSM6DSO_GY_INT_ENABLE;
+          work_queue(HPWORK, &priv->dev[LSM6DSO_GY_IDX].work,
+                     lsm6dso_gy_worker, priv,
+                     priv->dev[LSM6DSO_GY_IDX].interval / USEC_PER_TICK);
         }
     }
   else
     {
       /* Set to Shut Down */
 
+      work_cancel(HPWORK, &priv->dev[LSM6DSO_GY_IDX].work);
       lsm6dso_gy_setodr(priv, LSM6DSO_GY_ODR_OFF);
-      pin_int1_route.drdy_g = LSM6DSO_GY_INT_DISABLE;
     }
-
-  /* Set interrupt route. */
-
-  lsm6dso_int1_setroute(priv, pin_int1_route);
 
   return OK;
 }
@@ -2883,6 +2905,53 @@ static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
   value->z = temp.i16bit[2] * priv->dev[LSM6DSO_GY_IDX].factor;
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: lsm6dso_gy_worker
+ *
+ * Description:
+ *   Task the worker with retrieving the latest sensor data.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static void lsm6dso_gy_worker(FAR void *arg)
+{
+  FAR struct lsm6dso_dev_s *priv = arg;
+  struct sensor_event_gyro temp_gy;
+
+  /* Sanity check. */
+
+  DEBUGASSERT(priv != NULL);
+
+  /* Get the timestamp. */
+
+  temp_gy.timestamp = sensor_get_timestamp();
+
+  /* Set work queue. */
+
+  work_queue(HPWORK, &priv->dev[LSM6DSO_GY_IDX].work, lsm6dso_gy_worker,
+             priv, priv->dev[LSM6DSO_GY_IDX].interval / USEC_PER_TICK);
+
+  /* Read out the latest sensor data. */
+
+  lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+
+  /* push data to upper half driver. */
+
+  priv->dev[LSM6DSO_GY_IDX].lower.push_event(
+        priv->dev[LSM6DSO_GY_IDX].lower.priv,
+        &temp_gy,
+        sizeof(struct sensor_event_gyro));
 }
 
 /****************************************************************************
@@ -3828,16 +3897,22 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
       if (lower->type == SENSOR_TYPE_ACCELEROMETER)
         {
           lsm6dso_fifo_xl_setbatch(priv, g_lsm6dso_xl_bdr[idx].regval);
+          work_cancel(HPWORK, &priv->dev[LSM6DSO_XL_IDX].work);
         }
       else if (lower->type == SENSOR_TYPE_GYROSCOPE)
         {
           lsm6dso_fifo_gy_setbatch(priv, g_lsm6dso_gy_bdr[idx].regval);
+          work_cancel(HPWORK, &priv->dev[LSM6DSO_GY_IDX].work);
         }
       else
         {
           snerr("Failed to match sensor type.\n");
           return -EINVAL;
         }
+
+      IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
+                      IOEXPANDER_OPTION_INTCFG,
+                      (FAR void *)IOEXPANDER_VAL_RISING);
     }
   else
     {
@@ -4044,13 +4119,6 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_XL_IDX);
       if (sensor->activated != enable)
         {
-          if (enable)
-            {
-              IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                              IOEXPANDER_OPTION_INTCFG,
-                              (FAR void *)IOEXPANDER_VAL_RISING);
-            }
-
           ret = lsm6dso_xl_enable(priv, enable);
           if (ret < 0)
             {
@@ -4066,13 +4134,6 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
       priv = (struct lsm6dso_dev_s *)(sensor - LSM6DSO_GY_IDX);
       if (sensor->activated != enable)
         {
-          if (enable)
-            {
-              IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
-                              IOEXPANDER_OPTION_INTCFG,
-                              (FAR void *)IOEXPANDER_VAL_RISING);
-            }
-
           ret = lsm6dso_gy_enable(priv, enable);
           if (ret < 0)
             {
@@ -4111,8 +4172,9 @@ static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
       return -EINVAL;
     }
 
-  if (priv->dev[LSM6DSO_XL_IDX].activated == false
-      && priv->dev[LSM6DSO_GY_IDX].activated == false)
+  if (priv->dev[LSM6DSO_FSM_IDX].activated == false
+      && priv->dev[LSM6DSO_XL_IDX].fifoen == false
+      && priv->dev[LSM6DSO_GY_IDX].fifoen == false)
     {
       IOEXP_SETOPTION(priv->config->ioedev, priv->config->pin,
                       IOEXPANDER_OPTION_INTCFG,
@@ -4954,9 +5016,7 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  * Name: lsm6dso_worker
  *
  * Description:
- *   Task the worker with retrieving the latest sensor data. We should not do
- *   this in a interrupt since it might take too long. Also we cannot lock
- *   the I2C bus from within an interrupt.
+ *   Task the worker with retrieving the latest sensor data.
  *
  * Input Parameters:
  *   arg    - Device struct.
@@ -4972,8 +5032,6 @@ static int lsm6dso_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 static void lsm6dso_worker(FAR void *arg)
 {
   FAR struct lsm6dso_dev_s *priv = arg;
-  struct sensor_event_accel temp_xl;
-  struct sensor_event_gyro temp_gy;
   lsm6dso_all_sources_t status;
   int ret;
 
@@ -4992,38 +5050,6 @@ static void lsm6dso_worker(FAR void *arg)
     {
       snerr("Failed to get interrupt source registers: %d\n", ret);
       return;
-    }
-
-  /* Get sensor data. */
-
-  if (status.drdy_xl && !priv->dev[LSM6DSO_XL_IDX].fifoen)
-    {
-      /* Read out the latest sensor data. */
-
-      lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
-      temp_xl.timestamp = priv->timestamp;
-
-      /* push data to upper half driver. */
-
-      priv->dev[LSM6DSO_XL_IDX].lower.push_event(
-            priv->dev[LSM6DSO_XL_IDX].lower.priv,
-            &temp_xl,
-            sizeof(struct sensor_event_accel));
-    }
-
-  if (status.drdy_g && !priv->dev[LSM6DSO_GY_IDX].fifoen)
-    {
-      /* Read out the latest sensor data. */
-
-      lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
-      temp_gy.timestamp = priv->timestamp;
-
-      /* push data to upper half driver. */
-
-      priv->dev[LSM6DSO_GY_IDX].lower.push_event(
-            priv->dev[LSM6DSO_GY_IDX].lower.priv,
-            &temp_gy,
-            sizeof(struct sensor_event_gyro));
     }
 
   /* Get sensor FIFO data. */
