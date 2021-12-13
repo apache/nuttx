@@ -86,7 +86,12 @@ SECTIONS
         *(.gnu.linkonce.b.*)
         *(.gnu.linkonce.sb.*)
         *(COMMON)
-        . = ALIGN(4);
+    } > ksram
+
+    /* Page tables here, align to 4K boundary */
+    .pgtables : ALIGN(0x1000) {
+        *(.pgtables)
+         . = ALIGN(4);
         _ebss = ABSOLUTE(.);
     } > ksram
 
