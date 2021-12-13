@@ -58,9 +58,16 @@
 void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 {
 #if CONFIG_RR_INTERVAL > 0
-#ifdef CONFIG_SCHED_SPORADIC
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+  if (
+#ifdef CONFIG_SMP
+      tcb != current_task(this_cpu())
+#else
+      tcb != this_task()
 #endif
+#ifdef CONFIG_SCHED_SPORADIC
+      && ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
+#endif
+  )
     {
       /* Reset the task's timeslice. */
 
