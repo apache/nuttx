@@ -76,7 +76,7 @@ static void up_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp; stack < stack_top; stack += 16)
+  for (stack = sp; stack < (stack_top & ~0x1f); stack += 16)
     {
       uint8_t *ptr = (uint8_t *)stack;
 
