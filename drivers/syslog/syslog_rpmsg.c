@@ -28,6 +28,10 @@
 #include <errno.h>
 #include <string.h>
 
+#ifdef CONFIG_ARCH_LOWPUTC
+#include <nuttx/arch.h>
+#endif
+
 #include <nuttx/irq.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/syslog/syslog.h>
@@ -53,16 +57,17 @@
 
 struct syslog_rpmsg_s
 {
-  volatile size_t       head;         /* The head index (where data is added) */
-  volatile size_t       tail;         /* The tail index (where data is removed) */
-  size_t                size;         /* Size of the RAM buffer */
-  FAR char              *buffer;      /* Circular RAM buffer */
-  struct work_s         work;         /* Used for deferred callback work */
+  volatile size_t       head;       /* The head index (where data is added) */
+  volatile size_t       tail;       /* The tail index (where data is removed) */
+  volatile size_t       flush;      /* The tail index of flush (where data is removed) */
+  size_t                size;       /* Size of the RAM buffer */
+  FAR char              *buffer;    /* Circular RAM buffer */
+  struct work_s         work;       /* Used for deferred callback work */
 
   struct rpmsg_endpoint ept;
   bool                  suspend;
-  bool                  transfer;     /* The transfer flag */
-  ssize_t               trans_len;    /* The data length when transfer */
+  bool                  transfer;   /* The transfer flag */
+  ssize_t               trans_len;  /* The data length when transfer */
 
   sem_t                 sem;
 };
@@ -333,11 +338,27 @@ int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
 
 int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 {
+#if defined(CONFIG_ARCH_LOWPUTC)
+  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
+  irqstate_t flags;
+
   UNUSED(channel);
 
-  FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
+  flags = enter_critical_section();
 
-  work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
+  if (priv->head - priv->flush > priv->size)
+    {
+      priv->flush = priv->tail;
+    }
+
+  while (priv->flush < priv->head)
+    {
+      up_putc(priv->buffer[priv->flush++ % priv->size]);
+    }
+
+  leave_critical_section(flags);
+#endif
+
   return OK;
 }
 
@@ -371,8 +392,8 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   nxsem_init(&priv->sem, 0, 0);
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
-  priv->buffer  = buffer;
-  priv->size    = size;
+  priv->buffer = buffer;
+  priv->size   = size;
 
   prev = priv->buffer[size - 1];
 
