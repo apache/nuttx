@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_rawinstream.c
+ * libs/libc/stream/lib_stdinstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <unistd.h>
 #include <assert.h>
-#include <errno.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -37,33 +31,25 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawinstream_getc
+ * Name: stdinstream_getc
  ****************************************************************************/
 
-static int rawinstream_getc(FAR struct lib_instream_s *this)
+static int stdinstream_getc(FAR struct lib_instream_s *this)
 {
-  FAR struct lib_rawinstream_s *rthis = (FAR struct lib_rawinstream_s *)this;
-  int nread;
-  char ch;
+  FAR struct lib_stdinstream_s *sthis = (FAR struct lib_stdinstream_s *)this;
+  int ret;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(this);
 
-  /* Attempt to read one character */
+  /* Get the next character from the incoming stream */
 
-  nread = _NX_READ(rthis->fd, &ch, 1);
-  if (nread == 1)
+  ret = getc(sthis->stream);
+  if (ret != EOF)
     {
       this->nget++;
-      return ch;
     }
 
-  /* Return EOF on any failure to read from the incoming byte stream. The
-   * only expected error is EINTR meaning that the read was interrupted
-   * by a signal.  A Zero return value would indicate an end-of-file
-   * condition.
-   */
-
-  return EOF;
+  return ret;
 }
 
 /****************************************************************************
@@ -71,25 +57,26 @@ static int rawinstream_getc(FAR struct lib_instream_s *this)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawinstream
+ * Name: lib_stdinstream
  *
  * Description:
- *   Initializes a stream for use with a file descriptor.
+ *   Initializes a stream for use with a FILE instance.
  *
  * Input Parameters:
  *   instream - User allocated, uninitialized instance of struct
- *              lib_rawinstream_s to be initialized.
- *   fd       - User provided file/socket descriptor (must have been opened
- *              for the correct access).
+ *              lib_stdinstream_s to be initialized.
+ *   stream   - User provided stream instance (must have been opened for
+ *              read access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawinstream(FAR struct lib_rawinstream_s *instream, int fd)
+void lib_stdinstream(FAR struct lib_stdinstream_s *instream,
+                     FAR FILE *stream)
 {
-  instream->public.get  = rawinstream_getc;
+  instream->public.get  = stdinstream_getc;
   instream->public.nget = 0;
-  instream->fd          = fd;
+  instream->stream      = stream;
 }

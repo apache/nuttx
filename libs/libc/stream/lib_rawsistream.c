@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_lowoutstream.c
+ * libs/libc/stream/lib_rawsistream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,11 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_LOWPUTC
-
-#include <stdio.h>
+#include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <nuttx/arch.h>
+
+#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -38,17 +37,46 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lowoutstream_putc
+ * Name: rawsistream_getc
  ****************************************************************************/
 
-static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
+static int rawsistream_getc(FAR struct lib_sistream_s *this)
 {
-  DEBUGASSERT(this);
+  FAR struct lib_rawsistream_s *rthis = (FAR struct lib_rawsistream_s *)this;
+  int nread;
+  char ch;
 
-  if (up_putc(ch) != EOF)
+  DEBUGASSERT(this && rthis->fd >= 0);
+
+  /* Attempt to read one character */
+
+  nread = _NX_READ(rthis->fd, &ch, 1);
+  if (nread == 1)
     {
-      this->nput++;
+      this->nget++;
+      return ch;
     }
+
+  /* Return EOF on any failure to read from the incoming byte stream. The
+   * only expected error is EINTR meaning that the read was interrupted
+   * by a signal.  A Zero return value would indicated an end-of-file
+   * confition.
+   */
+
+  return EOF;
+}
+
+/****************************************************************************
+ * Name: rawsistream_seek
+ ****************************************************************************/
+
+static off_t rawsistream_seek(FAR struct lib_sistream_s *this, off_t offset,
+                              int whence)
+{
+  FAR struct lib_rawsistream_s *mthis = (FAR struct lib_rawsistream_s *)this;
+
+  DEBUGASSERT(this);
+  return _NX_SEEK(mthis->fd, offset, whence);
 }
 
 /****************************************************************************
@@ -56,25 +84,26 @@ static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_lowoutstream
+ * Name: lib_rawsistream
  *
  * Description:
- *   Initializes a stream for use with low-level, architecture-specific I/O.
+ *   Initializes a stream for use with a file descriptor.
  *
  * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_lowoutstream_s to be initialized.
+ *   instream - User allocated, uninitialized instance of struct
+ *              lib_rawsistream_s to be initialized.
+ *   fd       - User provided file/socket descriptor (must have been opened
+ *              for the correct access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_lowoutstream(FAR struct lib_outstream_s *stream)
+void lib_rawsistream(FAR struct lib_rawsistream_s *instream, int fd)
 {
-  stream->put   = lowoutstream_putc;
-  stream->flush = lib_noflush;
-  stream->nput  = 0;
+  instream->public.get  = rawsistream_getc;
+  instream->public.seek = rawsistream_seek;
+  instream->public.nget = 0;
+  instream->fd          = fd;
 }
-
-#endif /* CONFIG_ARCH_LOWPUTC */
