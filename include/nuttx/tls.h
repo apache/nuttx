@@ -140,7 +140,7 @@ struct pthread_cleanup_s
  * The stack memory is fully accessible to user mode threads.  TLS is not
  * available from interrupt handlers (nor from the IDLE thread).
  *
- * The following diagram represent the typic stack layout:
+ * The following diagram represent the typical stack layout:
  *
  *      Push Down             Push Up
  *   +-------------+      +-------------+ <- Stack memory allocation
@@ -179,9 +179,6 @@ struct tls_info_s
 #endif
 
   int tl_errno;                        /* Per-thread error number */
-#ifdef CONFIG_SCHED_THREAD_LOCAL
-  uint8_t tl_data[0];
-#endif
 };
 
 /****************************************************************************
