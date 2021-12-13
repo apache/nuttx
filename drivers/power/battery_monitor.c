@@ -100,11 +100,16 @@ static const struct file_operations g_batteryops =
  ****************************************************************************/
 
 static int battery_monitor_notify(FAR struct battery_monitor_priv_s *priv,
-                                   uint32_t mask)
+                                  uint32_t mask)
 {
   FAR struct pollfd *fd = priv->fds;
   int semcnt;
   int ret;
+
+  if (!fd)
+    {
+      return OK;
+    }
 
   ret = nxsem_wait_uninterruptible(&priv->lock);
   if (ret < 0)
