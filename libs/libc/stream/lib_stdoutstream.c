@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_rawoutstream.c
+ * libs/libc/stream/lib_stdoutstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,13 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <unistd.h>
+#include <fcntl.h>
 #include <assert.h>
 #include <errno.h>
-
-#include <nuttx/fs/fs.h>
 
 #include "libc.h"
 
@@ -37,81 +33,100 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: rawsostream_putc
+ * Name: stdoutstream_putc
  ****************************************************************************/
 
-static void rawsostream_putc(FAR struct lib_sostream_s *this, int ch)
+static void stdoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_rawsostream_s *rthis = (FAR struct lib_rawsostream_s *)this;
-  char buffer = ch;
-  int nwritten;
-  int errcode;
+  FAR struct lib_stdoutstream_s *sthis =
+                               (FAR struct lib_stdoutstream_s *)this;
+  int result;
 
-  DEBUGASSERT(this && rthis->fd >= 0);
+  DEBUGASSERT(this && sthis->stream);
 
-  /* Loop until the character is successfully transferred or until an
-   * irrecoverable error occurs.
+  /* Loop until the character is successfully transferred or an irrecoverable
+   * error occurs.
    */
 
   do
     {
-      nwritten = _NX_WRITE(rthis->fd, &buffer, 1);
-      if (nwritten == 1)
+      result = fputc(ch, sthis->stream);
+      if (result != EOF)
         {
           this->nput++;
           return;
         }
 
-      /* The only expected error is EINTR, meaning that the write operation
-       * was awakened by a signal.  Zero would not be a valid return value
-       * from _NX_WRITE().
+      /* EINTR (meaning that fputc was interrupted by a signal) is the only
+       * recoverable error.
        */
-
-      errcode = _NX_GETERRNO(nwritten);
-      DEBUGASSERT(nwritten < 0);
     }
-  while (errcode == EINTR);
+  while (get_errno() == EINTR);
 }
 
 /****************************************************************************
- * Name: rawsostream_seek
+ * Name: stdoutstream_flush
  ****************************************************************************/
 
-static off_t rawsostream_seek(FAR struct lib_sostream_s *this, off_t offset,
-                              int whence)
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+static int stdoutstream_flush(FAR struct lib_outstream_s *this)
 {
-  FAR struct lib_rawsostream_s *mthis = (FAR struct lib_rawsostream_s *)this;
+  FAR struct lib_stdoutstream_s *sthis =
+                                (FAR struct lib_stdoutstream_s *)this;
 
-  DEBUGASSERT(this);
-  return _NX_SEEK(mthis->fd, offset, whence);
+  DEBUGASSERT(sthis != NULL && sthis->stream != NULL);
+  return lib_fflush(sthis->stream, true);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_rawsostream
+ * Name: lib_stdoutstream
  *
  * Description:
- *   Initializes a stream for use with a file descriptor.
+ *   Initializes a stream for use with a FILE instance.
  *
  * Input Parameters:
  *   outstream - User allocated, uninitialized instance of struct
- *               lib_rawsostream_s to be initialized.
- *   fd        - User provided file/socket descriptor (must have been opened
- *               for write access).
+ *               lib_stdoutstream_s to be initialized.
+ *   stream    - User provided stream instance (must have been opened for
+ *               write access).
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_rawsostream(FAR struct lib_rawsostream_s *outstream, int fd)
+void lib_stdoutstream(FAR struct lib_stdoutstream_s *outstream,
+                      FAR FILE *stream)
 {
-  outstream->public.put   = rawsostream_putc;
-  outstream->public.flush = lib_snoflush;
-  outstream->public.seek  = rawsostream_seek;
-  outstream->public.nput  = 0;
-  outstream->fd           = fd;
+  /* Select the put operation */
+
+  outstream->public.put = stdoutstream_putc;
+
+  /* Select the correct flush operation.  This flush is only called when
+   * a newline is encountered in the output stream.  However, we do not
+   * want to support this line buffering behavior if the stream was
+   * opened in binary mode.  In binary mode, the newline has no special
+   * meaning.
+   */
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  if (stream->fs_bufstart != NULL && (stream->fs_oflags & O_BINARY) == 0)
+    {
+      outstream->public.flush = stdoutstream_flush;
+    }
+  else
+#endif
+    {
+      outstream->public.flush = lib_noflush;
+    }
+
+  /* Set the number of bytes put to zero and remember the stream */
+
+  outstream->public.nput = 0;
+  outstream->stream      = stream;
 }

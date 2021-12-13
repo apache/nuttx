@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/stdio/lib_meminstream.c
+ * libs/libc/stream/lib_lowoutstream.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_LOWPUTC
+
+#include <stdio.h>
 #include <assert.h>
+#include <errno.h>
+#include <nuttx/arch.h>
 
 #include "libc.h"
 
@@ -31,29 +38,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: meminstream_getc
+ * Name: lowoutstream_putc
  ****************************************************************************/
 
-static int meminstream_getc(FAR struct lib_instream_s *this)
+static void lowoutstream_putc(FAR struct lib_outstream_s *this, int ch)
 {
-  FAR struct lib_meminstream_s *mthis = (FAR struct lib_meminstream_s *)this;
-  int ret;
-
   DEBUGASSERT(this);
 
-  /* Get the next character (if any) from the buffer */
-
-  if (this->nget < mthis->buflen)
+  if (up_putc(ch) != EOF)
     {
-      ret = mthis->buffer[this->nget];
-      this->nget++;
+      this->nput++;
     }
-  else
-    {
-      ret = EOF;
-    }
-
-  return ret;
 }
 
 /****************************************************************************
@@ -61,27 +56,25 @@ static int meminstream_getc(FAR struct lib_instream_s *this)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: lib_meminstream
+ * Name: lib_lowoutstream
  *
  * Description:
- *   Initializes a stream for use with a fixed-size memory buffer.
+ *   Initializes a stream for use with low-level, architecture-specific I/O.
  *
  * Input Parameters:
- *   instream    - User allocated, uninitialized instance of struct
- *                 lib_meminstream_s to be initialized.
- *   bufstart    - Address of the beginning of the fixed-size memory buffer
- *   buflen      - Size of the fixed-sized memory buffer in bytes
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_lowoutstream_s to be initialized.
  *
  * Returned Value:
- *   None (instream initialized).
+ *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void lib_meminstream(FAR struct lib_meminstream_s *instream,
-                     FAR const char *bufstart, int buflen)
+void lib_lowoutstream(FAR struct lib_outstream_s *stream)
 {
-  instream->public.get  = meminstream_getc;
-  instream->public.nget = 0;          /* Will be buffer index */
-  instream->buffer      = bufstart;   /* Start of buffer */
-  instream->buflen      = buflen;     /* Length of the buffer */
+  stream->put   = lowoutstream_putc;
+  stream->flush = lib_noflush;
+  stream->nput  = 0;
 }
+
+#endif /* CONFIG_ARCH_LOWPUTC */
