@@ -94,7 +94,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
     {
       /* We got it! */
 
-      goto success_with_irqdisabled;
+      goto out;
     }
 
   /* We will have to wait for the semaphore.  Make sure that we were provided
@@ -105,7 +105,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
     {
       /* Return the errno from nxsem_trywait() */
 
-      goto errout_with_irqdisabled;
+      goto out;
     }
 
   /* Adjust the delay for any time since the delay was calculated */
@@ -114,7 +114,7 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
   if (/* elapsed >= (UINT32_MAX / 2) || */ elapsed >= delay)
     {
       ret = -ETIMEDOUT;
-      goto errout_with_irqdisabled;
+      goto out;
     }
 
   delay -= elapsed;
@@ -131,20 +131,9 @@ int nxsem_tickwait(FAR sem_t *sem, clock_t start, uint32_t delay)
 
   wd_cancel(&rtcb->waitdog);
 
-  if (ret < 0)
-    {
-      goto errout_with_irqdisabled;
-    }
-
   /* We can now restore interrupts */
 
-  /* Success exits */
-
-success_with_irqdisabled:
-
-  /* Error exits */
-
-errout_with_irqdisabled:
+out:
   leave_critical_section(flags);
   return ret;
 }
