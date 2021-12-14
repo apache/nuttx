@@ -79,12 +79,10 @@ config ESP32C3_ESPTOOLPY_NO_STUB
 		Usually you should not need to disable that feature.
 
 config ESP32C3_FLASH_DETECT
-	bool "Auto-detect FLASH size (to be used with master esptool)"
+	bool "Auto-detect FLASH size"
 	default n
 	---help---
 		Auto detect flash size when flashing.
-		Current released version of esptool doesn't support auto-detecting flash size.
-		Use latest master from https://github.com/espressif/esptool.
 
 choice ESP32C3_FLASH_MODE
 	prompt "SPI FLASH mode"
