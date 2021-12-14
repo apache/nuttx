@@ -240,7 +240,7 @@ struct enc_driver_s
   struct work_s         towork;        /* Tx timeout work queue support */
   struct work_s         pollwork;      /* Poll timeout work queue support */
 
-  /* This is the contained SPI driver intstance */
+  /* This is the contained SPI driver instance */
 
   FAR struct spi_dev_s *spi;
 

@@ -851,7 +851,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
  *              driver instance.
  *
  * Returned Value:
- *   A non-NULL MTD driver intstance is returned on success.  NULL is
+ *   A non-NULL MTD driver instance is returned on success.  NULL is
  *   returned on any failaure.
  *
  ****************************************************************************/
