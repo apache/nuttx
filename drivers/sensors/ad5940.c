@@ -57,7 +57,7 @@
 
 /* Configurations */
 
-#define AD5940_FIFOWTM_DEFAULT   1          /* Default FIFO watermark is 1. */
+#define AD5940_FIFOWTM_DEFAULT   0          /* Default FIFO watermark is 0. */
 #define AD5940_INTVL_DEFAULT     50000      /* Default inteval = 50 ms. */
 #define AD5940_BIAODR_DEFAULT    20.0f      /* Default BIA out rate = 20Hz. */
 #define AD5940_BIAODR_MAX        50.0f      /* Max. BIA output rate = 50Hz. */
@@ -70,9 +70,8 @@
 #define AD5940_BIACTRL_START     0          /* BIA function starts. */
 #define AD5940_BIACTRL_RESTART   1          /* BIA restarts with new config */
 #define AD5940_BIACTRL_STOPNOW   2          /* BIA function stops. */
-#define AD5940_BIACTRL_STOPSYNC  3          /* BIA stop after FIFO-ready. */
-#define AD5940_BIACTRL_GETFREQ   4          /* Get current frequency. */
-#define AD5940_BIACTRL_SHUTDOWN  5          /* Power down all parts in AFE. */
+#define AD5940_BIACTRL_GETFREQ   3          /* Get current frequency. */
+#define AD5940_BIACTRL_SHUTDOWN  4          /* Power down all parts in AFE. */
 
 /* Control commands */
 
@@ -159,7 +158,6 @@ struct ad5940_biacfg_s
   uint32_t ctiasel;             /* Select CTIA in pF unit from 0 to 31pF */
   uint32_t dftnum;              /* DFT number */
   uint32_t dftsrc;              /* DFT Source */
-  uint32_t fifodatacount;       /* How many times have been measured */
   uint32_t measseqcyclecount;   /* How long the measurement seq will take */
   uint8_t  adcsinc3osr;         /* SINC3 OSR selection */
   uint8_t  adcsinc2osr;         /* SINC2 OSR selection */
@@ -167,7 +165,6 @@ struct ad5940_biacfg_s
   bool     redortiacal;         /* Set true if need calibration. */
   bool     hanwinen;            /* Enable Hanning window */
   bool     biainited;           /* Generated sequence commands */
-  bool     stoprequired;        /* After FIFO ready, stop measurement seq */
 };
 
 /* Device struct */
@@ -177,7 +174,8 @@ struct ad5940_dev_s
   /* sensor_lowerhalf_s must be in the first line. */
 
   struct sensor_lowerhalf_s        lower;         /* Lower half driver */
-  struct work_s                    work;          /* Interrupt handler */
+  struct work_s                    work_intrpt;   /* Interrupt handler */
+  struct work_s                    work_poll;     /* Polling handler */
   uint64_t                         timestamp;     /* Units is us */
   struct ad5940_biacfg_s           biacfg;        /* BIA configure struct */
   FAR const struct ad5940_config_s *config;       /* The board config */
@@ -192,6 +190,8 @@ struct ad5940_dev_s
   uint32_t                         batch_latency; /* Batch latency(us) */
   uint16_t                         fifowtm;       /* FIFO water marker */
   bool                             activated;     /* Device state */
+  bool                             poll2batch;    /* Change polling->batch */
+  bool                             batch2poll;    /* Change batch->polling */
 };
 
 /****************************************************************************
@@ -292,6 +292,8 @@ static int      ad5940_seqinfocfg(FAR struct ad5940_dev_s *priv,
 static void     ad5940_setdexrtia(FAR struct ad5940_dev_s *priv,
                                   uint32_t dexpin, uint32_t dertia,
                                   uint32_t derload);
+static void     ad5940_set_intpin(FAR struct ad5940_dev_s *priv,
+                                  bool enable);
 static void     ad5940_statisticcfg(FAR struct ad5940_dev_s *priv,
                                     FAR const struct ad5940_statcfg_s
                                     *pstatcfg);
@@ -369,7 +371,8 @@ static int  ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
 
 static int  ad5940_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
-static void ad5940_worker(FAR void *arg);
+static void ad5940_worker_intrpt(FAR void *arg);
+static void ad5940_worker_poll(FAR void *arg);
 
 /****************************************************************************
  * Private Data
@@ -461,7 +464,6 @@ FAR const struct ad5940_biacfg_s ad5940_biacfgdefault =
   .biainited = false,
   .hanwinen = true,
   .redortiacal = false,
-  .stoprequired = false,
   .measseqcyclecount = 0,
 };
 
@@ -1236,12 +1238,14 @@ static int ad5940_checkid(FAR struct ad5940_dev_s *priv)
   ret = ad5940_readreg(priv, AD5940_REG_AFECON_ADIID, &manufid);
   if (ret < 0)
     {
+      snerr("AD5940 failed to read manufactory ID.\n");
       return ret;
     }
 
   ret = ad5940_readreg(priv, AD5940_REG_AFECON_CHIPID, &chipid);
   if (ret < 0)
     {
+      snerr("AD5940 failed to read chip ID.\n");
       return ret;
     }
 
@@ -1356,6 +1360,7 @@ static int ad5940_shutdown(FAR struct ad5940_dev_s *priv)
 {
   FAR struct ad5940_aferefcfg_s aferefcfg;
   FAR struct ad5940_lploopcfg_s *plploopcfg;
+  uint32_t regval;
 
   plploopcfg = kmm_zalloc(sizeof(struct ad5940_lploopcfg_s));
   if (plploopcfg == NULL)
@@ -1369,8 +1374,15 @@ static int ad5940_shutdown(FAR struct ad5940_dev_s *priv)
 
   ad5940_refcfg(priv, &aferefcfg);
   ad5940_lploopcfg(priv, plploopcfg);
-  ad5940_sleeplock(priv, false);
-  ad5940_entersleep(priv);
+
+  /* Change power mode to sleep mode. */
+
+  ad5940_writereg(priv, AD5940_REG_ALLON_PWRKEY, AD5940_PWRKEY_UNLOCK1);
+  ad5940_writereg(priv, AD5940_REG_ALLON_PWRKEY, AD5940_PWRKEY_UNLOCK2);
+  ad5940_readreg(priv, AD5940_REG_ALLON_PWRMOD, &regval);
+  regval = regval & (~AD5940_BITM_ALLON_PWRMOD_PWRMOD);
+  regval = regval | AD5940_ENUM_ALLON_PWRMOD_SLPMOD;
+  ad5940_writereg(priv, AD5940_REG_ALLON_PWRMOD, regval);
 
   kmm_free(plploopcfg);
   return OK;
@@ -2018,7 +2030,7 @@ static void ad5940_fifoctrl(FAR struct ad5940_dev_s *priv, uint32_t fifosrc,
 
 static uint32_t ad5940_fifogetcnt(FAR struct ad5940_dev_s *priv)
 {
-  uint32_t regval = 0;
+  uint32_t regval;
 
   ad5940_readreg(priv, AD5940_REG_AFE_FIFOCNTSTA, &regval);
   regval = regval >> AD5940_BITP_AFE_FIFOCNTSTA_DATAFIFOCNT;
@@ -3208,6 +3220,41 @@ static void ad5940_setdexrtia(FAR struct ad5940_dev_s *priv, uint32_t dexpin,
 }
 
 /****************************************************************************
+ * Name: ad5940_set_intpin
+ *
+ * Description:
+ *   Configure AD5940 GPO for interrupt.
+ *
+ * Input Parameters:
+ *   priv   - Device struct.
+ *   enable - Enable interrupt pin or not.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void ad5940_set_intpin(FAR struct ad5940_dev_s *priv, bool enable)
+{
+  if (enable)
+    {
+      ad5940_writereg(priv, AD5940_REG_AGPIO_GP0OEN, AD5940_AGPIO_PIN0);
+    }
+  else
+    {
+      ad5940_writereg(priv, AD5940_REG_AGPIO_GP0OEN, 0);
+    }
+
+  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0CON, AD5940_GP0_INT0);
+  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0IEN, 0);
+  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0PE, 0);
+  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0OUT, 0);
+}
+
+/****************************************************************************
  * Name: ad5940_statisticcfg
  *
  * Description:
@@ -3497,7 +3544,7 @@ static void ad5940_wuptctrl(FAR struct ad5940_dev_s *priv, bool enable)
 {
   uint32_t tempreg;
 
-  tempreg = ad5940_readreg(priv, AD5940_REG_WUPTMR_CON, &tempreg);
+  ad5940_readreg(priv, AD5940_REG_WUPTMR_CON, &tempreg);
   tempreg = tempreg & (~AD5940_BITM_WUPTMR_CON_EN);
   if (enable == true)
     {
@@ -3538,9 +3585,7 @@ static void ad5940_biacfgstructinit(FAR struct ad5940_dev_s *priv,
   pbiacfg->biainited = false;
   pbiacfg->bparachanged = false;
   pbiacfg->redortiacal = false;
-  pbiacfg->stoprequired = false;
   pbiacfg->freqofdata = 0;
-  pbiacfg->fifodatacount = 0;
   pbiacfg->maxodr = 0;
   pbiacfg->measseqcyclecount = 0;
   pbiacfg->rtiacurrvalue[0] = 0;
@@ -3584,13 +3629,12 @@ static int ad5940_biaplatformcfg(FAR struct ad5940_dev_s *priv)
   ret = ad5940_clkcfg(priv);
   if (ret < 0)
     {
-      snerr("Failed to configure AD5940 CLK: ret\n", ret);
+      snerr("Failed to configure AD5940 CLK: %d\n", ret);
       return ret;
     }
 
   /* Step2. Configure FIFO and Sequencer. FIFO 4KB and seq 2KB. */
 
-  fifocfg.fifoen      = false;
   fifocfg.fifomode    = AD5940_FIFOMODE_FIFO;
   fifocfg.fifosize    = AD5940_FIFOSIZE_4KB;
   fifocfg.fifosrc     = AD5940_FIFOSRC_DFT;
@@ -3602,20 +3646,19 @@ static int ad5940_biaplatformcfg(FAR struct ad5940_dev_s *priv)
    * generate a rising edge interrupt to MCU.
    */
 
+  ad5940_intrptclr(priv, AD5940_AFEINTSRC_ALLINT);
   ad5940_intrptcfg(priv, AD5940_AFEINTC_1, AD5940_AFEINTSRC_ALLINT, true);
   ad5940_intrptcfg(priv, AD5940_AFEINTC_0, AD5940_AFEINTSRC_DATAFIFOTHRESH,
                    true);
-  ad5940_intrptclr(priv, AD5940_AFEINTSRC_ALLINT);
   ad5940_spiwritereg(priv, AD5940_REG_INTC_INTCPOL,
                      AD5940_ENUM_INTC_INTCPOL_RISING);
 
   /* Step4: Configure GPIO. GP0 for INT0, no pull, output 0, no input. */
 
-  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0CON, AD5940_GP0_INT0);
-  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0OEN, AD5940_AGPIO_PIN0);
-  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0IEN, 0);
-  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0PE, 0);
-  ad5940_writereg(priv, AD5940_REG_AGPIO_GP0OUT, 0);
+  if (priv->fifowtm > 0)
+    {
+      ad5940_set_intpin(priv, true);
+    }
 
   /* Allow AFE to enter sleep mode. */
 
@@ -3864,7 +3907,7 @@ static int ad5940_biactrl(FAR struct ad5940_dev_s *priv,
           wuptcfg->wuptendseq = AD5940_WUPTENDSEQ_A;
           wuptcfg->wuptorder[0] = AD5940_SEQID_0;
           wuptcfg->seqxsleeptime[AD5940_SEQID_0] =
-                  (uint32_t)(pbiacfg->wuptclkfreq / pbiacfg->biaodr) - 2 - 1;
+            (uint32_t)(pbiacfg->wuptclkfreq / pbiacfg->biaodr) - 2 - 1;
 
           /* The minimum value is 1. Do not set it to zero. Set it to 1 will
            * spend 2 32kHz clock.
@@ -3873,9 +3916,6 @@ static int ad5940_biactrl(FAR struct ad5940_dev_s *priv,
           wuptcfg->seqxwakeuptime[AD5940_SEQID_0] = 1;
           ad5940_wuptcfg(priv, wuptcfg);
 
-          /* Restart */
-
-          pbiacfg->fifodatacount = 0;
           kmm_free(wuptcfg);
         }
         break;
@@ -3903,15 +3943,6 @@ static int ad5940_biactrl(FAR struct ad5940_dev_s *priv,
         }
         break;
 
-      case AD5940_BIACTRL_STOPSYNC:
-        {
-          if (pbiacfg)
-            {
-              pbiacfg->stoprequired = true;
-            }
-        }
-        break;
-
       case AD5940_BIACTRL_GETFREQ:
         {
           if (ppara)
@@ -3933,6 +3964,10 @@ static int ad5940_biactrl(FAR struct ad5940_dev_s *priv,
           /* Stop the measurement if it's running. */
 
           ad5940_biactrl(priv, pbiacfg, AD5940_BIACTRL_STOPNOW, NULL);
+
+          /* Reset the device to avoid wake-up by sequencer. */
+
+          ad5940_hardreset(priv);
 
           /* Turn off LPloop related blocks which are not controlled
            * automatically by sleep operation
@@ -4013,8 +4048,15 @@ static int ad5940_biadataprocess(FAR struct ad5940_dev_s *priv,
       voltphase = voltphase - currphase + priv->biacfg.rtiacurrvalue[1];
       pout[i].real = voltmag;
       pout[i].imag = voltphase;
-      pout[i].timestamp = priv->timestamp - priv->interval *
-                                            (priv->fifowtm - i - 1);
+      if (priv->fifowtm > 0)
+        {
+          pout[i].timestamp = priv->timestamp - priv->interval *
+                              (priv->fifowtm - i - 1);
+        }
+      else
+        {
+          pout[i].timestamp = priv->timestamp;
+        }
     }
 
   priv->lower.push_event(priv->lower.priv, pout,
@@ -4057,17 +4099,6 @@ static int ad5940_biadataprocess(FAR struct ad5940_dev_s *priv,
 static int ad5940_biaregmodify(FAR struct ad5940_dev_s *priv,
                                FAR struct ad5940_biacfg_s *pbiacfg)
 {
-  /* BIA will stop, mark device as inactivated set IOEXP */
-
-  if (pbiacfg->stoprequired)
-    {
-      ad5940_wuptctrl(priv, false);
-      priv->activated = false;
-      IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
-      return OK;
-    }
-
   /* Need to set new frequency and set power mode */
 
   if (pbiacfg->sweepcfg.sweepen)
@@ -4075,9 +4106,34 @@ static int ad5940_biaregmodify(FAR struct ad5940_dev_s *priv,
       ad5940_wgfreqctrl(priv, pbiacfg->sweepnextfreq, pbiacfg->sysclkfreq);
     }
 
-  /* A new FIFO watermark need to be set, causing by ad5940_batch() */
+  /* If AFE will switch between batch mode and polling mode. */
 
-  if (pbiacfg->fifothreshd != priv->fifowtm * AD5940_RESULTS_PER_MEAS)
+  if (priv->poll2batch)
+    {
+      work_cancel(HPWORK, &priv->work_poll);
+      IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                      IOEXPANDER_OPTION_INTCFG,
+                      (FAR void *)IOEXPANDER_VAL_RISING);
+      ad5940_set_intpin(priv, true);
+      priv->poll2batch = false;
+    }
+  else if (priv->batch2poll)
+    {
+      work_queue(HPWORK, &priv->work_poll, ad5940_worker_poll, priv,
+                     priv->interval / USEC_PER_TICK);
+      IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                      IOEXPANDER_OPTION_INTCFG,
+                      (FAR void *)IOEXPANDER_VAL_DISABLE);
+      ad5940_set_intpin(priv, false);
+      priv->batch2poll = false;
+    }
+
+  /* A new FIFO watermark need to be set, causing by ad5940_batch(). If AFE
+   * is changing from polling mode to batch mode, this case is also suitable.
+   */
+
+  if (priv->fifowtm > 0 &&
+      pbiacfg->fifothreshd != priv->fifowtm * AD5940_RESULTS_PER_MEAS)
     {
       pbiacfg->fifothreshd = priv->fifowtm * AD5940_RESULTS_PER_MEAS;
       ad5940_writereg(priv, AD5940_REG_AFE_DATAFIFOTHRES,
@@ -5349,12 +5405,22 @@ static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
 
       ad5940_biafuncinit(priv, pbiacfg, AD5940_BIA_BUFFSIZE);
 
-      /* Set interrupt pin on MCU for receiving AD5940's interrupt. AD5940's
-       * GPIO is configured as active-high.
+      /* If FIFO is used (FIFO watermark > 0), set the interrupt pin on MCU
+       * for receiving AD5940's interrupt. AD5940's GPIO have been configured
+       * as active-high. Otherwise start a worker task to poll the data.
        */
 
-      IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                      IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_RISING);
+      if (priv->fifowtm > 0)
+        {
+          IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                          IOEXPANDER_OPTION_INTCFG,
+                          (FAR void *)IOEXPANDER_VAL_RISING);
+        }
+      else
+        {
+          work_queue(HPWORK, &priv->work_poll, ad5940_worker_poll, priv,
+                     priv->interval / USEC_PER_TICK);
+        }
 
       /* Control BIA measurement to start. The last parameter has no meaning
        * in this suitation.
@@ -5365,12 +5431,22 @@ static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
-      /* BIA measurement will stop at next interrupt. It's the safe method.
-       * Thus the priv->activated and IOEXP will be changed in ISR, and the
-       * BIA configure struct will be released there.
+      /* Stop BIA measurements and the interrupt (FIFO is used) or the worker
+       * task (FIFO is not used).
        */
 
-      ad5940_biactrl(priv, pbiacfg, AD5940_BIACTRL_STOPSYNC, NULL);
+      ad5940_biactrl(priv, pbiacfg, AD5940_BIACTRL_SHUTDOWN, NULL);
+      priv->activated = false;
+      if (priv->fifowtm > 0)
+        {
+          IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
+                          IOEXPANDER_OPTION_INTCFG,
+                          (FAR void *)IOEXPANDER_VAL_DISABLE);
+        }
+      else
+        {
+          work_cancel(HPWORK, &priv->work_poll);
+        }
     }
 
   return OK;
@@ -5431,7 +5507,7 @@ static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
    * written to AD5940 once it's activated.
    * If ad5940_interval() is called during device has been activated, new ODR
    * will be written to AD5940 in ad5940_biaregmodify() when next interrupt
-   * comes.
+   * or polling comes.
    */
 
   return OK;
@@ -5468,11 +5544,16 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
 
   if (*latency_us == 0)
     {
-      /* If don't use batch, the FIFO watermark is 1 to trigger an interrupt
-       * for each data, since data must be read from FIFO.
+      /* If AFE has been activated with batch mode, change the flag and thus
+       * the AFE will switch into polling mode when next interrupt comes.
        */
 
-      priv->fifowtm = 1;
+      if (priv->activated && priv->fifowtm > 0)
+        {
+          priv->batch2poll = true;
+        }
+
+      priv->fifowtm = 0;
     }
   else
     {
@@ -5486,6 +5567,15 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
           *latency_us = priv->interval;
         }
 
+      /* If AFE has been activated with polling, change the flag and thus the
+       * AFE will switch into batch mode when next polling comes.
+       */
+
+      if (priv->activated && priv->fifowtm == 0)
+        {
+          priv->poll2batch = true;
+        }
+
       priv->fifowtm = AD5940_CEILING(*latency_us, priv->interval);
       *latency_us = priv->fifowtm * priv->interval;
       priv->batch_latency = *latency_us;
@@ -5495,7 +5585,7 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
    * be written to AD5940 once it's activated.
    * If ad5940_batch is called during device has been activated, new FIFO
    * watermark will be written to AD5940 in ad5940_biaregmodify() when next
-   * interrupt comes.
+   * interrupt or polling comes.
    */
 
   return OK;
@@ -5525,6 +5615,7 @@ static int ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg)
 {
   FAR struct ad5940_dev_s *priv = (FAR struct ad5940_dev_s *)lower;
+  int ret;
 
   DEBUGASSERT(lower != NULL);
 
@@ -5532,7 +5623,16 @@ static int ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
     {
       case AD5940_CTRL_CHECKID:             /* Check ID command. */
         {
-          return ad5940_checkid(priv);
+          ret = ad5940_wakeup(priv, 10);
+          if (ret == OK)
+            {
+              ret = ad5940_checkid(priv);
+            }
+
+          /* After wake-up, it should shut down to save power. */
+
+          ad5940_shutdown(priv);
+          return ret;
         }
 
       /* In the case above, function has returned thus no break is need. */
@@ -5584,7 +5684,7 @@ static int ad5940_interrupt_handler(FAR struct ioexpander_dev_s *dev,
    * lock the SPI bus within an interrupt.
    */
 
-  work_queue(HPWORK, &priv->work, ad5940_worker, priv, 0);
+  work_queue(HPWORK, &priv->work_intrpt, ad5940_worker_intrpt, priv, 0);
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
                   IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_DISABLE);
 
@@ -5592,7 +5692,7 @@ static int ad5940_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: ad5940_worker
+ * Name: ad5940_worker_intrpt
  *
  * Description:
  *   Task the worker with retrieving the latest sensor data. We should not do
@@ -5610,7 +5710,7 @@ static int ad5940_interrupt_handler(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static void ad5940_worker(FAR void *arg)
+static void ad5940_worker_intrpt(FAR void *arg)
 {
   FAR struct ad5940_dev_s *priv = arg;
   uint32_t fifocnt;
@@ -5621,7 +5721,8 @@ static void ad5940_worker(FAR void *arg)
   DEBUGASSERT(priv != NULL);
 
   IOEXP_SETOPTION(priv->config->ioedev, priv->config->intpin,
-                  IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_RISING);
+                  IOEXPANDER_OPTION_INTCFG,
+                  (FAR void *)IOEXPANDER_VAL_RISING);
 
   /* Wakeup AFE by read register, read 10 times at most */
 
@@ -5650,7 +5751,7 @@ static void ad5940_worker(FAR void *arg)
           goto exit;
         }
 
-      if (fifocnt > AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS);
+      if (fifocnt > (AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS))
         {
           fifocnt = AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS;
         }
@@ -5675,9 +5776,94 @@ static void ad5940_worker(FAR void *arg)
 
 exit:
 
-  /* Allow AFE to enter hibernate mode */
+  /* If the device will go on measuring, unlock sleep key to allow AFE to
+   * enter hibernate mode. Otherwise, never operate the SPI, or the AFE will
+   * be waked up again.
+   */
 
-  ad5940_sleeplock(priv, false);
+  if (priv->activated == true)
+    {
+      ad5940_sleeplock(priv, false);
+    }
+}
+
+/****************************************************************************
+ * Name: ad5940_worker
+ *
+ * Description:
+ *   Task the worker with polling the latest sensor data.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void ad5940_worker_poll(FAR void *arg)
+{
+  FAR struct ad5940_dev_s *priv = arg;
+  uint32_t fifocnt;
+
+  /* Sanity check */
+
+  DEBUGASSERT(priv != NULL);
+
+  priv->timestamp = sensor_get_timestamp();
+  work_queue(HPWORK, &priv->work_poll, ad5940_worker_poll,
+             priv, priv->interval / USEC_PER_TICK);
+
+  /* Wakeup AFE by read register, read 10 times at most */
+
+  if (ad5940_wakeup(priv, 10) != OK)
+    {
+      return;
+    }
+
+  /* Don't enter hibernate */
+
+  ad5940_sleeplock(priv, true);
+
+  /* A measurement contains 4(AD5940_RESULTS_PER_MEAS) data */
+
+  fifocnt = ad5940_fifogetcnt(priv) / AD5940_RESULTS_PER_MEAS *
+            AD5940_RESULTS_PER_MEAS;
+
+  if (fifocnt >= AD5940_RESULTS_PER_MEAS)
+    {
+      if (fifocnt > (AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS))
+        {
+          fifocnt = AD5940_FIFOSLOTS_MAX * AD5940_RESULTS_PER_MEAS;
+        }
+
+      /* Read data out. */
+
+      ad5940_readfifo(priv, priv->fifobuf, fifocnt);
+
+      /* If it's needed to do AFE re-configure, do it here when AFE is in
+       * active state.
+       */
+
+      ad5940_biaregmodify(priv, &priv->biacfg);
+
+      /* Process data and push the results. */
+
+      ad5940_biadataprocess(priv, priv->fifobuf, fifocnt);
+    }
+
+  /* If the device will go on measuring, unlock sleep key to allow AFE to
+   * enter hibernate mode. Otherwise, never operate the SPI, or the AFE will
+   * be waked up again.
+   */
+
+  if (priv->activated == true)
+    {
+      ad5940_sleeplock(priv, false);
+    }
 }
 
 /****************************************************************************
@@ -5742,6 +5928,12 @@ int ad5940_register(int devno, FAR const struct ad5940_config_s *config)
       snerr("AD5940 ID doesn't match: %d\n", ret);
       goto err_exit;
     }
+
+  ad5940_init(priv);
+
+  /* Enter shutdown mode */
+
+  ad5940_shutdown(priv);
 
   /* Set GPIO on MCU for AD5940 interrupt */
 

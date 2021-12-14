@@ -483,6 +483,8 @@
 #define AD5940_BITM_ALLON_PWRMOD_SEQSLPEN 0x0008 /* Mask */
 #define AD5940_BITM_ALLON_PWRMOD_TMRSLPEN 0x0004 /* Mask */
 #define AD5940_BITM_ALLON_PWRMOD_PWRMOD   0x0003 /* Mask */
+#define AD5940_ENUM_ALLON_PWRMOD_SLPMOD   0x0002 /* Sleep mode */
+#define AD5940_ENUM_ALLON_PWRMOD_ACTIVMOD 0x0001 /* Active mode */
 
 /* ALLON Key Protection for PWRMOD register */
 
@@ -3664,6 +3666,10 @@
 
 #define AD5940_SLPKEY_LOCK         0             /* Incorrect value */
 #define AD5940_SLPKEY_UNLOCK       0xa47e5       /* The correct key */
+
+/* Power mode key */
+#define AD5940_PWRKEY_UNLOCK1      0x4859        /* Correct key 1 */
+#define AD5940_PWRKEY_UNLOCK2      0xf27b        /* Correct key 1 */
 
 /* Set HPOSC output clock frequency, 16MHz or 32MHz. */
 
