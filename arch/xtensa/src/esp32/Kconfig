@@ -853,7 +853,7 @@ comment "Application Image OTA Update support"
 
 config ESP32_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default "0x10000"
+	default 0x10000
 
 config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -861,7 +861,7 @@ config ESP32_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default "0x110000"
+	default 0x110000
 
 config ESP32_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -869,15 +869,15 @@ config ESP32_OTA_SECONDARY_SLOT_DEVPATH
 
 config ESP32_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default "0x100000"
+	default 0x100000
 
 config ESP32_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default "0x210000"
+	default 0x210000
 
 config ESP32_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
-	default "0x40000"
+	default 0x40000
 
 config ESP32_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
@@ -969,7 +969,7 @@ endchoice # ESP32_SPIRAM_SPEED
 config ESP32_SPIRAM_BOOT_INIT
 	bool "Initialize SPI RAM during startup"
 	depends on ESP32_SPIRAM
-	default "y"
+	default y
 	---help---
 		If this is enabled, the SPI RAM will be enabled during initial
 		boot. Unless you have specific requirements, you'll want to leave
@@ -978,7 +978,7 @@ config ESP32_SPIRAM_BOOT_INIT
 
 config ESP32_SPIRAM_IGNORE_NOTFOUND
 	bool "Ignore PSRAM when not found"
-	default "n"
+	default n
 	depends on ESP32_SPIRAM_BOOT_INIT && !BOOT_SDRAM_DATA
 	---help---
 		Normally, if psram initialization is enabled during compile time
@@ -989,7 +989,7 @@ config ESP32_SPIRAM_IGNORE_NOTFOUND
 config ESP32_SPIRAM_2T_MODE
 	bool "Enable SPI PSRAM 2T mode"
 	depends on ESP32_SPIRAM
-	default "n"
+	default n
 	---help---
 		Enable this option to fix single bit errors inside 64Mbit PSRAM.
 		Some 64Mbit PSRAM chips have a hardware issue in the RAM which
@@ -1357,7 +1357,7 @@ config ESP32_APP_MCUBOOT_HEADER_SIZE
 
 config ESP32_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
-	default "0x8000"
+	default 0x8000
 	depends on ESP32_APP_FORMAT_LEGACY
 
 endmenu # Application Image Configuration
