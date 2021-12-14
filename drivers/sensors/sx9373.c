@@ -40,10 +40,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SX9373_WHOAMI_VALUE           0x937327 /* Device ID */
-#define SX9373_CHANNEL_NUM            2        /* Number of channel */
-#define SX9373_MAX_RETRY              3        /* Clear interrupt attempts. */
-#define SX9373_POWERON_DELAY          3000     /* Power-on delay time(us). */
+#define SX9373_WHOAMI_VALUE           0x937327 /* Device ID. */
+#define SX9373_CHANNEL_NUM            4        /* Number of channel. */
+#define SX9373_MAX_RETRY              3        /* Clear. */
 
 /* Interrupt control. */
 
@@ -154,9 +153,9 @@
 /* Startup setup. */
 
 #define SX9373_STARTUP_PH0            0x8094
-#define SX9373_STARTUP_PH1            0x80B4
-#define SX9373_STARTUP_PH2            0x80D4
-#define SX9373_STARTUP_PH3            0x80F4
+#define SX9373_STARTUP_PH1            0x80b4
+#define SX9373_STARTUP_PH2            0x80d4
+#define SX9373_STARTUP_PH3            0x80f4
 
 /* Reference correction setup A. */
 
@@ -231,6 +230,14 @@
 #define SX9373_DIFF_PH2               0x8238
 #define SX9373_DIFF_PH3               0x823c
 
+/* Specialized Readback. */
+
+#define SX9373_DEBUG_SETUP            0x8274
+#define SX9373_DEBUG_READBACK_0       0x8278
+#define SX9373_DEBUG_READBACK_1       0x827c
+#define SX9373_DEBUG_READBACK_2       0x8280
+#define SX9373_DEBUG_READBACK_3       0x8284
+
 /* Control opcode . */
 
 #define SX9373_PHASE_CONTROL          0x000f   /* Phase control opcode. */
@@ -242,21 +249,11 @@
 /* Factory test instructions. */
 
 #define SX9373_SIMPLE_CHECK           0x00     /* Simple communication check. */
+#define SX9373_SET_CFGPARAM           0x00     /* Set config parameter. */
 
 /****************************************************************************
  * Private Type Definitions
  ****************************************************************************/
-
-/* Enumerate of detection level. */
-
-enum sx9373_level_e
-{
-  SX9373_LEVEL_0,
-  SX9373_LEVEL_1,
-  SX9373_LEVEL_2,
-  SX9373_LEVEL_3,
-  SX9373_LEVEL_4
-};
 
 /* Structure for param information. */
 
@@ -266,54 +263,109 @@ struct sx9373_param_s
   uint32_t val;           /* Value of register. */
 };
 
+/* Enumerate  of channel state. */
+
+enum prox_state_e
+{
+  PROX_STATE_0,
+  PROX_STATE_1,
+  PROX_STATE_2,
+  PROX_STATE_3,
+  PROX_STATE_4,
+};
+
 /* Structure for status information of each button. */
 
 struct sx9373_channel_s
 {
-  uint32_t prox1_mask;                 /* Shield bit1 for each channel. */
-  uint32_t prox2_mask;                 /* Shield bit2 for each channel. */
-  uint32_t prox3_mask;                 /* Shield bit3 for each channel. */
-  uint32_t prox4_mask;                 /* Shield bit4 for each channel. */
-  enum sx9373_level_e level;           /* Current detection level. */
+  uint32_t prox1_mask;       /* Shield bit1 for each channel. */
+  uint32_t prox2_mask;       /* Shield bit2 for each channel. */
+  uint32_t prox3_mask;       /* Shield bit3 for each channel. */
+  uint32_t prox4_mask;       /* Shield bit4 for each channel. */
+  enum prox_state_e state;   /* Current state of channel. */
 };
+
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+
+/* Structure of debug data. */
+
+struct sx9373_dgbdata_s
+{
+  int32_t useful_data;       /* Valid data after low pass filter. */
+  int32_t average_data;      /* Valid data after averaging filter. */
+  int32_t diff_data;         /* Difference between useful and average. */
+  uint32_t status_a;         /* Data of status registers. */
+  int32_t ref_useful_data;   /* Rerence useful data. */
+  int32_t debug_readback0;   /* Debug readback 0. */
+  int32_t debug_readback1;   /* Debug readback 1. */
+  int32_t debug_readback2;   /* Debug readback 2. */
+  int32_t debug_readback3;   /* Debug readback 3. */
+  uint16_t offset_data;      /* Actual detected cap change value. */
+  int16_t state;             /* State of detection. */
+};
+
+#endif
 
 /* SX9373 that need to be initialized to config values. */
 
 static const struct sx9373_param_s g_sx9373_param[] =
 {
-  {SX9373_GENERAL_SETUP, 0x00000300},       /* PHEN. */
-  {SX9373_IRQ_MASK_A, 0x0000007f},          /* irq mask. */
-  {SX9373_AFE_PARAM_PH0, 0x0000085c},       /* AFE_PARAM_PH0. */
-  {SX9373_AFE_PARAM_PH1, 0x0000085c},       /* AFE_PARAM_PH1. */
-  {SX9373_AFE_CS_USAGE_PH0, 0x00fff9fd},    /* REG_AFEPH_PH0. */
-  {SX9373_AFE_CS_USAGE_PH1, 0x00fff9ef},    /* REG_AFEPH_PH1. */
-  {SX9373_PROX_THRESH_PH0, 0xc8ad8d64},     /* prox threshold ph0. */
-  {SX9373_PROX_THRESH_PH1, 0xc8ad8d64},     /* prox threshold ph1. */
-  {SX9373_GENERAL_SETUP, 0x00000303},       /* PHEN. */
+  {SX9373_GENERAL_SETUP, 0x00007f00},    /* PHEN. */
+  {SX9373_IRQ_MASK_A, 0x0000007f},       /* irq mask. */
+  {SX9373_AFE_PARAM_PH0, 0x0000446e},    /* AFE_PARAM_PH0. */
+  {SX9373_AFE_PARAM_PH1, 0x0000446e},    /* AFE_PARAM_PH1. */
+  {SX9373_AFE_PARAM_PH2, 0x0000446e},    /* AFE_PARAM_PH2. */
+  {SX9373_AFE_CS_USAGE_PH0, 0x000001f5}, /* REG_AFEPH_PH0. */
+  {SX9373_AFE_CS_USAGE_PH1, 0x000001f7}, /* REG_AFEPH_PH1. */
+  {SX9373_AFE_CS_USAGE_PH2, 0x00000177}, /* REG_AFEPH_PH2. */
+  {SX9373_PROX_THRESH_PH0, 0x00008e8e},  /* prox threshold ph0. */
+  {SX9373_PROX_THRESH_PH1, 0x00000000},  /* prox threshold ph1. */
+  {SX9373_PROX_THRESH_PH2, 0x00000000},  /* prox threshold ph2. */
+  {SX9373_GENERAL_SETUP, 0x0000f7f7},    /* PHEN. */
 };
 
 /* SX9373 information of channels. */
 
 static struct sx9373_channel_s g_sx9373_channel[SX9373_CHANNEL_NUM] =
 {
-  /* Capture channel. */
+  /* CapSense channel0. */
 
   {
     .prox1_mask = 1 << 24,
     .prox2_mask = 1 << 16,
     .prox3_mask = 1 << 8,
     .prox4_mask = 1 << 0,
-    .level = SX9373_LEVEL_0,
+    .state = PROX_STATE_0,
   },
 
-  /* Reference channel. */
+  /* CapSense channel1. */
 
   {
     .prox1_mask = 1 << 25,
     .prox2_mask = 1 << 17,
     .prox3_mask = 1 << 9,
     .prox4_mask = 1 << 1,
-    .level = SX9373_LEVEL_0,
+    .state = PROX_STATE_0,
+  },
+
+  /* CapSense channel2. */
+
+  {
+    .prox1_mask = 1 << 26,
+    .prox2_mask = 1 << 18,
+    .prox3_mask = 1 << 10,
+    .prox4_mask = 1 << 2,
+    .state = PROX_STATE_0,
+  },
+
+  /* CapSense channel3. */
+
+  {
+    .prox1_mask = 1 << 27,
+    .prox2_mask = 1 << 19,
+    .prox3_mask = 1 << 11,
+    .prox4_mask = 1 << 3,
+    .state = PROX_STATE_0,
   }
 };
 
@@ -344,12 +396,16 @@ static int sx9373_i2c_write(FAR struct sx9373_dev_s *priv,
 static int sx9373_checkid(FAR struct sx9373_dev_s *priv);
 static int sx9373_clearirq(FAR struct sx9373_dev_s *priv);
 static int sx9373_softreset(FAR struct sx9373_dev_s *priv);
-static int sx9373_setparam(FAR struct sx9373_dev_s *priv);
 static int sx9373_suspend(FAR struct sx9373_dev_s *priv);
 static int sx9373_resume(FAR struct sx9373_dev_s *priv);
 static int sx9373_readstate(FAR struct sx9373_dev_s *priv);
 static int sx9373_enable(FAR struct sx9373_dev_s *priv, bool enable);
 static int sx9373_init(FAR struct sx9373_dev_s *priv);
+static int sx9373_setparam(FAR struct sx9373_dev_s *priv,
+                           FAR const struct sx9373_param_s *param, int len);
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv);
+#endif
 
 /* Sensor ops functions. */
 
@@ -357,6 +413,12 @@ static int sx9373_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg);
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+static int sx9373_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg);
+static int sx9373_control(FAR struct sensor_lowerhalf_s *lower,
+                          int cmd, unsigned long arg);
+#endif
 
 /* Sensor interrupt functions. */
 
@@ -370,8 +432,12 @@ static void sx9373_worker(FAR void *arg);
 
 static const struct sensor_ops_s g_sx9373_ops =
 {
-  .activate = sx9373_activate,     /* Enable/disable snesor. */
-  .selftest = sx9373_selftest      /* Sensor selftest function. */
+  .activate = sx9373_activate,               /* Enable/disable snesor. */
+  .selftest = sx9373_selftest,               /* Sensor selftest function. */
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+  .calibrate = sx9373_calibrate,             /* Calibration Operations. */
+  .control = sx9373_control                  /* Control Operations. */
+#endif
 };
 
 /****************************************************************************
@@ -586,6 +652,8 @@ static int sx9373_softreset(FAR struct sx9373_dev_s *priv)
  *
  * Input Parameters
  *   priv     -Device struct
+ *   param    -Parameters of cap sensor
+ *   len      -Length of parameter
  *
  * Returned Value
  *   Return 0 if the driver was success; A negated errno
@@ -596,16 +664,15 @@ static int sx9373_softreset(FAR struct sx9373_dev_s *priv)
  *
  ****************************************************************************/
 
-static int sx9373_setparam(FAR struct sx9373_dev_s *priv)
+static int sx9373_setparam(FAR struct sx9373_dev_s *priv,
+                           FAR const struct sx9373_param_s *param, int len)
 {
   int ret;
   int i;
-  int len = sizeof(g_sx9373_param) / sizeof(struct sx9373_param_s);
 
   for (i = 0 ; i < len; i++)
     {
-      ret = sx9373_i2c_write(priv, g_sx9373_param[i].reg,
-                             g_sx9373_param[i].val);
+      ret = sx9373_i2c_write(priv, param[i].reg, param[i].val);
       if (ret < 0)
         {
           snerr("Failed to set param: %d\n", ret);
@@ -622,6 +689,102 @@ static int sx9373_setparam(FAR struct sx9373_dev_s *priv)
 
   return ret;
 }
+
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+
+/****************************************************************************
+ * Name: sx9373_read_rawdata
+ *
+ * Description:
+ *   Set device parameters of sx9373
+ *
+ * Input Parameters
+ *   priv     -Device struct
+ *
+ * Returned Value
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure;
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sx9373_read_rawdata(FAR struct sx9373_dev_s *priv)
+{
+  struct sx9373_dgbdata_s dgbdata;
+  uint32_t buf;
+  int ret;
+
+  ret = sx9373_i2c_read(priv, SX9373_DEVICE_STATUS_A,
+                        &dgbdata.status_a);
+  if (ret < 0)
+    {
+      snerr("Failed to read status register: %d\n", ret);
+      return ret;
+    }
+  else
+    {
+      sninfo("SX9373_DEVICE_STATUS_A= 0x%lX\n", dgbdata.status_a);
+    }
+
+  for (int i = 0; i < SX9373_CHANNEL_NUM; i++)
+    {
+      ret = sx9373_i2c_read(priv, SX9373_USEFUL_PH0 + 4 * i, &buf);
+      if (ret < 0)
+        {
+          snerr("Failed to read useful data: %d\n", ret);
+          break;
+        }
+      else
+        {
+          dgbdata.useful_data = (int32_t)buf >> 10;
+        }
+
+      ret = sx9373_i2c_read(priv, SX9373_AVERAGE_PH0 + 4 * i, &buf);
+      if (ret < 0)
+        {
+          snerr("Failed to read average data: %d\n", ret);
+          break;
+        }
+      else
+        {
+          dgbdata.average_data = (int32_t)buf >> 10;
+        }
+
+      ret = sx9373_i2c_read(priv, SX9373_DIFF_PH0 + 4 * i, &buf);
+      if (ret < 0)
+        {
+          snerr("Failed to read diff data: %d\n", ret);
+          break;
+        }
+      else
+        {
+          dgbdata.diff_data = (int32_t)buf >> 10;
+        }
+
+      ret = sx9373_i2c_read(priv, SX9373_OFFSET_PH0 + 4 * i, &buf);
+      if (ret < 0)
+        {
+          snerr("Failed to read offest data: %d\n", ret);
+          break;
+        }
+      else
+        {
+          dgbdata.offset_data = (uint16_t)(buf & 0x3fff);
+        }
+
+      dgbdata.state = g_sx9373_channel[i].state;
+
+      sninfo("PH:%d DIFF:%ld USE:%ld AVG:%ld OFFSET:%ld\n",
+             i, dgbdata.diff_data, dgbdata.useful_data,
+             dgbdata.average_data, dgbdata.offset_data);
+    }
+
+  return ret;
+}
+
+#endif
 
 /****************************************************************************
  * Name: sx9373_suspend
@@ -731,23 +894,23 @@ static int sx9373_readstate(FAR struct sx9373_dev_s *priv)
     {
       if (prox_state & g_sx9373_channel[i].prox4_mask)
         {
-          g_sx9373_channel[i].level = SX9373_LEVEL_4;
+          g_sx9373_channel[i].state = PROX_STATE_4;
         }
       else if (prox_state & g_sx9373_channel[i].prox3_mask)
         {
-          g_sx9373_channel[i].level = SX9373_LEVEL_3;
+          g_sx9373_channel[i].state = PROX_STATE_3;
         }
       else if (prox_state & g_sx9373_channel[i].prox2_mask)
         {
-          g_sx9373_channel[i].level = SX9373_LEVEL_2;
+          g_sx9373_channel[i].state = PROX_STATE_2;
         }
       else if (prox_state & g_sx9373_channel[i].prox1_mask)
         {
-          g_sx9373_channel[i].level = SX9373_LEVEL_1;
+          g_sx9373_channel[i].state = PROX_STATE_1;
         }
       else
         {
-          g_sx9373_channel[i].level = SX9373_LEVEL_0;
+          g_sx9373_channel[i].state = PROX_STATE_0;
         }
     }
 
@@ -825,6 +988,7 @@ static int sx9373_enable(FAR struct sx9373_dev_s *priv, bool enable)
 
 static int sx9373_init(FAR struct sx9373_dev_s *priv)
 {
+  int len = sizeof(g_sx9373_param) / sizeof(struct sx9373_param_s);
   int ret;
 
   /* Soft reset device. */
@@ -838,7 +1002,7 @@ static int sx9373_init(FAR struct sx9373_dev_s *priv)
 
   /* set phase parameter. */
 
-  ret = sx9373_setparam(priv);
+  ret = sx9373_setparam(priv, g_sx9373_param, len);
   if (ret < 0)
     {
       snerr("Failed to set param: %d\n", ret);
@@ -956,6 +1120,110 @@ static int sx9373_selftest(FAR struct sensor_lowerhalf_s *lower,
     return ret;
 }
 
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+
+/****************************************************************************
+ * Name: sx9373_calibrate
+ *
+ * Description:
+ * Trigger clear calibration in an empty state.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with calibration value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY - The cmd don't support.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sx9373_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                            unsigned long arg)
+{
+  FAR struct sx9373_dev_s *priv = (FAR struct sx9373_dev_s *)lower;
+  FAR struct sx9373_param_s param;
+  int ret;
+
+  DEBUGASSERT(lower != NULL);
+
+  param.reg = SX9373_COMMAND;
+  param.val = SX9373_COMPENSATION_CONTROL;
+
+  ret = sx9373_setparam(priv, &param, 1);
+  if (ret < 0)
+    {
+      snerr("Failed to set param: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: sx9373_control
+ *
+ * Description:
+ *   With this method, the user can set some special config for the sensor,
+ *   such as changing the custom mode, setting the custom resolution, reset,
+ *   etc, which are all parsed and implemented by lower half driver.
+ *
+ * Input Parameters:
+ *   lower      - The instance of lower half sensor driver.
+ *   cmd        - The special cmd for sensor.
+ *   arg        - The parameters associated with cmd.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *   -ENOTTY    - The cmd don't support.
+ *   -EINVAL    - Failed to match sensor type.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static int sx9373_control(FAR struct sensor_lowerhalf_s *lower,
+                          int cmd, unsigned long arg)
+{
+  FAR struct sx9373_dev_s *priv = (FAR struct sx9373_dev_s *)lower;
+  int ret = -ENOTTY;
+
+  DEBUGASSERT(lower != NULL);
+
+  /* Set calibrate value commands. */
+
+  switch (cmd)
+    {
+      case SX9373_SET_CFGPARAM:               /* Set config parameters commands. */
+        {
+          FAR struct sx9373_param_s *param;   /* debug parameters. */
+          param = (FAR struct sx9373_param_s *)arg;
+
+          /* set phase parameter. */
+
+          ret = sx9373_setparam(priv, param, 1);
+          if (ret < 0)
+            {
+              snerr("Failed to set param: %d\n", ret);
+            }
+        }
+        break;
+
+      default:                                /* Other cmd tag. */
+        {
+          snerr("The cmd don't support: %d\n", ret);
+        }
+        break;
+    }
+
+  return ret;
+}
+
+#endif
+
 /* Sensor interrupt functions */
 
 /****************************************************************************
@@ -1050,10 +1318,14 @@ static void sx9373_worker(FAR void *arg)
                   IOEXPANDER_OPTION_INTCFG,
                   (FAR void *)IOEXPANDER_VAL_FALLING);
 
+#ifdef CONFIG_SENSORS_SX9373_DEBUG
+  sx9373_read_rawdata(priv);
+#endif
+
   if (sx9373_readstate(priv) >= 0)
     {
       prox.timestamp = priv->timestamp;
-      prox.proximity = (float)g_sx9373_channel[0].level;
+      prox.proximity = (float)g_sx9373_channel[0].state;
 
       /* push data to upper half driver */
 
@@ -1105,10 +1377,6 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
   priv->lower.type = SENSOR_TYPE_PROXIMITY;
   priv->lower.ops = &g_sx9373_ops;
   priv->lower.buffer_number = CONFIG_SENSORS_SX9373_BUFFER_NUMBER;
-
-  /* Wait 3ms for stable power supply. */
-
-  up_udelay(SX9373_POWERON_DELAY);
 
   /* Check Device ID. */
 
