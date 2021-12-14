@@ -71,6 +71,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" the interrupt stack.
+ *   Single CPU case.
+ *   Must be provided by MCU-specific logic in the SMP case.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+	.macro	setintstack tmp1 tmp2
+	movi		a1, g_intstacktop
+	.endm
+#endif
+
+/****************************************************************************
  * Macro: ps_setup
  *
  * Description:
@@ -208,6 +224,12 @@ _xtensa_user_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Save exc cause and vaddr into exception frame */
 
@@ -361,6 +383,12 @@ _xtensa_syscall_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	1 a0
@@ -483,6 +511,12 @@ _xtensa_coproc_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Save exc cause and vaddr into exception frame */
 
