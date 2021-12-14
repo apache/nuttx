@@ -6,7 +6,7 @@
 config ALLSYMS
 	bool "Load all symbols for debugging"
 	default n
-	help
-	  Say Y here to let the nuttx print out symbolic crash information and
-	  symbolic stack backtraces. This increases the size of the nuttx
-	  somewhat, as all symbols have to be loaded into the nuttx image.
+	---help---
+		Say Y here to let the nuttx print out symbolic crash information and
+		symbolic stack backtraces. This increases the size of the nuttx
+		somewhat, as all symbols have to be loaded into the nuttx image.

@@ -11359,38 +11359,38 @@ menuconfig STM32_FOC
 if STM32_FOC
 
 config STM32_FOC_FOC0
-       bool "FOC0 device (TIM1 for PWM modulation)"
-       default n
-       depends on STM32_HAVE_TIM1
-       select STM32_FOC_USE_TIM1
-       ---help---
-         Enable support for FOC0 device that uses TIM1 for PWM modulation
+	bool "FOC0 device (TIM1 for PWM modulation)"
+	default n
+	depends on STM32_HAVE_TIM1
+	select STM32_FOC_USE_TIM1
+	---help---
+		Enable support for FOC0 device that uses TIM1 for PWM modulation
 
 config STM32_FOC_FOC1
-       bool "FOC1 device (TIM8 for PWM modulation)"
-       default n
-       depends on STM32_HAVE_TIM8
-       select STM32_FOC_USE_TIM8
-       ---help---
-         Enable support for FOC1 device that uses TIM8 for PWM modulation
+	bool "FOC1 device (TIM8 for PWM modulation)"
+	default n
+	depends on STM32_HAVE_TIM8
+	select STM32_FOC_USE_TIM8
+	---help---
+		Enable support for FOC1 device that uses TIM8 for PWM modulation
 
 choice
 	prompt "FOC ADC trigger selection"
 	default STM32_FOC_ADC_TRGO
 
 config STM32_FOC_ADC_CCR4
-       bool "FOC uses CCR4 as ADC trigger"
-       ---help---
-         This option uses the software frequency prescaler and is
-         not possible for 4-phase output.
+	bool "FOC uses CCR4 as ADC trigger"
+	---help---
+		This option uses the software frequency prescaler and is
+		not possible for 4-phase output.
 
 config STM32_FOC_ADC_TRGO
-       bool "FOC uses TRGO as ADC trigger"
-       depends on STM32_HAVE_IP_ADC_V2 || (STM32_HAVE_IP_ADC_V1 && !STM32_FOC_FOC1)
-       select STM32_PWM_TRGO
-       ---help---
-         This option allows you to use higher PWM frequency and works for 4-phase output.
-         It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
+	bool "FOC uses TRGO as ADC trigger"
+	depends on STM32_HAVE_IP_ADC_V2 || (STM32_HAVE_IP_ADC_V1 && !STM32_FOC_FOC1)
+	select STM32_PWM_TRGO
+	---help---
+		This option allows you to use higher PWM frequency and works for 4-phase output.
+		It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
 
 endchoice # "FOC ADC trigger selection"
 
@@ -11401,24 +11401,24 @@ choice
 	default STM32_FOC_FOC0_ADC1
 
 config STM32_FOC_FOC0_ADC1
-       bool "FOC0 uses ADC1"
-       depends on STM32_HAVE_ADC1
-       select STM32_FOC_USE_ADC1
+	bool "FOC0 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
 
 config STM32_FOC_FOC0_ADC2
-       bool "FOC0 uses ADC2"
-       depends on STM32_HAVE_ADC2
-       select STM32_FOC_USE_ADC2
+	bool "FOC0 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
 
 config STM32_FOC_FOC0_ADC3
-       bool "FOC0 uses ADC3"
-       depends on STM32_HAVE_ADC3
-       select STM32_FOC_USE_ADC3
+	bool "FOC0 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
 
 config STM32_FOC_FOC0_ADC4
-       bool "FOC0 uses ADC4"
-       depends on STM32_HAVE_ADC4
-       select STM32_FOC_USE_ADC4
+	bool "FOC0 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
 
 endchoice # "FOC0 device ADC selection"
 
@@ -11431,115 +11431,115 @@ choice
 	default STM32_FOC_FOC1_ADC2
 
 config STM32_FOC_FOC1_ADC1
-       bool "FOC1 uses ADC1"
-       depends on STM32_HAVE_ADC1
-       select STM32_FOC_USE_ADC1
+	bool "FOC1 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
 
 config STM32_FOC_FOC1_ADC2
-       bool "FOC1 uses ADC2"
-       depends on STM32_HAVE_ADC2
-       select STM32_FOC_USE_ADC2
+	bool "FOC1 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
 
 config STM32_FOC_FOC1_ADC3
-       bool "FOC1 uses ADC3"
-       depends on STM32_HAVE_ADC3
-       select STM32_FOC_USE_ADC3
+	bool "FOC1 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
 
 config STM32_FOC_FOC1_ADC4
-       bool "FOC1 uses ADC4"
-       depends on STM32_HAVE_ADC4
-       select STM32_FOC_USE_ADC4
+	bool "FOC1 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
 
 endchoice # "FOC0 device ADC selection"
 
 endif # STM32_FOC_FOC1
 
 config STM32_FOC_HAS_PWM_COMPLEMENTARY
-       bool "FOC PWM has complementary outputs"
-       default n
-       ---help---
-         Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
+	bool "FOC PWM has complementary outputs"
+	default n
+	---help---
+		Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
 
 # hidden variables and automatic configuration
 
 config STM32_FOC_USE_TIM1
-       bool
-       default n
-       select STM32_TIM1
-       select STM32_TIM1_PWM
-       select STM32_TIM1_CHANNEL1
-       select STM32_TIM1_CHANNEL2
-       select STM32_TIM1_CHANNEL3
-       select STM32_TIM1_CHANNEL4 if STM32_FOC_ADC_CCR4
-       select STM32_TIM1_CH1OUT
-       select STM32_TIM1_CH2OUT
-       select STM32_TIM1_CH3OUT
-       select STM32_TIM1_CH4OUT if STM32_FOC_ADC_CCR4
-       select STM32_TIM1_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM1_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM1_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       ---help---
-         The TIM1 generates PWM for the FOC
+	bool
+	default n
+	select STM32_TIM1
+	select STM32_TIM1_PWM
+	select STM32_TIM1_CHANNEL1
+	select STM32_TIM1_CHANNEL2
+	select STM32_TIM1_CHANNEL3
+	select STM32_TIM1_CHANNEL4 if STM32_FOC_ADC_CCR4
+	select STM32_TIM1_CH1OUT
+	select STM32_TIM1_CH2OUT
+	select STM32_TIM1_CH3OUT
+	select STM32_TIM1_CH4OUT if STM32_FOC_ADC_CCR4
+	select STM32_TIM1_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM1_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM1_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM1 generates PWM for the FOC
 
 config STM32_FOC_USE_TIM8
-       bool
-       default n
-       select STM32_TIM8
-       select STM32_TIM8_PWM
-       select STM32_TIM8_CHANNEL1
-       select STM32_TIM8_CHANNEL2
-       select STM32_TIM8_CHANNEL3
-       select STM32_TIM8_CHANNEL4 if STM32_FOC_ADC_CCR4
-       select STM32_TIM8_CH1OUT
-       select STM32_TIM8_CH2OUT
-       select STM32_TIM8_CH3OUT
-       select STM32_TIM8_CH4OUT if STM32_FOC_ADC_CCR4
-       select STM32_TIM8_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM8_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM8_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       ---help---
-         The TIM8 generates PWM for the FOC
+	bool
+	default n
+	select STM32_TIM8
+	select STM32_TIM8_PWM
+	select STM32_TIM8_CHANNEL1
+	select STM32_TIM8_CHANNEL2
+	select STM32_TIM8_CHANNEL3
+	select STM32_TIM8_CHANNEL4 if STM32_FOC_ADC_CCR4
+	select STM32_TIM8_CH1OUT
+	select STM32_TIM8_CH2OUT
+	select STM32_TIM8_CH3OUT
+	select STM32_TIM8_CH4OUT if STM32_FOC_ADC_CCR4
+	select STM32_TIM8_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM8_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM8_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM8 generates PWM for the FOC
 
 config STM32_FOC_USE_ADC1
-       bool
-       default n
-       select STM32_ADC1
-       select STM32_ADC1_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC1_JEXTSEL
+	bool
+	default n
+	select STM32_ADC1
+	select STM32_ADC1_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC1_JEXTSEL
 
 config STM32_FOC_USE_ADC2
-       bool
-       default n
-       select STM32_ADC2
-       select STM32_ADC2_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC2_JEXTSEL
+	bool
+	default n
+	select STM32_ADC2
+	select STM32_ADC2_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC2_JEXTSEL
 
 config STM32_FOC_USE_ADC3
-       bool
-       default n
-       select STM32_ADC3
-       select STM32_ADC3_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC3_JEXTSEL
+	bool
+	default n
+	select STM32_ADC3
+	select STM32_ADC3_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC3_JEXTSEL
 
 config STM32_FOC_USE_ADC4
-       bool
-       default n
-       select STM32_ADC4
-       select STM32_ADC3_JEXTSEL
+	bool
+	default n
+	select STM32_ADC4
+	select STM32_ADC3_JEXTSEL
 
 config STM32_FOC_G4_ADCCHAN0_WORKAROUND
-       bool "FOC G4 ADC channel 0 unwanted conversion workaround"
-       default n
-       ---help---
-         Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
-         conversion when a regular conversion is interrupted by an injected conversion.
-         This FOC implementation uses injected conversion to sample phase currents
-         and allows user to use regular conversion as an auxiliary analog conversion.
-         In this case, there is a certain probability that regular conversion will be
-         interrupted by an injected conversion that will lead to an incorrect reading
-         of phase currents.
+	bool "FOC G4 ADC channel 0 unwanted conversion workaround"
+	default n
+	---help---
+		Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
+		conversion when a regular conversion is interrupted by an injected conversion.
+		This FOC implementation uses injected conversion to sample phase currents
+		and allows user to use regular conversion as an auxiliary analog conversion.
+		In this case, there is a certain probability that regular conversion will be
+		interrupted by an injected conversion that will lead to an incorrect reading
+		of phase currents.
 
-         This workaround inserts a dummy conversion at the beginning of the injected
-         sequence. For more details look at the chip errata documents.
+		This workaround inserts a dummy conversion at the beginning of the injected
+		sequence. For more details look at the chip errata documents.
 
 endif #STM32_FOC

@@ -201,7 +201,7 @@ config XTENSA_INTBACKTRACE
 config XTENSA_IMEM_USE_SEPARATE_HEAP
 	bool "Use a separate heap for internal memory"
 	default n
-	help
+	---help---
 		This is a separate internal heap that's used by drivers when certain operations
 		are not possible with the provided buffer(s).
 		Mainly, when the provided buffer comes from external RAM and a DMA or flash
@@ -216,7 +216,7 @@ config XTENSA_IMEM_REGION_SIZE
 config XTENSA_EXTMEM_BSS
 	bool "Allow BSS section in external memory"
 	default n
-	help
+	---help---
 		Adds a section and an attribute that allows to force variables into
 		the external memory.
 

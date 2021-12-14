@@ -51,8 +51,8 @@ config ARCH_CHIP_EZ80F93
 endchoice
 
 choice
-    prompt "Toolchain Selection"
-    default EZ80_TOOLCHAIN_ZDSII
+	prompt "Toolchain Selection"
+	default EZ80_TOOLCHAIN_ZDSII
 
 config EZ80_TOOLCHAIN_ZDSII
 	bool "ZDS-II for Windows"
@@ -60,7 +60,7 @@ config EZ80_TOOLCHAIN_ZDSII
 
 config EZ80_TOOLCHAIN_CLANG
 	bool "Clang for Linux, macOS, or Cygwin"
-        depends on EXPERIMENTAL
+	depends on EXPERIMENTAL
 
 endchoice
 

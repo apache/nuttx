@@ -385,10 +385,10 @@ config IEEE80211_REALTEK_AMEBAZ
 if IEEE80211_REALTEK_AMEBAZ
 
 config IEEE80211_REALTEK_AMEBAZ_RECV_STACKSIZE
-  int "Realtek amebaZ recv stack size"
-  default 4096
-  ---help---
-    Default recv stack size
+	int "Realtek amebaZ recv stack size"
+	default 4096
+	---help---
+		Default recv stack size
 
 endif
 

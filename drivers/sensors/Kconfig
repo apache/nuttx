@@ -189,7 +189,7 @@ config SENSORS_DS18B20_POLL_INTERVAL
 	int "Polling interval in microseconds, default 1 sec"
 	depends on SENSORS_DS18B20 && SENSORS_DS18B20_POLL
 	default 1000000
-	range 0  4294967295
+	range 0 4294967295
 	---help---
 		The interval until a new sensor measurement will be triggered.
 
@@ -826,11 +826,11 @@ config SGP30_DEBUG
 endif # SENSORS_SGP30
 
 config SENSORS_AHT10
-        bool "ASAIR AHT10 temperature and humidity sensor"
-        default n
-        select I2C
-        ---help---
-                Enable driver support for the ASAIR AHT10 temperature and humidity sensors.
+	bool "ASAIR AHT10 temperature and humidity sensor"
+	default n
+	select I2C
+	---help---
+		Enable driver support for the ASAIR AHT10 temperature and humidity sensors.
 
 if SENSORS_AHT10
 config AHT10_I2C_FREQUENCY
@@ -992,12 +992,12 @@ config SENSORS_HDC1008
 if SENSORS_HDC1008
 
 config HDC1008_I2C_ADDRESS
-  hex "HDC1008 I2C address"
-  default 0x40
-  range 0x40 0x43
-  ---help---
-    The I2C address of the HDC1008 sensor. It can be configured via straps to
-    a value between 0x40 and 0x43.
+	hex "HDC1008 I2C address"
+	default 0x40
+	range 0x40 0x43
+	---help---
+		The I2C address of the HDC1008 sensor. It can be configured via straps to
+		a value between 0x40 and 0x43.
 
 config HDC1008_I2C_FREQUENCY
 	int "HDC1008 I2C frequency"
