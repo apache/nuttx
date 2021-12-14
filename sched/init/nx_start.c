@@ -457,7 +457,6 @@ void nx_start(void)
       g_idleargv[i][0]  = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
       g_idleargv[i][1]  = NULL;
-      g_idletcb[i].argv = &g_idleargv[i][0];
 
       /* Then add the idle task's TCB to the head of the current ready to
        * run list.
@@ -563,6 +562,7 @@ void nx_start(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
+      g_idletcb[i].cmn.group->tg_info->argv = &g_idleargv[i][0];
 
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already
@@ -580,7 +580,9 @@ void nx_start(void)
 
       up_initial_state(&g_idletcb[i].cmn);
 
-      /* Initialize the thread local storage */
+      /* Initialize the thread local storage
+       * Note: Don't copy tdata and tss for idle task to improve footprint
+       */
 
       info = up_stack_frame(&g_idletcb[i].cmn, sizeof(struct tls_info_s));
       DEBUGASSERT(info == g_idletcb[i].cmn.stack_alloc_ptr);

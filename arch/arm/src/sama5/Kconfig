@@ -5070,29 +5070,29 @@ endif #SAMA5_EBICS3_HEAP
 endmenu # Heap Configuration
 
 config SAMA5_SDMMC
-    bool "enable SDMMC controller"
-    default y if SAMA5_HAVE_SDMMC
-    select SDIO_DMA
-    select SCHED_WORKQUEUE
-    select SCHED_HPWORK
-    select MMCSD
-    select MMCSD_SDIO
-    select SDIO_BLOCKSETUP
-    select ARCH_HAVE_SDIO
-    select SAMA5_SDMMC_DMA
-    ---help---
-    Enable SD Card interface SDMMC. Selects SAMA5_SDMMC SAMA5_SDMMC_DMA SDIO_DMA SCHED_WORKQUEUE SCHED_HPWORK SDIO_BLOCKSETUP
+	bool "enable SDMMC controller"
+	default y if SAMA5_HAVE_SDMMC
+	select SDIO_DMA
+	select SCHED_WORKQUEUE
+	select SCHED_HPWORK
+	select MMCSD
+	select MMCSD_SDIO
+	select SDIO_BLOCKSETUP
+	select ARCH_HAVE_SDIO
+	select SAMA5_SDMMC_DMA
+	---help---
+		Enable SD Card interface SDMMC. Selects SAMA5_SDMMC SAMA5_SDMMC_DMA SDIO_DMA SCHED_WORKQUEUE SCHED_HPWORK SDIO_BLOCKSETUP
 
 choice
-   prompt "SDMMC maximum bus speed"
-   default SAMA5_SDMMC_50MHZ
-   depends on SAMA5_SDMMC
+	prompt "SDMMC maximum bus speed"
+	default SAMA5_SDMMC_50MHZ
+	depends on SAMA5_SDMMC
 
 config SAMA5_SDMMC_25MHZ
-   bool "SDMMC 25Mhz"
+	bool "SDMMC 25Mhz"
 
 config SAMA5_SDMMC_50MHZ
-   bool "SDMMC 50Mhz"
+	bool "SDMMC 50Mhz"
 
 endchoice # SDMMC bus speed
 

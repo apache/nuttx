@@ -34,7 +34,6 @@
 #  include <stdbool.h>
 #  include <arch/arch.h>
 #  include <time.h>
-#  include <debug.h>
 #  include <nuttx/config.h>
 #endif
 

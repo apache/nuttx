@@ -148,7 +148,6 @@ struct task_group_s;
 /* sig_initializee.c */
 
 void weak_function nxsig_initialize(void);
-void               nxsig_alloc_actionblock(void);
 
 /* sig_action.c */
 

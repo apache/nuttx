@@ -76,7 +76,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
-  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -107,12 +107,14 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
 
   /* Dump the interrupt registers */
 
-  _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
-        regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
-  _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  _alert("R0: %08x R1: %08x R2: %08x  R3: %08x\n",
+         regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3]);
+  _alert("R4: %08x R5: %08x R6: %08x  FP: %08x\n",
+         regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+  _alert("R8: %08x SB: %08x SL: %08x R11: %08x\n",
+         regs[REG_R8], regs[REG_R9], regs[REG_R10], regs[REG_R11]);
+  _alert("IP: %08x SP: %08x LR: %08x  PC: %08x\n",
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 #ifdef CONFIG_BUILD_PROTECTED
   _alert("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
         regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);

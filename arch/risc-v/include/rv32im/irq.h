@@ -56,7 +56,7 @@
 
 #define REG_X1_NDX          1
 
-/* $2: Stack POinter
+/* $2: Stack  Pointer
  * $3: Global Pointer
  * $4: Thread Pointer
  */

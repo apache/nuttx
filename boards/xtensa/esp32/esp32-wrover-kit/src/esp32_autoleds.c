@@ -42,20 +42,23 @@
 
 /* The following definitions map the encoded LED setting to GPIO settings */
 
-#define LED_STARTED_BITS             (BOARD_LED2_BIT)
-#define LED_HEAPALLOCATE_BITS        (BOARD_LED3_BIT)
-#define LED_IRQSENABLED_BITS         (BOARD_LED3_BIT | BOARD_LED2_BIT)
-#define LED_STACKCREATED_BITS        (BOARD_LED3_BIT)
-#define LED_INIRQ_BITS               (BOARD_LED1_BIT | BOARD_LED3_BIT)
-#define LED_SIGNAL_BITS              (BOARD_LED2_BIT | BOARD_LED3_BIT)
-#define LED_ASSERTION_BITS           (BOARD_LED1_BIT | BOARD_LED2_BIT |\
-                                      BOARD_LED3_BIT)
-#define LED_PANIC_BITS               (BOARD_LED1_BIT)
+#ifndef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+#  define LED_STARTED_BITS         (BOARD_LED2_BIT)
+#  define LED_HEAPALLOCATE_BITS    (BOARD_LED3_BIT)
+#  define LED_IRQSENABLED_BITS     (BOARD_LED3_BIT | BOARD_LED2_BIT)
+#  define LED_STACKCREATED_BITS    (BOARD_LED3_BIT)
+#  define LED_INIRQ_BITS           (BOARD_LED1_BIT | BOARD_LED3_BIT)
+#  define LED_SIGNAL_BITS          (BOARD_LED2_BIT | BOARD_LED3_BIT)
+#  define LED_ASSERTION_BITS       (BOARD_LED1_BIT | BOARD_LED2_BIT |\
+                                    BOARD_LED3_BIT)
+#  define LED_PANIC_BITS           (BOARD_LED1_BIT)
+#endif
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_ARCH_LEDS_CPU_ACTIVITY
 static const unsigned int g_ledbits[8] =
 {
   LED_STARTED_BITS,
@@ -67,6 +70,7 @@ static const unsigned int g_ledbits[8] =
   LED_ASSERTION_BITS,
   LED_PANIC_BITS
 };
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -131,8 +135,25 @@ void board_autoled_initialize(void)
 
 void board_autoled_on(int led)
 {
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  switch (led)
+    {
+      case LED_CPU0:
+        esp32_gpiowrite(GPIO_LED1, true);
+        break;
+      case LED_CPU1:
+        esp32_gpiowrite(GPIO_LED2, true);
+        break;
+      case LED_HEAPALLOCATE:
+        esp32_gpiowrite(GPIO_LED3, true);
+        break;
+      default:
+        break;
+    }
+#else
   led_clrbits(BOARD_LED1_BIT | BOARD_LED2_BIT | BOARD_LED3_BIT);
   led_setbits(g_ledbits[led]);
+#endif
 }
 
 /****************************************************************************
@@ -141,7 +162,24 @@ void board_autoled_on(int led)
 
 void board_autoled_off(int led)
 {
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+  switch (led)
+    {
+      case LED_CPU0:
+        esp32_gpiowrite(GPIO_LED1, false);
+        break;
+      case LED_CPU1:
+        esp32_gpiowrite(GPIO_LED2, false);
+        break;
+      case LED_HEAPALLOCATE:
+        esp32_gpiowrite(GPIO_LED3, false);
+        break;
+      default:
+        break;
+    }
+#else
   led_clrbits(g_ledbits[led]);
+#endif
 }
 
 #endif /* CONFIG_ARCH_LEDS */

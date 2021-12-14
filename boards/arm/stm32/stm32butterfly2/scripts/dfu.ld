@@ -61,6 +61,18 @@ SECTIONS
     } > flash
     __exidx_end = ABSOLUTE(.);
 
+    .tdata : {
+        _stdata = ABSOLUTE(.);
+        *(.tdata .tdata.* .gnu.linkonce.td.*);
+        _etdata = ABSOLUTE(.);
+    } > flash
+
+    .tbss : {
+        _stbss = ABSOLUTE(.);
+        *(.tbss .tbss.* .gnu.linkonce.tb.* .tcommon);
+        _etbss = ABSOLUTE(.);
+    } > flash
+
     _eronly = ABSOLUTE(.);
 
     /* The RAM vector table (if present) should lie at the beginning of SRAM */

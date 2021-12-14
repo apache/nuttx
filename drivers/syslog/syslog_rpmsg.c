@@ -44,9 +44,7 @@
 
 #define SYSLOG_RPMSG_WORK_DELAY         MSEC2TICK(CONFIG_SYSLOG_RPMSG_WORK_DELAY)
 
-#define SYSLOG_RPMSG_COUNT(h, t, size)  ((B2C_OFF(h)>=(t)) ? \
-                                          B2C_OFF(h)-(t) : \
-                                          (size)-((t)-B2C_OFF(h)))
+#define SYSLOG_RPMSG_COUNT(h, t, size)  (((h)>=(t)) ? (h)-(t) : (size)-((t)-(h)))
 #define SYSLOG_RPMSG_SPACE(h, t, size)  ((size) - 1 - SYSLOG_RPMSG_COUNT(h, t, size))
 
 /****************************************************************************
@@ -65,6 +63,8 @@ struct syslog_rpmsg_s
   bool                  suspend;
   bool                  transfer;     /* The transfer flag */
   ssize_t               trans_len;    /* The data length when transfer */
+
+  sem_t                 sem;
 };
 
 /****************************************************************************
@@ -117,11 +117,6 @@ static void syslog_rpmsg_work(FAR void *priv_)
 
   flags = enter_critical_section();
 
-  if (B2C_REM(priv->head))
-    {
-      priv->head += C2B(1) - B2C_REM(priv->head);
-    }
-
   space  -= sizeof(*msg);
   len     = SYSLOG_RPMSG_COUNT(priv->head, priv->tail, priv->size);
   len_end = priv->size - priv->tail;
@@ -147,44 +142,59 @@ static void syslog_rpmsg_work(FAR void *priv_)
   leave_critical_section(flags);
 
   msg->header.command = SYSLOG_RPMSG_TRANSFER;
-  msg->count          = C2B(len);
+  msg->count          = len;
   rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
 }
 
 static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
                                  bool last)
 {
-  if (B2C_REM(priv->head) == 0)
+  size_t next;
+
+  while (1)
     {
-      priv->buffer[B2C_OFF(priv->head)] = 0;
-    }
-
-  priv->buffer[B2C_OFF(priv->head)] |= (ch & 0xff) <<
-                                       (8 * B2C_REM(priv->head));
-
-  priv->head += 1;
-  if (priv->head >= C2B(priv->size))
-    {
-      priv->head = 0;
-    }
-
-  /* Allow overwrite */
-
-  if (priv->head == C2B(priv->tail))
-    {
-      priv->buffer[priv->tail] = 0;
-
-      priv->tail += 1;
-      if (priv->tail >= priv->size)
+      next = priv->head + 1;
+      if (next >= priv->size)
         {
-          priv->tail = 0;
+          next = 0;
         }
 
-      if (priv->transfer)
+      if (next == priv->tail)
         {
-          priv->trans_len--;
+#ifndef CONFIG_SYSLOG_RPMSG_OVERWRITE
+          if (!up_interrupt_context() && !sched_idletask())
+            {
+              nxsem_wait(&priv->sem);
+            }
+          else
+#endif
+            {
+              /* Overwrite */
+
+              priv->buffer[priv->tail] = 0;
+              priv->tail += 1;
+
+              if (priv->tail >= priv->size)
+                {
+                  priv->tail = 0;
+                }
+
+              if (priv->transfer)
+                {
+                  priv->trans_len--;
+                }
+
+              break;
+            }
+        }
+      else
+        {
+          break;
         }
     }
+
+  priv->buffer[priv->head] = ch & 0xff;
+  priv->head = next;
 
   if (last && !priv->suspend && !priv->transfer &&
           is_rpmsg_ept_ready(&priv->ept))
@@ -259,6 +269,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       irqstate_t flags;
       ssize_t len_end;
+      int sval;
 
       flags = enter_critical_section();
 
@@ -280,6 +291,12 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
           if (priv->tail >= priv->size)
             {
               priv->tail -= priv->size;
+            }
+
+          nxsem_get_value(&priv->sem, &sval);
+          while (sval++ < 0)
+            {
+              nxsem_post(&priv->sem);
             }
         }
 
@@ -350,35 +367,34 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   char prev;
   char cur;
   size_t i;
-  size_t j;
+
+  nxsem_init(&priv->sem, 0, 0);
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   priv->buffer  = buffer;
   priv->size    = size;
 
-  prev = (priv->buffer[size - 1] >> (CHAR_BIT - 8)) & 0xff;
+  prev = priv->buffer[size - 1];
 
   for (i = 0; i < size; i++)
     {
-      for (j = 0; j * 8 < CHAR_BIT; j++)
+      cur = priv->buffer[i];
+
+      if (!isascii(cur))
         {
-          cur = (priv->buffer[i] >> j * 8) & 0xff;
-
-          if (!isascii(cur))
-            {
-              memset(priv->buffer, 0, size);
-              break;
-            }
-          else if (prev && !cur)
-            {
-              priv->head = C2B(i) + j;
-            }
-          else if (!prev && cur)
-            {
-              priv->tail = i;
-            }
-
-          prev = cur;
+          memset(priv->buffer, 0, size);
+          break;
         }
+      else if (prev && !cur)
+        {
+          priv->head = i;
+        }
+      else if (!prev && cur)
+        {
+          priv->tail = i;
+        }
+
+      prev = cur;
     }
 
   if (i != size)

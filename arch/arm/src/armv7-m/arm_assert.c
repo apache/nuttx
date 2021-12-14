@@ -79,7 +79,7 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
-  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -110,12 +110,14 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
 
   /* Dump the interrupt registers */
 
-  _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
-        regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
-  _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  _alert("R0: %08x R1: %08x R2: %08x  R3: %08x\n",
+         regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3]);
+  _alert("R4: %08x R5: %08x R6: %08x  FP: %08x\n",
+         regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+  _alert("R8: %08x SB: %08x SL: %08x R11: %08x\n",
+         regs[REG_R8], regs[REG_R9], regs[REG_R10], regs[REG_R11]);
+  _alert("IP: %08x SP: %08x LR: %08x  PC: %08x\n",
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 
 #ifdef CONFIG_ARMV7M_USEBASEPRI
   _alert("xPSR: %08x BASEPRI: %08x CONTROL: %08x\n",
@@ -125,7 +127,7 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
         regs[REG_XPSR], regs[REG_PRIMASK], getcontrol());
 #endif
 
-#ifdef REG_EXC_RETURN
+#ifdef CONFIG_BUILD_PROTECTED
   _alert("EXC_RETURN: %08x\n", regs[REG_EXC_RETURN]);
 #endif
 }
@@ -137,40 +139,90 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
  * Name: up_taskdump
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
-static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+static void up_dump_task(FAR struct tcb_s *tcb, FAR void *arg)
 {
+#ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_filled = 0;
+  uint32_t stack_used;
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+  struct cpuload_s cpuload;
+  uint32_t fracpart;
+  uint32_t intpart;
+  uint32_t tmp;
+
+  clock_cpuload(tcb->pid, &cpuload);
+
+  if (cpuload.total > 0)
+    {
+      tmp      = (1000 * cpuload.active) / cpuload.total;
+      intpart  = tmp / 10;
+      fracpart = tmp - 10 * intpart;
+    }
+  else
+    {
+      intpart  = 0;
+      fracpart = 0;
+    }
+#endif
+
+#ifdef CONFIG_STACK_COLORATION
+  stack_used = up_check_tcbstack(tcb);
+  if (tcb->adj_stack_size > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 * stack_used / tcb->adj_stack_size;
+    }
+#endif
+
   /* Dump interesting properties of this task */
 
-  _alert(
-#if CONFIG_TASK_NAME_SIZE > 0
-         "%s: "
-#endif
-         "PID=%d "
+  _alert("  %4d   %4d"
 #ifdef CONFIG_STACK_COLORATION
-         "Stack Used=%lu of %lu\n",
-#else
-         "Stack=%lu\n",
+         "   %7lu"
+#endif
+         "   %7lu"
+#ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "   %3" PRId32 ".%01" PRId32 "%%"
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
-        tcb->name,
+         "   %s"
 #endif
-        tcb->pid,
+         "\n",
+         tcb->pid, tcb->sched_priority,
 #ifdef CONFIG_STACK_COLORATION
-        (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)up_check_tcbstack(tcb),
 #endif
-        (unsigned long)tcb->adj_stack_size);
+         (unsigned long)tcb->adj_stack_size
+#ifdef CONFIG_STACK_COLORATION
+        , stack_filled / 10, stack_filled % 10,
+        (stack_filled >= 10 * 80 ? '!' : ' ')
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+        , intpart, fracpart
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+        , tcb->name
+#endif
+        );
+}
 
-  /* Show back trace */
+/****************************************************************************
+ * Name: up_dump_backtrace
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_BACKTRACE
+static void up_dump_backtrace(FAR struct tcb_s *tcb, FAR void *arg)
+{
+  /* Show back trace */
+
   sched_dumpstack(tcb->pid);
-#endif
-
-  /* Dump the registers */
-
-  up_registerdump(tcb->xcp.regs);
 }
+#endif
 
 /****************************************************************************
  * Name: up_showtasks
@@ -178,13 +230,71 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 
 static inline void up_showtasks(void)
 {
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+#  ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_used = up_check_intstack();
+  uint32_t stack_filled = 0;
+
+  if ((CONFIG_ARCH_INTERRUPTSTACK & ~7) > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 *
+                     stack_used / (CONFIG_ARCH_INTERRUPTSTACK & ~7);
+    }
+#  endif
+#endif
+
   /* Dump interesting properties of each task in the crash environment */
 
-  nxsched_foreach(up_taskdump, NULL);
-}
-#else
-#  define up_showtasks()
+  _alert("   PID    PRI"
+#ifdef CONFIG_STACK_COLORATION
+         "      USED"
 #endif
+         "     STACK"
+#ifdef CONFIG_STACK_COLORATION
+         "   FILLED "
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "      CPU"
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         "   COMMAND"
+#endif
+         "\n");
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+  _alert("  ----   ----"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %7lu"
+#  endif
+         "   %7lu"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#  endif
+#  ifdef CONFIG_SCHED_CPULOAD
+         "     ----"
+#  endif
+#  if CONFIG_TASK_NAME_SIZE > 0
+         "   irq"
+#  endif
+         "\n"
+#  ifdef CONFIG_STACK_COLORATION
+         , (unsigned long)stack_used
+#  endif
+         , (unsigned long)(CONFIG_ARCH_INTERRUPTSTACK & ~7)
+#  ifdef CONFIG_STACK_COLORATION
+         , stack_filled / 10, stack_filled % 10,
+         (stack_filled >= 10 * 80 ? '!' : ' ')
+#  endif
+        );
+#endif
+
+  nxsched_foreach(up_dump_task, NULL);
+#ifdef CONFIG_SCHED_BACKTRACE
+  nxsched_foreach(up_dump_backtrace, NULL);
+#endif
+}
 
 /****************************************************************************
  * Name: assert_tracecallback
@@ -257,9 +367,6 @@ static void up_dumpstate(void)
   _alert("IRQ stack:\n");
   _alert("  base: %08x\n", istackbase);
   _alert("  size: %08x\n", istacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("  used: %08x\n", up_check_intstack());
-#endif
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -291,9 +398,6 @@ static void up_dumpstate(void)
   _alert("User stack:\n");
   _alert("  base: %08x\n", ustackbase);
   _alert("  size: %08x\n", ustacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("  used: %08x\n", up_check_tcbstack(rtcb));
-#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -316,9 +420,6 @@ static void up_dumpstate(void)
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
   _alert("stack size: %08x\n", ustacksize);
-#ifdef CONFIG_STACK_COLORATION
-  _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
-#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.

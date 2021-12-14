@@ -945,7 +945,7 @@ struct fat_dirseq_s
 
 #ifdef CONFIG_FAT_LFN
 #  ifdef CONFIG_FAT_LFN_UTF8
-typedef wchar_t lfnchar;
+typedef uint16_t lfnchar;
 #  else
 typedef uint8_t lfnchar;
 #  endif

@@ -162,7 +162,7 @@ config SYSLOG_PRIORITY
 		Prepend log priority (severity) to syslog message.
 
 config SYSLOG_PROCESS_NAME
-  bool "Prepend process name to syslog message"
+	bool "Prepend process name to syslog message"
 	default n
 	---help---
 		Prepend Process name to syslog message.
@@ -249,6 +249,14 @@ config SYSLOG_RPMSG_WORK_DELAY
 	int "SYSLOG RPMSG work delay(ms)"
 	default 100
 	depends on SYSLOG_RPMSG
+
+config SYSLOG_RPMSG_OVERWRITE
+	bool "SYSLOG RPMSG overwrite"
+	default n
+	depends on SYSLOG_RPMSG
+	---help---
+		Allow syslog rpmsg overwrite, maybe caused syslog lost.
+		Set 'n' if you don't want lost logs, but may harmful to preformance.
 
 config SYSLOG_RPMSG_SERVER
 	bool "Enable RPMSG server for SYSLOG"

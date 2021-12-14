@@ -38,6 +38,7 @@ open-amp.zip:
 	$(Q) patch -p0 < 0003-rpmsg-wait-endpoint-ready-in-rpmsg_send-and-rpmsg_se.patch
 	$(Q) patch -p0 < 0004-openamp-add-ns_unbind_notify-support.patch
 	$(Q) patch -p0 < 0005-rpmsg-notify-the-user-when-the-remote-address-is-rec.patch
+	$(Q) patch -p0 < 0006-openamp-fix-scenario-case.patch
 
 .openamp_headers: open-amp.zip
 	$(eval headers := $(wildcard open-amp/lib/include/openamp/*.h))

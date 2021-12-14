@@ -42,37 +42,11 @@
 
 #define INSTR_IS(i, o)      (((i) & (IMASK_##o)) == (IOP_##o))
 
-#define IMASK_T_STMDB       0xfffff000  /* stmdb sp!,{..lr} */
-#define IOP_T_STMDB         0xe92d4000
-
-#define IMASK_T_PUSH_LO     0xff00      /* push {reglist} (not LR) */
-#define IOP_T_PUSH_LO       0xb400
-
-#define IMASK_T_PUSH        0xff00      /* push {reglist} (inc LR) */
-#define IOP_T_PUSH          0xb500
-
-#define IMASK_T_VPUSH_16    0xffbf8f00  /* vpush d */
-#define IOP_T_VPUSH_16      0xed2d8b00
-
-#define IMASK_T_VPUSH_8     0xffbf8f00  /* vpush s */
-#define IOP_T_VPUSH_8       0xed2d8a00
-
-#define IMASK_T_SUB_SP_16   0xff80      /* sub sp, # */
-#define IOP_T_SUB_SP_16     0xb080
-
-#define IMASK_T_SUB_SP_32   0xf2ff8f00  /* subw sp, sp, # */
-#define IOP_T_SUB_SP_32     0xf2ad0d00
-
-#define IMASK_T_SUB_W_SP_32 0xfbff8f00  /* sub.w sp, sp, # */
-#define IOP_T_SUB_W_SP_32   0xf1ad0d00
-
 #define IMASK_T_BLX         0xff80      /* blx */
 #define IOP_T_BLX           0x4780
 
 #define IMASK_T_BL          0xf800      /* blx */
 #define IOP_T_BL            0xf000
-
-#define INSTR_LIMIT         0x2000
 
 /****************************************************************************
  * Private Data
@@ -83,32 +57,6 @@ static FAR void **g_backtrace_code_regions;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: getlroffset
- *
- * Description:
- *  getlroffset()  returns the currect link address offset.
- *
- * Input Parameters:
- *   lr    - Link register address
- *
- * Returned Value:
- *   Link address offset, 0 is returned if the lr is invalid.
- *
- ****************************************************************************/
-
-static int getlroffset(FAR uint8_t *lr)
-{
-  lr = (FAR uint8_t *)((uintptr_t)lr & 0xfffffffe);
-
-  if (((uintptr_t)lr & 0xffffffe0) == 0xffffffe0)
-    {
-      return 0;
-    }
-
-  return (*(FAR uint16_t *)(lr - 4) & 0xf000) == 0xf000 ? 5 : 3;
-}
 
 /****************************************************************************
  * Name: in_code_region
@@ -126,6 +74,9 @@ static int getlroffset(FAR uint8_t *lr)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static bool in_code_region(FAR void *pc)
 {
   int i = 0;
@@ -156,178 +107,6 @@ static bool in_code_region(FAR void *pc)
 }
 
 /****************************************************************************
- * Name: backtrace_push_internal
- *
- * Description:
- *  backtrace_push_internal()  returns the currect link address from
- *  program counter and stack pointer
- *
- * Input Parameters:
- *   psp    - Double poninter to the SP, this parameter will be changed if
- *            the corresponding LR address is successfully found.
- *   ppc    - Double poninter to the PC, this parameter will be changed if
- *            the corresponding LR address is successfully found.
- *
- * Returned Value:
- *   Link address should be returned if successful
- *   Otherwise, NULL is returned
- *
- ****************************************************************************/
-
-static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
-{
-  FAR uint8_t *sp = *psp;
-  FAR uint8_t *pc = *ppc;
-  FAR uint8_t *base;
-  FAR uint8_t *lr;
-  uint32_t ins32;
-  uint16_t ins16;
-  int offset = 1;
-  int frame;
-  int i;
-
-  for (i = 0; i < INSTR_LIMIT; i += 2)
-    {
-      ins16 = *(FAR uint16_t *)(pc - i);
-      if (INSTR_IS(ins16, T_PUSH))
-        {
-          frame = __builtin_popcount(ins16 & 0xff) + 1;
-          ins16 = *(FAR uint16_t *)(pc - i - 2);
-          if (INSTR_IS(ins16, T_PUSH_LO))
-            {
-              offset += __builtin_popcount(ins16 & 0xff);
-              frame  += offset - 1;
-            }
-
-          break;
-        }
-
-      ins32  = ins16 << 16;
-      ins32 |= *(FAR uint16_t *)(pc - i + 2);
-      if (INSTR_IS(ins32, T_STMDB))
-        {
-          frame = __builtin_popcount(ins32 & 0xfff) + 1;
-          ins16 = *(FAR uint16_t *)(pc - i - 2);
-          if (INSTR_IS(ins16, T_PUSH_LO))
-            {
-              offset += __builtin_popcount(ins16 & 0xff);
-              frame  += offset - 1;
-            }
-
-          break;
-        }
-    }
-
-  if (i >= INSTR_LIMIT)
-    {
-      return NULL;
-    }
-
-  base = pc - i;
-
-  for (i = 0; i < INSTR_LIMIT && base + i < pc; )
-    {
-      ins16 = *(FAR uint16_t *)(base + i);
-      if (INSTR_IS(ins16, T_SUB_SP_16))
-        {
-          frame += (ins16 & 0x7f);
-          break;
-        }
-
-      ins32  = ins16 << 16;
-      ins32 |= *(FAR uint16_t *)(base + i + 2);
-      if (INSTR_IS(ins32, T_SUB_SP_32))
-        {
-          uint32_t shift = ins32 >> 24 & 0x4;
-          uint32_t sub = 0;
-
-          if (shift)
-            {
-              sub = 1 << (shift - 1 + 8);
-            }
-
-          frame += (sub + (ins32 & 0xff) +
-              ((ins32 & 0x7000) >> 4)) / sizeof(uint32_t);
-          break;
-        }
-      else if (INSTR_IS(ins32, T_SUB_W_SP_32))
-        {
-          uint32_t shift;
-          uint32_t sub;
-
-          sub    = (ins32 & 0x7f) + 0x80;
-          shift  = (ins32 >> 7) & 0x1;
-          shift += ((ins32 >> 12) & 0x7) << 1;
-          shift += ((ins32 >> 26) & 0x1) << 4;
-
-          frame += sub << (30 - shift);
-          break;
-        }
-      else if (INSTR_IS(ins32, T_VPUSH_16))
-        {
-          frame += (ins32 & 0xff);
-        }
-      else if (INSTR_IS(ins32, T_VPUSH_8))
-        {
-          frame += (ins32 & 0xff) / 2;
-        }
-
-      i += ((ins16 & 0xf800) >= 0xe800) ? 4 : 2;
-    }
-
-  lr = (FAR uint8_t *)*((FAR uint32_t *)sp + frame - offset);
-  if (!in_code_region(lr))
-    {
-      return NULL;
-    }
-
-  offset = getlroffset(lr);
-  if (offset == 0)
-    {
-      return NULL;
-    }
-
-  *psp   = (FAR uint32_t *)sp + frame;
-  *ppc   = lr - offset;
-
-  return *ppc;
-}
-
-/****************************************************************************
- * Name: backtrace_push
- *
- * Description:
- *  backtrace_push() parsing the return address through instruction
- *
- ****************************************************************************/
-
-static int backtrace_push(FAR void *limit, FAR void **sp,
-                          FAR void *pc, FAR void **buffer, int size)
-{
-  int i = 0;
-
-  pc = (uintptr_t)pc & 0xfffffffe;
-
-  buffer[i++] = pc;
-
-  for (; i < size; i++)
-    {
-      if (*sp >= limit)
-        {
-          break;
-        }
-
-      buffer[i] = backtrace_push_internal(sp, &pc);
-      if (!buffer[i])
-        {
-          break;
-        }
-    }
-
-  return i;
-}
-
-/****************************************************************************
  * Name: backtrace_branch
  *
  * Description:
@@ -335,6 +114,9 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static int backtrace_branch(FAR void *limit, FAR void *sp,
                             FAR void **buffer, int size)
 {
@@ -410,6 +192,9 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 void arm_backtrace_init_code_regions(FAR void **regions)
 {
   g_backtrace_code_regions = regions;
@@ -439,6 +224,9 @@ void arm_backtrace_init_code_regions(FAR void **regions)
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 {
   FAR struct tcb_s *rtcb = running_task();
@@ -458,54 +246,47 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
   if (tcb == rtcb)
     {
+      sp = (FAR void *)up_getsp();
       if (up_interrupt_context())
         {
-          sp = (FAR void *)up_getsp();
-
-          ret = backtrace_push(rtcb->stack_base_ptr +
-                               rtcb->adj_stack_size,
-                               &sp, (FAR void *)up_backtrace + 10,
-                               buffer, size);
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+          ret = backtrace_branch(
+#  ifdef CONFIG_SMP
+                                 (uint32_t)arm_intstack_alloc()
+#  else
+                                 (uint32_t)&g_intstackalloc
+#  endif
+                                 + (CONFIG_ARCH_INTERRUPTSTACK & ~7), sp,
+                                 buffer, size);
           if (ret < size)
             {
               sp = (FAR void *)CURRENT_REGS[REG_SP];
-              ret += backtrace_push(rtcb->stack_base_ptr +
-                                    rtcb->adj_stack_size, &sp,
-                                    (FAR void *)CURRENT_REGS[REG_PC],
-                                    &buffer[ret], size - ret);
+              ret += backtrace_branch(rtcb->stack_base_ptr +
+                                      rtcb->adj_stack_size, sp,
+                                      &buffer[ret], size - ret);
             }
+#else
+          sp = (FAR void *)CURRENT_REGS[REG_SP];
+          ret = backtrace_branch(rtcb->stack_base_ptr +
+                                 rtcb->adj_stack_size, sp,
+                                 buffer, size);
+#endif
         }
       else
         {
-          sp = (FAR void *)up_getsp();
-          ret = backtrace_push(rtcb->stack_base_ptr +
-                               rtcb->adj_stack_size, &sp,
-                               (FAR void *)up_backtrace + 10,
-                               buffer, size);
-        }
-
-      if (ret < size)
-        {
-          ret += backtrace_branch(rtcb->stack_base_ptr +
-                                  rtcb->adj_stack_size, sp,
-                                  &buffer[ret], size - ret);
+          ret = backtrace_branch(rtcb->stack_base_ptr +
+                                 rtcb->adj_stack_size, sp,
+                                 buffer, size);
         }
     }
   else
     {
       flags = enter_critical_section();
 
-      sp = (FAR void *)tcb->xcp.regs[REG_SP];
-      ret = backtrace_push(tcb->stack_base_ptr +
-                           tcb->adj_stack_size, &sp,
-                           (FAR void *)tcb->xcp.regs[REG_PC],
-                           buffer, size);
-      if (ret < size)
-        {
-          ret += backtrace_branch(tcb->stack_base_ptr +
-                                  tcb->adj_stack_size, sp,
-                                  &buffer[ret], size - ret);
-        }
+      ret = backtrace_branch(tcb->stack_base_ptr +
+                             tcb->adj_stack_size,
+                             (FAR void *)tcb->xcp.regs[REG_SP],
+                             buffer, size);
 
       leave_critical_section(flags);
     }

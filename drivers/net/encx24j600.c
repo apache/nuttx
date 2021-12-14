@@ -243,7 +243,7 @@ struct enc_driver_s
   sq_queue_t            txqueue;       /* Enqueued descriptors waiting for transmission */
   sq_queue_t            rxqueue;       /* Unhandled incoming packets waiting for reception */
 
-  /* This is the contained SPI driver intstance */
+  /* This is the contained SPI driver instance */
 
   FAR struct spi_dev_s *spi;
 

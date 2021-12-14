@@ -49,6 +49,7 @@
 #endif
 
 #define RPTUNIOC_NONE           0
+#define NO_HOLDER               (pid_t)-1
 
 /****************************************************************************
  * Private Types
@@ -63,6 +64,7 @@ struct rptun_priv_s
   struct metal_list            bind;
   struct metal_list            node;
   sem_t                        sem;
+  int                          tid;
   unsigned long                cmd;
 };
 
@@ -107,6 +109,7 @@ rptun_get_mem(FAR struct remoteproc *rproc,
               metal_phys_addr_t da,
               FAR void *va, size_t size,
               FAR struct remoteproc_mem *buf);
+static int rptun_can_recursive(FAR struct remoteproc *rproc);
 
 static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
                           FAR const char *name, uint32_t dest);
@@ -138,13 +141,14 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 static struct remoteproc_ops g_rptun_ops =
 {
-  .init    = rptun_init,
-  .remove  = rptun_remove,
-  .config  = rptun_config,
-  .start   = rptun_start,
-  .stop    = rptun_stop,
-  .notify  = rptun_notify,
-  .get_mem = rptun_get_mem,
+  .init          = rptun_init,
+  .remove        = rptun_remove,
+  .config        = rptun_config,
+  .start         = rptun_start,
+  .stop          = rptun_stop,
+  .notify        = rptun_notify,
+  .get_mem       = rptun_get_mem,
+  .can_recursive = rptun_can_recursive,
 };
 
 static const struct file_operations g_rptun_devops =
@@ -162,7 +166,9 @@ static struct image_store_ops g_rptun_storeops =
 };
 #endif
 
-static sem_t g_rptun_sem = SEM_INITIALIZER(1);
+static sem_t        g_rptunlock = SEM_INITIALIZER(1);
+static pid_t        g_holder    = NO_HOLDER;
+static unsigned int g_count     = 0;
 
 static METAL_DECLARE_LIST(g_rptun_cb);
 static METAL_DECLARE_LIST(g_rptun_priv);
@@ -171,11 +177,65 @@ static METAL_DECLARE_LIST(g_rptun_priv);
  * Private Functions
  ****************************************************************************/
 
+static int rptun_lock(void)
+{
+  pid_t me = getpid();
+  int ret = OK;
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_holder == me)
+    {
+      /* Yes.. just increment the reference count */
+
+      g_count++;
+    }
+  else
+    {
+      /* No.. take the semaphore (perhaps waiting) */
+
+      ret = nxsem_wait_uninterruptible(&g_rptunlock);
+      if (ret >= 0)
+        {
+          /* Now this thread holds the semaphore */
+
+          g_holder = me;
+          g_count  = 1;
+        }
+    }
+
+  return ret;
+}
+
+static void rptun_unlock(void)
+{
+  DEBUGASSERT(g_holder == getpid() && g_count > 0);
+
+  /* If the count would go to zero, then release the semaphore */
+
+  if (g_count == 1)
+    {
+      /* We no longer hold the semaphore */
+
+      g_holder = NO_HOLDER;
+      g_count  = 0;
+      nxsem_post(&g_rptunlock);
+    }
+  else
+    {
+      /* We still hold the semaphore. Just decrement the count */
+
+      g_count--;
+    }
+}
+
 static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
+  priv->tid = gettid();
+
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
   while (1)
@@ -321,6 +381,13 @@ rptun_get_mem(FAR struct remoteproc *rproc,
   return buf;
 }
 
+static int rptun_can_recursive(FAR struct remoteproc *rproc)
+{
+  FAR struct rptun_priv_s *priv = rproc->priv;
+
+  return gettid() == priv->tid;
+}
+
 static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
 {
   struct rpmsg_virtio_device *rvdev;
@@ -360,7 +427,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
       bind->dest = dest;
       strncpy(bind->name, name, RPMSG_NAME_SIZE);
 
-      nxsem_wait(&g_rptun_sem);
+      rptun_lock();
 
       metal_list_add_tail(&priv->bind, &bind->node);
 
@@ -373,7 +440,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
             }
         }
 
-      nxsem_post(&g_rptun_sem);
+      rptun_unlock();
     }
 }
 
@@ -383,7 +450,7 @@ static void rptun_ns_unbind(FAR struct rpmsg_device *rdev,
   FAR struct rptun_priv_s *priv = rptun_get_priv_by_rdev(rdev);
   FAR struct metal_list *node;
 
-  nxsem_wait(&g_rptun_sem);
+  rptun_lock();
 
   metal_list_for_each(&priv->bind, node)
     {
@@ -399,7 +466,7 @@ static void rptun_ns_unbind(FAR struct rpmsg_device *rdev,
         }
     }
 
-  nxsem_post(&g_rptun_sem);
+  rptun_unlock();
 }
 
 static int rptun_dev_start(FAR struct remoteproc *rproc)
@@ -471,8 +538,8 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       metal_phys_addr_t pa0;
       metal_phys_addr_t pa1;
 
-      align0 = B2C(rsc->rpmsg_vring0.align);
-      align1 = B2C(rsc->rpmsg_vring1.align);
+      align0 = rsc->rpmsg_vring0.align;
+      align1 = rsc->rpmsg_vring1.align;
 
       tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
@@ -529,7 +596,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
-  nxsem_wait(&g_rptun_sem);
+  rptun_lock();
 
   /* Add priv to list */
 
@@ -546,7 +613,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         }
     }
 
-  nxsem_post(&g_rptun_sem);
+  rptun_unlock();
 
   /* Register callback to mbox for receiving remote message */
 
@@ -565,7 +632,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   RPTUN_UNREGISTER_CALLBACK(priv->dev);
 
-  nxsem_wait(&g_rptun_sem);
+  rptun_lock();
 
   /* Remove priv from list */
 
@@ -582,7 +649,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
         }
     }
 
-  nxsem_post(&g_rptun_sem);
+  rptun_unlock();
 
   /* Remote proc stop and shutdown */
 
@@ -765,7 +832,7 @@ int rpmsg_register_callback(FAR void *priv_,
   cb->device_destroy = device_destroy;
   cb->ns_bind        = ns_bind;
 
-  nxsem_wait(&g_rptun_sem);
+  rptun_lock();
 
   metal_list_add_tail(&g_rptun_cb, &cb->node);
 
@@ -791,7 +858,7 @@ int rpmsg_register_callback(FAR void *priv_,
         }
     }
 
-  nxsem_post(&g_rptun_sem);
+  rptun_unlock();
 
   return 0;
 }
@@ -804,7 +871,7 @@ void rpmsg_unregister_callback(FAR void *priv_,
   FAR struct metal_list *node;
   FAR struct metal_list *pnode;
 
-  nxsem_wait(&g_rptun_sem);
+  rptun_lock();
 
   metal_list_for_each(&g_rptun_cb, node)
     {
@@ -835,7 +902,7 @@ void rpmsg_unregister_callback(FAR void *priv_,
         }
     }
 
-  nxsem_post(&g_rptun_sem);
+  rptun_unlock();
 }
 
 int rptun_initialize(FAR struct rptun_dev_s *dev)

@@ -153,6 +153,10 @@
 #  define _DATA_INIT   &_eronly
 #  define _START_DATA  &_sdata
 #  define _END_DATA    &_edata
+#  define _START_TDATA &_stdata
+#  define _END_TDATA   &_etdata
+#  define _START_TBSS  &_stbss
+#  define _END_TBSS    &_etbss
 #endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
@@ -240,6 +244,10 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+EXTERN uint32_t _stdata;          /* Start of .tdata */
+EXTERN uint32_t _etdata;          /* End+1 of .tdata */
+EXTERN uint32_t _stbss;           /* Start of .tbss */
+EXTERN uint32_t _etbss;           /* End+1 of .tbss */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the
  * following macro may be used (with GCC!) to specify a function that will
@@ -335,6 +343,8 @@ int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
 int  arm_memfault(int irq, FAR void *context, FAR void *arg);
+int  arm_busfault(int irq, FAR void *context, FAR void *arg);
+int  arm_usagefault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 

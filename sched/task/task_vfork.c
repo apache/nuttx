@@ -94,7 +94,7 @@
 FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 {
   FAR struct tcb_s *ptcb = this_task();
-  FAR struct task_tcb_s *parent;
+  FAR struct tcb_s *parent;
   FAR struct task_tcb_s *child;
   FAR struct tls_info_s *info;
   size_t stack_size;
@@ -111,7 +111,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
       /* Fork'ed from a kernel thread */
 
       ttype = TCB_FLAG_TTYPE_KERNEL;
-      parent = (FAR struct task_tcb_s *)ptcb;
+      parent = ptcb;
     }
   else
     {
@@ -120,12 +120,11 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
       ttype = TCB_FLAG_TTYPE_TASK;
       if ((ptcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_TASK)
         {
-          parent = (FAR struct task_tcb_s *)ptcb;
+          parent = ptcb;
         }
       else
         {
-          parent = (FAR struct task_tcb_s *)
-              nxsched_get_tcb(ptcb->group->tg_pid);
+          parent = nxsched_get_tcb(ptcb->group->tg_pid);
           if (parent == NULL)
             {
               ret = -ENOENT;
@@ -173,7 +172,7 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Setup thread local storage */
 
-  info = up_stack_frame(&child->cmn, sizeof(struct tls_info_s));
+  info = up_stack_frame(&child->cmn, up_tls_size());
   if (info == NULL)
     {
       ret = -ENOMEM;
@@ -181,8 +180,10 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
     }
 
   DEBUGASSERT(info == child->cmn.stack_alloc_ptr);
-  memcpy(info, parent->cmn.stack_alloc_ptr, sizeof(struct tls_info_s));
+  memcpy(info, parent->stack_alloc_ptr, sizeof(struct tls_info_s));
   info->tl_task = child->cmn.group->tg_info;
+
+  up_tls_initialize(info);
 
   /* Get the priority of the parent task */
 
@@ -204,7 +205,8 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Setup to pass parameters to the new task */
 
-  nxtask_setup_arguments(child, parent->argv[0], &parent->argv[1]);
+  nxtask_setup_arguments(child, parent->group->tg_info->argv[0],
+                         &parent->group->tg_info->argv[1]);
 
   /* Now we have enough in place that we can join the group */
 

@@ -107,12 +107,12 @@ typedef CODE int (*pin_interrupt_t)(FAR struct gpio_dev_s *dev, uint8_t pin);
 /* Pin interface vtable definition.  Instances of this vtable are read-only
  * and may reside in FLASH.
  *
- *   - go_read.  Required for all all pin types.
+ *   - go_read.  Required for all pin types.
  *   - go_write.  Required only for the GPIO_OUTPUT_PIN pin type.  Unused
- *     for other pin types may be NULL.
- *   - go_attach and gp_eanble.  Required only the GPIO_INTERRUPT_PIN pin
- *     type.  Unused for other pin types may be NULL.
- *   - go_setpinytype.  Required for all all pin types.
+ *     for other pin types, may be NULL.
+ *   - go_attach and gp_enable.  Required only for the GPIO_INTERRUPT_PIN pin
+ *     type.  Unused for other pin types, may be NULL.
+ *   - go_setpinytype.  Required for all pin types.
  */
 
 struct gpio_dev_s;
@@ -177,14 +177,8 @@ extern "C"
  * Name: gpio_pin_register
  *
  * Description:
- *   Register GPIO pin device driver.
- *
- *   - Input pin types will be registered at /dev/gpinN
- *   - Output pin types will be registered at /dev/gpoutN
- *   - Interrupt pin types will be registered at /dev/gpintN
- *
- *   Where N is the provided minor number in the range of 0-99.
- *
+ *   Register GPIO pin device driver at /dev/gpioN, where N is the provided
+ *   minor number.
  *
  ****************************************************************************/
 
@@ -194,18 +188,12 @@ int gpio_pin_register(FAR struct gpio_dev_s *dev, int minor);
  * Name: gpio_pin_unregister
  *
  * Description:
- *   Unregister GPIO pin device driver.
- *
- *   - Input pin types will be registered at /dev/gpinN
- *   - Output pin types will be registered at /dev/gpoutN
- *   - Interrupt pin types will be registered at /dev/gpintN
- *
- *   Where N is the provided minor number in the range of 0-99.
- *
+ *   Unregister GPIO pin device driver at /dev/gpioN, where N is the provided
+ *   minor number.
  *
  ****************************************************************************/
 
-void gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor);
+int gpio_pin_unregister(FAR struct gpio_dev_s *dev, int minor);
 
 /****************************************************************************
  * Name: gpio_lower_half

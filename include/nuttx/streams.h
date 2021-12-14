@@ -173,21 +173,6 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
-/* This is a special stream that does buffered character I/O.  NOTE that is
- * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
- * lib_outstream_s
- */
-
-struct iob_s;  /* Forward reference */
-
-struct lib_syslogstream_s
-{
-  struct lib_outstream_s public;
-#ifdef CONFIG_SYSLOG_BUFFER
-  FAR struct iob_s *iob;
-#endif
-};
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -343,45 +328,6 @@ void lib_lowoutstream(FAR struct lib_outstream_s *lowoutstream);
 void lib_zeroinstream(FAR struct lib_instream_s *zeroinstream);
 void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
-
-/****************************************************************************
- * Name: syslogstream_create
- *
- * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *   Only accessible from with the OS SYSLOG logic.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
- *
- ****************************************************************************/
-
-void syslogstream_create(FAR struct lib_syslogstream_s *stream);
-
-/****************************************************************************
- * Name: syslogstream_destroy
- *
- * Description:
- *   Free resources held by the syslog stream.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
- *
- * Returned Value:
- *   None (Resources freed).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSLOG_BUFFER
-void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
-#else
-#  define syslogstream_destroy(s)
-#endif
 
 /****************************************************************************
  * Name: lib_noflush

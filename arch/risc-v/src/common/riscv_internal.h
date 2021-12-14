@@ -64,6 +64,10 @@
 #define _DATA_INIT   &_eronly
 #define _START_DATA  &_sdata
 #define _END_DATA    &_edata
+#define _START_TDATA &_stdata
+#define _END_TDATA   &_etdata
+#define _START_TBSS  &_stbss
+#define _END_TBSS    &_etbss
 
 /* Determine which (if any) console driver to use.  If a console is enabled
  * and no other console device is specified, then a serial console is
@@ -138,6 +142,10 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+EXTERN uint32_t _stdata;          /* Start of .tdata */
+EXTERN uint32_t _etdata;          /* End+1 of .tdata */
+EXTERN uint32_t _stbss;           /* Start of .tbss */
+EXTERN uint32_t _etbss;           /* End+1 of .tbss */
 
 #endif /* __ASSEMBLY__ */
 

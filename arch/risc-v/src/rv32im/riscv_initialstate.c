@@ -93,6 +93,13 @@ void up_initial_state(struct tcb_s *tcb)
 
   xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
 
+  /* Setup thread local storage pointer */
+
+#ifdef CONFIG_SCHED_THREAD_LOCAL
+  xcp->regs[REG_TP]      = (uint32_t)tcb->stack_alloc_ptr +
+                                     sizeof(struct tls_info_s);
+#endif
+
   /* If this task is running PIC, then set the PIC base register to the
    * address of the allocated D-Space region.
    */

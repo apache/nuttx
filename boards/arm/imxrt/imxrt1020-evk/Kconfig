@@ -5,26 +5,26 @@
 
 if ARCH_BOARD_IMXRT1020_EVK
 choice
-        prompt "Boot Flash"
-        default IMXRT1020_EVK_HYPER_FLASH
+	prompt "Boot Flash"
+	default IMXRT1020_EVK_HYPER_FLASH
 
 config IMXRT1020_EVK_HYPER_FLASH
-        bool "HYPER Flash"
+	bool "HYPER Flash"
 
 config IMXRT1020_EVK_QSPI_FLASH
-        bool "QSPI Flash"
+	bool "QSPI Flash"
 
 endchoice # Boot Flash
 
 config IMXRT1020_EVK_SDRAM
-        bool "Enable SDRAM"
-        default n
-        select IMXRT_SEMC_INIT_DONE
-        ---help---
-                Activate DCD configuration of SDRAM
+	bool "Enable SDRAM"
+	default n
+	select IMXRT_SEMC_INIT_DONE
+	---help---
+		Activate DCD configuration of SDRAM
 
 config HAVE_LEDS
-       bool "Have user leds"
-       default y
-       select ARCH_HAVE_LEDS
+	bool "Have user leds"
+	default y
+	select ARCH_HAVE_LEDS
 endif

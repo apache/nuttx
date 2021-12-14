@@ -71,6 +71,36 @@ POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
+ifeq ($(CONFIG_REGULATOR), y)
+
+CSRCS += regulator.c
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
+ifeq ($(CONFIG_REGULATOR_RPMSG), y)
+
+CSRCS += regulator_rpmsg.c
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
+ifeq ($(CONFIG_REGULATOR_GPIO), y)
+
+CSRCS += regulator_gpio.c
+
+POWER_DEPPATH := --dep-path power
+POWER_VPATH := :power
+POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
+
+endif
+
 # Add battery charger drivers
 
 ifeq ($(CONFIG_BATTERY_CHARGER),y)

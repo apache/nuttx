@@ -1,0 +1,51 @@
+############################################################################
+# arch/risc-v/src/qemu-rv32/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Specify our HEAD assembly file.  This will be linked as
+# the first object file, so it will appear at address 0
+HEAD_ASRC = qemu_rv32_head.S
+
+# Specify our general Assembly files
+CHIP_ASRCS = qemu_rv32_vectors.S riscv_syscall.S
+
+# Specify C code within the common directory to be included
+CMN_CSRCS  += riscv_initialize.c riscv_swint.c
+CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c
+CMN_CSRCS  += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
+CMN_CSRCS  += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c
+CMN_CSRCS  += riscv_releasepending.c riscv_reprioritizertr.c riscv_copyfullstate.c
+CMN_CSRCS  += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
+CMN_CSRCS  += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += riscv_checkstack.c
+endif
+
+ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
+CMN_CSRCS  += riscv_vfork.c
+endif
+
+ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
+CMN_CSRCS  += riscv_tls.c
+endif
+
+# Specify our C code within this directory to be included
+CHIP_CSRCS  = qemu_rv32_start.c qemu_rv32_irq_dispatch.c qemu_rv32_irq.c
+CHIP_CSRCS += qemu_rv32_idle.c qemu_rv32_timerisr.c

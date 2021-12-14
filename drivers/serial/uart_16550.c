@@ -860,7 +860,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
               /* Read the modem status register (MSR) to clear */
 
               status = u16550_serialin(priv, UART_MSR_OFFSET);
-              sinfo("MSR: %02x\n", status);
+              sinfo("MSR: %02"PRIx32"\n", status);
               break;
             }
 
@@ -871,7 +871,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
               /* Read the line status register (LSR) to clear */
 
               status = u16550_serialin(priv, UART_LSR_OFFSET);
-              sinfo("LSR: %02x\n", status);
+              sinfo("LSR: %02"PRIx32"\n", status);
               break;
             }
 
@@ -879,7 +879,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
           default:
             {
-              serr("ERROR: Unexpected IIR: %02x\n", status);
+              serr("ERROR: Unexpected IIR: %02"PRIx32"\n", status);
               break;
             }
         }

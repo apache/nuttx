@@ -600,6 +600,14 @@ config SCHED_USER_IDENTITY
 		Those can then be managed using the interfaces.  Child tasks will
 		inherit the UID and GID of its parent.
 
+config SCHED_THREAD_LOCAL
+	bool "Support __thread/thread_local keyword"
+	default n
+	depends on ARCH_HAVE_THREAD_LOCAL
+	---help---
+		This option enables architecture-sepecific TLS supports (__thread/thread_local keyword)
+		Note: Toolchain must be compiled with '--enable-tls' enabled
+
 endmenu # Tasks and Scheduling
 
 menu "Pthread Options"
@@ -1029,6 +1037,19 @@ config SCHED_INSTRUMENTATION_IRQHANDLER
 		must provide this additional logic.
 
 			void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
+
+config SCHED_INSTRUMENTATION_DUMP
+	bool "Use note dump for instrumentation"
+	default n
+	---help---
+		Use note dump for instrumentation.
+
+			void sched_note_string(FAR const char *buf);
+			void sched_note_dump(uint32_t module, uint8_t event, FAR const void *buf, size_t len);
+			void sched_note_vprintf(FAR const char *fmt, va_list va);
+			void sched_note_vbprintf(uint32_t module, uint8_t event, FAR const char *fmt, va_list va);
+			void sched_note_printf(FAR const char *fmt, ...) printflike(1, 2);
+			void sched_note_bprintf(uint32_t module, uint8_t event, FAR const char *fmt, ...);
 
 config SCHED_INSTRUMENTATION_HIRES
 	bool "Use Hi-Res RTC for instrumentation"
@@ -1800,14 +1821,12 @@ menu "Stack and heap information"
 
 config DEFAULT_TASK_STACKSIZE
 	int "The default stack size for tasks"
-	default 65536 if ARCH_SIM
 	default 2048
 	---help---
 		The default stack size for tasks.
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
-	default DEFAULT_TASK_STACKSIZE if ARCH_SIM
 	default 1024
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread

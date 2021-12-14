@@ -8,12 +8,12 @@ if ARCH_BOARD_B_G431B_ESC1
 if STM32_FOC
 
 config BOARD_STM32_BG431BESC1_FOC_VBUS
-       bool "B-G431B-ESC1 board VBUS sense"
-       default n
+	bool "B-G431B-ESC1 board VBUS sense"
+	default n
 
 config BOARD_STM32_BG431BESC1_FOC_POT
-       bool "B-G431B-ESC1 board POT support"
-       default n
+	bool "B-G431B-ESC1 board POT support"
+	default n
 
 endif # STM32_FOC
 

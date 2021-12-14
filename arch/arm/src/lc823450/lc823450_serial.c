@@ -40,6 +40,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
+#include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
 
@@ -172,6 +173,7 @@ struct up_dev_s
   sem_t rxpkt_wait;
   sem_t txdma_wait;
 #endif /* CONFIG_HSUART */
+  spinlock_t lock;
 };
 
 /****************************************************************************
@@ -944,7 +946,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
       /* Set to receive an interrupt when the TX fifo is half emptied */
@@ -963,7 +965,9 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
        * the TX interrupt.
        */
 
+      spin_unlock_irqrestore(&priv->lock, flags);
       uart_xmitchars(dev);
+      flags = spin_lock_irqsave(&priv->lock);
 #endif
     }
   else
@@ -974,7 +978,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
       up_serialout(priv, UART_UIEN, priv->im);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************

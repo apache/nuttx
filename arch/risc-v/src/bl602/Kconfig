@@ -65,13 +65,13 @@ menu "SPI Flash configuration"
 config BL602_MTD_OFFSET
 	hex "MTD base address in SPI Flash"
 	default 0x001c5000
-	help
+	---help---
 		MTD base address in SPI Flash.
 
 config BL602_MTD_SIZE
 	hex "MTD size in SPI Flash"
 	default 0x30000
-	help
+	---help---
 		MTD size in SPI Flash.
 
 endmenu # BL602_SPIFLASH
