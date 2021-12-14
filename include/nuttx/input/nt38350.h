@@ -111,14 +111,12 @@ struct nt38350_config_s
                  bool state);
 };
 
-#ifdef CONFIG_NVT_OFFLINE_LOG
 struct nvt_diff_s
 {
   uint8_t x_num;
   uint8_t y_num;
   int32_t data[NVT_RESULT_BUFSIZE];
 };
-#endif
 
 #ifdef CONFIG_NVT_TOUCH_MP
 struct nvt_mp_test_s

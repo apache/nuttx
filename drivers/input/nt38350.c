@@ -189,8 +189,8 @@ enum nvt_finger_contact_e
 
 enum nvt_pm_e
 {
-  NVT_PM_DPSTDBY = 0x11,  /* Deep Standby mode*/
-  NVT_PM_PD      = 0x12,  /* Power down mode, not recommend*/
+  NVT_PM_DPSTDBY = 0x11,  /* Deep Standby mode */
+  NVT_PM_PD      = 0x12,  /* Power down mode, not recommend */
   NVT_PM_FDM     = 0x13   /* Finger detect mode */
 };
 
@@ -556,6 +556,8 @@ static int nt38350_read_reg(FAR struct nt38350_dev_s *priv,
       ierr("ERROR: %s Failed to read reg: %d\n", __func__, ret);
       return ret;
     }
+
+  return ret;
 }
 
 static int nt38350_write_reg(FAR struct nt38350_dev_s *priv,
@@ -692,6 +694,10 @@ static int nvt_clear_fw_status(FAR struct nt38350_dev_s *priv)
       buf[0] = EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE;
       buf[1] = 0xff;
       ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+      if (ret != OK)
+        {
+          ierr("ERROR: Failed to read register\n");
+        }
 
       if (buf[1] == 0x00)
         {
@@ -735,6 +741,10 @@ static int nvt_check_fw_status(FAR struct nt38350_dev_s *priv)
       buf[0] = EVENT_MAP_HANDSHAKING_OR_SUB_CMD_BYTE;
       buf[1] = 0x00;
       ret = nt38350_read_reg(priv, NVT_I2C_FW_ADDRESS, buf, 2);
+      if (ret != OK)
+        {
+          ierr("ERROR: Failed to read register\n");
+        }
 
       if ((buf[1] & 0xf0) == 0xa0)
          break;
@@ -868,7 +878,7 @@ info_retry:
       if (retry_count < 3)
         {
           retry_count++;
-          ierr("retry_count = %d\n", retry_count);
+          ierr("retry_count = %ld\n", retry_count);
           goto info_retry;
         }
       else
@@ -1130,7 +1140,6 @@ static int get_nvt_fw_content(FAR struct nt38350_dev_s *priv,
 static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
                                       FAR uint8_t *data)
 {
-  int ret;
   int i;
   uint32_t total_sectors_to_check;
 
@@ -1143,7 +1152,7 @@ static int nvt_get_fw_need_write_size(FAR struct nt38350_dev_s *priv,
     {
       /* check if there is end flag "NVT" at the end of this sector */
 
-      if (strncmp(&data[i * NVT_FLASH_SECTOR_SIZE -
+      if (strncmp((char *)&data[i * NVT_FLASH_SECTOR_SIZE -
           NVT_FLASH_END_FLAG_LEN], "NVT", NVT_FLASH_END_FLAG_LEN) == 0)
         {
           priv->fw_need_write_size = i * NVT_FLASH_SECTOR_SIZE;
@@ -1189,7 +1198,7 @@ static int nvt_init_bootloader(FAR struct nt38350_dev_s *priv)
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 3);
   if (ret < 0)
     {
-      ierr("ERROR: Inittial Flash Block error!!(%d)\n", ret);
+      ierr("ERROR: Inittial Flash Block error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -1205,7 +1214,7 @@ static int nvt_init_bootloader(FAR struct nt38350_dev_s *priv)
       if (ret < 0)
         {
           ierr("ERROR: Check 0xAA (Inittial Flash Block) "
-               "error.(%d)\n", ret);
+               "error.(%ld)\n", ret);
           return ret;
         }
 
@@ -1255,7 +1264,7 @@ static int nvt_resume_pd(FAR struct nt38350_dev_s *priv)
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
   if (ret < 0)
     {
-      ierr("ERROR: Write Enable error!!(%d)\n", ret);
+      ierr("ERROR: Write Enable error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -1270,7 +1279,7 @@ static int nvt_resume_pd(FAR struct nt38350_dev_s *priv)
       ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
       if (ret < 0)
         {
-          ierr("ERROR: Check 0xAA (Resume Command) error!!(%d)\n", ret);
+          ierr("ERROR: Check 0xAA (Resume Command) error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1324,7 +1333,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
   if (ret < 0)
     {
       ierr("ERROR: Write Enable (for Write Status Register)"
-           " error!!(%d)\n", ret);
+           " error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -1341,7 +1350,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       if (ret < 0)
         {
           ierr("ERROR: Check 0xAA (Write Enable for Write Status Register)"
-               " error!!(%d)\n", ret);
+               " error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1367,7 +1376,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 3);
   if (ret < 0)
     {
-      ierr("ERROR: Write Status Register error!!(%d)\n", ret);
+      ierr("ERROR: Write Status Register error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -1383,7 +1392,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       if (ret < 0)
         {
           ierr("ERROR: Check 0xAA (Write Status Register)"
-               " error!!(%d)\n", ret);
+               " error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1413,7 +1422,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       if (ret < 0)
         {
           ierr("ERROR: Read Status (for Write Status Register)"
-               "error!!(%d)\n", ret);
+               "error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1426,7 +1435,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       if (ret < 0)
         {
           ierr("ERROR: Check 0xAA (Read Status for"
-               "Write Status Register) error!!(%d)\n", ret);
+               "Write Status Register) error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1440,7 +1449,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
         {
           ierr("ERROR: Check 0xAA (Read Status for Write Status"
                " Register) failed,buf[1]=0x%02X, buf[2]=0x%02X,"
-               "retry=%d\n", buf[1], buf[2], retry);
+               "retry=%ld\n", buf[1], buf[2], retry);
           return -1;
         }
     }
@@ -1459,7 +1468,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
       if (ret < 0)
         {
-          ierr("ERROR: Write Enable error!!(%d,%d)\n", ret, i);
+          ierr("ERROR: Write Enable error!!(%ld,%ld)\n", ret, i);
           return ret;
         }
 
@@ -1474,7 +1483,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Check 0xAA (Write Enable) error!!(%d,%d)\n",
+              ierr("ERROR: Check 0xAA (Write Enable) error!!(%ld,%ld)\n",
                    ret, i);
               return ret;
             }
@@ -1508,7 +1517,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
       ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 5);
       if (ret < 0)
         {
-          ierr("ERROR: Sector Erase error!!(%d,%d)\n", ret, i);
+          ierr("ERROR: Sector Erase error!!(%ld,%ld)\n", ret, i);
           return ret;
         }
 
@@ -1523,7 +1532,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Check 0xAA (Sector Erase) error!!(%d,%d)\n",
+              ierr("ERROR: Check 0xAA (Sector Erase) error!!(%ld,%ld)\n",
                    ret, i);
               return ret;
             }
@@ -1538,7 +1547,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           if (retry > 20)
             {
               ierr("ERROR: Check 0xAA (Sector Erase) failed,"
-                   "buf[1]=0x%02X,retry=%d\n", buf[1], retry);
+                   "buf[1]=0x%02X,retry=%ld\n", buf[1], retry);
               return -1;
             }
         }
@@ -1554,7 +1563,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Read Status error!!(%d,%d)\n", ret, i);
+              ierr("ERROR: Read Status error!!(%ld,%ld)\n", ret, i);
               return ret;
             }
 
@@ -1566,7 +1575,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 3);
           if (ret < 0)
             {
-              ierr("ERROR: Check 0xAA (Read Status) error!!(%d,%d)\n",
+              ierr("ERROR: Check 0xAA (Read Status) error!!(%ld,%ld)\n",
                    ret, i);
               return ret;
             }
@@ -1581,7 +1590,7 @@ static int nvt_erase_flash(FAR struct nt38350_dev_s *priv)
           if (retry > 100)
             {
               ierr("ERROR: Check 0xAA (Read Status) failed,"
-                   "buf[1]=0x%02X, buf[2]=0x%02X,retry=%d\n",
+                   "buf[1]=0x%02X, buf[2]=0x%02X,retry=%ld\n",
                     buf[1], buf[2], retry);
               return -1;
             }
@@ -1622,7 +1631,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
   ret = nvt_set_page(priv, NVT_I2C_BLDR_ADDRESS, xdata_addr);
   if (ret < 0)
     {
-      ierr("ERROR: change I2C buffer index error!!(%d)\n", ret);
+      ierr("ERROR: change I2C buffer index error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -1646,7 +1655,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
       ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
       if (ret < 0)
         {
-          ierr("ERROR: Write Enable error!!(%d)\n", ret);
+          ierr("ERROR: Write Enable error!!(%ld)\n", ret);
           return ret;
         }
 
@@ -1661,7 +1670,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Check 0xAA (Write Enable) error!!(%d,%d)\n",
+              ierr("ERROR: Check 0xAA (Write Enable) error!!(%ld,%ld)\n",
                    ret, i);
               return ret;
             }
@@ -1697,7 +1706,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_write_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 33);
           if (ret < 0)
             {
-              ierr("ERROR: Write Page error!!(%d), j=%d\n", ret, j);
+              ierr("ERROR: Write Page error!!(%ld), j=%ld\n", ret, j);
               return ret;
             }
         }
@@ -1732,7 +1741,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
       ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 8);
       if (ret < 0)
         {
-          ierr("ERROR: Page Program error!!(%d), i=%d\n", ret, i);
+          ierr("ERROR: Page Program error!!(%ld), i=%ld\n", ret, i);
           return ret;
         }
 
@@ -1747,7 +1756,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Page Program error!!(%d)\n", ret);
+              ierr("ERROR: Page Program error!!(%ld)\n", ret);
               return ret;
             }
 
@@ -1760,14 +1769,14 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           if (retry > 20)
             {
               ierr("ERROR: Check 0xAA (Page Program) failed,"
-                   "buf[1]=0x%02X,retry=%d\n", buf[1], retry);
+                   "buf[1]=0x%02X,retry=%ld\n", buf[1], retry);
               return -1;
             }
         }
 
       if (buf[1] == 0xea)
         {
-          ierr("ERROR: Page Program error!! i=%d  %d\n", i, __LINE__);
+          ierr("ERROR: Page Program error!! i=%ld  %d\n", i, __LINE__);
           return -3;
         }
 
@@ -1782,7 +1791,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
           if (ret < 0)
             {
-              ierr("ERROR: Read Status error!!(%d)\n", ret);
+              ierr("ERROR: Read Status error!!(%ld)\n", ret);
               return ret;
             }
 
@@ -1794,7 +1803,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 3);
           if (ret < 0)
             {
-              ierr("ERROR: Check 0xAA (Read Status) error!!(%d)\n", ret);
+              ierr("ERROR: Check 0xAA (Read Status) error!!(%ld)\n", ret);
               return ret;
             }
 
@@ -1807,7 +1816,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           if (retry > 100)
             {
               ierr("ERROR: Check 0xAA (Read Status) failed,"
-                   "buf[1]=0x%02X, buf[2]=0x%02X,retry=%d\n",
+                   "buf[1]=0x%02X, buf[2]=0x%02X,retry=%ld\n",
                     buf[1], buf[2], retry);
               return -1;
             }
@@ -1815,14 +1824,14 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
 
       if (buf[1] == 0xea)
         {
-          ierr("Page Program error!! i=%d %d\n", i, __LINE__);
+          ierr("Page Program error!! i=%ld %d\n", i, __LINE__);
           return -4;
         }
 
       percent = ((i + 1) * 100) / count;
       if (((percent % 10) == 0) && (percent != previous_percent))
         {
-          iinfo("Programming...%2d%%\n", percent);
+          iinfo("Programming...%2ld%%\n", percent);
           previous_percent = percent;
         }
     }
@@ -1891,7 +1900,7 @@ static int nvt_verify_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 7);
           if (ret < 0)
             {
-              ierr("ERROR: Fast Read Command error!!(%d)\n", ret);
+              ierr("ERROR: Fast Read Command error!!(%ld)\n", ret);
               return ret;
             }
 
@@ -1907,7 +1916,7 @@ static int nvt_verify_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
               if (ret < 0)
                 {
                   ierr("ERROR: Check 0xAA (Fast Read Command)"
-                       "error!!(%d)\n", ret);
+                       "error!!(%ld)\n", ret);
                   return ret;
                 }
 
@@ -1920,7 +1929,7 @@ static int nvt_verify_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
               if (retry > 5)
                 {
                   ierr("ERROR: Check 0xAA (Fast Read Command)failed,"
-                        "buf[1]=0x%02X,retry=%d\n", buf[1], retry);
+                        "buf[1]=0x%02X,retry=%ld\n", buf[1], retry);
                   return -1;
                 }
             }
@@ -1931,7 +1940,7 @@ static int nvt_verify_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           if (ret < 0)
             {
               ierr("ERROR: Read Checksum (write addr high byte &"
-                   "middle byte)error!(%d)\n", ret);
+                   "middle byte)error!(%ld)\n", ret);
               return ret;
             }
 
@@ -1943,16 +1952,16 @@ static int nvt_verify_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 3);
           if (ret < 0)
             {
-              ierr("ERROR: Read Checksum error!!(%d)\n", ret);
+              ierr("ERROR: Read Checksum error!!(%ld)\n", ret);
               return ret;
             }
 
           rd_filechksum[i] = (uint16_t)((buf[2] << 8) | buf[1]);
           if (wr_filechksum[i] != rd_filechksum[i])
             {
-              ierr("ERROR: Verify Fail%d!!\n", i);
-              ierr("ERROR: rd_filechksum[%d]=0x%04X,"
-                   "wr_filechksum[%d]=0x%04X\n",
+              ierr("ERROR: Verify Fail%ld!!\n", i);
+              ierr("ERROR: rd_filechksum[%ld]=0x%04X,"
+                   "wr_filechksum[%ld]=0x%04X\n",
                    i, rd_filechksum[i], i, wr_filechksum[i]);
               return -1;
             }
@@ -2029,7 +2038,7 @@ static int nvt_check_checksum(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 7);
           if (ret < 0)
             {
-              ierr("ERROR: Fast Read Command error!!(%d)\n", ret);
+              ierr("ERROR: Fast Read Command error!!(%ld)\n", ret);
               return ret;
             }
 
@@ -2045,7 +2054,7 @@ static int nvt_check_checksum(FAR struct nt38350_dev_s *priv, uint8_t *data)
               if (ret < 0)
                 {
                   ierr("ERROR: Check 0xAA (Fast Read Command) "
-                       "error!!(%d)\n", ret);
+                       "error!!(%ld)\n", ret);
                   return ret;
                 }
 
@@ -2059,7 +2068,7 @@ static int nvt_check_checksum(FAR struct nt38350_dev_s *priv, uint8_t *data)
               if (retry > 5)
                 {
                   ierr("ERROR: Check 0xAA (Fast Read Command)failed,"
-                       "buf[1]=0x%02X,retry=%d\n", buf[1], retry);
+                       "buf[1]=0x%02X,retry=%ld\n", buf[1], retry);
                   return -1;
                 }
             }
@@ -2070,7 +2079,7 @@ static int nvt_check_checksum(FAR struct nt38350_dev_s *priv, uint8_t *data)
           if (ret < 0)
             {
               ierr("ERROR: Read Checksum (write addr high byte &"
-                "middle byte)error!(%d)\n", ret);
+                "middle byte)error!(%ld)\n", ret);
               return ret;
             }
 
@@ -2082,15 +2091,15 @@ static int nvt_check_checksum(FAR struct nt38350_dev_s *priv, uint8_t *data)
           ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 3);
           if (ret < 0)
             {
-              ierr("ERROR: Read Checksum error!!(%d)\n", ret);
+              ierr("ERROR: Read Checksum error!!(%ld)\n", ret);
               return ret;
             }
 
           rd_filechksum[i] = (uint16_t)((buf[2] << 8) | buf[1]);
           if (wr_filechksum[i] != rd_filechksum[i])
             {
-              ierr("ERROR: rd_filechksum[%d]=0x%04X,"
-                   "wr_filechksum[%d]=0x%04X\n",
+              ierr("ERROR: rd_filechksum[%ld]=0x%04X,"
+                   "wr_filechksum[%ld]=0x%04X\n",
                    i, rd_filechksum[i], i, wr_filechksum[i]);
               ierr("ERROR: firmware checksum not match!!\n");
               return 0;
@@ -2221,7 +2230,9 @@ static int nvt_check_fw_ver(FAR struct nt38350_dev_s *priv,
 {
   int32_t ret;
   size_t nvt_fw_bin_ver_offset = priv->fw_need_write_size - NVT_SIZE_4KB;
+#ifdef CONFIG_NVT_DEBUG
   size_t nvt_fw_bin_ver_bar_offset = nvt_fw_bin_ver_offset + 1;
+#endif
   uint8_t buf[16] =
   {
     0
@@ -2233,7 +2244,7 @@ static int nvt_check_fw_ver(FAR struct nt38350_dev_s *priv,
                      priv->mmap->event_buf_addr | EVENT_MAP_FWINFO);
   if (ret < 0)
     {
-      ierr("ERROR: i2c write error!(%d)\n", ret);
+      ierr("ERROR: i2c write error!(%ld)\n", ret);
       return ret;
     }
 
@@ -2245,7 +2256,7 @@ static int nvt_check_fw_ver(FAR struct nt38350_dev_s *priv,
   ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 3);
   if (ret < 0)
     {
-      ierr("ERROR: i2c read error!(%d)\n", ret);
+      ierr("ERROR: i2c read error!(%ld)\n", ret);
       return ret;
     }
 
@@ -2324,7 +2335,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
   if (ret < 0)
     {
-      ierr("ERROR: write unlock error!!(%d)\n", ret);
+      ierr("ERROR: write unlock error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -2342,7 +2353,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   ret = nt38350_write_reg(priv, NVT_I2C_HW_ADDRESS, buf, 7);
   if (ret < 0)
     {
-      ierr("ERROR: write Read Command error!!(%d)\n", ret);
+      ierr("ERROR: write Read Command error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -2355,7 +2366,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   ret = nt38350_read_reg(priv, NVT_I2C_HW_ADDRESS, buf, 2);
   if (ret < 0)
     {
-      ierr("ERROR: Check 0xaa (Read Command) error!!(%d)\n", ret);
+      ierr("ERROR: Check 0xaa (Read Command) error!!(%ld)\n", ret);
       return ret;
     }
 
@@ -2374,7 +2385,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
                priv->mmap->read_flash_checksum_addr);
   if (ret < 0)
     {
-      ierr("ERROR: change index error!! (%d)\n", ret);
+      ierr("ERROR: change index error!! (%ld)\n", ret);
       return ret;
     }
 
@@ -2386,19 +2397,19 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
   ret = nt38350_read_reg(priv, NVT_I2C_BLDR_ADDRESS, buf, 6);
   if (ret < 0)
     {
-      ierr("ERROR: Read Back error!! (%d)\n", ret);
+      ierr("ERROR: Read Back error!! (%ld)\n", ret);
       return ret;
     }
 
   /* buf[3:5] => NVT End Flag */
 
-  strncpy(nvt_end_flag, &buf[3], NVT_FLASH_END_FLAG_LEN);
+  strncpy((char *)nvt_end_flag, (char *)&buf[3], NVT_FLASH_END_FLAG_LEN);
 #ifdef CONFIG_NVT_DEBUG
   iinfo("nvt_end_flag=%s (%02X %02X %02X)\n",
         nvt_end_flag, buf[3], buf[4], buf[5]);
 #endif
 
-  if (strncmp(nvt_end_flag, "NVT", NVT_FLASH_END_FLAG_LEN) == 0)
+  if (strncmp((char *)nvt_end_flag, "NVT", NVT_FLASH_END_FLAG_LEN) == 0)
     {
       return 0;
     }
@@ -2448,7 +2459,7 @@ static int nvt_boot_update_firmware(FAR struct nt38350_dev_s *priv)
   ret = nvt_update_firmware_request(priv, fw_data);
   if (ret)
     {
-      ierr("ERROR: nvt_update_firmware_request failed. (%d)\n", ret);
+      ierr("ERROR: nvt_update_firmware_request failed. (%ld)\n", ret);
       goto err;
     }
 
@@ -2676,7 +2687,6 @@ static void nvt_read_mdata(FAR struct nt38350_dev_s *priv,
  *      Executive outcomes. 0---succeed. negative---failed.
  ***************************************************************************/
 
-#ifdef CONFIG_NVT_OFFLINE_LOG
 static int nvt_diff_get(FAR struct nt38350_dev_s *priv, int32_t *data)
 {
   irqstate_t flags;
@@ -2684,7 +2694,7 @@ static int nvt_diff_get(FAR struct nt38350_dev_s *priv, int32_t *data)
 
   flags = enter_critical_section();
 
-#if NVT_TOUCH_ESD_PROTECT
+#ifdef CONFIG_NVT_TOUCH_ESD_PROTECT
   nvt_esd_check_enable(false);
 #endif /* #if NVT_TOUCH_ESD_PROTECT */
 
@@ -2728,9 +2738,7 @@ err:
   leave_critical_section(flags);
   return ret;
 }
-#endif
 
-#ifdef CONFIG_NVT_OFFLINE_LOG
 static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
                          FAR struct nvt_diff_s *diff)
 {
@@ -2757,7 +2765,6 @@ static int nvt_diff_show(FAR struct nt38350_dev_s *priv,
 
   return 0;
 }
-#endif
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
 static void nvt_log_data_to_csv(FAR void *arg)
@@ -2768,7 +2775,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
   int32_t  write_ret;
   char     date_buf[64];
   char     *fbufp = NULL;
-  struct   file *fp = NULL;
+  int      fp = -1;
   int32_t  iarrayindex  = 0;
   int32_t  fw_frame_cnt = 0;
   uint32_t output_len   = 0;
@@ -2796,7 +2803,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
   /* open csv file */
 
   fp = open(csv_file_path, O_RDWR | O_CREAT);
-  if (fp == NULL || fp < 0)
+  if (fp < 0)
     {
       ierr("ERROR: open %s failed\n", csv_file_path);
       if (fbufp)
@@ -2809,6 +2816,11 @@ static void nvt_log_data_to_csv(FAR void *arg)
   /* saved header info to csv file */
 
   ret = read(fp, fbufp, 1);
+  if (ret <= 0)
+    {
+      ierr("ERROR: %s Read error\n", __func__);
+    }
+
   if (fbufp[0] != 'L')
     {
       sprintf(fbufp, "LogVer:''2.0'',TLVer:''Driver'',ChipID:''38350'',"
@@ -2829,7 +2841,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
 
   localtime_r(&ts.tv_sec, &tm);
 
-  ret = strftime(date_buf, 64, "%e/%m/%Y %H:%M:%S", &tm);
+  strftime(date_buf, 64, "%e/%m/%Y %H:%M:%S", &tm);
 
   input_x1 = (uint32_t)((priv->point_xdata_temp[1]) << 4) +
                        (uint32_t) ((priv->point_xdata_temp[3]) >> 4);
@@ -2842,8 +2854,8 @@ static void nvt_log_data_to_csv(FAR void *arg)
   fw_frame_cnt = (int32_t)((priv->point_xdata_temp[89]) +
                        256 * priv->point_xdata_temp[90]);
 
-  sprintf(fbufp, "timestamp: %s,Frame index: %5d ,"
-            "RawData: ,%2X,%4X,%5d,%5d,%5d,%5d\r\n",
+  sprintf(fbufp, "timestamp: %s,Frame index: %5ld ,"
+            "RawData: ,%2X,%4X,%5ld,%5ld,%5ld,%5ld\r\n",
             date_buf, fw_frame_cnt, priv->fw_ver,
             priv->nvt_pid, input_x1, input_y1, input_x2, input_y2);
   for (y = 0; y < priv->y_num; y++)
@@ -2885,7 +2897,6 @@ static void nvt_log_data_to_csv(FAR void *arg)
       if (fp)
         {
           close(fp);
-          fp = NULL;
         }
 
       if (fbufp)
@@ -2900,7 +2911,6 @@ static void nvt_log_data_to_csv(FAR void *arg)
   if (fp)
     {
       close(fp);
-      fp = NULL;
     }
 
   if (fbufp)
@@ -2927,7 +2937,7 @@ static void nvt_print_data_log_in_one_line(int32_t *data,
 
   for (i = 0; i < data_num; i++)
     {
-      sprintf(tmp_log + i * 7, "%5d, ", data[i]);
+      sprintf(tmp_log + i * 7, "%5ld, ", data[i]);
     }
 
   tmp_log[data_num * 7] = '\0';
@@ -3000,7 +3010,7 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
   int32_t  iarrayindex = 0;
   int32_t  write_ret = 0;
   uint32_t output_len = 0;
-  struct file *fp = NULL;
+  int fp = -1;
 
   fbufp = (char *)kmm_zalloc(1024);
   if (!fbufp)
@@ -3014,7 +3024,7 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
       for (x = 0; x < x_ch; x++)
         {
           iarrayindex = y * x_ch + x;
-          sprintf(fbufp + iarrayindex * 7 + y * 2, "%5d, ",
+          sprintf(fbufp + iarrayindex * 7 + y * 2, "%5ld, ",
                   rawdata[iarrayindex]);
         }
 
@@ -3031,7 +3041,7 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
       fp = open(file_path, O_RDWR | O_CREAT);
     }
 
-  if (fp == NULL)
+  if (fp < 0)
     {
       ierr("ERROR: open %s failed\n", file_path);
       if (fbufp)
@@ -3057,7 +3067,6 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
       if (fp)
         {
           close(fp);
-          fp = NULL;
         }
 
       if (fbufp)
@@ -3072,7 +3081,6 @@ static int32_t nvt_save_rawdata_to_csv(int32_t *rawdata,
   if (fp)
     {
       close(fp);
-      fp = NULL;
     }
 
   if (fbufp)
@@ -3313,8 +3321,6 @@ static int32_t rawdatatest_singlepoint_sub(FAR int32_t raw_data[],
 static int32_t nvt_read_baseline(FAR struct nt38350_dev_s *priv,
                                  FAR struct nvt_mp_test_s *mp)
 {
-  int32_t iarrayindex = 0;
-
   nvt_read_mdata(priv, priv->mmap->baseline_addr,
                  priv->mmap->baseline_btn_addr, mp->raw_data);
 
@@ -3390,14 +3396,14 @@ static int32_t nvt_read_fw_noise(FAR struct nt38350_dev_s *priv,
 
   /* ---Enter Test Mode--- */
 
-  rawdata_diff_max = (int8_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
+  rawdata_diff_max = (int32_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
   if (!rawdata_diff_max)
     {
       ierr("ERROR: kzalloc for rawdata_diff_max failed!\n");
       return -ENOMEM;
     }
 
-  rawdata_diff_min = (int8_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
+  rawdata_diff_min = (int32_t *)kmm_zalloc(NVT_RAWDATA_BUFSIZE);
   if (!rawdata_diff_min)
     {
       ierr("ERROR: kzalloc for rawdata_diff_min failed!\n");
@@ -4110,6 +4116,7 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
         default:
           break;
         }
+
       dev->current_state = pmstate;
     }
 }
@@ -4167,14 +4174,12 @@ static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
           *ptr = (uint32_t)priv->fw_ver;
         }
         break;
-#ifdef CONFIG_NVT_OFFLINE_LOG
       case TSIOC_GETNVTDIFF:  /* arg: Pointer to struct nvt_diff_s */
         {
           FAR struct nvt_diff_s *ptr = (FAR struct nvt_diff_s *)arg;
           nvt_diff_show(priv, ptr);
         }
         break;
-#endif
 #ifdef CONFIG_NVT_TOUCH_MP
       case TSIOC_SELFTEST:  /* arg: Pointer to struct nvt_mp_test_s */
         {
