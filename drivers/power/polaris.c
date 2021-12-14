@@ -73,6 +73,10 @@ static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
                                   int value);
 static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
                             uintptr_t param);
+static int stwlc38_chipid(FAR struct battery_charger_dev_s *dev,
+                           unsigned int *value);
+static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                int *value);
 
 /* Charger rx interrupt functions */
 
@@ -824,6 +828,8 @@ static const struct battery_charger_operations_s g_stwlc38ops =
   stwlc38_current,
   stwlc38_input_current,
   stwlc38_operate,
+  stwlc38_chipid,
+  stwlc38_get_voltage,
 };
 
 static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
@@ -901,8 +907,6 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
 
   while (count)
     {
-      batinfo("[WLC] the left %d time to try i2c0 status.. \n", count);
-      count--;
       err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG,
                          (uint8_t *)&reg_value, 2);
       if (err != OK)
@@ -913,11 +917,22 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
             }
           else
             {
+              count--;
+              batinfo("[WLC] left %d time to try i2c0 status.. \n", count);
               usleep(AFTER_SYS_RESET_SLEEP_MS);
               continue;
             }
         }
+      else
+        {
+          break;
+        }
     }
+
+  err = fw_i2c_read(priv, WLC_RX_VOUT_REG, (uint8_t *)&reg_value, 2);
+  batinfo("[WLC] rx output voltage is %d\n", reg_value);
+  err = fw_i2c_read(priv, WLC_RX_IOUT_REG, (uint8_t *)&reg_value, 2);
+  batinfo("[WLC] rx output curerent is %d\n", reg_value);
 
   return OK;
 }
@@ -940,6 +955,7 @@ static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
                                   FAR int value)
 {
+  batinfo("Unsupported setup input current limit!");
   return OK;
 }
 
@@ -1013,6 +1029,59 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
     }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: stwlc38_chipid
+ *
+ * Description:
+ *       Get chip id
+ *
+ ****************************************************************************/
+
+static int stwlc38_chipid(FAR struct battery_charger_dev_s *dev,
+                           unsigned int *value)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  struct polaris_chip_info chip_info;
+
+  if (get_polaris_chip_info(priv, &chip_info) < OK)
+    {
+      baterr("[WLC] Error in reading polaris_chip_info\n");
+      return E_BUS_R;
+    }
+
+  *value = chip_info.chip_id;
+
+  batinfo("the chipid of stwlc38 is: %d\n", *value);
+  return OK;
+}
+
+/****************************************************************************
+ * Name: stwlc38_get_voltage
+ *
+ * Description:
+ *   Get the actual output voltage from rx
+ *
+ ****************************************************************************/
+
+static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                int *value)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  uint8_t read_buff[2];
+
+  memset(read_buff, 0, 2);
+  if (fw_i2c_read(priv, WLC_RX_VOUT_REG, read_buff, 2) < OK)
+    {
+      baterr("[WLC] Error in reading WLC_RX_VOUT_REG\n");
+      return E_BUS_R;
+    }
+
+  *value = read_buff[1] << 8 | read_buff[0];
+
+  batinfo("The the actual output voltage of stwlc38 is %d mv", *value);
+  return OK;
 }
 
 static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
