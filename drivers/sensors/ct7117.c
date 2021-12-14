@@ -115,8 +115,6 @@ struct ct7117_dev_s
 {
   struct sensor_lowerhalf_s lower;          /* Lower half driver. */
   FAR const struct ct7117_config_s *config; /* The board config function. */
-  uint64_t start_timestamp;                 /* Start timestamp(us). */
-  uint64_t sample_count;                    /* The count of sampling */
   bool activated;                           /* Sensor working state. */
   unsigned int interval;                    /* Sensor acquisition interval. */
   struct work_s work;                       /* Work queue for reading data. */
@@ -511,9 +509,6 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
           return ret;
         }
 
-      priv->start_timestamp = sensor_get_timestamp();
-      priv->sample_count = 1;
-
       work_queue(LPWORK, &priv->work,
                  ct7117_worker, priv,
                  priv->interval / USEC_PER_TICK);
@@ -746,7 +741,6 @@ static void ct7117_worker(FAR void *arg)
 {
   struct sensor_event_temp tmp;
   FAR struct ct7117_dev_s *priv = arg;
-  int interval;
 
   DEBUGASSERT(priv != NULL);
 
@@ -754,25 +748,10 @@ static void ct7117_worker(FAR void *arg)
 
   tmp.timestamp = sensor_get_timestamp();
 
-  /* Update the number of sampling points. */
-
-  priv->sample_count++;
-
-  /* Get fixed interval. */
-
-  interval = priv->start_timestamp +
-             priv->sample_count * priv->interval -
-             tmp.timestamp;
-
-  /* If it is negative, need to start immediately to compensate the time. */
-
-  if (interval < 0)
-    {
-      interval = 0;
-    }
+  /* Set work queue. */
 
   work_queue(LPWORK, &priv->work, ct7117_worker,
-             priv, interval / USEC_PER_TICK);
+             priv, priv->interval / USEC_PER_TICK);
 
   if (ct7117_readtemp(priv, &tmp) >= 0)
     {
