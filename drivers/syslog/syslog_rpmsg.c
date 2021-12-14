@@ -367,7 +367,6 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   char prev;
   char cur;
   size_t i;
-  size_t j;
 
   nxsem_init(&priv->sem, 0, 0);
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
@@ -375,30 +374,27 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   priv->buffer  = buffer;
   priv->size    = size;
 
-  prev = (priv->buffer[size - 1] >> (CHAR_BIT - 8)) & 0xff;
+  prev = priv->buffer[size - 1];
 
   for (i = 0; i < size; i++)
     {
-      for (j = 0; j * 8 < CHAR_BIT; j++)
+      cur = priv->buffer[i];
+
+      if (!isascii(cur))
         {
-          cur = (priv->buffer[i] >> j * 8) & 0xff;
-
-          if (!isascii(cur))
-            {
-              memset(priv->buffer, 0, size);
-              break;
-            }
-          else if (prev && !cur)
-            {
-              priv->head = (i) + j;
-            }
-          else if (!prev && cur)
-            {
-              priv->tail = i;
-            }
-
-          prev = cur;
+          memset(priv->buffer, 0, size);
+          break;
         }
+      else if (prev && !cur)
+        {
+          priv->head = i;
+        }
+      else if (!prev && cur)
+        {
+          priv->tail = i;
+        }
+
+      prev = cur;
     }
 
   if (i != size)
