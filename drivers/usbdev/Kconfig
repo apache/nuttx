@@ -828,7 +828,7 @@ endif # !USBMSC_COMPOSITE
 
 config USBMSC_VERSIONNO
 	hex "USB MSC Version Number"
-	default "0x399"
+	default 0x399
 
 config USBMSC_REMOVABLE
 	bool "Mass storage removable"
