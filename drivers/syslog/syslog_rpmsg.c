@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <string.h>
@@ -45,8 +46,11 @@
 
 #define SYSLOG_RPMSG_WORK_DELAY MSEC2TICK(CONFIG_SYSLOG_RPMSG_WORK_DELAY)
 
-#define SYSLOG_RPMSG_COUNT(p)   ((p)->head - (p)->tail)
-#define SYSLOG_RPMSG_SPACE(p)   ((p)->size - 1 - SYSLOG_RPMSG_COUNT(p))
+#define SYSLOG_RPMSG_COUNT(p)       ((p)->head - (p)->tail)
+#define SYSLOG_RPMSG_SPACE(p)       ((p)->size - 1 - SYSLOG_RPMSG_COUNT(p))
+#define SYSLOG_RPMSG_HEADOFF(p)     ((p)->head & ((p)->size -1))
+#define SYSLOG_RPMSG_TAILOFF(p)     ((p)->tail & ((p)->size -1))
+#define SYSLOG_RPMSG_FLUSHOFF(p)    ((p)->flush & ((p)->size -1))
 
 /****************************************************************************
  * Private Types
@@ -122,7 +126,7 @@ static void syslog_rpmsg_work(FAR void *priv_)
 
   space  -= sizeof(*msg);
   len     = SYSLOG_RPMSG_COUNT(priv);
-  off     = priv->tail % priv->size;
+  off     = SYSLOG_RPMSG_TAILOFF(priv);
   len_end = priv->size - off;
 
   if (len > space)
@@ -171,7 +175,7 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
             {
               /* Overwrite */
 
-              priv->buffer[priv->tail % priv->size] = 0;
+              priv->buffer[SYSLOG_RPMSG_TAILOFF(priv)] = 0;
               priv->tail += 1;
 
               if (priv->transfer)
@@ -188,7 +192,7 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
         }
     }
 
-  priv->buffer[priv->head % priv->size] = ch & 0xff;
+  priv->buffer[SYSLOG_RPMSG_HEADOFF(priv)] = ch & 0xff;
   priv->head = next;
 
   if (last && !priv->suspend && !priv->transfer &&
@@ -271,7 +275,7 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
 
       if (priv->trans_len > 0)
         {
-          off = priv->tail % priv->size;
+          off = SYSLOG_RPMSG_TAILOFF(priv);
           len_end = priv->size - off;
 
           if (priv->trans_len > len_end)
@@ -337,7 +341,8 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 
   while (priv->flush < priv->head)
     {
-      up_putc(priv->buffer[priv->flush++ % priv->size]);
+      up_putc(priv->buffer[SYSLOG_RPMSG_FLUSHOFF(priv)]);
+      priv->flush++;
     }
 
   leave_critical_section(flags);
@@ -370,6 +375,8 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
   char prev;
   char cur;
   size_t i;
+
+  DEBUGASSERT((size & (size - 1)) == 0);
 
   nxsem_init(&priv->sem, 0, 0);
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
