@@ -228,6 +228,34 @@ config DAC7554
 	---help---
 		Enable driver support for the Texas Instruments DAC7554 dac.
 
+config MCP48XX
+	bool "MCP4802/4812/4822 support"
+	default n
+	select SPI
+	---help---
+		Enable driver support for the Microchip MCP4802/4812/4822 dac.
+
+choice
+	prompt "MCP48XX variant"
+	default MCP4802
+	depends on MCP48XX
+
+config MCP4802
+	bool "MCP4802 (8-bit) dac"
+
+config MCP4812
+	bool "MCP4812 (10-bit) dac"
+
+config MCP4822
+	bool "MCP4822 (12-bit) dac"
+
+endchoice # MCP48XX variant
+
+config MCP48XX_SPI_FREQUENCY
+	int "MCP48XX SPI frequency"
+	default 4000000
+	depends on MCP48XX
+
 endif # DAC
 
 config OPAMP
