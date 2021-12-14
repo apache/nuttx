@@ -81,6 +81,7 @@ begin_packed_struct struct ioe_rpmsg_direction_s
 begin_packed_struct struct ioe_rpmsg_option_s
 {
   struct ioe_rpmsg_header_s    header;
+  uint64_t                     val;
   uint32_t                     opt;
   uint8_t                      pin;
 } end_packed_struct;
@@ -345,6 +346,7 @@ static int ioe_rpmsg_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   msg.pin = pin;
   msg.opt = opt;
+  msg.val = (uintptr_t)regval;
 
   return ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_OPTION,
                            (struct ioe_rpmsg_header_s *)&msg,
@@ -414,7 +416,7 @@ static int ioe_rpmsg_option_handler(FAR struct rpmsg_endpoint *ept,
 
   msg->header.result = IOEXP_SETOPTION(priv->ioe,
                                        msg->pin, msg->opt,
-                                       NULL);
+                                       (void *)(uintptr_t)msg->val);
 
   return rpmsg_send(ept, msg, len);
 }
