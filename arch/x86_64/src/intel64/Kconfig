@@ -7,16 +7,16 @@ if ARCH_INTEL64
 comment "intel64 Configuration Options"
 
 config ARCH_INTEL64_HAVE_TSC_DEADLINE
-    bool "TSC DEADLINE timer support"
-    default y
+	bool "TSC DEADLINE timer support"
+	default y
 	---help---
 		Select to enable the use of TSC DEADLINE timer of x86_64
 
 if ARCH_INTEL64_HAVE_TSC_DEADLINE
 
 config ARCH_INTEL64_CORE_FREQ_KHZ
-    int "CPU Core frequency in kHz"
-    default 2000000
+	int "CPU Core frequency in kHz"
+	default 2000000
 	---help---
 		The CPU Core frequency (without Turbo boost). This is used
 		to set the TSC deadline timer frequency.
@@ -26,8 +26,8 @@ endif
 if !ARCH_INTEL64_HAVE_TSC_DEADLINE
 
 config ARCH_INTEL64_APIC_FREQ_KHZ
-    int "APIC timer frequency in kHz"
-    default 2000000
+	int "APIC timer frequency in kHz"
+	default 2000000
 	---help---
 		The APIC timer frequency. This is used to set the APIC timer
 		frequency in case of no TSC DEADLINE timer is available.
@@ -35,27 +35,27 @@ config ARCH_INTEL64_APIC_FREQ_KHZ
 endif
 
 config ARCH_INTEL64_HAVE_XSAVE
-    bool "XSAVE support"
-    default y
+	bool "XSAVE support"
+	default y
 	---help---
 		Select to enable the use of XSAVE and FPU/SSE/AVX functions
 		of x86_64
 
 config ARCH_INTEL64_HAVE_PCID
-    bool "PCID support"
-    default y
+	bool "PCID support"
+	default y
 	---help---
 		Select to enable the use of PCID to reduce TLB flush
 
 config ARCH_INTEL64_HAVE_RDRAND
-    bool "RDRAND support"
-    default y
+	bool "RDRAND support"
+	default y
 	---help---
 		Select to enable the use of RDRAND for /dev/random
 
 config ARCH_INTEL64_DISABLE_INT_INIT
-    bool "Disable Initialization of 8259/APIC/IO-APIC"
-    default n
+	bool "Disable Initialization of 8259/APIC/IO-APIC"
+	default n
 	---help---
 		Select to disable all initialization related to interrupt
 		controllers. This is necessary if those are already

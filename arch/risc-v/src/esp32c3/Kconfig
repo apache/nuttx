@@ -830,7 +830,7 @@ choice ESP32C3_WIFI_LOG_LEVEL
 	depends on DEBUG_INFO
 	prompt "WiFi debug log level"
 	default WIFI_LOG_LEVEL_INFO
-	help
+	---help---
 		The WiFi log is divided into the following levels: ERROR,WARNING,INFO,DEBUG,VERBOSE.
 
 	config WIFI_LOG_LEVEL_NONE
@@ -926,8 +926,8 @@ config ESP32C3_MTD
 	select MTD_BYTE_WRITE
 	select MTD_PARTITION
 	---help---
-	       Initialize an MTD driver for the ESP32-C3 SPI Flash, which will
-               add an entry at /dev for application access from userspace.
+		Initialize an MTD driver for the ESP32-C3 SPI Flash, which will
+		add an entry at /dev for application access from userspace.
 
 config ESP32C3_STORAGE_MTD_BLKSIZE
 	int "Storage MTD block size"

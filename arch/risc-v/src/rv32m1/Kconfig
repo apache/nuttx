@@ -13,7 +13,7 @@ choice
 config ARCH_CHIP_RV32M1_RI5CY
 	bool "RV32M1_RI5CY"
 	select RV32M1_HAVE_ITCM
-    select RV32M1_HAVE_TSTMR
+	select RV32M1_HAVE_TSTMR
 	---help---
 		RV32M1 RI5CY, RV32IMC 256KB SRAM, 1MB FLASH.
 
@@ -45,52 +45,52 @@ config RV32M1_HAVE_ITCM
 	default n
 
 config RV32M1_HAVE_TSTMR
-    bool
-    default y
+	bool
+	default y
 
 config RV32M1_LPUART
-    bool
-    default n
+	bool
+	default n
 
 config RV32M1_SERIALDRIVER
-    bool
-    default n
+	bool
+	default n
 
 # These are the peripheral selections proper
 
 config RV32M1_LPUART0
 	bool "LPUART0"
 	default n
-    depends on RV32M1_HAVE_LPUART0
-    select RV32M1_LPUART
+	depends on RV32M1_HAVE_LPUART0
+	select RV32M1_LPUART
 
 config RV32M1_LPUART1
 	bool "LPUART1"
 	default n
-    depends on RV32M1_HAVE_LPUART1
-    select RV32M1_LPUART
+	depends on RV32M1_HAVE_LPUART1
+	select RV32M1_LPUART
 
 config RV32M1_LPUART2
 	bool "LPUART2"
 	default n
-    depends on RV32M1_HAVE_LPUART2
-    select RV32M2_LPUART
+	depends on RV32M1_HAVE_LPUART2
+	select RV32M2_LPUART
 
 config RV32M1_LPUART3
 	bool "LPUART3"
 	default n
-    depends on RV32M1_HAVE_LPUART3
-    select RV32M2_LPUART
+	depends on RV32M1_HAVE_LPUART3
+	select RV32M2_LPUART
 
 config RV32M1_ITCM
 	bool "ITCM"
 	default n
-    depends on RV32M1_HAVE_ITCM
+	depends on RV32M1_HAVE_ITCM
 
 config RV32M1_TSTMR
 	bool "TSTMR"
 	default n
-    depends on RV32M1_HAVE_TSTMR
+	depends on RV32M1_HAVE_TSTMR
 
 menu "LPUART Configuration"
 	depends on RV32M1_LPUART
@@ -106,7 +106,7 @@ config RV32M1_LPUART0_SERIALDRIVER
 	bool "Standard serial driver"
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select RV32M1_SERIALDRIVER
-    select LPUART0_SERIALDRIVER
+	select LPUART0_SERIALDRIVER
 
 endchoice # LPUART0 Driver Configuration
 
@@ -123,7 +123,7 @@ config RV32M1_LPUART1_SERIALDRIVER
 	bool "Standard serial driver"
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select RV32M1_SERIALDRIVER
-    select LPUART1_SERIALDRIVER
+	select LPUART1_SERIALDRIVER
 
 endchoice # LPUART1 Driver Configuration
 
@@ -140,7 +140,7 @@ config RV32M1_LPUART2_SERIALDRIVER
 	bool "Standard serial driver"
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select RV32M1_SERIALDRIVER
-    select LPUART2_SERIALDRIVER
+	select LPUART2_SERIALDRIVER
 
 endchoice # LPUART2 Driver Configuration
 
@@ -157,7 +157,7 @@ config RV32M1_LPUART3_SERIALDRIVER
 	bool "Standard serial driver"
 	select ARCH_HAVE_SERIAL_TERMIOS
 	select RV32M1_SERIALDRIVER
-    select LPUART3_SERIALDRIVER
+	select LPUART3_SERIALDRIVER
 
 endchoice # LPUART3 Driver Configuration
 
