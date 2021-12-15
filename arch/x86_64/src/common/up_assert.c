@@ -69,6 +69,10 @@ static void up_stackdump(uint64_t sp, uint64_t stack_top)
 {
   uint64_t stack;
 
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;

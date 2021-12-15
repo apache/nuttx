@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/syslog/syslog.h>
 
 #include <debug.h>
 
@@ -68,8 +69,12 @@ static void z16_stackdump(void)
       stack = stack_base;
     }
 
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
   for (stack = stack & ~0x0f;
-       stack < stack_base + stack_size;
+       stack < ((stack_base + stack_size) & ~0x0f);
        stack += 8 * sizeof(chipreg_t))
     {
       chipreg_t *ptr = (chipreg_t *)stack;
