@@ -3115,6 +3115,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
     {
       priv->rxbuffer = buffer;
       priv->rxend    = buffer + buflen;
+      up_invalidate_dcache((uintptr_t)priv->rxbuffer,
+                           (uintptr_t)priv->rxend);
     }
 
   /* Start the DMA */
