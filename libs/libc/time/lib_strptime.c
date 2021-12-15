@@ -414,7 +414,7 @@ _conv_num(const unsigned char **buf, int *dest, int llim, int ulim)
     int rulim = ulim;
 
     while (isspace(**buf))
-        *buf++;
+        (*buf)++;
 
     if (**buf < '0' || **buf > '9')
         return (0);
