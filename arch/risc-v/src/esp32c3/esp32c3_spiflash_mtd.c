@@ -47,12 +47,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define MTD_BLK_SIZE                CONFIG_ESP32C3_STORAGE_MTD_BLKSIZE
+#define MTD_BLK_SIZE                CONFIG_ESP32C3_SPIFLASH_MTD_BLKSIZE
 #define MTD_ERASE_SIZE              4096
 #define MTD_ERASED_STATE            (0xff)
-
-#define MTD_PART_OFFSET             CONFIG_ESP32C3_STORAGE_MTD_OFFSET
-#define MTD_PART_SIZE               CONFIG_ESP32C3_STORAGE_MTD_SIZE
 
 #define MTD2PRIV(_dev)              ((struct esp32c3_mtd_dev_s *)_dev)
 #define MTD_SIZE(_priv)             ((*(_priv)->data)->chip.chip_size)
@@ -638,12 +635,13 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
     {
       case MTDIOC_GEOMETRY:
         {
+          struct esp32c3_mtd_dev_s *priv = (struct esp32c3_mtd_dev_s *)dev;
           struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = MTD_BLK_SIZE;
               geo->erasesize    = MTD_ERASE_SIZE;
-              geo->neraseblocks = MTD_PART_SIZE / MTD_ERASE_SIZE;
+              geo->neraseblocks = MTD_SIZE(priv) / MTD_ERASE_SIZE;
               ret               = OK;
 
               finfo("blocksize: %" PRId32 " erasesize: %" PRId32 \
@@ -655,10 +653,11 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
 
       case BIOC_PARTINFO:
         {
+          struct esp32c3_mtd_dev_s *priv = (struct esp32c3_mtd_dev_s *)dev;
           struct partition_info_s *info = (struct partition_info_s *)arg;
           if (info != NULL)
             {
-              info->numsectors  = MTD_PART_SIZE / MTD_BLK_SIZE;
+              info->numsectors  = MTD_SIZE(priv) / MTD_BLK_SIZE;
               info->sectorsize  = MTD_BLK_SIZE;
               info->startsector = 0;
               info->parent[0]   = '\0';
