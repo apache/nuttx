@@ -1033,14 +1033,15 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   bool       nonblock;
   int        ret = OK;
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_type != SOCK_STREAM ||
+      psock->s_conn == NULL)
     {
       nerr("ERROR: Invalid socket\n");
       ret = -EBADF;
       goto errout;
     }
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -1099,6 +1100,17 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       ssize_t chunk_result;
 
       net_lock();
+
+      /* Now that we have the network locked, we need to check the connection
+       * state again to ensure the connection is still valid.
+       */
+
+      if (!_SS_ISCONNECTED(psock->s_flags))
+        {
+          nerr("ERROR: No longer connected\n");
+          ret = -ENOTCONN;
+          goto errout_with_lock;
+        }
 
       /* Allocate resources to receive a callback */
 
