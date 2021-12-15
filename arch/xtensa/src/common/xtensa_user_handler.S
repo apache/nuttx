@@ -71,6 +71,22 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" the interrupt stack.
+ *   Single CPU case.
+ *   Must be provided by MCU-specific logic in the SMP case.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+	.macro	setintstack tmp1 tmp2
+	movi		a1, g_intstacktop
+	.endm
+#endif
+
+/****************************************************************************
  * Macro: ps_setup
  *
  * Description:
@@ -209,6 +225,18 @@ _xtensa_user_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it,
+	* it's the register save area.
+	*/
+
+	mov	a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
+
 	/* Save exc cause and vaddr into exception frame */
 
 	rsr		a0, EXCCAUSE
@@ -249,17 +277,18 @@ _xtensa_user_handler:
 
 #ifdef __XTENSA_CALL0_ABI__
 	rsr		a2, EXCCAUSE					/* Argument 1 (a2) = EXCCAUSE */
-	mov		a3, sp							/* Argument 2 (a3) = pointer to register save area */
+	mov		a3, a12							/* Argument 2 (a3) = pointer to register save area */
 	calx0	xtensa_user						/* Call xtensa_user */
 #else
 	rsr		a6, EXCCAUSE					/* Argument 1 (a6) = EXCCAUSE */
-	mov		a7, sp							/* Argument 2 (a7) = pointer to register save area */
+	mov		a7, a12							/* Argument 2 (a7) = pointer to register save area */
 	call4	xtensa_user						/* Call xtensa_user */
-	mov		a2, a6
+	mov		a12, a6
 #endif
 
 	/* Restore registers in preparation to return from interrupt */
 
+	mov		a2, a12							/* a2 = address of new state save area */
 	call0	_xtensa_context_restore			/* (Preserves a2) */
 
 	/* Restore only level-specific regs (the rest were already restored) */
@@ -360,6 +389,12 @@ _xtensa_syscall_handler:
 
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -483,6 +518,12 @@ _xtensa_coproc_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Save exc cause and vaddr into exception frame */
 

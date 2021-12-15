@@ -67,6 +67,26 @@
 #include "chip.h"
 
 /****************************************************************************
+ * Assembly Language Macros
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" the interrupt stack.
+ *   Single CPU case.
+ *   Must be provided by MCU-specific logic in the SMP case.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+	.macro	setintstack tmp1 tmp2
+	movi		a1, g_intstacktop
+	.endm
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -108,6 +128,12 @@ _xtensa_panic:
 
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Save exc cause and vaddr into exception frame */
 
