@@ -45,6 +45,8 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/kthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,6 +108,16 @@ static int     uart_poll(FAR struct file *filep,
                          FAR struct pollfd *fds, bool setup);
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+/* Lanch program entry, this must be supplied by the application. */
+
+int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, char *argv[]);
+#endif
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -122,6 +134,10 @@ static const struct file_operations g_serialops =
   , NULL      /* unlink */
 #endif
 };
+
+#ifdef CONFIG_TTY_LAUNCH
+static struct work_s g_serial_work;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -1610,6 +1626,58 @@ errout:
 }
 
 /****************************************************************************
+ * Name: uart_nxsched_foreach_cb
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH
+static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
+{
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_ENTRYNAME))
+#else
+  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_FILEPATH))
+#endif
+    {
+      *(int *)arg = 1;
+    }
+}
+
+static void uart_launch_worker(void *arg)
+{
+#ifdef CONFIG_TTY_LAUNCH_ARGS
+  FAR char *const argv[] =
+  {
+    CONFIG_TTY_LAUNCH_ARGS,
+    NULL,
+  };
+#else
+  FAR char *const *argv = NULL;
+#endif
+  int found = 0;
+
+  nxsched_foreach(uart_launch_foreach, &found);
+  if (!found)
+    {
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+      nxtask_create(CONFIG_TTY_LAUNCH_ENTRYNAME,
+                    CONFIG_TTY_LAUNCH_PRIORITY,
+                    CONFIG_TTY_LAUNCH_STACKSIZE,
+                    (main_t)CONFIG_TTY_LAUNCH_ENTRYPOINT,
+                    argv);
+#else
+      posix_spawnattr_t attr;
+
+      posix_spawnattr_init(&attr);
+
+      attr.priority  = CONFIG_TTY_LAUNCH_PRIORITY;
+      attr.stacksize = CONFIG_TTY_LAUNCH_STACKSIZE;
+      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH, argv, NULL, 0, &attr);
+#endif
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1817,3 +1885,19 @@ void uart_reset_sem(FAR uart_dev_t *dev)
   nxsem_reset(&dev->recv.sem, 1);
   nxsem_reset(&dev->pollsem,  1);
 }
+
+/****************************************************************************
+ * Name: uart_launch
+ *
+ * Description:
+ *   This function is called when user want launch a new program by
+ *   using a special char.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH
+void uart_launch(void)
+{
+  work_queue(HPWORK, &g_serial_work, uart_launch_worker, NULL, 0);
+}
+#endif

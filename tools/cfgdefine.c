@@ -60,6 +60,8 @@ static const char *dequote_list[] =
   "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",                  /* Pass1 build target */
   "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */
+  "CONFIG_TTY_LAUNCH_ENTRYPOINT",         /* Name of entry point from tty launch */
+  "CONFIG_TTY_LAUNCH_ARGS",               /* Argument list of entry point from tty launch */
 
   /* NxWidgets/NxWM */
 

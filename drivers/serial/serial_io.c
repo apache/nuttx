@@ -252,6 +252,17 @@ void uart_recvchars(FAR uart_dev_t *dev)
         }
       else
 #endif
+#ifdef CONFIG_TTY_LAUNCH
+      /* Is this the special character that will generate the SIGTSTP
+       * signal?
+       */
+
+      if ((dev->tc_lflag & ISIG) && ch == CONFIG_TTY_LAUNCH_CHAR)
+        {
+          uart_launch();
+        }
+      else
+#endif
 
       /* If the RX buffer becomes full, then the serial data is discarded.
        * This is necessary because on most serial hardware, you must read
