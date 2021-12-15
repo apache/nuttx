@@ -495,6 +495,19 @@ void uart_recvchars_done(FAR uart_dev_t *dev);
 
 void uart_reset_sem(FAR uart_dev_t *dev);
 
+/****************************************************************************
+ * Name: uart_lanch
+ *
+ * Description:
+ *   This function is called when user want lanch a new program by
+ *   using a special char.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH
+void uart_launch(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
