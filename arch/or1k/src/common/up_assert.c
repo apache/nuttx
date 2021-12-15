@@ -32,6 +32,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/board/board.h>
@@ -74,6 +75,10 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
 static void up_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
+
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
 
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {

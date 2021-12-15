@@ -30,6 +30,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -69,7 +70,11 @@ static void rx65n_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp & ~7; stack < stack_top; stack += 8) /* check */
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
+  for (stack = sp & ~7; stack < (stack_top & ~7); stack += 8) /* check */
 
     {
       uint8_t *ptr = (uint8_t *)&stack;
