@@ -531,7 +531,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
 
   /* Verify that the sockfd corresponds to valid, allocated socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (psock == NULL || psock->s_type != SOCK_STREAM ||
+      psock->s_conn == NULL)
     {
       nerr("ERROR: Invalid socket\n");
       ret = -EBADF;
@@ -543,7 +544,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * guarantee the state won't change until we have the network locked.
    */
 
-  if (psock->s_type != SOCK_STREAM)
+  if (!_SS_ISCONNECTED(psock->s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
