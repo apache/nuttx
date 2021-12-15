@@ -929,25 +929,10 @@ config ESP32C3_MTD
 	       Initialize an MTD driver for the ESP32-C3 SPI Flash, which will
                add an entry at /dev for application access from userspace.
 
-config ESP32C3_STORAGE_MTD_BLKSIZE
+config ESP32C3_SPIFLASH_MTD_BLKSIZE
 	int "Storage MTD block size"
 	default 64
 	depends on ESP32C3_MTD
-
-config ESP32C3_STORAGE_MTD_OFFSET
-	hex "Storage MTD base address in SPI Flash"
-	default 0x180000 if !ESP32C3_HAVE_OTA_PARTITION
-	default 0x250000 if ESP32C3_HAVE_OTA_PARTITION
-	depends on ESP32C3_MTD
-	---help---
-		MTD base address in SPI Flash.
-
-config ESP32C3_STORAGE_MTD_SIZE
-	hex "Storage MTD size in SPI Flash"
-	default 0x100000
-	depends on ESP32C3_MTD
-	---help---
-		MTD size in SPI Flash.
 
 config ESP32C3_STORAGE_MTD_DEBUG
 	bool "Storage MTD Debug"

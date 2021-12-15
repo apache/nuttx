@@ -50,10 +50,25 @@ config ESP32C3_MERGE_BINS
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
 
+config ESP32C3_STORAGE_MTD_OFFSET
+	hex "Storage MTD base address in SPI Flash"
+	default 0x180000 if !ESP32C3_HAVE_OTA_PARTITION
+	default 0x250000 if ESP32C3_HAVE_OTA_PARTITION
+	depends on ESP32C3_MTD
+	---help---
+		MTD base address in SPI Flash.
+
+config ESP32C3_STORAGE_MTD_SIZE
+	hex "Storage MTD size in SPI Flash"
+	default 0x100000
+	depends on ESP32C3_MTD
+	---help---
+		MTD size in SPI Flash.
+
 choice ESP32C3_SPIFLASH_FS
 	prompt "Mount SPI Flash MTD on bring-up"
 	default ESP32C3_SPIFLASH_SMARTFS
-	depends on ESP32C3_SPIFLASH
+	depends on ESP32C3_MTD
 	optional
 	---help---
 		Mount the SPI Flash MTD with the selected File System format on board
