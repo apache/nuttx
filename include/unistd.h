@@ -327,14 +327,12 @@ ssize_t pwrite(int fd, FAR const void *buf, size_t nbytes, off_t offset);
 int     ftruncate(int fd, off_t length);
 int     fchown(int fd, uid_t owner, gid_t group);
 
-#ifdef CONFIG_SERIAL_TERMIOS
 /* Check if a file descriptor corresponds to a terminal I/O file */
 
 int     isatty(int fd);
 
 FAR char *ttyname(int fd);
 int       ttyname_r(int fd, FAR char *buf, size_t buflen);
-#endif
 
 /* Memory management */
 
