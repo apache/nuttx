@@ -81,6 +81,7 @@
 #include <debug.h>
 #include <errno.h>
 #include <string.h>
+#include <inttypes.h>
 #include <nuttx/fs/fs.h>
 
 #include <nuttx/kmalloc.h>
@@ -472,7 +473,7 @@ static off_t ee24xx_seek(FAR struct file *filep, off_t offset, int whence)
     {
       filep->f_pos = newpos;
       ret = newpos;
-      finfo("SEEK newpos %d\n", newpos);
+      finfo("SEEK newpos %" PRIdOFF "\n", newpos);
     }
   else
     {
@@ -523,7 +524,7 @@ static ssize_t ee24xx_read(FAR struct file *filep, FAR char *buffer,
 
   /* Write data address */
 
-  finfo("READ %d bytes at pos %d\n", len, filep->f_pos);
+  finfo("READ %zu bytes at pos %" PRIdOFF "\n", len, filep->f_pos);
 
   addr_hi           = (filep->f_pos >> (eedev->addrlen << 3));
 
@@ -667,14 +668,14 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
       return -EFBIG;
     }
 
-  finfo("Entering with len=%d\n", len);
+  finfo("Entering with len=%zu\n", len);
 
   /* Clamp len to avoid crossing the end of the memory */
 
   if ((len + filep->f_pos) > eedev->size)
     {
       len = eedev->size - filep->f_pos;
-      finfo("Len clamped to %d\n", len);
+      finfo("Len clamped to %zu\n", len);
     }
 
   savelen = len; /* save number of bytes written */
@@ -703,7 +704,7 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
 
   if (pageoff > 0)
     {
-      finfo("First %d unaligned bytes at %d (pageoff %d)\n",
+      finfo("First %zu unaligned bytes at %" PRIdOFF " (pageoff %d)\n",
             cnt, filep->f_pos, pageoff);
 
       ret = ee24xx_writepage(eedev, filep->f_pos, buffer, cnt);
@@ -735,7 +736,8 @@ static ssize_t ee24xx_write(FAR struct file *filep, FAR const char *buffer,
           cnt = eedev->pgsize;
         }
 
-      finfo("Aligned page write for %d bytes at %d\n", cnt, filep->f_pos);
+      finfo("Aligned page write for %zu bytes at %" PRIdOFF "\n",
+            cnt, filep->f_pos);
 
       ret = ee24xx_writepage(eedev, filep->f_pos, buffer, cnt);
       if (ret < 0)
