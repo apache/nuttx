@@ -31,9 +31,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
-#ifdef CONFIG_SERIAL_TERMIOS
-#  include <termios.h>
-#endif
+#include <termios.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/semaphore.h>

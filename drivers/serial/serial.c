@@ -1333,7 +1333,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
-#ifdef CONFIG_SERIAL_TERMIOS
           case TCFLSH:
             {
               /* Empty the tx/rx buffers */
@@ -1388,7 +1387,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = uart_tcdrain(dev, 10 * TICK_PER_SEC);
             }
             break;
-#endif
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           /* Make the controlling terminal of the calling process */
