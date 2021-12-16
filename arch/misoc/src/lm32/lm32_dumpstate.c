@@ -44,10 +44,10 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: lm32_stackdump
  ****************************************************************************/
 
-static void up_stackdump(uint32_t sp, uint32_t stack_top)
+static void lm32_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
@@ -65,43 +65,42 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
 }
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: lm32_registerdump
  ****************************************************************************/
 
-static inline void up_registerdump(void)
+static inline void lm32_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
   if (g_current_regs)
     {
       _alert("EPC:%08x \n",
-            g_current_regs[REG_EPC]);
+             g_current_regs[REG_EPC]);
       _alert(" X0:%08x  A0:%08x  A1:%08x  A2:%08x "
              " A3:%08x  A4:%08x  A5:%08x  A6:%08x\n",
-            g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],
-            g_current_regs[REG_X2_NDX], g_current_regs[REG_X3_NDX],
-            g_current_regs[REG_X4_NDX], g_current_regs[REG_X5_NDX],
-            g_current_regs[REG_X6_NDX], g_current_regs[REG_X7_NDX]);
+             g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],
+             g_current_regs[REG_X2_NDX], g_current_regs[REG_X3_NDX],
+             g_current_regs[REG_X4_NDX], g_current_regs[REG_X5_NDX],
+             g_current_regs[REG_X6_NDX], g_current_regs[REG_X7_NDX]);
       _alert(" A7:%08x  X9:%08x X10:%08x X11:%08x "
              "X12:%08x X13:%08x X14:%08x X15:%08x\n",
-            g_current_regs[REG_X8_NDX], g_current_regs[REG_X9_NDX],
-            g_current_regs[REG_X10_NDX], g_current_regs[REG_X11_NDX],
-            g_current_regs[REG_X12_NDX], g_current_regs[REG_X13_NDX],
-            g_current_regs[REG_X14_NDX], g_current_regs[REG_X15_NDX]);
+             g_current_regs[REG_X8_NDX], g_current_regs[REG_X9_NDX],
+             g_current_regs[REG_X10_NDX], g_current_regs[REG_X11_NDX],
+             g_current_regs[REG_X12_NDX], g_current_regs[REG_X13_NDX],
+             g_current_regs[REG_X14_NDX], g_current_regs[REG_X15_NDX]);
       _alert("X16:%08x X17:%08x X18:%08x X19:%08x "
              "X20:%08x X21:%08x X22:%08x X23:%08x\n",
-            g_current_regs[REG_X16_NDX], g_current_regs[REG_X17_NDX],
-            g_current_regs[REG_X18_NDX], g_current_regs[REG_X19_NDX],
-            g_current_regs[REG_X20_NDX], g_current_regs[REG_X21_NDX],
-            g_current_regs[REG_X22_NDX], g_current_regs[REG_X23_NDX]);
+             g_current_regs[REG_X16_NDX], g_current_regs[REG_X17_NDX],
+             g_current_regs[REG_X18_NDX], g_current_regs[REG_X19_NDX],
+             g_current_regs[REG_X20_NDX], g_current_regs[REG_X21_NDX],
+             g_current_regs[REG_X22_NDX], g_current_regs[REG_X23_NDX]);
       _alert("X24:%08x X25:%08x  GP:%08x  FP:%08x "
              " SP:%08x  RA:%08x  EA:%08x  BA:%08x\n",
-            g_current_regs[REG_X24_NDX], g_current_regs[REG_X25_NDX],
-            g_current_regs[REG_X26_NDX], g_current_regs[REG_X27_NDX],
-            g_current_regs[REG_X28_NDX], g_current_regs[REG_X29_NDX],
-            g_current_regs[REG_X30_NDX], g_current_regs[REG_X31_NDX]);
-      _alert(" IE:%08x\n",
-            g_current_regs[REG_X32_NDX]);
+             g_current_regs[REG_X24_NDX], g_current_regs[REG_X25_NDX],
+             g_current_regs[REG_X26_NDX], g_current_regs[REG_X27_NDX],
+             g_current_regs[REG_X28_NDX], g_current_regs[REG_X29_NDX],
+             g_current_regs[REG_X30_NDX], g_current_regs[REG_X31_NDX]);
+      _alert(" IE:%08x\n", g_current_regs[REG_X32_NDX]);
     }
 }
 
@@ -115,7 +114,7 @@ static inline void up_registerdump(void)
 
 void lm32_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -126,7 +125,7 @@ void lm32_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  lm32_registerdump();
 
   /* Get the limits on the user stack memory */
 
@@ -154,7 +153,7 @@ void lm32_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase + istacksize);
+      lm32_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
@@ -166,7 +165,7 @@ void lm32_dumpstate(void)
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      lm32_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */
@@ -186,12 +185,12 @@ void lm32_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      up_stackdump(sp, ustackbase + ustacksize);
+      lm32_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      lm32_stackdump(ustackbase, ustackbase + ustacksize);
     }
 }
 

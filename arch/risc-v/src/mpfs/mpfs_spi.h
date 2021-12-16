@@ -92,13 +92,13 @@ int mpfs_spibus_uninitialize(struct spi_dev_s *dev);
  ****************************************************************************/
 
 #ifdef CONFIG_MPFS_SPI0
-void weak_function mpfs_spi0_select(FAR struct spi_dev_s *dev,
-                        uint32_t devid, bool selected);
+void weak_function mpfs_spi0_select(struct spi_dev_s *dev,
+                                    uint32_t devid, bool selected);
 #endif
 
 #ifdef CONFIG_MPFS_SPI1
-void weak_function mpfs_spi1_select(FAR struct spi_dev_s *dev,
-                        uint32_t devid, bool selected);
+void weak_function mpfs_spi1_select(struct spi_dev_s *dev,
+                                    uint32_t devid, bool selected);
 #endif
 
 #ifdef __cplusplus

@@ -48,7 +48,7 @@ static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
  * Name: z180_registerdump
  ****************************************************************************/
 
-static void z180_registerdump(void)
+void z180_registerdump(void)
 {
   volatile chipreg_t *regs = g_current_regs;
 
@@ -59,15 +59,15 @@ static void z180_registerdump(void)
     }
 
   _alert("AF: %04x  I: %04x\n",
-        regs[XCPT_AF], regs[XCPT_I]);
+         regs[XCPT_AF], regs[XCPT_I]);
   _alert("BC: %04x DE: %04x HL: %04x\n",
-        regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
+         regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
   _alert("IX: %04x IY: %04x\n",
-        regs[XCPT_IX], regs[XCPT_IY]);
+         regs[XCPT_IX], regs[XCPT_IY]);
   _alert("SP: %04x PC: %04x\n"
-        regs[XCPT_SP], regs[XCPT_PC]);
+         regs[XCPT_SP], regs[XCPT_PC]);
   _alert("CBAR: %02x BBR: %02x CBR: %02x\n"
-        inp(Z180_MMU_CBAR), inp(Z180_MMU_BBR), inp(Z180_MMU_CBR));
+         inp(Z180_MMU_CBAR), inp(Z180_MMU_BBR), inp(Z180_MMU_CBR));
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */
