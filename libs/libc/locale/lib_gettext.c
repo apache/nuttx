@@ -119,7 +119,8 @@ static FAR void *momap(FAR const char *path, FAR size_t *size)
     {
       *size = st.st_size;
       map = mmap(NULL, *size, PROT_READ, MAP_SHARED, fd, 0);
-      if (map[0] != MO_MAGIC && map[0] != __swap_uint32(MO_MAGIC))
+      if (map != MAP_FAILED &&
+          map[0] != MO_MAGIC && map[0] != __swap_uint32(MO_MAGIC))
         {
           munmap(map, *size);
           map = MAP_FAILED;
