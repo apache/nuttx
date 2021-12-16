@@ -1815,8 +1815,6 @@ static int sc8551_operate(FAR struct battery_charger_dev_s *dev,
   int value;
   int ret = OK;
 
-  sc8551_dump_regs(priv);
-
   op = msg->operate_type;
   value = (int)msg->u32;
   switch (op)

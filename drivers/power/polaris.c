@@ -891,15 +891,21 @@ static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
                            FAR bool *status)
 {
-  *status = true;
-  return OK;
+  int ret;
+  int *chipid;
+
+  ret = stwlc38_chipid(dev, chipid);
+
+  *status = (ret == OK) ? true : false;
+
+  return ret;
 }
 
 static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
                             FAR int value)
 {
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
-  int err;
+  int ret;
   uint16_t reg_value;
   uint8_t count = 5;
 
@@ -907,13 +913,13 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
 
   while (count)
     {
-      err = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG,
+      ret = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG,
                          (uint8_t *)&reg_value, 2);
-      if (err != OK)
+      if (ret != OK)
         {
           if (count == 0)
             {
-              return err;
+              return ret;
             }
           else
             {
@@ -929,27 +935,28 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
         }
     }
 
-  err = fw_i2c_read(priv, WLC_RX_VOUT_REG, (uint8_t *)&reg_value, 2);
-  batinfo("[WLC] rx output voltage is %d\n", reg_value);
-  err = fw_i2c_read(priv, WLC_RX_IOUT_REG, (uint8_t *)&reg_value, 2);
-  batinfo("[WLC] rx output curerent is %d\n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_OP_FREQ_REG, (uint8_t *)&reg_value, 2);
+  batinfo("[WLC] rx operation frequency is %dkHz\n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_VOUT_REG, (uint8_t *)&reg_value, 2);
+  batinfo("[WLC] rx output voltage is %dmV\n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_IOUT_REG, (uint8_t *)&reg_value, 2);
+  batinfo("[WLC] rx output curerent is %dmA\n", reg_value);
 
-  return OK;
+  return ret;
 }
 
 static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
                             FAR int value)
 {
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
-  int err;
+  int ret;
   uint8_t reg_value;
 
   reg_value = (uint8_t)(value / 100);
 
-  err = fw_i2c_write(priv, WLC_RX_ILIM_SET_REG, &reg_value, 1);
-  if (err != OK) return err;
+  ret = fw_i2c_write(priv, WLC_RX_ILIM_SET_REG, &reg_value, 1);
 
-  return OK;
+  return ret;
 }
 
 static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
