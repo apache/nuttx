@@ -230,7 +230,7 @@ static void esp32c3_phy_disable_clock(void)
  *
  ****************************************************************************/
 
-static int esp32c3_wl_swi_irq(int irq, void *context, FAR void *arg)
+static int esp32c3_wl_swi_irq(int irq, void *context, void *arg)
 {
   int i;
   int ret;

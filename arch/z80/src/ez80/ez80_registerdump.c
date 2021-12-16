@@ -60,22 +60,22 @@ void ez80_registerdump(void)
 
 #ifdef CONFIG_EZ80_Z80MODE
   _alert("AF: %04x  I: %04x\n",
-        regs[XCPT_AF], regs[XCPT_I]);
+         regs[XCPT_AF], regs[XCPT_I]);
   _alert("BC: %04x DE: %04x HL: %04x\n",
-        regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
+         regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
   _alert("IX: %04x IY: %04x\n",
-        regs[XCPT_IX], regs[XCPT_IY]);
+         regs[XCPT_IX], regs[XCPT_IY]);
   _alert("SP: %04x PC: %04x\n"
-        regs[XCPT_SP], regs[XCPT_PC]);
+         regs[XCPT_SP], regs[XCPT_PC]);
 #else
   _alert("AF: %06x  I: %06x\n",
-        regs[XCPT_AF], regs[XCPT_I]);
+         regs[XCPT_AF], regs[XCPT_I]);
   _alert("BC: %06x DE: %06x HL: %06x\n",
-        regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
+         regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
   _alert("IX: %06x IY: %06x\n",
-        regs[XCPT_IX], regs[XCPT_IY]);
+         regs[XCPT_IX], regs[XCPT_IY]);
   _alert("SP: %06x PC: %06x\n",
-        regs[XCPT_SP], regs[XCPT_PC]);
+         regs[XCPT_SP], regs[XCPT_PC]);
 #endif
 }
 

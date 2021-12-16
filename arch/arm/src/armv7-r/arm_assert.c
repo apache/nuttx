@@ -68,11 +68,11 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: arm_stackdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint32_t sp, uint32_t stack_top)
+static void arm_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
@@ -88,16 +88,14 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#else
-#  define up_stackdump(sp,stack_top)
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: arm_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(FAR volatile uint32_t *regs)
+static inline void arm_registerdump(FAR volatile uint32_t *regs)
 {
   int reg;
 
@@ -124,7 +122,7 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
   _alert("CPSR: %08x\n", regs[REG_CPSR]);
 }
 #else
-# define up_registerdump(regs)
+# define arm_registerdump(regs)
 #endif
 
 /****************************************************************************
@@ -163,7 +161,7 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 
   /* Dump the registers */
 
-  up_registerdump(tcb->xcp.regs);
+  arm_registerdump(tcb->xcp.regs);
 }
 
 /****************************************************************************
@@ -211,7 +209,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -231,7 +229,7 @@ static void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump(CURRENT_REGS);
+  arm_registerdump(CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 
@@ -286,12 +284,12 @@ static void up_dumpstate(void)
       /* Yes.. dump the interrupt stack */
 
       _alert("Interrupt Stack\n", sp);
-      up_stackdump(sp, istackbase + istacksize);
+      arm_stackdump(sp, istackbase + istacksize);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      arm_stackdump(istackbase, istackbase + istacksize);
     }
 #endif
 
@@ -313,7 +311,7 @@ static void up_dumpstate(void)
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
       _alert("User Stack\n", sp);
-      up_stackdump(sp, ustackbase + ustacksize);
+      arm_stackdump(sp, ustackbase + ustacksize);
     }
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -325,15 +323,15 @@ static void up_dumpstate(void)
            sp < kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE)
     {
       _alert("Kernel Stack\n", sp);
-      up_stackdump(sp, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
+      arm_stackdump(sp, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
     }
 #endif
   else
     {
       _alert("ERROR: Stack pointer is not within the allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      arm_stackdump(ustackbase, ustackbase + ustacksize);
 #ifdef CONFIG_ARCH_KERNEL_STACK
-      up_stackdump(kstackbase, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
+      arm_stackdump(kstackbase, kstackbase + CONFIG_ARCH_KERNEL_STACKSIZE);
 #endif
     }
 
