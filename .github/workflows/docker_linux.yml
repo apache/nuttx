@@ -30,6 +30,10 @@ on:
 env:
   IMAGE_NAME: apache-nuttx-ci-linux
 
+concurrency:
+  group: docker-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # Push image to GitHub Packages.
   push:
