@@ -191,7 +191,6 @@ config TTY_FORCE_PANIC_CHAR
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
-	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
@@ -235,7 +234,6 @@ config TTY_SIGINT_CHAR
 config TTY_SIGTSTP
 	bool "Support SIGTSTP"
 	default n
-	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-z event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
