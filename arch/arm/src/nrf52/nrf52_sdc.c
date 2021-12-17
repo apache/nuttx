@@ -429,7 +429,6 @@ int nrf52_sdc_initialize(void)
 
   ret = mpsl_init(&g_clock_config, NRF52_IRQ_SWI5_EGU5 - NRF52_IRQ_EXTINT,
                   &mpsl_assert_handler);
-
   if (ret < 0)
     {
       wlerr("mpsl init failed: %d\n", ret);
@@ -439,7 +438,6 @@ int nrf52_sdc_initialize(void)
   /* Initialize SDC */
 
   ret = sdc_init(&sdc_fault_handler);
-
   if (ret < 0)
     {
       wlerr("mpsl init failed: %d\n", ret);
@@ -451,7 +449,6 @@ int nrf52_sdc_initialize(void)
   cfg.master_count.count = SDC_MASTER_COUNT;
   ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
                     SDC_CFG_TYPE_MASTER_COUNT, &cfg);
-
   if (ret < 0)
     {
       wlerr("Failed to set master role count: %d\n", ret);
@@ -461,7 +458,6 @@ int nrf52_sdc_initialize(void)
   cfg.slave_count.count = CONFIG_NRF52_SDC_SLAVE_COUNT;
   ret = sdc_cfg_set(SDC_DEFAULT_RESOURCE_CFG_TAG,
                     SDC_CFG_TYPE_SLAVE_COUNT, &cfg);
-
   if (ret < 0)
     {
       wlerr("Failed to set slave role count: %d\n", ret);
@@ -491,7 +487,6 @@ int nrf52_sdc_initialize(void)
 
 #ifdef CONFIG_NRF52_SDC_ADVERTISING
   ret = sdc_support_adv();
-
   if (ret < 0)
     {
       wlerr("Could not enable advertising feature: %d\n", ret);
@@ -501,7 +496,6 @@ int nrf52_sdc_initialize(void)
 
 #ifdef CONFIG_NRF52_SDC_SCANNING
   ret = sdc_support_scan();
-
   if (ret < 0)
     {
       wlerr("Could not enable scanning feature: %d\n", ret);
@@ -511,7 +505,6 @@ int nrf52_sdc_initialize(void)
 
 #if SDC_MASTER_COUNT > 0
   ret = sdc_support_master();
-
   if (ret < 0)
     {
       wlerr("Could not enable master feature: %d\n", ret);
@@ -521,7 +514,6 @@ int nrf52_sdc_initialize(void)
 
 #if CONFIG_NRF52_SDC_SLAVE_COUNT > 0
   ret = sdc_support_slave();
-
   if (ret < 0)
     {
       wlerr("Could not enable slave feature: %d\n", ret);
@@ -531,7 +523,6 @@ int nrf52_sdc_initialize(void)
 
 #ifdef CONFIG_NRF52_SDC_DLE
   ret = sdc_support_dle();
-
   if (ret < 0)
     {
       wlerr("Could not enable DLE feature: %d\n", ret);
@@ -541,7 +532,6 @@ int nrf52_sdc_initialize(void)
 
 #ifdef CONFIG_NRF52_SDC_LE_2M_PHY
   ret = sdc_support_le_2m_phy();
-
   if (ret < 0)
     {
       wlerr("Could not enable 2M PHY feature: %d\n", ret);
@@ -551,7 +541,6 @@ int nrf52_sdc_initialize(void)
 
 #ifdef CONFIG_NRF52_SDC_LE_CODED_PHY
   ret = sdc_support_le_coded_phy();
-
   if (ret < 0)
     {
       wlerr("Could not enable Coded PHY feature: %d\n", ret);
@@ -562,7 +551,6 @@ int nrf52_sdc_initialize(void)
   /* Finally enable SoftDevice Controller */
 
   ret = sdc_enable(on_hci, g_sdc_dev.mempool);
-
   if (ret < 0)
     {
       wlerr("SoftDevice controller enable failed: %d\n", ret);
