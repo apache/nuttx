@@ -730,5 +730,13 @@ config NRF52_BLE_TTY_NAME
 	default "/dev/ttyHCI0"
 	depends on UART_BTH4
 
+config NRF52_SDC_FICR_STATIC_ADDR
+	bool "Configure factory generated static random address"
+	default n
+
+config NRF52_SDC_PUB_ADDR
+	hex "Configure BT public address"
+	default 0x0000000000
+
 endif
 
