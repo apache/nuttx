@@ -217,7 +217,7 @@
 
 /* Baud rate selection */
 
-typedef unsigned int  speed_t;   /* Used for terminal baud rates */
+typedef unsigned long speed_t;   /* Used for terminal baud rates */
 
 /* Types used within the termios structure */
 
