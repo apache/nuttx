@@ -44,6 +44,8 @@
 #include "ram_vectors.h"
 #include "arm_arch.h"
 
+#include "hardware/nrf52_ficr.h"
+
 #include <mpsl.h>
 #include <sdc.h>
 #include <sdc_hci.h>
@@ -79,6 +81,11 @@
 #define MEMPOOL_SIZE  ((CONFIG_NRF52_SDC_SLAVE_COUNT * SLAVE_MEM_SIZE) + \
                        (SDC_MASTER_COUNT * MASTER_MEM_SIZE))
 
+#if (CONFIG_NRF52_SDC_PUB_ADDR > 0) ||          \
+  defined(CONFIG_NRF52_SDC_FICR_STATIC_ADDR)
+#  define HAVE_BTADDR_CONFIGURE
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -91,6 +98,25 @@ struct nrf52_sdc_dev_s
   sem_t exclsem;
   struct work_s work;
 };
+
+begin_packed_struct struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s
+{
+  uint8_t bd_addr[6];
+} end_packed_struct;
+
+begin_packed_struct struct sdc_hci_cmd_le_set_random_address_s
+{
+  uint8_t bd_addr[6];
+} end_packed_struct;
+
+/****************************************************************************
+ * External Function Prototypes
+ ****************************************************************************/
+
+uint8_t sdc_hci_cmd_vs_zephyr_write_bd_addr(
+  FAR const struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s *p_params);
+uint8_t sdc_hci_cmd_le_set_random_address(
+  FAR const struct sdc_hci_cmd_le_set_random_address_s *p_params);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -377,6 +403,85 @@ static void radio_handler(void)
   MPSL_IRQ_RADIO_Handler();
 }
 
+#ifdef HAVE_BTADDR_CONFIGURE
+/****************************************************************************
+ * Name: nrf52_sdc_btaddr_configure
+ ****************************************************************************/
+
+static int nrf52_sdc_btaddr_configure(void)
+{
+#ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
+  struct sdc_hci_cmd_le_set_random_address_s   rand_addr;
+#endif
+#if CONFIG_NRF52_SDC_PUB_ADDR > 0
+  struct sdc_hci_cmd_vs_zephyr_write_bd_addr_s pub_addr;
+#endif
+#ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
+  uint32_t                              regval   = 0;
+  uint32_t                              addr[2];
+  uint32_t                              addrtype = 0;
+#endif
+  int                                   ret      = OK;
+
+#ifdef CONFIG_NRF52_SDC_FICR_STATIC_ADDR
+  /* Get device address type */
+
+  addrtype = getreg32(NRF52_FICR_DEVICEADDRTYPE);
+
+  /* Get device addr from FICR */
+
+  addr[0] = getreg32(NRF52_FICR_DEVICEADDR0);
+  addr[1] = getreg32(NRF52_FICR_DEVICEADDR1);
+
+  if ((addrtype & 0x01) == FICR_DEVICEADDRTYPE_RANDOM)
+    {
+      /* Configure static random address */
+
+      memcpy(&rand_addr.bd_addr[0], &addr[0], 4);
+      memcpy(&rand_addr.bd_addr[4], &addr[1], 2);
+
+      /* The two most significant bits of the address shall be set */
+
+      rand_addr.bd_addr[4] |= 0x0c;
+
+      ret = sdc_hci_cmd_le_set_random_address(&rand_addr);
+      if (ret < 0)
+        {
+          wlerr("sdc_hci_cmd_le_set_random_address failed: %d\n", ret);
+          goto errout;
+        }
+    }
+  else
+    {
+      wlerr("Static random address not available\n");
+      ret = -EINVAL;
+      goto errout;
+    }
+#endif
+
+#if CONFIG_NRF52_SDC_PUB_ADDR > 0
+  /* Configure public address if available */
+
+  pub_addr.bd_addr[0] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 5)) & 0xff;
+  pub_addr.bd_addr[1] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 4)) & 0xff;
+  pub_addr.bd_addr[2] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 3)) & 0xff;
+  pub_addr.bd_addr[3] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 2)) & 0xff;
+  pub_addr.bd_addr[4] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 1)) & 0xff;
+  pub_addr.bd_addr[5] = (CONFIG_NRF52_SDC_PUB_ADDR >> (8 * 0)) & 0xff;
+
+  ret = sdc_hci_cmd_vs_zephyr_write_bd_addr(&pub_addr);
+  if (ret < 0)
+    {
+      wlerr("sdc_hci_cmd_vs_zephyr_write_bd_addr failed: %d\n", ret);
+      goto errout;
+    }
+#endif
+
+errout:
+  return ret;
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -548,6 +653,17 @@ int nrf52_sdc_initialize(void)
   if (ret < 0)
     {
       wlerr("Could not enable Coded PHY feature: %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef HAVE_BTADDR_CONFIGURE
+  /* Configure BT address */
+
+  ret = nrf52_sdc_btaddr_configure();
+  if (ret < 0)
+    {
+      wlerr("Could not configure BT addr: %d\n", ret);
       return ret;
     }
 #endif
