@@ -279,7 +279,6 @@ static int sendto_next_transfer(FAR struct socket *psock,
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct net_driver_s *dev;
-  int ret;
 
   /* Set the UDP "connection" to the destination address of the write buffer
    * at the head of the queue.
@@ -292,11 +291,15 @@ static int sendto_next_transfer(FAR struct socket *psock,
       return -ENOENT;
     }
 
-  ret = udp_connect(conn, (FAR const struct sockaddr *)&wrb->wb_dest);
-  if (ret < 0)
+  /* Has this address already been bound to a local port (lport)? */
+
+  if (!conn->lport)
     {
-      nerr("ERROR: udp_connect failed: %d\n", ret);
-      return ret;
+      /* No.. Find an unused local port number and bind it to the
+       * connection structure.
+       */
+
+      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
     }
 
   /* Get the device that will handle the remote packet transfers.  This
@@ -308,7 +311,7 @@ static int sendto_next_transfer(FAR struct socket *psock,
    * transmission could harm performance.
    */
 
-  dev = udp_find_raddr_device(conn);
+  dev = udp_find_raddr_device(conn, &wrb->wb_dest);
   if (dev == NULL)
     {
       nerr("ERROR: udp_find_raddr_device failed\n");
@@ -452,6 +455,14 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
 
       wrb = (FAR struct udp_wrbuffer_s *)sq_peek(&conn->write_q);
       DEBUGASSERT(wrb != NULL);
+
+      /* If the udp socket not connected, it is possible to have
+       * multi-different destination address in each iob entry,
+       * update the remote address every time to avoid sent to the
+       * incorrect destination.
+       */
+
+      udp_connect(conn, (FAR const struct sockaddr *)&wrb->wb_dest);
 
       /* Get the amount of data that we can send in the next packet.
        * We will send either the remaining data in the buffer I/O

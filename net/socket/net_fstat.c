@@ -133,7 +133,7 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf)
             * order to get the MTU and LL_HDRLEN:
             */
 
-           dev = udp_find_raddr_device(conn);
+           dev = udp_find_raddr_device(conn, NULL);
            if (dev == NULL)
              {
                /* This should never happen except perhaps in some rare race
