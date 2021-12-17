@@ -86,6 +86,14 @@
 #  define HAVE_BTADDR_CONFIGURE
 #endif
 
+/* Calls to sdc */
+
+#define SDC_RNG_IRQHANDLER      sdc_RNG_IRQHandler
+#define MPSL_IRQ_CLOCK_HANDLER  MPSL_IRQ_CLOCK_Handler
+#define MPSL_IRQ_RTC0_HANDLER   MPSL_IRQ_RTC0_Handler
+#define MPSL_IRQ_TIMER0_HANDLER MPSL_IRQ_TIMER0_Handler
+#define MPSL_IRQ_RADIO_HANDLER  MPSL_IRQ_RADIO_Handler
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -362,7 +370,7 @@ static int swi_isr(int irq, FAR void *context, FAR void *arg)
 
 static void rng_handler(void)
 {
-  sdc_RNG_IRQHandler();
+  SDC_RNG_IRQHANDLER();
 }
 
 /****************************************************************************
@@ -371,7 +379,7 @@ static void rng_handler(void)
 
 static int power_clock_isr(int irq, FAR void *context, FAR void *arg)
 {
-  MPSL_IRQ_CLOCK_Handler();
+  MPSL_IRQ_CLOCK_HANDLER();
 
   return 0;
 }
@@ -382,7 +390,7 @@ static int power_clock_isr(int irq, FAR void *context, FAR void *arg)
 
 static void rtc0_handler(void)
 {
-  MPSL_IRQ_RTC0_Handler();
+  MPSL_IRQ_RTC0_HANDLER();
 }
 
 /****************************************************************************
@@ -391,7 +399,7 @@ static void rtc0_handler(void)
 
 static void timer0_handler(void)
 {
-  MPSL_IRQ_TIMER0_Handler();
+  MPSL_IRQ_TIMER0_HANDLER();
 }
 
 /****************************************************************************
@@ -400,7 +408,7 @@ static void timer0_handler(void)
 
 static void radio_handler(void)
 {
-  MPSL_IRQ_RADIO_Handler();
+  MPSL_IRQ_RADIO_HANDLER();
 }
 
 #ifdef HAVE_BTADDR_CONFIGURE
