@@ -725,5 +725,10 @@ config NRF52_SDC_VERSION
 		to use. See official Nordic documentation on which chips are supported
 		in each version.
 
+config NRF52_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
 endif
 

@@ -36,6 +36,10 @@
 #include <arch/nrf52/nrf52_irq.h>
 #include <nuttx/wqueue.h>
 
+#if defined(CONFIG_UART_BTH4)
+#  include <nuttx/serial/uart_bth4.h>
+#endif
+
 #include "arm_internal.h"
 #include "ram_vectors.h"
 #include "arm_arch.h"
@@ -557,9 +561,25 @@ int nrf52_sdc_initialize(void)
       return ret;
     }
 
+#ifdef CONFIG_UART_BTH4
+  /* Register UART BT H4 device */
+
+  ret = uart_bth4_register(CONFIG_NRF52_BLE_TTY_NAME, &g_bt_driver);
+  if (ret < 0)
+    {
+      wlerr("bt_bth4_register error: %d\n", ret);
+      return ret;
+    }
+#else
   /* Register network device */
 
   ret = bt_netdev_register(&g_bt_driver);
+  if (ret < 0)
+    {
+      wlerr("bt_netdev_register error: %d\n", ret);
+      return ret;
+    }
+#endif
 
   return ret;
 }
