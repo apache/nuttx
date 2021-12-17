@@ -169,14 +169,10 @@
                                            *      int value.
                                            * OUT: Origin option.
                                            */
-#define FIOC_MINOR      _FIOC(0x000c)     /* IN:  None
-                                           * OUT: Integer that contains device
-                                           *      minor number
-                                           */
-#define FIOCLEX         _FIOC(0x000d)     /* IN:  None
+#define FIOCLEX         _FIOC(0x000c)     /* IN:  None
                                            * OUT: None
                                            */
-#define FIONCLEX        _FIOC(0x000e)     /* IN:  None
+#define FIONCLEX        _FIOC(0x000d)     /* IN:  None
                                            * OUT: None
                                            */
 
