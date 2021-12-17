@@ -181,7 +181,7 @@ FAR struct dirent *readdir(DIR *dirp)
 
   if (!idir)
     {
-      ret = EBADF;
+      ret = -EBADF;
       goto errout;
     }
 
@@ -215,7 +215,7 @@ FAR struct dirent *readdir(DIR *dirp)
 
       if (!inode->u.i_mops || !inode->u.i_mops->readdir)
         {
-          ret = EACCES;
+          ret = -EACCES;
           goto errout;
         }
 
@@ -239,10 +239,6 @@ FAR struct dirent *readdir(DIR *dirp)
         {
           ret = OK;
         }
-      else
-        {
-          ret = -ret;
-        }
 
       goto errout;
     }
@@ -253,6 +249,6 @@ FAR struct dirent *readdir(DIR *dirp)
   return &idir->fd_dir;
 
 errout:
-  set_errno(ret);
+  set_errno(-ret);
   return NULL;
 }
