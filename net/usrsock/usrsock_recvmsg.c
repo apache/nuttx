@@ -174,9 +174,9 @@ static int do_recvfrom_request(FAR struct usrsock_conn_s *conn,
       addrlen = UINT16_MAX;
     }
 
-  if (buflen > UINT16_MAX)
+  if (buflen > UINT32_MAX)
     {
-      buflen = UINT16_MAX;
+      buflen = UINT32_MAX;
     }
 
   /* Prepare request for daemon to read. */
