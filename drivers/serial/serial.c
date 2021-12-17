@@ -41,6 +41,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/power/pm.h>
@@ -89,7 +90,8 @@ static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch,
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
                                     FAR const char *buffer,
                                     size_t buflen);
-static int     uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout);
+static int     uart_tcdrain(FAR uart_dev_t *dev,
+                            bool cancelable, clock_t timeout);
 
 /* Character driver methods */
 
@@ -413,9 +415,24 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
  *
  ****************************************************************************/
 
-static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
+static int uart_tcdrain(FAR uart_dev_t *dev,
+                        bool cancelable, clock_t timeout)
 {
   int ret;
+
+  /* tcdrain is a cancellation point */
+
+  if (cancelable && enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      leave_cancellation_point();
+      return -ECANCELED;
+#endif
+    }
 
   /* Get exclusive access to the to dev->tmit.  We cannot permit new data to
    * be written while we are trying to flush the old data.
@@ -517,6 +534,11 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
         }
 
       uart_givesem(&dev->xmit.sem);
+    }
+
+  if (cancelable)
+    {
+      leave_cancellation_point();
     }
 
   return ret;
@@ -677,7 +699,7 @@ static int uart_close(FAR struct file *filep)
     {
       /* Now we wait for the transmit buffer(s) to clear */
 
-      uart_tcdrain(dev, 4 * TICK_PER_SEC);
+      uart_tcdrain(dev, false, 4 * TICK_PER_SEC);
     }
 
   /* Free the IRQ and disable the UART */
@@ -1381,7 +1403,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCDRN:
             {
-              ret = uart_tcdrain(dev, 10 * TICK_PER_SEC);
+              ret = uart_tcdrain(dev, true, 10 * TICK_PER_SEC);
             }
             break;
 
