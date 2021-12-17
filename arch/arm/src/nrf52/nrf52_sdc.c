@@ -275,7 +275,7 @@ static void on_hci(void)
               struct hci_evt_cmd_complete_s *cmd_complete =
                   (struct hci_evt_cmd_complete_s *)
                       (g_sdc_dev.msg_buffer + sizeof(*hdr));
-              uint8_t *status = (uint8_t *)cmd_complete + 1;
+              uint8_t *status = (uint8_t *)cmd_complete + 3;
 
               wlinfo("received CMD_COMPLETE from softdevice "
                      "(opcode: %d, status: 0x%x)\n",
