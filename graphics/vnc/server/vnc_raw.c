@@ -250,7 +250,7 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
       srcleft = (FAR lfb_color_t *)((uintptr_t)srcleft + RFB_STRIDE);
     }
 
-  return (size_t)((uintptr_t)srcleft - (uintptr_t)update->rect[0].data);
+  return (size_t)((uintptr_t)dest - (uintptr_t)update->rect[0].data);
 }
 
 /****************************************************************************
@@ -357,8 +357,16 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
       deststride = maxwidth;
     }
 
-  destwidth  = deststride / bytesperpixel;
-  destheight = CONFIG_VNCSERVER_UPDATE_BUFSIZE / deststride;
+  DEBUGASSERT(CONFIG_VNCSERVER_UPDATE_BUFSIZE >
+              SIZEOF_RFB_FRAMEBUFFERUPDATE_S(SIZEOF_RFB_RECTANGE_S(0)));
+
+  destwidth = deststride / bytesperpixel;
+
+  /* Reserve some space for message header */
+
+  destheight = (CONFIG_VNCSERVER_UPDATE_BUFSIZE -
+                SIZEOF_RFB_FRAMEBUFFERUPDATE_S(SIZEOF_RFB_RECTANGE_S(0))) /
+                deststride;
 
   if (destheight > srcheight)
     {
