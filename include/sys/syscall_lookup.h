@@ -222,9 +222,6 @@ SYSCALL_LOOKUP(pwrite,                     4)
   SYSCALL_LOOKUP(if_indextoname,           2)
   SYSCALL_LOOKUP(if_nametoindex,           1)
 #endif
-#ifdef CONFIG_SERIAL_TERMIOS
-  SYSCALL_LOOKUP(tcdrain,                  1)
-#endif
 
 /* Board support */
 
