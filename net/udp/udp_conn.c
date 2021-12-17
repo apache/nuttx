@@ -173,76 +173,6 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
 }
 
 /****************************************************************************
- * Name: udp_select_port
- *
- * Description:
- *   Select an unused port number.
- *
- *   NOTE that in principle this function could fail if there is no available
- *   port number.  There is no check for that case and it would actually
- *   in an infinite loop if that were the case.  In this simple, small UDP
- *   implementation, it is reasonable to assume that that error cannot happen
- *   and that a port number will always be available.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   Next available port number
- *
- ****************************************************************************/
-
-static uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
-{
-  static uint16_t g_last_udp_port;
-  uint16_t portno;
-
-  net_lock();
-
-  /* Generate port base dynamically */
-
-  if (g_last_udp_port == 0)
-    {
-      g_last_udp_port = clock_systime_ticks() % 32000;
-
-      if (g_last_udp_port < 4096)
-        {
-          g_last_udp_port += 4096;
-        }
-    }
-
-  /* Find an unused local port number.  Loop until we find a valid
-   * listen port number that is not being used by any other connection.
-   */
-
-  do
-    {
-      /* Guess that the next available port number will be the one after
-       * the last port number assigned.
-       */
-
-      ++g_last_udp_port;
-
-      /* Make sure that the port number is within range */
-
-      if (g_last_udp_port >= 32000)
-        {
-          g_last_udp_port = 4096;
-        }
-    }
-  while (udp_find_conn(domain, u, htons(g_last_udp_port)) != NULL);
-
-  /* Initialize and return the connection structure, bind it to the
-   * port number
-   */
-
-  portno = g_last_udp_port;
-  net_unlock();
-
-  return portno;
-}
-
-/****************************************************************************
  * Name: udp_ipv4_active
  *
  * Description:
@@ -526,6 +456,76 @@ static inline FAR struct udp_conn_s *
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: udp_select_port
+ *
+ * Description:
+ *   Select an unused port number.
+ *
+ *   NOTE that in principle this function could fail if there is no available
+ *   port number.  There is no check for that case and it would actually
+ *   in an infinite loop if that were the case.  In this simple, small UDP
+ *   implementation, it is reasonable to assume that that error cannot happen
+ *   and that a port number will always be available.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Next available port number
+ *
+ ****************************************************************************/
+
+uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
+{
+  static uint16_t g_last_udp_port;
+  uint16_t portno;
+
+  net_lock();
+
+  /* Generate port base dynamically */
+
+  if (g_last_udp_port == 0)
+    {
+      g_last_udp_port = clock_systime_ticks() % 32000;
+
+      if (g_last_udp_port < 4096)
+        {
+          g_last_udp_port += 4096;
+        }
+    }
+
+  /* Find an unused local port number.  Loop until we find a valid
+   * listen port number that is not being used by any other connection.
+   */
+
+  do
+    {
+      /* Guess that the next available port number will be the one after
+       * the last port number assigned.
+       */
+
+      ++g_last_udp_port;
+
+      /* Make sure that the port number is within range */
+
+      if (g_last_udp_port >= 32000)
+        {
+          g_last_udp_port = 4096;
+        }
+    }
+  while (udp_find_conn(domain, u, htons(g_last_udp_port)) != NULL);
+
+  /* Initialize and return the connection structure, bind it to the
+   * port number
+   */
+
+  portno = g_last_udp_port;
+  net_unlock();
+
+  return portno;
+}
 
 /****************************************************************************
  * Name: udp_initialize
