@@ -223,9 +223,6 @@ SYSCALL_LOOKUP(pwrite,                     4)
   SYSCALL_LOOKUP(timerfd_settime,          4)
   SYSCALL_LOOKUP(timerfd_gettime,          2)
 #endif
-#ifdef CONFIG_SERIAL_TERMIOS
-  SYSCALL_LOOKUP(tcdrain,                  1)
-#endif
 
 /* Board support */
 

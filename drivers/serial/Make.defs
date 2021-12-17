@@ -36,12 +36,6 @@ ifeq ($(CONFIG_RPMSG_UART),y)
   CSRCS += uart_rpmsg.c
 endif
 
-# termios support
-
-ifeq ($(CONFIG_SERIAL_TERMIOS),y)
-  CSRCS += tcdrain.c
-endif
-
 # Pseudo-terminal support
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
