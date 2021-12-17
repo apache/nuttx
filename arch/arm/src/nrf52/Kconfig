@@ -661,6 +661,7 @@ endmenu
 
 menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
+	depends on ALLOW_BSDNORDIC_COMPONENTS
 	select CONFIG_ARMV7M_USEBASEPRI
 	select CONFIG_ARCH_RAMVECTORS
 	select NRF52_USE_LFCLK
