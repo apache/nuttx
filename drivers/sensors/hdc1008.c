@@ -35,6 +35,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/hdc1008.h>
 #include <nuttx/random.h>
+#include <nuttx/signal.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_HDC1008)
 
