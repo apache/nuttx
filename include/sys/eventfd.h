@@ -36,10 +36,6 @@
 #define EFD_SEMAPHORE O_BINARY
 #define EFD_CLOEXEC   O_CLOEXEC
 
-/* Get device minor number */
-
-#define EFD_FIOC_MINOR FIOC_MINOR
-
 /****************************************************************************
  * Public Type Declarations
  ****************************************************************************/
@@ -64,8 +60,6 @@ int eventfd(unsigned int count, int flags);
 
 int eventfd_read(int fd, FAR eventfd_t *value);
 int eventfd_write(int fd, eventfd_t value);
-
-int eventfd_get_minor(int fd);
 
 #undef EXTERN
 #ifdef __cplusplus

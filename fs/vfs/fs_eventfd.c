@@ -91,8 +91,6 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
                                size_t len);
 static ssize_t eventfd_do_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t len);
-static int eventfd_do_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
@@ -121,8 +119,8 @@ static const struct file_operations g_eventfd_fops =
   eventfd_do_close, /* close */
   eventfd_do_read,  /* read */
   eventfd_do_write, /* write */
-  0,                /* seek */
-  eventfd_do_ioctl  /* ioctl */
+  NULL,             /* seek */
+  NULL              /* ioctl */
 #ifdef CONFIG_EVENT_FD_POLL
   , eventfd_do_poll /* poll */
 #endif
@@ -473,21 +471,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
 
   nxsem_post(&dev->exclsem);
   return sizeof(eventfd_t);
-}
-
-static int eventfd_do_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *priv = inode->i_private;
-
-  if (cmd == FIOC_MINOR)
-    {
-      *(FAR int *)((uintptr_t)arg) = priv->minor;
-      return OK;
-    }
-
-  return -ENOSYS;
 }
 
 #ifdef CONFIG_EVENT_FD_POLL
