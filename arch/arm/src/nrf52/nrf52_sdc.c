@@ -278,7 +278,7 @@ static void on_hci(void)
               uint8_t *status = (uint8_t *)cmd_complete + 3;
 
               wlinfo("received CMD_COMPLETE from softdevice "
-                     "(opcode: %d, status: 0x%x)\n",
+                     "(opcode: 0x%x, status: 0x%x)\n",
                      cmd_complete->opcode, *status);
             }
           else
