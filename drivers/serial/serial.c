@@ -1603,13 +1603,13 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-#ifdef CONFIG_SERIAL_TERMIOS
-#  if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
   dev->pid = (pid_t)-1;
-#  endif
+#endif
 
+#ifdef CONFIG_SERIAL_TERMIOS
   /* If this UART is a serial console */
 
   if (dev->isconsole)
