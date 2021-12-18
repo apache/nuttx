@@ -694,7 +694,7 @@ int nrf52_sdc_initialize(void)
       wlerr("bt_bth4_register error: %d\n", ret);
       return ret;
     }
-#else
+#elif defined(CONFIG_NET_BLUETOOTH)
   /* Register network device */
 
   ret = bt_netdev_register(&g_bt_driver);
@@ -703,6 +703,8 @@ int nrf52_sdc_initialize(void)
       wlerr("bt_netdev_register error: %d\n", ret);
       return ret;
     }
+#else
+#  error
 #endif
 
   return ret;
