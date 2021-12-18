@@ -69,7 +69,7 @@ struct eventfd_priv_s
   eventfd_t    counter;         /* eventfd counter */
   unsigned int minor;           /* eventfd minor number */
   uint8_t      crefs;           /* References counts on eventfd (max: 255) */
-  uint8_t      mode_semaphore;  /* eventfd mode (semaphore or counter) */
+  bool         mode_semaphore;  /* eventfd mode (semaphore or counter) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
