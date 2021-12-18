@@ -66,10 +66,10 @@ struct eventfd_priv_s
   sem_t     exclsem;            /* Enforces device exclusive access */
   eventfd_waiter_sem_t *rdsems; /* List of blocking readers */
   eventfd_waiter_sem_t *wrsems; /* List of blocking writers */
-  eventfd_t counter;            /* eventfd counter */
-  size_t    minor;              /* eventfd minor number */
-  uint8_t   crefs;              /* References counts on eventfd (max: 255) */
-  uint8_t   mode_semaphore;     /* eventfd mode (semaphore or counter) */
+  eventfd_t    counter;         /* eventfd counter */
+  unsigned int minor;           /* eventfd minor number */
+  uint8_t      crefs;           /* References counts on eventfd (max: 255) */
+  uint8_t      mode_semaphore;  /* eventfd mode (semaphore or counter) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
@@ -103,8 +103,8 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
                                eventfd_waiter_sem_t *sem,
                                FAR eventfd_waiter_sem_t **slist);
 
-static size_t eventfd_get_unique_minor(void);
-static void eventfd_release_minor(size_t minor);
+static unsigned int eventfd_get_unique_minor(void);
+static void eventfd_release_minor(unsigned int minor);
 
 static FAR struct eventfd_priv_s *eventfd_allocdev(void);
 static void eventfd_destroy(FAR struct eventfd_priv_s *dev);
@@ -175,14 +175,14 @@ static void eventfd_pollnotify(FAR struct eventfd_priv_s *dev,
 }
 #endif
 
-static size_t eventfd_get_unique_minor(void)
+static unsigned int eventfd_get_unique_minor(void)
 {
-  static size_t minor;
+  static unsigned int minor;
 
   return minor++;
 }
 
-static void eventfd_release_minor(size_t minor)
+static void eventfd_release_minor(unsigned int minor)
 {
 }
 
@@ -591,7 +591,7 @@ int eventfd(unsigned int count, int flags)
 
   /* Get device path */
 
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%d", new_dev->minor);
+  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%u", new_dev->minor);
 
   /* Register the driver */
 
