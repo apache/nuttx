@@ -711,7 +711,8 @@ config NRF52_SDC_LE_2M_PHY
 
 config NRF52_SDC_LE_CODED_PHY
 	bool "Support LE Coded PHY"
-	default y
+	default n if ARCH_CHIP_NRF52832
+	default y if ARCH_CHIP_NRF52840
 
 config NRF52_SDC_DLE
 	bool "Support Data Length Extension (DLE)"
