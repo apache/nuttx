@@ -41,7 +41,7 @@
  ****************************************************************************/
 
 #ifndef CONFIG_EVENT_FD_VFS_PATH
-#define CONFIG_EVENT_FD_VFS_PATH "/dev"
+#define CONFIG_EVENT_FD_VFS_PATH "/var/event"
 #endif
 
 #ifndef CONFIG_EVENT_FD_NPOLLWAITERS
@@ -226,9 +226,9 @@ static int eventfd_do_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct eventfd_priv_s *priv = inode->i_private;
 
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %d (3) + null char (1) */
+  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %d (10) + null char (1) */
 
-  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 3 + 1];
+  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Get exclusive access to the device structures */
 
