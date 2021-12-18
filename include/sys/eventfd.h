@@ -42,7 +42,11 @@
 
 /* Type for event counter */
 
+#ifdef __INT64_DEFINED
+typedef uint64_t eventfd_t;
+#else
 typedef uint32_t eventfd_t;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
