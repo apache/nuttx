@@ -29,11 +29,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdbool.h>
 #include <math.h>
-
-#include <assert.h>
 
 /****************************************************************************
  * Pre-processor Definitions
