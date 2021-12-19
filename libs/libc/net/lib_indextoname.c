@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev/netdev_indextoname.c
+ * libs/libc/net/lib_indextoname.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,64 +22,16 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <string.h>
-#include <assert.h>
-#include <errno.h>
-
 #include <net/if.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "nuttx/net/net.h"
-#include "nuttx/net/netdev.h"
-
-#include "netdev/netdev.h"
-
-#ifdef CONFIG_NETDEV_IFINDEX
+#include <nuttx/net/netconfig.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: netdev_indextoname
- *
- * Description:
- *   The if_indextoname() function maps an interface index to its
- *   corresponding name.
- *
- * Input Parameters:
- *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
- *             if_indextoname() will place in this buffer the name of the
- *             interface with index ifindex.
- *
- * Returned Value:
- *   If ifindex is an interface index, then the function will return zero
- *   (OK). Otherwise, the function returns a negated errno value;
- *
- ****************************************************************************/
-
-int netdev_indextoname(unsigned int ifindex, FAR char *ifname)
-{
-  FAR struct net_driver_s *dev;
-  int ret = -ENODEV;
-
-  DEBUGASSERT(ifindex > 0 && ifindex <= MAX_IFINDEX);
-  DEBUGASSERT(ifname != NULL);
-
-  /* Find the driver with this name */
-
-  net_lock();
-  dev = netdev_findbyindex(ifindex);
-  if (dev != NULL)
-    {
-      memcpy(ifname, dev->d_ifname, IF_NAMESIZE);
-      ret = OK;
-    }
-
-  net_unlock();
-  return ret;
-}
 
 /****************************************************************************
  * Name: if_indextoname
@@ -102,18 +54,20 @@ int netdev_indextoname(unsigned int ifindex, FAR char *ifname)
 
 FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname)
 {
-  int ret;
-
-  /* Let netdev_indextoname to the work */
-
-  ret = netdev_indextoname(ifindex, ifname);
-  if (ret < 0)
+  int sockfd = socket(NET_SOCK_FAMILY, NET_SOCK_TYPE, NET_SOCK_PROTOCOL);
+  if (sockfd >= 0)
     {
-      set_errno(-ret);
-      return NULL;
+      struct ifreq req;
+      req.ifr_ifindex = ifindex;
+      if (ioctl(sockfd, SIOCGIFNAME, (unsigned long)&req) >= 0)
+        {
+          strncpy(ifname, req.ifr_name, IF_NAMESIZE);
+          close(sockfd);
+          return ifname;
+        }
+
+      close(sockfd);
     }
 
-  return ifname;
+  return NULL;
 }
-
-#endif /* CONFIG_NETDEV_IFINDEX */
