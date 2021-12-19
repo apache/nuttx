@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/netdev/netdev_nametoindex.c
+ * libs/libc/net/lib_nametoindex.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,57 +22,16 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <errno.h>
-
 #include <net/if.h>
+#include <sys/ioctl.h>
+#include <string.h>
+#include <unistd.h>
 
-#include "nuttx/net/net.h"
-#include "nuttx/net/netdev.h"
-
-#include "netdev/netdev.h"
-
-#ifdef CONFIG_NETDEV_IFINDEX
+#include <nuttx/net/netconfig.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: netdev_nametoindex
- *
- * Description:
- *   The if_nametoindex() function returns the interface index corresponding
- *   to name ifname.
- *
- * Input Parameters:
- *   ifname - The interface name
- *
- * Returned Value:
- *   The corresponding index if ifname is the name of an interface;
- *   otherwise, a negated errno value is returned.
- *
- ****************************************************************************/
-
-unsigned int netdev_nametoindex(FAR const char *ifname)
-{
-  FAR struct net_driver_s *dev;
-  unsigned int ifindex = -ENODEV;
-
-  /* Find the driver with this name */
-
-  net_lock();
-  dev = netdev_findbyname(ifname);
-  if (dev != NULL)
-    {
-      ifindex = dev->d_ifindex;
-    }
-
-  net_unlock();
-  return ifindex;
-}
 
 /****************************************************************************
  * Name: if_nametoindex
@@ -92,18 +51,19 @@ unsigned int netdev_nametoindex(FAR const char *ifname)
 
 unsigned int if_nametoindex(FAR const char *ifname)
 {
-  int ret;
-
-  /* Let netdev_nametoindex to the work */
-
-  ret = netdev_nametoindex(ifname);
-  if (ret < 0)
+  int sockfd = socket(NET_SOCK_FAMILY, NET_SOCK_TYPE, NET_SOCK_PROTOCOL);
+  if (sockfd >= 0)
     {
-      set_errno(-ret);
-      return 0;
+      struct ifreq req;
+      strncpy(req.ifr_name, ifname, IF_NAMESIZE);
+      if (ioctl(sockfd, SIOCGIFINDEX, (unsigned long)&req) >= 0)
+        {
+          close(sockfd);
+          return req.ifr_ifindex;
+        }
+
+      close(sockfd);
     }
 
-  return ret;
+  return 0;
 }
-
-#endif /* CONFIG_NETDEV_IFINDEX */
