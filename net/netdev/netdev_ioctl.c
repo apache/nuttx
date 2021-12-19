@@ -120,17 +120,6 @@
 #endif
 #endif /* CONFIG_NETDEV_IOCTL */
 
-/* This is really kind of bogus.. When asked for an IP address, this is
- * family that is returned in the ifr structure.  Probably could just skip
- * this since the address family has nothing to do with the Ethernet address.
- */
-
-#ifdef CONFIG_NET_IPv6
-#  define AF_INETX AF_INET6
-#else
-#  define AF_INETX AF_INET
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -932,7 +921,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (dev->d_lltype == NET_LL_ETHERNET ||
                   dev->d_lltype == NET_LL_IEEE80211)
                 {
-                  req->ifr_hwaddr.sa_family = AF_INETX;
+                  req->ifr_hwaddr.sa_family = NET_SOCK_FAMILY;
                   memcpy(req->ifr_hwaddr.sa_data,
                          dev->d_mac.ether.ether_addr_octet, IFHWADDRLEN);
                   ret = OK;
@@ -944,7 +933,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
               if (dev->d_lltype == NET_LL_IEEE802154 ||
                   dev->d_lltype == NET_LL_PKTRADIO)
                 {
-                  req->ifr_hwaddr.sa_family = AF_INETX;
+                  req->ifr_hwaddr.sa_family = NET_SOCK_FAMILY;
                   memcpy(req->ifr_hwaddr.sa_data,
                          dev->d_mac.radio.nv_addr,
                          dev->d_mac.radio.nv_addrlen);
