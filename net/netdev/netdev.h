@@ -288,48 +288,6 @@ int netdev_nextindex(int ifindex);
 #endif
 
 /****************************************************************************
- * Name: netdev_indextoname
- *
- * Description:
- *   The if_indextoname() function maps an interface index to its
- *   corresponding name.
- *
- * Input Parameters:
- *   ifname  - Points to a buffer of at least IF_NAMESIZE bytes.
- *             if_indextoname() will place in this buffer the name of the
- *             interface with index ifindex.
- *
- * Returned Value:
- *   If ifindex is an interface index, then the function will return zero
- *   (OK). Otherwise, the function returns a negated errno value;
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDEV_IFINDEX
-int netdev_indextoname(unsigned int ifindex, FAR char *ifname);
-#endif
-
-/****************************************************************************
- * Name: netdev_nametoindex
- *
- * Description:
- *   The if_nametoindex() function returns the interface index corresponding
- *   to name ifname.
- *
- * Input Parameters:
- *   ifname - The interface name
- *
- * Returned Value:
- *   The corresponding index if ifname is the name of an interface;
- *   otherwise, a negated errno value is returned.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NETDEV_IFINDEX
-unsigned int netdev_nametoindex(FAR const char *ifname);
-#endif
-
-/****************************************************************************
  * Name: netdev_default
  *
  * Description:
