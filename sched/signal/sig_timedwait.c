@@ -309,10 +309,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           waitticks = MSEC2TICK(waitmsec);
 #endif
 
-          /* Disable interrupts to avoid race conditions */
-
-          flags = enter_critical_section();
-
           /* Start the watchdog */
 
           wd_start(&rtcb->waitdog, waitticks,
@@ -329,10 +325,6 @@ int nxsig_timedwait(FAR const sigset_t *set, FAR struct siginfo *info,
           /* We no longer need the watchdog */
 
           wd_cancel(&rtcb->waitdog);
-
-          /* Interrupts may now be enabled. */
-
-          leave_critical_section(flags);
         }
 
       /* No timeout, just wait */

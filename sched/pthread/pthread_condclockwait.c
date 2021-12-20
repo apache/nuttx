@@ -220,7 +220,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
             }
           else
             {
-              irqstate_t flags;
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
               uint8_t mflags;
 #endif
@@ -241,11 +240,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
               ret        = pthread_mutex_give(mutex);
               if (ret == 0)
                 {
-
-                  /* Disable interrupts to avoid race conditions */
-
-                  flags = enter_critical_section();
-
                   /* Start the watchdog */
 
                   wd_start(&rtcb->waitdog, ticks,
@@ -262,10 +256,6 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                   /* We no longer need the watchdog */
 
                   wd_cancel(&rtcb->waitdog);
-
-                  /* Interrupts may now be enabled. */
-
-                  leave_critical_section(flags);
 
                   /* Did we get the condition semaphore. */
 

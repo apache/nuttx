@@ -92,7 +92,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
                     FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
-  irqstate_t flags;
   sclock_t ticks;
   int status;
   int ret = ERROR;
@@ -160,10 +159,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
       goto out;
     }
 
-  /* Disable interrupts to avoid race conditions */
-
-  flags = enter_critical_section();
-
   /* Start the watchdog */
 
   wd_start(&rtcb->waitdog, ticks, nxsem_timeout, getpid());
@@ -177,10 +172,6 @@ int nxsem_clockwait(FAR sem_t *sem, clockid_t clockid,
   /* Stop the watchdog timer */
 
   wd_cancel(&rtcb->waitdog);
-
-  /* Interrupts may now be enabled. */
-
-  leave_critical_section(flags);
 
 out:
   return ret;
