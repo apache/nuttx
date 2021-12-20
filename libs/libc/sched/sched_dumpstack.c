@@ -34,7 +34,7 @@
 #define DUMP_FORMAT "%*p"
 #define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 3)
 
-#define DUMP_DEPTH  16
+#define DUMP_DEPTH  32
 #define DUMP_NITEM  8
 #define DUMP_LINESIZE (DUMP_NITEM * DUMP_WIDTH)
 
