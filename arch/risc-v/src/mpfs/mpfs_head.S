@@ -163,9 +163,13 @@ __start_mpfs:
   csrw mie, zero
   csrw mip, zero
 
+#ifdef CONFIG_MPFS_OPENSBI
+  jal mpfs_opensbi_prepare_hart
+#else
   /* Jump to app (TODO: remove fixed address) */
   li a1, 0x80000000
   jr a1
+#endif
 
 .continue_boot:
 

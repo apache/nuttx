@@ -148,6 +148,8 @@ config ARCH_RISCV_INTXCPT_EXTREGS
 
 endif
 
+source "arch/risc-v/src/opensbi/Kconfig"
+
 if ARCH_RV32IM
 source "arch/risc-v/src/rv32im/Kconfig"
 endif
