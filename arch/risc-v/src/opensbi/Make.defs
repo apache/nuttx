@@ -1,0 +1,89 @@
+############################################################################
+# arch/risc-v/src/opensbi/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+ifeq ($(CONFIG_OPENSBI),y)
+
+DEPPATH += --dep-path opensbi/opensbi-3rdparty
+VPATH += :opensbi/opensbi-3rdparty
+
+OPENSBI_CSRCS = opensbi/opensbi-3rdparty/lib/sbi/riscv_asm.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_atomic.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/riscv_locks.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_bitmap.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_bitops.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_console.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_domain.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_base.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_hsm.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_legacy.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_pmu.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_replace.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ecall_vendor.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_emulate_csr.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_fifo.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hart.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hsm.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_illegal_insn.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_init.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_ipi.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_math.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_misaligned_ldst.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_platform.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_pmu.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_scratch.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_string.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_system.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_timer.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_tlb.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_trap.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_unpriv.c
+
+OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
+OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
+
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/ipi/aclint_mswi.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/irqchip/plic.c
+OPENSBI_CSRCS += opensbi/opensbi-3rdparty/lib/utils/timer/aclint_mtimer.c
+
+OPENSBI_UNPACK  = opensbi-3rdparty
+OPENSBI_COMMIT  = 69d7e536138ae71a24028ca849d401a4d64d564b
+OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
+OPENSBI_TARBALL = opensbi.tar.gz
+OPENSBI_DIR     = riscv-software-src-opensbi-69d7e53
+
+$(OPENSBI_TARBALL):
+	$(Q) echo "Downloading: OpenSBI"
+	$(Q) curl -L $(OPENSBI_URL)/$(OPENSBI_COMMIT) -o opensbi/$(OPENSBI_TARBALL)
+
+.opensbi_unpack: $(OPENSBI_TARBALL)
+	$(Q) echo "Unpacking: OpenSBI"
+	$(Q) tar xzf opensbi/$(OPENSBI_TARBALL) -C opensbi
+	$(Q) mv opensbi/$(OPENSBI_DIR) opensbi/$(OPENSBI_UNPACK)
+	$(Q) touch opensbi/.opensbi_unpack
+
+context:: .opensbi_unpack
+
+distclean::
+	$(call DELFILE, opensbi/.opensbi_unpack)
+	$(call DELFILE, opensbi/$(OPENSBI_TARBALL))
+	$(call DELDIR, opensbi/$(OPENSBI_UNPACK))
+
+endif
