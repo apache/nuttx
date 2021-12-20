@@ -145,11 +145,14 @@ static inline int da9168_enable_interrput(FAR struct da9168_dev_s *priv,
                                           bool int_mask_sel);
 static int da9168_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                     ioe_pinset_t pinset, FAR void *arg);
-int da9168_config_shipmode(
-                       FAR struct da9168_dev_s *priv,
+static int da9168_config_shipmode(FAR struct da9168_dev_s *priv,
                        enum da9168_ship_mode_entry_delay_sel entry_delay_sel,
                        enum da9168_ship_mode_exit_deb_sel exit_deb_sel);
-int da9168_enable_shipmode(FAR struct da9168_dev_s *priv);
+static int da9168_enable_shipmode(FAR struct da9168_dev_s *priv);
+static int da9168_control_rev_vbus(FAR struct da9168_dev_s *priv,
+                                   bool enable);
+static int da9168_control_boost_en(FAR struct da9168_dev_s *priv,
+                                   bool enable);
 
 /* Battery driver lower half methods */
 
@@ -570,7 +573,55 @@ static int da9168_control_hiz(FAR struct da9168_dev_s *priv, bool enable)
   int ret;
 
   ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_06, DA9168_HIZ_MODE_MASK,
-                               (enable) ? DA9168_HIZ_MODE_MASK : 0);
+                               enable ? DA9168_HIZ_MODE_MASK : 0);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_control_rev_vbus
+ *
+ * Description:
+ *   Enable DA9168 rev vbus
+ *
+ ****************************************************************************/
+
+static int da9168_control_rev_vbus(FAR struct da9168_dev_s *priv,
+                                   bool enable)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_04,
+        DA9168_REV_VBUS_EN_MASK, enable ? DA9168_REV_VBUS_EN_MASK : 0);
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: da9168_control_boost_en
+ *
+ * Description:
+ *   Enable DA9168 boost
+ *
+ ****************************************************************************/
+
+static int da9168_control_boost_en(FAR struct da9168_dev_s *priv,
+                                   bool enable)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_04, DA9168_BOOST_EN_MASK,
+                               enable ? DA9168_BOOST_EN_MASK : 0);
   if (ret < 0)
     {
       baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
@@ -1642,6 +1693,19 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 
         break;
 
+      case BATIO_OPRTN_BOOST:
+        {
+          batinfo("BATIO_OPRTN_BOOST\n");
+          ret = da9168_control_rev_vbus(priv, value);
+          ret |= da9168_control_boost_en(priv, value);
+          if (ret < 0)
+            {
+              baterr("ERROR: Failed to enable DA9168 boost: %d\n", ret);
+            }
+        }
+
+      break;
+
       default:
         baterr("Unsupported operate type: %d\n", msg->operate_type);
         ret = -EINVAL;
@@ -1652,22 +1716,22 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 }
 
 /****************************************************************************
-* Name: da9168_worker
-*
-* Description:
-*   Polling the battery charge data, according to 2s Frequency
-*
-* Input Parameters
-*   priv    - Device struct
-*
-* Returned Value
-*   Return 0 if the driver was success; A negated errno
-*   value is returned on any failure;
-*
-* Assumptions/Limitations:
-*   None.
-*
-****************************************************************************/
+ * Name: da9168_worker
+ *
+ * Description:
+ *   Polling the battery charge data, according to 2s Frequency
+ *
+ * Input Parameters
+ *   priv    - Device struct
+ *
+ * Returned Value
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure;
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
 
 static void da9168_worker(FAR void *arg)
 {
@@ -1786,13 +1850,42 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
 
   /* enable vus_uv interrput event */
 
-  da9168_enable_interrput(priv, DA9168_PMC_MASK_01, DA9168_M_VBUS_UV_MASK,
-                          DA9168_M_VBUS_UV_SHIFT, false);
+  ret = da9168_enable_interrput(priv, DA9168_PMC_MASK_01,
+                                DA9168_M_VBUS_UV_MASK,
+                                DA9168_M_VBUS_UV_SHIFT, false);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to enable DA9168 vbus_uv interrput: %d\n", ret);
+      return ret;
+    }
 
-  /* config shiomode parameter */
+  /* config shipmode parameter */
 
   da9168_config_shipmode(priv, DA9168_SHIP_MODE_ENTRY_DELAY_2S,
                          DA9168_SHIP_MODE_EXIT_DEB_2S);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to config DA9168 shipmode parameter: %d\n", ret);
+      return ret;
+    }
+
+  /* enable rev vbus */
+
+  ret = da9168_control_rev_vbus(priv, true);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to enable DA9168 rev vubs: %d\n", ret);
+      return ret;
+    }
+
+  /* enable boost */
+
+  ret = da9168_control_boost_en(priv, true);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to enable DA9168 boost: %d\n", ret);
+      return ret;
+    }
 
   work_queue(HPWORK, &priv->work, da9168_worker, priv,
              DA9168_WORK_POLL_TIME);
