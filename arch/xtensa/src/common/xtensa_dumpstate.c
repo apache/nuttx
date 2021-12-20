@@ -63,12 +63,12 @@ static void up_taskdump(struct tcb_s *tcb, void *arg)
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)tcb->adj_stack_size);
 #else
   _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)tcb->adj_stack_size);
 #endif
 
   /* Dump the backtrace */

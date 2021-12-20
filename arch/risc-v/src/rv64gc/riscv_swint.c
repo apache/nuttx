@@ -77,8 +77,6 @@ static void riscv_registerdump(const uint64_t *regs)
           regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #endif
 }
-#else
-#  define riscv_registerdump(regs)
 #endif
 
 /****************************************************************************

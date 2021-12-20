@@ -71,11 +71,11 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: arm_stackdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint32_t sp, uint32_t stack_top)
+static void arm_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
@@ -91,16 +91,14 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#else
-#  define up_stackdump(sp,stack_top)
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: arm_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(FAR volatile uint32_t *regs)
+static inline void arm_registerdump(FAR volatile uint32_t *regs)
 {
   /* Are user registers available from interrupt processing? */
 
@@ -125,18 +123,16 @@ static inline void up_registerdump(FAR volatile uint32_t *regs)
 
 #ifdef CONFIG_ARMV8M_USEBASEPRI
   _alert("xPSR: %08x BASEPRI: %08x CONTROL: %08x\n",
-        regs[REG_XPSR], regs[REG_BASEPRI], getcontrol());
+         regs[REG_XPSR], regs[REG_BASEPRI], getcontrol());
 #else
   _alert("xPSR: %08x PRIMASK: %08x CONTROL: %08x\n",
-        regs[REG_XPSR], regs[REG_PRIMASK], getcontrol());
+         regs[REG_XPSR], regs[REG_PRIMASK], getcontrol());
 #endif
 
 #ifdef CONFIG_BUILD_PROTECTED
   _alert("EXC_RETURN: %08x\n", regs[REG_EXC_RETURN]);
 #endif
 }
-#else
-# define up_registerdump(regs)
 #endif
 
 /****************************************************************************
@@ -331,7 +327,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -348,7 +344,7 @@ static void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump(CURRENT_REGS);
+  arm_registerdump(CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 
@@ -380,12 +376,12 @@ static void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase + istacksize);
+      arm_stackdump(sp, istackbase + istacksize);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      arm_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Extract the user stack pointer if we are in an interrupt handler.
@@ -402,28 +398,11 @@ static void up_dumpstate(void)
   _alert("User stack:\n");
   _alert("  base: %08x\n", ustackbase);
   _alert("  size: %08x\n", ustacksize);
-
-  /* Dump the user stack if the stack pointer lies within the allocated user
-   * stack memory.
-   */
-
-  if (sp >= ustackbase && sp < ustackbase + ustacksize)
-    {
-      up_stackdump(sp, ustackbase + ustacksize);
-    }
-  else
-    {
-      _alert("ERROR: Stack pointer is not within the allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
-    }
-
 #else
-
-  /* Show user stack info */
-
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
   _alert("stack size: %08x\n", ustacksize);
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -431,15 +410,13 @@ static void up_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      up_stackdump(sp, ustackbase + ustacksize);
+      arm_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
       _alert("ERROR: Stack pointer is not within the allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      arm_stackdump(ustackbase, ustackbase + ustacksize);
     }
-
-#endif
 
 #ifdef CONFIG_SMP
   /* Show the CPU number */

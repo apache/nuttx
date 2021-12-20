@@ -74,7 +74,7 @@ static void sh1_stackdump(uint32_t sp, uint32_t stack_top)
 
 static inline void sh1_registerdump(void)
 {
-  uint32_t *ptr = (uint32_t *)g_current_regs;
+  volatile uint32_t *ptr = g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -89,18 +89,18 @@ static inline void sh1_registerdump(void)
   /* Dump the interrupt registers */
 
   _alert("PC: %08x SR=%08x\n",
-        ptr[REG_PC], ptr[REG_SR]);
+         ptr[REG_PC], ptr[REG_SR]);
 
   _alert("PR: %08x GBR: %08x MACH: %08x MACL: %08x\n",
-        ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
+         ptr[REG_PR], ptr[REG_GBR], ptr[REG_MACH], ptr[REG_MACL]);
 
   _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 0,
-        ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
-        ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
+         ptr[REG_R0], ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
+         ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
 
   _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
-        ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
-        ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
+         ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
+         ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
 }
 
 /****************************************************************************
@@ -113,7 +113,7 @@ static inline void sh1_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
