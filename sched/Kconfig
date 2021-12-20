@@ -347,6 +347,10 @@ config INIT_ENTRYPOINT
 		applications this is of the form 'app_main' where 'app' is the application
 		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
+config INIT_ENTRYNAME
+	string "Application entry name"
+	default INIT_ENTRYPOINT
+
 endif # INIT_ENTRY
 
 if INIT_FILE
