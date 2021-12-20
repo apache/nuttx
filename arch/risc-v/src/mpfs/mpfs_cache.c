@@ -45,6 +45,23 @@
 
 #define MPFS_L2LIM_ADDR               0x08200000
 
+#define MPFS_ZERO_DEVICE_BOTTOM       0x0a000000
+#define MPFS_ZERO_DEVICE_TOP          0x0c000000
+#define MPFS_MAX_WAY_ENABLE           15
+#define MPFS_NB_SETS                  512
+#define MPFS_NB_BANKS                 4
+#define MPFS_CACHE_BLOCK_BYTE_LENGTH  64
+#define MPFS_WAY_BYTE_LENGTH          (MPFS_CACHE_BLOCK_BYTE_LENGTH * \
+                                       MPFS_NB_SETS * MPFS_NB_BANKS)
+
+#define INIT_MARKER                   0xc0ffeebec0010000
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const uint64_t g_init_marker = INIT_MARKER;
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -67,6 +84,12 @@
 
 void mpfs_enable_cache(void)
 {
+  uint64_t *p_scratchpad = (uint64_t *)MPFS_ZERO_DEVICE_BOTTOM;
+  uint32_t ways_inc;
+  uint32_t inc;
+  uint64_t current_way = 1 << (((LIBERO_SETTING_WAY_ENABLE + 1) -
+                                 LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS));
+
   /* Increasing the ways decreases the 2 MB l2lim area:
    *   - Way0:  0x081e0000 - 0x08200000
    *   - Way1:  0x081c0000 - 0x081e0000
@@ -121,11 +144,28 @@ void mpfs_enable_cache(void)
   putreg32(LIBERO_SETTING_WAY_MASK_U54_4_ICACHE,
            MPFS_CACHE_WAY_MASK_U54_4_ICACHE);
 
-  /* L2 scratchpad region needs to be configured right here.  Currently
-   * we have no OpenSBI or other modules using the region so it isn't
-   * configured.  This corresponds to LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS
-   * = 0.
-   */
+  /* Assign ways to Zero Device */
+
+  for (ways_inc = 0; ways_inc < LIBERO_SETTING_NUM_SCRATCH_PAD_WAYS;
+       ++ways_inc)
+    {
+      /* Populate the scratchpad memory one way at a time */
+
+      putreg32(current_way, MPFS_CACHE_WAY_MASK_E51_DCACHE);
+      mb();
+
+      /* Write to the first 64-bit location of each cache block */
+
+      for (inc = 0; inc < (MPFS_WAY_BYTE_LENGTH /
+           MPFS_CACHE_BLOCK_BYTE_LENGTH); ++inc)
+        {
+          *p_scratchpad = g_init_marker + inc;
+          p_scratchpad += MPFS_CACHE_BLOCK_BYTE_LENGTH / sizeof(uint64_t);
+        }
+
+      current_way = current_way << 1U;
+      mb();
+    }
 
   putreg32(LIBERO_SETTING_WAY_MASK_E51_DCACHE,
            MPFS_CACHE_WAY_MASK_E51_DCACHE);
