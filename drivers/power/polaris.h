@@ -95,6 +95,7 @@ struct rx_int_state_s
   bool wlc_rx_int_output_on;
   bool wlc_rx_int_output_off;
   bool wlc_rx_int_uvp;
+  bool wlc_rx_pp_done;
 };
 
 #define WLC_HEALTH_TEMP_MAX  80

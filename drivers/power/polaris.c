@@ -791,30 +791,48 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   int ret;
   uint32_t reg_value;
 
-  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, &reg_value, 4);
+  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, &reg_value, 4);
   if (ret != OK)
     {
       baterr("[WLC] failed to read INTR states !!!\n");
       return ret;
     }
 
-  rx_int_state->wlc_rx_int_otp       = (reg_value & WLC_RX_OTP_INT_MASK);
-  rx_int_state->wlc_rx_int_ocp       = (reg_value & WLC_RX_OCP_INT_MASK);
-  rx_int_state->wlc_rx_int_ovp       = (reg_value & WLC_RX_OVP_INT_MASK);
-  rx_int_state->wlc_rx_int_scp       = (reg_value & WLC_RX_SCP_INT_MASK);
-  rx_int_state->wlc_rx_int_ss_tx     = (reg_value & WLC_RX_SS_TX_INT_MASK);
+  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %08X \n", reg_value);
+
+  rx_int_state->wlc_rx_int_otp       =
+      ((reg_value & WLC_RX_OTP_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_int_ocp       =
+      ((reg_value & WLC_RX_OCP_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_int_ovp       =
+      ((reg_value & WLC_RX_OVP_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_int_scp       =
+      ((reg_value & WLC_RX_SCP_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_int_ss_tx     =
+      ((reg_value & WLC_RX_SS_TX_INT_MASK) == false) ? false : true;
   rx_int_state->wlc_rx_int_output_on =
-                                  (reg_value & WLC_RX_OUTPUT_OFF_INT_MASK);
-  rx_int_state->wlc_rx_int_uvp       = (reg_value & WLC_RX_UVP_INT_MASK);
+      ((reg_value & WLC_RX_OUTPUT_ON_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_int_uvp       =
+      ((reg_value & WLC_RX_UVP_INT_MASK) == false) ? false : true;
+  rx_int_state->wlc_rx_pp_done       =
+      ((reg_value & WLC_RX_PP_DONE_INT_MASK) == false) ? false : true;
+
+  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, &reg_value, 4);
+  batinfo("[WLC] read WLC_RX_INTR_EN_REG is %08X \n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, &reg_value, 4);
+  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %08X \n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_STAT_REG, &reg_value, 4);
+  batinfo("[WLC] read WLC_RX_STAT_REG is %08X \n", reg_value);
 
   /* CLR int register */
 
   batinfo("[WLC] start to CLR INTR states !!!\n");
-  reg_value = 0x00;
+  reg_value = 0xffffffff;
   ret = fw_i2c_write(priv, WLC_RX_INTR_CLR_REG, &reg_value, 4);
+  batinfo("[WLC] read WLC_RX_INTR_CLR_REG is %08X \n", reg_value);
   if (ret != OK)
     {
-      baterr("[WLC] failed to CLR INTR states !!!\n");
+      baterr("[WLC] Failed to CLR INTR states !!!\n");
       return ret;
     }
 
@@ -861,6 +879,19 @@ static void stwlc38_worker(FAR void *arg)
                rx_int_state->wlc_rx_int_output_off ? "true" : "false");
       batinfo("  rx_int_state->wlc_rx_int_uvp       = %s\n",
                rx_int_state->wlc_rx_int_uvp ? "true" : "false");
+      batinfo("  rx_int_state->wlc_rx_pp_done       = %s\n",
+               rx_int_state->wlc_rx_pp_done ? "true" : "false");
+    }
+
+  /**************************************************************************
+   *  if recieved ss intr, start charge_manger app
+   *  if removed tx, the charge_manager app will return
+   **************************************************************************/
+
+  if (rx_int_state->wlc_rx_int_output_on)
+    {
+      batinfo("[WLC] start charge_manager !!!\n");
+      system("charge_manager &");
     }
 
   return;
@@ -1196,6 +1227,10 @@ FAR struct battery_charger_dev_s *
       return NULL;
     }
 
+  ret = nvm_program_show(priv);
+  if (ret != OK)
+    baterr("Failed to [WLC] NVM programming exited, Error: %d\n", ret);
+
   ret = stwlc38_init_interrupt(priv);
   if (ret < 0)
     {
@@ -1209,10 +1244,6 @@ FAR struct battery_charger_dev_s *
     {
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
-
-  ret = nvm_program_show(priv);
-  if (ret != OK)
-    baterr("Failed to [WLC] NVM programming exited, Error: %d\n", ret);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }

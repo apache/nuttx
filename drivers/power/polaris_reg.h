@@ -34,7 +34,7 @@
  * @brief Unsigned integer with bit position @p n set (signed in
  * assembly language).
  */
-#define BIT(n)  (1UL << (n))
+#define BIT(n)  (1U << (n))
 #endif
 #endif
 
@@ -44,10 +44,12 @@
 #define WLC_RX_OCP_INT_MASK           BIT(1)  /* Byte0 */
 #define WLC_RX_OVP_INT_MASK           BIT(2)  /* Byte0 */
 #define WLC_RX_SCP_INT_MASK           BIT(4)  /* Byte0 */
-#define WLC_RX_SS_TX_INT_MASK         BIT(5)  /* Byte0 */
+#define WLC_RX_R_TX_INT_MASK          BIT(5)  /* Byte0 */
 #define WLC_RX_OUTPUT_ON_INT_MASK     BIT(6)  /* Byte0 */
 #define WLC_RX_OUTPUT_OFF_INT_MASK    BIT(7)  /* Byte0 */
+#define WLC_RX_SS_TX_INT_MASK         BIT(10) /* Byte1 */
 #define WLC_RX_UVP_INT_MASK           BIT(12) /* Byte1 */
+#define WLC_RX_PP_DONE_INT_MASK       BIT(24) /* Byte3 */
 
 #define WLC_CHIP_ID_REG               0x0000  /* Length: 2, default: 0x00 */
 #define WLC_CHIP_REV_REG              0x0002  /* Length: 1, default: 0x00 */
