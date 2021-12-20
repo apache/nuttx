@@ -496,16 +496,26 @@ void uart_recvchars_done(FAR uart_dev_t *dev);
 void uart_reset_sem(FAR uart_dev_t *dev);
 
 /****************************************************************************
- * Name: uart_lanch
+ * Name: uart_check_special
  *
  * Description:
- *   This function is called when user want lanch a new program by
- *   using a special char.
+ *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
+ *   buffer region.  The first signal associated with the first such
+ *   character is returned.
+ *
+ *   If there multiple such characters in the buffer, only the signal
+ *   associated with the first is returned (this a bug!)
+ *
+ * Returned Value:
+ *   0 if a signal-related character does not appear in the.  Otherwise,
+ *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
+ *   action.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TTY_LAUNCH
-void uart_launch(void);
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size);
 #endif
 
 #undef EXTERN
