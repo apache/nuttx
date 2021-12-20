@@ -634,7 +634,7 @@ int spirit_waitstatus(FAR struct spirit_library_s *spirit,
    * resulting delay in ticks is greater than or equal to the requested time
    * in MSEC.
    *
-   * REVIST: If USEC_PER_TICK and 'msec' are large, then the second
+   * REVISIT: If USEC_PER_TICK and 'msec' are large, then the second
    * computation may overflow!
    */
 

@@ -976,7 +976,7 @@ config DEBUG_MEMFAULT
 	default n
 	depends on ARCH_HAVE_MEMFAULT_DEBUG && DEBUG_ALERT && ARCH_USE_MPU
 	---help---
-		Enables verbose debug output when a mem fault is occurs.  This verbose
+		Enables verbose debug output when a mem fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult mem fault problems,
 		but may be more than you typically want to see.
 
@@ -989,7 +989,7 @@ config DEBUG_BUSFAULT
 	default n
 	depends on ARCH_HAVE_BUSFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a bus fault is occurs.  This verbose
+		Enables verbose debug output when a bus fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult bus fault problems,
 		but may be more than you typically want to see.
 
@@ -1002,7 +1002,7 @@ config DEBUG_USAGEFAULT
 	default n
 	depends on ARCH_HAVE_USAGEFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a usage fault is occurs.  This verbose
+		Enables verbose debug output when a usage fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult usage fault problems,
 		but may be more than you typically want to see.
 

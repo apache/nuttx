@@ -163,7 +163,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * REVIST:  Only SOCK_STREAM and SOCK_DGRAM are supported.  Should also
+   * REVISIT:  Only SOCK_STREAM and SOCK_DGRAM are supported.  Should also
    * support SOCK_RAW.
    */
 

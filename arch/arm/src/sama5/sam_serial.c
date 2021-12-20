@@ -1074,13 +1074,13 @@ static int up_setup(struct uart_dev_s *dev)
            && priv->usartbase != SAM_UART1_VBASE
 #endif
 #if defined(CONFIG_SAMA5_UART2)
-#  warning REVIST
+#  warning REVISIT
 #endif
 #if defined(CONFIG_SAMA5_UART3)
-#  warning REVIST
+#  warning REVISIT
 #endif
 #if defined(CONFIG_SAMA5_UART4)
-#  warning REVIST
+#  warning REVISIT
 #endif
           )
     {

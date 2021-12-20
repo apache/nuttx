@@ -143,7 +143,7 @@ int setvbuf(FAR FILE *stream, FAR char *buffer, int mode, size_t size)
    * Here we really only verify that there is no valid data in the existing
    * buffer.
    *
-   * REVIST:  There could be race conditions here, could there not?
+   * REVISIT:  There could be race conditions here, could there not?
    */
 
   if (stream->fs_bufpos != stream->fs_bufstart)
