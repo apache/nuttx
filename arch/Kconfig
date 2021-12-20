@@ -423,7 +423,7 @@ config ARCH_USE_TEXT_HEAP
 	default n
 	depends on ARCH_HAVE_TEXT_HEAP
 	---help---
-		This option enables architecture-sepecific memory allocator
+		This option enables architecture-specific memory allocator
 		for dynamic code loading. For example, ESP32 has a separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.

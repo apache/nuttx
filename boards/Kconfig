@@ -2065,7 +2065,7 @@ config ARCH_BOARD_TEENSY_3X
 
 		This board configuration can also be used with the older Teensy-3.0.  The
 		Teensy-3.0 has the same schematic (although some pins are not used on the
-		Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
+		Teensy-3.0).  The primary difference is that the Teensy 3.0 has a
 		MK20DX128VLH5 with slightly less capability.
 
 config ARCH_BOARD_TEENSY_4X
@@ -2271,7 +2271,7 @@ config ARCH_BOARD_PHY6222
 	depends on ARCH_CHIP_PHY62XX
 	---help---
 		none
-		
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
