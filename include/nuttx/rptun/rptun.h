@@ -38,6 +38,7 @@
 
 #define RPTUNIOC_START              _RPTUNIOC(1)
 #define RPTUNIOC_STOP               _RPTUNIOC(2)
+#define RPTUNIOC_PANIC              _RPTUNIOC(3)
 
 #define RPTUN_NOTIFY_ALL            (UINT32_MAX - 0)
 
@@ -314,6 +315,7 @@ extern "C"
 
 int rptun_initialize(FAR struct rptun_dev_s *dev);
 int rptun_boot(FAR const char *cpuname);
+int rptun_panic(FAR const char *cpuname);
 
 #ifdef __cplusplus
 }

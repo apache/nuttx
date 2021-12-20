@@ -116,6 +116,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
 
 static int rptun_dev_start(FAR struct remoteproc *rproc);
 static int rptun_dev_stop(FAR struct remoteproc *rproc);
+static int rptun_dev_panic(FAR struct remoteproc *rproc);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
@@ -265,6 +266,13 @@ static int rptun_thread(int argc, FAR char *argv[])
                 rptun_dev_stop(&priv->rproc);
               }
             break;
+
+          case RPTUNIOC_PANIC:
+            if (priv->rproc.state != RPROC_OFFLINE)
+              {
+                rptun_dev_panic(&priv->rproc);
+              }
+            break;
         }
 
         priv->cmd = RPTUNIOC_NONE;
@@ -287,7 +295,18 @@ static void rptun_wakeup(FAR struct rptun_priv_s *priv)
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
-  rptun_wakeup(arg);
+  FAR struct rptun_priv_s *priv = arg;
+
+  if (!RPTUN_IS_MASTER(priv->dev))
+    {
+      int status = rpmsg_virtio_get_status(&priv->vdev);
+      if (status & VIRTIO_CONFIG_STATUS_NEEDS_RESET)
+        {
+          PANIC();
+        }
+    }
+
+  rptun_wakeup(priv);
   return OK;
 }
 
@@ -672,6 +691,14 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
+static int rptun_dev_panic(FAR struct remoteproc *rproc)
+{
+  FAR struct rptun_priv_s *priv = rproc->priv;
+
+  rpmsg_virtio_set_status(&priv->vdev, VIRTIO_CONFIG_STATUS_NEEDS_RESET);
+  RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
+}
+
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
@@ -683,6 +710,7 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
     {
       case RPTUNIOC_START:
       case RPTUNIOC_STOP:
+      case RPTUNIOC_PANIC:
         priv->cmd = cmd;
         rptun_wakeup(priv);
         break;
@@ -1002,3 +1030,24 @@ int rptun_boot(FAR const char *cpuname)
 
   return ret;
 }
+
+int rptun_panic(FAR const char *cpuname)
+{
+  FAR struct metal_list *node;
+
+  metal_list_for_each(&g_rptun_priv, node)
+    {
+      FAR struct rptun_priv_s *priv;
+
+      priv = metal_container_of(node, struct rptun_priv_s, node);
+
+      if (RPTUN_IS_MASTER(priv->dev) &&
+          !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
+        {
+          rptun_dev_panic(&priv->rproc);
+        }
+    }
+
+  return -ENOENT;
+}
+
