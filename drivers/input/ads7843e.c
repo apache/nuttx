@@ -1216,6 +1216,7 @@ int ads7843e_register(FAR struct spi_dev_s *spi,
    */
 
 #ifdef CONFIG_ADS7843E_MULTIPLE
+  flags = enter_critical_section();
   priv->flink    = g_ads7843elist;
   g_ads7843elist = priv;
   leave_critical_section(flags);
