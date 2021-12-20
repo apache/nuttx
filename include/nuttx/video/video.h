@@ -178,6 +178,18 @@ extern "C"
 
 #define VIDIOC_QUERYCAP               _VIDIOC(0x001b)
 
+/* Set clip
+ * Address pointing to struct v4l2_selection
+ */
+
+#define VIDIOC_S_SELECTION            _VIDIOC(0x001c)
+
+/* Get clip
+ * Address pointing to struct v4l2_selection
+ */
+
+#define VIDIOC_G_SELECTION            _VIDIOC(0x001d)
+
 #define VIDEO_HSIZE_QVGA        (320)   /* QVGA    horizontal size */
 #define VIDEO_VSIZE_QVGA        (240)   /* QVGA    vertical   size */
 #define VIDEO_HSIZE_VGA         (640)   /* VGA     horizontal size */
@@ -256,6 +268,39 @@ struct v4l2_capability
   uint32_t version;      /* version number of the driver */
   uint32_t capabilities; /* Available capabilities of the physical device */
   uint32_t device_caps;  /* Device capabilities of the opened device */
+};
+
+/* Rectangle information */
+
+struct v4l2_rect
+{
+  /* Horizontal offset of the top, left corner of the rectangle, in pixels. */
+
+  int32_t left;
+
+  /* Vertical offset of the top, left corner of the rectangle, in pixels. */
+
+  int32_t top;
+
+  /* Width of the rectangle, in pixels. */
+
+  uint32_t width;
+
+  /* Height of the rectangle, in pixels. */
+
+  uint32_t height;
+};
+
+/* V4L2 selection info for VIDIOC_S_SELECTION and VIDIOC_G_SELECTION.
+ * Currently, only member type and r are supported.
+ */
+
+struct v4l2_selection
+{
+  uint32_t type;       /* Buffer type */
+  uint32_t target;
+  uint32_t flags;
+  struct v4l2_rect r;  /* The selection rectangle. */
 };
 
 /* Buffer type.

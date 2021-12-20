@@ -75,6 +75,23 @@
 #define IMGSENSOR_ID_3A_STATUS            (0x00010015)
 #define IMGSENSOR_ID_FLASH_LED_MODE       (0x00020000)
 #define IMGSENSOR_ID_JPEG_QUALITY         (0x00030000)
+#define IMGSENSOR_ID_CLIP_VIDEO           (0xFFFF0000)
+#define IMGSENSOR_ID_CLIP_STILL           (0xFFFF0001)
+
+/* Number of elements in clip data array
+ * in IMGSENSOR_ID_CLIP_VIDEO and IMGSENSOR_ID_CLIP_STILL case
+ */
+
+#define IMGSENSOR_CLIP_NELEM              (4)
+
+/* Index of clip information
+ * in IMGSENSOR_ID_CLIP_VIDEO and IMGSENSOR_ID_CLIP_STILL case
+ */
+
+#define IMGSENSOR_CLIP_INDEX_LEFT         (0)
+#define IMGSENSOR_CLIP_INDEX_TOP          (1)
+#define IMGSENSOR_CLIP_INDEX_WIDTH        (2)
+#define IMGSENSOR_CLIP_INDEX_HEIGHT       (3)
 
 /* bit definition for IMGSENSOR_ID_3A_LOCK */
 
