@@ -166,7 +166,7 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
       if (next - priv->tail >= priv->size)
         {
 #ifndef CONFIG_SYSLOG_RPMSG_OVERWRITE
-          if (!up_interrupt_context() && !sched_idletask())
+          if (!priv->flush && !up_interrupt_context() && !sched_idletask())
             {
               nxsem_wait(&priv->sem);
             }
@@ -194,6 +194,15 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
 
   priv->buffer[SYSLOG_RPMSG_HEADOFF(priv)] = ch & 0xff;
   priv->head = next;
+
+  if (priv->flush)
+    {
+#if defined(CONFIG_ARCH_LOWPUTC)
+      up_putc(ch);
+#endif
+      priv->flush++;
+      return;
+    }
 
   if (last && !priv->suspend && !priv->transfer &&
           is_rpmsg_ept_ready(&priv->ept))
@@ -328,7 +337,6 @@ int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
 
 int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 {
-#if defined(CONFIG_ARCH_LOWPUTC)
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
 
@@ -341,12 +349,13 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 
   while (priv->flush < priv->head)
     {
+#if defined(CONFIG_ARCH_LOWPUTC)
       up_putc(priv->buffer[SYSLOG_RPMSG_FLUSHOFF(priv)]);
+#endif
       priv->flush++;
     }
 
   leave_critical_section(flags);
-#endif
 
   return OK;
 }
