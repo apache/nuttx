@@ -308,18 +308,18 @@ endif # SMP
 
 choice
 	prompt "Initialization Task"
-	default INIT_ENTRYPOINT if !BUILD_KERNEL
-	default INIT_FILEPATH if !BINFMT_DISABLE
+	default INIT_ENTRY if !BUILD_KERNEL
+	default INIT_FILE if !BINFMT_DISABLE
 	default INIT_NONE if BINFMT_DISABLE
 
 config INIT_NONE
 	bool "None"
 
-config INIT_ENTRYPOINT
-	bool "Via application entry point"
+config INIT_ENTRY
+	bool "Via application entry"
 	depends on !BUILD_KERNEL
 
-config INIT_FILEPATH
+config INIT_FILE
 	bool "Via executable file"
 	depends on !BINFMT_DISABLE
 
@@ -332,39 +332,39 @@ config INIT_ARGS
 		The argument list for user applications. e.g.:
 		  "\"arg1\",\"arg2\",\"arg3\""
 
-if INIT_ENTRYPOINT
-config USER_ENTRYPOINT
-	string "Application entry point"
-	default "main"
-	---help---
-		The name of the entry point for user applications.  For the example
-		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "main".
-
-config USERMAIN_STACKSIZE
+config INIT_STACKSIZE
 	int "Main thread stack size"
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The size of the stack to allocate for the user initialization thread
 		that is started as soon as the OS completes its initialization.
 
-config USERMAIN_PRIORITY
+config INIT_PRIORITY
 	int "init thread priority"
 	default 100
 	---help---
 		The priority of the user initialization thread.
 
-endif # INIT_ENTRYPOINT
+if INIT_ENTRY
+config INIT_ENTRYPOINT
+	string "Application entry point"
+	default "main"
+	---help---
+		The name of the entry point for user applications.  For the example
+		applications this is of the form 'app_main' where 'app' is the application
+		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
-if INIT_FILEPATH
+endif # INIT_ENTRY
 
-config USER_INITPATH
+if INIT_FILE
+
+config INIT_FILEPATH
 	string "Application initialization path"
 	default "/bin/init"
 	---help---
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "main".
+		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
 config INIT_SYMTAB
 	string "Symbol table"
@@ -430,7 +430,7 @@ config INIT_MOUNT_DATA
 	default ""
 
 endif # INIT_MOUNT
-endif # INIT_FILEPATH
+endif # INIT_FILE
 
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
