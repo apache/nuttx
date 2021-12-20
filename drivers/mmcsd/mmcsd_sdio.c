@@ -1367,9 +1367,6 @@ static ssize_t mmcsd_readsingle(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_BES_HAVE_MTDSDMMC)
-    return hal_sdmmc_read_blocks(0, startblock, 1, buffer);
-#endif
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
@@ -1505,9 +1502,6 @@ static ssize_t mmcsd_readmultiple(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_BES_HAVE_MTDSDMMC)
-    return hal_sdmmc_read_blocks(0, startblock, nblocks, buffer);
-#endif
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
@@ -1651,9 +1645,6 @@ static ssize_t mmcsd_writesingle(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_BES_HAVE_MTDSDMMC)
-    return hal_sdmmc_write_blocks(0, startblock, 1, buffer);
-#endif
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
@@ -1825,9 +1816,6 @@ static ssize_t mmcsd_writemultiple(FAR struct mmcsd_state_s *priv,
       return -EPERM;
     }
 
-#if defined(CONFIG_BES_HAVE_MTDSDMMC)
-    return hal_sdmmc_write_blocks(0, startblock, nblocks, buffer);
-#endif
 #if defined(CONFIG_SDIO_DMA) && defined(CONFIG_ARCH_HAVE_SDIO_PREFLIGHT)
   /* If we think we are going to perform a DMA transfer, make sure that we
    * will be able to before we commit the card to the operation.
