@@ -345,6 +345,7 @@ int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
 int  arm_memfault(int irq, FAR void *context, FAR void *arg);
 int  arm_busfault(int irq, FAR void *context, FAR void *arg);
 int  arm_usagefault(int irq, FAR void *context, FAR void *arg);
+int  arm_securefault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 
