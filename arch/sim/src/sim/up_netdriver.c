@@ -283,11 +283,13 @@ static int netdriver_ifup(FAR struct net_driver_s *dev)
 {
   netdev_ifup(dev->d_ipaddr);
   work_queue(LPWORK, &g_timer_work, netdriver_timer_work, dev, CLK_TCK);
+  netdev_carrier_on(dev);
   return OK;
 }
 
 static int netdriver_ifdown(FAR struct net_driver_s *dev)
 {
+  netdev_carrier_off(dev);
   work_cancel(LPWORK, &g_timer_work);
   netdev_ifdown();
   return OK;
