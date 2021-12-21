@@ -444,7 +444,6 @@ int usrsock_host_accept(int sockfd, struct nuttx_sockaddr *addr,
 {
   socklen_t naddrlen = sizeof(socklen_t);
   struct sockaddr naddr;
-  socklen_t naddrlen;
   int ret;
 
   ret = accept(sockfd, &naddr, &naddrlen);
