@@ -34,6 +34,7 @@
 
 #include "arm_arch.h"
 #include "nvic.h"
+#include "sau.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -75,6 +76,9 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
 {
   uint32_t hfsr = getreg32(NVIC_HFAULTS);
   uint32_t cfsr = getreg32(NVIC_CFAULTS);
+#ifdef CONFIG_DEBUG_SECUREFAULT
+  uint32_t sfsr = getreg32(SAU_SFSR);
+#endif /* CONFIG_DEBUG_SECUREFAULT */
 
   /* Get the value of the program counter where the fault occurred */
 
@@ -130,18 +134,27 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
           return arm_memfault(irq, context, arg);
         }
 #endif /* CONFIG_DEBUG_MEMFAULT */
+
 #ifdef CONFIG_DEBUG_BUSFAULT
       if (cfsr & NVIC_CFAULTS_BUSFAULTSR_MASK)
         {
           return arm_busfault(irq, context, arg);
         }
 #endif /* CONFIG_DEBUG_BUSFAULT */
+
 #ifdef CONFIG_DEBUG_USAGEFAULT
       if (cfsr & NVIC_CFAULTS_USGFAULTSR_MASK)
         {
           return arm_usagefault(irq, context, arg);
         }
 #endif /* CONFIG_DEBUG_USAGEFAULT */
+
+#ifdef CONFIG_DEBUG_SECUREFAULT
+      if (sfsr & SAU_SFSR_MASK)
+        {
+          return arm_securefault(irq, context, arg);
+        }
+#endif /* CONFIG_DEBUG_SECUREFAULT */
     }
 
   /* Dump some hard fault info */
