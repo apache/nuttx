@@ -534,11 +534,7 @@ static void governor_statechanged(int domain, enum pm_state_e newstate)
 
 static void governor_timer_cb(wdparm_t arg)
 {
-  /* Do nothing here, cause we only need TIMER ISR to wake up PM,
-   * for deceasing PM state.
-   */
-
-  UNUSED(arg);
+  pm_auto_updatestate((int)arg);
 }
 
 /****************************************************************************
@@ -586,7 +582,8 @@ static void governor_timer(int domain)
       if (!WDOG_ISACTIVE(&pdomstate->wdog) ||
           abs(delay - left) > PM_TIMER_GAP)
         {
-          wd_start(&pdomstate->wdog, delay, governor_timer_cb, 0);
+          wd_start(&pdomstate->wdog, delay, governor_timer_cb,
+                   (wdparm_t)domain);
         }
     }
   else

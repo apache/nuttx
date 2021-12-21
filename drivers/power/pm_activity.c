@@ -73,6 +73,8 @@ void pm_activity(int domain, int priority)
     {
       g_pmglobals.governor->activity(domain, priority);
     }
+
+  pm_auto_updatestate(domain);
 }
 
 /****************************************************************************
@@ -112,6 +114,8 @@ void pm_stay(int domain, enum pm_state_e state)
   DEBUGASSERT(pdom->stay[state] < UINT16_MAX);
   pdom->stay[state]++;
   leave_critical_section(flags);
+
+  pm_auto_updatestate(domain);
 }
 
 /****************************************************************************
@@ -150,6 +154,8 @@ void pm_relax(int domain, enum pm_state_e state)
   DEBUGASSERT(pdom->stay[state] > 0);
   pdom->stay[state]--;
   leave_critical_section(flags);
+
+  pm_auto_updatestate(domain);
 }
 
 /****************************************************************************

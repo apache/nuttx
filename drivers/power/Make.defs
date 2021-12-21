@@ -23,7 +23,7 @@
 ifeq ($(CONFIG_PM),y)
 
 CSRCS += pm_initialize.c pm_activity.c pm_changestate.c pm_checkstate.c
-CSRCS += pm_register.c pm_unregister.c
+CSRCS += pm_register.c pm_unregister.c pm_autoupdate.c
 
 # Governor implementations
 
