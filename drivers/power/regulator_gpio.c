@@ -142,18 +142,21 @@ int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
 
   ret = IOEXP_SETDIRECTION(priv->iodev, desc->enable_reg,
                            IOEXPANDER_DIRECTION_OUT);
+  if (ret >= 0)
+    {
+      priv->rdev = regulator_register(desc,
+                                      &g_regulator_gpio_ops,
+                                      priv);
+      if (priv->rdev == NULL)
+        {
+          ret = -EINVAL;
+        }
+    }
+
   if (ret < 0)
     {
-      return ret;
-    }
-
-  priv->rdev = regulator_register(desc, &g_regulator_gpio_ops,
-                                  priv);
-  if (!priv->rdev)
-    {
       kmm_free(priv);
-      return -EINVAL;
     }
 
-  return 0;
+  return ret;
 }
