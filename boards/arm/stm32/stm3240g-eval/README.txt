@@ -1124,9 +1124,9 @@ Where <subdir> is one of the following:
        "If you use a large I/O buffer to access the file system, then the
         MMCSD driver will perform multiple block SD transfers.  With DMA
         ON, this seems to result in CRC errors detected by the hardware
-        during the transfer.  Workaround:  CONFIG_MMCSD_MULTIBLOCK_DISABLE=y"
+        during the transfer.  Workaround:  CONFIG_MMCSD_MULTIBLOCK_LIMIT=1"
 
-       For this reason, CONFIG_MMCSD_MULTIBLOCK_DISABLE=y appears in the defconfig
+       For this reason, CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 appears in the defconfig
        file.
 
     7. Another DMA-related concern.  I see this statement in the reference

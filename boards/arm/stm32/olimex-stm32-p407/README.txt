@@ -103,7 +103,7 @@ microSD Card Interface
       # CONFIG_MMCSD_MMCSUPPORT is not set     : Interferes with some SD cards
       # CONFIG_MMCSD_SPI is not set            : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                      : SDIO-based MMC/SD support
-      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y        : Disable to keep things simple
+      CONFIG_MMCSD_MULTIBLOCK_LIMIT=1          : Disable to keep things simple
       CONFIG_SDIO_DMA=y                        : Use SDIO DMA
       # CONFIG_SDIO_BLOCKSETUP is not set      : (not implemented)
 
