@@ -128,6 +128,15 @@ extern "C"
 
 void      srand(unsigned int seed);
 int       rand(void);
+double    drand48(void);
+double    erand48(unsigned short xsubi[3]);
+long int  lrand48(void);
+long int  nrand48(unsigned short xsubi[3]);
+long int  mrand48(void);
+long int  jrand48(unsigned short xsubi[3]);
+void      srand48(long int seedval);
+void      lcong48(unsigned short param[7]);
+FAR unsigned short *seed48(unsigned short seed16v[3]);
 
 #define   srandom(s) srand(s)
 long      random(void);
