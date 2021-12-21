@@ -54,9 +54,55 @@ FAR const struct symtab_s *
 symtab_findbyvalue(FAR const struct symtab_s *symtab,
                    FAR void *value, int nsyms)
 {
+#ifndef CONFIG_SYMTAB_ORDEREDBYVALUE
   FAR const struct symtab_s *retval = NULL;
+#else
+  int high = nsyms - 1;
+  int mid  = high >> 1;
+  int low  = 0;
+#endif
 
   DEBUGASSERT(symtab != NULL);
+
+#ifdef CONFIG_SYMTAB_ORDEREDBYVALUE
+
+  while (high >= low)
+    {
+      mid = (low + high) >> 1;
+
+      if (symtab[mid].sym_value == value)
+        {
+          break;
+        }
+      else if (symtab[mid].sym_value > value)
+        {
+          if (symtab[mid - 1].sym_value <= value)
+            {
+              mid -= 1;
+              break;
+            }
+          else
+            {
+              high = mid - 1;
+            }
+        }
+      else if (symtab[mid].sym_value < value)
+        {
+          if (symtab[mid + 1].sym_value >= value)
+            {
+              break;
+            }
+          else
+            {
+              low = mid + 1;
+            }
+        }
+    }
+
+  return &symtab[mid];
+
+#else /* CONFIG_SYMTAB_ORDEREDBYVALUE */
+
   for (; nsyms > 0; symtab++, nsyms--)
     {
       /* Look for symbols of lesser or equal value (probably address) to
@@ -89,4 +135,5 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
     }
 
   return retval;
+#endif /* CONFIG_SYMTAB_ORDEREDBYVALUE */
 }
