@@ -85,6 +85,10 @@
 #  include "esp32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_SHT3X
+#  include "esp32_sht3x.h"
+#endif
+
 #ifdef CONFIG_LCD_HT16K33
 #  include "esp32_ht16k33.h"
 #endif
@@ -383,6 +387,17 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_SHT3X
+  /* Try to register SHT3x device in I2C0 */
+
+  ret = board_sht3x_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SHT3X driver: %d\n", ret);
     }
 #endif
 
