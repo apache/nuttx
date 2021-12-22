@@ -356,6 +356,9 @@ static FAR void *vnc_updater(FAR void *arg)
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct vnc_fbupdate_s *srcrect;
   int ret;
+#ifdef CONFIG_FB_SYNC
+  int val;
+#endif
 
   DEBUGASSERT(session != NULL);
   ginfo("Updater running for Display %d\n", session->display);
@@ -392,6 +395,21 @@ static FAR void *vnc_updater(FAR void *arg)
       /* Release the update structure */
 
       vnc_free_update(session, srcrect);
+
+#ifdef CONFIG_FB_SYNC
+      ret = nxsem_get_value(&session->vsyncsem, &val);
+
+      if (ret < 0)
+        {
+          gerr("ERROR: Get vsync sem failed: %d\n", ret);
+          break;
+        }
+
+      if (sq_count(&session->updqueue) == 0 && val <= 0)
+        {
+          nxsem_post(&session->vsyncsem);
+        }
+#endif
 
       /* Break out and terminate the server if the encoding failed */
 

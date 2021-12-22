@@ -279,6 +279,11 @@ int vnc_server(int argc, FAR char *argv[])
   nxsem_init(&session->freesem, 0, CONFIG_VNCSERVER_NUPDATES);
   nxsem_init(&session->queuesem, 0, 0);
 
+#ifdef CONFIG_FB_SYNC
+  nxsem_init(&session->vsyncsem, 0, 0);
+  nxsem_set_protocol(&session->vsyncsem, SEM_PRIO_NONE);
+#endif
+
   /* Inform any waiter that we have started */
 
   vnc_reset_session(session, fb, display);
