@@ -235,6 +235,9 @@ struct vnc_session_s
   sq_queue_t updqueue;
   sem_t freesem;
   sem_t queuesem;
+#ifdef CONFIG_FB_SYNC
+  sem_t vsyncsem;
+#endif
 
   /* I/O buffers for misc network send/receive */
 
