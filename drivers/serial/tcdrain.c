@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/termios/lib_tcdrain.c
+ * drivers/serial/tcdrain.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -29,6 +29,7 @@
 #include <termios.h>
 #include <errno.h>
 
+#include <nuttx/cancelpt.h>
 #include <nuttx/serial/tioctl.h>
 
 /****************************************************************************
@@ -53,5 +54,33 @@
 
 int tcdrain(int fd)
 {
-  return ioctl(fd, TCDRN, (unsigned long)0);
+  int ret;
+
+  /* tcdrain is a cancellation point */
+
+  if (enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      set_errno(ECANCELED);
+      leave_cancellation_point();
+      return ERROR;
+#endif
+    }
+
+  /* Perform the TCDRM IOCTL command.  It is safe to use the file descriptor
+   * in this context because we are executing on the calling application's
+   * thread.
+   *
+   * NOTE: ioctl() will set the errno variable and return ERROR if any error
+   * occurs.
+   */
+
+  ret = ioctl(fd, TCDRN, (unsigned long)0);
+
+  leave_cancellation_point();
+  return ret;
 }

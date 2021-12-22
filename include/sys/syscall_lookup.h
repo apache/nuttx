@@ -218,6 +218,9 @@ SYSCALL_LOOKUP(pwrite,                     4)
 #ifdef CONFIG_EVENT_FD
   SYSCALL_LOOKUP(eventfd,                  2)
 #endif
+#ifdef CONFIG_SERIAL_TERMIOS
+  SYSCALL_LOOKUP(tcdrain,                  1)
+#endif
 
 /* Board support */
 

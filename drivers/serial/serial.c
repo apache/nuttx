@@ -41,7 +41,6 @@
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/cancelpt.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/power/pm.h>
@@ -1353,24 +1352,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             {
               /* Empty the tx/rx buffers */
 
-              irqstate_t flags;
-
-              /* tcdrain is a cancellation point */
-
-              if (enter_cancellation_point())
-                {
-#ifdef CONFIG_CANCELLATION_POINTS
-                  /* If there is a pending cancellation, then do not perform
-                   * the wait.  Exit now with ECANCELED.
-                   */
-
-                  ret = -ECANCELED;
-                  leave_cancellation_point();
-                  break;
-#endif
-                }
-
-              flags = enter_critical_section();
+              irqstate_t flags = enter_critical_section();
 
               if (arg == TCIFLUSH || arg == TCIOFLUSH)
                 {
@@ -1393,7 +1375,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 }
 
               leave_critical_section(flags);
-              leave_cancellation_point();
               ret = 0;
             }
             break;
