@@ -175,8 +175,6 @@ endif
 ifeq ($(NEED_MATH_H),y)
 include/math.h: include/nuttx/lib/math.h .clean_context
 	$(Q) cp -f include/nuttx/lib/math.h include/math.h
-else
-include/math.h:
 endif
 
 # The float.h header file defines the properties of your floating point
@@ -188,8 +186,6 @@ endif
 ifeq ($(CONFIG_ARCH_FLOAT_H),y)
 include/float.h: include/nuttx/lib/float.h .clean_context
 	$(Q) cp -f include/nuttx/lib/float.h include/float.h
-else
-include/float.h:
 endif
 
 # Target used to copy include/nuttx/lib/stdarg.h.  If CONFIG_ARCH_STDARG_H is
@@ -200,8 +196,6 @@ endif
 ifeq ($(CONFIG_ARCH_STDARG_H),y)
 include/stdarg.h: include/nuttx/lib/stdarg.h .clean_context
 	$(Q) cp -f include/nuttx/lib/stdarg.h include/stdarg.h
-else
-include/stdarg.h:
 endif
 
 # Target used to copy include/nuttx/lib/setjmp.h.  If CONFIG_ARCH_SETJMP_H is
@@ -212,8 +206,6 @@ endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 include/setjmp.h: include/nuttx/lib/setjmp.h .clean_context
 	$(Q) cp -f include/nuttx/lib/setjmp.h include/setjmp.h
-else
-include/setjmp.h:
 endif
 
 # Targets used to build include/nuttx/version.h.  Creation of version.h is
@@ -336,11 +328,36 @@ dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(
 # the config.h and version.h header files in the include/nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: include/nuttx/config.h include/nuttx/version.h include/math.h include/float.h include/stdarg.h include/setjmp.h dirlinks
-	$(Q) mkdir -p staging
-	$(Q) for dir in $(CONTEXTDIRS) ; do \
-		$(MAKE) -C $$dir context || exit; \
-	done
+# Generate a pattern to make Directories.mk context
+
+CONTEXTDIRS_DEPS = $(patsubst %,%/.context,$(CONTEXTDIRS))
+
+context: include/nuttx/config.h include/nuttx/version.h dirlinks $(CONTEXTDIRS_DEPS) | staging
+
+staging:
+	$(Q) mkdir -p $@
+
+# Pattern rule for $(CONTEXTDIRS_DEPS)
+
+%.context: include/nuttx/config.h dirlinks
+	$(Q) $(MAKE) -C $(patsubst %.context,%,$@) TOPDIR="$(TOPDIR)" context
+	$(Q) touch $@
+
+ifeq ($(NEED_MATH_H),y)
+context: include/math.h
+endif
+
+ifeq ($(CONFIG_ARCH_FLOAT_H),y)
+context: include/float.h
+endif
+
+ifeq ($(CONFIG_ARCH_STDARG_H),y)
+context: include/stdarg.h
+endif
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+context: include/setjmp.h
+endif
 
 # clean_context
 #
@@ -360,6 +377,7 @@ clean_context:
 	$(call DELFILE, include/stdarg.h)
 	$(call DELFILE, include/setjmp.h)
 	$(call DELFILE, arch/dummy/Kconfig)
+	$(call DELFILE, $(CONTEXTDIRS_DEPS))
 	$(Q) $(DIRUNLINK) include/arch/board
 	$(Q) $(DIRUNLINK) include/arch/chip
 	$(Q) $(DIRUNLINK) include/arch
