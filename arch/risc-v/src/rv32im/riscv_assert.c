@@ -123,43 +123,93 @@ static inline void riscv_registerdump(volatile uint32_t *regs)
 #endif
 
 /****************************************************************************
- * Name: riscv_taskdump
+ * Name: riscv_dump_task
  ****************************************************************************/
 
-#if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
-static void riscv_taskdump(struct tcb_s *tcb, void *arg)
+static void riscv_dump_task(struct tcb_s *tcb, void *arg)
 {
+#ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_filled = 0;
+  uint32_t stack_used;
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+  struct cpuload_s cpuload;
+  uint32_t fracpart;
+  uint32_t intpart;
+  uint32_t tmp;
+
+  clock_cpuload(tcb->pid, &cpuload);
+
+  if (cpuload.total > 0)
+    {
+      tmp      = (1000 * cpuload.active) / cpuload.total;
+      intpart  = tmp / 10;
+      fracpart = tmp - 10 * intpart;
+    }
+  else
+    {
+      intpart  = 0;
+      fracpart = 0;
+    }
+#endif
+
+#ifdef CONFIG_STACK_COLORATION
+  stack_used = up_check_tcbstack(tcb);
+  if (tcb->adj_stack_size > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 * stack_used / tcb->adj_stack_size;
+    }
+#endif
+
   /* Dump interesting properties of this task */
 
-  _alert(
-#if CONFIG_TASK_NAME_SIZE > 0
-         "%s: "
-#endif
-         "PID=%d "
+  _alert("  %4d   %4d"
 #ifdef CONFIG_STACK_COLORATION
-         "Stack Used=%lu of %lu\n",
-#else
-         "Stack=%lu\n",
+         "   %7lu"
+#endif
+         "   %7lu"
+#ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "   %3" PRId32 ".%01" PRId32 "%%"
 #endif
 #if CONFIG_TASK_NAME_SIZE > 0
-        tcb->name,
+         "   %s"
 #endif
-        tcb->pid,
+         "\n",
+         tcb->pid, tcb->sched_priority,
 #ifdef CONFIG_STACK_COLORATION
-        (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)up_check_tcbstack(tcb),
 #endif
-        (unsigned long)tcb->adj_stack_size);
+         (unsigned long)tcb->adj_stack_size
+#ifdef CONFIG_STACK_COLORATION
+         , stack_filled / 10, stack_filled % 10,
+         (stack_filled >= 10 * 80 ? '!' : ' ')
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         , intpart, fracpart
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         , tcb->name
+#endif
+        );
+}
 
-  /* Show back trace */
+/****************************************************************************
+ * Name: riscv_dump_backtrace
+ ****************************************************************************/
 
 #ifdef CONFIG_SCHED_BACKTRACE
+static void riscv_dump_backtrace(struct tcb_s *tcb, void *arg)
+{
+  /* Show back trace */
+
   sched_dumpstack(tcb->pid);
-#endif
-
-  /* Dump the registers */
-
-  riscv_registerdump(tcb->xcp.regs);
 }
+#endif
 
 /****************************************************************************
  * Name: riscv_showtasks
@@ -167,13 +217,71 @@ static void riscv_taskdump(struct tcb_s *tcb, void *arg)
 
 static inline void riscv_showtasks(void)
 {
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#  ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_used = up_check_intstack();
+  uint32_t stack_filled = 0;
+
+  if ((CONFIG_ARCH_INTERRUPTSTACK & ~15) > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 *
+                     stack_used / (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+    }
+#  endif
+#endif
+
   /* Dump interesting properties of each task in the crash environment */
 
-  nxsched_foreach(riscv_taskdump, NULL);
-}
-#else
-#  define riscv_showtasks()
+  _alert("   PID    PRI"
+#ifdef CONFIG_STACK_COLORATION
+         "      USED"
 #endif
+         "     STACK"
+#ifdef CONFIG_STACK_COLORATION
+         "   FILLED "
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "      CPU"
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         "   COMMAND"
+#endif
+         "\n");
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  _alert("  ----   ----"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %7lu"
+#  endif
+         "   %7lu"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#  endif
+#  ifdef CONFIG_SCHED_CPULOAD
+         "     ----"
+#  endif
+#  if CONFIG_TASK_NAME_SIZE > 0
+         "   irq"
+#  endif
+         "\n"
+#  ifdef CONFIG_STACK_COLORATION
+         , (unsigned long)stack_used
+#  endif
+         , (unsigned long)(CONFIG_ARCH_INTERRUPTSTACK & ~15)
+#  ifdef CONFIG_STACK_COLORATION
+         , stack_filled / 10, stack_filled % 10,
+         (stack_filled >= 10 * 80 ? '!' : ' ')
+#  endif
+        );
+#endif
+
+  nxsched_foreach(riscv_dump_task, NULL);
+#ifdef CONFIG_SCHED_BACKTRACE
+  nxsched_foreach(riscv_dump_backtrace, NULL);
+#endif
+}
 
 /****************************************************************************
  * Name: riscv_dumpstate
