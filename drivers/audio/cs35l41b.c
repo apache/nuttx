@@ -665,7 +665,7 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
           priv->bclk    = caps->ac_controls.hw[0] *
                           (priv->lower->bclk_factor);
 
-          if (cs35l41b_set_channel(priv, priv->nchannels) == ERROR)
+          if (cs35l41b_set_channel(priv, CHANNEL_LEFT_RIGHT) == ERROR)
             {
               auderr("cs35l41b_set_channel error\n");
               return ERROR;
@@ -1241,45 +1241,70 @@ static int cs35l41b_set_channel(FAR struct cs35l41b_dev_s *priv,
       return ERROR;
     }
 
-  if (channels == CHANNEL_LEFT_RIGHT)
-    {
-      temp = ~CS35L41B_ASP_RX1_EN_MASK;
-      temp &= ~CS35L41B_ASP_RX2_EN_MASK;
-      temp &= regval;
+  temp = ~CS35L41B_ASP_RX1_EN_MASK;
+  temp &= ~CS35L41B_ASP_RX2_EN_MASK;
+  temp &= regval;
 
-      temp |= CS35L41B_ASP_RX2_EN_ENABLE;
-      temp |= CS35L41B_ASP_RX1_EN_ENABLE;
-    }
-  else if (channels == CHANNEL_LEFT)
-    {
-      temp = ~CS35L41B_ASP_RX1_EN_MASK;
-      temp &= ~CS35L41B_ASP_RX2_EN_MASK;
-      temp &= regval;
-
-      temp |= CS35L41B_ASP_RX1_EN_ENABLE;
-    }
-  else if (channels == CHANNEL_RIGHT)
-    {
-      temp = ~CS35L41B_ASP_RX1_EN_MASK;
-      temp &= ~CS35L41B_ASP_RX2_EN_MASK;
-      temp &= regval;
-
-      temp |= CS35L41B_ASP_RX2_EN_ENABLE;
-    }
-  else
-    {
-      temp = ~CS35L41B_ASP_RX1_EN_MASK;
-      temp &= ~CS35L41B_ASP_RX2_EN_MASK;
-      temp &= regval;
-
-      temp |= CS35L41B_ASP_RX2_EN_ENABLE;
-      temp |= CS35L41B_ASP_RX1_EN_ENABLE;
-    }
+  temp |= CS35L41B_ASP_RX2_EN_ENABLE;
+  temp |= CS35L41B_ASP_RX1_EN_ENABLE;
 
   if (cs35l41b_write_register(priv, CS35L41B_ASP_ENABLES1_REG, temp) != OK)
     {
       auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
       return ERROR;
+    }
+
+  if (channels == CHANNEL_LEFT_RIGHT)
+    {
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX1_INPUT_REG, 0x08) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX2_INPUT_REG, 0x09) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+    }
+  else if (channels == CHANNEL_LEFT)
+    {
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX1_INPUT_REG, 0x08) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX2_INPUT_REG, 0x08) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+    }
+  else if (channels == CHANNEL_RIGHT)
+    {
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX1_INPUT_REG, 0x09) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+
+      if (cs35l41b_write_register(priv,
+          CS35L41_MIXER_DSP1RX2_INPUT_REG, 0x09) != OK)
+        {
+          auderr("write CS35L41B_ASP_ENABLES1_REG error\n");
+          return ERROR;
+        }
+    }
+  else
+    {
+      auderr("cs35l41b_set_channel paramter error\n");
     }
 
   return OK;
