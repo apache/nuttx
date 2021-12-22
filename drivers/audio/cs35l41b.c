@@ -368,12 +368,11 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
-  unsigned long paramter = *(FAR unsigned long *) arg;
-  cs35l41b_io_t io_param;
+  FAR struct audio_msg_s *audio_msg = (FAR unsigned long *)arg;
 
   if (cmd == AUDIOIOC_SETPARAMTER)
     {
-      switch (paramter)
+      switch (audio_msg->msg_id)
         {
           case IO_SET_BYPASS:
             if (cs35l41b_write_register(priv,
@@ -406,9 +405,9 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             break;
 
           case IO_GET_CHIP_ID:
-            io_param.cmd = IO_GET_CHIP_ID;
-            io_param.data = CS35L41_DEVID;
-            *(FAR cs35l41b_io_t *)arg = io_param;
+            audio_msg->msg_id = IO_GET_CHIP_ID;
+            audio_msg->u.data = CS35L41_DEVID;
+            *(FAR struct audio_msg_s *)arg = *audio_msg;
             break;
 
           default:
