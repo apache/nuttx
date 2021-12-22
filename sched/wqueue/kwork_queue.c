@@ -108,6 +108,7 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                FAR void *arg, clock_t delay)
 {
   irqstate_t flags;
+  int ret = OK;
 
   /* Remove the entry from the timer and work queue. */
 
@@ -160,11 +161,15 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
                    (wdparm_t)work);
         }
     }
+  else
 #endif
+    {
+      ret = -EINVAL;
+    }
 
   leave_critical_section(flags);
 
-  return OK;
+  return ret;
 }
 
 #endif /* CONFIG_SCHED_WORKQUEUE */
