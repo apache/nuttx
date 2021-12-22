@@ -315,9 +315,36 @@ dirlinks: include\arch include\arch\board include\arch\chip $(ARCH_SRC)\board $(
 # the config.h and version.h header files in the include\nuttx directory and
 # the establishment of symbolic links to configured directories.
 
-context: include\nuttx\config.h include\nuttx\version.h include\math.h include\float.h include\stdarg.h include\setjmp.h dirlinks
-	$(Q) mkdir -p staging
-	$(Q) for %%G in ($(CONTEXTDIRS)) do ( $(MAKE) -C %%G context )
+# Generate a pattern to make Directories.mk context
+
+CONTEXTDIRS_DEPS = $(patsubst %,%\.context,$(CONTEXTDIRS))
+
+context: include\nuttx\config.h include\nuttx\version.h $(CONTEXTDIRS_DEPS) dirlinks | staging
+
+ifeq ($(NEED_MATH_H),y)
+context: include\math.h
+endif
+
+ifeq ($(CONFIG_ARCH_FLOAT_H),y)
+context: include\float.h
+endif
+
+ifeq ($(CONFIG_ARCH_STDARG_H),y)
+context: include\stdarg.h
+endif
+
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+context: include\setjmp.h
+endif
+
+staging:
+	$(Q) mkdir -p $@
+
+# Pattern rule for $(CONTEXTDIRS_DEPS)
+
+%.context: include\nuttx\config.h dirlinks
+	$(Q) $(MAKE) -C $(patsubst %.context,%,$@) TOPDIR="$(TOPDIR)" context
+	$(Q) touch $@
 
 # clean_context
 #
@@ -333,6 +360,7 @@ clean_context:
 	$(call DELFILE, include\stdarg.h)
 	$(call DELFILE, include\setjmp.h)
 	$(call DELFILE, arch\dummy\Kconfig)
+	$(call DELFILE, $(CONTEXTDIRS_DEPS))
 	$(call DIRUNLINK, include\arch\board)
 	$(call DIRUNLINK, include\arch\chip)
 	$(call DIRUNLINK, include\arch)
