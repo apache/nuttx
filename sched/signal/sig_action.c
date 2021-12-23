@@ -101,7 +101,7 @@ static FAR sigactq_t *nxsig_alloc_action(void)
 
   /* Check if we got one. */
 
-  if (!sigact)
+  while (!sigact)
     {
       /* Add another block of signal actions to the list */
 
@@ -112,7 +112,6 @@ static FAR sigactq_t *nxsig_alloc_action(void)
       flags = spin_lock_irqsave(&g_sigaction_spin);
       sigact = (FAR sigactq_t *)sq_remfirst(&g_sigfreeaction);
       spin_unlock_irqrestore(&g_sigaction_spin, flags);
-      DEBUGASSERT(sigact);
     }
 
   return sigact;
