@@ -73,13 +73,13 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 /* This is the user space entry point */
 
-int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
+int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
 
 const struct userspace_s userspace locate_data(".userspace") =
 {
   /* General memory map */
 
-  .us_entrypoint    = (main_t)CONFIG_USER_ENTRYPOINT,
+  .us_entrypoint    = (main_t)CONFIG_INIT_ENTRYPOINT,
   .us_textstart     = (uintptr_t)&_stext,
   .us_textend       = (uintptr_t)&_etext,
   .us_datasource    = (uintptr_t)&_eronly,

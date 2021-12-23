@@ -3998,8 +3998,8 @@ Configurations
          CONFIG_BUILD_KERNEL=y                  : Kernel build enabled
 
        RTOS Features -> Tasks and Scheduling
-         CONFIG_INIT_FILEPATH=y                 : Start-up is via an ELF file
-         CONFIG_USER_INITPATH="/bin/init"       : The location of the startup
+         CONFIG_INIT_FILE=y                     : Start-up is via an ELF file
+         CONFIG_INIT_FILEPATH="/bin/init"       : The location of the startup
          CONFIG_SCHED_HAVE_PARENT=y             : Needed to handle task exit
 
        RTOS Features -> System call support
