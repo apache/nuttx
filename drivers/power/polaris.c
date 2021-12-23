@@ -723,6 +723,32 @@ static int stwlc38_onoff_ldo_output(FAR struct stwlc38_dev_s *priv,
   return OK;
 }
 
+static int stwlc38_onoff_vaa(FAR struct stwlc38_dev_s *priv,
+                                     bool onoff)
+{
+  int ret;
+
+  /* Turn on vout ldo output when gpio2 input low */
+
+  ret = IOEXP_SETDIRECTION(priv->rpmsg_dev, priv->lower->vaa_pin,
+                   IOEXPANDER_DIRECTION_OUT);
+  if (ret < 0)
+    {
+      baterr("Failed to set vaa_pin as output: %d\n", ret);
+      return ret;
+    }
+
+  ret = IOEXP_WRITEPIN(priv->rpmsg_dev, priv->lower->vaa_pin, onoff ? 0 : 1);
+  if (ret < 0)
+    {
+      baterr("Failed to set vaa_pin as %s, error: %d\n",
+             onoff ? "Enable" : "Disable" , ret);
+      return ret;
+    }
+
+  return OK;
+}
+
 /****************************************************************************
  * Name: stwlc38_interrupt_handler
  *
@@ -1235,6 +1261,14 @@ FAR struct battery_charger_dev_s *
   if (ret < 0)
     {
       baterr("Failed to init_interrupt: %d\n", ret);
+    }
+
+  /* Turn on WPC_VAA_2V5 */
+
+  ret = stwlc38_onoff_vaa(priv, ON);
+  if (ret < 0)
+    {
+      baterr("Failed to set vaa_pin as Enable: %d\n", ret);
     }
 
   /* Turn on vout ldo output when gpio2 input low */

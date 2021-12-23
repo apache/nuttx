@@ -393,6 +393,7 @@ struct stwlc38_lower_s
   uint32_t detect_pin;
   uint32_t int_pin;                        /* Interrupt pin */
   uint32_t enb_pin;
+  uint32_t vaa_pin;                        /* WPC_VAA_2V5 enable pin*/
 };
 
 struct i2c_master_s;
