@@ -742,7 +742,7 @@ Configuration sub-directories
 
          CONFIG_ARCH_INTERRUPTSTACK=2048
          CONFIG_IDLETHREAD_STACKSIZE=1024
-         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_INIT_STACKSIZE=2048
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          ... and others ...
 
@@ -795,7 +795,7 @@ Configuration sub-directories
       CONFIG_MCUBOOT_ENABLE_LOGGING=y
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+      CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
 
   mcuboot-confirm:
     This configuration exercises the MCUboot compatible application slot
@@ -815,4 +815,4 @@ Configuration sub-directories
       CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_confirm_main"
+      CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"

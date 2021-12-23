@@ -638,7 +638,7 @@ Where <subdir> is one of the following:
 
           Provide the new start-up entry point:
 
-            CONFIG_USER_ENTRYPOINT="nxlines_main"
+            CONFIG_INIT_ENTRYPOINT="nxlines_main"
 
           Disable apps/examples/nx:
 
@@ -670,7 +670,7 @@ Where <subdir> is one of the following:
 
           Provide the new start-up entry point:
 
-            CONFIG_USER_ENTRYPOINT="nxtext_main"
+            CONFIG_INIT_ENTRYPOINT="nxtext_main"
 
           Disable apps/examples/nx:
 
