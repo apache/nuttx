@@ -99,7 +99,6 @@ static void arm_stackdump(uint32_t sp, uint32_t stack_top)
 static inline void arm_registerdump(void)
 {
   volatile uint32_t *regs = CURRENT_REGS;
-  int reg;
 
   /* Are user registers available from interrupt processing? */
 
@@ -113,13 +112,24 @@ static inline void arm_registerdump(void)
 
   /* Dump the interrupt registers */
 
-  for (reg = REG_R0; reg <= REG_R15; reg += 8)
-    {
-      uint32_t *ptr = (uint32_t *)&regs[reg];
-      _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-             reg, ptr[0], ptr[1], ptr[2], ptr[3],
-             ptr[4], ptr[5], ptr[6], ptr[7]);
-    }
+  _alert("R0: %08x R1: %08x R2: %08x  R3: %08x\n",
+         regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3]);
+  _alert("R4: %08x R5: %08x R6: %08x  "
+#ifdef CONFIG_ARM_THUMB
+         "FP: %08x\n",
+#else
+         "R7: %08x\n",
+#endif
+         regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+  _alert("R8: %08x SB: %08x SL: %08x "
+#ifdef CONFIG_ARM_THUMB
+         "R11: %08x\n",
+#else
+         " FP: %08x\n",
+#endif
+         regs[REG_R8], regs[REG_R9], regs[REG_R10], regs[REG_R11]);
+  _alert("IP: %08x SP: %08x LR: %08x  PC: %08x\n",
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 
   _alert("CPSR: %08x\n", regs[REG_CPSR]);
 }
