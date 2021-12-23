@@ -197,19 +197,20 @@ int regulator_gpio_init(FAR struct ioexpander_dev_s *iodev,
 FAR struct regulator_dev_s *regulator_rpmsg_get(FAR const char *name);
 
 /****************************************************************************
- * Name: regulator_rpmsg_init
+ * Name: regulator_rpmsg_server_init
  *
  * Description:
+ *
+ *   Establish rpmsg channel for the operations of the remote regulator
  *
  * Input Parameters:
  *
  * Returned Value:
- *
  *   Zero (OK) on success; a negated errno on failure
  *
  ****************************************************************************/
 
-int regulator_rpmsg_init(void);
+int regulator_rpmsg_server_init(void);
 
 #endif
 
