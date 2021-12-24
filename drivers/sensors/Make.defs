@@ -278,6 +278,10 @@ ifeq ($(CONFIG_LIS3DH),y)
   CSRCS += lis3dh.c
 endif
 
+ifeq ($(CONFIG_SENSORS_GH3020),y)
+  include sensors${DELIM}gh3020${DELIM}Make.defs
+endif
+
 ifeq ($(CONFIG_SENSORS_MAX31855),y)
   CSRCS += max31855.c
 endif

@@ -155,6 +155,14 @@ config SENSORS_BMG160
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
 
+config SENSORS_GH3020
+	bool "Goodix GH3020 PPG sensor Support"
+	default n
+	select SPI
+	select IOEXPANDER
+	---help---
+		Enable support for the Goodix GH3020 PPG sensor
+
 config SENSORS_LSM6DSO
 	bool "STMicro LSM6DSO support"
 	default n
