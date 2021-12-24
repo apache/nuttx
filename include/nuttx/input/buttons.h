@@ -148,6 +148,11 @@ struct btn_lowerhalf_s
   CODE void (*bl_enable)(FAR const struct btn_lowerhalf_s *lower,
                          btn_buttonset_t press, btn_buttonset_t release,
                          btn_handler_t handler, FAR void *arg);
+
+  /* Key write callback function */
+
+  CODE ssize_t (*bl_write)(FAR const struct btn_lowerhalf_s *lower,
+                           FAR const char *buffer, size_t buflen);
 };
 
 /****************************************************************************

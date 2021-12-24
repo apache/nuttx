@@ -128,6 +128,8 @@ static int     btn_ioctl(FAR struct file *filep, int cmd,
                          unsigned long arg);
 static int     btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup);
+static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -138,7 +140,7 @@ static const struct file_operations btn_fops =
   btn_open,  /* open */
   btn_close, /* close */
   btn_read,  /* read */
-  NULL,      /* write */
+  btn_write, /* write */
   NULL,      /* seek */
   btn_ioctl, /* ioctl */
   btn_poll   /* poll */
@@ -505,7 +507,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
 
   if (len < sizeof(btn_buttonset_t))
     {
-      ierr("ERROR: buffer too small: %lu\n", (unsigned long)len);
+      ierr("ERROR: buffer too small: %zu\n", len);
       return -EINVAL;
     }
 
@@ -526,6 +528,61 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
 
   btn_givesem(&priv->bu_exclsem);
   return (ssize_t)sizeof(btn_buttonset_t);
+}
+
+/****************************************************************************
+ * Name: btn_write
+ ****************************************************************************/
+
+static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen)
+{
+  FAR struct inode *inode;
+  FAR struct btn_upperhalf_s *priv;
+  FAR const struct btn_lowerhalf_s *lower;
+  int ret;
+
+  DEBUGASSERT(filep && filep->f_inode);
+  inode = filep->f_inode;
+  DEBUGASSERT(inode->i_private);
+  priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
+
+  /* Make sure that the buffer is sufficiently large to hold at least one
+   * complete sample.
+   *
+   * REVISIT:  Should also check buffer alignment.
+   */
+
+  if (buflen < sizeof(btn_buttonset_t))
+    {
+      ierr("ERROR: buffer too small: %zu\n", buflen);
+      return -EINVAL;
+    }
+
+  /* Get exclusive access to the driver structure */
+
+  ret = btn_takesem(&priv->bu_exclsem);
+  if (ret < 0)
+    {
+      ierr("ERROR: btn_takesem failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Write the current state of the buttons */
+
+  lower = priv->bu_lower;
+  DEBUGASSERT(lower);
+  if (lower->bl_write)
+    {
+      ret = lower->bl_write(lower, buffer, buflen);
+    }
+  else
+    {
+      ret = -ENOSYS;
+    }
+
+  btn_givesem(&priv->bu_exclsem);
+  return (ssize_t)ret;
 }
 
 /****************************************************************************

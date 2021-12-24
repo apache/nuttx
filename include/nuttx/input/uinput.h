@@ -49,4 +49,21 @@
 int uinput_touch_initialize(FAR const char *name, int maxpoint,
                             int buffnums);
 
+/****************************************************************************
+ * Name: uinput_button_initialize
+ *
+ * Description:
+ *   Initialized the uinput button device
+ *
+ * Input Parameters:
+ *   name:      Button devices name
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int uinput_button_initialize(FAR const char *name);
+
 #endif /* __INCLUDE_NUTTX_INPUT_UINPUT_H */
