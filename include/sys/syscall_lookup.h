@@ -45,7 +45,7 @@ SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 
 #ifdef CONFIG_SCHED_BACKTRACE
-  SYSCALL_LOOKUP(sched_backtrace,          3)
+  SYSCALL_LOOKUP(sched_backtrace,          4)
 #endif
 
 #ifdef CONFIG_SMP
