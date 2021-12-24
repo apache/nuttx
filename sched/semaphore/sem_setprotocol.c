@@ -82,7 +82,7 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 
         /* Disable priority inheritance */
 
-        sem->flags |= PRIOINHERIT_FLAGS_DISABLE;
+        sem->flags &= ~PRIOINHERIT_FLAGS_ENABLE;
 
         /* Remove any current holders */
 
@@ -93,7 +93,7 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 
         /* Enable priority inheritance (dangerous) */
 
-        sem->flags &= ~PRIOINHERIT_FLAGS_DISABLE;
+        sem->flags |= PRIOINHERIT_FLAGS_ENABLE;
         return OK;
 
       case SEM_PRIO_PROTECT:
