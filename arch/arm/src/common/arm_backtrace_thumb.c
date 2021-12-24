@@ -316,10 +316,10 @@ static FAR void *backtrace_push_internal(FAR void **psp,
 #ifdef CONFIG_MM_KASAN
 __attribute__((no_sanitize_address))
 #endif
-static int backtrace_push(FAR void *limit, FAR void **sp,
-                          FAR void *pc, FAR void **buffer, int size)
+static int backtrace_push(FAR void *limit, FAR void **sp, FAR void *pc,
+                          FAR void **buffer, int size, FAR int *skip)
 {
-  int i = 0;
+  int i = 1;
 
   if (!in_code_region(pc))
     {
@@ -328,7 +328,10 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
 
   pc = (uintptr_t)pc & 0xfffffffe;
 
-  buffer[i++] = pc;
+  if (*skip-- <= 0)
+    {
+      *buffer++ = pc;
+    }
 
   for (; i < size; i++)
     {
@@ -337,10 +340,20 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
           break;
         }
 
-      buffer[i] = backtrace_push_internal(sp, &pc);
-      if (!buffer[i])
+      pc = backtrace_push_internal(sp, &pc);
+      if (!pc)
         {
           break;
+        }
+
+      if (*skip-- <= 0)
+        {
+          *buffer++ = pc;
+        }
+
+      if (ip)
+        {
+          ip = NULL;
         }
     }
 
@@ -359,7 +372,7 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
 __attribute__((no_sanitize_address))
 #endif
 static int backtrace_branch(FAR void *limit, FAR void *sp,
-                            FAR void **buffer, int size)
+                            FAR void **buffer, int size, FAR int *skip)
 {
   uint16_t ins16;
   uint32_t addr;
@@ -377,7 +390,11 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
       ins16 = *(FAR uint16_t *)addr;
       if (INSTR_IS(ins16, T_BLX))
         {
-          buffer[i++] = addr;
+          i++;
+          if (*skip-- <= 0)
+            {
+              *buffer++ = addr;
+            }
         }
 
       /* BL Instruction
@@ -393,7 +410,11 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
           ins16 = *(FAR uint16_t *)addr;
           if (INSTR_IS(ins16, T_BL))
             {
-              buffer[i++] = addr;
+              i++;
+              if (*skip-- <= 0)
+                {
+                  *buffer++ = addr;
+                }
             }
         }
     }
@@ -468,7 +489,8 @@ void up_backtrace_init_code_regions(FAR void **regions)
 #ifdef CONFIG_MM_KASAN
 __attribute__((no_sanitize_address))
 #endif
-int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
+int up_backtrace(FAR struct tcb_s *tcb,
+                 FAR void **buffer, int size, FAR int skip)
 {
   FAR struct tcb_s *rtcb = running_task();
   irqstate_t flags;
@@ -504,7 +526,7 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size,
                                &sp, (FAR void *)up_backtrace + 10,
-                               buffer, size);
+                               buffer, size, &skip));
 #endif
           if (ret < size)
             {
@@ -512,7 +534,7 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
               ret += backtrace_push(rtcb->stack_base_ptr +
                                     rtcb->adj_stack_size, &sp,
                                     (FAR void *)CURRENT_REGS[REG_PC],
-                                    &buffer[ret], size - ret);
+                                    &buffer[ret], size - ret, &skip));
             }
         }
       else
@@ -520,14 +542,14 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size, &sp,
                                (FAR void *)up_backtrace + 10,
-                               buffer, size);
+                               buffer, size, &skip));
         }
 
       if (ret < size)
         {
           ret += backtrace_branch(rtcb->stack_base_ptr +
                                   rtcb->adj_stack_size, sp,
-                                  &buffer[ret], size - ret);
+                                  &buffer[ret], size - ret, &skip);
         }
     }
   else
@@ -544,13 +566,13 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
           ret += backtrace_push(tcb->stack_base_ptr +
                                 tcb->adj_stack_size, &sp,
                                 (FAR void *)tcb->xcp.regs[REG_LR],
-                                &buffer[ret], size - ret);
+                                &buffer[ret], size - ret, &skip));
 
           if (ret < size)
             {
               ret += backtrace_branch(tcb->stack_base_ptr +
                                       tcb->adj_stack_size, sp,
-                                      &buffer[ret], size - ret);
+                                      &buffer[ret], size - ret, &skip);
             }
         }
 

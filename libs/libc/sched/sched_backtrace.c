@@ -64,7 +64,7 @@ backtrace_helper(FAR struct _Unwind_Context *ctx, FAR void *a)
    * Skip it.
    */
 
-  if (arg->cnt != -1)
+  if (arg->cnt >= 0)
     {
       arg->array[arg->cnt] = (FAR void *)_Unwind_GetIP(ctx);
       if (arg->cnt > 0)
@@ -88,7 +88,7 @@ backtrace_helper(FAR struct _Unwind_Context *ctx, FAR void *a)
       arg->cfa = cfa;
     }
 
-  if (++arg->cnt == arg->size)
+  if (++arg->cnt >= arg->size)
     {
       return _URC_END_OF_STACK;
     }
@@ -108,7 +108,7 @@ backtrace_helper(FAR struct _Unwind_Context *ctx, FAR void *a)
  *
  ****************************************************************************/
 
-int sched_backtrace(pid_t tid, FAR void **buffer, int size)
+int sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip)
 {
   struct trace_arg arg;
 
@@ -120,7 +120,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size)
   arg.array = buffer;
   arg.cfa = 0;
   arg.size = size;
-  arg.cnt = -1;
+  arg.cnt = -skip - 1;
 
   if (size <= 0)
     {
@@ -138,7 +138,7 @@ int sched_backtrace(pid_t tid, FAR void **buffer, int size)
       --arg.cnt;
     }
 
-  return arg.cnt != -1 ? arg.cnt : 0;
+  return arg.cnt > 0 ? arg.cnt : 0;
 }
 
 #endif /* !CONFIG_ARCH_HAVE_BACKTRACE */

@@ -29,7 +29,6 @@
 
 #include <stdio.h>
 #include <syslog.h>
-#include <execinfo.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -54,38 +53,43 @@
 
 void sched_dumpstack(pid_t tid)
 {
-  FAR void *address[DUMP_DEPTH];
+  int size = DUMP_DEPTH;
+  int skip;
+
+  for (skip = 0; size == DUMP_DEPTH; skip += size)
+    {
+      FAR void *address[DUMP_DEPTH];
 #ifndef CONFIG_ALLSYMS
-  const char *format = " %0*p";
-  char line[DUMP_LINESZ + 1];
-  int ret = 0;
+      const char *format = " %0*p";
+      char line[DUMP_LINESZ + 1];
+      int ret = 0;
 #endif
-  int size;
-  int i;
+      int i;
 
-  size = sched_backtrace(tid, address, DUMP_DEPTH);
-  if (size <= 0)
-    {
-      return;
-    }
-
-#ifndef CONFIG_ALLSYMS
-  for (i = 0; i < size; i++)
-    {
-      ret += snprintf(line + ret, sizeof(line) - ret,
-                      format, DUMP_WIDTH, address[i]);
-      if (i == size - 1 || ret % DUMP_LINESZ == 0)
+      size = sched_backtrace(tid, address, DUMP_DEPTH, skip);
+      if (size <= 0)
         {
-          syslog(LOG_EMERG, "backtrace|%2d:%s\n", tid, line);
-          ret = 0;
+          break;
         }
-    }
+
+#ifndef CONFIG_ALLSYMS
+      for (i = 0; i < size; i++)
+        {
+          ret += snprintf(line + ret, sizeof(line) - ret,
+                          format, DUMP_WIDTH, address[i]);
+          if (i == size - 1 || ret % DUMP_LINESZ == 0)
+            {
+              syslog(LOG_EMERG, "backtrace|%2d:%s\n", tid, line);
+              ret = 0;
+            }
+        }
 #else
-  syslog(LOG_EMERG, "backtrace:\n");
-  for (i = 0; i < size; i++)
-    {
-      syslog(LOG_EMERG, "[%2d] [<%p>] %pS\n",
-                         tid, address[i], address[i]);
-    }
+      syslog(LOG_EMERG, "backtrace:\n");
+      for (i = 0; i < size; i++)
+        {
+          syslog(LOG_EMERG, "[%2d] [<%p>] %pS\n",
+                            tid, address[i], address[i]);
+        }
 #endif
+    }
 }
