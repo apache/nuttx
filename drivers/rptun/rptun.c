@@ -29,6 +29,7 @@
 #include <fcntl.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/board.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
 #include <nuttx/semaphore.h>
@@ -50,6 +51,9 @@
 
 #define RPTUNIOC_NONE           0
 #define NO_HOLDER               (pid_t)-1
+
+#define RPTUN_STATUS_MASK       0xf
+#define RPTUN_STATUS_PANIC      0xf
 
 /****************************************************************************
  * Private Types
@@ -116,7 +120,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
 
 static int rptun_dev_start(FAR struct remoteproc *rproc);
 static int rptun_dev_stop(FAR struct remoteproc *rproc);
-static int rptun_dev_panic(FAR struct remoteproc *rproc);
+static int rptun_dev_reset(FAR struct remoteproc *rproc, int value);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
@@ -257,13 +261,6 @@ static int rptun_thread(int argc, FAR char *argv[])
                 rptun_dev_stop(&priv->rproc);
               }
             break;
-
-          case RPTUNIOC_PANIC:
-            if (priv->rproc.state != RPROC_OFFLINE)
-              {
-                rptun_dev_panic(&priv->rproc);
-              }
-            break;
         }
 
         priv->cmd = RPTUNIOC_NONE;
@@ -291,9 +288,20 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
   if (!RPTUN_IS_MASTER(priv->dev))
     {
       int status = rpmsg_virtio_get_status(&priv->vdev);
+
       if (status & VIRTIO_CONFIG_STATUS_NEEDS_RESET)
         {
-          PANIC();
+          status &= RPTUN_STATUS_MASK;
+          if (status == RPTUN_STATUS_PANIC)
+            {
+              PANIC();
+            }
+          else
+            {
+#ifdef CONFIG_BOARDCTL_RESET
+              board_reset(status);
+#endif
+            }
         }
     }
 
@@ -682,12 +690,14 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
-static int rptun_dev_panic(FAR struct remoteproc *rproc)
+static int rptun_dev_reset(FAR struct remoteproc *rproc, int value)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
 
-  rpmsg_virtio_set_status(&priv->vdev, VIRTIO_CONFIG_STATUS_NEEDS_RESET);
-  RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
+  rpmsg_virtio_set_status(&priv->vdev,
+          (value & RPTUN_STATUS_MASK) | VIRTIO_CONFIG_STATUS_NEEDS_RESET);
+
+  return RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
 }
 
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
@@ -701,11 +711,15 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
     {
       case RPTUNIOC_START:
       case RPTUNIOC_STOP:
-      case RPTUNIOC_PANIC:
         priv->cmd = cmd;
         rptun_wakeup(priv);
         break;
-
+      case RPTUNIOC_RESET:
+        rptun_dev_reset(&priv->rproc, arg);
+        break;
+      case RPTUNIOC_PANIC:
+        rptun_dev_reset(&priv->rproc, RPTUN_STATUS_PANIC);
+        break;
       default:
         ret = -ENOTTY;
         break;
@@ -1025,9 +1039,14 @@ int rptun_boot(FAR const char *cpuname)
   return ret;
 }
 
-int rptun_panic(FAR const char *cpuname)
+int rptun_reset(FAR const char *cpuname, int value)
 {
   FAR struct metal_list *node;
+
+  if (!cpuname)
+    {
+      return -EINVAL;
+    }
 
   metal_list_for_each(&g_rptun_priv, node)
     {
@@ -1038,10 +1057,14 @@ int rptun_panic(FAR const char *cpuname)
       if (RPTUN_IS_MASTER(priv->dev) &&
           !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
         {
-          rptun_dev_panic(&priv->rproc);
+          rptun_dev_reset(&priv->rproc, value);
         }
     }
 
   return -ENOENT;
 }
 
+int rptun_panic(FAR const char *cpuname)
+{
+  return rptun_reset(cpuname, RPTUN_STATUS_PANIC);
+}
