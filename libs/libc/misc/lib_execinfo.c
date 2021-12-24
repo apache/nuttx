@@ -1,5 +1,5 @@
 /****************************************************************************
- * include/execinfo.h
+ * libs/libc/misc/lib_execinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,53 +18,73 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_EXECINFO_H
-#define __INCLUDE_EXECINFO_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <sys/types.h>
-#include <sched.h>
+#include <execinfo.h>
+#include <stdio.h>
+
+#include "libc.h"
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Private Functions
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_BACKTRACE)
-
-/* Store up to SIZE return address of the current back trace in
- * ARRAY and return the exact number of values stored.
- */
-
-#define backtrace(buffer, size) sched_backtrace(gettid(), buffer, size)
-#define dump_stack()            sched_dumpstack(gettid())
-
-#else
-# define backtrace(buffer, size) 0
-# define dump_stack()
-#endif
-
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
+static FAR char **backtrace_malloc(FAR void *const *buffer, int size)
 {
-#else
-#define EXTERN extern
-#endif
+  size_t length = 0;
 
-FAR char **backtrace_symbols(FAR void *const *buffer, int size);
-void backtrace_symbols_fd(FAR void *const *buffer, int size, int fd);
+  if (size <= 0)
+    {
+      return NULL;
+    }
 
-#undef EXTERN
-#if defined(__cplusplus)
+  while (size-- > 0)
+    {
+      int ret = sprintf(NULL, "%pS", *buffer++);
+      if (ret < 0)
+        {
+          return NULL;
+        }
+
+      length += sizeof(FAR char *) + ret + 1;
+    }
+
+  return lib_malloc(length);
 }
-#endif
 
-#endif /* __INCLUDE_EXECINFO_H */
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+FAR char **backtrace_symbols(FAR void *const *buffer, int size)
+{
+  FAR char **syms;
+  FAR char *buf;
+  int i;
+
+  syms = backtrace_malloc(buffer, size);
+  if (syms != NULL)
+    {
+      buf = syms[size];
+      for (i = 0; i < size; i++)
+        {
+          syms[i] = buf;
+          buf += sprintf(buf, "%pS", buffer[i]);
+          buf += 1;
+        }
+    }
+
+  return syms;
+}
+
+void backtrace_symbols_fd(FAR void *const *buffer, int size, int fd)
+{
+  int i;
+
+  for (i = 0; i < size; i++)
+    {
+      dprintf(fd, "%pS\n", buffer[i]);
+    }
+}
