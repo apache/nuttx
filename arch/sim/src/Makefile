@@ -60,6 +60,10 @@ CSRCS += up_heap.c up_uart.c up_assert.c up_puts.c
 CSRCS += up_copyfullstate.c
 CSRCS += up_sigdeliver.c
 
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CSRCS += up_backtrace.c
+endif
+
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
 CSRCS += up_vfork.c
@@ -74,7 +78,7 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_host_abort.c
+HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_hostmisc.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
 ifeq ($(CONFIG_LIBCXX),y)
