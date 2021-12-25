@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_host_abort.c
+ * arch/sim/src/sim/up_hostmisc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <execinfo.h>
 #include <stdlib.h>
 
 #include "up_internal.h"
@@ -47,3 +48,9 @@ void host_abort(int status)
   exit(status);
 }
 
+int host_backtrace(void** array, int size)
+{
+  /* exit the simulation */
+
+  return backtrace(array, size);
+}
