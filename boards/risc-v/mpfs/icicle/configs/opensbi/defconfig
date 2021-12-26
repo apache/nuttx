@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_ARCH_FPU is not set
 # CONFIG_DISABLE_OS_API is not set
 # CONFIG_NSH_DISABLE_MW is not set
 CONFIG_ARCH="risc-v"

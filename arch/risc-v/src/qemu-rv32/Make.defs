@@ -46,6 +46,10 @@ ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
 CMN_CSRCS  += riscv_tls.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_ASRCS  += riscv_fpu.S
+endif
+
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = qemu_rv32_start.c qemu_rv32_irq_dispatch.c qemu_rv32_irq.c
 CHIP_CSRCS += qemu_rv32_idle.c qemu_rv32_timerisr.c
