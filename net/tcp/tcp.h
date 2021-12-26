@@ -215,7 +215,8 @@ struct tcp_conn_s
   int32_t  snd_bufs;      /* Maximum amount of bytes queued in send */
   sem_t    snd_sem;       /* Semaphore signals send completion */
 #endif
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
+    defined(CONFIG_NET_TCP_WINDOW_SCALE)
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
   uint16_t tx_unacked;    /* Number bytes sent but not yet ACKed */
