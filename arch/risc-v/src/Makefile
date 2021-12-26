@@ -24,14 +24,12 @@ ifeq ($(CONFIG_OPENSBI),y)
 include opensbi/Make.defs
 endif
 
-ifeq ($(CONFIG_ARCH_RV32I),y)           # Base Integer support
-ARCH_SUBDIR = rv32i
-else ifeq ($(CONFIG_ARCH_RV32IM),y)     # Integer + math support
+# TODO: Merge these implementaions into one
+
+ifeq ($(CONFIG_ARCH_RV32),y)
 ARCH_SUBDIR = rv32im
-else ifeq ($(CONFIG_ARCH_RV64GC),y)     # GC=IMAFDC
+else ifeq ($(CONFIG_ARCH_RV64),y)
 ARCH_SUBDIR = rv64gc
-else
-ARCH_SUBDIR = rv32i                     # Default to base RV32I core
 endif
 
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
