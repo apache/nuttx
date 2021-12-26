@@ -75,7 +75,7 @@ int lc823450_wm8776initialize(int minor)
   char devname[12];
   int ret;
 
-  ainfo("Initializing WM8776 \n");
+  ainfo("Initializing WM8776\n");
 
   /* Initialize I2C */
 

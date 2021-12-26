@@ -74,7 +74,7 @@ static inline void mineva_registerdump(void)
 
   if (g_current_regs)
     {
-      _alert("EPC:%08x \n", g_current_regs[REG_CSR_MEPC]);
+      _alert("EPC:%08x\n", g_current_regs[REG_CSR_MEPC]);
       _alert(" X0:%08x  A0:%08x  A1:%08x  A2:%08x "
              " A3:%08x  A4:%08x  A5:%08x  A6:%08x\n",
              g_current_regs[REG_X0_NDX], g_current_regs[REG_X1_NDX],

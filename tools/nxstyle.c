@@ -1913,7 +1913,7 @@ int main(int argc, char **argv, char **envp)
                        */
 
                       ncomment = 0;
-                       ERROR("Closing without opening comment", lineno, n);
+                      ERROR("Closing without opening comment", lineno, n);
                     }
 
                   n++;
@@ -1926,7 +1926,8 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* Check for URI schemes, e.g. "http://" or "https://" */
 
-                  if (n == 0 || strncmp(&line[n - 1], "://", 3) != 0)
+                  if ((ncomment == 0) &&
+                      (n == 0 || strncmp(&line[n - 1], "://", 3) != 0))
                     {
                       ERROR("C++ style comment", lineno, n);
                       n++;

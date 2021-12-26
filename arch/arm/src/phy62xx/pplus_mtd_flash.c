@@ -262,7 +262,7 @@ static int pplus_fls_ioctl(FAR struct mtd_dev_s *dev,
   FAR struct pplus_fls_dev_s *priv = (FAR struct pplus_fls_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

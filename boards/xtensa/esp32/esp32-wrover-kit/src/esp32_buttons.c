@@ -102,7 +102,7 @@ uint32_t board_buttons(void)
       b0 = b1;
     }
 
-  iinfo("b=%d n=%d \n", b0, n);
+  iinfo("b=%d n=%d\n", b0, n);
 
   /* Low value means that the button is pressed */
 

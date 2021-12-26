@@ -2179,7 +2179,7 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
 
   if (ret < 0)
     {
-      wlerr("Failed to create mqueue %d \n", ret);
+      wlerr("Failed to create mqueue %d\n", ret);
       kmm_free(mq_adpt);
       return NULL;
     }

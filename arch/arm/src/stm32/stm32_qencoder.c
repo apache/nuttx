@@ -1314,7 +1314,7 @@ static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
 
   if (priv->index_use == false)
     {
-      snerr("ERROR: QE TIM%d index not registered \n",
+      snerr("ERROR: QE TIM%d index not registered\n",
             priv->config->timid);
       ret = -EPERM;
       goto errout;
@@ -1464,7 +1464,7 @@ int stm32_qe_index_init(int tim, uint32_t gpio)
                            stm32_qe_index_irq, priv);
   if (ret < 0)
     {
-      snerr("ERROR: QE TIM%d failed register irq \n", tim);
+      snerr("ERROR: QE TIM%d failed register irq\n", tim);
       goto errout;
     }
 
