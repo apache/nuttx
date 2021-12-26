@@ -98,35 +98,35 @@ static inline void riscv_registerdump(volatile uintptr_t *regs)
 {
   /* Are user registers available from interrupt processing? */
 
-  _alert("EPC:%016" PRIx64 " \n", regs[REG_EPC]);
+  _alert("EPC:%016" PRIx64 "\n", regs[REG_EPC]);
   _alert("A0:%016" PRIx64 " A1:%01" PRIx64 "6 A2:%016" PRIx64
-         " A3:%016" PRIx64 " \n",
+         " A3:%016" PRIx64 "\n",
          regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3]);
   _alert("A4:%016" PRIx64 " A5:%016" PRIx64 "A6:%016" PRIx64
-         " A7:%016" PRIx64 " \n",
+         " A7:%016" PRIx64 "\n",
          regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
   _alert("T0:%016" PRIx64 " T1:%016" PRIx64 " T2:%016" PRIx64
-         " T3:%016" PRIx64 " \n",
+         " T3:%016" PRIx64 "\n",
          regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3]);
-  _alert("T4:%016" PRIx64 " T5:%016" PRIx64 " T6:%016" PRIx64 " \n",
+  _alert("T4:%016" PRIx64 " T5:%016" PRIx64 " T6:%016" PRIx64 "\n",
          regs[REG_T4], regs[REG_T5], regs[REG_T6]);
   _alert("S0:%016" PRIx64 " S1:%016" PRIx64 " S2:%016" PRIx64
-         " S3:%016" PRIx64 " \n",
+         " S3:%016" PRIx64 "\n",
          regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3]);
   _alert("S4:%016" PRIx64 " S5:%016" PRIx64 " S6:%016" PRIx64
-         " S7:%016" PRIx64 " \n",
+         " S7:%016" PRIx64 "\n",
          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
   _alert("S8:%016" PRIx64 " S9:%016" PRIx64 " S10:%016" PRIx64
-         " S11:%016" PRIx64 " \n",
+         " S11:%016" PRIx64 "\n",
          regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
 #ifdef RISCV_SAVE_GP
   _alert("GP:%016" PRIx64 " SP:%016" PRIx64 " FP:%016" PRIx64
-         " TP:%016" PRIx64 " RA:%016" PRIx64 " \n",
+         " TP:%016" PRIx64 " RA:%016" PRIx64 "\n",
          regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
          regs[REG_RA]);
 #else
   _alert("SP:%016" PRIx64 " FP:%016" PRIx64 " TP:%016" PRIx64
-         " RA:%016" PRIx64 " \n",
+         " RA:%016" PRIx64 "\n",
          regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #endif
 }

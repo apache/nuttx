@@ -1437,7 +1437,7 @@ static int am335x_i2c_transfer(FAR struct i2c_master_s *dev,
       priv->msgc  = count;
       priv->flags = msgs->flags;
 
-      i2cinfo("Flags %x, len %d \n", msgs->flags, msgs->length);
+      i2cinfo("Flags %x, len %d\n", msgs->flags, msgs->length);
 
       /* Reset I2C trace logic */
 

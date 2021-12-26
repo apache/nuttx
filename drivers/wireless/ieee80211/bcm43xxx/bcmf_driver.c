@@ -262,7 +262,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
                   O_RDONLY | O_BINARY);
   if (ret < 0)
     {
-      wlerr("ERROR: Failed to open the FILE MTD file \n", ret);
+      wlerr("ERROR: Failed to open the FILE MTD file\n", ret);
       return ret;
     }
 

@@ -1025,7 +1025,7 @@ static int mx25l_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct mx25l_dev_s *priv = (FAR struct mx25l_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  mxlinfo("cmd: %d \n", cmd);
+  mxlinfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

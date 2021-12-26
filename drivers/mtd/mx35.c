@@ -779,7 +779,7 @@ static int mx35_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct mx35_dev_s *priv = (FAR struct mx35_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  mx35info("cmd: %d \n", cmd);
+  mx35info("cmd: %d\n", cmd);
 
   switch (cmd)
     {

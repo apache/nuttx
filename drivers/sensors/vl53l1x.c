@@ -843,7 +843,7 @@ static uint16_t vl53l1x_getreg16(FAR struct vl53l1x_dev_s *priv,
 
   /* Register to read */
 
-  sninfo("Reg %02x % \n", reg_addr_aux[0], reg_addr_aux[1]);
+  sninfo("Reg %02x %\n", reg_addr_aux[0], reg_addr_aux[1]);
   ret = i2c_write(priv->i2c, &config, (uint8_t *)&reg_addr_aux, 2);
   if (ret < 0)
     {

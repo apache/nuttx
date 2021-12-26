@@ -632,7 +632,7 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg)
 {
   int ret = OK;
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

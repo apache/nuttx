@@ -905,7 +905,7 @@ static ssize_t sx127x_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
-  wlinfo("buflen=%d \n", buflen);
+  wlinfo("buflen=%d\n", buflen);
 
   /* Change mode to STANDBY */
 
@@ -4113,7 +4113,7 @@ static int sx127x_calibration(FAR struct sx127x_dev_s *dev, uint32_t freq)
   ret = sx127x_modulation_set(dev, SX127X_MODULATION_FSK);
   if (ret < 0)
     {
-      wlerr("ERROR: can't change modulation to FSK \n");
+      wlerr("ERROR: can't change modulation to FSK\n");
       goto errout;
     }
 
@@ -4220,7 +4220,7 @@ static int sx127x_init(FAR struct sx127x_dev_s *dev)
   ret = sx127x_calibration(dev, SX127X_FREQ_CALIBRATION);
   if (ret < 0)
     {
-      wlerr("ERROR: calibration failed \n");
+      wlerr("ERROR: calibration failed\n");
     }
 
   /* Set default modulation */

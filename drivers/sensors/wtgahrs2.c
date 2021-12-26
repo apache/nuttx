@@ -333,7 +333,7 @@ static void wtgahrs2_gps_data(FAR struct wtgahrs2_dev_s *rtdata,
              rtdata->gps.timestamp, rtdata->gps.time_utc);
       sninfo("GPS longitude : %fdegree, latitude:%fdegree\n",
               rtdata->gps.longitude, rtdata->gps.latitude);
-      sninfo("GPS speed: %fm/s, altitude: %fm \n",
+      sninfo("GPS speed: %fm/s, altitude: %fm\n",
               rtdata->gps.ground_speed, rtdata->gps.altitude);
     }
 }

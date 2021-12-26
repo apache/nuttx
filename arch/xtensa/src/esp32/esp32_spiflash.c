@@ -1908,7 +1908,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
   int ret = -EINVAL;
   struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {
