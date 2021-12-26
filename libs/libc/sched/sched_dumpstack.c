@@ -31,12 +31,14 @@
 #include <syslog.h>
 #include <execinfo.h>
 
-#define DUMP_FORMAT "%*p"
-#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 3)
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define DUMP_DEPTH  16
 #define DUMP_NITEM  8
-#define DUMP_LINESIZE (DUMP_NITEM * DUMP_WIDTH)
+#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 2)
+#define DUMP_LINESZ (DUMP_NITEM * (DUMP_WIDTH + 1))
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +56,8 @@ void sched_dumpstack(pid_t tid)
 {
   FAR void *address[DUMP_DEPTH];
 #ifndef CONFIG_ALLSYMS
-  char line[DUMP_LINESIZE + 1];
+  const char *format = " %0*p";
+  char line[DUMP_LINESZ + 1];
   int ret = 0;
 #endif
   int size;
@@ -70,10 +73,10 @@ void sched_dumpstack(pid_t tid)
   for (i = 0; i < size; i++)
     {
       ret += snprintf(line + ret, sizeof(line) - ret,
-                      DUMP_FORMAT, DUMP_WIDTH, address[i]);
-      if (i == size - 1 || ret % DUMP_LINESIZE == 0)
+                      format, DUMP_WIDTH, address[i]);
+      if (i == size - 1 || ret % DUMP_LINESZ == 0)
         {
-          syslog(LOG_EMERG, "backtrace|%2d: %s\n", tid, line);
+          syslog(LOG_EMERG, "backtrace|%2d:%s\n", tid, line);
           ret = 0;
         }
     }
