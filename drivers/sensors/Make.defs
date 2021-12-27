@@ -20,6 +20,10 @@
 
 # Include sensor drivers
 
+ifeq ($(CONFIG_SENSORS_AK09919C),y)
+  include sensors${DELIM}ak09919c${DELIM}Make.defs
+endif
+
 ifeq ($(CONFIG_SENSORS),y)
 
 CSRCS += sensor.c
@@ -54,10 +58,6 @@ endif
 
 ifeq ($(CONFIG_SENSORS_AK09912),y)
   CSRCS += ak09912.c
-endif
-
-ifeq ($(CONFIG_SENSORS_AK09919C),y)
-  CSRCS += ak09919c.c
 endif
 
 ifeq ($(CONFIG_SENSORS_SX9373),y)
