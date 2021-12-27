@@ -6,6 +6,21 @@
 if ARCH_ARM
 comment "ARM Options"
 
+config ARCH_CORTEXM
+	bool
+	---help---
+		This option signifies the use of a CPU of the Cortex-M family.
+
+config ARCH_CORTEXA
+	bool
+	---help---
+		This option signifies the use of a CPU of the Cortex-A family.
+
+config ARCH_CORTEXR
+	bool
+	---help---
+		This option signifies the use of a CPU of the Cortex-R family.
+
 choice
 	prompt "ARM MCU selection"
 	default ARCH_CHIP_STM32
@@ -567,6 +582,7 @@ config ARCH_ARM1176JZ
 config ARCH_ARMV6M
 	bool
 	default n
+	select ARCH_CORTEXM
 
 config ARCH_CORTEXM0
 	bool
@@ -579,6 +595,7 @@ config ARCH_CORTEXM0
 config ARCH_ARMV7M
 	bool
 	default n
+	select ARCH_CORTEXM
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
 
 config ARCH_CORTEXM3
@@ -634,6 +651,7 @@ config ARCH_ARMV7A
 	bool
 	default n
 	select ARM_HAVE_WFE_SEV
+	select ARCH_CORTEXA
 
 config ARCH_CORTEXA5
 	bool
@@ -678,6 +696,7 @@ config ARCH_CORTEXA9
 config ARCH_ARMV7R
 	bool
 	default n
+	select ARCH_CORTEXR
 
 config ARCH_CORTEXR4
 	bool
@@ -710,6 +729,7 @@ config ARCH_ARMV8M
 	bool
 	default n
 	select ARCH_HAVE_SETJMP
+	select ARCH_CORTEXM
 
 config ARCH_CORTEXM23
 	bool
