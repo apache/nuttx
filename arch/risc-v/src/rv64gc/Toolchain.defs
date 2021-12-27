@@ -57,6 +57,12 @@ ifeq ($(CONFIG_MM_KASAN),y)
   MAXOPTIMIZATION += -fsanitize=kernel-address
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
 # Generic GNU RVG toolchain
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
