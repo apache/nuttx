@@ -299,7 +299,7 @@ static int gplh_enable(FAR struct gpio_dev_s *gpio, bool enable)
           ret = IOEP_DETACH(priv->ioe, priv->handle);
           if (ret < 0)
             {
-              gpioerr("ERROR: pin%u: IOEP_DETACH() failed\n",
+              gpioerr("ERROR: pin%u: IOEP_DETACH() failed %d\n",
                       priv->pin, ret);
             }
 
