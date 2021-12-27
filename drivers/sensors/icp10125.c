@@ -987,7 +987,6 @@ static int icp10125_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable)
 {
   FAR struct icp10125_dev_s *priv = (FAR struct icp10125_dev_s *)lower;
-  uint8_t mode[2];
   int ret = OK;
 
   /* Sanity check. */

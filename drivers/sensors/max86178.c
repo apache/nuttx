@@ -893,10 +893,10 @@ static int max86178_ppg_enable(FAR struct max86178_dev_s *priv, bool enable)
       /* PPG1 selects PD1 & PD3， PPG2 selects PD2 & PD4. */
 
       max86178_readsingle(priv, MAX86178_REG_MEAS1CFG5, &regval);
-      regval = regval & (~(MAX86178_MEASXCFG5_PD1SEL_MASK |
-                           MAX86178_MEASXCFG5_PD2SEL_MASK |
-                           MAX86178_MEASXCFG5_PD3SEL_MASK |
-                           MAX86178_MEASXCFG5_PD4SEL_MASK));
+      regval = regval & (uint8_t)(~(MAX86178_MEASXCFG5_PD1SEL_MASK |
+                                    MAX86178_MEASXCFG5_PD2SEL_MASK |
+                                    MAX86178_MEASXCFG5_PD3SEL_MASK |
+                                    MAX86178_MEASXCFG5_PD4SEL_MASK));
       regval = regval | MAX86178_MEASXCFG5_PD1SEL_PPG1 |
                         MAX86178_MEASXCFG5_PD3SEL_PPG1 |
                         MAX86178_MEASXCFG5_PD2SEL_PPG2 |
