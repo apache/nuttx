@@ -562,6 +562,7 @@ config ARCH_ARMV6M
 config ARCH_CORTEXM0
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV6M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RESET
@@ -575,6 +576,7 @@ config ARCH_ARMV7M
 config ARCH_CORTEXM3
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -591,6 +593,7 @@ config ARCH_CORTEXM3
 config ARCH_CORTEXM4
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -607,6 +610,7 @@ config ARCH_CORTEXM4
 config ARCH_CORTEXM7
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
@@ -705,6 +709,7 @@ config ARCH_ARMV8M
 config ARCH_CORTEXM23
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -721,6 +726,7 @@ config ARCH_CORTEXM23
 config ARCH_CORTEXM33
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -738,6 +744,7 @@ config ARCH_CORTEXM33
 config ARCH_CORTEXM35P
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -755,6 +762,7 @@ config ARCH_CORTEXM35P
 config ARCH_CORTEXM55
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -847,7 +855,6 @@ endchoice # TrustZone Configuration
 config ARM_THUMB
 	bool
 	default n
-	depends on ARCH_ARMV7A
 
 config ARM_HAVE_WFE_SEV
 	bool
