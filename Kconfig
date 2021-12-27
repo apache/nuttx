@@ -1919,6 +1919,14 @@ config DEBUG_SYMBOLS
 	---help---
 		Build with debug symbols (needed for use with a debugger).
 
+config FRAME_POINTER
+	bool "Compile the NuttX with frame pointers"
+	default n
+	---help---
+		If you say Y here the resulting NuttX image will be slightly
+		larger and slower, but it gives very useful debugging information
+		in case of bugs.
+
 endmenu # Debug Options
 
 config ARCH_HAVE_CUSTOMOPT
