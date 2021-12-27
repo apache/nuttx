@@ -42,7 +42,7 @@ endif
 MAXOPTIMIZATION = -Os
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce
 endif
 
 ARCHCPUFLAGS = -march=rv32imac -mabi=ilp32

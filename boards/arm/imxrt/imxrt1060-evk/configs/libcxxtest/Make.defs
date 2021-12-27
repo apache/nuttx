@@ -40,7 +40,7 @@ endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing \
-                      -fno-strength-reduce -fomit-frame-pointer
+                      -fno-strength-reduce
 endif
 
 ARCHCFLAGS = -fno-builtin
