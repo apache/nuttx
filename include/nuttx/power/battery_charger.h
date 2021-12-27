@@ -342,6 +342,29 @@ FAR struct battery_charger_dev_s *bq25618_initialize(
 
 #if defined(CONFIG_I2C) && defined(CONFIG_I2C_SC8551)
 
+#ifndef BIT
+#if defined(_ASMLANGUAGE)
+#define BIT(n)  (1 << (n))
+#else
+/**
+ * @brief Unsigned integer with bit position @p n set (signed in
+ * assembly language).
+ */
+#define BIT(n)  (1U << (n))
+#endif
+#endif
+
+#define VBAT_OVP_MASK             BIT(0)
+#define IBAT_OCP_MASK             BIT(1)
+#define VBUS_OVP_MASK             BIT(2)
+#define IBUS_OCP_MASK             BIT(3)
+#define ADAPTER_INSERT_MASK       BIT(4)
+#define VBAT_INSERT_MASK          BIT(5)
+#define ADC_DONE_MASK             BIT(6)
+#define VBUS_ERRORLO_STAT_MASK    BIT(7)
+#define VBUS_ERRORHI_STAT_MASK    BIT(8)
+#define CP_SWITCHING_STAT_MASK    BIT(9)
+
 struct i2c_master_s;
 FAR struct battery_charger_dev_s *
   sc8551_initialize(FAR struct i2c_master_s *i2c,
@@ -393,7 +416,7 @@ struct stwlc38_lower_s
   uint32_t detect_pin;
   uint32_t int_pin;                        /* Interrupt pin */
   uint32_t enb_pin;
-  uint32_t vaa_pin;                        /* WPC_VAA_2V5 enable pin*/
+  uint32_t vaa_pin;                        /* WPC_VAA_2V5 enable pin */
 };
 
 struct i2c_master_s;
