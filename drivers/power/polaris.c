@@ -1265,7 +1265,9 @@ FAR struct battery_charger_dev_s *
 
   /* Turn on WPC_VAA_2V5 */
 
-  ret = stwlc38_onoff_vaa(priv, ON);
+  /* It bring interrupt abnormal to turn on vaa, so turn off it */
+
+  ret = stwlc38_onoff_vaa(priv, OFF);
   if (ret < 0)
     {
       baterr("Failed to set vaa_pin as Enable: %d\n", ret);
