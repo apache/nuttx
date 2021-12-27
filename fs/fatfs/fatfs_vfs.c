@@ -668,7 +668,7 @@ static int fatfs_opendir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
   FAR DIR *dp;
   int ret;
 
@@ -987,7 +987,7 @@ static int fatfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
 static int fatfs_unlink(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1010,7 +1010,7 @@ static int fatfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
                        mode_t mode)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1032,7 +1032,7 @@ static int fatfs_mkdir(FAR struct inode *mountpt, FAR const char *relpath,
 static int fatfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1056,8 +1056,8 @@ static int fatfs_rename(FAR struct inode *mountpt,
                         FAR const char *newrelpath)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char oldpath[PATH_MAX];
-  char newpath[PATH_MAX];
+  char oldpath[strlen(oldrelpath) + 3];
+  char newpath[strlen(newrelpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1084,7 +1084,7 @@ static int fatfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                       FAR struct stat *buf)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
@@ -1104,7 +1104,7 @@ static int fatfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
                         FAR const struct stat *buf, int flags)
 {
   FAR struct fatfs_mountpt_s *fs;
-  char path[PATH_MAX];
+  char path[strlen(relpath) + 3];
 
   /* Get the mountpoint private data from the inode structure */
 
