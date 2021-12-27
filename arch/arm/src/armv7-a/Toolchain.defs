@@ -79,6 +79,12 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
 ifeq ($(CONFIG_ENDIAN_BIG),y)
   TARGET_ARCH := armeb
 else

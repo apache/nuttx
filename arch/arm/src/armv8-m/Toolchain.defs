@@ -75,6 +75,12 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
 # Parametrization for ARCHCPUFLAGS
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m23
