@@ -442,12 +442,12 @@ static off_t fatfs_seek(FAR struct file *filep, off_t offset, int whence)
 
 static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
+  FAR struct fatfs_mountpt_s *fs;
   FAR struct fatfs_file_s *fp;
-  FAR struct inode *drv;
 
   /* Recover our private data from the struct file instance */
 
-  drv = filep->f_inode;
+  fs = filep->f_inode->i_private;
   fp = filep->f_priv;
   if (cmd == FIOC_FILEPATH)
     {
@@ -458,6 +458,7 @@ static int fatfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
   else
     {
+      FAR struct inode *drv = g_drv[fs->pdrv];
       return drv->u.i_bops->ioctl(drv, cmd, arg);
     }
 }
