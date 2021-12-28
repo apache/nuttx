@@ -61,6 +61,15 @@
 
 #define PTE_LEAF_MASK           (7 << 1)
 
+/* Flags for page tables */
+
+#define MMU_PGT_FLAGS           (PTE_G)
+
+/* Flags for user FLASH (RX) and user RAM (RW) */
+
+#define MMU_UTEXT_FLAGS         (PTE_R | PTE_X | PTE_U | PTE_G)
+#define MMU_UDATA_FLAGS         (PTE_R | PTE_W | PTE_U | PTE_G)
+
 /* SvX definitions, only Sv39 is currently supported, but it should be
  * trivial to extend the driver to support other SvX implementations
  *
