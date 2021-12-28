@@ -123,7 +123,8 @@ begin_packed_struct struct clk_rpmsg_setphase_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR struct clk_rpmsg_client_s *clk_rpmsg_get_priv(FAR const char *name);
+static FAR struct clk_rpmsg_client_s *
+clk_rpmsg_get_priv(FAR const char *name);
 static FAR struct rpmsg_endpoint *clk_rpmsg_get_ept(FAR const char **name);
 static FAR struct clk_rpmsg_s *
 clk_rpmsg_get_clk(FAR struct rpmsg_endpoint *ept,
@@ -211,7 +212,8 @@ static const rpmsg_ept_cb g_clk_rpmsg_handler[] =
  * Private Functions
  ****************************************************************************/
 
-static FAR struct clk_rpmsg_client_s *clk_rpmsg_get_priv(FAR const char *name)
+static FAR struct clk_rpmsg_client_s *
+clk_rpmsg_get_priv(FAR const char *name)
 {
   FAR struct clk_rpmsg_client_s *priv;
   FAR const char *slash = strchr(name, '/');
@@ -226,8 +228,6 @@ static FAR struct clk_rpmsg_client_s *clk_rpmsg_get_priv(FAR const char *name)
   list_for_every_entry(&g_clk_rpmsg_priv, priv,
                        struct clk_rpmsg_client_s, node)
     {
-      size_t len = strlen(priv->cpuname);
-
       if (!strncmp(priv->cpuname, name, slash - name))
         {
           goto out;
@@ -240,7 +240,7 @@ static FAR struct clk_rpmsg_client_s *clk_rpmsg_get_priv(FAR const char *name)
       goto out;
     }
 
-  priv->cpuname = strndup(name, slash - name);;
+  priv->cpuname = strndup(name, slash - name);
 
   list_add_head(&g_clk_rpmsg_priv, &priv->node);
 
@@ -306,8 +306,8 @@ clk_rpmsg_get_clk(FAR struct rpmsg_endpoint *ept, FAR const char *name)
 }
 
 static int clk_rpmsg_enable_handler(FAR struct rpmsg_endpoint *ept,
-                                     FAR void *data, size_t len,
-                                     uint32_t src, FAR void *priv)
+                                    FAR void *data, size_t len,
+                                    uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_enable_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -368,9 +368,10 @@ static int clk_rpmsg_getrate_handler(FAR struct rpmsg_endpoint *ept,
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
-static int clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+static int
+clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
+                            FAR void *data, size_t len,
+                            uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_roundrate_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -388,8 +389,8 @@ static int clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_setrate_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                     FAR void *data, size_t len,
+                                     uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_setrate_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -407,8 +408,8 @@ static int clk_rpmsg_setrate_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_setphase_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_setphase_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -426,8 +427,8 @@ static int clk_rpmsg_setphase_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_getphase_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_getphase_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -621,7 +622,7 @@ static int clk_rpmsg_enable(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -631,7 +632,7 @@ static int clk_rpmsg_enable(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_ENABLE,
                            (struct clk_rpmsg_header_s *)msg,
@@ -652,7 +653,7 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
     return;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -662,7 +663,7 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   clk_rpmsg_sendrecv(ept, CLK_RPMSG_DISABLE,
                     (struct clk_rpmsg_header_s *)msg, len);
@@ -682,7 +683,7 @@ static int clk_rpmsg_is_enabled(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -692,7 +693,7 @@ static int clk_rpmsg_is_enabled(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_ISENABLED,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -714,7 +715,7 @@ static uint32_t clk_rpmsg_round_rate(FAR struct clk_s *clk, uint32_t rate,
       return 0;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -725,7 +726,7 @@ static uint32_t clk_rpmsg_round_rate(FAR struct clk_s *clk, uint32_t rate,
   DEBUGASSERT(len <= size);
 
   msg->rate = rate;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   ret = clk_rpmsg_sendrecv(ept, CLK_RPMSG_ROUNDRATE,
                           (struct clk_rpmsg_header_s *)msg, len);
@@ -752,7 +753,7 @@ static int clk_rpmsg_set_rate(FAR struct clk_s *clk, uint32_t rate,
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -763,7 +764,7 @@ static int clk_rpmsg_set_rate(FAR struct clk_s *clk, uint32_t rate,
   DEBUGASSERT(len <= size);
 
   msg->rate = rate;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_SETRATE,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -785,7 +786,7 @@ static uint32_t clk_rpmsg_recalc_rate(FAR struct clk_s *clk,
       return 0;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -795,7 +796,7 @@ static uint32_t clk_rpmsg_recalc_rate(FAR struct clk_s *clk,
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   ret = clk_rpmsg_sendrecv(ept, CLK_RPMSG_GETRATE,
                           (struct clk_rpmsg_header_s *)msg, len);
@@ -821,7 +822,7 @@ static int clk_rpmsg_get_phase(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -831,7 +832,7 @@ static int clk_rpmsg_get_phase(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_GETPHASE,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -851,7 +852,7 @@ static int clk_rpmsg_set_phase(FAR struct clk_s *clk, int degrees)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -862,7 +863,7 @@ static int clk_rpmsg_set_phase(FAR struct clk_s *clk, int degrees)
   DEBUGASSERT(len <= size);
 
   msg->degrees = degrees;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_SETPHASE,
                            (struct clk_rpmsg_header_s *)msg, len);
