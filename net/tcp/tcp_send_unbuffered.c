@@ -321,8 +321,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_NEWDATA) == 0 && pstate->snd_sent < pstate->snd_buflen)
     {
-      uint32_t seqno;
-
       /* Get the amount of data that we can send in the next packet */
 
       uint32_t sndlen = pstate->snd_buflen - pstate->snd_sent;
@@ -336,19 +334,6 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->snd_wnd)
         {
-          /* Set the sequence number for this packet.  NOTE:  The network
-           * updates sndseq on receipt of ACK *before* this function is
-           * called.  In that case sndseq will point to the next
-           * unacknowledged byte (which might have already been sent).  We
-           * will overwrite the value of sndseq here before the packet is
-           * sent.
-           */
-
-          seqno = pstate->snd_sent + pstate->snd_isn;
-          ninfo("SEND: sndseq %08" PRIx32 "->%08" PRIx32 "\n",
-                tcp_getsequence(conn->sndseq), seqno);
-          tcp_setsequence(conn->sndseq, seqno);
-
 #ifdef NEED_IPDOMAIN_SUPPORT
           /* If both IPv4 and IPv6 support are enabled, then we will need to
            * select which one to use when generating the outgoing packet.
