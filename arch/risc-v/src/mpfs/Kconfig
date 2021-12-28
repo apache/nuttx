@@ -137,6 +137,14 @@ config MPFS_EMMCSD_MUX_GPIO
 	---help---
 		External mux GPIO between e.MMC and SD-card
 
+config MPFS_ROMFS_MOUNT
+	bool "Mount the ROMFS file system"
+	depends on FS_ROMFS
+	default n
+	---help---
+		Mount a ROMFS image to /bin mount point. The image must be placed into
+		<arch/board/boot_romfsimg.h>
+
 menu "MPFS Peripheral Support"
 
 # These "hidden" settings determine whether a peripheral option is available
