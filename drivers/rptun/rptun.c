@@ -35,6 +35,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
+#include <nuttx/wqueue.h>
 #include <metal/utilities.h>
 
 /****************************************************************************
@@ -67,8 +68,12 @@ struct rptun_priv_s
   struct rpmsg_virtio_shm_pool shm_pool;
   struct metal_list            bind;
   struct metal_list            node;
+#ifdef CONFIG_RPTUN_WORKQUEUE
+  struct work_s                work;
+#else
   sem_t                        sem;
   int                          tid;
+#endif
   unsigned long                cmd;
 };
 
@@ -243,6 +248,37 @@ static void rptun_unlock(void)
     }
 }
 
+static void rptun_worker(FAR void *arg)
+{
+  FAR struct rptun_priv_s *priv = arg;
+
+  switch (priv->cmd)
+    {
+      case RPTUNIOC_START:
+        if (priv->rproc.state == RPROC_OFFLINE)
+          {
+            rptun_dev_start(&priv->rproc);
+          }
+        break;
+
+      case RPTUNIOC_STOP:
+        if (priv->rproc.state != RPROC_OFFLINE)
+          {
+            rptun_dev_stop(&priv->rproc);
+          }
+        break;
+    }
+
+  priv->cmd = RPTUNIOC_NONE;
+  remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+}
+
+#ifdef CONFIG_RPTUN_WORKQUEUE
+static void rptun_wakeup(FAR struct rptun_priv_s *priv)
+{
+  work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
+}
+#else
 static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
@@ -250,30 +286,10 @@ static int rptun_thread(int argc, FAR char *argv[])
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
   priv->tid = gettid();
 
-  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
-
   while (1)
     {
       nxsem_wait_uninterruptible(&priv->sem);
-      switch (priv->cmd)
-        {
-          case RPTUNIOC_START:
-            if (priv->rproc.state == RPROC_OFFLINE)
-              {
-                rptun_dev_start(&priv->rproc);
-              }
-            break;
-
-          case RPTUNIOC_STOP:
-            if (priv->rproc.state != RPROC_OFFLINE)
-              {
-                rptun_dev_stop(&priv->rproc);
-              }
-            break;
-        }
-
-        priv->cmd = RPTUNIOC_NONE;
-        remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+      rptun_worker(priv);
     }
 
   return 0;
@@ -289,6 +305,7 @@ static void rptun_wakeup(FAR struct rptun_priv_s *priv)
       nxsem_post(&priv->sem);
     }
 }
+#endif
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
@@ -419,9 +436,14 @@ rptun_get_mem(FAR struct remoteproc *rproc,
 
 static int rptun_can_recursive(FAR struct remoteproc *rproc)
 {
+#ifndef CONFIG_RPTUN_RECURSIVE_DISPATCH
+  return false;
+#elif defined(CONFIG_RPTUN_WORKQUEUE)
+  return work_in_context(HPWORK);
+#else
   FAR struct rptun_priv_s *priv = rproc->priv;
-
   return gettid() == priv->tid;
+#endif
 }
 
 static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
@@ -960,8 +982,10 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
 {
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
+#ifndef CONFIG_RPTUN_WORKQUEUE
   FAR char *argv[3];
   char arg1[19];
+#endif
   char name[32];
   int ret;
 
@@ -979,14 +1003,9 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     }
 
   priv->dev = dev;
-  if (RPTUN_IS_AUTOSTART(dev))
-    {
-      priv->cmd = RPTUNIOC_START;
-    }
 
+  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
   metal_list_init(&priv->bind);
-  nxsem_init(&priv->sem, 0, RPTUN_IS_AUTOSTART(dev) ? 1 : 0);
-  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
   ret = register_driver(name, &g_rptun_devops, 0222, priv);
@@ -994,6 +1013,25 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     {
       goto err_driver;
     }
+
+#ifdef CONFIG_RPTUN_WORKQUEUE
+  if (RPTUN_IS_AUTOSTART(dev))
+    {
+      priv->cmd = RPTUNIOC_START;
+      work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
+    }
+#else
+  if (RPTUN_IS_AUTOSTART(dev))
+    {
+      priv->cmd = RPTUNIOC_START;
+      nxsem_init(&priv->sem, 0, 1);
+    }
+  else
+    {
+      nxsem_init(&priv->sem, 0, 0);
+    }
+
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
@@ -1004,16 +1042,15 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
                        CONFIG_RPTUN_STACKSIZE, rptun_thread, argv);
   if (ret < 0)
     {
-      goto err_thread;
+      unregister_driver(name);
+      nxsem_destroy(&priv->sem);
+      goto err_driver;
     }
+#endif
 
   return OK;
 
-err_thread:
-  unregister_driver(name);
-
 err_driver:
-  nxsem_destroy(&priv->sem);
   kmm_free(priv);
 
 err_mem:
