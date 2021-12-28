@@ -154,7 +154,7 @@ kconfig2html.c
 
   or more quickly with:
 
-    make dirlinks
+    make .dirlinks
 
 Libraries.mk, FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk
 -------------------------------------------------------------
