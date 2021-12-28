@@ -55,7 +55,6 @@ config ARCH_CHIP_ESP32C3
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_C
-	select RV32IM_HW_MULDIV
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RESET
 	select LIBC_ARCH_ATOMIC
@@ -206,9 +205,6 @@ source "arch/risc-v/src/common/Kconfig"
 
 if ARCH_RV32
 source "arch/risc-v/src/rv32im/Kconfig"
-endif
-if ARCH_RV64
-source "arch/risc-v/src/rv64gc/Kconfig"
 endif
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"
