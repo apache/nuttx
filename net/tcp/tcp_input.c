@@ -684,8 +684,9 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       uint32_t sndseq;
-
+#endif
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
        * data (tx_unacked).
@@ -737,6 +738,7 @@ found:
             }
         }
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* Update sequence number to the unacknowledge sequence number.  If
        * there is still outstanding, unacknowledged data, then this will
        * be beyond ackseq.
@@ -751,6 +753,7 @@ found:
                 (uint32_t)conn->tx_unacked);
           tcp_setsequence(conn->sndseq, ackseq);
         }
+#endif
 
       /* Do RTT estimation, unless we have done retransmissions. */
 
