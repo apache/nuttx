@@ -12,13 +12,31 @@ menuconfig RPTUN
 
 if RPTUN
 
+choice
+	prompt "rptun dispatch method"
+
+config RPTUN_THREAD
+	bool "rptun thread"
+
+config RPTUN_WORKQUEUE
+	bool "rptun workqueue"
+	depends on SCHED_WORKQUEUE
+
+endchoice
+
 config RPTUN_PRIORITY
-	int "rpturn thread priority"
+	int "rptun thread priority"
+	depends on RPTUN_THREAD
 	default 224
 
 config RPTUN_STACKSIZE
 	int "rptun stack size"
+	depends on RPTUN_THREAD
 	default 4096
+
+config RPTUN_RECURSIVE_DISPATCH
+	bool "rptun recursive dispatch"
+	default y
 
 config RPTUN_LOADER
 	bool "rptun loader support"
