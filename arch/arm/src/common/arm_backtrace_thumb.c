@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_backtrace.c
+ * arch/arm/src/common/arm_backtrace_thumb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,6 +33,8 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_ARM_THUMB
 
 /* Macro and definitions for simple decoding of instuctions.
  * To check an instruction, it is ANDed with the IMASK_ and
@@ -183,7 +185,8 @@ static bool in_code_region(FAR void *pc)
 #ifdef CONFIG_MM_KASAN
 __attribute__((no_sanitize_address))
 #endif
-static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
+static FAR void *backtrace_push_internal(FAR void **psp,
+                                         FAR void **ppc)
 {
   FAR uint8_t *sp = *psp;
   FAR uint8_t *pc = *ppc;
@@ -207,13 +210,6 @@ static FAR void *backtrace_push_internal(FAR void **psp, FAR void **ppc)
               offset += __builtin_popcount(ins16 & 0xff);
               frame  += offset - 1;
             }
-
-          break;
-        }
-      else if (INSTR_IS(ins16, T_PUSH_LO))
-        {
-          offset += __builtin_popcount(ins16 & 0xff);
-          frame  += offset - 1;
 
           break;
         }
@@ -325,6 +321,11 @@ static int backtrace_push(FAR void *limit, FAR void **sp,
 {
   int i = 0;
 
+  if (!in_code_region(pc))
+    {
+      return 0;
+    }
+
   pc = (uintptr_t)pc & 0xfffffffe;
 
   buffer[i++] = pc;
@@ -405,10 +406,10 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: arm_backtrace_init_code_regions
+ * Name: up_backtrace_init_code_regions
  *
  * Description:
- *  The up call arm_backtrace_init_code_regions() will set the start
+ *  The up call up_backtrace_init_code_regions() will set the start
  *  and end addresses of the customized program sections, this method
  *  will help the different boards to configure the current text
  *  sections for some complicate platfroms
@@ -428,14 +429,14 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
  *                NULL,         NULL,
  *              };
  *
- *              arm_backtrace_init_code_regions(g_code_regions);
+ *              up_backtrace_init_code_regions(g_code_regions);
  *
  ****************************************************************************/
 
 #ifdef CONFIG_MM_KASAN
 __attribute__((no_sanitize_address))
 #endif
-void arm_backtrace_init_code_regions(FAR void **regions)
+void up_backtrace_init_code_regions(FAR void **regions)
 {
   g_backtrace_code_regions = regions;
 }
@@ -486,14 +487,25 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
   if (tcb == rtcb)
     {
+      sp = (FAR void *)up_getsp();
+
       if (up_interrupt_context())
         {
-          sp = (FAR void *)up_getsp();
-
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+          ret = backtrace_push(
+#  ifdef CONFIG_SMP
+                               arm_intstack_top(),
+#  else
+                               &g_intstacktop,
+#  endif /* CONFIG_SMP */
+                               &sp, (FAR void *)up_backtrace + 10,
+                               buffer, size);
+#else
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size,
                                &sp, (FAR void *)up_backtrace + 10,
                                buffer, size);
+#endif
           if (ret < size)
             {
               sp = (FAR void *)CURRENT_REGS[REG_SP];
@@ -505,7 +517,6 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
         }
       else
         {
-          sp = (FAR void *)up_getsp();
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size, &sp,
                                (FAR void *)up_backtrace + 10,
@@ -521,18 +532,26 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
     }
   else
     {
+      ret = 0;
+
       flags = enter_critical_section();
 
-      sp = (FAR void *)tcb->xcp.regs[REG_SP];
-      ret = backtrace_push(tcb->stack_base_ptr +
-                           tcb->adj_stack_size, &sp,
-                           (FAR void *)tcb->xcp.regs[REG_PC],
-                           buffer, size);
+      buffer[ret++] = tcb->xcp.regs[REG_PC];
+
       if (ret < size)
         {
-          ret += backtrace_branch(tcb->stack_base_ptr +
-                                  tcb->adj_stack_size, sp,
-                                  &buffer[ret], size - ret);
+          sp = (FAR void *)tcb->xcp.regs[REG_SP];
+          ret += backtrace_push(tcb->stack_base_ptr +
+                                tcb->adj_stack_size, &sp,
+                                (FAR void *)tcb->xcp.regs[REG_LR],
+                                &buffer[ret], size - ret);
+
+          if (ret < size)
+            {
+              ret += backtrace_branch(tcb->stack_base_ptr +
+                                      tcb->adj_stack_size, sp,
+                                      &buffer[ret], size - ret);
+            }
         }
 
       leave_critical_section(flags);
@@ -540,3 +559,4 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
   return ret;
 }
+#endif /* CONFIG_ARM_THUMB */

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/arm/arm_backtrace.c
+ * arch/arm/src/common/arm_backtrace_fp.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,16 +23,18 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
 #include <nuttx/arch.h>
-#include <nuttx/irq.h>
 
 #include "sched/sched.h"
 
 #include "arm_internal.h"
 
 /****************************************************************************
- * Private Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+#if defined(CONFIG_FRAME_POINTER) && !defined(CONFIG_ARM_THUMB)
 
 /****************************************************************************
  * Name: backtrace
@@ -42,6 +44,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 static int backtrace(FAR uintptr_t *base, FAR uintptr_t *limit,
                      FAR uintptr_t *fp, FAR uintptr_t *pc,
                      FAR void **buffer, int size)
@@ -94,6 +99,9 @@ static int backtrace(FAR uintptr_t *base, FAR uintptr_t *limit,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_MM_KASAN
+__attribute__((no_sanitize_address))
+#endif
 int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 {
   FAR struct tcb_s *rtcb = running_task();
@@ -160,3 +168,4 @@ int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size)
 
   return ret;
 }
+#endif /* CONFIG_FRAME_POINTER && !CONFIG_ARM_THUMB */
