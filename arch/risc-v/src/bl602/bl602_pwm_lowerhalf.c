@@ -372,6 +372,15 @@ static int bl602_pwm_start(struct pwm_lowerhalf_s *dev,
 #ifdef CONFIG_PWM_NCHANNELS
   for (i = 0; i < CONFIG_PWM_NCHANNELS; i++)
     {
+      int8_t chan = info->channels[i].channel;
+
+      /* Break the loop if all following channels are not configured */
+
+      if (chan == -1)
+        {
+          break;
+        }
+
       bl602_pwm_freq(priv, i, info->frequency);
       bl602_pwm_duty(priv, i, info->channels[i].duty);
       pwm_channel_enable(i);
