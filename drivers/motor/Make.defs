@@ -30,10 +30,11 @@ ifeq ($(CONFIG_MOTOR_UPPER),y)
 CSRCS += motor.c
 endif
 
-# Add motor drv2624 driver
+# Add motor lower-half driver
 
 ifeq ($(CONFIG_MOTOR_UPPER_HAVE_PATTERN),y)
 CSRCS += drv2624.c
+CSRCS += aw86225.c
 endif
 
 # Include motor drivers in the build
