@@ -5938,7 +5938,7 @@ int ad5940_register(int devno, FAR const struct ad5940_config_s *config)
   /* Set GPIO on MCU for AD5940 interrupt */
 
   ret = IOEXP_SETDIRECTION(priv->config->ioedev, priv->config->intpin,
-                           IOEXPANDER_DIRECTION_IN_PULLDOWN);
+                           IOEXPANDER_DIRECTION_IN);
   if (ret < 0)
     {
       snerr("Failed to set GPIO direction: %d\n", ret);
