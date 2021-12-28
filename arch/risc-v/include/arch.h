@@ -82,18 +82,6 @@ uint32_t up_gethartid(void);
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifdef CONFIG_RV32IM_HW_MULDIV
-uint32_t up_hard_mul(uint32_t a, uint32_t b);
-uint32_t up_hard_mulh(uint32_t a, uint32_t b);
-uint32_t up_hard_mulhsu(uint32_t a, uint32_t b);
-uint32_t up_hard_mulhu(uint32_t a, uint32_t b);
-uint32_t up_hard_div(uint32_t a, uint32_t b);
-uint32_t up_hard_rem(uint32_t a, uint32_t b);
-uint32_t up_hard_divu(uint32_t a, uint32_t b);
-uint32_t up_hard_remu(uint32_t a, uint32_t b);
-uint32_t time_hard_mul(uint32_t a, uint32_t b, uint32_t *t);
-#endif
-
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"

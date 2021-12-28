@@ -5,38 +5,6 @@
 
 comment "RV32IM Configuration Options"
 
-choice
-	prompt "Toolchain Selection"
-	default RV32IM_TOOLCHAIN_GNU_RVGW if TOOLCHAIN_WINDOWS
-	default RV32IM_TOOLCHAIN_GNU_RVGL if !TOOLCHAIN_WINDOWS
-
-config RV32IM_TOOLCHAIN_GNU_RVGL
-	bool "Generic GNU RVG toolchain under Linux (or other POSIX environment)"
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
-		configured for riscv32-unknown-elf.
-
-config RV32IM_TOOLCHAIN_GNU_RVGW
-	bool "Generic GNU RVG toolchain under Windows"
-	depends on TOOLCHAIN_WINDOWS
-	select CYGWIN_WINTOOL if WINDOWS_CYGWIN
-	select ARCH_TOOLCHAIN_GNU
-	---help---
-		This option should work for any modern GNU toolchain (GCC 5.2 or newer)
-		configured for riscv32-unknown-elf.
-
-endchoice
-
-config RV32IM_HW_MULDIV
-	bool "Supports Hardware MUL and DIV"
-	default n
-	---help---
-		Specifies if the architecture supports hardware multiply and
-		hardware division instructions.  Selecting this will cause the
-		generated code to natively use mul / div instructions for any
-		math operations.
-
 config RV32IM_SYSTEM_CSRRS_SUPPORT
 	bool "Supports RV core feature identification via CSRRS opcode"
 	default n

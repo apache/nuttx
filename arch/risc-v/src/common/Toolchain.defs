@@ -117,11 +117,6 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)
   endif
 
-  ifeq ($(CONFIG_RV32IM_HW_MULDIV),y)
-    ARCHCPUFLAGS += -mdiv
-  else
-    ARCHCPUFLAGS += -mno-div
-  endif
 endif
 
 # Default toolchain
