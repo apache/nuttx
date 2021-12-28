@@ -26,6 +26,10 @@ MEMORY
 
 OUTPUT_ARCH("riscv")
 
+__ksram_start = ORIGIN(sram);
+__ksram_size = LENGTH(sram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
 ENTRY(_stext)
 EXTERN(_vectors)
 SECTIONS
