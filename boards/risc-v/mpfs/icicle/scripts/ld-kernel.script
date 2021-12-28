@@ -18,26 +18,32 @@
  *
  ****************************************************************************/
 
-/* NOTE:  This depends on the memory.ld script having been included prior to
- * this script.
+/* Map memory so that the kernel itself has 256K executable and data memory,
+ * for a total of 0.5M, and the rest is given for the user tasks. A total of
+ * 4M is reserved which should be plenty
  */
- 
+
+MEMORY
+{
+    kflash (rx) : ORIGIN = 0x80000000, LENGTH = 1024K   /* w/ cache */
+    ksram (rwx) : ORIGIN = 0x80100000, LENGTH = 1024K   /* w/ cache */
+    pgram (rwx) : ORIGIN = 0x80200000, LENGTH = 4096K   /* w/ cache */
+}
+
 OUTPUT_ARCH("riscv")
 
-/* Provide these so there is no need for using config files for this */
-
-__uflash_start = ORIGIN(uflash);
-__uflash_size = LENGTH(uflash);
-__usram_start = ORIGIN(usram);
-__usram_size = LENGTH(usram);
-
-/* Provide the kernel boundaries as well */
+/* Provide the kernel boundaries */
 
 __kflash_start = ORIGIN(kflash);
 __kflash_size = LENGTH(kflash);
 __ksram_start = ORIGIN(ksram);
 __ksram_size = LENGTH(ksram);
 __ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+
+/* Page heap */
+
+__pgheap_start = ORIGIN(pgram);
+__pgheap_size = LENGTH(pgram);
 
 ENTRY(_stext)
 EXTERN(_vectors)
@@ -87,13 +93,15 @@ SECTIONS
         *(.gnu.linkonce.b.*)
         *(.gnu.linkonce.sb.*)
         *(COMMON)
+        . = ALIGN(4);
+        _ebss = ABSOLUTE(.);
     } > ksram
 
-    /* Page tables here, align to 4K boundary */
-    .pgtables : ALIGN(0x1000) {
-        *(.pgtables)
-         . = ALIGN(32);
-        _ebss = ABSOLUTE(.);
+    /* Stack top */
+
+    .stack_top : {
+        . = ALIGN(32);
+        _default_stack_limit = ABSOLUTE(.);
     } > ksram
 
     /* Stabs debugging sections. */
