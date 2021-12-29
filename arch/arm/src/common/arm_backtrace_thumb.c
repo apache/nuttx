@@ -526,7 +526,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size,
                                &sp, (FAR void *)up_backtrace + 10,
-                               buffer, size, &skip));
+                               buffer, size, &skip);
 #endif
           if (ret < size)
             {
@@ -534,7 +534,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
               ret += backtrace_push(rtcb->stack_base_ptr +
                                     rtcb->adj_stack_size, &sp,
                                     (FAR void *)CURRENT_REGS[REG_PC],
-                                    &buffer[ret], size - ret, &skip));
+                                    &buffer[ret], size - ret, &skip);
             }
         }
       else
@@ -542,7 +542,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size, &sp,
                                (FAR void *)up_backtrace + 10,
-                               buffer, size, &skip));
+                               buffer, size, &skip);
         }
 
       if (ret < size)
@@ -566,7 +566,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
           ret += backtrace_push(tcb->stack_base_ptr +
                                 tcb->adj_stack_size, &sp,
                                 (FAR void *)tcb->xcp.regs[REG_LR],
-                                &buffer[ret], size - ret, &skip));
+                                &buffer[ret], size - ret, &skip);
 
           if (ret < size)
             {
