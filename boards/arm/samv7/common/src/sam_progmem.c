@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/common/src/sam_progmem_common.c
+ * boards/arm/samv7/common/src/sam_progmem.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,21 +33,19 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <nuttx/kmalloc.h>
 #include <nuttx/mtd/mtd.h>
 #ifdef CONFIG_BCH
 #include <nuttx/drivers/drivers.h>
 #endif
 
 #include "sam_progmem.h"
-#include "sam_progmem_common.h"
+#include "board_progmem.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 #define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
-#define PROGMEM_MTD_MINOR           0
 
 /****************************************************************************
  * Private Types
@@ -85,11 +83,70 @@ static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
     .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
   }
 };
+#endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: sam_progmem_register_driver
+ *
+ * Description:
+ *   Initialize the FLASH and register MTD devices.
+ *
+ * Input Parameters:
+ *   minor   - The minor number for progmem MTD block driver.
+ *   mtd     - MTD partition data pointer
+ *   devpath - Character device path
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+static int sam_progmem_register_driver(int minor, FAR struct mtd_dev_s *mtd,
+                                       FAR const char *devpath)
+{
+#ifdef CONFIG_BCH
+  char blockdev[18];
+  char chardev[12];
+#endif
+  int ret = OK;
+
+  /* Use the FTL layer to wrap the MTD driver as a block driver */
+
+  ret = ftl_initialize(minor, mtd);
+  if (ret < 0)
+    {
+      ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+      return ret;
+    }
+
+#ifdef CONFIG_BCH
+  /* Use the minor number to create device paths */
+
+  snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", minor);
+  if (devpath == NULL)
+    {
+      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", minor);
+      devpath = chardev;
+    }
+
+  /* Now create a character device on the block device */
+
+  ret = bchdev_register(blockdev, devpath, false);
+  if (ret < 0)
+    {
+      ferr("ERROR: bchdev_register %s failed: %d\n", devpath, ret);
+      return ret;
+    }
+#endif
+
+  return ret;
+}
+
+#if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
 /****************************************************************************
  * Name: sam_progmem_alloc_mtdpart
  *
@@ -116,8 +173,8 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
   ASSERT((mtd_offset % up_progmem_pagesize(0)) == 0);
   ASSERT((mtd_size % up_progmem_pagesize(0)) == 0);
 
-  finfo("\tMTD offset = 0x%"PRIx32"\n", mtd_offset);
-  finfo("\tMTD size = 0x%"PRIx32"\n", mtd_size);
+  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
+  finfo("\tMTD size = 0x%" PRIx32 "\n", mtd_size);
 
   startblock = up_progmem_getpage(mtd_offset);
   if (startblock < 0)
@@ -137,19 +194,16 @@ static struct mtd_dev_s *sam_progmem_alloc_mtdpart(uint32_t mtd_offset,
  *   Initialize partitions that are dedicated to firmware MCUBOOT update.
  *
  * Input Parameters:
- *   None.
+ *   minor - The starting minor number for progmem MTD partitions.
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-static int init_mcuboot_partitions(void)
+static int init_mcuboot_partitions(int minor)
 {
   FAR struct mtd_dev_s *mtd;
-#ifdef CONFIG_BCH
-  char blockdev[18];
-#endif
   int ret = OK;
 
   for (int i = 0; i < ARRAYSIZE(g_mcuboot_partition_table); ++i)
@@ -157,29 +211,17 @@ static int init_mcuboot_partitions(void)
       const struct mcuboot_partition_s *part = &g_mcuboot_partition_table[i];
       mtd = sam_progmem_alloc_mtdpart(part->offset, part->size);
 
-      if (!mtd)
+      if (mtd == NULL)
         {
           ferr("ERROR: create MTD OTA partition %s", part->devpath);
           continue;
         }
 
-      ret = ftl_initialize(i, mtd);
+      ret = sam_progmem_register_driver(minor + i, mtd, part->devpath);
       if (ret < 0)
         {
-          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
           return ret;
         }
-
-#ifdef CONFIG_BCH
-      snprintf(blockdev, 18, "/dev/mtdblock%d", i);
-
-      ret = bchdev_register(blockdev, part->devpath, false);
-      if (ret < 0)
-        {
-          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
-          return ret;
-        }
-#endif
     }
 
   return ret;
@@ -191,13 +233,21 @@ static int init_mcuboot_partitions(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_progmem_init
+ * Name: board_progmem_init
  *
  * Description:
- *   Initialize the FLASH and register the MTD device.
+ *   Initialize the FLASH and register MTD devices.
+ *
+ * Input Parameters:
+ *   minor - The starting minor number for progmem MTD partitions.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-int sam_progmem_common_initialize(void)
+int board_progmem_init(int minor)
 {
   int ret = OK;
 
@@ -214,41 +264,17 @@ int sam_progmem_common_initialize(void)
     }
 
 #if defined(CONFIG_SAMV7_PROGMEM_OTA_PARTITION)
-  ret = init_mcuboot_partitions();
+  ret = init_mcuboot_partitions(minor);
   if (ret < 0)
     {
       return ret;
     }
 #else
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(PROGMEM_MTD_MINOR, g_samv7_progmem_mtd);
+  ret = sam_progmem_register_driver(minor, g_samv7_progmem_mtd, NULL);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-             ret);
       return ret;
     }
-
-#ifdef CONFIG_BCH
-  char blockdev[18];
-  char chardev[12];
-
-  /* Use the minor number to create device paths */
-
-  snprintf(blockdev, 18, "/dev/mtdblock%d", PROGMEM_MTD_MINOR);
-  snprintf(chardev, 12, "/dev/mtd%d", PROGMEM_MTD_MINOR);
-
-  /* Now create a character device on the block device */
-
-  ret = bchdev_register(blockdev, chardev, false);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
-             chardev, ret);
-      return ret;
-    }
-#endif /* CONFIG_BCH */
 #endif
 
   return ret;

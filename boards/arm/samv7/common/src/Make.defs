@@ -23,9 +23,9 @@ CSRCS += sam_boot_image.c
 endif
 
 ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_progmem_common.c
+CSRCS += sam_progmem.c
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
-CSRCS += sam_progmem_common.c
+CSRCS += sam_progmem.c
 endif
 
 DEPPATH += --dep-path src

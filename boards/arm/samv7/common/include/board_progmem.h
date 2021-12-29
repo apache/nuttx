@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/common/include/sam_progmem_common.h
+ * boards/arm/samv7/common/include/board_progmem.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_PROGMEM_COMMON_H
-#define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_PROGMEM_COMMON_H
+#ifndef __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_PROGMEM_H
+#define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_PROGMEM_H
 
 /****************************************************************************
  * Public Types
@@ -45,13 +45,21 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sam_progmem_init
+ * Name: board_progmem_init
  *
  * Description:
  *   Initialize the FLASH and register MTD devices.
+ *
+ * Input Parameters:
+ *   minor - The starting minor number for progmem MTD partitions.
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
  ****************************************************************************/
 
-int sam_progmem_common_initialize(void);
+int board_progmem_init(int minor);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -59,4 +67,4 @@ int sam_progmem_common_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_PROGMEM_COMMON_H */
+#endif /* __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_PROGMEM_H */
