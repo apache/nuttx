@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_testset.S
+ * arch/risc-v/src/common/riscv_testset.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,11 +25,19 @@
 #include <nuttx/config.h>
 #include <arch/spinlock.h>
 
-  .file "arm_testset.S"
+  .file "riscv_testset.S"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_RV32
+#define LR_INST lr.w
+#define SC_INST sc.w
+#else
+#define LR_INST lr.d
+#define SC_INST sc.d
+#endif
 
 /****************************************************************************
  * Public Symbols
@@ -78,29 +86,29 @@
 
 up_testset:
 
-  li     a1, SP_LOCKED
+  li       a1, SP_LOCKED
 
   /* Test if the spinlock is locked or not */
 
 retry:
-  lr.d   a2, (a0)       /* Test if spinlock is locked or not */
-  beq    a2, a1, locked /* Already locked? Go to locked: */
+  LR_INST  a2, (a0)       /* Test if spinlock is locked or not */
+  beq      a2, a1, locked /* Already locked? Go to locked: */
 
   /* Not locked ... attempt to lock it */
 
-  sc.d   a2, a1, (a0)   /* Attempt to set the locked state (a1) to (a0) */
-  bnez   a2, retry      /* a2 will not be zero, if sc.b failed, try again */
+  SC_INST  a2, a1, (a0)   /* Attempt to set the locked state (a1) to (a0) */
+  bnez     a2, retry      /* a2 will not be zero, if sc.b failed, try again */
 
   /* Lock acquired -- return SP_UNLOCKED */
 
-  fence                 /* Required before accessing protected resource */
-  li     a0, SP_UNLOCKED
-  jr     ra
+  fence                   /* Required before accessing protected resource */
+  li        a0, SP_UNLOCKED
+  jr        ra
 
   /* Lock not acquired -- return SP_LOCKED */
 
 locked:
-  li     a0, SP_LOCKED
-  jr     ra
+  li        a0, SP_LOCKED
+  jr        ra
   .size	up_testset, . - up_testset
   .end

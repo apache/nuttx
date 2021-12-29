@@ -25,6 +25,8 @@ HEAD_ASRC = fe310_vectors.S
 # Specify our general Assembly files
 CHIP_ASRCS = fe310_head.S riscv_syscall.S
 
+CMN_ASRCS += riscv_testset.S
+
 # Specify C code within the common directory to be included
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c
 CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c

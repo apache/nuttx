@@ -146,6 +146,7 @@ config ARCH_RV_ISA_M
 config ARCH_RV_ISA_A
 	bool
 	default n
+	select ARCH_HAVE_TESTSET
 
 config ARCH_RV_ISA_C
 	bool
@@ -161,11 +162,6 @@ config ARCH_RV_ISA_D
 	default n
 	depends on ARCH_RV_ISA_F
 	select ARCH_HAVE_DPFPU
-
-config ARCH_RV32I
-	bool
-	default n
-	select ARCH_HAVE_SETJMP
 
 config ARCH_FAMILY
 	string
