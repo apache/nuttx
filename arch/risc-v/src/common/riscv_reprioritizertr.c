@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_reprioritizertr.c
+ * arch/risc-v/src/common/riscv_reprioritizertr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -124,10 +124,10 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
           /* Are we in an interrupt handler? */
 
-          if (g_current_regs)
+          if (CURRENT_REGS)
             {
               /* Yes, then we have to do things differently.
-               * Just copy the g_current_regs into the OLD rtcb.
+               * Just copy the CURRENT_REGS into the OLD rtcb.
                */
 
                riscv_savestate(rtcb->xcp.regs);
@@ -166,7 +166,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * thread at the head of the ready-to-run list.
                */
 
-              group_addrenv(nexttcb);
+              (void)group_addrenv(nexttcb);
 #endif
               /* Update scheduler parameters */
 
