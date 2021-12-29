@@ -198,7 +198,7 @@ int esp32_bringup(void)
   ret = esp32_ble_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize BLE: %d \n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE: %d\n", ret);
     }
 #endif
 
