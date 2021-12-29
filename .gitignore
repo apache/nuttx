@@ -27,7 +27,6 @@
 *.ddc
 *~
 .depend
-/.clean_context
 /.config
 /.config.old
 /.cproject
