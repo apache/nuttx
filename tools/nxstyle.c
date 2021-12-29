@@ -251,6 +251,8 @@ static const char *g_white_list[] =
   /* Ref:
    * fs/nfs/rpc.h
    * fs/nfs/nfs_proto.h
+   * fs/nfs/nfs_mount.h
+   * fs/nfs/nfs_vfsops.c
    */
 
   "CREATE3args",
@@ -275,6 +277,10 @@ static const char *g_white_list[] =
   "SETATTR3args",
   "SETATTR3resok",
   "FS3args",
+  "SIZEOF_rpc_reply_read",
+  "SIZEOF_rpc_call_write",
+  "SIZEOF_rpc_reply_readdir",
+  "SIZEOF_nfsmount",
 
   /* Ref:
    * mm/kasan/kasan.c
