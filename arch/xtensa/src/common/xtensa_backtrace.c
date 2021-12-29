@@ -136,10 +136,9 @@ static int backtrace_window(uintptr_t *base, uintptr_t *limit,
               continue;
             }
 
-          i++;
           if (*skip-- <= 0)
             {
-              *buffer++ = MAKE_PC_FROM_RA(ra);
+              buffer[i++] = MAKE_PC_FROM_RA(ra);
             }
         }
     }
@@ -164,14 +163,13 @@ static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
 
   if (ra)
     {
-      i++;
-      if (*skip-- <= 0)
+      if ((*skip)-- <= 0)
         {
-          *buffer++ = MAKE_PC_FROM_RA((uintptr_t)ra);
+          buffer[i++] = MAKE_PC_FROM_RA((uintptr_t)ra);
         }
     }
 
-  for (; i < size; sp = (uintptr_t *)*(sp - 3), i++)
+  for (; i < size; sp = (uintptr_t *)*(sp - 3))
     {
       if (sp > limit || sp < base)
         {
@@ -186,7 +184,7 @@ static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
 
       if (*skip-- <= 0)
         {
-          *buffer++ = MAKE_PC_FROM_RA((uintptr_t)ra);
+          buffer[i++] = MAKE_PC_FROM_RA((uintptr_t)ra);
         }
     }
 
