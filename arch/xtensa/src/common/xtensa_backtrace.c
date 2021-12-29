@@ -136,7 +136,7 @@ static int backtrace_window(uintptr_t *base, uintptr_t *limit,
               continue;
             }
 
-          if (*skip-- <= 0)
+          if ((*skip)-- <= 0)
             {
               buffer[i++] = MAKE_PC_FROM_RA(ra);
             }
@@ -182,7 +182,7 @@ static int backtrace_stack(uintptr_t *base, uintptr_t *limit,
           break;
         }
 
-      if (*skip-- <= 0)
+      if ((*skip)-- <= 0)
         {
           buffer[i++] = MAKE_PC_FROM_RA((uintptr_t)ra);
         }
