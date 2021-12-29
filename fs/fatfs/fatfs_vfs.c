@@ -757,7 +757,7 @@ static int fatfs_readdir(FAR struct inode *mountpt,
       dir->fd_dir.d_type = DTYPE_FILE;
     }
 
-  strncpy(dir->fd_dir.d_name, fno.fname, NAME_MAX);
+  strlcpy(dir->fd_dir.d_name, fno.fname, sizeof(dir->fd_dir.d_name));
 
   return ret;
 }

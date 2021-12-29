@@ -951,7 +951,7 @@ static int exfatfs_readdir(FAR struct inode *mountpt,
           dir->fd_dir.d_type = DTYPE_FILE;
         }
 
-      strncpy(dir->fd_dir.d_name, priv->entry->name, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, priv->entry->name, sizeof(dir->fd_dir.d_name));
       node = priv->entry;
       priv->entry = exfat_readdir(&priv->it);
       exfatfs_release_node(&fs->ef, node);

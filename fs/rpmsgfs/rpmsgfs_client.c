@@ -168,8 +168,7 @@ static int rpmsgfs_readdir_handler(FAR struct rpmsg_endpoint *ept,
   cookie->result = header->result;
   if (cookie->result >= 0)
     {
-      strncpy(entry->d_name, rsp->name, NAME_MAX);
-      entry->d_name[NAME_MAX] = '\0';
+      strlcpy(entry->d_name, rsp->name, sizeof(entry->d_name));
       entry->d_type = rsp->type;
     }
 
@@ -587,7 +586,7 @@ int rpmsgfs_client_bind(FAR void **handle, FAR const char *cpuname)
       return -ENOMEM;
     }
 
-  strncpy(priv->cpuname, cpuname, RPMSG_NAME_SIZE);
+  strlcpy(priv->cpuname, cpuname, sizeof(priv->cpuname));
   ret = rpmsg_register_callback(priv,
                                 rpmsgfs_device_created,
                                 rpmsgfs_device_destroy,
