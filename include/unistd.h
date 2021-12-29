@@ -386,8 +386,8 @@ FAR int   *getopterrp(void);  /* Print error message */
 FAR int   *getoptindp(void);  /* Index into argv */
 FAR int   *getoptoptp(void);  /* Unrecognized option character */
 
-int     gethostname(FAR char *name, size_t size);
-int     sethostname(FAR const char *name, size_t size);
+int     gethostname(FAR char *name, size_t namelen);
+int     sethostname(FAR const char *name, size_t namelen);
 
 /* Get configurable system variables */
 
