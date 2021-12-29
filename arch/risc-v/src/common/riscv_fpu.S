@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/risc-v/src/rv64gc/riscv_fpu.S
+ * arch/risc-v/src/common/riscv_fpu.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -23,7 +23,12 @@
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_RV32
+#include <arch/rv32im/irq.h>
+#else
 #include <arch/rv64gc/irq.h>
+#endif
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -56,6 +61,14 @@
 #else
 #  define FLOAD     flw
 #  define FSTORE    fsw
+#endif
+
+#ifdef CONFIG_ARCH_RV32
+#  define REGLOAD   lw
+#  define REGSTORE  sw
+#else
+#  define REGLOAD   ld
+#  define REGSTORE  sd
 #endif
 
 /************************************************************************************
@@ -95,7 +108,7 @@ up_fpuconfig:
  *   floating point registers.
  *
  * C Function Prototype:
- *   void riscv_savefpu(uint64_t *regs);
+ *   void riscv_savefpu(uintptr_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area in which to save the floating point
@@ -109,7 +122,7 @@ up_fpuconfig:
     .type         riscv_savefpu, function
 
 riscv_savefpu:
-    ld            t0, REG_INT_CTX(a0)
+    REGLOAD       t0, REG_INT_CTX(a0)
     li            t1, FS_MASK
     and           t2, t0, t1
     li            t1, FS_DIRTY
@@ -118,7 +131,7 @@ riscv_savefpu:
     and           t0, t0, t1
     li            t1, FS_CLEAN
     or            t0, t0, t1
-    sd            t0, REG_INT_CTX(a0)
+    REGSTORE      t0, REG_INT_CTX(a0)
 
     /* Store all floating point registers */
 
@@ -156,7 +169,7 @@ riscv_savefpu:
     FSTORE        f31, REG_F31(a0)
 
     frcsr         t0
-    sd            t0, REG_FCSR(a0)
+    REGSTORE      t0, REG_FCSR(a0)
 
 1:
     ret
@@ -169,7 +182,7 @@ riscv_savefpu:
  *   floating point registers.
  *
  * C Function Prototype:
- *   void riscv_restorefpu(const uint64_t *regs);
+ *   void riscv_restorefpu(const uintptr_t *regs);
  *
  * Input Parameters:
  *   regs - A pointer to the register save area containing the floating point
@@ -184,7 +197,7 @@ riscv_savefpu:
     .type        riscv_restorefpu, function
 
 riscv_restorefpu:
-    ld           t0, REG_INT_CTX(a0)
+    REGLOAD      t0, REG_INT_CTX(a0)
     li           t1, FS_MASK
     and          t2, t0, t1
     li           t1, FS_INITIAL
@@ -227,7 +240,7 @@ riscv_restorefpu:
 
     /* Store the floating point control and status register */
 
-    ld           t0, REG_FCSR(a0)
+    REGLOAD      t0, REG_FCSR(a0)
     fscsr        t0
 
 1:
