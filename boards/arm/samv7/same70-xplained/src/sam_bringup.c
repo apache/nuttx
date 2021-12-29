@@ -43,8 +43,11 @@
 #include <nuttx/i2c/i2c_master.h>
 
 #include "sam_twihs.h"
-#include "sam_progmem_common.h"
 #include "same70-xplained.h"
+
+#ifdef HAVE_PROGMEM_CHARDEV
+#  include "board_progmem.h"
+#endif
 
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
@@ -241,7 +244,7 @@ int sam_bringup(void)
 #ifdef HAVE_PROGMEM_CHARDEV
   /* Initialize the SAME70 FLASH programming memory library */
 
-  ret = sam_progmem_common_initialize();
+  ret = board_progmem_init(PROGMEM_MTD_MINOR);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize progmem: %d\n", ret);

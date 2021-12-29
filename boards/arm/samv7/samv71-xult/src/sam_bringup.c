@@ -61,8 +61,7 @@
 #endif
 
 #ifdef HAVE_PROGMEM_CHARDEV
-#  include "sam_progmem.h"
-#  include "sam_progmem_common.h"
+#  include "board_progmem.h"
 #endif
 
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
@@ -421,8 +420,9 @@ int sam_bringup(void)
 #if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
-      snprintf(blockdev, 18, "/dev/mtdblock%d", S25FL1_MTD_MINOR);
-      snprintf(chardev, 12, "/dev/mtd%d", S25FL1_MTD_MINOR);
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
+               S25FL1_MTD_MINOR);
+      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", S25FL1_MTD_MINOR);
 
       /* Now create a character device on the block device */
 
@@ -441,7 +441,7 @@ int sam_bringup(void)
 #ifdef HAVE_PROGMEM_CHARDEV
   /* Initialize the SAMV71 FLASH programming memory library */
 
-  ret = sam_progmem_common_initialize();
+  ret = board_progmem_init(PROGMEM_MTD_MINOR);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize progmem: %d\n", ret);

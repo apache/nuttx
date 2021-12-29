@@ -123,7 +123,7 @@ static int init_ota_partitions(void)
         }
 
 #ifdef CONFIG_BCH
-      snprintf(blockdev, 18, "/dev/mtdblock%d", i);
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
 
       ret = bchdev_register(blockdev, part->devpath, false);
       if (ret < 0)
