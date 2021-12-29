@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43438.c
+ * drivers/wireless/ieee80211/bcm43xxx/bcmf_chip_43455.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,23 +37,23 @@
  * Public Data
  ****************************************************************************/
 
-extern const char ap6212_nvram_image[];
-extern const unsigned int ap6212_nvram_image_len;
+extern const char bcm43455_nvram_image[];
+extern const unsigned int bcm43455_nvram_image_len;
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-extern const uint8_t ap6212_firmware_image[];
-extern const unsigned int ap6212_firmware_len;
+extern const uint8_t bcm43455_firmware_image[];
+extern const unsigned int bcm43455_firmware_len;
 
-extern const uint8_t ap6212_clm_blob[];
-extern const unsigned int ap6212_clm_blob_len;
+extern const uint8_t bcm43455_clm_blob[];
+extern const unsigned int bcm43455_clm_blob_len;
 #endif
 
-const struct bcmf_sdio_chip bcmf_43438_config_sdio =
+const struct bcmf_sdio_chip bcmf_43455_config_sdio =
 {
   /* General chip stats */
 
-  .ram_base = 0,
-  .ram_size = 512 * 1024,
+  .ram_base = 0x198000,
+  .ram_size = 800 * 1024,
 
   /* Backplane architecture */
 
@@ -61,26 +61,24 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
   {
     [CHIPCOMMON_CORE_ID]  = 0x18000000,  /* Chipcommon core register base   */
     [DOT11MAC_CORE_ID]    = 0x18001000,  /* dot11mac core register base     */
-    [SDIOD_CORE_ID]       = 0x18002000,  /* SDIOD Device core register base */
-    [WLAN_ARMCM3_CORE_ID] = 0x18003000 + /* ARMCM3 core register base       */
-                            WRAPPER_REGISTER_OFFSET,
-    [SOCSRAM_CORE_ID]     = 0x18004000 + /* SOCSRAM core register base      */
-                            WRAPPER_REGISTER_OFFSET
+    [WLAN_ARMCR4_CORE_ID] = 0x18002000   /* ARMCR4 core register base       */
+                          + WRAPPER_REGISTER_OFFSET,
+    [SDIOD_CORE_ID]       = 0x18004000   /* SDIOD Device core register base */
   },
 
   /* Firmware images */
 
   /* TODO find something smarter than using image_len references */
 
-  .nvram_image         = (FAR uint8_t *)ap6212_nvram_image,
-  .nvram_image_size    = (FAR unsigned int *)&ap6212_nvram_image_len,
+  .nvram_image         = (FAR uint8_t *)bcm43455_nvram_image,
+  .nvram_image_size    = (FAR unsigned int *)&bcm43455_nvram_image_len,
 
 #ifndef CONFIG_IEEE80211_BROADCOM_FWFILES
-  .firmware_image      = (FAR uint8_t *)ap6212_firmware_image,
-  .firmware_image_size = (FAR unsigned int *)&ap6212_firmware_len,
+  .firmware_image      = (FAR uint8_t *)bcm43455_firmware_image,
+  .firmware_image_size = (FAR unsigned int *)&bcm43455_firmware_len,
 
-  .clm_blob_image      = (FAR uint8_t *)ap6212_clm_blob,
-  .clm_blob_image_size = (FAR unsigned int *)&ap6212_clm_blob_len,
+  .clm_blob_image      = (FAR uint8_t *)bcm43455_clm_blob,
+  .clm_blob_image_size = (FAR unsigned int *)&bcm43455_clm_blob_len,
 #endif
 };
 

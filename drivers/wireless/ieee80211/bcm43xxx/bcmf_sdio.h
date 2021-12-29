@@ -53,6 +53,7 @@
 
 struct bcmf_sdio_chip
 {
+  uint32_t ram_base;
   uint32_t ram_size;
   uint32_t core_base[MAX_CORE_ID];
 
