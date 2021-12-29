@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/compiler.h>
 
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -55,6 +56,10 @@
 #define BCMA_IOCTL_CORE_BITS 0x3FFC
 #define BCMA_IOCTL_PME_EN    0x4000
 #define BCMA_IOCTL_BIST_EN   0x8000
+
+/* ARM CR4 core specific control flag bits */
+
+#define ARMCR4_BCMA_IOCTL_CPUHALT  0x0020
 
 #define BCMA_IOST_CORE_BITS  0x0FFF
 #define BCMA_IOST_DMA64      0x1000
@@ -336,7 +341,9 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Write image */
 
-  ret = bcmf_upload_binary(sbus, sbus->chip->ram_size - 4 - nvram_sz,
+  ret = bcmf_upload_binary(sbus,
+                           sbus->chip->ram_size - 4 - nvram_sz
+                           + sbus->chip->ram_base,
                            sbus->chip->nvram_image,
                            *sbus->chip->nvram_image_size);
   if (ret != OK)
@@ -351,7 +358,8 @@ int bcmf_upload_nvram(FAR struct bcmf_sdio_dev_s *sbus)
 
   /* Write the length token to the last word */
 
-  ret = bcmf_write_sbreg(sbus, sbus->chip->ram_size - 4,
+  ret = bcmf_write_sbreg(sbus,
+                         sbus->chip->ram_size - 4 + sbus->chip->ram_base,
                          (FAR uint8_t *)&token, 4);
   if (ret != OK)
     {
@@ -422,24 +430,58 @@ int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
 {
   int ret;
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43455)
+  uint32_t base;
+  uint32_t value;
+#endif
 
   wlinfo("upload firmware\n");
 
-  /* Disable ARMCM3 core and reset SOCRAM core to set device in firmware
-   * upload mode
-   */
-
-  bcmf_core_disable(sbus, WLAN_ARMCM3_CORE_ID);
-  bcmf_core_reset(sbus, SOCSRAM_CORE_ID);
-
-  /* Do chip specific initialization */
-
-  if (sbus->cur_chip_id == SDIO_DEVICE_ID_BROADCOM_43430)
+  switch (sbus->cur_chip_id)
     {
-      /* Disable remap for SRAM_3. Only for 4343x */
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
+    defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
 
-      bcmf_write_sbregw(sbus, SOCSRAM_BANKX_INDEX, 0x3);
-      bcmf_write_sbregw(sbus, SOCSRAM_BANKX_PDA, 0);
+      case SDIO_DEVICE_ID_BROADCOM_43362:
+      case SDIO_DEVICE_ID_BROADCOM_43430:
+        /* Disable ARMCM3 core and reset SOCRAM core to set device in
+         * firmware upload mode
+         */
+
+        bcmf_core_disable(sbus, WLAN_ARMCM3_CORE_ID, 0, 0);
+        bcmf_core_reset(sbus, SOCSRAM_CORE_ID, 0, 0, 0);
+
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
+        if (sbus->cur_chip_id == SDIO_DEVICE_ID_BROADCOM_43430)
+          {
+            /* Disable remap for SRAM_3. Only for 4343x */
+
+            bcmf_write_sbregw(sbus, SOCSRAM_BANKX_INDEX, 0x3);
+            bcmf_write_sbregw(sbus, SOCSRAM_BANKX_PDA, 0);
+          }
+#endif
+        break;
+#endif
+
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43455)
+
+      case SDIO_DEVICE_ID_BROADCOM_43455:
+
+        /* Clear all IOCTL bits except HALT bit */
+
+        base = sbus->chip->core_base[WLAN_ARMCR4_CORE_ID];
+        bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
+        value &= ARMCR4_BCMA_IOCTL_CPUHALT;
+        bcmf_core_reset(sbus,
+                        WLAN_ARMCR4_CORE_ID,
+                        value,
+                        ARMCR4_BCMA_IOCTL_CPUHALT,
+                        ARMCR4_BCMA_IOCTL_CPUHALT);
+        break;
+#endif
+
+      default:
+        DEBUGASSERT(false);
     }
 
   up_mdelay(50);
@@ -447,11 +489,15 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
   /* Flash chip firmware */
 
 #ifdef CONFIG_IEEE80211_BROADCOM_FWFILES
-  ret = bcmf_upload_file(sbus, 0, CONFIG_IEEE80211_BROADCOM_FWFILENAME);
+  ret = bcmf_upload_file(sbus,
+                         sbus->chip->ram_base,
+                         CONFIG_IEEE80211_BROADCOM_FWFILENAME);
 #else
   wlinfo("firmware size is %d bytes\n", *sbus->chip->firmware_image_size);
 
-  ret = bcmf_upload_binary(sbus, 0, sbus->chip->firmware_image,
+  ret = bcmf_upload_binary(sbus,
+                           sbus->chip->ram_base,
+                           sbus->chip->firmware_image,
                            *sbus->chip->firmware_image_size);
 #endif
 
@@ -471,18 +517,71 @@ int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus)
       return ret;
     }
 
-  /* Firmware upload done, restart ARMCM3 core */
+  /* Firmware upload done, restart ARM CM3/CR4 core */
 
-  up_mdelay(10);
-  bcmf_core_reset(sbus, WLAN_ARMCM3_CORE_ID);
-
-  /* Check ARMCM3 core is running */
-
-  up_mdelay(10);
-  if (!bcmf_core_isup(sbus, WLAN_ARMCM3_CORE_ID))
+  switch (sbus->cur_chip_id)
     {
-      wlerr("Cannot start ARMCM3 core\n");
-      return -ETIMEDOUT;
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43362) || \
+    defined(CONFIG_IEEE80211_BROADCOM_BCM43438)
+
+      case SDIO_DEVICE_ID_BROADCOM_43362:
+      case SDIO_DEVICE_ID_BROADCOM_43430:
+        up_mdelay(10);
+        bcmf_core_reset(sbus, WLAN_ARMCM3_CORE_ID, 0, 0, 0);
+
+        /* Check ARMCM3 core is running */
+
+        up_mdelay(10);
+        if (!bcmf_core_isup(sbus, WLAN_ARMCM3_CORE_ID))
+          {
+            wlerr("Cannot start ARMCM3 core\n");
+            return -ETIMEDOUT;
+          }
+        break;
+#endif
+
+#if defined(CONFIG_IEEE80211_BROADCOM_BCM43455)
+
+      case SDIO_DEVICE_ID_BROADCOM_43455:
+
+        /* Clear all interrupts */
+
+        bcmf_write_sbregw(
+          sbus,
+          CORE_BUS_REG(sbus->chip->core_base[SDIOD_CORE_ID], intstatus),
+          0xffffffff);
+
+        /* Write reset vector to address 0 */
+
+        ret = bcmf_upload_binary(sbus,
+                                 0,
+                                 sbus->chip->firmware_image,
+                                 4);
+        if (ret < 0)
+          {
+            return ret;
+          }
+
+        bcmf_core_reset(sbus,
+                        WLAN_ARMCR4_CORE_ID,
+                        ARMCR4_BCMA_IOCTL_CPUHALT,
+                        0,
+                        0);
+
+        /* Check ARMCR4 core is running */
+
+        up_mdelay(10);
+        if (!bcmf_core_isup(sbus, WLAN_ARMCR4_CORE_ID))
+          {
+            wlerr("Cannot start ARMCR4 core\n");
+            return -ETIMEDOUT;
+          }
+
+        break;
+#endif
+
+      default:
+        DEBUGASSERT(false);
     }
 
   return OK;
@@ -513,9 +612,12 @@ bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
   return (value & BCMA_RESET_CTL_RESET) == 0;
 }
 
-void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
+void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus,
+                       unsigned int core,
+                       uint32_t prereset,
+                       uint32_t reset)
 {
-  uint8_t value;
+  uint32_t value;
 
   if (core >= MAX_CORE_ID)
     {
@@ -525,34 +627,43 @@ void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   uint32_t base = sbus->chip->core_base[core];
 
-  /* Check if core is already in reset state */
+  /* Check if core is already in reset state.
+   * If core is already in reset state, skip reset.
+   */
 
-  bcmf_read_sbregb(sbus, base + BCMA_RESET_CTL, &value);
+  bcmf_read_sbregw(sbus, base + BCMA_RESET_CTL, &value);
 
-  if ((value & BCMA_RESET_CTL_RESET) != 0)
+  if ((value & BCMA_RESET_CTL_RESET) == 0)
     {
-      /* Core already disabled */
+      /* Core is not in reset state */
 
-      return;
+      /*  Ensure no backplane operation is pending */
+
+      up_mdelay(10);
+
+      bcmf_write_sbregw(sbus,
+                        base + BCMA_IOCTL,
+                        prereset | BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
+      bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
+
+      /* Set core in reset state */
+
+      bcmf_write_sbregw(sbus, base + BCMA_RESET_CTL, BCMA_RESET_CTL_RESET);
+      up_udelay(1);
     }
 
-  /*  Ensure no backplane operation is pending */
-
-  up_mdelay(10);
-
-  /* Set core in reset state */
-
-  bcmf_write_sbregb(sbus, base + BCMA_RESET_CTL, BCMA_RESET_CTL_RESET);
-  up_udelay(1);
-
-  /* Write 0 to the IO control and read it back */
-
-  bcmf_write_sbregb(sbus, base + BCMA_IOCTL, 0);
-  bcmf_read_sbregb(sbus, base + BCMA_IOCTL, &value);
+  bcmf_write_sbregw(sbus,
+                    base + BCMA_IOCTL,
+                    reset | BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
+  bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
   up_udelay(10);
 }
 
-void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
+void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus,
+                     unsigned int core,
+                     uint32_t prereset,
+                     uint32_t reset,
+                     uint32_t postreset)
 {
   uint32_t value;
   uint32_t base;
@@ -567,20 +678,16 @@ void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core)
 
   /* Put core in reset state */
 
-  bcmf_core_disable(sbus, core);
+  bcmf_core_disable(sbus, core, prereset, reset);
 
   /* Run initialization sequence */
 
-  bcmf_write_sbregb(sbus, base + BCMA_IOCTL,
-                    BCMA_IOCTL_FGC | BCMA_IOCTL_CLK);
-  bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
-
-  bcmf_write_sbregb(sbus, base + BCMA_RESET_CTL, 0);
+  bcmf_write_sbregw(sbus, base + BCMA_RESET_CTL, 0);
   bcmf_read_sbregw(sbus, base + BCMA_RESET_CTL, &value);
 
   up_udelay(1);
 
-  bcmf_write_sbregb(sbus, base + BCMA_IOCTL, BCMA_IOCTL_CLK);
+  bcmf_write_sbregw(sbus, base + BCMA_IOCTL, postreset | BCMA_IOCTL_CLK);
   bcmf_read_sbregw(sbus, base + BCMA_IOCTL, &value);
 
   up_udelay(1);
