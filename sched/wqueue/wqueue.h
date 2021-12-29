@@ -51,9 +51,7 @@
 
 struct kworker_s
 {
-#ifdef CONFIG_PRIORITY_INHERITANCE
   pid_t             pid;       /* The task ID of the worker thread */
-#endif
 };
 
 /* This structure defines the state of one kernel-mode work queue */
