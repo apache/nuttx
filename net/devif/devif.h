@@ -285,35 +285,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_initialize
- *
- * Description:
- *   Perform initialization of the network device interface layer
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void devif_initialize(void);
-
-/****************************************************************************
- * Name: devif_callback_init
- *
- * Description:
- *   Configure the pre-allocated callback structures into a free list.
- *
- * Assumptions:
- *   This function must be called with the network locked.
- *
- ****************************************************************************/
-
-void devif_callback_init(void);
-
-/****************************************************************************
  * Name: devif_callback_alloc
  *
  * Description:

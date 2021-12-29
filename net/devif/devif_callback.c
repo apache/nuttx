@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -42,7 +43,6 @@
  * Private Data
  ****************************************************************************/
 
-static struct devif_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
 static FAR struct devif_callback_s *g_cbfreelist = NULL;
 
 /****************************************************************************
@@ -214,29 +214,6 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devif_callback_init
- *
- * Description:
- *   Configure the pre-allocated callback structures into a free list.
- *
- * Assumptions:
- *   Called early in the initialization sequence so that no special
- *   protection is required.
- *
- ****************************************************************************/
-
-void devif_callback_init(void)
-{
-  int i;
-
-  for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
-    {
-      g_cbprealloc[i].nxtconn = g_cbfreelist;
-      g_cbfreelist = &g_cbprealloc[i];
-    }
-}
-
-/****************************************************************************
  * Name: devif_callback_alloc
  *
  * Description:
@@ -258,11 +235,31 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
+  int i;
 
   /* Check the head of the free list */
 
   net_lock();
-  ret  = g_cbfreelist;
+  ret = g_cbfreelist;
+
+  /* Allocate the callback entry from heap */
+
+  if (ret == NULL)
+    {
+      ret = kmm_zalloc(sizeof(struct devif_callback_s) *
+                       CONFIG_NET_NACTIVESOCKETS_PER_ALLOC);
+      if (ret != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_NACTIVESOCKETS_PER_ALLOC; i++)
+            {
+              ret[i].nxtconn = g_cbfreelist;
+              g_cbfreelist = &ret[i];
+            }
+
+          ret = g_cbfreelist;
+        }
+    }
+
   if (ret)
     {
       /* Remove the next instance from the head of the free list */

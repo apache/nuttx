@@ -378,7 +378,6 @@ ViewTool DP83848 Ethernet Module
       CONFIG_NET_NTCP_READAHEAD_BUFFERS=8
 
       CONFIG_NET_UDP=y                       : UDP support
-      CONFIG_NET_UDP_CONNS=8
 
       CONFIG_NET_ICMP=y                      : ICMP support
       CONFIG_NET_ICMP_SOCKET=y
