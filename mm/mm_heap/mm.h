@@ -106,8 +106,28 @@
 #else
 # define MM_ALLOC_BIT    0x80000000
 #endif
+
 #define MM_IS_ALLOCATED(n) \
   ((int)((FAR struct mm_allocnode_s *)(n)->preceding) < 0)
+
+/* What is the size of the allocnode? */
+
+#ifdef CONFIG_MM_SMALL
+# define SIZEOF_MM_ALLOCNODE   (4)
+#else
+# define SIZEOF_MM_ALLOCNODE   (8)
+#endif
+
+#define CHECK_ALLOCNODE_SIZE \
+  DEBUGASSERT(sizeof(struct mm_allocnode_s) == SIZEOF_MM_ALLOCNODE)
+
+/* What is the size of the freenode? */
+
+#define MM_PTR_SIZE sizeof(FAR struct mm_freenode_s *)
+#define SIZEOF_MM_FREENODE (SIZEOF_MM_ALLOCNODE + 2*MM_PTR_SIZE)
+
+#define CHECK_FREENODE_SIZE \
+  DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
 
 /****************************************************************************
  * Public Types
@@ -134,17 +154,6 @@ struct mm_allocnode_s
   mmsize_t preceding;      /* Size of the preceding chunk */
 };
 
-/* What is the size of the allocnode? */
-
-#ifdef CONFIG_MM_SMALL
-# define SIZEOF_MM_ALLOCNODE   (4)
-#else
-# define SIZEOF_MM_ALLOCNODE   (8)
-#endif
-
-#define CHECK_ALLOCNODE_SIZE \
-  DEBUGASSERT(sizeof(struct mm_allocnode_s) == SIZEOF_MM_ALLOCNODE)
-
 /* This describes a free chunk */
 
 struct mm_freenode_s
@@ -159,14 +168,6 @@ struct mm_delaynode_s
 {
   FAR struct mm_delaynode_s *flink;
 };
-
-/* What is the size of the freenode? */
-
-#define MM_PTR_SIZE sizeof(FAR struct mm_freenode_s *)
-#define SIZEOF_MM_FREENODE (SIZEOF_MM_ALLOCNODE + 2*MM_PTR_SIZE)
-
-#define CHECK_FREENODE_SIZE \
-  DEBUGASSERT(sizeof(struct mm_freenode_s) == SIZEOF_MM_FREENODE)
 
 /* This describes one heap (possibly with multiple regions) */
 
