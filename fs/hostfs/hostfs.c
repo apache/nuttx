@@ -195,7 +195,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   /* Copy base host path to output */
 
-  strncpy(path, fs->fs_root, pathlen);
+  strlcpy(path, fs->fs_root, pathlen);
 
   /* Be sure we aren't trying to use ".." to display outside of our
    * mounted path.
@@ -1051,7 +1051,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       if ((strncmp(ptr, "fs=", 3) == 0))
         {
-          strncpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
+          strlcpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
         }
 
       ptr = strtok_r(NULL, ",", &saveptr);
@@ -1344,10 +1344,10 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   /* Append to the host's root directory */
 
-  strncpy(oldpath, fs->fs_root, sizeof(oldpath));
-  strncat(oldpath, oldrelpath, sizeof(oldpath)-strlen(oldpath)-1);
-  strncpy(newpath, fs->fs_root, sizeof(newpath));
-  strncat(newpath, newrelpath, sizeof(newpath)-strlen(newpath)-1);
+  strlcpy(oldpath, fs->fs_root, sizeof(oldpath));
+  strlcat(oldpath, oldrelpath, sizeof(oldpath));
+  strlcpy(newpath, fs->fs_root, sizeof(newpath));
+  strlcat(newpath, newrelpath, sizeof(newpath));
 
   /* Call the host FS to do the mkdir */
 
