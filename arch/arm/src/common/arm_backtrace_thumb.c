@@ -319,7 +319,7 @@ __attribute__((no_sanitize_address))
 static int backtrace_push(FAR void *limit, FAR void **sp, FAR void *pc,
                           FAR void **buffer, int size, FAR int *skip)
 {
-  int i = 1;
+  int i = 0;
 
   if (!in_code_region(pc))
     {
@@ -349,11 +349,6 @@ static int backtrace_push(FAR void *limit, FAR void **sp, FAR void *pc,
       if (*skip-- <= 0)
         {
           *buffer++ = pc;
-        }
-
-      if (ip)
-        {
-          ip = NULL;
         }
     }
 
