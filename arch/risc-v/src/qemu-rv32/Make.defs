@@ -25,6 +25,8 @@ HEAD_ASRC = qemu_rv32_head.S
 # Specify our general Assembly files
 CHIP_ASRCS = qemu_rv32_vectors.S riscv_syscall.S
 
+CMN_ASRCS += riscv_testset.S
+
 # Specify C code within the common directory to be included
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c
 CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c
@@ -39,15 +41,15 @@ CMN_CSRCS += riscv_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += riscv_vfork.c
+CMN_CSRCS += riscv_vfork.c
 endif
 
 ifeq ($(CONFIG_SCHED_THREAD_LOCAL),y)
-CMN_CSRCS  += riscv_tls.c
+CMN_CSRCS += riscv_tls.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS  += riscv_fpu.S
+CMN_ASRCS += riscv_fpu.S
 endif
 
 # Specify our C code within this directory to be included
