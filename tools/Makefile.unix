@@ -42,10 +42,12 @@ CONFIG_VERSION_BUILD ?= "0"
 VERSION_ARG = -v $(CONFIG_VERSION_STRING) -b $(CONFIG_VERSION_BUILD)
 else
 
-# Generate .version every time from GIT history
+# Generate .version.tmp every time from GIT history
+# Only update .version if the contents of version.tmp actually changes
+# Note: this is executed before any rule is run
 
-.PHONY: $(TOPDIR)/.version
-
+$(shell tools/version.sh .version.tmp)
+$(shell $(call TESTANDREPLACEFILE, .version.tmp, .version))
 endif
 
 # Process architecture specific directories
@@ -225,8 +227,7 @@ $(TOPDIR)/.version:
 
 include/nuttx/version.h: $(TOPDIR)/.version tools/mkversion$(HOSTEXEEXT)
 	$(Q) echo "Create version.h"
-	$(Q) tools/mkversion $(TOPDIR) > $@.tmp
-	$(Q) $(call TESTANDREPLACEFILE, $@.tmp, $@)
+	$(Q) tools/mkversion $(TOPDIR) > $@
 
 # Targets used to build include/nuttx/config.h.  Creation of config.h is
 # part of the overall NuttX configuration sequence. Notice that the
