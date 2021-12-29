@@ -23,7 +23,7 @@
 HEAD_ASRC = rv32m1_vectors.S
 
 # Specify our general Assembly files
-CHIP_ASRCS = rv32m1_head.S riscv_syscall.S
+CHIP_ASRCS = rv32m1_head.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c

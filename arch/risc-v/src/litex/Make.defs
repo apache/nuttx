@@ -23,7 +23,7 @@
 HEAD_ASRC = litex_vectors.S
 
 # Specify our general Assembly files
-CHIP_ASRCS = litex_head.S riscv_syscall.S
+CHIP_ASRCS = litex_head.S
 
 CMN_ASRCS += riscv_testset.S
 
