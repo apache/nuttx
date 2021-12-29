@@ -516,7 +516,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
                                &g_intstacktop,
 #  endif /* CONFIG_SMP */
                                &sp, (FAR void *)up_backtrace + 10,
-                               buffer, size);
+                               buffer, size, &skip);
 #else
           ret = backtrace_push(rtcb->stack_base_ptr +
                                rtcb->adj_stack_size,
