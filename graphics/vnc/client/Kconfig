@@ -6,7 +6,7 @@
 menuconfig VNCCLIENT
 	bool "VNC client"
 	default n
-	depends on NET_TCP && !NX_LCDDRIVER && !VNC_SERVER && EXPERIMENTAL
+	depends on NET_TCP && !VNC_SERVER && EXPERIMENTAL
 	---help---
 		Enable support for a VNC Remote Frame Buffer (RFB) client
 
