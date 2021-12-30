@@ -34,8 +34,6 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
 #include <nuttx/video/vnc.h>
-#include <nuttx/nx/nxglib.h>
-#include <nuttx/nx/nx.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
 
@@ -196,7 +194,7 @@ struct vnc_fbupdate_s
 {
   FAR struct vnc_fbupdate_s *flink;
   bool whupd;                  /* True: whole screen update */
-  struct nxgl_rect_s rect;     /* The enqueued update rectangle */
+  struct fb_area_s rect;       /* The enqueued update rectangle */
 };
 
 struct vnc_session_s
@@ -424,7 +422,7 @@ int vnc_stop_updater(FAR struct vnc_session_s *session);
  ****************************************************************************/
 
 int vnc_update_rectangle(FAR struct vnc_session_s *session,
-                         FAR const struct nxgl_rect_s *rect,
+                         FAR const struct fb_area_s *rect,
                          bool change);
 
 /****************************************************************************
@@ -464,7 +462,7 @@ int vnc_receiver(FAR struct vnc_session_s *session);
  *
  ****************************************************************************/
 
-int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+int vnc_rre(FAR struct vnc_session_s *session, FAR struct fb_area_s *rect);
 
 /****************************************************************************
  * Name: vnc_raw
@@ -484,7 +482,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
  *
  ****************************************************************************/
 
-int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
+int vnc_raw(FAR struct vnc_session_s *session, FAR struct fb_area_s *rect);
 
 /****************************************************************************
  * Name: vnc_key_map
@@ -503,10 +501,8 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NX_KBD
 void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown);
-#endif
 
 /****************************************************************************
  * Name: vnc_convert_rgbNN
@@ -556,7 +552,7 @@ uint32_t vnc_convert_rgb32_888(lfb_color_t rgb);
  ****************************************************************************/
 
 int vnc_colors(FAR struct vnc_session_s *session,
-               FAR struct nxgl_rect_s *rect,
+               FAR struct fb_area_s *rect,
                unsigned int maxcolors, FAR lfb_color_t *colors);
 
 #undef EXTERN

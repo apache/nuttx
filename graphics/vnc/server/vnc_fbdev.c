@@ -418,7 +418,6 @@ static int up_updateearea(FAR struct fb_vtable_s *vtable,
 {
   FAR struct vnc_fbinfo_s *fbinfo = (FAR struct vnc_fbinfo_s *)vtable;
   FAR struct vnc_session_s *session;
-  struct nxgl_rect_s rect;
   int ret = OK;
 
   DEBUGASSERT(fbinfo != NULL && area != NULL);
@@ -436,8 +435,7 @@ static int up_updateearea(FAR struct fb_vtable_s *vtable,
     {
       /* Queue the rectangular update */
 
-      nxgl_area2rect(&rect, area);
-      ret = vnc_update_rectangle(session, &rect, true);
+      ret = vnc_update_rectangle(session, area, true);
       if (ret < 0)
         {
           gerr("ERROR: vnc_update_rectangle failed: %d\n", ret);
@@ -733,8 +731,6 @@ int up_fbinitialize(int display)
  *   called, however, keyboard/mouse inputs from the remote VNC client will
  *   be lost.  By calling vnc_fbinitialize(), you can provide callout
  *   functions that can be received by logic higher in the architecture.
- *   These higher level callouts can then call nx_kbdin() or nx_mousein() on
- *   behalf of the VNC server.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this

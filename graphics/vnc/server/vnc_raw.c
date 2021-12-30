@@ -71,16 +71,16 @@
  ****************************************************************************/
 
 static size_t vnc_copy8(FAR struct vnc_session_s *session,
-                         nxgl_coord_t row, nxgl_coord_t col,
-                         nxgl_coord_t height, nxgl_coord_t width,
+                         fb_coord_t row, fb_coord_t col,
+                         fb_coord_t height, fb_coord_t width,
                          vnc_convert8_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  fb_coord_t x;
+  fb_coord_t y;
 
   /* Destination rectangle start address */
 
@@ -129,8 +129,8 @@ static size_t vnc_copy8(FAR struct vnc_session_s *session,
  ****************************************************************************/
 
 static size_t vnc_copy16(FAR struct vnc_session_s *session,
-                         nxgl_coord_t row, nxgl_coord_t col,
-                         nxgl_coord_t height, nxgl_coord_t width,
+                         fb_coord_t row, fb_coord_t col,
+                         fb_coord_t height, fb_coord_t width,
                          vnc_convert16_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
@@ -138,8 +138,8 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
   uint16_t pixel;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  fb_coord_t x;
+  fb_coord_t y;
   bool bigendian;
 
   /* Destination rectangle start address */
@@ -201,16 +201,16 @@ static size_t vnc_copy16(FAR struct vnc_session_s *session,
  ****************************************************************************/
 
 static size_t vnc_copy32(FAR struct vnc_session_s *session,
-                         nxgl_coord_t row, nxgl_coord_t col,
-                         nxgl_coord_t height, nxgl_coord_t width,
+                         fb_coord_t row, fb_coord_t col,
+                         fb_coord_t height, fb_coord_t width,
                          vnc_convert32_t convert)
 {
   FAR struct rfb_framebufferupdate_s *update;
   FAR const lfb_color_t *srcleft;
   FAR const lfb_color_t *src;
   FAR uint8_t *dest;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  fb_coord_t x;
+  fb_coord_t y;
   uint32_t pixel;
   bool bigendian;
 
@@ -275,20 +275,20 @@ static size_t vnc_copy32(FAR struct vnc_session_s *session,
  *
  ****************************************************************************/
 
-int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
+int vnc_raw(FAR struct vnc_session_s *session, FAR struct fb_area_s *rect)
 {
   FAR struct rfb_framebufferupdate_s *update;
   FAR const uint8_t *src;
-  nxgl_coord_t srcwidth;
-  nxgl_coord_t srcheight;
-  nxgl_coord_t destwidth;
-  nxgl_coord_t destheight;
-  nxgl_coord_t deststride;
-  nxgl_coord_t updwidth;
-  nxgl_coord_t updheight;
-  nxgl_coord_t width;
-  nxgl_coord_t x;
-  nxgl_coord_t y;
+  fb_coord_t srcwidth;
+  fb_coord_t srcheight;
+  fb_coord_t destwidth;
+  fb_coord_t destheight;
+  fb_coord_t deststride;
+  fb_coord_t updwidth;
+  fb_coord_t updheight;
+  fb_coord_t width;
+  fb_coord_t x;
+  fb_coord_t y;
   unsigned int bytesperpixel;
   unsigned int maxwidth;
   size_t size;
@@ -345,11 +345,8 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
    * In that case, we will have to emit multiple rectangles.
    */
 
-  DEBUGASSERT(rect->pt1.x <= rect->pt2.x);
-  srcwidth = rect->pt2.x - rect->pt1.x + 1;
-
-  DEBUGASSERT(rect->pt1.y <= rect->pt2.y);
-  srcheight = rect->pt2.y - rect->pt1.y + 1;
+  srcwidth = rect->w;
+  srcheight = rect->h;
 
   deststride = srcwidth * bytesperpixel;
   if (deststride > maxwidth)
@@ -385,7 +382,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
    * asynchronously.
    */
 
-  for (y = rect->pt1.y;
+  for (y = rect->y;
        srcheight > 0 && colorfmt == session->colorfmt;
        srcheight -= updheight, y += updheight)
     {
@@ -410,7 +407,7 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
        * changes asynchronously.
        */
 
-      for (width = srcwidth, x = rect->pt1.x;
+      for (width = srcwidth, x = rect->x;
            width > 0 && colorfmt == session->colorfmt;
            width -= updwidth, x += updwidth)
         {

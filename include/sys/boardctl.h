@@ -155,7 +155,7 @@
  * ARG:           A reference readable instance of struct
  *                boardioc_vncstart_s
  * CONFIGURATION: CONFIG_VNCSERVER
- * DEPENDENCIES:  VNC server provides vnc_default_fbinitialize()
+ * DEPENDENCIES:  VNC server provides nx_vnc_fbinitialize()
  *
  * CMD:           BOARDIOC_NXTERM
  * DESCRIPTION:   Create an NX terminal device
