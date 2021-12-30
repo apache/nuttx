@@ -18,12 +18,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CAN_CAN_H
-#define __INCLUDE_NUTTX_CAN_CAN_H
+#ifndef __INCLUDE_NUTTX_CAN_H
+#define __INCLUDE_NUTTX_CAN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #ifdef CONFIG_CAN_TXREADY
 #  include <nuttx/wqueue.h>
@@ -307,4 +309,4 @@ extern "C"
 #endif
 
 #endif /* CONFIG_CAN */
-#endif /* __INCLUDE_NUTTX_CAN_CAN_H */
+#endif /* __INCLUDE_NUTTX_CAN_H */
