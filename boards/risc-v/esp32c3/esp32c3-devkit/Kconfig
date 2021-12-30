@@ -50,6 +50,11 @@ config ESP32C3_MERGE_BINS
 		This is only useful when the path to binary files (e.g. bootloader)
 		is provided via the ESPTOOL_BINDIR variable.
 
+config ESP32C3_STORAGE_MTD_ENCRYPT
+	bool "Encrypt Storage MTD partition"
+	default y
+	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
 config ESP32C3_STORAGE_MTD_OFFSET
 	hex "Storage MTD base address in SPI Flash"
 	default 0x180000 if !ESP32C3_HAVE_OTA_PARTITION

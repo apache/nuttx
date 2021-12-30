@@ -691,30 +691,40 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
  * Name: esp32c3_spiflash_alloc_mtdpart
  *
  * Description:
- *   Allocate SPI Flash MTD.
+ *   Allocate an MTD partition from the ESP32-C3 SPI Flash.
  *
  * Input Parameters:
- *   None
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
  *
  * Returned Value:
- *   SPI Flash MTD data pointer if success or NULL if fail.
+ *   ESP32-C3 SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
 struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                 uint32_t mtd_size)
+                                                 uint32_t mtd_size,
+                                                 bool encrypted)
 {
-  struct esp32c3_mtd_dev_s *priv =
-      (struct esp32c3_mtd_dev_s *)&g_esp32c3_spiflash;
-  const esp32c3_spiflash_chip_t *chip = &(*priv->data)->chip;
+  const struct esp32c3_mtd_dev_s *priv;
+  const esp32c3_spiflash_chip_t *chip;
   struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
-  ASSERT((mtd_offset % chip->sector_size) == 0);
-  ASSERT((mtd_size % chip->sector_size) == 0);
+  if (encrypted)
+    {
+      priv = &g_esp32c3_spiflash_encrypt;
+    }
+  else
+    {
+      priv = &g_esp32c3_spiflash;
+    }
+
+  chip = &(*priv->data)->chip;
 
   finfo("ESP32-C3 SPI Flash information:\n");
   finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
@@ -723,6 +733,10 @@ struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   finfo("\tPage size = %" PRId32 " B\n", chip->page_size);
   finfo("\tSector size = %" PRId32 " KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %" PRId32 " KB\n", chip->block_size / 1024);
+
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   if (mtd_size == 0)
     {
@@ -739,7 +753,8 @@ struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   startblock = MTD_SIZE2BLK(priv, mtd_offset);
   blocks = MTD_SIZE2BLK(priv, size);
 
-  mtd_part = mtd_partition(&priv->mtd, startblock, blocks);
+  mtd_part = mtd_partition((struct mtd_dev_s *)&priv->mtd, startblock,
+                           blocks);
   if (!mtd_part)
     {
       ferr("ERROR: Failed to create MTD partition\n");

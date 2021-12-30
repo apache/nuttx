@@ -778,6 +778,11 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	---help---
 		Mount point of Wi-Fi storage file system.
 
+config ESP32C3_WIFI_MTD_ENCRYPT
+	bool "Encrypt Wi-Fi MTD partition"
+	default y
+	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
 config ESP32C3_WIFI_MTD_OFFSET
 	hex "Wi-Fi MTD partition offset"
 	default 0x280000 if !ESP32C3_HAVE_OTA_PARTITION
@@ -890,6 +895,11 @@ menu "SPI Flash configuration"
 if ESP32C3_HAVE_OTA_PARTITION
 
 comment "Application Image OTA Update support"
+
+config ESP32C3_OTA_PARTITION_ENCRYPT
+	bool "Encrypt OTA partitions"
+	default y
+	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
 
 config ESP32C3_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
