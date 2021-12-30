@@ -657,7 +657,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        * ARG:           A reference readable instance of struct
        *                boardioc_vncstart_s
        * CONFIGURATION: CONFIG_VNCSERVER
-       * DEPENDENCIES:  VNC server provides vnc_default_fbinitialize()
+       * DEPENDENCIES:  VNC server provides nx_vnc_fbinitialize()
        */
 
       case BOARDIOC_VNC_START:
@@ -673,7 +673,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
             {
               /* Setup the VNC server to support keyboard/mouse inputs */
 
-              ret = vnc_default_fbinitialize(vnc->display, vnc->handle);
+              ret = nx_vnc_fbinitialize(vnc->display, vnc->handle);
             }
         }
         break;

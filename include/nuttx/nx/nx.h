@@ -31,6 +31,7 @@
 #include <stdbool.h>
 
 #include <nuttx/nx/nxglib.h>
+#include <nuttx/video/vnc.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -257,6 +258,49 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: nx_vnc_fbinitialize
+ *
+ * Description:
+ *   This is just a wrapper around vnc_fbinitialize() that will establish
+ *   the default mouse and keyboard callout functions.
+ *
+ * Input Parameters:
+ *   display - In the case of hardware with multiple displays, this
+ *     specifies the display.  Normally this is zero.
+ *   handle - And instance of NXHANDLE returned from initialization of the
+ *     NX graphics system for that display.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+/* int nx_vnc_fbinitialize(int display, NXHANDLE handle); */
+
+#if defined(CONFIG_NX_KBD) && defined(CONFIG_NX_XYINPUT)
+
+#  define nx_vnc_fbinitialize(d,h) \
+  vnc_fbinitialize((d), nx_kbdin, nx_mousein, (FAR void *)(h))
+
+#elif defined(CONFIG_NX_KBD)
+
+#  define nx_vnc_fbinitialize(d,h) \
+  vnc_fbinitialize((d), nx_kbdin, NULL, (FAR void *)(h))
+
+#elif defined(CONFIG_NX_XYINPUT)
+
+#  define nx_vnc_fbinitialize(d,h) \
+  vnc_fbinitialize((d), NULL, nx_mousein, (FAR void *)(h))
+
+#else
+
+#  define nx_vnc_fbinitialize(d,h) \
+  vnc_fbinitialize((d), NULL, NULL, NULL)
+
+#endif
 
 /****************************************************************************
  * Name: nx_runinstance (and nx_run macro)

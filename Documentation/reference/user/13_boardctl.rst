@@ -208,7 +208,7 @@ Graphics
    
    :configuration: CONFIG_VNCSERVER
    
-   :dependencies: VNC server provides :c:func:`vnc_default_fbinitialize`.
+   :dependencies: VNC server provides :c:func:`nx_vnc_fbinitialize`.
    
 .. c:macro:: BOARDIOC_NXTERM
 

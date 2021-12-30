@@ -92,74 +92,48 @@ struct rre_encode32_s
 
 ssize_t vnc_rre8(FAR struct vnc_session_s *session,
                  FAR struct rre_encode8_s *dest,
-                 FAR struct nxgl_rect_s *rect,
+                 FAR struct fb_area_s *rect,
                  uint8_t bgcolor)
 {
-  nxgl_coord_t width;
-  nxgl_coord_t height;
-
   rfb_putbe32(dest->hdr.nsubrects, 1);
   dest->hdr.pixel = bgcolor;
-
   dest->rect.pixel = bgcolor;
-  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
-  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
-
-  width  = rect->pt2.x - rect->pt1.x + 1;
-  height = rect->pt2.y - rect->pt1.y + 1;
-
-  rfb_putbe16(dest->rect.width,  width);
-  rfb_putbe16(dest->rect.height, height);
+  rfb_putbe16(dest->rect.xpos,   rect->x);
+  rfb_putbe16(dest->rect.ypos,   rect->y);
+  rfb_putbe16(dest->rect.width,  rect->w);
+  rfb_putbe16(dest->rect.height, rect->h);
 
   return sizeof(struct rre_encode8_s);
 }
 
 ssize_t vnc_rre16(FAR struct vnc_session_s *session,
                   FAR struct rre_encode16_s *dest,
-                  FAR struct nxgl_rect_s *rect,
+                  FAR struct fb_area_s *rect,
                   uint16_t bgcolor)
 {
-  nxgl_coord_t width;
-  nxgl_coord_t height;
-
   rfb_putbe32(dest->hdr.nsubrects, 1);
   rfb_putbe16(dest->hdr.pixel,   bgcolor);
-
   rfb_putbe16(dest->rect.pixel,  bgcolor);
-  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
-  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
-  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
-
-  width  = rect->pt2.x - rect->pt1.x + 1;
-  height = rect->pt2.y - rect->pt1.y + 1;
-
-  rfb_putbe16(dest->rect.width,  width);
-  rfb_putbe16(dest->rect.height, height);
+  rfb_putbe16(dest->rect.xpos,   rect->x);
+  rfb_putbe16(dest->rect.ypos,   rect->y);
+  rfb_putbe16(dest->rect.width,  rect->w);
+  rfb_putbe16(dest->rect.height, rect->h);
 
   return sizeof(struct rre_encode16_s);
 }
 
 ssize_t vnc_rre32(FAR struct vnc_session_s *session,
                   FAR struct rre_encode32_s *dest,
-                  FAR struct nxgl_rect_s *rect,
+                  FAR struct fb_area_s *rect,
                   uint32_t bgcolor)
 {
-  nxgl_coord_t width;
-  nxgl_coord_t height;
-
   rfb_putbe32(dest->hdr.nsubrects, 1);
   rfb_putbe32(dest->hdr.pixel,   bgcolor);
-
   rfb_putbe32(dest->rect.pixel,  bgcolor);
-  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
-  rfb_putbe16(dest->rect.xpos,   rect->pt1.x);
-  rfb_putbe16(dest->rect.ypos,   rect->pt1.y);
-
-  width  = rect->pt2.x - rect->pt1.x + 1;
-  height = rect->pt2.y - rect->pt1.y + 1;
-
-  rfb_putbe16(dest->rect.width,  width);
-  rfb_putbe16(dest->rect.height, height);
+  rfb_putbe16(dest->rect.xpos,   rect->x);
+  rfb_putbe16(dest->rect.ypos,   rect->y);
+  rfb_putbe16(dest->rect.width,  rect->w);
+  rfb_putbe16(dest->rect.height, rect->h);
 
   return sizeof(struct rre_encode32_s);
 }
@@ -189,13 +163,11 @@ ssize_t vnc_rre32(FAR struct vnc_session_s *session,
  *
  ****************************************************************************/
 
-int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
+int vnc_rre(FAR struct vnc_session_s *session, FAR struct fb_area_s *rect)
 {
   FAR struct rfb_framebufferupdate_s *rre;
   FAR struct rfb_rectangle_s *rrect;
   lfb_color_t bgcolor;
-  nxgl_coord_t width;
-  nxgl_coord_t height;
   size_t nbytes;
   ssize_t nsent;
   int ret;
@@ -209,9 +181,6 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
       ret = vnc_colors(session, rect, 1, &bgcolor);
       if (ret == 1)
         {
-          width  = rect->pt2.x - rect->pt1.x + 1;
-          height = rect->pt2.y - rect->pt1.y + 1;
-
           /* Format the FrameBuffer Update with a single RRE encoded
            * rectangle.
            */
@@ -223,10 +192,10 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
           rfb_putbe16(rre->nrect,          1);
 
           rrect         = (FAR struct rfb_rectangle_s *)&rre->rect;
-          rfb_putbe16(rrect->xpos,         rect->pt1.x);
-          rfb_putbe16(rrect->ypos,         rect->pt1.y);
-          rfb_putbe16(rrect->width,        width);
-          rfb_putbe16(rrect->height,       height);
+          rfb_putbe16(rrect->xpos,         rect->x);
+          rfb_putbe16(rrect->ypos,         rect->y);
+          rfb_putbe16(rrect->width,        rect->w);
+          rfb_putbe16(rrect->height,       rect->h);
           rfb_putbe32(rrect->encoding,     RFB_ENCODING_RRE);
 
           /* The sub-rectangle encoding depends of the remote pixel width */
@@ -292,7 +261,7 @@ int vnc_rre(FAR struct vnc_session_s *session, FAR struct nxgl_rect_s *rect)
 
               DEBUGASSERT(nsent == nbytes);
               updinfo("Sent {(%d, %d),(%d, %d)}\n",
-                      rect->pt1.x, rect->pt1.y, rect->pt2.x, rect->pt2.y);
+                      rect->x, rect->y, rect->w, rect->h);
               return nbytes;
             }
 

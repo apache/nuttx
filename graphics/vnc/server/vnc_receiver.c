@@ -51,8 +51,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/video/rfb.h>
 #include <nuttx/video/vnc.h>
-#include <nuttx/nx/nx.h>
-#include <nuttx/nx/nxglib.h>
+#include <nuttx/input/mouse.h>
 
 #include "vnc_server.h"
 
@@ -266,7 +265,7 @@ int vnc_receiver(FAR struct vnc_session_s *session)
           case RFB_FBUPDATEREQ_MSG:    /* FramebufferUpdateRequest */
             {
               FAR struct rfb_fbupdatereq_s *update;
-              struct nxgl_rect_s rect;
+              struct fb_area_s rect;
 
               ginfo("Received FramebufferUpdateRequest\n");
 
@@ -287,10 +286,10 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
                   update = (FAR struct rfb_fbupdatereq_s *)session->inbuf;
 
-                  rect.pt1.x = rfb_getbe16(update->xpos);
-                  rect.pt1.y = rfb_getbe16(update->ypos);
-                  rect.pt2.x = rect.pt1.x + rfb_getbe16(update->width);
-                  rect.pt2.y = rect.pt1.y + rfb_getbe16(update->height);
+                  rect.x = rfb_getbe16(update->xpos);
+                  rect.y = rfb_getbe16(update->ypos);
+                  rect.w = rfb_getbe16(update->width);
+                  rect.h = rfb_getbe16(update->height);
 
                   ret = vnc_update_rectangle(session, &rect, false);
                   if (ret < 0)
@@ -330,10 +329,9 @@ int vnc_receiver(FAR struct vnc_session_s *session)
 
           case RFB_POINTEREVENT_MSG:   /* PointerEvent */
             {
-#ifdef CONFIG_NX_XYINPUT
               FAR struct rfb_pointerevent_s *event;
               uint8_t buttons;
-#endif
+
               ginfo("Received PointerEvent\n");
 
               /* Read the rest of the PointerEvent message */
@@ -346,10 +344,6 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   gerr("ERROR: Failed to read PointerEvent message: %d\n",
                        ret);
                 }
-#ifdef CONFIG_NX_XYINPUT
-
-              /* REVISIT:  How will be get the NX handle? */
-
               else if (session->mouseout != NULL)
                 {
                   event = (FAR struct rfb_pointerevent_s *)session->inbuf;
@@ -362,25 +356,24 @@ int vnc_receiver(FAR struct vnc_session_s *session)
                   buttons = 0;
                   if ((event->buttons & (1 << 0)) != 0)
                     {
-                      buttons |= NX_MOUSE_LEFTBUTTON;
+                      buttons |= MOUSE_BUTTON_1;
                     }
 
                   if ((event->buttons & (1 << 1)) != 0)
                     {
-                      buttons |= NX_MOUSE_CENTERBUTTON;
+                      buttons |= MOUSE_BUTTON_2;
                     }
 
                   if ((event->buttons & (1 << 2)) != 0)
                     {
-                      buttons |= NX_MOUSE_RIGHTBUTTON;
+                      buttons |= MOUSE_BUTTON_3;
                     }
 
                   session->mouseout(session->arg,
-                                    (nxgl_coord_t)rfb_getbe16(event->xpos),
-                                    (nxgl_coord_t)rfb_getbe16(event->ypos),
+                                    (fb_coord_t)rfb_getbe16(event->xpos),
+                                    (fb_coord_t)rfb_getbe16(event->ypos),
                                     buttons);
                 }
-#endif
             }
             break;
 
@@ -483,31 +476,3 @@ int vnc_client_encodings(FAR struct vnc_session_s *session,
   session->change = true;
   return OK;
 }
-
-/****************************************************************************
- * Name: vnc_mouse
- *
- * Description:
- *   This is the default keyboard/mouse callout function.  This is simply a
- *   wrapper around nx_mousein().  When
- *   configured using vnc_fbinitialize(), the 'arg' must be the correct
- *   NXHANDLE value.
- *
- * Input Parameters:
- *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
- *   callouts have arguments that match the inputs to nx_kbdin() and
- *   nx_mousein() (if arg is really of type NXHANDLE).
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_XYINPUT
-void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
-                  uint8_t buttons)
-{
-  DEBUGASSERT(arg != NULL);
-  nx_mousein((NXHANDLE)arg, x, y, buttons);
-}
-#endif
