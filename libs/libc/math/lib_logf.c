@@ -44,7 +44,7 @@
  */
 
 #define LOGF_MAX_ITER         10
-#define LOGF_RELAX_MULTIPLIER 2
+#define LOGF_RELAX_MULTIPLIER 2.0F
 
 /****************************************************************************
  * Public Functions
@@ -60,7 +60,7 @@ float logf(float x)
   float y_old;
   float ey;
   float epsilon;
-  int   relax_factor;
+  float relax_factor;
   int   iter;
 
   y       = 0.0F;
@@ -68,7 +68,7 @@ float logf(float x)
   epsilon = FLT_EPSILON;
 
   iter         = 0;
-  relax_factor = 1;
+  relax_factor = 1.0F;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -94,7 +94,7 @@ float logf(float x)
           iter = 0;
         }
 
-      if (relax_factor > 1)
+      if (relax_factor > 1.0F)
         {
           epsilon *= relax_factor;
         }
