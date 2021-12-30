@@ -341,6 +341,14 @@ config SIM_NOINPUT
 	bool "No input device"
 
 endchoice # Input Device
+
+config SIM_KEYBOARD
+	bool "X11 keyboard"
+	select INPUT_KEYBOARD
+	depends on SIM_X11FB
+	---help---
+		Support an X11 mouse-based keyboard emulation.  Also needs INPUT=y
+
 endif # if INPUT
 
 endmenu

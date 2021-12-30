@@ -24,6 +24,7 @@
 
 #include <stdio.h>
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
 
 #include "up_internal.h"
 
@@ -116,6 +117,15 @@ void up_x11events(void)
 
       switch (event.type)
         {
+          #ifdef CONFIG_SIM_KEYBOARD
+          case KeyPress:
+            up_kbdevent(XLookupKeysym(&event.xkey, 0), 0);
+            break;
+          case KeyRelease:
+            up_kbdevent(XLookupKeysym(&event.xkey, 0), 1);
+            break;
+          #endif
+
           case MotionNotify : /* Enabled by ButtonMotionMask */
             {
               up_buttonevent(event.xmotion.x, event.xmotion.y,
