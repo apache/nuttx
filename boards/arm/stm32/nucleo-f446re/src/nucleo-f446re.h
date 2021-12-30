@@ -36,6 +36,16 @@
 
 /* Configuration ************************************************************/
 
+/* procfs File System */
+
+#ifdef CONFIG_FS_PROCFS
+#  ifdef CONFIG_NSH_PROC_MOUNTPOINT
+#    define STM32_PROCFS_MOUNTPOINT CONFIG_NSH_PROC_MOUNTPOINT
+#  else
+#    define STM32_PROCFS_MOUNTPOINT "/proc"
+#  endif
+#endif
+
 #define HAVE_MMCSD 1
 #if !defined(CONFIG_STM32_SDIO) || !defined(CONFIG_MMCSD) || \
     !defined(CONFIG_MMCSD_SDIO)
