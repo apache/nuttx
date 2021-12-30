@@ -110,20 +110,6 @@ menu "Potentially insecure options"
 	# it's possible for the insecure menu to be disabled but the insecure option
 	# to remain on which is very bad.)
 
-config ESP32C3_SECURE_BOOT_ALLOW_ROM_BASIC
-	bool "Leave ROM BASIC Interpreter available on reset"
-	default n
-	depends on ESP32C3_SECURE_BOOT_INSECURE
-	---help---
-		By default, the BASIC ROM Console starts on reset if no valid bootloader is
-		read from the flash.
-
-		When either Flash Encryption or Secure Boot are enabled, the default is to
-		disable this BASIC fallback mode permanently via eFuse.
-
-		If this option is set, this eFuse is not burned and the BASIC ROM Console may
-		remain accessible. Only set this option in testing environments.
-
 config ESP32C3_SECURE_BOOT_ALLOW_JTAG
 	bool "Allow JTAG Debugging"
 	default n
