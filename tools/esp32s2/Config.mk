@@ -253,7 +253,7 @@ define FLASH
 		echo "USAGE: make flash ESPTOOL_PORT=<port> [ ESPTOOL_BAUD=<baud> ] [ ESPTOOL_BINDIR=<dir> ]"; \
 		exit 1; \
 	fi
-	$(eval ESPTOOL_OPTS := -c esp32s2 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(ESPTOOL_RESET_OPTS))
+	$(eval ESPTOOL_OPTS := -c esp32s2 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(ESPTOOL_RESET_OPTS) $(if $(CONFIG_ESP32S2_ESPTOOLPY_NO_STUB),--no-stub))
 	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
 
 	$(if $(CONFIG_ESP32S2_SECURE_BOOT),$(call HELP_FLASH_BOOTLOADER))
