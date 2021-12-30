@@ -87,6 +87,8 @@ struct mtd_dev_s *esp32c3_spiflash_encrypt_mtd(void);
  * Input Parameters:
  *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
  *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
  *
  * Returned Value:
  *   SPI Flash MTD data pointer if success or NULL if fail.
@@ -94,7 +96,8 @@ struct mtd_dev_s *esp32c3_spiflash_encrypt_mtd(void);
  ****************************************************************************/
 
 struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                 uint32_t mtd_size);
+                                                 uint32_t mtd_size,
+                                                 bool encrypted);
 
 #ifdef __cplusplus
 }
