@@ -99,13 +99,6 @@ struct stwlc38_dev_s
   struct work_s work;                       /* Interrupt handler worker */
 };
 
-static uint8_t type_of_command[CMD_STR_LEN] =
-{
-  0
-};
-
-static int number_parameters;
-
 static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
                         int cmd_length, uint8_t *read_data, int read_count)
 {
@@ -557,146 +550,6 @@ exit_0:
   return err;
 }
 
-static ssize_t st_polaris_i2c_bridge_show(FAR struct stwlc38_dev_s *priv,
-                                          char *buf)
-{
-  int err = 0;
-  uint8_t *read_buff = NULL;
-  uint8_t *all_strbuff = NULL;
-  int read_count = 0;
-  int i = 0;
-  int index = 0;
-  int size = (6 * 2) + 1;
-  if (number_parameters != 0)
-    {
-      switch (type_of_command[0])
-        {
-          case WRITE_READ_OPERATION:
-            {
-              if (number_parameters >= MIN_WR_BYTE_LENGTH)
-                {
-                  read_count = ((type_of_command[number_parameters - 2] << 8)
-                               | (type_of_command[number_parameters - 1]));
-                  batinfo("[WLC] read Count is %d\n", read_count);
-                  read_buff = kmm_zalloc(read_count * sizeof(uint8_t));
-                  if (read_buff == NULL)
-                    {
-                      err = E_MEMORY_ALLOC;
-                      goto cleanup;
-                    }
-
-                  if (wlc_i2c_read(priv, type_of_command + 1,
-                                   (number_parameters - 3),
-                                   read_buff, read_count) < OK)
-                    {
-                      err = E_BUS_WR;
-                    }
-                  else
-                    {
-                      size += (read_count * sizeof(uint8_t)) * 2;
-                      all_strbuff = kmm_zalloc(size);
-                      if (all_strbuff == NULL)
-                        {
-                          err = E_MEMORY_ALLOC;
-                          goto cleanup;
-                        }
-
-                      err = OK;
-                      snprintf((char *)all_strbuff, 11, "{ %08X", err);
-                      index += 10;
-                      for (i = 0; i < read_count; i++)
-                        {
-                          snprintf((char *)all_strbuff, 3, "%02X",
-                                   read_buff[i]);
-                          index += 2;
-                        }
-                      snprintf((char *)all_strbuff, 3, " }");
-                      index += 2;
-                      err = snprintf(buf, PAGE_SIZE, "%s\n", all_strbuff);
-                      number_parameters = 0;
-                      kmm_free(read_buff);
-                      kmm_free(all_strbuff);
-                      return err;
-                    }
-                }
-              else
-                {
-                  batinfo("[WLC] Invalid input for Write read operation\n");
-                  err = E_INVALID_INPUT;
-                }
-
-              goto cleanup;
-            }
-
-          case WRITE_OPERATION:
-            {
-              if (number_parameters >= MIN_W_BYTE_LENGTH)
-                {
-                  if (wlc_i2c_write(priv, type_of_command + 1,
-                                   (number_parameters - 1)) < OK)
-                    {
-                      err = E_BUS_W;
-                    }
-                  else
-                    {
-                      err = OK;
-                    }
-                }
-              else
-                {
-                  batinfo("[WLC] Invalid input for Write operation\n");
-                  err = E_INVALID_INPUT;
-                }
-
-              goto cleanup;
-            }
-
-          default:
-            {
-              batinfo("[WLC] Invalid input for i2c bridge\n");
-              err = E_INVALID_INPUT;
-              goto cleanup;
-            }
-        }
-    }
-  else
-    {
-       err = E_INVALID_INPUT;
-       batinfo("[WLC] Invalid input for write/write_read operation\n");
-       goto cleanup;
-    }
-
-cleanup:
-  number_parameters = 0;
-  if (read_buff != NULL) kmm_free(read_buff);
-  err = snprintf(buf, PAGE_SIZE, "{ %08X }\n", err);
-  return err;
-}
-
-static ssize_t st_polaris_i2c_bridge_store(FAR struct stwlc38_dev_s *priv,
-                                           const char *buf, size_t count)
-{
-  int n;
-  int temp;
-  char *p = (char *)buf;
-  number_parameters = 0;
-
-  for (n = 0; n < (count + 1) / 3; n++)
-    {
-      if (sscanf(p, "%02X ", &temp) == 1)
-        {
-          p += 3;
-          type_of_command[n] = (uint8_t)temp;
-          batinfo("[WLC] type_of_command[%d] = %02X\n",
-                  n, type_of_command[n]);
-          number_parameters++;
-        }
-    }
-
-  batinfo("[WLC] Number of Parameters = %d\n", number_parameters);
-  return count;
-}
-
 static int stwlc38_onoff_ldo_output(FAR struct stwlc38_dev_s *priv,
                                      bool onoff)
 {
@@ -817,7 +670,7 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   int ret;
   uint32_t reg_value;
 
-  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, &reg_value, 4);
+  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, (uint8_t *)&reg_value, 4);
   if (ret != OK)
     {
       baterr("[WLC] failed to read INTR states !!!\n");
@@ -843,18 +696,18 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   rx_int_state->wlc_rx_pp_done       =
       ((reg_value & WLC_RX_PP_DONE_INT_MASK) == false) ? false : true;
 
-  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, &reg_value, 4);
-  batinfo("[WLC] read WLC_RX_INTR_EN_REG is %08X \n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, &reg_value, 4);
-  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %08X \n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_STAT_REG, &reg_value, 4);
-  batinfo("[WLC] read WLC_RX_STAT_REG is %08X \n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, (uint8_t *)&reg_value, 4);
+  batinfo("[WLC] read WLC_RX_INTR_EN_REG is %x \n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, (uint8_t *)&reg_value, 4);
+  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %x \n", reg_value);
+  ret = fw_i2c_read(priv, WLC_RX_STAT_REG, (uint8_t *)&reg_value, 4);
+  batinfo("[WLC] read WLC_RX_STAT_REG is %x \n", reg_value);
 
   /* CLR int register */
 
   batinfo("[WLC] start to CLR INTR states !!!\n");
   reg_value = 0xffffffff;
-  ret = fw_i2c_write(priv, WLC_RX_INTR_CLR_REG, &reg_value, 4);
+  ret = fw_i2c_write(priv, WLC_RX_INTR_CLR_REG, (uint8_t *)&reg_value, 4);
   batinfo("[WLC] read WLC_RX_INTR_CLR_REG is %08X \n", reg_value);
   if (ret != OK)
     {
@@ -996,7 +849,7 @@ static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
                            FAR bool *status)
 {
   int ret;
-  int *chipid;
+  unsigned int *chipid = NULL;
 
   ret = stwlc38_chipid(dev, chipid);
 
@@ -1191,7 +1044,7 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
 
   *value = read_buff[1] << 8 | read_buff[0];
 
-  batinfo("The the actual output voltage of stwlc38 is %d mv", *value);
+  batinfo("The the actual output voltage of stwlc38 is %d mv \n", *value);
   return OK;
 }
 
@@ -1216,7 +1069,7 @@ static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
     }
 
   ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                        IOEXPANDER_OPTION_INTCFG, IOEXPANDER_VAL_FALLING);
+                        IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
   if (ret < 0)
     {
       baterr("Failed to set option: %d\n", ret);
