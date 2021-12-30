@@ -211,6 +211,7 @@ struct pat9126ja_sensor_s
   uint64_t                  timestamp;          /* Units is microseconds */
   int32_t                   x_position;         /* Position of x-axis */
   uint32_t                  polling_count;      /* Units is counts */
+  uint8_t                   x_resolution;       /* Resolution of x-axis */
 };
 
 /* Device struct */
@@ -259,9 +260,10 @@ static int pat9126ja_activate(FAR struct sensor_lowerhalf_s *lower,
                               bool enable);
 static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
                               unsigned long arg);
-
 static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
                                     unsigned long arg);
+static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                               unsigned long arg);
 
 /* Sensor interrupt functions */
 
@@ -277,9 +279,10 @@ static void pat9126ja_worker(FAR void *arg);
 
 static const struct sensor_ops_s g_pat9126ja_ops =
 {
-  .activate       = pat9126ja_activate,      /* Enable/disable sensor */
-  .selftest       = pat9126ja_selftest,      /* Sensor selftest */
-  .set_calibvalue = pat9126ja_set_calibvalue /* Sensor set calibvalue */
+  .activate       = pat9126ja_activate,       /* Enable/disable sensor */
+  .selftest       = pat9126ja_selftest,       /* Sensor selftest */
+  .set_calibvalue = pat9126ja_set_calibvalue, /* Sensor set calibvalue */
+  .calibrate      = pat9126ja_calibrate       /* Sensor calibrate */
 };
 
 /****************************************************************************
@@ -901,7 +904,7 @@ static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv)
   /* Set X-axis resolution, deponding on application */
 
   ret = pat9126ja_writereg(priv, PAT9126JA_REG_RES_X,
-                           PAT9126JA_X_RESOLUTION);
+                           priv->dev.x_resolution);
   if (ret < 0)
     {
       snerr("Failed to set X-axis resolution: %d\n", ret);
@@ -1102,9 +1105,9 @@ static int pat9126ja_selftest(FAR struct sensor_lowerhalf_s *lower,
  *
  * Description:
  *   The calibration value to be written in the dedicated registers. At each
- * power-on, so that the values read from the sensor are already corrected.
- * When the device is calibrated, the absolute accuracy will be better than
- * before.
+ *   power-on, so that the values read from the sensor are already corrected.
+ *   When the device is calibrated, the absolute accuracy will be better than
+ *   before.
  *
  * Input Parameters:
  *   lower - The instance of lower half sensor driver.
@@ -1132,13 +1135,50 @@ static int pat9126ja_set_calibvalue(FAR struct sensor_lowerhalf_s *lower,
 
   /* Set resolution according to target value */
 
-  ret = pat9126ja_writereg(priv, x_res, PAT9126JA_X_RESOLUTION);
+  ret = pat9126ja_writereg(priv, PAT9126JA_REG_RES_X, x_res);
   if (ret < 0)
     {
       snerr("Failed to set X-axis resolution: %d\n", ret);
     }
+  else
+    {
+      priv->dev.x_resolution = x_res;
+    }
 
   return ret;
+}
+
+/****************************************************************************
+ * Name: pat9126ja_calibrate
+ *
+ * Description:
+ *   This operation can trigger the calibration operation, and if the
+ *   calibration operation is short-lived, the calibration result value can
+ *   be obtained at the same time, the calibration value to be written in or
+ *   the non-volatile memory of the sensor or dedicated registers. When the
+ *   upper application calibration is completed, the current calibration
+ *   value of the sensor needs to be obtained and backed up, so that the last
+ *   calibration value can be directly obtained after power-on.
+ *
+ * Input Parameters:
+ *   lower - The instance of lower half sensor driver.
+ *   arg   - The parameters associated with calibration value.
+ *
+ * Returned Value:
+ *   Zero (OK) on success.
+ *
+ ****************************************************************************/
+
+static int pat9126ja_calibrate(FAR struct sensor_lowerhalf_s *lower,
+                               unsigned long arg)
+{
+  FAR struct pat9126ja_dev_s *priv = (FAR struct pat9126ja_dev_s *)lower;
+
+  DEBUGASSERT(lower != NULL);
+
+  sprintf((FAR char *)arg, "%d", priv->dev.x_resolution);
+
+  return OK;
 }
 
 /* Sensor interrupt functions */
@@ -1312,6 +1352,7 @@ int pat9126ja_register(int devno,
   priv->dev.lower.type          = SENSOR_TYPE_OTS;
   priv->dev.lower.buffer_number = PAT9126JA_DEFAULT_BUFFER_NUMBER;
   priv->dev.lower.ops           = &g_pat9126ja_ops;
+  priv->dev.x_resolution        = PAT9126JA_X_RESOLUTION;
   priv->config                  = config;
 
   /* Initialize chip and enter into lowpower mode */
