@@ -341,6 +341,12 @@ void xtensa_pminitialize(void);
 #  define xtensa_pminitialize()
 #endif
 
+/* Interrupt handling *******************************************************/
+
+/* Exception Handlers */
+
+int xtensa_svcall(int irq, void *context, void *arg);
+
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
