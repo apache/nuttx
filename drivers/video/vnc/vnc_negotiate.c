@@ -104,10 +104,10 @@ int vnc_negotiate(FAR struct vnc_session_s *session)
   ssize_t nsent;
   ssize_t nrecvd;
   size_t len;
+  int ret;
 
 #ifdef CONFIG_NET_SOCKOPTS
   struct timeval tv;
-  int ret;
 
   /* Set a receive timeout so that we don't hang if the client does not
    * respond according to RFB 3.3 protocol.
