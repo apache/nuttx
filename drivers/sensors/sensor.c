@@ -53,6 +53,17 @@
  * Private Types
  ****************************************************************************/
 
+struct sensor_axis_map_s
+{
+  int8_t src_x;
+  int8_t src_y;
+  int8_t src_z;
+
+  int8_t sign_x;
+  int8_t sign_y;
+  int8_t sign_z;
+};
+
 /* This structure describes sensor info */
 
 struct sensor_info
@@ -97,6 +108,18 @@ static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+static const struct sensor_axis_map_s g_remap_tbl[] =
+{
+  { 0, 1, 2,  1,  1,  1 }, /* P0 */
+  { 1, 0, 2,  1, -1,  1 }, /* P1 */
+  { 0, 1, 2, -1, -1,  1 }, /* P2 */
+  { 1, 0, 2, -1,  1,  1 }, /* P3 */
+  { 0, 1, 2, -1,  1, -1 }, /* P4 */
+  { 1, 0, 2, -1, -1, -1 }, /* P5 */
+  { 0, 1, 2,  1, -1, -1 }, /* P6 */
+  { 1, 0, 2,  1,  1, -1 }, /* P7 */
+};
 
 static const struct sensor_info g_sensor_info[] =
 {
@@ -640,6 +663,35 @@ static void sensor_notify_event(FAR void *priv)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: sensor_remap_vector_raw16
+ *
+ * Description:
+ *   This function remap the sensor data according to the place position on
+ *   board. The value of place is determined base on g_remap_tbl.
+ *
+ * Input Parameters:
+ *   in    - A pointer to input data need remap.
+ *   out   - A pointer to output data.
+ *   place - The place position of sensor on board.
+ *
+ ****************************************************************************/
+
+void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
+                               int place)
+{
+  FAR const struct sensor_axis_map_s *remap;
+  int16_t tmp[3];
+
+  DEBUGASSERT(place < (sizeof(g_remap_tbl) / sizeof(g_remap_tbl[0])));
+
+  remap = &g_remap_tbl[place];
+  tmp[0] = in[remap->src_x] * remap->sign_x;
+  tmp[1] = in[remap->src_y] * remap->sign_y;
+  tmp[2] = in[remap->src_z] * remap->sign_z;
+  memcpy(out, tmp, sizeof(tmp));
+}
 
 /****************************************************************************
  * Name: sensor_register
