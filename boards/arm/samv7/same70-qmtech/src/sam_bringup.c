@@ -39,12 +39,16 @@
 
 #include "same70-qmtech.h"
 
-#ifdef HAVE_PROGMEM_CHARDEV
-#  include "board_progmem.h"
-#endif
+#ifdef HAVE_AUTOMOUNTER
+#  include "sam_automount.h"
+#endif /* HAVE_AUTOMOUNTER */
 
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
+#endif
+
+#ifdef HAVE_PROGMEM_CHARDEV
+#  include "board_progmem.h"
 #endif
 
 /****************************************************************************

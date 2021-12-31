@@ -18,14 +18,23 @@
 #
 #############################################################################
 
+ifeq ($(CONFIG_BOARDCTL),y)
+CSRCS += sam_progmem.c
+
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += sam_reset.c
+endif
+
 ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
 CSRCS += sam_boot_image.c
 endif
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_progmem.c
 else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += sam_progmem.c
+endif
+
+ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
+CSRCS += sam_automount.c
 endif
 
 DEPPATH += --dep-path src

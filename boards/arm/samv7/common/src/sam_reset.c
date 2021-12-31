@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-qmtech/src/sam_reset.c
+ * boards/arm/samv7/common/src/sam_reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
