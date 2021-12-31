@@ -523,6 +523,5 @@ config NXSTART_DEVNO
 	---help---
 		LCD device number (in case there are more than one LCDs connected).
 		Default: 0
-source "graphics/vnc/Kconfig"
 
 endif # NX

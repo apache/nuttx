@@ -1,5 +1,5 @@
 ############################################################################
-# graphics/vnc/server/Make.defs
+# drivers/video/vnc/Make.defs
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -23,8 +23,8 @@ ifeq ($(CONFIG_VNCSERVER),y)
 CSRCS += vnc_server.c vnc_negotiate.c vnc_updater.c vnc_receiver.c
 CSRCS += vnc_raw.c vnc_rre.c vnc_color.c vnc_fbdev.c vnc_keymap.c
 
-DEPPATH += --dep-path vnc/server
-CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)/graphics/vnc/server}
-VPATH += :vnc/server
+DEPPATH += --dep-path video/vnc
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)video$(DELIM)vnc}
+VPATH += :video/vnc
 
 endif
