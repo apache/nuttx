@@ -36,6 +36,8 @@
 #include "arm_arch.h"
 #include "barriers.h"
 
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -184,3 +186,5 @@ int board_boot_image(FAR const char *path, uint32_t hdr_size)
 
   return 0;
 }
+
+#endif /* CONFIG_BOARDCTL_BOOT_IMAGE */

@@ -60,10 +60,6 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef HAVE_PROGMEM_CHARDEV
-#  include "board_progmem.h"
-#endif
-
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
 #  include <nuttx/clock.h>
 #  include <nuttx/i2c/i2c_master.h>
@@ -75,8 +71,16 @@
 #  include "sam_twihs.h"
 #endif
 
+#ifdef HAVE_AUTOMOUNTER
+#  include "sam_automount.h"
+#endif /* HAVE_AUTOMOUNTER */
+
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
+#endif
+
+#ifdef HAVE_PROGMEM_CHARDEV
+#  include "board_progmem.h"
 #endif
 
 /****************************************************************************
