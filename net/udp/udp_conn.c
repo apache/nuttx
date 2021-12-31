@@ -80,7 +80,9 @@
 
 /* The array containing all UDP connections. */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 struct udp_conn_s g_udp_connections[CONFIG_NET_UDP_CONNS];
+#endif
 
 /* A list of all free UDP connections */
 
@@ -125,15 +127,12 @@ static FAR struct udp_conn_s *udp_find_conn(uint8_t domain,
                                             FAR union ip_binding_u *ipaddr,
                                             uint16_t portno)
 {
-  FAR struct udp_conn_s *conn;
-  int i;
+  FAR struct udp_conn_s *conn = NULL;
 
   /* Now search each connection structure. */
 
-  for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
+  while ((conn = udp_nextconn(conn)) != NULL)
     {
-      conn = &g_udp_connections[i];
-
       /* If the port local port number assigned to the connections matches
        * AND the IP address of the connection matches, then return a
        * reference to the connection structure.  INADDR_ANY is a special
@@ -454,6 +453,46 @@ static inline FAR struct udp_conn_s *
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
+ * Name: udp_alloc_conn
+ *
+ * Description:
+ *   Allocate a uninitialized UDP connection structure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ALLOC_CONNS
+FAR struct udp_conn_s *udp_alloc_conn(void)
+{
+  FAR struct udp_conn_s *conn;
+  int i;
+
+  /* Return the entry from the head of the free list */
+
+  if (dq_peek(&g_free_udp_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(struct udp_conn_s) *
+                        CONFIG_NET_UDP_CONNS);
+      if (conn == NULL)
+        {
+          return conn;
+        }
+
+      /* Now initialize each connection structure */
+
+      for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
+        {
+          /* Mark the connection closed and move it to the free list */
+
+          conn[i].lport = 0;
+          dq_addlast(&conn[i].node, &g_free_udp_connections);
+        }
+    }
+
+  return (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -538,7 +577,9 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
 
 void udp_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -546,6 +587,7 @@ void udp_initialize(void)
   dq_init(&g_active_udp_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_UDP_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
@@ -553,6 +595,7 @@ void udp_initialize(void)
       g_udp_connections[i].lport = 0;
       dq_addlast(&g_udp_connections[i].node, &g_free_udp_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -571,7 +614,11 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _udp_semtake(&g_free_sem);
+#ifndef CONFIG_NET_ALLOC_CONNS
   conn = (FAR struct udp_conn_s *)dq_remfirst(&g_free_udp_connections);
+#else
+  conn = udp_alloc_conn();
+#endif
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
