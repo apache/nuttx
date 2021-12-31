@@ -299,7 +299,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                                                USRSOCK_EVENT_REMOTE_CLOSED);
           if (ret < 0)
             {
-              nwarn("usrsock_setup_request_callback failed: %d\n", ret);
+              nwarn("usrsock_setup_request_callback failed: %zd\n", ret);
               goto errout_unlock;
             }
 
@@ -321,7 +321,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                 }
               else
                 {
-                  nerr("net_timedwait errno: %d\n", ret);
+                  nerr("net_timedwait errno: %zd\n", ret);
                   DEBUGASSERT(false);
                 }
             }
@@ -361,7 +361,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
                                            USRSOCK_EVENT_REQ_COMPLETE);
       if (ret < 0)
         {
-          nwarn("usrsock_setup_request_callback failed: %d\n", ret);
+          nwarn("usrsock_setup_request_callback failed: %zd\n", ret);
           goto errout_unlock;
         }
 

@@ -154,7 +154,7 @@ int usrsock_bind(FAR struct socket *psock,
   {
   };
 
-  ssize_t ret;
+  int ret;
 
   DEBUGASSERT(conn);
 
