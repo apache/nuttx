@@ -255,7 +255,7 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
   if (len > xfer->length)
     {
       memcpy(msg->data, xfer->buffer, xfer->length);
-      memcpy(msg->data, xfer->nbuffer, len - xfer->length);
+      memcpy(msg->data + xfer->length, xfer->nbuffer, len - xfer->length);
     }
   else
     {
