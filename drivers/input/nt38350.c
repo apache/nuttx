@@ -252,6 +252,7 @@ struct nt38350_dev_s
 #if CONFIG_PM
   struct pm_callback_s          pm;
   enum pm_state_e               current_state;
+  int8_t                        enable_fdm;
 #endif
 
   /* Touch info */
@@ -3949,6 +3950,7 @@ static void nt38350_data_worker(FAR void *arg)
     }
 
   sample.npoints            = 1;
+  sample.point[0].id        = 0;
   sample.point[0].gesture   = 0xff;
   sample.point[0].x         = priv->sample.x;
   sample.point[0].y         = priv->sample.y;
@@ -4098,16 +4100,18 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
           nt38350_ts_resume(dev);
           break;
         case PM_STANDBY:
-          if (dev->current_state == PM_STANDBY ||
-              dev->current_state == PM_SLEEP)
-            return;
-          nt38350_ts_suspend(dev, NVT_PM_FDM);
-          break;
         case PM_SLEEP:
           if (dev->current_state == PM_STANDBY ||
               dev->current_state == PM_SLEEP)
             return;
-          nt38350_ts_suspend(dev, NVT_PM_DPSTDBY);
+          if (dev->enable_fdm)
+            {
+              nt38350_ts_suspend(dev, NVT_PM_FDM);
+            }
+          else
+            {
+              nt38350_ts_suspend(dev, NVT_PM_DPSTDBY);
+            }
           break;
         case PM_IDLE:
           dev->idle_mode = true;
@@ -4194,6 +4198,14 @@ static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
           *ptr = nvt_boot_update_firmware(priv);
         }
         break;
+#if CONFIG_PM
+      case TSIOC_ENABLEGESTURE:
+        {
+          FAR int8_t *ptr = (FAR int8_t *)((uintptr_t)arg);
+          priv->enable_fdm = *ptr;
+        }
+        break;
+#endif
       default:
         ret = -ENOTTY;
         break;
@@ -4291,6 +4303,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   priv->pm.prepare = nt38350_pm_prepare;
   priv->pm.notify  = nt38350_pm_notify;
   lcdc_pmcb_early_register(&priv->pm);
+  priv->enable_fdm = 0;
 #endif
 
   ret = touch_register(&(priv->lower), devname,

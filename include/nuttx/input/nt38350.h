@@ -53,9 +53,9 @@
 
 /* Specific IOCTL commands for NT38350 */
 
-#define TSIOC_GETNVTDIFF     _TSIOC(0x0006)  /* arg: Pointer to get struct nvt_diff_s */
-#define TSIOC_SELFTEST       _TSIOC(0x0007)  /* arg: Pointer to int self test value */
-#define TSIOC_UPGRADEFW      _TSIOC(0x0008)  /* arg: Pointer to int upgrade fw value */
+#define TSIOC_GETNVTDIFF     _TSIOC(0x000A)  /* arg: Pointer to get struct nvt_diff_s */
+#define TSIOC_SELFTEST       _TSIOC(0x000B)  /* arg: Pointer to int self test value */
+#define TSIOC_UPGRADEFW      _TSIOC(0x000C)  /* arg: Pointer to int upgrade fw value */
 
 /****************************************************************************
  * Public Types
