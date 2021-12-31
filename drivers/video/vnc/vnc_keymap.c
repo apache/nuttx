@@ -1,5 +1,5 @@
 /****************************************************************************
- * graphics/vnc/server/vnc_keymap.c
+ * drivers/video/vnc/vnc_keymap.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -121,7 +121,7 @@ static const struct vnc_keymap_s g_asciimap[] =
   /* Alternative encodings */
 
   {'`',              XK_dead_grave},
-  {'´',              XK_dead_acute},
+  {'\xb4',           XK_dead_acute},
   {ASCII_TILDE,      XK_dead_tilde},
   {ASCII_CARET,      XK_dead_circumflex},
 
