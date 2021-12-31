@@ -178,7 +178,7 @@ int usrsock_getsockopt(FAR struct usrsock_conn_s *conn,
   };
 
   struct iovec inbufs[1];
-  ssize_t ret;
+  int ret;
 
   net_lock();
 

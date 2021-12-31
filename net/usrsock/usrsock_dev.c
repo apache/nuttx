@@ -485,7 +485,7 @@ static ssize_t usrsockdev_handle_event(FAR struct usrsockdev_s *dev,
 
         if (len < sizeof(*hdr))
           {
-            nwarn("message too short, %d < %d.\n", len, sizeof(*hdr));
+            nwarn("message too short, %zu < %zu.\n", len, sizeof(*hdr));
 
             return -EINVAL;
           }
@@ -654,7 +654,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
   if (conn->resp.datain.iov[iovpos].iov_len < datahdr->valuelen)
     {
-      nwarn("%dth buffer not large enough (need: %d, have: %d).\n",
+      nwarn("%dth buffer not large enough (need: %d, have: %zu).\n",
             iovpos,
             datahdr->valuelen,
             conn->resp.datain.iov[iovpos].iov_len);
@@ -676,7 +676,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
       if (conn->resp.datain.iov[iovpos].iov_len < hdr->result)
         {
           nwarn("%dth buffer not large enough "
-                "(need: %" PRId32 ", have: %d).\n",
+                "(need: %" PRId32 ", have: %zu).\n",
                 iovpos,
                 hdr->result,
                 conn->resp.datain.iov[iovpos].iov_len);
@@ -742,7 +742,7 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
 
   if (len < hdrlen)
     {
-      nwarn("message too short, %d < %d.\n", len, hdrlen);
+      nwarn("message too short, %zu < %u.\n", len, hdrlen);
 
       return -EINVAL;
     }
@@ -855,7 +855,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
       if (len < sizeof(struct usrsock_message_common_s))
         {
-          nwarn("message too short, %d < %d.\n", len,
+          nwarn("message too short, %zu < %zu.\n", len,
                 sizeof(struct usrsock_message_common_s));
 
           ret = -EINVAL;
