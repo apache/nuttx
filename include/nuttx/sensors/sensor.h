@@ -316,6 +316,125 @@
 #define SENSOR_REMOTE                               (1u << 31)
 #define SENSOR_PERSIST                              (1u << 30)
 
+/* Body coordinate system position P0:
+ *
+ *          +y
+ *          |
+ *          |
+ *          |
+ *          |
+ *          .------>+x
+ *         /
+ *        /
+ *       /
+ *      /
+ *     +z
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P0                   0
+
+/* Body coordinate system position P1:
+ *
+ *          .------>+y
+ *         /|
+ *        / |
+ *       /  |
+ *      /   |
+ *     +z  -x
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P1                   1
+
+/* Body coordinate system position P2:
+ *
+ * -x<------.
+ *         /|
+ *        / |
+ *       /  |
+ *      /   |
+ *     +z  -y
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P2                   2
+
+/* Body coordinate system position P3:
+ *
+ *          +x
+ *          |
+ *          |
+ *          |
+ *          |
+ * -y<------.
+ *         /
+ *        /
+ *       /
+ *      /
+ *     +z
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P3                   3
+
+/* Body coordinate system position P4:
+ *
+ *          +y  -z
+ *          |   /
+ *          |  /
+ *          | /
+ *          |/
+ * -x<------.
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P4                   4
+
+/* Body coordinate system position P5:
+ *
+ *          +y  -z
+ *          |   /
+ *          |  /
+ *          | /
+ *          |/
+ * -x<------.
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P5                   5
+
+/* Body coordinate system position P6:
+ *
+ *              -z
+ *              /
+ *             /
+ *            /
+ *           /
+ * -x<------.
+ *          |
+ *          |
+ *          |
+ *          |
+ *         -y
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P6                   6
+
+/* Body coordinate system position P7:
+ *
+ *         +x   -z
+ *          |   /
+ *          |  /
+ *          | /
+ *          |/
+ *          .------->y
+ *
+ */
+
+#define SENSOR_BODY_COORDINATE_P7                   7
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
@@ -1057,6 +1176,24 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+/****************************************************************************
+ * Name: sensor_remap_vector_raw16
+ *
+ * Description:
+ *   This function remap the sensor data according to the place position on
+ *   board. The value of place is determined base on g_remap_tbl.
+ *
+ * Input Parameters:
+ *   in    - A pointer to input data need remap.
+ *   out   - A pointer to output data.
+ *   place - The place position of sensor on board,
+ *           ex:SENSOR_BODY_COORDINATE_PX
+ *
+ ****************************************************************************/
+
+void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
+                               int place);
 
 /****************************************************************************
  * "Upper Half" Sensor Driver Interfaces
