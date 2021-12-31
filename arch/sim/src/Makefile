@@ -118,7 +118,7 @@ endif
 ifeq ($(CONFIG_SIM_LCDDRIVER),y)
   CSRCS += up_lcd.c
 else ifeq ($(CONFIG_SIM_FRAMEBUFFER),y)
-    CSRCS += up_framebuffer.c
+  CSRCS += up_framebuffer.c
 endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
