@@ -184,6 +184,62 @@ static void littlefs_semgive(FAR struct littlefs_mountpt_s *fs)
 }
 
 /****************************************************************************
+ * Name: littlefs_convert_result
+ ****************************************************************************/
+
+static int littlefs_convert_result(int ret)
+{
+  switch (ret)
+    {
+      case LFS_ERR_IO:
+        return -EIO;
+
+      case LFS_ERR_CORRUPT:
+        return -EFAULT;
+
+      case LFS_ERR_NOENT:
+        return -ENOENT;
+
+      case LFS_ERR_EXIST:
+        return -EEXIST;
+
+      case LFS_ERR_NOTDIR:
+        return -ENOTDIR;
+
+      case LFS_ERR_ISDIR:
+        return -EISDIR;
+
+      case LFS_ERR_NOTEMPTY:
+        return -ENOTEMPTY;
+
+      case LFS_ERR_BADF:
+        return -EBADF;
+
+      case LFS_ERR_FBIG:
+        return -EFBIG;
+
+      case LFS_ERR_INVAL:
+        return -EINVAL;
+
+      case LFS_ERR_NOSPC:
+        return -ENOSPC;
+
+      case LFS_ERR_NOMEM:
+        return -ENOMEM;
+
+      case LFS_ERR_NOATTR:
+        return -ENODATA;
+
+      case LFS_ERR_NAMETOOLONG:
+        return -ENAMETOOLONG;
+
+      case LFS_ERR_OK:
+      default:
+        return ret;
+    }
+}
+
+/****************************************************************************
  * Name: littlefs_convert_oflags
  ****************************************************************************/
 
@@ -264,7 +320,8 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
   /* Try to open the file */
 
   oflags = littlefs_convert_oflags(oflags);
-  ret = lfs_file_open(&fs->lfs, &priv->file, relpath, oflags);
+  ret = littlefs_convert_result(lfs_file_open(&fs->lfs, &priv->file,
+                                              relpath, oflags));
   if (ret < 0)
     {
       /* Error opening file */
@@ -278,7 +335,8 @@ static int littlefs_open(FAR struct file *filep, FAR const char *relpath,
 
   if (oflags & LFS_O_APPEND)
     {
-      ret = lfs_file_seek(&fs->lfs, &priv->file, 0, LFS_SEEK_END);
+      ret = littlefs_convert_result(lfs_file_seek(&fs->lfs, &priv->file,
+                                                  0, LFS_SEEK_END));
       if (ret >= 0)
         {
           filep->f_pos = ret;
@@ -337,7 +395,7 @@ static int littlefs_close(FAR struct file *filep)
 
   if (--priv->refs <= 0)
     {
-      ret = lfs_file_close(&fs->lfs, &priv->file);
+      ret = littlefs_convert_result(lfs_file_close(&fs->lfs, &priv->file));
     }
 
   littlefs_semgive(fs);
@@ -377,14 +435,17 @@ static ssize_t littlefs_read(FAR struct file *filep, FAR char *buffer,
 
   if (filep->f_pos != priv->file.pos)
     {
-      ret = lfs_file_seek(&fs->lfs, &priv->file, filep->f_pos, LFS_SEEK_SET);
+      ret = littlefs_convert_result(lfs_file_seek(&fs->lfs, &priv->file,
+                                                  filep->f_pos,
+                                                  LFS_SEEK_SET));
       if (ret < 0)
         {
           goto out;
         }
     }
 
-  ret = lfs_file_read(&fs->lfs, &priv->file, buffer, buflen);
+  ret = littlefs_convert_result(lfs_file_read(&fs->lfs, &priv->file,
+                                              buffer, buflen));
   if (ret > 0)
     {
       filep->f_pos += ret;
@@ -423,14 +484,17 @@ static ssize_t littlefs_write(FAR struct file *filep, const char *buffer,
 
   if (filep->f_pos != priv->file.pos)
     {
-      ret = lfs_file_seek(&fs->lfs, &priv->file, filep->f_pos, LFS_SEEK_SET);
+      ret = littlefs_convert_result(lfs_file_seek(&fs->lfs, &priv->file,
+                                                  filep->f_pos,
+                                                  LFS_SEEK_SET));
       if (ret < 0)
         {
           goto out;
         }
     }
 
-  ret = lfs_file_write(&fs->lfs, &priv->file, buffer, buflen);
+  ret = littlefs_convert_result(lfs_file_write(&fs->lfs, &priv->file,
+                                               buffer, buflen));
   if (ret > 0)
     {
       filep->f_pos += ret;
@@ -466,7 +530,8 @@ static off_t littlefs_seek(FAR struct file *filep, off_t offset, int whence)
       return ret;
     }
 
-  ret = lfs_file_seek(&fs->lfs, &priv->file, offset, whence);
+  ret = littlefs_convert_result(lfs_file_seek(&fs->lfs, &priv->file,
+                                              offset, whence));
   if (ret >= 0)
     {
       filep->f_pos = ret;
@@ -529,7 +594,7 @@ static int littlefs_sync(FAR struct file *filep)
       return ret;
     }
 
-  ret = lfs_file_sync(&fs->lfs, &priv->file);
+  ret = littlefs_convert_result(lfs_file_sync(&fs->lfs, &priv->file));
   littlefs_semgive(fs);
 
   return ret;
@@ -645,7 +710,8 @@ static int littlefs_truncate(FAR struct file *filep, off_t length)
       return ret;
     }
 
-  ret = lfs_file_truncate(&fs->lfs, &priv->file, length);
+  ret = littlefs_convert_result(lfs_file_truncate(&fs->lfs, &priv->file,
+                                                  length));
   littlefs_semgive(fs);
 
   return ret;
@@ -688,7 +754,7 @@ static int littlefs_opendir(FAR struct inode *mountpt,
 
   /* Call the LFS's opendir function */
 
-  ret = lfs_dir_open(&fs->lfs, priv, relpath);
+  ret = littlefs_convert_result(lfs_dir_open(&fs->lfs, priv, relpath));
   if (ret < 0)
     {
       goto errout;
@@ -769,7 +835,7 @@ static int littlefs_readdir(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = lfs_dir_read(&fs->lfs, priv, &info);
+  ret = littlefs_convert_result(lfs_dir_read(&fs->lfs, priv, &info));
   if (ret > 0)
     {
       dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
@@ -820,7 +886,7 @@ static int littlefs_rewinddir(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = lfs_dir_rewind(&fs->lfs, priv);
+  ret = littlefs_convert_result(lfs_dir_rewind(&fs->lfs, priv));
   if (ret >= 0)
     {
       dir->fd_position = lfs_dir_tell(&fs->lfs, priv);
@@ -1038,25 +1104,24 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
   if (data && strcmp(data, "forceformat") == 0)
     {
-      ret = lfs_format(&fs->lfs, &fs->cfg);
+      ret = littlefs_convert_result(lfs_format(&fs->lfs, &fs->cfg));
       if (ret < 0)
         {
           goto errout_with_fs;
         }
     }
 
-  ret = lfs_mount(&fs->lfs, &fs->cfg);
+  ret = littlefs_convert_result(lfs_mount(&fs->lfs, &fs->cfg));
   if (ret < 0)
     {
       /* Auto format the device if -o autoformat */
 
-      if (ret != LFS_ERR_CORRUPT ||
-          !data || strcmp(data, "autoformat"))
+      if (ret != -EFAULT || !data || strcmp(data, "autoformat"))
         {
           goto errout_with_fs;
         }
 
-      ret = lfs_format(&fs->lfs, &fs->cfg);
+      ret = littlefs_convert_result(lfs_format(&fs->lfs, &fs->cfg));
       if (ret < 0)
         {
           goto errout_with_fs;
@@ -1064,7 +1129,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
 
       /* Try to mount the device again */
 
-      ret = lfs_mount(&fs->lfs, &fs->cfg);
+      ret = littlefs_convert_result(lfs_mount(&fs->lfs, &fs->cfg));
       if (ret < 0)
         {
           goto errout_with_fs;
@@ -1110,7 +1175,7 @@ static int littlefs_unbind(FAR void *handle, FAR struct inode **driver,
       return ret;
     }
 
-  ret = lfs_unmount(&fs->lfs);
+  ret = littlefs_convert_result(lfs_unmount(&fs->lfs));
   littlefs_semgive(fs);
 
   if (ret >= 0)
@@ -1174,7 +1239,7 @@ static int littlefs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
       return ret;
     }
 
-  ret = lfs_fs_size(&fs->lfs);
+  ret = littlefs_convert_result(lfs_fs_size(&fs->lfs));
   if (ret > 0)
     {
       buf->f_bfree -= ret;
@@ -1212,7 +1277,7 @@ static int littlefs_unlink(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = lfs_remove(&fs->lfs, relpath);
+  ret = littlefs_convert_result(lfs_remove(&fs->lfs, relpath));
   littlefs_semgive(fs);
 
   return ret;
@@ -1297,7 +1362,8 @@ static int littlefs_rename(FAR struct inode *mountpt,
       return ret;
     }
 
-  ret = lfs_rename(&fs->lfs, oldrelpath, newrelpath);
+  ret = littlefs_convert_result(lfs_rename(&fs->lfs, oldrelpath,
+                                           newrelpath));
   littlefs_semgive(fs);
 
   return ret;
