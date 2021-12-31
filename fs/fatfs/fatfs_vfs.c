@@ -859,8 +859,8 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
     {
       /* Auto format the device if -o "autoformat" */
 
-      if (ret != -EIO ||
-          !data || fatfs_match_option(data, "autoformat"))
+      if ((ret != -EIO && ret != -EINVAL) ||
+          !data || !fatfs_match_option(data, "autoformat"))
         {
           goto errout_with_open;
         }
