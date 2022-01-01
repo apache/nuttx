@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -42,7 +43,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct devif_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
+#endif
 static FAR struct devif_callback_s *g_cbfreelist = NULL;
 
 /****************************************************************************
@@ -227,6 +230,7 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
 
 void devif_callback_init(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
 
   for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
@@ -234,6 +238,7 @@ void devif_callback_init(void)
       g_cbprealloc[i].nxtconn = g_cbfreelist;
       g_cbfreelist = &g_cbprealloc[i];
     }
+#endif
 }
 
 /****************************************************************************
@@ -258,11 +263,33 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
+
+  net_lock();
+
+  /* Allocate the callback entry from heap */
+
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (g_cbfreelist == NULL)
+    {
+      ret = kmm_zalloc(sizeof(struct devif_callback_s) *
+                       CONFIG_NET_NACTIVESOCKETS);
+      if (ret != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
+            {
+              ret[i].nxtconn = g_cbfreelist;
+              g_cbfreelist = &ret[i];
+            }
+        }
+    }
+#endif
 
   /* Check the head of the free list */
 
-  net_lock();
-  ret  = g_cbfreelist;
+  ret = g_cbfreelist;
   if (ret)
     {
       /* Remove the next instance from the head of the free list */
