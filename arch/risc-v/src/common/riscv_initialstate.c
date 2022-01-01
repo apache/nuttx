@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_initialstate.c
+ * arch/risc-v/src/common/riscv_initialstate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -55,7 +55,7 @@
 void up_initial_state(struct tcb_s *tcb)
 {
   struct xcptcontext *xcp = &tcb->xcp;
-  uint32_t regval;
+  uintptr_t regval;
 
   /* Initialize the idle thread stack */
 
@@ -86,37 +86,18 @@ void up_initial_state(struct tcb_s *tcb)
    * only the start function would do that and we have control over that one
    */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+  xcp->regs[REG_SP]      = (uintptr_t)tcb->stack_base_ptr +
+                                      tcb->adj_stack_size;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_EPC]     = (uint32_t)tcb->start;
+  xcp->regs[REG_EPC]     = (uintptr_t)tcb->start;
 
   /* Setup thread local storage pointer */
 
 #ifdef CONFIG_SCHED_THREAD_LOCAL
-  xcp->regs[REG_TP]      = (uint32_t)tcb->stack_alloc_ptr +
+  xcp->regs[REG_TP]      = (uintptr_t)tcb->stack_alloc_ptr +
                                      sizeof(struct tls_info_s);
-#endif
-
-  /* If this task is running PIC, then set the PIC base register to the
-   * address of the allocated D-Space region.
-   */
-
-#ifdef CONFIG_PIC
-#  warning "Missing logic"
-#endif
-
-  /* Set privileged- or unprivileged-mode, depending on how NuttX is
-   * configured and what kind of thread is being started.
-   *
-   * If the kernel build is not selected, then all threads run in
-   * privileged thread mode.
-   */
-
-#ifdef CONFIG_BUILD_KERNEL
-#  warning "Missing logic"
 #endif
 
   /* Set the initial value of the interrupt context register.
