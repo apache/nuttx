@@ -165,8 +165,9 @@ void icmp_free(FAR struct icmp_conn_s *conn)
       /* Free the connection */
 
       dq_addlast(&conn->node, &g_free_icmp_connections);
-      nxsem_post(&g_free_sem);
     }
+
+  nxsem_post(&g_free_sem);
 }
 
 /****************************************************************************
