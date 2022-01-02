@@ -80,10 +80,10 @@ extern void g_intstacktop;
  * in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
- *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
  *    that the value _sdata is the address of a uint32_t variable _data
  *    (it is not!).
- *  - We can recoved the linker value then by simply taking the address of
+ *  - We can recover the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
