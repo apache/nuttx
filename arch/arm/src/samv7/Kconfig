@@ -1944,7 +1944,7 @@ config SAMV7_DAC_TRIGGER_SELECT
 	default 3
 	range 1 3
 	---help---
-		Define DAC trigger source.  Snly support for TC0, TC1, TC2 output is
+		Define DAC trigger source.  Only support for TC0, TC1, TC2 output is
 		currently implemented:
 
 		1 -> TC0
