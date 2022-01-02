@@ -382,6 +382,25 @@ static void tcp_sendcommon(FAR struct net_driver_s *dev,
   /* Finish the IP portion of the message and calculate checksums */
 
   tcp_sendcomplete(dev, tcp);
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  if ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)
+    {
+      /* Remember sndseq that will be used in case of a possible
+       * SYN or FIN retransmission
+       */
+
+      conn->rexmit_seq = tcp_getsequence(conn->sndseq);
+
+      /* Advance sndseq by +1 because SYN and FIN occupy
+       * one sequence number (RFC 793)
+       */
+
+      net_incr32(conn->sndseq, 1);
+    }
+#else
+  /* REVISIT for the buffered mode */
+#endif
 }
 
 /****************************************************************************
