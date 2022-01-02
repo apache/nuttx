@@ -112,6 +112,7 @@ static const struct qe_ops_s g_qe_ops =
   .position  = tiva_qe_position,
   .setposmax = NULL,            /* not supported yet */
   .reset     = tiva_qe_reset,
+  .setindex  = NULL,            /* not supported yet */
   .ioctl     = tiva_qe_ioctl,
 };
 
