@@ -101,7 +101,7 @@ static void sam_oneshot_handler(TC_HANDLE tch, void *arg, uint32_t sr)
    * Disable the TC now and disable any further interrupts.
    */
 
-  sam_tc_attach(oneshot->tch, NULL, NULL, 0);
+  sam_tc_detach(oneshot->tch);
   sam_tc_stop(oneshot->tch);
 
   /* The timer is no longer running */
@@ -321,8 +321,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
 
   /* Set up to receive the callback when the interrupt occurs */
 
-  sam_tc_attach(oneshot->tch, sam_oneshot_handler, oneshot,
-                TC_INT_CPCS);
+  sam_tc_attach(oneshot->tch, sam_oneshot_handler, oneshot, TC_INT_CPCS);
 
   /* Set RC so that an event will be triggered when TC_CV register counts
    * up to RC.
@@ -400,8 +399,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
   uint64_t usec;
   uint64_t sec;
   uint64_t nsec;
-  uint32_t count;
   uint32_t rc;
+  uint16_t count;
 
   /* Was the timer running? */
 
@@ -451,7 +450,7 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
 
   /* Now we can disable the interrupt and stop the timer. */
 
-  sam_tc_attach(oneshot->tch, NULL, NULL, 0);
+  sam_tc_detach(oneshot->tch);
   sam_tc_stop(oneshot->tch);
 
   oneshot->running = false;

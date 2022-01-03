@@ -121,8 +121,7 @@ int sam_freerun_initialize(struct sam_freerun_s *freerun, int chan,
 
   /* Set up to receive the callback when the counter overflow occurs */
 
-  (void)sam_tc_attach(freerun->tch, sam_freerun_handler,
-                      freerun, TC_INTFLAG_OVF);
+  sam_tc_attach(freerun->tch, sam_freerun_handler, freerun, TC_INTFLAG_OVF);
 
   /* Start the counter */
 
@@ -241,7 +240,7 @@ int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
 
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  sam_tc_attach(freerun->tch, NULL, NULL, 0);
+  sam_tc_detach(freerun->tch);
   sam_tc_stop(freerun->tch);
 
   /* Free the timer */
