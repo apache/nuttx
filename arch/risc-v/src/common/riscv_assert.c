@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_assert.c
+ * arch/risc-v/src/common/riscv_assert.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -37,8 +37,10 @@
 
 #include <arch/board/board.h>
 
-#include "riscv_arch.h"
 #include "sched/sched.h"
+#include "irq/irq.h"
+
+#include "riscv_arch.h"
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -55,9 +57,19 @@
 #  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
 
+/* Format output with register width and hex */
+
+#ifdef CONFIG_ARCH_RV32
+#  define PRIxREG "%08"PRIxPTR
+#else
+#  define PRIxREG "%016"PRIxPTR
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+#ifdef CONFIG_ARCH_STACKDUMP
 
 /****************************************************************************
  * Private Functions
@@ -67,10 +79,9 @@
  * Name: riscv_stackdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
+static void riscv_stackdump(uintptr_t sp, uintptr_t stack_top)
 {
-  uint32_t stack;
+  uintptr_t stack;
 
   /* Flush any buffered SYSLOG data to avoid overwrite */
 
@@ -79,48 +90,54 @@ static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
+      _alert(PRIxREG ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#endif
 
 /****************************************************************************
  * Name: riscv_registerdump
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-static inline void riscv_registerdump(volatile uint32_t *regs)
+static inline void riscv_registerdump(volatile uintptr_t *regs)
 {
   /* Are user registers available from interrupt processing? */
 
-  _alert("EPC:%08x\n", regs[REG_EPC]);
-  _alert("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x "
-         "A6:%08x A7:%08x\n",
-         regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
+  _alert("EPC:" PRIxREG "\n", regs[REG_EPC]);
+  _alert("A0:" PRIxREG " A1:" PRIxREG "A2:" PRIxREG
+         " A3:" PRIxREG "\n",
+         regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3]);
+  _alert("A4:" PRIxREG " A5:" PRIxREG "A6:" PRIxREG
+         " A7:" PRIxREG "\n",
          regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
-  _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
-         regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
+  _alert("T0:" PRIxREG " T1:" PRIxREG " T2:" PRIxREG
+         " T3:" PRIxREG "\n",
+         regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3]);
+  _alert("T4:" PRIxREG " T5:" PRIxREG " T6:" PRIxREG "\n",
          regs[REG_T4], regs[REG_T5], regs[REG_T6]);
-  _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
-         "S6:%08x S7:%08x\n",
-         regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
+  _alert("S0:" PRIxREG " S1:" PRIxREG " S2:" PRIxREG
+         " S3:" PRIxREG "\n",
+         regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3]);
+  _alert("S4:" PRIxREG " S5:" PRIxREG " S6:" PRIxREG
+         " S7:" PRIxREG "\n",
          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
-  _alert("S8:%08x S9:%08x S10:%08x S11:%08x\n",
+  _alert("S8:" PRIxREG " S9:" PRIxREG " S10:" PRIxREG
+         " S11:" PRIxREG "\n",
          regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
 #ifdef RISCV_SAVE_GP
-  _alert("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
+  _alert("GP:" PRIxREG " SP:" PRIxREG " FP:" PRIxREG
+         " TP:" PRIxREG " RA:" PRIxREG "\n",
          regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
          regs[REG_RA]);
 #else
-  _alert("SP:%08x FP:%08x TP:%08x RA:%08x\n",
+  _alert("SP:" PRIxREG " FP:" PRIxREG " TP:" PRIxREG
+         " RA:" PRIxREG "\n",
          regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #endif
 }
-#else
-#  define riscv_registerdump(reg)
-#endif
 
 /****************************************************************************
  * Name: riscv_dump_task
@@ -287,16 +304,15 @@ static inline void riscv_showtasks(void)
  * Name: riscv_dumpstate
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
 static void riscv_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = up_getsp();
-  uint32_t ustackbase;
-  uint32_t ustacksize;
+  uintptr_t sp = up_getsp();
+  uintptr_t ustackbase;
+  uintptr_t ustacksize;
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-  uint32_t istackbase;
-  uint32_t istacksize;
+  uintptr_t istackbase;
+  uintptr_t istacksize;
 #endif
 
   /* Show back trace */
@@ -307,25 +323,25 @@ static void riscv_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  riscv_registerdump(CURRENT_REGS);
+  riscv_registerdump((volatile uintptr_t *)CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->stack_base_ptr;
-  ustacksize = (uint32_t)rtcb->adj_stack_size;
+  ustackbase = (uintptr_t)rtcb->stack_base_ptr;
+  ustacksize = (uintptr_t)rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
-  istackbase = (uint32_t)&g_intstackalloc;
+  istackbase = (uintptr_t)&g_intstackalloc;
   istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
 
   /* Show interrupt stack info */
 
-  _alert("sp:     %08x\n", sp);
+  _alert("sp:     " PRIxREG "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: %08x\n", istackbase);
-  _alert("  size: %08x\n", istacksize);
+  _alert("  base: " PRIxREG "\n", istackbase);
+  _alert("  size: " PRIxREG "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -337,14 +353,12 @@ static void riscv_dumpstate(void)
 
       riscv_stackdump(sp, istackbase + istacksize);
 
-      /* Extract the user stack pointer which should lie
-       * at the base of the interrupt stack.
-       */
+      /* Extract the user stack pointer */
 
-      sp = (uint32_t)&g_intstacktop;
-      _alert("sp:     %08x\n", sp);
+      sp = CURRENT_REGS[REG_SP];
+      _alert("sp:     " PRIxREG "\n", sp);
     }
-  else if (g_current_regs)
+  else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
       riscv_stackdump(istackbase, istackbase + istacksize);
@@ -353,12 +367,12 @@ static void riscv_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: %08x\n", ustackbase);
-  _alert("  size: %08x\n", ustacksize);
+  _alert("  base: " PRIxREG "\n", ustackbase);
+  _alert("  size: " PRIxREG "\n", ustacksize);
 #else
-  _alert("sp:         %08x\n", sp);
-  _alert("stack base: %08x\n", ustackbase);
-  _alert("stack size: %08x\n", ustacksize);
+  _alert("sp:         " PRIxREG "\n", sp);
+  _alert("stack base: " PRIxREG "\n", ustackbase);
+  _alert("stack size: " PRIxREG "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
@@ -367,17 +381,17 @@ static void riscv_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      riscv_stackdump(sp, ustackbase + ustacksize);
+      _alert("ERROR: Stack pointer is not within allocated stack\n");
+      riscv_stackdump(ustackbase, ustackbase + ustacksize);
     }
   else
     {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      riscv_stackdump(ustackbase, ustackbase + ustacksize);
+      riscv_stackdump(sp, ustackbase + ustacksize);
     }
 }
 #else
 #  define riscv_dumpstate()
-#endif
+#endif /* CONFIG_ARCH_STACKDUMP */
 
 /****************************************************************************
  * Name: riscv_assert
@@ -391,11 +405,17 @@ static void riscv_assert(void)
 
   /* Are we in an interrupt handler or the idle task? */
 
-  if (g_current_regs || running_task()->flink == NULL)
+  if (CURRENT_REGS || running_task()->flink == NULL)
     {
       up_irq_save();
       for (; ; )
         {
+#ifdef CONFIG_SMP
+          /* Try (again) to stop activity on other CPUs */
+
+          spin_trylock(&g_cpu_irqlock);
+#endif
+
 #if CONFIG_BOARD_RESET_ON_ASSERT >= 1
           board_reset(CONFIG_BOARD_ASSERT_RESET_VALUE);
 #endif
@@ -455,15 +475,31 @@ void up_assert(const char *filename, int lineno)
 
   syslog_flush();
 
+#ifdef CONFIG_SMP
+#if CONFIG_TASK_NAME_SIZE > 0
+  _alert("Assertion failed CPU%d at file:%s line: %d task: %s\n",
+         up_cpu_index(), filename, lineno, running_task()->name);
+#else
+  _alert("Assertion failed CPU%d at file:%s line: %d\n",
+         up_cpu_index(), filename, lineno);
+#endif
+#else
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
          filename, lineno, running_task()->name);
 #else
   _alert("Assertion failed at file:%s line: %d\n",
-        filename, lineno);
+         filename, lineno);
+#endif
 #endif
 
   riscv_dumpstate();
+
+#ifdef CONFIG_SMP
+  /* Show the CPU number */
+
+  _alert("CPU%d:\n", up_cpu_index());
+#endif
 
   /* Dump the state of all tasks (if available) */
 
