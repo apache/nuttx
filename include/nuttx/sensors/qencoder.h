@@ -50,8 +50,10 @@
  *   Argument: int32_t pointer to the location to return the position.
  * QEIOC_RESET - Reset the position to zero.
  *   Argument: None
- * QEIOC_POSMAX - Set the maximum position for the encoder.
+ * QEIOC_SETPOSMAX - Set the maximum position for the encoder.
  *   Argument: uint32_t maximum position
+ * QEIOC_SETINDEX - Set the index position for the encoder.
+ *   Argument: uint32_t index position
  */
 
 #define QEIOC_POSITION     _QEIOC(0x0001) /* Arg: int32_t* pointer */
