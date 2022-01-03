@@ -614,7 +614,7 @@ config SAMV7_QSPI_SPI_MODE
 	default n
 	depends on SAMV7_QSPI_IS_SPI
 	---help---
-					Use Quad SPI in SPI mode
+		Use Quad SPI in SPI mode
 
 endif
 
