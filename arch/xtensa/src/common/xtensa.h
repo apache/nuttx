@@ -344,7 +344,7 @@ void xtensa_pminitialize(void);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(void *stackbase, size_t nbytes);
+void xtensa_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */
