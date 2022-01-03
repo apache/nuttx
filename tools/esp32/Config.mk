@@ -58,7 +58,7 @@ else
 	ESPTOOL_WRITEFLASH_OPTS := -fs $(FLASH_SIZE) -fm dio -ff $(FLASH_FREQ)
 endif
 
-ifeq ($(CONFIG_ESP32_SECURE_BOOT),y)
+ifneq ($(CONFIG_ESP32_SECURE_BOOT)$(CONFIG_ESP32_SECURE_FLASH_ENC_ENABLED),)
 	ESPTOOL_RESET_OPTS += --after no_reset
 endif
 
@@ -76,14 +76,19 @@ ifdef ESPTOOL_BINDIR
 		FLASH_PT        := $(PT_OFFSET) $(PARTITION_TABLE)
 		ESPTOOL_BINS    := $(FLASH_BL) $(FLASH_PT)
 	else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-		BL_OFFSET       := 0x1000
+		BL_OFFSET        := 0x1000
+
 		ifeq ($(CONFIG_ESP32_SECURE_BOOT),y)
 			BOOTLOADER   := $(ESPTOOL_BINDIR)/mcuboot-esp32.signed.bin
-			FLASH_BL     := $(BL_OFFSET) $(BOOTLOADER)
-			ESPTOOL_BINS :=
 		else
 			BOOTLOADER   := $(ESPTOOL_BINDIR)/mcuboot-esp32.bin
-			FLASH_BL     := $(BL_OFFSET) $(BOOTLOADER)
+		endif
+
+		FLASH_BL         := $(BL_OFFSET) $(BOOTLOADER)
+
+		ifneq ($(CONFIG_ESP32_SECURE_BOOT)$(CONFIG_ESP32_SECURE_FLASH_ENC_ENABLED),)
+			ESPTOOL_BINS :=
+		else
 			ESPTOOL_BINS := $(FLASH_BL)
 		endif
 	endif
@@ -131,7 +136,7 @@ endef
 
 define HELP_FLASH_BOOTLOADER
 	$(Q) echo ""
-	$(Q) echo "$(YELLOW)Secure boot enabled, so bootloader not flashed automatically.$(RST)"
+	$(Q) echo "$(YELLOW)Security features enabled, so bootloader not flashed automatically.$(RST)"
 	$(Q) echo "Use the following command to flash the bootloader:"
 	$(Q) echo "    esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(FLASH_BL)"
 	$(Q) echo ""
@@ -268,5 +273,5 @@ define FLASH
 	$(eval ESPTOOL_OPTS := -c esp32 -p $(ESPTOOL_PORT) -b $(ESPTOOL_BAUD) $(ESPTOOL_RESET_OPTS))
 	esptool.py $(ESPTOOL_OPTS) write_flash $(ESPTOOL_WRITEFLASH_OPTS) $(ESPTOOL_BINS)
 
-	$(if $(CONFIG_ESP32_SECURE_BOOT),$(call HELP_FLASH_BOOTLOADER))
+	$(if $(CONFIG_ESP32_SECURE_BOOT)$(CONFIG_ESP32_SECURE_FLASH_ENC_ENABLED),$(call HELP_FLASH_BOOTLOADER))
 endef
