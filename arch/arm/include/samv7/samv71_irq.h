@@ -104,8 +104,13 @@
 #define SAM_PID_EMACQ1        (66)  /* EMAC Queue 1 Interrupt */
 #define SAM_PID_EMACQ2        (67)  /* EMAC Queue 2 Interrupt */
 #define SAM_PID_FPIXC         (68)  /* ARM Cache ECC Warning */
+#define SAM_PID_I2SC0         (69)  /* Inter-IC Sound Controller 0 */
+#define SAM_PID_I2SC1         (70)  /* Inter-IC Sound Controller 1 */
+#define SAM_PID_EMACQ3        (71)  /* EMAC Queue 3 Interrupt */
+#define SAM_PID_EMACQ4        (72)  /* EMAC Queue 4 Interrupt */
+#define SAM_PID_EMACQ5        (73)  /* EMAC Queue 5 Interrupt */
 
-#define NR_PIDS               (69)  /* Number of peripheral identifiers */
+#define NR_PIDS               (74)  /* Number of peripheral identifiers */
 
 /* External interrupts (priority levels >= 256 */
 
@@ -180,6 +185,11 @@
 #define SAM_IRQ_EMACQ1        (SAM_IRQ_EXTINT+SAM_PID_EMACQ1) /* EMAC Queue 1 Interrupt */
 #define SAM_IRQ_EMACQ2        (SAM_IRQ_EXTINT+SAM_PID_EMACQ2) /* EMAC Queue 2 Interrupt */
 #define SAM_IRQ_FPIXC         (SAM_IRQ_EXTINT+SAM_PID_FPIXC)  /* ARM Cache ECC Warning */
+#define SAM_IRQ_I2SC0         (SAM_IRQ_EXTINT+SAM_PID_I2SC0)  /* Inter-IC Sound Controller 0 */
+#define SAM_IRQ_I2SC1         (SAM_IRQ_EXTINT+SAM_PID_I2SC1)  /* Inter-IC Sound Controller 1 */
+#define SAM_IRQ_EMACQ3        (SAM_IRQ_EXTINT+SAM_PID_EMACQ3) /* EMAC Queue 3 Interrupt */
+#define SAM_IRQ_EMACQ4        (SAM_IRQ_EXTINT+SAM_PID_EMACQ4) /* EMAC Queue 4 Interrupt */
+#define SAM_IRQ_EMACQ5        (SAM_IRQ_EXTINT+SAM_PID_EMACQ5) /* EMAC Queue 5 Interrupt */
 
 #define SAM_IRQ_NEXTINT       NR_PIDS                         /* Total number of external interrupt numbers */
 #define SAM_IRQ_NIRQS         (SAM_IRQ_EXTINT+NR_PIDS)        /* The number of real IRQs */
