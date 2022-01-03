@@ -132,7 +132,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * water marks.
    */
 
-  up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+  xtensa_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 #endif
 
   return OK;
