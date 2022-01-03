@@ -308,7 +308,7 @@ int sam_freerun_uninitialize(struct sam_freerun_s *freerun)
 
   /* Now we can disable the timer interrupt and disable the timer. */
 
-  sam_tc_attach(freerun->tch, NULL, NULL, 0);
+  sam_tc_detach(freerun->tch);
   sam_tc_stop(freerun->tch);
 
   /* Free the timer */

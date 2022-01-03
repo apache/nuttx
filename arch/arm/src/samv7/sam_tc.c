@@ -93,7 +93,6 @@ struct sam_chconfig_s
   uintptr_t base;          /* Channel register base address */
   uint8_t pid;             /* Peripheral ID */
   uint8_t irq;             /* IRQ number */
-  xcpt_t handler;          /* Timer interrupt handler */
   gpio_pinset_t clkset;    /* CLK input PIO configuration */
   gpio_pinset_t tioaset;   /* Output A PIO configuration */
   gpio_pinset_t tiobset;   /* Output B PIO configuration */
@@ -108,7 +107,7 @@ struct sam_tcconfig_s
 
   /* Channels */
 
-  struct sam_chconfig_s channel[3];
+  struct sam_chconfig_s channel[SAM_TC_NCHANNELS];
 };
 
 /* This structure describes one timer counter channel */
@@ -135,7 +134,7 @@ struct sam_tc_s
 
   /* Channels */
 
-  struct sam_chan_s channel[3];
+  struct sam_chan_s channel[SAM_TC_NCHANNELS];
 
   /* Debug stuff */
 
@@ -185,31 +184,7 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
 
 /* Interrupt Handling *******************************************************/
 
-static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan);
-
-#ifdef CONFIG_SAMV7_TC0
-static int sam_tc0_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc1_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc2_interrupt(int irq, void *context, FAR void *arg);
-#endif
-
-#ifdef CONFIG_SAMV7_TC1
-static int sam_tc3_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc4_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc5_interrupt(int irq, void *context, FAR void *arg);
-#endif
-
-#ifdef CONFIG_SAMV7_TC2
-static int sam_tc6_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc7_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc8_interrupt(int irq, void *context, FAR void *arg);
-#endif
-
-#ifdef CONFIG_SAMV7_TC3
-static int sam_tc9_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc10_interrupt(int irq, void *context, FAR void *arg);
-static int sam_tc11_interrupt(int irq, void *context, FAR void *arg);
-#endif
+static int sam_tc_interrupt(int irq, void *context, FAR void *arg);
 
 /* Initialization ***********************************************************/
 
@@ -235,7 +210,6 @@ static const struct sam_tcconfig_s g_tc012config =
     [0] =
     {
       .base    = SAM_TC012_CHAN_BASE(0),
-      .handler = sam_tc0_interrupt,
       .pid     = SAM_PID_TC0,
       .irq     = SAM_IRQ_TC0,
 
@@ -258,7 +232,6 @@ static const struct sam_tcconfig_s g_tc012config =
     [1] =
     {
       .base    = SAM_TC012_CHAN_BASE(1),
-      .handler = sam_tc1_interrupt,
       .pid     = SAM_PID_TC1,
       .irq     = SAM_IRQ_TC1,
 
@@ -281,7 +254,6 @@ static const struct sam_tcconfig_s g_tc012config =
     [2] =
     {
       .base    = SAM_TC012_CHAN_BASE(2),
-      .handler = sam_tc2_interrupt,
       .pid     = SAM_PID_TC2,
       .irq     = SAM_IRQ_TC2,
 
@@ -315,7 +287,6 @@ static const struct sam_tcconfig_s g_tc345config =
     [0] =
     {
       .base    = SAM_TC345_CHAN_BASE(3),
-      .handler = sam_tc3_interrupt,
       .pid     = SAM_PID_TC3,
       .irq     = SAM_IRQ_TC3,
 
@@ -338,7 +309,6 @@ static const struct sam_tcconfig_s g_tc345config =
     [1] =
     {
       .base    = SAM_TC345_CHAN_BASE(4),
-      .handler = sam_tc4_interrupt,
       .pid     = SAM_PID_TC4,
       .irq     = SAM_IRQ_TC4,
 
@@ -361,7 +331,6 @@ static const struct sam_tcconfig_s g_tc345config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(5),
-      .handler = sam_tc5_interrupt,
       .pid     = SAM_PID_TC5,
       .irq     = SAM_IRQ_TC5,
 
@@ -395,7 +364,6 @@ static const struct sam_tcconfig_s g_tc678config =
     [0] =
     {
       .base    = SAM_TC678_CHAN_BASE(6),
-      .handler = sam_tc6_interrupt,
       .pid     = SAM_PID_TC6,
       .irq     = SAM_IRQ_TC6,
 
@@ -418,7 +386,6 @@ static const struct sam_tcconfig_s g_tc678config =
     [1] =
     {
       .base    = SAM_TC678_CHAN_BASE(7),
-      .handler = sam_tc7_interrupt,
       .pid     = SAM_PID_TC7,
       .irq     = SAM_IRQ_TC7,
 
@@ -441,7 +408,6 @@ static const struct sam_tcconfig_s g_tc678config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(8),
-      .handler = sam_tc8_interrupt,
       .pid     = SAM_PID_TC8,
       .irq     = SAM_IRQ_TC8,
 
@@ -475,7 +441,6 @@ static const struct sam_tcconfig_s g_tc901config =
     [0] =
     {
       .base    = SAM_TC901_CHAN_BASE(9),
-      .handler = sam_tc9_interrupt,
       .pid     = SAM_PID_TC9,
       .irq     = SAM_IRQ_TC9,
 
@@ -498,7 +463,6 @@ static const struct sam_tcconfig_s g_tc901config =
     [1] =
     {
       .base    = SAM_TC901_CHAN_BASE(10),
-      .handler = sam_tc10_interrupt,
       .pid     = SAM_PID_TC10,
       .irq     = SAM_IRQ_TC10,
 
@@ -521,7 +485,6 @@ static const struct sam_tcconfig_s g_tc901config =
     [2] =
     {
       .base    = SAM_TC345_CHAN_BASE(11),
-      .handler = sam_tc11_interrupt,
       .pid     = SAM_PID_TC11,
       .irq     = SAM_IRQ_TC11,
 
@@ -840,16 +803,18 @@ static inline void sam_chan_putreg(struct sam_chan_s *chan,
  *  Common timer channel interrupt handling.
  *
  * Input Parameters:
- *   tc   Timer/counter state instance
- *   chan Channel state instance
+ *   irq     The IRQ number that generated the interrupt
+ *   context Architecture specific register save information.
+ *   arg     Pointer to timer counter channel structure
  *
  * Returned Value:
  *   OK on success; a negated errno value on failure
  *
  ****************************************************************************/
 
-static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
+static int sam_tc_interrupt(int irq, void *context, FAR void *arg)
 {
+  struct sam_chan_s *chan = (struct sam_chan_s *)arg;
   uint32_t sr;
   uint32_t imr;
   uint32_t pending;
@@ -861,7 +826,7 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
   pending = sr & imr;
 
   tmrinfo("TC%d Channel %d: pending=%08lx\n",
-          tc->tc, chan->chan, (unsigned long)pending);
+          chan->tc->tc, chan->chan, (unsigned long)pending);
 
   /* Are there any pending interrupts for this channel? */
 
@@ -888,93 +853,6 @@ static int sam_tc_interrupt(struct sam_tc_s *tc, struct sam_chan_s *chan)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: sam_tcABC_interrupt
- *
- * Description:
- *  Timer block interrupt handlers
- *
- * Input Parameters:
- *   chan TC channel structure
- *   sr   The status register value that generated the interrupt
- *
- * Returned Value:
- *   A pointer to the initialized timer channel structure associated with tc
- *   and channel.  NULL is returned on any failure.
- *
- *   On successful return, the caller holds the tc exclusive access
- *   semaphore.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SAMV7_TC0
-static int sam_tc0_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[0]);
-}
-
-static int sam_tc1_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[1]);
-}
-
-static int sam_tc2_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc012, &g_tc012.channel[2]);
-}
-#endif
-
-#ifdef CONFIG_SAMV7_TC1
-static int sam_tc3_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[0]);
-}
-
-static int sam_tc4_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[1]);
-}
-
-static int sam_tc5_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc345, &g_tc345.channel[2]);
-}
-#endif
-
-#ifdef CONFIG_SAMV7_TC2
-static int sam_tc6_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[0]);
-}
-
-static int sam_tc7_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[1]);
-}
-
-static int sam_tc8_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc678, &g_tc678.channel[2]);
-}
-#endif
-
-#ifdef CONFIG_SAMV7_TC3
-static int sam_tc9_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[0]);
-}
-
-static int sam_tc10_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[1]);
-}
-
-static int sam_tc11_interrupt(int irq, void *context, FAR void *arg)
-{
-  return sam_tc_interrupt(&g_tc901, &g_tc901.channel[2]);
-}
-#endif
 
 /****************************************************************************
  * Initialization
@@ -1303,7 +1181,7 @@ static inline struct sam_chan_s *sam_tc_initialize(int channel)
 
   /* Attach the timer interrupt handler and enable the timer interrupts */
 
-  irq_attach(chconfig->irq, chconfig->handler, NULL);
+  irq_attach(chconfig->irq, sam_tc_interrupt, chan);
   up_enable_irq(chconfig->irq);
 
   /* Mark the channel "inuse" */
@@ -1402,7 +1280,7 @@ void sam_tc_free(TC_HANDLE handle)
    * is stopped and disabled.
    */
 
-  sam_tc_attach(handle, NULL, NULL, 0);
+  sam_tc_detach(handle);
   sam_tc_stop(handle);
 
   /* Mark the channel as available */
@@ -1435,7 +1313,7 @@ void sam_tc_start(TC_HANDLE handle)
 
   sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
 
-  /* Then enable the timer (by setting the CLKEN bit).  Setting SWTRIG
+  /* Then enable the timer (by setting the CLKEN bit).  Setting SWTRG
    * will also reset the timer counter and starting the timer.
    */
 
@@ -1610,7 +1488,7 @@ uint32_t sam_tc_getregister(TC_HANDLE handle, int regid)
  *
  ****************************************************************************/
 
-uint32_t sam_tc_getcounter(TC_HANDLE handle)
+uint16_t sam_tc_getcounter(TC_HANDLE handle)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
   DEBUGASSERT(chan);
