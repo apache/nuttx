@@ -83,7 +83,7 @@
 void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
                     unsigned int len)
 {
-  DEBUGASSERT(dev && len > 0 && len < NETDEV_PKTSIZE(dev));
+  DEBUGASSERT(dev && len > 0 && len <= NETDEV_PKTSIZE(dev));
 
   /* Copy the data into the device packet buffer */
 
