@@ -907,22 +907,44 @@ static int up_ioctl(struct file *filep, int cmd, unsigned long arg)
 
         priv->stopbits2 = (termiosp->c_cflag & CSTOPB) != 0;
 
-        priv->bits = (termiosp->c_cflag & CS5) ? 5 : 0;
-        priv->bits = (termiosp->c_cflag & CS6) ? 6 : 0;
-        priv->bits = (termiosp->c_cflag & CS7) ? 7 : 0;
-        priv->bits = (termiosp->c_cflag & CS8) ? 8 : 0;
+        switch (termiosp->c_cflag & CSIZE)
+          {
+          case CS5:
+            priv->bits = 5;
+            break;
 
-        /* Note that only cfgetispeed is used because we have knowledge
-         * that only one speed is supported.
-         */
+          case CS6:
+            priv->bits = 6;
+            break;
 
-        priv->baud = cfgetispeed(termiosp);
+          case CS7:
+            priv->bits = 7;
+            break;
 
-        /* Effect the changes immediately - note that we do not implement
-         * TCSADRAIN / TCSAFLUSH
-         */
+          case CS8:
+            priv->bits = 8;
+            break;
 
-        up_set_format(dev);
+          default:
+            priv->bits = 0;
+            ret = -EINVAL;
+            break;
+          }
+
+        if (ret == OK)
+          {
+            /* Note that only cfgetispeed is used because we have knowledge
+             * that only one speed is supported.
+             */
+
+            priv->baud = cfgetispeed(termiosp);
+
+            /* Effect the changes immediately - note that we do not implement
+             * TCSADRAIN / TCSAFLUSH
+             */
+
+            up_set_format(dev);
+          }
       }
       break;
 #endif /* CONFIG_SERIAL_TERMIOS */
