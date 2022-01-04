@@ -522,7 +522,7 @@ On Board Debug Support
   that provides debugger connectivity over USB. The PIC32MX440F512H is hard-wired
   to the PIC32 device to provide two types of protocol translation:
 
-    - I/O pins of PIC32MX440F512H to the ICSP™ pins of the PIC32
+    - I/O pins of PIC32MX440F512H to the ICSPâ„¢ pins of the PIC32
     - I/O pins of PIC32MX440F512H to the JTAG pins of the PIC32
 
   The PIC32 Ethernet Starter Kit currently uses the JTAG pins of the PIC32 device for
@@ -1038,7 +1038,7 @@ Where <subdir> is one of the following:
        as NSH built-in built in functions.
 
        To use USB device, connect the starter kit to the host using a cable
-       with a Type-B micro-plug to the starter kit’s micro-A/B port J5, located
+       with a Type-B micro-plug to the starter kit's micro-A/B port J5, located
        on the bottom side of the starter kit. The other end of the cable
        must have a Type-A plug. Connect it to a USB host. Jumper JP2 should be
        removed.
