@@ -163,7 +163,7 @@ cp -a "${TOPDIR}/Make.defs" "${EXPORTDIR}/Make.defs" ||
 
 # Extract information from the Make.defs file.  A Makefile can do this best
 
-${MAKE} -C "${TOPDIR}/tools" -f Makefile.export TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
+${MAKE} -C "${TOPDIR}/tools" -f Export.mk TOPDIR="${TOPDIR}" EXPORTDIR="${EXPORTDIR}"
 source "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/makeinfo.sh"
 rm -f "${EXPORTDIR}/Make.defs"
