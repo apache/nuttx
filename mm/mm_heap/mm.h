@@ -209,6 +209,15 @@ struct mm_heap_s
 #endif
 };
 
+/* This describes the callback for mm_foreach */
+
+typedef CODE void (*mmchunk_handler_t)(FAR struct mm_allocnode_s *node,
+                                       FAR void *arg);
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
@@ -225,8 +234,13 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
 void mm_addfreechunk(FAR struct mm_heap_s *heap,
                      FAR struct mm_freenode_s *node);
 
-/* Functions contained in mm_size2ndx.c.c ***********************************/
+/* Functions contained in mm_size2ndx.c *************************************/
 
 int mm_size2ndx(size_t size);
+
+/* Functions contained in mm_foreach.c **************************************/
+
+void mm_foreach(FAR struct mm_heap_s *heap, mmchunk_handler_t handler,
+                FAR void *arg);
 
 #endif /* __MM_MM_HEAP_MM_H */
