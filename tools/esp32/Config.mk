@@ -112,7 +112,18 @@ else ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
 	else
 		APP_IMAGE  := nuttx.bin
 	endif
+
 	FLASH_APP      := $(APP_OFFSET) $(APP_IMAGE)
+
+	ifeq ($(CONFIG_ESP32_SECURE_FLASH_ENC_ENABLED),y)
+		IMGTOOL_ALIGN_ARGS := --align 32 --max-align 32
+	else
+		IMGTOOL_ALIGN_ARGS := --align 4
+	endif
+
+	IMGTOOL_SIGN_ARGS := --pad $(VERIFIED) $(IMGTOOL_ALIGN_ARGS) -v 0 -s auto \
+		-H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header \
+		-S $(CONFIG_ESP32_OTA_SLOT_SIZE)
 endif
 
 ESPTOOL_BINS += $(FLASH_APP)
@@ -130,7 +141,7 @@ define HELP_SIGN_APP
 	$(Q) echo ""
 	$(Q) echo "$(YELLOW)Application not signed. Sign the application before flashing.$(RST)"
 	$(Q) echo "To sign the application, you can use this command:"
-	$(Q) echo "    imgtool sign -k $(ESPSEC_KEYDIR)/$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY) --public-key-format hash --pad $(VERIFIED) --align 4 -v 0 -s auto -H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header -S $(CONFIG_ESP32_OTA_SLOT_SIZE) nuttx.hex nuttx.signed.bin"
+	$(Q) echo "    imgtool sign -k $(ESPSEC_KEYDIR)/$(CONFIG_ESP32_SECURE_BOOT_APP_SIGNING_KEY) --public-key-format hash $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.signed.bin"
 	$(Q) echo ""
 endef
 
@@ -196,13 +207,8 @@ define SIGNBIN
 		echo ""; \
 		exit 1; \
 	fi
-	$(if $(CONFIG_ESP32_SECURE_BOOT_BUILD_SIGNED_BINARIES), \
-		$(eval IMGTOOL_KEY_ARGS := -k $(APP_SIGN_KEY) --public-key-format hash))
 
-	imgtool sign $(IMGTOOL_KEY_ARGS) --pad $(VERIFIED) --align 4 -v 0 -s auto \
-		-H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header \
-		-S $(CONFIG_ESP32_OTA_SLOT_SIZE) \
-		nuttx.hex nuttx.signed.bin
+	imgtool sign -k $(APP_SIGN_KEY) --public-key-format hash $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.signed.bin
 	$(Q) echo nuttx.signed.bin >> nuttx.manifest
 	$(Q) echo "Generated: nuttx.signed.bin (MCUboot compatible)"
 endef
@@ -241,10 +247,7 @@ define MKIMAGE
 		echo "Run make again to create the nuttx.bin image."; \
 		exit 1; \
 	fi
-	imgtool sign --pad $(VERIFIED) --align 4 -v 0 -s auto \
-		-H $(CONFIG_ESP32_APP_MCUBOOT_HEADER_SIZE) --pad-header \
-		-S $(CONFIG_ESP32_OTA_SLOT_SIZE) \
-		nuttx.hex nuttx.bin
+	imgtool sign $(IMGTOOL_SIGN_ARGS) nuttx.hex nuttx.bin
 	$(Q) echo "Generated: nuttx.bin (MCUboot compatible)"
 endef
 endif
