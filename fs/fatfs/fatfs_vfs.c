@@ -525,6 +525,10 @@ static int fatfs_stat_i(FAR const char *path, FAR struct stat *buf)
     {
       buf->st_mode |= S_IFDIR;
     }
+  else
+    {
+      buf->st_mode |= S_IFREG;
+    }
 
   buf->st_size  = fno.fsize;
 
