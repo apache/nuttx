@@ -258,6 +258,10 @@ function build {
     fail=1
   fi
 
+  # Verify that the context rule does not need to be rebuilt
+
+  makefunc context --question
+
   # Ensure nuttx and apps directory in clean state
 
   if [ ${CHECKCLEAN} -ne 0 ]; then
