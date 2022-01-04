@@ -50,6 +50,7 @@
 #define LSM6DSO_SET_DELAY         10         /* Delay after set(ms) */
 #define LSM6DSO_READ_DELAY        10         /* Selftest data read delay (ms) */
 #define LSM6DSO_SPI_MAX_BUFFER    10         /* SPI exchange buffer size */
+#define LSM6DSO_VECTOR_REMAP      6          /* Vector remap of lsm6dso */
 
 /* Multi sensor index */
 
@@ -221,7 +222,7 @@
 #define LSM6DSO_FSM_ODR_CFG_NU1   0x03       /* FSM odr config register not used bit */
 #define LSM6DSO_FSM_ODR_CFG_NU2   0x02       /* FSM odr config register not used bit */
 #define LSM6DSO_FSM_PAGE_SEL_NU   0x01       /* FSM page sel config register not used bit */
-#define LSM6DSO_DEFAULT_FSM_EN    0x07lu     /* Default FSM enable */
+#define LSM6DSO_DEFAULT_FSM_EN    0x0001lu   /* Default FSM enable */
 
 /* Property status */
 
@@ -1399,7 +1400,7 @@ static const struct lsm6dso_bdr_s g_lsm6dso_gy_bdr[] =
 
 const uint8_t g_lsm6so_prg_wrist_tilt_xl[] =
 {
-  0x52, 0x00, 0x14, 0x00, 0x0d, 0x00, 0x8e, 0x31, 0x20, 0x00, 0x00, 0x0d,
+  0x52, 0x00, 0x14, 0x00, 0x0d, 0x00, 0x8e, 0x31, 0x10, 0x00, 0x00, 0x0d,
   0x06, 0x23, 0x00, 0x53, 0x33, 0x74, 0x44, 0x22
 };
 
@@ -2606,6 +2607,7 @@ static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
   axis3bit16_t temp;
 
   lsm6dso_spi_read(priv, regaddr, temp.u8bit, 6);
+  sensor_remap_vector_raw16(temp.i16bit, temp.i16bit, LSM6DSO_VECTOR_REMAP);
 
   value->x = temp.i16bit[0] *priv->dev[LSM6DSO_XL_IDX].factor;
   value->y = temp.i16bit[1] *priv->dev[LSM6DSO_XL_IDX].factor;
@@ -2899,6 +2901,7 @@ static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
   axis3bit16_t temp;
 
   lsm6dso_spi_read(priv, regaddr, temp.u8bit, 6);
+  sensor_remap_vector_raw16(temp.i16bit, temp.i16bit, LSM6DSO_VECTOR_REMAP);
 
   value->x = temp.i16bit[0] * priv->dev[LSM6DSO_GY_IDX].factor;
   value->y = temp.i16bit[1] * priv->dev[LSM6DSO_GY_IDX].factor;
@@ -4529,7 +4532,7 @@ static int lsm6dso_int1_setroute(FAR struct lsm6dso_dev_s *priv,
 
   lsm6dso_spi_read(priv, LSM6DSO_CTRL4_C, (FAR uint8_t *)&ctrl4_c, 1);
 
-  if ((value.drdy_temp | value.timestamp) != LSM6DSO_PROPERTY_ENABLE)
+  if ((value.drdy_temp | value.timestamp) != LSM6DSO_PROPERTY_DISABLE)
     {
       ctrl4_c.int2_on_int1 = LSM6DSO_PROPERTY_ENABLE;
     }
@@ -4580,7 +4583,7 @@ static int lsm6dso_int1_setroute(FAR struct lsm6dso_dev_s *priv,
       | fsm_int1_b.int1_fsm13
       | fsm_int1_b.int1_fsm14
       | fsm_int1_b.int1_fsm15
-      | fsm_int1_b.int1_fsm16) != LSM6DSO_PROPERTY_ENABLE)
+      | fsm_int1_b.int1_fsm16) != LSM6DSO_PROPERTY_DISABLE)
     {
       md1_cfg.int1_emb_func = LSM6DSO_PROPERTY_ENABLE;
     }
