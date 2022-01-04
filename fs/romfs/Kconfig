@@ -20,4 +20,10 @@ config FS_ROMFS_CACHE_NODE
 		is mounted so that we can quick access entry of ROMFS
 		filesystem on emmc/sdcard.
 
+config FS_ROMFS_CACHE_FILE_NSECTORS
+	int "The number of file cache sector"
+	default 1
+	---help---
+		The number of file cache sector
+
 endif
