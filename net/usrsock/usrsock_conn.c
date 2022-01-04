@@ -181,20 +181,6 @@ FAR struct usrsock_conn_s *usrsock_nextconn(FAR struct usrsock_conn_s *conn)
 }
 
 /****************************************************************************
- * Name: usrsock_connidx()
- ****************************************************************************/
-
-int usrsock_connidx(FAR struct usrsock_conn_s *conn)
-{
-  int idx = conn - g_usrsock_connections;
-
-  DEBUGASSERT(idx >= 0);
-  DEBUGASSERT(idx < ARRAY_SIZE(g_usrsock_connections));
-
-  return idx;
-}
-
-/****************************************************************************
  * Name: usrsock_active()
  *
  * Description:
