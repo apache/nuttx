@@ -149,8 +149,10 @@ struct romfs_mountpt_s
 struct romfs_file_s
 {
   uint32_t rf_startoffset;        /* Offset to the start of the file data */
+  uint32_t rf_endsector;          /* Last sector of the file data */
   uint32_t rf_size;               /* Size of the file in bytes */
-  uint32_t rf_cachesector;        /* Current sector in the rf_buffer */
+  uint32_t rf_cachesector;        /* First sector in the rf_buffer */
+  uint32_t rf_ncachesector;       /* Number of sectors in the rf_buffer */
   FAR uint8_t *rf_buffer;         /* File sector buffer, allocated if rm_xipbase==0 */
   uint8_t rf_type;                /* File type (for fstat()) */
   char rf_path[1];                /* Path of open file */
