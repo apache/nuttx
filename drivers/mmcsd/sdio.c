@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/wireless/ieee80211/bcm43xxx/mmc_sdio.c
+ * drivers/mmcsd/sdio.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <debug.h>
 #include <errno.h>
 #include <inttypes.h>
@@ -30,6 +29,7 @@
 
 #include <nuttx/compiler.h>
 #include <nuttx/arch.h>
+#include <nuttx/sdio.h>
 
 /****************************************************************************
  * Pre-processor Definitions

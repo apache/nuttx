@@ -37,8 +37,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>
+#include <nuttx/sdio.h>
 
-#include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
 
