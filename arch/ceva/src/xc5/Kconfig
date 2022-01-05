@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "XC5 Configuration Options"
+
+config XC5_PSU_ENABLE
+	bool "Enable power management of XC5"
+	---help---
+	  Doze or idle mode of xc5 power managerment.
