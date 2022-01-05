@@ -800,7 +800,7 @@ static int procfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
               level0->lastlen = strcspn(name, "/");
               level0->lastread = name;
-              strlcpy(dir->fd_dir.d_name, name, level0->lastlen);
+              strlcpy(dir->fd_dir.d_name, name, level0->lastlen + 1);
 
               /* If the entry is a directory type OR if the reported name is
                * only a sub-string of the entry (meaning that it contains
