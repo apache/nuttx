@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/sim/src/sim/up_vfork32.S
+ * arch/sim/src/sim/up_vfork_x64.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -96,15 +96,19 @@
 #endif
 
 SYMBOL(vfork):
-	sub	$XCPTCONTEXT_SIZE, %esp
-	push	%esp
+	sub	$XCPTCONTEXT_SIZE, %rsp
+#ifdef CONFIG_SIM_X8664_MICROSOFT
+	mov	%rsp, %rcx
+#else /* if defined(CONFIG_SIM_X8664_SYSTEMV) */
+	mov	%rsp, %rdi
+#endif
 	call	SYMBOL(setjmp)
 
 	sub	$1, %eax
 	jz	child
 	call	SYMBOL(up_vfork)
 child:
-	add	$XCPTCONTEXT_SIZE+4, %esp
+	add	$XCPTCONTEXT_SIZE, %rsp
 	ret
 #ifdef __ELF__
 	.size	SYMBOL(vfork), . - SYMBOL(vfork)
