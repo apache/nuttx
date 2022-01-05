@@ -55,7 +55,7 @@ struct fatfs_file_s
 {
   FIL        f;
   atomic_int refs;
-  char       path[PATH_MAX];
+  char       path[PATH_MAX + 3];
 };
 
 struct fatfs_mountpt_s
@@ -314,8 +314,8 @@ static int fatfs_open(FAR struct file *filep, FAR const char *relpath,
   fp->path[1] = ':';
   fp->path[2] = '\0';
   oflags = fatfs_convert_oflags(oflags);
-  ret = fatfs_convert_result(f_open(&fp->f, strcat(fp->path, relpath),
-                                    oflags));
+  strlcat(fp->path, relpath, sizeof(fp->path));
+  ret = fatfs_convert_result(f_open(&fp->f, fp->path, oflags));
   if (ret < 0)
     {
       kmm_free(fp);
