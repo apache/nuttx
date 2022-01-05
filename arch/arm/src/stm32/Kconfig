@@ -3388,6 +3388,7 @@ config STM32_I2C
 
 config STM32_CAN
 	bool
+	select ARCH_HAVE_CAN_ERRORS
 
 config STM32_TIM
 	bool
