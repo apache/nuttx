@@ -130,7 +130,7 @@ int board_app_initialize(uintptr_t arg)
 {
   int ret;
 
-#ifdef CONFIG_CAN
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 
   ret = stm32_can_setup();

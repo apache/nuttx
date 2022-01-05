@@ -45,7 +45,7 @@ endif
 endif
 endif
 
-ifeq ($(CONFIG_CAN),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CSRCS += stm32_can.c
 endif
 
