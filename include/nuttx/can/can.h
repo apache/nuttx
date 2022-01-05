@@ -293,7 +293,7 @@
 #  define CAN_ERROR_TXTIMEOUT     (1 << 0) /* Bit 0: TX timeout */
 #  define CAN_ERROR_LOSTARB       (1 << 1) /* Bit 1: Lost arbitration (See CAN_ERROR0_* definitions) */
 #  define CAN_ERROR_CONTROLLER    (1 << 2) /* Bit 2: Controller error (See CAN_ERROR1_* definitions) */
-#  define CAN_ERROR_PROTOCOL      (1 << 3) /* Bit 3: Protocol error (see CAN_ERROR1_* and CAN_ERROR3_* definitions) */
+#  define CAN_ERROR_PROTOCOL      (1 << 3) /* Bit 3: Protocol error (see CAN_ERROR2_* and CAN_ERROR3_* definitions) */
 #  define CAN_ERROR_TRANSCEIVER   (1 << 4) /* Bit 4: Transceiver error (See CAN_ERROR4_* definitions)    */
 #  define CAN_ERROR_NOACK         (1 << 5) /* Bit 5: No ACK received on transmission */
 #  define CAN_ERROR_BUSOFF        (1 << 6) /* Bit 6: Bus off */
