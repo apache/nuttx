@@ -241,7 +241,12 @@ CHIP_CSRCS += stm32_hall3ph.c
 endif
 
 ifeq ($(CONFIG_STM32_CAN),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c
+endif
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+CHIP_CSRCS += stm32_can_sock.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32_IWDG),y)
