@@ -310,6 +310,10 @@ ifeq ($(CONFIG_SENSORS_ADT7320),y)
   CSRCS += adt7320.c
 endif
 
+ifeq ($(CONFIG_SENSORS_BMI270),y)
+  CSRCS += bmi270.c
+endif
+
 endif # CONFIG_SPI
 
 # These drivers depend on 1WIRE support

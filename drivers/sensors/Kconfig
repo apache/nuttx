@@ -234,6 +234,29 @@ config SENSORS_STK31850_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
+config SENSORS_BMI270
+	bool "Bosch BMI270 Accelerator & Gyroscope Sensor support"
+	default n
+	select SPI
+	select IOEXPANDER
+	---help---
+		Enable driver support for the Bosch BMI270 sensor.
+
+config SENSORS_BMI270_BUFFER_NUMBER
+	int "The nunmber of circular buffer for sensor BMI270"
+	default 1
+	depends on SENSORS_BMI270
+	---help---
+		The size of the circular buffer used. If the value equal to zero,
+		indicates that the circular buffer is disabled.
+
+config SENSORS_BMI270_FIFO_SLOTS_NUMBER
+	int "The nunmber of fifo slots for sensor BMI270"
+	default 10
+	depends on SENSORS_BMI270
+	---help---
+		The nunmber of fifo slots for sensor BMI270.
+
 config SENSORS_PAT9126JA
 	bool "PixArt PAT9126JA optical tracking sensor support"
 	default n
