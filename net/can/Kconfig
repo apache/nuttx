@@ -26,6 +26,10 @@ config NET_CAN_HAVE_CANFD
 	bool
 	default n
 
+config NET_CAN_HAVE_ERRORS
+	bool
+	default n
+
 config CAN_CONNS
 	int "Number of CAN connections"
 	default 4
@@ -38,6 +42,13 @@ config NET_CAN_CANFD
 	depends on NET_CAN_HAVE_CANFD
 	---help---
 		Enable CAN FD support in SocketCAN stack
+
+config NET_CAN_ERRORS
+	bool "Enable CAN errors support"
+	default n
+	depends on NET_CAN_HAVE_ERRORS
+	---help---
+		Enable CAN errors support in SocketCAN stack
 
 config NET_CAN_SOCK_OPTS
 	bool "sockopt support"
