@@ -328,6 +328,12 @@ arch/dummy/Kconfig:
 	@echo "CP: $@ to $(CHIP_KCONFIG)"
 	$(Q) cp -f $(CHIP_KCONFIG) $@
 
+# Copy $(BOARD_KCONFIG) to boards/dummy/Kconfig
+
+boards/dummy/Kconfig:
+	@echo "CP: $@ to $(BOARD_KCONFIG)"
+	$(Q) cp -f $(BOARD_KCONFIG) $@
+
 DIRLINKS_SYMLINK = \
   include/arch \
   include/arch/board \
@@ -335,6 +341,7 @@ DIRLINKS_SYMLINK = \
 
 DIRLINKS_FILE = \
   arch/dummy/Kconfig \
+  boards/dummy/Kconfig \
 
 ifneq ($(INCLUDE_ARCH_CHIP_SYMLINK_DIR),)
 DIRLINKS_SYMLINK += include/arch/chip
@@ -352,24 +359,7 @@ ifneq ($(ARCH_SRC_BOARD_BOARD_SYMLINK),)
 DIRLINKS_SYMLINK += $(ARCH_SRC)/board/board
 endif
 
-DIRLINKS_EXTERNAL_DIRS = boards
-
-ifneq ($(APPDIR),)
-DIRLINKS_EXTERNAL_DIRS += $(APPDIR)
-endif
-
-# Generate a pattern to build $(DIRLINKS_EXTERNAL_DIRS)
-
-DIRLINKS_EXTERNAL_DEP = $(patsubst %,%/.dirlinks,$(DIRLINKS_EXTERNAL_DIRS))
-DIRLINKS_FILE += $(DIRLINKS_EXTERNAL_DEP)
-
 .dirlinks: $(DIRLINKS_FILE) | $(DIRLINKS_SYMLINK)
-	touch $@
-
-# Pattern rule for $(DIRLINKS_EXTERNAL_DEP)
-
-%/.dirlinks:
-	$(Q) $(MAKE) -C $(patsubst %/.dirlinks,%,$@) dirlinks
 	$(Q) touch $@
 
 # clean_dirlinks
@@ -589,36 +579,43 @@ pass2dep: context tools/mkdeps$(HOSTEXEEXT) tools/cnvwindeps$(HOSTEXEEXT)
 
 config:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf Kconfig
 
 oldconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --oldconfig Kconfig
 
 olddefconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-conf --olddefconfig Kconfig
 
 menuconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-mconf Kconfig
 
-nconfig: apps_preconfig
+nconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-nconf Kconfig
 
-qconfig: apps_preconfig
+qconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-qconf Kconfig
 
-gconfig: apps_preconfig
+gconfig:
 	$(Q) $(MAKE) clean_context
+	$(Q) $(MAKE) context
 	$(Q) $(MAKE) apps_preconfig
 	$(Q) APPSDIR=${CONFIG_APPS_DIR} EXTERNALDIR=$(EXTERNALDIR) kconfig-gconf Kconfig
 
@@ -719,7 +716,7 @@ endif
 # apps_distclean: Perform the distclean operation only in the user application
 #                 directory.
 
-apps_preconfig: .dirlinks
+apps_preconfig:
 ifneq ($(APPDIR),)
 	$(Q) $(MAKE) -C $(APPDIR) preconfig
 endif
