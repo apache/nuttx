@@ -317,7 +317,7 @@ INCLUDE_ARCH_CHIP_SYMLINK_DIR=$(TOPDIR)/$(ARCH_INC)/$(CONFIG_ARCH_CHIP)
 endif
 
 ifneq ($(INCLUDE_ARCH_CHIP_SYMLINK_DIR),)
-include/arch/chip:
+include/arch/chip: | include/arch
 	@echo "LN: $@ to $(INCLUDE_ARCH_CHIP_SYMLINK_DIR)"
 	$(DIRLINK) $(INCLUDE_ARCH_CHIP_SYMLINK_DIR) $@
 endif
