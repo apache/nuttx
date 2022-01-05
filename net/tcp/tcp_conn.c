@@ -79,6 +79,12 @@
  * Private Data
  ****************************************************************************/
 
+/* The array containing all TCP connections. */
+
+#ifndef CONFIG_NET_ALLOC_CONNS
+static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_CONNS];
+#endif
+
 /* A list of all free TCP connections */
 
 static dq_queue_t g_free_tcp_connections;
@@ -525,6 +531,7 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NET_ALLOC_CONNS
 FAR struct tcp_conn_s *tcp_alloc_conn(void)
 {
   FAR struct tcp_conn_s *conn;
@@ -535,7 +542,7 @@ FAR struct tcp_conn_s *tcp_alloc_conn(void)
   if (dq_peek(&g_free_tcp_connections) == NULL)
     {
       conn = kmm_zalloc(sizeof(struct tcp_conn_s) *
-                        CONFIG_NET_TCP_CONNS_PER_ALLOC);
+                        CONFIG_NET_TCP_CONNS);
       if (conn == NULL)
         {
           return conn;
@@ -543,7 +550,7 @@ FAR struct tcp_conn_s *tcp_alloc_conn(void)
 
       /* Now initialize each connection structure */
 
-      for (i = 0; i < CONFIG_NET_TCP_CONNS_PER_ALLOC; i++)
+      for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
         {
           /* Mark the connection closed and move it to the free list */
 
@@ -554,6 +561,7 @@ FAR struct tcp_conn_s *tcp_alloc_conn(void)
 
   return (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
 }
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -570,10 +578,26 @@ FAR struct tcp_conn_s *tcp_alloc_conn(void)
 
 void tcp_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
+
   /* Initialize the queues */
 
   dq_init(&g_free_tcp_connections);
   dq_init(&g_active_tcp_connections);
+
+  /* Now initialize each connection structure */
+
+#ifndef CONFIG_NET_ALLOC_CONNS
+  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
+    {
+      /* Mark the connection closed and move it to the free list */
+
+      g_tcp_connections[i].tcpstateflags = TCP_CLOSED;
+      dq_addlast(&g_tcp_connections[i].node, &g_free_tcp_connections);
+    }
+#endif
 }
 
 /****************************************************************************
@@ -678,10 +702,12 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
   /* Allocate the connect entry from heap */
 
+#ifdef CONFIG_NET_ALLOC_CONNS
   if (conn == NULL)
     {
       conn = tcp_alloc_conn();
     }
+#endif
 
   net_unlock();
 

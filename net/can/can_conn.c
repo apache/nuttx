@@ -49,7 +49,9 @@
 
 /* The array containing all NetLink connections. */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct can_conn_s g_can_connections[CONFIG_CAN_CONNS];
+#endif
 
 /* A list of all free NetLink connections */
 
@@ -97,7 +99,9 @@ static void _can_semgive(FAR sem_t *sem)
 
 void can_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -105,15 +109,14 @@ void can_initialize(void)
   dq_init(&g_active_can_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_CAN_CONNS; i++)
     {
-      FAR struct can_conn_s *conn = &g_can_connections[i];
-
       /* Mark the connection closed and move it to the free list */
 
-      memset(conn, 0, sizeof(*conn));
-      dq_addlast(&conn->node, &g_free_can_connections);
+      dq_addlast(&g_can_connections[i].node, &g_free_can_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -128,17 +131,30 @@ void can_initialize(void)
 FAR struct can_conn_s *can_alloc(void)
 {
   FAR struct can_conn_s *conn;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
 
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _can_semtake(&g_free_sem);
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (dq_peek(&g_free_can_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_CAN_CONNS);
+      if (conn != NULL)
+        {
+          for (i = 0; i < CONFIG_CAN_CONNS; i++)
+            {
+              dq_addlast(&conn[i].node, &g_free_can_connections);
+            }
+        }
+    }
+#endif
+
   conn = (FAR struct can_conn_s *)dq_remfirst(&g_free_can_connections);
   if (conn != NULL)
     {
-      /* Make sure that the connection is marked as uninitialized */
-
-      memset(conn, 0, sizeof(*conn));
-
       /* FIXME SocketCAN default behavior enables loopback */
 
 #ifdef CONFIG_NET_CANPROTO_OPTIONS

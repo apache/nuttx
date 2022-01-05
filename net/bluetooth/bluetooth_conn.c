@@ -32,6 +32,7 @@
 #include <netpacket/bluetooth.h>
 #include <arch/irq.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -51,8 +52,10 @@
  * network lock.
  */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct bluetooth_conn_s
   g_bluetooth_connections[CONFIG_NET_BLUETOOTH_NCONNS];
+#endif
 
 /* A list of all free packet socket connections */
 
@@ -85,28 +88,24 @@ static const bt_addr_t g_any_addr =
 
 void bluetooth_conn_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
   dq_init(&g_free_bluetooth_connections);
   dq_init(&g_active_bluetooth_connections);
 
-  /* Mark connections as uninitialized */
-
-  memset(g_bluetooth_connections, 0, sizeof(g_bluetooth_connections));
-
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_BLUETOOTH_NCONNS; i++)
     {
-      /* Indicate a connection unbound with BTPROTO_NONE */
-
-      g_bluetooth_connections[i].bc_proto = BTPROTO_NONE;
-
       /* Link each pre-allocated connection structure into the free list. */
 
       dq_addlast(&g_bluetooth_connections[i].bc_node,
                  &g_free_bluetooth_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -121,18 +120,38 @@ void bluetooth_conn_initialize(void)
 FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
 {
   FAR struct bluetooth_conn_s *conn;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
 
   /* The free list is protected by the network lock */
 
   net_lock();
-  conn = (FAR struct bluetooth_conn_s *)
-    dq_remfirst(&g_free_bluetooth_connections);
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (dq_peek(&g_active_bluetooth_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_BLUETOOTH_NCONNS);
+      if (conn != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_BLUETOOTH_NCONNS; i++)
+            {
+              dq_addlast(&conn[i].bc_node,
+                         &g_active_bluetooth_connections);
+            }
+        }
+    }
+#endif
 
+  conn = (FAR struct bluetooth_conn_s *)
+         dq_remfirst(&g_free_bluetooth_connections);
   if (conn)
     {
+      /* Mark as unbound */
+
+      conn->bc_proto = BTPROTO_NONE;
+
       /* Enqueue the connection into the active list */
 
-      memset(conn, 0, sizeof(struct bluetooth_conn_s));
       dq_addlast(&conn->bc_node, &g_active_bluetooth_connections);
     }
 
@@ -184,13 +203,13 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
       bluetooth_container_free(container);
     }
 
+  /* Reset structure */
+
+  memset(conn, 0, sizeof(*conn));
+
   /* Free the connection */
 
   dq_addlast(&conn->bc_node, &g_free_bluetooth_connections);
-
-  /* Mark as unbound */
-
-  conn->bc_proto = BTPROTO_NONE;
 
   net_unlock();
 }

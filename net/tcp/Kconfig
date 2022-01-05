@@ -50,12 +50,11 @@ config NET_TCPURGDATA
 		compiled in. Urgent data (out-of-band data) is a rarely used TCP feature
 		that is very seldom would be required.
 
-config NET_TCP_CONNS_PER_ALLOC
-	int "Number of TCP/IP connections per allocation"
-	default 1 if DEFAULT_SMALL
-	default 4
+config NET_TCP_CONNS
+	int "Number of TCP/IP connections"
+	default 8
 	---help---
-		The number of TCP/IP connections per allocation(all tasks)
+		Maximum number of TCP/IP connections (all tasks)
 
 config NET_TCP_NPOLLWAITERS
 	int "Number of TCP poll waiters"

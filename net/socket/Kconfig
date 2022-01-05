@@ -5,13 +5,13 @@
 
 menu "Socket Support"
 
-config NET_NACTIVESOCKETS_PER_ALLOC
-	int "Number of socket operations per allocation"
-	default 1 if DEFAULT_SMALL
-	default 4
+config NET_NACTIVESOCKETS
+	int "Max socket operations"
+	default 16 if !DEFAULT_SMALL
+	default 4 if DEFAULT_SMALL
 	---help---
-		The number of concurrent socket operations per allocation
-		(recv, send, connection monitoring, etc.)
+		Maximum number of concurrent socket operations (recv, send,
+		connection monitoring, etc.). Default: 16
 
 config NET_SOCKOPTS
 	bool "Socket options"

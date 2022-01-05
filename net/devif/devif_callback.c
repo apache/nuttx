@@ -43,6 +43,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_NET_ALLOC_CONNS
+static struct devif_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
+#endif
 static FAR struct devif_callback_s *g_cbfreelist = NULL;
 
 /****************************************************************************
@@ -214,6 +217,31 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: devif_callback_init
+ *
+ * Description:
+ *   Configure the pre-allocated callback structures into a free list.
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence so that no special
+ *   protection is required.
+ *
+ ****************************************************************************/
+
+void devif_callback_init(void)
+{
+#ifndef CONFIG_NET_ALLOC_CONNS
+  int i;
+
+  for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
+    {
+      g_cbprealloc[i].nxtconn = g_cbfreelist;
+      g_cbfreelist = &g_cbprealloc[i];
+    }
+#endif
+}
+
+/****************************************************************************
  * Name: devif_callback_alloc
  *
  * Description:
@@ -235,31 +263,33 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
+#ifdef CONFIG_NET_ALLOC_CONNS
   int i;
-
-  /* Check the head of the free list */
+#endif
 
   net_lock();
-  ret = g_cbfreelist;
 
   /* Allocate the callback entry from heap */
 
-  if (ret == NULL)
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (g_cbfreelist == NULL)
     {
       ret = kmm_zalloc(sizeof(struct devif_callback_s) *
-                       CONFIG_NET_NACTIVESOCKETS_PER_ALLOC);
+                       CONFIG_NET_NACTIVESOCKETS);
       if (ret != NULL)
         {
-          for (i = 0; i < CONFIG_NET_NACTIVESOCKETS_PER_ALLOC; i++)
+          for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
             {
               ret[i].nxtconn = g_cbfreelist;
               g_cbfreelist = &ret[i];
             }
-
-          ret = g_cbfreelist;
         }
     }
+#endif
 
+  /* Check the head of the free list */
+
+  ret = g_cbfreelist;
   if (ret)
     {
       /* Remove the next instance from the head of the free list */

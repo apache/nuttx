@@ -50,13 +50,11 @@ config NET_UDP_CHECKSUMS
 		Enable/disable UDP checksum support.  UDP checksum support is
 		REQUIRED for IPv6.
 
-config NET_UDP_CONNS_PER_ALLOC
-	int "Number of UDP sockets per allocation"
-	default 1 if DEFAULT_SMALL
-	default 4
+config NET_UDP_CONNS
+	int "Number of UDP sockets"
+	default 8
 	---help---
-		The number of UDP sockets allocated per allocation
-		that occurs when none are available.
+		The maximum amount of open concurrent UDP sockets
 
 config NET_UDP_NPOLLWAITERS
 	int "Number of UDP poll waiters"

@@ -49,6 +49,10 @@
 #include "devif/devif.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Public Data
  ****************************************************************************/
 
@@ -62,4 +66,28 @@ struct net_stats_s g_netstats;
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: devif_initialize
+ *
+ * Description:
+ *   Perform initialization of the network device interface layer
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   Called early in the initialization sequence so that no special
+ *   protection is required.
+ *
+ ****************************************************************************/
+
+void devif_initialize(void)
+{
+  /* Initialize callback support */
+
+  devif_callback_init();
+}
 #endif /* CONFIG_NET */

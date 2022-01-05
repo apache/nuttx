@@ -321,13 +321,13 @@
 
 /* UDP configuration options */
 
-/* The maximum amount of concurrent UDP connection, Default: 4 */
+/* The maximum amount of concurrent UDP connection, Default: 10 */
 
-#ifndef CONFIG_NET_UDP_CONNS_PER_ALLOC
+#ifndef CONFIG_NET_UDP_CONNS
 #  ifdef CONFIG_NET_UDP
-#    define CONFIG_NET_UDP_CONNS_PER_ALLOC 4
+#    define CONFIG_NET_UDP_CONNS 10
 #  else
-#    define CONFIG_NET_UDP_CONNS_PER_ALLOC 0
+#    define CONFIG_NET_UDP_CONNS  0
 #  endif
 #endif
 
@@ -449,11 +449,11 @@
  * connection requires approximately 30 bytes of memory.
  */
 
-#ifndef CONFIG_NET_TCP_CONNS_PER_ALLOC
+#ifndef CONFIG_NET_TCP_CONNS
 #  ifdef CONFIG_NET_TCP
-#   define CONFIG_NET_TCP_CONNS_PER_ALLOC 4
+#   define CONFIG_NET_TCP_CONNS 10
 #  else
-#   define CONFIG_NET_TCP_CONNS_PER_ALLOC 0
+#   define CONFIG_NET_TCP_CONNS  0
 #  endif
 #endif
 
@@ -471,9 +471,8 @@
  * sockets in order to support multi-threaded read/write operations.
  */
 
-#ifndef CONFIG_NET_NACTIVESOCKETS_PER_ALLOC
-#  define CONFIG_NET_NACTIVESOCKETS_PER_ALLOC \
-          (CONFIG_NET_TCP_CONNS_PER_ALLOC + CONFIG_NET_UDP_CONNS_PER_ALLOC)
+#ifndef CONFIG_NET_NACTIVESOCKETS
+#  define CONFIG_NET_NACTIVESOCKETS (CONFIG_NET_TCP_CONNS + CONFIG_NET_UDP_CONNS)
 #endif
 
 /* The initial retransmission timeout counted in timer pulses.

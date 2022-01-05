@@ -111,8 +111,9 @@ enum usrsock_message_types_e
 
 begin_packed_struct struct usrsock_request_common_s
 {
-  int8_t reqid;
-  uint8_t xid;
+  uint64_t xid;
+  int8_t   reqid;
+  int8_t   reserved;
 } end_packed_struct;
 
 begin_packed_struct struct usrsock_request_socket_s
@@ -242,9 +243,9 @@ begin_packed_struct struct usrsock_message_req_ack_s
 {
   struct usrsock_message_common_s head;
 
-  uint8_t xid;
-  uint8_t reserved;
-  int32_t result;
+  int16_t  reserved;
+  int32_t  result;
+  uint64_t xid;
 } end_packed_struct;
 
 /* Request acknowledgment/completion message */

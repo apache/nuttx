@@ -90,6 +90,10 @@ void net_initialize(void)
 #endif
 #endif /* CONFIG_NET_IPv6 */
 
+  /* Initialize the device interface layer */
+
+  devif_initialize();
+
 #ifdef HAVE_FWDALLOC
   /* Initialize IP forwarding support */
 
