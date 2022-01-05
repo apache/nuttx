@@ -10836,6 +10836,20 @@ config STM32_USB_ITRMP
 menu "CAN driver configuration"
 	depends on STM32_CAN
 
+choice
+	prompt "CAN character driver or SocketCAN support"
+	default STM32_CAN_CHARDRIVER
+
+config STM32_CAN_CHARDRIVER
+	bool "STM32 CAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+
+config STM32_CAN_SOCKET
+	bool "STM32 CAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # CAN character driver or SocketCAN support
+
 config STM32_CAN1_BAUD
 	int "CAN1 BAUD"
 	default 250000
