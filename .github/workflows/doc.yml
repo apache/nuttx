@@ -30,7 +30,7 @@ jobs:
       - name: Generate Documentation
         run: |
           cd Documentation/
-          pip3 install pipenv==2021.5.29
+          pip3 install pipenv
           pipenv install
           pipenv run make html
       - uses: actions/upload-artifact@v2
