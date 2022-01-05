@@ -48,7 +48,9 @@
 
 /* default ODR */
 
-#define AK09919C_DEFAULT_ODR            20000      /* default 50 ms */
+#define AK09919C_DEFAULT_ODR            20000      /* default 50 ms. */
+
+#define AK09919C_VECTOR_REMAP           2          /* Vector remap of lsm6dso. */
 
 /* Register address. */
 
@@ -531,8 +533,9 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
                             FAR struct sensor_event_mag *data)
 {
   int ret;
-  uint8_t buffer[8];
   uint8_t state;
+  uint8_t buffer[8];
+  int16_t raw_data[3];
 
   /* AK09919C_REG_ST1 must be read separately before reading data. */
 
@@ -553,9 +556,15 @@ static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
       return ret;
     }
 
-  data->x = AK09919C_RESOLUTION * MAKE_S16(buffer[0], buffer[1]);
-  data->y = AK09919C_RESOLUTION * MAKE_S16(buffer[2], buffer[3]);
-  data->z = AK09919C_RESOLUTION * MAKE_S16(buffer[4], buffer[5]);
+  raw_data[0] = MAKE_S16(buffer[0], buffer[1]);
+  raw_data[1] = MAKE_S16(buffer[2], buffer[3]);
+  raw_data[2] = MAKE_S16(buffer[4], buffer[5]);
+
+  sensor_remap_vector_raw16(raw_data, raw_data, AK09919C_VECTOR_REMAP);
+
+  data->x = AK09919C_RESOLUTION * raw_data[0];
+  data->y = AK09919C_RESOLUTION * raw_data[1];
+  data->z = AK09919C_RESOLUTION * raw_data[2];
 
   return ret;
 }
