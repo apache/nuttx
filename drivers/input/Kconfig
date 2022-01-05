@@ -14,7 +14,7 @@ menuconfig INPUT
 if INPUT
 
 config INPUT_MOUSE
-	bool "Enable mouse support"
+	bool
 	default n
 	---help---
 		Enable support for mouse devices.
