@@ -180,6 +180,10 @@ config SAMA5_HAVE_TWI3
 config SAMA5_HAVE_VDEC
 	bool
 	default n
+  
+config SAMA5_HAVE_CLASSD
+  bool
+  default n
 
 # Summary configurations
 
@@ -274,6 +278,7 @@ choice
 config ARCH_CHIP_ATSAMA5D21
 	bool "Atmel ATSAMA5D21"
 	select ARCH_CHIP_SAMA5D2
+  select SAMA5_HAVE_CLASSD
 
 config ARCH_CHIP_ATSAMA5D22
 	bool "Atmel ATSAMA5D22"
@@ -284,17 +289,20 @@ config ARCH_CHIP_ATSAMA5D23
 	bool "Atmel ATSAMA5D23"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_MCAN0
-
+  select SAMA5_HAVE_CLASSD
+  
 config ARCH_CHIP_ATSAMA5D24
 	bool "Atmel ATSAMA5D24"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_DDR32
-
+  select SAMA5_HAVE_CLASSD
+  
 config ARCH_CHIP_ATSAMA5D26
 	bool "Atmel ATSAMA5D26"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_DDR32
-
+  select SAMA5_HAVE_CLASSD
+  
 config ARCH_CHIP_ATSAMA5D27
 	bool "Atmel ATSAMA5D27"
 	select ARCH_CHIP_SAMA5D2
@@ -303,14 +311,16 @@ config ARCH_CHIP_ATSAMA5D27
 	select SAMA5_HAVE_DDR32
 	select SAMA5_HAVE_SDMMC
 	select SAMA5_HAVE_GMAC
-
+  select SAMA5_HAVE_CLASSD
+  
 config ARCH_CHIP_ATSAMA5D28
 	bool "Atmel ATSAMA5D28"
 	select ARCH_CHIP_SAMA5D2
 	select SAMA5_HAVE_MCAN0
 	select SAMA5_HAVE_MCAN1
 	select SAMA5_HAVE_DDR32
-
+  select SAMA5_HAVE_CLASSD
+  
 config ARCH_CHIP_ATSAMA5D31
 	bool "Atmel ATSAMA5D31"
 	select ARCH_CHIP_SAMA5D3
@@ -392,6 +402,11 @@ menu "SAMA5 Peripheral Support"
 config SAMA5_AES
 	bool "Advanced Encryption Standard (AES)"
 	default n
+
+config SAMA5D2_CLASSD
+  bool "Class D Audio (CLASSD)"
+  default n
+  depends on SAMA5_HAVE_CLASSD
 
 config SAMA5_TDES
 	bool "Triple Data Encryption Standard (TDES)"
@@ -973,6 +988,154 @@ config SAMA5_DBGU_PARITY
 
 endif # !SAMA5_DBGU_NOCONFIG
 endmenu #DBGU Configuration
+
+if SAMA5D2_CLASSD
+menu "Class D Audio Default Configuration"
+
+config SAMA5D2_CLASSD_PAD_CLK
+	bool "drive CLK_AUDIO from AUDIOPINCLK"
+	default n
+config SAMA5D2_CLASSD_LEN
+  bool "Left Channel Enable (LEN)"
+  default y
+  
+config SAMA5D2_CLASSD_LMUTE 
+  bool "Left Channel Muted (LMUTE)"
+  default n
+  depends on SAMA5D2_CLASSD_LEN
+
+config SAMA5D2_CLASSD_REN
+  bool "Right Channel Enable (REN)"
+  default y
+
+config SAMA5D2_CLASSD_RMUTE
+  bool "Right Channel Muted (RMUTE)"
+  default n
+  depends on SAMA5D2_CLASSD_REN
+
+config SAMA5D2_CLASSD_PWMTYP
+  int "PWM Modulation Type(PWMTYP)"
+  default 0
+  range 0 1
+  ---help---
+    0 (TRAILING_EDGE): The signal is single-ended.
+      If bit NON_OVERLAP is cleared, the signal is sent to 
+      CLASSD_L0 and CLASSD_R0.
+      
+      If bit NON_OVERLAP is set, the signal is sent to
+      CLASSD_L0/L1 and CLASSD_R0/R1.
+    1 (UNIFORM): The signal is differential.
+      If bit NON_OVERLAP is cleared, the signal is sent to 
+      CLASSD_L0/L2 and CLASSD_R0/R2.
+      
+      If bit NON_OVERLAP is set, the signal is sent to 
+      CLASSD_L0/L1/L2/L3 and CLASSD_R0/R1/R2/R3.
+    
+config SAMA5D2_CLASSD_NON_OVERLAP_MODE
+  bool "Non-overlapping Circuit Enable (NON_OVERLAP)"
+  default n
+  
+config SAMA5D2_CLASSD_NON_OVERLAP_VALUE
+  int "Non-overlapping Value (NOVRVAL)"
+  default 0
+  range 0 3
+  depends on SAMA5D2_CLASSD_NON_OVERLAP_MODE
+  ---help---
+    0=5ns, 1=10ns, 2=15ns, 3=20ns
+
+config SAMA5D2_CLASSD_ATTL
+  int "Left Channel Attenuation (ATTL)"
+  default 0
+  range 0 128
+  ---help---
+    Left channel attenuation is defined as follows:
+      if ATTL ≤ 77 the attenuation is -ATTL dB
+      else the left signal is muted  
+
+config SAMA5D2_CLASSD_ATTR
+  int "Right Channel Attenuation (ATTR)"
+  default 0
+  range 0 128
+  ---help---
+    Right channel attenuation is defined as follows:
+      if ATTL ≤ 77 the attenuation is -ATTL dB
+      else the right signal is muted
+      
+config SAMA5D2_CLASSD_DSPCLK
+  int "DSP Clock Frequency"
+  default 0
+  range 0 1
+  ---help---
+  0 (12M288):  DSP Clock (DSPCLK) is 12.288 MHz
+  1 (11M2896): DSP Clock (DSPCLK) is 11.2896 MHz
+  
+config SAMA5D2_CLASSD_DEEMP
+  bool "Enable De-emphasis Filter (DEEMP)"
+  default n
+  
+config SAMA5D2_CLASSD_SWAP
+  bool "Swap Left and Right Channels (SWAP)
+  default n
+  
+config SAMA5D2_CLASSD_FRAME
+  int "Incoming Data Sampling Frequency (FRAME)"
+  default 2
+  range 0 7
+  ---help---
+  0 8 kHz
+  1 16 kHz
+  2 32 kHz
+  3 48 kHz
+  4 96 kHz
+  5 22.05 kHz
+  6 44.1 kHz
+  7 88.2 kHz
+  
+config SAMA5D2_CLASSD_EQCFG
+  int "Equalisation Selection (EQCFG)"
+  default 0
+  range 0 12
+  ---help---
+  0  Flat Response
+  1  Bass boost   +12 dB
+  2  Bass boost    +6 dB
+  3  Bass cut     -12 dB
+  4  Bass cut      -6 dB
+  5  Medium boost  +3 dB
+  6  Medium boost  +8 dB
+  7  Medium cut    -3 dB
+  8  Medium cut    -8 dB
+  9  Treble boost +12 dB
+  10 Treble boost  +6 dB
+  11 Treble cut   -12 dB
+  12 Treble cut    -6 dB  
+  
+config SAMA5D2_CLASSD_MONO
+  bool "Enable Mono Mode (MONO)"
+  default 0
+  ---help---
+  0=disabled. The signal is sent stereo to the left and right channels.
+  1=enabled.  The same signal is sent on both left and right channels. 
+              The sent signal is defined by the MONOMODE field value. 
+              
+config SAMA5D2_CLASSD_MONOMODE
+  int "Mono Mode Selection (MONOMODE)"
+  default 0
+  range 0 3
+  depends on SAMA5D2_CLASSD_MONO
+  ---help---
+  0 MONOMIX (left + right) / 2 is sent on both channels
+  1 MONOSAT (left + right) is sent to both channels. 
+    If the sum is too high, the result is saturated.
+  2 MONOLEFT  Audio data THR[15:0]  is sent on both left and right channels
+  3 MONORIGHT Audio data THR[31:16] is sent on both left and right channels
+
+config SAMA5_CLASSD_REGDEBUG
+  bool "Enable Register Debug"
+	default 0
+	
+endmenu # Class D Default Configuration
+endif # SAMA5D2_CLASSD
 
 if SAMA5_LCDC
 menu "LCDC Configuration"
