@@ -389,6 +389,18 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   return 0;
 }
 
+/****************************************************************************
+ * Name: mm_memdump
+ *
+ * Description:
+ *   mm_memdump returns a memory info about specified pid of task/thread.
+ *
+ ****************************************************************************/
+
+void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
+{
+}
+
 #ifdef CONFIG_DEBUG_MM
 
 /****************************************************************************
