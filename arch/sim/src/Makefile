@@ -141,10 +141,6 @@ ifeq ($(CONFIG_SIM_IOEXPANDER),y)
   CSRCS += up_ioexpander.c
 endif
 
-ifeq ($(CONFIG_SIM_QSPIFLASH),y)
-  CSRCS += up_qspiflash.c
-endif
-
 ifeq ($(CONFIG_FS_FAT),y)
   CSRCS += up_blockdevice.c up_deviceimage.c
   STDLIBS += -lz
