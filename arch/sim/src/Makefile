@@ -141,10 +141,6 @@ ifeq ($(CONFIG_SIM_IOEXPANDER),y)
   CSRCS += up_ioexpander.c
 endif
 
-ifeq ($(CONFIG_SIM_SPIFLASH),y)
-  CSRCS += up_spiflash.c
-endif
-
 ifeq ($(CONFIG_SIM_QSPIFLASH),y)
   CSRCS += up_qspiflash.c
 endif
