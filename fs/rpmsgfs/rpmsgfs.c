@@ -265,7 +265,7 @@ static void rpmsgfs_mkpath(FAR struct rpmsgfs_mountpt_s *fs,
       struct stat buf;
       int ret;
 
-      ret = rpmsgfs_client_stat(fs->handle, path, &buf);
+      ret = rpmsgfs_client_stat(fs->handle, fs->fs_root, &buf);
       if (ret == 0)
         {
           break;
