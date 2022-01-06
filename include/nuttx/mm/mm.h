@@ -296,6 +296,7 @@ void kmm_extend(FAR void *mem, size_t size, int region);
 
 struct mallinfo; /* Forward reference */
 int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info);
+void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid);
 
 /* Functions contained in kmm_mallinfo.c ************************************/
 
