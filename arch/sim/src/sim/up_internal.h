@@ -91,7 +91,6 @@
  ****************************************************************************/
 
 struct tcb_s;
-struct foc_dev_s;
 struct ioexpander_dev_s;
 struct i2c_master_s;
 
@@ -361,13 +360,6 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(void *stackbase, size_t nbytes);
-#endif
-
-/* up_foc.c *****************************************************************/
-
-#ifdef CONFIG_MOTOR_FOC
-struct foc_dev_s *sim_foc_initialize(int inst);
-void sim_foc_update(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

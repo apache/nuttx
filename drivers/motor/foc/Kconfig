@@ -28,4 +28,10 @@ config MOTOR_FOC_TRACE
 	---help---
 		Enables FOC driver trace interface.
 
+config MOTOR_FOC_DUMMY
+	bool "Simulated FOC device"
+	default n
+	---help---
+		Build a simulated lower-half FOC device
+
 endif #MOTOR_FOC
