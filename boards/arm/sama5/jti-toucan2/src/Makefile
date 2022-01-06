@@ -34,10 +34,15 @@ ifeq ($(CONFIG_SAMA5_DDRCS),y)
 CSRCS += sam_sdram.c
 endif
 
+ifeq ($(CONFIG_FUSB302),y)
+CSRCS += sam_fusb302.c
+endif
 
 ifeq ($(CONFIG_MTD_M25P),y)
 ifeq ($(CONFIG_SAMA5_SPI0),y)
 CSRCS += sam_at25.c
+CSRCS += sam_usbmsc.c
+else 
 endif
 endif
 
@@ -61,6 +66,12 @@ endif
 
 ifeq ($(CONFIG_PWM),y)
 CSRCS += sam_pwm.c
+endif
+
+ifeq ($(CONFIG_AUDIO_NULL),y)
+CSRCS += sam_audio.c
+else ifeq ($(CONFIG_SAMA5D2_CLASSD),y)
+CSRCS += sam_audio.c
 endif
 
 ifeq ($(CONFIG_SAMA5_MCAN),y)

@@ -35,6 +35,7 @@
 #include <nuttx/irq.h>
 #include "sam_spi.h"
 #include "sam_flexcom_spi.h"
+#include <sam_classd.h>
 #include "hardware/sam_pinmap.h"
 //#include "sam_pio.h"
 
@@ -44,15 +45,18 @@
 
 /* Configuration ************************************************************/
 
-//#define HAVE_USBHOST    1
-//#define HAVE_USBDEV     1
-//#define HAVE_USBMONITOR 1
-#define HAVE_M25P 1
-#define HAVE_AT25 1
+//#define HAVE_USBHOST  1
+#define HAVE_USBDEV     1
+#define HAVE_USBMONITOR 1
+#define HAVE_M25P       1
+#define HAVE_AT25       1
 //#define HAVE_CAN		1
 //#define HAVE_PWM		1
 #define HAVE_EGT 1
 #define HAVE_BLUETOOTH 1
+#define HAVE_AUDIO_CLASSD 1
+#define HAVE_AUDIO_NULL 1
+//#define HAVE_FUSB302
 
 #define BOARD_CRYSTAL_FREQUENCY_12MHZ  0
 #define BOARD_CRYSTAL_FREQUENCY_16MHZ  1
@@ -104,18 +108,9 @@
  * for the M25P, it should appear as /dev/mtdblock0
  */
 
-#define _NAND_MINOR 0
-
-#ifdef HAVE_NAND
-#  define NAND_MINOR  _NAND_MINOR
-#  define _M25P_MINOR (_NAND_MINOR+1)
-#else
-#  define _M25P_MINOR _NAND_MINOR
-#endif
-
 #ifdef HAVE_M25P
-#  define M25P_MINOR  _M25P_MINOR
-int sam_at25_automount(int minor);
+#  define M25P_MINOR  0
+//int sam_at25_automount(int minor);
 #endif
 
 
@@ -141,7 +136,7 @@ int sam_at25_automount(int minor);
 #endif
 
 #if defined(CONFIG_USBHOST)
-#  if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
+#  if !defined(CONFIG_SAMA5_EHCI) && !defined(CONFIG_SAMA5_OHCI)
 #    warning CONFIG_USBHOST is defined, but neither CONFIG_SAMA5_OHCI nor CONFIG_SAMA5_EHCI are defined
 #  endif
 #else
@@ -149,13 +144,13 @@ int sam_at25_automount(int minor);
 #  undef CONFIG_SAMA5_EHCI
 #endif
 
-#if !defined(CONFIG_SAMA5_OHCI) && !defined(CONFIG_SAMA5_EHCI)
+#if !defined(CONFIG_SAMA5_OHCI) || !defined(CONFIG_SAMA5_EHCI)
 #  undef HAVE_USBHOST
 #endif
 
 /* Check if we should enable the USB monitor before starting NSH */
 
-#ifndef CONFIG_USBMONITOR
+#if !defined(CONFIG_USBMONITOR)
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -168,6 +163,7 @@ int sam_at25_automount(int minor);
 #endif
 
 #if !defined(CONFIG_USBDEV_TRACE) && !defined(CONFIG_USBHOST_TRACE)
+#else
 #  undef HAVE_USBMONITOR
 #endif
 
@@ -248,16 +244,16 @@ int sam_bringup(void);
  *
  * Description:
  *   Called from sam_usbinitialize very early in initialization to setup
- *   USB-related PIO pins for the SAMA5D2-XULT board.
+ *   USB-related PIO pins for the board.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_SAMA5_UHPHS) || defined(CONFIG_SAMA5_UDPHS)
+#if defined(CONFIG_SAMA5_UDPHS) || defined(CONFIG_SAMA5_UHPHS)
 void weak_function sam_usbinitialize(void);
 #endif
 
 /****************************************************************************
- * Name: stm32_usbhost_initialize
+ * Name: sam_usbhost_initialize
  *
  * Description:
  *   Called at application startup time to initialize the USB host
@@ -269,6 +265,10 @@ void weak_function sam_usbinitialize(void);
 
 #ifdef HAVE_USBHOST
 int sam_usbhost_initialize(void);
+#endif
+
+#ifdef HAVE_USBDEV
+
 #endif
 
 #if defined(CONFIG_PWM)
@@ -301,6 +301,7 @@ int sam_can_setup(void);
 #define PIO_M25P_NPCS1 (PIO_OUTPUT | PIO_CFG_PULLUP | PIO_OUTPUT_SET | \
                         PIO_PORT_PIOA | PIO_PIN18)
 #define M25P_PORT       SPI0_CS1
+int board_usbmsc_initialize(int port);
 #endif
 
 #if defined (HAVE_EGT)
@@ -331,9 +332,69 @@ int sam_can_setup(void);
 # endif
 #endif
 
+/* FUSB302 */
+#if defined (HAVE_FUSB302)
+#define PIO_FUSB302_INT \
+           (PIO_INPUT | PIO_CFG_DEGLITCH | \
+            PIO_INT_BOTHEDGES | PIO_PORT_PIOA | PIO_PIN29 )
+          
+#define IRQ_FUSB302_INT SAM_IRQ_PA29
+#else /*unused pin */
+#define PIO_FUSB302_INT \
+           (PIO_INPUT | PIO_CFG_DEGLITCH | \
+            PIO_INT_BOTHEDGES | PIO_PORT_PIOB | PIO_PIN0 )
+          
+#define IRQ_FUSB302_INT SAM_IRQ_PB0
+#endif
+
+#define PIO_USBA_VBUS_SENSE \
+            (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+            PIO_INT_BOTHEDGES | PIO_PORT_PIOA | PIO_PIN29 )
+#define IRQ_USBA_VBUS_SENSE SAM_IRQ_PA29
+
+#define PIO_USBB_VBUS_OVERCURRENT \
+            (PIO_INPUT | PIO_CFG_PULLUP | PIO_CFG_DEGLITCH | \
+            PIO_INT_BOTHEDGES | PIO_PORT_PIOA | PIO_PIN28 )
+#define IRQ_USBB_VBUS_OVERCURRENT SAM_IRQ_PA28
+
+#define PIO_USBB_VBUS_ENABLE \
+            (PIO_OUTPUT | PIO_CFG_DEFAULT | PIO_OUTPUT_SET | \
+            PIO_PORT_PIOC | PIO_PIN18)
+
+/****************************************************************************
+ * Name: sam_audio_null_initialize
+ *
+ * Description:
+ *   Set up to use the NULL audio device for PCM unit-level testing.
+ *
+ * Input Parameters:
+ *   minor - The input device minor number
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+#ifdef HAVE_AUDIO_NULL
+int sam_audio_null_initialize(int minor);
+#endif /* HAVE_AUDIO_NULL */
+
+#ifdef HAVE_AUDIO_CLASSD
+int sam_audio_classd_initialize(int minor);
+#endif /* HAVE_AUDIO_CLASSD */
 
 void sam_spidev_initialize(void);
 void sam_flexcom_spidev_initialize(void);
+
+#ifdef HAVE_FUSB302
+//int sam_fusb302init(FAR struct i2c_master_s *i2c, uint8_t fusb302addr);
+int sam_fusb302init(int busno);
+#endif
+
+#ifdef HAVE_AT25
+# define AT25_MINOR 0
+int sam_at25_automount(int minor);
+#endif
 
 
 

@@ -38,6 +38,8 @@
 #include "jti-toucan2.h"
 
 #ifdef HAVE_AT25
+# include <nuttx/eeprom/spi_xx25xx.h>
+# include <fcntl.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,18 +78,28 @@ int sam_at25_automount(int minor)
         }
 
       /* Now bind the SPI interface to the AT25 SPI FLASH driver */
+      ret = ee25xx_initialize(spi, "/dev/at25", EEPROM_25XX128, O_RDWR);      
 
-      mtd = at25_initialize(spi);
-      if (!mtd)
+      //mtd = at25_initialize(spi);
+      //if (!mtd)
+      if (ret < 0)
         {
           ferr("ERROR: Failed to bind SPI port %d to AT25 FLASH driver\n");
           return -ENODEV;
+        }
+      else
+        {
+          syslog(LOG_INFO, "Successfully initialised the AT25 driver\n");
         }
 
       /* Now we are initializeed */
 
       initialized = true;
     }
+    else
+      {
+        syslog(LOG_INFO, "AT25 already initialised\n");
+      }
 
   return OK;
 }

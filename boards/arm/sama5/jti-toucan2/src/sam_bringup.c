@@ -50,6 +50,10 @@
 #  include <net/if.h>
 #endif
 
+#ifdef CONFIG_FUSB302
+# include <nuttx/usb/fusb302.h>
+#endif
+
 #ifdef CONFIG_USBMONITOR
 #  include <nuttx/usb/usbmonitor.h>
 #endif
@@ -67,19 +71,30 @@
 # include "sam_mcan.h"
 #endif
 
+#ifdef CONFIG_SAMA5D2_CLASSD
+# include "sam_classd.h"
+#endif
+
 #if defined(CONFIG_MTD_M25P)
-# include <nuttx/mtd/mtd.h>
 # include <nuttx/fs/fs.h>
+# include <nuttx/mtd/mtd.h>
 # include <nuttx/fs/nxffs.h>
 #endif
 
 #if defined(HAVE_AT25)
-# include <nuttx/eeprom/spi_xx25xx.h>
+//# include <nuttx/eeprom/spi_xx25xx.h>
 # include <fcntl.h>
 #endif
 
 #if defined (HAVE_EGT)
-#  include <nuttx/sensors/max31855.h>
+# include <nuttx/sensors/max31855.h>
+#endif
+
+#if defined (HAVE_FUSB302) && !defined (CONFIG_SAMA5_TWI0)
+#undef HAVE_FUSB302
+#warning HAVE_FUSB302 has been undefined as CONFIG_SAMA5_TWI0 not defined
+#else
+# include <nuttx/usb/fusb302.h>
 #endif
 
 
@@ -91,10 +106,37 @@
   (((n)+CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE-1) / \
    CONFIG_SAMA5D4EK_ROMFS_ROMDISK_SECTSIZE)
 
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+#if 0
+#ifdef CONFIG_SAMA5_TWI0
+FAR struct i2c_master_s *g_i2c0_dev;
+#endif
+#ifdef CONFIG_SAMA5_TWI1
+FAR struct i2c_master_s *g_i2c1_dev;
+#endif
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
+#if 0
 /****************************************************************************
  * Name: sam_i2c_register
  *
@@ -103,12 +145,11 @@
  *
  ****************************************************************************/
 
-#ifdef HAVE_I2CTOOL
-static void sam_i2c_register(int bus)
+#if defined (CONFIG_SAMA5_TWI0) || defined (CONFIG_SAMA5_TWI1)
+static void sam_i2c_register(FAR struct i2c_master_s *i2c, int bus)
 {
-  FAR struct i2c_master_s *i2c;
+  ;
   int ret;
-
   i2c = sam_i2cbus_initialize(bus);
   if (i2c == NULL)
     {
@@ -120,38 +161,11 @@ static void sam_i2c_register(int bus)
       if (ret < 0)
         {
           _err("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-          sam_i2cbus_uninitialize(i2c);
+          //sam_i2cbus_uninitialize(i2c);
         }
     }
 }
 #endif
-
-/****************************************************************************
- * Name: sam_i2ctool
- *
- * Description:
- *   Register I2C drivers for the I2C tool.
- *
- ****************************************************************************/
-
-#ifdef HAVE_I2CTOOL
-static void sam_i2ctool(void)
-{
-#ifdef CONFIG_SAMA5_TWI0
-  sam_i2c_register(0);
-#endif
-#ifdef CONFIG_SAMA5_TWI1
-  sam_i2c_register(1);
-#endif
-#ifdef CONFIG_SAMA5_TWI2
-  sam_i2c_register(2);
-#endif
-#ifdef CONFIG_SAMA5_TWI3
-  sam_i2c_register(3);
-#endif
-}
-#else
-#  define sam_i2ctool()
 #endif
 
 
@@ -170,9 +184,9 @@ static void sam_i2ctool(void)
 int sam_bringup(void)
 {
   int ret;
-  
+
   /*
-  There are ssues with the 24MHz crystal as u-boot is not setting 
+  There are issues with the 24MHz crystal as u-boot is not setting 
   the SFR register to indicate the correct crystal frequency
   */
   uint32_t regval;
@@ -181,12 +195,22 @@ int sam_bringup(void)
   regval &= 0xFFFFFFFC;
   regval |= BOARD_CRYSTAL_FREQUENCY;
   putreg32(regval, (SAM_SFR_VBASE + SAM_SFR_UTMICKTRIM_OFFSET));
+  _info("INFO: UTMI CLK TRIM register is: %08x\n", regval);
 
- /* Register I2C drivers on behalf of the I2C tool */
+ /* Register I2C drivers */
+#if 0
+#if defined (CONFIG_SAMA5_TWI0)
+  sam_i2c_register(g_i2c0_dev, 0);
+#endif
 
- 
-  sam_i2ctool();
-
+#if defined (CONFIG_SAMA5_TWI1)
+#if !defined (CONFIG_SAMA5_TWI0)
+    sam_i2c_register(g_i2c0_dev, 0);
+#else
+    sam_i2c_register(g_i2c1_dev, 1);
+#endif
+#endif
+#endif
 
 #ifdef HAVE_AUTOMOUNTER
   #undef HAVE_AUTOMOUNTER
@@ -241,9 +265,10 @@ else
     }
   }
 #endif  
-  
-#if defined(HAVE_AT25) && defined(CONFIG_SAMA5_SPI0)
 
+#if defined(HAVE_AT25) && defined(CONFIG_SAMA5_SPI0)
+sam_at25_automount(AT25_PORT);
+#if 0
 FAR struct spi_dev_s *spi_at25;
 spi_at25 = sam_spibus_initialize(AT25_PORT);
 if (!spi_at25)
@@ -266,12 +291,12 @@ if (ret<0)
 else
   {
     syslog(LOG_INFO, "Successfully initialised the AT25 driver\n");
+       
   }
-
-
+#endif
 #endif
 
-
+#if 0
 #if defined(CONFIG_MTD_M25P) && defined(CONFIG_SAMA5_SPI0)
 FAR struct spi_dev_s *spi_m25p;
 FAR struct mtd_dev_s *mtd_m25p;
@@ -286,47 +311,76 @@ else
   /* Now bind the SPI interface to the MT25QL256 SPI FLASH driver */
 
   mtd_m25p = m25p_initialize(spi_m25p);
+
   if (!mtd_m25p)
     {
       syslog(LOG_ERR,
             "ERROR: Failed to bind SPI0 CS1 to the SPI FLASH driver\n");
     }
   else
-    {
+   {
       syslog(LOG_INFO, "Successfully bound SPI0 CS1 to the SPI"
                       " FLASH driver\n");
-      //ret = ftl_initialize(M25P_MINOR, mtd_m25p);
-      //if (ret < 0)
-        //{
-          //syslog(LOG_ERR, "Failed to initialise the FTL layer: %d\n", ret);
-        //}
-      //else
+      if (ret < 0)
         {
-          //syslog(LOG_INFO, "FTL layer successfully initialised\n");    
-          //ret = smart_initialize(M25P_MINOR, mtd_m25p, NULL);
-          ret = nxffs_initialize(mtd_m25p);
-          if (ret < 0)
-            {
-              syslog(LOG_ERR, "Failed to initialise file system %d\n", ret);
-            }
-          else      
-            {
-              syslog(LOG_INFO, "Successfully initialised NXFSS\n");
-              //ret = nx_mount("/dev/mtdblock0", "/mnt/flash", "nxffs",0, NULL);
-              ret = nx_mount(NULL, "/mnt/flash", "nxffs",0, NULL);
-              if (ret < 0)
-                {
-                  syslog(LOG_ERR, "Failed to mount the NXFSS volume %d\n", ret);
-                }
-              else      
-                {
-                  syslog(LOG_INFO, "Succesfully mounted NXFSS\n");
-                }
-            }
+          syslog(LOG_ERR, "Failed to initialise the FTL layer: %d\n", ret);
         }
-    }
+        else
+          {
+            //syslog(LOG_INFO, "FTL layer successfully initialised\n");    
+            //ret = smart_initialize(M25P_MINOR, mtd_m25p, NULL);
+            ret = ftl_initialize(0, mtd_m25p);
+            if (ret < 0)
+              {
+                syslog(LOG_ERR, "Failed to initialise the ftl layer %d\n", ret);
+              }
+            else
+              {
+                syslog(LOG_INFO, "Successfully initialised ftl layer\n");
+                syslog(LOG_INFO, "initializing  file system...be patient\n");
+                ret = nxffs_initialize(mtd_m25p);
+
+                //smart_initialize(M25P_MINOR, mtd_m25p, NULL);
+
+                if (ret < 0)
+                  {
+                    syslog(LOG_ERR, "Failed to initialise file system %d\n", ret);
+                  }
+                else      
+                  {
+                    syslog(LOG_INFO, "Successfully initialised file system\n");
+                
+                    //ret = nx_mount("/dev/smart0", "/mnt", "smartfs",0, NULL);
+                    
+                    ret = nx_mount(NULL, "/mnt/flash", "nxffs",0, NULL);
+                    
+                    if (ret < 0)
+                      {
+                        syslog(LOG_ERR, "Failed to mount the file system %d\n", ret);
+                      }
+                    else      
+                      {
+                        syslog(LOG_INFO, "Successfully mounted the file system\n");
+
+                      }
+                  }
+              }
+          }
+      }
   }
 #endif
+#endif
+
+#ifdef HAVE_FUSB302
+  //ret = sam_fusb302init(g_i2c0_dev, FUSB302_I2C_ADDR);
+  ret = sam_fusb302init(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialise FUSB302 device, %d\n", ret);
+    }
+
+#endif
+
 
 
 #ifdef HAVE_USBHOST
@@ -349,6 +403,11 @@ else
     {
         _err("ERROR: Failed to start the USB monitor: %d\n", ret);
     }
+  else
+  {
+    syslog(LOG_INFO, "INFO: started the USB monitor\n");
+  }
+    
 #endif
 
 #ifdef HAVE_MAXTOUCH
@@ -404,13 +463,33 @@ else
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_adc_setup failed: %d\n", ret);
-    }endchoice # CPU Frequency
+    }
+#endif
+
+#ifdef HAVE_AUDIO_NULL
+  /* Configure the NULL audio device */
+
   ret = sam_audio_null_initialize(0);
   if (ret != OK)
     {
       _err("ERROR: Failed to initialize the NULL audio device: %d\n", ret);
     }
 #endif
+
+#ifdef HAVE_AUDIO_CLASSD
+  /*  configure the ClassD audio device  */
+#ifndef HAVE_AUDIO_NULL
+  ret = sam_audio_classd_initialize(0);
+#else
+  ret = sam_audio_classd_initialize(1);
+#endif
+  if (ret != OK)
+    {
+      _err("ERROR: Failed to initialize the CLASSD audio device: %d\n", ret);
+    }
+#endif
+
+
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -434,6 +513,9 @@ else
     }
 #endif
 
+#if defined(CONFIG_USBMSC)
+  board_usbmsc_initialize(AT25_PORT);
+#endif
 
 #if defined(CONFIG_RNDIS)
   /* Set up a MAC address for the RNDIS device. */
@@ -460,6 +542,7 @@ else
    * at least enough succeeded to bring-up NSH with perhaps reduced
    * capabilities.
    */
+   
 
   UNUSED(ret);
   return OK;
