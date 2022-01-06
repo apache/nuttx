@@ -60,7 +60,6 @@
 
 #ifdef HAVE_USBDEV
 #  undef CONFIG_SAMA5_UHPHS_RHPORT1
-#  undef CONFIG_SAMA5_UHPHS_RHPORT1
 #endif
 
 /****************************************************************************
@@ -135,7 +134,7 @@ static int usbhost_waiter(struct usbhost_connection_s *dev)
  *   Wait for USB devices to be connected to the OHCI hub.
  *
  ****************************************************************************/
-
+#ifdef HAVE_USBHOST
 #ifdef CONFIG_SAMA5_OHCI
 static int ohci_waiter(int argc, char *argv[])
 {
@@ -146,6 +145,7 @@ static int ohci_waiter(int argc, char *argv[])
 #endif
 }
 #endif
+
 
 /****************************************************************************
  * Name: ehci_waiter
@@ -164,6 +164,7 @@ static int ehci_waiter(int argc, char *argv[])
   return usbhost_waiter(g_ehciconn);
 #endif
 }
+#endif
 #endif
 
 /****************************************************************************
@@ -194,8 +195,15 @@ static int ehci_waiter(int argc, char *argv[])
 
 void weak_function sam_usbinitialize(void)
 {
+  /*  This board uses the UHPHS port 
+      to allow it to either act as a host or device.
+      A USB-C is connected with an FUSB302 device to detect attaches
+  */
+
+
 #ifdef HAVE_USBDEV
   /* Configure Port A to support the USB device function */
+  sam_configpio(PIO_USBA_VBUS_SENSE);
 
 #endif
 
@@ -351,16 +359,17 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
   switch (rhport)
     {
     case SAM_RHPORT1:
-#if !defined(CONFIG_SAMA5_UHPHS_RHPORT1)
+#if !defined(CONFIG_SAMA5_UDPHS_RHPORT1)
       uerr("ERROR: RHPort1 is not available in this configuration\n");
       return;
 
-#elif !defined(PIO_USBA_VBUS_ENABLE)
+#elif !defined(PIO_USBB_VBUS_ENABLE)
       /* SAMA5D2-XULT has no port A VBUS enable */
 
       uerr("ERROR: RHPort1 has no VBUS enable\n");
       return;
 #else
+      pinset = PIO_USBA_VBUS_ENABLE;
       break;
 #endif
 
@@ -369,6 +378,7 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
       uerr("ERROR: RHPort2 is not available in this configuration\n");
       return;
 #else
+      pinset = PIO_USBB_VBUS_ENABLE;
       break;
 #endif
 
@@ -378,7 +388,11 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
     }
 
   /* Then enable or disable VBUS power (active high) */
-
+#if !defined (HAVE_FUSB302)
+  /* this is handled by FUSB302
+     NEVER drive this in case legacy power drive switch is fitted!
+  */
+#if 0  
   if (enable)
     {
       /* Enable the Power Switch by driving the enable pin high */
@@ -386,6 +400,8 @@ void sam_usbhost_vbusdrive(int rhport, bool enable)
       sam_piowrite(pinset, true);
     }
   else
+#endif
+#endif
     {
       /* Disable the Power Switch by driving the enable pin low */
 
@@ -433,11 +449,14 @@ xcpt_t sam_setup_overcurrent(xcpt_t handler)
   g_ochandler = handler;
 
   /* Configure the interrupt */
-
-  sam_pioirq(PIO_USBBC_VBUS_OVERCURRENT);
-  irq_attach(IRQ_USBBC_VBUS_OVERCURRENT, handler, NULL);
-  sam_pioirqenable(IRQ_USBBC_VBUS_OVERCURRENT);
-
+//#if 0
+  /* This board has FUSB302 handling this.
+     Needs support for OVC adding though
+  */
+  sam_pioirq(PIO_USBB_VBUS_OVERCURRENT);
+  irq_attach(IRQ_USBB_VBUS_OVERCURRENT, handler, NULL);
+  sam_pioirqenable(IRQ_USBB_VBUS_OVERCURRENT);
+//#endif
   /* Return the old handler (so that it can be restored) */
 
   leave_critical_section(flags);

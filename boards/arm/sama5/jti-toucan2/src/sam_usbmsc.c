@@ -44,10 +44,10 @@
 #  error AT25 Serial FLASH not supported
 #endif
 
-#ifndef CONFIG_SAMA5D3XPLAINED_AT25_FTL
-#  error AT25 FTL support required (CONFIG_SAMA5D3XPLAINED_AT25_FTL)
-#  undef HAVE_AT25
-#endif
+//#ifndef CONFIG_SAMA5D3XPLAINED_AT25_FTL
+//#  error AT25 FTL support required (CONFIG_SAMA5D3XPLAINED_AT25_FTL)
+//#  undef HAVE_AT25
+//#endif
 
 #ifndef CONFIG_SYSTEM_USBMSC_DEVMINOR1
 #  define CONFIG_SYSTEM_USBMSC_DEVMINOR1 0
@@ -73,10 +73,9 @@
 
 int board_usbmsc_initialize(int port)
 {
-  /* Initialize the AT25 MTD driver */
-
-#ifdef HAVE_AT25
-  int ret = sam_at25_automount(AT25_MINOR);
+#if 0
+#ifdef CONFIG_MTD_M25P
+  int ret = sam_at25_automount(port);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_at25_automount failed: %d\n", ret);
@@ -86,6 +85,13 @@ int board_usbmsc_initialize(int port)
 #else
   return -ENODEV;
 #endif
+#endif
+  return OK;
+}
+
+int usbmsc_archinitialize(void)
+{
+  return OK;
 }
 
 #endif /* CONFIG_USBMSC */
