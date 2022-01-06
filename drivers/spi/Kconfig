@@ -319,4 +319,75 @@ config SPI_FLASH_PAGESIZE
 
 endif # SPI_FLASH
 
+config QSPI_FLASH
+	bool "Simulated QSPI FLASH with SMARTFS"
+	default n
+	---help---
+		Adds a simulated QSPI FLASH that responds to N25QXXX style
+		commands on the QSPI bus.
+
+if QSPI_FLASH
+
+choice
+	prompt "Simulated QSPI FLASH Size"
+	default QSPI_FLASH_1M
+
+config QSPI_FLASH_1M
+	bool "1 MBit (128K Byte)"
+
+config QSPI_FLASH_8M
+	bool "8 MBit (1M Byte)"
+
+config QSPI_FLASH_32M
+	bool "32 MBit (4M Byte)"
+
+config QSPI_FLASH_64M
+	bool "64 MBit (8M Byte)"
+
+config QSPI_FLASH_128M
+	bool "128 MBit (16M Byte)"
+
+endchoice
+
+config QSPI_FLASH_MANUFACTURER
+	hex "Hex ID of the FLASH manufacturer code"
+	default 0x20
+	---help---
+		Allows the simulated FLASH Manufacturer ID to be set.
+
+config QSPI_FLASH_MEMORY_TYPE
+	hex "Hex ID of the FLASH Memory Type code"
+	default 0xba
+	---help---
+		Allows the simulated FLASH Memory Type code to be set.
+
+config QSPI_FLASH_SECTORSIZE
+	int "FLASH Sector Erase Size"
+	default 65536
+	---help---
+		Sets the large sector erase size that the part simulates.
+		This driver simulates QSPI devices that have both a large
+		sector erase as well as a "sub-sector" (per the datasheet)
+		erase size (typically 4K bytes).
+
+config QSPI_FLASH_SUBSECTORSIZE
+	int "FLASH Sub-Sector Erase Size"
+	default 4096
+	---help---
+		Sets the smaller sub-sector erase size supported by the
+		FLASH emulation
+
+config QSPI_FLASH_PAGESIZE
+	int "FLASH Write / Program Page Size"
+	default 256
+	---help---
+		Sets the size of a page program operation.  The page size
+		represents the maximum number of bytes that can be sent
+		for a program operation.  If more bytes than this are
+		sent on a single Page Program, then the address will
+		"wrap" causing the initial data sent to be overwritten.
+		This is consistent with standard SPI FLASH operation.
+
+endif # QSPI_FLASH
+
 endif # SPI
