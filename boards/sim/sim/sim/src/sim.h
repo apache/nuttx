@@ -120,7 +120,7 @@ int sim_gpio_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SIM_MOTOR_FOC
+#ifdef CONFIG_MOTOR_FOC_DUMMY
 int sim_foc_setup(void);
 #endif
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_foc.c
+ * drivers/motor/foc/foc_dummy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,6 +31,7 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/motor/foc/foc_lower.h>
 
 /****************************************************************************
@@ -43,13 +44,13 @@
 
 /* Board HW configuration */
 
-#define SIM_FOC_HW_PWM_NS      (500)
-#define SIM_FOC_HW_PWM_MAX     (0.95f)
+#define FOC_DUMMY_HW_PWM_NS      (500)
+#define FOC_DUMMY_HW_PWM_MAX     (0.95f)
 
 /* Helper macros ************************************************************/
 
-#define SIM_FOC_DATA_FROM_DEV_GET(d)                                     \
-  ((FAR struct sim_foc_data_s *)(d)->lower->data)
+#define FOC_DUMMY_DATA_FROM_DEV_GET(d) \
+  ((FAR struct foc_dummy_data_s *)(d)->lower->data)
 
 /****************************************************************************
  * Private Types
@@ -57,14 +58,14 @@
 
 /* SIM FOC board data */
 
-struct sim_foc_board_s
+struct foc_dummy_board_s
 {
   uint32_t reserved;
 };
 
 /* SIM FOC specific data */
 
-struct sim_foc_data_s
+struct foc_dummy_data_s
 {
   /* Upper-half FOC controller callbacks */
 
@@ -72,7 +73,7 @@ struct sim_foc_data_s
 
   /* SIM FOC board data */
 
-  FAR struct sim_foc_board_s *board;
+  FAR struct foc_dummy_board_s *board;
 
   /* Phase currents */
 
@@ -93,34 +94,34 @@ struct sim_foc_data_s
 
 /* Lower-half FOC operations */
 
-static int sim_foc_configure(FAR struct foc_dev_s *dev,
-                             FAR struct foc_cfg_s *cfg);
-static int sim_foc_setup(FAR struct foc_dev_s *dev);
-static int sim_foc_shutdown(FAR struct foc_dev_s *dev);
-static int sim_foc_start(FAR struct foc_dev_s *dev, bool state);
-static int sim_foc_pwm_duty_set(FAR struct foc_dev_s *dev,
-                                FAR foc_duty_t *duty);
-static int sim_foc_ioctl(FAR struct foc_dev_s *dev, int cmd,
-                         unsigned long arg);
-static int sim_foc_bind(FAR struct foc_dev_s *dev,
-                        FAR struct foc_callbacks_s *cb);
-static int sim_foc_fault_clear(FAR struct foc_dev_s *dev);
+static int foc_dummy_configure(FAR struct foc_dev_s *dev,
+                               FAR struct foc_cfg_s *cfg);
+static int foc_dummy_setup(FAR struct foc_dev_s *dev);
+static int foc_dummy_shutdown(FAR struct foc_dev_s *dev);
+static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state);
+static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
+                                  FAR foc_duty_t *duty);
+static int foc_dummy_ioctl(FAR struct foc_dev_s *dev, int cmd,
+                           unsigned long arg);
+static int foc_dummy_bind(FAR struct foc_dev_s *dev,
+                          FAR struct foc_callbacks_s *cb);
+static int foc_dummy_fault_clear(FAR struct foc_dev_s *dev);
 #ifdef CONFIG_MOTOR_FOC_TRACE
-static void sim_foc_trace(FAR struct foc_dev_s *dev, int type, bool state);
+static void foc_dummy_trace(FAR struct foc_dev_s *dev, int type, bool state);
 #endif
 
 /* Handlers */
 
-static int sim_foc_notifier_handler(FAR struct foc_dev_s *dev);
+static void foc_dummy_notifier_handler(FAR struct foc_dev_s *dev);
 
 /* Helpers */
 
-static void sim_foc_hw_config_get(FAR struct foc_dev_s *dev);
-static int sim_foc_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq);
-static int sim_foc_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq);
-static int sim_foc_pwm_start(FAR struct foc_dev_s *dev, bool state);
-static int sim_foc_adc_setup(FAR struct foc_dev_s *dev);
-static int sim_foc_adc_start(FAR struct foc_dev_s *dev, bool state);
+static void foc_dummy_hw_config_get(FAR struct foc_dev_s *dev);
+static int foc_dummy_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq);
+static int foc_dummy_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq);
+static int foc_dummy_pwm_start(FAR struct foc_dev_s *dev, bool state);
+static int foc_dummy_adc_setup(FAR struct foc_dev_s *dev);
+static int foc_dummy_adc_start(FAR struct foc_dev_s *dev, bool state);
 
 /****************************************************************************
  * Private Data
@@ -128,29 +129,29 @@ static int sim_foc_adc_start(FAR struct foc_dev_s *dev, bool state);
 
 /* SIM FOC specific data */
 
-static struct sim_foc_data_s  g_sim_foc_data[CONFIG_MOTOR_FOC_INST];
-static struct sim_foc_board_s g_sim_foc_board[CONFIG_MOTOR_FOC_INST];
+static struct foc_dummy_data_s  g_foc_dummy_data[CONFIG_MOTOR_FOC_INST];
+static struct foc_dummy_board_s g_foc_dummy_board[CONFIG_MOTOR_FOC_INST];
 
 /* SIM specific FOC ops */
 
-static struct foc_lower_ops_s g_sim_foc_ops =
+static struct foc_lower_ops_s g_foc_dummy_ops =
 {
-  .configure      = sim_foc_configure,
-  .setup          = sim_foc_setup,
-  .shutdown       = sim_foc_shutdown,
-  .start          = sim_foc_start,
-  .pwm_duty_set   = sim_foc_pwm_duty_set,
-  .ioctl          = sim_foc_ioctl,
-  .bind           = sim_foc_bind,
-  .fault_clear    = sim_foc_fault_clear,
+  foc_dummy_configure,
+  foc_dummy_setup,
+  foc_dummy_shutdown,
+  foc_dummy_pwm_duty_set,
+  foc_dummy_start,
+  foc_dummy_ioctl,
+  foc_dummy_bind,
+  foc_dummy_fault_clear,
 #ifdef CONFIG_MOTOR_FOC_TRACE
-  .trace          = sim_foc_trace
+  foc_dummy_trace
 #endif
 };
 
 /* FOC lower-half */
 
-static struct foc_lower_s g_sim_foc_lower[CONFIG_MOTOR_FOC_INST];
+static struct foc_lower_s g_foc_dummy_lower[CONFIG_MOTOR_FOC_INST];
 
 /* FOC upper-half device data */
 
@@ -161,16 +162,16 @@ static struct foc_dev_s g_foc_dev[CONFIG_MOTOR_FOC_INST];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_foc_pwm_setup
+ * Name: foc_dummy_pwm_setup
  *
  * Description:
  *   Setup PWM for FOC controller
  *
  ****************************************************************************/
 
-static int sim_foc_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
+static int foc_dummy_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
@@ -187,36 +188,36 @@ static int sim_foc_pwm_setup(FAR struct foc_dev_s *dev, uint32_t freq)
 }
 
 /****************************************************************************
- * Name: sim_foc_start
+ * Name: foc_dummy_start
  *
  * Description:
  *   Start/stop PWM for the FOC controller
  *
  ****************************************************************************/
 
-static int sim_foc_start(FAR struct foc_dev_s *dev, bool state)
+static int foc_dummy_start(FAR struct foc_dev_s *dev, bool state)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
-  irqstate_t                 flags;
-  int                        ret = OK;
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
+  irqstate_t                   flags;
+  int                          ret = OK;
 
   mtrinfo("[FOC_START] state=%d\n", state);
 
   /* Start PWM */
 
-  ret = sim_foc_pwm_start(dev, state);
+  ret = foc_dummy_pwm_start(dev, state);
   if (ret < 0)
     {
-      mtrerr("sim_foc_pwm_start failed %d\n", ret);
+      mtrerr("foc_dummy_pwm_start failed %d\n", ret);
       goto errout;
     }
 
   /* Start ADC */
 
-  ret = sim_foc_adc_start(dev, state);
+  ret = foc_dummy_adc_start(dev, state);
   if (ret < 0)
     {
-      mtrerr("sim_foc_adc_start failed %d\n", ret);
+      mtrerr("foc_dummy_adc_start failed %d\n", ret);
       goto errout;
     }
 
@@ -231,14 +232,14 @@ errout:
 }
 
 /****************************************************************************
- * Name: sim_foc_pwm_start
+ * Name: foc_dummy_pwm_start
  *
  * Description:
  *   Start/stop PWM for the FOC controller
  *
  ****************************************************************************/
 
-static int sim_foc_pwm_start(FAR struct foc_dev_s *dev, bool state)
+static int foc_dummy_pwm_start(FAR struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -248,14 +249,14 @@ static int sim_foc_pwm_start(FAR struct foc_dev_s *dev, bool state)
 }
 
 /****************************************************************************
- * Name: sim_foc_adc_setup
+ * Name: foc_dummy_adc_setup
  *
  * Description:
  *   Setup ADC for the FOC controller
  *
  ****************************************************************************/
 
-static int sim_foc_adc_setup(FAR struct foc_dev_s *dev)
+static int foc_dummy_adc_setup(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -265,14 +266,14 @@ static int sim_foc_adc_setup(FAR struct foc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: sim_foc_adc_start
+ * Name: foc_dummy_adc_start
  *
  * Description:
  *   Start/stop ADC conversion for the FOC controller
  *
  ****************************************************************************/
 
-static int sim_foc_adc_start(FAR struct foc_dev_s *dev, bool state)
+static int foc_dummy_adc_start(FAR struct foc_dev_s *dev, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -282,17 +283,17 @@ static int sim_foc_adc_start(FAR struct foc_dev_s *dev, bool state)
 }
 
 /****************************************************************************
- * Name: sim_foc_notifier_cfg
+ * Name: foc_dummy_notifier_cfg
  *
  * Description:
  *   Configure FOC notifier
  *
  ****************************************************************************/
 
-static int sim_foc_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq)
+static int foc_dummy_notifier_cfg(FAR struct foc_dev_s *dev, uint32_t freq)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
-  int                        ret = OK;
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
+  int                          ret = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
@@ -317,18 +318,18 @@ errout:
 }
 
 /****************************************************************************
- * Name: sim_foc_configure
+ * Name: foc_dummy_configure
  *
  * Description:
  *   Arch-specific FOC controller configuration
  *
  ****************************************************************************/
 
-static int sim_foc_configure(FAR struct foc_dev_s *dev,
-                             FAR struct foc_cfg_s *cfg)
+static int foc_dummy_configure(FAR struct foc_dev_s *dev,
+                               FAR struct foc_cfg_s *cfg)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
-  int                        ret = OK;
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
+  int                          ret = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
@@ -340,28 +341,28 @@ static int sim_foc_configure(FAR struct foc_dev_s *dev,
 
   /* Configure ADC */
 
-  ret = sim_foc_adc_setup(dev);
+  ret = foc_dummy_adc_setup(dev);
   if (ret < 0)
     {
-      mtrerr("sim_foc_adc_setup failed %d\n", ret);
+      mtrerr("foc_dummy_adc_setup failed %d\n", ret);
       goto errout;
     }
 
   /* Configure PWM */
 
-  ret = sim_foc_pwm_setup(dev, cfg->pwm_freq);
+  ret = foc_dummy_pwm_setup(dev, cfg->pwm_freq);
   if (ret < 0)
     {
-      mtrerr("sim_foc_pwm_setup failed %d\n", ret);
+      mtrerr("foc_dummy_pwm_setup failed %d\n", ret);
       goto errout;
     }
 
   /* Configure notifier */
 
-  ret = sim_foc_notifier_cfg(dev, cfg->notifier_freq);
+  ret = foc_dummy_notifier_cfg(dev, cfg->notifier_freq);
   if (ret < 0)
     {
-      mtrerr("sim_foc_notifier_cfg failed %d\n", ret);
+      mtrerr("foc_dummy_notifier_cfg failed %d\n", ret);
       goto errout;
     }
 
@@ -374,14 +375,14 @@ errout:
 }
 
 /****************************************************************************
- * Name: sim_foc_setup
+ * Name: foc_dummy_setup
  *
  * Description:
  *   Arch-specific FOC controller setup
  *
  ****************************************************************************/
 
-static int sim_foc_setup(FAR struct foc_dev_s *dev)
+static int foc_dummy_setup(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -389,20 +390,20 @@ static int sim_foc_setup(FAR struct foc_dev_s *dev)
 
   /* Get HW configuration */
 
-  sim_foc_hw_config_get(dev);
+  foc_dummy_hw_config_get(dev);
 
   return OK;
 }
 
 /****************************************************************************
- * Name: sim_foc_shutdown
+ * Name: foc_dummy_shutdown
  *
  * Description:
  *   Arch-specific FOC controller shutdown
  *
  ****************************************************************************/
 
-static int sim_foc_shutdown(FAR struct foc_dev_s *dev)
+static int foc_dummy_shutdown(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -412,15 +413,15 @@ static int sim_foc_shutdown(FAR struct foc_dev_s *dev)
 }
 
 /****************************************************************************
- * Name: sim_foc_ioctl
+ * Name: foc_dummy_ioctl
  *
  * Description:
  *   Arch-specific FOC controller ioctl
  *
  ****************************************************************************/
 
-static int sim_foc_ioctl(FAR struct foc_dev_s *dev, int cmd,
-                         unsigned long arg)
+static int foc_dummy_ioctl(FAR struct foc_dev_s *dev, int cmd,
+                           unsigned long arg)
 {
   int ret = OK;
 
@@ -441,24 +442,21 @@ static int sim_foc_ioctl(FAR struct foc_dev_s *dev, int cmd,
 }
 
 /****************************************************************************
- * Name: sim_foc_notifier_handler
+ * Name: foc_dummy_notifier_handler
  *
  * Description:
  *   Handle ADC conversion and notofiy user-space
  *
  ****************************************************************************/
 
-static int sim_foc_notifier_handler(FAR struct foc_dev_s *dev)
+static void foc_dummy_notifier_handler(FAR struct foc_dev_s *dev)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
-  irqstate_t                 flags;
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
 
   DEBUGASSERT(dev);
   DEBUGASSERT(sim);
 
   mtrinfo("[FOC_NOTIFIER_HANDLER] cntr=%d\n", sim->notifier_cntr);
-
-  flags = enter_critical_section();
 
   /* Call FOC notifier handler */
 
@@ -472,10 +470,6 @@ static int sim_foc_notifier_handler(FAR struct foc_dev_s *dev)
   /* Increase counter */
 
   sim->notifier_cntr += 1;
-
-  leave_critical_section(flags);
-
-  return OK;
 }
 
 /****************************************************************************
@@ -486,8 +480,8 @@ static int sim_foc_notifier_handler(FAR struct foc_dev_s *dev)
  *
  ****************************************************************************/
 
-static int sim_foc_pwm_duty_set(FAR struct foc_dev_s *dev,
-                                FAR foc_duty_t *duty)
+static int foc_dummy_pwm_duty_set(FAR struct foc_dev_s *dev,
+                                  FAR foc_duty_t *duty)
 {
   int i = 0;
 
@@ -515,36 +509,36 @@ static int sim_foc_pwm_duty_set(FAR struct foc_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: sim_foc_hw_config_get
+ * Name: foc_dummy_hw_config_get
  *
  * Description:
  *   Get HW configuration for FOC controller
  *
  ****************************************************************************/
 
-static void sim_foc_hw_config_get(FAR struct foc_dev_s *dev)
+static void foc_dummy_hw_config_get(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
   /* Get HW configuration */
 
-  dev->info.hw_cfg.pwm_dt_ns = SIM_FOC_HW_PWM_NS;
-  dev->info.hw_cfg.pwm_max   = ftob16(SIM_FOC_HW_PWM_MAX);
+  dev->info.hw_cfg.pwm_dt_ns = FOC_DUMMY_HW_PWM_NS;
+  dev->info.hw_cfg.pwm_max   = ftob16(FOC_DUMMY_HW_PWM_MAX);
 }
 
 /****************************************************************************
- * Name: sim_foc_bind
+ * Name: foc_dummy_bind
  *
  * Description:
  *   Bind lower-half FOC controller with upper-half FOC logic
  *
  ****************************************************************************/
 
-static int sim_foc_bind(FAR struct foc_dev_s *dev,
-                        FAR struct foc_callbacks_s *cb)
+static int foc_dummy_bind(FAR struct foc_dev_s *dev,
+                          FAR struct foc_callbacks_s *cb)
 {
-  FAR struct sim_foc_data_s *sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
-  int                        ret = OK;
+  FAR struct foc_dummy_data_s *sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
+  int                          ret = OK;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(cb);
@@ -559,14 +553,14 @@ static int sim_foc_bind(FAR struct foc_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: sim_foc_fault_clear
+ * Name: foc_dummy_fault_clear
  *
  * Description:
  *   Arch-specific fault clear
  *
  ****************************************************************************/
 
-static int sim_foc_fault_clear(FAR struct foc_dev_s *dev)
+static int foc_dummy_fault_clear(FAR struct foc_dev_s *dev)
 {
   DEBUGASSERT(dev);
 
@@ -577,14 +571,14 @@ static int sim_foc_fault_clear(FAR struct foc_dev_s *dev)
 
 #ifdef CONFIG_MOTOR_FOC_TRACE
 /****************************************************************************
- * Name: sim_foc_trace
+ * Name: foc_dummy_trace
  *
  * Description:
  *   SIM FOC trace
  *
  ****************************************************************************/
 
-static void sim_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
+static void foc_dummy_trace(FAR struct foc_dev_s *dev, int type, bool state)
 {
   DEBUGASSERT(dev);
 
@@ -597,14 +591,14 @@ static void sim_foc_trace(FAR struct foc_dev_s *dev, int type, bool state)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_foc_initialize
+ * Name: foc_dummy_initialize
  *
  * Description:
  *   Initialize the FOC controller lower-half support.
  *
  ****************************************************************************/
 
-FAR struct foc_dev_s *sim_foc_initialize(int inst)
+FAR struct foc_dev_s *foc_dummy_initialize(int inst)
 {
   FAR struct foc_lower_s *foc_lower = NULL;
   FAR struct foc_dev_s   *dev       = NULL;
@@ -613,20 +607,20 @@ FAR struct foc_dev_s *sim_foc_initialize(int inst)
 
   /* Reset data */
 
-  memset(&g_sim_foc_data[inst], 0, sizeof(struct sim_foc_data_s));
+  memset(&g_foc_dummy_data[inst], 0, sizeof(struct foc_dummy_data_s));
 
   /* Get SIM FOC arch-specific driver */
 
-  foc_lower = &g_sim_foc_lower[inst];
+  foc_lower = &g_foc_dummy_lower[inst];
 
   /* Connect ops, data and dev with arch-specific FOC driver */
 
-  foc_lower->data  = &g_sim_foc_data[inst];
-  foc_lower->ops   = &g_sim_foc_ops;
+  foc_lower->data = &g_foc_dummy_data[inst];
+  foc_lower->ops  = &g_foc_dummy_ops;
 
   /* Connect board data */
 
-  g_sim_foc_data[inst].board = &g_sim_foc_board[inst];
+  g_foc_dummy_data[inst].board = &g_foc_dummy_board[inst];
 
   /* Get FOC device */
 
@@ -642,20 +636,20 @@ FAR struct foc_dev_s *sim_foc_initialize(int inst)
 }
 
 /****************************************************************************
- * Name: sim_foc_update
+ * Name: foc_dummy_update
  *
  * Description:
  *   Called periodically from the IDLE loop to simulate FOC driver interrupts
  *
  ****************************************************************************/
 
-void sim_foc_update(void)
+void foc_dummy_update(void)
 {
-  FAR struct foc_dev_s      *dev  = NULL;
-  FAR struct sim_foc_data_s *sim  = NULL;
-  static uint32_t            cntr = 0;
-  int                        i    = 0;
-  irqstate_t                 flags;
+  FAR struct foc_dev_s        *dev  = NULL;
+  FAR struct foc_dummy_data_s *sim  = NULL;
+  static uint32_t              cntr = 0;
+  int                          i    = 0;
+  irqstate_t                   flags;
 
   /* Increase local counter */
 
@@ -673,11 +667,11 @@ void sim_foc_update(void)
 
       /* Get SIM data */
 
-      sim = SIM_FOC_DATA_FROM_DEV_GET(dev);
+      sim = FOC_DUMMY_DATA_FROM_DEV_GET(dev);
 
       if (sim->state == true)
         {
-          sim_foc_notifier_handler(dev);
+          foc_dummy_notifier_handler(dev);
         }
     }
 
