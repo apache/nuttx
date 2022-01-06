@@ -353,31 +353,6 @@ config SIM_TCNWAITERS
 		The maximum number of threads that can be waiting on poll() for a
 		touchscreen event. Default: 4
 
-config SIM_IOEXPANDER
-	bool "Simulated I/O Expander"
-	default n
-	depends on IOEXPANDER
-	select IOEXPANDER_INT_ENABLE
-	---help---
-		Build a simple, simulated I/O Expander chip simulation (for testing
-		purposes only).
-
-if SIM_IOEXPANDER
-
-config SIM_INT_NCALLBACKS
-	int "Max number of interrupt callbacks"
-	default 4
-	---help---
-		This is the maximum number of interrupt callbacks supported
-
-config SIM_INT_POLLDELAY
-	int "Interrupt poll delay (used)"
-	default 500000
-	---help---
-		This microsecond delay defines the polling rate for missed interrupts.
-
-endif # SIM_IOEXPANDER
-
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
 	default false
