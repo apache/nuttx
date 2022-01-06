@@ -152,7 +152,7 @@ struct max86178_dev_s
   FAR const struct max86178_config_s
                  *config;                   /* The board config */
   struct work_s  work;                      /* Interrupt handler */
-  struct sensor_event_ppg
+  struct sensor_event_ppgd
                  ppgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
   struct sensor_event_ecg
                  ecgdata[CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER];
@@ -1006,13 +1006,13 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
                 priv->sensor[MAX86178_PPG_IDX].current;
               if (toggle_ppgch == 1)
                 {
-                  priv->ppgdata[counter_ppg].ppg1 =
+                  priv->ppgdata[counter_ppg].ppg[0] =
                     max86178_ppg_calcudata(priv, temp_sample);
                   toggle_ppgch = 2;
                 }
               else
                 {
-                  priv->ppgdata[counter_ppg].ppg2 =
+                  priv->ppgdata[counter_ppg].ppg[1] =
                     max86178_ppg_calcudata(priv, temp_sample);
                   toggle_ppgch = 1;
                   counter_ppg++;
@@ -1029,12 +1029,12 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
                 priv->sensor[MAX86178_PPG_IDX].current;
               if (toggle_ppgch == 1)
                 {
-                  priv->ppgdata[counter_ppg].ppg1 = MAX86178_ABS_PPG_MAX;
+                  priv->ppgdata[counter_ppg].ppg[0] = MAX86178_ABS_PPG_MAX;
                   toggle_ppgch = 2;
                 }
               else
                 {
-                  priv->ppgdata[counter_ppg].ppg2 = MAX86178_ABS_PPG_MAX;
+                  priv->ppgdata[counter_ppg].ppg[1] = MAX86178_ABS_PPG_MAX;
                   toggle_ppgch = 1;
                   counter_ppg++;
                 }
@@ -1098,7 +1098,7 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
     {
       priv->sensor[MAX86178_PPG_IDX].lower.push_event(
             priv->sensor[MAX86178_PPG_IDX].lower.priv, priv->ppgdata,
-            sizeof(FAR struct sensor_event_ppg) * counter_ppg);
+            sizeof(FAR struct sensor_event_ppgd) * counter_ppg);
     }
 
   /* Release ecg and ppg data after push events have been done */
@@ -1557,7 +1557,7 @@ static int max86178_activate(FAR struct sensor_lowerhalf_s *lower,
               return ret;
             }
         }
-      else if(lower->type == SENSOR_TYPE_PPG)
+      else if(lower->type == SENSOR_TYPE_PPGD)
         {
           ret = max86178_ppg_enable(priv, enable);
           if (ret < 0)
@@ -1653,7 +1653,7 @@ static int max86178_set_interval(FAR struct sensor_lowerhalf_s *lower,
       *period_us = MAX86178_ONE_SECOND / freq;
       priv->sensor[MAX86178_ECG_IDX].interval = *period_us;
     }
-  else if(lower->type == SENSOR_TYPE_PPG)
+  else if(lower->type == SENSOR_TYPE_PPGD)
     {
       /* Find the period that matches best. */
 
@@ -1848,7 +1848,7 @@ static int max86178_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
     {
       return max86178_ecg_control(priv, cmd, arg);
     }
-  else if (lower->type == SENSOR_TYPE_PPG)
+  else if (lower->type == SENSOR_TYPE_PPGD)
     {
       return max86178_ppg_control(priv, cmd, arg);
     }
@@ -2005,7 +2005,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
   priv->sensor[MAX86178_ECG_IDX].dev = priv;
 
   priv->sensor[MAX86178_PPG_IDX].lower.ops = &g_max86178_ppg_ops;
-  priv->sensor[MAX86178_PPG_IDX].lower.type = SENSOR_TYPE_PPG;
+  priv->sensor[MAX86178_PPG_IDX].lower.type = SENSOR_TYPE_PPGD;
   priv->sensor[MAX86178_PPG_IDX].lower.batch_number =
                               CONFIG_SENSORS_MAX86178_FIFO_SLOTS_NUMBER;
   priv->sensor[MAX86178_PPG_IDX].interval = MAX86178_PPG_INTVL_DFT;
