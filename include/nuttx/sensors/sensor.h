@@ -226,17 +226,27 @@
 
 #define SENSOR_TYPE_ECG                             25
 
-/* PPG (Photoplethysmography)
- * A sensor of this type returns the PPG measurements in counts. The PPG
- * measurements come from photodiode and following current amplifiers, where
- * the photodiode switches reflected light intensity to current. Here the PPG
- * value means the ADC counts, since the LED lightness, the photodiode model,
- * the reflect-ratio, and the integration time of ADC varies with different
- * measurements, while the useful information of PPG is the not the magnitude
- * but the shape of the waveform.
+/* PPG Dual (2-channel photoplethysmography)
+ * A sensor of this type returns the 2 channels PPG measurements in ADC
+ * counts and their corresponding LED current and ADC gains. The PPG
+ * measurements come from photodiodes and following current amplifiers and
+ * ADCs, where a photodiode switches reflected light intensity to current.
+ * The LED current decides the lightness of LED, which is the input of PPG
+ * measurements. The ADC gains are multipled on the output and affect SNR.
  */
 
-#define SENSOR_TYPE_PPG                             26
+#define SENSOR_TYPE_PPGD                            26
+
+/* PPG Quad (4-channel photoplethysmography)
+ * A sensor of this type returns the 4 channels PPG measurements in ADC
+ * counts and their corresponding LED current and ADC gains. The PPG
+ * measurements come from photodiodes and following current amplifiers and
+ * ADCs, where a photodiode switches reflected light intensity to current.
+ * The LED current decides the lightness of LED, which is the input of PPG
+ * measurements. The ADC gains are multipled on the output and affect SNR.
+ */
+
+#define SENSOR_TYPE_PPGQ                            27
 
 /* Imdepance
  * A sensor of this type returns the impedance measurements. An impedance
@@ -244,7 +254,7 @@
  * imaginary part(reactance). Both of them are in uint Ohm(Ω).
  */
 
-#define SENSOR_TYPE_IMPEDANCE                       27
+#define SENSOR_TYPE_IMPEDANCE                       28
 
 /* OTS (Optical tracking sensor)
  * A sensor of this type returns the OTS measurements in counts. It
@@ -253,17 +263,17 @@
  * design flexibility into a compact device.
  */
 
-#define SENSOR_TYPE_OTS                             28
+#define SENSOR_TYPE_OTS                             29
 
 /* Sensor of gps satellite
  * A sensor of this type returns the gps satellite information.
  */
 
-#define SENSOR_TYPE_GPS_SATELLITE                   29
+#define SENSOR_TYPE_GPS_SATELLITE                   30
 
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           30
+#define SENSOR_TYPE_COUNT                           31
 
 /****************************************************************************
  * Inline Functions
@@ -480,10 +490,20 @@ struct sensor_event_ecg     /* Type: ECG */
   float ecg;                /* Unit is μV */
 };
 
-struct sensor_event_ppg     /* Type: PPG */
+struct sensor_event_ppgd    /* Type: PPGD */
 {
   uint64_t timestamp;       /* Unit is microseconds */
-  uint32_t ppg;             /* Unit is ADC counts */
+  uint32_t ppg[2];          /* PPG from 2 channels. Units are ADC counts. */
+  uint32_t current;         /* LED current. Unit is uA. */
+  uint16_t gain[2];         /* ADC gains of channels. Units are V/V or V/A. */
+};
+
+struct sensor_event_ppgq    /* Type: PPDQ */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  uint32_t ppg[4];          /* PPG from 4 channels. Units are ADC counts. */
+  uint32_t current;         /* LED current. Unit is uA. */
+  uint16_t gain[4];         /* ADC gains of channels. Units are V/V or V/A. */
 };
 
 struct sensor_event_impd    /* Type: Impedance */
