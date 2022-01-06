@@ -137,6 +137,10 @@ ifeq ($(CONFIG_I2C_STWLC38),y)
 CSRCS += polaris.c
 endif
 
+ifeq ($(CONFIG_I2C_CPS4019),y)
+CSRCS += cps4019_ctl.c
+endif
+
 # Add the BQ256XX I2C-based battery charger driver
 
 ifeq ($(CONFIG_I2C_BQ25618),y)

@@ -431,6 +431,58 @@ FAR struct battery_charger_dev_s *
 #endif
 
 /****************************************************************************
+ * Name: cps4019_initialize
+ *
+ * Description:
+ *   Initialize the cps4019 (wireless rx) charger driver and return
+ *   an instance of the lower-half interface that may be used with
+ *   battery_charger_register().
+ *
+ * This is for:
+ *   CPS4019
+ *
+ *   This driver requires:
+ *
+ *   CONFIG_BATTERY_CHARGER - Upper half battery charger driver support
+ *   CONFIG_I2C - I2C support
+ *   CONFIG_I2C_CPS4019 - And the driver must be explicitly selected.
+ *
+ * Input Parameters:
+ *   i2c       - An instance of the I2C interface to use to communicate with
+ *               the SC8551
+ *   addr      - The I2C address of the CPS4019 (Better be 0x30).
+ *   frequency - The I2C frequency
+ *   current   - The input current our power-supply can offer to charger
+ *
+ * Returned Value:
+ *   A pointer to the initialized battery driver instance.  A NULL pointer
+ *   is returned on a failure to initialize the CPS4019.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_I2C) && defined(CONFIG_I2C_CPS4019)
+
+struct cps4019_lower_s
+{
+  uint8_t  addr;                           /* I2C device address */
+  uint32_t frequency;                      /* I2C frequency */
+  uint32_t current;                        /* Power supply capability */
+  uint32_t sleep_pin;
+  uint32_t detect_pin;
+  uint32_t int_pin;                        /* Interrupt pin */
+  uint32_t enb_pin;
+  uint32_t vaa_pin;                        /* WPC_VAA_2V5 enable pin */
+};
+
+struct i2c_master_s;
+
+FAR struct battery_charger_dev_s *
+  cps4019_initialize(FAR struct i2c_master_s *i2c,
+                     FAR struct cps4019_lower_s *lower,
+                     FAR struct ioexpander_dev_s *rpmsg_dev,
+                     FAR struct ioexpander_dev_s *io_dev);
+#endif
+/****************************************************************************
  * Name: da9168_initialize
  *
  * Description:

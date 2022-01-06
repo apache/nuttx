@@ -429,7 +429,14 @@ config STWLC38
 	depends on BATTERY_CHARGER
 	---help---
 		The STWLC38 are wireless rx for power supply.
-
+config CPS4019
+	bool "CPS4019 Battery charger support"
+	default n
+	select I2C
+	select I2C_CPS4019
+	depends on BATTERY_CHARGER
+	---help---
+		The CPS4019 are wireless rx for power supply.
 config AXP202
 	bool "AXP202 Battery charger support"
 	default n
@@ -581,6 +588,10 @@ config I2C_SC8551
 config I2C_STWLC38
 	bool
 	default y if STWLC38
+
+config I2C_CPS4019
+        bool
+        default y if CPS4019
 
 config I2C_AXP202
 	bool
