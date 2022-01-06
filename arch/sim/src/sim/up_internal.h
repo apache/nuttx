@@ -92,7 +92,6 @@
 
 struct tcb_s;
 struct foc_dev_s;
-struct spi_dev_s;
 struct qspi_dev_s;
 struct ioexpander_dev_s;
 struct i2c_master_s;
@@ -329,10 +328,6 @@ void usrsock_loop(void);
 #ifdef CONFIG_RPTUN
 int up_rptun_init(const char *shmemname, const char *cpuname, bool master);
 void up_rptun_loop(void);
-#endif
-
-#ifdef CONFIG_SIM_SPIFLASH
-struct spi_dev_s *up_spiflashinitialize(const char *name);
 #endif
 
 #ifdef CONFIG_SIM_QSPIFLASH

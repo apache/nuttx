@@ -1,5 +1,5 @@
 /************************************************************************************
- * arch/sim/src/sim/up_spiflash.c
+ * drivers/spi/spi_flash.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,18 +24,10 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <errno.h>
 #include <debug.h>
 #include <string.h>
 
-#include <nuttx/irq.h>
-#include <nuttx/arch.h>
-#include <nuttx/spi/spi.h>
-
-#include "up_internal.h"
+#include <nuttx/spi/spi_flash.h>
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -45,118 +37,118 @@
 
 /* Define the FLASH SIZE in bytes */
 
-#ifdef CONFIG_SIM_SPIFLASH_1M
-#  define CONFIG_SPIFLASH_SIZE            (128 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY        0x11
+#ifdef CONFIG_SPI_FLASH_1M
+#  define CONFIG_SPI_FLASH_SIZE            (128 * 1024)
+#  define CONFIG_SPI_FLASH_CAPACITY        0x11
 
-#ifndef CONFIG_SIM_SPIFLASH_SECTORSIZE
-#  define CONFIG_SIM_SPIFLASH_SECTORSIZE  2048
+#ifndef CONFIG_SPI_FLASH_SECTORSIZE
+#  define CONFIG_SPI_FLASH_SECTORSIZE      2048
 #endif
 
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_8M
-#  define CONFIG_SPIFLASH_SIZE            (1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x3f
-#  define CONFIG_SPIFLASH_CAPACITY        0x14
+#ifdef CONFIG_SPI_FLASH_8M
+#  define CONFIG_SPI_FLASH_SIZE            (1024 * 1024)
+#  define CONFIG_SPI_FLASH_CAPACITY_SST26  0x3f
+#  define CONFIG_SPI_FLASH_CAPACITY        0x14
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_32M
-#  define CONFIG_SPIFLASH_SIZE            (4 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x42
-#  define CONFIG_SPIFLASH_CAPACITY        0x16
+#ifdef CONFIG_SPI_FLASH_32M
+#  define CONFIG_SPI_FLASH_SIZE            (4 * 1024 * 1024)
+#  define CONFIG_SPI_FLASH_CAPACITY_SST26  0x42
+#  define CONFIG_SPI_FLASH_CAPACITY        0x16
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_64M
-#  define CONFIG_SPIFLASH_SIZE            (8 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x43
-#  define CONFIG_SPIFLASH_CAPACITY        0x17
+#ifdef CONFIG_SPI_FLASH_64M
+#  define CONFIG_SPI_FLASH_SIZE            (8 * 1024 * 1024)
+#  define CONFIG_SPI_FLASH_CAPACITY_SST26  0x43
+#  define CONFIG_SPI_FLASH_CAPACITY        0x17
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_128M
-#  define CONFIG_SPIFLASH_SIZE            (16 * 1024 * 1024)
-#  define CONFIG_SPIFLASH_CAPACITY_SST26  0x44
-#  define CONFIG_SPIFLASH_CAPACITY        0x18
+#ifdef CONFIG_SPI_FLASH_128M
+#  define CONFIG_SPI_FLASH_SIZE            (16 * 1024 * 1024)
+#  define CONFIG_SPI_FLASH_CAPACITY_SST26  0x44
+#  define CONFIG_SPI_FLASH_CAPACITY        0x18
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_MANUFACTURER
-#  define CONFIG_SIM_SPIFLASH_MANUFACTURER  0x20
+#ifndef CONFIG_SPI_FLASH_MANUFACTURER
+#  define CONFIG_SPI_FLASH_MANUFACTURER    0x20
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_MEMORY_TYPE
-#  define CONFIG_SIM_SPIFLASH_MEMORY_TYPE   0x20
+#ifndef CONFIG_SPI_FLASH_MEMORY_TYPE
+#  define CONFIG_SPI_FLASH_MEMORY_TYPE     0x20
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_SECTORSIZE
-#  define CONFIG_SIM_SPIFLASH_SECTORSIZE    65536
+#ifndef CONFIG_SPI_FLASH_SECTORSIZE
+#  define CONFIG_SPI_FLASH_SECTORSIZE      65536
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_SUBSECTORSIZE
-#  define CONFIG_SIM_SPIFLASH_SUBSECTORSIZE    4096
+#ifndef CONFIG_SPI_FLASH_SUBSECTORSIZE
+#  define CONFIG_SPI_FLASH_SUBSECTORSIZE   4096
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_SECTORSIZE_MASK
-#  define CONFIG_SIM_SPIFLASH_SECTORSIZE_MASK  (~(CONFIG_SIM_SPIFLASH_SECTORSIZE-1))
+#ifndef CONFIG_SPI_FLASH_SECTORSIZE_MASK
+#  define CONFIG_SPI_FLASH_SECTORSIZE_MASK (~(CONFIG_SPI_FLASH_SECTORSIZE-1))
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_SUBSECTORSIZE_MASK
-#  define CONFIG_SIM_SPIFLASH_SUBSECTORSIZE_MASK  (~(CONFIG_SIM_SPIFLASH_SUBSECTORSIZE-1))
+#ifndef CONFIG_SPI_FLASH_SUBSECTORSIZE_MASK
+#  define CONFIG_SPI_FLASH_SUBSECTORSIZE_MASK (~(CONFIG_SPI_FLASH_SUBSECTORSIZE-1))
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_PAGESIZE
-#  define CONFIG_SIM_SPIFLASH_PAGESIZE    256
+#ifndef CONFIG_SPI_FLASH_PAGESIZE
+#  define CONFIG_SPI_FLASH_PAGESIZE        256
 #endif
 
-#ifndef CONFIG_SIM_SPIFLASH_PAGESIZE_MASK
-#  define CONFIG_SIM_SPIFLASH_PAGESIZE_MASK  (CONFIG_SIM_SPIFLASH_PAGESIZE-1)
+#ifndef CONFIG_SPI_FLASH_PAGESIZE_MASK
+#  define CONFIG_SPI_FLASH_PAGESIZE_MASK   (CONFIG_SPI_FLASH_PAGESIZE-1)
 #endif
 
 /* Define FLASH States */
 
-#define SPIFLASH_STATE_IDLE         0
-#define SPIFLASH_STATE_RDID1        1
-#define SPIFLASH_STATE_RDID2        2
-#define SPIFLASH_STATE_RDID3        3
-#define SPIFLASH_STATE_WREN         4
-#define SPIFLASH_STATE_RDSR         5
-#define SPIFLASH_STATE_SE1          6
-#define SPIFLASH_STATE_SE2          7
-#define SPIFLASH_STATE_SE3          8
-#define SPIFLASH_STATE_PP1          9
-#define SPIFLASH_STATE_PP2          10
-#define SPIFLASH_STATE_PP3          11
-#define SPIFLASH_STATE_PP4          12
-#define SPIFLASH_STATE_READ1        13
-#define SPIFLASH_STATE_READ2        14
-#define SPIFLASH_STATE_READ3        15
-#define SPIFLASH_STATE_READ4        16
-#define SPIFLASH_STATE_FREAD_WAIT   17
+#define SPI_FLASH_STATE_IDLE         0
+#define SPI_FLASH_STATE_RDID1        1
+#define SPI_FLASH_STATE_RDID2        2
+#define SPI_FLASH_STATE_RDID3        3
+#define SPI_FLASH_STATE_WREN         4
+#define SPI_FLASH_STATE_RDSR         5
+#define SPI_FLASH_STATE_SE1          6
+#define SPI_FLASH_STATE_SE2          7
+#define SPI_FLASH_STATE_SE3          8
+#define SPI_FLASH_STATE_PP1          9
+#define SPI_FLASH_STATE_PP2          10
+#define SPI_FLASH_STATE_PP3          11
+#define SPI_FLASH_STATE_PP4          12
+#define SPI_FLASH_STATE_READ1        13
+#define SPI_FLASH_STATE_READ2        14
+#define SPI_FLASH_STATE_READ3        15
+#define SPI_FLASH_STATE_READ4        16
+#define SPI_FLASH_STATE_FREAD_WAIT   17
 
 /* Instructions */
 
 /*      Command            Value      N Description             Addr Dummy Data   */
 
-#define SPIFLASH_WREN      0x06    /* 1 Write Enable              0   0     0     */
-#define SPIFLASH_WRDI      0x04    /* 1 Write Disable             0   0     0     */
-#define SPIFLASH_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
-#define SPIFLASH_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
-#define SPIFLASH_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
-#define SPIFLASH_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
-#define SPIFLASH_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
-#define SPIFLASH_PP        0x02    /* 1 Page Program              3   0     1-256 */
-#define SPIFLASH_SE        0xd8    /* 1 Sector Erase              3   0     0     */
-#define SPIFLASH_BE        0xc7    /* 1 Bulk Erase                0   0     0     */
-#define SPIFLASH_DP        0xb9    /* 2 Deep power down           0   0     0     */
-#define SPIFLASH_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1   */
-#define SPIFLASH_SSE       0x20    /* 3 Sub-Sector Erase          0   0     0     */
+#define SPI_FLASH_WREN      0x06    /* 1 Write Enable              0   0     0     */
+#define SPI_FLASH_WRDI      0x04    /* 1 Write Disable             0   0     0     */
+#define SPI_FLASH_RDID      0x9f    /* 1 Read Identification       0   0     1-3   */
+#define SPI_FLASH_RDSR      0x05    /* 1 Read Status Register      0   0     >=1   */
+#define SPI_FLASH_WRSR      0x01    /* 1 Write Status Register     0   0     1     */
+#define SPI_FLASH_READ      0x03    /* 1 Read Data Bytes           3   0     >=1   */
+#define SPI_FLASH_FAST_READ 0x0b    /* 1 Higher speed read         3   1     >=1   */
+#define SPI_FLASH_PP        0x02    /* 1 Page Program              3   0     1-256 */
+#define SPI_FLASH_SE        0xd8    /* 1 Sector Erase              3   0     0     */
+#define SPI_FLASH_BE        0xc7    /* 1 Bulk Erase                0   0     0     */
+#define SPI_FLASH_DP        0xb9    /* 2 Deep power down           0   0     0     */
+#define SPI_FLASH_RES       0xab    /* 2 Read Electronic Signature 0   3     >=1   */
+#define SPI_FLASH_SSE       0x20    /* 3 Sub-Sector Erase          0   0     0     */
 
-#define SPIFLASH_DUMMY     0xa5
+#define SPI_FLASH_DUMMY     0xa5
 
 /************************************************************************************
  * Private Types
  ************************************************************************************/
 
-struct sim_spiflashdev_s
+struct spi_flash_dev_s
 {
   struct spi_dev_s  spidev;     /* Externally visible part of the SPI interface */
   uint32_t          selected;   /* SPIn base address */
@@ -169,7 +161,7 @@ struct sim_spiflashdev_s
   uint8_t           manuf;
   uint8_t           type;
   unsigned long     address;
-  unsigned char     data[CONFIG_SPIFLASH_SIZE];
+  unsigned char     data[CONFIG_SPI_FLASH_SIZE];
 };
 
 /************************************************************************************
@@ -178,31 +170,32 @@ struct sim_spiflashdev_s
 
 /* SPI methods */
 
-static int         spiflash_lock(FAR struct spi_dev_s *dev, bool lock);
-static uint32_t    spiflash_setfrequency(FAR struct spi_dev_s *dev,
-                                         uint32_t frequency);
-static void        spiflash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
-static void        spiflash_setbits(FAR struct spi_dev_s *dev, int nbits);
-static uint32_t    spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd);
-static void        spiflash_exchange(FAR struct spi_dev_s *dev,
-                                     FAR const void *txbuffer, FAR void *rxbuffer,
-                                     size_t nwords);
-static void        spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
-                                   bool selected);
-static uint8_t     spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid);
+static int         spi_flash_lock(FAR struct spi_dev_s *dev, bool lock);
+static uint32_t    spi_flash_setfrequency(FAR struct spi_dev_s *dev,
+                                          uint32_t frequency);
+static void        spi_flash_setmode(FAR struct spi_dev_s *dev,
+                                     enum spi_mode_e mode);
+static void        spi_flash_setbits(FAR struct spi_dev_s *dev, int nbits);
+static uint32_t    spi_flash_send(FAR struct spi_dev_s *dev, uint32_t wd);
+static void        spi_flash_exchange(FAR struct spi_dev_s *dev,
+                                      FAR const void *txbuffer, FAR void *rxbuffer,
+                                      size_t nwords);
+static void        spi_flash_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                                    bool selected);
+static uint8_t     spi_flash_status(FAR struct spi_dev_s *dev, uint32_t devid);
 #ifdef CONFIG_SPI_CMDDATA
-static int         spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
-                                    bool cmd);
+static int         spi_flash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid,
+                                     bool cmd);
 #endif
 #ifndef CONFIG_SPI_EXCHANGE
-static void        spiflash_sndblock(FAR struct spi_dev_s *dev,
-                                     FAR const void *txbuffer, size_t nwords);
-static void        spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                                      size_t nwords);
+static void        spi_flash_sndblock(FAR struct spi_dev_s *dev,
+                                      FAR const void *txbuffer, size_t nwords);
+static void        spi_flash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                                       size_t nwords);
 #endif
 
-static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data);
-static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
+static void spi_flash_writeword(FAR struct spi_flash_dev_s *priv, uint16_t data);
+static uint32_t spi_flash_readword(FAR struct spi_flash_dev_s *priv);
 
 /************************************************************************************
  * Private Data
@@ -210,30 +203,30 @@ static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv);
 
 static const struct spi_ops_s g_spiops =
 {
-  .lock              = spiflash_lock,
-  .select            = spiflash_select,
-  .setfrequency      = spiflash_setfrequency,
-  .setmode           = spiflash_setmode,
-  .setbits           = spiflash_setbits,
+  .lock              = spi_flash_lock,
+  .select            = spi_flash_select,
+  .setfrequency      = spi_flash_setfrequency,
+  .setmode           = spi_flash_setmode,
+  .setbits           = spi_flash_setbits,
 #ifdef CONFIG_SPI_HWFEATURES
   .hwfeatures        = 0,                   /* Not supported */
 #endif
-  .status            = spiflash_status,
+  .status            = spi_flash_status,
 #ifdef CONFIG_SPI_CMDDATA
-  .cmddata           = spiflash_cmddata,
+  .cmddata           = spi_flash_cmddata,
 #endif
-  .send              = spiflash_send,
+  .send              = spi_flash_send,
 #ifdef CONFIG_SPI_EXCHANGE
-  .exchange          = spiflash_exchange,
+  .exchange          = spi_flash_exchange,
 #else
-  .sndblock          = spiflash_sndblock,
-  .recvblock         = spiflash_recvblock,
+  .sndblock          = spi_flash_sndblock,
+  .recvblock         = spi_flash_recvblock,
 #endif
   .registercallback  = 0,
 };
 
-#ifdef CONFIG_SIM_SPIFLASH_M25P
-struct sim_spiflashdev_s g_spidev_m25p =
+#ifdef CONFIG_SPI_FLASH_M25P
+struct spi_flash_dev_s g_spidev_m25p =
 {
   .spidev   =
   {
@@ -242,12 +235,12 @@ struct sim_spiflashdev_s g_spidev_m25p =
   .name     = "m25p",
   .manuf    = 0x20,
   .type     = 0x20,
-  .capacity = CONFIG_SPIFLASH_CAPACITY
+  .capacity = CONFIG_SPI_FLASH_CAPACITY
 };
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_SST26
-struct sim_spiflashdev_s g_spidev_sst26 =
+#ifdef CONFIG_SPI_FLASH_SST26
+struct spi_flash_dev_s g_spidev_sst26 =
 {
   .spidev   =
   {
@@ -260,12 +253,12 @@ struct sim_spiflashdev_s g_spidev_sst26 =
 #else
   .type     = 0x25,
 #endif
-  .capacity = CONFIG_SPIFLASH_CAPACITY_SST26
+  .capacity = CONFIG_SPI_FLASH_CAPACITY_SST26
 };
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_W25
-struct sim_spiflashdev_s g_spidev_w25 =
+#ifdef CONFIG_SPI_FLASH_W25
+struct spi_flash_dev_s g_spidev_w25 =
 {
   .spidev   =
   {
@@ -274,36 +267,36 @@ struct sim_spiflashdev_s g_spidev_w25 =
   .name     = "w25",
   .manuf    = 0xef,
   .type     = 0x30,
-  .capacity = CONFIG_SPIFLASH_CAPACITY
+  .capacity = CONFIG_SPI_FLASH_CAPACITY
 };
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH_CUSTOM
-struct sim_spiflashdev_s g_spidev_custom =
+#ifdef CONFIG_SPI_FLASH_CUSTOM
+struct spi_flash_dev_s g_spidev_custom =
 {
   .spidev   =
   {
     &g_spiops
   },
   .name     = "custom",
-  .manuf    = CONFIG_SIM_SPIFLASH_MANUFACTURER,
-  .type     = CONFIG_SIM_SPIFLASH_MEMORY_TYPE,
-  .capacity = CONFIG_SIM_SPIFLASH_CAPACITY
+  .manuf    = CONFIG_SPI_FLASH_MANUFACTURER,
+  .type     = CONFIG_SPI_FLASH_MEMORY_TYPE,
+  .capacity = CONFIG_SPI_FLASH_CAPACITY
 };
 #endif
 
-struct sim_spiflashdev_s *gp_spidev[] =
+struct spi_flash_dev_s *gp_spidev[] =
 {
-#ifdef CONFIG_SIM_SPIFLASH_M25P
+#ifdef CONFIG_SPI_FLASH_M25P
   &g_spidev_m25p,
 #endif
-#ifdef CONFIG_SIM_SPIFLASH_SST26
+#ifdef CONFIG_SPI_FLASH_SST26
   &g_spidev_sst26,
 #endif
-#ifdef CONFIG_SIM_SPIFLASH_W25
+#ifdef CONFIG_SPI_FLASH_W25
   &g_spidev_w25,
 #endif
-#ifdef CONFIG_SIM_SPIFLASH_CUSTOM
+#ifdef CONFIG_SPI_FLASH_CUSTOM
   &g_spidev_custom,
 #endif
 
@@ -317,7 +310,7 @@ struct sim_spiflashdev_s *gp_spidev[] =
  ************************************************************************************/
 
 /************************************************************************************
- * Name: spiflash_lock
+ * Name: spi_flash_lock
  *
  * Description:
  *   On SPI buses where there are multiple devices, it will be necessary to
@@ -337,13 +330,13 @@ struct sim_spiflashdev_s *gp_spidev[] =
  *
  ************************************************************************************/
 
-static int spiflash_lock(FAR struct spi_dev_s *dev, bool lock)
+static int spi_flash_lock(FAR struct spi_dev_s *dev, bool lock)
 {
   return OK;
 }
 
 /************************************************************************************
- * Name: spiflash_select
+ * Name: spi_flash_select
  *
  * Description:
  *   Process select logic for the FLASH.
@@ -353,10 +346,10 @@ static int spiflash_lock(FAR struct spi_dev_s *dev, bool lock)
  *
  ************************************************************************************/
 
-static void spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
-                            bool selected)
+static void spi_flash_select(FAR struct spi_dev_s *dev, uint32_t devid,
+                             bool selected)
 {
-  FAR struct sim_spiflashdev_s *priv = (FAR struct sim_spiflashdev_s *)dev;
+  FAR struct spi_flash_dev_s *priv = (FAR struct spi_flash_dev_s *)dev;
 
   if (devid == SPIDEV_FLASH(0))
     {
@@ -366,18 +359,18 @@ static void spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
 
       if (!selected)
         {
-          if (priv->last_cmd != SPIFLASH_WREN)
+          if (priv->last_cmd != SPI_FLASH_WREN)
             {
               priv->wren = 0;
             }
 
-          priv->state = SPIFLASH_STATE_IDLE;
+          priv->state = SPI_FLASH_STATE_IDLE;
         }
     }
 }
 
 /************************************************************************************
- * Name: spiflash_cmddata
+ * Name: spi_flash_cmddata
  *
  * Description:
  *   Perform SPI Command operations
@@ -388,14 +381,14 @@ static void spiflash_select(FAR struct spi_dev_s *dev, uint32_t devid,
  ************************************************************************************/
 
 #ifdef CONFIG_SPI_CMDDATA
-static int spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
+static int spi_flash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
 {
   return 0;
 }
 #endif
 
 /************************************************************************************
- * Name: spiflash_setfrequency
+ * Name: spi_flash_setfrequency
  *
  * Description:
  *   Set the SPI frequency.
@@ -409,13 +402,13 @@ static int spiflash_cmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd)
  *
  ************************************************************************************/
 
-static uint32_t spiflash_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
+static uint32_t spi_flash_setfrequency(FAR struct spi_dev_s *dev, uint32_t frequency)
 {
   return frequency;
 }
 
 /************************************************************************************
- * Name: spiflash_setmode
+ * Name: spi_flash_setmode
  *
  * Description:
  *   Set the SPI mode.  see enum spi_mode_e for mode definitions
@@ -429,12 +422,12 @@ static uint32_t spiflash_setfrequency(FAR struct spi_dev_s *dev, uint32_t freque
  *
  ************************************************************************************/
 
-static void spiflash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
+static void spi_flash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 {
 }
 
 /************************************************************************************
- * Name: spiflash_setbits
+ * Name: spi_flash_setbits
  *
  * Description:
  *   Set the number of bits per word.
@@ -448,12 +441,12 @@ static void spiflash_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
  *
  ************************************************************************************/
 
-static void spiflash_setbits(FAR struct spi_dev_s *dev, int nbits)
+static void spi_flash_setbits(FAR struct spi_dev_s *dev, int nbits)
 {
 }
 
 /************************************************************************************
- * Name: spiflash_status
+ * Name: spi_flash_status
  *
  * Description:
  *   Set the SPI bus status
@@ -463,13 +456,13 @@ static void spiflash_setbits(FAR struct spi_dev_s *dev, int nbits)
  *
  ************************************************************************************/
 
-static uint8_t spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid)
+static uint8_t spi_flash_status(FAR struct spi_dev_s *dev, uint32_t devid)
 {
   return 0;
 }
 
 /************************************************************************************
- * Name: spiflash_send
+ * Name: spi_flash_send
  *
  * Description:
  *   Exchange one word on SPI
@@ -484,15 +477,15 @@ static uint8_t spiflash_status(FAR struct spi_dev_s *dev, uint32_t devid)
  *
  ************************************************************************************/
 
-static uint32_t spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd)
+static uint32_t spi_flash_send(FAR struct spi_dev_s *dev, uint32_t wd)
 {
-  FAR struct sim_spiflashdev_s *priv = (FAR struct sim_spiflashdev_s *)dev;
+  FAR struct spi_flash_dev_s *priv = (FAR struct spi_flash_dev_s *)dev;
   uint32_t ret;
 
   if (priv->selected)
     {
-      spiflash_writeword(priv, wd);
-      ret = spiflash_readword(priv);
+      spi_flash_writeword(priv, wd);
+      ret = spi_flash_readword(priv);
     }
   else
     {
@@ -503,7 +496,7 @@ static uint32_t spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd)
 }
 
 /************************************************************************************
- * Name: spiflash_exchange (no DMA).  aka spi_exchange_nodma
+ * Name: spi_flash_exchange (no DMA).  aka spi_exchange_nodma
  *
  * Description:
  *   Exchange a block of data on SPI without using DMA
@@ -523,10 +516,10 @@ static uint32_t spiflash_send(FAR struct spi_dev_s *dev, uint32_t wd)
  *
  ************************************************************************************/
 
-static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                              FAR void *rxbuffer, size_t nwords)
+static void spi_flash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                               FAR void *rxbuffer, size_t nwords)
 {
-  spiinfo("txbuffer=%p rxbuffer=%p nwords=%d\n", txbuffer, rxbuffer, nwords);
+  spiinfo("txbuffer=%p rxbuffer=%p nwords=%zu\n", txbuffer, rxbuffer, nwords);
 
   /* 8-bit mode */
 
@@ -549,7 +542,7 @@ static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffe
 
       /* Exchange one word */
 
-      word = (uint8_t)spiflash_send(dev, (uint16_t)word);
+      word = (uint8_t)spi_flash_send(dev, (uint16_t)word);
 
       /* Is there a buffer to receive the return value? */
 
@@ -581,11 +574,11 @@ static void spiflash_exchange(FAR struct spi_dev_s *dev, FAR const void *txbuffe
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
-                              size_t nwords)
+static void spi_flash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffer,
+                               size_t nwords)
 {
   spiinfo("txbuffer=%p nwords=%d\n", txbuffer, nwords);
-  return spiflash_exchange(dev, txbuffer, NULL, nwords);
+  return spi_flash_exchange(dev, txbuffer, NULL, nwords);
 }
 #endif
 
@@ -610,16 +603,16 @@ static void spiflash_sndblock(FAR struct spi_dev_s *dev, FAR const void *txbuffe
  ************************************************************************************/
 
 #ifndef CONFIG_SPI_EXCHANGE
-static void spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
-                               size_t nwords)
+static void spi_flash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
+                                size_t nwords)
 {
   spiinfo("rxbuffer=%p nwords=%d\n", rxbuffer, nwords);
-  return spiflash_exchange(dev, NULL, rxbuffer, nwords);
+  return spi_flash_exchange(dev, NULL, rxbuffer, nwords);
 }
 #endif
 
 /************************************************************************************
- * Name: spiflash_sectorerase
+ * Name: spi_flash_sectorerase
  *
  * Description:
  *   Erase one sector
@@ -632,25 +625,25 @@ static void spiflash_recvblock(FAR struct spi_dev_s *dev, FAR void *rxbuffer,
  *
  ************************************************************************************/
 
-static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
+static void spi_flash_sectorerase(FAR struct spi_flash_dev_s *priv)
 {
   uint32_t  address;
-  uint32_t  len;
+  uint32_t  len = 0;
 
   /* Ensure the WREN bit is set before any erase operation */
 
   if (priv->wren)
     {
       address = priv->address;
-      if (priv->last_cmd == SPIFLASH_SE)
+      if (priv->last_cmd == SPI_FLASH_SE)
         {
-          address &= CONFIG_SIM_SPIFLASH_SECTORSIZE_MASK;
-          len = CONFIG_SIM_SPIFLASH_SECTORSIZE;
+          address &= CONFIG_SPI_FLASH_SECTORSIZE_MASK;
+          len = CONFIG_SPI_FLASH_SECTORSIZE;
         }
-      else if (priv->last_cmd == SPIFLASH_SSE)
+      else if (priv->last_cmd == SPI_FLASH_SSE)
         {
-          address &= CONFIG_SIM_SPIFLASH_SUBSECTORSIZE_MASK;
-          len = CONFIG_SIM_SPIFLASH_SUBSECTORSIZE;
+          address &= CONFIG_SPI_FLASH_SUBSECTORSIZE_MASK;
+          len = CONFIG_SPI_FLASH_SUBSECTORSIZE;
         }
 
       /* Now perform the erase */
@@ -660,7 +653,7 @@ static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
 }
 
 /************************************************************************************
- * Name: spiflash_writeword
+ * Name: spi_flash_writeword
  *
  * Description:
  *   Write a word (byte in our case) to the FLASH state machine.
@@ -674,52 +667,52 @@ static void spiflash_sectorerase(FAR struct sim_spiflashdev_s *priv)
  *
  ************************************************************************************/
 
-static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data)
+static void spi_flash_writeword(FAR struct spi_flash_dev_s *priv, uint16_t data)
 {
   switch (priv->state)
     {
-      case SPIFLASH_STATE_IDLE:
+      case SPI_FLASH_STATE_IDLE:
         priv->last_cmd = data;
         priv->read_data = 0xff;
         switch (data)
           {
-            case SPIFLASH_RDID:
-              priv->state = SPIFLASH_STATE_RDID1;
+            case SPI_FLASH_RDID:
+              priv->state = SPI_FLASH_STATE_RDID1;
               break;
 
-            case SPIFLASH_WREN:
+            case SPI_FLASH_WREN:
               priv->wren = 1;
-              priv->state = SPIFLASH_STATE_WREN;
+              priv->state = SPI_FLASH_STATE_WREN;
               break;
 
-            case SPIFLASH_RDSR:
-              priv->state = SPIFLASH_STATE_RDSR;
+            case SPI_FLASH_RDSR:
+              priv->state = SPI_FLASH_STATE_RDSR;
               break;
 
             /* Sector / Subsector erase */
 
-            case SPIFLASH_SE:
-            case SPIFLASH_SSE:
-              priv->state = SPIFLASH_STATE_SE1;
+            case SPI_FLASH_SE:
+            case SPI_FLASH_SSE:
+              priv->state = SPI_FLASH_STATE_SE1;
               break;
 
             /* Bulk Erase */
 
-            case SPIFLASH_BE:
-              priv->state = SPIFLASH_STATE_IDLE;
+            case SPI_FLASH_BE:
+              priv->state = SPI_FLASH_STATE_IDLE;
               if (priv->wren)
                 {
-                  memset(priv->data, 0xff, CONFIG_SPIFLASH_SIZE);
+                  memset(priv->data, 0xff, CONFIG_SPI_FLASH_SIZE);
                 }
               break;
 
-            case SPIFLASH_PP:
-              priv->state = SPIFLASH_STATE_PP1;
+            case SPI_FLASH_PP:
+              priv->state = SPI_FLASH_STATE_PP1;
               break;
 
-            case SPIFLASH_READ:
-            case SPIFLASH_FAST_READ:
-              priv->state = SPIFLASH_STATE_READ1;
+            case SPI_FLASH_READ:
+            case SPI_FLASH_FAST_READ:
+              priv->state = SPI_FLASH_STATE_READ1;
               break;
 
             default:
@@ -729,74 +722,74 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
 
       /* Read ID States */
 
-      case SPIFLASH_STATE_RDID1:
-        priv->read_data = priv->manuf;    /* CONFIG_SIM_SPIFLASH_MANUFACTURER; */
-        priv->state = SPIFLASH_STATE_RDID2;
+      case SPI_FLASH_STATE_RDID1:
+        priv->read_data = priv->manuf;    /* CONFIG_SPI_FLASH_MANUFACTURER; */
+        priv->state = SPI_FLASH_STATE_RDID2;
         break;
 
-      case SPIFLASH_STATE_RDID2:
-        priv->read_data = priv->type;     /* CONFIG_SIM_SPIFLASH_MEMORY_TYPE; */
-        priv->state = SPIFLASH_STATE_RDID3;
+      case SPI_FLASH_STATE_RDID2:
+        priv->read_data = priv->type;     /* CONFIG_SPI_FLASH_MEMORY_TYPE; */
+        priv->state = SPI_FLASH_STATE_RDID3;
         break;
 
-      case SPIFLASH_STATE_RDID3:
-        priv->read_data = priv->capacity; /* CONFIG_SPIFLASH_CAPACITY; */
-        priv->state = SPIFLASH_STATE_IDLE;
+      case SPI_FLASH_STATE_RDID3:
+        priv->read_data = priv->capacity; /* CONFIG_SPI_FLASH_CAPACITY; */
+        priv->state = SPI_FLASH_STATE_IDLE;
         break;
 
       /* WREN state - if we receive any bytes here, then we abort the WREN */
 
-      case SPIFLASH_STATE_WREN:
+      case SPI_FLASH_STATE_WREN:
         priv->wren = 0;
         break;
 
       /* Read Status Register state */
 
-      case SPIFLASH_STATE_RDSR:
+      case SPI_FLASH_STATE_RDSR:
         priv->read_data = 0;
-        priv->state = SPIFLASH_STATE_IDLE;
+        priv->state = SPI_FLASH_STATE_IDLE;
         break;
 
       /* Sector and Sub-Sector erase states - Read the address */
 
-      case SPIFLASH_STATE_SE1:
+      case SPI_FLASH_STATE_SE1:
         priv->address = data << 16;
-        priv->state = SPIFLASH_STATE_SE2;
+        priv->state = SPI_FLASH_STATE_SE2;
         break;
 
-      case SPIFLASH_STATE_SE2:
+      case SPI_FLASH_STATE_SE2:
         priv->address |= data << 8;
-        priv->state = SPIFLASH_STATE_SE3;
+        priv->state = SPI_FLASH_STATE_SE3;
         break;
 
-      case SPIFLASH_STATE_SE3:
+      case SPI_FLASH_STATE_SE3:
         priv->address |= data;
 
         /* Now perform the sector or sub-sector erase.  Really this should
          * be done during the deselect, but this is just a simulation .
          */
 
-        spiflash_sectorerase(priv);
+        spi_flash_sectorerase(priv);
         break;
 
       /* Page Program.  We could reuse the SE states, but let's keep it clean. */
 
-      case SPIFLASH_STATE_PP1:
+      case SPI_FLASH_STATE_PP1:
         priv->address = data << 16;
-        priv->state = SPIFLASH_STATE_PP2;
+        priv->state = SPI_FLASH_STATE_PP2;
         break;
 
-      case SPIFLASH_STATE_PP2:
+      case SPI_FLASH_STATE_PP2:
         priv->address |= data << 8;
-        priv->state = SPIFLASH_STATE_PP3;
+        priv->state = SPI_FLASH_STATE_PP3;
         break;
 
-      case SPIFLASH_STATE_PP3:
+      case SPI_FLASH_STATE_PP3:
         priv->address |= data;
-        priv->state = SPIFLASH_STATE_PP4;
+        priv->state = SPI_FLASH_STATE_PP4;
         break;
 
-      case SPIFLASH_STATE_PP4:
+      case SPI_FLASH_STATE_PP4:
 
         /* In this state we actually write data (if WREN enabled) */
 
@@ -809,10 +802,10 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
          * the actual FLASH.
          */
 
-        if ((priv->address & CONFIG_SIM_SPIFLASH_PAGESIZE_MASK) ==
-              CONFIG_SIM_SPIFLASH_PAGESIZE_MASK)
+        if ((priv->address & CONFIG_SPI_FLASH_PAGESIZE_MASK) ==
+              CONFIG_SPI_FLASH_PAGESIZE_MASK)
           {
-            priv->address &= !CONFIG_SIM_SPIFLASH_PAGESIZE_MASK;
+            priv->address &= !CONFIG_SPI_FLASH_PAGESIZE_MASK;
           }
         else
           {
@@ -822,53 +815,53 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
 
       /* Read data */
 
-      case SPIFLASH_STATE_READ1:
+      case SPI_FLASH_STATE_READ1:
         priv->address = data << 16;
-        priv->state = SPIFLASH_STATE_READ2;
+        priv->state = SPI_FLASH_STATE_READ2;
         break;
 
-      case SPIFLASH_STATE_READ2:
+      case SPI_FLASH_STATE_READ2:
         priv->address |= data << 8;
-        priv->state = SPIFLASH_STATE_READ3;
+        priv->state = SPI_FLASH_STATE_READ3;
         break;
 
-      case SPIFLASH_STATE_READ3:
+      case SPI_FLASH_STATE_READ3:
         priv->address |= data;
-        if (priv->last_cmd == SPIFLASH_FAST_READ)
+        if (priv->last_cmd == SPI_FLASH_FAST_READ)
           {
-            priv->state = SPIFLASH_STATE_FREAD_WAIT;
+            priv->state = SPI_FLASH_STATE_FREAD_WAIT;
           }
         else
           {
-            priv->state = SPIFLASH_STATE_READ4;
+            priv->state = SPI_FLASH_STATE_READ4;
           }
         break;
 
-      case SPIFLASH_STATE_FREAD_WAIT:
+      case SPI_FLASH_STATE_FREAD_WAIT:
         priv->read_data = 0xff;
-        priv->state = SPIFLASH_STATE_READ4;
+        priv->state = SPI_FLASH_STATE_READ4;
         break;
 
-      case SPIFLASH_STATE_READ4:
+      case SPI_FLASH_STATE_READ4:
 
         /* In this state perform data reads until de-selected. */
 
         priv->read_data = priv->data[priv->address++];
-        if (priv->address == CONFIG_SPIFLASH_SIZE)
+        if (priv->address == CONFIG_SPI_FLASH_SIZE)
           {
             priv->address = 0;
           }
         break;
 
       default:
-        priv->state = SPIFLASH_STATE_IDLE;
+        priv->state = SPI_FLASH_STATE_IDLE;
         priv->read_data = 0xff;
         break;
     }
 }
 
 /************************************************************************************
- * Name: spiflash_readword
+ * Name: spi_flash_readword
  *
  * Description:
  *   Read a word (byte in our case) from the simulated FLASH.
@@ -881,7 +874,7 @@ static void spiflash_writeword(FAR struct sim_spiflashdev_s *priv, uint16_t data
  *
  ************************************************************************************/
 
-static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
+static uint32_t spi_flash_readword(FAR struct spi_flash_dev_s *priv)
 {
   return priv->read_data;
 }
@@ -891,7 +884,7 @@ static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_spiflashinitialize
+ * Name: up_spi_flashinitialize
  *
  * Description:
  *   Initialize the selected SPI port
@@ -904,14 +897,10 @@ static uint32_t spiflash_readword(FAR struct sim_spiflashdev_s *priv)
  *
  ************************************************************************************/
 
-FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
+FAR struct spi_dev_s *spi_flash_initialize(FAR const char *name)
 {
-  FAR struct sim_spiflashdev_s *priv = NULL;
+  FAR struct spi_flash_dev_s *priv = NULL;
   int  x;
-
-  irqstate_t flags = enter_critical_section();
-
-  /* Loop through all supported flash devices */
 
   /* Default to custom FLASH if not specified */
 
@@ -919,6 +908,8 @@ FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
     {
       name = "custom";
     }
+
+  /* Loop through all supported flash devices */
 
   for (x = 0; gp_spidev[x] != NULL; x++)
     {
@@ -945,11 +936,10 @@ FAR struct spi_dev_s *up_spiflashinitialize(FAR const char *name)
   priv->selected = 0;
   priv->wren = 0;
   priv->address = 0;
-  priv->state = SPIFLASH_STATE_IDLE;
+  priv->state = SPI_FLASH_STATE_IDLE;
   priv->read_data = 0xff;
   priv->last_cmd = 0xff;
   memset(&priv->data[0], 0xff, sizeof(priv->data));
 
-  leave_critical_section(flags);
   return (FAR struct spi_dev_s *)priv;
 }
