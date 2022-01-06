@@ -27,7 +27,7 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include <nuttx/ioexpander/ioexpander.h>
+#include <nuttx/ioexpander/ioe_rpmsg.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/nuttx.h>
 #include <nuttx/semaphore.h>
