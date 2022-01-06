@@ -95,6 +95,10 @@ ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
 CHIP_CSRCS += esp32_imm.c
 endif
 
+ifeq ($(CONFIG_ESP32_LEDC),y)
+CHIP_CSRCS += esp32_ledc.c
+endif
+
 ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c
 endif
