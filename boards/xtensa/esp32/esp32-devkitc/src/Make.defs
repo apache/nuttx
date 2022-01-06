@@ -39,6 +39,10 @@ ifeq ($(CONFIG_DEV_GPIO),y)
 CSRCS += esp32_gpio.c
 endif
 
+ifeq ($(CONFIG_PWM),y)
+CSRCS += esp32_ledc.c
+endif
+
 ifeq ($(CONFIG_USERLED),y)
 CSRCS += esp32_userleds.c
 endif

@@ -223,6 +223,14 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32_LEDC
+  ret = esp32_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32_pwm_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32_LEDC */
+
 #ifdef CONFIG_ESP32_RT_TIMER
   ret = esp32_rt_timer_init();
   if (ret < 0)
