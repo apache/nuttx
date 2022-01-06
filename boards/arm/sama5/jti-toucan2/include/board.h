@@ -250,27 +250,10 @@ SAM_PIOA_VBASE
 
 /* PIO pins */
 
-//not sure if need to define board specific PIO here?
 
-//#define PIO_TX      IO_
+/*not sure if need to define any more board specific PIO here? */
 
-/* SDIO - Used for both Port 0 & 1 ******************************************/
 
-/* 386 KHz for initial inquiry stuff */
-
-//#define BOARD_SDMMC_IDMODE_PRESCALER    SDMMC_SYSCTL_SDCLKFS_DIV256
-//#define BOARD_SDMMC_IDMODE_DIVISOR      SDMMC_SYSCTL_DVS_DIV(2)
-
-/* 24.8MHz for other modes */
-
-//#define BOARD_SDMMC_MMCMODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
-//#define BOARD_SDMMC_MMCMODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
-
-//#define BOARD_SDMMC_SD1MODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
-//#define BOARD_SDMMC_SD1MODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
-
-//#define BOARD_SDMMC_SD4MODE_PRESCALER   SDMMC_SYSCTL_SDCLKFS_DIV8
-//#define BOARD_SDMMC_SD4MODE_DIVISOR     SDMMC_SYSCTL_DVS_DIV(1)
 
 /****************************************************************************
  * Assembly Language Macros
