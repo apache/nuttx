@@ -39,6 +39,7 @@
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
 #include <nuttx/spi/spi_flash.h>
+#include <nuttx/spi/qspi_flash.h>
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/power/pm.h>
 
@@ -58,7 +59,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_MTD_SMART) && \
-    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_SIM_QSPIFLASH))
+    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_QSPI_FLASH))
 static void up_init_smartfs(void)
 {
 #if defined(CONFIG_MTD_M25P) || defined(CONFIG_MTD_W25) || defined(CONFIG_MTD_SST26)
@@ -129,10 +130,10 @@ static void up_init_smartfs(void)
 #endif
 #endif /* CONFIG_SPI_FLASH */
 
-#if defined(CONFIG_MTD_N25QXXX) && defined(CONFIG_SIM_QSPIFLASH)
+#if defined(CONFIG_MTD_N25QXXX) && defined(CONFIG_QSPI_FLASH)
   /* Initialize a simulated SPI FLASH block device n25qxxx MTD driver */
 
-  qspi = up_qspiflashinitialize();
+  qspi = qspi_flash_initialize();
   if (qspi != NULL)
     {
       mtd = n25qxxx_initialize(qspi, 0);
@@ -273,7 +274,7 @@ void up_initialize(void)
 #endif
 
 #if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_MTD_SMART) && \
-    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_SIM_QSPIFLASH))
+    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_QSPI_FLASH))
   up_init_smartfs();
 #endif
 
