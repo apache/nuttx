@@ -274,11 +274,16 @@ FAR struct devif_callback_s *
    * device in the UP state.
    */
 
+  /* Note: dev->d_flags may be asynchronously changed by netdev_ifdown()
+   * (in net/netdev/netdev_ioctl.c). Nevertheless, net_lock() / net_unlock()
+   * are not required in netdev_ifdown() to prevent dev->d_flags from
+   * asynchronous change here. There is not an issue because net_lock() and
+   * net_unlock() present inside of devif_dev_event(). That should be enough
+   * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
+   */
+
   if (dev && !netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
     {
-      /* No.. release the callback structure and fail */
-
-      devif_callback_free(NULL, NULL, list_head, list_tail);
       net_unlock();
       return NULL;
     }
