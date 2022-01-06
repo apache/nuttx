@@ -54,21 +54,21 @@ int pthread_mutexattr_setprotocol(FAR pthread_mutexattr_t *attr,
   linfo("attr=0x%p protocol=%d\n", attr, protocol);
   DEBUGASSERT(attr != NULL);
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
   if (protocol >= PTHREAD_PRIO_NONE && protocol <= PTHREAD_PRIO_PROTECT)
     {
-      attr->proto = protocol;
-      return OK;
+      switch (protocol)
+        {
+          case PTHREAD_PRIO_NONE:
+#ifdef CONFIG_PRIORITY_INHERITANCE
+          case PTHREAD_PRIO_INHERIT:
+            attr->proto = protocol;
+#endif /* CONFIG_PRIORITY_INHERITANCE */
+            return OK;
+
+          default:
+            return ENOTSUP;
+        }
     }
 
   return EINVAL;
-
-#else
-  if (protocol == PTHREAD_PRIO_NONE)
-    {
-      return OK;
-    }
-
-  return EINVAL;
-#endif
 }
