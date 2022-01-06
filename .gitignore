@@ -47,3 +47,4 @@ uImage
 /external
 .config-works
 boards/arm/sama5/jti-toucan2/src/sam_can_not_needed.c
+arch/arm/src/sama5/sam_flexcom_spi (2).h
