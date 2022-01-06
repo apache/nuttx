@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/sim/src/sim/up_ioexpander.c
+ * drivers/ioexpander/ioe_dummy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,36 +31,35 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/wdog.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/ioexpander/ioexpander.h>
-
-#include "up_internal.h"
+#include <nuttx/ioexpander/ioe_dummy.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SIM_POLLDELAY   (CONFIG_SIM_INT_POLLDELAY / USEC_PER_TICK)
+#define IOE_DUMMY_POLLDELAY \
+  (CONFIG_IOEXPANDER_DUMMY_INT_POLLDELAY / USEC_PER_TICK)
 
-#define SIM_INT_ENABLED(d,p) \
+#define IOE_DUMMY_INT_ENABLED(d,p) \
   (((d)->intenab  & ((ioe_pinset_t)1 << (p))) != 0)
-#define SIM_INT_DISABLED(d,p) \
+#define IOE_DUMMY_INT_DISABLED(d,p) \
   (((d)->intenab  & ((ioe_pinset_t)1 << (p))) == 0)
 
-#define SIM_LEVEL_SENSITIVE(d,p) \
+#define IOE_DUMMY_LEVEL_SENSITIVE(d,p) \
   (((d)->trigger  & ((ioe_pinset_t)1 << (p))) == 0)
-#define SIM_LEVEL_HIGH(d,p) \
+#define IOE_DUMMY_LEVEL_HIGH(d,p) \
   (((d)->level[0] & ((ioe_pinset_t)1 << (p))) != 0)
-#define SIM_LEVEL_LOW(d,p) \
+#define IOE_DUMMY_LEVEL_LOW(d,p) \
   (((d)->level[1] & ((ioe_pinset_t)1 << (p))) != 0)
 
-#define SIM_EDGE_SENSITIVE(d,p) \
+#define IOE_DUMMY_EDGE_SENSITIVE(d,p) \
   (((d)->trigger  & ((ioe_pinset_t)1 << (p))) != 0)
-#define SIM_EDGE_RISING(d,p) \
+#define IOE_DUMMY_EDGE_RISING(d,p) \
   (((d)->level[0] & ((ioe_pinset_t)1 << (p))) != 0)
-#define SIM_EDGE_FALLING(d,p) \
+#define IOE_DUMMY_EDGE_FALLING(d,p) \
   (((d)->level[1] & ((ioe_pinset_t)1 << (p))) != 0)
-#define SIM_EDGE_BOTH(d,p) \
-  (SIM_LEVEL_RISING(d,p) && SIM_LEVEL_FALLING(d,p))
+#define IOE_DUMMY_EDGE_BOTH(d,p) \
+  (IOE_DUMMY_LEVEL_RISING(d,p) && IOE_DUMMY_LEVEL_FALLING(d,p))
 
 /****************************************************************************
  * Private Types
@@ -68,7 +67,7 @@
 
 /* This type represents on registered pin interrupt callback */
 
-struct sim_callback_s
+struct ioe_dummy_callback_s
 {
   ioe_pinset_t pinset;              /* Set of pin interrupts that will generate
                                      * the callback. */
@@ -78,7 +77,7 @@ struct sim_callback_s
 
 /* This structure represents the state of the I/O Expander driver */
 
-struct sim_dev_s
+struct ioe_dummy_dev_s
 {
   struct ioexpander_dev_s dev;       /* Nested structure to allow casting as
                                       * public GPIO expander. */
@@ -100,7 +99,7 @@ struct sim_dev_s
 
   /* Saved callback information for each I/O expander client */
 
-  struct sim_callback_s cb[CONFIG_SIM_INT_NCALLBACKS];
+  struct ioe_dummy_callback_s cb[CONFIG_IOEXPANDER_DUMMY_INT_NCALLBACKS];
 };
 
 /****************************************************************************
@@ -109,27 +108,31 @@ struct sim_dev_s
 
 /* I/O Expander Methods */
 
-static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             int dir);
-static int sim_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             int opt, void *regval);
-static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             bool value);
-static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             FAR bool *value);
+static int ioe_dummy_direction(FAR struct ioexpander_dev_s *dev,
+                               uint8_t pin, int dir);
+static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev,
+                            uint8_t pin, int opt, void *regval);
+static int ioe_dummy_writepin(FAR struct ioexpander_dev_s *dev,
+                              uint8_t pin, bool value);
+static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
+                             uint8_t pin, FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
-static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+static int ioe_dummy_multiwritepin(FAR struct ioexpander_dev_s *dev,
+                                   FAR uint8_t *pins, FAR bool *values,
+                                   int count);
+static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
+                                  FAR uint8_t *pins, FAR bool *values,
+                                  int count);
 #endif
-static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
-             ioe_pinset_t pinset, ioe_callback_t callback, FAR void *arg);
-static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle);
+static FAR void *ioe_dummy_attach(FAR struct ioexpander_dev_s *dev,
+                                  ioe_pinset_t pinset,
+                                  ioe_callback_t callback, FAR void *arg);
+static int ioe_dummy_detach(FAR struct ioexpander_dev_s *dev,
+                            FAR void *handle);
 
-static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv);
-static void sim_interrupt_work(void *arg);
-static void sim_interrupt(wdparm_t arg);
+static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv);
+static void ioe_dummy_interrupt_work(void *arg);
+static void ioe_dummy_interrupt(wdparm_t arg);
 
 /****************************************************************************
  * Private Data
@@ -139,24 +142,24 @@ static void sim_interrupt(wdparm_t arg);
  * well be pre-allocated.
  */
 
-static struct sim_dev_s g_ioexpander;
+static struct ioe_dummy_dev_s g_ioexpander;
 
 /* I/O expander vtable */
 
-static const struct ioexpander_ops_s g_sim_ops =
+static const struct ioexpander_ops_s g_ioe_dummy_ops =
 {
-  sim_direction,
-  sim_option,
-  sim_writepin,
-  sim_readpin,
-  sim_readpin
+  ioe_dummy_direction,
+  ioe_dummy_option,
+  ioe_dummy_writepin,
+  ioe_dummy_readpin,
+  ioe_dummy_readpin,
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-  , sim_multiwritepin
-  , sim_multireadpin
-  , sim_multireadpin
+  ioe_dummy_multiwritepin,
+  ioe_dummy_multireadpin,
+  ioe_dummy_multireadpin,
 #endif
-  , sim_attach
-  , sim_detach
+  ioe_dummy_attach,
+  ioe_dummy_detach
 };
 
 /****************************************************************************
@@ -164,7 +167,7 @@ static const struct ioexpander_ops_s g_sim_ops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_direction
+ * Name: ioe_dummy_direction
  *
  * Description:
  *   Set the direction of an ioexpander pin. Required.
@@ -179,10 +182,10 @@ static const struct ioexpander_ops_s g_sim_ops =
  *
  ****************************************************************************/
 
-static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                          int direction)
+static int ioe_dummy_direction(FAR struct ioexpander_dev_s *dev,
+                               uint8_t pin, int direction)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
 
   if (direction != IOEXPANDER_DIRECTION_IN &&
       direction != IOEXPANDER_DIRECTION_OUT)
@@ -219,7 +222,7 @@ static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 }
 
 /****************************************************************************
- * Name: sim_option
+ * Name: ioe_dummy_option
  *
  * Description:
  *   Set pin options. Required.
@@ -237,10 +240,10 @@ static int sim_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *
  ****************************************************************************/
 
-static int sim_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                        int opt, FAR void *value)
+static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev,
+                            uint8_t pin, int opt, FAR void *value)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   int ret = -ENOSYS;
 
   DEBUGASSERT(priv != NULL);
@@ -325,7 +328,7 @@ static int sim_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 }
 
 /****************************************************************************
- * Name: sim_writepin
+ * Name: ioe_dummy_writepin
  *
  * Description:
  *   Set the pin level. Required.
@@ -341,10 +344,10 @@ static int sim_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *
  ****************************************************************************/
 
-static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                         bool value)
+static int ioe_dummy_writepin(FAR struct ioexpander_dev_s *dev,
+                              uint8_t pin, bool value)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
 
   DEBUGASSERT(priv != NULL && pin < CONFIG_IOEXPANDER_NPINS);
 
@@ -368,7 +371,7 @@ static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 }
 
 /****************************************************************************
- * Name: sim_readpin
+ * Name: ioe_dummy_readpin
  *
  * Description:
  *   Read the actual PIN level. This can be different from the last value
@@ -386,10 +389,10 @@ static int sim_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  *
  ****************************************************************************/
 
-static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                        FAR bool *value)
+static int ioe_dummy_readpin(FAR struct ioexpander_dev_s *dev,
+                            uint8_t pin, FAR bool *value)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   ioe_pinset_t inval;
   bool retval;
 
@@ -417,7 +420,7 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 }
 
 /****************************************************************************
- * Name: sim_multiwritepin
+ * Name: ioe_dummy_multiwritepin
  *
  * Description:
  *   Set the pin level for multiple pins. This routine may be faster than
@@ -434,11 +437,11 @@ static int sim_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                 FAR uint8_t *pins, FAR bool *values,
-                                 int count)
+static int ioe_dummy_multiwritepin(FAR struct ioexpander_dev_s *dev,
+                                   FAR uint8_t *pins, FAR bool *values,
+                                   int count)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   uint8_t pin;
   int i;
 
@@ -467,7 +470,7 @@ static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: sim_multireadpin
+ * Name: ioe_dummy_multireadpin
  *
  * Description:
  *   Read the actual level for multiple pins. This routine may be faster than
@@ -484,11 +487,11 @@ static int sim_multiwritepin(FAR struct ioexpander_dev_s *dev,
  ****************************************************************************/
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
-static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count)
+static int ioe_dummy_multireadpin(FAR struct ioexpander_dev_s *dev,
+                                  FAR uint8_t *pins, FAR bool *values,
+                                  int count)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   ioe_pinset_t inval;
   uint8_t pin;
   bool pinval;
@@ -524,7 +527,7 @@ static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
 #endif
 
 /****************************************************************************
- * Name: sim_attach
+ * Name: ioe_dummy_attach
  *
  * Description:
  *   Attach and enable a pin interrupt callback function.
@@ -542,11 +545,11 @@ static int sim_multireadpin(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
-                              ioe_pinset_t pinset, ioe_callback_t callback,
-                              FAR void *arg)
+static FAR void *ioe_dummy_attach(FAR struct ioexpander_dev_s *dev,
+                                  ioe_pinset_t pinset,
+                                  ioe_callback_t callback, FAR void *arg)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   FAR void *handle = NULL;
   int i;
 
@@ -555,7 +558,7 @@ static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
 
   /* Find and available in entry in the callback table */
 
-  for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
+  for (i = 0; i < CONFIG_IOEXPANDER_DUMMY_INT_NCALLBACKS; i++)
     {
       /* Is this entry available (i.e., no callback attached) */
 
@@ -575,31 +578,32 @@ static FAR void *sim_attach(FAR struct ioexpander_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: sim_detach
+ * Name: ioe_dummy_detach
  *
  * Description:
  *   Detach and disable a pin interrupt callback function.
  *
  * Input Parameters:
  *   dev      - Device-specific state data
- *   handle   - The non-NULL opaque value return by sim_attch()
+ *   handle   - The non-NULL opaque value return by ioe_dummy_attch()
  *
  * Returned Value:
  *   0 on success, else a negative error code
  *
  ****************************************************************************/
 
-static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+static int ioe_dummy_detach(FAR struct ioexpander_dev_s *dev,
+                            FAR void *handle)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)dev;
-  FAR struct sim_callback_s *cb = (FAR struct sim_callback_s *)handle;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
+  FAR struct ioe_dummy_callback_s *cb =
+    (FAR struct ioe_dummy_callback_s *)handle;
 
   gpioinfo("handle=%p\n", handle);
 
   DEBUGASSERT(priv != NULL && cb != NULL);
-  DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
-              (uintptr_t)cb <= (uintptr_t)&priv->cb[
-                                            CONFIG_SIM_INT_NCALLBACKS - 1]);
+  DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] && (uintptr_t)cb <=
+           (uintptr_t)&priv->cb[CONFIG_IOEXPANDER_DUMMY_INT_NCALLBACKS - 1]);
   UNUSED(priv);
 
   cb->pinset = 0;
@@ -609,14 +613,14 @@ static int sim_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
 }
 
 /****************************************************************************
- * Name: sim_int_update
+ * Name: ioe_dummy_int_update
  *
  * Description:
  *   Check for pending interrupts.
  *
  ****************************************************************************/
 
-static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
+static ioe_pinset_t ioe_dummy_int_update(FAR struct ioe_dummy_dev_s *priv)
 {
   ioe_pinset_t toggles;
   ioe_pinset_t diff;
@@ -631,7 +635,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
    */
 
   toggles = 0;
-  for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
+  for (i = 0; i < CONFIG_IOEXPANDER_DUMMY_INT_NCALLBACKS; i++)
     {
       /* Is there a callback attached?  */
 
@@ -671,13 +675,13 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
           pinval = !pinval;
         }
 
-      if (SIM_INT_DISABLED(priv, pin))
+      if (IOE_DUMMY_INT_DISABLED(priv, pin))
         {
           /* Interrupts disabled on this pin.  Do nothing.. just skip to the
            * next pin.
            */
         }
-      else if (SIM_EDGE_SENSITIVE(priv, pin))
+      else if (IOE_DUMMY_EDGE_SENSITIVE(priv, pin))
         {
           /* Edge triggered. Was there a change in the level? */
 
@@ -685,19 +689,19 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
             {
               /* Set interrupt as a function of edge type */
 
-              if ((!pinval && SIM_EDGE_FALLING(priv, pin)) ||
-                  (pinval && SIM_EDGE_RISING(priv, pin)))
+              if ((!pinval && IOE_DUMMY_EDGE_FALLING(priv, pin)) ||
+                  (pinval && IOE_DUMMY_EDGE_RISING(priv, pin)))
                 {
                   intstat |= 1 << pin;
                 }
             }
         }
-      else /* if (SIM_LEVEL_SENSITIVE(priv, pin)) */
+      else /* if (IOE_DUMMY_LEVEL_SENSITIVE(priv, pin)) */
         {
           /* Level triggered. Set intstat if match in level type. */
 
-          if ((pinval  && SIM_LEVEL_HIGH(priv, pin)) ||
-              (!pinval && SIM_LEVEL_LOW(priv, pin)))
+          if ((pinval  && IOE_DUMMY_LEVEL_HIGH(priv, pin)) ||
+              (!pinval && IOE_DUMMY_LEVEL_LOW(priv, pin)))
             {
               intstat |= 1 << pin;
             }
@@ -711,7 +715,7 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
 }
 
 /****************************************************************************
- * Name: sim_interrupt_work
+ * Name: ioe_dummy_interrupt_work
  *
  * Description:
  *   Handle GPIO interrupt events (this function actually executes in the
@@ -719,9 +723,9 @@ static ioe_pinset_t sim_int_update(FAR struct sim_dev_s *priv)
  *
  ****************************************************************************/
 
-static void sim_interrupt_work(void *arg)
+static void ioe_dummy_interrupt_work(void *arg)
 {
-  FAR struct sim_dev_s *priv = (FAR struct sim_dev_s *)arg;
+  FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)arg;
   ioe_pinset_t intstat;
   int ret;
   int i;
@@ -730,14 +734,14 @@ static void sim_interrupt_work(void *arg)
 
   /* Update the input status with the 32 bits read from the expander */
 
-  intstat = sim_int_update(priv);
+  intstat = ioe_dummy_int_update(priv);
   if (intstat != 0)
     {
       gpioinfo("intstat=%lx\n", (unsigned long)intstat);
 
       /* Perform pin interrupt callbacks */
 
-      for (i = 0; i < CONFIG_SIM_INT_NCALLBACKS; i++)
+      for (i = 0; i < CONFIG_IOEXPANDER_DUMMY_INT_NCALLBACKS; i++)
         {
           /* Is this entry valid (i.e., callback attached)?  */
 
@@ -759,8 +763,8 @@ static void sim_interrupt_work(void *arg)
 
   /* Re-start the poll timer */
 
-  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
-                 sim_interrupt, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, IOE_DUMMY_POLLDELAY,
+                 ioe_dummy_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
@@ -768,7 +772,7 @@ static void sim_interrupt_work(void *arg)
 }
 
 /****************************************************************************
- * Name: sim_interrupt
+ * Name: ioe_dummy_interrupt
  *
  * Description:
  *   The poll timer has expired; check for missed interrupts
@@ -778,11 +782,11 @@ static void sim_interrupt_work(void *arg)
  *
  ****************************************************************************/
 
-static void sim_interrupt(wdparm_t arg)
+static void ioe_dummy_interrupt(wdparm_t arg)
 {
-  FAR struct sim_dev_s *priv;
+  FAR struct ioe_dummy_dev_s *priv;
 
-  priv = (FAR struct sim_dev_s *)arg;
+  priv = (FAR struct ioe_dummy_dev_s *)arg;
   DEBUGASSERT(priv != NULL);
 
   /* Defer interrupt processing to the worker thread.  This is not only
@@ -791,7 +795,7 @@ static void sim_interrupt(wdparm_t arg)
    *
    * Notice that further GPIO interrupts are disabled until the work is
    * actually performed.  This is to prevent overrun of the worker thread.
-   * Interrupts are re-enabled in sim_interrupt_work() when the work is
+   * Interrupts are re-enabled in ioe_dummy_interrupt_work() when the work is
    * completed.
    */
 
@@ -801,7 +805,7 @@ static void sim_interrupt(wdparm_t arg)
        * thread.
        */
 
-      work_queue(HPWORK, &priv->work, sim_interrupt_work,
+      work_queue(HPWORK, &priv->work, ioe_dummy_interrupt_work,
                  (FAR void *)priv, 0);
     }
 }
@@ -811,7 +815,7 @@ static void sim_interrupt(wdparm_t arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: sim_ioexpander_initialize
+ * Name: ioe_dummy_initialize
  *
  * Description:
  *   Instantiate and configure the I/O Expander device driver to use the
@@ -827,14 +831,14 @@ static void sim_interrupt(wdparm_t arg)
  *
  ****************************************************************************/
 
-FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
+FAR struct ioexpander_dev_s *ioe_dummy_initialize(void)
 {
-  FAR struct sim_dev_s *priv = &g_ioexpander;
+  FAR struct ioe_dummy_dev_s *priv = &g_ioexpander;
   int ret;
 
   /* Initialize the device state structure */
 
-  priv->dev.ops = &g_sim_ops;
+  priv->dev.ops = &g_ioe_dummy_ops;
 
   /* Initial interrupt state:  Edge triggered on both edges */
 
@@ -842,8 +846,8 @@ FAR struct ioexpander_dev_s *sim_ioexpander_initialize(void)
   priv->level[0] = PINSET_ALL;  /* All rising edge */
   priv->level[1] = PINSET_ALL;  /* All falling edge */
 
-  ret = wd_start(&priv->wdog, SIM_POLLDELAY,
-                 sim_interrupt, (wdparm_t)priv);
+  ret = wd_start(&priv->wdog, IOE_DUMMY_POLLDELAY,
+                 ioe_dummy_interrupt, (wdparm_t)priv);
   if (ret < 0)
     {
       gpioerr("ERROR: Failed to start poll timer\n");
