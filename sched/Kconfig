@@ -1403,7 +1403,7 @@ config SIG_EVTHREAD
 config SIG_EVTHREAD_HPWORK
 	bool "SIGEV_EVTHREAD use HPWORK"
 	default n
-	depends on SIG_EVTHREAD && CONFIG_SCHED_HPWORK
+	depends on SIG_EVTHREAD && SCHED_HPWORK
 	---help---
 		if selected, SIGEV_THHREAD will use the high priority work queue.
 		If not, it will use the low priority work queue (if available).
