@@ -63,7 +63,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
   CSRCS += sim_buttons.c
 endif
 
-ifeq ($(CONFIG_SIM_MOTOR_FOC),y)
+ifeq ($(CONFIG_MOTOR_FOC_DUMMY),y)
 CSRCS += sim_foc.c
 endif
 
