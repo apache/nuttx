@@ -460,6 +460,17 @@ static int up_setup(FAR struct uart_dev_s *dev)
   uint32_t lcr;
   uint32_t cr;
 
+#ifdef CONFIG_CXD56_SUBCORE
+  if (priv->id == 1)
+    {
+      /* In case of SUBCORE, UART1 has been already initialized,
+       * then we don't need to do anything.
+       */
+
+      return OK;
+    }
+#endif
+
   cxd56_uart_setup(priv->id);
 
   /* Init HW */
@@ -851,11 +862,11 @@ static int up_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #endif
           priv->baud = cfgetispeed(termiosp);
 
+          spin_unlock_irqrestore(&priv->lock, flags);
+
           /* Configure the UART line format and speed. */
 
           up_set_format(dev);
-
-          spin_unlock_irqrestore(&priv->lock, flags);
         }
         break;
 #endif
@@ -981,7 +992,7 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->priv;
   irqstate_t flags;
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
   if (enable)
     {
 #ifndef CONFIG_SUPPRESS_SERIAL_INTS
@@ -992,7 +1003,9 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
        * interrupts disabled (note this may recurse).
        */
 
+      spin_unlock_irqrestore(&priv->lock, flags);
       uart_xmitchars(dev);
+      flags = spin_lock_irqsave(&priv->lock);
 #endif
     }
   else
@@ -1001,7 +1014,7 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
       up_serialout(priv, CXD56_UART_IMSC, priv->ier);
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 }
 
 /****************************************************************************

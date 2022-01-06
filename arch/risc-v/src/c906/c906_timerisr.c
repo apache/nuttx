@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"
@@ -92,7 +93,7 @@ static void c906_reload_mtimecmp(void)
  * Name:  c906_timerisr
  ****************************************************************************/
 
-static int c906_timerisr(int irq, void *context, FAR void *arg)
+static int c906_timerisr(int irq, void *context, void *arg)
 {
   c906_reload_mtimecmp();
 

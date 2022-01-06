@@ -52,7 +52,7 @@ typedef FAR void (*binfmt_dtor_t)(void);
 /* This describes the file to be loaded.
  *
  * NOTE 1: The 'filename' must be the full, absolute path to the file to be
- * executed unless CONFIG_LIB_ENVPATH is defined.  In that case,
+ * executed unless CONFIG_LIBC_ENVPATH is defined.  In that case,
  * 'filename' may be a relative path; a set of candidate absolute paths
  * will be generated using the PATH environment variable and load_module()
  * will attempt to load each file that is found at those absolute paths.
@@ -61,18 +61,6 @@ typedef FAR void (*binfmt_dtor_t)(void);
 struct symtab_s;
 struct binary_s
 {
-  /* Information provided to the loader to load and bind a module */
-
-  FAR const char *filename;            /* Full path to the binary to be loaded (See NOTE 1 above) */
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
-  FAR char *argbuffer;                 /* Allocated argument list */
-  FAR char **argv;                     /* Copy of argument list */
-#else
-  FAR char * const *argv;              /* Argument list */
-#endif
-  FAR const struct symtab_s *exports;  /* Table of exported symbols */
-  int nexports;                        /* The number of symbols in exports[] */
-
   /* Information provided from the loader (if successful) describing the
    * resources used by the loaded module.
    */
@@ -124,7 +112,10 @@ struct binfmt_s
 
   /* Verify and load binary into memory */
 
-  CODE int (*load)(FAR struct binary_s *bin);
+  CODE int (*load)(FAR struct binary_s *bin,
+                   FAR const char *filename,
+                   FAR const struct symtab_s *exports,
+                   int nexports);
 
   /* Unload module callback */
 
@@ -198,7 +189,8 @@ int unregister_binfmt(FAR struct binfmt_s *binfmt);
  *
  ****************************************************************************/
 
-int load_module(FAR struct binary_s *bin);
+int load_module(FAR struct binary_s *bin, FAR const char *filename,
+                FAR const struct symtab_s *exports, int nexports);
 
 /****************************************************************************
  * Name: unload_module
@@ -234,7 +226,8 @@ int unload_module(FAR struct binary_s *bin);
  *
  ****************************************************************************/
 
-int exec_module(FAR const struct binary_s *bin);
+int exec_module(FAR const struct binary_s *binp,
+                FAR const char *filename, FAR char * const *argv);
 
 /****************************************************************************
  * Name: exec
@@ -278,7 +271,7 @@ int exec_module(FAR const struct binary_s *bin);
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
- *              CONFIG_LIB_ENVPATH is defined in the configuration, then
+ *              CONFIG_LIBC_ENVPATH is defined in the configuration, then
  *              this may be a relative path from the current working
  *              directory. Otherwise, path must be the absolute path to the
  *              program.
@@ -308,7 +301,7 @@ int exec(FAR const char *filename, FAR char * const *argv,
  *
  * Input Parameters:
  *   filename - The path to the program to be executed. If
- *              CONFIG_LIB_ENVPATH is defined in the configuration, then
+ *              CONFIG_LIBC_ENVPATH is defined in the configuration, then
  *              this may be a relative path from the current working
  *              directory. Otherwise, path must be the absolute path to the
  *              program.

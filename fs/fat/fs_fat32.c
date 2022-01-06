@@ -117,6 +117,7 @@ const struct mountpt_operations fat_operations =
   fat_sync,          /* sync */
   fat_dup,           /* dup */
   fat_fstat,         /* fstat */
+  NULL,              /* fchstat */
   fat_truncate,      /* truncate */
 
   fat_opendir,       /* opendir */
@@ -132,7 +133,8 @@ const struct mountpt_operations fat_operations =
   fat_mkdir,         /* mkdir */
   fat_rmdir,         /* rmdir */
   fat_rename,        /* rename */
-  fat_stat           /* stat */
+  fat_stat,          /* stat */
+  NULL               /* chstat */
 };
 
 /****************************************************************************
@@ -225,10 +227,6 @@ static int fat_open(FAR struct file *filep, FAR const char *relpath,
           ret = -EEXIST;
           goto errout_with_semaphore;
         }
-
-      /* TODO: if CONFIG_FILE_MODE=y, need check for privileges based on
-       * inode->i_mode
-       */
 
       /* Check if the caller has sufficient privileges to open the file */
 

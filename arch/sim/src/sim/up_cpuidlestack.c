@@ -78,10 +78,5 @@
 
 int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size)
 {
-  /* REVISIT:  I don't think anything is needed here */
-
-  tcb->adj_stack_size  = 0;
-  tcb->stack_alloc_ptr = NULL;
-  tcb->stack_base_ptr   = NULL;
-  return OK;
+  return up_create_stack(tcb, stack_size, TCB_FLAG_TTYPE_KERNEL);
 }

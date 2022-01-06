@@ -25,10 +25,12 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
+#include <inttypes.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>
@@ -36,24 +38,50 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mtd/mtd.h>
 
+#include "esp32c3_attr.h"
 #include "esp32c3_spiflash.h"
 #include "rom/esp32c3_spiflash.h"
+#include "hardware/esp32c3_soc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* RO data page in MMU index */
+
+#define DROM0_PAGES_START           (2)
+#define DROM0_PAGES_END             (128)
+
+/* MMU invalid value */
+
+#define INVALID_MMU_VAL             (0x100)
+
+/* MMU page size */
+
+#define SPI_FLASH_MMU_PAGE_SIZE     (0x10000)
+
+/* MMU base virtual mapped address */
+
+#define VADDR0_START_ADDR           (0x3c020000)
+
+/* Flash MMU table for CPU */
+
+#define MMU_TABLE                   ((volatile uint32_t *)DR_REG_MMU_TABLE)
+
+#define MMU_ADDR2PAGE(_addr)        ((_addr) / SPI_FLASH_MMU_PAGE_SIZE)
+#define MMU_ADDR2OFF(_addr)         ((_addr) % SPI_FLASH_MMU_PAGE_SIZE)
+#define MMU_BYTES2PAGES(_n)         (((_n) + SPI_FLASH_MMU_PAGE_SIZE - 1) / \
+                                     SPI_FLASH_MMU_PAGE_SIZE)
+
 #define SPI_FLASH_BLK_SIZE          256
 #define SPI_FLASH_ERASE_SIZE        4096
+#define SPI_FLASH_ERASED_STATE      (0xff)
 #define SPI_FLASH_SIZE              (4 * 1024 * 1024)
 
-#define ESP32C3_MTD_OFFSET          CONFIG_ESP32C3_MTD_OFFSET
-#define ESP32C3_MTD_SIZE            CONFIG_ESP32C3_MTD_SIZE
-
-#define MTD2PRIV(_dev)              ((FAR struct esp32c3_spiflash_s *)_dev)
-#define MTD_SIZE(_priv)             ((_priv)->chip->chip_size)
-#define MTD_BLKSIZE(_priv)          ((_priv)->chip->page_size)
-#define MTD_ERASESIZE(_priv)        ((_priv)->chip->sector_size)
+#define MTD2PRIV(_dev)              ((struct esp32c3_spiflash_s *)_dev)
+#define MTD_SIZE(_priv)             ((*(_priv)->data)->chip.chip_size)
+#define MTD_BLKSIZE(_priv)          ((*(_priv)->data)->chip.page_size)
+#define MTD_ERASESIZE(_priv)        ((*(_priv)->data)->chip.sector_size)
 #define MTD_BLK2SIZE(_priv, _b)     (MTD_BLKSIZE(_priv) * (_b))
 #define MTD_SIZE2BLK(_priv, _s)     ((_s) / MTD_BLKSIZE(_priv))
 
@@ -69,7 +97,38 @@ struct esp32c3_spiflash_s
 
   /* SPI Flash data */
 
-  esp32c3_spiflash_chip_t *chip;
+  const struct spiflash_legacy_data_s **data;
+};
+
+/* SPI Flash map request data */
+
+struct spiflash_map_req_s
+{
+  /* Request mapping SPI Flash base address */
+
+  uint32_t  src_addr;
+
+  /* Request mapping SPI Flash size */
+
+  uint32_t  size;
+
+  /* Mapped memory pointer */
+
+  void      *ptr;
+
+  /* Mapped started MMU page index */
+
+  uint32_t  start_page;
+
+  /* Mapped MMU page count */
+
+  uint32_t  page_cnt;
+};
+
+struct spiflash_cachestate_s
+{
+  irqstate_t flags;
+  uint32_t val;
 };
 
 /****************************************************************************
@@ -104,6 +163,20 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg);
 
 /****************************************************************************
+ * Public Functions Declaration
+ ****************************************************************************/
+
+extern int cache_invalidate_addr(uint32_t addr, uint32_t size);
+extern uint32_t cache_suspend_icache(void);
+extern void cache_resume_icache(uint32_t val);
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern const struct spiflash_legacy_data_s *rom_spiflash_legacy_data;
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -121,7 +194,7 @@ static struct esp32c3_spiflash_s g_esp32c3_spiflash =
 #endif
             .name   = "esp32c3_spiflash"
           },
-  .chip = &g_rom_flashchip,
+  .data = &rom_spiflash_legacy_data,
 };
 
 static struct esp32c3_spiflash_s g_esp32c3_spiflash_encrypt =
@@ -147,6 +220,175 @@ static sem_t g_exclsem = SEM_INITIALIZER(1);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: spiflash_opstart
+ *
+ * Description:
+ *   Prepare for an SPIFLASH operation.
+ *
+ ****************************************************************************/
+
+static inline void spiflash_opstart(struct spiflash_cachestate_s *state)
+{
+  state->flags = enter_critical_section();
+  state->val   = cache_suspend_icache() << 16;
+}
+
+/****************************************************************************
+ * Name: spiflash_opdone
+ *
+ * Description:
+ *   Undo all the steps of opstart.
+ *
+ ****************************************************************************/
+
+static inline void spiflash_opdone(const struct spiflash_cachestate_s *state)
+{
+  cache_resume_icache(state->val >> 16);
+  leave_critical_section(state->flags);
+}
+
+/****************************************************************************
+ * Name: esp32c3_mmap
+ *
+ * Description:
+ *   Mapped SPI Flash address to ESP32-C3's address bus, so that software
+ *   can read SPI Flash data by reading data from memory access.
+ *
+ *   If SPI Flash hardware encryption is enable, the read from mapped
+ *   address is decrypted.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   0 if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static int IRAM_ATTR esp32c3_mmap(struct spiflash_map_req_s *req)
+{
+  int ret;
+  int i;
+  int start_page;
+  int flash_page;
+  int page_cnt;
+  uint32_t mapped_addr;
+  struct spiflash_cachestate_s state;
+
+  spiflash_opstart(&state);
+
+  for (start_page = DROM0_PAGES_START;
+       start_page < DROM0_PAGES_END;
+       ++start_page)
+    {
+      if (MMU_TABLE[start_page] == INVALID_MMU_VAL)
+        {
+          break;
+        }
+    }
+
+  flash_page = MMU_ADDR2PAGE(req->src_addr);
+  page_cnt   = MMU_BYTES2PAGES(req->size);
+
+  if (start_page + page_cnt < DROM0_PAGES_END)
+    {
+      mapped_addr = (start_page - DROM0_PAGES_START) *
+                    SPI_FLASH_MMU_PAGE_SIZE +
+                    VADDR0_START_ADDR;
+
+      for (i = 0; i < page_cnt; i++)
+        {
+          MMU_TABLE[start_page + i] = flash_page + i;
+          cache_invalidate_addr(mapped_addr + i * SPI_FLASH_MMU_PAGE_SIZE,
+                                SPI_FLASH_MMU_PAGE_SIZE);
+        }
+
+      req->start_page = start_page;
+      req->page_cnt = page_cnt;
+      req->ptr = (void *)(mapped_addr + MMU_ADDR2OFF(req->src_addr));
+      ret = OK;
+    }
+  else
+    {
+      ret = -ENOBUFS;
+    }
+
+  spiflash_opdone(&state);
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp32c3_ummap
+ *
+ * Description:
+ *   Unmap SPI Flash address in ESP32-C3's address bus, and free resource.
+ *
+ * Input Parameters:
+ *   req - SPI Flash mapping requesting parameters
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR esp32c3_ummap(const struct spiflash_map_req_s *req)
+{
+  int i;
+  struct spiflash_cachestate_s state;
+
+  spiflash_opstart(&state);
+
+  for (i = req->start_page; i < req->start_page + req->page_cnt; ++i)
+    {
+      MMU_TABLE[i] = INVALID_MMU_VAL;
+    }
+
+  spiflash_opdone(&state);
+}
+
+/****************************************************************************
+ * Name: esp32c3_readdata_encrypted
+ *
+ * Description:
+ *   Read decrypted data from SPI Flash at designated address when
+ *   enable SPI Flash hardware encryption.
+ *
+ * Input Parameters:
+ *   addr   - target address
+ *   buffer - data buffer pointer
+ *   size   - data number
+ *
+ * Returned Value:
+ *   OK if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static IRAM_ATTR int esp32c3_readdata_encrypted(uint32_t addr,
+                                                uint8_t *buffer,
+                                                uint32_t size)
+{
+  int ret;
+  struct spiflash_map_req_s req =
+    {
+      .src_addr = addr,
+      .size = size
+    };
+
+  ret = esp32c3_mmap(&req);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  memcpy(buffer, req.ptr, size);
+
+  esp32c3_ummap(&req);
+
+  return OK;
+}
 
 /****************************************************************************
  * Name: esp32c3_erase
@@ -353,7 +595,7 @@ static ssize_t esp32c3_read_decrypt(struct mtd_dev_s *dev,
       return ret;
     }
 
-  ret = spi_flash_read_encrypted(offset, buffer, nbytes);
+  ret = esp32c3_readdata_encrypted(offset, buffer, nbytes);
 
   nxsem_post(&g_exclsem);
 
@@ -387,9 +629,9 @@ static ssize_t esp32c3_read_decrypt(struct mtd_dev_s *dev,
  ****************************************************************************/
 
 static ssize_t esp32c3_bread_decrypt(struct mtd_dev_s *dev,
-                                   off_t startblock,
-                                   size_t nblocks,
-                                   uint8_t *buffer)
+                                     off_t startblock,
+                                     size_t nblocks,
+                                     uint8_t *buffer)
 {
   ssize_t ret;
   uint32_t addr = startblock * SPI_FLASH_BLK_SIZE;
@@ -406,7 +648,7 @@ static ssize_t esp32c3_bread_decrypt(struct mtd_dev_s *dev,
       return ret;
     }
 
-  ret = spi_flash_read_encrypted(addr, buffer, size);
+  ret = esp32c3_readdata_encrypted(addr, buffer, size);
 
   nxsem_post(&g_exclsem);
 
@@ -609,7 +851,6 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg)
 {
   int ret = OK;
-  struct mtd_geometry_s *geo;
 
   finfo("cmd: %d \n", cmd);
 
@@ -617,7 +858,7 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
     {
       case MTDIOC_GEOMETRY:
         {
-          geo = (struct mtd_geometry_s *)arg;
+          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               geo->blocksize    = SPI_FLASH_BLK_SIZE;
@@ -629,6 +870,28 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
                     " neraseblocks: %" PRId32 "\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
             }
+        }
+        break;
+
+      case BIOC_PARTINFO:
+        {
+          struct partition_info_s *info = (struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = SPI_FLASH_SIZE / SPI_FLASH_BLK_SIZE;
+              info->sectorsize  = SPI_FLASH_BLK_SIZE;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+            }
+        }
+        break;
+
+      case MTDIOC_ERASESTATE:
+        {
+          uint8_t *result = (uint8_t *)arg;
+          *result = SPI_FLASH_ERASED_STATE;
+
+          ret = OK;
         }
         break;
 
@@ -649,30 +912,32 @@ static int esp32c3_ioctl(struct mtd_dev_s *dev, int cmd,
  * Name: esp32c3_spiflash_alloc_mtdpart
  *
  * Description:
- *   Allocate SPI Flash MTD.
+ *   Allocate an MTD partition from the ESP32-C3 SPI Flash.
  *
  * Input Parameters:
- *   None
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
  *
  * Returned Value:
  *   SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
-FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
+struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                     uint32_t mtd_size)
 {
   struct esp32c3_spiflash_s *priv = &g_esp32c3_spiflash;
-  esp32c3_spiflash_chip_t *chip = priv->chip;
-  FAR struct mtd_dev_s *mtd_part;
+  const esp32c3_spiflash_chip_t *chip = &(*priv->data)->chip;
+  struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((ESP32C3_MTD_OFFSET + ESP32C3_MTD_SIZE) <= chip->chip_size);
-  ASSERT((ESP32C3_MTD_OFFSET % chip->sector_size) == 0);
-  ASSERT((ESP32C3_MTD_SIZE % chip->sector_size) == 0);
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
-  finfo("ESP32 SPI Flash information:\n");
+  finfo("ESP32-C3 SPI Flash information:\n");
   finfo("\tID = 0x%" PRIx32 "\n", chip->device_id);
   finfo("\tStatus mask = 0x%" PRIx32 "\n", chip->status_mask);
   finfo("\tChip size = %" PRId32 " KB\n", chip->chip_size / 1024);
@@ -680,16 +945,19 @@ FAR struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(void)
   finfo("\tSector size = %" PRId32 " KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %" PRId32 " KB\n", chip->block_size / 1024);
 
-#if ESP32C3_MTD_SIZE == 0
-  size = chip->chip_size - ESP32C3_MTD_OFFSET;
-#else
-  size = ESP32C3_MTD_SIZE;
-#endif
+  if (mtd_size == 0)
+    {
+      size = chip->chip_size - mtd_offset;
+    }
+  else
+    {
+      size = mtd_size;
+    }
 
-  finfo("\tMTD offset = 0x%x\n", ESP32C3_MTD_OFFSET);
+  finfo("\tMTD offset = 0x%" PRIx32 "\n", mtd_offset);
   finfo("\tMTD size = 0x%" PRIx32 "\n", size);
 
-  startblock = MTD_SIZE2BLK(priv, ESP32C3_MTD_OFFSET);
+  startblock = MTD_SIZE2BLK(priv, mtd_offset);
   blocks = MTD_SIZE2BLK(priv, size);
 
   mtd_part = mtd_partition(&priv->mtd, startblock, blocks);

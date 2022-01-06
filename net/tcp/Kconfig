@@ -106,6 +106,27 @@ config NET_TCP_FAST_RETRANSMIT_WATERMARK
 			missing segment, without waiting for a retransmission timer to
 			expire.
 
+config NET_TCP_WINDOW_SCALE
+	bool "Enable TCP/IP Window Scale Option"
+	default n
+	---help---
+		RFC1323:
+		2. TCP WINDOW SCALE OPTION
+			The window scale extension expands the definition of the TCP
+			window to 32 bits and then uses a scale factor to carry this 32-
+			bit value in the 16-bit Window field of the TCP header (SEG.WND in
+			RFC-793).
+
+if NET_TCP_WINDOW_SCALE
+
+config NET_TCP_WINDOW_SCALE_FACTOR
+	int "TCP/IP Window Scale Factor"
+	default 0
+	---help---
+		This is the default value for window scale factor.
+
+endif # NET_TCP_WINDOW_SCALE
+
 config NET_TCP_NOTIFIER
 	bool "Support TCP notifications"
 	default n

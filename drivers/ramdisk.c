@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -232,7 +233,7 @@ static ssize_t rd_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct rd_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->rd_sectsize);
 
   if (start_sector < dev->rd_nsectors &&
@@ -266,7 +267,7 @@ static ssize_t rd_write(FAR struct inode *inode, const unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct rd_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIuOFF " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->rd_sectsize);
 
   if (!RDFLAG_IS_WRENABLED(dev->rd_flags))
@@ -314,7 +315,7 @@ static int rd_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIi16 "\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIi16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

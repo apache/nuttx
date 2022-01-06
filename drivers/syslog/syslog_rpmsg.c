@@ -62,7 +62,6 @@ struct syslog_rpmsg_s
   struct work_s         work;         /* Used for deferred callback work */
 
   struct rpmsg_endpoint ept;
-  FAR const char        *cpuname;
   bool                  suspend;
   bool                  transfer;     /* The transfer flag */
   ssize_t               trans_len;    /* The data length when transfer */
@@ -210,7 +209,8 @@ static void syslog_rpmsg_device_created(FAR struct rpmsg_device *rdev,
   FAR struct syslog_rpmsg_s *priv = priv_;
   int ret;
 
-  if (priv->buffer && strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
+  if (priv->buffer && strcmp(CONFIG_SYSLOG_RPMSG_SERVER_NAME,
+                             rpmsg_get_cpuname(rdev)) == 0)
     {
       priv->ept.priv = priv;
 
@@ -230,7 +230,8 @@ static void syslog_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
 {
   FAR struct syslog_rpmsg_s *priv = priv_;
 
-  if (priv->buffer && strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)) == 0)
+  if (priv->buffer && strcmp(CONFIG_SYSLOG_RPMSG_SERVER_NAME,
+                             rpmsg_get_cpuname(rdev)) == 0)
     {
       rpmsg_destroy_ept(&priv->ept);
     }
@@ -343,15 +344,14 @@ ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
   return buflen;
 }
 
-void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
-                             size_t size)
+void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
 {
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
-  char prev, cur;
+  char prev;
+  char cur;
   size_t i;
   size_t j;
 
-  priv->cpuname = cpuname;
   priv->buffer  = buffer;
   priv->size    = size;
 
@@ -365,15 +365,14 @@ void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
 
           if (!isascii(cur))
             {
-              goto out;
+              memset(priv->buffer, 0, size);
+              break;
             }
-
-          if (prev && !cur)
+          else if (prev && !cur)
             {
               priv->head = C2B(i) + j;
             }
-
-          if (!prev && cur)
+          else if (!prev && cur)
             {
               priv->tail = i;
             }
@@ -382,11 +381,9 @@ void syslog_rpmsg_init_early(FAR const char *cpuname, FAR void *buffer,
         }
     }
 
-out:
   if (i != size)
     {
       priv->head = priv->tail = 0;
-      memset(priv->buffer, 0, size);
     }
 }
 

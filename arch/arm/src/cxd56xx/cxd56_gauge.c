@@ -52,11 +52,11 @@
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_CXD56_GAUGE_DEBUG
-#define baterr(fmt, ...) logerr(fmt, ## __VA_ARGS__)
-#define batdbg(fmt, ...) logdebug(fmt, ## __VA_ARGS__)
+#define baterr(fmt, ...)  _err(fmt, ## __VA_ARGS__)
+#define batinfo(fmt, ...) _info(fmt, ## __VA_ARGS__)
 #else
 #define baterr(fmt, ...)
-#define batdbg(fmt, ...)
+#define batinfo(fmt, ...)
 #endif
 
 /****************************************************************************
@@ -111,7 +111,7 @@ static struct bat_gauge_dev_s g_gaugedev;
  * Name: gauge_get_status
  ****************************************************************************/
 
-static int gauge_get_status(FAR enum battery_gauge_status_e *status)
+static int gauge_get_status(FAR enum battery_status_e *status)
 {
   uint8_t state;
   int ret;
@@ -152,7 +152,7 @@ static int gauge_get_status(FAR enum battery_gauge_status_e *status)
         break;
 
       default:
-        _info("Charge state %d\n", state);
+        batinfo("Charge state %d\n", state);
         *status = BATTERY_IDLE;
         break;
     }
@@ -325,8 +325,8 @@ static int gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case BATIOC_STATE:
         {
-          FAR enum battery_gauge_status_e *status =
-            (FAR enum battery_gauge_status_e *)(uintptr_t)arg;
+          FAR enum battery_status_e *status =
+            (FAR enum battery_status_e *)(uintptr_t)arg;
           ret = gauge_get_status(status);
         }
         break;
@@ -394,7 +394,7 @@ int cxd56_gauge_initialize(FAR const char *devpath)
   ret = register_driver(devpath, &g_gaugeops, 0666, priv);
   if (ret < 0)
     {
-      _err("ERROR: register_driver failed: %d\n", ret);
+      baterr("ERROR: register_driver failed: %d\n", ret);
       return -EFAULT;
     }
 

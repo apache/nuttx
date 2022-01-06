@@ -43,8 +43,12 @@
 int file_vioctl(FAR struct file *filep, int req, va_list ap)
 {
   FAR struct inode *inode;
+  unsigned long arg;
+  int ret = -ENOTTY;
 
   DEBUGASSERT(filep != NULL);
+
+  arg = va_arg(ap, unsigned long);
 
   /* Is a driver opened? */
 
@@ -56,14 +60,59 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
 
   /* Does the driver support the ioctl method? */
 
-  if (inode->u.i_ops == NULL || inode->u.i_ops->ioctl == NULL)
+  if (inode->u.i_ops != NULL && inode->u.i_ops->ioctl != NULL)
     {
-      return -ENOTTY;
+      /* Yes on both accounts.  Let the driver perform the ioctl command */
+
+      ret = inode->u.i_ops->ioctl(filep, req, arg);
     }
 
-  /* Yes on both accounts.  Let the driver perform the ioctl command */
+  /* Check for File system IOCTL commands that can be implemented via
+   * fcntl()
+   */
 
-  return inode->u.i_ops->ioctl(filep, req, va_arg(ap, unsigned long));
+  if (ret != -ENOTTY)
+    {
+      return ret;
+    }
+
+  switch (req)
+    {
+      case FIONBIO:
+        {
+          FAR int *nonblock = (FAR int *)(uintptr_t)arg;
+          if (nonblock && *nonblock)
+            {
+              ret = file_fcntl(filep, F_SETFL,
+                              file_fcntl(filep, F_GETFL) | O_NONBLOCK);
+            }
+          else
+            {
+              ret = file_fcntl(filep, F_SETFL,
+                              file_fcntl(filep, F_GETFL) & ~O_NONBLOCK);
+            }
+        }
+        break;
+
+      case FIOCLEX:
+        ret = file_fcntl(filep, F_SETFD,
+                         file_fcntl(filep, F_GETFD) | FD_CLOEXEC);
+        break;
+
+      case FIONCLEX:
+        ret = file_fcntl(filep, F_SETFD,
+                         file_fcntl(filep, F_GETFD) & ~FD_CLOEXEC);
+        break;
+
+      case FIOC_FILEPATH:
+        if (!INODE_IS_MOUNTPT(inode))
+          {
+            ret = inode_getpath(inode, (FAR char *)(uintptr_t)arg);
+          }
+        break;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -73,7 +122,6 @@ int file_vioctl(FAR struct file *filep, int req, va_list ap)
 static int nx_vioctl(int fd, int req, va_list ap)
 {
   FAR struct file *filep;
-  FAR int *arg;
   int ret;
 
   /* Get the file structure corresponding to the file descriptor. */
@@ -84,43 +132,9 @@ static int nx_vioctl(int fd, int req, va_list ap)
       return ret;
     }
 
-  DEBUGASSERT(filep != NULL);
+  /* Let file_vioctl() do the real work. */
 
-  /* Perform the file ioctl. */
-
-  ret = file_vioctl(filep, req, ap);
-
-  /* Check for File system IOCTL commands that can be implemented via
-   * fcntl()
-   */
-
-  if (ret == -ENOTTY)
-    {
-      switch (req)
-        {
-          case FIONBIO:
-            arg = va_arg(ap, FAR int *);
-            if (arg && *arg)
-              {
-                ret = nx_fcntl(fd, F_SETFL,
-                               nx_fcntl(fd, F_GETFL) | O_NONBLOCK);
-              }
-            else
-              {
-                ret = nx_fcntl(fd, F_SETFL,
-                               nx_fcntl(fd, F_GETFL) & ~O_NONBLOCK);
-              }
-            break;
-          case FIOCLEX:
-            ret = nx_fcntl(fd, F_SETFD, nx_fcntl(fd, F_GETFD) | FD_CLOEXEC);
-            break;
-          case FIONCLEX:
-            ret = nx_fcntl(fd, F_SETFD, nx_fcntl(fd, F_GETFD) & ~FD_CLOEXEC);
-            break;
-        }
-    }
-
-  return ret;
+  return file_vioctl(filep, req, ap);
 }
 
 /****************************************************************************

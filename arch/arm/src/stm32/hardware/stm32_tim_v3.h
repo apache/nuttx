@@ -769,6 +769,7 @@
 #define ATIM_CCER_CC5P                 (1 << 17)                          /* Bit 17: Capture/Compare 5 Output Polarity */
 #define ATIM_CCER_CC6E                 (1 << 20)                          /* Bit 20: Capture/Compare 6 Output Enable */
 #define ATIM_CCER_CC6P                 (1 << 21)                          /* Bit 21: Capture/Compare 6 Output Polarity */
+#define ATIM_CCER_CCXBASE(ch)          (ch << 2)                          /* Each channel uses 4-bits */
 
 /* ATIM Counter (CNT) */
 
@@ -1236,6 +1237,7 @@
 #define GTIM_CCER_CC4E                 (1 << 12)                          /* Bit 12: Capture/Compare 4 Output Enable */
 #define GTIM_CCER_CC4P                 (1 << 13)                          /* Bit 13: Capture/Compare 4 Output Polarity */
 #define GTIM_CCER_CC4NP                (1 << 15)                          /* Bit 15: Capture/Compare 4 Complementary Output Polarity */
+#define GTIM_CCER_CCXBASE(ch)          (ch << 2)                          /* Each channel uses 4-bits */
 
 /* GTIM Counter (CNT) */
 

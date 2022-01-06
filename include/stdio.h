@@ -29,10 +29,10 @@
 
 #include <sys/types.h>
 #include <stdarg.h>
-#include <sched.h>
 #include <time.h>
 
 #include <nuttx/fs/fs.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,6 +86,16 @@
 
 #define TMP_MAX 56800235584ull
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define tmpfile64 tmpfile
+#  define fopen64   fopen
+#  define freopen64 freopen
+#  define fseeko64  fseeko
+#  define ftello64  ftello
+#  define fgetpos64 fgetpos
+#  define fsetpos64 fsetpos
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -93,6 +103,12 @@
 /* Streams */
 
 typedef struct file_struct FILE;
+
+struct va_format
+{
+  FAR const char *fmt;
+  FAR va_list *va;
+};
 
 /****************************************************************************
  * Public Data

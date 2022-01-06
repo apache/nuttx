@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -1349,7 +1350,7 @@ static void stm32_sdma_setup(DMA_HANDLE handle, FAR stm32_dmacfg_t *cfg)
   scr    &=  (DMA_SCR_PFCTRL | DMA_SCR_DIR_MASK | DMA_SCR_PINC |
               DMA_SCR_MINC | DMA_SCR_PSIZE_MASK | DMA_SCR_MSIZE_MASK |
               DMA_SCR_PINCOS | DMA_SCR_DBM | DMA_SCR_CIRC |
-              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK);
+              DMA_SCR_PBURST_MASK | DMA_SCR_MBURST_MASK | DMA_SCR_TRBUFF);
   regval |= scr;
   dmachan_putreg(dmachan, STM32_DMA_SCR_OFFSET, regval);
 }
@@ -2054,7 +2055,7 @@ static bool stm32_bdma_capable(FAR stm32_dmacfg_t *cfg)
       ((mend + 1) & (ARMV7M_DCACHE_LINESIZE - 1)) != 0)
     {
       dmainfo("stm32_dmacapable: dcache unaligned "
-              "maddr:0x%08" PRIx32 " mend:0x%08x\n",
+              "maddr:0x%08" PRIx32 " mend:0x%08" PRIx32 "\n",
               cfg->maddr, mend);
 #if !defined(CONFIG_STM32H7_DMACAPABLE_ASSUME_CACHE_ALIGNED)
       return false;
@@ -2270,9 +2271,9 @@ void weak_function arm_dma_initialize(void)
  *     in chip/stm32h7xxxxxxx_dmamux.h
  *
  * Returned Value:
- *   One success, this function returns a non-NULL, void* DMA channel
- *   handle.  NULL is returned on any failure.  This function can fail only
- *   if no DMA channel is available.
+ *   On success, this function returns a non-NULL, void* DMA channel handle.
+ *   NULL is returned on any failure.  This function can fail only if no DMA
+ *   channel is available.
  *
  * Assumptions:
  *   - The caller does not hold he DMA channel.

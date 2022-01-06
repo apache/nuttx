@@ -3,8 +3,8 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-source libs/libnx/nx/Kconfig
-source libs/libnx/nxfonts/Kconfig
-source libs/libnx/nxglib/Kconfig
-source libs/libnx/nxmu/Kconfig
-source libs/libnx/nxtk/Kconfig
+source "libs/libnx/nx/Kconfig"
+source "libs/libnx/nxfonts/Kconfig"
+source "libs/libnx/nxglib/Kconfig"
+source "libs/libnx/nxmu/Kconfig"
+source "libs/libnx/nxtk/Kconfig"

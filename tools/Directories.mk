@@ -37,7 +37,7 @@
 #   CONFIG_BUILD_KERNEL is selected, then applications are not build at all.
 
 CLEANDIRS :=
-CCLEANDIRS := boards $(APPDIR) graphics $(ARCH_SRC)
+CCLEANDIRS := boards $(APPDIR) graphics
 KERNDEPDIRS :=
 USERDEPDIRS :=
 
@@ -97,6 +97,9 @@ endif
 endif
 
 CONTEXTDIRS += libs$(DELIM)libc
+ifeq ($(CONFIG_HAVE_CXX),y)
+CONTEXTDIRS += libs$(DELIM)libxx
+endif
 
 ifeq ($(CONFIG_NX),y)
 KERNDEPDIRS += graphics
@@ -156,6 +159,7 @@ endif
 
 ifeq ($(CONFIG_OPENAMP),y)
 KERNDEPDIRS += openamp
+CONTEXTDIRS += openamp
 else
 CLEANDIRS += openamp
 endif

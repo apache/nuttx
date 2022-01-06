@@ -112,9 +112,9 @@ done
 # Sanity checking
 
 if [ -z "${boardconfig}" ]; then
-  echo ""
-  echo "Missing <board/config> argument"
-  echo "$USAGE"
+  echo "" 1>&2
+  echo "Missing <board/config> argument" 1>&2
+  echo "$USAGE" 1>&2
   exit 2
 fi
 
@@ -134,10 +134,10 @@ if [ ! -d ${configpath} ]; then
   if [ ! -d ${configpath} ]; then
     configpath=${boardconfig}
     if [ ! -d ${configpath} ]; then
-      echo "Directory for ${boardconfig} does not exist."
-      echo ""
-      echo "Run tools/configure.sh -L to list available configurations."
-      echo "$USAGE"
+      echo "Directory for ${boardconfig} does not exist." 1>&2
+      echo "" 1>&2
+      echo "Run tools/configure.sh -L to list available configurations." 1>&2
+      echo "$USAGE" 1>&2
       exit 3
     fi
   fi

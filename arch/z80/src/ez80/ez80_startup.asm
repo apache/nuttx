@@ -22,11 +22,11 @@
 ; Constants
 ;**************************************************************************
 
-EZ80_RAM_CTL      EQU %b4
-EZ80_RAM_ADDR_U   EQU %b5
+EZ80_RAM_CTL      EQU 0b4h
+EZ80_RAM_ADDR_U   EQU 0b5h
 
-EZ80_FLASH_ADDR_U EQU %f7
-EZ80_FLASH_CTRL   EQU %f8
+EZ80_FLASH_ADDR_U EQU 0f7h
+EZ80_FLASH_CTRL   EQU 0f8h
 
 ;**************************************************************************
 ; Imported Symbols
@@ -82,10 +82,13 @@ _ez80_startup:
 	out0	(EZ80_RAM_CTL), a
 
 	; Position the IDLE task stack point at an offset of 1Kb in on-chip SRAM
-	; On-chip SRAM resides at an offset of %00e000 from the RAM base address.
+	; On-chip SRAM resides at an offset of 000e000h from the RAM base address.
 	; REVISIT:  CONFIG_IDLETHREAD_STACKSIZE is not used!
 
-	ld		sp, __RAM_ADDR_U_INIT_PARAM << 16 + %00e400
+	; The GNU assembler (2.36.1) cannot produce this relocation, although the
+	; Z80 ELF format supports it. The instruction is instead hand assembled.
+	;ld		sp, __RAM_ADDR_U_INIT_PARAM << 16 + 000e400h
+	db		031h, 000h, 0e4h, __RAM_ADDR_U_INIT_PARAM
 
 	; Perform chip-specific initialization
 

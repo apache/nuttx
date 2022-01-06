@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"
@@ -90,7 +91,7 @@ static void fe310_reload_mtimecmp(void)
  * Name:  fe310_timerisr
  ****************************************************************************/
 
-static int fe310_timerisr(int irq, void *context, FAR void *arg)
+static int fe310_timerisr(int irq, void *context, void *arg)
 {
   fe310_reload_mtimecmp();
 

@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -38,6 +39,7 @@
 #include <nuttx/wdog.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wqueue.h>
 #include <nuttx/signal.h>
 #include <nuttx/net/mii.h>
@@ -286,7 +288,7 @@ static struct imxrt_driver_s g_enet[CONFIG_IMXRT_ENET_NETHIFS];
  */
 
 static uint8_t g_desc_pool[NENET_NBUFFERS * sizeof(struct enet_desc_s)]
-               __attribute__((aligned(ENET_ALIGN)));
+               aligned_data(ENET_ALIGN);
 
 /* The DMA buffers.  Again, A unaligned uint8_t is used to allocate the
  * memory; 16 is added to assure that we can meet the descriptor alignment
@@ -294,7 +296,7 @@ static uint8_t g_desc_pool[NENET_NBUFFERS * sizeof(struct enet_desc_s)]
  */
 
 static uint8_t g_buffer_pool[NENET_NBUFFERS * IMXRT_BUF_SIZE]
-               __attribute__((aligned(ENET_ALIGN)));
+               aligned_data(ENET_ALIGN);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -1836,7 +1838,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd, unsigned long arg)
 static int imxrt_phyintenable(struct imxrt_driver_s *priv)
 {
 #if defined(CONFIG_ETH0_PHY_KSZ8051) || defined(CONFIG_ETH0_PHY_KSZ8061) || \
-    defined(CONFIG_ETH0_PHY_KSZ8081)
+    defined(CONFIG_ETH0_PHY_KSZ8081) || defined(CONFIG_ETH0_PHY_DP83825I)
   uint16_t phyval;
   int ret;
 
@@ -2558,6 +2560,28 @@ int imxrt_netinitialize(int intf)
   priv->dev.d_private = g_enet;         /* Used to recover private state from dev */
 
 #ifdef CONFIG_NET_ETHERNET
+
+#ifdef CONFIG_NET_USE_OTP_ETHERNET_MAC
+
+  /* Boards like the teensy have a unique (official)
+   * MAC address stored in OTP.
+   * TODO: hardcoded mem locations: use proper registers and header file
+   * offsets: 0x620: MAC0, 0x630: MAC1
+   */
+
+  uidl   = getreg32(IMXRT_OCOTP_BASE + 0x620);
+  uidml  = getreg32(IMXRT_OCOTP_BASE + 0x630);
+  mac    = priv->dev.d_mac.ether.ether_addr_octet;
+
+  mac[0] = (uidml & 0x0000ff00) >> 8;
+  mac[1] = (uidml & 0x000000ff) >> 0;
+  mac[2] = (uidl & 0xff000000) >> 24;
+  mac[3] = (uidl & 0x00ff0000) >> 16;
+  mac[4] = (uidl & 0x0000ff00) >> 8;
+  mac[5] = (uidl & 0x000000ff) >> 0;
+
+#else
+
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
    * 48 bits.  We then force unicast and locally administered bits
@@ -2579,6 +2603,9 @@ int imxrt_netinitialize(int intf)
   mac[3] = (uidl &  0x00ff0000) >> 16;
   mac[4] = (uidl &  0x0000ff00) >> 8;
   mac[5] = (uidl &  0x000000ff);
+
+#endif
+
 #endif
 
 #ifdef CONFIG_IMXRT_ENET_PHYINIT

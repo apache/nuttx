@@ -168,6 +168,7 @@ typedef uint8_t sockcaps_t;
  */
 
 struct file;    /* Forward reference */
+struct stat;    /* Forward reference */
 struct socket;  /* Forward reference */
 struct pollfd;  /* Forward reference */
 
@@ -195,14 +196,13 @@ struct sock_intf_s
   CODE ssize_t    (*si_recvmsg)(FAR struct socket *psock,
                     FAR struct msghdr *msg, int flags);
   CODE int        (*si_close)(FAR struct socket *psock);
+  CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
+                    FAR void *arg, size_t arglen);
+  CODE int        (*si_socketpair)(FAR struct socket *psocks[2]);
 #ifdef CONFIG_NET_SENDFILE
   CODE ssize_t    (*si_sendfile)(FAR struct socket *psock,
                     FAR struct file *infile, FAR off_t *offset,
                     size_t count);
-#endif
-#ifdef CONFIG_NET_USRSOCK
-  CODE int        (*si_ioctl)(FAR struct socket *psock, int cmd,
-                    FAR void *arg, size_t arglen);
 #endif
 };
 
@@ -496,7 +496,7 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
  *   Allocate a socket descriptor
  *
  * Input Parameters:
- *   psock    A double pointer to socket structure to be allocated.
+ *   psock    A pointer to socket structure.
  *   oflags   Open mode flags.
  *
  * Returned Value:
@@ -505,7 +505,7 @@ FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
  *
  ****************************************************************************/
 
-int sockfd_allocate(FAR struct socket **psock, int oflags);
+int sockfd_allocate(FAR struct socket *psock, int oflags);
 
 /****************************************************************************
  * Name: sockfd_socket
@@ -522,6 +522,7 @@ int sockfd_allocate(FAR struct socket **psock, int oflags);
  *
  ****************************************************************************/
 
+FAR struct socket *file_socket(FAR struct file *filep);
 FAR struct socket *sockfd_socket(int sockfd);
 
 /****************************************************************************
@@ -1313,8 +1314,6 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2);
  *
  ****************************************************************************/
 
-struct stat;  /* Forward reference.  See sys/stat.h */
-
 int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
 
 /****************************************************************************
@@ -1335,7 +1334,7 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
  *
  * Returned Value:
  *   On success, returns the number of characters sent.  On  error,
- *   -1 is returned, and errno is set appropriately:
+ *   the negative errno is return appropriately:
  *
  *   EAGAIN or EWOULDBLOCK
  *     The socket is marked non-blocking and the requested operation
@@ -1380,7 +1379,6 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
  ****************************************************************************/
 
 #ifdef CONFIG_NET_SENDFILE
-struct file;
 ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
                        FAR off_t *offset, size_t count);
 #endif
@@ -1424,6 +1422,27 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap);
  ****************************************************************************/
 
 int psock_fcntl(FAR struct socket *psock, int cmd, ...);
+
+/****************************************************************************
+ * Name: psock_socketpair
+ *
+ * Description:
+ * Create an unbound pair of connected sockets in a specified domain, of a
+ * specified type, under the protocol optionally specified by the protocol
+ * argument. The two sockets shall be identical. The file descriptors used
+ * in referencing the created sockets shall be returned in
+ * sv[0] and sv[1].
+ *
+ * Input Parameters:
+ *   domain   (see sys/socket.h)
+ *   type     (see sys/socket.h)
+ *   protocol (see sys/socket.h)
+ *   psocks   A pointer to a user allocated socket structure to be paired.
+ *
+ ****************************************************************************/
+
+int psock_socketpair(int domain, int type, int protocol,
+                     FAR struct socket *psocks[2]);
 
 /****************************************************************************
  * Name: netdev_register

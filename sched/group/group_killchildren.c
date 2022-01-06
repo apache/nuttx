@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <sched.h>
 #include <pthread.h>
+#include <debug.h>
 
 #include <nuttx/sched.h>
 

@@ -20,4 +20,8 @@ config RPTUN_STACKSIZE
 	int "rptun stack size"
 	default DEFAULT_TASK_STACKSIZE
 
+config RPTUN_LOADER
+        bool "rptun loader support"
+        default n
+
 endif # RPTUN

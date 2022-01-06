@@ -50,11 +50,13 @@
 #include <stdbool.h>
 #include <string.h>
 #include <queue.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/semaphore.h>
 
 #include "arm_arch.h"
@@ -169,7 +171,7 @@ static sq_queue_t g_tcd_free;
 /* This is a pool of pre-allocated TCDs */
 
 static struct imxrt_edmatcd_s g_tcd_pool[CONFIG_IMXRT_EDMA_NTCD]
-              __attribute__((aligned(EDMA_ALIGN)));
+              aligned_data(EDMA_ALIGN);
 #endif
 
 /****************************************************************************

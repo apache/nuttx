@@ -36,8 +36,7 @@
 #include <unistd.h>          /* For getpid */
 #include <signal.h>          /* Needed for sigset_t, includes this file */
 #include <time.h>            /* Needed for struct timespec */
-
-#include <nuttx/semaphore.h> /* For sem_t and SEM_PRIO_* defines */
+#include <semaphore.h>       /* For sem_t and SEM_PRIO_* defines */
 
 #ifdef CONFIG_PTHREAD_SPINLOCKS
 /* The architecture specific spinlock.h header file must provide the
@@ -224,6 +223,10 @@ typedef FAR void *pthread_addr_t;
 
 typedef CODE pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
+
+typedef void (*pthread_exitroutine_t)(pthread_addr_t);
+
+typedef void (*pthread_trampoline_t)(pthread_startroutine_t, pthread_addr_t);
 
 struct pthread_attr_s
 {

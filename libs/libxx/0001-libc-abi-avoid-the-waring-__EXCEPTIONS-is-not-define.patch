@@ -1,0 +1,28 @@
+From d74ec1669d8f09d2ac9289423b51ae8b3af13d11 Mon Sep 17 00:00:00 2001
+From: Xiang Xiao <xiaoxiang@xiaomi.com>
+Date: Sat, 28 Aug 2021 02:11:15 +0800
+Subject: [PATCH] [libc++abi] avoid the waring: "__EXCEPTIONS" is not defined,
+ evaluates to 0 [-Werror=undef]
+
+Signed-off-by: Xiang Xiao <xiaoxiang@xiaomi.com>
+Change-Id: I228cf44401f7ef9d7f49d8b806177bae1242d674
+---
+ include/__cxxabi_config.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git libcxxabi/include/__cxxabi_config.h libcxxabi/include/__cxxabi_config.h
+index cffedb8..05ed8b6 100644
+--- libcxxabi/include/__cxxabi_config.h
++++ libcxxabi/include/__cxxabi_config.h
+@@ -93,7 +93,7 @@
+ #  if !__has_feature(cxx_exceptions)
+ #    define _LIBCXXABI_NO_EXCEPTIONS
+ #  endif
+-#elif defined(_LIBCXXABI_COMPILER_GCC) && !__EXCEPTIONS
++#elif defined(_LIBCXXABI_COMPILER_GCC) && !defined(__EXCEPTIONS)
+ #  define _LIBCXXABI_NO_EXCEPTIONS
+ #endif
+ 
+-- 
+2.25.1
+

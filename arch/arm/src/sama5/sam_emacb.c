@@ -43,6 +43,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <queue.h>
 #include <errno.h>
@@ -545,12 +546,12 @@ static int  sam_emac_configure(struct sam_emac_s *priv);
 /* EMAC0 TX descriptors list */
 
 static struct emac_txdesc_s g_emac0_txdesc[CONFIG_SAMA5_EMAC0_NTXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* EMAC0 RX descriptors list */
 
 static struct emac_rxdesc_s g_emac0_rxdesc[CONFIG_SAMA5_EMAC0_NRXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* EMAC0 Transmit Buffers
  *
@@ -561,13 +562,13 @@ static struct emac_rxdesc_s g_emac0_rxdesc[CONFIG_SAMA5_EMAC0_NRXBUFFERS]
 
 static uint8_t
 g_emac0_txbuffer[CONFIG_SAMA5_EMAC0_NTXBUFFERS * EMAC_TX_UNITSIZE]
-__attribute__((aligned(8)));
+aligned_data(8);
 
 /* EMAC0 Receive Buffers */
 
 static uint8_t
 g_emac0_rxbuffer[CONFIG_SAMA5_EMAC0_NRXBUFFERS * EMAC_RX_UNITSIZE]
-__attribute__((aligned(8)));
+aligned_data(8);
 
 #endif
 
@@ -575,12 +576,12 @@ __attribute__((aligned(8)));
 /* EMAC1 TX descriptors list */
 
 static struct emac_txdesc_s g_emac1_txdesc[CONFIG_SAMA5_EMAC1_NTXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* EMAC1 RX descriptors list */
 
 static struct emac_rxdesc_s g_emac1_rxdesc[CONFIG_SAMA5_EMAC1_NRXBUFFERS]
-              __attribute__((aligned(8)));
+              aligned_data(8);
 
 /* EMAC1 Transmit Buffers
  *
@@ -591,13 +592,13 @@ static struct emac_rxdesc_s g_emac1_rxdesc[CONFIG_SAMA5_EMAC1_NRXBUFFERS]
 
 static uint8_t
 g_emac1_txbuffer[CONFIG_SAMA5_EMAC1_NTXBUFFERS * EMAC_TX_UNITSIZE]
-__attribute__((aligned(8)));
+aligned_data(8);
 
 /* EMAC1 Receive Buffers */
 
 static uint8_t
 g_emac1_rxbuffer[CONFIG_SAMA5_EMAC1_NRXBUFFERS * EMAC_RX_UNITSIZE]
-__attribute__((aligned(8)));
+aligned_data(8);
 
 #endif
 #endif

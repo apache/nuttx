@@ -1,13 +1,6 @@
 /****************************************************************************
  * drivers/mtd/mtd_nand.c
  *
- *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * This logic was based largely on Atmel sample code with modifications for
- * better integration with NuttX.  The Atmel sample code has a BSD
- * compatible license that requires this copyright notice:
- *
  *   Copyright (c) 2011, 2012, Atmel Corporation
  *
  * Redistribution and use in source and binary forms, with or without
@@ -787,7 +780,7 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
     {
       case MTDIOC_GEOMETRY:
         {
-          struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
+          FAR struct mtd_geometry_s *geo = (struct mtd_geometry_s *)arg;
           if (geo)
             {
               /* Populate the geometry structure with information needed to
@@ -806,6 +799,23 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = nandmodel_getdevblocks(model) *
+                                  nandmodel_getbyteblocksize(model) /
+                                  model->pagesize;
+              info->sectorsize  = model->pagesize;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
           /* Erase the entire device */
@@ -814,7 +824,6 @@ static int nand_ioctl(struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

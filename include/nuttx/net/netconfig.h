@@ -201,6 +201,10 @@
 #  define NET_LO_PKTSIZE        CONFIG_NET_LOOPBACK_PKTSIZE
 #endif
 
+#ifndef CONFIG_NET_SEND_BUFSIZE
+#define CONFIG_NET_SEND_BUFSIZE 0
+#endif
+
 /* Layer 3/4 Configuration Options ******************************************/
 
 /* IP configuration options */
@@ -210,7 +214,7 @@
  * This should normally not be changed.
  */
 
-#define IP_TTL 64
+#define IP_TTL_DEFAULT 64
 
 /* Network drivers often receive packets with garbage at the end
  * and are longer than the size of packet in the TCP header.  The

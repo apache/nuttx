@@ -61,7 +61,7 @@ First, install the following set of system dependencies according to your Operat
 KConfig frontend
 ----------------
 
-NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which is exposed via a series of interactive menu-based *frontends*, part of the ``kconfig-frontends`` package. Depending on your OS you may use a precompiled package or you will have to build it from source:
+NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt>`_ which is exposed via a series of interactive menu-based *frontends*, part of the ``kconfig-frontends`` package. Depending on your OS you may use a precompiled package or you will have to build it from source, which is available in the `NuttX tools repository <https://bitbucket.org/nuttx/tools/src/master/kconfig-frontends/>`_:
 
    .. tabs::
 
@@ -71,12 +71,13 @@ NuttX configuration system uses `KConfig <https://www.kernel.org/doc/Documentati
 
       .. code-tab:: console MacOS, Ubuntu 18.04 LTS and earlier
 
+         $ git clone https://bitbucket.org/nuttx/tools.git
          $ cd tools/kconfig-frontends
          $ # on MacOS do the following:
          $ patch < ../kconfig-macos.diff -p 1
          $ ./configure --enable-mconf --disable-shared --enable-static --disable-gconf --disable-qconf --disable-nconf
          $ # on Linux do the following:
-         $  ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
+         $ ./configure --enable-mconf --disable-nconf --disable-gconf --disable-qconf
          $ make
          $ make install
 
@@ -164,8 +165,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
        $ cd nuttx
        $ curl -L https://github.com/apache/incubator-nuttx/tarball/master -o nuttx.tar.gz 
        $ curl -L https://github.com/apache/incubator-nuttx-apps/tarball/master -o apps.tar.gz
-       $ tar zxf nuttx.tar.gz
-       $ tar zxf apps.tar.gz
+       $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
+       $ tar zxf apps.tar.gz --one-top-level=apps --strip-components 1
        
     There are also ``.zip`` archives available (useful for Windows users): just replace ``tarball`` with
     ``zipball``.
@@ -173,13 +174,13 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
   .. tab:: Download stable release
   
     Go to `releases <https://nuttx.apache.org/download/>`_ and choose a version to download. The following
-    example uses version 9.1.0:
+    example uses version 10.1.0:
 
     .. code-block:: console
     
        $ mkdir nuttx
        $ cd nuttx
-       $ curl -L https://downloads.apache.org/incubator/nuttx/9.1.0/apache-nuttx-9.1.0-incubating.tar.gz -o nuttx.tar.gz 
-       $ curl -L https://downloads.apache.org/incubator/nuttx/9.1.0/apache-nuttx-apps-9.1.0-incubating.tar.gz -o apps.tar.gz
+       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-10.1.0-incubating.tar.gz?action=download -o nuttx.tar.gz 
+       $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-apps-10.1.0-incubating.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz
        $ tar zxf apps.tar.gz

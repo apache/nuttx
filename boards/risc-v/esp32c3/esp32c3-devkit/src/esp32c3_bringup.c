@@ -42,61 +42,54 @@
 #include "esp32c3_partition.h"
 #include "esp32c3-devkit.h"
 
-#ifdef CONFIG_SPI_DRIVER
+#ifdef CONFIG_SPI
 #  include "esp32c3_spi.h"
+#endif
+
+#ifdef CONFIG_LCD_DEV
+#  include <nuttx/board.h>
+#  include <nuttx/lcd/lcd_dev.h>
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+#  include <nuttx/video/fb.h>
+#endif
+
+#ifdef CONFIG_ESP32C3_RT_TIMER
+#  include "esp32c3_rt_timer.h"
 #endif
 
 #ifdef CONFIG_TIMER
 #  include "esp32c3_tim_lowerhalf.h"
 #endif
 
+#include "esp32c3_rtc.h"
+#ifdef CONFIG_ESP32C3_EFUSE
+#  include "esp32c3_efuse.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+#  include "esp32c3_sha.h"
+#endif
+
+#ifdef CONFIG_RTC_DRIVER
+#  include "esp32c3_rtc_lowerhalf.h"
+#endif
+
+#ifdef CONFIG_ESP32C3_BLE
+#  include "esp32c3_ble.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ESP32C3_MTD_OFFSET            CONFIG_ESP32C3_MTD_OFFSET
+#define ESP32C3_MTD_SIZE              CONFIG_ESP32C3_MTD_SIZE
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: esp32c3_init_wifi_storage
- *
- * Description:
- *   Initialization of saved Wi-Fi parameters
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
-static int esp32c3_init_wifi_storage(void)
-{
-  int ret;
-  const char *path = "/dev/mtdblock1";
-  FAR struct mtd_dev_s *mtd_part;
-
-  mtd_part = esp32c3_spiflash_alloc_mtdpart();
-  if (!mtd_part)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to alloc MTD partition of SPI Flash\n");
-      return -1;
-    }
-
-  ret = register_mtddriver(path, mtd_part, 0777, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to register MTD: %d\n", ret);
-      return -1;
-    }
-
-  ret = nx_mount(path, CONFIG_ESP32C3_WIFI_FS_MOUNTPT, "spiffs", 0, NULL);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: Failed to mount the FS volume: %d\n", ret);
-      return ret;
-    }
-
-  return 0;
-}
-#endif
 
 /****************************************************************************
  * Name: esp32c3_bringup
@@ -104,10 +97,10 @@ static int esp32c3_init_wifi_storage(void)
  * Description:
  *   Perform architecture-specific initialization
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -115,6 +108,23 @@ static int esp32c3_init_wifi_storage(void)
 int esp32c3_bringup(void)
 {
   int ret;
+
+#if defined(CONFIG_ESP32C3_EFUSE)
+  ret = esp32c3_efuse_initialize("/dev/efuse");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to init EFUSE: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32C3_SHA_ACCELERATOR
+  ret = esp32c3_sha_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to initialize SHA: %d\n", ret);
+    }
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -138,11 +148,15 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
+
+#  ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
+  esp32c3_spiflash_encrypt_test();
+#  endif
+
   ret = esp32c3_spiflash_init();
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
-      return ret;
     }
 #endif
 
@@ -152,7 +166,6 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize partition error=%d\n",
              ret);
-      return ret;
     }
 #endif
 
@@ -161,7 +174,6 @@ int esp32c3_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -171,6 +183,37 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize SPI%d driver: %d\n",
              ESP32C3_SPI2, ret);
+    }
+#endif
+
+#if defined(CONFIG_SPI_SLAVE_DRIVER) && defined(CONFIG_ESP32C3_SPI2)
+  ret = board_spislavedev_initialize(ESP32C3_SPI2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SPI%d Slave driver: %d\n",
+             ESP32C3_SPI2, ret);
+    }
+#endif
+
+#ifdef CONFIG_VIDEO_FB
+  ret = fb_register(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Frame Buffer Driver.\n");
+    }
+#elif defined(CONFIG_LCD)
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
     }
 #endif
 
@@ -194,7 +237,6 @@ int esp32c3_bringup(void)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 "
                        "Driver for I2C0: %d\n", ret);
-      return ret;
     }
 #endif
 
@@ -250,37 +292,69 @@ int esp32c3_bringup(void)
 
 #endif /* CONFIG_ONESHOT */
 
+#ifdef CONFIG_ESP32C3_RT_TIMER
+  ret = esp32c3_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_ESP32C3_WIRELESS
 
-#ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
-  ret = esp32c3_init_wifi_storage();
+#ifdef CONFIG_ESP32C3_WIFI_BT_COEXIST
+  ret = esp32c3_wifi_bt_coexist_init();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi storage\n");
-      return ret;
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT coexist\n");
     }
 #endif
 
-#ifdef CONFIG_NET
-#ifdef ESP32C3_WLAN_HAS_STA
-  ret = esp32c3_wlan_sta_initialize();
+#ifdef CONFIG_ESP32C3_BLE
+  ret = esp32c3_ble_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi station\n");
-      return ret;
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE\n");
     }
 #endif
 
-#ifdef ESP32C3_WLAN_HAS_SOFTAP
-  ret = esp32c3_wlan_softap_initialize();
-  if (ret)
+#ifdef CONFIG_ESP32C3_WIFI
+
+  ret = board_wlan_init();
+  if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi softAP\n");
-      return ret;
+      syslog(LOG_ERR, "ERROR: board_wlan_init() failed: %d\n", ret);
     }
-#endif
+
 #endif
 
+#endif /* CONFIG_ESP32C3_WIRELESS */
+
+#ifdef CONFIG_ESP32C3_LEDC
+  ret = esp32c3_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: esp32c3_pwm_setup() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32C3_LEDC */
+
+#ifdef CONFIG_ESP32C3_ADC
+  ret = board_adc_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: board_adc_init() failed: %d\n", ret);
+    }
+#endif /* CONFIG_ESP32C3_ADC */
+
+#ifdef CONFIG_RTC_DRIVER
+  /* Instantiate the ESP32-C3 RTC driver */
+
+  ret = esp32c3_rtc_driverinit();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to Instantiate the RTC driver: %d\n", ret);
+    }
 #endif
 
   /* If we got here then perhaps not all initialization was successful, but

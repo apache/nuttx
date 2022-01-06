@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"
@@ -133,7 +134,7 @@ static void litex_reload_mtimecmp(void)
  * Name:  litex_timerisr
  ****************************************************************************/
 
-static int litex_timerisr(int irq, void *context, FAR void *arg)
+static int litex_timerisr(int irq, void *context, void *arg)
 {
   litex_reload_mtimecmp();
 

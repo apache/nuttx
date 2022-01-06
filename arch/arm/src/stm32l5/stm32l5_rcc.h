@@ -131,7 +131,7 @@ void stm32l5_clockconfig(void);
  *
  * Description:
  *   Any STM32L5 board may replace the "standard" board clock configuration
- *   logic with its own, custom clock cofiguration logic.
+ *   logic with its own, custom clock configuration logic.
  *
  ****************************************************************************/
 
@@ -163,9 +163,9 @@ void stm32l5_stdclockconfig(void);
  *   operation:  When re-awakening from deep-sleep modes, it is necessary to
  *   re-enable/re-start the PLL
  *
- *   This functional performs a subset of the operations performed by
+ *   This function performs a subset of the operations performed by
  *   stm32l5_clockconfig():  It does not reset any devices, and it does not
- *   reset the currenlty enabled peripheral clocks.
+ *   reset the currently enabled peripheral clocks.
  *
  *   If CONFIG_ARCH_BOARD_STM32L5_CUSTOM_CLOCKCONFIG is defined, then
  *   clocking will be enabled by an externally provided, board-specific

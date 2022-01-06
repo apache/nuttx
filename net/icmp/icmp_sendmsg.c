@@ -133,7 +133,7 @@ static void sendto_request(FAR struct net_driver_s *dev,
   ipv4->ipid[1]     = g_ipid & 0xff;
   ipv4->ipoffset[0] = IP_FLAG_DONTFRAG >> 8;
   ipv4->ipoffset[1] = IP_FLAG_DONTFRAG & 0xff;
-  ipv4->ttl         = IP_TTL;
+  ipv4->ttl         = IP_TTL_DEFAULT;
   ipv4->proto       = IP_PROTO_ICMP;
 
   net_ipv4addr_hdrcopy(ipv4->srcipaddr, &dev->d_ipaddr);

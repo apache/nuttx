@@ -78,11 +78,16 @@
  *    really intended only for crash error reporting.
  */
 
-#ifdef CONFIG_HAVE_FUNCTIONNAME
+#if !defined(EXTRA_FMT) && !defined(EXTRA_ARG) && defined(CONFIG_HAVE_FUNCTIONNAME)
 #  define EXTRA_FMT "%s: "
 #  define EXTRA_ARG ,__FUNCTION__
-#else
+#endif
+
+#ifndef EXTRA_FMT
 #  define EXTRA_FMT
+#endif
+
+#ifndef EXTRA_ARG
 #  define EXTRA_ARG
 #endif
 
@@ -747,6 +752,24 @@
 #  define mtrinfo     _info
 #else
 #  define mtrinfo     _none
+#endif
+
+#ifdef CONFIG_DEBUG_VIDEO_ERROR
+#  define verr        _err
+#else
+#  define verr        _none
+#endif
+
+#ifdef CONFIG_DEBUG_VIDEO_WARN
+#  define vwarn       _warn
+#else
+#  define vwarn       _none
+#endif
+
+#ifdef CONFIG_DEBUG_VIDEO_INFO
+#  define vinfo       _info
+#else
+#  define vinfo       _none
 #endif
 
 /* Buffer dumping macros do not depend on varargs */

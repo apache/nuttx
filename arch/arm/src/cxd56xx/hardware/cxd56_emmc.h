@@ -324,6 +324,9 @@
 #define EXTCSD_BUS_WIDTH            (183u)
 #define EXTCSD_BUS_WIDTH_4BIT_SDR   (0x01u)
 #define EXTCSD_BUS_WIDTH_4BIT_DDR   (0x05u)
+
+/* Vendor-specific Extended CSD */
+
 #define EXTCSD_PON                  (34u) /* Power Off Notification */
 #define EXTCSD_PON_POWERED_ON       (0x01u)
 #define EXTCSD_PON_POWERED_OFF_LONG (0x03u)

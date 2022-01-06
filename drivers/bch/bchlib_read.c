@@ -99,7 +99,11 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
     {
       /* Read the sector into the sector buffer */
 
-      bchlib_readsector(bch, sector);
+      ret = bchlib_readsector(bch, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Copy the tail end of the sector to the user buffer */
 
@@ -169,7 +173,11 @@ ssize_t bchlib_read(FAR void *handle, FAR char *buffer, size_t offset,
     {
       /* Read the sector into the sector buffer */
 
-      bchlib_readsector(bch, sector);
+      ret = bchlib_readsector(bch, sector);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
       /* Copy the head end of the sector to the user buffer */
 

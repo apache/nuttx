@@ -31,9 +31,9 @@
 #include <nuttx/arch.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/kthread.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
-#include <nuttx/signal.h>
 #include <metal/utilities.h>
 
 /****************************************************************************
@@ -48,6 +48,8 @@
 #  define ALIGN_UP(s, a)        (((s) + (a) - 1) & ~((a) - 1))
 #endif
 
+#define RPTUNIOC_NONE           0
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -60,7 +62,8 @@ struct rptun_priv_s
   struct rpmsg_virtio_shm_pool shm_pool;
   struct metal_list            bind;
   struct metal_list            node;
-  int                          pid;
+  sem_t                        sem;
+  unsigned long                cmd;
 };
 
 struct rptun_bind_s
@@ -93,14 +96,17 @@ static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
                                          FAR struct remoteproc_ops *ops,
                                          FAR void *arg);
 static void rptun_remove(FAR struct remoteproc *rproc);
-static int rptun_mmap(FAR struct remoteproc *rproc,
-                      FAR metal_phys_addr_t *pa, FAR metal_phys_addr_t *da,
-                      FAR void **va, size_t size, unsigned int attribute,
-                      FAR struct metal_io_region **io_);
 static int rptun_config(struct remoteproc *rproc, void *data);
 static int rptun_start(FAR struct remoteproc *rproc);
 static int rptun_stop(FAR struct remoteproc *rproc);
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id);
+static FAR struct remoteproc_mem *
+rptun_get_mem(FAR struct remoteproc *rproc,
+              FAR const char *name,
+              metal_phys_addr_t pa,
+              metal_phys_addr_t da,
+              FAR void *va, size_t size,
+              FAR struct remoteproc_mem *buf);
 
 static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
                           FAR const char *name, uint32_t dest);
@@ -110,6 +116,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
+#ifdef CONFIG_RPTUN_LOADER
 static int rptun_store_open(FAR void *store_, FAR const char *path,
                             FAR const void **img_data);
 static void rptun_store_close(FAR void *store_);
@@ -118,6 +125,7 @@ static int rptun_store_load(FAR void *store_, size_t offset,
                             metal_phys_addr_t pa,
                             FAR struct metal_io_region *io,
                             char is_blocking);
+#endif
 
 static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa);
@@ -130,13 +138,13 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 static struct remoteproc_ops g_rptun_ops =
 {
-  .init   = rptun_init,
-  .remove = rptun_remove,
-  .mmap   = rptun_mmap,
-  .config = rptun_config,
-  .start  = rptun_start,
-  .stop   = rptun_stop,
-  .notify = rptun_notify,
+  .init    = rptun_init,
+  .remove  = rptun_remove,
+  .config  = rptun_config,
+  .start   = rptun_start,
+  .stop    = rptun_stop,
+  .notify  = rptun_notify,
+  .get_mem = rptun_get_mem,
 };
 
 static const struct file_operations g_rptun_devops =
@@ -144,6 +152,7 @@ static const struct file_operations g_rptun_devops =
   .ioctl = rptun_dev_ioctl,
 };
 
+#ifdef CONFIG_RPTUN_LOADER
 static struct image_store_ops g_rptun_storeops =
 {
   .open     = rptun_store_open,
@@ -151,6 +160,7 @@ static struct image_store_ops g_rptun_storeops =
   .load     = rptun_store_load,
   .features = SUPPORT_SEEK,
 };
+#endif
 
 static sem_t g_rptun_sem = SEM_INITIALIZER(1);
 
@@ -164,32 +174,52 @@ static METAL_DECLARE_LIST(g_rptun_priv);
 static int rptun_thread(int argc, FAR char *argv[])
 {
   FAR struct rptun_priv_s *priv;
-  sigset_t set;
-  int ret;
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
-
-  sigemptyset(&set);
-  nxsig_addset(&set, SIGUSR1);
-  nxsig_procmask(SIG_BLOCK, &set, NULL);
+  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
   while (1)
     {
-      ret = nxsig_timedwait(&set, NULL, NULL);
-      if (ret == SIGUSR1)
+      nxsem_wait_uninterruptible(&priv->sem);
+      switch (priv->cmd)
         {
-          remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+          case RPTUNIOC_START:
+            if (priv->rproc.state == RPROC_OFFLINE)
+              {
+                rptun_dev_start(&priv->rproc);
+              }
+            break;
+
+          case RPTUNIOC_STOP:
+            if (priv->rproc.state != RPROC_OFFLINE)
+              {
+                rptun_dev_stop(&priv->rproc);
+              }
+            break;
         }
+
+        priv->cmd = RPTUNIOC_NONE;
+        remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
     }
 
   return 0;
 }
 
+static void rptun_wakeup(FAR struct rptun_priv_s *priv)
+{
+  int semcount;
+
+  nxsem_get_value(&priv->sem, &semcount);
+  if (semcount < 1)
+    {
+      nxsem_post(&priv->sem);
+    }
+}
+
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
-  FAR struct rptun_priv_s *priv = arg;
-
-  return nxsig_kill(priv->pid, SIGUSR1);
+  rptun_wakeup(arg);
+  return OK;
 }
 
 static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
@@ -205,55 +235,6 @@ static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
 static void rptun_remove(FAR struct remoteproc *rproc)
 {
   rproc->priv = NULL;
-}
-
-static int rptun_mmap(FAR struct remoteproc *rproc,
-                      FAR metal_phys_addr_t *pa, FAR metal_phys_addr_t *da,
-                      FAR void **va, size_t size, unsigned int attribute,
-                      FAR struct metal_io_region **io_)
-{
-  FAR struct rptun_priv_s *priv = rproc->priv;
-  FAR struct metal_io_region *io = metal_io_get_region();
-
-  if (*pa != METAL_BAD_PHYS)
-    {
-      *da = rptun_pa_to_da(priv->dev, *pa);
-      *va = metal_io_phys_to_virt(io, *pa);
-      if (!*va)
-        {
-          return -RPROC_EINVAL;
-        }
-    }
-  else if (*da != METAL_BAD_PHYS)
-    {
-      *pa = rptun_da_to_pa(priv->dev, *da);
-      *va = metal_io_phys_to_virt(io, *pa);
-      if (!*va)
-        {
-          return -RPROC_EINVAL;
-        }
-    }
-  else if (*va)
-    {
-      *pa = metal_io_virt_to_phys(io, *va);
-      if (*pa == METAL_BAD_PHYS)
-        {
-          return -RPROC_EINVAL;
-        }
-
-      *da = rptun_pa_to_da(priv->dev, *pa);
-    }
-  else
-    {
-      return -RPROC_EINVAL;
-    }
-
-  if (io_)
-    {
-      *io_ = io;
-    }
-
-  return 0;
 }
 
 static int rptun_config(struct remoteproc *rproc, void *data)
@@ -299,6 +280,45 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
   RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
 
   return 0;
+}
+
+static FAR struct remoteproc_mem *
+rptun_get_mem(FAR struct remoteproc *rproc,
+              FAR const char *name,
+              metal_phys_addr_t pa,
+              metal_phys_addr_t da,
+              FAR void *va, size_t size,
+              FAR struct remoteproc_mem *buf)
+{
+  FAR struct rptun_priv_s *priv = rproc->priv;
+
+  metal_list_init(&buf->node);
+  strcpy(buf->name, name ? name : "");
+  buf->io = metal_io_get_region();
+  buf->size = size;
+
+  if (pa != METAL_BAD_PHYS)
+    {
+      buf->pa = pa;
+      buf->da = rptun_pa_to_da(priv->dev, pa);
+    }
+  else if (da != METAL_BAD_PHYS)
+    {
+      buf->pa = rptun_da_to_pa(priv->dev, da);
+      buf->da = da;
+    }
+  else
+    {
+      buf->pa = metal_io_virt_to_phys(buf->io, va);
+      buf->da = rptun_pa_to_da(priv->dev, buf->pa);
+    }
+
+  if (buf->pa == METAL_BAD_PHYS || buf->da == METAL_BAD_PHYS)
+    {
+      return NULL;
+    }
+
+  return buf;
 }
 
 static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
@@ -373,6 +393,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
+#ifdef CONFIG_RPTUN_LOADER
   if (RPTUN_GET_FIRMWARE(priv->dev))
     {
       struct rptun_store_s store =
@@ -390,6 +411,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       rsc = rproc->rsc_table;
     }
   else
+#endif
     {
       rsc = RPTUN_GET_RESOURCE(priv->dev);
       if (!rsc)
@@ -420,6 +442,9 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       FAR void *va0;
       FAR void *va1;
       FAR void *shbuf;
+      FAR struct metal_io_region *io;
+      metal_phys_addr_t pa0;
+      metal_phys_addr_t pa1;
 
       align0 = B2C(rsc->rpmsg_vring0.align);
       align1 = B2C(rsc->rpmsg_vring1.align);
@@ -428,13 +453,17 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
       v1sz = ALIGN_UP(vring_size(rsc->rpmsg_vring1.num, align1), align1);
 
-      va0 = (char *)rsc + tbsz;
-      va1 = (char *)rsc + tbsz + v0sz;
+      va0 = (FAR char *)rsc + tbsz;
+      va1 = (FAR char *)rsc + tbsz + v0sz;
+
+      io  = metal_io_get_region();
+      pa0 = metal_io_virt_to_phys(io, va0);
+      pa1 = metal_io_virt_to_phys(io, va1);
 
       da0 = da1 = METAL_BAD_PHYS;
 
-      remoteproc_mmap(rproc, NULL, &da0, &va0, v0sz, 0, NULL);
-      remoteproc_mmap(rproc, NULL, &da1, &va1, v1sz, 0, NULL);
+      remoteproc_mmap(rproc, &pa0, &da0, v0sz, 0, NULL);
+      remoteproc_mmap(rproc, &pa1, &da1, v1sz, 0, NULL);
 
       rsc->rpmsg_vring0.da = da0;
       rsc->rpmsg_vring1.da = da1;
@@ -555,28 +584,25 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct rptun_priv_s *priv = inode->i_private;
-  int ret = -ENOTTY;
+  int ret = OK;
 
   switch (cmd)
     {
       case RPTUNIOC_START:
-        if (priv->rproc.state == RPROC_OFFLINE)
-          {
-            ret = rptun_dev_start(&priv->rproc);
-          }
+      case RPTUNIOC_STOP:
+        priv->cmd = cmd;
+        rptun_wakeup(priv);
         break;
 
-      case RPTUNIOC_STOP:
-        if (priv->rproc.state != RPROC_OFFLINE)
-          {
-            ret = rptun_dev_stop(&priv->rproc);
-          }
+      default:
+        ret = -ENOTTY;
         break;
     }
 
   return ret;
 }
 
+#ifdef CONFIG_RPTUN_LOADER
 static int rptun_store_open(FAR void *store_,
                             FAR const char *path,
                             FAR const void **img_data)
@@ -643,6 +669,7 @@ static int rptun_store_load(FAR void *store_, size_t offset,
   file_seek(&store->file, offset, SEEK_SET);
   return file_read(&store->file, tmp, size);
 }
+#endif
 
 static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa)
@@ -804,7 +831,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   int ret;
 
   ret = metal_init(&params);
-  if (ret)
+  if (ret < 0)
     {
       return ret;
     }
@@ -812,11 +839,28 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   priv = kmm_zalloc(sizeof(struct rptun_priv_s));
   if (priv == NULL)
     {
-      return -ENOMEM;
+      ret = -ENOMEM;
+      goto err_mem;
+    }
+
+  priv->dev = dev;
+  if (RPTUN_IS_AUTOSTART(dev))
+    {
+      priv->cmd = RPTUNIOC_START;
+    }
+
+  metal_list_init(&priv->bind);
+  nxsem_init(&priv->sem, 0, RPTUN_IS_AUTOSTART(dev) ? 1 : 0);
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
+
+  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
+  ret = register_driver(name, &g_rptun_devops, 0666, priv);
+  if (ret < 0)
+    {
+      goto err_driver;
     }
 
   snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
-
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
@@ -828,23 +872,21 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
                        argv);
   if (ret < 0)
     {
-      kmm_free(priv);
-      return ret;
+      goto err_thread;
     }
 
-  priv->pid = ret;
-  priv->dev = dev;
+  return OK;
 
-  metal_list_init(&priv->bind);
-  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
+err_thread:
+  unregister_driver(name);
 
-  if (RPTUN_IS_AUTOSTART(dev))
-    {
-      rptun_dev_start(&priv->rproc);
-    }
+err_driver:
+  nxsem_destroy(&priv->sem);
+  kmm_free(priv);
 
-  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
-  return register_driver(name, &g_rptun_devops, 0666, priv);
+err_mem:
+  metal_finish();
+  return ret;
 }
 
 int rptun_boot(FAR const char *cpuname)

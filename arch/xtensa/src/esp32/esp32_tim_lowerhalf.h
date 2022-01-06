@@ -37,6 +37,6 @@
  * Name: esp32_timer_initialize
  ****************************************************************************/
 
-int esp32_timer_initialize(FAR const char *devpath, uint8_t timer);
+int esp32_timer_initialize(const char *devpath, uint8_t timer);
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_TIM_LOWERHALF_H */

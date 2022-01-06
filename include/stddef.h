@@ -31,28 +31,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The <stddef.h> header shall define the following macros:
- *
- * NULL
- *   The null pointer constant.
- *
- *     NOTE: Currently the definition of NULL is in sys/types.h but should
- *     be moved here sometime.
- *
- * offsetof(type, member-designator)
- *   Integer constant expression of type size_t, the value of which is the
- *   offset in bytes to the structure member (member-designator), from the
- *   beginning of its structure (type).
- *
- *     NOTE: This version of offsetof() depends on behaviors that could be
- *     undefined for some compilers.  It would be better to use a builtin
- *     function if one exists.
- *
- * Reference: Opengroup.org
- */
-
-#define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
-
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/

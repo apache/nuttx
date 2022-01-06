@@ -89,10 +89,20 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   ninfo("result: %04x d_sndlen: %d conn->tx_unacked: %" PRId32 "\n",
         result, dev->d_sndlen, (uint32_t)conn->tx_unacked);
 
+  /* Need to update the recv window? */
+
+  if (tcp_should_send_recvwindow(conn))
+    {
+      result |= TCP_SNDACK;
+#ifdef CONFIG_NET_TCP_DELAYED_ACK
+      conn->rx_unackseg = 0;
+#endif
+    }
+
 #ifdef CONFIG_NET_TCP_DELAYED_ACK
   /* Did the caller request that an ACK be sent? */
 
-  if ((result & TCP_SNDACK) != 0)
+  else if ((result & TCP_SNDACK) != 0)
     {
       /* Yes.. Handle delayed acknowledgments */
 
@@ -309,11 +319,18 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
   if (dev->d_sndlen > 0 && conn->tx_unacked > 0)
 #endif
     {
+      uint32_t seq;
+
       /* We always set the ACK flag in response packets adding the length of
        * the IP and TCP headers.
        */
 
       tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+
+      /* Advance sndseq */
+
+      seq = tcp_getsequence(conn->sndseq);
+      tcp_setsequence(conn->sndseq, seq + dev->d_sndlen);
     }
 
   /* If there is no data to send, just send out a pure ACK if one is

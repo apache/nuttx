@@ -106,7 +106,7 @@ struct iob_s
   uint16_t io_len;      /* Length of the data in the entry */
   uint16_t io_offset;   /* Data begins at this offset */
 #endif
-  uint16_t io_pktlen;   /* Total length of the packet */
+  unsigned int io_pktlen; /* Total length of the packet */
 
   uint8_t  io_data[CONFIG_IOB_BUFSIZE];
 };
@@ -426,6 +426,32 @@ void iob_free_queue(FAR struct iob_queue_s *qhead,
 #endif /* CONFIG_IOB_NCHAINS > 0 */
 
 /****************************************************************************
+ * Name: iob_free_queue_qentry
+ *
+ * Description:
+ *   Free an iob entire queue of I/O buffer chains.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+void iob_free_queue_qentry(FAR struct iob_s *iob,
+                           FAR struct iob_queue_s *iobq,
+                           enum iob_user_e producerid);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
+ * Name: iob_get_queue_size
+ *
+ * Description:
+ *   Queue helper for get the iob queue buffer size.
+ *
+ ****************************************************************************/
+
+#if CONFIG_IOB_NCHAINS > 0
+unsigned int iob_get_queue_size(FAR struct iob_queue_s *queue);
+#endif /* CONFIG_IOB_NCHAINS > 0 */
+
+/****************************************************************************
  * Name: iob_copyin
  *
  * Description:
@@ -463,6 +489,17 @@ int iob_trycopyin(FAR struct iob_s *iob, FAR const uint8_t *src,
 
 int iob_copyout(FAR uint8_t *dest, FAR const struct iob_s *iob,
                 unsigned int len, unsigned int offset);
+
+/****************************************************************************
+ * Name: iob_tailroom
+ *
+ * Description:
+ *  Return the number of bytes at the tail of the I/O buffer chain which
+ *  can be used to append data without additional allocations.
+ *
+ ****************************************************************************/
+
+unsigned int iob_tailroom(FAR struct iob_s *iob);
 
 /****************************************************************************
  * Name: iob_clone

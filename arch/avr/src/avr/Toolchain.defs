@@ -86,36 +86,30 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -O2
 endif
 
 # NuttX buildroot GCC toolchain under Linux or Cygwin
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),BUILDROOT)
   CROSSDEV ?= avr-nuttx-elf-
-  MAXOPTIMIZATION ?= -O2
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # AVR CrossPack under macOS
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),CROSSPACK)
   CROSSDEV ?= avr-
-  MAXOPTIMIZATION ?= -O2
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # GCC toolchain under Linux
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),LINUXGCC)
   CROSSDEV ?= avr-
-  MAXOPTIMIZATION ?= -O2
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 ifeq ($(CONFIG_AVR_TOOLCHAIN),WINAVR)
   CROSSDEV ?= avr-
-  MAXOPTIMIZATION ?= -O2
-  LDFLAGS += -nostartfiles -nodefaultlibs
 endif
 
 # Default toolchain
@@ -140,7 +134,7 @@ ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
 endif
 
-ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += -lsupc++
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif

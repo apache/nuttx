@@ -1323,6 +1323,28 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+#ifdef CONFIG_W25_SECTOR512
+              info->numsectors  = priv->nsectors <<
+                                  (W25_SECTOR_SHIFT - W25_SECTOR512_SHIFT);
+              info->sectorsize  = 1 << W25_SECTOR512_SHIFT;
+#else
+              info->numsectors  = priv->nsectors *
+                                  W25_SECTOR_SIZE / W25_PAGE_SIZE;
+              info->sectorsize  = W25_PAGE_SIZE;
+#endif
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
             /* Erase the entire device */
@@ -1333,7 +1355,15 @@ static int w25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = W25_ERASED_STATE;
+
+          ret = OK;
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;

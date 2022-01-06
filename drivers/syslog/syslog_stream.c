@@ -56,6 +56,11 @@ static int syslogstream_flush(FAR struct lib_syslogstream_s *stream)
 
   if (iob != NULL && iob->io_len > 0)
     {
+      /* Ensure the buffer is zero terminated */
+
+      DEBUGASSERT(iob->io_len < CONFIG_IOB_BUFSIZE);
+      iob->io_data[iob->io_len] = '\0';
+
       /* Yes write the buffered data */
 
       do
@@ -100,7 +105,7 @@ static void syslogstream_addchar(FAR struct lib_syslogstream_s *stream,
 
   /* Is the buffer full? */
 
-  if (iob->io_len >= CONFIG_IOB_BUFSIZE)
+  if (iob->io_len >= CONFIG_IOB_BUFSIZE - 1)
     {
       /* Yes.. then flush the buffer */
 

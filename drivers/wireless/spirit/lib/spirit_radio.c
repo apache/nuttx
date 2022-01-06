@@ -1,14 +1,9 @@
 /******************************************************************************
  * drivers/wireless/spirit/lib/spirit_radio.c
- * This file provides all the low level API to manage Analog and Digital radio
- * part of SPIRIT.
  *
  *   Copyright(c) 2015 STMicroelectronics
  *   Author: VMA division - AMS
  *   Version 3.2.2 08-July-2015
- *
- *   Adapted for NuttX by:
- *   Author:  Gregory Nutt <gnutt@nuttx.org>
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are

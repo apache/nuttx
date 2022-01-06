@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/irq.h>
@@ -132,8 +133,8 @@ static void stm32l5_dumpnvic(const char *msg, int irq)
  *       stm32l5_dbgmonitor, stm32l5_pendsv, stm32l5_reserved
  *
  * Description:
- *   Handlers for various execptions.  None are handled and all are fatal
- *   error conditions.  The only advantage these provided over the default
+ *   Handlers for various exceptions.  None are handled and all are fatal
+ *   error conditions.  The only advantage these provide over the default
  *   unexpected interrupt handler is that they provide a diagnostic output.
  *
  ****************************************************************************/

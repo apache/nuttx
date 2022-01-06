@@ -60,13 +60,13 @@ static int pwm_initialize(uint32_t channel)
   pwm = cxd56_pwminitialize(channel);
   if (!pwm)
     {
-      pwmerr("Failed to get the CXD56 PWM%d lower half\n", channel);
+      pwmerr("Failed to get the CXD56 PWM%ld lower half\n", channel);
       return -ENODEV;
     }
 
   /* Register the PWM driver at "/dev/pwmX" */
 
-  snprintf(devname, sizeof(devname), "/dev/pwm%d", channel);
+  snprintf(devname, sizeof(devname), "/dev/pwm%ld", channel);
   ret = pwm_register(devname, pwm);
   if (ret < 0)
     {

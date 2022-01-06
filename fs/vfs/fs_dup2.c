@@ -26,6 +26,7 @@
 
 #include <unistd.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 
 #include "inode/inode.h"
@@ -87,14 +88,17 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
    * can maintain the correct open counts.
    */
 
-  if (inode->u.i_ops && inode->u.i_ops->open)
+  if (inode->u.i_ops)
     {
 #ifndef CONFIG_DISABLE_MOUNTPOINT
       if (INODE_IS_MOUNTPT(inode))
         {
           /* Dup the open file on the in the new file structure */
 
-          ret = inode->u.i_mops->dup(filep1, &temp);
+          if (inode->u.i_mops->dup)
+            {
+              ret = inode->u.i_mops->dup(filep1, &temp);
+            }
         }
       else
 #endif
@@ -102,7 +106,11 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2)
           /* (Re-)open the pseudo file or device driver */
 
           temp.f_priv = filep1->f_priv;
-          ret = inode->u.i_ops->open(&temp);
+
+          if (inode->u.i_ops->open)
+            {
+              ret = inode->u.i_ops->open(&temp);
+            }
         }
 
       /* Handle open failures */

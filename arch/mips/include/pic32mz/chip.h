@@ -102,6 +102,40 @@
 #  define CHIP_NTRACE       1    /* Has trace capability */
 
 /* Available in 64/100/124/144 pin packages.  Description here is
+ * specifically for the 100 pin package (PIC32MZ2048EFG100).
+ */
+
+#elif defined(CONFIG_ARCH_CHIP_PIC32MZ2048EFG)
+#  undef  CHIP_PIC32MZEC         /* Not PIC32MZEC family */
+#  define CHIP_PIC32MZEF    1    /* PIC32MZEF family */
+#  define CHIP_BOOTFLASH_KB 160  /* 160Kb boot FLASH */
+#  define CHIP_PROGFLASH_KB 2048 /* 2048Kb program FLASH */
+#  define CHIP_DATAMEM_KB   512  /* 512Kb data memory */
+#  define CHIP_NTIMERS      9    /* 5 timers */
+#  define CHIP_NIC          9    /* 5 input capture */
+#  define CHIP_NOC          9    /* 5 output compare */
+#  define CHIP_NUARTS       6    /* 6 UARTS */
+#  define CHIP_UARTFIFOD    8    /* 8 level deep UART FIFOs */
+#  define CHIP_NSPI         6    /* 6 SPI/I2S interfaces */
+#  define CHIP_NCAN         0    /* No CAN 2.0B interfaces */
+#  define CHIP_NCRTYPO      0    /* No crypto support */
+#  define CHIP_RNG          1    /* 1 Random number generator */
+#  define CHIP_NDMACH       8    /* 8 programmable DMA channels */
+#  define CHIP_NUSBDMACHAN  12   /* 12 dedicated DMA channels */
+#  define CHIP_NADC10       40   /* 40 ADC channels */
+#  define CHIP_NCM          2    /* 2 Analog comparators */
+#  define CHIP_USBHSOTG     1    /* 1 USB 2.0 HSOTG */
+#  define CHIP_NI2C         5    /* 5 I2C interfaces */
+#  define CHIP_NPMP         1    /* Have parallel master port */
+#  define CHIP_NEBI         1    /* Have eternal bus interface */
+#  define CHIP_NSQI         1    /* 1 Serial quad interface */
+#  define CHIP_NRTCC        1    /* Has RTCC */
+#  define CHIP_NETHERNET    1    /* 1 Ethernet MAC */
+#  define CHIP_NPORTS       7    /* 7 ports (A-G) */
+#  define CHIP_NJTAG        1    /* Has JTAG */
+#  define CHIP_NTRACE       1    /* Has trace capability */
+
+/* Available in 64/100/124/144 pin packages.  Description here is
  * specifically for the 124 and 144 pin packages (PIC32MZ2048EFH1100, and
  * PIC32MZ2048EFH144).  The PIC32MZ2048EFH1100 differs in that it has only
  * 40 ADC channels.  The PIC32MZ2048EFH1064 differs in that it has only 24

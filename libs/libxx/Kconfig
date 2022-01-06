@@ -24,14 +24,14 @@ if HAVE_CXX
 
 choice
 	prompt "C++ Library"
-	default NUTTX_LIBXX
+	default LIBCXXMINI
 
-config NUTTX_LIBXX
-	bool "NuttX C++ library"
+config LIBCXXMINI
+	bool "Basic C++ support"
 	---help---
 		A fragmentary C++ library that will allow to build only
-		the simplest of C++ applications.  In the deeply embedded world,
-		that is probably all that is necessary.
+		the simplest of C++ applications. Only contain basic C++
+		runtime support function.
 
 config LIBCXX
 	bool "LLVM libc++ C++ Standard Library"
@@ -50,6 +50,29 @@ config UCLIBCXX
 
 endchoice
 
+if LIBCXX || UCLIBCXX
+
+choice
+	prompt "C++ low level library select"
+	default LIBSUPCXX
+
+config LIBCXXABI
+	bool "LLVM low level C++ Library"
+	---help---
+		LLVM "libc++abi" C++ Standard Library
+		https://libcxxabi.llvm.org/
+		Select if your use libc++abi as lower level c++ library
+
+config LIBSUPCXX
+	bool "GNU low level libsupc++"
+	---help---
+		Select if your toolchain provides libsupc++ and use libsupc++ as lower
+		level c++ library.
+
+endchoice
+
+endif
+
 config HAVE_CXXINITIALIZE
 	bool "Have C++ initialization"
 	default LIBCXX || UCLIBCXX
@@ -60,14 +83,6 @@ config HAVE_CXXINITIALIZE
 
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
-	default LIBCXX || UCLIBCXX
-
-config CXX_LIBSUPCXX
-	bool "Have libsupc++ (required)"
-	default LIBCXX || UCLIBCXX
-	---help---
-		Select if your toolchain provides libsupc++.  This option is required
-		at present because the built-in libsupc++ support is incomplete.
 
 if UCLIBCXX
 

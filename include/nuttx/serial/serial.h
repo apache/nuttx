@@ -45,7 +45,7 @@
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_SERIAL_NPOLLWAITERS
-#  define CONFIG_SERIAL_NPOLLWAITERS 2
+#  define CONFIG_SERIAL_NPOLLWAITERS 4
 #endif
 
 /* RX flow control */

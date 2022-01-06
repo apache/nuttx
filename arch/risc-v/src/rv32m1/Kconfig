@@ -1,0 +1,170 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "RV32M1 Configuration Options"
+
+choice
+	prompt "RV32M1 Chip Selection"
+	default ARCH_CHIP_RV32M1_RI5CY
+	depends on ARCH_CHIP_RV32M1
+
+config ARCH_CHIP_RV32M1_RI5CY
+	bool "RV32M1_RI5CY"
+	select RV32M1_HAVE_ITCM
+    select RV32M1_HAVE_TSTMR
+	---help---
+		RV32M1 RI5CY, RV32IMC 256KB SRAM, 1MB FLASH.
+
+endchoice
+
+menu "RV32M1 Peripheral Support"
+
+# These "hidden" settings determine whether a peripheral option is available
+# for the selected MCU
+
+config RV32M1_HAVE_LPUART0
+	bool
+	default y
+
+config RV32M1_HAVE_LPUART1
+	bool
+	default y
+
+config RV32M1_HAVE_LPUART2
+	bool
+	default y
+
+config RV32M1_HAVE_LPUART3
+	bool
+	default y
+
+config RV32M1_HAVE_ITCM
+	bool
+	default n
+
+config RV32M1_HAVE_TSTMR
+    bool
+    default y
+
+config RV32M1_LPUART
+    bool
+    default n
+
+config RV32M1_SERIALDRIVER
+    bool
+    default n
+
+# These are the peripheral selections proper
+
+config RV32M1_LPUART0
+	bool "LPUART0"
+	default n
+    depends on RV32M1_HAVE_LPUART0
+    select RV32M1_LPUART
+
+config RV32M1_LPUART1
+	bool "LPUART1"
+	default n
+    depends on RV32M1_HAVE_LPUART1
+    select RV32M1_LPUART
+
+config RV32M1_LPUART2
+	bool "LPUART2"
+	default n
+    depends on RV32M1_HAVE_LPUART2
+    select RV32M2_LPUART
+
+config RV32M1_LPUART3
+	bool "LPUART3"
+	default n
+    depends on RV32M1_HAVE_LPUART3
+    select RV32M2_LPUART
+
+config RV32M1_ITCM
+	bool "ITCM"
+	default n
+    depends on RV32M1_HAVE_ITCM
+
+config RV32M1_TSTMR
+	bool "TSTMR"
+	default n
+    depends on RV32M1_HAVE_TSTMR
+
+menu "LPUART Configuration"
+	depends on RV32M1_LPUART
+
+comment "LPUART Device Configuration"
+
+choice
+	prompt "LPUART0 Driver Configuration"
+	default RV32M1_LPUART0_SERIALDRIVER
+	depends on RV32M1_LPUART0
+
+config RV32M1_LPUART0_SERIALDRIVER
+	bool "Standard serial driver"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select RV32M1_SERIALDRIVER
+    select LPUART0_SERIALDRIVER
+
+endchoice # LPUART0 Driver Configuration
+
+if RV32M1_LPUART0_SERIALDRIVER
+
+endif # RV32M1_LPUART0_SERIALDRIVER
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default RV32M1_LPUART1_SERIALDRIVER
+	depends on RV32M1_LPUART1
+
+config RV32M1_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select RV32M1_SERIALDRIVER
+    select LPUART1_SERIALDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+if RV32M1_LPUART1_SERIALDRIVER
+
+endif # RV32M1_LPUART1_SERIALDRIVER
+
+choice
+	prompt "LPUART2 Driver Configuration"
+	default RV32M1_LPUART2_SERIALDRIVER
+	depends on RV32M1_LPUART2
+
+config RV32M1_LPUART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select RV32M1_SERIALDRIVER
+    select LPUART2_SERIALDRIVER
+
+endchoice # LPUART2 Driver Configuration
+
+if RV32M1_LPUART2_SERIALDRIVER
+
+endif # RV32M1_LPUART2_SERIALDRIVER
+
+choice
+	prompt "LPUART3 Driver Configuration"
+	default RV32M1_LPUART3_SERIALDRIVER
+	depends on RV32M1_LPUART3
+
+config RV32M1_LPUART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select RV32M1_SERIALDRIVER
+    select LPUART3_SERIALDRIVER
+
+endchoice # LPUART3 Driver Configuration
+
+if RV32M1_LPUART3_SERIALDRIVER
+
+endif # RV32M1_LPUART3_SERIALDRIVER
+
+endmenu # LPUART Configuration Menu
+
+endmenu

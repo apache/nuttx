@@ -649,7 +649,7 @@ Configuration sub-directories
          CONFIG_LCD_MAXCONTRAST=63
 
        Library Routines -> Non-standard Library Support
-         CONFIG_LIB_SLCDCODEC=y
+         CONFIG_LIBC_SLCDCODEC=y
 
        The SLCD example can be enabled to verify the SLCD:
 

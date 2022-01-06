@@ -26,7 +26,7 @@ ifeq ($(CONFIG_SAMV7_SDRAMC),y)
 CSRCS += sam_sdram.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c sam_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += sam_reset.c
@@ -108,6 +108,10 @@ endif
 
 ifeq ($(CONFIG_IEEE802154_MRF24J40),y)
 CSRCS += sam_mrf24j40.c
+endif
+
+ifeq ($(CONFIG_LCD_ST7789),y)
+CSRCS += sam_st7789.c
 endif
 
 include $(TOPDIR)/boards/Board.mk

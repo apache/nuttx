@@ -23,13 +23,9 @@
 ifeq ($(CONFIG_MM_DEFAULT_MANAGER),y)
 
 CSRCS += mm_initialize.c mm_sem.c mm_addfreechunk.c mm_size2ndx.c
-CSRCS += mm_malloc_usable_size.c mm_shrinkchunk.c
-CSRCS += mm_brkaddr.c mm_calloc.c mm_extend.c mm_free.c mm_mallinfo.c
-CSRCS += mm_malloc.c mm_memalign.c mm_realloc.c mm_zalloc.c mm_heapmember.c
-
-ifeq ($(CONFIG_BUILD_KERNEL),y)
-CSRCS += mm_sbrk.c
-endif
+CSRCS += mm_malloc_size.c mm_shrinkchunk.c mm_brkaddr.c mm_calloc.c
+CSRCS += mm_extend.c mm_free.c mm_mallinfo.c mm_malloc.c
+CSRCS += mm_memalign.c mm_realloc.c mm_zalloc.c mm_heapmember.c
 
 ifeq ($(CONFIG_DEBUG_MM),y)
 CSRCS += mm_checkcorruption.c

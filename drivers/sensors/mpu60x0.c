@@ -1,38 +1,20 @@
 /****************************************************************************
  * drivers/sensors/mpu60x0.c
  *
- * Support for the Invensense MPU6000 and MPU6050 MotionTracking(tm)
- * 6-axis accelerometer and gyroscope.
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2019 Bill Gatliff. All rights reserved.
- *   Author: Bill Gatliff <bgat@billgatliff.com>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright+
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -77,7 +59,7 @@
 
 /* Masks and shifts @v into bit field @m */
 
-#define TO_BITFIELD(m,v) ((v) & MASK(m ##__WIDTH) << (m ##__SHIFT))
+#define TO_BITFIELD(m,v) (((v) & MASK(m ##__WIDTH)) << (m ##__SHIFT))
 
 /* Un-masks and un-shifts bit field @m from @v */
 
@@ -693,6 +675,7 @@ static void inline mpu_unlock(FAR struct mpu_dev_s *dev)
 
 static int mpu_reset(FAR struct mpu_dev_s *dev)
 {
+  int ret;
 #ifdef CONFIG_MPU60X0_SPI
   if (dev->config.spi == NULL)
     {
@@ -709,7 +692,12 @@ static int mpu_reset(FAR struct mpu_dev_s *dev)
 
   /* Awaken chip, issue hardware reset */
 
-  __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
+  ret = __mpu_write_pwr_mgmt_1(dev, PWR_MGMT_1__DEVICE_RESET);
+  if (ret != OK)
+    {
+      snerr("Could not find mpu60x0!\n");
+      return ret;
+    }
 
   /* Wait for reset cycle to finish (note: per the datasheet, we don't need
    * to hold NSS for this)
@@ -994,6 +982,19 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
 
   priv->config = *config;
 
+  /* Reset the chip, to give it an initial configuration. */
+
+  ret = mpu_reset(priv);
+  if (ret < 0)
+    {
+      snerr("ERROR: Failed to configure mpu60x0: %d\n", ret);
+
+      nxmutex_destroy(&priv->lock);
+
+      kmm_free(priv);
+      return ret;
+    }
+
   /* Register the device node. */
 
   ret = register_driver(path, &g_mpu_fops, 0666, priv);
@@ -1007,7 +1008,5 @@ int mpu60x0_register(FAR const char *path, FAR struct mpu_config_s *config)
       return ret;
     }
 
-  /* Reset the chip, to give it an initial configuration. */
-
-  return mpu_reset(priv);
+  return OK;
 }

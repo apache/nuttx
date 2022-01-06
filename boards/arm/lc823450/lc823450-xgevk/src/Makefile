@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS = lc823450_boot.c lc823450_mux.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += lc823450_appinit.c lc823450_bringup.c
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += lc823450_reset.c

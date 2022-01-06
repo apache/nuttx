@@ -621,6 +621,17 @@
 
 #define EDBG_CSNO           SPI0_CS2
 
+/* LCD display (over SPI) */
+
+#define GPIO_LCD_CD       (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                           GPIO_PORT_PIOB | GPIO_PIN2)
+
+#define GPIO_LCD_RST      (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                           GPIO_PORT_PIOB | GPIO_PIN3)
+
+#define SPI0_NPCS1        (GPIO_OUTPUT | GPIO_CFG_DEFAULT | GPIO_OUTPUT_SET | \
+                           GPIO_PORT_PIOD | GPIO_PIN25)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -667,7 +678,7 @@ void sam_sdram_config(void);
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LIB_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int sam_bringup(void);
 #endif
 

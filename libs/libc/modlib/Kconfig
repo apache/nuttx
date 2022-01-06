@@ -7,7 +7,7 @@ config LIBC_MODLIB
 	bool
 	default n
 	select LIBC_ARCH_ELF
-	select ARCH_USE_MODULE_TEXT if ARCH_HAVE_MODULE_TEXT
+	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 
 menu "Module library configuration"
 	depends on LIBC_MODLIB

@@ -22,7 +22,7 @@ include $(TOPDIR)/Make.defs
 
 CSRCS  = c906_bringup.c c906_boot.c
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += c906_appinit.c
 endif
 

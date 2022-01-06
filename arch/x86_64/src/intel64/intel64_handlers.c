@@ -29,6 +29,7 @@
 #include <nuttx/board.h>
 #include <nuttx/signal.h>
 #include <arch/io.h>
+#include <assert.h>
 #include <inttypes.h>
 #include <syscall.h>
 #include <arch/board/board.h>

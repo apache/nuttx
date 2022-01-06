@@ -117,6 +117,19 @@ config NET_GUARDSIZE
 		packet size will be chopped down to the size indicated in the TCP
 		header.
 
+config NET_RECV_BUFSIZE
+	int "Net Receive buffer size"
+	default 0
+	---help---
+		This is the default value for receive buffer size.
+
+config NET_SEND_BUFSIZE
+	int "Net Send buffer size"
+	depends on NET_TCP_WRITE_BUFFERS || NET_UDP_WRITE_BUFFERS
+	default 0
+	---help---
+		This is the default value for send buffer size.
+
 endmenu # Driver buffer configuration
 
 menu "Link layer support"

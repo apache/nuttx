@@ -40,6 +40,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <sys/types.h>
+#include <assert.h>
 #include <debug.h>
 #include <stdio.h>
 #include <errno.h>

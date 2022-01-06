@@ -76,8 +76,11 @@
 #define TCP_OPT_END       0   /* End of TCP options list */
 #define TCP_OPT_NOOP      1   /* "No-operation" TCP option */
 #define TCP_OPT_MSS       2   /* Maximum segment size TCP option */
+#define TCP_OPT_WS        3   /* Window size scaling factor */
 
+#define TCP_OPT_NOOP_LEN  1   /* Length of TCP NOOP option. */
 #define TCP_OPT_MSS_LEN   4   /* Length of TCP MSS option. */
+#define TCP_OPT_WS_LEN    3   /* Length of TCP WS option. */
 
 /* The TCP states used in the struct tcp_conn_s tcpstateflags field */
 
@@ -171,7 +174,7 @@ struct tcp_hdr_s
   uint8_t  wnd[2];
   uint16_t tcpchksum;
   uint8_t  urgp[2];
-  uint8_t  optdata[4];
+  uint8_t  optdata[0];
 };
 
 /* The structure holding the TCP/IP statistics that are gathered if

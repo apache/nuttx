@@ -56,6 +56,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -631,6 +632,27 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+#if CONFIG_AT24XX_MTD_BLOCKSIZE > AT24XX_PAGESIZE
+              info->numsectors  = (CONFIG_AT24XX_SIZE * 1024 / 8) /
+                                  CONFIG_AT24XX_MTD_BLOCKSIZE;
+              info->sectorsize  = CONFIG_AT24XX_MTD_BLOCKSIZE;
+#else
+              info->numsectors  = priv->npages;
+              info->sectorsize  = priv->pagesize;
+#endif
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         ret = at24c_eraseall(priv);
         break;
@@ -642,7 +664,6 @@ static int at24c_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         break;
 #endif
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

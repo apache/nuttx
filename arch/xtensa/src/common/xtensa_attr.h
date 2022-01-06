@@ -40,33 +40,33 @@
 
 /* Forces code into IRAM instead of flash */
 
-#define IRAM_ATTR __attribute__((section(".iram1")))
+#define IRAM_ATTR locate_data(".iram1")
 
 /* Forces data into DRAM instead of flash */
 
-#define DRAM_ATTR __attribute__((section(".dram1")))
+#define DRAM_ATTR locate_data(".dram1")
 
 /* Forces code into RTC fast memory */
 
-#define RTC_IRAM_ATTR __attribute__((section(".rtc.text")))
+#define RTC_IRAM_ATTR locate_data(".rtc.text")
 
 /* Forces data into RTC slow memory
  * Any variable marked with this attribute will keep its value
  * during a deep sleep / wake cycle.
  */
 
-#define RTC_DATA_ATTR __attribute__((section(".rtc.data")))
+#define RTC_DATA_ATTR locate_data(".rtc.data")
 
 /* Forces read-only data into RTC slow memory
  * Makes constant data available to RTC wake stubs.
  */
 
-#define RTC_RODATA_ATTR __attribute__((section(".rtc.rodata")))
+#define RTC_RODATA_ATTR locate_data(".rtc.rodata")
 
 /* Allow bss variables into external memory. */
 
 #ifdef CONFIG_XTENSA_EXTMEM_BSS
-#  define EXT_RAM_ATTR __attribute__((section(".extmem.bss")))
+#  define EXT_RAM_ATTR locate_data(".extmem.bss")
 #else
 #  define EXT_RAM_ATTR
 #endif

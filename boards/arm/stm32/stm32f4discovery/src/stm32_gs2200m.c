@@ -30,6 +30,7 @@
 #include <nuttx/board.h>
 #include <nuttx/spi/spi.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/wireless/gs2200m.h>
 
 #include "arm_arch.h"

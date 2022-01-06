@@ -30,6 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
+#undef strpbrk /* See mm/README.txt */
 FAR char *strpbrk(FAR const char *str, FAR const char *charset)
 {
   /* Sanity checking */

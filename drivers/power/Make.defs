@@ -71,18 +71,6 @@ POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
 
 endif
 
-# Add motor driver
-
-ifeq ($(CONFIG_DRIVERS_MOTOR),y)
-
-CSRCS += motor.c
-
-POWER_DEPPATH := --dep-path power
-POWER_VPATH := :power
-POWER_CFLAGS := ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)power}
-
-endif
-
 # Add battery charger drivers
 
 ifeq ($(CONFIG_BATTERY_CHARGER),y)
@@ -109,6 +97,12 @@ endif
 
 ifeq ($(CONFIG_I2C_BQ2429X),y)
 CSRCS += bq2429x.c
+endif
+
+# Add the axp202 I2C-based battery charger driver
+
+ifeq ($(CONFIG_I2C_AXP202),y)
+CSRCS += axp202.c
 endif
 
 endif

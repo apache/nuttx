@@ -119,7 +119,7 @@
 #define REG_V7              REG_R10
 #define REG_SB              REG_R9
 #define REG_SL              REG_R10
-#define REG_FP              REG_R11
+#define REG_FP              REG_R7
 #define REG_IP              REG_R12
 #define REG_SP              REG_R13
 #define REG_LR              REG_R14
@@ -130,6 +130,12 @@
  */
 
 #define REG_PIC             REG_R10
+
+/* CONTROL register */
+
+#define CONTROL_FPCA        (1 << 2) /* Bit 2: Floating-point context active */
+#define CONTROL_SPSEL       (1 << 1) /* Bit 1: Stack-pointer select */
+#define CONTROL_NPRIV       (1 << 0) /* Bit 0: Not privileged */
 
 /****************************************************************************
  * Public Types

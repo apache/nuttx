@@ -72,7 +72,9 @@
 /* Maximum value in the high 22 bits from timer counters */
 
 #define LOW_32_MASK                0xffffffff
-#define LOW_22_MASK                0x3fffff
+#define LOW_22_MASK                0x003fffff
+#define LOW_20_MASK                0x000fffff
+#define LOW_26_MASK                0x03ffffff
 #define SHIFT_32                   32
 
 #define TIMG_T0CONFIG_REG(i)          (REG_TIMG_BASE(i) + 0x0000)

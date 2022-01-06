@@ -78,7 +78,12 @@ arm_fullcontextrestore:
 	 * s0, s1, ... in increasing address order.
 	 */
 
+#ifdef CONFIG_ARM_HAVE_FPU_D32
+	vldmia.64	r1!, {d0-d15}			/* Restore the full FP context */
+	vldmia.64	r1!, {d16-d31}
+#else
 	vldmia		r1!, {s0-s31}			/* Restore the full FP context */
+#endif
 
 	/* Load the floating point control and status register.   At the end of the
 	 * vstmia, r1 will point to the FPCSR storage location.
@@ -133,7 +138,7 @@ arm_fullcontextrestore:
 	 */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the stored CPSR value */
-	msr		spsr, r1			/* Set the SPSR */
+	msr		spsr_cxsf, r1			/* Set the SPSR */
 
 	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
 

@@ -71,6 +71,12 @@
 #  define XCHAL_SEP2                    },{
 #endif
 
+/* WSBITS and WBBITS are the width of the WINDOWSTART and WINDOWBASE
+ * registers
+ */
+#define WSBITS  (XCHAL_NUM_AREGS / 4)      /* width of WINDOWSTART in bits */
+#define WBBITS  (XCHAL_NUM_AREGS_LOG2 - 2) /* width of WINDOWBASE in bits */
+
 /* ISA **********************************************************************/
 
 #if XCHAL_HAVE_BE

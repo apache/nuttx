@@ -78,13 +78,13 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <sched.h>
 
 #include <arch/arch.h>
 #include <arch/types.h>
 
 #include <nuttx/compiler.h>
 #include <nuttx/cache.h>
+#include <nuttx/sched.h>
 
 /****************************************************************************
  * Pre-processor definitions
@@ -449,8 +449,7 @@ void up_release_pending(void);
  *   1) The priority of the currently running task drops and the next
  *      task in the ready to run list has priority.
  *   2) An idle, ready to run task's priority has been raised above the
- *      the priority of the current, running task and it now has the
- *      priority.
+ *      priority of the current, running task and it now has the priority.
  *
  *   This function is called only from the NuttX scheduling
  *   logic.  Interrupts will always be disabled when this
@@ -492,6 +491,35 @@ void up_exit() noreturn_function;
  ****************************************************************************/
 
 void up_assert(FAR const char *filename, int linenum);
+
+#ifdef CONFIG_ARCH_HAVE_BACKTRACE
+
+/****************************************************************************
+ * Name: up_backtrace
+ *
+ * Description:
+ *  up_backtrace()  returns  a backtrace for the TCB, in the array
+ *  pointed to by buffer.  A backtrace is the series of currently active
+ *  function calls for the program.  Each item in the array pointed to by
+ *  buffer is of type void *, and is the return address from the
+ *  corresponding stack frame.  The size argument specifies the maximum
+ *  number of addresses that can be stored in buffer.   If  the backtrace is
+ *  larger than size, then the addresses corresponding to the size most
+ *  recent function calls are returned; to obtain the complete backtrace,
+ *  make sure that buffer and size are large enough.
+ *
+ * Input Parameters:
+ *   tcb    - Address of the task's TCB, NULL means dump the running task
+ *   buffer - Return address from the corresponding stack frame
+ *   size   - Maximum number of addresses that can be stored in buffer
+ *
+ * Returned Value:
+ *   up_backtrace() returns the number of addresses returned in buffer
+ *
+ ****************************************************************************/
+
+int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size);
+#endif /* CONFIG_ARCH_HAVE_BACKTRACE */
 
 /****************************************************************************
  * Name: up_schedule_sigaction
@@ -558,6 +586,8 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
        noreturn_function;
 #endif
 
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
+    !defined(CONFIG_DISABLE_PTHREAD)
 /****************************************************************************
  * Name: up_pthread_start
  *
@@ -569,9 +599,10 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *   pthread by calling this function.
  *
  *   Normally the a user-mode start-up stub will also execute before the
- *   pthread actually starts.  See libc/pthread/pthread_startup.c
+ *   pthread actually starts.  See libc/pthread/pthread_create.c
  *
  * Input Parameters:
+ *   startup - The user-space pthread startup function
  *   entrypt - The user-space address of the pthread entry point
  *   arg     - Standard argument for the pthread entry point
  *
@@ -582,10 +613,28 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
-    !defined(CONFIG_DISABLE_PTHREAD)
-void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
+void up_pthread_start(pthread_trampoline_t startup,
+                      pthread_startroutine_t entrypt, pthread_addr_t arg)
        noreturn_function;
+
+/****************************************************************************
+ * Name: up_pthread_exit
+ *
+ * Description:
+ *   In this kernel mode build, this function will be called to execute a
+ *   pthread in user-space. This kernel-mode stub will then be called
+ *   transfer control to the user-mode pthread_exit.
+ *
+ * Input Parameters:
+ *   exit       - The user-space pthread_exit function
+ *   exit_value - The pointer of the pthread exit parameter
+ *
+ * Returned Value:
+ *   None
+ ****************************************************************************/
+
+void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
+        noreturn_function;
 #endif
 
 /****************************************************************************
@@ -733,39 +782,39 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_init
+ * Name: up_extraheaps_init
  *
  * Description:
- *   Initialize the module text allocator
+ *   Initialize any extra heap.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-void up_module_text_init(void);
+#if defined(CONFIG_ARCH_HAVE_EXTRA_HEAPS)
+void up_extraheaps_init(void);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_memalign
+ * Name: up_textheap_memalign
  *
  * Description:
- *   Allocate memory for module text with the specified alignment.
+ *   Allocate memory for text sections with the specified alignment.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-FAR void *up_module_text_memalign(size_t align, size_t size);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+FAR void *up_textheap_memalign(size_t align, size_t size);
 #endif
 
 /****************************************************************************
- * Name: up_module_text_free
+ * Name: up_textheap_free
  *
  * Description:
- *   Free memory for module text.
+ *   Free memory allocated for text sections.
  *
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-void up_module_text_free(FAR void *p);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+void up_textheap_free(FAR void *p);
 #endif
 
 /****************************************************************************
@@ -1437,6 +1486,30 @@ void up_trigger_irq(int irq);
 int up_prioritize_irq(int irq, int priority);
 #endif
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+
+/****************************************************************************
+ * Name: up_set_secure_irq
+ *
+ * Description:
+ *   Secure an IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq(int irq, bool secure);
+
+/****************************************************************************
+ * Name: up_secure_irq_all
+ *
+ * Description:
+ *   Secure all IRQ
+ *
+ ****************************************************************************/
+
+void up_secure_irq_all(bool secure);
+
+#endif
+
 /****************************************************************************
  * Function:  up_timer_initialize
  *
@@ -1667,6 +1740,23 @@ int up_timer_start(FAR const struct timespec *ts);
 #endif
 
 /****************************************************************************
+ * Name: up_getsp
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Current stack pointer.
+ *
+ ****************************************************************************/
+
+/* uintptr_t up_getsp(void);
+ *
+ * The actual declaration or definition is provided in arch/arch.h.
+ * The actual implementation may be a MACRO or an inline function.
+ */
+
+/****************************************************************************
  * TLS support
  ****************************************************************************/
 
@@ -1848,14 +1938,14 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size);
  * Name: up_cpu_start
  *
  * Description:
- *   In an SMP configution, only one CPU is initially active (CPU 0). System
- *   initialization occurs on that single thread. At the completion of the
- *   initialization of the OS, just before beginning normal multitasking,
+ *   In an SMP configuration, only one CPU is initially active (CPU 0).
+ *   System initialization occurs on that single thread. At the completion of
+ *   the initialization of the OS, just before beginning normal multitasking,
  *   the additional CPUs would be started by calling this function.
  *
- *   Each CPU is provided the entry point to is IDLE task when started.  A
+ *   Each CPU is provided the entry point to its IDLE task when started.  A
  *   TCB for each CPU's IDLE task has been initialized and placed in the
- *   CPU's g_assignedtasks[cpu] list.  A stack has also been allocateded and
+ *   CPU's g_assignedtasks[cpu] list.  No stack has been allocated or
  *   initialized.
  *
  *   The OS initialization logic calls this function repeatedly until each
@@ -1863,8 +1953,8 @@ int up_cpu_idlestack(int cpu, FAR struct tcb_s *tcb, size_t stack_size);
  *
  * Input Parameters:
  *   cpu - The index of the CPU being started.  This will be a numeric
- *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
- *         0 is already active)
+ *         value in the range of one to (CONFIG_SMP_NCPUS-1).
+ *         (CPU 0 is already active)
  *
  * Returned Value:
  *   Zero on success; a negated errno value on failure.

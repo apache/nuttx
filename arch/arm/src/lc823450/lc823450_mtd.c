@@ -349,8 +349,23 @@ static int lc823450_ioctl(FAR struct mtd_dev_s *dev, int cmd,
               geo->erasesize, geo->neraseblocks);
         break;
 
-      case MTDIOC_XIPBASE:
-        finfo("MTDIOC_XIPBASE\n");
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->nblocks;
+              info->sectorsize  = priv->blocksize;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
+      case BIOC_XIPBASE:
+        finfo("BIOC_XIPBASE\n");
         ppv = (FAR void**)arg;
         if (ppv)
           {
@@ -679,8 +694,9 @@ int lc823450_mtd_initialize(uint32_t devno)
                                    partinfo[i].nblocks);
       if (!g_mtdpart[i])
         {
-          finfo("%s(): mtd_partition failed. startblock=%lu nblocks=%lu\n",
-                __func__, partinfo[i].startblock, partinfo[i].nblocks);
+          finfo("%s(): mtd_partition failed. startblock=%"
+                PRIuOFF " nblocks=%" PRIuOFF "\n", __func__,
+                partinfo[i].startblock, partinfo[i].nblocks);
           mtd_semgive(&g_sem);
           DEBUGASSERT(0);
           return -EIO;

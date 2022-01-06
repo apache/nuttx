@@ -33,7 +33,7 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += stm32_buttons.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += stm32_appinit.c
 endif
 
@@ -49,6 +49,10 @@ endif
 
 ifeq ($(CONFIG_BOARD_STM32_IHM16M1),y)
 CSRCS += stm32_foc_ihm16m1.c
+endif
+
+ifeq ($(CONFIG_MATH_CORDIC),y)
+CSRCS += stm32_cordic.c
 endif
 
 DEPPATH += --dep-path board

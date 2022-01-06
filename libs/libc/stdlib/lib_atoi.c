@@ -28,6 +28,7 @@
  * Public Functions
  ****************************************************************************/
 
+#undef atoi /* See mm/README.txt */
 int atoi(FAR const char *nptr)
 {
   return strtol(nptr, NULL, 10);

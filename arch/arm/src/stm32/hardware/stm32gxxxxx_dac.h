@@ -32,6 +32,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Configuration ************************************************************/
+
+#define HAVE_IP_DAC_V2
+#undef HAVE_IP_DAC_V1           /* No DAC IPv1 */
+
 /* Register Offsets *********************************************************/
 
 #define STM32_DAC_CR_OFFSET            0x0000                         /* DAC control register */
@@ -60,7 +65,7 @@
 
 /* Register Addresses *******************************************************/
 
-#if STM32_NDAC > 0
+#ifdef CONFIG_STM32_HAVE_DAC1
 /* DAC1 */
 
 #  define STM32_DAC1_CR                (STM32_DAC1_BASE + STM32_DAC_CR_OFFSET)
@@ -87,9 +92,9 @@
 #  define STM32_DAC1_STR2              (STM32_DAC1_BASE + STM32_DAC_STR2_OFFSET)
 #  define STM32_DAC1_STMODR            (STM32_DAC1_BASE + STM32_DAC_STMODR_OFFSET)
 
-#endif
+#endif /* CONFIG_STM32_HAVE_DAC1 */
 
-#if STM32_NDAC > 1
+#ifdef CONFIG_STM32_HAVE_DAC2
 /* DAC2 */
 
 #  define STM32_DAC2_CR                (STM32_DAC2_BASE + STM32_DAC_CR_OFFSET)
@@ -116,7 +121,36 @@
 #  define STM32_DAC2_STR2              (STM32_DAC2_BASE + STM32_DAC_STR2_OFFSET)
 #  define STM32_DAC2_STMODR            (STM32_DAC2_BASE + STM32_DAC_STMODR_OFFSET)
 
-#endif
+#endif /* CONFIG_STM32_HAVE_DAC2 */
+
+#ifdef CONFIG_STM32_HAVE_DAC3
+/* DAC3 */
+
+#  define STM32_DAC3_CR                (STM32_DAC3_BASE + STM32_DAC_CR_OFFSET)
+#  define STM32_DAC3_SWTRIGR           (STM32_DAC3_BASE + STM32_DAC_SWTRIGR_OFFSET)
+#  define STM32_DAC3_DHR12R1           (STM32_DAC3_BASE + STM32_DAC_DHR12R1_OFFSET)
+#  define STM32_DAC3_DHR12L1           (STM32_DAC3_BASE + STM32_DAC_DHR12L1_OFFSET)
+#  define STM32_DAC3_DHR8R1            (STM32_DAC3_BASE + STM32_DAC_DHR8R1_OFFSET)
+#  define STM32_DAC3_DHR12R2           (STM32_DAC3_BASE + STM32_DAC_DHR12R2_OFFSET)
+#  define STM32_DAC3_DHR12L2           (STM32_DAC3_BASE + STM32_DAC_DHR12L2_OFFSET)
+#  define STM32_DAC3_DHR8R2            (STM32_DAC3_BASE + STM32_DAC_DHR8R2_OFFSET)
+#  define STM32_DAC3_DHR12RD           (STM32_DAC3_BASE + STM32_DAC_DHR12RD_OFFSET)
+#  define STM32_DAC3_DHR12LD           (STM32_DAC3_BASE + STM32_DAC_DHR12LD_OFFSET)
+#  define STM32_DAC3_DHR8RD            (STM32_DAC3_BASE + STM32_DAC_DHR8RD_OFFSET)
+#  define STM32_DAC3_DOR1              (STM32_DAC3_BASE + STM32_DAC_DOR1_OFFSET)
+#  define STM32_DAC3_DOR2              (STM32_DAC3_BASE + STM32_DAC_DOR2_OFFSET)
+#  define STM32_DAC3_SR                (STM32_DAC3_BASE + STM32_DAC_SR_OFFSET)
+#  define STM32_DAC3_CCR               (STM32_DAC3_BASE + STM32_DAC_CCR_OFFSET)
+#  define STM32_DAC3_MCR               (STM32_DAC3_BASE + STM32_DAC_MCR_OFFSET)
+#  define STM32_DAC3_SHSR1             (STM32_DAC3_BASE + STM32_DAC_SHSR1_OFFSET)
+#  define STM32_DAC3_SHSR2             (STM32_DAC3_BASE + STM32_DAC_SHSR2_OFFSET)
+#  define STM32_DAC3_SHHR              (STM32_DAC3_BASE + STM32_DAC_SHHR_OFFSET)
+#  define STM32_DAC3_SHRR              (STM32_DAC3_BASE + STM32_DAC_SHRR_OFFSET)
+#  define STM32_DAC3_STR1              (STM32_DAC3_BASE + STM32_DAC_STR1_OFFSET)
+#  define STM32_DAC3_STR2              (STM32_DAC3_BASE + STM32_DAC_STR2_OFFSET)
+#  define STM32_DAC3_STMODR            (STM32_DAC3_BASE + STM32_DAC_STMODR_OFFSET)
+
+#endif /* CONFIG_STM32_HAVE_DAC3 */
 
 /* Register Bitfield Definitions ********************************************/
 
@@ -375,7 +409,7 @@
 
 #define DAC_SR_DACRDY(n)               (1 << ((((n) - 1) << 4) + 11))
 #define DAC_SR_DAC1RDY                 (1 << 11)                      /* Bit 13: DAC channel 1 ready status bit */
-#define DAC_SR_DAC2RDY                 (1 << 27)                      /* Bit 29: DAC channel 2 ready status bit */
+#define DAC_SR_DAC2RDY                 (1 << 27)                      /* Bit 27: DAC channel 2 ready status bit */
 
 #define DAC_SR_DORSTAT(n)              (1 << ((((n) - 1) << 4) + 12))
 #define DAC_SR_DORSTAT1                (1 << 12)                      /* Bit 13: DAC channel 1 output register status bit */
@@ -448,10 +482,10 @@
 
 #define DAC_MCR_HFSEL_SHIFT            (14)                           /* High-frequency interface mode selection */
 #define DAC_MCR_HFSEL_MASK             (0x3 << DAC_MCR_HFSEL_SHIFT)
-#  define DAC_MCR_HFSEL_DISABLED       (0x1 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency disabled */
-#  define DAC_MCR_HFSEL_AHB_80MHz      (0x2 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 80 MHz */
-#  define DAC_MCR_HFSEL_AHB_160MHz     (0x3 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 160 MHz */
-#  define DAC_MCR_HFSEL_RESERVED       (0x4 << DAC_MCR_HFSEL_SHIFT)   /* Reserved */
+#  define DAC_MCR_HFSEL_DISABLED       (0x0 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency disabled */
+#  define DAC_MCR_HFSEL_AHB_80MHz      (0x1 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 80 MHz */
+#  define DAC_MCR_HFSEL_AHB_160MHz     (0x2 << DAC_MCR_HFSEL_SHIFT)   /* High-frequency for AHB > 160 MHz */
+#  define DAC_MCR_HFSEL_RESERVED       (0x3 << DAC_MCR_HFSEL_SHIFT)   /* Reserved */
 
 /* DAC channel 1/2 sample and hold sample time register (SHSR1, SHSR2) */
 

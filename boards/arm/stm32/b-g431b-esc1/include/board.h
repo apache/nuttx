@@ -120,6 +120,45 @@
 #define STM32_RCC_CFGR_PPRE2           RCC_CFGR_PPRE2_HCLK
 #define STM32_PCLK2_FREQUENCY          STM32_HCLK_FREQUENCY
 
+/* APB2 timers 1, 8, 20 and 15-17 will receive PCLK2. */
+
+/* Timers driven from APB2 will be PCLK2 */
+
+#define STM32_APB2_TIM1_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_APB2_TIM8_CLKIN   (STM32_PCLK2_FREQUENCY)
+#define STM32_APB1_TIM15_CLKIN  (STM32_PCLK2_FREQUENCY)
+#define STM32_APB1_TIM16_CLKIN  (STM32_PCLK2_FREQUENCY)
+#define STM32_APB1_TIM17_CLKIN  (STM32_PCLK2_FREQUENCY)
+
+/* APB1 timers 2-7 will be twice PCLK1 */
+
+#define STM32_APB1_TIM2_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM3_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM4_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM6_CLKIN   (STM32_PCLK1_FREQUENCY)
+#define STM32_APB1_TIM7_CLKIN   (STM32_PCLK1_FREQUENCY)
+
+/* USB divider -- Divide PLL clock by 1.5 */
+
+#define STM32_CFGR_USBPRE       0
+
+/* Timer Frequencies, if APBx is set to 1, frequency is same to APBx
+ * otherwise frequency is 2xAPBx.
+ */
+
+#define BOARD_TIM1_FREQUENCY   (STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM2_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM3_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM4_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM5_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM6_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM7_FREQUENCY   (STM32_PCLK1_FREQUENCY)
+#define BOARD_TIM8_FREQUENCY   (STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM15_FREQUENCY  (STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM16_FREQUENCY  (STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM17_FREQUENCY  (STM32_PCLK2_FREQUENCY)
+#define BOARD_TIM20_FREQUENCY  (STM32_PCLK2_FREQUENCY)
+
 /* LED definitions **********************************************************/
 
 /* The B-G431B-ESC1 has four user LEDs.
@@ -183,5 +222,22 @@
 #define GPIO_USART2_RX     GPIO_USART2_RX_3 /* PB4 */
 
 /* Pin Multiplexing Disambiguation ******************************************/
+
+/* TIM1 configuration *******************************************************/
+
+#define GPIO_TIM1_CH1NOUT  GPIO_TIM1_CH1NOUT_4 /* TIM1 CH1N - PC13 - U low */
+#define GPIO_TIM1_CH2NOUT  GPIO_TIM1_CH2NOUT_1 /* TIM1 CH2N - PA12 - V low */
+#define GPIO_TIM1_CH3NOUT  GPIO_TIM1_CH3NOUT_3 /* TIM1 CH3N - PB15 - W low */
+
+/* DMA channels *************************************************************/
+
+/* ADC */
+
+#define ADC1_DMA_CHAN DMAMAP_DMA12_ADC1_0     /* DMA1 */
+
+/* USART2 */
+
+#define DMACHAN_USART2_TX DMAMAP_DMA12_USART2TX_0 /* DMA1 */
+#define DMACHAN_USART2_RX DMAMAP_DMA12_USART2RX_0 /* DMA1 */
 
 #endif /* __BOARDS_ARM_STM32_B_G431B_ESC1_INCLUDE_BOARD_H */

@@ -22,6 +22,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <math.h>
@@ -32,12 +34,14 @@
 #include <nuttx/arch.h>
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 
 #include <arch/board/cxd56_clock.h>
 #include <arch/board/board.h>
 #include <arch/chip/audio.h>
+#include <arch/chip/chip.h>
 
 #include "cxd56.h"
 
@@ -159,7 +163,6 @@
 #define CXD56_DMA_SMP_WAIT_HIRES    10 /* usec per sample. */
 #define CXD56_DMA_SMP_WAIT_NORMALT  40 /* usec per sample. */
 #define CXD56_DMA_CMD_FIFO_NOT_FULL 1
-#define CXD56_DMA_START_ADDR_MASK   0x3fffffff
 
 /****************************************************************************
  * Public Function Prototypes
@@ -3222,11 +3225,11 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
 
 #ifdef CONFIG_AUDIO_CXD56_SRC
           src_apb = (struct ap_buffer_s *) dq_peek(&dev->down_pendq);
-          addr = ((uint32_t)src_apb->samp) & CXD56_DMA_START_ADDR_MASK;
+          addr = CXD56_PHYSADDR(src_apb->samp);
           size = (src_apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
 #else
           apb = (struct ap_buffer_s *) dq_peek(&dev->up_pendq);
-          addr = ((uint32_t)apb->samp) & CXD56_DMA_START_ADDR_MASK;
+          addr = CXD56_PHYSADDR(apb->samp);
           size = (apb->nbytes / (dev->bitwidth / 8) / dev->channels) - 1;
 #endif
 

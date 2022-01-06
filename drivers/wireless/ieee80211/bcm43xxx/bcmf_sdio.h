@@ -1,35 +1,20 @@
 /****************************************************************************
  * drivers/wireless/ieee80211/bcm43xxx/bcmf_sdio.h
  *
- *   Copyright (C) 2017-2018 Gregory Nutt. All rights reserved.
- *   Author: Simon Piriou <spiriou31@gmail.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -56,11 +41,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HEADER_SIZE        0x12 /* Default sdpcm + bdc header size */
-
-/* TODO move to Kconfig */
-
-#define BCMF_PKT_POOL_SIZE 4    /* Frame pool size */
+#define HEADER_SIZE          0x12 /* Default sdpcm + bdc header size */
+#define FIRST_WORD_SIZE      4
+#define FC_UPDATE_PKT_LENGTH 12
 
 /****************************************************************************
  * Public Types
@@ -115,6 +98,7 @@ struct bcmf_sdio_dev_s
   uint8_t max_seq;                 /* Maximum transmit sequence allowed */
   uint8_t tx_seq;                  /* Transmit sequence number (next) */
   uint8_t rx_seq;                  /* Receive sequence number (expected) */
+  bool    flow_ctrl;               /* Current flow control status */
 
   sem_t queue_mutex;               /* Lock for TX/RX/free queues */
   dq_queue_t free_queue;           /* Queue of available frames */
@@ -130,6 +114,21 @@ struct bcmf_sdio_frame
   struct bcmf_frame_s header;
   bool                tx;
   dq_entry_t          list_entry;
+  uint8_t             pad[CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT -
+                          FIRST_WORD_SIZE]
+  aligned_data(CONFIG_IEEE80211_BROADCOM_DMABUF_ALIGNMENT);
+
+  /* pad[] array is used and aligned in order to make the following data[]
+   * buffer aligned beginning from the offset of 4 bytes to the address
+   * boundary for SDIO DMA transfers.
+   * The first 4 bytes of data[] buffer are not directly used in DMA
+   * transfers. Instead, they are used as the initial phase just to get
+   * the length of the remaining long data to be read. Thus only
+   * the remaining part of data[] buffer beginning from the offset of 4 bytes
+   * is required to be aligned to the address boundary set by
+   * CONFIG_IEEE80211_BROADCOM_SDIO_DMA_BUF_ALIGNMENT parameter.
+   */
+
   uint8_t             data[HEADER_SIZE + MAX_NETDEV_PKTSIZE +
                            CONFIG_NET_GUARDSIZE];
 };

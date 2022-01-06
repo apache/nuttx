@@ -1,4 +1,4 @@
-apps/system/zoneinfo/README.txt
+libs/libc/zoneinfo/README.txt
 Author: Gregory Nutt <gnutt@nuttx.org>
 
 Directory Contents
@@ -54,8 +54,8 @@ modifications to the configuration that I used for testing:
   CONFIG_LIBC_TZ_MAX_TIMES=370
   CONFIG_LIBC_TZ_MAX_TYPES=20
 
-  CONFIG_LIB_ZONEINFO=y
-  CONFIG_LIB_ZONEINFO_ROMFS=y
+  CONFIG_LIBC_ZONEINFO=y
+  CONFIG_LIBC_ZONEINFO_ROMFS=y
 
 NOTE:  The full TZ database is quite large.  To create a reasonable sized
 ROMFS image, I had to trim some of the files like this:
@@ -68,7 +68,7 @@ Select the above localtime() and nuttx/zoneinfo configuration settings.
 Then:
 
   make context
-  cd ../nuttx/zoneinfo/tzbin/etc/zoneinfo
+  cd ../nuttx/libs/libc/zoneinfo/tzbin/usr/share/zoneinfo
 
 Remove as many timezone files as you can.  Do not remove the GMT, localtime,
 or posixrules files.  Those might be needed in any event.  Then you can

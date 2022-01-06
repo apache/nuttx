@@ -59,7 +59,7 @@
  *   msglen - Size of the buffer in bytes
  *
  * Returned Value:
- *   One success, zero (OK) is returned.  A negated errno value is returned
+ *   On success, zero (OK) is returned.  A negated errno value is returned
  *   on any failure:
  *
  *   EPERM    Message queue opened not opened for reading.
@@ -108,7 +108,7 @@ int nxmq_verify_receive(FAR struct mqueue_inode_s *msgq,
  *            received message.
  *
  * Returned Value:
- *   One success, zero (OK) is returned.  A negated errno value is returned
+ *   On success, zero (OK) is returned.  A negated errno value is returned
  *   on any failure.
  *
  * Assumptions:

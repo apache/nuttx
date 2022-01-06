@@ -122,6 +122,10 @@
 #define POSIX_TYPED_MEM_ALLOCATE_CONTIG  (1)
 #define POSIX_TYPED_MEM_MAP_ALLOCATABLE  (2)
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define mmap64 mmap
+#endif
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

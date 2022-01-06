@@ -94,10 +94,9 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
 
   /* Open the binary file */
 
-  loadinfo->filfd = nx_open(filename, O_RDONLY);
-  if (loadinfo->filfd < 0)
+  ret = file_open(&loadinfo->file, filename, O_RDONLY);
+  if (ret < 0)
     {
-      ret = loadinfo->filfd;
       berr("ERROR: Failed to open NXFLAT binary %s: %d\n", filename, ret);
       return ret;
     }
@@ -109,7 +108,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
   if (ret < 0)
     {
       berr("ERROR: Failed to read NXFLAT header: %d\n", ret);
-      nx_close(loadinfo->filfd);
+      file_close(&loadinfo->file);
       return ret;
     }
 
@@ -128,7 +127,7 @@ int nxflat_init(const char *filename, struct nxflat_loadinfo_s *loadinfo)
        */
 
       berr("ERROR: Bad NXFLAT header\n");
-      nx_close(loadinfo->filfd);
+      file_close(&loadinfo->file);
       return -ENOEXEC;
     }
 

@@ -1,0 +1,9 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+#if ARCH_RENESAS_RX
+#source "libs/libc/machine/renesas/rx/Kconfig"
+#endif
+

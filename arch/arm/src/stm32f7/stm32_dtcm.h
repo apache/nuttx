@@ -69,25 +69,25 @@
  */
 
 #define dtcm_initialize() \
-  mm_initialize(&g_dtcm_heap, (FAR void *)DTCM_START, DTCM_END-DTCM_START)
+  g_dtcm_heap = mm_initialize("dtcm", (FAR void *)DTCM_START, DTCM_END-DTCM_START)
 
 /* The dtcm_addregion interface could be used if, for example, you want to
  * add some other memory region to the DTCM heap.  I don't really know why
  * you might want to do that, but the functionality is essentially free.
  */
 
-#define dtcm_addregion(b,s) mm_addregion(&g_dtcm_heap, b, s);
+#define dtcm_addregion(b,s) mm_addregion(g_dtcm_heap, b, s);
 
 /* Then, once g_dtcm_heap has been setup by dtcm_initialize(), these memory
  * allocators can be used just like the standard memory allocators.
  */
 
-#define dtcm_malloc(s)      mm_malloc(&g_dtcm_heap, s)
-#define dtcm_zalloc(s)      mm_zalloc(&g_dtcm_heap, s)
-#define dtcm_calloc(n,s)    mm_calloc(&g_dtcm_heap, n,s)
-#define dtcm_free(p)        mm_free(&g_dtcm_heap, p)
-#define dtcm_realloc(p,s)   mm_realloc(&g_dtcm_heap, p, s)
-#define dtcm_memalign(a,s)  mm_memalign(&g_dtcm_heap, a, s)
+#define dtcm_malloc(s)      mm_malloc(g_dtcm_heap, s)
+#define dtcm_zalloc(s)      mm_zalloc(g_dtcm_heap, s)
+#define dtcm_calloc(n,s)    mm_calloc(g_dtcm_heap, n,s)
+#define dtcm_free(p)        mm_free(g_dtcm_heap, p)
+#define dtcm_realloc(p,s)   mm_realloc(g_dtcm_heap, p, s)
+#define dtcm_memalign(a,s)  mm_memalign(g_dtcm_heap, a, s)
 
 /****************************************************************************
  * Public Types
@@ -107,7 +107,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-EXTERN struct mm_heap_s g_dtcm_heap;
+EXTERN FAR struct mm_heap_s *g_dtcm_heap;
 
 /****************************************************************************
  * Public Function Prototypes
@@ -116,18 +116,6 @@ EXTERN struct mm_heap_s g_dtcm_heap;
 #undef EXTERN
 #ifdef __cplusplus
 }
-#endif
-
-/****************************************************************************
- * Name: dtcm_procfs_register
- *
- * Description:
- *   Register the DTCM procfs file system entry
- *
- ****************************************************************************/
-
-#ifdef CONFIG_STM32F7_DTCM_PROCFS
-int dtcm_procfs_register(void);
 #endif
 
 #endif /* __ASSEMBLY__ */

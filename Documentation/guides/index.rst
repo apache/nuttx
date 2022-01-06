@@ -11,3 +11,4 @@ Guides
   drivers.rst
   tasktrace.rst
   cpp_cmake.rst
+  pysimcoder.rst

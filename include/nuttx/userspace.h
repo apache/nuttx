@@ -98,15 +98,11 @@ struct userspace_s
 
   /* Memory manager heap structure */
 
-  FAR struct mm_heap_s *us_heap;
+  FAR struct mm_heap_s **us_heap;
 
-  /* Task/thread startup routines */
+  /* Task startup routine */
 
   CODE void (*task_startup)(main_t entrypt, int argc, FAR char *argv[]);
-#ifndef CONFIG_DISABLE_PTHREAD
-  CODE void (*pthread_startup)(pthread_startroutine_t entrypt,
-    pthread_addr_t arg);
-#endif
 
   /* Signal handler trampoline */
 
@@ -115,7 +111,7 @@ struct userspace_s
 
   /* User-space work queue support */
 
-#ifdef CONFIG_LIB_USRWORK
+#ifdef CONFIG_LIBC_USRWORK
   CODE int (*work_usrstart)(void);
 #endif
 };
@@ -135,26 +131,6 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: pthread_startup
- *
- * Description:
- *   This function is the user-space, pthread startup function.  It is called
- *   from up_pthread_start() in user-mode.
- *
- * Input Parameters:
- *   entrypt - The user-space address of the pthread entry point
- *   arg     - Standard argument for the pthread entry point
- *
- * Returned Value:
- *   None.  This function does not return.
- *
- ****************************************************************************/
-
-#if !defined(__KERNEL__) && !defined(CONFIG_DISABLE_PTHREAD)
-void pthread_startup(pthread_startroutine_t entrypt, pthread_addr_t arg);
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

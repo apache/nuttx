@@ -9,6 +9,18 @@ config DISABLE_MOUNTPOINT
 	bool "Disable support for mount points"
 	default n
 
+config FS_LARGEFILE
+	bool "Large File Support"
+	default !DEFAULT_SMALL
+	---help---
+		Support files which's length is larger than 4GB:
+		https://www.opengroup.org/platform/lfs.html
+
+		Note: the protected and kernel mode on 32bit platform can't exceed
+		the 4GB limitation since the auto generated proxy and stub still
+		cut 64bit to 32bit value. Please check tools/mksyscall.c for more
+		information.
+
 config FS_AUTOMOUNTER
 	bool "Auto-mounter"
 	default n
@@ -47,6 +59,14 @@ config DISABLE_PSEUDOFS_OPERATIONS
 		However, in practical embedded system, they are seldom needed and
 		you can save a little FLASH space by disabling the capability.
 
+config PSEUDOFS_ATTRIBUTES
+	bool "Pseudo-filesystem attributes"
+	default n
+	depends on !DISABLE_PSEUDOFS_OPERATIONS
+	---help---
+		Enable support for attributes(e.g. mode, uid, gid and time)
+		in the pseudo file system.
+
 config PSEUDOFS_SOFTLINKS
 	bool "Pseudo-filesystem soft links"
 	default n
@@ -58,6 +78,12 @@ config PSEUDOFS_SOFTLINKS
 		may be add in the pseudo file system.  This might be useful, for
 		to link a directory in the pseudo-file system, such as /bin, to
 		to a directory in a mounted volume, say /mnt/sdcard/bin.
+
+config SENDFILE_BUFSIZE
+	int "sendfile() buffer size"
+	default 512
+	---help---
+		Size of the I/O buffer to allocate in sendfile().  Default: 512b
 
 config EVENT_FD
 	bool "EventFD"
@@ -82,28 +108,29 @@ config EVENT_FD_POLL
 config EVENT_FD_NPOLLWAITERS
 	int "Number of eventFD poll waiters"
 	default 2
+	depends on EVENT_FD_POLL
 	---help---
 		Maximum number of threads that can be waiting on poll()
 
 endif # EVENT_FD
 
-source fs/aio/Kconfig
-source fs/semaphore/Kconfig
-source fs/mqueue/Kconfig
-source fs/shm/Kconfig
-source fs/mmap/Kconfig
-source fs/partition/Kconfig
-source fs/fat/Kconfig
-source fs/nfs/Kconfig
-source fs/nxffs/Kconfig
-source fs/romfs/Kconfig
-source fs/cromfs/Kconfig
-source fs/tmpfs/Kconfig
-source fs/smartfs/Kconfig
-source fs/binfs/Kconfig
-source fs/procfs/Kconfig
-source fs/spiffs/Kconfig
-source fs/littlefs/Kconfig
-source fs/unionfs/Kconfig
-source fs/userfs/Kconfig
-source fs/hostfs/Kconfig
+source "fs/aio/Kconfig"
+source "fs/semaphore/Kconfig"
+source "fs/mqueue/Kconfig"
+source "fs/shm/Kconfig"
+source "fs/mmap/Kconfig"
+source "fs/partition/Kconfig"
+source "fs/fat/Kconfig"
+source "fs/nfs/Kconfig"
+source "fs/nxffs/Kconfig"
+source "fs/romfs/Kconfig"
+source "fs/cromfs/Kconfig"
+source "fs/tmpfs/Kconfig"
+source "fs/smartfs/Kconfig"
+source "fs/binfs/Kconfig"
+source "fs/procfs/Kconfig"
+source "fs/spiffs/Kconfig"
+source "fs/littlefs/Kconfig"
+source "fs/unionfs/Kconfig"
+source "fs/userfs/Kconfig"
+source "fs/hostfs/Kconfig"

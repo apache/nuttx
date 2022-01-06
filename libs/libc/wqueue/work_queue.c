@@ -32,10 +32,11 @@
 
 #include <nuttx/clock.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/semaphore.h>
 
 #include "wqueue/wqueue.h"
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 
 /****************************************************************************
  * Private Functions
@@ -56,11 +57,11 @@
  *   and remove it from the work queue.
  *
  * Input Parameters:
- *   qid    - The work queue ID (index)
+ *   wqueue - The work queue
  *   work   - The work structure to queue
- *   worker - The worker callback to be invoked.  The callback will invoked
- *            on the worker thread of execution.
- *   arg    - The argument that will be passed to the workder callback when
+ *   worker - The worker callback to be invoked.  The callback will be
+ *            invoked on the worker thread of execution.
+ *   arg    - The argument that will be passed to the worker callback when
  *            int is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
@@ -74,37 +75,74 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
                        FAR struct work_s *work, worker_t worker,
                        FAR void *arg, clock_t delay)
 {
-  DEBUGASSERT(work != NULL);
+  FAR sq_entry_t *prev = NULL;
+  FAR sq_entry_t *curr;
+  sclock_t delta;
+  int semcount;
 
   /* Get exclusive access to the work queue */
 
-  while (work_lock() < 0);
-
-  /* Is there already pending work? */
-
-  if (work->worker != NULL)
-    {
-      /* Remove the entry from the work queue.  It will re requeued at the
-       * end of the work queue.
-       */
-
-      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
-    }
+  while (_SEM_WAIT(&wqueue->lock) < 0);
 
   /* Initialize the work structure */
 
-  work->worker = worker;           /* Work callback. non-NULL means queued */
-  work->arg    = arg;              /* Callback argument */
-  work->delay  = delay;            /* Delay until work performed */
+  work->worker = worker;             /* Work callback. non-NULL means queued */
+  work->arg    = arg;                /* Callback argument */
+  work->u.s.qtime = clock() + delay; /* Delay until work performed */
 
-  /* Now, time-tag that entry and put it in the work queue. */
+  /* Do the easy case first -- when the work queue is empty. */
 
-  work->qtime  = clock(); /* Time work queued */
+  if (wqueue->q.head == NULL)
+    {
+      /* Add the watchdog to the head == tail of the queue. */
 
-  dq_addlast((FAR dq_entry_t *)work, &wqueue->q);
-  kill(wqueue->pid, SIGWORK);   /* Wake up the worker thread */
+      sq_addfirst(&work->u.s.sq, &wqueue->q);
+      _SEM_POST(&wqueue->wake);
+    }
 
-  work_unlock();
+  /* There are other active watchdogs in the timer queue */
+
+  else
+    {
+      curr = wqueue->q.head;
+
+      /* Check if the new work must be inserted before the curr. */
+
+      do
+        {
+          delta = work->u.s.qtime - ((FAR struct work_s *)curr)->u.s.qtime;
+          if (delta < 0)
+            {
+              break;
+            }
+
+          prev = curr;
+          curr = curr->flink;
+        }
+      while (curr != NULL);
+
+      /* Insert the new watchdog in the list */
+
+      if (prev == NULL)
+        {
+          /* Insert the watchdog at the head of the list */
+
+          sq_addfirst(&work->u.s.sq, &wqueue->q);
+          _SEM_GETVALUE(&wqueue->wake, &semcount);
+          if (semcount < 1)
+            {
+              _SEM_POST(&wqueue->wake);
+            }
+        }
+      else
+        {
+          /* Insert the watchdog in mid- or end-of-queue */
+
+          sq_addafter(prev, &work->u.s.sq, &wqueue->q);
+        }
+    }
+
+  _SEM_POST(&wqueue->lock);
   return OK;
 }
 
@@ -123,15 +161,15 @@ static int work_qqueue(FAR struct usr_wqueue_s *wqueue,
  *   the caller.  Otherwise, the work structure is completely managed by the
  *   work queue logic.  The caller should never modify the contents of the
  *   work queue structure directly.  If work_queue() is called before the
- *   previous work as been performed and removed from the queue, then any
+ *   previous work has been performed and removed from the queue, then any
  *   pending work will be canceled and lost.
  *
  * Input Parameters:
  *   qid    - The work queue ID (index)
  *   work   - The work structure to queue
- *   worker - The worker callback to be invoked.  The callback will invoked
- *            on the worker thread of execution.
- *   arg    - The argument that will be passed to the workder callback when
+ *   worker - The worker callback to be invoked.  The callback will be
+ *            invoked on the worker thread of execution.
+ *   arg    - The argument that will be passed to the worker callback when
  *            int is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
  *            is invoked. Zero means to perform the work immediately.
@@ -146,6 +184,10 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
 {
   if (qid == USRWORK)
     {
+      /* Is there already pending work? */
+
+      work_cancel(qid, work);
+
       return work_qqueue(&g_usrwork, work, worker, arg, delay);
     }
   else
@@ -154,4 +196,4 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
     }
 }
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__ */
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */

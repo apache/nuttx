@@ -73,6 +73,14 @@
 #define SCHED_PRIORITY_MIN       1
 #define SCHED_PRIORITY_IDLE      0
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define fsblkcnt64_t           fsblkcnt_t
+#  define fsfilcnt64_t           fsfilcnt_t
+#  define blkcnt64_t             blkcnt_t
+#  define off64_t                off_t
+#  define fpos64_t               fpos_t
+#endif
+
 /****************************************************************************
  * Type Declarations
  ****************************************************************************/
@@ -175,6 +183,16 @@ typedef int wint_t;
 
 typedef int wctype_t;
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+/* Large file versions */
+
+typedef uint64_t     fsblkcnt_t;
+typedef uint64_t     fsfilcnt_t;
+
+typedef uint64_t     blkcnt_t;
+typedef int64_t      off_t;
+typedef int64_t      fpos_t;
+#else
 /* fsblkcnt_t and fsfilcnt_t shall be defined as unsigned integer types. */
 
 typedef uint32_t     fsblkcnt_t;
@@ -191,13 +209,7 @@ typedef uint32_t     fsfilcnt_t;
 
 typedef uint32_t     blkcnt_t;
 typedef int32_t      off_t;
-typedef off_t        fpos_t;
-
-#ifdef CONFIG_HAVE_LONG_LONG
-/* Large file versions */
-
-typedef int64_t      off64_t;
-typedef int64_t      fpos64_t;
+typedef int32_t      fpos_t;
 #endif
 
 /* blksize_t is a signed integer value used for file block sizes */

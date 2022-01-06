@@ -199,7 +199,7 @@ Functions
   - Deletion of self is supported, but only because ``task_delete()``
     will re-direct processing to ``exit()``.
 
-.. :c:funcion:: int task_restart(pid_t pid)
+.. :c:function:: int task_restart(pid_t pid)
 
   This function *restarts* a task. The task is first
   terminated and then reinitialized with same ID, priority, original entry
@@ -405,7 +405,7 @@ Functions
   exits.
 
   :param filename: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
      ``path`` must be the absolute path to the program.
   :param argv: A pointer to an array of string arguments. The end of the
@@ -469,7 +469,7 @@ Functions
   task.
 
   :param path: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
   :param path: must be the absolute path to the program.
 
@@ -489,7 +489,7 @@ Functions
   information.
 
   :param path: The path to the program to be executed. If
-     ``CONFIG_LIB_ENVPATH`` is defined in the configuration, then this may
+     ``CONFIG_LIBC_ENVPATH`` is defined in the configuration, then this may
      be a relative path from the current working directory. Otherwise,
   :param path: must be the absolute path to the program.
 
@@ -530,7 +530,7 @@ Functions
     variable PATH.
 
     NOTE: NuttX provides only one implementation: If
-    ``CONFIG_LIB_ENVPATH`` is defined, then only ``posix_spawnp()``
+    ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
     behavior is supported; otherwise, only ``posix_spawn`` behavior is
     supported.
 
@@ -584,8 +584,8 @@ Functions
   **Assumptions/Limitations:**
 
   -  NuttX provides only ``posix_spawn()`` or ``posix_spawnp()`` behavior
-     depending upon the setting of ``CONFIG_LIB_ENVPATH``: If
-     ``CONFIG_LIB_ENVPATH`` is defined, then only ``posix_spawnp()``
+     depending upon the setting of ``CONFIG_LIBC_ENVPATH``: If
+     ``CONFIG_LIBC_ENVPATH`` is defined, then only ``posix_spawnp()``
      behavior is supported; otherwise, only ``posix_spawn()`` behavior is
      supported.
   -  The ``envp`` argument is not used and the ``environ`` variable is not
@@ -789,18 +789,13 @@ Functions
   :return: On success, this function returns 0; on failure it
     will return an error number from ``<errno.h>``
 
-.. c:function:: int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry, \
+.. c:function:: int task_spawn(FAR const char *name, main_t entry, \
       FAR const posix_spawn_file_actions_t *file_actions, \
       FAR const posix_spawnattr_t *attr, \
       FAR char * const argv[], FAR char * const envp[])
 
   The ``task_spawn()`` function will create a new, child
   task, where the entry point to the task is an address in memory.
-
-  :param pid: Upon successful completion, ``task_spawn()`` will return the
-     task ID of the child task to the parent task, in the variable pointed
-     to by a non-NULL ``pid`` argument. If the ``pid`` argument is a null
-     pointer, the process ID of the child is not returned to the caller.
 
   :param name: The name to assign to the child task.
 
@@ -844,9 +839,9 @@ Functions
   :param envp: The ``envp[]`` argument is not used by NuttX and may be
      ``NULL``.
 
-  :return: ``task_spawn()`` will return zero on success.
-    Otherwise, an error number will be returned as the function return value
-    to indicate the error:
+  :return: ``task_spawn()`` will return process ID of new task on success.
+    Otherwise, a negative number will be returned as the function return
+    value to indicate the error:
 
   **POSIX Compatibility:** This is a non-standard interface inspired by
   ``posix_spawn()``.

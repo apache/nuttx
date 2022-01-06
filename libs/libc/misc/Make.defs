@@ -34,8 +34,6 @@ CSRCS += lib_uadd32x64.c lib_uadd64.c lib_usub64x32.c lib_usub64.c
 
 # Add C files that depend on file OR socket descriptors
 
-CSRCS += lib_sendfile.c
-
 ifeq ($(CONFIG_FILE_STREAM),y)
 CSRCS += lib_streamsem.c
 endif
@@ -46,24 +44,25 @@ endif
 
 # Add the miscellaneous C files to the build
 
+CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_fnmatch.c lib_debug.c
 CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
-CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_match.c lib_debug.c
+CSRCS += lib_crc8table.c lib_glob.c
 
 # Keyboard driver encoder/decoder
 
-ifeq ($(CONFIG_LIB_KBDCODEC),y)
+ifeq ($(CONFIG_LIBC_KBDCODEC),y)
 CSRCS += lib_kbdencode.c lib_kbddecode.c
 endif
 
 # SLCD driver encoder/decoder
 
-ifeq ($(CONFIG_LIB_SLCDCODEC),y)
+ifeq ($(CONFIG_LIBC_SLCDCODEC),y)
 CSRCS += lib_slcdencode.c lib_slcddecode.c
 endif
 
 # Environment search path support
 
-ifeq ($(CONFIG_LIB_ENVPATH),y)
+ifeq ($(CONFIG_LIBC_ENVPATH),y)
 CSRCS += lib_envpath.c
 endif
 

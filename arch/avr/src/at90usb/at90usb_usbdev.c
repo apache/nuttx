@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1961,7 +1962,7 @@ static void avr_genvbus(void)
 
       UDCON |= (1 << DETACH);
 
-      /* Disable the clock inputs (the ”Resume Detection” is still active).
+      /* Disable the clock inputs (the Resume Detection is still active).
        * This reduces the power consumption. Clear to enable the clock
        * inputs.
        */

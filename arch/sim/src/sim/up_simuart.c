@@ -31,6 +31,8 @@
 #include <poll.h>
 #include <errno.h>
 
+#include "up_internal.h"
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -154,7 +156,7 @@ int simuart_getc(int fd)
  * Name: simuart_getcflag
  ****************************************************************************/
 
-int simuart_getcflag(int fd, tcflag_t *cflag)
+int simuart_getcflag(int fd, unsigned int *cflag)
 {
   struct termios t;
   int ret;
@@ -176,7 +178,7 @@ int simuart_getcflag(int fd, tcflag_t *cflag)
  * Name: simuart_setcflag
  ****************************************************************************/
 
-int simuart_setcflag(int fd, tcflag_t cflag)
+int simuart_setcflag(int fd, unsigned int cflag)
 {
   struct termios t;
   int ret;

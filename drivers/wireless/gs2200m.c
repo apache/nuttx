@@ -39,6 +39,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <poll.h>
@@ -215,6 +216,8 @@ static int     gs2200m_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static int     gs2200m_irq(int irq, FAR void *context, FAR void *arg);
 static void    gs2200m_irq_worker(FAR void *arg);
+
+static void _remove_all_pkt(FAR struct gs2200m_dev_s *dev, uint8_t c);
 
 /****************************************************************************
  * Private Data
@@ -524,7 +527,7 @@ static void _check_pkt_q_empty(FAR struct gs2200m_dev_s *dev, char cid)
           pkt_dat = (FAR struct pkt_dat_s *)pkt_dat->dq.flink;
         }
 
-      ASSERT(false);
+      _remove_all_pkt(dev, c);
     }
 }
 
@@ -662,6 +665,12 @@ errout:
       /* Copy the source address and port */
 
       memcpy(&msg->addr, &pkt_dat->addr, sizeof(pkt_dat->addr));
+
+      /* Set the address family
+       * NOTE: gs2200m only supports IPv4
+       */
+
+      msg->addr.sin_family = AF_INET;
 
       /* In udp case, treat the packet separately */
 
@@ -863,18 +872,18 @@ retry:
 
   _write_data(dev, hdr, sizeof(hdr));
 
-  /* NOTE: busy wait 30us
-   * workaround to avoid an invalid frame response
-   */
-
-  up_udelay(30);
-
   /* Wait for data ready */
 
   while (!dev->lower->dready(NULL))
     {
       /* TODO: timeout */
     }
+
+  /* NOTE: busy wait 50us
+   * workaround to avoid an invalid frame response
+   */
+
+  up_udelay(50);
 
   /* Read frame response */
 
@@ -2380,6 +2389,7 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
     {
       wlinfo("+++ already closed \n");
       type = TYPE_DISCONNECT;
+      ret = -ENOTCONN;
       goto errout;
     }
 
@@ -2389,7 +2399,7 @@ static int gs2200m_ioctl_send(FAR struct gs2200m_dev_s *dev,
 
 errout:
 
-  if (type != TYPE_OK)
+  if (type != TYPE_OK && type != TYPE_DISCONNECT)
     {
       ret = -EINVAL;
     }

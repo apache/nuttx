@@ -26,6 +26,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <poll.h>

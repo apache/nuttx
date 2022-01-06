@@ -94,20 +94,25 @@
 #define USERFS_MAGIC          0x52455355
 #define CROMFS_MAGIC          0x4d4f5243
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define statfs64            statfs
+#  define fstatfs64           fstatfs
+#endif
+
 /****************************************************************************
  * Type Definitions
  ****************************************************************************/
 
 struct statfs
 {
-  uint32_t f_type;     /* Type of filesystem (see definitions above) */
-  size_t   f_namelen;  /* Maximum length of filenames */
-  size_t   f_bsize;    /* Optimal block size for transfers */
-  off_t    f_blocks;   /* Total data blocks in the file system of this size */
-  off_t    f_bfree;    /* Free blocks in the file system */
-  off_t    f_bavail;   /* Free blocks avail to non-superuser */
-  off_t    f_files;    /* Total file nodes in the file system */
-  off_t    f_ffree;    /* Free file nodes in the file system */
+  uint32_t   f_type;     /* Type of filesystem (see definitions above) */
+  size_t     f_namelen;  /* Maximum length of filenames */
+  size_t     f_bsize;    /* Optimal block size for transfers */
+  fsblkcnt_t f_blocks;   /* Total data blocks in the file system of this size */
+  fsblkcnt_t f_bfree;    /* Free blocks in the file system */
+  fsblkcnt_t f_bavail;   /* Free blocks avail to non-superuser */
+  fsfilcnt_t f_files;    /* Total file nodes in the file system */
+  fsfilcnt_t f_ffree;    /* Free file nodes in the file system */
 };
 
 /****************************************************************************

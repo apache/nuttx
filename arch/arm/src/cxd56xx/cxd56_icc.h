@@ -32,6 +32,7 @@
 #define CXD56_PROTO_HOTSLEEP  8
 #define CXD56_PROTO_IMAGE     9
 #define CXD56_PROTO_PM       10 /* Power manager */
+#define CXD56_PROTO_HOSTIF   11
 #define CXD56_PROTO_SYSCTL   12
 #define CXD56_PROTO_GNSS     13
 #define CXD56_PROTO_SIG      15 /* Inter-CPU Comm signal */

@@ -53,8 +53,8 @@
 
 MEMORY
 {
-  locked (rx) : ORIGIN = 0x11029080, LENGTH = 48K - 4224
-  paged  (rx) : ORIGIN = 0x11034000, LENGTH = 384K
+  locked (rx) : ORIGIN = 0x11029080, LENGTH = 52K - 4224
+  paged  (rx) : ORIGIN = 0x11035000, LENGTH = 380K
   data   (rw) : ORIGIN = 0x11094000, LENGTH = 44K
 }
 

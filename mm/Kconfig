@@ -15,7 +15,7 @@ config MM_DEFAULT_MANAGER
 config MM_CUSTOMIZE_MANAGER
 	bool "Customized heap manager"
 	---help---
-		Customized memory manger policy. The build will fail
+		Customized memory manager policy. The build will fail
 		if the MM heap module not defined by customer.
 
 endchoice

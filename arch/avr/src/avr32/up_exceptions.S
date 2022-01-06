@@ -36,7 +36,7 @@
 	.global		avr32_int2irqno			/* Returns IRQ number of INT2 event */
 	.global		avr32_int3irqno			/* Returns IRQ number of INT3 event */
 	.global		up_doirq				/* Dispatch an IRQ                  */
-	.global		up_fullcontextrestore	/* Restore new task contex          */
+	.global		up_fullcontextrestore	/* Restore new task context         */
 
 /****************************************************************************
  * Macros
@@ -303,7 +303,7 @@ avr32_common:
 #endif
 
 	/* On return, r12 will hold the new address of the register context     */
-	/* save area.  On an interrupt contex switch, this will (1) not be the  */
+	/* save area.  On an interrupt context switch, this will (1) not be the  */
 	/* same as the value of r12 passed to up_doirq(), and (2) may not       */
 	/* reside on a stack.                                                   */
 

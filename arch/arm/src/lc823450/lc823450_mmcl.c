@@ -26,7 +26,9 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <inttypes.h>
 #include <stdio.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -127,7 +129,7 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
   ssize_t nread;
   struct mmcl_dev_s *dev;
 
-  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
+  finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
@@ -135,7 +137,7 @@ static ssize_t mmcl_read(FAR struct inode *inode, unsigned char *buffer,
   nread = MTD_BREAD(dev->mtd, start_sector, nsectors, buffer);
   if (nread != nsectors)
     {
-      finfo("Read %u blocks starting at block %" PRIu32 " failed: %d\n",
+      finfo("Read %u blocks starting at block %" PRIuOFF " failed: %d\n",
             nsectors, start_sector, nread);
       return -EIO;
     }
@@ -157,7 +159,7 @@ static ssize_t mmcl_write(FAR struct inode *inode,
   ssize_t nwrite;
   struct mmcl_dev_s *dev;
 
-  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
+  finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct mmcl_dev_s *)inode->i_private;
@@ -165,7 +167,7 @@ static ssize_t mmcl_write(FAR struct inode *inode,
   nwrite = MTD_BWRITE(dev->mtd, start_sector, nsectors, buffer);
   if (nwrite != nsectors)
     {
-      finfo("Write %u blocks starting at block %" PRIu32 " failed: %d\n",
+      finfo("Write %u blocks starting at block %" PRIuOFF " failed: %d\n",
             nsectors, start_sector, nwrite);
       return -EIO;
     }
@@ -199,7 +201,7 @@ static int mmcl_geometry(FAR struct inode *inode, struct geometry *geometry)
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
 
-      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIi16 "\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIi16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

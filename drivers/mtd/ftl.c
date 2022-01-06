@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -189,8 +190,8 @@ static ssize_t ftl_reload(FAR void *priv, FAR uint8_t *buffer,
   nread   = MTD_BREAD(dev->mtd, startblock, nblocks, buffer);
   if (nread != nblocks)
     {
-      ferr("ERROR: Read %zu blocks starting at block %jd failed: %zd\n",
-            nblocks, (intmax_t)startblock, nread);
+      ferr("ERROR: Read %zu blocks starting at block %" PRIdOFF
+           " failed: %zd\n", nblocks, startblock, nread);
     }
 
   return nread;
@@ -208,7 +209,7 @@ static ssize_t ftl_read(FAR struct inode *inode, unsigned char *buffer,
 {
   FAR struct ftl_struct_s *dev;
 
-  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
+  finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
 
@@ -283,8 +284,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd   = MTD_BREAD(dev->mtd, rwblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("ERROR: Read erase block %jd failed: %zd\n",
-               (intmax_t)rwblock, nxfrd);
+          ferr("ERROR: Read erase block %" PRIdOFF " failed: %zd\n",
+               rwblock, nxfrd);
           return -EIO;
         }
 
@@ -294,8 +295,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("ERROR: Erase block=%jd failed: %d\n",
-               (intmax_t)eraseblock, ret);
+          ferr("ERROR: Erase block=%" PRIdOFF "failed: %d\n",
+               eraseblock, ret);
           return ret;
         }
 
@@ -312,8 +313,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
           nbytes = dev->geo.erasesize - offset;
         }
 
-      finfo("Copy %d bytes into erase block=%jd at offset=%jd\n",
-             nbytes, (intmax_t)eraseblock, (intmax_t)offset);
+      finfo("Copy %d bytes into erase block=%" PRIdOFF
+            " at offset=%" PRIdOFF "\n", nbytes, eraseblock, offset);
 
       memcpy(dev->eblock + offset, buffer, nbytes);
 
@@ -322,8 +323,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, rwblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("ERROR: Write erase block %jd failed: %zu\n",
-               (intmax_t)rwblock, nxfrd);
+          ferr("ERROR: Write erase block %" PRIdOFF " failed: %zu\n",
+               rwblock, nxfrd);
           return -EIO;
         }
 
@@ -351,21 +352,21 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("ERROR: Erase block=%jd failed: %d\n",
-               (intmax_t)eraseblock, ret);
+          ferr("ERROR: Erase block=%" PRIdOFF " failed: %d\n",
+               eraseblock, ret);
           return ret;
         }
 
       /* Write a full erase back to flash */
 
-      finfo("Write %" PRId32 " bytes into erase block=%jd at offset=0\n",
-             dev->geo.erasesize, (intmax_t)alignedblock);
+      finfo("Write %" PRId32 " bytes into erase block=%" PRIdOFF
+            " at offset=0\n", dev->geo.erasesize, alignedblock);
 
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, buffer);
       if (nxfrd != dev->blkper)
         {
-          ferr("ERROR: Write erase block %jd failed: %zu\n",
-               (intmax_t)alignedblock, nxfrd);
+          ferr("ERROR: Write erase block %" PRIdOFF " failed: %zu\n",
+               alignedblock, nxfrd);
           return -EIO;
         }
 
@@ -392,8 +393,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BREAD(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("ERROR: Read erase block %jd failed: %zu\n",
-               (intmax_t)alignedblock, nxfrd);
+          ferr("ERROR: Read erase block %" PRIdOFF " failed: %zu\n",
+               alignedblock, nxfrd);
           return -EIO;
         }
 
@@ -403,16 +404,16 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       ret        = MTD_ERASE(dev->mtd, eraseblock, 1);
       if (ret < 0)
         {
-          ferr("ERROR: Erase block=%jd failed: %d\n",
-               (intmax_t)eraseblock, ret);
+          ferr("ERROR: Erase block=%" PRIdOFF "failed: %d\n",
+               eraseblock, ret);
           return ret;
         }
 
       /* Copy the user data at the beginning the buffered erase block */
 
       nbytes = remaining * dev->geo.blocksize;
-      finfo("Copy %d bytes into erase block=%jd at offset=0\n",
-             nbytes, (intmax_t)alignedblock);
+      finfo("Copy %d bytes into erase block=%" PRIdOFF " at offset=0\n",
+             nbytes, alignedblock);
       memcpy(dev->eblock, buffer, nbytes);
 
       /* And write the erase back to flash */
@@ -420,8 +421,8 @@ static ssize_t ftl_flush(FAR void *priv, FAR const uint8_t *buffer,
       nxfrd = MTD_BWRITE(dev->mtd, alignedblock, dev->blkper, dev->eblock);
       if (nxfrd != dev->blkper)
         {
-          ferr("ERROR: Write erase block %jd failed: %zu\n",
-               (intmax_t)alignedblock, nxfrd);
+          ferr("ERROR: Write erase block %" PRIdOFF " failed: %zu\n",
+               alignedblock, nxfrd);
           return -EIO;
         }
     }
@@ -442,7 +443,7 @@ static ssize_t ftl_write(FAR struct inode *inode,
 {
   struct ftl_struct_s *dev;
 
-  finfo("sector: %" PRIu32 " nsectors: %u\n", start_sector, nsectors);
+  finfo("sector: %" PRIuOFF " nsectors: %u\n", start_sector, nsectors);
 
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct ftl_struct_s *)inode->i_private;
@@ -479,7 +480,7 @@ static int ftl_geometry(FAR struct inode *inode,
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %" PRIu32 " sectorsize: %u\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize: %u\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;
@@ -505,36 +506,12 @@ static int ftl_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   dev = (struct ftl_struct_s *)inode->i_private;
 
-  /* Only one block driver ioctl command is supported by this driver (and
-   * that command is just passed on to the MTD driver in a slightly
-   * different form).
-   */
-
-  if (cmd == BIOC_XIPBASE)
+  if (cmd == BIOC_FLUSH)
     {
-      /* The argument accompanying the BIOC_XIPBASE should be non-NULL.  If
-       * DEBUG is enabled, we will catch it here instead of in the MTD
-       * driver.
-       */
-
-#ifdef CONFIG_DEBUG_FEATURES
-      if (arg == 0)
-        {
-          ferr("ERROR: BIOC_XIPBASE argument is NULL\n");
-          return -EINVAL;
-        }
-#endif
-
-      /* Change the BIOC_XIPBASE command to the MTDIOC_XIPBASE command. */
-
-      cmd = MTDIOC_XIPBASE;
-    }
 #ifdef CONFIG_FTL_WRITEBUFFER
-  else if (cmd == BIOC_FLUSH)
-    {
-      return rwb_flush(&dev->rwb);
-    }
+      rwb_flush(&dev->rwb);
 #endif
+    }
 
   /* No other block driver ioctl commands are not recognized by this
    * driver.  Other possible MTD driver ioctl commands are passed through

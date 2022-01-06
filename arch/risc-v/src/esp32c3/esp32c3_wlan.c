@@ -24,9 +24,10 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ESP32C3_WIRELESS
+#ifdef CONFIG_ESP32C3_WIFI
 
 #include <queue.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <crc64.h>
@@ -92,8 +93,6 @@
 #  endif
 #endif
 
-#define MAC_LEN                   (6)
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -115,7 +114,7 @@ struct wlan_pktbuf_s
 struct wlan_ops_s
 {
   int (*start)(void);
-  int (*send)(FAR void *pdata, size_t n);
+  int (*send)(void *pdata, size_t n);
   int (*essid)(struct iwreq *iwr, bool set);
   int (*bssid)(struct iwreq *iwr, bool set);
   int (*passwd)(struct iwreq *iwr, bool set);
@@ -129,7 +128,7 @@ struct wlan_ops_s
   int (*rssi)(struct iwreq *iwr, bool set);
   int (*connect)(void);
   int (*disconnect)(void);
-  int (*event)(pid_t pid, FAR struct sigevent *event);
+  int (*event)(pid_t pid, struct sigevent *event);
   int (*stop)(void);
 };
 
@@ -232,17 +231,17 @@ static const struct wlan_ops_s g_softap_ops =
 
 /* Common TX logic */
 
-static void wlan_transmit(FAR struct wlan_priv_s *priv);
-static void wlan_rxpoll(FAR void *arg);
-static int  wlan_txpoll(FAR struct net_driver_s *dev);
-static void wlan_dopoll(FAR struct wlan_priv_s *priv);
+static void wlan_transmit(struct wlan_priv_s *priv);
+static void wlan_rxpoll(void *arg);
+static int  wlan_txpoll(struct net_driver_s *dev);
+static void wlan_dopoll(struct wlan_priv_s *priv);
 
 /* Watchdog timer expirations */
 
-static void wlan_txtimeout_work(FAR void *arg);
+static void wlan_txtimeout_work(void *arg);
 static void wlan_txtimeout_expiry(wdparm_t arg);
 
-static void wlan_poll_work(FAR void *arg);
+static void wlan_poll_work(void *arg);
 static void wlan_poll_expiry(wdparm_t arg);
 
 /* NuttX callback functions */
@@ -250,15 +249,15 @@ static void wlan_poll_expiry(wdparm_t arg);
 static int wlan_ifup(struct net_driver_s *dev);
 static int wlan_ifdown(struct net_driver_s *dev);
 
-static void wlan_txavail_work(FAR void *arg);
+static void wlan_txavail_work(void *arg);
 static int wlan_txavail(struct net_driver_s *dev);
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int wlan_addmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int wlan_addmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int wlan_rmmac(struct net_driver_s *dev, FAR const uint8_t *mac);
+static int wlan_rmmac(struct net_driver_s *dev, const uint8_t *mac);
 #endif
 
 #ifdef CONFIG_NETDEV_IOCTL
@@ -266,13 +265,8 @@ static int wlan_ioctl(struct net_driver_s *dev, int cmd,
                       unsigned long arg);
 #endif
 
-#ifdef ESP32C3_WLAN_HAS_STA
-static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
-                                   bool linkstatus);
-#endif
-
 #ifdef CONFIG_NET_ICMPv6
-static void wlan_ipv6multicast(FAR struct wlan_priv_s *priv);
+static void wlan_ipv6multicast(struct wlan_priv_s *priv);
 #endif
 
 /****************************************************************************
@@ -457,7 +451,7 @@ static inline void wlan_add_txpkt_head(struct wlan_priv_s *priv,
  *
  ****************************************************************************/
 
-static struct wlan_pktbuf_s *wlan_recvframe(FAR struct wlan_priv_s *priv)
+static struct wlan_pktbuf_s *wlan_recvframe(struct wlan_priv_s *priv)
 {
   irqstate_t flags;
   sq_entry_t *entry;
@@ -490,7 +484,7 @@ static struct wlan_pktbuf_s *wlan_recvframe(FAR struct wlan_priv_s *priv)
  *
  ****************************************************************************/
 
-static struct wlan_pktbuf_s *wlan_txframe(FAR struct wlan_priv_s *priv)
+static struct wlan_pktbuf_s *wlan_txframe(struct wlan_priv_s *priv)
 {
   irqstate_t flags;
   sq_entry_t *entry;
@@ -524,7 +518,7 @@ static struct wlan_pktbuf_s *wlan_txframe(FAR struct wlan_priv_s *priv)
  *
  ****************************************************************************/
 
-static void wlan_transmit(FAR struct wlan_priv_s *priv)
+static void wlan_transmit(struct wlan_priv_s *priv)
 {
   struct wlan_pktbuf_s *pktbuf;
   int ret;
@@ -561,7 +555,7 @@ static void wlan_transmit(FAR struct wlan_priv_s *priv)
  *
  ****************************************************************************/
 
-static void wlan_tx_done(FAR struct wlan_priv_s *priv)
+static void wlan_tx_done(struct wlan_priv_s *priv)
 {
   wd_cancel(&priv->txtimeout);
 
@@ -586,7 +580,7 @@ static void wlan_tx_done(FAR struct wlan_priv_s *priv)
  *
  ****************************************************************************/
 
-static int wlan_rx_done(FAR struct wlan_priv_s *priv, void *buffer,
+static int wlan_rx_done(struct wlan_priv_s *priv, void *buffer,
                         uint16_t len, void *eb)
 {
   struct wlan_pktbuf_s *pktbuf;
@@ -656,12 +650,12 @@ out:
  *
  ****************************************************************************/
 
-static void wlan_rxpoll(FAR void *arg)
+static void wlan_rxpoll(void *arg)
 {
   struct wlan_pktbuf_s *pktbuf;
   struct eth_hdr_s *eth_hdr;
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)arg;
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
+  struct net_driver_s *dev = &priv->dev;
 #ifdef WLAN_RX_THRESHOLD
   uint32_t rbytes = 0;
 #endif
@@ -879,10 +873,10 @@ static void wlan_rxpoll(FAR void *arg)
  *
  ****************************************************************************/
 
-static int wlan_txpoll(FAR struct net_driver_s *dev)
+static int wlan_txpoll(struct net_driver_s *dev)
 {
   struct wlan_pktbuf_s *pktbuf;
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
   DEBUGASSERT(dev->d_buf != NULL);
 
@@ -952,9 +946,9 @@ static int wlan_txpoll(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static void wlan_dopoll(FAR struct wlan_priv_s *priv)
+static void wlan_dopoll(struct wlan_priv_s *priv)
 {
-  FAR struct net_driver_s *dev = &priv->dev;
+  struct net_driver_s *dev = &priv->dev;
   struct wlan_pktbuf_s *pktbuf;
   uint8_t *txbuf;
   int ret;
@@ -1070,10 +1064,10 @@ static void wlan_txtimeout_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void wlan_poll_work(FAR void *arg)
+static void wlan_poll_work(void *arg)
 {
   int32_t delay = WLAN_WDDELAY;
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)arg;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
   struct net_driver_s *dev = &priv->dev;
   struct wlan_pktbuf_s *pktbuf;
 
@@ -1140,7 +1134,7 @@ exit:
 
 static void wlan_poll_expiry(wdparm_t arg)
 {
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)arg;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
 
   if (priv->ifup)
     {
@@ -1165,9 +1159,9 @@ static void wlan_poll_expiry(wdparm_t arg)
  *
  ****************************************************************************/
 
-static void wlan_txavail_work(FAR void *arg)
+static void wlan_txavail_work(void *arg)
 {
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)arg;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
 
   /* Try to send all cached TX packets even if net is down */
 
@@ -1208,10 +1202,10 @@ static void wlan_txavail_work(FAR void *arg)
  *
  ****************************************************************************/
 
-static int wlan_ifup(FAR struct net_driver_s *dev)
+static int wlan_ifup(struct net_driver_s *dev)
 {
   int ret;
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
 #ifdef CONFIG_NET_IPv4
   ninfo("Bringing up: %d.%d.%d.%d\n",
@@ -1275,10 +1269,10 @@ static int wlan_ifup(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int wlan_ifdown(FAR struct net_driver_s *dev)
+static int wlan_ifdown(struct net_driver_s *dev)
 {
   int ret;
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
   net_lock();
 
@@ -1327,9 +1321,9 @@ static int wlan_ifdown(FAR struct net_driver_s *dev)
  *
  ****************************************************************************/
 
-static int wlan_txavail(FAR struct net_driver_s *dev)
+static int wlan_txavail(struct net_driver_s *dev)
 {
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
   if (work_available(&priv->txwork))
     {
@@ -1358,9 +1352,9 @@ static int wlan_txavail(FAR struct net_driver_s *dev)
  ****************************************************************************/
 
 #if defined(CONFIG_NET_MCASTGROUP) || defined(CONFIG_NET_ICMPv6)
-static int wlan_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int wlan_addmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1385,9 +1379,9 @@ static int wlan_addmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_MCASTGROUP
-static int wlan_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
+static int wlan_rmmac(struct net_driver_s *dev, const uint8_t *mac)
 {
-  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)dev->d_private;
+  struct wlan_priv_s *priv = (struct wlan_priv_s *)dev->d_private;
 
   /* Add the MAC address to the hardware multicast routing table */
 
@@ -1410,9 +1404,9 @@ static int wlan_rmmac(FAR struct net_driver_s *dev, FAR const uint8_t *mac)
  ****************************************************************************/
 
 #ifdef CONFIG_NET_ICMPv6
-static void wlan_ipv6multicast(FAR struct wlan_priv_s *priv)
+static void wlan_ipv6multicast(struct wlan_priv_s *priv)
 {
-  FAR struct net_driver_s *dev;
+  struct net_driver_s *dev;
   uint16_t tmp16;
   uint8_t mac[6];
 
@@ -1482,7 +1476,7 @@ static void wlan_ipv6multicast(FAR struct wlan_priv_s *priv)
  ****************************************************************************/
 
 #ifdef CONFIG_NETDEV_IOCTL
-static int wlan_ioctl(FAR struct net_driver_s *dev,
+static int wlan_ioctl(struct net_driver_s *dev,
                       int cmd,
                       unsigned long arg)
 {
@@ -1537,15 +1531,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                     nerr("ERROR: Failed to connect\n");
                     break;
                   }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-                ret = wlan_sta_set_linkstatus(dev, true);
-                if (ret < 0)
-                  {
-                    nerr("ERROR: Failed to set linkstatus\n");
-                    break;
-                  }
-#endif
               }
           }
         else
@@ -1556,15 +1541,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to disconnect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, false);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
 
         break;
@@ -1591,15 +1567,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to connect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, true);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
         else
           {
@@ -1609,15 +1576,6 @@ static int wlan_ioctl(FAR struct net_driver_s *dev,
                 nerr("ERROR: Failed to disconnect\n");
                 break;
               }
-
-#ifdef ESP32C3_WLAN_HAS_STA
-            ret = wlan_sta_set_linkstatus(dev, false);
-            if (ret < 0)
-              {
-                nerr("ERROR: Failed to set linkstatus\n");
-                break;
-              }
-#endif
           }
 
         break;
@@ -1716,8 +1674,8 @@ static int esp32c3_net_initialize(int devno, uint8_t *mac_addr,
                                 const struct wlan_ops_s *ops)
 {
   int ret;
-  FAR struct wlan_priv_s *priv;
-  FAR struct net_driver_s *netdev;
+  struct wlan_priv_s *priv;
+  struct net_driver_s *netdev;
 
   priv = &g_wlan_priv[devno];
   if (priv->ref != 0)
@@ -1785,7 +1743,7 @@ static int esp32c3_net_initialize(int devno, uint8_t *mac_addr,
 #ifdef ESP32C3_WLAN_HAS_STA
 static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
 {
-  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
 
   return wlan_rx_done(priv, buffer, len, eb);
 }
@@ -1810,43 +1768,9 @@ static int wlan_sta_rx_done(void *buffer, uint16_t len, void *eb)
 
 static void wlan_sta_tx_done(uint8_t *data, uint16_t *len, bool status)
 {
-  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
 
   wlan_tx_done(priv);
-}
-
-/****************************************************************************
- * Name: wlan_sta_set_linkstatus
- *
- * Description:
- *   Set Wi-Fi station link status
- *
- * Parameters:
- *   dev - Reference to the NuttX driver state structure
- *
- * Returned Value:
- *   0:Success; negated errno on failure
- *
- ****************************************************************************/
-
-static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
-                                   bool linkstatus)
-{
-  if (dev)
-    {
-      if (linkstatus == true)
-        {
-          dev->d_flags |= IFF_RUNNING;
-        }
-      else
-        {
-          dev->d_flags &= ~IFF_RUNNING;
-        }
-
-      return OK;
-    }
-
-  return -EINVAL;
 }
 
 #endif
@@ -1871,7 +1795,7 @@ static int wlan_sta_set_linkstatus(FAR struct net_driver_s *dev,
 #ifdef ESP32C3_WLAN_HAS_SOFTAP
 static int wlan_softap_rx_done(void *buffer, uint16_t len, void *eb)
 {
-  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_SOFTAP_DEVNO];
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_SOFTAP_DEVNO];
 
   return wlan_rx_done(priv, buffer, len, eb);
 }
@@ -1896,7 +1820,7 @@ static int wlan_softap_rx_done(void *buffer, uint16_t len, void *eb)
 
 static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 {
-  FAR struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_SOFTAP_DEVNO];
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_SOFTAP_DEVNO];
 
   wlan_tx_done(priv);
 }
@@ -1905,6 +1829,48 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32c3_wlan_sta_set_linkstatus
+ *
+ * Description:
+ *   Set Wi-Fi station link status
+ *
+ * Parameters:
+ *   linkstatus - true Notifies the networking layer about an available
+ *                carrier, false Notifies the networking layer about an
+ *                disappeared carrier.
+ *
+ * Returned Value:
+ *   OK on success; Negated errno on failure.
+ *
+ ****************************************************************************/
+
+#ifdef ESP32C3_WLAN_HAS_STA
+int esp32c3_wlan_sta_set_linkstatus(bool linkstatus)
+{
+  int ret = -EINVAL;
+  struct wlan_priv_s *priv = &g_wlan_priv[ESP32C3_WLAN_STA_DEVNO];
+
+  if (priv != NULL)
+    {
+      if (linkstatus == true)
+        {
+          ret = netdev_carrier_on(&priv->dev);
+        }
+      else
+        {
+          ret = netdev_carrier_off(&priv->dev);
+        }
+
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to notify the networking layer\n");
+        }
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: esp32c3_wlan_sta_initialize
@@ -1920,7 +1886,6 @@ static void wlan_softap_tx_done(uint8_t *data, uint16_t *len, bool status)
  *
  ****************************************************************************/
 
-#ifdef ESP32C3_WLAN_HAS_STA
 int esp32c3_wlan_sta_initialize(void)
 {
   int ret;
@@ -2027,4 +1992,4 @@ int esp32c3_wlan_softap_initialize(void)
 }
 #endif
 
-#endif  /* CONFIG_ESP32C3_WIRELESS */
+#endif  /* CONFIG_ESP32C3_WIFI */

@@ -260,6 +260,7 @@ typedef CODE uint16_t (*devif_callback_event_t)(FAR struct net_driver_s *dev,
 struct devif_callback_s
 {
   FAR struct devif_callback_s *nxtconn;
+  FAR struct devif_callback_s *prevconn;
   FAR struct devif_callback_s *nxtdev;
   FAR devif_callback_event_t event;
   FAR void *priv;
@@ -330,7 +331,8 @@ void devif_callback_init(void);
 
 FAR struct devif_callback_s *
   devif_callback_alloc(FAR struct net_driver_s *dev,
-                       FAR struct devif_callback_s **list);
+                       FAR struct devif_callback_s **list_head,
+                       FAR struct devif_callback_s **list_tail);
 
 /****************************************************************************
  * Name: devif_conn_callback_free
@@ -352,7 +354,8 @@ FAR struct devif_callback_s *
 
 void devif_conn_callback_free(FAR struct net_driver_s *dev,
                               FAR struct devif_callback_s *cb,
-                              FAR struct devif_callback_s **list);
+                              FAR struct devif_callback_s **list_head,
+                              FAR struct devif_callback_s **list_tail);
 
 /****************************************************************************
  * Name: devif_dev_callback_free

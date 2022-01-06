@@ -44,6 +44,10 @@ SYSCALL_LOOKUP(sched_unlock,               0)
 SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 
+#ifdef CONFIG_SCHED_BACKTRACE
+  SYSCALL_LOOKUP(sched_backtrace,          3)
+#endif
+
 #ifdef CONFIG_SMP
   SYSCALL_LOOKUP(sched_getaffinity,        3)
   SYSCALL_LOOKUP(sched_getcpu,             0)
@@ -85,9 +89,7 @@ SYSCALL_LOOKUP(sem_wait,                   1)
 
 #ifndef CONFIG_BUILD_KERNEL
   SYSCALL_LOOKUP(task_create,              5)
-#ifdef CONFIG_LIB_SYSCALL
-  SYSCALL_LOOKUP(nx_task_spawn,            1)
-#endif
+  SYSCALL_LOOKUP(task_spawn,               6)
 #else
   SYSCALL_LOOKUP(pgalloc,                  2)
 #endif
@@ -142,7 +144,7 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(exec,                     4)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
   SYSCALL_LOOKUP(posix_spawnp,             6)
 #else
   SYSCALL_LOOKUP(posix_spawn,              6)
@@ -226,7 +228,7 @@ SYSCALL_LOOKUP(pwrite,                     4)
 
 /* Board support */
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
   SYSCALL_LOOKUP(boardctl,                 2)
 #endif
 
@@ -249,6 +251,16 @@ SYSCALL_LOOKUP(fstat,                      2)
 SYSCALL_LOOKUP(statfs,                     2)
 SYSCALL_LOOKUP(fstatfs,                    2)
 SYSCALL_LOOKUP(telldir,                    1)
+SYSCALL_LOOKUP(sendfile,                   4)
+SYSCALL_LOOKUP(chmod,                      2)
+SYSCALL_LOOKUP(lchmod,                     2)
+SYSCALL_LOOKUP(fchmod,                     2)
+SYSCALL_LOOKUP(chown,                      3)
+SYSCALL_LOOKUP(lchown,                     3)
+SYSCALL_LOOKUP(fchown,                     3)
+SYSCALL_LOOKUP(utimens,                    2)
+SYSCALL_LOOKUP(lutimens,                   2)
+SYSCALL_LOOKUP(futimens,                   2)
 
 #if defined(CONFIG_FS_RAMMAP)
   SYSCALL_LOOKUP(munmap,                   2)
@@ -261,16 +273,15 @@ SYSCALL_LOOKUP(telldir,                    1)
 
 #if defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0
   SYSCALL_LOOKUP(nx_pipe,                  3)
+#endif
+
+#if defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0
   SYSCALL_LOOKUP(nx_mkfifo,                3)
 #endif
 
 #ifdef CONFIG_FILE_STREAM
   SYSCALL_LOOKUP(fs_fdopen,                4)
   SYSCALL_LOOKUP(nxsched_get_streams,      0)
-#endif
-
-#ifdef CONFIG_NET_SENDFILE
-  SYSCALL_LOOKUP(sendfile,                 4)
 #endif
 
 #ifndef CONFIG_DISABLE_MOUNTPOINT
@@ -293,11 +304,6 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(shmdt,                    1)
 #endif
 
-#if CONFIG_TLS_NELEM > 0
-  SYSCALL_LOOKUP(tls_alloc,                0)
-  SYSCALL_LOOKUP(tls_free,                 1)
-#endif
-
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
@@ -305,9 +311,9 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1)
   SYSCALL_LOOKUP(pthread_cond_signal,      1)
   SYSCALL_LOOKUP(pthread_cond_wait,        2)
-  SYSCALL_LOOKUP(pthread_create,           4)
+  SYSCALL_LOOKUP(nx_pthread_create,        6)
   SYSCALL_LOOKUP(pthread_detach,           1)
-  SYSCALL_LOOKUP(pthread_exit,             1)
+  SYSCALL_LOOKUP(nx_pthread_exit,          1)
   SYSCALL_LOOKUP(pthread_getschedparam,    3)
   SYSCALL_LOOKUP(pthread_join,             2)
   SYSCALL_LOOKUP(pthread_mutex_destroy,    1)
@@ -327,10 +333,6 @@ SYSCALL_LOOKUP(telldir,                    1)
   SYSCALL_LOOKUP(pthread_cond_clockwait,   4)
   SYSCALL_LOOKUP(pthread_kill,             2)
   SYSCALL_LOOKUP(pthread_sigmask,          3)
-#ifdef CONFIG_PTHREAD_CLEANUP
-  SYSCALL_LOOKUP(pthread_cleanup_push,     2)
-  SYSCALL_LOOKUP(pthread_cleanup_pop,      1)
-#endif
 #endif
 
 /* The following are defined only if message queues are enabled */

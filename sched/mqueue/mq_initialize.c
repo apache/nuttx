@@ -114,7 +114,7 @@ mq_msgblockalloc(FAR sq_queue_t *queue, uint16_t nmsgs,
  * Name: nxmq_initialize
  *
  * Description:
- *   This function initializes the messasge system.  This function must
+ *   This function initializes the message system.  This function must
  *   be called early in the initialization sequence before any of the
  *   other message interfaces execute.
  *

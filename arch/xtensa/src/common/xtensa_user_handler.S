@@ -64,7 +64,7 @@
 #include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "chip_macros.h"
+#include "chip.h"
 
 /****************************************************************************
  * Assembly Language Macros
@@ -311,7 +311,7 @@ _xtensa_syscall_handler:
 
 	/* Save EPC */
 
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
 	/* Save A2 and A3 now to give us some registers to work with.  A0, A2
 	 * and A3 are now available.  NOTE that A3 will get saved again in
 	 * _xtensa_context_save().

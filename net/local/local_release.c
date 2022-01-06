@@ -29,6 +29,7 @@
 #include <queue.h>
 #include <assert.h>
 
+#include <nuttx/nuttx.h>
 #include <nuttx/net/net.h>
 
 #include <arch/irq.h>
@@ -68,6 +69,7 @@ int local_release(FAR struct local_conn_s *conn)
   /* If the socket is connected (SOCK_STREAM client), then disconnect it */
 
   if (conn->lc_state == LOCAL_STATE_CONNECTED ||
+      conn->lc_state == LOCAL_STATE_CONNECTING ||
       conn->lc_state == LOCAL_STATE_DISCONNECTED)
     {
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
@@ -80,25 +82,24 @@ int local_release(FAR struct local_conn_s *conn)
   else if (conn->lc_state == LOCAL_STATE_LISTENING)
     {
       FAR struct local_conn_s *client;
+      FAR dq_entry_t *waiter;
 
       DEBUGASSERT(conn->lc_proto == SOCK_STREAM);
 
       /* Are there still clients waiting for a connection to the server? */
 
-      for (client =
-          (FAR struct local_conn_s *)conn->u.server.lc_waiters.head;
-           client;
-           client = (FAR struct local_conn_s *)dq_next(&client->lc_node))
+      for (waiter = dq_peek(&conn->u.server.lc_waiters);
+           waiter;
+           waiter = dq_next(&client->u.client.lc_waiter))
         {
+          client = container_of(waiter, struct local_conn_s,
+                                u.client.lc_waiter);
           client->u.client.lc_result = -ENOTCONN;
           nxsem_post(&client->lc_waitsem);
+          local_event_pollnotify(client, POLLOUT);
         }
 
       conn->u.server.lc_pending = 0;
-
-      /* Remove the server from the list of listeners. */
-
-      dq_rem(&conn->lc_node, &g_local_listeners);
     }
 #endif /* CONFIG_NET_LOCAL_STREAM */
 

@@ -83,7 +83,7 @@ static int sim_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int sim_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
                            FAR const struct rtc_time *rtctime)
 {
-  g_sim_delta = mktime((FAR struct tm *)rtctime);
+  g_sim_delta = timegm((FAR struct tm *)rtctime);
   g_sim_delta *= NSEC_PER_SEC;
   g_sim_delta += rtctime->tm_nsec;
   g_sim_delta -= host_gettime(true);
@@ -123,7 +123,7 @@ static bool sim_rtc_havesettime(FAR struct rtc_lowerhalf_s *lower)
 
 int up_rtc_initialize(void)
 {
-#ifdef CONFIG_SIM_RPTUN_MASTER
+#ifdef CONFIG_RTC_RPMSG_SERVER
   up_rtc_set_lowerhalf(rpmsg_rtc_server_initialize(&g_sim_rtc));
 #else
   up_rtc_set_lowerhalf(&g_sim_rtc);

@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -154,7 +155,7 @@ static uart_dev_t g_uart0port =
   },
   &g_uart_ops,              /* ops */
   &g_uart0priv,             /* priv */
-  NULL,                     /* pollfds */
+  { },                      /* pollfds: all zero */
 };
 #endif
 
@@ -201,7 +202,7 @@ static uart_dev_t g_uart1port =
   },
   &g_uart_ops,              /* ops */
   &g_uart1priv,             /* priv */
-  NULL,                     /* pollfds */
+  { },                      /* pollfds */
 };
 #endif
 

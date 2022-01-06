@@ -194,7 +194,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
   ipv6tcp->ipv6.tcf    = 0x00;
   ipv6tcp->ipv6.flow   = 0x00;
   ipv6tcp->ipv6.proto  = IP_PROTO_TCP;
-  ipv6tcp->ipv6.ttl    = IP_TTL;
+  ipv6tcp->ipv6.ttl    = IP_TTL_DEFAULT;
 
   /* The IPv6 header length field does not include the size of IPv6 IP
    * header.
@@ -257,7 +257,8 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
     {
       /* Update the TCP received window based on I/O buffer availability */
 
-      uint16_t recvwndo = tcp_get_recvwindow(dev, conn);
+      uint32_t rcvseq = tcp_getsequence(conn->rcvseq);
+      uint32_t recvwndo = tcp_get_recvwindow(dev, conn);
 
       /* Set the TCP Window */
 
@@ -266,7 +267,7 @@ static int sixlowpan_tcp_header(FAR struct tcp_conn_s *conn,
 
       /* Update the Receiver Window */
 
-      conn->rcv_wnd = recvwndo;
+      conn->rcv_adv = rcvseq + recvwndo;
     }
 
   /* Calculate TCP checksum. */

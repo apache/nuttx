@@ -25,9 +25,8 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <stdint.h>
 #include <syslog.h>
-
-#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_INPUT_BUTTONS
 #  include <nuttx/input/buttons.h>
@@ -37,9 +36,12 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef CONFIG_I2C_DRIVER
-#  include <nuttx/i2c/i2c_master.h>
-#  include "s32k1xx_lpi2c.h"
+#ifdef CONFIG_FS_PROCFS
+#  include <nuttx/fs/fs.h>
+#endif
+
+#ifdef CONFIG_S32K1XX_PROGMEM
+#  include <nuttx/mtd/mtd.h>
 #endif
 
 #ifdef CONFIG_S32K1XX_EEEPROM
@@ -61,7 +63,7 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -100,48 +102,46 @@ int s32k1xx_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_S32K1XX_LPSPI
-  /* Configure SPI chip selects if 1) SPI is not disabled, and 2) the weak
-   * function s32k1xx_spidev_initialize() has been brought into the link.
-   */
-
-  s32k1xx_spidev_initialize();
-#endif
-
-#if defined(CONFIG_S32K1XX_LPI2C0) && defined(CONFIG_I2C_DRIVER)
-  FAR struct i2c_master_s *i2c;
-
-  i2c = s32k1xx_i2cbus_initialize(0);
-  if (i2c == NULL)
-    {
-      serr("ERROR: Failed to get I2C%d interface\n", bus);
-    }
-  else
-    {
-      ret = i2c_register(i2c, 0);
-      if (ret < 0)
-        {
-          serr("ERROR: Failed to register I2C%d driver: %d\n", bus, ret);
-          s32k1xx_i2cbus_uninitialize(i2c);
-        }
-    }
-#endif
-
 #ifdef CONFIG_S32K1XX_PROGMEM
   FAR struct mtd_dev_s *mtd;
-  int minor = 0;
 
   mtd = progmem_initialize();
-  if (!mtd)
+  if (mtd == NULL)
     {
-      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
+      syslog(LOG_ERR, "ERROR: progmem_initialize() failed\n");
     }
 #endif
 
 #ifdef CONFIG_S32K1XX_EEEPROM
   /* Register EEEPROM block device */
 
-  s32k1xx_eeeprom_register(0, 4096);
+  ret = s32k1xx_eeeprom_register(0, 4096);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_eeeprom_register() failed\n");
+    }
+#endif
+
+#ifdef CONFIG_S32K1XX_LPI2C
+  /* Initialize I2C driver */
+
+  ret = s32k1xx_i2cdev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_i2cdev_initialize() failed: %d\n",
+             ret);
+    }
+#endif
+
+#ifdef CONFIG_S32K1XX_LPSPI
+  /* Initialize SPI driver */
+
+  ret = s32k1xx_spidev_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: s32k1xx_spidev_initialize() failed: %d\n",
+             ret);
+    }
 #endif
 
   return ret;

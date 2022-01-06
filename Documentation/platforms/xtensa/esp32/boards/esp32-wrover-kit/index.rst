@@ -107,7 +107,7 @@ At the nsh, we can turn LEDs on and off with the following::
 
 We can use the interrupt pin to send a signal when the interrupt fires::
 
-    nsh> gpio -w 14 /dev/gpint3
+    nsh> gpio -w 14 /dev/gpint0
 
 The pin is configured to as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.

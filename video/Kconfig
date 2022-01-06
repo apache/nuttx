@@ -13,6 +13,6 @@ config VIDEO
 
 if VIDEO
 
-source video/videomode/Kconfig
+source "video/videomode/Kconfig"
 
 endif # VIDEO

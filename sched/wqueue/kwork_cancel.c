@@ -45,12 +45,12 @@
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling
+ *   After work has been cancelled, it may be requeued by calling
  *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno on failure.  This error may be
@@ -77,18 +77,19 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
   flags = enter_critical_section();
   if (work->worker != NULL)
     {
-      /* A little test of the integrity of the work queue */
-
-      DEBUGASSERT(work->dq.flink != NULL ||
-                  (FAR dq_entry_t *)work == wqueue->q.tail);
-      DEBUGASSERT(work->dq.blink != NULL ||
-                  (FAR dq_entry_t *)work == wqueue->q.head);
-
       /* Remove the entry from the work queue and make sure that it is
        * marked as available (i.e., the worker field is nullified).
        */
 
-      dq_rem((FAR dq_entry_t *)work, &wqueue->q);
+      if (WDOG_ISACTIVE(&work->u.timer))
+        {
+          wd_cancel(&work->u.timer);
+        }
+      else
+        {
+          sq_rem((FAR sq_entry_t *)work, &wqueue->q);
+        }
+
       work->worker = NULL;
       ret = OK;
     }
@@ -106,12 +107,12 @@ static int work_qcancel(FAR struct kwork_wqueue_s *wqueue,
  *
  * Description:
  *   Cancel previously queued user-mode work.  This removes work from the
- *   user mode work queue.  After work has been cancelled, it may be re-queue
- *   by calling work_queue() again.
+ *   user mode work queue.  After work has been cancelled, it may be
+ *   requeued by calling work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID (must be HPWORK or LPWORK)
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero (OK) on success, a negated errno on failure.  This error may be

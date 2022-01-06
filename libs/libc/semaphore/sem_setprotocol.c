@@ -47,7 +47,7 @@
  *      TASK A                 TASK B
  *      nxsem_init(sem, 0, 0);
  *      nxsem_wait(sem);
- *                             snxem_post(sem);
+ *                             nxsem_post(sem);
  *      Awakens as holder
  *
  *    In this case priority inheritance can interfere with the operation of

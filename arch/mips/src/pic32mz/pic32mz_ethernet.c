@@ -388,13 +388,13 @@ struct pic32mz_driver_s
 /* Descriptors and packet buffers */
 
 union pic32mz_rxdesc_u g_rxdesc[CONFIG_PIC32MZ_ETH_NRXDESC]
-  __attribute__((aligned(PIC32MZ_DCACHE_LINESIZE)));
+  aligned_data(PIC32MZ_DCACHE_LINESIZE);
 
 union pic32mz_txdesc_u g_txdesc[CONFIG_PIC32MZ_ETH_NTXDESC]
-  __attribute__((aligned(PIC32MZ_DCACHE_LINESIZE)));
+  aligned_data(PIC32MZ_DCACHE_LINESIZE);
 
 uint8_t g_buffers[PIC32MZ_NBUFFERS * PIC32MZ_ALIGNED_BUFSIZE]
-  __attribute__((aligned(PIC32MZ_DCACHE_LINESIZE)));
+  aligned_data(PIC32MZ_DCACHE_LINESIZE);
 
 /* Array of ethernet driver status structures */
 

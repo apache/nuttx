@@ -326,9 +326,7 @@ endif
 	$(Q) touch $@
 
 dirlinks: include/arch include/arch/board include/arch/chip $(ARCH_SRC)/board $(ARCH_SRC)/chip drivers/platform
-	$(Q) $(MAKE) -C libs/libxx dirlinks
 	$(Q) $(MAKE) -C boards dirlinks
-	$(Q) $(MAKE) -C openamp dirlinks
 	$(Q) $(MAKE) -C $(CONFIG_APPS_DIR) dirlinks
 
 # context
@@ -461,6 +459,26 @@ endif
 download: $(BIN)
 	$(call DOWNLOAD, $<)
 
+# bootloader
+#
+# Some architectures require the provisioning of a bootloader or other
+# functions required for properly executing the NuttX binary.
+# Make.defs files for those architectures should define a bootloader target
+# with the correct operations for that platform. It will generate an error
+# if the bootloader target is not defined.
+
+bootloader:
+	$(Q) $(MAKE) -C $(ARCH_SRC) bootloader
+
+# clean_bootloader
+#
+# Removes all of the files and directories created by the bootloader target.
+# It will generate an error if the clean_bootloader target is not defined on
+# the architecture-specific Makefile.
+
+clean_bootloader:
+	$(Q) $(MAKE) -C $(ARCH_SRC) clean_bootloader
+
 # pass1dep: Create pass1 build dependencies
 # pass2dep: Create pass2 build dependencies
 
@@ -570,10 +588,14 @@ $(foreach SDIR, $(CLEANDIRS), $(eval $(call SDIR_template,$(SDIR),distclean)))
 
 subdir_distclean: $(foreach SDIR, $(CLEANDIRS), $(SDIR)_distclean)
 
-distclean: clean subdir_distclean clean_context
+distclean: clean subdir_distclean
 ifeq ($(CONFIG_BUILD_2PASS),y)
 	$(Q) $(MAKE) -C $(CONFIG_PASS1_BUILDIR) distclean
 endif
+ifeq ($(CONFIG_ARCH_HAVE_BOOTLOADER),y)
+	$(Q) $(MAKE) clean_bootloader
+endif
+	$(Q) $(MAKE) clean_context
 	$(call DELFILE, Make.defs)
 	$(call DELFILE, defconfig)
 	$(call DELFILE, .config)

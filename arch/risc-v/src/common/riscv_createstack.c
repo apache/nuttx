@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <stdint.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/kmalloc.h>
@@ -42,20 +43,13 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* RISC-V requires at least a 4-byte stack alignment.
- * For floating point use, however, the stack must be aligned to 8-byte
- * addresses.
- */
+/* RISC-V requires a 16-byte stack alignment. */
 
-#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
-#  define STACK_ALIGNMENT   8
-#else
-#  define STACK_ALIGNMENT   4
-#endif
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
@@ -108,7 +102,7 @@
  *
  ****************************************************************************/
 
-int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
+int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
@@ -193,18 +187,16 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       uintptr_t top_of_stack;
       size_t size_of_stack;
 
-      /* RISCV uses a push-down stack:  the stack grows toward lower
-       * addresses in memory.  The stack pointer register points to the
-       * lowest, valid working address (the "top" of the stack).  Items on
-       * the stack are referenced as positive word offsets from sp.
+      /* RISC-V uses a push-down stack: the stack grows toward lower
+       * addresses in memory. The stack pointer register points to the
+       * lowest, valid working address (the "top" of the stack). Items on
+       * the stack are referenced as positive word offsets from SP.
        */
 
       top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
 
-      /* The RISC-V stack must be aligned at word (4 byte) boundaries; for
-       * floating point use, the stack must be aligned to 8-byte addresses.
-       * If necessary top_of_stack must be rounded down to the next
-       * boundary to meet these alignment requirements.
+      /* The RISC-V stack must be aligned at 128-bit (16-byte) boundaries.
+       * If necessary top_of_stack must be rounded down to the next boundary.
        */
 
       top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
@@ -212,7 +204,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
@@ -224,6 +216,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       riscv_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
+      tcb->flags |= TCB_FLAG_FREE_STACK;
 
       board_autoled_on(LED_STACKCREATED);
       return OK;
@@ -241,12 +234,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void riscv_stack_color(FAR void *stackbase, size_t nbytes)
+void riscv_stack_color(void *stackbase, size_t nbytes)
 {
   /* Take extra care that we do not write outsize the stack boundaries */
 
   uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  uintptr_t stkend = (((uintptr_t)stackbase + nbytes) & ~3);
+  uintptr_t stkend = nbytes ? (((uintptr_t)stackbase + nbytes) & ~3):
+                     up_getsp(); /* 0: colorize the running stack */
   size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */

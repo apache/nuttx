@@ -114,7 +114,7 @@ static inline void nxsched_process_scheduler(void)
   int i;
 
   /* If we are running on a single CPU architecture, then we know interrupts
-   * a disabled an there is no need to explicitly call
+   * are disabled and there is no need to explicitly call
    * enter_critical_section().  However, in the SMP case,
    * enter_critical_section() does much more than just disable interrupts on
    * the local CPU; it also manages spinlocks to assure the stability of the
@@ -140,6 +140,42 @@ static inline void nxsched_process_scheduler(void)
 }
 #else
 #  define nxsched_process_scheduler()
+#endif
+
+/****************************************************************************
+ * Name: nxsched_process_wdtimer
+ *
+ * Description:
+ *   Wdog timer process, should with critical_section when SMP mode.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline void nxsched_process_wdtimer(void)
+{
+  irqstate_t flags;
+
+  /* We are in an interrupt handler and, as a consequence, interrupts are
+   * disabled.  But in the SMP case, interrupts MAY be disabled only on
+   * the local CPU since most architectures do not permit disabling
+   * interrupts on other CPUS.
+   *
+   * Hence, we must follow rules for critical sections even here in the
+   * SMP case.
+   */
+
+  flags = enter_critical_section();
+  wd_timer();
+  leave_critical_section(flags);
+}
+#else
+#  define nxsched_process_wdtimer() wd_timer()
 #endif
 
 /****************************************************************************
@@ -210,7 +246,7 @@ void nxsched_process_timer(void)
 
   /* Process watchdogs */
 
-  wd_timer();
+  nxsched_process_wdtimer();
 
 #ifdef CONFIG_SYSTEMTICK_HOOK
   /* Call out to a user-provided function in order to perform board-specific,

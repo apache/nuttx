@@ -26,10 +26,12 @@
 
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <debug.h>
 
 #include "arm_arch.h"
 
@@ -63,6 +65,9 @@ struct eeed_struct_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
+
+static inline void wait_ftfc_ready(void);
+static uint32_t execute_ftfc_command(void);
 
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     eeed_open(FAR struct inode *inode);
@@ -207,7 +212,7 @@ static ssize_t eeed_read(FAR struct inode *inode, unsigned char *buffer,
   DEBUGASSERT(inode && inode->i_private);
   dev = (FAR struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
@@ -244,7 +249,7 @@ static ssize_t eeed_write(FAR struct inode *inode,
   DEBUGASSERT(inode && inode->i_private);
   dev = (struct eeed_struct_s *)inode->i_private;
 
-  finfo("sector: %" PRIu32 " nsectors: %u sectorsize: %d\n",
+  finfo("sector: %" PRIu64 " nsectors: %u sectorsize: %d\n",
         start_sector, nsectors, dev->eeed_sectsize);
 
   if (start_sector < dev->eeed_nsectors &&
@@ -298,7 +303,7 @@ static int eeed_geometry(FAR struct inode *inode, struct geometry *geometry)
 
       finfo("available: true mediachanged: false writeenabled: %s\n",
             geometry->geo_writeenabled ? "true" : "false");
-      finfo("nsectors: %" PRIu32 " sectorsize: %" PRIu16 "\n",
+      finfo("nsectors: %" PRIuOFF " sectorsize: %" PRIu16 "\n",
             geometry->geo_nsectors, geometry->geo_sectorsize);
 
       return OK;

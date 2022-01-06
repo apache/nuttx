@@ -53,8 +53,6 @@
  *   key        - A pointer to the key to create.
  *   destructor - An optional destructor() function that may be associated
  *                with each key that is invoked when a thread exits.
- *                However, this argument is ignored in the current
- *                implementation.
  *
  * Returned Value:
  *   If successful, the pthread_key_create() function will store the newly
@@ -67,9 +65,6 @@
  *                has been exceeded
  *      ENOMEM  - Insufficient memory exist to create the key.
  *
- * POSIX Compatibility:
- *   - The present implementation ignores the destructor argument.
- *
  ****************************************************************************/
 
 int pthread_key_create(FAR pthread_key_t *key,
@@ -81,15 +76,13 @@ int pthread_key_create(FAR pthread_key_t *key,
 
   /* Allocate a TLS index */
 
-  tlsindex = tls_alloc();
+  tlsindex = tls_alloc(destructor);
 
   /* Check if found a TLS index. */
 
   if (tlsindex >= 0)
     {
-      /* Yes.. Return the key value and success */
-
-      *key = (pthread_key_t)tlsindex;
+      *key = tlsindex;
       return OK;
     }
 

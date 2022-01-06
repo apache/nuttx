@@ -32,6 +32,7 @@
 
 #include "hardware/s32k1xx_pinmux.h"
 #include "s32k1xx_periphclocks.h"
+#include "s32k1xx_pin.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -43,16 +44,16 @@
 
 /* LEDs.  The S32K144EVB has one RGB LED:
  *
- *   RedLED   PTD15 (FTM0 CH0)
- *   GreenLED PTD16 (FTM0 CH1)
- *   BlueLED  PTD0  (FTM0 CH2)
+ *   RedLED    PTD15  (FTM0 CH0)
+ *   GreenLED  PTD16  (FTM0 CH1)
+ *   BlueLED   PTD0   (FTM0 CH2)
  *
- * An output of '1' illuminates the LED.
+ * An output of '0' illuminates the LED.
  */
 
-#define GPIO_LED_R     (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
-#define GPIO_LED_G     (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
-#define GPIO_LED_B     (PIN_PTD0  | GPIO_LOWDRIVE | GPIO_OUTPUT_ZERO)
+#define GPIO_LED_R  (PIN_PTD15 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_G  (PIN_PTD16 | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
+#define GPIO_LED_B  (PIN_PTD0  | GPIO_LOWDRIVE | GPIO_OUTPUT_ONE)
 
 /* Buttons.  The S32K144EVB supports two buttons:
  *
@@ -60,18 +61,12 @@
  *   SW3  PTC13
  */
 
-#define GPIO_SW2       (PIN_PTC12 | PIN_INT_BOTH)
-#define GPIO_SW3       (PIN_PTC13 | PIN_INT_BOTH)
-
-/* SPI chip selects */
+#define GPIO_SW2    (PIN_PTC12 | PIN_INT_BOTH)
+#define GPIO_SW3    (PIN_PTC13 | PIN_INT_BOTH)
 
 /* Count of peripheral clock user configurations */
 
 #define NUM_OF_PERIPHERAL_CLOCKS_0 15
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
 
 /****************************************************************************
  * Public Data
@@ -96,7 +91,7 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/
@@ -104,17 +99,25 @@ extern const struct peripheral_clock_config_s g_peripheral_clockconfig0[];
 int s32k1xx_bringup(void);
 
 /****************************************************************************
- * Name: s32k1xx_spidev_initialize
+ * Name: s32k1xx_i2cdev_initialize
  *
  * Description:
- *   Called to configure SPI chip select GPIO pins for the S32K144EVB
- *   board.
+ *   Initialize I2C driver and register /dev/i2cN devices.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_S32K1XX_LPSPI
-void s32k1xx_spidev_initialize(void);
-#endif
+int s32k1xx_i2cdev_initialize(void);
+
+/****************************************************************************
+ * Name: s32k1xx_spidev_initialize
+ *
+ * Description:
+ *   Configure chip select pins, initialize the SPI driver and register
+ *   /dev/spiN devices.
+ *
+ ****************************************************************************/
+
+int s32k1xx_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_ARM_S32K1XX_S32K144EVB_SRC_S32K144EVB_H */

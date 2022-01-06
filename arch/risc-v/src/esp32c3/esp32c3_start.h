@@ -37,9 +37,10 @@
  * Name: esp32c3_board_initialize
  *
  * Description:
- *   All ESP32 architectures must provide the following entry point.  This
- *   entry point is called early in the initialization -- after all memory
- *   has been configured but before any devices have been initialized.
+ *   All ESP32-C3 architectures must provide the following entry point.
+ *   This entry point is called early in the initialization -- after all
+ *   memory has been configured and mapped but before any devices have been
+ *   initialized.
  *
  * Input Parameters:
  *   None

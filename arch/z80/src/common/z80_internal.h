@@ -128,7 +128,7 @@ int up_multicastfilter(FAR struct net_driver_s *dev, FAR uint8_t *mac,
 
 /* Return the current value of the stack pointer (used in stack dump logic) */
 
-uintptr_t z80_getsp(void);
+uintptr_t up_getsp(void);
 
 /* Dump stack and registers */
 

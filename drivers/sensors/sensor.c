@@ -28,6 +28,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -370,13 +371,18 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_SET_INTERVAL:
         {
+          if (lower->ops->set_interval == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
           if (upper->interval == *val)
             {
               break;
             }
 
-          ret = lower->ops->set_interval ?
-                lower->ops->set_interval(lower, val) : -ENOTSUP;
+          ret = lower->ops->set_interval(lower, val);
           if (ret >= 0)
             {
               upper->interval = *val;
@@ -386,6 +392,12 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_BATCH:
         {
+          if (lower->ops->batch == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
           if (upper->interval == 0)
             {
               ret = -EINVAL;
@@ -397,8 +409,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          ret = lower->ops->batch ?
-                lower->ops->batch(lower, val) : -ENOTSUP;
+          ret = lower->ops->batch(lower, val);
           if (ret >= 0)
             {
               upper->latency = *val;
@@ -414,6 +425,18 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                   ret = circbuf_resize(&upper->buffer, buffer_size);
                 }
             }
+        }
+        break;
+
+      case SNIOC_SELFTEST:
+        {
+          if (lower->ops->selftest == NULL)
+            {
+              ret = -ENOTSUP;
+              break;
+            }
+
+          ret = lower->ops->selftest(lower, arg);
         }
         break;
 

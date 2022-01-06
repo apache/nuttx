@@ -286,6 +286,78 @@ int board_uniqueid(FAR uint8_t *uniqueid);
 #endif
 
 /****************************************************************************
+ * Name: board_uniquekey
+ *
+ * Description:
+ *   Return a unique KEY associated with the board.  The meaning of this
+ *   unique KEY is not specified.  It may be a trusted key or a private
+ *   identity, etc.  The only requirement is that the length of the
+ *   unique KEY be exactly CONFIG_BOARDCTL_UNIQUEKEY_SIZE in length.
+ *
+ * Input Parameters:
+ *   uniquekey - A reference to a writable memory location provided by the
+ *     caller to receive the board unique KEY.  The memory memory referenced
+ *     by this pointer must be at least CONFIG_BOARDCTL_UNIQUEKEY_SIZE in
+ *     length.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_UNIQUEKEY
+int board_uniquekey(FAR uint8_t *uniquekey);
+#endif
+
+/****************************************************************************
+ * Name:  board_switch_boot
+ *
+ * Description:
+ *   BOARDIOC_SWITCH_BOOT is required to communicate the boot partition from
+ *   userspace (OTA subsystem) to board, it can be used to change the system
+ *   boot behavior. It's useful for A/B boot or even in the single boot case.
+ *
+ * Input Parameters:
+ *   system - The boot system updated or specified
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success.  Otherwise a negated errno value is
+ *   returned indicating the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_SWITCH_BOOT
+int board_switch_boot(FAR const char *system);
+#endif
+
+/****************************************************************************
+ * Name:  board_boot_image
+ *
+ * Description:
+ *   Boot a new application firmware image. Execute the required actions for
+ *   booting a new application firmware image (e.g. deinitialize peripherals,
+ *   load the Program Counter register with the application firmware image
+ *   entry point address).
+ *
+ * Input Parameters:
+ *   path     - Path to the new application firmware image to be booted.
+ *   hdr_size - Image header size in bytes. This value may be useful for
+ *              skipping metadata information preprended to the application
+ *              image.
+ *
+ * Returned Value:
+ *   If this function returns, then it was not possible to load the
+ *   application firmware image due to some constraints. The return value in
+ *   this case is a board-specific reason for the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+int board_boot_image(FAR const char *path, uint32_t hdr_size);
+#endif
+
+/****************************************************************************
  * Name:  board_timerhook
  *
  * Description:
@@ -382,7 +454,7 @@ FAR struct fb_vtable_s *board_graphics_setup(unsigned int devno);
  * Name: board_ioctl
  *
  * Description:
- *   If CONFIG_LIB_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
+ *   If CONFIG_BOARDCTL=y, boards may also select CONFIG_BOARDCTL_IOCTL=y
  *   enable board specific commands.  In this case, all commands not
  *   recognized by boardctl() will be forwarded to the board-provided
  *   board_ioctl() function.

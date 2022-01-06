@@ -102,6 +102,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_STDARG_H
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
@@ -140,20 +141,20 @@ config ARCH
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
 
-source arch/arm/Kconfig
-source arch/avr/Kconfig
-source arch/hc/Kconfig
-source arch/mips/Kconfig
-source arch/misoc/Kconfig
-source arch/renesas/Kconfig
-source arch/risc-v/Kconfig
-source arch/sim/Kconfig
-source arch/x86/Kconfig
-source arch/x86_64/Kconfig
-source arch/xtensa/Kconfig
-source arch/z16/Kconfig
-source arch/z80/Kconfig
-source arch/or1k/Kconfig
+source "arch/arm/Kconfig"
+source "arch/avr/Kconfig"
+source "arch/hc/Kconfig"
+source "arch/mips/Kconfig"
+source "arch/misoc/Kconfig"
+source "arch/renesas/Kconfig"
+source "arch/risc-v/Kconfig"
+source "arch/sim/Kconfig"
+source "arch/x86/Kconfig"
+source "arch/x86_64/Kconfig"
+source "arch/xtensa/Kconfig"
+source "arch/z16/Kconfig"
+source "arch/z80/Kconfig"
+source "arch/or1k/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool
@@ -191,7 +192,7 @@ config ARCH_CHIP_CUSTOM_DIR_RELPATH
 endmenu # Custom Chip Configuration
 endif #ARCH_CHIP_CUSTOM
 
-source arch/dummy/Kconfig
+source "arch/dummy/Kconfig"
 
 config ARCH_TOOLCHAIN_IAR
 	bool
@@ -259,9 +260,17 @@ config ARCH_NEED_ADDRENV_MAPPING
 	bool
 	default n
 
-config ARCH_HAVE_MODULE_TEXT
-	bool "Special memory region for dynamic code loading"
+config ARCH_HAVE_EXTRA_HEAPS
+	bool
 	default n
+	---help---
+		Special memory regions used as separate heaps
+
+config ARCH_HAVE_TEXT_HEAP
+	bool
+	default n
+	---help---
+		Special memory region for dynamic code loading
 
 config ARCH_HAVE_MULTICPU
 	bool
@@ -335,6 +344,14 @@ config ARCH_HAVE_SYSCALL_HOOKS
 		required if CONFIG_SCHED_INSTRUMENTATION_SYSCALL is enabled.  Refer
 		to sched/Kconfig for additional information.
 
+config ARCH_HAVE_BACKTRACE
+	bool
+	default n
+
+config ARCH_HAVE_BOOTLOADER
+	bool
+	default n
+
 config ARCH_FPU
 	bool "FPU support"
 	default y
@@ -371,12 +388,12 @@ config ARCH_USE_MPU
 		is enabled by other, platform-specific logic.  In those cases, this
 		selection will always be forced.
 
-config ARCH_USE_MODULE_TEXT
-	bool "Enable module text allocator"
+config ARCH_USE_TEXT_HEAP
+	bool "Enable separate text allocation for dynamic code loading"
 	default n
-	depends on ARCH_HAVE_MODULE_TEXT
+	depends on ARCH_HAVE_TEXT_HEAP
 	---help---
-		This option enable architecture-sepecific memory allocator
+		This option enables architecture-sepecific memory allocator
 		for dynamic code loading. For example, ESP32 has a separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.

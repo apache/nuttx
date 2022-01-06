@@ -32,11 +32,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <semaphore.h>
+#include <time.h>
 
-#ifdef CONFIG_FS_NAMED_SEMAPHORES
-#  include <nuttx/semaphore.h>
-#endif
+#include <nuttx/semaphore.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -156,6 +154,16 @@
 #define DIRENT_SETPSEUDONODE(f) do (f) |= DIRENTFLAGS_PSEUDONODE; while (0)
 #define DIRENT_ISPSEUDONODE(f) (((f) & DIRENTFLAGS_PSEUDONODE) != 0)
 
+/* The status change flags.
+ * These should be or-ed together to figure out what want to change.
+ */
+
+#define CH_STAT_MODE       (1 << 0)
+#define CH_STAT_UID        (1 << 1)
+#define CH_STAT_GID        (1 << 2)
+#define CH_STAT_ATIME      (1 << 3)
+#define CH_STAT_MTIME      (1 << 4)
+
 /* nx_umount() is equivalent to nx_umount2() with flags = 0 */
 
 #define umount(t)       umount2(t,0)
@@ -214,6 +222,20 @@ struct geometry
   bool      geo_writeenabled; /* true: It is okay to write to this device */
   blkcnt_t  geo_nsectors;     /* Number of sectors on the device */
   blksize_t geo_sectorsize;   /* Size of one sector */
+};
+
+struct partition_info_s
+{
+  size_t          numsectors;   /* Number of sectors in the partition */
+  size_t          sectorsize;   /* Size in bytes of a single sector */
+  off_t           startsector;  /* Offset to the first section/block of the
+                                 * managed sub-region */
+
+  /* NULL-terminated string representing the name of the parent node of the
+   * partition.
+   */
+
+  char            parent[NAME_MAX + 1];
 };
 
 /* This structure is provided by block devices when they register with the
@@ -278,6 +300,8 @@ struct mountpt_operations
   int     (*sync)(FAR struct file *filep);
   int     (*dup)(FAR const struct file *oldp, FAR struct file *newp);
   int     (*fstat)(FAR const struct file *filep, FAR struct stat *buf);
+  int     (*fchstat)(FAR const struct file *filep,
+                     FAR const struct stat *buf, int flags);
   int     (*truncate)(FAR struct file *filep, off_t length);
 
   /* Directory operations */
@@ -309,10 +333,8 @@ struct mountpt_operations
             FAR const char *newrelpath);
   int     (*stat)(FAR struct inode *mountpt, FAR const char *relpath,
             FAR struct stat *buf);
-
-  /* NOTE:  More operations will be needed here to support:  disk usage
-   * stats file stat(), file attributes, file truncation, etc.
-   */
+  int     (*chstat)(FAR struct inode *mountpt, FAR const char *relpath,
+            FAR const struct stat *buf, int flags);
 };
 #endif /* CONFIG_DISABLE_MOUNTPOINT */
 
@@ -350,13 +372,19 @@ union inode_ops_u
 
 struct inode
 {
+  FAR struct inode *i_parent;   /* Link to parent level inode */
   FAR struct inode *i_peer;     /* Link to same level inode */
   FAR struct inode *i_child;    /* Link to lower level inode */
   int16_t           i_crefs;    /* References to inode */
   uint16_t          i_flags;    /* Flags for inode */
   union inode_ops_u u;          /* Inode operations */
-#ifdef CONFIG_FILE_MODE
+#ifdef CONFIG_PSEUDOFS_ATTRIBUTES
   mode_t            i_mode;     /* Access mode flags */
+  uid_t             i_owner;    /* Owner */
+  gid_t             i_group;    /* Group */
+  struct timespec   i_atime;    /* Time of last access */
+  struct timespec   i_mtime;    /* Time of last modification */
+  struct timespec   i_ctime;    /* Time of last status change */
 #endif
   FAR void         *i_private;  /* Per inode driver private data */
   char              i_name[1];  /* Name of inode (variable) */
@@ -494,7 +522,7 @@ void fs_initialize(void);
  * Input Parameters:
  *   path - The path to the inode to create
  *   fops - The file operations structure
- *   mode - Access privileges (not used)
+ *   mode - Access privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -521,7 +549,7 @@ int register_driver(FAR const char *path,
  * Input Parameters:
  *   path - The path to the inode to create
  *   bops - The block driver operations structure
- *   mode - Access privileges (not used)
+ *   mode - Access privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -567,7 +595,7 @@ int register_blockdriver(FAR const char *path,
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 int register_blockpartition(FAR const char *partition,
                             mode_t mode, FAR const char *parent,
-                            size_t firstsector, size_t nsectors);
+                            off_t firstsector, off_t nsectors);
 #endif
 
 /****************************************************************************
@@ -599,7 +627,7 @@ int unregister_blockdriver(FAR const char *path);
  * Input Parameters:
  *   path - The path to the inode to create
  *   mtd  - The MTD driver structure
- *   mode - inode privileges (not used)
+ *   mode - inode privileges
  *   priv - Private, user data that will be associated with the inode.
  *
  * Returned Value:
@@ -644,7 +672,7 @@ int register_mtddriver(FAR const char *path, FAR struct mtd_dev_s *mtd,
 #ifdef CONFIG_MTD
 int register_mtdpartition(FAR const char *partition,
                           mode_t mode, FAR const char *parent,
-                          off_t firstblock, size_t nblocks);
+                          off_t firstblock, off_t nblocks);
 #endif
 
 /****************************************************************************
@@ -795,7 +823,7 @@ int file_dup2(FAR struct file *filep1, FAR struct file *filep2);
  *   applications.
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is return on
+ *   fd2 is returned on success; a negated errno value is return on
  *   any failure.
  *
  ****************************************************************************/
@@ -974,18 +1002,6 @@ int lib_flushall(FAR struct streamlist *list);
 #endif
 
 /****************************************************************************
- * Name: lib_sendfile
- *
- * Description:
- *   Transfer a file
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NET_SENDFILE
-ssize_t lib_sendfile(int outfd, int infd, off_t *offset, size_t count);
-#endif
-
-/****************************************************************************
  * Name: file_read
  *
  * Description:
@@ -1116,6 +1132,18 @@ ssize_t file_pwrite(FAR struct file *filep, FAR const void *buf,
                     size_t nbytes, off_t offset);
 
 /****************************************************************************
+ * Name: file_sendfile
+ *
+ * Description:
+ *   Equivalent to the standard sendfile function except that is accepts a
+ *   struct file instance instead of a file descriptor.
+ *
+ ****************************************************************************/
+
+ssize_t file_sendfile(FAR struct file *outfile, FAR struct file *infile,
+                      off_t *offset, size_t count);
+
+/****************************************************************************
  * Name: file_seek
  *
  * Description:
@@ -1170,6 +1198,30 @@ int file_fsync(FAR struct file *filep);
 #ifndef CONFIG_DISABLE_MOUNTPOINT
 int file_truncate(FAR struct file *filep, off_t length);
 #endif
+
+/****************************************************************************
+ * Name: file_mmap
+ *
+ * Description:
+ *   Equivalent to the standard mmap() function except that is accepts
+ *   a struct file instance instead of a file descriptor and it does not set
+ *   the errno variable.
+ *
+ ****************************************************************************/
+
+int file_mmap(FAR struct file *filep, FAR void *start, size_t length,
+              int prot, int flags, off_t offset, FAR void **mapped);
+
+/****************************************************************************
+ * Name: file_mummap
+ *
+ * Description:
+ *   Equivalent to the standard mummap() function except it does not set
+ *   the errno variable.
+ *
+ ****************************************************************************/
+
+int file_munmap(FAR void *start, size_t length);
 
 /****************************************************************************
  * Name: file_ioctl
@@ -1329,6 +1381,31 @@ int file_fstat(FAR struct file *filep, FAR struct stat *buf);
  ****************************************************************************/
 
 int nx_stat(FAR const char *path, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: file_fchstat
+ *
+ * Description:
+ *   file_fchstat() is an internal OS interface. It is functionally similar
+ *   to the combination of fchmod/fchown/futimens standard interface except:
+ *
+ *    - It does not modify the errno variable,
+ *    - It is not a cancellation point,
+ *    - It does not handle socket descriptors, and
+ *    - It accepts a file structure instance instead of file descriptor.
+ *
+ * Input Parameters:
+ *   filep  - File structure instance
+ *   buf    - The stat to be modified
+ *   flags  - The vaild field in buf
+ *
+ * Returned Value:
+ *   Upon successful completion, 0 shall be returned. Otherwise, the
+ *   negative errno shall be returned to indicate the error.
+ *
+ ****************************************************************************/
+
+int file_fchstat(FAR struct file *filep, FAR struct stat *buf, int flags);
 
 /****************************************************************************
  * Name: nx_unlink

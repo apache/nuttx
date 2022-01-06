@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <mqueue.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <sched.h>
 #include <debug.h>
@@ -62,7 +63,7 @@
  *   prio   - The priority of the message
  *
  * Returned Value:
- *   One success, 0 (OK) is returned. On failure, a negated errno value is
+ *   On success, 0 (OK) is returned. On failure, a negated errno value is
  *   returned.
  *
  *     EINVAL   Either msg or msgq is NULL or the value of prio is invalid.

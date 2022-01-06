@@ -30,6 +30,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 #include "hardware/bl602_clic.h"
 #include "riscv_arch.h"
@@ -110,7 +111,7 @@ static void bl602_reload_mtimecmp(void)
  * Name:  bl602_timerisr
  ****************************************************************************/
 
-static int bl602_timerisr(int irq, void *context, FAR void *arg)
+static int bl602_timerisr(int irq, void *context, void *arg)
 {
   bl602_reload_mtimecmp();
 

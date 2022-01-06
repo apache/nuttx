@@ -44,7 +44,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int builtin_loadbinary(FAR struct binary_s *binp);
+static int builtin_loadbinary(FAR struct binary_s *binp,
+                              FAR const char *filename,
+                              FAR const struct symtab_s *exports,
+                              int nexports);
 
 /****************************************************************************
  * Private Data
@@ -69,46 +72,41 @@ static struct binfmt_s g_builtin_binfmt =
  *
  ****************************************************************************/
 
-static int builtin_loadbinary(struct binary_s *binp)
+static int builtin_loadbinary(FAR struct binary_s *binp,
+                              FAR const char *filename,
+                              FAR const struct symtab_s *exports,
+                              int nexports)
 {
-  FAR const char *filename;
   FAR const struct builtin_s *builtin;
-  int fd;
+  FAR char *name;
+  struct file file;
   int index;
   int ret;
 
-  binfo("Loading file: %s\n", binp->filename);
+  binfo("Loading file: %s\n", filename);
 
   /* Open the binary file for reading (only) */
 
-  fd = nx_open(binp->filename, O_RDONLY);
-  if (fd < 0)
-    {
-      berr("ERROR: Failed to open binary %s: %d\n", binp->filename, fd);
-      return fd;
-    }
-
-  /* If this file is a BINFS file system, then we can recover the name of
-   * the file using the FIOC_FILENAME ioctl() call.
-   */
-
-  ret = nx_ioctl(fd, FIOC_FILENAME, (unsigned long)((uintptr_t)&filename));
+  ret = file_open(&file, filename, O_RDONLY);
   if (ret < 0)
     {
-      berr("ERROR: FIOC_FILENAME ioctl failed: %d\n", ret);
-      nx_close(fd);
+      berr("ERROR: Failed to open binary %s: %d\n", filename, ret);
       return ret;
     }
 
-  /* Other file systems may also support FIOC_FILENAME, so the real proof
-   * is that we can look up the index to this name in g_builtins[].
-   */
+  name = strrchr(filename, '/');
+  if (name != NULL)
+    {
+      filename = name + 1;
+    }
+
+  /* Looking up the index to this name in g_builtins[] */
 
   index = builtin_isavail(filename);
   if (index < 0)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
-      nx_close(fd);
+      file_close(&file);
       return index;
     }
 
@@ -120,7 +118,7 @@ static int builtin_loadbinary(struct binary_s *binp)
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
-  nx_close(fd);
+  file_close(&file);
   return OK;
 }
 

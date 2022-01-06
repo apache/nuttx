@@ -24,17 +24,17 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
-#include <syslog.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
 
-#include "esp32_cpuint.h"
 #include "esp32_gpio.h"
 
 #include "esp32-devkitc.h"

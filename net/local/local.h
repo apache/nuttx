@@ -45,8 +45,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define HAVE_LOCAL_POLL 1
 #define LOCAL_NPOLLWAITERS 2
+#define LOCAL_NCONTROLFDS  4
 
 /* Packet format in FIFO:
  *
@@ -89,6 +89,7 @@ enum local_state_s
   /* SOCK_STREAM peers only */
 
   LOCAL_STATE_ACCEPT,          /* Client waiting for a connection */
+  LOCAL_STATE_CONNECTING,      /* Non-blocking connect */
   LOCAL_STATE_CONNECTED,       /* Peer connected */
   LOCAL_STATE_DISCONNECTED     /* Peer disconnected */
 };
@@ -119,7 +120,7 @@ struct local_conn_s
 
   /* lc_node supports a doubly linked list: Listening SOCK_STREAM servers
    * will be linked into a list of listeners; SOCK_STREAM clients will be
-   * linked to the lc_waiters and lc_conn lists.
+   * linked to the lc_conn lists.
    */
 
   dq_entry_t lc_node;          /* Supports a doubly linked list */
@@ -136,29 +137,35 @@ struct local_conn_s
 
   /* Fields common to SOCK_STREAM and SOCK_DGRAM */
 
-  uint8_t lc_crefs;            /* Reference counts on this instance */
-  uint8_t lc_proto;            /* SOCK_STREAM or SOCK_DGRAM */
-  uint8_t lc_type;             /* See enum local_type_e */
-  uint8_t lc_state;            /* See enum local_state_e */
-  struct file lc_infile;       /* File for read-only FIFO (peers) */
-  struct file lc_outfile;      /* File descriptor of write-only FIFO (peers) */
-  char lc_path[UNIX_PATH_MAX]; /* Path assigned by bind() */
-  int32_t lc_instance_id;      /* Connection instance ID for stream
-                                * server<->client connection pair */
+  uint8_t lc_crefs;              /* Reference counts on this instance */
+  uint8_t lc_proto;              /* SOCK_STREAM or SOCK_DGRAM */
+  uint8_t lc_type;               /* See enum local_type_e */
+  uint8_t lc_state;              /* See enum local_state_e */
+  struct file lc_infile;         /* File for read-only FIFO (peers) */
+  struct file lc_outfile;        /* File descriptor of write-only FIFO (peers) */
+  char lc_path[UNIX_PATH_MAX];   /* Path assigned by bind() */
+  int32_t lc_instance_id;        /* Connection instance ID for stream
+                                  * server<->client connection pair */
+#ifdef CONFIG_NET_LOCAL_SCM
+  FAR struct local_conn_s *
+                        lc_peer; /* Peer connection instance */
+  uint16_t lc_cfpcount;          /* Control file pointer counter */
+  FAR struct file *
+     lc_cfps[LOCAL_NCONTROLFDS]; /* Socket message control filep */
+#endif /* CONFIG_NET_LOCAL_SCM */
 
 #ifdef CONFIG_NET_LOCAL_STREAM
   /* SOCK_STREAM fields common to both client and server */
 
   sem_t lc_waitsem;            /* Use to wait for a connection to be accepted */
+  FAR struct socket *lc_psock; /* A reference to the socket structure */
 
-#ifdef HAVE_LOCAL_POLL
   /* The following is a list if poll structures of threads waiting for
    * socket events.
    */
 
-  struct pollfd *lc_accept_fds[LOCAL_NPOLLWAITERS];
+  struct pollfd *lc_event_fds[LOCAL_NPOLLWAITERS];
   struct pollfd lc_inout_fds[2*LOCAL_NPOLLWAITERS];
-#endif
 
   /* Union of fields unique to SOCK_STREAM client, server, and connected
    * peers.
@@ -179,16 +186,9 @@ struct local_conn_s
 
     struct
     {
-      uint16_t lc_remaining;   /* (For binary compatibility with peer) */
       volatile int lc_result;  /* Result of the connection operation (client) */
+      dq_entry_t lc_waiter;    /* Linked to the lc_waiters lists */
     } client;
-
-    /* Fields common to connected peers (connected or accepted) */
-
-    struct
-    {
-      uint16_t lc_remaining;   /* Bytes remaining in the incoming stream */
-    } peer;
   } u;
 #endif /* CONFIG_NET_LOCAL_STREAM */
 };
@@ -208,12 +208,6 @@ extern "C"
 /* The local socket interface */
 
 EXTERN const struct sock_intf_s g_local_sockif;
-
-#ifdef CONFIG_NET_LOCAL_STREAM
-/* A list of all SOCK_STREAM listener connections */
-
-EXTERN dq_queue_t g_local_listeners;
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -254,6 +248,32 @@ FAR struct local_conn_s *local_alloc(void);
  ****************************************************************************/
 
 void local_free(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_nextconn
+ *
+ * Description:
+ *   Traverse the list of allocated Local connections
+ *
+ * Assumptions:
+ *   Called from network stack logic with the network stack locked
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *local_nextconn(FAR struct local_conn_s *conn);
+
+/****************************************************************************
+ * Name: local_peerconn
+ *
+ * Description:
+ *   Traverse the connections list to find the peer
+ *
+ * Assumptions:
+ *   This function must be called with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct local_conn_s *local_peerconn(FAR struct local_conn_s *conn);
 
 /****************************************************************************
  * Name: psock_local_bind
@@ -392,6 +412,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   filep    File structure of write-only FIFO.
  *   buf      Data to send
  *   len      Length of data to send
+ *   preamble Flag to indicate the preamble sync header assembly
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -400,7 +421,7 @@ ssize_t local_sendmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  ****************************************************************************/
 
 int local_send_packet(FAR struct file *filep, FAR const struct iovec *buf,
-                      size_t len);
+                      size_t len, bool preamble);
 
 /****************************************************************************
  * Name: local_recvmsg
@@ -441,6 +462,7 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *   buf   - Local to store the received data
  *   len   - Length of data to receive [in]
  *           Length of data actually received [out]
+ *   once  - Flag to indicate the buf may only be read once
  *
  * Returned Value:
  *   Zero is returned on success; a negated errno value is returned on any
@@ -450,7 +472,8 @@ ssize_t local_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
  *
  ****************************************************************************/
 
-int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf, size_t *len);
+int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
+                    size_t *len, bool once);
 
 /****************************************************************************
  * Name: local_getaddr
@@ -612,15 +635,11 @@ int local_open_sender(FAR struct local_conn_s *conn, FAR const char *path,
 #endif
 
 /****************************************************************************
- * Name: local_accept_pollnotify
+ * Name: local_event_pollnotify
  ****************************************************************************/
 
-#ifdef HAVE_LOCAL_POLL
-void local_accept_pollnotify(FAR struct local_conn_s *conn,
-                             pollevent_t eventset);
-#else
-#define local_accept_pollnotify(conn, eventset) ((void)(conn))
-#endif
+void local_event_pollnotify(FAR struct local_conn_s *conn,
+                            pollevent_t eventset);
 
 /****************************************************************************
  * Name: local_pollsetup
@@ -638,9 +657,7 @@ void local_accept_pollnotify(FAR struct local_conn_s *conn,
  *
  ****************************************************************************/
 
-#ifdef HAVE_LOCAL_POLL
 int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
 
 /****************************************************************************
  * Name: local_pollteardown
@@ -658,9 +675,17 @@ int local_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
  *
  ****************************************************************************/
 
-#ifdef HAVE_LOCAL_POLL
 int local_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
-#endif
+
+/****************************************************************************
+ * Name: local_generate_instance_id
+ *
+ * Description:
+ *   Generate instance ID for stream
+ *
+ ****************************************************************************/
+
+int32_t local_generate_instance_id(void);
 
 #undef EXTERN
 #ifdef __cplusplus

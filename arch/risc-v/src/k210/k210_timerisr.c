@@ -29,6 +29,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <arch/board/board.h>
 
 #include "riscv_arch.h"
@@ -92,7 +93,7 @@ static void k210_reload_mtimecmp(void)
  * Name:  k210_timerisr
  ****************************************************************************/
 
-static int k210_timerisr(int irq, void *context, FAR void *arg)
+static int k210_timerisr(int irq, void *context, void *arg)
 {
   k210_reload_mtimecmp();
 

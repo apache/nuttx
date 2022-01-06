@@ -117,6 +117,8 @@
 #  define fmt_char(fmt)   (*(fmt)++)
 #endif
 
+#define fmt_ungetc(fmt)   ((fmt)--)
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -375,7 +377,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                 }
             }
 
-          /* Note: On Nuttx, ptrdiff_t == intptr_t == ssize_t. */
+          /* Note: On NuttX, ptrdiff_t == intptr_t == ssize_t. */
 
           if (c == 'z' || c == 't')
             {
@@ -459,6 +461,25 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
       if (c == 'p')
         {
+          if (fmt_char(fmt) == 'V')
+            {
+              FAR struct va_format *vaf = va_arg(ap, void *);
+#ifdef va_copy
+              va_list copy;
+
+              va_copy(copy, *vaf->va);
+              vsprintf_internal(stream, NULL, 0, vaf->fmt, copy);
+              va_end(copy);
+#else
+              vsprintf_internal(stream, NULL, 0, vaf->fmt, *vaf->va);
+#endif
+              continue;
+            }
+          else
+            {
+              fmt_ungetc(fmt);
+            }
+
           /* Determine size of pointer and set flags accordingly */
 
           flags &= ~(FL_LONG | FL_REPD_TYPE);

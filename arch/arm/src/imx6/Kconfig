@@ -89,26 +89,31 @@ config IMX6_UART1
 	bool "UART1"
 	default n
 	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config IMX6_UART2
 	bool "UART2"
 	default n
 	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config IMX6_UART3
 	bool "UART3"
 	default n
 	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config IMX6_UART4
 	bool "UART4"
 	default n
 	select UART4_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config IMX6_UART5
 	bool "UART5"
 	default n
 	select UART5_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
 
 config IMX6_SPI1
 	bool "SPI1"

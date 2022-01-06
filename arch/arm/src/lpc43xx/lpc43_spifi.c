@@ -887,6 +887,27 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+#ifdef CONFIG_SPIFI_SECTOR512
+              info->numsectors  = priv->nblocks <<
+                                  (SPIFI_BLKSHIFT - SPIFI_512SHIFT);
+              info->sectorsize  = 512;
+#else
+              info->numsectors  = priv->nblocks;
+              info->sectorsize  = SPIFI_BLKSIZE;
+#endif
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
             /* Erase the entire device */
@@ -895,7 +916,15 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = SPIFI_ERASED_STATE;
+
+          ret = OK;
+        }
+        break;
+
       default:
         ret = -ENOTTY; /* Bad command */
         break;
@@ -1146,7 +1175,7 @@ static inline int lpc43_rominit(FAR struct lpc43_dev_s *priv)
  *   None
  *
  * Returned Value:
- *   One success, a reference to the initialized MTD device instance is
+ *   On success, a reference to the initialized MTD device instance is
  *   returned;  NULL is returned on any failure.
  *
  ****************************************************************************/

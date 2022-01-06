@@ -23,10 +23,9 @@
  ****************************************************************************/
 
 #include <stdint.h>
+#include <stdatomic.h>
 
-#ifdef CONFIG_SMP
-#  include <stdatomic.h>
-#endif
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -41,14 +40,14 @@
  *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   lock - The address of spinlock object.
+ *   lock  - A reference to the spinlock object.
  *
  * Returned Value:
- *   The spinlock is always locked upon return.  The value of previous value
- *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   as previously locked (meaning that the test-and-set operation failed to
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock)
+ *   (meaning that we successfully obtained the lock).
  *
  ****************************************************************************/
 

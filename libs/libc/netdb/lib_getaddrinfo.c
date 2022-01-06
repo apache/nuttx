@@ -1,35 +1,20 @@
 /****************************************************************************
  * libs/libc/netdb/lib_getaddrinfo.c
  *
- *   Copyright (C) 2018-2019 Gregory Nutt. All rights reserved.
- *   Author: Juha Niskanen <juha.niskanen@haltian.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -43,7 +28,9 @@
 
 #include <arpa/inet.h>
 #include <nuttx/net/loopback.h>
+#include <netpacket/rpmsg.h>
 #include <netdb.h>
+#include <sys/un.h>
 
 #include "libc.h"
 #include "lib_netdb.h"
@@ -57,8 +44,10 @@ struct ai_s
   struct addrinfo ai;
   union
   {
+    struct sockaddr_un sun;
     struct sockaddr_in sin;
     struct sockaddr_in6 sin6;
+    struct sockaddr_rpmsg srp;
   } sa;
 };
 
@@ -67,13 +56,9 @@ struct ai_s
  ****************************************************************************/
 
 FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
-                                 int port, FAR void *addr)
+                                 int port, FAR const void *addr)
 {
   FAR struct ai_s *ai;
-  socklen_t addrlen;
-
-  addrlen = (family == AF_INET) ? sizeof(struct sockaddr_in)
-                                : sizeof(struct sockaddr_in6);
 
   ai = lib_zalloc(sizeof(struct ai_s));
   if (ai == NULL)
@@ -82,25 +67,41 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
     }
 
   ai->ai.ai_addr     = (FAR struct sockaddr *)&ai->sa;
-  ai->ai.ai_addrlen  = addrlen;
   ai->ai.ai_family   = family;
   ai->ai.ai_socktype = socktype;
   ai->ai.ai_protocol = protocol;
 
   switch (family)
     {
+#ifdef CONFIG_NET_LOCAL
+      case AF_LOCAL:
+        ai->ai.ai_addrlen       = sizeof(struct sockaddr_un);
+        ai->sa.sun.sun_family   = AF_LOCAL;
+        strncpy(ai->sa.sun.sun_path, addr, sizeof(ai->sa.sun.sun_path));
+        break;
+#endif
 #ifdef CONFIG_NET_IPv4
       case AF_INET:
-        ai->sa.sin.sin_family = AF_INET;
-        ai->sa.sin.sin_port   = port;  /* Already network order */
+        ai->ai.ai_addrlen       = sizeof(struct sockaddr_in);
+        ai->sa.sin.sin_family   = AF_INET;
+        ai->sa.sin.sin_port     = port;  /* Already network order */
         memcpy(&ai->sa.sin.sin_addr, addr, sizeof(ai->sa.sin.sin_addr));
         break;
 #endif
 #ifdef CONFIG_NET_IPv6
       case AF_INET6:
+        ai->ai.ai_addrlen       = sizeof(struct sockaddr_in6);
         ai->sa.sin6.sin6_family = AF_INET6;
         ai->sa.sin6.sin6_port   = port;  /* Already network order */
         memcpy(&ai->sa.sin6.sin6_addr, addr, sizeof(ai->sa.sin6.sin6_addr));
+        break;
+#endif
+#ifdef CONFIG_NET_RPMSG
+      case AF_RPMSG:
+        ai->ai.ai_addrlen       = sizeof(struct sockaddr_rpmsg);
+        ai->sa.srp.rp_family    = AF_RPMSG;
+        strncpy(ai->sa.srp.rp_cpu, addr, sizeof(ai->sa.srp.rp_cpu));
+        snprintf(ai->sa.srp.rp_name, sizeof(ai->sa.srp.rp_name), "%d", port);
         break;
 #endif
     }
@@ -153,6 +154,8 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 
       if (family != AF_INET &&
           family != AF_INET6 &&
+          family != AF_LOCAL &&
+          family != AF_RPMSG &&
           family != AF_UNSPEC)
         {
           return EAI_FAMILY;
@@ -203,7 +206,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv4
       if (family == AF_INET || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET, socktype, proto, port, (FAR void *)&addr);
+          ai = alloc_ai(AF_INET, socktype, proto, port, &addr);
           if (ai != NULL)
             {
               *res = (FAR struct addrinfo *)ai;
@@ -214,7 +217,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
 #ifdef CONFIG_NET_IPv6
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
-          ai = alloc_ai(AF_INET6, socktype, proto, port, (FAR void *)&addr);
+          ai = alloc_ai(AF_INET6, socktype, proto, port, &addr);
           if (ai != NULL)
             {
               /* Can return both IPv4 and IPv6 loopback. */
@@ -243,7 +246,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET || family == AF_UNSPEC)
         {
           ai = alloc_ai(AF_INET, socktype, proto, port,
-                        (FAR void *)&g_lo_ipv4addr);
+                        &g_lo_ipv4addr);
           if (ai != NULL)
             {
               *res = (FAR struct addrinfo *)ai;
@@ -255,7 +258,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (family == AF_INET6 || family == AF_UNSPEC)
         {
           ai = alloc_ai(AF_INET6, socktype, proto, port,
-                        (FAR void *)&g_lo_ipv6addr);
+                        &g_lo_ipv6addr);
           if (ai != NULL)
             {
               /* Can return both IPv4 and IPv6 loopback. */
@@ -279,6 +282,24 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       return EAI_FAIL;
 #endif /* CONFIG_NET_LOOPBACK */
     }
+
+#if defined(CONFIG_NET_LOCAL) || defined(CONFIG_NET_RPMSG)
+  if (family == AF_LOCAL || family == AF_RPMSG)
+    {
+      ai = alloc_ai(family, socktype, proto, port, hostname);
+      if (ai != NULL)
+        {
+          *res = (FAR struct addrinfo *)ai;
+        }
+
+      if (flags & AI_CANONNAME)
+        {
+          ai->ai.ai_canonname = (FAR char *)hostname;
+        }
+
+      return (*res != NULL) ? OK : EAI_MEMORY;
+    }
+#endif
 
   hostbuffer = lib_malloc(CONFIG_NETDB_BUFSIZE);
   if (hostbuffer == NULL)

@@ -27,6 +27,7 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/clock.h>
 #include <stdint.h>
 #include <queue.h>
 
@@ -34,15 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Watchdog Definitions *****************************************************/
-
-/* Flag bits for the flags field of struct wdog_s */
-
-#define WDOGF_ACTIVE       (1 << 0) /* Bit 0: 1=Watchdog is actively timing */
-
-#define WDOG_SETACTIVE(w)  do { (w)->flags |= WDOGF_ACTIVE; } while (0)
-#define WDOG_CLRACTIVE(w)  do { (w)->flags &= ~WDOGF_ACTIVE; } while (0)
-#define WDOG_ISACTIVE(w)   (((w)->flags & WDOGF_ACTIVE) != 0)
+#define WDOG_ISACTIVE(w)   ((w)->func != NULL)
 
 /****************************************************************************
  * Public Type Declarations
@@ -77,8 +70,7 @@ struct wdog_s
 #ifdef CONFIG_PIC
   FAR void          *picbase;    /* PIC base address */
 #endif
-  int                lag;        /* Timer associated with the delay */
-  uint8_t            flags;      /* See WDOGF_* definitions above */
+  sclock_t           lag;        /* Timer associated with the delay */
   wdparm_t           arg;        /* Callback argument */
 };
 
@@ -130,7 +122,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int wd_start(FAR struct wdog_s *wdog, int32_t delay,
+int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
              wdentry_t wdentry, wdparm_t arg);
 
 /****************************************************************************

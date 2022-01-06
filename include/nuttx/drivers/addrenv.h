@@ -57,7 +57,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-void simple_addrenv_initialize(const struct simple_addrenv_s *addrenv);
+void simple_addrenv_initialize(FAR const struct simple_addrenv_s *addrenv);
 
 #ifdef __cplusplus
 }

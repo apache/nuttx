@@ -35,8 +35,12 @@
 
 /* Configuration ************************************************************/
 
-#ifndef CONFIG_LIB_SENDFILE_BUFSIZE
-#  define CONFIG_LIB_SENDFILE_BUFSIZE 512
+#ifndef CONFIG_SENDFILE_BUFSIZE
+#  define CONFIG_SENDFILE_BUFSIZE 512
+#endif
+
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define sendfile64              sendfile
 #endif
 
 /****************************************************************************

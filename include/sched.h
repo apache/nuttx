@@ -31,9 +31,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <strings.h>
+#include <time.h>
 #include "queue.h"
-
-#include <nuttx/sched.h>
 
 /********************************************************************************
  * Pre-processor Definitions
@@ -262,6 +261,11 @@ int    sched_lockcount(void);
 /* Queries */
 
 bool   sched_idletask(void);
+
+/* Task Backtrace */
+
+int    sched_backtrace(pid_t tid, FAR void **buffer, int size);
+void   sched_dumpstack(pid_t tid);
 
 #undef EXTERN
 #if defined(__cplusplus)

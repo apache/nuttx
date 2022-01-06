@@ -56,14 +56,12 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
   irqstate_t flags;
   int hash_ndx;
 
-  /* Verify that the PID is within range */
+  /* Verify whether g_pidhash hash table has already been allocated and
+   * whether the PID is within range.
+   */
 
-  if (pid >= 0)
+  if (g_pidhash != NULL && pid >= 0)
     {
-      /* Get the hash_ndx associated with the pid */
-
-      hash_ndx = PIDHASH(pid);
-
       /* The test and the return setup should be atomic.  This still does
        * not provide proper protection if the recipient of the TCB does not
        * also protect against the task associated with the TCB from
@@ -71,6 +69,10 @@ FAR struct tcb_s *nxsched_get_tcb(pid_t pid)
        */
 
       flags = enter_critical_section();
+
+      /* Get the hash_ndx associated with the pid */
+
+      hash_ndx = PIDHASH(pid);
 
       /* Verify that the correct TCB was found. */
 

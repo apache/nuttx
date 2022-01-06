@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 #include <string.h>

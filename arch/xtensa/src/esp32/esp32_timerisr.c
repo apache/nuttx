@@ -33,7 +33,7 @@
 #include <arch/board/board.h>
 
 #include "clock/clock.h"
-#include "xtensa_timer.h"
+#include "xtensa_counter.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -45,52 +45,6 @@ static uint32_t g_tick_divisor;
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Function:  xtensa_getcount, xtensa_getcompare, and xtensa_setcompare
- *
- * Description:
- *   Lower level operations on Xtensa special registers.
- *
- ****************************************************************************/
-
-/* Return the current value of the cycle count register */
-
-static inline uint32_t xtensa_getcount(void)
-{
-  uint32_t count;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, CCOUNT"  : "=r"(count)
-  );
-
-  return count;
-}
-
-/* Return the old value of the compare register */
-
-static inline uint32_t xtensa_getcompare(void)
-{
-  uint32_t compare;
-
-  __asm__ __volatile__
-  (
-    "rsr %0, %1"  : "=r"(compare) : "I"(XT_CCOMPARE)
-  );
-
-  return compare;
-}
-
-/* Set the value of the compare register */
-
-static inline void xtensa_setcompare(uint32_t compare)
-{
-  __asm__ __volatile__
-  (
-    "wsr %0, %1" : : "r"(compare), "I"(XT_CCOMPARE)
-  );
-}
 
 /****************************************************************************
  * Function:  esp32_timerisr
@@ -111,7 +65,7 @@ static inline void xtensa_setcompare(uint32_t compare)
  *
  ****************************************************************************/
 
-static int esp32_timerisr(int irq, uint32_t *regs, FAR void *arg)
+static int esp32_timerisr(int irq, uint32_t *regs, void *arg)
 {
   uint32_t divisor;
   uint32_t compare;
@@ -181,5 +135,5 @@ void up_timer_initialize(void)
 
   /* Enable the timer 0 CPU interrupt. */
 
-  up_enable_irq(ESP32_CPUINT_TIMER0);
+  up_enable_irq(XTENSA_IRQ_TIMER0);
 }

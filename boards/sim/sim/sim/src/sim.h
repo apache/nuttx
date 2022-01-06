@@ -93,7 +93,7 @@ int sim_bringup(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_ZONEINFO_ROMFS
+#ifdef CONFIG_LIBC_ZONEINFO_ROMFS
 int sim_zoneinfo(int minor);
 #endif
 

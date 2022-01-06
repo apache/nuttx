@@ -37,20 +37,13 @@
  * Pre-processor Macros
  ****************************************************************************/
 
-/* RISC-V requires at least a 4-byte stack alignment.
- * For floating point use, however, the stack must be aligned to 8-byte
- * addresses.
- */
+/* RISC-V requires a 16-byte stack alignment. */
 
-#if defined(CONFIG_LIBC_FLOATINGPOINT) || defined (CONFIG_ARCH_RV64GC)
-#  define STACK_ALIGNMENT   8
-#else
-#  define STACK_ALIGNMENT   4
-#endif
+#define STACK_ALIGNMENT     16
 
 /* Stack alignment macros */
 
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
@@ -97,9 +90,9 @@
  *
  ****************************************************************************/
 
-FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
+void *up_stack_frame(struct tcb_s *tcb, size_t frame_size)
 {
-  FAR void *ret;
+  void *ret;
 
   /* Align the frame_size */
 
@@ -117,7 +110,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr   = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
+  tcb->stack_base_ptr   = (uint8_t *)tcb->stack_base_ptr + frame_size;
   tcb->adj_stack_size -= frame_size;
 
   /* And return the pointer to the allocated region */

@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <assert.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
@@ -66,7 +67,7 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 #ifdef CONFIG_SYSLOG_INTBUFFER
           if (up_interrupt_context())
             {
-              syslog_add_intbuffer(*buffer++);
+              syslog_add_intbuffer(buffer[nwritten]);
             }
           else
 #endif
@@ -80,7 +81,7 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
 
                   DEBUGASSERT(g_syslog_channel[i]->sc_ops->sc_force != NULL);
                   g_syslog_channel[i]->sc_ops->sc_force(g_syslog_channel[i],
-                                                        *buffer++);
+                                                        buffer[nwritten]);
                 }
             }
         }
@@ -107,7 +108,7 @@ static ssize_t syslog_default_write(FAR const char *buffer, size_t buflen)
               for (nwritten = 0; nwritten < buflen; nwritten++)
                 {
                   g_syslog_channel[i]->sc_ops->sc_putc(g_syslog_channel[i],
-                                                       *buffer++);
+                                                       buffer[nwritten]);
                 }
             }
         }

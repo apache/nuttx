@@ -24,8 +24,9 @@
 
 #include <nuttx/config.h>
 #include <sys/resource.h>
-#include <sched.h>
 
+#include <sched.h>
+#include <unistd.h>
 #include <errno.h>
 
 /****************************************************************************
@@ -81,5 +82,9 @@ int getpriority(int which, id_t who)
       return ret;
     }
 
-  return param.sched_priority;
+  /* Since -1 is a legal return value, clear errno to avoid the chaos */
+
+  set_errno(0);
+
+  return NZERO - param.sched_priority;
 }

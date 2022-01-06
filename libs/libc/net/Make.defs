@@ -26,11 +26,15 @@ CSRCS += lib_inetntop.c lib_inetpton.c
 CSRCS += lib_etherntoa.c lib_etheraton.c
 
 ifeq ($(CONFIG_NET),y)
-CSRCS += lib_shutdown.c lib_socketpair.c
+CSRCS += lib_shutdown.c
 endif
 
 ifeq ($(CONFIG_NET_LOOPBACK),y)
 CSRCS += lib_loopback.c
+endif
+
+ifeq ($(CONFIG_NETDEV_IFINDEX),y)
+CSRCS += lib_nameindex.c lib_freenameindex.c
 endif
 
 # Routing table support

@@ -1,37 +1,20 @@
 /****************************************************************************
  * arch/arm/src/kinetis/kinetis_serial.c
  *
- *   Copyright (C) 2011-2012, 2017-2018 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            David Sidrane <david_s5@nscdg.com>
- *            Jan Okle <jan@leitwert.ch>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -46,6 +29,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -69,7 +53,7 @@
 #include "hardware/kinetis_uart.h"
 #include "hardware/kinetis_pinmux.h"
 #include "kinetis.h"
-#include "kinetis_dma.h"
+#include "kinetis_edma.h"
 #include "kinetis_uart.h"
 
 /****************************************************************************
@@ -286,9 +270,6 @@
 #  define RXDMA_BUFFER_SIZE   ((CONFIG_KINETIS_SERIAL_RXDMA_BUFFER_SIZE \
                                 + RXDMA_BUFFER_MASK) & ~RXDMA_BUFFER_MASK)
 
-#  define SERIAL_DMA_CONTROL_WORD \
-                              (DMA_TCD_CSR_MAJORELINK | \
-                               DMA_TCD_CSR_INTHALF)
 #endif /* SERIAL_HAVE_DMA */
 
 /****************************************************************************
@@ -322,7 +303,7 @@ struct up_dev_s
 #endif
 #ifdef SERIAL_HAVE_DMA
   const uint8_t rxdma_reqsrc;
-  DMA_HANDLE        rxdma;     /* currently-open receive DMA stream */
+  DMACH_HANDLE      rxdma;     /* currently-open receive DMA stream */
   uint32_t          rxdmanext; /* Next byte in the DMA buffer to be read */
   char      *const  rxfifo;    /* Receive DMA buffer */
 #endif
@@ -363,7 +344,8 @@ static void up_dma_shutdown(struct uart_dev_s *dev);
 static int  up_dma_receive(struct uart_dev_s *dev, unsigned int *status);
 static bool up_dma_rxavailable(struct uart_dev_s *dev);
 static uint8_t get_and_clear_uart_status(struct up_dev_s *priv);
-static void up_dma_rxcallback(DMA_HANDLE handle, void *arg, int result);
+static void up_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                              int result);
 #endif
 
 /****************************************************************************
@@ -427,7 +409,7 @@ static char g_uart0rxbuffer[CONFIG_UART0_RXBUFSIZE];
 static char g_uart0txbuffer[CONFIG_UART0_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART0_RXDMA
 static char g_uart0rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -436,7 +418,7 @@ static char g_uart1rxbuffer[CONFIG_UART1_RXBUFSIZE];
 static char g_uart1txbuffer[CONFIG_UART1_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART1_RXDMA
 static char g_uart1rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -445,7 +427,7 @@ static char g_uart2rxbuffer[CONFIG_UART2_RXBUFSIZE];
 static char g_uart2txbuffer[CONFIG_UART2_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART2_RXDMA
 static char g_uart2rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -454,7 +436,7 @@ static char g_uart3rxbuffer[CONFIG_UART3_RXBUFSIZE];
 static char g_uart3txbuffer[CONFIG_UART3_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART3_RXDMA
 static char g_uart3rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -463,7 +445,7 @@ static char g_uart4rxbuffer[CONFIG_UART4_RXBUFSIZE];
 static char g_uart4txbuffer[CONFIG_UART4_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART4_RXDMA
 static char g_uart4rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -472,7 +454,7 @@ static char g_uart5rxbuffer[CONFIG_UART5_RXBUFSIZE];
 static char g_uart5txbuffer[CONFIG_UART5_TXBUFSIZE];
 # ifdef CONFIG_KINETIS_UART5_RXDMA
 static char g_uart5rxfifo[RXDMA_BUFFER_SIZE]
-  __attribute__((aligned(ARMV7M_DCACHE_LINESIZE)));
+  aligned_data(ARMV7M_DCACHE_LINESIZE);
 # endif
 #endif
 
@@ -944,7 +926,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
   int result;
   uint8_t regval;
-  DMA_HANDLE rxdma = NULL;
+  DMACH_HANDLE rxdma = NULL;
 
   /* Do the basic UART setup first, unless we are the console */
 
@@ -959,10 +941,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
   /* Acquire the DMA channel. */
 
-  rxdma = kinetis_dmachannel(priv->rxdma_reqsrc,
-                             priv->uartbase + KINETIS_UART_D_OFFSET,
-                             KINETIS_DMA_DATA_SZ_8BIT,
-                             KINETIS_DMA_DIRECTION_PERIPHERAL_TO_MEMORY);
+  rxdma = kinetis_dmach_alloc(priv->rxdma_reqsrc | DMAMUX_CHCFG_ENBL, 0);
   if (rxdma == NULL)
     {
       return -EBUSY;
@@ -970,8 +949,21 @@ static int up_dma_setup(struct uart_dev_s *dev)
 
   /* Configure for circular DMA reception into the RX FIFO */
 
-  kinetis_dmasetup(rxdma, (uint32_t)priv->rxfifo, RXDMA_BUFFER_SIZE,
-                   SERIAL_DMA_CONTROL_WORD);
+  struct kinetis_edma_xfrconfig_s config;
+  config.saddr  = priv->uartbase + KINETIS_UART_D_OFFSET;
+  config.daddr  = (uint32_t) priv->rxfifo;
+  config.soff   = 0;
+  config.doff   = 1;
+  config.iter   = RXDMA_BUFFER_SIZE;
+  config.flags  = EDMA_CONFIG_LINKTYPE_LINKNONE | EDMA_CONFIG_LOOPDEST;
+  config.ssize  = EDMA_8BIT;
+  config.dsize  = EDMA_8BIT;
+  config.ttype  = EDMA_PERIPH2MEM;
+  config.nbytes = 1;
+#ifdef CONFIG_KINETIS_EDMA_ELINK
+  config.linkch = NULL;
+#endif
+  kinetis_dmach_xfrsetup(rxdma, &config);
 
   /* Reset our DMA shadow pointer to match the address just programmed
    * above.
@@ -990,7 +982,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
    * worth of time to claim bytes before they are overwritten.
    */
 
-  kinetis_dmastart(rxdma, up_dma_rxcallback, (void *)dev);
+  kinetis_dmach_start(rxdma, up_dma_rxcallback, (void *)dev);
   priv->rxdma = rxdma;
   return OK;
 }
@@ -1031,8 +1023,7 @@ static void up_shutdown(struct uart_dev_s *dev)
 static void up_dma_shutdown(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  DMA_HANDLE rxdma = priv->rxdma;
-  priv->rxdma = NULL;
+  DMACH_HANDLE rxdma = priv->rxdma;
 
   /* Perform the normal UART shutdown */
 
@@ -1040,11 +1031,13 @@ static void up_dma_shutdown(struct uart_dev_s *dev)
 
   /* Stop the DMA channel */
 
-  kinetis_dmastop(rxdma);
+  kinetis_dmach_stop(rxdma);
 
   /* Release the DMA channel */
 
-  kinetis_dmafree(rxdma);
+  kinetis_dmach_free(rxdma);
+
+  priv->rxdma = NULL;
 }
 #endif
 
@@ -1837,7 +1830,7 @@ static int up_dma_nextrx(struct up_dev_s *priv)
 {
   size_t dmaresidual;
 
-  dmaresidual = kinetis_dmaresidual(priv->rxdma);
+  dmaresidual = kinetis_dmach_getcount(priv->rxdma);
 
   return (RXDMA_BUFFER_SIZE - (int)dmaresidual) % RXDMA_BUFFER_SIZE;
 }
@@ -1958,7 +1951,8 @@ static bool up_txempty(struct uart_dev_s *dev)
  ****************************************************************************/
 
 #ifdef SERIAL_HAVE_DMA
-static void up_dma_rxcallback(DMA_HANDLE handle, void *arg, int result)
+static void up_dma_rxcallback(DMACH_HANDLE handle, void *arg, bool done,
+                              int result)
 {
   struct uart_dev_s *dev = (struct uart_dev_s *)arg;
 
@@ -2095,42 +2089,42 @@ void kinetis_serial_dma_poll(void)
 #ifdef CONFIG_KINETIS_UART0_RXDMA
   if (g_uart0priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart0priv.rxdma, (void *)&g_uart0port, 0);
+      up_dma_rxcallback(g_uart0priv.rxdma, (void *)&g_uart0port, false, 0);
     }
 #endif
 
 #ifdef CONFIG_KINETIS_UART1_RXDMA
   if (g_uart1priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart1priv.rxdma, (void *)&g_uart1port, 0);
+      up_dma_rxcallback(g_uart1priv.rxdma, (void *)&g_uart1port, false, 0);
     }
 #endif
 
 #ifdef CONFIG_KINETIS_UART2_RXDMA
   if (g_uart2priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart2priv.rxdma, (void *)&g_uart2port, 0);
+      up_dma_rxcallback(g_uart2priv.rxdma, (void *)&g_uart2port, false, 0);
     }
 #endif
 
 #ifdef CONFIG_KINETIS_UART3_RXDMA
   if (g_uart3priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart3priv.rxdma, (void *)&g_uart3port, 0);
+      up_dma_rxcallback(g_uart3priv.rxdma, (void *)&g_uart3port, false, 0);
     }
 #endif
 
 #ifdef CONFIG_KINETIS_UART4_RXDMA
   if (g_uart4priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart4priv.rxdma, (void *)&g_uart4port, 0);
+      up_dma_rxcallback(g_uart4priv.rxdma, (void *)&g_uart4port, false, 0);
     }
 #endif
 
 #ifdef CONFIG_KINETIS_UART5_RXDMA
   if (g_uart5priv.rxdma != NULL)
     {
-      up_dma_rxcallback(g_uart5priv.rxdma, (void *)&g_uart5port, 0);
+      up_dma_rxcallback(g_uart5priv.rxdma, (void *)&g_uart5port, false, 0);
     }
 #endif
 

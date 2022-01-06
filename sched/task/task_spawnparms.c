@@ -26,7 +26,9 @@
 
 #include <fcntl.h>
 #include <spawn.h>
+#include <assert.h>
 #include <debug.h>
+#include <errno.h>
 
 #include <nuttx/semaphore.h>
 #include <nuttx/signal.h>
@@ -125,6 +127,10 @@ static inline int nxspawn_open(FAR struct spawn_open_file_action_s *action)
       if (ret < 0)
         {
           serr("ERROR: dup2 failed: %d\n", ret);
+        }
+      else
+        {
+          ret = OK;
         }
 
       sinfo("Closing fd=%d\n", fd);

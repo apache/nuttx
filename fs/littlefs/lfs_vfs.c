@@ -141,6 +141,7 @@ const struct mountpt_operations littlefs_operations =
   littlefs_sync,          /* sync */
   littlefs_dup,           /* dup */
   littlefs_fstat,         /* fstat */
+  NULL,                   /* fchstat */
   littlefs_truncate,      /* truncate */
 
   littlefs_opendir,       /* opendir */
@@ -156,7 +157,8 @@ const struct mountpt_operations littlefs_operations =
   littlefs_mkdir,         /* mkdir */
   littlefs_rmdir,         /* rmdir */
   littlefs_rename,        /* rename */
-  littlefs_stat           /* stat */
+  littlefs_stat,          /* stat */
+  NULL                    /* chstat */
 };
 
 /****************************************************************************
@@ -335,7 +337,7 @@ static int littlefs_close(FAR struct file *filep)
 
   if (--priv->refs <= 0)
     {
-      lfs_file_close(&fs->lfs, &priv->file);
+      ret = lfs_file_close(&fs->lfs, &priv->file);
     }
 
   littlefs_semgive(fs);
@@ -344,7 +346,7 @@ static int littlefs_close(FAR struct file *filep)
       kmm_free(priv);
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
@@ -1017,12 +1019,14 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
   fs->cfg.prog           = littlefs_write_block;
   fs->cfg.erase          = littlefs_erase_block;
   fs->cfg.sync           = littlefs_sync_block;
-  fs->cfg.read_size      = fs->geo.blocksize;
+  fs->cfg.read_size      = fs->geo.blocksize *
+                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
   fs->cfg.prog_size      = fs->geo.blocksize;
   fs->cfg.block_size     = fs->geo.erasesize;
   fs->cfg.block_count    = fs->geo.neraseblocks;
-  fs->cfg.block_cycles   = 500;
-  fs->cfg.cache_size     = fs->geo.blocksize;
+  fs->cfg.block_cycles   = CONFIG_FS_LITTLEFS_BLOCK_CYCLE;
+  fs->cfg.cache_size     = fs->geo.blocksize *
+                           CONFIG_FS_LITTLEFS_BLOCK_FACTOR;
   fs->cfg.lookahead_size = lfs_min(lfs_alignup(fs->cfg.block_count, 64) / 8,
                                    fs->cfg.read_size);
 

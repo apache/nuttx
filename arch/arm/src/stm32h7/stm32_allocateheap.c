@@ -79,7 +79,7 @@
  *      Define CONFIG_STM32H7_DTCMEXCLUDE to exclude the DTCM from heap.
  *      +1 to CONFIG_MM_REGIONS if you want to use DTCM.
  *
- * - External SDRAM can be connected to the FMC peripherial. Initialization
+ * - External SDRAM can be connected to the FMC peripheral. Initialization
  *      of FMC is done as arm_addregion() will invoke stm32_fmc_init().
  *      Please read the comment in stm32_fmc.c how to initialize FMC
  *      correctly.
@@ -91,7 +91,7 @@
  *      - BOARD_SDRAM2_SIZE, if defined, declares the size of SDRAM
  *              at address STM32_FMC_BANK6. +1 to CONFIG_MM_REGIONS.
  *
- * - Additionaly, you may use the following options to add one more region
+ * - Additionally, you may use the following options to add one more region
  *      of memory to system heap:
  *
  *      - CONFIG_ARCH_HAVE_HEAP2=y

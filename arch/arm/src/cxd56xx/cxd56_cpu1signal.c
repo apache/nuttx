@@ -26,7 +26,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sched.h>
-#include <pthread.h>
+#include <nuttx/kthread.h>
 #include <debug.h>
 
 #include "cxd56_icc.h"

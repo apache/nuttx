@@ -20,28 +20,28 @@
 
 /* The S32K118EVB has one RGB LED:
  *
- *   RedLED   PTD16 (FTM0CH1)
- *   GreenLED PTD15 (FTM0CH0)
- *   BlueLED  PTE8  (FTM0CH6)
+ *   RedLED    PTD16  (FTM0 CH1)
+ *   GreenLED  PTD15  (FTM0 CH0)
+ *   BlueLED   PTE8   (FTM0 CH6)
  *
  * An output of '1' illuminates the LED.
  *
  * If CONFIG_ARCH_LEDs is defined, then NuttX will control the LED on board
- * the Freedom K66F.  The following definitions describe how NuttX controls
- * the LEDs:
+ * the S32K118EVB.  The following definitions describe how NuttX controls the
+ * LEDs:
  *
- *   SYMBOL                Meaning                 LED state
- *                                                 RED   GREEN  BLUE
- *   -------------------  -----------------------  -----------------
- *   LED_STARTED          NuttX has been started    OFF  OFF  OFF
- *   LED_HEAPALLOCATE     Heap has been allocated   OFF  OFF  ON
- *   LED_IRQSENABLED      Interrupts enabled        OFF  OFF  ON
- *   LED_STACKCREATED     Idle stack created        OFF  ON   OFF
- *   LED_INIRQ            In an interrupt          (no change)
- *   LED_SIGNAL           In a signal handler      (no change)
- *   LED_ASSERTION        An assertion failed      (no change)
- *   LED_PANIC            The system has crashed    FLASH OFF OFF
- *   LED_IDLE             K66 is in sleep mode     (Optional, not used)
+ *   SYMBOL            Meaning                    LED state
+ *                                                RED    GREEN  BLUE
+ *   ----------------  ------------------------  --------------------
+ *   LED_STARTED       NuttX has been started     OFF    OFF    OFF
+ *   LED_HEAPALLOCATE  Heap has been allocated    OFF    OFF    ON
+ *   LED_IRQSENABLED   Interrupts enabled         OFF    OFF    ON
+ *   LED_STACKCREATED  Idle stack created         OFF    ON     OFF
+ *   LED_INIRQ         In an interrupt           (No change)
+ *   LED_SIGNAL        In a signal handler       (No change)
+ *   LED_ASSERTION     An assertion failed       (No change)
+ *   LED_PANIC         The system has crashed     FLASH  OFF    OFF
+ *   LED_IDLE          S32K118 is in sleep mode  (Optional, not used)
  */
 
 /****************************************************************************
@@ -52,18 +52,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <debug.h>
 
 #include <nuttx/board.h>
-#include <arch/board/board.h>
-
-#include "arm_arch.h"
-#include "arm_internal.h"
 
 #include "s32k1xx_pin.h"
-#include "s32k118evb.h"
 
-#include <arch/board/board.h>
+#include "s32k118evb.h"
 
 #ifdef CONFIG_ARCH_LEDS
 
@@ -73,11 +67,11 @@
 
 /* Summary of all possible settings */
 
-#define LED_NOCHANGE      0 /* LED_IRQSENABLED, LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
-#define LED_OFF_OFF_OFF   1 /* LED_STARTED */
-#define LED_OFF_OFF_ON    2 /* LED_HEAPALLOCATE */
-#define LED_OFF_ON_OFF    3 /* LED_STACKCREATED */
-#define LED_ON_OFF_OFF    4 /* LED_PANIC */
+#define LED_NOCHANGE     0 /* LED_IRQSENABLED, LED_INIRQ, LED_SIGNAL, LED_ASSERTION */
+#define LED_OFF_OFF_OFF  1 /* LED_STARTED */
+#define LED_OFF_OFF_ON   2 /* LED_HEAPALLOCATE */
+#define LED_OFF_ON_OFF   3 /* LED_STACKCREATED */
+#define LED_ON_OFF_OFF   4 /* LED_PANIC */
 
 /****************************************************************************
  * Public Functions
@@ -127,6 +121,8 @@ void board_autoled_on(int led)
             break;
         }
 
+      /* An output of '1' illuminates the LED */
+
       s32k1xx_gpiowrite(GPIO_LED_R, redon);
       s32k1xx_gpiowrite(GPIO_LED_G, greenon);
       s32k1xx_gpiowrite(GPIO_LED_B, blueon);
@@ -141,6 +137,8 @@ void board_autoled_off(int led)
 {
   if (led == LED_ON_OFF_OFF)
     {
+      /* An output of '1' illuminates the LED */
+
       s32k1xx_gpiowrite(GPIO_LED_R, true);
       s32k1xx_gpiowrite(GPIO_LED_G, false);
       s32k1xx_gpiowrite(GPIO_LED_B, false);

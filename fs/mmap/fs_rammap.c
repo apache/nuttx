@@ -46,34 +46,14 @@
 
 /* This is the list of all mapped files */
 
-struct fs_allmaps_s g_rammaps;
+struct fs_allmaps_s g_rammaps =
+{
+  SEM_INITIALIZER(1)
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: rammap_initialize
- *
- * Description:
- *   Verified that this capability has been initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void rammap_initialize(void)
-{
-  if (!g_rammaps.initialized)
-    {
-      nxsem_init(&g_rammaps.exclsem, 0, 1);
-      g_rammaps.initialized = true;
-    }
-}
 
 /****************************************************************************
  * Name: rammmap
@@ -82,14 +62,15 @@ void rammap_initialize(void)
  *   Support simulation of memory mapped files by copying files into RAM.
  *
  * Input Parameters:
- *   fd      file descriptor of the backing file -- required.
+ *   filep   file descriptor of the backing file -- required.
  *   length  The length of the mapping.  For exception #1 above, this length
  *           ignored:  The entire underlying media is always accessible.
  *   offset  The offset into the file to map
+ *   kernel  kmm_zalloc or kumm_zalloc
+ *   mapped  The pointer to the mapped area
  *
  * Returned Value:
- *   On success, rammmap() returns a pointer to the mapped area. On error,
- *   the value MAP_FAILED is returned, and errno is set  appropriately.
+ *  On success, rammmap returns 0. Otherwise errno is returned appropriately.
  *
  *     EBADF
  *      'fd' is not a valid file descriptor.
@@ -100,7 +81,8 @@ void rammap_initialize(void)
  *
  ****************************************************************************/
 
-FAR void *rammap(int fd, size_t length, off_t offset)
+int rammap(FAR struct file *filep, size_t length,
+           off_t offset, bool kernel, FAR void **mapped)
 {
   FAR struct fs_rammap_s *map;
   FAR uint8_t *alloc;
@@ -124,12 +106,13 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 
   /* Allocate a region of memory of the specified size */
 
-  alloc = (FAR uint8_t *)kumm_malloc(sizeof(struct fs_rammap_s) + length);
+  alloc = kernel ?
+    kmm_malloc(sizeof(struct fs_rammap_s) + length) :
+    kumm_malloc(sizeof(struct fs_rammap_s) + length);
   if (!alloc)
     {
       ferr("ERROR: Region allocation failed, length: %d\n", (int)length);
-      ret = -ENOMEM;
-      goto errout;
+      return -ENOMEM;
     }
 
   /* Initialize the region */
@@ -142,7 +125,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 
   /* Seek to the specified file offset */
 
-  fpos = nx_seek(fd, offset,  SEEK_SET);
+  fpos = file_seek(filep, offset, SEEK_SET);
   if (fpos < 0)
     {
       /* Seek failed... errno has already been set, but EINVAL is probably
@@ -159,7 +142,7 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   rdbuffer = map->addr;
   while (length > 0)
     {
-      nread = nx_read(fd, rdbuffer, length);
+      nread = file_read(filep, rdbuffer, length);
       if (nread < 0)
         {
           /* Handle the special case where the read was interrupted by a
@@ -197,7 +180,6 @@ FAR void *rammap(int fd, size_t length, off_t offset)
 
   /* Add the buffer to the list of regions */
 
-  rammap_initialize();
   ret = nxsem_wait(&g_rammaps.exclsem);
   if (ret < 0)
     {
@@ -208,14 +190,20 @@ FAR void *rammap(int fd, size_t length, off_t offset)
   g_rammaps.head = map;
 
   nxsem_post(&g_rammaps.exclsem);
-  return map->addr;
+  *mapped = map->addr;
+  return OK;
 
 errout_with_region:
-  kumm_free(alloc);
+  if (kernel)
+    {
+      kmm_free(alloc);
+    }
+  else
+    {
+      kumm_free(alloc);
+    }
 
-errout:
-  set_errno(-ret);
-  return MAP_FAILED;
+  return ret;
 }
 
 #endif /* CONFIG_FS_RAMMAP */

@@ -53,6 +53,22 @@
 
 /* Built-in functions */
 
+/* The <stddef.h> header shall define the following macros:
+ *
+ * offsetof(type, member-designator)
+ *   Integer constant expression of type size_t, the value of which is the
+ *   offset in bytes to the structure member (member-designator), from the
+ *   beginning of its structure (type).
+ *
+ *     NOTE: This version of offsetof() depends on behaviors that could be
+ *     undefined for some compilers.  It would be better to use a builtin
+ *     function if one exists.
+ *
+ * Reference: Opengroup.org
+ */
+
+#  define offsetof(a, b) __builtin_offsetof(a, b)
+
 /* GCC 4.x have __builtin_ctz(|l|ll) and __builtin_clz(|l|ll). These count
  * trailing/leading zeros of input number and typically will generate few
  * fast bit-counting instructions. Inputting zero to these functions is
@@ -143,6 +159,38 @@
 #  define inline_function __attribute__ ((always_inline,no_instrument_function))
 #  define noinline_function __attribute__ ((noinline))
 
+/* The noinstrument_function attribute informs GCC don't instrument it */
+
+#  define noinstrument_function __attribute__ ((no_instrument_function))
+
+/* The nostackprotect_function attribute disables stack protection in
+ * sensitive functions, e.g., stack coloration routines.
+ */
+
+#if defined(__has_attribute)
+#  if __has_attribute(no_stack_protector)
+#    define nostackprotect_function __attribute__ ((no_stack_protector))
+#  endif
+#endif
+
+/* nostackprotect_function definition for older versions of GCC and Clang.
+ * Note that Clang does not support setting per-function optimizations,
+ * simply disable the entire optimization pass for the required function.
+ */
+
+#ifndef nostackprotect_function
+#  if defined(__clang__)
+#    define nostackprotect_function __attribute__ ((optnone))
+#  else
+#    define nostackprotect_function __attribute__ ((__optimize__ ("-fno-stack-protector")))
+#  endif
+#endif
+
+/* The unsued code or data */
+
+#  define unused_code __attribute__((unused))
+#  define unused_data __attribute__((unused))
+
 /* Some versions of GCC have a separate __syslog__ format.
  * http://mail-index.netbsd.org/source-changes/2015/10/14/msg069435.html
  * Use it if available. Otherwise, assume __printf__ accepts %m.
@@ -152,6 +200,7 @@
 #    define __syslog__ __printf__
 #  endif
 
+#  define formatlike(a) __attribute__((__format_arg__ (a)))
 #  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
 #  define sysloglike(a, b) __attribute__((__format__ (__syslog__, a, b)))
 #  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
@@ -163,6 +212,13 @@
 #  define NEAR
 #  define DSEG
 #  define CODE
+
+/* Define these here and allow specific architectures to override as needed */
+
+#  define CONFIG_HAVE_LONG_LONG 1
+#  define CONFIG_HAVE_FLOAT 1
+#  define CONFIG_HAVE_DOUBLE 1
+#  define CONFIG_HAVE_LONG_DOUBLE 1
 
 /* Handle cases where sizeof(int) is 16-bits, sizeof(long) is 32-bits, and
  * pointers are 16-bits.
@@ -252,6 +308,30 @@
 #   define CONFIG_PTR_IS_NOT_INT 1
 # endif
 
+#elif defined(_EZ80ACCLAIM)
+
+/* No I-space access qualifiers */
+
+#  define IOBJ
+#  define IPTR
+
+/* Select the large, 24-bit addressing model */
+
+#  undef  CONFIG_SMALL_MEMORY
+
+/* int is 24-bits, long is 32-bits */
+
+#  define CONFIG_LONG_IS_NOT_INT 1
+
+/* pointers are 24-bits too */
+
+#  undef  CONFIG_PTR_IS_NOT_INT
+
+/* the ez80 stdlib doesn't support doubles */
+
+#  undef  CONFIG_HAVE_DOUBLE
+#  undef  CONFIG_HAVE_LONG_DOUBLE
+
 #else
 
 /* No I-space access qualifiers */
@@ -270,6 +350,7 @@
 /* Pointers and int are the same size (32-bits) */
 
 #  undef  CONFIG_PTR_IS_NOT_INT
+
 #endif
 
 /* ISO C11 supports anonymous (unnamed) structures and unions, added in
@@ -293,11 +374,6 @@
 #    define CONFIG_HAVE_ANONYMOUS_STRUCT 1
 #    define CONFIG_HAVE_ANONYMOUS_UNION 1
 #  endif
-
-#  define CONFIG_HAVE_LONG_LONG 1
-#  define CONFIG_HAVE_FLOAT 1
-#  define CONFIG_HAVE_DOUBLE 1
-#  define CONFIG_HAVE_LONG_DOUBLE 1
 
 /* Indicate that a local variable is not used */
 
@@ -371,7 +447,13 @@
 
 #  define inline_function
 #  define noinline_function
+#  define noinstrument_function
+#  define nostackprotect_function
 
+#  define unused_code
+#  define unused_data
+
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -449,6 +531,8 @@
 
 #  define UNUSED(a) ((void)(1 || (a)))
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* Zilog-specific definitions ***********************************************/
 
 #elif defined(__ZILOG__)
@@ -503,6 +587,11 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define noinstrument_function
+#  define nostackprotect_function
+#  define unused_code
+#  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -580,6 +669,8 @@
 
 #  define UNUSED(a) ((void)(1 || (a)))
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
@@ -607,6 +698,11 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define noinstrument_function
+#  define nostackprotect_function
+#  define unused_code
+#  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -640,6 +736,8 @@
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
 /* Unknown compiler *********************************************************/
 
 #else
@@ -666,6 +764,11 @@
 #  define naked_function
 #  define inline_function
 #  define noinline_function
+#  define noinstrument_function
+#  define nostackprotect_function
+#  define unused_code
+#  define unused_data
+#  define formatlike(a)
 #  define printflike(a, b)
 #  define sysloglike(a, b)
 #  define scanflike(a, b)
@@ -687,6 +790,8 @@
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
 #  define UNUSED(a) ((void)(1 || (a)))
+
+#  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 #endif
 

@@ -22,7 +22,7 @@
 
 /* Ordering Code Detail:
  *
- * AT 45DB 16 1 D – SS U
+ * AT 45DB 16 1 D   SS U
  * |  |    |  | |   |  `- Device grade
  * |  |    |  | |   `- Package Option
  * |  |    |  | `- Device revision
@@ -805,6 +805,21 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd,
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->npages;
+              info->sectorsize  = 1 << priv->pageshift;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
           /* Take the lock so that we have exclusive access to the bus, then
@@ -822,7 +837,6 @@ static int at45db_ioctl(FAR struct mtd_dev_s *mtd,
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

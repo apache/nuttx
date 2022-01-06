@@ -33,6 +33,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 #include <fcntl.h>
@@ -94,10 +95,6 @@
 #define CONFIG_DEFAULT_PHY_CFG0 \
   (PHY_STAGSELECT | PHY_HSFALLCNTRL | PHY_IHSTX(0xc) | PHY_INHSRFRED | \
    PHY_INHSIPLUS | PHY_INHSDRVSLEW| PHY_INLFSFBCAP)
-
-#ifndef __aligned
-#  define __aligned(x) __attribute__((aligned(x)))
-#endif
 
 /* Debug ********************************************************************/
 
@@ -555,9 +552,9 @@ static struct cxd56_usbdev_s g_usbdev;
 
 /* DMA Descriptors for each endpoints */
 
-static struct cxd56_setup_desc_s __aligned(4) g_ep0setup;
-static struct cxd56_data_desc_s __aligned(4) g_ep0in;
-static struct cxd56_data_desc_s __aligned(4) g_ep0out;
+static struct cxd56_setup_desc_s aligned_data(4) g_ep0setup;
+static struct cxd56_data_desc_s aligned_data(4) g_ep0in;
+static struct cxd56_data_desc_s aligned_data(4) g_ep0out;
 
 /* Summarizes information about all CXD56 endpoints */
 
@@ -755,7 +752,7 @@ static int cxd56_epwrite(FAR struct cxd56_ep_s *privep, FAR uint8_t *buf,
       return 0;
     }
 
-  desc->buf    = (uint32_t)(uintptr_t)buf;
+  desc->buf    = CXD56_PHYSADDR(buf);
   desc->status = nbytes | DESC_LAST; /* always last descriptor */
 
   /* Set Poll bit to ready to send */
@@ -1042,7 +1039,7 @@ static int cxd56_rdrequest(FAR struct cxd56_ep_s *privep)
 
   usbtrace(TRACE_READ(privep->epphy), privep->ep.maxpacket);
 
-  desc->buf    = (uint32_t)(uintptr_t)privreq->req.buf;
+  desc->buf    = CXD56_PHYSADDR(privreq->req.buf);
   desc->status = privep->ep.maxpacket | DESC_LAST;
 
   /* Ready to receive next packet */
@@ -2023,12 +2020,12 @@ static void cxd56_ep0hwinitialize(FAR struct cxd56_usbdev_s *priv)
   memset(&g_ep0in, 0, sizeof(g_ep0in));
   memset(&g_ep0out, 0, sizeof(g_ep0out));
 
-  g_ep0out.buf    = (uint32_t)(uintptr_t)g_ep0outbuffer;
+  g_ep0out.buf    = CXD56_PHYSADDR(g_ep0outbuffer);
   g_ep0out.status = CXD56_EP0MAXPACKET | DESC_LAST;
 
-  putreg32((uint32_t)(uintptr_t)&g_ep0setup, CXD56_USB_OUT_EP_SETUP(0));
-  putreg32((uint32_t)(uintptr_t)&g_ep0in, CXD56_USB_IN_EP_DATADESC(0));
-  putreg32((uint32_t)(uintptr_t)&g_ep0out, CXD56_USB_OUT_EP_DATADESC(0));
+  putreg32(CXD56_PHYSADDR(&g_ep0setup), CXD56_USB_OUT_EP_SETUP(0));
+  putreg32(CXD56_PHYSADDR(&g_ep0in), CXD56_USB_IN_EP_DATADESC(0));
+  putreg32(CXD56_PHYSADDR(&g_ep0out), CXD56_USB_OUT_EP_DATADESC(0));
 
   /* Clear all interrupts */
 
@@ -2253,12 +2250,12 @@ static int cxd56_epconfigure(FAR struct usbdev_ep_s *ep,
 
   if (privep->in)
     {
-      putreg32((uint32_t)(uintptr_t)privep->desc,
+      putreg32(CXD56_PHYSADDR(privep->desc),
                CXD56_USB_IN_EP_DATADESC(privep->epphy));
     }
   else
     {
-      putreg32((uint32_t)(uintptr_t)privep->desc,
+      putreg32(CXD56_PHYSADDR(privep->desc),
                CXD56_USB_OUT_EP_DATADESC(privep->epphy));
     }
 
@@ -2629,12 +2626,12 @@ static int cxd56_allocepbuffer(FAR struct cxd56_ep_s *privep)
 
   if (privep->in)
     {
-      putreg32((uint32_t)(uintptr_t)privep->desc,
+      putreg32(CXD56_PHYSADDR(privep->desc),
                CXD56_USB_IN_EP_DATADESC(privep->epphy));
     }
   else
     {
-      putreg32((uint32_t)(uintptr_t)privep->desc,
+      putreg32(CXD56_PHYSADDR(privep->desc),
                CXD56_USB_OUT_EP_DATADESC(privep->epphy));
     }
 
@@ -3339,12 +3336,12 @@ static void cxd56_usbreset(FAR struct cxd56_usbdev_s *priv)
 
       if (priv->eplist[i].in)
         {
-          putreg32((uint32_t)(uintptr_t)priv->eplist[i].desc,
+          putreg32(CXD56_PHYSADDR(priv->eplist[i].desc),
                    CXD56_USB_IN_EP_DATADESC(priv->eplist[i].epphy));
         }
       else
         {
-          putreg32((uint32_t)(uintptr_t)priv->eplist[i].desc,
+          putreg32(CXD56_PHYSADDR(priv->eplist[i].desc),
                    CXD56_USB_OUT_EP_DATADESC(priv->eplist[i].epphy));
         }
 

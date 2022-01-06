@@ -28,6 +28,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/irq.h>
 #include <nuttx/signal.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -181,7 +182,7 @@ static int cxd56_farapidonehandler(int cpuid, int protoid,
  * Public Functions
  ****************************************************************************/
 
-__attribute__((used))
+unused_code
 void farapi_main(int id, void *arg, struct modulelist_s *mlist)
 {
   struct farmsg_s msg;

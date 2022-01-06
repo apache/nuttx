@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-#menu "Locale Support"
+menu "Locale Support"
 
 config LIBC_LOCALE
 	bool "Enable I18N (LOCALE) support"
@@ -11,4 +11,30 @@ config LIBC_LOCALE
 	---help---
 		By default, i18n (locale) support is disabled.
 
-#endmenu # Locale Support
+if LIBC_LOCALE
+
+config LIBC_LOCALE_CATALOG
+	bool "Enable X/Open Message Catalog"
+	depends on !DISABLE_ENVIRON
+	default n
+	---help---
+		Enable catopen, catgets and catclose support.
+
+config LIBC_LOCALE_GETTEXT
+	bool "Enable GNU gettext(libintl)"
+	depends on !DISABLE_ENVIRON
+	default n
+	---help---
+		Enable gettext, textdomain and bindtextdomain support.
+
+config LIBC_LOCALE_PATH
+	string "The default search path for message catalog file"
+	depends on LIBC_LOCALE_CATALOG || LIBC_LOCALE_GETTEXT
+	default "/etc/locale"
+	---help---
+		This is the default search path to the location where
+		the message catalog file is expected to be found.
+
+endif
+
+endmenu # Locale Support

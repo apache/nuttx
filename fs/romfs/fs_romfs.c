@@ -106,6 +106,7 @@ const struct mountpt_operations romfs_operations =
   NULL,            /* sync */
   romfs_dup,       /* dup */
   romfs_fstat,     /* fstat */
+  NULL,            /* fchstat */
   NULL,            /* truncate */
 
   romfs_opendir,   /* opendir */
@@ -121,7 +122,8 @@ const struct mountpt_operations romfs_operations =
   NULL,            /* mkdir */
   NULL,            /* rmdir */
   NULL,            /* rename */
-  romfs_stat       /* stat */
+  romfs_stat,      /* stat */
+  NULL             /* chstat */
 };
 
 /****************************************************************************
@@ -224,10 +226,6 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
       ferr("ERROR: '%s' is a special file\n", relpath);
       goto errout_with_semaphore;
     }
-
-#ifdef CONFIG_FILE_MODE
-# warning "Missing check for privileges based on inode->i_mode"
-#endif
 
   /* Create an instance of the file private data to describe the opened
    * file.

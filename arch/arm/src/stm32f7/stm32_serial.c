@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -235,7 +236,7 @@
 
 #if defined(CONFIG_ARMV7M_DCACHE)
 #  define TXDMA_BUF_SIZE(b) (((b) + TXDMA_BUFFER_MASK) & ~TXDMA_BUFFER_MASK)
-#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE);
+#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE)
 #else
 #  define TXDMA_BUF_SIZE(b)  (b)
 #  define TXDMA_BUF_ALIGN
@@ -3335,6 +3336,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
       up_restoreusartint(priv, ie);
 
+#else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */
@@ -3641,10 +3643,10 @@ void arm_serialinit(void)
 
 #if !defined(SERIAL_HAVE_ONLY_DMA)
 #  if defined(SERIAL_HAVE_RXDMA)
-  UNUSED(g_uart_rxdma_ops);
+  UNUSED(&g_uart_rxdma_ops);
 #  endif
 #  if defined(SERIAL_HAVE_TXDMA)
-  UNUSED(g_uart_txdma_ops);
+  UNUSED(&g_uart_txdma_ops);
 #  endif
 #endif
 

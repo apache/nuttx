@@ -436,8 +436,20 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         }
         break;
 
-      case MTDIOC_XIPBASE:
-        ret = -ENOTTY; /* Bad command */
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->nblocks *
+                                  priv->erasesize / priv->blocksize;
+              info->sectorsize  = priv->blocksize;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
+            }
+        }
         break;
 
       case MTDIOC_BULKERASE:
@@ -445,6 +457,15 @@ static int filemtd_ioctl(FAR struct mtd_dev_s *dev, int cmd,
           /* Erase the entire device */
 
           filemtd_erase(dev, 0, priv->nblocks);
+          ret = OK;
+        }
+        break;
+
+      case MTDIOC_ERASESTATE:
+        {
+          FAR uint8_t *result = (FAR uint8_t *)arg;
+          *result = CONFIG_FILEMTD_ERASESTATE;
+
           ret = OK;
         }
         break;

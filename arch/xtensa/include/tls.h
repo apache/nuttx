@@ -63,10 +63,10 @@
  ****************************************************************************/
 
 #ifdef CONFIG_TLS_ALIGNED
-static inline FAR struct tls_info_s *up_tls_info(void)
+static inline struct tls_info_s *up_tls_info(void)
 {
   DEBUGASSERT(!up_interrupt_context());
-  return TLS_INFO((uintptr_t)xtensa_getsp());
+  return TLS_INFO((uintptr_t)up_getsp());
 }
 #else
 #  define up_tls_info() tls_get_info()

@@ -112,22 +112,6 @@ __start:
 	bl		board_autoled_initialize
 #endif
 
-#ifdef CONFIG_STACK_COLORATION
-	/* Write a known value to the IDLE thread stack to support stack
-	 * monitoring logic
-	 */
-
-	adr		r3, .Lstkinit
-	ldmia		r3, {r0, r1, r2}		/* R0 = start of IDLE stack; R1 = Size of tack; R2 = coloration */
-
-2:							/* Top of the loop */
-	sub		r1, r1, #1			/* R1 = Number of words remaining */
-	cmp		r1, #0				/* Check (nwords == 0) */
-	str		r2, [r0], #4			/* Save stack color word, increment stack address */
-	bne		2b				/* Bottom of the loop */
-
-#endif
-
 	/* Finally branch to the OS entry point */
 
 	mov		lr, #0				/* LR = return address (none) */
@@ -154,14 +138,6 @@ __start:
 	.long	_edata
 #endif
 
-#ifdef CONFIG_STACK_COLORATION
-	.type	.Lstkinit, %object
-.Lstkinit:
-	.long	_ebss					/* Beginning of the IDLE stack, then words of IDLE stack */
-	.long	(CONFIG_IDLETHREAD_STACKSIZE >> 2)
-	.long	STACK_COLOR				/* Stack coloration word */
-	.size	.Lstkinit, . -.Lstkinit
-#endif
 	.size	__start, .-__start
 
 	/* This global variable is unsigned long g_idle_topstack and is

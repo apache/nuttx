@@ -29,11 +29,7 @@
 
 #ifndef __ASSEMBLY__
 # include <stdint.h>
-# include <assert.h>
-# ifdef CONFIG_SMP
-#  include <stdbool.h>
-#  include <nuttx/spinlock.h>
-# endif
+# include <stdbool.h>
 #endif
 
 /* Now include architecture-specific types */
@@ -159,53 +155,6 @@ int irqchain_detach(int irq, xcpt_t isr, FAR void *arg);
 #endif
 
 /****************************************************************************
- * Name: irq_waitlock
- *
- * Description:
- *   Spin to get g_irq_waitlock, handling a known deadlock condition:
- *
- *   A deadlock may occur if enter_critical_section is called from an
- *   interrupt handler.  Suppose:
- *
- *   - CPUn is in a critical section and has the g_cpu_irqlock spinlock.
- *   - CPUm takes an interrupt and attempts to enter the critical section.
- *   - It spins waiting on g_cpu_irqlock with interrupts disabled.
- *   - CPUn calls up_cpu_pause() to pause operation on CPUm.  This will
- *     issue an inter-CPU interrupt to CPUm
- *   - But interrupts are disabled on CPUm so the up_cpu_pause() is never
- *     handled, causing the deadlock.
- *
- *   This same deadlock can occur in the normal tasking case:
- *
- *   - A task on CPUn enters a critical section and has the g_cpu_irqlock
- *     spinlock.
- *   - Another task on CPUm attempts to enter the critical section but has
- *     to wait, spinning to get g_cpu_irqlock with interrupts disabled.
- *   - The task on CPUn causes a new task to become ready-to-run and the
- *     scheduler selects CPUm.  CPUm is requested to pause via a pause
- *     interrupt.
- *   - But the task on CPUm is also attempting to enter the critical
- *     section.  Since it is spinning with interrupts disabled, CPUm cannot
- *     process the pending pause interrupt, causing the deadlock.
- *
- *   This function detects this deadlock condition while spinning with \
- *   interrupts disabled.
- *
- * Input Parameters:
- *   cpu - The index of CPU that is trying to enter the critical section.
- *
- * Returned Value:
- *   True:  The g_cpu_irqlock spinlock has been taken.
- *   False: The g_cpu_irqlock spinlock has not been taken yet, but there is
- *          a pending pause interrupt request.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SMP
-bool irq_waitlock(int cpu);
-#endif
-
-/****************************************************************************
  * Name: enter_critical_section
  *
  * Description:
@@ -213,7 +162,7 @@ bool irq_waitlock(int cpu);
  *   instrumentation):
  *
  *     Take the CPU IRQ lock and disable interrupts on all CPUs.  A thread-
- *     specific counter is increment to indicate that the thread has IRQs
+ *     specific counter is incremented to indicate that the thread has IRQs
  *     disabled and to support nested calls to enter_critical_section().
  *
  *     NOTE: Most architectures do not support disabling all CPUs from one
@@ -268,80 +217,6 @@ irqstate_t enter_critical_section(void);
 void leave_critical_section(irqstate_t flags);
 #else
 #  define leave_critical_section(f) up_irq_restore(f)
-#endif
-
-/****************************************************************************
- * Name: spin_lock_irqsave
- *
- * Description:
- *   If SMP is are enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     disable local interrupts and take the global spinlock (g_irq_spin)
- *     if the call counter (g_irq_spin_count[cpu]) equals to 0. Then the
- *     counter on the CPU is increment to allow nested call and return
- *     the interrupt state.
- *
- *     If the argument lock is specified,
- *     disable local interrupts and take the lock spinlock and return
- *     the interrupt state.
- *
- *     NOTE: This API is very simple to protect data (e.g. H/W register
- *     or internal data structure) in SMP mode. But do not use this API
- *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_save().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used
- *          and can be nested. Otherwise, nested call for the same lock
- *          would cause a deadlock
- *
- * Returned Value:
- *   An opaque, architecture-specific value that represents the state of
- *   the interrupts prior to the call to spin_lock_irqsave(lock);
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP)
-irqstate_t spin_lock_irqsave(spinlock_t *lock);
-#else
-#  define spin_lock_irqsave(l) up_irq_save()
-#endif
-
-/****************************************************************************
- * Name: spin_unlock_irqrestore
- *
- * Description:
- *   If SMP is enabled:
- *     If the argument lock is not specified (i.e. NULL),
- *     decrement the call counter (g_irq_spin_count[cpu]) and if it
- *     decrements to zero then release the spinlock (g_irq_spin) and
- *     restore the interrupt state as it was prior to the previous call to
- *     spin_lock_irqsave(NULL).
- *
- *     If the argument lock is specified, release the the lock and
- *     restore the interrupt state as it was prior to the previous call to
- *     spin_lock_irqsave(lock).
- *
- *   If SMP is not enabled:
- *     This function is equivalent to up_irq_restore().
- *
- * Input Parameters:
- *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used.
- *
- *   flags - The architecture-specific value that represents the state of
- *           the interrupts prior to the call to spin_lock_irqsave(lock);
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#if defined(CONFIG_SMP)
-void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags);
-#else
-#  define spin_unlock_irqrestore(l, f) up_irq_restore(f)
 #endif
 
 #undef EXTERN

@@ -268,6 +268,7 @@ config SMP
 	default n
 	depends on ARCH_HAVE_MULTICPU
 	depends on ARCH_HAVE_TESTSET
+	depends on ARCH_INTERRUPTSTACK != 0
 	select SPINLOCK
 	select SCHED_RESUMESCHEDULER
 	select IRQCOUNT
@@ -275,13 +276,23 @@ config SMP
 		Enables support for Symmetric Multi-Processing (SMP) on a multi-CPU
 		platform.
 
+		N.B. SMP mode requires the use of ARCH_INTERRUPTSTACK:
+
+		CPU0 thread0  ->  IRQ enter -> add thread0 to block_list -> IRQ leave(crash)
+		                                                        ||
+		                                                        /\
+		                                                       /  \
+		CPU1 thread1  ->  block_task -> take thread0 from block_list -> run thread0
+
+		CPU0 IRQ handler use thread0's stack, but thread0 may switch to CPU1, that
+		will caused IRQ handler stack corruption.
+
 if SMP
 
 config SMP_NCPUS
 	int "Number of CPUs"
 	default 4
-	range 1 32 if DEBUG_FEATURES
-	range 2 32 if !DEBUG_FEATURES
+	range 1 32
 	---help---
 		This value identifies the number of CPUs supported by the processor
 		that will be used for SMP.
@@ -471,13 +482,6 @@ config TASK_NAME_SIZE
 		will be TASK_NAME_SIZE + 1.  The default of 31 then results in
 		a align-able 32-byte allocation.
 
-config MAX_TASKS
-	int "Max number of tasks"
-	default 32
-	---help---
-		The maximum number of simultaneously active tasks. This value must be
-		a power of two.
-
 config SCHED_HAVE_PARENT
 	bool "Support parent/child task relationships"
 	default n
@@ -539,11 +543,8 @@ config PREALLOC_CHILDSTATUS
 		To prevent runaway child status allocations and to improve
 		allocation performance, child task exit status structures are pre-
 		allocated when the system boots.  This setting determines the number
-		of child status structures that will be pre-allocated.  If this
-		setting is not defined or if it is defined to be zero then a value
-		of 2*MAX_TASKS is used.
+		of child status structures that will be pre-allocated.
 
-		Note that there cannot be more than MAX_TASKS tasks in total.
 		However, the number of child status structures may need to be
 		significantly larger because this number includes the maximum number
 		of tasks that are running PLUS the number of tasks that have exit'ed
@@ -735,6 +736,58 @@ config SCHED_CRITMONITOR
 
 		The second interface simply converts an elapsed time into well known
 		units for presentation by the ProcFS file system.
+
+if SCHED_CRITMONITOR
+
+config SCHED_CRITMONITOR_MAXTIME_THREAD
+	int "THREAD max execution time"
+	default 0
+	---help---
+		Thread execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_THREAD, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_WQUEUE
+	int "WORK queue max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_THREAD
+	---help---
+		Worker execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+	int "Pre-emption (sched_lock) max holding time"
+	default SCHED_CRITMONITOR_MAXTIME_WQUEUE
+	---help---
+		Pre-emption holding time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_PREEMPTION, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_CSECTION
+	int "Csection (enter_critical_section) max holding time"
+	default SCHED_CRITMONITOR_MAXTIME_PREEMPTION
+	---help---
+		Csection holding time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_CSECTION, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_IRQ
+	int "IRQ max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_CSECTION
+	---help---
+		IRQ handler execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_IRQ, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+config SCHED_CRITMONITOR_MAXTIME_WDOG
+	int "WDOG callback max execution time"
+	default SCHED_CRITMONITOR_MAXTIME_IRQ
+	---help---
+		Wdog callback execution time should be smaller than
+		SCHED_CRITMONITOR_MAXTIME_WDOG, or system will give a warnning.
+		For debugging system lantency, 0 means disabled.
+
+endif # SCHED_CRITMONITOR
 
 config SCHED_CPULOAD
 	bool "Enable CPU load monitoring"
@@ -1077,7 +1130,7 @@ config PATH_MAX
 endmenu # Files and I/O
 
 menuconfig PRIORITY_INHERITANCE
-	bool "Enable priority inheritance "
+	bool "Enable priority inheritance"
 	default n
 	---help---
 		Set to enable support for priority inheritance on mutexes and semaphores.
@@ -1302,7 +1355,8 @@ config SIG_PREALLOC_IRQ_ACTIONS
 config SIG_EVTHREAD
 	bool "Support SIGEV_THHREAD"
 	default n
-	depends on BUILD_FLAT && SCHED_WORKQUEUE
+	depends on !BUILD_KERNEL && SCHED_WORKQUEUE
+	select LIBC_USRWORK if BUILD_PROTECTED
 	---help---
 		Built in support for the SIGEV_THREAD signal deliver method.
 
@@ -1507,11 +1561,11 @@ config SIG_SIGCONDTIMEDOUT
 config SIG_SIGWORK
 	int "SIGWORK"
 	default 17
-	depends on SCHED_WORKQUEUE || LIB_USRWORK
+	depends on SCHED_WORKQUEUE || LIBC_USRWORK
 	---help---
-		SIGWORK is a non-standard signal used to wake up the internal NuttX
-		worker thread.  This setting specifies the signal number that will be
-		used for SIGWORK.  Default: 17
+		SIGWORK is a non-standard signal used to wake up various internal
+		NuttX worker threads.  This setting specifies the signal number
+		that will be used for SIGWORK.  Default: 17
 
 endmenu # Signal Numbers
 endmenu # Signal Configuration
@@ -1545,7 +1599,7 @@ config MODULE
 	bool "Enable loadable OS modules"
 	default n
 	select LIBC_MODLIB
-	select ARCH_USE_MODULE_TEXT if ARCH_HAVE_MODULE_TEXT
+	select ARCH_USE_TEXT_HEAP if ARCH_HAVE_TEXT_HEAP
 	---help---
 		Enable support for loadable OS modules.  Default: n
 
@@ -1746,6 +1800,7 @@ config DEFAULT_TASK_STACKSIZE
 
 config IDLETHREAD_STACKSIZE
 	int "Idle thread stack size"
+	default DEFAULT_TASK_STACKSIZE if ARCH_SIM
 	default 1024
 	---help---
 		The size of the initial stack used by the IDLE thread.  The IDLE thread
@@ -1766,3 +1821,12 @@ config PTHREAD_STACK_DEFAULT
 		Default pthread stack size
 
 endmenu # Stack and heap information
+
+config SCHED_BACKTRACE
+	bool "Stack BackTrace"
+	default "n"
+	---help---
+		This option enables stack backtrace support in the NuttX
+		using the information automatically generated by the
+		compiler or architecture specific approach when ARCH_HAVE_BACKTRACE
+		is selected

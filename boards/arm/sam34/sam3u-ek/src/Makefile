@@ -26,7 +26,7 @@ ifeq ($(CONFIG_LCD),y)
 CSRCS += sam_lcd.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += sam_appinit.c
 endif
 

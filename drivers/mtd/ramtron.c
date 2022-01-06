@@ -41,6 +41,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -506,10 +507,10 @@ static inline int ramtron_readid(struct ramtron_dev_s *priv)
       UNUSED(manufacturer); /* Eliminate warnings when debug is off */
       UNUSED(memory);       /* Eliminate warnings when debug is off */
 
-      finfo(
-       "RAMTRON %s of size %d bytes (mf:%02x mem:%02x cap:%02x part:%02x)\n",
-        priv->part->name, priv->part->size,
-        manufacturer, memory, capacity, part);
+      finfo("RAMTRON %s of size %" PRIu32 " bytes (mf:%02" PRIx16 " mem:%02"
+            PRIx16 " cap:%02" PRIx16 " part:%02" PRIx16 ")\n",
+            priv->part->name, priv->part->size, manufacturer, memory,
+            capacity, part);
 
       priv->sectorshift = RAMTRON_EMULATE_SECTOR_SHIFT;
       priv->nsectors    = priv->part->size /
@@ -891,6 +892,8 @@ static ssize_t ramtron_read(FAR struct mtd_dev_s *dev,
    * enable state
    */
 
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), false);
+  SPI_SELECT(priv->dev, SPIDEV_FLASH(0), true);
   SPI_SEND(priv->dev, RAMTRON_RDSR);
   status = SPI_SEND(priv->dev, RAMTRON_DUMMY);
   if ((status & ~RAMTRON_SR_SRWD) == 0)
@@ -945,8 +948,24 @@ static int ramtron_ioctl(FAR struct mtd_dev_s *dev,
               geo->neraseblocks = priv->nsectors;
               ret               = OK;
 
-              finfo("blocksize: %d erasesize: %d neraseblocks: %d\n",
+              finfo("blocksize: %ld erasesize: %ld neraseblocks: %ld\n",
                     geo->blocksize, geo->erasesize, geo->neraseblocks);
+            }
+        }
+        break;
+
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->nsectors *
+                                  (priv->sectorshift - priv->pageshift);
+              info->sectorsize  = 1 << priv->pageshift;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+              ret               = OK;
             }
         }
         break;
@@ -970,7 +989,6 @@ static int ramtron_ioctl(FAR struct mtd_dev_s *dev,
         break;
 #endif
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

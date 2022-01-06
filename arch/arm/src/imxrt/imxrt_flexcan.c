@@ -354,7 +354,7 @@ static inline uint32_t arm_lsb(unsigned int value)
  *            classical can timings
  *
  * Returned Value:
- *   return 1 on succes, return 0 on failure
+ *   return 1 on success, return 0 on failure
  *
  ****************************************************************************/
 
@@ -470,9 +470,6 @@ static void imxrt_setfreeze(uint32_t base, uint32_t freeze);
 static uint32_t imxrt_waitmcr_change(uint32_t base,
                                        uint32_t mask,
                                        uint32_t target_state);
-static uint32_t imxrt_waitesr2_change(uint32_t base,
-                                       uint32_t mask,
-                                       uint32_t target_state);
 static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
                                     uint32_t mbi);
 
@@ -531,10 +528,10 @@ static void imxrt_reset(struct imxrt_driver_s *priv);
 
 static bool imxrt_txringfull(FAR struct imxrt_driver_s *priv)
 {
-  uint32_t mbi = RXMBCOUNT;
+  uint32_t mbi = RXMBCOUNT + 1;
   struct mb_s *mb;
 
-  while (mbi < TXMBCOUNT)
+  while (mbi < TOTALMBCOUNT)
     {
       mb = flexcan_get_mb(priv, mbi);
       if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
@@ -583,18 +580,13 @@ static int imxrt_transmit(FAR struct imxrt_driver_s *priv)
   int32_t timeout;
 #endif
 
-  if ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-      (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-      (CAN_ESR2_IMB | CAN_ESR2_VPS))
-    {
-      mbi  = ((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-        CAN_ESR2_LPTM_MASK) >> CAN_ESR2_LPTM_SHIFT);
-    }
-
+  mbi = RXMBCOUNT + 1;
   mb_bit = 1 << mbi;
 
   while (mbi < TOTALMBCOUNT)
     {
+      /* Check whether message buffer is not currently transmitting */
+
       struct mb_s *mb = flexcan_get_mb(priv, mbi);
       if (mb->cs.code != CAN_TXMB_DATAORREMOTE)
         {
@@ -771,10 +763,13 @@ static int imxrt_txpoll(struct net_driver_s *dev)
 {
   FAR struct imxrt_driver_s *priv =
     (FAR struct imxrt_driver_s *)dev->d_private;
+  irqstate_t flags;
 
   /* If the polling resulted in data that should be sent out on the network,
    * the field d_len is set to a value > 0.
    */
+
+  flags = spin_lock_irqsave(NULL);
 
   if (priv->dev.d_len > 0)
     {
@@ -790,14 +785,15 @@ static int imxrt_txpoll(struct net_driver_s *dev)
            * not, return a non-zero value to terminate the poll.
            */
 
-          if (!((getreg32(priv->base + IMXRT_CAN_ESR2_OFFSET) &
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) ==
-              (CAN_ESR2_IMB | CAN_ESR2_VPS)) || (imxrt_txringfull(priv)))
-                {
-                  return -EBUSY;
-                }
+          if (imxrt_txringfull(priv))
+            {
+              spin_unlock_irqrestore(NULL, flags);
+              return -EBUSY;
+            }
         }
     }
+
+  spin_unlock_irqrestore(NULL, flags);
 
   /* If zero is returned, the polling will continue until all connections
    * have been examined.
@@ -1006,10 +1002,13 @@ static void imxrt_txdone(FAR struct imxrt_driver_s *priv)
           NETDEV_TXDONE(&priv->dev);
 #ifdef TX_TIMEOUT_WQ
           /* We are here because a transmission completed, so the
-           * corresponding watchdog can be canceled.
+           * corresponding watchdog can be canceled
+           * mailbox be set to inactive
            */
 
-          wd_cancel(priv->txtimeout[mbi]);
+          wd_cancel(&priv->txtimeout[mbi]);
+          struct mb_s *mb = &priv->tx[mbi];
+          mb->cs.code = CAN_TXMB_INACTIVE;
 #endif
         }
 
@@ -1129,7 +1128,9 @@ static int imxrt_flexcan_interrupt(int irq, FAR void *context,
 static void imxrt_txtimeout_work(FAR void *arg)
 {
   FAR struct imxrt_driver_s *priv = (FAR struct imxrt_driver_s *)arg;
+  uint32_t flags;
   uint32_t mbi;
+  uint32_t mb_bit;
 
   struct timespec ts;
   struct timeval *now = (struct timeval *)&ts;
@@ -1140,6 +1141,8 @@ static void imxrt_txtimeout_work(FAR void *arg)
    * transmit function transmitted a new frame
    */
 
+  flags  = getreg32(priv->base + IMXRT_CAN_IFLAG1_OFFSET);
+
   for (mbi = 0; mbi < TXMBCOUNT; mbi++)
     {
       if (priv->txmb[mbi].deadline.tv_sec != 0
@@ -1147,6 +1150,14 @@ static void imxrt_txtimeout_work(FAR void *arg)
           || now->tv_usec > priv->txmb[mbi].deadline.tv_usec))
         {
           NETDEV_TXTIMEOUTS(&priv->dev);
+
+          mb_bit = 1 << (RXMBCOUNT +  mbi);
+
+          if (flags & mb_bit)
+            {
+              putreg32(mb_bit, priv->base + IMXRT_CAN_IFLAG1_OFFSET);
+            }
+
           struct mb_s *mb = &priv->tx[mbi];
           mb->cs.code = CAN_TXMB_ABORT;
           priv->txmb[mbi].pending = TX_ABORT;
@@ -1251,26 +1262,6 @@ static uint32_t imxrt_waitfreezeack_change(uint32_t base,
                                              uint32_t target_state)
 {
   return imxrt_waitmcr_change(base, CAN_MCR_FRZACK, target_state);
-}
-
-static uint32_t imxrt_waitesr2_change(uint32_t base, uint32_t mask,
-                                       uint32_t target_state)
-{
-  const uint32_t timeout = 1000;
-  uint32_t wait_ack;
-
-  for (wait_ack = 0; wait_ack < timeout; wait_ack++)
-    {
-      uint32_t state = (getreg32(base + IMXRT_CAN_ESR2_OFFSET) & mask);
-      if (state == target_state)
-        {
-          return true;
-        }
-
-      up_udelay(10);
-    }
-
-  return false;
 }
 
 static struct mb_s *flexcan_get_mb(FAR struct imxrt_driver_s *priv,
@@ -1386,9 +1377,7 @@ static void imxrt_txavail_work(FAR void *arg)
        * packet.
        */
 
-      if (imxrt_waitesr2_change(priv->base,
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS),
-                             (CAN_ESR2_IMB | CAN_ESR2_VPS)))
+      if (!imxrt_txringfull(priv))
         {
           /* No, there is space for another transfer.  Poll the network for
            * new XMIT data.
@@ -1464,7 +1453,7 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
 {
   FAR struct imxrt_driver_s *priv =
       (FAR struct imxrt_driver_s *)dev->d_private;
-
+  struct flexcan_timeseg data_timing;
   int ret;
 
   switch (cmd)
@@ -1510,7 +1499,6 @@ static int imxrt_ioctl(struct net_driver_s *dev, int cmd,
 
           if (priv->canfd_capable)
           {
-            struct flexcan_timeseg data_timing;
             data_timing.bitrate = req->data_bitrate * 1000;
             data_timing.samplep = req->data_samplep;
 

@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-VERSION ?= 2020.04.0
+VERSION ?= 2021.04.0
 
 include libmetal.defs
 include open-amp.defs
@@ -34,7 +34,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libopenamp$(LIBEXT)
 
 all: $(BIN)
-.PHONY: context depend clean distclean dirlinks
+.PHONY: context depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -45,7 +45,7 @@ $(COBJS): %$(OBJEXT): %.c
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-dirlinks::
+context::
 
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)

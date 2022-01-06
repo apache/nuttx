@@ -21,8 +21,10 @@
 CROSSDEV = riscv32-unknown-elf-
 ARCHCPUFLAGS = -march=rv32i
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),)
-MAXOPTIMIZATION ?= -Os
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # Default toolchain
@@ -47,7 +49,7 @@ ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
 endif
 
-ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += -lsupc++
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif

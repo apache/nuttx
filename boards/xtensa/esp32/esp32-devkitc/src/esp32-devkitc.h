@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
-#define __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H
+#define __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H
 
 /****************************************************************************
  * Included Files
@@ -85,7 +85,7 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library via board_app_initialize()
  *
  ****************************************************************************/
@@ -111,24 +111,6 @@ int esp32_mmcsd_initialize(int minor);
 int esp32_spiflash_init(void);
 
 /****************************************************************************
- * Name: esp32_spiflash_encrypt_test
- *
- * Description:
- *   Test ESP32 SPI Flash driver read/write with encryption.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
-void esp32_spiflash_encrypt_test(void);
-#endif
-
-/****************************************************************************
  * Name: esp32_gpio_init
  ****************************************************************************/
 
@@ -136,5 +118,24 @@ void esp32_spiflash_encrypt_test(void);
 int esp32_gpio_init(void);
 #endif
 
+/****************************************************************************
+ * Name: board_spidev_initialize
+ *
+ * Description:
+ *   Initialize SPI driver and register the /dev/spi device.
+ *
+ * Input Parameters:
+ *   bus - The SPI bus number, used to build the device path as /dev/spiN
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SPI_DRIVER
+int board_spidev_initialize(int bus);
+#endif
+
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_ESP32_CORE_SRC_ESP32_CORE_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_DEVKITC_SRC_ESP32_DEVKITC_H */

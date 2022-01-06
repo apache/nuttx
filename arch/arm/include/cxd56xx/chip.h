@@ -25,6 +25,10 @@
  * Pre-processor Prototypes
  ****************************************************************************/
 
+/* physical address conversion macro */
+
+#define CXD56_PHYSADDR(a) ((uint32_t)((uint32_t)(a) & 0x9ffffffful))
+
 #define CXD56M4_SYSH_PRIORITY_MIN     0xe0 /* All bits[7:5] set is minimum priority */
 #define CXD56M4_SYSH_PRIORITY_DEFAULT 0x80 /* Midpoint is the default */
 #define CXD56M4_SYSH_PRIORITY_MAX     0x00 /* Zero is maximum priority */

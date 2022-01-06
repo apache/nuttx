@@ -29,6 +29,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -378,7 +379,7 @@
 
 #if defined(CONFIG_ARMV7M_DCACHE)
 #  define TXDMA_BUF_SIZE(b) (((b) + TXDMA_BUFFER_MASK) & ~TXDMA_BUFFER_MASK)
-#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE);
+#  define TXDMA_BUF_ALIGN   aligned_data(ARMV7M_DCACHE_LINESIZE)
 #else
 #  define TXDMA_BUF_SIZE(b)  (b)
 #  define TXDMA_BUF_ALIGN
@@ -466,7 +467,8 @@
                DMA_SCR_MSIZE_8BITS    | \
                DMA_SCR_PBURST_SINGLE  | \
                DMA_SCR_MBURST_SINGLE  | \
-               CONFIG_USART_TXDMAPRIO)
+               CONFIG_USART_TXDMAPRIO | \
+               DMA_SCR_TRBUFF)
 
 #endif /* SERIAL_HAVE_TXDMA */
 
@@ -2220,7 +2222,7 @@ static int up_dma_setup(struct uart_dev_s *dev)
     {
       priv->txdma = stm32_dmachannel(priv->txdma_channel);
 
-      nxsem_init(&priv->txdmasem, 0, 0);
+      nxsem_init(&priv->txdmasem, 0, 1);
       nxsem_set_protocol(&priv->txdmasem, SEM_PRIO_NONE);
 
       /* Enable receive Tx DMA for the UART */
@@ -3369,16 +3371,10 @@ static void up_dma_txcallback(DMA_HANDLE handle, uint8_t status, void *arg)
 static void up_dma_txavailable(struct uart_dev_s *dev)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
-  size_t resid = 0;
-
-  resid = stm32_dmaresidual(priv->txdma);
 
   /* Only send when the DMA is idle */
 
-  if (resid != 0)
-    {
-      nxsem_wait(&priv->txdmasem);
-    }
+  nxsem_wait(&priv->txdmasem);
 
   uart_xmitchars_dma(dev);
 }
@@ -3535,6 +3531,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
       up_restoreusartint(priv, ie);
 
+#else
       /* Fake a TX interrupt here by just calling uart_xmitchars() with
        * interrupts disabled (note this may recurse).
        */

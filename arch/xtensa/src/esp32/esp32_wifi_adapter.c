@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <debug.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -37,9 +38,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <irq/irq.h>
-#include "nuttx/kmalloc.h"
+#include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
-#include "nuttx/spinlock.h"
+#include <nuttx/spinlock.h>
 #include <nuttx/irq.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/kthread.h>
@@ -55,10 +56,14 @@
 #include "hardware/esp32_dport.h"
 #include "hardware/esp32_emac.h"
 #include "hardware/esp32_soc.h"
-#include "esp32_cpuint.h"
+#include "esp32_irq.h"
 #include "esp32_wifi_adapter.h"
 #include "esp32_rt_timer.h"
 #include "esp32_wifi_utils.h"
+
+#ifdef CONFIG_PM
+#include "esp32_pm.h"
+#endif
 
 #include "espidf_wifi.h"
 
@@ -89,6 +94,24 @@
 
 #define SSID_MAX_LEN                   (32)
 #define PWD_MAX_LEN                    (64)
+
+#ifndef CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+#define CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL 3
+#endif
+
+#define DEFAULT_LISTEN_INTERVAL CONFIG_EXAMPLE_WIFI_LISTEN_INTERVAL
+
+/* CONFIG_POWER_SAVE_MODEM */
+
+#if defined(CONFIG_EXAMPLE_POWER_SAVE_MIN_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MIN_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_MAX_MODEM)
+#  define DEFAULT_PS_MODE WIFI_PS_MAX_MODEM
+#elif defined(CONFIG_EXAMPLE_POWER_SAVE_NONE)
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#else
+#  define DEFAULT_PS_MODE WIFI_PS_NONE
+#endif
 
 /****************************************************************************
  * Private Types
@@ -325,6 +348,8 @@ static uint8_t wifi_coex_get_schm_curr_period(void);
 static void *wifi_coex_get_schm_curr_phase(void);
 static int wifi_coex_set_schm_curr_phase_idx(int idx);
 static int wifi_coex_get_schm_curr_phase_idx(void);
+
+extern void coex_bt_high_prio(void);
 
 /****************************************************************************
  * Public Functions declaration
@@ -650,7 +675,7 @@ static int32_t wifi_errno_trans(int ret)
  *
  ****************************************************************************/
 
-static int esp_int_adpt_cb(int irq, void *context, FAR void *arg)
+static int esp_int_adpt_cb(int irq, void *context, void *arg)
 {
   struct irq_adpt *adapter = (struct irq_adpt *)arg;
 
@@ -821,7 +846,7 @@ static void esp32_ints_on(uint32_t mask)
 
   wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
 
-  up_enable_irq(irq);
+  up_enable_irq(ESP32_IRQ_MAC);
 }
 
 /****************************************************************************
@@ -844,7 +869,7 @@ static void esp32_ints_off(uint32_t mask)
 
   wlinfo("INFO mask=%08x irq=%d\n", mask, irq);
 
-  up_disable_irq(irq);
+  up_disable_irq(ESP32_IRQ_MAC);
 }
 
 /****************************************************************************
@@ -2071,7 +2096,7 @@ static int esp_event_id_map(int event_id)
  *
  ****************************************************************************/
 
-static void esp_evt_work_cb(FAR void *arg)
+static void esp_evt_work_cb(void *arg)
 {
   int ret;
   irqstate_t flags;
@@ -2100,7 +2125,7 @@ static void esp_evt_work_cb(FAR void *arg)
           case WIFI_ADPT_EVT_STA_START:
             wlinfo("WiFi sta start\n");
             g_sta_connected = false;
-            ret = esp_wifi_set_ps(WIFI_PS_NONE);
+            ret = esp_wifi_set_ps(DEFAULT_PS_MODE);
             if (ret)
               {
                 wlerr("Failed to close PS\n");
@@ -2287,16 +2312,9 @@ int32_t esp_event_post(esp_event_base_t event_base,
 
 uint32_t esp_get_free_heap_size(void)
 {
-  int ret;
   struct mallinfo info;
 
-  ret = mm_mallinfo(&g_mmheap, &info);
-  if (ret)
-    {
-      wlerr("Failed to create task\n");
-      return 0;
-    }
-
+  info = kmm_mallinfo();
   return info.fordblks;
 }
 
@@ -2334,24 +2352,30 @@ static void esp_dport_access_stall_other_cpu_end(void)
  * Name: wifi_apb80m_request
  *
  * Description:
- *   Don't support
+ *   Take Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_request(void)
 {
+#ifdef CONFIG_ESP32_AUTO_SLEEP
+  esp32_pm_lockacquire();
+#endif
 }
 
 /****************************************************************************
  * Name: wifi_apb80m_release
  *
  * Description:
- *   Don't support
+ *   Release Wi-Fi lock in auto-sleep
  *
  ****************************************************************************/
 
 static void wifi_apb80m_release(void)
 {
+#ifdef CONFIG_ESP32_AUTO_SLEEP
+  esp32_pm_lockrelease();
+#endif
 }
 
 /****************************************************************************
@@ -2473,6 +2497,7 @@ static void wifi_phy_enable(void)
       esp_phy_enable_clock();
       phy_set_wifi_mode_only(0);
       register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
+      coex_bt_high_prio();
     }
 
   g_phy_access_ref++;
@@ -2581,7 +2606,7 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   uint8_t crc;
   int i;
 
-  if (type > ESP_MAC_WIFI_SOFTAP)
+  if (type > ESP_MAC_BT)
     {
       wlerr("Input type is error=%d\n", type);
       return -1;
@@ -2591,12 +2616,12 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
   regval[1] = getreg32(MAC_ADDR1_REG);
 
   crc = data[6];
-  for (i = 0; i < 6; i++)
+  for (i = 0; i < MAC_LEN; i++)
     {
       mac[i] = data[5 - i];
     }
 
-  if (crc != esp_crc8(mac, 6))
+  if (crc != esp_crc8(mac, MAC_LEN))
     {
       wlerr("Failed to check MAC address CRC\n");
       return -1;
@@ -2621,6 +2646,22 @@ int32_t esp_read_mac(uint8_t *mac, esp_mac_type_t type)
           wlerr("Failed to generate SoftAP MAC\n");
           return -1;
         }
+    }
+
+  if (type == ESP_MAC_BT)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+      mac[5] += 1;
     }
 
   return 0;
@@ -3645,7 +3686,7 @@ static void *esp_realloc_internal(void *ptr, size_t size)
           return NULL;
         }
 
-      old_size = malloc_usable_size(old_ptr);
+      old_size = malloc_size(old_ptr);
       DEBUGASSERT(old_size > 0);
       memcpy(new_ptr, old_ptr, MIN(old_size, size));
       kmm_free(old_ptr);
@@ -4765,7 +4806,7 @@ void esp_wifi_free_eb(void *eb)
  *
  ****************************************************************************/
 
-int esp_wifi_notify_subscribe(pid_t pid, FAR struct sigevent *event)
+int esp_wifi_notify_subscribe(pid_t pid, struct sigevent *event)
 {
   int id;
   struct wifi_notify *notify;
@@ -4870,13 +4911,6 @@ int esp_wifi_adapter_init(void)
       return OK;
     }
 
-  ret = esp32_rt_timer_init();
-  if (ret < 0)
-    {
-      wlerr("Failed to initialize RT timer error=%d\n", ret);
-      goto errout_init_timer;
-    }
-
   sq_init(&g_wifi_evt_queue);
 
 #ifdef CONFIG_ESP32_WIFI_SAVE_PARAM
@@ -4935,9 +4969,8 @@ int esp_wifi_adapter_init(void)
 errout_init_txdone:
   esp_wifi_deinit();
 errout_init_wifi:
-  esp32_rt_timer_deinit();
-errout_init_timer:
   esp_wifi_lock(false);
+
   return ret;
 }
 
@@ -5210,9 +5243,11 @@ int esp_wifi_sta_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.sta.password, pdata, len);
 
       wifi_cfg.sta.pmf_cfg.capable = true;
+      wifi_cfg.sta.listen_interval = DEFAULT_LISTEN_INTERVAL;
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5333,6 +5368,7 @@ int esp_wifi_sta_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.sta.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.sta.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
@@ -5410,7 +5446,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
   if (set)
     {
       wifi_cfg.sta.bssid_set = true;
-      memcpy(wifi_cfg.sta.bssid, pdata, 6);
+      memcpy(wifi_cfg.sta.bssid, pdata, MAC_LEN);
 
       ret = esp_wifi_set_config(WIFI_IF_STA, &wifi_cfg);
       if (ret)
@@ -5421,7 +5457,7 @@ int esp_wifi_sta_bssid(struct iwreq *iwr, bool set)
     }
   else
     {
-      memcpy(pdata, wifi_cfg.sta.bssid, 6);
+      memcpy(pdata, wifi_cfg.sta.bssid, MAC_LEN);
     }
 
   return OK;
@@ -5583,7 +5619,7 @@ int esp_wifi_sta_auth(struct iwreq *iwr, bool set)
 
   if (set)
     {
-      return -ENOSYS;
+      return OK;
     }
   else
     {
@@ -6280,7 +6316,16 @@ int esp_wifi_softap_password(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      /* Clear the password field and copy the user password to it */
+
+      memset(wifi_cfg.ap.password, 0x0, PWD_MAX_LEN);
       memcpy(wifi_cfg.ap.password, pdata, len);
+
+      /* Enable the WPA2 password by default */
+
+      wifi_cfg.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
+
+      /* Setup the config to the SoftAP */
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);
       if (ret)
@@ -6359,6 +6404,7 @@ int esp_wifi_softap_essid(struct iwreq *iwr, bool set)
 
   if (set)
     {
+      memset(wifi_cfg.ap.ssid, 0x0, SSID_MAX_LEN);
       memcpy(wifi_cfg.ap.ssid, pdata, len);
 
       ret = esp_wifi_set_config(WIFI_IF_AP, &wifi_cfg);

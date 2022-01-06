@@ -21,6 +21,12 @@ config FS_PROCFS_REGISTER
 		Support run-time registration of the new entries in the procfs file
 		system.
 
+config FS_PROCFS_MAX_TASKS
+	int "The maxinum number of active tasks for procfs snapshot"
+	default 128
+	---help---
+		The maxinum number of active tasks for procfs snapshot.
+
 menu "Exclude individual procfs entries"
 
 config FS_PROCFS_EXCLUDE_PROCESS

@@ -334,56 +334,6 @@ config SMPS_HAVE_EFFICIENCY
 
 endif
 
-config DRIVERS_MOTOR
-	bool "Motor driver"
-	default n
-	---help---
-		Enables building of a motor upper half driver.
-
-if DRIVERS_MOTOR
-
-config MOTOR_HAVE_POSITION
-	bool "Have position control"
-	default n
-
-config MOTOR_HAVE_DIRECTION
-	bool "Have direction control"
-	default n
-
-config MOTOR_HAVE_SPEED
-	bool "Have speed control"
-	default n
-
-config MOTOR_HAVE_TORQUE
-	bool "Have torque control (rotary motors)"
-	default n
-
-config MOTOR_HAVE_FORCE
-	bool "Have force control (linear motors)"
-	default n
-
-config MOTOR_HAVE_ACCELERATION
-	bool "Have acceleration control"
-	default n
-
-config MOTOR_HAVE_DECELERATION
-	bool "Have deceleration control"
-	default n
-
-config MOTOR_HAVE_INPUT_VOLTAGE
-	bool "Have input voltage protection"
-	default n
-
-config MOTOR_HAVE_INPUT_CURRENT
-	bool "Have input current protection"
-	default n
-
-config MOTOR_HAVE_INPUT_POWER
-	bool "Have input power protection"
-	default n
-
-endif
-
 menuconfig POWER
 	bool "Power Management Support"
 	default n
@@ -414,6 +364,51 @@ config BQ2429X
 	depends on BATTERY_CHARGER
 	---help---
 		The BQ24296/BQ24297/BQ24296M are battery charger for lithium-ion batteries.
+
+config AXP202
+	bool "AXP202 Battery charger support"
+	default n
+	select I2C
+	depends on BATTERY_CHARGER
+	---help---
+		axp202 are battery charger for lithium-ion batteries.
+
+config AXP202_DC2_VOLTAGE
+	int "AXP202 DC2 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		AXP202 DC2 output voltage. 0 is disable, enable range: [700, 2275] mV.
+
+config AXP202_DC3_VOLTAGE
+	int "AXP202 DC3 output voltage"
+	default 3300
+	depends on AXP202
+	---help---
+		AXP202 DC3 output voltage. 0 is disable, enable range: [700, 3500] mV.
+
+config AXP202_LDO2_VOLTAGE
+	int "AXP202 LDO2 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		AXP202 LDO2 output voltage. 0 is disable, enable range: [1800, 3300] mV.
+
+config AXP202_LDO3_VOLTAGE
+	int "AXP202 LDO3 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		Enable LDO3 output voltage. 0 is disable, enable range: [700, 2275] mV.
+
+config AXP202_LDO4_VOLTAGE
+	int "AXP202 LDO4 output voltage"
+	default 0
+	depends on AXP202
+	---help---
+		Enable LDO4 output voltage. 0 is disable, other value: 
+			1250 1300 1400 1500 1600 1700 1800 1900 
+			2000 2500 2700 2800 3000 3100 3200 3300 mV.
 
 config MCP73871
 	bool "Microchip MCP73871 Battery charger support"
@@ -476,6 +471,10 @@ config I2C_BQ2425X
 config I2C_BQ2429X
 	bool
 	default y if BQ2429X
+
+config I2C_AXP202
+	bool
+	default y if AXP202
 
 config I2C_MAX1704X
 	bool

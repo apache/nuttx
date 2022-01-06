@@ -26,6 +26,7 @@
 #include <sched.h>
 
 #include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
@@ -68,7 +69,7 @@ int setpriority(int which, id_t who, int value)
       return ret;
     }
 
-  param.sched_priority = value;
+  param.sched_priority = NZERO - value;
 
   return sched_setparam(who, &param);
 }

@@ -45,7 +45,7 @@ if PWM_MULTICHAN
 config PWM_NCHANNELS
 	int "Number of Output Channels Per Timer"
 	default 1
-	range 1 6
+	range 1 16
 	---help---
 		Specifies the number of output channels per timer.  Each timer
 		may support fewer output channels than this value.
@@ -296,6 +296,17 @@ config RTC_RPMSG
 	default n
 	depends on OPENAMP
 	select ARCH_HAVE_RTC_SUBSECONDS
+
+config RTC_RPMSG_SERVER
+	bool "The RTC Rpmsg Role"
+	depends on OPENAMP
+
+config RTC_RPMSG_SERVER_NAME
+	string "The name of RTC Rpmsg Server"
+	depends on RTC_RPMSG
+	---help---
+		The proc name of rtc server. Client requests time from
+		specified name of remote proc.
 
 endif # RTC
 

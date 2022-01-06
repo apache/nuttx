@@ -143,6 +143,17 @@ typedef struct
     uint16_t data;
 } esp_rom_spiflash_common_cmd_t;
 
+/**
+ * Global ROM spiflash data, as used by legacy SPI flash functions
+ */
+
+struct spiflash_legacy_data_s
+{
+  esp32c3_spiflash_chip_t chip;
+  uint8_t dummy_len_plus[3];
+  uint8_t sig_matrix;
+};
+
 /*****************************************************************************
  * Public Function Prototypes
  *****************************************************************************/

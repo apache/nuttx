@@ -59,8 +59,6 @@
  * Private Functions
  ****************************************************************************/
 
-#ifdef CONFIG_ARCH_STACKDUMP
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -69,9 +67,10 @@
  * Name: riscv_stackdump
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_STACKDUMP
 static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
 {
-  uint32_t stack ;
+  uint32_t stack;
 
   for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
     {
@@ -81,33 +80,89 @@ static void riscv_stackdump(uint32_t sp, uint32_t stack_top)
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
+#else
+#  define riscv_stackdump(sp, stack_top)
+#endif
+
+/****************************************************************************
+ * Name: riscv_registerdump
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_STACKDUMP
+static inline void riscv_registerdump(volatile uint32_t *regs)
+{
+  /* Are user registers available from interrupt processing? */
+
+  _alert("EPC:%08x \n", regs[REG_EPC]);
+  _alert("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x "
+         "A6:%08x A7:%08x\n",
+        regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
+        regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
+  _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
+        regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
+        regs[REG_T4], regs[REG_T5], regs[REG_T6]);
+  _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
+         "S6:%08x S7:%08x\n",
+        regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
+        regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
+  _alert("S8:%08x S9:%08x S10:%08x S11:%08x\n",
+        regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
+#ifdef RISCV_SAVE_GP
+  _alert("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
+        regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
+        regs[REG_RA]);
+#else
+  _alert("SP:%08x FP:%08x TP:%08x RA:%08x\n",
+        regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
+#endif
+}
+#else
+#  define riscv_registerdump(reg)
+#endif
 
 /****************************************************************************
  * Name: riscv_taskdump
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
-static void riscv_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
+#if defined(CONFIG_STACK_COLORATION) || defined(CONFIG_SCHED_BACKTRACE)
+static void riscv_taskdump(struct tcb_s *tcb, void *arg)
 {
   /* Dump interesting properties of this task */
 
+  _alert(
 #if CONFIG_TASK_NAME_SIZE > 0
-  _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         "%s: "
+#endif
+         "PID=%d "
+#ifdef CONFIG_STACK_COLORATION
+         "Stack Used=%lu of %lu\n",
 #else
-  _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         "Stack=%lu\n",
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+        tcb->name,
+#endif
+        tcb->pid,
+#ifdef CONFIG_STACK_COLORATION
+        (unsigned long)up_check_tcbstack(tcb),
+#endif
         (unsigned long)tcb->adj_stack_size);
+
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(tcb->pid);
 #endif
+
+  /* Dump the registers */
+
+  riscv_registerdump(tcb->xcp.regs);
 }
-#endif
 
 /****************************************************************************
  * Name: riscv_showtasks
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
 static inline void riscv_showtasks(void)
 {
   /* Dump interesting properties of each task in the crash environment */
@@ -119,68 +174,30 @@ static inline void riscv_showtasks(void)
 #endif
 
 /****************************************************************************
- * Name: riscv_registerdump
- ****************************************************************************/
-
-static inline void riscv_registerdump(void)
-{
-  /* Are user registers available from interrupt processing? */
-
-  if (g_current_regs)
-    {
-      _alert("EPC:%08x \n",
-            g_current_regs[REG_EPC]);
-      _alert("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x "
-             "A6:%08x A7:%08x\n",
-            g_current_regs[REG_A0], g_current_regs[REG_A1],
-            g_current_regs[REG_A2], g_current_regs[REG_A3],
-            g_current_regs[REG_A4], g_current_regs[REG_A5],
-            g_current_regs[REG_A6], g_current_regs[REG_A7]);
-      _alert("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
-            g_current_regs[REG_T0], g_current_regs[REG_T1],
-            g_current_regs[REG_T2], g_current_regs[REG_T3],
-            g_current_regs[REG_T4], g_current_regs[REG_T5],
-            g_current_regs[REG_T6]);
-      _alert("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
-             "S6:%08x S7:%08x\n",
-            g_current_regs[REG_S0], g_current_regs[REG_S1],
-            g_current_regs[REG_S2], g_current_regs[REG_S3],
-            g_current_regs[REG_S4], g_current_regs[REG_S5],
-            g_current_regs[REG_S6], g_current_regs[REG_S7]);
-      _alert("S8:%08x S9:%08x S10:%08x S11:%08x\n",
-            g_current_regs[REG_S8], g_current_regs[REG_S9],
-            g_current_regs[REG_S10], g_current_regs[REG_S11]);
-#ifdef RISCV_SAVE_GP
-      _alert("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
-            g_current_regs[REG_GP], g_current_regs[REG_SP],
-            g_current_regs[REG_FP], g_current_regs[REG_TP],
-            g_current_regs[REG_RA]);
-#else
-      _alert("SP:%08x FP:%08x TP:%08x RA:%08x\n",
-            g_current_regs[REG_SP], g_current_regs[REG_FP],
-            g_current_regs[REG_TP], g_current_regs[REG_RA]);
-#endif
-    }
-}
-
-/****************************************************************************
  * Name: riscv_dumpstate
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_STACKDUMP
 static void riscv_dumpstate(void)
 {
   struct tcb_s *rtcb = running_task();
-  uint32_t sp = riscv_getsp();
+  uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   uint32_t istackbase;
   uint32_t istacksize;
 #endif
 
+  /* Show back trace */
+
+#ifdef CONFIG_SCHED_BACKTRACE
+  sched_dumpstack(rtcb->pid);
+#endif
+
   /* Dump the registers (if available) */
 
-  riscv_registerdump();
+  riscv_registerdump(CURRENT_REGS);
 
   /* Get the limits on the user stack memory */
 
@@ -189,9 +206,9 @@ static void riscv_dumpstate(void)
 
   /* Get the limits on the interrupt stack memory */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   istackbase = (uint32_t)&g_intstackalloc;
-  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~3);
+  istacksize = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
 
   /* Show interrupt stack info */
 
@@ -248,8 +265,9 @@ static void riscv_dumpstate(void)
       riscv_stackdump(ustackbase, ustackbase + ustacksize);
     }
 }
-
-#endif /* CONFIG_ARCH_STACKDUMP */
+#else
+#  define riscv_dumpstate()
+#endif
 
 /****************************************************************************
  * Name: riscv_assert
@@ -292,7 +310,7 @@ static void riscv_assert(void)
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_USBDUMP
-static int usbtrace_syslog(FAR const char *fmt, ...)
+static int usbtrace_syslog(const char *fmt, ...)
 {
   va_list ap;
 
@@ -304,7 +322,7 @@ static int usbtrace_syslog(FAR const char *fmt, ...)
   return OK;
 }
 
-static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
+static int assert_tracecallback(struct usbtrace_s *trace, void *arg)
 {
   usbtrace_trprintf(usbtrace_syslog, trace->event, trace->value);
   return 0;
@@ -321,10 +339,6 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 
 void up_assert(const char *filename, int lineno)
 {
-#if CONFIG_TASK_NAME_SIZE > 0 && defined(CONFIG_DEBUG_ALERT)
-  struct tcb_s *rtcb = running_task();
-#endif
-
   board_autoled_on(LED_ASSERTION);
 
   /* Flush any buffered SYSLOG data (from prior to the assertion) */
@@ -333,7 +347,7 @@ void up_assert(const char *filename, int lineno)
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("Assertion failed at file:%s line: %d task: %s\n",
-        filename, lineno, rtcb->name);
+         filename, lineno, running_task()->name);
 #else
   _alert("Assertion failed at file:%s line: %d\n",
         filename, lineno);
@@ -356,7 +370,7 @@ void up_assert(const char *filename, int lineno)
   syslog_flush();
 
 #ifdef CONFIG_BOARD_CRASHDUMP
-  board_crashdump(riscv_getsp(), running_task(), filename, lineno);
+  board_crashdump(up_getsp(), running_task(), filename, lineno);
 #endif
 
   riscv_assert();

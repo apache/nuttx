@@ -74,7 +74,7 @@
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library via board_app_initialize()
  *
  ****************************************************************************/
@@ -98,24 +98,6 @@ int esp32_mmcsd_initialize(int minor);
  ****************************************************************************/
 
 int esp32_spiflash_init(void);
-
-/****************************************************************************
- * Name: esp32_spiflash_encrypt_test
- *
- * Description:
- *   Test ESP32 SPI Flash driver read/write with encryption.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32_SPIFLASH_ENCRYPTION_TEST
-void esp32_spiflash_encrypt_test(void);
-#endif
 
 #endif /* __ASSEMBLY__ */
 #endif /* __BOARDS_XTENSA_ESP32_ESP32_ETHERNETKIT_SRC_ESP32_ETHERNETKIT_H */

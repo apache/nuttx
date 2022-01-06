@@ -63,6 +63,11 @@
                        * it.  */
 #endif
 
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define ftw64    ftw
+#  define nftw64   nftw
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

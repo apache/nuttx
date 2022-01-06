@@ -2,6 +2,15 @@
 # For a description of the syntax of this configuration file,
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
+config ESP32_MERGE_BINS
+	bool "Merge raw binary files into a single file"
+	default n
+	---help---
+		Merge the raw binary files into a single file for flashing to the
+		device.
+		This is only useful when the path to binary files (e.g. bootloader)
+		is provided via the ESPTOOL_BINDIR variable.
+
 config ESP32_QEMU_IMAGE
 	bool "ESP32 binary image for QEMU"
 	default n
@@ -30,22 +39,6 @@ choice ESP32_SPIFLASH_FS
 		depends on FS_LITTLEFS
 
 endchoice
-
-config ESP32_SPIFLASH_ENCRYPTION_TEST
-	bool "SPI Flash encryption test"
-	default n
-	depends on ESP32_SPIFLASH
-	select DEBUG_ASSERTIONS
-	---help---
-		Enable SPI Flash encryption test. This option will also select
-		DEBUG_ASSERTIONS to enable kernel assert macro.
-
-config ESP32_SPIFLASH_TEST_ADDRESS
-	hex "SPI Flash test address"
-	default 0x180000
-	depends on ESP32_SPIFLASH_ENCRYPTION_TEST
-	---help---
-		SPI Flash encryption test read/write address.
 
 config ESP32_LCD_OVERCLOCK
 	bool "Run LCD at higher clock speed than allowed"

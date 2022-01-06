@@ -30,8 +30,8 @@
 #include <errno.h>
 #include <debug.h>
 
-#include <arch/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
 #ifdef CONFIG_CLOCK_TIMEKEEPING

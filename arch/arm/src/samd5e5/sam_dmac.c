@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 
@@ -141,9 +142,9 @@ static struct sam_dmach_s g_dmach[SAMD5E5_NDMACHAN];
  */
 
 static struct dma_desc_s g_base_desc[SAMD5E5_NDMACHAN]
-  __attribute__ ((section(".lpram"), aligned(16)));
+  locate_data(".lpram"), aligned(16);
 static struct dma_desc_s g_writeback_desc[SAMD5E5_NDMACHAN]
-  __attribute__ ((section(".lpram"), aligned(16)));
+  locate_data(".lpram"), aligned(16);
 
 #if CONFIG_SAMD5E5_DMAC_NDESC > 0
 /* Additional DMA descriptors for (optional) multi-block transfer support.
@@ -151,7 +152,7 @@ static struct dma_desc_s g_writeback_desc[SAMD5E5_NDMACHAN]
  */
 
 static struct dma_desc_s g_dma_desc[CONFIG_SAMD5E5_DMAC_NDESC]
-  __attribute__ ((section(".lpram"), aligned(16)));
+  locate_data(".lpram"), aligned(16);
 #endif
 
 /****************************************************************************

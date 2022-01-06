@@ -120,7 +120,7 @@ extern volatile uint64_t *g_current_regs;
  * end of the heap is CONFIG_RAM_END
  */
 
-extern uint64_t g_idle_topstack;
+extern const uintptr_t g_idle_topstack;
 
 /* Address of the saved user stack pointer */
 

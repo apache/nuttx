@@ -542,6 +542,28 @@ struct sensor_ops_s
                     FAR char *buffer, size_t buflen);
 
   /**************************************************************************
+   * Name: selftest
+   *
+   * Selftest allows for the testing of the mechanical and electrical
+   * portions of the sensors. When the selftest is activated, the
+   * electronics cause the sensors to be actuated and produce an output
+   * signal. The output signal is used to observe the selftest response.
+   * When the selftest response exceeds the min/max values,
+   * the part is deemed to have failed selftest.
+   *
+   * Input Parameters:
+   *   lower      - The instance of lower half sensor driver.
+   *   arg        - The parameters associated with selftest.
+   *
+   * Returned Value:
+   *   Zero (OK) on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*selftest)(FAR struct sensor_lowerhalf_s *lower,
+                        unsigned long arg);
+
+  /**************************************************************************
    * Name: control
    *
    * With this method, the user can set some special config for the sensor,

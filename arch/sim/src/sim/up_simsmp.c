@@ -51,22 +51,6 @@ struct sim_cpuinfo_s
 static pthread_key_t g_cpu_key;
 static pthread_t     g_cpu_thread[CONFIG_SMP_NCPUS];
 
-static pthread_t     g_timer_thread;
-
-/****************************************************************************
- * NuttX domain function prototypes
- ****************************************************************************/
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-void sched_note_cpu_start(struct tcb_s *tcb, int cpu);
-void sched_note_cpu_pause(struct tcb_s *tcb, int cpu);
-void sched_note_cpu_resume(struct tcb_s *tcb, int cpu);
-#endif
-
-void up_irqinitialize(void);
-
-extern uint8_t g_nx_initstate;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -94,9 +78,7 @@ extern uint8_t g_nx_initstate;
 static void *sim_idle_trampoline(void *arg)
 {
   struct sim_cpuinfo_s *cpuinfo = (struct sim_cpuinfo_s *)arg;
-#ifdef CONFIG_SIM_WALLTIME
   uint64_t now = 0;
-#endif
   int ret;
 
   /* Set the CPU number for the CPU thread */
@@ -107,10 +89,6 @@ static void *sim_idle_trampoline(void *arg)
     {
       return NULL;
     }
-
-  /* Initialize IRQ */
-
-  up_irqinitialize();
 
   /* Let up_cpu_start() continue */
 
@@ -131,40 +109,10 @@ static void *sim_idle_trampoline(void *arg)
 
   for (; ; )
     {
-#ifdef CONFIG_SIM_WALLTIME
       /* Wait a bit so that the timing is close to the correct rate. */
 
       now += 1000 * CONFIG_USEC_PER_TICK;
       host_sleepuntil(now);
-#else
-      /* Give other pthreads/CPUs a shot */
-
-      sched_yield();
-#endif
-    }
-
-  return NULL;
-}
-
-/****************************************************************************
- * Name: sim_host_timer_handler
- ****************************************************************************/
-
-static void *sim_host_timer_handler(void *arg)
-{
-  /* Wait until OSINIT_OSREADY(5) */
-
-  while (g_nx_initstate < 5)
-    {
-      host_sleep(10 * 1000); /* 10ms */
-    }
-
-  /* Send a periodic timer event to CPU0 */
-
-  while (1)
-    {
-      pthread_kill(g_cpu_thread[0], SIGUSR1);
-      host_sleep(10 * 1000); /* 10ms */
     }
 
   return NULL;
@@ -210,13 +158,6 @@ void sim_cpu0_start(void)
     {
       return;
     }
-
-  /* NOTE: IRQ initialization will be done in up_irqinitialize */
-
-  /* Create timer thread to send a periodic timer event */
-
-  ret = pthread_create(&g_timer_thread,
-                       NULL, sim_host_timer_handler, NULL);
 }
 
 /****************************************************************************
@@ -268,16 +209,11 @@ int up_cpu_index(void)
  *
  ****************************************************************************/
 
-int up_cpu_start(int cpu)
+int sim_cpu_start(int cpu, void *stack, size_t size)
 {
   struct sim_cpuinfo_s cpuinfo;
+  pthread_attr_t attr;
   int ret;
-
-#ifdef CONFIG_SCHED_INSTRUMENTATION
-  /* Notify of the start event */
-
-  sched_note_cpu_start(up_this_task(), cpu);
-#endif
 
   /* Initialize the CPU info */
 
@@ -291,11 +227,13 @@ int up_cpu_start(int cpu)
    * in a multi-CPU hardware model.
    */
 
+  pthread_attr_init(&attr);
+  pthread_attr_setstack(&attr, stack, size);
   ret = pthread_create(&g_cpu_thread[cpu],
-                       NULL, sim_idle_trampoline, &cpuinfo);
+                       &attr, sim_idle_trampoline, &cpuinfo);
+  pthread_attr_destroy(&attr);
   if (ret != 0)
     {
-      ret = -ret;  /* REVISIT:  That is a host errno value. */
       goto errout_with_cond;
     }
 

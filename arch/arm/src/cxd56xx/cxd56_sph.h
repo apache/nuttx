@@ -48,7 +48,7 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Public Function Protoypes
+ * Public Function Prototypes
  ****************************************************************************/
 
 int cxd56_sphinitialize(FAR const char *devname);

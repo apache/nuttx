@@ -89,6 +89,8 @@
 
 /* Watchdog feed sequence register  */
 
+#define WDT_FEED_KEY_1                (0xaa)    /* Watchdog feed key 1 */
+#define WDT_FEED_KEY_2                (0x55)    /* Watchdog feed key 2 */
 #define WDT_FEED_MASK                 (0xff)    /* Bits 0-7: Feed value should be 0xaa
                                                  *           followed by 0x55 */
                                                 /* Bits 14-31: Reserved */

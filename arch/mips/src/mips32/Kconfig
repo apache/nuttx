@@ -67,6 +67,11 @@ config MIPS32_TOOLCHAIN_PINGUINOL
 	depends on HOST_LINUX || HOST_MACOS
 	select ARCH_TOOLCHAIN_GNU
 
+config MIPS32_TOOLCHAIN_SOURCERY_CODEBENCH_LITE
+	bool "Sourcery CodeBench Lite for MIPS ELF toolchain under Linux"
+	depends on HOST_LINUX
+	select ARCH_TOOLCHAIN_GNU
+
 endchoice
 
 config MIPS32_TOOLCHAIN_MICROCHIP_XC32_LICENSED

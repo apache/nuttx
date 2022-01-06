@@ -188,6 +188,7 @@
  */
 
 #define ESP32_IRQ2PERIPH(irq)       ((irq)-XTENSA_IRQ_FIRSTPERIPH)
+#define ESP32_PERIPH2IRQ(id)        ((id)+XTENSA_IRQ_FIRSTPERIPH)
 
 /* PRO_INTR_STATUS_REG_0 / APP_INTR_STATUS_REG_0 */
 
@@ -278,12 +279,27 @@
 
 #define ESP32_NIRQ_PERIPH           ESP32_NPERIPHERALS
 
+#ifdef CONFIG_ESP32_GPIO_IRQ
+
+/* The PRO and APP CPU have different interrupts sources for the GPIO
+ * peripheral.  Each CPU needs to allocate a separate interrupt and attach
+ * it to its peripheral.
+ * Here we add a separate IRQ to differentiate between each interrupt.
+ * When enabling/disabling the IRQ we handle the APP's GPIO separately
+ * to correctly retrieve the peripheral.
+ */
+
+#  ifdef CONFIG_SMP
+#    define ESP32_IRQ_APPCPU_GPIO     ESP32_NPERIPHERALS
+#    undef  ESP32_NIRQ_PERIPH
+#    define ESP32_NIRQ_PERIPH         ESP32_NPERIPHERALS + 1
+#  endif
+
 /* Second level GPIO interrupts.  GPIO interrupts are decoded and dispatched
  * as a second level of decoding:  The first level dispatches to the GPIO
  * interrupt handler.  The second to the decoded GPIO interrupt handler.
  */
 
-#ifdef CONFIG_ESP32_GPIO_IRQ
 #  define ESP32_NIRQ_GPIO           40
 #  define ESP32_FIRST_GPIOIRQ       (XTENSA_NIRQ_INTERNAL+ESP32_NIRQ_PERIPH)
 #  define ESP32_LAST_GPIOIRQ        (ESP32_FIRST_GPIOIRQ+ESP32_NIRQ_GPIO-1)
@@ -355,7 +371,7 @@
 #define ESP32_CPUINT_LEVELPERIPH_20 31
 
 #define ESP32_CPUINT_NLEVELPERIPHS  21
-#define EPS32_CPUINT_LEVELSET       0x8fbe333f
+#define ESP32_CPUINT_LEVELSET       0x8fbe333f
 
 #define ESP32_CPUINT_EDGEPERIPH_0   10
 #define ESP32_CPUINT_EDGEPERIPH_1   22
@@ -363,10 +379,10 @@
 #define ESP32_CPUINT_EDGEPERIPH_3   30
 
 #define ESP32_CPUINT_NEDGEPERIPHS   4
-#define EPS32_CPUINT_EDGESET        0x50400400
+#define ESP32_CPUINT_EDGESET        0x50400400
 
 #define ESP32_CPUINT_NNMIPERIPHS    1
-#define EPS32_CPUINT_NMISET         0x00004000
+#define ESP32_CPUINT_NMISET         0x00004000
 
 #define ESP32_CPUINT_MAC            0
 #define ESP32_CPUINT_TIMER0         6
@@ -380,8 +396,8 @@
 
 #define ESP32_NCPUINTS              32
 #define ESP32_CPUINT_MAX            (ESP32_NCPUINTS - 1)
-#define EPS32_CPUINT_PERIPHSET      0xdffe773f
-#define EPS32_CPUINT_INTERNALSET    0x200188c0
+#define ESP32_CPUINT_PERIPHSET      0xdffe741f
+#define ESP32_CPUINT_INTERNALSET    0x200188c0
 
 /* Priority 1:   0-10, 12-13, 17-18    (15)
  * Priority 2:   19-21                 (3)
@@ -407,6 +423,24 @@
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+#ifdef CONFIG_ESP32_GPIO_IRQ
+#ifdef CONFIG_SMP
+static inline int esp32_irq_gpio(int cpu)
+{
+  if (cpu == 0)
+    {
+      return ESP32_IRQ_CPU_GPIO;
+    }
+  else
+    {
+      return ESP32_IRQ_APPCPU_GPIO;
+    }
+}
+#else
+#  define esp32_irq_gpio(c)   (UNUSED(c), ESP32_IRQ_CPU_GPIO)
+#endif
+#endif
 
 /****************************************************************************
  * Public Data

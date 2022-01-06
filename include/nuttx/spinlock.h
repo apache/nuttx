@@ -30,6 +30,8 @@
 #include <sys/types.h>
 #include <stdint.h>
 
+#include <nuttx/irq.h>
+
 #ifndef CONFIG_SPINLOCK
 typedef struct
 {
@@ -43,7 +45,7 @@ typedef struct
  *   SP_UNLOCKED - A definition of the unlocked state value (usually 0)
  *   spinlock_t  - The type of a spinlock memory object.
  *
- * SP_LOCKED and SP_UNLOCKED must constants of type spinlock_t.
+ * SP_LOCKED and SP_UNLOCKED must be constants of type spinlock_t.
  */
 
 #include <arch/spinlock.h>
@@ -94,14 +96,14 @@ typedef struct
  *   This function must be provided via the architecture-specific logic.
  *
  * Input Parameters:
- *   lock - The address of spinlock object.
+ *   lock  - A reference to the spinlock object.
  *
  * Returned Value:
- *   The spinlock is always locked upon return.  The value of previous value
- *   of the spinlock variable is returned, either SP_LOCKED if the spinlock
- *   as previously locked (meaning that the test-and-set operation failed to
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
  *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock)
+ *   (meaning that we successfully obtained the lock).
  *
  ****************************************************************************/
 
@@ -156,7 +158,7 @@ static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
  *
  *   This implementation is non-reentrant and is prone to deadlocks in
  *   the case that any logic on the same CPU attempts to take the lock
- *   more than one
+ *   more than once.
  *
  * Input Parameters:
  *   lock - A reference to the spinlock object to lock.
@@ -350,4 +352,79 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
 #endif
 
 #endif /* CONFIG_SPINLOCK */
+
+/****************************************************************************
+ * Name: spin_lock_irqsave
+ *
+ * Description:
+ *   If SMP is are enabled:
+ *     If the argument lock is not specified (i.e. NULL),
+ *     disable local interrupts and take the global spinlock (g_irq_spin)
+ *     if the call counter (g_irq_spin_count[cpu]) equals to 0. Then the
+ *     counter on the CPU is incremented to allow nested calls and return
+ *     the interrupt state.
+ *
+ *     If the argument lock is specified,
+ *     disable local interrupts and take the lock spinlock and return
+ *     the interrupt state.
+ *
+ *     NOTE: This API is very simple to protect data (e.g. H/W register
+ *     or internal data structure) in SMP mode. But do not use this API
+ *     with kernel APIs which suspend a caller thread. (e.g. nxsem_wait)
+ *
+ *   If SMP is not enabled:
+ *     This function is equivalent to up_irq_save().
+ *
+ * Input Parameters:
+ *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used
+ *          and can be nested. Otherwise, nested call for the same lock
+ *          would cause a deadlock
+ *
+ * Returned Value:
+ *   An opaque, architecture-specific value that represents the state of
+ *   the interrupts prior to the call to spin_lock_irqsave(lock);
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP)
+irqstate_t spin_lock_irqsave(spinlock_t *lock);
+#else
+#  define spin_lock_irqsave(l) ((void)(l), up_irq_save())
+#endif
+
+/****************************************************************************
+ * Name: spin_unlock_irqrestore
+ *
+ * Description:
+ *   If SMP is enabled:
+ *     If the argument lock is not specified (i.e. NULL),
+ *     decrement the call counter (g_irq_spin_count[cpu]) and if it
+ *     decrements to zero then release the spinlock (g_irq_spin) and
+ *     restore the interrupt state as it was prior to the previous call to
+ *     spin_lock_irqsave(NULL).
+ *
+ *     If the argument lock is specified, release the lock and
+ *     restore the interrupt state as it was prior to the previous call to
+ *     spin_lock_irqsave(lock).
+ *
+ *   If SMP is not enabled:
+ *     This function is equivalent to up_irq_restore().
+ *
+ * Input Parameters:
+ *   lock - Caller specific spinlock. If specified NULL, g_irq_spin is used.
+ *
+ *   flags - The architecture-specific value that represents the state of
+ *           the interrupts prior to the call to spin_lock_irqsave(lock);
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP)
+void spin_unlock_irqrestore(spinlock_t *lock, irqstate_t flags);
+#else
+#  define spin_unlock_irqrestore(l, f) up_irq_restore(f)
+#endif
+
 #endif /* __INCLUDE_NUTTX_SPINLOCK_H */

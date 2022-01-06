@@ -74,4 +74,10 @@
 #define UPTR_MAX    16777215U
 #endif
 
+#ifdef __clang__
+#define LLONG_MIN       (-LLONG_MAX - 1)
+#define LLONG_MAX       9223372036854775807LL
+#define ULLONG_MAX      18446744073709551615ULL
+#endif
+
 #endif /* __ARCH_Z80_INCLUDE_EZ80_LIMITS_H */

@@ -318,6 +318,13 @@ config Z180_TOOLCHAIN_SDCCW
 
 endchoice
 
+config Z180_MAX_TASKS
+       int "Max number of tasks for arch chip z180"
+       default 8
+       ---help---
+               The maximum number of simultaneously active tasks. This value must be
+               a power of two.
+
 config LINKER_HOME_AREA
 	hex "Physical start of _HOME area"
 	default 0x0000

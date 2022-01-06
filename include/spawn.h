@@ -31,7 +31,6 @@
 
 #include <sched.h>
 #include <signal.h>
-#include <errno.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -53,6 +52,7 @@
 #define POSIX_SPAWN_SETSCHEDULER  (1 << 3)  /* 1: Set task's scheduler policy */
 #define POSIX_SPAWN_SETSIGDEF     (1 << 4)  /* 1: Set default signal actions */
 #define POSIX_SPAWN_SETSIGMASK    (1 << 5)  /* 1: Set sigmask */
+#define POSIX_SPAWN_SETSID        (1 << 7)  /* 1: Create the new session(glibc specific) */
 
 /****************************************************************************
  * Type Definitions
@@ -84,7 +84,8 @@ struct posix_spawnattr_s
 #ifndef CONFIG_BUILD_KERNEL
   /* Used only by task_spawn (non-standard) */
 
-  size_t   stacksize;            /* Task stack size */
+  FAR void *stackaddr;           /* Task stack address */
+  size_t    stacksize;           /* Task stack size */
 #endif
 
 #ifdef CONFIG_SCHED_SPORADIC
@@ -124,7 +125,7 @@ extern "C"
  * file system at 'path'
  */
 
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
 int posix_spawnp(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
@@ -146,7 +147,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
  * 'name'.
  */
 
-int task_spawn(FAR pid_t *pid, FAR const char *name, main_t entry,
+int task_spawn(FAR const char *name, main_t entry,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
       FAR char * const argv[], FAR char * const envp[]);
@@ -210,8 +211,13 @@ int posix_spawnattr_setsigmask(FAR posix_spawnattr_t *attr,
  * task_spawn()
  */
 
+int task_spawnattr_getstackaddr(FAR const posix_spawnattr_t *attr,
+                                FAR void **stackaddr);
+int task_spawnattr_setstackaddr(FAR posix_spawnattr_t *attr,
+                                FAR void *stackaddr);
+
 int task_spawnattr_getstacksize(FAR const posix_spawnattr_t *attr,
-                                size_t *stacksize);
+                                FAR size_t *stacksize);
 int task_spawnattr_setstacksize(FAR posix_spawnattr_t *attr,
                                 size_t stacksize);
 

@@ -70,9 +70,7 @@
 void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
 {
   bool mmc = (cardtype == MMCSD_CARDTYPE_MMC);
-#if defined(CONFIG_DEBUG_FS_INFO)
   bool sd2 = (MMCSD_CSD_CSDSTRUCT(csd) == 1);
-#endif
 
   finfo("CSD\n");
   finfo("  CSD_STRUCTURE:           1.%d\n",   MMCSD_CSD_CSDSTRUCT(csd));
@@ -81,8 +79,7 @@ void mmcsd_dmpcsd(FAR const uint8_t *csd, uint8_t cardtype)
       finfo("  MMC SPEC_VERS:           %d\n", MMC_CSD_SPECVERS(csd));
     }
 
-  finfo("  TAAC:\n",
-      sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
+  finfo("  TAAC:\n");
   finfo("    TIME_VALUE:            0x%02x\n",
       sd2 ? SD20_CSD_TAC_TIMEVALUE(csd) : MMCSD_CSD_TAAC_TIMEVALUE(csd));
   finfo("    TIME_UNIT:             0x%02x\n",

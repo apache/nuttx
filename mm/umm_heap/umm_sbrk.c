@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include <nuttx/mm/mm.h>
@@ -70,5 +72,52 @@
 
 FAR void *sbrk(intptr_t incr)
 {
-  return mm_sbrk(USR_HEAP, incr, ARCH_HEAP_VEND);
+  uintptr_t brkaddr;
+  uintptr_t allocbase;
+  unsigned int pgincr;
+  size_t bytesize;
+  int errcode;
+
+  DEBUGASSERT(incr >= 0);
+  if (incr < 0)
+    {
+      errcode = ENOSYS;
+      goto errout;
+    }
+
+  /* Initialize the user heap if it wasn't yet */
+
+  umm_try_initialize();
+
+  /* Get the current break address (NOTE: assumes region 0). */
+
+  brkaddr = (uintptr_t)mm_brkaddr(USR_HEAP, 0);
+  if (incr > 0)
+    {
+      /* Convert the increment to multiples of the page size */
+
+      pgincr = MM_NPAGES(incr);
+
+      /* Allocate the requested number of pages and map them to the
+       * break address.
+       */
+
+      allocbase = pgalloc(brkaddr, pgincr);
+      if (allocbase == 0)
+        {
+          errcode = EAGAIN;
+          goto errout;
+        }
+
+      /* Extend the heap (region 0) */
+
+      bytesize = pgincr << MM_PGSHIFT;
+      mm_extend(USR_HEAP, (FAR void *)allocbase, bytesize, 0);
+    }
+
+  return (FAR void *)brkaddr;
+
+errout:
+  set_errno(errcode);
+  return (FAR void *)-1;
 }

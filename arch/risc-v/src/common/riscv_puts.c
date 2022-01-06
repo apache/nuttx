@@ -32,14 +32,14 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_puts
+ * Name: up_puts
  *
  * Description:
  *   This is a low-level helper function used to support debug.
  *
  ****************************************************************************/
 
-void riscv_puts(const char *str)
+void up_puts(const char *str)
 {
   while (*str)
     {

@@ -36,7 +36,7 @@
 
 #include "libc.h"
 
-#if defined(CONFIG_LIB_ENVPATH)
+#if defined(CONFIG_LIBC_ENVPATH)
 
 /****************************************************************************
  * Private Types

@@ -118,14 +118,14 @@ void esp32_sleep_enable_timer_wakeup(uint64_t time_in_us);
  *   Enter sleep mode
  *
  * Input Parameters:
- *   None
+ *   sleep_time - Actual sleep time
  *
  * Returned Value:
  *   0 is returned on success or a negated errno value is returned
  *
  ****************************************************************************/
 
-int esp32_light_sleep_start(void);
+int esp32_light_sleep_start(uint64_t *sleep_time);
 
 /****************************************************************************
  * Name: esp32_pminit
@@ -206,6 +206,36 @@ void esp32_deep_sleep_start(void);
  ****************************************************************************/
 
 void esp32_pmsleep(uint64_t time_in_us);
+
+/****************************************************************************
+ * Name: esp32_pm_lockacquire
+ *
+ * Description:
+ *   Take a power management lock
+ *
+ ****************************************************************************/
+
+void esp32_pm_lockacquire(void);
+
+/****************************************************************************
+ * Name: esp32_pm_lockrelease
+ *
+ * Description:
+ *   Release the lock taken using esp32_pm_lock.
+ *
+ ****************************************************************************/
+
+void esp32_pm_lockrelease(void);
+
+/****************************************************************************
+ * Name: esp32_pm_lockstatus
+ *
+ * Description:
+ *   Return power management lock status.
+ *
+ ****************************************************************************/
+
+uint32_t esp32_pm_lockstatus(void);
 
 #endif /* CONFIG_PM */
 

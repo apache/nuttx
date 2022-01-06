@@ -75,4 +75,4 @@ int board_ina219_initialize(int busno);
 }
 #endif
 
-#endif // __BOARDS_ARM_RP2040_COMMON_INCLUDE_RP2040_INA219_H
+#endif /* __BOARDS_ARM_RP2040_COMMON_INCLUDE_RP2040_INA219_H  */

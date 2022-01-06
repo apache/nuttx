@@ -43,14 +43,17 @@ EZ80_UNUSED	EQU	64		; Denotes an unused vector
 
 ; Define one interrupt handler
 
+ifdef irqhandler
+else
 irqhandler: macro vectno
 	; Save AF on the stack, set the interrupt number and jump to the
 	; common reset handling logic.
-								; Offset 8: Return PC is already on the stack
+							; Offset 8: Return PC is already on the stack
 	push	af					; Offset 7: AF (retaining flags)
 	ld		a, #vectno			; A = vector number
-	jp		_ez80_irq_common	; Remaining RST handling is common
+	jp		_ez80_irq_common		; Remaining RST handling is common
 	endmac	irqhandler
+endif
 
 ;**************************************************************************
 ; Interrupt Vector Handlers
@@ -64,7 +67,7 @@ irqhandler: macro vectno
 						;----------------- --- ----- -----
 _ez80_handlers:
 	irqhandler	 0		; EZ80_EMACRX_IRQ   0    0   0x040
-	_handlersize equ $-_ez80_handlers
+_handlersize equ $-_ez80_handlers
 	irqhandler	 1		; EZ80_EMACTX_IRQ   1    1   0x044
 	irqhandler	 2		; EZ80_EMACSYS_IRQ  2    2   0x048
 	irqhandler	 3		; EZ80_PLL_IRQ      3    3   0x04c
@@ -159,23 +162,29 @@ _ez80_initvectors:
 	;  (24 bits) are required.  A fourth byte is implemented for both
 	;  programmability and expansion purposes."
 
-$1:
+L1:
 	ld		(iy), hl			; Store IRQ handler
 	ld		(iy+3), a			; Pad with zero to 4 bytes
 	add		hl, de				; Point to next handler
-	push	de
+	push		de
 	ld		de, 4
 	add		iy, de				; Point to next entry in vector table
 	pop		de
-	djnz	$1					; Loop until all vectors have been written
+	djnz		L1				; Loop until all vectors have been written
 
 	; Select interrupt mode 2
 
-	im		2					; Interrupt mode 2
+	im		2				; Interrupt mode 2
 
 	; Write the address of the vector table into the interrupt vector base
 
-	ld		hl, _ez80_vectable >> 8
+	; The GNU assembler (2.36.1) cannot produce this relocation, although the
+	; Z80 ELF format supports it. The instruction is instead hand assembled.
+	;ld		hl, _ez80_vectable >> 8
+	db		021h
+	db		_ez80_vectable >> 8
+	db		_ez80_vectable >> 16
+	db		0
 	ld		i, hl
 	ret
 

@@ -30,6 +30,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
+#include <debug.h>
 #include <errno.h>
 
 /* Prototypes for Remote API */
@@ -81,7 +82,8 @@ static int cxd56_erase(FAR struct mtd_dev_s *dev, off_t startblock,
   int ret;
   size_t i;
 
-  finfo("erase: %08lx (%u blocks)\n", startblock << PAGE_SHIFT, nblocks);
+  finfo("erase: %" PRIxOFF " (%u blocks)\n",
+        startblock << PAGE_SHIFT, nblocks);
 
   for (i = 0; i < nblocks; i++)
     {
@@ -100,7 +102,8 @@ static ssize_t cxd56_bread(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   int ret;
 
-  finfo("bread: %08lx (%u blocks)\n", startblock << PAGE_SHIFT, nblocks);
+  finfo("bread: %" PRIxOFF " (%u blocks)\n",
+        startblock << PAGE_SHIFT, nblocks);
 
   ret = fw_fm_rawread(startblock << PAGE_SHIFT, buffer,
                       nblocks << PAGE_SHIFT);
@@ -117,7 +120,8 @@ static ssize_t cxd56_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 {
   int ret;
 
-  finfo("bwrite: %08lx (%u blocks)\n", startblock << PAGE_SHIFT, nblocks);
+  finfo("bwrite: %" PRIxOFF " (%u blocks)\n",
+        startblock << PAGE_SHIFT, nblocks);
 
 #ifdef CONFIG_CXD56_SFC_VERIFY_WRITE
   ret = fw_fm_rawverifywrite(startblock << PAGE_SHIFT, buffer,
@@ -139,7 +143,7 @@ static ssize_t cxd56_read(FAR struct mtd_dev_s *dev, off_t offset,
 {
   int ret;
 
-  finfo("read: %08lx (%u bytes)\n", offset, nbytes);
+  finfo("read: %" PRIxOFF " (%u bytes)\n", offset, nbytes);
 
   ret = fw_fm_rawread(offset, buffer, nbytes);
   if (ret < 0)
@@ -156,7 +160,7 @@ static ssize_t cxd56_write(FAR struct mtd_dev_s *dev, off_t offset,
 {
   int ret;
 
-  finfo("write: %08lx (%u bytes)\n", offset, nbytes);
+  finfo("write: %" PRIxOFF " (%u bytes)\n", offset, nbytes);
 
 #ifdef CONFIG_CXD56_SFC_VERIFY_WRITE
   ret = fw_fm_rawverifywrite(offset, buffer, nbytes);
@@ -208,6 +212,20 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->density / PAGE_SIZE;
+              info->sectorsize  = PAGE_SIZE;
+              info->startsector = 0;
+              info->parent[0]   = '\0';
+            }
+        }
+        break;
+
       case MTDIOC_BULKERASE:
         {
           /* Erase the entire device */
@@ -225,7 +243,6 @@ static int cxd56_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
       default:
         ret = -ENOTTY; /* Bad command */
         break;

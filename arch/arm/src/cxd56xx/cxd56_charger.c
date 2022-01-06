@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <assert.h>
 #include <debug.h>
 
 #include <sys/types.h>
@@ -61,13 +62,8 @@
 
 /* Configuration */
 
-#undef USE_FLOAT_CONVERSION
-
 #ifdef CONFIG_CXD56_CHARGER_TEMP_PRECISE
-#if !defined(CONFIG_LIBM) && !defined(CONFIG_ARCH_MATH_H)
-#  error Temperature conversion in float requires math library.
-#endif
-#define USE_FLOAT_CONVERSION 1
+#  define USE_FLOAT_CONVERSION
 #endif
 
 /****************************************************************************
@@ -83,8 +79,8 @@ struct charger_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int charger_get_status(FAR enum battery_charger_status_e *status);
-static int charger_get_health(FAR enum battery_charger_health_e *health);
+static int charger_get_status(FAR enum battery_status_e *status);
+static int charger_get_health(FAR enum battery_health_e *health);
 static int charger_online(FAR bool *online);
 static int charger_get_temptable(FAR struct battery_temp_table_s *table);
 static int charger_set_temptable(FAR struct battery_temp_table_s *table);
@@ -214,7 +210,7 @@ static int charger_therm2temp(int val)
  * Name: charger_get_status
  ****************************************************************************/
 
-static int charger_get_status(FAR enum battery_charger_status_e *status)
+static int charger_get_status(FAR enum battery_status_e *status)
 {
   uint8_t state;
   int ret;
@@ -273,7 +269,7 @@ static int charger_get_status(FAR enum battery_charger_status_e *status)
  * Name: charger_get_health
  ****************************************************************************/
 
-static int charger_get_health(FAR enum battery_charger_health_e *health)
+static int charger_get_health(FAR enum battery_health_e *health)
 {
   FAR struct pmic_gauge_s gauge;
   uint8_t state;
@@ -499,16 +495,16 @@ static int charger_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     {
       case BATIOC_STATE:
         {
-          FAR enum battery_charger_status_e *status =
-            (FAR enum battery_charger_status_e *)(uintptr_t)arg;
+          FAR enum battery_status_e *status =
+            (FAR enum battery_status_e *)(uintptr_t)arg;
           ret = charger_get_status(status);
         }
         break;
 
       case BATIOC_HEALTH:
         {
-          FAR enum battery_charger_health_e *health =
-            (FAR enum battery_charger_health_e *)(uintptr_t)arg;
+          FAR enum battery_health_e *health =
+            (FAR enum battery_health_e *)(uintptr_t)arg;
           ret = charger_get_health(health);
         }
         break;
@@ -672,7 +668,7 @@ int cxd56_charger_initialize(FAR const char *devpath)
   ret = register_driver(devpath, &g_chargerops, 0666, priv);
   if (ret < 0)
     {
-      _err("ERROR: register_driver failed: %d\n", ret);
+      baterr("ERROR: register_driver failed: %d\n", ret);
       return -EFAULT;
     }
 

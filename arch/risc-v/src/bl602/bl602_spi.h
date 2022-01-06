@@ -65,7 +65,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct spi_dev_s *bl602_spibus_initialize(int port);
+struct spi_dev_s *bl602_spibus_initialize(int port);
 
 /****************************************************************************
  * Name: bl602_spibus_uninitialize
@@ -75,7 +75,7 @@ FAR struct spi_dev_s *bl602_spibus_initialize(int port);
  *
  ****************************************************************************/
 
-int bl602_spibus_uninitialize(FAR struct spi_dev_s *dev);
+int bl602_spibus_uninitialize(struct spi_dev_s *dev);
 
 #endif /* CONFIG_BL602_SPI0 */
 

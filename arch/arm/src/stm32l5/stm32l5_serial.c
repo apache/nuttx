@@ -30,6 +30,7 @@
 #include <unistd.h>
 #include <semaphore.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1794,9 +1795,9 @@ static int stm32l5serial_interrupt(int irq, FAR void *context, FAR void *arg)
        * "           "    USART_ISR_ORE  Overrun Error Detected
        * USART_CR3_CTSIE  USART_ISR_CTS  CTS flag               (not used)
        *
-       * NOTE: Some of these status bits must be cleared by explicity writing
-       * one to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF. Note of
-       * those are currently being used.
+       * NOTE: Some of these status bits must be cleared by explicitly
+       * writing one to the ICR register: USART_ICR_CTSCF, USART_ICR_LBDCF.
+       * None of those are currently being used.
        */
 
 #ifdef HAVE_RS485

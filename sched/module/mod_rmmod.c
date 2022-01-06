@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/kmalloc.h>
@@ -119,8 +120,8 @@ int rmmod(FAR void *handle)
        * and nullify so that the memory cannot be freed again
        */
 
-#if defined(CONFIG_ARCH_USE_MODULE_TEXT)
-      up_module_text_free((FAR void *)modp->textalloc);
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
+      up_textheap_free((FAR void *)modp->textalloc);
 #else
       kmm_free((FAR void *)modp->textalloc);
 #endif

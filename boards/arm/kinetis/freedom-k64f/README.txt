@@ -461,7 +461,7 @@ SD Card Support
 
     Application Configuration -> NSH Library
       CONFIG_NSH_ARCHINIT=y                 : NSH board-initialization, and
-      CONFIG_LIB_BOARDCTL=y                 : Or
+      CONFIG_BOARDCTL=y                 : Or
       CONFIG_BOARD_LATE_INITIALIZE=y
 
   Using the SD card

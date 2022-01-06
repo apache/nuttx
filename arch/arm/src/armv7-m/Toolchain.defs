@@ -71,6 +71,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
 endif
 
 # Parametrization for ARCHCPUFLAGS
@@ -78,8 +80,6 @@ endif
 ifeq ($(CONFIG_ARCH_CORTEXM4),y)
   TOOLCHAIN_ARM7EM   := y
   TOOLCHAIN_MCPU     := -mcpu=cortex-m4
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m4
-  TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv4-sp-d16 -mfloat-abi=hard
   else
@@ -88,8 +88,6 @@ ifeq ($(CONFIG_ARCH_CORTEXM4),y)
 else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
   TOOLCHAIN_ARM7EM   := y
   TOOLCHAIN_MCPU     := -mcpu=cortex-m7
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m7
-  TOOLCHAIN_MARCH    := -march=armv7e-m
   ifeq ($(CONFIG_ARCH_FPU),y)
   ifeq ($(CONFIG_ARCH_DPFPU),y)
     TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
@@ -102,8 +100,6 @@ else ifeq ($(CONFIG_ARCH_CORTEXM7),y)
 else # ifeq ($(CONFIG_ARCH_CORTEXM3),y)
   TOOLCHAIN_ARM7EM   := n
   TOOLCHAIN_MCPU     := -mcpu=cortex-m3
-  TOOLCHAIN_MTUNE    := -mtune=cortex-m3
-  TOOLCHAIN_MARCH    := -march=armv7-m
   TOOLCHAIN_MFLOAT   := -mfloat-abi=soft
 endif
 
@@ -117,14 +113,12 @@ else
   CROSSDEV ?= arm-nuttx-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
-  MAXOPTIMIZATION ?= -Os
 endif
 
 # Generic GNU EABI toolchain
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = $(TOOLCHAIN_MCPU) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
@@ -132,7 +126,6 @@ endif
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
   CROSSDEV ?= arm-none-eabi-
-  MAXOPTIMIZATION ?= -Os
   ARCHCPUFLAGS = -target arm-none-eabi $(TOOLCHAIN_MCPU) $(TOOLCHAIN_MFLOAT)
   CC = clang
   CXX = clang++
@@ -160,7 +153,7 @@ ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
 endif
 
-ifeq ($(CONFIG_CXX_LIBSUPCXX),y)
+ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += -lsupc++
   EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif

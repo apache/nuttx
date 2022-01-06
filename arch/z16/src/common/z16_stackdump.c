@@ -37,7 +37,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: z16_getsp
+ * Name: up_getsp
  ****************************************************************************/
 
 /* To be provided */
@@ -49,7 +49,7 @@
 static void z16_stackdump(void)
 {
   struct tcb_s *rtcb = this_task();
-  chipreg_t sp = z16_getsp();
+  chipreg_t sp = up_getsp();
   chipreg_t stack_base = (chipreg_t)rtcb->stack_base_ptr;
   chipreg_t stack_size = (chipreg_t)rtcb->adj_stack_size;
   chipreg_t stack;

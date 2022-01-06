@@ -27,6 +27,8 @@
 
 #include <nuttx/config.h>
 
+#include <nuttx/fs/procfs.h>
+
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
@@ -40,12 +42,12 @@
 
 /* Chunk Header Definitions *************************************************/
 
-/* These definitions define the characteristics of allocator
+/* These definitions define the characteristics of the allocator:
  *
  * MM_MIN_SHIFT is used to define MM_MIN_CHUNK.
- * MM_MIN_CHUNK - is the smallest physical chunk that can be allocated.  It
- *   must be at least a large as sizeof(struct mm_freenode_s).  Larger values
- *   may improve performance slightly, but will waste memory due to
+ * MM_MIN_CHUNK - is the smallest physical chunk that can be allocated.
+ *   It must be at least as large as sizeof(struct mm_freenode_s). Larger
+ *   values may improve performance slightly, but will waste memory due to
  *   quantization losses.
  *
  * MM_MAX_SHIFT is used to define MM_MAX_CHUNK
@@ -111,8 +113,6 @@
  * Public Types
  ****************************************************************************/
 
-struct mm_heap_s;
-
 /* Determines the size of the chunk size/offset type */
 
 #ifdef CONFIG_MM_SMALL
@@ -170,15 +170,13 @@ struct mm_delaynode_s
 
 /* This describes one heap (possibly with multiple regions) */
 
-struct mm_heap_impl_s
+struct mm_heap_s
 {
   /* Mutually exclusive access to this data set is enforced with
    * the following un-named semaphore.
    */
 
   sem_t mm_semaphore;
-  pid_t mm_holder;
-  int mm_counts_held;
 
   /* This is the size of the heap provided to mm */
 
@@ -200,16 +198,25 @@ struct mm_heap_impl_s
 
   struct mm_freenode_s mm_nodelist[MM_NNODES];
 
-  /* Free delay list, for some situation can't do free immdiately */
+  /* Free delay list, for some situations where we can't do free
+   * immdiately.
+   */
 
-  FAR struct mm_delaynode_s *mm_delaylist;
+#ifdef CONFIG_SMP
+  FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
+#else
+  FAR struct mm_delaynode_s *mm_delaylist[1];
+#endif
+
+#if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
+  struct procfs_meminfo_entry_s mm_procfs;
+#endif
 };
 
 /* Functions contained in mm_sem.c ******************************************/
 
 void mm_seminitialize(FAR struct mm_heap_s *heap);
-void mm_takesemaphore(FAR struct mm_heap_s *heap);
-int  mm_trysemaphore(FAR struct mm_heap_s *heap);
+bool mm_takesemaphore(FAR struct mm_heap_s *heap);
 void mm_givesemaphore(FAR struct mm_heap_s *heap);
 
 /* Functions contained in mm_shrinkchunk.c **********************************/

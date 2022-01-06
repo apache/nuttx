@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 
 #include <stdio.h>
+#include <assert.h>
+#include <debug.h>
 #include <errno.h>
 #include <poll.h>
 #include <fcntl.h>
@@ -944,9 +946,10 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
                     }
                 }
 
-              leave_critical_section(flags);
               upper->gap = false;
             }
+
+          leave_critical_section(flags);
         }
 
       sample = ev.pulse ? LIRC_PULSE(ev.duration) : LIRC_SPACE(ev.duration);

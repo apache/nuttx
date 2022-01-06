@@ -63,7 +63,7 @@ config ARMV7M_USEBASEPRI
 		WARNING:  If CONFIG_ARCH_HIPRI_INTERRUPT is selected, then you
 		MUST select CONFIG_ARMV7M_USEBASEPRI.  The Kconfig dependencies
 		here will permit to select an invalid configuration because it
-		cannot enforce that requirement.  If you create this invalild
+		cannot enforce that requirement.  If you create this invalid
 		configuration, you will encounter some problems that may be
 		very difficult to debug.
 

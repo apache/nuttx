@@ -42,18 +42,17 @@
 #include <arch/xtensa/xtensa_corebits.h>
 #include <arch/xtensa/xtensa_coproc.h>
 
+/* Include chip-specific IRQ definitions (including IRQ numbers) */
+
+#include <arch/chip/irq.h>
+
 /* Include architecture-specific IRQ definitions */
 
 #ifdef CONFIG_ARCH_FAMILY_LX6
 #  include <arch/lx6/irq.h>
 
-/* Include implementation-specific IRQ definitions (including IRQ numbers) */
-
-#  ifdef CONFIG_ARCH_CHIP_ESP32
-#    include <arch/esp32/irq.h>
-#  else
-#    error Unknown LX6 implementation
-#  endif
+#elif CONFIG_ARCH_FAMILY_LX7
+#  include <arch/lx7/irq.h>
 
 #else
 #  error Unknown XTENSA architecture
@@ -89,7 +88,7 @@
 
 #define _REG_LOOPS_START    (21)
 
-#ifdef XCHAL_HAVE_LOOPS
+#if XCHAL_HAVE_LOOPS != 0
 #  define REG_LBEG          (_REG_LOOPS_START + 0)
 #  define REG_LEND          (_REG_LOOPS_START + 1)
 #  define REG_LCOUNT        (_REG_LOOPS_START + 2)
@@ -192,7 +191,11 @@ static inline void xtensa_setps(uint32_t ps)
 {
   __asm__ __volatile__
   (
-    "wsr %0, PS"  : : "r"(ps)
+    "wsr %0, PS \n"
+    "rsync \n"
+    :
+    : "r"(ps)
+    : "memory"
   );
 }
 
@@ -202,7 +205,11 @@ static inline void up_irq_restore(uint32_t ps)
 {
   __asm__ __volatile__
   (
-    "wsr %0, PS"  : : "r"(ps)
+    "wsr %0, PS \n"
+    "rsync \n"
+    :
+    : "r"(ps)
+    : "memory"
   );
 }
 
@@ -219,7 +226,7 @@ static inline uint32_t up_irq_save(void)
 
   __asm__ __volatile__
   (
-    "rsil %0, %1" : "=r"(ps) : "I"(XCHAL_EXCM_LEVEL)
+    "rsil %0, %1" : "=r"(ps) : "i"(XCHAL_EXCM_LEVEL)
   );
 
   /* Return the previous PS value so that it can be restored with
@@ -249,6 +256,35 @@ static inline void up_irq_disable(void)
 #else
   xtensa_setps(PS_INTLEVEL(XCHAL_EXCM_LEVEL) | PS_UM | PS_WOE);
 #endif
+}
+
+/****************************************************************************
+ * Name: xtensa_disable_all
+ ****************************************************************************/
+
+static inline void xtensa_disable_all(void)
+{
+  __asm__ __volatile__
+  (
+    "movi a2, 0\n"
+    "xsr a2, INTENABLE\n"
+    : : : "a2"
+  );
+}
+
+/****************************************************************************
+ * Name: xtensa_intclear
+ ****************************************************************************/
+
+static inline void xtensa_intclear(uint32_t mask)
+{
+  __asm__ __volatile__
+  (
+    "wsr %0, INTCLEAR\n"
+    :
+    : "r"(mask)
+    :
+  );
 }
 
 /****************************************************************************

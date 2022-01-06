@@ -64,7 +64,7 @@ extern "C"
  *
  ****************************************************************************/
 
-FAR struct i2c_master_s *esp32_i2cbus_initialize(int port);
+struct i2c_master_s *esp32_i2cbus_initialize(int port);
 
 /****************************************************************************
  * Name: esp32_i2cbus_uninitialize
@@ -81,7 +81,7 @@ FAR struct i2c_master_s *esp32_i2cbus_initialize(int port);
  *
  ****************************************************************************/
 
-int esp32_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
+int esp32_i2cbus_uninitialize(struct i2c_master_s *dev);
 
 #ifdef __cplusplus
 }

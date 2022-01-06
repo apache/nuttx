@@ -64,8 +64,8 @@ extern uint32_t g_cpu1_idlestack[CPU1_IDLETHREAD_STACKWORDS];
  *
  ****************************************************************************/
 
-int esp32_fromcpu0_interrupt(int irq, FAR void *context, FAR void *arg);
-int esp32_fromcpu1_interrupt(int irq, FAR void *context, FAR void *arg);
+int esp32_fromcpu0_interrupt(int irq, void *context, void *arg);
+int esp32_fromcpu1_interrupt(int irq, void *context, void *arg);
 
 #endif /* CONFIG_SMP */
 #endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_SMP_H */

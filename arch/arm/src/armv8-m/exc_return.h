@@ -45,10 +45,6 @@
  * The remaining bits of the EXC_RETURN value should be set to 1.
  */
 
-/* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
-
-#define EXC_RETURN_BASE          0xffffff80
-
 /* EXC_RETURN_EXC_SECURE: Exception Secure.  The security domain the
  * exception was taken to.  If this bit is clear non-secure, else secure.
  */
@@ -92,6 +88,15 @@
 
 #define EXC_RETURN_SECURE_STACK  (1 << 6)
 
+/* EXC_RETURN_BASE: Bits that are always set in an EXC_RETURN value. */
+
+#ifdef CONFIG_ARCH_TRUSTZONE_NONSECURE
+#define EXC_RETURN_BASE          (0xffffff80)
+#else
+#define EXC_RETURN_BASE          (0xffffff80 | EXC_RETURN_EXC_SECURE | \
+                                  EXC_RETURN_SECURE_STACK)
+#endif
+
 /* EXC_RETURN_HANDLER: Return to handler mode. Exception return gets state
  * from the main stack. Execution uses MSP after return.
  */
@@ -123,6 +128,30 @@
                                   EXC_RETURN_THREAD_MODE | EXC_RETURN_PROCESS_STACK | \
                                   EXC_RETURN_DEF_STACKING)
 #endif
+
+#if defined(CONFIG_ARCH_FPU)
+#define EXC_INTEGRITY_SIGNATURE  (0xfefa125a)
+#else
+#define EXC_INTEGRITY_SIGNATURE  (0xfefa125b)
+#endif
+
+/* FUNC_RETURN_EXC_SECURE: Exception Secure.  The security domain the
+ * function was taken to.  If this bit is clear non-secure, else secure.
+ */
+
+#define FUNC_RETURN_EXC_SECURE   (1 << 0)
+
+/* FUNC_RETURN_BASE: Bits that are always set in a FUNC_RETURN value. */
+
+#define FUNC_RETURN_BASE         (0xfefffffe)
+
+/* FUNC_RETURN_SECURE: Return to the secure state. */
+
+#define FUNC_RETURN_SECURE       (FUNC_RETURN_BASE | FUNC_RETURN_EXC_SECURE)
+
+/* FUNC_RETURN_NONSECURE: Return to the non-secure state. */
+
+#define FUNC_RETURN_NONSECURE    (FUNC_RETURN_BASE)
 
 /****************************************************************************
  * Inline Functions

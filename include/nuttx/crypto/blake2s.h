@@ -100,8 +100,8 @@ typedef struct blake2s_param__
 
 #ifdef __GNUC__ > 3
 #define BLAKE2_UNALIGNED 1
-typedef uint32_t uint32_alias_t __attribute__((may_alias, aligned(1)));
-typedef uint16_t uint16_alias_t __attribute__((may_alias, aligned(1)));
+typedef uint32_t uint32_alias_t __attribute__((may_alias)) aligned_data(1);
+typedef uint16_t uint16_alias_t __attribute__((may_alias)) aligned_data(1);
 #endif
 
 /****************************************************************************

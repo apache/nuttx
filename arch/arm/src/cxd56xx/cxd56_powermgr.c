@@ -29,6 +29,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/mqueue.h>
 
+#include <assert.h>
 #include <debug.h>
 #include <errno.h>
 #include <sched.h>
@@ -83,14 +84,22 @@
 
 #define PM_CPUFREQLOCK_FLAG_INITIALIZED (0x8000)
 
-#ifdef CONFIG_CXD56_PM_DEBUG
-#  define pmerr(format, ...)  _err(format, ##__VA_ARGS__)
-#  define pmwarn(format, ...) _warn(format, ##__VA_ARGS__)
-#  define pminfo(format, ...) _info(format, ##__VA_ARGS__)
+/* Debug */
+
+#ifdef CONFIG_CXD56_PM_DEBUG_ERROR
+#  define pmerr(format, ...)   _err(format, ##__VA_ARGS__)
 #else
-#  define pmerr(x...)
-#  define pmwarn(x...)
-#  define pminfo(x...)
+#  define pmerr(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_WARN
+#  define pmwarn(format, ...)  _warn(format, ##__VA_ARGS__)
+#else
+#  define pmwarn(x, ...)
+#endif
+#ifdef CONFIG_CXD56_PM_DEBUG_INFO
+#  define pminfo(format, ...)  _info(format, ##__VA_ARGS__)
+#else
+#  define pminfo(x, ...)
 #endif
 
 void up_cpuctxload(void);
@@ -577,6 +586,13 @@ void up_pm_acquire_freqlock(struct pm_cpu_freqlock_s *lock)
 
   cxd56_pm_semtake(&g_freqlock);
 
+  if (lock->flag == PM_CPUFREQLOCK_FLAG_HOLD)
+    {
+      /* Return with holding the current frequency */
+
+      return;
+    }
+
   for (entry = sq_peek(&g_freqlockqueue); entry; entry = sq_next(entry))
     {
       if (entry == (struct sq_entry_s *)lock)
@@ -616,6 +632,13 @@ void up_pm_release_freqlock(struct pm_cpu_freqlock_s *lock)
 
   DEBUGASSERT(lock);
 
+  if (lock->flag == PM_CPUFREQLOCK_FLAG_HOLD)
+    {
+      /* Release holding the current frequency */
+
+      goto exit;
+    }
+
   up_pm_acquire_wakelock(&g_wlock);
 
   cxd56_pm_semtake(&g_freqlock);
@@ -634,6 +657,7 @@ void up_pm_release_freqlock(struct pm_cpu_freqlock_s *lock)
         }
     }
 
+exit:
   nxsem_post(&g_freqlock);
 
   up_pm_release_wakelock(&g_wlock);

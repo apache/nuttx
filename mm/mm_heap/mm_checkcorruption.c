@@ -47,12 +47,8 @@
 
 void mm_checkcorruption(FAR struct mm_heap_s *heap)
 {
-  FAR struct mm_heap_impl_s *heap_impl;
   FAR struct mm_allocnode_s *node;
   FAR struct mm_allocnode_s *prev;
-
-  DEBUGASSERT(MM_IS_VALID(heap));
-  heap_impl = heap->mm_impl;
 
 #if CONFIG_MM_REGIONS > 1
   int region;
@@ -63,37 +59,22 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
   /* Visit each region */
 
 #if CONFIG_MM_REGIONS > 1
-  for (region = 0; region < heap_impl->mm_nregions; region++)
+  for (region = 0; region < heap->mm_nregions; region++)
 #endif
     {
-      irqstate_t flags = 0;
-
       prev = NULL;
 
       /* Visit each node in the region
        * Retake the semaphore for each region to reduce latencies
        */
 
-      if (up_interrupt_context() || sched_idletask())
+      if (mm_takesemaphore(heap) == false)
         {
-          if (heap_impl->mm_counts_held)
-            {
-#if CONFIG_MM_REGIONS > 1
-              continue;
-#else
-              return;
-#endif
-            }
-
-          flags = enter_critical_section();
-        }
-      else
-        {
-          mm_takesemaphore(heap);
+          return;
         }
 
-      for (node = heap_impl->mm_heapstart[region];
-           node < heap_impl->mm_heapend[region];
+      for (node = heap->mm_heapstart[region];
+           node < heap->mm_heapend[region];
            node = (FAR struct mm_allocnode_s *)
                   ((FAR char *)node + node->size))
         {
@@ -120,15 +101,8 @@ void mm_checkcorruption(FAR struct mm_heap_s *heap)
           prev = node;
         }
 
-      assert(node == heap_impl->mm_heapend[region]);
+      assert(node == heap->mm_heapend[region]);
 
-      if (up_interrupt_context() || sched_idletask())
-        {
-          leave_critical_section(flags);
-        }
-      else
-        {
-          mm_givesemaphore(heap);
-        }
+      mm_givesemaphore(heap);
     }
 }

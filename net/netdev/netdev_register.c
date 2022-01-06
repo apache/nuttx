@@ -189,7 +189,7 @@ static int get_ifindex(void)
 
   for (ndx = 0; ndx < MAX_IFINDEX; ndx++)
     {
-      uint32_t bit = 1L << ndx;
+      uint32_t bit = 1UL << ndx;
       if ((devset & bit) == 0)
         {
           /* Indicate that this index is in use */
@@ -240,6 +240,7 @@ static int get_ifindex(void)
 
 int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 {
+  FAR struct net_driver_s **last;
   FAR char devfmt_str[IFNAMSIZ];
   FAR const char *devfmt;
   uint16_t pktsize = 0;
@@ -363,6 +364,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       /* There are no clients of the device yet */
 
       dev->d_conncb = NULL;
+      dev->d_conncb_tail = NULL;
       dev->d_devcb = NULL;
 
       /* We need exclusive access for the following operations */
@@ -428,8 +430,15 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
 
       /* Add the device to the list of known network devices */
 
-      dev->flink  = g_netdevices;
-      g_netdevices = dev;
+      last = &g_netdevices;
+      while (*last)
+        {
+          last = &((*last)->flink);
+        }
+
+      *last = dev;
+
+      dev->flink = NULL;
 
 #ifdef CONFIG_NET_IGMP
       /* Configure the device for IGMP support */

@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
+
 #include <nuttx/sched.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/spinlock.h>
@@ -95,14 +97,6 @@ static int sim_cpupause_handler(int irq, FAR void *context, FAR void *arg)
       DEBUGVERIFY(!up_cpu_pausereq(cpu));
 
       leave_critical_section(flags);
-    }
-  else
-    {
-      /* NOTE: sim specific logic
-       * In the case of no pause request, call sim_timer_handler()
-       */
-
-      sim_timer_handler();
     }
 
   return OK;
@@ -239,20 +233,47 @@ void up_cpu_started(void)
 }
 
 /****************************************************************************
- * Name: up_this_task
+ * Name: up_cpu_start
  *
  * Description:
- *   Return the currrent task tcb.
+ *   In an SMP configution, only one CPU is initially active (CPU 0). System
+ *   initialization occurs on that single thread. At the completion of the
+ *   initialization of the OS, just before beginning normal multitasking,
+ *   the additional CPUs would be started by calling this function.
+ *
+ *   Each CPU is provided the entry point to is IDLE task when started.  A
+ *   TCB for each CPU's IDLE task has been initialized and placed in the
+ *   CPU's g_assignedtasks[cpu] list.  A stack has also been allocateded and
+ *   initialized.
+ *
+ *   The OS initialization logic calls this function repeatedly until each
+ *   CPU has been started, 1 through (CONFIG_SMP_NCPUS-1).
+ *
+ * Input Parameters:
+ *   cpu - The index of the CPU being started.  This will be a numeric
+ *         value in the range of from one to (CONFIG_SMP_NCPUS-1).  (CPU
+ *         0 is already active)
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
  *
  ****************************************************************************/
 
-struct tcb_s *up_this_task(void)
+int up_cpu_start(int cpu)
 {
-  return this_task();
+  FAR struct tcb_s *tcb = current_task(cpu);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION
+  /* Notify of the start event */
+
+  sched_note_cpu_start(this_task(), cpu);
+#endif
+
+  return sim_cpu_start(cpu, tcb->stack_base_ptr, tcb->adj_stack_size);
 }
 
 /****************************************************************************
- * Name: up_cpu_set_pause_handler
+ * Name: up_init_ipi
  *
  * Description:
  *   Attach the CPU pause request interrupt to the NuttX logic.
@@ -264,7 +285,7 @@ struct tcb_s *up_this_task(void)
  *   On success returns OK (0), otherwise a negative value.
  ****************************************************************************/
 
-int up_cpu_set_pause_handler(int irq)
+int up_init_ipi(int irq)
 {
   up_enable_irq(irq);
   return irq_attach(irq, sim_cpupause_handler, NULL);

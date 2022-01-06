@@ -25,7 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "hardware/esp32_soc.h"
+#include "esp32_soc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -1184,7 +1184,8 @@
 #define DPORT_SLAVE_SPI_MASK_PRO_V  0x1
 #define DPORT_SLAVE_SPI_MASK_PRO_S  0
 
-#define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0CC)
+#define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0cc)
+#define DPORT_CORE_RST_EN_REG          (DR_REG_DPORT_BASE + 0x0d0)
 
 #define DPORT_EMAC_CLK_EN              (BIT(14))
 
@@ -4397,5 +4398,11 @@
 /* SPI Flash MMU table regitser base address for APP CPU */
 
 #define DPORT_APP_FLASH_MMU_TABLE_REG       (DR_REG_DPORT_BASE + 0x12000)
+
+#define DPORT_FLASH_MMU_TABLE_SIZE          0x100
+
+#define DPORT_FLASH_MMU_TABLE_INVALID_VAL   0x100
+
+#define DPORT_MMU_ADDRESS_MASK              0xff
 
 #endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_DPORT_H */

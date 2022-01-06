@@ -42,7 +42,7 @@
 
 FAR void *kmm_calloc(size_t n, size_t elem_size)
 {
-  return mm_calloc(&g_kmmheap, n, elem_size);
+  return mm_calloc(g_kmmheap, n, elem_size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

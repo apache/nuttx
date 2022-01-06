@@ -265,7 +265,6 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs);
 /* Software interrupt handler */
 
 #ifdef CONFIG_SMP
-void __cpu1_start(void) noreturn_function;
 int xtensa_intercpu_interrupt(int tocpu, int intcode);
 void xtensa_pause_handler(void);
 #endif
@@ -311,8 +310,8 @@ void xtensa_add_region(void);
 /* Serial output */
 
 void up_lowputc(char ch);
-void xtensa_early_serial_initialize(void);
-void xtensa_serial_initialize(void);
+void xtensa_earlyserialinit(void);
+void xtensa_serialinit(void);
 
 void rpmsg_serialinit(void);
 
@@ -345,11 +344,7 @@ void xtensa_pminitialize(void);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(FAR void *stackbase, size_t nbytes);
-#endif
-
-#ifdef CONFIG_XTENSA_DUMPBT_ON_ASSERT
-void xtensa_backtrace_start(uint32_t *pc, uint32_t *sp, uint32_t *next_pc);
+void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

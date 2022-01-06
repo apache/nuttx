@@ -37,16 +37,6 @@
 #endif
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* If CONFIG_NETDEV_IFINDEX is enabled then there is limit to the number of
- * devices that can be registered due to the nature of some static data.
- */
-
-#define MAX_IFINDEX  32
-
-/****************************************************************************
  * Public Data
  ****************************************************************************/
 

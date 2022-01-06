@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <syslog.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/kthread.h>
@@ -318,7 +319,7 @@ static int nsh_usbhostinitialize(void)
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_LIB_BOARDCTL=y :
+ *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
  *     Called from the NSH library
  *
  ****************************************************************************/

@@ -22,7 +22,7 @@
 ; Global Symbols Exported
 ;**************************************************************************
 
-	xdef	_z80_getsp
+	xdef	_up_getsp
 
 ;**************************************************************************
 ; Code
@@ -32,15 +32,15 @@
 	.assume ADL=1
 
 ;**************************************************************************
-;* Name: _z80_getsp
+;* Name: _up_getsp
 ;*
 ;* Description:
 ;*   Return the current value of the stack pointer
 ;*
 ;**************************************************************************
 
-_z80_getsp:
-	ld		hl, #0			; Initialize HL to zero
+_up_getsp:
+	ld		hl, 0			; Initialize HL to zero
 	add		hl, sp			; Add the stack pointer to HL
 	ret						; Return stack pointer in HL
 

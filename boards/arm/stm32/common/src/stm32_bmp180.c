@@ -27,6 +27,7 @@
 #include <nuttx/sensors/bmp180.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <stdio.h>
+#include <debug.h>
 #include "stm32_i2c.h"
 
 /****************************************************************************

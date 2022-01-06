@@ -142,7 +142,7 @@ int chdir(FAR const char *path)
   oldpwd = getenv("PWD");
   if (!oldpwd)
     {
-      oldpwd = CONFIG_LIB_HOMEDIR;
+      oldpwd = CONFIG_LIBC_HOMEDIR;
     }
 
   alloc = strdup(oldpwd);  /* kludge needed because environment is realloc'ed */

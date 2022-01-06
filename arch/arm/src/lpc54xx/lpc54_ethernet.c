@@ -3048,7 +3048,7 @@ int arm_netinitialize(int intf)
     {
       /* We could not attach the ISR to the interrupt */
 
-      nerr("ERROR:  irq_attach failed: %d\n", ret);
+      nerr("ERROR: irq_attach failed: %d\n", ret);
       return -EAGAIN;
     }
 

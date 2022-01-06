@@ -48,7 +48,7 @@
 
 FAR void *kmm_zalloc(size_t size)
 {
-  return mm_zalloc(&g_kmmheap, size);
+  return mm_zalloc(g_kmmheap, size);
 }
 
 #endif /* CONFIG_MM_KERNEL_HEAP */

@@ -40,7 +40,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/lcd/st7032.h>
 
-#ifndef CONFIG_LIB_SLCDCODEC
+#ifndef CONFIG_LIBC_SLCDCODEC
 # error please also select Library Routines, Segment LCD CODEC
 #endif
 

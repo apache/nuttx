@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -413,7 +414,24 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
         }
         break;
 
-      case MTDIOC_XIPBASE:
+      case BIOC_PARTINFO:
+        {
+          FAR struct partition_info_s *info =
+            (FAR struct partition_info_s *)arg;
+          if (info != NULL)
+            {
+              info->numsectors  = priv->neraseblocks * priv->blkpererase;
+              info->sectorsize  = priv->blocksize;
+              info->startsector = priv->firstblock;
+
+              strncpy(info->parent, priv->parent->name, NAME_MAX);
+
+              ret = OK;
+          }
+        }
+        break;
+
+      case BIOC_XIPBASE:
         {
           FAR void **ppv = (FAR void**)arg;
           unsigned long base;
@@ -422,7 +440,7 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
             {
               /* Get the XIP base of the entire FLASH */
 
-              ret = priv->parent->ioctl(priv->parent, MTDIOC_XIPBASE,
+              ret = priv->parent->ioctl(priv->parent, BIOC_XIPBASE,
                                         (unsigned long)((uintptr_t)&base));
               if (ret == OK)
                 {
@@ -430,8 +448,8 @@ static int part_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
                    * return the sum to the caller.
                    */
 
-                  *ppv = (FAR void *)(base +
-                                      priv->firstblock * priv->blocksize);
+                  *ppv = (FAR void *)(uintptr_t)
+                            (base + priv->firstblock * priv->blocksize);
                 }
             }
         }
@@ -578,7 +596,7 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
                   MTDIOC_GEOMETRY, (unsigned long)((uintptr_t)&geo));
           if (ret < 0)
             {
-              ferr("ERROR: mtd->ioctl failed: %d\n", ret);
+              ferr("ERROR: mtd->ioctl failed: %zd\n", ret);
               return 0;
             }
 
@@ -614,16 +632,17 @@ static ssize_t part_procfs_read(FAR struct file *filep, FAR char *buffer,
 
           /* Terminate the partition name and add to output buffer */
 
-          ret = snprintf(&buffer[total], buflen - total, "%s%7ju %ju   %s\n",
-                  partname,
-                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
-                  (uintmax_t)attr->nextpart->neraseblocks,
-                  attr->nextpart->parent->name);
+          ret = snprintf(&buffer[total], buflen - total,
+                         "%s%7ju %7ju   %s\n",
+                         partname,
+                         (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                         (uintmax_t)attr->nextpart->neraseblocks,
+                         attr->nextpart->parent->name);
 #else
           ret = snprintf(&buffer[total], buflen - total, "%7ju %7ju   %s\n",
-                  (uintmax_t)attr->nextpart->firstblock / blkpererase,
-                  (uintmax_t)attr->nextpart->neraseblocks,
-                  attr->nextpart->parent->name);
+                         (uintmax_t)attr->nextpart->firstblock / blkpererase,
+                         (uintmax_t)attr->nextpart->neraseblocks,
+                         attr->nextpart->parent->name);
 #endif
 
           if (ret + total < buflen)

@@ -41,9 +41,20 @@
  * IEEE Std 1003.1-2008
  */
 
+#ifndef bcmp /* See mm/README.txt */
 #define bcmp(b1,b2,len)  memcmp(b1,b2,(size_t)len)
+#endif
+
+#ifndef bcopy /* See mm/README.txt */
 #define bcopy(b1,b2,len) (void)memmove(b2,b1,len)
+#endif
+
+#ifndef bzero /* See mm/README.txt */
 #define bzero(s,n)       (void)memset(s,0,n)
+#endif
+
+#define strcasecmp_l(s1, s2, l)     strcasecmp(s1, s2)
+#define strncasecmp_l(s1, s2, n, l) strncasecmp(s1, s2, n)
 
 /****************************************************************************
  * Inline Functions

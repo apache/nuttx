@@ -34,6 +34,10 @@ ifeq ($(CONFIG_ESP32_SPI),y)
   CSRCS += esp32_board_spi.c
 endif
 
+ifeq ($(CONFIG_SPI_DRIVER),y)
+  CSRCS += esp32_board_spidev.c
+endif
+
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
   CSRCS += esp32_board_wlan.c
 endif
@@ -42,12 +46,24 @@ ifeq ($(CONFIG_SENSORS_BMP180),y)
   CSRCS += esp32_bmp180.c
 endif
 
+ifeq ($(CONFIG_LCD_HT16K33),y)
+  CSRCS += esp32_ht16k33.c
+endif
+
 ifeq ($(CONFIG_CAN_MCP2515),y)
   CSRCS += esp32_mcp2515.c
 endif
 
+ifeq ($(CONFIG_LCD_BACKPACK),y)
+  CSRCS += esp32_lcd_backpack.c
+endif
+
 ifeq ($(CONFIG_LCD_ILI9341),y)
   CSRCS += esp32_ili9341.c
+endif
+
+ifeq ($(CONFIG_LCD_SSD1306_I2C),y)
+  CSRCS += esp32_ssd1306.c
 endif
 
 DEPPATH += --dep-path src

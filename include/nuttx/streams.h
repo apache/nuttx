@@ -381,24 +381,6 @@ void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
 #endif
 
 /****************************************************************************
- * Name: emergstream
- *
- * Description:
- *   Initializes a stream for use with the configured emergency syslog
- *   interface.  Only accessible from with the OS SYSLOG logic.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_outstream_s to be initialized.
- *
- * Returned Value:
- *   None (User allocated instance initialized).
- *
- ****************************************************************************/
-
-void emergstream(FAR struct lib_outstream_s *stream);
-
-/****************************************************************************
  * Name: lib_noflush
  *
  * Description:

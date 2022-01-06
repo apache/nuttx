@@ -31,7 +31,7 @@ ifeq ($(CONFIG_KINETIS_USBOTG),y)
 CSRCS += k20_usbdev.c
 endif
 
-ifeq ($(CONFIG_LIB_BOARDCTL),y)
+ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += k20_appinit.c
 endif
 

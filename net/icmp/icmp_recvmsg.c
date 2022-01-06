@@ -162,7 +162,7 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Return the size of the returned data */
 
-          DEBUGASSERT(recvsize > INT16_MAX);
+          DEBUGASSERT(recvsize <= INT16_MAX);
           pstate->recv_result = recvsize;
 
           /* Return the IPv4 address of the sender from the IPv4 header */
@@ -181,7 +181,8 @@ static uint16_t recvfrom_eventhandler(FAR struct net_driver_s *dev,
 
           /* Indicate that the data has been consumed */
 
-          flags &= ~ICMP_NEWDATA;
+          flags     &= ~ICMP_NEWDATA;
+          dev->d_len = 0;
           goto end_wait;
         }
 
@@ -377,6 +378,8 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
         }
     }
 
+  net_lock();
+
   /* We cannot receive a response from a device until a request has been
    * sent to the devivce.
    */
@@ -388,32 +391,6 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout;
     }
 
-  /* Check if there is buffered read-ahead data for this socket.  We may have
-   * already received the response to previous command.
-   */
-
-  if (!IOB_QEMPTY(&conn->readahead))
-    {
-      return icmp_readahead(conn, buf, len,
-                            (FAR struct sockaddr_in *)from, fromlen);
-    }
-
-  /* Initialize the state structure */
-
-  memset(&state, 0, sizeof(struct icmp_recvfrom_s));
-
-  /* This semaphore is used for signaling and, hence, should not have
-   * priority inheritance enabled.
-   */
-
-  nxsem_init(&state.recv_sem, 0, 0);
-  nxsem_set_protocol(&state.recv_sem, SEM_PRIO_NONE);
-
-  state.recv_sock   = psock;    /* The IPPROTO_ICMP socket instance */
-  state.recv_result = -ENOMEM;  /* Assume allocation failure */
-  state.recv_buf    = buf;      /* Location to return the response */
-  state.recv_buflen = len;      /* Size of the response */
-
   /* Get the device that was used to send the ICMP request. */
 
   dev = conn->dev;
@@ -424,67 +401,101 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       goto errout;
     }
 
-  net_lock();
+  /* Check if there is buffered read-ahead data for this socket.  We may have
+   * already received the response to previous command.
+   */
 
-  /* Set up the callback */
-
-  state.recv_cb = icmp_callback_alloc(dev, conn);
-  if (state.recv_cb != NULL)
+  if (!IOB_QEMPTY(&conn->readahead))
     {
-      state.recv_cb->flags = (ICMP_NEWDATA | NETDEV_DOWN);
-      state.recv_cb->priv  = (FAR void *)&state;
-      state.recv_cb->event = recvfrom_eventhandler;
+      ret = icmp_readahead(conn, buf, len,
+                           (FAR struct sockaddr_in *)from, fromlen);
+    }
+  else if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+    {
+      /* Handle non-blocking ICMP sockets */
 
-      /* Wait for either the response to be received or for timeout to
-       * occur. net_timedwait will also terminate if a signal is received.
+      ret = -EAGAIN;
+    }
+  else
+    {
+      /* Initialize the state structure */
+
+      memset(&state, 0, sizeof(struct icmp_recvfrom_s));
+
+      /* This semaphore is used for signaling and, hence, should not have
+       * priority inheritance enabled.
        */
 
-      ret = net_timedwait(&state.recv_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
-      if (ret < 0)
+      nxsem_init(&state.recv_sem, 0, 0);
+      nxsem_set_protocol(&state.recv_sem, SEM_PRIO_NONE);
+
+      state.recv_sock   = psock;    /* The IPPROTO_ICMP socket instance */
+      state.recv_result = -ENOMEM;  /* Assume allocation failure */
+      state.recv_buf    = buf;      /* Location to return the response */
+      state.recv_buflen = len;      /* Size of the response */
+
+      /* Set up the callback */
+
+      state.recv_cb = icmp_callback_alloc(dev, conn);
+      if (state.recv_cb != NULL)
         {
-          state.recv_result = ret;
+          state.recv_cb->flags = (ICMP_NEWDATA | NETDEV_DOWN);
+          state.recv_cb->priv  = (FAR void *)&state;
+          state.recv_cb->event = recvfrom_eventhandler;
+
+          /* Wait for either the response to be received or for timeout to
+           * occur. net_timedwait will also terminate if a signal is
+           * received.
+           */
+
+          ret = net_timedwait(&state.recv_sem,
+                              _SO_TIMEOUT(psock->s_rcvtimeo));
+          if (ret < 0)
+            {
+              state.recv_result = ret;
+            }
+
+          icmp_callback_free(dev, conn, state.recv_cb);
         }
 
-      icmp_callback_free(dev, conn, state.recv_cb);
+      /* Return the negated error number in the event of a failure, or the
+       * number of bytes received on success.
+       */
+
+      if (state.recv_result < 0)
+        {
+          nerr("ERROR: Return error=%d\n", state.recv_result);
+          ret = state.recv_result;
+          goto errout;
+        }
+
+      if (from != NULL)
+        {
+          inaddr             = (FAR struct sockaddr_in *)from;
+          inaddr->sin_family = AF_INET;
+          inaddr->sin_port   = 0;
+
+          net_ipv4addr_copy(inaddr->sin_addr.s_addr, state.recv_from);
+        }
+
+      ret = state.recv_result;
+
+      /* If there a no further outstanding requests,
+       * make sure that the request struct is left pristine.
+       */
+
+errout:
+      if (conn->nreqs < 1)
+        {
+          conn->id    = 0;
+          conn->nreqs = 0;
+          conn->dev   = NULL;
+
+          iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
+        }
     }
 
   net_unlock();
-
-  /* Return the negated error number in the event of a failure, or the
-   * number of bytes received on success.
-   */
-
-  if (state.recv_result < 0)
-    {
-      nerr("ERROR: Return error=%d\n", state.recv_result);
-      ret = state.recv_result;
-      goto errout;
-    }
-
-  if (from != NULL)
-    {
-      inaddr             = (FAR struct sockaddr_in *)from;
-      inaddr->sin_family = AF_INET;
-      inaddr->sin_port   = 0;
-
-      net_ipv4addr_copy(inaddr->sin_addr.s_addr, state.recv_from);
-    }
-
-  ret = state.recv_result;
-
-  /* If there a no further outstanding requests, make sure that the request
-   * struct is left pristine.
-   */
-
-errout:
-  if (conn->nreqs < 1)
-    {
-      conn->id    = 0;
-      conn->nreqs = 0;
-      conn->dev   = NULL;
-
-      iob_free_queue(&conn->readahead, IOBUSER_NET_SOCK_ICMP);
-    }
 
   return ret;
 }

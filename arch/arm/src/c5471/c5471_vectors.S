@@ -156,7 +156,7 @@ arm_vectorirq:
 	/* Restore the CPSR, SVC modr registers and return */
 .Lnoirqset:
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lirqtmp:
@@ -215,7 +215,7 @@ arm_vectorsvc:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 	.align	5
@@ -280,7 +280,7 @@ arm_vectordata:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Ldaborttmp:
@@ -346,7 +346,7 @@ arm_vectorprefetch:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lpaborttmp:
@@ -412,7 +412,7 @@ arm_vectorundefinsn:
 	/* Restore the CPSR, SVC modr registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
-	msr	spsr, r0
+	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
 .Lundeftmp:

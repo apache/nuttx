@@ -186,6 +186,9 @@ boards/arm/stm32/b-g474e-dpow1
   Initial support for booting NuttX to a functional NSH prompt on the
   STMicro B-G474E-DPOW1 Discovery kit with STM32G474RE MCU.
 
+boards/arm/stm32/nucleo-g431kb
+    STMicro Nucleo G431KB board based on the STMicro STM32G431KB MCU.
+
 boards/arm/stm32/nucleo-g431rb
     STMicro Nucleo G431RB board based on the STMicro STM32G431RB MCU.
 
@@ -255,6 +258,11 @@ boards/arm/tiva/ekk-lm3s9b96
   TI/Stellaris EKK-LM3S9B96 board.  This board is based on the
   an EKK-LM3S9B96 which is a Cortex-M3.
 
+boards/arm/stm32/emw3162
+  A configuration for the EMW3162 Wi-Fi board
+  (https://www.waveshare.com/wiki/EMW3162). This board features
+  the STM32F205RGY6 MCU from STMicro.
+
 boards/xtensa/esp32/esp-core
   The ESP32 is a dual-core system from Espressif with two Harvard architecture
   Xtensa LX6 CPUs.  All embedded memory, external memory and peripherals are
@@ -283,6 +291,11 @@ boards/mips/pic32mz/flipnclick-pic32mz
   bootloader).  It has with four Mikroe Click bus interfaces in addition to
   standard Arduino connectors.  This board features the Microchip
   PIC32MZ2048EFH100 MCU running at 200 MHz (252 MHz capable).
+
+boards/mips/pic32mz/chipkit-wifire
+  Board support for the chipKIT Wi-FIRE board. This board is a chipKIT
+  Arduino-compatible board. This board features
+  the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
 
 boards/arm/sam34/flipnclick-sam3x
   Board support for the Mikroe Flip&Click STM32X board.  This board is an

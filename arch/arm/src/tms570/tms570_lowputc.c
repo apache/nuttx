@@ -46,6 +46,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
+#include <assert.h>
 #include <errno.h>
 
 #include <nuttx/irq.h>

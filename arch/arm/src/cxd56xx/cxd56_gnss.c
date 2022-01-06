@@ -132,14 +132,12 @@ extern int fw_pm_sleepcpu(int cpuid, int mode);
  * Private Types
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_SIGNAL
 struct cxd56_gnss_sig_s
 {
   uint8_t                             enable;
   int                                 pid;
   FAR struct cxd56_gnss_signal_info_s info;
 };
-#endif
 
 struct cxd56_gnss_shared_info_s
 {
@@ -163,8 +161,7 @@ struct cxd56_gnss_dev_s
   struct file                     cepfp;
   FAR void *                      cepbuf;
   FAR struct pollfd              *fds[CONFIG_CXD56_GNSS_NPOLLWAITERS];
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   struct cxd56_gnss_sig_s         sigs[CONFIG_CXD56_GNSS_NSIGNALRECEIVERS];
 #endif
   struct cxd56_gnss_shared_info_s shared_info;
@@ -392,6 +389,11 @@ static struct pm_cpu_freqlock_s g_lv_lock =
   PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('G', 'T', 0),
                       PM_CPUFREQLOCK_FLAG_LV);
 
+/* Lock to prohibit clock change in gnss open */
+
+static struct pm_cpu_freqlock_s g_hold_lock =
+  PM_CPUFREQLOCK_INIT(0, PM_CPUFREQLOCK_FLAG_HOLD);
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -517,7 +519,7 @@ static int cxd56_gnss_get_satellite_system(FAR struct file *filep,
                                            unsigned long    arg)
 {
   int ret;
-  uint32_t system;
+  uint32_t system = 0;
 
   if (!arg)
     {
@@ -699,7 +701,7 @@ static int cxd56_gnss_get_tcxo_offset(FAR struct file *filep,
                                       unsigned long    arg)
 {
   int     ret;
-  int32_t offset;
+  int32_t offset = 0;
 
   if (!arg)
     {
@@ -1459,8 +1461,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
 {
   int ret = 0;
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   FAR struct inode                       *inode;
   FAR struct cxd56_gnss_dev_s            *priv;
   FAR struct cxd56_gnss_signal_setting_s *setting;
@@ -1533,10 +1534,7 @@ static int cxd56_gnss_set_signal(FAR struct file *filep, unsigned long arg)
   _success:
   _err:
   nxsem_post(&priv->devsem);
-#endif
-/* if !defined(CONFIG_DISABLE_SIGNAL) &&
- *  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
- */
+#endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
   return ret;
 }
@@ -1743,7 +1741,7 @@ static int cxd56_gnss_get_rtk_interval(FAR struct file *filep,
                                        unsigned long    arg)
 {
   int ret;
-  int interval;
+  int interval = 0;
 
   if (!arg)
     {
@@ -1800,7 +1798,7 @@ static int cxd56_gnss_get_rtk_satellite(FAR struct file *filep,
                                         unsigned long    arg)
 {
   int       ret;
-  uint32_t  gnss;
+  uint32_t  gnss = 0;
 
   if (!arg)
     {
@@ -1857,7 +1855,7 @@ static int cxd56_gnss_get_rtk_ephemeris_enable(FAR struct file *filep,
                                                unsigned long    arg)
 {
   int ret;
-  int enable;
+  int enable = 0;
 
   if (!arg)
     {
@@ -2257,9 +2255,6 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
   cxd56_cpu1sigsend(CXD56_CPU1_DATA_TYPE_BKUPFILE, 0);
 }
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
-
 /****************************************************************************
  * Name: cxd56_gnss_common_signalhandler
  *
@@ -2276,6 +2271,7 @@ static void cxd56_gnss_read_backup_file(FAR int *retval)
  *
  ****************************************************************************/
 
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
 static void cxd56_gnss_common_signalhandler(uint32_t data,
                                             FAR void *userdata)
 {
@@ -2312,11 +2308,7 @@ static void cxd56_gnss_common_signalhandler(uint32_t data,
 
   nxsem_post(&priv->devsem);
 }
-
-#endif
-/* if !defined(CONFIG_DISABLE_SIGNAL) &&
- *  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
- */
+#endif /* CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0 */
 
 /****************************************************************************
  * Name: cxd56_gnss_default_sighandler
@@ -2418,8 +2410,7 @@ static void cxd56_gnss_default_sighandler(uint32_t data, FAR void *userdata)
 
   nxsem_post(&priv->devsem);
 
-#if !defined(CONFIG_DISABLE_SIGNAL) && \
-  (CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0)
+#if CONFIG_CXD56_GNSS_NSIGNALRECEIVERS != 0
   cxd56_gnss_common_signalhandler(data, userdata);
 #endif
 }
@@ -2646,7 +2637,16 @@ static int cxd56_gnss_open(FAR struct file *filep)
 
       nxsem_set_protocol(&priv->syncsem, SEM_PRIO_NONE);
 
+      /* Prohibit the clock change during loading image */
+
+      up_pm_acquire_freqlock(&g_hold_lock);
+
       ret = fw_pm_loadimage(CXD56_GNSS_GPS_CPUID, CXD56_GNSS_FWNAME);
+
+      /* Allow the clock change after loading image */
+
+      up_pm_release_freqlock(&g_hold_lock);
+
       if (ret < 0)
         {
           goto _err1;

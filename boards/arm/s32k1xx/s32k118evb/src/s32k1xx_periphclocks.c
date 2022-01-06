@@ -58,7 +58,9 @@
 
 #include <nuttx/config.h>
 
+#include "s32k11x/s32k11x_clocknames.h"
 #include "s32k1xx_periphclocks.h"
+
 #include "s32k118evb.h"
 
 /****************************************************************************
@@ -73,7 +75,7 @@ const struct peripheral_clock_config_s g_peripheral_clockconfig0[] =
 {
   {
     .clkname = FLEXCAN0_CLK,
-#ifdef CONFIG_S32K1XX_FLEXCAN
+#ifdef CONFIG_S32K1XX_FLEXCAN0
     .clkgate = true,
 #else
     .clkgate = false,

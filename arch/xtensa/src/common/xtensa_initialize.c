@@ -42,7 +42,7 @@
 #include <arch/board/board.h>
 
 #include "xtensa.h"
-#include "chip_macros.h"
+#include "chip.h"
 
 /****************************************************************************
  * Private Functions
@@ -181,7 +181,7 @@ void up_initialize(void)
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
-  xtensa_serial_initialize();
+  xtensa_serialinit();
 #endif
 
 #ifdef CONFIG_RPMSG_UART

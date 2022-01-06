@@ -33,8 +33,30 @@
 
 #include "rp2040_pico.h"
 
+#ifdef CONFIG_LCD_BACKPACK
+#include "rp2040_lcd_backpack.h"
+#endif
+
+#ifdef CONFIG_LCD
+#include <nuttx/board.h>
+#endif
+
+#ifdef CONFIG_LCD_DEV
+#include <nuttx/lcd/lcd_dev.h>
+#endif
+
 #ifdef CONFIG_VIDEO_FB
-#  include <nuttx/video/fb.h>
+#include <nuttx/video/fb.h>
+#endif
+
+#ifdef CONFIG_SENSORS_INA219
+#include <nuttx/sensors/ina219.h>
+#include "rp2040_ina219.h"
+#endif
+
+#ifdef CONFIG_SENSORS_BMP180
+#include <nuttx/sensors/bmp180.h>
+#include "rp2040_bmp180.h"
 #endif
 
 /****************************************************************************
@@ -132,6 +154,31 @@ int rp2040_bringup(void)
     {
       _err("ERROR: Failed to initialize Frame Buffer Driver.\n");
     }
+#elif defined(CONFIG_LCD)
+  ret = board_lcd_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize LCD.\n");
+    }
+#endif
+
+#ifdef CONFIG_LCD_DEV
+  ret = lcddev_register(0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: lcddev_register() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_LCD_BACKPACK
+  /* slcd:0, i2c:0, rows=2, cols=16 */
+
+  ret = board_lcd_backpack_init(0, 0, 2, 16);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize PCF8574 LCD, error %d\n", ret);
+      return ret;
+    }
 #endif
 
 #ifdef CONFIG_RP2040_I2S
@@ -139,6 +186,15 @@ int rp2040_bringup(void)
   if (ret < 0)
     {
       _err("ERROR: Failed to initialize I2S.\n");
+    }
+#endif
+
+#ifdef CONFIG_DEV_GPIO
+  ret = rp2040_dev_gpio_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+      return ret;
     }
 #endif
 

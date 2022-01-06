@@ -29,6 +29,7 @@
 #include <libgen.h>
 #include <dlfcn.h>
 #include <assert.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/envpath.h>
@@ -409,7 +410,7 @@ FAR void *dlopen(FAR const char *file, int mode)
 {
   FAR void *handle = NULL;
 
-#ifdef CONFIG_LIB_ENVPATH
+#ifdef CONFIG_LIBC_ENVPATH
   if (file[0] != '/')
     {
       FAR const char *relpath;

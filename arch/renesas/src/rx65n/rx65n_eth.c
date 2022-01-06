@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <assert.h>
 #include <debug.h>
 #include <queue.h>
 #include <errno.h>
@@ -237,7 +238,7 @@
  * interrupt.
  */
 
-#define ETHER_CFG_AL1_INT_PRIORTY                   (15)
+#define ETHER_CFG_AL1_INT_PRIORITY                  (15)
 
 /* Use LINKSTA signal for detect link status changes
  * 0 = unused  (use PHY-LSI status register)
@@ -335,7 +336,7 @@
 
 /* DMA descriptor buffer alignment to 32 bytes */
 
-#define NX_ALIGN32 __attribute__((aligned(32)))
+#define NX_ALIGN32 aligned_data(32)
 
 /****************************************************************************
  * Public Variables
@@ -3113,7 +3114,7 @@ void rx65n_ether_enable_icu(void)
 
   /* Priority to this interrupt should be value 2 */
 
-  ipl = ETHER_CFG_AL1_INT_PRIORTY;
+  ipl = ETHER_CFG_AL1_INT_PRIORITY;
 
   /* Disable group interrupts */
 

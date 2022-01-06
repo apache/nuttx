@@ -59,6 +59,9 @@
 #define LCDDEVIO_SETCURSOR    _LCDIOC(12) /* Arg: struct fb_setcursor_s* */
 #endif
 
+#define LCDDEVIO_SETFRAMERATE _LCDIOC(13) /* Arg: int */
+#define LCDDEVIO_GETFRAMERATE _LCDIOC(14) /* Arg: int* */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/

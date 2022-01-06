@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
@@ -34,6 +35,7 @@
 
 #include <netinet/in.h>
 
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/net/net.h>
 #include <socket/socket.h>
 
@@ -67,6 +69,9 @@ static int        local_accept(FAR struct socket *psock,
 static int        local_poll(FAR struct socket *psock,
                     FAR struct pollfd *fds, bool setup);
 static int        local_close(FAR struct socket *psock);
+static int        local_ioctl(FAR struct socket *psock, int cmd,
+                    FAR void *arg, size_t arglen);
+static int        local_socketpair(FAR struct socket *psocks[2]);
 
 /****************************************************************************
  * Public Data
@@ -86,7 +91,9 @@ const struct sock_intf_s g_local_sockif =
   local_poll,        /* si_poll */
   local_sendmsg,     /* si_sendmsg */
   local_recvmsg,     /* si_recvmsg */
-  local_close        /* si_close */
+  local_close,       /* si_close */
+  local_ioctl,       /* si_ioctl */
+  local_socketpair   /* si_socketpair */
 };
 
 /****************************************************************************
@@ -124,6 +131,9 @@ static int local_sockif_alloc(FAR struct socket *psock)
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
+#if defined(CONFIG_NET_LOCAL_STREAM)
+  conn->lc_psock = psock;
+#endif
   return OK;
 }
 #endif
@@ -609,9 +619,6 @@ static int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
                       bool setup)
 {
-#ifndef HAVE_LOCAL_POLL
-  return -ENOSYS;
-#else
   /* Check if we are setting up or tearing down the poll */
 
   if (setup)
@@ -626,7 +633,6 @@ static int local_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 
       return local_pollteardown(psock, fds);
     }
-#endif /* HAVE_LOCAL_POLL */
 }
 
 /****************************************************************************
@@ -684,6 +690,158 @@ static int local_close(FAR struct socket *psock)
       default:
         return -EBADF;
     }
+}
+
+/****************************************************************************
+ * Name: local_ioctl
+ *
+ * Description:
+ *   This function performs local device specific operations.
+ *
+ * Parameters:
+ *   psock    A reference to the socket structure of the socket
+ *   cmd      The ioctl command
+ *   arg      The argument of the ioctl cmd
+ *   arglen   The length of 'arg'
+ *
+ ****************************************************************************/
+
+static int local_ioctl(FAR struct socket *psock, int cmd,
+                       FAR void *arg, size_t arglen)
+{
+  FAR struct local_conn_s *conn;
+  int ret = OK;
+
+  conn = (FAR struct local_conn_s *)psock->s_conn;
+
+  switch (cmd)
+    {
+      case FIONREAD:
+        if (conn->lc_infile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_infile, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTCONN;
+          }
+        break;
+      case FIONSPACE:
+        if (conn->lc_outfile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_outfile, cmd, arg);
+          }
+        else
+          {
+            ret = -ENOTCONN;
+          }
+        break;
+      default:
+        ret = -ENOTTY;
+        break;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: local_socketpair
+ *
+ * Description:
+ *   Create a pair of connected sockets between psocks[2]
+ *
+ * Parameters:
+ *   psocks  A reference to the socket structure of the socket pair
+ *
+ ****************************************************************************/
+
+static int local_socketpair(FAR struct socket *psocks[2])
+{
+#if defined(CONFIG_NET_LOCAL_STREAM) || defined(CONFIG_NET_LOCAL_DGRAM)
+  FAR struct local_conn_s *conns[2];
+#ifdef CONFIG_NET_LOCAL_STREAM
+  bool nonblock;
+  int ret;
+#endif /* CONFIG_NET_LOCAL_STREAM */
+  int i;
+
+  for (i = 0; i < 2; i++)
+    {
+      conns[i] = psocks[i]->s_conn;
+      snprintf(conns[i]->lc_path,
+               sizeof(conns[i]->lc_path), "socketpair%p", psocks[0]);
+
+      conns[i]->lc_proto = psocks[i]->s_type;
+      conns[i]->lc_type  = LOCAL_TYPE_PATHNAME;
+      conns[i]->lc_state = LOCAL_STATE_BOUND;
+    }
+
+#ifdef CONFIG_NET_LOCAL_DGRAM
+#ifdef CONFIG_NET_LOCAL_STREAM
+  if (psocks[0]->s_type == SOCK_DGRAM)
+#endif /* CONFIG_NET_LOCAL_STREAM */
+    {
+      return OK;
+    }
+#endif /* CONFIG_NET_LOCAL_DGRAM */
+
+#ifdef CONFIG_NET_LOCAL_STREAM
+  conns[0]->lc_instance_id = conns[1]->lc_instance_id
+                           = local_generate_instance_id();
+
+  /* Create the FIFOs needed for the connection */
+
+  ret = local_create_fifos(conns[0]);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  nonblock = _SS_ISNONBLOCK(psocks[0]->s_flags);
+
+  /* Open the client-side write-only FIFO. */
+
+  ret = local_open_client_tx(conns[0], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the server-side read-only FIFO. */
+
+  ret = local_open_server_rx(conns[1], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the server-side write-only FIFO. */
+
+  ret = local_open_server_tx(conns[1], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  /* Open the client-side read-only FIFO */
+
+  ret = local_open_client_rx(conns[0], nonblock);
+  if (ret < 0)
+    {
+      goto errout;
+    }
+
+  conns[0]->lc_state = conns[1]->lc_state
+                     = LOCAL_STATE_CONNECTED;
+  return OK;
+
+errout:
+  local_release_fifos(conns[0]);
+  return ret;
+#endif /* CONFIG_NET_LOCAL_STREAM */
+#else
+  return -EOPNOTSUPP;
+#endif /* CONFIG_NET_LOCAL_STREAM || CONFIG_NET_LOCAL_DGRAM */
 }
 
 /****************************************************************************

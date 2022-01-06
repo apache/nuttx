@@ -63,9 +63,9 @@
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
+#include "chip.h"
 #include "xtensa.h"
 #include "xtensa_abi.h"
-#include "chip_macros.h"
 #include "xtensa_timer.h"
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -209,7 +209,7 @@ g_intstacktop:
   or a0, a0, a4               /* set top 2 bits */
   addx2 a0, a4, a0            /* clear top bit -- simulating call4 size   */
 #endif
-  
+
 	/* Call xtensa_int_decode passing the address of the register save area
 	 * as a parameter (A7).
 	 */
@@ -416,6 +416,13 @@ _xtensa_level2_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	2 a0
@@ -480,6 +487,13 @@ _xtensa_level3_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -546,6 +560,13 @@ _xtensa_level4_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	4 a0
@@ -611,6 +632,13 @@ _xtensa_level5_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
+
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
 	ps_setup	5 a0
@@ -675,6 +703,13 @@ _xtensa_level6_handler:
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
+
+	/* Save current SP before (possibly) overwriting it, it's the register save
+	 * area. This value will be used later by dispatch_c_isr to retrieve the
+	 * register save area.
+	 */
+
+	mov  a12, sp
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -749,7 +784,7 @@ _xtensa_level6_handler:
  *
  ****************************************************************************/
 
-#if XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2
+#if XCHAL_NUM_INTLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level2_handler, @function
 	.global		_xtensa_level2_handler
@@ -781,9 +816,9 @@ _xtensa_level2_handler:
 	rfi		2
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2 */
+#endif /* XCHAL_NUM_INTLEVELS >= 2 && XCHAL_EXCM_LEVEL < 2 && XCHAL_DEBUGLEVEL != 2 */
 
-#if XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3
+#if XCHAL_NUM_INTLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level3_handler, @function
 	.global		_xtensa_level3_handler
@@ -817,9 +852,9 @@ _xtensa_level3_handler:
 	rfi		3
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3 */
+#endif /* XCHAL_NUM_INTLEVELS >= 3 && XCHAL_EXCM_LEVEL < 3 && XCHAL_DEBUGLEVEL != 3 */
 
-#if XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4
+#if XCHAL_NUM_INTLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level4_handler, @function
 	.global		_xtensa_level4_handler
@@ -853,9 +888,9 @@ _xtensa_level4_handler:
 	rfi		4
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4 */
+#endif /* XCHAL_NUM_INTLEVELS >= 4 && XCHAL_EXCM_LEVEL < 4 && XCHAL_DEBUGLEVEL != 4 */
 
-#if XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5
+#if XCHAL_NUM_INTLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level5_handler, @function
 	.global		_xtensa_level5_handler
@@ -889,9 +924,9 @@ _xtensa_level5_handler:
 	rfi		5
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5 */
+#endif /* XCHAL_NUM_INTLEVELS >= 5 && XCHAL_EXCM_LEVEL < 5 && XCHAL_DEBUGLEVEL != 5 */
 
-#if XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6
+#if XCHAL_NUM_INTLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6
 	.section	HANDLER_SECTION, "ax"
 	.type		_xtensa_level6_handler, @function
 	.global		_xtensa_level6_handler
@@ -925,4 +960,4 @@ _xtensa_level6_handler:
 	rfi		6
 
 #endif
-#endif /* XCHAL_INT_NLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6 */
+#endif /* XCHAL_NUM_INTLEVELS >= 6 && XCHAL_EXCM_LEVEL < 6 && XCHAL_DEBUGLEVEL != 6 */

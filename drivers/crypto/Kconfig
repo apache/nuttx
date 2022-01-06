@@ -46,7 +46,7 @@ config DEV_URANDOM_CONGRUENTIAL
 		Use the same congruential general used with srand().  This algorithm
 		is computationally more intense and uses double precision floating
 		point.  NOTE: Good randomness from the congruential generator also
-		requires that you also select CONFIG_LIB_RAND_ORDER > 2
+		requires that you also select CONFIG_LIBC_RAND_ORDER > 2
 
 		NOTE: Not cyptographically secure
 

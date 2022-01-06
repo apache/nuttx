@@ -110,7 +110,8 @@ static const struct syslog_channel_ops_s g_syslog_dev_ops =
   syslog_dev_putc,
   syslog_dev_force,
   syslog_dev_flush,
-  syslog_dev_write
+  syslog_dev_write,
+  syslog_dev_uninitialize
 };
 
 static const uint8_t g_syscrlf[2] =

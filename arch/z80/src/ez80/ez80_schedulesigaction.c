@@ -102,7 +102,7 @@ static void ez80_sigsetup(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver,
 
 void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  sinfo("tcb=0x%p sigdeliver=0x%04x\n", tcb, (uint16_t)sigdeliver);
+  sinfo("tcb=0x%p sigdeliver=0x%06" PRIx32 "\n", tcb, (uint32_t)sigdeliver);
 
   /* Refuse to handle nested signal actions */
 
@@ -137,7 +137,7 @@ void up_schedule_sigaction(FAR struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * disabled.
                */
 
-              ez80_sigsetup(tcb, sigdeliver, IRQ_STATE());
+              ez80_sigsetup(tcb, sigdeliver, (chipreg_t *)IRQ_STATE());
 
               /* And make sure that the saved context in the TCB
                * is the same as the interrupt return context.

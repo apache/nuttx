@@ -144,7 +144,7 @@ struct task_group_s;  /* Forward reference */
  *   Optional parameters.  When the O_CREAT flag is specified, two optional
  *   parameters are expected:
  *
- *     1. mode_t mode (ignored), and
+ *     1. mode_t mode, and
  *     2. struct mq_attr *attr.  The mq_maxmsg attribute
  *        is used at the time that the message queue is
  *        created to determine the maximum number of
@@ -360,12 +360,12 @@ ssize_t nxmq_timedreceive(mqd_t mqdes, FAR char *msg, size_t msglen,
  * Description:
  *   This function deallocates an initialized message queue structure.
  *   First, it deallocates all of the queued messages in the message
- *   queue.  It is assumed that this message is fully unlinked and
- *   closed so that no thread will attempt access it while it is being
- *   deleted.
+ *   queue.  It is assumed that this message queue is fully unlinked
+ *   and closed so that no thread will attempt to access it while it
+ *   is being deleted.
  *
  * Input Parameters:
- *   msgq - Named essage queue to be freed
+ *   msgq - Named message queue to be freed
  *
  * Returned Value:
  *   None
@@ -382,7 +382,6 @@ void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq);
  *   It allocates and initializes a struct mqueue_inode_s structure.
  *
  * Input Parameters:
- *   mode   - mode_t value is ignored
  *   attr   - The mq_maxmsg attribute is used at the time that the message
  *            queue is created to determine the maximum number of
  *            messages that may be placed in the message queue.
@@ -393,17 +392,16 @@ void nxmq_free_msgq(FAR struct mqueue_inode_s *msgq);
  *
  ****************************************************************************/
 
-FAR struct mqueue_inode_s *nxmq_alloc_msgq(mode_t mode,
-                                           FAR struct mq_attr *attr);
+FAR struct mqueue_inode_s *nxmq_alloc_msgq(FAR struct mq_attr *attr);
 
 /****************************************************************************
  * Name: nxmq_pollnotify
  *
  * Description:
- *   pollnotify, used for notify the poll
+ *   pollnotify, used for notifying the poll
  *
  * Input Parameters:
- *   msgq     - Named essage queue
+ *   msgq     - Named message queue
  *   eventset - evnet
  *
  * Returned Value:
@@ -434,7 +432,7 @@ void nxmq_pollnotify(FAR struct mqueue_inode_s *msgq, pollevent_t eventset);
  *   Optional parameters.  When the O_CREAT flag is specified, two optional
  *   parameters are expected:
  *
- *     1. mode_t mode (ignored), and
+ *     1. mode_t mode, and
  *     2. struct mq_attr *attr.  The mq_maxmsg attribute
  *        is used at the time that the message queue is
  *        created to determine the maximum number of

@@ -154,16 +154,16 @@ choice
 		Sets SPI 1 clock mode
 
 config NUCLEO_SPI1_TEST_MODE0
-	bool "CPOL=0 CHPHA=0"
+	bool "CPOL=0 CPHA=0"
 
 config NUCLEO_SPI1_TEST_MODE1
-	bool "CPOL=0 CHPHA=1"
+	bool "CPOL=0 CPHA=1"
 
 config NUCLEO_SPI1_TEST_MODE2
-	bool "CPOL=1 CHPHA=0"
+	bool "CPOL=1 CPHA=0"
 
 config NUCLEO_SPI1_TEST_MODE3
-	bool "CPOL=1 CHPHA=1"
+	bool "CPOL=1 CPHA=1"
 
 endchoice # "SPI BUS 1 Clock Mode"
 
@@ -199,16 +199,16 @@ choice
 		Sets SPI 2 clock mode
 
 config NUCLEO_SPI2_TEST_MODE0
-	bool "CPOL=0 CHPHA=0"
+	bool "CPOL=0 CPHA=0"
 
 config NUCLEO_SPI2_TEST_MODE1
-	bool "CPOL=0 CHPHA=1"
+	bool "CPOL=0 CPHA=1"
 
 config NUCLEO_SPI2_TEST_MODE2
-	bool "CPOL=1 CHPHA=0"
+	bool "CPOL=1 CPHA=0"
 
 config NUCLEO_SPI2_TEST_MODE3
-	bool "CPOL=1 CHPHA=1"
+	bool "CPOL=1 CPHA=1"
 
 endchoice # "SPI BUS 2 Clock Mode"
 
@@ -244,16 +244,16 @@ choice
 		Sets SPI 3 clock mode
 
 config NUCLEO_SPI3_TEST_MODE0
-	bool "CPOL=0 CHPHA=0"
+	bool "CPOL=0 CPHA=0"
 
 config NUCLEO_SPI3_TEST_MODE1
-	bool "CPOL=0 CHPHA=1"
+	bool "CPOL=0 CPHA=1"
 
 config NUCLEO_SPI3_TEST_MODE2
-	bool "CPOL=1 CHPHA=0"
+	bool "CPOL=1 CPHA=0"
 
 config NUCLEO_SPI3_TEST_MODE3
-	bool "CPOL=1 CHPHA=1"
+	bool "CPOL=1 CPHA=1"
 
 endchoice # "SPI BUS 3 Clock Mode"
 

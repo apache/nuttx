@@ -27,6 +27,7 @@
 #include <nuttx/fs/fs.h>
 
 #include <stdio.h>
+#include <debug.h>
 
 #include "up_internal.h"
 
@@ -59,7 +60,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 int board_app_initialize(uintptr_t arg)
 {
   int ret = OK;
@@ -76,4 +77,4 @@ int board_app_initialize(uintptr_t arg)
 
   return ret;
 }
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

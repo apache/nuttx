@@ -27,10 +27,11 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
 
-#include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/spinlock.h>
 
 #include "sched/sched.h"
 #include "riscv_internal.h"
@@ -266,7 +267,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver        = (void *)sigdeliver;
                   tcb->xcp.saved_epc         = tcb->xcp.regs[REG_EPC];
                   tcb->xcp.saved_int_ctx     = tcb->xcp.regs[REG_INT_CTX];
 
@@ -291,7 +292,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.sigdeliver       = (FAR void *)sigdeliver;
+                  tcb->xcp.sigdeliver       = (void *)sigdeliver;
                   tcb->xcp.saved_epc        = CURRENT_REGS[REG_EPC];
                   tcb->xcp.saved_int_ctx    = CURRENT_REGS[REG_INT_CTX];
 
@@ -351,7 +352,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * by the signal trampoline after the signal has been delivered.
            */
 
-          tcb->xcp.sigdeliver        = (FAR void *)sigdeliver;
+          tcb->xcp.sigdeliver        = (void *)sigdeliver;
           tcb->xcp.saved_epc         = tcb->xcp.regs[REG_EPC];
           tcb->xcp.saved_int_ctx     = tcb->xcp.regs[REG_INT_CTX];
 

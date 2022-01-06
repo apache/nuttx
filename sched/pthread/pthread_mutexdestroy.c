@@ -27,6 +27,7 @@
 #include <pthread.h>
 #include <signal.h>
 #include <sched.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 

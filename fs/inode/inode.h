@@ -229,8 +229,36 @@ int inode_find(FAR struct inode_search_s *desc);
  *
  * Input Parameters:
  *   inode   - The inode of interest
- *   buf     - The caller provide location in which to return information
+ *   buf     - The caller-provided location in which to return information
  *             about the inode.
+ *   resolve - Whether to resolve the symbolic link:
+ *               0: Don't resolve the symbolic line
+ *               1: Resolve the symbolic link
+ *             >=2: The recursive count in the resolving process
+ *
+ * Returned Value:
+ *   Zero (OK) returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
+
+/****************************************************************************
+ * Name: inode_chstat
+ *
+ * Description:
+ *   The inode_chstat() function will change information about an 'inode'
+ *   in the pseudo file system according the area pointed to by 'buf'.
+ *
+ *   The 'buf' argument is a pointer to a stat structure, as defined in
+ *   <sys/stat.h>, which information is placed concerning the file.
+ *
+ * Input Parameters:
+ *   inode   - The inode of interest
+ *   buf     - The caller provide location in which to apply information
+ *             about the inode.
+ *   flags   - The vaild field in buf
  *   resolve - Whether to resolve the symbolic link
  *
  * Returned Value:
@@ -239,8 +267,18 @@ int inode_find(FAR struct inode_search_s *desc);
  *
  ****************************************************************************/
 
-struct stat;  /* Forward reference */
-int inode_stat(FAR struct inode *inode, FAR struct stat *buf, int resolve);
+int inode_chstat(FAR struct inode *inode,
+                 FAR const struct stat *buf, int flags, int resolve);
+
+/****************************************************************************
+ * Name: inode_getpath
+ *
+ * Description:
+ *   Given the full path from inode.
+ *
+ ****************************************************************************/
+
+int inode_getpath(FAR struct inode *node, FAR char *path);
 
 /****************************************************************************
  * Name: inode_free
@@ -283,6 +321,7 @@ void inode_root_reserve(void);
  *
  * Input Parameters:
  *   path - The path to the inode to create
+ *   mode - inmode privileges
  *   inode - The location to return the inode pointer
  *
  * Returned Value:
@@ -295,7 +334,8 @@ void inode_root_reserve(void);
  *
  ****************************************************************************/
 
-int inode_reserve(FAR const char *path, FAR struct inode **inode);
+int inode_reserve(FAR const char *path,
+                  mode_t mode, FAR struct inode **inode);
 
 /****************************************************************************
  * Name: inode_unlink

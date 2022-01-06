@@ -108,12 +108,13 @@ EXTERN volatile uint64_t *g_current_regs[1];
 EXTERN uintptr_t g_idle_topstack;
 #else
 EXTERN volatile uint32_t *g_current_regs;
+#  define CURRENT_REGS (g_current_regs)
 EXTERN uint32_t g_idle_topstack;
 #endif
 
 /* Address of the saved user stack pointer */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 3
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
 EXTERN uint32_t g_intstackalloc; /* Allocated stack base */
 EXTERN uint32_t g_intstacktop;   /* Initial top of interrupt stack */
 #endif
@@ -167,7 +168,7 @@ void riscv_copyfullstate(uint32_t *dest, uint32_t *src);
 #endif
 
 void riscv_sigdeliver(void);
-int riscv_swint(int irq, FAR void *context, FAR void *arg);
+int riscv_swint(int irq, void *context, void *arg);
 uint32_t riscv_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
@@ -199,7 +200,6 @@ void riscv_pminitialize(void);
 /* Low level serial output **************************************************/
 
 void riscv_lowputc(char ch);
-void riscv_puts(const char *str);
 void riscv_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
@@ -221,7 +221,7 @@ void riscv_exception(uint32_t mcause, uint32_t *regs);
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void riscv_stack_color(FAR void *stackbase, size_t nbytes);
+void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #undef EXTERN

@@ -34,7 +34,6 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#define __SIM__ 1
 #include "hostfs.h"
 
 /****************************************************************************
@@ -126,7 +125,7 @@ static void host_stat_convert(struct stat *hostbuf, struct nuttx_stat_s *buf)
  * Name: host_open
  ****************************************************************************/
 
-int host_open(const char *pathname, int flags, int mode)
+int host_open(const char *pathname, int flags, nuttx_mode_t mode)
 {
   int mapflags = 0;
 
@@ -212,11 +211,11 @@ int host_close(int fd)
  * Name: host_read
  ****************************************************************************/
 
-ssize_t host_read(int fd, void *buf, size_t count)
+nuttx_ssize_t host_read(int fd, void *buf, nuttx_size_t count)
 {
   /* Just call the read routine */
 
-  ssize_t ret = read(fd, buf, count);
+  nuttx_ssize_t ret = read(fd, buf, count);
   if (ret == -1)
     {
       ret = -errno;
@@ -229,11 +228,11 @@ ssize_t host_read(int fd, void *buf, size_t count)
  * Name: host_write
  ****************************************************************************/
 
-ssize_t host_write(int fd, const void *buf, size_t count)
+nuttx_ssize_t host_write(int fd, const void *buf, nuttx_size_t count)
 {
   /* Just call the write routine */
 
-  ssize_t ret = write(fd, buf, count);
+  nuttx_ssize_t ret = write(fd, buf, count);
   if (ret == -1)
     {
       ret = -errno;
@@ -246,12 +245,12 @@ ssize_t host_write(int fd, const void *buf, size_t count)
  * Name: host_lseek
  ****************************************************************************/
 
-off_t host_lseek(int fd, off_t offset, int whence)
+nuttx_off_t host_lseek(int fd, nuttx_off_t offset, int whence)
 {
   /* Just call the lseek routine */
 
-  off_t ret = lseek(fd, offset, whence);
-  if (ret == (off_t)-1)
+  nuttx_off_t ret = lseek(fd, offset, whence);
+  if (ret == (nuttx_off_t)-1)
     {
       ret = -errno;
     }
@@ -314,10 +313,69 @@ int host_fstat(int fd, struct nuttx_stat_s *buf)
 }
 
 /****************************************************************************
+ * Name: host_fchstat
+ ****************************************************************************/
+
+int host_fchstat(int fd, const struct nuttx_stat_s *buf, int flags)
+{
+  struct timespec times[2];
+  int ret;
+
+  if (flags & NUTTX_CH_STAT_MODE)
+    {
+      ret = fchmod(fd, buf->st_mode);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_UID | NUTTX_CH_STAT_GID))
+    {
+      ret = fchown(fd, buf->st_uid, buf->st_gid);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_ATIME | NUTTX_CH_STAT_MTIME))
+    {
+      if (flags & NUTTX_CH_STAT_ATIME)
+        {
+          times[0].tv_sec  = buf->st_atim.tv_sec;
+          times[0].tv_nsec = buf->st_atim.tv_nsec;
+        }
+      else
+        {
+          times[0].tv_nsec = UTIME_OMIT;
+        }
+
+      if (flags & NUTTX_CH_STAT_MTIME)
+        {
+          times[1].tv_sec  = buf->st_mtim.tv_sec;
+          times[1].tv_nsec = buf->st_mtim.tv_nsec;
+        }
+      else
+        {
+          times[1].tv_nsec = UTIME_OMIT;
+        }
+
+      ret = futimens(fd, times);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  return 0;
+}
+
+/****************************************************************************
  * Name: host_truncate
  ****************************************************************************/
 
-int host_ftruncate(int fd, off_t length)
+int host_ftruncate(int fd, nuttx_off_t length)
 {
   int ret = ftruncate(fd, length);
   if (ret < 0)
@@ -538,4 +596,63 @@ int host_stat(const char *path, struct nuttx_stat_s *buf)
 
   host_stat_convert(&hostbuf, buf);
   return ret;
+}
+
+/****************************************************************************
+ * Name: host_chstat
+ ****************************************************************************/
+
+int host_chstat(const char *path, const struct nuttx_stat_s *buf, int flags)
+{
+  struct timespec times[2];
+  int ret;
+
+  if (flags & NUTTX_CH_STAT_MODE)
+    {
+      ret = chmod(path, buf->st_mode);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_UID | NUTTX_CH_STAT_GID))
+    {
+      ret = chown(path, buf->st_uid, buf->st_gid);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  if (flags & (NUTTX_CH_STAT_ATIME | NUTTX_CH_STAT_MTIME))
+    {
+      if (flags & NUTTX_CH_STAT_ATIME)
+        {
+          times[0].tv_sec  = buf->st_atim.tv_sec;
+          times[0].tv_nsec = buf->st_atim.tv_nsec;
+        }
+      else
+        {
+          times[0].tv_nsec = UTIME_OMIT;
+        }
+
+      if (flags & NUTTX_CH_STAT_MTIME)
+        {
+          times[1].tv_sec  = buf->st_mtim.tv_sec;
+          times[1].tv_nsec = buf->st_mtim.tv_nsec;
+        }
+      else
+        {
+          times[1].tv_nsec = UTIME_OMIT;
+        }
+
+      ret = utimensat(AT_FDCWD, path, times, 0);
+      if (ret < 0)
+        {
+          return -errno;
+        }
+    }
+
+  return 0;
 }

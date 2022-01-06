@@ -93,10 +93,10 @@ void stm32_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
-#ifndef CONFIG_LIB_BOARDCTL
+#ifndef CONFIG_BOARDCTL
   /* Perform NSH initialization here instead of from the
    * board_app_initialize.
-   * If CONFIG_LIB_BOARDCTL=y we assume that come application will perform
+   * If CONFIG_BOARDCTL=y we assume that come application will perform
    * the initialization by calling board_app_initialize indirectly through
    * boardctl().
    */

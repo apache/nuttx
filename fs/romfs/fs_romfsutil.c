@@ -530,7 +530,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   if (INODE_IS_MTD(inode))
     {
-      ret = MTD_IOCTL(inode->u.i_mtd, MTDIOC_XIPBASE,
+      ret = MTD_IOCTL(inode->u.i_mtd, BIOC_XIPBASE,
                       (unsigned long)&rm->rm_xipbase);
     }
   else if (inode->u.i_bops->ioctl != NULL)

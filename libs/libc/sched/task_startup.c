@@ -27,6 +27,7 @@
 #include <sched.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <debug.h>
 
 #ifndef CONFIG_BUILD_KERNEL
 

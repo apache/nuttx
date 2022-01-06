@@ -50,7 +50,7 @@
  *   ungetc(3) function on the same stream.
  *
  * Returned Value:
- *   Zero on succes; -1 on failure with errno set appropriately.
+ *   Zero on success; -1 on failure with errno set appropriately.
  *
  ****************************************************************************/
 

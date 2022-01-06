@@ -68,10 +68,199 @@
  ****************************************************************************/
 
 #define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: tcp_trim_head
+ *
+ * Description:
+ *   Trim the head of the TCP segment.
+ *
+ * Input Parameters:
+ *   dev     - The device driver structure containing the received TCP
+ *             packet.
+ *   tcp     - The TCP header.
+ *   trimlen - The length to trim in bytes.
+ *
+ * Returned Value:
+ *   True if nothing was left.
+ *
+ * Assumptions:
+ *   The network is locked.
+ *
+ ****************************************************************************/
+
+static bool tcp_trim_head(FAR struct net_driver_s *dev,
+                          FAR struct tcp_hdr_s *tcp,
+                          uint32_t trimlen)
+{
+  uint32_t seq = tcp_getsequence(tcp->seqno);
+  uint16_t urg_ptr = (tcp->urgp[0] << 8) | tcp->urgp[1];
+  uint32_t urg_trimlen = 0;
+  uint8_t th_flags = tcp->flags;
+
+  DEBUGASSERT(trimlen > 0);
+  ninfo("Dropping %" PRIu32 " bytes: "
+        "seq=%" PRIu32 ", "
+        "tcp flags=%" PRIx8 ", "
+        "d_len=%" PRIu16 ", "
+        "urg_ptr=%" PRIu16 "\n",
+        trimlen,
+        seq,
+        th_flags,
+        dev->d_len,
+        urg_ptr);
+
+  if ((th_flags & TCP_SYN) != 0)
+    {
+      ninfo("Dropping SYN\n");
+      seq = TCP_SEQ_ADD(seq, 1);
+      urg_trimlen++;
+      trimlen--;
+      th_flags &= ~TCP_SYN;
+    }
+
+  if (trimlen > 0)
+    {
+      uint32_t len = trimlen;
+
+      if (len > dev->d_len)
+        {
+          len = dev->d_len;
+        }
+
+      ninfo("Dropping %" PRIu32 " bytes app data\n", len);
+      seq = TCP_SEQ_ADD(seq, len);
+      urg_trimlen += len;
+      dev->d_appdata += len;
+      dev->d_len -= len;
+      trimlen -= len;
+    }
+
+  if (trimlen > 0)
+    {
+      if ((th_flags & TCP_FIN) != 0)
+        {
+          ninfo("Dropping FIN\n");
+          seq = TCP_SEQ_ADD(seq, 1);
+          urg_trimlen++;
+          trimlen--;
+          th_flags &= ~TCP_FIN;
+        }
+    }
+
+  /* Update the header */
+
+  if ((th_flags & TCP_URG) != 0)
+    {
+      /* Adjust URG pointer */
+
+      if (urg_trimlen >= urg_ptr)
+        {
+          th_flags &= ~TCP_URG;
+          urg_ptr = 0;
+        }
+      else
+        {
+          urg_ptr -= urg_trimlen;
+        }
+
+      ninfo("Adjusting URG pointer by %" PRIu32 ", "
+            "new urg_ptr=%" PRIu16 "\n",
+            urg_trimlen, urg_ptr);
+
+      tcp->urgp[0] = (uint8_t)(urg_ptr >> 8);
+      tcp->urgp[1] = (uint8_t)urg_ptr;
+    }
+
+  tcp->flags = th_flags;
+  tcp_setsequence(tcp->seqno, seq);
+
+  if ((th_flags & (TCP_SYN | TCP_FIN)) == 0 && dev->d_len == 0)
+    {
+      ninfo("Dropped the entire segment\n");
+      return true;
+    }
+
+  DEBUGASSERT(trimlen == 0);
+  ninfo("Dropped the segment partially\n");
+  return false;
+}
+
+static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
+                             FAR struct tcp_hdr_s *tcp)
+{
+  /* Just ensure that the next tcp_update_snd_wnd will be accepted. */
+
+  DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
+  conn->snd_wl1 = TCP_SEQ_SUB(tcp_getsequence(tcp->seqno), 1);
+  conn->snd_wl2 = tcp_getsequence(tcp->ackno);
+  conn->snd_wnd = 0;
+  ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
+}
+
+static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
+                               FAR struct tcp_hdr_s *tcp)
+{
+  uint32_t ackseq = tcp_getsequence(tcp->ackno);
+  uint32_t seq = tcp_getsequence(tcp->seqno);
+  uint16_t unscaled_wnd = ((uint16_t)tcp->wnd[0] << 8) + tcp->wnd[1];
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  uint32_t wnd = (uint32_t)unscaled_wnd << conn->snd_scale;
+#else
+  uint16_t wnd = unscaled_wnd;
+#endif
+  uint32_t wl2 = conn->snd_wl2;
+
+  DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
+
+  if (TCP_SEQ_LT(wl2, ackseq))
+    {
+      uint32_t nacked = TCP_SEQ_SUB(ackseq, wl2);
+
+      ninfo("snd_wnd acked: "
+            "wl2 %" PRIu32 " -> %" PRIu32 " subtracting wnd %" PRIu32
+            " by %" PRIu32 "\n",
+            wl2,
+            ackseq,
+            (uint32_t)conn->snd_wnd,
+            nacked);
+
+      if (nacked > conn->snd_wnd)
+        {
+          conn->snd_wnd = 0;
+        }
+      else
+        {
+          conn->snd_wnd -= nacked;
+        }
+
+      conn->snd_wl2 = ackseq;
+    }
+
+  if (TCP_SEQ_LT(conn->snd_wl1, seq) ||
+      (conn->snd_wl1 == seq && TCP_SEQ_LT(wl2, ackseq)) ||
+      (wl2 == ackseq && conn->snd_wnd < wnd))
+    {
+      ninfo("snd_wnd update: "
+            "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 " -> "
+            "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 "\n",
+            conn->snd_wl1,
+            wl2,
+            (uint32_t)conn->snd_wnd,
+            seq,
+            ackseq,
+            (uint32_t)wnd);
+
+      conn->snd_wl1 = seq;
+      conn->snd_wl2 = ackseq;
+      conn->snd_wnd = wnd;
+    }
+}
 
 /****************************************************************************
  * Name: tcp_input
@@ -95,8 +284,9 @@
 static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       unsigned int iplen)
 {
-  FAR struct tcp_hdr_s *tcp;
   FAR struct tcp_conn_s *conn = NULL;
+  FAR struct tcp_hdr_s *tcp;
+  union ip_binding_u uaddr;
   unsigned int tcpiplen;
   unsigned int hdrlen;
   uint16_t tmp16;
@@ -182,10 +372,29 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
        */
 
       tmp16 = tcp->destport;
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+      if (domain == PF_INET6)
+#  endif
+        {
+          net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
+        }
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+      if (domain == PF_INET)
+#  endif
+        {
+          net_ipv4addr_copy(uaddr.ipv4.laddr,
+                            net_ip4addr_conv32(IPv4BUF->destipaddr));
+        }
+#endif
+
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-      if (tcp_islistener(tmp16, domain))
+      if (tcp_islistener(&uaddr, tmp16, domain))
 #else
-      if (tcp_islistener(tmp16))
+      if (tcp_islistener(&uaddr, tmp16))
 #endif
         {
           /* We matched the incoming packet with a connection in LISTEN.
@@ -238,7 +447,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
               goto drop;
             }
 
-          net_incr32(conn->rcvseq, 1);
+          net_incr32(conn->rcvseq, 1); /* ack SYN */
 
           /* Parse the TCP MSS option, if present. */
 
@@ -258,6 +467,7 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       /* NOP option. */
 
                       ++i;
+                      continue;
                     }
                   else if (opt == TCP_OPT_MSS &&
                           dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -269,11 +479,16 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
                       tmp16 = ((uint16_t)dev->d_buf[hdrlen + 2 + i] << 8) |
                                (uint16_t)dev->d_buf[hdrlen + 3 + i];
                       conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                      /* And we are done processing options. */
-
-                      break;
                     }
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+                  else if (opt == TCP_OPT_WS &&
+                          dev->d_buf[hdrlen + 1 + i] == TCP_OPT_WS_LEN)
+                    {
+                      conn->snd_scale = dev->d_buf[hdrlen + 2 + i];
+                      conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+                      conn->flags    |= TCP_WSCALE;
+                    }
+#endif
                   else
                     {
                       /* All other options have a length field, so that we
@@ -288,9 +503,9 @@ static void tcp_input(FAR struct net_driver_s *dev, uint8_t domain,
 
                           break;
                         }
-
-                      i += dev->d_buf[hdrlen + 1 + i];
                     }
+
+                  i += dev->d_buf[hdrlen + 1 + i];
                 }
             }
 
@@ -324,10 +539,6 @@ reset:
 
 found:
 
-  /* Update the connection's window size */
-
-  conn->snd_wnd = ((uint16_t)tcp->wnd[0] << 8) + (uint16_t)tcp->wnd[1];
-
   flags = 0;
 
   /* We do a very naive form of TCP reset processing; we just accept
@@ -351,10 +562,29 @@ found:
 
           /* Notify the listener for the connection of the reset event */
 
+#ifdef CONFIG_NET_IPv6
+#  ifdef CONFIG_NET_IPv4
+          if (domain == PF_INET6)
+#  endif
+            {
+              net_ipv6addr_copy(&uaddr.ipv6.laddr, IPv6BUF->destipaddr);
+            }
+#endif
+
+#ifdef CONFIG_NET_IPv4
+#  ifdef CONFIG_NET_IPv6
+          if (domain == PF_INET)
+#  endif
+            {
+              net_ipv4addr_copy(uaddr.ipv4.laddr,
+                                net_ip4addr_conv32(IPv4BUF->destipaddr));
+            }
+#endif
+
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
-          listener = tcp_findlistener(conn->lport, domain);
+          listener = tcp_findlistener(&uaddr, conn->lport, domain);
 #else
-          listener = tcp_findlistener(conn->lport);
+          listener = tcp_findlistener(&uaddr, conn->lport);
 #endif
 
           /* We must free this TCP connection structure; this connection
@@ -399,46 +629,6 @@ found:
 
   dev->d_len -= (len + iplen);
 
-#ifdef CONFIG_NET_TCP_KEEPALIVE
-  /* Check for a to KeepAlive probes.  These packets have these properties:
-   *
-   *   - TCP_ACK flag is set.  SYN/FIN/RST never appear in a Keepalive probe.
-   *   - Sequence number is the sequence number of previously ACKed data,
-   *     i.e., the expected sequence number minus one.
-   *   - The data payload is one or two bytes.
-   *
-   * We would expect a KeepAlive only in the ESTABLISHED state and only after
-   * some time has elapsed with no network activity.  If there is un-ACKed
-   * data, then we will let the normal TCP re-transmission logic handle that
-   * case.
-   */
-
-  if ((tcp->flags & TCP_ACK) != 0 &&
-      (tcp->flags & (TCP_SYN | TCP_FIN | TCP_RST)) == 0 &&
-      (conn->tcpstateflags & TCP_STATE_MASK) == TCP_ESTABLISHED &&
-      (dev->d_len == 0 || dev->d_len == 1) &&
-      conn->tx_unacked <= 0)
-    {
-      uint32_t ackseq;
-      uint32_t rcvseq;
-
-      /* Get the sequence number of that has just been acknowledged by this
-       * incoming packet.
-       */
-
-      ackseq = tcp_getsequence(tcp->seqno);
-      rcvseq = tcp_getsequence(conn->rcvseq);
-
-      if (ackseq < rcvseq)
-        {
-          /* Send a "normal" acknowledgment of the KeepAlive probe */
-
-          tcp_send(dev, conn, TCP_ACK, tcpiplen);
-          return;
-        }
-    }
-#endif
-
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
    * in, unless we are in the SYN_RCVD state and receive a SYN, in which
@@ -450,11 +640,38 @@ found:
         (((conn->tcpstateflags & TCP_STATE_MASK) == TCP_SYN_RCVD) &&
         ((tcp->flags & TCP_CTL) == TCP_SYN))))
     {
-      if ((dev->d_len > 0 || ((tcp->flags & (TCP_SYN | TCP_FIN)) != 0)) &&
-          memcmp(tcp->seqno, conn->rcvseq, 4) != 0)
+      uint32_t seq;
+      uint32_t rcvseq;
+
+      seq = tcp_getsequence(tcp->seqno);
+      rcvseq = tcp_getsequence(conn->rcvseq);
+
+      if (seq != rcvseq)
         {
-          tcp_send(dev, conn, TCP_ACK, tcpiplen);
-          return;
+          /* Trim the head of the segment */
+
+          if (TCP_SEQ_LT(seq, rcvseq))
+            {
+              uint32_t trimlen = TCP_SEQ_SUB(rcvseq, seq);
+
+              if (tcp_trim_head(dev, tcp, trimlen))
+                {
+                  /* The segment was completely out of the window.
+                   * E.g. a retransmit which was not necessary.
+                   * E.g. a keep-alive segment.
+                   */
+
+                  tcp_send(dev, conn, TCP_ACK, tcpiplen);
+                  return;
+                }
+            }
+          else
+            {
+              /* We never queue out-of-order segments. */
+
+              tcp_send(dev, conn, TCP_ACK, tcpiplen);
+              return;
+            }
         }
     }
 
@@ -467,6 +684,7 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+      uint32_t sndseq;
 
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
@@ -492,7 +710,7 @@ found:
        * new sequence number.
        */
 
-      if (ackseq <= unackseq)
+      if (TCP_SEQ_LTE(ackseq, unackseq))
         {
           /* Calculate the new number of outstanding, unacknowledged bytes */
 
@@ -524,11 +742,15 @@ found:
        * be beyond ackseq.
        */
 
-      ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-            " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
-            tcp_getsequence(conn->sndseq), ackseq, unackseq,
-            (uint32_t)conn->tx_unacked);
-      tcp_setsequence(conn->sndseq, ackseq);
+      sndseq = tcp_getsequence(conn->sndseq);
+      if (TCP_SEQ_LT(sndseq, ackseq))
+        {
+          ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
+                " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
+                tcp_getsequence(conn->sndseq), ackseq, unackseq,
+                (uint32_t)conn->tx_unacked);
+          tcp_setsequence(conn->sndseq, ackseq);
+        }
 
       /* Do RTT estimation, unless we have done retransmissions. */
 
@@ -558,6 +780,14 @@ found:
       /* Reset the retransmission timer. */
 
       conn->timer = conn->rto;
+    }
+
+  /* Update the connection's window size */
+
+  if ((tcp->flags & TCP_ACK) != 0 &&
+      (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
+    {
+      tcp_snd_wnd_update(conn, tcp);
     }
 
   /* Do different things depending on in what state the connection is. */
@@ -616,13 +846,15 @@ found:
             conn->sndseq_max    = 0;
 #endif
             conn->tx_unacked    = 0;
+            tcp_snd_wnd_init(conn, tcp);
+            tcp_snd_wnd_update(conn, tcp);
+
             flags               = TCP_CONNECTED;
             ninfo("TCP state: TCP_ESTABLISHED\n");
 
             if (dev->d_len > 0)
               {
                 flags          |= TCP_NEWDATA;
-                net_incr32(conn->rcvseq, dev->d_len);
               }
 
             dev->d_sndlen       = 0;
@@ -669,6 +901,7 @@ found:
                         /* NOP option. */
 
                         ++i;
+                        continue;
                       }
                     else if (opt == TCP_OPT_MSS &&
                               dev->d_buf[hdrlen + 1 + i] == TCP_OPT_MSS_LEN)
@@ -681,11 +914,16 @@ found:
                           (dev->d_buf[hdrlen + 2 + i] << 8) |
                           dev->d_buf[hdrlen + 3 + i];
                         conn->mss = tmp16 > tcp_mss ? tcp_mss : tmp16;
-
-                        /* And we are done processing options. */
-
-                        break;
                       }
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+                    else if (opt == TCP_OPT_WS &&
+                            dev->d_buf[hdrlen + 1 + i] == TCP_OPT_WS_LEN)
+                      {
+                        conn->snd_scale = dev->d_buf[hdrlen + 2 + i];
+                        conn->rcv_scale = CONFIG_NET_TCP_WINDOW_SCALE_FACTOR;
+                        conn->flags    |= TCP_WSCALE;
+                      }
+#endif
                     else
                       {
                         /* All other options have a length field, so that we
@@ -700,16 +938,19 @@ found:
 
                             break;
                           }
-
-                        i += dev->d_buf[hdrlen + 1 + i];
                       }
+
+                    i += dev->d_buf[hdrlen + 1 + i];
                   }
               }
 
             conn->tcpstateflags = TCP_ESTABLISHED;
             memcpy(conn->rcvseq, tcp->seqno, 4);
+            conn->rcv_adv = tcp_getsequence(conn->rcvseq);
+            tcp_snd_wnd_init(conn, tcp);
+            tcp_snd_wnd_update(conn, tcp);
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack SYN */
             conn->tx_unacked    = 0;
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
@@ -777,7 +1018,6 @@ found:
              * has been closed.
              */
 
-            net_incr32(conn->rcvseq, dev->d_len + 1);
             flags |= TCP_CLOSE;
 
             if (dev->d_len > 0)
@@ -785,17 +1025,26 @@ found:
                 flags |= TCP_NEWDATA;
               }
 
-            tcp_callback(dev, conn, flags);
+            result = tcp_callback(dev, conn, flags);
 
-            conn->tcpstateflags = TCP_LAST_ACK;
-            conn->tx_unacked    = 1;
-            conn->nrtx          = 0;
+            if ((result & TCP_CLOSE) != 0)
+              {
+                conn->tcpstateflags = TCP_LAST_ACK;
+                conn->tx_unacked    = 1;
+                conn->nrtx          = 0;
+                net_incr32(conn->rcvseq, 1); /* ack FIN */
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-            conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
+                conn->sndseq_max    = tcp_getsequence(conn->sndseq) + 1;
 #endif
-            ninfo("TCP state: TCP_LAST_ACK\n");
+                ninfo("TCP state: TCP_LAST_ACK\n");
+                tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
+              }
+            else
+              {
+                ninfo("TCP: Dropped a FIN\n");
+                tcp_appsend(dev, conn, result);
+              }
 
-            tcp_send(dev, conn, TCP_FIN | TCP_ACK, tcpiplen);
             return;
           }
 
@@ -917,30 +1166,11 @@ found:
 
         if ((flags & (TCP_NEWDATA | TCP_ACKDATA)) != 0)
           {
-            /* Clear sndlen and remember the size in d_len.  The application
-             * may modify d_len and we will need this value later when we
-             * update the sequence number.
-             */
-
             dev->d_sndlen = 0;
-            len           = dev->d_len;
 
             /* Provide the packet to the application */
 
             result = tcp_callback(dev, conn, flags);
-
-            /* If the application successfully handled the incoming data,
-             * then TCP_SNDACK will be set in the result.  In this case,
-             * we need to update the sequence number.  The ACK will be
-             * send by tcp_appsend().
-             */
-
-            if ((result & TCP_SNDACK) != 0)
-              {
-                /* Update the sequence number using the saved length */
-
-                net_incr32(conn->rcvseq, len);
-              }
 
             /* Send the response, ACKing the data or not, as appropriate */
 
@@ -989,7 +1219,7 @@ found:
                 ninfo("TCP state: TCP_CLOSING\n");
               }
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack FIN */
             tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;
@@ -1021,7 +1251,7 @@ found:
             conn->timer         = 0;
             ninfo("TCP state: TCP_TIME_WAIT\n");
 
-            net_incr32(conn->rcvseq, 1);
+            net_incr32(conn->rcvseq, 1); /* ack FIN */
             tcp_callback(dev, conn, TCP_CLOSE);
             tcp_send(dev, conn, TCP_ACK, tcpiplen);
             return;

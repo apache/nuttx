@@ -37,6 +37,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <debug.h>
 #include <errno.h>
 #include <hex2bin.h>
 
@@ -44,7 +45,7 @@
 
 #include "libc.h"
 
-#ifdef CONFIG_LIB_HEX2BIN
+#ifdef CONFIG_LIBC_HEX2BIN
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -709,4 +710,4 @@ exit_with_buffers:
   return ret;
 }
 
-#endif /* CONFIG_LIB_HEX2BIN */
+#endif /* CONFIG_LIBC_HEX2BIN */

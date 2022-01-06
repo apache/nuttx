@@ -395,10 +395,6 @@ static inline void set_pcid(uint64_t pcid)
                      "%%rbx; mov %%rbx, %%cr3;"
                      ::"g"(pcid):"memory", "rbx", "rax");
       }
-    else
-      {
-        PANIC();
-      }
 }
 
 static inline unsigned long read_msr(unsigned int msr)
@@ -458,7 +454,7 @@ static inline void write_gsbase(unsigned long val)
 
 /* Return stack pointer */
 
-static inline uint64_t x64_getsp()
+static inline uint64_t up_getsp()
 {
   uint64_t regval;
 

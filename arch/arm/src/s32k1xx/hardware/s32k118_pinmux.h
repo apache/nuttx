@@ -182,7 +182,7 @@
 #define PIN_LPSPI0_PCS2           (PIN_ALT2   | PIN_PORTE | PIN6)
 #define PIN_LPSPI0_SCK_1          (PIN_ALT2   | PIN_PORTE | PIN0)
 #define PIN_LPSPI0_SCK_2          (PIN_ALT3   | PIN_PORTB | PIN2)
-#define PIN_LPSPI0_SCK            (PIN_ALT4   | PIN_PORTD | PIN15)
+#define PIN_LPSPI0_SCK_3          (PIN_ALT4   | PIN_PORTD | PIN15)
 #define PIN_LPSPI0_SIN_1          (PIN_ALT2   | PIN_PORTE | PIN1)
 #define PIN_LPSPI0_SIN_2          (PIN_ALT3   | PIN_PORTB | PIN3)
 #define PIN_LPSPI0_SIN_3          (PIN_ALT4   | PIN_PORTD | PIN16)

@@ -28,6 +28,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <semaphore.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -1841,19 +1842,19 @@ static void rspi_setmode(FAR struct spi_dev_s *dev, enum spi_mode_e mode)
 
       switch (mode)
         {
-          case SPIDEV_MODE0: /* CPOL=0 CHPHA=0 */
+          case SPIDEV_MODE0: /* CPOL=0 CPHA=0 */
             modebits = 0;
             break;
 
-          case SPIDEV_MODE1: /* CPOL=0 CHPHA=1 */
+          case SPIDEV_MODE1: /* CPOL=0 CPHA=1 */
             modebits = RSPI_SPCMD_PHA;
             break;
 
-          case SPIDEV_MODE2: /* CPOL=1 CHPHA=0 */
+          case SPIDEV_MODE2: /* CPOL=1 CPHA=0 */
             modebits = RSPI_SPCMD_POL;
             break;
 
-          case SPIDEV_MODE3: /* CPOL=1 CHPHA=1 */
+          case SPIDEV_MODE3: /* CPOL=1 CPHA=1 */
             modebits = RSPI_SPCMD_PHA | RSPI_SPCMD_POL;
             break;
 

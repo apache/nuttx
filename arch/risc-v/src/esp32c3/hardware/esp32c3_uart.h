@@ -2182,4 +2182,25 @@
 #define UART_REG_UPDATE_V  0x00000001
 #define UART_REG_UPDATE_S  31
 
+/* ESP32-C3 have 2 UART: UART0-1 */
+
+#define ESP32C3_NUARTS 2
+
+/* UART has an extra TX_WAIT_SEND state when the
+ * FIFO is not empty and XOFF is enabled.
+ */
+
+#define SOC_UART_SUPPORT_FSM_TX_WAIT_SEND   (1)
+#define UART_FSM_IDLE                       (0x0)
+#define UART_FSM_TX_WAIT_SEND               (0xf)
+
+/* Software write 1 would synchronize registers into UART Core clock
+ * domain and would be cleared by hardware after synchronization is done.
+ */
+
+#define UART_UPDATE    (BIT(31))
+#define UART_UPDATE_M  (BIT(31))
+#define UART_UPDATE_V  0x1
+#define UART_UPDATE_S  31
+
 #endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_UART_H */

@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/Make.defs
 
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 CSRCS += tzromfs.c
 endif
 
@@ -51,7 +51,7 @@ $(COBJS): %$(OBJEXT): %.c
 
 # ROMFS file system containing the TZ database
 
-ifeq ($(CONFIG_LIB_ZONEINFO_ROMFS),y)
+ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 
 checkgenromfs:
 	@genromfs -h 1>/dev/null 2>&1 || { \
@@ -72,7 +72,7 @@ else
 
 romfs:
 
-endif # CONFIG_LIB_ZONEINFO_ROMFS
+endif # CONFIG_LIBC_ZONEINFO_ROMFS
 
 # Build TZ database
 

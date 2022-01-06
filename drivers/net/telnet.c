@@ -866,6 +866,13 @@ static ssize_t telnet_read(FAR struct file *filep, FAR char *buffer,
     }
   while (nread == 0);
 
+  /* Notify the I/O thread the rxbuffer is available */
+
+  if (nread > 0)
+    {
+      nxsem_post(&g_iosem);
+    }
+
   /* Returned Value:
    *
    * nread > 0:  The number of characters copied into the user buffer by
@@ -1270,7 +1277,10 @@ static int telnet_io_main(int argc, FAR char** argv)
       for (i = 0; i < CONFIG_TELNET_MAXLCLIENTS; i++)
         {
           priv = g_telnet_clients[i];
-          if (priv != NULL && !(priv->td_fds.revents & (POLLHUP | POLLERR)))
+          if (priv != NULL &&
+              !(priv->td_fds.revents & (POLLHUP | POLLERR)) &&
+              (CONFIG_TELNET_RXBUFFER_SIZE -
+               priv->td_pending - priv->td_offset) > 0)
             {
               priv->td_fds.sem     = &g_iosem;
               priv->td_fds.events  = POLLIN | POLLHUP | POLLERR;

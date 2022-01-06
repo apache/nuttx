@@ -25,6 +25,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <stdbool.h>
 #include <fcntl.h>
 #include <sched.h>
@@ -46,12 +47,12 @@
  * Name: file_vopen
  ****************************************************************************/
 
-static int file_vopen(FAR struct file *filep,
-                      FAR const char *path, int oflags, va_list ap)
+static int file_vopen(FAR struct file *filep, FAR const char *path,
+                      int oflags, mode_t umask, va_list ap)
 {
   struct inode_search_s desc;
   FAR struct inode *inode;
-#if defined(CONFIG_FILE_MODE) || !defined(CONFIG_DISABLE_MOUNTPOINT)
+#ifndef CONFIG_DISABLE_MOUNTPOINT
   mode_t mode = 0666;
 #endif
   int ret;
@@ -61,10 +62,7 @@ static int file_vopen(FAR struct file *filep,
       return -EINVAL;
     }
 
-#ifdef CONFIG_FILE_MODE
-#  ifdef CONFIG_CPP_HAVE_WARNING
-#    warning "File creation not implemented"
-#  endif
+#ifndef CONFIG_DISABLE_MOUNTPOINT
 
   /* If the file is opened for creation, then get the mode bits */
 
@@ -72,6 +70,8 @@ static int file_vopen(FAR struct file *filep,
     {
       mode = va_arg(ap, mode_t);
     }
+
+  mode &= ~umask;
 #endif
 
   /* Get an inode for this file */
@@ -199,7 +199,7 @@ static int nx_vopen(FAR const char *path, int oflags, va_list ap)
 
   /* Let file_vopen() do all of the work */
 
-  ret = file_vopen(&filep, path, oflags, ap);
+  ret = file_vopen(&filep, path, oflags, getumask(), ap);
   if (ret < 0)
     {
       return ret;
@@ -270,7 +270,7 @@ int file_open(FAR struct file *filep, FAR const char *path, int oflags, ...)
   int ret;
 
   va_start(ap, oflags);
-  ret = file_vopen(filep, path, oflags, ap);
+  ret = file_vopen(filep, path, oflags, 0, ap);
   va_end(ap);
 
   return ret;

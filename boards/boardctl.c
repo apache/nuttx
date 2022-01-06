@@ -58,7 +58,7 @@
 #  include <nuttx/lib/builtin.h>
 #endif
 
-#ifdef CONFIG_LIB_BOARDCTL
+#ifdef CONFIG_BOARDCTL
 
 /****************************************************************************
  * Private Functions
@@ -325,7 +325,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        *                data read from a file or serial FLASH, or whatever
        *                you would like to do with it.  Every implementation
        *                should accept zero/NULL as a default configuration.
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL
+       * CONFIGURATION: CONFIG_BOARDCTL
        * DEPENDENCIES:  Board logic must provide board_app_initialization
        */
 
@@ -414,6 +414,65 @@ int boardctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_UNIQUEID:
         {
           ret = board_uniqueid((FAR uint8_t *)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_UNIQUEKEY
+      /* CMD:           BOARDIOC_UNIQUEKEY
+       * DESCRIPTION:   Return a unique KEY associated with the board (such
+       *                as a trusted key or a private identity).
+       * ARG:           A writable array of size
+       *                CONFIG_BOARDCTL_UNIQUEKEY_SIZE in which to receive
+       *                the board unique KEY.
+       * DEPENDENCIES:  Board logic must provide the board_uniquekey()
+       *                interface.
+       */
+
+      case BOARDIOC_UNIQUEKEY:
+        {
+          ret = board_uniquekey((FAR uint8_t *)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_SWITCH_BOOT
+      /* CMD:           BOARDIOC_SWITCH_BOOT
+       * DESCRIPTION:   Used to change the system boot behavior. Switch to
+       *                the updated or specified boot system.
+       * ARG:           Boot system updated or specified
+       * DEPENDENCIES:  Board logic must provide the board_switch_boot()
+       *                interface.
+       */
+
+      case BOARDIOC_SWITCH_BOOT:
+        {
+          ret = board_switch_boot((FAR const char *)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_BOARDCTL_BOOT_IMAGE
+      /* CMD:           BOARDIOC_BOOT_IMAGE
+       * DESCRIPTION:   Boot a new application firmware image.
+       *                Execute the required actions for booting a new
+       *                application firmware image (e.g. deinitialize
+       *                peripherals, load the Program Counter register with
+       *                the application firmware image entry point address).
+       * ARG:           Pointer to a read-only instance of struct
+       *                boardioc_boot_info_s.
+       * DEPENDENCIES:  Board logic must provide the board_boot_image()
+       *                interface.
+       */
+
+      case BOARDIOC_BOOT_IMAGE:
+        {
+          FAR const struct boardioc_boot_info_s *info =
+            (FAR const struct boardioc_boot_info_s *)arg;
+
+          DEBUGASSERT(info != NULL);
+
+          ret = board_boot_image(info->path, info->header_size);
         }
         break;
 #endif
@@ -556,7 +615,7 @@ int boardctl(unsigned int cmd, uintptr_t arg)
        * DESCRIPTION:   Manage USB device classes
        * ARG:           A pointer to an instance of struct
        *                boardioc_usbdev_ctrl_s
-       * CONFIGURATION: CONFIG_LIB_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
+       * CONFIGURATION: CONFIG_BOARDCTL && CONFIG_BOARDCTL_USBDEVCTRL
        * DEPENDENCIES:  Board logic must provide board_<usbdev>_initialize()
        */
 
@@ -746,4 +805,4 @@ int boardctl(unsigned int cmd, uintptr_t arg)
   return OK;
 }
 
-#endif /* CONFIG_LIB_BOARDCTL */
+#endif /* CONFIG_BOARDCTL */

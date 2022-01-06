@@ -32,6 +32,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* If CONFIG_NETDEV_IFINDEX is enabled then there is limit to the number of
+ * devices that can be registered due to the nature of some static data.
+ */
+
+#define MAX_IFINDEX        32
+
 /* Sizing parameters */
 
 #define IFNAMSIZ           16  /* Older naming standard */
@@ -44,6 +50,7 @@
 #define IFF_UP             (1 << 1) /* Interface is up */
 #define IFF_RUNNING        (1 << 2) /* Carrier is available */
 #define IFF_IPv6           (1 << 3) /* Configured for IPv6 packet (vs ARP or IPv4) */
+#define IFF_BOUND          (1 << 4) /* Bound to a socket */
 #define IFF_NOARP          (1 << 7) /* ARP is not required for this packet */
 
 /* Interface flag helpers */
@@ -51,20 +58,23 @@
 #define IFF_SET_DOWN(f)    do { (f) |= IFF_DOWN; } while (0)
 #define IFF_SET_UP(f)      do { (f) |= IFF_UP; } while (0)
 #define IFF_SET_RUNNING(f) do { (f) |= IFF_RUNNING; } while (0)
+#define IFF_SET_BOUND(f)   do { (f) |= IFF_BOUND; } while (0)
 #define IFF_SET_NOARP(f)   do { (f) |= IFF_NOARP; } while (0)
 
 #define IFF_CLR_DOWN(f)    do { (f) &= ~IFF_DOWN; } while (0)
 #define IFF_CLR_UP(f)      do { (f) &= ~IFF_UP; } while (0)
 #define IFF_CLR_RUNNING(f) do { (f) &= ~IFF_RUNNING; } while (0)
+#define IFF_CLR_BOUND(f)   do { (f) &= ~IFF_BOUND; } while (0)
 #define IFF_CLR_NOARP(f)   do { (f) &= ~IFF_NOARP; } while (0)
 
 #define IFF_IS_DOWN(f)     (((f) & IFF_DOWN) != 0)
 #define IFF_IS_UP(f)       (((f) & IFF_UP) != 0)
 #define IFF_IS_RUNNING(f)  (((f) & IFF_RUNNING) != 0)
+#define IFF_IS_BOUND(f)    (((f) & IFF_BOUND) != 0)
 #define IFF_IS_NOARP(f)    (((f) & IFF_NOARP) != 0)
 
 /* We only need to manage the IPv6 bit if both IPv6 and IPv4 are supported.
- *  Otherwise, we can save a few bytes by ignoring it.
+ * Otherwise, we can save a few bytes by ignoring it.
  */
 
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
@@ -98,6 +108,12 @@
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
+
+struct if_nameindex
+{
+  unsigned int if_index; /* 1, 2, ... */
+  FAR char *if_name;     /* null terminated name: "eth0", ... */
+};
 
 /* Structure passed with the SIOCMIINOTIFY ioctl command to enable
  * notification of of PHY state changes.
@@ -293,6 +309,48 @@ unsigned int if_nametoindex(FAR const char *ifname);
  ****************************************************************************/
 
 FAR char *if_indextoname(unsigned int ifindex, FAR char *ifname);
+
+/****************************************************************************
+ * Name: if_nameindex
+ *
+ * Description:
+ *   The if_nameindex() function returns an array of if_nameindex structures,
+ *   each containing information about one of the network interfaces on the
+ *   local system. The if_nameindex structure contains at least the following
+ *   entries:
+ *         unsigned int if_index;
+ *         FAR char     *if_name;
+ *   The if_index field contains the interface index. The if_name field
+ *   points to the null-terminated interface name.  The end of the array
+ *   is indicated by entry with if_index set to zero and if_name set to NULL.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   On success, if_nameindex() returns pointer to the array; on error, NULL
+ *   is returned, and errno is set to indicate the error.
+ *
+ ****************************************************************************/
+
+FAR struct if_nameindex *if_nameindex(void);
+
+/****************************************************************************
+ * Name: if_freenameindex
+ *
+ * Description:
+ *   The if_freenameindex() function free the data structure returned by
+ *   if_nameindex().
+ *
+ * Input Parameters:
+ *   ifn - The data structure to free
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void if_freenameindex(FAR struct if_nameindex *ifn);
 
 #undef EXTERN
 #ifdef __cplusplus

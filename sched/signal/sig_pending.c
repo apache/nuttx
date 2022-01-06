@@ -26,6 +26,7 @@
 
 #include <signal.h>
 #include <sched.h>
+#include <assert.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/signal.h>

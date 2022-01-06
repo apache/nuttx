@@ -40,6 +40,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <errno.h>
 #include <debug.h>
 
@@ -673,7 +674,7 @@ static const struct usbdev_ops_s g_devops =
  */
 
 static volatile struct usbotg_bdtentry_s g_bdt[4*KHCI_NENDPOINTS]
-  __attribute__ ((aligned(512)));
+  aligned_data(512);
 
 /****************************************************************************
  * Private Private Functions

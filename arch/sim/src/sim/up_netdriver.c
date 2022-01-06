@@ -53,10 +53,7 @@
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/arp.h>
-
-#ifdef CONFIG_NET_PKT
-#  include <nuttx/net/pkt.h>
-#endif
+#include <nuttx/net/pkt.h>
 
 #include "up_internal.h"
 

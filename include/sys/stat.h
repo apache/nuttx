@@ -107,6 +107,13 @@
 #define S_TYPEISMQ(buf)  S_ISMQ((buf)->st_mode)
 #define S_TYPEISSHM(buf) S_ISSHM((buf)->st_mode)
 
+/* Special value for tv_nsec field of timespec */
+
+#define UTIME_NOW     ((1l << 30) - 1l)
+#ifndef __cplusplus
+#  define UTIME_OMIT  ((1l << 30) - 2l)
+#endif
+
 /* The following macros are required by POSIX to achieve backward
  * compatibility with earlier versions of struct stat.
  */
@@ -114,6 +121,13 @@
 #define st_atime     st_atim.tv_sec
 #define st_ctime     st_ctim.tv_sec
 #define st_mtime     st_mtim.tv_sec
+
+#if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
+#  define stat64     stat
+#  define fstat64    fstat
+#  define lstat64    lstat
+#  define fstatat64  fstatat
+#endif
 
 /****************************************************************************
  * Type Definitions
@@ -141,14 +155,6 @@ struct stat
   struct timespec  st_ctim;    /* Time of last status change */
   blksize_t        st_blksize; /* Block size used for filesystem I/O */
   blkcnt_t         st_blocks;  /* Number of blocks allocated */
-
-  /* Internal fields.  These are part this specific implementation and
-   * should not referenced by application code for portability reasons.
-   */
-
-#ifdef CONFIG_PSEUDOFS_SOFTLINKS
-  uint8_t   st_count;   /* Used internally to limit traversal of links */
-#endif
 };
 
 /****************************************************************************
@@ -170,9 +176,14 @@ int stat(FAR const char *path, FAR struct stat *buf);
 int lstat(FAR const char *path, FAR struct stat *buf);
 int fstat(int fd, FAR struct stat *buf);
 int chmod(FAR const char *path, mode_t mode);
+int lchmod(FAR const char *path, mode_t mode);
 int fchmod(int fd, mode_t mode);
+int utimens(FAR const char *path, const struct timespec times[2]);
+int lutimens(FAR const char *path, const struct timespec times[2]);
+int futimens(int fd, const struct timespec times[2]);
 
 mode_t umask(mode_t mask);
+mode_t getumask(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

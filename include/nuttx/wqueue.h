@@ -32,6 +32,7 @@
 #include <queue.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/wdog.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,11 +77,11 @@
  * builds.  This those configurations, the user-mode work queue provides the
  * same (non-standard) facility for use by applications.
  *
- * CONFIG_LIB_USRWORK. If CONFIG_LIB_USRWORK is also defined then the
+ * CONFIG_LIBC_USRWORK. If CONFIG_LIBC_USRWORK is also defined then the
  *   user-mode work queue will be created.
- * CONFIG_LIB_USRWORKPRIORITY - The minimum execution priority of the lower
+ * CONFIG_LIBC_USRWORKPRIORITY - The minimum execution priority of the lower
  *   priority worker thread.  Default: 100
- * CONFIG_LIB_USRWORKSTACKSIZE - The stack size allocated for the lower
+ * CONFIG_LIBC_USRWORKSTACKSIZE - The stack size allocated for the lower
  *   priority worker thread.  Default: 2048.
  */
 
@@ -90,7 +91,7 @@
 
   /* Yes.. user-space worker threads are not built in a flat build */
 
-#  undef CONFIG_LIB_USRWORK
+#  undef CONFIG_LIBC_USRWORK
 
 #elif !defined(__KERNEL__)
 
@@ -178,17 +179,17 @@
 
 /* User space work queue configuration **************************************/
 
-#ifdef CONFIG_LIB_USRWORK
+#ifdef CONFIG_LIBC_USRWORK
 
-#  ifndef CONFIG_LIB_USRWORKPRIORITY
-#    define CONFIG_LIB_USRWORKPRIORITY 100
+#  ifndef CONFIG_LIBC_USRWORKPRIORITY
+#    define CONFIG_LIBC_USRWORKPRIORITY 100
 #  endif
 
-#  ifndef CONFIG_LIB_USRWORKSTACKSIZE
-#    define CONFIG_LIB_USRWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
+#  ifndef CONFIG_LIBC_USRWORKSTACKSIZE
+#    define CONFIG_LIBC_USRWORKSTACKSIZE CONFIG_IDLETHREAD_STACKSIZE
 #  endif
 
-#endif /* CONFIG_LIB_USRWORK */
+#endif /* CONFIG_LIBC_USRWORK */
 
 /* Work queue IDs:
  *
@@ -207,7 +208,7 @@
  *     priority work queue (if there is one).
  */
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 /* User mode */
 
 #  define USRWORK  2          /* User mode work queue */
@@ -225,7 +226,7 @@
 #  endif
 #  define USRWORK  LPWORK     /* Redirect user-mode references */
 
-#endif /* CONFIG_LIB_USRWORK && !__KERNEL__ */
+#endif /* CONFIG_LIBC_USRWORK && !__KERNEL__ */
 
 /****************************************************************************
  * Public Types
@@ -244,11 +245,17 @@ typedef CODE void (*worker_t)(FAR void *arg);
 
 struct work_s
 {
-  struct dq_entry_s dq;  /* Implements a doubly linked list */
-  worker_t  worker;      /* Work callback */
-  FAR void *arg;         /* Callback argument */
-  clock_t qtime;         /* Time work queued */
-  clock_t delay;         /* Delay until work performed */
+  union
+  {
+    struct
+    {
+      struct sq_entry_s sq; /* Implements a single linked list */
+      clock_t qtime;        /* Time work queued */
+    } s;
+    struct wdog_s timer;    /* Delay expiry timer */
+  } u;
+  worker_t  worker;         /* Work callback */
+  FAR void *arg;            /* Callback argument */
 };
 
 /* This is an enumeration of the various events that may be
@@ -316,7 +323,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#if defined(CONFIG_LIB_USRWORK) && !defined(__KERNEL__)
+#if defined(CONFIG_LIBC_USRWORK) && !defined(__KERNEL__)
 int work_usrstart(void);
 #endif
 
@@ -331,14 +338,14 @@ int work_usrstart(void);
  *   the caller.  Otherwise, the work structure is completely managed by the
  *   work queue logic.  The caller should never modify the contents of the
  *   work queue structure directly.  If work_queue() is called before the
- *   previous work as been performed and removed from the queue, then any
+ *   previous work has been performed and removed from the queue, then any
  *   pending work will be canceled and lost.
  *
  * Input Parameters:
  *   qid    - The work queue ID
  *   work   - The work structure to queue
- *   worker - The worker callback to be invoked.  The callback will invoked
- *            on the worker thread of execution.
+ *   worker - The worker callback to be invoked.  The callback will be
+ *            invoked on the worker thread of execution.
  *   arg    - The argument that will be passed to the worker callback when
  *            it is invoked.
  *   delay  - Delay (in clock ticks) from the time queue until the worker
@@ -357,12 +364,12 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  *
  * Description:
  *   Cancel previously queued work.  This removes work from the work queue.
- *   After work has been cancelled, it may be re-queue by calling
+ *   After work has been cancelled, it may be requeued by calling
  *   work_queue() again.
  *
  * Input Parameters:
  *   qid    - The work queue ID
- *   work   - The previously queue work structure to cancel
+ *   work   - The previously queued work structure to cancel
  *
  * Returned Value:
  *   Zero on success, a negated errno on failure
@@ -373,24 +380,6 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  ****************************************************************************/
 
 int work_cancel(int qid, FAR struct work_s *work);
-
-/****************************************************************************
- * Name: work_signal
- *
- * Description:
- *   Signal the worker thread to process the work queue now.  This function
- *   is used internally by the work logic but could also be used by the
- *   user to force an immediate re-assessment of pending work.
- *
- * Input Parameters:
- *   qid    - The work queue ID
- *
- * Returned Value:
- *   Zero on success, a negated errno on failure
- *
- ****************************************************************************/
-
-int work_signal(int qid);
 
 /****************************************************************************
  * Name: work_available

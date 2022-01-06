@@ -1,12 +1,5 @@
 /****************************************************************************
  * drivers/wireless/bluetooth/bt_uart.h
- * UART based Bluetooth driver
- *
- *   Copyright (C) 2018 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
- *
- * Ported from the Intel/Zephyr arduino101_firmware_source-v1.tar package
- * where the code was released with a compatible 3-clause BSD license:
  *
  *   Copyright (c) 2016, Intel Corporation
  *   All rights reserved.
@@ -94,7 +87,9 @@ struct btuart_upperhalf_s
 
 /* Generic implementations of HCI UART methods */
 
-int btuart_send(FAR const struct bt_driver_s *dev, FAR struct bt_buf_s *buf);
-int btuart_open(FAR const struct bt_driver_s *dev);
+int btuart_send(FAR struct bt_driver_s *dev,
+                enum bt_buf_type_e type,
+                FAR void *data, size_t len);
+int btuart_open(FAR struct bt_driver_s *dev);
 
 #endif /* __DRIVER_WIRELESS_BLUETOOTH_BT_UART_H */

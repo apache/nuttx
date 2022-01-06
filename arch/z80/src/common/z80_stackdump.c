@@ -44,7 +44,7 @@
 void up_stackdump(void)
 {
   FAR struct tcb_s *rtcb = this_task();
-  uintptr_t sp = z80_getsp();
+  uintptr_t sp = up_getsp();
   uintptr_t stack_base = (uintptr_t)rtcb->stack_base_ptr;
   uintptr_t stack_size = (uintptr_t)rtcb->adj_stack_size;
   uintptr_t stack;

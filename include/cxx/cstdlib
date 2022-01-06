@@ -104,10 +104,8 @@ namespace std
 #ifdef CONFIG_PSEUDOTERM
   // Pseudo-Terminals
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
   using ::ptsname;
   using ::ptsname_r;
-#endif
   using ::unlockpt;
 #endif
 

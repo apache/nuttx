@@ -36,6 +36,14 @@
 #include <nuttx/b2c.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define strcoll_l(s1, s2, l)    strcoll(s1, s2)
+#define strerror_l(e, l)        strerror(e)
+#define strxfrm_l(s1, s2, n, l) strxfrm(s1, s2, n)
+
+/****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
@@ -66,6 +74,7 @@ FAR char  *strncpy(FAR char *, FAR const char *, size_t);
 FAR char  *stpncpy(FAR char *, FAR const char *, size_t);
 FAR char  *strpbrk(FAR const char *, FAR const char *);
 FAR char  *strchr(FAR const char *s, int c);
+FAR char  *strchrnul(FAR const char *s, int c);
 FAR char  *strrchr(FAR const char *s, int c);
 size_t     strspn(FAR const char *, FAR const char *);
 size_t     strcspn(FAR const char *, FAR const char *);

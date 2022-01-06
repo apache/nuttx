@@ -130,7 +130,7 @@ static void stm32_i2ctool(void)
  *   CONFIG_BOARD_LATE_INITIALIZE=y :
  *     Called from board_late_initialize().
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_LIB_BOARDCTL=y &&
+ *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y &&
  *   CONFIG_NSH_ARCHINIT:
  *     Called from the NSH library
  *
@@ -150,14 +150,6 @@ int stm32_bringup(void)
 #endif
 
 #ifdef CONFIG_FS_PROCFS
-#ifdef CONFIG_STM32_CCM_PROCFS
-  /* Register the CCM procfs entry.  This must be done before the procfs is
-   * mounted.
-   */
-
-  ccm_procfs_register();
-#endif /* CONFIG_STM32_CCM_PROCFS */
-
   /* Mount the procfs file system */
 
   ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);

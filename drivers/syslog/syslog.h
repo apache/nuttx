@@ -94,10 +94,6 @@ FAR struct syslog_channel_s *syslog_dev_initialize(FAR const char *devpath,
  * Input Parameters:
  *   channel    - Handle to syslog channel to be used.
  *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
- *
  * Assumptions:
  *   The caller has already switched the SYSLOG source to some safe channel
  *   (the default channel).
@@ -125,13 +121,12 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel);
  *   None
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   A pointer to the new SYSLOG channel; NULL is returned on any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CHAR
-int syslog_dev_channel(void);
+FAR struct syslog_channel_s *syslog_dev_channel(void);
 #endif
 
 /****************************************************************************
@@ -156,13 +151,12 @@ int syslog_dev_channel(void);
  *   None
  *
  * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure.
+ *   A pointer to the new SYSLOG channel; NULL is returned on any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_SYSLOG_CONSOLE
-int syslog_console_channel(void);
+FAR struct syslog_channel_s *syslog_console_channel(void);
 #endif
 
 /****************************************************************************

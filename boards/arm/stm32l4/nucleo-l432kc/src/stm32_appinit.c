@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
-#include <syslog.h>
+#include <debug.h>
 #include <errno.h>
 
 #include <nuttx/arch.h>

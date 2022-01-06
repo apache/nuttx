@@ -27,13 +27,12 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
 #include <errno.h>
 #include <stdint.h>
-#include <debug.h>
-#include <assert.h>
+#include <stdbool.h>
+#include <limits.h>
 
+#include <arch/chip/chip.h>
 #include <arch/board/board.h>
 #include <nuttx/progmem.h>
 #include <nuttx/irq.h>
@@ -74,7 +73,7 @@ static void lpc17_40_iap(FAR void *in, FAR void *out)
 
   flags = enter_critical_section();
 
-  ((void *(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
+  ((void (*)(FAR void *, FAR void *))LPC17_40_IAP_ENTRY_ADDR)(in, out);
 
   leave_critical_section(flags);
 }
@@ -171,7 +170,7 @@ static uint32_t lpc17_40_iap_copy_ram_to_flash(void *flash, const void *ram,
 
 size_t up_progmem_neraseblocks(void)
 {
-  return CONFIG_LPC17_40_PROGMEM_NSECTORS;
+  return LPC17_40_FLASH_NUM_SECTORS;
 }
 
 /****************************************************************************
@@ -184,7 +183,7 @@ size_t up_progmem_neraseblocks(void)
 
 bool up_progmem_isuniform(void)
 {
-  return true;
+  return false;
 }
 
 /****************************************************************************
@@ -197,7 +196,7 @@ bool up_progmem_isuniform(void)
 
 size_t up_progmem_pagesize(size_t page)
 {
-  return (size_t)LPC17_40_PROGMEM_PAGE_SIZE;
+  return up_progmem_erasesize(page);
 }
 
 /****************************************************************************
@@ -210,7 +209,19 @@ size_t up_progmem_pagesize(size_t page)
 
 size_t up_progmem_erasesize(size_t block)
 {
-  return (size_t)LPC17_40_PROGMEM_SECTOR_SIZE;
+  if (block >= LPC17_40_FLASH_NUM_SECTORS)
+    {
+      return 0;
+    }
+
+  if (block < LPC17_40_FLASH_NUM_4K_SECTORS)
+    {
+      return (size_t)(4 * 1024);
+    }
+  else
+    {
+      return (size_t)(32 * 1024);
+    }
 }
 
 /****************************************************************************
@@ -233,12 +244,25 @@ size_t up_progmem_erasesize(size_t block)
 
 ssize_t up_progmem_getpage(size_t addr)
 {
-  if (addr >= LPC17_40_PROGMEM_START_ADDR)
+  ssize_t page;
+
+  if (addr >= LPC17_40_FLASH_SIZE)
     {
-      addr -= LPC17_40_PROGMEM_START_ADDR;
+      return -EFAULT;
     }
 
-  return (size_t)(addr / LPC17_40_PROGMEM_PAGE_SIZE);
+  if (addr < (LPC17_40_FLASH_NUM_4K_SECTORS * (4 * 1024)))
+    {
+      page = addr / (4 * 1024);
+    }
+  else
+    {
+      page = LPC17_40_FLASH_NUM_4K_SECTORS +
+              ((addr - (LPC17_40_FLASH_NUM_4K_SECTORS *
+              (4 * 1024))) / (32 * 1024));
+    }
+
+  return page;
 }
 
 /****************************************************************************
@@ -257,8 +281,24 @@ ssize_t up_progmem_getpage(size_t addr)
 
 size_t up_progmem_getaddress(size_t page)
 {
-  return (size_t)(LPC17_40_PROGMEM_START_ADDR +
-           page * LPC17_40_PROGMEM_PAGE_SIZE);
+  size_t addr;
+
+  if (page >= LPC17_40_FLASH_NUM_SECTORS)
+    {
+      return SIZE_MAX;
+    }
+
+  if (page < LPC17_40_FLASH_NUM_4K_SECTORS)
+    {
+      addr = page * (4 * 1024);
+    }
+  else
+    {
+      addr = (LPC17_40_FLASH_NUM_4K_SECTORS * (4 * 1024)) +
+              ((page - LPC17_40_FLASH_NUM_4K_SECTORS) * (32 * 1024));
+    }
+
+  return addr;
 }
 
 /****************************************************************************
@@ -287,27 +327,25 @@ ssize_t up_progmem_eraseblock(size_t block)
 {
   uint32_t rc;
 
-  if (block >= CONFIG_LPC17_40_PROGMEM_NSECTORS)
+  if (block >= LPC17_40_FLASH_NUM_SECTORS)
     {
       return -EFAULT;
     }
 
-  rc = lpc17_40_iap_prepare_sector_for_write_operation((uint32_t)block +
-                                            LPC17_40_PROGMEM_START_SECTOR);
+  rc = lpc17_40_iap_prepare_sector_for_write_operation((uint32_t)block);
   if (rc != LPC17_40_IAP_RC_CMD_SUCCESS)
     {
       return -EIO;
     }
 
-  rc = lpc17_40_iap_erase_sector((uint32_t)block +
-                                            LPC17_40_PROGMEM_START_SECTOR);
+  rc = lpc17_40_iap_erase_sector((uint32_t)block);
 
   if (rc != LPC17_40_IAP_RC_CMD_SUCCESS)
     {
       return -EIO;
     }
 
-  return (ssize_t)LPC17_40_PROGMEM_SECTOR_SIZE;
+  return (ssize_t)up_progmem_erasesize(block);
 }
 
 /****************************************************************************
@@ -330,17 +368,19 @@ ssize_t up_progmem_eraseblock(size_t block)
 
 ssize_t up_progmem_ispageerased(size_t page)
 {
+  size_t page_size;
   const uint8_t *p;
   int i;
 
-  if (page >= CONFIG_LPC17_40_PROGMEM_NSECTORS)
+  if (page >= LPC17_40_FLASH_NUM_SECTORS)
     {
       return -EFAULT;
     }
 
+  page_size = up_progmem_pagesize(page);
   p = (const uint8_t *)up_progmem_getaddress(page);
 
-  for (i = 0; i < LPC17_40_PROGMEM_SECTOR_SIZE; i++)
+  for (i = 0; i < page_size; i++)
     {
       if (p[i] != 0xffu)
         {
@@ -348,7 +388,7 @@ ssize_t up_progmem_ispageerased(size_t page)
         }
     }
 
-  return (ssize_t)(LPC17_40_PROGMEM_SECTOR_SIZE - i);
+  return (ssize_t)(page_size - i);
 }
 
 /****************************************************************************
@@ -386,13 +426,17 @@ ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count)
   size_t page;
   uint32_t rc;
 
-  if (count % LPC17_40_PROGMEM_PAGE_SIZE)
+  if (addr % LPC17_40_WRITE_SIZE)
+    {
+      return -EFAULT;
+    }
+
+  if (count % LPC17_40_WRITE_SIZE)
     {
       return -EINVAL;
     }
 
-  page = up_progmem_getpage(addr) / LPC17_40_PROGMEM_PAGES_PER_SECTOR +
-         LPC17_40_PROGMEM_START_SECTOR;
+  page = up_progmem_getpage(addr);
 
   rc = lpc17_40_iap_prepare_sector_for_write_operation((uint32_t)page);
 

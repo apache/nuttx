@@ -1,37 +1,20 @@
 /****************************************************************************
  * boards/arm/stm32f7/nucleo-144/src/stm32_appinitialize.c
  *
- *   Copyright (C) 2016 Gregory Nutt. All rights reserved.
- *   Authors: Gregory Nutt <gnutt@nuttx.org>
- *            Mark Olsson <post@markolsson.se>
- *            David Sidrane <david_s5@nscdg.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -48,7 +31,13 @@
 
 #include "nucleo-144.h"
 #include <nuttx/fs/fs.h>
+#include <nuttx/i2c/i2c_master.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/leds/userled.h>
+#include <nuttx/sensors/mpu60x0.h>
+
+#include "stm32_i2c.h"
+
 #ifdef CONFIG_STM32_ROMFS
 #include "stm32_romfs.h"
 #endif
@@ -97,6 +86,13 @@ int stm32f7_can_setup(void);
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
+#ifdef CONFIG_I2C
+  int i2c_bus;
+  FAR struct i2c_master_s *i2c;
+#ifdef CONFIG_MPU60X0_I2C
+  FAR struct mpu_config_s *mpu_config;
+#endif
+#endif
 
 #ifdef CONFIG_FS_PROCFS
   /* Mount the procfs file system */
@@ -217,6 +213,40 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "ERROR: stm32f7_can_setup failed: %d\n", ret);
       return ret;
+    }
+#endif
+
+#if defined(CONFIG_I2C) && defined(CONFIG_STM32F7_I2C1)
+  i2c_bus = 1;
+  i2c = stm32_i2cbus_initialize(i2c_bus);
+  if (i2c == NULL)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to get I2C%d interface\n", i2c_bus);
+    }
+  else
+    {
+#if defined(CONFIG_SYSTEM_I2CTOOL)
+      ret = i2c_register(i2c, i2c_bus);
+      if (ret < 0)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to register I2C%d driver: %d\n",
+                 i2c_bus, ret);
+        }
+#endif
+
+#ifdef CONFIG_MPU60X0_I2C
+      mpu_config = kmm_zalloc(sizeof(struct mpu_config_s));
+      if (mpu_config == NULL)
+        {
+          syslog(LOG_ERR, "ERROR: Failed to allocate mpu60x0 driver\n");
+        }
+      else
+        {
+          mpu_config->i2c = i2c;
+          mpu_config->addr = 0x68;
+          mpu60x0_register("/dev/imu0", mpu_config);
+        }
+#endif
     }
 #endif
 

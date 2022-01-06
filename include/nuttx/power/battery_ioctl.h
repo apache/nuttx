@@ -55,9 +55,60 @@
 #define BATIOC_CLEARFAULTS   _BATIOC(0x000F)
 #define BATIOC_COULOMBS      _BATIOC(0x0010)
 
+/* Special input values for BATIOC_INPUT_CURRENT that may optionally
+ * be supported by lower-half driver:
+ */
+
+#define BATTERY_INPUT_CURRENT_EXT_LIM   (-1) /* External input current limit */
+
+/* The change mask definition used to set the mask. */
+
+#define BATTERY_STATE_CHANGED           (1U << 0)
+#define BATTERY_HEALTH_CHANGED          (1U << 1)
+#define BATTERY_ONLINE_CHANGED          (1U << 2)
+#define BATTERY_VOLTAGE_CHANGED         (1U << 3)
+#define BATTERY_CURRENT_CHANGED         (1U << 4)
+#define BATTERY_CAPACITY_CHANGED        (1U << 5)
+#define BATTERY_CELLVOLTAGE_CHANGED     (1U << 6)
+#define BATTERY_TEMPERATURE_CHANGED     (1U << 7)
+#define BATTERY_COULOMBS_CHANGED        (1U << 8)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
+
+/* Battery status */
+
+enum battery_status_e
+{
+  BATTERY_UNKNOWN = 0, /* Battery state is not known */
+  BATTERY_FAULT,       /* Charger reported a fault, get health for more info */
+  BATTERY_IDLE,        /* Not full, not charging, not discharging */
+  BATTERY_FULL,        /* Full, not discharging */
+  BATTERY_CHARGING,    /* Not full, charging */
+  BATTERY_DISCHARGING  /* Probably not full, discharging */
+};
+
+/* Battery Health status */
+
+enum battery_health_e
+{
+  BATTERY_HEALTH_UNKNOWN = 0,   /* Battery health state is not known */
+  BATTERY_HEALTH_GOOD,          /* Battery is in good condiction */
+  BATTERY_HEALTH_DEAD,          /* Battery is dead, nothing we can do */
+  BATTERY_HEALTH_OVERHEAT,      /* Battery is over recommended temperature */
+  BATTERY_HEALTH_OVERVOLTAGE,   /* Battery voltage is over recommended level */
+  BATTERY_HEALTH_UNDERVOLTAGE,  /* Battery monitor reported an unspecified failure */
+  BATTERY_HEALTH_OVERCURRENT,   /* Battery monitor reported an overcurrent event */
+  BATTERY_HEALTH_SHORT_CIRCUIT, /* Battery monitor reported a short circuit event */
+  BATTERY_HEALTH_UNSPEC_FAIL,   /* Battery charger reported an unspected failure */
+  BATTERY_HEALTH_COLD,          /* Battery is under recommended temperature */
+  BATTERY_HEALTH_WD_TMR_EXP,    /* Battery WatchDog Timer Expired */
+  BATTERY_HEALTH_SAFE_TMR_EXP,  /* Battery Safety Timer Expired */
+  BATTERY_HEALTH_DISCONNECTED   /* Battery is not connected */
+};
+
+/* Battery operation message */
 
 struct batio_operate_msg_s
 {
