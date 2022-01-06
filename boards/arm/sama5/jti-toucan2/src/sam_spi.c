@@ -144,7 +144,7 @@ void sam_spi0select(uint32_t devid, bool selected)
       sam_piowrite(PIO_AT25_NPCS0, !selected);
     }
 #endif
-#if defined(CONFIG_MTD_M25P)
+#if defined(HAVE_M25P)
   /* SPI  serial NOR flash using NPCS1 */
 
   if (devid == SPIDEV_FLASH(0))
