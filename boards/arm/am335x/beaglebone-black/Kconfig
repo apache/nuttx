@@ -8,7 +8,7 @@ if ARCH_BOARD_BEAGLEBONE_BLACK
 config BEAGLEBONE_VIDEOMODE
 	string "LCD Video Mode"
 	default "640x480x60"
-	depends on !CONFIG_LCD_TDA19988 || !CONFIG_AM335X_I2C2
+	depends on !LCD_TDA19988 || !AM335X_I2C2
 	---help---
 		If we are not using HDMI (via the TDA19988) then we must select a
 		fixed LCD resolution.  The default, "640x480x60" is standard VGA
