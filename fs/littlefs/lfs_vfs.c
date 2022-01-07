@@ -205,7 +205,7 @@ static void littlefs_semgive(FAR struct littlefs_mountpt_s *fs)
  * Name: littlefs_convert_result
  ****************************************************************************/
 
-static int littlefs_convert_result(enum lfs_error ret)
+static int littlefs_convert_result(int ret)
 {
   switch (ret)
     {
