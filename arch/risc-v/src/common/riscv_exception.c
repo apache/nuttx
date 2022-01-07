@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_copyfullstate.c
+ * arch/risc-v/src/common/riscv_exception.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,38 +25,72 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <arch/irq.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
+#include <nuttx/board.h>
+#include <nuttx/syslog/syslog.h>
+#include <arch/mcause.h>
+
+#include "riscv_arch.h"
 #include "riscv_internal.h"
+
+#ifdef CONFIG_DEBUG_INFO
+static const char *g_reasons_str[MCAUSE_MAX_EXCEPTION + 1] =
+{
+  "Instruction address misaligned",
+  "Instruction access fault",
+  "Illegal instruction",
+  "Breakpoint",
+  "Load address misaligned",
+  "Load access fault",
+  "Store/AMO address misaligned",
+  "Store/AMO access fault",
+  "Environment call from U-mode",
+  "Environment call from S-mode",
+  "Reserved",
+  "Environment call from M-mode",
+  "Instruction page fault",
+  "Load page fault",
+  "Reserved",
+  "Store/AMO page fault"
+};
+#endif
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_copyfullstate
+ * Name: riscv_exception
  *
  * Description:
- *    Copy the entire register save area (including the floating point
- *    registers if applicable).  This is a little faster than most memcpy's
- *    since it does 32-bit transfers.
+ *   This is the exception handler.
  *
  ****************************************************************************/
 
-void riscv_copyfullstate(uint32_t *dest, uint32_t *src)
+void riscv_exception(uintptr_t mcause, uintptr_t *regs)
 {
-  int i;
+  uintptr_t cause = mcause & MCAUSE_INTERRUPT_MASK;
 
-  /* In the RV32 targets, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
-   */
-
-  if (src != dest)
+#ifdef CONFIG_DEBUG_INFO
+  if (mcause > MCAUSE_MAX_EXCEPTION)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
+      _alert("EXCEPTION: Unknown.  MCAUSE: %08" PRIx32 "\n", cause);
     }
+  else
+    {
+      _alert("EXCEPTION: %s. MCAUSE: %08" PRIx32 "\n",
+             g_reasons_str[cause], cause);
+    }
+#endif
+
+  _alert("PANIC!!! Exception = %08" PRIx32 "\n", cause);
+  up_irq_save();
+  CURRENT_REGS = regs;
+  PANIC();
 }
+

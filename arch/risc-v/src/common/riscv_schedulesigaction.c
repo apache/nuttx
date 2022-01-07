@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_schedulesigaction.c
+ * arch/risc-v/src/common/riscv_schedulesigaction.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -80,7 +80,7 @@
 #ifndef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  uint64_t int_ctx;
+  uintptr_t int_ctx;
 
   sinfo("tcb=0x%p sigdeliver=0x%p\n", tcb, sigdeliver);
 
@@ -152,8 +152,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
               riscv_savestate(tcb->xcp.regs);
 
-              sinfo("PC/STATUS Saved: %016" PRIx64 "/%016" PRIx64
-                    " New: %016" PRIx64 "/%016" PRIx64 "\n",
+              sinfo("PC/STATUS Saved: %" PRIxREG "/%" PRIxREG
+                    " New: %" PRIxREG "/%" PRIxREG "\n",
                     tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                     CURRENT_REGS[REG_EPC], CURRENT_REGS[REG_INT_CTX]);
             }
@@ -188,8 +188,8 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 
           tcb->xcp.regs[REG_INT_CTX]  = int_ctx;
 
-          sinfo("PC/STATUS Saved: %016" PRIx64 "/%016" PRIx64
-                " New: %016" PRIx64 "/%016" PRIx64 "\n",
+          sinfo("PC/STATUS Saved: %" PRIxREG "/%" PRIxREG
+                " New: %" PRIxREG "/%" PRIxREG "\n",
                 tcb->xcp.saved_epc, tcb->xcp.saved_int_ctx,
                 tcb->xcp.regs[REG_EPC], tcb->xcp.regs[REG_INT_CTX]);
         }
@@ -200,7 +200,7 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 #ifdef CONFIG_SMP
 void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
 {
-  uint64_t int_ctx;
+  uintptr_t int_ctx;
   int cpu;
   int me;
 

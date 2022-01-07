@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/csr.h>
-#include <arch/rv64gc/irq.h>
+#include <arch/irq.h>
 
 #include "chip.h"
 #include "c906_memorymap.h"
