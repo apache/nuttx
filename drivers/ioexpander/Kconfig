@@ -17,6 +17,7 @@ if IOEXPANDER
 config IOEXPANDER_RPMSG
 	bool "IO expander rpmsg server and client"
 	default n
+	select IOEXPANDER_INT_ENABLE
 	---help---
 		This settings enable ioexpander rpmsg server and client.
 
@@ -25,7 +26,6 @@ if IOEXPANDER_RPMSG
 config IOEXPANDER_RPMSG_INT_NCALLBACKS
 	int "number of ioexpander rpmsg interrupt callbacks"
 	default 32
-	select IOEXPANDER_INT_ENABLE
 	---help---
 		This set the IO expander number in interrupt callbacks.
 
