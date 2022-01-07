@@ -121,7 +121,7 @@ _xtensa_coproc_savestate:
 
 	s16i	a2, a15, XTENSA_CPSTORED		/* Save mask of CPs being stored */
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	l32i	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
+	addi	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
 
 #if XCHAL_CP0_SA_SIZE > 0
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
@@ -320,7 +320,7 @@ _xtensa_coproc_restorestate:
 	s16i	a3, a15, XTENSA_CPSTORED		/* Clear saved CP mask */
 
 	movi	a13, _xtensa_coproc_saoffsets	/* Array of CP save offsets */
-	l32i	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
+	addi	a15, a15, XTENSA_CPASA			/* a15 = base of aligned save area */
 
 #if XCHAL_CP0_SA_SIZE
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
