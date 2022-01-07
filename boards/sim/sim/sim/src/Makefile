@@ -44,12 +44,6 @@ ifeq ($(CONFIG_LIBC_ZONEINFO_ROMFS),y)
 endif
 endif
 
-ifeq ($(CONFIG_SIM_X11FB),y)
-ifeq ($(CONFIG_SIM_TOUCHSCREEN),y)
-  CSRCS += sim_touchscreen.c
-endif
-endif
-
 ifeq ($(CONFIG_EXAMPLES_GPIO),y)
 ifeq ($(CONFIG_GPIO_LOWER_HALF),y)
   CSRCS += sim_ioexpander.c

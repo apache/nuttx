@@ -105,38 +105,12 @@
 
 #if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_HSMCI)
 #  undef HAVE_AUTOMOUNTER
-#  undef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
+#  undef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
 #endif
 
-#ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
+#ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
 #  undef HAVE_AUTOMOUNTER
 #endif
-
-#ifdef HAVE_AUTOMOUNTER
-#  ifdef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT
-  /* HSMCI0 Automounter defaults */
-
-#    ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_FSTYPE
-#      define CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_FSTYPE "vfat"
-#    endif
-
-#    ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_BLKDEV
-#      define CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_BLKDEV "/dev/mmcds0"
-#    endif
-
-#    ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT
-#      define CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
-#    endif
-
-#    ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_DDELAY
-#      define CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_DDELAY 1000
-#    endif
-
-#    ifndef CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY
-#      define CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY 2000
-#    endif
-#  endif /* CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT */
-#endif /* HAVE_AUTOMOUNTER */
 
 /* USB Device */
 
@@ -782,53 +756,6 @@ bool sam_cardinserted(int slotno);
 
 #ifdef HAVE_HSMCI
 bool sam_writeprotected(int slotno);
-#endif
-
-/****************************************************************************
- * Name:  sam_automount_initialize
- *
- * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
- *
- * Input Parameters:
- *   None
- *
- *  Returned Value:
- *    None
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void sam_automount_initialize(void);
-#endif
-
-/****************************************************************************
- * Name:  sam_automount_event
- *
- * Description:
- *   The HSMCI card detection logic has detected an insertion or removal
- *   event.  It has already scheduled the MMC/SD block driver operations.
- *   Now we need to schedule the auto-mount event which will occur with a
- *   substantial delay to make sure that everything has settle down.
- *
- * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.  There
- *      is a terminology problem here:
- *      Each HSMCI supports two slots, slot A and slot B.
- *      Only slot A is used.  So this is not a really a slot,
- *      but an HSCMI peripheral number.
- *   inserted - True if the card is inserted in the slot.  False otherwise.
- *
- *  Returned Value:
- *    None
- *
- *  Assumptions:
- *    Interrupts are disabled.
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void sam_automount_event(int slotno, bool inserted);
 #endif
 
 /****************************************************************************

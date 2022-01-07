@@ -88,6 +88,7 @@
 #define _EFUSEBASE      (0x3000) /* Efuse device ioctl commands */
 #define _MTRIOBASE      (0x3100) /* Motor device ioctl commands */
 #define _MATHIOBASE     (0x3200) /* MATH device ioctl commands */
+#define _MMCSDIOBASE    (0x3300) /* MMCSD device ioctl commands */
 #define _WLIOCBASE      (0x8b00) /* Wireless modules ioctl network commands */
 
 /* boardctl() commands share the same number space */
@@ -169,14 +170,10 @@
                                            *      int value.
                                            * OUT: Origin option.
                                            */
-#define FIOC_MINOR      _FIOC(0x000c)     /* IN:  None
-                                           * OUT: Integer that contains device
-                                           *      minor number
-                                           */
-#define FIOCLEX         _FIOC(0x000d)     /* IN:  None
+#define FIOCLEX         _FIOC(0x000c)     /* IN:  None
                                            * OUT: None
                                            */
-#define FIONCLEX        _FIOC(0x000e)     /* IN:  None
+#define FIONCLEX        _FIOC(0x000d)     /* IN:  None
                                            * OUT: None
                                            */
 
@@ -558,6 +555,11 @@
 
 #define _MATHIOCVALID(c)    (_IOC_TYPE(c) == _MATHIOBASE)
 #define _MATHIOC(nr)        _IOC(_MATHIOBASE, nr)
+
+/* MMCSD drivers ************************************************************/
+
+#define _MMCSDIOCVALID(c)   (_IOC_TYPE(c) == _MMCSDIOBASE)
+#define _MMCSDIOC(nr)       _IOC(_MMCSDIOBASE, nr)
 
 /* Wireless driver network ioctl definitions ********************************/
 

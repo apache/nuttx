@@ -35,6 +35,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/hdc1008.h>
 #include <nuttx/random.h>
+#include <nuttx/signal.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_HDC1008)
 
@@ -631,7 +632,7 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
 
   if (priv->mode == HDC1008_MEAS_TEMPERATURE)
     {
-      len = snprintf(buffer, buflen, "%d.%d", data.temperature / 100,
+      len = snprintf(buffer, buflen, "%d.%02d", data.temperature / 100,
                      data.temperature % 100);
     }
   else if (priv->mode == HDC1008_MEAS_HUMIDITY)
@@ -641,7 +642,7 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
     }
   else if (priv->mode == HDC1008_MEAS_T_AND_RH)
     {
-      len = snprintf(buffer, buflen, "%d.%d %d.%d",
+      len = snprintf(buffer, buflen, "%d.%02d %d.%d",
                      data.temperature / 100, data.temperature % 100,
                      data.humidity / 10, data.humidity % 10);
     }

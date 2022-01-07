@@ -431,7 +431,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * should never be NULL.
    */
 
-  state.st_dev = udp_find_raddr_device(conn);
+  state.st_dev = udp_find_raddr_device(conn, NULL);
   if (state.st_dev == NULL)
     {
       nerr("ERROR: udp_find_raddr_device failed\n");

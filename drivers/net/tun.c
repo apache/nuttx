@@ -883,6 +883,7 @@ static int tun_ifup(FAR struct net_driver_s *dev)
   wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
 
   priv->bifup = true;
+  netdev_carrier_on(dev);
   return OK;
 }
 
@@ -906,6 +907,8 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
   irqstate_t flags;
+
+  netdev_carrier_off(dev);
 
   flags = enter_critical_section();
 

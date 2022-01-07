@@ -61,6 +61,12 @@ else
   MAXOPTIMIZATION ?= -Os
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARMV6M_TOOLCHAIN),BUILDROOT)

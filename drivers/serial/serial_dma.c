@@ -57,7 +57,7 @@
  ****************************************************************************/
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC)
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
 static int uart_check_signo(int pid, const char *buf, size_t size)
 {
   size_t i;
@@ -68,6 +68,14 @@ static int uart_check_signo(int pid, const char *buf, size_t size)
       if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
         {
           PANIC();
+          return 0;
+        }
+#endif
+
+#ifdef CONFIG_TTY_LAUNCH
+      if (buf[i] == CONFIG_TTY_LAUNCH_CHAR)
+        {
+          uart_launch();
           return 0;
         }
 #endif
@@ -105,7 +113,7 @@ static int uart_check_signo(int pid, const char *buf, size_t size)
 
 #if defined(CONFIG_SERIAL_RXDMA) && \
    (defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC))
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH))
 static int uart_recvchars_signo(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
@@ -369,7 +377,7 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC)
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 
   /* Check if the SIGINT character is anywhere in the newly received DMA

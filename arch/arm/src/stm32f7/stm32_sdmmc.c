@@ -81,7 +81,7 @@
  *     4 SD data lines).
  *   CONFIG_SDMMC_DMAPRIO - SDMMC DMA priority.  This can be selected if
  *     CONFIG_STM32F7_SDMMC_DMA is enabled.
- *   CONFIG_CONFIG_STM32F7_SDMMC_XFRDEBUG - Enables some very low-level debug
+ *   CONFIG_STM32F7_SDMMC_XFRDEBUG - Enables some very low-level debug
  *     output.  This also requires CONFIG_DEBUG_FS and CONFIG_DEBUG_INFO
  *
  *   CONFIG_SDMMC1/2_SDIO_MODE
@@ -162,7 +162,7 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_FEATURES)
-#  undef CONFIG_CONFIG_STM32F7_SDMMC_XFRDEBUG
+#  undef CONFIG_STM32F7_SDMMC_XFRDEBUG
 #endif
 
 #ifdef CONFIG_SDMMC1_SDIO_PULLUP
@@ -3115,6 +3115,8 @@ static int stm32_dmarecvsetup(FAR struct sdio_dev_s *dev,
     {
       priv->rxbuffer = buffer;
       priv->rxend    = buffer + buflen;
+      up_invalidate_dcache((uintptr_t)priv->rxbuffer,
+                           (uintptr_t)priv->rxend);
     }
 
   /* Start the DMA */

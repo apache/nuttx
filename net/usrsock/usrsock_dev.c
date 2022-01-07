@@ -67,13 +67,13 @@ struct usrsockdev_s
   struct
   {
     FAR const struct iovec *iov; /* Pending request buffers */
-    int     iovcnt;              /* Number of request buffers */
-    size_t  pos;                 /* Reader position on request buffer */
-    sem_t   sem;                 /* Request semaphore (only one outstanding
+    int       iovcnt;            /* Number of request buffers */
+    size_t    pos;               /* Reader position on request buffer */
+    sem_t     sem;               /* Request semaphore (only one outstanding
                                   * request) */
-    sem_t   acksem;              /* Request acknowledgment notification */
-    uint8_t ack_xid;             /* Exchange id for which waiting ack */
-    uint16_t nbusy;              /* Number of requests blocked from different
+    sem_t     acksem;            /* Request acknowledgment notification */
+    uint64_t  ackxid;            /* Exchange id for which waiting ack */
+    uint16_t  nbusy;             /* Number of requests blocked from different
                                   * threads */
   } req;
 
@@ -243,30 +243,6 @@ static ssize_t iovec_put(FAR struct iovec *iov, int iovcnt, size_t pos,
                          FAR const void *src, size_t srclen)
 {
   return iovec_do((FAR void *)src, srclen, iov, iovcnt, pos, false);
-}
-
-/****************************************************************************
- * Name: usrsockdev_get_xid()
- ****************************************************************************/
-
-static uint8_t usrsockdev_get_xid(FAR struct usrsock_conn_s *conn)
-{
-  int conn_idx;
-
-#if CONFIG_NET_USRSOCK_CONNS > 254
-#  error "CONFIG_NET_USRSOCK_CONNS too large (over 254)"
-#endif
-
-  /* Each connection can one only one request/response pending. So map
-   * connection structure index to xid value.
-   */
-
-  conn_idx = usrsock_connidx(conn);
-
-  DEBUGASSERT(1 <= conn_idx + 1);
-  DEBUGASSERT(conn_idx + 1 <= UINT8_MAX);
-
-  return conn_idx + 1;
 }
 
 /****************************************************************************
@@ -485,7 +461,7 @@ static ssize_t usrsockdev_handle_event(FAR struct usrsockdev_s *dev,
 
         if (len < sizeof(*hdr))
           {
-            nwarn("message too short, %d < %d.\n", len, sizeof(*hdr));
+            nwarn("message too short, %zu < %zu.\n", len, sizeof(*hdr));
 
             return -EINVAL;
           }
@@ -654,7 +630,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
   if (conn->resp.datain.iov[iovpos].iov_len < datahdr->valuelen)
     {
-      nwarn("%dth buffer not large enough (need: %d, have: %d).\n",
+      nwarn("%dth buffer not large enough (need: %d, have: %zu).\n",
             iovpos,
             datahdr->valuelen,
             conn->resp.datain.iov[iovpos].iov_len);
@@ -676,7 +652,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
       if (conn->resp.datain.iov[iovpos].iov_len < hdr->result)
         {
           nwarn("%dth buffer not large enough "
-                "(need: %" PRId32 ", have: %d).\n",
+                "(need: %" PRId32 ", have: %zu).\n",
                 iovpos,
                 hdr->result,
                 conn->resp.datain.iov[iovpos].iov_len);
@@ -714,7 +690,7 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
                                               size_t len)
 {
   FAR const struct usrsock_message_req_ack_s *hdr = buffer;
-  FAR struct usrsock_conn_s *conn;
+  FAR struct usrsock_conn_s *conn = NULL;
   unsigned int hdrlen;
   ssize_t ret;
   ssize_t (*handle_response)(FAR struct usrsockdev_s *dev,
@@ -734,7 +710,7 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
       break;
 
     default:
-      nwarn("unknown message type: %d, flags: %d, xid: %02x, "
+      nwarn("unknown message type: %d, flags: %d, xid: %" PRIu64 ", "
             "result: %" PRId32 "\n",
             hdr->head.msgid, hdr->head.flags, hdr->xid, hdr->result);
       return -EINVAL;
@@ -742,7 +718,7 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
 
   if (len < hdrlen)
     {
-      nwarn("message too short, %d < %d.\n", len, hdrlen);
+      nwarn("message too short, %zu < %u.\n", len, hdrlen);
 
       return -EINVAL;
     }
@@ -751,27 +727,20 @@ static ssize_t usrsockdev_handle_req_response(FAR struct usrsockdev_s *dev,
 
   /* Get corresponding usrsock connection for this transfer */
 
-  conn = usrsock_nextconn(NULL);
-  while (conn)
-    {
-      if (conn->resp.xid == hdr->xid)
-        break;
-
-      conn = usrsock_nextconn(conn);
-    }
-
+  while ((conn = usrsock_nextconn(conn)) != NULL &&
+         conn->resp.xid != hdr->xid);
   if (!conn)
     {
       /* No connection waiting for this message. */
 
-      nwarn("Could find connection waiting for response with xid=%d\n",
-            hdr->xid);
+      nwarn("Could find connection waiting for response"
+            "with xid=%" PRIu64 "\n", hdr->xid);
 
       ret = -EINVAL;
       goto unlock_out;
     }
 
-  if (dev->req.ack_xid == hdr->xid && dev->req.iov)
+  if (dev->req.ackxid == hdr->xid && dev->req.iov)
     {
       /* Signal that request was received and read by daemon and
        * acknowledgment response was received.
@@ -855,7 +824,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
       if (len < sizeof(struct usrsock_message_common_s))
         {
-          nwarn("message too short, %d < %d.\n", len,
+          nwarn("message too short, %zu < %zu.\n", len,
                 sizeof(struct usrsock_message_common_s));
 
           ret = -EINVAL;
@@ -969,8 +938,8 @@ static int usrsockdev_open(FAR struct file *filep)
 static int usrsockdev_close(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
+  FAR struct usrsock_conn_s *conn = NULL;
   FAR struct usrsockdev_s *dev;
-  FAR struct usrsock_conn_s *conn;
   int ret;
 
   DEBUGASSERT(inode);
@@ -987,23 +956,16 @@ static int usrsockdev_close(FAR struct file *filep)
 
   ninfo("closing /dev/usrsock\n");
 
+  net_lock();
+
   /* Set active usrsock sockets to aborted state. */
 
-  conn = usrsock_nextconn(NULL);
-  while (conn)
+  while ((conn = usrsock_nextconn(conn)) != NULL)
     {
-      net_lock();
-
       conn->resp.inprogress = false;
       conn->resp.xid = 0;
       usrsock_event(conn, USRSOCK_EVENT_ABORT);
-
-      net_unlock();
-
-      conn = usrsock_nextconn(conn);
     }
-
-  net_lock();
 
   /* Decrement the references to the driver. */
 
@@ -1192,7 +1154,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
 
   /* Get exchange id. */
 
-  req_head->xid = usrsockdev_get_xid(conn);
+  req_head->xid = (uintptr_t)conn;
 
   /* Prepare connection for response. */
 
@@ -1208,7 +1170,7 @@ int usrsockdev_do_request(FAR struct usrsock_conn_s *conn,
   if (usrsockdev_is_opened(dev))
     {
       DEBUGASSERT(dev->req.iov == NULL);
-      dev->req.ack_xid = req_head->xid;
+      dev->req.ackxid = req_head->xid;
       dev->req.iov = iov;
       dev->req.pos = 0;
       dev->req.iovcnt = iovcnt;

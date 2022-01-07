@@ -513,13 +513,15 @@ void up_assert(FAR const char *filename, int linenum);
  *   tcb    - Address of the task's TCB, NULL means dump the running task
  *   buffer - Return address from the corresponding stack frame
  *   size   - Maximum number of addresses that can be stored in buffer
+ *   skip   - number of addresses to be skipped
  *
  * Returned Value:
  *   up_backtrace() returns the number of addresses returned in buffer
  *
  ****************************************************************************/
 
-int up_backtrace(FAR struct tcb_s *tcb, FAR void **buffer, int size);
+int up_backtrace(FAR struct tcb_s *tcb,
+                 FAR void **buffer, int size, int skip);
 #endif /* CONFIG_ARCH_HAVE_BACKTRACE */
 
 /****************************************************************************

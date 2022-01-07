@@ -1908,7 +1908,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
   int ret = -EINVAL;
   struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {
@@ -1974,25 +1974,35 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
  * Input Parameters:
  *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
  *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
  *
  * Returned Value:
- *   ESP32 SPI Flash MTD data pointer if success or NULL if fail
+ *   ESP32 SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
 struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                   uint32_t mtd_size)
+                                               uint32_t mtd_size,
+                                               bool encrypted)
 {
-  struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
-  esp32_spiflash_chip_t *chip = priv->chip;
+  struct esp32_spiflash_s *priv;
+  esp32_spiflash_chip_t *chip;
   struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
-  ASSERT((mtd_offset % chip->sector_size) == 0);
-  ASSERT((mtd_size % chip->sector_size) == 0);
+  if (encrypted)
+    {
+      priv = &g_esp32_spiflash1_encrypt;
+    }
+  else
+    {
+      priv = &g_esp32_spiflash1;
+    }
+
+  chip = priv->chip;
 
   finfo("ESP32 SPI Flash information:\n");
   finfo("\tID = 0x%x\n", chip->device_id);
@@ -2001,6 +2011,10 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   finfo("\tPage size = %d B\n", chip->page_size);
   finfo("\tSector size = %d KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %d KB\n", chip->block_size / 1024);
+
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   if (mtd_size == 0)
     {

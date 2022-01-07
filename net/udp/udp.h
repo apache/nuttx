@@ -247,6 +247,22 @@ FAR struct udp_conn_s *udp_active(FAR struct net_driver_s *dev,
 FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
+ * Name: udp_select_port
+ *
+ * Description:
+ *   Select an unused port number.
+ *
+ *   NOTE that in principle this function could fail if there is no available
+ *   port number.  There is no check for that case and it would actually
+ *   in an infinite loop if that were the case.  In this simple, small UDP
+ *   implementation, it is reasonable to assume that that error cannot happen
+ *   and that a port number will always be available.
+ *
+ ****************************************************************************/
+
+uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u);
+
+/****************************************************************************
  * Name: udp_bind
  *
  * Description:
@@ -610,7 +626,9 @@ FAR struct net_driver_s *udp_find_laddr_device(FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-FAR struct net_driver_s *udp_find_raddr_device(FAR struct udp_conn_s *conn);
+FAR struct net_driver_s *
+udp_find_raddr_device(FAR struct udp_conn_s *conn,
+                      FAR struct sockaddr_storage *remote);
 
 /****************************************************************************
  * Name: udp_callback

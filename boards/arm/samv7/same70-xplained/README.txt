@@ -236,12 +236,12 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT=y
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_DDELAY=1000
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY=2000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -752,7 +752,7 @@ MCAN1 Loopback Test
 SPI Slave
 =========
 
-  An interrutp driven SPI slave driver as added on 2015-08-09 but has not
+  An interrupt driven SPI slave driver as added on 2015-08-09 but has not
   been verified as of this writing. See discussion in include/nuttx/spi/slave.h
   and below.
 
@@ -1159,7 +1159,7 @@ Using OpenOCD and GDB to flash via the EDBG chip
 
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_same70_xplained.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -1175,15 +1175,15 @@ Using OpenOCD and GDB to flash via the EDBG chip
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
 
-    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - Possibly the value of OPENOCD_PATH, TARGET_PATH and TARGET_BOARD
     - It assumes that the correct script to use is the one at
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_${TARGET_BOARD}.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/arm/samv7/same70-xplained/tools/oocd.sh $PWD
+      boards/arm/samv7/common/tools/oocd.sh $PWD
 
   Connecting GDB
 
@@ -1415,7 +1415,7 @@ Configuration sub-directories
 
          CONFIG_SCHED_HPWORKSTACKSIZE=2048
          CONFIG_IDLETHREAD_STACKSIZE=1024
-         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_INIT_STACKSIZE=2048
          CONFIG_PTHREAD_STACK_MIN=256
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          CONFIG_POSIX_SPAWN_PROXY_STACKSIZE=1024
@@ -1518,7 +1518,7 @@ Configuration sub-directories
 
          CONFIG_ARCH_INTERRUPTSTACK=2048
          CONFIG_IDLETHREAD_STACKSIZE=1024
-         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_INIT_STACKSIZE=2048
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          ... and others ...
 
@@ -1716,9 +1716,8 @@ Configuration sub-directories
       CONFIG_MCUBOOT_BOOTLOADER=y
       CONFIG_MCUBOOT_ENABLE_LOGGING=y
 
-      CONFIG_SAME70XPLAINED_FORMAT_MCUBOOT=y
-      CONFIG_SAME70XPLAINED_MCUBOOT_BOOTLOADER=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
 
   mcuboot-confirm:
     This configuration exercises the MCUboot compatible application slot
@@ -1737,5 +1736,5 @@ Configuration sub-directories
       CONFIG_BOOT_MCUBOOT=y
       CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
 
-      CONFIG_SAME70XPLAINED_FORMAT_MCUBOOT=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_confirm_main"
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"

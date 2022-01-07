@@ -573,10 +573,10 @@ void up_uartloop(void)
  * Name: up_putc
  ****************************************************************************/
 
-#ifdef USE_DEVCONSOLE
 int up_putc(int ch)
 {
+#ifdef USE_DEVCONSOLE
   tty_send(&g_console_dev, ch);
+#endif
   return 0;
 }
-#endif

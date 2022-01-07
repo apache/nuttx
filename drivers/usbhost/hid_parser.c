@@ -37,6 +37,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <string.h>
 
 #include <nuttx/usb/hid.h>
 #include <nuttx/usb/hid_parser.h>

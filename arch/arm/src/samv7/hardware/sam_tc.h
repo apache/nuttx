@@ -417,7 +417,7 @@
 #define TC_CMR_BURST_SHIFT       (4)       /* Bits 4-5: Burst Signal Selection */
 #define TC_CMR_BURST_MASK        (3 << TC_CMR_BURST_SHIFT)
 #  define TC_CMR_BURST_NONE      (0 << TC_CMR_BURST_SHIFT) /* Clock not gated by external signal */
-#  define TC_CMR_BURST_XC0       (1 << TC_CMR_BURST_SHIFT) /* XXC0 ANDed with clock */
+#  define TC_CMR_BURST_XC0       (1 << TC_CMR_BURST_SHIFT) /* XC0 ANDed with clock */
 #  define TC_CMR_BURST_XC1       (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with clock */
 #  define TC_CMR_BURST_XC2       (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with clock */
 
@@ -633,7 +633,7 @@
 #define TC_QINT_DIRCHG           (1 << 1)  /* Bit 1:  Direction change */
 #define TC_QINT_QERR             (1 << 2)  /* Bit 2:  Quadrature ERRor */
 
-#define TC_QISR_DIRR             (1 << 8)  /* Bit 8: Direction */
+#define TC_QISR_DIR              (1 << 8)  /* Bit 8:  Direction */
 
 /* Fault Mode Register */
 

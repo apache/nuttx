@@ -91,11 +91,13 @@ static int as5048b_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
 
 static const struct qe_ops_s g_qeops =
 {
-  as5048b_setup,
-  as5048b_shutdown,
-  as5048b_position,
-  as5048b_reset,
-  as5048b_ioctl
+  .setup     = as5048b_setup,
+  .shutdown  = as5048b_shutdown,
+  .position  = as5048b_position,
+  .setposmax = NULL,            /* not supported yet */
+  .reset     = as5048b_reset,
+  .setindex  = NULL,            /* not supported yet */
+  .ioctl     = as5048b_ioctl
 };
 
 /****************************************************************************

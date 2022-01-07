@@ -49,12 +49,12 @@ long double modfl(long double x, long double *iptr)
     }
   else if (fabsl(x) < 1.0)
     {
-      *iptr = (x * 0.0);
+      *iptr = 0.0;
       return x;
     }
   else
     {
-      *iptr = (long double)(int64_t) x;
+      *iptr = (long double)(int64_t)x;
       return (x - *iptr);
     }
 }

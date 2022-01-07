@@ -48,7 +48,7 @@ static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
  * Name: z80_registerdump
  ****************************************************************************/
 
-static void z80_registerdump(void)
+void z80_registerdump(void)
 {
   volatile chipreg_t *regs = g_current_regs;
 
@@ -59,13 +59,13 @@ static void z80_registerdump(void)
     }
 
   _alert("AF: %04x  I: %04x\n",
-        regs[XCPT_AF], regs[XCPT_I]);
+         regs[XCPT_AF], regs[XCPT_I]);
   _alert("BC: %04x DE: %04x HL: %04x\n",
-        regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
+         regs[XCPT_BC], regs[XCPT_DE], regs[XCPT_HL]);
   _alert("IX: %04x IY: %04x\n",
-        regs[XCPT_IX], regs[XCPT_IY]);
+         regs[XCPT_IX], regs[XCPT_IY]);
   _alert("SP: %04x PC: %04x\n"
-        regs[XCPT_SP], regs[XCPT_PC]);
+         regs[XCPT_SP], regs[XCPT_PC]);
 }
 
 #endif /* CONFIG_ARCH_STACKDUMP */

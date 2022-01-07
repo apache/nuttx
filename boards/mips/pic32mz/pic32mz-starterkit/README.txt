@@ -78,9 +78,9 @@ On Board Debug Support
   The starter kit includes a PIC24FJ256GB106 USB microcontroller that
   provides debugger connectivity over USB. The PIC24FJ256GB106 is hard-wired
   to the PIC32 device to provide protocol translation through the I/O pins
-  of the PIC24FJ256GB106 to the ICSP™ pins of the PIC32 device.
+  of the PIC24FJ256GB106 to the ICSPâ„¢ pins of the PIC32 device.
 
-  If MPLAB® REAL ICE™ or MPLAB ICD 3 is used with the starter kit,
+  If MPLABÂ® REAL ICEâ„¢ or MPLAB ICD 3 is used with the starter kit,
   disconnect the onboard debugger from the PIC32 device by removing the
   jumper JP2. When the on-board debugger is required, replace the jumper
   JP2. When the jumper JP2 is installed, pin 1 must be connected to pin 3

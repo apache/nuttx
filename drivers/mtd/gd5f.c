@@ -691,7 +691,7 @@ static ssize_t gd5f_write(FAR struct mtd_dev_s *dev,
   size_t bytesleft = nbytes;
   uint32_t position = offset;
 
-  finfo("Write: offset: %08lx nbytes: %d \n", (long)offset, (int)nbytes);
+  finfo("Write: offset: %08lx nbytes: %d\n", (long)offset, (int)nbytes);
   gd5f_lock(priv->dev);
 
   /* Wait all operations complete */
@@ -759,7 +759,7 @@ static int gd5f_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct gd5f_dev_s *priv = (FAR struct gd5f_dev_s *)dev;
   int ret = -EINVAL;
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

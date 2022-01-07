@@ -90,6 +90,7 @@ int nxsem_trywait(FAR sem_t *sem)
           /* It is, let the task take the semaphore */
 
           sem->semcount--;
+          nxsem_add_holder(sem);
           rtcb->waitsem = NULL;
           ret = OK;
         }

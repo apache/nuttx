@@ -46,74 +46,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* The address family that we used to create the socket really does not
- * matter. It should, however, be valid in the current configuration.
- */
-
-#if defined(CONFIG_NET_IPv4)
-#  define NET_RPMSG_DRV_FAMILY     AF_INET
-#elif defined(CONFIG_NET_IPv6)
-#  define NET_RPMSG_DRV_FAMILY     AF_INET6
-#elif defined(CONFIG_NET_IEEE802154)
-#  define NET_RPMSG_DRV_FAMILY     AF_IEEE802154
-#elif defined(CONFIG_WIRELESS_PKTRADIO)
-#  define NET_RPMSG_DRV_FAMILY     AF_PKTRADIO
-#elif defined(CONFIG_NET_USRSOCK)
-#  define NET_RPMSG_DRV_FAMILY     AF_INET
-#elif defined(CONFIG_NET_PKT)
-#  define NET_RPMSG_DRV_FAMILY     AF_PACKET
-#elif defined(CONFIG_NET_LOCAL)
-#  define NET_RPMSG_DRV_FAMILY     AF_LOCAL
-#else
-#  define NET_RPMSG_DRV_FAMILY     AF_UNSPEC
-#endif
-
-/* SOCK_DGRAM is the preferred socket type to use when we just want a
- * socket for performing driver ioctls.  However, we can't use SOCK_DRAM
- * if UDP is disabled.
- *
- * Pick a socket type (and perhaps protocol) compatible with the currently
- * selected address family.
- */
-
-#if NET_RPMSG_DRV_FAMILY == AF_INET
-#  if defined(CONFIG_NET_UDP)
-#    define NET_RPMSG_DRV_TYPE     SOCK_DGRAM
-#  elif defined(CONFIG_NET_TCP)
-#   define NET_RPMSG_DRV_TYPE      SOCK_STREAM
-#  elif defined(CONFIG_NET_ICMP_SOCKET)
-#   define NET_RPMSG_DRV_TYPE      SOCK_DGRAM
-#   define NET_RPMSG_DRV_PROTOCOL  IPPROTO_ICMP
-#  endif
-#elif NET_RPMSG_DRV_FAMILY == AF_INET6
-#  if defined(CONFIG_NET_UDP)
-#    define NET_RPMSG_DRV_TYPE     SOCK_DGRAM
-#  elif defined(CONFIG_NET_TCP)
-#   define NET_RPMSG_DRV_TYPE      SOCK_STREAM
-#  elif defined(CONFIG_NET_ICMPv6_SOCKET)
-#   define NET_RPMSG_DRV_TYPE      SOCK_DGRAM
-#   define NET_RPMSG_DRV_PROTOCOL  IPPROTO_ICMP6
-#  endif
-#elif NET_RPMSG_DRV_FAMILY == AF_IEEE802154
-#  define NET_RPMSG_DRV_TYPE       SOCK_DGRAM
-#elif NET_RPMSG_DRV_FAMILY == AF_PKTRADIO
-#  define NET_RPMSG_DRV_TYPE       SOCK_DGRAM
-#elif NET_RPMSG_DRV_FAMILY == AF_PACKET
-#  define NET_RPMSG_DRV_TYPE       SOCK_RAW
-#elif NET_RPMSG_DRV_FAMILY == AF_LOCAL
-#  if defined(CONFIG_NET_LOCAL_DGRAM)
-#    define NET_RPMSG_DRV_TYPE     SOCK_DGRAM
-#  elif defined(CONFIG_NET_LOCAL_STREAM)
-#     define NET_RPMSG_DRV_TYPE    SOCK_STREAM
-#  endif
-#endif
-
-/* Socket protocol of zero normally works */
-
-#ifndef NET_RPMSG_DRV_PROTOCOL
-#  define NET_RPMSG_DRV_PROTOCOL   0
-#endif
-
 /* Work queue support is required. */
 
 #if !defined(CONFIG_SCHED_WORKQUEUE)
@@ -458,9 +390,9 @@ static int net_rpmsg_drv_sockioctl_task(int argc, FAR char *argv[])
   FAR struct rpmsg_endpoint *ept;
   struct socket sock;
 
-  int domain   = NET_RPMSG_DRV_FAMILY;
-  int type     = NET_RPMSG_DRV_TYPE;
-  int protocol = NET_RPMSG_DRV_PROTOCOL;
+  int domain   = NET_SOCK_FAMILY;
+  int type     = NET_SOCK_TYPE;
+  int protocol = NET_SOCK_PROTOCOL;
 
   /* Restore pointers from argv */
 
@@ -505,8 +437,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 
   /* Save pointers into argv */
 
-  sprintf(arg1, "%#p", ept);
-  sprintf(arg2, "%#p", data);
+  sprintf(arg1, "%p", ept);
+  sprintf(arg2, "%p", data);
 
   argv[0] = arg1;
   argv[1] = arg2;

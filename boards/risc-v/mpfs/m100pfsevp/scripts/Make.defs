@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/arch/risc-v/src/rv64gc/Toolchain.defs
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_MPFS_BOOTLOADER),y)
   LDSCRIPT = ld-envm.script
@@ -50,11 +50,7 @@ endif
 # ARCHCPUFLAGS = -march=rv64gcxthead -mabi=lp64d -mcmodel=medany
 # TODO: We are not going to enable this at this time for the CI compatiblity.
 
-ifeq ($(CONFIG_ARCH_HAVE_DPFPU),y)
-  ARCHCPUFLAGS = -march=rv64gc -mabi=lp64d -mcmodel=medany
-else
-  ARCHCPUFLAGS = -march=rv64imac -mabi=lp64 -mcmodel=medany
-endif
+ARCHCPUFLAGS += -mcmodel=medany
 
 ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti

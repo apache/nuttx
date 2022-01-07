@@ -162,8 +162,8 @@ int usrsock_getpeername(FAR struct socket *psock,
   };
 
   struct iovec inbufs[1];
-  ssize_t ret;
   socklen_t outaddrlen = 0;
+  int ret;
 
   net_lock();
 

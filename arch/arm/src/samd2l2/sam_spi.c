@@ -1472,7 +1472,7 @@ struct spi_dev_s *sam_spibus_initialize(int port)
 
   /* Get the port state structure */
 
-  spiinfo("port: %d \n", port);
+  spiinfo("port: %d\n", port);
 
 #ifdef SAMD2L2_HAVE_SPI0
   if (port == 0)

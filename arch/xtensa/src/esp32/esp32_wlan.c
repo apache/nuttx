@@ -48,6 +48,7 @@
 #include "esp32_wlan.h"
 #include "esp32_wifi_utils.h"
 #include "esp32_wifi_adapter.h"
+#include "esp32_systemreset.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -181,6 +182,10 @@ struct wlan_priv_s
 /****************************************************************************
  * Private Data
  ****************************************************************************/
+
+/* Reference count of register Wi-Fi handler */
+
+static uint8_t g_callback_register_ref = 0;
 
 static struct wlan_priv_s g_wlan_priv[ESP32_WLAN_DEVS];
 
@@ -526,7 +531,7 @@ static void wlan_transmit(struct wlan_priv_s *priv)
   while ((pktbuf = wlan_txframe(priv)))
     {
       ret = priv->ops->send(pktbuf->buffer, pktbuf->len);
-      if (ret < 0)
+      if (ret == -ENOMEM)
         {
           wlan_add_txpkt_head(priv, pktbuf);
           wd_start(&priv->txtimeout, WLAN_TXTOUT,
@@ -535,6 +540,11 @@ static void wlan_transmit(struct wlan_priv_s *priv)
         }
       else
         {
+          if (ret < 0)
+            {
+              nwarn("WARN: Failed to send pkt, ret: %d\n", ret);
+            }
+
           wlan_free_buffer(priv, pktbuf->buffer);
         }
     }
@@ -1066,8 +1076,8 @@ static void wlan_txtimeout_expiry(wdparm_t arg)
 
 static void wlan_poll_work(void *arg)
 {
-  int32_t delay = WLAN_WDDELAY;
-  struct wlan_priv_s *priv = (struct wlan_priv_s *)arg;
+  int32_t delay_tick = WLAN_WDDELAY;
+  FAR struct wlan_priv_s *priv = (FAR struct wlan_priv_s *)arg;
   struct net_driver_s *dev = &priv->dev;
   struct wlan_pktbuf *pktbuf;
 
@@ -1082,7 +1092,14 @@ static void wlan_poll_work(void *arg)
   pktbuf = wlan_alloc_buffer(priv);
   if (!pktbuf)
     {
-      delay = 1;
+      /* Delay 10ms */
+
+      delay_tick = MSEC2TICK(10);
+      if (delay_tick == 0)
+        {
+          delay_tick = 1;
+        }
+
       goto exit;
     }
 
@@ -1098,7 +1115,7 @@ static void wlan_poll_work(void *arg)
 
   /* Update TCP timing states and poll the network for new XMIT data. */
 
-  devif_timer(&priv->dev, delay, wlan_txpoll);
+  devif_timer(&priv->dev, delay_tick, wlan_txpoll);
 
   if (dev->d_buf)
     {
@@ -1113,7 +1130,7 @@ static void wlan_poll_work(void *arg)
   wlan_transmit(priv);
 
 exit:
-  wd_start(&priv->txpoll, delay, wlan_poll_expiry, (wdparm_t)priv);
+  wd_start(&priv->txpoll, delay_tick, wlan_poll_expiry, (wdparm_t)priv);
   net_unlock();
 }
 
@@ -1249,7 +1266,16 @@ static int wlan_ifup(struct net_driver_s *dev)
   wd_start(&priv->txpoll, WLAN_WDDELAY, wlan_poll_expiry, (wdparm_t)priv);
 
   priv->ifup = true;
+  if (g_callback_register_ref == 0)
+    {
+      ret = esp32_register_shutdown_handler(esp_wifi_stop_callback);
+      if (ret < 0)
+        {
+          nwarn("WARN: Failed to register handler ret=%d\n", ret);
+        }
+    }
 
+  ++g_callback_register_ref;
   net_unlock();
 
   return OK;
@@ -1295,6 +1321,16 @@ static int wlan_ifdown(struct net_driver_s *dev)
   if (ret < 0)
     {
       nerr("ERROR: Failed to stop Wi-Fi ret=%d\n", ret);
+    }
+
+  --g_callback_register_ref;
+  if (g_callback_register_ref == 0)
+    {
+      ret = esp32_unregister_shutdown_handler(esp_wifi_stop_callback);
+      if (ret < 0)
+        {
+          nwarn("WARN: Failed to unregister handler ret=%d\n", ret);
+        }
     }
 
   net_unlock();

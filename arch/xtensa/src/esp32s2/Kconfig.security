@@ -1,0 +1,283 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Secure Boot"
+
+config ESP32S2_SECURE_BOOT
+	bool "Enable hardware Secure Boot in bootloader (READ HELP FIRST)"
+	default n
+	depends on ESP32S2_APP_FORMAT_MCUBOOT
+	---help---
+		Build a bootloader which enables Secure Boot on first boot.
+
+		Once enabled, Secure Boot will not boot a modified bootloader. The bootloader will only boot an
+		application firmware image if it has a verified digital signature. There are implications for reflashing
+		updated images once Secure Boot is enabled.
+
+		When enabling Secure Boot, JTAG and ROM BASIC Interpreter are permanently disabled by default.
+
+if ESP32S2_SECURE_BOOT
+
+comment "Secure Boot support requires building the bootloader from source (ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE)"
+	depends on !ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+
+config ESP32S2_SECURE_BOOT_BUILD_SIGNED_BINARIES
+	bool "Sign binaries during build"
+	default y
+	---help---
+		Once Secure Boot is enabled, bootloader and application images are required to be signed.
+
+		If enabled (default), these binary files are signed as part of the build process.
+		The files named in "Bootloader private signing key" and "Application private signing key" will
+		be used to sign the bootloader and application images, respectively.
+
+		If disabled, unsigned firmware images will be built.
+		They must be then signed manually using imgtool (e.g., on a remote signing server).
+
+config ESP32S2_SECURE_BOOT_BOOTLOADER_SIGNING_KEY
+	string "Bootloader private signing key"
+	default "bootloader_signing_key.pem"
+	---help---
+		Path to the key file used to sign the bootloader image.
+
+		Key file is an RSA private key in PEM format.
+
+		Path is evaluated relative to the directory indicated by the ESPSEC_KEYDIR environment
+		variable.
+
+		You can generate a new signing key by running the following command:
+		$ espsecure.py generate_signing_key --version 2 bootloader_signing_key.pem
+
+		See the Secure Boot section of the ESP-IDF Programmer's Guide for this version for details.
+
+choice ESP32S2_SECURE_SIGNED_APPS_SCHEME
+	prompt "Application image signing scheme"
+	default ESP32S2_SECURE_SIGNED_APPS_SCHEME_ECDSA_P256
+	---help---
+		Select the secure application signing scheme.
+
+	config ESP32S2_SECURE_SIGNED_APPS_SCHEME_RSA_2048
+		bool "RSA-2048"
+
+	config ESP32S2_SECURE_SIGNED_APPS_SCHEME_RSA_3072
+		bool "RSA-3072"
+
+	config ESP32S2_SECURE_SIGNED_APPS_SCHEME_ECDSA_P256
+		bool "ECDSA-P256"
+
+	config ESP32S2_SECURE_SIGNED_APPS_SCHEME_ED25519
+		bool "ED25519"
+
+endchoice
+
+config ESP32S2_SECURE_BOOT_APP_SIGNING_KEY
+	string "Application private signing key"
+	default "app_signing_key.pem"
+	---help---
+		Path to the key file used to sign NuttX application images.
+
+		Key file is in PEM format and its type shall be specified by the configuration defined in
+		"Application image signing scheme".
+
+		Path is evaluated relative to the directory indicated by the ESPSEC_KEYDIR environment
+		variable.
+
+		You can generate a new signing key by running the following command:
+		$ imgtool keygen --key app_signing_key.pem --type <ESP32S2_SECURE_SIGNED_APPS_SCHEME>
+
+config ESP32S2_SECURE_BOOT_INSECURE
+	bool "Allow potentially insecure options"
+	default n
+	---help---
+		You can disable some of the default protections offered by Secure Boot, in order to enable testing or a
+		custom combination of security features.
+
+		Only enable these options if you are very sure.
+
+		Refer to the Secure Boot section of the ESP-IDF Programmer's Guide for this version before enabling.
+
+endif # ESP32S2_SECURE_BOOT
+
+comment "Flash Encryption"
+
+config ESP32S2_SECURE_FLASH_ENC_ENABLED
+	bool "Enable Flash Encryption on boot (READ HELP FIRST)"
+	default n
+	depends on ESP32S2_APP_FORMAT_MCUBOOT
+	---help---
+		If this option is set, flash contents will be encrypted by the bootloader on first boot.
+
+		Note: After first boot, the system will be permanently encrypted. Re-flashing an encrypted
+		system is complicated and not always possible.
+
+		Read https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/flash-encryption.html
+		before enabling.
+
+if ESP32S2_SECURE_FLASH_ENC_ENABLED
+
+comment "Flash Encryption support requires building the bootloader from source (ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE)"
+	depends on !ESP32S2_BOOTLOADER_BUILD_FROM_SOURCE
+
+choice ESP32S2_SECURE_FLASH_ENCRYPTION_MODE
+	bool "Enable usage mode"
+	default ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		By default, Development mode is enabled which allows ROM download mode to perform Flash Encryption
+		operations (plaintext is sent to the device, and it encrypts it internally and writes ciphertext
+		to flash). This mode is not secure, it's possible for an attacker to write their own chosen plaintext
+		to flash.
+
+		Release mode should always be selected for production or manufacturing. Once enabled it's no longer
+		possible for the device in ROM Download Mode to use the Flash Encryption hardware.
+
+		Refer to the Flash Encryption section of the ESP-IDF Programmer's Guide for details:
+		https://docs.espressif.com/projects/esp-idf/en/latest/esp32s2/security/flash-encryption.html#flash-encryption-configuration
+
+	config ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+		bool "Development (NOT SECURE)"
+		select ESP32S2_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+
+	config ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_RELEASE
+		bool "Release"
+
+endchoice
+
+endif # ESP32S2_SECURE_FLASH_ENC_ENABLED
+
+menu "Potentially insecure options"
+	visible if ESP32S2_SECURE_BOOT_INSECURE || ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+
+	# NOTE: Options in this menu NEED to have ESP32S2_SECURE_BOOT_INSECURE
+	# and/or ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT in "depends on", as the menu
+	# itself doesn't enable/disable its children (if it's not set,
+	# it's possible for the insecure menu to be disabled but the insecure option
+	# to remain on which is very bad.)
+
+config ESP32S2_SECURE_BOOT_ALLOW_JTAG
+	bool "Allow JTAG Debugging"
+	default n
+	depends on ESP32S2_SECURE_BOOT_INSECURE || ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable JTAG (across entire chip) on first boot
+		when either Secure Boot or Flash Encryption is enabled.
+
+		Setting this option leaves JTAG on for debugging, which negates all protections of Flash Encryption
+		and some of the protections of Secure Boot.
+
+		Only set this option in testing environments.
+
+config ESP32S2_SECURE_BOOT_ALLOW_EFUSE_RD_DIS
+	bool "Allow additional read protecting of efuses"
+	default n
+	depends on ESP32S2_SECURE_BOOT_INSECURE
+	---help---
+		If not set (default, recommended), on first boot the bootloader will burn the WR_DIS_RD_DIS
+		efuse when Secure Boot is enabled. This prevents any more efuses from being read protected.
+
+		If this option is set, it will remain possible to write the EFUSE_RD_DIS efuse field after Secure
+		Boot is enabled. This may allow an attacker to read-protect the BLK2 efuse (for ESP32) and
+		BLOCK4-BLOCK10 (i.e. BLOCK_KEY0-BLOCK_KEY5)(for other chips) holding the public key digest, causing an
+		immediate denial of service and possibly allowing an additional fault injection attack to
+		bypass the signature protection.
+
+		NOTE: Once a BLOCK is read-protected, the application will read all zeros from that block
+
+		NOTE: If UART ROM download mode "Permanently disabled (recommended)" is set,
+		then it is __NOT__ possible to read/write efuses using espefuse.py utility.
+		However, efuse can be read/written from the application.
+
+config ESP32S2_SECURE_FLASH_UART_BOOTLOADER_ALLOW_ENC
+	bool "Leave UART bootloader encryption enabled"
+	default n
+	depends on ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader encryption access on
+		first boot. If set, the UART bootloader will still be able to access hardware encryption.
+
+		It is recommended to only set this option in testing environments.
+
+config ESP32S2_SECURE_FLASH_UART_BOOTLOADER_ALLOW_CACHE
+	bool "Leave UART bootloader flash cache enabled"
+	default n
+	depends on ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), the bootloader will permanently disable UART bootloader flash cache access on
+		first boot. If set, the UART bootloader will still be able to access the flash cache.
+
+		Only set this option in testing environments.
+
+config ESP32S2_SECURE_FLASH_REQUIRE_ALREADY_ENABLED
+	bool "Require Flash Encryption to be already enabled"
+	default n
+	depends on ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+	---help---
+		If not set (default), and Flash Encryption is not yet enabled in eFuses, the 2nd stage bootloader
+		will enable Flash Encryption: generate the Flash Encryption key and program eFuses.
+		If this option is set, and Flash Encryption is not yet enabled, the bootloader will error out and
+		reboot.
+		If Flash Encryption is enabled in eFuses, this option does not change the bootloader behavior.
+
+		Only use this option in testing environments, to avoid accidentally enabling Flash Encryption on
+		the wrong device. The device needs to have Flash Encryption already enabled using espefuse.py.
+
+endmenu # Potentially insecure options
+
+config ESP32S2_SECURE_ROM_DL_MODE_ENABLED
+	bool
+	default y if !ESP32S2_SECURE_FLASH_ENCRYPTION_MODE_DEVELOPMENT
+
+choice ESP32S2_SECURE_UART_ROM_DL_MODE
+	bool "UART ROM download mode"
+	default ESP32S2_SECURE_ENABLE_SECURE_ROM_DL_MODE if ESP32S2_SECURE_ROM_DL_MODE_ENABLED
+	default ESP32S2_SECURE_INSECURE_ALLOW_DL_MODE
+	depends on ESP32S2_SECURE_BOOT || ESP32S2_SECURE_FLASH_ENC_ENABLED
+
+	config ESP32S2_SECURE_DISABLE_ROM_DL_MODE
+		bool "Permanently disabled (recommended)"
+		---help---
+			If set, during startup the app will burn an eFuse bit to permanently disable the UART ROM
+			Download Mode. This prevents any future use of esptool.py, espefuse.py and similar tools.
+
+			Once disabled, if the SoC is booted with strapping pins set for ROM Download Mode
+			then an error is printed instead.
+
+			It is recommended to enable this option in any production application where Flash
+			Encryption and/or Secure Boot is enabled and access to Download Mode is not required.
+
+			It is also possible to permanently disable Download Mode by calling
+			esp_efuse_disable_rom_download_mode() at runtime.
+
+	config ESP32S2_SECURE_ENABLE_SECURE_ROM_DL_MODE
+		bool "Permanently switch to Secure mode (recommended)"
+		select ESP32S2_ESPTOOLPY_NO_STUB
+		---help---
+			If set, during startup the app will burn an eFuse bit to permanently switch the UART ROM
+			Download Mode into a separate Secure Download mode. This option can only work if
+			Download Mode is not already disabled by eFuse.
+
+			Secure Download mode limits the use of Download Mode functions to simple flash read,
+			write and erase operations, plus a command to return a summary of currently enabled
+			security features.
+
+			Secure Download mode is not compatible with the esptool.py flasher stub feature,
+			espefuse.py, read/writing memory or registers, encrypted download, or any other
+			features that interact with unsupported Download Mode commands.
+
+			Secure Download mode should be enabled in any application where Flash Encryption
+			and/or Secure Boot is enabled. Disabling this option does not immediately cancel
+			the benefits of the security features, but it increases the potential "attack
+			surface" for an attacker to try and bypass them with a successful physical attack.
+
+			It is also possible to enable secure download mode at runtime by calling
+			esp_efuse_enable_rom_secure_download_mode()
+
+	config ESP32S2_SECURE_INSECURE_ALLOW_DL_MODE
+		bool "Enabled (not recommended)"
+		---help---
+			This is a potentially insecure option.
+			Enabling this option will allow the full UART download mode to stay enabled.
+			This option SHOULD NOT BE ENABLED for production use cases.
+
+endchoice

@@ -571,6 +571,7 @@ config ARCH_ARMV6M
 config ARCH_CORTEXM0
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV6M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_RESET
@@ -584,6 +585,7 @@ config ARCH_ARMV7M
 config ARCH_CORTEXM3
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -600,6 +602,7 @@ config ARCH_CORTEXM3
 config ARCH_CORTEXM4
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -616,6 +619,7 @@ config ARCH_CORTEXM4
 config ARCH_CORTEXM7
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV7M
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
@@ -714,6 +718,7 @@ config ARCH_ARMV8M
 config ARCH_CORTEXM23
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -727,6 +732,7 @@ config ARCH_CORTEXM23
 config ARCH_CORTEXM33
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -739,10 +745,12 @@ config ARCH_CORTEXM33
 	select ARCH_HAVE_MEMFAULT_DEBUG
 	select ARCH_HAVE_BUSFAULT_DEBUG
 	select ARCH_HAVE_USAGEFAULT_DEBUG
+	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
 config ARCH_CORTEXM35P
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -755,10 +763,12 @@ config ARCH_CORTEXM35P
 	select ARCH_HAVE_MEMFAULT_DEBUG
 	select ARCH_HAVE_BUSFAULT_DEBUG
 	select ARCH_HAVE_USAGEFAULT_DEBUG
+	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
 config ARCH_CORTEXM55
 	bool
 	default n
+	select ARM_THUMB
 	select ARCH_ARMV8M
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_IRQTRIGGER
@@ -771,6 +781,7 @@ config ARCH_CORTEXM55
 	select ARCH_HAVE_MEMFAULT_DEBUG
 	select ARCH_HAVE_BUSFAULT_DEBUG
 	select ARCH_HAVE_USAGEFAULT_DEBUG
+	select ARCH_HAVE_SECUREFAULT_DEBUG if ARCH_TRUSTZONE_SECURE
 
 config ARCH_FAMILY
 	string
@@ -851,7 +862,6 @@ endchoice # TrustZone Configuration
 config ARM_THUMB
 	bool
 	default n
-	depends on ARCH_ARMV7A
 
 config ARM_HAVE_WFE_SEV
 	bool
@@ -976,7 +986,7 @@ config DEBUG_MEMFAULT
 	default n
 	depends on ARCH_HAVE_MEMFAULT_DEBUG && DEBUG_ALERT && ARCH_USE_MPU
 	---help---
-		Enables verbose debug output when a mem fault is occurs.  This verbose
+		Enables verbose debug output when a mem fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult mem fault problems,
 		but may be more than you typically want to see.
 
@@ -989,7 +999,7 @@ config DEBUG_BUSFAULT
 	default n
 	depends on ARCH_HAVE_BUSFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a bus fault is occurs.  This verbose
+		Enables verbose debug output when a bus fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult bus fault problems,
 		but may be more than you typically want to see.
 
@@ -1001,6 +1011,19 @@ config DEBUG_USAGEFAULT
 	bool "Verbose Usage-Fault Debug"
 	default n
 	depends on ARCH_HAVE_USAGEFAULT_DEBUG && DEBUG_ALERT
+	---help---
+		Enables verbose debug output when a usage fault occurs.  This verbose
+		output is sometimes helpful when debugging difficult usage fault problems,
+		but may be more than you typically want to see.
+
+config ARCH_HAVE_SECUREFAULT_DEBUG
+	bool
+	default n
+
+config DEBUG_SECUREFAULT
+	bool "Verbose Secure-Fault Debug"
+	default n
+	depends on ARCH_HAVE_SECUREFAULT_DEBUG && DEBUG_ALERT
 	---help---
 		Enables verbose debug output when a usage fault is occurs.  This verbose
 		output is sometimes helpful when debugging difficult usage fault problems,

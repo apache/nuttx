@@ -284,23 +284,13 @@
  * aligned at an appropriate boundary so that pointers to it can be cast
  * as pointers to protocol-specific address structures and used to access
  * the fields of those structures without alignment problems.
- *
- * REVISIT: sizeof(struct sockaddr_storge) should be 128 bytes.
  */
 
-#ifdef CONFIG_NET_IPv6
 struct sockaddr_storage
 {
   sa_family_t ss_family;       /* Address family */
-  char        ss_data[26];     /* 26-bytes of address data */
+  char        ss_data[126];    /* 126-bytes of address data */
 };
-#else
-struct sockaddr_storage
-{
-  sa_family_t ss_family;       /* Address family */
-  char        ss_data[14];     /* 14-bytes of address data */
-};
-#endif
 
 /* The sockaddr structure is used to define a socket address which is used
  * in the bind(), connect(), getpeername(), getsockname(), recvfrom(), and

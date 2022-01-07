@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/syslog/syslog.h>
 
 #include <arch/xtensa/xtensa_corebits.h>
 #include <arch/board/board.h>
@@ -52,47 +53,165 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_taskdump
+ * Name: xtensa_dump_task
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
-static void up_taskdump(struct tcb_s *tcb, void *arg)
+static void xtensa_dump_task(struct tcb_s *tcb, void *arg)
 {
+#ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_filled = 0;
+  uint32_t stack_used;
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+  struct cpuload_s cpuload;
+  uint32_t fracpart;
+  uint32_t intpart;
+  uint32_t tmp;
+
+  clock_cpuload(tcb->pid, &cpuload);
+
+  if (cpuload.total > 0)
+    {
+      tmp      = (1000 * cpuload.active) / cpuload.total;
+      intpart  = tmp / 10;
+      fracpart = tmp - 10 * intpart;
+    }
+  else
+    {
+      intpart  = 0;
+      fracpart = 0;
+    }
+#endif
+
+#ifdef CONFIG_STACK_COLORATION
+  stack_used = up_check_tcbstack(tcb);
+  if (tcb->adj_stack_size > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 * stack_used / tcb->adj_stack_size;
+    }
+#endif
+
   /* Dump interesting properties of this task */
 
+  _alert("  %4d   %4d"
+#ifdef CONFIG_STACK_COLORATION
+         "   %7lu"
+#endif
+         "   %7lu"
+#ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "   %3" PRId32 ".%01" PRId32 "%%"
+#endif
 #if CONFIG_TASK_NAME_SIZE > 0
-  _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
-#else
-  _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         "   %s"
 #endif
+         "\n",
+         tcb->pid, tcb->sched_priority,
+#ifdef CONFIG_STACK_COLORATION
+         (unsigned long)up_check_tcbstack(tcb),
+#endif
+         (unsigned long)tcb->adj_stack_size
+#ifdef CONFIG_STACK_COLORATION
+         , stack_filled / 10, stack_filled % 10,
+         (stack_filled >= 10 * 80 ? '!' : ' ')
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         , intpart, fracpart
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         , tcb->name
+#endif
+        );
+}
 
-  /* Dump the backtrace */
+/****************************************************************************
+ * Name: xtensa_dump_backtrace
+ ****************************************************************************/
 
-#if defined(CONFIG_XTENSA_DUMPBT_ON_ASSERT) && \
-    defined(CONFIG_SCHED_BACKTRACE)
+#ifdef CONFIG_SCHED_BACKTRACE
+static void xtensa_dump_backtrace(struct tcb_s *tcb, void *arg)
+{
+  /* Show back trace */
+
   sched_dumpstack(tcb->pid);
-#endif
 }
 #endif
 
 /****************************************************************************
- * Name: up_showtasks
+ * Name: xtensa_showtasks
  ****************************************************************************/
 
-#ifdef CONFIG_STACK_COLORATION
-static inline void up_showtasks(void)
+static inline void xtensa_showtasks(void)
 {
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#  ifdef CONFIG_STACK_COLORATION
+  uint32_t stack_used = up_check_intstack();
+  uint32_t stack_filled = 0;
+
+  if ((CONFIG_ARCH_INTERRUPTSTACK & ~15) > 0 && stack_used > 0)
+    {
+      /* Use fixed-point math with one decimal place */
+
+      stack_filled = 10 * 100 *
+                     stack_used / (CONFIG_ARCH_INTERRUPTSTACK & ~15);
+    }
+#  endif
+#endif
+
   /* Dump interesting properties of each task in the crash environment */
 
-  nxsched_foreach(up_taskdump, NULL);
-}
-#else
-#  define up_showtasks()
+  _alert("   PID    PRI"
+#ifdef CONFIG_STACK_COLORATION
+         "      USED"
 #endif
+         "     STACK"
+#ifdef CONFIG_STACK_COLORATION
+         "   FILLED "
+#endif
+#ifdef CONFIG_SCHED_CPULOAD
+         "      CPU"
+#endif
+#if CONFIG_TASK_NAME_SIZE > 0
+         "   COMMAND"
+#endif
+         "\n");
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+  _alert("  ----   ----"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %7lu"
+#  endif
+         "   %7lu"
+#  ifdef CONFIG_STACK_COLORATION
+         "   %3" PRId32 ".%1" PRId32 "%%%c"
+#  endif
+#  ifdef CONFIG_SCHED_CPULOAD
+         "     ----"
+#  endif
+#  if CONFIG_TASK_NAME_SIZE > 0
+         "   irq"
+#  endif
+         "\n"
+#  ifdef CONFIG_STACK_COLORATION
+         , (unsigned long)stack_used
+#  endif
+         , (unsigned long)(CONFIG_ARCH_INTERRUPTSTACK & ~15)
+#  ifdef CONFIG_STACK_COLORATION
+         , stack_filled / 10, stack_filled % 10,
+         (stack_filled >= 10 * 80 ? '!' : ' ')
+#  endif
+        );
+#endif
+
+  nxsched_foreach(xtensa_dump_task, NULL);
+#ifdef CONFIG_SCHED_BACKTRACE
+  nxsched_foreach(xtensa_dump_backtrace, NULL);
+#endif
+}
 
 /****************************************************************************
  * Name: xtensa_stackdump
@@ -102,7 +221,11 @@ static void xtensa_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
 
-  for (stack = sp & ~0x1f; stack < stack_top; stack += 32)
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
       _alert("%08x: %08x %08x %08x %08x %08x %08x %08x %08x\n",
@@ -274,7 +397,7 @@ void xtensa_dumpstate(void)
 
   /* Dump the state of all tasks (if available) */
 
-  up_showtasks();
+  xtensa_showtasks();
 }
 
 #endif /* CONFIG_DEBUG_ALERT */

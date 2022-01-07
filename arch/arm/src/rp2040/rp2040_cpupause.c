@@ -257,7 +257,7 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
       return OK;
     }
 
-  DPRINTF("cpu%d will be paused \n", cpu);
+  DPRINTF("cpu%d will be paused\n", cpu);
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2

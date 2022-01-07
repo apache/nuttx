@@ -106,7 +106,7 @@ RNG          Yes
 AES          Yes
 eFuse        Yes
 ADC          No
-Bluetooth    No
+Bluetooth    Yes
 SDIO         No
 SD/MMC       No
 I2S          No
@@ -308,7 +308,48 @@ The ``dhcpd_start`` is necessary to let your board to associate an IP to your sm
 Bluetooth
 =========
 
-Bluetooth is not currently supported.
+These are the steps to test Bluetooth Low Energy (BLE) scan on ESP32 (i.e. Devkit board).
+First configure to use the BLE board profile::
+
+    $ make distclean
+    $ ./tools/configure.sh esp32-devkitc:ble
+    $ make flash ESPTOOL_PORT=/dev/ttyUSB0
+
+Enter in the NSH shell using your prefered serial console tool and run the scan command::
+
+    NuttShell (NSH) NuttX-10.2.0
+    nsh> ifconfig
+    bnep0   Link encap:UNSPEC at DOWN
+            inet addr:0.0.0.0 DRaddr:0.0.0.0 Mask:0.0.0.0
+
+    wlan0   Link encap:Ethernet HWaddr ac:67:b2:53:8b:ec at UP
+            inet addr:10.0.0.2 DRaddr:10.0.0.1 Mask:255.255.255.0
+
+    nsh> bt bnep0 scan start
+    nsh> bt bnep0 scan stop
+    nsh> bt bnep0 scan get
+    Scan result:
+    1.     addr:           63:14:2f:b9:9f:83 type: 1
+           rssi:            -90
+           response type:   3
+           advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
+    2.     addr:           52:ca:05:b5:ad:77 type: 1
+           rssi:            -82
+           response type:   3
+           advertiser data: 1e ff 06 00 01 09 20 02 03 d1 21 57 bf 19 b3 7a
+    3.     addr:           46:8e:b2:cd:94:27 type: 1
+           rssi:            -92
+           response type:   2
+           advertiser data: 02 01 1a 09 ff c4 00 10 33 14 12 16 80 02 0a d4
+    4.     addr:           46:8e:b2:cd:94:27 type: 1
+           rssi:            -92
+           response type:   4
+           advertiser data: 18 09 5b 4c 47 5d 20 77 65 62 4f 53 20 54 56 20
+    5.     addr:           63:14:2f:b9:9f:83 type: 1
+           rssi:            -80
+           response type:   3
+        advertiser data: 1e ff 06 00 01 09 20 02 7c 33 a3 a7 cd c9 44 5b
+    nsh>
 
 Using QEMU
 ==========

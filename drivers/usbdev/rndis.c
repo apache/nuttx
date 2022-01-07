@@ -1290,7 +1290,7 @@ static inline int rndis_recvpacket(FAR struct rndis_dev_s *priv,
             }
           else
             {
-              uerr("The packet exceeds request buffer (reqlen=%d) \n",
+              uerr("The packet exceeds request buffer (reqlen=%d)\n",
                    reqlen);
             }
         }

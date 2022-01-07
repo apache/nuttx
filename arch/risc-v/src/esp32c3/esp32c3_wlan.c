@@ -47,6 +47,7 @@
 #include "esp32c3_wlan.h"
 #include "esp32c3_wifi_utils.h"
 #include "esp32c3_wifi_adapter.h"
+#include "esp32c3_wireless.h"
 #include "esp32c3_systemreset.h"
 
 /****************************************************************************

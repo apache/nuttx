@@ -684,8 +684,9 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       uint32_t sndseq;
-
+#endif
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
        * data (tx_unacked).
@@ -694,7 +695,7 @@ found:
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       unackseq = conn->sndseq_max;
 #else
-      unackseq = tcp_addsequence(conn->sndseq, conn->tx_unacked);
+      unackseq = tcp_getsequence(conn->sndseq);
 #endif
 
       /* Get the sequence number of that has just been acknowledged by this
@@ -737,6 +738,7 @@ found:
             }
         }
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
       /* Update sequence number to the unacknowledge sequence number.  If
        * there is still outstanding, unacknowledged data, then this will
        * be beyond ackseq.
@@ -751,6 +753,7 @@ found:
                 (uint32_t)conn->tx_unacked);
           tcp_setsequence(conn->sndseq, ackseq);
         }
+#endif
 
       /* Do RTT estimation, unless we have done retransmissions. */
 
@@ -867,6 +870,11 @@ found:
 
         if ((tcp->flags & TCP_CTL) == TCP_SYN)
           {
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+            tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+#else
+            /* REVISIT for the buffered mode */
+#endif
             tcp_synack(dev, conn, TCP_ACK | TCP_SYN);
             return;
           }

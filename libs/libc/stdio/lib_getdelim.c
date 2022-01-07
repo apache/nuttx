@@ -173,7 +173,7 @@ ssize_t getdelim(FAR char **lineptr, size_t *n, int delimiter,
           newbuffer = (FAR char *)lib_realloc(*lineptr, bufsize);
           if (newbuffer == NULL)
             {
-              ret = -ENOMEM;
+              ret = ENOMEM;
               goto errout;
             }
 

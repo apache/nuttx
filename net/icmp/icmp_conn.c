@@ -31,6 +31,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -47,7 +48,9 @@
 
 /* The array containing all IPPROTO_ICMP socket connections */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct icmp_conn_s g_icmp_connections[CONFIG_NET_ICMP_NCONNS];
+#endif
 
 /* A list of all free IPPROTO_ICMP socket connections */
 
@@ -73,7 +76,9 @@ static dq_queue_t g_active_icmp_connections;
 
 void icmp_sock_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -81,12 +86,14 @@ void icmp_sock_initialize(void)
   dq_init(&g_active_icmp_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_ICMP_NCONNS; i++)
     {
       /* Move the connection structure to the free list */
 
       dq_addlast(&g_icmp_connections[i].node, &g_free_icmp_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -109,13 +116,23 @@ FAR struct icmp_conn_s *icmp_alloc(void)
   ret = net_lockedwait(&g_free_sem);
   if (ret >= 0)
     {
+#ifdef CONFIG_NET_ALLOC_CONNS
+      if (dq_peek(&g_free_icmp_connections) == NULL)
+        {
+          conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_ICMP_NCONNS);
+          if (conn != NULL)
+            {
+              for (ret = 0; ret < CONFIG_NET_ICMP_NCONNS; ret++)
+                {
+                  dq_addlast(&conn[ret].node, &g_free_retcmp_connectretons);
+                }
+            }
+        }
+#endif
+
       conn = (FAR struct icmp_conn_s *)dq_remfirst(&g_free_icmp_connections);
       if (conn != NULL)
         {
-          /* Clear the connection structure */
-
-          memset(conn, 0, sizeof(struct icmp_conn_s));
-
           /* Enqueue the connection into the active list */
 
           dq_addlast(&conn->node, &g_active_icmp_connections);
@@ -162,11 +179,16 @@ void icmp_free(FAR struct icmp_conn_s *conn)
 
       dq_rem(&conn->node, &g_active_icmp_connections);
 
+      /* Clear the connection structure */
+
+      memset(conn, 0, sizeof(*conn));
+
       /* Free the connection */
 
       dq_addlast(&conn->node, &g_free_icmp_connections);
-      nxsem_post(&g_free_sem);
     }
+
+  nxsem_post(&g_free_sem);
 }
 
 /****************************************************************************

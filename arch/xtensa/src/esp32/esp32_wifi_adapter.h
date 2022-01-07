@@ -63,6 +63,14 @@ extern "C"
 
 #define MAC_LEN                     (6)
 
+/* Needed to fix coex_adapter_funcs_t definition */
+
+#define CONFIG_IDF_TARGET_ESP32   1
+
+/* Define esp_err_t */
+
+typedef int esp_err_t;
+
 /* Wi-Fi event ID */
 
 enum wifi_adpt_evt_e
@@ -76,6 +84,16 @@ enum wifi_adpt_evt_e
   WIFI_ADPT_EVT_MAX,
 };
 
+enum coex_log_level_e
+{
+    COEX_LOG_NONE = 0,
+    COEX_LOG_ERROR,
+    COEX_LOG_WARN,
+    COEX_LOG_INFO,
+    COEX_LOG_DEBUG,
+    COEX_LOG_VERBOSE
+};
+
 /* Wi-Fi event callback function */
 
 typedef void (*wifi_evt_cb_t)(void *p);
@@ -83,6 +101,8 @@ typedef void (*wifi_evt_cb_t)(void *p);
 /* Wi-Fi TX done callback function */
 
 typedef void (*wifi_txdone_cb_t)(uint8_t *data, uint16_t *len, bool status);
+
+#define COEX_ADAPTER_FUNCS_TIME_BLOCKING      0xffffffff
 
 /****************************************************************************
  * Public Function Prototypes
@@ -810,7 +830,43 @@ int esp_wifi_softap_country(struct iwreq *iwr, bool set);
  ****************************************************************************/
 
 int esp_wifi_softap_rssi(struct iwreq *iwr, bool set);
+#endif /* ESP32_WLAN_HAS_SOFTAP */
+
+/****************************************************************************
+ * Name: esp32_wifi_bt_coexist_init
+ *
+ * Description:
+ *   Initialize ESP32 Wi-Fi and BT coexistence module.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   OK on success (positive non-zero values are cmd-specific)
+ *   Negated errno returned on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+int esp32_wifi_bt_coexist_init(void);
+void coex_dbg_set_log_level(int level);
 #endif
+
+/****************************************************************************
+ * Name: esp_wifi_stop_callback
+ *
+ * Description:
+ *   Callback to stop Wi-Fi
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp_wifi_stop_callback(void);
 
 #ifdef __cplusplus
 }

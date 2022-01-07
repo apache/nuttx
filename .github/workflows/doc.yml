@@ -15,6 +15,10 @@ on:
   pull_request:
   push:
 
+concurrency:
+  group: docs-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-html:
     runs-on: ubuntu-latest
@@ -26,7 +30,7 @@ jobs:
       - name: Generate Documentation
         run: |
           cd Documentation/
-          pip3 install pipenv==2021.5.29
+          pip3 install pipenv
           pipenv install
           pipenv run make html
       - uses: actions/upload-artifact@v2

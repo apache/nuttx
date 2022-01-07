@@ -36,13 +36,20 @@
 #include "up_usrsock_host.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SIM_USRSOCK_BUFSIZE (400 * 1024)
+
+/****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
 
 struct usrsock_s
 {
   struct file usock;
-  uint8_t data[4096];
+  uint8_t     in [SIM_USRSOCK_BUFSIZE];
+  uint8_t     out[SIM_USRSOCK_BUFSIZE];
 };
 
 /****************************************************************************
@@ -206,10 +213,10 @@ static int usrsock_recvfrom_handler(FAR struct usrsock_s *usrsock,
   size_t buflen = req->max_buflen;
   int ret;
 
-  ack = (struct usrsock_message_datareq_ack_s *)usrsock->data;
-  if (sizeof(*ack) + inaddrlen + buflen > sizeof(usrsock->data))
+  ack = (struct usrsock_message_datareq_ack_s *)usrsock->out;
+  if (sizeof(*ack) + inaddrlen + buflen > sizeof(usrsock->out))
     {
-      buflen = sizeof(usrsock->data) - sizeof(*ack) - inaddrlen;
+      buflen = sizeof(usrsock->out) - sizeof(*ack) - inaddrlen;
     }
 
   ret = usrsock_host_recvfrom(req->usockid,
@@ -246,7 +253,7 @@ static int usrsock_getsockopt_handler(FAR struct usrsock_s *usrsock,
   socklen_t optlen = req->max_valuelen;
   int ret;
 
-  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->data;
+  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->out;
   ret = usrsock_host_getsockopt(req->usockid,
                                 req->level, req->option,
                                 ack + 1, &optlen);
@@ -264,7 +271,7 @@ static int usrsock_getsockname_handler(FAR struct usrsock_s *usrsock,
   socklen_t inaddrlen = req->max_addrlen;
   int ret;
 
-  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->data;
+  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->out;
   ret = usrsock_host_getsockname(req->usockid,
           (FAR struct sockaddr *)(ack + 1), &outaddrlen);
 
@@ -281,7 +288,7 @@ static int usrsock_getpeername_handler(FAR struct usrsock_s *usrsock,
   socklen_t inaddrlen = req->max_addrlen;
   int ret;
 
-  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->data;
+  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->out;
   ret = usrsock_host_getpeername(req->usockid,
           (FAR struct sockaddr *)(ack + 1), &outaddrlen);
 
@@ -319,7 +326,7 @@ static int usrsock_accept_handler(FAR struct usrsock_s *usrsock,
   int sockfd;
   int ret;
 
-  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->data;
+  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->out;
   sockfd = usrsock_host_accept(req->usockid,
                                outaddrlen ?
                                (FAR struct sockaddr *)(ack + 1) : NULL,
@@ -361,7 +368,7 @@ static int usrsock_ioctl_handler(FAR struct usrsock_s *usrsock,
   FAR struct usrsock_message_datareq_ack_s *ack;
   int ret;
 
-  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->data;
+  ack = (FAR struct usrsock_message_datareq_ack_s *)usrsock->out;
   memcpy(ack + 1, req + 1, req->arglen);
   ret = usrsock_host_ioctl(req->usockid, req->cmd,
                            (unsigned long)(ack + 1));
@@ -404,7 +411,6 @@ int usrsock_init(void)
 void usrsock_loop(void)
 {
   FAR struct usrsock_request_common_s *common;
-  uint8_t data[4096];
   int ret;
   struct pollfd pfd =
     {
@@ -415,16 +421,16 @@ void usrsock_loop(void)
   ret = poll(&pfd, 1, 0);
   if (ret > 0)
     {
-      ret = file_read(&g_usrsock.usock, data, sizeof(data));
+      ret = file_read(&g_usrsock.usock, g_usrsock.in, sizeof(g_usrsock.in));
       if (ret > 0)
         {
-          common = (FAR struct usrsock_request_common_s *)data;
+          common = (FAR struct usrsock_request_common_s *)g_usrsock.in;
 
           if (common->reqid >= 0 &&
               common->reqid < USRSOCK_REQUEST__MAX)
             {
               ret = g_usrsock_handler[common->reqid](&g_usrsock,
-                                                     data, ret);
+                                                     g_usrsock.in, ret);
               if (ret < 0)
                 {
                   syslog(LOG_ERR, "Usrsock request %d failed: %d\n",

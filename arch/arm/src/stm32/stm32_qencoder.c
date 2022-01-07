@@ -796,7 +796,7 @@ static int stm32_qe_index_irq(int irq, FAR void *context, FAR void *arg)
 
   if (valid == true)
     {
-      /* Force postion to index offset */
+      /* Force position to index offset */
 
       stm32_putreg32(priv, STM32_GTIM_CNT_OFFSET, priv->index_offset);
     }
@@ -1296,7 +1296,7 @@ static int stm32_reset(FAR struct qe_lowerhalf_s *lower)
  * Name: stm32_setindex
  *
  * Description:
- *   Set the index pin postion
+ *   Set the index pin position
  *
  ****************************************************************************/
 
@@ -1314,15 +1314,13 @@ static int stm32_setindex(FAR struct qe_lowerhalf_s *lower, uint32_t pos)
 
   if (priv->index_use == false)
     {
-      snerr("ERROR: QE TIM%d index not registered \n",
+      snerr("ERROR: QE TIM%d index not registered\n",
             priv->config->timid);
       ret = -EPERM;
       goto errout;
     }
 
-#ifdef CONFIG_STM32_QENCODER_INDEX_PIN
   priv->index_offset = pos;
-#endif
 
 errout:
   return ret;
@@ -1464,7 +1462,7 @@ int stm32_qe_index_init(int tim, uint32_t gpio)
                            stm32_qe_index_irq, priv);
   if (ret < 0)
     {
-      snerr("ERROR: QE TIM%d failed register irq \n", tim);
+      snerr("ERROR: QE TIM%d failed register irq\n", tim);
       goto errout;
     }
 

@@ -68,35 +68,34 @@ static uint8_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: hc_stackdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint16_t sp, uint16_t stack_top)
+static void hc_stackdump(uint16_t sp, uint16_t stack_top)
 {
   uint16_t stack;
 
-  for (stack = sp; stack < (stack_top & ~0x1f); stack += 16)
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
+  for (stack = sp & ~0x7; stack < (stack_top & ~0x7); stack += 8)
     {
       uint8_t *ptr = (uint8_t *)stack;
-
-      _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x"
-            "   %02x %02x %02x %02x %02x %02x %02x %02x\n",
-             stack, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4],
-             ptr[5], ptr[6], ptr[7], ptr[8], ptr[9], ptr[10],
-             ptr[11], ptr[12], ptr[13], ptr[14], ptr[15]);
+      _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+             stack, ptr[0], ptr[1], ptr[2], ptr[3],
+             ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#else
-# define up_stackdump()
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: hc_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(void)
+static inline void hc_registerdump(void)
 {
   volatile uint8_t *regs = g_current_regs;
 
@@ -123,19 +122,17 @@ static inline void up_registerdump(void)
 #  error "Need to save more registers"
 #elif CONFIG_HCS12_MSOFTREGS == 2
   _alert("SOFTREGS: %02x%02x :%02x%02x\n",
-        regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1],
-        regs[REG_SOFTREG2], regs[REG_SOFTREG2 + 1]);
+         regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1],
+         regs[REG_SOFTREG2], regs[REG_SOFTREG2 + 1]);
 #elif CONFIG_HCS12_MSOFTREGS == 1
   _alert("SOFTREGS: %02x%02x\n",
-        regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1]);
+         regs[REG_SOFTREG1], regs[REG_SOFTREG1 + 1]);
 #endif
 
 #ifndef CONFIG_HCS12_NONBANKED
   _alert("PPAGE: %02x\n", regs[REG_PPAGE]);
 #endif
 }
-#else
-# define up_registerdump()
 #endif
 
 /****************************************************************************
@@ -169,7 +166,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint16_t sp = up_getsp();
   uint16_t ustackbase;
   uint16_t ustacksize;
@@ -180,7 +177,7 @@ static void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  hc_registerdump();
 
   /* Get the limits on the user stack memory */
 
@@ -208,7 +205,7 @@ static void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase + istacksize);
+      hc_stackdump(sp, istackbase + istacksize);
 
       /* Extract the user stack pointer which should lie
        * at the base of the interrupt stack.
@@ -220,7 +217,7 @@ static void up_dumpstate(void)
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      hc_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Show user stack info */
@@ -240,12 +237,12 @@ static void up_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      up_stackdump(sp, ustackbase + ustacksize);
+      hc_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      hc_stackdump(ustackbase, ustackbase + ustacksize);
     }
 
 #ifdef CONFIG_ARCH_USBDUMP

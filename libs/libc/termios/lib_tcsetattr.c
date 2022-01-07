@@ -93,5 +93,5 @@ int tcsetattr(int fd, int options, FAR const struct termios *termiosp)
       tcflush(fd, TCIFLUSH);
     }
 
-  return ioctl(fd, TCSETS, (unsigned long)termiosp);
+  return ioctl(fd, TCSETS, (unsigned long)(uintptr_t)termiosp);
 }

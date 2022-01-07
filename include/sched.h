@@ -264,7 +264,7 @@ bool   sched_idletask(void);
 
 /* Task Backtrace */
 
-int    sched_backtrace(pid_t tid, FAR void **buffer, int size);
+int    sched_backtrace(pid_t tid, FAR void **buffer, int size, int skip);
 void   sched_dumpstack(pid_t tid);
 
 #undef EXTERN

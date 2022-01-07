@@ -56,12 +56,18 @@
  * Private Types
  ****************************************************************************/
 
-struct clk_rpmsg_priv_s
+struct clk_rpmsg_client_s
+{
+  struct rpmsg_endpoint     ept;
+  struct list_node          node;
+  FAR const char            *cpuname;
+  sem_t                     sem;
+};
+
+struct clk_rpmsg_server_s
 {
   struct rpmsg_endpoint     ept;
   struct list_node          clk_list;
-  struct list_node          node;
-  FAR const char            *cpuname;
 };
 
 struct clk_rpmsg_s
@@ -117,7 +123,8 @@ begin_packed_struct struct clk_rpmsg_setphase_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static FAR struct clk_rpmsg_priv_s *clk_rpmsg_get_priv(FAR const char *name);
+static FAR struct clk_rpmsg_client_s *
+clk_rpmsg_get_priv(FAR const char *name);
 static FAR struct rpmsg_endpoint *clk_rpmsg_get_ept(FAR const char **name);
 static FAR struct clk_rpmsg_s *
 clk_rpmsg_get_clk(FAR struct rpmsg_endpoint *ept,
@@ -148,10 +155,16 @@ static int clk_rpmsg_isenabled_handler(FAR struct rpmsg_endpoint *ept,
                                        FAR void *data, size_t len,
                                        uint32_t src, FAR void *priv);
 
-static void clk_rpmsg_device_created(FAR struct rpmsg_device *rdev,
+static void clk_rpmsg_client_created(FAR struct rpmsg_device *rdev,
                                      FAR void *priv_);
-static void clk_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
+static void clk_rpmsg_client_destroy(FAR struct rpmsg_device *rdev,
                                      FAR void *priv_);
+
+static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_,
+                                  FAR const char *name,
+                                  uint32_t dest);
+static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept);
 
 static int clk_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
                             FAR void *data, size_t len,
@@ -199,25 +212,45 @@ static const rpmsg_ept_cb g_clk_rpmsg_handler[] =
  * Private Functions
  ****************************************************************************/
 
-static FAR struct clk_rpmsg_priv_s *clk_rpmsg_get_priv(FAR const char *name)
+static FAR struct clk_rpmsg_client_s *
+clk_rpmsg_get_priv(FAR const char *name)
 {
-  FAR struct clk_rpmsg_priv_s *priv;
+  FAR struct clk_rpmsg_client_s *priv;
+  FAR const char *slash = strchr(name, '/');
+
+  if (!slash)
+    {
+      return NULL;
+    }
 
   nxmutex_lock(&g_clk_rpmsg_lock);
 
   list_for_every_entry(&g_clk_rpmsg_priv, priv,
-                       struct clk_rpmsg_priv_s, node)
+                       struct clk_rpmsg_client_s, node)
     {
-      size_t len = strlen(priv->cpuname);
-
-      if (!strncmp(priv->cpuname, name, len) &&
-         (name[len] == '/' || name[len] == 0))
+      if (!strncmp(priv->cpuname, name, slash - name))
         {
           goto out;
         }
     }
 
-  priv = NULL;
+  priv = kmm_zalloc(sizeof(struct clk_rpmsg_client_s));
+  if (!priv)
+    {
+      goto out;
+    }
+
+  priv->cpuname = strndup(name, slash - name);
+
+  list_add_head(&g_clk_rpmsg_priv, &priv->node);
+
+  nxmutex_unlock(&g_clk_rpmsg_lock);
+
+  rpmsg_register_callback(priv,
+                          clk_rpmsg_client_created,
+                          clk_rpmsg_client_destroy,
+                          NULL);
+  return priv;
 
 out:
   nxmutex_unlock(&g_clk_rpmsg_lock);
@@ -226,7 +259,7 @@ out:
 
 static FAR struct rpmsg_endpoint *clk_rpmsg_get_ept(FAR const char **name)
 {
-  FAR struct clk_rpmsg_priv_s *priv;
+  FAR struct clk_rpmsg_client_s *priv;
 
   priv = clk_rpmsg_get_priv(*name);
   if (priv == NULL)
@@ -242,7 +275,7 @@ static FAR struct rpmsg_endpoint *clk_rpmsg_get_ept(FAR const char **name)
 static FAR struct clk_rpmsg_s *
 clk_rpmsg_get_clk(FAR struct rpmsg_endpoint *ept, FAR const char *name)
 {
-  FAR struct clk_rpmsg_priv_s *priv = ept->priv;
+  FAR struct clk_rpmsg_server_s *priv = ept->priv;
   FAR struct list_node *clk_list = &priv->clk_list;
   FAR struct clk_rpmsg_s *clkrp;
 
@@ -273,8 +306,8 @@ clk_rpmsg_get_clk(FAR struct rpmsg_endpoint *ept, FAR const char *name)
 }
 
 static int clk_rpmsg_enable_handler(FAR struct rpmsg_endpoint *ept,
-                                     FAR void *data, size_t len,
-                                     uint32_t src, FAR void *priv)
+                                    FAR void *data, size_t len,
+                                    uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_enable_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -335,9 +368,10 @@ static int clk_rpmsg_getrate_handler(FAR struct rpmsg_endpoint *ept,
   return rpmsg_send(ept, msg, sizeof(*msg));
 }
 
-static int clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+static int
+clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
+                            FAR void *data, size_t len,
+                            uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_roundrate_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -355,8 +389,8 @@ static int clk_rpmsg_roundrate_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_setrate_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                     FAR void *data, size_t len,
+                                     uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_setrate_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -374,8 +408,8 @@ static int clk_rpmsg_setrate_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_setphase_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_setphase_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -393,8 +427,8 @@ static int clk_rpmsg_setphase_handler(FAR struct rpmsg_endpoint *ept,
 }
 
 static int clk_rpmsg_getphase_handler(FAR struct rpmsg_endpoint *ept,
-                                       FAR void *data, size_t len,
-                                       uint32_t src, FAR void *priv)
+                                      FAR void *data, size_t len,
+                                      uint32_t src, FAR void *priv)
 {
   FAR struct clk_rpmsg_getphase_s *msg = data;
   FAR struct clk_rpmsg_s *clkrp = clk_rpmsg_get_clk(ept, msg->name);
@@ -461,48 +495,37 @@ static int64_t clk_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
   return cookie.result;
 }
 
-static void clk_rpmsg_device_created(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv_)
+static void clk_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
+                                  FAR void *priv_,
+                                  FAR const char *name,
+                                  uint32_t dest)
 {
-  struct clk_rpmsg_priv_s *priv;
-  int ret;
+  FAR struct clk_rpmsg_server_s *priv;
 
-  priv = kmm_zalloc(sizeof(struct clk_rpmsg_priv_s));
-  if (!priv)
+  if (!strcmp(name, CLK_RPMSG_EPT_NAME))
     {
-      return;
-    }
+      priv = kmm_zalloc(sizeof(struct clk_rpmsg_server_s));
+      if (!priv)
+        {
+          return;
+        }
 
-  priv->ept.priv = priv;
-  priv->cpuname  = rpmsg_get_cpuname(rdev);
+      priv->ept.priv = priv;
 
-  list_initialize(&priv->clk_list);
+      list_initialize(&priv->clk_list);
 
-  nxmutex_lock(&g_clk_rpmsg_lock);
-  list_add_head(&g_clk_rpmsg_priv, &priv->node);
-  nxmutex_unlock(&g_clk_rpmsg_lock);
-
-  ret = rpmsg_create_ept(&priv->ept, rdev, CLK_RPMSG_EPT_NAME,
-                         RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                         clk_rpmsg_ept_cb, NULL);
-  if (ret)
-    {
-      free(priv);
+      rpmsg_create_ept(&priv->ept, rdev, name,
+                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                       clk_rpmsg_ept_cb,
+                       clk_rpmsg_server_unbind);
     }
 }
 
-static void clk_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
-                                     FAR void *priv_)
+static void clk_rpmsg_server_unbind(FAR struct rpmsg_endpoint *ept)
 {
-  struct clk_rpmsg_s *clkrp;
-  struct clk_rpmsg_s *clkrp_tmp;
-  struct clk_rpmsg_priv_s *priv;
-
-  priv = clk_rpmsg_get_priv(rpmsg_get_cpuname(rdev));
-  if (!priv)
-    {
-      return;
-    }
+  FAR struct clk_rpmsg_server_s *priv = ept->priv;
+  FAR struct clk_rpmsg_s *clkrp_tmp;
+  FAR struct clk_rpmsg_s *clkrp;
 
   list_for_every_entry_safe(&priv->clk_list, clkrp, clkrp_tmp,
                             struct clk_rpmsg_s, node)
@@ -516,12 +539,45 @@ static void clk_rpmsg_device_destroy(FAR struct rpmsg_device *rdev,
       kmm_free(clkrp);
     }
 
-  nxmutex_lock(&g_clk_rpmsg_lock);
-  list_delete(&priv->node);
-  nxmutex_unlock(&g_clk_rpmsg_lock);
+  rpmsg_destroy_ept(ept);
 
-  rpmsg_destroy_ept(&priv->ept);
   kmm_free(priv);
+}
+
+static void clk_rpmsg_client_created(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv_)
+{
+  struct clk_rpmsg_client_s *priv = priv_;
+
+  if (!priv)
+    {
+      return;
+    }
+
+  if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
+    {
+      priv->ept.priv = priv;
+
+      rpmsg_create_ept(&priv->ept, rdev, CLK_RPMSG_EPT_NAME,
+                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                       clk_rpmsg_ept_cb, NULL);
+
+      nxsem_post(&priv->sem);
+    }
+}
+
+static void clk_rpmsg_client_destroy(FAR struct rpmsg_device *rdev,
+                                     FAR void *priv_)
+{
+  struct clk_rpmsg_client_s *priv = priv_;
+
+  if (!priv)
+    {
+      return;
+    }
+
+  nxsem_wait(&priv->sem);
+  rpmsg_destroy_ept(&priv->ept);
 }
 
 static int clk_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
@@ -566,7 +622,7 @@ static int clk_rpmsg_enable(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -576,7 +632,7 @@ static int clk_rpmsg_enable(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_ENABLE,
                            (struct clk_rpmsg_header_s *)msg,
@@ -597,7 +653,7 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
     return;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -607,7 +663,7 @@ static void clk_rpmsg_disable(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   clk_rpmsg_sendrecv(ept, CLK_RPMSG_DISABLE,
                     (struct clk_rpmsg_header_s *)msg, len);
@@ -627,7 +683,7 @@ static int clk_rpmsg_is_enabled(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -637,7 +693,7 @@ static int clk_rpmsg_is_enabled(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_ISENABLED,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -659,7 +715,7 @@ static uint32_t clk_rpmsg_round_rate(FAR struct clk_s *clk, uint32_t rate,
       return 0;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -670,7 +726,7 @@ static uint32_t clk_rpmsg_round_rate(FAR struct clk_s *clk, uint32_t rate,
   DEBUGASSERT(len <= size);
 
   msg->rate = rate;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   ret = clk_rpmsg_sendrecv(ept, CLK_RPMSG_ROUNDRATE,
                           (struct clk_rpmsg_header_s *)msg, len);
@@ -697,7 +753,7 @@ static int clk_rpmsg_set_rate(FAR struct clk_s *clk, uint32_t rate,
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -708,7 +764,7 @@ static int clk_rpmsg_set_rate(FAR struct clk_s *clk, uint32_t rate,
   DEBUGASSERT(len <= size);
 
   msg->rate = rate;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_SETRATE,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -730,7 +786,7 @@ static uint32_t clk_rpmsg_recalc_rate(FAR struct clk_s *clk,
       return 0;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -740,7 +796,7 @@ static uint32_t clk_rpmsg_recalc_rate(FAR struct clk_s *clk,
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   ret = clk_rpmsg_sendrecv(ept, CLK_RPMSG_GETRATE,
                           (struct clk_rpmsg_header_s *)msg, len);
@@ -766,7 +822,7 @@ static int clk_rpmsg_get_phase(FAR struct clk_s *clk)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -776,7 +832,7 @@ static int clk_rpmsg_get_phase(FAR struct clk_s *clk)
 
   DEBUGASSERT(len <= size);
 
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_GETPHASE,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -796,7 +852,7 @@ static int clk_rpmsg_set_phase(FAR struct clk_s *clk, int degrees)
       return -ENODEV;
     }
 
-  len = sizeof(*msg) + B2C(strlen(name) + 1);
+  len = sizeof(*msg) + strlen(name) + 1;
 
   msg = rpmsg_get_tx_payload_buffer(ept, &size, true);
   if (!msg)
@@ -807,7 +863,7 @@ static int clk_rpmsg_set_phase(FAR struct clk_s *clk, int degrees)
   DEBUGASSERT(len <= size);
 
   msg->degrees = degrees;
-  cstr2bstr(msg->name, name);
+  strcpy(msg->name, name);
 
   return clk_rpmsg_sendrecv(ept, CLK_RPMSG_SETPHASE,
                            (struct clk_rpmsg_header_s *)msg, len);
@@ -844,10 +900,10 @@ FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags)
                       &g_clk_rpmsg_ops, NULL, 0);
 }
 
-int clk_rpmsg_initialize(void)
+int clk_rpmsg_server_initialize(void)
 {
   return rpmsg_register_callback(NULL,
-                                 clk_rpmsg_device_created,
-                                 clk_rpmsg_device_destroy,
-                                 NULL);
+                                 NULL,
+                                 NULL,
+                                 clk_rpmsg_server_bind);
 }

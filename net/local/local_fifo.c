@@ -419,7 +419,7 @@ int local_release_fifos(FAR struct local_conn_s *conn)
 int local_release_halfduplex(FAR struct local_conn_s *conn)
 {
 #if 1
-  /* REVIST: We need to think about this carefully.  Unlike the connection-
+  /* REVISIT: We need to think about this carefully.  Unlike the connection-
    * oriented Unix domain socket, we don't really know the best time to
    * release the FIFO resource.  It would be extremely inefficient to create
    * and destroy the FIFO on each packet. But, on the other hand, failing

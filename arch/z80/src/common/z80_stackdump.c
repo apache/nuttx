@@ -38,16 +38,17 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: z80_stackdump
  ****************************************************************************/
 
-void up_stackdump(void)
+void z80_stackdump(void)
 {
-  FAR struct tcb_s *rtcb = this_task();
+  FAR struct tcb_s *rtcb = running_task();
   uintptr_t sp = up_getsp();
   uintptr_t stack_base = (uintptr_t)rtcb->stack_base_ptr;
   uintptr_t stack_size = (uintptr_t)rtcb->adj_stack_size;
   uintptr_t stack;
+  uintptr_t stack_top;
 
   _alert("stack_base: %06x\n", stack_base);
   _alert("stack_size: %06x\n", stack_size);
@@ -63,17 +64,20 @@ void up_stackdump(void)
       stack = stack_base;
     }
 
-  for (stack = stack & ~0x0f; stack < stack_base + stack_size; stack += 16)
-    {
-      FAR uint8_t *ptr = (FAR uint8_t *)stack;
+  stack_top = stack_base + stack_size;
 
-      _alert("%06x: %02x %02x %02x %02x %02x %02x %02x %02x  ",
-             "%02x %02x %02x %02x %02x %02x %02x %02x\n",
-             stack,
-             ptr[0],  ptr[1],  ptr[2],  ptr[3],
-             ptr[4],  ptr[5],  ptr[6],  ptr[7],
-             ptr[8],  ptr[9],  ptr[10], ptr[11],
-             ptr[12], ptr[13], ptr[14], ptr[15]);
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
+
+  for (stack = stack & ~(8 * sizeof(chipreg_t) - 1);
+       stack < (stack_top & ~(8 * sizeof(chipreg_t) - 1));
+       stack += 8 * sizeof(chipreg_t))
+    {
+      FAR chipreg_t *ptr = (FAR chipreg_t *)stack;
+      _alert("%06x: %06x %06x %06x %06x %06x %06x %06x %06x\n",
+             stack, ptr[0], ptr[1], ptr[2], ptr[3],
+             ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
 

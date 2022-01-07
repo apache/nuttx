@@ -122,7 +122,7 @@ ifneq ($(CONFIG_ALLSYMS),y)
 		$(LDSTARTGROUP) $(LDLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 else
 	$(Q) # Link and generate default table
-	$(Q) $(call LINK_ALLSYMS, $^)
+	$(Q) $(if $(wildcard $(shell echo $(NUTTX))),,$(call LINK_ALLSYMS,$^))
 	$(Q) # Extract all symbols
 	$(Q) $(call LINK_ALLSYMS, $^)
 	$(Q) # Extract again since the table offset may changed

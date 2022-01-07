@@ -2415,7 +2415,7 @@ Configuration Sub-directories
        usable as of this writing.  The windows native build logic is currently
        separate and must be started by:
 
-        make -f Makefile.win
+        make -f Win.mk
 
       This build:
 

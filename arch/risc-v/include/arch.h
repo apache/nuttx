@@ -37,14 +37,6 @@
 
 #include <arch/csr.h>
 
-#ifdef CONFIG_ARCH_RV32IM
-#  include <arch/rv32im/arch.h>
-#endif
-
-#ifdef CONFIG_ARCH_RV64GC
-#  include <arch/rv64gc/arch.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -75,24 +67,27 @@ uint32_t up_gethartid(void);
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: up_getsp
+ ****************************************************************************/
+
+static inline uintptr_t up_getsp(void)
+{
+  register uintptr_t sp;
+  __asm__
+  (
+    "\tadd  %0, x0, x2\n"
+    : "=r"(sp)
+  );
+  return sp;
+}
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-#ifdef CONFIG_RV32IM_HW_MULDIV
-uint32_t up_hard_mul(uint32_t a, uint32_t b);
-uint32_t up_hard_mulh(uint32_t a, uint32_t b);
-uint32_t up_hard_mulhsu(uint32_t a, uint32_t b);
-uint32_t up_hard_mulhu(uint32_t a, uint32_t b);
-uint32_t up_hard_div(uint32_t a, uint32_t b);
-uint32_t up_hard_rem(uint32_t a, uint32_t b);
-uint32_t up_hard_divu(uint32_t a, uint32_t b);
-uint32_t up_hard_remu(uint32_t a, uint32_t b);
-uint32_t time_hard_mul(uint32_t a, uint32_t b, uint32_t *t);
-#endif
 
 #ifdef __cplusplus
 #define EXTERN extern "C"

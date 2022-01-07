@@ -612,7 +612,7 @@ static void IRAM_ATTR interrupt_clear_wrapper(int intr_source, int intr_num)
  *
  ****************************************************************************/
 
-static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, FAR void *arg)
+static int IRAM_ATTR esp_int_adpt_cb(int irq, void *context, void *arg)
 {
   struct irq_adpt_s *adapter = (struct irq_adpt_s *)arg;
 
@@ -1328,7 +1328,7 @@ static void *malloc_internal_wrapper(size_t size)
 
 static int read_mac_wrapper(uint8_t mac[6])
 {
-  return 0;
+  return esp_read_mac(mac, ESP_MAC_BT);
 }
 
 /****************************************************************************

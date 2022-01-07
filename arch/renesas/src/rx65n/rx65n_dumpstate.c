@@ -30,6 +30,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/syslog/syslog.h>
 
 #include "up_arch.h"
 #include "up_internal.h"
@@ -65,15 +66,20 @@ static inline uint16_t rx65n_getusersp(void)
  * Name: rx65n_stackdump
  ****************************************************************************/
 
-static void rx65n_stackdump(uint16_t sp, uint16_t stack_top)
+static void rx65n_stackdump(uint32_t sp, uint32_t stack_top)
 {
-  uint16_t stack;
+  uint32_t stack;
 
-  for (stack = sp & ~7; stack < stack_top; stack += 8) /* check */
+  /* Flush any buffered SYSLOG data to avoid overwrite */
 
+  syslog_flush();
+
+  for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
-      uint8_t *ptr = (uint8_t *)&stack;
-      _alert("%04x: %02x %02x %02x %02x %02x %02x %02x %02x\n",
+      uint32_t *ptr = (uint32_t *)stack;
+      _alert("%08" PRIxPTR ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+             " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
@@ -85,8 +91,7 @@ static void rx65n_stackdump(uint16_t sp, uint16_t stack_top)
 
 static inline void rx65n_registerdump(void)
 {
-  uint8_t *ptr = (uint8_t *) g_current_regs;
-  uint32_t regs[XCPTCONTEXT_SIZE];
+  volatile uint32_t *ptr = g_current_regs;
 
   /* Are user registers available from interrupt processing? */
 
@@ -94,28 +99,31 @@ static inline void rx65n_registerdump(void)
     {
       /* No.. capture user registers by hand */
 
-      up_saveusercontext((uint32_t *)s_last_regs);
-       *regs = *s_last_regs;
+      up_saveusercontext(s_last_regs);
+      ptr = s_last_regs;
     }
 
   /* Dump the interrupt registers */
 
-  _alert("PC: %08x PSW=%08x\n",
-        ptr[REG_PC], ptr[REG_PSW]);
+  _alert("PC: %08" PRIx32 " PSW=%08" PRIx32 "\n",
+         ptr[REG_PC], ptr[REG_PSW]);
 
-  _alert("FPSW: %08x ACC0LO: %08x ACC0HI: %08x ACC0GU: %08x"
-         "ACC1LO: %08x ACC1HI: %08x ACC1GU: %08x\n",
+  _alert("FPSW: %08" PRIx32 " ACC0LO: %08" PRIx32 " ACC0HI: %08" PRIx32
+         " ACC0GU: %08" PRIx32 "ACC1LO: %08" PRIx32 " ACC1HI: %08" PRIx32
+         " ACC1GU: %08" PRIx32 "\n",
          ptr[REG_FPSW], ptr[REG_ACC0LO], ptr[REG_ACC0HI],
          ptr[REG_ACC0GU], ptr[REG_ACC1LO],
          ptr[REG_ACC1HI], ptr[REG_ACC1GU]);
 
-  _alert("R%d:%08x %08x %08x %08x %08x %08x %08x\n", 0,
-        ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
-        ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
+  _alert("R%d:%08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+         " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n", 0,
+         ptr[REG_R1], ptr[REG_R2], ptr[REG_R3],
+         ptr[REG_R4], ptr[REG_R5], ptr[REG_R6], ptr[REG_R7]);
 
-  _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n", 8,
-        ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
-        ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
+  _alert("R%d: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+         " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n", 8,
+         ptr[REG_R8], ptr[REG_R9], ptr[REG_R10], ptr[REG_R11],
+         ptr[REG_R12], ptr[REG_R13], ptr[REG_R14], ptr[REG_R15]);
 }
 
 /****************************************************************************
@@ -128,7 +136,7 @@ static inline void rx65n_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -144,7 +152,7 @@ void up_dumpstate(void)
   /* Get the limits on the user stack memory */
 
   ustackbase = (uint32_t)rtcb->stack_base_ptr;
-  ustacksize = (uint16_t)rtcb->adj_stack_size;
+  ustacksize = (uint32_t)rtcb->adj_stack_size;
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
   istackbase = ebss; /* check how to declare ebss, as of now declared in chip.h */
@@ -153,10 +161,10 @@ void up_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  _alert("sp:     %04" PRIx32 "\n", sp);
+  _alert("sp:     %08" PRIx32 "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: %04" PRIx32 "\n", istackbase);
-  _alert("  size: %04" PRIx32 "\n", istacksize);
+  _alert("  base: %08" PRIx32 "\n", istackbase);
+  _alert("  size: %08" PRIx32 "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -171,7 +179,7 @@ void up_dumpstate(void)
       /* Extract the user stack pointer from the register area */
 
       sp = rx65n_getusersp();
-      _alert("sp:     %04" PRIx32 "\n", sp);
+      _alert("sp:     %08" PRIx32 "\n", sp);
     }
   else if (g_current_regs)
     {
@@ -182,12 +190,12 @@ void up_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: %04" PRIx32 "\n", ustackbase);
-  _alert("  size: %04" PRIx32 "\n", ustacksize);
+  _alert("  base: %08" PRIx32 "\n", ustackbase);
+  _alert("  size: %08" PRIx32 "\n", ustacksize);
 #else
-  _alert("sp:         %04" PRIx32 "\n", sp);
-  _alert("stack base: %04" PRIx32 "\n", ustackbase);
-  _alert("stack size: %04" PRIx32 "\n", ustacksize);
+  _alert("sp:         %08" PRIx32 "\n", sp);
+  _alert("stack base: %08" PRIx32 "\n", ustackbase);
+  _alert("stack size: %08" PRIx32 "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user

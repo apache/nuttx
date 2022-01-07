@@ -1022,6 +1022,8 @@
 #define FLASHCONST      (*(volatile struct st_flashconst      *)0xfe7f7d90)
 #define TEMPSCONST      (*(volatile struct st_tempsconst      *)0xfe7f7d7c)
 
+#undef B0 /* Avoid the conflicted macro in termios.h */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
