@@ -1489,8 +1489,6 @@ void up_trigger_irq(int irq);
 int up_prioritize_irq(int irq, int priority);
 #endif
 
-#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
-
 /****************************************************************************
  * Name: up_set_secure_irq
  *
@@ -1499,7 +1497,9 @@ int up_prioritize_irq(int irq, int priority);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq(int irq, bool secure);
+#endif
 
 /****************************************************************************
  * Name: up_secure_irq_all
@@ -1509,7 +1509,22 @@ void up_secure_irq(int irq, bool secure);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
 void up_secure_irq_all(bool secure);
+#endif
+
+/****************************************************************************
+ * Name: up_secure_set_nbanked_exception_state
+ *
+ * Description:
+ *   Set target state for exceptions not banked between security states
+ *   Function sets the security state (Secure or Non-Secure) target
+ *   for ARMv8-M HardFault, NMI, and BusFault exception.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_TRUSTZONE
+void up_secure_set_nbanked_exception_state(bool secure);
 
 #endif
 
