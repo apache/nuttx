@@ -1815,6 +1815,14 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
+  /* enable dsp fadein feature */
+
+  if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
+    {
+      auderr("write 0x00006000 error\n");
+      return ERROR;
+    }
+
   return OK;
 }
 
