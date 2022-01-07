@@ -9,7 +9,7 @@ comment "Maxim Integrate MAX326xx Configuration Options"
 
 choice
 	prompt "MAX326xx Chip Selection"
-	default CONFIG_ARCH_CHIP_MAX32630
+	default ARCH_CHIP_MAX32630
 	depends on ARCH_CHIP_MAX326XX
 
 config ARCH_CHIP_MAX32620
