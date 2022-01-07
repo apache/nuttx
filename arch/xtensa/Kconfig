@@ -70,6 +70,34 @@ config ARCH_CHIP_ESP32S2
 		Based on an Xtensa single-core 32-bit LX7 processor, it can be clocked
 		at up to 240 MHz.
 
+config ARCH_CHIP_ESP32S3
+	bool "Espressif ESP32-S3"
+	select ARCH_FAMILY_LX7
+	select XTENSA_HAVE_INTERRUPTS
+	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_TEXT_HEAP
+	select ARCH_HAVE_SDRAM
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_BOOTLOADER
+	select ARCH_VECNOTIRQ
+	select LIBC_ARCH_MEMCPY
+	select LIBC_ARCH_MEMCHR
+	select LIBC_ARCH_MEMCMP
+	select LIBC_ARCH_MEMMOVE
+	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
+	---help---
+		ESP32-S3 is a dual-core Xtensa LX7 MCU, capable of running at 240 MHz.
+		Apart from its 512 KB of internal SRAM, it also comes with integrated 2.4 GHz,
+		802.11 b/g/n Wi-Fi and Bluetooth 5 (LE) connectivity that provides long-range
+		support.
+
 config ARCH_CHIP_XTENSA_CUSTOM
 	bool "Custom XTENSA chip"
 	select ARCH_CHIP_CUSTOM
@@ -145,8 +173,9 @@ config ARCH_FAMILY_LX7
 
 config ARCH_CHIP
 	string
-	default "esp32"		if ARCH_CHIP_ESP32
-	default "esp32s2"	if ARCH_CHIP_ESP32S2
+	default "esp32" if ARCH_CHIP_ESP32
+	default "esp32s2" if ARCH_CHIP_ESP32S2
+	default "esp32s3" if ARCH_CHIP_ESP32S3
 
 config XTENSA_CP_LAZY
 	bool "Lazy co-processor state restoration"
@@ -267,13 +296,19 @@ config XTENSA_TOOLCHAIN_ESP
 endchoice
 
 source "arch/xtensa/src/lx6/Kconfig"
+
 if ARCH_CHIP_ESP32
 source "arch/xtensa/src/esp32/Kconfig"
 endif
 
 source "arch/xtensa/src/lx7/Kconfig"
+
 if ARCH_CHIP_ESP32S2
 source "arch/xtensa/src/esp32s2/Kconfig"
+endif
+
+if ARCH_CHIP_ESP32S3
+source "arch/xtensa/src/esp32s3/Kconfig"
 endif
 
 endif # ARCH_XTENSA
