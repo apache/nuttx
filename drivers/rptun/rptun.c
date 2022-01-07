@@ -429,7 +429,7 @@ static int rptun_can_recursive(FAR struct remoteproc *rproc)
 {
 #ifndef CONFIG_RPTUN_RECURSIVE_DISPATCH
   return false;
-#elif CONFIG_RPTUN_WORKQUEUE
+#elif defined(CONFIG_RPTUN_WORKQUEUE)
   return work_in_context(HPWORK);
 #else
   FAR struct rptun_priv_s *priv = rproc->priv;
