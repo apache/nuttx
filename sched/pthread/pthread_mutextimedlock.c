@@ -94,12 +94,12 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
 
 #ifdef CONFIG_PTHREAD_MUTEX_TYPES
       /* All mutex types except for NORMAL (and DEFAULT) will return
-       * and an error  error if the caller does not hold the mutex.
+       * an error if the caller does not hold the mutex.
        */
 
       if (mutex->type != PTHREAD_MUTEX_NORMAL && mutex->pid == mypid)
         {
-          /* Yes.. Is this a recursive mutex? */
+          /* Yes... Is this a recursive mutex? */
 
           if (mutex->type == PTHREAD_MUTEX_RECURSIVE)
             {
@@ -124,9 +124,9 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
                *
                * NOTE: This is the correct behavior for a 'robust', NORMAL
                * mutex.  Compliant behavior for non-robust mutex should not
-               * include these checks.  In that case, it the deadlock
-               * condition should not be detected and the thread should be
-               * permitted to deadlock.
+               * include these checks.  In that case, the deadlock condition
+               * should not be detected and the thread should be permitted
+               * to deadlock.
                */
 
               serr("ERROR: Returning EDEADLK\n");
@@ -140,7 +140,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
       /* The calling thread does not hold the semaphore.  The correct
        * behavior for the 'robust' mutex is to verify that the holder of the
        * mutex is still valid.  This is protection from the case
-       * where the holder of the mutex has exitted without unlocking it.
+       * where the holder of the mutex has exited without unlocking it.
        */
 
 #ifdef CONFIG_PTHREAD_MUTEX_BOTH
@@ -172,7 +172,7 @@ int pthread_mutex_timedlock(FAR pthread_mutex_t *mutex,
           /* A thread holds the mutex, but there is no such thread.  POSIX
            * requires that the 'robust' mutex return EOWNERDEAD in this
            * case.  It is then the caller's responsibility to call
-           * pthread_mutx_consistent() to fix the mutex.
+           * pthread_mutex_consistent() to fix the mutex.
            */
 
           mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;

@@ -31,6 +31,7 @@
 #include <debug.h>
 #include <assert.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -42,7 +43,9 @@
  * Private Data
  ****************************************************************************/
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct devif_callback_s g_cbprealloc[CONFIG_NET_NACTIVESOCKETS];
+#endif
 static FAR struct devif_callback_s *g_cbfreelist = NULL;
 
 /****************************************************************************
@@ -227,6 +230,7 @@ static bool devif_event_trigger(uint16_t events, uint16_t triggers)
 
 void devif_callback_init(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
 
   for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
@@ -234,6 +238,7 @@ void devif_callback_init(void)
       g_cbprealloc[i].nxtconn = g_cbfreelist;
       g_cbfreelist = &g_cbprealloc[i];
     }
+#endif
 }
 
 /****************************************************************************
@@ -258,11 +263,52 @@ FAR struct devif_callback_s *
                        FAR struct devif_callback_s **list_tail)
 {
   FAR struct devif_callback_s *ret;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
+
+  net_lock();
+
+  /* Verify that the device pointer is valid, i.e., that it still
+   * points to a registered network device and also that the network
+   * device in the UP state.
+   */
+
+  /* Note: dev->d_flags may be asynchronously changed by netdev_ifdown()
+   * (in net/netdev/netdev_ioctl.c). Nevertheless, net_lock() / net_unlock()
+   * are not required in netdev_ifdown() to prevent dev->d_flags from
+   * asynchronous change here. There is not an issue because net_lock() and
+   * net_unlock() present inside of devif_dev_event(). That should be enough
+   * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
+   */
+
+  if (dev && !netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
+    {
+      net_unlock();
+      return NULL;
+    }
+
+  /* Allocate the callback entry from heap */
+
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (g_cbfreelist == NULL)
+    {
+      ret = kmm_zalloc(sizeof(struct devif_callback_s) *
+                       CONFIG_NET_NACTIVESOCKETS);
+      if (ret != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_NACTIVESOCKETS; i++)
+            {
+              ret[i].nxtconn = g_cbfreelist;
+              g_cbfreelist = &ret[i];
+            }
+        }
+    }
+#endif
 
   /* Check the head of the free list */
 
-  net_lock();
-  ret  = g_cbfreelist;
+  ret = g_cbfreelist;
   if (ret)
     {
       /* Remove the next instance from the head of the free list */
@@ -276,22 +322,6 @@ FAR struct devif_callback_s *
 
       if (dev)
         {
-          /* Verify that the device pointer is valid, i.e., that it still
-           * points to a registered network device and also that the network
-           * device in in the UP state.
-           *
-           * And if it does, should that device also not be in the UP state?
-           */
-
-          if (!netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
-            {
-              /* No.. release the callback structure and fail */
-
-              devif_callback_free(NULL, NULL, list_head, list_tail);
-              net_unlock();
-              return NULL;
-            }
-
           ret->nxtdev  = dev->d_devcb;
           dev->d_devcb = ret;
         }

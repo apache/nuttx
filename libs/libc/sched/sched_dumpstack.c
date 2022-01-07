@@ -23,19 +23,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/allsyms.h>
 
 #include <sys/types.h>
 
 #include <stdio.h>
 #include <syslog.h>
-#include <execinfo.h>
 
-#define DUMP_FORMAT "%*p"
-#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 3)
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 #define DUMP_DEPTH  16
 #define DUMP_NITEM  8
-#define DUMP_LINESIZE (DUMP_NITEM * DUMP_WIDTH)
+#define DUMP_WIDTH  (int)(2 * sizeof(FAR void *) + 2)
+#define DUMP_LINESZ (DUMP_NITEM * (DUMP_WIDTH + 1))
 
 /****************************************************************************
  * Public Functions
@@ -51,26 +53,43 @@
 
 void sched_dumpstack(pid_t tid)
 {
-  FAR void *address[DUMP_DEPTH];
-  char line[DUMP_LINESIZE + 1];
-  int ret = 0;
-  int size;
-  int i;
+  int size = DUMP_DEPTH;
+  int skip;
 
-  size = sched_backtrace(tid, address, DUMP_DEPTH);
-  if (size <= 0)
+  for (skip = 0; size == DUMP_DEPTH; skip += size)
     {
-      return;
-    }
+      FAR void *address[DUMP_DEPTH];
+#ifndef CONFIG_ALLSYMS
+      const char *format = " %0*p";
+      char line[DUMP_LINESZ + 1];
+      int ret = 0;
+#endif
+      int i;
 
-  for (i = 0; i < size; i++)
-    {
-      ret += snprintf(line + ret, sizeof(line) - ret,
-                      DUMP_FORMAT, DUMP_WIDTH, address[i]);
-      if (i == size - 1 || ret % DUMP_LINESIZE == 0)
+      size = sched_backtrace(tid, address, DUMP_DEPTH, skip);
+      if (size <= 0)
         {
-          syslog(LOG_EMERG, "backtrace|%2d: %s\n", tid, line);
-          ret = 0;
+          break;
         }
+
+#ifndef CONFIG_ALLSYMS
+      for (i = 0; i < size; i++)
+        {
+          ret += snprintf(line + ret, sizeof(line) - ret,
+                          format, DUMP_WIDTH, address[i]);
+          if (i == size - 1 || ret % DUMP_LINESZ == 0)
+            {
+              syslog(LOG_EMERG, "backtrace|%2d:%s\n", tid, line);
+              ret = 0;
+            }
+        }
+#else
+      syslog(LOG_EMERG, "backtrace:\n");
+      for (i = 0; i < size; i++)
+        {
+          syslog(LOG_EMERG, "[%2d] [<%p>] %pS\n",
+                            tid, address[i], address[i]);
+        }
+#endif
     }
 }

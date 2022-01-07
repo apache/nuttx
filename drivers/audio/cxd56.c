@@ -1397,7 +1397,7 @@ static void _process_audio(cxd56_dmahandle_t hdl, uint16_t err_code)
       if (dev->state != CXD56_DEV_STATE_PAUSED &&
           dev->state != CXD56_DEV_STATE_STOPPED)
         {
-          audinfo("DMA_TRANS up_pendq=%d \n",
+          audinfo("DMA_TRANS up_pendq=%d\n",
                  dq_count(&dev->up_pendq));
           msg.msg_id = AUDIO_MSG_STOP;
           msg.u.data = 0;
@@ -3114,7 +3114,7 @@ static int cxd56_resume(FAR struct audio_lowerhalf_s *lower)
           cxd56_power_on_analog_output(dev);
         }
 
-      audinfo("START DMA up_pendq=%d \n", dq_count(&dev->up_pendq));
+      audinfo("START DMA up_pendq=%d\n", dq_count(&dev->up_pendq));
       ret = cxd56_start_dma(dev);
       if (ret != OK)
         {
@@ -3200,12 +3200,12 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
     {
       /* Underrun occurred, stop DMA and change state for buffering */
 
-      audwarn("Underrun \n");
+      audwarn("Underrun\n");
 
       spin_unlock_irqrestore(&dev->lock, flags);
       ret = cxd56_stop_dma(dev);
       flags = spin_lock_irqsave(&dev->lock);
-      audwarn("STOP DMA due to underrun \n");
+      audwarn("STOP DMA due to underrun\n");
       if (ret != CXD56_AUDIO_ECODE_OK)
         {
           auderr("ERROR: Could not stop DMA transfer (%d)\n", ret);
@@ -3387,7 +3387,7 @@ static int cxd56_start_dma(FAR struct cxd56_dev_s *dev)
             {
               /* If the apb is final, send stop message */
 
-              audinfo("Final apb \n");
+              audinfo("Final apb\n");
               struct audio_msg_s msg;
               msg.msg_id = AUDIO_MSG_STOP;
               msg.u.data = 0;
@@ -3607,7 +3607,7 @@ static void *cxd56_workerthread(pthread_addr_t pvarg)
           case AUDIO_MSG_ENQUEUE:
             if (priv->state == CXD56_DEV_STATE_BUFFERING)
               {
-                audwarn("Buffering up_pendq=%d \n",
+                audwarn("Buffering up_pendq=%d\n",
                         dq_count(&priv->up_pendq));
 
                 FAR struct ap_buffer_s *apb;

@@ -63,13 +63,6 @@ void up_sigdeliver(void)
 
   regs = (uint64_t *)(((uint64_t)(regs_area) + 15) & (~(uint64_t)15));
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = get_errno();
-
   /* Save the real return state on the stack ASAP before any chance we went
    * sleeping and break the register profile.  We entered this function with
    * interrupt disabled, therefore we don't have to worried being preempted
@@ -109,7 +102,6 @@ void up_sigdeliver(void)
 
   sinfo("Resuming\n");
   (void)up_irq_save();
-  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is

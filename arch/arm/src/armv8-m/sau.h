@@ -81,6 +81,19 @@
 #define SAU_RLAR_NSC            (1 << 1)   /* Bit 1: Non-secure callable */
 #define SAU_RLAR_LIMIT_MASK     0xffffffe0 /* Bits 5-31: Region limit address */
 
+/* Secure Fault Status Register Definitions */
+
+#define SAU_SFSR_MASK           (0xf)      /* Secure Fault Status Register Mask */
+
+#define SAU_SFSR_INVEP          (1 << 0)   /* Bit 0: INVEP Mask */
+#define SAU_SFSR_INVIS          (1 << 1)   /* Bit 1: INVIS Mask */
+#define SAU_SFSR_INVER          (1 << 2)   /* Bit 2: INVER Mask */
+#define SAU_SFSR_AUVIOL         (1 << 3)   /* Bit 3: AUVIOL Mask */
+#define SAU_SFSR_INVTRAN        (1 << 4)   /* Bit 4: INVTRAN Mask */
+#define SAU_SFSR_LSPERR         (1 << 5)   /* Bit 5: LSPERR Mask */
+#define SAU_SFSR_SFARVALID      (1 << 6)   /* Bit 6: SFARVALID Mask */
+#define SAU_SFSR_LSERR          (1 << 7)   /* Bit 7: LSERR Mask */
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

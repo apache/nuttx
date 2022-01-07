@@ -27,8 +27,14 @@
 #include <sys/types.h>
 #include <syslog.h>
 
+#include <nuttx/fs/fs.h>
+
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
+#endif
+
+#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
+#  include "nrf52_sdc.h"
 #endif
 
 #include "nrf52840-dk.h"
@@ -112,6 +118,17 @@ static void nrf52_i2ctool(void)
 int nrf52_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, NRF52_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
+    }
+#endif /* CONFIG_FS_PROCFS */
 
 #ifdef CONFIG_USERLED
   /* Register the LED driver */
@@ -198,6 +215,15 @@ int nrf52_bringup(void)
       syslog(LOG_ERR,
              "ERROR: Failed to initialize ADC driver: %d\n",
              ret);
+    }
+#endif
+
+#ifdef CONFIG_NRF52_SOFTDEVICE_CONTROLLER
+  ret = nrf52_sdc_initialize();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: nrf52_sdc_initialize() failed: %d\n", ret);
     }
 #endif
 

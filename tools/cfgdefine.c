@@ -54,12 +54,14 @@ static const char *dequote_list[] =
   "CONFIG_INIT_ARGS",                     /* Argument list of entry point */
   "CONFIG_INIT_SYMTAB",                   /* Global symbol table */
   "CONFIG_INIT_NEXPORTS",                 /* Global symbol table size */
+  "CONFIG_INIT_ENTRYPOINT",               /* Name of entry point function */
   "CONFIG_MODLIB_SYMTAB_ARRAY",           /* Symbol table array used by modlib functions */
   "CONFIG_MODLIB_NSYMBOLS_VAR",           /* Variable holding number of symbols in the table */
   "CONFIG_PASS1_BUILDIR",                 /* Pass1 build directory */
   "CONFIG_PASS1_TARGET",                  /* Pass1 build target */
   "CONFIG_PASS1_OBJECT",                  /* Pass1 build object */
-  "CONFIG_USER_ENTRYPOINT",               /* Name of entry point function */
+  "CONFIG_TTY_LAUNCH_ENTRYPOINT",         /* Name of entry point from tty launch */
+  "CONFIG_TTY_LAUNCH_ARGS",               /* Argument list of entry point from tty launch */
 
   /* NxWidgets/NxWM */
 

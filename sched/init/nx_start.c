@@ -806,8 +806,12 @@ void nx_start(void)
           if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
                       > CONFIG_STACK_USAGE_SAFE_PERCENT))
             {
+#if CONFIG_TASK_NAME_SIZE > 0
               _alert("Stack check failed, pid %d, name %s\n",
                       tcb->pid, tcb->name);
+#else
+              _alert("Stack check failed, pid %d\n", tcb->pid);
+#endif
               PANIC();
             }
 

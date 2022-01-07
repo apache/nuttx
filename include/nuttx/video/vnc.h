@@ -29,8 +29,6 @@
 
 #include <stdint.h>
 
-#include <nuttx/nx/nxglib.h>
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -41,10 +39,10 @@
  * the inputs to nx_kbdin() and nx_mousein().
  */
 
-typedef CODE void (*vnc_mouseout_t)(FAR void *arg, nxgl_coord_t x,
-                                    nxgl_coord_t y, uint8_t buttons);
-typedef CODE void (*vnc_kbdout_t)(FAR void *arg, uint8_t nch,
-                                  FAR const uint8_t *ch);
+typedef CODE int (*vnc_mouseout_t)(FAR void *arg, int16_t x,
+                                   int16_t y, uint8_t buttons);
+typedef CODE int (*vnc_kbdout_t)(FAR void *arg, uint8_t nch,
+                                 FAR const uint8_t *ch);
 
 /****************************************************************************
  * Public Function Prototypes
@@ -93,7 +91,7 @@ extern "C"
  *   These higher level callouts can then call nx_kbdin() or nx_mousein() on
  *   behalf of the VNC server.
  *
- *   See also vnc_default_fbinitialize() below.
+ *   See also nx_vnc_fbinitialize() in include/nuttx/nx/nx.h.
  *
  * Input Parameters:
  *   display - In the case of hardware with multiple displays, this
@@ -115,79 +113,6 @@ extern "C"
 
 int vnc_fbinitialize(int display, vnc_kbdout_t kbdout,
                      vnc_mouseout_t mouseout, FAR void *arg);
-
-/****************************************************************************
- * Name: vnc_mouse and vnc_kbdout
- *
- * Description:
- *   These are the default keyboard/mouse callout functions.  They are
- *   simply wrappers around nx_mousein() and nx_kdbout(), respectively.  When
- *   configured using vnc_fbinitialize(), the 'arg' must be the correct
- *   NXHANDLE value.
- *
- *   See also vnc_default_fbinitialize() below.
- *
- * Input Parameters:
- *   See vnc_mouseout_t and vnc_kbdout_t typde definitions above.  These
- *   callouts have arguments that match the inputs to nx_kbdin() and
- *   nx_mousein() (if arg is really of type NXHANDLE).
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-#ifdef CONFIG_NX_KBD
-void vnc_kbdout(FAR void *arg, uint8_t nch, FAR const uint8_t *ch);
-#endif
-
-#ifdef CONFIG_NX_XYINPUT
-void vnc_mouseout(FAR void *arg, nxgl_coord_t x, nxgl_coord_t y,
-                  uint8_t buttons);
-#endif
-
-/****************************************************************************
- * Name: vnc_default_fbinitialize
- *
- * Description:
- *   This is just a wrapper around vnc_fbinitialize() that will establish
- *   the default mouse and keyboard callout functions.
- *
- * Input Parameters:
- *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *   handle - And instance of NXHANDLE returned from initialization of the
- *     NX graphics system for that display.
- *
- * Returned Value:
- *   Zero (OK) is returned on success.  Otherwise, a negated errno value is
- *   returned to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-/* int vnc_default_fbinitialize(int display, NXHANDLE handle); */
-
-#if defined(CONFIG_NX_KBD) && defined(CONFIG_NX_XYINPUT)
-
-#define vnc_default_fbinitialize(d,h) \
-  vnc_fbinitialize((d), vnc_kbdout, vnc_mouseout, (FAR void *)(h))
-
-#elif defined(CONFIG_NX_KBD)
-
-#define vnc_default_fbinitialize(d,h) \
-  vnc_fbinitialize((d), vnc_kbdout, NULL, (FAR void *)(h))
-
-#elif defined(CONFIG_NX_XYINPUT)
-
-#define vnc_default_fbinitialize(d,h) \
-  vnc_fbinitialize((d), NULL, vnc_mouseout, (FAR void *)(h))
-
-#else
-
-#define vnc_default_fbinitialize(d,h) \
-  vnc_fbinitialize((d), NULL, NULL, NULL)
-
-#endif
 
 #undef EXTERN
 #ifdef __cplusplus

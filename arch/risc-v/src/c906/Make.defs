@@ -25,6 +25,8 @@ HEAD_ASRC = c906_vectors.S
 # Specify our general Assembly files
 CHIP_ASRCS = c906_head.S
 
+CMN_ASRCS += riscv_testset.S
+
 # Specify C code within the common directory to be included
 CMN_CSRCS  += riscv_initialize.c riscv_swint.c
 CMN_CSRCS  += riscv_createstack.c riscv_exit.c riscv_fault.c
@@ -34,6 +36,10 @@ CMN_CSRCS  += riscv_releasepending.c riscv_reprioritizertr.c
 CMN_CSRCS  += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS  += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS  += riscv_mdelay.c riscv_copyfullstate.c
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += riscv_backtrace.c
+endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += riscv_checkstack.c

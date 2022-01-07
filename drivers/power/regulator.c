@@ -821,7 +821,7 @@ void regulator_unregister(FAR struct regulator_dev_s *rdev)
   nxsem_wait_uninterruptible(&g_reg_sem);
   if (rdev->open_count)
     {
-      pwrerr("unregister, open %PRIu32\n", rdev->open_count);
+      pwrerr("unregister, open %" PRIu32 "\n", rdev->open_count);
       nxsem_post(&g_reg_sem);
       return;
     }

@@ -72,7 +72,7 @@ void *fe310_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   if (FE310_IRQ_ECALLM == irq)
     {
-      *mepc += 4;
+      *mepc += 2;
     }
 
   /* Acknowledge the interrupt */

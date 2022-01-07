@@ -61,7 +61,7 @@ void up_fault(int irq, uint64_t *regs)
   _alert("EPC:%016" PRIx64 "\n",
          CURRENT_REGS[REG_EPC]);
 
-  _alert("Fault IRQ=%d \n", irq);
+  _alert("Fault IRQ=%d\n", irq);
 
   /* Dump register info */
 
@@ -81,7 +81,7 @@ void up_fault(int irq, uint64_t *regs)
          CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
 
   _alert("T4:%016" PRIx64 " T5:%016" PRIx64
-         " T6:%016" PRIx64 " \n",
+         " T6:%016" PRIx64 "\n",
          CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
          CURRENT_REGS[REG_T6]);
 

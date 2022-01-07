@@ -55,6 +55,7 @@
 #include <arch/irq.h>
 
 #include <nuttx/clock.h>
+#include <nuttx/kmalloc.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
@@ -80,7 +81,9 @@
 
 /* The array containing all TCP connections. */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct tcp_conn_s g_tcp_connections[CONFIG_NET_TCP_CONNS];
+#endif
 
 /* A list of all free TCP connections */
 
@@ -110,15 +113,12 @@ static FAR struct tcp_conn_s *
   tcp_listener(uint8_t domain, FAR const union ip_addr_u *ipaddr,
                uint16_t portno)
 {
-  FAR struct tcp_conn_s *conn;
-  int i;
+  FAR struct tcp_conn_s *conn = NULL;
 
   /* Check if this port number is in use by any active UIP TCP connection */
 
-  for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
+  while ((conn = tcp_nextconn(conn)) != NULL)
     {
-      conn = &g_tcp_connections[i];
-
       /* Check if this connection is open and the local port assignment
        * matches the requested port number.
        */
@@ -524,6 +524,46 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 #endif /* CONFIG_NET_IPv6 */
 
 /****************************************************************************
+ * Name: tcp_alloc_conn
+ *
+ * Description:
+ *   Find or allocate a free TCP/IP connection structure for use.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_NET_ALLOC_CONNS
+FAR struct tcp_conn_s *tcp_alloc_conn(void)
+{
+  FAR struct tcp_conn_s *conn;
+  int i;
+
+  /* Return the entry from the head of the free list */
+
+  if (dq_peek(&g_free_tcp_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(struct tcp_conn_s) *
+                        CONFIG_NET_TCP_CONNS);
+      if (conn == NULL)
+        {
+          return conn;
+        }
+
+      /* Now initialize each connection structure */
+
+      for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
+        {
+          /* Mark the connection closed and move it to the free list */
+
+          conn[i].tcpstateflags = TCP_CLOSED;
+          dq_addlast(&conn[i].node, &g_free_tcp_connections);
+        }
+    }
+
+  return (FAR struct tcp_conn_s *)dq_remfirst(&g_free_tcp_connections);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -538,7 +578,9 @@ static inline int tcp_ipv6_bind(FAR struct tcp_conn_s *conn,
 
 void tcp_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -547,6 +589,7 @@ void tcp_initialize(void)
 
   /* Now initialize each connection structure */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
@@ -554,6 +597,7 @@ void tcp_initialize(void)
       g_tcp_connections[i].tcpstateflags = TCP_CLOSED;
       dq_addlast(&g_tcp_connections[i].node, &g_free_tcp_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -653,6 +697,15 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
           conn = (FAR struct tcp_conn_s *)
             dq_remfirst(&g_free_tcp_connections);
         }
+    }
+#endif
+
+  /* Allocate the connect entry from heap */
+
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (conn == NULL)
+    {
+      conn = tcp_alloc_conn();
     }
 #endif
 

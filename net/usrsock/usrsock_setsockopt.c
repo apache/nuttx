@@ -166,7 +166,7 @@ int usrsock_setsockopt(FAR struct usrsock_conn_s *conn,
   {
   };
 
-  ssize_t ret;
+  int ret;
 
   DEBUGASSERT(conn);
 

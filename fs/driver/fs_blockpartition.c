@@ -227,7 +227,8 @@ static int part_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
               info->sectorsize  = dev->sectorsize;
               info->startsector = dev->firstsector;
 
-              strncpy(info->parent, dev->parent->i_name, NAME_MAX);
+              strlcpy(info->parent, dev->parent->i_name,
+                      sizeof(info->parent));
 
               ret = OK;
           }

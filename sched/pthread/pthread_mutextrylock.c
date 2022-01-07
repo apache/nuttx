@@ -172,7 +172,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
               /* A thread holds the mutex, but there is no such thread.
                * POSIX requires that the 'robust' mutex return EOWNERDEAD
                * in this case. It is then the caller's responsibility to
-               * call pthread_mutx_consistent() to fix the mutex.
+               * call pthread_mutex_consistent() to fix the mutex.
                */
 
               mutex->flags |= _PTHREAD_MFLAGS_INCONSISTENT;

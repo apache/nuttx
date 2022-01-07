@@ -923,7 +923,7 @@ static int gd25_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct gd25_dev_s *priv = (FAR struct gd25_dev_s *)dev;
   int ret = -EINVAL;
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

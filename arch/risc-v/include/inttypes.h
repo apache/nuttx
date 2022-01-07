@@ -29,7 +29,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(__LP64__)
+#if defined(CONFIG_ARCH_RV64)
 #define _PRI32PREFIX
 #define _PRI64PREFIX "l"
 #define _PRIPTRPREFIX "l"
@@ -40,7 +40,7 @@
 #define INT64_C(x)  x ## l
 #define UINT32_C(x) x ## u
 #define UINT64_C(x) x ## ul
-#else /* defined(__LP64__) */
+#else /* defined(CONFIG_ARCH_RV64) */
 #define _PRI32PREFIX "l"
 #define _PRI64PREFIX "ll"
 #define _PRIPTRPREFIX
@@ -51,7 +51,7 @@
 #define INT64_C(x)  x ## ll
 #define UINT32_C(x) x ## ul
 #define UINT64_C(x) x ## ull
-#endif /* defined(__LP64__) */
+#endif /* defined(CONFIG_ARCH_RV64) */
 
 #define PRId8       "d"
 #define PRId16      "d"

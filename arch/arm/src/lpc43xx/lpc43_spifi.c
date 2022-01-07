@@ -849,7 +849,7 @@ static int lpc43_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct lpc43_dev_s *priv = (FAR struct lpc43_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

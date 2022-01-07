@@ -1325,7 +1325,7 @@ damage your configuration (see
   environment:
 
   1. You can run the configuration tool using Cygwin.  However, the
-     Cygwin `Makefile.win` will complain so to do this will, you have
+     Cygwin `Win.mk` will complain so to do this will, you have
      to manually edit the `.config` file:
 
      a. Delete the line: `CONFIG_WINDOWS_NATIVE=y`

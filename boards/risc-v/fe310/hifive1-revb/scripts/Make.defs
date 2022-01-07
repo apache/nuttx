@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_ARCH_CHIP_FE310_QEMU),y)
   LDSCRIPT = ld-qemu.script
@@ -42,10 +42,9 @@ endif
 MAXOPTIMIZATION = -Os
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce
 endif
 
-ARCHCPUFLAGS = -march=rv32imac -mabi=ilp32
 ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

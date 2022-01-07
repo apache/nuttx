@@ -9,6 +9,7 @@ choice
 
 config ARCH_ARM
 	bool "ARM"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_STACKCHECK
@@ -59,6 +60,7 @@ config ARCH_RENESAS
 
 config ARCH_RISCV
 	bool "RISC-V"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
@@ -71,6 +73,7 @@ config ARCH_RISCV
 
 config ARCH_SIM
 	bool "Simulation"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -100,12 +103,14 @@ config ARCH_X86_64
 
 config ARCH_XTENSA
 	bool "Xtensa"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
@@ -423,8 +428,8 @@ config ARCH_USE_TEXT_HEAP
 	default n
 	depends on ARCH_HAVE_TEXT_HEAP
 	---help---
-		This option enables architecture-sepecific memory allocator
-		for dynamic code loading. For example, ESP32 has a separate memory
+		This option enables architecture-specific memory allocator
+		for dynamic code loading. For example, ESP32 has separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.
 

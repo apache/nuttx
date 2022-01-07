@@ -187,6 +187,7 @@ static int usrsock_host_sockopt(int sockfd, int level, int optname,
 
 int usrsock_host_socket(int domain, int type, int protocol)
 {
+  int opt = 1;
   int ret;
 
   if (domain == NUTTX_PF_INET)
@@ -237,6 +238,12 @@ int usrsock_host_socket(int domain, int type, int protocol)
     {
       return -errno;
     }
+
+  /* Reuse all addresses to avoid bind fail if the
+   * nuttx exits unexpectedly.
+   */
+
+  setsockopt(ret, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
   sock_nonblock(ret, true);
   usrsock_host_set_fd(ret, &g_active_read_fds);
@@ -435,8 +442,8 @@ int usrsock_host_listen(int sockfd, int backlog)
 int usrsock_host_accept(int sockfd, struct nuttx_sockaddr *addr,
                         nuttx_socklen_t *addrlen)
 {
+  socklen_t naddrlen = sizeof(socklen_t);
   struct sockaddr naddr;
-  socklen_t naddrlen;
   int ret;
 
   ret = accept(sockfd, &naddr, &naddrlen);

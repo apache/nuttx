@@ -24,6 +24,10 @@ on:
       - 'releases/*'
     tags:
 
+concurrency:
+  group: build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   Fetch-Source:
     runs-on: ubuntu-latest

@@ -20,7 +20,7 @@
 
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
-include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 ifeq ($(CONFIG_RV32M1_OPENISA_TOOLCHAIN),y)
   CROSSDEV = riscv32-unknown-elf-
@@ -46,20 +46,17 @@ endif
 MAXOPTIMIZATION = -Os
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce
 endif
-
-ARCHCPURV32IM = -march=rv32imc -mabi=ilp32
 
 ifeq ($(CONFIG_RV32M1_OPENISA_TOOLCHAIN),y)
   ifdef CONFIG_ARCH_RISCV_INTXCPT_EXTREGS
     ifeq ($(filter 0 1 2 3 4 5 , $(CONFIG_ARCH_RISCV_INTXCPT_EXTREGS)),)
-      ARCHCPURV32IM = -march=rv32imcxpulpv2
+      ARCHCPUFLAGS = -march=rv32imcxpulpv2
     endif
   endif
 endif
 
-ARCHCPUFLAGS = $(ARCHCPURV32IM)
 ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

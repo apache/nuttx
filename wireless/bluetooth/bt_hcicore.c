@@ -1622,7 +1622,7 @@ int bt_receive(FAR struct bt_driver_s *btdev, enum bt_buf_type_e type,
    * queue.
    */
 
-  buf = bt_buf_alloc(type, NULL, 0);
+  buf = bt_buf_alloc(type, NULL, BLUETOOTH_H4_HDRLEN);
   if (buf == NULL)
     {
       return -ENOMEM;

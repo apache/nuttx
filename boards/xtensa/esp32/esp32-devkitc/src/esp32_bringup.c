@@ -73,12 +73,20 @@
 #  include "esp32_board_wlan.h"
 #endif
 
+#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+#  include "esp32_wifi_adapter.h"
+#endif
+
 #ifdef CONFIG_ESP32_I2C
 #  include "esp32_board_i2c.h"
 #endif
 
 #ifdef CONFIG_SENSORS_BMP180
 #  include "esp32_bmp180.h"
+#endif
+
+#ifdef CONFIG_SENSORS_SHT3X
+#  include "esp32_sht3x.h"
 #endif
 
 #ifdef CONFIG_LCD_HT16K33
@@ -223,11 +231,20 @@ int esp32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
+  ret = esp32_wifi_bt_coexist_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize Wi-Fi and BT "
+             "coexistence support\n");
+    }
+#endif
+
 #ifdef CONFIG_ESP32_BLE
   ret = esp32_ble_initialize();
   if (ret)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize BLE: %d \n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize BLE: %d\n", ret);
     }
 #endif
 
@@ -370,6 +387,17 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180 driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_SHT3X
+  /* Try to register SHT3x device in I2C0 */
+
+  ret = board_sht3x_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize SHT3X driver: %d\n", ret);
     }
 #endif
 

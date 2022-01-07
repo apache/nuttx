@@ -173,6 +173,69 @@ config SERIAL_TERMIOS
 		If this is not defined, then the terminal settings (baud, parity, etc).
 		are not configurable at runtime; serial streams cannot be flushed, etc..
 
+config TTY_LAUNCH
+	bool "Enable feature TTY launch program"
+	default n
+	---help---
+		If select this, then user can launch a program with a special input.
+
+if TTY_LAUNCH
+
+config TTY_LAUNCH_CHAR
+	hex "TTY launch program characters"
+	default 0x12
+	---help---
+		Use Ctrl-R 0x12 inputs to determine whether launch a program
+
+config TTY_LAUNCH_ARGS
+	string "TTY launch argument list"
+	default INIT_ARGS
+	---help---
+		The argument list for user applications. e.g.:
+		  "\"arg1\",\"arg2\",\"arg3\""
+
+config TTY_LAUNCH_PRIORITY
+	int "TTY launch program priority"
+	default INIT_PRIORITY
+
+config TTY_LAUNCH_STACKSIZE
+	hex "TTY launch program stack size"
+	default INIT_STACKSIZE
+
+choice
+	prompt "TTY launch method"
+	default TTY_LAUNCH_ENTRY
+
+config TTY_LAUNCH_ENTRY
+	bool "TTY launch program"
+
+config TTY_LAUNCH_FILE
+	bool "TTY launch file"
+	depends on !BINFMT_DISABLE
+
+endchoice
+
+config TTY_LAUNCH_ENTRYPOINT
+	string "TTY launch program entry"
+	depends on TTY_LAUNCH_ENTRY
+	default INIT_ENTRYPOINT
+
+config TTY_LAUNCH_ENTRYNAME
+	string "TTY launch program name"
+	depends on TTY_LAUNCH_ENTRY
+	default TTY_LAUNCH_ENTRYPOINT
+
+config TTY_LAUNCH_FILEPATH
+	string "TTY launch file path"
+	depends on TTY_LAUNCH_FILE
+	default INIT_FILEPATH
+	---help---
+		The name of the entry point for user applications.  For the example
+		applications this is of the form 'app_main' where 'app' is the application
+		name. If not defined, USER_ENTRYPOINT defaults to "main".
+
+endif # TTY_LAUNCH
+
 config TTY_FORCE_PANIC
 	bool "Enable TTY force crash"
 	default n
@@ -191,7 +254,6 @@ config TTY_FORCE_PANIC_CHAR
 config TTY_SIGINT
 	bool "Support SIGINT"
 	default n
-	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-c/x event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit
@@ -235,7 +297,6 @@ config TTY_SIGINT_CHAR
 config TTY_SIGTSTP
 	bool "Support SIGTSTP"
 	default n
-	depends on SERIAL_TERMIOS
 	---help---
 		Whether support Ctrl-z event.  Enabled automatically for console
 		devices.  May be enabled for other serial devices using the ISIG bit

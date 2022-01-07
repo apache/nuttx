@@ -31,6 +31,8 @@
 #include <semaphore.h>
 #include <nuttx/list.h>
 
+#include "espidf_wifi.h"
+
 #ifndef __ASSEMBLY__
 
 #undef EXTERN
@@ -55,6 +57,12 @@ struct esp32c3_wl_semcache_s
   sem_t *sem;
   uint32_t count;
 };
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define MAC_LEN       (6)
 
 /****************************************************************************
  * Public Function Prototypes
@@ -159,6 +167,23 @@ int esp32c3_wl_init(void);
  ****************************************************************************/
 
 int esp32c3_wl_deinit(void);
+
+/****************************************************************************
+ * Name: esp_read_mac
+ *
+ * Description:
+ *   Read MAC address from efuse
+ *
+ * Input Parameters:
+ *   mac  - MAC address buffer pointer
+ *   type - MAC address type
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_read_mac(uint8_t *mac, esp_mac_type_t type);
 
 #ifdef __cplusplus
 }

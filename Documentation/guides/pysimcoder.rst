@@ -60,7 +60,7 @@ with NuttX. The list is the following:
 ``CONFIG_LIBC_EXECFUNCS=y``          ``CONFIG_SYMTAB_ORDEREDBYNAME=y``
 ``CONFIG_LIBC_STRERROR=y``           ``CONFIG_SYSTEM_NSH=y``
 ``CONFIG_MAX_TASKS=16``              ``CONFIG_SYSTEM_NSH_STACKSIZE=4096``
-``CONFIG_NSH_BUILTIN_APPS=y``        ``CONFIG_USER_ENTRYPOINT="nsh_main"``
+``CONFIG_NSH_BUILTIN_APPS=y``        ``CONFIG_INIT_ENTRYPOINT="nsh_main"``
 ``CONFIG_NSH_FILEIOSIZE=512``
 ==================================== =====================================
 

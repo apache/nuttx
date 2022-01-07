@@ -132,7 +132,7 @@ the stack and overflow the small NuttX stacks.  X11, in particular, requires
 large stacks.  If you are using X11 in the simulation, make sure that you set
 aside a "lot" of stack for the X11 library calls (maybe 8 or 16Kb). The stack
 size for the thread that begins with user start is controlled by the
-configuration setting CONFIG_USERMAIN_STACKSIZE; you may need to increase this
+configuration setting CONFIG_INIT_STACKSIZE; you may need to increase this
 value to larger number to survive the X11 library calls.
 
 If you are running X11 applications such as NSH add-on programs, then the
@@ -316,7 +316,9 @@ SMP
     +CONFIG_DEBUG_SCHED=y
 
     -# CONFIG_SCHED_INSTRUMENTATION is not set
+    -# CONFIG_SCHED_INSTRUMENTATION_SWITCH is not set
     +CONFIG_SCHED_INSTRUMENTATION=y
+    +CONFIG_SCHED_INSTRUMENTATION_SWITCH=y
 
   The SMP configuration will run with:
 
@@ -536,7 +538,7 @@ bluetooth
   drivers/wireless/bluetooth/bt_null.c
 
   There is also support on a Linux Host for attaching the bluetooth hardware
-  from the host to the NuttX bluetoooth stack via the HCI Socket interface
+  from the host to the NuttX bluetooth stack via the HCI Socket interface
   over the User Channel.  This is enabled in the bthcisock configuration.
   In order to use this you must give the nuttx elf additional capabilities:
 
@@ -617,7 +619,7 @@ loadable
   This is the key part of the configuration:
 
   +CONFIG_PATH_INITIAL="/system/bin"
-  +CONFIG_USER_INITPATH="/system/bin/nsh"
+  +CONFIG_INIT_FILEPATH="/system/bin/nsh"
 
   The shell is loaded from the elf, but you can also run any of the ELFs that are in /system/bin as they are on the "PATH"
 

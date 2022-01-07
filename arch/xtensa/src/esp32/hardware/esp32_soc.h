@@ -804,6 +804,10 @@ extern int rom_i2c_writereg(int block, int block_id, int reg_add,
 
 #define INVALID_MMU_VAL             0x100
 
+/*  phy registers and memory size */
+
+#define SOC_PHY_DIG_REGS_MEM_SIZE   (21*4)
+
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/

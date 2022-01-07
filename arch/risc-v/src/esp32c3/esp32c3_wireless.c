@@ -33,16 +33,20 @@
 #include "hardware/esp32c3_system.h"
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_syscon.h"
+#include "hardware/esp32c3_efuse.h"
+#include "esp32c3_wireless.h"
 #include "esp32c3.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_attr.h"
 #include "esp32c3_wireless.h"
-
 #include "espidf_wifi.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#define MAC_ADDR0_REG EFUSE_RD_MAC_SPI_SYS_0_REG
+#define MAC_ADDR1_REG EFUSE_RD_MAC_SPI_SYS_1_REG
 
 /* Software Interrupt */
 
@@ -226,7 +230,7 @@ static void esp32c3_phy_disable_clock(void)
  *
  ****************************************************************************/
 
-static int esp32c3_wl_swi_irq(int irq, void *context, FAR void *arg)
+static int esp32c3_wl_swi_irq(int irq, void *context, void *arg)
 {
   int i;
   int ret;
@@ -503,4 +507,81 @@ int esp32c3_wl_deinit(void)
   leave_critical_section(flags);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: esp_read_mac
+ *
+ * Description:
+ *   Read MAC address from efuse
+ *
+ * Input Parameters:
+ *   mac  - MAC address buffer pointer
+ *   type - MAC address type
+ *
+ * Returned Value:
+ *   0 if success or -1 if fail
+ *
+ ****************************************************************************/
+
+int esp_read_mac(uint8_t *mac, esp_mac_type_t type)
+{
+  uint32_t regval[2];
+  uint8_t tmp;
+  uint8_t *data = (uint8_t *)regval;
+  int i;
+
+  if (type > ESP_MAC_BT)
+    {
+      wlerr("ERROR: Input type is error=%d\n", type);
+      return -1;
+    }
+
+  regval[0] = getreg32(MAC_ADDR0_REG);
+  regval[1] = getreg32(MAC_ADDR1_REG);
+
+  for (i = 0; i < MAC_LEN; i++)
+    {
+      mac[i] = data[5 - i];
+    }
+
+  if (type == ESP_MAC_WIFI_SOFTAP)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+
+      if (i >= 64)
+        {
+          wlerr("ERROR: Failed to generate softAP MAC\n");
+          return -1;
+        }
+    }
+
+  if (type == ESP_MAC_BT)
+    {
+      tmp = mac[0];
+      for (i = 0; i < 64; i++)
+        {
+          mac[0] = tmp | 0x02;
+          mac[0] ^= i << 2;
+
+          if (mac[0] != tmp)
+            {
+              break;
+            }
+        }
+
+      mac[5] += 1;
+    }
+
+  return 0;
 }

@@ -68,7 +68,8 @@
 #  error "CONFIG_16550_ADDRWIDTH not defined"
 #endif
 
-#if CONFIG_16550_ADDRWIDTH != 8 && CONFIG_16550_ADDRWIDTH != 16 && CONFIG_16550_ADDRWIDTH != 32
+#if CONFIG_16550_ADDRWIDTH != 8 && CONFIG_16550_ADDRWIDTH != 16 && \
+    CONFIG_16550_ADDRWIDTH != 32 && CONFIG_16550_ADDRWIDTH != 64
 #  error "CONFIG_16550_ADDRWIDTH not supported"
 #endif
 
@@ -314,6 +315,8 @@ typedef uint8_t uart_addrwidth_t;
 typedef uint16_t uart_addrwidth_t;
 #elif CONFIG_16550_ADDRWIDTH == 32
 typedef uint32_t uart_addrwidth_t;
+#elif CONFIG_16550_ADDRWIDTH == 64
+typedef uint64_t uart_addrwidth_t;
 #endif
 
 /****************************************************************************

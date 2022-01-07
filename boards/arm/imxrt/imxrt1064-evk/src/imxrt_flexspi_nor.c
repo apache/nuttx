@@ -545,7 +545,7 @@ static int imxrt_flexspi_nor_ioctl(FAR struct mtd_dev_s *dev,
                   (FAR struct imxrt_flexspi_nor_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

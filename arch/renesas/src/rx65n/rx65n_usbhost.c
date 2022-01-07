@@ -841,7 +841,7 @@ uint16_t hw_usb_hread_devadd (uint16_t devsel)
   if (devadr > USB_MAXDEVADDR)
     {
       uerr("ERROR: device address %d is more than max device \
-            address. \n", devadd);
+            address.\n", devadd);
       return -ENODEV;
     }
   else
@@ -2765,7 +2765,7 @@ void usb_hstd_buf_to_fifo (uint8_t *buffer, size_t buflen, uint16_t pipe,
 
       /* FIFO access error */
 
-      syslog (LOG_INFO, "### FIFO access error \n");
+      syslog (LOG_INFO, "### FIFO access error\n");
       usb_hstd_forced_termination(pipe, (uint16_t) USB_DATA_ERR);
       break;
 
@@ -6215,7 +6215,7 @@ static void rx65n_usbhost_bottomhalf (void *arg)
         {
           /* Yes.. connected. */
 
-          connected_times ++;
+          connected_times++;
           syslog (LOG_INFO, "NuttX: USB Device Connected. %d\n",
                   connected_times);
           priv->connected = true;
@@ -6730,7 +6730,7 @@ static int rx65n_usbhost_epalloc(struct usbhost_driver_s *drvr,
 
       /* Note down the pipe number for reference */
 
-      ed ->pipenum = pipe_num;
+      ed->pipenum = pipe_num;
 
       /* Get the direction of the endpoint.  For control endpoints, the
        * direction is in the TD.
@@ -7615,7 +7615,7 @@ static ssize_t rx65n_usbhost_transfer(struct usbhost_driver_s *drvr,
 
         case TD_CC_DEVNOTRESPONDING:
           xfrinfo->wdhwait = false;
-          transfer_retry_count ++;
+          transfer_retry_count++;
           nbytes = -EBUSY;
           break;
 

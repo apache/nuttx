@@ -54,19 +54,19 @@ typedef unsigned char      _uint8_t;
 typedef signed short       _int16_t;
 typedef unsigned short     _uint16_t;
 
-#ifdef __LP64__
+#ifdef CONFIG_ARCH_RV64
 typedef signed int         _int32_t;
 typedef unsigned int       _uint32_t;
 
 typedef signed long        _int64_t;
 typedef unsigned long      _uint64_t;
-#else /* __LP64__ */
+#else /* CONFIG_ARCH_RV64 */
 typedef signed long        _int32_t;
 typedef unsigned long      _uint32_t;
 
 typedef signed long long   _int64_t;
 typedef unsigned long long _uint64_t;
-#endif /* __LP64__ */
+#endif /* CONFIG_ARCH_RV64 */
 #define __INT64_DEFINED
 
 typedef _int64_t           _intmax_t;
@@ -78,7 +78,7 @@ typedef __WCHAR_TYPE__     _wchar_t;
 typedef int                _wchar_t;
 #endif
 
-#ifdef __LP64__
+#ifdef CONFIG_ARCH_RV64
 /* A size is 8 bytes */
 
 #if defined(__SIZE_TYPE__)

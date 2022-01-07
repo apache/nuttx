@@ -250,7 +250,7 @@ FAR struct clk_s *clk_register_mux(FAR const char *name,
 #ifdef CONFIG_CLK_RPMSG
 FAR struct clk_s *clk_register_rpmsg(FAR const char *name, uint8_t flags);
 
-int clk_rpmsg_initialize(void);
+int clk_rpmsg_server_initialize(void);
 #endif
 
 #undef EXTERN

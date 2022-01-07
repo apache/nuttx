@@ -861,7 +861,7 @@ static int sst25xx_ioctl(FAR struct mtd_dev_s *dev, int cmd,
   FAR struct sst25xx_dev_s *priv = (FAR struct sst25xx_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

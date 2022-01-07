@@ -173,12 +173,12 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT=y
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT_DDELAY=1000
-      CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT_UDELAY=2000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -229,7 +229,7 @@ button.
 SPI Slave
 =========
 
-  An interrutp driven SPI slave driver as added on 2015-08-09 but has not
+  An interrupt driven SPI slave driver as added on 2015-08-09 but has not
   been verified as of this writing. See discussion in include/nuttx/spi/slave.h
   and below.
 
@@ -742,7 +742,7 @@ Configuration sub-directories
 
          CONFIG_ARCH_INTERRUPTSTACK=2048
          CONFIG_IDLETHREAD_STACKSIZE=1024
-         CONFIG_USERMAIN_STACKSIZE=2048
+         CONFIG_INIT_STACKSIZE=2048
          CONFIG_PTHREAD_STACK_DEFAULT=2048
          ... and others ...
 
@@ -794,9 +794,8 @@ Configuration sub-directories
       CONFIG_MCUBOOT_BOOTLOADER=y
       CONFIG_MCUBOOT_ENABLE_LOGGING=y
 
-      CONFIG_SAME70QMTECH_FORMAT_MCUBOOT=y
-      CONFIG_SAME70QMTECH_MCUBOOT_BOOTLOADER=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_loader_main"
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
 
   mcuboot-confirm:
     This configuration exercises the MCUboot compatible application slot
@@ -815,5 +814,5 @@ Configuration sub-directories
       CONFIG_BOOT_MCUBOOT=y
       CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
 
-      CONFIG_SAME70QMTECH_FORMAT_MCUBOOT=y
-      CONFIG_USER_ENTRYPOINT="mcuboot_confirm_main"
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"

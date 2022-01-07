@@ -99,6 +99,18 @@
   memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
+/* Note dump module tag definitions */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+#  define NOTE_MODULE(a, b, c, d)  \
+  ((uint32_t)((a) & 0xff)        | \
+  ((uint32_t)((b) & 0xff) << 8)  | \
+  ((uint32_t)((c) & 0xff) << 16) | \
+  ((uint32_t)((d) & 0xff) << 24))
+#else
+#  define NOTE_MODULE(a,b,c,d)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -108,17 +120,23 @@
 enum note_type_e
 {
   NOTE_START           = 0,
-  NOTE_STOP            = 1,
+  NOTE_STOP            = 1
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+  ,
   NOTE_SUSPEND         = 2,
   NOTE_RESUME          = 3
+#endif
 #ifdef CONFIG_SMP
   ,
   NOTE_CPU_START       = 4,
-  NOTE_CPU_STARTED     = 5,
+  NOTE_CPU_STARTED     = 5
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+  ,
   NOTE_CPU_PAUSE       = 6,
   NOTE_CPU_PAUSED      = 7,
   NOTE_CPU_RESUME      = 8,
   NOTE_CPU_RESUMED     = 9
+#endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   ,
@@ -191,6 +209,7 @@ struct note_stop_s
   struct note_common_s nsp_cmn; /* Common note parameters */
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_SUSPEND note */
 
 struct note_suspend_s
@@ -205,6 +224,7 @@ struct note_resume_s
 {
   struct note_common_s nre_cmn; /* Common note parameters */
 };
+#endif
 
 #ifdef CONFIG_SMP
 
@@ -223,6 +243,7 @@ struct note_cpu_started_s
   struct note_common_s ncs_cmn; /* Common note parameters */
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_CPU_PAUSE note */
 
 struct note_cpu_pause_s
@@ -252,6 +273,7 @@ struct note_cpu_resumed_s
 {
   struct note_common_s ncr_cmn; /* Common note parameters */
 };
+#endif
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -336,7 +358,7 @@ struct note_string_s
 struct note_binary_s
 {
   struct note_common_s nbi_cmn; /* Common note parameters */
-  uint32_t nbi_module;          /* Module number */
+  uint8_t  nbi_module[4];       /* Module number */
   uint8_t  nbi_event;           /* Event number */
   uint8_t  nbi_data[1];         /* Binary data */
 };
@@ -406,23 +428,36 @@ struct note_filter_irq_s
 
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb);
 void sched_note_resume(FAR struct tcb_s *tcb);
+#else
+#  define sched_note_suspend(t)
+#  define sched_note_resume(t)
+#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_started(FAR struct tcb_s *tcb);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_paused(FAR struct tcb_s *tcb);
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #else
-#  define sched_note_cpu_start(t,c)
-#  define sched_note_cpu_started(t)
 #  define sched_note_cpu_pause(t,c)
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)
 #  define sched_note_cpu_resumed(t)
+#endif
+#else
+#  define sched_note_cpu_pause(t,c)
+#  define sched_note_cpu_paused(t)
+#  define sched_note_cpu_resume(t,c)
+#  define sched_note_cpu_resumed(t)
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -589,6 +624,7 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
+#  define NOTE_MODULE(a,b,c,d)
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)

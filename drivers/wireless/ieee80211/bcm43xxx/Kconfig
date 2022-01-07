@@ -22,10 +22,18 @@ config IEEE80211_BROADCOM_BCM43438
 	default n
 	select IEEE80211_BROADCOM_HAVE_CLM
 
+config IEEE80211_BROADCOM_BCM43455
+	bool "Broadcom 43455 chip support"
+	depends on IEEE80211_BROADCOM_FULLMAC
+	default n
+	select IEEE80211_BROADCOM_HAVE_CLM
+
 config IEEE80211_BROADCOM_FWFILES
 	bool "Firmware files"
 	default y
-	depends on IEEE80211_BROADCOM_BCM43362 || IEEE80211_BROADCOM_BCM43438
+	depends on IEEE80211_BROADCOM_BCM43362 || \
+               IEEE80211_BROADCOM_BCM43438 || \
+               IEEE80211_BROADCOM_BCM43455
 	---help---
 		By default, firmware and CLM files are provided in memory.
 		This selection enables an option to load the firmware and CLM

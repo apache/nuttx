@@ -126,18 +126,17 @@
 struct romfs_file_s;
 struct romfs_mountpt_s
 {
-  struct inode        *rm_blkdriver; /* The block driver inode that hosts the FAT32 fs */
-  struct romfs_file_s *rm_head;      /* A list to all files opened on this mountpoint */
-
-  bool     rm_mounted;              /* true: The file system is ready */
-  uint16_t rm_hwsectorsize;         /* HW: Sector size reported by block driver */
-  sem_t    rm_sem;                  /* Used to assume thread-safe access */
-  uint32_t rm_rootoffset;           /* Saved offset to the first root directory entry */
-  uint32_t rm_hwnsectors;           /* HW: The number of sectors reported by the hardware */
-  uint32_t rm_volsize;              /* Size of the ROMFS volume */
-  uint32_t rm_cachesector;          /* Current sector in the rm_buffer */
-  uint8_t *rm_xipbase;              /* Base address of directly accessible media */
-  uint8_t *rm_buffer;               /* Device sector buffer, allocated if rm_xipbase==0 */
+  struct inode *rm_blkdriver; /* The block driver inode that hosts the FAT32 fs */
+  bool     rm_mounted;        /* true: The file system is ready */
+  uint16_t rm_hwsectorsize;   /* HW: Sector size reported by block driver */
+  sem_t    rm_sem;            /* Used to assume thread-safe access */
+  uint32_t rm_refs;           /* The references for all files opened on this mountpoint */
+  uint32_t rm_rootoffset;     /* Saved offset to the first root directory entry */
+  uint32_t rm_hwnsectors;     /* HW: The number of sectors reported by the hardware */
+  uint32_t rm_volsize;        /* Size of the ROMFS volume */
+  uint32_t rm_cachesector;    /* Current sector in the rm_buffer */
+  uint8_t *rm_xipbase;        /* Base address of directly accessible media */
+  uint8_t *rm_buffer;         /* Device sector buffer, allocated if rm_xipbase==0 */
 };
 
 /* This structure represents on open file under the mountpoint.  An instance
@@ -147,7 +146,6 @@ struct romfs_mountpt_s
 
 struct romfs_file_s
 {
-  FAR struct romfs_file_s *rf_next; /* Retained in a singly linked list */
   uint32_t rf_startoffset;          /* Offset to the start of the file data */
   uint32_t rf_size;                 /* Size of the file in bytes */
   uint32_t rf_cachesector;          /* Current sector in the rf_buffer */

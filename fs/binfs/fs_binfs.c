@@ -326,7 +326,7 @@ static int binfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
       finfo("Entry %d: \"%s\"\n", index, name);
       dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, name, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, name, sizeof(dir->fd_dir.d_name));
 
       /* The application list is terminated by an entry with a NULL name.
        * Therefore, there is at least one more entry in the list.

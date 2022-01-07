@@ -142,9 +142,10 @@ void up_copyfullstate(uint32_t *dest, uint32_t *src);
 
 void *up_doirq(int irq, void *regs);
 
-/* up_head.c ****************************************************************/
+/* up_hostmisc.c ************************************************************/
 
 void host_abort(int status);
+int  host_backtrace(void** array, int size);
 
 /* up_hostmemory.c **********************************************************/
 

@@ -45,7 +45,7 @@ SYSCALL_LOOKUP(sched_yield,                0)
 SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
 
 #ifdef CONFIG_SCHED_BACKTRACE
-  SYSCALL_LOOKUP(sched_backtrace,          3)
+  SYSCALL_LOOKUP(sched_backtrace,          4)
 #endif
 
 #ifdef CONFIG_SMP
@@ -218,12 +218,10 @@ SYSCALL_LOOKUP(pwrite,                     4)
 #ifdef CONFIG_EVENT_FD
   SYSCALL_LOOKUP(eventfd,                  2)
 #endif
-#ifdef CONFIG_NETDEV_IFINDEX
-  SYSCALL_LOOKUP(if_indextoname,           2)
-  SYSCALL_LOOKUP(if_nametoindex,           1)
-#endif
-#ifdef CONFIG_SERIAL_TERMIOS
-  SYSCALL_LOOKUP(tcdrain,                  1)
+#ifdef CONFIG_TIMER_FD
+  SYSCALL_LOOKUP(timerfd_create,           2)
+  SYSCALL_LOOKUP(timerfd_settime,          4)
+  SYSCALL_LOOKUP(timerfd_gettime,          2)
 #endif
 
 /* Board support */

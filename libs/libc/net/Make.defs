@@ -34,6 +34,8 @@ CSRCS += lib_loopback.c
 endif
 
 ifeq ($(CONFIG_NETDEV_IFINDEX),y)
+CSRCS += lib_getifaddrs.c lib_freeifaddrs.c
+CSRCS += lib_indextoname.c lib_nametoindex.c
 CSRCS += lib_nameindex.c lib_freenameindex.c
 endif
 

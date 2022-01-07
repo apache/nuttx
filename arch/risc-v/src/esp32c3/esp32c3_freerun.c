@@ -159,7 +159,7 @@ int esp32c3_freerun_initialize(struct esp32c3_freerun_s *freerun, int chan,
 
       pre = esp32c3_clk_apb_freq() * resolution / USEC_PER_SEC;
 
-      tmrinfo("pre=% "PRIu16 " clk=%d \n", pre, esp32c3_clk_apb_freq());
+      tmrinfo("pre=% "PRIu16 " clk=%d\n", pre, esp32c3_clk_apb_freq());
 
       /* Configure TIMER prescaler */
 

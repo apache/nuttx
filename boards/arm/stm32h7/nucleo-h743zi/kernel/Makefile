@@ -22,8 +22,8 @@ include $(TOPDIR)/Make.defs
 
 # The entry point name (if none is provided in the .config file)
 
-CONFIG_USER_ENTRYPOINT ?= user_start
-ENTRYPT = $(patsubst "%",%,$(CONFIG_USER_ENTRYPOINT))
+CONFIG_INIT_ENTRYPOINT ?= user_start
+ENTRYPT = $(patsubst "%",%,$(CONFIG_INIT_ENTRYPOINT))
 
 # Get the paths to the libraries and the links script path in format that
 # is appropriate for the host OS

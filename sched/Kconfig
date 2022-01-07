@@ -13,14 +13,6 @@ menuconfig DISABLE_OS_API
 		disable functions unless you want to restrict usage
 		of those APIs.
 
-		There are certain dependency relationships in these
-		features.
-
-		1) mq_notify logic depends on signals to awaken tasks
-		waiting for queues to become full or empty.
-		2) pthread_condtimedwait() depends on signals to wake
-		up waiting tasks.
-
 if DISABLE_OS_API
 
 config DISABLE_POSIX_TIMERS
@@ -63,11 +55,11 @@ config SCHED_TICKLESS
 	---help---
 		By default, system time is driven by a periodic timer interrupt.  An
 		alternative configurations is a tick-less configuration in which
-		there is no periodic timer interrupt.  Instead and interval timer is
+		there is no periodic timer interrupt.  Instead an interval timer is
 		used to schedule the next OS time event.  This option selects that
 		tick-less OS option.  If the tick-less OS is selected, then there are
 		additional platform specific interfaces that must be provided as
-		defined include/nuttx/arch.h
+		defined in include/nuttx/arch.h
 
 if SCHED_TICKLESS
 
@@ -309,18 +301,18 @@ endif # SMP
 
 choice
 	prompt "Initialization Task"
-	default INIT_ENTRYPOINT if !BUILD_KERNEL
-	default INIT_FILEPATH if !BINFMT_DISABLE
+	default INIT_ENTRY if !BUILD_KERNEL
+	default INIT_FILE if !BINFMT_DISABLE
 	default INIT_NONE if BINFMT_DISABLE
 
 config INIT_NONE
 	bool "None"
 
-config INIT_ENTRYPOINT
-	bool "Via application entry point"
+config INIT_ENTRY
+	bool "Via application entry"
 	depends on !BUILD_KERNEL
 
-config INIT_FILEPATH
+config INIT_FILE
 	bool "Via executable file"
 	depends on !BINFMT_DISABLE
 
@@ -333,39 +325,43 @@ config INIT_ARGS
 		The argument list for user applications. e.g.:
 		  "\"arg1\",\"arg2\",\"arg3\""
 
-if INIT_ENTRYPOINT
-config USER_ENTRYPOINT
-	string "Application entry point"
-	default "main"
-	---help---
-		The name of the entry point for user applications.  For the example
-		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "main".
-
-config USERMAIN_STACKSIZE
+config INIT_STACKSIZE
 	int "Main thread stack size"
 	default DEFAULT_TASK_STACKSIZE
 	---help---
 		The size of the stack to allocate for the user initialization thread
 		that is started as soon as the OS completes its initialization.
 
-config USERMAIN_PRIORITY
+config INIT_PRIORITY
 	int "init thread priority"
 	default 100
 	---help---
 		The priority of the user initialization thread.
 
-endif # INIT_ENTRYPOINT
+if INIT_ENTRY
+config INIT_ENTRYPOINT
+	string "Application entry point"
+	default "main"
+	---help---
+		The name of the entry point for user applications.  For the example
+		applications this is of the form 'app_main' where 'app' is the application
+		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
-if INIT_FILEPATH
+config INIT_ENTRYNAME
+	string "Application entry name"
+	default INIT_ENTRYPOINT
 
-config USER_INITPATH
+endif # INIT_ENTRY
+
+if INIT_FILE
+
+config INIT_FILEPATH
 	string "Application initialization path"
 	default "/bin/init"
 	---help---
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "main".
+		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
 config INIT_SYMTAB
 	string "Symbol table"
@@ -431,7 +427,7 @@ config INIT_MOUNT_DATA
 	default ""
 
 endif # INIT_MOUNT
-endif # INIT_FILEPATH
+endif # INIT_FILE
 
 config RR_INTERVAL
 	int "Round robin timeslice (MSEC)"
@@ -605,7 +601,7 @@ config SCHED_THREAD_LOCAL
 	default n
 	depends on ARCH_HAVE_THREAD_LOCAL
 	---help---
-		This option enables architecture-sepecific TLS supports (__thread/thread_local keyword)
+		This option enables architecture-specific TLS support (__thread/thread_local keyword)
 		Note: Toolchain must be compiled with '--enable-tls' enabled
 
 endmenu # Tasks and Scheduling
@@ -688,7 +684,7 @@ config CANCELLATION_POINTS
 	default n
 	---help---
 		Enable POSIX cancellation points for pthread_cancel().  If selected,
-		cancellation points will also used with the () task_delete() API even if
+		cancellation points will also used with the task_delete() API even if
 		pthreads are not enabled.
 
 endmenu # Pthread Options
@@ -755,48 +751,48 @@ config SCHED_CRITMONITOR_MAXTIME_THREAD
 	default 0
 	---help---
 		Thread execution time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_THREAD, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_THREAD, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 config SCHED_CRITMONITOR_MAXTIME_WQUEUE
 	int "WORK queue max execution time"
 	default SCHED_CRITMONITOR_MAXTIME_THREAD
 	---help---
 		Worker execution time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_WQUEUE, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 config SCHED_CRITMONITOR_MAXTIME_PREEMPTION
 	int "Pre-emption (sched_lock) max holding time"
 	default SCHED_CRITMONITOR_MAXTIME_WQUEUE
 	---help---
 		Pre-emption holding time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_PREEMPTION, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_PREEMPTION, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 config SCHED_CRITMONITOR_MAXTIME_CSECTION
 	int "Csection (enter_critical_section) max holding time"
 	default SCHED_CRITMONITOR_MAXTIME_PREEMPTION
 	---help---
 		Csection holding time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_CSECTION, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_CSECTION, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 config SCHED_CRITMONITOR_MAXTIME_IRQ
 	int "IRQ max execution time"
 	default SCHED_CRITMONITOR_MAXTIME_CSECTION
 	---help---
 		IRQ handler execution time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_IRQ, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_IRQ, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 config SCHED_CRITMONITOR_MAXTIME_WDOG
 	int "WDOG callback max execution time"
 	default SCHED_CRITMONITOR_MAXTIME_IRQ
 	---help---
 		Wdog callback execution time should be smaller than
-		SCHED_CRITMONITOR_MAXTIME_WDOG, or system will give a warnning.
-		For debugging system lantency, 0 means disabled.
+		SCHED_CRITMONITOR_MAXTIME_WDOG, or system will give a warning.
+		For debugging system latency, 0 means disabled.
 
 endif # SCHED_CRITMONITOR
 
@@ -946,6 +942,21 @@ config SCHED_INSTRUMENTATION
 
 			void sched_note_start(FAR struct tcb_s *tcb);
 			void sched_note_stop(FAR struct tcb_s *tcb);
+
+		If CONFIG_SMP is enabled, then these additional interfaces are
+		expected:
+
+			void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
+			void sched_note_cpu_started(FAR struct tcb_s *tcb);
+
+if SCHED_INSTRUMENTATION
+
+config SCHED_INSTRUMENTATION_SWITCH
+	bool "Use note switch for instrumentation"
+	default n
+	---help---
+		Use note switch for instrumentation.
+
 			void sched_note_suspend(FAR struct tcb_s *tcb);
 			void sched_note_resume(FAR struct tcb_s *tcb);
 
@@ -961,8 +972,6 @@ config SCHED_INSTRUMENTATION
 		critical locations in the OS. There is very little that can be
 		done in these interfaces.  For example, normal devices may not be
 		used; syslog output cannot be performed.
-
-if SCHED_INSTRUMENTATION
 
 config SCHED_INSTRUMENTATION_EXTERNAL
 	bool "System performance monitor endpoints are external"
@@ -1394,7 +1403,7 @@ config SIG_EVTHREAD
 config SIG_EVTHREAD_HPWORK
 	bool "SIGEV_EVTHREAD use HPWORK"
 	default n
-	depends on SIG_EVTHREAD && CONFIG_SCHED_HPWORK
+	depends on SIG_EVTHREAD && SCHED_HPWORK
 	---help---
 		if selected, SIGEV_THHREAD will use the high priority work queue.
 		If not, it will use the low priority work queue (if available).

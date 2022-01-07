@@ -425,8 +425,8 @@ static void mpfs_spi_select(struct spi_dev_s *dev, uint32_t devid,
  ****************************************************************************/
 
 #ifdef CONFIG_MPFS_SPI0
-void weak_function mpfs_spi0_select(FAR struct spi_dev_s *dev,
-                        uint32_t devid, bool selected)
+void weak_function mpfs_spi0_select(struct spi_dev_s *dev,
+                                    uint32_t devid, bool selected)
 {
 #ifdef CONFIG_SPI_CS_CONTROL
   mpfs_spi_select(dev, devid, selected);
@@ -437,8 +437,8 @@ void weak_function mpfs_spi0_select(FAR struct spi_dev_s *dev,
 #endif /* CONFIG_MPFS_SPI0 */
 
 #ifdef CONFIG_MPFS_SPI1
-void weak_function mpfs_spi1_select(FAR struct spi_dev_s *dev,
-                        uint32_t devid, bool selected)
+void weak_function mpfs_spi1_select(struct spi_dev_s *dev,
+                                    uint32_t devid, bool selected)
 {
 #ifdef CONFIG_SPI_CS_CONTROL
   mpfs_spi_select(dev, devid, selected);

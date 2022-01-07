@@ -60,10 +60,6 @@
 #  include <nuttx/leds/userled.h>
 #endif
 
-#ifdef HAVE_PROGMEM_CHARDEV
-#  include "sam_progmem.h"
-#endif
-
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
 #  include <nuttx/clock.h>
 #  include <nuttx/i2c/i2c_master.h>
@@ -75,8 +71,16 @@
 #  include "sam_twihs.h"
 #endif
 
+#ifdef HAVE_AUTOMOUNTER
+#  include "sam_automount.h"
+#endif /* HAVE_AUTOMOUNTER */
+
 #ifdef HAVE_ROMFS
 #  include <arch/board/boot_romfsimg.h>
+#endif
+
+#ifdef HAVE_PROGMEM_CHARDEV
+#  include "board_progmem.h"
 #endif
 
 /****************************************************************************
@@ -165,13 +169,13 @@ int sam_bringup(void)
 #ifdef HAVE_S25FL1
   FAR struct qspi_dev_s *qspi;
 #endif
-#if defined(HAVE_S25FL1) || defined(HAVE_PROGMEM_CHARDEV)
+#if defined(HAVE_S25FL1)
   FAR struct mtd_dev_s *mtd;
 #endif
 #if defined(HAVE_RTC_DSXXXX) || defined(HAVE_RTC_PCF85263)
   FAR struct i2c_master_s *i2c;
 #endif
-#if defined(HAVE_S25FL1_CHARDEV) || defined(HAVE_PROGMEM_CHARDEV)
+#if defined(HAVE_S25FL1_CHARDEV)
 #if defined(CONFIG_BCH)
   char blockdev[18];
   char chardev[12];
@@ -420,8 +424,9 @@ int sam_bringup(void)
 #if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
-      snprintf(blockdev, 18, "/dev/mtdblock%d", S25FL1_MTD_MINOR);
-      snprintf(chardev, 12, "/dev/mtd%d", S25FL1_MTD_MINOR);
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
+               S25FL1_MTD_MINOR);
+      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", S25FL1_MTD_MINOR);
 
       /* Now create a character device on the block device */
 
@@ -440,42 +445,12 @@ int sam_bringup(void)
 #ifdef HAVE_PROGMEM_CHARDEV
   /* Initialize the SAMV71 FLASH programming memory library */
 
-  sam_progmem_initialize();
-
-  /* Create an instance of the SAMV71 FLASH program memory device driver */
-
-  mtd = progmem_initialize();
-  if (!mtd)
-    {
-      syslog(LOG_ERR, "ERROR: progmem_initialize failed\n");
-    }
-
-  /* Use the FTL layer to wrap the MTD driver as a block driver */
-
-  ret = ftl_initialize(PROGMEM_MTD_MINOR, mtd);
+  ret = board_progmem_init(PROGMEM_MTD_MINOR);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to initialize the FTL layer: %d\n",
-             ret);
+      syslog(LOG_ERR, "ERROR: Failed to initialize progmem: %d\n", ret);
       return ret;
     }
-
-#if defined(CONFIG_BCH)
-  /* Use the minor number to create device paths */
-
-  snprintf(blockdev, 18, "/dev/mtdblock%d", PROGMEM_MTD_MINOR);
-  snprintf(chardev, 12, "/dev/mtd%d", PROGMEM_MTD_MINOR);
-
-  /* Now create a character device on the block device */
-
-  ret = bchdev_register(blockdev, chardev, false);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: bchdev_register %s failed: %d\n",
-             chardev, ret);
-      return ret;
-    }
-#endif /* defined(CONFIG_BCH) */
 #endif
 
 #ifdef HAVE_USBHOST

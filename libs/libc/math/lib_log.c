@@ -39,13 +39,15 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* To avoid looping forever in particular corner cases, every LOGF_MAX_ITER
- * the error criteria is relaxed by a factor LOGF_RELAX_MULTIPLIER.
+#define DBL_MAX_EXP_X   700.0
+
+/* To avoid looping forever in particular corner cases, every LOG_MAX_ITER
+ * the error criteria is relaxed by a factor LOG_RELAX_MULTIPLIER.
  * todo: might need to adjust the double floating point version too.
  */
 
-#define LOGF_MAX_ITER         10
-#define LOGF_RELAX_MULTIPLIER 2
+#define LOG_MAX_ITER         10
+#define LOG_RELAX_MULTIPLIER 2.0
 
 /****************************************************************************
  * Public Functions
@@ -62,7 +64,7 @@ double log(double x)
   double y_old;
   double ey;
   double epsilon;
-  int    relax_factor;
+  double relax_factor;
   int    iter;
 
   y = 0.0;
@@ -70,7 +72,7 @@ double log(double x)
   epsilon = DBL_EPSILON;
 
   iter         = 0;
-  relax_factor = 1;
+  relax_factor = 1.0;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
     {
@@ -78,36 +80,36 @@ double log(double x)
       ey    = exp(y);
       y    -= (ey - x) / ey;
 
-      if (y > 700.0)
+      if (y > DBL_MAX_EXP_X)
         {
-          y = 700.0;
+          y = DBL_MAX_EXP_X;
         }
 
-      if (y < -700.0)
+      if (y < -DBL_MAX_EXP_X)
         {
-          y = -700.0;
+          y = -DBL_MAX_EXP_X;
         }
 
       epsilon = (fabs(y) > 1.0) ? fabs(y) * DBL_EPSILON : DBL_EPSILON;
 
-      if (++iter >= LOGF_MAX_ITER)
+      if (++iter >= LOG_MAX_ITER)
         {
-          relax_factor *= LOGF_RELAX_MULTIPLIER;
+          relax_factor *= LOG_RELAX_MULTIPLIER;
           iter = 0;
         }
 
-      if (relax_factor > 1)
+      if (relax_factor > 1.0)
         {
           epsilon *= relax_factor;
         }
     }
 
-  if (y == 700.0)
+  if (y == DBL_MAX_EXP_X)
     {
       return INFINITY;
     }
 
-  if (y == -700.0)
+  if (y == -DBL_MAX_EXP_X)
     {
       return INFINITY;
     }

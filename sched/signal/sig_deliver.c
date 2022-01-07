@@ -51,6 +51,14 @@
 
 void nxsig_deliver(FAR struct tcb_s *stcb)
 {
+  /* Save the errno.  This must be preserved throughout the signal handling
+   * so that the user code final gets the correct errno value (probably
+   * EINTR).
+   */
+
+  int saved_errno = get_errno();
+  int16_t saved_errcode = stcb->errcode;
+
   FAR sigq_t *sigq;
   sigset_t    savesigprocmask;
   sigset_t    newsigprocmask;
@@ -194,4 +202,9 @@ void nxsig_deliver(FAR struct tcb_s *stcb)
 
       nxsig_release_pendingsigaction(sigq);
     }
+
+  /* Restore the saved errno value */
+
+  set_errno(saved_errno);
+  stcb->errcode = saved_errcode;
 }

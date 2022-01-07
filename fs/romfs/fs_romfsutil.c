@@ -169,7 +169,7 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
   int      ret;
 
   /* rm->rm_cachesector holds the current sector that is buffer in or
-   * referenced by rm->tm_buffer. If the requested sector is the same as this
+   * referenced by rm->rm_buffer. If the requested sector is the same as this
    * this then we do nothing.
    */
 

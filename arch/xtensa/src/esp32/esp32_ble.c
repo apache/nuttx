@@ -178,7 +178,7 @@ static int esp32_ble_recv_cb(uint8_t *data, uint16_t len)
 
   if (!valid)
     {
-      wlerr("Invalid H4 header \n");
+      wlerr("Invalid H4 header\n");
       ret = ERROR;
     }
   else

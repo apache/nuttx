@@ -2743,7 +2743,7 @@ static int sam_ifup(struct net_driver_s *dev)
     }
 
   while (sam_linkup(priv) == 0);
-  ninfo("Link detected \n");
+  ninfo("Link detected\n");
 
   /* Enable normal MAC operation */
 

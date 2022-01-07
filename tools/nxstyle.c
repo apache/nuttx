@@ -251,6 +251,8 @@ static const char *g_white_list[] =
   /* Ref:
    * fs/nfs/rpc.h
    * fs/nfs/nfs_proto.h
+   * fs/nfs/nfs_mount.h
+   * fs/nfs/nfs_vfsops.c
    */
 
   "CREATE3args",
@@ -275,6 +277,10 @@ static const char *g_white_list[] =
   "SETATTR3args",
   "SETATTR3resok",
   "FS3args",
+  "SIZEOF_rpc_reply_read",
+  "SIZEOF_rpc_call_write",
+  "SIZEOF_rpc_reply_readdir",
+  "SIZEOF_nfsmount",
 
   /* Ref:
    * mm/kasan/kasan.c
@@ -1913,7 +1919,7 @@ int main(int argc, char **argv, char **envp)
                        */
 
                       ncomment = 0;
-                       ERROR("Closing without opening comment", lineno, n);
+                      ERROR("Closing without opening comment", lineno, n);
                     }
 
                   n++;
@@ -1926,7 +1932,8 @@ int main(int argc, char **argv, char **envp)
                 {
                   /* Check for URI schemes, e.g. "http://" or "https://" */
 
-                  if (n == 0 || strncmp(&line[n - 1], "://", 3) != 0)
+                  if ((ncomment == 0) &&
+                      (n == 0 || strncmp(&line[n - 1], "://", 3) != 0))
                     {
                       ERROR("C++ style comment", lineno, n);
                       n++;

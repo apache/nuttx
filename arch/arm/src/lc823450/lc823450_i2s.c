@@ -433,14 +433,14 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
 
             if (rate[0] != rate[1])
               {
-                audinfo("change output rate: %" PRId32 " -> %" PRId32 " \n",
+                audinfo("change output rate: %" PRId32 " -> %" PRId32 "\n",
                         rate[0], rate[1]);
                 lc823450_i2s_txsamplerate(dev, rate[1]);
               }
 
             if (ch[0] != ch[1])
               {
-                audinfo("change output ch: %d -> %d \n", ch[0], ch[1]);
+                audinfo("change output ch: %d -> %d\n", ch[0], ch[1]);
                 lc823450_i2s_setchannel('C', ch[1]);
               }
 
@@ -457,14 +457,14 @@ static int lc823450_i2s_ioctl(struct i2s_dev_s *dev, int cmd,
 
             if (rate[0] != rate[1])
               {
-                audinfo("change input rate: %" PRId32 " -> %" PRId32 " \n",
+                audinfo("change input rate: %" PRId32 " -> %" PRId32 "\n",
                         rate[0], rate[1]);
                 lc823450_i2s_rxsamplerate(dev, rate[1]);
               }
 
             if (ch[0] != ch[1])
               {
-                audinfo("change input ch: %d -> %d \n", ch[0], ch[1]);
+                audinfo("change input ch: %d -> %d\n", ch[0], ch[1]);
                 lc823450_i2s_setchannel('J', ch[1]);
               }
           }
@@ -699,7 +699,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 
   if (0 == decsel && (n & 0x3))
     {
-      auderr("** PCM data is not word-aligned (n=%" PRId32 ") ** \n", n);
+      auderr("** PCM data is not word-aligned (n=%" PRId32 ") **\n", n);
 
       /* Set size to align on a word boundary */
 
@@ -747,7 +747,7 @@ static int lc823450_i2s_send(struct i2s_dev_s *dev, struct ap_buffer_s *apb,
 #ifdef SHOW_BUFFERING
   if (0 == bufc_enabled)
     {
-      audinfo("buffering (remain=%d) \n", getreg32(BUF_DTCAP('C')));
+      audinfo("buffering (remain=%d)\n", getreg32(BUF_DTCAP('C')));
     }
 #endif
 
@@ -826,9 +826,9 @@ static void lc823450_dmic_enable(void)
            33 << 8 | 33,
            VOLSP0_CONT);
 
-  audinfo("ASRC_FSIO=%" PRId32 " \n",  getreg32(ASRC_FSO));
-  audinfo("DTCAP(I)=0x%" PRIx32 " \n", getreg32(BUF_DTCAP('I')));
-  audinfo("DTCAP(J)=0x%" PRIx32 " \n", getreg32(BUF_DTCAP('J')));
+  audinfo("ASRC_FSIO=%" PRId32 "\n",  getreg32(ASRC_FSO));
+  audinfo("DTCAP(I)=0x%" PRIx32 "\n", getreg32(BUF_DTCAP('I')));
+  audinfo("DTCAP(J)=0x%" PRIx32 "\n", getreg32(BUF_DTCAP('J')));
 
   /* Start ASRC */
 
@@ -990,9 +990,9 @@ static int lc823450_i2s_configure(void)
   putreg32(0x1, SSRC_MODE);
   while (getreg32(SSRC_STATUS) != 0x1);
 
-  audinfo("DTCAP(C)=0x%08x \n", BUF_DTCAP('C'));
-  audinfo("DTCAP(I)=0x%08x \n", BUF_DTCAP('I'));
-  audinfo("DTCAP(J)=0x%08x \n", BUF_DTCAP('J'));
+  audinfo("DTCAP(C)=0x%08x\n", BUF_DTCAP('C'));
+  audinfo("DTCAP(I)=0x%08x\n", BUF_DTCAP('I'));
+  audinfo("DTCAP(J)=0x%08x\n", BUF_DTCAP('J'));
 
   /* Setup default tx threshold */
 

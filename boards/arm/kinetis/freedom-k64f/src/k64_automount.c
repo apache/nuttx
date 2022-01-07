@@ -190,7 +190,7 @@ static void k64_enable(FAR const struct automount_lower_s *lower,
 
   if (enable && state->pending)
     {
-      /* Yes.. perform the fake interrupt if the interrutp is attached */
+      /* Yes.. perform the fake interrupt if the interrupt is attached */
 
       if (state->handler)
         {

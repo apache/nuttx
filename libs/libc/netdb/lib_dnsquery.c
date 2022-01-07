@@ -471,7 +471,7 @@ static int dns_recv_response(int sd, FAR union dns_addr_u *addr, int naddr,
 
       ans = (FAR struct dns_answer_s *)nameptr;
 
-      ninfo("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x \n",
+      ninfo("Answer: type=%04x, class=%04x, ttl=%06x, length=%04x\n",
             ntohs(ans->type), ntohs(ans->class),
             (ntohs(ans->ttl[0]) << 16) | ntohs(ans->ttl[1]),
             ntohs(ans->len));

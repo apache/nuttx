@@ -41,9 +41,12 @@
 #include <nuttx/sched.h>
 #include <nuttx/signal.h>
 #include <nuttx/fs/fs.h>
+#include <nuttx/cancelpt.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/wqueue.h>
+#include <nuttx/kthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -87,7 +90,8 @@ static int     uart_putxmitchar(FAR uart_dev_t *dev, int ch,
 static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
                                     FAR const char *buffer,
                                     size_t buflen);
-static int     uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout);
+static int     uart_tcdrain(FAR uart_dev_t *dev,
+                            bool cancelable, clock_t timeout);
 
 /* Character driver methods */
 
@@ -102,6 +106,16 @@ static int     uart_ioctl(FAR struct file *filep,
                           int cmd, unsigned long arg);
 static int     uart_poll(FAR struct file *filep,
                          FAR struct pollfd *fds, bool setup);
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+/* Lanch program entry, this must be supplied by the application. */
+
+int CONFIG_TTY_LAUNCH_ENTRYPOINT(int argc, char *argv[]);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -120,6 +134,10 @@ static const struct file_operations g_serialops =
   , NULL      /* unlink */
 #endif
 };
+
+#ifdef CONFIG_TTY_LAUNCH
+static struct work_s g_serial_work;
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -397,9 +415,24 @@ static inline ssize_t uart_irqwrite(FAR uart_dev_t *dev,
  *
  ****************************************************************************/
 
-static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
+static int uart_tcdrain(FAR uart_dev_t *dev,
+                        bool cancelable, clock_t timeout)
 {
   int ret;
+
+  /* tcdrain is a cancellation point */
+
+  if (cancelable && enter_cancellation_point())
+    {
+#ifdef CONFIG_CANCELLATION_POINTS
+      /* If there is a pending cancellation, then do not perform
+       * the wait.  Exit now with ECANCELED.
+       */
+
+      leave_cancellation_point();
+      return -ECANCELED;
+#endif
+    }
 
   /* Get exclusive access to the to dev->tmit.  We cannot permit new data to
    * be written while we are trying to flush the old data.
@@ -501,6 +534,11 @@ static int uart_tcdrain(FAR uart_dev_t *dev, clock_t timeout)
         }
 
       uart_givesem(&dev->xmit.sem);
+    }
+
+  if (cancelable)
+    {
+      leave_cancellation_point();
     }
 
   return ret;
@@ -661,7 +699,7 @@ static int uart_close(FAR struct file *filep)
     {
       /* Now we wait for the transmit buffer(s) to clear */
 
-      uart_tcdrain(dev, 4 * TICK_PER_SEC);
+      uart_tcdrain(dev, false, 4 * TICK_PER_SEC);
     }
 
   /* Free the IRQ and disable the UART */
@@ -1332,7 +1370,6 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
             break;
 
-#ifdef CONFIG_SERIAL_TERMIOS
           case TCFLSH:
             {
               /* Empty the tx/rx buffers */
@@ -1366,10 +1403,9 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
           case TCDRN:
             {
-              ret = uart_tcdrain(dev, 10 * TICK_PER_SEC);
+              ret = uart_tcdrain(dev, true, 10 * TICK_PER_SEC);
             }
             break;
-#endif
 
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
           /* Make the controlling terminal of the calling process */
@@ -1590,6 +1626,58 @@ errout:
 }
 
 /****************************************************************************
+ * Name: uart_nxsched_foreach_cb
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH
+static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
+{
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_ENTRYNAME))
+#else
+  if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_FILEPATH))
+#endif
+    {
+      *(int *)arg = 1;
+    }
+}
+
+static void uart_launch_worker(void *arg)
+{
+#ifdef CONFIG_TTY_LAUNCH_ARGS
+  FAR char *const argv[] =
+  {
+    CONFIG_TTY_LAUNCH_ARGS,
+    NULL,
+  };
+#else
+  FAR char *const *argv = NULL;
+#endif
+  int found = 0;
+
+  nxsched_foreach(uart_launch_foreach, &found);
+  if (!found)
+    {
+#ifdef CONFIG_TTY_LAUNCH_ENTRY
+      nxtask_create(CONFIG_TTY_LAUNCH_ENTRYNAME,
+                    CONFIG_TTY_LAUNCH_PRIORITY,
+                    CONFIG_TTY_LAUNCH_STACKSIZE,
+                    (main_t)CONFIG_TTY_LAUNCH_ENTRYPOINT,
+                    argv);
+#else
+      posix_spawnattr_t attr;
+
+      posix_spawnattr_init(&attr);
+
+      attr.priority  = CONFIG_TTY_LAUNCH_PRIORITY;
+      attr.stacksize = CONFIG_TTY_LAUNCH_STACKSIZE;
+      exec_spawn(CONFIG_TTY_LAUNCH_FILEPATH, argv, NULL, 0, &attr);
+#endif
+    }
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1603,13 +1691,13 @@ errout:
 
 int uart_register(FAR const char *path, FAR uart_dev_t *dev)
 {
-#ifdef CONFIG_SERIAL_TERMIOS
-#  if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
   /* Initialize  of the task that will receive SIGINT signals. */
 
   dev->pid = (pid_t)-1;
-#  endif
+#endif
 
+#ifdef CONFIG_SERIAL_TERMIOS
   /* If this UART is a serial console */
 
   if (dev->isconsole)
@@ -1797,3 +1885,19 @@ void uart_reset_sem(FAR uart_dev_t *dev)
   nxsem_reset(&dev->recv.sem, 1);
   nxsem_reset(&dev->pollsem,  1);
 }
+
+/****************************************************************************
+ * Name: uart_launch
+ *
+ * Description:
+ *   This function is called when user want launch a new program by
+ *   using a special char.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TTY_LAUNCH
+void uart_launch(void)
+{
+  work_queue(HPWORK, &g_serial_work, uart_launch_worker, NULL, 0);
+}
+#endif

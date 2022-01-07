@@ -31,6 +31,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <nuttx/syslog/syslog.h>
 #include <arch/board/board.h>
 
 #include "up_arch.h"
@@ -44,12 +45,16 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: avr_stackdump
  ****************************************************************************/
 
-static void up_stackdump(uint32_t sp, uint32_t stack_top)
+static void avr_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
+
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
 
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
@@ -61,28 +66,28 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
 }
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: avr_registerdump
  ****************************************************************************/
 
-static inline void up_registerdump(void)
+static inline void avr_registerdump(void)
 {
   /* Are user registers available from interrupt processing? */
 
   if (g_current_regs)
     {
       _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            0,
-            g_current_regs[REG_R0], g_current_regs[REG_R1],
-            g_current_regs[REG_R2], g_current_regs[REG_R3],
-            g_current_regs[REG_R4], g_current_regs[REG_R5],
-            g_current_regs[REG_R6], g_current_regs[REG_R7]);
+             0,
+             g_current_regs[REG_R0], g_current_regs[REG_R1],
+             g_current_regs[REG_R2], g_current_regs[REG_R3],
+             g_current_regs[REG_R4], g_current_regs[REG_R5],
+             g_current_regs[REG_R6], g_current_regs[REG_R7]);
 
       _alert("R%d: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-            8,
-            g_current_regs[REG_R8],  g_current_regs[REG_R9],
-            g_current_regs[REG_R10], g_current_regs[REG_R11],
-            g_current_regs[REG_R12], g_current_regs[REG_R13],
-            g_current_regs[REG_R14], g_current_regs[REG_R15]);
+             8,
+             g_current_regs[REG_R8],  g_current_regs[REG_R9],
+             g_current_regs[REG_R10], g_current_regs[REG_R11],
+             g_current_regs[REG_R12], g_current_regs[REG_R13],
+             g_current_regs[REG_R14], g_current_regs[REG_R15]);
 
       _alert("SR: %08x\n", g_current_regs[REG_SR]);
     }
@@ -94,7 +99,7 @@ static inline void up_registerdump(void)
 
 void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -105,7 +110,7 @@ void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  avr_registerdump();
 
   /* Get the limits on the user stack memory */
 
@@ -136,12 +141,12 @@ void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase + istacksize);
+      avr_stackdump(sp, istackbase + istacksize);
     }
   else if (g_current_regs)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      avr_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Extract the user stack pointer if we are in an interrupt handler.
@@ -161,20 +166,6 @@ void up_dumpstate(void)
 #ifdef CONFIG_STACK_COLORATION
   _alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
-
-  /* Dump the user stack if the stack pointer lies within the allocated user
-   * stack memory.
-   */
-
-  if (sp >= ustackbase && sp < ustackbase + ustacksize)
-    {
-      up_stackdump(sp, ustackbase + ustacksize);
-    }
-  else
-    {
-      _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
-    }
 #else
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
@@ -182,6 +173,7 @@ void up_dumpstate(void)
 #ifdef CONFIG_STACK_COLORATION
   _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -189,13 +181,12 @@ void up_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      up_stackdump(sp, ustackbase + ustacksize);
+      avr_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      avr_stackdump(ustackbase, ustackbase + ustacksize);
     }
-#endif
 }
 #endif

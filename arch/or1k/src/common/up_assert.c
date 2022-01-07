@@ -32,6 +32,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <arch/board/board.h>
@@ -67,13 +68,17 @@ static uint32_t s_last_regs[XCPTCONTEXT_REGS];
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_stackdump
+ * Name: or1k_stackdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static void up_stackdump(uint32_t sp, uint32_t stack_top)
+static void or1k_stackdump(uint32_t sp, uint32_t stack_top)
 {
   uint32_t stack;
+
+  /* Flush any buffered SYSLOG data to avoid overwrite */
+
+  syslog_flush();
 
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
@@ -83,8 +88,6 @@ static void up_stackdump(uint32_t sp, uint32_t stack_top)
              ptr[4], ptr[5], ptr[6], ptr[7]);
     }
 }
-#else
-#  define up_stackdump(sp,stack_top)
 #endif
 
 /****************************************************************************
@@ -98,12 +101,12 @@ static void up_taskdump(FAR struct tcb_s *tcb, FAR void *arg)
 
 #if CONFIG_TASK_NAME_SIZE > 0
   _alert("%s: PID=%d Stack Used=%lu of %lu\n",
-        tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         tcb->name, tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)tcb->adj_stack_size);
 #else
   _alert("PID: %d Stack Used=%lu of %lu\n",
-        tcb->pid, (unsigned long)up_check_tcbstack(tcb),
-        (unsigned long)tcb->adj_stack_size);
+         tcb->pid, (unsigned long)up_check_tcbstack(tcb),
+         (unsigned long)tcb->adj_stack_size);
 #endif
 }
 #endif
@@ -124,11 +127,11 @@ static inline void up_showtasks(void)
 #endif
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: or1k_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_ARCH_STACKDUMP
-static inline void up_registerdump(void)
+static inline void or1k_registerdump(void)
 {
   volatile uint32_t *regs = CURRENT_REGS;
 
@@ -145,21 +148,19 @@ static inline void up_registerdump(void)
   /* Dump the interrupt registers */
 
   _alert("R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
-        regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
+         regs[REG_R0], regs[REG_R1], regs[REG_R2], regs[REG_R3],
+         regs[REG_R4], regs[REG_R5], regs[REG_R6], regs[REG_R7]);
   _alert("R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-        regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-        regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+         regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+         regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
 #ifdef CONFIG_BUILD_PROTECTED
   _alert("xPSR: %08x PRIMASK: %08x EXEC_RETURN: %08x\n",
-        regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
+         regs[REG_XPSR], regs[REG_PRIMASK], regs[REG_EXC_RETURN]);
 #else
   _alert("xPSR: %08x PRIMASK: %08x\n",
-        regs[REG_XPSR], regs[REG_PRIMASK]);
+         regs[REG_XPSR], regs[REG_PRIMASK]);
 #endif
 }
-#else
-# define up_registerdump()
 #endif
 
 /****************************************************************************
@@ -194,7 +195,7 @@ static int assert_tracecallback(FAR struct usbtrace_s *trace, FAR void *arg)
 #ifdef CONFIG_ARCH_STACKDUMP
 static void up_dumpstate(void)
 {
-  struct tcb_s *rtcb = running_task();
+  FAR struct tcb_s *rtcb = running_task();
   uint32_t sp = up_getsp();
   uint32_t ustackbase;
   uint32_t ustacksize;
@@ -205,7 +206,7 @@ static void up_dumpstate(void)
 
   /* Dump the registers (if available) */
 
-  up_registerdump();
+  or1k_registerdump();
 
   /* Get the limits on the user stack memory */
 
@@ -236,12 +237,12 @@ static void up_dumpstate(void)
     {
       /* Yes.. dump the interrupt stack */
 
-      up_stackdump(sp, istackbase + istacksize);
+      or1k_stackdump(sp, istackbase + istacksize);
     }
   else if (CURRENT_REGS)
     {
       _alert("ERROR: Stack pointer is not within the interrupt stack\n");
-      up_stackdump(istackbase, istackbase + istacksize);
+      or1k_stackdump(istackbase, istackbase + istacksize);
     }
 
   /* Extract the user stack pointer if we are in an interrupt handler.
@@ -261,21 +262,6 @@ static void up_dumpstate(void)
 #ifdef CONFIG_STACK_COLORATION
   _alert("  used: %08x\n", up_check_tcbstack(rtcb));
 #endif
-
-  /* Dump the user stack if the stack pointer lies within the allocated user
-   * stack memory.
-   */
-
-  if (sp >= ustackbase && sp < ustackbase + ustacksize)
-    {
-      up_stackdump(sp, ustackbase + ustacksize);
-    }
-  else
-    {
-      _alert("ERROR: Stack pointer is not within the allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
-    }
-
 #else
   _alert("sp:         %08x\n", sp);
   _alert("stack base: %08x\n", ustackbase);
@@ -283,6 +269,7 @@ static void up_dumpstate(void)
 #ifdef CONFIG_STACK_COLORATION
   _alert("stack used: %08x\n", up_check_tcbstack(rtcb));
 #endif
+#endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user
    * stack memory.
@@ -290,14 +277,13 @@ static void up_dumpstate(void)
 
   if (sp >= ustackbase && sp < ustackbase + ustacksize)
     {
-      up_stackdump(sp, ustackbase + ustacksize);
+      or1k_stackdump(sp, ustackbase + ustacksize);
     }
   else
     {
       _alert("ERROR: Stack pointer is not within allocated stack\n");
-      up_stackdump(ustackbase, ustackbase + ustacksize);
+      or1k_stackdump(ustackbase, ustackbase + ustacksize);
     }
-#endif
 
   /* Dump the state of all tasks (if available) */
 

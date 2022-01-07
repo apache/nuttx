@@ -54,6 +54,8 @@ endif
 
 endif
 
+include video/vnc/Make.defs
+
 # Include video driver build support
 
 DEPPATH += --dep-path video
