@@ -41,12 +41,12 @@ REQUIREDOBJS = $(LINKOBJS)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
-  ASRCS += up_vfork32.S
+  ASRCS += up_vfork_x86.S
 else
-  ASRCS += up_vfork64.S
+  ASRCS += up_vfork_x86_64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
-  ASRCS += up_vfork32.S
+  ASRCS += up_vfork_x86.S
 else ifeq ($(CONFIG_HOST_ARM),y)
   ASRCS += up_vfork_arm.S
 endif
