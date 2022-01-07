@@ -131,7 +131,7 @@
 
 #define XTENSA_CPENABLE   0  /* (2 bytes) coprocessors active for this thread */
 #define XTENSA_CPSTORED   2  /* (2 bytes) coprocessors saved for this thread */
-#define XTENSA_CPASA      4  /* (4 bytes) ptr to aligned save area */
+#define XTENSA_CPASA      8  /* (8 bytes) ptr to aligned save area */
 
 /****************************************************************************
  * Public Types
@@ -139,11 +139,12 @@
 
 #ifndef __ASSEMBLY__
 
-struct xtensa_cpstate_s
+struct aligned_data(8) xtensa_cpstate_s
 {
-  uint16_t cpenable;  /* (2 bytes) Co-processors active for this thread */
-  uint16_t cpstored;  /* (2 bytes) Co-processors saved for this thread */
-  uint32_t *cpasa;    /* (4 bytes) Pointer to aligned save area */
+  uint16_t cpenable;    /* (2 bytes) Co-processors active for this thread */
+  uint16_t cpstored;    /* (2 bytes) Co-processors saved for this thread */
+  uint16_t reserved[2]; /* keep cpasa aligned 8 */
+  uint8_t  cpasa[XTENSA_CP_SA_SIZE]; /* cp save area */
 };
 
 /****************************************************************************
