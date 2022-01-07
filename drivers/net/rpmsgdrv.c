@@ -437,8 +437,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 
   /* Save pointers into argv */
 
-  sprintf(arg1, "%#p", ept);
-  sprintf(arg2, "%#p", data);
+  sprintf(arg1, "%p", ept);
+  sprintf(arg2, "%p", data);
 
   argv[0] = arg1;
   argv[1] = arg2;
