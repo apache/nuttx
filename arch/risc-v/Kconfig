@@ -199,9 +199,6 @@ endif
 source "arch/risc-v/src/opensbi/Kconfig"
 source "arch/risc-v/src/common/Kconfig"
 
-if ARCH_RV32
-source "arch/risc-v/src/rv32im/Kconfig"
-endif
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"
 endif

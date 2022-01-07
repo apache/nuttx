@@ -88,7 +88,7 @@ void up_irqinitialize(void)
 
   /* currents_regs is non-NULL only while processing an interrupt */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Attach the ecall interrupt handler */
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_sigdeliver.c
+ * arch/risc-v/src/common/riscv_sigdeliver.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -57,7 +57,7 @@
 void riscv_sigdeliver(void)
 {
   struct tcb_s *rtcb = this_task();
-  uint64_t regs[XCPTCONTEXT_REGS];
+  uintptr_t regs[XCPTCONTEXT_REGS];
 
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
@@ -115,7 +115,7 @@ void riscv_sigdeliver(void)
    * errno that is needed by the user logic (it is probably EINTR).
    */
 
-  sinfo("Resuming EPC: %016" PRIx64 " INT_CTX: %016" PRIx64 "\n",
+  sinfo("Resuming EPC: %" PRIxREG " INT_CTX: %" PRIxREG "\n",
         regs[REG_EPC], regs[REG_INT_CTX]);
 
 #ifdef CONFIG_SMP

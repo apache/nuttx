@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_doirq.c
+ * arch/risc-v/src/common/riscv_doirq.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -57,20 +57,20 @@
  * Public Functions
  ****************************************************************************/
 
-uint32_t *up_doirq(int irq, uint32_t *regs)
+uintptr_t *up_doirq(int irq, uintptr_t *regs)
 {
   board_autoled_on(LED_INIRQ);
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * g_current_regs is also used to manage interrupt level context switches.
+   * CURRENT_REGS is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
   /* Disable further occurrences of this interrupt (until the interrupt
    * sources have been clear by the driver).
@@ -84,18 +84,18 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
-   * g_current_regs will have a different value than it did on entry.  If an
+   * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
    * point state and the establish the correct address environment before
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != CURRENT_REGS)
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      riscv_restorefpu((uint32_t *)g_current_regs);
+      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -111,18 +111,18 @@ uint32_t *up_doirq(int irq, uint32_t *regs)
 #endif
 
   /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
+   * CURRENT_REGS may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)g_current_regs;
+  regs = (uintptr_t *)CURRENT_REGS;
 
-  /* Set g_current_regs to NULL to indicate that we are no longer in an
+  /* Set CURRENT_REGS to NULL to indicate that we are no longer in an
    * interrupt handler.
    */
 
-  g_current_regs = NULL;
+  CURRENT_REGS = NULL;
 
   /* Unmask the last interrupt (global interrupts are still disabled) */
 

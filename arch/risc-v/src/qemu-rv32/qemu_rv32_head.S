@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/rv32im/irq.h>
+#include <arch/irq.h>
 
 #include "chip.h"
 
@@ -105,26 +105,11 @@ exception_common:
   sw   x30, 30*4(sp)  /* t5 */
   sw   x31, 31*4(sp)  /* t6 */
 
-#if defined(INT_XCPT_REGS) && INT_XCPT_REGS >= 39
-  csrr x28, 0x7b0
-  csrr x29, 0x7b1
-  csrr x30, 0x7b2
-  sw x28, 33*4(sp)
-  sw x29, 34*4(sp)
-  sw x30, 35*4(sp)
-  csrr x28, 0x7b4
-  csrr x29, 0x7b5
-  csrr x30, 0x7b6
-  sw x28, 36*4(sp)
-  sw x29, 37*4(sp)
-  sw x30, 38*4(sp)
-#endif
-
   csrr s0, mstatus
-  sw   s0,  32*4(sp)  /* mstatus */
+  sw   s0, 32*4(sp)  /* mstatus */
 
   addi s0, sp, XCPTCONTEXT_SIZE
-  sw   s0,  2*4(sp)   /* original SP */
+  sw   s0, 2*4(sp)   /* original SP */
 
   /* Setup arg0(exception cause), arg1(context) */
 
@@ -153,21 +138,6 @@ exception_common:
 
   lw   s0, 32*4(sp) /* restore mstatus */
   csrw mstatus, s0
-
-#if defined(INT_XCPT_REGS) && INT_XCPT_REGS >= 39
-  lw x28, 36*4(sp)
-  lw x29, 37*4(sp)
-  lw x30, 38*4(sp)
-  csrrw x0, 0x7b4, x28
-  csrrw x0, 0x7b5, x29
-  csrrw x0, 0x7b6, x30
-  lw x28, 33*4(sp)
-  lw x29, 34*4(sp)
-  lw x30, 35*4(sp)
-  csrrw x0, 0x7b0, x28
-  csrrw x0, 0x7b1, x29
-  csrrw x0, 0x7b2, x30
-#endif
 
   lw  x3,  3*4(sp)  /* gp */
   lw  x4,  4*4(sp)  /* tp */

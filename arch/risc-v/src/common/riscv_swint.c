@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_swint.c
+ * arch/risc-v/src/common/riscv_swint.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -43,6 +43,10 @@
 #include "riscv_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -51,29 +55,35 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void riscv_registerdump(const uint64_t *regs)
+static void riscv_registerdump(const uintptr_t *regs)
 {
-  svcinfo("EPC:%08x\n",
+  svcinfo("EPC: %" PRIxREG "\n",
           regs[REG_EPC]);
-  svcinfo("A0:%08x A1:%08x A2:%08x A3:%08x A4:%08x A5:%08x "
-          "A6:%08x A7:%08x\n",
+  svcinfo("A0: %" PRIxREG " A1: %" PRIxREG " A2: %" PRIxREG " A3: %" PRIxREG
+          " A4: %" PRIxREG " A5: %" PRIxREG " A6: %" PRIxREG " A7: %" PRIxREG
+          "\n",
           regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3],
           regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
-  svcinfo("T0:%08x T1:%08x T2:%08x T3:%08x T4:%08x T5:%08x T6:%08x\n",
+  svcinfo("T0: %" PRIxREG " T1: %" PRIxREG " T2: %" PRIxREG " T3: %" PRIxREG
+          " T4: %" PRIxREG " T5: %" PRIxREG " T6: %" PRIxREG "\n",
           regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3],
           regs[REG_T4], regs[REG_T5], regs[REG_T6]);
-  svcinfo("S0:%08x S1:%08x S2:%08x S3:%08x S4:%08x S5:%08x "
-          "S6:%08x S7:%08x\n",
+  svcinfo("S0: %" PRIxREG " S1: %" PRIxREG " S2: %" PRIxREG " S3: %" PRIxREG
+          " S4: %" PRIxREG " S5: %" PRIxREG " S6: %" PRIxREG " S7: %" PRIxREG
+          "\n",
           regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3],
           regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
-  svcinfo("S8:%08x S9:%08x S10:%08x S11:%08x\n",
+  svcinfo("S8: %" PRIxREG " S9: %" PRIxREG " S10: %"PRIxREG
+          " S11: %" PRIxREG "\n",
           regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
 #ifdef RISCV_SAVE_GP
-  svcinfo("GP:%08x SP:%08x FP:%08x TP:%08x RA:%08x\n",
+  svcinfo("GP: %" PRIxREG " SP: %" PRIxREG " FP: %" PRIxREG
+          " TP: %" PRIxREG " RA: %" PRIxREG "\n",
           regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
           regs[REG_RA]);
 #else
-  svcinfo("SP:%08x FP:%08x TP:%08x RA:%08x\n",
+  svcinfo("SP: %" PRIxREG " FP: %" PRIxREG " TP: %" PRIxREG " RA: %" PRIxREG
+          "\n",
           regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #endif
 }
@@ -98,6 +108,7 @@ static void riscv_registerdump(const uint64_t *regs)
 
 #ifdef CONFIG_LIB_SYSCALL
 static void dispatch_syscall(void) naked_function;
+#ifdef CONFIG_ARCH_RV64
 static void dispatch_syscall(void)
 {
   asm volatile
@@ -116,6 +127,26 @@ static void dispatch_syscall(void)
      " ecall"                     /* Return from the syscall */
   );
 }
+#else
+static void dispatch_syscall(void)
+{
+  asm volatile
+    (
+     " addi sp, sp, -4\n"         /* Create a stack frame to hold ra */
+     " sw   ra, 0(sp)\n"          /* Save ra in the stack frame */
+     " la   t0, g_stublookup\n"   /* t0=The base of the stub lookup table */
+     " slli a0, a0, 3\n"          /* a0=Offset for the stub lookup table */
+     " add  t0, t0, a0\n"         /* t0=The address in the table */
+     " lw   t0, 0(t0)\n"          /* t0=The address of the stub for this syscall */
+     " jalr ra, t0\n"             /* Call the stub (modifies ra) */
+     " lw   ra, 0(sp)\n"          /* Restore ra */
+     " addi sp, sp, 4\n"          /* Destroy the stack frame */
+     " mv   a2, a0\n"             /* a2=Save return value in a0 */
+     " li   a0, 3\n"              /* a0=SYS_syscall_return (3) */
+     " ecall"                     /* Return from the syscall */
+  );
+}
+#endif
 #endif
 
 /****************************************************************************
@@ -133,7 +164,7 @@ static void dispatch_syscall(void)
 
 int riscv_swint(int irq, void *context, void *arg)
 {
-  uint64_t *regs = (uint64_t *)context;
+  uintptr_t *regs = (uintptr_t *)context;
 
   DEBUGASSERT(regs && regs == CURRENT_REGS);
 
@@ -170,7 +201,7 @@ int riscv_swint(int irq, void *context, void *arg)
       case SYS_restore_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0);
-          CURRENT_REGS = (uint64_t *)regs[REG_A1];
+          CURRENT_REGS = (uintptr_t *)regs[REG_A1];
         }
         break;
 
@@ -193,8 +224,8 @@ int riscv_swint(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          riscv_copystate((uint64_t *)regs[REG_A1], regs);
-          CURRENT_REGS = (uint64_t *)regs[REG_A2];
+          riscv_copystate((uintptr_t *)regs[REG_A1], regs);
+          CURRENT_REGS = (uintptr_t *)regs[REG_A2];
         }
         break;
 
@@ -455,7 +486,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
-          svcerr("ERROR: Bad SYS call: %" PRId64 "\n", regs[REG_A0]);
+          svcerr("ERROR: Bad SYS call: %" PRIdPTR "\n", regs[REG_A0]);
 #endif
         }
         break;
@@ -469,7 +500,7 @@ int riscv_swint(int irq, void *context, void *arg)
   if (regs != CURRENT_REGS)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      riscv_registerdump((const uint32_t *)CURRENT_REGS);
+      riscv_registerdump((const uintptr_t *)CURRENT_REGS);
     }
   else
     {

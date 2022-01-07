@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_fault.c
+ * arch/risc-v/src/common/riscv_fault.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -54,61 +54,61 @@
  *
  ****************************************************************************/
 
-void up_fault(int irq, uint64_t *regs)
+void up_fault(int irq, uintptr_t *regs)
 {
   CURRENT_REGS = regs;
 
-  _alert("EPC:%016" PRIx64 "\n",
+  _alert("EPC: %" PRIxREG "\n",
          CURRENT_REGS[REG_EPC]);
 
   _alert("Fault IRQ=%d\n", irq);
 
   /* Dump register info */
 
-  _alert("A0:%016" PRIx64 " A1:%016" PRIx64 " A2:%016" PRIx64
-         " A3:%016" PRIx64 "\n",
+  _alert("A0: %" PRIxREG " A1: %" PRIxREG " A2: %" PRIxREG
+         " A3: %" PRIxREG "\n",
          CURRENT_REGS[REG_A0], CURRENT_REGS[REG_A1],
          CURRENT_REGS[REG_A2], CURRENT_REGS[REG_A3]);
 
-  _alert("A4:%016" PRIx64 " A5:%016" PRIx64 " A6:%016" PRIx64
-         " A7:%016" PRIx64 "\n",
+  _alert("A4: %" PRIxREG " A5: %" PRIxREG " A6: %" PRIxREG
+         " A7: %" PRIxREG "\n",
          CURRENT_REGS[REG_A4], CURRENT_REGS[REG_A5],
          CURRENT_REGS[REG_A6], CURRENT_REGS[REG_A7]);
 
-  _alert("T0:%016" PRIx64 " T1:%016" PRIx64 " T2:%016" PRIx64
-         " T3:%016" PRIx64 "\n",
+  _alert("T0: %" PRIxREG " T1: %" PRIxREG " T2: %" PRIxREG
+         " T3: %" PRIxREG "\n",
          CURRENT_REGS[REG_T0], CURRENT_REGS[REG_T1],
          CURRENT_REGS[REG_T2], CURRENT_REGS[REG_T3]);
 
-  _alert("T4:%016" PRIx64 " T5:%016" PRIx64
-         " T6:%016" PRIx64 "\n",
+  _alert("T4: %" PRIxREG " T5: %" PRIxREG
+         " T6: %" PRIxREG "\n",
          CURRENT_REGS[REG_T4], CURRENT_REGS[REG_T5],
          CURRENT_REGS[REG_T6]);
 
-  _alert("S0:%016" PRIx64 " S1:%016" PRIx64 " S2:%016" PRIx64
-         " S3:%016" PRIx64 "\n",
+  _alert("S0: %" PRIxREG " S1: %" PRIxREG " S2: %" PRIxREG
+         " S3: %" PRIxREG "\n",
          CURRENT_REGS[REG_S0], CURRENT_REGS[REG_S1],
          CURRENT_REGS[REG_S2], CURRENT_REGS[REG_S3]);
 
-  _alert("S4:%016" PRIx64 " S5:%016" PRIx64 " S6:%016" PRIx64
-         " S7:%016" PRIx64 "\n",
+  _alert("S4: %" PRIxREG " S5: %" PRIxREG " S6: %" PRIxREG
+         " S7: %" PRIxREG "\n",
          CURRENT_REGS[REG_S4], CURRENT_REGS[REG_S5],
          CURRENT_REGS[REG_S6], CURRENT_REGS[REG_S7]);
 
-  _alert("S8:%016" PRIx64 " S9:%016" PRIx64 " S10:%016" PRIx64
-         " S11:%016" PRIx64 "\n",
+  _alert("S8: %" PRIxREG " S9: %" PRIxREG " S10: %" PRIxREG
+         " S11: %" PRIxREG "\n",
          CURRENT_REGS[REG_S8], CURRENT_REGS[REG_S9],
          CURRENT_REGS[REG_S10], CURRENT_REGS[REG_S11]);
 
 #ifdef RISCV_SAVE_GP
-  _alert("GP:%016" PRIx64 " SP:%016" PRIx64 " FP:%016" PRIx64
-         " TP:%016 " PRIx64 "RA:%016" PRIx64 "\n",
+  _alert("GP: %" PRIxREG " SP: %" PRIxREG " FP: %" PRIxREG
+         " TP: %" PRIxREG "RA: %" PRIxREG "\n",
          CURRENT_REGS[REG_GP], CURRENT_REGS[REG_SP],
          CURRENT_REGS[REG_FP], CURRENT_REGS[REG_TP],
          CURRENT_REGS[REG_RA]);
 #else
-  _alert("SP:%016" PRIx64 " FP:%016" PRIx64 " TP:%016" PRIx64
-         " RA:%016" PRIx64 "\n",
+  _alert("SP: %" PRIxREG " FP: %" PRIxREG " TP: %" PRIxREG
+         " RA: %" PRIxREG "\n",
          CURRENT_REGS[REG_SP], CURRENT_REGS[REG_FP],
          CURRENT_REGS[REG_TP], CURRENT_REGS[REG_RA]);
 #endif

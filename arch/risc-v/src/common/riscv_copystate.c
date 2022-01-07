@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_copystate.c
+ * arch/risc-v/src/common/riscv_copystate.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -51,12 +51,12 @@
 
 /* A little faster than most memcpy's */
 
-void riscv_copystate(uint64_t *dest, uint64_t *src)
+void riscv_copystate(uintptr_t *dest, uintptr_t *src)
 {
   int i;
 
 #ifdef CONFIG_ARCH_FPU
-  uint64_t *regs = dest;
+  uintptr_t *regs = dest;
 #endif
 
   /* In the RISC-V model, the state is copied from the stack to the TCB,

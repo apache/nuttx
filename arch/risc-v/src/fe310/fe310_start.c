@@ -57,7 +57,7 @@
  * address.
  */
 
-uint32_t g_idle_topstack = FE310_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = FE310_IDLESTACK_TOP;
 
 /****************************************************************************
  * Public Functions

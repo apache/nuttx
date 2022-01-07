@@ -50,7 +50,7 @@
  * for CPU0 and this value is used in up_initial_state()
  */
 
-uint32_t g_idle_topstack = QEMU_RV32_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = QEMU_RV32_IDLESTACK_TOP;
 
 /****************************************************************************
  * Public Functions
