@@ -50,7 +50,7 @@
 #define LSM6DSO_SET_DELAY         10         /* Delay after set(ms) */
 #define LSM6DSO_READ_DELAY        10         /* Selftest data read delay (ms) */
 #define LSM6DSO_SPI_MAX_BUFFER    10         /* SPI exchange buffer size */
-#define LSM6DSO_VECTOR_REMAP      6          /* Vector remap of lsm6dso */
+#define LSM6DSO_VECTOR_REMAP      2          /* Vector remap of lsm6dso */
 
 /* Multi sensor index */
 
