@@ -139,11 +139,13 @@ static bool in_code_region(FAR void *pc)
 {
   int i = 0;
 
+#if 0
   if ((uintptr_t)pc >= (uintptr_t)_START_TEXT &&
       (uintptr_t)pc <  (uintptr_t)_END_TEXT)
     {
       return true;
     }
+#endif
 
   if (g_backtrace_code_regions)
     {
