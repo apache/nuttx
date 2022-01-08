@@ -246,6 +246,10 @@ struct esp32_config_s
   uint8_t  dma_chan;            /* DMA instance 0-1 */
   sem_t *  dma_sem;             /* DMA semaphore */
 #endif
+#ifdef HAVE_RS485
+  uint8_t  rs485_dir_gpio;      /* UART RS-485 DIR GPIO pin cfg */
+  bool     rs485_dir_polarity;  /* UART RS-485 DIR TXEN polarity */
+#endif
 };
 
 /* Current state of the UART */
@@ -380,6 +384,14 @@ static const struct esp32_config_s g_uart0config =
 #endif
 #endif
 #endif
+#ifdef CONFIG_ESP32_UART0_RS485
+  .rs485_dir_gpio = CONFIG_ESP32_UART0_RS485_DIR_PIN,
+#if (CONFIG_ESP32_UART0_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
+#endif
+#endif
 };
 
 static struct esp32_dev_s g_uart0priv =
@@ -459,6 +471,14 @@ static const struct esp32_config_s g_uart1config =
 #endif
 #endif
 #endif
+#ifdef CONFIG_ESP32_UART1_RS485
+  .rs485_dir_gpio = CONFIG_ESP32_UART1_RS485_DIR_PIN,
+#if (CONFIG_ESP32_UART1_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
+#endif
+#endif
 };
 
 static struct esp32_dev_s g_uart1priv =
@@ -536,6 +556,14 @@ static const struct esp32_config_s g_uart2config =
 #else
   .dma_sem        = &g_dma1_sem,
 #endif
+#endif
+#endif
+#ifdef CONFIG_ESP32_UART2_RS485
+  .rs485_dir_gpio = CONFIG_ESP32_UART2_RS485_DIR_PIN,
+#if (CONFIG_ESP32_UART2_RS485_DIR_POLARITY == 0)
+  .rs485_dir_polarity = false,
+#else
+  .rs485_dir_polarity = true,
 #endif
 #endif
 };
@@ -1345,8 +1373,25 @@ static int esp32_interrupt(int cpuint, void *context, void *arg)
 
       regval = (UART_RXFIFO_FULL_INT_CLR | UART_FRM_ERR_INT_CLR |
                 UART_RXFIFO_TOUT_INT_CLR | UART_TX_DONE_INT_CLR |
-                UART_TXFIFO_EMPTY_INT_CLR);
+                UART_TXFIFO_EMPTY_INT_CLR | UART_TX_BRK_IDLE_DONE_INT_CLR);
       putreg32(regval, UART_INT_CLR_REG(priv->config->id));
+
+#ifdef HAVE_RS485
+      if ((enabled & UART_TX_BRK_IDLE_DONE_INT_ENA) != 0 &&
+          (status & UART_TX_DONE_INT_ST) != 0)
+        {
+          /* If al bytes were transmited, then we can disable the RS485
+           * transmit (TX/nTX) pin.
+           */
+
+          nfifo = REG_MASK(status, UART_TXFIFO_CNT);
+          if (nfifo == 0)
+            {
+              esp32_gpiowrite(priv->config->rs485_dir_gpio,
+                              !priv->config->rs485_dir_polarity);
+            }
+        }
+#endif
 
       /* Are Rx interrupts enabled?  The upper layer may hold off Rx input
        * by disabling the Rx interrupts if there is no place to saved the
@@ -1697,6 +1742,14 @@ static void esp32_send(struct uart_dev_s *dev, int ch)
 {
   struct esp32_dev_s *priv = (struct esp32_dev_s *)dev->priv;
 
+#ifdef HAVE_RS485
+  if (priv->config->rs485_dir_gpio != 0)
+    {
+      esp32_gpiowrite(priv->config->rs485_dir_gpio,
+                      priv->config->rs485_dir_polarity);
+    }
+#endif
+
   putreg32((uint32_t)ch, AHB_UART_FIFO_REG(priv->config->id));
 }
 
@@ -1720,6 +1773,18 @@ static void esp32_txint(struct uart_dev_s *dev, bool enable)
 
       if (enable)
         {
+          /* After all bytes physically transmitted in the RS485 bus
+           * the TX_BRK_IDLE will indicate we can disable the TX pin.
+           */
+
+    #ifdef HAVE_RS485
+          if (priv->config->rs485_dir_gpio != 0)
+            {
+              modifyreg32(UART_INT_ENA_REG(priv->config->id),
+                          0, UART_TX_BRK_IDLE_DONE_INT_ENA);
+            }
+    #endif
+
           /* Set to receive an interrupt when the TX holding register
            * is empty.
            */
@@ -1827,6 +1892,17 @@ static void esp32_config_pins(struct esp32_dev_s *priv)
     {
       esp32_configgpio(priv->config->ctspin, INPUT_FUNCTION_3);
       esp32_gpio_matrix_in(priv->config->ctspin, priv->config->ctssig, 0);
+    }
+#endif
+
+#ifdef HAVE_RS485
+  if (priv->config->rs485_dir_gpio != 0)
+    {
+      esp32_configgpio(priv->config->rs485_dir_gpio, OUTPUT_FUNCTION_3);
+      esp32_gpio_matrix_out(priv->config->rs485_dir_gpio,
+                            SIG_GPIO_OUT_IDX, 0, 0);
+      esp32_gpiowrite(priv->config->rs485_dir_gpio,
+                      !priv->config->rs485_dir_polarity);
     }
 #endif
 }
