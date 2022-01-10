@@ -145,10 +145,7 @@ struct mmcsd_state_s
 /* Misc Helpers *************************************************************/
 
 static int    mmcsd_takesem(FAR struct mmcsd_state_s *priv);
-
-#ifndef CONFIG_SDIO_MUXBUS
-#  define mmcsd_givesem(p) nxsem_post(&priv->sem);
-#endif
+static void   mmcsd_givesem(FAR struct mmcsd_state_s *priv);
 
 /* Command/response helpers *************************************************/
 
@@ -259,35 +256,45 @@ static int mmcsd_takesem(FAR struct mmcsd_state_s *priv)
    * waiting)
    */
 
-  ret = nxsem_wait_uninterruptible(&priv->sem);
-  if (ret < 0)
+  if (up_interrupt_context() == false)
     {
-      return ret;
-    }
+      ret = nxsem_wait_uninterruptible(&priv->sem);
+      if (ret < 0)
+        {
+          return ret;
+        }
 
-  /* Lock the bus if mutually exclusive access to the SDIO bus is required
-   * on this platform.
-   */
+      /* Lock the bus if mutually exclusive access to the
+       * SDIO bus is required on this platform.
+       */
 
 #ifdef CONFIG_SDIO_MUXBUS
-  SDIO_LOCK(priv->dev, TRUE);
+      SDIO_LOCK(priv->dev, TRUE);
 #endif
+    }
+  else
+    {
+      ret = OK;
+    }
 
   return ret;
 }
 
-#ifdef CONFIG_SDIO_MUXBUS
 static void mmcsd_givesem(FAR struct mmcsd_state_s *priv)
 {
-  /* Release the SDIO bus lock, then the MMC/SD driver semaphore in the
-   * opposite order that they were taken to assure that no deadlock
-   * conditions will arise.
-   */
+  if (up_interrupt_context() == false)
+    {
+      /* Release the SDIO bus lock, then the MMC/SD driver semaphore in the
+       * opposite order that they were taken to assure that no deadlock
+       * conditions will arise.
+       */
 
-  SDIO_LOCK(priv->dev, FALSE);
-  nxsem_post(&priv->sem);
-}
+#ifdef CONFIG_SDIO_MUXBUS
+      SDIO_LOCK(priv->dev, FALSE);
 #endif
+      nxsem_post(&priv->sem);
+    }
+}
 
 /****************************************************************************
  * Command/Response Helpers
