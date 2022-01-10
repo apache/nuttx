@@ -293,10 +293,8 @@ static ssize_t cxd56_gnss_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t buflen);
 static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
-#endif
 static int8_t cxd56_gnss_select_notifytype(off_t fpos, uint32_t *offset);
 
 static int cxd56_gnss_cpufifo_api(FAR struct file *filep,
@@ -315,10 +313,11 @@ static const struct file_operations g_gnssfops =
   cxd56_gnss_close, /* close */
   cxd56_gnss_read,  /* read */
   cxd56_gnss_write, /* write */
-  0,                /* seek */
+  NULL,             /* seek */
   cxd56_gnss_ioctl, /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  cxd56_gnss_poll,  /* poll */
+  cxd56_gnss_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
 #endif
 };
 
@@ -2899,7 +2898,6 @@ static int cxd56_gnss_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int cxd56_gnss_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup)
 {
@@ -2965,7 +2963,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: cxd56_gnss_register

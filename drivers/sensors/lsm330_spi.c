@@ -144,29 +144,29 @@ static void     lsm330_dvr_exchange(FAR void *instance_handle,
 
 static const struct file_operations g_lsm330a_fops =
 {
-  lsm330acl_open,
-  lsm330acl_close,
-  lsm330acl_read,
-  lsm330acl_write,
-  lsm330acl_seek,
-  lsm330_ioctl,
-  NULL
+  lsm330acl_open,      /* open */
+  lsm330acl_close,     /* close */
+  lsm330acl_read,      /* read */
+  lsm330acl_write,     /* write */
+  lsm330acl_seek,      /* seek */
+  lsm330_ioctl,        /* ioctl */
+  NULL                 /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL               /* unlink */
 #endif
 };
 
 static const struct file_operations g_lsm330g_fops =
 {
-  lsm330gyro_open,
-  lsm330gyro_close,
-  lsm330gyro_read,
-  lsm330gyro_write,
-  lsm330gyro_seek,
-  lsm330_ioctl,
-  NULL
+  lsm330gyro_open,     /* open */
+  lsm330gyro_close,    /* close */
+  lsm330gyro_read,     /* read */
+  lsm330gyro_write,    /* write */
+  lsm330gyro_seek,     /* seek */
+  lsm330_ioctl,        /* ioctl */
+  NULL                 /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL               /* unlink */
 #endif
 };
 

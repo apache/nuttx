@@ -161,15 +161,15 @@ static int     kxtj9_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  kxtj9_open,
-  kxtj9_close,
-  kxtj9_read,
-  kxtj9_write,
-  NULL,
-  kxtj9_ioctl,
-  NULL,
+  kxtj9_open,      /* open */
+  kxtj9_close,     /* close */
+  kxtj9_read,      /* read */
+  kxtj9_write,     /* write */
+  NULL,            /* seek */
+  kxtj9_ioctl,     /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL,
+  , NULL           /* unlink */
 #endif
 };
 

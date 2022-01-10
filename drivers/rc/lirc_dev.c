@@ -97,13 +97,16 @@ static ssize_t lirc_read(FAR struct file *filep, FAR char *buffer,
 
 static const struct file_operations g_lirc_fops =
 {
-  lirc_open,   /* open  */
+  lirc_open,   /* open */
   lirc_close,  /* close */
-  lirc_read,   /* read  */
+  lirc_read,   /* read */
   lirc_write,  /* write */
-  NULL,        /* seek  */
+  NULL,        /* seek */
   lirc_ioctl,  /* ioctl */
-  lirc_poll,   /* poll  */
+  lirc_poll    /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL       /* unlink */
+#endif
 };
 
 /****************************************************************************

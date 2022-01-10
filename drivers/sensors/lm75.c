@@ -98,13 +98,16 @@ static int     lm75_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_lm75fops =
 {
-  lm75_open,
-  lm75_close,
-  lm75_read,
-  lm75_write,
-  NULL,
-  lm75_ioctl,
-  NULL
+  lm75_open,       /* open */
+  lm75_close,      /* close */
+  lm75_read,       /* read */
+  lm75_write,      /* write */
+  NULL,            /* seek */
+  lm75_ioctl,      /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

@@ -90,13 +90,16 @@ static ssize_t max31855_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_max31855fops =
 {
-  max31855_open,
-  max31855_close,
-  max31855_read,
-  max31855_write,
-  NULL,
-  NULL,
-  NULL
+  max31855_open,   /* open */
+  max31855_close,  /* close */
+  max31855_read,   /* read */
+  max31855_write,  /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

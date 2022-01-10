@@ -83,15 +83,15 @@ static int     mb7040_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  mb7040_open,
-  mb7040_close,
-  mb7040_read,
-  mb7040_write,
-  NULL,
-  mb7040_ioctl,
-  NULL
+  mb7040_open,     /* open */
+  mb7040_close,    /* close */
+  mb7040_read,     /* read */
+  mb7040_write,    /* write */
+  NULL,            /* seek */
+  mb7040_ioctl,    /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

@@ -126,12 +126,12 @@ static const struct file_operations g_bh1745nucfops =
   bh1745nuc_close,             /* close */
   bh1745nuc_read,              /* read */
   bh1745nuc_write,             /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   bh1745nuc_ioctl,             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* Take color data. */

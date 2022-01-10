@@ -107,12 +107,16 @@ static int fxos8700cq_checkid(FAR struct fxos8700cq_dev_s *priv);
 
 static const struct file_operations g_fxos8700cqfops =
 {
-  fxos8700cq_open,
-  fxos8700cq_close,
-  fxos8700cq_read,
-  0, /* write */
-  0, /* seek */
-  0, /* ioctl */
+  fxos8700cq_open,    /* open */
+  fxos8700cq_close,   /* close */
+  fxos8700cq_read,    /* read */
+  NULL,               /* write */
+  NULL,               /* seek */
+  NULL,               /* ioctl */
+  NULL                /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL              /* unlink */
+#endif
 };
 
 /****************************************************************************

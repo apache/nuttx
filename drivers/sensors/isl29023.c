@@ -130,6 +130,9 @@ static const struct file_operations g_isl29023fops =
   NULL,            /* seek */
   isl29023_ioctl,  /* ioctl */
   NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

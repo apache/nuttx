@@ -127,7 +127,7 @@ static const struct file_operations g_serialops =
   uart_close, /* close */
   uart_read,  /* read */
   uart_write, /* write */
-  0,          /* seek */
+  NULL,       /* seek */
   uart_ioctl, /* ioctl */
   uart_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS

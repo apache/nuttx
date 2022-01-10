@@ -88,7 +88,7 @@ static const struct file_operations g_noteram_fops =
   noteram_ioctl, /* ioctl */
   NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0            /* unlink */
+  , NULL         /* unlink */
 #endif
 };
 

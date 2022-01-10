@@ -68,11 +68,14 @@ static const struct file_operations g_pca9635pw_fileops =
 {
   pca9635pw_open,               /* open */
   pca9635pw_close,              /* close */
-  0,                            /* read */
-  0,                            /* write */
-  0,                            /* seek */
+  NULL,                         /* read */
+  NULL,                         /* write */
+  NULL,                         /* seek */
   pca9635pw_ioctl,              /* ioctl */
-  0                             /* poll */
+  NULL                          /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                        /* unlink */
+#endif
 };
 
 /****************************************************************************
