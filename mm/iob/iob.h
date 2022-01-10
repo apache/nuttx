@@ -48,6 +48,12 @@
 #  define iobinfo                _none
 #endif /* CONFIG_DEBUG_FEATURES && CONFIG_IOB_DEBUG */
 
+#if defined(CONFIG_DEBUG_FEATURES)
+#  define IOB_CHECK(iob)         iob_check(iob)
+#else
+#  define IOB_CHECK(iob)         do {} while (0)
+#endif /* CONFIG_DEBUG_FEATURES */
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -182,6 +188,18 @@ void iob_stats_onalloc(enum iob_user_e consumerid);
     defined(CONFIG_MM_IOB) && !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)
 void iob_stats_onfree(enum iob_user_e producerid);
 #endif
+
+#if defined(CONFIG_DEBUG_FEATURES)
+/****************************************************************************
+ * Name: iob_check
+ *
+ * Description:
+ *   Perform sanity checks on the IOB chain.
+ *
+ ****************************************************************************/
+
+void iob_check(FAR struct iob_s *iob);
+#endif /* defined(CONFIG_DEBUG_FEATURES) */
 
 #endif /* CONFIG_MM_IOB */
 #endif /* __MM_IOB_IOB_H */

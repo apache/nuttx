@@ -200,10 +200,10 @@ static void tcp_snd_wnd_init(FAR struct tcp_conn_s *conn,
   conn->snd_wl1 = TCP_SEQ_SUB(tcp_getsequence(tcp->seqno), 1);
   conn->snd_wl2 = tcp_getsequence(tcp->ackno);
   conn->snd_wnd = 0;
-  ninfo("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
+  nwarn("snd_wnd init: wl1 %" PRIu32 "\n", conn->snd_wl1);
 }
 
-static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
+static bool tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
                                FAR struct tcp_hdr_s *tcp)
 {
   uint32_t ackseq = tcp_getsequence(tcp->ackno);
@@ -215,6 +215,7 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
   uint16_t wnd = unscaled_wnd;
 #endif
   uint32_t wl2 = conn->snd_wl2;
+  bool updated = false;
 
   DEBUGASSERT((tcp->flags & TCP_ACK) != 0);
 
@@ -222,7 +223,7 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
     {
       uint32_t nacked = TCP_SEQ_SUB(ackseq, wl2);
 
-      ninfo("snd_wnd acked: "
+      nwarn("snd_wnd acked: "
             "wl2 %" PRIu32 " -> %" PRIu32 " subtracting wnd %" PRIu32
             " by %" PRIu32 "\n",
             wl2,
@@ -246,7 +247,7 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
       (conn->snd_wl1 == seq && TCP_SEQ_LT(wl2, ackseq)) ||
       (wl2 == ackseq && conn->snd_wnd < wnd))
     {
-      ninfo("snd_wnd update: "
+      nwarn("snd_wnd update: "
             "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 " -> "
             "wl1 %" PRIu32 " wl2 %" PRIu32 " wnd %" PRIu32 "\n",
             conn->snd_wl1,
@@ -256,10 +257,17 @@ static void tcp_snd_wnd_update(FAR struct tcp_conn_s *conn,
             ackseq,
             (uint32_t)wnd);
 
+      if (conn->snd_wnd != wnd)
+        {
+          updated = true;
+        }
+
       conn->snd_wl1 = seq;
       conn->snd_wl2 = ackseq;
       conn->snd_wnd = wnd;
     }
+
+  return updated;
 }
 
 /****************************************************************************
@@ -539,7 +547,7 @@ reset:
 
 found:
 
-  flags = 0;
+  flags = TCP_PUREACK;
 
   /* We do a very naive form of TCP reset processing; we just accept
    * any RST and kill our connection. We should in fact check if the
@@ -628,6 +636,10 @@ found:
    */
 
   dev->d_len -= (len + iplen);
+  if (dev->d_len > 0)
+    {
+      flags &= ~TCP_PUREACK;
+    }
 
   /* Check if the sequence number of the incoming packet is what we are
    * expecting next.  If not, we send out an ACK with the correct numbers
@@ -782,6 +794,8 @@ found:
 
       /* Reset the retransmission timer. */
 
+      nwarn("conn %p, timer reset from %u to rto %u\n",
+            conn, conn->timer, conn->rto);
       conn->timer = conn->rto;
     }
 
@@ -790,7 +804,10 @@ found:
   if ((tcp->flags & TCP_ACK) != 0 &&
       (conn->tcpstateflags & TCP_STATE_MASK) != TCP_SYN_RCVD)
     {
-      tcp_snd_wnd_update(conn, tcp);
+      if (tcp_snd_wnd_update(conn, tcp))
+        {
+          flags &= ~TCP_PUREACK;
+        }
     }
 
   /* Do different things depending on in what state the connection is. */

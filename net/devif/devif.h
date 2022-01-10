@@ -188,8 +188,9 @@
 #define TCP_ABORT          (1 << 7)
 #define TCP_CONNECTED      (1 << 8)
 #define TCP_TIMEDOUT       (1 << 9)
+#define TCP_PUREACK        (1 << 10)
 
-/* Bits 10-11: Unused, available */
+/* Bits 11: Unused, available */
 
 /* Bit 12: Device specific event bits */
 

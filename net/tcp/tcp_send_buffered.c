@@ -508,6 +508,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   TCP_WBTRIM(wrb, trimlen);
                   TCP_WBSEQNO(wrb) += trimlen;
                   TCP_WBSENT(wrb) -= trimlen;
+                  TCP_WBNACK(wrb) = 0;
 
                   /* Set the new sequence number for what remains */
 
@@ -519,19 +520,25 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             {
               /* Reset the duplicate ack counter */
 
-              if ((flags & TCP_NEWDATA) != 0)
+              if ((flags & TCP_PUREACK) == 0)
                 {
+                  nwarn("fast retransmit: non pure ack, seq=%" PRIu32
+                        ", nack was %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
                   TCP_WBNACK(wrb) = 0;
                 }
 
               /* Duplicate ACK? Retransmit data if need */
 
-              if (++TCP_WBNACK(wrb) ==
+              else if (++TCP_WBNACK(wrb) ==
                   CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
                 {
                   /* Do fast retransmit */
 
                   rexmit = true;
+                  nwarn("fast retransmit: start, seq=%" PRIu32 "\n",
+                        TCP_WBSEQNO(wrb));
                 }
               else if ((TCP_WBNACK(wrb) >
                        CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK) &&
@@ -539,6 +546,18 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                 {
                   /* Reset the duplicate ack counter */
 
+                  nwarn("fast retransmit: reset, seq=%" PRIu32
+                        ", nack was %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
+                  TCP_WBNACK(wrb) = 0;
+                }
+              else
+                {
+                  nwarn("fast retransmit: dupack, seq=%" PRIu32
+                        ", nack incremented to %u\n",
+                        TCP_WBSEQNO(wrb),
+                        TCP_WBNACK(wrb));
                   TCP_WBNACK(wrb) = 0;
                 }
             }
@@ -553,6 +572,8 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       if (wrb && TCP_WBSENT(wrb) > 0 && TCP_SEQ_GT(ackno, TCP_WBSEQNO(wrb)))
         {
           uint32_t nacked;
+
+          DEBUGASSERT(TCP_WBSENT(wrb) < TCP_WBPKTLEN(wrb));
 
           /* Number of bytes that were ACKed */
 
@@ -573,6 +594,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           TCP_WBTRIM(wrb, nacked);
           TCP_WBSEQNO(wrb) += nacked;
           TCP_WBSENT(wrb) -= nacked;
+          TCP_WBNACK(wrb) = 0;
 
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb));
@@ -584,6 +606,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   else if ((flags & TCP_REXMIT) != 0)
     {
       rexmit = true;
+      nwarn("slow retrasmit: %04x\n", flags);
     }
 
   if (rexmit)
@@ -702,6 +725,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
             }
 
           TCP_WBSENT(wrb) = 0;
+          TCP_WBNACK(wrb) = 0;
           ninfo("REXMIT: wrb=%p sent=%u, "
                 "conn tx_unacked=%" PRId32 " sent=%" PRId32 "\n",
                 wrb, TCP_WBSENT(wrb), conn->tx_unacked, conn->sent);
@@ -792,6 +816,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
       wrb = (FAR struct tcp_wrbuffer_s *)sq_peek(&conn->write_q);
       DEBUGASSERT(wrb);
+      DEBUGASSERT(TCP_WBSENT(wrb) < TCP_WBPKTLEN(wrb));
 
       /* Set the sequence number for this segment.  If we are
        * retransmitting, then the sequence number will already
@@ -1301,6 +1326,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        * conn->write_q
        */
 
+      DEBUGASSERT(TCP_WBSENT(wrb) == 0);
+      DEBUGASSERT(TCP_WBPKTLEN(wrb) > 0);
       sq_addlast(&wrb->wb_node, &conn->write_q);
       ninfo("Queued WRB=%p pktlen=%u write_q(%p,%p)\n",
             wrb, TCP_WBPKTLEN(wrb),

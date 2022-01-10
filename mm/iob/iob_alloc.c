@@ -172,6 +172,7 @@ static FAR struct iob_s *iob_allocwait(bool throttled,
     }
 
   leave_critical_section(flags);
+  IOB_CHECK(iob);
   return iob;
 }
 
@@ -287,6 +288,7 @@ FAR struct iob_s *iob_tryalloc(bool throttled, enum iob_user_e consumerid)
           iob->io_len    = 0;    /* Length of the data in the entry */
           iob->io_offset = 0;    /* Offset to the beginning of data */
           iob->io_pktlen = 0;    /* Total length of the packet */
+          IOB_CHECK(iob);
           return iob;
         }
     }

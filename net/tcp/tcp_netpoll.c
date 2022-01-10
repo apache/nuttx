@@ -70,7 +70,7 @@ static uint16_t tcp_poll_eventhandler(FAR struct net_driver_s *dev,
   FAR struct tcp_poll_s *info = (FAR struct tcp_poll_s *)pvpriv;
   int reason;
 
-  ninfo("flags: %04x\n", flags);
+  nwarn("flags: %04x\n", flags);
 
   DEBUGASSERT(info == NULL || (info->psock != NULL && info->fds != NULL));
 

@@ -178,6 +178,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
 
       dev->d_len = 0;
       flags = (flags & ~TCP_NEWDATA) | TCP_CLOSE;
+      ninfo("flagging TCP_CLOSE\n");
     }
 
   UNUSED(conn);           /* May not be used */
@@ -263,6 +264,8 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
   FAR struct tcp_conn_s *conn;
   int ret = OK;
 
+  ninfo("TCP: user CLOSE\n");
+
   /* Interrupts are disabled here to avoid race conditions */
 
   net_lock();
@@ -311,6 +314,8 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
        conn->tcpstateflags == TCP_LAST_ACK) &&
       (state.cl_cb = tcp_callback_alloc(conn)) != NULL)
     {
+      ninfo("installed callback\n");
+
       /* Set up to receive TCP data event callbacks */
 
       state.cl_cb->flags = (TCP_NEWDATA | TCP_POLL | TCP_DISCONN_EVENTS);
