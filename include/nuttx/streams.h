@@ -29,6 +29,9 @@
 
 #include <lzf.h>
 #include <stdio.h>
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+#include <nuttx/fs/fs.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -194,6 +197,16 @@ struct lib_lzfoutstream_s
   size_t                      offset;
   char                        in[LZF_STREAM_BLOCKSIZE];
   char                        out[LZF_MAX_HDR_SIZE + LZF_STREAM_BLOCKSIZE];
+};
+#endif
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+struct lib_blkoutstream_s
+{
+  struct lib_outstream_s public;
+  FAR struct inode      *inode;
+  struct geometry        geo;
+  FAR unsigned char     *cache;
 };
 #endif
 
@@ -372,6 +385,46 @@ void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 #ifdef CONFIG_LIBC_LZF
 void lib_lzfoutstream(FAR struct lib_lzfoutstream_s *stream,
                       FAR struct lib_outstream_s *backend);
+#endif
+
+/****************************************************************************
+ * Name: lib_blkoutstream_open
+ *
+ * Description:
+ *  open block driver stream backend
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_blkoutstream_s to be initialized.
+ *   name    - The full path to the block driver to be opened.
+ *
+ * Returned Value:
+ *   Returns zero on success or a negated errno on failure
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+int lib_blkoutstream_open(FAR struct lib_blkoutstream_s *stream,
+                          FAR const char *name);
+#endif
+
+/****************************************************************************
+ * Name: lib_blkoutstream_close
+ *
+ * Description:
+ *  close block driver stream backend
+ *
+ * Input Parameters:
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_blkoutstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+#ifndef CONFIG_DISABLE_MOUNTPOINT
+void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream);
 #endif
 
 /****************************************************************************

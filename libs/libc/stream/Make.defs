@@ -38,6 +38,10 @@ ifeq ($(CONFIG_LIBC_LZF),y)
 CSRCS += lib_lzfcompress.c
 endif
 
+ifeq ($(CONFIG_DISABLE_MOUNTPOINT),)
+CSRCS += lib_blkoutstream.c
+endif
+
 # Add the stdio directory to the build
 
 DEPPATH += --dep-path stream
