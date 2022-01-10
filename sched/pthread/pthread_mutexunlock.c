@@ -51,7 +51,7 @@
  *
  ****************************************************************************/
 
-static inline bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
+inline_function static bool pthread_mutex_islocked(FAR struct pthread_mutex_s *mutex)
 {
   int semcount = mutex->sem.semcount;
 

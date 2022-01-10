@@ -52,12 +52,13 @@
  * The maximum height of a red-black tree is 2lg (n+1).
  */
 
+#ifndef __INCLUDE_NUTTX_TREE_H
+#define __INCLUDE_NUTTX_TREE_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
-
-#ifndef __INCLUDE_NUTTX_TREE_H
-#define __INCLUDE_NUTTX_TREE_H
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -147,7 +148,7 @@ while (0)
   struct type *name##_SPLAY_REMOVE(struct name *, struct type *); \
   \
   /* Finds the node with the same key as elm */ \
-  static __inline struct type * name##_SPLAY_FIND(struct name *head, struct type *elm) \
+  inline_function static struct type * name##_SPLAY_FIND(struct name *head, struct type *elm) \
   { \
     if (SPLAY_EMPTY(head)) \
       { \
@@ -162,7 +163,7 @@ while (0)
     return (NULL); \
   } \
   \
-  static __inline struct type * name##_SPLAY_NEXT(struct name *head, struct type *elm) \
+  inline_function static struct type * name##_SPLAY_NEXT(struct name *head, struct type *elm) \
   { \
     name##_SPLAY(head, elm); \
     if (SPLAY_RIGHT(elm, field) != NULL) \
@@ -181,7 +182,7 @@ while (0)
     return (elm); \
   } \
   \
-  static __inline struct type *name##_SPLAY_MIN_MAX(struct name *head, int val) \
+  inline_function static struct type *name##_SPLAY_MIN_MAX(struct name *head, int val) \
   { \
     name##_SPLAY_MINMAX(head, val); \
     return (SPLAY_ROOT(head)); \
