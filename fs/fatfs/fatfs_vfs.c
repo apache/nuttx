@@ -849,7 +849,7 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
       /* format the device if -o "forceformat"  */
 
       memset(&opt, 0, sizeof(opt));
-      opt.fmt = FM_ANY | FM_SFD;
+      opt.fmt = FM_EXFAT | FM_SFD;
       opt.n_fat = 2;
       ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
       if (ret < 0)
@@ -870,7 +870,7 @@ static int fatfs_bind(FAR struct inode *driver, FAR const void *data,
         }
 
       memset(&opt, 0, sizeof(opt));
-      opt.fmt = FM_ANY | FM_SFD;
+      opt.fmt = FM_EXFAT | FM_SFD;
       opt.n_fat = 2;
       ret = fatfs_convert_result(f_mkfs(path, &opt, NULL, FF_MAX_SS));
       if (ret < 0)
