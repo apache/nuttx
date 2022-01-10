@@ -103,12 +103,12 @@ static const struct file_operations g_bh1721fvcfops =
   bh1721fvc_close,             /* close */
   bh1721fvc_read,              /* read */
   bh1721fvc_write,             /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   bh1721fvc_ioctl,             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* Take ambient light data. */

@@ -236,12 +236,12 @@ static void adb_char_on_connect(FAR struct usbdev_adb_s *priv, int connect);
 
 static const struct usbdevclass_driverops_s g_adb_driverops =
 {
-  usbclass_bind,       /* bind       */
-  usbclass_unbind,     /* unbind     */
-  usbclass_setup,      /* setup      */
+  usbclass_bind,       /* bind */
+  usbclass_unbind,     /* unbind */
+  usbclass_setup,      /* setup */
   usbclass_disconnect, /* disconnect */
-  usbclass_suspend,    /* suspend    */
-  usbclass_resume      /* resume     */
+  usbclass_suspend,    /* suspend */
+  usbclass_resume      /* resume */
 };
 
 /* Char device **************************************************************/
@@ -252,9 +252,12 @@ static const struct file_operations g_adb_fops =
   adb_char_close, /* close */
   adb_char_read,  /* read */
   adb_char_write, /* write */
-  0,              /* seek */
+  NULL,           /* seek */
   adb_char_ioctl, /* ioctl */
   adb_char_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /* USB descriptor ***********************************************************/

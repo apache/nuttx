@@ -248,13 +248,16 @@ static int  spq10kbd_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_hidkbd_fops =
 {
-  spq10kbd_open,             /* open      */
-  spq10kbd_close,            /* close     */
-  spq10kbd_read,             /* read      */
-  spq10kbd_write,            /* write     */
-  NULL,                      /* seek      */
-  NULL,                      /* ioctl     */
-  spq10kbd_poll              /* poll      */
+  spq10kbd_open,             /* open */
+  spq10kbd_close,            /* close */
+  spq10kbd_read,             /* read */
+  spq10kbd_write,            /* write */
+  NULL,                      /* seek */
+  NULL,                      /* ioctl */
+  spq10kbd_poll              /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                     /* unlink */
+#endif
 };
 
 /****************************************************************************

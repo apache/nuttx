@@ -101,15 +101,15 @@ static int mlx90393_ioctl(FAR struct file *filep,
 
 static const struct file_operations g_mlx90393_fops =
 {
-  mlx90393_open,
-  mlx90393_close,
-  mlx90393_read,
-  mlx90393_write,
-  NULL,
-  mlx90393_ioctl,
-  NULL
+  mlx90393_open,   /* open */
+  mlx90393_close,  /* close */
+  mlx90393_read,   /* read */
+  mlx90393_write,  /* write */
+  NULL,            /* seek */
+  mlx90393_ioctl,  /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

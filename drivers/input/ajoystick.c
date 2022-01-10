@@ -142,10 +142,13 @@ static const struct file_operations ajoy_fops =
   ajoy_open,  /* open */
   ajoy_close, /* close */
   ajoy_read,  /* read */
-  0,          /* write */
-  0,          /* seek */
+  NULL,       /* write */
+  NULL,       /* seek */
   ajoy_ioctl, /* ioctl */
   ajoy_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL      /* unlink */
+#endif
 };
 
 /****************************************************************************

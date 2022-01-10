@@ -87,13 +87,16 @@ static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_touch_fops =
 {
-  touch_open,
-  touch_close,
-  touch_read,
-  NULL,
-  NULL,
-  touch_ioctl,
-  touch_poll
+  touch_open,     /* open */
+  touch_close,    /* close */
+  touch_read,     /* read */
+  NULL,           /* write */
+  NULL,           /* seek */
+  touch_ioctl,    /* ioctl */
+  touch_poll      /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /****************************************************************************

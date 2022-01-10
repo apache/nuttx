@@ -132,9 +132,14 @@ static const struct file_operations g_timerfd_fops =
   timerfd_read,  /* read */
   NULL,          /* write */
   NULL,          /* seek */
-  NULL           /* ioctl */
+  NULL,          /* ioctl */
 #ifdef CONFIG_TIMER_FD_POLL
-  , timerfd_poll /* poll */
+  timerfd_poll   /* poll */
+#else
+  NULL           /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
 #endif
 };
 

@@ -139,12 +139,12 @@ static const struct file_operations g_bm1422gmvfops =
   bm1422gmv_close,             /* close */
   bm1422gmv_read,              /* read */
   bm1422gmv_write,             /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   bm1422gmv_ioctl,             /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* Take XYZ data. */

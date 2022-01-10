@@ -120,15 +120,15 @@ static int lis3dh_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_lis3dh_fops =
 {
-  lis3dh_open,
-  lis3dh_close,
-  lis3dh_read,
-  lis3dh_write,
-  NULL,
-  lis3dh_ioctl,
-  NULL
+  lis3dh_open,     /* open */
+  lis3dh_close,    /* close */
+  lis3dh_read,     /* read */
+  lis3dh_write,    /* write */
+  NULL,            /* seek */
+  lis3dh_ioctl,    /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

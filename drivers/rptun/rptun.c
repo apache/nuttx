@@ -153,7 +153,16 @@ static struct remoteproc_ops g_rptun_ops =
 
 static const struct file_operations g_rptun_devops =
 {
-  .ioctl = rptun_dev_ioctl,
+  NULL,             /* open */
+  NULL,             /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  rptun_dev_ioctl,  /* ioctl */
+  NULL              /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 #ifdef CONFIG_RPTUN_LOADER

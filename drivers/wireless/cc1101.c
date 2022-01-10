@@ -306,8 +306,7 @@ static const struct file_operations g_cc1101ops =
   NULL,              /* ioctl */
   cc1101_file_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  ,
-  NULL               /* unlink */
+  , NULL             /* unlink */
 #endif
 };
 

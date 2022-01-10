@@ -171,12 +171,12 @@ static const struct file_operations g_ak09912fops =
   ak09912_close,                 /* close */
   ak09912_read,                  /* read */
   ak09912_write,                 /* write */
-  0,                             /* seek */
+  NULL,                          /* seek */
   ak09912_ioctl,                 /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                             /* poll */
+  NULL                           /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                         /* unlink */
 #endif
-  0                              /* unlink */
 };
 
 /* Take XYZ data, temperature and Status 2 register.

@@ -336,15 +336,16 @@ static ssize_t mx7_debug_write(FAR struct file *filep,
 
 static const struct file_operations g_mx7_fops =
 {
-  .poll   = NULL,
+  mx7_open,      /* open */
+  mx7_close,     /* close */
+  mx7_read,      /* read */
+  mx7_write,     /* write */
+  NULL,          /* seek */
+  mx7_ioctl,     /* ioctl */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .unlink = NULL,
+  , NULL         /* unlink */
 #endif
-  .open   = mx7_open,
-  .close  = mx7_close,
-  .read   = mx7_read,
-  .write  = mx7_write,
-  .ioctl  = mx7_ioctl
 };
 
 #if defined(DEBUG)
@@ -353,14 +354,16 @@ static const struct file_operations g_mx7_fops =
 
 static const struct file_operations g_mx7_debug_fops =
 {
-  .poll   = NULL,
+  mx7_debug_open,      /* open */
+  mx7_debug_close,     /* close */
+  mx7_debug_read,      /* read */
+  mx7_debug_write,     /* write */
+  NULL,                /* seek */
+  NULL,                /* ioctl */
+  NULL                 /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .unlink = NULL,
+  , NULL               /* unlink */
 #endif
-  .open   = mx7_debug_open,
-  .close  = mx7_debug_close,
-  .read   = mx7_debug_read,
-  .write  = mx7_debug_write,
 };
 #endif
 

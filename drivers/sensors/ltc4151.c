@@ -105,15 +105,15 @@ static int     ltc4151_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_ltc4151fops =
 {
-  ltc4151_open,
-  ltc4151_close,
-  ltc4151_read,
-  ltc4151_write,
-  NULL,
-  ltc4151_ioctl,
-  NULL
+  ltc4151_open,    /* open */
+  ltc4151_close,   /* close */
+  ltc4151_read,    /* read */
+  ltc4151_write,   /* write */
+  NULL,            /* seek */
+  ltc4151_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

@@ -101,15 +101,15 @@ static int lis3mdl_ioctl(FAR struct file *filep,
 
 static const struct file_operations g_lis3mdl_fops =
 {
-  lis3mdl_open,
-  lis3mdl_close,
-  lis3mdl_read,
-  lis3mdl_write,
-  NULL,
-  lis3mdl_ioctl,
-  NULL
+  lis3mdl_open,    /* open */
+  lis3mdl_close,   /* close */
+  lis3mdl_read,    /* read */
+  lis3mdl_write,   /* write */
+  NULL,            /* seek */
+  lis3mdl_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

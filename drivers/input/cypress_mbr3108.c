@@ -225,6 +225,9 @@ static const struct file_operations g_mbr3108_fileops =
   NULL,           /* seek */
   NULL,           /* ioctl */
   mbr3108_poll    /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /****************************************************************************

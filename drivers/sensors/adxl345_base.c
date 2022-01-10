@@ -65,9 +65,13 @@ static const struct file_operations g_adxl345fops =
   adxl345_open,    /* open */
   adxl345_close,   /* close */
   adxl345_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  0,               /* ioctl */
+  NULL,            /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

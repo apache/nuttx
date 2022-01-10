@@ -83,12 +83,16 @@ static int     uart_bth4_poll (FAR struct file *filep,
 
 static const struct file_operations g_uart_bth4_ops =
 {
-  .open  = uart_bth4_open,
-  .close = uart_bth4_close,
-  .read  = uart_bth4_read,
-  .write = uart_bth4_write,
-  .ioctl = uart_bth4_ioctl,
-  .poll  = uart_bth4_poll
+  uart_bth4_open,   /* open */
+  uart_bth4_close,  /* cose */
+  uart_bth4_read,   /* read */
+  uart_bth4_write,  /* write */
+  NULL,             /* seek */
+  uart_bth4_ioctl,  /* ioctl */
+  uart_bth4_poll    /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************
