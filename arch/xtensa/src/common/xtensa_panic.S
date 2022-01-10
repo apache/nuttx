@@ -127,6 +127,7 @@ _xtensa_panic:
 	 */
 
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */

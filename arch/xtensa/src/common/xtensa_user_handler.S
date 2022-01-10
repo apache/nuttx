@@ -223,6 +223,7 @@ _xtensa_user_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
@@ -517,6 +518,7 @@ _xtensa_coproc_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */
