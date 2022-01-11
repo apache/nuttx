@@ -265,6 +265,7 @@ void xtensa_pause_handler(void);
 
 int xtensa_context_save(uint32_t *regs);
 void xtensa_context_restore(uint32_t *regs) noreturn_function;
+void xtensa_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 #if XCHAL_CP_NUM > 0
 void xtensa_coproc_savestate(struct xtensa_cpstate_s *cpstate);
