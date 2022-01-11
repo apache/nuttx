@@ -233,7 +233,7 @@ _xtensa_nmi_vector:
 	.align		4
 
 _debug_exception_vector:
-
+	wsr		a0, EXCSAVE + XCHAL_DEBUGLEVEL   /* Preserve a0 */
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
@@ -273,6 +273,8 @@ _double_exception_vector:
 	break	1, 4							/* Unhandled double exception */
 #endif
 
+	wsr		a0, EXCSAVE_1		/* Preserve a0 */
+
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
@@ -280,7 +282,7 @@ _double_exception_vector:
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, DEPC						/* Save interruptee's PC */
 	s32i	a0, sp, (4 * REG_PC)
-	rsr		a0, EXCSAVE						/* Save interruptee's a0 -- REVISIT */
+	rsr		a0, EXCSAVE_1				/* Save interruptee's a0 -- REVISIT */
 	s32i	a0, sp, (4 * REG_A0)
 
 	rsr		a0, EXCCAUSE					/* Save the EXCCAUSE register */
@@ -314,6 +316,8 @@ _kernel_exception_vector:
 #if XCHAL_HAVE_DEBUG
 	break	1, 0							/* Unhandled kernel exception */
 #endif
+
+	wsr		a0, EXCSAVE_1					/* Preserve a0 */
 
 	mov		a0, sp							/* sp == a1 */
 	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
