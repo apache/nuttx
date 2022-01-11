@@ -112,7 +112,7 @@
 #define STM32_LPUART1_BASE   0x40008000     /* 0x40008000-0x400083ff: LPUART1 */
 #define STM32_I2C4_BASE      0x40008400     /* 0x40008400-0x400087ff: I2C4 */
 #define STM32_UCPD1_BASE     0x4000a000     /* 0x4000a000-0x4000a3ff: UCPD1 */
-#define STM32_SRAMCAN_BASE   0x4000a400     /* 0x4000a400-0x4000afff: FDCANs Message RAM */
+#define STM32_CANRAM_BASE    0x4000a400     /* 0x4000a400-0x4000afff: FDCANs Message RAM */
 
 /* APB2 Base Addresses ******************************************************/
 
