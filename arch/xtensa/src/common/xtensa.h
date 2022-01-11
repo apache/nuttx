@@ -266,6 +266,8 @@ void xtensa_pause_handler(void);
 int xtensa_context_save(uint32_t *regs);
 void xtensa_context_restore(uint32_t *regs) noreturn_function;
 
+void xtensa_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+
 #if XCHAL_CP_NUM > 0
 void xtensa_coproc_savestate(struct xtensa_cpstate_s *cpstate);
 void xtensa_coproc_restorestate(struct xtensa_cpstate_s *cpstate);
@@ -337,7 +339,7 @@ void xtensa_pminitialize(void);
 
 /* Exception Handlers */
 
-int xtensa_svcall(int irq, void *context, void *arg);
+int xtensa_swint(int irq, void *context, void *arg);
 
 /* Debug ********************************************************************/
 
