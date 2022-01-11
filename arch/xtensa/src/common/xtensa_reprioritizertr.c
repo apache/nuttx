@@ -149,51 +149,28 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
               xtensa_restorestate(rtcb->xcp.regs);
             }
 
-          /* Copy the exception context into the TCB at the (old) head of the
-           * ready-to-run Task list. if up_saveusercontext returns a non-zero
-           * value, then this is really the previously running task
-           * restarting!
-           */
+          /* No, then we will need to perform the user context switch */
 
-          else if (!xtensa_context_save(rtcb->xcp.regs))
+          else
             {
-#if XCHAL_CP_NUM > 0
-              /* Save the co-processor state in in the suspended thread's co-
-               * processor save area.
+              struct tcb_s *nexttcb = this_task();
+
+              /* Reset scheduler parameters */
+
+              nxsched_resume_scheduler(nexttcb);
+
+              /* Switch context to the context of the task at the head of the
+               * ready to run list.
                */
 
-              xtensa_coproc_savestate(&rtcb->xcp.cpstate);
-#endif
-              /* Restore the exception context of the rtcb at the (new) head
-               * of the ready-to-run task list.
+              xtensa_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+
+              /* xtensa_switchcontext forces a context switch to the task at
+               * the head of the ready-to-run list. It does not 'return' in
+               * the normal sense. When it does return, it is because the
+               * blocked task is again ready to run and has execution
+               * priority.
                */
-
-              rtcb = this_task();
-
-#if XCHAL_CP_NUM > 0
-              /* Set up the co-processor state for the newly started
-               * thread.
-               */
-
-              xtensa_coproc_restorestate(&rtcb->xcp.cpstate);
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
-              /* Make sure that the address environment for the previously
-               * running task is closed down gracefully (data caches dump,
-               * MMU flushed) and set up the address environment for the new
-               * thread at the head of the ready-to-run list.
-               */
-
-              group_addrenv(rtcb);
-#endif
-              /* Update scheduler parameters */
-
-              nxsched_resume_scheduler(rtcb);
-
-              /* Then switch contexts */
-
-              xtensa_context_restore(rtcb->xcp.regs);
             }
         }
     }

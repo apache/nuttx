@@ -29,9 +29,32 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <debug.h>
+#include <arch/irq.h>
+
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* This is the value used as the argument to the SYSCALL instruction.
+ */
+
+#define SYS_syscall 0x00
+
+/* The SYS_signal_handler_return is executed here... its value is not always
+ * available in this context and so is assumed to be 7.
+ */
+
+#ifndef SYS_signal_handler_return
+#  define SYS_signal_handler_return (7)
+#elif SYS_signal_handler_return != 7
+#  error "SYS_signal_handler_return was assumed to be 7"
+#endif
 
 /****************************************************************************
  * Public Types
@@ -40,6 +63,194 @@
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* SVC call with SYS_ call number and no parameters */
+
+static inline uintptr_t sys_call0(unsigned int nbr)
+{
+  register long reg0 __asm__("a2") = (long)(nbr);
+
+  __asm__ __volatile__
+  (
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    "movi a3, %1\n"
+    "wsr a3, intset\n"
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    : "=r"(reg0)
+    : "i"(XCHAL_SW_SYSCALL), "r"(reg0)
+    : "a3", "memory"
+  );
+
+  return reg0;
+}
+
+/* SVC call with SYS_ call number and one parameter */
+
+static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
+{
+  register long reg0 __asm__("a2") = (long)(nbr);
+  register long reg1 __asm__("a3") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    "movi a4, %1\n"
+    "wsr a4, intset\n"
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    : "=r"(reg0)
+    : "i"(XCHAL_SW_SYSCALL), "r"(reg0), "r"(reg1)
+    : "a4", "memory"
+  );
+
+  return reg0;
+}
+
+/* SVC call with SYS_ call number and two parameters */
+
+static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2)
+{
+  register long reg0 __asm__("a2") = (long)(nbr);
+  register long reg2 __asm__("a4") = (long)(parm2);
+  register long reg1 __asm__("a3") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    "movi a5, %1\n"
+    "wsr a5, intset\n"
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    : "=r"(reg0)
+    : "i"(XCHAL_SW_SYSCALL), "r"(reg0), "r"(reg1), "r"(reg2)
+    : "a5", "memory"
+  );
+
+  return reg0;
+}
+
+/* SVC call with SYS_ call number and three parameters */
+
+static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4);
+static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3)
+{
+  return sys_call4(nbr, parm1, parm2, parm3, 0);
+}
+
+/* SVC call with SYS_ call number and four parameters.
+ *
+ * NOTE the nonstandard parameter passing:  parm4 is in R4
+ */
+
+static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4)
+{
+  register long reg0 __asm__("a2") = (long)(nbr);
+  register long reg4 __asm__("a6") = (long)(parm4);
+  register long reg3 __asm__("a5") = (long)(parm3);
+  register long reg2 __asm__("a4") = (long)(parm2);
+  register long reg1 __asm__("a3") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    "movi a7, %1\n"
+    "wsr a7, intset\n"
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    : "=r"(reg0)
+    : "i"(XCHAL_SW_SYSCALL), "r"(reg0), "r"(reg1), "r"(reg2),
+      "r"(reg3), "r"(reg4)
+    : "a7", "memory"
+  );
+
+  return reg0;
+}
+
+/* SVC call with SYS_ call number and five parameters.
+ *
+ * NOTE the nonstandard parameter passing:  parm4 and parm5 are in R4 and R5
+ */
+
+static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5,
+                                  uintptr_t parm6);
+static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5)
+{
+  return sys_call6(nbr, parm1, parm2, parm3, parm4, parm5, 0);
+}
+
+/* SVC call with SYS_ call number and six parameters.
+ *
+ * NOTE the nonstandard parameter passing:  parm4-parm6 are in R4-R6
+ */
+
+static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5,
+                                  uintptr_t parm6)
+{
+  register long reg0 __asm__("a2") = (long)(nbr);
+  register long reg6 __asm__("a8") = (long)(parm6);
+  register long reg5 __asm__("a7") = (long)(parm5);
+  register long reg4 __asm__("a5") = (long)(parm4);
+  register long reg3 __asm__("a4") = (long)(parm3);
+  register long reg2 __asm__("a4") = (long)(parm2);
+  register long reg1 __asm__("a3") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    "movi a7, %1\n"
+    "wsr a7, intset\n"
+    "isync\n"
+    "dsync\n"
+    "esync\n"
+    "memw\n"
+    : "=r"(reg0)
+    : "i"(XCHAL_SW_SYSCALL), "r"(reg0), "r"(reg1), "r"(reg2),
+      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
+    : "a7", "memory"
+  );
+
+  return reg0;
+}
+
+#endif
 
 /****************************************************************************
  * Public Data

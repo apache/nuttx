@@ -50,6 +50,13 @@ int xtensa_svcall(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
+#if XCHAL_CP_NUM > 0
+  uintptr_t cpstate;
+  uint32_t cpstate_off;
+
+  cpstate_off = offsetof(struct xcptcontext, cpstate) -
+                offsetof(struct xcptcontext, regs);
+#endif
 
   DEBUGASSERT(regs && regs == CURRENT_REGS);
   cmd = regs[REG_A2];
@@ -81,7 +88,7 @@ int xtensa_svcall(int irq, void *context, void *arg)
     {
       /* A2=SYS_save_context:  This is a save context command:
        *
-       *   int xtensa_saveusercontext(uint32_t *saveregs);
+       * int xtensa_saveusercontext(uint32_t *saveregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -94,9 +101,71 @@ int xtensa_svcall(int irq, void *context, void *arg)
 
       case SYS_save_context:
         {
-          /* Nothing to do. As context save was done in syscall handler enter */
+          DEBUGASSERT(regs[REG_A3] != 0);
+          memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
         }
-        break;
+      break;
+
+      /* A2=SYS_restore_context:  This a restore context command:
+       *
+       * void xtensa_fullcontextrestore(uint32_t *restoreregs)
+       *      noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_restore_context
+       *   A3 = restoreregs
+       *
+       * In this case, we simply need to set CURRENT_REGS to restore
+       * register area referenced in the saved A3. context == CURRENT_REGS
+       * is the normal exception return.  By setting CURRENT_REGS =
+       * context[A3], we force the return to the saved context referenced
+       * in A3.
+       */
+
+      case SYS_restore_context:
+        {
+          DEBUGASSERT(regs[REG_A3] != 0);
+          CURRENT_REGS = (uint32_t *)regs[REG_A3];
+        }
+      break;
+
+      /* A2=SYS_switch_context:  This a switch context command:
+       *
+       * void xtensa_switchcontext
+       *      (uint32_t *saveregs, uint32_t *restoreregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_switch_context
+       *   A3 = saveregs
+       *   A4 = restoreregs
+       *
+       * In this case, we do both: We save the context registers to the save
+       * register area reference by the saved contents of A3 and then set
+       * CURRENT_REGS to the save register area referenced by the saved
+       * contents of A4.
+       */
+
+      case SYS_switch_context:
+        {
+          DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
+
+          memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
+#if XCHAL_CP_NUM > 0
+          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
+          xtensa_coproc_savestate(cpstate);
+          cpstate = (uintptr_t)regs[REG_A4] + cpstate_off;
+          xtensa_coproc_restorestate(cpstate);
+#endif
+          CURRENT_REGS = (uint32_t *)regs[REG_A4];
+        }
+      break;
+    }
+
+  if (CURRENT_REGS[REG_PS] & PS_EXCM_MASK)
+    {
+      CURRENT_REGS[REG_PS] &= ~PS_EXCM_MASK;
     }
 
   /* Report what happened.  That might difficult in the case of a context
@@ -127,7 +196,7 @@ int xtensa_svcall(int irq, void *context, void *arg)
 # ifdef CONFIG_DEBUG_SVCALL
   else
     {
-      svcinfo("SVCall Return: %d\n", regs[REG_A0]);
+      svcinfo("SVCall Return: %d\n", regs[REG_A2]);
     }
 # endif
 #endif
