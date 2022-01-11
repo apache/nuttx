@@ -331,10 +331,6 @@ static void ajoy_sample(FAR struct ajoy_upperhalf_s *priv)
         }
     }
 
-  /* Enable/disable interrupt handling */
-
-  ajoy_enable(priv);
-
   priv->au_sample = sample;
   leave_critical_section(flags);
 }
