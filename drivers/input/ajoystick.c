@@ -64,7 +64,6 @@ struct ajoy_upperhalf_s
   FAR const struct ajoy_lowerhalf_s *au_lower;
 
   ajoy_buttonset_t au_sample;  /* Last sampled button states */
-  sem_t au_exclsem;            /* Supports exclusive access to the device */
 
   /* The following is a singly linked list of open references to the
    * joystick device.
@@ -80,10 +79,6 @@ struct ajoy_open_s
   /* Supports a singly linked list */
 
   FAR struct ajoy_open_s *ao_flink;
-
-  /* The following will be true if we are closing */
-
-  volatile bool ao_closing;
 
   /* Joystick event notification information */
 
@@ -106,11 +101,6 @@ struct ajoy_open_s
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
-
-/* Semaphore helpers */
-
-static inline int ajoy_takesem(sem_t *sem);
-#define ajoy_givesem(s) nxsem_post(s);
 
 /* Sampling and Interrupt handling */
 
@@ -156,15 +146,6 @@ static const struct file_operations ajoy_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: ajoy_takesem
- ****************************************************************************/
-
-static inline int ajoy_takesem(sem_t *sem)
-{
-  return nxsem_wait(sem);
-}
-
-/****************************************************************************
  * Name: ajoy_enable
  ****************************************************************************/
 
@@ -174,17 +155,10 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
   FAR struct ajoy_open_s *opriv;
   ajoy_buttonset_t press;
   ajoy_buttonset_t release;
-  irqstate_t flags;
 
   DEBUGASSERT(priv);
   lower = priv->au_lower;
   DEBUGASSERT(lower);
-
-  /* This routine is called both task level and interrupt level, so
-   * interrupts must be disabled.
-   */
-
-  flags = enter_critical_section();
 
   /* Visit each opened reference to the device */
 
@@ -218,8 +192,6 @@ static void ajoy_enable(FAR struct ajoy_upperhalf_s *priv)
 
       lower->al_enable(lower, 0, 0, NULL, NULL);
     }
-
-  leave_critical_section(flags);
 }
 
 /****************************************************************************
@@ -336,21 +308,12 @@ static int ajoy_open(FAR struct file *filep)
   FAR struct ajoy_open_s *opriv;
   FAR const struct ajoy_lowerhalf_s *lower;
   ajoy_buttonset_t supported;
-  int ret;
+  irqstate_t flags;
 
   DEBUGASSERT(filep && filep->f_inode);
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv = (FAR struct ajoy_upperhalf_s *)inode->i_private;
-
-  /* Get exclusive access to the driver structure */
-
-  ret = ajoy_takesem(&priv->au_exclsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: ajoy_takesem failed: %d\n", ret);
-      return ret;
-    }
 
   /* Allocate a new open structure */
 
@@ -358,16 +321,17 @@ static int ajoy_open(FAR struct file *filep)
   if (!opriv)
     {
       ierr("ERROR: Failed to allocate open structure\n");
-      ret = -ENOMEM;
-      goto errout_with_sem;
+      return -ENOMEM;
     }
 
   /* Initialize the open structure */
 
   lower = priv->au_lower;
   DEBUGASSERT(lower && lower->al_supported);
-  supported = lower->al_supported(lower);
 
+  flags = enter_critical_section();
+
+  supported = lower->al_supported(lower);
   opriv->ao_pollevents.ap_press   = supported;
   opriv->ao_pollevents.ap_release = supported;
 
@@ -383,11 +347,9 @@ static int ajoy_open(FAR struct file *filep)
   /* Attach the open structure to the file structure */
 
   filep->f_priv = (FAR void *)opriv;
-  ret = OK;
 
-errout_with_sem:
-  ajoy_givesem(&priv->au_exclsem);
-  return ret;
+  leave_critical_section(flags);
+  return OK;
 }
 
 /****************************************************************************
@@ -402,8 +364,6 @@ static int ajoy_close(FAR struct file *filep)
   FAR struct ajoy_open_s *curr;
   FAR struct ajoy_open_s *prev;
   irqstate_t flags;
-  bool closing;
-  int ret;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
@@ -411,36 +371,7 @@ static int ajoy_close(FAR struct file *filep)
   DEBUGASSERT(inode->i_private);
   priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
-  /* Handle an improbable race conditions with the following atomic test
-   * and set.
-   *
-   * This is actually a pretty feeble attempt to handle this.  The
-   * improbable race condition occurs if two different threads try to
-   * close the joystick driver at the same time.  The rule:  don't do
-   * that!  It is feeble because we do not really enforce stale pointer
-   * detection anyway.
-   */
-
   flags = enter_critical_section();
-  closing = opriv->ao_closing;
-  opriv->ao_closing = true;
-  leave_critical_section(flags);
-
-  if (closing)
-    {
-      /* Another thread is doing the close */
-
-      return OK;
-    }
-
-  /* Get exclusive access to the driver structure */
-
-  ret = ajoy_takesem(&priv->au_exclsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: ajoy_takesem failed: %d\n", ret);
-      return ret;
-    }
 
   /* Find the open structure in the list of open structures for the device */
 
@@ -452,8 +383,8 @@ static int ajoy_close(FAR struct file *filep)
   if (!curr)
     {
       ierr("ERROR: Failed to find open entry\n");
-      ret = -ENOENT;
-      goto errout_with_exclsem;
+      leave_critical_section(flags);
+      return -ENOENT;
     }
 
   /* Remove the structure from the device */
@@ -467,6 +398,12 @@ static int ajoy_close(FAR struct file *filep)
       priv->au_open = opriv->ao_flink;
     }
 
+  /* Enable/disable interrupt handling */
+
+  ajoy_enable(priv);
+
+  leave_critical_section(flags);
+
   /* Cancel any pending notification */
 
   nxsig_cancel_notification(&opriv->ao_work);
@@ -474,15 +411,7 @@ static int ajoy_close(FAR struct file *filep)
   /* And free the open structure */
 
   kmm_free(opriv);
-
-  /* Enable/disable interrupt handling */
-
-  ajoy_enable(priv);
-  ret = OK;
-
-errout_with_exclsem:
-  ajoy_givesem(&priv->au_exclsem);
-  return ret;
+  return OK;
 }
 
 /****************************************************************************
@@ -496,6 +425,7 @@ static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
   FAR struct ajoy_open_s *opriv;
   FAR struct ajoy_upperhalf_s *priv;
   FAR const struct ajoy_lowerhalf_s *lower;
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
@@ -518,12 +448,7 @@ static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
 
   /* Get exclusive access to the driver structure */
 
-  ret = ajoy_takesem(&priv->au_exclsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: ajoy_takesem failed: %d\n", ret);
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Read and return the current state of the joystick buttons */
 
@@ -536,7 +461,7 @@ static ssize_t ajoy_read(FAR struct file *filep, FAR char *buffer,
       ret = sizeof(struct ajoy_sample_s);
     }
 
-  ajoy_givesem(&priv->au_exclsem);
+  leave_critical_section(flags);
   return (ssize_t)ret;
 }
 
@@ -550,6 +475,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct ajoy_upperhalf_s *priv;
   FAR struct ajoy_open_s *opriv;
   FAR const struct ajoy_lowerhalf_s *lower;
+  irqstate_t flags;
   int ret;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
@@ -560,12 +486,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Get exclusive access to the driver structure */
 
-  ret = ajoy_takesem(&priv->au_exclsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: ajoy_takesem failed: %d\n", ret);
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Handle the ioctl command */
 
@@ -665,7 +586,7 @@ static int ajoy_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
       break;
     }
 
-  ajoy_givesem(&priv->au_exclsem);
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -677,25 +598,19 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
                      bool setup)
 {
   FAR struct inode *inode;
-  FAR struct ajoy_upperhalf_s *priv;
   FAR struct ajoy_open_s *opriv;
-  int ret;
+  irqstate_t flags;
+  int ret = OK;
   int i;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
-  priv  = (FAR struct ajoy_upperhalf_s *)inode->i_private;
 
   /* Get exclusive access to the driver structure */
 
-  ret = ajoy_takesem(&priv->au_exclsem);
-  if (ret < 0)
-    {
-      ierr("ERROR: ajoy_takesem failed: %d\n", ret);
-      return ret;
-    }
+  flags = enter_critical_section();
 
   /* Are we setting up the poll?  Or tearing it down? */
 
@@ -737,7 +652,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
           ierr("ERROR: Too man poll waiters\n");
           fds->priv    = NULL;
           ret          = -EBUSY;
-          goto errout_with_dusem;
+          goto errout;
         }
     }
   else if (fds->priv)
@@ -751,7 +666,7 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
         {
           ierr("ERROR: Poll slot not found\n");
           ret = -EIO;
-          goto errout_with_dusem;
+          goto errout;
         }
 #endif
 
@@ -761,8 +676,8 @@ static int ajoy_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = NULL;
     }
 
-errout_with_dusem:
-  ajoy_givesem(&priv->au_exclsem);
+errout:
+  leave_critical_section(flags);
   return ret;
 }
 
@@ -803,7 +718,6 @@ int ajoy_register(FAR const char *devname,
 
   priv = (FAR struct ajoy_upperhalf_s *)
     kmm_zalloc(sizeof(struct ajoy_upperhalf_s));
-
   if (!priv)
     {
       ierr("ERROR: Failed to allocate device structure\n");
@@ -818,7 +732,6 @@ int ajoy_register(FAR const char *devname,
   /* Initialize the new ajoystick driver instance */
 
   priv->au_lower = lower;
-  nxsem_init(&priv->au_exclsem, 0, 1);
 
   DEBUGASSERT(lower->al_buttons);
   priv->au_sample = lower->al_buttons(lower);
@@ -829,13 +742,8 @@ int ajoy_register(FAR const char *devname,
   if (ret < 0)
     {
       ierr("ERROR: register_driver failed: %d\n", ret);
-      goto errout_with_priv;
+      kmm_free(priv);
     }
 
-  return OK;
-
-errout_with_priv:
-  nxsem_destroy(&priv->au_exclsem);
-  kmm_free(priv);
   return ret;
 }
