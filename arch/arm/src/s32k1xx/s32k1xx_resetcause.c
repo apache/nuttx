@@ -146,14 +146,6 @@ static int resetcause_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "resetcause" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "resetcause") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   attr = kmm_zalloc(sizeof(struct resetcause_file_s));
@@ -278,14 +270,6 @@ static int resetcause_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int resetcause_stat(FAR const char *relpath, FAR struct stat *buf)
 {
-  /* "resetcause" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "resetcause") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "resetcause" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

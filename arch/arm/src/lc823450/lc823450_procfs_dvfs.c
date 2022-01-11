@@ -137,14 +137,6 @@ static int dvfs_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Open '%s'\n", relpath);
 
-  /* "dvfs" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "dvfs") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the task and attribute selection */
 
   priv = (FAR struct dvfs_file_s *)kmm_zalloc(sizeof(struct dvfs_file_s));
@@ -355,12 +347,6 @@ static int dvfs_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int dvfs_stat(const char *relpath, struct stat *buf)
 {
-  if (strcmp(relpath, "dvfs") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   buf->st_mode    =
     S_IFREG |
     S_IROTH | S_IWOTH |
