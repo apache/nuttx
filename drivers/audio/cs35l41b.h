@@ -966,6 +966,14 @@ struct cs35l41b_dev_s
 
   bool                    is_bypassed;
 
+  /* set pa calibration */
+
+  bool                    is_calibrating;
+
+  /* is pa calibration value loaded */
+
+  bool                    is_calibrate_value_loaded;
+
   uint8_t otp_contents[128];         /* Cache storage for OTP contents */
 };
 

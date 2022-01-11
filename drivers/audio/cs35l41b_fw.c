@@ -43,6 +43,7 @@
 #include "cs35l41b_fw.h"
 #include "cs35l41_fw_img.h"
 #include "cs35l41_tune_fw_img.h"
+#include "cs35l41_cal_fw_img.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -62,6 +63,7 @@
 #define FW_HEADER_OFFSET                                8
 
 #define FW_SYM_TABLE_OFFSET                             40
+#define FW_SYM_TABLE_SINGLE_OFFSET                      8
 
 #define FW_DATA_HEADER_SIZE                             8
 #define FW_DATA_HEADER_BLOCK_SIZE_OFFSET                0
@@ -78,7 +80,7 @@
 #define FW_MAGIC2_TYPE                                  6
 #define FW_CHECKSUM_TYPE                                7
 
-#define CS35L41_DSP_STATUS_WORDS_TOTAL                  9
+#define CS35L41_DSP_STATUS_WORDS_TOTAL                  10
 
 /* FIRMWARE_HALO_CSPL */
 
@@ -95,6 +97,10 @@
 #define CS35L41_SYM_CSPL_CAL_CHECKSUM                   (0x8)
 #define CS35L41_SYM_CSPL_CAL_R_SELECTED                 (0x9)
 #define CS35L41_SYM_CSPL_CAL_SET_STATUS                 (0xa)
+
+#define CS35L41_CAL_STATUS_CALIB_SUCCESS                (0x1)
+
+#define CS35L41B_CALIBERATION_INFO_STR                  "ro.factory.audio_par"
 
 /****************************************************************************
  * Private Type Declarations
@@ -161,12 +167,13 @@ typedef struct
           uint32_t halo_state;
           uint32_t halo_heartbeat;
           uint32_t cspl_state;
-          uint32_t cal_set_status;
-          uint32_t cal_r_selected;
+          uint32_t cspl_temperature;
           uint32_t cal_r;
+          uint32_t cal_ambient;
           uint32_t cal_status;
           uint32_t cal_checksum;
-          uint32_t cspl_temperature;
+          uint32_t cal_r_selected;
+          uint32_t cal_set_status;
         };
     } data;
 
@@ -670,6 +677,25 @@ static int cs35l41b_load_tune_process(FAR struct cs35l41b_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: cs35l41b_load_cal_process
+ *
+ * Description:
+ *   cs35l41b load calibration fw
+ *
+ ****************************************************************************/
+
+static int cs35l41b_load_cal_process(FAR struct cs35l41b_dev_s *priv)
+{
+  g_fw_info.imager_buffer = (uint8_t *)g_cs35l41_cal_fw_img;
+  if (load_fw_process(priv, &g_fw_info) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: cs35l41b_set_boot_configuration
  *
  * Description:
@@ -722,6 +748,32 @@ cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
     }
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: get_symbol_link_address
+ *
+ * Description:
+ *   get symbol link table address of id
+ *
+ ****************************************************************************/
+
+static uint32_t get_symbol_link_address(int id)
+{
+  uint8_t *temp_buffer = (uint8_t *)g_cs35l41_fw_img;
+  uint32_t addr;
+
+  /* skip preheader and header */
+
+  temp_buffer += FW_SYM_TABLE_OFFSET;
+
+  temp_buffer += (id - 1) * FW_SYM_TABLE_SINGLE_OFFSET;
+  temp_buffer += 4;
+
+  addr = temp_buffer[0] + ((uint32_t)temp_buffer[1] << 8) +
+         ((uint32_t)temp_buffer[2] << 16) + ((uint32_t)temp_buffer[3] << 24);
+
+  return addr;
 }
 
 /****************************************************************************
@@ -801,6 +853,154 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: cs35l41b_write_caliberate_ambient
+ *
+ * Description:
+ *   cs35l41b write cliberate ambient degree
+ *
+ ****************************************************************************/
+
+int cs35l41b_write_caliberate_ambient(FAR struct cs35l41b_dev_s *priv,
+                                      uint32_t ambient_temp_deg_c)
+{
+  uint32_t address;
+  int ret;
+
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_AMBIENT);
+  ret = cs35l41b_write_register(priv, address, ambient_temp_deg_c);
+  if (ret == ERROR)
+    {
+      auderr("Error write 0x%08x!\n", address);
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_calibrate
+ *
+ * Description:
+ *   cs35l41b cliberate process
+ *
+ ****************************************************************************/
+
+int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv,
+                       uint32_t ambient_temp_deg_c)
+{
+  uint32_t address;
+  uint32_t val;
+  int ret;
+
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
+  val = cs35l41b_read_register(priv, address);
+  if (val < 0)
+    {
+      auderr("Error read register!\n");
+      return ERROR;
+    }
+
+  g_dsp_status.data.cal_r = val;
+
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_STATUS);
+  val = cs35l41b_read_register(priv, address);
+  if (val < 0)
+    {
+      auderr("Error read register!\n");
+      return ERROR;
+    }
+
+  if ((val != CS35L41_CAL_STATUS_CALIB_SUCCESS) && (val != 3))
+    {
+      auderr("Error calibrate cs35l41b!\n");
+      return ERROR;
+    }
+
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
+  val = cs35l41b_read_register(priv, address);
+  if (val < 0)
+    {
+      auderr("Error read register!\n");
+      return ERROR;
+    }
+
+  if (val != (g_dsp_status.data.cal_r + CS35L41_CAL_STATUS_CALIB_SUCCESS))
+    {
+      auderr("Error verify calibrate cs35l41b!\n");
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_get_calibration_result
+ *
+ * Description:
+ *   cs35l41b get cliberate value
+ *
+ ****************************************************************************/
+
+uint32_t cs35l41b_get_calibration_result(void)
+{
+  return g_dsp_status.data.cal_r;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_load_calibration_value
+ *
+ * Description:
+ *   cs35l41b load caliberate value
+ *
+ ****************************************************************************/
+
+int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
+{
+  uint32_t address;
+  int ret;
+  int value;
+
+  if (!priv->lower->get_caliberate_result)
+    {
+      audwarn("cs45l41b don't need caliberate!\n");
+      return OK;
+    }
+
+  if (priv->lower->get_caliberate_result(&value) == OK)
+    {
+      audwarn("caliberate value:0x%08lx\n", value);
+
+      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
+      ret = cs35l41b_write_register(priv, address, value);
+      if (ret == ERROR)
+        {
+          printf("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
+          return ERROR;
+        }
+
+      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_STATUS);
+      ret = cs35l41b_write_register(priv, address,
+                                    CS35L41_CAL_STATUS_CALIB_SUCCESS);
+      if (ret == ERROR)
+        {
+          printf("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+          return ERROR;
+        }
+
+      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
+      ret = cs35l41b_write_register(priv, address,
+            (value + CS35L41_CAL_STATUS_CALIB_SUCCESS));
+      if (ret == ERROR)
+        {
+          printf("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+          return ERROR;
+        }
+    }
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: cs35l41_dsp_boot
  *
  * Description:
@@ -815,9 +1015,19 @@ int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
-  if (cs35l41b_load_tune_process(priv) == ERROR)
+  if (!priv->is_calibrating)
     {
-      return ERROR;
+      if (cs35l41b_load_tune_process(priv) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+  else
+    {
+      if (cs35l41b_load_cal_process(priv) == ERROR)
+        {
+          return ERROR;
+        }
     }
 
   if (cs35l41b_set_boot_configuration(priv) == ERROR)

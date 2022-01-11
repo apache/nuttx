@@ -64,6 +64,11 @@
 #define IO_SET_BYPASS               1
 #define IO_CANCEL_BYPASS            2
 #define IO_GET_CHIP_ID              3
+#define IO_SET_CALIBRATED           4
+#define IO_GET_CALIBRATED           5
+
+#define CALIBRATED_STATUS_OK        1
+#define CALIBRATED_STATUS_ERROR     2
 
 /* Delay in ms between polling OTP_BOOT_DONE */
 
@@ -408,6 +413,37 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             audio_msg->msg_id = IO_GET_CHIP_ID;
             audio_msg->u.data = CS35L41_DEVID;
             *(FAR struct audio_msg_s *)arg = *audio_msg;
+            break;
+
+          case IO_SET_CALIBRATED:
+            priv->is_calibrating = true;
+            audio_msg->msg_id = IO_SET_CALIBRATED;
+            if (cs35l41b_reset(priv) == ERROR)
+              {
+                audio_msg->u.data = CALIBRATED_STATUS_ERROR;
+              }
+
+            audio_msg->u.data = CALIBRATED_STATUS_OK;
+
+            *(FAR struct audio_msg_s *)arg = *audio_msg;
+
+            if (cs35l41b_write_caliberate_ambient(priv, 30) == ERROR)
+              {
+                return ERROR;
+              }
+            break;
+
+          case IO_GET_CALIBRATED:
+            priv->is_calibrating = false;
+
+            audio_msg->msg_id = IO_GET_CALIBRATED;
+            audio_msg->u.data = cs35l41b_get_calibration_result();
+            *(FAR struct audio_msg_s *)arg = *audio_msg;
+
+            if (cs35l41b_reset(priv) == ERROR)
+              {
+                return ERROR;
+              }
             break;
 
           default:
@@ -786,6 +822,19 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
+  /* if dsp do not load caliberate that can be load caliberated  value */
+
+  if ((!priv->is_calibrating) && (!priv->is_calibrate_value_loaded))
+    {
+      if (cs35l41b_load_calibration_value(priv) == ERROR)
+        {
+          auderr("dsp caliberate error\n");
+          return ERROR;
+        }
+
+      priv->is_calibrate_value_loaded = true;
+    }
+
   return OK;
 }
 
@@ -806,6 +855,7 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
 #  endif
 #endif
 {
+  uint32_t val;
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
@@ -819,6 +869,11 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
     {
       return ERROR;
+    }
+
+  if (priv->is_calibrating)
+    {
+      cs35l41b_calibrate(priv, val);
     }
 
   return OK;
@@ -1806,6 +1861,10 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
       auderr("dsp boot process error\n");
       return ERROR;
     }
+
+  /* cs45l41b reset and reset caliberate value load state */
+
+  priv->is_calibrate_value_loaded = false;
 
   /* enable dsp output */
 
