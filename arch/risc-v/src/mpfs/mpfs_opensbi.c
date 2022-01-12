@@ -199,7 +199,7 @@ static sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
 
 uint8_t g_hart_stacks[SBI_PLATFORM_DEFAULT_HART_STACK_SIZE * \
                       MPFS_HART_COUNT] \
-                      __attribute__((section(".ddrstorage")));
+                      __attribute__((section(".ddrstorage"), aligned(16)));
 
 /****************************************************************************
  * Private Functions
