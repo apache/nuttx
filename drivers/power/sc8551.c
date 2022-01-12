@@ -926,15 +926,15 @@ static int sc8551_set_vdrop_deglitch(FAR struct sc8551_dev_s *priv, int us)
 }
 
 static int sc8551_enable_bat_therm(FAR struct sc8551_dev_s *priv,
-                                   bool disable)
+                                   bool enable)
 {
   int ret;
   uint8_t val;
 
-  if (disable)
-    val = SC8551_TSBAT_DISABLE;
-  else
+  if (enable)
     val = SC8551_TSBAT_ENABLE;
+  else
+    val = SC8551_TSBAT_DISABLE;
 
   val <<= SC8551_TSBAT_DIS_SHIFT;
 
