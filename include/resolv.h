@@ -42,6 +42,14 @@ int b64_ntop(FAR const unsigned char *src, size_t srclen,
 int b64_pton(FAR const char *src,
              FAR unsigned char *target, size_t targsize);
 
+/* dn resolution */
+
+int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
+            FAR unsigned char **dnptrs, FAR unsigned char **lastdnptr);
+
+int dn_expand(FAR const unsigned char *base, FAR const unsigned char *end,
+              FAR const unsigned char *src, FAR char *dest, int space);
+
 #if defined(__cplusplus)
 }
 #endif
