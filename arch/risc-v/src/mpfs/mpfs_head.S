@@ -41,9 +41,9 @@
   .extern __trap_vec
 
   .section .text
-  .global __start_mpfs
+  .global __start
 
-__start_mpfs:
+__start:
 
 
   /* Disable all interrupts (i.e. timer, external) in mie */

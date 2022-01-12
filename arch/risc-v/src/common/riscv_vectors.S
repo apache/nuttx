@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/fe310/fe310_vectors.S
+ * arch/risc-v/src/common/riscv_vectors.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,16 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-  .section .text.vec
-  .global  __reset_vec
+  .section .text
   .global  __trap_vec
-
-/****************************************************************************
- * Name: __reset_vec
- ****************************************************************************/
-
-__reset_vec:
-  jal  __start
 
 /****************************************************************************
  * Name: exception_common
