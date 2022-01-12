@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/s32k1xx/s32k1xx_resetcause.h
+ * arch/arm/src/s32k1xx/s32k1xx_resetcause_procfs.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,46 +18,33 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H
-#define __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_RESETCAUSE_PROCFS_H
+#define __ARCH_ARM_SRC_S32K1XX_S32K1XX_RESETCAUSE_PROCFS_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#ifdef CONFIG_S32K1XX_RESETCAUSE_PROCFS
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: s32k1xx_resetcause_init
+ * Name: s32k1xx_resetcause_procfs_register
  *
- * Description: This function initializes the resetcause
- *              It will get the resetcause and store it
+ * Description:
+ *   Register the S32K1XX Reset Cause procfs file system entry
  *
- ****************************************************************************/
-
-void s32k1xx_resetcause_init(void);
-
-/****************************************************************************
- * Name: s32k1xx_resetcause_initialize_procfs
- *
- * Description:   This function registrates the reset cause as a proc fs
- *                Returns 0 if OK, error number otherwise
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure
  *
  ****************************************************************************/
 
-int s32k1xx_resetcause_initialize_procfs(void);
+int s32k1xx_resetcause_procfs_register(void);
 
-#endif /* __ARCH_ARM_SRC_S32K1XX_RESETCAUSE_H */
+#endif /* CONFIG_S32K1XX_RESETCAUSE_PROCFS */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32K1XX_RESETCAUSE_PROCFS_H */
