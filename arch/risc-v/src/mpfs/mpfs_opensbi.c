@@ -71,8 +71,6 @@
 #define MPFS_PMP_DEFAULT_ADDR      0xfffffffff
 #define MPFS_PMP_DEFAULT_PERM      0x000000009f
 
-#define UBOOT_LOAD_ADDR            0x80200000  /* We expect u-boot here */
-
 /* The following define is not accessible with assember.  Make sure it's in
  * sync with the assembler usage in mpfs_opensbi_utils.S.
  */
@@ -200,6 +198,15 @@ static sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
 uint8_t g_hart_stacks[SBI_PLATFORM_DEFAULT_HART_STACK_SIZE * \
                       MPFS_HART_COUNT] \
                       __attribute__((section(".ddrstorage"), aligned(16)));
+
+static const uint64_t sbi_entrypoints[] =
+{
+  CONFIG_MPFS_HART0_ENTRYPOINT,
+  CONFIG_MPFS_HART1_ENTRYPOINT,
+  CONFIG_MPFS_HART2_ENTRYPOINT,
+  CONFIG_MPFS_HART3_ENTRYPOINT,
+  CONFIG_MPFS_HART4_ENTRYPOINT
+};
 
 /****************************************************************************
  * Private Functions
@@ -519,7 +526,7 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
-  g_scratches[hartid].scratch.next_addr = UBOOT_LOAD_ADDR;
+  g_scratches[hartid].scratch.next_addr = sbi_entrypoints[hartid];
   g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);

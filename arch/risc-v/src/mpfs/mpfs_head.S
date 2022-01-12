@@ -133,6 +133,18 @@ __start:
 
 .skip_e51:
 
+/* initialize global pointer, global data
+ * The __global_pointer is allocated in the linker script.
+ * It points to a location between _sdata and _edata as the offsets used in the gp are +/- 2k
+ * See https://www.sifive.com/blog/2017/08/28/all-aboard-part-3-linker-relaxation-in-riscv-toolchain/
+ * see: http://www.rowleydownload.co.uk/arm/documentation/gnu/as/RISC_002dV_002dDirectives.html
+ */
+
+.option push
+.option norelax
+  la  gp, __global_pointer$
+.option pop
+
 #ifdef CONFIG_MPFS_BOOTLOADER
 
   /* Set all but the boot hart into wfi */
@@ -166,13 +178,17 @@ __start:
   csrw mie, zero
   csrw mip, zero
 
-#ifdef CONFIG_MPFS_OPENSBI
-  jal mpfs_opensbi_prepare_hart
-#else
-  /* Jump to app (TODO: remove fixed address) */
-  li a1, 0x80000000
-  jr a1
-#endif
+  /* Offset to g_entrypoints vector, acc. to hart id */
+  li t1,8
+  mul t1, a0, t1
+
+  /* Load the entrypoint address */
+  la t0, g_entrypoints
+  add t0, t0, t1
+  ld t0, 0(t0)
+
+  /* Jump to app */
+  jr t0
 
 .continue_boot:
 
@@ -181,20 +197,6 @@ __start:
   /* Set stack pointer to the idle thread stack */
 
   la   sp, MPFS_IDLESTACK_TOP
-
-
-/* initialize global pointer, global data
- * The __global_pointer is allocated in the linker script.
- * It points to a location between _sdata and _edata as the offsets used in the gp are +/- 2k
- * See https://www.sifive.com/blog/2017/08/28/all-aboard-part-3-linker-relaxation-in-riscv-toolchain/
- * see: http://www.rowleydownload.co.uk/arm/documentation/gnu/as/RISC_002dV_002dDirectives.html
- */
-
-.option push
-.option norelax
-  la  gp, __global_pointer$
-.option pop
-
 
   /* Jump to __mpfs_start with mhartid in a0 */
 
