@@ -58,6 +58,66 @@ config MPFS_OPENSBI
         ---help---
                 This uses a ld-envm-opensbi.script linker script and the mpfs_opensbi.c code to use external OpenSBI.
 
+config MPFS_HART0_SBI
+	bool "HART0 boots via SBI"
+	depends on MPFS_OPENSBI
+	default n
+
+config MPFS_HART1_SBI
+	bool "HART1 boots via SBI"
+	depends on MPFS_OPENSBI
+	default n
+
+config MPFS_HART2_SBI
+	bool "HART2 boots via SBI"
+	depends on MPFS_OPENSBI
+	default n
+
+config MPFS_HART3_SBI
+	bool "HART3 boots via SBI"
+	depends on MPFS_OPENSBI
+	default n
+
+config MPFS_HART4_SBI
+	bool "HART4 boots via SBI"
+	depends on MPFS_OPENSBI
+	default n
+
+config MPFS_HART0_ENTRYPOINT
+	hex "Application entry point for HART0"
+	depends on MPFS_BOOTLOADER
+	default 0xffffffffffffffff
+	---help---
+		The default address of the entry point for HART0
+
+config MPFS_HART1_ENTRYPOINT
+	hex "Application entry point for HART1"
+	depends on MPFS_BOOTLOADER
+	default 0xffffffffffffffff
+	---help---
+		The default address of the entry point for HART1
+
+config MPFS_HART2_ENTRYPOINT
+	hex "Application entry point for HART2"
+	depends on MPFS_BOOTLOADER
+	default 0xafb00000
+	---help---
+		The default address of the entry point for HART2
+
+config MPFS_HART3_ENTRYPOINT
+	hex "Application entry point for HART3"
+	depends on MPFS_BOOTLOADER
+	default 0xffffffffffffffff
+	---help---
+		The default address of the entry point for HART3
+
+config MPFS_HART4_ENTRYPOINT
+	hex "Application entry point for HART4"
+	depends on MPFS_BOOTLOADER
+	default 0xffffffffffffffff
+	---help---
+		The default address of the entry point for HART4
+
 config MPFS_BOOT_HART
 	int "HART used for booting"
 	depends on MPFS_BOOTLOADER
