@@ -184,6 +184,10 @@ bool nxsched_merge_pending(void)
   int cpu;
   int me;
 
+  /* Lock the tasklist before accessing */
+
+  irqstate_t lock = nxsched_lock_tasklist();
+
   /* Remove and process every TCB in the g_pendingtasks list.
    *
    * Do nothing if (1) pre-emption is still disabled (by any CPU), or (2) if
@@ -200,7 +204,7 @@ bool nxsched_merge_pending(void)
         {
           /* The pending task list is empty */
 
-          goto errout;
+          goto errout_with_lock;
         }
 
       cpu  = nxsched_select_cpu(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
@@ -224,7 +228,9 @@ bool nxsched_merge_pending(void)
 
           /* Add the pending task to the correct ready-to-run list. */
 
+          nxsched_unlock_tasklist(lock);
           ret |= nxsched_add_readytorun(tcb);
+          lock = nxsched_lock_tasklist();
 
           /* This operation could cause the scheduler to become locked.
            * Check if that happened.
@@ -245,7 +251,7 @@ bool nxsched_merge_pending(void)
                * pending task list.
                */
 
-              goto errout;
+              goto errout_with_lock;
             }
 
           /* Set up for the next time through the loop */
@@ -256,7 +262,7 @@ bool nxsched_merge_pending(void)
             {
               /* The pending task list is empty */
 
-              goto errout;
+              goto errout_with_lock;
             }
 
           cpu  = nxsched_select_cpu(ALL_CPUS); /* REVISIT:  Maybe ptcb->affinity */
@@ -272,8 +278,11 @@ bool nxsched_merge_pending(void)
                                 TSTATE_TASK_READYTORUN);
     }
 
-errout:
+errout_with_lock:
 
+  /* Unlock the tasklist */
+
+  nxsched_unlock_tasklist(lock);
   return ret;
 }
 #endif /* CONFIG_SMP */
