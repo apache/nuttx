@@ -49,10 +49,10 @@ volatile uintptr_t *g_current_regs[1];
  ****************************************************************************/
 
 /****************************************************************************
- * qemu_rv32_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *qemu_rv32_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   uintptr_t irq = (vector >> 27) | (vector & 0xf);
   uintptr_t *mepc = regs;

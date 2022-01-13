@@ -48,10 +48,10 @@ extern void up_fault(int irq, uint64_t *regs);
  ****************************************************************************/
 
 /****************************************************************************
- * c906_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *c906_dispatch_irq(uint64_t vector, uint64_t *regs)
+void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 {
   uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
   uint64_t *mepc = regs;
