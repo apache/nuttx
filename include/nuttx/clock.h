@@ -322,7 +322,7 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
  *   timers and delays.  So use this interface with care.
  *
  * Input Parameters:
- *   None
+ *   tp: rtc time should be synced, set NULL to re-get time
  *
  * Returned Value:
  *   None
@@ -332,7 +332,7 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-void clock_synchronize(void);
+void clock_synchronize(FAR const struct timespec *tp);
 #endif
 
 /****************************************************************************
