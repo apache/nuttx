@@ -766,7 +766,7 @@ struct pthread_tcb_s
  */
 
 #ifdef CONFIG_DEBUG_TCBINFO
-struct tcbinfo_s
+begin_packed_struct struct tcbinfo_s
 {
   uint16_t pid_off;                      /* Offset of tcb.pid               */
   uint16_t state_off;                    /* Offset of tcb.task_state        */
@@ -787,7 +787,7 @@ struct tcbinfo_s
     uint8_t       u[8];
     FAR uint16_t *p;
   } reg_off;
-};
+} end_packed_struct;
 #endif
 
 /* This is the callback type used by nxsched_foreach() */

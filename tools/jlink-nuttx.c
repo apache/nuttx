@@ -72,7 +72,7 @@ enum symbol_e
   NSYMBOLS
 };
 
-struct tcbinfo_s
+__attribute__ ((packed)) struct tcbinfo_s
 {
   uint16_t pid_off;
   uint16_t state_off;
