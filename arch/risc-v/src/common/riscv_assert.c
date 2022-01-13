@@ -82,7 +82,7 @@ static void riscv_stackdump(uintptr_t sp, uintptr_t stack_top)
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert(PRIxREG ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+      _alert("%" PRIxREG ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
