@@ -48,10 +48,10 @@ extern void up_fault(int irq, uintptr_t *regs);
  ****************************************************************************/
 
 /****************************************************************************
- * k210_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *k210_dispatch_irq(uintptr_t vector, uintptr_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   uintptr_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
   uintptr_t *mepc = regs;
