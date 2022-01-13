@@ -358,12 +358,14 @@ FAR struct battery_charger_dev_s *bq25618_initialize(
 #define IBAT_OCP_MASK             BIT(1)
 #define VBUS_OVP_MASK             BIT(2)
 #define IBUS_OCP_MASK             BIT(3)
-#define ADAPTER_INSERT_MASK       BIT(4)
-#define VBAT_INSERT_MASK          BIT(5)
-#define ADC_DONE_MASK             BIT(6)
-#define VBUS_ERRORLO_STAT_MASK    BIT(7)
-#define VBUS_ERRORHI_STAT_MASK    BIT(8)
-#define CP_SWITCHING_STAT_MASK    BIT(9)
+#define IBUS_UCP_MASK             BIT(4)
+#define ADAPTER_INSERT_MASK       BIT(5)
+#define VBAT_INSERT_MASK          BIT(6)
+#define ADC_DONE_MASK             BIT(7)
+#define VBUS_ERRORLO_STAT_MASK    BIT(8)
+#define VBUS_ERRORHI_STAT_MASK    BIT(9)
+#define CP_SWITCHING_STAT_MASK    BIT(10)
+#define CHG_EN_STAT_MASK          BIT(11)
 
 struct i2c_master_s;
 FAR struct battery_charger_dev_s *

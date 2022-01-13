@@ -354,6 +354,24 @@ static int sc8551_get_flt_stat(FAR struct sc8551_dev_s * priv,
   return ret;
 }
 
+static int sc8551_get_ibus_ucp(FAR struct sc8551_dev_s * priv,
+                               bool *ibus_ucp)
+{
+  uint8_t ibus_reg;
+  int ret;
+
+  ret  = sc8551_getreg8(priv, SC8551_REG_08, &ibus_reg, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get flt_stat of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  if (ibus_reg & SC8551_IBUS_UCP_FALL_FLAG_MASK) *ibus_ucp = true;
+
+  return ret;
+}
+
 static int sc8551_get_int_stat(FAR struct sc8551_dev_s * priv,
                                bool *adapter_insert,
                                bool *vbat_insert,
@@ -398,6 +416,24 @@ static int sc8551_get_converse_stat(FAR struct sc8551_dev_s * priv,
   return ret;
 }
 
+static int sc8551_get_charge_en_stat(FAR struct sc8551_dev_s * priv,
+                                      bool *charge_en_stat)
+{
+  uint8_t chg_ctl;
+  int ret;
+
+  ret = sc8551_getreg8(priv, SC8551_REG_0C, &chg_ctl, 1);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to get charge_en_stat of sc8551: %d\n", ret);
+      return ERROR;
+    }
+
+  if (chg_ctl & SC8551_CHG_EN_MASK) *charge_en_stat = true;
+
+  return ret;
+}
+
 static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
                             FAR struct sc8551_key_state_s *sc8551_key_state)
 {
@@ -412,6 +448,8 @@ static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
                            &(sc8551_key_state->ibus_ocp),
                            &(sc8551_key_state->vbat_ovp),
                            &(sc8551_key_state->ibat_ocp));
+  ret = sc8551_get_ibus_ucp(priv,
+                           &(sc8551_key_state->ibus_ucp));
   ret = sc8551_get_int_stat(priv,
                            &(sc8551_key_state->adapter_insert),
                            &(sc8551_key_state->vbat_insert),
@@ -420,6 +458,8 @@ static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
                                  &(sc8551_key_state->vbus_errorlo_stat),
                                  &(sc8551_key_state->vbus_errorhi_stat),
                                  &(sc8551_key_state->cp_switching_stat));
+  ret = sc8551_get_charge_en_stat(priv,
+                                 &(sc8551_key_state->charge_en_stat));
   if (ret < 0)
     {
       baterr("ERROR: !!! Failed to get key_state of sc8551: %d\n", ret);
@@ -438,6 +478,8 @@ static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
           sc8551_key_state->vbus_ovp ? "true" : "false");
   batinfo("  ibus_ocp = %s\n",
           sc8551_key_state->ibus_ocp ? "true" : "false");
+  batinfo("  ibus_ucp = %s\n",
+          sc8551_key_state->ibus_ucp ? "true" : "false");
   batinfo("  adapter_insert = %s\n",
           sc8551_key_state->adapter_insert ? "true" : "false");
   batinfo("  vbat_insert = %s\n",
@@ -450,6 +492,9 @@ static int sc8551_get_key_state(FAR struct sc8551_dev_s * priv,
           sc8551_key_state->vbus_errorhi_stat ? "true" : "false");
   batinfo("  cp_switching_stat = %s\n",
           sc8551_key_state->cp_switching_stat ? "true" : "false");
+  batinfo("  charge_en_stat = %s\n",
+          sc8551_key_state->charge_en_stat ? "true" : "false");
+
 #endif
 
   return ret;
@@ -1575,16 +1620,20 @@ static int sc8551_state(FAR struct battery_charger_dev_s *dev,
     }
 
   *status = 0;
-  if (sc8551_key_state.vbat_ovp) *status &= VBAT_OVP_MASK;
-  if (sc8551_key_state.ibat_ocp) *status &= IBAT_OCP_MASK;
-  if (sc8551_key_state.vbus_ovp) *status &= VBUS_OVP_MASK;
-  if (sc8551_key_state.ibus_ocp) *status &= IBUS_OCP_MASK;
-  if (sc8551_key_state.adapter_insert) *status &= ADAPTER_INSERT_MASK;
-  if (sc8551_key_state.vbat_insert) *status &= VBAT_INSERT_MASK;
-  if (sc8551_key_state.adc_done) *status &= ADC_DONE_MASK;
-  if (sc8551_key_state.vbus_errorlo_stat) *status &= VBUS_ERRORLO_STAT_MASK;
-  if (sc8551_key_state.vbus_errorhi_stat) *status &= VBUS_ERRORHI_STAT_MASK;
-  if (sc8551_key_state.cp_switching_stat) *status &= CP_SWITCHING_STAT_MASK;
+  if (sc8551_key_state.vbat_ovp) *status |= VBAT_OVP_MASK;
+  if (sc8551_key_state.ibat_ocp) *status |= IBAT_OCP_MASK;
+  if (sc8551_key_state.vbus_ovp) *status |= VBUS_OVP_MASK;
+  if (sc8551_key_state.ibus_ocp) *status |= IBUS_OCP_MASK;
+  if (sc8551_key_state.ibus_ucp) *status |= IBUS_UCP_MASK;
+  if (sc8551_key_state.adapter_insert) *status |= ADAPTER_INSERT_MASK;
+  if (sc8551_key_state.vbat_insert) *status |= VBAT_INSERT_MASK;
+  if (sc8551_key_state.adc_done) *status |= ADC_DONE_MASK;
+  if (sc8551_key_state.vbus_errorlo_stat) *status |= VBUS_ERRORLO_STAT_MASK;
+  if (sc8551_key_state.vbus_errorhi_stat) *status |= VBUS_ERRORHI_STAT_MASK;
+  if (sc8551_key_state.cp_switching_stat) *status |= CP_SWITCHING_STAT_MASK;
+  if (sc8551_key_state.charge_en_stat) *status |= CHG_EN_STAT_MASK;
+
+  baterr("ATTENION INFO: status is 0x%4x \n", *status);
 
   return OK;
 }

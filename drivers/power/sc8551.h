@@ -165,12 +165,14 @@ FAR struct sc8551_key_state_s
   bool     ibat_ocp;
   bool     vbus_ovp;
   bool     ibus_ocp;
+  bool     ibus_ucp;
   bool     adapter_insert;
   bool     vbat_insert;
   bool     adc_done;
   bool     vbus_errorlo_stat;
   bool     vbus_errorhi_stat;
   bool     cp_switching_stat;
+  bool     charge_en_stat;
 };
 
 #endif
