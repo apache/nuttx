@@ -189,7 +189,7 @@ void sam_tc_stop(TC_HANDLE handle);
  *   arg     An opaque argument that will be provided when the interrupt
  *           handler callback is executed.  Ignored if handler is NULL.
  *   mask    The value of the timer interrupt mask register that defines
- *           which interrupts should be disabled.  Ignored if handler is
+ *           which interrupts should be enabled.  Ignored if handler is
  *           NULL.
  *
  * Returned Value:
@@ -235,7 +235,7 @@ uint32_t sam_tc_getpending(TC_HANDLE handle);
  *
  ****************************************************************************/
 
-void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval);
+void sam_tc_setregister(TC_HANDLE handle, int regid, uint16_t regval);
 
 /****************************************************************************
  * Name: sam_tc_getregister
@@ -252,7 +252,7 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval);
  *
  ****************************************************************************/
 
-uint32_t sam_tc_getregister(TC_HANDLE handle, int regid);
+uint16_t sam_tc_getregister(TC_HANDLE handle, int regid);
 
 /****************************************************************************
  * Name: sam_tc_getcounter
@@ -269,6 +269,23 @@ uint32_t sam_tc_getregister(TC_HANDLE handle, int regid);
  ****************************************************************************/
 
 uint16_t sam_tc_getcounter(TC_HANDLE handle);
+
+/****************************************************************************
+ * Name: sam_tc_setblockmode
+ *
+ * Description:
+ *   Set the value of TC_BMR register
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regval Then value to set in the register
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_setblockmode(TC_HANDLE handle, uint32_t regval);
 
 /****************************************************************************
  * Name: sam_tc_infreq

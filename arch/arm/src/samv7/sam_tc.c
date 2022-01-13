@@ -175,7 +175,7 @@ static bool sam_checkreg(struct sam_tc_s *tc, bool wr, uint32_t regaddr,
 static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
                                      unsigned int offset);
 static inline void sam_tc_putreg(struct sam_chan_s *chan,
-                                 uint32_t regval, unsigned int offset);
+                                 unsigned int offset, uint32_t regval);
 
 static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
                                        unsigned int offset);
@@ -729,8 +729,8 @@ static inline uint32_t sam_tc_getreg(struct sam_chan_s *chan,
  *
  ****************************************************************************/
 
-static inline void sam_tc_putreg(struct sam_chan_s *chan, uint32_t regval,
-                                 unsigned int offset)
+static inline void sam_tc_putreg(struct sam_chan_s *chan,
+                                 unsigned int offset, uint32_t regval)
 {
   struct sam_tc_s *tc = chan->tc;
   uint32_t regaddr    = tc->base + offset;
@@ -825,8 +825,8 @@ static int sam_tc_interrupt(int irq, void *context, FAR void *arg)
   imr     = sam_chan_getreg(chan, SAM_TC_IMR_OFFSET);
   pending = sr & imr;
 
-  tmrinfo("TC%d Channel %d: pending=%08lx\n",
-          chan->tc->tc, chan->chan, (unsigned long)pending);
+  tmrinfo("TC%u Channel %u: pending=%08" PRIx32 "\n",
+          chan->tc->tc, chan->chan, pending);
 
   /* Are there any pending interrupts for this channel? */
 
@@ -1299,6 +1299,7 @@ void sam_tc_free(TC_HANDLE handle)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -1331,6 +1332,7 @@ void sam_tc_start(TC_HANDLE handle)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
+ *   None
  *
  ****************************************************************************/
 
@@ -1359,9 +1361,10 @@ void sam_tc_stop(TC_HANDLE handle)
  *   arg     An opaque argument that will be provided when the interrupt
  *           handler callback is executed.
  *   mask    The value of the timer interrupt mask register that defines
- *           which interrupts should be disabled.
+ *           which interrupts should be enabled.
  *
  * Returned Value:
+ *   The old timer channel interrupt handler
  *
  ****************************************************************************/
 
@@ -1384,7 +1387,7 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
    * says.
    */
 
-  if (!handler)
+  if (handler == NULL)
     {
       arg  = NULL;
       mask = 0;
@@ -1439,14 +1442,14 @@ uint32_t sam_tc_getpending(TC_HANDLE handle)
  *
  ****************************************************************************/
 
-void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
+void sam_tc_setregister(TC_HANDLE handle, int regid, uint16_t regval)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
 
   DEBUGASSERT(chan && regid < TC_NREGISTERS);
 
-  tmrinfo("Channel %d: Set register RC%d to %08lx\n",
-          chan->chan, regid, (unsigned long)regval);
+  tmrinfo("Channel %u: Set register RC%d to %04x\n",
+          chan->chan, regid, regval);
 
   sam_chan_putreg(chan, g_regoffset[regid], regval);
   sam_regdump(chan, "Set register");
@@ -1467,7 +1470,7 @@ void sam_tc_setregister(TC_HANDLE handle, int regid, uint32_t regval)
  *
  ****************************************************************************/
 
-uint32_t sam_tc_getregister(TC_HANDLE handle, int regid)
+uint16_t sam_tc_getregister(TC_HANDLE handle, int regid)
 {
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
   DEBUGASSERT(chan);
@@ -1484,7 +1487,7 @@ uint32_t sam_tc_getregister(TC_HANDLE handle, int regid)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *  The current value of the timer counter register for this channel.
+ *   The current value of the timer counter register for this channel.
  *
  ****************************************************************************/
 
@@ -1493,6 +1496,28 @@ uint16_t sam_tc_getcounter(TC_HANDLE handle)
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
   DEBUGASSERT(chan);
   return sam_chan_getreg(chan, SAM_TC_CV_OFFSET);
+}
+
+/****************************************************************************
+ * Name: sam_tc_setblockmode
+ *
+ * Description:
+ *   Set the value of TC_BMR register
+ *
+ * Input Parameters:
+ *   handle Channel handle previously allocated by sam_tc_allocate()
+ *   regval Then value to set in the register
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_setblockmode(TC_HANDLE handle, uint32_t regval)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  DEBUGASSERT(chan);
+  sam_tc_putreg(chan, SAM_TC_BMR_OFFSET, regval);
 }
 
 /****************************************************************************
@@ -1506,7 +1531,7 @@ uint16_t sam_tc_getcounter(TC_HANDLE handle)
  *   handle Channel handle previously allocated by sam_tc_allocate()
  *
  * Returned Value:
- *  The timer counter frequency.
+ *   The timer counter frequency.
  *
  ****************************************************************************/
 

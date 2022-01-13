@@ -327,7 +327,7 @@ int sam_oneshot_start(struct sam_oneshot_s *oneshot,
    * up to RC.
    */
 
-  sam_tc_setregister(oneshot->tch, TC_REGC, (uint32_t)regval);
+  sam_tc_setregister(oneshot->tch, TC_REGC, regval);
 
   /* Start the counter */
 
@@ -399,8 +399,8 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
   uint64_t usec;
   uint64_t sec;
   uint64_t nsec;
-  uint32_t rc;
   uint16_t count;
+  uint16_t rc;
 
   /* Was the timer running? */
 
