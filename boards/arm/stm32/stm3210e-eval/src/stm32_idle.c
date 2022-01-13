@@ -316,7 +316,7 @@ static void stm32_idlepm(void)
                  */
 
 #ifdef CONFIG_RTC
-                clock_synchronize();
+                clock_synchronize(NULL);
 #endif
               }
           }
