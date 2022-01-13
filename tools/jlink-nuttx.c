@@ -85,7 +85,7 @@ struct tcbinfo_s
     uint16_t *p;
   } reg_off;
   uint16_t reg_offs[0];
-};
+} __attribute__ ((packed));
 
 struct symbols_s
 {
