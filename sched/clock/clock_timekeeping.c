@@ -129,7 +129,8 @@ int clock_timekeeping_set_wall_time(FAR struct timespec *ts)
       goto errout_in_critical_section;
     }
 
-  g_clock_wall_time    = *ts;
+  memcpy(&g_clock_wall_time, ts, sizeof(struct timespec));
+
   g_clock_adjust       = 0;
   g_clock_last_counter = counter;
 
@@ -275,10 +276,19 @@ errout_in_critical_section:
  * Name: clock_inittimekeeping
  ****************************************************************************/
 
-void clock_inittimekeeping(void)
+void clock_inittimekeeping(FAR const struct timespec *tp)
 {
   up_timer_getmask(&g_clock_mask);
-  clock_basetime(&g_clock_wall_time);
+
+  if (tp)
+    {
+      memcpy(&g_clock_wall_time, tp, sizeof(struct timespec));
+    }
+  else
+    {
+      clock_basetime(&g_clock_wall_time);
+    }
+
   up_timer_getcounter(&g_clock_last_counter);
 }
 

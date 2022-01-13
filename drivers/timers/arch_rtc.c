@@ -58,7 +58,7 @@ void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower, bool sync)
 #ifdef CONFIG_RTC_EXTERNAL
   if (sync)
     {
-      clock_synchronize();
+      clock_synchronize(NULL);
     }
 #endif
 }
