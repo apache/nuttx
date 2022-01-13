@@ -458,7 +458,7 @@ int sim_bringup(void)
 #endif
 
 #ifndef CONFIG_RTC_RPMSG_SERVER
-  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
+  rpmsg_rtc_initialize(0);
 #endif
 
 #ifdef CONFIG_FS_RPMSGFS

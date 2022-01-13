@@ -401,7 +401,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                  * current system time to match.
                  */
 
-                clock_synchronize();
+                clock_synchronize(NULL);
               }
           }
       }
