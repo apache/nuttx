@@ -90,6 +90,11 @@
 /* Interrupts ***************************************************************/
 
 /* Indexing macros: */
+#ifndef XCHAL_SYSCALL_LEVEL
+#  define XCHAL_IRQ_LEVEL  XCHAL_EXCM_LEVEL
+#else
+#  define XCHAL_IRQ_LEVEL  XCHAL_SYSCALL_LEVEL
+#endif
 
 #define _XCHAL_INTLEVEL_MASK(n)         XCHAL_INTLEVEL ## n ## _MASK
 #define XCHAL_INTLEVEL_MASK(n)          _XCHAL_INTLEVEL_MASK(n) /* n = 0 .. 15 */
