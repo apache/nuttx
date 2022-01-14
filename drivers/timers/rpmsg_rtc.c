@@ -123,7 +123,7 @@ struct rpmsg_rtc_server_s
   sem_t exclsem;
 };
 
-struct rpmsg_rtc_session_s
+struct rpmsg_rtc_client_s
 {
   struct list_node node;
   struct rpmsg_endpoint ept;
@@ -464,7 +464,7 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
 {
   FAR struct rpmsg_rtc_server_s *server =
                          (FAR struct rpmsg_rtc_server_s *)lower;
-  FAR struct rpmsg_rtc_session_s *session;
+  FAR struct rpmsg_rtc_client_s *client;
   FAR struct list_node *node;
   struct rpmsg_rtc_header_s header;
   int ret;
@@ -476,8 +476,8 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
       header.command = RPMSG_RTC_SYNC;
       list_for_every(&server->list, node)
         {
-          session = (FAR struct rpmsg_rtc_session_s *)node;
-          rpmsg_send(&session->ept, &header, sizeof(header));
+          client = (FAR struct rpmsg_rtc_client_s *)node;
+          rpmsg_send(&client->ept, &header, sizeof(header));
         }
 
       nxsem_post(&server->exclsem);
@@ -554,28 +554,28 @@ static int rpmsg_rtc_server_cancelperiodic
 
 static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
 {
-  FAR struct rpmsg_rtc_session_s *session = container_of(ept,
-                                            struct rpmsg_rtc_session_s, ept);
+  FAR struct rpmsg_rtc_client_s *client = container_of(ept,
+                                            struct rpmsg_rtc_client_s, ept);
   FAR struct rpmsg_rtc_server_s *server = ept->priv;
 
   nxsem_wait_uninterruptible(&server->exclsem);
-  list_delete(&session->node);
+  list_delete(&client->node);
   nxsem_post(&server->exclsem);
-  rpmsg_destroy_ept(&session->ept);
-  kmm_free(session);
+  rpmsg_destroy_ept(&client->ept);
+  kmm_free(client);
 }
 
 #ifdef CONFIG_RTC_ALARM
 static void rpmsg_rtc_server_alarm_cb(FAR void *priv, int alarmid)
 {
-  FAR struct rpmsg_rtc_session_s *session = priv;
+  FAR struct rpmsg_rtc_client_s *client = priv;
   struct rpmsg_rtc_alarm_fire_s msg =
   {
     .header.command = RPMSG_RTC_ALARM_FIRE,
     .id = alarmid,
   };
 
-  rpmsg_send(&session->ept, &msg, sizeof(msg));
+  rpmsg_send(&client->ept, &msg, sizeof(msg));
 }
 #endif
 
@@ -612,8 +612,8 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 #ifdef CONFIG_RTC_ALARM
     case RPMSG_RTC_ALARM_SET:
       {
-        FAR struct rpmsg_rtc_session_s *session = container_of(ept,
-                                            struct rpmsg_rtc_session_s, ept);
+        FAR struct rpmsg_rtc_client_s *client = container_of(ept,
+                                            struct rpmsg_rtc_client_s, ept);
         FAR struct rpmsg_rtc_alarm_set_s *msg = data;
         FAR struct rpmsg_rtc_server_s *server = priv;
         time_t time = msg->sec;
@@ -621,7 +621,7 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         {
           .id = msg->id,
           .cb = rpmsg_rtc_server_alarm_cb,
-          .priv = session
+          .priv = client
         };
 
         gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
@@ -653,31 +653,31 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
                                      uint32_t dest)
 {
   FAR struct rpmsg_rtc_server_s *server = priv;
-  FAR struct rpmsg_rtc_session_s *session;
+  FAR struct rpmsg_rtc_client_s *client;
 
   if (strcmp(name, RPMSG_RTC_EPT_NAME))
     {
       return;
     }
 
-  session = kmm_zalloc(sizeof(*session));
-  if (!session)
+  client = kmm_zalloc(sizeof(*client));
+  if (client == NULL)
     {
       return;
     }
 
-  session->ept.priv = server;
-  if (rpmsg_create_ept(&session->ept, rdev, RPMSG_RTC_EPT_NAME,
+  client->ept.priv = server;
+  if (rpmsg_create_ept(&client->ept, rdev, RPMSG_RTC_EPT_NAME,
                        RPMSG_ADDR_ANY, dest,
                        rpmsg_rtc_server_ept_cb,
                        rpmsg_rtc_server_ns_unbind) < 0)
     {
-      kmm_free(session);
+      kmm_free(client);
       return;
     }
 
   nxsem_wait_uninterruptible(&server->exclsem);
-  list_add_tail(&server->list, &session->node);
+  list_add_tail(&server->list, &client->node);
   nxsem_post(&server->exclsem);
 }
 #endif
