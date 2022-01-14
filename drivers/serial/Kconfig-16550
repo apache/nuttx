@@ -347,6 +347,8 @@ config 16550_ADDRWIDTH
 	int "Address width of 16550 registers"
 	default 8
 	---help---
-		The bit width of registers.  Options are 8, 16, or 32. Default: 8
+		The bit width of registers.  Options are 0, 8, 16, or 32.
+		Default: 8
+		Note: 0 means auto detect address size (uintptr_t)
 
 endif # 16550_UART
