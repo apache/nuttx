@@ -1451,9 +1451,9 @@ config ARCH_BOARD_RV32M1_VEGA
 		This is the board configuration for the port of NuttX to the
 		RV32M1 VEGA board. This board features the RV32M1 RISC-V Core(s).
 
-config ARCH_BOARD_QEMU_RV32_VIRT
-	bool "QEMU RV32 Virt"
-	depends on ARCH_CHIP_QEMU_RV32
+config ARCH_BOARD_QEMU_RV_VIRT
+	bool "QEMU RV Virt"
+	depends on ARCH_CHIP_QEMU_RV
 	---help---
 		This is the board configuration for the port of NuttX to the
 		QEMU RV32 Virt board. This board features the QEMU RV32 CPU.
@@ -2506,7 +2506,7 @@ config ARCH_BOARD
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
-	default "rv32-virt"                if ARCH_BOARD_QEMU_RV32_VIRT
+	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -3254,8 +3254,8 @@ endif
 if ARCH_BOARD_RV32M1_VEGA
 source "boards/risc-v/rv32m1/rv32m1-vega/Kconfig"
 endif
-if ARCH_BOARD_QEMU_RV32_VIRT
-source "boards/risc-v/qemu-rv32/rv32-virt/Kconfig"
+if ARCH_BOARD_QEMU_RV_VIRT
+source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
