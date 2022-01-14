@@ -315,6 +315,12 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
 
+  /* Check RX data availability and read the data from the network device now
+   * to prevent RX data stream congestion in case of high TX network traffic.
+   */
+
+  netdriver_loop();
+
   return OK;
 }
 
