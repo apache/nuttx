@@ -65,7 +65,7 @@ struct rptun_priv_s
 {
   FAR struct rptun_dev_s       *dev;
   struct remoteproc            rproc;
-  struct rpmsg_virtio_device   vdev;
+  struct rpmsg_virtio_device   rvdev;
   struct rpmsg_virtio_shm_pool tx_shpool;
   struct rpmsg_virtio_shm_pool rx_shpool;
   struct metal_list            bind;
@@ -331,7 +331,7 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
   FAR struct rptun_priv_s *priv = arg;
 
-  int status = rpmsg_virtio_get_status(&priv->vdev);
+  int status = rpmsg_virtio_get_status(&priv->rvdev);
 
   if ((status & VIRTIO_CONFIG_STATUS_NEEDS_RESET)
       && (RPTUN_IS_MASTER(priv->dev) ^
@@ -684,13 +684,13 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   if (priv->rx_shpool.base)
     {
-      ret = rpmsg_init_vdev_ext(&priv->vdev, vdev, rptun_ns_bind,
+      ret = rpmsg_init_vdev_ext(&priv->rvdev, vdev, rptun_ns_bind,
                                 metal_io_get_region(),
                                 &priv->tx_shpool, &priv->rx_shpool);
     }
   else
     {
-      ret = rpmsg_init_vdev(&priv->vdev, vdev, rptun_ns_bind,
+      ret = rpmsg_init_vdev(&priv->rvdev, vdev, rptun_ns_bind,
                             metal_io_get_region(), &priv->tx_shpool);
     }
 
@@ -700,7 +700,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return ret;
     }
 
-  priv->vdev.rdev.ns_unbind_cb = rptun_ns_unbind;
+  priv->rvdev.rdev.ns_unbind_cb = rptun_ns_unbind;
 
   /* Remote proc start */
 
@@ -728,7 +728,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       cb = metal_container_of(node, struct rptun_cb_s, node);
       if (cb->device_created)
         {
-          cb->device_created(&priv->vdev.rdev, cb->priv);
+          cb->device_created(&priv->rvdev.rdev, cb->priv);
         }
     }
 
@@ -760,7 +760,7 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
       cb = metal_container_of(node, struct rptun_cb_s, node);
       if (cb->device_destroy)
         {
-          cb->device_destroy(&priv->vdev.rdev, cb->priv);
+          cb->device_destroy(&priv->rvdev.rdev, cb->priv);
         }
     }
 
@@ -772,8 +772,8 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
 
   /* Remote proc remove */
 
-  remoteproc_remove_virtio(rproc, priv->vdev.vdev);
-  rpmsg_deinit_vdev(&priv->vdev);
+  remoteproc_remove_virtio(rproc, priv->rvdev.vdev);
+  rpmsg_deinit_vdev(&priv->rvdev);
 
   return 0;
 }
@@ -785,7 +785,7 @@ static int rptun_dev_reset(FAR struct remoteproc *rproc, int value)
   value = (value & RPTUN_STATUS_MASK) | VIRTIO_CONFIG_STATUS_NEEDS_RESET
           | (RPTUN_IS_MASTER(priv->dev) ? RPTUN_STATUS_FROM_MASTER : 0);
 
-  rpmsg_virtio_set_status(&priv->vdev, value);
+  rpmsg_virtio_set_status(&priv->rvdev, value);
 
   return RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
 }
@@ -809,6 +809,9 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
         break;
       case RPTUNIOC_PANIC:
         rptun_dev_reset(&priv->rproc, RPTUN_STATUS_PANIC);
+        break;
+      case RPTUNIOC_DUMP:
+        rpmsg_dump(&priv->rvdev);
         break;
       default:
         ret = -ENOTTY;
@@ -998,6 +1001,21 @@ FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
   return RPTUN_GET_CPUNAME(priv->dev);
 }
 
+int rpmsg_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
+{
+  FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
+
+  if ((rpmsg_virtio_get_role(rvdev) == RPMSG_MASTER) ^ rx)
+    {
+      return vq->vq_ring.avail->idx - vq->vq_ring.used->idx;
+    }
+  else
+    {
+      return vq->vq_nentries -
+             (vq->vq_ring.avail->idx - vq->vq_ring.used->idx);
+    }
+}
+
 int rpmsg_register_callback(FAR void *priv_,
                             rpmsg_dev_cb_t device_created,
                             rpmsg_dev_cb_t device_destroy,
@@ -1024,12 +1042,12 @@ int rpmsg_register_callback(FAR void *priv_,
 
   metal_list_for_each(&g_rptun_priv, node)
     {
-      struct rptun_priv_s *priv;
+      FAR struct rptun_priv_s *priv;
 
       priv = metal_container_of(node, struct rptun_priv_s, node);
       if (device_created)
         {
-          device_created(&priv->vdev.rdev, priv_);
+          device_created(&priv->rvdev.rdev, priv_);
         }
 
       if (ns_bind)
@@ -1039,7 +1057,7 @@ int rpmsg_register_callback(FAR void *priv_,
               struct rptun_bind_s *bind;
 
               bind = metal_container_of(bnode, struct rptun_bind_s, node);
-              ns_bind(&priv->vdev.rdev, priv_, bind->name, bind->dest);
+              ns_bind(&priv->rvdev.rdev, priv_, bind->name, bind->dest);
             }
         }
     }
@@ -1077,7 +1095,7 @@ void rpmsg_unregister_callback(FAR void *priv_,
 
                   priv = metal_container_of(pnode,
                                             struct rptun_priv_s, node);
-                  device_destroy(&priv->vdev.rdev, priv_);
+                  device_destroy(&priv->rvdev.rdev, priv_);
                 }
             }
 
@@ -1227,4 +1245,17 @@ int rptun_reset(FAR const char *cpuname, int value)
 int rptun_panic(FAR const char *cpuname)
 {
   return rptun_reset(cpuname, RPTUN_STATUS_PANIC);
+}
+
+void rptun_dump(void)
+{
+  FAR struct metal_list *node;
+
+  metal_list_for_each(&g_rptun_priv, node)
+    {
+      FAR struct rptun_priv_s *priv =
+          metal_container_of(node, struct rptun_priv_s, node);
+
+      rpmsg_dump(&priv->rvdev);
+    }
 }
