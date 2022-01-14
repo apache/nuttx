@@ -113,8 +113,6 @@ config ARCH_CHIP_RV32M1
 config ARCH_CHIP_QEMU_RV32
 	bool "QEMU RV32"
 	select ARCH_RV32
-	select ARCH_RV_ISA_M
-	select ARCH_RV_ISA_A
 	select ARCH_RV_ISA_F
 	select ARCH_RV_ISA_D
 	---help---
