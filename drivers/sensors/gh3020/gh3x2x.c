@@ -3065,6 +3065,7 @@ void gh3020_start_sampling_factest(GU32 unFuncMode, STGh3x2xEngineeringModeSampl
     g_pstSampleParaGroup = pstSampleParaGroup;
     g_uchEngineeringModeSampleParaGroupNum = uchSampleParaGroupNum;
     g_uchEngineeringModeStatus = 1;
+    g_unDemoFuncMode = GH3X2X_FUNCTION_TEST1;
     Gh3x2xDemoStartSamplingInner(unFuncMode);
 #if    __SUPPORT_HARD_ADT_CONFIG__
     Gh3x2xSoftAdtStatusCheck();

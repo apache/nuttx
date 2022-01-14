@@ -30,13 +30,13 @@
 #include <debug.h>
 #include <errno.h>
 #include <math.h>
-
-#include <sys/types.h>
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/sched_note.h>
 #include <nuttx/sensors/gh3020.h>
 #include <nuttx/sensors/sensor.h>
 #include <nuttx/wqueue.h>
+#include <sys/types.h>
 
 #include "gh3020_bridge.h"
 #include "gh3x2x_drv.h"
@@ -453,6 +453,7 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
       gh3020_start_sampling(priv->channelmode);
     }
 
+  sched_note_printf("GH3020 starts, fifowtm=%u", fifowtm);
   priv->fifowtm = fifowtm;
 }
 
@@ -532,6 +533,7 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
   FAR struct gh3020_dev_s *priv;
   uint32_t interval_min;
+  uint16_t rate;
   uint16_t fifowtm;
   uint8_t idx;
 
@@ -569,6 +571,8 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
         }
       else
         {
+          rate =  (uint16_t)(GH3020_ONE_SECOND / sensor->interval);
+
           /* If any PPG channel has been activated, device shall be stopped
            * and start again with new configurations.
            */
@@ -583,9 +587,10 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
                   priv->channelmode = priv->channelmode |
                     gh3020_channel_function_list[sensor->chidx];
                   gh3020_samplerate_set(
-                    gh3020_channel_function_list[sensor->chidx],
-                    (uint16_t)(GH3020_ONE_SECOND / sensor->interval));
+                    gh3020_channel_function_list[sensor->chidx], rate);
                   priv->activated++;
+                  sched_note_printf("activate ppgq%u, rate=%u",
+                                    sensor->chidx, rate);
                 }
               else
                 {
@@ -594,6 +599,7 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
                   priv->channelmode = priv->channelmode &
                     (~gh3020_channel_function_list[sensor->chidx]);
                   priv->activated--;
+                  sched_note_printf("inactivate ppgq%u", sensor->chidx);
                 }
 
               /* If GH3020 shall restart because of some activated channels */
@@ -633,6 +639,8 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
                     {
                       work_cancel(HPWORK, &priv->work_poll);
                     }
+
+                  sched_note_printf("GH3020 stops");
                 }
             }
 
@@ -685,11 +693,16 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
                     }
                   else
                     {
+                      priv->fifowtm = 0;
                       gh3020_start_sampling(priv->channelmode);
                       work_queue(HPWORK, &priv->work_poll,
                                  gh3020_worker_poll, priv,
                                  priv->interval / USEC_PER_TICK);
                     }
+
+                  sched_note_printf("activate ppgq%u, rate=%u, GH3020 starts"
+                                    ", fifowtm=%u", sensor->chidx, rate,
+                                    priv->fifowtm);
                 }
             }
         }
@@ -896,6 +909,9 @@ static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
           work_queue(HPWORK, &priv->work_poll, gh3020_worker_poll, priv,
                      priv->interval / USEC_PER_TICK);
         }
+
+      sched_note_printf("ppgq%u updates rate=%u", sensor->chidx,
+                        (uint16_t)freq);
     }
 
   return OK;

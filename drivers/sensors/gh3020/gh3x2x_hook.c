@@ -121,47 +121,37 @@ void gh3x2x_get_rawdata_hook_func(GU8 *read_buffer_ptr, GU16 length)
             stTempFifoInfo.ubFlagLedAdjIsAgc_EcgRecover = ((temp >> 26) & 0x00000001);
             stTempFifoInfo.ubFlagLedAdjAgcUp = ((temp >> 25) & 0x00000001);
             rawdata = (GS32)(stTempFifoInfo.uiAdcCode) - 0x800000;
-            // if(rawdata < 0)
-            // {
-            //     rawdata = 0;
-            // }
+            if(rawdata < 0)
+            {
+                rawdata = 0;
+            }
             if(GH3X2X_FUNCTION_TEST1 == g_unDemoFuncMode)
             {
                 switch(stTempFifoInfo.ubSlotNo)
                 {
                     case 0x00:  //slot0-dark
-                        {
-                            ppg[3].ppg[stTempFifoInfo.ubAdcNo] = rawdata;
-                        }
+                        ppg[3].ppg[stTempFifoInfo.ubAdcNo] = (uint32_t)rawdata;
                         break;
                     case 0x01:  //slot1-green
-                        switch(stTempFifoInfo.ubAdcNo)
-                        {
-                            ppg[0].ppg[stTempFifoInfo.ubAdcNo] = rawdata;
-                        }
+                        ppg[0].ppg[stTempFifoInfo.ubAdcNo] = (uint32_t)rawdata;
                         break;
                     case 0x02:  //slot2-red
-                        switch(stTempFifoInfo.ubAdcNo)
-                        {
-                            ppg[1].ppg[stTempFifoInfo.ubAdcNo] = rawdata;
-                        }
+                        ppg[1].ppg[stTempFifoInfo.ubAdcNo] = (uint32_t)rawdata;
                         break;
                     case 0x03:  //slot3-ir
-                        switch(stTempFifoInfo.ubAdcNo)
-                        {
-                            ppg[2].ppg[stTempFifoInfo.ubAdcNo] = rawdata;
-                        }
+                        ppg[2].ppg[stTempFifoInfo.ubAdcNo] = (uint32_t)rawdata;
                         break;
                     default :
                         break;
                 }
             }
         }
+
+        gh3020_transdata(&ppg[0], 0);
+        gh3020_transdata(&ppg[1], 1);
+        gh3020_transdata(&ppg[2], 2);
+        gh3020_transdata(&ppg[3], 3);
     }
-    gh3020_transdata(&ppg[0], 0);
-    gh3020_transdata(&ppg[1], 1);
-    gh3020_transdata(&ppg[2], 2);
-    gh3020_transdata(&ppg[3], 3);
 #endif
 }
 
