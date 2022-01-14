@@ -22,9 +22,10 @@
 
 ifeq ($(CONFIG_RPTUN),y)
 
-CSRCS += rptun.c
+CSRCS += rptun.c rpmsg_dump.c
 
 DEPPATH += --dep-path rptun
 VPATH += :rptun
 CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)drivers$(DELIM)rptun}
+CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)openamp$(DELIM)open-amp$(DELIM)lib}
 endif
