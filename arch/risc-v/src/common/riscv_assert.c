@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <syscall.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -313,9 +315,21 @@ static void riscv_dumpstate(void)
   sched_dumpstack(rtcb->pid);
 #endif
 
+  /* Update the xcp context */
+
+  if (CURRENT_REGS)
+    {
+      memcpy(rtcb->xcp.regs,
+             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_REGS);
+    }
+  else
+    {
+      riscv_saveusercontext(rtcb->xcp.regs);
+    }
+
   /* Dump the registers (if available) */
 
-  riscv_registerdump((volatile uintptr_t *)CURRENT_REGS);
+  riscv_registerdump(rtcb->xcp.regs);
 
   /* Get the limits on the user stack memory */
 
@@ -347,7 +361,11 @@ static void riscv_dumpstate(void)
 
       /* Extract the user stack pointer */
 
-      sp = CURRENT_REGS[REG_SP];
+      if (CURRENT_REGS)
+        {
+          sp = CURRENT_REGS[REG_SP];
+        }
+
       _alert("sp:     %" PRIxREG "\n", sp);
     }
   else if (CURRENT_REGS)
