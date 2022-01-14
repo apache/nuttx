@@ -23,7 +23,7 @@
 HEAD_ASRC = qemu_rv32_head.S
 
 # Specify our general Assembly files
-CMN_ASRCS += riscv_vectors.S riscv_testset.S riscv_exception_common.S
+CMN_ASRCS += riscv_vectors.S riscv_exception_common.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c
@@ -52,6 +52,10 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += riscv_fpu.S
+endif
+
+ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+CMN_ASRCS += riscv_testset.S
 endif
 
 # Specify our C code within this directory to be included
