@@ -55,13 +55,6 @@ int file_fsync(FAR struct file *filep)
 {
   struct inode *inode;
 
-  /* Was this file opened for write access? */
-
-  if ((filep->f_oflags & O_WROK) == 0)
-    {
-      return -EBADF;
-    }
-
   /* Is this inode a registered mountpoint? Does it support the
    * sync operations may be relevant to device drivers but only
    * the mountpoint operations vtable contains a sync method.
