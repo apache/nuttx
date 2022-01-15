@@ -24,7 +24,7 @@ HEAD_ASRC = mpfs_head.S
 
 # Specify our general Assembly files
 
-CMN_ASRCS += riscv_vectors.S riscv_testset.S
+CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_testset.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c
