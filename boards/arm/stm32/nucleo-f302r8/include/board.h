@@ -213,6 +213,11 @@
 #define GPIO_USART1_RX GPIO_USART1_RX_2 /* PB7 */
 #define GPIO_USART1_TX GPIO_USART1_TX_2 /* PB6 */
 
+/* CAN */
+
+#define GPIO_CAN1_RX     GPIO_CAN_RX_3 /* PB8 */
+#define GPIO_CAN1_TX     GPIO_CAN_TX_3 /* PB9 */
+
 /* PWM configuration ********************************************************/
 
 /* TIM1 PWM */
