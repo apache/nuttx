@@ -44,8 +44,8 @@ config ARCH_CHIP_BL602
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
-	select ARCH_RV_ISA_F
 	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
 	---help---
 		BouffaloLab BL602(rv32imfc)
@@ -80,9 +80,9 @@ config ARCH_CHIP_C906
 	select ARCH_RV64
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
-	select ARCH_RV_ISA_F
-	select ARCH_RV_ISA_D
 	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
@@ -92,9 +92,9 @@ config ARCH_CHIP_MPFS
 	select ARCH_RV64
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
-	select ARCH_RV_ISA_F
-	select ARCH_RV_ISA_D
 	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
@@ -112,8 +112,8 @@ config ARCH_CHIP_RV32M1
 
 config ARCH_CHIP_QEMU_RV
 	bool "QEMU RV"
-	select ARCH_RV_ISA_F
-	select ARCH_RV_ISA_D
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	---help---
 		QEMU Generic RV32 processor
 
@@ -148,17 +148,6 @@ config ARCH_RV_ISA_A
 config ARCH_RV_ISA_C
 	bool
 	default n
-
-config ARCH_RV_ISA_F
-	bool
-	default n
-	select ARCH_HAVE_FPU
-
-config ARCH_RV_ISA_D
-	bool
-	default n
-	depends on ARCH_RV_ISA_F
-	select ARCH_HAVE_DPFPU
 
 config ARCH_FAMILY
 	string

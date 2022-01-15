@@ -81,13 +81,9 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
     ARCHRVISAC = c
   endif
 
-  # ARCH_FPU depends on ARCH_RV_ISA_F
-
   ifeq ($(CONFIG_ARCH_FPU),y)
       ARCHRVISAF = f
   endif
-
-  # ARCH_DPFPU depends on ARCH_RV_ISA_D and ARCH_FPU
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)
       ARCHRVISAD = d

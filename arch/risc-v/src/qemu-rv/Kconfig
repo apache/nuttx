@@ -22,17 +22,17 @@ endchoice
 
 config ARCH_CHIP_QEMU_RV_ISA_M
     bool "Standard Extension for Integer Multiplication and Division"
-    default y
+    default n
     select ARCH_RV_ISA_M
 
 config ARCH_CHIP_QEMU_RV_ISA_A
     bool "Standard Extension for Atomic Instructions"
-    default y
+    default n
     select ARCH_RV_ISA_A
 
 config ARCH_CHIP_QEMU_RV_ISA_C
     bool "Standard Extension for Compressed Instructions"
-    default y
+    default n
     select ARCH_RV_ISA_C
 
 endif
