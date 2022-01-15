@@ -106,7 +106,9 @@ int sim_bringup(void)
 #ifdef CONFIG_SIM_SPI
   FAR struct spi_dev_s *spidev;
 #endif
-
+#if defined(CONFIG_RTC_RPMSG) && !defined(CONFIG_RTC_RPMSG_SERVER)
+  FAR struct rtc_lowerhalf_s *rtc;
+#endif
   int ret = OK;
 
 #ifdef CONFIG_FS_BINFS
@@ -467,14 +469,14 @@ int sim_bringup(void)
   syslog_rpmsg_server_init();
 #endif
 
-#ifndef CONFIG_RTC_RPMSG_SERVER
-  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
+#if defined(CONFIG_RTC_RPMSG) && !defined(CONFIG_RTC_RPMSG_SERVER)
+  rtc = rpmsg_rtc_initialize();
+  up_rtc_set_lowerhalf(rtc);
+  rtc_initialize(0, rtc);
 #endif
 
-#ifdef CONFIG_FS_RPMSGFS
-#ifdef CONFIG_SIM_RPTUN_MASTER
+#if defined(CONFIG_FS_RPMSGFS) && defined(CONFIG_SIM_RPTUN_MASTER)
   rpmsgfs_server_init();
-#endif
 #endif
 #endif
 

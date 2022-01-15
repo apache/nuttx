@@ -689,9 +689,6 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  *
  *   Take remote core RTC as external RTC hardware through rpmsg.
  *
- * Input Parameters:
- *   minor  - device minor number
- *
  * Returned Value:
  *   Return the lower half RTC driver instance on success;
  *   A NULL pointer on failure.
@@ -699,21 +696,19 @@ static void rpmsg_rtc_server_ns_bind(FAR struct rpmsg_device *rdev,
  ****************************************************************************/
 
 #ifndef CONFIG_RTC_RPMSG_SERVER
-FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(int minor)
+FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(void)
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower;
 
   lower = kmm_zalloc(sizeof(*lower));
-  if (lower)
+  if (lower != NULL)
     {
-      lower->ops     = &g_rpmsg_rtc_ops;
+      lower->ops = &g_rpmsg_rtc_ops;
 
       rpmsg_register_callback(lower,
                               rpmsg_rtc_device_created,
                               rpmsg_rtc_device_destroy,
                               NULL);
-
-      rtc_initialize(minor, (FAR struct rtc_lowerhalf_s *)lower);
     }
 
   return (FAR struct rtc_lowerhalf_s *)lower;
