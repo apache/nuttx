@@ -348,6 +348,10 @@ int main(int argc, char **argv, char **envp)
       wintool = true;
 #endif
     }
+  else if (compiler == COMPILER_SDCC)
+    {
+      cmdarg = "-I";
+    }
   else
     {
       cmdarg = (pathtype == SYSTEM_PATH) ? "-isystem" : "-I";
