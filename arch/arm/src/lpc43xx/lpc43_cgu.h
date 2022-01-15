@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_CGU_H
-#define __ARCH_ARM_SRC_LPC43XX_CGU_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_CGU_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_CGU_H
 
 /****************************************************************************
  * Included Files
@@ -105,4 +105,4 @@ void lpc43_clockconfig(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_CGU_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_CGU_H */

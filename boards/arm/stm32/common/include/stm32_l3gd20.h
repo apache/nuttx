@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_L3GD20_H
-#define __STM32_L3GD20_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_L3GD20_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_L3GD20_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ int board_l3gd20_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_L3GD20_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_L3GD20_H */

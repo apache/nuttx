@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USB_PHY_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USB_PHY_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBPHY_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBPHY_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@
 #define USBPHY_CTRL_SFTRST          (1 << 31)  /* Bit 31: Soft-reset */
 #define USBPHY_CTRL_CLKGATE         (1 << 30)  /* Bit 30: Gate UTMI clocks */
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USB_PHY_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT_USBPHY_H */

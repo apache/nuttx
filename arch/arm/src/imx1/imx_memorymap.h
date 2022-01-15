@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_MEMORYMAP_H
-#define __ARCH_ARM_IMX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_IMX1_IMX_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -250,4 +250,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_IMX_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_MEMORYMAP_H */

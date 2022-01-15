@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32_WDG_H
-#define __ARCH_ARM_SRC_STM32_STM32_WDG_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_WDG_H
 
 /****************************************************************************
  * Included Files
@@ -101,4 +101,4 @@ void stm32_wwdginitialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_STM32_STM32_WDG_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_WDG_H */

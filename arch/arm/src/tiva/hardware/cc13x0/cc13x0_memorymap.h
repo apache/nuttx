@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_C13X0_C13X0_MEMORYMAP_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_C13X0_C13X0_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_MEMORYMAP_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -159,4 +159,4 @@
 #define TIVA_CPU_TIPROP_BASE          0xe00fe000 /* CPU_TIPROP */
 #define TIVA_CPU_ROM_TABLE_BASE       0xe00ff000 /* CPU_ROM_TABLE */
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_C13X0_C13X0_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_MEMORYMAP_H */

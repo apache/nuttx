@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LCD_H
-#define __INCLUDE_NUTTX_LCD_H
+#ifndef __INCLUDE_NUTTX_LCD_LCD_H
+#define __INCLUDE_NUTTX_LCD_LCD_H
 
 /****************************************************************************
  * Included Files
@@ -231,4 +231,4 @@ extern "C"
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_LCD_H */
+#endif /* __INCLUDE_NUTTX_LCD_LCD_H */

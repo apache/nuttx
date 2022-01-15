@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CALIBRATE_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CALIBRATE_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CALIBRATE_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CALIBRATE_H
 
 /****************************************************************************
  * Included Files
@@ -90,4 +90,4 @@ struct efm32_calibrate_s
   const uint32_t value;   /* Default value for calibration register */
 };
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CALIBRATE_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CALIBRATE_H */

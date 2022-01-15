@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H
-#define __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4370_LINK2_INCLUDE_BOARD_H
+#define __BOARDS_ARM_LPC43XX_LPC4370_LINK2_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -304,4 +304,4 @@
 #define PINCONF_SSP1_SCK            PINCONF_SSP1_SCK_1
 #define PINCONF_SSP1_SSEL           PINCONF_SSP1_SSEL_1
 
-#endif /* __BOARDS_ARM_LPC43XX_LPC4357_LINK2_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_LPC43XX_LPC4370_LINK2_INCLUDE_BOARD_H */

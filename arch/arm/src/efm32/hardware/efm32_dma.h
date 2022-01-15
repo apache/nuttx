@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DMA_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DMA_H
 
 /****************************************************************************
  * Included Files
@@ -2285,4 +2285,4 @@ struct dma_descriptor_s
   volatile uint32_t        user;   /* DMA padding register, available for user */
 };
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DMA_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DMA_H */

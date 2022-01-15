@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H
-#define __LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H
+#ifndef __LIBS_LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H
+#define __LIBS_LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H
 
 /****************************************************************************
  * Included Files
@@ -832,4 +832,4 @@ extern "C"
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H */
+#endif /* __LIBS_LIBNX_NXFONTS_NXFONTS_X11_MISC_FIXED_6X10_H */

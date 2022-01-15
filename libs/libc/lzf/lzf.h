@@ -28,8 +28,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_LZF_LZF_H
-#define __LIBC_LZF_LZF_H
+#ifndef __LIBS_LIBC_LZF_LZF_H
+#define __LIBS_LIBC_LZF_LZF_H
 
 /****************************************************************************
  * Included Files
@@ -92,4 +92,4 @@ using namespace std;
  * Public Types
  ****************************************************************************/
 
-#endif /* __LIBC_LZF_LZF_H */
+#endif /* __LIBS_LIBC_LZF_LZF_H */

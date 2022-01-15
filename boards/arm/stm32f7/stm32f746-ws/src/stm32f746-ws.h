@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F746_WS_SRC_STM32F746_WS_H
-#define __BOARDS_ARM_STM32F746_WS_SRC_STM32F746_WS_H
+#ifndef __BOARDS_ARM_STM32F7_STM32F746_WS_SRC_STM32F746_WS_H
+#define __BOARDS_ARM_STM32F7_STM32F746_WS_SRC_STM32F746_WS_H
 
 /****************************************************************************
  * Included Files
@@ -126,4 +126,4 @@ int stm32_dma_alloc_init(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32F746_WS_SRC_STM32F746_WS_H */
+#endif /* __BOARDS_ARM_STM32F7_STM32F746_WS_SRC_STM32F746_WS_H */

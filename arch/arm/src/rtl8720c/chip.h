@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_AMEBA_CHIP_H
-#define __ARCH_ARM_SRC_AMEBA_CHIP_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_CHIP_H
+#define __ARCH_ARM_SRC_RTL8720C_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -45,4 +45,4 @@
  */
 #define ARMV8M_PERIPHERAL_INTERRUPTS  (CONFIG_AMEBA_NR_IRQS - 16)
 
-#endif /* __ARCH_ARM_SRC_AMEBA_CHIP_H */
+#endif /* __ARCH_ARM_SRC_RTL8720C_CHIP_H */

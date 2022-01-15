@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_CGC_H
-#define __ARCH_RENESAS_SRC_RX65N_CGC_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_CGC_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_CGC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -281,4 +281,4 @@
 
 void r_cgc_create(void);
 
-#endif
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_CGC_H */

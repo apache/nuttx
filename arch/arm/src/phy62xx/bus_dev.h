@@ -27,8 +27,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BUS_DEV_H__
-#define __BUS_DEV_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_BUS_DEV_H
+#define __ARCH_ARM_SRC_PHY62XX_BUS_DEV_H
 
 #ifdef __cplusplus
 extern "C"
@@ -130,4 +130,4 @@ typedef enum IRQn
 #include "mcu_phy_prime.h"
 #endif
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_BUS_DEV_H */

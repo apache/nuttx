@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_GPIO_H
-#define __ARCH_ARM_SRC_KL_KINETIS_GPIO_H
+#ifndef __ARCH_ARM_SRC_KL_KL_GPIO_H
+#define __ARCH_ARM_SRC_KL_KL_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -402,4 +402,4 @@ void kl_gpioirqdisable(uint32_t pinset);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_GPIO_H */
+#endif /* __ARCH_ARM_SRC_KL_KL_GPIO_H */

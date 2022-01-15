@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXTK_NXTK_H
-#define __LIBNX_NXTK_NXTK_H
+#ifndef __LIBS_LIBNX_NXTK_NXTK_H
+#define __LIBS_LIBNX_NXTK_NXTK_H
 
 /****************************************************************************
  * Included Files
@@ -209,4 +209,4 @@ int nxtk_drawframe(FAR struct nxtk_framedwindow_s *fwnd,
 }
 #endif
 
-#endif /* __LIBNX_NXTK_NXTK_H */
+#endif /* __LIBS_LIBNX_NXTK_NXTK_H */

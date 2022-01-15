@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_X86_64_INTEL64_QEMU_INCLUDE_BOARD_H
-#define __BOARDS_X86_64_INTEL64_QEMU_INCLUDE_BOARD_H
+#ifndef __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H
+#define __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -72,4 +72,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_X86_64_INTEL64_QEMU_INCLUDE_BOARD_H */
+#endif /* __BOARDS_X86_64_INTEL64_QEMU_INTEL64_INCLUDE_BOARD_H */

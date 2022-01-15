@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_DMA_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -556,4 +556,4 @@
 #define DMAMAP_TIM8_TRIG           STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 #define DMAMAP_TIM8_COM            STM32_DMA_MAP(DMA2,DMA_STREAM7,DMA_CHAN7)
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V2_H */

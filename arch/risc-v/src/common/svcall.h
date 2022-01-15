@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/svcall.h
+ * arch/risc-v/src/common/svcall.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_RV64GC_SVCALL_H
-#define __ARCH_RISCV_SRC_RV64GC_SVCALL_H
+#ifndef __ARCH_RISCV_SRC_COMMON_SVCALL_H
+#define __ARCH_RISCV_SRC_COMMON_SVCALL_H
 
 /****************************************************************************
  * Included Files
@@ -135,4 +135,4 @@
 #endif /* !CONFIG_BUILD_FLAT */
 #endif /* CONFIG_LIB_SYSCALL */
 
-#endif /* __ARCH_RISCV_SRC_RV64GC_SVCALL_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_SVCALL_H */

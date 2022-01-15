@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_MPL115A_H
-#define __STM32_MPL115A_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MPL115A_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MPL115A_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int board_mpl115a_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_MPL115A_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MPL115A_H */

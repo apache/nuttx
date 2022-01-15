@@ -30,8 +30,8 @@
  *   @author   qing.han
  ****************************************************************************/
 
-#ifndef __UART_H__
-#define __UART_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_UART_H
+#define __ARCH_ARM_SRC_PHY62XX_UART_H
 
 #ifdef __cplusplus
 extern "C"
@@ -174,4 +174,4 @@ void __attribute__((weak)) hal_UART1_IRQHandler(void);
 }
 #endif
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_UART_H */

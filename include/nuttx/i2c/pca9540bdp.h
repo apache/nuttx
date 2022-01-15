@@ -37,8 +37,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_I2C_PCA9540BDP_H
-#define __INCLUDE_I2C_PCA9540BDP_H
+#ifndef __INCLUDE_NUTTX_I2C_PCA9540BDP_H
+#define __INCLUDE_NUTTX_I2C_PCA9540BDP_H
 
 /****************************************************************************
  * Included Files
@@ -121,4 +121,4 @@ FAR struct pca9540bdp_dev_s *
 }
 #endif
 
-#endif /* __INCLUDE_I2C_PCA9540BDP_H */
+#endif /* __INCLUDE_NUTTX_I2C_PCA9540BDP_H */

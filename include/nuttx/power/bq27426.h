@@ -19,8 +19,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_POWER_BQ27426_H
-#define __DRIVERS_POWER_BQ27426_H
+#ifndef __INCLUDE_NUTTX_POWER_BQ27426_H
+#define __INCLUDE_NUTTX_POWER_BQ27426_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -201,10 +201,10 @@
 #define BQ27426_OPCONFIG_BATLOWEN      (1 << 2)
 #define BQ27426_OPCONFIG_TEMPS         (1 << 0)
 
-#define  BQ27426_ACCESS_SUB_CLASS_80   0x50
-#define  BQ27426_ACCESS_SUB_CLASS_81   0x51
-#define  BQ27426_ACCESS_SUB_CLASS_82   0x52
-#define  BQ27426_ACCESS_SUB_CLASS_89   0x59
-#define  BQ27426_ACCESS_SUB_CLASS_64   0x40
+#define BQ27426_ACCESS_SUB_CLASS_80    0x50
+#define BQ27426_ACCESS_SUB_CLASS_81    0x51
+#define BQ27426_ACCESS_SUB_CLASS_82    0x52
+#define BQ27426_ACCESS_SUB_CLASS_89    0x59
+#define BQ27426_ACCESS_SUB_CLASS_64    0x40
 
-#endif /* __DRIVERS_POWER_BQ27426_H */
+#endif /* __INCLUDE_NUTTX_POWER_BQ27426_H */

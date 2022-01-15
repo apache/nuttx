@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_EFM32_EFM32_SPI_H
-#define __ARCH_ARM_EFM32_EFM32_SPI_H
+#ifndef __ARCH_ARM_SRC_EFM32_EFM32_SPI_H
+#define __ARCH_ARM_SRC_EFM32_EFM32_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@ int efm32_spi2_cmddata(struct spi_dev_s *dev, uint32_t devid,
                        bool cmd);
 #endif
 
-#endif /* __ARCH_ARM_EFM32_EFM32_SPI_H */
+#endif /* __ARCH_ARM_SRC_EFM32_EFM32_SPI_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_TCP_TCP_H
-#define _NET_TCP_TCP_H
+#ifndef __NET_TCP_TCP_H
+#define __NET_TCP_TCP_H
 
 /****************************************************************************
  * Included Files
@@ -1928,4 +1928,4 @@ void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
 #endif
 
 #endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
-#endif /* _NET_TCP_TCP_H */
+#endif /* __NET_TCP_TCP_H */

@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CDC_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CDC_H
 
 #include "bcmf_driver.h"
 #include <stdbool.h>
@@ -53,4 +53,4 @@ int bcmf_cdc_iovar_request_unsafe(FAR struct bcmf_dev_s *priv,
 int bcmf_cdc_process_control_frame(FAR struct bcmf_dev_s *priv,
                                    struct bcmf_frame_s *frame);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CDC_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CDC_H */

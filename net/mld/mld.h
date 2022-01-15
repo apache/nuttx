@@ -82,8 +82,8 @@
  *   -----------------
  */
 
-#ifndef __NET_NETLINK_MLD_H
-#define __NET_NETLINK_MLD_H
+#ifndef __NET_MLD_MLD_H
+#define __NET_MLD_MLD_H
 
 /****************************************************************************
  * Included Files
@@ -510,4 +510,4 @@ void mld_removemcastmac(FAR struct net_driver_s *dev,
 #endif
 
 #endif /* CONFIG_NET_MLD */
-#endif /* __NET_NETLINK_MLD_H */
+#endif /* __NET_MLD_MLD_H */

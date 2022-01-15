@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_WDT_H
-#define __ARCH_ARM_SRC_SAM34_WDT_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_WDT_H
+#define __ARCH_ARM_SRC_SAM34_SAM_WDT_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@ void sam_wdtinitialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_WATCHDOG */
-#endif /* __ARCH_ARM_SRC_SAM34_WDT_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_WDT_H */

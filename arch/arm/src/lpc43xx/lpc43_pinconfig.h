@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_PINCONFIG_H
-#define __ARCH_ARM_SRC_LPC43XX_PINCONFIG_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_PINCONFIG_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_PINCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -281,4 +281,4 @@ int lpc43_pin_dump(uint32_t pinconf, const char *msg);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_LPC43XX_PINCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_PINCONFIG_H */

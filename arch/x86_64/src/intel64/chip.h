@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_X86_64_SRC_BROADWELL_BROADWELL_CHIP_H
-#define __ARCH_X86_64_SRC_BROADWELL_BROADWELL_CHIP_H
+#ifndef __ARCH_X86_64_SRC_INTEL64_CHIP_H
+#define __ARCH_X86_64_SRC_INTEL64_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -43,4 +43,4 @@
  * Public Function Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_X86_64_SRC_BROADWELL_BROADWELL_CHIP_H */
+#endif /* __ARCH_X86_64_SRC_INTEL64_CHIP_H */

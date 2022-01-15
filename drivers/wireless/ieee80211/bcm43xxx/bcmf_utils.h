@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_UTILS_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_UTILS_H
 
 /****************************************************************************
  * Included Files
@@ -64,4 +64,4 @@ static inline uint32_t bcmf_getle32(void *val)
   return (uint32_t)bcmf_getle16(valw) << 16 | bcmf_getle16(valw + 1);
 }
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_UTILS_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_UTILS_H */

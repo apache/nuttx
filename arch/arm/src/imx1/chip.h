@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_CHIP_H
-#define __ARCH_ARM_IMX_CHIP_H
+#ifndef __ARCH_ARM_SRC_IMX1_CHIP_H
+#define __ARCH_ARM_SRC_IMX1_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -47,4 +47,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_IMX_CHIP_H */
+#endif /* __ARCH_ARM_SRC_IMX1_CHIP_H */

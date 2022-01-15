@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCIO_H
-#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCIO_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_IO_H
+#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_IO_H
 
 /****************************************************************************
  * Included Files
@@ -3701,4 +3701,4 @@
 #define RTCIO_IO_DATE_V  0x0FFFFFFF
 #define RTCIO_IO_DATE_S  0
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCIO_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_IO_H */

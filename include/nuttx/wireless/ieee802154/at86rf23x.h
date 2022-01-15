@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
-#define __INCLUDE_NUTTX_IEEE802154_AT86RF23X_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_IEEE802154_AT86RF23X_H
+#define __INCLUDE_NUTTX_WIRELESS_IEEE802154_AT86RF23X_H
 
 /****************************************************************************
  * Included Files
@@ -96,4 +96,4 @@ FAR struct ieee802154_radio_s *
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_IEEE802154__AT86RF23X_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_IEEE802154_AT86RF23X_H */

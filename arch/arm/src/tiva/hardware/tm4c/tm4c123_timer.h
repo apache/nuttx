@@ -46,8 +46,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C123_TIMER_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C123_TIMER_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_TIMER_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -590,4 +590,4 @@
 #  define TIMER_PP_SIZE_16             (0 << TIMER_PP_SIZE_SHIFT) /* Timer A/B 16 bits with 8-bit prescale */
 #  define TIMER_PP_SIZE_32             (1 << TIMER_PP_SIZE_SHIFT) /* Timer A/B 32 bits with 16-bit prescale */
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C123_TIMER_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_TIMER_H */

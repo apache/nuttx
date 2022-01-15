@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_STATUS_H
-#define __ARCH_RENESAS_SRC_RX65N_STATUS_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_MACRODRIVER_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_MACRODRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -82,4 +82,4 @@
 #define __TYPEDEF__
 #endif
 
-#endif /* __ARCH_RENESAS_SRC_RX65N_STATUS_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_MACRODRIVER_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_DTC_H
-#define __ARCH_RENESAS_SRC_RX65N_DTC_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_DTC_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_DTC_H
 
 /****************************************************************************
  * Included Files
@@ -512,4 +512,4 @@ void rx65n_dtc_stop(DTC_HANDLE handle);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RENESAS_SRC_RX65N_DTC_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_DTC_H */

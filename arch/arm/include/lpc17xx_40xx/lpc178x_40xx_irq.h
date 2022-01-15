@@ -22,8 +22,8 @@
  * only indirectly through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_IRQ_H
-#define __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_40XX_IRQ_H
+#define __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_40XX_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -272,4 +272,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_LPC17XX_40XX_LPC178X_40XX_IRQ_H */

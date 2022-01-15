@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDEO_H
-#define __INCLUDE_NUTTX_VIDEO_H
+#ifndef __INCLUDE_NUTTX_VIDEO_VIDEO_H
+#define __INCLUDE_NUTTX_VIDEO_VIDEO_H
 
 /****************************************************************************
  * Included Files
@@ -661,4 +661,4 @@ int video_uninitialize(void);
 #ifdef __cplusplus
 }
 #endif
-#endif /* __INCLUDE_NUTTX_VIDEO_H */
+#endif /* __INCLUDE_NUTTX_VIDEO_VIDEO_H */

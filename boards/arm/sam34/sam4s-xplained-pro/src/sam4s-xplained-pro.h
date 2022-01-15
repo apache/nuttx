@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
-#define __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H
+#ifndef __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_SRC_SAM4S_XPLAINED_PRO_H
+#define __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_SRC_SAM4S_XPLAINED_PRO_H
 
 /****************************************************************************
  * Included Files
@@ -252,4 +252,4 @@ bool sam_writeprotected(int slotno);
 
 int sam_watchdog_initialize(void);
 
-#endif /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_SRC_SAM4S_XPLAINED_H */
+#endif /* __BOARDS_ARM_SAM34_SAM4S_XPLAINED_PRO_SRC_SAM4S_XPLAINED_PRO_H */

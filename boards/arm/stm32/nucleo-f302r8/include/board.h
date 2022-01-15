@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_NUCLEOF302R8_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_NUCLEOF302R8_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F302R8_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEO_F302R8_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files

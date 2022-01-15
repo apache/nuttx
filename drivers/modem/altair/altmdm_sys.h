@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MODEM_ALTMDM_ALTMDM_SYS_H
-#define __DRIVERS_MODEM_ALTMDM_ALTMDM_SYS_H
+#ifndef __DRIVERS_MODEM_ALTAIR_ALTMDM_SYS_H
+#define __DRIVERS_MODEM_ALTAIR_ALTMDM_SYS_H
 
 #if defined(CONFIG_MODEM_ALTMDM)
 
@@ -256,4 +256,4 @@ int altmdm_sys_restarttimer(timer_t timerid, int first_ms, int interval_ms);
 void altmdm_sys_stoptimer(timer_t timerid);
 
 #endif
-#endif /* __DRIVERS_MODEM_ALTMDM_ALTMDM_SYS_H */
+#endif /* __DRIVERS_MODEM_ALTAIR_ALTMDM_SYS_H */

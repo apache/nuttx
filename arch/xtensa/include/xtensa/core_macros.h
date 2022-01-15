@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
-#define __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACRO_H
+#ifndef __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACROS_H
+#define __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACROS_H
 
 /****************************************************************************
  * Included Files
@@ -40,4 +40,4 @@
                                          __asm__ __volatile__("wsr.ccount %0" :: "a"(__ccount):"memory");\
                                          } while(0)
 
-#endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_H */
+#endif /* __ARCH_XTENSA_INCUDE_XTENSA_CORE_MACROS_H */

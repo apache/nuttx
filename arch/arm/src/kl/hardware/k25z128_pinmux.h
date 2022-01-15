@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_KL25PINMUX_H
-#define __ARCH_ARM_SRC_KINETIS_KINETIS_KL25PINMUX_H
+#ifndef __ARCH_ARM_SRC_KL_HARDWARE_K25Z128_PINMUX_H
+#define __ARCH_ARM_SRC_KL_HARDWARE_K25Z128_PINMUX_H
 
 /****************************************************************************
  * Included Files
@@ -324,4 +324,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KL_HARDWARE_K25PINMUX_H */
+#endif /* __ARCH_ARM_SRC_KL_HARDWARE_K25Z128_PINMUX_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_HC_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_HC_SRC_COMMON_UP_ARCH_H
+#ifndef __ARCH_HC_SRC_COMMON_UP_ARCH_H
+#define __ARCH_HC_SRC_COMMON_UP_ARCH_H
 
 /****************************************************************************
  * Included Files

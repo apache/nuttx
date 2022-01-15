@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H
+#define __ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -44,4 +44,4 @@
 
 #define LITEX_IDLESTACK_TOP  (LITEX_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 
-#endif /* _ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H */
+#endif /* __ARCH_RISCV_SRC_LITEX_LITEX_MEMORYMAP_H */

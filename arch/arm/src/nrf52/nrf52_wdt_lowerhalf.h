@@ -34,8 +34,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_NRF52_WDT_LOWERHALF_H
-#define __ARCH_ARM_NRF52_WDT_LOWERHALF_H
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_WDT_LOWERHALF_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_WDT_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
@@ -101,4 +101,4 @@ extern "C"
 int nrf52_wdt_initialize(FAR const char *devpath, int16_t mode_sleep,
                          int16_t mode_halt);
 
-#endif /* __ARCH_ARM_NRF52_WDT_LOWERHALF_H */
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_WDT_LOWERHALF_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5_SDMMC_H
-#define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5_SDMMC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_SDMMC_H
+#define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_SDMMC_H
 
 /****************************************************************************
  * Included Files
@@ -610,4 +610,4 @@ enum bus_mode
  * Public Data
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAMA5_SDMMC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_SDMMC_H */

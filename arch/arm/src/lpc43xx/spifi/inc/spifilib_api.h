@@ -28,8 +28,8 @@
  *
  ****************************************************************************/
 
-#ifndef __SPIFILIB_API_H_
-#define __SPIFILIB_API_H_
+#ifndef __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_API_H
+#define __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_API_H
 
 /****************************************************************************
  * Included Files
@@ -64,7 +64,7 @@ uint16_t spifiGetLibVersion(void);
  * spifiCtrlAddr  : Base address of SPIFI controller
  * reset          : true to reset the SPIFI controller, or false to not reset
  * return         SPIFI library error code
- * NOTE  This function should be called prior to any other SPIFILIB functions.
+ * NOTE This function should be called prior to any other SPIFILIB functions.
  * In most cases, a reset isn't needed. Before calling this function, all
  * board specific functions related to the SPIFI interface must be setup and
  * the SPIFI clock must be enabled. If booting from SPIFI FLASH, this will
@@ -101,7 +101,7 @@ uint32_t spifiGetSuppFamilyCount(void);
  * index        : Index (0 - n) where n = number of families returned
  *                    by spifiGetSuppFamilyCount() -1
  * return       a string pointer to the generic device name
- * NOTE	Can be used with the spifiGetSuppFamilyCount() to get a list of
+ * NOTE Can be used with the spifiGetSuppFamilyCount() to get a list of
  * device families the library is configured for.
  */
 
@@ -454,4 +454,4 @@ SPIFI_ERR_T spifiEraseByAddr(const SPIFI_HANDLE_T *pHandle,
 }
 #endif
 
-#endif /* __SPIFILIB_API_H_ */
+#endif /* __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_API_H */

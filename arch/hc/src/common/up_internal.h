@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __UP_INTERNAL_H
-#define __UP_INTERNAL_H
+#ifndef __ARCH_HC_SRC_COMMON_UP_INTERNAL_H
+#define __ARCH_HC_SRC_COMMON_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -185,4 +185,4 @@ void up_usbuninitialize(void);
 
 #endif /* __ASSEMBLY__ */
 
-#endif /* __UP_INTERNAL_H */
+#endif /* __ARCH_HC_SRC_COMMON_UP_INTERNAL_H */

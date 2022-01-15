@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_CCM_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_CCM_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_CCM_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_CCM_H
 
 /****************************************************************************
  * Included Files
@@ -1197,4 +1197,4 @@
 #define CCM_ANALOG_MISC2_VIDEO_DIV_MASK                (0x3 << CCM_ANALOG_MISC2_VIDEO_DIV_SHIFT)
 #  define CCM_ANALOG_MISC2_VIDEO_DIV(n)                ((uint32_t)(n) << CCM_ANALOG_MISC2_VIDEO_DIV_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_CCM_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_CCM_H */

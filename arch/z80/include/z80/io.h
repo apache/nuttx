@@ -22,8 +22,8 @@
  * through arch/io.h
  */
 
-#ifndef __ARCH_Z80_IO_H
-#define __ARCH_Z80_IO_H
+#ifndef __ARCH_Z80_INCLUDE_Z80_IO_H
+#define __ARCH_Z80_INCLUDE_Z80_IO_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ char inp(char p);
 #endif
 #endif
 
-#endif /* __ARCH_Z80_IO_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_IO_H */

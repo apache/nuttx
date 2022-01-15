@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_SPI_H
-#define __ARCH_ARM_SRC_LPC43XX_SPI_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_SPI_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -171,4 +171,4 @@ int lpc43_spiregister(FAR struct spi_dev_s *dev,
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_LPC43_SPI */
-#endif /* __ARCH_ARM_SRC_LPC43XX_SPI_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_SPI_H */

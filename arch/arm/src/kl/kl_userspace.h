@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_USERSPACE_H
-#define __ARCH_ARM_SRC_KL_KINETIS_USERSPACE_H
+#ifndef __ARCH_ARM_SRC_KL_KL_USERSPACE_H
+#define __ARCH_ARM_SRC_KL_KL_USERSPACE_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@
 void kl_userspace(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_USERSPACE_H */
+#endif /* __ARCH_ARM_SRC_KL_KL_USERSPACE_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32H7_NUCLEOH743ZI_SRC_STM32_ROMFS_H
-#define __BOARDS_ARM_STM32H7_NUCLEOH743ZI_SRC_STM32_ROMFS_H
+#ifndef __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_STM32_ROMFS_H
+#define __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_STM32_ROMFS_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@ int stm32_romfs_initialize(void);
 
 #endif /* CONFIG_STM32_ROMFS */
 
-#endif /* __BOARDS_ARM_STM32H7_NUCLEOH743ZI_SRC_STM32_ROMFS_H */
+#endif /* __BOARDS_ARM_STM32H7_NUCLEO_H743ZI_SRC_STM32_ROMFS_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_LC823450_H
-#define __ARCH_ARM_SRC_LC823450_LC823450_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_START_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_START_H
 
 /****************************************************************************
  * Included Files
@@ -31,4 +31,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LC823450_LC823450_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_START_H */

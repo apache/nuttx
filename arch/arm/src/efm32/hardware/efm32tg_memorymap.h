@@ -56,8 +56,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM3TG_MEMORYMAP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM3TG_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM3TG_MEMORYMAP_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM3TG_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -125,4 +125,4 @@
 #define EFM32_CALIBRATE_BASE       0x0fe08000 /* CALIBRATE base address */
 #define EFM32_DEVINFO_BASE         0x0fe081b0 /* DEVINFO base address */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM3TG_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM3TG_MEMORYMAP_H */

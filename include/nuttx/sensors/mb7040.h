@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MB7040
-#define __INCLUDE_NUTTX_SENSORS_MB7040
+#ifndef __INCLUDE_NUTTX_SENSORS_MB7040_H
+#define __INCLUDE_NUTTX_SENSORS_MB7040_H
 
 /****************************************************************************
  * Included Files
@@ -98,4 +98,4 @@ int mb7040_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_MB7040 */
-#endif /* __INCLUDE_NUTTX_SENSORS_MB7040 */
+#endif /* __INCLUDE_NUTTX_SENSORS_MB7040_H */

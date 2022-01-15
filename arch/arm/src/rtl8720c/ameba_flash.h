@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_AMEBA_FLASH_H
-#define __INCLUDE_AMEBA_FLASH_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBA_FLASH_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBA_FLASH_H
 
 /****************************************************************************
  * Included Files
@@ -43,4 +43,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __INCLUDE_AMEBA_FLASH_H */
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBA_FLASH_H */

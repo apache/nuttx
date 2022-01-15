@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_IOMUXC_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_IOMUXC_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_IOMUXC_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_IOMUXC_H
 
 /****************************************************************************
  * Included Files
@@ -1587,4 +1587,4 @@
 #define GPR_GPR25_M7_APC_AC_R3_TOP_MASK                         (0x1fffffff << GPR_GPR25_M7_APC_AC_R3_TOP_SHIFT)
 #define GPR_GPR25_M7_APC_AC_R3_TOP(n)                           ((uint32_t)(n)) << GPR_GPR25_M7_APC_AC_R3_TOP_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_IOMUXC_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_IOMUXC_H */

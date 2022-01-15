@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_TONE_H
-#define __STM32_TONE_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_TONE_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_TONE_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int board_tone_initialize(int devno);
 }
 #endif
 
-#endif // __STM32_TONE_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_TONE_H */

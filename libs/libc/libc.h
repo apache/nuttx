@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_LIBC_H
-#define __LIBC_LIBC_H
+#ifndef __LIBS_LIBC_LIBC_H
+#define __LIBS_LIBC_LIBC_H
 
 /****************************************************************************
  * Included Files
@@ -163,4 +163,4 @@ int lib_restoredir(void);
 }
 #endif
 
-#endif /* __LIBC_LIBC_H */
+#endif /* __LIBS_LIBC_LIBC_H */

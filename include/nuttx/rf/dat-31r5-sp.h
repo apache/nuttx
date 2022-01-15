@@ -17,8 +17,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_
-#define __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_
+#ifndef __INCLUDE_NUTTX_RF_DAT_31R5_SP_H
+#define __INCLUDE_NUTTX_RF_DAT_31R5_SP_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ int dat31r5sp_register(FAR const char *devpath,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_RF_DAT_31R5_SP_H_ */
+#endif /* __INCLUDE_NUTTX_RF_DAT_31R5_SP_H */

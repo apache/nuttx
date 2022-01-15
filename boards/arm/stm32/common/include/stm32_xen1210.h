@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_XEN1210_H
-#define __STM32_XEN1210_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_XEN1210_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_XEN1210_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ int board_xen1210_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_XEN1210_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_XEN1210_H */

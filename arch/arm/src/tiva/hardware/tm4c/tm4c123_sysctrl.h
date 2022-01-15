@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCTRL_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCTRL_H
 
 /****************************************************************************
  * Included Files
@@ -1859,4 +1859,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C123_SYSCTRL_H */

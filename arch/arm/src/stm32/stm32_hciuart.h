@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HCIUART_H
-#define __ARCH_ARM_SRC_STM32_HCIUART_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_HCIUART_H
+#define __ARCH_ARM_SRC_STM32_STM32_HCIUART_H
 
 /****************************************************************************
  * Included Files
@@ -91,4 +91,4 @@ void hciuart_initialize(void);
 void stm32_serial_dma_poll(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_HCIUART_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_HCIUART_H */

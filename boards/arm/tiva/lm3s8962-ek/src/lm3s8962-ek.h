@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962EK_H
-#define __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962EK_H
+#ifndef __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962_EK_H
+#define __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962_EK_H
 
 /****************************************************************************
  * Included Files
@@ -114,4 +114,4 @@
 void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962EK_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S8962_EK_SRC_LM3S8962_EK_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_INA219_H
-#define __STM32_INA219_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_INA219_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_INA219_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int board_ina219_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_INA219_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_INA219_H */

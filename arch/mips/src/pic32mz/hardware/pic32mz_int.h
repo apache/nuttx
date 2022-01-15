@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_INT_H
-#define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_INT_H
+#ifndef __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_INT_H
+#define __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_INT_H
 
 /****************************************************************************
  * Included Files
@@ -1248,4 +1248,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_INT_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MZ_HARDWARE_PIC32MZ_INT_H */

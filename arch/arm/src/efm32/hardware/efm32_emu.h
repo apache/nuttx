@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_EMU_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_EMU_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_EMU_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_EMU_H
 
 /****************************************************************************
  * Included Files
@@ -440,4 +440,4 @@
 #define _EMU_BUBODUNREGCAL_RANGE_DEFAULT     0x00000001UL                            /* Mode DEFAULT for EMU_BUBODUNREGCAL */
 #define EMU_BUBODUNREGCAL_RANGE_DEFAULT      (_EMU_BUBODUNREGCAL_RANGE_DEFAULT << 3) /* Shifted mode DEFAULT for EMU_BUBODUNREGCAL */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_EMU_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_EMU_H */

@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_BURTC_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_BURTC_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_BURTC_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_BURTC_H
 
 /****************************************************************************
  * Included Files
@@ -468,4 +468,4 @@
 #define _BURTC_RET_REG_REG_DEFAULT            0x00000000UL                      /* Mode DEFAULT for BURTC_RET_REG */
 #define BURTC_RET_REG_REG_DEFAULT             (_BURTC_RET_REG_REG_DEFAULT << 0) /* Shifted mode DEFAULT for BURTC_RET_REG */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_BURTC_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_BURTC_H */

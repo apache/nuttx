@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_GPIO_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_GPIO_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_GPIO_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@
 #define IMXRT_GPIO5_CLEAR        (IMXRT_GPIO5_BASE + IMXRT_GPIO_CLEAR_OFFSET)
 #define IMXRT_GPIO5_TOGGLE       (IMXRT_GPIO5_BASE + IMXRT_GPIO_TOGGLE_OFFSET)
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_GPIO_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_GPIO_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCTRL_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCTRL_H
 
 /****************************************************************************
  * Included Files
@@ -494,4 +494,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_LM3S_SYSCTRL_H */

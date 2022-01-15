@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_s32k1xx_s32k1xx_rtc_H
-#define __ARCH_ARM_SRC_s32k1xx_s32k1xx_rtc_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32JK1XX_RTC_H
+#define __ARCH_ARM_SRC_S32K1XX_S32JK1XX_RTC_H
 
 #include <nuttx/config.h>
 
@@ -95,4 +95,4 @@ bool s32k1xx_rtc_havesettime(void);
 #endif
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_S32K1XX_RTC */
-#endif /* __ARCH_ARM_SRC_s32k1xx_s32k1xx_rtc_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32JK1XX_RTC_H */

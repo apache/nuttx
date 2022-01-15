@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_NUCLEOF207ZG_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32_NUCLEOF207ZG_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32_NUCLEO_F207ZG_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32_NUCLEO_F207ZG_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H
-#define __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H
+#ifndef __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H
+#define __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -225,4 +225,4 @@ void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H
-#define __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_OLIMEX_STM32_P107_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_OLIMEX_STM32_P107_H
 
 /****************************************************************************
  * Included Files
@@ -82,4 +82,4 @@ int stm32_can_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P107_SRC_OLIMEX_STM32_P107_H */

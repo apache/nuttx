@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H
 
 /****************************************************************************
  * Included Files
@@ -211,4 +211,4 @@ void mrf24j40_setup_fifo(FAR struct mrf24j40_radio_s *dev,
 void mrf24j40_norm_trigger(FAR struct mrf24j40_radio_s *dev);
 void mrf24j40_beacon_trigger(FAR struct mrf24j40_radio_s *dev);
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_H */

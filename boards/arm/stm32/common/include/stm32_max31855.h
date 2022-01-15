@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_MAX31855_H
-#define __STM32_MAX31855_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX31855_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX31855_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int board_max31855_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_MAX31855_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX31855_H */

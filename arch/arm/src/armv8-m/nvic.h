@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H
-#define __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_NVIC_H
+#define __ARCH_ARM_SRC_ARMV8_M_NVIC_H
 
 /****************************************************************************
  * Included Files
@@ -896,4 +896,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_COMMON_ARMV8_M_NVIC_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_NVIC_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SERIAL_UART_AMEBA_H
-#define __INCLUDE_NUTTX_SERIAL_UART_AMEBA_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBA_UART_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBA_UART_H
 
 /****************************************************************************
  * Included Files
@@ -175,4 +175,4 @@ typedef uint32_t uart_addrwidth_t;
 struct file;  /* Forward reference */
 int uart_ioctl(struct file *filep, int cmd, unsigned long arg);
 #endif /* CONFIG_AMEBA_UART */
-#endif /* __INCLUDE_NUTTX_SERIAL_UART_AMEBA_H */
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBA_UART_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_SDC_NRF_H__
-#define __ARCH_ARM_SRC_NRF52_SDC_NRF_H__
+#ifndef __ARCH_ARM_SRC_NRF52_SDC_NRF_H
+#define __ARCH_ARM_SRC_NRF52_SDC_NRF_H
 
 /****************************************************************************
  * Public Types
@@ -81,4 +81,4 @@ typedef enum
   FPU_IRQn                               =  38
 } IRQn_Type;
 
-#endif /* __ARCH_ARM_SRC_NRF52_SDC_NRF_H__ */
+#endif /* __ARCH_ARM_SRC_NRF52_SDC_NRF_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_ONESHOT_H
-#define __ARCH_ARM_SRC_STM32_ONESHOT_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_ONESHOT_H
+#define __ARCH_ARM_SRC_STM32_STM32_ONESHOT_H
 
 /****************************************************************************
  * Included Files
@@ -192,4 +192,4 @@ int stm32_oneshot_cancel(struct stm32_oneshot_s *oneshot,
 #endif
 
 #endif /* CONFIG_STM32_ONESHOT */
-#endif /* __ARCH_ARM_SRC_STM32_ONESHOT_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_ONESHOT_H */

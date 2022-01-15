@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_AES_H_
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_AES_H_
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_AES_H_
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_AES_H_
 
 /****************************************************************************
  * Included Files
@@ -325,4 +325,4 @@
 #define _AES_KEYHD_KEYHD_DEFAULT        0x00000000UL                    /* Mode DEFAULT for AES_KEYHD */
 #define AES_KEYHD_KEYHD_DEFAULT         (_AES_KEYHD_KEYHD_DEFAULT << 0) /* Shifted mode DEFAULT for AES_KEYHD */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_AES_H_ */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_AES_H_ */

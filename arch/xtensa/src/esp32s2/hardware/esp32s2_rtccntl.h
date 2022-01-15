@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_H
-#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCCNTL_H
+#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCCNTL_H
 
 /****************************************************************************
  * Included Files
@@ -4422,4 +4422,4 @@
 #define RTC_CNTL_CNTL_DATE_V  0x0FFFFFFF
 #define RTC_CNTL_CNTL_DATE_S  0
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTC_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_RTCCNTL_H */

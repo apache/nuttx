@@ -40,6 +40,7 @@
 #include "imxrt_periphclks.h"
 
 #include "imxrt_enc.h"
+#include "hardware/imxrt_enc.h"
 
 /* This functionality is dependent on Qencoder Sensor support */
 

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_LM75_H
-#define __STM32_LM75_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LM75_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LM75_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int board_lm75_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_LM75_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LM75_H */

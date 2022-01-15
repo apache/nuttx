@@ -32,8 +32,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTSTACK_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTSTACK_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTSTACK_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTSTACK_H
 
 /* This module can be used to manage the configuration of Spirit STack
  * packets, and it is quite similar to the Basic packets one since the
@@ -482,4 +482,4 @@ int spirit_pkstack_enable_rxsource_addrfilter(
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_SPIRIT_PKTSTACK_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_PKTSTACK_H */

@@ -24,8 +24,8 @@
  * Included Files
  ****************************************************************************/
 
-#  include <stdint.h>
-#  include <stdbool.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -33,153 +33,153 @@
 
 /* FLEXSPI memory config block related definitions */
 
-#  define FLEXSPI_CFG_BLK_TAG         (0x42464346ul)
-#  define FLEXSPI_CFG_BLK_VERSION     (0x56010100ul)
-#  define FLEXSPI_CFG_BLK_SIZE        (512)
+#define FLEXSPI_CFG_BLK_TAG         (0x42464346ul)
+#define FLEXSPI_CFG_BLK_VERSION     (0x56010100ul)
+#define FLEXSPI_CFG_BLK_SIZE        (512)
 
 /* FLEXSPI Feature related definitions */
 
-#  define FLEXSPI_FEATURE_HAS_PARALLEL_MODE 1
+#define FLEXSPI_FEATURE_HAS_PARALLEL_MODE 1
 
 /* Lookup table related definitions */
 
-#  define CMD_INDEX_READ              0
-#  define CMD_INDEX_READSTATUS        1
-#  define CMD_INDEX_WRITEENABLE       2
-#  define CMD_INDEX_WRITE             4
+#define CMD_INDEX_READ              0
+#define CMD_INDEX_READSTATUS        1
+#define CMD_INDEX_WRITEENABLE       2
+#define CMD_INDEX_WRITE             4
 
-#  define CMD_LUT_SEQ_IDX_READ        0
-#  define CMD_LUT_SEQ_IDX_READSTATUS  1
-#  define CMD_LUT_SEQ_IDX_WRITEENABLE 3
-#  define CMD_LUT_SEQ_IDX_WRITE       9
+#define CMD_LUT_SEQ_IDX_READ        0
+#define CMD_LUT_SEQ_IDX_READSTATUS  1
+#define CMD_LUT_SEQ_IDX_WRITEENABLE 3
+#define CMD_LUT_SEQ_IDX_WRITE       9
 
-#  define CMD_SDR                     0x01
-#  define CMD_DDR                     0x21
-#  define RADDR_SDR                   0x02
-#  define RADDR_DDR                   0x22
-#  define CADDR_SDR                   0x03
-#  define CADDR_DDR                   0x23
-#  define MODE1_SDR                   0x04
-#  define MODE1_DDR                   0x24
-#  define MODE2_SDR                   0x05
-#  define MODE2_DDR                   0x25
-#  define MODE4_SDR                   0x06
-#  define MODE4_DDR                   0x26
-#  define MODE8_SDR                   0x07
-#  define MODE8_DDR                   0x27
-#  define WRITE_SDR                   0x08
-#  define WRITE_DDR                   0x28
-#  define READ_SDR                    0x09
-#  define READ_DDR                    0x29
-#  define LEARN_SDR                   0x0a
-#  define LEARN_DDR                   0x2a
-#  define DATSZ_SDR                   0x0b
-#  define DATSZ_DDR                   0x2b
-#  define DUMMY_SDR                   0x0c
-#  define DUMMY_DDR                   0x2c
-#  define DUMMY_RWDS_SDR              0x0d
-#  define DUMMY_RWDS_DDR              0x2d
-#  define JMP_ON_CS                   0x1f
-#  define STOP                        0
+#define CMD_SDR                     0x01
+#define CMD_DDR                     0x21
+#define RADDR_SDR                   0x02
+#define RADDR_DDR                   0x22
+#define CADDR_SDR                   0x03
+#define CADDR_DDR                   0x23
+#define MODE1_SDR                   0x04
+#define MODE1_DDR                   0x24
+#define MODE2_SDR                   0x05
+#define MODE2_DDR                   0x25
+#define MODE4_SDR                   0x06
+#define MODE4_DDR                   0x26
+#define MODE8_SDR                   0x07
+#define MODE8_DDR                   0x27
+#define WRITE_SDR                   0x08
+#define WRITE_DDR                   0x28
+#define READ_SDR                    0x09
+#define READ_DDR                    0x29
+#define LEARN_SDR                   0x0a
+#define LEARN_DDR                   0x2a
+#define DATSZ_SDR                   0x0b
+#define DATSZ_DDR                   0x2b
+#define DUMMY_SDR                   0x0c
+#define DUMMY_DDR                   0x2c
+#define DUMMY_RWDS_SDR              0x0d
+#define DUMMY_RWDS_DDR              0x2d
+#define JMP_ON_CS                   0x1f
+#define STOP                        0
 
-#  define FLEXSPI_1PAD                0
-#  define FLEXSPI_2PAD                1
-#  define FLEXSPI_4PAD                2
-#  define FLEXSPI_8PAD                3
+#define FLEXSPI_1PAD                0
+#define FLEXSPI_2PAD                1
+#define FLEXSPI_4PAD                2
+#define FLEXSPI_8PAD                3
 
-#  define FLEXSPI_LUT_OPERAND0_MASK   (0xffu)
-#  define FLEXSPI_LUT_OPERAND0_SHIFT  (0U)
-#  define FLEXSPI_LUT_OPERAND0(x)     (((uint32_t) \
+#define FLEXSPI_LUT_OPERAND0_MASK   (0xffu)
+#define FLEXSPI_LUT_OPERAND0_SHIFT  (0U)
+#define FLEXSPI_LUT_OPERAND0(x)     (((uint32_t) \
                                      (((uint32_t)(x)) << FLEXSPI_LUT_OPERAND0_SHIFT)) & \
                                      FLEXSPI_LUT_OPERAND0_MASK)
-#  define FLEXSPI_LUT_NUM_PADS0_MASK  (0x300u)
-#  define FLEXSPI_LUT_NUM_PADS0_SHIFT (8u)
-#  define FLEXSPI_LUT_NUM_PADS0(x)    (((uint32_t) \
+#define FLEXSPI_LUT_NUM_PADS0_MASK  (0x300u)
+#define FLEXSPI_LUT_NUM_PADS0_SHIFT (8u)
+#define FLEXSPI_LUT_NUM_PADS0(x)    (((uint32_t) \
                                      (((uint32_t)(x)) << FLEXSPI_LUT_NUM_PADS0_SHIFT)) & \
                                      FLEXSPI_LUT_NUM_PADS0_MASK)
-#  define FLEXSPI_LUT_OPCODE0_MASK    (0xfc00u)
-#  define FLEXSPI_LUT_OPCODE0_SHIFT   (10u)
-#  define FLEXSPI_LUT_OPCODE0(x)      (((uint32_t) \
+#define FLEXSPI_LUT_OPCODE0_MASK    (0xfc00u)
+#define FLEXSPI_LUT_OPCODE0_SHIFT   (10u)
+#define FLEXSPI_LUT_OPCODE0(x)      (((uint32_t) \
                                      (((uint32_t)(x)) << FLEXSPI_LUT_OPCODE0_SHIFT)) & \
                                      FLEXSPI_LUT_OPCODE0_MASK)
-#  define FLEXSPI_LUT_OPERAND1_MASK   (0xff0000u)
-#  define FLEXSPI_LUT_OPERAND1_SHIFT  (16U)
-#  define FLEXSPI_LUT_OPERAND1(x)     (((uint32_t) \
+#define FLEXSPI_LUT_OPERAND1_MASK   (0xff0000u)
+#define FLEXSPI_LUT_OPERAND1_SHIFT  (16U)
+#define FLEXSPI_LUT_OPERAND1(x)     (((uint32_t) \
                                      (((uint32_t)(x)) << FLEXSPI_LUT_OPERAND1_SHIFT)) & \
                                      FLEXSPI_LUT_OPERAND1_MASK)
-#  define FLEXSPI_LUT_NUM_PADS1_MASK  (0x3000000u)
-#  define FLEXSPI_LUT_NUM_PADS1_SHIFT (24u)
-#  define FLEXSPI_LUT_NUM_PADS1(x)    (((uint32_t) \
+#define FLEXSPI_LUT_NUM_PADS1_MASK  (0x3000000u)
+#define FLEXSPI_LUT_NUM_PADS1_SHIFT (24u)
+#define FLEXSPI_LUT_NUM_PADS1(x)    (((uint32_t) \
                                      (((uint32_t)(x)) << FLEXSPI_LUT_NUM_PADS1_SHIFT)) & \
                                      FLEXSPI_LUT_NUM_PADS1_MASK)
-#  define FLEXSPI_LUT_OPCODE1_MASK    (0xfc000000u)
-#  define FLEXSPI_LUT_OPCODE1_SHIFT   (26u)
-#  define FLEXSPI_LUT_OPCODE1(x)      (((uint32_t)(((uint32_t)(x)) << FLEXSPI_LUT_OPCODE1_SHIFT)) & \
+#define FLEXSPI_LUT_OPCODE1_MASK    (0xfc000000u)
+#define FLEXSPI_LUT_OPCODE1_SHIFT   (26u)
+#define FLEXSPI_LUT_OPCODE1(x)      (((uint32_t)(((uint32_t)(x)) << FLEXSPI_LUT_OPCODE1_SHIFT)) & \
                                     FLEXSPI_LUT_OPCODE1_MASK)
 
-#  define FLEXSPI_LUT_SEQ(cmd0, pad0, op0, cmd1, pad1, op1)  \
+#define FLEXSPI_LUT_SEQ(cmd0, pad0, op0, cmd1, pad1, op1)  \
     (FLEXSPI_LUT_OPERAND0(op0) | FLEXSPI_LUT_NUM_PADS0(pad0) | \
      FLEXSPI_LUT_OPCODE0(cmd0) | FLEXSPI_LUT_OPERAND1(op1) | \
      FLEXSPI_LUT_NUM_PADS1(pad1) | FLEXSPI_LUT_OPCODE1(cmd1))
 
 /*  */
 
-#  define NOR_CMD_INDEX_READ          CMD_INDEX_READ
-#  define NOR_CMD_INDEX_READSTATUS    CMD_INDEX_READSTATUS
-#  define NOR_CMD_INDEX_WRITEENABLE   CMD_INDEX_WRITEENABLE
-#  define NOR_CMD_INDEX_ERASESECTOR   3
-#  define NOR_CMD_INDEX_PAGEPROGRAM   CMD_INDEX_WRITE
-#  define NOR_CMD_INDEX_CHIPERASE     5
-#  define NOR_CMD_INDEX_DUMMY         6
-#  define NOR_CMD_INDEX_ERASEBLOCK    7
+#define NOR_CMD_INDEX_READ          CMD_INDEX_READ
+#define NOR_CMD_INDEX_READSTATUS    CMD_INDEX_READSTATUS
+#define NOR_CMD_INDEX_WRITEENABLE   CMD_INDEX_WRITEENABLE
+#define NOR_CMD_INDEX_ERASESECTOR   3
+#define NOR_CMD_INDEX_PAGEPROGRAM   CMD_INDEX_WRITE
+#define NOR_CMD_INDEX_CHIPERASE     5
+#define NOR_CMD_INDEX_DUMMY         6
+#define NOR_CMD_INDEX_ERASEBLOCK    7
 
 /*  READ LUT sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_READ    CMD_LUT_SEQ_IDX_READ
+#define NOR_CMD_LUT_SEQ_IDX_READ    CMD_LUT_SEQ_IDX_READ
 
 /* Read Status LUT sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_READSTATUS CMD_LUT_SEQ_IDX_READSTATUS
+#define NOR_CMD_LUT_SEQ_IDX_READSTATUS CMD_LUT_SEQ_IDX_READSTATUS
 
 /* 2  Read status DPI/QPI/OPI sequence id in LUT stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_READSTATUS_XPI 2
+#define NOR_CMD_LUT_SEQ_IDX_READSTATUS_XPI 2
 
 /* 3  Write Enable sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE CMD_LUT_SEQ_IDX_WRITEENABLE
+#define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE CMD_LUT_SEQ_IDX_WRITEENABLE
 
 /* 4  Write Enable DPI/QPI/OPI sequence id in LUT stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE_XPI 4
+#define NOR_CMD_LUT_SEQ_IDX_WRITEENABLE_XPI 4
 
 /* 5  Erase Sector sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_ERASESECTOR 5
+#define NOR_CMD_LUT_SEQ_IDX_ERASESECTOR 5
 
 /* 8 Erase Block sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_ERASEBLOCK 8
+#define NOR_CMD_LUT_SEQ_IDX_ERASEBLOCK 8
 
 /* 9  Program sequence id in lookupTable stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_PAGEPROGRAM CMD_LUT_SEQ_IDX_WRITE
+#define NOR_CMD_LUT_SEQ_IDX_PAGEPROGRAM CMD_LUT_SEQ_IDX_WRITE
 
 /* 11 Chip Erase sequence in lookupTable id stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_CHIPERASE 11
+#define NOR_CMD_LUT_SEQ_IDX_CHIPERASE 11
 
 /* 13 Read SFDP sequence in lookupTable id stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_READ_SFDP 13
+#define NOR_CMD_LUT_SEQ_IDX_READ_SFDP 13
 
 /* 14 Restore 0-4-4/0-8-8 mode sequence id in LUT stored in config block */
 
-#  define NOR_CMD_LUT_SEQ_IDX_RESTORE_NOCMD 14
+#define NOR_CMD_LUT_SEQ_IDX_RESTORE_NOCMD 14
 
 /* 15 Exit 0-4-4/0-8-8 mode sequence id in LUT stored in config blobk */
 
-#  define NOR_CMD_LUT_SEQ_IDX_EXIT_NOCMD 15
+#define NOR_CMD_LUT_SEQ_IDX_EXIT_NOCMD 15
 
 /****************************************************************************
  * Public Types

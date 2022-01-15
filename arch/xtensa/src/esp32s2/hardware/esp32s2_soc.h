@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H
-#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32S2_SOC_H
+#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32S2_SOC_H
 
 /****************************************************************************
  * Included Files
@@ -764,4 +764,4 @@ static inline bool IRAM_ATTR esp32s2_ptr_exec(const void *p)
       || (ip >= SOC_RTC_IRAM_LOW && ip < SOC_RTC_IRAM_HIGH);
 }
 
-#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_SOC_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32S2_SOC_H */

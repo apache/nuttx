@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_PMSLEEP_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_PMSLEEP_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_PM_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_PM_H
 
 /****************************************************************************
  * Included Files
@@ -245,4 +245,4 @@ uint32_t esp32_pm_lockstatus(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_PMSLEEP_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_PM_H */

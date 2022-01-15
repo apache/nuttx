@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM327_CHIP_STM32F72XX73XX_FLASH_H
-#define __ARCH_ARM_SRC_STM327_CHIP_STM32F72XX73XX_FLASH_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_FLASH_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_FLASH_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -199,4 +199,4 @@
 #define FLASH_OPTCR1_BOOTADD1_MASK  (0xffff << FLASH_OPTCR1_BOOTADD1_SHIFT)
 #  define FLASH_OPTCR1_BOOTADD1(n)  ((uint32_t)(n) << FLASH_OPTCR1_BOOTADD1_SHIFT)
 
-#endif /* __ARCH_ARM_SRC_STM327_CHIP_STM32F72XX73XX_FLASH_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_FLASH_H */

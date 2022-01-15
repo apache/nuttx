@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43_TMR_H
-#define __ARCH_ARM_SRC_LPC43_TMR_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_TIMER_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ void lpc43_tmrinitialize(FAR const char *devpath, int irq);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_TIMER */
-#endif /* __ARCH_ARM_SRC_LPC43_TMR_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_TIMER_H */

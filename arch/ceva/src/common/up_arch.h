@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef ___ARCH_CEVA_SRC_COMMON_UP_ARCH_H
-#define ___ARCH_CEVA_SRC_COMMON_UP_ARCH_H
+#ifndef __ARCH_CEVA_SRC_COMMON_UP_ARCH_H
+#define __ARCH_CEVA_SRC_COMMON_UP_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* ___ARCH_CEVA_SRC_COMMON_UP_ARCH_H */
+#endif /* __ARCH_CEVA_SRC_COMMON_UP_ARCH_H */

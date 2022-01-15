@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_PINMUX_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_PINMUX_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_PINMUX_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_PINMUX_H
 
 /****************************************************************************
  * Included Files
@@ -855,4 +855,4 @@
 #define GPIO_REF_32K_OUT_1             (GPIO_PERIPH | GPIO_ALT2 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_SD_B0_06_INDEX))
 #define GPIO_REF_32K_OUT_2             (GPIO_PERIPH | GPIO_ALT6 | GPIO_PADMUX(IMXRT_PADMUX_GPIO_AD_B0_06_INDEX))
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_PINMUX_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_PINMUX_H */

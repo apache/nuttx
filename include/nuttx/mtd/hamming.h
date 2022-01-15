@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_HAMMING_H
-#define __INCLUDE_NUTTX_HAMMING_H
+#ifndef __INCLUDE_NUTTX_MTD_HAMMING_H
+#define __INCLUDE_NUTTX_MTD_HAMMING_H
 
 /****************************************************************************
  * Included Files
@@ -139,4 +139,4 @@ int hamming_verify256x(FAR uint8_t *data,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_HAMMING_H */
+#endif /* __INCLUDE_NUTTX_MTD_HAMMING_H */

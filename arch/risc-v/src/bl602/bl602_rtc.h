@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H
-#define __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_RTC_H
+#define __ARCH_RISCV_SRC_BL602_BL602_RTC_H
 
 /****************************************************************************
  * Included Files
@@ -167,4 +167,4 @@ void bl602_hbn_get_rtc_timer_val(uint32_t *val_low, uint32_t *val_high);
 
 struct rtc_lowerhalf_s *bl602_rtc_lowerhalf_initialize(void);
 
-#endif /* __ARCH_RISCV_SRC_BL602_RTC_LOWERHALF_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_RTC_H */

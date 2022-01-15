@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_ADC_H
-#define __ARCH_ARM_SRC_IMXRT_ADC_H
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_ADC_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ FAR struct adc_dev_s *imxrt_adcinitialize(int intf,
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_IMXRT_ADC_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_ADC_H */

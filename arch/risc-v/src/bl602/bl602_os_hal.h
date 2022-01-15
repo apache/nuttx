@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_OS_HAL_H
-#define __ARCH_RISCV_SRC_BL602_OS_HAL_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_OS_HAL_H
+#define __ARCH_RISCV_SRC_BL602_BL602_OS_HAL_H
 
 /****************************************************************************
  * Included Files
@@ -183,4 +183,4 @@ void bl_os_log_write(uint32_t level,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_BL602_OS_HAL_H*/
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_OS_HAL_H */

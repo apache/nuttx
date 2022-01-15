@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_GC9A01_H
-#define __INCLUDE_NUTTX_GC9A01_H
+#ifndef __INCLUDE_NUTTX_LCD_GC9A01_H
+#define __INCLUDE_NUTTX_LCD_GC9A01_H
 
 /****************************************************************************
  * Included Files
@@ -69,4 +69,4 @@ FAR struct lcd_dev_s *gc9a01_lcdinitialize(FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_GC9A01_H */
+#endif /* __INCLUDE_NUTTX_LCD_GC9A01_H */

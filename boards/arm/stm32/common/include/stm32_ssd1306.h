@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_SSD1306_H
-#define __STM32_SSD1306_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_SSD1306_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_SSD1306_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ FAR struct lcd_dev_s *board_ssd1306_getdev(void);
 }
 #endif
 
-#endif // __STM32_SSD1306_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_SSD1306_H */

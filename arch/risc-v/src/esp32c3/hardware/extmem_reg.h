@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H
 
 /****************************************************************************
  * Included Files
@@ -87,4 +87,4 @@
 #define EXTMEM_ICACHE_TAG_MEM_FORCE_ON_V  0x1
 #define EXTMEM_ICACHE_TAG_MEM_FORCE_ON_S  0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_EXTMEM_REG_H */

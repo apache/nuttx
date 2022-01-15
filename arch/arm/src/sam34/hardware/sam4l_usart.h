@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H
-#define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H
+#ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_USART_H
+#define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_USART_H
 
 /****************************************************************************
  * Included Files
@@ -439,4 +439,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_UART_H */
+#endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_USART_H */

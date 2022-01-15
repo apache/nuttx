@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_CMTW_H
-#define __ARCH_RENESAS_SRC_RX65N_CMTW_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -241,4 +241,4 @@
 #define _0E_CMTW_PRIORITY_LEVEL14  (0x0eU) /* Level 14 */
 #define _0F_CMTW_PRIORITY_LEVEL15  (0x0fU) /* Level 15 (highest) */
 
-#endif /* __ARCH_RENESAS_SRC_RX65N_CMTW_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW_H */

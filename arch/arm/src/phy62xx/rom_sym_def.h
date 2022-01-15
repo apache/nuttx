@@ -22,8 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ROM_SYM_H__
-#define __ROM_SYM_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_ROM_SYM_DEF_H
+#define __ARCH_ARM_SRC_PHY62XX_ROM_SYM_DEF_H
+
 #ifdef USE_ROMSYM_ALIAS
 
   /* #define x _symrom_
@@ -973,6 +974,5 @@
   #define zigbee_crc16_gen _symrom_zigbee_crc16_gen
   #define WaitUs _symrom_WaitUs
 
-#endif
-#endif
-
+#endif /* USE_ROMSYM_ALIAS */
+#endif /* __ARCH_ARM_SRC_PHY62XX_ROM_SYM_DEF_H */
