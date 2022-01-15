@@ -36,7 +36,15 @@
 #  define REGLOAD   ld
 #  define REGSTORE  sd
 #endif
- 
+
+#ifdef CONFIG_IRQ_NSTACKS
+#  define IRQ_NSTACKS CONFIG_IRQ_NSTACKS
+#elif defined CONFIG_SMP
+#  define IRQ_NSTACKS CONFIG_SMP_NCPUS
+#else
+#  define IRQ_NSTACKS 1
+#endif
+
 /****************************************************************************
  * Name: exception_common
  ****************************************************************************/
@@ -50,7 +58,9 @@ exception_common:
   addi       sp, sp, -XCPTCONTEXT_SIZE
 
   REGSTORE   x1,  REG_X1(sp)   /* ra */
+#ifdef RISCV_SAVE_GP
   REGSTORE   x3,  REG_X3(sp)   /* gp */
+#endif
   REGSTORE   x4,  REG_X4(sp)   /* tp */
   REGSTORE   x5,  REG_X5(sp)   /* t0 */
   REGSTORE   x6,  REG_X6(sp)   /* t1 */
@@ -100,15 +110,14 @@ exception_common:
   csrr s0, mhartid
 
   /* Switch to interrupt stack */
-
-  bnez s0, 1f
-  la   sp, g_intstacktop
-  j    2f
-1:
-  la   sp, g_intstacktop
-  li   t0, -(CONFIG_ARCH_INTERRUPTSTACK & ~15)
-  add  sp, sp, t0
-2:
+#if IRQ_NSTACKS > 1
+  li t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
+  mul t0, s0, t0
+  la s0, g_intstacktop
+  sub sp, s0, t0
+#else
+  la sp, g_intstacktop
+#endif
 
 #endif
 
@@ -125,7 +134,9 @@ exception_common:
   REGLOAD    s0, REG_INT_CTX(sp) /* restore mstatus   */
   csrw       mstatus, s0
 
+#ifdef RISCV_SAVE_GP
   REGLOAD    x3,  REG_X3(sp)   /* gp */
+#endif
   REGLOAD    x4,  REG_X4(sp)   /* tp */
   REGLOAD    x5,  REG_X5(sp)   /* t0 */
   REGLOAD    x6,  REG_X6(sp)   /* t1 */
@@ -179,16 +190,8 @@ exception_common:
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-#ifndef CONFIG_SMP
-  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
-#else
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) + 8) & ~15)
-#endif
+  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * IRQ_NSTACKS) + 8) & ~15)
 g_intstacktop:
   .size  g_intstacktop, 0
-#ifndef CONFIG_SMP
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-#else
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15)
-#endif
+  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * IRQ_NSTACKS) & ~15)
 #endif

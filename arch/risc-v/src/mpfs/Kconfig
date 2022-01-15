@@ -46,6 +46,11 @@ config MPFS_BOOTLOADER
 	---help---
 		This NuttX image is used as a bootloader, which will boot only on one hart, putting the others in WFI
 
+config IRQ_NSTACKS
+	int
+	depends on MPFS_BOOTLOADER
+	default 5
+
 config MPFS_OPENSBI
         bool "Use OpenSBI"
         depends on MPFS_BOOTLOADER && OPENSBI
