@@ -325,6 +325,18 @@ int stm32_can_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: stm32_cansock_setup
+ *
+ * Description:
+ *  Initialize CAN socket interface
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_CAN_SOCKET
+int stm32_cansock_setup(void);
+#endif
+
+/****************************************************************************
  * Name: board_ajoy_initialize
  *
  * Description:
