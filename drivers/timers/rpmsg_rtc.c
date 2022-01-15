@@ -583,6 +583,7 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len, uint32_t src,
                                    FAR void *priv)
 {
+  FAR struct rpmsg_rtc_server_s *server = priv;
   FAR struct rpmsg_rtc_header_s *header = data;
 
   switch (header->command)
@@ -590,22 +591,25 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
     case RPMSG_RTC_GET:
       {
         FAR struct rpmsg_rtc_get_s *msg = data;
-        struct timespec ts;
+        struct rtc_time rtctime;
 
-        header->result = clock_gettime(CLOCK_REALTIME, &ts);
-        msg->sec = ts.tv_sec;
-        msg->nsec = ts.tv_nsec;
+        header->result = server->lower->ops->rdtime(server->lower,
+                                                    &rtctime);
+        msg->sec = timegm((FAR struct tm *)&rtctime);
+        msg->nsec = rtctime.tm_nsec;
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 
     case RPMSG_RTC_SET:
       {
         FAR struct rpmsg_rtc_set_s *msg = data;
-        struct timespec ts;
+        struct rtc_time rtctime;
+        time_t time = msg->sec;
 
-        ts.tv_sec = msg->sec;
-        ts.tv_nsec = msg->nsec;
-        header->result = clock_settime(CLOCK_REALTIME, &ts);
+        gmtime_r(&time, (FAR struct tm *)&rtctime);
+        rtctime.tm_nsec = msg->nsec;
+        header->result = server->lower->ops->settime(server->lower,
+                                                     &rtctime);
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 
@@ -615,7 +619,6 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         FAR struct rpmsg_rtc_client_s *client = container_of(ept,
                                             struct rpmsg_rtc_client_s, ept);
         FAR struct rpmsg_rtc_alarm_set_s *msg = data;
-        FAR struct rpmsg_rtc_server_s *server = priv;
         time_t time = msg->sec;
         struct lower_setalarm_s alarminfo =
         {
@@ -634,7 +637,6 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
     case RPMSG_RTC_ALARM_CANCEL:
       {
         FAR struct rpmsg_rtc_alarm_cancel_s *msg = data;
-        FAR struct rpmsg_rtc_server_s *server = priv;
         header->result = server->lower->ops->cancelalarm(server->lower,
                                                          msg->id);
         return rpmsg_send(ept, msg, sizeof(*msg));
