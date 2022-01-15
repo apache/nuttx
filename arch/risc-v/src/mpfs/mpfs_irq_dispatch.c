@@ -50,10 +50,10 @@ extern void up_fault(int irq, uint64_t *regs);
  ****************************************************************************/
 
 /****************************************************************************
- * mpfs_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *mpfs_dispatch_irq(uint64_t vector, uint64_t *regs)
+void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 {
   uint32_t irq = (vector & 0x3f);
   uint64_t *mepc = regs;
