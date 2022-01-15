@@ -1,0 +1,42 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_BM3823
+comment "BM3823 Configuration Options"
+
+menu "BM3823 Peripheral Support"
+
+config BM3823_WDT
+	bool "Watchdog timer (WDT)"
+	default n
+
+config BM3823_T1
+	bool "Timer 1 (T1)"
+	default n
+
+config BM3823_T2
+	bool "Timer 2 (T2)"
+	default n
+
+config BM3823_UART1
+	bool "UART1"
+	default n
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config BM3823_UART2
+	bool "UART2"
+	default n
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config BM3823_UART3
+	bool "UART3"
+	default n
+	select UART3_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+endmenu # BM3823 Peripheral Selections
+endif

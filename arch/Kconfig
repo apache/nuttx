@@ -131,6 +131,13 @@ config ARCH_OR1K
 	---help---
 		OpenRISC architectures.
 
+config ARCH_SPARC
+	bool "SPARC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		SPARC architectures (SPARC V8)
+
 endchoice
 
 config ARCH
@@ -148,6 +155,7 @@ config ARCH
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
+	default "sparc"   if ARCH_SPARC
 
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
@@ -163,6 +171,7 @@ source "arch/xtensa/Kconfig"
 source "arch/z16/Kconfig"
 source "arch/z80/Kconfig"
 source "arch/or1k/Kconfig"
+source "arch/sparc/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool
