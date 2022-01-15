@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_cpuindex.c
+ * arch/risc-v/src/common/riscv_cpuindex.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,8 +28,6 @@
 
 #include "riscv_arch.h"
 
-#ifdef CONFIG_SMP
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -57,5 +55,3 @@ int up_cpu_index(void)
   asm volatile ("csrr %0, mhartid": "=r" (mhartid));
   return mhartid;
 }
-
-#endif /* CONFIG_SMP */
