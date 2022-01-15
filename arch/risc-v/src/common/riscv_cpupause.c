@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_cpupause.c
+ * arch/risc-v/src/common/riscv_cpupause.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,16 +38,6 @@
 #include "sched/sched.h"
 #include "riscv_internal.h"
 #include "chip.h"
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if 0
-#define DPRINTF(fmt, args...) llinfo(fmt, ##args)
-#else
-#define DPRINTF(fmt, args...) do {} while (0)
-#endif
 
 /****************************************************************************
  * Public Data
@@ -193,7 +183,7 @@ int riscv_pause_handler(int irq, void *c, void *arg)
 
   /* Clear machine software interrupt */
 
-  putreg32(0, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
+  putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
 
   /* Check for false alarms.  Such false could occur as a consequence of
    * some deadlock breaking logic that might have already serviced the SG2
@@ -243,7 +233,7 @@ int riscv_pause_handler(int irq, void *c, void *arg)
 
 int up_cpu_pause(int cpu)
 {
-  DPRINTF("cpu=%d\n", cpu);
+  sinfo("cpu=%d\n", cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the pause event */
@@ -269,7 +259,7 @@ int up_cpu_pause(int cpu)
 
   /* Execute Pause IRQ to CPU(cpu) */
 
-  putreg32(1, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
+  putreg32(1, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
 
   /* Wait for the other CPU to unlock g_cpu_paused meaning that
    * it is fully paused and ready for up_cpu_resume();
@@ -308,7 +298,7 @@ int up_cpu_pause(int cpu)
 
 int up_cpu_resume(int cpu)
 {
-  DPRINTF("cpu=%d\n", cpu);
+  sinfo("cpu=%d\n", cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the resume event */
