@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_SIXLOWPAN_SIXLOWPAN_H
-#define _NET_SIXLOWPAN_SIXLOWPAN_H
+#ifndef __NET_SIXLOWPAN_SIXLOWPAN_H
+#define __NET_SIXLOWPAN_SIXLOWPAN_H
 
 /****************************************************************************
  * Included Files
@@ -260,4 +260,4 @@ void sixlowpan_udp_send(FAR struct net_driver_s *dev,
 #endif
 
 #endif /* CONFIG_NET_6LOWPAN */
-#endif /* _NET_SIXLOWPAN_SIXLOWPAN_H */
+#endif /* __NET_SIXLOWPAN_SIXLOWPAN_H */

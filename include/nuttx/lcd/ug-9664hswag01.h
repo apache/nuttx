@@ -21,8 +21,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_UG_9664HSWAG01_H
-#define __INCLUDE_NUTTX_UG_9664HSWAG01_H
+#ifndef __INCLUDE_NUTTX_LCD_UG_9664HSWAG01_H
+#define __INCLUDE_NUTTX_LCD_UG_9664HSWAG01_H
 
 /****************************************************************************
  * Included Files
@@ -140,4 +140,4 @@ void ug_power(unsigned int devno, bool on);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_UG_9664HSWAG01_H */
+#endif /* __INCLUDE_NUTTX_LCD_UG_9664HSWAG01_H */

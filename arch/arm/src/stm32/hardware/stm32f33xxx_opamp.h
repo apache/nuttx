@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_OPAMP_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_OPAMP_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_OPAMP_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_OPAMP_H
 
 /****************************************************************************
  * Included Files
@@ -99,4 +99,4 @@
 #define OPAMP_CSR_OUTCAL            (1 << 30)                       /* Bit 30: OPAMP output status flag */
 #define OPAMP_CSR_LOCK              (1 << 31)                       /* Bit 31: OPAMP 2 lock */
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_OPAMP_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32F33XXX_OPAMP_H */

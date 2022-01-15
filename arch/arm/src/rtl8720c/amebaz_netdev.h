@@ -18,13 +18,12 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_NETDEV_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBAZ_NETDEV_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBAZ_NETDEV_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-#define __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_NETDEV_H
 
 /****************************************************************************
  * Included Files
@@ -36,4 +35,4 @@
 int   amebaz_netdev_register(FAR struct amebaz_dev_s *priv);
 void  amebaz_netdev_notify_receive(FAR struct amebaz_dev_s *priv,
                                            int index, unsigned int len);
-#endif /* __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_NETDEV_H */
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBAZ_NETDEV_H */

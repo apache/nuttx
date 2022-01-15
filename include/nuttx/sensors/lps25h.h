@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTT_SENSORS_LPS25H_H
-#define __INCLUDE_NUTT_SENSORS_LPS25H_H
+#ifndef __INCLUDE_NUTTX_SENSORS_LPS25H_H
+#define __INCLUDE_NUTTX_SENSORS_LPS25H_H
 
 /****************************************************************************
  * Included Files
@@ -88,4 +88,4 @@ typedef struct lps25h_config_s
 int lps25h_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, FAR lps25h_config_t *config);
 
-#endif /* __INCLUDE_NUTT_SENSORS_LPS25H_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_LPS25H_H */

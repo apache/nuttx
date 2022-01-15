@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARD_HALL3PH_H
-#define __BOARD_HALL3PH_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_HALL3PH_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_HALL3PH_H
 
 /****************************************************************************
  * Included Files
@@ -64,4 +64,4 @@ int board_hall3ph_initialize(int devno, int pha, int phb, int phc);
 }
 #endif
 
-#endif // __BOARD_HALL3PH_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_HALL3PH_H */

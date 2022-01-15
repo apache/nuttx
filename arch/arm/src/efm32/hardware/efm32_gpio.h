@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_GPIO_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_GPIO_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_GPIO_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -1483,4 +1483,4 @@
 #define GPIO_EM4WUCAUSE_EM4WUCAUSE_F2                     (_GPIO_EM4WUCAUSE_EM4WUCAUSE_F2 << 0)      /* Shifted mode F2 for GPIO_EM4WUCAUSE */
 #define GPIO_EM4WUCAUSE_EM4WUCAUSE_E13                    (_GPIO_EM4WUCAUSE_EM4WUCAUSE_E13 << 0)     /* Shifted mode E13 for GPIO_EM4WUCAUSE */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_GPIO_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_GPIO_H */

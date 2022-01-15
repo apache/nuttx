@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv32im/riscv_vfork.h
+ * arch/risc-v/src/common/riscv_vfork.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_RVIM32_VFORK_H
-#define __ARCH_RISCV_SRC_RVIM32_VFORK_H
+#ifndef __ARCH_RISCV_SRC_COMMON_RISCV_VFORK_H
+#define __ARCH_RISCV_SRC_COMMON_RISCV_VFORK_H
 
 /****************************************************************************
  * Included Files
@@ -116,4 +116,4 @@ struct vfork_s
 };
 #endif
 
-#endif /* __ARCH_RISCVRC_RVIM32_VFORK_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_RISCV_VFORK_H */

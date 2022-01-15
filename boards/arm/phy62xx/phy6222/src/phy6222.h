@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PHY6222_H
-#define __BOARDS_ARM_PHY6222_H
+#ifndef __BOARDS_ARM_PHY62XX_PHY6222_SRC_PHY6222_H
+#define __BOARDS_ARM_PHY62XX_PHY6222_SRC_PHY6222_H
 
 /****************************************************************************
  * Included Files
@@ -116,4 +116,4 @@
 int phy62xx_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_PHY6222_H */
+#endif /* __BOARDS_ARM_PHY62XX_PHY6222_SRC_PHY6222_H */

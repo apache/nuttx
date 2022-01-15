@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H
-#define __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_KINETIS_TWR_K60N512_INCLUDE_BOARD_H
+#define __BOARDS_ARM_KINETIS_TWR_K60N512_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -362,4 +362,4 @@
  * B80 EBI_D0               PTC15
  */
 
-#endif /* __BOARDS_ARM_KINETIS_TWR-K60N512_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_KINETIS_TWR_K60N512_INCLUDE_BOARD_H */

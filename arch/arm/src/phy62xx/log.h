@@ -27,8 +27,8 @@
  ****************************************************************************/
 
 #ifndef ENABLE_LOG_ROM
-#ifndef __LOG_H__
-#define __LOG_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_LOG_H
+#define __ARCH_ARM_SRC_PHY62XX_LOG_H
 
 #ifdef __cplusplus
 extern "C"
@@ -84,12 +84,12 @@ typedef void(*std_putc)(char *data, uint16_t size);
 }
 #endif
 
-#endif //__LOG_H__
+#endif /* __ARCH_ARM_SRC_PHY62XX_LOG_H */
 
 #else
 
-#ifndef __PHY_LOG_H
-#define __PHY_LOG_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_LOG_H
+#define __ARCH_ARM_SRC_PHY62XX_LOG_H
 
 #ifdef __cplusplus
 extern "C"
@@ -136,6 +136,6 @@ uint32_t log_get_debug_level(void);
 }
 #endif
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_LOG_H */
 
 #endif

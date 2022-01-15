@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_FREERUN_H
-#define __ARCH_RISCV_SRC_ESP32C3_FREERUN_H
+#ifndef __ARCH_RISCV_SRC_ESP32C3_ESP32C3_FREERUN_H
+#define __ARCH_RISCV_SRC_ESP32C3_ESP32C3_FREERUN_H
 
 /****************************************************************************
  * Included Files
@@ -142,4 +142,4 @@ int esp32c3_freerun_uninitialize(struct esp32c3_freerun_s *freerun);
 #endif
 
 #endif /* CONFIG_ESP32C3_FREERUN */
-#endif /* __ARCH_RISCV_SRC_ESP32C3_FREERUN_H */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_FREERUN_H */

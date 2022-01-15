@@ -22,8 +22,8 @@
  * through include/syscall.h or include/sys/sycall.h
  */
 
-#ifndef _ARCH_HC_INCLUDE_SYSCALL_H
-#define _ARCH_HC_INCLUDE_SYSCALL_H
+#ifndef __ARCH_HC_INCLUDE_SYSCALL_H
+#define __ARCH_HC_INCLUDE_SYSCALL_H
 
 /****************************************************************************
  * Included Files
@@ -64,4 +64,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* _ARCH_HC_INCLUDE_SYSCALL_H */
+#endif /* __ARCH_HC_INCLUDE_SYSCALL_H */

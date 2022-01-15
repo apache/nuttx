@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_DEVIF_DEVIF_H
-#define _NET_DEVIF_DEVIF_H
+#ifndef __NET_DEVIF_DEVIF_H
+#define __NET_DEVIF_DEVIF_H
 
 /****************************************************************************
  * Included Files
@@ -526,4 +526,4 @@ void devif_can_send(FAR struct net_driver_s *dev, FAR const void *buf,
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* _NET_DEVIF_DEVIF_H */
+#endif /* __NET_DEVIF_DEVIF_H */

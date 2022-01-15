@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_ST7565_H
-#define __INCLUDE_NUTTX_ST7565_H
+#ifndef __INCLUDE_NUTTX_LCD_ST7565_H
+#define __INCLUDE_NUTTX_LCD_ST7565_H
 
 /****************************************************************************
  * Included Files
@@ -121,4 +121,4 @@ FAR struct lcd_dev_s *st7565_initialize(FAR struct st7565_lcd_s *lcd,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_ST7567_H */
+#endif /* __INCLUDE_NUTTX_LCD_ST7567_H */

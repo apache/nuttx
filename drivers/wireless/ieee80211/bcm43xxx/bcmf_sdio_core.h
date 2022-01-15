@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_CORE_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_CORE_H
 
 /****************************************************************************
  * Included Files
@@ -253,4 +253,4 @@ struct sdpcmd_regs
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_CORE_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_CORE_H */

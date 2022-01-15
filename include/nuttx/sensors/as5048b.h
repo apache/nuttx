@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_AS5048B
-#define __INCLUDE_NUTTX_SENSORS_AS5048B
+#ifndef __INCLUDE_NUTTX_SENSORS_AS5048B_H
+#define __INCLUDE_NUTTX_SENSORS_AS5048B_H
 
 /****************************************************************************
  * Included Files
@@ -127,4 +127,4 @@ FAR struct qe_lowerhalf_s *as5048b_initialize(FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_QENCODER && CONFIG_SENSORS_AS5048B */
-#endif /* __INCLUDE_NUTTX_SENSORS_AS5048B */
+#endif /* __INCLUDE_NUTTX_SENSORS_AS5048B_H */

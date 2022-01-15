@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_IRQ_H
-#define __ARCH_ARM_SRC_KL_KINETIS_IRQ_H
+#ifndef __ARCH_ARM_SRC_KL_KL_IRQ_H
+#define __ARCH_ARM_SRC_KL_KL_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -64,4 +64,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_IRQ_H */
+#endif /* __ARCH_ARM_SRC_KL_KL_IRQ_H */

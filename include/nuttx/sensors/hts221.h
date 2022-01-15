@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTT_SENSORS_HTS221_H
-#define __INCLUDE_NUTT_SENSORS_HTS221_H
+#ifndef __INCLUDE_NUTTX_SENSORS_HTS221_H
+#define __INCLUDE_NUTTX_SENSORS_HTS221_H
 
 /****************************************************************************
  * Included Files
@@ -144,4 +144,4 @@ typedef struct hts221_status_s
 int hts221_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                     uint8_t addr, hts221_config_t * config);
 
-#endif /* __INCLUDE_NUTT_SENSORS_HTS221_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_HTS221_H */

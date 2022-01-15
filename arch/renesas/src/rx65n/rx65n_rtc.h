@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_RTC_H
-#define __ARCH_RENESAS_SRC_RX65N_RTC_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_RTC_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_RTC_H
 
 #include <nuttx/config.h>
 
@@ -243,4 +243,4 @@ FAR struct rtc_lowerhalf_s *rx65n_rtc_lowerhalf(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RENESAS_SRC_RX65N_RTC_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_RTC_H */

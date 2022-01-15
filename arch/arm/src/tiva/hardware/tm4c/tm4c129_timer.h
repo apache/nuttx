@@ -46,8 +46,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C129_TIMER_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C129_TIMER_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_TIMER_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -661,4 +661,4 @@
 
 #define TIMER_CC_ALTCLK                (1 << 0)  /* Bit 0: Alternate Clock Source */
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_LM_TM4C129_TIMER_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_TM4C_TM4C129_TIMER_H */

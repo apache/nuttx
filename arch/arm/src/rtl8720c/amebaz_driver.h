@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_DRIVER_H
-#define __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_DRIVER_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBAZ_DRIVER_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBAZ_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -116,4 +116,4 @@ void amebaz_wl_netif_info_handler(int index, void *dev,
                                   unsigned char *addr);
 void amebaz_wl_notify_rx_handler(int index, unsigned int len);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_DRIVER_H */
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBAZ_DRIVER_H */

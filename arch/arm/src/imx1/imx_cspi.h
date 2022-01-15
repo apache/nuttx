@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_CSPI_H
-#define __ARCH_ARM_IMX_CSPI_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_CSPI_H
+#define __ARCH_ARM_SRC_IMX1_IMX_CSPI_H
 
 /****************************************************************************
  * Included Files
@@ -224,4 +224,4 @@ int imx_spicmddata(FAR struct spi_dev_s *dev, uint32_t devid, bool cmd);
 #endif /* __cplusplus */
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_IMX_CSPI_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_CSPI_H */

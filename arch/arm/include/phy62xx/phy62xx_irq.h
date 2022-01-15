@@ -22,8 +22,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_PHYPLUS_PHY62XX_IRQ_H
-#define __ARCH_ARM_INCLUDE_PHYPLUS_PHY62XX_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_PHY62XX_PHY62XX_IRQ_H
+#define __ARCH_ARM_INCLUDE_PHY62XX_PHY62XX_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -101,4 +101,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_INCLUDE_STM32F0L0G0_STM32F0_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_PHY62XX_PHY62XX_IRQ_H */

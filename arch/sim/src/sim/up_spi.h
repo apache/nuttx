@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_SIM_SRC_SIM_SPI_H_
-#define _ARCH_SIM_SRC_SIM_SPI_H_
+#ifndef __ARCH_SIM_SRC_SIM_UP_SPI_H
+#define __ARCH_SIM_SRC_SIM_UP_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -153,4 +153,4 @@ struct spi_sequence_s
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* _ARCH_SIM_SRC_SIM_SPI_H_ */
+#endif /* __ARCH_SIM_SRC_SIM_UP_SPI_H */

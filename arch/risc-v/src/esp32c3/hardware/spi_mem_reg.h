@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H
 
 /****************************************************************************
  * Included Files
@@ -43,4 +43,4 @@
 #define SPI_MEM_CLK_EN_V  0x1
 #define SPI_MEM_CLK_EN_S  0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_SPI_MEM_REG_H */

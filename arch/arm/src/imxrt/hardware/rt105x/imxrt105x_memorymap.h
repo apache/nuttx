@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -308,4 +308,4 @@
 #define IMXRT_PROCROM_BASE        0xe00fe000  /* 4KB Processor ROM */
 #define IMXRT_PPBROM_BASE         0xe00ff000  /* 4KB PPB ROM */
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT105X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT105X_IMXRT105X_MEMORYMAP_H */

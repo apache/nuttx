@@ -20,8 +20,8 @@
 
 /* Reference: "EFM32G Reference Manual, Gecko Series", Energy Micro */
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32G_MEMORYMAP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32G_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32G_MEMORYMAP_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32G_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -83,4 +83,4 @@
 #define EFM32_PRS_BASE             0x400cc000 /* PRS base address */
 #define EFM32_AES_BASE             0x400e0000 /* AES base address */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32G_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32G_MEMORYMAP_H */

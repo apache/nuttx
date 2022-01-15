@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __GRAPHICS_VNC_SERVER_VNC_SERVER_H
-#define __GRAPHICS_VNC_SERVER_VNC_SERVER_H
+#ifndef __DRIVERS_VIDEO_VNC_VNC_SERVER_H
+#define __DRIVERS_VIDEO_VNC_VNC_SERVER_H
 
 /****************************************************************************
  * Included Files
@@ -560,4 +560,4 @@ int vnc_colors(FAR struct vnc_session_s *session,
 }
 #endif
 
-#endif /* __GRAPHICS_VNC_SERVER_VNC_SERVER_H */
+#endif /* __DRIVERS_VIDEO_VNC_VNC_SERVER_H */

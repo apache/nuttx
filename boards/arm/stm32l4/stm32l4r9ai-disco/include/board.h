@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
-#define __BOARDS_ARM_STM32L_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
+#define __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -291,4 +291,4 @@ void stm32l4_board_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32L4R9AI_DISCO_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_STM32L4_STM32L4R9AI_DISCO_INCLUDE_BOARD_H */

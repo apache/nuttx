@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_GMAC_H
-#define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_GMAC_H
+#ifndef __ARCH_ARM_SRC_SAMA5E5_HARDWARE_SAM_GMAC_H
+#define __ARCH_ARM_SRC_SAMA5E5_HARDWARE_SAM_GMAC_H
 
 /****************************************************************************
  * Included Files
@@ -1063,4 +1063,4 @@ struct gmac_txdesc_s
   uint32_t status;   /* TX status and controls */
 };
 
-#endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_GMAC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5E5_HARDWARE_SAM_GMAC_H */

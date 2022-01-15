@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_I2C_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_I2C_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_I2C_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_I2C_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -209,4 +209,4 @@
 #define I2C_MCR_MFE                             (1 << 4)  /* Bit 4:  I2C master function enable */
 #define I2C_MCR_SFE                             (1 << 5)  /* Bit 5:  I2C slave function enable */
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2_CC13X20_CC26X2_I2C_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_I2C_H */

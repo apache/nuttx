@@ -18,13 +18,13 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_WLAN_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBAZ_WLAN_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBAZ_WLAN_H
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_WLAN_H
 #define WEP_ENABLED             0x0001
 #define TKIP_ENABLED            0x0002
 #define AES_ENABLED             0x0004
@@ -412,5 +412,4 @@ void            netif_rx(int index, unsigned int len);
 void            netif_post_sleep_processing(void);
 void            netif_pre_sleep_processing(void);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_AMEBAZ_AMEBAZ_WLAN_H */
-
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBAZ_WLAN_H */

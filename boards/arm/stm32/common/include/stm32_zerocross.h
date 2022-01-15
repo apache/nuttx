@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_ZEROCROSS_H
-#define __STM32_ZEROCROSS_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_ZEROCROSS_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_ZEROCROSS_H
 
 /****************************************************************************
  * Included Files
@@ -70,4 +70,4 @@ int board_zerocross_initialize(int devno);
 }
 #endif
 
-#endif // __STM32_ZEROCROSS_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_ZEROCROSS_H */

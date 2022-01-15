@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_ONESHOT_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_ONESHOT_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ int esp32_oneshot_init(int timer, uint16_t resolution);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_ONESHOT_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BOARD_ONESHOT_H */

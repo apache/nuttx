@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_PHYPLUS_TIM_H
-#define __ARCH_ARM_SRC_PHYPLUS_TIM_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIM_H
+#define __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIM_H
 
 /****************************************************************************
  * Included Files
@@ -123,4 +123,4 @@ void phyplus_tim_deinit(FAR struct phyplus_tim_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIM_H */

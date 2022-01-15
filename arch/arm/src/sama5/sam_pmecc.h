@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_PMECC_H
-#define __ARCH_ARM_SRC_SAMA5_PMECC_H
+#ifndef __ARCH_ARM_SRC_SAMA5_SAM_PMECC_H
+#define __ARCH_ARM_SRC_SAMA5_SAM_PMECC_H
 
 /****************************************************************************
  * Included Files
@@ -423,4 +423,4 @@ void pmecc_buildgf(uint32_t mm, int16_t *indexof, int16_t *alphato);
 #  define pmecc_get_pagesize()   (0)
 
 #endif /* CONFIG_SAMA5_HAVE_PMECC */
-#endif /* __ARCH_ARM_SRC_SAMA5_PMECC_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_SAM_PMECC_H */

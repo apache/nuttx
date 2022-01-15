@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_ICMPv6_H
-#define __INCLUDE_NUTTX_NET_ICMPv6_H
+#ifndef __INCLUDE_NUTTX_NET_ICMPV6_H
+#define __INCLUDE_NUTTX_NET_ICMPV6_H
 
 /****************************************************************************
  * Included Files
@@ -380,4 +380,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif /* __INCLUDE_NUTTX_NET_ICMPv6_H */
+#endif /* __INCLUDE_NUTTX_NET_ICMPV6_H */

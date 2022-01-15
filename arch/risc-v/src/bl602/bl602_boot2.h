@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_BOOT2_H
-#define __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_BOOT2_H
+#ifndef __ARCH_RISCV_SRC_BL602_BL602_BOOT2_H
+#define __ARCH_RISCV_SRC_BL602_BL602_BOOT2_H
 
 /****************************************************************************
  * Included Files
@@ -103,4 +103,4 @@ struct boot2_partition_table_s
 };
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_BOOT2_H */
+#endif /* __ARCH_RISCV_SRC_BL602_BL602_BOOT2_H */

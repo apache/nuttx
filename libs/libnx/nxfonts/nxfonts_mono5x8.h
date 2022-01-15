@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_MONO5X8_H
-#define __LIBNX_NXFONTS_NXFONTS_MONO5X8_H
+#ifndef __LIBS_LIBNX_NXFONTS_NXFONTS_MONO5X8_H
+#define __LIBS_LIBNX_NXFONTS_NXFONTS_MONO5X8_H
 
 #define NXFONT_ID         FONTID_MONO5X8
 
@@ -794,4 +794,4 @@
 #define NXFONT_METRICS_255 {1, 5, 8, 0, 0, 0}
 #define NXFONT_BITMAP_255 {0x0, 0x90, 0x0, 0x90, 0x90, 0x70, 0x90, 0x60}
 
-#endif
+#endif /* __LIBS_LIBNX_NXFONTS_NXFONTS_MONO5X8_H */

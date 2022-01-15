@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTT_SENSORS_SHT3X_H
-#define __INCLUDE_NUTT_SENSORS_SHT3X_H
+#ifndef __INCLUDE_NUTTX_SENSORS_SHT3X_H
+#define __INCLUDE_NUTTX_SENSORS_SHT3X_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ struct sht3x_meas_data_s
 int sht3x_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                    uint8_t addr);
 
-#endif /* __INCLUDE_NUTT_SENSORS_SHT3X_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_SHT3X_H */

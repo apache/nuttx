@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LCD_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LCD_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LCD_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LCD_H
 
 /****************************************************************************
  * Included Files
@@ -712,4 +712,4 @@
 #define _LCD_SEGD7L_SEGD7L_DEFAULT         0x00000000UL                      /* Mode DEFAULT for LCD_SEGD7L */
 #define LCD_SEGD7L_SEGD7L_DEFAULT          (_LCD_SEGD7L_SEGD7L_DEFAULT << 0) /* Shifted mode DEFAULT for LCD_SEGD7L */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LCD_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LCD_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32L476_MDK_SRC_STM32L476_MDK_H
-#define __BOARDS_ARM_STM32L476_MDK_SRC_STM32L476_MDK_H
+#ifndef __BOARDS_ARM_STM32L4_STM32L476_MDK_SRC_STM32L476_MDK_H
+#define __BOARDS_ARM_STM32L4_STM32L476_MDK_SRC_STM32L476_MDK_H
 
 /****************************************************************************
  * Included Files
@@ -155,4 +155,4 @@ int stm32_bringup(void);
 
 void stm32_spiinitialize(void);
 
-#endif /* __BOARDS_ARM_STM32L476_MDK_SRC_STM32L476_MDK_H */
+#endif /* __BOARDS_ARM_STM32L4_STM32L476_MDK_SRC_STM32L476_MDK_H */

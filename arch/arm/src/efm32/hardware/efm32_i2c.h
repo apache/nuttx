@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_I2C_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_I2C_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_I2C_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -798,4 +798,4 @@
 #define I2C_ROUTE_LOCATION_LOC5           (_I2C_ROUTE_LOCATION_LOC5 << 8)    /* Shifted mode LOC5 for I2C_ROUTE */
 #define I2C_ROUTE_LOCATION_LOC6           (_I2C_ROUTE_LOCATION_LOC6 << 8)    /* Shifted mode LOC6 for I2C_ROUTE */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_I2C_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_I2C_H */

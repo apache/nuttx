@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H
-#define __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_LPI2C_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_LPI2C_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +71,4 @@ FAR struct i2c_master_s *imxrt_i2cbus_initialize(int port);
 
 int imxrt_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-#endif /* __ARCH_ARM_SRC_IMXRT_IMX_LPI2C_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_LPI2C_H */

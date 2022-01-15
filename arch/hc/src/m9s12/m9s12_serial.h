@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_HC_SRC_M9S12_CHIP_H
-#define __ARCH_HC_SRC_M9S12_CHIP_H
+#ifndef __ARCH_HC_SRC_M9S12_M9S12_SERIAL_H
+#define __ARCH_HC_SRC_M9S12_M9S12_SERIAL_H
 
 /****************************************************************************
  * Included Files
@@ -119,4 +119,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_HC_SRC_M9S12_CHIP_H */
+#endif /* __ARCH_HC_SRC_M9S12_M9S12_SERIAL_H */

@@ -22,8 +22,8 @@
  * only indirectly through nuttx/arch.h (via arch/arch.h)
  */
 
-#ifndef __ARCH_Z80_ARCH_H
-#define __ARCH_Z80_ARCH_H
+#ifndef __ARCH_Z80_INCLUDE_Z80_ARCH_H
+#define __ARCH_Z80_INCLUDE_Z80_ARCH_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_Z80_ARCH_H */
+#endif /* __ARCH_Z80_INCLUDE_Z80_ARCH_H */

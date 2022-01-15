@@ -22,8 +22,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SSD1306_H
-#define __INCLUDE_NUTTX_SSD1306_H
+#ifndef __INCLUDE_NUTTX_LCD_SSD1306_H
+#define __INCLUDE_NUTTX_LCD_SSD1306_H
 
 /****************************************************************************
  * Included Files
@@ -74,7 +74,7 @@
  *
  * "The serial interface consists of serial clock SCL, serial data SI, A0 and
  *  CS. SI is shifted into an 8-bit shift register on every rising edge of
- *  SCL in the order of D7, D6, … and D0. A0 is sampled on every eighth
+ *  SCL in the order of D7, D6, ... and D0. A0 is sampled on every eighth
  *  clock and the data byte in the shift register is written to the display
  *  data RAM or command register in the same clock."
  *
@@ -86,10 +86,10 @@
 #ifdef CONFIG_LCD_SSD1306_SPI
 
 /* "This module determines whether the input data is interpreted as data or
- * command. When A0 = H, the inputs at D7 - D0 are interpreted as data and be
- * written to display RAM. When A0 = L, the inputs at D7 - D0 are interpreted
- * as command, they will be decoded and be written to the corresponding
- * command registers."
+ * command. When A0 = "H," the inputs at D7 - D0 are interpreted as data and
+ * be written to display RAM. When A0 = "L", the inputs at D7 - D0 are
+ * interpreted as command, they will be decoded and be written to the
+ * corresponding command registers."
  */
 
 #ifndef CONFIG_SPI_CMDDATA
@@ -253,4 +253,4 @@ int ssd1306_fill(FAR struct lcd_dev_s *dev, uint8_t color);
 #endif
 
 #endif /* CONFIG_LCD_SSD1306 */
-#endif /* __INCLUDE_NUTTX_SSD1306_H */
+#endif /* __INCLUDE_NUTTX_LCD_SSD1306_H */

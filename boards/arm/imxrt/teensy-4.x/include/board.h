@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_IMXRT_TEENSY_4_INCLUDE_BOARD_H
-#define __BOARDS_ARM_IMXRT_TEENSY_4_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_IMXRT_TEENSY_4X_INCLUDE_BOARD_H
+#define __BOARDS_ARM_IMXRT_TEENSY_4X_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -306,4 +306,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_IMXRT_TEENSY_4_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_IMXRT_TEENSY_4X_INCLUDE_BOARD_H */

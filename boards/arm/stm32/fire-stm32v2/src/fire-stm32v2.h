@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_H
-#define __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_H
+#ifndef __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_STM32V2_H
+#define __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_STM32V2_H
 
 /****************************************************************************
  * Included Files
@@ -330,4 +330,4 @@ int stm32_w25initialize(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_H */
+#endif /* __BOARDS_ARM_STM32_FIRE_STM32V2_SRC_FIRE_STM32V2_H */

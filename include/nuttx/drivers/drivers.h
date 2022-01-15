@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_FS_DRIVERS_H
-#define __INCLUDE_NUTTX_FS_DRIVERS_H
+#ifndef __INCLUDE_NUTTX_DRIVERS_DRIVERS_H
+#define __INCLUDE_NUTTX_DRIVERS_DRIVERS_H
 
 /****************************************************************************
  * Included Files
@@ -222,4 +222,4 @@ void lwlconsole_init(void);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_FS_DRIVERS_H */
+#endif /* __INCLUDE_NUTTX_DRIVERS_DRIVERS_H */

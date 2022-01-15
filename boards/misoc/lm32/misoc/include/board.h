@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_MISOC_AMBER_INCLUDE_BOARD_H
-#define __BOARDS_MISOC_AMBER_INCLUDE_BOARD_H
+#ifndef __BOARDS_MISOC_LM32_MICOS_INCLUDE_BOARD_H
+#define __BOARDS_MISOC_LM32_MICOS_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -83,4 +83,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_MISOC_AMBER_INCLUDE_BOARD_H */
+#endif /* __BOARDS_MISOC_LM32_MICOS_INCLUDE_BOARD_H */

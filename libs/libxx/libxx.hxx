@@ -17,8 +17,8 @@
 //
 //***************************************************************************
 
-#ifndef __LIBXX_LIBXX_HXX
-#define __LIBXX_LIBXX_HXX 1
+#ifndef __LIBS_LIBXX_LIBXX_HXX
+#define __LIBS_LIBXX_LIBXX_HXX 1
 
 //***************************************************************************
 // Included Files
@@ -46,4 +46,4 @@ extern "C" FAR void *__dso_handle weak_data;
 
 extern "C" int __cxa_atexit(__cxa_exitfunc_t func, void *arg, void *dso_handle);
 
-#endif // __LIBXX_LIBXX_HXX
+#endif // __LIBS_LIBXX_LIBXX_HXX

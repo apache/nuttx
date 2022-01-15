@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
-#define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO__H
+#ifndef __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H
+#define __BOARDS_ARM_STM32F7_STM32F746G_DISCO_SRC_STM32F746G_DISCO_H
 
 /****************************************************************************
  * Included Files

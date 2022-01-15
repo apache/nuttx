@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H
-#define __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H
+#ifndef __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432_S2E_H
+#define __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432_S2E_H
 
 /****************************************************************************
  * Included Files
@@ -106,4 +106,4 @@
 void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432S2E_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S6432_S2E_SRC_LM3S6432_S2E_H */

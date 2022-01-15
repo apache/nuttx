@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_PORT_H
-#define __ARCH_RENESAS_SRC_RX65N_PORT_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_PORT_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_PORT_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -304,4 +304,4 @@ void r_port_create(void);
 void r_ether_port_configuration(void);
 #endif
 
-#endif /* __ARCH_RENESAS_SRC_RX65N_PORT_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_PORT_H */

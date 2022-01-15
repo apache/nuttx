@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LC823450_USBDEV_H
-#define __ARCH_ARM_SRC_LC823450_USBDEV_H
+#ifndef __ARCH_ARM_SRC_LC823450_LC823450_USBDEV_H
+#define __ARCH_ARM_SRC_LC823450_LC823450_USBDEV_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -175,4 +175,4 @@
 #define USB_EPCOUNT_APPCNT_SHIFT 0
 #define USB_EPCOUNT_APPCNT_MASK 0x000007ff
 
-#endif /* __ARCH_ARM_SRC_LC823450_USBDEV_H */
+#endif /* __ARCH_ARM_SRC_LC823450_LC823450_USBDEV_H */

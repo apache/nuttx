@@ -32,8 +32,8 @@
  *
  ******************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H
-#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_LINEARFIFO_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_LINEARFIFO_H
 
 /******************************************************************************
  * Included Files
@@ -255,4 +255,4 @@ uint8_t spirit_fifo_get_txalmostempty(FAR struct spirit_library_s *spirit);
 }
 #endif
 
-#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_FIFO_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_LINEARFIFO_H */

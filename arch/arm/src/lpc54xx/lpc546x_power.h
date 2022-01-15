@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_LPC546X_PERIPHPOWER_H
-#define __ARCH_ARM_SRC_LPC54XX_LPC546X_PERIPHPOWER_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC546X_POWER_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC546X_POWER_H
 
 /****************************************************************************
  * Included Files
@@ -132,4 +132,4 @@
 #define lpc54_eeprom_ispowered()   lpc54_ispowered1(SYSCON_PDRUNCFG1_EEPROM)
 #define lpc54_rng_ispowered()      lpc54_ispowered1(SYSCON_PDRUNCFG1_RNG)
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_LPC546X_PERIPHPOWER_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC546X_POWER_H */

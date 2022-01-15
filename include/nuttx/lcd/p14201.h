@@ -19,8 +19,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_P14201_H
-#define __INCLUDE_NUTTX_P14201_H
+#ifndef __INCLUDE_NUTTX_LCD_P14201_H
+#define __INCLUDE_NUTTX_LCD_P14201_H
 
 /****************************************************************************
  * Included Files
@@ -114,4 +114,4 @@ FAR struct lcd_dev_s *rit_initialize(FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_P14201_H */
+#endif /* __INCLUDE_NUTTX_LCD_P14201_H */

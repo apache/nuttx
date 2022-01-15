@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_ARMV8_M_RAM_VECTORS_H
-#define __ARCH_ARM_SRC_COMMON_ARMV8_M_RAM_VECTORS_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H
+#define __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H
 
 /****************************************************************************
  * Included Files
@@ -100,4 +100,4 @@ void exception_common(void);
 int arm_ramvec_attach(int irq, up_vector_t vector);
 
 #endif /* CONFIG_ARCH_RAMVECTORS */
-#endif /* __ARCH_ARM_SRC_COMMON_ARMV8_M_RAM_VECTORS_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_RAM_VECTORS_H */

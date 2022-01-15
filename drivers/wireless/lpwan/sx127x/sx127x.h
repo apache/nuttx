@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_LPWAN_SX127X_H
-#define __DRIVERS_WIRELESS_LPWAN_SX127X_H
+#ifndef __DRIVERS_WIRELESS_LPWAN_SX127X_SX127X_H
+#define __DRIVERS_WIRELESS_LPWAN_SX127X_SX127X_H
 
 /****************************************************************************
  * Included Files
@@ -834,4 +834,4 @@
   }
 #endif
 
-#endif /* __DRIVERS_WIRELESS_LPWAN_SX127X_H */
+#endif /* __DRIVERS_WIRELESS_LPWAN_SX127X_SX127X_H */

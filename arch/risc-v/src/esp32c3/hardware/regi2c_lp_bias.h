@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,4 +57,4 @@
 #define I2C_ULP_EXT_CODE_MSB 7
 #define I2C_ULP_EXT_CODE_LSB 0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H */

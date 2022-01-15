@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USART_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USART_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USART_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USART_H
 
 /****************************************************************************
  * Included Files
@@ -1388,4 +1388,4 @@
 #define USART_I2SCTRL_FORMAT_W16D8            (_USART_I2SCTRL_FORMAT_W16D8 << 8)     /* Shifted mode W16D8 for USART_I2SCTRL */
 #define USART_I2SCTRL_FORMAT_W8D8             (_USART_I2SCTRL_FORMAT_W8D8 << 8)      /* Shifted mode W8D8 for USART_I2SCTRL */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USART_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USART_H */

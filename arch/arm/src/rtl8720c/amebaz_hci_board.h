@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_AMEBA_HCI_BOARD_H
-#define __INCLUDE_AMEBA_HCI_BOARD_H
+#ifndef __ARCH_ARM_SRC_RTL8720C_AMEBA_HCI_BOARD_H
+#define __ARCH_ARM_SRC_RTL8720C_AMEBA_HCI_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -53,5 +53,4 @@ int hci_get_efuse_iqk_data(uint8_t *data);
 int hci_board_init(void);
 int hci_board_init_done(void);
 
-#endif /* __INCLUDE_AMEBA_FLASH_H */
-
+#endif /* __ARCH_ARM_SRC_RTL8720C_AMEBA_HCI_BOARD_H */

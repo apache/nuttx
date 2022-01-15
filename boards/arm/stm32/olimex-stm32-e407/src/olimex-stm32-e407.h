@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_H
-#define __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_OLIMEX_STM32_E407_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_OLIMEX_STM32_E407_H
 
 /****************************************************************************
  * Included Files
@@ -341,4 +341,4 @@ int stm32_mrf24j40_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_INTERNAL_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_E407_SRC_OLIMEX_STM32_E407_H */

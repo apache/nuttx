@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONF_H
-#define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONF_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONFIG_H
+#define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -975,4 +975,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONF_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC4337JET100_PINCONFIG_H */

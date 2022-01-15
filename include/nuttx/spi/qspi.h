@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_QSPI_QSPI_H
-#define __INCLUDE_NUTTX_QSPI_QSPI_H
+#ifndef __INCLUDE_NUTTX_SPI_QSPI_H
+#define __INCLUDE_NUTTX_SPI_QSPI_H
 
 /****************************************************************************
  * Included Files
@@ -310,4 +310,4 @@ extern "C"
 #if defined(__cplusplus)
 }
 #endif
-#endif /* __INCLUDE_NUTTX_QSPI_QSPI_H */
+#endif /* __INCLUDE_NUTTX_SPI_QSPI_H */

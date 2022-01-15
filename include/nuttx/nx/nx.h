@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _INCLUDE_NUTTX_NX_NX_H
-#define _INCLUDE_NUTTX_NX_NX_H
+#ifndef __INCLUDE_NUTTX_NX_NX_H
+#define __INCLUDE_NUTTX_NX_NX_H
 
 /****************************************************************************
  * Included Files
@@ -1069,4 +1069,4 @@ int nx_constructwindow(NXHANDLE handle, NXWINDOW hwnd, uint8_t flags,
 }
 #endif
 
-#endif /* _INCLUDE_NUTTX_NX_NX_H */
+#endif /* __INCLUDE_NUTTX_NX_NX_H */

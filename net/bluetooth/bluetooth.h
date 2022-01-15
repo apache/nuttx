@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_BLUETOOTH_BLUETOOTH_H
-#define _NET_BLUETOOTH_BLUETOOTH_H
+#ifndef __NET_BLUETOOTH_BLUETOOTH_H
+#define __NET_BLUETOOTH_BLUETOOTH_H
 
 /****************************************************************************
  * Included Files
@@ -448,4 +448,4 @@ void bluetooth_container_free(FAR struct bluetooth_container_s *container);
 #endif
 
 #endif /* CONFIG_NET_BLUETOOTH */
-#endif /* _NET_BLUETOOTH_BLUETOOTH_H */
+#endif /* __NET_BLUETOOTH_BLUETOOTH_H */

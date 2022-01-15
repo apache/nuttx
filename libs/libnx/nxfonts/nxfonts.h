@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_H
-#define __LIBNX_NXFONTS_NXFONTS_H
+#ifndef __LIBS_LIBNX_NXFONTS_NXFONTS_H
+#define __LIBS_LIBNX_NXFONTS_NXFONTS_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ EXTERN struct nx_font_s g_fonts;
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_H */
+#endif /* __LIBS_LIBNX_NXFONTS_NXFONTS_H */

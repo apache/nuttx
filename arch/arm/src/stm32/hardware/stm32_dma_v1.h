@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_DMA_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_H
+#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -768,4 +768,4 @@
 #  error "Unknown DMA channel assignments"
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32_DMA_V1_H */

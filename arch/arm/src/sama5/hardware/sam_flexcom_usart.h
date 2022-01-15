@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H
-#define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H
+#ifndef __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_USART_H
+#define __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_USART_H
 
 /****************************************************************************
  * Included Files
@@ -575,4 +575,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_FLEXUS_H */
+#endif /* __ARCH_ARM_SRC_SAMA5_HARDWARE_SAM_FLEXCOM_USART_H */

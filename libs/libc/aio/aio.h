@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_AIO_AIO_H
-#define __LIBC_AIO_AIO_H
+#ifndef __LIBS_LIBC_AIO_AIO_H
+#define __LIBS_LIBC_AIO_AIO_H
 
 /****************************************************************************
  * Included Files
@@ -60,4 +60,4 @@ extern "C"
 #endif
 
 #endif /* CONFIG_FS_AIO */
-#endif /* __LIBC_AIO_AIO_H */
+#endif /* __LIBS_LIBC_AIO_AIO_H */

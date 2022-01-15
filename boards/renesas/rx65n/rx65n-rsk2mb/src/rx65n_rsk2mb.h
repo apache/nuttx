@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RENESAS_RX65N_GRROSE_SRC_RX65N_GRROSE_H
-#define __BOARDS_RENESAS_RX65N_GRROSE_SRC_RX65N_GRROSE_H
+#ifndef __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_SRC_RX65N_RSK2MB_H
+#define __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_SRC_RX65N_RSK2MB_H
 
 /****************************************************************************
  * Included Files
@@ -72,4 +72,4 @@ int rx65n_sbram_int(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RENESAS_RX65N_GRROSE_SRC_RX65N_GRROSE_H */
+#endif /* __BOARDS_RENESAS_RX65N_RX65N_RSK2MB_SRC_RX65N_RSK2MB_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SRC_INCLUDE_PHY62XX_PHYPLUS_GPIO_H
-#define __ARCH_SRC_INCLUDE_PHY62XX_PHYPLUS_GPIO_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHYPLUS_GPIO_H
+#define __ARCH_ARM_SRC_PHY62XX_PHYPLUS_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -58,5 +58,4 @@ int phyplus_gpio_register(FAR struct phyplus_gpio_param_s
                 *phyplus_gpio_param);
 int phyplus_gpio_unregister(FAR struct phyplus_gpio_param_s
                 *phyplus_gpio_param);
-#endif
-
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHYPLUS_GPIO_H */

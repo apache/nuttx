@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_AON_SEC_H
-#define __ARCH_RISCV_SRC_BL602_HARDWARE_AON_SEC_H
+#ifndef __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_AON_H
+#define __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_AON_H
 
 /****************************************************************************
  * Included Files
@@ -384,4 +384,4 @@
 
 #define GPADC_REG_DEFINE_GPADC_OS_CAL_DATA_MASK              (0xffff)
 
-#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_AON_SEC_H */
+#endif /* __ARCH_RISCV_SRC_BL602_HARDWARE_BL602_AON_H */

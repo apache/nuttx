@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_ECC_H
-#define __INCLUDE_NUTTX_MTD_ECC_H
+#ifndef __INCLUDE_NUTTX_MTD_NAND_ECC_H
+#define __INCLUDE_NUTTX_MTD_NAND_ECC_H
 
 /****************************************************************************
  * Included Files
@@ -126,4 +126,4 @@ int nandecc_writepage(FAR struct nand_dev_s *nand, off_t block,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_ECC_H */
+#endif /* __INCLUDE_NUTTX_MTD_NAND_ECC_H */

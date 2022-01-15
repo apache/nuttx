@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC31XX_EA3131_INCLUDE_MEMORYMAP_H
-#define __BOARDS_ARM_LPC31XX_EA3131INCLUDE_MEMORYMAP_H
+#ifndef __BOARDS_ARM_LPC31XX_EA3131_INCLUDE_BOARD_MEMORYMAP_H
+#define __BOARDS_ARM_LPC31XX_EA3131_INCLUDE_BOARD_MEMORYMAP_H
 
 /* This file should never be included directly, but only indirectly via
  * lpc31_memorymap.h.
@@ -102,4 +102,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LPC31XX_EA3131_MEMORYMAP_H */
+#endif /* __BOARDS_ARM_LPC31XX_EA3131_BOARD_MEMORYMAP_H */

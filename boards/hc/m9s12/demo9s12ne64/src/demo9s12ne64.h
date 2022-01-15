@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_SRC_DEMO9S12NE64_H
-#define __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_SRC_DEMO9S12NE64_H
+#ifndef __BOARDS_HC_M9S12_DEMO9S12NE64_SRC_DEMO9S12NE64_H
+#define __BOARDS_HC_M9S12_DEMO9S12NE64_SRC_DEMO9S12NE64_H
 
 /****************************************************************************
  * Included Files
@@ -60,4 +60,4 @@
 void weak_function hcs12_spidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_SRC_DEMO9S12NE64_H */
+#endif /* __BOARDS_HC_M9S12_DEMO9S12NE64_SRC_DEMO9S12NE64_H */

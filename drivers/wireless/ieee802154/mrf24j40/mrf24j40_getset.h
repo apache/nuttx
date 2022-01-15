@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_GETSET_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_GETSET_H
 
 int mrf24j40_setrxmode(FAR struct mrf24j40_radio_s *dev, int mode);
 
@@ -49,4 +49,4 @@ int mrf24j40_setcca(FAR struct mrf24j40_radio_s *dev,
 
 int mrf24j40_setpamode(FAR struct mrf24j40_radio_s *dev, int mode);
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_GETSET_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_GETSET_H */

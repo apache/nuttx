@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BSP_BOARD_COMMON_INCLUDE_CXD56_BCM20706_H
-#define __BSP_BOARD_COMMON_INCLUDE_CXD56_BCM20706_H
+#ifndef __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BCM20706_H
+#define __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BCM20706_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@ void board_bluetooth_enable_sleep(bool en);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BSP_BOARD_COMMON_INCLUDE_CXD56_BCM20706_H */
+#endif /* __BOARDS_ARM_CXD56XX_SPRESENSE_INCLUDE_CXD56_BCM20706_H */

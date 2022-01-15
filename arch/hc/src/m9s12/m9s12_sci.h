@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H
-#define __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H
+#ifndef __ARCH_HC_SRC_M9S12_M9S12_SCI_H
+#define __ARCH_HC_SRC_M9S12_M9S12_SCI_H
 
 /****************************************************************************
  * Included Files
@@ -142,4 +142,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_SCI_H */
+#endif /* __ARCH_HC_SRC_M9S12_M9S12_SCI_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_MEMORYMAP_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -38,4 +38,4 @@
 #  error "Unsupported EFM32 memory map"
 #endif
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_MEMORYMAP_H */

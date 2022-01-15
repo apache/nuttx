@@ -18,14 +18,20 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_ATMEGA_CHIP_H
-#define __ARCH_AVR_SRC_ATMEGA_CHIP_H
+#ifndef __ARCH_AVR_SRC_AT90USB_CHIP_H
+#define __ARCH_AVR_SRC_AT90USB_CHIP_H
 
 /************************************************************************************
  * Included Files
  ************************************************************************************/
 
 #include <nuttx/config.h>
+
+/* Include only the memory map.  Other chip hardware files should then include this
+ * file for the proper setup
+ */
+
+#include "at90usb_memorymap.h"
 
 /************************************************************************************
  * Pre-processor Definitions
@@ -65,12 +71,6 @@
 #  error "Unsupported AVR chip"
 #endif
 
-/* Include only the memory map.  Other chip hardware files should then include this
- * file for the proper setup
- */
-
-#include "at90usb_memorymap.h"
-
 /************************************************************************************
  * Public Types
  ************************************************************************************/
@@ -83,4 +83,4 @@
  * Public Functions Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_AVR_SRC_ATMEGA_CHIP_H */
+#endif /* __ARCH_AVR_SRC_AT90USB_CHIP_H */

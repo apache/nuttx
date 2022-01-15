@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XXX_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XXX_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files

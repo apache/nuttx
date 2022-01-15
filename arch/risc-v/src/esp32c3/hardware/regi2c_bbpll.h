@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -72,4 +72,4 @@
 #define I2C_BBPLL_OC_DIV_7_0_MSB    7
 #define I2C_BBPLL_OC_DIV_7_0_LSB    0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BBPLL_H */

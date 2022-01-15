@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_INCLUDE_BL602_CHIP_H
-#define __ARCH_RISCV_INCLUDE_BL602_CHIP_H
+#ifndef __ARCH_RISCV_SRC_BL602_CHIP_H
+#define __ARCH_RISCV_SRC_BL602_CHIP_H
 
 /****************************************************************************
  * Included Files
@@ -32,4 +32,4 @@
 
 #include <arch/irq.h>
 
-#endif /* __ARCH_RISCV_INCLUDE_BL602_CHIP_H */
+#endif /* __ARCH_RISCV_SRC_BL602_CHIP_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_NUNCHUCK_H
-#define __STM32_NUNCHUCK_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NUNCHUCK_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NUNCHUCK_H
 
 /****************************************************************************
  * Included Files
@@ -82,4 +82,4 @@ int board_nunchuck_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_NUNCHUCK_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NUNCHUCK_H */

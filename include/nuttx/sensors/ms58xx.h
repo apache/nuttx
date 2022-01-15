@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MS58XX
-#define __INCLUDE_NUTTX_SENSORS_MS58XX
+#ifndef __INCLUDE_NUTTX_SENSORS_MS58XX_H
+#define __INCLUDE_NUTTX_SENSORS_MS58XX_H
 
 /****************************************************************************
  * Included Files
@@ -112,4 +112,4 @@ int ms58xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_MS58XX */
-#endif /* __INCLUDE_NUTTX_SENSORS_MS58XX */
+#endif /* __INCLUDE_NUTTX_SENSORS_MS58XX_H */

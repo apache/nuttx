@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26x2_IRQ_H
-#define __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26x2_IRQ_H
+#ifndef __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26X2_IRQ_H
+#define __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26X2_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -128,4 +128,4 @@
 
 #define NR_GPIO_IRQS                (_NGPIOTIRQS - NR_IRQS)
 
-#endif /* __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26x2_IRQ_H */
+#endif /* __ARCH_ARM_INCLUDE_TIVA_CC13X2_CC26X2_IRQ_H */

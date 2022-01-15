@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32F74XX77XX_I2C_H
-#define __ARCH_ARM_SRC_STM32F7_STM32F74XX77XX_I2C_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_I2C_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_I2C_H
 
 /****************************************************************************
  * Pre-processor Definitions

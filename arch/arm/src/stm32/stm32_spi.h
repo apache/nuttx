@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_STC_STM32_STM32_SPI_H
-#define __ARCH_ARM_STC_STM32_STM32_SPI_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_SPI_H
+#define __ARCH_ARM_SRC_STM32_STM32_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -204,4 +204,4 @@ int stm32_spi6register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_STC_STM32_STM32_SPI_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_SPI_H */

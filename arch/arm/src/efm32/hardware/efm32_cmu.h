@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CMU_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CMU_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CMU_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CMU_H
 
 /****************************************************************************
  * Included Files
@@ -1653,4 +1653,4 @@
 #define CMU_LOCK_LOCKKEY_LOCKED                    (_CMU_LOCK_LOCKKEY_LOCKED << 0)   /* Shifted mode LOCKED for CMU_LOCK */
 #define CMU_LOCK_LOCKKEY_UNLOCK                    (_CMU_LOCK_LOCKKEY_UNLOCK << 0)   /* Shifted mode UNLOCK for CMU_LOCK */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_CMU_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_CMU_H */

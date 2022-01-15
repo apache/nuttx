@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_UID_H
-#define __ARCH_ARM_SRC_KINETIS_UID_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_UID_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_UID_H
 
 /****************************************************************************
  * Included Files
@@ -39,4 +39,4 @@
 
 void kinetis_get_uniqueid(uint8_t *uniqueid);
 
-#endif /* __ARCH_ARM_SRC_KINETIS_UID_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_UID_H */

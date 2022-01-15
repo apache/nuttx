@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __RX65NIODEFINE_HEADER__
-#define __RX65NIODEFINE_HEADER__
+#ifndef __ARCH_RENESAS_INCLUDE_RX65N_IODEFINE_H
+#define __ARCH_RENESAS_INCLUDE_RX65N_IODEFINE_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -38098,5 +38098,4 @@ typedef struct st_s12ad1
 #pragma pack()
 
 #endif  /* __ASSEMBLER__ */
-#endif
-
+#endif /* __ARCH_RENESAS_INCLUDE_RX65N_IODEFINE_H */

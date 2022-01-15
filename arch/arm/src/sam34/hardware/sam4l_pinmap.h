@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM3U_PINMAP_H
-#define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM3U_PINMAP_H
+#ifndef __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PINMAP_H
+#define __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PINMAP_H
 
 /****************************************************************************
  * Included Files
@@ -562,4 +562,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM3U_PINMAP_H */
+#endif /* __ARCH_ARM_SRC_SAM34_HARDWARE_SAM4L_PINMAP_H */
