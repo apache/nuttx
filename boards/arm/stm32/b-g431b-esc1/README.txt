@@ -48,6 +48,9 @@ Configuration Sub-directories
     ENCO_Z/HALL_H3   TIM4_CH3           PB8
     BUTTON           GPIO_PC10          PC10
     PWM                                 PA15
+    CAN_RX                              PA11
+    CAN_TX                              PB9
+    CAN_TERM                            PC14
 
     Current shunt resistance          = 0.003
     PGA gain                          = 16

@@ -29,4 +29,8 @@ config BOARD_STM32_BG431BESC1_FOC_POT
 
 endif # STM32_FOC
 
+config BOARD_STM32_BG431BESC1_CANTERM
+	bool "B-G431B-ESC1 use on-board CAN terminator resistor"
+	default y
+
 endif # ARCH_BOARD_B_G431B_ESC1
