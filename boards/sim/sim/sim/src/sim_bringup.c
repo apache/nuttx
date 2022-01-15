@@ -471,7 +471,7 @@ int sim_bringup(void)
 
 #if defined(CONFIG_RTC_RPMSG) && !defined(CONFIG_RTC_RPMSG_SERVER)
   rtc = rpmsg_rtc_initialize();
-  up_rtc_set_lowerhalf(rtc);
+  up_rtc_set_lowerhalf(rtc, true);
   rtc_initialize(0, rtc);
 #endif
 

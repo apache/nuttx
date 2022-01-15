@@ -128,6 +128,6 @@ int up_rtc_initialize(void)
 #ifdef CONFIG_RTC_RPMSG_SERVER
   rtc = rpmsg_rtc_server_initialize(rtc);
 #endif
-  up_rtc_set_lowerhalf(rtc);
+  up_rtc_set_lowerhalf(rtc, true);
   return rtc_initialize(0, rtc);
 }
