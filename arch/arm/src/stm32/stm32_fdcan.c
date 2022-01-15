@@ -148,17 +148,17 @@
 #  endif
 
 #  ifdef CONFIG_STM32_FDCAN1_FD_BRS
-#  define FDCAN1_DTSEG1 (CONFIG_STM32_FDCAN1_DTSEG1 - 1)
-#  define FDCAN1_DTSEG2 (CONFIG_STM32_FDCAN1_DTSEG2 - 1)
-#  define FDCAN1_DBRP   ((STM32_FDCANCLK_FREQUENCY /             \
-                          ((FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
-                           CONFIG_STM32_FDCAN1_DBITRATE)) - 1)
-#  define FDCAN1_DSJW   (CONFIG_STM32_FDCAN1_DSJW - 1)
+#    define FDCAN1_DTSEG1 (CONFIG_STM32_FDCAN1_DTSEG1 - 1)
+#    define FDCAN1_DTSEG2 (CONFIG_STM32_FDCAN1_DTSEG2 - 1)
+#    define FDCAN1_DBRP   ((STM32_FDCANCLK_FREQUENCY /             \
+                            ((FDCAN1_DTSEG1 + FDCAN1_DTSEG2 + 3) * \
+                             CONFIG_STM32_FDCAN1_DBITRATE)) - 1)
+#    define FDCAN1_DSJW   (CONFIG_STM32_FDCAN1_DSJW - 1)
 #  else
-#  define FDCAN1_DTSEG1 1
-#  define FDCAN1_DTSEG2 1
-#  define FDCAN1_DBRP   1
-#  define FDCAN1_DSJW   1
+#    define FDCAN1_DTSEG1 1
+#    define FDCAN1_DTSEG2 1
+#    define FDCAN1_DBRP   1
+#    define FDCAN1_DSJW   1
 #  endif /* CONFIG_STM32_FDCAN1_FD_BRS */
 
 #  if FDCAN1_DTSEG1 > FDCAN_DBTP_DTSEG1_MAX
@@ -215,17 +215,17 @@
 #  endif
 
 #  ifdef CONFIG_STM32_FDCAN2_FD_BRS
-#  define FDCAN2_DTSEG1 (CONFIG_STM32_FDCAN2_DTSEG1 - 1)
-#  define FDCAN2_DTSEG2 (CONFIG_STM32_FDCAN2_DTSEG2 - 1)
-#  define FDCAN2_DBRP   (((STM32_FDCANCLK_FREQUENCY /                   \
-                           ((FDCAN2_DTSEG1 + FDCAN2_DTSEG2 + 3) *       \
-                            CONFIG_STM32_FDCAN2_DBITRATE)) - 1))
-#  define FDCAN2_DSJW   (CONFIG_STM32_FDCAN2_DSJW - 1)
+#    define FDCAN2_DTSEG1 (CONFIG_STM32_FDCAN2_DTSEG1 - 1)
+#    define FDCAN2_DTSEG2 (CONFIG_STM32_FDCAN2_DTSEG2 - 1)
+#    define FDCAN2_DBRP   (((STM32_FDCANCLK_FREQUENCY /                 \
+                             ((FDCAN2_DTSEG1 + FDCAN2_DTSEG2 + 3) *     \
+                              CONFIG_STM32_FDCAN2_DBITRATE)) - 1))
+#    define FDCAN2_DSJW   (CONFIG_STM32_FDCAN2_DSJW - 1)
 #  else
-#  define FDCAN2_DTSEG1 1
-#  define FDCAN2_DTSEG2 1
-#  define FDCAN2_DBRP   1
-#  define FDCAN2_DSJW   1
+#    define FDCAN2_DTSEG1 1
+#    define FDCAN2_DTSEG2 1
+#    define FDCAN2_DBRP   1
+#    define FDCAN2_DSJW   1
 #  endif /* CONFIG_STM32_FDCAN2_FD_BRS */
 
 #  if FDCAN2_DTSEG1 > FDCAN_DBTP_DTSEG1_MAX
@@ -282,17 +282,17 @@
 #  endif
 
 #  ifdef CONFIG_STM32_FDCAN3_FD_BRS
-#  define FDCAN3_DTSEG1 (CONFIG_STM32_FDCAN3_DTSEG1 - 1)
-#  define FDCAN3_DTSEG2 (CONFIG_STM32_FDCAN3_DTSEG2 - 1)
-#  define FDCAN3_DBRP   (((STM32_FDCANCLK_FREQUENCY /                   \
-                           ((FDCAN3_DTSEG1 + FDCAN3_DTSEG2 + 3) *       \
-                            CONFIG_STM32_FDCAN3_DBITRATE)) - 1))
-#  define FDCAN3_DSJW   (CONFIG_STM32_FDCAN3_DSJW - 1)
+#    define FDCAN3_DTSEG1 (CONFIG_STM32_FDCAN3_DTSEG1 - 1)
+#    define FDCAN3_DTSEG2 (CONFIG_STM32_FDCAN3_DTSEG2 - 1)
+#    define FDCAN3_DBRP   (((STM32_FDCANCLK_FREQUENCY /                   \
+                             ((FDCAN3_DTSEG1 + FDCAN3_DTSEG2 + 3) *     \
+                              CONFIG_STM32_FDCAN3_DBITRATE)) - 1))
+#    define FDCAN3_DSJW   (CONFIG_STM32_FDCAN3_DSJW - 1)
 #  else
-#  define FDCAN3_DTSEG1 1
-#  define FDCAN3_DTSEG2 1
-#  define FDCAN3_DBRP   1
-#  define FDCAN3_DSJW   1
+#    define FDCAN3_DTSEG1 1
+#    define FDCAN3_DTSEG2 1
+#    define FDCAN3_DBRP   1
+#    define FDCAN3_DSJW   1
 #  endif /* CONFIG_STM32_FDCAN3_FD_BRS */
 
 #  if FDCAN3_DTSEG1 > FDCAN_DBTP_DTSEG1_MAX
@@ -368,7 +368,7 @@
 #define FDCAN_RXFIFO0_INTS  (FDCAN_INT_RF0N | FDCAN_INT_RF0L)
 #define FDCAN_RXFIFO1_INTS  (FDCAN_INT_RF1N | FDCAN_INT_RF1L)
 #define FDCAN_RXFIFO_INTS   (FDCAN_RXFIFO0_INTS | FDCAN_RXFIFO1_INTS | \
-                            FDCAN_INT_HPM | FDCAN_RXCOMMON_INTS)
+                             FDCAN_INT_HPM | FDCAN_RXCOMMON_INTS)
 
 #define FDCAN_RXERR_INTS    (FDCAN_INT_RF0L | FDCAN_INT_RF1L)
 
@@ -391,7 +391,7 @@
 #define FDCAN_TXCOMMON_INTS (FDCAN_INT_TC | FDCAN_INT_TCF)
 #define FDCAN_TXFIFOQ_INTS  (FDCAN_INT_TFE | FDCAN_TXCOMMON_INTS)
 #define FDCAN_TXEVFIFO_INTS (FDCAN_INT_TEFN | FDCAN_INT_TEFF | \
-                            FDCAN_INT_TEFL)
+                             FDCAN_INT_TEFL)
 #define FDCAN_TXDEDBUF_INTS FDCAN_TXCOMMON_INTS
 
 #define FDCAN_TXERR_INTS    (FDCAN_INT_TEFL | FDCAN_INT_PEA | FDCAN_INT_PED)
@@ -420,39 +420,41 @@
 
 enum stm32_frameformat_e
 {
-  FDCAN_ISO11898_1_FORMAT        = 0,  /* Frame format according to ISO11898-1 */
-  FDCAN_NONISO_BOSCH_V1_FORMAT   = 1   /* Frame format according to Bosch CAN FD V1.0 */
+  FDCAN_ISO11898_1_FORMAT      = 0,  /* Frame format according to ISO11898-1 */
+  FDCAN_NONISO_BOSCH_V1_FORMAT = 1   /* Frame format according to Bosch CAN FD V1.0 */
 };
 
 /* CAN mode of operation */
 
 enum stm32_canmode_e
 {
-  FDCAN_CLASSIC_MODE    = 0, /* Classic CAN operation */
-  FDCAN_FD_MODE         = 1, /* CAN FD operation */
-  FDCAN_FD_BRS_MODE     = 2  /* CAN FD operation with bit rate switching */
+  FDCAN_CLASSIC_MODE = 0,   /* Classic CAN operation */
+#ifdef CONFIG_CAN_FD
+  FDCAN_FD_MODE      = 1,   /* CAN FD operation */
+  FDCAN_FD_BRS_MODE  = 2    /* CAN FD operation with bit rate switching */
+#endif
 };
 
 /* CAN driver state */
 
 enum can_state_s
 {
-  FDCAN_STATE_UNINIT = 0,    /* Not yet initialized */
-  FDCAN_STATE_RESET,         /* Initialized, reset state */
-  FDCAN_STATE_SETUP,         /* fdcan_setup() has been called */
-  FDCAN_STATE_DISABLED       /* Disabled by a fdcan_shutdown() */
+  FDCAN_STATE_UNINIT = 0,   /* Not yet initialized */
+  FDCAN_STATE_RESET,        /* Initialized, reset state */
+  FDCAN_STATE_SETUP,        /* fdcan_setup() has been called */
+  FDCAN_STATE_DISABLED      /* Disabled by a fdcan_shutdown() */
 };
 
 /* This structure describes the FDCAN message RAM layout */
 
 struct stm32_msgram_s
 {
-  uint32_t *stdfilters;    /* Standard filters */
-  uint32_t *extfilters;    /* Extended filters */
-  uint32_t *rxfifo0;       /* RX FIFO0 */
-  uint32_t *rxfifo1;       /* RX FIFO1 */
-  uint32_t *txeventfifo;   /* TX event FIFO */
-  uint32_t *txfifoq;       /* TX FIFO queue */
+  volatile uint32_t *stdfilters;     /* Standard filters */
+  volatile uint32_t *extfilters;     /* Extended filters */
+  volatile uint32_t *rxfifo0;        /* RX FIFO0 */
+  volatile uint32_t *rxfifo1;        /* RX FIFO1 */
+  volatile uint32_t *txeventfifo;    /* TX event FIFO */
+  volatile uint32_t *txfifoq;        /* TX FIFO queue */
 };
 
 /* This structure provides the constant configuration of a FDCAN peripheral */
@@ -481,7 +483,7 @@ struct stm32_config_s
   uint8_t txeventesize;     /* TXevent element size (words) */
   uint8_t txbufferesize;    /* TX buffer element size (words) */
 #ifdef STM32_FDCAN_LOOPBACK
-  bool    loopback;         /* True: Loopback mode */
+  bool loopback;            /* True: Loopback mode */
 #endif
 
   /* FDCAN message RAM layout */
@@ -527,7 +529,7 @@ struct stm32_fdcan_s
 
 static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset);
 static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
-              uint32_t regval);
+                         uint32_t regval);
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
                            FAR const char *msg);
@@ -549,11 +551,11 @@ static uint8_t fdcan_dlc2bytes(FAR struct stm32_fdcan_s *priv, uint8_t dlc);
 
 #ifdef CONFIG_CAN_EXTID
 static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
-              FAR struct canioc_extfilter_s *extconfig);
+                               FAR struct canioc_extfilter_s *extconfig);
 static int fdcan_del_extfilter(FAR struct stm32_fdcan_s *priv, int ndx);
 #endif
 static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
-              FAR struct canioc_stdfilter_s *stdconfig);
+                               FAR struct canioc_stdfilter_s *stdconfig);
 static int fdcan_del_stdfilter(FAR struct stm32_fdcan_s *priv, int ndx);
 
 static int
@@ -579,7 +581,7 @@ static bool fdcan_txempty(FAR struct can_dev_s *dev);
 static void fdcan_error(FAR struct can_dev_s *dev, uint32_t status);
 #endif
 static void fdcan_receive(FAR struct can_dev_s *dev,
-                          FAR uint32_t *rxbuffer,
+                          FAR volatile uint32_t *rxbuffer,
                           unsigned long nwords);
 static int  fdcan_interrupt(int irq, void *context, FAR void *arg);
 
@@ -912,7 +914,7 @@ static uint32_t fdcan_getreg(FAR struct stm32_fdcan_s *priv, int offset)
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
-                        uint32_t regval)
+                         uint32_t regval)
 {
   FAR const struct stm32_config_s *config = priv->config;
   uintptr_t regaddr = config->base + offset;
@@ -928,7 +930,7 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
 
 #else
 static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
-                        uint32_t regval)
+                         uint32_t regval)
 {
   FAR const struct stm32_config_s *config = priv->config;
   putreg32(regval, config->base + offset);
@@ -952,7 +954,7 @@ static void fdcan_putreg(FAR struct stm32_fdcan_s *priv, int offset,
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
-                                  FAR const char *msg)
+                           FAR const char *msg)
 {
   FAR const struct stm32_config_s *config = priv->config;
 
@@ -998,7 +1000,7 @@ static void fdcan_dumpregs(FAR struct stm32_fdcan_s *priv,
 
 #ifdef CONFIG_STM32_FDCAN_REGDEBUG
 static void fdcan_dumprxregs(FAR struct stm32_fdcan_s *priv,
-                                FAR const char *msg)
+                             FAR const char *msg)
 {
   FAR const struct stm32_config_s *config = priv->config;
 
@@ -1104,7 +1106,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
               1);
     }
 
-  if (config->nextfilters)
+  if (config->nextfilters > 0)
     {
       caninfo("EXT filters   %p   %4d        %2d\n",
               config->msgram.extfilters,
@@ -1112,7 +1114,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
               2);
     }
 
-  if (config->nrxfifo0)
+  if (config->nrxfifo0 > 0)
     {
       caninfo("RX FIFO 0     %p   %4d        %2d\n",
               config->msgram.rxfifo0,
@@ -1120,7 +1122,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
               config->rxfifo0esize);
     }
 
-  if (config->nrxfifo1)
+  if (config->nrxfifo1 > 0)
     {
       caninfo("RX FIFO 1     %p   %4d        %2d\n",
               config->msgram.rxfifo1,
@@ -1128,7 +1130,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
               config->rxfifo1esize);
     }
 
-  if (config->ntxeventfifo)
+  if (config->ntxeventfifo > 0)
     {
       caninfo("TX EVENT      %p   %4d        %2d\n",
               config->msgram.txeventfifo,
@@ -1136,7 +1138,7 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
               config->txeventesize);
     }
 
-  if (config->ntxfifoq)
+  if (config->ntxfifoq > 0)
     {
       caninfo("TX FIFO       %p   %4d        %2d\n",
               config->msgram.txfifoq,
@@ -1220,10 +1222,10 @@ static uint8_t fdcan_dlc2bytes(FAR struct stm32_fdcan_s *priv, uint8_t dlc)
 
 #ifdef CONFIG_CAN_EXTID
 static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
-                              FAR struct canioc_extfilter_s *extconfig)
+                               FAR struct canioc_extfilter_s *extconfig)
 {
   FAR const struct stm32_config_s *config    = NULL;
-  FAR uint32_t                    *extfilter = NULL;
+  FAR volatile uint32_t           *extfilter = NULL;
   uint32_t                         regval    = 0;
   int                              word      = 0;
   int                              bit       = 0;
@@ -1234,7 +1236,7 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
 
   /* Find an unused standard filter */
 
-  for (ndx = 0; ndx <  config->nextfilters; ndx++)
+  for (ndx = 0; ndx < config->nextfilters; ndx++)
     {
       /* Is this filter assigned? */
 
@@ -1262,7 +1264,7 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
             }
           else
             {
-              regval |= EXTFILTER_F0_EFEC_FIFO0;
+              regval |= EXTFILTER_F0_EFEC_FIFO1;
             }
 
           extfilter[0] = regval;
@@ -1274,17 +1276,28 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
 
           switch (extconfig->xf_type)
             {
-              default:
               case CAN_FILTER_DUAL:
-                regval |= EXTFILTER_F1_EFT_DUAL;
-                break;
+                {
+                  regval |= EXTFILTER_F1_EFT_DUAL;
+                  break;
+                }
 
               case CAN_FILTER_MASK:
-                regval |= EXTFILTER_F1_EFT_CLASSIC;
-                break;
+                {
+                  regval |= EXTFILTER_F1_EFT_CLASSIC;
+                  break;
+                }
+
               case CAN_FILTER_RANGE:
-                regval |= EXTFILTER_F1_EFT_RANGE;
-                break;
+                {
+                  regval |= EXTFILTER_F1_EFT_RANGE;
+                  break;
+                }
+
+              default:
+                {
+                  return -EINVAL;
+                }
             }
 
           extfilter[1] = regval;
@@ -1360,7 +1373,7 @@ static int fdcan_add_extfilter(FAR struct stm32_fdcan_s *priv,
 static int fdcan_del_extfilter(FAR struct stm32_fdcan_s *priv, int ndx)
 {
   FAR const struct stm32_config_s *config    = NULL;
-  FAR uint32_t                    *extfilter = NULL;
+  FAR volatile uint32_t           *extfilter = NULL;
   uint32_t                         regval    = 0;
   int                              word      = 0;
   int                              bit       = 0;
@@ -1409,9 +1422,7 @@ static int fdcan_del_extfilter(FAR struct stm32_fdcan_s *priv, int ndx)
       /* Wait for initialization mode to take effect */
 
       while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) &
-             FDCAN_CCCR_INIT) == 0)
-        {
-        }
+              FDCAN_CCCR_INIT) == 0);
 
       /* Enable writing to configuration registers */
 
@@ -1465,10 +1476,10 @@ static int fdcan_del_extfilter(FAR struct stm32_fdcan_s *priv, int ndx)
  ****************************************************************************/
 
 static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
-                              FAR struct canioc_stdfilter_s *stdconfig)
+                               FAR struct canioc_stdfilter_s *stdconfig)
 {
   FAR const struct stm32_config_s *config    = NULL;
-  FAR uint32_t                    *stdfilter = NULL;
+  FAR volatile uint32_t           *stdfilter = NULL;
   uint32_t                         regval    = 0;
   int                              word      = 0;
   int                              bit       = 0;
@@ -1515,17 +1526,28 @@ static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
 
           switch (stdconfig->sf_type)
             {
-              default:
               case CAN_FILTER_DUAL:
-                regval |= STDFILTER_S0_SFT_DUAL;
-                break;
+                {
+                  regval |= STDFILTER_S0_SFT_DUAL;
+                  break;
+                }
 
               case CAN_FILTER_MASK:
-                regval |= STDFILTER_S0_SFT_CLASSIC;
-                break;
+                {
+                  regval |= STDFILTER_S0_SFT_CLASSIC;
+                  break;
+                }
+
               case CAN_FILTER_RANGE:
-                regval |= STDFILTER_S0_SFT_RANGE;
-                break;
+                {
+                  regval |= STDFILTER_S0_SFT_RANGE;
+                  break;
+                }
+
+              default:
+                {
+                  return -EINVAL;
+                }
             }
 
           *stdfilter = regval;
@@ -1543,9 +1565,7 @@ static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
               /* Wait for initialization mode to take effect */
 
               while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) &
-                     FDCAN_CCCR_INIT) == 0)
-                {
-                }
+                      FDCAN_CCCR_INIT) == 0);
 
               /* Enable writing to configuration registers */
 
@@ -1600,7 +1620,7 @@ static int fdcan_add_stdfilter(FAR struct stm32_fdcan_s *priv,
 static int fdcan_del_stdfilter(FAR struct stm32_fdcan_s *priv, int ndx)
 {
   FAR const struct stm32_config_s *config    = NULL;
-  FAR uint32_t                    *stdfilter = NULL;
+  FAR volatile uint32_t           *stdfilter = NULL;
   uint32_t                         regval    = 0;
   int                              word      = 0;
   int                              bit       = 0;
@@ -1649,9 +1669,7 @@ static int fdcan_del_stdfilter(FAR struct stm32_fdcan_s *priv, int ndx)
       /* Wait for initialization mode to take effect */
 
       while ((fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET) &
-              FDCAN_CCCR_INIT) == 0)
-        {
-        }
+              FDCAN_CCCR_INIT) == 0);
 
       /* Enable writing to configuration registers */
 
@@ -1691,21 +1709,8 @@ static int fdcan_del_stdfilter(FAR struct stm32_fdcan_s *priv, int ndx)
  *
  * Description:
  *   This function initiates the BUS-OFF recovery sequence.
- *   CAN Specification Rev. 2.0 or ISO11898-1:2015
- *   According the SAMV71 datasheet:
- *
- *   "If the device goes Bus_Off, it will set FDCAN_CCCR.INIT of its own
- *    accord, stopping all bus activities. Once FDCAN_CCCR.INIT has been
- *    cleared by the processor (application), the device will then wait for
- *    129 occurrences of Bus Idle (129 * 11 consecutive recessive bits)
- *    before resuming normal operation. At the end of the Bus_Off recovery
- *    sequence, the Error Management Counters will be reset. During the
- *    waiting time after the resetting of FDCAN_CCCR.INIT, each time a
- *    sequence of 11 recessive bits has been monitored, a Bit0 Error code is
- *    written to FDCAN_PSR.LEC, enabling the processor to readily check up
- *    whether the CAN bus is stuck at dominant or continuously disturbed and
- *    to monitor the Bus_Off recovery sequence.  FDCAN_ECR.REC is used to
- *    count these sequences."
+ *   CAN Specification Rev. 2.0 or ISO11898-1:2015.
+ *   According the STM32G4 datasheet section 44.3.2 Software initialziation.
  *
  * Input Parameters:
  *   priv - An instance of the FDCAN driver state structure.
@@ -1726,7 +1731,7 @@ fdcan_start_busoff_recovery_sequence(FAR struct stm32_fdcan_s *priv)
   /* Only start BUS-OFF recovery if we are in BUS-OFF state */
 
   regval = fdcan_getreg(priv, STM32_FDCAN_PSR_OFFSET);
-  if (!(regval & FDCAN_PSR_BO))
+  if ((regval & FDCAN_PSR_BO) == 0)
     {
       return -EPERM;
     }
@@ -2309,7 +2314,7 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 {
   FAR struct stm32_fdcan_s        *priv       = NULL;
   FAR const struct stm32_config_s *config     = NULL;
-  FAR uint32_t                    *txbuffer   = NULL;
+  FAR volatile uint32_t           *txbuffer   = NULL;
   FAR const uint8_t               *src        = NULL;
   FAR uint32_t                    *dest       = NULL;
   uint32_t                         regval     = 0;
@@ -2383,7 +2388,7 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
-  dest   = &txbuffer[2];
+  dest   = (FAR uint32_t *)&txbuffer[2];
   src    = msg->cm_data;
   nbytes = fdcan_dlc2bytes(priv, msg->cm_hdr.ch_dlc);
 
@@ -2478,7 +2483,7 @@ static bool fdcan_txempty(FAR struct can_dev_s *dev)
    */
 
   regval = fdcan_getreg(priv, STM32_FDCAN_TXFQS_OFFSET);
-  if (((regval & FDCAN_TXFQS_TFQF) != 0))
+  if ((regval & FDCAN_TXFQS_TFQF) != 0)
     {
       return false;
     }
@@ -2532,7 +2537,7 @@ static void fdcan_error(FAR struct can_dev_s *dev, uint32_t status)
       data[1] |= (CAN_ERROR1_RXPASSIVE | CAN_ERROR1_TXPASSIVE);
     }
 
-  if (psr & FDCAN_PSR_EW)
+  if ((psr & FDCAN_PSR_EW) != 0)
     {
       data[1] |= (CAN_ERROR1_RXWARNING | CAN_ERROR1_TXWARNING);
     }
@@ -2548,7 +2553,7 @@ static void fdcan_error(FAR struct can_dev_s *dev, uint32_t status)
     {
       /* Protocol Error in Arbitration Phase */
 
-      if (psr & FDCAN_PSR_LEC_MASK)
+      if ((psr & FDCAN_PSR_LEC_MASK) != 0)
         {
           /* Error code present */
 
@@ -2613,7 +2618,7 @@ static void fdcan_error(FAR struct can_dev_s *dev, uint32_t status)
     {
       /* Protocol Error in Data Phase */
 
-      if (psr & FDCAN_PSR_DLEC_MASK)
+      if ((psr & FDCAN_PSR_DLEC_MASK) != 0)
         {
           /* Error code present */
 
@@ -2763,8 +2768,9 @@ static void fdcan_error(FAR struct can_dev_s *dev, uint32_t status)
  *
  ****************************************************************************/
 
-static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
-                         unsigned long nwords)
+static void fdcan_receive(FAR struct can_dev_s *dev,
+                          FAR volatile uint32_t *rxbuffer,
+                          unsigned long nwords)
 {
   struct can_hdr_s hdr;
   uint32_t         regval = 0;
@@ -2783,14 +2789,9 @@ static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 #endif
   hdr.ch_unused = 0;
 
-  if ((regval & BUFFER_R0_RTR) != 0)
-    {
-      hdr.ch_rtr = true;
-    }
-  else
-    {
-      hdr.ch_rtr = false;
-    }
+  /* Extract the RTR bit */
+
+  hdr.ch_rtr = ((regval & BUFFER_R0_RTR) != 0);
 
 #ifdef CONFIG_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
@@ -2799,13 +2800,13 @@ static void fdcan_receive(FAR struct can_dev_s *dev, FAR uint32_t *rxbuffer,
 
       hdr.ch_id    = (regval & BUFFER_R0_EXTID_MASK) >>
                      BUFFER_R0_EXTID_SHIFT;
-      hdr.ch_extid = true;
+      hdr.ch_extid = 1;
     }
   else
     {
       hdr.ch_id    = (regval & BUFFER_R0_STDID_MASK) >>
                      BUFFER_R0_STDID_SHIFT;
-      hdr.ch_extid = false;
+      hdr.ch_extid = 0;
     }
 
 #else
@@ -2991,9 +2992,9 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
       /* Check all TX buffers */
 
       regval = fdcan_getreg(priv, STM32_FDCAN_TXBTO_OFFSET);
-      for (ndx = 0; ndx < config->ntxfifoq; ndx += 1)
+      for (ndx = 0; ndx < config->ntxfifoq; ndx++)
         {
-          if (regval & (1 << ndx))
+          if ((regval & (1 << ndx)) != 0)
             {
               /* Tell the upper half that the transfer is finished. */
 
@@ -3127,7 +3128,7 @@ static int fdcan_interrupt(int irq, void *context, FAR void *arg)
 static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 {
   FAR const struct stm32_config_s *config = priv->config;
-  FAR uint32_t                    *msgram = NULL;
+  FAR volatile uint32_t           *msgram = NULL;
   uint32_t                         regval = 0;
   uint32_t                         cntr   = 0;
 
@@ -3264,15 +3265,23 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
   /* Select ISO11898-1 or Non ISO Bosch CAN FD Specification V1.0 */
 
-    switch (config->format)
+  switch (config->format)
     {
-    default:
-    case FDCAN_ISO11898_1_FORMAT:
-      break;
+      case FDCAN_ISO11898_1_FORMAT:
+        {
+          break;
+        }
 
-    case FDCAN_NONISO_BOSCH_V1_FORMAT:
-      regval |= FDCAN_CCCR_NISO;
-      break;
+      case FDCAN_NONISO_BOSCH_V1_FORMAT:
+        {
+          regval |= FDCAN_CCCR_NISO;
+          break;
+        }
+
+      default:
+        {
+          return -EINVAL;
+        }
     }
 
   /* Select Classic CAN mode or FD mode with or without fast bit rate
@@ -3281,19 +3290,29 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
   switch (config->mode)
     {
-    default:
-    case FDCAN_CLASSIC_MODE:
-      break;
+      case FDCAN_CLASSIC_MODE:
+        {
+          break;
+        }
 
 #ifdef CONFIG_CAN_FD
-    case FDCAN_FD_MODE:
-      regval |= FDCAN_CCCR_FDOE;
-      break;
+      case FDCAN_FD_MODE:
+        {
+          regval |= FDCAN_CCCR_FDOE;
+          break;
+        }
 
-    case FDCAN_FD_BRS_MODE:
-      regval |= (FDCAN_CCCR_FDOE | FDCAN_CCCR_BRSE);
-      break;
+      case FDCAN_FD_BRS_MODE:
+        {
+          regval |= (FDCAN_CCCR_FDOE | FDCAN_CCCR_BRSE);
+          break;
+        }
 #endif
+
+      default:
+        {
+          return -EINVAL;
+        }
     }
 
   /* Set the initial CAN mode */
@@ -3315,10 +3334,10 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
 
   if (config->loopback)
     {
-     /* FDCAN_CCCR_TEST  - Test mode enable
-      * FDCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
-      * FDCAN_TEST_LBCK  - Loopback mode
-      */
+      /* FDCAN_CCCR_TEST  - Test mode enable
+       * FDCAN_CCCR_MON   - Bus monitoring mode (for internal loopback)
+       * FDCAN_TEST_LBCK  - Loopback mode
+       */
 
       regval = fdcan_getreg(priv, STM32_FDCAN_CCCR_OFFSET);
       regval |= (FDCAN_CCCR_TEST | FDCAN_CCCR_MON);
