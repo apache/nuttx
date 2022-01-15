@@ -1,5 +1,5 @@
 ############################################################################
-# libs/libc/machine/Make.defs
+# boards/sparc/bm3803/xx3803/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -18,31 +18,24 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_LIBC_ARCH_ATOMIC),y)
-  CSRCS += arch_atomic.c
+-include $(TOPDIR)/Make.defs
+
+ASRCS =
+CSRCS = bm3803_boot.c
+
+ifeq ($(CONFIG_BOARDCTL),y)
+CSRCS += bm3803_appinit.c
+ifeq ($(CONFIG_BOARDCTL_RESET),y)
+CSRCS += bm3803_reset.c
+endif
 endif
 
-ifeq ($(CONFIG_ARCH_ARM),y)
-include $(TOPDIR)/libs/libc/machine/arm/Make.defs
+ifeq ($(CONFIG_MTD_AM29LV),y)
+CSRCS += bm3803_am29lv.c
 endif
-ifeq ($(CONFIG_ARCH_RISCV),y)
-include $(TOPDIR)/libs/libc/machine/risc-v/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SIM),y)
-include $(TOPDIR)/libs/libc/machine/sim/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_X86),y)
-include $(TOPDIR)/libs/libc/machine/x86/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_XTENSA),y)
-include $(TOPDIR)/libs/libc/machine/xtensa/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_RENESAS),y)
-include $(TOPDIR)/libs/libc/machine/renesas/Make.defs
-endif
-ifeq ($(CONFIG_ARCH_SPARC),y)
-include $(TOPDIR)/libs/libc/machine/sparc/Make.defs
-endif
-DEPPATH += --dep-path machine
-VPATH += :machine
 
+ifeq ($(CONFIG_XX3803_WDG),y)
+CSRCS += bm3803_wdt.c
+endif
+
+include $(TOPDIR)/boards/Board.mk

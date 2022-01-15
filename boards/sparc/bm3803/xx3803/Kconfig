@@ -1,0 +1,106 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_XX3803
+
+config XX3803_WDG
+	bool "xx3803 wdg kicker support"
+	depends on BM3803_WDG
+	depends on WATCHDOG
+
+config XX3803_WDG_TIMEOUT
+	int "xx3803 wdg Timeout (ms)"
+	default 1000
+	depends on XX3803_WDG
+	---help---
+		Watchdog timeout value in milliseconds.
+
+if XX3803_WDG
+config XX3803_WDG_THREAD
+	bool "Watchdog Deamon Thread"
+
+if XX3803_WDG_THREAD
+config XX3803_WDG_THREAD_NAME
+	string "Watchdog Thread Name"
+	default "wdog"
+
+config XX3803_WDG_THREAD_INTERVAL
+	int "Watchdog Thread Interval (ms)"
+	default 500
+
+config XX3803_WDG_THREAD_PRIORITY
+	int "Watchdog Thread Priority"
+	default 200
+
+config XX3803_WDG_THREAD_STACKSIZE
+	int "Watchdog Thread Stacksize"
+	default 2048
+
+endif # XX3803_WDG_THREAD
+endif # XX3803_WDG
+
+config XX3803_FLASH
+	bool "MTD driver for AM29LV FLASH"
+	default n
+	select MTD
+	select MTD_AM29LV
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config XX3803_FLASH_PARA
+	bool "Create application para data on partition or sector of FLASH"
+	default n
+	depends on XX3803_FLASH
+	---help---
+		Enables creation of a /dev/para on the FLASH
+
+config XX3803_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on XX3803_FLASH
+	depends on FS_SMARTFS
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config XX3803_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default y
+	depends on XX3803_FLASH
+	select MTD_PARTITION
+	---help---
+		Enables creation of partitions on the FLASH
+
+config XX3803_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default n
+	depends on XX3803_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config XX3803_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on XX3803_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config XX3803_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "1024,1024,1024,1024"
+	depends on XX3803_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config XX3803_FLASH_PART_NAMES
+	string "Flash partition name list"
+	default "first,second,third,forth"
+	depends on XX3803_FLASH_PART
+	depends on MTD_PARTITION_NAMES
+	---help---
+		Comma separated list of partition names.
+
+endif

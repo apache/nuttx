@@ -1,0 +1,65 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_BOARD_XX3823
+
+config XX3823_FLASH
+	bool "MTD driver for AM29LV FLASH"
+	default n
+	select MTD
+	select MTD_AM29LV
+	select MTD_SMART
+	select FS_SMARTFS
+	select MTD_BYTE_WRITE
+	---help---
+		Configures an MTD device for use with the onboard flash
+
+config XX3823_FLASH_MINOR
+	int "Minor number for the FLASH /dev/smart entry"
+	default 0
+	depends on XX3823_FLASH
+	---help---
+		Sets the minor number for the FLASH MTD /dev entry
+
+config XX3823_FLASH_PART
+	bool "Enable partition support on FLASH"
+	default y
+	depends on XX3823_FLASH
+	select MTD_PARTITION
+	---help---
+		Enables creation of partitions on the FLASH
+
+config XX3823_FLASH_CONFIG_PART
+	bool "Create application config data partition on FLASH"
+	default n
+	depends on XX3823_FLASH_PART
+	depends on PLATFORM_CONFIGDATA
+	---help---
+		Enables creation of a /dev/config partition on the FLASH
+
+config XX3823_FLASH_CONFIG_PART_NUMBER
+	int "Index number of config partition (in list below)"
+	default 0
+	depends on XX3823_FLASH_CONFIG_PART
+	---help---
+		Specifies the index number of the config data partition
+		from the partition list.
+
+config XX3823_FLASH_PART_LIST
+	string "Flash partition size list"
+	default "1024,1024,1024,1024"
+	depends on XX3823_FLASH_PART
+	---help---
+		Comma separated list of partition sizes in KB.
+
+config XX3823_FLASH_PART_NAMES
+	string "Flash partition name list"
+	default "first,second,third,forth"
+	depends on XX3823_FLASH_PART
+	depends on MTD_PARTITION_NAMES
+	---help---
+		Comma separated list of partition names.
+
+endif
