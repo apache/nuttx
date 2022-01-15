@@ -247,6 +247,15 @@
 #define BOARD_TIM17_FREQUENCY  (STM32_PCLK2_FREQUENCY)
 #define BOARD_TIM20_FREQUENCY  (STM32_PCLK2_FREQUENCY)
 
+#ifdef CONFIG_STM32_FDCAN
+#  ifdef CONFIG_BOARD_NUCLEO_G431RB_USE_HSE
+#    define STM32_CCIPR_FDCANSRC   (RCC_CCIPR_FDCANSEL_HSE)
+#    define STM32_FDCAN_FREQUENCY  (STM32_HSE_FREQUENCY)
+#  else
+#    error For now FDCAN supported only if HSE enabled
+#  endif
+#endif
+
 /* LED definitions **********************************************************/
 
 /* The NUCLEO-G431RB has four user LEDs.
@@ -328,6 +337,11 @@
 #define GPIO_TIM1_CH3OUT  GPIO_TIM1_CH3OUT_1  /* PA10 */
 #define GPIO_TIM1_CH3NOUT GPIO_TIM1_CH3NOUT_1 /* PB1 */
 #define GPIO_TIM1_CH4OUT  GPIO_TIM1_CH4OUT_2  /* PC3 */
+
+/* CAN configuration ********************************************************/
+
+#define GPIO_FDCAN1_RX GPIO_FDCAN1_RX_2 /* PB8 */
+#define GPIO_FDCAN1_TX GPIO_FDCAN1_TX_2 /* PB9 */
 
 /* DMA channels *************************************************************/
 
