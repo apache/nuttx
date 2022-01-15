@@ -247,6 +247,15 @@
 #define BOARD_TIM17_FREQUENCY  (STM32_PCLK2_FREQUENCY)
 #define BOARD_TIM20_FREQUENCY  (STM32_PCLK2_FREQUENCY)
 
+#ifdef CONFIG_STM32_FDCAN
+#  ifdef CONFIG_BOARD_STM32_BG431BESC1_USE_HSE
+#    define STM32_CCIPR_FDCANSRC   (RCC_CCIPR_FDCANSEL_HSE)
+#    define STM32_FDCAN_FREQUENCY  (STM32_HSE_FREQUENCY)
+#  else
+#    error For now FDCAN supported only if HSE enabled
+#  endif
+#endif
+
 /* LED definitions **********************************************************/
 
 /* The B-G431B-ESC1 has four user LEDs.
@@ -332,5 +341,10 @@
 
 #define DMACHAN_USART2_TX DMAMAP_DMA12_USART2TX_0 /* DMA1 */
 #define DMACHAN_USART2_RX DMAMAP_DMA12_USART2RX_0 /* DMA1 */
+
+/* CAN configuration ********************************************************/
+
+#define GPIO_FDCAN1_RX GPIO_FDCAN1_RX_1 /* PA11 */
+#define GPIO_FDCAN1_TX GPIO_FDCAN1_TX_2 /* PB9 */
 
 #endif /* __BOARDS_ARM_STM32_B_G431B_ESC1_INCLUDE_BOARD_H */
