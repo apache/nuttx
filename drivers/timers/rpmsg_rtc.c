@@ -184,8 +184,15 @@ static int rpmsg_rtc_server_rdalarm(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
               FAR const struct lower_setperiodic_s *alarminfo);
 
-static int rpmsg_rtc_server_cancelperiodic
-              (FAR struct rtc_lowerhalf_s *lower, int alarmid);
+static int rpmsg_rtc_server_cancelperiodic(
+              FAR struct rtc_lowerhalf_s *lower, int alarmid);
+#endif
+#ifdef CONFIG_RTC_IOCTL
+static int rpmsg_rtc_server_ioctl(FAR struct rtc_lowerhalf_s *lower,
+              int cmd, unsigned long arg);
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int rpmsg_rtc_server_destroy(FAR struct rtc_lowerhalf_s *lower);
 #endif
 #endif
 
@@ -221,6 +228,12 @@ static struct rtc_ops_s g_rpmsg_rtc_server_ops =
 #ifdef CONFIG_RTC_PERIODIC
   rpmsg_rtc_server_setperiodic,
   rpmsg_rtc_server_cancelperiodic,
+#endif
+#ifdef CONFIG_RTC_IOCTL
+  rpmsg_rtc_server_ioctl,
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  rpmsg_rtc_server_destroy,
 #endif
 };
 #endif
@@ -535,13 +548,52 @@ static int rpmsg_rtc_server_setperiodic(FAR struct rtc_lowerhalf_s *lower,
   return server->lower->ops->setperiodic(server->lower, alarminfo);
 }
 
-static int rpmsg_rtc_server_cancelperiodic
-                     (FAR struct rtc_lowerhalf_s *lower, int alarmid)
+static int rpmsg_rtc_server_cancelperiodic(
+                     FAR struct rtc_lowerhalf_s *lower, int alarmid)
 {
   FAR struct rpmsg_rtc_server_s *server =
                          (FAR struct rpmsg_rtc_server_s *)lower;
 
   return server->lower->ops->cancelperiodic(server->lower, alarmid);
+}
+#endif
+
+#ifdef CONFIG_RTC_IOCTL
+static int rpmsg_rtc_server_ioctl(FAR struct rtc_lowerhalf_s *lower,
+              int cmd, unsigned long arg)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+
+  return server->lower->ops->ioctl(server->lower, cmd, arg);
+}
+#endif
+
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int rpmsg_rtc_server_destroy(FAR struct rtc_lowerhalf_s *lower)
+{
+  FAR struct rpmsg_rtc_server_s *server =
+                         (FAR struct rpmsg_rtc_server_s *)lower;
+  FAR struct rpmsg_rtc_client_s *client;
+  FAR struct list_node *node;
+  FAR struct list_node *temp;
+  int ret;
+
+  ret = server->lower->ops->destroy(server->lower);
+  if (ret >= 0)
+    {
+      list_for_every_safe(&server->list, node, temp)
+        {
+          client = (FAR struct rpmsg_rtc_client_s *)node;
+          list_delete(&client->node);
+          rpmsg_destroy_ept(&client->ept);
+          kmm_free(client);
+        }
+
+      kmm_free(server);
+    }
+
+  return ret;
 }
 #endif
 
