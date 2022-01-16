@@ -196,31 +196,31 @@ static int rpmsg_rtc_server_cancelperiodic
 #ifndef CONFIG_RTC_RPMSG_SERVER
 static const struct rtc_ops_s g_rpmsg_rtc_ops =
 {
-  .rdtime      = rpmsg_rtc_rdtime,
-  .settime     = rpmsg_rtc_settime,
-  .havesettime = rpmsg_rtc_havesettime,
+  rpmsg_rtc_rdtime,
+  rpmsg_rtc_settime,
+  rpmsg_rtc_havesettime,
 #ifdef CONFIG_RTC_ALARM
-  .setalarm    = rpmsg_rtc_setalarm,
-  .setrelative = rpmsg_rtc_setrelative,
-  .cancelalarm = rpmsg_rtc_cancelalarm,
-  .rdalarm     = rpmsg_rtc_rdalarm,
+  rpmsg_rtc_setalarm,
+  rpmsg_rtc_setrelative,
+  rpmsg_rtc_cancelalarm,
+  rpmsg_rtc_rdalarm,
 #endif
 };
 #else
 static struct rtc_ops_s g_rpmsg_rtc_server_ops =
 {
-  .rdtime      = rpmsg_rtc_server_rdtime,
-  .settime     = rpmsg_rtc_server_settime,
-  .havesettime = rpmsg_rtc_server_havesettime,
+  rpmsg_rtc_server_rdtime,
+  rpmsg_rtc_server_settime,
+  rpmsg_rtc_server_havesettime,
 #ifdef CONFIG_RTC_ALARM
-  .setalarm    = rpmsg_rtc_server_setalarm,
-  .setrelative = rpmsg_rtc_server_setrelative,
-  .cancelalarm = rpmsg_rtc_server_cancelalarm,
-  .rdalarm     = rpmsg_rtc_server_rdalarm,
+  rpmsg_rtc_server_setalarm,
+  rpmsg_rtc_server_setrelative,
+  rpmsg_rtc_server_cancelalarm,
+  rpmsg_rtc_server_rdalarm,
 #endif
 #ifdef CONFIG_RTC_PERIODIC
-  .setperiodic    = rpmsg_rtc_server_setperiodic,
-  .cancelperiodic = rpmsg_rtc_server_cancelperiodic,
+  rpmsg_rtc_server_setperiodic,
+  rpmsg_rtc_server_cancelperiodic,
 #endif
 };
 #endif
@@ -365,11 +365,10 @@ static int rpmsg_rtc_rdtime(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_settime(FAR struct rtc_lowerhalf_s *lower,
                              FAR const struct rtc_time *rtctime)
 {
-  struct rpmsg_rtc_set_s msg =
-  {
-    .sec  = timegm((FAR struct tm *)rtctime),
-    .nsec = rtctime->tm_nsec,
-  };
+  struct rpmsg_rtc_set_s msg;
+
+  msg.sec = timegm((FAR struct tm *)rtctime);
+  msg.nsec = rtctime->tm_nsec;
 
   return rpmsg_rtc_send_recv((FAR struct rpmsg_rtc_lowerhalf_s *)lower,
           RPMSG_RTC_SET, (struct rpmsg_rtc_header_s *)&msg, sizeof(msg));
@@ -386,14 +385,12 @@ static int rpmsg_rtc_setalarm(FAR struct rtc_lowerhalf_s *lower_,
 {
   FAR struct rpmsg_rtc_lowerhalf_s *lower =
     (FAR struct rpmsg_rtc_lowerhalf_s *)lower_;
-  struct rpmsg_rtc_alarm_set_s msg =
-  {
-    .sec  = timegm((FAR struct tm *)&alarminfo->time),
-    .nsec = alarminfo->time.tm_nsec,
-    .id   = alarminfo->id,
-  };
-
+  struct rpmsg_rtc_alarm_set_s msg;
   int ret;
+
+  msg.id = alarminfo->id;
+  msg.sec = timegm((FAR struct tm *)&alarminfo->time);
+  msg.nsec = alarminfo->time.tm_nsec;
 
   ret = rpmsg_rtc_send_recv(lower, RPMSG_RTC_ALARM_SET,
           (struct rpmsg_rtc_header_s *)&msg, sizeof(msg));
@@ -410,13 +407,11 @@ rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
                       FAR const struct lower_setrelative_s *relinfo)
 {
   struct lower_setalarm_s alarminfo =
-  {
-    .id   = relinfo->id,
-    .cb   = relinfo->cb,
-    .priv = relinfo->priv,
-  };
-
   time_t time;
+
+  alarminfo.id = relinfo->id;
+  alarminfo.cb = relinfo->cb;
+  alarminfo.priv = relinfo->priv;
 
   rpmsg_rtc_rdtime(lower, &alarminfo.time);
   time = timegm((FAR struct tm *)&alarminfo.time);
@@ -429,11 +424,9 @@ rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
 static int rpmsg_rtc_cancelalarm(FAR struct rtc_lowerhalf_s *lower,
                                  int alarmid)
 {
-  struct rpmsg_rtc_alarm_cancel_s msg =
-  {
-    .id = alarmid,
-  };
+  struct rpmsg_rtc_alarm_cancel_s msg;
 
+  msg.id = alarmid;
   return rpmsg_rtc_send_recv((FAR struct rpmsg_rtc_lowerhalf_s *)lower,
           RPMSG_RTC_ALARM_CANCEL, (struct rpmsg_rtc_header_s *)&msg,
           sizeof(msg));
@@ -569,11 +562,10 @@ static void rpmsg_rtc_server_ns_unbind(FAR struct rpmsg_endpoint *ept)
 static void rpmsg_rtc_server_alarm_cb(FAR void *priv, int alarmid)
 {
   FAR struct rpmsg_rtc_client_s *client = priv;
-  struct rpmsg_rtc_alarm_fire_s msg =
-  {
-    .header.command = RPMSG_RTC_ALARM_FIRE,
-    .id = alarmid,
-  };
+  struct rpmsg_rtc_alarm_fire_s msg;
+
+  msg.header.command = RPMSG_RTC_ALARM_FIRE;
+  msg.id = alarmid;
 
   rpmsg_send(&client->ept, &msg, sizeof(msg));
 }
@@ -620,12 +612,11 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
                                             struct rpmsg_rtc_client_s, ept);
         FAR struct rpmsg_rtc_alarm_set_s *msg = data;
         time_t time = msg->sec;
-        struct lower_setalarm_s alarminfo =
-        {
-          .id = msg->id,
-          .cb = rpmsg_rtc_server_alarm_cb,
-          .priv = client
-        };
+        struct lower_setalarm_s alarminfo;
+
+        alarminfo.id = msg->id;
+        alarminfo.cb = rpmsg_rtc_server_alarm_cb;
+        alarminfo.priv = client;
 
         gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
         alarminfo.time.tm_nsec = msg->nsec;
