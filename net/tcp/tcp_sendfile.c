@@ -495,6 +495,9 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    */
 
   net_lock();
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->sendfile = true;
+#endif
   memset(&state, 0, sizeof(struct sendfile_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -574,6 +577,9 @@ errout_datacb:
 
 errout_locked:
   nxsem_destroy(&state.snd_sem);
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->sendfile = false;
+#endif
   net_unlock();
 
   /* Return the current file position */

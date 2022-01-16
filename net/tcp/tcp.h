@@ -287,6 +287,10 @@ struct tcp_conn_s
   uint8_t    keepretries; /* Number of retries attempted */
 #endif
 
+#if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  bool       sendfile;    /* True if sendfile operation is in progress */
+#endif
+
   /* connevents is a list of callbacks for each socket the uses this
    * connection (there can be more that one in the event that the the socket
    * was dup'ed).  It is used with the network monitor to handle
