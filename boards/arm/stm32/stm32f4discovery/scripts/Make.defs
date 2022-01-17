@@ -50,9 +50,6 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
 else
   ARCHCFLAGS += -funwind-tables
   ARCHCXXFLAGS += -fno-rtti -funwind-tables
-  ifneq ($(CONFIG_DEBUG_NOOPT),y)
-    ARCHOPTIMIZATION += -fno-strength-reduce
-  endif
 
 endif
 

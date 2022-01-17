@@ -43,7 +43,7 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 ifneq ($(CONFIG_ARMV8M_STACKCHECK),y)
   #ARCHOPTIMIZATION += -flto -fuse-linker-plugin

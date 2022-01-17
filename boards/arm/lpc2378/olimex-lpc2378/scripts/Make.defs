@@ -70,7 +70,7 @@ ifeq ("${CONFIG_DEBUG_FEATURES}","y")
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
 ifeq ($(OLDGCC),n)
