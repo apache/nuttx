@@ -66,14 +66,14 @@
  ****************************************************************************/
 
 #define IPv4BUF \
-  ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+  ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define IPv6BUF \
-  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 #define UDPIPv4BUF \
-  ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+  ((FAR struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
 #define UDPIPv6BUF \
-  ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+  ((FAR struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Public Functions

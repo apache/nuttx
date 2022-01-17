@@ -451,7 +451,7 @@ typedef CODE int (*devif_poll_callback_t)(FAR struct net_driver_s *dev);
  * Ethernet, you will need to call the network ARP code before calling
  * this function:
  *
- *     #define BUF ((struct eth_hdr_s *)&dev->d_buf[0])
+ *     #define BUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
  *     dev->d_len = ethernet_devicedrver_poll();
  *     if (dev->d_len > 0)
  *       {

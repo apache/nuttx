@@ -255,7 +255,7 @@ extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define ETHBUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define ETHBUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types

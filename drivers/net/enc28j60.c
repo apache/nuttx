@@ -181,7 +181,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /* Debug ********************************************************************/
 

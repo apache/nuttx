@@ -281,7 +281,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->dm_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dm_dev.d_buf)
 
 /****************************************************************************
  * Private Types

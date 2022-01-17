@@ -607,7 +607,7 @@
  * header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -3690,7 +3690,7 @@ static int stm32_ethreset(FAR struct stm32_ethmac_s *priv)
   while (((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0) &&
          retries > 0)
     {
-      retries --;
+      retries--;
       up_mdelay(10);
     }
 

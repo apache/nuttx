@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /* RFC 1812:
  * 4.3.2.3, Original Message Header
@@ -93,7 +93,7 @@ void icmp_reply(FAR struct net_driver_s *dev, int type, int code)
 {
   int ipicmplen = IPv4_HDRLEN + sizeof(struct icmp_hdr_s);
   FAR struct ipv4_hdr_s *ipv4 = IPv4BUF;
-  FAR struct icmp_hdr_s *icmp = (FAR void *)(ipv4 + 1);
+  FAR struct icmp_hdr_s *icmp = (FAR struct icmp_hdr_s *)(ipv4 + 1);
   uint16_t datalen;
 #ifdef CONFIG_NET_BROADCAST
   const in_addr_t bcast = INADDR_BROADCAST;

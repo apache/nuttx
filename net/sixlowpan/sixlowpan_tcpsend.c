@@ -52,7 +52,7 @@
 
 /* Buffer access helpers */
 
-#define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
+#define TCPBUF(dev) ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
 
 /****************************************************************************
  * Pre-processor Definitions

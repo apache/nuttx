@@ -198,7 +198,7 @@
  * header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /* PHY return definitions */
 
@@ -3646,7 +3646,7 @@ static int rx65n_ethreset(FAR struct rx65n_ethmac_s *priv)
   while (((rx65n_getreg(RX65N_ETHD_EDMR) & ETHD_EDMR_SWR) != 0) &&
          retries > 0)
     {
-      retries --;
+      retries--;
       up_mdelay(10);
     }
 
@@ -3703,7 +3703,7 @@ static int rx65n_macconfig(FAR struct rx65n_ethmac_s *priv)
   while (((rx65n_getreg(RX65N_ETHD_EDMR) & ETHD_EDMR_SWR) != 0) &&
          retries > 0)
     {
-      retries --;
+      retries--;
       up_mdelay(10);
     }
 

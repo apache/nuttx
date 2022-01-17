@@ -239,7 +239,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 #define S32K1XX_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE)
 

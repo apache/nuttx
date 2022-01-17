@@ -2271,7 +2271,7 @@ static void cdcmbim_receive(struct usbhost_cdcmbim_s *priv,
   priv->netdev.d_buf = buf;
   priv->netdev.d_len = len;
 
-  switch (((struct ipv4_hdr_s *)buf)->vhl & IP_VERSION_MASK)
+  switch (((FAR struct ipv4_hdr_s *)buf)->vhl & IP_VERSION_MASK)
     {
 #ifdef CONFIG_NET_IPv4
     case IPv4_VERSION:
