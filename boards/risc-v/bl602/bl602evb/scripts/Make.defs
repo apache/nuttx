@@ -45,8 +45,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS += -mno-relax
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fno-omit-frame-pointer
-ARCHCXXFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -fno-omit-frame-pointer -fno-exceptions -fcheck-new -std=c++17 -D__NuttX__ -pipe -nostdinc++
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer
+ARCHCXXFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer -fno-exceptions -fcheck-new -std=c++17 -D__NuttX__ -pipe -nostdinc++
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
