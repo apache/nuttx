@@ -390,7 +390,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure.  May be NULL if the even is not related to a TCP
+ *     port structure. It can be NULL if the event is not related to a TCP
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
@@ -416,7 +416,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, FAR void *pvconn,
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure.  May be NULL if the even is not related to a TCP
+ *     port structure. It can be NULL if the event is not related to a TCP
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *
