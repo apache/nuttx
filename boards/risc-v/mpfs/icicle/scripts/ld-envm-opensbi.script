@@ -59,7 +59,7 @@ SECTIONS
 
     .text : {
         _stext = ABSOLUTE(.);
-        *(.vectors)
+        mpfs_head.o
         *(.text .text.*)
         *(.f-ixup)
         *(.gnu.warning)
