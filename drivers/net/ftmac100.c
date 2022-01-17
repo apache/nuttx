@@ -95,7 +95,7 @@
  * header.
  */
 
-#define BUF ((struct eth_hdr_s *)priv->ft_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->ft_dev.d_buf)
 
 /* RX/TX buffer alignment */
 

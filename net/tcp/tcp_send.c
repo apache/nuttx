@@ -66,11 +66,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF    ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF    ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF    ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF    ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
-#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define TCPIPv4BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Functions
@@ -649,7 +649,7 @@ uint16_t tcp_rx_mss(FAR struct net_driver_s *dev)
 void tcp_synack(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                 uint8_t ack)
 {
-  struct tcp_hdr_s *tcp;
+  FAR struct tcp_hdr_s *tcp;
   uint16_t tcp_mss;
   int16_t optlen = 0;
 
