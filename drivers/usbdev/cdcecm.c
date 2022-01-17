@@ -120,8 +120,8 @@ struct cdcecm_driver_s
   FAR struct usbdev_ep_s      *epbulkout;   /* Bulk OUT endpoint */
   uint8_t                      config;      /* Selected configuration number */
 
-  uint8_t                      pktbuf[CONFIG_NET_ETH_PKTSIZE +
-                                      CONFIG_NET_GUARDSIZE];
+  uint16_t                     pktbuf[(CONFIG_NET_ETH_PKTSIZE +
+                                       CONFIG_NET_GUARDSIZE + 1) / 2];
 
   struct usbdev_req_s         *rdreq;       /* Single read request */
   bool                         rxpending;   /* Packet available in rdreq */
@@ -2095,7 +2095,7 @@ static int cdcecm_classobject(int minor,
 
   /* Network device initialization */
 
-  self->dev.d_buf     = self->pktbuf;
+  self->dev.d_buf     = (uint8_t *)self->pktbuf;
   self->dev.d_ifup    = cdcecm_ifup;     /* I/F up (new IP address) callback */
   self->dev.d_ifdown  = cdcecm_ifdown;   /* I/F down callback */
   self->dev.d_txavail = cdcecm_txavail;  /* New TX data callback */
