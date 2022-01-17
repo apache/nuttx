@@ -50,7 +50,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #ifdef CONFIG_NET_TCP
 
 #include <stdint.h>
@@ -163,7 +164,7 @@
 
 /* TCP header */
 
-struct tcp_hdr_s
+begin_packed_struct struct tcp_hdr_s
 {
   uint16_t srcport;
   uint16_t destport;
@@ -175,7 +176,7 @@ struct tcp_hdr_s
   uint16_t tcpchksum;
   uint8_t  urgp[2];
   uint8_t  optdata[0];
-};
+} end_packed_struct;
 
 /* The structure holding the TCP/IP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.

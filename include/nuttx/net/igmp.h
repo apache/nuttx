@@ -48,7 +48,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -85,7 +85,7 @@
 
 /* Convenience [re-]definition of the IPv4 header with the router alert */
 
-struct igmp_iphdr_s
+begin_packed_struct struct igmp_iphdr_s
 {
   /* IPv4 IP header */
 
@@ -103,7 +103,7 @@ struct igmp_iphdr_s
   /* Router Alert IP header option */
 
   uint16_t ra[2];            /* RFC 2113 */
-};
+} end_packed_struct;
 
 /* IGMPv2 packet structure as defined by RFC 2236.
  *
@@ -113,7 +113,7 @@ struct igmp_iphdr_s
  * (0x11); in other messages it is set to 0 and ignored by the receiver.
  */
 
-struct igmp_hdr_s
+begin_packed_struct struct igmp_hdr_s
 {
   /* IGMPv2 header:
    *
@@ -130,7 +130,7 @@ struct igmp_hdr_s
   uint8_t  maxresp;          /* 8-bit Max response time */
   uint16_t chksum;           /* 16-bit Checksum */
   uint16_t grpaddr[2];       /* 32-bit Group address */
-};
+} end_packed_struct;
 
 #ifdef CONFIG_NET_STATISTICS
 struct igmp_stats_s

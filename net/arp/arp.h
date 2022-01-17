@@ -35,7 +35,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <queue.h>
@@ -86,7 +86,7 @@
 
 /* ARP header -- Size 28 bytes */
 
-struct arp_hdr_s
+begin_packed_struct struct arp_hdr_s
 {
   uint16_t ah_hwtype;        /* 16-bit Hardware type (Ethernet=0x001) */
   uint16_t ah_protocol;      /* 16-bit Protocol type (IP=0x0800) */
@@ -97,11 +97,11 @@ struct arp_hdr_s
   uint16_t ah_sipaddr[2];    /* 32-bit Sender IP address */
   uint8_t  ah_dhwaddr[6];    /* 48-bit Target hardware address */
   uint16_t ah_dipaddr[2];    /* 32-bit Target IP address */
-};
+} end_packed_struct;
 
 /* IP header -- Size 20 or 24 bytes */
 
-struct arp_iphdr_s
+begin_packed_struct struct arp_iphdr_s
 {
   uint8_t  eh_vhl;           /*  8-bit Version (4) and header length (5 or 6) */
   uint8_t  eh_tos;           /*  8-bit Type of service (e.g., 6=TCP) */
@@ -114,7 +114,7 @@ struct arp_iphdr_s
   uint16_t eh_srcipaddr[2];  /* 32-bit Source IP address */
   uint16_t eh_destipaddr[2]; /* 32-bit Destination IP address */
   uint16_t eh_ipoption[2];   /* (optional) */
-};
+} end_packed_struct;
 
 #ifdef CONFIG_NET_ARP_SEND
 /* This structure holds the state of the send operation until it can be

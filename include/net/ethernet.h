@@ -25,6 +25,8 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/compiler.h>
+
 #include <stdint.h>
 
 /****************************************************************************
@@ -37,17 +39,17 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct ether_addr
+begin_packed_struct struct ether_addr
 {
   uint8_t ether_addr_octet[6];            /* 48-bit Ethernet address */
-};
+} end_packed_struct;
 
-struct ether_header
+begin_packed_struct struct ether_header
 {
   uint8_t  ether_dhost[ETHER_ADDR_LEN];   /* Destination Ethernet address */
   uint8_t  ether_shost[ETHER_ADDR_LEN];   /* Source Ethernet address */
   uint16_t ether_type;                    /* Ethernet packet type */
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Public Function Prototypes

@@ -46,7 +46,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 
@@ -147,7 +147,7 @@
 
 /* The ICMPv6 header */
 
-struct icmpv6_hdr_s
+begin_packed_struct struct icmpv6_hdr_s
 {
   uint8_t  type;             /* Defines the format of the ICMP message */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -158,11 +158,11 @@ struct icmpv6_hdr_s
    */
 
   uint16_t data[2];
-};
+} end_packed_struct;
 
 /* The ICMPv6 and IPv6 headers */
 
-struct icmpv6_iphdr_s
+begin_packed_struct struct icmpv6_iphdr_s
 {
   /* IPv6 Ip header */
 
@@ -184,11 +184,11 @@ struct icmpv6_iphdr_s
   /* Data following the ICMP header contains the data specific to the
    * message type indicated by the Type and Code fields.
    */
-};
+} end_packed_struct;
 
 /* This the message format for the ICMPv6 Neighbor Solicitation message */
 
-struct icmpv6_neighbor_solicit_s
+begin_packed_struct struct icmpv6_neighbor_solicit_s
 {
   uint8_t  type;             /* Message Type: ICMPv6_NEIGHBOR_SOLICIT */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -199,14 +199,14 @@ struct icmpv6_neighbor_solicit_s
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
   uint8_t  optlen;           /* Option length: 1 octet */
   uint8_t  srclladdr[6];     /* Options: Source link layer address */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_NEIGHBOR_SOLICIT_S(n) \
   (sizeof(struct icmpv6_neighbor_solicit_s) + ICMPv6_OPT_SIZE(n) - 8)
 
 /* This the message format for the ICMPv6 Neighbor Advertisement message */
 
-struct icmpv6_neighbor_advertise_s
+begin_packed_struct struct icmpv6_neighbor_advertise_s
 {
   uint8_t  type;             /* Message Type: ICMPv6_NEIGHBOR_ADVERTISE */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -218,14 +218,14 @@ struct icmpv6_neighbor_advertise_s
   uint8_t  optlen;           /* Option length in octets */
   uint8_t  tgtlladdr[6];     /* Options: Target link layer address */
                              /* Actual size determined by optlen */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_NEIGHBOR_ADVERTISE_S(n) \
   (sizeof(struct icmpv6_neighbor_advertise_s) + ICMPv6_OPT_SIZE(n) - 8)
 
 /* This the message format for the ICMPv6 Router Solicitation message */
 
-struct icmpv6_router_solicit_s
+begin_packed_struct struct icmpv6_router_solicit_s
 {
   uint8_t  type;             /* Message Type: ICMPV6_ROUTER_SOLICIT */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -235,7 +235,7 @@ struct icmpv6_router_solicit_s
   uint8_t  opttype;          /* Option Type: ICMPv6_OPT_SRCLLADDR */
   uint8_t  optlen;           /* Option length in octets */
   uint8_t  srclladdr[6];     /* Options: Source link layer address */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_ROUTER_SOLICIT_S(n) \
   (sizeof(struct icmpv6_router_solicit_s) + ICMPv6_OPT_SIZE(n) - 8)
@@ -245,7 +245,7 @@ struct icmpv6_router_solicit_s
  *                      ICMPv6_OPT_PREFIX
  */
 
-struct icmpv6_router_advertise_s
+begin_packed_struct struct icmpv6_router_advertise_s
 {
   uint8_t  type;             /* Message Type: ICMPV6_ROUTER_ADVERTISE */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -256,14 +256,14 @@ struct icmpv6_router_advertise_s
   uint32_t reachable;        /* Reachable time */
   uint32_t retrans;          /* Retransmission timer */
                              /* Options begin here */
-};
+} end_packed_struct;
 
 #define ICMPv6_RADV_MINLEN    (16)
 #define ICMPv6_RADV_OPTLEN(n) ((n) - ICMPv6_RADV_MINLEN)
 
 /* This the message format for the ICMPv6 Echo Request message */
 
-struct icmpv6_echo_request_s
+begin_packed_struct struct icmpv6_echo_request_s
 {
   uint8_t  type;             /* Message Type: ICMPv6_ECHO_REQUEST */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -271,14 +271,14 @@ struct icmpv6_echo_request_s
   uint16_t id;               /* Identifier */
   uint16_t seqno;            /* Sequence Number */
   uint8_t  data[1];          /* Data follows */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_ECHO_REQUEST_S(n) \
   (sizeof(struct icmpv6_echo_request_s) - 1 + (n))
 
 /* This the message format for the ICMPv6 Echo Reply message */
 
-struct icmpv6_echo_reply_s
+begin_packed_struct struct icmpv6_echo_reply_s
 {
   uint8_t  type;             /* Message Type: ICMPv6_ECHO_REQUEST */
   uint8_t  code;             /* Further qualifies the ICMP messages */
@@ -286,39 +286,39 @@ struct icmpv6_echo_reply_s
   uint16_t id;               /* Identifier */
   uint16_t seqno;            /* Sequence Number */
   uint8_t  data[1];          /* Data follows */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_ECHO_REPLY_S(n) \
   (sizeof(struct icmpv6_echo_reply_s) - 1 + (n))
 
 /* Option types */
 
-struct icmpv6_generic_s
+begin_packed_struct struct icmpv6_generic_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type */
   uint8_t  optlen;           /* "   " ": Option length (in octets) */
   uint16_t pad;              /* "   " ": The rest depends on the option */
-};
+} end_packed_struct;
 
-struct icmpv6_srclladdr_s
+begin_packed_struct struct icmpv6_srclladdr_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_SRCLLADDR */
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
   uint8_t  srclladdr[6];     /* "   " ": Options: Source link layer address */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_SRCLLADDR_S(n) ICMPv6_OPT_SIZE(n)
 
-struct icmpv6_tgrlladdr_s
+begin_packed_struct struct icmpv6_tgrlladdr_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_TGTLLADDR */
   uint8_t  optlen;           /* "   " ": Option length in octets */
   uint8_t  tgtlladdr[6];     /* "   " ": Options: Target link layer address */
-};
+} end_packed_struct;
 
 #define SIZEOF_ICMPV6_TGRLLADDR_S(n) ICMPv6_OPT_SIZE(n)
 
-struct icmpv6_prefixinfo_s
+begin_packed_struct struct icmpv6_prefixinfo_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_PREFIX */
   uint8_t  optlen;           /* "   " ": Option length: 4 octets */
@@ -328,23 +328,23 @@ struct icmpv6_prefixinfo_s
   uint32_t plifetime;        /* Octet 2: Preferred lifetime */
   uint16_t reserved[2];      /* "   " ": Reserved */
   uint16_t prefix[8];        /* Octets 3-4: Prefix */
-};
+} end_packed_struct;
 
-struct icmpv6_redirect_s
+begin_packed_struct struct icmpv6_redirect_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_REDIRECT */
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
   uint16_t reserved[3];      /* "   " ": Reserved */
   uint8_t  header[1];        /* Octets 2-: Beginning of the IP header */
-};
+} end_packed_struct;
 
-struct icmpv6_mtu_s
+begin_packed_struct struct icmpv6_mtu_s
 {
   uint8_t  opttype;          /* Octet 1: Option Type: ICMPv6_OPT_MTU */
   uint8_t  optlen;           /* "   " ": Option length: 1 octet */
   uint16_t reserved;         /* "   " ": Reserved */
   uint32_t mtu;              /* "   " ": MTU */
-};
+} end_packed_struct;
 
 /* The structure holding the ICMP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.

@@ -45,7 +45,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 
@@ -118,7 +118,7 @@
  * Public Type Definitions
  ****************************************************************************/
 
-struct icmp_hdr_s
+begin_packed_struct struct icmp_hdr_s
 {
   /* ICMP header */
 
@@ -143,7 +143,7 @@ struct icmp_hdr_s
 
       uint16_t data[2];
     };
-};
+} end_packed_struct;
 
 /* The structure holding the ICMP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.

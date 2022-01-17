@@ -49,7 +49,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 
@@ -78,13 +78,13 @@
 
 /* The UDP header */
 
-struct udp_hdr_s
+begin_packed_struct struct udp_hdr_s
 {
   uint16_t srcport;
   uint16_t destport;
   uint16_t udplen;
   uint16_t udpchksum;
-};
+} end_packed_struct;
 
 /* The structure holding the UDP statistics that are gathered if
  * CONFIG_NET_STATISTICS is defined.

@@ -59,7 +59,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -145,31 +145,31 @@
 #ifdef CONFIG_NET_TCP
 /* IPv6 + TCP header.  Cast compatible based on IPv6 protocol field. */
 
-struct ipv6tcp_hdr_s
+begin_packed_struct struct ipv6tcp_hdr_s
 {
   struct ipv6_hdr_s     ipv6;
   struct tcp_hdr_s      tcp;
-};
+} end_packed_struct;
 #endif
 
 #ifdef CONFIG_NET_UDP
 /* IPv6 + UDP header */
 
-struct ipv6udp_hdr_s
+begin_packed_struct struct ipv6udp_hdr_s
 {
   struct ipv6_hdr_s     ipv6;
   struct udp_hdr_s      udp;
-};
+} end_packed_struct;
 #endif
 
 #ifdef CONFIG_NET_ICMPv6
 /* IPv6 + ICMPv6 header */
 
-struct ipv6icmp_hdr_s
+begin_packed_struct struct ipv6icmp_hdr_s
 {
   struct ipv6_hdr_s     ipv6;
   struct icmpv6_iphdr_s icmp;
-};
+} end_packed_struct;
 #endif
 
 #ifdef CONFIG_WIRELESS_IEEE802154

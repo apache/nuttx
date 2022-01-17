@@ -52,8 +52,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <stdint.h>
 #include <nuttx/config.h>
+
+#include <stdint.h>
+
 #include <nuttx/net/ethernet.h>
 
 /****************************************************************************

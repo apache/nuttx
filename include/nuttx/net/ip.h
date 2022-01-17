@@ -48,7 +48,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -151,7 +151,7 @@ union ip_binding_u
 #ifdef CONFIG_NET_IPv4
 /* The IPv4 header */
 
-struct ipv4_hdr_s
+begin_packed_struct struct ipv4_hdr_s
 {
   uint8_t  vhl;              /*  8-bit Version (4) and header length (5 or 6) */
   uint8_t  tos;              /*  8-bit Type of service (e.g., 6=TCP) */
@@ -163,13 +163,13 @@ struct ipv4_hdr_s
   uint16_t ipchksum;         /* 16-bit Header checksum */
   uint16_t srcipaddr[2];     /* 32-bit Source IP address */
   uint16_t destipaddr[2];    /* 32-bit Destination IP address */
-};
+} end_packed_struct;
 #endif /* CONFIG_NET_IPv4 */
 
 #ifdef CONFIG_NET_IPv6
 /* The IPv6 header */
 
-struct ipv6_hdr_s
+begin_packed_struct struct ipv6_hdr_s
 {
   uint8_t  vtc;              /* Bits 0-3: version, bits 4-7: traffic class (MS) */
   uint8_t  tcf;              /* Bits 0-3: traffic class (LS), 4-bits: flow label (MS) */
@@ -179,7 +179,7 @@ struct ipv6_hdr_s
   uint8_t  ttl;              /*  8-bit Hop limit (like IPv4 TTL field) */
   net_ipv6addr_t srcipaddr;  /* 128-bit Source address */
   net_ipv6addr_t destipaddr; /* 128-bit Destination address */
-};
+} end_packed_struct;
 #endif /* CONFIG_NET_IPv6 */
 
 #ifdef CONFIG_NET_STATISTICS

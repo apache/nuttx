@@ -45,8 +45,10 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <stdint.h>
+
 #include <net/ethernet.h>
 
 /****************************************************************************
@@ -87,12 +89,12 @@
  * some compilers refuse to pack 6 byte structures.
  */
 
-struct eth_hdr_s
+begin_packed_struct struct eth_hdr_s
 {
   uint8_t  dest[6]; /* Ethernet destination address (6 bytes) */
   uint8_t  src[6];  /* Ethernet source address (6 bytes) */
   uint16_t type;    /* Type code (2 bytes) */
-};
+} end_packed_struct;
 
 /* IEEE 802.1Q adds a 32-bit field between the source MAC address and the
  * type fields of the original Ethernet header.  Two bytes are used for the
@@ -101,14 +103,14 @@ struct eth_hdr_s
  * VID.
  */
 
-struct eth_8021qhdr_s
+begin_packed_struct struct eth_8021qhdr_s
 {
   uint8_t  dest[6]; /* Ethernet destination address (6 bytes) */
   uint8_t  src[6];  /* Ethernet source address (6 bytes) */
   uint16_t tpid;    /* TCI: Tag protocol identifier (2 bytes) */
   uint16_t tci;     /* TCI: Tag control information: PCP, DEI, VID (2 bytes) */
   uint16_t type;    /* Type code (2 bytes) */
-};
+} end_packed_struct;
 
 /****************************************************************************
  * Public Data

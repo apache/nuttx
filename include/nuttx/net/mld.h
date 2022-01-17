@@ -26,7 +26,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
 #include <stdint.h>
 #include <queue.h>
 
@@ -249,7 +250,7 @@
  * All queries have the following format:
  */
 
-struct mld_mcast_listen_query_s
+begin_packed_struct struct mld_mcast_listen_query_s
 {
   /* The initial fields are common for MLDv1 and MLDv2 (24-bytes) */
 
@@ -267,7 +268,7 @@ struct mld_mcast_listen_query_s
   uint16_t nsources;         /* Number of sources that follow */
   net_ipv6addr_t srcaddr[1]; /* Array of source IPv6 address (actual size is
                               * nsources) */
-};
+} end_packed_struct;
 
 /* The actual size of the query structure depends on the number of sources */
 
@@ -282,7 +283,7 @@ struct mld_mcast_listen_query_s
  * Version 1 Multicast Listener Report (RFC 2710)
  */
 
-struct mld_mcast_listen_report_v1_s
+begin_packed_struct struct mld_mcast_listen_report_v1_s
 {
   uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_REPORT_V1 */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
@@ -290,13 +291,13 @@ struct mld_mcast_listen_report_v1_s
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   uint16_t reserved3;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t mcastaddr;  /* Multicast address */
-};
+} end_packed_struct;
 
 /* Version 2 Multicast Listener Report (RFC 3810). */
 
 /* This is the form of the address record used in the listener report */
 
-struct mld_mcast_addrec_v2_s
+begin_packed_struct struct mld_mcast_addrec_v2_s
 {
   uint8_t rectype;           /* Record type.  See definitions above. */
   uint8_t auxdatlen;         /* Auxiliary data length */
@@ -306,7 +307,7 @@ struct mld_mcast_addrec_v2_s
                               * nsources) */
 
   /* Auxiliary data may follow the list of address records. */
-};
+} end_packed_struct;
 
 /* The actual size of the query structure depends on the number of sources
  * as well as the size of any auxiliary data.
@@ -317,7 +318,7 @@ struct mld_mcast_addrec_v2_s
    sizeof(net_ipv6addr_t) * ((nsources) - 1) + \
    (auxdatlen))
 
-struct mld_mcast_listen_report_v2_s
+begin_packed_struct struct mld_mcast_listen_report_v2_s
 {
   uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_REPORT_V2 */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
@@ -328,7 +329,7 @@ struct mld_mcast_listen_report_v2_s
   /* List of multicast address records (actual size is naddrec) */
 
   struct mld_mcast_addrec_v2_s addrec[1];
-};
+} end_packed_struct;
 
 /* The actual size of the listener report depends on the sum of the
  * size of each variable length address record (addreclen).
@@ -341,7 +342,7 @@ struct mld_mcast_listen_report_v2_s
 
 /* Multicast Listener Done (RFC 2710) */
 
-struct mld_mcast_listen_done_s
+begin_packed_struct struct mld_mcast_listen_done_s
 {
   uint8_t  type;             /* Message Type: ICMPV6_MCAST_LISTEN_DONE */
   uint8_t  reserved1;        /* Reserved, must be zero on transmission */
@@ -349,7 +350,7 @@ struct mld_mcast_listen_done_s
   uint16_t reserved2;        /* Reserved, must be zero on transmission */
   uint16_t reserved3;        /* Reserved, must be zero on transmission */
   net_ipv6addr_t mcastaddr;  /* Multicast address */
-};
+} end_packed_struct;
 
 /* This structure represents the overall MLD state for a single network.
  * This structure in included within the net_driver_s structure.
