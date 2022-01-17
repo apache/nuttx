@@ -89,6 +89,12 @@
 #define ADDRENV_VBASE       (CONFIG_ARCH_DATA_VBASE)
 
 /****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern uintptr_t            g_kernel_mappings;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -185,6 +191,38 @@ static int create_spgtables(group_addrenv_t *addrenv)
   __DMB();
 
   return i;
+}
+
+/****************************************************************************
+ * Name: copy_kernel_mappings
+ *
+ * Description:
+ *   Copy kernel mappings to address environment. Expects that the user page
+ *   table does not contain any mappings yet (as they will be wiped).
+ *
+ * Input Parameters:
+ *   addrenv - Describes the address environment. The page tables must exist
+ *      at this point.
+ *
+ * Returned value:
+ *   OK on success, ERROR on failure
+ *
+ ****************************************************************************/
+
+static int copy_kernel_mappings(group_addrenv_t *addrenv)
+{
+  uintptr_t user_mappings = addrenv->spgtables[0];
+
+  /* Copy the L1 references */
+
+  if (user_mappings == 0)
+    {
+      return -EINVAL;
+    }
+
+  memcpy((void *)user_mappings, (void *)g_kernel_mappings, RV_MMU_PAGE_SIZE);
+
+  return OK;
 }
 
 /****************************************************************************
@@ -340,6 +378,16 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
   if (ret < 0)
     {
       serr("ERROR: Failed to create static page tables\n");
+      goto errout;
+    }
+
+  /* Map the kernel memory for the user */
+
+  ret = copy_kernel_mappings(addrenv);
+
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to copy kernel mappings to new environment");
       goto errout;
     }
 
