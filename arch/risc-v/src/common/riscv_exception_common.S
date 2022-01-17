@@ -43,6 +43,7 @@
 
   .section .text
   .global exception_common
+  .align  8
 
 exception_common:
 
