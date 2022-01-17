@@ -47,9 +47,6 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCXXFLAGS += -nostdlib -ffreestanding
 else
   ARCHCXXFLAGS += -fno-rtti
-  ifneq ($(CONFIG_DEBUG_NOOPT),y)
-    ARCHOPTIMIZATION += -fno-strength-reduce
-  endif
 endif
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

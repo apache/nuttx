@@ -33,7 +33,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += -Os -ffunction-sections -fdata-sections -fno-strict-aliasing
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -ffunction-sections -fdata-sections -fno-strict-aliasing
 endif
 
 ARCHCFLAGS = -fno-builtin -muse-rodata-section
