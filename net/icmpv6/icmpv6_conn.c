@@ -124,7 +124,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
             {
               for (ret = 0; ret < CONFIG_NET_ICMPv6_NCONNS; ret++)
                 {
-                  dq_addlast(&conn[i].node, &g_free_icmpv6_connections);
+                  dq_addlast(&conn[ret].node, &g_free_icmpv6_connections);
                 }
             }
         }
