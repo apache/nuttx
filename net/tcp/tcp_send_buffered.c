@@ -355,9 +355,38 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                                         FAR void *pvconn, FAR void *pvpriv,
                                         uint16_t flags)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  /* FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+   *
+   * Do not use pvconn argument to get the TCP connection pointer (the above
+   * commented line) because pvconn is normally NULL for some events like
+   * NETDEV_DOWN. Instead, the TCP connection pointer can be reliably
+   * obtained from the corresponding TCP socket.
+   */
+
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
+  FAR struct tcp_conn_s *conn;
   bool rexmit = false;
+
+  DEBUGASSERT(psock != NULL);
+
+  /* Get the TCP connection pointer reliably from
+   * the corresponding TCP socket.
+   */
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the one that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+
+  ninfo("flags: %04x\n", flags);
 
   /* Check for a loss of connection */
 
@@ -383,23 +412,11 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
       return flags;
     }
 
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the one that we are bound to.
-   */
-
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
-
-  ninfo("flags: %04x\n", flags);
-
   /* If this packet contains an acknowledgment, then update the count of
    * acknowledged bytes.
    */
 
-  if ((flags & TCP_ACKDATA) != 0)
+  else if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       FAR struct tcp_hdr_s *tcp;

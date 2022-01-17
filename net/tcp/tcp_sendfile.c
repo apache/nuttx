@@ -161,10 +161,43 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
                                       FAR void *pvconn, FAR void *pvpriv,
                                       uint16_t flags)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  /* FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+   *
+   * Do not use pvconn argument to get the TCP connection pointer (the above
+   * commented line) because pvconn is normally NULL for some events like
+   * NETDEV_DOWN. Instead, the TCP connection pointer can be reliably
+   * obtained from the corresponding TCP socket.
+   */
+
   FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
-  FAR struct socket *psock = pstate->snd_sock;
+  FAR struct socket *psock;
+  FAR struct tcp_conn_s *conn;
   int ret;
+
+  DEBUGASSERT(pstate != NULL);
+
+  psock = pstate->snd_sock;
+  DEBUGASSERT(psock != NULL);
+
+  /* Get the TCP connection pointer reliably from
+   * the corresponding TCP socket.
+   */
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+
+  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* Check for a loss of connection */
 
@@ -177,7 +210,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
         {
           /* Report not connected */
@@ -191,25 +223,11 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       goto end_wait;
     }
 
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
-   */
-
-  DEBUGASSERT(conn);
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
-
-  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
-        flags, pstate->snd_acked, pstate->snd_sent);
-
   /* If this packet contains an acknowledgement, then update the count of
    * acknowledged bytes.
    */
 
-  if ((flags & TCP_ACKDATA) != 0)
+  else if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_hdr_s *tcp;
 
@@ -362,6 +380,8 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 end_wait:
 
   /* Do not allow any further callbacks */
+
+  DEBUGASSERT(pstate->snd_cb != NULL);
 
   pstate->snd_cb->flags   = 0;
   pstate->snd_cb->priv    = NULL;
