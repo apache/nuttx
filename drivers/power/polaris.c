@@ -1085,6 +1085,7 @@ FAR struct battery_charger_dev_s *
                      FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct stwlc38_dev_s *priv;
+  struct polaris_chip_info chip_info;
   int ret;
 
   /* Initialize the STWLC38 device structure */
@@ -1102,6 +1103,12 @@ FAR struct battery_charger_dev_s *
     }
   else
     {
+      return NULL;
+    }
+
+  if (get_polaris_chip_info(priv, &chip_info) < OK)
+    {
+      baterr("[WLC] Error in reading polaris_chip_info\n");
       return NULL;
     }
 
