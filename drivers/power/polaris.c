@@ -865,7 +865,7 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
   uint16_t reg_value;
   uint8_t count = 5;
 
-  reg_value = (uint16_t)(value / 100 - 5);
+  reg_value = (uint16_t)((value << 6) / 25);
 
   while (count)
     {
@@ -1068,7 +1068,7 @@ static int stwlc38_init_interrupt(FAR struct stwlc38_dev_s *priv)
     }
 
   ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
-                        IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
+              IOEXPANDER_OPTION_INTCFG, (FAR void *)IOEXPANDER_VAL_FALLING);
   if (ret < 0)
     {
       baterr("Failed to set option: %d\n", ret);

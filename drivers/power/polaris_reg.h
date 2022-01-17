@@ -82,7 +82,7 @@
 #define WLC_RX_CTRL_ERR_REG           0x00A4  /* Length: 2, default: 0x00 */
 #define WLC_RX_RCVD_PWR_REG           0x00A6  /* Length: 2, default: 0x00 */
 #define WLC_RX_SIGNAL_STRENGTH_REG    0x00A8  /* Length: 1, default: 0x00 */
-#define WLC_RX_VOUT_SET_REG           0x00B2  /* Length: 2, default: 0x00 */
+#define WLC_RX_VOUT_SET_REG           0x00B1  /* Length: 2, default: 0x00 */
 #define WLC_RX_VRECT_ADJ_REG          0x00B4  /* Length: 1, default: 0x00 */
 #define WLC_RX_ILIM_SET_REG           0x00B5  /* Length: 1, default: 0x00 */
 #define WLC_RX_FOD_CUR_THRES1_REG     0x00B6  /* Length: 1, default: 0x00 */
