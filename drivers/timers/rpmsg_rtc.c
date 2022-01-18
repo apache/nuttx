@@ -624,7 +624,6 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
                                    FAR void *data, size_t len, uint32_t src,
                                    FAR void *priv)
 {
-  FAR struct rpmsg_rtc_server_s *server = priv;
   FAR struct rpmsg_rtc_header_s *header = data;
 
   switch (header->command)
@@ -634,8 +633,8 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         FAR struct rpmsg_rtc_get_s *msg = data;
         struct rtc_time rtctime;
 
-        header->result = server->lower->ops->rdtime(server->lower,
-                                                    &rtctime);
+        header->result = rpmsg_rtc_server_rdtime(priv, &rtctime);
+
         msg->sec = timegm((FAR struct tm *)&rtctime);
         msg->nsec = rtctime.tm_nsec;
         return rpmsg_send(ept, msg, sizeof(*msg));
@@ -649,8 +648,18 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 
         gmtime_r(&time, (FAR struct tm *)&rtctime);
         rtctime.tm_nsec = msg->nsec;
-        header->result = server->lower->ops->settime(server->lower,
-                                                     &rtctime);
+
+        header->result = rpmsg_rtc_server_settime(priv, &rtctime);
+        if (header->result >= 0)
+          {
+            struct timespec tp;
+
+            tp.tv_sec  = msg->sec;
+            tp.tv_nsec = msg->nsec;
+
+            clock_synchronize(&tp);
+          }
+
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 
@@ -669,16 +678,14 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
 
         gmtime_r(&time, (FAR struct tm *)&alarminfo.time);
         alarminfo.time.tm_nsec = msg->nsec;
-        header->result = server->lower->ops->setalarm(server->lower,
-                                                      &alarminfo);
+        header->result = rpmsg_rtc_server_setalarm(priv, &alarminfo);
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 
     case RPMSG_RTC_ALARM_CANCEL:
       {
         FAR struct rpmsg_rtc_alarm_cancel_s *msg = data;
-        header->result = server->lower->ops->cancelalarm(server->lower,
-                                                         msg->id);
+        header->result = rpmsg_rtc_server_cancelalarm(priv, msg->id);
         return rpmsg_send(ept, msg, sizeof(*msg));
       }
 #endif
