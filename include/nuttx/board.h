@@ -430,6 +430,23 @@ FAR void *board_composite_connect(int port, int configid);
 #endif
 
 /****************************************************************************
+ * Name:  board_usbdev_serialstr
+ *
+ * Description:
+ *   Use board unique serial number string to iSerialNumber field in the
+ *   device descriptor. This is for determining the board when multiple
+ *   boards on the same host.
+ *
+ * Returned Value:
+ *   The board unique serial number string.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_BOARD_USBDEV_SERIALSTR)
+FAR const char *board_usbdev_serialstr(void);
+#endif
+
+/****************************************************************************
  * Name: board_graphics_setup
  *
  * Description:
