@@ -41,15 +41,11 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 /* For the case of configurations with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
 volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-#else
-volatile uintptr_t *g_current_regs[1];
-#endif
 
 #ifdef CONFIG_SMP
 extern int riscv_pause_handler(int irq, void *c, void *arg);
@@ -83,11 +79,7 @@ void up_irqinitialize(void)
 
 #if defined(CONFIG_STACK_COLORATION) && CONFIG_ARCH_INTERRUPTSTACK > 15
   size_t intstack_size = 0;
-#ifndef CONFIG_SMP
-  intstack_size = (CONFIG_ARCH_INTERRUPTSTACK & ~15);
-#else
   intstack_size = ((CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS) & ~15);
-#endif
   riscv_stack_color((void *)&g_intstackalloc, intstack_size);
 #endif
 

@@ -75,15 +75,11 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 /* For the case of configurations with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#else
-volatile uint32_t *g_current_regs[1];
-#endif
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 /* In the SMP configuration, we will need two custom interrupt stacks.
