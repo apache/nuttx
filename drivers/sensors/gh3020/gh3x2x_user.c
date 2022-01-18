@@ -428,7 +428,7 @@ void Temp_drv_get_fifo_data(STTempRawdata temp_data_buffer[], GU16 *temp_buffer_
  */
 void GH3X2X_Log(GCHAR *log_string)
 {
-  //syslog(LOG_INFO, log_string);
+  //syslog(LOG_DEBUG, log_string);
 }
 #endif
 
@@ -647,7 +647,14 @@ void  GH3x2xHrAlgoExe(const STGh3x2xFrameInfo * const pstFrameInfo)
     {
         ppg_data.ppg_gr1_raw[i] = raw_temp[i];
         ppg_data.ppg_gr1_status[i] = status_temp[i];
-        ppg.ppg[i] = raw_temp[i];
+        if (raw_temp[i] > 0)
+        {
+            ppg.ppg[i] = (uint32_t)raw_temp[i];
+        }
+        else
+        {
+            ppg.ppg[i] = 0;
+        }
     }
     ppg.current = current_temp * 1000;
     gh3020_transdata(&ppg, GH3020_PPG0_SENSOR_IDX);
@@ -699,7 +706,14 @@ void  GH3x2xHrvAlgoExe(const STGh3x2xFrameInfo * const pstFrameInfo)
     {
         ppg_data.ppg_ir1_raw[i] = raw_temp[i];
         ppg_data.ppg_ir1_status[i] = status_temp[i];
-        ppg.ppg[i] = raw_temp[i];
+        if (raw_temp[i] > 0)
+        {
+            ppg.ppg[i] = (uint32_t)raw_temp[i];
+        }
+        else
+        {
+            ppg.ppg[i] = 0;
+        }
     }
     ppg.current = current_temp * 1000;
     gh3020_transdata(&ppg, GH3020_PPG2_SENSOR_IDX);
@@ -753,7 +767,14 @@ void  GH3x2xSpo2AlgoExe(const STGh3x2xFrameInfo * const pstFrameInfo)
     {
         ppg_data.ppg_rd1_raw[i] = raw_temp[i];
         ppg_data.ppg_rd1_status[i] = status_temp[i];
-        ppg.ppg[i] = raw_temp[i];
+        if (raw_temp[i] > 0)
+        {
+            ppg.ppg[i] = (uint32_t)raw_temp[i];
+        }
+        else
+        {
+            ppg.ppg[i] = 0;
+        }
     }
     ppg.current = current_temp * 1000;
     gh3020_transdata(&ppg, GH3020_PPG1_SENSOR_IDX);
@@ -851,7 +872,14 @@ void  GH3x2xRespAlgoExe(const STGh3x2xFrameInfo * const pstFrameInfo)
     {
         gain_temp = (GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000000F;
         ppg_data.amb_raw[i] = (GS32)(pstFrameInfo->punFrameRawdata[i]) - 0x800000;
-        ppg.ppg[i] = ppg_data.amb_raw[i];
+        if (ppg_data.amb_raw[i] > 0)
+        {
+            ppg.ppg[i] = (uint32_t)ppg_data.amb_raw[i];
+        }
+        else
+        {
+            ppg.ppg[i] = 0;
+        }
         ppg.gain[i] = gh3x2x_gain_list[gain_temp];
     }
     ppg.current = 0;

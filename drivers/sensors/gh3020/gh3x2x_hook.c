@@ -147,10 +147,13 @@ void gh3x2x_get_rawdata_hook_func(GU8 *read_buffer_ptr, GU16 length)
             }
         }
 
-        gh3020_transdata(&ppg[0], 0);
-        gh3020_transdata(&ppg[1], 1);
-        gh3020_transdata(&ppg[2], 2);
-        gh3020_transdata(&ppg[3], 3);
+        if(GH3X2X_FUNCTION_TEST1 == g_unDemoFuncMode)
+        {
+            gh3020_transdata(&ppg[0], 0);
+            gh3020_transdata(&ppg[1], 1);
+            gh3020_transdata(&ppg[2], 2);
+            gh3020_transdata(&ppg[3], 3);
+        }
     }
 #endif
 }
