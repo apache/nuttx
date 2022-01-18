@@ -466,7 +466,9 @@ extern "C"
 #ifndef CONFIG_USBMSC_COMPOSITE
 EXTERN const char g_mscvendorstr[];
 EXTERN const char g_mscproductstr[];
+#ifndef CONFIG_USBMSC_BOARD_SERIALSTR
 EXTERN const char g_mscserialstr[];
+#endif
 
 /* If we are using a composite device, then vendor/product/serial number
  * strings are provided by the composite device logic.
@@ -475,11 +477,15 @@ EXTERN const char g_mscserialstr[];
 #else
 EXTERN const char g_compvendorstr[];
 EXTERN const char g_compproductstr[];
+#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
 EXTERN const char g_compserialstr[];
+#endif
 
 #define g_mscvendorstr  g_compvendorstr
 #define g_mscproductstr g_compproductstr
+#ifndef CONFIG_USBMSC_BOARD_SERIALSTR
 #define g_mscserialstr  g_compserialstr
+#endif
 #endif
 
 /* Used to hand-off the state structure when the SCSI worker thread is

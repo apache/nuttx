@@ -118,7 +118,9 @@ static const struct usbdevclass_driverops_s g_driverops =
 
 const char g_compvendorstr[]  = CONFIG_COMPOSITE_VENDORSTR;
 const char g_compproductstr[] = CONFIG_COMPOSITE_PRODUCTSTR;
+#ifndef CONFIG_COMPOSITE_BOARD_SERIALSTR
 const char g_compserialstr[]  = CONFIG_COMPOSITE_SERIALSTR;
+#endif
 
 /****************************************************************************
  * Private Functions

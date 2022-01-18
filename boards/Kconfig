@@ -3563,3 +3563,7 @@ config BOARDCTL_IOCTL
 		Architecture specific logic must provide board_ioctl() interface.
 
 endif # BOARDCTL
+
+config BOARD_USBDEV_SERIALSTR
+	bool
+	default n

@@ -36,6 +36,10 @@
 #include <nuttx/usb/cdcacm.h>
 #include <nuttx/usb/usbdev_trace.h>
 
+#ifdef CONFIG_CDCACM_BOARD_SERIALSTR
+#include <nuttx/board.h>
+#endif
+
 #include "cdcacm.h"
 
 /****************************************************************************
@@ -144,7 +148,11 @@ int cdcacm_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       break;
 
     case CDCACM_SERIALSTRID:
+#ifdef CONFIG_CDCACM_BOARD_SERIALSTR
+      str = board_usbdev_serialstr();
+#else
       str = CONFIG_CDCACM_SERIALSTR;
+#endif
       break;
 
     case CDCACM_CONFIGSTRID:

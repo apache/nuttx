@@ -33,6 +33,10 @@
 #include <nuttx/usb/usb.h>
 #include <nuttx/usb/usbdev_trace.h>
 
+#ifdef CONFIG_USBMSC_BOARD_SERIALSTR
+#include <nuttx/board.h>
+#endif
+
 #include "usbmsc.h"
 
 /****************************************************************************
@@ -103,7 +107,9 @@ static const struct usb_qualdesc_s g_qualdesc =
 #ifndef CONFIG_USBMSC_COMPOSITE
 const char g_mscvendorstr[]  = CONFIG_USBMSC_VENDORSTR;
 const char g_mscproductstr[] = CONFIG_USBMSC_PRODUCTSTR;
+#ifndef CONFIG_USBMSC_BOARD_SERIALSTR
 const char g_mscserialstr[]  = CONFIG_USBMSC_SERIALSTR;
+#endif
 #endif
 
 /****************************************************************************
@@ -152,7 +158,11 @@ int usbmsc_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       break;
 
     case USBMSC_SERIALSTRID:
+#ifdef CONFIG_USBMSC_BOARD_SERIALSTR
+      str = board_usbdev_serialstr();
+#else
       str = g_mscserialstr;
+#endif
       break;
 #endif
 
