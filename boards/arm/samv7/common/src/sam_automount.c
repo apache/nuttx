@@ -97,7 +97,7 @@ static const struct sam_automount_config_s g_hsmci0config =
     .enable     = sam_enable,
     .inserted   = sam_inserted
   },
-  .hsmci        = HSMCI0_SLOTNO,
+  .hsmci        = 0,
   .state        = &g_hsmci0state
 };
 #endif
@@ -250,7 +250,7 @@ void sam_automount_initialize(void)
   /* Initialize the HSMCI0 auto-mounter */
 
   handle = automount_initialize(&g_hsmci0config.lower);
-  if (!handle)
+  if (handle == NULL)
     {
       ferr("ERROR: Failed to initialize auto-mounter for HSMCI0\n");
     }
@@ -291,7 +291,7 @@ void sam_automount_event(int slotno, bool inserted)
 #ifdef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
   /* Is this a change in the HSMCI0 insertion state? */
 
-  if (slotno == HSMCI0_SLOTNO)
+  if (g_hsmci0config.hsmci == slotno)
     {
       /* Yes.. Select the HSMCI0 automounter */
 
