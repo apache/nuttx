@@ -185,7 +185,7 @@ static void netdriver_recv_work(FAR void *arg)
           else
 #endif/* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
-          if (eth->type == htons(ETHTYPE_ARP))
+          if (eth->type == HTONS(ETHTYPE_ARP))
             {
               ninfo("ARP frame\n");
               NETDEV_RXARP(dev);

@@ -304,7 +304,7 @@ extern "C"
  *
  ****************************************************************************/
 
-#define ip6_addr(addr, addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
+#define ip6_addr(addr,addr0,addr1,addr2,addr3,addr4,addr5,addr6,addr7) \
   do { \
     ((FAR uint16_t *)(addr))[0] = HTONS((addr0)); \
     ((FAR uint16_t *)(addr))[1] = HTONS((addr1)); \

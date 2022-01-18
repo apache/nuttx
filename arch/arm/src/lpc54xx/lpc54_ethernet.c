@@ -1005,7 +1005,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (ETHBUF->type == htons(ETHTYPE_ARP))
+  if (ETHBUF->type == HTONS(ETHTYPE_ARP))
     {
       struct lpc54_txring_s *txring;
       unsigned int chan;

@@ -1430,7 +1430,7 @@ static int userfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   /* Preset the server address */
 
   priv->server.sin_family      = AF_INET;
-  priv->server.sin_port        = htons(config->portno);
+  priv->server.sin_port        = HTONS(config->portno);
   priv->server.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 
   /* Create a LocalHost UDP client socket */

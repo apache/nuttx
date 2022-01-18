@@ -1549,7 +1549,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
           else
 #endif
 #ifdef CONFIG_NET_ARP
-          if (BUF->type == htons(ETHTYPE_ARP))
+          if (BUF->type == HTONS(ETHTYPE_ARP))
             {
               /* Handle the incoming ARP packet */
 
@@ -1572,7 +1572,7 @@ static void pic32mx_rxdone(struct pic32mx_driver_s *priv)
               /* Unrecognized... drop it. */
 
               nerr("ERROR: Unrecognized packet type dropped: %04x\n",
-                   ntohs(BUF->type));
+                   NTOHS(BUF->type));
               NETDEV_RXDROPPED(&priv->pd_dev);
             }
 

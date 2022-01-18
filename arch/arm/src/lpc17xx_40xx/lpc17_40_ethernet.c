@@ -1041,7 +1041,7 @@ static void lpc17_40_rxdone_work(FAR void *arg)
           else
 #endif
 #ifdef CONFIG_NET_ARP
-          if (BUF->type == htons(ETHTYPE_ARP))
+          if (BUF->type == HTONS(ETHTYPE_ARP))
             {
               NETDEV_RXARP(&priv->lp_dev);
               arp_arpin(&priv->lp_dev);

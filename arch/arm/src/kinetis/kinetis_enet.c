@@ -718,7 +718,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           NETDEV_RXARP(&priv->dev);
           arp_arpin(&priv->dev);

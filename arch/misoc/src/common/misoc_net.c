@@ -489,7 +489,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(&priv->misoc_net_dev);
           NETDEV_RXARP(&priv->misoc_net_dev);
