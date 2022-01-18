@@ -419,7 +419,7 @@ static int
 rpmsg_rtc_setrelative(FAR struct rtc_lowerhalf_s *lower,
                       FAR const struct lower_setrelative_s *relinfo)
 {
-  struct lower_setalarm_s alarminfo =
+  struct lower_setalarm_s alarminfo;
   time_t time;
 
   alarminfo.id = relinfo->id;
