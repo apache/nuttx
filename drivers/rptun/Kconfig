@@ -34,10 +34,6 @@ config RPTUN_STACKSIZE
 	depends on RPTUN_THREAD
 	default 4096
 
-config RPTUN_RECURSIVE_DISPATCH
-	bool "rptun recursive dispatch"
-	default y
-
 config RPTUN_LOADER
 	bool "rptun loader support"
 	default n
