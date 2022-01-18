@@ -26,7 +26,7 @@
  ****************************************************************************/
 
 #ifdef __SIM__
-#include "config.h"
+#  include "config.h"
 #endif
 
 #ifndef __ASSEMBLY__
@@ -38,6 +38,10 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS 1
+#endif
 
 /* Determine which (if any) console driver to use */
 
@@ -103,21 +107,12 @@ struct i2c_master_s;
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 /* For the case of architectures with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
-int up_cpu_index(void); /* See include/nuttx/arch.h */
 extern volatile void *g_current_regs[CONFIG_SMP_NCPUS];
-#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
-#else
-
-extern volatile void *g_current_regs[1];
-#  define CURRENT_REGS (g_current_regs[0])
-
-#endif
+#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /* The command line  arguments passed to simulator */
 
