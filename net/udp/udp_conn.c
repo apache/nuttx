@@ -555,7 +555,7 @@ uint16_t udp_select_port(uint8_t domain, FAR union ip_binding_u *u)
           g_last_udp_port = 4096;
         }
     }
-  while (udp_find_conn(domain, u, htons(g_last_udp_port)) != NULL);
+  while (udp_find_conn(domain, u, HTONS(g_last_udp_port)) != NULL);
 
   /* Initialize and return the connection structure, bind it to the
    * port number
@@ -833,7 +833,7 @@ int udp_bind(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
     {
       /* Yes.. Select any unused local port number */
 
-      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
+      conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
       ret         = OK;
     }
   else
@@ -903,7 +903,7 @@ int udp_connect(FAR struct udp_conn_s *conn, FAR const struct sockaddr *addr)
        * connection structure.
        */
 
-      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
+      conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
     }
 
   /* Is there a remote port (rport)? */

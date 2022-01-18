@@ -447,7 +447,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       /* Check for an ARP packet */
 
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           /* Dispatch ARP packet to the network layer */
 

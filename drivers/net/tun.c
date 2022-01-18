@@ -605,7 +605,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       arp_arpin(&priv->dev);
       NETDEV_RXARP(&priv->dev);

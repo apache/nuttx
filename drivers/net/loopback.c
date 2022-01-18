@@ -294,10 +294,10 @@ static int lo_ifup(FAR struct net_driver_s *dev)
 #endif
 #ifdef CONFIG_NET_IPv6
   ninfo("Bringing up: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(dev->d_ipv6addr[0]), ntohs(dev->d_ipv6addr[1]),
-        ntohs(dev->d_ipv6addr[2]), ntohs(dev->d_ipv6addr[3]),
-        ntohs(dev->d_ipv6addr[4]), ntohs(dev->d_ipv6addr[5]),
-        ntohs(dev->d_ipv6addr[6]), ntohs(dev->d_ipv6addr[7]));
+        NTOHS(dev->d_ipv6addr[0]), NTOHS(dev->d_ipv6addr[1]),
+        NTOHS(dev->d_ipv6addr[2]), NTOHS(dev->d_ipv6addr[3]),
+        NTOHS(dev->d_ipv6addr[4]), NTOHS(dev->d_ipv6addr[5]),
+        NTOHS(dev->d_ipv6addr[6]), NTOHS(dev->d_ipv6addr[7]));
 #endif
 
   /* Set and activate a timer process */
