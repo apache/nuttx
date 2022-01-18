@@ -26,11 +26,11 @@
 
 #include <nuttx/list.h>
 #include <nuttx/clock.h>
+#include <nuttx/wqueue.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/timers/rpmsg_rtc.h>
-#include <nuttx/timers/arch_rtc.h>
 
 #include <errno.h>
 #include <string.h>
@@ -108,6 +108,7 @@ struct rpmsg_rtc_lowerhalf_s
    */
 
   struct rpmsg_endpoint      ept;
+  struct work_s              syncwork;
 
 #ifdef CONFIG_RTC_ALARM
   struct lower_setalarm_s    alarminfo[CONFIG_RTC_NALARMS];
@@ -270,6 +271,18 @@ static void rpmsg_rtc_alarm_fire_handler(FAR struct rpmsg_endpoint *ept,
 #endif
 }
 
+static void rpmsg_rtc_syncworker(FAR void *arg)
+{
+  clock_synchronize();
+}
+
+static void rpmsg_rtc_sync_handler(FAR void *priv)
+{
+  FAR struct rpmsg_rtc_lowerhalf_s *lower = priv;
+
+  work_queue(HPWORK, &lower->syncwork, rpmsg_rtc_syncworker, NULL, 0);
+}
+
 static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
                             size_t len, uint32_t src, FAR void *priv)
 {
@@ -284,17 +297,7 @@ static int rpmsg_rtc_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
       break;
 
     case RPMSG_RTC_SYNC:
-        {
-          FAR struct rtc_lowerhalf_s *lower = priv;
-          struct rpmsg_rtc_set_s *msg = data;
-          struct timespec tp =
-          {
-            .tv_sec  = msg->sec,
-            .tv_nsec = msg->nsec,
-          };
-
-          up_rtc_set_lowerhalf(lower, &tp);
-        }
+      rpmsg_rtc_sync_handler(priv);
       break;
 
     default:
@@ -463,22 +466,18 @@ static int rpmsg_rtc_server_settime(FAR struct rtc_lowerhalf_s *lower,
                          (FAR struct rpmsg_rtc_server_s *)lower;
   FAR struct rpmsg_rtc_session_s *session;
   FAR struct list_node *node;
-  struct rpmsg_rtc_set_s msg =
-  {
-    .sec  = timegm((FAR struct tm *)rtctime),
-    .nsec = rtctime->tm_nsec,
-  };
+  struct rpmsg_rtc_header_s header;
   int ret;
 
   ret = server->lower->ops->settime(server->lower, rtctime);
   if (ret >= 0)
     {
       nxsem_wait_uninterruptible(&server->exclsem);
-      msg.header.command = RPMSG_RTC_SYNC;
+      header.command = RPMSG_RTC_SYNC;
       list_for_every(&server->list, node)
         {
           session = (FAR struct rpmsg_rtc_session_s *)node;
-          rpmsg_send(&session->ept, &msg, sizeof(msg));
+          rpmsg_send(&session->ept, &header, sizeof(header));
         }
 
       nxsem_post(&server->exclsem);
