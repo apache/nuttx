@@ -155,18 +155,13 @@ extern volatile dq_queue_t g_readytorun;
  */
 
 extern volatile dq_queue_t g_assignedtasks[CONFIG_SMP_NCPUS];
+#endif
 
 /* g_running_tasks[] holds a references to the running task for each cpu.
  * It is valid only when up_interrupt_context() returns true.
  */
 
 extern FAR struct tcb_s *g_running_tasks[CONFIG_SMP_NCPUS];
-
-#else
-
-extern FAR struct tcb_s *g_running_tasks[1];
-
-#endif
 
 /* This is the list of all tasks that are ready-to-run, but cannot be placed
  * in the g_readytorun list because:  (1) They are higher priority than the

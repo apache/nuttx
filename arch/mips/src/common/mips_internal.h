@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+#  include <nuttx/arch.h>
 #  include <stdint.h>
 #  include <stdbool.h>
 #endif
@@ -94,21 +95,12 @@ typedef void (*up_vector_t)(void);
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 /* For the case of architectures with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
-int up_cpu_index(void); /* See include/nuttx/arch.h */
 extern volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
-#else
-
-extern volatile uint32_t *g_current_regs[1];
-#  define CURRENT_REGS (g_current_regs[0])
-
-#endif
+#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /* This is the beginning of heap as provided from up_head.S. This is the
  * first address in DRAM after the loaded program+bss+idle stack.  The end

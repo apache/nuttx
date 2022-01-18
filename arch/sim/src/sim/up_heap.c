@@ -50,11 +50,7 @@ struct mm_delaynode_s
 
 struct mm_heap_s
 {
-#ifdef CONFIG_SMP
   struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
-#else
-  struct mm_delaynode_s *mm_delaylist[1];
-#endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;
