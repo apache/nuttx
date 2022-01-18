@@ -22,6 +22,10 @@
 
 CSRCS += foc_dev.c
 
+ifeq ($(CONFIG_MOTOR_FOC_DUMMY),y)
+CSRCS += foc_dummy.c
+endif
+
 # Include FOC driver build support
 
 DEPPATH += --dep-path motor$(DELIM)foc

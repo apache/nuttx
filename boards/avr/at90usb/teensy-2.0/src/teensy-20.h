@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H
-#define __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H
+#ifndef __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_20_H
+#define __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_20_H
 
 /****************************************************************************
  * Included Files
@@ -72,4 +72,4 @@ void at90usb_led_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_H */
+#endif /* __BOARDS_AVR_AT90USB_TEENSY_20_SRC_TEENSY_20_H */

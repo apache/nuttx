@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_I2C_I2C_BITBANG_H
-#define __DRIVERS_I2C_I2C_BITBANG_H
+#ifndef __INCLUDE_NUTTX_I2C_I2C_BITBANG_H
+#define __INCLUDE_NUTTX_I2C_I2C_BITBANG_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@ struct i2c_bitbang_lower_dev_s
 FAR struct i2c_master_s *i2c_bitbang_initialize(
     FAR struct i2c_bitbang_lower_dev_s *lower);
 
-#endif /* __DRIVERS_I2C_I2C_BITBANG_H */
+#endif /* __INCLUDE_NUTTX_I2C_I2C_BITBANG_H */

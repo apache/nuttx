@@ -32,8 +32,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_MTD_SCHEME_H
-#define __INCLUDE_NUTTX_MTD_SCHEME_H
+#ifndef __INCLUDE_NUTTX_MTD_NAND_SCHEME_H
+#define __INCLUDE_NUTTX_MTD_NAND_SCHEME_H
 
 /****************************************************************************
  * Included Files
@@ -312,4 +312,4 @@ int nandscheme_build4086(FAR struct nand_scheme_s *scheme,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_MTD_SCHEME_H */
+#endif /* __INCLUDE_NUTTX_MTD_NAND_SCHEME_H */

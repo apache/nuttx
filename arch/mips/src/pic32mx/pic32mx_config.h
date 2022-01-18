@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H
-#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H
+#ifndef __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CONFIG_H
+#define __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CONFIG_H
 
 /************************************************************************************
  * Included Files
@@ -908,4 +908,4 @@
  * Public Functions Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_PIC32_H */
+#endif /* __ARCH_MIPS_SRC_PIC32MX_PIC32MX_CONFIG_H */

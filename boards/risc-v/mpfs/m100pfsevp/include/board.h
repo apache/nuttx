@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_MPFS_M100PFSEVP_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_MPFS_M100PFSEVP_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -84,4 +84,4 @@ void mpfs_boardinitialize(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_M100PFSEVP_MPFS_INCLUDE_BOARD_H  */
+#endif /* __BOARDS_RISCV_MPFS_M100PFSEVP_INCLUDE_BOARD_H  */

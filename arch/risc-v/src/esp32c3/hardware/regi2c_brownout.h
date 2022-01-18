@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H
 
 #define I2C_BOD                     0x61
 #define I2C_BOD_HOSTID              0
@@ -28,4 +28,4 @@
 #define I2C_BOD_THRESHOLD_MSB       2
 #define I2C_BOD_THRESHOLD_LSB       0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_BROWNOUT_H */

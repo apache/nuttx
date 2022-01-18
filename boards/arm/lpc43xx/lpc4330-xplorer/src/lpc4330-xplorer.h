@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_XPLORER_H
-#define __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_XPLORER_H
+#ifndef __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_LPC4330_XPLORER_H
+#define __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_LPC4330_XPLORER_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@
 void weak_function lpc43_sspdev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_XPLORER_H */
+#endif /* __BOARDSS_ARM_LPC43XX_LPC4330_XPLORER_SRC_LPC4330_XPLORER_H */

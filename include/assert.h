@@ -21,12 +21,13 @@
 #ifndef __INCLUDE_ASSERT_H
 #define __INCLUDE_ASSERT_H
 
+#ifndef __ASSEMBLY__
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/compiler.h>
-#include <stdint.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,4 +107,5 @@ void _assert(FAR const char *filename, int linenum) noreturn_function;
 }
 #endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __INCLUDE_ASSERT_H */

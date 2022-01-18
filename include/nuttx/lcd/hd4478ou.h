@@ -21,8 +21,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_HD4478OU_H
-#define __INCLUDE_NUTTX_HD4478OU_H
+#ifndef __INCLUDE_NUTTX_LCD_HD4478OU_H
+#define __INCLUDE_NUTTX_LCD_HD4478OU_H
 
 /****************************************************************************
  * Included Files
@@ -121,4 +121,4 @@ int up_lcd1602_initialize(void);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_HD4478OU_H */
+#endif /* __INCLUDE_NUTTX_LCD_HD4478OU_H */

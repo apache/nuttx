@@ -181,12 +181,12 @@ static const struct file_operations g_apds9930alsfops =
   apds9930_close_als,          /* close */
   apds9930_read_als,           /* read */
   apds9930_write,              /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   apds9930_ioctl_als,          /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* Proximity sensor */
@@ -197,12 +197,12 @@ static const struct file_operations g_apds9930psfops =
   apds9930_close_ps,           /* close */
   apds9930_read_ps,            /* read */
   apds9930_write,              /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   apds9930_ioctl_ps,           /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* SCU instructions for pick ambient light sensing data. */

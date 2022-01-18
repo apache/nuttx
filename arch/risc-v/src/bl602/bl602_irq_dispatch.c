@@ -41,20 +41,20 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs = NULL;
+volatile uintptr_t *g_current_regs[1];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * bl602_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uint32_t  irq  = vector & 0x3ff; /* E24 [9:0] */
-  uint32_t *mepc = regs;
+  uintptr_t  irq  = vector & 0x3ff; /* E24 [9:0] */
+  uintptr_t *mepc = regs;
 
   /* If current is interrupt */
 
@@ -67,7 +67,7 @@ void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
 
   if (BL602_IRQ_ECALLM == irq)
     {
-      *mepc += 2;
+      *mepc += 4;
     }
 
   /* Acknowledge the interrupt */
@@ -78,13 +78,13 @@ void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
   PANIC();
 #else
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * g_current_regs is also used to manage interrupt level context switches.
+   * CURRENT_REGS is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
   /* Deliver the IRQ */
 
@@ -92,18 +92,18 @@ void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
 
 #if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
-   * g_current_regs will have a different value than it did on entry.  If an
+   * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
    * point state and the establish the correct address environment before
    * returning from the interrupt.
    */
 
-  if (regs != g_current_regs)
+  if (regs != CURRENT_REGS)
     {
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      riscv_restorefpu((uint32_t *)g_current_regs);
+      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -121,13 +121,13 @@ void *bl602_dispatch_irq(uint32_t vector, uint32_t *regs)
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
   /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
+   * CURRENT_REGS may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs           = (uint32_t *)g_current_regs;
-  g_current_regs = NULL;
+  regs           = (uintptr_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   return regs;
 }

@@ -164,6 +164,26 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_can_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_CAN_SOCKET
+  /* Initialize CAN socket interface */
+
+  ret = stm32_cansock_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
+    }
+#endif
+
   UNUSED(ret);
   return OK;
 }

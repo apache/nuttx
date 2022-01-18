@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_XBEE_H
-#define __DRIVERS_WIRELESS_IEEE802154_XBEE_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_H
+#define __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_H
 
 /****************************************************************************
  * Included Files
@@ -485,4 +485,4 @@ void xbee_enable_coord(FAR struct xbee_priv_s *priv, bool enable);
 
 void xbee_regdump(FAR struct xbee_priv_s *priv);
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_XBEE_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_H */

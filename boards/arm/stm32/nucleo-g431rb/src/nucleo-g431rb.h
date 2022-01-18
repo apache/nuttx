@@ -155,4 +155,16 @@ int stm32_foc_setup(void);
 int stm32_cordic_setup(void);
 #endif
 
+/****************************************************************************
+ * Name: stm32_can_setup
+ *
+ * Description:
+ *  Initialize CAN and register the CAN device
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
+int stm32_can_setup(void);
+#endif
+
 #endif /* __BOARDS_ARM_STM32_NUCLEO_G431RB_SRC_NUCLEO_G431RB_H */

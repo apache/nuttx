@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_FREERUN_H
-#define __ARCH_ARM_SRC_STM32L4_FREERUN_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_FREERUN_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_FREERUN_H
 
 /****************************************************************************
  * Included Files
@@ -139,4 +139,4 @@ int stm32l4_freerun_uninitialize(struct stm32l4_freerun_s *freerun);
 #endif
 
 #endif /* CONFIG_STM32L4_FREERUN */
-#endif /* __ARCH_ARM_SRC_STM32L4_FREERUN_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_FREERUN_H */

@@ -97,13 +97,16 @@ static int     lm92_ioctl(FAR struct file *filep,
 
 static const struct file_operations g_lm92fops =
 {
-  lm92_open,
-  lm92_close,
-  lm92_read,
-  lm92_write,
-  NULL,
-  lm92_ioctl,
-  NULL
+  lm92_open,       /* open */
+  lm92_close,      /* close */
+  lm92_read,       /* read */
+  lm92_write,      /* write */
+  NULL,            /* seek */
+  lm92_ioctl,      /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

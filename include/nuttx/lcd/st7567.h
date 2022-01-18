@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_ST7567_H
-#define __INCLUDE_NUTTX_ST7567_H
+#ifndef __INCLUDE_NUTTX_LCD_ST7567_H
+#define __INCLUDE_NUTTX_LCD_ST7567_H
 
 /****************************************************************************
  * Included Files
@@ -135,4 +135,4 @@ void st7567_power(unsigned int devno, bool on);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_ST7567_H */
+#endif /* __INCLUDE_NUTTX_LCD_ST7567_H */

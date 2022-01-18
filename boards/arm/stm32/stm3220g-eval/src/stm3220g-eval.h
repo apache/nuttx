@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_H
-#define __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_H
+#ifndef __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_EVAL_H
+#define __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_EVAL_H
 
 /****************************************************************************
  * Included Files
@@ -412,4 +412,4 @@ void stm32_deselectlcd(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_H */
+#endif /* __BOARDS_ARM_STM32_STM3220G_EVAL_SRC_STM3220G_EVAL_H */

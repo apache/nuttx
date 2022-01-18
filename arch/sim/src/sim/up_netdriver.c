@@ -185,7 +185,7 @@ static void netdriver_recv_work(FAR void *arg)
           else
 #endif/* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
-          if (eth->type == htons(ETHTYPE_ARP))
+          if (eth->type == HTONS(ETHTYPE_ARP))
             {
               ninfo("ARP frame\n");
               NETDEV_RXARP(dev);
@@ -314,6 +314,12 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
     {
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
+
+  /* Check RX data availability and read the data from the network device now
+   * to prevent RX data stream congestion in case of high TX network traffic.
+   */
+
+  netdriver_loop();
 
   return OK;
 }

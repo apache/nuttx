@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_NUC1XX_NUTINY_NUC120_INCLUDE_BOARD_H
+#define __BOARDS_ARM_NUC1XX_NUTINY_NUC120_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -122,4 +122,4 @@
 
 #define NUM_BUTTONS        0
 
-#endif /* __BOARDS_ARM_NUC1XX_NUTINY_NUC12_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_NUC1XX_NUTINY_NUC120_INCLUDE_BOARD_H */

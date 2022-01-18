@@ -26,8 +26,8 @@
  *    @author   qing.han
  ****************************************************************************/
 
-#ifndef __GPIO_H__
-#define __GPIO_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_GPIO_H
+#define __ARCH_ARM_SRC_PHY62XX_GPIO_H
 
 #ifdef __cplusplus
 extern "C"
@@ -206,4 +206,4 @@ extern int gpio_write(gpio_pin_e pin, uint8_t en);
 }
 #endif
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_GPIO_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_PINMAP_H
-#define __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_PINMAP_H
+#ifndef __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_484_PINMAP_H
+#define __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_484_PINMAP_H
 
 /****************************************************************************
  * Included Files
@@ -132,4 +132,4 @@
 
 #endif
 
-#endif /* __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_PINMAP_H */
+#endif /* __ARCH_RISCV_SRC_MPFS_HARDWARE_MPFS250T_484_PINMAP_H */

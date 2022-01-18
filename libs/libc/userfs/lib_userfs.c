@@ -1043,7 +1043,7 @@ int userfs_run(FAR const char *mountpt,
   /* Bind the socket to a server port number */
 
   server.sin_family      = AF_INET;
-  server.sin_port        = htons(config.portno);
+  server.sin_port        = HTONS(config.portno);
   server.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
 
   ret = bind(info->sockfd, (struct sockaddr *)&server,

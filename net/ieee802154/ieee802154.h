@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_IEEE802154_IEEE802154_H
-#define _NET_IEEE802154_IEEE802154_H
+#ifndef __NET_IEEE802154_IEEE802154_H
+#define __NET_IEEE802154_IEEE802154_H
 
 /****************************************************************************
  * Included Files
@@ -462,4 +462,4 @@ void ieee802154_container_free(FAR struct ieee802154_container_s *container);
 #endif
 
 #endif /* CONFIG_NET_IEEE802154 */
-#endif /* _NET_IEEE802154_IEEE802154_H */
+#endif /* __NET_IEEE802154_IEEE802154_H */

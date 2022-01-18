@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_UP_INTERNAL_H
-#define __ARCH_SIM_SRC_UP_INTERNAL_H
+#ifndef __ARCH_SIM_SRC_SIM_UP_INTERNAL_H
+#define __ARCH_SIM_SRC_SIM_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -91,10 +91,6 @@
  ****************************************************************************/
 
 struct tcb_s;
-struct foc_dev_s;
-struct spi_dev_s;
-struct qspi_dev_s;
-struct ioexpander_dev_s;
 struct i2c_master_s;
 
 /****************************************************************************
@@ -253,12 +249,6 @@ void up_buttonevent(int x, int y, int buttons);
 int sim_ajoy_initialize(void);
 #endif
 
-/* up_ioexpander.c **********************************************************/
-
-#ifdef CONFIG_SIM_IOEXPANDER
-struct ioexpander_dev_s *sim_ioexpander_initialize(void);
-#endif
-
 /* up_tapdev.c **************************************************************/
 
 #if defined(CONFIG_SIM_NETDEV_TAP) && !defined(__CYGWIN__)
@@ -331,14 +321,6 @@ int up_rptun_init(const char *shmemname, const char *cpuname, bool master);
 void up_rptun_loop(void);
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH
-struct spi_dev_s *up_spiflashinitialize(const char *name);
-#endif
-
-#ifdef CONFIG_SIM_QSPIFLASH
-struct qspi_dev_s *up_qspiflashinitialize(void);
-#endif
-
 /* up_hcisocket.c ***********************************************************/
 
 #ifdef CONFIG_SIM_HCISOCKET
@@ -373,12 +355,5 @@ int sim_spi_uninitialize(struct spi_dev_s *dev);
 void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
-/* up_foc.c *****************************************************************/
-
-#ifdef CONFIG_MOTOR_FOC
-struct foc_dev_s *sim_foc_initialize(int inst);
-void sim_foc_update(void);
-#endif
-
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_SIM_SRC_UP_INTERNAL_H */
+#endif /* __ARCH_SIM_SRC_SIM_UP_INTERNAL_H */

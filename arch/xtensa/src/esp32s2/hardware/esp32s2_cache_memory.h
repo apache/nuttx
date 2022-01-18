@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H_
-#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H_
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H
+#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H
 
 /****************************************************************************
  * Included Files
@@ -150,4 +150,4 @@
 #define CACHE_MEMORY_BANK2_ADDR         0x3ffb4000
 #define CACHE_MEMORY_BANK3_ADDR         0x3ffb6000
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H_ */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_CACHE_MEMORY_H */

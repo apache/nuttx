@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_MIPS32_VFORK_H
-#define __ARCH_MIPS_SRC_MIPS32_VFORK_H
+#ifndef __ARCH_MIPS_SRC_MIPS32_MIPS_VFORK_H
+#define __ARCH_MIPS_SRC_MIPS32_MIPS_VFORK_H
 
 /****************************************************************************
  * Included Files
@@ -115,4 +115,4 @@ struct vfork_s
 };
 #endif
 
-#endif /* __ARCH_MIPS_SRC_MIPS32_VFORK_H */
+#endif /* __ARCH_MIPS_SRC_MIPS32_MIPS_VFORK_H */

@@ -29,6 +29,8 @@
 #include <assert.h>
 #include <debug.h>
 
+#include <syscall.h>
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
@@ -57,14 +59,6 @@
 #  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
 
-/* Format output with register width and hex */
-
-#ifdef CONFIG_ARCH_RV32
-#  define PRIxREG "%08"PRIxPTR
-#else
-#  define PRIxREG "%016"PRIxPTR
-#endif
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -90,7 +84,7 @@ static void riscv_stackdump(uintptr_t sp, uintptr_t stack_top)
   for (stack = sp & ~0x1f; stack < (stack_top & ~0x1f); stack += 32)
     {
       uint32_t *ptr = (uint32_t *)stack;
-      _alert(PRIxREG ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+      _alert("%" PRIxREG ": %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
              " %08" PRIx32 "\n",
              stack, ptr[0], ptr[1], ptr[2], ptr[3],
@@ -106,35 +100,35 @@ static inline void riscv_registerdump(volatile uintptr_t *regs)
 {
   /* Are user registers available from interrupt processing? */
 
-  _alert("EPC:" PRIxREG "\n", regs[REG_EPC]);
-  _alert("A0:" PRIxREG " A1:" PRIxREG "A2:" PRIxREG
-         " A3:" PRIxREG "\n",
+  _alert("EPC: %" PRIxREG "\n", regs[REG_EPC]);
+  _alert("A0: %" PRIxREG " A1: %" PRIxREG " A2: %" PRIxREG
+         " A3: %" PRIxREG "\n",
          regs[REG_A0], regs[REG_A1], regs[REG_A2], regs[REG_A3]);
-  _alert("A4:" PRIxREG " A5:" PRIxREG "A6:" PRIxREG
-         " A7:" PRIxREG "\n",
+  _alert("A4: %" PRIxREG " A5: %" PRIxREG " A6: %" PRIxREG
+         " A7: %" PRIxREG "\n",
          regs[REG_A4], regs[REG_A5], regs[REG_A6], regs[REG_A7]);
-  _alert("T0:" PRIxREG " T1:" PRIxREG " T2:" PRIxREG
-         " T3:" PRIxREG "\n",
+  _alert("T0: %" PRIxREG " T1: %" PRIxREG " T2: %" PRIxREG
+         " T3: %" PRIxREG "\n",
          regs[REG_T0], regs[REG_T1], regs[REG_T2], regs[REG_T3]);
-  _alert("T4:" PRIxREG " T5:" PRIxREG " T6:" PRIxREG "\n",
+  _alert("T4: %" PRIxREG " T5: %" PRIxREG " T6: %" PRIxREG "\n",
          regs[REG_T4], regs[REG_T5], regs[REG_T6]);
-  _alert("S0:" PRIxREG " S1:" PRIxREG " S2:" PRIxREG
-         " S3:" PRIxREG "\n",
+  _alert("S0: %" PRIxREG " S1: %" PRIxREG " S2: %" PRIxREG
+         " S3: %" PRIxREG "\n",
          regs[REG_S0], regs[REG_S1], regs[REG_S2], regs[REG_S3]);
-  _alert("S4:" PRIxREG " S5:" PRIxREG " S6:" PRIxREG
-         " S7:" PRIxREG "\n",
+  _alert("S4: %" PRIxREG " S5: %" PRIxREG " S6: %" PRIxREG
+         " S7: %" PRIxREG "\n",
          regs[REG_S4], regs[REG_S5], regs[REG_S6], regs[REG_S7]);
-  _alert("S8:" PRIxREG " S9:" PRIxREG " S10:" PRIxREG
-         " S11:" PRIxREG "\n",
+  _alert("S8: %" PRIxREG " S9: %" PRIxREG " S10: %" PRIxREG
+         " S11: %" PRIxREG "\n",
          regs[REG_S8], regs[REG_S9], regs[REG_S10], regs[REG_S11]);
 #ifdef RISCV_SAVE_GP
-  _alert("GP:" PRIxREG " SP:" PRIxREG " FP:" PRIxREG
-         " TP:" PRIxREG " RA:" PRIxREG "\n",
+  _alert("GP: %" PRIxREG " SP: %" PRIxREG " FP: %" PRIxREG
+         " TP: %" PRIxREG " RA: %" PRIxREG "\n",
          regs[REG_GP], regs[REG_SP], regs[REG_FP], regs[REG_TP],
          regs[REG_RA]);
 #else
-  _alert("SP:" PRIxREG " FP:" PRIxREG " TP:" PRIxREG
-         " RA:" PRIxREG "\n",
+  _alert("SP: %" PRIxREG " FP: %" PRIxREG " TP: %" PRIxREG
+         " RA: %" PRIxREG "\n",
          regs[REG_SP], regs[REG_FP], regs[REG_TP], regs[REG_RA]);
 #endif
 }
@@ -321,9 +315,21 @@ static void riscv_dumpstate(void)
   sched_dumpstack(rtcb->pid);
 #endif
 
+  /* Update the xcp context */
+
+  if (CURRENT_REGS)
+    {
+      memcpy(rtcb->xcp.regs,
+             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_REGS);
+    }
+  else
+    {
+      riscv_saveusercontext(rtcb->xcp.regs);
+    }
+
   /* Dump the registers (if available) */
 
-  riscv_registerdump((volatile uintptr_t *)CURRENT_REGS);
+  riscv_registerdump(rtcb->xcp.regs);
 
   /* Get the limits on the user stack memory */
 
@@ -338,10 +344,10 @@ static void riscv_dumpstate(void)
 
   /* Show interrupt stack info */
 
-  _alert("sp:     " PRIxREG "\n", sp);
+  _alert("sp:     %" PRIxREG "\n", sp);
   _alert("IRQ stack:\n");
-  _alert("  base: " PRIxREG "\n", istackbase);
-  _alert("  size: " PRIxREG "\n", istacksize);
+  _alert("  base: %" PRIxREG "\n", istackbase);
+  _alert("  size: %" PRIxREG "\n", istacksize);
 
   /* Does the current stack pointer lie within the interrupt
    * stack?
@@ -355,8 +361,12 @@ static void riscv_dumpstate(void)
 
       /* Extract the user stack pointer */
 
-      sp = CURRENT_REGS[REG_SP];
-      _alert("sp:     " PRIxREG "\n", sp);
+      if (CURRENT_REGS)
+        {
+          sp = CURRENT_REGS[REG_SP];
+        }
+
+      _alert("sp:     %" PRIxREG "\n", sp);
     }
   else if (CURRENT_REGS)
     {
@@ -367,12 +377,12 @@ static void riscv_dumpstate(void)
   /* Show user stack info */
 
   _alert("User stack:\n");
-  _alert("  base: " PRIxREG "\n", ustackbase);
-  _alert("  size: " PRIxREG "\n", ustacksize);
+  _alert("  base: %" PRIxREG "\n", ustackbase);
+  _alert("  size: %" PRIxREG "\n", ustacksize);
 #else
-  _alert("sp:         " PRIxREG "\n", sp);
-  _alert("stack base: " PRIxREG "\n", ustackbase);
-  _alert("stack size: " PRIxREG "\n", ustacksize);
+  _alert("sp:         %" PRIxREG "\n", sp);
+  _alert("stack base: %" PRIxREG "\n", ustackbase);
+  _alert("stack size: %" PRIxREG "\n", ustacksize);
 #endif
 
   /* Dump the user stack if the stack pointer lies within the allocated user

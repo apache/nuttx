@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_PHY62XX_BLE_H
-#define __ARCH_ARM_SRC_PHY62XX_BLE_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHY62XX_BLE_H
+#define __ARCH_ARM_SRC_PHY62XX_PHY62XX_BLE_H
 
 /****************************************************************************
  * Included Files
@@ -58,4 +58,4 @@ extern llStatus_t LL_TxData(uint16 connId,
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_STM32_START_H */
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHY62XX_BLE_H */

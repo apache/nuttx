@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H_
-#define __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H_
+#ifndef __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H
+#define __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H
 
 /****************************************************************************
  * Included Files
@@ -127,4 +127,4 @@ int cypress_mbr3108_register(FAR const char *devpath,
                         struct mbr3108_board_s *board_config,
                         const struct mbr3108_sensor_conf_s *sensor_conf);
 
-#endif /* __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H_ */
+#endif /* __INCLUDE_NUTTX_INPUT_CYPRESS_MBR3108_H */

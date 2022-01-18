@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DAC_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DAC_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DAC_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DAC_H
 
 /****************************************************************************
  * Included Files
@@ -881,4 +881,4 @@
 #define DAC_OPA2MUX_RESSEL_RES6               (_DAC_OPA2MUX_RESSEL_RES6 << 28)     /* Shifted mode RES6 for DAC_OPA2MUX */
 #define DAC_OPA2MUX_RESSEL_RES7               (_DAC_OPA2MUX_RESSEL_RES7 << 28)     /* Shifted mode RES7 for DAC_OPA2MUX */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DAC_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DAC_H */

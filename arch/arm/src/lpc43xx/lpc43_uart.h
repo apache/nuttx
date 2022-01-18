@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_LOWSETUP_H
-#define __ARCH_ARM_SRC_LPC43XX_LPC43_LOWSETUP_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_UART_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_UART_H
 
 /****************************************************************************
  * Included Files
@@ -139,4 +139,4 @@ void lpc43_setbaud(uintptr_t uartbase, uint32_t basefreq, uint32_t baud);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_LOWSETUP_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_UART_H */

@@ -1765,8 +1765,8 @@ int smartfs_shrinkfile(FAR struct smartfs_mountpt_s *fs,
               remaining = 0;
             }
         }
-      else
 #endif
+
       /* Are we retaining the sector it its entirety? */
 
       if (remaining >= available)

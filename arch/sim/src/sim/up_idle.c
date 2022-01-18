@@ -26,6 +26,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
+#include <nuttx/motor/foc/foc_dummy.h>
 
 #include "up_internal.h"
 
@@ -112,9 +113,9 @@ void up_idle(void)
   up_timer_update();
 #endif
 
-#ifdef CONFIG_SIM_MOTOR_FOC
+#ifdef CONFIG_MOTOR_FOC_DUMMY
   /* Update simulated FOC device */
 
-  sim_foc_update();
+  foc_dummy_update();
 #endif
 }

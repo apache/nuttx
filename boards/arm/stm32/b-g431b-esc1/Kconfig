@@ -5,6 +5,18 @@
 
 if ARCH_BOARD_B_G431B_ESC1
 
+choice
+	prompt "PLL clock source"
+	default BOARD_STM32_BG431BESC1_HSI
+
+config BOARD_STM32_BG431BESC1_USE_HSI
+	bool "HSI"
+
+config BOARD_STM32_BG431BESC1_USE_HSE
+	bool "HSE"
+
+endchoice
+
 if STM32_FOC
 
 config BOARD_STM32_BG431BESC1_FOC_VBUS
@@ -16,5 +28,9 @@ config BOARD_STM32_BG431BESC1_FOC_POT
 	default n
 
 endif # STM32_FOC
+
+config BOARD_STM32_BG431BESC1_CANTERM
+	bool "B-G431B-ESC1 use on-board CAN terminator resistor"
+	default y
 
 endif # ARCH_BOARD_B_G431B_ESC1

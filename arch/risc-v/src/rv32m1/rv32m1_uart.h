@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H
-#define _ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H
+#ifndef __ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H
+#define __ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H
 
 /****************************************************************************
  * Included Files
@@ -102,4 +102,4 @@ EXTERN void rv32m1_console_uart_putc(char);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* _ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H */
+#endif /* __ARCH_RISCV_SRC_RV32M1_RV32M1_UART_H */

@@ -86,13 +86,16 @@ static int     dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations dac_fops =
 {
-  dac_open,
-  dac_close,
-  dac_read,
-  dac_write,
-  NULL,
-  dac_ioctl,
-  NULL
+  dac_open,       /* open */
+  dac_close,      /* close */
+  dac_read,       /* read */
+  dac_write,      /* write */
+  NULL,           /* seek */
+  dac_ioctl,      /* ioctl */
+  NULL            /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /****************************************************************************

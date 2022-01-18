@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_PHY62xx_PHY6222_INCLUDE_BOARD_H
-#define __BOARDS_ARM_PHY62xx_PHY6222_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_PHY62XX_PHY6222_INCLUDE_BOARD_H
+#define __BOARDS_ARM_PHY62XX_PHY6222_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -33,4 +33,4 @@
 
 #define HCLK_FREQUENCY    32000000ul       /* HSI48 for USB, only some STM32F0xx */
 
-#endif /* phy62xx */
+#endif /* __BOARDS_ARM_PHY62XX_PHY6222_INCLUDE_BOARD_H */

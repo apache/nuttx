@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_XBEE_MAC_H
-#define __DRIVERS_WIRELESS_IEEE802154_XBEE_MAC_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_MAC_H
+#define __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_MAC_H
 
 /****************************************************************************
  * Included Files
@@ -231,4 +231,4 @@ int xbee_req_associate(XBEEHANDLE xbee,
 
 int xbee_req_reset(XBEEHANDLE xbee, bool resetattr);
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_XBEE_MAC_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_XBEE_XBEE_MAC_H */

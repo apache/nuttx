@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include <arch/irq.h>
-#include <arch/rv32im/mcause.h>
+#include <arch/mcause.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_interrupt.h"
@@ -60,7 +60,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+volatile uintptr_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -373,7 +373,7 @@ void esp32c3_free_cpuint(uint8_t periphid)
  *
  ****************************************************************************/
 
-IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
+IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 {
   int irq;
 
@@ -390,14 +390,14 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
     }
   else
     {
-      /* Check "g_current_regs" only in interrupt or ecall */
+      /* Check "CURRENT_REGS" only in interrupt or ecall */
 
-      DEBUGASSERT(g_current_regs == NULL);
+      DEBUGASSERT(CURRENT_REGS == NULL);
     }
 
-  g_current_regs = regs;
+  CURRENT_REGS = regs;
 
-  irqinfo("INFO: mcause=%08" PRIX32 "\n", mcause);
+  irqinfo("INFO: mcause=%08" PRIXPTR "\n", mcause);
 
   /* If the board supports LEDs, turn on an LED now to indicate that we are
    * processing an interrupt.
@@ -436,8 +436,8 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
         }
     }
 
-  regs = (uint32_t *)g_current_regs;
-  g_current_regs = NULL;
+  regs = (uintptr_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   board_autoled_off(LED_INIRQ);
 

@@ -99,11 +99,6 @@
 
 int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-#if XCHAL_CP_NUM > 0
-  struct xcptcontext *xcp;
-  uintptr_t cpstart;
-#endif
-
 #ifdef CONFIG_TLS_ALIGNED
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
@@ -127,16 +122,6 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       up_release_stack(tcb, ttype);
     }
-
-#if XCHAL_CP_NUM > 0
-  /* Add the size of the co-processor save area to the stack allocation.
-   * REVISIT:  This may waste memory.  Increasing the caller's requested
-   * stack size should only be necessary if the requested size could not
-   * hold the co-processor save area.
-   */
-
-  stack_size += XTENSA_CP_SA_SIZE;
-#endif
 
   /* Do we need to allocate a new stack? */
 
@@ -204,31 +189,6 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
-
-#if XCHAL_CP_NUM > 0
-      /* Allocate the co-processor save area at the top of the (push down)
-       * stack.
-       *
-       * REVISIT:  This is not secure.  In secure built configurations it
-       * be more appropriate to use kmm_memalign() to allocate protected
-       * memory rather than using the stack.
-       */
-
-      cpstart      = (uintptr_t)_CP_ALIGNDOWN(XCHAL_CP0_SA_ALIGN,
-                                              top_of_stack -
-                                              XCHAL_CP1_SA_ALIGN);
-      top_of_stack = cpstart;
-
-      /* Initialize the coprocessor save area (see xtensa_coproc.h) */
-
-      xcp                   = &tcb->xcp;
-      xcp->cpstate.cpenable = 0;                   /* No coprocessors active
-                                                    * for this thread */
-      xcp->cpstate.cpstored = 0;                   /* No coprocessors saved
-                                                    * for this thread */
-      xcp->cpstate.cpasa    = (uint32_t *)cpstart; /* Start of aligned save
-                                                    * area */
-#endif
 
       /* The XTENSA stack must be aligned.  If necessary top_of_stack must be
        * rounded down to the next boundary to meet this alignment

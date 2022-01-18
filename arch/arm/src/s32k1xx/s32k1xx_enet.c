@@ -770,7 +770,7 @@ static inline void s32k1xx_dispatch(FAR struct s32k1xx_driver_s *priv)
 #ifdef CONFIG_NET_ARP
   /* Check for an ARP packet */
 
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       NETDEV_RXARP(&priv->dev);
       arp_arpin(&priv->dev);

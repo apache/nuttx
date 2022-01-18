@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_PHYPLUS_STUB_H
-#define __INCLUDE_NUTTX_PHYPLUS_STUB_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHYPLUS_STUB_H
+#define __ARCH_ARM_SRC_PHY62XX_PHYPLUS_STUB_H
 
 enum phyplus_stub_e
 {
@@ -34,4 +34,4 @@ enum phyplus_stub_e
   PHYPLUS_MAX
 };
 
-#endif 
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHYPLUS_STUB_H */

@@ -79,13 +79,16 @@ static int dat31r5sp_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_dat31r5sp_fops =
 {
-  dat31r5sp_open,
-  dat31r5sp_close,
-  dat31r5sp_read,
-  dat31r5sp_write,
-  NULL,
-  dat31r5sp_ioctl,
-  NULL
+  dat31r5sp_open,   /* open */
+  dat31r5sp_close,  /* close */
+  dat31r5sp_read,   /* read */
+  dat31r5sp_write,  /* write */
+  NULL,             /* seek */
+  dat31r5sp_ioctl,  /* ioctl */
+  NULL              /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************

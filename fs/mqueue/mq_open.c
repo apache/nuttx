@@ -60,9 +60,9 @@ static const struct file_operations g_nxmq_fileops =
   NULL,             /* write */
   NULL,             /* seek */
   NULL,             /* ioctl */
-  nxmq_file_poll,   /* poll */
+  nxmq_file_poll    /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL,             /* unlink */
+  , NULL            /* unlink */
 #endif
 };
 

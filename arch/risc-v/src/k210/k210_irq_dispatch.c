@@ -41,20 +41,20 @@
  * Public Data
  ****************************************************************************/
 
-extern void up_fault(int irq, uint64_t *regs);
+extern void up_fault(int irq, uintptr_t *regs);
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * k210_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
-  uint64_t *mepc = regs;
+  uintptr_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
+  uintptr_t *mepc = regs;
 
   /* Check if fault happened */
 
@@ -120,7 +120,7 @@ void *k210_dispatch_irq(uint64_t vector, uint64_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)CURRENT_REGS;
+  regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   return regs;

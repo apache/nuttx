@@ -101,13 +101,16 @@ static int adt7320_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_adt7320fops =
 {
-  adt7320_open,
-  adt7320_close,
-  adt7320_read,
-  adt7320_write,
-  NULL,
-  adt7320_ioctl,
-  NULL
+  adt7320_open,    /* open */
+  adt7320_close,   /* close */
+  adt7320_read,    /* read */
+  adt7320_write,   /* write */
+  NULL,            /* seek */
+  adt7320_ioctl,   /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

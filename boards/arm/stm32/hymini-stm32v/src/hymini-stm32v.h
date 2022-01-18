@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_HYMINI_STM32V_H
-#define __BOARDS_ARM_STM32_HYMINI_STM32V_H
+#ifndef __BOARDS_ARM_STM32_HYMINI_STM32V_SRC_HYMINI_STM32V_H
+#define __BOARDS_ARM_STM32_HYMINI_STM32V_SRC_HYMINI_STM32V_H
 
 /****************************************************************************
  * Included Files
@@ -151,4 +151,4 @@ int stm32_tsc_setup(int minor);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_HYMINI_STM32V_H */
+#endif /* __BOARDS_ARM_STM32_HYMINI_STM32V_SRC_HYMINI_STM32V_H */

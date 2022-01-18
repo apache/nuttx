@@ -41,20 +41,20 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t * g_current_regs;
+volatile uintptr_t *g_current_regs[1];
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * litex_dispatch_irq
+ * riscv_dispatch_irq
  ****************************************************************************/
 
-void *litex_dispatch_irq(uint32_t vector, uint32_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uint32_t  irq = (vector >> 27) | (vector & 0xf);
-  uint32_t *mepc = regs;
+  uintptr_t  irq = (vector >> 27) | (vector & 0xf);
+  uintptr_t *mepc = regs;
   int i;
 
   /* Firstly, check if the irq is machine external interrupt */
@@ -99,13 +99,13 @@ void *litex_dispatch_irq(uint32_t vector, uint32_t *regs)
   PANIC();
 #else
   /* Current regs non-zero indicates that we are processing an interrupt;
-   * g_current_regs is also used to manage interrupt level context switches.
+   * CURRENT_REGS is also used to manage interrupt level context switches.
    *
    * Nested interrupts are not supported
    */
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  DEBUGASSERT(CURRENT_REGS == NULL);
+  CURRENT_REGS = regs;
 
   /* Deliver the IRQ */
 
@@ -114,13 +114,13 @@ void *litex_dispatch_irq(uint32_t vector, uint32_t *regs)
 #endif
 
   /* If a context switch occurred while processing the interrupt then
-   * g_current_regs may have change value.  If we return any value different
+   * CURRENT_REGS may have change value.  If we return any value different
    * from the input regs, then the lower level will know that a context
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)g_current_regs;
-  g_current_regs = NULL;
+  regs = (uintptr_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   return regs;
 }

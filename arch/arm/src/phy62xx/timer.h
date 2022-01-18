@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __TIMER_H__
-#define __TIMER_H__
+#ifndef __ARCH_ARM_SRC_PHY62XX_TIMER_H
+#define __ARCH_ARM_SRC_PHY62XX_TIMER_H
 
 #ifdef __cplusplus
 extern "C"
@@ -78,4 +78,4 @@ extern uint32  read_LL_remainder_time(void);
 }
 #endif
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_TIMER_H */

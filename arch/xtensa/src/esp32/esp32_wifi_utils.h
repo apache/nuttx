@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_UTILS_H
-#define __ARCH_XTENSA_SRC_ESP32_ESP32_UTILS_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_WIFI_UTILS_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_WIFI_UTILS_H
 
 #include <nuttx/config.h>
 #include <nuttx/net/netdev.h>
@@ -117,4 +117,4 @@ int esp_wifi_scan_init(void);
 #undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_UTILS_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_WIFI_UTILS_H */

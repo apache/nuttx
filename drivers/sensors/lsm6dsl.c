@@ -134,16 +134,16 @@ static double g_gyrofactor = 0;
 
 static const struct file_operations g_fops =
 {
-  lsm6dsl_open,
-  lsm6dsl_close,
-  lsm6dsl_read,
-  lsm6dsl_write,
-  NULL,
-  lsm6dsl_ioctl,
-  NULL
+  lsm6dsl_open,    /* open */
+  lsm6dsl_close,   /* close */
+  lsm6dsl_read,    /* read */
+  lsm6dsl_write,   /* write */
+  NULL,            /* seek */
+  lsm6dsl_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
-#  endif
+  , NULL           /* unlink */
+#endif
 };
 
 static const struct lsm6dsl_ops_s g_lsm6dsl_sensor_ops =

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_FREERUN_H
-#define __ARCH_XTENSA_SRC_ESP32S2_FREERUN_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_FREERUN_H
+#define __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_FREERUN_H
 
 /****************************************************************************
  * Included Files
@@ -142,4 +142,4 @@ int esp32s2_freerun_uninitialize(struct esp32s2_freerun_s *freerun);
 #endif
 
 #endif /* CONFIG_ESP32S2_FREERUN */
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_FREERUN_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_ESP32S2_FREERUN_H */

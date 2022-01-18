@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_TCP_TCP_H
-#define _NET_TCP_TCP_H
+#ifndef __NET_TCP_TCP_H
+#define __NET_TCP_TCP_H
 
 /****************************************************************************
  * Included Files
@@ -285,6 +285,10 @@ struct tcp_conn_s
   bool       keepalive;   /* True: KeepAlive enabled; false: disabled */
   uint8_t    keepcnt;     /* Number of retries before the socket is closed */
   uint8_t    keepretries; /* Number of retries attempted */
+#endif
+
+#if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  bool       sendfile;    /* True if sendfile operation is in progress */
 #endif
 
   /* connevents is a list of callbacks for each socket the uses this
@@ -1928,4 +1932,4 @@ void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
 #endif
 
 #endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
-#endif /* _NET_TCP_TCP_H */
+#endif /* __NET_TCP_TCP_H */

@@ -125,7 +125,7 @@ HDR_ATTR static void (*_entry_point)(void) = &__start;
 
 uint8_t g_idlestack[CONFIG_IDLETHREAD_STACKSIZE]
   aligned_data(16) locate_data(".noinit");
-uint32_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
 
 /****************************************************************************
  * Private Functions

@@ -126,15 +126,15 @@ static double g_magnetofactor = 0;
 
 static const struct file_operations g_fops =
 {
-  lsm303agr_open,
-  lsm303agr_close,
-  lsm303agr_read,
-  lsm303agr_write,
-  NULL,
-  lsm303agr_ioctl,
-  NULL
+  lsm303agr_open,     /* open */
+  lsm303agr_close,    /* close */
+  lsm303agr_read,     /* read */
+  lsm303agr_write,    /* write */
+  NULL,               /* seek */
+  lsm303agr_ioctl,    /* ioctl */
+  NULL                /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL              /* unlink */
 #endif
 };
 

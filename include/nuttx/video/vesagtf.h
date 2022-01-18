@@ -40,8 +40,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_VIDEO_VESAGTF
-#define __INCLUDE_NUTTX_VIDEO_VESAGTF
+#ifndef __INCLUDE_NUTTX_VIDEO_VESAGTF_H
+#define __INCLUDE_NUTTX_VIDEO_VESAGTF_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,4 +120,4 @@ void vesagtf_mode_params(unsigned int x,
                          unsigned int flags,
                          FAR struct videomode_s *videomode);
 
-#endif /* __INCLUDE_NUTTX_VIDEO_VESAGTF */
+#endif /* __INCLUDE_NUTTX_VIDEO_VESAGTF_H */

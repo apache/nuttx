@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_BMP180_H
-#define __STM32_BMP180_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_BMP180_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_BMP180_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_bmp180_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_BMP180_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_BMP180_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -56,4 +56,4 @@
 #define I2C_DIG_REG_XPD_DIG_REG_MSB 3
 #define I2C_DIG_REG_XPD_DIG_REG_LSB 3
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_DIG_REG_H */

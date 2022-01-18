@@ -2914,16 +2914,19 @@ config STM32_FDCAN1
 	bool "FDCAN1"
 	default n
 	depends on STM32_HAVE_FDCAN1
+	select STM32_FDCAN
 
 config STM32_FDCAN2
 	bool "FDCAN2"
 	default n
 	depends on STM32_HAVE_FDCAN2
+	select STM32_FDCAN
 
 config STM32_FDCAN3
 	bool "FDCAN3"
 	default n
 	depends on STM32_HAVE_FDCAN3
+	select STM32_FDCAN
 
 config STM32_FSMC
 	bool "FSMC"
@@ -3387,6 +3390,10 @@ config STM32_I2C
 	bool
 
 config STM32_CAN
+	bool
+	select ARCH_HAVE_CAN_ERRORS
+
+config STM32_FDCAN
 	bool
 	select ARCH_HAVE_CAN_ERRORS
 
@@ -10884,7 +10891,380 @@ config STM32_CAN_REGDEBUG
 		Output detailed register-level CAN device debug information.
 		Requires also CONFIG_DEBUG_CAN_INFO.
 
-endmenu
+endmenu # "CAN driver configuration"
+
+menu "FDCAN driver configuration"
+	depends on STM32_FDCAN
+
+choice
+	prompt "FDCAN character driver or SocketCAN support"
+	default STM32_FDCAN_CHARDRIVER
+
+config STM32_FDCAN_CHARDRIVER
+	bool "STM32 FDCAN character driver support"
+	select ARCH_HAVE_FDCAN_ERRORS
+
+config STM32_FDCAN_SOCKET
+	bool "STM32 FDCAN SocketCAN support (not supported yet)"
+	select NET_FDCAN_HAVE_ERRORS
+
+endchoice # FDCAN character driver or SocketCAN support
+
+config STM32_FDCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+config STM32_FDCAN_QUEUE_MODE
+	bool "FDCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+menu "FDCAN1 device driver options"
+	depends on STM32_FDCAN1
+
+choice
+	prompt "FDCAN1 frame format"
+	default STM32_FDCAN1_ISO11898_1
+
+config STM32_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	default STM32_FDCAN1_CLASSIC
+
+config STM32_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+config STM32_FDCAN1_LOOPBACK
+	bool "Enable FDCAN1 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN1 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN1_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32_FDCAN1 is defined.
+
+config STM32_FDCAN1_NTSEG1
+	int "FDCAN1 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_NTSEG2
+	int "FDCAN1 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_NSJW
+	int "FDCAN1 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+
+config STM32_FDCAN1_DBITRATE
+	int "FDCAN1 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN1_DTSEG1
+	int "FDCAN1 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_DTSEG2
+	int "FDCAN1 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_DSJW
+	int "FDCAN1 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN1 device driver options
+
+menu "FDCAN2 device driver options"
+	depends on STM32_FDCAN2
+
+choice
+	prompt "FDCAN2 frame format"
+	default STM32_FDCAN2_ISO11898_1
+
+config STM32_FDCAN2_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN2_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN2 frame format
+
+choice
+	prompt "FDCAN2 mode"
+	default STM32_FDCAN2_CLASSIC
+
+config STM32_FDCAN2_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN2_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN2_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN2 mode
+
+config STM32_FDCAN2_LOOPBACK
+	bool "Enable FDCAN2 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN2 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN2_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if STM32_FDCAN2 is defined.
+
+config STM32_FDCAN2_NTSEG1
+	int "FDCAN2 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_NTSEG2
+	int "FDCAN2 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_NSJW
+	int "FDCAN2 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+
+config STM32_FDCAN2_DBITRATE
+	int "FDCAN2 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN2_DTSEG1
+	int "FDCAN2 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_DTSEG2
+	int "FDCAN2 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_DSJW
+	int "FDCAN2 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN2 device driver options
+
+menu "FDCAN3 device driver options"
+	depends on STM32_FDCAN3
+
+choice
+	prompt "FDCAN3 frame format"
+	default STM32_FDCAN3_ISO11898_1
+
+config STM32_FDCAN3_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN3_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN3 frame format
+
+choice
+	prompt "FDCAN3 mode"
+	default STM32_FDCAN3_CLASSIC
+
+config STM32_FDCAN3_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN3_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN3_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN3 mode
+
+config STM32_FDCAN3_LOOPBACK
+	bool "Enable FDCAN3 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN3 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN3_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN3 bitrate in bits per second.  Required if STM32_FDCAN3 is defined.
+
+config STM32_FDCAN3_NTSEG1
+	int "FDCAN3 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_NTSEG2
+	int "FDCAN3 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_NSJW
+	int "FDCAN3 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+
+config STM32_FDCAN3_DBITRATE
+	int "FDCAN3 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		FDCAN3 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN3_DTSEG1
+	int "FDCAN3 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_DTSEG2
+	int "FDCAN3 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_DSJW
+	int "FDCAN3 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN3 device driver options
+
+endmenu  # "FDCAN driver configuration"
 
 if STM32_LTDC
 

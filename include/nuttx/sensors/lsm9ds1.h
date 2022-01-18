@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_LSM9DS1
-#define __INCLUDE_NUTTX_SENSORS_LSM9DS1
+#ifndef __INCLUDE_NUTTX_SENSORS_LSM9DS1_H
+#define __INCLUDE_NUTTX_SENSORS_LSM9DS1_H
 
 /****************************************************************************
  * Included Files
@@ -131,4 +131,4 @@ int lsm9ds1mag_register(FAR const char *devpath,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_LSM9DS1 */
-#endif /* __INCLUDE_NUTTX_SENSORS_LSM9DS1 */
+#endif /* __INCLUDE_NUTTX_SENSORS_LSM9DS1_H */

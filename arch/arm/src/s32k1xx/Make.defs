@@ -38,7 +38,7 @@ endif
 
 CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c
 CHIP_CSRCS += s32k1xx_periphclocks.c s32k1xx_pin.c s32k1xx_pingpio.c
-CHIP_CSRCS += s32k1xx_idle.c
+CHIP_CSRCS += s32k1xx_idle.c s32k1xx_uid.c
 
 ifeq ($(CONFIG_BOOT_RUNFROMFLASH),y)
 CHIP_CSRCS += s32k1xx_flashcfg.c
@@ -98,8 +98,8 @@ ifneq ($(CONFIG_ARCH_CUSTOM_PMINIT),y)
 CHIP_CSRCS += s32k1xx_pminitialize.c
 endif
 
-ifeq ($(CONFIG_RESET_CAUSE_PROC_FS), y)
-CHIP_CSRCS += s32k1xx_resetcause.c
+ifeq ($(CONFIG_S32K1XX_RESETCAUSE_PROCFS), y)
+CHIP_CSRCS += s32k1xx_resetcause_procfs.c
 endif
 
 # Source files specific to the ARM CPU family and to the S32K1xx chip family

@@ -658,6 +658,24 @@ config PTHREAD_MUTEX_DEFAULT_UNSAFE
 
 endchoice # Default NORMAL mutex robustness
 
+choice
+	prompt "Default pthread mutex protocol"
+	default PTHREAD_MUTEX_DEFAULT_PRIO_NONE
+
+config PTHREAD_MUTEX_DEFAULT_PRIO_NONE
+	bool "PTHREAD_PRIO_NONE default"
+	---help---
+		By default, pthread mutexes utilize PTHREAD_PRIO_NONE protocol (standard).
+
+config PTHREAD_MUTEX_DEFAULT_PRIO_INHERIT
+	bool "PTHREAD_PRIO_INHERIT default"
+	depends on PRIORITY_INHERITANCE
+	---help---
+		By default, pthread mutexes utilize PTHREAD_PRIO_INHERIT protocol
+		(POSIX non-standard but a reasonable choice for most real-time systems).
+
+endchoice # Default pthread mutex protocol
+
 config PTHREAD_CLEANUP
 	bool "pthread cleanup stack"
 	default n
@@ -675,7 +693,7 @@ config PTHREAD_CLEANUP_STACKSIZE
 		The maximum number of cleanup actions that may be pushed by
 		pthread_clean_push().  This setting will increase the size of EVERY
 		pthread task control block by about n * CONFIG_PTHREAD_CLEANUP_STACKSIZE
-		where n is the size of a pointer, 2* sizeof(uintptr_t), this would be
+		where n is the size of a pointer, 2 * sizeof(uintptr_t), this would be
 		8 for a CPU with 32-bit addressing and 4 for a CPU with 16-bit
 		addressing.
 

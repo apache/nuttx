@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_ST7789_H
-#define __INCLUDE_NUTTX_ST7789_H
+#ifndef __INCLUDE_NUTTX_LCD_ST7789_H
+#define __INCLUDE_NUTTX_LCD_ST7789_H
 
 /****************************************************************************
  * Included Files
@@ -69,4 +69,4 @@ FAR struct lcd_dev_s *st7789_lcdinitialize(FAR struct spi_dev_s *spi);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_ST7789_H */
+#endif /* __INCLUDE_NUTTX_LCD_ST7789_H */

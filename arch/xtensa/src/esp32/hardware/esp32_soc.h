@@ -620,7 +620,7 @@ extern int rom_i2c_writereg(int block, int block_id, int reg_add,
                                     (REG_GET_FIELD(EFUSE_BLK0_RDATA5_REG, \
                                      EFUSE_RD_VOL_LEVEL_HP_INV)))
 
-#ifdef CONFIG_ESPTOOLPY_FLASHFREQ_80M
+#ifdef CONFIG_ESP32_FLASH_FREQ_80M
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_HP_VOLT
 #else
 #define DIG_DBIAS_80M_160M          RTC_CNTL_DBIAS_1V10

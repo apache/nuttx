@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_PWM_H
-#define __ARCH_ARM_SRC_KL_KINETIS_PWM_H
+#ifndef __ARCH_ARM_SRC_KL_KL_PWM_H
+#define __ARCH_ARM_SRC_KL_KL_PWM_H
 
 /****************************************************************************
  * Included Files
@@ -182,4 +182,4 @@ FAR struct pwm_lowerhalf_s *kl_pwminitialize(int timer);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_KL_TPMx_PWM */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_PWM_H */
+#endif /* __ARCH_ARM_SRC_KL_KL_PWM_H */

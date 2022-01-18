@@ -141,6 +141,9 @@ static const struct file_operations g_sensor_fops =
   NULL,           /* seek  */
   sensor_ioctl,   /* ioctl */
   sensor_poll     /* poll  */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /****************************************************************************

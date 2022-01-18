@@ -218,4 +218,176 @@ config SPI_BITBANG_VARWIDTH
 		only.
 
 endif # SPI_BITBANG
+
+config SPI_FLASH
+	bool "Simulated SPI FLASH with SMARTFS"
+	default n
+	---help---
+		Adds a simulated SPI FLASH that responds to standard M25 style
+		commands on the SPI bus.
+
+if SPI_FLASH
+
+choice
+	prompt "Simulated SPI FLASH Size"
+	default SPI_FLASH_1M
+
+config SPI_FLASH_1M
+	bool "1 MBit (128K Byte)"
+
+config SPI_FLASH_8M
+	bool "8 MBit (1M Byte)"
+
+config SPI_FLASH_32M
+	bool "32 MBit (4M Byte)"
+
+config SPI_FLASH_64M
+	bool "64 MBit (8M Byte)"
+
+config SPI_FLASH_128M
+	bool "128 MBit (16M Byte)"
+
+endchoice
+
+config SPI_FLASH_SECTORSIZE
+	int "FLASH Sector Erase Size"
+	default 65536
+	---help---
+		Sets the large sector erase size that the part simulates.
+		This driver simulates SPI devices that have both a large
+		sector erase as well as a "sub-sector" (per the datasheet)
+		erase size (typically 4K bytes).
+
+config SPI_FLASH_SUBSECTORSIZE
+	int "FLASH Sub-Sector Erase Size"
+	default 4096
+	---help---
+		Sets the smaller sub-sector erase size supported by the
+		FLASH emulation
+
+config SPI_FLASH_M25P
+	bool "Enable M25Pxx FLASH"
+	---help---
+		Enables simulation of an M25P type FLASH
+
+config SPI_FLASH_SST26
+	bool "Enable SST26 FLASH"
+	---help---
+		Enables simulation of an SST26 type FLASH
+
+config SPI_FLASH_W25
+	bool "Enable W25 FLASH"
+	---help---
+		Enables simulation of a W25 type FLASH
+
+config SPI_FLASH_CUSTOM
+	bool "Enable Emulation of a Custom Manufacturer / ID FLASH"
+	---help---
+		Enables simulation of FLASH with a custom Manufacturer, ID and Capacity
+
+config SPI_FLASH_MANUFACTURER
+	hex "Hex ID of the FLASH manufacturer code"
+	default 0x20
+	depends on SPI_FLASH_CUSTOM
+	---help---
+		Allows the simulated FLASH Manufacturer ID to be set.
+
+config SPI_FLASH_MEMORY_TYPE
+	hex "Hex ID of the FLASH Memory Type code"
+	default 0x20
+	depends on SPI_FLASH_CUSTOM
+	---help---
+		Allows the simulated FLASH Memory Type code to be set.
+
+config SPI_FLASH_CAPACITY
+	hex "Hex ID of the FLASH capacity code"
+	default 0x14
+	depends on SPI_FLASH_CUSTOM
+	---help---
+		Allows the simulated FLASH Memory Capacity code to be set.
+
+config SPI_FLASH_PAGESIZE
+	int "FLASH Write / Program Page Size"
+	default 256
+	---help---
+		Sets the size of a page program operation.  The page size
+		represents the maximum number of bytes that can be sent
+		for a program operation.  If more bytes than this are
+		sent on a single Page Program, then the address will
+		"wrap" causing the initial data sent to be overwritten.
+		This is consistent with standard SPI FLASH operation.
+
+endif # SPI_FLASH
+
+config QSPI_FLASH
+	bool "Simulated QSPI FLASH with SMARTFS"
+	default n
+	---help---
+		Adds a simulated QSPI FLASH that responds to N25QXXX style
+		commands on the QSPI bus.
+
+if QSPI_FLASH
+
+choice
+	prompt "Simulated QSPI FLASH Size"
+	default QSPI_FLASH_1M
+
+config QSPI_FLASH_1M
+	bool "1 MBit (128K Byte)"
+
+config QSPI_FLASH_8M
+	bool "8 MBit (1M Byte)"
+
+config QSPI_FLASH_32M
+	bool "32 MBit (4M Byte)"
+
+config QSPI_FLASH_64M
+	bool "64 MBit (8M Byte)"
+
+config QSPI_FLASH_128M
+	bool "128 MBit (16M Byte)"
+
+endchoice
+
+config QSPI_FLASH_MANUFACTURER
+	hex "Hex ID of the FLASH manufacturer code"
+	default 0x20
+	---help---
+		Allows the simulated FLASH Manufacturer ID to be set.
+
+config QSPI_FLASH_MEMORY_TYPE
+	hex "Hex ID of the FLASH Memory Type code"
+	default 0xba
+	---help---
+		Allows the simulated FLASH Memory Type code to be set.
+
+config QSPI_FLASH_SECTORSIZE
+	int "FLASH Sector Erase Size"
+	default 65536
+	---help---
+		Sets the large sector erase size that the part simulates.
+		This driver simulates QSPI devices that have both a large
+		sector erase as well as a "sub-sector" (per the datasheet)
+		erase size (typically 4K bytes).
+
+config QSPI_FLASH_SUBSECTORSIZE
+	int "FLASH Sub-Sector Erase Size"
+	default 4096
+	---help---
+		Sets the smaller sub-sector erase size supported by the
+		FLASH emulation
+
+config QSPI_FLASH_PAGESIZE
+	int "FLASH Write / Program Page Size"
+	default 256
+	---help---
+		Sets the size of a page program operation.  The page size
+		represents the maximum number of bytes that can be sent
+		for a program operation.  If more bytes than this are
+		sent on a single Page Program, then the address will
+		"wrap" causing the initial data sent to be overwritten.
+		This is consistent with standard SPI FLASH operation.
+
+endif # QSPI_FLASH
+
 endif # SPI

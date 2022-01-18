@@ -453,8 +453,11 @@ static void mpfs_opensbi_scratch_setup(uint32_t hartid)
    * them so that OpenSBI has no chance override then.
    */
 
-  g_scratches[hartid].scratch.fw_start = __mpfs_nuttx_start;
-  g_scratches[hartid].scratch.fw_size  = __mpfs_nuttx_end;
+  g_scratches[hartid].scratch.fw_start = (unsigned long)&__mpfs_nuttx_start;
+  g_scratches[hartid].scratch.fw_size  = (unsigned long)&__mpfs_nuttx_end -
+                                         (unsigned long)&__mpfs_nuttx_start;
+
+  DEBUGASSERT(g_scratches[hartid].scratch.fw_size > 0);
 }
 
 /****************************************************************************
@@ -516,6 +519,7 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
   g_scratches[hartid].scratch.next_addr = UBOOT_LOAD_ADDR;
+  g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);
 

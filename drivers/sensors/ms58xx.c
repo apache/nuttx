@@ -160,15 +160,15 @@ static int     ms58xx_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  ms58xx_open,
-  ms58xx_close,
-  ms58xx_read,
-  ms58xx_write,
-  NULL,
-  ms58xx_ioctl,
-  NULL
+  ms58xx_open,     /* open */
+  ms58xx_close,    /* close */
+  ms58xx_read,     /* read */
+  ms58xx_write,    /* write */
+  NULL,            /* seek */
+  ms58xx_ioctl,    /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

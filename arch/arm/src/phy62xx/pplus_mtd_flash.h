@@ -22,8 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#ifndef __INCLUDE_PPLUS_MTD_FLASH_H
-#define __INCLUDE_PPLUS_MTD_FLASH_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PPLUS_MTD_FLASH_H
+#define __ARCH_ARM_SRC_PHY62XX_PPLUS_MTD_FLASH_H
 
 /****************************************************************************
  * Included Files
@@ -52,4 +52,4 @@ struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __INCLUDE_PPLUS_MTD_FLASH_H */
+#endif /* __ARCH_ARM_SRC_PHY62XX_PPLUS_MTD_FLASH_H */

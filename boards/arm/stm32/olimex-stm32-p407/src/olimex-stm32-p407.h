@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H
-#define __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H
+#ifndef __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_OLIMEX_STM32_P407_H
+#define __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_OLIMEX_STM32_P407_H
 
 /****************************************************************************
  * Included Files
@@ -354,4 +354,4 @@ int stm32_djoy_initialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_H */
+#endif /* __BOARDS_ARM_STM32_OLIMEX_STM32_P407_SRC_OLIMEX_STM32_P407_H */

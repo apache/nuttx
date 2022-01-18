@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_RPMSGFS_H
-#define __FS_RPMSGFS_H
+#ifndef __FS_RPMSGFS_RPMSGFS_H
+#define __FS_RPMSGFS_RPMSGFS_H
 
 /****************************************************************************
  * Included Files
@@ -243,4 +243,4 @@ int       rpmsgfs_client_stat(FAR void *handle, FAR const char *path,
 int       rpmsgfs_client_chstat(FAR void *handle, FAR const char *path,
                                 FAR const struct stat *buf, int flags);
 
-#endif /* __FS_RPMSGFS_H */
+#endif /* __FS_RPMSGFS_RPMSGFS_H */

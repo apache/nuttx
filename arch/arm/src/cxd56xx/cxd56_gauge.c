@@ -81,11 +81,9 @@ static const struct file_operations g_gaugeops =
   gauge_close,  /* close */
   gauge_read,   /* read */
   gauge_write,  /* write */
-  0,            /* seek */
-  gauge_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL        /* poll */
-#endif
+  NULL,         /* seek */
+  gauge_ioctl,  /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif

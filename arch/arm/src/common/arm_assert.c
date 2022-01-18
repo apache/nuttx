@@ -58,12 +58,7 @@
 #  define CONFIG_BOARD_RESET_ON_ASSERT 0
 #endif
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
 #ifdef CONFIG_ARCH_STACKDUMP
-static uint32_t s_last_regs[XCPTCONTEXT_REGS];
 
 /****************************************************************************
  * Private Functions
@@ -96,16 +91,6 @@ static void arm_stackdump(uint32_t sp, uint32_t stack_top)
 
 static void arm_registerdump(FAR volatile uint32_t *regs)
 {
-  /* Are user registers available from interrupt processing? */
-
-  if (regs == NULL)
-    {
-      /* No.. capture user registers by hand */
-
-      arm_saveusercontext(s_last_regs);
-      regs = s_last_regs;
-    }
-
   /* Dump the interrupt registers */
 
   _alert("R0: %08x R1: %08x R2: %08x  R3: %08x\n",
@@ -368,9 +353,21 @@ static void arm_dumpstate(void)
   sched_dumpstack(rtcb->pid);
 #endif
 
-  /* Dump the registers (if available) */
+  /* Update the xcp context */
 
-  arm_registerdump(CURRENT_REGS);
+  if (CURRENT_REGS)
+    {
+      memcpy(rtcb->xcp.regs,
+             (FAR uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
+    }
+  else
+    {
+      arm_saveusercontext(rtcb->xcp.regs);
+    }
+
+  /* Dump the registers */
+
+  arm_registerdump(rtcb->xcp.regs);
 
   /* Dump the irq stack */
 

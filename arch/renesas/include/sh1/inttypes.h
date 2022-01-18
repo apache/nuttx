@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_INCLUDE_SH1_INTTYPES_H
-#define __ARCH_AVR_INCLUDE_SH1_INTTYPES_H
+#ifndef __ARCH_RENESAS_INCLUDE_SH1_INTTYPES_H
+#define __ARCH_RENESAS_INCLUDE_SH1_INTTYPES_H
 
 /****************************************************************************
  * Included Files
@@ -116,4 +116,4 @@
 #define UINT32_C(x) x ## u
 #define UINT64_C(x) x ## ull
 
-#endif /* __ARCH_AVR_INCLUDE_SH1_INTTYPES_H */
+#endif /* __ARCH_RENESAS_INCLUDE_SH1_INTTYPES_H */

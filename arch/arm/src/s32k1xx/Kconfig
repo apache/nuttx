@@ -347,6 +347,15 @@ config S32K1XX_EEEPROM
 
 endmenu # S32K1XX Peripheral Selection
 
+menu "S32K1xx Reset Control Module (RCM)"
+
+config S32K1XX_RESETCAUSE_PROCFS
+	bool "S32K1XX MCU Reset Cause PROCFS entry"
+	default n
+	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+
+endmenu # S32K1XX Reset Control Module (RCM)
+
 menu "S32K1XX FTM PWM Configuration"
 	depends on S32K1XX_FTM
 

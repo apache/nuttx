@@ -65,8 +65,10 @@ config ARCH_CHIP_ESP32S2
 	select LIBC_ARCH_STRLEN
 	select LIBC_ARCH_STRNLEN
 	---help---
-		The ESP32-S2 is a dual-core system from Espressif with a
-		Harvard architecture Xtensa LX7 CPU.
+		ESP32-S2 is a truly secure, highly integrated, low-power, 2.4 GHz Wi-Fi
+		Microcontroller SoC supporting Wi-Fi HT40 and having 43 GPIOs.
+		Based on an Xtensa single-core 32-bit LX7 processor, it can be clocked
+		at up to 240 MHz.
 
 config ARCH_CHIP_XTENSA_CUSTOM
 	bool "Custom XTENSA chip"

@@ -62,8 +62,12 @@ static const struct file_operations g_altmdmfops =
   altmdm_close,                 /* close */
   altmdm_read,                  /* read */
   altmdm_write,                 /* write */
-  0,                            /* seek */
+  NULL,                         /* seek */
   altmdm_ioctl,                 /* ioctl */
+  NULL                          /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                        /* unlink */
+#endif
 };
 
 /****************************************************************************

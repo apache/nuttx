@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_MCP2515_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_MCP2515_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MCP2515_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MCP2515_H
 
 /****************************************************************************
  * Included Files
@@ -80,4 +80,4 @@ int board_mcp2515_initialize(int devno);
 }
 #endif
 
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_BMP180_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MCP2515_H */

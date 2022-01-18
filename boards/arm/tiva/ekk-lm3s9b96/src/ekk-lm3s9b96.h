@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
-#define __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H
+#ifndef __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKK_LM3S9B96_H
+#define __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKK_LM3S9B96_H
 
 /****************************************************************************
  * Included Files
@@ -92,4 +92,4 @@
 extern void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKKLM3S9B96_H */
+#endif /* __BOARDS_ARM_TIVA_EKK_LM3S9B96_SRC_EKK_LM3S9B96_H */

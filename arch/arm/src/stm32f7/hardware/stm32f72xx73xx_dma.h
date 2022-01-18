@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XX_DMA_H
-#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XX_DMA_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_DMA_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_DMA_H
 
 /****************************************************************************
  * Included Files
@@ -538,4 +538,4 @@
 #define DMAMAP_SDMMC2_2            STM32_DMA_MAP(DMA2,DMA_STREAM5,DMA_CHAN11)
 
 #endif /* CONFIG_STM32F7_STM32F72XX || CONFIG_STM32F7_STM32F73XX */
-#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XXX73XX_DMA_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F72XX73XX_DMA_H */

@@ -110,17 +110,16 @@ static int msa301_register(FAR const char *               devpath,
 
 static const struct file_operations g_fops =
 {
-  msa301_open,
-  msa301_close,
-  msa301_read,
-  msa301_write,
-  NULL,
-  msa301_ioctl,
-  NULL
-#  ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  ,
-  NULL
-#  endif
+  msa301_open,     /* open */
+  msa301_close,    /* close */
+  msa301_read,     /* read */
+  msa301_write,    /* write */
+  NULL,            /* seek */
+  msa301_ioctl,    /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 static const struct msa301_ops_s g_msa301_sensor_ops =

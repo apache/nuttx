@@ -269,7 +269,12 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
               else if (
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#  ifdef CONFIG_NET_SENDFILE
+                  (!conn->sendfile && conn->expired > 0) ||
+                  (conn->sendfile && conn->nrtx >= TCP_MAXRTX) ||
+#  else
                   conn->expired > 0 ||
+#  endif
 #else
                   conn->nrtx >= TCP_MAXRTX ||
 #endif

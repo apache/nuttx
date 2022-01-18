@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_XTENSA_ESP32_H
-#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_XTENSA_ESP32_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_RTCCNTL_H
+#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_RTCCNTL_H
 
 /****************************************************************************
  * Included Files
@@ -3197,4 +3197,4 @@
 #define RTC_IO_DBIAS_XTAL_32K_V  0x3
 #define RTC_IO_DBIAS_XTAL_32K_S  1
 
-#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_XTENSA_ESP32_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_ESP32_RTCCNTL_H */

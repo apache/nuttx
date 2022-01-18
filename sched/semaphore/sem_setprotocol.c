@@ -100,7 +100,7 @@ int nxsem_set_protocol(FAR sem_t *sem, int protocol)
 
         /* Not yet supported */
 
-        return -ENOSYS;
+        return -ENOTSUP;
 
       default:
         break;

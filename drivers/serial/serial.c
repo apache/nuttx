@@ -127,7 +127,7 @@ static const struct file_operations g_serialops =
   uart_close, /* close */
   uart_read,  /* read */
   uart_write, /* write */
-  0,          /* seek */
+  NULL,       /* seek */
   uart_ioctl, /* ioctl */
   uart_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -1675,6 +1675,11 @@ static void uart_launch_worker(void *arg)
 #endif
     }
 }
+
+static void uart_launch(void)
+{
+  work_queue(HPWORK, &g_serial_work, uart_launch_worker, NULL, 0);
+}
 #endif
 
 /****************************************************************************
@@ -1887,17 +1892,71 @@ void uart_reset_sem(FAR uart_dev_t *dev)
 }
 
 /****************************************************************************
- * Name: uart_launch
+ * Name: uart_check_special
  *
  * Description:
- *   This function is called when user want launch a new program by
- *   using a special char.
+ *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
+ *   buffer region.  The first signal associated with the first such
+ *   character is returned.
+ *
+ *   If there multiple such characters in the buffer, only the signal
+ *   associated with the first is returned (this a bug!)
+ *
+ * Returned Value:
+ *   0 if a signal-related character does not appear in the.  Otherwise,
+ *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
+ *   action.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_TTY_LAUNCH
-void uart_launch(void)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size)
 {
-  work_queue(HPWORK, &g_serial_work, uart_launch_worker, NULL, 0);
+  size_t i;
+
+#ifdef CONFIG_SERIAL_TERMIOS
+  if ((dev->tc_lflag & ISIG) == 0)
+#else
+  if (!dev->isconsole)
+#endif
+    {
+      return 0;
+    }
+
+  for (i = 0; i < size; i++)
+    {
+#ifdef CONFIG_TTY_FORCE_PANIC
+      if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
+        {
+          PANIC();
+          return 0;
+        }
+#endif
+
+#ifdef CONFIG_TTY_LAUNCH
+      if (buf[i] == CONFIG_TTY_LAUNCH_CHAR)
+        {
+          uart_launch();
+          return 0;
+        }
+#endif
+
+#ifdef CONFIG_TTY_SIGINT
+      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGINT_CHAR)
+        {
+          return SIGINT;
+        }
+#endif
+
+#ifdef CONFIG_TTY_SIGTSTP
+      if (dev->pid > 0 && buf[i] == CONFIG_TTY_SIGTSTP_CHAR)
+        {
+          return SIGTSTP;
+        }
+#endif
+    }
+
+  return 0;
 }
 #endif

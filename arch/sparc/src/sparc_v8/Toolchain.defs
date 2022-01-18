@@ -1,0 +1,80 @@
+############################################################################
+# arch/sparc/src/sparc/Toolchain.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Handle old-style chip-specific toolchain names in the absence of
+# a new-style toolchain specification, force the selection of a single
+# toolchain and allow the selected toolchain to be overridden by a
+# command-line selection.
+#
+
+ifeq ($(filter y, \
+      $(CONFIG_SPARC_TOOLCHAIN_BUILDROOT) \
+    ),y)
+  CONFIG_SPARC_TOOLCHAIN ?= BUILDROOT
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_SPARC_TOOLCHAIN_CODEREDW) \
+    ),y)
+  CONFIG_SPARC_TOOLCHAIN ?= CODEREDW
+endif
+
+ifeq ($(filter y, \
+      $(CONFIG_SPARC_LINUXGCC_TOOLCHAIN) \
+    ),y)
+  CONFIG_SPARC_TOOLCHAIN ?= LINUXGCC
+endif
+
+
+# Chip-specific CPU flags
+
+ifeq ($(CONFIG_ARCH_CHIP_BM3803),y)
+#  ARCHCPUFLAGS += -mcpu=leon -mflat
+  ARCHCPUFLAGS += -mcpu=leon
+else ifeq ($(CONFIG_ARCH_CHIP_BM3823),y)
+  ARCHCPUFLAGS += -mcpu=leon -mflat
+else
+  $(error "No valid CONFIG_ARCH_CHIP_ set in the configuration")
+endif
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+endif
+
+# NuttX buildroot GCC toolchain under Linux or Cygwin
+
+ifeq ($(CONFIG_SPARC_TOOLCHAIN),BUILDROOT)
+  CROSSDEV ?= sparc-gaisler-elf-
+  MAXOPTIMIZATION ?= -O2
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = sparc-gaisler-elf-debug.ld
+endif
+
+# NuttX Windows Native toolchain
+
+ifeq ($(CONFIG_SPARC_TOOLCHAIN),CODEREDW)
+  CROSSDEV ?= sparc-elf-
+  MAXOPTIMIZATION ?= -O2
+  LDFLAGS += -nostartfiles -nodefaultlibs
+  LDSCRIPT = sparc-elf-debug.ld
+endif

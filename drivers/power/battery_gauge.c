@@ -87,13 +87,16 @@ static int     bat_gauge_poll(FAR struct file *filep,
 
 static const struct file_operations g_batteryops =
 {
-  bat_gauge_open,
-  bat_gauge_close,
-  bat_gauge_read,
-  bat_gauge_write,
-  NULL,
-  bat_gauge_ioctl,
-  bat_gauge_poll
+  bat_gauge_open,   /* open */
+  bat_gauge_close,  /* close */
+  bat_gauge_read,   /* read */
+  bat_gauge_write,  /* write */
+  NULL,             /* seek */
+  bat_gauge_ioctl,  /* ioctl */
+  bat_gauge_poll    /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H
-#define __XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H
+#define __ARCH_XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H
 
 /****************************************************************************
  * Included Files
@@ -93,4 +93,4 @@ unsigned char esp_crc8(unsigned char const *p, unsigned int len);
 }
 #endif
 
-#endif /* __XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ROM_ESP32_EFUSE_H */

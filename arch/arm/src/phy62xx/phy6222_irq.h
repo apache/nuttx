@@ -22,8 +22,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_ARM_INCLUDE_ARMV6_M_IRQ_H
-#define __ARCH_ARM_INCLUDE_ARMV6_M_IRQ_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHY6222_IRQ_H
+#define __ARCH_ARM_SRC_PHY62XX_PHY6222_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -368,5 +368,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __ARCH_ARM_INCLUDE_ARMV6_M_IRQ_H */
-
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHY6222_IRQ_H */

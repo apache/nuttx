@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_INCLUDE_BOARD_H
-#define __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_INCLUDE_BOARD_H
+#ifndef __BOARDS_HC_M9S12_DEMO9S12NE64_INCLUDE_BOARD_H
+#define __BOARDS_HC_M9S12_DEMO9S12NE64_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@
 
 /* Button definitions *******************************************************/
 
-#endif /* __BOARDS_HC_MCS92S12NE64_DEMO9S12NE64_INCLUDE_BOARD_H */
+#endif /* __BOARDS_HC_M9S12_DEMO9S12NE64_INCLUDE_BOARD_H */

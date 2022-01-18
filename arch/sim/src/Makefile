@@ -136,18 +136,6 @@ else ifeq ($(CONFIG_SIM_BUTTONS),y)
 endif
 endif
 
-ifeq ($(CONFIG_SIM_IOEXPANDER),y)
-  CSRCS += up_ioexpander.c
-endif
-
-ifeq ($(CONFIG_SIM_SPIFLASH),y)
-  CSRCS += up_spiflash.c
-endif
-
-ifeq ($(CONFIG_SIM_QSPIFLASH),y)
-  CSRCS += up_qspiflash.c
-endif
-
 ifeq ($(CONFIG_FS_FAT),y)
   CSRCS += up_blockdevice.c up_deviceimage.c
   STDLIBS += -lz
@@ -155,10 +143,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
-endif
-
-ifeq ($(CONFIG_SIM_MOTOR_FOC),y)
-CSRCS += up_foc.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)

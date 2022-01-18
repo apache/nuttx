@@ -78,13 +78,13 @@
 
 /* See include/nuttx/sensors/as5048b.h */
 
-#define QE_AS5048B_FIRST   (QE_TIVA_FIRST + QEIOC_TIVA_NCMDS)
+#define QE_AS5048B_FIRST   (QE_TIVA_FIRST + QE_TIVA_NCMDS)
 #define QE_AS5048B_NCMDS   4
 
 /* See arch/arm/src/imxrt/imxrt_enc.h */
 
-#define QE_IMXRT_FIRST      (QE_FIRST + QE_NCMDS)
-#define QE_IMXRT_NCMDS      7
+#define QE_IMXRT_FIRST     (QE_AS5048B_FIRST + QE_AS5048B_NCMDS)
+#define QE_IMXRT_NCMDS     7
 
 /****************************************************************************
  * Public Types

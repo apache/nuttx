@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_PERIPHPOWER_H
-#define __ARCH_ARM_SRC_LPC54XX_LPC54_PERIPHPOWER_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_POWER_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_POWER_H
 
 /****************************************************************************
  * Included Files
@@ -35,4 +35,4 @@
 #  error "Unsupported LPC54 architecture"
 #endif
 
-#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_PERIPHPOWER_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_POWER_H */

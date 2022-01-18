@@ -369,7 +369,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(&priv->bc_dev);
           NETDEV_RXARP(&priv->bc_dev);

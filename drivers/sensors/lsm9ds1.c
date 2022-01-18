@@ -584,15 +584,15 @@ static int lsm9ds1_register(FAR const char *devpath,
 
 static const struct file_operations g_fops =
 {
-  lsm9ds1_open,
-  lsm9ds1_close,
-  lsm9ds1_read,
-  lsm9ds1_write,
-  NULL,
-  lsm9ds1_ioctl,
-  NULL,
+  lsm9ds1_open,    /* open */
+  lsm9ds1_close,   /* close */
+  lsm9ds1_read,    /* read */
+  lsm9ds1_write,   /* write */
+  NULL,            /* seek */
+  lsm9ds1_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL,
+  , NULL           /* unlink */
 #endif
 };
 

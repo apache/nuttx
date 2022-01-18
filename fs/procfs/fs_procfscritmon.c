@@ -137,14 +137,6 @@ static int critmon_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "critmon" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "critmon") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   attr = kmm_zalloc(sizeof(struct critmon_file_s));
@@ -359,14 +351,6 @@ static int critmon_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int critmon_stat(const char *relpath, struct stat *buf)
 {
-  /* "critmon" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "critmon") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "critmon" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

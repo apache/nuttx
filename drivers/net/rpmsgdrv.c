@@ -898,7 +898,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
       };
 
       dnsaddr.sin_family = AF_INET;
-      dnsaddr.sin_port   = htons(DNS_DEFAULT_PORT);
+      dnsaddr.sin_port   = HTONS(DNS_DEFAULT_PORT);
       memcpy(&dnsaddr.sin_addr, &msg.dnsaddr, sizeof(msg.dnsaddr));
 
       dns_add_nameserver((FAR const struct sockaddr *)&dnsaddr,
@@ -914,7 +914,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
       };
 
       dnsaddr.sin6_family = AF_INET6;
-      dnsaddr.sin6_port   = htons(DNS_DEFAULT_PORT);
+      dnsaddr.sin6_port   = HTONS(DNS_DEFAULT_PORT);
       memcpy(&dnsaddr.sin6_addr, msg.ipv6dnsaddr, sizeof(msg.ipv6dnsaddr));
 
       dns_add_nameserver((FAR const struct sockaddr *)&dnsaddr,

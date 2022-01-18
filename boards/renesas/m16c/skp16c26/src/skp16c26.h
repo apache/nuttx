@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RENESAS_M32262F8_SKP16C26_SRC_SKP16C26_H
-#define __BOARDS_RENESAS_M32262F8_SKP16C26_SRC_SKP16C26_H
+#ifndef __BOARDS_RENESAS_MC16_SKP16C26_SRC_SKP16C26_H
+#define __BOARDS_RENESAS_MC16_SKP16C26_SRC_SKP16C26_H
 
 /****************************************************************************
  * Included Files
@@ -45,4 +45,4 @@
 
 #endif
 
-#endif /* __BOARDS_RENESAS_M32262F8_SKP16C26_SRC_SKP16C26_H */
+#endif /* __BOARDS_RENESAS_MC16_SKP16C26_SRC_SKP16C26_H */

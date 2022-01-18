@@ -139,14 +139,6 @@ static int version_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "version" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "version") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   attr = (FAR struct version_file_s *)
@@ -279,14 +271,6 @@ static int version_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int version_stat(FAR const char *relpath, FAR struct stat *buf)
 {
-  /* "version" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "version") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "version" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

@@ -31,9 +31,7 @@
 
 #include <arch/board/board.h>
 
-#include <nuttx/motor/foc/foc_lower.h>
-
-#include "up_internal.h"
+#include <nuttx/motor/foc/foc_dummy.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -76,7 +74,7 @@ int sim_foc_setup(void)
         {
           /* Initialize arch specific FOC lower-half */
 
-          foc[i] = sim_foc_initialize(i);
+          foc[i] = foc_dummy_initialize(i);
           if (foc[i] == NULL)
             {
               ret = -errno;

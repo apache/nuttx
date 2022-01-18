@@ -213,10 +213,10 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
             ninfo("local/remote port %04x/%04x\n",
                    udp->srcport, udp->destport);
 
-            if (ntohs(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
-                ntohs(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
-                ntohs(udp->destport) >=  CONFIG_NET_6LOWPAN_MINPORT &&
-                ntohs(udp->destport) <  (CONFIG_NET_6LOWPAN_MINPORT + 16))
+            if (NTOHS(udp->srcport)  >=  CONFIG_NET_6LOWPAN_MINPORT &&
+                NTOHS(udp->srcport)  <  (CONFIG_NET_6LOWPAN_MINPORT + 16) &&
+                NTOHS(udp->destport) >=  CONFIG_NET_6LOWPAN_MINPORT &&
+                NTOHS(udp->destport) <  (CONFIG_NET_6LOWPAN_MINPORT + 16))
               {
                 FAR uint8_t *hcudp = fptr + g_frame_hdrlen;
 
@@ -229,9 +229,9 @@ int sixlowpan_compresshdr_hc1(FAR struct radio_driver_s *radio,
                 hcudp[SIXLOWPAN_HC1_HC_UDP_UDP_ENCODING] = 0xe0;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_TTL]          = ipv6->ttl;
                 hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS]        =
-                  (uint8_t)((ntohs(udp->srcport) -
+                  (uint8_t)((NTOHS(udp->srcport) -
                             CONFIG_NET_6LOWPAN_MINPORT) << 4) +
-                  (uint8_t)((ntohs(udp->destport) -
+                  (uint8_t)((NTOHS(udp->destport) -
                             CONFIG_NET_6LOWPAN_MINPORT));
 
                 memcpy(&hcudp[SIXLOWPAN_HC1_HC_UDP_CHKSUM],
@@ -370,10 +370,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
             /* UDP ports, len, checksum */
 
             udp->srcport =
-              htons(CONFIG_NET_6LOWPAN_MINPORT +
+              HTONS(CONFIG_NET_6LOWPAN_MINPORT +
                     (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] >> 4));
             udp->destport =
-              htons(CONFIG_NET_6LOWPAN_MINPORT +
+              HTONS(CONFIG_NET_6LOWPAN_MINPORT +
                     (hcudp[SIXLOWPAN_HC1_HC_UDP_PORTS] & 0x0f));
 
             ninfo("UDP srcport=%04x destport=%04x\n",
@@ -425,10 +425,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
     }
 
   ninfo("srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(ipv6->srcipaddr[0]), ntohs(ipv6->srcipaddr[1]),
-        ntohs(ipv6->srcipaddr[2]), ntohs(ipv6->srcipaddr[3]),
-        ntohs(ipv6->srcipaddr[4]), ntohs(ipv6->srcipaddr[5]),
-        ntohs(ipv6->srcipaddr[6]), ntohs(ipv6->srcipaddr[7]));
+        NTOHS(ipv6->srcipaddr[0]), NTOHS(ipv6->srcipaddr[1]),
+        NTOHS(ipv6->srcipaddr[2]), NTOHS(ipv6->srcipaddr[3]),
+        NTOHS(ipv6->srcipaddr[4]), NTOHS(ipv6->srcipaddr[5]),
+        NTOHS(ipv6->srcipaddr[6]), NTOHS(ipv6->srcipaddr[7]));
 
   if ((hc1[SIXLOWPAN_HC1_ENCODING] & SIXLOWPAN_HC1_DESTADDR_MASK) ==
       SIXLOWPAN_HC1_DESTADDR_PCIC)
@@ -450,10 +450,10 @@ int sixlowpan_uncompresshdr_hc1(FAR struct radio_driver_s *radio,
     }
 
   ninfo("destipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(ipv6->destipaddr[0]), ntohs(ipv6->destipaddr[1]),
-        ntohs(ipv6->destipaddr[2]), ntohs(ipv6->destipaddr[3]),
-        ntohs(ipv6->destipaddr[4]), ntohs(ipv6->destipaddr[5]),
-        ntohs(ipv6->destipaddr[6]), ntohs(ipv6->destipaddr[7]));
+        NTOHS(ipv6->destipaddr[0]), NTOHS(ipv6->destipaddr[1]),
+        NTOHS(ipv6->destipaddr[2]), NTOHS(ipv6->destipaddr[3]),
+        NTOHS(ipv6->destipaddr[4]), NTOHS(ipv6->destipaddr[5]),
+        NTOHS(ipv6->destipaddr[6]), NTOHS(ipv6->destipaddr[7]));
 
   /* IP length field. */
 

@@ -1,0 +1,133 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CEVA
+comment "CEVA Options"
+
+config ARCH_XC5
+	bool
+	default n
+	---help---
+		CEVA-XC5 is a licensable DSP and memory subsystem (MSS) platform
+		designed for advanced wireless communication, with low power and
+		flexible architecture support for both legacy and next-generation
+		wireless standards.
+
+config ARCH_XM6
+	bool
+	default n
+	select ARCH_HAVE_HARDFAULT_DEBUG
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MULTICPU
+	---help---
+		CEVA-XM6 is a licensable DSP and memory subsystem (MSS) platform
+		targeted for high-performance computer vision and image-processing
+		applications that provide very high processing power while
+		maintaining a small footprint and low power consumption.
+
+config ARCH_FAMILY
+	string
+	default "xc5"		if ARCH_XC5
+	default "xm6"		if ARCH_XM6
+
+config ARCH_ITCM_SIZE
+	int "ITCM Size"
+
+config ARCH_DTCM_SIZE
+	int "DTCM Size"
+
+config CEVA_ICACHE
+	bool "Use I-Cache"
+	default n
+	select ARCH_ICACHE
+
+config CEVA_DCACHE
+	bool "Use D-Cache"
+	default n
+	select ARCH_DCACHE
+
+config ARCH_NR_FPUS
+	int "FPU Number"
+	default 1
+	depends on ARCH_HAVE_FPU
+	---help---
+		Built-in support for the number of Floating Point Unit.
+		Check your chip specifications first; not all CEVA chips
+		support the FPU.
+
+config ARCH_MPU
+	bool "MPU support"
+	default n
+	depends on ARCH_HAVE_MPU
+	select ARCH_USE_MPU
+	---help---
+		Built-in support for the CEVA Memory Protection Unit (MPU).
+		Also used to configure the cache and memory attribute.
+
+config ARCH_HAVE_VINTC
+	bool
+	default n
+
+config ARCH_HARDFAULT_IRQ
+	int "Hard Fault IRQ Number"
+	default -1
+
+config ARCH_NR_MEMORY
+	int "Memory Block Number"
+	default 1
+
+config ARCH_NR_USER_MEMORY
+	int "User Memory Block Number"
+	depends on BUILD_PROTECTED
+	default 1
+
+config ARCH_DEFAULT_HEAP
+	int "Default Heap Index"
+	default 0
+
+config ARCH_USER_DEFAULT_HEAP
+	int "User Default Heap Index"
+	depends on BUILD_PROTECTED
+	default 0
+
+config ARCH_STACK_HEAP
+	int "Stack Heap Index"
+	default 0
+
+config ARCH_KERNEL_STACK_HEAP
+	int "Kernel Stack Heap Index"
+	depends on MM_KERNEL_HEAP
+	default 0
+
+config ARCH_RTL_MAJOR
+	int "RTL Version Major Number"
+
+config ARCH_RTL_MINOR
+	int "RTL Version Minor Number"
+
+config ARCH_RTL_REVISION
+	int "RTL Version Revision Number"
+
+config ARCH_HAVE_HARDFAULT_DEBUG
+	bool
+	default n
+
+config DEBUG_HARDFAULT
+	bool "Verbose Hard-Fault Debug"
+	default n
+	depends on ARCH_HAVE_HARDFAULT_DEBUG && DEBUG_ALERT
+	---help---
+		Enables verbose debug output when a hard fault occurs.  This verbose
+		output is sometimes helpful when debugging difficult hard fault problems,
+		but may be more than you typically want to see.
+
+if ARCH_XC5
+source arch/ceva/src/xc5/Kconfig
+endif
+if ARCH_XM6
+source arch/ceva/src/xm6/Kconfig
+endif
+
+endif # ARCH_CEVA

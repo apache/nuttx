@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@ static inline int bcmf_write_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
     return bcmf_write_sbreg(sbus, address, (uint8_t *)&reg, 4);
 }
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H */

@@ -40,14 +40,14 @@ config ESP32S2_INSTRUCTION_CACHE_16KB
 endchoice # ESP32S2 Instruction CACHE size
 
 choice
-	prompt "Instruction CACHE Size"
-	default ESP32S2_INSTRUCTION_CACHE_8KB
+	prompt "Data CACHE Size"
+	default ESP32S2_DATA_CACHE_8KB
 	depends on ARCH_CHIP_ESP32S2
 
 config ESP32S2_DATA_CACHE_0KB
 	bool "No DATA CACHE"
 	---help---
-		Use 8KB of SRAM as Data Cache
+		Disable Data Cache
 
 config ESP32S2_DATA_CACHE_8KB
 	bool "8KB"

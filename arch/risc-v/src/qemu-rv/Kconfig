@@ -1,0 +1,38 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_QEMU_RV
+comment "QEMU RISC-V Options"
+
+choice
+	prompt "QEMU Chip Selection"
+	default ARCH_CHIP_QEMU_RV32
+
+config ARCH_CHIP_QEMU_RV32
+	bool "QEMU RV32"
+	select ARCH_RV32
+
+config ARCH_CHIP_QEMU_RV64
+	bool "QEMU RV64"
+	select ARCH_RV64
+
+endchoice
+
+config ARCH_CHIP_QEMU_RV_ISA_M
+    bool "Standard Extension for Integer Multiplication and Division"
+    default n
+    select ARCH_RV_ISA_M
+
+config ARCH_CHIP_QEMU_RV_ISA_A
+    bool "Standard Extension for Atomic Instructions"
+    default n
+    select ARCH_RV_ISA_A
+
+config ARCH_CHIP_QEMU_RV_ISA_C
+    bool "Standard Extension for Compressed Instructions"
+    default n
+    select ARCH_RV_ISA_C
+
+endif

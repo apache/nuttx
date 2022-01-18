@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PCNT_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PCNT_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PCNT_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PCNT_H
 
 /****************************************************************************
  * Included Files
@@ -527,4 +527,4 @@
 #define _PCNT_INPUT_S1PRSEN_DEFAULT       0x00000000UL                        /* Mode DEFAULT for PCNT_INPUT */
 #define PCNT_INPUT_S1PRSEN_DEFAULT        (_PCNT_INPUT_S1PRSEN_DEFAULT << 10) /* Shifted mode DEFAULT for PCNT_INPUT */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PCNT_H*/
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PCNT_H*/

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_LSM6DSL
-#define __INCLUDE_NUTTX_SENSORS_LSM6DSL
+#ifndef __INCLUDE_NUTTX_SENSORS_LSM6DSL_H
+#define __INCLUDE_NUTTX_SENSORS_LSM6DSL_H
 
 /****************************************************************************
  * Included Files
@@ -880,4 +880,4 @@ int lsm6dsl_sensor_register(FAR const char *devpath,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_LSM9DS1 */
-#endif /* __INCLUDE_NUTTX_SENSORS_LSM9DS1 */
+#endif /* __INCLUDE_NUTTX_SENSORS_LSM6DSL_H */

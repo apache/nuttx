@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H
-#define _ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H
+#ifndef __ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H
+#define __ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -47,4 +47,4 @@ extern uintptr_t *_default_stack_limit;
 #define C906_IDLESTACK0_TOP  (C906_IDLESTACK_BASE + CONFIG_IDLETHREAD_STACKSIZE)
 #define C906_IDLESTACK_TOP   (C906_IDLESTACK0_TOP)
 
-#endif /* _ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H */
+#endif /* __ARCH_RISCV_SRC_C906_C906_MEMORYMAP_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_STM32F7_I2C_H
-#define __ARCH_ARM_SRC_STM32F7_STM32F7_I2C_H
+#ifndef __ARCH_ARM_SRC_STM32F7_STM32_I2C_H
+#define __ARCH_ARM_SRC_STM32F7_STM32_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -86,4 +86,4 @@ FAR struct i2c_master_s *stm32_i2cbus_initialize(int port);
 
 int stm32_i2cbus_uninitialize(FAR struct i2c_master_s *dev);
 
-#endif /* __ARCH_ARM_SRC_STM32F7_STM32F7_I2C_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_STM32_I2C_H */

@@ -828,8 +828,7 @@ found:
                  */
 
                 nwarn("WARNING: Listen canceled while waiting for ACK on "
-                      "port %d\n",
-                      ntohs(tcp->destport));
+                      "port %d\n", NTOHS(tcp->destport));
 
                 /* Free the connection structure */
 

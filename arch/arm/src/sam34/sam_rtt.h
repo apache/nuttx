@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_RTT_H
-#define __ARCH_ARM_SRC_SAM34_RTT_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_RTT_H
+#define __ARCH_ARM_SRC_SAM34_SAM_RTT_H
 
 /****************************************************************************
  * Included Files
@@ -80,4 +80,4 @@ void sam_rttinitialize(FAR const char *devpath);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_TIMER */
-#endif /* __ARCH_ARM_SRC_SAM34_RTT_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_RTT_H */

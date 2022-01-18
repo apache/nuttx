@@ -24,11 +24,7 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_RV32
-#include <arch/rv32im/irq.h>
-#else
-#include <arch/rv64gc/irq.h>
-#endif
+#include <arch/irq.h>
 
 #ifdef CONFIG_ARCH_FPU
 

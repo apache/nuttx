@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTT_SENSORS_SCD30_H
-#define __INCLUDE_NUTT_SENSORS_SCD30_H
+#ifndef __INCLUDE_NUTTX_SENSORS_SCD30_H
+#define __INCLUDE_NUTTX_SENSORS_SCD30_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ int scd30_register_i2c(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                        uint8_t addr);
 #endif
 
-#endif /* __INCLUDE_NUTT_SENSORS_SHT21_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_SCD30_H */

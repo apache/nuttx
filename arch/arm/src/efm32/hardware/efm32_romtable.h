@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ROMTABLE_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ROMTABLE_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ROMTABLE_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ROMTABLE_H
 
 /****************************************************************************
  * Included Files
@@ -111,4 +111,4 @@ struct efm32_romtable_s
   const uint32_t cid0; /* Unused */
 };
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ROMTABLE_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ROMTABLE_H */

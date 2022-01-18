@@ -40,7 +40,9 @@ endif
 ifeq ($(CONFIG_ARCH_RENESAS),y)
 include $(TOPDIR)/libs/libc/machine/renesas/Make.defs
 endif
-
+ifeq ($(CONFIG_ARCH_SPARC),y)
+include $(TOPDIR)/libs/libc/machine/sparc/Make.defs
+endif
 DEPPATH += --dep-path machine
 VPATH += :machine
 

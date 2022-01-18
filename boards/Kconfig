@@ -1398,6 +1398,14 @@ config ARCH_BOARD_RASPBERRYPI_PICO
 	---help---
 		This is a port to the Raspberry Pi Pico board.
 
+config ARCH_BOARD_PIMORONI_TINY2040
+	bool "Pimoroni Tiny2040 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Pimoroni Tiny2040 board.
+		Support is derived from Raspberry Pi Pico support.
+		STATUS:  Work has just began on this port.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -1443,9 +1451,9 @@ config ARCH_BOARD_RV32M1_VEGA
 		This is the board configuration for the port of NuttX to the
 		RV32M1 VEGA board. This board features the RV32M1 RISC-V Core(s).
 
-config ARCH_BOARD_QEMU_RV32_VIRT
-	bool "QEMU RV32 Virt"
-	depends on ARCH_CHIP_QEMU_RV32
+config ARCH_BOARD_QEMU_RV_VIRT
+	bool "QEMU RV Virt"
+	depends on ARCH_CHIP_QEMU_RV
 	---help---
 		This is the board configuration for the port of NuttX to the
 		QEMU RV32 Virt board. This board features the QEMU RV32 CPU.
@@ -2272,6 +2280,20 @@ config ARCH_BOARD_PHY6222
 	---help---
 		none
 
+config ARCH_BOARD_XX3803
+	bool "Sparc Bm3803 XX3803 Board"
+	depends on ARCH_CHIP_BM3803
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
+config ARCH_BOARD_XX3823
+	bool "Sparc Bm3823 XX3823 Board"
+	depends on ARCH_CHIP_BM3823
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
@@ -2489,6 +2511,7 @@ config ARCH_BOARD
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "intel64-qemu"             if ARCH_BOARD_INTEL64_QEMU
 	default "raspberrypi-pico"         if ARCH_BOARD_RASPBERRYPI_PICO
+	default "pimoroni-tiny2040"        if ARCH_BOARD_PIMORONI_TINY2040
 	default "rx65n"                    if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
@@ -2497,7 +2520,7 @@ config ARCH_BOARD
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
-	default "rv32-virt"                if ARCH_BOARD_QEMU_RV32_VIRT
+	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -2582,6 +2605,8 @@ config ARCH_BOARD
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
 	default "spresense"                if ARCH_BOARD_SPRESENSE
+	default "xx3803"                   if ARCH_BOARD_XX3803
+	default "xx3823"                   if ARCH_BOARD_XX3823
 
 comment "Common Board Options"
 
@@ -2815,6 +2840,9 @@ source "boards/arm/nuc1xx/nutiny-nuc120/Kconfig"
 endif
 if ARCH_BOARD_RASPBERRYPI_PICO
 source "boards/arm/rp2040/raspberrypi-pico/Kconfig"
+endif
+if ARCH_BOARD_PIMORONI_TINY2040
+source "boards/arm/rp2040/pimoroni-tiny2040/Kconfig"
 endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
@@ -3242,8 +3270,8 @@ endif
 if ARCH_BOARD_RV32M1_VEGA
 source "boards/risc-v/rv32m1/rv32m1-vega/Kconfig"
 endif
-if ARCH_BOARD_QEMU_RV32_VIRT
-source "boards/risc-v/qemu-rv32/rv32-virt/Kconfig"
+if ARCH_BOARD_QEMU_RV_VIRT
+source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
@@ -3322,6 +3350,12 @@ source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
 if ARCH_BOARD_PHY6222
 source "boards/arm/phy62xx/phy6222/Kconfig"
+endif
+if ARCH_BOARD_XX3803
+source "boards/sparc/bm3803/xx3803/Kconfig"
+endif
+if ARCH_BOARD_XX3823
+source "boards/sparc/bm3823/xx3823/Kconfig"
 endif
 
 comment "Board-Common Options"

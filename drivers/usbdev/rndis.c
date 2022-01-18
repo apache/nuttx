@@ -939,7 +939,7 @@ static void rndis_rxdispatch(FAR void *arg)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (hdr->type == htons(ETHTYPE_ARP))
+  if (hdr->type == HTONS(ETHTYPE_ARP))
     {
       NETDEV_RXARP(&priv->netdev);
 
@@ -954,7 +954,7 @@ static void rndis_rxdispatch(FAR void *arg)
 #endif
     {
       uerr("ERROR: Unsupported packet type dropped (%02x)\n",
-           htons(hdr->type));
+           HTONS(hdr->type));
       NETDEV_RXDROPPED(&priv->netdev);
       priv->netdev.d_len = 0;
     }

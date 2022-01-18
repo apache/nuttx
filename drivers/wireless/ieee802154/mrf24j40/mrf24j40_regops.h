@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REGOPS_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REGOPS_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REGOPS_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REGOPS_H
 
 void mrf24j40_setreg(FAR struct spi_dev_s *spi, uint32_t addr, uint8_t val);
 
@@ -27,4 +27,4 @@ uint8_t mrf24j40_getreg(FAR struct spi_dev_s *spi, uint32_t addr);
 
 int mrf24j40_regdump(FAR struct mrf24j40_radio_s *dev);
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REGOPS_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REGOPS_H */

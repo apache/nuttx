@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_BMP180_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_BMP180_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BMP180_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BMP180_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_bmp180_initialize(int devno, int busno);
 }
 #endif
 
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_BMP180_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_BMP180_H */

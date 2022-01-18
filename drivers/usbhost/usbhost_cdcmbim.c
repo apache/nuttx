@@ -331,21 +331,21 @@ static void cdcmbim_txpoll_work(void *arg);
 
 static const struct usbhost_id_s g_id =
 {
-  USB_CLASS_CDC,      /* base     */
+  USB_CLASS_CDC,      /* base */
   CDC_SUBCLASS_MBIM,  /* subclass */
-  0,                  /* proto    */
-  0,                  /* vid      */
-  0                   /* pid      */
+  0,                  /* proto */
+  0,                  /* vid */
+  0                   /* pid */
 };
 
 /* This is the USB host storage class's registry entry */
 
 static struct usbhost_registry_s g_cdcmbim =
 {
-  NULL,                   /* flink    */
-  usbhost_create,         /* create   */
-  1,                      /* nids     */
-  &g_id                   /* id[]     */
+  NULL,                   /* flink */
+  usbhost_create,         /* create */
+  1,                      /* nids */
+  &g_id                   /* id[] */
 };
 
 /* File operations for control channel */

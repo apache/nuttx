@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __VIDEO_VIDEO_FRAMEBUFF_H__
-#define __VIDEO_VIDEO_FRAMEBUFF_H__
+#ifndef __DRIVERS_VIDEO_VIDEO_FRAMEBUFF_H
+#define __DRIVERS_VIDEO_VIDEO_FRAMEBUFF_H
 
 /****************************************************************************
  * Included Files
@@ -84,4 +84,4 @@ void              video_framebuff_capture_done
 void              video_framebuff_change_mode
                        (video_framebuff_t *fbuf, enum v4l2_buf_mode mode);
 
-#endif  // __VIDEO_VIDEO_FRAMEBUFF_H__
+#endif  /* __DRIVERS_VIDEO_VIDEO_FRAMEBUFF_H */

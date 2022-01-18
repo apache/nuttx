@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L5_STM32L5_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32L5_STM32L5_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -150,4 +150,4 @@
 #define STM32L5_OCTOSPI1_BASE   0x44021000
 #define STM32L5_FMC_BASE        0x44020000
 
-#endif /* __ARCH_ARM_SRC_STM32L5_STM32L5_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L5_MEMORYMAP_H */

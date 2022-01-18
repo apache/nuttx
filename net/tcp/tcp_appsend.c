@@ -226,9 +226,19 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   else
     {
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      /* The application cannot send more than what is allowed by the
+       * MSS (the minimum of the MSS and the available window).
+       */
+
       DEBUGASSERT(dev->d_sndlen <= conn->mss);
-#else
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_SENDFILE)
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      if (conn->sendfile)
+        {
+#endif
+
       /* If d_sndlen > 0, the application has data to be sent. */
 
       if (dev->d_sndlen > 0)
@@ -241,15 +251,14 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            */
 
           conn->tx_unacked += dev->d_sndlen;
-
-          /* The application cannot send more than what is allowed by the
-           * MSS (the minimum of the MSS and the available window).
-           */
-
-          DEBUGASSERT(dev->d_sndlen <= conn->mss);
         }
 
       conn->nrtx = 0;
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+        }
+#endif
+
 #endif
 
       /* Then handle the rest of the operation just as for the rexmit case */

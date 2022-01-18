@@ -15,8 +15,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@
 
 #define CACHE_MEMORY_IBANK0_ADDR    0x4037c000
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_ESP32C3_CACHE_MEMORY_H */

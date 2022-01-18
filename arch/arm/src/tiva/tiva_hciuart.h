@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HCIUART_H
-#define __ARCH_ARM_SRC_TIVA_HCIUART_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_HCIUART_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_HCIUART_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@ void hciuart_initialize(void);
 void tiva_serial_dma_poll(void);
 #endif
 
-#endif /* __ARCH_ARM_SRC_TIVA_HCIUART_H */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_HCIUART_H */

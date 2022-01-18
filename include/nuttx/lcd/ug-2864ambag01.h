@@ -21,8 +21,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_UG_8264AMBAG01_H
-#define __INCLUDE_NUTTX_UG_8264AMBAG01_H
+#ifndef __INCLUDE_NUTTX_LCD_UG_8264AMBAG01_H
+#define __INCLUDE_NUTTX_LCD_UG_8264AMBAG01_H
 
 /****************************************************************************
  * Included Files
@@ -69,9 +69,9 @@
  *
  * "The serial interface consists of serial clock SCL, serial data SI, A0 and
  *  CS . SI is shifted into an 8-bit shift register on every rising edge of
- *  SCL in the order of D7, D6, … and D0. A0 is sampled on every eighth clock
- *  and the data byte in the shift register is written to the display data
- *  RAM or command register in the same clock."
+ *  SCL in the order of D7, D6, ... and D0. A0 is sampled on every eighth
+ *  clock and the data byte in the shift register is written to the display
+ *  data RAM or command register in the same clock."
  *
  * MODE 3:
  *   Clock polarity:  High (CPOL=1)
@@ -83,8 +83,8 @@
 #endif
 
 /* "This module determines whether the input data is interpreted as data or
- * command. When A0 = “H”, the inputs at D7 - D0 are interpreted as data and
- * be written to display RAM. When A0 = “L”, the inputs at D7 - D0 are
+ * command. When A0 = "H", the inputs at D7 - D0 are interpreted as data and
+ * be written to display RAM. When A0 = "L", the inputs at D7 - D0 are
  * interpreted as command, they will be decoded and be written to the
  * corresponding command registers.
  */
@@ -229,4 +229,4 @@ void ug2864ambag01_fill(FAR struct lcd_dev_s *dev, uint8_t color);
 #endif
 
 #endif /* CONFIG_LCD_UG2864AMBAG01 */
-#endif /* __INCLUDE_NUTTX_UG_8264AMBAG01_H */
+#endif /* __INCLUDE_NUTTX_LCD_UG_8264AMBAG01_H */

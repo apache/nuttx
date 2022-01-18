@@ -48,6 +48,15 @@ ifeq ($(CONFIG_BOARD_STM32_IHM07M1),y)
 CSRCS += stm32_foc_ihm07m1.c
 endif
 
+ifeq ($(CONFIG_STM32_CAN),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
+CSRCS += stm32_can.c
+endif
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+CSRCS += stm32_cansock.c
+endif
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

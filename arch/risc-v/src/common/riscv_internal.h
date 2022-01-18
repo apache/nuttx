@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H
-#define __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H
+#ifndef __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H
+#define __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -45,17 +45,20 @@
 #define INTSTACK_COLOR 0xdeadbeef
 #define HEAP_COLOR     'h'
 
+/* Format output with register width and hex */
+
+#ifdef CONFIG_ARCH_RV32
+#  define PRIxREG "08" PRIxPTR
+#else
+#  define PRIxREG "016" PRIxPTR
+#endif
+
 /* In the RISC_V model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  */
 
-#ifdef CONFIG_ARCH_RV64
-#define riscv_savestate(regs)    riscv_copystate(regs, (uint64_t*)CURRENT_REGS)
+#define riscv_savestate(regs)    riscv_copystate(regs, (uintptr_t*)CURRENT_REGS)
 #define riscv_restorestate(regs) (CURRENT_REGS = regs)
-#else
-#define riscv_savestate(regs)    riscv_copystate(regs, (uint32_t*)g_current_regs)
-#define riscv_restorestate(regs) (g_current_regs = regs)
-#endif
 
 #define _START_TEXT  &_stext
 #define _END_TEXT    &_etext
@@ -101,20 +104,14 @@ extern "C"
 #endif
 
 #ifndef __ASSEMBLY__
-#ifdef CONFIG_ARCH_RV64
 #ifdef CONFIG_SMP
-EXTERN volatile uint64_t *g_current_regs[CONFIG_SMP_NCPUS];
+EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 #  define CURRENT_REGS (g_current_regs[up_cpu_index()])
 #else
-EXTERN volatile uint64_t *g_current_regs[1];
+EXTERN volatile uintptr_t *g_current_regs[1];
 #  define CURRENT_REGS (g_current_regs[0])
 #endif
 EXTERN uintptr_t g_idle_topstack;
-#else
-EXTERN volatile uint32_t *g_current_regs;
-#  define CURRENT_REGS (g_current_regs)
-EXTERN uint32_t g_idle_topstack;
-#endif
 
 /* Address of the saved user stack pointer */
 
@@ -167,26 +164,16 @@ void riscv_addregion(void);
 
 void riscv_ack_irq(int irq);
 
-#ifdef CONFIG_ARCH_RV64
-void riscv_copystate(uint64_t *dest, uint64_t *src);
-void riscv_copyfullstate(uint64_t *dest, uint64_t *src);
-#else
-void riscv_copystate(uint32_t *dest, uint32_t *src);
-void riscv_copyfullstate(uint32_t *dest, uint32_t *src);
-#endif
+void riscv_copystate(uintptr_t *dest, uintptr_t *src);
+void riscv_copyfullstate(uintptr_t *dest, uintptr_t *src);
 
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
 uint32_t riscv_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
-#ifdef CONFIG_ARCH_RV64
-void riscv_savefpu(uint64_t *regs);
-void riscv_restorefpu(const uint64_t *regs);
-#else /* !CONFIG_ARCH_RV64 */
-void riscv_savefpu(uint32_t *regs);
-void riscv_restorefpu(const uint32_t *regs);
-#endif /* CONFIG_ARCH_RV64 */
+void riscv_savefpu(uintptr_t *regs);
+void riscv_restorefpu(const uintptr_t *regs);
 #else
 #  define riscv_savefpu(regs)
 #  define riscv_restorefpu(regs)
@@ -224,7 +211,7 @@ void rpmsg_serialinit(void);
 
 /* Exception Handler ********************************************************/
 
-void riscv_exception(uint32_t mcause, uint32_t *regs);
+void riscv_exception(uintptr_t mcause, uintptr_t *regs);
 
 /* Debug ********************************************************************/
 
@@ -238,4 +225,4 @@ void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_RISCV_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_RISCV_SRC_COMMON_RISCV_INTERNAL_H */

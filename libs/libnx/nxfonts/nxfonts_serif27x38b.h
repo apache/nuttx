@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H
-#define __LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H
+#ifndef __LIBS_LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H
+#define __LIBS_LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H
 
 /****************************************************************************
  * Included Files
@@ -832,4 +832,4 @@ extern "C"
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H */
+#endif /* __LIBS_LIBNX_NXFONTS_NXFONTS_SERIF27X38B_H */

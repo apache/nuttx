@@ -103,7 +103,6 @@ mpfs_opensbi_prepare_hart:
   /* Setup stacks per hart */
 
   csrr a0, mhartid
-  mv   t0, a0
   li   t1, SBI_PLATFORM_DEFAULT_HART_STACK_SIZE
   mul  t0, a0, t1
   la   sp, g_hart_stacks

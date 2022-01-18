@@ -196,7 +196,7 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       if (rport != 0)
         {
           sin = (FAR struct sockaddr_in6 *)&raddr;
-          sin->sin6_port = htons(rport);
+          sin->sin6_port = HTONS(rport);
         }
 
       sin = (FAR struct sockaddr_in6 *)&laddr;
@@ -210,7 +210,7 @@ static int rpcclnt_socket(FAR struct rpcclnt *rpc, in_port_t rport)
       if (rport != 0)
         {
           sin = (FAR struct sockaddr_in *)&raddr;
-          sin->sin_port = htons(rport);
+          sin->sin_port = HTONS(rport);
         }
 
       sin = (FAR struct sockaddr_in *)&laddr;

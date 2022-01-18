@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32_ONESHOT_H
-#define __ARCH_XTENSA_SRC_ESP32_ONESHOT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_ESP32_ONESHOT_H
+#define __ARCH_XTENSA_SRC_ESP32_ESP32_ONESHOT_H
 
 /****************************************************************************
  * Included Files
@@ -199,4 +199,4 @@ int esp32_oneshot_current(struct esp32_oneshot_s *oneshot, uint64_t *usec);
 #endif
 
 #endif /* CONFIG_ESP32_ONESHOT */
-#endif /* __ARCH_XTENSA_SRC_ESP32_ONESHOT_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_ESP32_ONESHOT_H */

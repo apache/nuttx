@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_M100PFSEVP_MPFS_SRC_BOARD_CONFIG_H
-#define __BOARDS_RISCV_M100PFSEVP_MPFS_SRC_BOARD_CONFIG_H
+#ifndef __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H
+#define __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -36,4 +36,4 @@ int mpfs_board_i2c_init(void);
 int mpfs_pwm_setup(void);
 int mpfs_board_emmcsd_init(void);
 
-#endif /* __BOARDS_RISCV_M100PFSEVP_MPFS_SRC_BOARD_CONFIG_H */
+#endif /* __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H */

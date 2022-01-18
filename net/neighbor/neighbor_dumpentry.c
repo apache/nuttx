@@ -122,10 +122,10 @@ void neighbor_dumpentry(FAR const char *msg,
 {
   ninfo("%s: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         msg,
-        ntohs(neighbor->ne_ipaddr[0]), ntohs(neighbor->ne_ipaddr[1]),
-        ntohs(neighbor->ne_ipaddr[2]), ntohs(neighbor->ne_ipaddr[3]),
-        ntohs(neighbor->ne_ipaddr[4]), ntohs(neighbor->ne_ipaddr[5]),
-        ntohs(neighbor->ne_ipaddr[6]), ntohs(neighbor->ne_ipaddr[7]));
+        NTOHS(neighbor->ne_ipaddr[0]), NTOHS(neighbor->ne_ipaddr[1]),
+        NTOHS(neighbor->ne_ipaddr[2]), NTOHS(neighbor->ne_ipaddr[3]),
+        NTOHS(neighbor->ne_ipaddr[4]), NTOHS(neighbor->ne_ipaddr[5]),
+        NTOHS(neighbor->ne_ipaddr[6]), NTOHS(neighbor->ne_ipaddr[7]));
 
   neighbor_dump_address(&neighbor->ne_addr.u,
                         neighbor->ne_addr.na_llsize);
@@ -151,9 +151,9 @@ void neighbor_dumpipaddr(FAR const char *msg,
 {
   ninfo("%s: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         msg,
-        ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
-        ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-        ntohs(ipaddr[6]), ntohs(ipaddr[7]));
+        NTOHS(ipaddr[0]), NTOHS(ipaddr[1]), NTOHS(ipaddr[2]),
+        NTOHS(ipaddr[3]), NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
+        NTOHS(ipaddr[6]), NTOHS(ipaddr[7]));
 }
 
 #endif /* CONFIG_DEBUG_NET_INFO */

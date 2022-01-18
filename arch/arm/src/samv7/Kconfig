@@ -670,7 +670,7 @@ config SAMV7_TC2
 	select SAMV7_HAVE_TC
 
 config SAMV7_TC3
-	bool "Timer Counter 3 (ch. 9, 10, 11) (TC2)"
+	bool "Timer Counter 3 (ch. 9, 10, 11) (TC3)"
 	default n
 	select SAMV7_HAVE_TC
 
@@ -1860,7 +1860,7 @@ if SCHED_TICKLESS
 config SAMV7_TICKLESS_ONESHOT
 	int "Tickless one-shot timer channel"
 	default 0
-	range 0 8
+	range 0 11
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the one-shot timer needed by the OS.
@@ -1868,7 +1868,7 @@ config SAMV7_TICKLESS_ONESHOT
 config SAMV7_TICKLESS_FREERUN
 	int "Tickless free-running timer channel"
 	default 1
-	range 0 8
+	range 0 11
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the free-running timer needed by the OS.
@@ -3003,4 +3003,51 @@ config SAMV7_MCAN_REGDEBUG
 
 endmenu # CAN device driver options
 endif # SAMV7_MCAN
+
+menu "QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on SAMV7_HAVE_TC
+
+config SAMV7_TC0_QE
+	bool "TC0"
+	default n
+	depends on SAMV7_TC0
+	select SAMV7_TC0_TIOA0
+	select SAMV7_TC0_TIOB0
+	---help---
+		Reserve TC0 for use by QEncoder.
+
+config SAMV7_TC1_QE
+	bool "TC1"
+	default n
+	depends on SAMV7_TC1
+	select SAMV7_TC1_TIOA3
+	select SAMV7_TC1_TIOB3
+	---help---
+		Reserve TC1 for use by QEncoder.
+
+config SAMV7_TC2_QE
+	bool "TC2"
+	default n
+	depends on SAMV7_TC2
+	select SAMV7_TC2_TIOA6
+	select SAMV7_TC2_TIOB6
+	---help---
+		Reserve TC2 for use by QEncoder.
+
+config SAMV7_TC3_QE
+	bool "TC3"
+	default n
+	depends on SAMV7_TC3
+	select SAMV7_TC3_TIOA9
+	select SAMV7_TC3_TIOB9
+	---help---
+		Reserve TC3 for use by QEncoder.
+
+config SAMV7_QENCODER_FILTER
+	bool "Enable filtering on SAMV7 QEncoder input"
+	default y
+
+endmenu
+
 endif # ARCH_CHIP_SAMV7

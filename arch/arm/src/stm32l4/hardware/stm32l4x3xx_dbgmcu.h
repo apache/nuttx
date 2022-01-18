@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_DBGMCU_H
-#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X6XX_DBGMCU_H
+#ifndef __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_DBGMCU_H
+#define __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_DBGMCU_H
 
 /****************************************************************************
  * Included Files
@@ -88,4 +88,4 @@
 #define DBGMCU_APB2_TIM15STOP     (1 << 16)  /* Bit 16: TIM15 stopped when core is halted */
 #define DBGMCU_APB2_TIM16STOP     (1 << 17)  /* Bit 17: TIM16 stopped when core is halted */
 
-#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XXDBGMCU_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_HARDWARE_STM32L4X3XX_DBGMCU_H */

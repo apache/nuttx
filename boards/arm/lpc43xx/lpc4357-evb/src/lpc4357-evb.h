@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H
-#define __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H
+#ifndef __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC4357_EVB_H
+#define __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC4357_EVB_H
 
 /****************************************************************************
  * Included Files
@@ -80,4 +80,4 @@
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC3257_EVB_H */
+#endif /* __BOARDS_ARM_LPC43XX_LPC4357_EVB_SRC_LPC4357_EVB_H */

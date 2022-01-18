@@ -1496,7 +1496,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (ETHBUF->type == htons(ETHTYPE_ARP))
+      if (ETHBUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);

@@ -91,9 +91,9 @@ static const struct file_operations g_mpl115afops =
   mpl115a_write,  /* write */
   NULL,           /* seek */
   NULL,           /* ioctl */
-  NULL,           /* poll */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL            /* unlink */
+  , NULL          /* unlink */
 #endif
 };
 

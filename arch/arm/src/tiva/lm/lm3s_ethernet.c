@@ -892,7 +892,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (ETHBUF->type == htons(ETHTYPE_ARP))
+      if (ETHBUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP packet received (%02x)\n", ETHBUF->type);
           NETDEV_RXARP(&priv->ld_dev);
@@ -912,7 +912,7 @@ static void tiva_receive(struct tiva_driver_s *priv)
 #endif
         {
           nwarn("WARNING: Unsupported packet type dropped (%02x)\n",
-                  htons(ETHBUF->type));
+                HTONS(ETHBUF->type));
           NETDEV_RXDROPPED(&priv->ld_dev);
         }
     }

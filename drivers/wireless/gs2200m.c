@@ -233,8 +233,10 @@ static const struct file_operations g_gs2200m_fops =
   gs2200m_write, /* write */
   NULL,          /* seek */
   gs2200m_ioctl, /* ioctl */
-  gs2200m_poll,  /* poll */
-  NULL           /* unlink */
+  gs2200m_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL         /* unlink */
+#endif
 };
 
 static struct evt_code_s _evt_table[] =
@@ -1306,7 +1308,7 @@ static void _parse_pkt_in_s4(FAR struct pkt_ctx_s *pkt_ctx,
       wlinfo("from (%s:%s)\n", addr, port);
 
       inet_aton(addr, &pkt_dat->addr.sin_addr);
-      pkt_dat->addr.sin_port = htons((uint16_t)atoi(port));
+      pkt_dat->addr.sin_port = HTONS((uint16_t)atoi(port));
 
       /* Skip until data length */
 
@@ -2028,7 +2030,7 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
   else
     {
       wlinfo("** addr=%s port=%d\n", inet_ntoa(msg->addr.sin_addr),
-             ntohs(msg->addr.sin_port));
+             NTOHS(msg->addr.sin_port));
 
       /* NOTE: See 7.5.3.2 Bulk Data Handling for UDP
        * <ESC>Y<CID><IP address>:<port>:<Data Length xxxx 4 ascii char><data>
@@ -2036,7 +2038,7 @@ static enum pkt_type_e gs2200m_send_bulk(FAR struct gs2200m_dev_s *dev,
 
       snprintf(cmd, sizeof(cmd), "%cY%c%s:%d:%s",
                ASCII_ESC, msg->cid,
-               inet_ntoa(msg->addr.sin_addr), ntohs(msg->addr.sin_port),
+               inet_ntoa(msg->addr.sin_addr), NTOHS(msg->addr.sin_port),
                digits);
     }
 
@@ -2219,12 +2221,12 @@ static enum pkt_type_e gs2200m_get_cstatus(FAR struct gs2200m_dev_s *dev,
 
           if (msg->local)
             {
-              msg->addr.sin_port = htons(p[0]);
+              msg->addr.sin_port = HTONS(p[0]);
             }
           else
             {
               char addr[20];
-              msg->addr.sin_port = htons(p[1]);
+              msg->addr.sin_port = HTONS(p[1]);
               snprintf(addr, sizeof(addr),
                        "%d.%d.%d.%d", a[0], a[1], a[2], a[3]);
               inet_aton(addr, &msg->addr.sin_addr);

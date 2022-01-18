@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD_TC_H
-#define __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD_TC_H
+#ifndef __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TC_H
+#define __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TC_H
 
 /****************************************************************************
  * Included Files
@@ -472,4 +472,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMD5E5_CHIP_SAMD_TC_H */
+#endif /* __ARCH_ARM_SRC_SAMD5E5_HARDWARE_SAM_TC_H */

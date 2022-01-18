@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_MAX44009
-#define __INCLUDE_NUTTX_SENSORS_MAX44009
+#ifndef __INCLUDE_NUTTX_SENSORS_MAX44009_H
+#define __INCLUDE_NUTTX_SENSORS_MAX44009_H
 
 /****************************************************************************
  * Included Files
@@ -105,4 +105,4 @@ struct max44009_data_s
 int max44009_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
                       uint8_t addr, FAR struct max44009_config_s *config);
 
-#endif /* __INCLUDE_NUTTX_SENSORS_MAX44009 */
+#endif /* __INCLUDE_NUTTX_SENSORS_MAX44009_H */

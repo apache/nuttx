@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 #include <arch/csr.h>
-#include <arch/rv64gc/irq.h>
+#include <arch/irq.h>
 
 #include "chip.h"
 #include "mpfs_memorymap.h"
@@ -41,9 +41,9 @@
   .extern __trap_vec
 
   .section .text
-  .global __start_mpfs
+  .global __start
 
-__start_mpfs:
+__start:
 
 
   /* Disable all interrupts (i.e. timer, external) in mie */

@@ -131,9 +131,9 @@ static const struct file_operations g_ws2812fops =
   ws2812_write,   /* write */
   ws2812_seek,    /* seek */
   NULL,           /* ioctl */
-  NULL,           /* poll */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL            /* unlink */
+  , NULL          /* unlink */
 #endif
 };
 

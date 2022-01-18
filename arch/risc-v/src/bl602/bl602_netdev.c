@@ -607,7 +607,7 @@ static void bl602_net_receive(struct bl602_net_driver_s *priv)
 #ifdef CONFIG_NET_ARP
   /* Check for an ARP packet */
 
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       /* Dispatch ARP packet to the network layer */
 

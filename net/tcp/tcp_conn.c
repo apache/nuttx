@@ -234,7 +234,7 @@ static int tcp_selectport(uint8_t domain,
               g_last_tcp_port = 4096;
             }
 
-          portno = htons(g_last_tcp_port);
+          portno = HTONS(g_last_tcp_port);
         }
       while (tcp_listener(domain, ipaddr, portno));
     }

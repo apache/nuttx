@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_PHYPLUS_TIMER_H
-#define __INCLUDE_NUTTX_PHYPLUS_TIMER_H
+#ifndef __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIMER_LOWERHALF_H
+#define __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIMER_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
@@ -34,4 +34,4 @@ struct phyplus_timer_param_s
   uint8_t timer_idx;
 };
 
-#endif
+#endif /* __ARCH_ARM_SRC_PHY62XX_PHYPLUS_TIMER_LOWERHALF_H */

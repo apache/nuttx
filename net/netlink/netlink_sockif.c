@@ -673,7 +673,6 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
                                FAR struct msghdr *msg, int flags)
 {
   FAR const void *buf = msg->msg_iov->iov_base;
-  size_t len = msg->msg_iov->iov_len;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
   FAR struct netlink_conn_s *conn;
@@ -719,7 +718,8 @@ static ssize_t netlink_sendmsg(FAR struct socket *psock,
     {
 #ifdef CONFIG_NETLINK_ROUTE
       case NETLINK_ROUTE:
-        ret = netlink_route_sendto(conn, nlmsg, len, flags,
+        ret = netlink_route_sendto(conn, nlmsg,
+                                   msg->msg_iov->iov_len, flags,
                                    (FAR const struct sockaddr_nl *)to,
                                    tolen);
         break;

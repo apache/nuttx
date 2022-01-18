@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_S32K1XX_PROGMEM_H
-#define __ARCH_ARM_SRC_S32K1XX_PROGMEM_H
+#ifndef __ARCH_ARM_SRC_S32K1XX_S32K1XX_PROGMEM_H
+#define __ARCH_ARM_SRC_S32K1XX_S32K1XX_PROGMEM_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@
 
 void s32k1xx_progmem_init();
 
-#endif /* __ARCH_ARM_SRC_S32K1XX_PROGMEM_H */
+#endif /* __ARCH_ARM_SRC_S32K1XX_S32K1XX_PROGMEM_H */

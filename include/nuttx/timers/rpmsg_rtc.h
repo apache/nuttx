@@ -42,7 +42,7 @@ extern "C"
 
 #ifdef CONFIG_RTC_RPMSG
 #ifndef CONFIG_RTC_RPMSG_SERVER
-FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(int minor);
+FAR struct rtc_lowerhalf_s *rpmsg_rtc_initialize(void);
 #else
 FAR struct rtc_lowerhalf_s *rpmsg_rtc_server_initialize(
                                          FAR struct rtc_lowerhalf_s *lower);

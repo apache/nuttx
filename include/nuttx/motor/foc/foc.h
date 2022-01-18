@@ -33,6 +33,8 @@
 
 #include <fixedmath.h>
 
+#ifdef CONFIG_MOTOR_FOC
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -153,4 +155,5 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev);
 }
 #endif
 
+#endif /* CONFIG_MOTOR_FOC */
 #endif /* __INCLUDE_NUTTX_MOTOR_FOC_FOC_H */

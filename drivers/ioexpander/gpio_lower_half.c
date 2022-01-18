@@ -356,7 +356,7 @@ static int gplh_setpintype(FAR struct gpio_dev_s *gpio,
         }
 
       IOEXP_SETOPTION(ioe, pin, IOEXPANDER_OPTION_INTCFG,
-                      (FAR void *)g_gplh_inttype[pintype]);
+                      (FAR void *)(uintptr_t)g_gplh_inttype[pintype]);
     }
 
   gpio->gp_pintype = pintype;
