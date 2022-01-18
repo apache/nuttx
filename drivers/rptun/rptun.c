@@ -36,6 +36,7 @@
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/wqueue.h>
+#include <nuttx/signal.h>
 #include <metal/utilities.h>
 
 /****************************************************************************
@@ -119,7 +120,7 @@ rptun_get_mem(FAR struct remoteproc *rproc,
               metal_phys_addr_t da,
               FAR void *va, size_t size,
               FAR struct remoteproc_mem *buf);
-static int rptun_can_recursive(FAR struct remoteproc *rproc);
+static int rptun_wait_tx_buffer(FAR struct remoteproc *rproc);
 
 static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
                           FAR const char *name, uint32_t dest);
@@ -152,14 +153,14 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 
 static struct remoteproc_ops g_rptun_ops =
 {
-  .init          = rptun_init,
-  .remove        = rptun_remove,
-  .config        = rptun_config,
-  .start         = rptun_start,
-  .stop          = rptun_stop,
-  .notify        = rptun_notify,
-  .get_mem       = rptun_get_mem,
-  .can_recursive = rptun_can_recursive,
+  .init           = rptun_init,
+  .remove         = rptun_remove,
+  .config         = rptun_config,
+  .start          = rptun_start,
+  .stop           = rptun_stop,
+  .notify         = rptun_notify,
+  .get_mem        = rptun_get_mem,
+  .wait_tx_buffer = rptun_wait_tx_buffer,
 };
 
 static const struct file_operations g_rptun_devops =
@@ -266,10 +267,32 @@ static void rptun_worker(FAR void *arg)
 }
 
 #ifdef CONFIG_RPTUN_WORKQUEUE
+static void rptun_kill(int tid, FAR void *arg)
+{
+  nxsig_kill(tid, SIGINT);
+}
+
 static void rptun_wakeup(FAR struct rptun_priv_s *priv)
 {
   work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
+  work_foreach(HPWORK, rptun_kill, NULL);
 }
+
+static void rptun_in_recursive(int tid, FAR void *arg)
+{
+  if (gettid() == tid)
+    {
+      *((FAR bool *)arg) = true;
+    }
+}
+
+static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
+{
+  bool in = false;
+  work_foreach(HPWORK, rptun_in_recursive, &in);
+  return in;
+}
+
 #else
 static int rptun_thread(int argc, FAR char *argv[])
 {
@@ -296,6 +319,13 @@ static void rptun_wakeup(FAR struct rptun_priv_s *priv)
     {
       nxsem_post(&priv->sem);
     }
+
+  nxsig_kill(priv->tid, SIGINT);
+}
+
+static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
+{
+  return gettid() == priv->tid;
 }
 #endif
 
@@ -425,16 +455,21 @@ rptun_get_mem(FAR struct remoteproc *rproc,
   return buf;
 }
 
-static int rptun_can_recursive(FAR struct remoteproc *rproc)
+static int rptun_wait_tx_buffer(FAR struct remoteproc *rproc)
 {
-#ifndef CONFIG_RPTUN_RECURSIVE_DISPATCH
-  return false;
-#elif defined(CONFIG_RPTUN_WORKQUEUE)
-  return work_in_context(HPWORK);
-#else
   FAR struct rptun_priv_s *priv = rproc->priv;
-  return gettid() == priv->tid;
-#endif
+
+  if (!rptun_is_recursive(priv))
+    {
+      return -EAGAIN;
+    }
+
+  /* Pause, wait nxsig_kill to wakeup */
+
+  pause();
+  rptun_worker(priv);
+
+  return 0;
 }
 
 static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
@@ -443,6 +478,11 @@ static void *rptun_get_priv_by_rdev(FAR struct rpmsg_device *rdev)
   struct virtio_device *vdev;
   struct remoteproc_virtio *rpvdev;
   struct remoteproc *rproc;
+
+  if (!rdev)
+    {
+      return NULL;
+    }
 
   rvdev = metal_container_of(rdev, struct rpmsg_virtio_device, rdev);
   vdev  = rvdev->vdev;
@@ -870,6 +910,41 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
+{
+  FAR struct rptun_priv_s *priv;
+  int ret;
+
+  if (!ept)
+    {
+      return -EINVAL;
+    }
+
+  priv = rptun_get_priv_by_rdev(ept->rdev);
+  if (!priv || !rptun_is_recursive(priv))
+    {
+      return nxsem_wait_uninterruptible(sem);
+    }
+
+  while (1)
+    {
+      ret = nxsem_wait(sem);
+      if (ret != -EINTR)
+        {
+          break;
+        }
+
+      rptun_worker(priv);
+    }
+
+  return ret;
+}
+
+int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
+{
+  return nxsem_post(sem);
+}
 
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
 {
