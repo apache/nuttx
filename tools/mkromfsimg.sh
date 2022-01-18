@@ -135,10 +135,10 @@ genromfs -h 1>/dev/null 2>&1 || { \
 # Supply defaults for all un-defined ROMFS settings
 
 if [ -z "$romfsmpt" ]; then
-  romfsmpt="/etc"
+  romfsmpt=\"/etc\"
 fi
 if [ -z "$initscript" ]; then
-  initscript="init.d/rcS"
+  initscript=\"init.d/rcS\"
 fi
 if [ -z "$romfsdevno" ]; then
   romfsdevno=0
@@ -163,7 +163,7 @@ if [ "$usefat" = true ]; then
     fatnsectors=1024
   fi
   if [ -z "$fatmpt" ]; then
-   fatmpt="/tmp"
+   fatmpt=\"/tmp\"
   fi
 fi
 
