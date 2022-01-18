@@ -50,14 +50,13 @@ volatile bool g_rtc_enabled = false;
  * Public Functions
  ****************************************************************************/
 
-void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower,
-                          FAR struct timespec *tp)
+void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower)
 {
   g_rtc_lower   = lower;
   g_rtc_enabled = true;
 
 #ifdef CONFIG_RTC_EXTERNAL
-  clock_synchronize(tp);
+  clock_synchronize();
 #endif
 }
 

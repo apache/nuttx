@@ -100,7 +100,7 @@ int stm32_ds1307_init(void)
 
       /* Synchronize the system time to the RTC time */
 
-      clock_synchronize(NULL);
+      clock_synchronize();
 
       /* Now we are initialized */
 

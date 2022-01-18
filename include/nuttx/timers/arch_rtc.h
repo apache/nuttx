@@ -42,12 +42,11 @@ extern "C"
 
 #ifdef CONFIG_RTC_ARCH
 
-void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower,
-                          FAR struct timespec *tp);
+void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower);
 
 #else
 
-#  define up_rtc_set_lowerhalf(lower, tp)
+#  define up_rtc_set_lowerhalf(lower)
 
 #endif /* CONFIG_RTC_ARCH */
 
