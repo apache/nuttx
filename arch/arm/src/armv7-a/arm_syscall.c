@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/addrenv.h>
 
