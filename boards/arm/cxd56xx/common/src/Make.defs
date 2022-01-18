@@ -164,6 +164,10 @@ ifeq ($(CONFIG_CXD56_SPISD),y)
   CSRCS += cxd56_spisd.c
 endif
 
+ifeq ($(CONFIG_BOARD_USBDEV_SERIALSTR),y)
+  CSRCS += cxd56_usbdevserialstr.c
+endif
+
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
