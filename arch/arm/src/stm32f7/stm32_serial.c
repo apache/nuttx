@@ -1702,7 +1702,7 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
         }
 
 #ifdef SERIAL_HAVE_RXDMA
-      if (priv->dev.ops == &g_uart_dma_ops && !priv->rxdmasusp)
+      if (priv->dev.ops == &g_uart_rxdma_ops && !priv->rxdmasusp)
         {
           /* Suspend Rx DMA. */
 
@@ -1714,7 +1714,7 @@ static void up_setsuspend(struct uart_dev_s *dev, bool suspend)
   else
     {
 #ifdef SERIAL_HAVE_RXDMA
-      if (priv->dev.ops == &g_uart_dma_ops && priv->rxdmasusp)
+      if (priv->dev.ops == &g_uart_rxdma_ops && priv->rxdmasusp)
         {
           /* Re-enable DMA. */
 
