@@ -721,7 +721,7 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
 static void stwlc38_worker(FAR void *arg)
 {
   FAR struct stwlc38_dev_s *priv = arg;
-  FAR struct rx_int_state_s *rx_int_state;
+  struct rx_int_state_s rx_int_state;
   int ret;
 
   DEBUGASSERT(priv != NULL);
@@ -736,30 +736,29 @@ static void stwlc38_worker(FAR void *arg)
 
   /* Read out the latest rx data */
 
-  rx_int_state = kmm_zalloc(sizeof(struct rx_int_state_s));
-  if (stwlc38_check_intr(priv, rx_int_state) == 0)
+  if (stwlc38_check_intr(priv, &rx_int_state) == 0)
     {
       /* push data to upper half driver */
 
       batinfo("SUCCESS: stwlc38_check_intr\n");
-      batinfo("  rx_int_state->wlc_rx_int_otp       = %s\n",
-               rx_int_state->wlc_rx_int_otp ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_ocp       = %s\n",
-               rx_int_state->wlc_rx_int_ocp ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_ovp       = %s\n",
-               rx_int_state->wlc_rx_int_ovp ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_scp       = %s\n",
-               rx_int_state->wlc_rx_int_scp ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_ss_tx     = %s\n",
-               rx_int_state->wlc_rx_int_ss_tx ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_output_on = %s\n",
-               rx_int_state->wlc_rx_int_output_on ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_output_off = %s\n",
-               rx_int_state->wlc_rx_int_output_off ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_int_uvp       = %s\n",
-               rx_int_state->wlc_rx_int_uvp ? "true" : "false");
-      batinfo("  rx_int_state->wlc_rx_pp_done       = %s\n",
-               rx_int_state->wlc_rx_pp_done ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_otp       = %s\n",
+               rx_int_state.wlc_rx_int_otp ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_ocp       = %s\n",
+               rx_int_state.wlc_rx_int_ocp ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_ovp       = %s\n",
+               rx_int_state.wlc_rx_int_ovp ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_scp       = %s\n",
+               rx_int_state.wlc_rx_int_scp ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_ss_tx     = %s\n",
+               rx_int_state.wlc_rx_int_ss_tx ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_output_on = %s\n",
+               rx_int_state.wlc_rx_int_output_on ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_output_off = %s\n",
+               rx_int_state.wlc_rx_int_output_off ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_int_uvp       = %s\n",
+               rx_int_state.wlc_rx_int_uvp ? "true" : "false");
+      batinfo("  rx_int_state.wlc_rx_pp_done       = %s\n",
+               rx_int_state.wlc_rx_pp_done ? "true" : "false");
     }
 
   /**************************************************************************
@@ -767,7 +766,7 @@ static void stwlc38_worker(FAR void *arg)
    *  if removed tx, the charge_manager app will return
    **************************************************************************/
 
-  if (rx_int_state->wlc_rx_int_output_on)
+  if (rx_int_state.wlc_rx_int_output_on)
     {
       batinfo("[WLC] start charge_manager !!!\n");
       system("charge_manager &");
