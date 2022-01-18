@@ -412,7 +412,7 @@ bool esp32_gpioread(int pin)
 void esp32_gpioirqinitialize(int cpu)
 {
 #ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu <= CONFIG_SMP_NCPUS);
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 #else
   DEBUGASSERT(cpu == 0);
 #endif
