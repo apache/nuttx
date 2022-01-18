@@ -519,7 +519,7 @@ void up_disable_irq(int irq)
     }
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-  DEBUGASSERT(cpu >= 0 && cpu <= CONFIG_SMP_NCPUS);
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {
@@ -580,7 +580,7 @@ void up_enable_irq(int irq)
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-  DEBUGASSERT(cpu >= 0 && cpu <= CONFIG_SMP_NCPUS);
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {
