@@ -199,35 +199,13 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
   ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
         flags, pstate->snd_acked, pstate->snd_sent);
 
-  /* Check for a loss of connection */
-
-  if ((flags & TCP_DISCONN_EVENTS) != 0)
-    {
-      nwarn("WARNING: Lost connection\n");
-
-      /* We could get here recursively through the callback actions of
-       * tcp_lost_connection().  So don't repeat that action if we have
-       * already been disconnected.
-       */
-
-      if (_SS_ISCONNECTED(psock->s_flags))
-        {
-          /* Report not connected */
-
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
-        }
-
-      /* Report not connected */
-
-      pstate->snd_sent = -ENOTCONN;
-      goto end_wait;
-    }
-
   /* If this packet contains an acknowledgement, then update the count of
    * acknowledged bytes.
+   * This condition is located here for performance reasons
+   * (TCP_ACKDATA is the most frequent event).
    */
 
-  else if ((flags & TCP_ACKDATA) != 0)
+  if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_hdr_s *tcp;
 
@@ -278,7 +256,10 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       /* No. Fall through to send more data if necessary */
     }
 
-  /* Check if we are being asked to retransmit data */
+  /* Check if we are being asked to retransmit data.
+   * This condition is located here after TCP_ACKDATA for performance reasons
+   * (TCP_REXMIT is less frequent than TCP_ACKDATA).
+   */
 
   else if ((flags & TCP_REXMIT) != 0)
     {
@@ -292,6 +273,33 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 #ifndef CONFIG_NET_TCP_WRITE_BUFFERS
       conn->rexmit_seq = pstate->snd_sent + pstate->snd_isn;
 #endif
+    }
+
+  /* Check for a loss of connection.
+   * This condition is located here after both the TCP_ACKDATA and TCP_REXMIT
+   * because TCP_DISCONN_EVENTS is the least frequent event.
+   */
+
+  else if ((flags & TCP_DISCONN_EVENTS) != 0)
+    {
+      nwarn("WARNING: Lost connection\n");
+
+      /* We could get here recursively through the callback actions of
+       * tcp_lost_connection().  So don't repeat that action if we have
+       * already been disconnected.
+       */
+
+      if (_SS_ISCONNECTED(psock->s_flags))
+        {
+          /* Report not connected */
+
+          tcp_lost_connection(psock, pstate->snd_cb, flags);
+        }
+
+      /* Report not connected */
+
+      pstate->snd_sent = -ENOTCONN;
+      goto end_wait;
     }
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
