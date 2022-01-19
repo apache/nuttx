@@ -104,6 +104,7 @@
 #define MAX86178_PPG_CTRL_LEDPA  0x90       /* Set PPG LED current. */
 #define MAX86178_PPG_CTRL_GAIN1  0x91       /* Set PPG ADC1's gain. */
 #define MAX86178_PPG_CTRL_GAIN2  0x92       /* Set PPG ADC2's gain. */
+#define MAX86178_PPG_CTRL_OPTM   0x93       /* Set PPG optimization ON/OFF */
 
 /* Default settings */
 
@@ -2993,6 +2994,12 @@ static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
         {
           FAR uint32_t *current = (FAR uint32_t *)arg;
 
+          if (current == NULL)
+            {
+              snerr("Empty argument.\n");
+              return -EINVAL;
+            }
+
           if (sensor->chidx < MAX86178_PPG3_SENSOR_IDX)
             {
               if (*current != sensor->current)
@@ -3008,6 +3015,20 @@ static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
 
               *current = 0;
             }
+        }
+        break;
+
+      case MAX86178_PPG_CTRL_OPTM:  /* Set PPG auto-optimization mode */
+        {
+          FAR bool *enable = (FAR bool *)arg;
+
+          if (enable == NULL)
+            {
+              snerr("Empty argument.\n");
+              return -EINVAL;
+            }
+
+          sensor->auto_optimize = *enable;
         }
         break;
 
