@@ -172,7 +172,8 @@ struct tcp_conn_s
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
-#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
+    defined(CONFIG_NET_SENDFILE)
   uint32_t rexmit_seq;    /* The sequence number to be retrasmitted */
 #endif
   uint8_t  crefs;         /* Reference counts on this instance */

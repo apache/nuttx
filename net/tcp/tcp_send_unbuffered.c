@@ -311,6 +311,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_REXMIT) != 0)
     {
+      nwarn("WARNING: TCP_REXMIT\n");
+
       /* According to RFC 6298 (5.4), retransmit the earliest segment
        * that has not been acknowledged by the TCP receiver.
        */
@@ -429,6 +431,10 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           pstate->snd_sent += sndlen;
           ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zd\n",
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+        }
+      else
+        {
+          nwarn("WARNING: Window full, wait for ack\n");
         }
     }
 
