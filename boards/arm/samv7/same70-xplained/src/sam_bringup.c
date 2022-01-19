@@ -45,6 +45,10 @@
 #include "sam_twihs.h"
 #include "same70-xplained.h"
 
+#ifdef HAVE_HSMCI
+#  include "board_hsmci.h"
+#endif /* HAVE_HSMCI */
+
 #ifdef HAVE_AUTOMOUNTER
 #  include "sam_automount.h"
 #endif /* HAVE_AUTOMOUNTER */
@@ -184,7 +188,8 @@ int sam_bringup(void)
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI0 driver */
 
-  ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR);
+  ret = sam_hsmci_initialize(HSMCI0_SLOTNO, HSMCI0_MINOR, GPIO_HSMCI0_CD,
+                             IRQ_HSMCI0_CD);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_hsmci_initialize(%d,%d) failed: %d\n",

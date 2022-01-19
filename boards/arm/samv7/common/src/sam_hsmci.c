@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/same70-qmtech/src/sam_hsmci.c
+ * boards/arm/samv7/common/src/sam_hsmci.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,24 +18,6 @@
  *
  ****************************************************************************/
 
-/* The SAM E70 Xplained Ultraas one standard SD card connector that is
- * connected to the High Speed Multimedia Card Interface (HSMCI) of the SAM
- * E70. SD card connector:
- *
- *   ------ ----------------- ---------------------
- *   SAME70 SAME70            Shared functionality
- *   Pin    Function
- *   ------ ----------------- ---------------------
- *   PA30   MCDA0 (DAT0)
- *   PA31   MCDA1 (DAT1)
- *   PA26   MCDA2 (DAT2)
- *   PA27   MCDA3 (DAT3)      Camera
- *   PA25   MCCK (CLK)        Shield
- *   PA28   MCCDA (CMD)
- *   PD17   Card Detect (C/D) Shield
- *   ------ ----------------- ---------------------
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -50,16 +32,12 @@
 #include <nuttx/sdio.h>
 #include <nuttx/mmcsd.h>
 
-#include "sam_gpio.h"
 #include "sam_hsmci.h"
+#include "board_hsmci.h"
 
-#include "same70-qmtech.h"
-
-#ifdef HAVE_AUTOMOUNTER
+#ifdef CONFIG_FS_AUTOMOUNTER
 #  include "sam_automount.h"
-#endif /* HAVE_AUTOMOUNTER */
-
-#ifdef HAVE_HSMCI
+#endif /* CONFIG_FS_AUTOMOUNTER */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -75,11 +53,9 @@ struct sam_hsmci_state_s
 {
   struct sdio_dev_s *hsmci;   /* R/W device handle */
   gpio_pinset_t cdcfg;        /* Card detect PIO pin configuration */
-  gpio_pinset_t pwrcfg;       /* Power PIO pin configuration */
-  uint8_t irq;                /* Interrupt number (same as pid) */
+  int cdirq;                  /* Interrupt number (same as pid) */
   uint8_t slotno;             /* Slot number */
   bool cd;                    /* TRUE: card is inserted */
-  xcpt_t handler;             /* Interrupt handler */
 };
 
 /****************************************************************************
@@ -89,14 +65,9 @@ struct sam_hsmci_state_s
 /* HSCMI device state */
 
 #ifdef CONFIG_SAMV7_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg);
-
 static struct sam_hsmci_state_s g_hsmci0 =
 {
-  .cdcfg   = GPIO_MCI0_CD,
-  .irq     = IRQ_MCI0_CD,
-  .slotno  = 0,
-  .handler = sam_hsmci0_cardetect,
+  .slotno  = 0
 };
 #endif
 
@@ -112,7 +83,7 @@ static struct sam_hsmci_state_s g_hsmci0 =
  *
  ****************************************************************************/
 
-bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
+static bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
 {
   bool inserted;
 
@@ -124,7 +95,7 @@ bool sam_cardinserted_internal(struct sam_hsmci_state_s *state)
 }
 
 /****************************************************************************
- * Name: sam_hsmci_cardetect, sam_hsmci0_cardetect, and sam_hsmci1_cardetect
+ * Name: sam_hsmci_cardetect and sam_hsmci_cardetect_handler
  *
  * Description:
  *   Card detect interrupt handlers
@@ -153,9 +124,10 @@ static int sam_hsmci_cardetect(struct sam_hsmci_state_s *state)
   return OK;
 }
 
-#ifdef CONFIG_SAMV7_HSMCI0
-static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
+static int sam_hsmci_cardetect_handler(int irq, FAR void *context,
+                                       FAR void *arg)
 {
+  struct sam_hsmci_state_s *state = (struct sam_hsmci_state_s *)arg;
   int ret;
 
   /* Handle the card detect interrupt.  The interrupt level logic will
@@ -163,17 +135,16 @@ static int sam_hsmci0_cardetect(int irq, void *regs, FAR void *arg)
    * device.
    */
 
-  ret = sam_hsmci_cardetect(&g_hsmci0);
+  ret = sam_hsmci_cardetect(state);
 
-#if defined(CONFIG_SAMV7_HSMCI0_AUTOMOUNT)
+#ifdef CONFIG_FS_AUTOMOUNTER
   /* Let the automounter know about the insertion event */
 
-  sam_automount_event(HSMCI0_SLOTNO, sam_cardinserted(HSMCI0_SLOTNO));
-#endif
+  sam_automount_event(state->slotno, sam_cardinserted(state->slotno));
+#endif /* CONFIG_FS_AUTOMOUNTER */
 
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: sam_hsmci_state
@@ -188,7 +159,10 @@ static inline struct sam_hsmci_state_s *sam_hsmci_state(int slotno)
   struct sam_hsmci_state_s *state = NULL;
 
 #ifdef CONFIG_SAMV7_HSMCI0
-  state = &g_hsmci0;
+  if (g_hsmci0.slotno == slotno)
+    {
+      state = &g_hsmci0;
+    }
 #endif
 
   return state;
@@ -206,7 +180,8 @@ static inline struct sam_hsmci_state_s *sam_hsmci_state(int slotno)
  *
  ****************************************************************************/
 
-int sam_hsmci_initialize(int slotno, int minor)
+int sam_hsmci_initialize(int slotno, int minor, gpio_pinset_t cdcfg,
+                         int cdirq)
 {
   struct sam_hsmci_state_s *state;
   int ret;
@@ -214,29 +189,26 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Get the static HSMI description */
 
   state = sam_hsmci_state(slotno);
-  if (!state)
+  if (state == NULL)
     {
       ferr("ERROR: No state for slotno %d\n", slotno);
       return -EINVAL;
     }
+
+  state->cdcfg = cdcfg;
+  state->cdirq = cdirq;
 
   /* Initialize card-detect, write-protect, and power enable PIOs */
 
   sam_configgpio(state->cdcfg);
   sam_dumpgpio(state->cdcfg, "HSMCI Card Detect");
 
-  if (state->pwrcfg != 0)
-    {
-      sam_configgpio(state->pwrcfg);
-      sam_dumpgpio(state->pwrcfg, "HSMCI Power");
-    }
-
   /* Mount the SDIO-based MMC/SD block driver */
 
   /* First, get an instance of the SDIO interface */
 
   state->hsmci = sdio_initialize(slotno);
-  if (!state->hsmci)
+  if (state->hsmci == NULL)
     {
       ferr("ERROR: Failed to initialize SDIO slot %d\n",  slotno);
       return -ENODEV;
@@ -254,7 +226,7 @@ int sam_hsmci_initialize(int slotno, int minor)
   /* Configure card detect interrupts */
 
   sam_gpioirq(state->cdcfg);
-  irq_attach(state->irq, state->handler, NULL);
+  irq_attach(state->cdirq, sam_hsmci_cardetect_handler, (FAR void *)state);
 
   /* Then inform the HSMCI driver if there is or is not a card in the slot. */
 
@@ -263,7 +235,7 @@ int sam_hsmci_initialize(int slotno, int minor)
 
   /* Enable card detect interrupts */
 
-  sam_gpioirqenable(state->irq);
+  sam_gpioirqenable(state->cdirq);
   return OK;
 }
 
@@ -282,7 +254,7 @@ bool sam_cardinserted(int slotno)
   /* Get the HSMI description */
 
   state = sam_hsmci_state(slotno);
-  if (!state)
+  if (state == NULL)
     {
       ferr("ERROR: No state for slotno %d\n", slotno);
       return false;
@@ -307,5 +279,3 @@ bool sam_writeprotected(int slotno)
 
   return false;
 }
-
-#endif /* HAVE_HSMCI */

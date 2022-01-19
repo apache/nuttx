@@ -42,10 +42,6 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += sam_buttons.c
 endif
 
-ifeq ($(CONFIG_SAMV7_HSMCI0),y)
-CSRCS += sam_hsmci.c
-endif
-
 ifeq ($(CONFIG_SAMV7_EMAC),y)
 CSRCS += sam_ethernet.c
 endif
