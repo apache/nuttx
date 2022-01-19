@@ -276,14 +276,47 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
     {
       nwarn("WARNING: TCP_REXMIT\n");
 
-      /* Yes.. in this case, reset the number of bytes that have been sent
-       * to the number of bytes that have been ACKed.
+      /* According to RFC 6298 (5.4), retransmit the earliest segment
+       * that has not been acknowledged by the TCP receiver.
        */
 
-      pstate->snd_sent = pstate->snd_acked;
-#ifndef CONFIG_NET_TCP_WRITE_BUFFERS
-      conn->rexmit_seq = pstate->snd_sent + pstate->snd_isn;
-#endif
+      /* Reconstruct the length of the earliest segment to be retransmitted */
+
+      uint32_t sndlen = pstate->snd_flen - pstate->snd_acked;
+
+      if (sndlen > conn->mss)
+        {
+          sndlen = conn->mss;
+        }
+
+      conn->rexmit_seq = pstate->snd_isn + pstate->snd_acked;
+
+      /* Then set-up to send that amount of data. (this won't actually
+       * happen until the polling cycle completes).
+       */
+
+      ret = file_seek(pstate->snd_file,
+                      pstate->snd_foffset + pstate->snd_acked, SEEK_SET);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to lseek: %d\n", ret);
+          pstate->snd_sent = ret;
+          goto end_wait;
+        }
+
+      ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read from input file: %d\n", (int)ret);
+          pstate->snd_sent = ret;
+          goto end_wait;
+        }
+
+      dev->d_sndlen = sndlen;
+
+      /* Continue waiting */
+
+      return flags;
     }
 
   /* Check for a loss of connection.
