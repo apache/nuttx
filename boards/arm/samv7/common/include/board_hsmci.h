@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/common/include/sam_automount.h
+ * boards/arm/samv7/common/include/board_hsmci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,36 +18,14 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_AUTOMOUNT_H
-#define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_AUTOMOUNT_H
+#ifndef __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H
+#define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H
 
 /****************************************************************************
- * Pre-processor Definitions
+ * Included Files
  ****************************************************************************/
 
-#ifdef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
-/* HSMCI0 Automounter defaults */
-
-#  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE
-#    define CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE "vfat"
-#  endif
-
-#  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV
-#    define CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV "/dev/mmcds0"
-#  endif
-
-#  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT
-#    define CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
-#  endif
-
-#  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY
-#    define CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY 1000
-#  endif
-
-#  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY
-#    define CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY 2000
-#  endif
-#endif
+#include "sam_gpio.h"
 
 /****************************************************************************
  * Public Types
@@ -73,46 +51,35 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name:  sam_automount_initialize
+ * Name: sam_hsmci_initialize
  *
  * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
- *
- * Input Parameters:
- *   None
- *
- *  Returned Value:
- *    None
+ *   Perform architecture specific initialization
  *
  ****************************************************************************/
 
-void sam_automount_initialize(void);
+int sam_hsmci_initialize(int slotno, int minor, gpio_pinset_t cdcfg,
+                         int cdirq);
 
 /****************************************************************************
- * Name:  sam_automount_event
+ * Name: sam_cardinserted
  *
  * Description:
- *   The HSMCI card detection logic has detected an insertion or removal
- *   event.  It has already scheduled the MMC/SD block driver operations.
- *   Now we need to schedule the auto-mount event which will occur with a
- *   substantial delay to make sure that everything has settle down.
- *
- * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.
- *       There is a terminology problem here:  Each HSMCI supports two slots,
- *      slot A and slot B. Only slot A is used.  So this is not a really a
- *      slot, but an HSCMI peripheral number.
- *   inserted - True if the card is inserted in the slot.  False otherwise.
- *
- *  Returned Value:
- *    None
- *
- *  Assumptions:
- *    Interrupts are disabled.
+ *   Check if a card is inserted into the selected HSMCI slot
  *
  ****************************************************************************/
 
-void sam_automount_event(int slotno, bool inserted);
+bool sam_cardinserted(int slotno);
+
+/****************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ****************************************************************************/
+
+bool sam_writeprotected(int slotno);
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -120,4 +87,4 @@ void sam_automount_event(int slotno, bool inserted);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_SAMV7_COMMON_INCLUDE_SAM_AUTOMOUNT_H */
+#endif /* __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H */

@@ -161,9 +161,9 @@
  *   ------ ----------------- ---------------------
  */
 
-#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_PULLDOWN | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
-#define IRQ_MCI0_CD   SAM_IRQ_PD17
+#define GPIO_HSMCI0_CD (GPIO_INPUT | GPIO_CFG_PULLDOWN | GPIO_CFG_DEGLITCH | \
+                        GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
+#define IRQ_HSMCI0_CD  SAM_IRQ_PD17
 
 /****************************************************************************
  * Public Types
@@ -229,20 +229,6 @@ void sam_spidev_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: sam_hsmci_initialize
- *
- * Description:
- *   Initialize HSMCI support
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-int sam_hsmci_initialize(int slot, int minor);
-#else
-# define sam_hsmci_initialize(s,m) (-ENOSYS)
-#endif
-
-/****************************************************************************
  * Name: sam_can_setup
  *
  * Description:
@@ -252,46 +238,6 @@ int sam_hsmci_initialize(int slot, int minor);
 
 #ifdef CONFIG_SAMV7_MCAN
 int sam_can_setup(void);
-#endif
-
-/****************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_cardinserted(int slotno);
-#else
-#  define sam_cardinserted(slotno) (false)
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#else
-#  define sam_writeprotected(slotno) (false)
 #endif
 
 #endif /* __ASSEMBLY__ */
