@@ -96,6 +96,8 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
@@ -181,6 +183,10 @@ config ARCH_RISCV_INTXCPT_EXTREGS
 	default 0
 
 endif
+
+config ARCH_MMU_TYPE_SV39
+	bool
+	default n
 
 source "arch/risc-v/src/opensbi/Kconfig"
 source "arch/risc-v/src/common/Kconfig"

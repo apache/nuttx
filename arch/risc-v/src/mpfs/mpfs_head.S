@@ -110,6 +110,11 @@ __start:
   csrw mideleg, 0
   csrw medeleg, 0
 
+  /* Disable MMU if not done already */
+
+  csrw satp, zero
+  fence
+
   /* invalid all MMU TLB Entry */
 
   sfence.vma x0, x0
