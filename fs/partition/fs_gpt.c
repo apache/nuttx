@@ -173,8 +173,8 @@ static const struct gpt_guid_s g_null_guid;
 
 static inline blkcnt_t gpt_last_lba(FAR struct partition_state_s *state)
 {
-  return (state->nblocks * state->blocksize + GPT_BLOCK_SIZE - 1) /
-         GPT_BLOCK_SIZE - 1;
+  return (((uint64_t)state->nblocks) * state->blocksize + GPT_BLOCK_SIZE - 1)
+         / GPT_BLOCK_SIZE - 1;
 }
 
 /****************************************************************************
