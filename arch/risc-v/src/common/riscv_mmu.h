@@ -71,6 +71,8 @@
  */
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
+#define RV_MMU_PTE_PADDR_SHIFT  (10)
+#define RV_MMU_PTE_PPN_MASK     ((1 << RV_MMU_PTE_PADDR_SHIFT) - 1)
 #define RV_MMU_PTE_PPN_SHIFT    (2)
 #define RV_MMU_VPN_WIDTH        (9)
 #define RV_MMU_VPN_MASK         ((1 << RV_MMU_VPN_WIDTH) - 1)
@@ -83,10 +85,10 @@
 #endif /* CONFIG_ARCH_MMU_TYPE_SV39 */
 
 /****************************************************************************
- * Name: mmu_enable
+ * Name: mmu_satp_reg
  *
  * Description:
- *   Enable MMU and set the base page table address
+ *   Utility function to build satp register value for input parameters
  *
  * Input Parameters:
  *   pgbase - The physical base address of the translation table base
@@ -97,24 +99,63 @@
  *
  ****************************************************************************/
 
-static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
+static inline uintptr_t mmu_satp_reg(uintptr_t pgbase, uint16_t asid)
 {
   uintptr_t reg;
   reg  = ((RV_MMU_SATP_MODE << SATP_MODE_SHIFT) & SATP_MODE_MASK);
   reg |= (((uintptr_t)asid << SATP_ASID_SHIFT) & SATP_ASID_MASK);
   reg |= ((SATP_ADDR_TO_PPN(pgbase) << SATP_PPN_SHIFT) & SATP_PPN_MASK);
+  return reg;
+}
 
-  /* Commit to satp and synchronize */
+/****************************************************************************
+ * Name: mmu_write_satp
+ *
+ * Description:
+ *   Write satp
+ *
+ * Input Parameters:
+ *   reg - satp value
+ *
+ ****************************************************************************/
 
+static inline void mmu_write_satp(uintptr_t reg)
+{
   __asm__ __volatile__
     (
       "csrw satp, %0\n"
       "sfence.vma x0, x0\n"
-      "fence iorw, iorw\n"
+      "fence\n"
       :
       : "rK" (reg)
       : "memory"
     );
+}
+
+/****************************************************************************
+ * Name: mmu_read_satp
+ *
+ * Description:
+ *   Read satp
+ *
+ * Returned Value:
+ *   satp register value
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_read_satp(void)
+{
+  uintptr_t reg;
+
+  __asm__ __volatile__
+    (
+      "csrr %0, satp\n"
+      : "=r" (reg)
+      :
+      : "memory"
+    );
+
+  return reg;
 }
 
 /****************************************************************************
@@ -156,6 +197,30 @@ static inline void mmu_invalidate_tlbs(void)
       :
       : "memory"
     );
+}
+
+/****************************************************************************
+ * Name: mmu_enable
+ *
+ * Description:
+ *   Enable MMU and set the base page table address
+ *
+ * Input Parameters:
+ *   pgbase - The physical base address of the translation table base
+ *   asid - Address space identifier. This can be used to identify different
+ *     address spaces. It is not necessary to use this, nor is it necessary
+ *     for the RISC-V implementation to implement such bits. This means in
+ *     practice that the value should not be used in this generic driver.
+ *
+ ****************************************************************************/
+
+static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
+{
+  uintptr_t reg = mmu_satp_reg(pgbase, asid);
+
+  /* Commit to satp and synchronize */
+
+  mmu_write_satp(reg);
 }
 
 /****************************************************************************
