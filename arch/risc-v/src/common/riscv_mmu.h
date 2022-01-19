@@ -246,9 +246,9 @@ static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
  *     MMU implementation specific
  *   lnvaddr - The virtual address of the beginning of the page table at
  *     level n
- *   paddr - The physical address to be mapped.  Must be aligned to a PPN
+ *   paddr - The physical address to be mapped. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
- *   vaddr - Must be aligned to a PPN
+ *   vaddr - The virtual address to be mapped. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
  *   mmuflags - The MMU flags to use in the mapping.
  *
@@ -256,6 +256,24 @@ static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
 
 void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
                      uintptr_t vaddr, uint32_t mmuflags);
+
+/****************************************************************************
+ * Name: mmu_ln_getentry
+ *
+ * Description:
+ *   Get a level n translation table entry.
+ *
+ * Input Parameters:
+ *   ptlevel - The translation table level, amount of levels is
+ *     MMU implementation specific
+ *   lnvaddr - The virtual address of the beginning of the page table at
+ *     level n
+ *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
+ *     address boundary which is dependent on the level of the entry
+ ****************************************************************************/
+
+uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
+                          uintptr_t vaddr);
 
 /****************************************************************************
  * Name: mmu_ln_map_region
@@ -268,9 +286,9 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
  *     MMU implementation specific
  *   lnvaddr - The virtual address of the beginning of the page table at
  *     level n
- *   paddr - The physical address to be mapped.  Must be aligned to a PPN
+ *   paddr - The physical address to be mapped. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
- *   vaddr - Must be aligned to a PPN
+ *   vaddr - The virtual address to be mapped. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
  *   size - The size of the region in bytes
  *   mmuflags - The MMU flags to use in the mapping.
