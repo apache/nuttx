@@ -60,11 +60,21 @@ CHIP_CSRCS += mpfs_dma.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c
-CMN_CSRCS  += riscv_signal_dispatch.c riscv_pmp.c
+CMN_CSRCS  += riscv_task_start.c
+CMN_CSRCS  += riscv_pthread_start.c riscv_pthread_exit.c
+CMN_CSRCS  += riscv_signal_dispatch.c
+
 CMN_UASRCS += riscv_signal_handler.S
 
 CHIP_CSRCS += mpfs_userspace.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_MPU),y)
+CMN_CSRCS += riscv_pmp.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_MMU),y)
+CMN_CSRCS += riscv_mmu.c
 endif
 
 ifeq ($(CONFIG_SPI),y)
