@@ -88,7 +88,10 @@
 #define RV_MMU_PT_LEVELS        (3)
 #define RV_MMU_VADDR_SHIFT(_n)  (RV_MMU_PAGE_SHIFT + RV_MMU_VPN_WIDTH * \
                                  (RV_MMU_PT_LEVELS - (_n)))
-#define RV_MMU_SATP_MODE        SATP_MODE_SV39
+#define RV_MMU_SATP_MODE        (SATP_MODE_SV39)
+#define RV_MMU_L1_PAGE_SIZE     (0x40000000) /* 1G */
+#define RV_MMU_L2_PAGE_SIZE     (0x200000)   /* 2M */
+#define RV_MMU_L3_PAGE_SIZE     (0x1000)     /* 4K */
 #else
 #error "Unsupported RISC-V MMU implementation selected"
 #endif /* CONFIG_ARCH_MMU_TYPE_SV39 */
