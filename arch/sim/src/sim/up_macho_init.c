@@ -22,8 +22,11 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/mman.h>
+
 #include <assert.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Private Data
@@ -49,6 +52,24 @@ static const char **g_saved_argv;
 static const char **g_saved_envp;
 static const char **g_saved_apple;
 
+static void
+allow_write(const void *start, const void *end)
+{
+  const size_t page_size = sysconf(_SC_PAGE_SIZE);
+  const size_t page_mask = ~(page_size - 1);
+  void *p = (void *)((uintptr_t)start & page_mask);
+  size_t sz = ((uintptr_t)end - (uintptr_t)p + page_size - 1) & ~page_mask;
+
+  /* It seems that Monterey (12.1) maps the section read-only.
+   * Make it writable as we want to patch it.
+   * This was not necessary for Mojave.
+   * Ignore failures as this might not be critical, depending on
+   * the OS version.
+   */
+
+  (void)mprotect(p, sz, PROT_READ | PROT_WRITE);
+}
+
 __attribute__((constructor))
 static void save_and_replace_init_funcs(int argc, const char *argv[],
                                         const char *envp[],
@@ -64,6 +85,7 @@ static void save_and_replace_init_funcs(int argc, const char *argv[],
   g_num_saved_init_funcs = nfuncs - 1;
   g_saved_init_funcs = malloc(g_num_saved_init_funcs *
                               sizeof(*g_saved_init_funcs));
+  allow_write(&mod_init_func_start, &mod_init_func_end);
   int i = 0;
   for (fp = &mod_init_func_start; fp < &mod_init_func_end; fp++)
     {
