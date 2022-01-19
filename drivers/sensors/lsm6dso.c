@@ -51,6 +51,7 @@
 #define LSM6DSO_READ_DELAY        10         /* Selftest data read delay (ms) */
 #define LSM6DSO_SPI_MAX_BUFFER    10         /* SPI exchange buffer size */
 #define LSM6DSO_VECTOR_REMAP      2          /* Vector remap of lsm6dso */
+#define LSM6DSO_ODR_FLT_EPSILON   0.1f       /* ODR float epsilon */
 
 /* Multi sensor index */
 
@@ -2424,8 +2425,9 @@ static int lsm6dso_xl_findodr(FAR float *freq)
 
   for (i = 0; i < num; i++)
     {
-      if (*freq < g_lsm6dso_xl_odr[i].odr
-          || *freq == g_lsm6dso_xl_odr[i].odr)
+      if (((*freq < g_lsm6dso_xl_odr[i].odr + LSM6DSO_ODR_FLT_EPSILON)
+          && (*freq > g_lsm6dso_xl_odr[i].odr - LSM6DSO_ODR_FLT_EPSILON))
+          || *freq < g_lsm6dso_xl_odr[i].odr)
         {
           *freq = g_lsm6dso_xl_odr[i].odr;
           return i;
@@ -2718,8 +2720,9 @@ static int lsm6dso_gy_findodr(FAR float *freq)
 
   for (i = 0; i < num; i++)
     {
-      if (*freq < g_lsm6dso_gy_odr[i].odr
-         || *freq == g_lsm6dso_gy_odr[i].odr)
+      if (((*freq < g_lsm6dso_gy_odr[i].odr + LSM6DSO_ODR_FLT_EPSILON)
+          && (*freq > g_lsm6dso_gy_odr[i].odr - LSM6DSO_ODR_FLT_EPSILON))
+          || *freq < g_lsm6dso_gy_odr[i].odr)
         {
           *freq = g_lsm6dso_gy_odr[i].odr;
           return i;
@@ -3586,8 +3589,9 @@ static int lsm6dso_fsm_findodr(FAR float *freq)
 
   for (i = 0; i < num; i++)
     {
-      if (*freq < g_lsm6dso_fsm_odr[i].odr
-         || *freq == g_lsm6dso_fsm_odr[i].odr)
+      if (((*freq < g_lsm6dso_fsm_odr[i].odr + LSM6DSO_ODR_FLT_EPSILON)
+          && (*freq > g_lsm6dso_fsm_odr[i].odr - LSM6DSO_ODR_FLT_EPSILON))
+          || *freq < g_lsm6dso_fsm_odr[i].odr)
         {
           *freq = g_lsm6dso_fsm_odr[i].odr;
           return i;
