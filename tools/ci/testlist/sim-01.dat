@@ -3,8 +3,6 @@
 # macOS doesn't have ALSA
 -Darwin,sim:alsa
 
--Darwin,sim:cxxtest
-
 # clang doesn't -fsanitize=kernel-address
 -Darwin,sim:kasan
 
