@@ -1478,15 +1478,13 @@ config ARCH_BOARD_S32K144EVB
 		This options selects support for NuttX on the NXP S32K144EVB board
 		featuring the S32K144 Cortex-M4F.
 
-config ARCH_BOARD_UCANS32K146
-	bool "NXP UCANS32K146"
-	depends on ARCH_CHIP_S32K146
+config ARCH_BOARD_RDDRONE_BMS772
+	bool "NXP RDDRONE-BMS772"
+	depends on ARCH_CHIP_S32K144
 	select ARCH_HAVE_LEDS
-	select ARCH_HAVE_BUTTONS
-	select ARCH_HAVE_IRQBUTTONS
 	---help---
-		This options selects support for NuttX on the NXP UCANS32K board
-		featuring the S32K146 Cortex-M4F.
+		This options selects support for NuttX on the NXP RDDRONE-BMS772
+		board featuring the S32K144 Cortex-M4F.
 
 config ARCH_BOARD_S32K146EVB
 	bool "NXP S32K146EVB"
@@ -1496,6 +1494,16 @@ config ARCH_BOARD_S32K146EVB
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		This options selects support for NuttX on the NXP S32K146EVB board
+		featuring the S32K146 Cortex-M4F.
+
+config ARCH_BOARD_UCANS32K146
+	bool "NXP UCANS32K146"
+	depends on ARCH_CHIP_S32K146
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects support for NuttX on the NXP UCANS32K board
 		featuring the S32K146 Cortex-M4F.
 
 config ARCH_BOARD_S32K148EVB
@@ -2518,11 +2526,12 @@ config ARCH_BOARD
 	default "rx65n-grrose"             if ARCH_BOARD_RX65N_GRROSE
 	default "s32k118evb"               if ARCH_BOARD_S32K118EVB
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
+	default "rddrone-bms772"           if ARCH_BOARD_RDDRONE_BMS772
+	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
+	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
 	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
-	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
-	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
 	default "sama5d2-xult"             if ARCH_BOARD_SAMA5D2_XULT
 	default "giant-board"              if ARCH_BOARD_GIANT_BOARD
@@ -2682,11 +2691,14 @@ endif
 if ARCH_BOARD_S32K144EVB
 source "boards/arm/s32k1xx/s32k144evb/Kconfig"
 endif
-if ARCH_BOARD_UCANS32K146
-source "boards/arm/s32k1xx/ucans32k146/Kconfig"
+if ARCH_BOARD_RDDRONE_BMS772
+source "boards/arm/s32k1xx/rddrone-bms772/Kconfig"
 endif
 if ARCH_BOARD_S32K146EVB
 source "boards/arm/s32k1xx/s32k146evb/Kconfig"
+endif
+if ARCH_BOARD_UCANS32K146
+source "boards/arm/s32k1xx/ucans32k146/Kconfig"
 endif
 if ARCH_BOARD_S32K148EVB
 source "boards/arm/s32k1xx/s32k148evb/Kconfig"
