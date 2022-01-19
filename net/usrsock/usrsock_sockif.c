@@ -66,9 +66,6 @@ const struct sock_intf_s g_usrsock_sockif =
   usrsock_sendmsg,            /* si_sendmsg */
   usrsock_recvmsg,            /* si_recvmsg */
   usrsock_sockif_close,       /* si_close */
-#ifdef CONFIG_NET_SENDFILE
-  NULL,                       /* si_sendfile */
-#endif
   usrsock_ioctl               /* si_ioctl */
 };
 
