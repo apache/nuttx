@@ -69,6 +69,10 @@ if SAMV7_FORMAT_MCUBOOT
 
 comment "MCUboot Application Image OTA Update support"
 
+config SAMV7_MCUBOOT_LOADER_SLOT_DEVPATH
+	string "MCUboot loader slot device path"
+	default "/dev/mcuboot"
+
 config SAMV7_OTA_PRIMARY_SLOT_OFFSET
 	hex "MCUboot application image primary slot offset"
 	default 0x20000

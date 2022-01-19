@@ -68,6 +68,11 @@ static FAR struct mtd_dev_s *g_samv7_progmem_mtd;
 static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
 {
   {
+    .offset  = 0,
+    .size    = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
+    .devpath = CONFIG_SAMV7_MCUBOOT_LOADER_SLOT_DEVPATH
+  },
+  {
     .offset  = CONFIG_SAMV7_OTA_PRIMARY_SLOT_OFFSET,
     .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
     .devpath = CONFIG_SAMV7_OTA_PRIMARY_SLOT_DEVPATH
@@ -206,21 +211,22 @@ static int init_mcuboot_partitions(int minor)
   FAR struct mtd_dev_s *mtd;
   int ret = OK;
 
-  for (int i = 0; i < ARRAYSIZE(g_mcuboot_partition_table); ++i)
+  for (int i = 0; i < ARRAYSIZE(g_mcuboot_partition_table); i++)
     {
       const struct mcuboot_partition_s *part = &g_mcuboot_partition_table[i];
       mtd = sam_progmem_alloc_mtdpart(part->offset, part->size);
 
-      if (mtd == NULL)
+      if (mtd != NULL)
         {
-          ferr("ERROR: create MTD OTA partition %s", part->devpath);
-          continue;
-        }
-
-      ret = sam_progmem_register_driver(minor + i, mtd, part->devpath);
-      if (ret < 0)
-        {
-          return ret;
+          ret = sam_progmem_register_driver(minor + i, mtd, part->devpath);
+          if (ret < 0)
+            {
+              return ret;
+            }
+          else
+            {
+              ferr("ERROR: create MTD OTA partition %s", part->devpath);
+            }
         }
     }
 
