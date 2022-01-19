@@ -198,15 +198,15 @@ int sam_bringup(void)
 
       /* Mount the volume on HSMCI0 */
 
-      ret = nx_mount(CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_BLKDEV,
-                     CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_MOUNTPOINT,
-                     CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_FSTYPE,
+      ret = nx_mount(CONFIG_SAMV7_HSMCI0_MOUNT_BLKDEV,
+                     CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT,
+                     CONFIG_SAMV7_HSMCI0_MOUNT_FSTYPE,
                      0, NULL);
 
       if (ret < 0)
         {
           syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAME70XPLAINED_HSMCI0_MOUNT_MOUNTPOINT, ret);
+                 CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT, ret);
         }
     }
 
