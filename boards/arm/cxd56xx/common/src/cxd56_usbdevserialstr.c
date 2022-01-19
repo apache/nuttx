@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/clock/clock_timekeeping.h
+ * boards/arm/cxd56xx/common/src/cxd56_usbdevserialstr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,29 +18,35 @@
  *
  ****************************************************************************/
 
-#ifndef __SCHED_CLOCK_CLOCK_TIMEKEEPING_H
-#define __SCHED_CLOCK_CLOCK_TIMEKEEPING_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
 
-#include <stdint.h>
+#include <stdio.h>
 
-#include <nuttx/clock.h>
+#include "cxd56_uid.h"
 
 /****************************************************************************
- * Public Function Prototypes
+ * Public Functions
  ****************************************************************************/
 
-int clock_timekeeping_get_wall_time(FAR struct timespec *ts);
-int clock_timekeeping_set_wall_time(FAR struct timespec *ts);
+#ifdef CONFIG_BOARD_USBDEV_SERIALSTR
 
-void clock_update_wall_time(void);
+static char g_serialstr[CONFIG_BOARDCTL_UNIQUEID_SIZE * 2 + 1];
 
-void clock_inittimekeeping(FAR const struct timespec *tp);
+FAR const char *board_usbdev_serialstr(void)
+{
+  uint8_t uid[CONFIG_BOARDCTL_UNIQUEID_SIZE];
 
-#endif /* __SCHED_CLOCK_CLOCK_TIMEKEEPING_H */
+  cxd56_get_uniqueid(uid);
+
+  snprintf(g_serialstr, sizeof(g_serialstr),
+           "%02X%02X%02X%02X%02X",
+           uid[0], uid[1], uid[2], uid[3], uid[4]);
+
+  return g_serialstr;
+}
+
+#endif

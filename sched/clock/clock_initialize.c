@@ -155,14 +155,22 @@ int clock_basetime(FAR struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-static void clock_inittime(void)
+static void clock_inittime(FAR const struct timespec *tp)
 {
   /* (Re-)initialize the time value to match the RTC */
 
 #ifndef CONFIG_CLOCK_TIMEKEEPING
   struct timespec ts;
 
-  clock_basetime(&g_basetime);
+  if (tp)
+    {
+      memcpy(&g_basetime, tp, sizeof(struct timespec));
+    }
+  else
+    {
+      clock_basetime(&g_basetime);
+    }
+
   clock_systime_timespec(&ts);
 
   /* Adjust base time to hide initial timer ticks. */
@@ -175,7 +183,7 @@ static void clock_inittime(void)
       g_basetime.tv_sec--;
     }
 #else
-  clock_inittimekeeping();
+  clock_inittimekeeping(tp);
 #endif
 }
 #endif
@@ -202,16 +210,18 @@ void clock_initialize(void)
   up_timer_initialize();
 #endif
 
-#if defined(CONFIG_RTC) && !defined(CONFIG_RTC_EXTERNAL)
+#if defined(CONFIG_RTC)
   /* Initialize the internal RTC hardware.  Initialization of external RTC
    * must be deferred until the system has booted.
    */
 
   up_rtc_initialize();
 
+#if !defined(CONFIG_RTC_EXTERNAL)
   /* Initialize the time value to match the RTC */
 
-  clock_inittime();
+  clock_inittime(NULL);
+#endif
 #endif
 }
 
@@ -234,7 +244,7 @@ void clock_initialize(void)
  *   timers and delays.  So use this interface with care.
  *
  * Input Parameters:
- *   None
+ *   tp: rtc time should be synced, set NULL to re-get time
  *
  * Returned Value:
  *   None
@@ -244,14 +254,14 @@ void clock_initialize(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-void clock_synchronize(void)
+void clock_synchronize(FAR const struct timespec *tp)
 {
   irqstate_t flags;
 
   /* Re-initialize the time value to match the RTC */
 
   flags = enter_critical_section();
-  clock_inittime();
+  clock_inittime(tp);
   leave_critical_section(flags);
 }
 #endif

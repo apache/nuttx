@@ -44,9 +44,7 @@
 #include <nuttx/sensors/wtgahrs2.h>
 #include <nuttx/serial/uart_rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
-#include <nuttx/timers/arch_rtc.h>
 #include <nuttx/timers/oneshot.h>
-#include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
@@ -104,9 +102,6 @@ int sim_bringup(void)
 #endif
 #ifdef CONFIG_SIM_SPI
   FAR struct spi_dev_s *spidev;
-#endif
-#if defined(CONFIG_RTC_RPMSG) && !defined(CONFIG_RTC_RPMSG_SERVER)
-  FAR struct rtc_lowerhalf_s *rtc;
 #endif
   int ret = OK;
 
@@ -446,12 +441,6 @@ int sim_bringup(void)
 
 #ifdef CONFIG_SYSLOG_RPMSG_SERVER
   syslog_rpmsg_server_init();
-#endif
-
-#if defined(CONFIG_RTC_RPMSG) && !defined(CONFIG_RTC_RPMSG_SERVER)
-  rtc = rpmsg_rtc_initialize();
-  up_rtc_set_lowerhalf(rtc, true);
-  rtc_initialize(0, rtc);
 #endif
 
 #if defined(CONFIG_FS_RPMSGFS) && defined(CONFIG_SIM_RPTUN_MASTER)
