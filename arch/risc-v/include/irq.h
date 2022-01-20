@@ -58,9 +58,13 @@
 #define RISCV_IRQ_SAMISALIGNED  (6)   /* Store/AMO Address Misaligned */
 #define RISCV_IRQ_SAFAULT       (7)   /* Store/AMO Access Fault */
 #define RISCV_IRQ_ECALLU        (8)   /* Environment Call from U-mode */
-                                      /* 9-10: Reserved */
+#define RISCV_IRQ_ECALLS        (9)   /* Environment Call from S-mode */
+#define RISCV_IRQ_ECALLH        (10)  /* Environment Call from H-mode */
 #define RISCV_IRQ_ECALLM        (11)  /* Environment Call from M-mode */
-                                      /* 12-15: Reserved */
+#define RISCV_IRQ_INSTRUCTIONPF (12)  /* Instruction page fault */
+#define RISCV_IRQ_LOADPF        (13)  /* Load page fault */
+#define RISCV_IRQ_RESERVED      (14)  /* Reserved */
+#define RISCV_IRQ_SROREPF       (15)  /* Store/AMO page fault */
 
 /* IRQ 16- : (async event:interrupt=1) */
 
