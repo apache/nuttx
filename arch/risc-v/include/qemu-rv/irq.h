@@ -33,30 +33,7 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-/* IRQ 0-15 : (exception:interrupt=0) */
-
-#define QEMU_RV_IRQ_IAMISALIGNED  (0) /* Instruction Address Misaligned */
-#define QEMU_RV_IRQ_IAFAULT       (1) /* Instruction Address Fault */
-#define QEMU_RV_IRQ_IINSTRUCTION  (2) /* Illegal Instruction */
-#define QEMU_RV_IRQ_BPOINT        (3) /* Break Point */
-#define QEMU_RV_IRQ_LAMISALIGNED  (4) /* Load Address Misaligned */
-#define QEMU_RV_IRQ_LAFAULT       (5) /* Load Access Fault */
-#define QEMU_RV_IRQ_SAMISALIGNED  (6) /* Store/AMO Address Misaligned */
-#define QEMU_RV_IRQ_SAFAULT       (7) /* Store/AMO Access Fault */
-#define QEMU_RV_IRQ_ECALLU        (8) /* Environment Call from U-mode */
-                                      /* 9-10: Reserved */
-
-#define QEMU_RV_IRQ_ECALLM       (11) /* Environment Call from M-mode */
-                                      /* 12-15: Reserved */
-
-/* IRQ 16- : (async event:interrupt=1) */
-
-#define QEMU_RV_IRQ_ASYNC  (16)
-#define QEMU_RV_IRQ_MSOFT  (QEMU_RV_IRQ_ASYNC + 3)  /* Machine Software Int */
-#define QEMU_RV_IRQ_MTIMER (QEMU_RV_IRQ_ASYNC + 7)  /* Machine Timer Int */
-#define QEMU_RV_IRQ_MEXT   (QEMU_RV_IRQ_ASYNC + 11) /* Machine External Int */
-
-#define QEMU_RV_IRQ_UART0  (QEMU_RV_IRQ_MEXT + 10)
+#define QEMU_RV_IRQ_UART0  (RISCV_IRQ_MEXT + 10)
 
 #define NR_IRQS (QEMU_RV_IRQ_UART0 + 1)
 

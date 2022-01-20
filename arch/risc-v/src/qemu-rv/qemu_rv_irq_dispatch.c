@@ -69,7 +69,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  if (QEMU_RV_IRQ_MEXT == irq)
+  if (RISCV_IRQ_MEXT == irq)
     {
       uintptr_t val = getreg32(QEMU_RV_PLIC_CLAIM);
 
@@ -80,7 +80,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (QEMU_RV_IRQ_ECALLM == irq)
+  if (RISCV_IRQ_ECALLM == irq)
     {
       *mepc += 4;
     }
@@ -101,11 +101,11 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   irq_dispatch(irq, regs);
 
-  if (QEMU_RV_IRQ_MEXT <= irq)
+  if (RISCV_IRQ_MEXT <= irq)
     {
       /* Then write PLIC_CLAIM to clear pending in PLIC */
 
-      putreg32(irq - QEMU_RV_IRQ_MEXT, QEMU_RV_PLIC_CLAIM);
+      putreg32(irq - RISCV_IRQ_MEXT, QEMU_RV_PLIC_CLAIM);
     }
 #endif
 
