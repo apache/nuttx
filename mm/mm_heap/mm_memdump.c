@@ -33,6 +33,20 @@
 
 #include "mm_heap/mm.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#if UINTPTR_MAX <= UINT32_MAX
+#  define MM_PTR_FMT_WIDTH 11
+#elif UINTPTR_MAX <= UINT64_MAX
+#  define MM_PTR_FMT_WIDTH 19
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
 struct memdump_info_s
 {
   pid_t pid;
@@ -51,13 +65,30 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
   if ((node->preceding & MM_ALLOC_BIT) != 0)
     {
       DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
+#ifndef CONFIG_DEBUG_MM
       if (info->pid == -1)
         {
+          syslog(LOG_INFO, "%12zu%*p\n",
+                 (size_t)node->size, MM_PTR_FMT_WIDTH,
+                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
+#else
+      if (info->pid == -1 || node->pid == info->pid)
+        {
+          int i;
+          char buf[MM_BACKTRACE_DEPTH * MM_PTR_FMT_WIDTH + 1];
+
+          for (i = 0; i < MM_BACKTRACE_DEPTH && node->backtrace[i]; i++)
+            {
+              sprintf(buf + i * MM_PTR_FMT_WIDTH, " %*p",
+                      MM_PTR_FMT_WIDTH - 3, node->backtrace[i]);
+            }
+
+          syslog(LOG_INFO, "%6d%12zu%*p%s\n",
+                 (int)node->pid, (size_t)node->size, MM_PTR_FMT_WIDTH,
+                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE), buf);
+#endif
           info->blks++;
           info->size += node->size;
-          syslog(LOG_INFO, "%12p%12" PRIu32 "\n",
-                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE),
-                 node->size);
         }
     }
   else
@@ -73,13 +104,13 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
                   fnode->flink->size == 0 ||
                   fnode->flink->size >= fnode->size);
 
-      if (info->pid == -2)
+      if (info->pid <= -2)
         {
           info->blks++;
           info->size += node->size;
-          syslog(LOG_INFO, "%12p%12" PRIu32 "\n",
-                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE),
-                 node->size);
+          syslog(LOG_INFO, "%12zu%*p\n",
+                 (size_t)node->size, MM_PTR_FMT_WIDTH,
+                 ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
         }
     }
 }
@@ -93,6 +124,10 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
  *
  * Description:
  *   mm_memdump returns a memory info about specified pid of task/thread.
+ *   if pid equals -1, this function will dump all allocated node and output
+ *   backtrace for every allocated node for this heap, if pid equals -2, this
+ *   function will dump all free node for this heap, and if pid is greater
+ *   than or equal to 0, will dump pid allocated node and output backtrace.
  *
  ****************************************************************************/
 
@@ -100,16 +135,21 @@ void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)
 {
   struct memdump_info_s info;
 
-  if (pid == -1)
+  if (pid >= -1)
     {
       syslog(LOG_INFO, "Dump all used memory node info:\n");
+#ifndef CONFIG_DEBUG_MM
+      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
+#else
+      syslog(LOG_INFO, "%6s%12s%*s %s\n", "PID", "Size", MM_PTR_FMT_WIDTH,
+             "Address", "Backtrace");
+#endif
     }
-  else if (pid == -2)
+  else
     {
       syslog(LOG_INFO, "Dump all free memory node info:\n");
+      syslog(LOG_INFO, "%12s%*s\n", "Size", MM_PTR_FMT_WIDTH, "Address");
     }
-
-  syslog(LOG_INFO, "%12s%12s\n", "Address", "Size");
 
   info.blks = 0;
   info.size = 0;

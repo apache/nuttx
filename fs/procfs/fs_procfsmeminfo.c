@@ -416,14 +416,19 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(procfile);
 
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+#ifdef CONFIG_DEBUG_MM
+                              "usage: <pid/used/free>\n"
+                              "pid: dump pid allocated node\n");
+#else
                               "usage: <used/free>\n");
+#endif
 
   copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                             &offset);
   totalsize = copysize;
   buffer   += copysize;
   buflen   -= copysize;
-  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN, "%s",
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                               "used: dump all allocated node\n"
                               "free: dump all free node\n");
 
@@ -462,6 +467,10 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
       case 'f':
         pid = -2;
         break;
+#ifdef CONFIG_DEBUG_MM
+      default:
+        pid = atoi(buffer);
+#endif
     }
 
   for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
