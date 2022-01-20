@@ -92,7 +92,7 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(BL602_IRQ_ECALLM, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -114,13 +114,13 @@ void up_disable_irq(int irq)
 {
   uint32_t oldstat;
 
-  if (irq == BL602_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
       asm volatile("csrrc %0, mie, %1" : "=r"(oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == BL602_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       putreg8(0, CLIC_TIMER_ENABLE_ADDRESS);
 
@@ -130,8 +130,8 @@ void up_disable_irq(int irq)
     }
   else
     {
-      ASSERT(irq < 64 + 16 + BL602_IRQ_ASYNC);
-      bl_irq_disable(irq - BL602_IRQ_ASYNC);
+      ASSERT(irq < 64 + 16 + RISCV_IRQ_ASYNC);
+      bl_irq_disable(irq - RISCV_IRQ_ASYNC);
     }
 }
 
@@ -147,13 +147,13 @@ void up_enable_irq(int irq)
 {
   uint32_t oldstat;
 
-  if (irq == BL602_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
       asm volatile("csrrs %0, mie, %1" : "=r"(oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == BL602_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       putreg8(1, CLIC_TIMER_ENABLE_ADDRESS);
 
@@ -165,8 +165,8 @@ void up_enable_irq(int irq)
     }
   else
     {
-      ASSERT(irq < 64 + 16 + BL602_IRQ_ASYNC);
-      bl_irq_enable(irq - BL602_IRQ_ASYNC);
+      ASSERT(irq < 64 + 16 + RISCV_IRQ_ASYNC);
+      bl_irq_enable(irq - RISCV_IRQ_ASYNC);
     }
 }
 
