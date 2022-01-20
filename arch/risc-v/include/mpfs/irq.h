@@ -33,7 +33,9 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-#define MPFS_IRQ_LOCAL_START                (RISCV_IRQ_ASYNC + 16)
+#define MPFS_IRQ_ASYNC RISCV_IRQ_ASYNC
+
+#define MPFS_IRQ_LOCAL_START                (MPFS_IRQ_ASYNC + 16)
 #define MPFS_IRQ_LOCAL_0                    (MPFS_IRQ_LOCAL_START + 0)   /* Local 0 spare */
 #define MPFS_IRQ_LOCAL_1                    (MPFS_IRQ_LOCAL_START + 1)   /* Local 1 spare */
 #define MPFS_IRQ_LOCAL_2                    (MPFS_IRQ_LOCAL_START + 2)   /* Local 2 spare */
