@@ -85,7 +85,7 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(QEMU_RV_IRQ_ECALLM, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -108,7 +108,7 @@ void up_disable_irq(int irq)
   int extirq;
   uint32_t oldstat;
 
-  if (irq == QEMU_RV_IRQ_MTIMER)
+  if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
@@ -116,9 +116,9 @@ void up_disable_irq(int irq)
                   : "=r"(oldstat)
                   : "r"(MIE_MTIE));
     }
-  else if (irq > QEMU_RV_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_MEXT)
     {
-      extirq = irq - QEMU_RV_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_MEXT;
 
       /* Clear enable bit for the irq */
 
@@ -147,7 +147,7 @@ void up_enable_irq(int irq)
   int extirq;
   uint32_t oldstat;
 
-  if (irq == QEMU_RV_IRQ_MTIMER)
+  if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
@@ -155,9 +155,9 @@ void up_enable_irq(int irq)
                   : "=r"(oldstat)
                   : "r"(MIE_MTIE));
     }
-  else if (irq > QEMU_RV_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_MEXT)
     {
-      extirq = irq - QEMU_RV_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_MEXT;
 
       /* Set enable bit for the irq */
 
