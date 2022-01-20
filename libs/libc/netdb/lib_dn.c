@@ -42,12 +42,24 @@ static int getoffs(FAR short *offs, FAR const unsigned char *base,
     {
       while (*s & 0xc0)
         {
-          if ((*s & 0xc0) != 0xc0) return 0;
+          if ((*s & 0xc0) != 0xc0)
+            {
+              return 0;
+            }
+
           s = base + ((s[0] & 0x3f) << 8 | s[1]);
         }
 
-      if (!*s) return i;
-      if (s - base >= 0x4000) return 0;
+      if (!*s)
+        {
+          return i;
+        }
+
+      if (s - base >= 0x4000)
+        {
+          return 0;
+        }
+
       offs[i++] = s - base;
       s += *s + 1;
     }
@@ -64,9 +76,17 @@ static int getlens(FAR unsigned char *lens, FAR const char *s, int l)
   for (; ; )
     {
       for (; j < l && s[j] != '.'; j++);
-      if (j - k - 1u > 62) return 0;
+      if (j - k - 1u > 62)
+        {
+          return 0;
+        }
+
       lens[i++] = j - k;
-      if (j == l) return i;
+      if (j == l)
+        {
+          return i;
+        }
+
       k = ++j;
     }
 }
@@ -83,7 +103,11 @@ static int match(FAR int *offset, FAR const unsigned char *base,
   short offs[128];
   int noff = getoffs(offs, base, dn);
 
-  if (!noff) return 0;
+  if (!noff)
+    {
+      return 0;
+    }
+
   for (; ; )
     {
       l = lens[--nlen];
@@ -96,8 +120,16 @@ static int match(FAR int *offset, FAR const unsigned char *base,
 
       *offset = o;
       m += l;
-      if (nlen) m++;
-      if (!nlen || !noff) return m;
+      if (nlen)
+        {
+          m++;
+        }
+
+      if (!nlen || !noff)
+        {
+          return m;
+        }
+
       end--;
     }
 }
@@ -113,15 +145,19 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
   int j;
   int n;
   int m = 0;
-  int offset;
+  int offset = 0;
   int bestlen = 0;
-  int bestoff;
+  int bestoff = 0;
   unsigned char lens[127];
   FAR unsigned char **p;
   FAR const char *end;
   size_t l = strnlen(src, 255);
 
-  if (l && src[l - 1] == '.') l--;
+  if (l && src[l - 1] == '.')
+    {
+      l--;
+    }
+
   if (l > 253 || space <= 0)
     {
       return -1;
@@ -135,18 +171,26 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
 
   end = src + l;
   n = getlens(lens, src, l);
-  if (!n) return -1;
+  if (!n)
+    {
+      return -1;
+    }
 
   p = dnptrs;
-  if (p && *p) for (p++; *p; p++)
+  if (p && *p)
     {
-      m = match(&offset, *dnptrs, *p, end, lens, n);
-      if (m > bestlen)
+      for (p++; *p; p++)
         {
-          bestlen = m;
-          bestoff = offset;
-          if (m == l)
-            break;
+          m = match(&offset, *dnptrs, *p, end, lens, n);
+          if (m > bestlen)
+            {
+              bestlen = m;
+              bestoff = offset;
+              if (m == l)
+                {
+                  break;
+                }
+            }
         }
     }
 
@@ -159,7 +203,9 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
 
   memcpy(dst + 1, src, l - bestlen);
   for (i = j = 0; i < l - bestlen; i += lens[j++] + 1)
-    dst[i] = lens[j];
+    {
+      dst[i] = lens[j];
+    }
 
   /* add tail */
 
@@ -169,13 +215,19 @@ int dn_comp(FAR const char *src, FAR unsigned char *dst, int space,
       dst[i++] = bestoff;
     }
   else
-    dst[i++] = 0;
+    {
+      dst[i++] = 0;
+    }
 
   /* save dst pointer */
 
   if (i > 2 && lastdnptr && dnptrs && *dnptrs)
     {
-      while (*p) p++;
+      while (*p)
+        {
+          p++;
+        }
+
       if (p + 1 < lastdnptr)
         {
           *p++ = dst;
@@ -211,23 +263,50 @@ int dn_expand(FAR const unsigned char *base, FAR const unsigned char *end,
 
       if (*p & 0xc0)
         {
-          if (p + 1 == end) return -1;
+          if (p + 1 == end)
+            {
+              return -1;
+            }
+
           j = ((p[0] & 0x3f) << 8) | p[1];
-          if (len < 0) len = p + 2 - src;
-          if (j >= end - base) return -1;
+          if (len < 0)
+            {
+              len = p + 2 - src;
+            }
+
+          if (j >= end - base)
+            {
+              return -1;
+            }
+
           p = base + j;
         }
       else if (*p)
         {
-          if (dest != dbegin) *dest++ = '.';
+          if (dest != dbegin)
+            {
+              *dest++ = '.';
+            }
+
           j = *p++;
-          if (j >= end - p || j >= dend - dest) return -1;
-          while (j--) *dest++ = *p++;
+          if (j >= end - p || j >= dend - dest)
+            {
+              return -1;
+            }
+
+          while (j--)
+            {
+              *dest++ = *p++;
+            }
         }
       else
         {
           *dest = 0;
-          if (len < 0) len = p + 1 - src;
+          if (len < 0)
+            {
+              len = p + 1 - src;
+            }
+
           return len;
         }
     }
