@@ -684,9 +684,7 @@ found:
     {
       uint32_t unackseq;
       uint32_t ackseq;
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      uint32_t sndseq;
-#endif
+
       /* The next sequence number is equal to the current sequence
        * number (sndseq) plus the size of the outstanding, unacknowledged
        * data (tx_unacked).
@@ -748,19 +746,24 @@ found:
         }
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      /* Update sequence number to the unacknowledge sequence number.  If
-       * there is still outstanding, unacknowledged data, then this will
-       * be beyond ackseq.
-       */
-
-      sndseq = tcp_getsequence(conn->sndseq);
-      if (TCP_SEQ_LT(sndseq, ackseq))
+#ifdef CONFIG_NET_SENDFILE
+      if (!conn->sendfile)
+#endif
         {
-          ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
-                " unackseq: %08" PRIx32 " new tx_unacked: %" PRId32 "\n",
-                tcp_getsequence(conn->sndseq), ackseq, unackseq,
-                (uint32_t)conn->tx_unacked);
-          tcp_setsequence(conn->sndseq, ackseq);
+          /* Update sequence number to the unacknowledge sequence number. If
+           * there is still outstanding, unacknowledged data, then this will
+           * be beyond ackseq.
+           */
+
+          uint32_t sndseq = tcp_getsequence(conn->sndseq);
+          if (TCP_SEQ_LT(sndseq, ackseq))
+            {
+              ninfo("sndseq: %08" PRIx32 "->%08" PRIx32
+                    " unackseq: %08" PRIx32 " new tx_unacked: %" PRIu32 "\n",
+                    tcp_getsequence(conn->sndseq), ackseq, unackseq,
+                    (uint32_t)conn->tx_unacked);
+              tcp_setsequence(conn->sndseq, ackseq);
+            }
         }
 #endif
 
