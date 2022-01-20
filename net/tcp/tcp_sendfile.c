@@ -369,8 +369,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       if ((pstate->snd_sent - pstate->snd_acked + sndlen) < conn->snd_wnd)
         {
-          uint32_t seqno;
-
           /* Then set-up to send that amount of data. (this won't actually
            * happen until the polling cycle completes).
            */
@@ -393,20 +391,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
             }
 
           dev->d_sndlen = sndlen;
-
-          /* Set the sequence number for this packet.  NOTE:  The network
-           * updates sndseq on recept of ACK *before* this function is
-           * called.  In that case sndseq will point to the next
-           * unacknowledge byte (which might have already been sent).  We
-           * will overwrite the value of sndseq here before the packet is
-           * sent.
-           */
-
-          seqno = pstate->snd_sent + pstate->snd_isn;
-          ninfo("SEND: sndseq %08" PRIx32 "->%08" PRIx32 " len: %d\n",
-                tcp_getsequence(conn->sndseq), seqno, ret);
-
-          tcp_setsequence(conn->sndseq, seqno);
 
           /* Notify the device driver of the availability of TX data */
 
