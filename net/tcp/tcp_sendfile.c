@@ -274,6 +274,8 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
   else if ((flags & TCP_REXMIT) != 0)
     {
+      uint32_t sndlen;
+
       nwarn("WARNING: TCP_REXMIT\n");
 
       /* According to RFC 6298 (5.4), retransmit the earliest segment
@@ -282,7 +284,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       /* Reconstruct the length of the earliest segment to be retransmitted */
 
-      uint32_t sndlen = pstate->snd_flen - pstate->snd_acked;
+      sndlen = pstate->snd_flen - pstate->snd_acked;
 
       if (sndlen > conn->mss)
         {
