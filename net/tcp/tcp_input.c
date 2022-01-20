@@ -692,8 +692,17 @@ found:
        * data (tx_unacked).
        */
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && !defined(CONFIG_NET_SENDFILE)
       unackseq = conn->sndseq_max;
+#elif defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_SENDFILE)
+      if (!conn->sendfile)
+        {
+          unackseq = conn->sndseq_max;
+        }
+      else
+        {
+          unackseq = tcp_getsequence(conn->sndseq);
+        }
 #else
       unackseq = tcp_getsequence(conn->sndseq);
 #endif
