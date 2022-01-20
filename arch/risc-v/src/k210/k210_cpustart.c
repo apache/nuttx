@@ -103,7 +103,7 @@ void k210_cpu_boot(int cpu)
 
   /* Enable machine software interrupt for IPI to boot */
 
-  up_enable_irq(K210_IRQ_MSOFT);
+  up_enable_irq(RISCV_IRQ_MSOFT);
 
   /* Wait interrupt */
 

@@ -58,14 +58,14 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Check if fault happened */
 
-  if (vector < K210_IRQ_ECALLU)
+  if (vector < RISCV_IRQ_ECALLU)
     {
       up_fault((int)irq, regs);
     }
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  if (K210_IRQ_MEXT == irq)
+  if (RISCV_IRQ_MEXT == irq)
     {
       uint32_t val = getreg32(K210_PLIC_CLAIM);
 
@@ -76,7 +76,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (K210_IRQ_ECALLM == irq || K210_IRQ_ECALLU == irq)
+  if (RISCV_IRQ_ECALLM == irq || RISCV_IRQ_ECALLU == irq)
     {
       *mepc += 4;
     }
@@ -99,18 +99,18 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* MEXT means no interrupt */
 
-  if (K210_IRQ_MEXT != irq)
+  if (RISCV_IRQ_MEXT != irq)
     {
       /* Deliver the IRQ */
 
       irq_dispatch(irq, regs);
     }
 
-  if (K210_IRQ_MEXT <= irq)
+  if (RISCV_IRQ_MEXT <= irq)
     {
       /* Then write PLIC_CLAIM to clear pending in PLIC */
 
-      putreg32(irq - K210_IRQ_MEXT, K210_PLIC_CLAIM);
+      putreg32(irq - RISCV_IRQ_MEXT, K210_PLIC_CLAIM);
     }
 #endif
 
