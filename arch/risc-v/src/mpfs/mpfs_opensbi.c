@@ -414,14 +414,6 @@ static int mpfs_early_init(bool cold_boot)
   modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, 0, SYSREG_SOFT_RESET_CR_MMC);
   modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_MMC, 0);
 
-  /* U-boot will use serial console 1, just turn on MMUART1 clocks now in
-   * order to see also u-boot traces.
-   */
-
-  modifyreg32(MPFS_SYSREG_SOFT_RESET_CR, SYSREG_SOFT_RESET_CR_MMUART1, 0);
-  modifyreg32(MPFS_SYSREG_SUBBLK_CLOCK_CR, 0,
-              SYSREG_SUBBLK_CLOCK_CR_MMUART1);
-
   /* There are other clocks that need to be enabled for the Linux kernel to
    * run. For now, turn on all the clocks.
    */
