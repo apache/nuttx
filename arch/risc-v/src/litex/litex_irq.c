@@ -72,7 +72,7 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(LITEX_IRQ_ECALLM, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
@@ -96,21 +96,21 @@ void up_disable_irq(int irq)
   int mask;
   uint32_t oldstat;
 
-  if (irq == LITEX_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
       asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == LITEX_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
       asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
     }
-  else if (irq > LITEX_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_MEXT)
     {
-      extirq = irq - LITEX_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_MEXT;
       extirq--;
 
       /* Clear enable bit for the irq */
@@ -142,21 +142,21 @@ void up_enable_irq(int irq)
   int mask;
   uint32_t oldstat;
 
-  if (irq == LITEX_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
       asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == LITEX_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
       asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
     }
-  else if (irq > LITEX_IRQ_MEXT)
+  else if (irq > RISCV_IRQ_MEXT)
     {
-      extirq = irq - LITEX_IRQ_MEXT;
+      extirq = irq - RISCV_IRQ_MEXT;
       extirq--;
 
       /* Set enable bit for the irq */

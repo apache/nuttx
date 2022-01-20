@@ -33,33 +33,8 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-/* IRQ 0-15 : (exception:interrupt=0) */
-
-#define LITEX_IRQ_IAMISALIGNED  (0) /* Instruction Address Misaligned */
-#define LITEX_IRQ_IAFAULT       (1) /* Instruction Address Fault */
-#define LITEX_IRQ_IINSTRUCTION  (2) /* Illegal Instruction */
-#define LITEX_IRQ_BPOINT        (3) /* Break Point */
-#define LITEX_IRQ_LAMISALIGNED  (4) /* Load Address Misaligned */
-#define LITEX_IRQ_LAFAULT       (5) /* Load Access Fault */
-#define LITEX_IRQ_SAMISALIGNED  (6) /* Store/AMO Address Misaligned */
-#define LITEX_IRQ_SAFAULT       (7) /* Store/AMO Access Fault */
-#define LITEX_IRQ_ECALLU        (8) /* Environment Call from U-mode */
-                                    /* 9-10: Reserved */
-
-#define LITEX_IRQ_ECALLM       (11) /* Environment Call from M-mode */
-                                    /* 12-15: Reserved */
-
-/* IRQ 16- : (async event:interrupt=1) */
-
-#define LITEX_IRQ_ASYNC        (16)
-#define LITEX_IRQ_MSOFT    (LITEX_IRQ_ASYNC + 3)  /* Machine Software Int */
-#define LITEX_IRQ_MTIMER   (LITEX_IRQ_ASYNC + 7)  /* Machine Timer Int */
-#define LITEX_IRQ_MEXT     (LITEX_IRQ_ASYNC + 11) /* Machine External Int */
-
-/* Machine Global External Interrupt */
-
-#define LITEX_IRQ_UART0    (LITEX_IRQ_MEXT + 1)
-#define LITEX_IRQ_TIMER0   (LITEX_IRQ_MEXT + 2)
+#define LITEX_IRQ_UART0    (RISCV_IRQ_MEXT + 1)
+#define LITEX_IRQ_TIMER0   (RISCV_IRQ_MEXT + 2)
 
 /* Total number of IRQs */
 
