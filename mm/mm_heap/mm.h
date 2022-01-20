@@ -30,10 +30,12 @@
 #include <nuttx/fs/procfs.h>
 
 #include <assert.h>
+#include <execinfo.h>
 #include <sys/types.h>
 #include <stdbool.h>
 #include <string.h>
 #include <semaphore.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,8 +66,8 @@
  * REVISIT: We could do better on machines with 16-bit addressing.
  */
 
-#  define MM_MIN_SHIFT   ( 4)  /* 16 bytes */
-#  define MM_MAX_SHIFT   (15)  /* 32 Kb */
+#  define MM_MIN_SHIFT_   ( 4)  /* 16 bytes */
+#  define MM_MAX_SHIFT    (15)  /* 32 Kb */
 
 #elif defined(CONFIG_HAVE_LONG_LONG)
 /* Four byte offsets; Pointers may be 4 or 8 bytes
@@ -73,19 +75,36 @@
  */
 
 #  if UINTPTR_MAX <= UINT32_MAX
-#    define MM_MIN_SHIFT ( 4)  /* 16 bytes */
+#    define MM_MIN_SHIFT_ ( 4)  /* 16 bytes */
 #  elif UINTPTR_MAX <= UINT64_MAX
-#    define MM_MIN_SHIFT ( 5)  /* 32 bytes */
+#    define MM_MIN_SHIFT_ ( 5)  /* 32 bytes */
 #  endif
-#  define MM_MAX_SHIFT   (22)  /*  4 Mb */
+#  define MM_MAX_SHIFT    (22)  /*  4 Mb */
 
 #else
 /* Four byte offsets; Pointers must be 4 bytes.
  * sizeof(struct mm_freenode_s) is 16 bytes.
  */
 
-#  define MM_MIN_SHIFT   ( 4)  /* 16 bytes */
-#  define MM_MAX_SHIFT   (22)  /*  4 Mb */
+#  define MM_MIN_SHIFT_   ( 4)  /* 16 bytes */
+#  define MM_MAX_SHIFT    (22)  /*  4 Mb */
+#endif
+
+#ifdef CONFIG_DEBUG_MM
+#  define MM_MIN_SHIFT       (MM_MIN_SHIFT_ + 2)
+#  define MM_BACKTRACE_DEPTH 8
+#  define MM_ADD_BACKTRACE(ptr) \
+     do \
+       { \
+         FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
+         tmp->pid = getpid(); \
+         memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
+         backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+       } \
+     while (0)
+#else
+#  define MM_ADD_BACKTRACE(ptr)
+#  define MM_MIN_SHIFT MM_MIN_SHIFT_
 #endif
 
 /* All other definitions derive from these two */
@@ -140,8 +159,12 @@ typedef uint32_t mmsize_t;
 
 struct mm_allocnode_s
 {
-  mmsize_t size;           /* Size of this chunk */
-  mmsize_t preceding;      /* Size of the preceding chunk */
+#ifdef CONFIG_DEBUG_MM
+  uint32_t pid;                            /* The pid for caller */
+  FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
+#endif
+  mmsize_t size;                           /* Size of this chunk */
+  mmsize_t preceding;                      /* Size of the preceding chunk */
 };
 
 static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
@@ -151,9 +174,13 @@ static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
 
 struct mm_freenode_s
 {
-  mmsize_t size;                   /* Size of this chunk */
-  mmsize_t preceding;              /* Size of the preceding chunk */
-  FAR struct mm_freenode_s *flink; /* Supports a doubly linked list */
+#ifdef CONFIG_DEBUG_MM
+  uint32_t pid;                            /* The pid for caller */
+  FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
+#endif
+  mmsize_t size;                           /* Size of this chunk */
+  mmsize_t preceding;                      /* Size of the preceding chunk */
+  FAR struct mm_freenode_s *flink;         /* Supports a doubly linked list */
   FAR struct mm_freenode_s *blink;
 };
 
