@@ -65,10 +65,13 @@
 /* IRQ 16- : (async event:interrupt=1) */
 
 #define RISCV_IRQ_ASYNC         (16)
-
+#define RISCV_IRQ_SSOFT         (RISCV_IRQ_ASYNC + 1)  /* Supervisor Software Int */
 #define RISCV_IRQ_MSOFT         (RISCV_IRQ_ASYNC + 3)  /* Machine Software Int */
+#define RISCV_IRQ_STIMER        (RISCV_IRQ_ASYNC + 5)  /* Supervisor Timer Int */
 #define RISCV_IRQ_MTIMER        (RISCV_IRQ_ASYNC + 7)  /* Machine Timer Int */
+#define RISCV_IRQ_SEXT          (RISCV_IRQ_ASYNC + 9)  /* Supervisor External Int */
 #define RISCV_IRQ_MEXT          (RISCV_IRQ_ASYNC + 11) /* Machine External Int */
+#define RISCV_IRQ_HPMOV         (RISCV_IRQ_ASYNC + 17) /* HPM Overflow Int */
 
 /* Configuration ************************************************************/
 

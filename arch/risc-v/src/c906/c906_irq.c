@@ -97,10 +97,10 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(C906_IRQ_ECALLM, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifdef CONFIG_BUILD_PROTECTED
-  irq_attach(C906_IRQ_ECALLU, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLU, riscv_swint, NULL);
 #endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
@@ -124,13 +124,13 @@ void up_disable_irq(int irq)
   int extirq = 0;
   uint64_t oldstat = 0;
 
-  if (irq == C906_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
       asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == C906_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
@@ -167,13 +167,13 @@ void up_enable_irq(int irq)
   int extirq;
   uint64_t oldstat;
 
-  if (irq == C906_IRQ_MSOFT)
+  if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
       asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
     }
-  else if (irq == C906_IRQ_MTIMER)
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
