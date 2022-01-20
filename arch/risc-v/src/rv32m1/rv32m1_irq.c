@@ -117,7 +117,7 @@ void up_irqinitialize(void)
 
   /* Attach the ecall interrupt handler */
 
-  irq_attach(RV32M1_IRQ_ECALL_M, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
