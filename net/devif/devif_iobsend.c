@@ -55,7 +55,11 @@
 void devif_iob_send(FAR struct net_driver_s *dev, FAR struct iob_s *iob,
                     unsigned int len, unsigned int offset)
 {
-  DEBUGASSERT(dev && len > 0 && len < NETDEV_PKTSIZE(dev));
+  if (!(dev && len > 0 && len < NETDEV_PKTSIZE(dev)))
+    {
+      nerr("devif_iob_send error, %p, send len: %d\n", dev, len);
+      return;
+    }
 
   /* Copy the data from the I/O buffer chain to the device buffer */
 
