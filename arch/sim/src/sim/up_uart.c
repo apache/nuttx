@@ -36,7 +36,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define BUFSIZE 256
+#ifndef CONFIG_SIM_UART_BUFFER_SIZE
+  #define CONFIG_SIM_UART_BUFFER_SIZE 256
+#endif
 
 /****************************************************************************
  * Private Types
@@ -96,28 +98,28 @@ static const struct uart_ops_s g_tty_ops =
 #endif
 
 #ifdef USE_DEVCONSOLE
-static char g_console_rxbuf[BUFSIZE];
-static char g_console_txbuf[BUFSIZE];
+static char g_console_rxbuf[CONFIG_SIM_UART_BUFFER_SIZE];
+static char g_console_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_SIM_UART0_NAME
-static char g_tty0_rxbuf[BUFSIZE];
-static char g_tty0_txbuf[BUFSIZE];
+static char g_tty0_rxbuf[CONFIG_SIM_UART_BUFFER_SIZE];
+static char g_tty0_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_SIM_UART1_NAME
-static char g_tty1_rxbuf[BUFSIZE];
-static char g_tty1_txbuf[BUFSIZE];
+static char g_tty1_rxbuf[CONFIG_SIM_UART_BUFFER_SIZE];
+static char g_tty1_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_SIM_UART2_NAME
-static char g_tty2_rxbuf[BUFSIZE];
-static char g_tty2_txbuf[BUFSIZE];
+static char g_tty2_rxbuf[CONFIG_SIM_UART_BUFFER_SIZE];
+static char g_tty2_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef CONFIG_SIM_UART3_NAME
-static char g_tty3_rxbuf[BUFSIZE];
-static char g_tty3_txbuf[BUFSIZE];
+static char g_tty3_rxbuf[CONFIG_SIM_UART_BUFFER_SIZE];
+static char g_tty3_txbuf[CONFIG_SIM_UART_BUFFER_SIZE];
 #endif
 
 #ifdef USE_DEVCONSOLE
@@ -127,12 +129,12 @@ static struct uart_dev_s g_console_dev =
   .ops            = &g_tty_ops,
   .xmit =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_console_txbuf,
   },
   .recv =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_console_rxbuf,
   },
 };
@@ -151,12 +153,12 @@ static struct uart_dev_s g_tty0_dev =
   .priv           = &g_tty0_priv,
   .xmit =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty0_txbuf,
   },
   .recv =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty0_rxbuf,
   },
 };
@@ -175,12 +177,12 @@ static struct uart_dev_s g_tty1_dev =
   .priv           = &g_tty1_priv,
   .xmit =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty1_txbuf,
   },
   .recv =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty1_rxbuf,
   },
 };
@@ -199,12 +201,12 @@ static struct uart_dev_s g_tty2_dev =
   .priv           = &g_tty2_priv,
   .xmit =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty2_txbuf,
   },
   .recv =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty2_rxbuf,
   },
 };
@@ -223,12 +225,12 @@ static struct uart_dev_s g_tty3_dev =
   .priv           = &g_tty3_priv,
   .xmit =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty3_txbuf,
   },
   .recv =
   {
-    .size         = BUFSIZE,
+    .size         = CONFIG_SIM_UART_BUFFER_SIZE,
     .buffer       = g_tty3_rxbuf,
   },
 };
