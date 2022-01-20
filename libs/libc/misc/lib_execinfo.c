@@ -42,7 +42,7 @@ static FAR char **backtrace_malloc(FAR void *const *buffer, int size)
 
   while (size-- > 0)
     {
-      int ret = sprintf(NULL, "%pS", *buffer++);
+      int ret = snprintf(NULL, 0, "%pS", *buffer++);
       if (ret < 0)
         {
           return NULL;
