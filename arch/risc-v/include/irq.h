@@ -45,6 +45,31 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Map RISC-V exception code to NuttX IRQ */
+
+/* IRQ 0-15 : (exception:interrupt=0) */
+
+#define RISCV_IRQ_IAMISALIGNED  (0)   /* Instruction Address Misaligned */
+#define RISCV_IRQ_IAFAULT       (1)   /* Instruction Address Fault */
+#define RISCV_IRQ_IINSTRUCTION  (2)   /* Illegal Instruction */
+#define RISCV_IRQ_BPOINT        (3)   /* Break Point */
+#define RISCV_IRQ_LAMISALIGNED  (4)   /* Load Address Misaligned */
+#define RISCV_IRQ_LAFAULT       (5)   /* Load Access Fault */
+#define RISCV_IRQ_SAMISALIGNED  (6)   /* Store/AMO Address Misaligned */
+#define RISCV_IRQ_SAFAULT       (7)   /* Store/AMO Access Fault */
+#define RISCV_IRQ_ECALLU        (8)   /* Environment Call from U-mode */
+                                      /* 9-10: Reserved */
+#define RISCV_IRQ_ECALLM        (11)  /* Environment Call from M-mode */
+                                      /* 12-15: Reserved */
+
+/* IRQ 16- : (async event:interrupt=1) */
+
+#define RISCV_IRQ_ASYNC         (16)
+
+#define RISCV_IRQ_MSOFT         (RISCV_IRQ_ASYNC + 3)  /* Machine Software Int */
+#define RISCV_IRQ_MTIMER        (RISCV_IRQ_ASYNC + 7)  /* Machine Timer Int */
+#define RISCV_IRQ_MEXT          (RISCV_IRQ_ASYNC + 11) /* Machine External Int */
+
 /* Configuration ************************************************************/
 
 /* If this is a kernel build, how many nested system calls should we
