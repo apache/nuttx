@@ -67,7 +67,7 @@ FAR char **backtrace_symbols(FAR void *const *buffer, int size)
   syms = backtrace_malloc(buffer, size);
   if (syms != NULL)
     {
-      buf = syms[size];
+      buf = (FAR char *)&syms[size];
       for (i = 0; i < size; i++)
         {
           syms[i] = buf;
