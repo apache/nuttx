@@ -260,7 +260,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       ackno = tcp_getsequence(tcp->ackno);
       pstate->snd_acked = TCP_SEQ_SUB(ackno,
                                       pstate->snd_isn);
-      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -311,6 +311,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_REXMIT) != 0)
     {
+      uint32_t sndlen;
+
       nwarn("WARNING: TCP_REXMIT\n");
 
       /* According to RFC 6298 (5.4), retransmit the earliest segment
@@ -319,7 +321,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       /* Reconstruct the length of the earliest segment to be retransmitted */
 
-      uint32_t sndlen = pstate->snd_buflen - pstate->snd_acked;
+      sndlen = pstate->snd_buflen - pstate->snd_acked;
 
       if (sndlen > conn->mss)
         {
@@ -429,7 +431,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           /* Update the amount of data sent (but not necessarily ACKed) */
 
           pstate->snd_sent += sndlen;
-          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zu\n",
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
         }
       else
