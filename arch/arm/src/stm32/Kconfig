@@ -10828,6 +10828,19 @@ endmenu
 
 comment "USB Device Configuration"
 
+menu "OTG Configuration"
+	depends on STM32_OTGFS
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	default n
+	---help---
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+endmenu
+
 config STM32_USB_ITRMP
 	bool "Re-map USB interrupt"
 	default n if !STM32_CAN1
