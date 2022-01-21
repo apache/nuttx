@@ -276,7 +276,7 @@
 
 
 #include <semaphore.h>
-#define FF_FS_REENTRANT	1
+#define FF_FS_REENTRANT	0
 #define FF_FS_TIMEOUT	0
 #define FF_SYNC_t		sem_t
 /* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
