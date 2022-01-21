@@ -438,6 +438,12 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
         }
     }
 
+  /* If a context switch occurred while processing the interrupt then
+   * CURRENT_REGS may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
   regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
