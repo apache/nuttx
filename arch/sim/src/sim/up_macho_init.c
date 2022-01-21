@@ -75,14 +75,25 @@ static void save_and_replace_init_funcs(int argc, const char *argv[],
                                         const char *envp[],
                                         const char *apple[])
 {
+  init_func_t *fp;
+  unsigned int nfuncs = &mod_init_func_end - &mod_init_func_start;
+
+  assert(nfuncs > 0);
+  g_num_saved_init_funcs = nfuncs - 1;
+  if (g_num_saved_init_funcs == 0)
+    {
+      /* This function is the only constructor in the binary.
+       * no need to apply the following hack.
+       */
+
+      return;
+    }
+
   g_saved_argc = argc;
   g_saved_argv = argv;
   g_saved_envp = envp;
   g_saved_apple = apple;
-  init_func_t *fp;
-  unsigned int nfuncs = &mod_init_func_end - &mod_init_func_start;
-  assert(nfuncs > 1);
-  g_num_saved_init_funcs = nfuncs - 1;
+
   g_saved_init_funcs = malloc(g_num_saved_init_funcs *
                               sizeof(*g_saved_init_funcs));
   allow_write(&mod_init_func_start, &mod_init_func_end);
