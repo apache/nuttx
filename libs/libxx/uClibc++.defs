@@ -28,6 +28,7 @@ $(TOPDIR)/include/uClibc++:
 	$(Q) $(DIRLINK) $(CURDIR)/uClibc++/include $(TOPDIR)/include/uClibc++
 	$(Q) $(COPYFILE) $(CURDIR)/system_configuration.h $(TOPDIR)/include/uClibc++
 	$(Q) patch -p0 < 0001-uClibcxx-basic_definitions-fix-GCC-specific-definiti.patch
+	$(Q) patch -p0 < 0001-uclibxx-use-overload-constructor-of-filebuf-ostream.patch
 
 context:: $(TOPDIR)/include/uClibc++
 
