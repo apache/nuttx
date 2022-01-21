@@ -84,6 +84,15 @@ struct sendfile_s
   ssize_t            snd_sent;             /* The number of bytes sent */
   uint32_t           snd_isn;              /* Initial sequence number */
   uint32_t           snd_acked;            /* The number of bytes acked */
+  uint32_t           snd_prev_ack;         /* The previous ACKed seq number */
+#ifdef CONFIG_NET_TCP_WINDOW_SCALE
+  uint32_t           snd_prev_wnd;         /* The advertised window in the last
+                                            * incoming acknowledgment
+                                            */
+#else
+  uint16_t           snd_prev_wnd;
+#endif
+  int                snd_dup_acks;         /* Duplicate ACK counter */
 };
 
 /****************************************************************************
@@ -218,6 +227,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_ACKDATA) != 0)
     {
+      uint32_t ackno;
       FAR struct tcp_hdr_s *tcp;
 
       /* Get the offset address of the TCP header */
@@ -242,14 +252,14 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
         }
 #endif /* CONFIG_NET_IPv4 */
 
-      /* The current acknowledgement number number is the (relative) offset
+      /* The current acknowledgement number is the (relative) offset
        * of the of the next byte needed by the receiver.  The snd_isn is the
        * offset of the first byte to send to the receiver.  The difference
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = TCP_SEQ_SUB(tcp_getsequence(tcp->ackno),
-                                      pstate->snd_isn);
+      ackno = tcp_getsequence(tcp->ackno);
+      pstate->snd_acked = TCP_SEQ_SUB(ackno, pstate->snd_isn);
       ninfo("ACK: acked=%" PRId32 " sent=%zd flen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
@@ -264,15 +274,43 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
-      /* No. Fall through to send more data if necessary */
+      /* Fast Retransmit (RFC 5681): an acknowledgment is considered a
+       * "duplicate" when (a) the receiver of the ACK has outstanding data,
+       * (b) the incoming acknowledgment carries no data, (c) the SYN and
+       * FIN bits are both off, (d) the acknowledgment number is equal to
+       * the greatest acknowledgment received on the given connection
+       * and (e) the advertised window in the incoming acknowledgment equals
+       * the advertised window in the last incoming acknowledgment.
+       */
+
+      if (pstate->snd_acked < pstate->snd_sent &&
+          (flags & TCP_NEWDATA) == 0 &&
+          (tcp->flags & (TCP_SYN | TCP_FIN)) == 0 &&
+          ackno == pstate->snd_prev_ack &&
+          conn->snd_wnd == pstate->snd_prev_wnd)
+        {
+          if (++pstate->snd_dup_acks >=
+                CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+            {
+              flags |= TCP_REXMIT;
+              pstate->snd_dup_acks = 0;
+            }
+        }
+      else
+        {
+          pstate->snd_dup_acks = 0;
+        }
+
+      pstate->snd_prev_ack = ackno;
+      pstate->snd_prev_wnd = conn->snd_wnd;
     }
 
   /* Check if we are being asked to retransmit data.
-   * This condition is located here after TCP_ACKDATA for performance reasons
-   * (TCP_REXMIT is less frequent than TCP_ACKDATA).
+   * This condition is located here (after TCP_ACKDATA and before
+   * TCP_DISCONN_EVENTS) for performance reasons.
    */
 
-  else if ((flags & TCP_REXMIT) != 0)
+  if ((flags & TCP_REXMIT) != 0)
     {
       uint32_t sndlen;
 
