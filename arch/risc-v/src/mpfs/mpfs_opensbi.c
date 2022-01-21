@@ -38,16 +38,12 @@
 
 #include <sbi/sbi_types.h>
 #include <sbi/riscv_atomic.h>
-#include <sbi/riscv_asm.h>
 #include <sbi/riscv_io.h>
-#include <sbi/riscv_encoding.h>
 #include <sbi/sbi_hart.h>
 #include <sbi/sbi_console.h>
 #include <sbi/sbi_platform.h>
-#include <sbi/sbi_domain.h>
 #include <sbi/sbi_timer.h>
 #include <sbi/sbi_init.h>
-#include <sbi/sbi_scratch.h>
 #include <sbi_utils/irqchip/plic.h>
 #include <sbi_utils/ipi/aclint_mswi.h>
 #include <sbi_utils/timer/aclint_mtimer.h>

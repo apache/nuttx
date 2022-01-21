@@ -31,14 +31,17 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-
-#include "riscv_internal.h"
+#include <inttypes.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define PRILX               PRIxREG
+#ifdef CONFIG_ARCH_RV32
+#  define PRILX             "08" PRIxPTR
+#else
+#  define PRILX             "016" PRIxPTR
+#endif
 
 #define __packed            end_packed_struct
 #define __noreturn          noreturn_function

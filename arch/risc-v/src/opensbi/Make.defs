@@ -47,6 +47,7 @@ $(OPENSBI_TARBALL):
 	$(Q) echo "Unpacking: OpenSBI"
 	$(Q) tar xzf opensbi/$(OPENSBI_TARBALL) -C opensbi
 	$(Q) mv opensbi/$(OPENSBI_DIR) opensbi/$(OPENSBI_UNPACK)
+	$(Q) patch -p0 < opensbi/0001-fix-redefinition-warnings-with-NuttX.patch
 	$(Q) touch opensbi/.opensbi_unpack
 
 context:: .opensbi_unpack
