@@ -249,6 +249,11 @@ size_t up_progmem_pagesize(size_t page)
     }
 }
 
+size_t up_progmem_erasesize(size_t block)
+{
+  return up_progmem_pagesize(block);
+}
+
 ssize_t up_progmem_getpage(size_t addr)
 {
   size_t page_end = 0;
