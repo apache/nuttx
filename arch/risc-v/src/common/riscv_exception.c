@@ -33,13 +33,12 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/syslog/syslog.h>
-#include <arch/mcause.h>
+#include <arch/irq.h>
 
 #include "riscv_arch.h"
 #include "riscv_internal.h"
 
-#ifdef CONFIG_DEBUG_INFO
-static const char *g_reasons_str[MCAUSE_MAX_EXCEPTION + 1] =
+static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 {
   "Instruction address misaligned",
   "Instruction access fault",
@@ -58,7 +57,6 @@ static const char *g_reasons_str[MCAUSE_MAX_EXCEPTION + 1] =
   "Reserved",
   "Store/AMO page fault"
 };
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -74,21 +72,19 @@ static const char *g_reasons_str[MCAUSE_MAX_EXCEPTION + 1] =
 
 void riscv_exception(uintptr_t mcause, uintptr_t *regs)
 {
-  uintptr_t cause = mcause & MCAUSE_INTERRUPT_MASK;
+  uintptr_t cause = mcause & RISCV_IRQ_MASK;
 
-#ifdef CONFIG_DEBUG_INFO
-  if (mcause > MCAUSE_MAX_EXCEPTION)
+  if (mcause > RISCV_MAX_EXCEPTION)
     {
-      _alert("EXCEPTION: Unknown.  MCAUSE: %08" PRIx32 "\n", cause);
+      _alert("EXCEPTION: Unknown.  MCAUSE: %" PRIxREG "\n", cause);
     }
   else
     {
-      _alert("EXCEPTION: %s. MCAUSE: %08" PRIx32 "\n",
+      _alert("EXCEPTION: %s. MCAUSE: %" PRIxREG "\n",
              g_reasons_str[cause], cause);
     }
-#endif
 
-  _alert("PANIC!!! Exception = %08" PRIx32 "\n", cause);
+  _alert("PANIC!!! Exception = %" PRIxREG "\n", cause);
   up_irq_save();
   CURRENT_REGS = regs;
   PANIC();

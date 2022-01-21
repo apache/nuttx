@@ -66,6 +66,8 @@
 #define RISCV_IRQ_RESERVED      (14)  /* Reserved */
 #define RISCV_IRQ_SROREPF       (15)  /* Store/AMO page fault */
 
+#define RISCV_MAX_EXCEPTION     (15)
+
 /* IRQ 16- : (async event:interrupt=1) */
 
 #define RISCV_IRQ_ASYNC         (16)
@@ -76,6 +78,16 @@
 #define RISCV_IRQ_SEXT          (RISCV_IRQ_ASYNC + 9)  /* Supervisor External Int */
 #define RISCV_IRQ_MEXT          (RISCV_IRQ_ASYNC + 11) /* Machine External Int */
 #define RISCV_IRQ_HPMOV         (RISCV_IRQ_ASYNC + 17) /* HPM Overflow Int */
+
+/* IRQ bit and IRQ mask */
+
+#ifdef CONFIG_ARCH_RV32
+#  define RISCV_IRQ_BIT           (1 << 31)
+#else
+#  define RISCV_IRQ_BIT           (1 << 63)
+#endif
+
+#define RISCV_IRQ_MASK            (~RISCV_IRQ_BIT)
 
 /* Configuration ************************************************************/
 
