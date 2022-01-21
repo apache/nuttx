@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/note/note_driver.c
+ * drivers/segger/config/SEGGER_SYSVIEW_Conf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,61 +18,62 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_SEGGER_CONFIG_SEGGER_SYSVIEW_CONF_H
+#define __DRIVERS_SEGGER_CONFIG_SEGGER_SYSVIEW_CONF_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/note/note_driver.h>
-#include <nuttx/note/note_sysview.h>
-#include <nuttx/note/noteram_driver.h>
-#include <nuttx/note/notectl_driver.h>
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
+
+/* Function macro to retrieve the Id of the currently active interrupt.
+ * Call user-supplied function SEGGER_SYSVIEW_X_GetInterruptId().
+ */
+
+#define SEGGER_SYSVIEW_GET_INTERRUPT_ID    sysview_get_interrupt_id
+
+/* Function macro to retrieve a system timestamp for SYSVIEW events.
+ * Call user-supplied function SEGGER_SYSVIEW_X_GetTimestamp().
+ */
+
+#define SEGGER_SYSVIEW_GET_TIMESTAMP       sysview_get_timestamp
+
+/* Number of bytes that SystemView uses for the RTT buffer. */
+
+#define SEGGER_SYSVIEW_RTT_BUFFER_SIZE     CONFIG_SEGGER_SYSVIEW_RTT_BUFFER_SIZE
+
+/* Largest cache line size (in bytes) in the target system. */
+
+#define SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE CONFIG_SEGGER_RTT_CPU_CACHE_LINE_SIZE
 
 /****************************************************************************
- * Name: note_register
- *
- * Description:
- *   Register sched note related drivers at /dev folder that can be used by
- *   an application to read or filter the note data.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero on succress. A negated errno value is returned on a failure.
- *
+ * Public Data
  ****************************************************************************/
 
-int note_register(void)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int ret = 0;
-
-#ifdef CONFIG_DRIVER_NOTERAM
-  ret = noteram_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
+#else
+#define EXTERN extern
 #endif
 
-#ifdef CONFIG_DRIVER_NOTECTL
-  ret = notectl_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#ifdef CONFIG_SEGGER_SYSVIEW
-  ret = sysview_initialize();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
+unsigned int sysview_get_interrupt_id(void);
+unsigned int sysview_get_timestamp(void);
 
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __DRIVERS_SEGGER_CONFIG_SEGGER_SYSVIEW_CONF_H */
