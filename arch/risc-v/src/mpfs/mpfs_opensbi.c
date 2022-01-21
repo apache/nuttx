@@ -178,13 +178,27 @@ static struct aclint_mswi_data mpfs_mswi =
   .hart_count     = MPFS_HART_COUNT,
 };
 
-const struct sbi_platform platform =
+/* OpenSBI picks the used and unused harts via the hart_index2id table.
+ * Unused hart is marked with -1.  Mpfs will always have the hart0 unused.
+ */
+
+static const u32 mpfs_hart_index2id[MPFS_HART_COUNT] =
+{
+  [0] = -1,
+  [1] = 1,
+  [2] = 2,
+  [3] = 3,
+  [4] = 4,
+};
+
+static const struct sbi_platform platform =
 {
   .opensbi_version   = OPENSBI_VERSION,
   .platform_version  = SBI_PLATFORM_VERSION(0x0, 0x01),
   .name              = "Microchip PolarFire(R) SoC",
   .features          = SBI_PLATFORM_DEFAULT_FEATURES,
   .hart_count        = MPFS_HART_COUNT,
+  .hart_index2id     = mpfs_hart_index2id,
   .hart_stack_size   = SBI_PLATFORM_DEFAULT_HART_STACK_SIZE,
   .platform_ops_addr = (unsigned long)&platform_ops,
   .firmware_context  = 0
