@@ -23,18 +23,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <assert.h>
 #include <errno.h>
 #include <stdint.h>
-
-#include "riscv_internal.h"
-#include "riscv_arch.h"
+#include <riscv_arch.h>
 
 #include <hardware/mpfs_plic.h>
 #include <hardware/mpfs_memorymap.h>
 #include <hardware/mpfs_clint.h>
 #include <hardware/mpfs_sysreg.h>
+
+/* OpenSBI will also define NULL. Undefine NULL in order to avoid warning:
+ * 'warning: "NULL" redefined'
+ */
+
+#ifdef NULL
+  #undef NULL
+#endif
 
 #include <sbi/sbi_types.h>
 #include <sbi/riscv_atomic.h>
@@ -111,6 +116,16 @@ static int  mpfs_opensbi_console_init(void);
 static int  mpfs_irqchip_init(bool cold_boot);
 static int  mpfs_ipi_init(bool cold_boot);
 static int  mpfs_timer_init(bool cold_boot);
+
+/****************************************************************************
+ * Extern Function Declarations
+ ****************************************************************************/
+
+/* riscv_internal.h cannot be included due to a number of redefinition
+ * conflicts.  Thus, define the riscv_lowputc() with the extern definition.
+ */
+
+extern void riscv_lowputc(char ch);
 
 /****************************************************************************
  * Private Data
