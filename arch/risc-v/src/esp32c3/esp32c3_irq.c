@@ -376,6 +376,7 @@ void esp32c3_free_cpuint(uint8_t periphid)
 IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 {
   int irq;
+  uintptr_t *mepc = regs;
 
   if (((MCAUSE_INTERRUPT & mcause) == 0) &&
       (mcause != MCAUSE_ECALL_M))
@@ -428,6 +429,7 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
     {
       if (mcause == MCAUSE_ECALL_M)
         {
+          *mepc += 4;
           irq_dispatch(ESP32C3_IRQ_ECALL_M, regs);
         }
       else
