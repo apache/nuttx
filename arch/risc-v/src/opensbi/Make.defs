@@ -37,8 +37,6 @@ OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
 OPENSBI_DIR     = riscv-software-src-opensbi-48f91ee
 
-CFLAGS += -DOPENSBI_EXTERNAL_SBI_TYPES=nuttx_sbi_types.h
-
 $(OPENSBI_TARBALL):
 	$(Q) echo "Downloading: OpenSBI"
 	$(Q) curl -L $(OPENSBI_URL)/$(OPENSBI_COMMIT) -o opensbi/$(OPENSBI_TARBALL)
