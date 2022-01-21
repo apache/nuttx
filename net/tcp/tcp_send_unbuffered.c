@@ -293,6 +293,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
                 CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
             {
               flags |= TCP_REXMIT;
+              pstate->snd_dup_acks = 0;
             }
         }
       else
