@@ -66,21 +66,21 @@ SD Card
 Card Slot
 ---------
 The SAM E70 QMTECH has one standard SD card connector that is connected to
-the High Speed Multimedia Card Interface (HSMCI) of the SAM
-E70. SD card connector:
+the High Speed Multimedia Card Interface (HSMCI) of the SAM E70.
+SD card connector:
 
-  ------ ----------------- ---------------------
-  SAME70 SAME70            Shared functionality
+  ------ -----------------
+  SAME70 SAME70
   Pin    Function
-  ------ ----------------- ---------------------
+  ------ -----------------
   PA30   MCDA0 (DAT0)
   PA31   MCDA1 (DAT1)
   PA26   MCDA2 (DAT2)
   PA27   MCDA3 (DAT3)
-  PA25   MCCK (CLK)        Shield
+  PA25   MCCK (CLK)
   PA28   MCCDA (CMD)
-  PD17   Card Detect (C/D) Shield
-  ------ ----------------- ---------------------
+  N/A    Card Detect (C/D)
+  ------ -----------------
 
 Configuration Settings
 ----------------------
