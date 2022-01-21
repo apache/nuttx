@@ -1098,35 +1098,43 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
         {
           case MAX86178_FIFOTAG_PRE_MEAS1:       /* PPG MEAS1 data tag. */
             {
-              chidx = 0;
-              max86178_ppg_dealsample(priv, 0, temp_sample, counter_ppg,
-                                      toggle_ppg);
+              chidx = MAX86178_PPG0_SENSOR_IDX;
+              max86178_ppg_dealsample(priv, chidx, temp_sample,
+                                      &counter_ppg[chidx],
+                                      &toggle_ppg[chidx]);
             }
             break;
 
-          case MAX86178_FIFOTAG_PRE_MEAS2:       /* PPG MEAS1 data tag. */
+          case MAX86178_FIFOTAG_PRE_MEAS2:       /* PPG MEAS2 data tag. */
             {
-              chidx = 1;
-              max86178_ppg_dealsample(priv, 1, temp_sample, &counter_ppg[1],
-                                      &toggle_ppg[1]);
+              chidx = MAX86178_PPG1_SENSOR_IDX;
+              max86178_ppg_dealsample(priv, chidx, temp_sample,
+                                      &counter_ppg[chidx],
+                                      &toggle_ppg[chidx]);
             }
             break;
 
-          case MAX86178_FIFOTAG_PRE_MEAS3:       /* PPG MEAS1 data tag. */
+          case MAX86178_FIFOTAG_PRE_MEAS3:       /* PPG MEAS3 data tag. */
             {
-              chidx = 2;
-              max86178_ppg_dealsample(priv, 2, temp_sample, &counter_ppg[2],
-                                      &toggle_ppg[2]);
+              chidx = MAX86178_PPG2_SENSOR_IDX;
+              max86178_ppg_dealsample(priv, chidx, temp_sample,
+                                      &counter_ppg[chidx],
+                                      &toggle_ppg[chidx]);
             }
             break;
 
-          case MAX86178_FIFOTAG_PRE_MEAS4:       /* PPG MEAS1 data tag. */
+          case MAX86178_FIFOTAG_PRE_MEAS4:       /* PPG MEAS4 data tag. */
             {
-              chidx = 3;
-              max86178_ppg_dealsample(priv, 3, temp_sample, &counter_ppg[3],
-                                      &toggle_ppg[3]);
+              chidx = MAX86178_PPG3_SENSOR_IDX;
+              max86178_ppg_dealsample(priv, chidx, temp_sample,
+                                      &counter_ppg[chidx],
+                                      &toggle_ppg[chidx]);
             }
             break;
+
+          case MAX86178_FIFOTAG_PRE_ALC_OVF:     /* PPG ambient overflow. */
+
+          /* ALC_OVF causes a max output, as the same as EXP_OVF case. */
 
           case MAX86178_FIFOTAG_PRE_EXP_OVF:     /* PPG exposure overflow. */
             {
