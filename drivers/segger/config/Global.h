@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/note/note_driver.c
+ * drivers/segger/config/Global.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,61 +18,28 @@
  *
  ****************************************************************************/
 
+#ifndef __DRIVERS_SEGGER_CONFIG_GLOBAL_H
+#define __DRIVERS_SEGGER_CONFIG_GLOBAL_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/note/note_driver.h>
-#include <nuttx/note/note_sysview.h>
-#include <nuttx/note/noteram_driver.h>
-#include <nuttx/note/notectl_driver.h>
+#include <nuttx/config.h>
+#include <stdint.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: note_register
- *
- * Description:
- *   Register sched note related drivers at /dev folder that can be used by
- *   an application to read or filter the note data.
- *
- * Input Parameters:
- *   None.
- *
- * Returned Value:
- *   Zero on succress. A negated errno value is returned on a failure.
- *
- ****************************************************************************/
+#define U8          uint8_t
+#define I8           int8_t
+#define U16        uint16_t
+#define I16         int16_t
+#define U32        uint32_t
+#define I32         int32_t
+#define U64        uint64_t
+#define I64         int64_t
+#define PTR_ADDR  uintptr_t
 
-int note_register(void)
-{
-  int ret = 0;
-
-#ifdef CONFIG_DRIVER_NOTERAM
-  ret = noteram_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_DRIVER_NOTECTL
-  ret = notectl_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_SEGGER_SYSVIEW
-  ret = sysview_initialize();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-  return ret;
-}
+#endif /* __DRIVERS_SEGGER_CONFIG_GLOBAL_H */

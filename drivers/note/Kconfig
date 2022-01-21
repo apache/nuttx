@@ -52,6 +52,18 @@ config DRIVER_NOTELOG
 	---help---
 		The note driver output to syslog.
 
+config SEGGER_SYSVIEW
+	bool "Note SEGGER SystemView driver"
+	select SEGGER_RTT
+	select SCHED_INSTRUMENTATION_EXTERNAL
+	---help---
+		SystemView is a real-time recording and visualization tool for embedded
+		systems that reveals the true runtime behavior of an application,
+		going far deeper than the system insights provided by debuggers. This is
+		particularly effective when developing and working with complex embedded
+		systems comprising multiple threads and interrupts. SystemView can ensure
+		unintended interactions and resource conflicts.
+
 endchoice
 
 config DRIVER_NOTERAM_BUFSIZE

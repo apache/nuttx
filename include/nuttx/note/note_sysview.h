@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/note/note_driver.c
+ * include/nuttx/note/note_sysview.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,25 +18,24 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H
+#define __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/note/note_driver.h>
-#include <nuttx/note/note_sysview.h>
-#include <nuttx/note/noteram_driver.h>
-#include <nuttx/note/notectl_driver.h>
+#include <nuttx/config.h>
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: note_register
+ * Name: sysview_initialize
  *
  * Description:
- *   Register sched note related drivers at /dev folder that can be used by
- *   an application to read or filter the note data.
+ *   Initializes the SYSVIEW module.
  *
  * Input Parameters:
  *   None.
@@ -46,33 +45,8 @@
  *
  ****************************************************************************/
 
-int note_register(void)
-{
-  int ret = 0;
-
-#ifdef CONFIG_DRIVER_NOTERAM
-  ret = noteram_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
-#ifdef CONFIG_DRIVER_NOTECTL
-  ret = notectl_register();
-  if (ret < 0)
-    {
-      return ret;
-    }
-#endif
-
 #ifdef CONFIG_SEGGER_SYSVIEW
-  ret = sysview_initialize();
-  if (ret < 0)
-    {
-      return ret;
-    }
+int sysview_initialize(void);
 #endif
 
-  return ret;
-}
+#endif /* __INCLUDE_NUTTX_NOTE_NOTE_SYSVIEW_H */
