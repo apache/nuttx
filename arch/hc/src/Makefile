@@ -88,16 +88,22 @@ endif
 # Add the builtin library
 
 EXTRA_LIBS += -lgcc
-EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}"
+EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name`"}"
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += -lm
-  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}"
+  LIBM_PATH = "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
+  
+  # Check if libm is provided by the compiler
+  
+  ifneq ($(LIBM_PATH),".")
+    EXTRA_LIBS += -lm
+    EXTRA_LIBPATHS += -L $(LIBM_PATH)
+  endif
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
   EXTRA_LIBS += -lsupc++
-  EXTRA_LIBPATHS += -L "${dir ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}"
+  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
 endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
