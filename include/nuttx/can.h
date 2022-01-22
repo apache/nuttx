@@ -214,7 +214,7 @@
 
 #define CAN_ERR_TXTIMEOUT        (1 << 0) /* Bit 0: TX timeout */
 #define CAN_ERR_LOSTARB          (1 << 1) /* Bit 1: Lost arbitration (See CAN_ERR_LOSTARB_* definitions) */
-#define CAN_ERR_CTRL             (1 << 2) /* Bit 2: Controller error (See CAN_ERR_CTRL_* definitions) */
+#define CAN_ERR_CRTL             (1 << 2) /* Bit 2: Controller error (See CAN_ERR_CRTL_* definitions) */
 #define CAN_ERR_PROT             (1 << 3) /* Bit 3: Protocol error (see CAN_ERR_PROT_* definitions) */
 #define CAN_ERR_TRX              (1 << 4) /* Bit 4: Transceiver error (See CAN_TRX_* definitions)    */
 #define CAN_ERR_ACK              (1 << 5) /* Bit 5: No ACK received on transmission */
@@ -235,13 +235,13 @@
 
 /* Data[1]:  Error status of CAN-controller */
 
-#define CAN_ERR_CTRL_UNSPEC      0x00     /* Unspecified error */
-#define CAN_ERR_CTRL_RX_OVERFLOW (1 << 0) /* Bit 0: RX buffer overflow */
-#define CAN_ERR_CTRL_TX_OVERFLOW (1 << 1) /* Bit 1: TX buffer overflow */
-#define CAN_ERR_CTRL_RX_WARNING  (1 << 2) /* Bit 2: Reached warning level for RX errors */
-#define CAN_ERR_CTRL_TX_WARNING  (1 << 3) /* Bit 3: Reached warning level for TX errors */
-#define CAN_ERR_CTRL_RX_PASSIVE  (1 << 4) /* Bit 4: Reached passive level for RX errors */
-#define CAN_ERR_CTRL_TX_PASSIVE  (1 << 5) /* Bit 5: Reached passive level for TX errors */
+#define CAN_ERR_CRTL_UNSPEC      0x00     /* Unspecified error */
+#define CAN_ERR_CRTL_RX_OVERFLOW (1 << 0) /* Bit 0: RX buffer overflow */
+#define CAN_ERR_CRTL_TX_OVERFLOW (1 << 1) /* Bit 1: TX buffer overflow */
+#define CAN_ERR_CRTL_RX_WARNING  (1 << 2) /* Bit 2: Reached warning level for RX errors */
+#define CAN_ERR_CRTL_TX_WARNING  (1 << 3) /* Bit 3: Reached warning level for TX errors */
+#define CAN_ERR_CRTL_RX_PASSIVE  (1 << 4) /* Bit 4: Reached passive level for RX errors */
+#define CAN_ERR_CRTL_TX_PASSIVE  (1 << 5) /* Bit 5: Reached passive level for TX errors */
 
 /* Data[2]:  Error in CAN protocol.  This provides the type of the error. */
 
