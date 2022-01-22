@@ -61,8 +61,6 @@
 uintptr_t g_idle_topstack = C906_IDLESTACK_TOP;
 volatile bool g_serial_ok = false;
 
-extern void c906_cpu_boot(uint32_t);
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

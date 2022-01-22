@@ -215,6 +215,11 @@ void riscv_exception(uintptr_t mcause, uintptr_t *regs);
 void riscv_stack_color(void *stackbase, size_t nbytes);
 #endif
 
+#ifdef CONFIG_SMP
+void riscv_cpu_boot(int cpu);
+int riscv_pause_handler(int irq, void *c, void *arg);
+#endif
+
 #undef EXTERN
 #ifdef __cplusplus
 }
