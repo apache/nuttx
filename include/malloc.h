@@ -52,6 +52,15 @@ struct mallinfo
                  * by free (not in use) chunks. */
 };
 
+#ifdef CONFIG_DEBUG_MM
+struct mallinfo_task
+{
+  pid_t pid;    /* The pid of task */
+  int aordblks; /* This is the number of allocated (in use) chunks for task */
+  int uordblks; /* This is the total size of memory occupied for task */
+};
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -63,6 +72,9 @@ extern "C"
 
 struct mallinfo mallinfo(void);
 size_t malloc_size(FAR void *ptr);
+#ifdef CONFIG_DEBUG_MM
+struct mallinfo_task mallinfo_task(pid_t pid);
+#endif
 
 #if defined(__cplusplus)
 }
