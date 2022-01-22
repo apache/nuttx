@@ -37,6 +37,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
+#include <malloc.h>
 
 #ifdef CONFIG_SCHED_CRITMONITOR
 #  include <time.h>
@@ -50,6 +51,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
 #include <nuttx/fs/dirent.h>
+#include <nuttx/mm/mm.h>
 
 #if defined(CONFIG_SCHED_CPULOAD) || defined(CONFIG_SCHED_CRITMONITOR)
 #  include <nuttx/clock.h>
@@ -86,6 +88,9 @@ enum proc_node_e
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
   PROC_CRITMON,                       /* Critical section monitor */
+#endif
+#ifdef CONFIG_DEBUG_MM
+  PROC_HEAP,                          /* Task heap info */
 #endif
   PROC_STACK,                         /* Task stack info */
   PROC_GROUP,                         /* Group directory */
@@ -171,6 +176,11 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
 static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
                  off_t offset);
+#endif
+#ifdef CONFIG_DEBUG_MM
+static ssize_t proc_heap(FAR struct proc_file_s *procfile,
+                         FAR struct tcb_s *tcb, FAR char *buffer,
+                         size_t buflen, off_t offset);
 #endif
 static ssize_t proc_stack(FAR struct proc_file_s *procfile,
                  FAR struct tcb_s *tcb, FAR char *buffer, size_t buflen,
@@ -268,6 +278,13 @@ static const struct proc_node_s g_critmon =
 };
 #endif
 
+#ifdef CONFIG_DEBUG_MM
+static const struct proc_node_s g_heap =
+{
+  "heap",         "heap",   (uint8_t)PROC_HEAP,          DTYPE_FILE        /* Task heap info */
+};
+#endif
+
 static const struct proc_node_s g_stack =
 {
   "stack",        "stack",   (uint8_t)PROC_STACK,        DTYPE_FILE        /* Task stack info */
@@ -308,6 +325,9 @@ static FAR const struct proc_node_s * const g_nodeinfo[] =
 #ifdef CONFIG_SCHED_CRITMONITOR
   &g_critmon,      /* Critical section Monitor */
 #endif
+#ifdef CONFIG_DEBUG_MM
+  &g_heap,         /* Task heap info */
+#endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
   &g_groupstatus,  /* Task group status */
@@ -330,6 +350,9 @@ static const struct proc_node_s * const g_level0info[] =
 #endif
 #ifdef CONFIG_SCHED_CRITMONITOR
   &g_critmon,      /* Critical section monitor */
+#endif
+#ifdef CONFIG_DEBUG_MM
+  &g_heap,         /* Task heap info */
 #endif
   &g_stack,        /* Task stack info */
   &g_group,        /* Group directory */
@@ -872,6 +895,58 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
                            &offset);
 
   totalsize += copysize;
+  return totalsize;
+}
+#endif
+
+/****************************************************************************
+ * Name: proc_heap
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_MM
+static ssize_t proc_heap(FAR struct proc_file_s *procfile,
+                         FAR struct tcb_s *tcb, FAR char *buffer,
+                         size_t buflen, off_t offset)
+{
+  size_t remaining = buflen;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize = 0;
+  struct mallinfo_task info;
+
+#ifdef CONFIG_MM_KERNEL_HEAP
+  if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_KERNEL)
+    {
+      info = kmm_mallinfo_task(tcb->pid);
+    }
+  else
+#endif
+    {
+      info = mallinfo_task(tcb->pid);
+    }
+
+  /* Show the heap alloc size */
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%d\n", "AllocSize:", info.uordblks);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  /* Show the heap alloc block */
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
+                               "%-12s%d\n", "AllocBlks:", info.aordblks);
+  totalsize += procfs_memcpy(procfile->line, linesize, buffer, remaining,
+                             &offset);
   return totalsize;
 }
 #endif
@@ -1482,6 +1557,11 @@ static ssize_t proc_read(FAR struct file *filep, FAR char *buffer,
 #ifdef CONFIG_SCHED_CRITMONITOR
     case PROC_CRITMON: /* Critical section monitor */
       ret = proc_critmon(procfile, tcb, buffer, buflen, filep->f_pos);
+      break;
+#endif
+#ifdef CONFIG_DEBUG_MM
+    case PROC_HEAP: /* Task heap info */
+      ret = proc_heap(procfile, tcb, buffer, buflen, filep->f_pos);
       break;
 #endif
     case PROC_STACK: /* Task stack info */
