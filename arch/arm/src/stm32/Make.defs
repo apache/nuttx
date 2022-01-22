@@ -249,6 +249,9 @@ ifeq ($(CONFIG_STM32_FDCAN),y)
 ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_fdcan.c
 endif
+ifeq ($(CONFIG_STM32_FDCAN_SOCKET),y)
+CHIP_CSRCS += stm32_fdcan_sock.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32_IWDG),y)
