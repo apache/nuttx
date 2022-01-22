@@ -296,7 +296,7 @@ static int fusb303_putreg(FAR struct fusb303_dev_s *priv, uint8_t regaddr,
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_FUSB303
-static int noinline_function fusb303_dumpregs(FAR const char *funcname,
+noinline_function static int fusb303_dumpregs(FAR const char *funcname,
                                               FAR struct fusb303_dev_s *priv)
 {
   fusb303_info("'%s':\n", funcname);

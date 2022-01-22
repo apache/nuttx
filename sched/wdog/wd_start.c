@@ -93,7 +93,7 @@
  *
  ****************************************************************************/
 
-static inline void wd_expiration(void)
+inline_function static void wd_expiration(void)
 {
   FAR struct wdog_s *wdog;
   wdentry_t func;

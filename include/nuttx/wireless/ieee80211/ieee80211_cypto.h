@@ -26,6 +26,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -106,12 +107,12 @@ struct ieee80211_pmk
  * Inline Functions
  ****************************************************************************/
 
-static __inline int ieee80211_is_8021x_akm(enum ieee80211_akm akm)
+inline_function static int ieee80211_is_8021x_akm(enum ieee80211_akm akm)
 {
   return akm == IEEE80211_AKM_8021X || akm == IEEE80211_AKM_SHA256_8021X;
 }
 
-static __inline int ieee80211_is_sha256_akm(enum ieee80211_akm akm)
+inline_function static int ieee80211_is_sha256_akm(enum ieee80211_akm akm)
 {
   return akm == IEEE80211_AKM_SHA256_8021X ||
                 akm == IEEE80211_AKM_SHA256_PSK;

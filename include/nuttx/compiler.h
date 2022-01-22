@@ -124,15 +124,15 @@
 
 /* Code locate */
 
-#  define locate_code(n) __attribute__ ((section(n)))
+#  define locate_code(n) __attribute__ ((section (n)))
 
 /* Data alignment */
 
-#  define aligned_data(n) __attribute__ ((aligned(n)))
+#  define aligned_data(n) __attribute__ ((aligned (n)))
 
 /* Data location */
 
-#  define locate_data(n) __attribute__ ((section(n)))
+#  define locate_data(n) __attribute__ ((section (n)))
 
 /* The packed attribute informs GCC that the structure elements are packed,
  * ignoring other alignment rules.
@@ -149,14 +149,14 @@
  * the function prolog and epilog.
  */
 
-#  define naked_function __attribute__ ((naked,no_instrument_function))
+#  define naked_function __attribute__ ((naked, no_instrument_function))
 
 /* The inline_function attribute informs GCC that the function should always
  * be inlined, regardless of the level of optimization.  The
  * noinline_function indicates that the function should never be inlined.
  */
 
-#  define inline_function __attribute__ ((always_inline,no_instrument_function))
+#  define inline_function __attribute__ ((always_inline, no_instrument_function)) inline
 #  define noinline_function __attribute__ ((noinline))
 
 /* The noinstrument_function attribute informs GCC don't instrument it */
@@ -182,14 +182,14 @@
 #  if defined(__clang__)
 #    define nostackprotect_function __attribute__ ((optnone))
 #  else
-#    define nostackprotect_function __attribute__ ((__optimize__ ("-fno-stack-protector")))
+#    define nostackprotect_function __attribute__ ((optimize ("-fno-stack-protector")))
 #  endif
 #endif
 
-/* The unsued code or data */
+/* The unused code or data */
 
-#  define unused_code __attribute__((unused))
-#  define unused_data __attribute__((unused))
+#  define unused_code __attribute__ ((unused))
+#  define unused_data __attribute__ ((unused))
 
 /* Some versions of GCC have a separate __syslog__ format.
  * http://mail-index.netbsd.org/source-changes/2015/10/14/msg069435.html
@@ -200,11 +200,11 @@
 #    define __syslog__ __printf__
 #  endif
 
-#  define formatlike(a) __attribute__((__format_arg__ (a)))
-#  define printflike(a, b) __attribute__((__format__ (__printf__, a, b)))
-#  define sysloglike(a, b) __attribute__((__format__ (__syslog__, a, b)))
-#  define scanflike(a, b) __attribute__((__format__ (__scanf__, a, b)))
-#  define strftimelike(a) __attribute__((__format__ (__strftime__, a, 0)))
+#  define formatlike(a) __attribute__ ((__format_arg__ (a)))
+#  define printflike(a, b) __attribute__ ((__format__ (__printf__, a, b)))
+#  define sysloglike(a, b) __attribute__ ((__format__ (__syslog__, a, b)))
+#  define scanflike(a, b) __attribute__ ((__format__ (__scanf__, a, b)))
+#  define strftimelike(a) __attribute__ ((__format__ (__strftime__, a, 0)))
 
 /* GCC does not use storage classes to qualify addressing */
 
@@ -684,10 +684,10 @@
 #  define UNUSED(a) ((void)(1 || (a)))
 
 #  define weak_alias(name, aliasname)
-#  define weak_data            __weak
-#  define weak_function        __weak
+#  define weak_data            _Pragma("__weak")
+#  define weak_function        _Pragma("__weak")
 #  define weak_const_function
-#  define noreturn_function
+#  define noreturn_function    _Pragma("object_attribute=__noreturn")
 #  define farcall_function
 #  define locate_code(n)
 #  define aligned_data(n)
@@ -696,8 +696,8 @@
 #  define end_packed_struct
 #  define reentrant_function
 #  define naked_function
-#  define inline_function
-#  define noinline_function
+#  define inline_function      _Pragma("inline=forced") inline
+#  define noinline_function    _Pragma("inline=never")
 #  define noinstrument_function
 #  define nostackprotect_function
 #  define unused_code

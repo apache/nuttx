@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/compiler.h>
 
 #include <sys/types.h>
 #include <stdbool.h>
@@ -86,10 +87,10 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  *
  ****************************************************************************/
 
-static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
-                                     pthread_trampoline_t trampoline,
-                                     pthread_addr_t arg,
-                                     pthread_exitroutine_t exit)
+inline_function static void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
+                                              pthread_trampoline_t trampoline,
+                                              pthread_addr_t arg,
+                                              pthread_exitroutine_t exit)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
@@ -124,8 +125,8 @@ static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
  *
  ****************************************************************************/
 
-static inline void pthread_addjoininfo(FAR struct task_group_s *group,
-                                       FAR struct join_s *pjoin)
+inline_function static void pthread_addjoininfo(FAR struct task_group_s *group,
+                                                FAR struct join_s *pjoin)
 {
   pjoin->next = NULL;
   if (!group->tg_jointail)
