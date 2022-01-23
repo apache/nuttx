@@ -89,6 +89,10 @@
 #  include "esp32_sht3x.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MS5611
+#  include "esp32_ms5611.h"
+#endif
+
 #ifdef CONFIG_LCD_HT16K33
 #  include "esp32_ht16k33.h"
 #endif
@@ -406,6 +410,18 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SHT3X driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MS5611
+  /* Try to register MS5611 device in I2C0 as device 0: I2C addr 0x77 */
+
+  ret = board_ms5611_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MS5611 driver: %d\n", ret);
+      return ret;
     }
 #endif
 
