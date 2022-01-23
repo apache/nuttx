@@ -41,16 +41,15 @@
  *
  * 300MHz Settings:
  *   PLLA: PLL Divider = 1, Multiplier = 20 to generate PLLACK = 240MHz
- *   Master Clock (MCK):
- *      Source = PLLACK,
- *      Prescalar = 1 to generate MCK = 120MHz
+ *   Master Clock (MCK): Source = PLLACK,
+ *                       Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
  * There are two on-board crystals:
  */
 
 #define BOARD_HAVE_SLOWXTAL        1          /* Slow crystal is populated */
-#define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 KHz slow crystal oscillator */
+#define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 kHz slow crystal oscillator */
 #define BOARD_MAINOSC_FREQUENCY    (12000000) /* 12 MHz main oscillator */
 
 /* Main oscillator register settings.
