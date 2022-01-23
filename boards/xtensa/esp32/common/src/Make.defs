@@ -54,6 +54,10 @@ ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
 endif
 
+ifeq ($(CONFIG_SENSORS_MS5611),y)
+  CSRCS += esp32_ms5611.c
+endif
+
 ifeq ($(CONFIG_LCD_HT16K33),y)
   CSRCS += esp32_ht16k33.c
 endif
