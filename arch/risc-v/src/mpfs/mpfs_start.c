@@ -61,7 +61,6 @@
  */
 
 uintptr_t g_idle_topstack = MPFS_IDLESTACK_TOP;
-volatile bool g_serial_ok = false;
 
 /* Default boot address for every hart */
 
@@ -158,8 +157,6 @@ void __mpfs_start(uint32_t mhartid)
 #endif
 
   showprogress('B');
-
-  g_serial_ok = true;
 
   /* Do board initialization */
 

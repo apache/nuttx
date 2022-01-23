@@ -53,7 +53,6 @@
  */
 
 uintptr_t g_idle_topstack = K210_IDLESTACK0_TOP;
-volatile bool g_serial_ok = false;
 
 /****************************************************************************
  * Public Functions
@@ -108,8 +107,6 @@ void __k210_start(uint32_t mhartid)
 #endif
 
   showprogress('B');
-
-  g_serial_ok = true;
 
   /* Do board initialization */
 
