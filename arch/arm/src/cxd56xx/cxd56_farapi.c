@@ -182,7 +182,7 @@ static int cxd56_farapidonehandler(int cpuid, int protoid,
  * Public Functions
  ****************************************************************************/
 
-unused_code
+used_code
 void farapi_main(int id, void *arg, struct modulelist_s *mlist)
 {
   struct farmsg_s msg;
