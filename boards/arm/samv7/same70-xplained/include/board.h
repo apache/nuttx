@@ -46,8 +46,8 @@
  *   CPU clock: 120MHz
  *
  * There can be two on-board crystals.  However, the 32.768 crystal is not
- * populated on the stock SAME70.  The fallback is to use th on-chip, slow RC
- * oscillator which has a frequency of 22-42 KHz, nominally 32 KHz.
+ * populated on the stock SAME70.  The fallback is to use the on-chip, slow
+ * RC oscillator which has a frequency of 22-42 KHz, nominally 32 KHz.
  */
 
 #undef  BOARD_HAVE_SLOWXTAL                   /* Slow crystal not populated */

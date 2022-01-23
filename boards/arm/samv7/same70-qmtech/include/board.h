@@ -45,13 +45,11 @@
  *                       Prescalar = 1 to generate MCK = 120MHz
  *   CPU clock: 120MHz
  *
- * There can be two on-board crystals.  However, the 32.768 crystal is not
- * populated on the stock SAME70.  The fallback is to use th on-chip, slow RC
- * oscillator which has a frequency of 22-42 KHz, nominally 32 KHz.
+ * There are two on-board crystals:
  */
 
-#undef  BOARD_HAVE_SLOWXTAL                   /* Slow crystal not populated */
-#define BOARD_SLOWCLK_FREQUENCY    (32000)    /* 32 KHz RC oscillator (nominal)  */
+#define BOARD_HAVE_SLOWXTAL        1          /* Slow crystal is populated */
+#define BOARD_SLOWCLK_FREQUENCY    (32768)    /* 32.768 kHz slow crystal oscillator */
 #define BOARD_MAINOSC_FREQUENCY    (12000000) /* 12 MHz main oscillator */
 
 /* Main oscillator register settings.
