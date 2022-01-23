@@ -560,6 +560,18 @@ Common Configuration Information
 Configuration Sub-Directories
 -----------------------------
 
+adb
+
+  A simple demo show how to config adb:
+    $ ./nuttx
+    NuttShell (NSH) NuttX-10.2.0
+    nsh> adbd &
+    adbd [2:100]
+  You can use the normal adb command from host:
+    adb kill-server
+    adb connect localhost:5555
+    adb shell
+
 bluetooth
 
   Supports some very limited, primitive, low-level debug of the Bluetooth
