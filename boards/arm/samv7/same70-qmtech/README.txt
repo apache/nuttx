@@ -804,7 +804,7 @@ Configuration sub-directories
     Generate signed binaries for MCUboot compatible application:
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
-        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0x28000 \
         nuttx/nuttx.bin signed_app_1_0_0.bin
 
     Relevant configuration settings:
