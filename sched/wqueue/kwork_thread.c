@@ -232,9 +232,7 @@ static int work_thread_create(FAR const char *name, int priority,
           return pid;
         }
 
-#ifdef CONFIG_PRIORITY_INHERITANCE
       wqueue->worker[wndx].pid  = pid;
-#endif
     }
 
   sched_unlock();
@@ -244,6 +242,55 @@ static int work_thread_create(FAR const char *name, int priority,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: work_foreach
+ *
+ * Description:
+ *   Enumerate over each work thread and provide the tid of each task to a
+ *   user callback functions.
+ *
+ * Input Parameters:
+ *   qid     - The work queue ID
+ *   handler - The function to be called with the pid of each task
+ *   arg     - The function callback
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void work_foreach(int qid, work_foreach_t handler, FAR void *arg)
+{
+  FAR struct kwork_wqueue_s *wqueue;
+  int nthread;
+  int wndx;
+
+#ifdef CONFIG_SCHED_HPWORK
+  if (qid == HPWORK)
+    {
+      wqueue  = (FAR struct kwork_wqueue_s *)&g_hpwork;
+      nthread = CONFIG_SCHED_HPNTHREADS;
+    }
+  else
+#endif
+#ifdef CONFIG_SCHED_LPWORK
+  if (qid == LPWORK)
+    {
+      wqueue  = (FAR struct kwork_wqueue_s *)&g_lpwork;
+      nthread = CONFIG_SCHED_LPNTHREADS;
+    }
+  else
+#endif
+    {
+      return;
+    }
+
+  for (wndx = 0; wndx < nthread; wndx++)
+    {
+      handler(wqueue->worker[wndx].pid, arg);
+    }
+}
 
 /****************************************************************************
  * Name: work_start_highpri
