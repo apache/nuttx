@@ -77,16 +77,20 @@ static const struct mcuboot_partition_s g_mcuboot_partition_table[] =
     .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
     .devpath = CONFIG_SAMV7_OTA_PRIMARY_SLOT_DEVPATH
   },
+#if defined(CONFIG_SAMV7_PROGMEM_SECONDARY_SLOT_PARTITION)
   {
     .offset  = CONFIG_SAMV7_OTA_SECONDARY_SLOT_OFFSET,
     .size    = CONFIG_SAMV7_OTA_SLOT_SIZE,
     .devpath = CONFIG_SAMV7_OTA_SECONDARY_SLOT_DEVPATH
   },
+#endif
+#if defined(CONFIG_MCUBOOT_SWAP_USING_SCRATCH)
   {
     .offset  = CONFIG_SAMV7_OTA_SCRATCH_OFFSET,
     .size    = CONFIG_SAMV7_OTA_SCRATCH_SIZE,
     .devpath = CONFIG_SAMV7_OTA_SCRATCH_DEVPATH
   }
+#endif
 };
 #endif /* CONFIG_SAMV7_PROGMEM_OTA_PARTITION */
 
