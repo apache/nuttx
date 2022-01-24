@@ -290,7 +290,6 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
       /* Yes.. Save the start time */
 
       tcb->premp_start = current;
-      DEBUGASSERT(tcb->premp_start != 0);
 
       /* Zero means that the timer is not ready */
 
@@ -320,7 +319,6 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
       /* Yes.. Save the start time */
 
       tcb->crit_start = current;
-      DEBUGASSERT(tcb->crit_start != 0);
 
       if (g_crit_start[cpu] == 0)
         {
