@@ -193,7 +193,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   if (g_premp_max[cpu] > 0)
     {
-      up_critmon_convert(g_premp_max[cpu], &maxtime);
+      up_perf_convert(g_premp_max[cpu], &maxtime);
     }
   else
     {
@@ -225,7 +225,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   if (g_crit_max[cpu] > 0)
     {
-      up_critmon_convert(g_crit_max[cpu], &maxtime);
+      up_perf_convert(g_crit_max[cpu], &maxtime);
     }
   else
     {

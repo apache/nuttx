@@ -80,10 +80,10 @@
          struct timespec delta; \
          uint32_t start; \
          uint32_t elapsed; \
-         start = up_critmon_gettime(); \
+         start = up_perf_gettime(); \
          vector(irq, context, arg); \
-         elapsed = up_critmon_gettime() - start; \
-         up_critmon_convert(elapsed, &delta); \
+         elapsed = up_perf_gettime() - start; \
+         up_perf_convert(elapsed, &delta); \
          if (delta.tv_nsec > g_irqvector[ndx].time) \
            { \
              g_irqvector[ndx].time = delta.tv_nsec; \
