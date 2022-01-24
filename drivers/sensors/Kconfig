@@ -585,13 +585,13 @@ config MS5611_SPI
 	---help---
 		Enables support for the SPI interface.
 
+endchoice
+
 config MS5611_THREAD_STACKSIZE
 	int "Worker thread stack size"
 	default 1024
 	---help---
 		The stack size for the worker thread
-
-endchoice
 
 config MS5611_I2C_FREQUENCY
 	int "MS5611 I2C frequency"
