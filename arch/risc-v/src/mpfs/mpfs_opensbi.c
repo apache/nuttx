@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdint.h>
-#include <riscv_arch.h>
+#include "riscv_arch.h"
 
 #include <hardware/mpfs_plic.h>
 #include <hardware/mpfs_memorymap.h>
@@ -41,16 +41,9 @@
   #undef NULL
 #endif
 
-#include <sbi/sbi_types.h>
-#include <sbi/riscv_atomic.h>
-#include <sbi/riscv_asm.h>
-#include <sbi/riscv_io.h>
 #include <sbi/riscv_encoding.h>
-#include <sbi/sbi_hart.h>
 #include <sbi/sbi_console.h>
 #include <sbi/sbi_platform.h>
-#include <sbi/sbi_domain.h>
-#include <sbi/sbi_timer.h>
 #include <sbi/sbi_init.h>
 #include <sbi/sbi_scratch.h>
 #include <sbi_utils/irqchip/plic.h>
@@ -547,5 +540,5 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   /* Will never get here */
 
-  DEBUGPANIC();
+  PANIC();
 }
