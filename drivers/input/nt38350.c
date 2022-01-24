@@ -4088,6 +4088,11 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
 {
   FAR struct nt38350_dev_s *dev = container_of(cb,
                                                struct nt38350_dev_s, pm);
+  int need_icpoweroff_state;
+  int enable_state;
+
+  need_icpoweroff_state = dev->config->need_icpoweroff_state();
+  enable_state = dev->config->get_icpower_state();
 
   if (domain == PM_DOMAIN_FACTEST || domain == PM_DOMAIN_OLED_TP)
     {
@@ -4097,6 +4102,11 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
         case PM_NORMAL:
           if (dev->current_state == PM_NORMAL)
             return;
+          if (need_icpoweroff_state && enable_state)
+            {
+              return;
+            }
+
           nt38350_ts_resume(dev);
           break;
         case PM_STANDBY:
