@@ -52,9 +52,9 @@
        { \
          uint32_t start; \
          uint32_t elapsed; \
-         start = up_critmon_gettime(); \
+         start = up_perf_gettime(); \
          worker(arg); \
-         elapsed = up_critmon_gettime() - start; \
+         elapsed = up_perf_gettime() - start; \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) \
            { \
              serr("WORKER %p execute too long %"PRIu32"\n", \
