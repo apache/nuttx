@@ -29,6 +29,8 @@
 
 #include <nuttx/addrenv.h>
 
+#include "svcall.h"
+
 #ifdef CONFIG_BUILD_KERNEL
 
 /****************************************************************************

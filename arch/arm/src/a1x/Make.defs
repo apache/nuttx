@@ -24,6 +24,9 @@
 HEAD_ASRC  = arm_vectortab.S
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
+crt0$(OBJEXT): crt0.c
+	$(CC) $(CFLAGS) -c armv7-a$(DELIM)crt0.c -o crt0$(OBJEXT)
+
 STARTUP_OBJS = crt0$(OBJEXT)
 endif
 
