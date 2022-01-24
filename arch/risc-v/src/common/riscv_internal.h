@@ -91,6 +91,12 @@
 #  endif
 #endif
 
+/* Return values from riscv_check_pmp_access */
+
+#define PMP_ACCESS_OFF      (0)     /* Access for area not set */
+#define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
+#define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -177,8 +183,12 @@ void riscv_restorefpu(const uintptr_t *regs);
 
 /* RISC-V PMP Config ********************************************************/
 
-void riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
-                             uintptr_t base, uintptr_t size);
+int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
+                            uintptr_t base, uintptr_t size);
+
+int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
+int riscv_configured_pmp_regions(void);
+int riscv_next_free_pmp_region(void);
 
 /* Power management *********************************************************/
 
