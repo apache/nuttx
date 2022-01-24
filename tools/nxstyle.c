@@ -276,6 +276,17 @@ static const char *g_white_list[] =
   "SETATTR3resok",
   "FS3args",
 
+  /* Ref:
+   * drivers/segger/note_sysview.c
+   */
+
+  "SEGGER_SYSVIEW",
+  "TaskID",
+  "sName",
+  "Prio",
+  "StackBase",
+  "StackSize",
+
   NULL
 };
 
