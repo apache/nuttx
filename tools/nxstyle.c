@@ -265,6 +265,17 @@ static const char *g_white_list[] =
   "WideCharToMultiByte",
 
   /* Ref:
+   * drivers/segger/note_sysview.c
+   */
+
+  "SEGGER_SYSVIEW",
+  "TaskID",
+  "sName",
+  "Prio",
+  "StackBase",
+  "StackSize",
+
+  /* Ref:
    * fs/nfs/rpc.h
    * fs/nfs/nfs_proto.h
    * fs/nfs/nfs_mount.h
