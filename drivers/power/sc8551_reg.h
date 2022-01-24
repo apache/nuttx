@@ -526,8 +526,10 @@
 
 /* Register 13h */
 #define SC8551_REG_13                       0x13
-#define SC8551_DEV_ID_MASK                  0x0F
+#define SC8551_DEV_ID_MASK                  0xFF
 #define SC8551_DEV_ID_SHIFT                 0
+#define SC8551_DEV_ID                       0x51
+#define NU2105_DEV_ID                       0xC0
 
 /* Register 14h */
 #define SC8551_REG_14                       0x14

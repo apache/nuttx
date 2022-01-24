@@ -516,7 +516,7 @@ static int sc8551_detect_device(FAR struct sc8551_dev_s *priv)
   ret = sc8551_getreg8(priv, SC8551_REG_13, &val, 1);
   if (ret < 0)
     {
-      return 1;
+      return ret;
     }
 
   priv->stat.part_no = (val & SC8551_DEV_ID_MASK);
@@ -1715,7 +1715,7 @@ static int sc8551_powersupply(FAR struct sc8551_dev_s *priv, int current)
  *
  ****************************************************************************/
 
-static int sc8551_voltage(FAR struct battery_charger_dev_s *dev, int value)
+static int  sc8551_voltage(FAR struct battery_charger_dev_s *dev, int value)
 {
   batinfo("The chip does not support the function of sc8551_voltage ");
   return OK;
@@ -1843,7 +1843,10 @@ static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
 {
   FAR struct sc8551_dev_s *priv = (FAR struct sc8551_dev_s *)dev;
   int ret;
+  uint8_t part_info;
   uint8_t val[2];
+
+  ret = sc8551_getreg8(priv, SC8551_REG_13, &part_info, 1);
 
   ret = sc8551_getreg8(priv, SC8551_REG_1C, &val[0], 1);
   ret = sc8551_getreg8(priv, SC8551_REG_1D, &val[1], 1);
@@ -1853,9 +1856,23 @@ static int sc8551_get_voltage(FAR struct battery_charger_dev_s *dev,
       return ERROR;
     }
 
-  *value = ((val[0] & 0x0f) << 8 | val[1]) * 5 / 4;
+  if (part_info == SC8551_DEV_ID)
+    {
+      *value = ((val[0] & 0x0f) << 8 | val[1]) * 5 / 4;
+      batinfo("The the actual output voltage of sc8551 is %d mv\n", *value);
+    }
 
-  batinfo("The the actual output voltage of sc8551 is %d mv", *value);
+  else if (part_info == NU2105_DEV_ID)
+    {
+      *value = (val[0] & 0x0f) << 8 | val[1];
+      batinfo("The the actual output voltage of nu2105 is %d mv\n", *value);
+    }
+
+  else
+    {
+      batinfo("The pump is unknow one");
+    }
+
   return OK;
 }
 
