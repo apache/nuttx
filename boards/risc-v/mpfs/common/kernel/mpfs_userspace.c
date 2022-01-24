@@ -43,10 +43,6 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x00001000
-#  error "CONFIG_NUTTX_USERSPACE must match the value in memory.ld"
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
