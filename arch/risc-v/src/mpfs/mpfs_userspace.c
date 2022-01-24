@@ -38,25 +38,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-/* TODO: get user space mem layout info from ld script or Configuration ? */
-
-#ifndef CONFIG_NUTTX_USERSPACE_SIZE
-#  define CONFIG_NUTTX_USERSPACE_SIZE        (0x00100000)
-#endif
-
-#ifndef CONFIG_NUTTX_USERSPACE_RAM_START
-#  define CONFIG_NUTTX_USERSPACE_RAM_START   (0x00100000)
-#endif
-
-#ifndef CONFIG_NUTTX_USERSPACE_RAM_SIZE
-#  define CONFIG_NUTTX_USERSPACE_RAM_SIZE    (0x00100000)
-#endif
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern uintptr_t __uflash_start;
+extern uintptr_t __uflash_size;
+extern uintptr_t __usram_start;
+extern uintptr_t __usram_size;
 
 /****************************************************************************
  * Name: mpfs_userspace
@@ -104,24 +97,35 @@ void mpfs_userspace(void)
     }
 
   /* Configure the PMP to permit user-space access to its ROM and RAM.
-   * Now this is done by simply adding the whole memory area to PMP.
-   * 1. no access for the 1st 4KB
-   * 2. "RX" for the left space until 1MB
-   * 3. "RW" for the user RAM area
-   * TODO: more accurate memory size control.
+   *
+   * Note: PMP by default revokes access, thus if different privilege modes
+   * are in use (mstatus.mprv is set), the the user space _must_ be granted
+   * access here, otherwise an exception will fire when the user space task
+   * is started.
+   *
+   * Note: according to the Polarfire reference manual, address bits [1:0]
+   * are not considered (due to 4 octet alignment), so strictly they don't
+   * have to be cleared here.
+   *
+   * Note: do not trust the stext / etc sections to be correctly aligned
+   * here, they should be but it is simpler and safer to handle the user
+   * region as a whole
+   *
+   * Access is currently granted by simply adding each userspace memory area
+   * to PMP, without further granularity.
+   *
+   * "RX" for the user progmem
+   * "RW" for the user RAM area
+   *
    */
 
-  riscv_config_pmp_region(0, PMPCFG_A_NAPOT,
-                          0,
-                          0x1000);
+  riscv_config_pmp_region(0, PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R,
+                          (uintptr_t)&__uflash_start,
+                          (uintptr_t)&__uflash_size);
 
-  riscv_config_pmp_region(1, PMPCFG_A_TOR | PMPCFG_X | PMPCFG_R,
-                          0 + CONFIG_NUTTX_USERSPACE_SIZE,
-                          0);
-
-  riscv_config_pmp_region(2, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
-                          CONFIG_NUTTX_USERSPACE_RAM_START,
-                          CONFIG_NUTTX_USERSPACE_RAM_SIZE);
+  riscv_config_pmp_region(1, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
+                          (uintptr_t)&__usram_start,
+                          (uintptr_t)&__usram_size);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */
