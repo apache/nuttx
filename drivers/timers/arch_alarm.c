@@ -355,7 +355,7 @@ int up_alarm_start(FAR const struct timespec *ts)
 #endif
 
 /****************************************************************************
- * Name: up_critmon_*
+ * Name: up_perf_*
  *
  * Description:
  *   The first interface simply provides the current time value in unknown
@@ -373,8 +373,7 @@ int up_alarm_start(FAR const struct timespec *ts)
  *   units.
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-uint32_t up_critmon_gettime(void)
+uint32_t up_perf_gettime(void)
 {
   uint32_t ret = 0;
 
@@ -389,11 +388,10 @@ uint32_t up_critmon_gettime(void)
   return ret;
 }
 
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
+void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
 {
   timespec_from_usec(ts, elapsed);
 }
-#endif
 
 /****************************************************************************
  * Name: up_mdelay

@@ -785,7 +785,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->premp_max > 0)
     {
-      up_critmon_convert(tcb->premp_max, &maxtime);
+      up_perf_convert(tcb->premp_max, &maxtime);
     }
   else
     {
@@ -818,7 +818,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->crit_max > 0)
     {
-      up_critmon_convert(tcb->crit_max, &maxtime);
+      up_perf_convert(tcb->crit_max, &maxtime);
     }
   else
     {
@@ -851,7 +851,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->run_max > 0)
     {
-      up_critmon_convert(tcb->run_max, &maxtime);
+      up_perf_convert(tcb->run_max, &maxtime);
     }
   else
     {

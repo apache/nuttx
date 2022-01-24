@@ -152,7 +152,7 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
 
       /* Disabling.. Save the thread start time */
 
-      tcb->premp_start = up_critmon_gettime();
+      tcb->premp_start = up_perf_gettime();
 
       /* Zero means that the timer is not ready */
 
@@ -167,7 +167,7 @@ void nxsched_critmon_preemption(FAR struct tcb_s *tcb, bool state)
     {
       /* Re-enabling.. Check for the max elapsed time */
 
-      uint32_t now     = up_critmon_gettime();
+      uint32_t now     = up_perf_gettime();
       uint32_t elapsed = now - tcb->premp_start;
 
       DEBUGASSERT(now != 0);
@@ -217,7 +217,7 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
       /* Entering... Save the start time. */
 
       DEBUGASSERT(tcb->crit_start == 0);
-      tcb->crit_start = up_critmon_gettime();
+      tcb->crit_start = up_perf_gettime();
 
       /* Zero means that the timer is not ready */
 
@@ -232,7 +232,7 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
     {
       /* Leaving .. Check for the max elapsed time */
 
-      uint32_t now     = up_critmon_gettime();
+      uint32_t now     = up_perf_gettime();
       uint32_t elapsed = now - tcb->crit_start;
 
       DEBUGASSERT(now != 0);
@@ -274,7 +274,7 @@ void nxsched_critmon_csection(FAR struct tcb_s *tcb, bool state)
 
 void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 {
-  uint32_t current = up_critmon_gettime();
+  uint32_t current = up_perf_gettime();
   int cpu = this_cpu();
   uint32_t elapsed;
 
@@ -357,7 +357,7 @@ void nxsched_resume_critmon(FAR struct tcb_s *tcb)
 
 void nxsched_suspend_critmon(FAR struct tcb_s *tcb)
 {
-  uint32_t current = up_critmon_gettime();
+  uint32_t current = up_perf_gettime();
   uint32_t elapsed = current - tcb->run_start;
 
   tcb->run_start = 0;
