@@ -28,7 +28,6 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-#include <stdbool.h>
 #include <stdint.h>
 #include <queue.h>
 
@@ -381,22 +380,6 @@ int work_queue(int qid, FAR struct work_s *work, worker_t worker,
  ****************************************************************************/
 
 int work_cancel(int qid, FAR struct work_s *work);
-
-/****************************************************************************
- * Name: work_in_context
- *
- * Description:
- *   Check current in workqueue context or not.
- *
- * Input Parameters:
- *   qid    - The work queue ID
- *
- * Returned Value:
- *   ture means current in workqueue context, false means not.
- *
- ****************************************************************************/
-
-bool work_in_context(int qid);
 
 /****************************************************************************
  * Name: work_available

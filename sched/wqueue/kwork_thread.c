@@ -234,7 +234,9 @@ static int work_thread_create(FAR const char *name, int priority,
           return pid;
         }
 
+#ifdef CONFIG_PRIORITY_INHERITANCE
       wqueue->worker[wndx].pid  = pid;
+#endif
     }
 
   sched_unlock();
@@ -244,57 +246,6 @@ static int work_thread_create(FAR const char *name, int priority,
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: work_in_context
- *
- * Description:
- *   Check current in workqueue context or not.
- *
- * Input Parameters:
- *   qid    - The work queue ID
- *
- * Returned Value:
- *   ture means current in workqueue context, false means not.
- *
- ****************************************************************************/
-
-bool work_in_context(int qid)
-{
-  FAR struct kwork_wqueue_s *wqueue;
-  int nthread;
-  int wndx;
-
-#ifdef CONFIG_SCHED_HPWORK
-  if (qid == HPWORK)
-    {
-      wqueue  = (FAR struct kwork_wqueue_s *)&g_hpwork;
-      nthread = CONFIG_SCHED_HPNTHREADS;
-    }
-  else
-#endif
-#ifdef CONFIG_SCHED_LPWORK
-  if (qid == LPWORK)
-    {
-      wqueue  = (FAR struct kwork_wqueue_s *)&g_lpwork;
-      nthread = CONFIG_SCHED_LPNTHREADS;
-    }
-  else
-#endif
-    {
-      return false;
-    }
-
-  for (wndx = 0; wndx < nthread; wndx++)
-    {
-      if (wqueue->worker[wndx].pid == getpid())
-        {
-          return true;
-        }
-    }
-
-  return false;
-}
 
 /****************************************************************************
  * Name: work_start_highpri
