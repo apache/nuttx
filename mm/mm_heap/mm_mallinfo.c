@@ -97,6 +97,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
 
   DEBUGASSERT(info);
 
+  memset(info, 0, sizeof(*info));
   mm_foreach(heap, mallinfo_handler, info);
 
   info->arena = heap->mm_heapsize;
