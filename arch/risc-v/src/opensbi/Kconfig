@@ -9,4 +9,4 @@ config OPENSBI
 	default n
 	---help---
 		Enable or disable Open Source Supervisor Binary Interface (OpenSBI) features
-                for RISC-V.
+		for RISC-V.
