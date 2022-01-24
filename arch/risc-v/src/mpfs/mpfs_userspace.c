@@ -39,11 +39,20 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define PMP_UFLASH_FLAGS    (PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R)
+#define PMP_USRAM_FLAGS     (PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R)
+
+#define UFLASH_START        (uintptr_t)&__uflash_start
+#define UFLASH_SIZE         (uintptr_t)&__uflash_size
+#define USRAM_START         (uintptr_t)&__usram_start
+#define USRAM_SIZE          (uintptr_t)&__usram_size
+
 /* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
 
-#define PGT_BASE_PADDR      (uint64_t)&m_l1_pgtable
+#define PGT_L1_PBASE        (uint64_t)&m_l1_pgtable
 #define PGT_L2_PBASE        (uint64_t)&m_l2_pgtable
 #define PGT_L3_PBASE        (uint64_t)&m_l3_pgtable
+#define PGT_L1_VBASE        PGT_L1_PBASE
 #define PGT_L2_VBASE        PGT_L2_PBASE
 #define PGT_L3_VBASE        PGT_L3_PBASE
 
@@ -51,6 +60,11 @@
 
 #define MMU_UFLASH_FLAGS    (PTE_R | PTE_X | PTE_U | PTE_G)
 #define MMU_USRAM_FLAGS     (PTE_R | PTE_W | PTE_U | PTE_G)
+
+/* Kernel RAM needs to be opened (the page tables) */
+
+#define KSRAM_START         (uintptr_t)&__ksram_start
+#define KSRAM_SIZE          (uintptr_t)&__ksram_size
 
 /****************************************************************************
  * Private Functions
@@ -178,9 +192,8 @@ static void configure_mpu(void)
   /* Configure the PMP to permit user-space access to its ROM and RAM.
    *
    * Note: PMP by default revokes access, thus if different privilege modes
-   * are in use (mstatus.mprv is set), the the user space _must_ be granted
-   * access here, otherwise an exception will fire when the user space task
-   * is started.
+   * are in use, the user space _must_ be granted access here, otherwise
+   * an exception will fire when the user space task is started.
    *
    * Note: according to the Polarfire reference manual, address bits [1:0]
    * are not considered (due to 4 octet alignment), so strictly they don't
@@ -198,19 +211,46 @@ static void configure_mpu(void)
    *
    */
 
-  riscv_config_pmp_region(0, PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R,
-                          (uintptr_t)&__uflash_start,
-                          (uintptr_t)&__uflash_size);
+  int ret;
+  int idx;
 
-  riscv_config_pmp_region(1, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
-                          (uintptr_t)&__usram_start,
-                          (uintptr_t)&__usram_size);
+  /* First, test access to user flash */
+
+  ret = riscv_check_pmp_access(PMP_UFLASH_FLAGS, UFLASH_START, UFLASH_SIZE);
+
+  /* No access or partial access means we must crash */
+
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_UFLASH_FLAGS, UFLASH_START,
+                              UFLASH_SIZE);
+    }
+
+  /* Then, test access to user RAM */
+
+  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
+    }
 
   /* The supervisor must have access to the page tables */
 
-  riscv_config_pmp_region(2, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
-                          (uintptr_t)&__ksram_start,
-                          (uintptr_t)&__ksram_size);
+  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
+    }
 }
 
 /****************************************************************************
@@ -228,24 +268,22 @@ static void configure_mmu(void)
 
   /* Setup the L3 references for executable memory */
 
-  mmu_ln_map_region(3, PGT_L3_VBASE, (uintptr_t)&__uflash_start,
-                    (uintptr_t)&__uflash_start, (uintptr_t)&__uflash_size,
-                    MMU_UFLASH_FLAGS);
+  mmu_ln_map_region(3, PGT_L3_VBASE, UFLASH_START, UFLASH_START,
+                    UFLASH_SIZE, MMU_UFLASH_FLAGS);
 
   /* Setup the L3 references for data memory */
 
-  mmu_ln_map_region(3, PGT_L3_VBASE, (uintptr_t)&__usram_start,
-                    (uintptr_t)&__usram_start, (uintptr_t)&__usram_size,
-                    MMU_USRAM_FLAGS);
+  mmu_ln_map_region(3, PGT_L3_VBASE, USRAM_START, USRAM_START,
+                    USRAM_SIZE, MMU_USRAM_FLAGS);
 
   /* Setup the L2 and L1 references */
 
   mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, PGT_L3_VBASE, PTE_G);
-  mmu_ln_setentry(1, PGT_BASE_PADDR, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
+  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
 
   /* Enable MMU */
 
-  mmu_enable(PGT_BASE_PADDR, 0);
+  mmu_enable(PGT_L1_PBASE, 0);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

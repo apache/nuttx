@@ -101,6 +101,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
+	select PMP_HAS_LIMITED_FEATURES
 	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
 
@@ -187,6 +188,29 @@ endif
 config ARCH_MMU_TYPE_SV39
 	bool
 	default n
+
+# MPU has certain architecture dependent configurations, which are presented
+# here. Default is that the full RISC-V PMP specification is supported.
+
+config PMP_HAS_LIMITED_FEATURES
+	bool
+	default n
+
+config ARCH_MPU_MIN_BLOCK_SIZE
+	int "Minimum MPU (PMP) block size"
+	default 4	if !PMP_HAS_LIMITED_FEATURES
+
+config ARCH_MPU_HAS_TOR
+	bool "PMP supports TOR"
+	default y	if !PMP_HAS_LIMITED_FEATURES
+
+config ARCH_MPU_HAS_NO4
+	bool "PMP supports NO4"
+	default y	if !PMP_HAS_LIMITED_FEATURES
+
+config ARCH_MPU_HAS_NAPOT
+	bool "PMP supports NAPOT"
+	default y	if !PMP_HAS_LIMITED_FEATURES
 
 source "arch/risc-v/src/opensbi/Kconfig"
 source "arch/risc-v/src/common/Kconfig"
