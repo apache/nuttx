@@ -48,7 +48,7 @@
 
 /* default ODR */
 
-#define AK09919C_DEFAULT_ODR            20000      /* default 50 ms. */
+#define AK09919C_DEFAULT_ODR            10000      /* default 100Hz. */
 
 #define AK09919C_VECTOR_REMAP           2          /* Vector remap of lsm6dso. */
 
@@ -1316,6 +1316,7 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
   priv->lower.buffer_number = CONFIG_SENSORS_AK09919C_BUFFER_NUMBER;
   priv->lower.ops = &g_ak09919c_ops;
   priv->interval = AK09919C_DEFAULT_ODR;
+  priv->workmode = AK09919C_CONTINUOUS_MODE4;
 
   /* Check Device ID */
 
