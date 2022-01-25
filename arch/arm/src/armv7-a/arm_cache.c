@@ -163,8 +163,8 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 
 void up_clean_dcache_all(void)
 {
-  cp15_clean_dcache_all(void);
-  l2cc_clean_all(void);
+  cp15_clean_dcache_all();
+  l2cc_clean_all();
 }
 
 /****************************************************************************
