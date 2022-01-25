@@ -36,7 +36,8 @@ $(ETCSRC): $(RCRAWS) $(RCOBJS)
 	  $(shell mkdir -p $(dir $(ETCDIR)$(DELIM)$(raw))) \
 	  $(shell cp -rfp $(raw) $(ETCDIR)$(DELIM)$(raw)))
 	$(Q) genromfs -f romfs.img -d $(ETCDIR)$(DELIM)$(CONFIG_NSH_ROMFSMOUNTPT) -V "$(basename $<)"
-	$(Q) xxd -i romfs.img | sed -e "s/^unsigned/const unsigned/g" > $@
+	$(Q) echo "#include <nuttx/compiler.h>" > $@
+	$(Q) xxd -i romfs.img | sed -e "s/^unsigned char/const unsigned char aligned_data(4)/g" >> $@
 	$(Q) rm romfs.img
 endif
 
