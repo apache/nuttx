@@ -49,16 +49,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Debug ********************************************************************/
-
-#ifdef CONFIG_CXD56_GAUGE_DEBUG
-#define baterr(fmt, ...)  _err(fmt, ## __VA_ARGS__)
-#define batinfo(fmt, ...) _info(fmt, ## __VA_ARGS__)
-#else
-#define baterr(fmt, ...)
-#define batinfo(fmt, ...)
-#endif
-
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -91,11 +81,9 @@ static const struct file_operations g_gaugeops =
   gauge_close,  /* close */
   gauge_read,   /* read */
   gauge_write,  /* write */
-  0,            /* seek */
-  gauge_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL        /* poll */
-#endif
+  NULL,         /* seek */
+  gauge_ioctl,  /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif

@@ -244,7 +244,7 @@
  * the contents of the Ethernet header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 #define IMXRT_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
                                       CONFIG_NET_GUARDSIZE)
@@ -775,7 +775,7 @@ static inline void imxrt_dispatch(FAR struct imxrt_driver_s *priv)
 #ifdef CONFIG_NET_ARP
   /* Check for an ARP packet */
 
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       NETDEV_RXARP(&priv->dev);
       arp_arpin(&priv->dev);
@@ -2560,6 +2560,28 @@ int imxrt_netinitialize(int intf)
   priv->dev.d_private = g_enet;         /* Used to recover private state from dev */
 
 #ifdef CONFIG_NET_ETHERNET
+
+#ifdef CONFIG_NET_USE_OTP_ETHERNET_MAC
+
+  /* Boards like the teensy have a unique (official)
+   * MAC address stored in OTP.
+   * TODO: hardcoded mem locations: use proper registers and header file
+   * offsets: 0x620: MAC0, 0x630: MAC1
+   */
+
+  uidl   = getreg32(IMXRT_OCOTP_BASE + 0x620);
+  uidml  = getreg32(IMXRT_OCOTP_BASE + 0x630);
+  mac    = priv->dev.d_mac.ether.ether_addr_octet;
+
+  mac[0] = (uidml & 0x0000ff00) >> 8;
+  mac[1] = (uidml & 0x000000ff) >> 0;
+  mac[2] = (uidl & 0xff000000) >> 24;
+  mac[3] = (uidl & 0x00ff0000) >> 16;
+  mac[4] = (uidl & 0x0000ff00) >> 8;
+  mac[5] = (uidl & 0x000000ff) >> 0;
+
+#else
+
   /* Determine a semi-unique MAC address from MCU UID
    * We use UID Low and Mid Low registers to get 64 bits, from which we keep
    * 48 bits.  We then force unicast and locally administered bits
@@ -2581,6 +2603,9 @@ int imxrt_netinitialize(int intf)
   mac[3] = (uidl &  0x00ff0000) >> 16;
   mac[4] = (uidl &  0x0000ff00) >> 8;
   mac[5] = (uidl &  0x000000ff);
+
+#endif
+
 #endif
 
 #ifdef CONFIG_IMXRT_ENET_PHYINIT

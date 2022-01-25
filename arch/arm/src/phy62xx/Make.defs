@@ -1,0 +1,123 @@
+############################################################################
+# arch/arm/src/phy62xx/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+
+CMN_ASRCS  = phy62xx_exception.S phy62xx_start.S arm_saveusercontext.S arm_fullcontextrestore.S
+#CMN_ASRCS += arm_switchcontext.S vfork.S
+CMN_ASRCS += vfork.S
+
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS += arm_createstack.c arm_mdelay.c arm_udelay.c arm_exit.c
+CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
+CMN_CSRCS += arm_puts.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
+CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
+CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
+CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
+#CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
+CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
+#CMN_CSRCS += arm_etherstub.c
+CMN_CSRCS += arm_switchcontext.c
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CMN_CSRCS += arm_task_start.c arm_pthread_start.c
+CMN_CSRCS += arm_pthread_exit.c
+CMN_CSRCS += arm_signal_dispatch.c
+CMN_UASRCS += arm_signal_handler.S
+endif
+
+ifeq ($(CONFIG_STACK_COLORATION),y)
+CMN_CSRCS += arm_checkstack.c
+endif
+
+ifeq ($(CONFIG_DEBUG_FEATURES),y)
+CMN_CSRCS += arm_dumpnvic.c
+endif
+
+CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c
+CHIP_CSRCS += jump_table.c
+CHIP_CSRCS += pplus_mtd_flash.c
+ifeq ($(CONFIG_PHY6222_BLE),y)
+#CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_hcitl.c 
+#CHIP_CSRCS += phy62xx_ble_patch.c phy62xx_ble_hci_event_patch.c rf_phy_driver.c
+#CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_patch.c rf_phy_driver.c
+CHIP_CSRCS += phy62xx_ble.c
+endif
+
+ifeq ($(CONFIG_TIMER),y)
+CHIP_CSRCS += phyplus_tim.c 
+CHIP_CSRCS += phyplus_timer_lowerhalf.c
+CHIP_CSRCS += phyplus_timerisr.c 
+endif
+
+ifeq ($(CONFIG_DEV_GPIO),y)
+CHIP_CSRCS += phyplus_gpio.c
+endif
+
+ifeq ($(CONFIG_PHYPLUS_STUB),y)
+CHIP_CSRCS += phyplus_stub.c
+endif
+
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)include)
+INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)controller)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)hci)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)ble$(DELIM)include)
+#INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)osal$(DELIM)include)
+
+CFLAGS += -ffunction-sections
+CFLAGS += -DCFG_CP
+CFLAGS += -DPHY_MCU_TYPE=MCU_BUMBEE_M0
+CFLAGS += -DHOST_CONFIG=4 
+CFLAGS += -DHCI_TL_NONE=1 
+CFLAGS += -DMTU_SIZE=247 
+CFLAGS += -DENABLE_LOG_ROMx=0 
+CFLAGS += -DPHY_MCU_TYPE=MCU_BUMBEE_M0 
+CFLAGS += -DCFG_SLEEP_MODE=PWR_MODE_NO_SLEEP 
+CFLAGS += -DDEBUG_INFO=1 
+CFLAGS += -DUSE_SYS_TICK 
+CFLAGS += -DHUGE_MODE=0 
+CFLAGS += -DMAX_NUM_LL_CONN=1
+CFLAGS += -DUSE_ROMSYM_ALIAS
+#CFLAGS += -Wimplicit-function-declaration
+#CFLAGS += -Wunused-but-set-variable
+CFLAGS += -DEXTERN_BLE_FUNC=0
+LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
+#CFLAGS += -Wstrict-prototypes
+#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
+#LDFLAGS += -Wl,-Map="../../../phyplus_build.map"		# param error
+#LDFLAGS += -Wl,--gc-sections					# param error
+
+.buildlib:
+	$(Q) if [ -d ../../../../phy62xxble ]; then \
+		echo "##############build lib internally##############"; \
+		make -C ../../../../phy62xxble; \
+	 else \
+		if [ ! -f libphy62xxble.a ]; then \
+			echo "############download lib form server############"; \
+			curl -L -o libphy62xxble.a http://www.phyplusinc.com/phyplus/libphy62xxble.a; \
+			cp -a libphy62xxble.a ../../../staging; \
+		 else \
+			echo "############file exist############"; \
+		fi \
+	fi
+
+context:: .buildlib
+
+EXTRA_LIBS += -lphy62xxble

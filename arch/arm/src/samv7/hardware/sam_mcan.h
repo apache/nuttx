@@ -38,11 +38,13 @@
 
                                           /* 0x0000-0x0004 Reserved */
 #define SAM_MCAN_CUST_OFFSET       0x0008 /* Customer Register */
-#define SAM_MCAN_FBTP_OFFSET       0x000c /* Fast Bit Timing and Prescaler Register */
+#define SAM_MCAN_REVA_FBTP_OFFSET  0x000c /* Fast Bit Timing and Prescaler Register (rev A) */
+#define SAM_MCAN_DBTP_OFFSET       0x000c /* Data Bit Timing and Prescaler Register (rev B) */
 #define SAM_MCAN_TEST_OFFSET       0x0010 /* Test Register */
 #define SAM_MCAN_RWD_OFFSET        0x0014 /* RAM Watchdog Register */
 #define SAM_MCAN_CCCR_OFFSET       0x0018 /* CC Control Register */
-#define SAM_MCAN_BTP_OFFSET        0x001c /* Bit Timing and Prescaler Register */
+#define SAM_MCAN_REVA_BTP_OFFSET   0x001c /* Bit Timing and Prescaler Register (rev A) */
+#define SAM_MCAN_NBTP_OFFSET       0x001c /* Nominal Bit Timing and Prescaler Register (rev B) */
 #define SAM_MCAN_TSCC_OFFSET       0x0020 /* Timestamp Counter Configuration Register */
 #define SAM_MCAN_TSCV_OFFSET       0x0024 /* Timestamp Counter Value Register */
 #define SAM_MCAN_TOCC_OFFSET       0x0028 /* Timeout Counter Configuration Register */
@@ -88,120 +90,44 @@
 #define SAM_MCAN_TXEFA_OFFSET      0x00f8 /* Transmit Event FIFO Acknowledge Register */
                                           /* 0x00fc Reserved */
 
-/* MCAN register addresses **************************************************/
-
-#define SAM_MCAN0_CUST             (SAM_MCAN0_BASE+SAM_MCAN_CUST_OFFSET)
-#define SAM_MCAN0_FBTP             (SAM_MCAN0_BASE+SAM_MCAN_FBTP_OFFSET)
-#define SAM_MCAN0_TEST             (SAM_MCAN0_BASE+SAM_MCAN_TEST_OFFSET)
-#define SAM_MCAN0_RWD              (SAM_MCAN0_BASE+SAM_MCAN_RWD_OFFSET)
-#define SAM_MCAN0_CCCR             (SAM_MCAN0_BASE+SAM_MCAN_CCCR_OFFSET)
-#define SAM_MCAN0_BTP              (SAM_MCAN0_BASE+SAM_MCAN_BTP_OFFSET)
-#define SAM_MCAN0_TSCC             (SAM_MCAN0_BASE+SAM_MCAN_TSCC_OFFSET)
-#define SAM_MCAN0_TSCV             (SAM_MCAN0_BASE+SAM_MCAN_TSCV_OFFSET)
-#define SAM_MCAN0_TOCC             (SAM_MCAN0_BASE+SAM_MCAN_TOCC_OFFSET)
-#define SAM_MCAN0_TOCV             (SAM_MCAN0_BASE+SAM_MCAN_TOCV_OFFSET)
-#define SAM_MCAN0_ECR              (SAM_MCAN0_BASE+SAM_MCAN_ECR_OFFSET)
-#define SAM_MCAN0_PSR              (SAM_MCAN0_BASE+SAM_MCAN_PSR_OFFSET)
-#define SAM_MCAN0_IR               (SAM_MCAN0_BASE+SAM_MCAN_IR_OFFSET)
-#define SAM_MCAN0_IE               (SAM_MCAN0_BASE+SAM_MCAN_IE_OFFSET)
-#define SAM_MCAN0_ILS              (SAM_MCAN0_BASE+SAM_MCAN_ILS_OFFSET)
-#define SAM_MCAN0_ILE              (SAM_MCAN0_BASE+SAM_MCAN_ILE_OFFSET)
-#define SAM_MCAN0_GFC              (SAM_MCAN0_BASE+SAM_MCAN_GFC_OFFSET)
-#define SAM_MCAN0_SIDFC            (SAM_MCAN0_BASE+SAM_MCAN_SIDFC_OFFSET)
-#define SAM_MCAN0_XIDFC            (SAM_MCAN0_BASE+SAM_MCAN_XIDFC_OFFSET)
-#define SAM_MCAN0_XIDAM            (SAM_MCAN0_BASE+SAM_MCAN_XIDAM_OFFSET)
-#define SAM_MCAN0_HPMS             (SAM_MCAN0_BASE+SAM_MCAN_HPMS_OFFSET)
-#define SAM_MCAN0_NDAT1            (SAM_MCAN0_BASE+SAM_MCAN_NDAT1_OFFSET)
-#define SAM_MCAN0_NDAT2            (SAM_MCAN0_BASE+SAM_MCAN_NDAT2_OFFSET)
-#define SAM_MCAN0_RXF0C            (SAM_MCAN0_BASE+SAM_MCAN_RXF0C_OFFSET)
-#define SAM_MCAN0_RXF0S            (SAM_MCAN0_BASE+SAM_MCAN_RXF0S_OFFSET)
-#define SAM_MCAN0_RXF0A            (SAM_MCAN0_BASE+SAM_MCAN_RXF0A_OFFSET)
-#define SAM_MCAN0_RXBC             (SAM_MCAN0_BASE+SAM_MCAN_RXBC_OFFSET)
-#define SAM_MCAN0_RXF1C            (SAM_MCAN0_BASE+SAM_MCAN_RXF1C_OFFSET)
-#define SAM_MCAN0_RXF1S            (SAM_MCAN0_BASE+SAM_MCAN_RXF1S_OFFSET)
-#define SAM_MCAN0_RXF1A            (SAM_MCAN0_BASE+SAM_MCAN_RXF1A_OFFSET)
-#define SAM_MCAN0_RXESC            (SAM_MCAN0_BASE+SAM_MCAN_RXESC_OFFSET)
-#define SAM_MCAN0_TXBC             (SAM_MCAN0_BASE+SAM_MCAN_TXBC_OFFSET)
-#define SAM_MCAN0_TXFQS            (SAM_MCAN0_BASE+SAM_MCAN_TXFQS_OFFSET)
-#define SAM_MCAN0_TXESC            (SAM_MCAN0_BASE+SAM_MCAN_TXESC_OFFSET)
-#define SAM_MCAN0_TXBRP            (SAM_MCAN0_BASE+SAM_MCAN_TXBRP_OFFSET)
-#define SAM_MCAN0_TXBAR            (SAM_MCAN0_BASE+SAM_MCAN_TXBAR_OFFSET)
-#define SAM_MCAN0_TXBCR            (SAM_MCAN0_BASE+SAM_MCAN_TXBCR_OFFSET)
-#define SAM_MCAN0_TXBTO            (SAM_MCAN0_BASE+SAM_MCAN_TXBTO_OFFSET)
-#define SAM_MCAN0_TXBCF            (SAM_MCAN0_BASE+SAM_MCAN_TXBCF_OFFSET)
-#define SAM_MCAN0_TXBTIE           (SAM_MCAN0_BASE+SAM_MCAN_TXBTIE_OFFSET)
-#define SAM_MCAN0_TXBCIE           (SAM_MCAN0_BASE+SAM_MCAN_TXBCIE_OFFSET)
-#define SAM_MCAN0_TXEFC            (SAM_MCAN0_BASE+SAM_MCAN_TXEFC_OFFSET)
-#define SAM_MCAN0_TXEFS            (SAM_MCAN0_BASE+SAM_MCAN_TXEFS_OFFSET)
-#define SAM_MCAN0_TXEFA            (SAM_MCAN0_BASE+SAM_MCAN_TXEFA_OFFSET)
-
-#define SAM_MCAN1_CUST             (SAM_MCAN1_BASE+SAM_MCAN_CUST_OFFSET)
-#define SAM_MCAN1_FBTP             (SAM_MCAN1_BASE+SAM_MCAN_FBTP_OFFSET)
-#define SAM_MCAN1_TEST             (SAM_MCAN1_BASE+SAM_MCAN_TEST_OFFSET)
-#define SAM_MCAN1_RWD              (SAM_MCAN1_BASE+SAM_MCAN_RWD_OFFSET)
-#define SAM_MCAN1_CCCR             (SAM_MCAN1_BASE+SAM_MCAN_CCCR_OFFSET)
-#define SAM_MCAN1_BTP              (SAM_MCAN1_BASE+SAM_MCAN_BTP_OFFSET)
-#define SAM_MCAN1_TSCC             (SAM_MCAN1_BASE+SAM_MCAN_TSCC_OFFSET)
-#define SAM_MCAN1_TSCV             (SAM_MCAN1_BASE+SAM_MCAN_TSCV_OFFSET)
-#define SAM_MCAN1_TOCC             (SAM_MCAN1_BASE+SAM_MCAN_TOCC_OFFSET)
-#define SAM_MCAN1_TOCV             (SAM_MCAN1_BASE+SAM_MCAN_TOCV_OFFSET)
-#define SAM_MCAN1_ECR              (SAM_MCAN1_BASE+SAM_MCAN_ECR_OFFSET)
-#define SAM_MCAN1_PSR              (SAM_MCAN1_BASE+SAM_MCAN_PSR_OFFSET)
-#define SAM_MCAN1_IR               (SAM_MCAN1_BASE+SAM_MCAN_IR_OFFSET)
-#define SAM_MCAN1_IE               (SAM_MCAN1_BASE+SAM_MCAN_IE_OFFSET)
-#define SAM_MCAN1_ILS              (SAM_MCAN1_BASE+SAM_MCAN_ILS_OFFSET)
-#define SAM_MCAN1_ILE              (SAM_MCAN1_BASE+SAM_MCAN_ILE_OFFSET)
-#define SAM_MCAN1_GFC              (SAM_MCAN1_BASE+SAM_MCAN_GFC_OFFSET)
-#define SAM_MCAN1_SIDFC            (SAM_MCAN1_BASE+SAM_MCAN_SIDFC_OFFSET)
-#define SAM_MCAN1_XIDFC            (SAM_MCAN1_BASE+SAM_MCAN_XIDFC_OFFSET)
-#define SAM_MCAN1_XIDAM            (SAM_MCAN1_BASE+SAM_MCAN_XIDAM_OFFSET)
-#define SAM_MCAN1_HPMS             (SAM_MCAN1_BASE+SAM_MCAN_HPMS_OFFSET)
-#define SAM_MCAN1_NDAT1            (SAM_MCAN1_BASE+SAM_MCAN_NDAT1_OFFSET)
-#define SAM_MCAN1_NDAT2            (SAM_MCAN1_BASE+SAM_MCAN_NDAT2_OFFSET)
-#define SAM_MCAN1_RXF0C            (SAM_MCAN1_BASE+SAM_MCAN_RXF0C_OFFSET)
-#define SAM_MCAN1_RXF0S            (SAM_MCAN1_BASE+SAM_MCAN_RXF0S_OFFSET)
-#define SAM_MCAN1_RXF0A            (SAM_MCAN1_BASE+SAM_MCAN_RXF0A_OFFSET)
-#define SAM_MCAN1_RXBC             (SAM_MCAN1_BASE+SAM_MCAN_RXBC_OFFSET)
-#define SAM_MCAN1_RXF1C            (SAM_MCAN1_BASE+SAM_MCAN_RXF1C_OFFSET)
-#define SAM_MCAN1_RXF1S            (SAM_MCAN1_BASE+SAM_MCAN_RXF1S_OFFSET)
-#define SAM_MCAN1_RXF1A            (SAM_MCAN1_BASE+SAM_MCAN_RXF1A_OFFSET)
-#define SAM_MCAN1_RXESC            (SAM_MCAN1_BASE+SAM_MCAN_RXESC_OFFSET)
-#define SAM_MCAN1_TXBC             (SAM_MCAN1_BASE+SAM_MCAN_TXBC_OFFSET)
-#define SAM_MCAN1_TXFQS            (SAM_MCAN1_BASE+SAM_MCAN_TXFQS_OFFSET)
-#define SAM_MCAN1_TXESC            (SAM_MCAN1_BASE+SAM_MCAN_TXESC_OFFSET)
-#define SAM_MCAN1_TXBRP            (SAM_MCAN1_BASE+SAM_MCAN_TXBRP_OFFSET)
-#define SAM_MCAN1_TXBAR            (SAM_MCAN1_BASE+SAM_MCAN_TXBAR_OFFSET)
-#define SAM_MCAN1_TXBCR            (SAM_MCAN1_BASE+SAM_MCAN_TXBCR_OFFSET)
-#define SAM_MCAN1_TXBTO            (SAM_MCAN1_BASE+SAM_MCAN_TXBTO_OFFSET)
-#define SAM_MCAN1_TXBCF            (SAM_MCAN1_BASE+SAM_MCAN_TXBCF_OFFSET)
-#define SAM_MCAN1_TXBTIE           (SAM_MCAN1_BASE+SAM_MCAN_TXBTIE_OFFSET)
-#define SAM_MCAN1_TXBCIE           (SAM_MCAN1_BASE+SAM_MCAN_TXBCIE_OFFSET)
-#define SAM_MCAN1_TXEFC            (SAM_MCAN1_BASE+SAM_MCAN_TXEFC_OFFSET)
-#define SAM_MCAN1_TXEFS            (SAM_MCAN1_BASE+SAM_MCAN_TXEFS_OFFSET)
-#define SAM_MCAN1_TXEFA            (SAM_MCAN1_BASE+SAM_MCAN_TXEFA_OFFSET)
-
 /* MCAN register bit definitions ********************************************/
 
 /* Customer Register (32-bit value) */
 
-/* Fast Bit Timing and Prescaler Register */
+/* Fast Bit Timing and Prescaler Register (rev A) */
 
-#define MCAN_FBTP_FSJW_SHIFT       (0)       /* Bits 0-1: Fast (Re) Synchronization Jump Width */
-#define MCAN_FBTP_FSJW_MASK        (3 << MCAN_FBTP_FSJW_SHIFT)
-#  define MCAN_FBTP_FSJW(n)        ((uint32_t)(n) << MCAN_FBTP_FSJW_SHIFT)
-#define MCAN_FBTP_FTSEG2_SHIFT     (4)       /* Bits 4-6: Fast Time Segment After Sample Point */
-#define MCAN_FBTP_FTSEG2_MASK      (7 << MCAN_FBTP_FTSEG2_SHIFT)
-#  define MCAN_FBTP_FTSEG2(n)      ((uint32_t)(n) << MCAN_FBTP_FTSEG2_SHIFT)
-#define MCAN_FBTP_FTSEG1_SHIFT     (8)       /* Bits 8-11: Fast Time Segment Before Sample Point */
-#define MCAN_FBTP_FTSEG1_MASK      (15 << MCAN_FBTP_FTSEG1_SHIFT)
-#  define MCAN_FBTP_FTSEG1(n)      ((uint32_t)(n) << MCAN_FBTP_FTSEG1_SHIFT)
-#define MCAN_FBTP_FBRP_SHIFT       (16)      /* Bits 16-20: Fast Baud Rate Prescaler */
-#define MCAN_FBTP_FBRP_MASK        (31 << MCAN_FBTP_FBRP_SHIFT)
-#  define MCAN_FBTP_FBRP(n)        ((uint32_t)(n) << MCAN_FBTP_FBRP_SHIFT)
-#define MCAN_FBTP_TDC              (1 << 23) /* Bit: 23: Transceiver Delay Compensation */
-#define MCAN_FBTP_TDCO_SHIFT       (24)      /* Bits 24-28: Transceiver Delay Compensation Offset */
-#define MCAN_FBTP_TDCO_MASK        (31 << MCAN_FBTP_TDC_SHIFT)
-#  define MCAN_FBTP_TDCO(n)        ((uint32_t)(n) << MCAN_FBTP_TDC_SHIFT)
+#define MCAN_REVA_FBTP_FSJW_SHIFT       (0)       /* Bits 0-1: Fast (Re) Synchronization Jump Width */
+#define MCAN_REVA_FBTP_FSJW_MASK        (0x3 << MCAN_REVA_FBTP_FSJW_SHIFT)
+#  define MCAN_REVA_FBTP_FSJW(n)        ((uint32_t)(n) << MCAN_REVA_FBTP_FSJW_SHIFT)
+#define MCAN_REVA_FBTP_FTSEG2_SHIFT     (4)       /* Bits 4-6: Fast Time Segment After Sample Point */
+#define MCAN_REVA_FBTP_FTSEG2_MASK      (0x7 << MCAN_REVA_FBTP_FTSEG2_SHIFT)
+#  define MCAN_REVA_FBTP_FTSEG2(n)      ((uint32_t)(n) << MCAN_REVA_FBTP_FTSEG2_SHIFT)
+#define MCAN_REVA_FBTP_FTSEG1_SHIFT     (8)       /* Bits 8-11: Fast Time Segment Before Sample Point */
+#define MCAN_REVA_FBTP_FTSEG1_MASK      (0xf << MCAN_REVA_FBTP_FTSEG1_SHIFT)
+#  define MCAN_REVA_FBTP_FTSEG1(n)      ((uint32_t)(n) << MCAN_REVA_FBTP_FTSEG1_SHIFT)
+#define MCAN_REVA_FBTP_FBRP_SHIFT       (16)      /* Bits 16-20: Fast Baud Rate Prescaler */
+#define MCAN_REVA_FBTP_FBRP_MASK        (0x1f << MCAN_REVA_FBTP_FBRP_SHIFT)
+#  define MCAN_REVA_FBTP_FBRP(n)        ((uint32_t)(n) << MCAN_REVA_FBTP_FBRP_SHIFT)
+#define MCAN_REVA_FBTP_TDC              (1 << 23) /* Bit: 23: Transceiver Delay Compensation */
+#define MCAN_REVA_FBTP_TDCO_SHIFT       (24)      /* Bits 24-28: Transceiver Delay Compensation Offset */
+#define MCAN_REVA_FBTP_TDCO_MASK        (0x1f << MCAN_REVA_FBTP_TDC_SHIFT)
+#  define MCAN_REVA_FBTP_TDCO(n)        ((uint32_t)(n) << MCAN_REVA_FBTP_TDC_SHIFT)
+
+/* Data Bit Timing and Prescaler Register (rev B) */
+
+#define MCAN_DBTP_DSJW_SHIFT       (0)       /* Bits 0-2: Data (Re) Synchronization Jump Width */
+#define MCAN_DBTP_DSJW_MASK        (0x7 << MCAN_DBTP_DSJW_SHIFT)
+#  define MCAN_DBTP_DSJW(n)        ((uint32_t)(n) << MCAN_DBTP_DSJW_SHIFT)
+#define MCAN_DBTP_DTSEG2_SHIFT     (4)       /* Bits 4-7: Data Time Segment After Sample Point */
+#define MCAN_DBTP_DTSEG2_MASK      (0xf << MCAN_DBTP_DTSEG2_SHIFT)
+#  define MCAN_DBTP_DTSEG2(n)      ((uint32_t)(n) << MCAN_DBTP_DTSEG2_SHIFT)
+#define MCAN_DBTP_DTSEG1_SHIFT     (8)       /* Bits 8-11: Data Time Segment Before Sample Point */
+#define MCAN_DBTP_DTSEG1_MASK      (0x1f << MCAN_DBTP_DTSEG1_SHIFT)
+#  define MCAN_DBTP_DTSEG1(n)      ((uint32_t)(n) << MCAN_DBTP_DTSEG1_SHIFT)
+#define MCAN_DBTP_DBRP_SHIFT       (16)      /* Bits 16-20: Data Baud Rate Prescaler */
+#define MCAN_DBTP_DBRP_MASK        (0x1f << MCAN_DBTP_DBRP_SHIFT)
+#  define MCAN_DBTP_DBRP(n)        ((uint32_t)(n) << MCAN_DBTP_DBRP_SHIFT)
+#define MCAN_DBTP_TDC              (1 << 23) /* Bit: 23: Transceiver Delay Compensation */
 
 /* Test Register */
 
@@ -214,9 +140,6 @@
 #  define MCAN_TEST_TX_RECESSIVE   (3 << MCAN_TEST_TX_SHIFT) /* Recessive (1) at CANTX. */
 
 #define MCAN_TEST_RX               (1 << 7)  /* Bit 7:  Receive Pin */
-#define MCAN_TEST_TDCV_SHIFT       (8)       /* Bits 8-13: Transceiver Delay Compensation Value */
-#define MCAN_TEST_TDCV_MASK        (0x3f << MCAN_TEST_TDCV_SHIFT)
-#  define MCAN_TEST_TDCV(n)        ((uint32_t)(n) << MCAN_TEST_TDCV_SHIFT)
 
 /* RAM Watchdog Register */
 
@@ -237,37 +160,56 @@
 #define MCAN_CCCR_MON              (1 << 5)  /* Bit 5:  Bus Monitoring Mode */
 #define MCAN_CCCR_DAR              (1 << 6)  /* Bit 6:  Disable Automatic Retransmission */
 #define MCAN_CCCR_TEST             (1 << 7)  /* Bit 7:  Test Mode Enable */
-#define MCAN_CCCR_CME_SHIFT        (8)       /* Bits 8-9: CAN Mode Enable */
+#define MCAN_CCCR_CME_SHIFT        (8)       /* Bits 8-9: CAN Mode Enable  (rev A) */
 #define MCAN_CCCR_CME_MASK         (3 << MCAN_CCCR_CME_SHIFT)
 #  define MCAN_CCCR_CME_ISO11898_1 (0 << MCAN_CCCR_CME_SHIFT) /* CAN operation according to ISO11898-1 enabled */
 #  define MCAN_CCCR_CME_FD         (1 << MCAN_CCCR_CME_SHIFT) /* CAN FD operation enabled */
 #  define MCAN_CCCR_CME_FD_BSW     (2 << MCAN_CCCR_CME_SHIFT) /* CAN FD operation with bit rate switching enabled */
 
-#define MCAN_CCCR_CMR_SHIFT        (10)      /* Bits 10-11: CAN Mode Request */
+#define MCAN_CCCR_FDOE             (1 << 8)  /* Bit 8:  CAN FD Operation Enable (rev B) */
+#define MCAN_CCCR_BRSE             (1 << 9)  /* Bit 9:  Bit Rate Switching Enable (rev B) */
+#define MCAN_CCCR_CMR_SHIFT        (10)      /* Bits 10-11: CAN Mode Request (rev A)*/
 #define MCAN_CCCR_CMR_MASK         (3 << MCAN_CCCR_CMR_SHIFT)
 #  define MCAN_CCCR_CMR_NOCHG      (0 << MCAN_CCCR_CMR_SHIFT) /* No mode change */
 #  define MCAN_CCCR_CMR_FD         (1 << MCAN_CCCR_CMR_SHIFT) /* Request CAN FD operation */
 #  define MCAN_CCCR_CMR_FD_BSW     (2 << MCAN_CCCR_CMR_SHIFT) /* Request CAN FD operation with bit rate switching */
 #  define MCAN_CCCR_CMR_ISO11898_1 (3 << MCAN_CCCR_CMR_SHIFT) /* Request CAN operation according ISO11898-1 */
 
-#define MCAN_CCCR_FDO              (1 << 12) /* Bit 12: CAN FD Operation */
+#define MCAN_CCCR_FDO              (1 << 12) /* Bit 12: CAN FD Operation (rev A) */
+#define MCAN_CCCR_PXHD             (1 << 12) /* Bit 12: Protocol Exception Event Handling (rev B) */
 #define MCAN_CCCR_FDBS             (1 << 13) /* Bit 13: CAN FD Bit Rate Switching */
+#define MCAN_CCCR_EFBI             (1 << 13) /* Bit 13: Edge Filtering during Bus Integration */
 #define MCAN_CCCR_TXP              (1 << 14) /* Bit 14: Transmit Pause */
+#define MCAN_CCCR_NISO             (1 << 15) /* Bit 15: Non-ISO Operation (Bosch FD)*/
 
-/* Bit Timing and Prescaler Register */
+/* Bit Timing and Prescaler Register (rev A) */
 
-#define MCAN_BTP_SJW_SHIFT         (0)       /* Bits 0-3: (Re) Synchronization Jump Width */
-#define MCAN_BTP_SJW_MASK          (15 << MCAN_BTP_SJW_SHIFT)
-#  define MCAN_BTP_SJW(n)          ((uint32_t)(n) << MCAN_BTP_SJW_SHIFT)
-#define MCAN_BTP_TSEG2_SHIFT       (4)       /* Bits 4-7: Time Segment After Sample Point */
-#define MCAN_BTP_TSEG2_MASK        (15 << MCAN_BTP_TSEG2_SHIFT)
-#  define MCAN_BTP_TSEG2(n)        ((uint32_t)(n) << MCAN_BTP_TSEG2_SHIFT)
-#define MCAN_BTP_TSEG1_SHIFT       (8)       /* Bits 8-13: Time Segment Before Sample Point */
-#define MCAN_BTP_TSEG1_MASK        (0x3f << MCAN_BTP_TSEG1_SHIFT)
-#  define MCAN_BTP_TSEG1(n)        ((uint32_t)(n) << MCAN_BTP_TSEG1_SHIFT)
-#define MCAN_BTP_BRP_SHIFT         (16)      /* Bits 16-25: Baud Rate Prescaler */
-#define MCAN_BTP_BRP_MASK          (0x3ff << MCAN_BTP_BRP_SHIFT)
-#  define MCAN_BTP_BRP(n)          ((uint32_t)(n) << MCAN_BTP_BRP_SHIFT)
+#define MCAN_REVA_BTP_SJW_SHIFT    (0)       /* Bits 0-3: (Re) Synchronization Jump Width */
+#define MCAN_REVA_BTP_SJW_MASK     (0xf << MCAN_REVA_BTP_SJW_SHIFT)
+#  define MCAN_REVA_BTP_SJW(n)     ((uint32_t)(n) << MCAN_REVA_BTP_SJW_SHIFT)
+#define MCAN_REVA_BTP_TSEG2_SHIFT  (4)       /* Bits 4-7: Time Segment After Sample Point */
+#define MCAN_REVA_BTP_TSEG2_MASK   (0xf << MCAN_REVA_BTP_TSEG2_SHIFT)
+#  define MCAN_REVA_BTP_TSEG2(n)   ((uint32_t)(n) << MCAN_REVA_BTP_TSEG2_SHIFT)
+#define MCAN_REVA_BTP_TSEG1_SHIFT  (8)       /* Bits 8-13: Time Segment Before Sample Point */
+#define MCAN_REVA_BTP_TSEG1_MASK   (0x3f << MCAN_REVA_BTP_TSEG1_SHIFT)
+#  define MCAN_REVA_BTP_TSEG1(n)   ((uint32_t)(n) << MCAN_REVA_BTP_TSEG1_SHIFT)
+#define MCAN_REVA_BTP_BRP_SHIFT    (16)      /* Bits 16-25: Baud Rate Prescaler */
+#define MCAN_REVA_BTP_BRP_MASK     (0x3ff << MCAN_REVA_BTP_BRP_SHIFT)
+#  define MCAN_REVA_BTP_BRP(n)     ((uint32_t)(n) << MCAN_REVA_BTP_BRP_SHIFT)
+
+/* Nominal Bit Timing and Prescaler Register (rev B) */
+#define MCAN_NBTP_NTSEG2_SHIFT       (0)       /* Bits 0-6: Nominal Time Segment After Sample Point */
+#define MCAN_NBTP_NTSEG2_MASK        (0x7f << MCAN_NBTP_NTSEG2_SHIFT)
+#  define MCAN_NBTP_NTSEG2(n)        ((uint32_t)(n) << MCAN_NBTP_NTSEG2_SHIFT)
+#define MCAN_NBTP_NTSEG1_SHIFT       (8)       /* Bits 8-15: Nominal Time Segment Before Sample Point */
+#define MCAN_NBTP_NTSEG1_MASK        (0xff << MCAN_NBTP_NTSEG1_SHIFT)
+#  define MCAN_NBTP_NTSEG1(n)        ((uint32_t)(n) << MCAN_NBTP_NTSEG1_SHIFT)
+#define MCAN_NBTP_NBRP_SHIFT         (16)      /* Bits 16-24: Nominal Bit Rate Prescaler */
+#define MCAN_NBTP_NBRP_MASK          (0x1ff << MCAN_NBTP_NBRP_SHIFT)
+#  define MCAN_NBTP_NBRP(n)          ((uint32_t)(n) << MCAN_NBTP_NBRP_SHIFT)
+#define MCAN_NBTP_NSJW_SHIFT         (25)       /* Bits 25-31: Nominal (Re) Synchronization Jump Width */
+#define MCAN_NBTP_NSJW_MASK          (0x7f << MCAN_NBTP_NSJW_SHIFT)
+#  define MCAN_NBTP_NSJW(n)          ((uint32_t)(n) << MCAN_NBTP_NSJW_SHIFT)
 
 /* Timestamp Counter Configuration Register */
 
@@ -330,7 +272,7 @@
 #define MCAN_PSR_EC_NO_CHANGE      (7)       /* No CAN bus event was detected since last read */
 
 #define MCAN_PSR_LEC_SHIFT         (0)       /* Bits 0-2: Last Error Code */
-#define MCAN_PSR_LEC_MASK          (7 << MCAN_PSR_LEC_SHIFT)
+#define MCAN_PSR_LEC_MASK          (0x7 << MCAN_PSR_LEC_SHIFT)
 #  define MCAN_PSR_LEC(n)          ((uint32_t)(n) << MCAN_PSR_LEC_SHIFT) /* See error codes above */
 
 #define MCAN_PSR_ACT_SHIFT         (3)       /* Bits 3-4: Activity */
@@ -343,16 +285,25 @@
 #define MCAN_PSR_EP                (1 << 5)  /* Bit 5:  Error Passive */
 #define MCAN_PSR_EW                (1 << 6)  /* Bit 6:  Warning Status */
 #define MCAN_PSR_BO                (1 << 7)  /* Bit 7:  Bus_Off Status */
-#define MCAN_PSR_FLEC_SHIFT        (8)       /* Bits 8-10: Fast Last Error Code */
-#define MCAN_PSR_FLEC_MASK         (7 << MCAN_PSR_FLEC_SHIFT)
+#define MCAN_PSR_FLEC_SHIFT        (8)       /* Bits 8-10: Fast Last Error Code (rev A) */
+#define MCAN_PSR_FLEC_MASK         (0x7 << MCAN_PSR_FLEC_SHIFT)
 #  define MCAN_PSR_FLEC(n)         ((uint32_t)(n) << MCAN_PSR_FLEC_SHIFT) /* See error codes above */
+
+#define MCAN_PSR_DLEC_SHIFT        (8)       /* Bits 8-10: Data Last Error Code (rev B) */
+#define MCAN_PSR_DLEC_MASK         (0x7 << MCAN_PSR_DLEC_SHIFT)
+#  define MCAN_PSR_DLEC(n)         ((uint32_t)(n) << MCAN_PSR_DLEC_SHIFT) /* See error codes above */
 
 #define MCAN_PSR_RESI              (1 << 11) /* Bit 11: ESI Flag of Last Received CAN FD Message */
 #define MCAN_PSR_RBRS              (1 << 12) /* Bit 12: BRS Flag of Last Received CAN FD Message */
-#define MCAN_PSR_REDL              (1 << 13) /* Bit 13: Received a CAN FD Message */
+#define MCAN_PSR_REDL              (1 << 13) /* Bit 13: Received a CAN FD Message (rev A) */
+#define MCAN_PSR_RFDF              (1 << 13) /* Bit 13: Received a CAN FD Message (rev B) */
+#define MCAN_PSR_PXE               (1 << 14) /* Bit 14: Protocol Exception Event (rev B) */
+#define MCAN_PSR_TDCV_SHIFT        (16)      /* Bits 16-22: Transmitter Delay Compensation Value (rev B) */
+#define MCAN_PSR_TDCV_MASK         (0x7f << MCAN_PSR_TDCV_SHIFT)
+#  define MCAN_PSR_TDCV(n)          ((uint32_t)(n) << MCAN_PSR_TDCV_SHIFT)
 
 /* Common bit definitions for Interrupt Register, Interrupt Enable Register,
- * Interrupt Line Select Register
+ * Interrupt, Line Select Register
  */
 
 #define MCAN_INT_RF0N              (1 << 0)  /* Bit 0:  Receive FIFO 0 New Message */
@@ -380,13 +331,17 @@
 #define MCAN_INT_EW                (1 << 24) /* Bit 24: Warning Status */
 #define MCAN_INT_BO                (1 << 25) /* Bit 25: Bus_Off Status */
 #define MCAN_INT_WDI               (1 << 26) /* Bit 26: Watchdog Interrupt */
-#define MCAN_INT_CRCE              (1 << 27) /* Bit 27: Receive CRC Error */
-#define MCAN_INT_BE                (1 << 28) /* Bit 28: Bit Error */
-#define MCAN_INT_ACKE              (1 << 29) /* Bit 29: Acknowledge Error */
-#define MCAN_INT_FOE               (1 << 30) /* Bit 30: Format Error */
-#define MCAN_INT_STE               (1 << 31) /* Bit 31: Stuff Error */
+#define MCAN_INT_CRCE              (1 << 27) /* Bit 27: Receive CRC Error (rev A) */
+#define MCAN_INT_PEA               (1 << 27) /* Bit 27: Protocol Error in Arbitration Phase (rev B) */
+#define MCAN_INT_BE                (1 << 28) /* Bit 28: Bit Error (rev A) */
+#define MCAN_INT_PED               (1 << 28) /* Bit 28: Protocol Error in Data Phase (rev B) */
+#define MCAN_INT_ACKE              (1 << 29) /* Bit 29: Acknowledge Error (rev A) */
+#define MCAN_INT_ARA               (1 << 29) /* Bit 29: Access to Reserved Address (rev B) */
+#define MCAN_INT_FOE               (1 << 30) /* Bit 30: Format Error (rev A) */
+#define MCAN_INT_STE               (1 << 31) /* Bit 31: Stuff Error (rev A) */
 
-#define MCAN_INT_ALL               (0xffcfffff)
+#define MCAN_REVA_INT_ALL          (0xffcfffff)
+#define MCAN_REVB_INT_ALL         (0x3fcfffff)
 
 /* Interrupt Line Enable Register */
 
@@ -632,7 +587,7 @@
 
 /* Transmit Buffer Cancellation Finished Interrupt Enable Register */
 
-#define MCAN_TXBTIE(n)             (1 << (n)) /* Cancellation finished interrupt enable for transmit buffer n, n=0-31 */
+#define MCAN_TXBCIE(n)             (1 << (n)) /* Cancellation finished interrupt enable for transmit buffer n, n=0-31 */
 
 /* Transmit Event FIFO Configuration Register */
 
@@ -695,8 +650,10 @@
 #define BUFFER_R1_DLC_SHIFT        (16)      /* Bits 16-19: Date length code */
 #define BUFFER_R1_DLC_MASK         (15 << BUFFER_R1_DLC_SHIFT)
 #  define BUFFER_R1_DLC(n)         ((uint32_t)(n) << BUFFER_R1_DLC_SHIFT)
-#define BUFFER_R1_BRS              (1 << 20) /* Bit 20: Bit Rate Switch */
-#define BUFFER_R1_EDL              (1 << 21) /* Bit 21: Extended Data Length */
+#define BUFFER_R1_BRS_SHIFT        (20)
+#define BUFFER_R1_EDL_SHIFT        (21)
+#define BUFFER_R1_BRS              (1 << BUFFER_R1_BRS_SHIFT) /* Bit 20: Bit Rate Switch */
+#define BUFFER_R1_EDL              (1 << BUFFER_R1_EDL_SHIFT) /* Bit 21: Extended Data Length */
 
 /* RX buffer/RX FIFOs */
 
@@ -805,10 +762,6 @@
 
 /****************************************************************************
  * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Public Functions Prototypes
  ****************************************************************************/
 
 #endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_MCAN_H */

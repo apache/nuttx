@@ -76,12 +76,15 @@ static int     touch_open(FAR struct file *filep);
 static int     touch_close(FAR struct file *filep);
 static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
-static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
-                           size_t buflen);
 static int     touch_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
                           bool setup);
+
+#ifdef CONFIG_INPUT_UINPUT
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
+                           size_t buflen);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -89,13 +92,20 @@ static int     touch_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct file_operations g_touch_fops =
 {
-  touch_open,
-  touch_close,
-  touch_read,
-  touch_write,
-  NULL,
-  touch_ioctl,
-  touch_poll
+  touch_open,     /* open */
+  touch_close,    /* close */
+  touch_read,     /* read */
+#ifdef CONFIG_INPUT_UINPUT
+  touch_write,    /* write */
+#else
+  NULL,           /* write */
+#endif
+  NULL,           /* seek */
+  touch_ioctl,    /* ioctl */
+  touch_poll      /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL          /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -200,6 +210,7 @@ static int touch_close(FAR struct file *filep)
  * Name: touch_write
  ****************************************************************************/
 
+#ifdef CONFIG_INPUT_UINPUT
 static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
@@ -214,6 +225,7 @@ static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
 
   return lower->write(lower, buffer, buflen);
 }
+#endif
 
 /****************************************************************************
  * Name: touch_read

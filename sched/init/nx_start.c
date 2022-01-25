@@ -62,10 +62,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SMP_NCPUS
-#  define CONFIG_SMP_NCPUS       1
-#endif
-
 /* This set of all CPUs */
 
 #define SCHED_ALL_CPUS           ((1 << CONFIG_SMP_NCPUS) - 1)

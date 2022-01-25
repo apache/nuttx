@@ -437,8 +437,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 
   /* Save pointers into argv */
 
-  sprintf(arg1, "%#p", ept);
-  sprintf(arg2, "%#p", data);
+  sprintf(arg1, "%p", ept);
+  sprintf(arg2, "%p", data);
 
   argv[0] = arg1;
   argv[1] = arg2;
@@ -457,8 +457,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 static bool net_rpmsg_drv_is_ipv4(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ip =
-    (struct ipv4_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+    (FAR struct ipv4_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
@@ -475,8 +475,8 @@ static bool net_rpmsg_drv_is_ipv4(FAR struct net_driver_s *dev)
 static bool net_rpmsg_drv_is_ipv6(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ip =
-    (struct ipv6_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+    (FAR struct ipv6_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
@@ -492,7 +492,7 @@ static bool net_rpmsg_drv_is_ipv6(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ARP
 static bool net_rpmsg_drv_is_arp(FAR struct net_driver_s *dev)
 {
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
@@ -898,7 +898,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
       };
 
       dnsaddr.sin_family = AF_INET;
-      dnsaddr.sin_port   = htons(DNS_DEFAULT_PORT);
+      dnsaddr.sin_port   = HTONS(DNS_DEFAULT_PORT);
       memcpy(&dnsaddr.sin_addr, &msg.dnsaddr, sizeof(msg.dnsaddr));
 
       dns_add_nameserver((FAR const struct sockaddr *)&dnsaddr,
@@ -914,7 +914,7 @@ static int net_rpmsg_drv_ifup(FAR struct net_driver_s *dev)
       };
 
       dnsaddr.sin6_family = AF_INET6;
-      dnsaddr.sin6_port   = htons(DNS_DEFAULT_PORT);
+      dnsaddr.sin6_port   = HTONS(DNS_DEFAULT_PORT);
       memcpy(&dnsaddr.sin6_addr, msg.ipv6dnsaddr, sizeof(msg.ipv6dnsaddr));
 
       dns_add_nameserver((FAR const struct sockaddr *)&dnsaddr,

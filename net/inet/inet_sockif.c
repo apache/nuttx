@@ -1382,7 +1382,7 @@ static int inet_socketpair(FAR struct socket *psocks[2])
       len = sizeof(addr[0].inaddr);
       memset(&addr[0], 0, len);
       addr[0].inaddr.sin_family = psocks[0]->s_domain;
-      addr[0].inaddr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+      addr[0].inaddr.sin_addr.s_addr = HTONL(INADDR_LOOPBACK);
     }
 
   memcpy(&addr[1], &addr[0], len);

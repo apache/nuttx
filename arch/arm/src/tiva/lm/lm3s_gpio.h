@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_LM_LM3S_H
-#define __ARCH_ARM_SRC_TIVA_LM_LM3S_H
+#ifndef __ARCH_ARM_SRC_TIVA_LM_LM3S_GPIO_H
+#define __ARCH_ARM_SRC_TIVA_LM_LM3S_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -261,4 +261,4 @@ typedef uint32_t pinconfig_t;
 
 uintptr_t tiva_gpiobaseaddress(unsigned int port);
 
-#endif /* __ARCH_ARM_SRC_TIVA_LM_LM3S_H */
+#endif /* __ARCH_ARM_SRC_TIVA_LM_LM3S_GPIO_H */

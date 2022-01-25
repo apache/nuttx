@@ -97,38 +97,12 @@
 
 #if !defined(CONFIG_FS_AUTOMOUNTER) || !defined(HAVE_HSMCI)
 #  undef HAVE_AUTOMOUNTER
-#  undef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
+#  undef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
 #endif
 
-#ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
+#ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
 #  undef HAVE_AUTOMOUNTER
 #endif
-
-#ifdef HAVE_AUTOMOUNTER
-#  ifdef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT
-  /* HSMCI0 Automounter defaults */
-
-#    ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_FSTYPE
-#      define CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_FSTYPE "vfat"
-#    endif
-
-#    ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_BLKDEV
-#      define CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_BLKDEV "/dev/mmcds0"
-#    endif
-
-#    ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_MOUNTPOINT
-#      define CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_MOUNTPOINT "/mnt/sdcard0"
-#    endif
-
-#    ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_DDELAY
-#      define CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_DDELAY 1000
-#    endif
-
-#    ifndef CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY
-#      define CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY 2000
-#    endif
-#  endif /* CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT */
-#endif /* HAVE_AUTOMOUNTER */
 
 /* USB Device */
 
@@ -327,9 +301,9 @@
  *   ------ ----------------- ---------------------
  */
 
-#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOC | GPIO_PIN16)
-#define IRQ_MCI0_CD   SAM_IRQ_PC16
+#define GPIO_HSMCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                        GPIO_INT_BOTHEDGES | GPIO_PORT_PIOC | GPIO_PIN16)
+#define IRQ_HSMCI0_CD   SAM_IRQ_PC16
 
 /* USB Host
  *
@@ -451,6 +425,18 @@ int sam_bringup(void);
 #endif
 
 /****************************************************************************
+ * Name: sam_afec_initialize
+ *
+ * Description:
+ *   Initialize and register the ADC driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_AFEC
+int sam_afec_setup(void);
+#endif
+
+/****************************************************************************
  * Name: sam_dacdev_initialize
  *
  * Description:
@@ -472,20 +458,6 @@ int sam_dacdev_initialize(void);
 
 #ifdef CONFIG_SAMV7_SPI
 void sam_spidev_initialize(void);
-#endif
-
-/****************************************************************************
- * Name: sam_hsmci_initialize
- *
- * Description:
- *   Initialize HSMCI support
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-int sam_hsmci_initialize(int slot, int minor);
-#else
-# define sam_hsmci_initialize(s,m) (-ENOSYS)
 #endif
 
 /****************************************************************************
@@ -536,92 +508,6 @@ void sam_netinitialize(void);
 
 #ifdef HAVE_MACADDR
 int sam_emac0_setmac(void);
-#endif
-
-/****************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_cardinserted(int slotno);
-#else
-#  define sam_cardinserted(slotno) (false)
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#endif
-
-/****************************************************************************
- * Name:  sam_automount_initialize
- *
- * Description:
- *   Configure auto-mounters for each enable and so configured HSMCI
- *
- * Input Parameters:
- *   None
- *
- *  Returned Value:
- *    None
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void sam_automount_initialize(void);
-#endif
-
-/****************************************************************************
- * Name:  sam_automount_event
- *
- * Description:
- *   The HSMCI card detection logic has detected an insertion or removal
- *   event.  It has already scheduled the MMC/SD block driver operations.
- *   Now we need to schedule the auto-mount event which will occur with a
- *   substantial delay to make sure that everything has settle down.
- *
- * Input Parameters:
- *   slotno - Identifies the HSMCI0 slot: HSMCI0 or HSMCI1_SLOTNO.
- *       There is a terminology problem here:  Each HSMCI supports two slots,
- *      slot A and slot B. Only slot A is used.  So this is not a really a
- *      slot, but an HSCMI peripheral number.
- *   inserted - True if the card is inserted in the slot.  False otherwise.
- *
- *  Returned Value:
- *    None
- *
- *  Assumptions:
- *    Interrupts are disabled.
- *
- ****************************************************************************/
-
-#ifdef HAVE_AUTOMOUNTER
-void sam_automount_event(int slotno, bool inserted);
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#else
-#  define sam_writeprotected(slotno) (false)
 #endif
 
 /****************************************************************************

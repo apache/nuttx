@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_ALARM_H
-#define __ARCH_ARM_SRC_KINETIS_ALARM_H
+#ifndef __ARCH_ARM_SRC_KINETIS_KINETIS_ALARM_H
+#define __ARCH_ARM_SRC_KINETIS_KINETIS_ALARM_H
 
 /****************************************************************************
  * Included Files
@@ -162,4 +162,4 @@ FAR struct rtc_lowerhalf_s *kinetis_rtc_lowerhalf(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_RTC_ALARM */
-#endif /* __ARCH_ARM_SRC_KINETIS_ALARM_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_KINETIS_ALARM_H */

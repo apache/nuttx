@@ -95,6 +95,10 @@ ifeq ($(CONFIG_XTENSA_IMEM_USE_SEPARATE_HEAP),y)
 CHIP_CSRCS += esp32_imm.c
 endif
 
+ifeq ($(CONFIG_ESP32_LEDC),y)
+CHIP_CSRCS += esp32_ledc.c
+endif
+
 ifeq ($(CONFIG_ESP32_I2C),y)
 CHIP_CSRCS += esp32_i2c.c
 endif
@@ -167,7 +171,7 @@ ifeq ($(CONFIG_ESP32_FREERUN),y)
 CHIP_CSRCS += esp32_freerun.c
 endif
 
-ifeq ($(CONFIG_ESP32_PARTITION),y)
+ifeq ($(CONFIG_ESP32_PARTITION_TABLE),y)
 CHIP_CSRCS += esp32_partition.c
 endif
 
@@ -206,7 +210,7 @@ endif
 
 ifeq ($(CONFIG_ESP32_WIRELESS),y)
 WIRELESS_DRV_UNPACK  = esp-wireless-drivers-3rdparty
-WIRELESS_DRV_ID      = 2b53111
+WIRELESS_DRV_ID      = 055f1ef
 WIRELESS_DRV_ZIP     = $(WIRELESS_DRV_ID).zip
 WIRELESS_DRV_URL     = https://github.com/espressif/esp-wireless-drivers-3rdparty/archive
 
@@ -231,10 +235,22 @@ INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wire
 CHIP_CSRCS += esp32_wlan.c esp32_wifi_utils.c esp32_wifi_adapter.c
 
 EXTRA_LIBPATHS += -L $(ARCH_SRCDIR)$(DELIM)chip$(DELIM)esp-wireless-drivers-3rdparty$(DELIM)libs$(DELIM)esp32
-EXTRA_LIBS += -lcore -lrtc -lnet80211 -lpp -lsmartconfig -lcoexist -lespnow -lphy -lwpa_supplicant
+EXTRA_LIBS += -lcore -lrtc -lnet80211 -lpp -lsmartconfig -lespnow -lphy -lwpa_supplicant
+
+ifeq ($(CONFIG_ESP32_BLE),y)
+CHIP_CSRCS += esp32_ble_adapter.c esp32_ble.c
+EXTRA_LIBS += -lbtdm_app
+  ifeq ($(CONFIG_ESP32_WIFI_BT_COEXIST),y)
+    EXTRA_LIBS += -lcoexist
+  endif
+endif
 
 # Due to some Wi-Fi related libraries, the option is need to avoid linking too much
 # unused functions.
 
 LDFLAGS += --gc-sections
+
+# Wireless interfaces.
+
+CHIP_CSRCS += esp32_wireless.c
 endif

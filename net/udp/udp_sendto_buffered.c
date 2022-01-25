@@ -74,8 +74,8 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-#define UDPIPv4BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define UDPIPv6BUF ((struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define UDPIPv4BUF ((FAR struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define UDPIPv6BUF ((FAR struct udp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /* Debug */
 
@@ -299,7 +299,7 @@ static int sendto_next_transfer(FAR struct socket *psock,
        * connection structure.
        */
 
-      conn->lport = htons(udp_select_port(conn->domain, &conn->u));
+      conn->lport = HTONS(udp_select_port(conn->domain, &conn->u));
     }
 
   /* Get the device that will handle the remote packet transfers.  This

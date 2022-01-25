@@ -172,7 +172,7 @@ static void _calc_imm(long offset, long *imm_hi, long *imm_lo)
 
   lo = offset - (hi * 4096);
 
-  binfo("offset=%ld: hi=%ld lo=%ld \n",
+  binfo("offset=%ld: hi=%ld lo=%ld\n",
         offset, hi, lo);
 
   ASSERT(-2048 <= lo && lo <= 2047);
@@ -290,7 +290,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
     {
       /* NOTE: RELAX has no symbol, so just return */
 
-      binfo("%s at %08" PRIxPTR " [%08" PRIx32 "] \n",
+      binfo("%s at %08" PRIxPTR " [%08" PRIx32 "]\n",
             _get_rname(relotype),
             addr, _get_val((uint16_t *)addr));
 
@@ -394,7 +394,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
           ASSERT(offset && val);
 
           binfo("offset for Bx=%ld (0x%lx) (val=0x%08" PRIx32 ") "
-                "already set! \n",
+                "already set!\n",
                 offset, offset, val);
         }
         break;
@@ -493,7 +493,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           ASSERT(offset && val);
 
-          binfo("offset for C.J=%ld (0x%lx) (val=0x%04x) already set! \n",
+          binfo("offset for C.J=%ld (0x%lx) (val=0x%04x) already set!\n",
                 offset, offset, val);
         }
         break;

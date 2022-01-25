@@ -224,15 +224,15 @@ struct stm32_lowerhalf_s
 static uint16_t stm32_getreg16(FAR struct stm32_lowerhalf_s *priv,
                                int offset);
 static void stm32_putreg16(FAR struct stm32_lowerhalf_s *priv, int offset,
-              uint16_t value);
+                           uint16_t value);
 static uint32_t stm32_getreg32(FAR struct stm32_lowerhalf_s *priv,
                                int offset);
 static void stm32_putreg32(FAR struct stm32_lowerhalf_s *priv, int offset,
-              uint32_t value);
+                           uint32_t value);
 
 #if defined(CONFIG_DEBUG_SENSORS) && defined(CONFIG_DEBUG_INFO)
 static void stm32_dumpregs(FAR struct stm32_lowerhalf_s *priv,
-              FAR const char *msg);
+                           FAR const char *msg);
 #else
 #  define stm32_dumpregs(priv,msg)
 #endif
@@ -253,7 +253,7 @@ static int stm32_position(FAR struct qe_lowerhalf_s *lower,
                           FAR int32_t *pos);
 static int stm32_reset(FAR struct qe_lowerhalf_s *lower);
 static int stm32_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
-              unsigned long arg);
+                       unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -268,6 +268,7 @@ static const struct qe_ops_s g_qecallbacks =
   .position  = stm32_position,
   .setposmax = NULL,            /* not supported yet */
   .reset     = stm32_reset,
+  .setindex  = NULL,            /* not supported yet */
   .ioctl     = stm32_ioctl,
 };
 

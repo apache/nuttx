@@ -62,7 +62,7 @@ struct myifaddrs
  * Name: getifaddrs
  *
  * Description:
- *   The getifaddrs() function returns a link list of ifaddrs structures,
+ *   The getifaddrs() function returns a linked list of ifaddrs structures,
  *   each containing information about one of the network interfaces on the
  *   local system. The ifaddrs structure contains at least the following
  *   entries:
@@ -106,7 +106,7 @@ struct myifaddrs
  *   None
  *
  * Returned Value:
- *   On success, getifaddrs() returns pointer to the link list; on error,
+ *   On success, getifaddrs() returns pointer to the linked list; on error,
  *   NULL is returned, and errno is set to indicate the error.
  *
  ****************************************************************************/

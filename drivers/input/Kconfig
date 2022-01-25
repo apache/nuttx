@@ -671,7 +671,7 @@ config INPUT_SPQ10KBD
 if INPUT_SPQ10KBD
 
 config SPQ10KBD_DJOY
-    bool "Joystick Interface for Buttons"
+	bool "Joystick Interface for Buttons"
 	select INPUT_DJOYSTICK
 	default n
 

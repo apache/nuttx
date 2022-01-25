@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_UNISTD_UNISTD_H
-#define __LIBC_UNISTD_UNISTD_H
+#ifndef __LIBS_LIBC_UNISTD_UNISTD_H
+#define __LIBS_LIBC_UNISTD_UNISTD_H
 
 /****************************************************************************
  * Included Files
@@ -105,4 +105,4 @@ int getopt_common(int argc, FAR char * const argv[],
 }
 #endif
 
-#endif /* __LIBC_UNISTD_UNISTD_H */
+#endif /* __LIBS_LIBC_UNISTD_UNISTD_H */

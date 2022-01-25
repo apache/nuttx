@@ -105,7 +105,7 @@ static uint16_t sixlowpan_udp_chksum(FAR const struct ipv6udp_hdr_s *ipv6udp,
   /* Sum payload data. */
 
   sum = chksum(sum, buf, buflen);
-  return (sum == 0) ? 0xffff : htons(sum);
+  return (sum == 0) ? 0xffff : HTONS(sum);
 }
 #endif
 
@@ -261,7 +261,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
 
   ipv6udp.udp.srcport     = conn->lport;
   ipv6udp.udp.destport    = to6->sin6_port;
-  ipv6udp.udp.udplen      = htons(iplen);
+  ipv6udp.udp.udplen      = HTONS(iplen);
   ipv6udp.udp.udpchksum   = 0;
 
 #ifdef CONFIG_NET_UDP_CHECKSUMS

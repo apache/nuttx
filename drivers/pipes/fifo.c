@@ -41,15 +41,15 @@
 
 static const struct file_operations fifo_fops =
 {
-  pipecommon_open,  /* open */
-  pipecommon_close, /* close */
-  pipecommon_read,  /* read */
-  pipecommon_write, /* write */
-  0,                /* seek */
-  pipecommon_ioctl, /* ioctl */
-  pipecommon_poll,  /* poll */
+  pipecommon_open,     /* open */
+  pipecommon_close,    /* close */
+  pipecommon_read,     /* read */
+  pipecommon_write,    /* write */
+  NULL,                /* seek */
+  pipecommon_ioctl,    /* ioctl */
+  pipecommon_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  pipecommon_unlink /* unlink */
+  , pipecommon_unlink  /* unlink */
 #endif
 };
 

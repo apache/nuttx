@@ -138,7 +138,7 @@ void up_timer_initialize(void)
 {
   /* Attach timer interrupt handler */
 
-  irq_attach(BL602_IRQ_MTIMER, bl602_timerisr, NULL);
+  irq_attach(RISCV_IRQ_MTIMER, bl602_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 
@@ -146,5 +146,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(BL602_IRQ_MTIMER);
+  up_enable_irq(RISCV_IRQ_MTIMER);
 }

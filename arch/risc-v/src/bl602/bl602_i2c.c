@@ -754,7 +754,7 @@ static int bl602_i2c_transfer(struct i2c_master_s *dev,
         }
       else
         {
-          i2cerr("i2c transfer error, event = %d \n", priv->i2cstate);
+          i2cerr("i2c transfer error, event = %d\n", priv->i2cstate);
         }
 
       nxsem_post(&priv->sem_isr);
@@ -938,7 +938,7 @@ static int bl602_i2c_irq(int cpuint, void *context, void *arg)
     }
   else
     {
-      i2cerr("other interrupt \n");
+      i2cerr("other interrupt\n");
       priv->i2cstate = EV_I2C_UNKNOW_INT;
       bl602_i2c_callback(priv);
       return -1;

@@ -65,15 +65,14 @@ extern "C"
  *   ...  - The list of the lower half audio driver.
  *
  * Returned Value:
- *   struct audio_lowerhalf_s* on success; NULL on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  * Note
  *   The variable argument list must be NULL terminated.
  *
  ****************************************************************************/
 
-FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
-                                                    ...);
+int audio_comp_initialize(FAR const char *name, ...);
 
 #undef EXTERN
 #ifdef __cplusplus

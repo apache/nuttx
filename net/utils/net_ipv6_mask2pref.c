@@ -155,7 +155,7 @@ uint8_t net_ipv6_mask2pref(FAR const uint16_t *mask)
 
   if (i < 8)
     {
-      preflen += net_msbits16(ntohs(mask[i]));
+      preflen += net_msbits16(NTOHS(mask[i]));
     }
 
   /* Return the prefix length */

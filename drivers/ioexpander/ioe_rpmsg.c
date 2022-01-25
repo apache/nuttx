@@ -378,7 +378,8 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
   return NULL;
 }
 
-static int ioe_rpmsg_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+static int ioe_rpmsg_detach(FAR struct ioexpander_dev_s *dev,
+                            FAR void *handle)
 {
   FAR struct ioe_rpmsg_client_s *priv =
                         (struct ioe_rpmsg_client_s *)dev;

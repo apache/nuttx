@@ -177,7 +177,7 @@ static void stm32_extmemgpios(const uint16_t *gpios, int ngpios);
 
 const uint16_t fsmc_gpios[] =
 {
-  /* A16... A23.  REVIST: only A16 is used by the LCD */
+  /* A16... A23.  REVISIT: only A16 is used by the LCD */
 
   GPIO_NPS_A16, GPIO_NPS_A17, GPIO_NPS_A18, GPIO_NPS_A19, GPIO_NPS_A20,
   GPIO_NPS_A21, GPIO_NPS_A22, GPIO_NPS_A23,

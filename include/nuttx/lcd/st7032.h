@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_LEDS_ST7032_H
-#define __INCLUDE_NUTTX_LEDS_ST7032_H
+#ifndef __INCLUDE_NUTTX_LCD_ST7032_H
+#define __INCLUDE_NUTTX_LCD_ST7032_H
 
 /****************************************************************************
  * Included Files
@@ -140,4 +140,4 @@ int st7032_register(FAR const char *devpath, FAR struct i2c_master_s *i2c);
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_ST7032 */
-#endif /* __INCLUDE_NUTTX_LEDS_ST7032_H */
+#endif /* __INCLUDE_NUTTX_LCD_ST7032_H */

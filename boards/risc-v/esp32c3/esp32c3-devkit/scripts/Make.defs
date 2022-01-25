@@ -21,10 +21,14 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32c3/Config.mk
-include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
-LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+else
+  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+endif
 LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
@@ -40,10 +44,10 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -msmall-data-limit=0
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -msmall-data-limit=0
 ARCHCXXFLAGS = $(ARCHCFLAGS) -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

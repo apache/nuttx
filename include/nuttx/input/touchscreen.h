@@ -98,7 +98,7 @@
 #define TOUCH_SIZE_VALID     (1 << 6) /* Hardware provided a valid H/W contact size */
 #define TOUCH_GESTURE_VALID  (1 << 7) /* Hardware provided a valid gesture */
 
-/* These definitions for touch gesture */
+/* These are definitions for touch gesture */
 
 #define TOUCH_DOUBLE_CLICK   (0x00)
 #define TOUCH_SLIDE_UP       (0x01)

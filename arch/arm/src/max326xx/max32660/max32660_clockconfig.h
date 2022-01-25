@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ extern "C"
 }
 #endif
 
-#endif /* __ARCH_ARM_SRC_MAX326XX_MAX_32660_MAX32660_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_MAX326XX_MAX32660_MAX32660_CLOCKCONFIG_H */

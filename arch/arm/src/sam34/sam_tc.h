@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_TC_H
-#define __ARCH_ARM_SRC_SAM34_TC_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM_TC_H
+#define __ARCH_ARM_SRC_SAM34_SAM_TC_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ void sam_tcinitialize(FAR const char *devpath, int irq);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_TIMER */
-#endif /* __ARCH_ARM_SRC_SAM34_TC_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM_TC_H */

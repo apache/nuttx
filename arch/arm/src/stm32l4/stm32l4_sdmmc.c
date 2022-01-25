@@ -78,7 +78,7 @@
  *     4 SD data lines).
  *   CONFIG_SDMMC_DMAPRIO - SDMMC DMA priority.  This can be selected if
  *     CONFIG_STM32L4_SDMMC_DMA is enabled.
- *   CONFIG_CONFIG_STM32L4_SDMMC_XFRDEBUG - Enables some very low-level
+ *   CONFIG_STM32L4_SDMMC_XFRDEBUG - Enables some very low-level
  *     debug output.  This also requires CONFIG_DEBUG_FS and
  *     CONFIG_DEBUG_INFO
  */
@@ -125,7 +125,7 @@
 #endif
 
 #if !defined(CONFIG_DEBUG_FS) || !defined(CONFIG_DEBUG_FEATURES)
-#  undef CONFIG_CONFIG_STM32L4_SDMMC_XFRDEBUG
+#  undef CONFIG_STM32L4_SDMMC_XFRDEBUG
 #endif
 
 /* Friendly CLKCR bit re-definitions ****************************************/

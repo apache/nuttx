@@ -550,22 +550,22 @@ config SAMD5E5_WDT
 	default n
 
 menuconfig SAMD5E5_PROGMEM
-        bool "FLASH program memory"
-        default n
-        select ARCH_HAVE_PROGMEM
-        ---help---
-                Enable support FLASH interfaces as defined in include/nuttx/progmem.h
+	bool "FLASH program memory"
+	default n
+	select ARCH_HAVE_PROGMEM
+	---help---
+		Enable support FLASH interfaces as defined in include/nuttx/progmem.h
 
 if SAMD5E5_PROGMEM
 
 config SAMD5E5_PROGMEM_NSECTORS
-        int "Number of 32Kbytes sectors"
-        default 2
-        range 1 32
-        ---help---
-                This is the number of 32Kbytes FLASH sectors at the end of the program
-                flash memory that will be reserved for use with by the interfaces
-                prototyped in include/nuttx/progmem.h
+	int "Number of 32Kbytes sectors"
+	default 2
+	range 1 32
+	---help---
+		This is the number of 32Kbytes FLASH sectors at the end of the program
+		flash memory that will be reserved for use with by the interfaces
+		prototyped in include/nuttx/progmem.h
 
 endif # SAMD5E5_PROGMEM
 

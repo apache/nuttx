@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562xx_RCC_H
-#define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562xx_RCC_H
+#ifndef __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_RCC_H
+#define __ARCH_ARM_SRC_STM32L5_HARDWARE_STM32L562XX_RCC_H
 
 /****************************************************************************
  * Included Files

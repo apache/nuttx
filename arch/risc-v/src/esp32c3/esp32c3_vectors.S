@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/rv32im/irq.h>
+#include <arch/irq.h>
 #include <arch/esp32c3/irq.h>
 
 #include "chip.h"

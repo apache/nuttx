@@ -36,6 +36,21 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Initializers */
+
+#ifdef CONFIG_PRIORITY_INHERITANCE
+# if CONFIG_SEM_PREALLOCHOLDERS > 0
+#  define NXSEM_INITIALIZER(c, f) \
+    {(c), (f), NULL}                    /* semcount, flags, hhead */
+# else
+#  define NXSEM_INITIALIZER(c, f) \
+    {(c), (f), {{NULL, 0}, {NULL, 0}}}  /* semcount, flags, holder[2] */
+# endif
+#else /* CONFIG_PRIORITY_INHERITANCE */
+#  define NXSEM_INITIALIZER(c, f) \
+    {(c)}                               /* semcount, flags */
+#endif /* CONFIG_PRIORITY_INHERITANCE */
+
 /* Most internal nxsem_* interfaces are not available in the user space in
  * PROTECTED and KERNEL builds.  In that context, the application semaphore
  * interfaces must be used.  The differences between the two sets of

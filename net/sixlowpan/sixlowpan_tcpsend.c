@@ -52,7 +52,7 @@
 
 /* Buffer access helpers */
 
-#define TCPBUF(dev)   ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
+#define TCPBUF(dev) ((FAR struct tcp_hdr_s *)(&(dev)->d_buf[IPv6_HDRLEN]))
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -156,7 +156,7 @@ static uint16_t sixlowpan_tcp_chksum(FAR const struct ipv6tcp_hdr_s *ipv6tcp,
   /* Sum payload data. */
 
   sum = chksum(sum, buf, buflen);
-  return (sum == 0) ? 0xffff : htons(sum);
+  return (sum == 0) ? 0xffff : HTONS(sum);
 }
 
 /****************************************************************************

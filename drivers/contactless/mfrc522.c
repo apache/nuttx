@@ -108,15 +108,15 @@ static inline int mfrc522_attachirq(FAR struct mfrc522_dev_s *dev,
 
 static const struct file_operations g_mfrc522fops =
 {
-  mfrc522_open,
-  mfrc522_close,
-  mfrc522_read,
-  mfrc522_write,
-  NULL,
-  mfrc522_ioctl,
-  NULL
+  mfrc522_open,   /* open */
+  mfrc522_close,  /* close */
+  mfrc522_read,   /* read */
+  mfrc522_write,  /* write */
+  NULL,           /* seek */
+  mfrc522_ioctl,  /* ioctl */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL          /* unlink */
 #endif
 };
 

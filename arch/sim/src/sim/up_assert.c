@@ -28,6 +28,10 @@
 #include <stdlib.h>
 #include <nuttx/syslog/syslog.h>
 
+#ifdef CONFIG_BOARD_CRASHDUMP
+#  include <nuttx/board.h>
+#endif
+
 #include "up_internal.h"
 
 /****************************************************************************

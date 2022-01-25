@@ -33,11 +33,7 @@
  * Public Data
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 volatile void *g_current_regs[CONFIG_SMP_NCPUS];
-#else
-volatile void *g_current_regs[1];
-#endif
 
 /****************************************************************************
  * Private Types

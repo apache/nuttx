@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7M_MPU_H
-#define __ARCH_ARM_SRC_ARMV7M_MPU_H
+#ifndef __ARCH_ARM_SRC_ARMV7_M_MPU_H
+#define __ARCH_ARM_SRC_ARMV7_M_MPU_H
 
 /****************************************************************************
  * Included Files
@@ -131,6 +131,36 @@
 #    define MPU_RASR_AP_RONO    (5 << MPU_RASR_AP_SHIFT)  /* P:RO   U:None */
 #    define MPU_RASR_AP_RORO    (6 << MPU_RASR_AP_SHIFT)  /* P:RO   U:RO   */
 #  define MPU_RASR_XN           (1 << 28)                 /* Bit 28: Instruction access disable */
+
+/****************************************************************************
+ * Name: mpu_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled during
+ *   MPU initialization.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MPU_RESET)
+void mpu_reset(void);
+#else
+#  define mpu_reset() do { } while (0)
+#endif
+
+/****************************************************************************
+ * Name: mpu_early_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled immediately
+ *   after reset.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARM_MPU_EARLY_RESET)
+void mpu_early_reset(void);
+#else
+#  define mpu_early_reset() do { } while (0)
+#endif
 
 #ifdef CONFIG_ARM_MPU
 
@@ -443,4 +473,4 @@ void mpu_configure_region(uintptr_t base, size_t size,
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ARM_MPU */
-#endif /* __ARCH_ARM_SRC_ARMV7M_MPU_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_M_MPU_H */

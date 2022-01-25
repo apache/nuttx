@@ -117,7 +117,6 @@ int bchlib_setup(const char *blkdev, bool readonly, FAR void **handle)
 #else
   bch->buffer = kmm_malloc(bch->sectsize);
 #endif
-
   if (!bch->buffer)
     {
       ferr("ERROR: Failed to allocate sector buffer\n");

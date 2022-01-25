@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_SAMV7_CONFIG_H
-#define __ARCH_ARM_SRC_SAMV7_SAMV7_CONFIG_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_CONFIG_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -330,4 +330,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_SAMV7_SAMV7_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_CONFIG_H */

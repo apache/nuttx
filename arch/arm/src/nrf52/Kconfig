@@ -244,8 +244,8 @@ config NRF52_PWM3
 	default n
 
 config NRF52_PPI
-  bool "PPI"
-  default n
+	bool "PPI"
+	default n
 
 config NRF52_RTC0
 	bool "RTC0"
@@ -281,19 +281,19 @@ endmenu # NRF52 Peripheral Selection
 menu "Clock Configuration"
 
 config NRF52_HFCLK_XTAL
-  bool "Enable HFCLK from external crystal"
-  default n
-  ---help---
-    If the board includes an external high-frequency crystal, enable this
-    option to supply the HFCLK. If this option is disabled, the internal
-    oscillator will be used.
-    Note that the RADIO peripheral requires the HFCLK to be used.
+	bool "Enable HFCLK from external crystal"
+	default n
+	---help---
+		If the board includes an external high-frequency crystal, enable this
+		option to supply the HFCLK. If this option is disabled, the internal
+		oscillator will be used.
+		Note that the RADIO peripheral requires the HFCLK to be used.
 
 config NRF52_USE_LFCLK
-  bool "Enable LFCLK"
-  default n
-  ---help---
-    Enable low-frequency clock.
+	bool "Enable LFCLK"
+	default n
+	---help---
+		Enable low-frequency clock.
 
 if NRF52_USE_LFCLK
 
@@ -308,7 +308,7 @@ config NRF52_LFCLK_RC
 	bool "Internal RC oscillator"
 
 config NRF52_LFCLK_SYNTH
-  bool "Synthesized from HFCLK"
+	bool "Synthesized from HFCLK"
 
 endchoice
 
@@ -319,61 +319,61 @@ endmenu # Clock Configuration
 menu "System Timer"
 
 config NRF52_SYSTIMER
-  bool
-  default y
+	bool
+	default y
 
 choice
-  prompt "System Timer Source"
-  default NRF52_SYSTIMER_SYSTICK
-  ---help---
-    Choose which hardware resource will drive NuttX
-    system time
+	prompt "System Timer Source"
+	default NRF52_SYSTIMER_SYSTICK
+	---help---
+		Choose which hardware resource will drive NuttX
+		system time
 
 config NRF52_SYSTIMER_SYSTICK
-  bool "SysTick"
-  select TIMER_ARCH
-  select TIMER
-  select ARMV7M_SYSTICK
-  ---help---
-    Use ARM SysTick. It can be used for tickless and
-    non-tickless mode.
+	bool "SysTick"
+	select TIMER_ARCH
+	select TIMER
+	select ARMV7M_SYSTICK
+	---help---
+		Use ARM SysTick. It can be used for tickless and
+		non-tickless mode.
 
-    NOTE: nRF52 implementation of WFE/WFI involves is
-    incompatible with SysTick. This means that if
-    you choose this option, WFE/WFI will not be used
-    in idle loop.
+		NOTE: nRF52 implementation of WFE/WFI involves is
+		incompatible with SysTick. This means that if
+		you choose this option, WFE/WFI will not be used
+		in idle loop.
 
 config NRF52_SYSTIMER_RTC
-  bool "RTC"
-  select NRF52_RTC
-  select SCHED_TICKLESS
-  select SCHED_TICKLESS_ALARM
-  select NRF52_USE_LFCLK
-  ---help---
-    Use RTC timer in tickless mode.
+	bool "RTC"
+	select NRF52_RTC
+	select SCHED_TICKLESS
+	select SCHED_TICKLESS_ALARM
+	select NRF52_USE_LFCLK
+	---help---
+		Use RTC timer in tickless mode.
 
 endchoice
 
 if NRF52_SYSTIMER_RTC
 
 config NRF52_SYSTIMER_RTC_INSTANCE
-  int "RTC timer instance"
-  default 0 if !NRF52_SOFTDEVICE_CONTROLLER
-  default 1 if NRF52_SOFTDEVICE_CONTROLLER
-  range 0 2
-  ---help---
-    Which RTC instance to use to drive the system timer
+	int "RTC timer instance"
+	default 0 if !NRF52_SOFTDEVICE_CONTROLLER
+	default 1 if NRF52_SOFTDEVICE_CONTROLLER
+	range 0 2
+	---help---
+		Which RTC instance to use to drive the system timer
 
 endif
 
 endmenu # System Timer
 
 config NRF52_DCDC
-  bool "Enable DC/DC regulator"
-  default n
-  ---help---
-    This option enables the DC/DC regulator, which reduces
-    current consumption. This requires extra circuitry (inductors).
+	bool "Enable DC/DC regulator"
+	default n
+	---help---
+		This option enables the DC/DC regulator, which reduces
+		current consumption. This requires extra circuitry (inductors).
 
 config NRF52_FLASH_PREFETCH
 	bool "Enable FLASH Pre-fetch"
@@ -567,16 +567,16 @@ menu "SAADC Configuration"
 if NRF52_SAADC
 
 choice
-  prompt "SAADC trigger selection"
-  default NRF52_SAADC_TASK
-  ---help---
-    Choose mode for sample rate control
+	prompt "SAADC trigger selection"
+	default NRF52_SAADC_TASK
+	---help---
+		Choose mode for sample rate control
 
 config NRF52_SAADC_TASK
-  bool "SAADC Task trigger"
+	bool "SAADC Task trigger"
 
 config NRF52_SAADC_TIMER
-  bool "SAADC Timer trigger"
+	bool "SAADC Timer trigger"
 
 endchoice # SAADC trigger selection
 
@@ -661,8 +661,10 @@ endmenu
 
 menuconfig NRF52_SOFTDEVICE_CONTROLLER
 	bool "SoftDevice Controller"
-	select CONFIG_ARMV7M_USEBASEPRI
-	select CONFIG_ARCH_RAMVECTORS
+	depends on ALLOW_BSDNORDIC_COMPONENTS
+	select ARMV7M_USEBASEPRI
+	select ARCH_RAMVECTORS
+	select ARCH_IRQPRIO
 	select NRF52_USE_LFCLK
 	select NRF52_LFCLK_XTAL
 	---help---
@@ -709,7 +711,8 @@ config NRF52_SDC_LE_2M_PHY
 
 config NRF52_SDC_LE_CODED_PHY
 	bool "Support LE Coded PHY"
-	default y
+	default n if ARCH_CHIP_NRF52832
+	default y if ARCH_CHIP_NRF52840
 
 config NRF52_SDC_DLE
 	bool "Support Data Length Extension (DLE)"
@@ -723,5 +726,19 @@ config NRF52_SDC_VERSION
 		The softdevice version to use. This depends on the particular chip
 		to use. See official Nordic documentation on which chips are supported
 		in each version.
+
+config NRF52_BLE_TTY_NAME
+	string "BLE TTY device name"
+	default "/dev/ttyHCI0"
+	depends on UART_BTH4
+
+config NRF52_SDC_FICR_STATIC_ADDR
+	bool "Configure factory generated static random address"
+	default n
+
+config NRF52_SDC_PUB_ADDR
+	hex "Configure BT public address"
+	default 0x0000000000
+
 endif
 

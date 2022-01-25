@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_MEMORYMAP_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_MEMORYMAP_H
 
 /****************************************************************************
  * Included Files
@@ -141,4 +141,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_MEMORYMAP_H */

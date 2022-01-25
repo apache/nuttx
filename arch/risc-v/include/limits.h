@@ -54,7 +54,7 @@
 
 /* These change on 32-bit and 64-bit platforms */
 
-#if defined(CONFIG_ARCH_RV32IM) || defined(CONFIG_ARCH_RV32I)
+#if defined(CONFIG_ARCH_RV32)
 
 #define LONG_MIN    (-LONG_MAX - 1)
 #define LONG_MAX    2147483647L
@@ -70,9 +70,9 @@
 #define PTR_MAX     2147483647
 #define UPTR_MAX    4294967295U
 
-#endif /* defined(CONFIG_ARCH_32IM) || defined(CONFIG_ARCH_32I) */
+#endif /* defined(CONFIG_ARCH_RV32) */
 
-#if defined(CONFIG_ARCH_RV64GC)
+#if defined(CONFIG_ARCH_RV64)
 
 #define LONG_MIN    (-LONG_MAX - 1)
 #define LONG_MAX    9223372036854775807L

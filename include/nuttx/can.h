@@ -18,12 +18,14 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_CAN_CAN_H
-#define __INCLUDE_NUTTX_CAN_CAN_H
+#ifndef __INCLUDE_NUTTX_CAN_H
+#define __INCLUDE_NUTTX_CAN_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
+
+#include <nuttx/config.h>
 
 #ifdef CONFIG_CAN_TXREADY
 #  include <nuttx/wqueue.h>
@@ -206,6 +208,83 @@
 
 #define CAN_INV_FILTER     0x20000000U /* to be set in can_filter.can_id */
 
+/* CAN Error Indications ****************************************************/
+
+#ifdef CONFIG_NET_CAN_ERRORS
+
+/* Error class in can_id */
+
+#  define CAN_ERR_TXTIMEOUT        (1 << 0) /* Bit 0: TX timeout */
+#  define CAN_ERR_LOSTARB          (1 << 1) /* Bit 1: Lost arbitration (See CAN_ERR_LOSTARB_* definitions) */
+#  define CAN_ERR_CTRL             (1 << 2) /* Bit 2: Controller error (See CAN_ERR_CTRL_* definitions) */
+#  define CAN_ERR_PROT             (1 << 3) /* Bit 3: Protocol error (see CAN_ERR_PROT_* definitions) */
+#  define CAN_ERR_TRX              (1 << 4) /* Bit 4: Transceiver error (See CAN_TRX_* definitions)    */
+#  define CAN_ERR_ACK              (1 << 5) /* Bit 5: No ACK received on transmission */
+#  define CAN_ERR_BUSOFF           (1 << 6) /* Bit 6: Bus off */
+#  define CAN_ERR_BUSERROR         (1 << 7) /* Bit 7: Bus error */
+#  define CAN_ERR_RESTARTED        (1 << 8) /* Bit 8: Controller restarted */
+
+/* The remaining definitions described the error report payload that follows
+ * the CAN header.
+ */
+
+#  define CAN_ERR_DLC              (8)      /* DLC of error report */
+
+/* Data[0]: Arbitration lost in ch_error. */
+
+#  define CAN_ERR_LOSTARB_UNSPEC   0x00     /* Unspecified error */
+#  define CAN_ERR_LOSTARB_BIT(n)   (n)      /* Bit number in the bit stream */
+
+/* Data[1]:  Error status of CAN-controller */
+
+#  define CAN_ERR_CTRL_UNSPEC      0x00     /* Unspecified error */
+#  define CAN_ERR_CTRL_RX_OVERFLOW (1 << 0) /* Bit 0: RX buffer overflow */
+#  define CAN_ERR_CTRL_TX_OVERFLOW (1 << 1) /* Bit 1: TX buffer overflow */
+#  define CAN_ERR_CTRL_RX_WARNING  (1 << 2) /* Bit 2: Reached warning level for RX errors */
+#  define CAN_ERR_CTRL_TX_WARNING  (1 << 3) /* Bit 3: Reached warning level for TX errors */
+#  define CAN_ERR_CTRL_RX_PASSIVE  (1 << 4) /* Bit 4: Reached passive level for RX errors */
+#  define CAN_ERR_CTRL_TX_PASSIVE  (1 << 5) /* Bit 5: Reached passive level for TX errors */
+
+/* Data[2]:  Error in CAN protocol.  This provides the type of the error. */
+
+#  define CAN_ERR_PROT_UNSPEC      0x00     /* Unspecified error */
+#  define CAN_ERR_PROT_BIT         (1 << 0) /* Bit 0: Single bit error */
+#  define CAN_ERR_PROT_FORM        (1 << 1) /* Bit 1: Frame format error */
+#  define CAN_ERR_PROT_STUFF       (1 << 2) /* Bit 2: Bit stuffing error */
+#  define CAN_ERR_PROT_BIT0        (1 << 3) /* Bit 3: Unable to send dominant bit */
+#  define CAN_ERR_PROT_BIT1        (1 << 4) /* Bit 4: Unable to send recessive bit */
+#  define CAN_ERR_PROT_OVERLOAD    (1 << 5) /* Bit 5: Bus overload */
+#  define CAN_ERR_PROT_ACTIVE      (1 << 6) /* Bit 6: Active error announcement */
+#  define CAN_ERR_PROT_TX          (1 << 7) /* Bit 7: Error occurred on transmission */
+
+/* Data[3]:  Error in CAN protocol.  This provides the loation of the error */
+
+#  define CAN_ERR_PROT_LOC_UNSPEC  0x00 /* Unspecified error */
+#  define CAN_ERR_PROT_LOC_SOF     0x01 /* start of frame */
+#  define CAN_ERR_PROT_LOC_ID0     0x02 /* ID bits 0-4 */
+#  define CAN_ERR_PROT_LOC_ID1     0x03 /* ID bits 5-12 */
+#  define CAN_ERR_PROT_LOC_ID2     0x04 /* ID bits 13-17 */
+#  define CAN_ERR_PROT_LOC_ID3     0x05 /* ID bits 21-28 */
+#  define CAN_ERR_PROT_LOC_ID4     0x06 /* ID bits 18-20 */
+#  define CAN_ERR_PROT_LOC_IDE     0x07 /* Identifier extension */
+#  define CAN_ERR_PROT_LOC_RTR     0x08 /* RTR */
+#  define CAN_ERR_PROT_LOC_SRTR    0x09 /* Substitute RTR */
+#  define CAN_ERR_PROT_LOC_RES0    0x0a /* Reserved bit 0 */
+#  define CAN_ERR_PROT_LOC_RES1    0x0b /* Reserved bit 1 */
+#  define CAN_ERR_PROT_LOC_DLC     0x0c /* Data length code */
+#  define CAN_ERR_PROT_LOC_DATA    0x0d /* Data section */
+#  define CAN_ERR_PROT_LOC_CRCSEQ  0x0e /* CRC sequence */
+#  define CAN_ERR_PROT_LOC_CRCDEL  0x0f /* CRC delimiter */
+#  define CAN_ERR_PROT_LOC_ACK     0x10 /* ACK slot */
+#  define CAN_ERR_PROT_LOC_ACKDEL  0x11 /* ACK delimiter */
+#  define CAN_ERR_PROT_LOC_EOF     0x12 /* End of frame */
+#  define CAN_ERR_PROT_LOC_INTERM  0x13 /* Intermission */
+
+/* Data[4]: Error status of CAN-transceiver */
+
+#  define CAN_ERR_TRX_UNSPEC       0x00     /* Unspecified error */
+#endif /* CONFIG_NET_CAN_ERRORS */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -223,7 +302,7 @@ typedef uint32_t canid_t;
 
 /* Controller Area Network Error Message Frame Mask structure
  *
- * bit 0-28  : error class mask (see include/uapi/linux/can/error.h)
+ * bit 0-28  : error class mask
  * bit 29-31 : set to zero
  */
 
@@ -307,4 +386,4 @@ extern "C"
 #endif
 
 #endif /* CONFIG_CAN */
-#endif /* __INCLUDE_NUTTX_CAN_CAN_H */
+#endif /* __INCLUDE_NUTTX_CAN_H */

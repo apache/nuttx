@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_IOC_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_IOC_H
 
 /****************************************************************************
  * Included Files
@@ -246,4 +246,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X20_CC26X2CC13X20_CC26X2IOC_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_IOC_H */

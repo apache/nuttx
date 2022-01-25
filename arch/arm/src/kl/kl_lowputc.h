@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KL_KINETIS_LOWPUTC_H
-#define __ARCH_ARM_SRC_KL_KINETIS_LOWPUTC_H
+#ifndef __ARCH_ARM_SRC_KL_KL_LOWPUTC_H
+#define __ARCH_ARM_SRC_KL_KL_LOWPUTC_H
 
 /****************************************************************************
  * Included Files
@@ -110,4 +110,4 @@ void kl_uartconfigure(uintptr_t uart_base, uint32_t baud, uint32_t clock,
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_KL_KINETIS_LOWPUTC_H */
+#endif /* __ARCH_ARM_SRC_KL_KL_LOWPUTC_H */

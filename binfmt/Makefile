@@ -46,10 +46,10 @@ endif
 include libnxflat/Make.defs
 include libelf/Make.defs
 
-AOBJS = $(BINFMT_ASRCS:.S=$(OBJEXT))
+AOBJS = $(ASRCS:.S=$(OBJEXT))
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
-SRCS = $(BINFMT_ASRCS) $(CSRCS)
+SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
 BIN = libbinfmt$(LIBEXT)
@@ -64,9 +64,9 @@ $(COBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
 $(BIN): $(OBJS)
-	$(call ARCHIVE, $@, $^)
+	$(call ARCHIVE, $@, $(OBJS))
 
-makedepfile: $(CSRCS:.c=.ddc) $(BINFMT_ASRCS:.S=.dds)
+makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
 	$(call DELFILE, $^)
 

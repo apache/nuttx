@@ -257,8 +257,8 @@
  * header.
  */
 
-#define ETHBUF       ((struct eth_hdr_s *)priv->eth_dev.d_buf)
-#define ETH8021QWBUF ((struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
+#define ETHBUF       ((FAR struct eth_hdr_s *)priv->eth_dev.d_buf)
+#define ETH8021QWBUF ((FAR struct eth_8021qhdr_s *)priv->eth_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -1005,7 +1005,7 @@ static void lpc54_eth_rxdispatch(struct lpc54_ethdriver_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (ETHBUF->type == htons(ETHTYPE_ARP))
+  if (ETHBUF->type == HTONS(ETHTYPE_ARP))
     {
       struct lpc54_txring_s *txring;
       unsigned int chan;

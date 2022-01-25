@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_MODLIB_MODLIB_H
-#define __LIBC_MODLIB_MODLIB_H
+#ifndef __LIBS_LIBC_MODLIB_MODLIB_H
+#define __LIBS_LIBC_MODLIB_MODLIB_H
 
 /****************************************************************************
  * Included Files
@@ -189,4 +189,4 @@ int modlib_reallocbuffer(FAR struct mod_loadinfo_s *loadinfo,
 
 int modlib_freebuffers(FAR struct mod_loadinfo_s *loadinfo);
 
-#endif /* __LIBC_MODLIB_MODLIB_H */
+#endif /* __LIBS_LIBC_MODLIB_MODLIB_H */

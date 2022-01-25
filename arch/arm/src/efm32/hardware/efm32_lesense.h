@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LESENSE_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LESENSE_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LESENSE_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LESENSE_H
 
 /****************************************************************************
  * Included Files
@@ -2158,4 +2158,4 @@
 #define _LESENSE_CH_EVAL_SCANRESINV_DEFAULT            0x00000000UL                                /* Mode DEFAULT for LESENSE_CH_EVAL */
 #define LESENSE_CH_EVAL_SCANRESINV_DEFAULT             (_LESENSE_CH_EVAL_SCANRESINV_DEFAULT << 19) /* Shifted mode DEFAULT for LESENSE_CH_EVAL */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LESENSE_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LESENSE_H */

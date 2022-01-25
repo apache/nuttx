@@ -54,10 +54,12 @@ struct regulator_s
 
 struct regulator_ops_s
 {
-  CODE int (*list_voltage)(FAR struct regulator_dev_s *rdev, unsigned selector);
+  CODE int (*list_voltage)(FAR struct regulator_dev_s *rdev,
+                           unsigned selector);
   CODE int (*set_voltage)(FAR struct regulator_dev_s *rdev, int min_uv,
                           int max_uv, FAR unsigned *selector);
-  CODE int (*set_voltage_sel)(FAR struct regulator_dev_s *rdev, unsigned selector);
+  CODE int (*set_voltage_sel)(FAR struct regulator_dev_s *rdev,
+                              unsigned selector);
   CODE int (*get_voltage)(FAR struct regulator_dev_s *rdev);
   CODE int (*get_voltage_sel)(FAR struct regulator_dev_s *rdev);
   CODE int (*enable)(FAR struct regulator_dev_s *rdev);
@@ -131,9 +133,10 @@ extern "C"
  *
  ****************************************************************************/
 
-struct regulator_dev_s *regulator_register(FAR const struct regulator_desc_s *desc,
-                                           FAR const struct regulator_ops_s *ops,
-                                           FAR void *priv);
+struct regulator_dev_s *
+regulator_register(FAR const struct regulator_desc_s *desc,
+                   FAR const struct regulator_ops_s *ops,
+                   FAR void *priv);
 
 /****************************************************************************
  * Name: regulator_unregister

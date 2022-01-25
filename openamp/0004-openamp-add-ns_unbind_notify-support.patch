@@ -1,0 +1,44 @@
+From 03217b06dfc9fd23b33401cec689cfdbe373770d Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Tue, 20 Jul 2021 17:52:13 +0800
+Subject: [PATCH] openamp: add ns_unbind_notify support
+
+neededby:826344
+This is for notify rdev unbind event
+
+Change-Id: Ie4301e8b774158baf8aa1299f8eb6748dd09b1d9
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+(cherry picked from commit 85818f5857d340635e81680a98924f2bb715c97f)
+---
+ lib/include/openamp/rpmsg.h | 1 +
+ lib/rpmsg/rpmsg_virtio.c    | 2 ++
+ 2 files changed, 3 insertions(+)
+
+diff --git a/lib/include/openamp/rpmsg.h open-amp/lib/include/openamp/rpmsg.h
+index 93aeec6..4ebb141 100644
+--- a/lib/include/openamp/rpmsg.h
++++ open-amp/lib/include/openamp/rpmsg.h
+@@ -129,6 +129,7 @@ struct rpmsg_device {
+ 	unsigned long bitmap[metal_bitmap_longs(RPMSG_ADDR_BMP_SIZE)];
+ 	metal_mutex_t lock;
+ 	rpmsg_ns_bind_cb ns_bind_cb;
++	rpmsg_ns_bind_cb ns_unbind_cb;
+ 	struct rpmsg_device_ops ops;
+ 	bool support_ns;
+ 	bool support_ack;
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 51c2565..2687320 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -553,6 +553,8 @@ static int rpmsg_virtio_ns_callback(struct rpmsg_endpoint *ept, void *data,
+ 		metal_mutex_release(&rdev->lock);
+ 		if (_ept && _ept->ns_unbind_cb)
+ 			_ept->ns_unbind_cb(_ept);
++		if (rdev->ns_unbind_cb)
++			rdev->ns_unbind_cb(rdev, name, dest);
+ 	} else if (ns_msg->flags == RPMSG_NS_CREATE) {
+ 		if (!_ept) {
+ 			/*
+-- 
+2.25.1
+

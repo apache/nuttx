@@ -992,6 +992,20 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
       return totalsize;
     }
 
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Parent:", group->tg_ppid);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                             remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                "%-12s0x%02x\n",
                                "Flags:", group->tg_flags);

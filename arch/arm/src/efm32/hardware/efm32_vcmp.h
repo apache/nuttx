@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_VCMP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_VCMP_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_VCMP_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_VCMP_H
 
 /****************************************************************************
  * Included Files
@@ -253,4 +253,4 @@
 #define _VCMP_IFC_WARMUP_DEFAULT            0x00000000UL                    /* Mode DEFAULT for VCMP_IFC */
 #define VCMP_IFC_WARMUP_DEFAULT             (_VCMP_IFC_WARMUP_DEFAULT << 1) /* Shifted mode DEFAULT for VCMP_IFC */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_VCMP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_VCMP_H */

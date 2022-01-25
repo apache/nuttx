@@ -476,7 +476,7 @@ if (ARCH_PHY_100BASE_T1)
 choice
 	prompt "Automotive Ethernet 100BASE-T1 master/slave mode"
 	default PHY_100BASE_T1_SLAVE
-    ---help---
+	---help---
 		Automotive Ethernet 100BASE-T1 requires the PHY to be configured
 		in either master or slave mode.
 

@@ -41,6 +41,10 @@ ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43438),y)
 CSRCS += bcmf_chip_43438.c
 endif
 
+ifeq ($(CONFIG_IEEE80211_BROADCOM_BCM43455),y)
+CSRCS += bcmf_chip_43455.c
+endif
+
 # Include BCM43xxx build support
 
 DEPPATH += --dep-path wireless$(DELIM)ieee80211$(DELIM)bcm43xxx

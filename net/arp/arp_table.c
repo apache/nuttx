@@ -415,6 +415,7 @@ void arp_delete(in_addr_t ipaddr)
 void arp_cleanup(FAR struct net_driver_s *dev)
 {
   int i;
+
   for (i = 0; i < CONFIG_NET_ARPTAB_SIZE; ++i)
     {
       if (dev == g_arptable[i].at_dev)

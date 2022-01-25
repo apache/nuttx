@@ -28,6 +28,7 @@
 #include <debug.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/i2c/i2c_master.h>
@@ -78,8 +79,8 @@ struct isl29023_dev_s
   FAR struct i2c_master_s *i2c;
   uint8_t addr;                   /* Address on the I2C bus */
   uint8_t op_mode;                /* Defined by isl29023_operational_mode_e */
-  uint32_t resolution;            /* Sensor ADC res. 16..65536 */
-  uint32_t range;                 /* Sensor range 1000..64000 */
+  uint32_t resolution;            /* Sensor ADC res in counts (16..65536) */
+  uint32_t range;                 /* Sensor range (1000..64000) */
 };
 
 /****************************************************************************
@@ -129,6 +130,9 @@ static const struct file_operations g_isl29023fops =
   NULL,            /* seek */
   isl29023_ioctl,  /* ioctl */
   NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -179,7 +183,7 @@ static int isl29023_i2c_read(FAR struct isl29023_dev_s *dev,
 
   /* Setup for the transfer */
 
-  msg.frequency = CONFIG_LM75_I2C_FREQUENCY,
+  msg.frequency = CONFIG_ISL29023_I2C_FREQUENCY,
   msg.addr      = dev->addr,
   msg.flags     = I2C_M_READ;
   msg.buffer    = buffer;
@@ -344,7 +348,7 @@ static int isl29023_set_op_mode(FAR struct isl29023_dev_s *dev, uint8_t mode)
   buffer[0] = ISL29023_COMMAND_1;
 
   dev->op_mode = mode;
-  sninfo("mode: %x\n", dev->mode);
+  sninfo("mode: %x\n", dev->op_mode);
 
   return isl29023_i2c_write(dev, buffer, 2);
 }
@@ -377,7 +381,7 @@ static int isl29023_set_resolution(FAR struct isl29023_dev_s *dev,
   buffer[0] = ISL29023_COMMAND_2;
 
   dev->resolution = 1u << (16u - res_mode * 4u);
-  sninfo("resolution: %d\n", dev->resolution);
+  sninfo("resolution: %" PRIu32 "\n", dev->resolution);
 
   return isl29023_i2c_write(dev, buffer, 2);
 }
@@ -410,7 +414,7 @@ static int isl29023_set_range(FAR struct isl29023_dev_s *dev,
   buffer[0] = ISL29023_COMMAND_2;
 
   dev->range = 1000u * (1u << range_mode) * (1u << range_mode);
-  sninfo("range: %u\n", dev->range);
+  sninfo("range: %" PRIu32 "\n", dev->range);
 
   return isl29023_i2c_write(dev, buffer, 2);
 }

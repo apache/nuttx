@@ -59,6 +59,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Used in spiflash_cachestate_s structure even when SMP is disabled. */
+
 #define SPI_FLASH_WRITE_BUF_SIZE    (32)
 #define SPI_FLASH_READ_BUF_SIZE     (64)
 
@@ -161,8 +163,11 @@ struct spiflash_map_req
 struct spiflash_cachestate_s
 {
   int cpu;
+#ifdef CONFIG_SMP
+  int other;
+#endif
   irqstate_t flags;
-  uint32_t val[2];
+  uint32_t val[CONFIG_SMP_NCPUS];
 };
 
 /****************************************************************************
@@ -405,25 +410,23 @@ static inline void spi_reset_regbits(struct esp32_spiflash_s *priv,
 static inline void IRAM_ATTR
   esp32_spiflash_opstart(struct spiflash_cachestate_s *state)
 {
-#ifdef CONFIG_SMP
-  int other;
-#endif
-
   state->flags = enter_critical_section();
 
   state->cpu = up_cpu_index();
 #ifdef CONFIG_SMP
-  other = state->cpu ? 0 : 1;
+  state->other = state->cpu ? 0 : 1;
 #endif
 
   DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
 #ifdef CONFIG_SMP
-  DEBUGASSERT(other == 0 || other == 1);
+  DEBUGASSERT(state->other == 0 || state->other == 1);
+  DEBUGASSERT(state->other != state->cpu);
+  up_cpu_pause(state->other);
 #endif
 
   spi_disable_cache(state->cpu, &state->val[state->cpu]);
 #ifdef CONFIG_SMP
-  spi_disable_cache(other, &state->val[other]);
+  spi_disable_cache(state->other, &state->val[state->other]);
 #endif
 }
 
@@ -438,22 +441,16 @@ static inline void IRAM_ATTR
 static inline void IRAM_ATTR
   esp32_spiflash_opdone(const struct spiflash_cachestate_s *state)
 {
-#ifdef CONFIG_SMP
-  int other;
-#endif
-
-#ifdef CONFIG_SMP
-  other = state->cpu ? 0 : 1;
-#endif
-
   DEBUGASSERT(state->cpu == 0 || state->cpu == 1);
 #ifdef CONFIG_SMP
-  DEBUGASSERT(other == 0 || other == 1);
+  DEBUGASSERT(state->other == 0 || state->other == 1);
+  DEBUGASSERT(state->other != state->cpu);
 #endif
 
   spi_enable_cache(state->cpu, state->val[state->cpu]);
 #ifdef CONFIG_SMP
-  spi_enable_cache(other, state->val[other]);
+  spi_enable_cache(state->other, state->val[state->other]);
+  up_cpu_resume(state->other);
 #endif
 
   leave_critical_section(state->flags);
@@ -1343,7 +1340,7 @@ static int IRAM_ATTR esp32_mmap(struct esp32_spiflash_s *priv,
     }
 
   flash_page = MMU_ADDR2PAGE(req->src_addr);
-  page_cnt = MMU_BYTES2PAGES(req->size);
+  page_cnt = MMU_BYTES2PAGES(MMU_ADDR2OFF(req->src_addr) + req->size);
 
   if (start_page + page_cnt < DROM0_PAGES_END)
     {
@@ -1907,7 +1904,7 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
   int ret = -EINVAL;
   struct esp32_spiflash_s *priv = MTD2PRIV(dev);
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {
@@ -1973,25 +1970,35 @@ static int esp32_ioctl(struct mtd_dev_s *dev, int cmd,
  * Input Parameters:
  *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
  *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
  *
  * Returned Value:
- *   ESP32 SPI Flash MTD data pointer if success or NULL if fail
+ *   ESP32 SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
 struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                   uint32_t mtd_size)
+                                               uint32_t mtd_size,
+                                               bool encrypted)
 {
-  struct esp32_spiflash_s *priv = &g_esp32_spiflash1;
-  esp32_spiflash_chip_t *chip = priv->chip;
+  struct esp32_spiflash_s *priv;
+  esp32_spiflash_chip_t *chip;
   struct mtd_dev_s *mtd_part;
   uint32_t blocks;
   uint32_t startblock;
   uint32_t size;
 
-  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
-  ASSERT((mtd_offset % chip->sector_size) == 0);
-  ASSERT((mtd_size % chip->sector_size) == 0);
+  if (encrypted)
+    {
+      priv = &g_esp32_spiflash1_encrypt;
+    }
+  else
+    {
+      priv = &g_esp32_spiflash1;
+    }
+
+  chip = priv->chip;
 
   finfo("ESP32 SPI Flash information:\n");
   finfo("\tID = 0x%x\n", chip->device_id);
@@ -2000,6 +2007,10 @@ struct mtd_dev_s *esp32_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   finfo("\tPage size = %d B\n", chip->page_size);
   finfo("\tSector size = %d KB\n", chip->sector_size / 1024);
   finfo("\tBlock size = %d KB\n", chip->block_size / 1024);
+
+  ASSERT((mtd_offset + mtd_size) <= chip->chip_size);
+  ASSERT((mtd_offset % chip->sector_size) == 0);
+  ASSERT((mtd_size % chip->sector_size) == 0);
 
   if (mtd_size == 0)
     {

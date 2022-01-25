@@ -253,8 +253,9 @@ int board_app_initialize(uintptr_t arg)
 #if defined(CONFIG_BCH)
       /* Use the minor number to create device paths */
 
-      snprintf(blockdev, 18, "/dev/mtdblock%d", N25QXXX_MTD_MINOR);
-      snprintf(chardev, 12, "/dev/mtd%d", N25QXXX_MTD_MINOR);
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d",
+               N25QXXX_MTD_MINOR);
+      snprintf(chardev, sizeof(chardev), "/dev/mtd%d", N25QXXX_MTD_MINOR);
 
       /* Now create a character device on the block device */
 

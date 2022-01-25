@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_H
 
 /****************************************************************************
  * Included Files
@@ -53,6 +53,7 @@
 
 struct bcmf_sdio_chip
 {
+  uint32_t ram_base;
   uint32_t ram_size;
   uint32_t core_base[MAX_CORE_ID];
 
@@ -162,4 +163,4 @@ struct bcmf_sdio_frame *bcmf_sdio_allocate_frame(FAR struct bcmf_dev_s *priv,
 void bcmf_sdio_free_frame(FAR struct bcmf_dev_s *priv,
                           struct bcmf_sdio_frame *sframe);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_SDIO_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_SDIO_H */

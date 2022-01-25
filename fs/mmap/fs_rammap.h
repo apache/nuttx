@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __FS_MMAP_RAMMAP_H
-#define __FS_MMAP_RAMMAP_H
+#ifndef __FS_MMAP_FS_RAMMAP_H
+#define __FS_MMAP_FS_RAMMAP_H
 
 /****************************************************************************
  * Included Files
@@ -111,4 +111,4 @@ int rammap(FAR struct file *filep, size_t length,
            off_t offset, bool kernel, FAR void **mapped);
 
 #endif /* CONFIG_FS_RAMMAP */
-#endif /* __FS_MMAP_RAMMAP_H */
+#endif /* __FS_MMAP_FS_RAMMAP_H */

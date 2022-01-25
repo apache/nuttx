@@ -102,8 +102,11 @@
 /* Note dump module tag definitions */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-#define NOTE_MODULE(a, b, c, d) \
-  ((unsigned)(a) | ((unsigned)(b) << 8) | ((unsigned)(c) << 16) | ((d) << 24))
+#  define NOTE_MODULE(a, b, c, d)  \
+  ((uint32_t)((a) & 0xff)        | \
+  ((uint32_t)((b) & 0xff) << 8)  | \
+  ((uint32_t)((c) & 0xff) << 16) | \
+  ((uint32_t)((d) & 0xff) << 24))
 #else
 #  define NOTE_MODULE(a,b,c,d)
 #endif

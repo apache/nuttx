@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H
-#define __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H
+#ifndef __ARCH_RENESAS_INCLUDE_SH1_PLIMITS_H
+#define __ARCH_RENESAS_INCLUDE_SH1_PLIMITS_H
 
 /****************************************************************************
  * Included Files
@@ -70,4 +70,4 @@
 #define PTR_MAX     2147483647
 #define UPTR_MAX    4294967295U
 
-#endif /* __ARCH_RENESAS_INCLUDE_SH1_LIMITS_H */
+#endif /* __ARCH_RENESAS_INCLUDE_SH1_PLIMITS_H */

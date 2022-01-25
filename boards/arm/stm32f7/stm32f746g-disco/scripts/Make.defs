@@ -31,7 +31,7 @@ else
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
 ARCHCFLAGS = -fno-builtin
@@ -42,9 +42,6 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCXXFLAGS += -nostdlib -ffreestanding
 else
   ARCHCXXFLAGS += -fno-rtti
-  ifneq ($(CONFIG_DEBUG_NOOPT),y)
-    ARCHOPTIMIZATION += -fno-strength-reduce
-  endif
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -71,7 +68,7 @@ ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
 endif
 
 ifneq ($(CONFIG_CYGWIN_WINTOOL),y)
-define DOWNLOAD
+define FLASH
   $(Q) st-flash write nuttx.bin 0x8000000
 endef
 endif

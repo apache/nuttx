@@ -46,8 +46,6 @@
 #include "esp32_smp.h"
 #include "esp32_gpio.h"
 
-#ifdef CONFIG_SMP
-
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -88,7 +86,6 @@ static inline void xtensa_registerdump(struct tcb_s *tcb)
  * Name: xtensa_attach_fromcpu0_interrupt
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
 static inline void xtensa_attach_fromcpu0_interrupt(void)
 {
   int cpuint;
@@ -106,7 +103,6 @@ static inline void xtensa_attach_fromcpu0_interrupt(void)
 
   up_enable_irq(ESP32_IRQ_CPU_CPU0);
 }
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -168,7 +164,9 @@ void xtensa_appcpu_start(void)
   sched_note_cpu_started(tcb);
 #endif
 
-  /* Handle interlock */
+  /* Release the spinlock to signal to the PRO CPU that the APP CPU has
+   * started.
+   */
 
   g_appcpu_started = true;
   spin_unlock(&g_appcpu_interlock);
@@ -191,11 +189,9 @@ void xtensa_appcpu_start(void)
 
   /* Attach and enable internal interrupts */
 
-#ifdef CONFIG_SMP
   /* Attach and enable the inter-CPU interrupt */
 
   xtensa_attach_fromcpu0_interrupt();
-#endif
 
 #if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
 #if XTENSA_CP_ALLSET != 0
@@ -274,8 +270,9 @@ int up_cpu_start(int cpu)
       sched_note_cpu_start(this_task(), cpu);
 #endif
 
-      /* The waitsem semaphore is used for signaling and, hence, should not
-       * have priority inheritance enabled.
+      /* This spinlock will be used as a handshake between the two CPUs.
+       * It's first initialized to its locked state, later the PRO CPU will
+       * try to lock it but spins until the APP CPU starts and unlocks it.
        */
 
       spin_initialize(&g_appcpu_interlock, SP_LOCKED);
@@ -319,7 +316,7 @@ int up_cpu_start(int cpu)
 
       ets_set_appcpu_boot_addr((uint32_t)xtensa_appcpu_start);
 
-      /* And wait for the initial task to run on CPU1 */
+      /* And wait until the APP CPU starts and releases the spinlock. */
 
       spin_lock(&g_appcpu_interlock);
       DEBUGASSERT(g_appcpu_started);
@@ -328,4 +325,3 @@ int up_cpu_start(int cpu)
   return OK;
 }
 
-#endif /* CONFIG_SMP */

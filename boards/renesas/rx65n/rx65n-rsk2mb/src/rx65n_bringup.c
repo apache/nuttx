@@ -170,7 +170,7 @@ static int nsh_usbhostinitialize(void)
 #ifdef CONFIG_USBHOST_CDCACM
   /* Register the CDC/ACM serial class */
 
-  printf ("USB Host CDCACM \n");
+  printf ("USB Host CDCACM\n");
   ret = usbhost_kbdinit();
   if (ret != OK)
     {

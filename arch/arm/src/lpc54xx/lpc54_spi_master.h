@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_SPI_MASTER_H
-#define __ARCH_ARM_SRC_LPC54XX_SPI_MASTER_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_SPI_MASTER_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_SPI_MASTER_H
 
 /****************************************************************************
  * Included Files
@@ -284,4 +284,4 @@ int lpc54_spi9_register(FAR struct spi_dev_s *dev,
 
 #endif /* __ASSEMBLY__ */
 #endif /* HAVE_SPI_MASTER_DEVICE */
-#endif /* __ARCH_ARM_SRC_LPC54XX_SPI_MASTER_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_SPI_MASTER_H */

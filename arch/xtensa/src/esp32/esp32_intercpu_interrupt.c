@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
 #include "hardware/esp32_dport.h"
@@ -48,7 +49,7 @@
  *
  ****************************************************************************/
 
-static int esp32_fromcpu_interrupt(int fromcpu)
+static int IRAM_ATTR esp32_fromcpu_interrupt(int fromcpu)
 {
   uintptr_t regaddr;
 
@@ -80,12 +81,12 @@ static int esp32_fromcpu_interrupt(int fromcpu)
  *
  ****************************************************************************/
 
-int esp32_fromcpu0_interrupt(int irq, void *context, void *arg)
+int IRAM_ATTR esp32_fromcpu0_interrupt(int irq, void *context, void *arg)
 {
   return esp32_fromcpu_interrupt(0);
 }
 
-int esp32_fromcpu1_interrupt(int irq, void *context, void *arg)
+int IRAM_ATTR esp32_fromcpu1_interrupt(int irq, void *context, void *arg)
 {
   return esp32_fromcpu_interrupt(1);
 }
@@ -98,7 +99,7 @@ int esp32_fromcpu1_interrupt(int irq, void *context, void *arg)
  *
  ****************************************************************************/
 
-int xtensa_intercpu_interrupt(int tocpu, int intcode)
+int IRAM_ATTR xtensa_intercpu_interrupt(int tocpu, int intcode)
 {
   int fromcpu;
 

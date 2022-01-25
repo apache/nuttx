@@ -1184,7 +1184,8 @@
 #define DPORT_SLAVE_SPI_MASK_PRO_V  0x1
 #define DPORT_SLAVE_SPI_MASK_PRO_S  0
 
-#define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0CC)
+#define DPORT_WIFI_CLK_EN_REG          (DR_REG_DPORT_BASE + 0x0cc)
+#define DPORT_CORE_RST_EN_REG          (DR_REG_DPORT_BASE + 0x0d0)
 
 #define DPORT_EMAC_CLK_EN              (BIT(14))
 

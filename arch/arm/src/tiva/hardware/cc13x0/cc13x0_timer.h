@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H
-#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H
+#ifndef __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_TIMER_H
+#define __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -70,4 +70,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X2_CC26X2_CC13X2_CC26X2_TIMER_H */
+#endif /* __ARCH_ARM_SRC_TIVA_HARDWARE_CC13X0_CC13X0_TIMER_H */

@@ -44,7 +44,7 @@
 #ifdef CONFIG_STM32_HAVE_IP_DBGMCU_V3
 #  define STM32_DBGMCU_APB1_FZ1    0xe0042008  /* Debug MCU APB1 freeze 1 register */
 #  define STM32_DBGMCU_APB1_FZ2    0xe004200c  /* Debug MCU APB1 freeze 2 register */
-#  define STM32_DBGMCU_APB2_FZ     0xe004200e  /* Debug MCU APB2 freeze register */
+#  define STM32_DBGMCU_APB2_FZ     0xe0042010  /* Debug MCU APB2 freeze register */
 #endif
 
 /* Register Bitfield Definitions ********************************************/

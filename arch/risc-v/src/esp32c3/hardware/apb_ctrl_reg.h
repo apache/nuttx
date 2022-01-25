@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H
 
 /****************************************************************************
  * Included Files
@@ -79,4 +79,4 @@
 #define APB_CTRL_RETENTION_LINK_ADDR_V  0x7FFFFFF
 #define APB_CTRL_RETENTION_LINK_ADDR_S  0
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_APB_CTRL_REG_H */

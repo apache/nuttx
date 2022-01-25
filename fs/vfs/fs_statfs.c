@@ -80,13 +80,13 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   if (path == NULL  || buf == NULL)
     {
-      ret = EFAULT;
+      ret = -EFAULT;
       goto errout;
     }
 
   if (*path == '\0')
     {
-      ret = ENOENT;
+      ret = -ENOENT;
       goto errout;
     }
 
@@ -101,7 +101,6 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
        * mountpoint that includes in this path.
        */
 
-      ret = -ret;
       goto errout_with_search;
     }
 
@@ -140,7 +139,6 @@ int statfs(FAR const char *path, FAR struct statfs *buf)
 
   if (ret < 0)
     {
-      ret = -ret;
       goto errout_with_inode;
     }
 
@@ -159,6 +157,6 @@ errout_with_search:
   RELEASE_SEARCH(&desc);
 
 errout:
-  set_errno(ret);
+  set_errno(-ret);
   return ERROR;
 }

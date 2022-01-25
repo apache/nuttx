@@ -11,7 +11,7 @@ menu "Architecture-Specific Support"
 
 config ARCH_LOWPUTC
 	bool "Low-level console output"
-	default "y"
+	default y
 	---help---
 		architecture supports low-level, boot time console output
 
@@ -188,6 +188,10 @@ source "libs/libc/machine/xtensa/Kconfig"
 endif
 if ARCH_RENESAS
 source "libs/libc/machine/renesas/Kconfig"
+endif
+
+if ARCH_SPARC
+source libs/libc/machine/sparc/Kconfig
 endif
 
 endmenu # Architecture-Specific Support

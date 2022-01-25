@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC17XX40XX_MBED_SRC_MBED_H
-#define __BOARDS_ARM_LPC17XX40XX_MBED_SRC_MBED_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_MBED_SRC_MBED_H
+#define __BOARDS_ARM_LPC17XX_40XX_MBED_SRC_MBED_H
 
 /****************************************************************************
  * Included Files
@@ -97,4 +97,4 @@ int mbed_adc_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LPC17XX40XX_MBED_SRC_MBED_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_MBED_SRC_MBED_H */

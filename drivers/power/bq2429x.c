@@ -542,7 +542,8 @@ static int bq2429x_en_stat(FAR struct bq2429x_dev_s *priv, bool state)
     }
 
   batinfo("int stat: REG07 %02X INT_MASK1=%d INT_MASK0=%d\n", regval,
-          !!(regval & BQ2429XR7_INT_MASK1), !!(regval & BQ2429XR7_INT_MASK0));
+          !!(regval & BQ2429XR7_INT_MASK1),
+          !!(regval & BQ2429XR7_INT_MASK0));
 
   /* We always set or clear both interrupts together. */
 

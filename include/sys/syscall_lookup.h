@@ -222,6 +222,11 @@ SYSCALL_LOOKUP(pwrite,                     4)
 #ifdef CONFIG_EVENT_FD
   SYSCALL_LOOKUP(eventfd,                  2)
 #endif
+#ifdef CONFIG_TIMER_FD
+  SYSCALL_LOOKUP(timerfd_create,           2)
+  SYSCALL_LOOKUP(timerfd_settime,          4)
+  SYSCALL_LOOKUP(timerfd_gettime,          2)
+#endif
 
 /* Board support */
 

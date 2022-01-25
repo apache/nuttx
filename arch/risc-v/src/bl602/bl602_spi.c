@@ -1078,6 +1078,32 @@ static void bl602_set_spi_0_act_mode_sel(uint8_t mod)
 }
 
 /****************************************************************************
+ * Name: bl602_swap_spi_0_mosi_with_miso
+ *
+ * Description:
+ *   Swap SPI0 MOSI with MISO
+ *
+ * Input Parameters:
+ *   swap      - Non-zero to swap MOSI and MISO
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void bl602_swap_spi_0_mosi_with_miso(uint8_t swap)
+{
+  if (swap)
+    {
+      modifyreg32(BL602_GLB_GLB_PARM, 0, GLB_PARM_REG_SPI_0_SWAP);
+    }
+  else
+    {
+      modifyreg32(BL602_GLB_GLB_PARM, GLB_PARM_REG_SPI_0_SWAP, 0);
+    }
+}
+
+/****************************************************************************
  * Name: bl602_spi_init
  *
  * Description:
@@ -1108,6 +1134,10 @@ static void bl602_spi_init(struct spi_dev_s *dev)
   /* set master mode */
 
   bl602_set_spi_0_act_mode_sel(1);
+
+  /* swap MOSI with MISO to be consistent with BL602 Reference Manual */
+
+  bl602_swap_spi_0_mosi_with_miso(1);
 
   /* spi cfg  reg:
    * cr_spi_deg_en 1

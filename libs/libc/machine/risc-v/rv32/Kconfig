@@ -4,7 +4,7 @@
 #
 
 config RISCV_MEMCPY
-        bool "Enable optimized memcpy() for RISC-V"
-        select LIBC_ARCH_MEMCPY
-        ---help---
-                Enable optimized RISC-V specific memcpy() library function
+	bool "Enable optimized memcpy() for RISC-V"
+	select LIBC_ARCH_MEMCPY
+	---help---
+		Enable optimized RISC-V specific memcpy() library function

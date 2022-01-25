@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H
-#define __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H
+#ifndef __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ECSPI_H
+#define __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ECSPI_H
 
 /****************************************************************************
  * Included Files
@@ -283,4 +283,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_ECSPI_H */
+#endif /* __ARCH_ARM_SRC_IMX6_HARDWARE_IMX_ECSPI_H */

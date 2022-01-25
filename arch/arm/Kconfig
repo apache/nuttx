@@ -231,7 +231,9 @@ config ARCH_CHIP_RP2040
 	select ARCH_HAVE_RAMVECTORS
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_TESTSET
+	select ARCH_HAVE_I2CRESET
 	select ARM_HAVE_WFE_SEV
+	select LIBC_ARCH_ATOMIC
 	---help---
 		Raspberry Pi RP2040 architectures (ARM dual Cortex-M0+).
 
@@ -297,6 +299,7 @@ config ARCH_CHIP_SAMV7
 	select ARCH_CORTEXM7
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_PROGMEM
 	select ARCH_HAVE_RAMFUNCS
 	select ARCH_HAVE_TICKLESS
 	select ARCH_HAVE_I2CRESET
@@ -461,6 +464,12 @@ config ARCH_CHIP_CXD56XX
 	select ARCH_HAVE_MATH_H
 	---help---
 		Sony CXD56XX (ARM Cortex-M4) architectures
+
+config ARCH_CHIP_PHY62XX
+	bool "Phyplus PHY62XX BLE"
+	select ARCH_CORTEXM0
+	---help---
+		Phyplus PHY62XX architectures (ARM Cortex-M0).
 
 config ARCH_CHIP_ARM_CUSTOM
 	bool "Custom ARM chip"
@@ -828,6 +837,7 @@ config ARCH_CHIP
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
 	default "cxd56xx"	if ARCH_CHIP_CXD56XX
+	default "phy62xx"	if ARCH_CHIP_PHY62XX
 
 config ARCH_HAVE_TRUSTZONE
 	bool
@@ -907,6 +917,34 @@ config ARM_MPU_NREGIONS
 	---help---
 		This is the number of protection regions supported by the MPU.
 
+config ARM_MPU_RESET
+	bool "MPU Reset before MPU initialization"
+	default n
+	depends on ARM_MPU
+	---help---
+		Configures the MPU initialization sequence to disable the MPU
+		before configuring it.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This may be all that is
+		needed to allow booting if the previous MPU configuration allow
+		the system to execute the MPU initialization code. If not use
+		ARM_MPU_EARLY_RESET.
+
+config ARM_MPU_EARLY_RESET
+	bool "MPU Early Reset"
+	default n
+	depends on ARCH_HAVE_MPU
+	---help---
+		Configures the early system initialization sequence to disable the MPU.
+
+		This may be needed in a system with a bootloader that has
+		configured the MPU prior to running NuttX. This is useful if the system
+		faults during bbs, or data initialization or before the
+		stm32_mpuinitialize can be called.
+
+		Note: This can be used without MPU Support enabled.
+
 config ARCH_HAVE_LOWVECTORS
 	bool
 
@@ -957,7 +995,7 @@ config DEBUG_MEMFAULT
 	default n
 	depends on ARCH_HAVE_MEMFAULT_DEBUG && DEBUG_ALERT && ARCH_USE_MPU
 	---help---
-		Enables verbose debug output when a mem fault is occurs.  This verbose
+		Enables verbose debug output when a mem fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult mem fault problems,
 		but may be more than you typically want to see.
 
@@ -970,7 +1008,7 @@ config DEBUG_BUSFAULT
 	default n
 	depends on ARCH_HAVE_BUSFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a bus fault is occurs.  This verbose
+		Enables verbose debug output when a bus fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult bus fault problems,
 		but may be more than you typically want to see.
 
@@ -983,7 +1021,7 @@ config DEBUG_USAGEFAULT
 	default n
 	depends on ARCH_HAVE_USAGEFAULT_DEBUG && DEBUG_ALERT
 	---help---
-		Enables verbose debug output when a usage fault is occurs.  This verbose
+		Enables verbose debug output when a usage fault occurs.  This verbose
 		output is sometimes helpful when debugging difficult usage fault problems,
 		but may be more than you typically want to see.
 
@@ -1159,6 +1197,9 @@ source "arch/arm/src/tms570/Kconfig"
 endif
 if ARCH_CHIP_XMC4
 source "arch/arm/src/xmc4/Kconfig"
+endif
+if ARCH_CHIP_PHY62XX
+source "arch/arm/src/phy62xx/Kconfig"
 endif
 if ARCH_CHIP_CXD56XX
 source "arch/arm/src/cxd56xx/Kconfig"

@@ -36,6 +36,12 @@
 #include <float.h>
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define LDBL_MAX_EXP_X  700.0
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -47,8 +53,8 @@ long double logl(long double x)
   long double ey;
   long double epsilon;
 
-  y       = 0.0;
-  y_old   = 1.0;
+  y = 0.0;
+  y_old = 1.0;
   epsilon = LDBL_EPSILON;
 
   while (y > y_old + epsilon || y < y_old - epsilon)
@@ -57,23 +63,25 @@ long double logl(long double x)
       ey    = expl(y);
       y    -= (ey - x) / ey;
 
-      if (y > 700.0)
+      if (y > LDBL_MAX_EXP_X)
         {
-          y = 700.0;
+          y = LDBL_MAX_EXP_X;
         }
 
-      if (y < -700.0)
+      if (y < -LDBL_MAX_EXP_X)
         {
-          y = -700.0;
+          y = -LDBL_MAX_EXP_X;
         }
+
+      epsilon = (fabsl(y) > 1.0) ? fabsl(y) * LDBL_EPSILON : LDBL_EPSILON;
     }
 
-  if (y == 700.0)
+  if (y == LDBL_MAX_EXP_X)
     {
       return INFINITY;
     }
 
-  if (y == -700.0)
+  if (y == -LDBL_MAX_EXP_X)
     {
       return INFINITY;
     }

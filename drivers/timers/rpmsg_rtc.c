@@ -633,7 +633,7 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         FAR struct rpmsg_rtc_get_s *msg = data;
         struct rtc_time rtctime;
 
-        header->result =  rpmsg_rtc_server_rdtime(priv, &rtctime);
+        header->result = rpmsg_rtc_server_rdtime(priv, &rtctime);
 
         msg->sec = timegm((FAR struct tm *)&rtctime);
         msg->nsec = rtctime.tm_nsec;
@@ -645,16 +645,20 @@ static int rpmsg_rtc_server_ept_cb(FAR struct rpmsg_endpoint *ept,
         FAR struct rpmsg_rtc_set_s *msg = data;
         struct rtc_time rtctime;
         time_t time = msg->sec;
-        struct timespec tp;
 
         gmtime_r(&time, (FAR struct tm *)&rtctime);
         rtctime.tm_nsec = msg->nsec;
 
-        rpmsg_rtc_server_settime(priv, &rtctime);
+        header->result = rpmsg_rtc_server_settime(priv, &rtctime);
+        if (header->result >= 0)
+          {
+            struct timespec tp;
 
-        tp.tv_sec  = msg->sec;
-        tp.tv_nsec = msg->nsec;
-        clock_synchronize(&tp);
+            tp.tv_sec  = msg->sec;
+            tp.tv_nsec = msg->nsec;
+
+            clock_synchronize(&tp);
+          }
 
         return rpmsg_send(ept, msg, sizeof(*msg));
       }

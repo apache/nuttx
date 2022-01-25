@@ -58,8 +58,8 @@ config ARCH_MIPS_M5150
 	select ARCH_HAVE_MICROMIPS
 
 config ARCH_HAVE_EIC
-  bool
-  default n
+	bool
+	default n
 
 config ARCH_HAVE_MICROMIPS
 	bool

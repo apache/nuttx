@@ -259,6 +259,12 @@ ifeq ($(CONFIG_MIPS32_TOOLCHAIN),PINGUINOW)
   LDSCRIPT = mips-elf-debug.ld
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
 # Default toolchain
 
 CC = $(CROSSDEV)gcc

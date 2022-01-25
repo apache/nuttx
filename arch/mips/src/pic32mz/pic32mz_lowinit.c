@@ -26,6 +26,7 @@
 
 #include <assert.h>
 
+#include <nuttx/arch.h>
 #include <arch/pic32mz/cp0.h>
 #include <arch/board/board.h>
 

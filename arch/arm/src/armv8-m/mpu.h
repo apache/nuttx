@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8M_MPU_H
-#define __ARCH_ARM_SRC_ARMV8M_MPU_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_MPU_H
+#define __ARCH_ARM_SRC_ARMV8_M_MPU_H
 
 /****************************************************************************
  * Included Files
@@ -170,6 +170,36 @@
                                  MPU_MAIR_OUTER_RA | MPU_MAIR_OUTER_WA | \
                                  MPU_MAIR_INNER_NT | MPU_MAIR_INNER_WB | \
                                  MPU_MAIR_INNER_RA | MPU_MAIR_INNER_WA)
+
+/****************************************************************************
+ * Name: mpu_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled during
+ *   MPU initialization.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MPU_RESET)
+void mpu_reset(void);
+#else
+#  define mpu_reset() do { } while (0)
+#endif
+
+/****************************************************************************
+ * Name: mpu_early_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled immediately
+ *   after reset.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARM_MPU_EARLY_RESET)
+void mpu_early_reset(void);
+#else
+#  define mpu_early_reset() do { } while (0)
+#endif
 
 #ifdef CONFIG_ARM_MPU
 
@@ -406,4 +436,4 @@ void mpu_configure_region(uintptr_t base, size_t size,
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_ARM_MPU */
-#endif /* __ARCH_ARM_SRC_ARMV8M_MPU_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_MPU_H */

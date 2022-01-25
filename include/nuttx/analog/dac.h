@@ -180,7 +180,7 @@ extern "C"
  *
  * Input Parameters:
  *    path - The full path to the DAC device to be registered.  This could
- *      be, as an example, "/dev/dac0"
+ *           be, as an example, "/dev/dac0"
  *    dev - An instance of the device-specific DAC interface
  *
  * Returned Value:
@@ -241,7 +241,25 @@ FAR struct dac_dev_s *dac7554_initialize(FAR struct spi_dev_s *spi,
  ****************************************************************************/
 
 FAR struct dac_dev_s *lmp92001_dac_initialize(FAR struct i2c_master_s *i2c,
-                                               uint8_t addr);
+                                              uint8_t addr);
+
+/****************************************************************************
+ * Name: mcp48xx_initialize
+ *
+ * Description:
+ *   Initialize DAC
+ *
+ * Input Parameters:
+ *    spi - SPI driver instance
+ *    spidev - SPI Chip Select number
+ *
+ * Returned Value:
+ *   Valid MCP48XX device structure reference on success; a NULL on failure
+ *
+ ****************************************************************************/
+
+FAR struct dac_dev_s *mcp48xx_initialize(FAR struct spi_dev_s *spi,
+                                         uint32_t spidev);
 
 #if defined(__cplusplus)
 }

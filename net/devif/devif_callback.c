@@ -269,6 +269,25 @@ FAR struct devif_callback_s *
 
   net_lock();
 
+  /* Verify that the device pointer is valid, i.e., that it still
+   * points to a registered network device and also that the network
+   * device in the UP state.
+   */
+
+  /* Note: dev->d_flags may be asynchronously changed by netdev_ifdown()
+   * (in net/netdev/netdev_ioctl.c). Nevertheless, net_lock() / net_unlock()
+   * are not required in netdev_ifdown() to prevent dev->d_flags from
+   * asynchronous change here. There is not an issue because net_lock() and
+   * net_unlock() present inside of devif_dev_event(). That should be enough
+   * to de-allocate connection callbacks reliably on NETDEV_DOWN event.
+   */
+
+  if (dev && !netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
+    {
+      net_unlock();
+      return NULL;
+    }
+
   /* Allocate the callback entry from heap */
 
 #ifdef CONFIG_NET_ALLOC_CONNS
@@ -303,22 +322,6 @@ FAR struct devif_callback_s *
 
       if (dev)
         {
-          /* Verify that the device pointer is valid, i.e., that it still
-           * points to a registered network device and also that the network
-           * device in in the UP state.
-           *
-           * And if it does, should that device also not be in the UP state?
-           */
-
-          if (!netdev_verify(dev) && (dev->d_flags & IFF_UP) != 0)
-            {
-              /* No.. release the callback structure and fail */
-
-              devif_callback_free(NULL, NULL, list_head, list_tail);
-              net_unlock();
-              return NULL;
-            }
-
           ret->nxtdev  = dev->d_devcb;
           dev->d_devcb = ret;
         }
@@ -463,7 +466,7 @@ void devif_dev_callback_free(FAR struct net_driver_s *dev,
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure.  May be NULL if the even is not related to a TCP
+ *     port structure. It can be NULL if the event is not related to a TCP
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *   list - The list to traverse in performing the notifications
@@ -526,7 +529,7 @@ uint16_t devif_conn_event(FAR struct net_driver_s *dev, void *pvconn,
  *   dev - The network device state structure associated with the network
  *     device that initiated the callback event.
  *   pvconn - Holds a reference to the TCP connection structure or the UDP
- *     port structure.  May be NULL if the even is not related to a TCP
+ *     port structure. It can be NULL if the event is not related to a TCP
  *     connection or UDP port.
  *   flags - The bit set of events to be notified.
  *

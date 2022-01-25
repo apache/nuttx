@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <arch/irq.h>
 

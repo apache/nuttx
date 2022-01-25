@@ -112,6 +112,7 @@ static const struct qe_ops_s g_qe_ops =
   .position  = tiva_qe_position,
   .setposmax = NULL,            /* not supported yet */
   .reset     = tiva_qe_reset,
+  .setindex  = NULL,            /* not supported yet */
   .ioctl     = tiva_qe_ioctl,
 };
 
@@ -345,7 +346,7 @@ static int tiva_qe_reset(FAR struct qe_lowerhalf_s *lower)
  * Name: tiva_qe_position
  *
  * Description:
- *   Return the position mesaured by QEI.
+ *   Return the position measured by QEI.
  *
  * Input Parameters:
  *   lower - A reference to the lower half QEI driver state structure
@@ -425,7 +426,7 @@ static int tiva_qe_ioctl(FAR struct qe_lowerhalf_s *lower, int cmd,
  * Name: tiva_qe_direction
  *
  * Description:
- *   Return the direction mesaured by QEI.
+ *   Return the direction measured by QEI.
  *
  * Input Parameters:
  *   qe - A reference to the TIVA QEI structure
@@ -456,7 +457,7 @@ static int tiva_qe_direction(FAR struct tiva_qe_s *qe, unsigned long *dir)
  * Name: tiva_qe_direction
  *
  * Description:
- *   Return the velocity (A/B pulses per second) mesaured by QEI.
+ *   Return the velocity (A/B pulses per second) measured by QEI.
  *
  * Input Parameters:
  *   qe - A reference to the TIVA QEI structure

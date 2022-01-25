@@ -74,13 +74,6 @@ void z80_sigdeliver(void)
   FAR struct tcb_s *rtcb = this_task();
   chipreg_t regs[XCPTCONTEXT_REGS];
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = get_errno();
-
   board_autoled_on(LED_SIGNAL);
 
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
@@ -110,7 +103,6 @@ void z80_sigdeliver(void)
 
   sinfo("Resuming\n");
   up_irq_save();
-  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is

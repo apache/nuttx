@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
-#define __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_USB0_OHCI_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_USB0_OHCI_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ FAR struct usbhost_connection_s *lpc54_usbhost_initialize(int controller);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_OHCI_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_USB0_OHCI_H */

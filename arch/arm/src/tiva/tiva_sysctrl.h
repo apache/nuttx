@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H
-#define __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_SYSCTRL_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_SYSCTRL_H
 
 /****************************************************************************
  * Included Files
@@ -134,4 +134,4 @@ void tiva_clock_configure(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_TIVA_TIVA_SYSCONTROL_H */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_SYSCTRL_H */

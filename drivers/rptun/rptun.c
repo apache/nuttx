@@ -163,7 +163,16 @@ static struct remoteproc_ops g_rptun_ops =
 
 static const struct file_operations g_rptun_devops =
 {
-  .ioctl = rptun_dev_ioctl,
+  NULL,             /* open */
+  NULL,             /* close */
+  NULL,             /* read */
+  NULL,             /* write */
+  NULL,             /* seek */
+  rptun_dev_ioctl,  /* ioctl */
+  NULL              /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 #ifdef CONFIG_RPTUN_LOADER
@@ -276,6 +285,8 @@ static int rptun_thread(int argc, FAR char *argv[])
 
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
   priv->tid = gettid();
+
+  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
 
   while (1)
     {

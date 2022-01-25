@@ -255,7 +255,7 @@ extern uintptr_t _RAM_ADDR_U_INIT_PARAM;
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define ETHBUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define ETHBUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -1496,7 +1496,7 @@ static int ez80emac_receive(struct ez80emac_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (ETHBUF->type == htons(ETHTYPE_ARP))
+      if (ETHBUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP packet received (%02x)\n", ETHBUF->type);
           EMAC_STAT(priv, rx_arp);

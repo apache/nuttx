@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_abi.h
+ * arch/xtensa/include/xtensa/xtensa_abi.h
  *
  * Adapted from use in NuttX by:
  *
@@ -31,8 +31,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H
+#ifndef __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_ABI_H
+#define __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_ABI_H
 
 /* Windowed ABI
  *
@@ -165,4 +165,4 @@
 
 #endif /* __ASSEMBLY_ */
 
-#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_ABI_H */
+#endif /* __ARCH_XTENSA_INCLUDE_XTENSA_XTENSA_ABI_H */

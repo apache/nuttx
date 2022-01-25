@@ -66,6 +66,7 @@ begin_packed_struct struct sdio_cmd53
 begin_packed_struct struct sdio_resp_r5
 {
   uint32_t data             : 8;
+  begin_packed_struct
   struct
   {
     uint32_t out_of_range     : 1;
@@ -75,7 +76,8 @@ begin_packed_struct struct sdio_resp_r5
     uint32_t io_current_state : 2;
     uint32_t illegal_command  : 1;
     uint32_t com_crc_error    : 1;
-  } flags;
+  }
+  end_packed_struct flags;
   uint32_t reserved_16      : 16;
 } end_packed_struct;
 

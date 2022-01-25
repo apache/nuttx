@@ -863,26 +863,6 @@ int esp32c3_mpi_inv_mod(struct esp32c3_mpi_s *X,
             const struct esp32c3_mpi_s *A,
             const struct esp32c3_mpi_s *N);
 
-#ifdef CONFIG_ESP32C3_BIGNUM_ACCELERATOR_TEST
-
-/****************************************************************************
- * Name: esp32c3_mpi_self_test
- *
- * Description:
- *   Checkup routine
- *
- * Input Parameters:
- *   verbose    - The result output or not
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- ****************************************************************************/
-
-int esp32c3_mpi_self_test(int verbose);
-
-#endif
-
 #ifdef __cplusplus
 }
 #endif

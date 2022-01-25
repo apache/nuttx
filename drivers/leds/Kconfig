@@ -32,6 +32,16 @@ config USERLED_LOWER
 		board src/ directory and modified for your specific board
 		requirements.
 
+config USERLED_LOWER_READSTATE
+	bool "LED Driver Read Actual Pin State"
+	default n
+	depends on USERLED_LOWER
+	---help---
+		Extends the standard LED interface as defined in the
+		include/nuttx/board.h header file with a function that
+		checks the actual state of the pin controlling the LED,
+		which can be used to find malfunctioning LEDs.
+
 endif # USERLED
 
 config LEDS_APA102

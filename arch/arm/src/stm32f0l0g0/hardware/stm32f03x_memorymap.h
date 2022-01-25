@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_ST32F03X_MEMORYMAP_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_ST32F03X_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F03X_MEMORYMAP_H
+#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F03X_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,4 +135,4 @@
 #define STM32_SCS_BASE       0xe000e000
 #define STM32_DEBUGMCU_BASE  0xe0042000
 
-#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_ST32F03X_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F03X_MEMORYMAP_H */

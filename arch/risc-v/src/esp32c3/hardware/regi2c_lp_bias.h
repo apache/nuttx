@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -33,8 +33,28 @@
 #define I2C_ULP 0x61
 #define I2C_ULP_HOSTID 0
 
+#define I2C_ULP_IR_RESETB 0
+#define I2C_ULP_IR_RESETB_MSB 0
+#define I2C_ULP_IR_RESETB_LSB 0
+
+#define I2C_ULP_O_DONE_FLAG 3
+#define I2C_ULP_O_DONE_FLAG_MSB 0
+#define I2C_ULP_O_DONE_FLAG_LSB 0
+
+#define I2C_ULP_BG_O_DONE_FLAG 3
+#define I2C_ULP_BG_O_DONE_FLAG_MSB 3
+#define I2C_ULP_BG_O_DONE_FLAG_LSB 3
+
 #define I2C_ULP_IR_FORCE_XPD_CK 0
 #define I2C_ULP_IR_FORCE_XPD_CK_MSB 2
 #define I2C_ULP_IR_FORCE_XPD_CK_LSB 2
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H_ */
+#define I2C_ULP_IR_FORCE_CODE 5
+#define I2C_ULP_IR_FORCE_CODE_MSB 6
+#define I2C_ULP_IR_FORCE_CODE_LSB 6
+
+#define I2C_ULP_EXT_CODE 6
+#define I2C_ULP_EXT_CODE_MSB 7
+#define I2C_ULP_EXT_CODE_LSB 0
+
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_LP_BIAS_H */

@@ -349,7 +349,9 @@ static FAR void *vnc_updater(FAR void *arg)
   FAR struct vnc_session_s *session = (FAR struct vnc_session_s *)arg;
   FAR struct vnc_fbupdate_s *srcrect;
   int ret;
+#ifdef CONFIG_FB_SYNC
   int val;
+#endif
 
   DEBUGASSERT(session != NULL);
   ginfo("Updater running for Display %d\n", session->display);

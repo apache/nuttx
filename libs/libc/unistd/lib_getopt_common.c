@@ -393,7 +393,7 @@ int getopt_common(int argc, FAR char * const argv[],
 
           /* Check for the end of the argument list */
 
-          go->go_optptr = argv[go->go_optind];
+          go->go_optptr = go->go_optind < argc ? argv[go->go_optind] : NULL;
           if (!go->go_optptr)
             {
               /* There are no more arguments, we are finished */

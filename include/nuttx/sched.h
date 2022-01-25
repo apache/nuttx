@@ -761,8 +761,8 @@ struct pthread_tcb_s
 
 /* struct tcbinfo_s *********************************************************/
 
-/* The structure save key filed offset of tcb_s while can be used by debuggers
- * to parse the tcb information
+/* The structure save key filed offset of tcb_s while can be used by
+ * debuggers to parse the tcb information
  */
 
 #ifdef CONFIG_DEBUG_TCBINFO
@@ -812,13 +812,8 @@ extern "C"
 #ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
-#ifdef CONFIG_SMP_NCPUS
 EXTERN uint32_t g_premp_max[CONFIG_SMP_NCPUS];
 EXTERN uint32_t g_crit_max[CONFIG_SMP_NCPUS];
-#else
-EXTERN uint32_t g_premp_max[1];
-EXTERN uint32_t g_crit_max[1];
-#endif
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 #ifdef CONFIG_DEBUG_TCBINFO

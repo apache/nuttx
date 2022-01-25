@@ -330,7 +330,7 @@ int sim_bringup(void)
 #endif
 
 #ifdef CONFIG_INPUT_UINPUT
-  /* Initialize the uinput */
+  /* Initialize the touchscreen uinput */
 
   ret = uinput_touch_initialize("utouch", 1, 4);
   if (ret < 0)

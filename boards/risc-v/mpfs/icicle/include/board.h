@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_ICICLE_MPFS_INCLUDE_BOARD_H
-#define __BOARDS_RISCV_ICICLE_MPFS_INCLUDE_BOARD_H
+#ifndef __BOARDS_RISCV_MPFS_ICICLE_INCLUDE_BOARD_H
+#define __BOARDS_RISCV_MPFS_ICICLE_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -45,6 +45,7 @@
 #define MPFS_MSS_RTC_TOGGLE_CLK      (1000000UL)
 #define MPFS_MSS_AXI_CLK           (300000000UL)
 #define MPFS_MSS_APB_AHB_CLK       (150000000UL)
+#define MPFS_FPGA_BCLK               (3000000UL)
 
 /* LED definitions **********************************************************/
 
@@ -108,4 +109,4 @@ void mpfs_boardinitialize(void);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_RISCV_ICICLE_MPFS_INCLUDE_BOARD_H  */
+#endif /* __BOARDS_RISCV_MPFS_ICICLE_INCLUDE_BOARD_H  */

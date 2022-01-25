@@ -54,7 +54,7 @@ static const struct file_operations notectl_fops =
   notectl_ioctl, /* ioctl */
   NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , 0            /* unlink */
+  , NULL         /* unlink */
 #endif
 };
 
@@ -231,7 +231,7 @@ static int notectl_ioctl(struct file *filep, int cmd, unsigned long arg)
  *   None.
  *
  * Returned Value:
- *   Zero on succress. A negated errno value is returned on a failure.
+ *   Zero on success. A negated errno value is returned on a failure.
  *
  ****************************************************************************/
 

@@ -711,7 +711,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
 
   spin_unlock_irqrestore(NULL, flags);
 
-  tmrinfo("elapsed = %lld \n", elapsed);
+  tmrinfo("elapsed = %lld\n", elapsed);
 
   /* Convert the elapsed time in seconds and nanoseconds. */
 

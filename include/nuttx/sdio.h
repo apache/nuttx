@@ -408,6 +408,9 @@
 #define SDIO_CCCR_BUS_IF_1_BIT           0x01 /* 1 bit bus width setting   */
 #define SDIO_CCCR_BUS_IF_4_BITS          0x02 /* 4 bits bus width setting  */
 
+#define SDIO_CCCR_HIGHSPEED_SHS          0x01 /* High-Speed mode capability */
+#define SDIO_CCCR_HIGHSPEED_EHS          0x02 /* Enable High-Speed mode    */
+
 #define SDIO_FBR_SHIFT   8                     /* FBR bit shift            */
 #define SDIO_FN1_BR_BASE (1 << SDIO_FBR_SHIFT) /* Func 1 registers base    */
 #define SDIO_FN2_BR_BASE (2 << SDIO_FBR_SHIFT) /* Func 2 registers base    */

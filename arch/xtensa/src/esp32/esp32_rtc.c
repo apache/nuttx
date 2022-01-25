@@ -29,7 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
-#include "esp32_rtc.h"
+#include "clock/clock.h"
+
 #include "esp32_clockconfig.h"
 #include "esp32_rt_timer.h"
 
@@ -39,6 +40,8 @@
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
+
+#include "esp32_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -199,7 +202,7 @@ struct esp32_rtc_sleep_config_s
   uint32_t rtc_fastmem_pd_en : 1;      /* power down RTC fast memory */
   uint32_t rtc_slowmem_pd_en : 1;      /* power down RTC slow memory */
   uint32_t rtc_peri_pd_en : 1;         /* power down RTC peripherals */
-  uint32_t wifi_pd_en : 1;             /* power down WiFi */
+  uint32_t wifi_pd_en : 1;             /* power down Wi-Fi */
   uint32_t rom_mem_pd_en : 1;          /* power down main RAM and ROM */
   uint32_t deep_slp : 1;               /* power down digital domain */
   uint32_t wdt_flashboot_mod_en : 1;   /* enable WDT flashboot mode */
@@ -220,9 +223,9 @@ struct esp32_rtc_sleep_pd_config_s
   uint32_t rtc_pd : 1;    /* Set to 1 to power down RTC memories in sleep */
   uint32_t cpu_pd : 1;    /* Set to 1 to power down digital memories and CPU in sleep */
   uint32_t i2s_pd : 1;    /* Set to 1 to power down I2S in sleep */
-  uint32_t bb_pd : 1;     /* Set to 1 to power down WiFi in sleep */
-  uint32_t nrx_pd : 1;    /* Set to 1 to power down WiFi in sleep */
-  uint32_t fe_pd : 1;     /* Set to 1 to power down WiFi in sleep */
+  uint32_t bb_pd : 1;     /* Set to 1 to power down Wi-Fi in sleep */
+  uint32_t nrx_pd : 1;    /* Set to 1 to power down Wi-Fi in sleep */
+  uint32_t fe_pd : 1;     /* Set to 1 to power down Wi-Fi in sleep */
 };
 
 #ifdef CONFIG_RTC_DRIVER
@@ -2066,8 +2069,7 @@ int up_rtc_gettime(struct timespec *tp)
     }
   else
     {
-      time_us = = esp32_rtc_get_time_us() +
-                    esp32_rtc_get_boot_time();
+      time_us = esp32_rtc_get_time_us() + esp32_rtc_get_boot_time();
     }
 
   tp->tv_sec  = time_us / USEC_PER_SEC;

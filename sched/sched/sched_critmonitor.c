@@ -102,13 +102,8 @@
 
 /* Start time when pre-emption disabled or critical section entered. */
 
-#ifdef CONFIG_SMP_NCPUS
 static uint32_t g_premp_start[CONFIG_SMP_NCPUS];
 static uint32_t g_crit_start[CONFIG_SMP_NCPUS];
-#else
-static uint32_t g_premp_start[1];
-static uint32_t g_crit_start[1];
-#endif
 
 /****************************************************************************
  * Public Data
@@ -116,13 +111,8 @@ static uint32_t g_crit_start[1];
 
 /* Maximum time with pre-emption disabled or within critical section. */
 
-#ifdef CONFIG_SMP_NCPUS
 uint32_t g_premp_max[CONFIG_SMP_NCPUS];
 uint32_t g_crit_max[CONFIG_SMP_NCPUS];
-#else
-uint32_t g_premp_max[1];
-uint32_t g_crit_max[1];
-#endif
 
 /****************************************************************************
  * Public Functions

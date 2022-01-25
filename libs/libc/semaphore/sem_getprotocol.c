@@ -46,8 +46,7 @@
  *
  * Returned Value:
  *   This function is exposed as a non-standard application interface.  It
- *   returns zero (OK) if successful.  Otherwise, -1 (ERROR) is returned and
- *   the errno value is set appropriately.
+ *   returns zero (OK).  Otherwise, an error code.
  *
  ****************************************************************************/
 

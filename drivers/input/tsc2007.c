@@ -205,10 +205,13 @@ static const struct file_operations tsc2007_fops =
   tsc2007_open,    /* open */
   tsc2007_close,   /* close */
   tsc2007_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
+  NULL,            /* write */
+  NULL,            /* seek */
   tsc2007_ioctl,   /* ioctl */
   tsc2007_poll     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /* If only a single TSC2007 device is supported, then the driver state

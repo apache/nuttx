@@ -91,7 +91,7 @@ static int net_match_ipv4(FAR struct net_route_ipv4_s *route, FAR void *arg)
   net_ipv4_dumproute("Comparing", route);
   ninfo("With:\n");
   ninfo("  target=%08lx netmask=%08lx\n",
-        htonl(match->target), htonl(match->netmask));
+        HTONL(match->target), HTONL(match->netmask));
 
   if (net_ipv4addr_maskcmp(route->target, match->target, match->netmask) &&
       net_ipv4addr_cmp(route->netmask, match->netmask))
@@ -139,15 +139,15 @@ static int net_match_ipv6(
   net_ipv6_dumproute("Comparing", route);
   ninfo("With:\n");
   ninfo("  target:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        htons(match->target[0]),  htons(match->target[1]),
-        htons(match->target[2]),  htons(match->target[3]),
-        htons(match->target[4]),  htons(match->target[5]),
-        htons(match->target[6]),  htons(match->target[7]));
+        HTONS(match->target[0]),  HTONS(match->target[1]),
+        HTONS(match->target[2]),  HTONS(match->target[3]),
+        HTONS(match->target[4]),  HTONS(match->target[5]),
+        HTONS(match->target[6]),  HTONS(match->target[7]));
   ninfo("  netmask: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        htons(match->netmask[0]), htons(match->netmask[1]),
-        htons(match->netmask[2]), htons(match->netmask[3]),
-        htons(match->netmask[4]), htons(match->netmask[5]),
-        htons(match->netmask[6]), htons(match->netmask[7]));
+        HTONS(match->netmask[0]), HTONS(match->netmask[1]),
+        HTONS(match->netmask[2]), HTONS(match->netmask[3]),
+        HTONS(match->netmask[4]), HTONS(match->netmask[5]),
+        HTONS(match->netmask[6]), HTONS(match->netmask[7]));
 
   if (net_ipv6addr_maskcmp(route->target, match->target, match->netmask) &&
       net_ipv6addr_cmp(route->netmask, match->netmask))

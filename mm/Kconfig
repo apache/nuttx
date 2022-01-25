@@ -12,11 +12,6 @@ config MM_DEFAULT_MANAGER
 	---help---
 		NuttX original memory manager strategy.
 
-config MM_TLSF_MANAGER
-	bool "TLSF heap manager"
-	---help---
-		TLSF(http://www.gii.upv.es/tlsf/) memory manager strategy.
-
 config MM_CUSTOMIZE_MANAGER
 	bool "Customized heap manager"
 	---help---
@@ -24,47 +19,6 @@ config MM_CUSTOMIZE_MANAGER
 		if the MM heap module not defined by customer.
 
 endchoice
-
-config MM_DMALLOC
-	bool "dmalloc heap debug tool"
-	default n
-	---help---
-		dmalloc(https://dmalloc.com) memory manager strategy.
-
-if MM_DMALLOC
-
-config MM_DMALLOC_OPTIONS
-	string "dmalloc option"
-	default "debug=0x02f06d00"
-
-config MM_DMALLOC_MAX_SKIP_LEVEL
-	int "dmalloc max skip level"
-	default 8
-	range 1 32
-
-config MM_DMALLOC_FREED_POINTER_DELAY
-	int "dmalloc freed pointer delay"
-	default 32
-
-config MM_DMALLOC_MAX_BACKTRACE_DEPTH
-	int "dmalloc max backtrace depth"
-	default 8
-	depends on SCHED_BACKTRACE
-
-config MM_DMALLOC_MAX_TAB_BACKTRACE_DEPTH
-	int "dmalloc max table backtrace depth"
-	default MM_DMALLOC_MAX_BACKTRACE_DEPTH
-	depends on SCHED_BACKTRACE
-
-config MM_DMALLOC_MEMORY_TABLE_TOP_LOG
-	int "dmalloc memory table top size"
-	default 64
-
-config MM_DMALLOC_MEMORY_TABLE_SIZE
-	int "dmalloc memory table size"
-	default MM_DMALLOC_MEMORY_TABLE_TOP_LOG
-
-endif
 
 config MM_KERNEL_HEAP
 	bool "Support a protected, kernel heap"
@@ -229,6 +183,7 @@ config MM_KASAN
 	default n
 	---help---
 		KASan is a fast compiler-based tool for detecting memory
-		bugs in native code.
+		bugs in native code. After turn on this option, Please
+		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
 source "mm/iob/Kconfig"

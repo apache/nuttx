@@ -164,7 +164,7 @@ uint32_t board_userled_initialize(void)
 
 void board_userled(int led, bool ledon)
 {
-  if (led == 1)
+  if (BOARD_LD2_BIT == (1 << led))
     {
       stm32_gpiowrite(GPIO_LD2, ledon);
     }
@@ -176,8 +176,28 @@ void board_userled(int led, bool ledon)
 
 void board_userled_all(uint32_t ledset)
 {
+  /* An output of '1' illuminates the LED */
+
   stm32_gpiowrite(GPIO_LD2, (ledset & BOARD_LD2_BIT) != 0);
 }
+
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+/****************************************************************************
+ * Name: board_userled_getall
+ ****************************************************************************/
+
+void board_userled_getall(uint32_t *ledset)
+{
+  /* Clear the LED bits */
+
+  *ledset = 0;
+
+  /* Get LED state. An output of '1' illuminates the LED. */
+
+  *ledset |= ((stm32_gpioread(GPIO_LD2) & 1) << BOARD_LD2);
+}
+
+#endif /* CONFIG_USERLED_LOWER_READSTATE */
 
 /****************************************************************************
  * Name: stm32_led_pminitialize

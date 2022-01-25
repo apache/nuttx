@@ -52,7 +52,7 @@ Now, to flash the binary to your board, connect the USB cable and do:
 .. code-block:: console
 
   $ cd nuttx/
-  $ openocd -f interface/st-link-v2.cfg -f target/stm32f1x.cfg -c 'init' \
+  $ openocd -f interface/stlink-v2.cfg -f target/stm32f1x.cfg -c 'init' \
     -c 'program nuttx/nuttx.bin verify reset' -c 'shutdown'
 
 Access NuttShell

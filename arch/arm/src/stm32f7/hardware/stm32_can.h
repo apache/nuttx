@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_CAN_H
-#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F7_CAN_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_CAN_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32_CAN_H
 
 /****************************************************************************
  * Included Files

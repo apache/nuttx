@@ -38,6 +38,7 @@
 #include "esp32c3_adc.h"
 
 #include "hardware/esp32c3_system.h"
+#include "hardware/esp32c3_efuse.h"
 #include "hardware/esp32c3_saradc.h"
 #include "hardware/esp32c3_gpio_sigmap.h"
 #include "hardware/regi2c_ctrl.h"
@@ -63,6 +64,16 @@
 
 #define ADC_VAL_MASK            (0xfff)
 
+#define ADC_CAL_BASE_REG        EFUSE_RD_SYS_DATA_PART1_0_REG
+
+#define ADC_CAL_VER_OFF         (128)
+#define ADC_CAL_VER_LEN         (3)
+
+#define ADC_CAL_DATA_LEN        (10)
+#define ADC_CAL_DATA_COMP       (1000)
+
+#define ADC_CAL_VOL_LEN         (10)
+
 /* ADC input voltage attenuation, this affects measuring range */
 
 #define ADC_ATTEN_DB_0          (0)     /* Vmax = 800 mV  */
@@ -74,16 +85,32 @@
 
 #if defined(CONFIG_ESP32C3_ADC_VOL_750)
 #  define ADC_ATTEN_DEF         ADC_ATTEN_DB_0
-#  define ADC_VOL_VAL           (750)
+
+#  define ADC_CAL_DATA_OFF      (148)
+#  define ADC_CAL_VOL_OFF       (188)
+
+#  define ADC_CAL_VOL_DEF       (400)
 #elif defined(CONFIG_ESP32C3_ADC_VOL_1050)
 #  define ADC_ATTEN_DEF         ADC_ATTEN_DB_2_5
-#  define ADC_VOL_VAL           (1050)
+
+#  define ADC_CAL_DATA_OFF      (158)
+#  define ADC_CAL_VOL_OFF       (198)
+
+#  define ADC_CAL_VOL_DEF       (550)
 #elif defined(CONFIG_ESP32C3_ADC_VOL_1300)
 #  define ADC_ATTEN_DEF         ADC_ATTEN_DB_6
-#  define ADC_VOL_VAL           (1300)
+
+#  define ADC_CAL_DATA_OFF      (168)
+#  define ADC_CAL_VOL_OFF       (208)
+
+#  define ADC_CAL_VOL_DEF       (750)
 #elif defined(CONFIG_ESP32C3_ADC_VOL_2500)
 #  define ADC_ATTEN_DEF         ADC_ATTEN_DB_11
-#  define ADC_VOL_VAL           (2500)
+
+#  define ADC_CAL_DATA_OFF      (178)
+#  define ADC_CAL_VOL_OFF       (218)
+
+#  define ADC_CAL_VOL_DEF       (1370)
 #endif
 
 #define ADC_WORK_DELAY          (1)
@@ -214,6 +241,10 @@ static struct adc_dev_s g_adc1_chan4_dev =
 
 static bool g_calibrated;
 
+/* ADC calibration digital parameter */
+
+static uint16_t g_cal_digit;
+
 /* ADC clock reference */
 
 static uint32_t g_clk_ref;
@@ -223,6 +254,48 @@ static sem_t g_sem_excl = SEM_INITIALIZER(1);
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: read_efuse
+ *
+ * Description:
+ *   Read Efuse data.
+ *
+ * Input Parameters:
+ *   addr   - register address
+ *   b_off  - bit offset
+ *   b_size - bit size
+ *
+ * Returned Value:
+ *  Efuse data.
+ *
+ ****************************************************************************/
+
+static uint32_t read_efuse(uint32_t addr, uint32_t b_off, uint32_t b_size)
+{
+  uint32_t data;
+  uint32_t regval;
+  uint32_t shift = 32 - b_size;
+  uint32_t mask = UINT32_MAX >> shift;
+  uint32_t res = b_off % 32;
+  uint32_t regaddr = addr + (b_off / 32 * 4);
+
+  regval = getreg32(regaddr);
+  data = regval >> res;
+  if (res <= shift)
+    {
+      data &= mask;
+    }
+  else
+    {
+      shift = 32 - res;
+
+      regval = getreg32(regaddr + 4);
+      data |= (regval & (mask >> shift)) << shift;
+    }
+
+  return data;
+}
 
 /****************************************************************************
  * Name: adc_enable_clk
@@ -410,47 +483,74 @@ static void adc_calibrate(void)
   uint16_t adc_max = 0;
   uint16_t adc_min = UINT16_MAX;
   uint32_t adc_sum = 0;
+  uint32_t regval;
 
-  /* Enable Vdef */
-
-  rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                        I2C_ADC1_DEF, I2C_ADC1_DEF_MSB,
-                        I2C_ADC1_DEF_LSB, 1);
-
-  /* Start sampling */
-
-  adc_samplecfg(ADC_CAL_CHANNEL);
-
-  /* Enable internal connect GND (for calibration). */
-
-  rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                        I2C_ADC1_ENCAL_GND, I2C_ADC1_ENCAL_GND_MSB,
-                        I2C_ADC1_ENCAL_GND_LSB, 1);
-
-  for (int i = 1; i < ADC_CAL_CNT_MAX ; i++)
+  regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_VER_OFF, ADC_CAL_VER_LEN);
+  if (regval == 1)
     {
-      adc_set_calibration(0);
-      adc = adc_read();
+      ainfo("Calibrate based on efuse data\n");
 
-      adc_sum += adc;
-      adc_max  = MAX(adc, adc_max);
-      adc_min  = MIN(adc, adc_min);
+      regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_DATA_OFF,
+                          ADC_CAL_DATA_LEN);
+      cali_val = regval + ADC_CAL_DATA_COMP;
     }
+  else
+    {
+      ainfo("Calibrate based on GND voltage\n");
 
-  cali_val = (adc_sum - adc_max - adc_min) / (ADC_CAL_CNT_MAX - 2);
+      /* Enable Vdef */
 
-  /* Disable internal connect GND (for calibration). */
+      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
+                            I2C_ADC1_DEF, I2C_ADC1_DEF_MSB,
+                            I2C_ADC1_DEF_LSB, 1);
 
-  rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
-                        I2C_ADC1_ENCAL_GND,
-                        I2C_ADC1_ENCAL_GND_MSB,
-                        I2C_ADC1_ENCAL_GND_LSB, 0);
+      /* Start sampling */
+
+      adc_samplecfg(ADC_CAL_CHANNEL);
+
+      /* Enable internal connect GND (for calibration). */
+
+      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
+                            I2C_ADC1_ENCAL_GND, I2C_ADC1_ENCAL_GND_MSB,
+                            I2C_ADC1_ENCAL_GND_LSB, 1);
+
+      for (int i = 1; i < ADC_CAL_CNT_MAX ; i++)
+        {
+          adc_set_calibration(0);
+          adc = adc_read();
+
+          adc_sum += adc;
+          adc_max  = MAX(adc, adc_max);
+          adc_min  = MIN(adc, adc_min);
+        }
+
+      cali_val = (adc_sum - adc_max - adc_min) / (ADC_CAL_CNT_MAX - 2);
+
+      /* Disable internal connect GND (for calibration). */
+
+      rom_i2c_writereg_mask(I2C_ADC, I2C_ADC_HOSTID,
+                            I2C_ADC1_ENCAL_GND,
+                            I2C_ADC1_ENCAL_GND_MSB,
+                            I2C_ADC1_ENCAL_GND_LSB, 0);
+    }
 
   ainfo("calibration value: %" PRIu16 "\n", cali_val);
 
   /* Set final calibration parameters */
 
   adc_set_calibration(cali_val);
+
+  /* Set calibration digital parameters */
+
+  regval = read_efuse(ADC_CAL_BASE_REG, ADC_CAL_VOL_OFF, ADC_CAL_VOL_LEN);
+  if (regval & BIT(ADC_CAL_VOL_LEN - 1))
+    {
+      g_cal_digit = 2000 - (regval & ~(BIT(ADC_CAL_VOL_LEN - 1)));
+    }
+  else
+    {
+      g_cal_digit = 2000 + regval;
+    }
 }
 
 /****************************************************************************
@@ -470,7 +570,8 @@ static void adc_calibrate(void)
 static void adc_read_work(struct adc_dev_s *dev)
 {
   int ret;
-  uint16_t adc;
+  uint32_t value;
+  int32_t adc;
   struct adc_chan_s *priv = (struct adc_chan_s *)dev->ad_priv;
 
   ret = sem_wait(&g_sem_excl);
@@ -481,12 +582,15 @@ static void adc_read_work(struct adc_dev_s *dev)
     }
 
   adc_samplecfg(priv->channel);
-  adc = adc_read();
+  value = adc_read();
+
+  adc = (int32_t)(value * (UINT16_MAX * ADC_CAL_VOL_DEF / g_cal_digit) /
+                  UINT16_MAX);
 
   priv->cb->au_receive(dev, priv->channel, adc);
 
   ainfo("channel: %" PRIu8 ", voltage: %" PRIu32 " mV\n", priv->channel,
-        (uint32_t)adc * ADC_VOL_VAL / ADC_CAL_VAL_MAX);
+        adc);
 
   sem_post(&g_sem_excl);
 }
@@ -579,6 +683,7 @@ static int adc_setup(struct adc_dev_s *dev)
 
   if (priv->ref > 0)
     {
+      priv->ref++;
       return OK;
     }
 

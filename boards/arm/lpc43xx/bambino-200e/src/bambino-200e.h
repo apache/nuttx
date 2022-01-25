@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H
-#define __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H
+#ifndef __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_200E_H
+#define __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_200E_H
 
 /****************************************************************************
  * Included Files
@@ -185,4 +185,4 @@ int lpc43_timerinitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_H */
+#endif /* __BOARDS_ARM_LPC43X_BAMBINO_200E_SRC_BAMBINO_200E_H */

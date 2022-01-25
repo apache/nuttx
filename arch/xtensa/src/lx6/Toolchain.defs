@@ -29,22 +29,6 @@
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION ?= -Os
-endif
-
-ifeq ($(CONFIG_MM_KASAN),y)
-  MAXOPTIMIZATION += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  MAXOPTIMIZATION += -fomit-frame-pointer
-endif
-
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CROSSDEV = xt-
 endif
@@ -58,6 +42,22 @@ ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
 endif
 
 ARCHCPUFLAGS =
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
 
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)

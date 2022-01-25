@@ -110,6 +110,7 @@ config ARCH_XTENSA
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
@@ -130,6 +131,13 @@ config ARCH_OR1K
 	---help---
 		OpenRISC architectures.
 
+config ARCH_SPARC
+	bool "SPARC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		SPARC architectures (SPARC V8)
+
 endchoice
 
 config ARCH
@@ -147,6 +155,7 @@ config ARCH
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
+	default "sparc"   if ARCH_SPARC
 
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
@@ -162,6 +171,7 @@ source "arch/xtensa/Kconfig"
 source "arch/z16/Kconfig"
 source "arch/z80/Kconfig"
 source "arch/or1k/Kconfig"
+source "arch/sparc/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool
@@ -225,7 +235,7 @@ config ARCH_SIZET_LONG
 		the same underlying type as your toolchain's size_t.
 
 config ARCH_COVERAGE
-	bool "arch coverage"
+	bool "Enable code coverage analysis"
 	select HAVE_CXX
 	select HAVE_CXXINITIALIZE
 	default n
@@ -345,6 +355,11 @@ config ARCH_HAVE_PROGMEM_READ
 	default n
 	depends on ARCH_HAVE_PROGMEM
 
+config ARCH_HAVE_PROGMEM_ERASESTATE
+	bool
+	default n
+	depends on ARCH_HAVE_PROGMEM
+
 config ARCH_HAVE_RESET
 	bool
 	default n
@@ -422,8 +437,8 @@ config ARCH_USE_TEXT_HEAP
 	default n
 	depends on ARCH_HAVE_TEXT_HEAP
 	---help---
-		This option enables architecture-sepecific memory allocator
-		for dynamic code loading. For example, ESP32 has a separate memory
+		This option enables architecture-specific memory allocator
+		for dynamic code loading. For example, ESP32 has separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.
 

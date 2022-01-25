@@ -99,4 +99,23 @@ void board_userled_all(uint32_t ledset)
   s32k1xx_gpiowrite(GPIO_LED_B, !((ledset & BOARD_LED_B_BIT) != 0));
 }
 
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+/****************************************************************************
+ * Name: board_userled_getall
+ ****************************************************************************/
+
+void board_userled_getall(uint32_t *ledset)
+{
+  /* Clear the LED bits */
+
+  *ledset = 0;
+
+  /* Get LED state. Invert value, an output of '0' illuminates the LED. */
+
+  *ledset |= (((!s32k1xx_gpioread(GPIO_LED_R)) & 1) << BOARD_LED_R);
+  *ledset |= (((!s32k1xx_gpioread(GPIO_LED_G)) & 1) << BOARD_LED_G);
+  *ledset |= (((!s32k1xx_gpioread(GPIO_LED_B)) & 1) << BOARD_LED_B);
+}
+#endif /* CONFIG_USERLED_LOWER_READSTATE */
+
 #endif /* !CONFIG_ARCH_LEDS */

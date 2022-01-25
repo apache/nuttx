@@ -33,7 +33,7 @@
 #include <nuttx/board.h>
 #include <nuttx/drivers/ramdisk.h>
 
-#include "mpfsicicle.h"
+#include "board_config.h"
 #include "mpfs_corepwm.h"
 #include "mpfs.h"
 

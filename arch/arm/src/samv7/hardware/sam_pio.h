@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H
-#define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H
+#ifndef __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PIO_H
+#define __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PIO_H
 
 /****************************************************************************
  * Included Files
@@ -578,4 +578,4 @@
  ****************************************************************************/
 
 #endif /* SAMV7_NPIO > 0 */
-#endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM4E_PIO_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_HARDWARE_SAM_PIO_H */

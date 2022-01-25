@@ -162,8 +162,8 @@ the SD slots can be enabled with the following settings:
   Device Drivers -> MMC/SD Driver Support
     CONFIG_MMCSD=y                        : Enable MMC/SD support
     CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-    CONFIG_MMCSD_MULTIBLOCK_LIMIT=1       : (REVISIT)
-    CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
+    CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
+    CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
     CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
     CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
     CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
@@ -236,12 +236,12 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT=y
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_DDELAY=1000
-      CONFIG_SAME70XPLAINED_HSMCI0_AUTOMOUNT_UDELAY=2000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -752,7 +752,7 @@ MCAN1 Loopback Test
 SPI Slave
 =========
 
-  An interrutp driven SPI slave driver as added on 2015-08-09 but has not
+  An interrupt driven SPI slave driver as added on 2015-08-09 but has not
   been verified as of this writing. See discussion in include/nuttx/spi/slave.h
   and below.
 
@@ -1159,7 +1159,7 @@ Using OpenOCD and GDB to flash via the EDBG chip
 
     OpenOCD requires a configuration file.  I keep the one I used last here:
 
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_same70_xplained.cfg
 
     However, the "correct" configuration script to use with OpenOCD may
     change as the features of OpenOCD evolve.  So you should at least
@@ -1175,15 +1175,15 @@ Using OpenOCD and GDB to flash via the EDBG chip
     the OpenOCD daemon on my system called oocd.sh.  That script will
     probably require some modifications to work in another environment:
 
-    - Possibly the value of OPENOCD_PATH and TARGET_PATH
+    - Possibly the value of OPENOCD_PATH, TARGET_PATH and TARGET_BOARD
     - It assumes that the correct script to use is the one at
-      boards/arm/samv7/same70-xplained/tools/atmel_same70_xplained.cfg
+      boards/arm/samv7/common/tools/atmel_${TARGET_BOARD}.cfg
 
   Starting OpenOCD
 
     Then you should be able to start the OpenOCD daemon like:
 
-      boards/arm/samv7/same70-xplained/tools/oocd.sh $PWD
+      boards/arm/samv7/common/tools/oocd.sh $PWD
 
   Connecting GDB
 
@@ -1310,6 +1310,16 @@ NOTES:
 
 Configuration sub-directories
 -----------------------------
+
+  adc
+
+    This is a basic nsh configuration (se below) with added example for
+    ADC (AFEC) driver. Data can be read through channel AFE0_AD0 by
+    running application "adc" in NuttShell.
+
+    The ADC is triggered by Timer/counter at 1 kHz frequency and uses
+    DMA to transfer samples. Number of transfered samples can be set
+    by configuring CONFIG_SAMV7_AFEC_DMASAMPLES.
 
   mrf24j40-starhub
 
@@ -1692,3 +1702,39 @@ Configuration sub-directories
          most of the issues.  Things look good on real, local hardware
          (see boards/lpcxpresso-lpc54628/twm4nx).  VNC is just not mature
          enough for this kind of usage at this time.
+
+  mcuboot-loader:
+    This configuration exercises the port of MCUboot loader to NuttX.
+
+    In this configuration both primary, secondary and scratch partitions are
+    mapped into the internal flash.
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_BOOTLOADER=y
+      CONFIG_MCUBOOT_ENABLE_LOGGING=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
+
+  mcuboot-confirm:
+    This configuration exercises the MCUboot compatible application slot
+    confirm example.
+
+    Generate signed binaries for MCUboot compatible application:
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin signed_app_1_0_0.bin
+
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"

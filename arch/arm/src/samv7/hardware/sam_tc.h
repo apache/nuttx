@@ -417,7 +417,7 @@
 #define TC_CMR_BURST_SHIFT       (4)       /* Bits 4-5: Burst Signal Selection */
 #define TC_CMR_BURST_MASK        (3 << TC_CMR_BURST_SHIFT)
 #  define TC_CMR_BURST_NONE      (0 << TC_CMR_BURST_SHIFT) /* Clock not gated by external signal */
-#  define TC_CMR_BURST_XC0       (1 << TC_CMR_BURST_SHIFT) /* XXC0 ANDed with clock */
+#  define TC_CMR_BURST_XC0       (1 << TC_CMR_BURST_SHIFT) /* XC0 ANDed with clock */
 #  define TC_CMR_BURST_XC1       (2 << TC_CMR_BURST_SHIFT) /* XC1 ANDed with clock */
 #  define TC_CMR_BURST_XC2       (3 << TC_CMR_BURST_SHIFT) /* XC2 ANDed with clock */
 
@@ -621,6 +621,7 @@
 #define TC_BMR_INVIDX            (1 << 15) /* Bit 15: INVerted InDeX */
 #define TC_BMR_SWAP              (1 << 16) /* Bit 16: SWAP PHA and PHB */
 #define TC_BMR_IDXPHB            (1 << 17) /* Bit 17: InDeX pin is PHB pin */
+#define TC_BMR_AUTOC             (1 << 18) /* Bit 18: AUTO Correction of missing pulses */
 #define TC_BMR_MAXFILT_SHIFT     (20)      /* Bits 20-25: MAXimum FILTer */
 #define TC_BMR_MAXFILT_MASK      (63 << TC_BMR_MAXFILT_SHIFT)
 #  define TC_BMR_MAXFILT(n)      ((uint32_t)(n) << TC_BMR_MAXFILT_SHIFT)
@@ -630,10 +631,12 @@
  */
 
 #define TC_QINT_IDX              (1 << 0)  /* Bit 0:  Index */
-#define TC_QINT_DIRCHG           (1 << 1)  /* Bit 1:  Direction change */
+#define TC_QINT_DIRCHG           (1 << 1)  /* Bit 1:  DIRection CHanGe */
 #define TC_QINT_QERR             (1 << 2)  /* Bit 2:  Quadrature ERRor */
+#define TC_QINT_MPE              (1 << 3)  /* Bit 3:  Consecutive Missing Pulse Error */
+#define TC_QINT_ALL              (0xf)
 
-#define TC_QISR_DIRR             (1 << 8)  /* Bit 8: Direction */
+#define TC_QISR_DIR              (1 << 8)  /* Bit 8:  DIRection */
 
 /* Fault Mode Register */
 

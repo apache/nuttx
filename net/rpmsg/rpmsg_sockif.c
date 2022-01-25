@@ -302,11 +302,13 @@ static int rpmsg_socket_ept_cb(FAR struct rpmsg_endpoint *ept,
     {
       rpmsg_socket_lock(&conn->recvlock);
       conn->sendsize = head->size;
+
       if (conn->psock)
         {
           conn->psock->s_flags |= _SF_CONNECTED;
           _SO_SETERRNO(conn->psock, OK);
         }
+
       rpmsg_socket_unlock(&conn->recvlock);
       rpmsg_socket_post(&conn->sendsem);
       rpmsg_socket_pollnotify(conn, POLLOUT);
@@ -522,9 +524,9 @@ static void rpmsg_socket_ns_bind(FAR struct rpmsg_device *rdev,
         {
           /* Reject the connection */
 
+          rpmsg_socket_unlock(&server->recvlock);
           rpmsg_destroy_ept(&new->ept);
           rpmsg_socket_free(new);
-          rpmsg_socket_unlock(&server->recvlock);
           return;
         }
     }
@@ -923,7 +925,7 @@ static uint32_t rpmsg_socket_get_iovlen(FAR const struct iovec *buf,
 
 static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
                                             FAR const struct iovec *buf,
-                                            size_t iovcnt, int nonblock)
+                                            size_t iovcnt, bool nonblock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   uint32_t len = rpmsg_socket_get_iovlen(buf, iovcnt);
@@ -1016,7 +1018,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
 
 static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
                                         FAR const struct iovec *buf,
-                                        size_t iovcnt, int nonblock)
+                                        size_t iovcnt, bool nonblock)
 {
   FAR struct rpmsg_socket_conn_s *conn = psock->s_conn;
   FAR struct rpmsg_socket_data_s *msg;
@@ -1116,7 +1118,7 @@ static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
   size_t len = msg->msg_iovlen;
   FAR const struct sockaddr *to = msg->msg_name;
   socklen_t tolen = msg->msg_namelen;
-  int nonblock;
+  bool nonblock;
   ssize_t ret;
 
   if (!_SS_ISCONNECTED(psock->s_flags))
@@ -1140,7 +1142,7 @@ static ssize_t rpmsg_socket_sendmsg(FAR struct socket *psock,
       return -ECONNRESET;
     }
 
-  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT);
+  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
 
   if (psock->s_type == SOCK_STREAM)
     {
@@ -1214,7 +1216,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
       goto out;
     }
 
-  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT))
+  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       ret = -EAGAIN;
       goto out;

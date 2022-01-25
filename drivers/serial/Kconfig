@@ -177,7 +177,7 @@ config TTY_LAUNCH
 	bool "Enable feature TTY launch program"
 	default n
 	---help---
-		If select this, then user can lanunch a program with a special input.
+		If select this, then user can launch a program with a special input.
 
 if TTY_LAUNCH
 

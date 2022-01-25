@@ -85,13 +85,16 @@ static ssize_t max6675_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_max6675fops =
 {
-  max6675_open,
-  max6675_close,
-  max6675_read,
-  max6675_write,
-  NULL,
-  NULL,
-  NULL
+  max6675_open,    /* open */
+  max6675_close,   /* close */
+  max6675_read,    /* read */
+  max6675_write,   /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

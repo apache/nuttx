@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_MPU_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_MPU_H
+#ifndef __ARCH_XTENSA_SRC_COMMON_MPU_H
+#define __ARCH_XTENSA_SRC_COMMON_MPU_H
 
 /****************************************************************************
  * Included Files
@@ -210,7 +210,7 @@ void mpu_control(bool enable);
  ****************************************************************************/
 
 void mpu_configure_region(uintptr_t base, size_t size,
-            uint32_t acc, uint32_t memtype);
+                          uint32_t acc, uint32_t memtype);
 
 /****************************************************************************
  * Name: mpu_priv_stronglyordered
@@ -371,4 +371,4 @@ void mpu_configure_region(uintptr_t base, size_t size,
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_MPU_H */
+#endif /* __ARCH_XTENSA_SRC_COMMON_MPU_H */

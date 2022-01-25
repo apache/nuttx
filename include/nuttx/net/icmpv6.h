@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_ICMPv6_H
-#define __INCLUDE_NUTTX_NET_ICMPv6_H
+#ifndef __INCLUDE_NUTTX_NET_ICMPV6_H
+#define __INCLUDE_NUTTX_NET_ICMPV6_H
 
 /****************************************************************************
  * Included Files
@@ -157,7 +157,7 @@ struct icmpv6_hdr_s
    * message type indicated by the Type and Code fields.
    */
 
-  uint32_t data;
+  uint16_t data[2];
 };
 
 /* The ICMPv6 and IPv6 headers */
@@ -380,4 +380,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif /* __INCLUDE_NUTTX_NET_ICMPv6_H */
+#endif /* __INCLUDE_NUTTX_NET_ICMPV6_H */

@@ -32,6 +32,10 @@
 #include <assert.h>
 #include <debug.h>
 
+#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
+#include <nuttx/board.h>
+#endif
+
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "composite.h"
@@ -143,7 +147,11 @@ int composite_mkstrdesc(uint8_t id, struct usb_strdesc_s *strdesc)
       break;
 
     case COMPOSITE_SERIALSTRID:
+#ifdef CONFIG_COMPOSITE_BOARD_SERIALSTR
+      str = board_usbdev_serialstr();
+#else
       str = g_compserialstr;
+#endif
       break;
 
     case COMPOSITE_CONFIGSTRID:

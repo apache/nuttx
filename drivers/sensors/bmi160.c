@@ -258,12 +258,16 @@ static int bmi160_checkid(FAR struct bmi160_dev_s *priv);
 
 static const struct file_operations g_bmi160fops =
 {
-  bmi160_open,    /* open */
-  bmi160_close,   /* close */
-  bmi160_read,    /* read */
-  0,              /* write */
-  0,              /* seek */
-  bmi160_ioctl,   /* ioctl */
+  bmi160_open,     /* open */
+  bmi160_close,    /* close */
+  bmi160_read,     /* read */
+  NULL,            /* write */
+  NULL,            /* seek */
+  bmi160_ioctl,    /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************

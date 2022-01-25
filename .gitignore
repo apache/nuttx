@@ -24,9 +24,9 @@
 *.swp
 *.sym
 *.wsp
+*.ddc
 *~
 .depend
-/.clean_context
 /.config
 /.config.old
 /.cproject
@@ -47,3 +47,7 @@ core
 Make*.dep
 uImage
 /external
+# $(TOPDIR)/Makefile.[unix|win]::$(CONTEXTDIRS_DEPS)
+.context
+# $(TOPDIR)/Makefile.[unix|win]::$(DIRLINKS_EXTERNAL_DIRS)
+.dirlinks

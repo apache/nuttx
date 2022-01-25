@@ -99,6 +99,11 @@
 #define AN_MAX1161X_FIRST (AN_STM32L4_FIRST + AN_STM32L4_NCMDS)
 #define AN_MAX1161X_NCMDS 8
 
+/* See include/nuttx/analog/mcp48xx.h */
+
+#define AN_MCP48XX_FIRST (AN_MAX1161X_FIRST + AN_MAX1161X_NCMDS)
+#define AN_MCP48XX_NCMDS 3
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

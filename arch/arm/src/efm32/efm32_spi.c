@@ -1215,7 +1215,7 @@ static uint32_t spi_send(struct spi_dev_s *dev, uint32_t wd)
   spi_wait_status(config, _USART_STATUS_RXDATAV_MASK, USART_STATUS_RXDATAV);
   ret = spi_getreg(config, EFM32_USART_RXDATA_OFFSET);
 
-  spiinfo("Sent: %04x Return: %04x \n", wd, ret);
+  spiinfo("Sent: %04x Return: %04x\n", wd, ret);
   return ret;
 }
 

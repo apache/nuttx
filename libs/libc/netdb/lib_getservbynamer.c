@@ -97,7 +97,7 @@ int getservbyname_r(FAR const char *name, FAR const char *proto,
         {
           result_buf->s_name = (FAR char *)name;
           result_buf->s_aliases = NULL;
-          result_buf->s_port = htons(g_services_db[i].s_port);
+          result_buf->s_port = HTONS(g_services_db[i].s_port);
 
           if (g_services_db[i].s_protocol == IPPROTO_TCP)
             {

@@ -34,9 +34,10 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
+#include <nuttx/spinlock.h>
 
-#include "esp32_freerun.h"
 #include "esp32_clockconfig.h"
+#include "esp32_freerun.h"
 
 #ifdef CONFIG_ESP32_FREERUN
 
@@ -47,6 +48,12 @@
 #define MAX_TIMERS 4
 #define MAX_US_RESOLUTION 819
 #define ESP32_TIMER_WIDTH 64
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static spinlock_t g_lock;      /* Device specific lock */
 
 /****************************************************************************
  * Private Functions
@@ -189,9 +196,9 @@ int esp32_freerun_initialize(struct esp32_freerun_s *freerun, int chan,
 
       /* Register the handler */
 
-      flags = enter_critical_section();
+      flags = spin_lock_irqsave(&g_lock);
       ret = ESP32_TIM_SETISR(freerun->tch, esp32_freerun_handler, freerun);
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&g_lock, flags);
       if (ret == OK)
         {
           ESP32_TIM_ENABLEINT(freerun->tch);
@@ -244,7 +251,7 @@ int esp32_freerun_counter(struct esp32_freerun_s *freerun,
 
   /* Temporarily disable the overflow counter. */
 
-  flags    = enter_critical_section();
+  flags    = spin_lock_irqsave(&g_lock);
 
   overflow = freerun->overflow;
   ESP32_TIM_GETCTR(freerun->tch, &counter);
@@ -271,7 +278,7 @@ int esp32_freerun_counter(struct esp32_freerun_s *freerun,
       freerun->overflow = overflow;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&g_lock, flags);
 
   tmrinfo("counter=%" PRIu64 " (%" PRIu64 ") overflow=%" PRIu32
           ", pending=%i\n",

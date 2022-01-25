@@ -222,11 +222,7 @@ long sysconf(int name)
 
       case _SC_NPROCESSORS_CONF:
       case _SC_NPROCESSORS_ONLN:
-#ifdef CONFIG_SMP_NCPUS
         return CONFIG_SMP_NCPUS;
-#else
-        return 1;
-#endif
 
       case _SC_MONOTONIC_CLOCK:
 #ifdef CONFIG_CLOCK_MONOTONIC

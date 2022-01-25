@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H
 
 /****************************************************************************
  * Included Files
@@ -49,4 +49,4 @@
 #define NRX_DEMAP_FORCE_PU_V  1
 #define NRX_DEMAP_FORCE_PU_S  1
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_NRX_REG_H */

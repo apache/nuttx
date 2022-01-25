@@ -25,6 +25,18 @@ else
     GCOV_DIR=${ROOT_DIR}/gcov
 fi
 
+files=$(find -name "*.gcda" 2> /dev/null | wc -l)
+if [ "$files" == "0" ] ;then
+    echo "Please run ./nuttx before using gcov.sh to generate the coverage report"
+    exit 1
+fi
+
+type lcov
+if [ $? -ne 0 ]; then
+    echo "Code coverage generation tool is not detected, please install lcov"
+    exit 1
+fi
+
 mkdir -p ${GCOV_DIR}
 cd ${GCOV_DIR}
 

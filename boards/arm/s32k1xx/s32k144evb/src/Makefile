@@ -37,6 +37,10 @@ ifeq ($(CONFIG_BOARDCTL),y)
 CSRCS += s32k1xx_appinit.c
 endif
 
+ifeq ($(CONFIG_BOARDCTL_UNIQUEID),y)
+CSRCS += s32k1xx_uid.c
+endif
+
 ifeq ($(CONFIG_S32K1XX_LPI2C),y)
 CSRCS += s32k1xx_i2c.c
 endif

@@ -23,148 +23,135 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/rv32im/irq.h>
+#include <arch/csr.h>
 
-/****************************************************************************
- * Public Symbols
- ****************************************************************************/
+    .section .init
+    .globl bl602_start
+    .globl __start
+    .type bl602_start,@function
 
-  .global exception_common
+__start:
+bl602_start:
+    .cfi_startproc
+    .cfi_undefined ra
+    .option push
+    .option norelax
 
-/****************************************************************************
- * Name: exception_common
- ****************************************************************************/
+  /*disable IRQ*/
 
-.align 8
-exception_common:
+    li t0, MSTATUS_MIE
+    csrc mstatus, t0
 
-  addi sp, sp, -XCPTCONTEXT_SIZE
+    la gp, __global_pointer$
+.option pop
+    la sp, g_idle_stack
+    add s11, sp, zero
 
-  sw   x1,  1*4(sp)  /* ra */
-  sw   x3,  3*4(sp)  /* gp */
-  sw   x4,  4*4(sp)  /* tp */
-  sw   x5,  5*4(sp)  /* t0 */
-  sw   x6,  6*4(sp)  /* t1 */
-  sw   x7,  7*4(sp)  /* t2 */
-  sw   x8,  8*4(sp)  /* s0 */
-  sw   x9,  9*4(sp)  /* s1 */
-  sw   x10, 10*4(sp) /* a0 */
-  sw   x11, 11*4(sp) /* a1 */
-  sw   x12, 12*4(sp) /* a2 */
-  sw   x13, 13*4(sp) /* a3 */
-  sw   x14, 14*4(sp) /* a4 */
-  sw   x15, 15*4(sp) /* a5 */
-  sw   x16, 16*4(sp) /* a6 */
-  sw   x17, 17*4(sp)  /* a7 */
-  sw   x18, 18*4(sp)  /* s2 */
-  sw   x19, 19*4(sp)  /* s3 */
-  sw   x20, 20*4(sp)  /* s4 */
-  sw   x21, 21*4(sp)  /* s5 */
-  sw   x22, 22*4(sp)  /* s6 */
-  sw   x23, 23*4(sp)  /* s7 */
-  sw   x24, 24*4(sp)  /* s8 */
-  sw   x25, 25*4(sp)  /* s9 */
-  sw   x26, 26*4(sp)  /* s10 */
-  sw   x27, 27*4(sp)  /* s11 */
-  sw   x28, 28*4(sp)  /* t3 */
-  sw   x29, 29*4(sp)  /* t4 */
-  sw   x30, 30*4(sp)  /* t5 */
-  sw   x31, 31*4(sp)  /* t6 */
+    li t0, CONFIG_IDLETHREAD_STACKSIZE
+    add sp, sp, t0
+    andi sp, sp, ~0xF
 
-  csrr s0, mstatus
-  sw   s0,  32*4(sp)  /* mstatus */
+#ifndef RUN_IN_RAM
 
-  addi s0, sp, XCPTCONTEXT_SIZE
-  sw   s0,  2*4(sp)   /* original SP */
+    /* Load boot2 partition address */
 
-  csrr s0, mepc
-  sw   s0, 0(sp)   /* exception PC */
+    la a0, __boot2_pt_addr_src
+    la a1, __boot2_pt_addr_start
+    la a2, __boot2_pt_addr_end
+    bgeu a1, a2, bl602_entry_load_boot2_partiton_address_end
 
-#ifdef CONFIG_STACK_OVERFLOW_CHECK
-  la t0, __cyg_profile_func_enter
-  jalr x1, 0(t0)
+bl602_entry_load_boot2_partiton_address_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_boot2_partiton_address_loop
+
+bl602_entry_load_boot2_partiton_address_end:
+
+    /* Load boot2 flashCfg address */
+
+    jal boot2_get_flash_addr
+    la a1, __boot2_flash_cfg_start
+    la a2, __boot2_flash_cfg_end
+    bgeu a1, a2, bl602_entry_load_boot2_flashcfg_address_end
+
+bl602_entry_load_boot2_flashcfg_address_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_boot2_flashcfg_address_loop
+
+bl602_entry_load_boot2_flashcfg_address_end:
 #endif
 
-  /* Setup arg0(exception cause), arg1(context) */
+    /* Load data section */
 
-  csrr a0, mcause  /* exception cause */
-  mv   a1, sp      /* context = sp */
+    la a0, _data_load
+    la a1, _data_run
+    la a2, _data_run_end
+    bgeu a1, a2, bl602_entry_load_data_section_end
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-  /* Switch to interrupt stack */
+bl602_entry_load_data_section_loop:
+    lw t0, (a0)
+    sw t0, (a1)
+    addi a0, a0, 4
+    addi a1, a1, 4
+    bltu a1, a2, bl602_entry_load_data_section_loop
 
-  lui  sp, %hi(g_intstacktop)
-  addi sp, sp, %lo(g_intstacktop)
-#ifdef CONFIG_STACK_OVERFLOW_CHECK
-  la s11, g_intstackalloc
+bl602_entry_load_data_section_end:
+
+    /* Clear bss section */
+
+    la a0, __bss_start
+    la a1, __bss_end
+    bgeu a0, a1, bl602_entry_zero_bss_end
+
+bl602_entry_zero_bss_loop:
+    sw zero, (a0)
+    addi a0, a0, 4
+    bltu a0, a1, bl602_entry_zero_bss_loop
+bl602_entry_zero_bss_end:
+
+    /* Clear bss section */
+
+    la a0, __wifi_bss_start
+    la a1, __wifi_bss_end
+    bgeu a0, a1, bl602_entry_zero_wifi_bss_end
+
+bl602_entry_zero_wifi_bss_loop:
+    sw zero, (a0)
+    addi a0, a0, 4
+    bltu a0, a1, bl602_entry_zero_wifi_bss_loop
+bl602_entry_zero_wifi_bss_end:
+
+#ifndef __riscv_float_abi_soft
+
+    /* Enable FPU */
+
+    li t0, MSTATUS_FS
+    csrs mstatus, t0
+    csrr t1, mstatus
+    and t1, t1, t0
+    beqz t1, bl602_entry_enable_fpu_end
+    fssr x0
+
+bl602_entry_enable_fpu_end:
 #endif
-#endif
 
-  /* Call interrupt handler in C */
+    auipc ra, 0
+    addi sp, sp, -16
+    sw ra, 8(sp)
 
-  jal  x1, bl602_dispatch_irq
+    /* argc = argv = 0 */
 
-  /* If context switch is needed, return a new sp */
+    li a0, 0
+    li a1, 0
+    call bfl_main
 
-  mv   sp, a0
-  lw   s0, 0(sp)    /* restore mepc */
-  csrw mepc, s0
+bl602_entry_deadloop:
+    j bl602_entry_deadloop
 
-  lw   s0, 32*4(sp) /* restore mstatus */
-  csrw mstatus, s0
+    .cfi_endproc
 
-  lw  x3,  3*4(sp)  /* gp */
-  lw  x4,  4*4(sp)  /* tp */
-  lw  x5,  5*4(sp)  /* t0 */
-  lw  x6,  6*4(sp)  /* t1 */
-  lw  x7,  7*4(sp)  /* t2 */
-  lw  x8,  8*4(sp)  /* s0 */
-  lw  x9,  9*4(sp)  /* s1 */
-  lw x10, 10*4(sp)  /* a0 */
-  lw x11, 11*4(sp)  /* a1 */
-  lw x12, 12*4(sp)  /* a2 */
-  lw x13, 13*4(sp)  /* a3 */
-  lw x14, 14*4(sp)  /* a4 */
-  lw x15, 15*4(sp)  /* a5 */
-  lw x16, 16*4(sp)  /* a6 */
-  lw x17, 17*4(sp)  /* a7 */
-  lw x18, 18*4(sp)  /* s2 */
-  lw x19, 19*4(sp)  /* s3 */
-  lw x20, 20*4(sp)  /* s4 */
-  lw x21, 21*4(sp)  /* s5 */
-  lw x22, 22*4(sp)  /* s6 */
-  lw x23, 23*4(sp)  /* s7 */
-  lw x24, 24*4(sp)  /* s8 */
-  lw x25, 25*4(sp)  /* s9 */
-  lw x26, 26*4(sp)  /* s10 */
-  lw x27, 27*4(sp)  /* s11 */
-  lw x28, 28*4(sp)  /* t3 */
-  lw x29, 29*4(sp)  /* t4 */
-  lw x30, 30*4(sp)  /* t5 */
-  lw x31, 31*4(sp)  /* t6 */
-
-  lw  x1,  1*4(sp)  /* ra */
-
-  lw  sp,  2*4(sp)  /* restore original sp */
-
-  /* Return from Machine Interrupt */
-
-  mret
-
-/************************************************************************************
- *  Name: g_intstackalloc and g_intstacktop
- ************************************************************************************/
-
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-  .bss
-  .balign 16
-  .global g_intstackalloc
-  .global g_intstacktop
-  .type   g_intstackalloc, object
-  .type   g_intstacktop, object
-g_intstackalloc:
-  .skip  ((CONFIG_ARCH_INTERRUPTSTACK + 8) & ~15)
-g_intstacktop:
-  .size  g_intstacktop, 0
-  .size  g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-#endif

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V2_H
-#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32F0_UART_V2_H
+#ifndef __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_UART_V2_H
+#define __ARCH_ARM_SRC_STM32F0L0G0_HARDWARE_STM32_UART_V2_H
 
 /****************************************************************************
  * Included Files

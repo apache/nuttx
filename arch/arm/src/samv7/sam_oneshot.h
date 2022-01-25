@@ -68,7 +68,7 @@ struct sam_oneshot_s
   volatile void *arg;                 /* The argument that will accompany
                                        * the callback */
 #ifdef CONFIG_SAMV7_FREERUN
-  volatile uint32_t start_count;      /* Stores the value of the freerun counter,
+  volatile uint16_t start_count;      /* Stores the value of the freerun counter,
                                        * at each start of the oneshot timer. Is necessary
                                        * to find out if the oneshot counter was updated
                                        * correctly at the time of the call to

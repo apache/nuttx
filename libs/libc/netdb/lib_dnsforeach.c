@@ -167,7 +167,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
                   tmp = atoi(portstr);
                   if (tmp != 0)
                     {
-                      port = htons(tmp);
+                      port = HTONS(tmp);
                     }
                 }
             }

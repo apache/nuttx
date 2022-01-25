@@ -188,8 +188,8 @@ config IMXRT_FLEXSPI
 	default n
 
 config IMXRT_ADC
-    bool
-    default n
+	bool
+	default n
 
 config IMXRT_ENC
 	bool
@@ -359,7 +359,7 @@ config IMXRT_FLEXIO3
 	bool "FLEXIO3"
 	default n
 	select IMXRT_FLEXIO
-    ---help---
+	---help---
 		FLEXIO3 uses the FLEXIO2 clock settings.
 
 endif # ARCH_FAMILY_IMXRT106x
@@ -915,14 +915,14 @@ endmenu # FLEXSPI Peripherals
 menu "ADC Peripherals"
 
 menuconfig IMXRT_ADC1
-    bool "ADC1"
-    default n
-    select IMXRT_ADC
+	bool "ADC1"
+	default n
+	select IMXRT_ADC
 
 menuconfig IMXRT_ADC2
-    bool "ADC2"
-    default n
-    select IMXRT_ADC
+	bool "ADC2"
+	default n
+	select IMXRT_ADC
 
 endmenu
 
@@ -1976,24 +1976,24 @@ if IMXRT_USBDEV
 menu "USB device controller driver (DCD) options"
 
 config IMXRT_USBDEV_NOVBUS
-    bool "No USB VBUS sensing"
-    default n
+	bool "No USB VBUS sensing"
+	default n
 
 config IMXRT_USBDEV_FRAME_INTERRUPT
-    bool "USB frame interrupt"
-    default n
-    ---help---
-        Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
-        handler vs. simply reading on demand. Probably a bad idea... Unless
-        there is some issue with sampling the SOF from hardware asynchronously.
+	bool "USB frame interrupt"
+	default n
+	---help---
+		Handle USB Start-Of-Frame events.  Enable reading SOF from interrupt
+		handler vs. simply reading on demand. Probably a bad idea... Unless
+		there is some issue with sampling the SOF from hardware asynchronously.
 
 config IMXRT_USBDEV_REGDEBUG
-    bool "Register level debug"
-    depends on DEBUG_USB_INFO
-    default n
-    ---help---
-        Output detailed register-level USB device debug information.  Requires
-        also CONFIG_DEBUG_USB_INFO.
+	bool "Register level debug"
+	depends on DEBUG_USB_INFO
+	default n
+	---help---
+		Output detailed register-level USB device debug information.  Requires
+		also CONFIG_DEBUG_USB_INFO.
 
 endmenu # USB device controller driver (DCD) options
 endif # IMXRT_USBDEV

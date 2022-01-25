@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_IOCON_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_IOCON_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_IOCON_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_IOCON_H
 
 /****************************************************************************
  * Included Files
@@ -357,4 +357,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_IOCON_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC178X_40XX_IOCON_H */

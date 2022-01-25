@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USB_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USB_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USB_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USB_H
 
 /****************************************************************************
  * Included Files
@@ -3156,4 +3156,4 @@
 #define _USB_FIFORAM_FIFORAM_DEFAULT               0x00000000UL                        /* Mode DEFAULT for USB_FIFORAM */
 #define USB_FIFORAM_FIFORAM_DEFAULT                (_USB_FIFORAM_FIFORAM_DEFAULT << 0) /* Shifted mode DEFAULT for USB_FIFORAM */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_USB_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_USB_H */

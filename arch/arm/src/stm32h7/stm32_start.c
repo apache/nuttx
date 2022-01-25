@@ -36,6 +36,7 @@
 #include "arm_internal.h"
 #include "barriers.h"
 #include "nvic.h"
+#include "mpu.h"
 
 #include "stm32_rcc.h"
 #include "stm32_userspace.h"
@@ -276,7 +277,11 @@ void __start(void)
                    "r"(CONFIG_IDLETHREAD_STACKSIZE - 64) :);
 #endif
 
-  /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
+  /* If enabled reset the MPU */
+
+  mpu_early_reset();
+
+/* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */
 

@@ -78,6 +78,10 @@ void stm32_mpuinitialize(void)
 
   mpu_showtype();
 
+  /* Reset MPU if enabled */
+
+  mpu_reset();
+
   /* Configure user flash and SRAM space */
 
   mpu_user_flash(USERSPACE->us_textstart,

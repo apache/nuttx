@@ -84,14 +84,14 @@ define _examine_target
     python if (type(gdb.lookup_global_symbol("up_check_tcbstack")) is gdb.Symbol) : \
     gdb.execute("set $_target_has_stack_coloration = 1")
 
-    printf "target examined \n"
+    printf "target examined\n"
     python print("_target_arch.name=" + _target_arch.name())
 
     # NOTE: i386:x86-64 (qemu) does not work
-    #printf "$_target_arch : %s \n", $_target_arch
+    #printf "$_target_arch : %s\n", $_target_arch
 
-    printf "$_target_has_fpu : %d \n", $_target_has_fpu
-    printf "$_target_has_smp : %d \n", $_target_has_smp
+    printf "$_target_has_fpu : %d\n", $_target_has_fpu
+    printf "$_target_has_smp : %d\n", $_target_has_smp
     set $_target_examined = 1
   end
 end
@@ -155,7 +155,7 @@ define _save_current_tcb
       set $tcb = (struct tcb_s *)g_assignedtasks[$cpu]->head
       _save_tcb $tcb
     end
-    printf "saved current_tcb (pid=%d) \n", $tcb->pid
+    printf "saved current_tcb (pid=%d)\n", $tcb->pid
     set $_current_tcb = $tcb
   end
 end
@@ -455,7 +455,7 @@ define info_nxthreads
 end
 
 define nxcontinue
-  printf "nxcontinue \n"
+  printf "nxcontinue\n"
   # TODO: SMP
   set $tcb = g_readytorun->head
   _switch_tcb $tcb

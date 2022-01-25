@@ -211,7 +211,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * water marks.
        */
 
-      up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+      xtensa_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
 #endif
       tcb->flags |= TCB_FLAG_FREE_STACK;
 
@@ -223,7 +223,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 }
 
 /****************************************************************************
- * Name: up_stack_color
+ * Name: xtensa_stack_color
  *
  * Description:
  *   Write a well know value into the stack
@@ -231,7 +231,7 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
  ****************************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
-void up_stack_color(void *stackbase, size_t nbytes)
+void xtensa_stack_color(void *stackbase, size_t nbytes)
 {
   uintptr_t start;
   uintptr_t end;

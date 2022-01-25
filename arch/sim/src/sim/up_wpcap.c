@@ -261,7 +261,7 @@ void wpcap_init(void)
   struct in_addr addr;
   FARPROC dlladdr;
 
-  addr.s_addr = htonl(WCAP_IPADDR);
+  addr.s_addr = HTONL(WCAP_IPADDR);
   syslog(LOG_INFO, "wpcap_init: IP address: %s\n", inet_ntoa(addr));
 
   wpcap = LoadLibrary("wpcap.dll");

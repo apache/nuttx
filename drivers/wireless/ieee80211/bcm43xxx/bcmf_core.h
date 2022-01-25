@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H
 
 /****************************************************************************
  * Included Files
@@ -42,9 +42,16 @@ int bcmf_write_sbreg(FAR struct bcmf_sdio_dev_s *sbus, uint32_t address,
 
 bool bcmf_core_isup(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
 
-void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
+void bcmf_core_disable(FAR struct bcmf_sdio_dev_s *sbus,
+                       unsigned int core,
+                       uint32_t prereset,
+                       uint32_t reset);
 
-void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus, unsigned int core);
+void bcmf_core_reset(FAR struct bcmf_sdio_dev_s *sbus,
+                     unsigned int core,
+                     uint32_t prereset,
+                     uint32_t reset,
+                     uint32_t postreset);
 
 int bcmf_core_upload_firmware(FAR struct bcmf_sdio_dev_s *sbus);
 
@@ -72,4 +79,4 @@ static inline int bcmf_write_sbregw(FAR struct bcmf_sdio_dev_s *sbus,
     return bcmf_write_sbreg(sbus, address, (uint8_t *)&reg, 4);
 }
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_CORE_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_CORE_H */

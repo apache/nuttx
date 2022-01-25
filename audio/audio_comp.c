@@ -919,15 +919,14 @@ static void audio_comp_callback(FAR void *arg, uint16_t reason,
  *   ...  - The list of the lower half audio driver.
  *
  * Returned Value:
- *   struct audio_lowerhalf_s* on success; NULL on failure.
+ *   Zero on success; a negated errno value on failure.
  *
  * Note
  *   The variable argument list must be NULL terminated.
  *
  ****************************************************************************/
 
-FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
-                                                    ...)
+int audio_comp_initialize(FAR const char *name, ...)
 {
   FAR struct audio_comp_priv_s *priv;
   va_list ap;
@@ -937,7 +936,7 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
   priv = kmm_zalloc(sizeof(struct audio_comp_priv_s));
   if (priv == NULL)
     {
-      return NULL;
+      return ret;
     }
 
   priv->export.ops = &g_audio_comp_ops;
@@ -975,11 +974,11 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
       goto free_lower;
     }
 
-  return &priv->export;
+  return OK;
 
 free_lower:
   kmm_free(priv->lower);
 free_priv:
   kmm_free(priv);
-  return NULL;
+  return ret;
 }

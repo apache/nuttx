@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H
-#define __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H
+#ifndef __ARCH_HC_SRC_M9S12_M9S12_MMC_H
+#define __ARCH_HC_SRC_M9S12_M9S12_MMC_H
 
 /****************************************************************************
  * Included Files
@@ -136,7 +136,7 @@
 
 /* Program Page Index Register Bit-Field Definitions */
 
-#define MMC_PPAGE_PIX_SHIFT     (0)       /* Bits 0-5 Program Page Index Bits 5–0 */
+#define MMC_PPAGE_PIX_SHIFT     (0)       /* Bits 0-5 Program Page Index Bits */
 #define MMC_PPAGE_PIX_MASK      (0x3f << MMC_PPAGE_PIX_SHIFT)
 
 /****************************************************************************
@@ -151,4 +151,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_HC_SRC_M9S12_M9S12_MMC_H */
+#endif /* __ARCH_HC_SRC_M9S12_M9S12_MMC_H */

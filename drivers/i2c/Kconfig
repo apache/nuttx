@@ -46,15 +46,15 @@ config I2C_BITBANG
 
 if I2C_BITBANG
 
-  config I2C_BITBANG_NO_DELAY
-  bool "Do not add delay"
-  default n
-  ---help---
-    If you want to go full speed (depending on how fast pins can be toggled)
-    you can enable this option. This will not respect the desired frequency
-    set during the I2C transfer operation.
+config I2C_BITBANG_NO_DELAY
+	bool "Do not add delay"
+	default n
+	---help---
+		If you want to go full speed (depending on how fast pins can be toggled)
+		you can enable this option. This will not respect the desired frequency
+		set during the I2C transfer operation.
 
-  config I2C_BITBANG_GPIO_OVERHEAD
+config I2C_BITBANG_GPIO_OVERHEAD
 	int "GPIO overhead"
 	depends on !I2C_BITBANG_NO_DELAY
 	default 0
@@ -63,13 +63,13 @@ if I2C_BITBANG
 		delays. This overhead will be subtracted from sleep times to achieve
 		desired frquency.
 
-	config I2C_BITBANG_TIMEOUT
+config I2C_BITBANG_TIMEOUT
 	int "I2C timeout"
 	default 1000
 	---help---
 		Timeout (microseconds) to abort wait on slave
 
-	config I2C_BITBANG_CLOCK_STRETCHING
+config I2C_BITBANG_CLOCK_STRETCHING
 	bool "Support clock stretching"
 	default n
 	---help---

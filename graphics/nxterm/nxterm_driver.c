@@ -60,16 +60,15 @@ static int     nxterm_unlink(FAR struct inode *inode);
 
 const struct file_operations g_nxterm_drvrops =
 {
-  nxterm_open,  /* open */
-  nxterm_close, /* close */
-  nxterm_read,  /* read */
-  nxterm_write, /* write */
-  NULL,         /* seek */
-  nxterm_ioctl, /* ioctl */
-  nxterm_poll   /* poll */
+  nxterm_open,    /* open */
+  nxterm_close,   /* close */
+  nxterm_read,    /* read */
+  nxterm_write,   /* write */
+  NULL,           /* seek */
+  nxterm_ioctl,   /* ioctl */
+  nxterm_poll     /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  ,
-  nxterm_unlink /* unlink */
+  , nxterm_unlink /* unlink */
 #endif
 };
 
@@ -77,16 +76,15 @@ const struct file_operations g_nxterm_drvrops =
 
 const struct file_operations g_nxterm_drvrops =
 {
-  nxterm_open,  /* open */
-  nxterm_close, /* close */
-  NULL,         /* read */
-  nxterm_write, /* write */
-  NULL,         /* seek */
-  nxterm_ioctl, /* ioctl */
-  NULL          /* poll */
+  nxterm_open,    /* open */
+  nxterm_close,   /* close */
+  NULL,           /* read */
+  nxterm_write,   /* write */
+  NULL,           /* seek */
+  nxterm_ioctl,   /* ioctl */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  ,
-  nxterm_unlink /* unlink */
+  , nxterm_unlink /* unlink */
 #endif
 };
 
