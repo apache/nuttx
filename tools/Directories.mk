@@ -164,4 +164,11 @@ else
 CLEANDIRS += openamp
 endif
 
+ifeq ($(CONFIG_NNABLA_RT),y)
+KERNDEPDIRS += nn$(DELIM)libnnablart
+CONTEXTDIRS += nn$(DELIM)libnnablart
+else
+CLEANDIRS += nn$(DELIM)libnnablart
+endif
+
 CLEANDIRS += $(KERNDEPDIRS) $(USERDEPDIRS)

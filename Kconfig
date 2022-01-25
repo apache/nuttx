@@ -2032,6 +2032,10 @@ menu "Open Asymmetric Multi Processing"
 source "openamp/Kconfig"
 endmenu
 
+menu "Neural Network Configuration"
+source "nn/Kconfig"
+endmenu
+
 menu "Application Configuration"
 source "$APPSDIR/Kconfig"
 endmenu

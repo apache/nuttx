@@ -1,0 +1,20 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config NNABLA_RT
+	bool "NNABLA Runtime Libraries"
+	default n
+	---help---
+		This is a runtime library for inference Neural Networks
+		created by Neural Network Libraries.
+		https://github.com/sony/nnabla-c-runtime
+
+if NNABLA_RT
+
+config NNABLA_RT_VER
+	string "Default NNABLA Runtime version"
+	default 1.24.0
+
+endif # NNABLA_RT
