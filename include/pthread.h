@@ -210,8 +210,6 @@ typedef FAR void *pthread_addr_t;
 typedef CODE pthread_addr_t (*pthread_startroutine_t)(pthread_addr_t);
 typedef pthread_startroutine_t pthread_func_t;
 
-typedef void (*pthread_exitroutine_t)(pthread_addr_t);
-
 typedef void (*pthread_trampoline_t)(pthread_startroutine_t, pthread_addr_t);
 
 struct pthread_attr_s

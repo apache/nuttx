@@ -72,7 +72,7 @@
 "munmap","sys/mman.h","defined(CONFIG_FS_RAMMAP)","int","FAR void *","size_t"
 "nx_mkfifo","nuttx/fs/fs.h","defined(CONFIG_PIPES) && CONFIG_DEV_FIFO_SIZE > 0","int","FAR const char *","mode_t","size_t"
 "nx_pipe","nuttx/fs/fs.h","defined(CONFIG_PIPES) && CONFIG_DEV_PIPE_SIZE > 0","int","int [2]|FAR int *","size_t","int"
-"nx_pthread_create","nuttx/pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_trampoline_t","FAR pthread_t *","FAR const pthread_attr_t *","pthread_startroutine_t","pthread_addr_t","pthread_exitroutine_t"
+"nx_pthread_create","nuttx/pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","pthread_trampoline_t","FAR pthread_t *","FAR const pthread_attr_t *","pthread_startroutine_t","pthread_addr_t"
 "nx_pthread_exit","nuttx/pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","noreturn","pthread_addr_t"
 "nx_vsyslog","nuttx/syslog/syslog.h","","int","int","FAR const IPTR char *","FAR va_list *"
 "nxsched_get_stackinfo","nuttx/sched.h","","int","pid_t","FAR struct stackinfo_s *"
