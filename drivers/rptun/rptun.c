@@ -117,7 +117,7 @@ struct rptun_store_s
  ****************************************************************************/
 
 static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
-                                         FAR struct remoteproc_ops *ops,
+                                         FAR const struct remoteproc_ops *ops,
                                          FAR void *arg);
 static void rptun_remove(FAR struct remoteproc *rproc);
 static int rptun_config(struct remoteproc *rproc, void *data);
@@ -161,7 +161,7 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
  * Private Data
  ****************************************************************************/
 
-static struct remoteproc_ops g_rptun_ops =
+static const struct remoteproc_ops g_rptun_ops =
 {
   .init           = rptun_init,
   .remove         = rptun_remove,
@@ -188,7 +188,7 @@ static const struct file_operations g_rptun_devops =
 };
 
 #ifdef CONFIG_RPTUN_LOADER
-static struct image_store_ops g_rptun_storeops =
+static const struct image_store_ops g_rptun_storeops =
 {
   .open     = rptun_store_open,
   .close    = rptun_store_close,
@@ -343,7 +343,7 @@ static int rptun_callback(FAR void *arg, uint32_t vqid)
 }
 
 static FAR struct remoteproc *rptun_init(FAR struct remoteproc *rproc,
-                                         FAR struct remoteproc_ops *ops,
+                                         FAR const struct remoteproc_ops *ops,
                                          FAR void *arg)
 {
   rproc->ops = ops;
