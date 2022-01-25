@@ -84,6 +84,7 @@ struct sendfile_s
   ssize_t            snd_sent;             /* The number of bytes sent */
   uint32_t           snd_isn;              /* Initial sequence number */
   uint32_t           snd_acked;            /* The number of bytes acked */
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint32_t           snd_prev_ack;         /* The previous ACKed seq number */
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
   uint32_t           snd_prev_wnd;         /* The advertised window in the last
@@ -93,6 +94,7 @@ struct sendfile_s
   uint16_t           snd_prev_wnd;
 #endif
   int                snd_dup_acks;         /* Duplicate ACK counter */
+#endif
 };
 
 /****************************************************************************
@@ -274,6 +276,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
       /* Fast Retransmit (RFC 5681): an acknowledgment is considered a
        * "duplicate" when (a) the receiver of the ACK has outstanding data,
        * (b) the incoming acknowledgment carries no data, (c) the SYN and
@@ -289,8 +292,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
           ackno == pstate->snd_prev_ack &&
           conn->snd_wnd == pstate->snd_prev_wnd)
         {
-          if (++pstate->snd_dup_acks >=
-                CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+          if (++pstate->snd_dup_acks >= TCP_FAST_RETRANSMISSION_THRESH)
             {
               flags |= TCP_REXMIT;
               pstate->snd_dup_acks = 0;
@@ -303,6 +305,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       pstate->snd_prev_ack = ackno;
       pstate->snd_prev_wnd = conn->snd_wnd;
+#endif
     }
 
   /* Check if we are being asked to retransmit data.

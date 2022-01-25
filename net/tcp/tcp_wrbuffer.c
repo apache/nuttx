@@ -243,9 +243,11 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb)
       iob_free_chain(wrb->wb_iob, IOBUSER_NET_TCP_WRITEBUFFER);
     }
 
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   /* Reset the ack counter */
 
   TCP_WBNACK(wrb) = 0;
+#endif
 
   /* Then free the write buffer structure */
 

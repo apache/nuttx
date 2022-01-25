@@ -65,7 +65,9 @@
 #  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
 #  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
 #  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
 #  define TCP_WBNACK(wrb)            ((wrb)->wb_nack)
+#endif
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n,off) \
@@ -100,6 +102,12 @@
 /* The TCP options flags */
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
+
+/* After receiving 3 duplicate ACKs, TCP performs a retransmission
+ * (RFC 5681 (3.2))
+ */
+
+#define TCP_FAST_RETRANSMISSION_THRESH 3
 
 /****************************************************************************
  * Public Type Definitions
@@ -330,7 +338,9 @@ struct tcp_wrbuffer_s
   uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint8_t    wb_nack;      /* The number of ack count */
+#endif
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif
