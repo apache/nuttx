@@ -82,9 +82,12 @@ void nxtask_start(void)
               TCB_FLAG_TTYPE_PTHREAD);
 
 #ifdef CONFIG_SIG_DEFAULT
-  /* Set up default signal actions */
+  if ((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) != TCB_FLAG_TTYPE_KERNEL)
+    {
+      /* Set up default signal actions for NON-kernel thread */
 
-  nxsig_default_initialize(&tcb->cmn);
+      nxsig_default_initialize(&tcb->cmn);
+    }
 #endif
 
   /* Execute the start hook if one has been registered */
