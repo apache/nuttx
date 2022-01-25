@@ -589,8 +589,6 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
        noreturn_function;
 #endif
 
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
-    !defined(CONFIG_DISABLE_PTHREAD)
 /****************************************************************************
  * Name: up_pthread_start
  *
@@ -616,28 +614,11 @@ void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
+    !defined(CONFIG_DISABLE_PTHREAD)
 void up_pthread_start(pthread_trampoline_t startup,
                       pthread_startroutine_t entrypt, pthread_addr_t arg)
        noreturn_function;
-
-/****************************************************************************
- * Name: up_pthread_exit
- *
- * Description:
- *   In this kernel mode build, this function will be called to execute a
- *   pthread in user-space. This kernel-mode stub will then be called
- *   transfer control to the user-mode pthread_exit.
- *
- * Input Parameters:
- *   exit       - The user-space pthread_exit function
- *   exit_value - The pointer of the pthread exit parameter
- *
- * Returned Value:
- *   None
- ****************************************************************************/
-
-void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
-        noreturn_function;
 #endif
 
 /****************************************************************************
