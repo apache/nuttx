@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/arch.h>
-
 #include <sys/types.h>
 #include <unistd.h>
 #include <pthread.h>
@@ -85,15 +83,7 @@ int pthread_cancel(pthread_t thread)
 
   if (tcb == this_task())
     {
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-      tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
-      tcb->flags |= TCB_FLAG_CANCEL_DOING;
-
-      up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
-                      PTHREAD_CANCELED);
-#else
       pthread_exit(PTHREAD_CANCELED);
-#endif
     }
 
   /* Complete pending join operations */
