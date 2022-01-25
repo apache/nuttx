@@ -543,6 +543,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                         wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb));
                 }
             }
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
           else if (ackno == TCP_WBSEQNO(wrb))
             {
               /* Reset the duplicate ack counter */
@@ -554,15 +555,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
               /* Duplicate ACK? Retransmit data if need */
 
-              if (++TCP_WBNACK(wrb) ==
-                  CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+              if (++TCP_WBNACK(wrb) == TCP_FAST_RETRANSMISSION_THRESH)
                 {
                   /* Do fast retransmit */
 
                   rexmit = true;
                 }
-              else if ((TCP_WBNACK(wrb) >
-                       CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK) &&
+              else if ((TCP_WBNACK(wrb) > TCP_FAST_RETRANSMISSION_THRESH) &&
                        TCP_WBNACK(wrb) == sq_count(&conn->unacked_q) - 1)
                 {
                   /* Reset the duplicate ack counter */
@@ -570,6 +569,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
                   TCP_WBNACK(wrb) = 0;
                 }
             }
+#endif
         }
 
       /* A special case is the head of the write_q which may be partially
