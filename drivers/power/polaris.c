@@ -798,7 +798,7 @@ static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
   /* Check WPC_DET, output High when SS package sent */
 
   ret = IOEXP_SETDIRECTION(priv->rpmsg_dev, priv->lower->detect_pin,
-                           IOEXPANDER_DIRECTION_IN);
+                           IOEXPANDER_DIRECTION_IN_PULLDOWN);
   if (ret < 0)
     {
       baterr("Failed to set direction (wpc_det): %d\n", ret);
