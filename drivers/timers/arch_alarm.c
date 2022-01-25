@@ -388,6 +388,11 @@ uint32_t weak_function up_perf_gettime(void)
   return ret;
 }
 
+uint32_t weak_function up_perf_getfreq(void)
+{
+  return USEC_PER_SEC;
+}
+
 void weak_function up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
 {
   timespec_from_usec(ts, elapsed);
