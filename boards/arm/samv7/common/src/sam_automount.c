@@ -255,7 +255,7 @@ void sam_automount_initialize(void)
     {
       ferr("ERROR: Failed to initialize auto-mounter for HSMCI0\n");
     }
-#endif
+#endif /* CONFIG_SAMV7_HSMCI0_AUTOMOUNT */
 }
 
 /****************************************************************************

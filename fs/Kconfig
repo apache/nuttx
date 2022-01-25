@@ -42,6 +42,22 @@ config FS_AUTOMOUNTER_DEBUG
 		system debug is not enable.  This is useful primarily for in vivo
 		unit testing of the auto-mount feature.
 
+config FS_AUTOMOUNTER_DRIVER
+	bool "Auto-mounter driver"
+	default n
+	depends on FS_AUTOMOUNTER
+	---help---
+		Enabling this option will lead to registering of a character driver
+		on FS_AUTOMOUNTER_VFS_PATH + mount point path for auto-mounter.
+		Example: /var/mnt/sdcard0
+		
+config FS_AUTOMOUNTER_VFS_PATH
+	string "Path to auto-mounter driver"
+	default "/var"
+	depends on FS_AUTOMOUNTER_DRIVER
+	---help---
+		The path to where auto-mounter driver will exist in the VFS namespace.
+
 config FS_NEPOLL_DESCRIPTORS
 	int "Maximum number of default epoll descriptors for epoll_create1(2)"
 	default 8
