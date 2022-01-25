@@ -421,6 +421,7 @@ void Gh3x2xSerialSendTimerHandle(void)
  */
 void Gh3x2xDemoSendProtocolData(GU8* puchProtocolDataBuffer, GU16 usProtocolDataLen)
 {
+    EXAMPLE_LOG("[%s]:cmd = 0x%02x\r\n", __FUNCTION__, puchProtocolDataBuffer[2]);
     if ((usProtocolDataLen > __PROTOCOL_DATA_LEN__) || (0 == usProtocolDataLen))
     {
         return;
@@ -463,10 +464,7 @@ void Gh3x2xDemoOneFrameDataProcess(GU8* puchProtocolDataBuffer, GU16 usRecvLen)
     GU8  puchRespondBuffer[__PROTOCOL_DATA_LEN__] = {0};
     GU16 usRespondLen = 0;
     GU32 unFuncMode   = 0;
-        if (g_uchDemoWorkMode != GH3X2X_DEMO_WORK_MODE_PASS_THROUGH || puchProtocolDataBuffer[2] == 0x10)
-        {
-            emCmdType = GH3X2X_UprotocolParseHandler(puchRespondBuffer, &usRespondLen, puchProtocolDataBuffer, usRecvLen);
-        }
+    emCmdType = GH3X2X_UprotocolParseHandler(puchRespondBuffer, &usRespondLen, puchProtocolDataBuffer, usRecvLen);
     /* if respond buffer len is 0, and return value is UPROTOCOL_CMD_IGNORE,
         it means driver lib can't analyze this protocol data */
     if ((0 == puchRespondBuffer[3]) && (UPROTOCOL_CMD_IGNORE == emCmdType))
@@ -480,14 +478,15 @@ void Gh3x2xDemoOneFrameDataProcess(GU8* puchProtocolDataBuffer, GU16 usRecvLen)
     }
     else
     {
-#ifdef GOODIX_DEMO_PLANFORM
+#if 0
         GOODIX_PLANFROM_CMD_PROCESS_ENTITY();
 #else
         if ((UPROTOCOL_CMD_START == emCmdType) || (UPROTOCOL_CMD_STOP == emCmdType))
         {
+            gh3x2x_protocol_ctrl_timer_handle(emCmdType);
             unFuncMode = GH3X2X_GetTargetFuncMode();
             Gh3x2xDemoSamplingControl(unFuncMode, emCmdType);
-            Gh3x2xSoftAdtStatusCheck();
+            EXAMPLE_LOG("[%s]:function = 0x%08x, ctrl = %d\r\n", __FUNCTION__, unFuncMode, emCmdType);
         }
 #endif
         Gh3x2xDemoSendProtocolData(puchRespondBuffer, usRespondLen);

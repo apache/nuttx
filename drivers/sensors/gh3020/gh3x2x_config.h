@@ -30,11 +30,11 @@
 #define __GS_READ_POINT_NUM__               (6)         /* host read gsensor sample num in one time */
 #define __GS_READ_POINT_NUM_JITTER__        (3)         /* host read gsensor sample num jitter */
 #endif
-#define __CAP_ENABLE__                      (0)        /*Cap enable*/
-#define __TEMP_ENABLE__                     (0)        /*Temperature sensor enable*/
+#define __CAP_ENABLE__                      (0)         /*Cap enable*/
+#define __TEMP_ENABLE__                     (0)         /*Temperature sensor enable*/
 
 #define __SUPPORT_HARD_RESET_CONFIG__       (1)         /**< support hard reset config */
-#define __INTERRUPT_PROCESS_BY_POLLING__    (__MIX_INT_PROCESS_MODE__)  /**< 2:polling+int 1:use polling 0:use interrupt */
+#define __INTERRUPT_PROCESS_MODE__          (__MIX_INT_PROCESS_MODE__)  /**< 2:polling+int 1:use polling 0:use interrupt */
 #define __PLATFORM_WITHOUT_OS__             (0)         /**< 1:not use os  0:use os */
 #define __PASS_THROUGH_MODE__               (0)         /**< pt mode enable */
 #define __GH3X2X_MP_MODE__                  (0)         /**< 1:enable mp mode  0:unable mp mode */
@@ -49,10 +49,11 @@
 #define __FUNC_TYPE_BT_ENABLE__             (0)    /**< bt function tye */
 #define __FUNC_TYPE_RESP_ENABLE__           (1)    /**< resp function tye */
 #define __FUNC_TYPE_AF_ENABLE__             (0)    /**< af function tye */
+#define __FUNC_TYPE_BP_ENABLE__             (0)    /**< bp function tye */
 #define __FUNC_TYPE_TEST_ENABLE__           (1)    /**< test function tye */
 #define __SUPPORT_HARD_ADT_CONFIG__         (1)    /**< support hard adt config */
 #define __SUPPORT_SOFT_AGC_CONFIG__         (1)    /**< support soft agc config */
-#define __FUNC_TYPE_BP_ENABLE__             (0)    /**< bp algorithm tye */
+
 
 /*sofe agc*/
 #define GH3X2X_NEW_AGC_SLOT_NUM_LIMIT       (8)
@@ -65,13 +66,13 @@
 #define __FUNC_TYPE_ECG_ENABLE__            (0)    /**< ecg algorithm tye */
 #if __FUNC_TYPE_ECG_ENABLE__
 #define __FUNC_TYPE_PWTT_ENABLE__           (1)    /**< pwtt algorithm tye */
-#define __FUNC_TYPE_BP_ENABLE__             (1)    /**< bp algorithm tye */
+#define __FUNC_TYPE_BP_ENABLE__             (0)    /**< bp algorithm tye */
 #define __SUPPORT_ECG_LEAD_OFF_DET_800HZ__  (1)
 #endif
 
 /* soft adt function type */
 #if (__SUPPORT_HARD_ADT_CONFIG__ && __FUNC_TYPE_HR_ENABLE__)
-#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (0)    /**< support soft adt config */
+#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (1)    /**< support soft adt config */
 #endif
 
 /* soft adt function threshold that can be judged as a movement */
@@ -80,12 +81,8 @@
 #define __GSENSOR_MOVE_CNT_THRESHOLD__                (1)    /**< (recomended value = 1) more than how many times of movement can be judged as effective moveing*/
 #define __GSENSOR_NOT_MOVE_CNT_THRESHOLD__            (150)  /**< (recommended value = 1.5 * sample rate of g-sensor ) more than how many times of movement can be judged as effective non-moveing*/
 #define __USE_POLLING_TIMER_AS_ADT_TIMER__            (1)    /** use polling timer as soft adt timer **/
-#define __USE_SOFT_ADT_DETECT_WEAR_ON__               (0)    /** 0:  do not use soft adt module to detect wear on   1:  use soft adt module to detect wear on(soft adt will be opened when hard adt detected wear on) **/
-#define __GREEN_CONFIRM_ADT_TIME_SEC__                (15)   /** green led adt confirm time(second, default value: 15,  0: do not use green led to confirm) after ir led detected wear off**/
-#define __SOFT_ADT_TIME_OUT_TIME__                    (20)   /** unit: second     soft adt detecting time out time  **/
-#define __SPECIAL_ANGLE_TIME_OUT_TIME__               (30)
-#define __MOTIONLESS_TIME_OUT_TIME__                  (150)
-#define __CLOSE_SOFT_ADT_WHEN_DETECTED_LIVING_OBJECT  (1)    /** 1: soft adt will be closed when system detected living object  0: do not close soft adt */
+#define __SOFT_ADT_CTRL_WEAR_OFF_ENABLE__             (1)    /**< support auto ctrl wear off */
+#define __SOFT_ADT_IR_DETECT_TIMEOUT__                (30)   /** (recomended value = 30 seconds) ir detect timeout **/
 #endif
 
 /*sample config*/
@@ -150,7 +147,8 @@
 #define __SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__  (1)  /**< enable it ,we can get algo input and output data **/
 
 /* gh3x2x data buffer size config,this is related to gh3x2x fifo water mark config */
-#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (100*4)                                  /**< rawdata buffer size in byte */
+#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (128 * 4)                                  /**< rawdata buffer size in byte */
+#define __GH3X2X_RAWDATA_BUFFER_CRC_SIZE__              (8)                                        /**< rawdata buffer crc size in byte */
 
 /* gsensor data buffer size config,every g sensor data has 6 bytes(x,y,z) */
 #define __GSENSOR_DATA_BUFFER_SIZE__                    (4)                                   /**< max num of gsensor data */
@@ -457,9 +455,14 @@
 #define __FIFO_PACKAGE_SEND_ENABLE__   0
 #endif
 
-
-
-
+#if 0
+#define __USE_SOFT_ADT_DETECT_WEAR_ON__               (1)    /** 0:  do not use soft adt module to detect wear on   1:  use soft adt module to detect wear on(soft adt will be opened when hard adt detected wear on) **/
+#define __GREEN_CONFIRM_ADT_TIME_SEC__                (15)   /** green led adt confirm time(second, default value: 15,  0: do not use green led to confirm) after ir led detected wear off**/
+#define __SOFT_ADT_TIME_OUT_TIME__                    (20)   /** unit: second     soft adt detecting time out time  **/
+#define __SPECIAL_ANGLE_TIME_OUT_TIME__               (30)
+#define __MOTIONLESS_TIME_OUT_TIME__                  (150)
+#define __CLOSE_SOFT_ADT_WHEN_DETECTED_LIVING_OBJECT  (1)    /** 1: soft adt will be closed when system detected living object  0: do not close soft adt */
+#endif
 
 
 

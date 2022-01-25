@@ -40,7 +40,7 @@
                                             GH3X2X_IRQ_MSK_TUNNING_FAIL_BIT | GH3X2X_IRQ_MSK_TUNNING_DONE_BIT | \
                                             GH3X2X_IRQ_MSK_CHIP_RESET_BIT \
                                         )
-#define DRV_LIB_REG_CFG_EMPTY           (0xFF)    //there is no reg config array loaded into driver lib
+#define DRV_LIB_REG_CFG_EMPTY           (0x00)    //there is no reg config array loaded into driver lib
 #define DRV_LIB_REG_CFG_MIN_LEN         (0x5)     //minimum length of reg config array
 #define DRV_LIB_DEMO_VERSION_HEAD       "GH(M)3X2X_DRV_LIB_DEMO"
 #define DRV_LIB_DEMO_VERSION_NUM        "1.0"
@@ -62,10 +62,6 @@ static STCapRawdata cap_soft_fifo_buffer[__CAP_DATA_BUFFER_SIZE__];
 #else
 static GU16 cap_soft_fifo_buffer_index = 0;
 static STCapRawdata* cap_soft_fifo_buffer = 0;
-GU8 GH3X2X_GetCapEnableFlag(void)
-{
-    return 0;
-}
 #endif
 #if __TEMP_ENABLE__
 static GU16 temp_soft_fifo_buffer_index = 0;
@@ -73,10 +69,6 @@ static STTempRawdata temp_soft_fifo_buffer[__TEMP_DATA_BUFFER_SIZE__];
 #else
 static GU16 temp_soft_fifo_buffer_index = 0;
 static STTempRawdata* temp_soft_fifo_buffer = 0;
-GU8 GH3X2X_GetTempEnableFlag(void)
-{
-    return 0;
-}
 #endif
 
 GU32 g_unDemoFuncMode = 0;
@@ -85,18 +77,16 @@ GU8 g_uchDemoAlgoEnableFlag = 1;
 #if __SLOT_SEQUENCE_DYNAMIC_ADJUST_EN__
 GU16 g_usGh3x2xSlotTime[8];
 #endif
-#if (__SUPPORT_HARD_ADT_CONFIG__)
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
 GU8 g_uchHardAdtFuncStatus = 0;    //0: stop   1: start
-GU32 g_unGh3x2xSoftWearOffDetFunctionId = GH3X2X_FUNCTION_SOFT_ADT_GREEN;
-#endif
+GU8 g_uchVirtualAdtTimerCtrlStatus = 0;  //0: stop  1: running
 #endif
 
 #if (__SUPPORT_ELECTRODE_WEAR_STATUS_DUMP__)
 GU8 g_uchGh3x2xElectrodeWearStatus;
 #endif
 
-
+EMWearDetectType g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
 
 
 #if __ALGO_RUN_SIMULTANEOUSLY_SUPPORT__
@@ -885,7 +875,7 @@ const STGh3x2xFrameInfo * const  g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_MAX] =
 };
 
 /// read data buffer
-static GU8 g_uchGh3x2xReadRawdataBuffer[__GH3X2X_RAWDATA_BUFFER_SIZE__ + 8];
+static GU8 g_uchGh3x2xReadRawdataBuffer[__GH3X2X_RAWDATA_BUFFER_SIZE__ + __GH3X2X_RAWDATA_BUFFER_CRC_SIZE__];
 
 /// read data buffer len
 GU16 g_usGh3x2xReadRawdataLen = 0;
@@ -936,7 +926,7 @@ GU32 g_unDemoHrvIncompleteRawDataArr[32] = {0};
 /// driver lib demo init flag
 static GU8 g_uchGh3x2xInitFlag = 0;
 
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
 //hal_gh3x2x_int_handler_call_back is called, this value is 1
 GU8 g_uchGh3x2xIntCallBackIsCalled = 0;
 #endif
@@ -951,7 +941,7 @@ GU8 g_uchEngineeringModeSampleParaGroupNum = 0;
 GU8 g_uchGh3x2xRegCfgArrIndex = DRV_LIB_REG_CFG_EMPTY;
 
 /// int mode
-GU8 g_uchGh3x2xIntMode = __INTERRUPT_PROCESS_BY_POLLING__;
+GU8 g_uchGh3x2xIntMode = __INTERRUPT_PROCESS_MODE__;
 
 #if __SUPPORT_SOFT_AGC_CONFIG__
 //main chnl
@@ -1145,152 +1135,7 @@ void Gh3x2xNonSyncGsenosrPostProcess(GU16 usCurrentGsenosrPoint,GU16 usNeedPoinN
 }
 #endif
 
-EMWearDetectType g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
-#define GH3X2X_WARR_DET_RESULT_UNKNOW                0
-#define GH3X2X_WARR_DET_RESULT_WAER_OFF_NO_OBJ       0x01
-#define GH3X2X_WARR_DET_RESULT_WAER_OFF_NO_LIV_OBJ   0x03
-#define GH3X2X_WARR_DET_RESULT_WAER_ON_OBJ           0x10
-#define GH3X2X_WARR_DET_RESULT_WAER_ON_LIV_OBJ       0x30
-
-GU8 g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_UNKNOW;
-
 #if (__SUPPORT_HARD_ADT_CONFIG__)
-#if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-//GU8 g_uchGh3x2xSoftAdtStatus = GH3X2X_SOFT_ADT_STATUS_OBJECT_MOVING_DETECTING;
-
-
-
-#define GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT       0
-#define GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT            1
-#define GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM      2
-#define GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_STOP               3
-#define GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION  4
-#define GH3X2X_SOFE_ADT_NEW_STATUS_NO_ADT                      5
-
-
-#define GH3X2X_FORCE_HARD_ADT_STATUS_HOLD              0
-#define GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF   1
-#define GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON    2
-
-
-GU8 g_uchGh3x2xSoftAdtNewStatus = GH3X2X_SOFE_ADT_NEW_STATUS_NO_ADT;
-
-
-
-#if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&(__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
-GU8 g_uchVirtualAdtTimerCtrlStatus = 0;  //0: stop  1: running
-#endif
-
-
-void Gh3x2xSetGh3x2xSoftWearOffDetFunctionId(GU32 unFunctionId)
-{
-    g_unGh3x2xSoftWearOffDetFunctionId = unFunctionId;
-    EXAMPLE_LOG("soft adt wear off detect fucntion ID = 0x%X.\r\n",unFunctionId);
-}
-
-
-
-
-
-
-
-
-#if __USE_SOFT_ADT_DETECT_WEAR_ON__
-GU32 g_unGH3x2xAdtRunTimeMs;     //ms
-GU8 Gh3x2xCheckSoftAdtTimeOut(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 unSpecialAngleTimeSec, GU32 unMovelessTimeSec)
-{
-
-    GU32 unGreenConfirmTimeOutSec;
-    GU8 uchCheckResult = 0;
-
-    if((GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT == g_uchGh3x2xSoftAdtNewStatus)||(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM == g_uchGh3x2xSoftAdtNewStatus))
-    {
-
-        g_unGH3x2xAdtRunTimeMs += 1000/(pstFrameInfo->pstFunctionInfo->usSampleRate);
-        EXAMPLE_LOG("adt time out checking,time = %d.\r\n",g_unGH3x2xAdtRunTimeMs/1000);
-
-
-
-        if((g_unGH3x2xAdtRunTimeMs/1000) > __SOFT_ADT_TIME_OUT_TIME__)
-        {
-            uchCheckResult |= 0x01;   //adt time out flag
-        }
-        if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM == g_uchGh3x2xSoftAdtNewStatus)
-        {
-            unGreenConfirmTimeOutSec = (*(pstFrameInfo->punFrameCnt))/((pstFrameInfo->pstFunctionInfo->usSampleRate));
-            EXAMPLE_LOG("confirm time = %d.\r\n",unGreenConfirmTimeOutSec);
-            if((unGreenConfirmTimeOutSec) > __GREEN_CONFIRM_ADT_TIME_SEC__)
-            {
-                uchCheckResult |= 0x02;   //confirm time out flag
-                EXAMPLE_LOG("confirm time out.\r\n");
-            }
-        }
-        if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT == g_uchGh3x2xSoftAdtNewStatus)
-        {
-            EXAMPLE_LOG("specia angle time = %d.\r\n",unSpecialAngleTimeSec);
-            if(unSpecialAngleTimeSec > __SPECIAL_ANGLE_TIME_OUT_TIME__)
-            {
-                uchCheckResult |= 0x04;   //special angle time out
-                EXAMPLE_LOG("special angle time out.\r\n");
-            }
-            EXAMPLE_LOG("moveless time = %d.\r\n",unMovelessTimeSec);
-            if(unMovelessTimeSec > __MOTIONLESS_TIME_OUT_TIME__)
-            {
-                uchCheckResult |= 0x08;   //moveless time out
-                EXAMPLE_LOG("moveless time out.\r\n");
-            }
-
-        }
-    }
-    return uchCheckResult;
-}
-#endif
-
-
-/**
- * @fn     void Gh3x2xDemoWearEventConfirmProcess(GU16* usEvent)
- *
- * @brief  confirm if it's effective wear event
- *
- * @attention   None
- *
- * @param[in]   usEvent             gh3x2x irq status
- * @param[out]  None
- *
- * @return  None
- */
-void Gh3x2xDemoWearEventConfirmProcess(GU16* usEvent)
-{
-    if(0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT))
-    {
-
-        if(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT == g_uchGh3x2xSoftAdtNewStatus)
-        {
-            if (GH3X2X_SENSOR_IS_NOT_MOVING == Gh3x2x_GetAdtConfirmStatus())  //not effect wear on event
-            {
-                *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_ON_BIT;
-                GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_ON,WEAR_DETECT_FORCE_SWITCH);
-                //GH3X2X_HardAdtFuncStop();
-                GH3X2X_FunctionStop(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-                EXAMPLE_LOG("WearEventConfirmProcess:Fake wear on!!!\r\n");
-            }
-            else
-            {
-                EXAMPLE_LOG("WearEventConfirmProcess:object moving!!!\r\n");
-
-            }
-        }
-    }
-    else if(0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT))
-    {
-        if ((g_unDemoFuncMode & GH3X2X_FUNCTION_ADT) == GH3X2X_FUNCTION_ADT)
-        {
-            EXAMPLE_LOG("WearEventConfirmProcess:wear off!!!\r\n");
-        }
-    }
-}
-#endif
-
 /**
  * @fn     void Gh3x2xDemoWearEventProcess(u16* usEvent,EMWearDetectForceSwitch emForceSwitch)
  *
@@ -1306,23 +1151,98 @@ void Gh3x2xDemoWearEventConfirmProcess(GU16* usEvent)
  */
 void Gh3x2xDemoWearEventProcess(GU16* usEvent,EMWearDetectForceSwitch emForceSwitch)
 {
-    if((0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT)) || (0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT)))
+#if __FUNC_TYPE_SOFT_ADT_ENABLE__
+    if (g_uchHardAdtFuncStatus == 0)
     {
-        if(0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT))
+        *usEvent &= ~(GH3X2X_IRQ_MSK_WEAR_OFF_BIT|GH3X2X_IRQ_MSK_WEAR_ON_BIT);
+        return;
+    }
+#endif
+    if ((g_unDemoFuncMode & GH3X2X_FUNCTION_ADT) == GH3X2X_FUNCTION_ADT)
+    {
+        if((0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT)) || (0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT)))
         {
-            g_uchWearDetectStatus = WEAR_DETECT_WEAR_OFF;
-            if(GH3X2X_RET_OK != GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_OFF,emForceSwitch))
+            if(0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT))
             {
-                *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_ON_BIT;
+                g_uchWearDetectStatus = WEAR_DETECT_WEAR_OFF;
+                if(GH3X2X_RET_OK != GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_OFF,emForceSwitch))
+                {
+                    *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_ON_BIT;
+                }
+                else
+                {
+                    EXAMPLE_LOG("[%s]:switch to wear off\r\n", __FUNCTION__);
+                }
+            }
+            else
+            {
+                g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
+                if(GH3X2X_RET_OK != GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_ON,emForceSwitch))
+                {
+                    *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_OFF_BIT;
+                }
+                else
+                {
+                    EXAMPLE_LOG("[%s]:switch to wear on\r\n", __FUNCTION__);
+                }
+
             }
         }
+    }
+    else
+    {
+        *usEvent &= ~(GH3X2X_IRQ_MSK_WEAR_OFF_BIT|GH3X2X_IRQ_MSK_WEAR_ON_BIT);
+    }
+}
+#endif
+
+#if __FUNC_TYPE_SOFT_ADT_ENABLE__
+void Gh3x2xDemoSoftAdtStatusSwtich(GU16* usEvent, GU8* uchEventEx)
+{
+    if ((g_unDemoFuncMode & GH3X2X_FUNCTION_ADT) == GH3X2X_FUNCTION_ADT)
+    {
+        if(g_uchWearDetectStatus == WEAR_DETECT_WEAR_OFF && g_uchVirtualAdtTimerCtrlStatus == 1)
+        {
+            if (Gh3x2x_GetAdtConfirmStatus() == 0)
+            {
+                EXAMPLE_LOG("wear on but not move!!!\r\n");
+                *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_ON_BIT;
+                *uchEventEx = 0;
+            }
+            else
+            {
+                *usEvent |= GH3X2X_IRQ_MSK_WEAR_ON_BIT;
+                GH3X2X_AdtFuncStopWithConfirm();
+                GH3X2X_STOP_ADT_TIMER();
+                *uchEventEx = 1;
+            }
+        }
+#if __SOFT_ADT_CTRL_WEAR_OFF_ENABLE__
         else
         {
-            g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
-            if(GH3X2X_RET_OK != GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_ON,emForceSwitch))
+            if ((g_unDemoFuncMode & GH3X2X_FUNCTION_SOFT_ADT_GREEN) == GH3X2X_FUNCTION_SOFT_ADT_GREEN ||\
+                (g_unDemoFuncMode & GH3X2X_FUNCTION_SOFT_ADT_IR) == GH3X2X_FUNCTION_SOFT_ADT_IR)
             {
-                *usEvent &= ~GH3X2X_IRQ_MSK_WEAR_OFF_BIT;
+                GU8 uchWearStatusValue = GH3X2X_UpdateSoftWearStatus();
+                if (uchWearStatusValue == STATUS_LVING_UNWEAR)
+                {
+                    EXAMPLE_LOG("STATUS_LVING_UNWEAR\r\n");
+                    *usEvent |= GH3X2X_IRQ_MSK_WEAR_OFF_BIT;
+                    Gh3x2xDemoWearEventProcess(usEvent, WEAR_DETECT_DONT_FORCE_SWITCH);
+					*uchEventEx = 0;
+                }
+                else if (uchWearStatusValue == STATUS_LVING_WEAR)
+                {
+                    EXAMPLE_LOG("STATUS_LVING_WEAR\r\n");
+					*uchEventEx = 1;
+                }
             }
+        }
+#endif
+        if(0 != (*usEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT))
+        {
+            GH3X2X_AdtFuncStartWithConfirm();
+            *uchEventEx = 0;
         }
     }
 }
@@ -1379,11 +1299,8 @@ void Gh3x2x_NormalizeGsensorSensitivity(STGsensorRawdata gsensor_buffer[], GU16 
 void Gh3x2xFunctionCtrlModuleInit(void)
 {
     g_unDemoFuncMode = 0;
-
-#if (__SUPPORT_HARD_ADT_CONFIG__)
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
     g_uchHardAdtFuncStatus = 0;
-#endif
 #endif
 }
 /**
@@ -1438,7 +1355,6 @@ void gh3020_samplerate_set(GU32 unFunctionID,  GU16 usSampleRate)
  */
 void Gh3x2xDemoFunctionChannelEnSet(GU32 unFunctionID,  GU32 unChnlEn)
 {
-
     for(GU8 uchFunctionCnt = 0; uchFunctionCnt < GH3X2X_FUNC_OFFSET_MAX; uchFunctionCnt++)
     {
         if(unFunctionID&(((GU32)1)<<uchFunctionCnt))
@@ -1450,108 +1366,6 @@ void Gh3x2xDemoFunctionChannelEnSet(GU32 unFunctionID,  GU32 unChnlEn)
         }
     }
 }
-
-
-
-#if __FUNC_TYPE_SOFT_ADT_ENABLE__
-void Gh3x2xDemoSoftAdtStatusSwtich(GU8 uchStatus ,GU8 uchForceHardAdtStatus)
-{
-
-    GH3X2X_ExitLowPowerMode();
-    if(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT != uchStatus)
-    {
-        Gh3x2x_ResetMoveDetectByGsData();
-        GH3X2X_STOP_ADT_TIMER();
-    }
-
-
-    if(GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF == uchForceHardAdtStatus)
-    {
-
-        if(WEAR_DETECT_WEAR_OFF != g_uchWearDetectStatus)
-        {
-            GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-            g_uchHardAdtFuncStatus = 1;
-            g_uchWearDetectStatus = WEAR_DETECT_WEAR_OFF;
-            GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_OFF,WEAR_DETECT_FORCE_SWITCH);
-        }
-    }
-    else if (GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON == uchForceHardAdtStatus)
-    {
-        if(WEAR_DETECT_WEAR_ON != g_uchWearDetectStatus)
-        {
-            g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
-            GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_ON,WEAR_DETECT_FORCE_SWITCH);
-            GH3X2X_FunctionStop(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-        }
-    }
-    GH3X2X_EnterLowPowerMode();
-
-
-    switch (uchStatus)
-    {
-        case GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT:
-
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_GREEN);
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-            GH3X2X_AdtFuncStartWithConfirm();
-            GH3X2X_START_ADT_TIMER();
-        #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-            g_unGH3x2xAdtRunTimeMs = 0;
-        #endif
-            break;
-
-        case GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT:
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_GREEN);
-            Gh3x2xDemoStopSamplingInner(g_unGh3x2xSoftWearOffDetFunctionId);
-            #ifdef GOODIX_DEMO_PLANFORM
-            if(GH3X2X_DEMO_WORK_MODE_MCU_ONLINE >= g_uchDemoWorkMode)
-            {
-                Gh3x2xDemoSamplingControl(GH3X2X_FUNCTION_SOFT_ADT_IR, UPROTOCOL_CMD_START);
-            }
-            else
-            #endif
-            {
-                Gh3x2xDemoStartSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-            }
-            break;
-
-        case GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM:
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-            #ifdef GOODIX_DEMO_PLANFORM
-            if(GH3X2X_DEMO_WORK_MODE_MCU_ONLINE >= g_uchDemoWorkMode)
-            {
-                Gh3x2xDemoSamplingControl(GH3X2X_FUNCTION_SOFT_ADT_GREEN, UPROTOCOL_CMD_START);
-            }
-            else
-            #endif
-            {
-                Gh3x2xDemoStartSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_GREEN);
-            }
-            break;
-        case GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_STOP:
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_GREEN);
-            break;
-        case GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION:
-            Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-            #ifdef GOODIX_DEMO_PLANFORM
-            if(GH3X2X_DEMO_WORK_MODE_MCU_ONLINE >= g_uchDemoWorkMode)
-            {
-                 Gh3x2xDemoSamplingControl(g_unGh3x2xSoftWearOffDetFunctionId, UPROTOCOL_CMD_START);
-                 EXAMPLE_LOG("%s : g_unGh3x2xSoftWearOffDetFunctionId will open!!!\r\n", __FUNCTION__);
-            }
-            else
-            #endif
-            {
-                Gh3x2xDemoStartSamplingInner(g_unGh3x2xSoftWearOffDetFunctionId);
-            }
-            break;
-    }
-    g_uchGh3x2xSoftAdtNewStatus =  uchStatus;
-
-}
-#endif
 
 /**
  * @fn     int gh3020_init(void)
@@ -1589,7 +1403,6 @@ int gh3020_init(void)
     }
 
     #if __SUPPORT_HOOK_FUNC_CONFIG__
-
     /* set hook */
     GH3X2X_RegisterHookFunc(gh3x2x_init_hook_func, gh3x2x_sampling_start_hook_func,
                             gh3x2x_sampling_stop_hook_func, gh3x2x_get_rawdata_hook_func);
@@ -1599,17 +1412,17 @@ int gh3020_init(void)
     /* Step 2: Reset gh3x2x chip */
     GH3X2X_RegisterDelayUsCallback(Gh3x2x_BspDelayUs);
 
-#if __SUPPORT_HARD_RESET_CONFIG__
+    #if __SUPPORT_HARD_RESET_CONFIG__
     if(0 == g_uchGh3x2xInitFlag)
     {
         hal_gh3x2x_reset_pin_init();
     }
     GH3X2X_RegisterResetPinControlFunc(hal_gh3x2x_reset_pin_ctrl);
     GH3X2X_HardReset();
-#else
+    #else
     GH3X2X_ExitLowPowerMode();
     GH3X2X_SoftReset();
-#endif
+    #endif
 
     Gh3x2x_BspDelayMs(30);
     GH3X2X_ExitLowPowerMode();
@@ -1625,13 +1438,13 @@ int gh3020_init(void)
     {
         g_uchGh3x2xRegCfgArrIndex = DRV_LIB_REG_CFG_EMPTY;
         EXAMPLE_LOG("gh3020_init:init fail, error code: %d\r\n", schret);
-        return (int)schret;
+        return schret;
     }
     GH3X2X_SetMaxNumWhenReadFifo(__GH3X2X_RAWDATA_BUFFER_SIZE__);
     GH3X2X_EnterLowPowerMode();
 
     /* Step 4: setup EX INT for GH3X2X INT pin */
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+    #if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
     if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
     {
         g_uchGh3x2xIntCallBackIsCalled = 0;
@@ -1640,7 +1453,7 @@ int gh3020_init(void)
             hal_gh3x2x_int_init();
         }
     }
-#endif
+    #endif
 
     /* Step 5: init memory information for driver lib */
     #if ((__DRIVER_LIB_MODE__ == __DRV_LIB_WITH_ALGO__) || __USE_GOODIX_SOFT_ADT_ALGORITHM__)
@@ -1657,9 +1470,10 @@ int gh3020_init(void)
     /* Step 6: Soft ADT init */
     #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
     {
-        Gh3x2x_SetAdtConfirmPara(__GSENSOR_MOVE_THRESHOLD__, __GSENSOR_MOVE_CNT_THRESHOLD__, __GSENSOR_NOT_MOVE_CNT_THRESHOLD__);
-        #if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&(__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
-        #else
+        Gh3x2x_SetAdtConfirmPara(__GSENSOR_MOVE_THRESHOLD__, __GSENSOR_MOVE_CNT_THRESHOLD__, __GSENSOR_NOT_MOVE_CNT_THRESHOLD__, __SOFT_ADT_IR_DETECT_TIMEOUT__);
+    #if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&\
+        (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
+    #else
         if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
         {
             Gh3x2xCreateAdtConfirmTimer();
@@ -1693,7 +1507,7 @@ int gh3020_init(void)
  */
 void gh3020_rdmode_switch(GU8 uchIntModeType)
 {
-#if (__MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+#if (__MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
     EXAMPLE_LOG("[%s]:int process switch to = %d\r\n", __FUNCTION__, uchIntModeType);
     g_uchGh3x2xIntMode = uchIntModeType;
     g_uchGh3x2xInitFlag = 0;
@@ -1729,38 +1543,23 @@ void gh3020_fifo_process(void)
 
     GU8 uchRet;
     GU16 usGotEvent;
-    GU16 uchWearOffOnType;   //0 :  object/no objiect   1: living/nonliving object
-
-#if __FUNC_TYPE_SOFT_ADT_ENABLE__
-    GU8 uchSoftAdtFlag = 0;
-    GU8 uchLivingConfi;
-#endif
-
+    GU8 uchEventEx;   //0 :  object/no objiect   1: living/nonliving object
 
 #if (__FUNC_TYPE_ECG_ENABLE__)
     STSoftLeadResult stLeadResult;
 #endif
 
-#if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-    EXAMPLE_LOG("g_uchGh3x2xSoftAdtNewStatus = %d\r\n",g_uchGh3x2xSoftAdtNewStatus);
-#endif
-
-
 #if __FUNC_TYPE_SOFT_ADT_ENABLE__
-#if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&(__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
-    if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
+#if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&(__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
+    if (g_uchGh3x2xIntMode == __POLLING_INT_PROCESS_MODE__ && 1 == g_uchVirtualAdtTimerCtrlStatus && GH3X2X_GetSoftWearOffDetEn())
     {
-        if(1 == g_uchVirtualAdtTimerCtrlStatus)
-        {
-            Gh3x2xDemoMoveDetectTimerHandler();
-        }
+        Gh3x2xDemoMoveDetectTimerHandler();
     }
 #endif
 #endif
 
-
-    //check "gh3020_fifo_process" call is legal or not
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+    //check "Gh3x2xDemoInterruptProcess" call is legal or not
+#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
     if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
     {
         if((0 == GH3X2X_GetSoftEvent())&&(0 == g_uchGh3x2xIntCallBackIsCalled))
@@ -1774,19 +1573,17 @@ void gh3020_fifo_process(void)
     }
 #endif
 
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
     if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
     {
         g_uchGh3x2xIntCallBackIsCalled = 0;
     }
 #endif
-
     do{
-
         uchRet = GH3X2X_INT_PROCESS_SUCCESS;
         usGotEvent = 0;
     #if (__SUPPORT_HARD_ADT_CONFIG__)
-        uchWearOffOnType = 0;  //object
+        uchEventEx = 0;  //object
     #endif
 
         /* Step 1: exit low power mode, and read irq status */
@@ -1801,10 +1598,12 @@ void gh3020_fifo_process(void)
 
         usGotEvent = GH3X2X_GetIrqStatus();
         usGotEvent &= __GH3X2X_EVENT_PROCESS_MASK__;
-
         /* Step 2: if hard adt enabled, do wear event process */
     #if (__SUPPORT_HARD_ADT_CONFIG__)
         Gh3x2xDemoWearEventProcess(&usGotEvent, WEAR_DETECT_DONT_FORCE_SWITCH);
+    #if __FUNC_TYPE_SOFT_ADT_ENABLE__
+        Gh3x2xDemoSoftAdtStatusSwtich(&usGotEvent, &uchEventEx);
+    #endif
     #if __EXAMPLE_LOG_CONFIG__
         if(0 != (usGotEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT))
         {
@@ -1815,26 +1614,24 @@ void gh3020_fifo_process(void)
             EXAMPLE_LOG("Got hardware wear off !!! \r\n");
         }
     #endif
-
     #endif
 
-
-
         /* Step 3: if it's FIFO interrupt, read gh3x2x fifo data, read gsensor data*/
-    #if (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+    #if (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
         if (g_uchGh3x2xIntMode == __POLLING_INT_PROCESS_MODE__)
         {
             usGotEvent |= GH3X2X_IRQ_MSK_FIFO_WATERMARK_BIT;
         }
     #endif
+        EXAMPLE_LOG("usGotEvent = 0x%x\n", usGotEvent);
         if ((usGotEvent & (GH3X2X_IRQ_MSK_FIFO_WATERMARK_BIT | GH3X2X_IRQ_MSK_FIFO_FULL_BIT)) \
             || (GH3X2X_GetSoftEvent() & (GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO|GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO)))
         {
             GU16 usFifoByteNum = ((GU16)4)*GH3X2X_ReadReg(GH3X2X_INT_FIFO_UR_REG_ADDR); //read fifo use
-        #if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+        #if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
             if (g_uchGh3x2xIntMode == __NORMAL_INT_PROCESS_MODE__)
             {
-			    		  GU8 uchIsForceRead = (GH3X2X_GetSoftEvent() & GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO);
+                GU8 uchIsForceRead = (GH3X2X_GetSoftEvent() & GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO);
                 if(0 == uchIsForceRead)
                 {
                     if(usFifoByteNum < ((GU16)4)*GH3X2X_GetCurrentFifoWaterLine())  //data is too less
@@ -1851,7 +1648,7 @@ void gh3020_fifo_process(void)
             {
                 GH3X2X_SetSoftEvent(GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
             }
-
+            //EXAMPLE_LOG("g_usGh3x2xReadRawdataLen = %d\r\n", g_usGh3x2xReadRawdataLen);
         #if ((__SUPPORT_PROTOCOL_ANALYZE__)||(__SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__))
         #if (__SUPPORT_ELECTRODE_WEAR_STATUS_DUMP__)
             GH3X2X_ReadElectrodeWearDumpData();
@@ -1915,9 +1712,9 @@ void gh3020_fifo_process(void)
                 EXAMPLE_LOG("Got chip reset event !!! ActiveChipResetFlag = %d, g_unDemoFuncMode = %d, recovering flag = %d\r\n",(int)GH3x2x_GetActiveChipResetFlag(), (int)g_unDemoFuncMode, (int)GH3x2x_GetChipResetRecoveringFlag());
                 if((GH3x2x_GetActiveChipResetFlag())||(0 == g_unDemoFuncMode))
                 {
-                    Gh3x2xDemoSamplingControl(0xFFFF, UPROTOCOL_CMD_STOP);
+                    Gh3x2xDemoSamplingControl(0xFFFFFFFF, UPROTOCOL_CMD_STOP);
                     GH3X2X_ExitLowPowerMode();
-                    GH3X2X_Init(NULL);
+                    GH3X2X_Init(GH3X2X_PTR_NULL);
                 }
                 else
                 {
@@ -1962,34 +1759,7 @@ void gh3020_fifo_process(void)
                 }
         }
     }
-        /* Extra operation: soft wear off status update */
-    #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-        if (GH3X2X_GetSoftWearOffDetEn())
-        {
-            if((0 == (usGotEvent & (GH3X2X_IRQ_MSK_WEAR_ON_BIT|GH3X2X_IRQ_MSK_WEAR_OFF_BIT))))   //no exist hardware wear event
-            {
-                GU8 uchSoftWearResult = GH3X2X_UpdateSoftWearOffStatus(&usGotEvent, &uchSoftAdtFlag, &uchLivingConfi);
-                if(2 == uchSoftWearResult)
-                {
-                    if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT == g_uchGh3x2xSoftAdtNewStatus)
-                    {
-                    }
-                    else
-                    {
-                        //Gh3x2xDemoWearEventProcess(&usGotEvent, WEAR_DETECT_FORCE_SWITCH);  //switch to detect wear off
-                        EXAMPLE_LOG("Detected soft wear off\r\n");
-                    }
-                    uchWearOffOnType = 1;  //0 :  object/no objiect   1: living/nonliving object
-                }
-                if(1 == uchSoftWearResult)
-                {
-                    EXAMPLE_LOG("Detected soft wear on\r\n");
-                    uchWearOffOnType = 1;  //0 :  object/no objiect   1: living/nonliving object
-                }
-            }
-            Gh3x2xDemoWearEventConfirmProcess(&usGotEvent);
-        }
-    #endif
+
 
         GH3X2X_EnterLowPowerMode();
 
@@ -2010,7 +1780,7 @@ void gh3020_fifo_process(void)
             usGotEvent &= ~(GH3X2X_IRQ_MSK_WEAR_ON_BIT | GH3X2X_IRQ_MSK_WEAR_OFF_BIT);
         }
     #endif
-        Gh3x2xDemoReportEvent(usGotEvent,uchWearOffOnType);
+        Gh3x2xDemoReportEvent(usGotEvent,uchEventEx);
     #endif
 
         if ((usGotEvent & (GH3X2X_IRQ_MSK_FIFO_WATERMARK_BIT | GH3X2X_IRQ_MSK_FIFO_FULL_BIT)) \
@@ -2023,7 +1793,7 @@ void gh3020_fifo_process(void)
             if (GH3X2X_GetGsensorEnableFlag())
             {
             #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-                if (GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT != g_uchGh3x2xSoftAdtNewStatus)
+                if (g_uchVirtualAdtTimerCtrlStatus == 0)
             #endif
                 {
                     Gsensor_drv_get_fifo_data(gsensor_soft_fifo_buffer + __GS_EXTRA_BUF_LEN__, &gsensor_soft_fifo_buffer_index);
@@ -2083,10 +1853,7 @@ void gh3020_fifo_process(void)
             #if __GH3X2X_MEM_POOL_CHECK_EN__
             Gh3x2xUpdataMemPollChkSumAfterAlgoCal();
             #endif
-
-
         }
-
 
         ///* Step 9: event hook */
     #if (__FUNC_TYPE_ECG_ENABLE__)
@@ -2103,112 +1870,9 @@ void gh3020_fifo_process(void)
     #endif
 
     #if (__SUPPORT_HARD_ADT_CONFIG__)
-        if ((usGotEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT) || (usGotEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT)
-#if __FUNC_TYPE_SOFT_ADT_ENABLE__
-            ||(uchSoftAdtFlag)
-#endif
-        )
+        if ((usGotEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT) || (usGotEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT))
         {
-
-
-            if(usGotEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT)   // wear off
-            {
-                if(1 == uchWearOffOnType)  //nonliving object
-                {
-                    #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-                    #if __GREEN_CONFIRM_ADT_TIME_SEC__ > 0
-                    if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT == g_uchGh3x2xSoftAdtNewStatus) //ir detected wear off
-                    {
-                        //stop ir and open green soft adt
-                        EXAMPLE_LOG("Ir detected wear off, need use green confirm.\r\n");
-                        Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-                        usGotEvent &= ~GH3X2X_IRQ_MSK_WEAR_OFF_BIT;  //clear event
-                        uchWearOffOnType = 0;
-
-                    }
-                    else
-                    {
-                        if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION != g_uchGh3x2xSoftAdtNewStatus)
-                        {
-                            EXAMPLE_LOG("soft adt detected wear off, return to hard and gsensor detecting.\r\n");
-                            Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON);
-                        }
-                    }
-                    #else
-                    EXAMPLE_LOG("soft adt detected wear off, return to hard and gsensor detecting.\r\n");
-                    Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON);
-                    #endif
-                    #endif
-                    g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_WAER_OFF_NO_LIV_OBJ;
-
-                }
-                else  //no object
-                {
-                    #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-                    if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION != g_uchGh3x2xSoftAdtNewStatus)
-                    {
-                        EXAMPLE_LOG("no object, return to hard and gsensor detecting.\r\n");
-                        Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON);
-                    }
-                    #endif
-                    g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_WAER_OFF_NO_OBJ;
-                }
-
-            }
-
-
-
-            if(usGotEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT)   // wear on
-            {
-                if(0 == uchWearOffOnType)   //object
-                {
-                    #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-                    if(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT == g_uchGh3x2xSoftAdtNewStatus)
-                    {
-                        EXAMPLE_LOG("object, start ir soft adt.\r\n");
-                        Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-                    }
-                    #endif
-                    g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_WAER_ON_OBJ;
-                    EXAMPLE_LOG("g_uchGh3x2xCurrentWearDetResult set to on obj.\r\n");
-                }
-                else if(1 == uchWearOffOnType)  //living object
-                {
-                    #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-                    if(__CLOSE_SOFT_ADT_WHEN_DETECTED_LIVING_OBJECT)
-                    {
-                        if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION != g_uchGh3x2xSoftAdtNewStatus)
-                        {
-                            EXAMPLE_LOG("living object, close soft adt.\r\n");
-                            Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_STOP, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-                        }
-                    }
-                    #endif
-                    g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_WAER_ON_LIV_OBJ;
-                }
-            }
-
-
-            #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-            if(uchSoftAdtFlag & (0x08|0x10))   //need use green to confirm
-            {
-                Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_GREEN_CONFIRM, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-            }
-            if(uchSoftAdtFlag & (0x04))   //confirm time out
-            {
-                Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-            }
-            #endif
-
-
-
-
-#if __FUNC_TYPE_SOFT_ADT_ENABLE__
-            Gh3x2x_WearEventHook(usGotEvent, uchWearOffOnType, uchSoftAdtFlag, uchLivingConfi);
-#else
-            Gh3x2x_WearEventHook(usGotEvent, uchWearOffOnType, 0,0);
-#endif
-
+            Gh3x2x_WearEventHook(usGotEvent, uchEventEx);
         }
     #endif
 
@@ -2277,7 +1941,7 @@ GS8 GH3x2xDemoSearchCfgListByFunc(GU8* puchCfgIndex, GU32 unFuncMode, GU32 unFun
  *
  * @brief  array cfg switch (call by user)
  *
- * @attention   If __GH3X2X_ARRAY_CFG_MANUAL_SWITCH_EN__ is 1, you should switch array cfg manually before calling gh3020_start_sampling
+ * @attention   If __GH3X2X_ARRAY_CFG_MANUAL_SWITCH_EN__ is 1, you should switch array cfg manually before calling Gh3x2xDemoStartSampling
  *
  * @param[in]   uchArrayCfgIndex    0: gh3x2x_reg_list0    1: gh3x2x_reg_list0 ...
  * @param[out]  None
@@ -2295,7 +1959,7 @@ GS8 Gh3x2xDemoArrayCfgSwitch(GU8 uchArrayCfgIndex)
     }
     else if(uchArrayCfgIndex < __GH3X2X_CFG_LIST_MAX_NUM__)
     {
-        Gh3x2xDemoSamplingControl(0xFFFF, UPROTOCOL_CMD_STOP);
+        Gh3x2xDemoSamplingControl(0xFFFFFFFF, UPROTOCOL_CMD_STOP);
         #if __SUPPORT_HARD_RESET_CONFIG__
         GH3X2X_HardReset();
         #else
@@ -2356,7 +2020,7 @@ void Gh3x2xSetCurrentSlotEnReg(GU32 unFuncMode)
             }
         }
     }
-	 #if __SLOT_SEQUENCE_DYNAMIC_ADJUST_EN__
+    #if __SLOT_SEQUENCE_DYNAMIC_ADJUST_EN__
     for(GU8 uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
     {
         //get diver for every slot cfg
@@ -2565,7 +2229,6 @@ void GH3x2xMaserControlFunctionLog(GU32 unFuncMode, EMUprotocolParseCmdType emCm
     {
         EXAMPLE_LOG("Master stop function = 0x%x\r\n",unFuncMode);
     }
-                                                                \
 }
 
 
@@ -2597,7 +2260,24 @@ void Gh3x2xDemoSamplingControl(GU32 unFuncMode, EMUprotocolParseCmdType emSwitch
     GU16 usTempFunction;
     #endif
 
+    EXAMPLE_LOG("[%s]:emSwitch = %d\r\n",__FUNCTION__, emSwitch);
+
+#if __SOFT_ADT_CTRL_WEAR_OFF_ENABLE__
+    if (emSwitch == UPROTOCOL_CMD_STOP && (unFuncMode & GH3X2X_FUNCTION_ADT) && (g_unDemoFuncMode & GH3X2X_FUNCTION_ADT))
+    {
+        if (g_unDemoFuncMode & GH3X2X_FUNCTION_SOFT_ADT_GREEN)
+        {
+            unFuncMode = unFuncMode|GH3X2X_FUNCTION_SOFT_ADT_GREEN;
+        }
+        if (g_unDemoFuncMode & GH3X2X_FUNCTION_SOFT_ADT_IR)
+        {
+            unFuncMode = unFuncMode|GH3X2X_FUNCTION_SOFT_ADT_IR;
+        }
+    }
+#endif
+
     GH3X2X_ExitLowPowerMode();
+    Gh3x2x_BspDelayUs(500);
 
     for(GU8 uchFunCnt = 0; uchFunCnt < GH3X2X_FUNC_OFFSET_MAX; uchFunCnt ++)
     {
@@ -2620,12 +2300,9 @@ void Gh3x2xDemoSamplingControl(GU32 unFuncMode, EMUprotocolParseCmdType emSwitch
                             GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[uchFunCnt]);
                             g_uchHardAdtFuncStatus = 1;
                         }
-                        g_uchGh3x2xSoftAdtNewStatus =  GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT;
                     #else
                         GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[uchFunCnt]);
                     #endif
-                        g_uchGh3x2xCurrentWearDetResult = GH3X2X_WARR_DET_RESULT_UNKNOW;
-                        EXAMPLE_LOG("g_uchGh3x2xCurrentWearDetResult clear to 0.\r\n");
                     }
                     else
                     {
@@ -2757,26 +2434,39 @@ void Gh3x2xDemoSamplingControl(GU32 unFuncMode, EMUprotocolParseCmdType emSwitch
 }
 
 
-void GH3X2X_StartHardAdt(void)
+void GH3X2X_StartHardAdtAndResetGsDetect(void)
 {
+    EXAMPLE_LOG("[%s]\r\n", __FUNCTION__);
+    GH3X2X_ExitLowPowerMode();
     GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-#if (__SUPPORT_HARD_ADT_CONFIG__)
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
     g_uchHardAdtFuncStatus = 1;
+    Gh3x2x_ResetMoveDetectByGsData();
 #endif
-#endif
-    Gh3x2xSetCurrentSlotEnReg(g_unDemoFuncMode);
+    Gh3x2xSetCurrentSlotEnReg(GH3X2X_FUNCTION_ADT);
+    GH3X2X_EnterLowPowerMode();
 }
 
-void GH3X2X_StopHardAdt(void)
+void GH3X2X_StopHardAdtAndStartGsDetect(void)
 {
+    EXAMPLE_LOG("[%s]\r\n", __FUNCTION__);
+    GH3X2X_ExitLowPowerMode();
     GH3X2X_FunctionStop(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-#if (__SUPPORT_HARD_ADT_CONFIG__)
+    GU16 usGotEvent = 0;
+    usGotEvent |= GH3X2X_IRQ_MSK_WEAR_OFF_BIT;
+    Gh3x2xDemoWearEventProcess(&usGotEvent,WEAR_DETECT_FORCE_SWITCH);
+#if (__SUPPORT_PROTOCOL_ANALYZE__)
+    Gh3x2xDemoReportEvent(usGotEvent,0);
+#endif
 #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
     g_uchHardAdtFuncStatus = 0;
+    Gh3x2x_ResetMoveDetectByGsData();
 #endif
+    Gh3x2xSetCurrentSlotEnReg(g_unDemoFuncMode&(~GH3X2X_FUNCTION_ADT));
+#if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
+    GH3X2X_START_ADT_TIMER();
 #endif
-    Gh3x2xSetCurrentSlotEnReg(g_unDemoFuncMode);
+    GH3X2X_EnterLowPowerMode();
 }
 
 
@@ -2888,7 +2578,6 @@ void Gh3x2xDemoStartSamplingInner(GU32 unFuncMode)
                     g_uchWearDetectStatus = WEAR_DETECT_WEAR_OFF;
                     GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_OFF,WEAR_DETECT_FORCE_SWITCH);
                 }
-
             }
         #endif
 
@@ -2921,124 +2610,15 @@ void Gh3x2xDemoStartSamplingInner(GU32 unFuncMode)
 }
 
 
-void Gh3x2xSoftAdtStatusCheck(void)
-{
-#if    __SUPPORT_HARD_ADT_CONFIG__
-    if(g_unDemoFuncMode&(GH3X2X_FUNCTION_ADT))
-    {
-
-        if(g_unDemoFuncMode&(~(GH3X2X_FUNCTION_ADT|GH3X2X_FUNCTION_SOFT_ADT_IR|GH3X2X_FUNCTION_SOFT_ADT_GREEN)))  //exist main function
-        {
-#if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-            if (GH3X2X_GetSoftWearOffDetEn())
-#endif
-            {
-                Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION, GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-            }
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-            else
-#endif
-#endif
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-            {
-                if(GH3X2X_WARR_DET_RESULT_UNKNOW == g_uchGh3x2xCurrentWearDetResult)
-                {
-                    if(WEAR_DETECT_WEAR_OFF != g_uchWearDetectStatus)
-                    {
-                        GH3X2X_ExitLowPowerMode();
-                        GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-                        #if __FUNC_TYPE_SOFT_ADT_ENABLE__
-                        g_uchHardAdtFuncStatus = 1;
-                        #endif
-                        g_uchWearDetectStatus = WEAR_DETECT_WEAR_OFF;
-                        GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_OFF,WEAR_DETECT_FORCE_SWITCH);
-                        GH3X2X_EnterLowPowerMode();
-                    }
-                }
-                #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-                g_uchGh3x2xSoftAdtNewStatus =  GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION;
-                #endif
-
-            }
-#endif
-        }
-        else
-        {
-#if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-        if (GH3X2X_GetSoftWearOffDetEn())
-#endif
-            {
-
-                #if __USE_SOFT_ADT_DETECT_WEAR_ON__
-                if(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_WITH_MAIN_FUCTION == g_uchGh3x2xSoftAdtNewStatus)
-                {
-                    if(g_uchGh3x2xCurrentWearDetResult&0x01)  //result == wear off
-                    {
-                        Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT,GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON);
-                    }
-                    else
-                    {
-                        Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_SOFT_ADT_IR_DECT,GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_OFF);
-                    }
-
-                }
-                #else
-                Gh3x2xDemoSoftAdtStatusSwtich(GH3X2X_SOFE_ADT_NEW_STATUS_HARD_AND_GSENSOR_DECT,GH3X2X_FORCE_HARD_ADT_STATUS_DETECT_WEAR_ON);
-                #endif
 
 
 
 
-            }
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-            else
-#endif
-#endif
-            {
-
-#if 0 == GH3X2X_ONLY_SUPPORT_SOFT_ADT
-                {
-                    EXAMPLE_LOG("g_uchGh3x2xCurrentWearDetResult = %d\r\n",g_uchGh3x2xCurrentWearDetResult);
-                    if(GH3X2X_WARR_DET_RESULT_UNKNOW == g_uchGh3x2xCurrentWearDetResult)
-                    {
-                        if(WEAR_DETECT_WEAR_ON != g_uchWearDetectStatus)
-                        {
-                            GH3X2X_ExitLowPowerMode();
-                            GH3X2X_FunctionStart(g_pstGh3x2xFrameInfo[GH3X2X_FUNC_OFFSET_ADT]);
-                            #if __FUNC_TYPE_SOFT_ADT_ENABLE__
-                            g_uchHardAdtFuncStatus = 1;
-                            #endif
-                            g_uchWearDetectStatus = WEAR_DETECT_WEAR_ON;
-                            GH3X2X_WearDetectSwitchTo(WEAR_DETECT_WEAR_ON,WEAR_DETECT_FORCE_SWITCH);
-                            GH3X2X_EnterLowPowerMode();
-                        }
-                    }
-                }
-
-#endif
-            }
-        }
-    }
-    #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
-    else
-    {
-        Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_IR);
-        Gh3x2xDemoStopSamplingInner(GH3X2X_FUNCTION_SOFT_ADT_GREEN);
-        g_uchGh3x2xSoftAdtNewStatus =  GH3X2X_SOFE_ADT_NEW_STATUS_NO_ADT;
-    }
-    #endif
-#endif
-}
 
 
 void gh3020_start_sampling(GU32 unFuncMode)
 {
     Gh3x2xDemoStartSamplingInner(unFuncMode);
-#if    __SUPPORT_HARD_ADT_CONFIG__
-    Gh3x2xSoftAdtStatusCheck();
-#endif
 }
 
 
@@ -3067,9 +2647,6 @@ void gh3020_start_sampling_factest(GU32 unFuncMode, STGh3x2xEngineeringModeSampl
     g_uchEngineeringModeStatus = 1;
     Gh3x2xDemoStartSamplingInner(unFuncMode);
     g_unDemoFuncMode = GH3X2X_FUNCTION_TEST1;
-#if    __SUPPORT_HARD_ADT_CONFIG__
-    Gh3x2xSoftAdtStatusCheck();
-#endif
 }
 #endif
 
@@ -3097,9 +2674,6 @@ void Gh3x2xDemoStopSamplingInner(GU32 unFuncMode)
 void gh3020_stop_sampling(GU32 unFuncMode)
 {
     Gh3x2xDemoStopSamplingInner(unFuncMode);
-#if    __SUPPORT_HARD_ADT_CONFIG__
-    Gh3x2xSoftAdtStatusCheck();
-#endif
 }
 
 
@@ -3121,7 +2695,7 @@ void gh3020_stop_sampling_factest(void)
 {
     Gh3x2xDemoStopSamplingInner(g_unDemoFuncMode);
 
-    Gh3x2xDemoSamplingControl(0xFFFF, UPROTOCOL_CMD_STOP);
+    Gh3x2xDemoSamplingControl(0xFFFFFFFF, UPROTOCOL_CMD_STOP);
 
     #if __SUPPORT_HARD_RESET_CONFIG__
     GH3X2X_HardReset();
@@ -3163,7 +2737,9 @@ void Gh3x2xDemoMoveDetectTimerHandler(void)
 {
     #if (__FUNC_TYPE_SOFT_ADT_ENABLE__)
     //0.check CAP
+    #if (__CAP_ENABLE__)
     Cap_drv_get_fifo_data(cap_soft_fifo_buffer, &cap_soft_fifo_buffer_index);
+    #endif
     GH3X2X_MoveDetectByCapData(cap_soft_fifo_buffer, cap_soft_fifo_buffer_index);
     //1.check GS
     Gsensor_drv_get_fifo_data(gsensor_soft_fifo_buffer + __GS_EXTRA_BUF_LEN__, &gsensor_soft_fifo_buffer_index);
@@ -3283,12 +2859,6 @@ void Gh3x2xSetFrameFlag2(const STGh3x2xFrameInfo * const pstFrameInfo)
     #endif
 }
 
-
-// __weak void GH3X2X_Log(GCHAR *log_string)
-// {
-// }
-
-
 #if    __SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__
 STGh3x2xAlgoInfoRecordData g_StAlgoRecordData;
 const STGh3x2xAlgoInfoRecordData * const g_pStAlgoRecordData = &g_StAlgoRecordData;
@@ -3297,7 +2867,7 @@ const STGh3x2xAlgoInfoRecordData * const g_pStAlgoRecordData = (STGh3x2xAlgoInfo
 #endif
 
 
-// __weak void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo){}
+//__weak void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo){}
 
 
 
@@ -3330,7 +2900,7 @@ void GH3X2X_SoftLedADJAutoADJInt(void){}
 #endif
 
 
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
 void Gh3x2xPollingModePro(void){}
 #endif
 
@@ -3410,6 +2980,24 @@ GS8 GH3X2X_BpParameterOperationFunc(GS8 (*pBpParameterWriteFunc)(GS32 *buffer), 
 GU8 GH3X2X_GetFifoPackageMode(void){return 0;}
 void GH3X2X_SendRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadByteNum){}
 #endif
+#if (0 == __CAP_ENABLE__)
+GU8 GH3X2X_GetCapEnableFlag(void)
+{
+    return 0;
+}
+#endif
+#if (0 == __TEMP_ENABLE__)
+GU8 GH3X2X_GetTempEnableFlag(void)
+{
+    return 0;
+}
+#endif
+
+/*__weak void GH3X2X_Log(GCHAR *log_string)
+{
+}*/
+
+
 
 
 

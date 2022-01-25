@@ -11,7 +11,12 @@
 
 #include "gh3x2x_config.h"
 #include "gh3x2x_inner.h"
+#include "gh3x2x.h"
 #include "gh3020_bridge.h"
+
+static const uint16_t gh3x2x_gain_list[13] = {
+    10, 25, 50, 75, 100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000
+};
 
 /* hook functions */
 
@@ -92,7 +97,7 @@ void gh3x2x_sampling_stop_hook_func(void)
     GU8  ubSlotNo;                       //slot number
     GU8  ubAdcNo;                        //adc number
     GU8  ubFlagLedAdjIsAgc_EcgRecover;   //adj flag of ppg data or fast recover flag of ecg data
-    GU8  ubFlagLedAdjAgcUp;                 //adj down flag of ppg data   0: down  1:up
+    GU8  ubFlagLedAdjAgcUp;              //adj down flag of ppg data   0: down  1:up
 }StFifoDataInformation;
 
 void gh3x2x_get_rawdata_hook_func(GU8 *read_buffer_ptr, GU16 length)
@@ -197,7 +202,6 @@ void Gh3x2x_LeadOffEventHook(void)
 
 
 #if (__SUPPORT_HARD_ADT_CONFIG__)
-
 /**
  * @fn     extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchWearOffType, GU8 uchSoftAdtFlag);
  *
@@ -211,51 +215,40 @@ void Gh3x2x_LeadOffEventHook(void)
  *
  * @return  None
  */
-void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType,GU8 uchSoftAdtFlag, GU8 uchLivingConfi)
+void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchExentEx)
 {
-
-
-    EXAMPLE_LOG("uchSoftAdtFlag = 0x%X\r\n",  uchSoftAdtFlag);
-
-    if(uchSoftAdtFlag&0x01)  // soft adt time out
-    {
-        EXAMPLE_LOG("Soft adt time out !!!\r\n");
-    }
-
-    if(uchSoftAdtFlag&0x02)  // maybe wear off
-    {
-        EXAMPLE_LOG("Soft adt maybe wear off\r\n");
-    }
-
-
     if (usGotEvent & GH3X2X_IRQ_MSK_WEAR_OFF_BIT)
     {
+        //Gh3x2xDemoStopSampling(g_unDemoFuncMode & (~GH3X2X_FUNCTION_ADT));
         GOODIX_PLANFROM_WEAR_OFF_EVENT();
-        if(0 == uchType)
-        {
-            EXAMPLE_LOG("Wear off, no object!!!\r\n");
-        }
-        else if(1 == uchType)
-        {
-            EXAMPLE_LOG("Wear off, nonliving object!!!\r\n");
-        }
-
+        EXAMPLE_LOG("Wear off, no object!!!\r\n");
     }
     else if (usGotEvent & GH3X2X_IRQ_MSK_WEAR_ON_BIT)
     {
-        if(0 == uchType)
-        {
-            GOODIX_PLANFROM_WEAR_ON_EVENT();
-            EXAMPLE_LOG("Wear on, object !!!\r\n");
-        }
-        else if(1 == uchType)
-        {
-            EXAMPLE_LOG("Wear on, living object !!!\r\n");
-        }
+        gh3020_start_sampling(GH3X2X_FUNCTION_SOFT_ADT_IR);
+        GOODIX_PLANFROM_WEAR_ON_EVENT();
+        EXAMPLE_LOG("Wear on, object !!!\r\n");
     }
 }
 #endif
 
+typedef struct{
+    GS32 ppg_gr1_raw[__HR_ALGORITHM_SUPPORT_CHNL_NUM__];
+    GS32 ppg_rd1_raw[__SPO2_ALGORITHM_SUPPORT_CHNL_NUM__];
+    GS32 ppg_ir1_raw[__SPO2_ALGORITHM_SUPPORT_CHNL_NUM__];
+    GS32 amb_raw[__SPO2_ALGORITHM_SUPPORT_CHNL_NUM__];
+
+    /*
+    ppg_status数据格式：
+    [15:0]   Gain,数据范围：0~12，分别表示[10,25,50,75,100,250,500,750,1000,1250,1500,1750,2000kΩ]
+    [31:16]  led电流，数据范围：0~400mA;
+    */
+    GU32 ppg_gr1_status[__HR_ALGORITHM_SUPPORT_CHNL_NUM__];
+    GU32 ppg_rd1_status[__SPO2_ALGORITHM_SUPPORT_CHNL_NUM__];
+    GU32 ppg_ir1_status[__SPO2_ALGORITHM_SUPPORT_CHNL_NUM__];
+
+}af_sensor_ppg_t;
+af_sensor_ppg_t ppg_data = {0};
 
 /**
  * @fn      void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo)
@@ -272,27 +265,129 @@ void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType,GU8 uchSoftAdtFlag, GU8 u
 #if    __SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__
 void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo)
 {
-    /****************** FOLLOWING CODE IS EXAMPLE **********************************/
-#if 0
-    //function id and channel num
-    EXAMPLE_LOG("[IO_DATA]Function ID: 0x%X, channel num = %d, frame cnt = %d\r\n",(int)(pstFrameInfo->unFunctionID),(int)(pstFrameInfo->pstFunctionInfo->uchChnlNum),(int)(pstFrameInfo->punFrameCnt[0]));
-    //gsensor data
-    EXAMPLE_LOG("[IO_DATA]Gsensor: x = %d, y = %d, z = %d\r\n",\
-                        (int)(pstFrameInfo->pusFrameGsensordata[0]),\
-                        (int)(pstFrameInfo->pusFrameGsensordata[1]),\
-                        (int)(pstFrameInfo->pusFrameGsensordata[2])\
-                );
-    //rawdata
-    for(GU8 uchChnlCnt = 0; uchChnlCnt < pstFrameInfo->pstFunctionInfo->uchChnlNum; uchChnlCnt ++)
+    struct sensor_event_ppgq ppg;
+    GS32 raw_temp = 0;
+    GU32 gain_temp = 0;
+    GU32 current_temp = 0;
+
+    //green
+    if((int)(pstFrameInfo->unFunctionID) & GH3X2X_FUNCTION_HR)
     {
-        EXAMPLE_LOG("[IO_DATA]Ch%d rawdata= %d\r\n",(int)(uchChnlCnt),(int)(pstFrameInfo->punFrameRawdata[uchChnlCnt]));
+        for(int i = 0;i < __HR_ALGORITHM_SUPPORT_CHNL_NUM__;i ++)
+        {
+            raw_temp = (GS32)(pstFrameInfo->punFrameRawdata[i]) - 0x800000;
+
+            //[15:0]:gain,0~12;[10,25,50,75,100,250,500,750,1000,1250,1500,1750,2000kΩ].
+            //[31:16]:LED current,0~200mA.
+            gain_temp = (GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000000F;
+            current_temp = ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000FF00) >> 8) * 200 / 255) +
+                        ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x00FF0000) >> 16) * 200 / 255);
+            ppg.gain[i] = gh3x2x_gain_list[gain_temp];
+            if (raw_temp > 0)
+            {
+                ppg.ppg[i] = (uint32_t)raw_temp;
+            }
+            else
+            {
+                ppg.ppg[i] = 0;
+            }
+        }
+        ppg.current = current_temp * 1000;
+        gh3020_transdata(&ppg, GH3020_PPG0_SENSOR_IDX);
     }
-    //algorithm result
-    if(pstFrameInfo->pstAlgoResult->uchUpdateFlag)
+
+    //red
+    if((int)(pstFrameInfo->unFunctionID) & GH3X2X_FUNCTION_SPO2)
     {
-        EXAMPLE_LOG("[IO_DATA]algorithm result0= %d\r\n",(int)pstFrameInfo->pstAlgoResult->snResult[0]);
+        for(int i = 0;i < __SPO2_ALGORITHM_SUPPORT_CHNL_NUM__;i ++)
+        {
+            raw_temp = (GS32)(pstFrameInfo->punFrameRawdata[i]) - 0x800000;
+
+            //[15:0]:gain,0~12;[10,25,50,75,100,250,500,750,1000,1250,1500,1750,2000kΩ].
+            //[31:16]:LED current,0~200mA.
+            gain_temp = (GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000000F;
+            current_temp = ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000FF00) >> 8) * 200 / 255) +
+                        ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x00FF0000) >> 16) * 200 / 255);
+            ppg.gain[i] = gh3x2x_gain_list[gain_temp];
+            if (raw_temp > 0)
+            {
+                ppg.ppg[i] = (uint32_t)raw_temp;
+            }
+            else
+            {
+                ppg.ppg[i] = 0;
+            }
+        }
+        ppg.current = current_temp * 1000;
+        gh3020_transdata(&ppg, GH3020_PPG1_SENSOR_IDX);
     }
-#endif
+
+    //ir
+    if((int)(pstFrameInfo->unFunctionID) & GH3X2X_FUNCTION_HRV)
+    {
+        for(int i = 0;i < __SPO2_ALGORITHM_SUPPORT_CHNL_NUM__;i ++)
+        {
+            raw_temp = (GS32)(pstFrameInfo->punFrameRawdata[i]) - 0x800000;
+
+            //[15:0]:gain,0~12;[10,25,50,75,100,250,500,750,1000,1250,1500,1750,2000kΩ].
+            //[31:16]:LED current,0~200mA.
+            gain_temp = (GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000000F;
+            current_temp = ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000FF00) >> 8) * 200 / 255) +
+                        ((((GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x00FF0000) >> 16) * 200 / 255);
+            ppg.gain[i] = gh3x2x_gain_list[gain_temp];
+            if (raw_temp > 0)
+            {
+                ppg.ppg[i] = (uint32_t)raw_temp;
+            }
+            else
+            {
+                ppg.ppg[i] = 0;
+            }
+        }
+        ppg.current = current_temp * 1000;
+        gh3020_transdata(&ppg, GH3020_PPG2_SENSOR_IDX);
+    }
+
+    //awb
+    if((int)(pstFrameInfo->unFunctionID) & GH3X2X_FUNCTION_RESP)
+    {
+        for(int i = 0;i < __SPO2_ALGORITHM_SUPPORT_CHNL_NUM__;i ++)
+        {
+            gain_temp = (GU32)pstFrameInfo->punFrameAgcInfo[i] & 0x0000000F;
+            raw_temp = (GS32)(pstFrameInfo->punFrameRawdata[i]) - 0x800000;
+            ppg.gain[i] = gh3x2x_gain_list[gain_temp];
+            if (raw_temp > 0)
+            {
+                ppg.ppg[i] = (uint32_t)raw_temp;
+            }
+            else
+            {
+                ppg.ppg[i] = 0;
+            }
+        }
+        ppg.current = 0;
+        gh3020_transdata(&ppg, GH3020_PPG3_SENSOR_IDX);
+    }
 }
 #endif
 
+void gh3x2x_active_reset_hook(void)
+{
+    Gh3x2x_BspDelayMs(20);
+    gh3020_fifo_process();
+    EXAMPLE_LOG("[%s]:handle protocol reset\r\n", __FUNCTION__);
+}
+
+void gh3x2x_protocol_ctrl_timer_handle(EMUprotocolParseCmdType emCmdType)
+{
+    if (UPROTOCOL_CMD_START == emCmdType)
+    {
+        EXAMPLE_LOG("[%s]:start polling timer\r\n", __FUNCTION__);
+        //start polling timer
+    }
+    else if (UPROTOCOL_CMD_STOP == emCmdType)
+    {
+        EXAMPLE_LOG("[%s]:stop polling timer\r\n", __FUNCTION__);
+        //stop polling timer
+    }
+}

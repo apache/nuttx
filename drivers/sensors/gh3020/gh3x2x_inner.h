@@ -68,6 +68,7 @@
 #define GOODIX_PLANFROM_PRINTF_ENTITY()
 #define GOODIX_PLANFROM_MALLOC_USER_ENTITY()
 #define GOODIX_PLANFROM_FREE_USER_ENTITY()
+#define GOODIX_PLANFROM_NADT_RESULT_HANDLE_ENTITY()
 
 
 
@@ -174,7 +175,7 @@ extern GU8 g_uchDemoWorkMode;
 
 
 
-#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
+#if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
 //hal_gh3x2x_int_handler_call_back is called, this value is 1
 extern GU8 g_uchGh3x2xIntCallBackIsCalled;
 #endif
@@ -461,7 +462,7 @@ extern void Gh3x2x_LeadOnEventHook(void);
 extern void Gh3x2x_LeadOffEventHook(void);
 
 /**
- * @fn     void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType,GU8 uchSoftAdtFlag, GU8 uchLivingConfi)
+ * @fn     void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType)
  *
  * @brief  Wear event hook
  *
@@ -473,7 +474,7 @@ extern void Gh3x2x_LeadOffEventHook(void);
  *
  * @return  None
  */
-extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType,GU8 uchSoftAdtFlag, GU8 uchLivingConfi);
+extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType);
 
 /**
  * @fn     void Gh3x2x_DemoAlgorithmMemConfig(void)
@@ -505,7 +506,7 @@ extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType,GU8 uchSoftAdtFlag
 void Gh3x2x_UserHandleCurrentInfo(void);
 
 
-
+extern void gh3x2x_protocol_ctrl_timer_handle(EMUprotocolParseCmdType emCmdType);
 
 
 
@@ -745,23 +746,19 @@ extern void Gh3x2xMemPoolCheckSumWrite(GU8 *lunMemPool);
 extern GU16 Gh3x2xMemPoolCheckSumCheck(GU8 *lunMemPool);
 extern void Gh3x2xCheckMemPollBeforeAlgoCal(void);
 extern void Gh3x2xUpdataMemPollChkSumAfterAlgoCal(void);
-
-
-extern void Gh3x2xSoftAdtStatusCheck(void);
-
 extern void Gh3x2xHrOutputValueStrategyPro(STGh3x2xAlgoResult * pstAlgoResult, GU32 lubFrameId);
-
 extern void GH3x2xMaserControlFunctionLog(GU32 unFuncMode, EMUprotocolParseCmdType emCmdType);
 
 
 #if __FUNC_TYPE_SOFT_ADT_ENABLE__
+extern GU8 g_uchVirtualAdtTimerCtrlStatus;
 #if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&\
-    (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_BY_POLLING__)
-#define GH3X2X_START_ADT_TIMER()   g_uchVirtualAdtTimerCtrlStatus = 1
-#define GH3X2X_STOP_ADT_TIMER()    g_uchVirtualAdtTimerCtrlStatus = 0
+    (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
+#define GH3X2X_START_ADT_TIMER()   g_uchVirtualAdtTimerCtrlStatus = 1;
+#define GH3X2X_STOP_ADT_TIMER()    g_uchVirtualAdtTimerCtrlStatus = 0;
 #else
-#define GH3X2X_START_ADT_TIMER()   Gh3x2x_StartAdtConfirmTimer()
-#define GH3X2X_STOP_ADT_TIMER()    Gh3x2x_StopAdtConfirmTimer()
+#define GH3X2X_START_ADT_TIMER()    if (GH3X2X_GetSoftWearOffDetEn()){Gh3x2x_StartAdtConfirmTimer();g_uchVirtualAdtTimerCtrlStatus = 1;}
+#define GH3X2X_STOP_ADT_TIMER()    if (GH3X2X_GetSoftWearOffDetEn()){Gh3x2x_StopAdtConfirmTimer();g_uchVirtualAdtTimerCtrlStatus = 0;}
 #endif
 #endif
 #endif /* _GH3X2X_DEMO_INNER_H_ */

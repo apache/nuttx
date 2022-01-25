@@ -5,7 +5,7 @@
  *
  * @brief   gh3x2x driver functions
  *
- * @version v3.2.4.5
+ * @version v3.2.4.5.8_L61A
  *
  * @author  Gooidx Iot Team
  *
@@ -125,40 +125,42 @@ typedef enum
  * @brief hba scene config
  */
 typedef enum {
-    HBA_SCENES_DEFAULT = 0,                 // default
+        HBA_SCENES_DEFAULT = 0,             // default
 
-    HBA_SCENES_DAILY_LIFE = 1,              // daily life
-    HBA_SCENES_RUNNING_INSIDE = 2,          // running machine
-    HBA_SCENES_WALKING_INSIDE = 3,          // walking inside
-    HBA_SCENES_STAIRS = 4,                  // stair
+        HBA_SCENES_DAILY_LIFE = 1,            // daily life
+        HBA_SCENES_RUNNING_INSIDE = 2,        // running machine
+        HBA_SCENES_WALKING_INSIDE = 3,        // walking inside
+        HBA_SCENES_STAIRS = 4,                // stair
 
-    HBA_SCENES_RUNNING_OUTSIDE = 5,         // running outside
-    HBA_SCENES_WALKING_OUTSIDE = 6,         // walking outing
+        HBA_SCENES_RUNNING_OUTSIDE = 5,     // running outside
+        HBA_SCENES_WALKING_OUTSIDE = 6,     // walking outing
 
-    HBA_SCENES_STILL_REST = 7,              // still rest
-    HBA_SCENES_REST = 8,                    // rest
-    HBA_SCENES_STILLRADON = 9,              //  breath holding
+        HBA_SCENES_STILL_REST = 7,            // still rest
+        HBA_SCENES_REST = 8,                // rest
+        HBA_SCENES_STILLRADON = 9,            // breath holding
 
-    HBA_SCENES_BIKING_INSIDE = 10,          // biking inside
-    HBA_SCENES_BIKING_OUTSIDE = 11,         // biking outside
-    HBA_SCENES_BIKING_MOUNTAIN= 12,         // biking mountain
-    HBA_SCENES_RUNNING_HIGH_HR = 13,        // running in high heart rate
+        HBA_SCENES_BIKING_INSIDE = 10,        //biking inside
+        HBA_SCENES_BIKING_OUTSIDE = 11,     //biking outside
+        HBA_SCENES_BIKING_MOUNTAIN= 12,     //biking mountain
+        HBA_SCENES_RUNNING_HIGH_HR = 13,    //running in high heart rate
 
-    HBA_SCENES_RUNNING_TREADMILL_CCOMBINE= 14,      // combination of treadmill running
+        HBA_SCENES_RUNNING_TREADMILL_CCOMBINE= 14,        // combination of treadmill running
 
-    HBA_SCENES_HIGH_INTENSITY_COMBINE = 15,         // combination of high intensity exercise
-    HBA_SCENES_TRADITIONAL_STRENGTH_COMBINE = 16,   // combination of traditional strength training
-    HBA_SCENES_STEP_TEST = 17,                      // step test
+        HBA_SCENES_HIGH_INTENSITY_COMBINE = 15,     // combination of high intensity exercise
+        HBA_SCENES_TRADITIONAL_STRENGTH_COMBINE = 16,        // combination of traditional strength training
+        HBA_SCENES_STEP_TEST = 17,            // step test
 
-    HBA_SCENES_BALL_SPORTS = 18,                    // ball sports
-    HBA_SCENES_AEROBICS = 19,                       // aerobics
+        HBA_SCENES_BALL_SPORTS = 18,        // ball sports
+        HBA_SCENES_AEROBICS = 19,            // aerobics
 
-    HBA_SCENES_SLEEP = 20,              // sleep
-    HBA_SCENES_JUMP = 21,               // jump
-    HBA_SCENES_CORDLESS_JUMP = 22,      // cordless jump
-    HBA_SCENES_SWIMMING = 23,           // SWIMMING
-    HBA_SCENES_SIZE = 24,
+
+        HBA_SCENES_SLEEP = 20,                // sleep
+        HBA_SCENES_JUMP = 21,                //jump
+        HBA_SCENES_CORDLESS_JUMP = 22,        // cordless jump
+        HBA_SCENES_SWIMMING = 23,            // SWIMMING
+        HBA_SCENES_SIZE = 24,
 }hba_scenes_e;
+
 
 /**
  * @brief wear detect enable type enum
@@ -197,6 +199,15 @@ typedef enum
     SKIN_COLOR_STATUS_YELLOW,       /**< yellow skin status */
     SKIN_COLOR_STATUS_FAIR,         /**< fair skin status */
 } EMSkinColorStatusType;
+
+typedef enum
+{
+    STATUS_DEFAULT = 0,
+    STATUS_LVING_WEAR = 1,
+    STATUS_LVING_UNWEAR = 2,
+    STATUS_WEAR_REPORTED = 3,
+    STATUS_UNWEAR_REPORTED = 4,
+}EMWearRecordType;
 
 /**
  * @brief register struct
@@ -555,11 +566,13 @@ typedef enum
 
 /// Overflow protocol payload max len
 #define  GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_HEADER_LEN           (10)
-#define  GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX                 (220)
+#define  GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX              (220)
 
 /// number of channel map id
 #define  CHANNEL_MAP_ID_NUM                               (32)
 
+/// null val
+#define   GH3X2X_PTR_NULL                                 ((void *) 0)
 
 /* ecg sample event type */
 #define  ECG_SAMPLE_EVENT_TYPE_SAMPLE                     (0x01)     /**< sample evt type sample config */
@@ -1160,6 +1173,89 @@ GS8 GH3X2X_LoadNewRegConfigArr(const STGh3x2xReg *pstRegConfigArr, GU16 usRegCon
  * @retval  #GH3X2X_RET_GENERIC_ERROR    dump gh3x2x address out of bounds
  */
 GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 usDumpRegsLen);
+
+/**
+ * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+ *
+ * @brief  memcpy() Re-implementation
+ *
+ * @attention   None
+ *
+ * @param[in]   pSrc        pointer to source buffer
+ * @param[in]   unByteSize  source buffer byte size
+ * @param[out]  pDest       pointer to destination buffer
+ *
+ * @return  pointer to destination buffer
+ */
+void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
+
+/**
+ * @fn     void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+ *
+ * @brief  memset() Re-implementation
+ *
+ * @attention   None
+ *
+ * @param[in]   chVal       char val for set
+ * @param[in]   unByteSize       source buffer len
+ * @param[out]  pDest       pointer to destination buffer
+ *
+ * @return  pointer to destination buffer
+ */
+void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
+
+/**
+ * @fn     GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+ *
+ * @brief  strlen() Re-implementation
+ *
+ * @attention   None
+ *
+ * @param[in]   pszSrc      pointer to string
+ * @param[out]  None
+ *
+ * @return  string len
+ */
+GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
+
+/**
+ * @fn     void GH3X2X_HbaAlgoChnlMapDefultSet(void)
+
+ *
+ * @brief  Set algo channel group Defult value
+ *
+ * @attention
+ *
+ *
+ * @return  None
+ */
+void GH3X2X_HbaAlgoChnlMapDefultSet(void);
+
+/**
+ * @fn     void GH3X2X_HrvAlgoChnlMapDefultSet(void)
+
+ *
+ * @brief  Set algo channel group Defult value
+ *
+ * @attention
+ *
+ *
+ * @return  None
+ */
+void GH3X2X_HrvAlgoChnlMapDefultSet(void);
+
+/**
+ * @fn     void GH3X2X_Spo2AlgoChnlMapDefultSet(void)
+
+ *
+ * @brief  Set algo channel group Defult value
+ *
+ * @attention
+ *
+ *
+ * @return  None
+ */
+void GH3X2X_Spo2AlgoChnlMapDefultSet(void);
 
 /**
  * @fn     GS8 GH3X2X_CommunicateConfirm(void)
@@ -2318,7 +2414,7 @@ void GH3X2X_ReportIrqStatus(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU16 us
  *
  * @return  None
  */
-void Gh3x2x_SetAdtConfirmPara(GU8 uchMoveThreshold, GU16 usMoveCntThreshold, GU16 usNotMoveCntThreshold);
+void Gh3x2x_SetAdtConfirmPara(GU8 uchMoveThreshold, GU16 usMoveCntThreshold, GU16 usNotMoveCntThreshold, GU32 unIRTimeoutSecondsThreshold);
 
 /**
  * @fn     GS8 GH3X2X_AdtFuncStartWithConfirm(void)
@@ -2895,13 +2991,25 @@ void GH3X2X_RecordTiaGainInfo(void);
  * @param[in]   None
  * @param[out]  None
  *
- * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x3x  1: need wake up gh3x2x
+ * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
 GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void);
 
 
-
-
+/**
+ * @fn     GU8 GH3X2X_UpdateSoftWearStatus(void)
+ *
+ * @brief  update wear status
+ *
+ * @attention   None
+ *
+ * @param[in]   old event point
+ * @param[out]  0: no soft wear off det event  1: have soft wear off det event
+ *
+ * @return  new event
+ */
+GU8 GH3X2X_UpdateSoftWearStatus(void);
+void GH3X2X_SetSoftWearStatus(EMWearRecordType emStatus);
 
 /**
  * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag)
@@ -2911,7 +3019,7 @@ GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void);
  *
  * @attention   None.
  *
- * @param[in]   set flag  0: do not need wake up gh3x3x  1: need wake up gh3x2x
+ * @param[in]   set flag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  * @param[out]  None
  *
  * @return  None
@@ -2926,7 +3034,7 @@ void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag);
  *
  * @attention   None.
  *
- * @param[in]   set flag  0: do not need wake up gh3x3x  1: need wake up gh3x2x
+ * @param[in]   set flag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  * @param[out]  None
  *
  * @return  None
@@ -2943,7 +3051,7 @@ void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag);
  * @param[in]   None
  * @param[out]  None
  *
- * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x3x  1: need wake up gh3x2x
+ * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
 GU8 GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void);
 
@@ -3023,7 +3131,7 @@ typedef struct
     GU32 unFunctionID ;
     STGh3x2xFunctionInfo *pstFunctionInfo;
     STGh3x2xDownSampleInfo *pstDownSampleInfo;
-    GU8    uchFuntionChnlLimit;   //max chnl num
+    GU8   uchFuntionChnlLimit;   //max chnl num
     GU8   *pchChnlMap;
     GU32 *punFrameRawdata;
     GS16 *pusFrameGsensordata;
@@ -3155,7 +3263,6 @@ GS8 GH3X2X_FunctionStop(const STGh3x2xFrameInfo * const pstFrameInfo);
 
 
 
-
 void GH3x2xFunctionProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, GS16 *pusGsValueArr, GU16 usGsDataNum,
                         STCapRawdata* pstCapValueArr,GU16 usCapDataNum,STTempRawdata* pstTempValueArr,GU16 usTempDataNum,
                         const STGh3x2xFrameInfo * const pstFrameInfo);
@@ -3240,19 +3347,14 @@ void GH3X2X_SlaverSoftLeadPramInit(void);
 
 
 
-void GH3X2X_StartHardAdt(void);
-void GH3X2X_StopHardAdt(void);
+void GH3X2X_StartHardAdtAndResetGsDetect(void);
+void GH3X2X_StopHardAdtAndStartGsDetect(void);
 GU8 GH3X2X_GetSoftLeadDetMode(void);
 GU8 GH3X2X_GetAdtElectrodeAdtEn(void);
-void  GH3x3xSoftAdtAlgoExe(const STGh3x2xFrameInfo * const pstFrameInfo);
-GS8 GH3x2xSoftAdtAlgoInit(const STGh3x2xFrameInfo * const pstFrameInfo);
-GS8 GH3x2xSoftAdtAlgoDeinit(const STGh3x2xFrameInfo * const pstFrameInfo);
-extern void GH3x2xAlgoVersion(GU32 unFunctionID, GCHAR version[100]);
-
 
 
 extern void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo);
-
+extern void gh3x2x_active_reset_hook(void);
 
 
 
@@ -3325,10 +3427,7 @@ extern void Gh3x2xAlgoMemFree(void* MemAddr);
 extern void GH3X2X_UprotocolFpbpDataReceiveCmd(GU8 *puchRespondBuffer, GU16 *pusRespondLen);
 extern void GH3x2xBpAlgoInitSetting(GU8 *puchRespondBuffer);
 
-extern void GH3X2X_MemFree(void* mem_addr);
-extern void* GH3X2X_MemMalloc(GS32 nSize);
-
-extern void GH3x2xOutputValueStrategyInit(GU32 unFunctionID);
+extern void Gh3x2xOutputValueStrategyInit(GU32 unFunctionID);
 
 
 

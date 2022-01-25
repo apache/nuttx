@@ -24,7 +24,7 @@ GU8 g_uchPreHrValue;
 void Gh3x2xOutputValueStrategyInit(GU32 unFunctionID)
 {
 #if __GH3X2X_HR_OUTPUT_VALUE_STRATEGY_EN__
-    if(GH3X2X_FUNCTION_HR == unFunctionID)
+    if(GH3X2X_FUNCTION_HR & unFunctionID == GH3X2X_FUNCTION_HR)
     {
         g_uchPreHrValue = 0;
     }
