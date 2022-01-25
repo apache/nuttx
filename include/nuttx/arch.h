@@ -2577,6 +2577,7 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  ****************************************************************************/
 
 uint32_t up_perf_gettime(void);
+uint32_t up_perf_getfreq(void);
 void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
 
 #undef EXTERN
