@@ -130,6 +130,9 @@ $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 $(COBJS) $(UCOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
+crt0$(OBJEXT): %$(OBJEXT): %.c
+	$(call COMPILE, $<, $@)
+
 ifeq ($(CONFIG_BUILD_FLAT),y)
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))

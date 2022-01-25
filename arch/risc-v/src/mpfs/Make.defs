@@ -22,6 +22,10 @@
 
 CMN_ASRCS += mpfs_head.S riscv_vectors.S riscv_exception_common.S riscv_testset.S
 
+ifeq ($(CONFIG_BUILD_KERNEL),y)
+STARTUP_OBJS = crt0$(OBJEXT)
+endif
+
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c
 CMN_CSRCS += riscv_createstack.c riscv_exit.c riscv_exception.c
