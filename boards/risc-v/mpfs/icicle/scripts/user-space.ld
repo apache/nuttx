@@ -45,7 +45,7 @@ SECTIONS
         *(.text .text.*)
         *(.fixup)
         *(.gnu.warning)
-        *(.rodata .rodata.*)
+        *(.rodata .rodata.* .srodata .srodata.*)
         *(.gnu.linkonce.t.*)
         *(.glue_7)
         *(.glue_7t)

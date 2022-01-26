@@ -135,13 +135,19 @@ endif
 
 ifeq ($(CONFIG_ARCH_BOARD_CUSTOM),y)
   CUSTOM_DIR = $(patsubst "%",%,$(CONFIG_ARCH_BOARD_CUSTOM_DIR))
-ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
-  BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_DIR)
-else
-  BOARD_DIR ?= $(CUSTOM_DIR)
-endif
+  ifeq ($(CONFIG_ARCH_BOARD_CUSTOM_DIR_RELPATH),y)
+    BOARD_DIR ?= $(TOPDIR)$(DELIM)$(CUSTOM_DIR)
+  else
+    BOARD_DIR ?= $(CUSTOM_DIR)
+  endif
+  CUSTOM_BOARD_KPATH = $(BOARD_DIR)$(DELIM)Kconfig
 else
   BOARD_DIR ?= $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)$(CONFIG_ARCH_BOARD)
+endif
+ifeq (,$(wildcard $(CUSTOM_BOARD_KPATH)))
+  BOARD_KCONFIG = $(TOPDIR)$(DELIM)boards$(DELIM)dummy$(DELIM)dummy_kconfig
+else
+  BOARD_KCONFIG = $(CUSTOM_BOARD_KPATH)
 endif
 
 BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
@@ -502,7 +508,7 @@ endef
 else
 define TESTANDREPLACEFILE
 	if [ -f $2 ]; then \
-		if cmp $1 $2; then \
+		if cmp -s $1 $2; then \
 			rm -f $1; \
 		else \
 			mv $1 $2; \

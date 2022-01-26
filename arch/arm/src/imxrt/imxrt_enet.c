@@ -244,7 +244,7 @@
  * the contents of the Ethernet header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 #define IMXRT_BUF_SIZE  ENET_ALIGN_UP(CONFIG_NET_ETH_PKTSIZE + \
                                       CONFIG_NET_GUARDSIZE)

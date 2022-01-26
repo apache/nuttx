@@ -44,9 +44,9 @@
  ****************************************************************************/
 
 #define IPv6_BUF \
-  ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+  ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 #define ICMPv6_BUF \
-  ((struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+  ((FAR struct icmpv6_echo_reply_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 #define ICMPv6_SIZE \
   ((dev)->d_len - IPv6_HDRLEN)
 

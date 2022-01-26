@@ -39,11 +39,7 @@
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 uint32_t *volatile g_current_regs[CONFIG_SMP_NCPUS];
-#else
-uint32_t *volatile g_current_regs[1];
-#endif
 
 /****************************************************************************
  * Public Functions

@@ -1633,8 +1633,8 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
-      CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
+      CONFIG_MMCSD_MULTIBLOCK_LIMIT=1       : (REVISIT)
+      CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
@@ -4929,7 +4929,7 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 is set to disable multi-block
    transfers because of some issues that I saw during testing.  The is very
    low priority to me but might be important to you if you are need very
    high performance SD card accesses.

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/k210/k210_cpustart.c
+ * arch/risc-v/src/common/riscv_cpustart.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -41,37 +41,12 @@
 #include "riscv_internal.h"
 #include "chip.h"
 
-#ifdef CONFIG_SMP
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#if 0
-#  define DPRINTF(fmt, args...) _err(fmt, ##args)
-#else
-#  define DPRINTF(fmt, args...) do {} while (0)
-#endif
-
-#ifdef CONFIG_DEBUG_FEATURES
-#  define showprogress(c) riscv_lowputc(c)
-#else
-#  define showprogress(c)
-#endif
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern volatile bool g_serial_ok;
-extern int riscv_pause_handler(int irq, void *c, void *arg);
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: k210_cpu_boot
+ * Name: riscv_cpu_boot
  *
  * Description:
  *   Boot handler for cpu1
@@ -84,33 +59,26 @@ extern int riscv_pause_handler(int irq, void *c, void *arg);
  *
  ****************************************************************************/
 
-void k210_cpu_boot(int cpu)
+void riscv_cpu_boot(int cpu)
 {
   if (1 < cpu)
     {
       return;
     }
 
-  /* Wait for g_serial_ok set by cpu0 when booting */
-
-  while (!g_serial_ok)
-    {
-    }
-
   /* Clear machine software interrupt for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
+  putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
 
   /* Enable machine software interrupt for IPI to boot */
 
-  up_enable_irq(K210_IRQ_MSOFT);
+  up_enable_irq(RISCV_IRQ_MSOFT);
 
   /* Wait interrupt */
 
   asm("WFI");
 
-  showprogress('b');
-  DPRINTF("CPU%d Started\n", this_cpu());
+  _info("CPU%d Started\n", this_cpu());
 
 #ifdef CONFIG_STACK_COLORATION
   struct tcb_s *tcb = this_task();
@@ -127,7 +95,7 @@ void k210_cpu_boot(int cpu)
 
   /* Clear machine software interrupt for CPU(cpu) */
 
-  putreg32(0, (uintptr_t)K210_CLINT_MSIP + (4 * cpu));
+  putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify that this CPU has started */
@@ -171,7 +139,7 @@ void k210_cpu_boot(int cpu)
 
 int up_cpu_start(int cpu)
 {
-  DPRINTF("cpu=%d\n", cpu);
+  _info("CPU=%d\n", cpu);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION
   /* Notify of the start event */
@@ -181,9 +149,7 @@ int up_cpu_start(int cpu)
 
   /* Send IPI to CPU(cpu) */
 
-  putreg32(1, (uintptr_t)K210_CLINT_MSIP + (cpu * 4));
+  putreg32(1, (uintptr_t)RISCV_CLINT_MSIP + (cpu * 4));
 
   return 0;
 }
-
-#endif /* CONFIG_SMP */

@@ -23,20 +23,32 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/mpfs/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
+LDMEMORY =
+ARCHSCRIPT =
+
 ifeq ($(CONFIG_MPFS_BOOTLOADER),y)
   ifeq ($(CONFIG_MPFS_OPENSBI),y)
     LDSCRIPT = ld-envm-opensbi.script
   else
     LDSCRIPT = ld-envm.script
   endif
+else ifeq ($(CONFIG_BUILD_PROTECTED),y)
+  LDMEMORY = memory.ld
+  LDSCRIPT = kernel-space.ld
 else
   LDSCRIPT = ld.script
 endif
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
+  ifneq ($(LDMEMORY),)
+    ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)}"
+  endif
+  ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
 else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+  ifneq ($(LDMEMORY),)
+    ARCHSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)
+  endif
+  ARCHSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
@@ -57,7 +69,7 @@ endif
 
 ARCHCPUFLAGS += -mcmodel=medany
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-omit-frame-pointer
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
 ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

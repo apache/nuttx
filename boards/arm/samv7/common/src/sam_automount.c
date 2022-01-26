@@ -35,6 +35,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/fs/automount.h>
 
+#include "board_hsmci.h"
 #include "sam_automount.h"
 
 /****************************************************************************

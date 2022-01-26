@@ -194,7 +194,7 @@
  * header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 #define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_PKTSIZE & 0xfffffff0) + 0x10)
 

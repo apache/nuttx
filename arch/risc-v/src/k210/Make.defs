@@ -36,7 +36,7 @@ CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_mdelay.c riscv_copyfullstate.c
 
 ifeq ($(CONFIG_SMP), y)
-CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c
+CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c riscv_cpustart.c
 endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
@@ -59,7 +59,6 @@ CHIP_CSRCS += k210_start.c k210_timerisr.c k210_gpiohs.c
 
 ifeq ($(CONFIG_SMP), y)
 CHIP_CSRCS += k210_cpuidlestack.c
-CHIP_CSRCS += k210_cpustart.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)

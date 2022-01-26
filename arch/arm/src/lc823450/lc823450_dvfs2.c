@@ -55,10 +55,6 @@
 #define UP_THRESHOLD 20
 #define DN_THRESHOLD 60
 
-#ifndef CONFIG_SMP_NCPUS
-#  define CONFIG_SMP_NCPUS 1
-#endif
-
 #ifdef CONFIG_DVFS_CHANGE_VOLTAGE
 #  define CORE12V_PIN (GPIO_PORT2 | GPIO_PIN1)
 #endif

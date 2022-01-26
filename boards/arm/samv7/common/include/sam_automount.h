@@ -25,7 +25,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef CONFIG_SAME70QMTECH_HSMCI0_AUTOMOUNT
+#ifdef CONFIG_SAMV7_HSMCI0_AUTOMOUNT
 /* HSMCI0 Automounter defaults */
 
 #  ifndef CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE

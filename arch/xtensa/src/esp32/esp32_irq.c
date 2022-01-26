@@ -122,18 +122,11 @@
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 /* For the case of architectures with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-#else
-
-volatile uint32_t *g_current_regs[1];
-
-#endif
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 /* In the SMP configuration, we will need custom interrupt stacks.
@@ -170,11 +163,7 @@ static volatile uint8_t g_irqmap[NR_IRQS];
  * content.
  */
 
-#ifdef CONFIG_SMP
 static uint32_t g_intenable[CONFIG_SMP_NCPUS];
-#else
-static uint32_t g_intenable[1];
-#endif
 
 /* Bitsets for free, unallocated CPU interrupts available to peripheral
  * devices.
@@ -530,11 +519,7 @@ void up_disable_irq(int irq)
     }
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-#ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu <= CONFIG_SMP_NCPUS);
-#else
-  DEBUGASSERT(cpu == 0);
-#endif
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {
@@ -595,11 +580,7 @@ void up_enable_irq(int irq)
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-#ifdef CONFIG_SMP
-  DEBUGASSERT(cpu >= 0 && cpu <= CONFIG_SMP_NCPUS);
-#else
-  DEBUGASSERT(cpu == 0);
-#endif
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {

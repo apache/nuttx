@@ -202,11 +202,7 @@ struct mm_heap_s
    * immdiately.
    */
 
-#ifdef CONFIG_SMP
   FAR struct mm_delaynode_s *mm_delaylist[CONFIG_SMP_NCPUS];
-#else
-  FAR struct mm_delaynode_s *mm_delaylist[1];
-#endif
 
 #if defined(CONFIG_FS_PROCFS) && !defined(CONFIG_FS_PROCFS_EXCLUDE_MEMINFO)
   struct procfs_meminfo_entry_s mm_procfs;

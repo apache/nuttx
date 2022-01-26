@@ -67,8 +67,8 @@
 #  define NEED_IPDOMAIN_SUPPORT 1
 #endif
 
-#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define TCPIPv4BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -88,6 +88,7 @@ struct send_s
   ssize_t                 snd_sent;     /* The number of bytes sent */
   uint32_t                snd_isn;      /* Initial sequence number */
   uint32_t                snd_acked;    /* The number of bytes acked */
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint32_t                snd_prev_ack; /* The previous ACKed seq number */
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
   uint32_t                snd_prev_wnd; /* The advertised window in the last
@@ -97,6 +98,7 @@ struct send_s
   uint16_t                snd_prev_wnd;
 #endif
   int                     snd_dup_acks; /* Duplicate ACK counter */
+#endif
 };
 
 /****************************************************************************
@@ -260,7 +262,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       ackno = tcp_getsequence(tcp->ackno);
       pstate->snd_acked = TCP_SEQ_SUB(ackno,
                                       pstate->snd_isn);
-      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -274,6 +276,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
       /* Fast Retransmit (RFC 5681): an acknowledgment is considered a
        * "duplicate" when (a) the receiver of the ACK has outstanding data,
        * (b) the incoming acknowledgment carries no data, (c) the SYN and
@@ -289,10 +292,10 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           ackno == pstate->snd_prev_ack &&
           conn->snd_wnd == pstate->snd_prev_wnd)
         {
-          if (++pstate->snd_dup_acks >=
-                CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+          if (++pstate->snd_dup_acks >= TCP_FAST_RETRANSMISSION_THRESH)
             {
               flags |= TCP_REXMIT;
+              pstate->snd_dup_acks = 0;
             }
         }
       else
@@ -302,6 +305,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       pstate->snd_prev_ack = ackno;
       pstate->snd_prev_wnd = conn->snd_wnd;
+#endif
     }
 
   /* Check if we are being asked to retransmit data.
@@ -311,13 +315,17 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_REXMIT) != 0)
     {
+      uint32_t sndlen;
+
+      nwarn("WARNING: TCP_REXMIT\n");
+
       /* According to RFC 6298 (5.4), retransmit the earliest segment
        * that has not been acknowledged by the TCP receiver.
        */
 
       /* Reconstruct the length of the earliest segment to be retransmitted */
 
-      uint32_t sndlen = pstate->snd_buflen - pstate->snd_acked;
+      sndlen = pstate->snd_buflen - pstate->snd_acked;
 
       if (sndlen > conn->mss)
         {
@@ -427,8 +435,12 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           /* Update the amount of data sent (but not necessarily ACKed) */
 
           pstate->snd_sent += sndlen;
-          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zu\n",
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
+        }
+      else
+        {
+          nwarn("WARNING: Window full, wait for ack\n");
         }
     }
 

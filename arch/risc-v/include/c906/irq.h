@@ -33,34 +33,7 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-/* IRQ 0-15 : (exception:interrupt=0) */
-
-#define C906_IRQ_IAMISALIGNED  (0) /* Instruction Address Misaligned */
-#define C906_IRQ_IAFAULT       (1) /* Instruction Address Fault */
-#define C906_IRQ_IINSTRUCTION  (2) /* Illegal Instruction */
-#define C906_IRQ_BPOINT        (3) /* Break Point */
-#define C906_IRQ_LAMISALIGNED  (4) /* Load Address Misaligned */
-#define C906_IRQ_LAFAULT       (5) /* Load Access Fault */
-#define C906_IRQ_SAMISALIGNED  (6) /* Store/AMO Address Misaligned */
-#define C906_IRQ_SAFAULT       (7) /* Store/AMO Access Fault */
-#define C906_IRQ_ECALLU        (8) /* Environment Call from U-mode */
-
-#define C906_IRQ_ECALLM       (11) /* Environment Call from M-mode */
-
-/* IRQ 16- : (async event:interrupt=1) */
-
-#define C906_IRQ_ASYNC        (16)
-#define C906_IRQ_SSOFT    (C906_IRQ_ASYNC + 1)  /* Supervisor Software Int */
-#define C906_IRQ_MSOFT    (C906_IRQ_ASYNC + 3)  /* Machine Software Int */
-#define C906_IRQ_STIMER   (C906_IRQ_ASYNC + 5)  /* Supervisor Timer Int */
-#define C906_IRQ_MTIMER   (C906_IRQ_ASYNC + 7)  /* Machine Timer Int */
-#define C906_IRQ_SEXT     (C906_IRQ_ASYNC + 9)  /* Supervisor External Int */
-#define C906_IRQ_MEXT     (C906_IRQ_ASYNC + 11) /* Machine External Int */
-#define C906_IRQ_HPMOV    (C906_IRQ_ASYNC + 17) /* HPM Overflow Int */
-
-/* Machine Global External Interrupt */
-
-#define C906_IRQ_PERI_START   (C906_IRQ_ASYNC + 18)
+#define C906_IRQ_PERI_START   (RISCV_IRQ_ASYNC + 18)
 
 #ifdef CONFIG_C906_WITH_QEMU
 #define C906_IRQ_UART0        (C906_IRQ_PERI_START + 32)

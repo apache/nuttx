@@ -223,6 +223,7 @@ _xtensa_user_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
@@ -347,7 +348,7 @@ _xtensa_syscall_handler:
 	 */
 
 	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
+	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
 
 	/* Get the interruptee's PC and skip over the 'syscall' instruction.
 	 * If it's at the end of a zero-overhead loop and it's not on the last
@@ -390,6 +391,10 @@ _xtensa_syscall_handler:
 	mov		a2, sp							/* Address of state save on stack */
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Dispatch the sycall as with other interrupts. */
+
+	mov		a12, sp							/* a12 = address of register save area */
+
 	/* Switch to an interrupt stack if we have one */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -400,13 +405,9 @@ _xtensa_syscall_handler:
 
 	ps_setup	1 a0
 
-	/* Dispatch the sycall as with other interrupts. */
-
-	mov		a12, sp							/* a12 = address of register save area */
-
 #ifdef __XTENSA_CALL0_ABI__
 	movi	a2, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a3, sp							/* Argument 2: Top of stack = register save area */
+	mov		a3, a12							/* Argument 2: Top of stack = register save area */
 	call0	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 
 	/* On return from xtensa_irq_dispatch, A2 will contain the address of the new
@@ -417,7 +418,7 @@ _xtensa_syscall_handler:
 
 #else
 	movi	a6, XTENSA_IRQ_SYSCALL			/* Argument 1: IRQ number */
-	mov		a7, sp							/* Argument 2: Top of stack = register save area */
+	mov		a7, a12							/* Argument 2: Top of stack = register save area */
 	call4	xtensa_irq_dispatch				/* Call xtensa_int_decode */
 
 	/* On return from xtensa_irq_dispatch, A6 will contain the address of the new
@@ -517,6 +518,7 @@ _xtensa_coproc_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */

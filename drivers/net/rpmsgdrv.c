@@ -457,8 +457,8 @@ static int net_rpmsg_drv_sockioctl_handler(FAR struct rpmsg_endpoint *ept,
 static bool net_rpmsg_drv_is_ipv4(FAR struct net_driver_s *dev)
 {
   FAR struct ipv4_hdr_s *ip =
-    (struct ipv4_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+    (FAR struct ipv4_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
@@ -475,8 +475,8 @@ static bool net_rpmsg_drv_is_ipv4(FAR struct net_driver_s *dev)
 static bool net_rpmsg_drv_is_ipv6(FAR struct net_driver_s *dev)
 {
   FAR struct ipv6_hdr_s *ip =
-    (struct ipv6_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+    (FAR struct ipv6_hdr_s *)(dev->d_buf + dev->d_llhdrlen);
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {
@@ -492,7 +492,7 @@ static bool net_rpmsg_drv_is_ipv6(FAR struct net_driver_s *dev)
 #ifdef CONFIG_NET_ARP
 static bool net_rpmsg_drv_is_arp(FAR struct net_driver_s *dev)
 {
-  FAR struct eth_hdr_s *eth = (struct eth_hdr_s *)dev->d_buf;
+  FAR struct eth_hdr_s *eth = (FAR struct eth_hdr_s *)dev->d_buf;
 
   if (dev->d_lltype == NET_LL_ETHERNET || dev->d_lltype == NET_LL_IEEE80211)
     {

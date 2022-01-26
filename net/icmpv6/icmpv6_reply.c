@@ -51,7 +51,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv6BUF ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /* The latest drafts declared increase in minimal mtu up to 1280. */
 
@@ -88,7 +88,7 @@ void icmpv6_reply(FAR struct net_driver_s *dev, int type, int code, int data)
 {
   int ipicmplen = IPv6_HDRLEN + sizeof(struct icmpv6_hdr_s);
   FAR struct ipv6_hdr_s *ipv6 = IPv6BUF;
-  FAR struct icmpv6_hdr_s *icmpv6 = (FAR void *)(ipv6 + 1);
+  FAR struct icmpv6_hdr_s *icmpv6 = (FAR struct icmpv6_hdr_s *)(ipv6 + 1);
   uint16_t datalen;
 
   if (net_ipv6addr_cmp(ipv6->destipaddr, g_ipv6_unspecaddr)

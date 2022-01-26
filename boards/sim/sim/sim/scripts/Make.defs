@@ -134,16 +134,24 @@ ifeq ($(CONFIG_LIBCXX),y)
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=address
+  CXXFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CFLAGS += -fsanitize=kernel-address
   CXXFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=undefined
+  CXXFLAGS += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CFLAGS += -fomit-frame-pointer
+  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
@@ -210,15 +218,20 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CCLINKFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=undefined
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CCLINKFLAGS += -fomit-frame-pointer
+endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe

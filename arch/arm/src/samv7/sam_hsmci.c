@@ -581,9 +581,6 @@ static const struct sdio_dev_s g_callbacks =
 #ifdef CONFIG_SAMV7_HSMCI0
 static struct sam_dev_s g_hsmci0;
 #endif
-#ifdef CONFIG_SAMV7_HSMCI1
-static struct sam_dev_s g_hsmci1;
-#endif
 
 /****************************************************************************
  * Private Functions
@@ -1904,13 +1901,6 @@ static int sam_attach(FAR struct sdio_dev_s *dev)
   if (priv->hsmci == 0)
     {
       irq = SAM_IRQ_HSMCI0;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMV7_HSMCI1
-  if (priv->hsmci == 1)
-    {
-      irq = SAM_IRQ_HSMCI1;
     }
   else
 #endif
@@ -3317,44 +3307,6 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
       /* For DMA channel selection */
 
       pid = SAM_PID_HSMCI0;
-    }
-  else
-#endif
-#ifdef CONFIG_SAMV7_HSMCI1
-  if (slotno == 1)
-    {
-      /* Select HSMCI1 */
-
-      priv = &g_hsmci1;
-
-      /* HSMCI1 Initialization */
-
-      priv->base  = SAM_HSMCI1_BASE;
-      priv->hsmci = 1;
-
-      /* Configure PIOs for 4-bit, wide-bus operation.  NOTE: (1) the chip
-       * is capable of 8-bit wide bus operation but D4-D7 are not configured,
-       * (2) any card detection PIOs must be set up in board-specific logic.
-       *
-       * REVISIT: What about Slot B?
-       */
-
-      sam_configgpio(GPIO_MCI1_DA0);   /* Data 0 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA1);   /* Data 1 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA2);   /* Data 2 of Slot A */
-      sam_configgpio(GPIO_MCI1_DA3);   /* Data 3 of Slot A */
-      sam_configgpio(GPIO_MCI1_CK);    /* Common SD clock */
-      sam_configgpio(GPIO_MCI1_CDA);   /* Command/Response of Slot A */
-
-      /* Enable the HSMCI1 peripheral clock  This really should be done in
-       * sam_enable (as well as disabling peripheral clocks in sam_disable().
-       */
-
-      sam_hsmci1_enableclk();
-
-      /* For DMA channel selection */
-
-      pid = SAM_PID_HSMCI1;
     }
   else
 #endif

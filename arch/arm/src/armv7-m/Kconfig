@@ -3,7 +3,7 @@
 # see the file kconfig-language.txt in the NuttX tools repository.
 #
 
-comment "ARMV7M Configuration Options"
+comment "ARMv7-M Configuration Options"
 
 config ARMV7M_HAVE_ICACHE
 	bool

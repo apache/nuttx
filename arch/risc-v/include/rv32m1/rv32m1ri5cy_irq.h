@@ -25,38 +25,15 @@
  * Included Files
  ****************************************************************************/
 
-#include <arch/mcause.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* RV32M1 RI5CY CPU throws four exceptions:
- *  -Reset,
- *  -Illegal Instruction,
- *  -ECALL Instruct Excecuted,
- *  -Load Store Unit Error. MCAUSE must be checked to
- *   figure out what kind of Error.
- */
-
-/* RISC-V standard exceptions alias with prefix RV32M1 **********************/
-
-#define RV32M1_IRQ_ADDE_MISALIGNED      MCAUSE_ADDE_MISALIGNED
-#define RV32M1_IRQ_INST_ACCESS_FAULT    MCAUSE_INST_ACCESS_FAULT
-#define RV32M1_IRQ_ILLEGAL_INST         MCAUSE_ILLEGAL_INST
-#define RV32M1_IRQ_LOAD_MISALIGNED      MCAUSE_LOAD_MISALIGNED
-#define RV32M1_IRQ_LOAD_ACCESS_FAULT    MCAUSE_LOAD_ACCESS_FAULT
-#define RV32M1_IRQ_STORE_MISALIGNED     MCAUSE_STORE_MISALIGNED
-#define RV32M1_IRQ_STORE_ACCESS_FAULT   MCAUSE_STORE_ACCESS_FAULT
-#define RV32M1_IRQ_ECALL_U              MCAUSE_ECALL_U
-#define RV32M1_IRQ_ECALL_M              MCAUSE_ECALL_M
-
 /* RV32M1 RI5CY Interrupts **************************************************/
 
-/* IRQ 16- : (async event:interrupt=1) */
-
-#define RV32M1_IRQ_ASYNC    (16)
-#define RV32M1_IRQ_MEXT     (RV32M1_IRQ_ASYNC + 0) /* Machine External Int */
+#define RV32M1_IRQ_MEXT     (RISCV_IRQ_ASYNC + 0)  /* Machine External Int */
 
 /* Machine Global External Interrupt */
 

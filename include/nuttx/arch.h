@@ -2558,7 +2558,7 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
- * Name: up_critmon_*
+ * Name: up_perf_*
  *
  * Description:
  *   The first interface simply provides the current time value in unknown
@@ -2576,10 +2576,9 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  *   units.
  ****************************************************************************/
 
-#ifdef CONFIG_SCHED_CRITMONITOR
-uint32_t up_critmon_gettime(void);
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts);
-#endif
+uint32_t up_perf_gettime(void);
+uint32_t up_perf_getfreq(void);
+void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);
 
 #undef EXTERN
 #if defined(__cplusplus)

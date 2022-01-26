@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_critmon.c
+ * boards/arm/samv7/common/include/board_hsmci.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,48 +18,73 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H
+#define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <time.h>
-#include <fixedmath.h>
-
-#include "dwt.h"
-#include "arm_arch.h"
-
-#include <nuttx/clock.h>
-
-#include <arch/board/board.h>
-
-#ifdef CONFIG_SCHED_CRITMONITOR
+#include "sam_gpio.h"
 
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_critmon_gettime
+ * Public Data
  ****************************************************************************/
 
-uint32_t up_critmon_gettime(void)
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  return getreg32(DWT_CYCCNT);
-}
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Name: up_critmon_gettime
+ * Public Functions Definitions
  ****************************************************************************/
 
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
-{
-  b32_t b32elapsed;
+/****************************************************************************
+ * Name: sam_hsmci_initialize
+ *
+ * Description:
+ *   Perform architecture specific initialization
+ *
+ ****************************************************************************/
 
-  b32elapsed  = itob32(elapsed) / STM32_SYSCLK_FREQUENCY;
-  ts->tv_sec  = b32toi(b32elapsed);
-  ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
+int sam_hsmci_initialize(int slotno, int minor, gpio_pinset_t cdcfg,
+                         int cdirq);
+
+/****************************************************************************
+ * Name: sam_cardinserted
+ *
+ * Description:
+ *   Check if a card is inserted into the selected HSMCI slot
+ *
+ ****************************************************************************/
+
+bool sam_cardinserted(int slotno);
+
+/****************************************************************************
+ * Name: sam_writeprotected
+ *
+ * Description:
+ *   Check if the card in the MMCSD slot is write protected
+ *
+ ****************************************************************************/
+
+bool sam_writeprotected(int slotno);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* CONFIG_SCHED_CRITMONITOR */
+#endif /* __ASSEMBLY__ */
+#endif /* __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_HSMCI_H */

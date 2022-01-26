@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/omnibusf4/src/stm32_critmon.c
+ * boards/xtensa/esp32/common/include/esp32_ms5611.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,48 +18,51 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MS5611_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MS5611_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <time.h>
-#include <fixedmath.h>
-
-#include "dwt.h"
-#include "arm_arch.h"
-
-#include <nuttx/clock.h>
-
-#include <arch/board/board.h>
-
-#ifdef CONFIG_SCHED_CRITMONITOR
-
 /****************************************************************************
- * Public Functions
+ * Public Data
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_critmon_gettime
- ****************************************************************************/
-
-uint32_t up_critmon_gettime(void)
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
 {
-  return getreg32(DWT_CYCCNT);
-}
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
- * Name: up_critmon_gettime
+ * Public Function Prototypes
  ****************************************************************************/
 
-void up_critmon_convert(uint32_t elapsed, FAR struct timespec *ts)
-{
-  b32_t b32elapsed;
+/****************************************************************************
+ * Name: board_ms5611_initialize
+ *
+ * Description:
+ *   Initialize and register the MS5611 Pressure Sensor driver.
+ *
+ * Input Parameters:
+ *   devno - The device number, used to build the device path as /dev/pressN
+ *   busno - The I2C bus number
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
 
-  b32elapsed  = itob32(elapsed) / STM32_SYSCLK_FREQUENCY;
-  ts->tv_sec  = b32toi(b32elapsed);
-  ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
+int board_ms5611_initialize(int devno, int busno);
+
+#undef EXTERN
+#ifdef __cplusplus
 }
+#endif
 
-#endif /* CONFIG_SCHED_CRITMONITOR */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_MS5611_H */

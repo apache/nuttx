@@ -60,12 +60,12 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   if (vector & 0x80000000u)
     {
-      irq += BL602_IRQ_ASYNC;
+      irq += RISCV_IRQ_ASYNC;
     }
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (BL602_IRQ_ECALLM == irq)
+  if (RISCV_IRQ_ECALLM == irq)
     {
       *mepc += 4;
     }

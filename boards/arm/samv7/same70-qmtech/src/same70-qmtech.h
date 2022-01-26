@@ -144,26 +144,30 @@
 /* HSMCI SD Card Detect
  *
  * The SAM E70 QMTECH has one standard SD card connector that is connected
- * to the High Speed Multimedia Card Interface (HSMCI) of the SAM E70. SD
- * card connector:
+ * to the High Speed Multimedia Card Interface (HSMCI) of the SAM E70.
+ * SD card connector:
  *
- *   ------ ----------------- ---------------------
- *   SAME70 SAME70            Shared functionality
+ *   ------ -----------------
+ *   SAME70 SAME70
  *   Pin    Function
- *   ------ ----------------- ---------------------
+ *   ------ -----------------
  *   PA30   MCDA0 (DAT0)
  *   PA31   MCDA1 (DAT1)
  *   PA26   MCDA2 (DAT2)
- *   PA27   MCDA3 (DAT3)      Camera
- *   PA25   MCCK (CLK)        Shield
+ *   PA27   MCDA3 (DAT3)
+ *   PA25   MCCK (CLK)
  *   PA28   MCCDA (CMD)
- *   PD17   Card Detect (C/D) Shield
- *   ------ ----------------- ---------------------
+ *   N/A    Card Detect (C/D)
+ *   ------ -----------------
+ *
+ * The SD card connector does not have CD signal connected to SAM E70 pin,
+ * but in order to provide automounter support the HW rework can be done and
+ * CD signal can be connected to SAM E70 PD17 (connector J3 pin 17).
  */
 
-#define GPIO_MCI0_CD (GPIO_INPUT | GPIO_CFG_PULLDOWN | GPIO_CFG_DEGLITCH | \
-                      GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
-#define IRQ_MCI0_CD   SAM_IRQ_PD17
+#define GPIO_HSMCI0_CD (GPIO_INPUT | GPIO_CFG_DEFAULT | GPIO_CFG_DEGLITCH | \
+                        GPIO_INT_BOTHEDGES | GPIO_PORT_PIOD | GPIO_PIN17)
+#define IRQ_HSMCI0_CD  SAM_IRQ_PD17
 
 /****************************************************************************
  * Public Types
@@ -229,20 +233,6 @@ void sam_spidev_initialize(void);
 #endif
 
 /****************************************************************************
- * Name: sam_hsmci_initialize
- *
- * Description:
- *   Initialize HSMCI support
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-int sam_hsmci_initialize(int slot, int minor);
-#else
-# define sam_hsmci_initialize(s,m) (-ENOSYS)
-#endif
-
-/****************************************************************************
  * Name: sam_can_setup
  *
  * Description:
@@ -252,46 +242,6 @@ int sam_hsmci_initialize(int slot, int minor);
 
 #ifdef CONFIG_SAMV7_MCAN
 int sam_can_setup(void);
-#endif
-
-/****************************************************************************
- * Name: sam_cardinserted
- *
- * Description:
- *   Check if a card is inserted into the selected HSMCI slot
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_cardinserted(int slotno);
-#else
-#  define sam_cardinserted(slotno) (false)
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#endif
-
-/****************************************************************************
- * Name: sam_writeprotected
- *
- * Description:
- *   Check if the card in the MMCSD slot is write protected
- *
- ****************************************************************************/
-
-#ifdef HAVE_HSMCI
-bool sam_writeprotected(int slotno);
-#else
-#  define sam_writeprotected(slotno) (false)
 #endif
 
 #endif /* __ASSEMBLY__ */

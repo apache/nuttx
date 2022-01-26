@@ -36,6 +36,7 @@
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/input/uinput.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
@@ -315,6 +316,16 @@ int sim_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sim_tsc_initialize failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_INPUT_UINPUT
+  /* Initialize the touchscreen uinput */
+
+  ret = uinput_touch_initialize("utouch", 1, 4);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: uinput_touch_initialize failed: %d\n", ret);
     }
 #endif
 

@@ -43,10 +43,6 @@
 #  error "CONFIG_NUTTX_USERSPACE not defined"
 #endif
 
-#if CONFIG_NUTTX_USERSPACE != 0x00001000
-#  error "CONFIG_NUTTX_USERSPACE must match the value in memory.ld"
-#endif
-
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -99,9 +95,6 @@ const struct userspace_s userspace locate_data(".userspace") =
   /* Task/thread startup routines */
 
   .task_startup     = nxtask_startup,
-#ifndef CONFIG_DISABLE_PTHREAD
-  .pthread_startup  = pthread_startup,
-#endif
 
   /* Signal handler trampoline */
 

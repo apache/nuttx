@@ -82,8 +82,11 @@ endif
 HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_hostmisc.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
-ifeq ($(CONFIG_LIBCXX),y)
-  STDLIBS += -lc++abi
+ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
+  # Note: up_macho_init.c is not in CSRCS because it's picky about
+  # the place in the object list for linking. Namely, its constructor
+  # should be the first one in the executable.
+  HEADSRC = up_macho_init.c
 endif
 else
   STDLIBS += -lrt
@@ -207,6 +210,7 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
 HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
+HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
@@ -243,7 +247,7 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(HOSTOBJS): %$(OBJEXT): %.c
+$(HOSTOBJS) $(HEADOBJ): %$(OBJEXT): %.c
 	$(Q) echo "CC:  $<"
 	$(Q) "$(CC)" -c $(HOSTCFLAGS) $< -o $@
 
@@ -278,7 +282,7 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
@@ -287,8 +291,8 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS)
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS))
+	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

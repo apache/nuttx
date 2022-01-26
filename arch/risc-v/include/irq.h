@@ -45,6 +45,50 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* Map RISC-V exception code to NuttX IRQ */
+
+/* IRQ 0-15 : (exception:interrupt=0) */
+
+#define RISCV_IRQ_IAMISALIGNED  (0)   /* Instruction Address Misaligned */
+#define RISCV_IRQ_IAFAULT       (1)   /* Instruction Address Fault */
+#define RISCV_IRQ_IINSTRUCTION  (2)   /* Illegal Instruction */
+#define RISCV_IRQ_BPOINT        (3)   /* Break Point */
+#define RISCV_IRQ_LAMISALIGNED  (4)   /* Load Address Misaligned */
+#define RISCV_IRQ_LAFAULT       (5)   /* Load Access Fault */
+#define RISCV_IRQ_SAMISALIGNED  (6)   /* Store/AMO Address Misaligned */
+#define RISCV_IRQ_SAFAULT       (7)   /* Store/AMO Access Fault */
+#define RISCV_IRQ_ECALLU        (8)   /* Environment Call from U-mode */
+#define RISCV_IRQ_ECALLS        (9)   /* Environment Call from S-mode */
+#define RISCV_IRQ_ECALLH        (10)  /* Environment Call from H-mode */
+#define RISCV_IRQ_ECALLM        (11)  /* Environment Call from M-mode */
+#define RISCV_IRQ_INSTRUCTIONPF (12)  /* Instruction page fault */
+#define RISCV_IRQ_LOADPF        (13)  /* Load page fault */
+#define RISCV_IRQ_RESERVED      (14)  /* Reserved */
+#define RISCV_IRQ_SROREPF       (15)  /* Store/AMO page fault */
+
+#define RISCV_MAX_EXCEPTION     (15)
+
+/* IRQ 16- : (async event:interrupt=1) */
+
+#define RISCV_IRQ_ASYNC         (16)
+#define RISCV_IRQ_SSOFT         (RISCV_IRQ_ASYNC + 1)  /* Supervisor Software Int */
+#define RISCV_IRQ_MSOFT         (RISCV_IRQ_ASYNC + 3)  /* Machine Software Int */
+#define RISCV_IRQ_STIMER        (RISCV_IRQ_ASYNC + 5)  /* Supervisor Timer Int */
+#define RISCV_IRQ_MTIMER        (RISCV_IRQ_ASYNC + 7)  /* Machine Timer Int */
+#define RISCV_IRQ_SEXT          (RISCV_IRQ_ASYNC + 9)  /* Supervisor External Int */
+#define RISCV_IRQ_MEXT          (RISCV_IRQ_ASYNC + 11) /* Machine External Int */
+#define RISCV_IRQ_HPMOV         (RISCV_IRQ_ASYNC + 17) /* HPM Overflow Int */
+
+/* IRQ bit and IRQ mask */
+
+#ifdef CONFIG_ARCH_RV32
+#  define RISCV_IRQ_BIT           (1 << 31)
+#else
+#  define RISCV_IRQ_BIT           (1 << 63)
+#endif
+
+#define RISCV_IRQ_MASK            (~RISCV_IRQ_BIT)
+
 /* Configuration ************************************************************/
 
 /* If this is a kernel build, how many nested system calls should we

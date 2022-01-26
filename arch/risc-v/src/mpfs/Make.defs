@@ -18,13 +18,9 @@
 #
 ############################################################################
 
-# Specify our HEAD assembly file.  This will be linked as
-# the first object file, so it will appear at address 0
-HEAD_ASRC = mpfs_head.S
-
 # Specify our general Assembly files
 
-CMN_ASRCS += riscv_vectors.S riscv_testset.S
+CMN_ASRCS += mpfs_head.S riscv_vectors.S riscv_exception_common.S riscv_testset.S
 
 # Specify C code within the common directory to be included
 CMN_CSRCS += riscv_initialize.c riscv_swint.c
@@ -64,11 +60,21 @@ CHIP_CSRCS += mpfs_dma.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c
-CMN_CSRCS  += riscv_signal_dispatch.c riscv_pmp.c
+CMN_CSRCS  += riscv_task_start.c
+CMN_CSRCS  += riscv_pthread_start.c riscv_pthread_exit.c
+CMN_CSRCS  += riscv_signal_dispatch.c
+
 CMN_UASRCS += riscv_signal_handler.S
 
 CHIP_CSRCS += mpfs_userspace.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_MPU),y)
+CMN_CSRCS += riscv_pmp.c
+endif
+
+ifeq ($(CONFIG_ARCH_USE_MMU),y)
+CMN_CSRCS += riscv_mmu.c
 endif
 
 ifeq ($(CONFIG_SPI),y)

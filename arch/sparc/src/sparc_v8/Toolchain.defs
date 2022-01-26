@@ -78,3 +78,9 @@ ifeq ($(CONFIG_SPARC_TOOLCHAIN),CODEREDW)
   LDFLAGS += -nostartfiles -nodefaultlibs
   LDSCRIPT = sparc-elf-debug.ld
 endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif

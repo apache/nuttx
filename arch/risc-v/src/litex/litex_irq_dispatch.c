@@ -59,7 +59,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  if (LITEX_IRQ_MEXT == irq)
+  if (RISCV_IRQ_MEXT == irq)
     {
       /* litex vexriscv dont follow riscv plic standard */
 
@@ -86,7 +86,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (LITEX_IRQ_ECALLM == irq)
+  if (RISCV_IRQ_ECALLM == irq)
     {
       *mepc += 4;
     }

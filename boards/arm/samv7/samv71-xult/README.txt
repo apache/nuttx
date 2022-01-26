@@ -79,7 +79,7 @@ to be resolved.  General problems are listed below.  But see the STATUS
 section associated with each configuration for additional issues specific
 to a particular configuration.
 
-  1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+  1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
      is very low priority to me but might be important to you if you are need
      very high performance SD card accesses.
@@ -275,7 +275,7 @@ Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card 
   Device Drivers -> MMC/SD Driver Support
     CONFIG_MMCSD=y                        : Enable MMC/SD support
     CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-    CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
+    CONFIG_MMCSD_MULTIBLOCK_LIMIT=1     : (REVISIT)
     CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
     CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
     CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support

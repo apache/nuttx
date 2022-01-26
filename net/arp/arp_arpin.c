@@ -59,8 +59,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF  ((struct eth_hdr_s *)&dev->d_buf[0])
-#define ARPBUF  ((struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
+#define ETHBUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+#define ARPBUF ((FAR struct arp_hdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
  * Public Functions

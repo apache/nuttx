@@ -59,7 +59,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  if (FE310_IRQ_MEXT == irq)
+  if (RISCV_IRQ_MEXT == irq)
     {
       uint32_t val = getreg32(FE310_PLIC_CLAIM);
 
@@ -70,7 +70,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* NOTE: In case of ecall, we need to adjust mepc in the context */
 
-  if (FE310_IRQ_ECALLM == irq)
+  if (RISCV_IRQ_ECALLM == irq)
     {
       *mepc += 4;
     }
@@ -95,7 +95,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   irq_dispatch(irq, regs);
 
-  if (FE310_IRQ_MEXT <= irq)
+  if (RISCV_IRQ_MEXT <= irq)
     {
       /* If the irq is from GPIO, clear pending bit in the GPIO */
 
@@ -106,7 +106,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
       /* Then write PLIC_CLAIM to clear pending in PLIC */
 
-      putreg32(irq - FE310_IRQ_MEXT, FE310_PLIC_CLAIM);
+      putreg32(irq - RISCV_IRQ_MEXT, FE310_PLIC_CLAIM);
     }
 #endif
 

@@ -33,6 +33,10 @@ else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
 CSRCS += sam_progmem.c
 endif
 
+ifeq ($(CONFIG_SAMV7_HSMCI0),y)
+CSRCS += sam_hsmci.c
+endif
+
 ifeq ($(CONFIG_FS_AUTOMOUNTER),y)
 CSRCS += sam_automount.c
 endif

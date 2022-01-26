@@ -807,13 +807,8 @@ extern "C"
 #ifdef CONFIG_SCHED_CRITMONITOR
 /* Maximum time with pre-emption disabled or within critical section. */
 
-#ifdef CONFIG_SMP_NCPUS
 EXTERN uint32_t g_premp_max[CONFIG_SMP_NCPUS];
 EXTERN uint32_t g_crit_max[CONFIG_SMP_NCPUS];
-#else
-EXTERN uint32_t g_premp_max[1];
-EXTERN uint32_t g_crit_max[1];
-#endif
 #endif /* CONFIG_SCHED_CRITMONITOR */
 
 #ifdef CONFIG_DEBUG_TCBINFO
