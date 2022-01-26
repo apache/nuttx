@@ -214,7 +214,7 @@ int opamp_register(FAR const char *path, FAR struct opamp_dev_s *dev)
 
   /* Register the OPAMP character driver */
 
-  ret =  register_driver(path, &opamp_fops, 0444, dev);
+  ret = register_driver(path, &opamp_fops, 0444, dev);
   if (ret < 0)
     {
       nxsem_destroy(&dev->ad_closesem);
