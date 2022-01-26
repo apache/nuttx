@@ -4104,6 +4104,9 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
             return;
           if (need_icpoweroff_state && enable_state)
             {
+              ierr("Failed to resume, need to reset the IC\n");
+              dev->touch_awake = 1;
+              dev->idle_mode   = false;
               return;
             }
 
