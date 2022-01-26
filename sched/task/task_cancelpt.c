@@ -141,9 +141,10 @@ bool enter_cancellation_point(void)
               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                   TCB_FLAG_TTYPE_PTHREAD)
                 {
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
                   tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
                   tcb->flags |= TCB_FLAG_CANCEL_DOING;
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+
                   up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
                                   PTHREAD_CANCELED);
 #else
@@ -235,9 +236,10 @@ void leave_cancellation_point(void)
               if ((tcb->flags & TCB_FLAG_TTYPE_MASK) ==
                   TCB_FLAG_TTYPE_PTHREAD)
                 {
+#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
                   tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
                   tcb->flags |= TCB_FLAG_CANCEL_DOING;
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
+
                   up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
                                   PTHREAD_CANCELED);
 #else
