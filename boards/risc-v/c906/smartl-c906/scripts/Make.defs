@@ -64,12 +64,6 @@ CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS = $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS += $(CFLAGS) -D__ASSEMBLY__ $(ASARCHCPUFLAGS)
 
-# NXFLAT module definitions
-
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
-LDNXFLATFLAGS = -e main -s 2048
-
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS)
