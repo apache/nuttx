@@ -18,6 +18,9 @@
 #
 ############################################################################
 
+TARGET_ZIP =
+SGDIR      = segger
+
 ifeq ($(CONFIG_SEGGER_RTT),y)
   CSRCS += segger/RTT/RTT/SEGGER_RTT.c
 
@@ -29,6 +32,16 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
     ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
   endif
+
+  RTT_VERSION ?= 7.54
+
+$(SGDIR)/RTT.zip:
+	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
+	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
+	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
+
+TARGET_ZIP += $(SGDIR)/RTT.zip
+
 endif
 
 ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
@@ -38,4 +51,21 @@ ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
   CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
   CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SEGGER}
   CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SYSVIEW}
+
+  SYSVIEW_VERSION ?= 3.30
+
+$(SGDIR)/SystemView.zip:
+	$(Q) curl -L https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V$(SYSVIEW_VERSION).zip -o $(SGDIR)/SystemView.zip
+	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
+	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
+
+TARGET_ZIP += $(SGDIR)/SystemView.zip
+
 endif
+
+context:: $(TARGET_ZIP)
+
+distclean::
+	$(call DELDIR, $(SGDIR)/SystemView)
+	$(call DELDIR, $(SGDIR)/RTT)
+	$(call DELFILE, $(TARGET_ZIP))
