@@ -947,7 +947,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
-  ret = register_driver(name, &g_rptun_devops, 0666, priv);
+  ret = register_driver(name, &g_rptun_devops, 0222, priv);
   if (ret < 0)
     {
       goto err_driver;

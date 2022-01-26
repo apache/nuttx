@@ -86,6 +86,9 @@ static const struct file_operations g_trngops =
   NULL,            /* seek */
   NULL,            /* ioctl */
   NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -402,7 +405,7 @@ void devrandom_register(void)
   ret = sam_rng_initialize();
   if (ret >= 0)
     {
-      ret = register_driver("/dev/random", &g_trngops, 0644, NULL);
+      ret = register_driver("/dev/random", &g_trngops, 0444, NULL);
       if (ret < 0)
         {
           ferr("ERROR: Failed to register /dev/random\n");
@@ -435,7 +438,7 @@ void devurandom_register(void)
   if (ret >= 0)
 #endif
     {
-      ret = register_driver("/dev/urandom", &g_trngops, 0644, NULL);
+      ret = register_driver("/dev/urandom", &g_trngops, 0444, NULL);
       if (ret < 0)
         {
           ferr("ERROR: Failed to register /dev/urandom\n");
