@@ -39,6 +39,7 @@ $(SGDIR)/RTT.zip:
 	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
 	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
 	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
+	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
 
 TARGET_ZIP += $(SGDIR)/RTT.zip
 
