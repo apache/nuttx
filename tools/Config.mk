@@ -508,7 +508,7 @@ endef
 else
 define TESTANDREPLACEFILE
 	if [ -f $2 ]; then \
-		if cmp $1 $2; then \
+		if cmp -s $1 $2; then \
 			rm -f $1; \
 		else \
 			mv $1 $2; \
