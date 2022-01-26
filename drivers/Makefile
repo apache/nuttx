@@ -103,7 +103,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libdrivers$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: context depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -113,6 +113,8 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
+
+context::
 
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
@@ -128,7 +130,7 @@ clean:
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 
