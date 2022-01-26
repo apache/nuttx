@@ -30,6 +30,9 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/tls.h>
+#include <nuttx/pthread.h>
+
 #include "sched/sched.h"
 #include "task/task.h"
 #include "pthread/pthread.h"
@@ -85,6 +88,12 @@ int pthread_cancel(pthread_t thread)
     {
       pthread_exit(PTHREAD_CANCELED);
     }
+
+  /* Refer to up_tls_info() */
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+  pthread_cleanup_popall(tcb->stack_alloc_ptr);
+#endif
 
   /* Complete pending join operations */
 
