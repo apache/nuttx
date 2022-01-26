@@ -172,17 +172,15 @@ void pthread_cleanup_push(pthread_cleanup_t routine, FAR void *arg)
  *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   None
+ *   tls - The local storage info of the exiting thread
  *
  * Returned Value:
  *   None
  *
  ****************************************************************************/
 
-void pthread_cleanup_popall(void)
+void pthread_cleanup_popall(FAR struct tls_info_s *tls)
 {
-  FAR struct tls_info_s *tls = up_tls_info();
-
   DEBUGASSERT(tls != NULL);
 
   sched_lock();
