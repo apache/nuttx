@@ -100,13 +100,14 @@ int task_setcanceltype(int type, FAR int *oldtype)
 #ifndef CONFIG_DISABLE_PTHREAD
           if ((tcb->flags & TCB_FLAG_TTYPE_MASK) == TCB_FLAG_TTYPE_PTHREAD)
             {
-              tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
-              tcb->flags |= TCB_FLAG_CANCEL_DOING;
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-              up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
-                               PTHREAD_CANCELED);
+                  tcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
+                  tcb->flags |= TCB_FLAG_CANCEL_DOING;
+
+                  up_pthread_exit(((FAR struct pthread_tcb_s *)tcb)->exit,
+                                  PTHREAD_CANCELED);
 #else
-              pthread_exit(PTHREAD_CANCELED);
+                  pthread_exit(PTHREAD_CANCELED);
 #endif
             }
           else
