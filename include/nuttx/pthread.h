@@ -176,7 +176,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   None
+ *   tls - The local storage info of the exiting thread
  *
  * Returned Value:
  *   None
@@ -184,7 +184,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  ****************************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
-void pthread_cleanup_popall(void);
+void pthread_cleanup_popall(FAR struct tls_info_s *tls);
 #endif
 
 #undef EXTERN
