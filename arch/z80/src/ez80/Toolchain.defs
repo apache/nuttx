@@ -64,7 +64,7 @@ ARCHASMINCLUDES = -include chip/clang-compat.asm
 ARCHASMLIST =
 ARCHASMWARNINGS = -W
 
-LDFLAGS += -gc-sections
+LDFLAGS += --gc-sections
 
 # Tool names/paths.
 
