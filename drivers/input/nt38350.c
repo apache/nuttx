@@ -860,12 +860,10 @@ info_retry:
   priv->abs_y_max = (uint16_t)((buf[7] << 8) | buf[8]);
   priv->max_button_num = buf[11];
 
-#ifdef CONFIG_NVT_DEBUG
-  iinfo("fw_ver: 0x%02x, x_num: %d, y_num: %d,"
+  iwarn("fw_ver: 0x%02x, x_num: %d, y_num: %d,"
         "abs_x_max: %d, abs_y_max: %d\n", priv->fw_ver,
         priv->x_num, priv->y_num, priv->abs_x_max,
         priv->abs_y_max);
-#endif
 
   if ((buf[1] + buf[2]) != 0xff)
     {
@@ -1007,11 +1005,9 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
 
       /* Get Touch IC ID */
 
-#ifdef CONFIG_NVT_DEBUG
-      iinfo("buf[1]=0x%02x, buf[2]=0x%02x, buf[3]=0x%02x,"
+      iwarn("buf[1]=0x%02x, buf[2]=0x%02x, buf[3]=0x%02x,"
             "buf[4]=0x%02x, buf[5]=0x%02x,buf[6]=0x%02x\n",
             buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
-#endif
 
       /* ---Stop CRC check to prevent IC auto reboot--- */
 
@@ -1047,9 +1043,7 @@ static int nvt_ts_check_chip_ver_trim(FAR struct nt38350_dev_s *priv,
 
           if (found_nvt_chip)
             {
-#ifdef CONFIG_NVT_DEBUG
-              ierr("This NVT touch IC\n");
-#endif
+              iwarn("This NVT touch IC\n");
               priv->mmap = g_trim_id_table[list].mmap;
               priv->carrier_system =
                     g_trim_id_table[list].hwinfo->carrier_system;
