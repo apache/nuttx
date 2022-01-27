@@ -196,6 +196,11 @@ CXXELFFLAGS = $(CXXFLAGS)
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
+ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+  # See the comment on CMODULEFLAGS above.
+  CELFFLAGS += -mcmodel=large
+  CXXELFFLAGS += -mcmodel=large
+endif
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
