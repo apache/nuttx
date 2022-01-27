@@ -182,15 +182,6 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
   heapsize -= sizeof(struct mm_heap_s);
   heapstart = (FAR char *)heap_adj + sizeof(struct mm_heap_s);
 
-  /* The following two lines have cause problems for some older ZiLog
-   * compilers in the past (but not the more recent).  Life is easier if we
-   * just the suppress them altogther for those tools.
-   */
-
-#ifndef __ZILOG__
-  CHECK_ALLOCNODE_SIZE;
-  CHECK_FREENODE_SIZE;
-#endif
   DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_FREENODE);
   DEBUGASSERT(MM_MIN_CHUNK >= SIZEOF_MM_ALLOCNODE);
 
