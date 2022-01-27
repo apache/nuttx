@@ -126,8 +126,11 @@ static int pplus_fls_erase_sector(struct pplus_fls_dev_s *priv, off_t sector)
   /* Get the address associated with the sector */
 
   address = (off_t)((sector << priv->sectorshift) + priv->offset);
+  _HAL_CS_ALLOC_();
+  HAL_ENTER_CRITICAL_SECTION();
 
   hal_flash_erase_sector(address);
+  HAL_EXIT_CRITICAL_SECTION();
   return OK;
 }
 
@@ -144,7 +147,10 @@ static int pplus_fls_erase_chip(struct pplus_fls_dev_s *priv)
 
   for (i = 0; i < priv->nsectors; i++)
     {
+      _HAL_CS_ALLOC_();
+      HAL_ENTER_CRITICAL_SECTION();
       hal_flash_erase_sector(address);
+      HAL_EXIT_CRITICAL_SECTION();
       address += (1ul << priv->sectorshift);
     }
 
@@ -213,9 +219,12 @@ static ssize_t pplus_fls_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   finfo("startblock: %08lx nblocks: %d\n", (long)startblock, (int)nblocks);
 
+  _HAL_CS_ALLOC_();
+  HAL_ENTER_CRITICAL_SECTION();
   int ret = hal_flash_write(priv->offset + (startblock << priv->pageshift),
       (uint8_t *)buffer, nblocks << priv->pageshift);
 
+  HAL_EXIT_CRITICAL_SECTION();
   if (ret)
     {
       ferr("ERROR: spif_write failed: %d\n", ret);
@@ -363,7 +372,7 @@ struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size)
       priv->size        = size;
       priv->sectorshift = 12;
       priv->pageshift   = 8;
-      priv->nsectors    = 64;
+      priv->nsectors    = 32;
 
       /* Identify the FLASH chip and get its capacity */
 
@@ -379,6 +388,7 @@ struct mtd_dev_s *pplus_fls_initialize(uint32_t offset, uint32_t size)
 
   /* errout_with_priv: */
 
-  kmm_free(priv);
-  return NULL;
+  /* kmm_free(priv); */
+
+  /* return NULL; */
 }
