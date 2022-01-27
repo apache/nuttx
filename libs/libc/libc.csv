@@ -158,6 +158,7 @@
 "pthread_barrierattr_setpshared","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_barrierattr_t *","int"
 "pthread_cond_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t *"
 "pthread_cond_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t *","FAR const pthread_condattr_t *"
+"pthread_cond_timedwait","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_cond_t *","FAR pthread_mutex_t *","FAR const struct timespec *"
 "pthread_condattr_destroy","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_condattr_t *"
 "pthread_condattr_init","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_condattr_t *"
 "pthread_create","pthread.h","!defined(CONFIG_DISABLE_PTHREAD)","int","FAR pthread_t *","FAR const pthread_attr_t *","pthread_startroutine_t","pthread_addr_t"
