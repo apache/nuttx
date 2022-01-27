@@ -259,6 +259,7 @@ rm -rf $workingdir || { echo "Failed to remove the old $workingdir"; exit 1; }
 
 # And, finally, create the header file
 
-xxd -i ${romfsimg} | sed 's/unsigned/const unsigned/' >${headerfile} || \
+echo '#include <nuttx/compiler.h>' >${headerfile}
+xxd -i ${romfsimg} | sed 's/^unsigned char/const unsigned char aligned_data(4)/g' >>${headerfile} || \
   { echo "ERROR: xxd of $< failed" ; rm -f $romfsimg; exit 1 ; }
 rm -f $romfsimg
