@@ -48,6 +48,7 @@
 "ether_ntoa","netinet/ether.h","","FAR char *","FAR const struct ether_addr *"
 "fclose","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fdopen","stdio.h","defined(CONFIG_FILE_STREAM)","FAR FILE *","int","FAR const char *"
+"feof","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "ferror","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "fflush","stdio.h","defined(CONFIG_FILE_STREAM)","int","FAR FILE *"
 "ffs","strings.h","","int","int"
