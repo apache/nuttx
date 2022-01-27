@@ -483,6 +483,7 @@ config ARCH_CHIP_CXD56XX
 config ARCH_CHIP_PHY62XX
 	bool "Phyplus PHY62XX BLE"
 	select ARCH_CORTEXM0
+	select LIBC_ARCH_ATOMIC
 	---help---
 		Phyplus PHY62XX architectures (ARM Cortex-M0).
 

@@ -1,3 +1,9 @@
+P256_ecdh_keygen = 0x00000d03;
+P256_ecdh_shared_secret = 0x00000d0b;
+_symrom_move_to_slave_function0 = 0x00014085;
+_symrom_ll_scheduler0 = 0x00013789;
+_symrom_llSetupNextSlaveEvent0 = 0x0000edf9;
+_symrom_LL_set_default_conn_params0 = 0x0000828d;
 _symrom_bx_to_application = 0x000000d5;
 _symrom_memset = 0x00000eb7;
 _symrom_strlen = 0x00000ec9;
@@ -353,6 +359,7 @@ _symrom_LL_slave_conn_event = 0x000082b9;
 _symrom_NMI_Handler = 0x00008481;
 _symrom_PendSV_Handler = 0x000084cd;
 _symrom_TIM1_IRQHandler = 0x00008545;
+_symrom_TIM2_IRQHandler = 0x00008569;
 _symrom_WaitRTCCount = 0x00008901;
 _symrom___ARM_common_switch8 = 0x00008961;
 _symrom__spif_read_status_reg = 0x0000961d;
