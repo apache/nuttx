@@ -314,6 +314,11 @@ void xtensa_add_region(void);
 # define xtensa_add_region()
 #endif
 
+/* Watchdog timer ***********************************************************/
+
+struct oneshot_lowerhalf_s *
+xtensa_oneshot_initialize(uint32_t irq, uint32_t freq);
+
 /* Serial output */
 
 void up_lowputc(char ch);
