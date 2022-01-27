@@ -247,6 +247,7 @@
 "ub16divub16","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t","ub16_t"
 "ub16mulub16","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t","ub16_t"
 "ub16sqr","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t"
+"uname","sys/utsname.h","","int","FAR struct utsname *"
 "ungetc","stdio.h","defined(CONFIG_FILE_STREAM)","int","int","FAR FILE *"
 "usleep","unistd.h","","int","useconds_t"
 "vasprintf","stdio.h","","int","FAR char **","FAR const IPTR char *","va_list"
