@@ -42,7 +42,7 @@
 #include <nuttx/config.h>
 
 #include <sys/types.h>
-
+#include <stdio.h>
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
@@ -72,7 +72,7 @@
 struct phyplus_lowerhalf_s
 {
   FAR const struct timer_ops_s   *ops;     /* Lower half operations        */
-  FAR struct phyplus_timer_dev_s *tim;     /* pic32mz timer driver         */
+  FAR struct phyplus_tim_dev_s   *tim;     /* pic32mz timer driver         */
   tccb_t                         callback; /* Current user interrupt cb    */
   FAR void                       *arg;     /* Argument to upper half cb    */
   bool                           started;  /* True: Timer has been started */
@@ -323,7 +323,7 @@ static int phyplus_settimeout(FAR struct timer_lowerhalf_s *lower,
 
   if (timeout < 1 || timeout > TMR_MAXTIMEOUT)
     {
-      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %" PRId32 "\n",
+      wderr("ERROR: Cannot represent timeout=%" PRId32 " > %" PRId16"\n",
             timeout, TMR_MAXTIMEOUT);
       return -ERANGE;
     }
@@ -561,7 +561,7 @@ static int phyplus_getstatus(FAR struct timer_lowerhalf_s *lower,
                              FAR struct timer_status_s *status)
 {
   FAR struct phyplus_lowerhalf_s *priv =
-      (FAR struct stm32l4_lowerhalf_s *)lower;
+      (FAR struct phyplus_lowerhalf_s *)lower;
   uint32_t value;
 
   DEBUGASSERT(priv);
@@ -598,7 +598,7 @@ int phyplus_timer_register(FAR struct phyplus_timer_param_s
 {
   FAR const char *fmt;
   char devname[16];
-  int ret;
+
   fmt = "/dev/timer%u";
 
   if ((phyplus_timer_param->timer_idx < 1) ||
@@ -614,7 +614,7 @@ int phyplus_timer_register(FAR struct phyplus_timer_param_s
 int phyplus_timer_ungister(FAR struct phyplus_timer_param_s
                            *phyplus_timer_param)
 {
-  return phyplus_timer_uninitialize(phyplus_timer_param->timer_idx);
+  return 0;
 }
 
 #endif
