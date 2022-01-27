@@ -182,6 +182,7 @@
 "sem_init","semaphore.h","","int","FAR sem_t *","int","unsigned int"
 "setlocale","locale.h","defined(CONFIG_LIBC_LOCALE)","FAR char *","int","FAR const char *"
 "setlogmask","syslog.h","","int","int"
+"shutdown","sys/socket.h","defined(CONFIG_NET)","int","int","int"
 "sigaddset","signal.h","","int","FAR sigset_t *","int"
 "sigdelset","signal.h","","int","FAR sigset_t *","int"
 "sigemptyset","signal.h","","int","FAR sigset_t *"
