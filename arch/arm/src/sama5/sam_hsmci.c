@@ -2382,7 +2382,7 @@ static int sam_waitresponse(FAR struct sdio_dev_s *dev, uint32_t cmd)
 
   for (; ; )
     {
-      /* Did a Command-Response sequence termination evernt occur? */
+      /* Did a Command-Response sequence termination event occur? */
 
       sr      = sam_getreg(priv, SAM_HSMCI_SR_OFFSET);
       pending = sr & priv->cmdrmask;
