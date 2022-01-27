@@ -123,6 +123,13 @@ config XTENSA_DCACHE_LOCK
 	---help---
 		Enable Xtensa D-Cache lock & unlock feature
 
+config XTENSA_ONESHOT
+	bool "Xtensa oneshot lower half driver"
+	default n
+	depends on ONESHOT
+	---help---
+		Enable Xtensa oneshot driver.
+
 config ARCH_FAMILY_LX6
 	bool
 	default n
