@@ -97,6 +97,8 @@ struct btn_open_s
    */
 
   FAR struct pollfd *bo_fds;
+
+  bool bo_pending;
 };
 
 /****************************************************************************
@@ -294,6 +296,11 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
                   iinfo("Report events: %02x\n", fds->revents);
                   nxsem_post(fds->sem);
                 }
+            }
+          else
+            {
+              opriv->bo_pending = true;
+              iinfo("bo_pending set true\n");
             }
         }
 
@@ -752,6 +759,19 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
           opriv->bo_fds = fds;
           fds->priv = &opriv->bo_fds;
+
+          /* if event not taken, post it */
+
+          if (opriv->bo_pending)
+            {
+              fds->revents |= (fds->events & POLLIN);
+              if (fds->revents != 0)
+                {
+                  iinfo("Report events: %02x\n", fds->revents);
+                  nxsem_post(fds->sem);
+                  opriv->bo_pending = false;
+                }
+            }
         }
     }
   else if (fds->priv)
