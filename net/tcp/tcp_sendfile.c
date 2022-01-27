@@ -307,10 +307,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
       dev->d_sndlen = sndlen;
 
-      /* Notify the device driver of the availability of TX data */
-
-      tcp_send_txnotify(psock, conn);
-
       /* Continue waiting */
 
       return flags;
@@ -388,10 +384,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
             }
 
           dev->d_sndlen = sndlen;
-
-          /* Notify the device driver of the availability of TX data */
-
-          tcp_send_txnotify(psock, conn);
 
           /* Update the amount of data sent (but not necessarily ACKed) */
 
