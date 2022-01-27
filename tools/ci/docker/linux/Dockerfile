@@ -110,14 +110,20 @@ RUN mkdir -p xtensa-esp32s2-elf-gcc && \
   curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s2-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
   | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xz
 
-RUN echo "ESP Binaries: 2021/06/01"
+RUN mkdir -p xtensa-esp32s3-elf-gcc && \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
+  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xz
+
+RUN echo "ESP Binaries: 2022/01/26"
 RUN mkdir -p /tools/blobs && cd /tools/blobs \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32.bin" -o bootloader-esp32.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32c3.bin" -o bootloader-esp32c3.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32s2.bin" -o bootloader-esp32s2.bin \
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32s3.bin" -o bootloader-esp32s3.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32.bin" -o partition-table-esp32.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32c3.bin" -o partition-table-esp32c3.bin \
-  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s2.bin" -o partition-table-esp32s2.bin
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s2.bin" -o partition-table-esp32s2.bin \
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s3.bin" -o partition-table-esp32s3.bin
 
 ###############################################################################
 # Build image for tool required by Renesas builds
@@ -261,6 +267,10 @@ ENV PATH="/tools/xtensa-esp32-elf-gcc/bin:$PATH"
 COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s2-elf-gcc/ xtensa-esp32s2-elf-gcc/
 ENV PATH="/tools/xtensa-esp32s2-elf-gcc/bin:$PATH"
 
+# ESP32-S3 toolchain
+COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s3-elf-gcc/ xtensa-esp32s3-elf-gcc/
+ENV PATH="/tools/xtensa-esp32s3-elf-gcc/bin:$PATH"
+
 RUN mkdir -p /tools/blobs/esp-bins
 COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
 RUN pip3 install esptool
@@ -289,6 +299,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/avr-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/avr-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/rx-elf-gcc
