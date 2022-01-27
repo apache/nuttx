@@ -75,6 +75,7 @@
 "getoptindp","unistd.h","","FAR int *"
 "getoptoptp","unistd.h","","FAR int *"
 "gets","stdio.h","defined(CONFIG_FILE_STREAM)","FAR char *","FAR char *"
+"gettimeofday","sys/time.h","","int","FAR struct timeval *","FAR struct timezone *"
 "gmtime","time.h","","FAR struct tm *","FAR const time_t *"
 "gmtime_r","time.h","","FAR struct tm *","FAR const time_t *","FAR struct tm *"
 "htonl","arpa/inet.h","","uint32_t","uint32_t"
