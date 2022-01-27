@@ -95,6 +95,9 @@ static int  gdrop = 0;
 #endif
 static int  gtapdevfd = -1;
 static char gdevname[IFNAMSIZ];
+static void *g_priv = NULL;
+static void (*g_tx_done_intr_cb)(void *priv) = NULL;
+static void (*g_rx_ready_intr_cb)(void *priv) = NULL;
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
 static struct rtentry ghostroute;
@@ -157,7 +160,9 @@ static void set_macaddr(void)
  * Public Functions
  ****************************************************************************/
 
-void tapdev_init(void)
+void tapdev_init(void *priv,
+                 void (*tx_done_intr_cb)(void *priv),
+                 void (*rx_ready_intr_cb)(void *priv))
 {
   struct ifreq ifr;
   int tapdevfd;
@@ -238,6 +243,15 @@ void tapdev_init(void)
 #endif
 
   gtapdevfd = tapdevfd;
+  g_priv = priv;
+
+  /* Register the emulated TX done interrupt callback */
+
+  g_tx_done_intr_cb = tx_done_intr_cb;
+
+  /* Register the emulated RX ready interrupt callback */
+
+  g_rx_ready_intr_cb = rx_ready_intr_cb;
 
   /* Set the MAC address */
 
@@ -315,6 +329,20 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
     }
 
   dump_ethhdr("write", buf, buflen);
+
+  /* Emulate TX done interrupt */
+
+  if (g_tx_done_intr_cb != NULL)
+    {
+      g_tx_done_intr_cb(g_priv);
+    }
+
+  /* Emulate RX ready interrupt */
+
+  if (g_rx_ready_intr_cb != NULL && tapdev_avail())
+    {
+      g_rx_ready_intr_cb(g_priv);
+    }
 }
 
 void tapdev_ifup(in_addr_t ifaddr)
