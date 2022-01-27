@@ -256,6 +256,7 @@
 "time","time.h","","time_t","FAR time_t *"
 "towlower","wchar.h","defined(CONFIG_LIBC_WCHAR)","wint_t","wint_t"
 "towupper","wchar.h","defined(CONFIG_LIBC_WCHAR)","wint_t","wint_t"
+"truncate","unistd.h","!defined(CONFIG_DISABLE_MOUNTPOINT)","FAR const char *","off_t"
 "ub16divub16","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t","ub16_t"
 "ub16mulub16","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t","ub16_t"
 "ub16sqr","fixedmath.h","!defined(CONFIG_HAVE_LONG_LONG)","ub16_t","ub16_t"
