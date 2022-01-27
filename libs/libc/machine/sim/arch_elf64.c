@@ -47,6 +47,7 @@
 #define R_X86_64_PLT32  4
 #define R_X86_64_32     10
 #define R_X86_64_32S    11
+#define R_X86_64_PC64   24
 
 /****************************************************************************
  * Private Data Types
@@ -180,6 +181,10 @@ int up_relocateadd(FAR const Elf64_Rela *rel, FAR const Elf64_Sym *sym,
           }
 
         *(uint32_t *)addr = value;
+        break;
+      case R_X86_64_PC64:  /* S + A - P */
+        value = sym->st_value + rel->r_addend - addr;
+        *(uint64_t *)addr = value;
         break;
       case R_X86_64_32:  /* S + A */
       case R_X86_64_32S: /* S + A */
