@@ -150,6 +150,7 @@
 "readdir_r","dirent.h","","int","FAR DIR *","FAR struct dirent *","FAR struct dirent **"
 "readv","sys/uio.h","","ssize_t","int","FAR const struct iovec *","int"
 "realloc","stdlib.h","","FAR void *","FAR void *","size_t"
+"rewind","stdio.h","defined(CONFIG_FILE_STREAM)","void","FAR FILE *"
 "sched_get_priority_max","sched.h","","int","int"
 "sched_get_priority_min","sched.h","","int","int"
 "sem_getvalue","semaphore.h","","int","FAR sem_t *","FAR int *"
