@@ -60,6 +60,12 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
   int cmp;
 #endif
 
+  if (symtab == NULL)
+    {
+      DEBUGASSERT(nsyms == 0);
+      return NULL;
+    }
+
 #ifdef CONFIG_SYMTAB_DECORATED
   if (name[0] == '_')
     {
@@ -67,7 +73,7 @@ symtab_findbyname(FAR const struct symtab_s *symtab,
     }
 #endif
 
-  DEBUGASSERT(symtab != NULL && name != NULL);
+  DEBUGASSERT(name != NULL);
 
 #ifdef CONFIG_SYMTAB_ORDEREDBYNAME
   while (low < high)
