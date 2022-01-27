@@ -36,22 +36,6 @@
 #include "arm_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -61,22 +45,22 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
-  uint32_t *savestate;
 
   /* Nested interrupts are not supported in this implementation.  If you
    * want to implement nested interrupts, you would have to (1) change the
    * way that CURRENT_REGS is handled and (2) the design associated with
-   * CONFIG_ARCH_INTERRUPTSTACK.  The savestate variable will not work for
-   * that purpose as implemented here because only the outermost nested
-   * interrupt can result in a context switch (it can probably be deleted).
+   * CONFIG_ARCH_INTERRUPTSTACK.
    */
 
   /* Current regs non-zero indicates that we are processing an interrupt;
    * CURRENT_REGS is also used to manage interrupt level context switches.
    */
 
-  savestate    = (uint32_t *)CURRENT_REGS;
-  CURRENT_REGS = regs;
+  if (CURRENT_REGS == NULL)
+    {
+      CURRENT_REGS = regs;
+      regs         = NULL;
+    }
 
   /* Acknowledge the interrupt */
 
@@ -84,7 +68,7 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
 
   /* Deliver the IRQ */
 
-  irq_dispatch(irq, regs);
+  irq_dispatch(irq, (uint32_t *)CURRENT_REGS);
 
   /* If a context switch occurred while processing the interrupt then
    * CURRENT_REGS may have change value.  If we return any value different
@@ -92,15 +76,15 @@ uint32_t *arm_doirq(int irq, uint32_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint32_t *)CURRENT_REGS;
+  if (regs == NULL)
+    {
+      /* Update the return regs and restore the CURRENT_REGS to NULL. */
 
-  /* Restore the previous value of CURRENT_REGS.  NULL would indicate that
-   * we are no longer in an interrupt handler.  It will be non-NULL if we
-   * are returning from a nested interrupt.
-   */
-
-  CURRENT_REGS = savestate;
+      regs         = (uint32_t *)CURRENT_REGS;
+      CURRENT_REGS = NULL;
+    }
 #endif
+
   board_autoled_off(LED_INIRQ);
   return regs;
 }
