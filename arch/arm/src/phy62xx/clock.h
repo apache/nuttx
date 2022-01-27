@@ -50,7 +50,7 @@ typedef enum
 typedef enum  _SYSCLK_SEL
 {
     SYS_CLK_RC_32M      = 0,
-    SYS_CLK_DLL_32M     = 1,
+    SYS_CLK_DBL_32M     = 1,
     SYS_CLK_XTAL_16M    = 2,
     SYS_CLK_DLL_48M     = 3,
     SYS_CLK_DLL_64M     = 4,

@@ -41,6 +41,7 @@
 #include "pwrmgr.h"
 #include "error.h"
 #include "jump_function.h"
+
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/fs/ioctl.h>
@@ -48,7 +49,9 @@
 #include <nuttx/mm/circbuf.h>
 
 #define UART_TX_BUFFER_SIZE   256
-
+#define UART_RX_BUFFER_SIZE   256
+uint8_t fifo_data_store[UART_RX_FIFO_SIZE];
+uint8_t fifo_len_store = 0;
 typedef struct _uart_Context
 {
   bool          enable;
@@ -183,9 +186,12 @@ static void irq_rx_handler(UART_INDEX_e uart_index, uint8_t flg)
   if (m_uartCtx[uart_index].cfg.use_fifo)
     {
       len = cur_uart->RFL;
-
+        fifo_len_store = len;
       for (i = 0; i < len; i++)
+        {
           data[i] = (uint8_t)(cur_uart->RBR & 0xff);
+          fifo_data_store[i] = data[i];
+        }
     }
   else
     {
@@ -407,6 +413,9 @@ int uart_hw_init(UART_INDEX_e uart_index)
       cur_uart->IER |= IER_PTIME;
     }
 
+  if(pcfg->use_tx_buf)
+        cur_uart->IER |= IER_ETBEI;
+
   NVIC_SetPriority(irq_type, IRQ_PRIO_HAL);
   NVIC_EnableIRQ(irq_type);
   return PPlus_SUCCESS;
@@ -615,7 +624,7 @@ static int pplus_uart_setup(struct uart_dev_s *dev)
       .rts_pin = GPIO_DUMMY,
       .cts_pin = GPIO_DUMMY,
       .baudrate = 115200,
-      .use_fifo = FALSE,
+      .use_fifo = TRUE,
       .hw_fwctrl = FALSE,
       .use_tx_buf = FALSE,
       .parity     = FALSE,
@@ -878,10 +887,21 @@ static int pplus_uart_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   uart_Ctx_t *priv = (uart_Ctx_t *)dev->priv;
   uint32_t data;
+  static uint8_t fifo_buf_store[UART_RX_BUFFER_SIZE];
+  static int buf_head;
+  static int buf_tail;
+  /* Put fifo data into loopback buffer */
+  for(int i=0;i<fifo_len_store;i++)
+    {
+	  fifo_buf_store[buf_head] = fifo_data_store[i];
+	  buf_head = buf_head +1;
+	  if(buf_head == UART_RX_BUFFER_SIZE)
+          buf_head = 0;
+    }
+  fifo_len_store = 0;
+  if(buf_tail == UART_RX_BUFFER_SIZE)
+      buf_tail = 0;
 
-  /* Get input data along with receiver control information */
-
-  data = (uint32_t)(priv->reg->RBR & 0xff);
   priv->rx_available = false;
 
   /* Return receiver control information */
@@ -891,9 +911,9 @@ static int pplus_uart_receive(struct uart_dev_s *dev, unsigned int *status)
       *status = 0x00;
     }
 
-  /* Then return the actual received data. */
+  /* Then return the fifo data byte by byte. */
 
-  return data;
+  return (char)fifo_buf_store[buf_tail++];
 }
 
 /****************************************************************************
@@ -921,11 +941,21 @@ static void pplus_uart_rxint(struct uart_dev_s *dev, bool enable)
 
 static bool pplus_uart_rxavailable(struct uart_dev_s *dev)
 {
+  static int len_fifo;
   uart_Ctx_t *priv = (uart_Ctx_t *)dev->priv;
-
-  /* Return true if the receive buffer/fifo is not "empty." */
-
-  return priv->rx_available;
+  /* Detect the length of received data from fifo*/
+  if(len_fifo == 0)
+  {
+  	  hal_UART0_IRQHandler();
+  	  len_fifo = fifo_len_store;
+  }
+  if(len_fifo <= 0)
+	  {
+	  len_fifo = 0;
+  	  return len_fifo;
+	  }
+  else
+	  return len_fifo--;
 }
 
 /****************************************************************************

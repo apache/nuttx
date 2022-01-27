@@ -108,8 +108,10 @@ void c_start(void)
 
   HAL_CRITICAL_SECTION_INIT();
 
-  g_system_clk = SYS_CLK_DLL_48M;
-  clk_init(SYS_CLK_DLL_48M);
+  /* g_system_clk = SYS_CLK_DLL_48M; */
+
+  g_system_clk = SYS_CLK_DBL_32M;
+  clk_init(SYS_CLK_DBL_32M);
 
   /* clk_init(SYS_CLK_XTAL_16M); */
 #if 1

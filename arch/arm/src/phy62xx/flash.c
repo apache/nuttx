@@ -251,6 +251,7 @@ int __RAMRUN hal_flash_read(uint32_t addr, uint8_t *data, uint32_t size)
                 ((addr & 0x7ffff) | FLASH_BASE_ADDR);
 
   /* uint32_t cb = AP_PCR->CACHE_BYPASS; */
+
   #if(SPIF_FLASH_SIZE == FLASH_SIZE_1MB)
   uint32_t remap = addr & 0xf80000;
 

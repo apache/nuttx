@@ -4,7 +4,7 @@ MEMORY
 {
   jumptbl (rwx) : ORIGIN = 0x1fff0000, LENGTH = 1K
   gcfgtbl  (rwx) : ORIGIN = 0x1fff0400, LENGTH = 1K
-  flash (rx) : ORIGIN = 0x1100e000, LENGTH = 256K
+  flash (rx) : ORIGIN = 0x1100e000, LENGTH = 384K
   sram (rwx) : ORIGIN = 0x1fff1c00, LENGTH = 58K
 }
 
@@ -66,6 +66,9 @@ SECTIONS
 		*libarch.a:phy62xx_exception.o(.text .text.*)
 		*libarch.a:irq.o(.text.arm_ack_irq)
 		*phy62xx_ble_patch.o(.text .text.*)
+		//patch.c*.o(.text .text.*)
+		jump_table.c*.o(.text .text.*)
+		rf_phy_driver.c*.o(.text .text.*)
         //*libarch.a:phy62xx_ble_patch.o(.text.ll_hw_go1)
         //*libarch.a:phy62xx_ble_patch.o(.text.TIM1_IRQHandler1)
         //*libarch.a:phy62xx_ble_patch.o(.text.LL_IRQHandler1)
@@ -87,6 +90,28 @@ SECTIONS
         //*libarch.a:phy62xx_ble_patch.o(.text.ll_processBasicIRQ_ScanTRX0)
         //*libarch.a:phy62xx_ble_patch.o(.text.ll_processBasicIRQ_SRX0)
         //*libarch.a:phy62xx_ble_patch.o(.text.ll_hw_read_rfifo1)
+		
+        patch.c*.o(.text.ll_hw_go1)
+        patch.c*.o(.text.TIM1_IRQHandler1)
+        patch.c*.o(.text.LL_IRQHandler1)
+        patch.c*.o(.text.rf_phy_change_cfg0)
+        patch.c*.o(.text.rf_calibrate1)
+        patch.c*.o(.text.l2capPocessFragmentTxData)
+        patch.c*.o(.text.LL_SetDataLengh1)
+        patch.c*.o(.text.llProcessTxData1)
+        patch.c*.o(.text.ll_generateTxBuffer1)
+        patch.c*.o(.text.ll_adptive_adj_next_time1)
+        patch.c*.o(.text.llSecAdvAllow1)
+        patch.c*.o(.text.ll_scheduler1)
+        patch.c*.o(.text.osal_set_event1)
+        patch.c*.o(.text.ll_processBasicIRQ_SRX)
+        patch.c*.o(.text.ll_processBasicIRQ_secondaryAdvTRX)
+        patch.c*.o(.text.ll_processBasicIRQ_ScanTRX)
+        patch.c*.o(.text.llSlaveEvt_TaskEndOk1)
+        patch.c*.o(.text.ll_processBasicIRQ_secondaryAdvTRX0)
+        patch.c*.o(.text.ll_processBasicIRQ_ScanTRX0)
+        patch.c*.o(.text.ll_processBasicIRQ_SRX0)
+        patch.c*.o(.text.ll_hw_read_rfifo1)
 		
         *rf_phy_driver.o(.text.rf_phy_get_pktFoot)
         *rf_phy_driver.o(.text.rf_phy_change_cfg0 )

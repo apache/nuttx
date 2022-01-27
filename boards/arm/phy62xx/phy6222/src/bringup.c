@@ -36,7 +36,9 @@
 
 #include "phy6222.h"
 #include "pplus_mtd_flash.h"
+#ifdef CONFIG_PHY6222_BLE
 #include "phy62xx_ble.h"
+#endif
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -54,8 +56,8 @@
  *     Called from the NSH library
  *
  ****************************************************************************/
-#define PPLUS_MTD_START_OFFSET  0x40000   //start from 256k offset
-#define PPLUS_MTD_SIZE          0x40000   //mtd size is 256k bytes
+#define PPLUS_MTD_START_OFFSET  0x60000   //start from 384k offset
+#define PPLUS_MTD_SIZE          0x20000   //mtd size is 128k bytes
 
 int phy62xx_bringup(void)
 {
@@ -125,16 +127,18 @@ int phy62xx_bringup(void)
 
       /* Mount the LittleFS file system */
 
-      ret = nx_mount("/dev/mtd", "/mnt/lfs", "littlefs", 0,
+      ret = nx_mount("/dev/mtd", "/data", "littlefs", 0,
                 "forceformat");
       if (ret < 0)
         {
           syslog(LOG_ERR,
-              "ERROR: Failed to mount LittleFS at /mnt/lfs: %d\n", ret);
+              "ERROR: Failed to mount LittleFS at /data: %d\n", ret);
         }
 
 #endif
+  phyplus_timer_initialize("/dev/timer3", 3);
 
+  phyplus_wdt_initialize("/dev/watchdog0");
 #ifdef CONFIG_PHY6222_BLE
 
   ret = pplus_ble_initialize();
