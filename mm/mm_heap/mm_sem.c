@@ -80,13 +80,9 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 
   if (up_interrupt_context())
     {
-#ifdef CONFIG_DEBUG_MM
-      return _SEM_TRYWAIT(&heap->mm_semaphore) >= 0;
-#else
       /* Can't take semaphore in the interrupt handler */
 
       return false;
-#endif
     }
   else
 #endif
