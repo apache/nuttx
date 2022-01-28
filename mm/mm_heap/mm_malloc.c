@@ -244,6 +244,7 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
   else
     {
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
+      mm_memdump(heap, -1);
     }
 #endif
 
