@@ -36,7 +36,6 @@
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/signal.h>
 #include <metal/utilities.h>
 
 /****************************************************************************
@@ -70,10 +69,10 @@ struct rptun_priv_s
   struct rpmsg_virtio_shm_pool shm_pool;
   struct metal_list            bind;
   struct metal_list            node;
+  sem_t                        sem;
 #ifdef CONFIG_RPTUN_WORKQUEUE
   struct work_s                work;
 #else
-  sem_t                        sem;
   int                          tid;
 #endif
   unsigned long                cmd;
@@ -266,16 +265,22 @@ static void rptun_worker(FAR void *arg)
   remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
 }
 
-#ifdef CONFIG_RPTUN_WORKQUEUE
-static void rptun_kill(int tid, FAR void *arg)
+static void rptun_post(FAR struct rptun_priv_s *priv)
 {
-  nxsig_kill(tid, SIGINT);
+  int semcount;
+
+  nxsem_get_value(&priv->sem, &semcount);
+  while (semcount++ < 1)
+    {
+      nxsem_post(&priv->sem);
+    }
 }
 
+#ifdef CONFIG_RPTUN_WORKQUEUE
 static void rptun_wakeup(FAR struct rptun_priv_s *priv)
 {
   work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
-  work_foreach(HPWORK, rptun_kill, NULL);
+  rptun_post(priv);
 }
 
 static void rptun_in_recursive(int tid, FAR void *arg)
@@ -312,15 +317,7 @@ static int rptun_thread(int argc, FAR char *argv[])
 
 static void rptun_wakeup(FAR struct rptun_priv_s *priv)
 {
-  int semcount;
-
-  nxsem_get_value(&priv->sem, &semcount);
-  if (semcount < 1)
-    {
-      nxsem_post(&priv->sem);
-    }
-
-  nxsig_kill(priv->tid, SIGINT);
+  rptun_post(priv);
 }
 
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
@@ -464,9 +461,9 @@ static int rptun_wait_tx_buffer(FAR struct remoteproc *rproc)
       return -EAGAIN;
     }
 
-  /* Pause, wait nxsig_kill to wakeup */
+  /* Wait to wakeup */
 
-  pause();
+  nxsem_wait(&priv->sem);
   rptun_worker(priv);
 
   return 0;
@@ -687,6 +684,10 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   rptun_lock();
 
+  /* Register callback to mbox for receiving remote message */
+
+  RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
+
   /* Add priv to list */
 
   metal_list_add_tail(&g_rptun_priv, &priv->node);
@@ -703,10 +704,6 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
     }
 
   rptun_unlock();
-
-  /* Register callback to mbox for receiving remote message */
-
-  RPTUN_REGISTER_CALLBACK(priv->dev, rptun_callback, priv);
 
   return 0;
 }
@@ -929,12 +926,13 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
 
   while (1)
     {
-      ret = nxsem_wait(sem);
-      if (ret != -EINTR)
+      ret = nxsem_trywait(sem);
+      if (ret >= 0)
         {
           break;
         }
 
+      nxsem_wait(&priv->sem);
       rptun_worker(priv);
     }
 
@@ -943,7 +941,25 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
 
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
 {
-  return nxsem_post(sem);
+  FAR struct rptun_priv_s *priv;
+  int semcount;
+  int ret;
+
+  if (!ept)
+    {
+      return -EINVAL;
+    }
+
+  nxsem_get_value(sem, &semcount);
+  ret = nxsem_post(sem);
+
+  priv = rptun_get_priv_by_rdev(ept->rdev);
+  if (priv && semcount >= 0)
+    {
+      rptun_post(priv);
+    }
+  
+  return ret;
 }
 
 FAR const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev)
@@ -1088,6 +1104,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       priv->cmd = RPTUNIOC_START;
       work_queue(HPWORK, &priv->work, rptun_worker, priv, 0);
     }
+
+  nxsem_init(&priv->sem, 0, 0);
 #else
   if (RPTUN_IS_AUTOSTART(dev))
     {
@@ -1098,8 +1116,6 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
     {
       nxsem_init(&priv->sem, 0, 0);
     }
-
-  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
@@ -1118,6 +1134,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       goto err_driver;
     }
 #endif
+  nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   return OK;
 
