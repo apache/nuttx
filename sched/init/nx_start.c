@@ -787,39 +787,6 @@ void nx_start(void)
   sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_STACK_USAGE_SAFE_PERCENT > 0
-
-      /* Check stack in idle thread */
-
-      for (i = 0; i < g_npidhash; i++)
-        {
-          FAR struct tcb_s *tcb;
-          irqstate_t flags;
-
-          flags = enter_critical_section();
-
-          tcb = g_pidhash[i];
-          if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
-                      > CONFIG_STACK_USAGE_SAFE_PERCENT))
-            {
-#if CONFIG_TASK_NAME_SIZE > 0
-              _alert("Stack check failed, pid %d, name %s\n",
-                     tcb->pid, tcb->name);
-#else
-              _alert("Stack check failed, pid %d\n", tcb->pid);
-#endif
-              PANIC();
-            }
-
-          leave_critical_section(flags);
-        }
-
-#endif
-
-      /* Check heap in idle thread */
-
-      kmm_checkcorruption();
-
       /* Perform any processor-specific idle state operations */
 
       up_idle();
