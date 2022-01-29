@@ -34,6 +34,29 @@ function mount_unionfs()
   unionfs-fuse -o cow ${OUTDIR}=RW:${ROOTDIR}=RO ${MOUNTDIR}
 }
 
+function setup_toolchain()
+{
+  ARCH=(\
+      "xtensa" \
+      "arm" \
+      "risc-v" )
+
+  TOOLCHAIN=(\
+            "gcc" \
+            "clang" )
+
+  if [ "$XTENSAD_LICENSE_FILE" == "" ]; then
+    export XTENSAD_LICENSE_FILE=28000@10.221.64.91
+  fi
+  export WASI_SDK_ROOT=${ROOTDIR}/prebuilts/clang/linux/wasm
+
+  for (( i = 0; i < ${#ARCH[*]}; i++)); do
+    for (( j = 0; j < ${#TOOLCHAIN[*]}; j++)); do
+      export PATH=${ROOTDIR}/prebuilts/${TOOLCHAIN[$j]}/linux/${ARCH[$i]}/bin:$PATH
+    done
+  done
+}
+
 function build_board()
 {
   echo -e "Build command line:"
@@ -51,28 +74,12 @@ function build_board()
   fi
   export PATH=${ROOTDIR}/prebuilts/kconfig-frontends/bin:$PATH
 
+  setup_toolchain
+
   if ! ${TOOLSDIR}/configure.sh -e $1; then
     echo "Error: ############# config ${1} fail ##############"
     exit 1
   fi
-
-  ARCH=`sed -n 's/CONFIG_ARCH="\(.*\)"/\1/p' ${NUTTXDIR}/.config`
-  TOOLCHAIN="gcc"
-
-  EXTRAFLAGS=-Wno-cpp
-  if [ "$ARCH" == "xtensa" ]; then
-    if [ "$XTENSAD_LICENSE_FILE" == "" ]; then
-      export XTENSAD_LICENSE_FILE=28000@10.221.64.91
-    fi
-    EXTRAFLAGS=""
-  fi
-
-  if grep -nR "TOOLCHAIN.*CLANG.*y" ${NUTTXDIR}/.config; then
-    TOOLCHAIN="clang"
-  fi
-
-  export PATH=${ROOTDIR}/prebuilts/$TOOLCHAIN/linux/$ARCH/bin:$PATH
-  export WASI_SDK_ROOT=${ROOTDIR}/prebuilts/clang/linux/wasm
 
   if ! make -C ${NUTTXDIR} EXTRAFLAGS=$EXTRAFLAGS ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
