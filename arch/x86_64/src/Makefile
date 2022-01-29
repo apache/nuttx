@@ -86,14 +86,14 @@ endif
 
 # Add the builtin library
 
-EXTRA_LIBS := ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}
+EXTRA_LIBS := ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libgcc.a}}
 
 ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}
+  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
 endif
 
 VPATH = chip:common:$(ARCH_SUBDIR)
