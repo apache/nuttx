@@ -7,6 +7,10 @@ config ARCH_HAVE_I2CRESET
 	bool
 	default n
 
+config BOARD_HAVE_I2CMUX
+	bool
+	default n
+
 menuconfig I2C
 	bool "I2C Driver Support"
 	default n
@@ -94,8 +98,17 @@ config I2CMULTIPLEXER_PCA9540BDP
 	bool "PCA9540BDP NXP multiplexer"
 	default n
 	depends on I2C
+	select BOARD_HAVE_I2CMUX
 	---help---
 		Enable support for the NXP PCA9540BDP i2c multiplexer
+
+config I2CMULTIPLEXER_TCA9548A
+	bool "TCA9548A TI multiplexer"
+	default n
+	depends on I2C
+	select BOARD_HAVE_I2CMUX
+	---help---
+		Enable support for the TI TCA9548A i2c multiplexer
 
 # put more i2c mux devices here
 
