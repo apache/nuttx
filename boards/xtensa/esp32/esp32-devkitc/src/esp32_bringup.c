@@ -81,6 +81,10 @@
 #  include "esp32_board_i2c.h"
 #endif
 
+#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
+#  include "esp32_tca9548a.h"
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
 #  include "esp32_bmp180.h"
 #endif
@@ -366,6 +370,21 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize GPIO Driver: %d\n", ret);
+    }
+#endif
+
+  /* Register the TCA9548A Multiplexer before others I2C drivers to allow it
+   * be used by other drivers. Look at esp32_ms5611.c how to use it.
+   */
+
+#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
+  /* Add the TCA9548A Mux as device 0 (0x70) in I2C Bus 0 */
+
+  ret = board_tca9548a_initialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize TCA9548A driver: %d\n", ret);
+      return ret;
     }
 #endif
 

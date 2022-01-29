@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32/common/src/esp32_ms5611.c
+ * boards/xtensa/esp32/common/include/esp32_tca9548a.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,36 +18,36 @@
  *
  ****************************************************************************/
 
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_TCA9548A_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_TCA9548A_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <debug.h>
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
-#include <nuttx/arch.h>
-#include <nuttx/sensors/ms5611.h>
-#include <nuttx/i2c/i2c_master.h>
-
-#include "esp32_board_i2c.h"
-#include "esp32_i2c.h"
-#include "esp32_ms5611.h"
-
-#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
-#  include "esp32_tca9548a.h"
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
 #endif
 
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: board_ms5611_initialize
+ * Name: board_tca9548a_initialize
  *
  * Description:
- *   Initialize and register the MS5611 Pressure Sensor driver.
+ *   Initialize and register the TCA9548A Pressure Sensor driver.
  *
  * Input Parameters:
  *   devno - The device number, used to build the device path as /dev/pressN
@@ -58,42 +58,31 @@
  *
  ****************************************************************************/
 
-int board_ms5611_initialize(int devno, int busno)
-{
-  struct i2c_master_s *i2c;
-  int ret;
+int board_tca9548a_initialize(int devno, int busno);
 
-  sninfo("Initializing MS5611!\n");
+/****************************************************************************
+ * Name: esp32_i2cmux_getmaster
+ *
+ * Description:
+ *   Returns an I2C Master for TCA9548A multiplexer channel.
+ *
+ *   NOTE: esp32_i2cmux_getmaster() is generic name, it can be used to return
+ *   an I2C Master for others I2C Master, not only TCA9548A.
+ *
+ * Input Parameters:
+ *   devno   - The device number, it is the TCA9548A I2C_Addr minus 0x70.
+ *   channel - The TCA9548A's channel where the device will be added.
+ *
+ * Returned Value:
+ *   Common i2c multiplexer device instance; NULL on failure.
+ *
+ ****************************************************************************/
 
-  /* Initialize MS5611 */
+struct i2c_master_s *esp32_i2cmux_getmaster(int devno, uint8_t channel);
 
-#ifdef CONFIG_BOARD_HAVE_I2CMUX
-  /* We will use the devno as channel to avoid modifying the
-   * board_ms5611_initialize() function. If you connected your
-   * MS5611 to another channel, pass it to the devno of the
-   * board_ms5611_initialize() function.
-   */
-
-  i2c = esp32_i2cmux_getmaster(busno, devno);
-#else
-  i2c = esp32_i2cbus_initialize(busno);
+#undef EXTERN
+#ifdef __cplusplus
+}
 #endif
 
-  if (i2c != NULL)
-    {
-      /* Then try to register the barometer sensor in I2C0 */
-
-      ret = ms5611_register(i2c, devno, MS5611_ADDR0);
-      if (ret < 0)
-        {
-          snerr("ERROR: Error registering MS5611 in I2C%d\n", busno);
-        }
-    }
-  else
-    {
-      ret = -ENODEV;
-    }
-
-  return ret;
-}
-
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_TCA9548A_H */
