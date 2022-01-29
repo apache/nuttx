@@ -50,7 +50,7 @@ OBJS = $(AOBJS) $(COBJS) $(CXXOBJS)
 BIN = libboards$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend context clean_context clean distclean
+.PHONY: depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -74,18 +74,8 @@ makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
 
 depend: .depend
 
-context:
-ifeq ($(BOARD_INSTALLED),y)
-	$(Q) $(MAKE) -C $(BOARDDIR) context
-endif
-
-clean_context:
-
-clean: clean_context
-	$(call DELFILE, $(BIN))
-	$(call CLEAN)
-
 distclean: clean
+	$(call DELFILE, $(BIN))
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

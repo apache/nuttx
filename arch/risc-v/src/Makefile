@@ -131,8 +131,6 @@ VPATH += $(CHIP_DIR)
 
 all: $(HEAD_OBJ) $(BIN)
 
-.PHONY: board/libboard$(LIBEXT)
-
 $(AOBJS) $(UAOBJS) $(HEAD_OBJ): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
 
@@ -150,8 +148,11 @@ endif
 $(KBIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
 
-board/libboard$(LIBEXT):
-	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
+LD_BOARD_DEPENDENCIES += libboard$(LIBEXT)
+
+PHONY: $(LD_BOARD_DEPENDENCIES)
+$(LD_BOARD_DEPENDENCIES) &:
+	$(Q) $(MAKE) -C board $(LD_BOARD_DEPENDENCIES) EXTRAFLAGS="$(EXTRAFLAGS)"
 
 define LINK_ALLSYMS
 	$(Q) $(TOPDIR)/tools/mkallsyms.sh $(NUTTX) $(CROSSDEV) > allsyms.tmp
@@ -162,7 +163,7 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
-nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(HEAD_OBJ) $(LD_BOARD_DEPENDENCIES)
 	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \

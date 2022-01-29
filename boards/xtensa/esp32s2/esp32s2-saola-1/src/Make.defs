@@ -44,14 +44,10 @@ endif
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32s2.template.ld
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32s2_out.ld
 
-.PHONY = context distclean
-
 $(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
 	$(Q) $(CC) -isystem $(TOPDIR)/include -C -P -x c -E $(SCRIPTIN) -o $@
 
-context:: $(SCRIPTOUT)
-
-distclean::
+clean::
 	$(call DELFILE, $(SCRIPTOUT))
 
 DEPPATH += --dep-path board

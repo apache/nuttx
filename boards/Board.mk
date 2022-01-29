@@ -108,8 +108,6 @@ endif
 
 depend: .depend
 
-context::
-
 clean::
 	$(call DELFILE, libboard$(LIBEXT))
 	$(call DELFILE, $(ETCSRC))

@@ -23,6 +23,8 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
+# LD_BOARD_DEPENDENCIES: List of BOARD files that must be generated to link
+
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 
@@ -52,6 +54,7 @@ endif
 # generated at the board level.
 
 LDSCRIPT_MEMORY = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
+LD_BOARD_DEPENDENCIES += $(LDSCRIPT_MEMORY)
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
   ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT_MEMORY)}"
