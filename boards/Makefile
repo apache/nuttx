@@ -74,8 +74,10 @@ makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds) $(CXXSRCS:.cxx=.ddx)
 
 depend: .depend
 
+clean:
+	$(call CLEAN)
+
 distclean: clean
-	$(call DELFILE, $(BIN))
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

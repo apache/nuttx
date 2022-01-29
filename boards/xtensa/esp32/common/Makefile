@@ -31,6 +31,3 @@ include $(TOPDIR)/boards/Board.mk
 ARCHSRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 BOARDDIR = $(ARCHSRCDIR)$(DELIM)board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(BOARDDIR)$(DELIM)include)
-
-clean::
-	$(call DELFILE, $(SCRIPTOUT))
