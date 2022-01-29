@@ -371,6 +371,19 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
 
   DEBUGASSERT(conn != NULL);
 
+#ifdef CONFIG_DEBUG_FEATURES
+  if (conn->dev == NULL || (pvconn != conn && pvconn != NULL))
+    {
+      tcp_event_handler_dump(dev, pvconn, pvpriv, flags, conn);
+    }
+#endif
+
+  /* If pvconn is not NULL, make sure that pvconn refers to the same
+   * connection as the socket is bound to.
+   */
+
+  DEBUGASSERT(pvconn == conn || pvconn == NULL);
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -1171,6 +1184,20 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       if (conn->sndcb == NULL)
         {
           conn->sndcb = tcp_callback_alloc(conn);
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+          if (conn->sndcb != NULL)
+            {
+              conn->sndcb_alloc_cnt++;
+
+              /* The callback is allowed to be allocated only once.
+               * This is to catch a potential re-allocation after
+               * conn->sndcb was set to NULL.
+               */
+
+              DEBUGASSERT(conn->sndcb_alloc_cnt == 1);
+            }
+#endif
         }
 
       /* Test if the callback has been allocated */

@@ -157,6 +157,12 @@ static int inet_tcp_alloc(FAR struct socket *psock)
   DEBUGASSERT(conn->crefs == 0);
   conn->crefs = 1;
 
+  /* It is expected the socket has not yet been associated with
+   * any other connection.
+   */
+
+  DEBUGASSERT(psock->s_conn == NULL);
+
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
