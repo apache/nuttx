@@ -150,6 +150,19 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+#ifdef CONFIG_DEBUG_NET_ERROR
+  if (conn->dev == NULL || (pvconn != conn && pvconn != NULL))
+    {
+      tcp_event_handler_dump(dev, pvconn, pvpriv, flags, conn);
+    }
+#endif
+
+  /* If pvconn is not NULL, make sure that pvconn refers to the same
+   * connection as the socket is bound to.
+   */
+
+  DEBUGASSERT(pvconn == conn || pvconn == NULL);
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the own that we are bound to.
    */
