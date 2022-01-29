@@ -106,6 +106,24 @@ if [ -z "$host" ]; then
   esac
 fi
 
+# Detect Host CPU type.
+# At least MacOS and Linux can have x86_64 and arm based hosts.
+
+if [ -z "$cpu" ]; then
+  case $(uname -m) in
+    arm64)
+      cpu=arm
+      ;;
+    aarch64)
+      cpu=arm
+      ;;
+    *)
+      # Assume x86_64 as default
+      cpu=x86_64
+      ;;
+  esac
+fi
+
 WD=`test -d ${0%/*} && cd ${0%/*}; pwd`
 cd $WD
 
@@ -146,6 +164,11 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" -o "X$host" == "Xbsd" ]; then
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_BSD
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
 
+    if [ "X$cpu" == "Xarm" ]; then
+      echo "  Select CONFIG_HOST_ARM=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM
+    fi
+
   elif [ "X$host" == "Xbsd" ]; then
     echo "  Select CONFIG_HOST_BSD=y"
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_MACOS
@@ -157,6 +180,11 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" -o "X$host" == "Xbsd" ]; then
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_LINUX
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_BSD
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_MACOS
+
+    if [ "X$cpu" == "Xarm" ]; then
+      echo "  Select CONFIG_HOST_ARM=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM
+    fi
   fi
 
   # Enable the System V ABI
