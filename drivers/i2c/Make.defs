@@ -38,6 +38,10 @@ ifeq ($(CONFIG_I2CMULTIPLEXER_PCA9540BDP),y)
 CSRCS += pca9540bdp.c
 endif
 
+ifeq ($(CONFIG_I2CMULTIPLEXER_TCA9548A),y)
+CSRCS += tca9548a.c
+endif
+
 # Include I2C device driver build support
 
 DEPPATH += --dep-path i2c
