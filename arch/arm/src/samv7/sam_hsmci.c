@@ -3182,6 +3182,7 @@ static void sam_callback(void *arg)
             {
               /* No... return without performing the callback */
 
+              leave_critical_section(flags);
               return;
             }
         }
@@ -3193,6 +3194,7 @@ static void sam_callback(void *arg)
             {
               /* No... return without performing the callback */
 
+              leave_critical_section(flags);
               return;
             }
         }
