@@ -987,20 +987,20 @@ testbuild.sh
 
     $ ./testbuild.sh -h
 
-    USAGE: ./testbuild.sh [-l|m|c|g|n] [-d] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
+    USAGE: ./testbuild.sh [-l|m|c|g|n] [-d] [-e <extraflags>] [-x] [-j <ncpus>] [-a <appsdir>] [-t <topdir>] [-p] [-G] <testlist-file>
            ./testbuild.sh -h
 
     Where:
       -l|m|c|g|n selects Linux (l), macOS (m), Cygwin (c),
-         MSYS/MSYS2 (g) or Windows native (n).  Default Linux
+         MSYS/MSYS2 (g) or Windows native (n). Default Linux
       -d enables script debug output
+      -e pass extra c/c++ flags such as -Wno-cpp via make command line
       -x exit on build failures
       -j <ncpus> passed on to make.  Default:  No -j make option.
       -a <appsdir> provides the relative path to the apps/ directory.  Default ../apps
-      -t <topdir> provides the absolute path to top nuttx/ directory.
-         Default $WD/../nuttx, where $WD is the parent directory of
-         the directory where this script is.
+      -t <topdir> provides the absolute path to top nuttx/ directory.  Default ../nuttx
       -p only print the list of configs without running any builds
+      -A store the build executable artifact in ARTIFACTDIR (defaults to ../buildartifacts
       -C Skip tree cleanness check.
       -G Use "git clean -xfdq" instead of "make distclean" to clean the tree.
          This option may speed up the builds. However, note that:
