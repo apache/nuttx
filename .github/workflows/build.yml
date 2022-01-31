@@ -150,7 +150,7 @@ jobs:
             mkdir $CCACHE_DIR
             export ARTIFACTDIR=`pwd`/buildartifacts
             cd sources/nuttx/tools/ci
-            ./cibuild.sh -A -c testlist/${{matrix.boards}}.dat
+            ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
             ccache -s
       - uses: actions/upload-artifact@v2
         with:
@@ -190,7 +190,7 @@ jobs:
           mkdir $CCACHE_DIR
           export ARTIFACTDIR=`pwd`/buildartifacts
           cd sources/nuttx/tools/ci
-          ./cibuild.sh -i -A -c testlist/${{matrix.boards}}.dat
+          ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
           ccache -s
       - uses: actions/upload-artifact@v2
         with:
