@@ -38,7 +38,8 @@ config SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
 
 config SEGGER_RTT_BUFFER_SIZE_UP
 	int "Segger RTT UP Buffer Size"
-	default 1024
+	default 1024 if SYSLOG_RTT
+	default 1 if !SYSLOG_RTT
 	---help---
 		Size of the buffer for terminal output of target, up to host
 
