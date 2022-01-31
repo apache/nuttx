@@ -80,8 +80,7 @@ endif
 
 # Add the builtin library
 
-EXTRA_LIBS += -lgcc
-EXTRA_LIBPATHS += -L""${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name`"}""
+EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}
 
 ifneq ($(CONFIG_LIBM),y)
   EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
