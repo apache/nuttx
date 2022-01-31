@@ -763,7 +763,8 @@ void files_releaselist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
+int files_duplist(FAR struct filelist *plist,
+                  FAR struct filelist *clist, bool stdio_only);
 
 /****************************************************************************
  * Name: file_dup
