@@ -1008,6 +1008,7 @@ testbuild.sh
            * This assumes that only nuttx and apps repos need to be cleaned.
            * If the tree has files not managed by git, they will be removed
              as well.
+      -R execute "run" script in the config directories if exists.
       -h will show this help test and terminate
       <testlist-file> selects the list of configurations to test.  No default
 
