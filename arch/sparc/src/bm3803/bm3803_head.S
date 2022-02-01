@@ -70,6 +70,8 @@
   jmp   %l4+%lo(_handler); \
    sll  %l3, 1, %l4 ! l4 = WIM << 1
 
+#define BM3803_STACK_TOP       _end+CONFIG_IDLETHREAD_STACKSIZE
+
     .text
     .global _trap_table, _hardreset
     .global __start
@@ -328,9 +330,9 @@ __start:
         nop
 
         ! initial the stack point
-        sethi  %hi(__stack), %g1
-        or     %g1, %lo(__stack), %g1
-        subcc  %g1, 16, %g1
+        sethi  %hi(BM3803_STACK_TOP), %g1
+        or     %g1, %lo(BM3803_STACK_TOP), %g1
+        subcc  %g1, CPU_MINIMUM_STACK_FRAME_SIZE, %g1
         mov    %g1, %sp
         nop
 
@@ -617,7 +619,7 @@ _fpdata:
 
 .align 8
 g_idle_topstack:
-	.long	_end + CONFIG_IDLETHREAD_STACKSIZE
+	.long	BM3803_STACK_TOP
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
 
