@@ -2294,7 +2294,7 @@ static int usbhost_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   uinfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct usbhost_state_s *)inode->i_private;
+  priv = (FAR struct usbhost_state_s *)inode->i_private;
 
   /* Check if the mass storage device is still connected */
 

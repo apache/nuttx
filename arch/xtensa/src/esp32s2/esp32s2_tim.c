@@ -341,7 +341,7 @@ static void esp32s2_tim_clear(struct esp32s2_tim_dev_s *dev)
 static void esp32s2_tim_setmode(struct esp32s2_tim_dev_s *dev,
                                 enum esp32s2_tim_mode_e mode)
 {
-  struct esp32s2_tim_priv_s *priv  = (struct esp32s2_tim_priv_s *)dev;
+  struct esp32s2_tim_priv_s *priv = (struct esp32s2_tim_priv_s *)dev;
 
   DEBUGASSERT(dev);
 

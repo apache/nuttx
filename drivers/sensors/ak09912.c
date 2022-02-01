@@ -516,7 +516,7 @@ static int ak09912_initialize(FAR struct ak09912_dev_s *priv)
 static int ak09912_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
   int ret = 0;
 
   ret = ak09912_set_power_mode(priv, priv->mode);
@@ -540,7 +540,7 @@ static int ak09912_open(FAR struct file *filep)
 static int ak09912_close(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
   int ret = 0;
 
   ret = ak09912_set_power_mode(priv, AKM_POWER_DOWN_MODE);
@@ -616,7 +616,7 @@ static ssize_t ak09912_write(FAR struct file *filep, FAR const char *buffer,
 static int ak09912_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)
