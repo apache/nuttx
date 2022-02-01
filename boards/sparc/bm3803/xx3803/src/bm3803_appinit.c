@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
+#include <sys/mount.h>
 #include <stdio.h>
 #include <syslog.h>
 
@@ -139,6 +139,17 @@ int board_app_initialize(uintptr_t arg)
     {
       syslog(LOG_ERR, "Failed to start watchdog thread: %d\n", ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = mount(NULL, BM3803_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to mount procfs at %s: %d\n",
+           BM3803_PROCFS_MOUNTPOINT, ret);
     }
 #endif
 
