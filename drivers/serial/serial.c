@@ -1439,7 +1439,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 #ifdef CONFIG_SERIAL_TERMIOS
   /* Append any higher level TTY flags */
 
-  else if (ret == OK)
+  if (ret == OK || ret == -ENOTTY)
     {
       switch (cmd)
         {
