@@ -2361,7 +2361,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uartdev = (FAR struct uart_dev_s *)inode->i_private;
 
   DEBUGASSERT(uartdev && uartdev->priv);
-  priv  = (FAR struct usbhost_ft232r_s *)uartdev->priv;
+  priv = (FAR struct usbhost_ft232r_s *)uartdev->priv;
 
   /* Check if the FTDI device is still connected */
 

@@ -649,7 +649,7 @@ static int sps30_configure(FAR struct sps30_dev_s *priv, bool start)
 static int sps30_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct sps30_dev_s *priv  = inode->i_private;
+  FAR struct sps30_dev_s *priv = inode->i_private;
   union article_u
     {
       uint32_t u32[8];
