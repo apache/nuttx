@@ -285,7 +285,7 @@ static int bh1745nuc_seqinit(FAR struct bh1745nuc_dev_s *priv)
 
 static int bh1745nuc_open(FAR struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
+  FAR struct inode           *inode = filep->f_inode;
   FAR struct bh1745nuc_dev_s *priv  = inode->i_private;
   uint8_t val;
 
@@ -337,7 +337,7 @@ static int bh1745nuc_open(FAR struct file *filep)
 
 static int bh1745nuc_close(FAR struct file *filep)
 {
-  FAR struct inode        *inode = filep->f_inode;
+  FAR struct inode           *inode = filep->f_inode;
   FAR struct bh1745nuc_dev_s *priv  = inode->i_private;
   uint8_t val;
 
@@ -371,7 +371,7 @@ static int bh1745nuc_close(FAR struct file *filep)
 static ssize_t bh1745nuc_read(FAR struct file *filep, FAR char *buffer,
                               size_t len)
 {
-  FAR struct inode        *inode = filep->f_inode;
+  FAR struct inode           *inode = filep->f_inode;
   FAR struct bh1745nuc_dev_s *priv  = inode->i_private;
 
   len = len / BH1745NUC_BYTESPERSAMPLE * BH1745NUC_BYTESPERSAMPLE;

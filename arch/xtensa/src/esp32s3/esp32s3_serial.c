@@ -776,8 +776,8 @@ static int esp32s3_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCGETS:
       {
-        struct termios  *termiosp    = (struct termios *)arg;
-        struct esp32s3_uart_s *priv  = (struct esp32s3_uart_s *)dev->priv;
+        struct termios  *termiosp   = (struct termios *)arg;
+        struct esp32s3_uart_s *priv = (struct esp32s3_uart_s *)dev->priv;
         if (termiosp == NULL)
           {
             ret = -EINVAL;
@@ -832,8 +832,8 @@ static int esp32s3_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios  *termiosp    = (struct termios *)arg;
-        struct esp32s3_uart_s *priv  = (struct esp32s3_uart_s *)dev->priv;
+        struct termios  *termiosp   = (struct termios *)arg;
+        struct esp32s3_uart_s *priv = (struct esp32s3_uart_s *)dev->priv;
         uint32_t baud;
         uint32_t current_int_sts;
         uint8_t  parity;

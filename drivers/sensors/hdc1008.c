@@ -513,8 +513,8 @@ static int hdc1008_putreg(FAR struct hdc1008_dev_s *priv, uint8_t regaddr,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int hdc1008_open(FAR struct file *filep)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 
@@ -546,8 +546,8 @@ static int hdc1008_open(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int hdc1008_close(FAR struct file *filep)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 
@@ -589,8 +589,8 @@ static int hdc1008_close(FAR struct file *filep)
 static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
   int len = 0;
@@ -738,8 +738,8 @@ static ssize_t hdc1008_write(FAR struct file *filep, FAR const char *buffer,
 
 static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 

@@ -748,8 +748,8 @@ static int ramlog_file_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       /* Remove all memory of the poll setup */
 
-      *slot      = NULL;
-      fds->priv  = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:
