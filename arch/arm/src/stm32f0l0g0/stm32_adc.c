@@ -1342,6 +1342,7 @@ static void adc_reset(FAR struct adc_dev_s *dev)
 #ifdef HAVE_ADC_CMN_DATA
   if (adccmn_lock(priv, true) < 0)
     {
+      leave_critical_section(flags);
       return;
     }
 
