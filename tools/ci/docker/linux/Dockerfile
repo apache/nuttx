@@ -98,6 +98,15 @@ RUN mkdir riscv64-unknown-elf-gcc && \
   | tar -C riscv64-unknown-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
+# Build image for tool required by SPARC builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-sparc
+# Download the SPARC GCC toolchain prebuilt by Gaisler
+RUN mkdir sparc-gaisler-elf-gcc && \
+  curl -s -L "https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz" \
+  | tar -C sparc-gaisler-elf-gcc --strip-components 1 -xJ
+
+###############################################################################
 # Build image for tool required by ESP32 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
@@ -259,6 +268,10 @@ ENV PATH="/tools/pinguino-compilers/p32/bin:$PATH"
 COPY --from=nuttx-toolchain-riscv /tools/riscv64-unknown-elf-gcc/ riscv64-unknown-elf-gcc/
 ENV PATH="/tools/riscv64-unknown-elf-gcc/bin:$PATH"
 
+# SPARC toolchain
+COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
+ENV PATH="/tools/sparc-gaisler-elf-gcc/bin:$PATH"
+
 # ESP32 toolchain
 COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32-elf-gcc/ xtensa-esp32-elf-gcc/
 ENV PATH="/tools/xtensa-esp32-elf-gcc/bin:$PATH"
@@ -295,6 +308,8 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/p32-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-gcc && \
