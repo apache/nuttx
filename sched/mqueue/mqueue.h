@@ -37,7 +37,7 @@
 
 #include <nuttx/mqueue.h>
 
-#if CONFIG_MQ_MAXMSGSIZE > 0
+#if defined(CONFIG_MQ_MAXMSGSIZE) && CONFIG_MQ_MAXMSGSIZE > 0
 
 /********************************************************************************
  * Pre-processor Definitions
@@ -142,5 +142,5 @@ void nxmq_recover(FAR struct tcb_s *tcb);
 }
 #endif
 
-#endif /* CONFIG_MQ_MAXMSGSIZE > 0 */
+#endif /* defined(CONFIG_MQ_MAXMSGSIZE) && CONFIG_MQ_MAXMSGSIZE > 0 */
 #endif /* __SCHED_MQUEUE_MQUEUE_H */
