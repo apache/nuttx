@@ -523,6 +523,9 @@ endef
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 
 ARCHDEFINES += ${shell $(DEFINE) "$(CC)" __NuttX__}
+ifeq ($(CONFIG_NDEBUG),y)
+  ARCHDEFINES += ${shell $(DEFINE) "$(CC)" NDEBUG}
+endif
 
 # The default C/C++ search path
 
