@@ -2345,7 +2345,6 @@ FAR struct spi_dev_s *s32k1xx_lpspibus_initialize(int bus)
 #endif
     {
       spierr("ERROR: Unsupported SPI bus: %d\n", bus);
-      return NULL;
     }
 
   leave_critical_section(flags);

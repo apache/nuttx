@@ -3181,6 +3181,7 @@ static int stm32_epstall(struct usbdev_ep_s *ep, bool resume)
           priv->ep0state = EP0STATE_STALLED;
         }
 
+      leave_critical_section(flags);
       return -ENODEV;
     }
 

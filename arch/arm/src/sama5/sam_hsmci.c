@@ -2260,6 +2260,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev,
           /* Some fatal error has occurred */
 
           lcderr("ERROR: sr %08" PRIx32 "\n", sr);
+          leave_critical_section(flags);
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)
