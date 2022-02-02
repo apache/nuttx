@@ -5838,7 +5838,7 @@ static int rx65n_usbinterrupt(int irq, FAR void *context, FAR void *arg)
       if (USB_ATTACH == usb_pstd_chk_vbsts())
         {
           priv->attached = 1;
-          connected_times ++;
+          connected_times++;
           syslog (LOG_INFO, "NuttX: USB Device Connected. %d\n",
                   connected_times);
           uinfo("Device attached\n");
