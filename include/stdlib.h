@@ -223,6 +223,7 @@ int       posix_memalign(FAR void **, size_t, size_t);
 /* Pseudo-Terminals */
 
 #ifdef CONFIG_PSEUDOTERM
+int       posix_openpt(int oflag);
 FAR char *ptsname(int fd);
 int       ptsname_r(int fd, FAR char *buf, size_t buflen);
 int       unlockpt(int fd);
