@@ -3138,6 +3138,7 @@ static int rx65n_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct
         {
           privreq->req.len = CDC_CLASS_DATA_LENGTH;
           rx65n_rdrequest(epno, priv, privep);
+          leave_critical_section(flags);
           return OK;
         }
 
@@ -3146,6 +3147,7 @@ static int rx65n_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct
       if (!privep->txbusy)
         {
           ret = rx65n_wrrequest(epno, priv, privep);
+          leave_critical_section(flags);
           return OK;
         }
     }
@@ -3159,6 +3161,7 @@ static int rx65n_epsubmit(FAR struct usbdev_ep_s *ep, FAR struct
       if (priv->ep0state == EP0STATE_RDREQUEST)
         {
           rx65n_rdrequest(epno, priv, privep);
+          leave_critical_section(flags);
           return OK;
         }
 

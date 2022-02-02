@@ -1326,6 +1326,7 @@ dtc_err_t rx65n_dtc_setup_seq_dynamic_transferdata(DTC_HANDLE handle,
   ret = rx65n_dtc_validate_dynamic_params(p_dtransfer_cfg, p_transfer_data);
   if (DTC_SUCCESS != ret)
     {
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -1345,6 +1346,7 @@ dtc_err_t rx65n_dtc_setup_seq_dynamic_transferdata(DTC_HANDLE handle,
           if (rx65n_dtc_set_dynamic_transfer_data(p_dtransfer_cfg,
                                   p_transfer_data) != DTC_SUCCESS)
             {
+              leave_critical_section(flags);
               return DTC_ERR_INVALID_ARG;
             }
 
@@ -1536,6 +1538,7 @@ dtc_err_t rx65n_dtc_setup_dynamic_transferdata(DTC_HANDLE handle,
   ret = rx65n_dtc_validate_dynamic_params(p_dtransfer_cfg, p_transfer_data);
   if (DTC_SUCCESS != ret)
     {
+      leave_critical_section(flags);
       return ret;
     }
 
@@ -1546,6 +1549,7 @@ dtc_err_t rx65n_dtc_setup_dynamic_transferdata(DTC_HANDLE handle,
       if (rx65n_dtc_set_dynamic_transfer_data(p_dtransfer_cfg,
                                   p_transfer_data) != DTC_SUCCESS)
         {
+          leave_critical_section(flags);
           return DTC_ERR_INVALID_ARG;
         }
 
