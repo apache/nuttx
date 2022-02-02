@@ -60,10 +60,6 @@ void up_irqinitialize(void)
 
   up_disable_irq(RISCV_IRQ_MTIMER);
 
-  /* enable access from supervisor mode */
-
-  putreg32(0x1, MPFS_PLIC_CTRL);
-
   /* Disable all global interrupts for current hart */
 
   uint64_t hart_id = READ_CSR(mhartid);
