@@ -23,6 +23,10 @@ config HOST_ARM
 	bool "arm"
 	select ARCH_HAVE_STACKCHECK
 
+config HOST_ARM64
+	bool "arm64"
+	select ARCH_HAVE_STACKCHECK
+
 endchoice # Host CPU Type
 
 config ARCH_CHIP
