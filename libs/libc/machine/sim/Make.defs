@@ -48,6 +48,10 @@ else ifeq ($(CONFIG_HOST_ARM),y)
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp_arm.S
 endif
+else ifeq ($(CONFIG_HOST_ARM64),y)
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp_arm64.S
+endif
 endif
 
 DEPPATH += --dep-path machine/sim

@@ -112,10 +112,10 @@ fi
 if [ -z "$cpu" ]; then
   case $(uname -m) in
     arm64)
-      cpu=arm
+      cpu=arm64
       ;;
     aarch64)
-      cpu=arm
+      cpu=arm64
       ;;
     *)
       # Assume x86_64 as default
@@ -164,9 +164,9 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" -o "X$host" == "Xbsd" ]; then
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_BSD
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_LINUX
 
-    if [ "X$cpu" == "Xarm" ]; then
-      echo "  Select CONFIG_HOST_ARM=y"
-      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM
+    if [ "X$cpu" == "Xarm64" ]; then
+      echo "  Select CONFIG_HOST_ARM64=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM64
     fi
 
   elif [ "X$host" == "Xbsd" ]; then
@@ -181,9 +181,9 @@ if [ "X$host" == "Xlinux" -o "X$host" == "Xmacos" -o "X$host" == "Xbsd" ]; then
     kconfig-tweak --file $nuttx/.config --disable CONFIG_HOST_BSD
     kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_MACOS
 
-    if [ "X$cpu" == "Xarm" ]; then
-      echo "  Select CONFIG_HOST_ARM=y"
-      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM
+    if [ "X$cpu" == "Xarm64" ]; then
+      echo "  Select CONFIG_HOST_ARM64=y"
+      kconfig-tweak --file $nuttx/.config --enable CONFIG_HOST_ARM64
     fi
   fi
 

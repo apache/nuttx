@@ -49,6 +49,8 @@ else ifeq ($(CONFIG_HOST_X86),y)
   ASRCS += up_vfork_x86.S
 else ifeq ($(CONFIG_HOST_ARM),y)
   ASRCS += up_vfork_arm.S
+else ifeq ($(CONFIG_HOST_ARM64),y)
+  ASRCS += up_vfork_arm64.S
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
