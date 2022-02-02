@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools gen-romfs gperf kconfig-frontends arm-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain c-cache"
+    install="python-tools gen-romfs gperf kconfig-frontends arm-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
     ;;
 esac
 
@@ -288,6 +288,24 @@ function rx-gcc-toolchain {
   rx-elf-gcc --version
 }
 
+function sparc-gcc-toolchain {
+  add_path "${prebuilt}"/sparc-gaisler-elf-gcc/bin
+
+  if [ ! -f "${prebuilt}/sparc-gaisler-elf-gcc/bin/sparc-gaisler-elf-gcc" ]; then
+    case ${os} in
+      Linux)
+        cd "${prebuilt}"
+        wget --quiet https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz
+        xz -d bcc-2.1.0-gcc-linux64.tar.xz
+        tar xf bcc-2.1.0-gcc-linux64.tar
+        mv bcc-2.1.0-gcc sparc-gaisler-elf-gcc
+        rm bcc-2.1.0-gcc-linux64.tar
+        ;;
+    esac
+  fi
+  sparc-gaisler-elf-gcc --version
+}
+
 function c-cache {
   add_path "${prebuilt}"/ccache/bin
 
@@ -324,6 +342,8 @@ function c-cache {
   ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/xtensa-esp32-elf-gcc
   ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-gcc
   ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/avr-g++
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-gcc
+  ln -sf "$(which ccache)" "${prebuilt}"/ccache/bin/sparc-gaisler-elf-g++
 }
 
 function binutils {
