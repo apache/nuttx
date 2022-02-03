@@ -635,7 +635,7 @@ static void get_clipped_format(uint8_t              nr_fmt,
     }
   else
     {
-      memcpy(c_fmt, fmt, sizeof(video_format_t));
+      memcpy(c_fmt, fmt, nr_fmt * sizeof(video_format_t));
     }
 }
 
