@@ -2547,7 +2547,6 @@ FAR struct spi_dev_s *rx65n_rspibus_initialize(int bus)
 #endif
     {
       spierr("ERROR: Unsupported RSPI bus: %d\n", bus);
-      return NULL;
     }
 
   leave_critical_section(flags);

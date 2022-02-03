@@ -101,7 +101,7 @@ const struct file_operations g_nxterm_drvrops =
 static int nxterm_open(FAR struct file *filep)
 {
   FAR struct inode         *inode = filep->f_inode;
-  FAR struct nxterm_state_s *priv  = inode->i_private;
+  FAR struct nxterm_state_s *priv = inode->i_private;
 
   DEBUGASSERT(filep && filep->f_inode);
 

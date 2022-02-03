@@ -538,6 +538,7 @@ int imxrt_hprtc_setalarm(FAR struct timespec *ts, hprtc_alarm_callback_t cb)
   if ((uint32_t)ts->tv_sec <= now)
     {
       rtcwarn("WARNING: time is in the past\n");
+      spin_unlock_irqrestore(NULL, flags);
       return -EINVAL;
     }
 

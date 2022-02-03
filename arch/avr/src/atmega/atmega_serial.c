@@ -100,7 +100,6 @@ static int  usart0_attach(struct uart_dev_s *dev);
 static void usart0_detach(struct uart_dev_s *dev);
 static int  usart0_rxinterrupt(int irq, void *context, FAR void *arg);
 static int  usart0_txinterrupt(int irq, void *context, FAR void *arg);
-static int  usart0_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  usart0_receive(struct uart_dev_s *dev, FAR unsigned int *status);
 static void usart0_rxint(struct uart_dev_s *dev, bool enable);
 static bool usart0_rxavailable(struct uart_dev_s *dev);
@@ -117,7 +116,6 @@ static int  usart1_attach(struct uart_dev_s *dev);
 static void usart1_detach(struct uart_dev_s *dev);
 static int  usart1_rxinterrupt(int irq, void *context, FAR void *arg);
 static int  usart1_txinterrupt(int irq, void *context, FAR void *arg);
-static int  usart1_ioctl(struct file *filep, int cmd, unsigned long arg);
 static int  usart1_receive(struct uart_dev_s *dev, FAR unsigned int *status);
 static void usart1_rxint(struct uart_dev_s *dev, bool enable);
 static bool usart1_rxavailable(struct uart_dev_s *dev);
@@ -140,7 +138,6 @@ struct uart_ops_s g_usart0_ops =
   .shutdown       = usart0_shutdown,
   .attach         = usart0_attach,
   .detach         = usart0_detach,
-  .ioctl          = usart0_ioctl,
   .receive        = usart0_receive,
   .rxint          = usart0_rxint,
   .rxavailable    = usart0_rxavailable,
@@ -185,7 +182,6 @@ struct uart_ops_s g_usart1_ops =
   .shutdown       = usart1_shutdown,
   .attach         = usart1_attach,
   .detach         = usart1_detach,
-  .ioctl          = usart1_ioctl,
   .receive        = usart1_receive,
   .rxint          = usart1_rxint,
   .rxavailable    = usart1_rxavailable,
@@ -541,62 +537,6 @@ static int usart1_txinterrupt(int irq, void *context, FAR void *arg)
     }
 
   return OK;
-}
-#endif
-
-/****************************************************************************
- * Name: usart0/1_ioctl
- *
- * Description:
- *   All ioctl calls will be routed through this method
- *
- ****************************************************************************/
-
-#ifdef CONFIG_AVR_USART0
-static int usart0_ioctl(struct file *filep, int cmd, unsigned long arg)
-{
-#ifdef CONFIG_SERIAL_TERMIOS
-  int ret = OK;
-
-  switch (cmd)
-    {
-     case TCGETS:
-     case TCSETS:
-      break;
-
-    default:
-      ret = -ENOTTY;
-      break;
-    }
-
-  return ret;
-#else
-  return -ENOTTY;
-#endif
-}
-#endif
-
-#ifdef CONFIG_AVR_USART1
-static int usart1_ioctl(struct file *filep, int cmd, unsigned long arg)
-{
-#ifdef CONFIG_SERIAL_TERMIOS
-  int ret = OK;
-
-  switch (cmd)
-    {
-     case TCGETS:
-     case TCSETS:
-      break;
-
-    default:
-      ret = -ENOTTY;
-      break;
-    }
-
-  return ret;
-#else
-  return -ENOTTY;
-#endif
 }
 #endif
 

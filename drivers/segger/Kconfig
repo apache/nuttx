@@ -1,0 +1,68 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config SEGGER_RTT
+	bool
+	---help---
+		Enable Segger J-Link RTT libraries for platforms that support it.
+		Selection of this option enables use of RTT for various subsystems.
+		Note that by enabling this option, RTT buffers consume more RAM.
+
+if SEGGER_RTT
+
+config SEGGER_RTT_CPU_CACHE_LINE_SIZE
+	int "Segger RTT Cache Line Size"
+	default 0
+	---help---
+		Largest cache line size (in bytes) in the target system.
+
+config SEGGER_RTT_UNCACHED_OFF
+	int "Segger RTT uncached offset"
+	default 0
+	---help---
+		Address alias where RTT CB and buffers can be accessed uncached
+
+config SEGGER_RTT_MAX_NUM_UP_BUFFERS
+	int "Segger RTT Maximum Number of UP Buffers"
+	default 3
+	---help---
+		Number of up-buffers (T->H) available on this target
+
+config SEGGER_RTT_MAX_NUM_DOWN_BUFFERS
+	int "Segger RTT Maximum Number of Down Buffers"
+	default 3
+	---help---
+		Number of down-buffers (H->T) available on this target
+
+config SEGGER_RTT_BUFFER_SIZE_UP
+	int "Segger RTT UP Buffer Size"
+	default 1024 if SYSLOG_RTT
+	default 1 if !SYSLOG_RTT
+	---help---
+		Size of the buffer for terminal output of target, up to host
+
+config SEGGER_RTT_BUFFER_SIZE_DOWN
+	int "Segger RTT Down Buffer Size"
+	default 16
+	---help---
+		Size of the buffer for terminal input to target from host (Usually keyboard input)
+
+if SEGGER_SYSVIEW
+
+config SEGGER_SYSVIEW_RTT_BUFFER_SIZE
+	int "Segger System View buffer size"
+	default 1024
+	---help---
+		Number of bytes that SystemView uses for the RTT buffer.
+
+config SEGGER_SYSVIEW_RAM_BASE
+	int "Segger System View Ram Base"
+	default 0
+	---help---
+		The lowest RAM address used for IDs
+
+endif
+
+endif

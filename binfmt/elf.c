@@ -112,6 +112,8 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
   binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
   binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  textalign:    %zu\n",   loadinfo->textalign);
+  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
   binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   binfo("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);
@@ -132,8 +134,8 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  e_machine:    %04x\n",  loadinfo->ehdr.e_machine);
   binfo("  e_version:    %08x\n",  loadinfo->ehdr.e_version);
   binfo("  e_entry:      %08lx\n", (long)loadinfo->ehdr.e_entry);
-  binfo("  e_phoff:      %d\n",    loadinfo->ehdr.e_phoff);
-  binfo("  e_shoff:      %d\n",    loadinfo->ehdr.e_shoff);
+  binfo("  e_phoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_phoff);
+  binfo("  e_shoff:      %ju\n",   (uintmax_t)loadinfo->ehdr.e_shoff);
   binfo("  e_flags:      %08x\n" , loadinfo->ehdr.e_flags);
   binfo("  e_ehsize:     %d\n",    loadinfo->ehdr.e_ehsize);
   binfo("  e_phentsize:  %d\n",    loadinfo->ehdr.e_phentsize);
@@ -148,16 +150,16 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
         {
           FAR Elf_Shdr *shdr = &loadinfo->shdr[i];
           binfo("Sections %d:\n", i);
-          binfo("  sh_name:      %08x\n", shdr->sh_name);
-          binfo("  sh_type:      %08x\n", shdr->sh_type);
-          binfo("  sh_flags:     %08x\n", shdr->sh_flags);
-          binfo("  sh_addr:      %08x\n", shdr->sh_addr);
-          binfo("  sh_offset:    %d\n",   shdr->sh_offset);
-          binfo("  sh_size:      %d\n",   shdr->sh_size);
-          binfo("  sh_link:      %d\n",   shdr->sh_link);
-          binfo("  sh_info:      %d\n",   shdr->sh_info);
-          binfo("  sh_addralign: %d\n",   shdr->sh_addralign);
-          binfo("  sh_entsize:   %d\n",   shdr->sh_entsize);
+          binfo("  sh_name:      %08x\n",  shdr->sh_name);
+          binfo("  sh_type:      %08x\n",  shdr->sh_type);
+          binfo("  sh_flags:     %08jx\n", (uintmax_t)shdr->sh_flags);
+          binfo("  sh_addr:      %08jx\n", (uintmax_t)shdr->sh_addr);
+          binfo("  sh_offset:    %ju\n",   (uintmax_t)shdr->sh_offset);
+          binfo("  sh_size:      %ju\n",   (uintmax_t)shdr->sh_size);
+          binfo("  sh_link:      %d\n",    shdr->sh_link);
+          binfo("  sh_info:      %d\n",    shdr->sh_info);
+          binfo("  sh_addralign: %ju\n",   (uintmax_t)shdr->sh_addralign);
+          binfo("  sh_entsize:   %ju\n",   (uintmax_t)shdr->sh_entsize);
         }
     }
 }

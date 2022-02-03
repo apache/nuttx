@@ -72,13 +72,18 @@ enum symbol_e
   NSYMBOLS
 };
 
-struct tcbinfo_s
+__attribute__ ((packed)) struct tcbinfo_s
 {
   uint16_t pid_off;
   uint16_t state_off;
   uint16_t pri_off;
   uint16_t name_off;
   uint16_t reg_num;
+  union
+  {
+    uint8_t  u[8];
+    uint16_t *p;
+  } reg_off;
   uint16_t reg_offs[0];
 };
 
@@ -249,12 +254,21 @@ static int update_tcbinfo(struct plugin_priv_s *priv)
     {
       uint16_t reg_num;
       int ret;
+      uint32_t reg_off;
 
       ret = READU16(g_symbols[TCBINFO].address +
                     offsetof(struct tcbinfo_s, reg_num), &reg_num);
       if (ret != 0 || !reg_num)
         {
           PERROR("error reading regs ret %d\n", ret);
+          return ret;
+        }
+
+      ret = READU32(g_symbols[TCBINFO].address +
+                    offsetof(struct tcbinfo_s, reg_off), &reg_off);
+      if (ret != 0 || !reg_off)
+        {
+          PERROR("error in read regoffs address ret %d\n", ret);
           return ret;
         }
 
@@ -268,10 +282,18 @@ static int update_tcbinfo(struct plugin_priv_s *priv)
         }
 
       ret = READMEM(g_symbols[TCBINFO].address, (char *)priv->tcbinfo,
-                    sizeof(struct tcbinfo_s) + reg_num * sizeof(uint16_t));
-      if (ret != sizeof(struct tcbinfo_s) + reg_num * sizeof(uint16_t))
+                    sizeof(struct tcbinfo_s));
+      if (ret != sizeof(struct tcbinfo_s))
         {
           PERROR("error in read tcbinfo_s ret %d\n", ret);
+          return ret;
+        }
+
+      ret = READMEM(reg_off, (char *)&priv->tcbinfo->reg_offs[0],
+                    reg_num * sizeof(uint16_t));
+      if (ret != reg_num * sizeof(uint16_t))
+        {
+          PERROR("error in read tcbinfo_s reg_offs ret %d\n", ret);
           return ret;
         }
 

@@ -418,6 +418,11 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
 
   start &= ~(XCHAL_DCACHE_LINESIZE - 1);
 
+  if ((end - start) >= XCHAL_DCACHE_SIZE)
+    {
+      return up_clean_dcache_all();
+    }
+
   for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {
       __asm__ __volatile__ ("dhwb %0, 0\n" : : "r"(start));
@@ -494,6 +499,11 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
   /* Align to XCHAL_DCACHE_LINESIZE */
 
   start &= ~(XCHAL_DCACHE_LINESIZE - 1);
+
+  if ((end - start) >= XCHAL_DCACHE_SIZE)
+    {
+      return up_clean_dcache_all();
+    }
 
   for (; start < end; start += XCHAL_DCACHE_LINESIZE)
     {

@@ -422,28 +422,99 @@ endchoice
 
 endif
 
+menu "Simulated UART"
+
 config SIM_UART_NUMBER
-	int "The number of tty ports on sim platform, range is 0~4"
+	int "Number of simulated UART ports"
 	default 0
+	range 0 4
+	---help---
+		Under simulation, a NuttX port can be bound to a serial
+		port on the host machine. This way NuttX can access the
+		host's hardware directly.
+				
+		There are two possibilities regarding the host's port:
+		it can be either a physical one, or a simulated one.
+		
+		In case of a physical port, NuttX will be able to open
+		this port and communicate with any actual hardware that
+		it is connected to. This is useful for testing code that
+		uses external hardware (e.g. sensors or other boards).
+		In order for this to work, NuttX port name must be set to
+		the same name that the host is using for this port (e.g.
+		/dev/ttyUSB0).
+		
+		Alternativelly, a "simulated" host port may be used to.
+		This is useful if you need to also simulate the external
+		hardware, or to have NuttX communicate with any other
+		software in your system.
+		You can create a "simulated" port in your host,
+		by running:
+		
+			socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
+		 	stty -F /dev/ttySIM0 raw
+		 	stty -F /dev/ttyNX0 raw
+		
+		This will create two new ports on your system.
+		NuttX will use the ttySIM0 port, and another software
+		may open and use the ttyNX0 port.
+		Anything sent to the one of these ports will be relayed
+		automatically to the other, and vice-versa.
+
+config SIM_UART_BUFFER_SIZE
+	int "UART buffer size"
+	default 256
+	depends on SIM_UART_NUMBER >= 1
+	---help---
+		The size of the transmit and receive buffers of the
+		simulated UART ports.
+		
+		Note that all ports will have the same buffer size.
 
 config SIM_UART0_NAME
-	string "the name of uart0 on sim"
+	string "UART port 0 name"
 	default "/dev/ttySIM0"
 	depends on SIM_UART_NUMBER >= 1
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART1_NAME
-	string "the name of uart1 on sim"
+	string "UART port 1 name"
 	default "/dev/ttySIM1"
 	depends on SIM_UART_NUMBER >= 2
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART2_NAME
-	string "the name of uart2 on sim"
+	string "UART port 2 name"
 	default "/dev/ttySIM2"
 	depends on SIM_UART_NUMBER >= 3
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART3_NAME
-	string "the name of uart3 on sim"
+	string "UART port 3 name"
 	default "/dev/ttySIM3"
 	depends on SIM_UART_NUMBER >= 4
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
+
+endmenu
 
 endif # ARCH_SIM

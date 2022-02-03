@@ -256,10 +256,14 @@ static void set_ethaddr(struct in_addr addr)
  * Public Functions
  ****************************************************************************/
 
-void wpcap_init(void)
+void wpcap_init(void *priv,
+                void (*tx_done_intr_cb)(void *priv),
+                void (*rx_ready_intr_cb)(void *priv))
 {
   struct in_addr addr;
   FARPROC dlladdr;
+
+  /* TODO: support emulation of TX done and RX ready interrupts */
 
   addr.s_addr = HTONL(WCAP_IPADDR);
   syslog(LOG_INFO, "wpcap_init: IP address: %s\n", inet_ntoa(addr));

@@ -34,12 +34,9 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/rptun/openamp.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 #include <nuttx/wqueue.h>
-#include <nuttx/compiler.h>
 
-#include "syslog.h"
 #include "syslog_rpmsg.h"
 
 /****************************************************************************
@@ -327,8 +324,6 @@ int syslog_rpmsg_putc(FAR struct syslog_channel_s *channel, int ch)
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
 
-  UNUSED(channel);
-
   flags = enter_critical_section();
   syslog_rpmsg_putchar(priv, ch, true);
   leave_critical_section(flags);
@@ -341,8 +336,6 @@ int syslog_rpmsg_flush(FAR struct syslog_channel_s *channel)
 #if defined(CONFIG_ARCH_LOWPUTC)
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
-
-  UNUSED(channel);
 
   flags = enter_critical_section();
 
@@ -368,8 +361,6 @@ ssize_t syslog_rpmsg_write(FAR struct syslog_channel_s *channel,
   FAR struct syslog_rpmsg_s *priv = &g_syslog_rpmsg;
   irqstate_t flags;
   size_t nwritten;
-
-  UNUSED(channel);
 
   flags = enter_critical_section();
   for (nwritten = 1; nwritten <= buflen; nwritten++)

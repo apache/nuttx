@@ -2306,7 +2306,7 @@ static int mmcsd_ioctl(FAR struct inode *inode, int cmd, unsigned long arg)
 
   finfo("Entry\n");
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (FAR struct mmcsd_state_s *)inode->i_private;
+  priv = (FAR struct mmcsd_state_s *)inode->i_private;
 
   /* Process the IOCTL by command */
 

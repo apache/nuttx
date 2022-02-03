@@ -92,8 +92,11 @@
 cp15_invalidate_dcache_all:
 
 	mrc		CP15_CCSIDR(r0)			/* Read the Cache Size Identification Register */
-	ldr		r3, =0xffff			/* Isolate the NumSets field (bits 13-27) */
+	ldr		r3, =0x7fff			/* Isolate the NumSets field (bits 13-27) */
 	and		r0, r3, r0, lsr #13		/* r0=NumSets (number of sets - 1) */
+
+	ldr		r3, =0x3ff			/* Isolate the way field (bits 3-12) */
+	add		r4, r3, r0, lsr #3		/* r4=(number of ways - 1) */
 
 	mov		r1, #0				/* r1 = way loop counter */
 way_loop:
@@ -108,7 +111,7 @@ set_loop:
 	bne		set_loop			/* Keep looping if not */
 
 	add		r1, r1, #1			/* Increment the way counter */
-	cmp		r1, #4				/* Last way? (four ways assumed) */
+	cmp		r4, r1				/* Last way? */
 	bne		way_loop			/* Keep looping if not */
 
 	dsb

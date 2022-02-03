@@ -323,13 +323,25 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
 
-  /* Check RX data availability and read the data from the network device now
-   * to prevent RX data stream congestion in case of high TX network traffic.
-   */
-
-  netdriver_loop();
-
   return OK;
+}
+
+static void netdriver_txdone_interrupt(FAR void *priv)
+{
+  if (work_available(&g_avail_work))
+    {
+      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
+    }
+}
+
+static void netdriver_rxready_interrupt(FAR void *priv)
+{
+  if (work_available(&g_recv_work))
+    {
+      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      work_queue(LPWORK, &g_recv_work, netdriver_recv_work, dev, 0);
+    }
 }
 
 /****************************************************************************
@@ -344,7 +356,9 @@ int netdriver_init(void)
 
   /* Internal initialization */
 
-  netdev_init();
+  netdev_init(dev,
+              netdriver_txdone_interrupt,
+              netdriver_rxready_interrupt);
 
   /* Update the buffer size */
 

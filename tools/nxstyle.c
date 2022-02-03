@@ -249,6 +249,39 @@ static const char *g_white_list[] =
   "_Erom",
 
   /* Ref:
+   * arch/sim/src/sim/up_wpcap.c
+   */
+
+  "Address",
+  "Description",
+  "FirstUnicastAddress",
+  "GetAdaptersAddresses",
+  "GetProcAddress",
+  "LoadLibrary",
+  "lpSockaddr",
+  "Next",
+  "PhysicalAddressLength",
+  "PhysicalAddress",
+  "WideCharToMultiByte",
+
+  /* Ref:
+   * drivers/segger/note_sysview.c
+   */
+
+  "SEGGER_SYSVIEW",
+  "TaskID",
+  "sName",
+  "Prio",
+  "StackBase",
+  "StackSize",
+
+  /* Ref:
+   * drivers/segger/syslog_rtt.c
+   */
+
+  "SEGGER_RTT",
+
+  /* Ref:
    * fs/nfs/rpc.h
    * fs/nfs/nfs_proto.h
    * fs/nfs/nfs_mount.h

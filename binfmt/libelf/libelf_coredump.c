@@ -247,7 +247,7 @@ static void elf_emit_note_info(FAR struct elf_dumpinfo_s *cinfo)
       for (j = 0; j < ARRAY_SIZE(status.pr_regs); j++)
         {
           status.pr_regs[j] = *(uintptr_t *)((uint8_t *)tcb +
-                                             g_tcbinfo.reg_offs[j]);
+                                             g_tcbinfo.reg_off.p[j]);
         }
 
       elf_emit(cinfo, &status, sizeof(status));
