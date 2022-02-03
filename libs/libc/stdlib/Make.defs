@@ -34,10 +34,7 @@ CSRCS += lib_mbstowcs.c lib_wcstombs.c
 endif
 
 ifeq ($(CONFIG_PSEUDOTERM),y)
-CSRCS += lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c
-ifeq ($(CONFIG_SERIAL_TERMIOS),y)
-CSRCS += lib_openpty.c
-endif
+CSRCS += lib_ptsname.c lib_ptsnamer.c lib_unlockpt.c lib_openpty.c
 endif
 
 # Add the stdlib directory to the build
