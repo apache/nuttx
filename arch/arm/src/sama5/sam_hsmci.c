@@ -2261,6 +2261,7 @@ static int sam_sendsetup(FAR struct sdio_dev_s *dev,
 
           lcderr("ERROR: sr %08" PRIx32 "\n", sr);
           leave_critical_section(flags);
+          sched_unlock();
           return -EIO;
         }
       else if ((sr & HSMCI_INT_TXRDY) != 0)

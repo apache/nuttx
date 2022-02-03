@@ -237,6 +237,8 @@ static CXD56_AUDIO_ECODE exec_dma_ch_sync_workaround(
 
       if (timeout_cnt == DMA_TIMEOUT_CNT)
         {
+          sched_unlock();
+          up_irq_enable();
           return CXD56_AUDIO_ECODE_DMA_SMP_TIMEOUT;
         }
 
