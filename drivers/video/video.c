@@ -626,11 +626,13 @@ static void get_clipped_format(uint8_t              nr_fmt,
                  &fmt[VIDEO_FMT_SUB],
                  sizeof(video_format_t));
 
-          c_fmt[VIDEO_FMT_SUB].width *= clip->width;
-          c_fmt[VIDEO_FMT_SUB].width /= fmt[VIDEO_FMT_MAIN].width;
+          c_fmt[VIDEO_FMT_SUB].width
+            = (uint32_t)c_fmt[VIDEO_FMT_SUB].width
+              * clip->width / fmt[VIDEO_FMT_MAIN].width;
 
-          c_fmt[VIDEO_FMT_SUB].height *= clip->height;
-          c_fmt[VIDEO_FMT_SUB].height /= fmt[VIDEO_FMT_MAIN].height;
+          c_fmt[VIDEO_FMT_SUB].height
+            = (uint32_t)c_fmt[VIDEO_FMT_SUB].height
+              * clip->height / fmt[VIDEO_FMT_MAIN].height;
         }
     }
   else
