@@ -18,12 +18,6 @@
 #
 ############################################################################
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)flat-template.ld),)
-  LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)flat-template.ld
-else
-  LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)flat-template.ld
-endif
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif

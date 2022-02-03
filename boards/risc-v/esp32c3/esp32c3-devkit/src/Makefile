@@ -20,10 +20,6 @@
 
 include $(TOPDIR)/Make.defs
 
-SCRIPTDIR = $(BOARD_DIR)$(DELIM)scripts
-
-CONFIGFILE = $(TOPDIR)$(DELIM)include$(DELIM)nuttx$(DELIM)config.h
-
 CSRCS = esp32c3_boot.c esp32c3_bringup.c
 
 ifeq ($(CONFIG_BOARDCTL),y)
@@ -108,18 +104,5 @@ ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
   RCRAWS = etc/group etc/passwd
 endif
 endif
-
-SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
-SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
-
-.PHONY = context distclean
-
-$(SCRIPTOUT): $(SCRIPTIN) $(CONFIGFILE)
-	$(Q) $(CC) -isystem $(TOPDIR)/include -I $(BOARD_DIR)/scripts -C -P -x c -E $(SCRIPTIN) -o $@
-
-context:: $(SCRIPTOUT)
-
-distclean::
-	$(call DELFILE, $(SCRIPTOUT))
 
 include $(TOPDIR)/boards/Board.mk

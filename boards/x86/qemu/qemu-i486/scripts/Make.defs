@@ -31,6 +31,8 @@ endif
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
 
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
+
 ARCHCPUFLAGS = -march=i486 -mtune=i486 -fno-builtin -fno-stack-protector
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef

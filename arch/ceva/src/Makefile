@@ -66,6 +66,8 @@ COBJS = $(CSRCS:.c=$(OBJEXT))
 SRCS = $(ASRCS) $(CSRCS)
 OBJS = $(AOBJS) $(COBJS)
 
+LDFLAGS += $(ARCHSCRIPT_CLI)
+
 # User-mode objects
 
 UASRCS = $(CHIP_UASRCS) $(CMN_UASRCS)

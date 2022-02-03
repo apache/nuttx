@@ -19,6 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+include $(TOPDIR)/tools/Config.mk
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_ARMV7A),y)          # ARMv7-A
@@ -206,6 +207,9 @@ endif
 	$(call DELFILE, $(BIN))
 ifneq ($(EXTRADELFILE),)
 	$(call DELFILE, $(EXTRADELFILE))
+endif
+ifneq ($(ARCHSCRIPT_PREPROCESS_OUTPUT),)
+	$(call DELFILE, $(ARCHSCRIPT_PREPROCESS_OUTPUT))
 endif
 	$(call CLEAN)
 

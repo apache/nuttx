@@ -51,3 +51,5 @@ uImage
 .context
 # $(TOPDIR)/Makefile.[unix|win]::$(DIRLINKS_EXTERNAL_DIRS)
 .dirlinks
+# linkerscripts that have been run through the preprocessor (ARCHSCRIPT_PREPROCESS)
+*.out.ld

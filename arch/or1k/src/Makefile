@@ -19,6 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+include $(TOPDIR)/tools/Config.mk
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_MOR1KX),y)          # OpenRISC mor1kx
@@ -170,6 +171,9 @@ context::
 clean:
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board clean
+endif
+ifneq ($(ARCHSCRIPT_PREPROCESS_OUTPUT),)
+	$(call DELFILE, $(ARCHSCRIPT_PREPROCESS_OUTPUT))
 endif
 	$(call DELFILE, $(KBIN))
 	$(call DELFILE, $(BIN))

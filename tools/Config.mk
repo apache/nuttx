@@ -252,7 +252,7 @@ endif
 # <filename>.S)
 
 define PREPROCESS
-	@echo "CPP: $1->$2"
+	@echo "CPP: $(1) -> $(2)"
 	$(Q) $(CPP) $(CPPFLAGS) $($(strip $1)_CPPFLAGS) $1 -o $2
 endef
 

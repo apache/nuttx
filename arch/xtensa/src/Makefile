@@ -19,6 +19,7 @@
 ############################################################################
 
 include $(TOPDIR)/Make.defs
+include $(TOPDIR)/tools/Config.mk
 include chip/Make.defs
 
 ifeq ($(CONFIG_ARCH_FAMILY_LX6),y)
@@ -158,6 +159,9 @@ endif
 distclean:: clean
 ifeq ($(BOARDMAKE),y)
 	$(Q) $(MAKE) -C board distclean
+endif
+ifneq ($(ARCHSCRIPT_PREPROCESS_OUTPUT),)
+	$(call DELFILE, $(ARCHSCRIPT_PREPROCESS_OUTPUT))
 endif
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)

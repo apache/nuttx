@@ -41,6 +41,7 @@ else
 	endif
 endif
 
+<<<<<<< HEAD
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld),)
 	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 else
@@ -51,6 +52,15 @@ ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
 	LDSCRIPT_TEMPLATE = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
 else
 	LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+=======
+# This is the generated memory layout linker script.  It will always be
+# generated at the board level.
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
+	ARCHSCRIPT_PREPROCESS += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+else
+	ARCHSCRIPT_PREPROCESS += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
+>>>>>>> 5bcad556ad (squashme: remove -T from ARCHSCRIPTS, create ARCHSCRIPTS_PREPROCESS)
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
