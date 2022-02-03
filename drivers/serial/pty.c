@@ -298,6 +298,7 @@ static int pty_open(FAR struct file *filep)
           ret = nxsem_wait(&devpair->pp_slavesem);
           if (ret < 0)
             {
+              sched_unlock();
               return ret;
             }
 
@@ -308,6 +309,7 @@ static int pty_open(FAR struct file *filep)
           ret = pty_semtake(devpair);
           if (ret < 0)
             {
+              sched_unlock();
               return ret;
             }
 
@@ -335,7 +337,7 @@ static int pty_open(FAR struct file *filep)
       ret = pty_semtake(devpair);
       if (ret < 0)
         {
-          goto errout_with_sem;
+          return ret;
         }
     }
 
@@ -362,7 +364,6 @@ static int pty_open(FAR struct file *filep)
       ret = OK;
     }
 
-errout_with_sem:
   pty_semgive(devpair);
   return ret;
 }
