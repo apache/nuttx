@@ -16,3 +16,7 @@
 # x86_64-elf-gcc from homebrew doesn't seem to
 # provide __udivdi3 etc for -m32
 /x86_64
+
+# Sparc-gaisler-elf toolchain doesn't provide macOS binaries
+/sparc
+-xx3823:nsh
