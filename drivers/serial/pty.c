@@ -120,14 +120,10 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
-
 #ifdef CONFIG_SERIAL_TERMIOS
-  /* Terminal control flags */
-
-  tcflag_t pd_iflag;            /* Terminal nput modes */
-  tcflag_t pd_oflag;            /* Terminal output modes */
+  tcflag_t pd_iflag;            /* Terminal input modes */
 #endif
-
+  tcflag_t pd_oflag;            /* Terminal output modes */
   struct pty_poll_s pd_poll[CONFIG_DEV_PTY_NPOLLWAITERS];
 };
 
@@ -608,18 +604,15 @@ static ssize_t pty_write(FAR struct file *filep,
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
-#ifdef CONFIG_SERIAL_TERMIOS
   ssize_t nwritten;
   size_t i;
   char ch;
-#endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Do output post-processing */
 
   if ((dev->pd_oflag & OPOST) != 0)
@@ -694,7 +687,6 @@ static ssize_t pty_write(FAR struct file *filep,
         }
     }
   else
-#endif
     {
       /* Write the 'len' bytes to the sink pipe.  This will block until all
        * 'len' bytes have been written to the pipe.
@@ -1103,9 +1095,7 @@ int pty_register(int minor)
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
   devpair->pp_slave.pd_devpair  = devpair;
-#ifdef CONFIG_SERIAL_TERMIOS
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
-#endif
 
   /* Create two pipes:
    *
