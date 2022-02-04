@@ -39,6 +39,14 @@
 
 #include "same70-qmtech.h"
 
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+#  include <nuttx/input/buttons.h>
+#else
+#  include <nuttx/board.h>
+#endif
+#endif
+
 #ifdef HAVE_HSMCI
 #  include "board_hsmci.h"
 #endif /* HAVE_HSMCI */
@@ -93,6 +101,23 @@ int sam_bringup(void)
              SAME70_PROCFS_MOUNTPOINT, ret);
     }
 #endif
+
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Enable BUTTON support for some other purpose */
+
+  board_button_initialize();
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS */
 
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI0 driver */
