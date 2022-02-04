@@ -6,6 +6,7 @@
 # modifications.
 #
 # CONFIG_DISABLE_MQUEUE is not set
+# CONFIG_DISABLE_PTHREAD is not set
 CONFIG_ADC=y
 CONFIG_ADC_FIFOSIZE=3
 CONFIG_ANALOG=y
