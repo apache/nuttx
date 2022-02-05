@@ -210,7 +210,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
     {
       delay = 1;
     }
-  else if (++delay <= 0)
+  else if ((delay + 1) <= 0)
     {
       delay--;
     }
