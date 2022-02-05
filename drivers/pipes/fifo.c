@@ -39,7 +39,7 @@
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations fifo_fops =
+static const struct file_operations g_fifo_fops =
 {
   pipecommon_open,     /* open */
   pipecommon_close,    /* close */
@@ -104,7 +104,7 @@ int nx_mkfifo(FAR const char *pathname, mode_t mode, size_t bufsize)
       return -ENOMEM;
     }
 
-  ret = register_driver(pathname, &fifo_fops, mode, (FAR void *)dev);
+  ret = register_driver(pathname, &g_fifo_fops, mode, (FAR void *)dev);
   if (ret != 0)
     {
       pipecommon_freedev(dev);
