@@ -54,15 +54,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************
- *
- * CONFIG_FS_AUTOMOUNTER - Enables AUTOMOUNT support
- */
-
-#ifndef CONFIG_FS_AUTOMOUNTER_VFS_PATH
-#  define CONFIG_FS_AUTOMOUNTER_VFS_PATH "/var"
-#endif
-
 /* Pre-requisites */
 
 #ifndef CONFIG_SCHED_WORKQUEUE
