@@ -174,7 +174,7 @@ static int pipe_register(size_t bufsize, int flags,
 
   /* Create a pathname to the pipe device */
 
-  snprintf(devname, namesize, "/dev/pipe%d", pipeno);
+  snprintf(devname, namesize, CONFIG_DEV_PIPE_VFS_PATH"/%d", pipeno);
 
   /* Check if the pipe device has already been created */
 
