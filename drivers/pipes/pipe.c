@@ -59,7 +59,7 @@ static int pipe_close(FAR struct file *filep);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations pipe_fops =
+static const struct file_operations g_pipe_fops =
 {
   pipecommon_open,   /* open */
   pipe_close,        /* close */
@@ -193,7 +193,7 @@ static int pipe_register(size_t bufsize, int flags,
 
       /* Register the pipe device */
 
-      ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
+      ret = register_driver(devname, &g_pipe_fops, 0666, (FAR void *)dev);
       if (ret != 0)
         {
           nxsem_post(&g_pipesem);
