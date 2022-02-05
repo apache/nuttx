@@ -1104,7 +1104,6 @@ int pty_register(int minor)
   devpair->pp_master.pd_master  = true;
   devpair->pp_slave.pd_devpair  = devpair;
 #ifdef CONFIG_SERIAL_TERMIOS
-  devpair->pp_slave.pd_iflag    = ISIG;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
 #endif
 
