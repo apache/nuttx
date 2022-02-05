@@ -14,8 +14,7 @@ if PIPES
 
 config DEV_PIPE_MAXSIZE
 	int "Maximum pipe/FIFO size"
-	default 1024 if !DEFAULT_SMALL
-	default 256 if DEFAULT_SMALL
+	default 65535
 	---help---
 		Maximum configurable size of a pipe or FIFO at runtime.
 
