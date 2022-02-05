@@ -520,14 +520,14 @@ struct stm32_fdcan_s
   const struct stm32_config_s *config;
 
   uint8_t state;            /* See enum can_state_s */
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   uint8_t nextalloc;        /* Number of allocated extended filters */
 #endif
   uint8_t nstdalloc;        /* Number of allocated standard filters */
   uint32_t nbtp;            /* Current nominal bit timing */
   uint32_t dbtp;            /* Current data bit timing */
 
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   uint32_t extfilters[2];   /* Extended filter bit allocator.  2*32=64 */
 #endif
   uint32_t stdfilters[4];   /* Standard filter bit allocator.  4*32=128 */
@@ -1718,7 +1718,7 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
    *   Extended Identifier (XTD)         - Depends on configuration.
    */
 
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   if (frame->can_id & CAN_EFF_FLAG)
     {
       DEBUGASSERT(frame->can_id < (1 << 29));
@@ -2409,7 +2409,7 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
       frame->can_id |= CAN_RTR_FLAG;
     }
 
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   if ((regval & BUFFER_R0_XTD) != 0)
     {
       /* Save the extended ID of the newly received message */
