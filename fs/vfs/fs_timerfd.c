@@ -531,7 +531,11 @@ static void timerfd_timeout(wdparm_t idev)
 
   if (dev->delay)
     {
-      wd_start(&dev->wdog, dev->delay, timerfd_timeout, idev);
+      /* We have to subtract 1 tick because wd_start() will add 1 tick
+       * unconditionally
+       */
+
+      wd_start(&dev->wdog, dev->delay - 1, timerfd_timeout, idev);
     }
 
   spin_unlock_irqrestore(&dev->lock, intflags);
