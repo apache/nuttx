@@ -255,6 +255,7 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
   /* And free the device structure */
 
   nxsem_destroy(&devpair->pp_exclsem);
+  nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
 }
 #endif
