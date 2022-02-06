@@ -149,14 +149,10 @@ struct pty_devpair_s
  ****************************************************************************/
 
 static int     pty_semtake(FAR struct pty_devpair_s *devpair);
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    pty_destroy(FAR struct pty_devpair_s *devpair);
-#endif
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
 static int     pty_close(FAR struct file *filep);
-#endif
 static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
@@ -174,13 +170,8 @@ static int     pty_unlink(FAR struct inode *inode);
 
 static const struct file_operations g_pty_fops =
 {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pty_open,      /* open */
   pty_close,     /* close */
-#else
-  NULL,          /* open */
-  NULL,          /* close */
-#endif
   pty_read,      /* read */
   pty_write,     /* write */
   NULL,          /* seek */
@@ -214,7 +205,6 @@ static int pty_semtake(FAR struct pty_devpair_s *devpair)
  * Name: pty_destroy
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void pty_destroy(FAR struct pty_devpair_s *devpair)
 {
   char devname[16];
@@ -235,13 +225,6 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 #endif
   unregister_driver(devname);
 
-  /* Close the contained file structures */
-
-  file_close(&devpair->pp_master.pd_src);
-  file_close(&devpair->pp_master.pd_sink);
-  file_close(&devpair->pp_slave.pd_src);
-  file_close(&devpair->pp_slave.pd_sink);
-
 #ifdef CONFIG_PSEUDOTERM_SUSV1
   /* Free this minor number so that it can be reused */
 
@@ -254,19 +237,55 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
   nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
 }
-#endif
+
+/****************************************************************************
+ * Name: pty_pipe
+ ****************************************************************************/
+
+static int pty_pipe(FAR struct pty_devpair_s *devpair)
+{
+  FAR struct file *pipe_a[2];
+  FAR struct file *pipe_b[2];
+  int ret;
+
+  /* Create two pipes:
+   *
+   *   pipe_a:  Master source, slave sink (TX, slave-to-master)
+   *   pipe_b:  Master sink, slave source (RX, master-to-slave)
+   */
+
+  pipe_a[0] = &devpair->pp_master.pd_src;
+  pipe_a[1] = &devpair->pp_slave.pd_sink;
+
+  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  pipe_b[0] = &devpair->pp_slave.pd_src;
+  pipe_b[1] = &devpair->pp_master.pd_sink;
+
+  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
+  if (ret < 0)
+    {
+      file_close(pipe_a[0]);
+      file_close(pipe_a[1]);
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: pty_open
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pty_open(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
   FAR struct pty_devpair_s *devpair;
-  int ret;
+  int ret = OK;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode   = filep->f_inode;
@@ -337,24 +356,32 @@ static int pty_open(FAR struct file *filep)
   else
 #endif
     {
+      /* First open? */
+
+      if (devpair->pp_nopen == 0)
+        {
+          /* Yes, create the internal pipe */
+
+          ret = pty_pipe(devpair);
+        }
+
       /* Increment the count of open references on the driver */
 
-      devpair->pp_nopen++;
-      DEBUGASSERT(devpair->pp_nopen > 0);
-
-      ret = OK;
+      if (ret >= 0)
+        {
+          devpair->pp_nopen++;
+          DEBUGASSERT(devpair->pp_nopen > 0);
+        }
     }
 
   pty_semgive(devpair);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: pty_open
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pty_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
@@ -390,6 +417,16 @@ static int pty_close(FAR struct file *filep)
     }
 #endif
 
+  /* Check if the decremented inode reference count would go to zero */
+
+  if (inode->i_crefs == 1)
+    {
+      /* Close the contained file structures */
+
+      file_close(&dev->pd_src);
+      file_close(&dev->pd_sink);
+    }
+
   /* Is this the last open reference?  If so, was the driver previously
    * unlinked?
    */
@@ -412,7 +449,6 @@ static int pty_close(FAR struct file *filep)
   pty_semgive(devpair);
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: pty_read
@@ -1047,8 +1083,6 @@ static int pty_unlink(FAR struct inode *inode)
 int pty_register(int minor)
 {
   FAR struct pty_devpair_s *devpair;
-  FAR struct file *pipe_a[2];
-  FAR struct file *pipe_b[2];
   char devname[16];
   int ret;
 
@@ -1080,30 +1114,6 @@ int pty_register(int minor)
   devpair->pp_slave.pd_devpair  = devpair;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
 
-  /* Create two pipes:
-   *
-   *   pipe_a:  Master source, slave sink (TX, slave-to-master)
-   *   pipe_b:  Master sink, slave source (RX, master-to-slave)
-   */
-
-  pipe_a[0] = &devpair->pp_master.pd_src;
-  pipe_a[1] = &devpair->pp_slave.pd_sink;
-
-  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
-  if (ret < 0)
-    {
-      goto errout_with_devpair;
-    }
-
-  pipe_b[0] = &devpair->pp_slave.pd_src;
-  pipe_b[1] = &devpair->pp_master.pd_sink;
-
-  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
-  if (ret < 0)
-    {
-      goto errout_with_pipea;
-    }
-
   /* Register the master device
    *
    * BSD style (deprecated): /dev/ptyN
@@ -1117,7 +1127,7 @@ int pty_register(int minor)
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
     {
-      goto errout_with_pipeb;
+      goto errout_with_devpair;
     }
 
   /* Register the slave device
@@ -1145,14 +1155,6 @@ int pty_register(int minor)
 errout_with_master:
   snprintf(devname, 16, "/dev/pty%d", minor);
   unregister_driver(devname);
-
-errout_with_pipeb:
-  file_close(pipe_b[0]);
-  file_close(pipe_b[1]);
-
-errout_with_pipea:
-  file_close(pipe_a[0]);
-  file_close(pipe_a[1]);
 
 errout_with_devpair:
   nxsem_destroy(&devpair->pp_exclsem);
