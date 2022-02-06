@@ -299,6 +299,8 @@ void ptmx_minor_free(uint8_t minor)
   int index;
   int bitno;
 
+  nxsem_wait_uninterruptible(&g_ptmx.px_exclsem);
+
   /* Free the address by clearing the associated bit in the px_alloctab[]; */
 
   index = minor >> 5;
@@ -313,4 +315,6 @@ void ptmx_minor_free(uint8_t minor)
     {
       g_ptmx.px_next = minor;
     }
+
+  nxsem_post(&g_ptmx.px_exclsem);
 }
