@@ -278,20 +278,28 @@ static int pty_open(FAR struct file *filep)
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
   devpair = dev->pd_devpair;
 
+  /* Get exclusive access to the device structure */
+
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
   /* Wait if this is an attempt to open the slave device and the slave
    * device is locked.
    */
 
   if (!dev->pd_master)
     {
-      /* Slave... Check if the slave driver is locked.  We need to lock the
-       * scheduler while we are running to prevent asyncrhonous modification
-       * of pp_locked by pty_ioctl().
-       */
+      /* Slave... Check if the slave driver is locked. */
 
-      sched_lock();
       while (devpair->pp_locked)
         {
+          /* Release the exclusive access before wait */
+
+          pty_semgive(devpair);
+
           /* Wait until unlocked.
            * We will also most certainly suspend here.
            */
@@ -299,9 +307,12 @@ static int pty_open(FAR struct file *filep)
           ret = nxsem_wait(&devpair->pp_slavesem);
           if (ret < 0)
             {
-              sched_unlock();
               return ret;
             }
+
+          /* Restore the semaphore count */
+
+          DEBUGVERIFY(nxsem_post(&devpair->pp_slavesem));
 
           /* Get exclusive access to the device structure.  This might also
            * cause suspension.
@@ -310,35 +321,8 @@ static int pty_open(FAR struct file *filep)
           ret = pty_semtake(devpair);
           if (ret < 0)
             {
-              sched_unlock();
               return ret;
             }
-
-          /* Check again in case something happened asynchronously while we
-           * were suspended.
-           */
-
-          if (devpair->pp_locked)
-            {
-              /* This cannot suspend because we have the scheduler locked.
-               * So pp_locked cannot change asyncrhonously between this test
-               * and the redundant test at the top of the loop.
-               */
-
-              pty_semgive(devpair);
-            }
-        }
-
-      sched_unlock();
-    }
-  else
-    {
-      /* Master ... Get exclusive access to the device structure */
-
-      ret = pty_semtake(devpair);
-      if (ret < 0)
-        {
-          return ret;
         }
     }
 
@@ -785,35 +769,26 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           if (arg == 0)
             {
-               int sval;
+              if (devpair->pp_locked)
+                {
+                  /* Release any waiting threads */
 
-               /* Unlocking */
-
-               sched_lock();
-               devpair->pp_locked = false;
-
-               /* Release any waiting threads */
-
-               do
-                 {
-                   DEBUGVERIFY(nxsem_get_value(&devpair->pp_slavesem,
-                                               &sval));
-                   if (sval < 0)
-                     {
-                       nxsem_post(&devpair->pp_slavesem);
-                     }
-                 }
-               while (sval < 0);
-
-               sched_unlock();
-               ret = OK;
+                  ret = nxsem_post(&devpair->pp_slavesem);
+                  if (ret >= 0)
+                    {
+                      devpair->pp_locked = false;
+                    }
+                }
             }
-          else
+          else if (!devpair->pp_locked)
             {
               /* Locking */
 
-               devpair->pp_locked = true;
-               ret = OK;
+              ret = nxsem_wait(&devpair->pp_slavesem);
+              if (ret >= 0)
+                {
+                  devpair->pp_locked = true;
+                }
             }
         }
         break;
@@ -827,7 +802,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              *ptr = (int)devpair->pp_locked;
+              *ptr = devpair->pp_locked;
               ret = OK;
             }
         }
