@@ -134,12 +134,11 @@ struct pty_devpair_s
   struct pty_dev_s pp_master;   /* Maseter device */
   struct pty_dev_s pp_slave;    /* Slave device */
 
+  bool pp_susv1;                /* SUSv1 or BSD style */
   bool pp_locked;               /* Slave is locked */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   bool pp_unlinked;             /* File has been unlinked */
   uint8_t pp_minor;             /* Minor device number */
   uint16_t pp_nopen;            /* Open file count */
-#endif
   sem_t pp_slavesem;            /* Slave lock semaphore */
   sem_t pp_exclsem;             /* Mutual exclusion */
 };
@@ -209,27 +208,31 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 {
   char devname[16];
 
-  /* Un-register the master device (/dev/ptyN may have already been
-   * unlinked).
-   */
+  if (devpair->pp_susv1)
+    {
+      /* Free this minor number so that it can be reused */
 
-  snprintf(devname, 16, "/dev/pty%d", devpair->pp_minor);
+      ptmx_minor_free(devpair->pp_minor);
+
+      /* Un-register the slave device */
+
+      snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
+    }
+  else
+    {
+      /* Un-register the master device (/dev/ptyN may have already been
+       * unlinked).
+       */
+
+      snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
+      unregister_driver(devname);
+
+      /* Un-register the slave device */
+
+      snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
+    }
+
   unregister_driver(devname);
-
-  /* Un-register the slave device */
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
-#else
-  snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
-#endif
-  unregister_driver(devname);
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Free this minor number so that it can be reused */
-
-  ptmx_minor_free(devpair->pp_minor);
-#endif
 
   /* And free the device structure */
 
@@ -341,12 +344,8 @@ static int pty_open(FAR struct file *filep)
         }
     }
 
-#ifndef CONFIG_PSEUDOTERM_SUSV1
   /* If one side of the driver has been unlinked, then refuse further
    * opens.
-   *
-   * NOTE: We ignore this case in the SUSv1 case.  In the SUSv1 case, the
-   * master side is always unlinked.
    */
 
   if (devpair->pp_unlinked)
@@ -354,7 +353,6 @@ static int pty_open(FAR struct file *filep)
       ret = -EIDRM;
     }
   else
-#endif
     {
       /* First open? */
 
@@ -390,10 +388,10 @@ static int pty_close(FAR struct file *filep)
   int ret;
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  inode     = filep->f_inode;
-  dev       = inode->i_private;
+  inode   = filep->f_inode;
+  dev     = inode->i_private;
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
-  devpair   = dev->pd_devpair;
+  devpair = dev->pd_devpair;
 
   /* Get exclusive access */
 
@@ -403,24 +401,22 @@ static int pty_close(FAR struct file *filep)
       return ret;
     }
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Did the (single) master just close its reference? */
-
-  if (dev->pd_master)
-    {
-      /* Yes, then we are essentially unlinked and when all of the
-       * slaves close there references, then the PTY should be
-       * destroyed.
-       */
-
-      devpair->pp_unlinked = true;
-    }
-#endif
-
   /* Check if the decremented inode reference count would go to zero */
 
   if (inode->i_crefs == 1)
     {
+      /* Did the (single) master just close its reference? */
+
+      if (dev->pd_master && devpair->pp_susv1)
+        {
+          /* Yes, then we are essentially unlinked and when all of the
+           * slaves close there references, then the PTY should be
+           * destroyed.
+           */
+
+          devpair->pp_unlinked = true;
+        }
+
       /* Close the contained file structures */
 
       file_close(&dev->pd_src);
@@ -776,9 +772,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case TIOCGPTN:    /* Get Pty Number (of pty-mux device): FAR int* */
         {
-#ifdef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-          ret = -ENOSYS;
-#else
           FAR int *ptyno = (FAR int *)((uintptr_t)arg);
           if (ptyno == NULL)
             {
@@ -789,7 +782,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               *ptyno = devpair->pp_minor;
               ret = OK;
             }
-#endif
         }
         break;
 
@@ -1028,8 +1020,8 @@ static int pty_unlink(FAR struct inode *inode)
   int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
-  dev       = inode->i_private;
-  devpair   = dev->pd_devpair;
+  dev     = inode->i_private;
+  devpair = dev->pd_devpair;
   DEBUGASSERT(dev->pd_devpair != NULL);
 
   /* Get exclusive access */
@@ -1064,7 +1056,7 @@ static int pty_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pty_register
+ * Name: pty_register2
  *
  * Description:
  *   Create and register PTY master and slave devices.  The slave side of
@@ -1073,6 +1065,7 @@ static int pty_unlink(FAR struct inode *inode)
  *
  * Input Parameters:
  *   minor - The number that qualifies the naming of the created devices.
+ *   susv1 - select SUSv1 or BSD behaviour
  *
  * Returned Value:
  *   0 is returned on success; otherwise, the negative error code return
@@ -1080,7 +1073,7 @@ static int pty_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int pty_register(int minor)
+int pty_register2(int minor, bool susv1)
 {
   FAR struct pty_devpair_s *devpair;
   char devname[16];
@@ -1105,9 +1098,8 @@ int pty_register(int minor)
 
   nxsem_set_protocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  devpair->pp_susv1             = susv1;
   devpair->pp_minor             = minor;
-#endif
   devpair->pp_locked            = true;
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
@@ -1138,11 +1130,14 @@ int pty_register(int minor)
    * Where N is the minor number
    */
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  snprintf(devname, 16, "/dev/pts/%d", minor);
-#else
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
-#endif
+  if (susv1)
+    {
+      snprintf(devname, 16, "/dev/pts/%d", minor);
+    }
+  else
+    {
+      snprintf(devname, 16, "/dev/ttyp%d", minor);
+    }
 
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
   if (ret < 0)
@@ -1161,4 +1156,29 @@ errout_with_devpair:
   nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
   return ret;
+}
+
+/****************************************************************************
+ * Name: pty_register
+ *
+ * Description:
+ *   Create and register PTY master and slave devices.  The master device
+ *   will be registered at /dev/ptyN and slave at /dev/ttypN where N is
+ *   the provided minor number.
+ *
+ *   The slave side of the interface is always locked initially.  The
+ *   master must call unlockpt() before the slave device can be opened.
+ *
+ * Input Parameters:
+ *   minor - The number that qualifies the naming of the created devices.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int pty_register(int minor)
+{
+  return pty_register2(minor, false);
 }

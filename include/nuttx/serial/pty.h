@@ -78,7 +78,7 @@ int ptmx_register(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_PSEUDOTERM_BSD
+#ifdef CONFIG_PSEUDOTERM
 int pty_register(int minor);
 #endif
 
