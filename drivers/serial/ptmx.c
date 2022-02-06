@@ -306,7 +306,7 @@ void ptmx_minor_free(uint8_t minor)
   index = minor >> 5;
   bitno = minor & 31;
 
-  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
+  DEBUGASSERT((g_ptmx.px_alloctab[index] & (1 << bitno)) != 0);
   g_ptmx.px_alloctab[index] &= ~(1 << bitno);
 
   /* Reset the next pointer if the one just released has a lower value */
