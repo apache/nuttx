@@ -196,7 +196,7 @@ static int ptmx_open(FAR struct file *filep)
    * Where N=minor
    */
 
-  ret = pty_register(minor);
+  ret = pty_register2(minor, true);
   if (ret < 0)
     {
       goto errout_with_minor;
@@ -207,20 +207,20 @@ static int ptmx_open(FAR struct file *filep)
   snprintf(devname, 16, "/dev/pty%d", minor);
   memcpy(&temp, filep, sizeof(temp));
   ret = file_open(filep, devname, O_RDWR);
-  DEBUGASSERT(ret >= 0);  /* open() should never fail */
+  DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
 
   /* Close the multiplexor device: /dev/ptmx */
 
   ret = file_close(&temp);
-  DEBUGASSERT(ret >= 0);  /* close() should never fail */
+  DEBUGASSERT(ret >= 0);  /* file_close() should never fail */
 
   /* Now unlink the master.  This will remove it from the VFS namespace,
    * the driver will still persist because of the open count on the
    * driver.
    */
 
-  ret = nx_unlink(devname);
-  DEBUGASSERT(ret >= 0);  /* nx_unlink() should never fail */
+  ret = unregister_driver(devname);
+  DEBUGASSERT(ret >= 0);  /* unregister_driver() should never fail */
 
   nxsem_post(&g_ptmx.px_exclsem);
   return OK;
