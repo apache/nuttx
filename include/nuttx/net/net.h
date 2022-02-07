@@ -243,6 +243,9 @@ struct socket_conn_s
 #ifdef CONFIG_NET_SOLINGER
   socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
 #endif
+#ifdef CONFIG_NET_TIMESTAMP
+  int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
+#endif
 #endif
 
   /* Connection-specific content may follow */
@@ -259,15 +262,6 @@ struct socket
   uint8_t       s_domain;    /* IP domain */
   uint8_t       s_type;      /* Protocol type */
   uint8_t       s_proto;     /* Socket Protocol */
-
-  /* Socket options */
-
-#ifdef CONFIG_NET_SOCKOPTS
-#ifdef CONFIG_NET_TIMESTAMP
-  int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
-#endif
-#endif
-
   FAR void     *s_conn;      /* Connection inherits from struct socket_conn_s */
 
   /* Socket interface */

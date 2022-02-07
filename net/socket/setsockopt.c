@@ -392,7 +392,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           net_lock();
 
-          psock->s_timestamp = *((FAR int32_t *)value);
+          conn->s_timestamp = *((FAR int32_t *)value);
 
           net_unlock();
         }

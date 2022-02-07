@@ -255,7 +255,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-          *(FAR int *)value = (int)psock->s_timestamp;
+          *(FAR int *)value = (int)conn->s_timestamp;
         }
         break;
 #endif
