@@ -666,7 +666,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
               uint32_t acked = state.snd_acked;
 
               ret = net_timedwait(&state.snd_sem,
-                                  _SO_TIMEOUT(psock->s_sndtimeo));
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   break; /* Timeout without any progress */

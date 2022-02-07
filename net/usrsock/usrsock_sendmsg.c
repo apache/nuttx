@@ -307,7 +307,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
           /* Wait for send-ready (or abort, or timeout, or signal). */
 
           ret = net_timedwait(&state.recvsem,
-                              _SO_TIMEOUT(psock->s_sndtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

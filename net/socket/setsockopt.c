@@ -116,11 +116,11 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           if (option == SO_RCVTIMEO)
             {
-              psock->s_rcvtimeo = timeo;
+              conn->s_rcvtimeo = timeo;
             }
           else
             {
-              psock->s_sndtimeo = timeo;
+              conn->s_sndtimeo = timeo;
             }
 
           /* Set/clear the corresponding enable/disable bit */

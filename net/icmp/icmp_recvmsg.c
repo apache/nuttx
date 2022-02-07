@@ -450,7 +450,7 @@ ssize_t icmp_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
            */
 
           ret = net_timedwait(&state.recv_sem,
-                              _SO_TIMEOUT(psock->s_rcvtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret < 0)
             {
               state.recv_result = ret;

@@ -741,7 +741,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
            * received.
            */
 
-          ret = net_timedwait(&state.ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
+          ret = net_timedwait(&state.ir_sem,
+                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;

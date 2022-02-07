@@ -473,7 +473,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * is received.
        */
 
-      ret = net_timedwait(&state.st_sem, _SO_TIMEOUT(psock->s_sndtimeo));
+      ret = net_timedwait(&state.st_sem,
+                          _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (ret >= 0)
         {
           /* The result of the sendto operation is the number of bytes
