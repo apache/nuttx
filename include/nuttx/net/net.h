@@ -237,6 +237,7 @@ struct socket_conn_s
 
 #ifdef CONFIG_NET_SOCKOPTS
   int16_t       s_error;     /* Last error that occurred on this socket */
+  sockopt_t     s_options;   /* Selected socket options */
 #endif
 
   /* Connection-specific content may follow */
@@ -257,7 +258,6 @@ struct socket
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
-  sockopt_t     s_options;   /* Selected socket options */
   socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
 #ifdef CONFIG_NET_SOLINGER

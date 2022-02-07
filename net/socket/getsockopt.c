@@ -194,7 +194,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
            * a macro will do.
            */
 
-          optionset         = psock->s_options;
+          optionset         = conn->s_options;
           *(FAR int *)value = _SO_GETOPT(optionset, option);
           *value_len        = sizeof(int);
         }
