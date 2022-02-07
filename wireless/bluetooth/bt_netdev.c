@@ -406,11 +406,11 @@ static void btnet_l2cap_receive(FAR struct bt_conn_s *conn,
        * io_offset should be a valid IPHC header.
        */
 
-      if ((iob->io_data[iob->io_offset] & SIXLOWPAN_DISPATCH_NALP_MASK) ==
-          SIXLOWPAN_DISPATCH_NALP)
+      if ((frame->io_data[frame->io_offset] &
+           SIXLOWPAN_DISPATCH_NALP_MASK) == SIXLOWPAN_DISPATCH_NALP)
         {
           wlwarn("WARNING: Dropped... Not a 6LoWPAN frame: %02x\n",
-                 iob->io_data[iob->io_offset]);
+                 frame->io_data[frame->io_offset]);
           ret = -EINVAL;
         }
       else
@@ -421,7 +421,7 @@ static void btnet_l2cap_receive(FAR struct bt_conn_s *conn,
 
           /* And give the packet to 6LoWPAN */
 
-          ret = sixlowpan_input(&priv->bd_dev, iob, (FAR void *)meta);
+          ret = sixlowpan_input(&priv->bd_dev, frame, (FAR void *)&meta);
         }
     }
 #endif
