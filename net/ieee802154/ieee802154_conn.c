@@ -96,7 +96,7 @@ void ieee802154_conn_initialize(void)
     {
       /* Link each pre-allocated connection structure into the free list. */
 
-      dq_addlast(&g_ieee802154_connections[i].node,
+      dq_addlast(&g_ieee802154_connections[i].sconn.node,
                  &g_free_ieee802154_connections);
     }
 #endif
@@ -129,7 +129,8 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
         {
           for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
             {
-              dq_addlast(&conn[i].node, &g_free_ieee802154_connections);
+              dq_addlast(&conn[i].sconn.node,
+                         &g_free_ieee802154_connections);
             }
         }
     }
@@ -139,7 +140,7 @@ FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
          dq_remfirst(&g_free_ieee802154_connections);
   if (conn)
     {
-      dq_addlast(&conn->node, &g_active_ieee802154_connections);
+      dq_addlast(&conn->sconn.node, &g_active_ieee802154_connections);
     }
 
   net_unlock();
@@ -167,7 +168,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
   /* Remove the connection from the active list */
 
   net_lock();
-  dq_rem(&conn->node, &g_active_ieee802154_connections);
+  dq_rem(&conn->sconn.node, &g_active_ieee802154_connections);
 
   /* Check if there any any frames attached to the container */
 
@@ -196,7 +197,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_ieee802154_connections);
+  dq_addlast(&conn->sconn.node, &g_free_ieee802154_connections);
   net_unlock();
 }
 
@@ -222,7 +223,7 @@ FAR struct ieee802154_conn_s *
   for (conn  = (FAR struct ieee802154_conn_s *)
        g_active_ieee802154_connections.head;
        conn != NULL;
-       conn = (FAR struct ieee802154_conn_s *)conn->node.flink)
+       conn = (FAR struct ieee802154_conn_s *)conn->sconn.node.flink)
     {
       /* Does the destination address match the bound address of the socket.
        *
@@ -300,7 +301,7 @@ FAR struct ieee802154_conn_s *
     }
   else
     {
-      return (FAR struct ieee802154_conn_s *)conn->node.flink;
+      return (FAR struct ieee802154_conn_s *)conn->sconn.node.flink;
     }
 }
 
