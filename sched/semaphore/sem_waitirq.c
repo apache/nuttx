@@ -83,12 +83,6 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
       sem_t *sem = wtcb->waitsem;
       DEBUGASSERT(sem != NULL && sem->semcount < 0);
 
-      /* Restore the correct priority of all threads that hold references
-       * to this semaphore.
-       */
-
-      nxsem_canceled(wtcb, sem);
-
       /* And increment the count on the semaphore.  This releases the count
        * that was taken by sem_post().  This count decremented the semaphore
        * count to negative and caused the thread to be blocked in the first
@@ -104,6 +98,12 @@ void nxsem_wait_irq(FAR struct tcb_s *wtcb, int errcode)
       /* Mark the errno value for the thread. */
 
       wtcb->errcode = errcode;
+
+      /* Restore the correct priority of all threads that hold references
+       * to this semaphore.
+       */
+
+      nxsem_canceled(wtcb, sem);
 
       /* Restart the task. */
 
