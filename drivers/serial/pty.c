@@ -219,20 +219,20 @@ static void pty_destroy(FAR struct pty_devpair_s *devpair)
 {
   char devname[16];
 
-  /* Un-register the slave device */
-
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
-#endif
-  unregister_driver(devname);
-
   /* Un-register the master device (/dev/ptyN may have already been
    * unlinked).
    */
 
-  snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
+  snprintf(devname, 16, "/dev/pty%d", devpair->pp_minor);
+  unregister_driver(devname);
+
+  /* Un-register the slave device */
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
+#else
+  snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
+#endif
   unregister_driver(devname);
 
   /* Close the contained file structures */
@@ -750,7 +750,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              *ptyno = (int)devpair->pp_minor;
+              *ptyno = devpair->pp_minor;
               ret = OK;
             }
 #endif
@@ -1104,29 +1104,9 @@ int pty_register(int minor)
       goto errout_with_pipea;
     }
 
-  /* Register the slave device
-   *
-   * BSD style (deprecated): /dev/ttypN
-   * SUSv1 style:  /dev/pts/N
-   *
-   * Where N is the minor number
-   */
-
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", minor);
-#endif
-
-  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
-  if (ret < 0)
-    {
-      goto errout_with_pipeb;
-    }
-
   /* Register the master device
    *
-   * BSD style (deprecated):  /dev/ptyN
+   * BSD style (deprecated): /dev/ptyN
    * SUSv1 style: Master: /dev/ptmx (multiplexor, see ptmx.c)
    *
    * Where N is the minor number
@@ -1137,17 +1117,33 @@ int pty_register(int minor)
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
     {
-      goto errout_with_slave;
+      goto errout_with_pipeb;
+    }
+
+  /* Register the slave device
+   *
+   * BSD style (deprecated): /dev/ttypN
+   * SUSv1 style: /dev/pts/N
+   *
+   * Where N is the minor number
+   */
+
+#ifdef CONFIG_PSEUDOTERM_SUSV1
+  snprintf(devname, 16, "/dev/pts/%d", minor);
+#else
+  snprintf(devname, 16, "/dev/ttyp%d", minor);
+#endif
+
+  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
+  if (ret < 0)
+    {
+      goto errout_with_master;
     }
 
   return OK;
 
-errout_with_slave:
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", minor);
-#endif
+errout_with_master:
+  snprintf(devname, 16, "/dev/pty%d", minor);
   unregister_driver(devname);
 
 errout_with_pipeb:
