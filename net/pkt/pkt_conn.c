@@ -116,7 +116,7 @@ void pkt_initialize(void)
 #ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
     {
-      dq_addlast(&g_pkt_connections[i].node, &g_free_pkt_connections);
+      dq_addlast(&g_pkt_connections[i].sconn.node, &g_free_pkt_connections);
     }
 #endif
 }
@@ -148,7 +148,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
         {
           for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
             {
-              dq_addlast(&conn[i].node, &g_free_pkt_connections);
+              dq_addlast(&conn[i].sconn.node, &g_free_pkt_connections);
             }
         }
     }
@@ -159,7 +159,7 @@ FAR struct pkt_conn_s *pkt_alloc(void)
     {
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_pkt_connections);
+      dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
     }
 
   _pkt_semgive(&g_free_sem);
@@ -185,7 +185,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_pkt_connections);
+  dq_rem(&conn->sconn.node, &g_active_pkt_connections);
 
   /* Make sure that the connection is marked as uninitialized */
 
@@ -193,7 +193,7 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_pkt_connections);
+  dq_addlast(&conn->sconn.node, &g_free_pkt_connections);
   _pkt_semgive(&g_free_sem);
 }
 
@@ -227,7 +227,7 @@ FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf)
 
       /* Look at the next active connection */
 
-      conn = (FAR struct pkt_conn_s *)conn->node.flink;
+      conn = (FAR struct pkt_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -252,7 +252,7 @@ FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
     }
   else
     {
-      return (FAR struct pkt_conn_s *)conn->node.flink;
+      return (FAR struct pkt_conn_s *)conn->sconn.node.flink;
     }
 }
 
