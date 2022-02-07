@@ -227,6 +227,7 @@ struct socket_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
   /* Connection-specific content may follow */
 };
