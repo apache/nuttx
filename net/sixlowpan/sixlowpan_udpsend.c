@@ -297,7 +297,7 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
                        &conn->sconn.list_tail,
                        (FAR const struct ipv6_hdr_s *)&ipv6udp,
                        buf, buflen, &destmac,
-                       _SO_TIMEOUT(psock->s_sndtimeo));
+                       _SO_TIMEOUT(conn->sconn.s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);

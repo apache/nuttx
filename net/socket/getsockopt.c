@@ -115,11 +115,11 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           if (option == SO_RCVTIMEO)
             {
-              timeo = psock->s_rcvtimeo;
+              timeo = conn->s_rcvtimeo;
             }
           else
             {
-              timeo = psock->s_sndtimeo;
+              timeo = conn->s_sndtimeo;
             }
 
           /* Then return the timeout value to the caller */

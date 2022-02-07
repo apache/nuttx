@@ -693,7 +693,7 @@ static int rpmsg_socket_connect_internal(FAR struct socket *psock)
         }
 
       ret = net_timedwait(&conn->sendsem,
-                          _SO_TIMEOUT(psock->s_rcvtimeo));
+                          _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
 
       if (ret < 0)
         {
@@ -953,7 +953,7 @@ static ssize_t rpmsg_socket_send_continuous(FAR struct socket *psock,
           if (!nonblock)
             {
               ret = net_timedwait(&conn->sendsem,
-                                  _SO_TIMEOUT(psock->s_sndtimeo));
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (!conn->ept.rdev)
                 {
                   ret = -ECONNRESET;
@@ -1051,7 +1051,7 @@ static ssize_t rpmsg_socket_send_single(FAR struct socket *psock,
       if (!nonblock)
         {
           ret = net_timedwait(&conn->sendsem,
-                              _SO_TIMEOUT(psock->s_sndtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           if (!conn->ept.rdev)
             {
               ret = -ECONNRESET;
@@ -1233,7 +1233,7 @@ static ssize_t rpmsg_socket_recvmsg(FAR struct socket *psock,
   rpmsg_socket_unlock(&conn->recvlock);
 
   ret = net_timedwait(&conn->recvsem,
-                      _SO_TIMEOUT(psock->s_rcvtimeo));
+                      _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
   if (!conn->ept.rdev)
     {
       ret = -ECONNRESET;
