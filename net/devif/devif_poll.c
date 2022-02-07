@@ -849,7 +849,7 @@ int devif_poll(FAR struct net_driver_s *dev, devif_poll_callback_t callback)
 int devif_timer(FAR struct net_driver_s *dev, int delay,
                 devif_poll_callback_t callback)
 {
-#if defined(CONFIG_NET_IPv4_REASSEMBLY) || defined(NET_TCP_HAVE_STACK)
+#if defined(NET_TCP_HAVE_STACK)
   int hsec = TICK2HSEC(delay);
 #endif
   int bstop = false;
