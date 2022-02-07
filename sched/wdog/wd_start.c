@@ -75,6 +75,12 @@
 #endif
 
 /****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static volatile bool g_in_wd_expiration;
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -97,6 +103,8 @@ static inline void wd_expiration(void)
 {
   FAR struct wdog_s *wdog;
   wdentry_t func;
+
+  g_in_wd_expiration = true;
 
   /* Process the watchdog at the head of the list as well as any
    * other watchdogs that became ready to run at this time
@@ -128,6 +136,8 @@ static inline void wd_expiration(void)
       up_setpicbase(wdog->picbase);
       CALL_FUNC(func, wdog->arg);
     }
+
+  g_in_wd_expiration = false;
 }
 
 /****************************************************************************
@@ -204,15 +214,31 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
   up_getpicbase(&wdog->picbase);
   wdog->arg = arg;
 
-  /* Calculate delay+1, forcing the delay into a range that we can handle */
+  /* Delay for at least one tick should be performed */
 
-  if (delay <= 0)
+  if (delay == 0)
     {
       delay = 1;
     }
-  else if (++delay <= 0)
+  else
     {
-      delay--;
+      /* Calculate delay+1, forcing the delay into a range that we can
+       * handle.  In general wd_start() can be called at any time and we do
+       * not know is it at the beginning in the middle or at the end of a
+       * system clock phase, so we need to add 1 tick to ensure that the
+       * operation will be delayed for at least delay number of ticks.  But
+       * in a special case when wd_start() is called from a wd expiration
+       * callback that is called from a system tick interrupt handler we know
+       * that we are exactly at the beginning of a new phase so we do not
+       * need to add an extra tick in this case.
+       */
+
+      delay += g_in_wd_expiration ? 0 : 1;
+
+      if (delay < 0)
+        {
+          delay--;
+        }
     }
 
 #ifdef CONFIG_SCHED_TICKLESS
