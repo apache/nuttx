@@ -1280,7 +1280,7 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
   /* Let low-level driver handle the call first */
 
-  int ret = dev->ops->ioctl(filep, cmd, arg);
+  int ret = dev->ops->ioctl ? dev->ops->ioctl(filep, cmd, arg) : -ENOTTY;
 
   /* The device ioctl() handler returns -ENOTTY when it doesn't know
    * how to handle the command. Check if we can handle it here.
@@ -1458,6 +1458,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               termiosp->c_iflag = dev->tc_iflag;
               termiosp->c_oflag = dev->tc_oflag;
               termiosp->c_lflag = dev->tc_lflag;
+
+              ret = 0;
             }
             break;
 
@@ -1476,6 +1478,8 @@ static int uart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               dev->tc_iflag = termiosp->c_iflag;
               dev->tc_oflag = termiosp->c_oflag;
               dev->tc_lflag = termiosp->c_lflag;
+
+              ret = 0;
             }
             break;
         }
