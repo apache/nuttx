@@ -309,6 +309,12 @@ struct tcp_conn_s
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
 
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  /* Callback instance for TCP send() */
+
+  FAR struct devif_callback_s *sndcb;
+#endif
+
   /* accept() is called when the TCP logic has created a connection
    *
    *   accept_private: This is private data that will be available to the

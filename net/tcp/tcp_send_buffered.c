@@ -238,10 +238,10 @@ static inline void psock_lost_connection(FAR struct socket *psock,
 
   /* Do not allow any further callbacks */
 
-  if (psock->s_sndcb != NULL)
+  if (conn->sndcb != NULL)
     {
-      psock->s_sndcb->flags = 0;
-      psock->s_sndcb->event = NULL;
+      conn->sndcb->flags = 0;
+      conn->sndcb->event = NULL;
     }
 
   if (conn != NULL)
@@ -414,7 +414,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, psock->s_sndcb, flags);
+          tcp_lost_connection(psock, conn->sndcb, flags);
         }
 
       /* Free write buffers and terminate polling */
@@ -1142,14 +1142,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Allocate resources to receive a callback */
 
-      if (psock->s_sndcb == NULL)
+      if (conn->sndcb == NULL)
         {
-          psock->s_sndcb = tcp_callback_alloc(conn);
+          conn->sndcb = tcp_callback_alloc(conn);
         }
 
       /* Test if the callback has been allocated */
 
-      if (psock->s_sndcb == NULL)
+      if (conn->sndcb == NULL)
         {
           /* A buffer allocation error occurred */
 
@@ -1160,10 +1160,10 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       /* Set up the callback in the connection */
 
-      psock->s_sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+      conn->sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
                                TCP_DISCONN_EVENTS);
-      psock->s_sndcb->priv  = (FAR void *)psock;
-      psock->s_sndcb->event = psock_send_eventhandler;
+      conn->sndcb->priv  = (FAR void *)psock;
+      conn->sndcb->event = psock_send_eventhandler;
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
       /* If the send buffer size exceeds the send limit,

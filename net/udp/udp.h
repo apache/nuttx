@@ -147,6 +147,10 @@ struct udp_conn_s
 
   sq_queue_t write_q;             /* Write buffering for UDP packets */
   FAR struct net_driver_s *dev;   /* Last device */
+
+  /* Callback instance for UDP sendto() */
+
+  FAR struct devif_callback_s *sndcb;
 #endif
 
   /* The following is a list of poll structures of threads waiting for
