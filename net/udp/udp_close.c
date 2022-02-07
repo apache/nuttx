@@ -131,10 +131,10 @@ int udp_close(FAR struct socket *psock)
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   /* Free any semi-permanent write buffer callback in place. */
 
-  if (psock->s_sndcb != NULL)
+  if (conn->sndcb != NULL)
     {
-      udp_callback_free(conn->dev, conn, psock->s_sndcb);
-      psock->s_sndcb = NULL;
+      udp_callback_free(conn->dev, conn, conn->sndcb);
+      conn->sndcb = NULL;
     }
 #endif
 

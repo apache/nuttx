@@ -264,13 +264,6 @@ struct socket
   /* Socket interface */
 
   FAR const struct sock_intf_s *s_sockif;
-
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
-    defined(CONFIG_NET_UDP_WRITE_BUFFERS)
-  /* Callback instance for TCP send() or UDP sendto() */
-
-  FAR struct devif_callback_s *s_sndcb;
-#endif
 };
 
 /****************************************************************************

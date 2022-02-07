@@ -173,9 +173,9 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
            * enqueued.
            */
 
-          psock->s_sndcb->flags = 0;
-          psock->s_sndcb->priv  = NULL;
-          psock->s_sndcb->event = NULL;
+          conn->sndcb->flags = 0;
+          conn->sndcb->priv  = NULL;
+          conn->sndcb->event = NULL;
           wrb = NULL;
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
@@ -331,24 +331,24 @@ static int sendto_next_transfer(FAR struct socket *psock,
    * callback instance.
    */
 
-  if (psock->s_sndcb != NULL && conn->dev != dev)
+  if (conn->sndcb != NULL && conn->dev != dev)
     {
-      udp_callback_free(conn->dev, conn, psock->s_sndcb);
-      psock->s_sndcb = NULL;
+      udp_callback_free(conn->dev, conn, conn->sndcb);
+      conn->sndcb = NULL;
     }
 
   /* Allocate resources to receive a callback from this device if the
    * callback is not already in place.
    */
 
-  if (psock->s_sndcb == NULL)
+  if (conn->sndcb == NULL)
     {
-      psock->s_sndcb = udp_callback_alloc(dev, conn);
+      conn->sndcb = udp_callback_alloc(dev, conn);
     }
 
   /* Test if the callback has been allocated */
 
-  if (psock->s_sndcb == NULL)
+  if (conn->sndcb == NULL)
     {
       /* A buffer allocation error occurred */
 
@@ -360,9 +360,9 @@ static int sendto_next_transfer(FAR struct socket *psock,
 
   /* Set up the callback in the connection */
 
-  psock->s_sndcb->flags = (UDP_POLL | NETDEV_DOWN);
-  psock->s_sndcb->priv  = (FAR void *)psock;
-  psock->s_sndcb->event = sendto_eventhandler;
+  conn->sndcb->flags = (UDP_POLL | NETDEV_DOWN);
+  conn->sndcb->priv  = (FAR void *)psock;
+  conn->sndcb->event = sendto_eventhandler;
 
   /* Notify the device driver of the availability of TX data */
 
