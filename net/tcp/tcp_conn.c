@@ -317,7 +317,7 @@ static inline FAR struct tcp_conn_s *
 
       /* Look at the next active connection */
 
-      conn = (FAR struct tcp_conn_s *)conn->node.flink;
+      conn = (FAR struct tcp_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -384,7 +384,7 @@ static inline FAR struct tcp_conn_s *
 
       /* Look at the next active connection */
 
-      conn = (FAR struct tcp_conn_s *)conn->node.flink;
+      conn = (FAR struct tcp_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -555,7 +555,7 @@ FAR struct tcp_conn_s *tcp_alloc_conn(void)
           /* Mark the connection closed and move it to the free list */
 
           conn[i].tcpstateflags = TCP_CLOSED;
-          dq_addlast(&conn[i].node, &g_free_tcp_connections);
+          dq_addlast(&conn[i].sconn.node, &g_free_tcp_connections);
         }
     }
 
@@ -595,7 +595,7 @@ void tcp_initialize(void)
       /* Mark the connection closed and move it to the free list */
 
       g_tcp_connections[i].tcpstateflags = TCP_CLOSED;
-      dq_addlast(&g_tcp_connections[i].node, &g_free_tcp_connections);
+      dq_addlast(&g_tcp_connections[i].sconn.node, &g_free_tcp_connections);
     }
 #endif
 }
@@ -668,7 +668,7 @@ FAR struct tcp_conn_s *tcp_alloc(uint8_t domain)
 
           /* Look at the next active connection */
 
-          tmp = (FAR struct tcp_conn_s *)tmp->node.flink;
+          tmp = (FAR struct tcp_conn_s *)tmp->sconn.node.flink;
         }
 
       /* Did we find a connection that we can re-use? */
@@ -769,7 +769,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
    * callback for CONFIG_NET_TCP_WRITE_BUFFERS is left.
    */
 
-  for (cb = conn->list; cb; cb = next)
+  for (cb = conn->sconn.list; cb; cb = next)
     {
       next = cb->nxtconn;
       tcp_callback_free(conn, cb);
@@ -783,7 +783,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
     {
       /* Remove the connection from the active list */
 
-      dq_rem(&conn->node, &g_active_tcp_connections);
+      dq_rem(&conn->sconn.node, &g_active_tcp_connections);
     }
 
   /* Release any read-ahead buffers attached to the connection */
@@ -835,7 +835,7 @@ void tcp_free(FAR struct tcp_conn_s *conn)
   /* Mark the connection available and put it into the free list */
 
   conn->tcpstateflags = TCP_CLOSED;
-  dq_addlast(&conn->node, &g_free_tcp_connections);
+  dq_addlast(&conn->sconn.node, &g_free_tcp_connections);
   net_unlock();
 }
 
@@ -892,7 +892,7 @@ FAR struct tcp_conn_s *tcp_nextconn(FAR struct tcp_conn_s *conn)
     }
   else
     {
-      return (FAR struct tcp_conn_s *)conn->node.flink;
+      return (FAR struct tcp_conn_s *)conn->sconn.node.flink;
     }
 }
 
@@ -1053,7 +1053,7 @@ FAR struct tcp_conn_s *tcp_alloc_accept(FAR struct net_driver_s *dev,
        * Interrupts should already be disabled in this context.
        */
 
-      dq_addlast(&conn->node, &g_active_tcp_connections);
+      dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
     }
 
   return conn;
@@ -1325,7 +1325,7 @@ int tcp_connect(FAR struct tcp_conn_s *conn, FAR const struct sockaddr *addr)
 
   /* And, finally, put the connection structure into the active list. */
 
-  dq_addlast(&conn->node, &g_active_tcp_connections);
+  dq_addlast(&conn->sconn.node, &g_active_tcp_connections);
   ret = OK;
 
 errout_with_lock:
