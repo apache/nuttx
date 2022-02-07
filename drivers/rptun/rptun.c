@@ -66,7 +66,8 @@ struct rptun_priv_s
   FAR struct rptun_dev_s       *dev;
   struct remoteproc            rproc;
   struct rpmsg_virtio_device   vdev;
-  struct rpmsg_virtio_shm_pool shm_pool;
+  struct rpmsg_virtio_shm_pool tx_shpool;
+  struct rpmsg_virtio_shm_pool rx_shpool;
   struct metal_list            bind;
   struct metal_list            node;
   sem_t                        sem;
@@ -627,30 +628,48 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       align0 = rsc->rpmsg_vring0.align;
       align1 = rsc->rpmsg_vring1.align;
 
-      tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
       v0sz = ALIGN_UP(vring_size(rsc->rpmsg_vring0.num, align0), align0);
       v1sz = ALIGN_UP(vring_size(rsc->rpmsg_vring1.num, align1), align1);
 
-      va0 = (FAR char *)rsc + tbsz;
-      va1 = (FAR char *)rsc + tbsz + v0sz;
+      if (rsc->rpmsg_vring0.da == 0 || rsc->rpmsg_vring1.da == 0)
+        {
+          tbsz = ALIGN_UP(sizeof(struct rptun_rsc_s), MAX(align0, align1));
 
-      io  = metal_io_get_region();
-      pa0 = metal_io_virt_to_phys(io, va0);
-      pa1 = metal_io_virt_to_phys(io, va1);
+          va0 = (FAR char *)rsc + tbsz;
+          va1 = (FAR char *)rsc + tbsz + v0sz;
 
-      da0 = da1 = METAL_BAD_PHYS;
+          io  = metal_io_get_region();
+          pa0 = metal_io_virt_to_phys(io, va0);
+          pa1 = metal_io_virt_to_phys(io, va1);
 
-      remoteproc_mmap(rproc, &pa0, &da0, v0sz, 0, NULL);
-      remoteproc_mmap(rproc, &pa1, &da1, v1sz, 0, NULL);
+          da0 = da1 = METAL_BAD_PHYS;
 
-      rsc->rpmsg_vring0.da = da0;
-      rsc->rpmsg_vring1.da = da1;
+          remoteproc_mmap(rproc, &pa0, &da0, v0sz, 0, NULL);
+          remoteproc_mmap(rproc, &pa1, &da1, v1sz, 0, NULL);
 
-      shbuf   = (FAR char *)rsc + tbsz + v0sz + v1sz;
-      shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring0.num +
-                rsc->config.rxbuf_size * rsc->rpmsg_vring1.num;
+          rsc->rpmsg_vring0.da = da0;
+          rsc->rpmsg_vring1.da = da1;
 
-      rpmsg_virtio_init_shm_pool(&priv->shm_pool, shbuf, shbufsz);
+          shbuf   = (FAR char *)rsc + tbsz + v0sz + v1sz;
+          shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring0.num +
+                    rsc->config.rxbuf_size * rsc->rpmsg_vring1.num;
+
+          rpmsg_virtio_init_shm_pool(&priv->tx_shpool, shbuf, shbufsz);
+        }
+      else
+        {
+          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL,
+                                              &rsc->rpmsg_vring0.da,
+                                              v0sz, 0, NULL) + v0sz;
+          shbufsz = rsc->config.rxbuf_size * rsc->rpmsg_vring0.num;
+          rpmsg_virtio_init_shm_pool(&priv->tx_shpool, shbuf, shbufsz);
+
+          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL,
+                                              &rsc->rpmsg_vring1.da,
+                                              v1sz, 0, NULL) + v1sz;
+          shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring1.num;
+          rpmsg_virtio_init_shm_pool(&priv->rx_shpool, shbuf, shbufsz);
+        }
 
       role = RPMSG_MASTER;
     }
@@ -663,8 +682,17 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       return -ENOMEM;
     }
 
-  ret = rpmsg_init_vdev(&priv->vdev, vdev, rptun_ns_bind,
-                        metal_io_get_region(), &priv->shm_pool);
+  if (priv->rx_shpool.base)
+    {
+      ret = rpmsg_init_vdev_ext(&priv->vdev, vdev, rptun_ns_bind,
+                                metal_io_get_region(),
+                                &priv->tx_shpool, &priv->rx_shpool);
+    }
+  else
+    {
+      ret = rpmsg_init_vdev(&priv->vdev, vdev, rptun_ns_bind,
+                            metal_io_get_region(), &priv->tx_shpool);
+    }
   if (ret)
     {
       remoteproc_remove_virtio(rproc, vdev);
