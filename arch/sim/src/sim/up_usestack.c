@@ -119,7 +119,6 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
    * since it's impossible to extend a preallocated memory in place.
    */
 
-  return up_create_stack(tcb, up_tls_size() + stack_size,
-                         tcb->flags & TCB_FLAG_TTYPE_MASK);
+  return up_create_stack(tcb, stack_size, tcb->flags & TCB_FLAG_TTYPE_MASK);
 #endif
 }
