@@ -63,6 +63,7 @@
 #include "nuttx/wireless/ieee802154/ieee802154_mac.h"
 
 #ifdef CONFIG_NET_PKT
+#  include <nuttx/net/pkt.h>
 #  include "pkt/pkt.h"
 #endif
 
