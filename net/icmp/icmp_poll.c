@@ -72,7 +72,7 @@ void icmp_poll(FAR struct net_driver_s *dev, FAR struct icmp_conn_s *conn)
 
   /* Perform the application callback */
 
-  devif_conn_event(dev, conn, ICMP_POLL, conn->list);
+  devif_conn_event(dev, conn, ICMP_POLL, conn->sconn.list);
 }
 
 #endif /* CONFIG_NET && CONFIG_NET_ICMP && CONFIG_NET_ICMP_SOCKET */
