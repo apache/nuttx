@@ -34,6 +34,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_TCP_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -54,9 +55,9 @@
  */
 
 #define tcp_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, &(conn)->list, &(conn)->list_tail)
+  devif_callback_alloc((conn)->dev, &(conn)->sconn.list, &(conn)->sconn.list_tail)
 #define tcp_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list, &(conn)->list_tail)
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->sconn.list, &(conn)->sconn.list_tail)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
@@ -145,8 +146,6 @@ struct tcp_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;        /* Implements a doubly linked list */
-
   /* TCP callbacks:
    *
    * Data transfer events are retained in 'list'.  Event handlers in 'list'
@@ -171,8 +170,7 @@ struct tcp_conn_s
    *                 then dev->d_len should also be cleared).
    */
 
-  FAR struct devif_callback_s *list;
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* TCP-specific content follows */
 

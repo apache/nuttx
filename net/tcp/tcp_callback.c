@@ -166,7 +166,7 @@ uint16_t tcp_callback(FAR struct net_driver_s *dev,
    *                 not set, then dev->d_len should also be cleared).
    */
 
-  flags = devif_conn_event(dev, conn, flags, conn->list);
+  flags = devif_conn_event(dev, conn, flags, conn->sconn.list);
 
   /* There may be no new data handler in place at them moment that the new
    * incoming data is received.  If the new incoming data was not handled,
