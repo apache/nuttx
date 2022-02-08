@@ -55,7 +55,6 @@ struct tcp_connect_s
 {
   FAR struct tcp_conn_s  *tc_conn;    /* Reference to TCP connection structure */
   FAR struct devif_callback_s *tc_cb; /* Reference to callback instance */
-  FAR struct socket *tc_psock;        /* The socket being connected */
   sem_t tc_sem;                       /* Semaphore signals recv completion */
   int tc_result;                      /* OK on success, otherwise a negated errno. */
 };
@@ -96,7 +95,6 @@ static inline int psock_setup_callbacks(FAR struct socket *psock,
   nxsem_set_protocol(&pstate->tc_sem, SEM_PRIO_NONE);
 
   pstate->tc_conn   = conn;
-  pstate->tc_psock  = psock;
   pstate->tc_result = -EAGAIN;
 
   /* Set up the callbacks in the connection */
@@ -167,6 +165,7 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
                                            FAR void *pvpriv, uint16_t flags)
 {
   struct tcp_connect_s *pstate = (struct tcp_connect_s *)pvpriv;
+  FAR struct tcp_conn_s *conn = pstate->tc_conn;
 
   ninfo("flags: %04x\n", flags);
 
@@ -218,19 +217,13 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_CONNECTED) != 0)
         {
-          FAR struct socket *psock = pstate->tc_psock;
-          FAR struct socket_conn_s *conn;
-          DEBUGASSERT(psock);
-
-          conn = psock->s_conn;
-
           /* Mark the connection bound and connected.  NOTE this is
            * is done here (vs. later) in order to avoid any race condition
            * in the socket state.  It is known to connected here and now,
            * but not necessarily at any time later.
            */
 
-          conn->s_flags |= (_SF_BOUND | _SF_CONNECTED);
+          conn->sconn.s_flags |= (_SF_BOUND | _SF_CONNECTED);
 
           /* Indicate that the socket is no longer connected */
 

@@ -333,7 +333,7 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
+          tcp_lost_connection(conn, pstate->snd_cb, flags);
         }
 
       /* Report not connected */

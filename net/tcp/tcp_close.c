@@ -45,8 +45,8 @@
 
 struct tcp_close_s
 {
+  FAR struct tcp_conn_s       *cl_conn;   /* Needed to handle loss of connection */
   FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
-  FAR struct socket           *cl_psock;  /* Reference to the TCP socket */
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
 };
@@ -64,7 +64,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        uint16_t flags)
 {
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  FAR struct tcp_conn_s *conn = pstate->cl_conn;
 
   DEBUGASSERT(pstate != NULL);
 
@@ -322,7 +322,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
       /* Set up for the lingering wait */
 
-      state.cl_psock     = psock;
+      state.cl_conn      = conn;
       state.cl_result    = -EBUSY;
 
       /* This semaphore is used for signaling and, hence, should not have

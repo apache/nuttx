@@ -374,7 +374,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
+          tcp_lost_connection(conn, pstate->snd_cb, flags);
         }
 
       pstate->snd_sent = -ENOTCONN;
@@ -719,7 +719,7 @@ errout:
  *   write occurs first.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK (Always can send).
@@ -729,7 +729,7 @@ errout:
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock)
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
 {
   return OK;
 }
