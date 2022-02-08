@@ -283,7 +283,8 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
       if (!(conn->flags & USRSOCK_EVENT_SENDTO_READY))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+          if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+              (flags & MSG_DONTWAIT) != 0)
             {
               /* Send busy at daemon side. */
 

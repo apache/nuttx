@@ -761,6 +761,7 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   FAR struct sockaddr *from = msg->msg_name;
   FAR socklen_t *fromlen = &msg->msg_namelen;
   FAR struct netlink_response_s *entry;
+  FAR struct socket_conn_s *conn;
 
   DEBUGASSERT(psock != NULL && psock->s_conn != NULL && buf != NULL);
   DEBUGASSERT(from == NULL ||
@@ -771,11 +772,13 @@ static ssize_t netlink_recvmsg(FAR struct socket *psock,
   entry = netlink_tryget_response(psock->s_conn);
   if (entry == NULL)
     {
+      conn = psock->s_conn;
+
       /* No response is variable, but presumably, one is expected.  Check
        * if the socket has been configured for non-blocking operation.
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+      if (_SS_ISNONBLOCK(conn->s_flags) || (flags & MSG_DONTWAIT) != 0)
         {
           return -EAGAIN;
         }

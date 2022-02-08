@@ -304,7 +304,7 @@ int usrsock_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
 
       if (!(conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags))
+          if (_SS_ISNONBLOCK(conn->sconn.s_flags))
             {
               /* Nothing to receive from daemon side. */
 

@@ -370,7 +370,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
@@ -545,12 +545,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
   /* Check early if this is an un-connected socket, if so, then
    * return -ENOTCONN. Note, we will have to check this again, as we can't
    * guarantee the state won't change until we have the network locked.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -558,8 +560,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   /* Make sure that we have the IP address mapping */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -607,7 +607,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * state again to ensure the connection is still valid.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
       net_unlock();
