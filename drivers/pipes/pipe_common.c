@@ -396,12 +396,12 @@ int pipecommon_close(FAR struct file *filep)
 
 ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode      *inode  = filep->f_inode;
-  FAR struct pipe_dev_s *dev    = inode->i_private;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
 #ifdef CONFIG_DEV_PIPEDUMP
-  FAR uint8_t           *start  = (FAR uint8_t *)buffer;
+  FAR uint8_t           *start = (FAR uint8_t *)buffer;
 #endif
-  ssize_t                nread  = 0;
+  ssize_t                nread = 0;
   int                    sval;
   int                    ret;
 
@@ -680,8 +680,8 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
-  FAR struct inode      *inode    = filep->f_inode;
-  FAR struct pipe_dev_s *dev      = inode->i_private;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
   pollevent_t            eventset;
   pipe_ndx_t             nbytes;
   int                    ret;
@@ -719,8 +719,8 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
         {
-          fds->priv   = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -784,15 +784,15 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ret              = -EIO;
+          ret = -EIO;
           goto errout;
         }
 #endif
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:
