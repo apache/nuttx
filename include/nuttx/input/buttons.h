@@ -34,12 +34,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
-
-#ifndef CONFIG_INPUT_BUTTONS_NPOLLWAITERS
-#  define CONFIG_INPUT_BUTTONS_NPOLLWAITERS 2
-#endif
-
 /* ioctl commands */
 
 /* Command:     BTNIOC_SUPPORTED
