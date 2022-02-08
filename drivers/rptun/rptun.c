@@ -658,14 +658,14 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
         }
       else
         {
-          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL,
-                                              &rsc->rpmsg_vring0.da,
+          da0 = rsc->rpmsg_vring0.da;
+          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da0,
                                               v0sz, 0, NULL) + v0sz;
           shbufsz = rsc->config.rxbuf_size * rsc->rpmsg_vring0.num;
           rpmsg_virtio_init_shm_pool(&priv->tx_shpool, shbuf, shbufsz);
 
-          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL,
-                                              &rsc->rpmsg_vring1.da,
+          da1 = rsc->rpmsg_vring1.da;
+          shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da1,
                                               v1sz, 0, NULL) + v1sz;
           shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring1.num;
           rpmsg_virtio_init_shm_pool(&priv->rx_shpool, shbuf, shbufsz);
@@ -693,6 +693,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
       ret = rpmsg_init_vdev(&priv->vdev, vdev, rptun_ns_bind,
                             metal_io_get_region(), &priv->tx_shpool);
     }
+
   if (ret)
     {
       remoteproc_remove_virtio(rproc, vdev);
@@ -986,7 +987,7 @@ int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem)
     {
       rptun_post(priv);
     }
-  
+
   return ret;
 }
 
@@ -1162,6 +1163,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       goto err_driver;
     }
 #endif
+
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
   return OK;
