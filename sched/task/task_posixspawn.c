@@ -310,17 +310,10 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIBC_ENVPATH
-int posix_spawnp(FAR pid_t *pid, FAR const char *path,
-                 FAR const posix_spawn_file_actions_t *file_actions,
-                 FAR const posix_spawnattr_t *attr,
-                 FAR char * const argv[], FAR char * const envp[])
-#else
 int posix_spawn(FAR pid_t *pid, FAR const char *path,
                 FAR const posix_spawn_file_actions_t *file_actions,
                 FAR const posix_spawnattr_t *attr,
                 FAR char * const argv[], FAR char * const envp[])
-#endif
 {
   struct sched_param param;
   pid_t proxy;
