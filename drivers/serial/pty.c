@@ -91,10 +91,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Should never be set... only for comparison to serial.c */
-
-#undef CONFIG_PSEUDOTERM_FULLBLOCKS
-
 /* Maximum number of threads than can be waiting for POLL events */
 
 #ifndef CONFIG_DEV_PTY_NPOLLWAITERS
@@ -488,7 +484,6 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
       ntotal = 0;
       for (i = 0; i < len; i++)
         {
-#ifndef CONFIG_PSEUDOTERM_FULLBLOCKS
           /* This logic should return if the pipe becomes empty after some
            * bytes were read from the pipe.  If we have already read some
            * data, we use the FIONREAD ioctl to test if there are more bytes
@@ -548,15 +543,6 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
               sched_unlock();
             }
           else
-#else
-          /* If we wanted to return full blocks of data, then file_read()
-           * may need to be called repeatedly.  That is because the pipe
-           * read() method will return early if the fifo becomes empty
-           * after any data has been read.
-           */
-
-# error Missing logic
-#endif
             {
               /* Read one byte from the source the byte.  This call will
                * block if the source pipe is empty.
