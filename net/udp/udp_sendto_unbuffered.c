@@ -510,7 +510,7 @@ errout_with_lock:
  *   write occurs first.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     A reference to UDP connection structure.
  *
  * Returned Value:
  *   OK (Always can send).
@@ -520,7 +520,7 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int psock_udp_cansend(FAR struct socket *psock)
+int psock_udp_cansend(FAR struct udp_conn_s *conn)
 {
   return OK;
 }

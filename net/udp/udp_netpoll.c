@@ -69,7 +69,7 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 
   ninfo("flags: %04x\n", flags);
 
-  DEBUGASSERT(!info || (info->psock && info->fds));
+  DEBUGASSERT(!info || (info->conn && info->fds));
 
   /* 'priv' might be null in some race conditions (?) */
 
@@ -93,7 +93,7 @@ static uint16_t udp_poll_eventhandler(FAR struct net_driver_s *dev,
 
       /* A poll is a sign that we are free to send data. */
 
-      else if (psock_udp_cansend(info->psock) >= 0)
+      else if (psock_udp_cansend(info->conn) >= 0)
         {
           eventset |= (POLLOUT & info->fds->events);
         }
@@ -153,7 +153,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Find a container to hold the poll information */
 
   info = conn->pollinfo;
-  while (info->psock != NULL)
+  while (info->conn != NULL)
     {
       if (++info >= &conn->pollinfo[CONFIG_NET_UDP_NPOLLWAITERS])
         {
@@ -180,9 +180,9 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
   /* Initialize the poll info container */
 
-  info->psock  = psock;
-  info->fds    = fds;
-  info->cb     = cb;
+  info->conn = conn;
+  info->fds  = fds;
+  info->cb   = cb;
 
   /* Initialize the callback structure.  Save the reference to the info
    * structure as callback private data so that it will be available during
@@ -218,7 +218,7 @@ int udp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
       fds->revents |= (POLLRDNORM & fds->events);
     }
 
-  if (psock_udp_cansend(psock) >= 0)
+  if (psock_udp_cansend(conn) >= 0)
     {
       /* Normal data may be sent without blocking (at least one byte). */
 
@@ -285,7 +285,7 @@ int udp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds)
 
       /* Then free the poll info container */
 
-      info->psock = NULL;
+      info->conn = NULL;
     }
 
   return OK;
