@@ -58,19 +58,38 @@
 
 #ifdef CONFIG_PRIORITY_INHERITANCE
 struct tcb_s; /* Forward reference */
+struct sem_s;
+
 struct semholder_s
 {
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-  struct semholder_s *flink;     /* Implements singly linked list */
+  FAR struct semholder_s *flink;  /* List of semaphore's holder            */
 #endif
-  FAR struct tcb_s *htcb;        /* Holder TCB */
-  int16_t counts;                /* Number of counts owned by this holder */
+  FAR struct semholder_s *tlink;  /* List of task held semaphores          */
+  FAR struct sem_s *sem;          /* Ths corresponding semaphore           */
+  FAR struct tcb_s *htcb;         /* Ths corresponding TCB                 */
+  int16_t counts;                 /* Number of counts owned by this holder */
 };
 
 #if CONFIG_SEM_PREALLOCHOLDERS > 0
-#  define SEMHOLDER_INITIALIZER {NULL, NULL, 0}
+#  define SEMHOLDER_INITIALIZER   {NULL, NULL, NULL, NULL, 0}
+#  define INITIALIZE_SEMHOLDER(h) \
+    do { \
+      (h)->flink  = NULL; \
+      (h)->tlink  = NULL; \
+      (h)->sem    = NULL; \
+      (h)->htcb   = NULL; \
+      (h)->counts = 0; \
+    } while (0)
 #else
-#  define SEMHOLDER_INITIALIZER {NULL, 0}
+#  define SEMHOLDER_INITIALIZER   {NULL, NULL, NULL, 0}
+#  define INITIALIZE_SEMHOLDER(h) \
+    do { \
+      (h)->tlink  = NULL; \
+      (h)->sem    = NULL; \
+      (h)->htcb   = NULL; \
+      (h)->counts = 0; \
+    } while (0)
 #endif
 #endif /* CONFIG_PRIORITY_INHERITANCE */
 

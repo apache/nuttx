@@ -78,10 +78,8 @@ int nxsem_init(FAR sem_t *sem, int pshared, unsigned int value)
 #  if CONFIG_SEM_PREALLOCHOLDERS > 0
       sem->hhead            = NULL;
 #  else
-      sem->holder[0].htcb   = NULL;
-      sem->holder[0].counts = 0;
-      sem->holder[1].htcb   = NULL;
-      sem->holder[1].counts = 0;
+      INITIALIZE_SEMHOLDER(&sem->holder[0]);
+      INITIALIZE_SEMHOLDER(&sem->holder[1]);
 #  endif
 #endif
       return OK;
