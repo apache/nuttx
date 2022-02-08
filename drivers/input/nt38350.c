@@ -194,6 +194,18 @@ enum nvt_pm_e
   NVT_PM_FDM     = 0x13   /* Finger detect mode */
 };
 
+enum nvt_icpower_state_e
+{
+  NVT_POWER_ON  = 0x01,
+  NVT_POWER_OFF = 0x02
+};
+
+struct nvt_power_resume_s
+{
+  uint8_t times;
+  uint8_t icpower_state;
+};
+
 struct nvt_ts_mem_map_s
 {
   uint32_t event_buf_addr;
@@ -253,6 +265,7 @@ struct nt38350_dev_s
   struct pm_callback_s          pm;
   enum pm_state_e               current_state;
   int8_t                        enable_fdm;
+  struct nvt_power_resume_s     nvt_pwr_resume;     /* The IC globle power state, the IC power controled by display */
 #endif
 
   /* Touch info */
@@ -792,7 +805,7 @@ static int nvt_check_fw_reset_state(FAR struct nt38350_dev_s *priv,
         }
 
       retry++;
-      if (retry > 100)
+      if (retry > 12)
         {
           ierr("ERROR: Failed to check FW state\n");
           ret = -1;
@@ -4026,6 +4039,43 @@ static int nt38350_data_interrupt(FAR struct ioexpander_dev_s *dev,
 }
 
 #if CONFIG_PM
+static void nt38350_poweroff_cb(void *arg)
+{
+  FAR struct nvt_power_resume_s *ptr =
+            (FAR struct nvt_power_resume_s *)(arg);
+
+  ptr->times++;
+  ptr->icpower_state = NVT_POWER_OFF;
+  iwarn("NT38350 ICPowerState %d\n", ptr->icpower_state);
+}
+#endif
+
+#if CONFIG_PM
+static int nt38350_hardware_reinit(FAR struct nt38350_dev_s *priv)
+{
+  int ret;
+
+  ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_ADDR);
+  if (ret)
+    {
+      ret = nvt_ts_check_chip_ver_trim(priv, NVT_CHIP_VER_TRIM_OLD_ADDR);
+      if (ret)
+        {
+          ierr("ERROR: Chip is not identified\n");
+          ret = -1;
+        }
+    }
+
+  nvt_bootloader_reset(priv);
+  nvt_check_fw_reset_state(priv, RESET_STATE_INIT);
+  nvt_get_fw_info(priv);
+  priv->nvt_pwr_resume.icpower_state = NVT_POWER_ON;
+
+  return ret;
+}
+#endif
+
+#if CONFIG_PM
 static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
 {
   int ret;
@@ -4034,16 +4084,20 @@ static int nt38350_ts_resume(FAR struct nt38350_dev_s *dev)
   config = dev->config;
   DEBUGASSERT(config != NULL);
 
-  ret = nvt_check_fw_reset_state(dev, RESET_STATE_REK);
+  iwarn("resume nt38350 touch IC\n");
+
+  nvt_bootloader_reset(dev);
+  ret = nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
   if (ret)
     {
-      iinfo("FW is not ready! Try to bootloader reset...\n");
+      iwarn("FW is not ready! Try to bootloader reset...\n");
       nvt_bootloader_reset(dev);
-      nvt_check_fw_reset_state(dev, RESET_STATE_REK);
+      nvt_check_fw_reset_state(dev, RESET_STATE_INIT);
     }
 
   dev->touch_awake = 1;
   dev->idle_mode   = false;
+  dev->nvt_pwr_resume.times = 0;
 
   return ret;
 }
@@ -4057,6 +4111,8 @@ static int nt38350_ts_suspend(FAR struct nt38350_dev_s *dev, uint8_t cmd)
 
   config = dev->config;
   DEBUGASSERT(config != NULL);
+
+  iwarn("suspend nt38350 touch IC cmd 0x%02x\n", cmd);
 
   buf[0] = EVENT_MAP_HOST_CMD;
   buf[1] = cmd;
@@ -4082,11 +4138,13 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
 {
   FAR struct nt38350_dev_s *dev = container_of(cb,
                                                struct nt38350_dev_s, pm);
-  int need_icpoweroff_state;
   int enable_state;
 
-  need_icpoweroff_state = dev->config->need_icpoweroff_state();
   enable_state = dev->config->get_icpower_state();
+  if (!enable_state)
+    {
+      return;
+    }
 
   if (domain == PM_DOMAIN_FACTEST || domain == PM_DOMAIN_OLED_TP)
     {
@@ -4096,12 +4154,18 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
         case PM_NORMAL:
           if (dev->current_state == PM_NORMAL)
             return;
-          if (need_icpoweroff_state && enable_state)
+          if (dev->nvt_pwr_resume.times >= 4)
             {
-              ierr("Failed to resume, need to reset the IC\n");
-              dev->touch_awake = 1;
-              dev->idle_mode   = false;
+              ierr("Retry resume NT38350 touch failed! times = %d\n",
+                   dev->nvt_pwr_resume.times);
+              dev->nvt_pwr_resume.times = 0;
               return;
+            }
+
+          if (dev->nvt_pwr_resume.icpower_state == NVT_POWER_OFF)
+            {
+              iwarn("Failed to resume, need to reset the IC\n");
+              nt38350_hardware_reinit(dev);
             }
 
           nt38350_ts_resume(dev);
@@ -4117,12 +4181,12 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
             }
           else
             {
+              dev->config->prepare_poweroff();
               nt38350_ts_suspend(dev, NVT_PM_DPSTDBY);
             }
           break;
         case PM_IDLE:
           dev->idle_mode = true;
-          dev->touch_awake = 0;
           break;
         default:
           break;
@@ -4311,6 +4375,10 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   priv->pm.notify  = nt38350_pm_notify;
   lcdc_pmcb_early_register(&priv->pm);
   priv->enable_fdm = 0;
+
+  priv->nvt_pwr_resume.icpower_state = NVT_POWER_ON;
+  priv->config->powerdev_register_cb(NULL,
+                nt38350_poweroff_cb, &(priv->nvt_pwr_resume));
 #endif
 
   ret = touch_register(&(priv->lower), devname,

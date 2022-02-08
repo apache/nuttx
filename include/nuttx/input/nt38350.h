@@ -111,8 +111,11 @@ struct nt38350_config_s
                  bool state);
 #if CONFIG_PM
   int  (*get_icpower_state)(void);
-  void (*disable_icpower)(void);
+  void (*prepare_poweroff)(void);
   int  (*need_icpoweroff_state)(void);
+  void  (*powerdev_register_cb)(void (*poweron_cb)(void *),
+                             void (*poweroff_cb)(void *),
+                             void *arg);
 #endif
 };
 
