@@ -40,7 +40,8 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static void tcp_close_connection(FAR struct socket *psock, uint16_t flags);
+static void tcp_close_connection(FAR struct tcp_conn_s *conn,
+                                 uint16_t flags);
 static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
                                   FAR void *pvconn, FAR void *pvpriv,
                                   uint16_t flags);
@@ -56,7 +57,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
  *   Called when a loss-of-connection event has occurred.
  *
  * Input Parameters:
- *   psock    The TCP socket structure associated.
+ *   conn     The TCP connection structure
  *   flags    Set of connection events events
  *
  * Returned Value:
@@ -67,10 +68,8 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
+static void tcp_close_connection(FAR struct tcp_conn_s *conn, uint16_t flags)
 {
-  FAR struct socket_conn_s *conn = psock->s_conn;
-
   /* These loss-of-connection events may be reported:
    *
    *   TCP_CLOSE: The remote host has closed the connection
@@ -94,8 +93,8 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
        * not handle as an error but as an "end-of-file"
        */
 
-      conn->s_flags &= ~_SF_CONNECTED;
-      conn->s_flags |= _SF_CLOSED;
+      conn->sconn.s_flags &= ~_SF_CONNECTED;
+      conn->sconn.s_flags |= _SF_CLOSED;
     }
   else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
@@ -103,7 +102,7 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
        * (eventually) be reported as an ENOTCONN error.
        */
 
-      conn->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
+      conn->sconn.s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
     }
 }
 
@@ -130,12 +129,11 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
                                   FAR void *pvconn, FAR void *pvpriv,
                                   uint16_t flags)
 {
-  FAR struct socket *psock = (FAR struct socket *)pvpriv;
-  FAR struct socket_conn_s *conn = psock->s_conn;
+  FAR struct tcp_conn_s *conn = pvpriv;
 
-  if (psock != NULL)
+  if (conn != NULL)
     {
-      ninfo("flags: %04x s_flags: %02x\n", flags, conn->s_flags);
+      ninfo("flags: %04x s_flags: %02x\n", flags, conn->sconn.s_flags);
 
       /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
        * NETDEV_DOWN.  All loss-of-connection events.
@@ -143,7 +141,7 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
       if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          tcp_close_connection(psock, flags);
+          tcp_close_connection(conn, flags);
         }
 
       /* TCP_CONNECTED: The socket is successfully connected */
@@ -169,12 +167,15 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
           /* Clear the socket error */
 
-          _SO_SETERRNO(psock, OK);
+#ifdef CONFIG_NET_SOCKOPTS
+          conn->sconn.s_error = OK;
+#endif
+          set_errno(OK);
 
           /* Indicate that the socket is now connected */
 
-          sconn->s_flags |= (_SF_BOUND | _SF_CONNECTED);
-          sconn->s_flags &= ~_SF_CLOSED;
+          conn->sconn.s_flags |= (_SF_BOUND | _SF_CONNECTED);
+          conn->sconn.s_flags &= ~_SF_CLOSED;
         }
     }
 
@@ -294,7 +295,7 @@ int tcp_start_monitor(FAR struct socket *psock)
   if (cb != NULL)
     {
       cb->event = tcp_monitor_event;
-      cb->priv  = (FAR void *)psock;
+      cb->priv  = (FAR void *)conn;
       cb->flags = TCP_DISCONN_EVENTS;
 
       /* Monitor the connected event */
@@ -386,7 +387,7 @@ void tcp_close_monitor(FAR struct socket *psock)
 
   /* Make sure that this socket is explicitly marked as closed */
 
-  tcp_close_connection(psock, TCP_CLOSE);
+  tcp_close_connection(conn, TCP_CLOSE);
 
   /* Now notify any sockets waiting for events from this particular sockets.
    * Other dup'ed sockets sharing the same connection must not be effected.
@@ -423,7 +424,7 @@ void tcp_close_monitor(FAR struct socket *psock)
  *   event handler.
  *
  * Input Parameters:
- *   psock - The TCP socket structure whose connection was lost.
+ *   conn  - The TCP connection of interest
  *   cb    - devif callback structure
  *   flags - Set of connection events events
  *
@@ -436,10 +437,10 @@ void tcp_close_monitor(FAR struct socket *psock)
  *
  ****************************************************************************/
 
-void tcp_lost_connection(FAR struct socket *psock,
+void tcp_lost_connection(FAR struct tcp_conn_s *conn,
                          FAR struct devif_callback_s *cb, uint16_t flags)
 {
-  DEBUGASSERT(psock != NULL && psock->s_conn != NULL);
+  DEBUGASSERT(conn != NULL);
 
   /* Nullify the callback structure so that recursive callbacks are not
    * received by the event handler due to disconnection processing.
@@ -460,11 +461,11 @@ void tcp_lost_connection(FAR struct socket *psock,
    * callback due to the above nullification.
    */
 
-  tcp_close_connection(psock, flags);
+  tcp_close_connection(conn, flags);
 
   /* Then stop the network monitor for all sockets. */
 
-  tcp_shutdown_monitor((FAR struct tcp_conn_s *)psock->s_conn, flags);
+  tcp_shutdown_monitor(conn, flags);
 }
 
 #endif /* NET_TCP_HAVE_STACK */

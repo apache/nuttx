@@ -137,7 +137,7 @@ struct tcp_hdr_s;         /* Forward reference */
 
 struct tcp_poll_s
 {
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct tcp_conn_s *conn;     /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
@@ -685,7 +685,7 @@ void tcp_close_monitor(FAR struct socket *psock);
  *   the event handler.
  *
  * Input Parameters:
- *   psock - The TCP socket structure associated.
+ *   conn  - The TCP connection of interest
  *   cb    - devif callback structure
  *   flags - Set of connection events events
  *
@@ -698,7 +698,7 @@ void tcp_close_monitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-void tcp_lost_connection(FAR struct socket *psock,
+void tcp_lost_connection(FAR struct tcp_conn_s *conn,
                          FAR struct devif_callback_s *cb, uint16_t flags);
 
 /****************************************************************************
@@ -1540,7 +1540,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
  *   another means.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK
@@ -1554,7 +1554,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock);
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_wrbuffer_initialize

@@ -229,8 +229,7 @@ static void psock_writebuffer_notify(FAR struct tcp_conn_s *conn)
  *
  ****************************************************************************/
 
-static inline void psock_lost_connection(FAR struct socket *psock,
-                                         FAR struct tcp_conn_s *conn,
+static inline void psock_lost_connection(FAR struct tcp_conn_s *conn,
                                          bool abort)
 {
   FAR sq_entry_t *entry;
@@ -363,17 +362,13 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
    * obtained from the corresponding TCP socket.
    */
 
-  FAR struct socket *psock = (FAR struct socket *)pvpriv;
-  FAR struct tcp_conn_s *conn;
+  FAR struct tcp_conn_s *conn = pvpriv;
   bool rexmit = false;
-
-  DEBUGASSERT(psock != NULL);
 
   /* Get the TCP connection pointer reliably from
    * the corresponding TCP socket.
    */
 
-  conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
   /* The TCP socket is connected and, hence, should be bound to a device.
@@ -410,16 +405,16 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (psock->s_conn != NULL && _SS_ISCONNECTED(conn->sconn.s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, conn->sndcb, flags);
+          tcp_lost_connection(conn, conn->sndcb, flags);
         }
 
       /* Free write buffers and terminate polling */
 
-      psock_lost_connection(psock, psock->s_conn, !!(flags & NETDEV_DOWN));
+      psock_lost_connection(conn, !!(flags & NETDEV_DOWN));
       return flags;
     }
 
@@ -1163,7 +1158,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
       conn->sndcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
                                TCP_DISCONN_EVENTS);
-      conn->sndcb->priv  = (FAR void *)psock;
+      conn->sndcb->priv  = (FAR void *)conn;
       conn->sndcb->event = psock_send_eventhandler;
 
 #if CONFIG_NET_SEND_BUFSIZE > 0
@@ -1405,7 +1400,7 @@ errout:
  *   another means.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK
@@ -1419,23 +1414,19 @@ errout:
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock)
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
 {
-  FAR struct socket_conn_s *conn;
-
   /* Verify that we received a valid socket */
 
-  if (!psock || !psock->s_conn)
+  if (!conn)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;
     }
 
-  conn = psock->s_conn;
-
   /* Verify that this is connected TCP socket */
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       return -ENOTCONN;
