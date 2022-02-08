@@ -233,6 +233,12 @@ struct socket_conn_s
 
   uint8_t       s_flags;     /* See _SF_* definitions */
 
+  /* Socket options */
+
+#ifdef CONFIG_NET_SOCKOPTS
+  int16_t       s_error;     /* Last error that occurred on this socket */
+#endif
+
   /* Connection-specific content may follow */
 };
 
@@ -251,7 +257,6 @@ struct socket
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
-  int16_t       s_error;     /* Last error that occurred on this socket */
   sockopt_t     s_options;   /* Selected socket options */
   socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */

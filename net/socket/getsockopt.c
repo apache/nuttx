@@ -242,8 +242,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
               return -EINVAL;
             }
 
-          *(FAR int *)value = (int)psock->s_error;
-          psock->s_error = 0;
+          *(FAR int *)value = (int)conn->s_error;
+          conn->s_error = 0;
         }
         break;
 
