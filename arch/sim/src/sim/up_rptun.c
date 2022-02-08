@@ -111,6 +111,7 @@ sim_rptun_get_resource(struct rptun_dev_s *dev)
       rsc->rpmsg_vdev.dfeatures     = 1 << VIRTIO_RPMSG_F_NS
                                     | 1 << VIRTIO_RPMSG_F_ACK
                                     | 1 << VIRTIO_RPMSG_F_BUFSZ;
+      rsc->rpmsg_vdev.config_len    = sizeof(struct fw_rsc_config);
       rsc->rpmsg_vdev.num_of_vrings = 2;
       rsc->rpmsg_vring0.align       = 8;
       rsc->rpmsg_vring0.num         = 8;
