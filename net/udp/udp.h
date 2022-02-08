@@ -90,7 +90,7 @@ struct udp_hdr_s;         /* Forward reference */
 
 struct udp_poll_s
 {
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct udp_conn_s *conn;     /* Needed to handle loss of connection */
   FAR struct net_driver_s *dev;    /* Needed to free the callback structure */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
@@ -375,7 +375,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  *   write occurs first.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     A reference to UDP connection structure.
  *
  * Returned Value:
  *   -ENOSYS (Function not implemented, always have to wait to send).
@@ -385,7 +385,7 @@ void udp_poll(FAR struct net_driver_s *dev, FAR struct udp_conn_s *conn);
  *
  ****************************************************************************/
 
-int psock_udp_cansend(FAR struct socket *psock);
+int psock_udp_cansend(FAR struct udp_conn_s *conn);
 
 /****************************************************************************
  * Name: udp_send

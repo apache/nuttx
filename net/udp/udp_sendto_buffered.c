@@ -95,8 +95,7 @@
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
 #endif
-static int sendto_next_transfer(FAR struct socket *psock,
-                                FAR struct udp_conn_s *conn);
+static int sendto_next_transfer(FAR struct udp_conn_s *conn);
 static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
                                     FAR void *pvconn, FAR void *pvpriv,
                                     uint16_t flags);
@@ -146,8 +145,7 @@ static uint32_t udp_inqueue_wrb_size(FAR struct udp_conn_s *conn)
  *   Release the write buffer at the head of the write buffer queue.
  *
  * Input Parameters:
- *   dev   - The structure of the network driver that caused the event
- *   psock - Socket state structure
+ *   conn  - The UDP connection of interest
  *
  * Returned Value:
  *   None
@@ -157,8 +155,7 @@ static uint32_t udp_inqueue_wrb_size(FAR struct udp_conn_s *conn)
  *
  ****************************************************************************/
 
-static void sendto_writebuffer_release(FAR struct socket *psock,
-                                       FAR struct udp_conn_s *conn)
+static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   int ret = OK;
@@ -200,7 +197,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
            * the write buffer queue.
            */
 
-          ret = sendto_next_transfer(psock, conn);
+          ret = sendto_next_transfer(conn);
         }
     }
   while (wrb != NULL && ret < 0);
@@ -223,7 +220,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
  *
  * Input Parameters:
  *   dev   - The structure of the network driver that caused the event
- *   psock - Socket state structure
+ *   conn  - The UDP connection of interest
  *
  * Returned Value:
  *   None
@@ -266,7 +263,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *   the head of the write queue.
  *
  * Input Parameters:
- *   psock - Socket state structure
  *   conn  - The UDP connection structure
  *
  * Returned Value:
@@ -274,8 +270,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int sendto_next_transfer(FAR struct socket *psock,
-                                FAR struct udp_conn_s *conn)
+static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct net_driver_s *dev;
@@ -361,7 +356,7 @@ static int sendto_next_transfer(FAR struct socket *psock,
   /* Set up the callback in the connection */
 
   conn->sndcb->flags = (UDP_POLL | NETDEV_DOWN);
-  conn->sndcb->priv  = (FAR void *)psock;
+  conn->sndcb->priv  = (FAR void *)conn;
   conn->sndcb->event = sendto_eventhandler;
 
   /* Notify the device driver of the availability of TX data */
@@ -394,10 +389,9 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
                                     FAR void *pvconn, FAR void *pvpriv,
                                     uint16_t flags)
 {
-  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvconn;
-  FAR struct socket *psock = (FAR struct socket *)pvpriv;
+  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvpriv;
 
-  DEBUGASSERT(dev != NULL && psock != NULL);
+  DEBUGASSERT(dev != NULL && conn != NULL);
 
   ninfo("flags: %04x\n", flags);
 
@@ -411,7 +405,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * the next transfer.
        */
 
-      sendto_writebuffer_release(psock, psock->s_conn);
+      sendto_writebuffer_release(conn);
       return flags;
     }
 
@@ -492,7 +486,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * setup the next transfer.
        */
 
-      sendto_writebuffer_release(psock, conn);
+      sendto_writebuffer_release(conn);
 
       /* Only one data can be sent by low level driver at once,
        * tell the caller stop polling the other connections.
@@ -826,7 +820,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
            * the write buffer queue.
            */
 
-          ret = sendto_next_transfer(psock, conn);
+          ret = sendto_next_transfer(conn);
           if (ret < 0)
             {
               sq_remlast(&conn->write_q);
@@ -859,7 +853,7 @@ errout_with_lock:
  *   another means.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     A reference to UDP connection structure.
  *
  * Returned Value:
  *   OK
@@ -871,11 +865,11 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int psock_udp_cansend(FAR struct socket *psock)
+int psock_udp_cansend(FAR struct udp_conn_s *conn)
 {
   /* Verify that we received a valid socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (conn == NULL)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;
