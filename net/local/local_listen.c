@@ -96,7 +96,11 @@ int local_listen(FAR struct socket *psock, int backlog)
 
   /* Set the backlog value */
 
-  DEBUGASSERT((unsigned)backlog < 256);
+  if (backlog > 255)
+    {
+      backlog = 255;
+    }
+
   server->u.server.lc_backlog = backlog;
 
   /* Is this the first time since being bound to an address and that
