@@ -363,12 +363,12 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
           if (setting->l_onoff)
             {
               _SO_SETOPT(conn->s_options, option);
-              psock->s_linger = 10 * setting->l_linger;
+              conn->s_linger = 10 * setting->l_linger;
             }
           else
             {
               _SO_CLROPT(conn->s_options, option);
-              psock->s_linger = 0;
+              conn->s_linger = 0;
             }
 
           net_unlock();
