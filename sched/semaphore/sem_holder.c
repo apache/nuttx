@@ -275,16 +275,11 @@ static int nxsem_foreachholder(FAR sem_t *sem, holderhandler_t handler,
 
       next = pholder->flink;
 
-      /* Check if there is a handler... there should always be one
-       * in this configuration.
-       */
+      DEBUGASSERT(pholder->htcb != NULL);
 
-      if (pholder->htcb != NULL)
-        {
-          /* Call the handler */
+      /* Call the handler */
 
-          ret = handler(pholder, sem, arg);
-        }
+      ret = handler(pholder, sem, arg);
     }
 #else
   int i;
@@ -871,7 +866,7 @@ void nxsem_add_holder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
       /* Find or allocate a container for this new holder */
 
       pholder = nxsem_findorallocateholder(sem, htcb);
-      if (pholder != NULL)
+      if (pholder != NULL && pholder->counts < SEM_VALUE_MAX)
         {
           /* Increment the number of counts held by this holder */
 
@@ -951,18 +946,60 @@ void nxsem_release_holder(FAR sem_t *sem)
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct semholder_s *pholder;
+  FAR struct semholder_s *candidate = NULL;
+  unsigned int total = 0;
 
   /* Find the container for this holder */
 
-  pholder = nxsem_findholder(sem, rtcb);
-  if (pholder != NULL && pholder->counts > 0)
+#if CONFIG_SEM_PREALLOCHOLDERS > 0
+  for (pholder = sem->hhead; pholder; pholder = pholder->flink)
+#else
+  int i;
+
+  /* We have two hard-allocated holder structures in sem_t */
+
+  for (i = 0; i < 2; i++)
+#endif
     {
-      /* Decrement the counts on this holder -- the holder will be freed
-       * later in nxsem_restore_baseprio.
+#if CONFIG_SEM_PREALLOCHOLDERS == 0
+      pholder = &sem->holder[i];
+      if (pholder->htcb == NULL)
+        {
+          continue;
+        }
+#endif
+
+      DEBUGASSERT(pholder->counts > 0);
+
+      if (pholder->htcb == rtcb)
+        {
+          /* Decrement the counts on this holder -- the holder will be freed
+           * later in nxsem_restore_baseprio.
+           */
+
+          pholder->counts--;
+          return;
+        }
+
+      total++;
+      candidate = pholder;
+    }
+
+  /* The current task is not a holder */
+
+  if (total == 1)
+    {
+      /* If the sempahore has only one holder, we can decrement the counts
+       * simply.
        */
 
-      pholder->counts--;
+      candidate->counts--;
+      return;
     }
+
+  /* TODO:
+   *   How do we choose the holder to decrement it's counts?
+   */
 }
 
 /****************************************************************************
