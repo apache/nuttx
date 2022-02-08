@@ -410,7 +410,7 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (psock->s_conn != NULL && _SS_ISCONNECTED(psock->s_flags))
+      if (psock->s_conn != NULL && _SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
@@ -1069,7 +1069,9 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
       goto errout;
     }
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -1077,8 +1079,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 
   /* Make sure that we have the IP address mapping */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -1113,7 +1113,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
-  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
+  nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
+                            (flags & MSG_DONTWAIT) != 0;
 
   /* Dump the incoming buffer */
 
@@ -1133,7 +1134,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
        * state again to ensure the connection is still valid.
        */
 
-      if (!_SS_ISCONNECTED(psock->s_flags))
+      if (!_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           nerr("ERROR: No longer connected\n");
           ret = -ENOTCONN;
@@ -1420,6 +1421,8 @@ errout:
 
 int psock_tcp_cansend(FAR struct socket *psock)
 {
+  FAR struct socket_conn_s *conn;
+
   /* Verify that we received a valid socket */
 
   if (!psock || !psock->s_conn)
@@ -1428,9 +1431,11 @@ int psock_tcp_cansend(FAR struct socket *psock)
       return -EBADF;
     }
 
+  conn = psock->s_conn;
+
   /* Verify that this is connected TCP socket */
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->s_flags))
     {
       nerr("ERROR: Not connected\n");
       return -ENOTCONN;

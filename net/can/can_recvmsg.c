@@ -652,7 +652,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Handle non-blocking CAN sockets */
 
-  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.

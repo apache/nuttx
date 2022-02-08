@@ -82,8 +82,8 @@ static int psock_fifo_read(FAR struct socket *psock, FAR void *buf,
            * eventually be reported as ENOTCONN.
            */
 
-          psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
-          conn->lc_state  = LOCAL_STATE_DISCONNECTED;
+          conn->lc_conn.s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
+          conn->lc_state = LOCAL_STATE_DISCONNECTED;
 
           /* Did we receive any data? */
 
@@ -330,7 +330,7 @@ psock_dgram_recvfrom(FAR struct socket *psock, FAR void *buf, size_t len,
 
   /* Open the receiving side of the transfer */
 
-  ret = local_open_receiver(conn, _SS_ISNONBLOCK(psock->s_flags) ||
+  ret = local_open_receiver(conn, _SS_ISNONBLOCK(conn->lc_conn.s_flags) ||
                             (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {

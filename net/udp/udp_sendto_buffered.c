@@ -539,11 +539,16 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags,
                          FAR const struct sockaddr *to, socklen_t tolen)
 {
-  FAR struct udp_conn_s *conn;
   FAR struct udp_wrbuffer_s *wrb;
+  FAR struct udp_conn_s *conn;
   bool nonblock;
   bool empty;
   int ret = OK;
+
+  /* Get the underlying the UDP connection structure.  */
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn);
 
   /* If the UDP socket was previously assigned a remote peer address via
    * connect(), then as with connection-mode socket, sendto() may not be
@@ -551,7 +556,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * used with such connected UDP sockets.
    */
 
-  if (to != NULL && _SS_ISCONNECTED(psock->s_flags))
+  if (to != NULL && _SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* EISCONN - A destination address was specified and the socket is
        * already connected.
@@ -564,7 +569,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * must be provided.
    */
 
-  else if (to == NULL && !_SS_ISCONNECTED(psock->s_flags))
+  else if (to == NULL && !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* EDESTADDRREQ - The socket is not connection-mode and no peer
        * address is set.
@@ -572,11 +577,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       return -EDESTADDRREQ;
     }
-
-  /* Get the underlying the UDP connection structure.  */
-
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn);
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -592,7 +592,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Check if the socket is connection mode */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. use the connected remote address (the 'to' address is
            * null).
@@ -631,7 +631,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Check if the socket is connection mode */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. use the connected remote address (the 'to' address is
            * null).
@@ -666,7 +666,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
-  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
+  nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
+                            (flags & MSG_DONTWAIT) != 0;
 
   /* Dump the incoming buffer */
 
@@ -720,7 +721,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * Check if the socket is connected
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. get the connection address from the connection structure */
 

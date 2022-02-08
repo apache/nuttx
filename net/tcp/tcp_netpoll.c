@@ -217,7 +217,7 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
-                   _SS_ISNONBLOCK(psock->s_flags));
+                   _SS_ISNONBLOCK(conn->sconn.s_flags));
 
   /* Find a container to hold the poll information */
 
@@ -331,8 +331,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
    *    Action: Return with POLLHUP|POLLERR events
    */
 
-  if (!nonblock_conn && !_SS_ISCONNECTED(psock->s_flags) &&
-      !_SS_ISLISTENING(psock->s_flags))
+  if (!nonblock_conn && !_SS_ISCONNECTED(conn->sconn.s_flags) &&
+      !_SS_ISLISTENING(conn->sconn.s_flags))
     {
       /* We were previously connected but lost the connection either due
        * to a graceful shutdown by the remote peer or because of some
@@ -341,7 +341,8 @@ int tcp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds)
 
       fds->revents |= (POLLERR | POLLHUP);
     }
-  else if (_SS_ISCONNECTED(psock->s_flags) && psock_tcp_cansend(psock) >= 0)
+  else if (_SS_ISCONNECTED(conn->sconn.s_flags) &&
+           psock_tcp_cansend(psock) >= 0)
     {
       fds->revents |= (POLLWRNORM & fds->events);
     }

@@ -219,7 +219,10 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
       else if ((flags & TCP_CONNECTED) != 0)
         {
           FAR struct socket *psock = pstate->tc_psock;
+          FAR struct socket_conn_s *conn;
           DEBUGASSERT(psock);
+
+          conn = psock->s_conn;
 
           /* Mark the connection bound and connected.  NOTE this is
            * is done here (vs. later) in order to avoid any race condition
@@ -227,7 +230,7 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
            * but not necessarily at any time later.
            */
 
-          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
+          conn->s_flags |= (_SF_BOUND | _SF_CONNECTED);
 
           /* Indicate that the socket is no longer connected */
 
@@ -293,8 +296,9 @@ static uint16_t psock_connect_eventhandler(FAR struct net_driver_s *dev,
 int psock_tcp_connect(FAR struct socket *psock,
                       FAR const struct sockaddr *addr)
 {
-  struct tcp_connect_s state;
-  int                  ret = OK;
+  FAR struct tcp_conn_s *conn;
+  struct tcp_connect_s   state;
+  int                    ret = OK;
 
   /* Interrupts must be disabled through all of the following because
    * we cannot allow the network callback to occur until we are completely
@@ -303,9 +307,11 @@ int psock_tcp_connect(FAR struct socket *psock,
 
   net_lock();
 
+  conn = psock->s_conn;
+
   /* Get the connection reference from the socket */
 
-  if (!psock->s_conn) /* Should always be non-NULL */
+  if (conn == NULL) /* Should always be non-NULL */
     {
       ret = -EINVAL;
     }
@@ -313,20 +319,20 @@ int psock_tcp_connect(FAR struct socket *psock,
     {
       /* Perform the TCP connection operation */
 
-      ret = tcp_connect(psock->s_conn, addr);
+      ret = tcp_connect(conn, addr);
     }
 
   if (ret >= 0)
     {
       /* Notify the device driver that new connection is available. */
 
-      netdev_txnotify_dev(((FAR struct tcp_conn_s *)psock->s_conn)->dev);
+      netdev_txnotify_dev(conn->dev);
 
       /* Non-blocking connection ? set the socket error
        * and start the monitor
        */
 
-      if (_SS_ISNONBLOCK(psock->s_flags))
+      if (_SS_ISNONBLOCK(conn->sconn.s_flags))
         {
           ret = -EINPROGRESS;
         }
@@ -385,7 +391,7 @@ int psock_tcp_connect(FAR struct socket *psock,
                * happen in this context, but just in case...
                */
 
-              tcp_stop_monitor(psock->s_conn, TCP_ABORT);
+              tcp_stop_monitor(conn, TCP_ABORT);
               ret = ret2;
             }
         }

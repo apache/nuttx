@@ -229,6 +229,10 @@ struct socket_conn_s
   FAR struct devif_callback_s *list;
   FAR struct devif_callback_s *list_tail;
 
+  /* Definitions of 8-bit socket flags */
+
+  uint8_t       s_flags;     /* See _SF_* definitions */
+
   /* Connection-specific content may follow */
 };
 
@@ -243,7 +247,6 @@ struct socket
   uint8_t       s_domain;    /* IP domain */
   uint8_t       s_type;      /* Protocol type */
   uint8_t       s_proto;     /* Socket Protocol */
-  uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Socket options */
 

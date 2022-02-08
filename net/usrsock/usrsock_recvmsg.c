@@ -302,7 +302,8 @@ ssize_t usrsock_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
       if (!(conn->flags & USRSOCK_EVENT_RECVFROM_AVAIL))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+          if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+              (flags & MSG_DONTWAIT) != 0)
             {
               /* Nothing to receive from daemon side. */
 

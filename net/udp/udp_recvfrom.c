@@ -627,7 +627,7 @@ ssize_t psock_udp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Handle non-blocking UDP sockets */
 
-  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.

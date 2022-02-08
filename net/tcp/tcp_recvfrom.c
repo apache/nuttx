@@ -462,6 +462,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
       else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
           FAR struct socket *psock = pstate->ir_sock;
+          FAR struct socket_conn_s *conn;
 
           nwarn("WARNING: Lost connection\n");
 
@@ -471,7 +472,8 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            */
 
           DEBUGASSERT(psock != NULL);
-          if (_SS_ISCONNECTED(psock->s_flags))
+          conn = psock->s_conn;
+          if (_SS_ISCONNECTED(conn->s_flags))
             {
               /* Handle loss-of-connection event */
 
@@ -660,7 +662,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Verify that the SOCK_STREAM has been and still is connected */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* Was any data transferred from the readahead buffer after we were
        * disconnected?  If so, then return the number of bytes received.  We
@@ -673,7 +675,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
        * recvfrom() will get an end-of-file indication.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(psock->s_flags))
+      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive any
@@ -690,7 +692,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
    * return EAGAIN if no data was obtained from the read-ahead buffers.
    */
 
-  else if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+           (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.

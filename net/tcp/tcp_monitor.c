@@ -69,6 +69,8 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
 static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
 {
+  FAR struct socket_conn_s *conn = psock->s_conn;
+
   /* These loss-of-connection events may be reported:
    *
    *   TCP_CLOSE: The remote host has closed the connection
@@ -92,8 +94,8 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
        * not handle as an error but as an "end-of-file"
        */
 
-      psock->s_flags &= ~_SF_CONNECTED;
-      psock->s_flags |= _SF_CLOSED;
+      conn->s_flags &= ~_SF_CONNECTED;
+      conn->s_flags |= _SF_CLOSED;
     }
   else if ((flags & (TCP_ABORT | TCP_TIMEDOUT | NETDEV_DOWN)) != 0)
     {
@@ -101,7 +103,7 @@ static void tcp_close_connection(FAR struct socket *psock, uint16_t flags)
        * (eventually) be reported as an ENOTCONN error.
        */
 
-      psock->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
+      conn->s_flags &= ~(_SF_CONNECTED | _SF_CLOSED);
     }
 }
 
@@ -129,10 +131,11 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
                                   uint16_t flags)
 {
   FAR struct socket *psock = (FAR struct socket *)pvpriv;
+  FAR struct socket_conn_s *conn = psock->s_conn;
 
   if (psock != NULL)
     {
-      ninfo("flags: %04x s_flags: %02x\n", flags, psock->s_flags);
+      ninfo("flags: %04x s_flags: %02x\n", flags, conn->s_flags);
 
       /* TCP_DISCONN_EVENTS: TCP_CLOSE, TCP_ABORT, TCP_TIMEDOUT, or
        * NETDEV_DOWN.  All loss-of-connection events.
@@ -170,8 +173,8 @@ static uint16_t tcp_monitor_event(FAR struct net_driver_s *dev,
 
           /* Indicate that the socket is now connected */
 
-          psock->s_flags |= (_SF_BOUND | _SF_CONNECTED);
-          psock->s_flags &= ~_SF_CLOSED;
+          sconn->s_flags |= (_SF_BOUND | _SF_CONNECTED);
+          sconn->s_flags &= ~_SF_CLOSED;
         }
     }
 
@@ -259,7 +262,7 @@ int tcp_start_monitor(FAR struct socket *psock)
   /* Non-blocking connection ? */
 
   nonblock_conn = (conn->tcpstateflags == TCP_SYN_SENT &&
-                   _SS_ISNONBLOCK(psock->s_flags));
+                   _SS_ISNONBLOCK(conn->sconn.s_flags));
 
   /* Check if the connection has already been closed before any callbacks
    * have been registered. (Maybe the connection is lost before accept has
