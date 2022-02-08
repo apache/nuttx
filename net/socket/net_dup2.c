@@ -77,11 +77,6 @@ int psock_dup2(FAR struct socket *psock1, FAR struct socket *psock2)
   psock2->s_domain   = psock1->s_domain;    /* IP domain: PF_INET, PF_INET6, or PF_PACKET */
   psock2->s_type     = psock1->s_type;      /* Protocol type: Only SOCK_STREAM or SOCK_DGRAM */
   psock2->s_sockif   = psock1->s_sockif;    /* Socket interface */
-#ifdef CONFIG_NET_SOCKOPTS
-#ifdef CONFIG_NET_SOLINGER
-  psock2->s_linger   = psock1->s_linger;    /* Linger timeout value (in deciseconds) */
-#endif
-#endif
   psock2->s_conn     = psock1->s_conn;      /* UDP or TCP connection structure */
 
   /* Increment the reference count on the underlying connection structure

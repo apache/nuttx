@@ -285,7 +285,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
     {
       /* Wait until for the buffered TX data to be sent. */
 
-      ret = tcp_txdrain(psock, _SO_TIMEOUT(psock->s_linger));
+      ret = tcp_txdrain(psock, _SO_TIMEOUT(conn->sconn.s_linger));
       if (ret < 0)
         {
           /* tcp_txdrain may fail, but that won't stop us from closing

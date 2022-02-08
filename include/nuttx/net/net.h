@@ -240,6 +240,9 @@ struct socket_conn_s
   sockopt_t     s_options;   /* Selected socket options */
   socktimeo_t   s_rcvtimeo;  /* Receive timeout value (in deciseconds) */
   socktimeo_t   s_sndtimeo;  /* Send timeout value (in deciseconds) */
+#ifdef CONFIG_NET_SOLINGER
+  socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
+#endif
 #endif
 
   /* Connection-specific content may follow */
@@ -260,9 +263,6 @@ struct socket
   /* Socket options */
 
 #ifdef CONFIG_NET_SOCKOPTS
-#ifdef CONFIG_NET_SOLINGER
-  socktimeo_t   s_linger;    /* Linger timeout value (in deciseconds) */
-#endif
 #ifdef CONFIG_NET_TIMESTAMP
   int32_t       s_timestamp; /* Socket timestamp enabled/disabled */
 #endif
