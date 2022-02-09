@@ -242,8 +242,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Get the start of the file data */
 
-  ret = romfs_datastart(rm, nodeinfo.rn_offset,
-                        &rf->rf_startoffset);
+  ret = romfs_datastart(rm, &nodeinfo, &rf->rf_startoffset);
   if (ret < 0)
     {
       ferr("ERROR: Failed to locate start of file data: %d\n", ret);
@@ -791,8 +790,13 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
 
   /* The entry is a directory */
 
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+  dir->u.romfs.fr_firstnode   = nodeinfo.rn_child;
+  dir->u.romfs.fr_currnode    = nodeinfo.rn_child;
+#else
   dir->u.romfs.fr_firstoffset = nodeinfo.rn_offset;
   dir->u.romfs.fr_curroffset  = nodeinfo.rn_offset;
+#endif
 
 errout_with_semaphore:
   romfs_semgive(rm);
@@ -810,10 +814,12 @@ static int romfs_readdir(FAR struct inode *mountpt,
                          FAR struct fs_dirent_s *dir)
 {
   FAR struct romfs_mountpt_s *rm;
+#ifndef CONFIG_FS_ROMFS_CACHE_NODE
   uint32_t                    linkoffset;
-  uint32_t                    next;
   uint32_t                    info;
   uint32_t                    size;
+#endif
+  uint32_t                    next;
   int                         ret;
 
   finfo("Entry\n");
@@ -847,7 +853,11 @@ static int romfs_readdir(FAR struct inode *mountpt,
     {
       /* Have we reached the end of the directory */
 
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+      if (!dir->u.romfs.fr_currnode || !(*dir->u.romfs.fr_currnode))
+#else
       if (!dir->u.romfs.fr_curroffset)
+#endif
         {
           /* We signal the end of the directory by returning the
            * special error -ENOENT
@@ -858,6 +868,11 @@ static int romfs_readdir(FAR struct inode *mountpt,
           goto errout_with_semaphore;
         }
 
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+      next = (*dir->u.romfs.fr_currnode)->rn_next;
+      strcpy(dir->fd_dir.d_name, (*dir->u.romfs.fr_currnode)->rn_name);
+      dir->u.romfs.fr_currnode++;
+#else
       /* Parse the directory entry */
 
       ret = romfs_parsedirentry(rm, dir->u.romfs.fr_curroffset, &linkoffset,
@@ -881,6 +896,7 @@ static int romfs_readdir(FAR struct inode *mountpt,
       /* Set up the next directory entry offset */
 
       dir->u.romfs.fr_curroffset = next & RFNEXT_OFFSETMASK;
+#endif
 
       /* Check the file type */
 
@@ -940,7 +956,11 @@ static int romfs_rewinddir(FAR struct inode *mountpt,
   ret = romfs_checkmount(rm);
   if (ret == OK)
     {
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+      dir->u.romfs.fr_currnode = dir->u.romfs.fr_firstnode;
+#else
       dir->u.romfs.fr_curroffset = dir->u.romfs.fr_firstoffset;
+#endif
     }
 
   romfs_semgive(rm);
@@ -1114,6 +1134,9 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
           kmm_free(rm->rm_buffer);
         }
 
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+      romfs_freenode(rm->rm_root);
+#endif
       nxsem_destroy(&rm->rm_sem);
       kmm_free(rm);
       return OK;
