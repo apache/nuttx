@@ -146,13 +146,13 @@ static int pplus_fls_erase_chip(struct pplus_fls_dev_s *priv)
   /* Erase the whole chip */
 
   for (i = 0; i < priv->nsectors; i++)
-  {
-    _HAL_CS_ALLOC_();
-    HAL_ENTER_CRITICAL_SECTION();
-    hal_flash_erase_sector(address);
-    HAL_EXIT_CRITICAL_SECTION();
-    address += (1ul << priv->sectorshift);
-  }
+    {
+      _HAL_CS_ALLOC_();
+      HAL_ENTER_CRITICAL_SECTION();
+      hal_flash_erase_sector(address);
+      HAL_EXIT_CRITICAL_SECTION();
+      address += (1ul << priv->sectorshift);
+    }
 
   return OK;
 }
@@ -271,7 +271,7 @@ static int pplus_fls_ioctl(FAR struct mtd_dev_s *dev,
   FAR struct pplus_fls_dev_s *priv = (FAR struct pplus_fls_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

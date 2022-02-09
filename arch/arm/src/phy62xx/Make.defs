@@ -36,7 +36,7 @@ CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += arm_switchcontext.c
 
 ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
-CMN_CSRCS += arm_backtrace.c
+CMN_CSRCS += arm_backtrace_thumb.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
@@ -54,7 +54,7 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CMN_CSRCS += arm_dumpnvic.c
 endif
 
-CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c
+CHIP_CSRCS  = start.c gpio.c irq.c timer.c uart.c pwrmgr.c idle.c my_printf.c
 CHIP_CSRCS += jump_table.c
 CHIP_CSRCS += pplus_mtd_flash.c
 ifeq ($(CONFIG_PHY6222_BLE),y)
@@ -62,7 +62,6 @@ ifeq ($(CONFIG_PHY6222_BLE),y)
 #CHIP_CSRCS += phy62xx_ble_patch.c phy62xx_ble_hci_event_patch.c rf_phy_driver.c
 #CHIP_CSRCS += phy62xx_ble.c phy62xx_ble_patch.c rf_phy_driver.c
 CHIP_CSRCS += phy62xx_ble.c
-EXTRA_LIBS += -lphy62xxble
 endif
 
 ifeq ($(CONFIG_TIMER),y)
@@ -131,9 +130,12 @@ LDFLAGS += -Map="../../../phyplus_build.map"
 ifndef CONFIG_PHY6222_SDK
 EXTRA_LIBPATHS += -L$(TOPDIR)/arch/arm/src/chip
 EXTRA_LIBS += -lphy62xxble
+CHIP_CSRCS += flash.c
+CHIP_CSRCS += clock.c 
 else
 EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/lib
 EXTRA_LIBS += -lphy6222_rf
+EXTRA_LIBS += -lphy6222_sec_boot
 EXTRA_LIBS += -lphy6222_host
 endif
 

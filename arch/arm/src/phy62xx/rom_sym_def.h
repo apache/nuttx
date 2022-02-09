@@ -31,7 +31,6 @@
    * #define x _symrom_
    */
 
-  #define TIM2_IRQHandler _symrom_TIM2_IRQHandler
   #define gpio_write _symrom_gpio_write
   #define ll_processExtInitIRQ _symrom_ll_processExtInitIRQ
   #define ll_processExtScanIRQ _symrom_ll_processExtScanIRQ
@@ -976,6 +975,5 @@
   #define zigbee_crc16_gen _symrom_zigbee_crc16_gen
   #define WaitUs _symrom_WaitUs
 
-#endif
-#endif
-
+#endif /* USE_ROMSYM_ALIAS */
+#endif /* __ARCH_ARM_SRC_PHY62XX_ROM_SYM_DEF_H */

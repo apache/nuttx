@@ -105,6 +105,7 @@ int phy62xx_bringup(void)
         }
 
 #endif
+
 #ifdef CONFIG_FS_LITTLEFS
 
       struct mtd_dev_s *mtd =
@@ -136,9 +137,13 @@ int phy62xx_bringup(void)
         }
 
 #endif
+
+#ifndef CONFIG_PHY6222_SDK
   phyplus_timer_initialize("/dev/timer3", 3);
 
   phyplus_wdt_initialize("/dev/watchdog0");
+#endif
+
 #ifdef CONFIG_PHY6222_BLE
 
   ret = pplus_ble_initialize();

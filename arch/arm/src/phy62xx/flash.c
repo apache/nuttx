@@ -234,7 +234,7 @@ static void __RAMRUN hw_spif_cache_config(void)
   hal_cache_init();
 }
 
-int __RAMRUN hal_spif_cache_init(void) /* xflash_Ctx_t cfg) */
+int __RAMRUN hal_spif_cache_init(xflash_Ctx_t cfg)
 {
   /* memset(&(s_xflashCtx), 0, sizeof(s_xflashCtx)); */
 

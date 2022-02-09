@@ -37,14 +37,6 @@
 #include "arm_internal.h"
 #include "jump_function.h"
 #include "bus_dev.h"
-  #define __PACKED                               __attribute__((packed))
-
-__PACKED typedef struct {
-    uint16_t opcode;        /**< operation code, defined mesh profile 3.7.3.1 Operation codes */
-    uint16_t company_id;    /**< SIG ID: 0xFFFF */
-} mible_mesh_opcode_t;
-
-
 /* #include "phy62xx_irq.h" */
 
 /****************************************************************************
@@ -215,9 +207,16 @@ int irq_priority(int irqid, uint8_t priority)
 
 void LL_IRQHandler1(void);
 void TIM1_IRQHandler1(void);
-/* void TIM2_IRQHandler1(void); */
+
+#ifdef CONFIG_PHY6222_SDK
+void TIM2_IRQHandler1(void);
+#endif
+
 void TIM3_IRQHandler1(void);
-/* void TIM5_IRQHandler1(void); */
+
+#ifdef CONFIG_PHY6222_SDK
+void TIM5_IRQHandler1(void);
+#endif
 
 void up_irqinitialize(void)
 {
@@ -321,27 +320,40 @@ void up_irqinitialize(void)
 
   irq_attach(PHY62XX_IRQ_BB_IRQn, (xcpt_t)LL_IRQHandler1, NULL);
   irq_attach(PHY62XX_IRQ_TIM1_IRQn, (xcpt_t)TIM1_IRQHandler1, NULL);
-/*  irq_attach(PHY62XX_IRQ_TIM2_IRQn, (xcpt_t)TIM2_IRQHandler1, NULL);*/
+
+#ifdef CONFIG_PHY6222_SDK
+  irq_attach(PHY62XX_IRQ_TIM2_IRQn, (xcpt_t)TIM2_IRQHandler1, NULL);
+#endif
+
   irq_attach(PHY62XX_IRQ_TIM3_IRQn, (xcpt_t)TIM3_IRQHandler1, NULL);
-/*  irq_attach(PHY62XX_IRQ_TIM5_IRQn, (xcpt_t)TIM5_IRQHandler1, NULL);*/
+
+#ifdef CONFIG_PHY6222_SDK
+  irq_attach(PHY62XX_IRQ_TIM5_IRQn, (xcpt_t)TIM5_IRQHandler1, NULL);
+#endif
+
   irq_priority((IRQn_Type)BB_IRQn,    IRQ_PRIO_REALTIME);
   irq_priority((IRQn_Type)TIM1_IRQn,  IRQ_PRIO_HIGH);     /* ll_EVT */
-/*  irq_priority((IRQn_Type)TIM2_IRQn,  IRQ_PRIO_HIGH);     */ /* OSAL_TICK */
+
+#ifdef CONFIG_PHY6222_SDK
+  irq_priority((IRQn_Type)TIM2_IRQn,  IRQ_PRIO_HIGH);     /* OSAL_TICK */
+#endif
+
   irq_priority((IRQn_Type)TIM3_IRQn,  IRQ_PRIO_APP);      /* OSAL_TICK */
   irq_priority((IRQn_Type)TIM4_IRQn,  IRQ_PRIO_HIGH);     /* LL_EXA_ADV */
   NVIC_EnableIRQ((IRQn_Type)BB_IRQn);
   NVIC_EnableIRQ((IRQn_Type)TIM1_IRQn);                   /* ll_EVT */
 
-  /* NVIC_EnableIRQ((IRQn_Type)TIM2_IRQn); */
-
-                                                          /* OSAL_TICK */
+#ifdef CONFIG_PHY6222_SDK
+  NVIC_EnableIRQ((IRQn_Type)TIM2_IRQn);
+#endif
 
   NVIC_EnableIRQ((IRQn_Type)TIM3_IRQn);
-/*  NVIC_EnableIRQ((IRQn_Type)TIM5_IRQn); */
+
+#ifdef CONFIG_PHY6222_SDK
+  NVIC_EnableIRQ((IRQn_Type)TIM5_IRQn);
+#endif
 
   /* NVIC_EnableIRQ((IRQn_Type)TIM4_IRQn); */
-
-                                                          /* LL_EXA_ADV */
 
   /* svc(SVC_CALL_WR); */
 

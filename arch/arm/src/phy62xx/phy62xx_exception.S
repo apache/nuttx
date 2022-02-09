@@ -366,5 +366,4 @@ g_intstacktop:
 	.size	g_intstackalloc, .-g_intstackalloc
 #endif
 
-
 	.end

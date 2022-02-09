@@ -186,7 +186,7 @@ static void irq_rx_handler(UART_INDEX_e uart_index, uint8_t flg)
   if (m_uartCtx[uart_index].cfg.use_fifo)
     {
       len = cur_uart->RFL;
-        fifo_len_store = len;
+      fifo_len_store = len;
       for (i = 0; i < len; i++)
         {
           data[i] = (uint8_t)(cur_uart->RBR & 0xff);
@@ -413,8 +413,8 @@ int uart_hw_init(UART_INDEX_e uart_index)
       cur_uart->IER |= IER_PTIME;
     }
 
-  if(pcfg->use_tx_buf)
-        cur_uart->IER |= IER_ETBEI;
+  if (pcfg->use_tx_buf)
+      cur_uart->IER |= IER_ETBEI;
 
   NVIC_SetPriority(irq_type, IRQ_PRIO_HAL);
   NVIC_EnableIRQ(irq_type);
@@ -890,17 +890,24 @@ static int pplus_uart_receive(struct uart_dev_s *dev, unsigned int *status)
   static uint8_t fifo_buf_store[UART_RX_BUFFER_SIZE];
   static int buf_head;
   static int buf_tail;
+
   /* Put fifo data into loopback buffer */
-  for(int i=0;i<fifo_len_store;i++)
+
+  for (int i = 0; i < fifo_len_store ; i++)
     {
-	  fifo_buf_store[buf_head] = fifo_data_store[i];
-	  buf_head = buf_head +1;
-	  if(buf_head == UART_RX_BUFFER_SIZE)
+      fifo_buf_store[buf_head] = fifo_data_store[i];
+      buf_head = buf_head + 1;
+      if (buf_head == UART_RX_BUFFER_SIZE)
+        {
           buf_head = 0;
+        }
     }
+
   fifo_len_store = 0;
-  if(buf_tail == UART_RX_BUFFER_SIZE)
+  if (buf_tail == UART_RX_BUFFER_SIZE)
+    {
       buf_tail = 0;
+    }
 
   priv->rx_available = false;
 
@@ -943,19 +950,22 @@ static bool pplus_uart_rxavailable(struct uart_dev_s *dev)
 {
   static int len_fifo;
   uart_Ctx_t *priv = (uart_Ctx_t *)dev->priv;
-  /* Detect the length of received data from fifo*/
-  if(len_fifo == 0)
-  {
-  	  hal_UART0_IRQHandler();
-  	  len_fifo = fifo_len_store;
-  }
-  if(len_fifo <= 0)
-	  {
-	  len_fifo = 0;
-  	  return len_fifo;
-	  }
+
+  /* Detect the length of received data from fifo */
+
+  if (len_fifo == 0)
+    {
+      hal_UART0_IRQHandler();
+      len_fifo = fifo_len_store;
+    }
+
+  if (len_fifo <= 0)
+    {
+      len_fifo = 0;
+      return len_fifo;
+    }
   else
-	  return len_fifo--;
+      return len_fifo--;
 }
 
 /****************************************************************************

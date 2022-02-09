@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f103-minimum/src/stm32_reset.c
+ * boards/arm/phy62xx/phy6222/src/reset.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -53,7 +53,6 @@
 
 int board_reset(int status)
 {
-
   up_systemreset();
   return 0;
 }

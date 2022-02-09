@@ -153,9 +153,24 @@ void irq_dispatch(int irq, FAR void *context)
 #else
       if (g_irqvector[ndx].handler)
         {
+//if(ndx != 15)
+//{
+//syslog(LOG_ERR, "g_irqvector ,idx:%d, vector:%x, arg:%x\n", ndx, vector, arg);
+//}
           vector = g_irqvector[ndx].handler;
           arg    = g_irqvector[ndx].arg;
+if(ndx != 15)
+{
+syslog(LOG_ERR, "g_irqvector ,idx:%d, vector:%x, arg:%x\n", ndx, vector, arg);
+}		  
         }
+      else
+      	{
+if(ndx != 15)
+{
+syslog(LOG_ERR, "g_irqvector handler invailed idx:%d\n", ndx);
+}
+      	}
 
       INCR_COUNT(ndx);
 #endif
@@ -176,7 +191,16 @@ void irq_dispatch(int irq, FAR void *context)
 
   /* Then dispatch to the interrupt handler */
 
-  CALL_VECTOR(ndx, vector, irq, context, arg);
+//  CALL_VECTOR(ndx, vector, irq, context, arg); //chrade comment this...
+  if(irq != 15)
+  {
+    syslog(LOG_ERR,"BEF NDX %d, IRQ %d (vector: %p)\n",ndx ,irq, vector);
+  }
+  vector(irq, context, arg); 
+  if(irq != 15)
+  {
+    syslog(LOG_ERR,"AFT NDX %d, IRQ %d (vector:%p)\n",ndx ,irq, vector);
+  }
   UNUSED(ndx);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
