@@ -32,7 +32,7 @@
 
 #include <nuttx/irq.h>
 
-#ifndef CONFIG_SPINLOCK
+#ifndef CONFIG_ARCH_HAVE_TESTSET
 typedef struct
 {
 } spinlock_t;
