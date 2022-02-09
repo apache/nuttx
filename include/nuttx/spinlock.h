@@ -32,10 +32,13 @@
 
 #include <nuttx/irq.h>
 
-#ifndef CONFIG_SPINLOCK
-typedef struct
-{
-} spinlock_t;
+#if !defined(CONFIG_ARCH_HAVE_TESTSET) && !defined(CONFIG_SPINLOCK)
+
+typedef uint8_t spinlock_t;
+
+#define SP_UNLOCKED 0  /* The Un-locked state */
+#define SP_LOCKED   1  /* The Locked state */
+
 #else
 
 /* The architecture specific spinlock.h header file must also provide the
@@ -49,6 +52,9 @@ typedef struct
  */
 
 #include <arch/spinlock.h>
+#endif
+
+#ifdef CONFIG_SPINLOCK
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -86,49 +92,6 @@ typedef struct
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: up_testset
- *
- * Description:
- *   Perform an atomic test and set operation on the provided spinlock.
- *
- *   This function must be provided via the architecture-specific logic.
- *
- * Input Parameters:
- *   lock  - A reference to the spinlock object.
- *
- * Returned Value:
- *   The spinlock is always locked upon return.  The previous value of the
- *   spinlock variable is returned, either SP_LOCKED if the spinlock was
- *   previously locked (meaning that the test-and-set operation failed to
- *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
- *   (meaning that we successfully obtained the lock).
- *
- ****************************************************************************/
-
-#if defined(CONFIG_ARCH_HAVE_TESTSET)
-spinlock_t up_testset(volatile FAR spinlock_t *lock);
-#elif !defined(CONFIG_SMP)
-static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
-{
-  irqstate_t flags;
-  spinlock_t ret;
-
-  flags = up_irq_save();
-
-  ret = *lock;
-
-  if (ret == SP_UNLOCKED)
-    {
-      *lock = SP_LOCKED;
-    }
-
-  up_irq_restore(flags);
-
-  return ret;
-}
-#endif
 
 /****************************************************************************
  * Name: spin_initialize
@@ -352,6 +315,49 @@ void spin_clrbit(FAR volatile cpu_set_t *set, unsigned int cpu,
 #endif
 
 #endif /* CONFIG_SPINLOCK */
+
+/****************************************************************************
+ * Name: up_testset
+ *
+ * Description:
+ *   Perform an atomic test and set operation on the provided spinlock.
+ *
+ *   This function must be provided via the architecture-specific logic.
+ *
+ * Input Parameters:
+ *   lock  - A reference to the spinlock object.
+ *
+ * Returned Value:
+ *   The spinlock is always locked upon return.  The previous value of the
+ *   spinlock variable is returned, either SP_LOCKED if the spinlock was
+ *   previously locked (meaning that the test-and-set operation failed to
+ *   obtain the lock) or SP_UNLOCKED if the spinlock was previously unlocked
+ *   (meaning that we successfully obtained the lock).
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_HAVE_TESTSET)
+spinlock_t up_testset(volatile FAR spinlock_t *lock);
+#elif !defined(CONFIG_SMP)
+static inline spinlock_t up_testset(volatile FAR spinlock_t *lock)
+{
+  irqstate_t flags;
+  spinlock_t ret;
+
+  flags = up_irq_save();
+
+  ret = *lock;
+
+  if (ret == SP_UNLOCKED)
+    {
+      *lock = SP_LOCKED;
+    }
+
+  up_irq_restore(flags);
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: spin_lock_irqsave
