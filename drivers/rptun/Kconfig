@@ -42,4 +42,14 @@ config RPTUN_LOCAL_CPUNAME
 	string "rptun local cpuname"
 	default LIBC_HOSTNAME
 
+config RPTUN_PM
+	bool "rptun power management"
+	depends on PM
+	default n
+	---help---
+		If TX/RX buffer is supplied and powered by each CPU.
+		And when one CPU in DEEP sleep, then it's buffer will
+		goto RAM-retention mode, can't access from another CPU.
+		So, we provide this method to resolve this.
+
 endif # RPTUN

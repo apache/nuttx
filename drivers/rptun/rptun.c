@@ -35,6 +35,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/rptun/openamp.h>
 #include <nuttx/rptun/rptun.h>
+#include <nuttx/power/pm.h>
 #include <nuttx/wqueue.h>
 #include <metal/utilities.h>
 
@@ -43,15 +44,15 @@
  ****************************************************************************/
 
 #ifndef MAX
-#  define MAX(a,b)              ((a) > (b) ? (a) : (b))
+#  define MAX(a,b)                  ((a) > (b) ? (a) : (b))
 #endif
 
 #ifndef ALIGN_UP
-#  define ALIGN_UP(s, a)        (((s) + (a) - 1) & ~((a) - 1))
+#  define ALIGN_UP(s, a)            (((s) + (a) - 1) & ~((a) - 1))
 #endif
 
-#define RPTUNIOC_NONE           0
-#define NO_HOLDER               (INVALID_PROCESS_ID)
+#define RPTUNIOC_NONE               0
+#define NO_HOLDER                   (INVALID_PROCESS_ID)
 
 #define RPTUN_STATUS_FROM_MASTER    0x8
 #define RPTUN_STATUS_MASK           0x7
@@ -71,12 +72,15 @@ struct rptun_priv_s
   struct metal_list            bind;
   struct metal_list            node;
   sem_t                        sem;
+  unsigned long                cmd;
 #ifdef CONFIG_RPTUN_WORKQUEUE
   struct work_s                work;
 #else
   int                          tid;
 #endif
-  unsigned long                cmd;
+#ifdef CONFIG_RPTUN_PM
+  bool                         stay;
+#endif
 };
 
 struct rptun_bind_s
@@ -250,6 +254,39 @@ static void rptun_unlock(void)
     }
 }
 
+#ifdef CONFIG_RPTUN_PM
+static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
+                                   bool stay)
+{
+  irqstate_t flags;
+
+  flags = enter_critical_section();
+
+  if (stay && !priv->stay)
+    {
+      pm_stay(0, PM_IDLE);
+      priv->stay = true;
+    }
+
+  if (!stay && priv->stay && !rpmsg_buffer_nused(&priv->rvdev, false))
+    {
+      pm_relax(0, PM_IDLE);
+      priv->stay = false;
+    }
+
+  leave_critical_section(flags);
+}
+
+static inline void rptun_enable_rx_kick(FAR struct rptun_priv_s *priv)
+{
+  virtqueue_enable_cb(priv->rvdev.svq);
+}
+
+#else
+#  define rptun_pm_action(priv, stay)
+#  define rptun_enable_rx_kick(priv)
+#endif
+
 static void rptun_worker(FAR void *arg)
 {
   FAR struct rptun_priv_s *priv = arg;
@@ -273,6 +310,8 @@ static void rptun_worker(FAR void *arg)
 
   priv->cmd = RPTUNIOC_NONE;
   remoteproc_get_notification(&priv->rproc, RPTUN_NOTIFY_ALL);
+
+  rptun_pm_action(priv, false);
 }
 
 static void rptun_post(FAR struct rptun_priv_s *priv)
@@ -417,6 +456,14 @@ static int rptun_stop(FAR struct remoteproc *rproc)
 static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
 {
   FAR struct rptun_priv_s *priv = rproc->priv;
+  FAR struct rpmsg_virtio_device *rvdev = &priv->rvdev;
+  FAR struct virtqueue *vq = rvdev->svq;
+
+  if (rvdev->vdev && vq &&
+      rvdev->vdev->vrings_info[vq->vq_queue_index].notifyid == id)
+    {
+      rptun_pm_action(priv, true);
+    }
 
   RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
 
@@ -743,6 +790,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   rptun_unlock();
 
+  rptun_enable_rx_kick(priv);
   return 0;
 }
 
