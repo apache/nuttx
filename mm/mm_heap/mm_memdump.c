@@ -75,12 +75,13 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
       if (info->pid == -1 || node->pid == info->pid)
         {
           int i;
+          FAR const char *format = " %0*p";
           char buf[MM_BACKTRACE_DEPTH * MM_PTR_FMT_WIDTH + 1];
 
           for (i = 0; i < MM_BACKTRACE_DEPTH && node->backtrace[i]; i++)
             {
-              sprintf(buf + i * MM_PTR_FMT_WIDTH, " %*p",
-                      MM_PTR_FMT_WIDTH - 3, node->backtrace[i]);
+              sprintf(buf + i * MM_PTR_FMT_WIDTH, format,
+                      MM_PTR_FMT_WIDTH - 1, node->backtrace[i]);
             }
 
           syslog(LOG_INFO, "%6d%12zu%*p%s\n",
