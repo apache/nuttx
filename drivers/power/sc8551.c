@@ -1269,7 +1269,7 @@ static int sc8551_init_adc(FAR struct sc8551_dev_s *priv)
   sc8551_set_adc_scan(priv, ADC_TDIE, true);
   sc8551_set_adc_scan(priv, ADC_VAC, true);
 
-  sc8551_enable_adc(priv, true);
+  sc8551_enable_adc(priv, false);
 
   return 0;
 }
