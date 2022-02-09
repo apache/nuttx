@@ -50,8 +50,11 @@
 
 #define UART_TX_BUFFER_SIZE   256
 #define UART_RX_BUFFER_SIZE   256
-uint8_t fifo_data_store[UART_RX_FIFO_SIZE];
-uint8_t fifo_len_store = 0;
+uint8_t fifo_data_store[2][UART_RX_FIFO_SIZE];
+uint8_t fifo_len_store[2] =
+{
+  0, 0
+};
 typedef struct _uart_Context
 {
   bool          enable;
@@ -65,6 +68,9 @@ typedef struct _uart_Context
   uint8_t       tx_state;
   uart_Tx_Buf_t tx_buf;
   uart_Cfg_t    cfg;
+  uint8_t fifo_buf_store[UART_RX_BUFFER_SIZE];
+  int buf_head;
+  int buf_tail;
 } uart_Ctx_t;
 
 static uart_Ctx_t m_uartCtx[2] =
@@ -186,11 +192,11 @@ static void irq_rx_handler(UART_INDEX_e uart_index, uint8_t flg)
   if (m_uartCtx[uart_index].cfg.use_fifo)
     {
       len = cur_uart->RFL;
-      fifo_len_store = len;
+      fifo_len_store[uart_index] = len;
       for (i = 0; i < len; i++)
         {
           data[i] = (uint8_t)(cur_uart->RBR & 0xff);
-          fifo_data_store[i] = data[i];
+          fifo_data_store[uart_index][i] = data[i];
         }
     }
   else
@@ -886,27 +892,29 @@ static int pplus_uart_ioctl(struct file *filep, int cmd, unsigned long arg)
 static int pplus_uart_receive(struct uart_dev_s *dev, unsigned int *status)
 {
   uart_Ctx_t *priv = (uart_Ctx_t *)dev->priv;
-  uint32_t data;
-  static uint8_t fifo_buf_store[UART_RX_BUFFER_SIZE];
-  static int buf_head;
-  static int buf_tail;
+
+  /* uint32_t data;
+   * static uint8_t fifo_buf_store[UART_RX_BUFFER_SIZE];
+   * static int buf_head;
+   * static int buf_tail;
+   */
 
   /* Put fifo data into loopback buffer */
 
-  for (int i = 0; i < fifo_len_store ; i++)
+  for (int i = 0; i < fifo_len_store[priv->ID] ; i++)
     {
-      fifo_buf_store[buf_head] = fifo_data_store[i];
-      buf_head = buf_head + 1;
-      if (buf_head == UART_RX_BUFFER_SIZE)
+      priv->fifo_buf_store[priv->buf_head] = fifo_data_store[priv->ID][i];
+      priv->buf_head = priv->buf_head + 1;
+      if (priv->buf_head == UART_RX_BUFFER_SIZE)
         {
-          buf_head = 0;
+          priv->buf_head = 0;
         }
     }
 
-  fifo_len_store = 0;
-  if (buf_tail == UART_RX_BUFFER_SIZE)
+  fifo_len_store[priv->ID] = 0;
+  if (priv->buf_tail == UART_RX_BUFFER_SIZE)
     {
-      buf_tail = 0;
+      priv->buf_tail = 0;
     }
 
   priv->rx_available = false;
@@ -920,7 +928,7 @@ static int pplus_uart_receive(struct uart_dev_s *dev, unsigned int *status)
 
   /* Then return the fifo data byte by byte. */
 
-  return (char)fifo_buf_store[buf_tail++];
+  return (char)priv->fifo_buf_store[priv->buf_tail++];
 }
 
 /****************************************************************************
@@ -956,7 +964,7 @@ static bool pplus_uart_rxavailable(struct uart_dev_s *dev)
   if (len_fifo == 0)
     {
       hal_UART0_IRQHandler();
-      len_fifo = fifo_len_store;
+      len_fifo = fifo_len_store[priv->ID];
     }
 
   if (len_fifo <= 0)
@@ -965,7 +973,9 @@ static bool pplus_uart_rxavailable(struct uart_dev_s *dev)
       return len_fifo;
     }
   else
+    {
       return len_fifo--;
+    }
 }
 
 /****************************************************************************

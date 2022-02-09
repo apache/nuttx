@@ -39,6 +39,15 @@
 #ifdef CONFIG_PHY6222_BLE
 #include "phy62xx_ble.h"
 #endif
+
+#ifdef CONFIG_WATCHDOG
+#include "phyplus_wdt.h"
+#endif
+
+#ifdef CONFIG_TIMER
+extern int phyplus_timer_initialize(FAR const char *devpath, int timer);
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -139,9 +148,13 @@ int phy62xx_bringup(void)
 #endif
 
 #ifndef CONFIG_PHY6222_SDK
+#ifdef CONFIG_TIMER
   phyplus_timer_initialize("/dev/timer3", 3);
+#endif
 
+#ifdef CONFIG_WATCHDOG
   phyplus_wdt_initialize("/dev/watchdog0");
+#endif
 #endif
 
 #ifdef CONFIG_PHY6222_BLE
