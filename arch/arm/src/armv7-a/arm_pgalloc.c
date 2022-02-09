@@ -63,6 +63,7 @@ static uintptr_t alloc_pgtable(void)
   /* Allocate one physical page for the L2 page table */
 
   paddr = mm_pgalloc(1);
+  binfo("a new l2 page table (paddr=%x)\n", paddr);
   if (paddr)
     {
       DEBUGASSERT(MM_ISALIGNED(paddr));
@@ -209,6 +210,8 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
 #endif
   unsigned int index;
 
+  binfo("tcb->pid=%d tcb->group=%p\n", tcb->pid, tcb->group);
+  binfo("brkaddr=%x npages=%d\n", brkaddr, npages);
   DEBUGASSERT(tcb && tcb->group);
   group = tcb->group;
 
@@ -235,6 +238,8 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       /* Get the physical address of the level 2 page table */
 
       paddr = get_pgtable(&group->tg_addrenv, brkaddr);
+      binfo("l2 page table (paddr=%x)\n", paddr);
+      binfo("brkaddr=%x\n", brkaddr);
       if (paddr == 0)
         {
           return 0;
@@ -261,6 +266,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
       /* Back up L2 entry with physical memory */
 
       paddr = mm_pgalloc(1);
+      binfo("a new page (paddr=%x)\n", paddr);
       if (paddr == 0)
         {
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING
