@@ -120,18 +120,23 @@
 
 /* This structure represents the overall mountpoint state.  An instance of
  * this structure is retained as inode private data on each mountpoint that
- * is mounted with a fat32 filesystem.
+ * is mounted with a romfs filesystem.
  */
 
 struct romfs_file_s;
 struct romfs_mountpt_s
 {
-  FAR struct inode *rm_blkdriver; /* The block driver inode that hosts the FAT32 fs */
+  FAR struct inode *rm_blkdriver; /* The block driver inode that hosts the romfs */
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+  FAR struct romfs_nodeinfo_s *rm_root;
+                                  /* The node for root node */
+#else
+  uint32_t rm_rootoffset;         /* Saved offset to the first root directory entry */
+#endif
   bool     rm_mounted;            /* true: The file system is ready */
   uint16_t rm_hwsectorsize;       /* HW: Sector size reported by block driver */
   sem_t    rm_sem;                /* Used to assume thread-safe access */
   uint32_t rm_refs;               /* The references for all files opened on this mountpoint */
-  uint32_t rm_rootoffset;         /* Saved offset to the first root directory entry */
   uint32_t rm_hwnsectors;         /* HW: The number of sectors reported by the hardware */
   uint32_t rm_volsize;            /* Size of the ROMFS volume */
   uint32_t rm_cachesector;        /* Current sector in the rm_buffer */
@@ -158,12 +163,14 @@ struct romfs_file_s
  * walking a path
  */
 
+#ifndef CONFIG_FS_ROMFS_CACHE_NODE
 struct romfs_nodeinfo_s
 {
   uint32_t rn_offset;             /* Offset of real file header */
   uint32_t rn_next;               /* Offset of the next file header+flags */
   uint32_t rn_size;               /* Size (if file) */
 };
+#endif
 
 /****************************************************************************
  * Public Data
@@ -201,8 +208,12 @@ int  romfs_parsedirentry(FAR struct romfs_mountpt_s *rm, uint32_t offset,
                          FAR uint32_t *pinfo, FAR uint32_t *psize);
 int  romfs_parsefilename(FAR struct romfs_mountpt_s *rm, uint32_t offset,
                          FAR char *pname);
-int  romfs_datastart(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+int  romfs_datastart(FAR struct romfs_mountpt_s *rm,
+                     FAR struct romfs_nodeinfo_s *nodeinfo,
                      FAR uint32_t *start);
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+void romfs_freenode(FAR struct romfs_nodeinfo_s *node);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)
