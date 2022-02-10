@@ -335,6 +335,10 @@ static int esp32c3_setup(struct uart_dev_s *dev)
   modifyreg32(UART_MEM_CONF_REG(priv->id), UART_TX_SIZE_M | UART_RX_SIZE_M,
               (1 << UART_TX_SIZE_S) | (1 << UART_RX_SIZE_S));
 
+  /* Enable the UART Clock */
+
+  esp32c3_lowputc_enable_sysclk(priv);
+
   /* Configure the UART Baud Rate */
 
   esp32c3_lowputc_baud(priv);
