@@ -148,8 +148,8 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
  */
 
 int bcmf_transfer_bytes(FAR struct bcmf_sdio_dev_s *sbus, bool write,
-                         uint8_t function, uint32_t address,
-                         uint8_t *buf, unsigned int len);
+                        uint8_t function, uint32_t address,
+                        uint8_t *buf, unsigned int len);
 
 int bcmf_read_reg(FAR struct bcmf_sdio_dev_s *sbus, uint8_t function,
                   uint32_t address, uint8_t *reg);

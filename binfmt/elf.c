@@ -112,6 +112,8 @@ static void elf_dumploadinfo(FAR struct elf_loadinfo_s *loadinfo)
   binfo("  dataalloc:    %08lx\n", (long)loadinfo->dataalloc);
   binfo("  textsize:     %ld\n",   (long)loadinfo->textsize);
   binfo("  datasize:     %ld\n",   (long)loadinfo->datasize);
+  binfo("  textalign:    %zu\n",   loadinfo->textalign);
+  binfo("  dataalign:    %zu\n",   loadinfo->dataalign);
   binfo("  filelen:      %ld\n",   (long)loadinfo->filelen);
 #ifdef CONFIG_BINFMT_CONSTRUCTORS
   binfo("  ctoralloc:    %08lx\n", (long)loadinfo->ctoralloc);

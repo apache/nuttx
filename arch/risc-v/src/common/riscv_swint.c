@@ -311,21 +311,19 @@ int riscv_swint(int irq, void *context, void *arg)
         break;
 #endif
 
-#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
-
-      /* A0=SYS_pthread_start:  This a user pthread start
+      /* R0=SYS_pthread_start:  This a user pthread start
        *
-       *   void up_pthread_start(pthread_trampoline_t startup,
-       *          pthread_startroutine_t entrypt, pthread_addr_t arg)
+       *   void up_pthread_start(pthread_startroutine_t entrypt,
+       *                         pthread_addr_t arg) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
-       *   A0 = SYS_pthread_start
-       *   A1 = startup
-       *   A2 = entrypt
-       *   A3 = arg
+       *   R0 = SYS_pthread_start
+       *   R1 = entrypt
+       *   R2 = arg
        */
 
+#if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
       case SYS_pthread_start:
         {
           /* Set up to return to the user-space pthread start-up function in
@@ -340,35 +338,6 @@ int riscv_swint(int irq, void *context, void *arg)
 
           regs[REG_A0]       = regs[REG_A2];  /* pthread entry */
           regs[REG_A1]       = regs[REG_A3];  /* arg */
-          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
-        }
-        break;
-
-      /* R0=SYS_pthread_exit:  This pthread_exit call in user-space
-       *
-       *   void up_pthread_exit(pthread_exitroutine_t exit,
-       *                        void *exit_value)
-       *
-       * At this point, the following values are saved in context:
-       *
-       *   R0 = SYS_pthread_exit
-       *   R1 = pthread_exit trampoline routine
-       *   R2 = exit_value
-       */
-
-      case SYS_pthread_exit:
-        {
-          /* Set up to enter the user-space pthread exit function in
-           * unprivileged mode.
-           */
-
-          regs[REG_EPC]      = (uintptr_t)regs[REG_A1] & ~1;  /* exit */
-
-          /* Change the parameter ordering to match the expectation of the
-           * user space pthread_exit:
-           */
-
-          regs[REG_A0]       = regs[REG_A2];  /* exit_value */
           regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
         }
         break;

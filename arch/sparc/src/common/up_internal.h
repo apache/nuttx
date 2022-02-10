@@ -28,6 +28,8 @@
 #include <nuttx/config.h>
 
 #ifndef __ASSEMBLY__
+#  include <nuttx/arch.h>
+#  include <sys/types.h>
 #  include <stdint.h>
 #  include <stdbool.h>
 #endif
@@ -246,6 +248,11 @@ void up_usbuninitialize(void);
 #else
 # define up_usbinitialize()
 # define up_usbuninitialize()
+#endif
+
+/* Debug ********************************************************************/
+#ifdef CONFIG_STACK_COLORATION
+void up_stack_color(FAR void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */

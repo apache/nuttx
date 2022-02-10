@@ -327,8 +327,8 @@ int nxterm_poll(FAR struct file *filep, FAR struct pollfd *fds, bool setup)
 
       /* Remove all memory of the poll setup */
 
-      *slot      = NULL;
-      fds->priv  = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

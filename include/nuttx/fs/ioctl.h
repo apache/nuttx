@@ -147,11 +147,12 @@
 #define FIOC_INTEGRITY  _FIOC(0x0005)     /* Run a consistency check on the
                                            *      file system media.
                                            * IN:  None
-                                           * OUT: None */
+                                           * OUT: None
+                                           */
 #define FIOC_DUMP       _FIOC(0x0006)     /* Dump logical content of media.
                                            * IN:  None
-                                           * OUT: None */
-
+                                           * OUT: None
+                                           */
 #define FIONREAD        _FIOC(0x0007)     /* IN:  Location to return value (int *)
                                            * OUT: Bytes readable from this fd
                                            */
@@ -174,6 +175,11 @@
                                            * OUT: None
                                            */
 #define FIONCLEX        _FIOC(0x000d)     /* IN:  None
+                                           * OUT: None
+                                           */
+#define FIOC_NOTIFY     _FIOC(0x000e)     /* IN:  Pointer to struct automount_notify_s
+                                           *      holding automount notification
+                                           *      configuration
                                            * OUT: None
                                            */
 

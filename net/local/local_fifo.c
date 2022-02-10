@@ -70,13 +70,13 @@ static inline void local_cs_name(FAR struct local_conn_s *conn,
   if (conn->lc_instance_id < 0)
     {
       snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_PATH_PREFIX "/%s" LOCAL_CS_SUFFIX,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_CS_SUFFIX,
                conn->lc_path);
     }
   else
     {
       snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_PATH_PREFIX "/%s" LOCAL_CS_SUFFIX "%" PRIx32,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_CS_SUFFIX "%" PRIx32,
                conn->lc_path, conn->lc_instance_id);
     }
 
@@ -99,13 +99,13 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
   if (conn->lc_instance_id < 0)
     {
       snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_PATH_PREFIX "/%s" LOCAL_SC_SUFFIX,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_SC_SUFFIX,
                conn->lc_path);
     }
   else
     {
       snprintf(path, LOCAL_FULLPATH_LEN - 1,
-               CONFIG_NET_LOCAL_PATH_PREFIX "/%s" LOCAL_SC_SUFFIX "%" PRIx32,
+               CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_SC_SUFFIX "%" PRIx32,
                conn->lc_path, conn->lc_instance_id);
     }
 
@@ -125,7 +125,7 @@ static inline void local_sc_name(FAR struct local_conn_s *conn,
 static inline void local_hd_name(FAR const char *inpath, FAR char *outpath)
 {
   snprintf(outpath, LOCAL_FULLPATH_LEN - 1,
-           CONFIG_NET_LOCAL_PATH_PREFIX "/%s" LOCAL_HD_SUFFIX, inpath);
+           CONFIG_NET_LOCAL_VFS_PATH "/%s" LOCAL_HD_SUFFIX, inpath);
   outpath[LOCAL_FULLPATH_LEN - 1] = '\0';
 }
 #endif /* CONFIG_NET_LOCAL_DGRAM */

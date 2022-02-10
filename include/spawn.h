@@ -125,21 +125,12 @@ extern "C"
  * file system at 'path'
  */
 
-#ifdef CONFIG_LIBC_ENVPATH
-int posix_spawnp(FAR pid_t *pid, FAR const char *path,
-      FAR const posix_spawn_file_actions_t *file_actions,
-      FAR const posix_spawnattr_t *attr,
-      FAR char * const argv[], FAR char * const envp[]);
-#define posix_spawn(pid,path,file_actions,attr,argv,envp) \
-      posix_spawnp(pid,path,file_actions,attr,argv,envp)
-#else
 int posix_spawn(FAR pid_t *pid, FAR const char *path,
       FAR const posix_spawn_file_actions_t *file_actions,
       FAR const posix_spawnattr_t *attr,
       FAR char * const argv[], FAR char * const envp[]);
 #define posix_spawnp(pid,path,file_actions,attr,argv,envp) \
       posix_spawn(pid,path,file_actions,attr,argv,envp)
-#endif
 
 #ifndef CONFIG_BUILD_KERNEL
 /* Non-standard task_spawn interface.  This function uses the same

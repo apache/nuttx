@@ -1,9 +1,24 @@
 /****************************************************************************
  * arch/sim/src/sim/up_tapdev.c
  *
- *   Copyright (C) 2007-2009, 2011, 2016 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
  * Based on code from uIP which also has a BSD-like license:
  *
  *   Copyright (c) 2001, Adam Dunkels.
@@ -95,6 +110,9 @@ static int  gdrop = 0;
 #endif
 static int  gtapdevfd = -1;
 static char gdevname[IFNAMSIZ];
+static void *g_priv = NULL;
+static void (*g_tx_done_intr_cb)(void *priv) = NULL;
+static void (*g_rx_ready_intr_cb)(void *priv) = NULL;
 
 #ifdef CONFIG_SIM_NET_HOST_ROUTE
 static struct rtentry ghostroute;
@@ -157,7 +175,9 @@ static void set_macaddr(void)
  * Public Functions
  ****************************************************************************/
 
-void tapdev_init(void)
+void tapdev_init(void *priv,
+                 void (*tx_done_intr_cb)(void *priv),
+                 void (*rx_ready_intr_cb)(void *priv))
 {
   struct ifreq ifr;
   int tapdevfd;
@@ -238,6 +258,15 @@ void tapdev_init(void)
 #endif
 
   gtapdevfd = tapdevfd;
+  g_priv = priv;
+
+  /* Register the emulated TX done interrupt callback */
+
+  g_tx_done_intr_cb = tx_done_intr_cb;
+
+  /* Register the emulated RX ready interrupt callback */
+
+  g_rx_ready_intr_cb = rx_ready_intr_cb;
 
   /* Set the MAC address */
 
@@ -315,6 +344,20 @@ void tapdev_send(unsigned char *buf, unsigned int buflen)
     }
 
   dump_ethhdr("write", buf, buflen);
+
+  /* Emulate TX done interrupt */
+
+  if (g_tx_done_intr_cb != NULL)
+    {
+      g_tx_done_intr_cb(g_priv);
+    }
+
+  /* Emulate RX ready interrupt */
+
+  if (g_rx_ready_intr_cb != NULL && tapdev_avail())
+    {
+      g_rx_ready_intr_cb(g_priv);
+    }
 }
 
 void tapdev_ifup(in_addr_t ifaddr)

@@ -134,7 +134,15 @@ void up_invalidate_icache_all(void)
 
 void up_clean_dcache(uintptr_t start, uintptr_t end)
 {
-  cp15_clean_dcache(start, end);
+  if (cp15_cache_size() < (end - start))
+    {
+      cp15_clean_dcache(start, end);
+    }
+  else
+    {
+      cp15_clean_dcache_all();
+    }
+
   l2cc_clean(start, end);
 }
 
@@ -190,7 +198,15 @@ void up_clean_dcache_all(void)
 
 void up_flush_dcache(uintptr_t start, uintptr_t end)
 {
-  cp15_flush_dcache(start, end);
+  if (cp15_cache_size() < (end - start))
+    {
+      cp15_flush_dcache(start, end);
+    }
+  else
+    {
+      cp15_flush_dcache_all();
+    }
+
   l2cc_flush(start, end);
 }
 

@@ -1638,7 +1638,7 @@ static int stm32_foc_adc_handler(int irq, FAR void *context, FAR void *arg)
 
       if (dev != NULL)
         {
-          priv  = STM32_FOC_PRIV_FROM_DEV_GET(dev);
+          priv = STM32_FOC_PRIV_FROM_DEV_GET(dev);
           DEBUGASSERT(priv);
 
           foc_dev = STM32_FOC_DEV_FROM_DEV_GET(dev);

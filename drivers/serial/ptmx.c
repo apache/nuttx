@@ -196,7 +196,7 @@ static int ptmx_open(FAR struct file *filep)
    * Where N=minor
    */
 
-  ret = pty_register(minor);
+  ret = pty_register2(minor, true);
   if (ret < 0)
     {
       goto errout_with_minor;
@@ -207,20 +207,20 @@ static int ptmx_open(FAR struct file *filep)
   snprintf(devname, 16, "/dev/pty%d", minor);
   memcpy(&temp, filep, sizeof(temp));
   ret = file_open(filep, devname, O_RDWR);
-  DEBUGASSERT(ret >= 0);  /* open() should never fail */
+  DEBUGASSERT(ret >= 0);  /* file_open() should never fail */
 
   /* Close the multiplexor device: /dev/ptmx */
 
   ret = file_close(&temp);
-  DEBUGASSERT(ret >= 0);  /* close() should never fail */
+  DEBUGASSERT(ret >= 0);  /* file_close() should never fail */
 
   /* Now unlink the master.  This will remove it from the VFS namespace,
    * the driver will still persist because of the open count on the
    * driver.
    */
 
-  ret = nx_unlink(devname);
-  DEBUGASSERT(ret >= 0);  /* nx_unlink() should never fail */
+  ret = unregister_driver(devname);
+  DEBUGASSERT(ret >= 0);  /* unregister_driver() should never fail */
 
   nxsem_post(&g_ptmx.px_exclsem);
   return OK;
@@ -299,12 +299,14 @@ void ptmx_minor_free(uint8_t minor)
   int index;
   int bitno;
 
+  nxsem_wait_uninterruptible(&g_ptmx.px_exclsem);
+
   /* Free the address by clearing the associated bit in the px_alloctab[]; */
 
   index = minor >> 5;
   bitno = minor & 31;
 
-  DEBUGASSERT((g_ptmx.px_alloctab[index] |= (1 << bitno)) != 0);
+  DEBUGASSERT((g_ptmx.px_alloctab[index] & (1 << bitno)) != 0);
   g_ptmx.px_alloctab[index] &= ~(1 << bitno);
 
   /* Reset the next pointer if the one just released has a lower value */
@@ -313,4 +315,6 @@ void ptmx_minor_free(uint8_t minor)
     {
       g_ptmx.px_next = minor;
     }
+
+  nxsem_post(&g_ptmx.px_exclsem);
 }

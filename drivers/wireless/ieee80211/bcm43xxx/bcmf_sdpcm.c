@@ -522,9 +522,9 @@ struct bcmf_frame_s *bcmf_sdpcm_alloc_frame(FAR struct bcmf_dev_s *priv,
 }
 
 void bcmf_sdpcm_free_frame(FAR struct bcmf_dev_s *priv,
-                     struct bcmf_frame_s *frame)
+                           struct bcmf_frame_s *frame)
 {
-  return bcmf_sdio_free_frame(priv, (struct bcmf_sdio_frame *)frame);
+  bcmf_sdio_free_frame(priv, (struct bcmf_sdio_frame *)frame);
 }
 
 struct bcmf_frame_s *bcmf_sdpcm_get_rx_frame(FAR struct bcmf_dev_s *priv)

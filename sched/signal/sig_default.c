@@ -217,18 +217,13 @@ static void nxsig_abnormal_termination(int signo)
        * REVISIT:  This will not work if HAVE_GROUP_MEMBERS is not set.
        */
 
-      rtcb->flags &= ~TCB_FLAG_CANCEL_PENDING;
-      rtcb->flags |= TCB_FLAG_CANCEL_DOING;
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
-      up_pthread_exit(((FAR struct pthread_tcb_s *)rtcb)->exit,
-                                  PTHREAD_CANCELED);
-#else
-      pthread_exit(PTHREAD_CANCELED);
-#endif
+      pthread_exit(NULL);
     }
   else
 #endif
     {
+      UNUSED(rtcb);
+
       /* Exit to terminate the task (note that exit() vs. _exit() is used. */
 
       exit(EXIT_FAILURE);

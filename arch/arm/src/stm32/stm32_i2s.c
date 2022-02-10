@@ -2625,6 +2625,7 @@ FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
 #endif
     {
       i2serr("ERROR: Unsupported I2S port: %d\n", port);
+      leave_critical_section(flags);
       return NULL;
     }
 
@@ -2646,6 +2647,7 @@ FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port)
   /* Failure exits */
 
 errout_with_alloc:
+  leave_critical_section(flags);
   nxsem_destroy(&priv->exclsem);
   kmm_free(priv);
   return NULL;

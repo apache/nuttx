@@ -96,8 +96,7 @@
 #define TCB_FLAG_NONCANCELABLE     (1 << 2)                      /* Bit 2: Pthread is non-cancelable */
 #define TCB_FLAG_CANCEL_DEFERRED   (1 << 3)                      /* Bit 3: Deferred (vs asynch) cancellation type */
 #define TCB_FLAG_CANCEL_PENDING    (1 << 4)                      /* Bit 4: Pthread cancel is pending */
-#define TCB_FLAG_CANCEL_DOING      (1 << 5)                      /* Bit 4: Pthread cancel/exit is doing */
-#define TCB_FLAG_POLICY_SHIFT      (6)                           /* Bit 5-6: Scheduling policy */
+#define TCB_FLAG_POLICY_SHIFT      (5)                           /* Bit 5-6: Scheduling policy */
 #define TCB_FLAG_POLICY_MASK       (3 << TCB_FLAG_POLICY_SHIFT)
 #  define TCB_FLAG_SCHED_FIFO      (0 << TCB_FLAG_POLICY_SHIFT)  /* FIFO scheding policy */
 #  define TCB_FLAG_SCHED_RR        (1 << TCB_FLAG_POLICY_SHIFT)  /* Round robin scheding policy */
@@ -754,7 +753,6 @@ struct pthread_tcb_s
 
   pthread_trampoline_t trampoline;       /* User-space pthread startup function */
   pthread_addr_t arg;                    /* Startup argument                    */
-  pthread_exitroutine_t exit;            /* User-space pthread exit function    */
   FAR void *joininfo;                    /* Detach-able info to support join    */
 };
 #endif /* !CONFIG_DISABLE_PTHREAD */

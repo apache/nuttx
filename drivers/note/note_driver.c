@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/note/note_driver.h>
+#include <nuttx/note/note_sysview.h>
 #include <nuttx/note/noteram_driver.h>
 #include <nuttx/note/notectl_driver.h>
 
@@ -59,6 +60,14 @@ int note_register(void)
 
 #ifdef CONFIG_DRIVER_NOTECTL
   ret = notectl_register();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SEGGER_SYSVIEW
+  ret = sysview_initialize();
   if (ret < 0)
     {
       return ret;

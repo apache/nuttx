@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_pthread_exit.c
+ * include/ssp/ssp.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,47 +18,31 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_SSP_SSP_H
+#define __INCLUDE_SSP_SSP_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#include <pthread.h>
-#include <nuttx/arch.h>
-
-#include "svcall.h"
-#include "riscv_internal.h"
-
-#if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \
-    !defined(CONFIG_DISABLE_PTHREAD)
-
 /****************************************************************************
- * Public Functions
+ * Public Function Prototypes
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_pthread_exit
- *
- * Description:
- *   In this kernel mode build, this function will be called to execute a
- *   pthread in user-space. This kernel-mode stub will then be called
- *   transfer control to the user-mode pthread_exit.
- *
- * Input Parameters:
- *   exit       - The user-space pthread_exit function
- *   exit_value - The pointer of the pthread exit parameter
- *
- * Returned Value:
- *   None
- ****************************************************************************/
-
-void up_pthread_exit(pthread_exitroutine_t exit, void *exit_value)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  sys_call2(SYS_pthread_exit, (uintptr_t)exit, (uintptr_t)exit_value);
+#else
+#define EXTERN extern
+#endif
 
-  /* Suppress "'noreturn' function does return" warning */
+void __stack_chk_fail(void);
 
-  while (1);
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
 
-#endif /* !CONFIG_BUILD_FLAT && __KERNEL__ && !CONFIG_DISABLE_PTHREAD */
+#endif /* __INCLUDE_SSP_SSP_H */

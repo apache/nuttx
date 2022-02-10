@@ -375,6 +375,7 @@ int netdev_register(FAR struct net_driver_s *dev, enum net_lltype_e lltype)
       ifindex = get_ifindex();
       if (ifindex < 0)
         {
+          net_unlock();
           return ifindex;
         }
 

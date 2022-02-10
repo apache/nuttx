@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/cp15_clean_dcache_all.S
+ * arch/arm/src/armv7-a/cp15_flush_dcache_all.S
  *
  *   Copyright (C) 2013 Gregory Nutt. All rights reserved.
  *   Author: Gregory Nutt <gnutt@nuttx.org>
@@ -54,7 +54,7 @@
 
 #include "cp15.h"
 
-	.file	"cp15_clean_dcache_all.S"
+	.file	"cp15_flush_dcache_all.S"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -64,7 +64,7 @@
  * Public Symbols
  ****************************************************************************/
 
-	.globl	cp15_clean_dcache_all
+	.globl	cp15_flush_dcache_all
 
 /****************************************************************************
  * Public Functions
@@ -73,10 +73,10 @@
 	.text
 
 /****************************************************************************
- * Name: cp15_clean_dcache_all
+ * Name: cp15_flush_dcache_all
  *
  * Description:
- *   Invalidate the entire contents of D cache.
+ *   Flush the entire contents of D cache.
  *
  * Input Parameters:
  *   None
@@ -86,36 +86,32 @@
  *
  ****************************************************************************/
 
-	.globl	cp15_clean_dcache_all
-	.type	cp15_clean_dcache_all, function
+	.globl	cp15_flush_dcache_all
+	.type	cp15_flush_dcache_all, function
 
-cp15_clean_dcache_all:
+cp15_flush_dcache_all:
 
-	mrc		CP15_CCSIDR(r0)			/* Read the Cache Size Identification Register */
+	mrc		CP15_CCSIDR(r1)			/* Read the Cache Size Identification Register */
+
 	ldr		r3, =0x7fff			/* Isolate the NumSets field (bits 13-27) */
-	and		r0, r3, r0, lsr #13		/* r0=NumSets (number of sets - 1) */
+	and		r0, r3, r1, lsr #13		/* r0=NumSets (number of sets - 1) */
 
 	ldr		r3, =0x3ff			/* Isolate the way field (bits 3-12) */
-	add		r4, r3, r0, lsr #3		/* r4=(number of ways - 1) */
+	and		r1, r3, r1, lsr #3		/* r1=(number of ways - 1) */
 
-	mov		r1, #0				/* r1 = way loop counter */
 way_loop:
-
-	mov		r3, #0				/* r3 = set loop counter */
+	mov		r3, r0				/* Init Sets */
 set_loop:
 	mov		r2, r1, lsl #30			/* r2 = way loop counter << 30 */
 	orr		r2, r3, lsl #5			/* r2 = set/way cache operation format */
-	mcr		CP15_DCCSW(r2)			/* Data Cache Invalidate by Set/Way */
-	add		r3, r3, #1			/* Increment set counter */
-	cmp		r0, r3				/* Last set? */
-	bne		set_loop			/* Keep looping if not */
+	mcr		CP15_DCCISW(r2)			/* Data Cache Clean and Invalidate by Set/Way */
+	subs		r3, r3, #1			/* Subtraction set counter */
+	bcs		set_loop			/* Keep looping if not */
 
-	add		r1, r1, #1			/* Increment the way counter */
-	cmp		r4, r1				/* Last way */
-	bne		way_loop			/* Keep looping if not */
+	subs		r1, r1, #1			/* Subtraction the way counter */
+	bcs		way_loop			/* Keep looping if not */
 
 	dsb
 	bx		lr
-	.size cp15_clean_dcache_all, . - cp15_clean_dcache_all
+	.size cp15_flush_dcache_all, . - cp15_flush_dcache_all
 	.end
-

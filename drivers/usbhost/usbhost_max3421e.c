@@ -1379,6 +1379,7 @@ static int max3421e_chan_wait(FAR struct max3421e_usbhost_s *priv,
       ret = nxsem_wait_uninterruptible(&priv->waitsem);
       if (ret < 0)
         {
+          leave_critical_section(flags);
           return ret;
         }
     }

@@ -51,7 +51,7 @@
  * Input Parameters:
  *   file_actions - The posix_spawn_file_actions_t to append the action.
  *   fd1 - The first file descriptor to be argument to dup2.
- *   fd2 - The first file descriptor to be argument to dup2.
+ *   fd2 - The second file descriptor to be argument to dup2.
  *
  * Returned Value:
  *   On success, these functions return 0; on failure they return an error

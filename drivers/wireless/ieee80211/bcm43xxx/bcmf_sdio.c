@@ -278,7 +278,7 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
     }
   else
     {
-      wlwarn("High-Speed mode is not supported by the chip!\n", value);
+      wlwarn("High-Speed mode is not supported by the chip!\n");
     }
 #endif
 

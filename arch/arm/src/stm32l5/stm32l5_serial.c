@@ -2741,6 +2741,7 @@ static void stm32l5serial_txint(FAR struct uart_dev_s *dev, bool enable)
 #  ifdef CONFIG_STM32L5_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {
+          leave_critical_section(flags);
           return;
         }
 #  endif

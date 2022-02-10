@@ -131,8 +131,12 @@ static void vpnkit_disconnect(void)
  *
  ****************************************************************************/
 
-void vpnkit_init(void)
+void vpnkit_init(void *priv,
+                 void (*tx_done_intr_cb)(void *priv),
+                 void (*rx_ready_intr_cb)(void *priv))
 {
+  /* TODO: support emulation of TX done and RX ready interrupts */
+
   vpnkit_connect();
 }
 

@@ -246,6 +246,7 @@ int a1x_pio_config(pio_pinset_t cfgset)
         break;
 
       default:
+        leave_critical_section(flags);
         return -EINVAL;
     }
 
@@ -286,6 +287,7 @@ int a1x_pio_config(pio_pinset_t cfgset)
         break;
 
       default:
+        leave_critical_section(flags);
         return -EINVAL;
     }
 

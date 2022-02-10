@@ -64,7 +64,7 @@
 
 void up_pthread_start(pthread_startroutine_t entrypt, pthread_addr_t arg)
 {
-  /* Let sys_call3() do all of the work */
+  /* Let sys_call2() do all of the work */
 
   sinfo("entry %p arg %p\n", entrypt, arg);
 
