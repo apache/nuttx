@@ -340,7 +340,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s    *rf;
   unsigned int                bytesread;
-  unsigned int                readsize;
+  unsigned int                readsize = 0;
   unsigned int                nsectors;
   uint32_t                    offset;
   size_t                      bytesleft;
@@ -394,7 +394,6 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
    * error occurs.
    */
 
-  readsize = 0;
   while (buflen > 0)
     {
       /* Get the first sector and index to read from. */
