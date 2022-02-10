@@ -148,8 +148,8 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
 {
   FAR struct tcb_s *rtcb = this_task();
   FAR struct inode *inode = mq->f_inode;
-  FAR struct mqueue_msg_s *mqmsg = NULL;
   FAR struct mqueue_inode_s *msgq;
+  FAR struct mqueue_msg_s *mqmsg;
   irqstate_t flags;
   sclock_t ticks;
   int result;
@@ -288,7 +288,6 @@ int file_mq_timedsend(FAR struct file *mq, FAR const char *msg,
   ret = nxmq_do_send(msgq, mqmsg, msg, msglen, prio);
 
   sched_unlock();
-  leave_cancellation_point();
   return ret;
 
   /* Exit here with (1) the scheduler locked, (2) a message allocated, (3) a
