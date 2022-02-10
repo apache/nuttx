@@ -466,7 +466,7 @@ endef
 # CLEAN - Default clean target
 
 ifeq ($(CONFIG_ARCH_COVERAGE),y)
-	EXTRA = *.gcno *.gcda
+	OBJS += *.gcno *.gcda
 endif
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
@@ -481,7 +481,7 @@ define CLEAN
 endef
 else
 define CLEAN
-	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN) $(EXTRA)
+	$(Q) rm -f *$(OBJEXT) *$(LIBEXT) *~ .*.swp $(OBJS) $(BIN)
 endef
 endif
 
