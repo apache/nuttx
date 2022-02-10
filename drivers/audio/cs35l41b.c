@@ -731,7 +731,7 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
           if (!priv->is_bypassed)
             {
               if (cs35l41b_set_gain(priv,
-                                    CS35L41B_AMP_GAIN_PCM_9P5DB) == ERROR)
+                                    CS35L41B_AMP_GAIN_PCM_16P5DB) == ERROR)
                 {
                   auderr("cs35l41b_set_gain error\n");
                   return ERROR;
