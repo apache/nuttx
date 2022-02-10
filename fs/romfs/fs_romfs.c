@@ -28,8 +28,6 @@
 #include <sys/statfs.h>
 #include <sys/stat.h>
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -43,7 +41,6 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/dirent.h>
-#include <nuttx/mtd/mtd.h>
 
 #include "fs_romfs.h"
 
@@ -231,7 +228,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  rf = (FAR struct romfs_file_s *)kmm_zalloc(sizeof(struct romfs_file_s));
+  rf = kmm_zalloc(sizeof(struct romfs_file_s));
   if (!rf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -272,11 +269,6 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
   filep->f_priv = rf;
 
   rm->rm_refs++;
-
-  romfs_semgive(rm);
-  return OK;
-
-  /* Error exits */
 
 errout_with_semaphore:
   romfs_semgive(rm);
@@ -348,7 +340,7 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
   FAR struct romfs_mountpt_s *rm;
   FAR struct romfs_file_s    *rf;
   unsigned int                bytesread;
-  unsigned int                readsize;
+  unsigned int                readsize = 0;
   unsigned int                nsectors;
   uint32_t                    offset;
   size_t                      bytesleft;
@@ -402,7 +394,6 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
    * error occurs.
    */
 
-  readsize = 0;
   while (buflen > 0)
     {
       /* Get the first sector and index to read from. */
@@ -474,12 +465,9 @@ static ssize_t romfs_read(FAR struct file *filep, FAR char *buffer,
       buflen       -= bytesread;
     }
 
-  romfs_semgive(rm);
-  return readsize;
-
 errout_with_semaphore:
   romfs_semgive(rm);
-  return ret;
+  return ret < 0 ? ret : readsize;
 }
 
 /****************************************************************************
@@ -560,9 +548,6 @@ static off_t romfs_seek(FAR struct file *filep, off_t offset, int whence)
   filep->f_pos = position;
   finfo("New file position: %jd\n", (intmax_t)filep->f_pos);
 
-  romfs_semgive(rm);
-  return OK;
-
 errout_with_semaphore:
   romfs_semgive(rm);
   return ret;
@@ -630,7 +615,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * structure
    */
 
-  rm = (FAR struct romfs_mountpt_s *)newp->f_inode->i_private;
+  rm = newp->f_inode->i_private;
   DEBUGASSERT(rm != NULL);
 
   /* Check if the mount is still healthy */
@@ -656,7 +641,7 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
    * dup'ed file.
    */
 
-  newrf = (FAR struct romfs_file_s *)kmm_malloc(sizeof(struct romfs_file_s));
+  newrf = kmm_malloc(sizeof(struct romfs_file_s));
   if (!newrf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -684,11 +669,6 @@ static int romfs_dup(FAR const struct file *oldp, FAR struct file *newp)
   newp->f_priv = newrf;
 
   rm->rm_refs++;
-
-  romfs_semgive(rm);
-  return OK;
-
-  /* Error exits */
 
 errout_with_semaphore:
   romfs_semgive(rm);
@@ -721,7 +701,7 @@ static int romfs_fstat(FAR const struct file *filep, FAR struct stat *buf)
    */
 
   rf = filep->f_priv;
-  rm = (FAR struct romfs_mountpt_s *)filep->f_inode->i_private;
+  rm = filep->f_inode->i_private;
   DEBUGASSERT(rm != NULL);
 
   /* Check if the mount is still healthy */
@@ -757,7 +737,7 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
                          FAR struct fs_dirent_s *dir)
 {
   FAR struct romfs_mountpt_s *rm;
-  FAR struct romfs_dirinfo_s  dirinfo;
+  struct romfs_dirinfo_s      dirinfo;
   int                         ret;
 
   finfo("relpath: '%s'\n", relpath);
@@ -808,8 +788,6 @@ static int romfs_opendir(FAR struct inode *mountpt, FAR const char *relpath,
   /* The entry is a directory */
 
   memcpy(&dir->u.romfs, &dirinfo.rd_dir, sizeof(struct fs_romfsdir_s));
-  romfs_semgive(rm);
-  return OK;
 
 errout_with_semaphore:
   romfs_semgive(rm);
@@ -1001,8 +979,7 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 
   /* Create an instance of the mountpt state structure */
 
-  rm = (FAR struct romfs_mountpt_s *)
-    kmm_zalloc(sizeof(struct romfs_mountpt_s));
+  rm = kmm_zalloc(sizeof(struct romfs_mountpt_s));
   if (!rm)
     {
       ferr("ERROR: Failed to allocate mountpoint structure\n");
@@ -1014,8 +991,8 @@ static int romfs_bind(FAR struct inode *blkdriver, FAR const void *data,
    * have to addref() here (but does have to release in ubind().
    */
 
-  nxsem_init(&rm->rm_sem, 0, 0);   /* Initialize the semaphore that controls access */
-  rm->rm_blkdriver   = blkdriver;  /* Save the block driver reference */
+  nxsem_init(&rm->rm_sem, 0, 0); /* Initialize the semaphore that controls access */
+  rm->rm_blkdriver = blkdriver;  /* Save the block driver reference */
 
   /* Get the hardware configuration and setup buffering appropriately */
 
@@ -1066,7 +1043,7 @@ errout_with_sem:
 static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
                         unsigned int flags)
 {
-  FAR struct romfs_mountpt_s *rm = (FAR struct romfs_mountpt_s *)handle;
+  FAR struct romfs_mountpt_s *rm = handle;
   int ret;
 
   finfo("Entry\n");
@@ -1104,7 +1081,7 @@ static int romfs_unbind(FAR void *handle, FAR struct inode **blkdriver,
 
       if (rm->rm_blkdriver)
         {
-          struct inode *inode = rm->rm_blkdriver;
+          FAR struct inode *inode = rm->rm_blkdriver;
           if (inode)
             {
               if (INODE_IS_BLOCK(inode) && inode->u.i_bops->close != NULL)
@@ -1194,9 +1171,6 @@ static int romfs_statfs(FAR struct inode *mountpt, FAR struct statfs *buf)
   buf->f_bavail  = 0;
   buf->f_namelen = NAME_MAX;
 
-  romfs_semgive(rm);
-  return OK;
-
 errout_with_semaphore:
   romfs_semgive(rm);
   return ret;
@@ -1269,7 +1243,7 @@ static int romfs_stat(FAR struct inode *mountpt, FAR const char *relpath,
                       FAR struct stat *buf)
 {
   FAR struct romfs_mountpt_s *rm;
-  FAR struct romfs_dirinfo_s dirinfo;
+  struct romfs_dirinfo_s dirinfo;
   uint8_t type;
   int ret;
 
