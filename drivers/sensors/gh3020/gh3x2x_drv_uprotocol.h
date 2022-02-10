@@ -15,10 +15,11 @@
 
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 /* function ptr typedef */
-typedef GCHAR* (*pfnGetFirmwareVersion)(void);                           /**< read pin status type */
+typedef char* (*pfnGetFirmwareVersion)(void);                           /**< read pin status type */
 
 
 #define GH3X2X_FRAME_POSI_HEAD  (0x01)
@@ -36,13 +37,13 @@ typedef GCHAR* (*pfnGetFirmwareVersion)(void);                           /**< re
  */
 typedef struct
 {
-    GU8 uchFlag;
-    GS16 sGsensorLastDataArr[GH3X2X_GSENSOR_MAX_SIZE];
-    GU8 uchFifoLastRawdataTagArr[GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastRawdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastAgcdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastAmbdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastResult;
+    uint8_t uchFlag;
+    int16_t sGsensorLastDataArr[GH3X2X_GSENSOR_MAX_SIZE];
+    uint8_t uchFifoLastRawdataTagArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastRawdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastAgcdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastAmbdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastResult;
 } STZipLastDataTemp;
 
 /* universal protocol packet, but index no use */
@@ -310,8 +311,8 @@ typedef enum
 } EMUprotocolParseStatus;
 
 /**
- * @fn     GU8 GH3X2X_UprotocolPacketFormat(GU8 uchCmd, GU8 *puchPacketBuffer,
- *                                          GU8 *puchPayloadData, GU8 uchPayloadDataLen)
+ * @fn     uint8_t GH3X2X_UprotocolPacketFormat(uint8_t uchCmd, uint8_t *puchPacketBuffer,
+ *                                          uint8_t *puchPayloadData, uint8_t uchPayloadDataLen)
  *
  * @brief  universal protocol format packet
  *
@@ -324,10 +325,10 @@ typedef enum
  *
  * @return  len after make packet
  */
-GU8 GH3X2X_UprotocolPacketFormat(GU8 uchCmd, GU8 *puchPacketBuffer, GU8 *puchPayloadData, GU8 uchPayloadDataLen);
+uint8_t GH3X2X_UprotocolPacketFormat(uint8_t uchCmd, uint8_t *puchPacketBuffer, uint8_t *puchPayloadData, uint8_t uchPayloadDataLen);
 
 /**
- * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize)
  *
  * @brief  memcpy() Re-implementation
  *
@@ -339,10 +340,10 @@ GU8 GH3X2X_UprotocolPacketFormat(GU8 uchCmd, GU8 *puchPacketBuffer, GU8 *puchPay
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
+void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize);
 
 /**
- * @fn     void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize)
  *
  * @brief  memset() Re-implementation
  *
@@ -354,10 +355,10 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
+void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize);
 
 /**
- * @fn     GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+ * @fn     uint32_t GH3X2X_Strlen(const char *pszSrc)
  *
  * @brief  strlen() Re-implementation
  *
@@ -368,10 +369,10 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
  *
  * @return  string len
  */
-GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
+uint32_t GH3X2X_Strlen(const char *pszSrc);
 
 /**
- * @fn       void GH3X2X_FillGsensorData(GU16* pusPayloadIndex, STGsensorRawdata* pstGsAxisValue 
+ * @fn       void GH3X2X_FillGsensorData(uint16_t* pusPayloadIndex, STGsensorRawdata* pstGsAxisValue
  *                                        y)
  *
  * @brief  fill g sensor data to protocol data
@@ -384,10 +385,10 @@ GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
  *
  * @return    None
  */
-//void GH3X2X_FillGsensorData(GU16* pusPayloadIndex, STGsensorRawdata* pstGsAxisValue);
+//void GH3X2X_FillGsensorData(uint16_t* pusPayloadIndex, STGsensorRawdata* pstGsAxisValue);
 
 /**
- * @fn       void GH3X2X_FillAlgoData(GU16* pusPayloadIndex, GS32 nAlgoCalcResultArr[], GU8 uchAlgoResNum)
+ * @fn       void GH3X2X_FillAlgoData(uint16_t* pusPayloadIndex, int32_t nAlgoCalcResultArr[], uint8_t uchAlgoResNum)
  *
  * @brief  fill algorithm data to protocol data
  *
@@ -399,10 +400,10 @@ GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
  *
  * @return    None
  */
-void GH3X2X_FillAlgoData(GU16* pusPayloadIndex, GS32 nAlgoCalcResultArr[], GU8 uchAlgoResNum);
+void GH3X2X_FillAlgoData(uint16_t* pusPayloadIndex, int32_t nAlgoCalcResultArr[], uint8_t uchAlgoResNum);
 
 /**
- * @fn       void GH3X2X_FillElectrodeWearRevertData(GU16* pusPayloadIndex)
+ * @fn       void GH3X2X_FillElectrodeWearRevertData(uint16_t* pusPayloadIndex)
  *
  * @brief  fill electrode wear revert data to protocol data buf
  *
@@ -413,9 +414,9 @@ void GH3X2X_FillAlgoData(GU16* pusPayloadIndex, GS32 nAlgoCalcResultArr[], GU8 u
  *
  * @return    None
  */
-void GH3X2X_FillElectrodeWearRevertData(GU16* pusPayloadIndex);
+void GH3X2X_FillElectrodeWearRevertData(uint16_t* pusPayloadIndex);
 
-GCHAR *GH3X2X_GetVersion(GU8 uchGetVersionType);
+char *GH3X2X_GetVersion(uint8_t uchGetVersionType);
 
 
 #endif /* _GH3X2X_DRV_UPROTOCOL_H_ */

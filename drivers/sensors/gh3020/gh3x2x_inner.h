@@ -76,13 +76,13 @@
 
 typedef struct
 {
-    GS16 sXAxisVal; // X-Axis Value
-    GS16 sYAxisVal; // Y-Axis Value
-    GS16 sZAxisVal; // Z-Axis Value
+    int16_t sXAxisVal; // X-Axis Value
+    int16_t sYAxisVal; // Y-Axis Value
+    int16_t sZAxisVal; // Z-Axis Value
 #if _GS_GYRO_ENABLE_
-    GS16 sXGyroVal;
-    GS16 sYGyroVal;
-    GS16 sZGyroVal;
+    int16_t sXGyroVal;
+    int16_t sYGyroVal;
+    int16_t sZGyroVal;
 #endif
 
 }STGsensorRawdata;
@@ -91,93 +91,71 @@ typedef struct
 #define __PROTOCOL_DATA_LEN__       235
 
 /// save function opened of driver lib
-extern GU32 g_unDemoFuncMode;
-
-/* algorithm result array */
-//#if (__FUNC_TYPE_HR_ENABLE__)
-//extern STHbAlgoResult g_stDemoHrAlgoResult[];
-//extern GU16 g_usHrFrameIndexOfAlgoResArr[];
-//extern GU16 g_usHrAlgoResCnt;
-//#endif
-//#if (__FUNC_TYPE_HRV_ENABLE__)
-//extern STHrvAlgoResult g_stDemoHrvAlgoResult[];
-//extern GU16 g_usHrvFrameIndexOfAlgoResArr[];
-//extern GU16 g_usHrvAlgoResCnt;
-//#endif
-//#if (__FUNC_TYPE_SPO2_ENABLE__)
-//extern STSpo2AlgoResult g_stDemoSpo2AlgoResult[];
-//extern GU16 g_usSpo2FrameIndexOfAlgoResArr[];
-//extern GU16 g_usSpo2AlgoResCnt;
-//#endif
-//#if (__FUNC_TYPE_ECG_ENABLE__)
-//extern STEcgAlgoResult g_stDemoEcgAlgoResult[];
-//extern GU16 g_usEcgFrameIndexOfAlgoResArr[];
-//extern GU16 g_usEcgAlgoResCnt;
-//#endif
+extern uint32_t g_unDemoFuncMode;
 
 /* config list array */
-extern const STGh3x2xInitConfig g_stGh3x2xCfgListArr[];
+extern const struct gh3020_initcfg_s gh3020_initcfg_list[];
 
 #if (__DRIVER_LIB_MODE__==__DRV_LIB_WITHOUT_ALGO__)
 /// data buffer for algorithm
-extern GU32 g_uchGh3x2xDemoBufferForAlgo[];
+extern uint32_t g_uchGh3x2xDemoBufferForAlgo[];
 
 #if (__FUNC_TYPE_HR_ENABLE__)
 /// hba algorithm channel map cnt
-extern GU8 g_uchHbaChannelMapCnt;
+extern uint8_t g_uchHbaChannelMapCnt;
 
 /// hba incomplete data mark
-extern GU32 g_unDemoHbaIncompleteChMark;
+extern uint32_t g_unDemoHbaIncompleteChMark;
 
 /// hba incomplete data last time
-extern GU32 g_unDemoHbaIncompleteRawDataArr[];
+extern uint32_t g_unDemoHbaIncompleteRawDataArr[];
 #endif
 
 #if (__FUNC_TYPE_SPO2_ENABLE__)
 /// spo2 algorithm channel map cnt
-extern GU8 g_uchSpo2ChannelMapCnt;
+extern uint8_t g_uchSpo2ChannelMapCnt;
 
 /// spo2 incomplete data mark
-extern GU32 g_unDemoSpo2IncompleteChMark;
+extern uint32_t g_unDemoSpo2IncompleteChMark;
 
 /// spo2 incomplete data last time
-extern GU32 g_unDemoSpo2IncompleteRawDataArr[];
+extern uint32_t g_unDemoSpo2IncompleteRawDataArr[];
 #endif
 
 #if (__FUNC_TYPE_ECG_ENABLE__)
 /// ecg incomplete data last time
-extern GU32 g_unDemoEcgIncompleteChMark;
+extern uint32_t g_unDemoEcgIncompleteChMark;
 
 /// ecg incomplete data last time
-extern GU32 g_unDemoEcgIncompleteRawDataArr[];
+extern uint32_t g_unDemoEcgIncompleteRawDataArr[];
 #endif
 
 #if (__FUNC_TYPE_HRV_ENABLE__)
 /// hrv algorithm channel map cnt
-extern GU8 g_uchHrvChannelMapCnt;
+extern uint8_t g_uchHrvChannelMapCnt;
 
 /// hrv incomplete data mark
-extern GU32 g_unDemoHrvIncompleteChMark;
+extern uint32_t g_unDemoHrvIncompleteChMark;
 
 /// hrv incomplete data last time
-extern GU32 g_unDemoHrvIncompleteRawDataArr[];
+extern uint32_t g_unDemoHrvIncompleteRawDataArr[];
 #endif
 
 #endif
 
 #if __GH3X2X_MEM_POOL_CHECK_EN__
-extern GU8  g_uchGh3x2xMemPollHaveGetCheckSum;
+extern uint8_t  g_uchGh3x2xMemPollHaveGetCheckSum;
 #endif
 
 
 
-extern GU8 g_uchDemoWorkMode;
+extern uint8_t g_uchDemoWorkMode;
 
 
 
 #if (__NORMAL_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
 //hal_gh3x2x_int_handler_call_back is called, this value is 1
-extern GU8 g_uchGh3x2xIntCallBackIsCalled;
+extern uint8_t g_uchGh3x2xIntCallBackIsCalled;
 #endif
 
 
@@ -214,7 +192,7 @@ extern void hal_gh3x2x_i2c_init(void);
  * @retval  #1      return successfully
  * @retval  #0      return error
  */
-GU8 hal_gh3x2x_i2c_write(GU8 device_id, const GU8 write_buffer[], GU16 length);
+uint8_t hal_gh3x2x_i2c_write(uint8_t device_id, const uint8_t write_buffer[], uint16_t length);
 
 /**
  * @fn     uint8_t hal_gh3x2x_i2c_read(uint8_t device_id, const uint8_t write_buffer[], uint16_t write_length,
@@ -234,7 +212,7 @@ GU8 hal_gh3x2x_i2c_write(GU8 device_id, const GU8 write_buffer[], GU16 length);
  * @retval  #1      return successfully
  * @retval  #0      return error
  */
-GU8 hal_gh3x2x_i2c_read(GU8 device_id, const GU8 write_buffer[], GU16 write_length, GU8 read_buffer[], GU16 read_length);
+uint8_t hal_gh3x2x_i2c_read(uint8_t device_id, const uint8_t write_buffer[], uint16_t write_length, uint8_t read_buffer[], uint16_t read_length);
 
 /* spi interface */
 /**
@@ -252,7 +230,7 @@ GU8 hal_gh3x2x_i2c_read(GU8 device_id, const GU8 write_buffer[], GU16 write_leng
 extern void hal_gh3x2x_spi_init(void);
 
 /**
- * @fn     GU8 hal_gh3x2x_spi_write(GU8 write_buffer[], GU16 length)
+ * @fn     uint8_t hal_gh3x2x_spi_write(uint8_t write_buffer[], uint16_t length)
  *
  * @brief  hal spi write for gh3x2x
  *
@@ -266,10 +244,10 @@ extern void hal_gh3x2x_spi_init(void);
  * @retval  #1      return successfully
  * @retval  #0      return error
  */
-extern GU8 hal_gh3x2x_spi_write(GU8 write_buffer[], GU16 length);
+extern uint8_t hal_gh3x2x_spi_write(uint8_t write_buffer[], uint16_t length);
 
 /**
- * @fn     GU8 hal_gh3x2x_spi_read(GU8 read_buffer[], GU16 length)
+ * @fn     uint8_t hal_gh3x2x_spi_read(uint8_t read_buffer[], uint16_t length)
  *
  * @brief  hal spi read for gh3x2x
  *
@@ -282,13 +260,13 @@ extern GU8 hal_gh3x2x_spi_write(GU8 write_buffer[], GU16 length);
  * @retval  #1      return successfully
  * @retval  #0      return error
  */
-extern GU8 hal_gh3x2x_spi_read(GU8 read_buffer[], GU16 length);
+extern uint8_t hal_gh3x2x_spi_read(uint8_t read_buffer[], uint16_t length);
 
-extern GU8 hal_gh3x2x_spi_write_F1_and_read(GU8 read_buf[], GU16 length);
+extern uint8_t hal_gh3x2x_spi_write_F1_and_read(uint8_t read_buf[], uint16_t length);
 
 
 /**
- * @fn     void hal_gh3x2x_spi_cs_ctrl(GU8 cs_pin_level)
+ * @fn     void hal_gh3x2x_spi_cs_ctrl(uint8_t cs_pin_level)
  *
  * @brief  hal spi cs pin ctrl for gh3x2x
  *
@@ -299,24 +277,11 @@ extern GU8 hal_gh3x2x_spi_write_F1_and_read(GU8 read_buf[], GU16 length);
  *
  * @return  None
  */
-extern void hal_gh3x2x_spi_cs_ctrl(GU8 cs_pin_level);
+extern void hal_gh3x2x_spi_cs_ctrl(uint8_t cs_pin_level);
+
 
 /**
- * @fn     void hal_gh3x2x_int_init(void)
- *
- * @brief  gh3x2x int init
- *
- * @attention   None
- *
- * @param[in]   None
- * @param[out]  None
- *
- * @return  None
- */
-extern void hal_gh3x2x_reset_pin_init(void);
-
-/**
- * @fn     void hal_gh3x2x_reset_pin_ctrl(GU8 pin_level)
+ * @fn     void hal_gh3x2x_reset_pin_ctrl(uint8_t pin_level)
  *
  * @brief  hal reset pin ctrl for gh3x2x
  *
@@ -327,7 +292,7 @@ extern void hal_gh3x2x_reset_pin_init(void);
  *
  * @return  None
  */
-extern void hal_gh3x2x_reset_pin_ctrl(GU8 pin_level);
+extern void hal_gh3x2x_reset_pin_ctrl(uint8_t pin_level);
 
 /**
  * @fn     void hal_gh3x2x_int_init(void)
@@ -375,7 +340,7 @@ extern void Cap_stop_cache_data(void);
 extern void Temp_start_cache_data(void);
 extern void Temp_stop_cache_data(void);
 /**
- * @fn     void Gsensor_drv_get_fifo_data(STGsensorRawdata gsensor_buffer[], GU16 *gsensor_buffer_index)
+ * @fn     void Gsensor_drv_get_fifo_data(STGsensorRawdata gsensor_buffer[], uint16_t *gsensor_buffer_index)
  *
  * @brief  get gsensor fifo data
  *
@@ -388,9 +353,9 @@ extern void Temp_stop_cache_data(void);
  *
  * @return  None
  */
-extern void Gsensor_drv_get_fifo_data(STGsensorRawdata gsensor_buffer[], GU16 *gsensor_buffer_index);
-extern void Cap_drv_get_fifo_data(STCapRawdata cap_data_buffer[], GU16 *cap_buffer_index);
-extern void Temp_drv_get_fifo_data(STTempRawdata Temp_data_buffer[], GU16 *temp_buffer_index);
+extern void Gsensor_drv_get_fifo_data(STGsensorRawdata gsensor_buffer[], uint16_t *gsensor_buffer_index);
+extern void Cap_drv_get_fifo_data(STCapRawdata cap_data_buffer[], uint16_t *cap_buffer_index);
+extern void Temp_drv_get_fifo_data(STTempRawdata Temp_data_buffer[], uint16_t *temp_buffer_index);
 /**
  * @fn     void GH3X2X_Log(char *log_string)
  *
@@ -403,10 +368,10 @@ extern void Temp_drv_get_fifo_data(STTempRawdata Temp_data_buffer[], GU16 *temp_
  *
  * @return  None
  */
-extern void GH3X2X_Log(GCHAR *log_string);
+extern void GH3X2X_Log(char *log_string);
 
 /**
- * @fn     void Gh3x2x_BspDelayUs(GU16 usUsec)
+ * @fn     void Gh3x2x_BspDelayUs(uint16_t usUsec)
  *
  * @brief  Delay in us,user should register this function into driver lib
  *
@@ -417,10 +382,10 @@ extern void GH3X2X_Log(GCHAR *log_string);
  *
  * @return  None
  */
-extern void Gh3x2x_BspDelayUs(GU16 usUsec);
+extern void Gh3x2x_BspDelayUs(uint16_t usUsec);
 
 /**
- * @fn     void Gh3x2x_BspDelayMs(GU16 usMsec)
+ * @fn     void Gh3x2x_BspDelayMs(uint16_t usMsec)
  *
  * @brief  Delay in ms
  *
@@ -431,7 +396,7 @@ extern void Gh3x2x_BspDelayUs(GU16 usUsec);
  *
  * @return  None
  */
-extern void Gh3x2x_BspDelayMs(GU16 usMsec);
+extern void Gh3x2x_BspDelayMs(uint16_t usMsec);
 
 /**
  * @fn     void Gh3x2x_LeadOnEventHook(void)
@@ -462,21 +427,6 @@ extern void Gh3x2x_LeadOnEventHook(void);
 extern void Gh3x2x_LeadOffEventHook(void);
 
 /**
- * @fn     void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType)
- *
- * @brief  Wear event hook
- *
- * @attention   None
- *
- * @param[in]   wear event
- * @param[in]   wear off type  0: no object  1: nonliving object
- * @param[out]  None
- *
- * @return  None
- */
-extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType);
-
-/**
  * @fn     void Gh3x2x_DemoAlgorithmMemConfig(void)
  *
  * @brief  Config memory for algorithm
@@ -505,15 +455,10 @@ extern void Gh3x2x_WearEventHook(GU16 usGotEvent, GU8 uchType);
  */
 void Gh3x2x_UserHandleCurrentInfo(void);
 
-
-extern void gh3x2x_protocol_ctrl_timer_handle(EMUprotocolParseCmdType emCmdType);
-
-
-
 extern void Gh3x2x_DemoAlgorithmMemConfig(void);
 
 /**
- * @fn     void Gh3x2x_Spo2AlgorithmResultHook(STSpo2AlgoResult stSpo2AlgoRes[], GU16 pusAlgoResIndexArr[],
+ * @fn     void Gh3x2x_Spo2AlgorithmResultHook(STSpo2AlgoResult stSpo2AlgoRes[], uint16_t pusAlgoResIndexArr[],
  *                                              usAlgoResCnt)
  *
  * @brief  This function will be called after calculate spo2 algorithm.
@@ -527,10 +472,10 @@ extern void Gh3x2x_DemoAlgorithmMemConfig(void);
  *
  * @return  None
  */
-void Gh3x2x_Spo2AlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFrameId);
+void Gh3x2x_Spo2AlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, uint8_t lubFrameId);
 
 /**
- * @fn     void Gh3x2x_HrAlgorithmResultHook(STHbAlgoResult stHbAlgoRes[], GU16 pusAlgoResIndexArr[], usAlgoResCnt)
+ * @fn     void Gh3x2x_HrAlgorithmResultHook(STHbAlgoResult stHbAlgoRes[], uint16_t pusAlgoResIndexArr[], usAlgoResCnt)
  *
  * @brief  This function will be called after calculate hb algorithm.
  *
@@ -543,10 +488,10 @@ void Gh3x2x_Spo2AlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubF
  *
  * @return  None
  */
-void Gh3x2x_HrAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFrameId);
+void Gh3x2x_HrAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, uint8_t lubFrameId);
 
 /**
- * @fn     void Gh3x2x_HrvAlgorithmResultHook(STHbAlgoResult stHbAlgoRes[], GU16 pusAlgoResIndexArr[], usAlgoResCnt)
+ * @fn     void Gh3x2x_HrvAlgorithmResultHook(STHbAlgoResult stHbAlgoRes[], uint16_t pusAlgoResIndexArr[], usAlgoResCnt)
  *
  * @brief  This function will be called after calculate hrv algorithm.
  *
@@ -559,10 +504,10 @@ void Gh3x2x_HrAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFra
  *
  * @return  None
  */
-void Gh3x2x_HrvAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFrameId);
+void Gh3x2x_HrvAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, uint8_t lubFrameId);
 
 /**
- * @fn     void Gh3x2x_EcgAlgorithmResultHook(STEcgAlgoResult stEcgAlgoRes[], GU16 pusAlgoResIndexArr[], usAlgoResCnt)
+ * @fn     void Gh3x2x_EcgAlgorithmResultHook(STEcgAlgoResult stEcgAlgoRes[], uint16_t pusAlgoResIndexArr[], usAlgoResCnt)
  *
  * @brief  This function will be called after calculate ecg algorithm.
  *
@@ -575,11 +520,11 @@ void Gh3x2x_HrvAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFr
  *
  * @return  None
  */
-void Gh3x2x_EcgAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFrameId);
+void Gh3x2x_EcgAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, uint8_t lubFrameId);
 
 /**
- * @fn     void Gh3x2xDemoAlgorithmCalculate(GU8* puchReadFifoBuffer, STGsensorRawdata *pstGsAxisValueArr,
- *                                              GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn     void Gh3x2xDemoAlgorithmCalculate(uint8_t* puchReadFifoBuffer, STGsensorRawdata *pstGsAxisValueArr,
+ *                                              uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Algorithm calculate.This function will be called in Gh3x2xDemoInterruptProcess()
  *
@@ -594,8 +539,8 @@ void Gh3x2x_EcgAlgorithmResultHook(STGh3x2xAlgoResult * pstAlgoResult, GU8 lubFr
  * @return  None
  */
 
-void Gh3x2x_DemoAlgorithmCalculate(GU8* puchReadFifoBuffer, GU16 usFifoBuffLen,STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum,
-                                   STCapRawdata* pstCapValueArr,GU16 usCapDataNum,STTempRawdata* pstTempValueArr,GU16 usTempDataNum);
+void Gh3x2x_DemoAlgorithmCalculate(uint8_t* puchReadFifoBuffer, uint16_t usFifoBuffLen,STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum,
+                                   STCapRawdata* pstCapValueArr,uint16_t usCapDataNum,STTempRawdata* pstTempValueArr,uint16_t usTempDataNum);
 
 /**
  * @fn     void Gh3x2xDemoSamplingControl(EMUprotocolParseCmdType emSwitch)
@@ -610,12 +555,12 @@ void Gh3x2x_DemoAlgorithmCalculate(GU8* puchReadFifoBuffer, GU16 usFifoBuffLen,S
  *
  * @return  None
  */
-extern void Gh3x2xDemoSamplingControl(GU32 unFuncMode, EMUprotocolParseCmdType emSwitch);
+extern void Gh3x2xDemoSamplingControl(uint32_t unFuncMode, EMUprotocolParseCmdType emSwitch);
 
 
 /// dump mode
-extern GU16 g_usDumpMode;
-extern void GH3X2X_LedAgcProcessExDump(GU8* puchReadFifoBuffer);
+extern uint16_t g_usDumpMode;
+extern void GH3X2X_LedAgcProcessExDump(uint8_t* puchReadFifoBuffer);
 
 extern void GH3X2X_ReadElectrodeWearDumpData(void);
 
@@ -627,12 +572,10 @@ extern void gh3x2x_sampling_start_hook_func(void);
 
 extern void gh3x2x_sampling_stop_hook_func(void);
 
-extern void gh3x2x_get_rawdata_hook_func(GU8 *read_buffer_ptr, GU16 length);
-
 
 
 /**
- * @fn     void Gh3x2xDemoReportEvent(GU16 usEvent,GU8 uchWearType)
+ * @fn     void Gh3x2xDemoReportEvent(uint16_t usEvent,uint8_t uchWearType)
  *
  * @brief  Report event to APP/EVK
  *
@@ -643,11 +586,11 @@ extern void gh3x2x_get_rawdata_hook_func(GU8 *read_buffer_ptr, GU16 length);
  *
  * @return  None
  */
-extern void Gh3x2xDemoReportEvent(GU16 usEvent,GU8 uchWearType);
+extern void Gh3x2xDemoReportEvent(uint16_t usEvent,uint8_t uchWearType);
 
 #if (__DRIVER_LIB_MODE__==__DRV_LIB_WITH_ALGO__)
 /**
- * @fn     void Gh3x2xDemoReportEvent(GU16 usEvent,GU8 uchWearType)
+ * @fn     void Gh3x2xDemoReportEvent(uint16_t usEvent,uint8_t uchWearType)
  *
  * @brief  Report event to APP/EVK
  *
@@ -661,12 +604,12 @@ extern void Gh3x2xDemoReportEvent(GU16 usEvent,GU8 uchWearType);
  *
  * @return  None
  */
-extern void Gh3x2xDemoSendRawdataPkg(GU8* puchFifoReadData, STGsensorRawdata *pstGsAxisValueArr,
-                                            GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity);
+extern void Gh3x2xDemoSendRawdataPkg(uint8_t* puchFifoReadData, STGsensorRawdata *pstGsAxisValueArr,
+                                            uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity);
 #else
 /**
- * @fn     void Gh3x2xDemoSendRawdataPkg(GU8* puchFifoReadData, GU16 usFifoDataLen, STGsensorRawdata *pstGsAxisValueArr,
-                                GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn     void Gh3x2xDemoSendRawdataPkg(uint8_t* puchFifoReadData, uint16_t usFifoDataLen, STGsensorRawdata *pstGsAxisValueArr,
+                                uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Report event to APP/EVK
  *
@@ -681,12 +624,12 @@ extern void Gh3x2xDemoSendRawdataPkg(GU8* puchFifoReadData, STGsensorRawdata *ps
  *
  * @return  None
  */
-extern void Gh3x2xDemoSendRawdataPkg(GU8* puchFifoReadData, GU16 usFifoDataLen, STGsensorRawdata *pstGsAxisValueArr,
-                                GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity);
+extern void Gh3x2xDemoSendRawdataPkg(uint8_t* puchFifoReadData, uint16_t usFifoDataLen, STGsensorRawdata *pstGsAxisValueArr,
+                                uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity);
 #endif
 
 /**
- * @fn     void Gh3x2x_HalSerialSendData(GU8* uchTxDataBuf, GU16 usBufLen)
+ * @fn     void Gh3x2x_HalSerialSendData(uint8_t* uchTxDataBuf, uint16_t usBufLen)
  *
  * @brief  Serial send data
  *
@@ -698,7 +641,7 @@ extern void Gh3x2xDemoSendRawdataPkg(GU8* puchFifoReadData, GU16 usFifoDataLen, 
  *
  * @return  None
  */
-extern void Gh3x2x_HalSerialSendData(GU8* uchTxDataBuf, GU16 usBufLen);
+extern void Gh3x2x_HalSerialSendData(uint8_t* uchTxDataBuf, uint16_t usBufLen);
 
 /**
  * @fn     void Gh3x2x_StartAdtConfirmTimer(void)
@@ -720,7 +663,7 @@ extern void Gh3x2xSerialSendTimerStart(void);
 
 extern void Gh3x2x_StartAdtConfirmTimer(void);
 
-extern void Gh3x2xSerialSendTimerInit(GU8 uchPeriodMs);
+extern void Gh3x2xSerialSendTimerInit(uint8_t uchPeriodMs);
 
 
 /**
@@ -737,21 +680,21 @@ extern void Gh3x2xSerialSendTimerInit(GU8 uchPeriodMs);
  */
 extern void Gh3x2x_StopAdtConfirmTimer(void);
 
-extern void Gh3x2xDemoSendWearOrLeadStateToUI(GU8 state);
+extern void Gh3x2xDemoSendWearOrLeadStateToUI(uint8_t state);
 
 extern void Gh3x2x_HalSerialFifoInit(void);
 
 
-extern void Gh3x2xMemPoolCheckSumWrite(GU8 *lunMemPool);
-extern GU16 Gh3x2xMemPoolCheckSumCheck(GU8 *lunMemPool);
+extern void Gh3x2xMemPoolCheckSumWrite(uint8_t *lunMemPool);
+extern uint16_t Gh3x2xMemPoolCheckSumCheck(uint8_t *lunMemPool);
 extern void Gh3x2xCheckMemPollBeforeAlgoCal(void);
 extern void Gh3x2xUpdataMemPollChkSumAfterAlgoCal(void);
-extern void Gh3x2xHrOutputValueStrategyPro(STGh3x2xAlgoResult * pstAlgoResult, GU32 lubFrameId);
-extern void GH3x2xMaserControlFunctionLog(GU32 unFuncMode, EMUprotocolParseCmdType emCmdType);
+extern void Gh3x2xHrOutputValueStrategyPro(STGh3x2xAlgoResult * pstAlgoResult, uint32_t lubFrameId);
+extern void GH3x2xMaserControlFunctionLog(uint32_t unFuncMode, EMUprotocolParseCmdType emCmdType);
 
 
 #if __FUNC_TYPE_SOFT_ADT_ENABLE__
-extern GU8 g_uchVirtualAdtTimerCtrlStatus;
+extern uint8_t g_uchVirtualAdtTimerCtrlStatus;
 #if (__USE_POLLING_TIMER_AS_ADT_TIMER__)&&\
     (__POLLING_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__ || __MIX_INT_PROCESS_MODE__ == __INTERRUPT_PROCESS_MODE__)
 #define GH3X2X_START_ADT_TIMER()   g_uchVirtualAdtTimerCtrlStatus = 1;

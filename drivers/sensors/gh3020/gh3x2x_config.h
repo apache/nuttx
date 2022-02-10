@@ -11,6 +11,7 @@
 #ifndef _GH3X2X_CONFIG_H_
 #define _GH3X2X_CONFIG_H_
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 #include "stdio.h"
 
 
@@ -44,7 +45,7 @@
 /* ppg function type */
 #define __FUNC_TYPE_HR_ENABLE__             (1)    /**< hb function tye */
 #define __FUNC_TYPE_HRV_ENABLE__            (1)    /**< hrv function tye */
-#define __FUNC_TYPE_HSM_ENABLE__            (0)    /**< hsm function tye */
+#define __FUNC_TYPE_HSM_ENABLE__            (1)    /**< hsm function tye */
 #define __FUNC_TYPE_SPO2_ENABLE__           (1)    /**< spo2 function tye */
 #define __FUNC_TYPE_BT_ENABLE__             (0)    /**< bt function tye */
 #define __FUNC_TYPE_RESP_ENABLE__           (1)    /**< resp function tye */
@@ -72,7 +73,7 @@
 
 /* soft adt function type */
 #if (__SUPPORT_HARD_ADT_CONFIG__ && __FUNC_TYPE_HR_ENABLE__)
-#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (1)    /**< support soft adt config */
+#define __FUNC_TYPE_SOFT_ADT_ENABLE__       (0)    /**< support soft adt config */
 #endif
 
 /* soft adt function threshold that can be judged as a movement */
@@ -139,7 +140,7 @@
 
 
 /*config list*/
-#define __GH3X2X_CFG_LIST_MAX_NUM__                     (8)             /**< max num of config list(1 ~ 8) */
+#define __GH3X2X_CFG_LIST_MAX_NUM__                     (2)             /**< max num of config list(1 ~ 8) */
 
 
 /* other config */
@@ -147,7 +148,7 @@
 #define __SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__  (1)  /**< enable it ,we can get algo input and output data **/
 
 /* gh3x2x data buffer size config,this is related to gh3x2x fifo water mark config */
-#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (128 * 4)                                  /**< rawdata buffer size in byte */
+#define __GH3X2X_RAWDATA_BUFFER_SIZE__                  (64 * 4)                                  /**< rawdata buffer size in byte */
 #define __GH3X2X_RAWDATA_BUFFER_CRC_SIZE__              (8)                                        /**< rawdata buffer crc size in byte */
 
 /* gsensor data buffer size config,every g sensor data has 6 bytes(x,y,z) */
@@ -214,7 +215,7 @@
 #define   EXAMPLE_LOG(...)          do {\
                                         char gh3x2x_example_log[EXAMPLE_LOG_MAX_LEN] = {0};\
                                         snprintf(gh3x2x_example_log, EXAMPLE_LOG_MAX_LEN, __VA_ARGS__);\
-                                        GH3X2X_Log((GCHAR *)gh3x2x_example_log);\
+                                        GH3X2X_Log((char *)gh3x2x_example_log);\
                                     } while(0)
 
 #else

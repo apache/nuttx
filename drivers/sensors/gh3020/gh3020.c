@@ -39,7 +39,9 @@
 #include <sys/types.h>
 
 #include "gh3020_bridge.h"
+#include "gh3020_def.h"
 #include "gh3x2x_drv.h"
+#include "gh3x2x_inner.h"
 #include "gh3x2x.h"
 
 /****************************************************************************
@@ -48,7 +50,7 @@
 
 /* Configurations */
 
-#define GH3020_BATCH_NUMBER      12         /* Maximum slots for each PPG */
+#define GH3020_BATCH_NUMBER      10         /* Maximum slots for each PPG */
 
 /* SPI parameters */
 
@@ -60,7 +62,6 @@
 
 #define GH3020_SAMPLERATE_MAX    1000.0f    /* Maximum sample rate = 1kHz */
 #define GH3020_SAMPLERATE_MIN    25.0f      /* Minimum sample rate = 25Hz */
-#define GH3020_DATA_PER_SAMPLE   4          /* Each sample has 4 PD data */
 #define GH3020_RDMODE_INTERRPT   0          /* Read data in interrupts */
 #define GH3020_RDMODE_POLLING    1          /* Read data with polling */
 
@@ -77,13 +78,31 @@
 #define GH3020_SR_DFT            25         /* Default sample rate = 25 Hz */
 #define GH3020_CURRENT_DFT       10000      /* Default LED current = 10mA */
 
+/* Constants */
+
+#define GH3020_CFGLIST_LEN_NML   146        /* Normal init cfg list length */
+#define GH3020_CFGLIST_LEN_FAC   75         /* Factest init cfg list length */
+#define GH3020_CFGLIST_NUM       2          /* Init cfg list number */
 #define GH3020_ONE_SECOND        1000000.0f /* 1 second = 1000000 us */
+
+/* Macros */
 
 #define GH3020_CEILING(x, y)     ((x) + ((y)- 1)) / (y)
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
+
+/* GH3020 FIFO data information struct */
+
+struct gh3020_fifodata_s
+{
+  uint32_t adccode;                      /* Sampling rawdata of ADC */
+  uint8_t  slot_idx;                     /* Slot index */
+  uint8_t  adc_idx;                      /* ADC index */
+  uint8_t  flag_ledadj_ecgrecover;       /* Flag of PPG or recover of ECG */
+  uint8_t  flag_ledadj_agc_up;           /* Adj flag of PPG 0: down 1:up */
+};
 
 /* Sensor struct */
 
@@ -135,10 +154,21 @@ struct gh3020_dev_s
  * Private Functions Prototypes
  ****************************************************************************/
 
-/* GH3020 common handle functions */
+/* GH3020 SPI interface handle functions */
 
 static int gh3020_configspi(FAR struct gh3020_dev_s *priv);
+static void gh3020_spi_exchange(FAR struct gh3020_dev_s *priv,
+                                FAR uint8_t *buf, uint16_t nwords);
+
+/* Functions which won't operate GH3020 directly, such as data processions */
+
 static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv);
+static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
+                                 FAR const struct gh3020_frameinfo_s
+                                 *pframeinfo);
+
+/* GH3020 common operation functions */
+
 static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv);
 static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
@@ -179,10 +209,19 @@ FAR static struct gh3020_dev_s *g_priv;
 
 static const uint32_t gh3020_channel_function_list[GH3020_SENSOR_NUM] =
   {
-    GH3X2X_FUNCTION_HR,                  /* HR function for ch0 (green) */
-    GH3X2X_FUNCTION_SPO2,                /* SPO2 function for ch1 (red) */
-    GH3X2X_FUNCTION_HRV,                 /* HRV function for ch2 (IR) */
-    GH3X2X_FUNCTION_RESP                 /* RESP function for ch3 (dark) */
+    GH3X2X_FUNCTION_HR,               /* HR(slot0) for ch0 (green dynamic) */
+    GH3X2X_FUNCTION_SPO2,             /* SPO2(slot4) for ch1 (red dynamic) */
+    GH3X2X_FUNCTION_HRV,              /* HRV(slot5) for ch2 (IR dynamic) */
+    GH3X2X_FUNCTION_RESP,             /* RESP(slot3) for ch3 (dark fixed) */
+    GH3X2X_FUNCTION_TEST2,            /* TEST2(slot1) for ch4 (green fixed) */
+    GH3X2X_FUNCTION_HSM               /* HSM(slot2) for ch5 (IR fixed) */
+  };
+
+/* GH3020 ADC gain register values vs actual ADC gains (KOhm) */
+
+static const uint16_t gh3020_gain_list[] =
+  {
+    10, 25, 50, 75, 100, 250, 500, 750, 1000, 1250, 1500, 1750, 2000
   };
 
 /* Sensor operations */
@@ -200,6 +239,247 @@ static const struct sensor_ops_s g_gh3020_ops =
  * Public Data
  ****************************************************************************/
 
+/* Initial register values for normal functions */
+
+const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
+{
+  {0x0004, 0x001f}, /* Maxmium sample rate = 32KHz / (31 +１) = 1000Hz */
+  {0x0006, 0x0006}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
+  {0x000a, 0x00c8}, /* Default FIFO watermark = 200 */
+  {0x000e, 0x000d}, /* GH3020_REG_WKUP_TMR. Not mentioned in datasheet. */
+  {0x0100, 0x0100}, /* Slot0 uses slot_cfg0, slot1 uses slot_cfg1 */
+  {0x0102, 0x0302}, /* Slot2 uses slot_cfg2, slot3 uses slot_cfg3 */
+  {0x0104, 0x0504}, /* Slot4 uses slot_cfg4, slot5 uses slot_cfg5 */
+  {0x0106, 0x0806}, /* Slot6 uses slot_cfg6, slot7 is disabled */
+  {0x010a, 0x277c}, /* Slot_cfg0: sync signal, use FIFO, 4ADCs */
+  {0x0110, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 512x ADC */
+  {0x0114, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x011e, 0x0013}, /* LED drv0 to LED0(to green LED) pin, 19/255*200=15mA */
+  {0x0120, 0x0013}, /* LED drv1 to LED4(to green LED) pin, 19/255*200=15mA */
+  {0x0122, 0x0c7f}, /* LED current (12~127)/255*200 = 9~100mA */
+  {0x0126, 0x277c}, /* Slot_cfg1: sync signal, use FIFO, 4ADCs */
+  {0x012c, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x012e, 0x2222}, /* TIA0~3 40KOHm */
+  {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x013a, 0x0003}, /* LED drv0 to LED0(to green LED) pin, 3/255*200=2.5mA */
+  {0x013c, 0x0003}, /* LED drv1 to LED0(to green LED) pin, 3/255*200=2.5mA */
+  {0x0142, 0x277c}, /* Slot_cfg2: sync signal, use FIFO, 4ADCs */
+  {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x014a, 0x2222}, /* TIA0~3 40KOHm */
+  {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x0156, 0x0103}, /* LED drv0 to LED1(to IR LED) pin, 3/255*200=2.5mA */
+  {0x0158, 0x0103}, /* LED drv1 to LED1(to IR LED) pin, 3/255*200=2.5mA */
+  {0x015e, 0x277c}, /* Slot_cfg3: sync signal, use FIFO, 4ADCs */
+  {0x0164, 0x0004}, /* No BG or DC cancel, 512x ADC */
+  {0x0166, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0168, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x017a, 0x277c}, /* Slot_cfg4: sync signal, use FIFO, 4ADCs */
+  {0x0180, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
+  {0x0182, 0x0000}, /* TIA0~3 10KOHm */
+  {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x018e, 0x0219}, /* LED drv0 to LED2(to red LED) pin, 25/255*200=20mA */
+  {0x0190, 0x0219}, /* LED drv1 to LED2(to red LED) pin, 25/255*200=20mA */
+  {0x0192, 0x137f}, /* LED current (19~127)/255*200 = 15~100 mA */
+  {0x0196, 0x277c}, /* Slot_cfg5: sync signal, use FIFO, 4ADCs */
+  {0x019c, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
+  {0x019e, 0x0000}, /* TIA0~3 10KOHm */
+  {0x01a0, 0x00aa}, /* All ADCs use 200pF TIA_CF */
+  {0x01aa, 0x0119}, /* LED drv0 to LED1(to IR LED) pin, 25/255*200=20mA */
+  {0x01ac, 0x0119}, /* LED drv1 to LED1(to IR LED) pin, 25/255*200=20mA */
+  {0x01ae, 0x137f}, /* LED current (19~127) / 255 * 200 = 15~100 mA */
+  {0x01b2, 0xc744}, /* Slot_cfg6: use FIFO, ADC0 */
+  {0x01b4, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
+  {0x01b6, 0x0000}, /* TIA2&3 disconnected */
+  {0x01b8, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
+  {0x01ba, 0x4442}, /* TIA0 10KOhm, TIA1~3 100KOhm */
+  {0x01bc, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
+  {0x01c2, 0x0003}, /* ADC0 BG cancel source 256uA max. */
+  {0x01c6, 0x0106}, /* LED drv0 to LED1(to IR LED) pin, 6/255*200=5mA */
+  {0x01c8, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 6/255*200=5mA */
+  {0x01ec, 0x0122}, /* Slot0's time 290 us (green dynamic) */
+  {0x01ee, 0x0122}, /* Slot1's time 290 us (green fixed) */
+  {0x01f0, 0x0122}, /* Slot2's time 290 us (IR fixed) */
+  {0x01f2, 0x005f}, /* Slot3's time 95 us (dark fixed) */
+  {0x01f4, 0x02fa}, /* Slot4's time 762 us (red dynamic) */
+  {0x01f6, 0x02fa}, /* Slot5's time 762 us (IR dynamic) */
+  {0x01f8, 0x0098}, /* Slot6's time 152 us (hard wear-on detection) */
+  {0x0200, 0x0120}, /* GH3020_REG_AFE_REG0. Not mentioned in datasheet. */
+  {0x0280, 0x0a00}, /* Starting LED tunning need continuous 10 samples */
+  {0x0282, 0xf530}, /* Tunning start upper threshold */
+  {0x0284, 0x9388}, /* Tunning start lower threshold */
+  {0x0286, 0xc45c}, /* Tunning done upper threshold */
+  {0x0288, 0xa328}, /* Tunning done lower threshold */
+  {0x0408, 0x0001}, /* Wear-on detection enabled */
+  {0x0410, 0x49f0}, /* Approaching detection upper threshold LSB 16bits */
+  {0x0412, 0x0082}, /* Approaching detection upper threshold MSB 8bits */
+  {0x0414, 0x49f0}, /* Approaching detection lower threshold LSB 16bits */
+  {0x0416, 0x0082}, /* Approaching detection lower threshold MSB 8bits */
+  {0x0422, 0x0011}, /* 1 data exceeding threshold will start wear-on detect */
+  {0x0424, 0x0901}, /* Wear-on2 detector confirm time 2s; wear-on1 0.4s */
+  {0x0426, 0x0102}, /* Wear-on logic: OR; wear-on_as0: prox1 */
+  {0x0428, 0x0102}, /* Wear-off logic: OR; wear-off_as0: prox1 */
+  {0x0502, 0x4f60}, /* INT: Rst,wear-off/on,tunning fail/done,FIFO ovf/full */
+  {0x0504, 0x000a}, /* Interrupt pulse width 33us * 10 */
+  {0x0588, 0x0008}, /* OSC32K_TEMP. Not mentioned in datasheet. */
+  {0x0692, 0x0233}, /* LED_DRV_AD_REG. Not mentioned in datasheet. */
+  {0x0694, 0x0400}, /* ECG_IA_AD_REG. Not mentioned in datasheet. */
+  {0x0698, 0x2310}, /* ECG_IA_AD_REG2. Not mentioned in datasheet. */
+  {0x0700, 0x0000}, /* EFUSE for LED current calibration disabled */
+  {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
+  {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0x45f0}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x29a2}, /* Virtual register. Maintained by Goodix. */
+  {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e4, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e6, 0xff02}, /* Virtual register. Maintained by Goodix. */
+  {0x10e8, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ea, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ec, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ee, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x1120, 0x00c8}, /* Virtual register. Maintained by Goodix. */
+  {0x1122, 0x0005}, /* Virtual register. Maintained by Goodix. */
+  {0x1124, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1160, 0x0031}, /* Virtual register. Maintained by Goodix. */
+  {0x1162, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1164, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1166, 0x4568}, /* Virtual register. Maintained by Goodix. */
+  {0x1168, 0x9940}, /* Virtual register. Maintained by Goodix. */
+  {0x116a, 0x00d9}, /* Virtual register. Maintained by Goodix. */
+  {0x116c, 0x8800}, /* Virtual register. Maintained by Goodix. */
+  {0x116e, 0x0093}, /* Virtual register. Maintained by Goodix. */
+  {0x1170, 0x5c00}, /* Virtual register. Maintained by Goodix. */
+  {0x1172, 0x00c4}, /* Virtual register. Maintained by Goodix. */
+  {0x1174, 0x2800}, /* Virtual register. Maintained by Goodix. */
+  {0x1176, 0x00a3}, /* Virtual register. Maintained by Goodix. */
+  {0x2000, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x2002, 0x00c2}, /* Virtual register. Maintained by Goodix. */
+  {0x2022, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x2024, 0x0901}, /* Virtual register. Maintained by Goodix. */
+  {0x2026, 0x1911}, /* Virtual register. Maintained by Goodix. */
+  {0x2044, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x2046, 0xaaa2}, /* Virtual register. Maintained by Goodix. */
+  {0x2048, 0xbab2}, /* Virtual register. Maintained by Goodix. */
+  {0x2066, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x2068, 0x4a42}, /* Virtual register. Maintained by Goodix. */
+  {0x206a, 0x5a52}, /* Virtual register. Maintained by Goodix. */
+  {0x20cc, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x20ce, 0x8b83}, /* Virtual register. Maintained by Goodix. */
+  {0x20d0, 0x9b93}, /* Virtual register. Maintained by Goodix. */
+  {0x2176, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x2178, 0x6d65}, /* Virtual register. Maintained by Goodix. */
+  {0x217a, 0x7d75}, /* Virtual register. Maintained by Goodix. */
+  {0x21dc, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x21de, 0x2921}, /* Virtual register. Maintained by Goodix. */
+  {0x21e0, 0x3931}, /* Virtual register. Maintained by Goodix. */
+  {0x2880, 0x0005}, /* Virtual register. Maintained by Goodix. */
+  {0x2882, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x2884, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x2886, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x288c, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x2896, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x289c, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x3000, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x3002, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x3004, 0x49f0}, /* Virtual register. Maintained by Goodix. */
+  {0x3006, 0x0082}, /* Virtual register. Maintained by Goodix. */
+  {0x35c0, 0x0004}, /* Virtual register. Maintained by Goodix. */
+  {0x35c4, 0x0100}, /* Virtual register. Maintained by Goodix. */
+  {0x35c6, 0x0302}, /* Virtual register. Maintained by Goodix. */
+  {0xffff, 0x0001}
+};
+
+/* Initial register values for factest mode */
+
+const struct gh3020_reg_s gh3020_reglist_factest[GH3020_CFGLIST_LEN_FAC] =
+{
+  {0x0004, 0x001f},
+  {0x000a, 0x00c8},
+  {0x000e, 0x000d},
+  {0x0100, 0x0100},
+  {0x0102, 0x0302},
+  {0x010a, 0x277c},
+  {0x0110, 0x0004},
+  {0x0112, 0x0000},
+  {0x0114, 0x00aa},
+  {0x0126, 0x277c},
+  {0x012c, 0x0c14},
+  {0x012e, 0x0000},
+  {0x0130, 0x00aa},
+  {0x013a, 0x0019},
+  {0x013c, 0x0019},
+  {0x0142, 0x277c},
+  {0x0148, 0x0c14},
+  {0x014a, 0x0000},
+  {0x014c, 0x00aa},
+  {0x0156, 0x0219},
+  {0x0158, 0x0219},
+  {0x015e, 0x277c},
+  {0x0164, 0x0c14},
+  {0x0166, 0x0000},
+  {0x0168, 0x00aa},
+  {0x0172, 0x0119},
+  {0x0174, 0x0119},
+  {0x01ec, 0x005f},
+  {0x01ee, 0x0122},
+  {0x01f0, 0x0122},
+  {0x01f2, 0x0122},
+  {0x0200, 0x0120},
+  {0x0502, 0x4f60},
+  {0x0504, 0x000a},
+  {0x0588, 0x0008},
+  {0x0692, 0x0233},
+  {0x0694, 0x0400},
+  {0x0698, 0x2310},
+  {0x0700, 0x0000},
+  {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
+  {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0xd082}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x297e}, /* Virtual register. Maintained by Goodix. */
+  {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e4, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10e6, 0xff02}, /* Virtual register. Maintained by Goodix. */
+  {0x10e8, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ea, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ec, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x10ee, 0x0202}, /* Virtual register. Maintained by Goodix. */
+  {0x1120, 0x00c8}, /* Virtual register. Maintained by Goodix. */
+  {0x1122, 0x0005}, /* Virtual register. Maintained by Goodix. */
+  {0x1124, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1140, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x1142, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x1144, 0x0001}, /* Virtual register. Maintained by Goodix. */
+  {0x1146, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x21ba, 0x0010}, /* Virtual register. Maintained by Goodix. */
+  {0x21bc, 0x0d05}, /* Virtual register. Maintained by Goodix. */
+  {0x21be, 0x1d15}, /* Virtual register. Maintained by Goodix. */
+  {0x21c0, 0x2921}, /* Virtual register. Maintained by Goodix. */
+  {0x21c2, 0x3931}, /* Virtual register. Maintained by Goodix. */
+  {0x21c4, 0x4b43}, /* Virtual register. Maintained by Goodix. */
+  {0x21c6, 0x5b53}, /* Virtual register. Maintained by Goodix. */
+  {0x21c8, 0x6a62}, /* Virtual register. Maintained by Goodix. */
+  {0x21ca, 0x7a72}, /* Virtual register. Maintained by Goodix. */
+  {0x289a, 0x0019}, /* Virtual register. Maintained by Goodix. */
+  {0x3000, 0x0400}, /* Virtual register. Maintained by Goodix. */
+  {0x3002, 0x0000}, /* Virtual register. Maintained by Goodix. */
+  {0x3004, 0x49f0}, /* Virtual register. Maintained by Goodix. */
+  {0x3006, 0x0082}, /* Virtual register. Maintained by Goodix. */
+  {0xffff, 0x0001}
+};
+
+/* Initial register configurations list */
+
+const struct gh3020_initcfg_s gh3020_initcfg_list[GH3020_CFGLIST_NUM] =
+{
+  {gh3020_reglist_normal, GH3020_CFGLIST_LEN_NML},
+  {gh3020_reglist_factest, GH3020_CFGLIST_LEN_FAC}
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -212,7 +492,7 @@ static const struct sensor_ops_s g_gh3020_ops =
  *   gh3020_config_s.
  *
  * Input Parameters:
- *   priv    - Device struct.
+ *   priv - Device struct.
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on any failure.
@@ -253,6 +533,51 @@ static int gh3020_configspi(FAR struct gh3020_dev_s *priv)
   SPI_SETBITS(priv->config->spi, GH3020_SPI_NBITS);
 
   return OK;
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_exchange
+ *
+ * Description:
+ *   Control CS pin and exchange content via SPI.
+ *
+ * Input Parameters:
+ *   priv   - Device struct.
+ *   buf    - A pointer to the buffer which stores data to exchange.
+ *   nwords - The numbers of word (8bits per word) to be read.
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void gh3020_spi_exchange(FAR struct gh3020_dev_s *priv,
+                                FAR uint8_t *buf, uint16_t nwords)
+{
+  /* Pull down CS pin manually */
+
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 0);
+
+  /* Selects the device. */
+
+  SPI_SELECT(priv->config->spi, priv->config->cs, true);
+
+  /* First send read command, then sends arbitrary content (nwords bytes) to
+   * read a block of nwords bytes.
+   */
+
+  SPI_EXCHANGE(priv->config->spi, buf, buf, nwords);
+
+  /* Pull up CS pin manually */
+
+  IOEXP_WRITEPIN(priv->config->ioedev, priv->config->gpiocs, 1);
+
+  /* Deselect the device and release the SPI bus. */
+
+  SPI_SELECT(priv->config->spi, priv->config->cs, false);
 }
 
 /****************************************************************************
@@ -323,6 +648,56 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: gh3020_extract_frame
+ *
+ * Description:
+ *   Extract PPG values, gains and LED current from frame readback, and store
+ *   them in specialized PPGQ struct.
+ *
+ * Input Parameters:
+ *   pppg       - Pointer to PPGQ struct to store this frame's useful infos.
+ *   pframeinfo - Pointer to the info of frame readback.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
+                                 FAR const struct gh3020_frameinfo_s
+                                 *pframeinfo)
+{
+  int32_t raw;
+  uint32_t gain;
+  uint8_t i;
+
+  pppg->current = (((pframeinfo->punFrameAgcInfo[0] & 0x0000ff00u) >> 8)
+                  + ((pframeinfo->punFrameAgcInfo[0] & 0x00ff0000u) >> 16))
+                  * GH3020_LEDDRV_CURRENT_MA_MAX * 1000 / 0xffu ;
+
+  for (i = 0; i < GH3020_ADC_NUM; i++)
+    {
+      raw = (int32_t)(pframeinfo->punFrameRawdata[i]);
+      gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
+      pppg->gain[i] = gh3020_gain_list[gain];
+
+      /* RAW PPG data may be negative because of BG cancellation. */
+
+      if (raw > 0)
+        {
+          pppg->ppg[i] = (uint32_t)raw;
+        }
+      else
+        {
+          pppg->ppg[i] = 0;
+        }
+    }
+}
+
+/****************************************************************************
  * Name: gh3020_factest_start
  *
  * Description:
@@ -343,39 +718,38 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
 
 static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
 {
-  STGh3x2xEngineeringModeSampleParam sample_para;
+  struct gh3020_factestmode_param_s sample_para;
 
   memset(&sample_para, 0, sizeof(sample_para));
-  memset(&sample_para.uchTiaGain[4],
-    GH3X2X_ENGINEERING_MODE_TIA_GAIN_100_K, 12);
-  sample_para.unFunctionID = GH3X2X_FUNCTION_TEST1;
-  sample_para.uchTiaGainChangeEn = 1;
-  sample_para.uchSampleRateChangeEn = 1;
-  sample_para.uchIntTimeChangeEn = 1;
-  sample_para.uchLedCurrentChangeEn = 1;
-  sample_para.usSampleRate = GH3020_SR_DFT;
-  sample_para.uchIntTime = GH3X2X_ENGINEERING_MODE_INT_TIME_79_US;
+  memset(&sample_para.tia_gain[4], GH3020_FACTEST_TIA_GAIN_100_K, 12);
+  sample_para.channelmode = GH3X2X_FUNCTION_TEST1;
+  sample_para.tia_gain_change_en = true;
+  sample_para.sample_rate_change_en = true;
+  sample_para.int_time_change_en = true;
+  sample_para.led_current_change_en = true;
+  sample_para.sample_rate = GH3020_SR_DFT;
+  sample_para.int_time = GH3020_FACTEST_INT_TIME_79_US;
 
   switch (channelmode)
     {
       case GH3X2X_FUNCTION_HR:    /* Green */
         {
-          sample_para.uchLedDrv0Current[7] = (uint8_t)(current / 2000);
-          sample_para.uchLedDrv1Current[7] = (uint8_t)(current / 2000);
+          sample_para.led_drv0_current[7] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[7] = (uint8_t)(current / 2000);
         }
         break;
 
       case GH3X2X_FUNCTION_SPO2:  /* Red */
         {
-          sample_para.uchLedDrv0Current[11] = (uint8_t)(current / 2000);
-          sample_para.uchLedDrv1Current[11] = (uint8_t)(current / 2000);
+          sample_para.led_drv0_current[11] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[11] = (uint8_t)(current / 2000);
         }
         break;
 
       case GH3X2X_FUNCTION_HRV:   /* IR */
         {
-          sample_para.uchLedDrv0Current[15] = (uint8_t)(current / 2000);
-          sample_para.uchLedDrv1Current[15] = (uint8_t)(current / 2000);
+          sample_para.led_drv0_current[15] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[15] = (uint8_t)(current / 2000);
         }
         break;
 
@@ -1070,7 +1444,12 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
           if (priv->factest_mode == true)
             {
               FAR uint32_t *current = (FAR uint32_t *)arg;
-              sensor->current = *current / 1000 * 1000;
+              uint32_t leddrv_val;
+
+              leddrv_val = (uint32_t)roundf((float)*current * 0xffu / 1000 /
+                                            GH3020_LEDDRV_CURRENT_MA_MAX);
+              sensor->current = leddrv_val * GH3020_LEDDRV_CURRENT_MA_MAX *
+                                1000 / 0xffu;
               *current = sensor->current;
               if (sensor->activated == true)
                 {
@@ -1282,26 +1661,122 @@ static void gh3020_worker_poll(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: gh3020_spiread
+ * Name: GH3X2X_WriteReg
  *
  * Description:
- *   Read content from SPI.
+ *   Equal to gh3020_spi_writereg. Used by vendor's library, thus the func
+ *   name has to remain origin.
  *
  * Input Parameters:
- *   recvbuf - A pointer to the buffer which stores data read.
- *   nwords  - The numbers of word (8bits per word) to be read.
+ *   regaddr - Register address.
+ *   regval  - Value to be written.
  *
  * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *   None.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-int gh3020_spiread(FAR uint8_t *recvbuf, uint16_t nwords)
+void GH3X2X_WriteReg(uint16_t regaddr, uint16_t regval)
 {
-  int ret;
+    gh3020_spi_writereg(regaddr, regval);
+}
+
+/****************************************************************************
+ * Name: GH3X2X_ReadReg
+ *
+ * Description:
+ *   Equal to gh3020_spi_readreg. Used by vendor's library, thus the function
+ *   name has to remain origin.
+ *
+ * Input Parameters:
+ *   regaddr - Register address.
+ *
+ * Returned Value:
+ *   The register value read.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+uint16_t GH3X2X_ReadReg(uint16_t regaddr)
+{
+  return gh3020_spi_readreg(regaddr);
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_sendcmd
+ *
+ * Description:
+ *   Send command via SPI.
+ *
+ * Input Parameters:
+ *   cmd - The command to be send.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+void gh3020_spi_sendcmd(uint8_t cmd)
+{
+  /* Lock the SPI bus thus only one device can access it at the same time. */
+
+  SPI_LOCK(g_priv->config->spi, true);
+
+  /* Configure SPI frequency, mode and number of bits per word. */
+
+  if (gh3020_configspi(g_priv) != OK)
+    {
+      snerr("SPI configuration failed.\n");
+      SPI_LOCK(g_priv->config->spi, false);
+      return;
+    }
+
+  gh3020_spi_exchange(g_priv, &cmd, 1);
+
+  /* Release the SPI bus. */
+
+  SPI_LOCK(g_priv->config->spi, false);
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_writereg
+ *
+ * Description:
+ *   Write specialized value to a register of specialized address.
+ *
+ * Input Parameters:
+ *   regaddr - Register address.
+ *   regval  - Value to be written.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+void gh3020_spi_writereg(uint16_t regaddr, uint16_t regval)
+{
+  uint8_t buf[GH3020_SPI_WR_BUF_LEN];
+
+  /* Write a register need: write_cmd + address + content_length + content */
+
+  buf[0] = GH3020_SPI_CMD_WRITE;
+  buf[1] = (uint8_t)((regaddr >> 8) & 0xff);
+  buf[2] = (uint8_t)(regaddr & 0xff);
+  buf[3] = GH3020_SPI_WR_LEN_H;
+  buf[4] = GH3020_SPI_WR_LEN_L;
+  buf[5] = (uint8_t)((regval >> 8) & 0xff);
+  buf[6] = (uint8_t)(regval & 0xff);
 
   /* Lock the SPI bus thus only one device can access it at the same time. */
 
@@ -1309,111 +1784,223 @@ int gh3020_spiread(FAR uint8_t *recvbuf, uint16_t nwords)
 
   /* Configure SPI frequency, mode and number of bits per word. */
 
-  ret = gh3020_configspi(g_priv);
-  if (ret < 0)
+  if (gh3020_configspi(g_priv) != OK)
     {
-      snerr("SPI configuration failed: %d\n", ret);
+      snerr("SPI configuration failed.\n");
       SPI_LOCK(g_priv->config->spi, false);
-      return ret;
+      return;
     }
 
-  /* Selects the device. */
+  gh3020_spi_exchange(g_priv, buf, GH3020_SPI_WR_BUF_LEN);
 
-  SPI_SELECT(g_priv->config->spi, g_priv->config->cs, true);
+  /* Release the SPI bus. */
 
-  /* First send read command, then sends arbitrary content (nwords bytes) to
-   * read a block of nwords bytes.
+  SPI_LOCK(g_priv->config->spi, false);
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_readreg
+ *
+ * Description:
+ *   Read a register value of specialized register address via SPI.
+ *
+ * Input Parameters:
+ *   regaddr - Register address.
+ *
+ * Returned Value:
+ *   The register value read.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+uint16_t gh3020_spi_readreg(uint16_t regaddr)
+{
+  uint8_t buf[GH3020_SPI_RD_BUF_LEN];
+
+  buf[0] = GH3020_SPI_CMD_WRITE;
+  buf[1] = (uint8_t)((regaddr >> 8) & 0xff);
+  buf[2] = (uint8_t)(regaddr & 0xff);
+
+  /* Lock the SPI bus thus only one device can access it at the same time. */
+
+  SPI_LOCK(g_priv->config->spi, true);
+
+  /* Configure SPI frequency, mode and number of bits per word. */
+
+  if (gh3020_configspi(g_priv) != OK)
+    {
+      snerr("SPI configuration failed.\n");
+      SPI_LOCK(g_priv->config->spi, false);
+      return 0;
+    }
+
+  /* Write the register address. */
+
+  gh3020_spi_exchange(g_priv, buf, GH3020_SPI_RD_BUF_LEN);
+
+  /* Read the register. */
+
+  buf[0] = GH3020_SPI_CMD_READ;
+  gh3020_spi_exchange(g_priv, buf, GH3020_SPI_RD_BUF_LEN);
+
+  /* Release the SPI bus. */
+
+  SPI_LOCK(g_priv->config->spi, false);
+
+  return (uint16_t)((((uint16_t)buf[1] << 8) & 0xff00) |
+                    ((uint16_t)buf[2] & 0xff));
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_readfifo
+ *
+ * Description:
+ *   Read FIFO via SPI.
+ *
+ * Input Parameters:
+ *   pbuf - Pointer to buffer for storing values readback.
+ *   len  - How many bytes to be read.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+void gh3020_spi_readfifo(FAR uint8_t *pbuf, uint16_t len)
+{
+  uint8_t localbuf[GH3020_SPI_LOCALBUF_SIZE];
+
+  localbuf[0] = GH3020_SPI_CMD_WRITE;
+  localbuf[1] = (uint8_t)((GH3020_REG_FIFO >> 8) & 0xff);
+  localbuf[2] = (uint8_t)(GH3020_REG_FIFO & 0xff);
+
+  /* Lock the SPI bus thus only one device can access it at the same time. */
+
+  SPI_LOCK(g_priv->config->spi, true);
+
+  /* Configure SPI frequency, mode and number of bits per word. */
+
+  if (gh3020_configspi(g_priv) != OK)
+    {
+      snerr("SPI configuration failed.\n");
+      SPI_LOCK(g_priv->config->spi, false);
+      return;
+    }
+
+  /* Write reading address. */
+
+  gh3020_spi_exchange(g_priv, localbuf, GH3020_SPI_RD_BUF_LEN);
+
+  /* Prepare for reading. */
+
+  localbuf[0] = GH3020_SPI_CMD_READ;
+
+  /* If there are not so many bytes to read, we use local buffer for SPI
+   * exchanging and copy the readout to destination buffer. Otherwise we
+   * have to exchange twice, bringing a inherent delay between 2 exchanges.
    */
 
-  SPI_EXCHANGE(g_priv->config->spi, recvbuf, recvbuf, nwords);
-
-  /* Deselect the device and release the SPI bus. */
-
-  SPI_SELECT(g_priv->config->spi, g_priv->config->cs, false);
-  SPI_LOCK(g_priv->config->spi, false);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: gh3020_spiwrite
- *
- * Description:
- *   Write the content to SPI.
- *
- * Input Parameters:
- *   sendbuf - A pointer to the buffer which stores data to be written.
- *   nwords  - The numbers of word (8bits per word) to be written.
- *
- * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-int gh3020_spiwrite(FAR uint8_t *sendbuf, uint16_t nwords)
-{
-  int ret;
-
-  /* Lock the SPI bus thus only one device can access it at the same time. */
-
-  SPI_LOCK(g_priv->config->spi, true);
-
-  /* Configure SPI frequency, mode and number of bits per word. */
-
-  ret = gh3020_configspi(g_priv);
-  if (ret < 0)
+  if (len + 1 <= GH3020_SPI_LOCALBUF_SIZE)
     {
-      snerr("SPI configuration failed: %d\n", ret);
-      SPI_LOCK(g_priv->config->spi, false);
-      return ret;
-    }
-
-  /* Selects the device. Set CS (as a GPIO) low. */
-
-  SPI_SELECT(g_priv->config->spi, g_priv->config->cs, true);
-
-  /* First send start address and 0x00(means reading). Then write a block. */
-
-  SPI_EXCHANGE(g_priv->config->spi, sendbuf, sendbuf, nwords);
-
-  /* Deselect the device, set CS high and release the SPI bus. */
-
-  SPI_SELECT(g_priv->config->spi, g_priv->config->cs, false);
-  SPI_LOCK(g_priv->config->spi, false);
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: gh3020_spi_csctrl
- *
- * Description:
- *   Control the level of SPI CS pin.
- *
- * Input Parameters:
- *   pinlevel - Desired level of SPI CS pin.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-void gh3020_spi_csctrl(uint8_t pinlevel)
-{
-  if (pinlevel == 0)
-    {
-      IOEXP_WRITEPIN(g_priv->config->ioedev, g_priv->config->gpiocs, 0);
+      gh3020_spi_exchange(g_priv, localbuf, len + 1);
+      memcpy(pbuf, localbuf + 1, len);
     }
   else
     {
+      /* Pull down CS pin manually */
+
+      IOEXP_WRITEPIN(g_priv->config->ioedev, g_priv->config->gpiocs, 0);
+
+      /* Selects the device. */
+
+      SPI_SELECT(g_priv->config->spi, g_priv->config->cs, true);
+
+      /* First send read command, then send arbitrary content to read a block
+       * of nwords bytes.
+       */
+
+      SPI_EXCHANGE(g_priv->config->spi, localbuf, localbuf, 1);
+      SPI_EXCHANGE(g_priv->config->spi, pbuf, pbuf, len);
+
+      /* Pull up CS pin manually */
+
       IOEXP_WRITEPIN(g_priv->config->ioedev, g_priv->config->gpiocs, 1);
+
+      /* Deselect the device and release the SPI bus. */
+
+      SPI_SELECT(g_priv->config->spi, g_priv->config->cs, false);
     }
+
+  /* Release the SPI bus. */
+
+  SPI_LOCK(g_priv->config->spi, false);
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_writebits
+ *
+ * Description:
+ *   Write specialized bits field to a register.
+ *
+ * Input Parameters:
+ *   regaddr - Register address.
+ *   lsb     - LSB position of the bits field in the register.
+ *   msb     - MSB position of the bits field in the register.
+ *   val     - Value of the bits field to be written.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+void gh3020_spi_writebits(uint16_t regaddr, uint8_t lsb, uint8_t msb,
+                          uint16_t val)
+{
+    uint16_t mask = ((0x0001 << (msb - lsb + 1)) - 1) << lsb;
+    uint16_t regval;
+
+    regval = gh3020_spi_readreg(regaddr);
+    GH3020_VAL_CLEAR_BIT(regval, mask);
+    GH3020_VAL_SET_BIT(regval, (val << lsb) & mask);
+    gh3020_spi_writereg(regaddr, regval);
+}
+
+/****************************************************************************
+ * Name: gh3020_spi_readbits
+ *
+ * Description:
+ *   Read specialized bits field from a register.
+ *
+ * Input Parameters:
+ *   regaddr - Register address.
+ *   lsb     - LSB position of the bits field in the register.
+ *   msb     - MSB position of the bits field in the register.
+ *
+ * Returned Value:
+ *   Value of the bits field to be read.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+uint16_t gh3020_spi_readbits(uint16_t regaddr, uint8_t lsb, uint8_t msb)
+{
+  uint16_t mask = ((0x0001 << (msb - lsb + 1)) - 1) << lsb;
+  uint16_t regval;
+
+  regval = gh3020_spi_readreg(regaddr);
+  GH3020_VAL_GET_BIT(regval, mask);
+
+  return (regval >> lsb);
 }
 
 /****************************************************************************
@@ -1446,31 +2033,173 @@ void gh3020_rstctrl(uint8_t pinlevel)
 }
 
 /****************************************************************************
- * Name: gh3020_transdata
+ * Name: gh3020_get_ppg_data
  *
  * Description:
- *   Control the level of SPI CS pin.
+ *   Get PPG data from the info of frame readback.
  *
  * Input Parameters:
- *   priv      - Device struct.
- *   startaddr - Address of the 1st register to be read.
- *   recvbuf   - A pointer to the buffer which stores the readouts.
- *   nwords    - The numbers of word (8bits per word) to be read.
+ *   pfameinfo - Pointer to the info of frame readback.
  *
  * Returned Value:
- *   Zero (OK) or positive on success; a negated errno value on any failure.
+ *   None.
  *
  * Assumptions/Limitations:
  *   None.
  *
  ****************************************************************************/
 
-void gh3020_transdata(FAR struct sensor_event_ppgq *ppg, uint8_t chidx)
+void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
 {
-  if (g_priv->sensor[chidx].activated == true)
+  uint8_t idx;
+
+  switch (pfameinfo->unFunctionID)
     {
-      g_priv->ppgdata[chidx][g_priv->ppgdatacnt[chidx]] = *ppg;
-      g_priv->ppgdatacnt[chidx]++;
+      case GH3X2X_FUNCTION_HR:        /* green dynamic */
+        {
+          idx = GH3020_PPG0_SENSOR_IDX;
+        };
+        break;
+
+      case GH3X2X_FUNCTION_TEST2:     /* green fixed */
+        {
+          idx = GH3020_PPG4_SENSOR_IDX;
+        }
+        break;
+
+      case GH3X2X_FUNCTION_HSM:       /* IR fixed */
+        {
+          idx = GH3020_PPG5_SENSOR_IDX;
+        };
+        break;
+
+      case GH3X2X_FUNCTION_RESP:      /* Dark fixed */
+        {
+          idx = GH3020_PPG3_SENSOR_IDX;
+        };
+        break;
+
+      case GH3X2X_FUNCTION_SPO2:      /* red dynamic */
+        {
+          idx = GH3020_PPG1_SENSOR_IDX;
+        };
+        break;
+
+      case GH3X2X_FUNCTION_HRV:       /* IR dynamic */
+        {
+          idx = GH3020_PPG2_SENSOR_IDX;
+        };
+        break;
+
+      default:                        /* No such data */
+        return;
+    }
+
+  if (g_priv->sensor[idx].activated == true)
+    {
+      gh3020_extract_frame(&g_priv->ppgdata[idx][g_priv->ppgdatacnt[idx]],
+                           pfameinfo);
+      g_priv->ppgdatacnt[idx]++;
+    }
+}
+
+/****************************************************************************
+ * Name: gh3020_get_rawdata_hook
+ *
+ * Description:
+ *   Get PPG data from the FIFO in factest mode.
+ *
+ * Input Parameters:
+ *   pfameinfo - Pointer to the info of frame readback.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
+{
+  struct sensor_event_ppgq ppg[4];
+  struct gh3020_fifodata_s fifoinfo;
+  uint32_t temp;
+  int32_t rawdata;
+  uint8_t chidx;
+  uint8_t i;
+
+  if (len / GH3020_DATA_PER_SAMPLE > 0 && g_priv->factest_mode == true)
+    {
+      for (i = 0; i < len; i = i + GH3020_DATA_PER_SAMPLE)
+        {
+          /* Swap big endian to little endian */
+
+          temp = ((uint32_t)pbuf[i + 0] << 24) +
+                 ((uint32_t)pbuf[i + 1] << 16) +
+                 ((uint32_t)pbuf[i + 2] << 8) + (uint32_t)pbuf[i + 3];
+
+          /* Pick rawdata and flag */
+
+          fifoinfo.adccode = temp & 0x00ffffff;
+          fifoinfo.slot_idx = (temp >> 29) & 0x00000007;
+          fifoinfo.adc_idx = (temp >> 27) & 0x00000003;
+          fifoinfo.flag_ledadj_ecgrecover = (temp >> 26) & 0x00000001;
+          fifoinfo.flag_ledadj_agc_up = (temp >> 25) & 0x00000001;
+
+          rawdata = (int32_t)(fifoinfo.adccode) - 0x800000;
+          if (rawdata < 0)
+            {
+              rawdata = 0;
+            }
+
+          switch (fifoinfo.slot_idx)
+            {
+              case 0:       /* slot0 - dark */
+                {
+                  chidx = GH3020_PPG3_SENSOR_IDX;
+                };
+                break;
+
+              case 1:       /* slot1 - green */
+                {
+                  chidx = GH3020_PPG0_SENSOR_IDX;
+                };
+                break;
+
+              case 2:       /* slot2 - red */
+                {
+                  chidx = GH3020_PPG1_SENSOR_IDX;
+                };
+                break;
+
+              case 3:       /* slot3 - ir */
+                {
+                  chidx = GH3020_PPG2_SENSOR_IDX;
+                };
+                break;
+
+              default:      /* No such data */
+                {
+                  chidx = GH3020_SENSOR_NUM;
+                };
+                break;
+            }
+
+          if (chidx < GH3020_SENSOR_NUM)
+            {
+              ppg[chidx].ppg[fifoinfo.adc_idx] = (uint32_t)rawdata;
+            }
+        }
+
+      for (chidx = 0; chidx <= GH3020_PPG3_SENSOR_IDX; chidx++)
+        {
+          if (g_priv->sensor[chidx].activated == true)
+            {
+              g_priv->ppgdata[chidx][g_priv->ppgdatacnt[chidx]] = ppg[chidx];
+              g_priv->ppgdatacnt[chidx]++;
+            }
+        }
     }
 }
 

@@ -14,8 +14,8 @@
 
 
 #include "gh3x2x_drv_config.h"
-#include "gh3x2x_drv_registers.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 #if defined ( __GNUC__ ) && !defined (__CC_ARM) /* GNU Compiler */
@@ -29,13 +29,13 @@
 
 
 /* extern log function */
-extern void GH3X2X_Log(GCHAR *chLogString);
+extern void GH3X2X_Log(char *chLogString);
 
 /// log support len
 #define GH3X2X_LOG_DEBUG_SUP_LEN     (128)
 
 #define   GH3X2X_SAMPLE_LOG_PARAM(...)        do {\
-                                                GCHAR chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
+                                                char chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
                                                 snprintf(chDebugStr, GH3X2X_LOG_DEBUG_SUP_LEN, \
                                                         "[gh3x2x_drv]: "__VA_ARGS__);\
                                                 GH3X2X_Log(chDebugStr);\
@@ -47,7 +47,7 @@ extern void GH3X2X_Log(GCHAR *chLogString);
 #ifdef GOODIX_DEMO_PLANFORM
 #ifdef GH3X2X_LOG_DEBUG
 #undef GH3X2X_LOG_DEBUG
-#endif																						
+#endif
 #define GH3X2X_LOG_DEBUG DRVLIB_GOODIX_DEMO_PLANFORM_DEBUG
 #endif
 
@@ -63,21 +63,21 @@ extern void GH3X2X_Log(GCHAR *chLogString);
 
 /// log string with param
 #define   GH3X2X_DEBUG_LOG_PARAM(...)       do {\
-                                                GCHAR chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
+                                                char chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
                                                 snprintf(chDebugStr, GH3X2X_LOG_DEBUG_SUP_LEN, \
                                                         "[gh3x2x_drv]: "__VA_ARGS__);\
                                                 GH3X2X_Log(chDebugStr);\
                                             } while (0)
 
-#define   GH3X2X_DEBUG_LOG_PARAM_WANPENG(...) 
+#define   GH3X2X_DEBUG_LOG_PARAM_WANPENG(...)
 
 
 #else
-#define   GH3X2X_DEBUG_LOG(...)              
-#define   GH3X2X_DEBUG_LOG_PARAM(...)        
+#define   GH3X2X_DEBUG_LOG(...)
+#define   GH3X2X_DEBUG_LOG_PARAM(...)
 
 #define   GH3X2X_DEBUG_LOG_PARAM_WANPENG(...)       do {\
-                                                GCHAR chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
+                                                char chDebugStr[GH3X2X_LOG_DEBUG_SUP_LEN] = {0};\
                                                 snprintf(chDebugStr, GH3X2X_LOG_DEBUG_SUP_LEN, \
                                                         "[gh3x2x_drv]: "__VA_ARGS__);\
                                                 GH3X2X_Log(chDebugStr);\
@@ -233,7 +233,7 @@ extern void GH3X2X_Log(GCHAR *chLogString);
 /// byte false flag val
 #define   GH3X2X_BYTE_FLAG_FALSE                    (0)
 
-/// GF32 0 val
+/// float 0 val
 #define   GH3X2X_GF32_0                             (0.0f)
 
 /// null val
@@ -249,42 +249,42 @@ extern void GH3X2X_Log(GCHAR *chLogString);
 #define   GH3X2X_GET_FIRST_4BITS(val)               ((val) & 0x0000000FU)
 
 /// get high byte from word
-#define   GH3X2X_GET_HIGH_BYTE_FROM_WORD(sValue)    ((GU8)(((sValue) >> 8) & 0xFFU))
+#define   GH3X2X_GET_HIGH_BYTE_FROM_WORD(sValue)    ((uint8_t)(((sValue) >> 8) & 0xFFU))
 
 /// get low byte from word
-#define   GH3X2X_GET_LOW_BYTE_FROM_WORD(sValue)     ((GU8)((sValue) & 0xFFU))
+#define   GH3X2X_GET_LOW_BYTE_FROM_WORD(sValue)     ((uint8_t)((sValue) & 0xFFU))
 
 /// get byte3 from dword
-#define   GH3X2X_GET_BYTE3_FROM_DWORD(unValue)      ((GU8)(((unValue) >> 24) & 0x000000FFU))
+#define   GH3X2X_GET_BYTE3_FROM_DWORD(unValue)      ((uint8_t)(((unValue) >> 24) & 0x000000FFU))
 
 /// get byte2 from dword
-#define   GH3X2X_GET_BYTE2_FROM_DWORD(unValue)      ((GU8)(((unValue) >> 16) & 0x000000FFU))
+#define   GH3X2X_GET_BYTE2_FROM_DWORD(unValue)      ((uint8_t)(((unValue) >> 16) & 0x000000FFU))
 
 /// get byte1 from dword
-#define   GH3X2X_GET_BYTE1_FROM_DWORD(unValue)      ((GU8)(((unValue) >> 8) & 0x000000FFU))
+#define   GH3X2X_GET_BYTE1_FROM_DWORD(unValue)      ((uint8_t)(((unValue) >> 8) & 0x000000FFU))
 
 /// get byte0 from dword
-#define   GH3X2X_GET_BYTE0_FROM_DWORD(unValue)      ((GU8)((unValue) & 0x000000FFU))
+#define   GH3X2X_GET_BYTE0_FROM_DWORD(unValue)      ((uint8_t)((unValue) & 0x000000FFU))
 
 /// get high word from dword
-#define   GH3X2X_GET_HIGH_WORD_FROM_DWORD(unValue)      ((GU16)(((unValue) >> 16) & 0x0000FFFFU))
+#define   GH3X2X_GET_HIGH_WORD_FROM_DWORD(unValue)      ((uint16_t)(((unValue) >> 16) & 0x0000FFFFU))
 
 /// get low word from dword
-#define   GH3X2X_GET_LOW_WORD_FROM_DWORD(unValue)       ((GU16)((unValue) & 0x0000FFFFU))    
+#define   GH3X2X_GET_LOW_WORD_FROM_DWORD(unValue)       ((uint16_t)((unValue) & 0x0000FFFFU))
 
 /// makeup word from bytes
-#define   GH3X2X_MAKEUP_WORD(uchHighByte, uchLowByte)              ((GU16)(((((GU16)(uchHighByte)) << 8)& 0xFF00) |\
-                                                                            (((GU16)(uchLowByte))& 0x00FF)))
+#define   GH3X2X_MAKEUP_WORD(uchHighByte, uchLowByte)              ((uint16_t)(((((uint16_t)(uchHighByte)) << 8)& 0xFF00) |\
+                                                                            (((uint16_t)(uchLowByte))& 0x00FF)))
 
 /// makeup dword from bytes
-#define   GH3X2X_MAKEUP_DWORD(uchByte3, uchByte2, uchByte1, uchByte0)     (((((GU32)(uchByte3)) << 24) & 0xFF000000U)|\
-                                                                          ((((GU32)(uchByte2)) << 16) & 0x00FF0000U) |\
-                                                                          ((((GU32)(uchByte1)) << 8) & 0x0000FF00U) |\
-                                                                          (((GU32)(uchByte0)) & 0x000000FFU))
+#define   GH3X2X_MAKEUP_DWORD(uchByte3, uchByte2, uchByte1, uchByte0)     (((((uint32_t)(uchByte3)) << 24) & 0xFF000000U)|\
+                                                                          ((((uint32_t)(uchByte2)) << 16) & 0x00FF0000U) |\
+                                                                          ((((uint32_t)(uchByte1)) << 8) & 0x0000FF00U) |\
+                                                                          (((uint32_t)(uchByte0)) & 0x000000FFU))
 
 /// makeup dword from words
-#define   GH3X2X_MAKEUP_DWORD2(usHighWord, usLowWord)                  (((((GU32)(usHighWord)) << 16) & 0xFFFF0000U) |\
-                                                                            (((GU32)(usLowWord)) & 0x0000FFFFU))
+#define   GH3X2X_MAKEUP_DWORD2(usHighWord, usLowWord)                  (((((uint32_t)(usHighWord)) << 16) & 0xFFFF0000U) |\
+                                                                            (((uint32_t)(usLowWord)) & 0x0000FFFFU))
 
 /// macro of hook function call
 /* NOLINTNEXTLINE(501) */

@@ -15,6 +15,7 @@
 
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 
@@ -107,27 +108,27 @@
 #endif
 
 //G202008031001 wanpeng START
-#define SOFT_EVENT_NEED_FORCE_READ_FIFO             ((GU8)1)
-#define SOFT_EVENT_WEAR_OFF                         ((GU8)2)
+#define SOFT_EVENT_NEED_FORCE_READ_FIFO             ((uint8_t)1)
+#define SOFT_EVENT_WEAR_OFF                         ((uint8_t)2)
 //G202008031001 wanpeng END
 
 
 
 
-extern GU8 g_uchAdtChannelMapArr[];
-extern GU8 g_uchAdtChannelMapCnt;
+extern uint8_t g_uchAdtChannelMapArr[];
+extern uint8_t g_uchAdtChannelMapCnt;
 
-extern GU8 g_uchHbaChannelMapArr[];
-extern GU8 g_uchHbaChannelMapCnt;
+extern uint8_t g_uchHbaChannelMapArr[];
+extern uint8_t g_uchHbaChannelMapCnt;
 
-extern GU8 g_uchSpo2ChannelMapArr[];
-extern GU8 g_uchSpo2ChannelMapCnt;
+extern uint8_t g_uchSpo2ChannelMapArr[];
+extern uint8_t g_uchSpo2ChannelMapCnt;
 
-extern GU8 g_uchHrvChannelMapArr[];
-extern GU8 g_uchHrvChannelMapCnt;
+extern uint8_t g_uchHrvChannelMapArr[];
+extern uint8_t g_uchHrvChannelMapCnt;
 
-extern GU8 g_uchEcgChannelMap;
-extern GU8 g_uchEcgChannelMapCnt;
+extern uint8_t g_uchEcgChannelMap;
+extern uint8_t g_uchEcgChannelMapCnt;
 
 
 
@@ -135,7 +136,7 @@ extern GU8 g_uchEcgChannelMapCnt;
 
 
 /**
- * @fn     GS8 GH3X2X_FuncStartedBitSet(GU16 usFuncStartedBitmapVal)
+ * @fn     int8_t GH3X2X_FuncStartedBitSet(uint16_t usFuncStartedBitmapVal)
  *
  * @brief  Set started bitmap
  *
@@ -147,10 +148,10 @@ extern GU8 g_uchEcgChannelMapCnt;
  * @return  error code
  * @retval  #GH3X2X_RET_OK                      return algorithm run successfully
  */
-GS8 GH3X2X_FuncStartedBitSet(GU16 usFuncStartedBitmapVal);
+int8_t GH3X2X_FuncStartedBitSet(uint16_t usFuncStartedBitmapVal);
 
 /**
- * @fn     GS8 GH3X2X_FuncStartedBitClear(GU16 usFuncStartedBitmapVal)
+ * @fn     int8_t GH3X2X_FuncStartedBitClear(uint16_t usFuncStartedBitmapVal)
  *
  * @brief  Clear started bitmap
  *
@@ -162,10 +163,10 @@ GS8 GH3X2X_FuncStartedBitSet(GU16 usFuncStartedBitmapVal);
  * @return  error code
  * @retval  #GH3X2X_RET_OK                      return algorithm run successfully
  */
-GS8 GH3X2X_FuncStartedBitClear(GU16 usFuncStartedBitmapVal);
+int8_t GH3X2X_FuncStartedBitClear(uint16_t usFuncStartedBitmapVal);
 
 /**
- * @fn     GS8 GH3X2X_SoftAdtFuncStart(void)
+ * @fn     int8_t GH3X2X_SoftAdtFuncStart(void)
  *
  * @brief  Soft adt function start
  *
@@ -179,10 +180,10 @@ GS8 GH3X2X_FuncStartedBitClear(GU16 usFuncStartedBitmapVal);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return func start error
  * @retval  #GH3X2X_RET_NO_INITED_ERROR         gh3x2x has not inited
  */
-GS8 GH3X2X_SoftAdtFuncStart(void);
+int8_t GH3X2X_SoftAdtFuncStart(void);
 
 /**
- * @fn     GS8 GH3X2X_SoftAdtFuncStop(void)
+ * @fn     int8_t GH3X2X_SoftAdtFuncStop(void)
  *
  * @brief  Soft adt function stop
  *
@@ -196,10 +197,10 @@ GS8 GH3X2X_SoftAdtFuncStart(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return func stop error
  * @retval  #GH3X2X_RET_NO_INITED_ERROR         gh3x2x has not inited
  */
-GS8 GH3X2X_SoftAdtFuncStop(void);
+int8_t GH3X2X_SoftAdtFuncStop(void);
 
 
- 
+
 
 
 

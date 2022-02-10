@@ -30,6 +30,8 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/sensors/sensor.h>
 #include <debug.h>
+#include "gh3x2x_drv.h"
+#include "gh3020_def.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -37,11 +39,13 @@
 
 /* GH3020 PPG has 4 different measurements and each one should be a node. */
 
-#define GH3020_PPG0_SENSOR_IDX   0          /* PPG0 (green) sensor index. */
-#define GH3020_PPG1_SENSOR_IDX   1          /* PPG1 (red) sensor index. */
-#define GH3020_PPG2_SENSOR_IDX   2          /* PPG2 (IR sensor index. */
-#define GH3020_PPG3_SENSOR_IDX   3          /* PPG3 (dark) sensor index. */
-#define GH3020_SENSOR_NUM        4          /* Total PPG sensors number. */
+#define GH3020_PPG0_SENSOR_IDX   0          /* PPG0 (green dynamic) */
+#define GH3020_PPG1_SENSOR_IDX   1          /* PPG1 (red dynamic) */
+#define GH3020_PPG2_SENSOR_IDX   2          /* PPG2 (IR dynamic) */
+#define GH3020_PPG3_SENSOR_IDX   3          /* PPG3 (dark fixed) */
+#define GH3020_PPG4_SENSOR_IDX   4          /* PPG4 (green fixed) */
+#define GH3020_PPG5_SENSOR_IDX   5          /* PPG5 (IR fixed). */
+#define GH3020_SENSOR_NUM        6          /* Total PPG sensors number. */
 
 /****************************************************************************
  * Public Types
@@ -63,15 +67,20 @@ extern "C"
  * Inline Functions
  ****************************************************************************/
 
-int gh3020_spiread(FAR uint8_t *recvbuf, uint16_t nbytes);
-int gh3020_spiwrite(FAR uint8_t *sendbuf, uint16_t nbytes);
-void gh3020_spi_csctrl(uint8_t pinlevel);
-void gh3020_rstctrl(uint8_t pinlevel);
-void gh3020_transdata(FAR struct sensor_event_ppgq *ppg, uint8_t chidx);
-
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+void gh3020_spi_sendcmd(uint8_t cmd);
+void gh3020_spi_writereg(uint16_t regaddr, uint16_t regval);
+uint16_t gh3020_spi_readreg(uint16_t regaddr);
+void gh3020_spi_readfifo(FAR uint8_t *pbuf, uint16_t len);
+void gh3020_spi_writebits(uint16_t regaddr, uint8_t lsb, uint8_t msb,
+                          uint16_t val);
+uint16_t gh3020_spi_readbits(uint16_t regaddr, uint8_t lsb, uint8_t msb);
+void gh3020_rstctrl(uint8_t pinlevel);
+void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo);
+void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len);
 
 #undef EXTERN
 #ifdef __cplusplus

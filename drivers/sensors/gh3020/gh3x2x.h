@@ -33,7 +33,7 @@
 int gh3020_init(void);
 
 /**
- * @fn     GU8 gh3020_fifo_process(void)
+ * @fn     uint8_t gh3020_fifo_process(void)
  *
  * @brief  Interrupt process of GH3x2x.
  *
@@ -62,19 +62,19 @@ void gh3x2x_int_handler_call_back(void);
 
 
 /**
- * @fn     GS8 Gh3x2xDemoArrayCfgSwitch(GU8 uchArrayCfgIndex)
+ * @fn     int8_t Gh3x2xDemoArrayCfgSwitch(uint8_t uchArrayCfgIndex)
  *
  * @brief  array cfg switch (call by user)
  *
  * @attention   If __GH3X2X_ARRAY_CFG_MANUAL_SWITCH_EN__ is 1, you should switch array cfg manually before calling gh3020_start_sampling
  *
- * @param[in]   uchArrayCfgIndex    0: gh3x2x_reg_list0    1: gh3x2x_reg_list0 ...
+ * @param[in]   uchArrayCfgIndex    0: gh3020_reglist_normal    1: gh3020_reglist_factest ...
  * @param[out]  None
  *
  * @return  GH3X2X_RET_OK:switch application mode success
  * @return  GH3X2X_RET_RESOURCE_ERROR:can't find corresponding reg config array
  */
-GS8 Gh3x2xDemoArrayCfgSwitch(GU8 uchArrayCfgIndex);
+int8_t Gh3x2xDemoArrayCfgSwitch(uint8_t uchArrayCfgIndex);
 
 
 /**
@@ -90,7 +90,7 @@ GS8 Gh3x2xDemoArrayCfgSwitch(GU8 uchArrayCfgIndex);
  *
  * @return  None
  */
-void gh3020_start_sampling(GU32 unFuncMode);
+void gh3020_start_sampling(uint32_t unFuncMode);
 
 /**
  * @fn     void gh3020_start_sampling_factest()
@@ -105,11 +105,11 @@ void gh3020_start_sampling(GU32 unFuncMode);
  *
  * @return  None
  */
-void gh3020_start_sampling_factest(GU32 unFuncMode, STGh3x2xEngineeringModeSampleParam *pstSampleParaGroup , GU8 uchSampleParaGroupNum);
+void gh3020_start_sampling_factest(uint32_t unFuncMode, FAR struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum);
 
 
 /**
- * @fn     void gh3020_stop_sampling(GU32 unFuncMode)
+ * @fn     void gh3020_stop_sampling(uint32_t unFuncMode)
  *
  * @brief  Stop sampling of GH3x2x
  *
@@ -121,7 +121,7 @@ void gh3020_start_sampling_factest(GU32 unFuncMode, STGh3x2xEngineeringModeSampl
  *
  * @return  None
  */
-void gh3020_stop_sampling(GU32 unFuncMode);
+void gh3020_stop_sampling(uint32_t unFuncMode);
 
 
 
@@ -170,7 +170,7 @@ void Gh3x2xCreateAdtConfirmTimer(void);
 void Gh3x2xDemoMoveDetectTimerHandler(void);
 
 /**
- * @fn     void Gh3x2xDemoProtocolProcess(GU8* puchProtocolDataBuffer, GU16 usRecvLen)
+ * @fn     void Gh3x2xDemoProtocolProcess(uint8_t* puchProtocolDataBuffer, uint16_t usRecvLen)
  *
  * @brief  Analyze protocol about GH3x2x,and pack protocol data to reply
  *
@@ -181,10 +181,10 @@ void Gh3x2xDemoMoveDetectTimerHandler(void);
  *
  * @return  None
  */
-void Gh3x2xDemoProtocolProcess(GU8* puchProtocolDataBuffer, GU16 usRecvLen);
+void Gh3x2xDemoProtocolProcess(uint8_t* puchProtocolDataBuffer, uint16_t usRecvLen);
 
 /**
- * @fn     void gh3020_samplerate_set(GU32 unFunctionID,  GU16 usSampleRate)
+ * @fn     void gh3020_samplerate_set(uint32_t unFunctionID,  uint16_t usSampleRate)
  *
  * @brief
  *
@@ -196,13 +196,13 @@ void Gh3x2xDemoProtocolProcess(GU8* puchProtocolDataBuffer, GU16 usRecvLen);
  *
  * @return  None
  */
-void gh3020_samplerate_set(GU32 unFunctionID,  GU16 usSampleRate);
+void gh3020_samplerate_set(uint32_t unFunctionID,  uint16_t usSampleRate);
 
 
 
 
 /**
- * @fn     void Gh3x2xDemoSetFuncionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current)
+ * @fn     void Gh3x2xDemoSetFuncionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current)
  *
  * @brief  Set function led current
  *
@@ -215,7 +215,7 @@ void gh3020_samplerate_set(GU32 unFunctionID,  GU16 usSampleRate);
  *
  * @return  None
  */
-void Gh3x2xDemoSetFuncionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current);
+void Gh3x2xDemoSetFuncionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current);
 
 
 
@@ -224,7 +224,7 @@ void Gh3x2xDemoSetFuncionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU
 
 
 /**
- * @fn      void Gh3x2xDemoFunctionChannelEnSet(GU32 unFunctionID,  GU32 unChnlEn)
+ * @fn      void Gh3x2xDemoFunctionChannelEnSet(uint32_t unFunctionID,  uint32_t unChnlEn)
  *
  * @brief
  *
@@ -236,7 +236,7 @@ void Gh3x2xDemoSetFuncionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU
  *
  * @return  None
  */
-void Gh3x2xDemoFunctionChannelEnSet(GU32 unFunctionID,  GU32 unChnlEn);
+void Gh3x2xDemoFunctionChannelEnSet(uint32_t unFunctionID,  uint32_t unChnlEn);
 
 /**
  * @fn     void gh3020_rdmode_switch(EMInterruptModeType emIntModeType)
@@ -250,8 +250,8 @@ void Gh3x2xDemoFunctionChannelEnSet(GU32 unFunctionID,  GU32 unChnlEn);
  *
  * @return  None
  */
-void gh3020_rdmode_switch(GU8 uchIntModeType);
-GU8 Gh3x2xGetInterruptMode(void);
+void gh3020_rdmode_switch(uint8_t uchIntModeType);
+uint8_t Gh3x2xGetInterruptMode(void);
 void Gh3x2xSerialSendTimerHandle(void);
 void gh3020_set_fifowtm(uint16_t fifowtm);
 

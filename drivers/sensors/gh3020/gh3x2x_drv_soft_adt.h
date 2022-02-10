@@ -16,38 +16,39 @@
 
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 
-typedef struct 
+typedef struct
 {
-    GU8 uchElectrodeAdtEn          : 1;  //0:disable electrode adt  1:enable electrode adt
-    GU8 uchElectrodeWearRevCntEn   : 1;  //elctrode wear state reverse counter dis/en    0: disable  1: enable
-    GU8 uchSoftWearOffDetEn        : 1;  //software wear off detction enable   0: disable  1: enable
-    GU8 uchElectrodeSoftWearColor  : 5;  //software wear led color             0:green     1:ir
+    uint8_t uchElectrodeAdtEn          : 1;  //0:disable electrode adt  1:enable electrode adt
+    uint8_t uchElectrodeWearRevCntEn   : 1;  //elctrode wear state reverse counter dis/en    0: disable  1: enable
+    uint8_t uchSoftWearOffDetEn        : 1;  //software wear off detction enable   0: disable  1: enable
+    uint8_t uchElectrodeSoftWearColor  : 5;  //software wear led color             0:green     1:ir
 }STAdtCfgByte0;
 
 
 
 typedef struct t_adt_cfg
 {
-    GU8 uchAdtSampleCtrlMode;     // 0: wear state do not affect sample  1:  wear off only open adt slot     2: wear on/off need switch cfg    
-    STAdtCfgByte0 stAdtCfgByte0;   
-    GU8 ubResByte2;
-    GU8 ubResByte3;
+    uint8_t uchAdtSampleCtrlMode;     // 0: wear state do not affect sample  1:  wear off only open adt slot     2: wear on/off need switch cfg
+    STAdtCfgByte0 stAdtCfgByte0;
+    uint8_t ubResByte2;
+    uint8_t ubResByte3;
 }STAdtCfg;
 
 
 /// wear on event en set
 #define  WEAR_ON_EVENT_EN_CONFIG(en)        do {\
-                                                GH3X2X_WriteRegBitField(GH3X2X_INT_CR2_REG_ADDR, \
-                                                    GH3X2X_WEAR_ON_EVENT_EN_LSB, GH3X2X_WEAR_ON_EVENT_EN_MSB, (en)); \
+                                                gh3020_spi_writebits(GH3020_REG_INT_CR2, \
+                                                    GH3020_WEAR_ON_EVENT_EN_LSB, GH3020_WEAR_ON_EVENT_EN_MSB, (en)); \
                                             } while (0)
 
 /// wear off event en set
 #define  WEAR_OFF_EVENT_EN_CONFIG(en)        do {\
-                                                GH3X2X_WriteRegBitField(GH3X2X_INT_CR2_REG_ADDR, \
-                                                    GH3X2X_WEAR_OFF_EVENT_EN_LSB, GH3X2X_WEAR_OFF_EVENT_EN_MSB, (en)); \
+                                                gh3020_spi_writebits(GH3020_REG_INT_CR2, \
+                                                    GH3020_WEAR_OFF_EVENT_EN_LSB, GH3020_WEAR_OFF_EVENT_EN_MSB, (en)); \
                                             } while (0)
 
 
@@ -69,11 +70,11 @@ typedef struct t_adt_cfg
 #define SOFT_WEAR_OUTPUT_DATA_INDEX_TOTAL (8)
 
 
-#define SOFT_WEAR_OUTPUT_WEAR_STATE_BIT  (3)   
+#define SOFT_WEAR_OUTPUT_WEAR_STATE_BIT  (3)
 
 
-#define NADTCAP_BYTE_TRUE       (GU8)1
-#define NADTCAP_BYTE_FALSE      (GU8)0
+#define NADTCAP_BYTE_TRUE       (uint8_t)1
+#define NADTCAP_BYTE_FALSE      (uint8_t)0
 
 
 
@@ -92,7 +93,7 @@ typedef struct t_adt_cfg
 #define NADT_MATH_ABSF(v)  fabs(v)
 #define NADT_MATH_ABS(v)   abs(v)
 #define NADT_MATH_ROUNDF(v) roundf(v)
-#define NADT_ABS_GS32(v) abs((GS32)(v))
+#define NADT_ABS_GS32(v) abs((int32_t)(v))
 #define NADT_MIN(a,b) ((a) > (b) ? (b) : (a))
 
 
@@ -104,66 +105,66 @@ typedef struct t_adt_cfg
 
 typedef struct
 {
-    GS32 *pData;
-    GS32 nLength;
-    GS32 nPos;
+    int32_t *pData;
+    int32_t nLength;
+    int32_t nPos;
 }NADT_QUEUE_BUFFER_S32;
 
 typedef struct
 {
-    GS16 *pData;
-    GS32 nLength;
-    GS32 nPos;
+    int16_t *pData;
+    int32_t nLength;
+    int32_t nPos;
 }NADT_QUEUE_BUFFER_S16;
 
 typedef struct
 {
-    const GF32 *pfCoefB;
-    const GF32 *pfCoefA;
-    GF32 *pfXbuff;
-    GF32 *pfYbuff;
-    GS32 lLen;
-    GF32 fThr;
+    const float *pfCoefB;
+    const float *pfCoefA;
+    float *pfXbuff;
+    float *pfYbuff;
+    int32_t lLen;
+    float fThr;
 }NADT_ST_IIR_PARAM;
 
 typedef struct
 {
-    GS32 *pfFftValue;
-    GS16 *psPeakIndex;
-    GS16 *psValleyIndex;
-    GS16 *psPeakValleyIndex;
-    GS32 lPeakValleyLen;
-    GS32 lPeakLen;
-    GS32 lValleyLen;
-    GS32 lDataLen;
+    int32_t *pfFftValue;
+    int16_t *psPeakIndex;
+    int16_t *psValleyIndex;
+    int16_t *psPeakValleyIndex;
+    int32_t lPeakValleyLen;
+    int32_t lPeakLen;
+    int32_t lValleyLen;
+    int32_t lDataLen;
 }NADT_ST_PEAK_VALLEY_INFO;
 
 typedef struct
 {
-    GBOOL bSearchMax;
-    GS32 fExtremumValue;
-    GS32 lPreExtremumPos;
-    GS32 lExtremumPos;
-    GS32 lDataCount;
+    bool bSearchMax;
+    int32_t fExtremumValue;
+    int32_t lPreExtremumPos;
+    int32_t lExtremumPos;
+    int32_t lDataCount;
 }NADT_ST_PEAKX_DET;
 
-//#ifdef __cplusplus    
-//extern "C" {          
+//#ifdef __cplusplus
+//extern "C" {
 //#endif
 
 
 extern STAdtCfg g_stAdtModuleCfg;
-extern GU8 g_uchElectrodeWearRevCnt;
-extern GU8  g_uchSoftAdtChannl0Color;
+extern uint8_t g_uchElectrodeWearRevCnt;
+extern uint8_t  g_uchSoftAdtChannl0Color;
 
 #if 1
-    //void NADTControl(GS32 lOptTye, GS32 lConfigValue[]);
+    //void NADTControl(int32_t lOptTye, int32_t lConfigValue[]);
 #endif
 
-extern GU8 NADTProc(GS32 lPacketInfoArr[], GS32 lResult[]);
-extern GS8* GetNadtVersion(void);
+extern uint8_t NADTProc(int32_t lPacketInfoArr[], int32_t lResult[]);
+extern int8_t* GetNadtVersion(void);
 
-    //GBOOL HBA_NADTProc(GS32 lPacketInfoArr[], GU8 lResult[1]);
+    //bool HBA_NADTProc(int32_t lPacketInfoArr[], uint8_t lResult[1]);
 
 //#ifdef __cplusplus
 //}
@@ -191,7 +192,7 @@ void GH3X2X_AdtPramInit(void);
 
 
 /**
- * @fn     void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi)
+ * @fn     void GH3X2X_AdtPramSet(uint16_t usRegVal, uint8_t uchRegPosi)
  *
  * @brief  GH3X2X_AdtPramSet
  *
@@ -204,11 +205,11 @@ void GH3X2X_AdtPramInit(void);
  * @return  None
  */
 
-void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi);
+void GH3X2X_AdtPramSet(uint16_t usRegVal, uint8_t uchRegPosi);
 
 
 /**
- * @fn     GU8 GH3X2X_GetAndClearElectrodeWearRevCnt(void)
+ * @fn     uint8_t GH3X2X_GetAndClearElectrodeWearRevCnt(void)
  *
  * @brief  GH3X2X_AddElectrodeWearRevCnt
  *
@@ -219,7 +220,7 @@ void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi);
  *
  * @return  ElectrodeWearRevCnt
  */
-extern GU8 GH3X2X_GetAndClearElectrodeWearRevCnt(void);
+extern uint8_t GH3X2X_GetAndClearElectrodeWearRevCnt(void);
 
 
 

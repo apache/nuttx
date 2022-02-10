@@ -15,6 +15,7 @@
 
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 /**
@@ -32,9 +33,9 @@ enum EMGh3x2xStatus
 /* function ptr typedef */
 
 typedef void (*pfnNormalHookFunc)(void);                                                 /**< normal hook type */
-typedef void (*pfnGetRawdataHookFunc)(GU8 *puchDataBuffer, GU16 usLen);                  /**< get rawdata hook type */
-typedef GU8 (*pfnReadPinStatus)(void);                                                   /**< read pin status type */
-typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                         /**< set pin status type */
+typedef void (*pfnGetRawdataHookFunc)(uint8_t *puchDataBuffer, uint16_t usLen);                  /**< get rawdata hook type */
+typedef uint8_t (*pfnReadPinStatus)(void);                                                   /**< read pin status type */
+typedef void (*pfnSetPinLevel)(uint8_t uchPinLevel);                                         /**< set pin status type */
 
 
 /// get slot & adc num from rawdata flag byte, equal channel map formats
@@ -44,16 +45,16 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
 #define   GH3X2X_CRYP_XOR_XOR_VAL                       (0xFF)
 
 /// send wakeup(resume) cmd
-#define   GH3X2X_SEND_WAKEUP_CMD()          do { GH3X2X_SendCmd(GH3X2X_CMD_RESUME); } while (0)
+#define   GH3X2X_SEND_WAKEUP_CMD()          do { gh3020_spi_sendcmd(GH3020_SPI_CMD_RESUME); } while (0)
 
 /// send sleep cmd
-#define   GH3X2X_SEND_DSLEEP_CMD()          do { GH3X2X_SendCmd(GH3X2X_CMD_SLEEP); } while (0)
+#define   GH3X2X_SEND_DSLEEP_CMD()          do { gh3020_spi_sendcmd(GH3020_SPI_CMD_SLEEP); } while (0)
 
 /// send reset cmd
-#define   GH3X2X_SEND_RESET_CMD()           do { GH3X2X_SendCmd(GH3X2X_CMD_RESET); } while (0)
+#define   GH3X2X_SEND_RESET_CMD()           do { gh3020_spi_sendcmd(GH3020_SPI_CMD_RESET); } while (0)
 
 /// wait send cmd done
-#define   GH3X2X_SEND_WAIT_CMD_DONE()       do { GH3X2X_DelayUs(GH3X2X_CMD_DELAY_X_US*2); } while (0)
+#define   GH3X2X_SEND_WAIT_CMD_DONE()       do { up_udelay(GH3020_CMD_DELAY_US); } while (0)
 
 /// chip wakeup
 #define   GH3X2X_CHIP_WAKEUP(ret)       do {\
@@ -68,6 +69,13 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
                                             GH3X2X_PMU_FIFO_POWER_OFF();\
                                             GH3X2X_SEND_DSLEEP_CMD();\
                                             GH3X2X_SEND_WAIT_CMD_DONE();\
+                                            (ret) = GH3X2X_RET_OK;\
+                                        } while (0)
+
+/// chip sleep with not waiting
+#define   GH3X2X_CHIP_SLEEP_NOWAIT(ret) do {\
+                                            GH3X2X_PMU_FIFO_POWER_OFF();\
+                                            GH3X2X_SEND_DSLEEP_CMD();\
                                             (ret) = GH3X2X_RET_OK;\
                                         } while (0)
 
@@ -183,20 +191,20 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
 
 /// set chip inited flag into reg
 #define   GH3X2X_SET_CHIP_INIED()    do {\
-                                        GU16 usChipIniedRegValTmp =\
-                                            GH3X2X_ReadReg(GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_ADDR);\
+                                        uint16_t usChipIniedRegValTmp =\
+                                            gh3020_spi_readreg(GH3020_REG_INSTRUCTIONS_CHIP_INIED);\
                                         GH3X2X_DEBUG_LOG_PARAM("[%s]:before usChipIniedRegValTmp = 0x%04x\r\n", __FUNCTION__, usChipIniedRegValTmp);\
-                                            GH3X2X_WriteReg(GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_ADDR, \
-                                                usChipIniedRegValTmp | GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_VAL);\
+                                            gh3020_spi_writereg(GH3020_REG_INSTRUCTIONS_CHIP_INIED, \
+                                                usChipIniedRegValTmp | GH3020_REGVAL_INSTRUCT_CHIP_INIED);\
                                         usChipIniedRegValTmp =\
-                                            GH3X2X_ReadReg(GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_ADDR);\
+                                            gh3020_spi_readreg(GH3020_REG_INSTRUCTIONS_CHIP_INIED);\
                                         GH3X2X_DEBUG_LOG_PARAM("[%s]:after usChipIniedRegValTmp = 0x%04x\r\n", __FUNCTION__, usChipIniedRegValTmp);\
                                      } while (0)
 
 /// read chip inited flag from reg
-#define   GH3X2X_IS_CHIP_INIED()    ((GH3X2X_ReadReg(GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_ADDR) &\
-                                        GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_VAL) == \
-                                        GH3X2X_INSTRUCTIONS_CHIP_INIED_REG_VAL)
+#define   GH3X2X_IS_CHIP_INIED()    ((gh3020_spi_readreg(GH3020_REG_INSTRUCTIONS_CHIP_INIED) &\
+                                        GH3020_REGVAL_INSTRUCT_CHIP_INIED) == \
+                                        GH3020_REGVAL_INSTRUCT_CHIP_INIED)
 #else
 
 /// set chip inited flag into reg
@@ -217,9 +225,9 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
                                                     (g_uchGh3x2xStatus == GH3X2X_STATUS_NO_INIT)) \
                                                 {\
                                                     g_usPmuFifoModuleCtrlVal = \
-                                                            GH3X2X_ReadReg(GH3X2X_PMU_CTRL4_REG_ADDR);\
-                                                    GH3X2X_WriteReg(GH3X2X_PMU_CTRL4_REG_ADDR, \
-                                                     (g_usPmuFifoModuleCtrlVal | GH3X2X_PMU_CTRL4_FIFO_DISABLE_MASK));\
+                                                            gh3020_spi_readreg(GH3020_REG_PMU_CTRL4);\
+                                                    gh3020_spi_writereg(GH3020_REG_PMU_CTRL4, \
+                                                     (g_usPmuFifoModuleCtrlVal | GH3020_MSK_PMU_CTRL4_FIFO_DISABLE));\
                                                     g_uchPmuFifoModuleCtrlCacheStatus = 1;\
                                                     GH3X2X_DEBUG_LOG_INTERNAL("save pmu fifo module status!\r\n");\
                                                 }\
@@ -230,7 +238,7 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
 #define  GH3X2X_PMU_FIFO_POWER_RECOVERY()       do {\
                                                     if (g_uchPmuFifoModuleCtrlCacheStatus == 1)\
                                                     {\
-                                                        GH3X2X_WriteReg(GH3X2X_PMU_CTRL4_REG_ADDR, \
+                                                        gh3020_spi_writereg(GH3020_REG_PMU_CTRL4, \
                                                                             g_usPmuFifoModuleCtrlVal);\
                                                         GH3X2X_PMU_WAIT_PULSE_MODE_OFF();\
                                                         g_uchPmuFifoModuleCtrlCacheStatus = 0;\
@@ -312,12 +320,9 @@ typedef void (*pfnSetPinLevel)(GU8 uchPinLevel);                                
 #define   GH3X2X_LSI_FINE_CALI_DELAY_VAL                (5000u)
 
 /**< rawdata buffer size in byte */
-#define   GH3X2X_RAWDATA_BUFFER_SIZE                    (200*4) 
+#define   GH3X2X_RAWDATA_BUFFER_SIZE                    (200*4)
 
 /* extern variables declaration */
-
-/// get rawdata hook func ptr
-extern pfnGetRawdataHookFunc g_pGh3x2xGetRawdataHookFunc;
 
 /// read int pin status func ptr
 extern pfnReadPinStatus g_pGh3x2xReadIntPinStatusFunc;
@@ -334,71 +339,71 @@ extern pfnReadPinStatus g_pGh3x2xReadSpdoPinStatusFunc;
 #if GH3X2X_PMU_FIFO_POWER_CTRL_ENABLED
 
 /// fifo power ctrl fifo control reg cache var
-extern GU16 g_usPmuFifoModuleCtrlVal;
+extern uint16_t g_usPmuFifoModuleCtrlVal;
 
 /// for fifo power ctrl cache status
-extern GU8 g_uchPmuFifoModuleCtrlCacheStatus;
+extern uint8_t g_uchPmuFifoModuleCtrlCacheStatus;
 
 #endif
 
 /// gh3x2x status
-extern GU8 g_uchGh3x2xStatus;
+extern uint8_t g_uchGh3x2xStatus;
 
 /// max rawdata num read from fifo every time
-extern GU16 g_usMaxNumReadFromFifo;
+extern uint16_t g_usMaxNumReadFromFifo;
 
 
 
-extern GU8 g_uchGsensorEnable;
+extern uint8_t g_uchGsensorEnable;
 /// Cap enable flag
-extern GU8 g_uchCapEnable;
+extern uint8_t g_uchCapEnable;
 
 /// Temp enable flag
-extern GU8 g_uchTempEnable;
+extern uint8_t g_uchTempEnable;
 
 /// function started bitmap, use for sampling control
-extern GU32 g_unFuncStartedBitmap ;
+extern uint32_t g_unFuncStartedBitmap ;
 
-extern GU8 g_uchAlgInitFlag[];
+extern uint8_t g_uchAlgInitFlag[];
 
 
 /**
- * @fn     GU16 GH3X2X_FindGu16MinVal(GU16 *pusBuffer, GU8 uchLen)
+ * @fn     uint16_t GH3X2X_FindGu16MinVal(uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find min val
  *
  * @attention   len must > 0
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  None
  *
  * @return  min val, if len = 0, return 0
  */
-GU16 GH3X2X_FindGu16MinVal(GU16 *pusBuffer, GU8 uchLen);
+uint16_t GH3X2X_FindGu16MinVal(uint16_t *pusBuffer, uint8_t uchLen);
 
 /**
- * @fn     GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen)
+ * @fn     uint16_t GH3X2X_FindGu16MaxVal(uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find max val
  *
  * @attention   len must > 0
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  None
  *
  * @return  max val, if len = 0, return 0
  */
-GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen);
+uint16_t GH3X2X_FindGu16MaxVal(uint16_t *pusBuffer, uint8_t uchLen);
 
 /**
- * @fn     void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer, GU8 uchLen)
+ * @fn     void GH3X2X_FindGu16MaxMinVal(uint16_t *pusMaxVal, uint16_t *pusMinVal, uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find min val & max val
  *
  * @attention   len must > 0, ptr not null
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  pusMaxVal        pointer to max val
@@ -406,10 +411,10 @@ GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen);
  *
  * @return  None
  */
-void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer, GU8 uchLen);
+void GH3X2X_FindGu16MaxMinVal(uint16_t *pusMaxVal, uint16_t *pusMinVal, uint16_t *pusBuffer, uint8_t uchLen);
 
 /**
- * @fn     GCHAR *GH3X2X_GetDriverLibFuncSupport(void)
+ * @fn     char *GH3X2X_GetDriverLibFuncSupport(void)
  *
  * @brief  Get driver function support
  *
@@ -420,14 +425,14 @@ void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer,
  *
  * @return  library version string
  */
-GCHAR *GH3X2X_GetDriverLibFuncSupport(void);
- 
+char *GH3X2X_GetDriverLibFuncSupport(void);
+
 /**
- * @fn       GU8 GH3x2x_GetChipResetRecoveringFlag(void)
- 
- 
+ * @fn       uint8_t GH3x2x_GetChipResetRecoveringFlag(void)
+
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -436,11 +441,11 @@ GCHAR *GH3X2X_GetDriverLibFuncSupport(void);
  *
  * @return  None
  */
-GU8 GH3x2x_GetChipResetRecoveringFlag(void);
+uint8_t GH3x2x_GetChipResetRecoveringFlag(void);
 
 
 /**
- * @fn     void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag)
+ * @fn     void GH3X2X_ReinitAllSwModuleParam(uint16_t usReinitFlag)
  *
  * @brief  reinit all software param config
  *
@@ -451,10 +456,10 @@ GU8 GH3x2x_GetChipResetRecoveringFlag(void);
  *
  * @return  None
  */
-void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag);
+void GH3X2X_ReinitAllSwModuleParam(uint16_t usReinitFlag);
 
 /**
- * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize)
  *
  * @brief  memcpy() Re-implementation
  *
@@ -466,10 +471,10 @@ void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag);
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
+void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize);
 
 /**
- * @fn     void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize)
  *
  * @brief  memset() Re-implementation
  *
@@ -481,10 +486,10 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
+void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize);
 
 /**
- * @fn     GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+ * @fn     uint32_t GH3X2X_Strlen(const char *pszSrc)
  *
  * @brief  strlen() Re-implementation
  *
@@ -495,22 +500,21 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
  *
  * @return  string len
  */
-GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
+uint32_t GH3X2X_Strlen(const char *pszSrc);
 
-GU8 GH3x2xGetProtocolMode(void);
-void GH3x2xCreatTagArray(GU8 *puchTagArray, GU16 usArrayLen,GU32 *unCompeletMask, const STGh3x2xFrameInfo * const pstFrameInfo);
-void GH3x2xHandleFrameData(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 *punTempIncompeletFlag,
-                                GU32 *punFunctionID, GU8 uchChnlNum, GU8 *puchRawdataBuf, GU32 *punFrameRawdata,
-                                GU8 *puchTag, GS16 *pusGsValueArr, float fGsensorIndex,
+uint8_t GH3x2xGetProtocolMode(void);
+void GH3x2xCreatTagArray(uint8_t *puchTagArray, uint16_t usArrayLen,uint32_t *unCompeletMask, const struct gh3020_frameinfo_s * const pstFrameInfo);
+void GH3x2xHandleFrameData(const struct gh3020_frameinfo_s * const pstFrameInfo, uint32_t *punTempIncompeletFlag,
+                                uint32_t *punFunctionID, uint8_t uchChnlNum, uint8_t *puchRawdataBuf, uint32_t *punFrameRawdata,
+                                uint8_t *puchTag, int16_t *pusGsValueArr, float fGsensorIndex,
                                 STCapRawdata* pstCapValueArr,float fCapIndex,STTempRawdata* pstTempValueArr,float fTempIndex);
 
-GU8 GH3X2X_CheckRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen);
-float GH3x2xCalGsensorStep(GU16 usGsDataNum, GU16 usFrameNum);
-void GH3X2X_SendOverflowLengthBuffer(GU8 *puchBuffer, GS32 nBufferLen, GU8 uchCmd);
-GU8 GH3X2X_ReceiveOverflowLengthBuffer(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchReceiveBuffer, GS32 *pnReceiveBufferLen);
+uint8_t GH3X2X_CheckRawdataBuf(uint8_t *puchRawdata, uint16_t usRawdataLen);
+float GH3x2xCalGsensorStep(uint16_t usGsDataNum, uint16_t usFrameNum);
+uint8_t GH3X2X_ReceiveOverflowLengthBuffer(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchReceiveBuffer, int32_t *pnReceiveBufferLen);
 
 /**
- * @fn     GU8 GH3X2X_GetSoftWearColor(void)
+ * @fn     uint8_t GH3X2X_GetSoftWearColor(void)
  *
  * @brief  GetSoftWearColor
  *
@@ -522,7 +526,7 @@ GU8 GH3X2X_ReceiveOverflowLengthBuffer(GU8 *puchRespondBuffer, GU16 *pusRespondL
  * @return  SoftWearColor 0: green  1:ir
  */
 
-GU8 GH3X2X_GetSoftWearColor(void);
+uint8_t GH3X2X_GetSoftWearColor(void);
 
 #endif /* _GH3X2X_DRV_CONTROL_H_ */
 

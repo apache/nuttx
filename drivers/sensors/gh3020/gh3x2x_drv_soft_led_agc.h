@@ -12,10 +12,11 @@
 
 #ifndef _GH3X2X_DRV_SOFT_LED_AGC_H_
 #define _GH3X2X_DRV_SOFT_LED_AGC_H_
- 
- 
+
+
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 #define  GH3X2X_LED_AGC_DISABLE             (0)
 #define  GH3X2X_LED_AGC_ENABLE              (1)
@@ -25,9 +26,9 @@
  */
 typedef struct
 {
-    GU8 uchAmbSampleEn  : 2;                /**< AMB sampling enable */
-    GU8 uchAmbSlot      : 3;                /**< slot of amb sampling */
-    GU8 uchRes          : 3;                /**< reserved */
+    uint8_t uchAmbSampleEn  : 2;                /**< AMB sampling enable */
+    uint8_t uchAmbSlot      : 3;                /**< slot of amb sampling */
+    uint8_t uchRes          : 3;                /**< reserved */
 } STAmbSlotCtrl;
 
  /**
@@ -35,10 +36,10 @@ typedef struct
  */
 typedef struct
 {
-    GU8 uchGainLimitBg32uA  : 4;          /**< gain limit bg current */
-    GU8 uchGainLimitBg64uA  : 4;          
-    GU8 uchGainLimitBg128uA : 4;        
-    GU8 uchGainLimitBg256uA : 4;
+    uint8_t uchGainLimitBg32uA  : 4;          /**< gain limit bg current */
+    uint8_t uchGainLimitBg64uA  : 4;
+    uint8_t uchGainLimitBg128uA : 4;
+    uint8_t uchGainLimitBg256uA : 4;
 } STSoftAgcGainLimit;
 
  /**
@@ -46,17 +47,17 @@ typedef struct
   */
 typedef struct
 {
-    GU8 uchSlotxSoftAgcAdjEn;              /**< soft agc enable */
-    GU8 uchSlotxSoftBgAdjEn;               /**< soft bg cancel adjust enable */
+    uint8_t uchSlotxSoftAgcAdjEn;              /**< soft agc enable */
+    uint8_t uchSlotxSoftBgAdjEn;               /**< soft bg cancel adjust enable */
     STAmbSlotCtrl stAmbSlotCtrl;           /**< amb slot ctrl */
-    GU8 uchRes0;                           /**< reserved */
-    GU8 uchRes1;
-    GU8 uchRes2;
+    uint8_t uchRes0;                           /**< reserved */
+    uint8_t uchRes1;
+    uint8_t uchRes2;
     STSoftAgcGainLimit stSoftAgcGainLimit; /**< soft gain limit */
-    GU32 unAgcTrigThd_H;                   /**< trig threshold(high) of soft agc */
-    GU32 unAgcTrigThd_L;                   /**< trig threshold(low) of soft agc */
-    GU32 unAgcRestrainThd_H;               /**< restrain threshold(high) of soft agc */
-    GU32 unAgcRestrainThd_L;               /**< restrain threshold(low) of soft agc */
+    uint32_t unAgcTrigThd_H;                   /**< trig threshold(high) of soft agc */
+    uint32_t unAgcTrigThd_L;                   /**< trig threshold(low) of soft agc */
+    uint32_t unAgcRestrainThd_H;               /**< restrain threshold(high) of soft agc */
+    uint32_t unAgcRestrainThd_L;               /**< restrain threshold(low) of soft agc */
 } STSoftAgcCfg;
 
 /**
@@ -74,7 +75,7 @@ typedef struct
 void GH3X2X_LedAgcReset(void);
 
 /**
- * @fn     void GH3X2X_LedAgcPramWrite(GU16 usRegAddr, GU16 usRegData)
+ * @fn     void GH3X2X_LedAgcPramWrite(uint16_t usRegAddr, uint16_t usRegData)
  *
  * @brief    write AGC parameter
  *
@@ -86,11 +87,11 @@ void GH3X2X_LedAgcReset(void);
  *
  * @return  None
  */
-void GH3X2X_LedAgcPramWrite(GU16 usRegAddr, GU16 usRegData);
+void GH3X2X_LedAgcPramWrite(uint16_t usRegAddr, uint16_t usRegData);
 
 /**
  * @fn     static void GH3X2X_LedAgcInit(void)
- * 
+ *
  * @brief  init led agc
  *
  * @attention   just use to show function support
@@ -104,7 +105,7 @@ void GH3X2X_LedAgcInit(void);
 
 /**
  * @fn     void GH3X2X_LedAgc_Close(void)
- * 
+ *
  * @brief  close agc
  *
  * @attention   None
@@ -118,7 +119,7 @@ void GH3X2X_LedAgc_Close(void);
 
 /**
  * @fn     void GH3X2X_LedAgc_Open(void)
- * 
+ *
  * @brief  open agc
  *
  * @attention   None

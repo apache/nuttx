@@ -15,13 +15,14 @@
 
 #include "gh3x2x_drv_config.h"
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 
 typedef struct
 {
-    GU8 uchAddrOffset;
-    GU8 uchMsb;
-    GU8 uchLsb;
+    uint8_t uchAddrOffset;
+    uint8_t uchMsb;
+    uint8_t uchLsb;
 } STGh3x2xAgcReg;
 
 
@@ -42,12 +43,12 @@ enum EMGh3x2xDumpRawdataBgLvlSelect
  */
 typedef struct
 {
-    GU32 *punPkgNoAndCurrentArr;        /**< pointer to buffer store PkgNo&current data, map e.g. ch0 ch1...chx ch0 */
-    GU32 *punChBgRawdataArr;            /**< pointer to buffer store channel bg data, map e.g. ch0 ch1...chx ch0 */
-    GU32 *punChRawdataArr;              /**< pointer to buffer store channel data, map e.g. ch0 ch1...chx ch0 */
-    GU16 usChRawdataCnt;                /**< channel rawdata count output */
-    GU32 (*punIncompleteChRawdataArr)[6];    /**< pointer to last incomplete packet buffer */
-    GU8  uchChIncompleteFlagArr[32];    /**< channel incomplete flag, max 32 channel */
+    uint32_t *punPkgNoAndCurrentArr;        /**< pointer to buffer store PkgNo&current data, map e.g. ch0 ch1...chx ch0 */
+    uint32_t *punChBgRawdataArr;            /**< pointer to buffer store channel bg data, map e.g. ch0 ch1...chx ch0 */
+    uint32_t *punChRawdataArr;              /**< pointer to buffer store channel data, map e.g. ch0 ch1...chx ch0 */
+    uint16_t usChRawdataCnt;                /**< channel rawdata count output */
+    uint32_t (*punIncompleteChRawdataArr)[6];    /**< pointer to last incomplete packet buffer */
+    uint8_t  uchChIncompleteFlagArr[32];    /**< channel incomplete flag, max 32 channel */
 } STGh3x2xChannelDumpData;
 
 
@@ -68,7 +69,7 @@ typedef struct
 #define DUMP_DATA_MAX_NUM                           (6)
 
 /// max slot num
-#define   GH3X2X_MAX_SLOT_NUM                       (8)    
+#define   GH3X2X_MAX_SLOT_NUM                       (8)
 
 /// ADC num
 #define   GH3X2X_ADC_NUM                            (4)
@@ -104,19 +105,19 @@ typedef struct
 #define   GH3X2X_ADC_BG_CANCEL_LEFT_SHIFT_BIT_NUM   (0x4)
 
 /// mask of slot bg level
-#define   GH3X2X_SLOT_BG_LEVEL_BIT_MASK             (0x03)    
+#define   GH3020_SLOT_BG_LEVEL_BIT_MASK             (0x03)
 
 /// dump data offset
 #define   GH3X2X_DUMP_DATA_OFFSET                   (8388608)
 
 /// max dump data num of every channel
-#define   GH3X2X_MAX_DUMP_DATA_NUM_CHANNEL          (4)  
+#define   GH3X2X_MAX_DUMP_DATA_NUM_CHANNEL          (4)
 
 /// max dump data num of every channel that will upload
-#define   GH3X2X_MAX_DUMP_DATA_NUM_UPLOAD           (3)  
+#define   GH3X2X_MAX_DUMP_DATA_NUM_UPLOAD           (3)
 
 /// dump gain & current enable
-#define   GH3X2X_DUMP_GAIN_CURRENT_ENABLE_BIT       (0)      
+#define   GH3X2X_DUMP_GAIN_CURRENT_ENABLE_BIT       (0)
 
 /// dump ambiance enable
 #define   GH3X2X_DUMP_AMBIANCE_ENABLE_BIT           (1)
@@ -158,71 +159,71 @@ typedef struct
 #define   GH3X2X_DUMP_AMBIANCE_CALC(x)              ((x) * GH3X2X_DUMP_AMBIANCE_DATA_SIZE)
 
 /// gain value in dump data
-#define DUMP_GAIN(x)      ((((GU8*)(&(x)))[1]) >> 4)
+#define DUMP_GAIN(x)      ((((uint8_t*)(&(x)))[1]) >> 4)
 
 /// current0 in dump data
-#define DUMP_CUREENT0(x)   (((GU8*)(&(x)))[3])
+#define DUMP_CUREENT0(x)   (((uint8_t*)(&(x)))[3])
 
 /// current1 in dump data
-#define DUMP_CUREENT1(x)   (((GU8*)(&(x)))[2])
+#define DUMP_CUREENT1(x)   (((uint8_t*)(&(x)))[2])
 
 /// PPG data in dump data
-#define DUMP_PPG_DATA(x)   ((((GU32)(((GU8*)(&(x)))[1])) << 16) + (((GU32)(((GU8*)(&(x)))[2])) << 8)\
-                                                                    + (((GU32)(((GU8*)(&(x)))[3])) << 0))
+#define DUMP_PPG_DATA(x)   ((((uint32_t)(((uint8_t*)(&(x)))[1])) << 16) + (((uint32_t)(((uint8_t*)(&(x)))[2])) << 8)\
+                                                                    + (((uint32_t)(((uint8_t*)(&(x)))[3])) << 0))
 
 /// spo2 rawdata incomplete array
-extern GU8 g_uchSpo2IncompleteArr[];
+extern uint8_t g_uchSpo2IncompleteArr[];
 
 /// hbd rawdata incomplete array
-extern GU8 g_uchHbaIncompleteArr[];
+extern uint8_t g_uchHbaIncompleteArr[];
 
 /// hrv rawdata incomplete array
-extern GU8 g_uchHrvIncompleteArr[];
+extern uint8_t g_uchHrvIncompleteArr[];
 
 /// spo2 algorithm channel map cnt
-extern GU8 g_uchSpo2ChannelMapCnt;
+extern uint8_t g_uchSpo2ChannelMapCnt;
 
 /// spo2 algorithm channel map array
-extern GU8 g_uchSpo2ChannelMapArr[];
+extern uint8_t g_uchSpo2ChannelMapArr[];
 
 /// hba algorithm channel map array
-extern GU8 g_uchHbaChannelMapArr[];
+extern uint8_t g_uchHbaChannelMapArr[];
 
 /// hba algorithm channel map cnt
-extern GU8 g_uchHbaChannelMapCnt;
+extern uint8_t g_uchHbaChannelMapCnt;
 
 /// hrv algorithm channel map array
-extern GU8 g_uchHrvChannelMapArr[];
+extern uint8_t g_uchHrvChannelMapArr[];
 
 /// hrv algorithm channel map cnt
-extern GU8 g_uchHrvChannelMapCnt;
+extern uint8_t g_uchHrvChannelMapCnt;
 
 /// current data index in raw data buf
-extern GU16 g_usGh3x2xDataIndexInBuf;
+extern uint16_t g_usGh3x2xDataIndexInBuf;
 
 /// current data index in raw data buf of every channel
-extern GU16 g_usRawdataByteIndexArr[];
+extern uint16_t g_usRawdataByteIndexArr[];
 
 /// packet payload
-//extern GU8 g_uchPacketPayloadArr[];
+//extern uint8_t g_uchPacketPayloadArr[];
 
 /// current data index in raw data buf
-extern GF32 g_fGsDataIndexInBuf;
+extern float g_fGsDataIndexInBuf;
 
 /// packet max len support
-extern GU8 g_uchPacketMaxLenSupport;
+extern uint8_t g_uchPacketMaxLenSupport;
 
 /// function started bitmap, use for sampling control
-extern GU32 g_unFuncStartedBitmap;
+extern uint32_t g_unFuncStartedBitmap;
 
 //save bg cancel value of every channel
-extern GU8  g_puchGainBgCancelRecord[];
+extern uint8_t  g_puchGainBgCancelRecord[];
 
 //save current of drv0 and drv1
-extern GU16  g_pusDrvCurrentRecord[];
+extern uint16_t  g_pusDrvCurrentRecord[];
 
 
-extern GU8 g_puchTiaGainAfterSoftAgc[];
+extern uint8_t g_puchTiaGainAfterSoftAgc[];
 
 
 /**
@@ -240,7 +241,7 @@ extern GU8 g_puchTiaGainAfterSoftAgc[];
 void GH3X2X_DumpInit(void);
 
 /**
- * @fn     void GH3X2X_DumpModeSet(GU16 usRegVal)
+ * @fn     void GH3X2X_DumpModeSet(uint16_t usRegVal)
  *
  * @brief  set dump mode
  *
@@ -251,10 +252,10 @@ void GH3X2X_DumpInit(void);
  *
  * @return  None
  */
-void GH3X2X_DumpModeSet(GU16 usRegVal);
+void GH3X2X_DumpModeSet(uint16_t usRegVal);
 
 /**
- * @fn     GU16 GH3X2X_DumpModeGet(void)
+ * @fn     uint16_t GH3X2X_DumpModeGet(void)
  *
  * @brief  get dump mode
  *
@@ -265,10 +266,10 @@ void GH3X2X_DumpModeSet(GU16 usRegVal);
  *
  * @return  dump mode
  */
-GU16 GH3X2X_DumpModeGet(void);
+uint16_t GH3X2X_DumpModeGet(void);
 
 /**
- * @fn     void GH3X2X_BgLevelSet(GU16 usRegVal)
+ * @fn     void GH3X2X_BgLevelSet(uint16_t usRegVal)
  *
  * @brief  set bg level of every slot
  *
@@ -279,7 +280,7 @@ GU16 GH3X2X_DumpModeGet(void);
  *
  * @return  None
  */
-void GH3X2X_BgLevelSet(GU16 usRegVal);
+void GH3X2X_BgLevelSet(uint16_t usRegVal);
 
 /**
  * @fn     void GH3X2X_RecordDumpData(void)
@@ -310,7 +311,7 @@ void GH3X2X_RecordDumpData(void);
 void GH3X2X_ReadElectrodeWearDumpData(void);
 
 /**
- * @fn     void GH3X2X_BgLevelDecode(GU8 puchBgLvArr[], GU8 uchChannelCnt, GU8 *puchChannelMapArray, GU16 usBgLevel)
+ * @fn     void GH3X2X_BgLevelDecode(uint8_t puchBgLvArr[], uint8_t uchChannelCnt, uint8_t *puchChannelMapArray, uint16_t usBgLevel)
  *
  * @brief  decode function's bg level array according to channel map and slot bg level
  *
@@ -323,14 +324,14 @@ void GH3X2X_ReadElectrodeWearDumpData(void);
  *
  * @return  None
  */
-void GH3X2X_BgLevelDecode(GU8 puchBgLvArr[], GU8 uchChannelCnt, GU8 *puchChannelMapArray, GU16 usBgLevel);
+void GH3X2X_BgLevelDecode(uint8_t puchBgLvArr[], uint8_t uchChannelCnt, uint8_t *puchChannelMapArray, uint16_t usBgLevel);
 
 /**
- * @fn     GS8 GH3X2X_GetDumpDataInfo(GF32 *pfGsFloatIncVal, GU16 *pusChannelDataCnt,
- *                                    GU8 *puchNextIncompleteFlag,GU8 *puchDumpDataIndexArr,
- *                                    GU8 *puchIncompleteFlagArr, GU16 usFifoLength, GU8 *puchDataBuffer,
- *                                    GU8 uchChannelCnt, GU8 *puchChannelMapArray, GU8 *puchChannelBgLvlArr, 
- *                                    GU16 usReadGsensorArrCnt)
+ * @fn     int8_t GH3X2X_GetDumpDataInfo(float *pfGsFloatIncVal, uint16_t *pusChannelDataCnt,
+ *                                    uint8_t *puchNextIncompleteFlag,uint8_t *puchDumpDataIndexArr,
+ *                                    uint8_t *puchIncompleteFlagArr, uint16_t usFifoLength, uint8_t *puchDataBuffer,
+ *                                    uint8_t uchChannelCnt, uint8_t *puchChannelMapArray, uint8_t *puchChannelBgLvlArr,
+ *                                    uint16_t usReadGsensorArrCnt)
  *
  * @brief  Get information from rawdata
  *
@@ -353,22 +354,22 @@ void GH3X2X_BgLevelDecode(GU8 puchBgLvArr[], GU8 uchChannelCnt, GU8 *puchChannel
  * @retval  #GH3X2X_RET_GENERIC_ERROR    generic error when size is 0
  * @retval  #GH3X2X_RET_RESOURCE_ERROR   resource error when doesn't correspond to channel map
  */
-GS8 GH3X2X_GetDumpDataInfo(GF32 *pfGsFloatIncVal, GU16 *pusChannelDataCnt,
-                            GU8 *puchNextIncompleteFlag, GU8 *puchDumpDataIndexArr,
-                            GU8 *puchIncompleteFlagArr, GU16 usFifoLength, GU8 *puchDataBuffer,
-                            GU8 uchChannelCnt, GU8 *puchChannelMapArray, GU8 *puchChannelBgLvlArr, 
-                            GU16 usReadGsensorArrCnt);
+int8_t GH3X2X_GetDumpDataInfo(float *pfGsFloatIncVal, uint16_t *pusChannelDataCnt,
+                            uint8_t *puchNextIncompleteFlag, uint8_t *puchDumpDataIndexArr,
+                            uint8_t *puchIncompleteFlagArr, uint16_t usFifoLength, uint8_t *puchDataBuffer,
+                            uint8_t uchChannelCnt, uint8_t *puchChannelMapArray, uint8_t *puchChannelBgLvlArr,
+                            uint16_t usReadGsensorArrCnt);
 
 /**
- * @fn     GS8 GH3X2X_UnpackDumpDataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
- *                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr,
- *                    GU8 *puchChannelBgLvlArr)
+ * @fn     int8_t GH3X2X_UnpackDumpDataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
+ *                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr,
+ *                    uint8_t *puchChannelBgLvlArr)
  *
  * @brief  Unpack to channel dump data from read fifo data buffer;
  *         if dump data incomplete, should change fifo watermark
  *
  * @attention   This function should use in get rawdata hook
- * 
+ *
  * @param[in]   puchReadRawdataBuffer           pointer to read data buffer
  * @param[in]   usReadRawdataLen                read data length
  * @param[in]   uchChannelMapCnt                channel map array cnt, max:32
@@ -380,13 +381,13 @@ GS8 GH3X2X_GetDumpDataInfo(GF32 *pfGsFloatIncVal, GU16 *pusChannelDataCnt,
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_UnpackDumpDataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
-                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr,
-                    GU8 *puchChannelBgLvlArr);
+int8_t GH3X2X_UnpackDumpDataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
+                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr,
+                    uint8_t *puchChannelBgLvlArr);
 
 /**
- * @fn     GS16 GH3X2X_GetDumpdataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData, 
- *                       GU8 *puchReadRawdataBuffer, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr, GU8 *puchBglvlArr)
+ * @fn     int16_t GH3X2X_GetDumpdataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
+ *                       uint8_t *puchReadRawdataBuffer, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr, uint8_t *puchBglvlArr)
  *
  * @brief  Get dump data from fifo with channel map
  *
@@ -402,11 +403,11 @@ GS8 GH3X2X_UnpackDumpDataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChanne
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  */
-GS16 GH3X2X_GetDumpdataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData, 
-                        GU8 *puchReadRawdataBuffer, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr, GU8 *puchBglvlArr);
+int16_t GH3X2X_GetDumpdataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData,
+                        uint8_t *puchReadRawdataBuffer, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr, uint8_t *puchBglvlArr);
 
 /**
- * @fn     GS8 GH3X2X_ChannelMapDumpDataClear(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData)
+ * @fn     int8_t GH3X2X_ChannelMapDumpDataClear(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData)
  *
  * @brief  clear channel map dump data struct
  *
@@ -420,10 +421,10 @@ GS16 GH3X2X_GetDumpdataWithChannelMap(STGh3x2xChannelDumpData *pstGh3x2xChannelD
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_ChannelMapDumpDataClear(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData);
+int8_t GH3X2X_ChannelMapDumpDataClear(STGh3x2xChannelDumpData *pstGh3x2xChannelDumpData);
 
 /**
- * @fn       void GH3X2X_ElectrWearDumpDataPro(GU8* puchRawdataTag, GU8 uchChMapIndex)
+ * @fn       void GH3X2X_ElectrWearDumpDataPro(uint8_t* puchRawdataTag, uint8_t uchChMapIndex)
  *
  * @brief    electrode wear dump data pro
  *
@@ -435,13 +436,13 @@ GS8 GH3X2X_ChannelMapDumpDataClear(STGh3x2xChannelDumpData *pstGh3x2xChannelDump
  *
  * @return    None
  */
-void GH3X2X_ElectrWearDumpDataPro(GU8* puchRawdataTag, GU8 uchChMapIndex);
+void GH3X2X_ElectrWearDumpDataPro(uint8_t* puchRawdataTag, uint8_t uchChMapIndex);
 
 /**
- * @fn       GS8 GH3X2X_SendSpo2DumpDataPkg(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
-                                            GS32 nAlgoResultArr[], STGsensorRawdata *pstGsAxisValueArr,
-                                            GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
- *                    
+ * @fn       int8_t GH3X2X_SendSpo2DumpDataPkg(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
+                                            int32_t nAlgoResultArr[], STGsensorRawdata *pstGsAxisValueArr,
+                                            uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ *
  * @brief  pack GH3X2X hb rawdata and other type of data according to specific protocol
  *
  * @attention    None
@@ -461,10 +462,10 @@ void GH3X2X_ElectrWearDumpDataPro(GU8* puchRawdataTag, GU8 uchChMapIndex);
  */
 
 /**
- * @fn     GS8 GH3X2X_SendHbDumpDataPkg(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
-                                        GS32 nAlgoResultArr[], STGsensorRawdata *pstGsAxisValueArr,
-                                        GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
- *                  
+ * @fn     int8_t GH3X2X_SendHbDumpDataPkg(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
+                                        int32_t nAlgoResultArr[], STGsensorRawdata *pstGsAxisValueArr,
+                                        uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ *
  * @brief  pack GH3X2X hb rawdata and other type of data according to specific protocol
  *
  * @attention   None

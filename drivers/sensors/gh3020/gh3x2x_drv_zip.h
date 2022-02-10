@@ -17,20 +17,20 @@
  */
 typedef struct
 {
-    GU8 uchFifoLastRawdataTagArr[GH3X2X_FUNC_OFFSET_MAX][GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastRawdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
-    GU32 unFifoLastAgcdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint8_t uchFifoLastRawdataTagArr[GH3X2X_FUNC_OFFSET_MAX][GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastRawdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
+    uint32_t unFifoLastAgcdataArr[GH3X2X_CHANNEL_MAP_MAX_CH];
 } STZipLastDataStruct;
 
 
 
 
-extern void GH3X2X_GetRawDataDiff(GU32 *punRawData, GU8 *puchRawdataTagTempArr, 
-                            GU8 uchChannelMapCnt, GU8 *puchZipDataArr, GU8 *puchZipDataArrSize, 
-                            GU8 *uchFifoLastRawdataTagArr, GU32 *unFifoLastRawdataArr);
+extern void GH3X2X_GetRawDataDiff(uint32_t *punRawData, uint8_t *puchRawdataTagTempArr,
+                            uint8_t uchChannelMapCnt, uint8_t *puchZipDataArr, uint8_t *puchZipDataArrSize,
+                            uint8_t *uchFifoLastRawdataTagArr, uint32_t *unFifoLastRawdataArr);
 
-extern void GH3X2X_GetDataDiff(GU32 *punData, GU8 uchChannelMapCnt, GU8 *puchZipDataArr, 
-                        GU8 *puchZipDataArrSize, GU32 *punZipTempData);
+extern void GH3X2X_GetDataDiff(uint32_t *punData, uint8_t uchChannelMapCnt, uint8_t *puchZipDataArr,
+                        uint8_t *puchZipDataArrSize, uint32_t *punZipTempData);
 
 extern void GH3X2X_ZipmodeInit(void);
 

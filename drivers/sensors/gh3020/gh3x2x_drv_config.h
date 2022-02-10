@@ -12,6 +12,7 @@
 #ifndef _GH3X2X_DRV_CONFIG_H_
 #define _GH3X2X_DRV_CONFIG_H_
 #include "gh3x2x_drv.h"
+#include "gh3020_bridge.h"
 
 /* started bitmap */
 
@@ -232,7 +233,7 @@
 #define GH3X2X_HSM_ALG_CFG_OFFSET 0x023F
 //fpbp_drv_cfg
 #define GH3X2X_FPBP_DRV_CFG_OFFSET 0x00C7
-//fpbp_alg_cfg 
+//fpbp_alg_cfg
 #define GH3X2X_FPBP_ALG_CFG_OFFSET 0x023F
 #define GH3X2X_FPBP_CALC_MODE_L_ADDR 0x3CC0
 #define GH3X2X_FPBP_CALC_MODE_H_ADDR 0x3CC2
@@ -629,10 +630,10 @@
 /// cmd support config: chip ctrl cmd support wakeup & sleep
 #define  GH3X2X_UPROTOCOL_CHIP_CTRL_CMD_WAKEUP_SLEEP_SUP        (1)
 
-GCHAR *GH3X2X_GetVirtualRegVersion(void);
+char *GH3X2X_GetVirtualRegVersion(void);
 
 /**
- * @fn     GU16 GH3X2X_ReadSwConfigWithVirtualReg(GU16 usVirtualRegAddr)
+ * @fn     uint16_t GH3X2X_ReadSwConfigWithVirtualReg(uint16_t usVirtualRegAddr)
  *
  * @brief  Read software config with virtual reg
  *
@@ -643,10 +644,10 @@ GCHAR *GH3X2X_GetVirtualRegVersion(void);
  *
  * @return  virtual reg val
  */
-GU16 GH3X2X_ReadSwConfigWithVirtualReg(GU16 usVirtualRegAddr);
+uint16_t GH3X2X_ReadSwConfigWithVirtualReg(uint16_t usVirtualRegAddr);
 
 /**
- * @fn     GS8 GH3X2X_WriteSwConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue)
+ * @fn     int8_t GH3X2X_WriteSwConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue)
  *
  * @brief  Write software param config with virtual reg
  *
@@ -658,10 +659,10 @@ GU16 GH3X2X_ReadSwConfigWithVirtualReg(GU16 usVirtualRegAddr);
  *
  * @return  None
  */
-void GH3X2X_WriteSwConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
+void GH3X2X_WriteSwConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
 
 /**
- * @fn     GU16 GH3X2X_ReadChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr)
+ * @fn     uint16_t GH3X2X_ReadChnlMapConfigWithVirtualReg(uint16_t usVirtualRegAddr)
  *
  * @brief  Read software config with virtual reg
  *
@@ -672,10 +673,10 @@ void GH3X2X_WriteSwConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualReg
  *
  * @return  virtual reg val
  */
-GU16 GH3X2X_ReadChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr);
+uint16_t GH3X2X_ReadChnlMapConfigWithVirtualReg(uint16_t usVirtualRegAddr);
 
 /**
- * @fn     GS8 GH3X2X_WriteChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue)
+ * @fn     int8_t GH3X2X_WriteChnlMapConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue)
  *
  * @brief  Write software param config with virtual reg
  *
@@ -687,10 +688,10 @@ GU16 GH3X2X_ReadChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr);
  *
  * @return  None
  */
-void GH3X2X_WriteChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
+void GH3X2X_WriteChnlMapConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
 
 /**
- * @fn     GS8 GH3X2X_WriteVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue)
+ * @fn     int8_t GH3X2X_WriteVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue)
  *
  * @brief  Write virtual reg val, for software param config
  *
@@ -702,10 +703,10 @@ void GH3X2X_WriteChnlMapConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtu
  *
  * @return  None
  */
-void GH3X2X_WriteVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
+void GH3X2X_WriteVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
 
 /**
- * @fn     GU16 GH3X2X_ReadVirtualReg(GU16 usVirtualRegAddr)
+ * @fn     uint16_t GH3X2X_ReadVirtualReg(uint16_t usVirtualRegAddr)
  *
  * @brief  Read virtual reg val, for software param config
  *
@@ -716,15 +717,15 @@ void GH3X2X_WriteVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
  *
  * @return  virtual reg val
  */
-GU16 GH3X2X_ReadVirtualReg(GU16 usVirtualRegAddr);
+uint16_t GH3X2X_ReadVirtualReg(uint16_t usVirtualRegAddr);
 
-extern void GH3X2X_WriteHrAlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_WriteHrvAlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_WriteSpo2AlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_WriteBtAlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_WriteAfAlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_WriteBpAlgConfigWithVirtualReg(GU16 usVirtualRegAddr, GU16 usVirtualRegValue);
-extern void GH3X2X_SetCurrentConfigFlag(GU8 value);
+extern void GH3X2X_WriteHrAlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_WriteHrvAlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_WriteSpo2AlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_WriteBtAlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_WriteAfAlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_WriteBpAlgConfigWithVirtualReg(uint16_t usVirtualRegAddr, uint16_t usVirtualRegValue);
+extern void GH3X2X_SetCurrentConfigFlag(uint8_t value);
 
 #endif /* _GH3X2X_DRV_CONFIG_H_ */
 

@@ -14,7 +14,8 @@
 #include "gh3x2x_drv_version.h"
 #include "gh3x2x_drv_common.h"
 #include "gh3x2x_drv.h"
-#include "gh3x2x_drv_interface.h"
+#include "gh3020_bridge.h"
+#include "gh3x2x.h"
 #include "gh3x2x_drv_control.h"
 #include "gh3x2x_drv_control_ex.h"
 #include "gh3x2x_drv_uprotocol.h"
@@ -25,65 +26,53 @@
 #include "gh3x2x_drv_zip.h"
 
 
-GU8 gubGh3x2xUseZipProtocol = 1;
-GU8 g_uchFifoPackageID = 0xFF;
-GU8 g_uchFifoPackageMode = 0;
-//GU8 *gpuchSendFifoPackage = GH3X2X_PTR_NULL;
-GU32 g_unSendFifoPackageCnt = 0;
+uint8_t gubGh3x2xUseZipProtocol = 1;
+uint8_t g_uchFifoPackageID = 0xFF;
+uint8_t g_uchFifoPackageMode = 0;
+//uint8_t *gpuchSendFifoPackage = GH3X2X_PTR_NULL;
+uint32_t g_unSendFifoPackageCnt = 0;
 
 
-GU8 g_uchAlgoEnableFlag = 1;
+uint8_t g_uchAlgoEnableFlag = 1;
 
-GU32 * gpunFrameRawdata;
+uint32_t * gpunFrameRawdata;
 
 STAdtCfg g_stAdtModuleCfg;
 
-GU8 g_uchElectrodeWearRevCnt;
+uint8_t g_uchElectrodeWearRevCnt;
 
-GU8 g_uchOddEvenChangeFlag = 1;
+uint8_t g_uchOddEvenChangeFlag = 1;
 
 /// config array translate key code. ascii array from "GooidxIOTConfigArrKeyCode"
-const GU8 g_uchConfigArrKeyCodeArr[] =
+const uint8_t g_uchConfigArrKeyCodeArr[] =
 {
     0x47, 0x6F, 0x6F, 0x69, 0x64, 0x78, 0x49, 0x4F, 0x54, 0x43, 0x6F, 0x6E, 0x66,
     0x69, 0x67, 0x41, 0x72, 0x72, 0x4B, 0x65, 0x79, 0x43, 0x6F, 0x64, 0x65,
 };
 
-/// xor val index @g_uchConfigArrKeyCodeArr 
-static GU8 g_uchEncryptRawdataXorIndex = GH3X2X_ENCRYPT_ARRAY_START_INDEX;
+/// xor val index @g_uchConfigArrKeyCodeArr
+static uint8_t g_uchEncryptRawdataXorIndex = GH3X2X_ENCRYPT_ARRAY_START_INDEX;
 
 
 
 /// soft event
-GU8 gubSoftEvent = 0;  //G202008231001 wanpeng
+uint8_t gubSoftEvent = 0;  //G202008231001 wanpeng
 /// G sensor enable flag
-GU8 g_uchGsensorEnable = 0;
+uint8_t g_uchGsensorEnable = 0;
 
 /// Cap enable flag
-GU8 g_uchCapEnable = 0;
+uint8_t g_uchCapEnable = 0;
 
 /// Temp enable flag
-GU8 g_uchTempEnable = 0;
+uint8_t g_uchTempEnable = 0;
 
-GU8 g_uchResetFromProtocolFlag = 0;
+uint8_t g_uchResetFromProtocolFlag = 0;
 
 /// gh3x2x status
-GU8 g_uchGh3x2xStatus = GH3X2X_STATUS_NO_INIT;
+uint8_t g_uchGh3x2xStatus = GH3X2X_STATUS_NO_INIT;
 
 /// current fifo water line
-GU16 g_usCurrentFiFoWaterLine = 0;
-
-/// init hook func ptr
-pfnNormalHookFunc g_pGh3x2xInitHookFunc = GH3X2X_PTR_NULL;
-
-/// start hook func ptr
-pfnNormalHookFunc g_pGh3x2xStartHookFunc = GH3X2X_PTR_NULL;
-
-/// stop hook func ptr
-pfnNormalHookFunc g_pGh3x2xStopHookFunc = GH3X2X_PTR_NULL;
-
-/// get rawdata hook func ptr
-pfnGetRawdataHookFunc g_pGh3x2xGetRawdataHookFunc = GH3X2X_PTR_NULL;
+uint16_t g_usCurrentFiFoWaterLine = 0;
 
 /// read int pin status func ptr
 pfnReadPinStatus g_pGh3x2xReadIntPinStatusFunc = GH3X2X_PTR_NULL;
@@ -103,61 +92,31 @@ pfnSetPinLevel g_pGh3x2xResetPinLevelControlFunc = GH3X2X_PTR_NULL;
 #if     GH3X2X_PMU_FIFO_POWER_CTRL_ENABLED
 
 /// fifo power ctrl fifo control reg cache var
-GU16 g_usPmuFifoModuleCtrlVal = 0x0000;
+uint16_t g_usPmuFifoModuleCtrlVal = 0x0000;
 
 /// for fifo power ctrl cache status
-GU8 g_uchPmuFifoModuleCtrlCacheStatus = 0;
+uint8_t g_uchPmuFifoModuleCtrlCacheStatus = 0;
 
 /// max rawdata num read from fifo every time
-GU16 g_usMaxNumReadFromFifo = GH3X2X_FIFO_DATA_BYTES_MAX_LEN;
+uint16_t g_usMaxNumReadFromFifo = GH3X2X_FIFO_DATA_BYTES_MAX_LEN;
 
 #endif
 
 
-GU8 g_uchActiveChipResetFlag = 0;   //1: user have done chip reset(soft reset and hardwear reset) actively   gh3x2x_init will clear it 
-GU8 g_uchChipResetRecoveringFlag = 0;  //0: is not in chip reset recovering flag  1: is in chip reset recovering
+uint8_t g_uchActiveChipResetFlag = 0;   //1: user have done chip reset(soft reset and hardwear reset) actively   gh3x2x_init will clear it
+uint8_t g_uchChipResetRecoveringFlag = 0;  //0: is not in chip reset recovering flag  1: is in chip reset recovering
 
 
-GU8 g_uchNeedWakeUpGh3x2x = 1; // 0: do not need wake up gh3x2x  1: need wake up gh3x2x
-GU8 g_uchNeedWakeUpGh3x2xBeforeInt = 0; // 0: do not need wake up gh3x2x  1: need wake up gh3x2x
+uint8_t g_uchNeedWakeUpGh3x2x = 1; // 0: do not need wake up gh3x2x  1: need wake up gh3x2x
+uint8_t g_uchNeedWakeUpGh3x2xBeforeInt = 0; // 0: do not need wake up gh3x2x  1: need wake up gh3x2x
 
-GU8 g_uchAlgInitFlag[GH3X2X_FUNC_OFFSET_MAX] = {0};
-GU8 g_uchGh3x2xSleepFlag = 0;
+uint8_t g_uchAlgInitFlag[GH3X2X_FUNC_OFFSET_MAX] = {0};
+uint8_t g_uchGh3x2xSleepFlag = 0;
 
-extern void GH3X2X_RawdataCode(GU32 *punRawdata, GU16 usChnlNum);
-
-/**
- * @fn     void GH3X2X_RegisterHookFunc(void (*pInitHookFunc)(void),
- *                            void (*pStartHookFunc)(void),
- *                           void (*pStopHookFunc)(void),
- *                            void (*pGetRawdataHookFunc)(GU8 *puchReadDataBuffer, GU16 usReadDataLen))
- *
- * @brief  Register hook function callback
- *
- * @attention   None
- *
- * @param[in]   pInitHookFunc           pointer to init hook function 
- * @param[in]   pStartHookFunc          pointer to start hook function 
- * @param[in]   pStopHookFunc           pointer to stop hook function 
- * @param[in]   pGetRawdataHookFunc     pointer to get rawdata hook function
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_RegisterHookFunc(void (*pInitHookFunc)(void),
-                             void (*pStartHookFunc)(void),
-                             void (*pStopHookFunc)(void),
-                             void (*pGetRawdataHookFunc)(GU8 *puchReadDataBuffer, GU16 usReadDataLen))
-{
-    g_pGh3x2xInitHookFunc = pInitHookFunc;
-    g_pGh3x2xStartHookFunc = pStartHookFunc;
-    g_pGh3x2xStopHookFunc = pStopHookFunc;
-    g_pGh3x2xGetRawdataHookFunc = pGetRawdataHookFunc;
-    GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-}
+extern void GH3X2X_RawdataCode(uint32_t *punRawdata, uint16_t usChnlNum);
 
 /**
- * @fn     GS8 GH3X2X_ExitLowPowerMode(void)
+ * @fn     int8_t GH3X2X_ExitLowPowerMode(void)
  *
  * @brief  Exit lowpower mode, in this mode, can read&write reg with gh3x2x
  *
@@ -170,9 +129,9 @@ void GH3X2X_RegisterHookFunc(void (*pInitHookFunc)(void),
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    exit low power mode error
  */
-GS8 GH3X2X_ExitLowPowerMode(void)
+int8_t GH3X2X_ExitLowPowerMode(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_CHIP_WAKEUP(chRet);
     GH3x2x_SetNeedWakeUpGh3x2xFlag(1);
@@ -180,7 +139,7 @@ GS8 GH3X2X_ExitLowPowerMode(void)
 }
 
 /**
- * @fn     GS8 GH3X2X_EnterLowPowerMode(void)
+ * @fn     int8_t GH3X2X_EnterLowPowerMode(void)
  *
  * @brief  Enter lowpower mode, in this mode, can't read&write reg with gh3x2x.
  *
@@ -193,18 +152,26 @@ GS8 GH3X2X_ExitLowPowerMode(void)
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    enter low power mode error
  */
-GS8 GH3X2X_EnterLowPowerMode(void)
+int8_t GH3X2X_EnterLowPowerMode(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_CHIP_SLEEP(chRet);
     return chRet;
 }
 
+int8_t GH3X2X_EnterLowPowerModeWithoutWaiting(void)
+{
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
+    GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
+    GH3X2X_CHIP_SLEEP_NOWAIT(chRet);
+    return chRet;
+}
+
 /**
- * @fn     GS8 GH3X2X_SoftReset(void)
+ * @fn     int8_t GH3X2X_SoftReset(void)
  *
- * @brief  Gh3x2x softreset via i2c/spi, can read&write reg with gh3x2x after reset 
+ * @brief  Gh3x2x softreset via i2c/spi, can read&write reg with gh3x2x after reset
  *
  * @attention   None
  *
@@ -215,16 +182,17 @@ GS8 GH3X2X_EnterLowPowerMode(void)
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    exit low power mode error
  */
-GS8 GH3X2X_SoftReset(void)
+int8_t GH3X2X_SoftReset(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_CHIP_RESET(chRet);
     g_uchActiveChipResetFlag = 1;
     if (g_uchResetFromProtocolFlag == 1)
     {
         g_uchResetFromProtocolFlag = 0;
-        gh3x2x_active_reset_hook();
+        up_mdelay(20);
+        gh3020_fifo_process();
     }
     return chRet;
 }
@@ -232,7 +200,7 @@ GS8 GH3X2X_SoftReset(void)
 
 #if defined(GH3X2X_LOG_DEBUG) && (GH3X2X_LOG_DEBUG > 0) // debug level > 0
 /**
- * @fn     void GH3X2X_LogConfigArr(STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen)
+ * @fn     void GH3X2X_LogConfigArr(struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen)
  *
  * @brief  log gh3x2x reg config array
  *
@@ -244,23 +212,23 @@ GS8 GH3X2X_SoftReset(void)
  *
  * @return  None
  */
-void GH3X2X_LogConfigArr(STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen)
+void GH3X2X_LogConfigArr(FAR struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen)
 {
-    GU16 usIndex = 0;
+    uint16_t usIndex = 0;
     GH3X2X_DEBUG_LOG("Log reg config arr:\r\n");
     if ((pstRegConfigArr != GH3X2X_PTR_NULL) && (usRegConfigLen != 0))
     {
         for (usIndex = 0; usIndex < usRegConfigLen; usIndex++)
         {
-            GH3X2X_DEBUG_LOG_PARAM("addr:0x%.4x, val:0x%.4x\r\n", pstRegConfigArr[usIndex].usRegAddr,
-                                                                pstRegConfigArr[usIndex].usRegData);
+            GH3X2X_DEBUG_LOG_PARAM("addr:0x%.4x, val:0x%.4x\r\n", pstRegConfigArr[usIndex].regaddr,
+                                                                pstRegConfigArr[usIndex].regval);
         }
     }
 }
 #endif
 
 /**
- * @fn     GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 usDumpRegsLen)
+ * @fn     int8_t GH3X2X_DumpRegs(struct gh3020_reg_s *pstDumpRegsArr, uint16_t usDumpRegsStartAddr, uint16_t usDumpRegsLen)
  *
  * @brief  Dump gh3x2x regs
  *
@@ -276,11 +244,11 @@ void GH3X2X_LogConfigArr(STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen)
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    dump gh3x2x address out of bounds
  */
-GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 usDumpRegsLen)
+int8_t GH3X2X_DumpRegs(FAR struct gh3020_reg_s *pstDumpRegsArr, uint16_t usDumpRegsStartAddr, uint16_t usDumpRegsLen)
 {
-    GS8 chRet = GH3X2X_RET_OK;
-    GU16 usIndex = 0;
-    GU16 usDumpRegsAddr = usDumpRegsStartAddr & GH3X2X_REG_ADDR_EVEN_FIXED; // just allow even addr val
+    int8_t chRet = GH3X2X_RET_OK;
+    uint16_t usIndex = 0;
+    uint16_t usDumpRegsAddr = usDumpRegsStartAddr & GH3020_REG_ADDR_EVEN_FIXED; // just allow even addr val
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if ((pstDumpRegsArr != GH3X2X_PTR_NULL) && (usDumpRegsLen != 0))
@@ -288,11 +256,11 @@ GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 
         GH3X2X_WAIT_CHIP_WAKEUP();
         for (usIndex = 0; usIndex < usDumpRegsLen; usIndex++) // read GH3X2X reg.
         {
-            pstDumpRegsArr[usIndex].usRegAddr = usDumpRegsAddr;
-            pstDumpRegsArr[usIndex].usRegData = GH3X2X_ReadReg(usDumpRegsAddr);
-            if (usDumpRegsAddr < GH3X2X_REG_ADDR_MAX) // last reg addr : 0xfffe
+            pstDumpRegsArr[usIndex].regaddr = usDumpRegsAddr;
+            pstDumpRegsArr[usIndex].regval = gh3020_spi_readreg(usDumpRegsAddr);
+            if (usDumpRegsAddr < GH3020_REG_ADDR_MAX) // last reg addr : 0xfffe
             {
-                usDumpRegsAddr += GH3X2X_REG_ADDR_SIZE;
+                usDumpRegsAddr += GH3020_REG_ADDR_SIZE;
             }
             else
             {
@@ -307,7 +275,7 @@ GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 
 }
 
 /**
- * @fn     GS8 GH3X2X_CommunicateConfirm(void)
+ * @fn     int8_t GH3X2X_CommunicateConfirm(void)
  *
  * @brief  Communication operation interface confirm
  *
@@ -320,30 +288,30 @@ GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_COMM_ERROR       gh3x2x communicate error
  */
-GS8 GH3X2X_CommunicateConfirm(void)
+int8_t GH3X2X_CommunicateConfirm(void)
 {
-    GU8 uchIndex = GH3X2X_COMMUNICATE_CONFIRM_MAX_CNT;
-    GS8 chRet = GH3X2X_RET_COMM_ERROR;
-    GU16 uchReadData;
-    GU16 uchWriteData;
+    uint8_t uchIndex = GH3X2X_COMMUNICATE_CONFIRM_MAX_CNT;
+    int8_t chRet = GH3X2X_RET_COMM_ERROR;
+    uint16_t uchReadData;
+    uint16_t uchWriteData;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     do
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        if (GH3X2X_ReadReg(GH3X2X_CHIP_READY_CODE_REG_ADDR) == GH3X2X_CHIP_READY_REG_VAL)
+        if (gh3020_spi_readreg(GH3020_REG_CHIP_READY_CODE) == GH3020_REGVAL_CHIP_READY)
         {
-            uchReadData = GH3X2X_ReadReg(GH3X2X_RG_SLOT_TMR0_REG_ADDR);
+            uchReadData = gh3020_spi_readreg(GH3020_REG_SLOT_TMR0);
             GH3X2X_DEBUG_LOG_PARAM("slot_time0 reg = %d\r\n", (int)uchReadData);
             uchWriteData = ~uchReadData;
-            GH3X2X_WriteReg(GH3X2X_RG_SLOT_TMR0_REG_ADDR, uchWriteData);
-            uchReadData = GH3X2X_ReadReg(GH3X2X_RG_SLOT_TMR0_REG_ADDR);
+            gh3020_spi_writereg(GH3020_REG_SLOT_TMR0, uchWriteData);
+            uchReadData = gh3020_spi_readreg(GH3020_REG_SLOT_TMR0);
             GH3X2X_DEBUG_LOG_PARAM("slot_time0 reg = %d\r\n", (int)uchReadData);
             if (uchWriteData == uchReadData)
             {
                 chRet = GH3X2X_RET_OK;
                 uchWriteData = ~uchReadData;
-                GH3X2X_WriteReg(GH3X2X_RG_SLOT_TMR0_REG_ADDR, uchWriteData);
+                gh3020_spi_writereg(GH3020_REG_SLOT_TMR0, uchWriteData);
                 break;
             }
         }
@@ -359,7 +327,7 @@ GS8 GH3X2X_CommunicateConfirm(void)
 }
 
 /**
- * @fn     GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
+ * @fn     int8_t GH3X2X_Init(const struct gh3020_initcfg_s *pstGh3x2xInitConfigParam)
  *
  * @brief  Init gh3x2x with configure parameters
  *
@@ -372,7 +340,7 @@ GS8 GH3X2X_CommunicateConfirm(void)
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_COMM_ERROR       gh3x2x communicate error
  */
-GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
+int8_t GH3X2X_Init(FAR const struct gh3020_initcfg_s *pstGh3x2xInitConfigParam)
 {
     g_uchGh3x2xStatus = GH3X2X_STATUS_NO_INIT;
 
@@ -385,14 +353,14 @@ GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
 
     /* clear int status. */
     GH3X2X_WAIT_CHIP_WAKEUP();
-    GH3X2X_WriteReg(GH3X2X_INT_STR_REG_ADDR, GH3X2X_INT_STR_MSK_ALL_BIT);
+    gh3020_spi_writereg(GH3020_REG_INT_STR, GH3020_MSK_INT_STR_ALL_BIT);
     GH3X2X_WAIT_CHIP_DSLP();
 
     if (pstGh3x2xInitConfigParam != GH3X2X_PTR_NULL)
     {
         /* load config */
-        if (GH3X2X_LoadNewRegConfigArr(pstGh3x2xInitConfigParam->pstRegConfigArr,
-            pstGh3x2xInitConfigParam->usConfigArrLen) != GH3X2X_RET_OK)
+        if (GH3X2X_LoadNewRegConfigArr(pstGh3x2xInitConfigParam->pregarr,
+            pstGh3x2xInitConfigParam->arrlen) != GH3X2X_RET_OK)
         {
             return GH3X2X_RET_COMM_ERROR;
         }
@@ -410,7 +378,6 @@ GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
 
     /* call hook */
     GH3X2X_WAIT_CHIP_WAKEUP();
-    HOOK_FUNC_CALL(g_pGh3x2xInitHookFunc, () );
     GH3X2X_WAIT_CHIP_DSLP();
 
     /* set chip status inited. */
@@ -421,7 +388,7 @@ GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
 }
 
 /**
- * @fn     GS8 GH3X2X_StartSampling(void)
+ * @fn     int8_t GH3X2X_StartSampling(void)
  *
  * @brief  Start gh3x2x sampling
  *
@@ -435,20 +402,20 @@ GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
  * @retval  #GH3X2X_RET_NO_INITED_ERROR     gh3x2x has not inited
  * @retval  #GH3X2X_RET_GENERIC_ERROR       gh3x2x has started, need restart should call GH3X2X_StopSampling then start
  */
-GS8 GH3X2X_StartSampling(void)
+int8_t GH3X2X_StartSampling(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (g_uchGh3x2xStatus != GH3X2X_STATUS_STARTED)
     {
         g_uchFifoPackageID = 0xFF;
         if (GH3X2X_IS_CHIP_INIED() && (g_uchGh3x2xStatus == GH3X2X_STATUS_INITED))
         {
-            GU16 usRegVal = 0;
+            uint16_t usRegVal = 0;
             GH3X2X_WAIT_CHIP_WAKEUP();
-            g_usCurrentFiFoWaterLine = GH3X2X_ReadReg(GH3X2X_FIFO_WATERLINE_REG_ADDR);  //record water line
-            usRegVal = GH3X2X_ReadReg(GH3X2X_CARDIFF_CTRL_REG_ADDR);
-            GH3X2X_WriteReg(GH3X2X_CARDIFF_CTRL_REG_ADDR, GH3X2X_SET_BIT(usRegVal, GH3X2X_CARDIFF_CTRL_START_BIT));
+            g_usCurrentFiFoWaterLine = gh3020_spi_readreg(GH3020_REG_FIFO_WATERLINE);  //record water line
+            usRegVal = gh3020_spi_readreg(GH3020_REG_CARDIFF_CTRL);
+            gh3020_spi_writereg(GH3020_REG_CARDIFF_CTRL, GH3X2X_SET_BIT(usRegVal, GH3020_MSK_CARDIFF_CTRL_START));
             #if GH3X2X_ALGORITHM_ECG_SUPPORT
             GH3X2X_LeadDetEnControl(ECG_SAMPLE_EVENT_INFO_SAMPLE_START);
             #endif
@@ -457,7 +424,6 @@ GS8 GH3X2X_StartSampling(void)
             GH3X2X_DumpInit();
         #endif
             g_uchGh3x2xStatus = GH3X2X_STATUS_STARTED;
-            HOOK_FUNC_CALL(g_pGh3x2xStartHookFunc, () );  /* call hook */
             GH3X2X_WAIT_CHIP_DSLP(); //  GH3X2X_SEND_DSLEEP_CMD(); // enter sleep mode in application code
             chRet = GH3X2X_RET_OK;
         }
@@ -477,7 +443,7 @@ GS8 GH3X2X_StartSampling(void)
 }
 
 /**
- * @fn     GS8 GH3X2X_StopSampling(void)
+ * @fn     int8_t GH3X2X_StopSampling(void)
  *
  * @brief  Stop gh3x2x sampling
  *
@@ -485,27 +451,26 @@ GS8 GH3X2X_StartSampling(void)
  *
  * @param[in]   None
  * @param[out]  None
- * 
+ *
  * @return  errcode
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_NO_INITED_ERROR     gh3x2x has not inited
  */
-GS8 GH3X2X_StopSampling(void)
+int8_t GH3X2X_StopSampling(void)
 {
-    GS8 chRet = GH3X2X_RET_NO_INITED_ERROR;
+    int8_t chRet = GH3X2X_RET_NO_INITED_ERROR;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if ((g_uchGh3x2xStatus == GH3X2X_STATUS_INITED) || (g_uchGh3x2xStatus == GH3X2X_STATUS_STARTED))
     {
-        GU16 usRegVal = 0;
+        uint16_t usRegVal = 0;
         GH3X2X_WAIT_CHIP_WAKEUP();
         g_uchGh3x2xStatus = GH3X2X_STATUS_INITED;
-        usRegVal = GH3X2X_ReadReg(GH3X2X_CARDIFF_CTRL_REG_ADDR);
-        GH3X2X_WriteReg(GH3X2X_CARDIFF_CTRL_REG_ADDR, GH3X2X_CLEAR_BIT(usRegVal, GH3X2X_CARDIFF_CTRL_START_BIT));
+        usRegVal = gh3020_spi_readreg(GH3020_REG_CARDIFF_CTRL);
+        gh3020_spi_writereg(GH3020_REG_CARDIFF_CTRL, GH3X2X_CLEAR_BIT(usRegVal, GH3020_MSK_CARDIFF_CTRL_START));
         #if GH3X2X_ALGORITHM_ECG_SUPPORT
         GH3X2X_LeadDetEnControl(ECG_SAMPLE_EVENT_INFO_SAMPLE_STOP);
         #endif
-        HOOK_FUNC_CALL(g_pGh3x2xStopHookFunc, () );  /* call hook */
         GH3X2X_WAIT_CHIP_DSLP();
         chRet = GH3X2X_RET_OK;
     }
@@ -518,7 +483,7 @@ GS8 GH3X2X_StopSampling(void)
 }
 
 /**
- * @fn     GU16 GH3X2X_GetIrqStatus(void)
+ * @fn     uint16_t GH3X2X_GetIrqStatus(void)
  *
  * @brief  Get irq status reg val
  *
@@ -529,20 +494,20 @@ GS8 GH3X2X_StopSampling(void)
  *
  * @return  irq status val, ref irq status mask
  */
-GU16 GH3X2X_GetIrqStatus(void)
+uint16_t GH3X2X_GetIrqStatus(void)
 {
-    GU16 usIrqRegVal = 0;
+    uint16_t usIrqRegVal = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_WAIT_CHIP_WAKEUP();
-    usIrqRegVal = GH3X2X_ReadReg(GH3X2X_INT_STR_REG_ADDR);
-    GH3X2X_WriteReg(GH3X2X_INT_STR_REG_ADDR, usIrqRegVal);
+    usIrqRegVal = gh3020_spi_readreg(GH3020_REG_INT_STR);
+    gh3020_spi_writereg(GH3020_REG_INT_STR, usIrqRegVal);
     GH3X2X_WAIT_CHIP_DSLP();
-    return (GU16)(usIrqRegVal & (GU16)GH3X2X_INT_STR_MSK_ALL_BIT);
+    return (uint16_t)(usIrqRegVal & (uint16_t)GH3020_MSK_INT_STR_ALL_BIT);
 }
 
 /**
  * @fn     void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
- *                                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen)
+ *                                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen)
  *
  * @brief  Unpack to 8 slot rawdata from read fifo data buffer
  *
@@ -557,16 +522,16 @@ GU16 GH3X2X_GetIrqStatus(void)
  * @return  None
  */
 void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
-                                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen)
+                                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen)
 {
-    GU16 usIndex = 0;
-    GU8  uchSlotNum = 0;
-    GU8  uchAdcNum = 0;
-    GU8  uchLastSlotNum = 0;
-    GU8  uchLastAdcNum = 0;
-    GU16 usRawdataIndex = 0;
+    uint16_t usIndex = 0;
+    uint8_t  uchSlotNum = 0;
+    uint8_t  uchAdcNum = 0;
+    uint8_t  uchLastSlotNum = 0;
+    uint8_t  uchLastAdcNum = 0;
+    uint16_t usRawdataIndex = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    for (usIndex = 0; usIndex < GH3X2X_SLOT_NUM_MAX; usIndex ++)
+    for (usIndex = 0; usIndex < GH3020_SLOT_NUM_MAX; usIndex ++)
     {
         pstSlotRawdataArr[usIndex].usRawdataCnt = 0; // clear cnt
     }
@@ -604,7 +569,7 @@ void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
 }
 
 /**
- * @fn     GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
+ * @fn     int16_t GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, uint16_t* usFifoLength)
  *
  * @brief  Get rawdata from fifo
  *
@@ -618,10 +583,10 @@ void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  */
-GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
+int16_t GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, uint16_t* usFifoLength)
 {
-    GU16 usIndex = 0;
-    GS16 sRet = GH3X2X_RET_PARAMETER_ERROR;
+    uint16_t usIndex = 0;
+    int16_t sRet = GH3X2X_RET_PARAMETER_ERROR;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (pstGh3x2xRawdata != GH3X2X_PTR_NULL)
@@ -629,7 +594,7 @@ GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
         if (pstGh3x2xRawdata->puchReadBuffer != GH3X2X_PTR_NULL)
         {
             GH3X2X_WAIT_CHIP_WAKEUP();
-            *usFifoLength = GH3X2X_FIFO_CNT_CALC(GH3X2X_ReadReg(GH3X2X_INT_FIFO_UR_REG_ADDR));
+            *usFifoLength = GH3X2X_FIFO_CNT_CALC(gh3020_spi_readreg( GH3020_REG_INT_FIFO_UR));
 
             if (*usFifoLength > g_usMaxNumReadFromFifo)
             {
@@ -639,7 +604,7 @@ GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
 
             if ((*usFifoLength > 0) && (*usFifoLength <= GH3X2X_FIFO_DATA_BYTES_MAX_LEN))
             {
-                GH3X2X_ReadFifo(pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
+                gh3020_spi_readfifo(pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
             }
             else
             {
@@ -653,9 +618,9 @@ GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
                     GH3X2X_DEBUG_LOG("get rawdata fifo equl 0!\r\n");
                 }
             }
-            
+
             /* call hook */
-            HOOK_FUNC_CALL(g_pGh3x2xGetRawdataHookFunc, (pstGh3x2xRawdata->puchReadBuffer, *usFifoLength) );
+            gh3020_get_rawdata(pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
             GH3X2X_WAIT_CHIP_DSLP();
             GH3X2X_UnpackRawdataPackage(pstGh3x2xRawdata->stSlotRawdataArr,
                                         pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
@@ -663,30 +628,30 @@ GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
         else // fixed clear cnt if readbuffer ptr is null
         {
             GH3X2X_DEBUG_LOG("get rawdata error that readbuffer is null!\r\n");
-            for (usIndex = 0; usIndex < GH3X2X_SLOT_NUM_MAX; usIndex ++)
+            for (usIndex = 0; usIndex < GH3020_SLOT_NUM_MAX; usIndex ++)
             {
                 pstGh3x2xRawdata->stSlotRawdataArr[usIndex].usRawdataCnt = 0; // clear cnt
             }
         }
     }// if (pstGh3x2xRawdata != GH3X2X_PTR_NULL)
-    
+
     return sRet;
 }
 
 
-void GH3X2X_CalRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen)
+void GH3X2X_CalRawdataBuf(uint8_t *puchRawdata, uint16_t usRawdataLen)
 {
-    
-    GU16 usIndex = usRawdataLen;
-    GU8 uchXorNum = g_uchConfigArrKeyCodeArr[g_uchEncryptRawdataXorIndex];
-    GU8 uchXorXorNum = GH3X2X_CRYP_XOR_XOR_VAL ^ uchXorNum;
-    GU8 uchCntH = GH3X2X_GET_HIGH_BYTE_FROM_WORD(usRawdataLen) ^ uchXorNum;
-    GU8 uchCntL = GH3X2X_GET_LOW_BYTE_FROM_WORD(usRawdataLen) ^ uchXorNum;
-    GU32 unSum = 0;
+
+    uint16_t usIndex = usRawdataLen;
+    uint8_t uchXorNum = g_uchConfigArrKeyCodeArr[g_uchEncryptRawdataXorIndex];
+    uint8_t uchXorXorNum = GH3X2X_CRYP_XOR_XOR_VAL ^ uchXorNum;
+    uint8_t uchCntH = GH3X2X_GET_HIGH_BYTE_FROM_WORD(usRawdataLen) ^ uchXorNum;
+    uint8_t uchCntL = GH3X2X_GET_LOW_BYTE_FROM_WORD(usRawdataLen) ^ uchXorNum;
+    uint32_t unSum = 0;
 
 
 
-    
+
 
 
     puchRawdata[usIndex + 0] = GH3X2X_GET_HIGH_4BITS(uchCntH) | GH3X2X_GET_LOW_4BITS(uchXorNum);
@@ -696,39 +661,39 @@ void GH3X2X_CalRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen)
     puchRawdata[usIndex + 3] = GH3X2X_GET_HIGH_4BITS(uchXorNum) | \
                                             GH3X2X_GET_LOW_4BITS(uchXorXorNum);
 
-    for(GU16 usByteCnt = 0; usByteCnt < usRawdataLen; usByteCnt += 4)
+    for(uint16_t usByteCnt = 0; usByteCnt < usRawdataLen; usByteCnt += 4)
     {
-        unSum += ((GU32)(puchRawdata[usByteCnt + 0]^uchXorNum)) << 24;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 1]^uchXorXorNum)) << 16;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 2]^uchXorNum)) << 8;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 3]^uchXorXorNum)) << 0;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 0]^uchXorNum)) << 24;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 1]^uchXorXorNum)) << 16;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 2]^uchXorNum)) << 8;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 3]^uchXorXorNum)) << 0;
     }
-    *((GU32*)(puchRawdata + usRawdataLen + 4)) = unSum;
+    *((uint32_t*)(puchRawdata + usRawdataLen + 4)) = unSum;
 
 
 
 
-    
-    
+
+
     g_uchEncryptRawdataXorIndex = (g_uchEncryptRawdataXorIndex + 1) % (sizeof(g_uchConfigArrKeyCodeArr));
 }
 
 
 
-GU8 GH3X2X_CheckRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen)
+uint8_t GH3X2X_CheckRawdataBuf(uint8_t *puchRawdata, uint16_t usRawdataLen)
 {
-    GU16 usIndex = usRawdataLen;
-    
-    GU8 uchXorNum = GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 3])
+    uint16_t usIndex = usRawdataLen;
+
+    uint8_t uchXorNum = GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 3])
                     | GH3X2X_GET_LOW_4BITS(puchRawdata[usIndex + 0]);
-    GU8 uchCntH = (GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 0])
+    uint8_t uchCntH = (GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 0])
                 | GH3X2X_GET_LOW_4BITS(puchRawdata[usIndex + 1])) ^ uchXorNum;
-    GU8 uchCntL = (GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 1]) 
+    uint8_t uchCntL = (GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 1])
                 | GH3X2X_GET_LOW_4BITS(puchRawdata[usIndex + 2])) ^ uchXorNum;
-    GU8 uchXorXorNum = GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 2])
+    uint8_t uchXorXorNum = GH3X2X_GET_HIGH_4BITS(puchRawdata[usIndex + 2])
                     | GH3X2X_GET_LOW_4BITS(puchRawdata[usIndex + 3]);
 
-    GU32 unSum = 0;
+    uint32_t unSum = 0;
 
 
 
@@ -739,14 +704,14 @@ GU8 GH3X2X_CheckRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen)
         GH3X2X_DEBUG_LOG_PARAM("rawdata buffer check fail [code0]!!!\r\n");
         return 0;
     }
-    for(GU16 usByteCnt = 0; usByteCnt < usRawdataLen; usByteCnt += 4)
+    for(uint16_t usByteCnt = 0; usByteCnt < usRawdataLen; usByteCnt += 4)
     {
-        unSum += ((GU32)(puchRawdata[usByteCnt + 0]^uchXorNum)) << 24;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 1]^uchXorXorNum)) << 16;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 2]^uchXorNum)) << 8;
-        unSum += ((GU32)(puchRawdata[usByteCnt + 3]^uchXorXorNum)) << 0;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 0]^uchXorNum)) << 24;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 1]^uchXorXorNum)) << 16;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 2]^uchXorNum)) << 8;
+        unSum += ((uint32_t)(puchRawdata[usByteCnt + 3]^uchXorXorNum)) << 0;
     }
-    if((0 == usRawdataLen)||(unSum == (*((GU32*)(puchRawdata + usRawdataLen + 4)))))
+    if((0 == usRawdataLen)||(unSum == (*((uint32_t*)(puchRawdata + usRawdataLen + 4)))))
     {
         return 1;
     }
@@ -757,19 +722,19 @@ GU8 GH3X2X_CheckRawdataBuf(GU8 *puchRawdata, GU16 usRawdataLen)
     }
 }
 #if 0
-void GH3X2X_SetFifoPackageMode(GU8 uchMode, GU8 *puchFifoBuffer)
+void GH3X2X_SetFifoPackageMode(uint8_t uchMode, uint8_t *puchFifoBuffer)
 {
     g_uchFifoPackageMode = uchMode;
     gpuchSendFifoPackage = puchFifoBuffer;
 }
 #endif
 
-__weak GU8 GH3X2X_GetFifoPackageMode(void)
+__weak uint8_t GH3X2X_GetFifoPackageMode(void)
 {
     return g_uchFifoPackageMode;
 }
 
-__weak void GH3X2X_SendRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadByteNum)
+__weak void GH3X2X_SendRawdataFifoPackage(uint8_t *puchGh3x2xReadFifoData, uint16_t usFifoReadByteNum)
 {
     if (usFifoReadByteNum == 0)
     {
@@ -777,12 +742,11 @@ __weak void GH3X2X_SendRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFi
     }
     g_uchFifoPackageID ++;
     //SlaverRttLog("[%s]:bytenum = %d, packid = %d\r\n", __FUNCTION__, usFifoReadByteNum, g_uchFifoPackageID);
-    GU8 unRawdataFifoBuffer[220] = {0};
-    GU8 unSendRawdataFifoBuffer[235] = {0};
-    GU32 uRawdataBufCnt = 0;
-    GU8 uchIdChangeFlag = 0;
-    GU16 usPackageNum = usFifoReadByteNum / 200;
-    GU16 usLastRawdataFifoBufNum = usFifoReadByteNum % 200;
+    uint8_t unRawdataFifoBuffer[220] = {0};
+    uint32_t uRawdataBufCnt = 0;
+    uint8_t uchIdChangeFlag = 0;
+    uint16_t usPackageNum = usFifoReadByteNum / 200;
+    uint16_t usLastRawdataFifoBufNum = usFifoReadByteNum % 200;
     if (usLastRawdataFifoBufNum == 0)
     {
         usLastRawdataFifoBufNum = 200;
@@ -794,21 +758,15 @@ __weak void GH3X2X_SendRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFi
         unRawdataFifoBuffer[1] = 200;
         unRawdataFifoBuffer[2] = uchIdChangeFlag;
         uchIdChangeFlag ++;
-        GH3X2X_Memcpy(&unRawdataFifoBuffer[5], &puchGh3x2xReadFifoData[uRawdataBufCnt * 200], (GU32)200);
-        GU16 usRespondLen = GH3X2X_UprotocolPacketFormat(GH3X2X_UPROTOCOL_CMD_RAWDATA_FIFO_UPDATE, unSendRawdataFifoBuffer,
-                                                unRawdataFifoBuffer, 200 + 5);
-        Gh3x2xDemoSendProtocolData(unSendRawdataFifoBuffer, usRespondLen);
+        GH3X2X_Memcpy(&unRawdataFifoBuffer[5], &puchGh3x2xReadFifoData[uRawdataBufCnt * 200], (uint32_t)200);
     }
     unRawdataFifoBuffer[0] = g_uchFifoPackageID;
-    unRawdataFifoBuffer[1] = (GU8)(usLastRawdataFifoBufNum);
+    unRawdataFifoBuffer[1] = (uint8_t)(usLastRawdataFifoBufNum);
     unRawdataFifoBuffer[2] = 0x10 | uchIdChangeFlag;
-    GH3X2X_Memcpy(&unRawdataFifoBuffer[5], &puchGh3x2xReadFifoData[usPackageNum * 200], (GU32)usLastRawdataFifoBufNum);
-    GU16 usRespondLen = GH3X2X_UprotocolPacketFormat(GH3X2X_UPROTOCOL_CMD_RAWDATA_FIFO_UPDATE, unSendRawdataFifoBuffer,
-                                            unRawdataFifoBuffer, usLastRawdataFifoBufNum + 5);
-    Gh3x2xDemoSendProtocolData(unSendRawdataFifoBuffer, usRespondLen);
+    GH3X2X_Memcpy(&unRawdataFifoBuffer[5], &puchGh3x2xReadFifoData[usPackageNum * 200], (uint32_t)usLastRawdataFifoBufNum);
 }
 #if 0
-void GH3X2X_PackRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadByteNum)
+void GH3X2X_PackRawdataFifoPackage(uint8_t *puchGh3x2xReadFifoData, uint16_t usFifoReadByteNum)
 {
     if (usFifoReadByteNum == 0)
     {
@@ -817,14 +775,14 @@ void GH3X2X_PackRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadB
 
     if (usFifoReadByteNum + g_unSendFifoPackageCnt >= GH3X2X_RAWDATA_BUFFER_SIZE)
     {
-        GU32 usFifoReadExternByteNum = GH3X2X_RAWDATA_BUFFER_SIZE - g_unSendFifoPackageCnt;
+        uint32_t usFifoReadExternByteNum = GH3X2X_RAWDATA_BUFFER_SIZE - g_unSendFifoPackageCnt;
         GH3X2X_Memcpy(&gpuchSendFifoPackage[g_unSendFifoPackageCnt], puchGh3x2xReadFifoData, usFifoReadExternByteNum);
         g_unSendFifoPackageCnt += usFifoReadExternByteNum;
 
         GH3X2X_SendRawdataFifoPackage(gpuchSendFifoPackage, g_unSendFifoPackageCnt);
 
         g_unSendFifoPackageCnt = 0;
-        
+
         GH3X2X_Memcpy(&gpuchSendFifoPackage[g_unSendFifoPackageCnt],\
             &puchGh3x2xReadFifoData[usFifoReadByteNum - (GH3X2X_RAWDATA_BUFFER_SIZE - g_unSendFifoPackageCnt)],\
             usFifoReadByteNum + g_unSendFifoPackageCnt - GH3X2X_RAWDATA_BUFFER_SIZE);
@@ -838,7 +796,7 @@ void GH3X2X_PackRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadB
 }
 #endif
 /**
- * @fn     GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen)
+ * @fn     int16_t GH3X2X_ReadFifodata(uint8_t *puchGh3x2xReadFifoData, uint16_t* pusReadFifoDataLen)
  *
  * @brief  Read Gh3x2x Fifo Data
  *
@@ -853,29 +811,29 @@ void GH3X2X_PackRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadB
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  */
-GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen ,GU16 usFifoReadByteNum)
+int16_t GH3X2X_ReadFifodata(uint8_t *puchGh3x2xReadFifoData, uint16_t* pusReadFifoDataLen ,uint16_t usFifoReadByteNum)
 {
-    //GU16 usFifoLength = 0;
-    GS16 sRet = GH3X2X_RET_OK;
+    //uint16_t usFifoLength = 0;
+    int16_t sRet = GH3X2X_RET_OK;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if ((puchGh3x2xReadFifoData != GH3X2X_PTR_NULL) && (pusReadFifoDataLen != GH3X2X_PTR_NULL))
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
         /*
-        usFifoLength = GH3X2X_FIFO_CNT_CALC(GH3X2X_ReadReg(GH3X2X_INT_FIFO_UR_REG_ADDR));
+        usFifoLength = GH3X2X_FIFO_CNT_CALC(gh3020_spi_readreg( GH3020_REG_INT_FIFO_UR));
         */
         if (usFifoReadByteNum > g_usMaxNumReadFromFifo)
         {
             usFifoReadByteNum = g_usMaxNumReadFromFifo;
             sRet = GH3X2X_RET_READ_FIFO_CONTINUE;
         }
-        
+
 
 
         if ((usFifoReadByteNum > 0) && (usFifoReadByteNum <= GH3X2X_FIFO_DATA_BYTES_MAX_LEN))
         {
-            GH3X2X_ReadFifo(puchGh3x2xReadFifoData, usFifoReadByteNum);
+            gh3020_spi_readfifo(puchGh3x2xReadFifoData, usFifoReadByteNum);
             GH3X2X_CalRawdataBuf(puchGh3x2xReadFifoData, usFifoReadByteNum);
         }
         else
@@ -890,9 +848,9 @@ GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen ,
                 GH3X2X_DEBUG_LOG("get rawdata fifo equl 0!\r\n");
             }
         }
-        
+
         /* call hook */
-        HOOK_FUNC_CALL(g_pGh3x2xGetRawdataHookFunc, (puchGh3x2xReadFifoData, usFifoReadByteNum) );
+        gh3020_get_rawdata(puchGh3x2xReadFifoData, usFifoReadByteNum);
         GH3X2X_WAIT_CHIP_DSLP();
         (*pusReadFifoDataLen) = usFifoReadByteNum;
     }// if (pstGh3x2xRawdata->puchReadBuffer != GH3X2X_PTR_NULL)
@@ -907,22 +865,22 @@ GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen ,
 }
 
 /**
- * @fn     GU16 GH3X2X_FindGu16MinVal(GU16 *pusBuffer, GU8 uchLen)
+ * @fn     uint16_t GH3X2X_FindGu16MinVal(uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find min val
  *
  * @attention   len must > 0
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  None
  *
  * @return  min val, if len = 0, return 0
  */
-GU16 GH3X2X_FindGu16MinVal(GU16 *pusBuffer, GU8 uchLen)
+uint16_t GH3X2X_FindGu16MinVal(uint16_t *pusBuffer, uint8_t uchLen)
 {
-    GU16 usMinVal = pusBuffer[0];
-    GU8 uchIndex = 1;
+    uint16_t usMinVal = pusBuffer[0];
+    uint8_t uchIndex = 1;
 
     for (uchIndex = 1; uchIndex < uchLen; uchIndex++)
     {
@@ -931,26 +889,26 @@ GU16 GH3X2X_FindGu16MinVal(GU16 *pusBuffer, GU8 uchLen)
             usMinVal = pusBuffer[uchIndex];
         }
     }
-    return usMinVal; 
+    return usMinVal;
 }
 
 /**
- * @fn     GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen)
+ * @fn     uint16_t GH3X2X_FindGu16MaxVal(uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find max val
  *
  * @attention   len must > 0
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  None
  *
  * @return  max val, if len = 0, return 0
  */
-GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen)
+uint16_t GH3X2X_FindGu16MaxVal(uint16_t *pusBuffer, uint8_t uchLen)
 {
-    GU16 usMaxVal = pusBuffer[0];
-    GU8 uchIndex = 1;
+    uint16_t usMaxVal = pusBuffer[0];
+    uint8_t uchIndex = 1;
 
     for (uchIndex = 1; uchIndex < uchLen; uchIndex++)
     {
@@ -959,16 +917,16 @@ GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen)
             usMaxVal = pusBuffer[uchIndex];
         }
     }
-    return usMaxVal; 
+    return usMaxVal;
 }
 
 /**
- * @fn     void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer, GU8 uchLen)
+ * @fn     void GH3X2X_FindGu16MaxMinVal(uint16_t *pusMaxVal, uint16_t *pusMinVal, uint16_t *pusBuffer, uint8_t uchLen)
  *
  * @brief  Find min val & max val
  *
  * @attention   len must > 0, ptr not null
- * 
+ *
  * @param[in]   pusBuffer        pointer to buffer
  * @param[in]   uchLen           buffer length
  * @param[out]  pusMaxVal        pointer to max val
@@ -976,11 +934,11 @@ GU16 GH3X2X_FindGu16MaxVal(GU16 *pusBuffer, GU8 uchLen)
  *
  * @return  None
  */
-void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer, GU8 uchLen)
+void GH3X2X_FindGu16MaxMinVal(uint16_t *pusMaxVal, uint16_t *pusMinVal, uint16_t *pusBuffer, uint8_t uchLen)
 {
-    GU16 usMaxVal = pusBuffer[0];
-    GU16 usMinVal = pusBuffer[0];
-    GU8 uchIndex = 1;
+    uint16_t usMaxVal = pusBuffer[0];
+    uint16_t usMinVal = pusBuffer[0];
+    uint8_t uchIndex = 1;
 
     for (uchIndex = 1; uchIndex < uchLen; uchIndex++)
     {
@@ -998,14 +956,14 @@ void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer,
 }
 
 /**
- * @fn     GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata, 
- *               GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr)
+ * @fn     int8_t GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+ *               uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr)
  *
  * @brief  Unpack to channel rawdata from read fifo data buffer;
  *         if last channel rawdata incomplete, should change fifo watermark
  *
  * @attention   This function should use in get rawdata hook
- * 
+ *
  * @param[in]   puchReadRawdataBuffer       pointer to read data buffer
  * @param[in]   usReadRawdataLen            read data length
  * @param[in]   uchChannelMapCnt            channel map array cnt, max:32
@@ -1016,17 +974,17 @@ void GH3X2X_FindGu16MaxMinVal(GU16 *pusMaxVal, GU16 *pusMinVal, GU16 *pusBuffer,
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata, 
-                GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr)
+int8_t GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+                uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr)
 {
-    GU8  uchChCntIndex = 0;
-    GU16 usRawdataIndex = 0;
-    GU16 usRawdataCnt = 0;
-    GU16 usRawdataCntMin = 0;
-    GU16 usRawdataCntMax = 0;
-    GU16 usRawdataIndexArr[GH3X2X_CHANNEL_MAP_MAX_CH] = {0}; // use for rawdata cnt & rawdata bytes index
-    GU16 usRawdataByteIndexTmp = 0;
-    GU16 usRawdataBaseIndex = 0;
+    uint8_t  uchChCntIndex = 0;
+    uint16_t usRawdataIndex = 0;
+    uint16_t usRawdataCnt = 0;
+    uint16_t usRawdataCntMin = 0;
+    uint16_t usRawdataCntMax = 0;
+    uint16_t usRawdataIndexArr[GH3X2X_CHANNEL_MAP_MAX_CH] = {0}; // use for rawdata cnt & rawdata bytes index
+    uint16_t usRawdataByteIndexTmp = 0;
+    uint16_t usRawdataBaseIndex = 0;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
 
@@ -1079,20 +1037,20 @@ GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelR
             GH3X2X_DEBUG_LOG("rawdata doesn't correspond to channel map error!\r\n");
             usRawdataCnt = 0;
             pstGh3x2xChannelRawdata->unIncompleteChMark = 0;
-            GH3X2X_Memset(pstGh3x2xChannelRawdata->punIncompleteChRawdataArr, 0, uchChannelMapCnt * sizeof(GU32));
+            GH3X2X_Memset(pstGh3x2xChannelRawdata->punIncompleteChRawdataArr, 0, uchChannelMapCnt * sizeof(uint32_t));
         }
         else // cnt tolerable deviation is 1
         {
             usRawdataCnt = GH3X2X_FindGu16MinVal(usRawdataIndexArr, uchChannelMapCnt);
         }
     } // end of if (usRawdataCntMax == usRawdataCntMin)
-    GH3X2X_Memset(usRawdataIndexArr, 0, uchChannelMapCnt * sizeof(GU16)); // clear index array, before next use
+    GH3X2X_Memset(usRawdataIndexArr, 0, uchChannelMapCnt * sizeof(uint16_t)); // clear index array, before next use
 
     if (usRawdataCnt != 0)
     {
         for (usRawdataIndex = 0; usRawdataIndex < usRawdataCnt; usRawdataIndex++)
         {
-            usRawdataBaseIndex = (GU16)(usRawdataIndex * uchChannelMapCnt);
+            usRawdataBaseIndex = (uint16_t)(usRawdataIndex * uchChannelMapCnt);
             for (uchChCntIndex = 0; uchChCntIndex < uchChannelMapCnt; uchChCntIndex++) // search each channel
             {
                 if (GH3X2X_CHECK_LEFT_BIT_SET(pstGh3x2xChannelRawdata->unIncompleteChMark, uchChCntIndex))
@@ -1158,9 +1116,9 @@ GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelR
 }
 
 /**
- * @fn     GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata, 
- *                                       GU8 *puchReadRawdataBuffer, GU16* usFifoLength, GU8 uchChannelMapCnt, 
- *                                       GU8 *puchChannelMapArr)
+ * @fn     int16_t GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+ *                                       uint8_t *puchReadRawdataBuffer, uint16_t* usFifoLength, uint8_t uchChannelMapCnt,
+ *                                       uint8_t *puchChannelMapArr)
  *
  * @brief  Get rawdata from fifo with channel map
  *
@@ -1176,18 +1134,18 @@ GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelR
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata, 
-                                        GU8 *puchReadRawdataBuffer, GU16* usFifoLength, GU8 uchChannelMapCnt, 
-                                        GU8 *puchChannelMapArr)
+int16_t GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+                                        uint8_t *puchReadRawdataBuffer, uint16_t* usFifoLength, uint8_t uchChannelMapCnt,
+                                        uint8_t *puchChannelMapArr)
 {
-    GS16 sRet = GH3X2X_RET_OK;
+    int16_t sRet = GH3X2X_RET_OK;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
 
     if ((puchReadRawdataBuffer != GH3X2X_PTR_NULL) && (usFifoLength != GH3X2X_PTR_NULL))
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        *usFifoLength = GH3X2X_FIFO_CNT_CALC(GH3X2X_ReadReg(GH3X2X_INT_FIFO_UR_REG_ADDR));
+        *usFifoLength = GH3X2X_FIFO_CNT_CALC(gh3020_spi_readreg( GH3020_REG_INT_FIFO_UR));
         if (*usFifoLength > g_usMaxNumReadFromFifo)
         {
             *usFifoLength = g_usMaxNumReadFromFifo;
@@ -1195,7 +1153,7 @@ GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRaw
         }
         if ((*usFifoLength > 0) && (*usFifoLength <= GH3X2X_FIFO_DATA_BYTES_MAX_LEN))
         {
-            GH3X2X_ReadFifo(puchReadRawdataBuffer, *usFifoLength);
+            gh3020_spi_readfifo(puchReadRawdataBuffer, *usFifoLength);
         }
         else
         {
@@ -1209,11 +1167,11 @@ GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRaw
                 GH3X2X_DEBUG_LOG("get rawdata fifo equl 0!\r\n");
             }
         }
-        
+
         /* call hook */
-        HOOK_FUNC_CALL(g_pGh3x2xGetRawdataHookFunc, (puchReadRawdataBuffer, *usFifoLength));
+        gh3020_get_rawdata(puchReadRawdataBuffer, *usFifoLength);
         GH3X2X_WAIT_CHIP_DSLP();
-        sRet = GH3X2X_UnpackRawdataWithChannelMap(pstGh3x2xChannelRawdata, puchReadRawdataBuffer, *usFifoLength, 
+        sRet = GH3X2X_UnpackRawdataWithChannelMap(pstGh3x2xChannelRawdata, puchReadRawdataBuffer, *usFifoLength,
                                                     uchChannelMapCnt, puchChannelMapArr);
     }
     else // fixed clear cnt if readbuffer ptr is null
@@ -1226,7 +1184,7 @@ GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRaw
 }
 
 /**
- * @fn     GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
+ * @fn     int8_t GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
  *
  * @brief  clear channel map rawdata struct
  *
@@ -1240,9 +1198,9 @@ GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRaw
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
+int8_t GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
 {
-    GS8 chRet = GH3X2X_RET_PARAMETER_ERROR;
+    int8_t chRet = GH3X2X_RET_PARAMETER_ERROR;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (pstGh3x2xChannelRawdata != GH3X2X_PTR_NULL)
@@ -1259,7 +1217,7 @@ GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdat
 }
 
 /**
- * @fn     GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
+ * @fn     int8_t GH3X2X_SlotEnableConfig(uint16_t usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
  *
  * @brief  Slot enable config
  *
@@ -1268,16 +1226,16 @@ GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdat
  * @param[in]  usSlotEnableConfig         slot enable index , @ref GH3X2X_SLOT_INDEX_0 ... GH3X2X_SLOT_INDEX_ALL
  * @param[in]  emSlotEnableConfigType     slot config type, @ref EMSlotEnableConfigType
  * @param[out]  None
- * 
+ *
  * @return  errcode
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
+int8_t GH3X2X_SlotEnableConfig(uint16_t usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
 {
-    GS8 chRet = GH3X2X_RET_OK;
-    GU16 usSlotEnableCfgRegVal = 0;
-    
+    int8_t chRet = GH3X2X_RET_OK;
+    uint16_t usSlotEnableCfgRegVal = 0;
+
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (GH3X2X_CHECK_BIT_SET(GH3X2X_SLOT_INDEX_ALL, usSlotEnableConfig))
     {
@@ -1285,17 +1243,17 @@ GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSl
         switch (emSlotEnableConfigType)
         {
         case GH3X2X_SET_SLOT_ENABLE:
-            usSlotEnableCfgRegVal = GH3X2X_ReadReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR);
-            GH3X2X_WriteReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR,
+            usSlotEnableCfgRegVal = gh3020_spi_readreg(GH3020_REG_SLOT_ENABLE_CFG);
+            gh3020_spi_writereg(GH3020_REG_SLOT_ENABLE_CFG,
                             GH3X2X_SET_BIT(usSlotEnableCfgRegVal, usSlotEnableConfig) & GH3X2X_SLOT_INDEX_ALL);
             break;
         case GH3X2X_SET_SLOT_DISABLE:
-            usSlotEnableCfgRegVal = GH3X2X_ReadReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR);
-            GH3X2X_WriteReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR,
+            usSlotEnableCfgRegVal = gh3020_spi_readreg(GH3020_REG_SLOT_ENABLE_CFG);
+            gh3020_spi_writereg(GH3020_REG_SLOT_ENABLE_CFG,
                             GH3X2X_CLEAR_BIT(usSlotEnableCfgRegVal, usSlotEnableConfig) & GH3X2X_SLOT_INDEX_ALL);
             break;
         default: // include GH3X2X_SET_SLOT_DIRECT_ENABLE mode
-            GH3X2X_WriteReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR, usSlotEnableConfig & GH3X2X_SLOT_INDEX_ALL);
+            gh3020_spi_writereg(GH3020_REG_SLOT_ENABLE_CFG, usSlotEnableConfig & GH3X2X_SLOT_INDEX_ALL);
             break;
         }
         GH3X2X_WAIT_CHIP_DSLP();
@@ -1309,7 +1267,7 @@ GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSl
 }
 
 /**
- * @fn     void GH3X2X_SlotEnRegSet(GU8 uchSetValue)
+ * @fn     void GH3X2X_SlotEnRegSet(uint8_t uchSetValue)
  *
  * @brief  Slot enable reg set
  *
@@ -1317,20 +1275,20 @@ GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSl
  *
  * @param[in]  set value
  * @param[out]  None
- * 
+ *
  * @return  None
  */
-void GH3X2X_SlotEnRegSet(GU8 uchSetValue)
+void GH3X2X_SlotEnRegSet(uint8_t uchSetValue)
 {
     GH3X2X_DEBUG_LOG_PARAM("[SlotEnRegSet] set slot en: 0x%X\r\n",uchSetValue);
-    GH3X2X_WriteReg(GH3X2X_SLOT_ENABLE_CFG_REG_ADDR,
-                (GU16)uchSetValue);
+    gh3020_spi_writereg(GH3020_REG_SLOT_ENABLE_CFG,
+                (uint16_t)uchSetValue);
 }
 
 
 
 /**
- * @fn     GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr)
+ * @fn     int8_t GH3X2X_FifoWatermarkThrConfig(uint16_t usFifoWatermarkThr)
  *
  * @brief  Fifo water mark threshold config
  *
@@ -1343,9 +1301,9 @@ void GH3X2X_SlotEnRegSet(GU8 uchSetValue)
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr)
+int8_t GH3X2X_FifoWatermarkThrConfig(uint16_t usFifoWatermarkThr)
 {
-    GU16 usFifoWatermarkThrVal = usFifoWatermarkThr;
+    uint16_t usFifoWatermarkThrVal = usFifoWatermarkThr;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (usFifoWatermarkThrVal < GH3X2X_FIFO_WATERMARK_THR_MIN)
     {
@@ -1358,13 +1316,13 @@ GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr)
         usFifoWatermarkThrVal = GH3X2X_FIFO_WATERMARK_THR_MAX;
     }
     GH3X2X_WAIT_CHIP_WAKEUP();
-    GH3X2X_WriteReg(GH3X2X_FIFO_WATERLINE_REG_ADDR, usFifoWatermarkThrVal);
+    gh3020_spi_writereg(GH3020_REG_FIFO_WATERLINE, usFifoWatermarkThrVal);
     GH3X2X_WAIT_CHIP_DSLP();
     return GH3X2X_RET_OK;
 }
 
 /**
- * @fn     GU16 GH3X2X_GetFifoWatermarkThr(void)
+ * @fn     uint16_t GH3X2X_GetFifoWatermarkThr(void)
  *
  * @brief  Get fifo water mark threshold
  *
@@ -1375,18 +1333,18 @@ GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr)
  *
  * @return  fifo water mark threshold
  */
-GU16 GH3X2X_GetFifoWatermarkThr(void)
+uint16_t GH3X2X_GetFifoWatermarkThr(void)
 {
-    GU16 usFifoWatermarkThrVal = 0;
+    uint16_t usFifoWatermarkThrVal = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_WAIT_CHIP_WAKEUP();
-    usFifoWatermarkThrVal = GH3X2X_ReadReg(GH3X2X_FIFO_WATERLINE_REG_ADDR);
+    usFifoWatermarkThrVal = gh3020_spi_readreg(GH3020_REG_FIFO_WATERLINE);
     GH3X2X_WAIT_CHIP_DSLP();
     return usFifoWatermarkThrVal;
 }
 
 /**
- * @fn     GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurrentVal)
+ * @fn     int8_t GH3X2X_SlotLedCurrentConfig(uint8_t uchSlotIndex, uint8_t uchDrvIndex, uint8_t uchCurrentVal)
  *
  * @brief  Slot led current config
  *
@@ -1401,31 +1359,31 @@ GU16 GH3X2X_GetFifoWatermarkThr(void)
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurrentVal)
+int8_t GH3X2X_SlotLedCurrentConfig(uint8_t uchSlotIndex, uint8_t uchDrvIndex, uint8_t uchCurrentVal)
 {
-    GU16 usCurrentRegVal = 0;
-    GU16 usSlotDrvRegAddr = 0;
-    GS8 chRet = GH3X2X_RET_PARAMETER_ERROR;
+    uint16_t usCurrentRegVal = 0;
+    uint16_t usSlotDrvRegAddr = 0;
+    int8_t chRet = GH3X2X_RET_PARAMETER_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if ((uchSlotIndex < GH3X2X_SLOT_NUM_MAX) && (uchDrvIndex < GH3X2X_SLOT_LED_DRV_NUM_MAX))
+    if ((uchSlotIndex < GH3020_SLOT_NUM_MAX) && (uchDrvIndex < GH3020_SLOT_LED_DRV_NUM_MAX))
     {
-        usSlotDrvRegAddr = GH3X2X_SLOT0_CTRL_10_REG_ADDR + (uchSlotIndex * GH3X2X_SLOT_CTRL_OFFSET)\
-                             + (uchDrvIndex * GH3X2X_REG_ADDR_SIZE);
+        usSlotDrvRegAddr = GH3020_REG_SLOT0_CTRL_10 + (uchSlotIndex * GH3020_OFFSET_SLOT_CTRL)\
+                             + (uchDrvIndex * GH3020_REG_ADDR_SIZE);
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usCurrentRegVal = GH3X2X_ReadReg(usSlotDrvRegAddr);
-        GH3X2X_VAL_CLEAR_BIT(usCurrentRegVal, (GU16)GH3X2X_SLOT_LED_CURRENT_CLEAR_MASK);
-        GH3X2X_VAL_SET_BIT(usCurrentRegVal, (GU16)uchCurrentVal);
-        GH3X2X_WriteReg(usSlotDrvRegAddr, usCurrentRegVal);
+        usCurrentRegVal = gh3020_spi_readreg(usSlotDrvRegAddr);
+        GH3X2X_VAL_CLEAR_BIT(usCurrentRegVal, (uint16_t)GH3020_MSK_SLOT_LED_CURRENT_CLEAR);
+        GH3X2X_VAL_SET_BIT(usCurrentRegVal, (uint16_t)uchCurrentVal);
+        gh3020_spi_writereg(usSlotDrvRegAddr, usCurrentRegVal);
         GH3X2X_WAIT_CHIP_DSLP();
         chRet = GH3X2X_RET_OK;
     }
     else
     {
-        if (uchSlotIndex >= GH3X2X_SLOT_NUM_MAX)
+        if (uchSlotIndex >= GH3020_SLOT_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("slot index param greater than max!\r\n");
         }
-        else // uchDrvIndex >= GH3X2X_SLOT_LED_DRV_NUM_MAX
+        else // uchDrvIndex >= GH3020_SLOT_LED_DRV_NUM_MAX
         {
             GH3X2X_DEBUG_LOG("drv index param greater than max!\r\n");
         }
@@ -1434,7 +1392,7 @@ GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurren
 }
 
 /**
- * @fn     GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex)
+ * @fn     uint8_t GH3X2X_GetSlotLedCurrent(uint8_t uchSlotIndex, uint8_t uchDrvIndex)
  *
  * @brief  Get slot led current config
  *
@@ -1446,26 +1404,26 @@ GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurren
  *
  * @return  current val. if param error, return val always equal 0
  */
-__weak GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex)
+__weak uint8_t GH3X2X_GetSlotLedCurrent(uint8_t uchSlotIndex, uint8_t uchDrvIndex)
 {
-    GU16 usCurrentRegVal = 0;
-    GU16 usSlotDrvRegAddr = 0;
+    uint16_t usCurrentRegVal = 0;
+    uint16_t usSlotDrvRegAddr = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if ((uchSlotIndex < GH3X2X_SLOT_NUM_MAX) && (uchDrvIndex < GH3X2X_SLOT_LED_DRV_NUM_MAX))
+    if ((uchSlotIndex < GH3020_SLOT_NUM_MAX) && (uchDrvIndex < GH3020_SLOT_LED_DRV_NUM_MAX))
     {
-        usSlotDrvRegAddr = GH3X2X_SLOT0_CTRL_10_REG_ADDR + (uchSlotIndex * GH3X2X_SLOT_CTRL_OFFSET)\
-                             + (uchDrvIndex * GH3X2X_REG_ADDR_SIZE);
+        usSlotDrvRegAddr = GH3020_REG_SLOT0_CTRL_10 + (uchSlotIndex * GH3020_OFFSET_SLOT_CTRL)\
+                             + (uchDrvIndex * GH3020_REG_ADDR_SIZE);
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usCurrentRegVal = GH3X2X_ReadReg(usSlotDrvRegAddr);
+        usCurrentRegVal = gh3020_spi_readreg(usSlotDrvRegAddr);
         GH3X2X_WAIT_CHIP_DSLP();
     }
     else
     {
-        if (uchSlotIndex >= GH3X2X_SLOT_NUM_MAX)
+        if (uchSlotIndex >= GH3020_SLOT_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("slot index param greater than max!\r\n");
         }
-        else // uchDrvIndex >= GH3X2X_SLOT_LED_DRV_NUM_MAX
+        else // uchDrvIndex >= GH3020_SLOT_LED_DRV_NUM_MAX
         {
             GH3X2X_DEBUG_LOG("drv index param greater than max!\r\n");
         }
@@ -1474,7 +1432,7 @@ __weak GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex)
 }
 
 /**
- * @fn     GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVal)
+ * @fn     int8_t GH3X2X_SlotLedTiaGainConfig(uint8_t uchSlotIndex, uint8_t uchAdcIndex, uint8_t uchGainVal)
  *
  * @brief  Slot gain config
  *
@@ -1489,32 +1447,32 @@ __weak GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex)
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVal)
+int8_t GH3X2X_SlotLedTiaGainConfig(uint8_t uchSlotIndex, uint8_t uchAdcIndex, uint8_t uchGainVal)
 {
-    GU16 usGainRegVal = 0;
-    GU16 usSlotTiaGainRegAddr = 0;
-    GS8 chRet = GH3X2X_RET_PARAMETER_ERROR;
+    uint16_t usGainRegVal = 0;
+    uint16_t usSlotTiaGainRegAddr = 0;
+    int8_t chRet = GH3X2X_RET_PARAMETER_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if ((uchSlotIndex < GH3X2X_SLOT_NUM_MAX) && (uchAdcIndex < GH3X2X_SLOT_TIA_GAIN_NUM_MAX)
-        && (uchGainVal < GH3X2X_SLOT_TIA_GAIN_VAL_MAX))
+    if ((uchSlotIndex < GH3020_SLOT_NUM_MAX) && (uchAdcIndex < GH3020_SLOT_TIA_GAIN_NUM_MAX)
+        && (uchGainVal < GH3020_SLOT_TIA_GAIN_VAL_MAX))
     {
-        usSlotTiaGainRegAddr = GH3X2X_SLOT0_CTRL_4_REG_ADDR + (uchSlotIndex * GH3X2X_SLOT_CTRL_OFFSET);
+        usSlotTiaGainRegAddr = GH3020_REG_SLOT0_CTRL_4 + (uchSlotIndex * GH3020_OFFSET_SLOT_CTRL);
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usGainRegVal = GH3X2X_ReadReg(usSlotTiaGainRegAddr);
+        usGainRegVal = gh3020_spi_readreg(usSlotTiaGainRegAddr);
         GH3X2X_VAL_CLEAR_BIT(usGainRegVal,
-                                (GH3X2X_SLOT_TIA_GAIN_BITS_MARK << (GH3X2X_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)));
-        GH3X2X_VAL_SET_BIT(usGainRegVal, (((GU16)uchGainVal) << (GH3X2X_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)));
-        GH3X2X_WriteReg(usSlotTiaGainRegAddr, usGainRegVal);
+                                (GH3020_MSK_SLOT_TIA_GAIN << (GH3020_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)));
+        GH3X2X_VAL_SET_BIT(usGainRegVal, (((uint16_t)uchGainVal) << (GH3020_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)));
+        gh3020_spi_writereg(usSlotTiaGainRegAddr, usGainRegVal);
         GH3X2X_WAIT_CHIP_DSLP();
         chRet = GH3X2X_RET_OK;
     }
     else
     {
-        if (uchSlotIndex >= GH3X2X_SLOT_NUM_MAX)
+        if (uchSlotIndex >= GH3020_SLOT_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("slot index param greater than max!\r\n");
         }
-        else if (uchAdcIndex >= GH3X2X_SLOT_TIA_GAIN_NUM_MAX)
+        else if (uchAdcIndex >= GH3020_SLOT_TIA_GAIN_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("adc index param greater than max!\r\n");
         }
@@ -1527,7 +1485,7 @@ GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVa
 }
 
 /**
- * @fn     GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex)
+ * @fn     uint8_t GH3X2X_GetSlotLedTiaGain(uint8_t uchSlotIndex, uint8_t uchAdcIndex)
  *
  * @brief  Get slot gain config
  *
@@ -1539,34 +1497,34 @@ GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVa
  *
  * @return  tia gain val. if param error, return val always equal 0
  */
-GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex)
+uint8_t GH3X2X_GetSlotLedTiaGain(uint8_t uchSlotIndex, uint8_t uchAdcIndex)
 {
-    GU16 usGainRegVal = 0;
-    GU16 usSlotTiaGainRegAddr = 0;
+    uint16_t usGainRegVal = 0;
+    uint16_t usSlotTiaGainRegAddr = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if ((uchSlotIndex < GH3X2X_SLOT_NUM_MAX) && (uchAdcIndex < GH3X2X_SLOT_TIA_GAIN_NUM_MAX))
+    if ((uchSlotIndex < GH3020_SLOT_NUM_MAX) && (uchAdcIndex < GH3020_SLOT_TIA_GAIN_NUM_MAX))
     {
-        usSlotTiaGainRegAddr = GH3X2X_SLOT0_CTRL_4_REG_ADDR + (uchSlotIndex * GH3X2X_SLOT_CTRL_OFFSET);
+        usSlotTiaGainRegAddr = GH3020_REG_SLOT0_CTRL_4 + (uchSlotIndex * GH3020_OFFSET_SLOT_CTRL);
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usGainRegVal = GH3X2X_ReadReg(usSlotTiaGainRegAddr);
+        usGainRegVal = gh3020_spi_readreg(usSlotTiaGainRegAddr);
         GH3X2X_WAIT_CHIP_DSLP();
     }
     else
     {
-        if (uchSlotIndex >= GH3X2X_SLOT_NUM_MAX)
+        if (uchSlotIndex >= GH3020_SLOT_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("slot index param greater than max!\r\n");
         }
-        else // uchAdcIndex >= GH3X2X_SLOT_TIA_GAIN_NUM_MAX
+        else // uchAdcIndex >= GH3020_SLOT_TIA_GAIN_NUM_MAX
         {
             GH3X2X_DEBUG_LOG("adc index param greater than max!\r\n");
         }
     }
-    return (GU8)(((usGainRegVal) >> (GH3X2X_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)) & GH3X2X_SLOT_TIA_GAIN_BITS_MARK);
+    return (uint8_t)(((usGainRegVal) >> (GH3020_SLOT_TIA_GAIN_BITS_SIZE * uchAdcIndex)) & GH3020_MSK_SLOT_TIA_GAIN);
 }
 
 /**
- * @fn     GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal)
+ * @fn     int8_t GH3X2X_AdcBgcThrConfig(uint8_t uchAdcIndex, uint8_t uchBgcThrVal)
  *
  * @brief  adc bgc thr config
  *
@@ -1580,26 +1538,26 @@ GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex)
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal)
+int8_t GH3X2X_AdcBgcThrConfig(uint8_t uchAdcIndex, uint8_t uchBgcThrVal)
 {
-    GU16 usBgcThregVal = 0;
-    GS8 chRet = GH3X2X_RET_PARAMETER_ERROR;
-    GU8 uchKdcCh = (GU8)(GH3X2X_SLOT_KDC_THR_ADC_INDEX_MAX - uchAdcIndex);
+    uint16_t usBgcThregVal = 0;
+    int8_t chRet = GH3X2X_RET_PARAMETER_ERROR;
+    uint8_t uchKdcCh = (uint8_t)(GH3020_SLOT_KDC_THR_ADC_INDEX_MAX - uchAdcIndex);
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if ((uchAdcIndex < GH3X2X_SLOT_TIA_GAIN_NUM_MAX) && (uchBgcThrVal < GH3X2X_SLOT_KDC_THR_VAL_MAX))
+    if ((uchAdcIndex < GH3020_SLOT_TIA_GAIN_NUM_MAX) && (uchBgcThrVal < GH3020_SLOT_KDC_THR_VAL_MAX))
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usBgcThregVal = GH3X2X_ReadReg(GH3X2X_PPG_DAC_AD_REG1_REG_ADDR);
+        usBgcThregVal = gh3020_spi_readreg(GH3020_REG_PPG_DAC_AD_REG1);
         GH3X2X_VAL_CLEAR_BIT(usBgcThregVal,
-                                (GH3X2X_SLOT_KDC_THR_BITS_MARK << (GH3X2X_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)));
-        GH3X2X_VAL_SET_BIT(usBgcThregVal, (((GU16)uchBgcThrVal) << (GH3X2X_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)));
-        GH3X2X_WriteReg(GH3X2X_PPG_DAC_AD_REG1_REG_ADDR, usBgcThregVal);
+                                (GH3020_MSK_SLOT_KDC_THR << (GH3020_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)));
+        GH3X2X_VAL_SET_BIT(usBgcThregVal, (((uint16_t)uchBgcThrVal) << (GH3020_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)));
+        gh3020_spi_writereg(GH3020_REG_PPG_DAC_AD_REG1, usBgcThregVal);
         GH3X2X_WAIT_CHIP_DSLP();
         chRet = GH3X2X_RET_OK;
     }
     else
     {
-        if (uchAdcIndex >= GH3X2X_SLOT_TIA_GAIN_NUM_MAX)
+        if (uchAdcIndex >= GH3020_SLOT_TIA_GAIN_NUM_MAX)
         {
             GH3X2X_DEBUG_LOG("adc index param greater than max!\r\n");
         }
@@ -1612,7 +1570,7 @@ GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal)
 }
 
 /**
- * @fn     GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex)
+ * @fn     uint8_t GH3X2X_GetAdcBgcThr(uint8_t uchAdcIndex)
  *
  * @brief  Get adc bgc thr config
  *
@@ -1623,27 +1581,27 @@ GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal)
  *
  * @return  tia gain val. if param error, return val always equal 0
  */
-GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex)
+uint8_t GH3X2X_GetAdcBgcThr(uint8_t uchAdcIndex)
 {
-    GU16 usBgcThregVal = 0;
-    GU8 uchKdcCh = 0;
+    uint16_t usBgcThregVal = 0;
+    uint8_t uchKdcCh = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
-    if (uchAdcIndex < GH3X2X_SLOT_TIA_GAIN_NUM_MAX)
+    if (uchAdcIndex < GH3020_SLOT_TIA_GAIN_NUM_MAX)
     {
-        uchKdcCh = (GU8)(GH3X2X_SLOT_KDC_THR_ADC_INDEX_MAX - uchAdcIndex);
+        uchKdcCh = (uint8_t)(GH3020_SLOT_KDC_THR_ADC_INDEX_MAX - uchAdcIndex);
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usBgcThregVal = GH3X2X_ReadReg(GH3X2X_PPG_DAC_AD_REG1_REG_ADDR);
+        usBgcThregVal = gh3020_spi_readreg(GH3020_REG_PPG_DAC_AD_REG1);
         GH3X2X_WAIT_CHIP_DSLP();
     }
     else
     {
         GH3X2X_DEBUG_LOG("adc index param greater than max!\r\n");
     }
-    return (GU8)(((usBgcThregVal) >> (GH3X2X_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)) & GH3X2X_SLOT_KDC_THR_BITS_MARK);
+    return (uint8_t)(((usBgcThregVal) >> (GH3020_SLOT_KDC_THR_BITS_SIZE * uchKdcCh)) & GH3020_MSK_SLOT_KDC_THR);
 }
 
 /**
- * @fn     GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth)
+ * @fn     int8_t GH3X2X_IrqWidthConfig(uint16_t usIrqPulseWidth, uint16_t usIrqColdWidth)
  *
  * @brief  Irq width config
  *
@@ -1657,10 +1615,10 @@ GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex)
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth)
+int8_t GH3X2X_IrqWidthConfig(uint16_t usIrqPulseWidth, uint16_t usIrqColdWidth)
 {
-    GU16 usIrqPulseWidthVal = usIrqPulseWidth;
-    GU16 usIrqColdWidthVal = usIrqColdWidth;
+    uint16_t usIrqPulseWidthVal = usIrqPulseWidth;
+    uint16_t usIrqColdWidthVal = usIrqColdWidth;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (usIrqPulseWidthVal > GH3X2X_IRQ_WIDTH_VAL_MAX)
     {
@@ -1673,14 +1631,14 @@ GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth)
         usIrqColdWidthVal = GH3X2X_IRQ_WIDTH_VAL_MAX;
     }
     GH3X2X_WAIT_CHIP_WAKEUP();
-    GH3X2X_WriteReg(GH3X2X_INT_PWR_REG_ADDR, usIrqPulseWidthVal);
-    GH3X2X_WriteReg(GH3X2X_INT_CTR_REG_ADDR, usIrqColdWidthVal);
+    gh3020_spi_writereg(GH3020_REG_INT_PWR, usIrqPulseWidthVal);
+    gh3020_spi_writereg(GH3020_REG_INT_CTR, usIrqColdWidthVal);
     GH3X2X_WAIT_CHIP_DSLP();
     return GH3X2X_RET_OK;
 }
 
 /**
- * @fn     GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
+ * @fn     int8_t GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
  *
  * @brief  Irq mode config
  *
@@ -1692,21 +1650,21 @@ GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth)
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
+int8_t GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
 {
-    GU16 usIrqCtrlRegVal = 0;
+    uint16_t usIrqCtrlRegVal = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_WAIT_CHIP_WAKEUP();
-    usIrqCtrlRegVal = GH3X2X_ReadReg(GH3X2X_INT_CR_REG_ADDR);
-    GH3X2X_VAL_CLEAR_BIT(usIrqCtrlRegVal, (GU16)GH3X2X_INT_CTRL_MODE_MSK_BIT);
-    GH3X2X_VAL_SET_BIT(usIrqCtrlRegVal, ((GU16)emIrqMode) & GH3X2X_INT_CTRL_MODE_MSK_BIT);
-    GH3X2X_WriteReg(GH3X2X_INT_CR_REG_ADDR, usIrqCtrlRegVal);
+    usIrqCtrlRegVal = gh3020_spi_readreg(GH3020_REG_INT_CR);
+    GH3X2X_VAL_CLEAR_BIT(usIrqCtrlRegVal, (uint16_t)GH3020_MSK_INT_CTRL_MODE_BIT);
+    GH3X2X_VAL_SET_BIT(usIrqCtrlRegVal, ((uint16_t)emIrqMode) & GH3020_MSK_INT_CTRL_MODE_BIT);
+    gh3020_spi_writereg(GH3020_REG_INT_CR, usIrqCtrlRegVal);
     GH3X2X_WAIT_CHIP_DSLP();
     return GH3X2X_RET_OK;
 }
 
 /**
- * @fn     void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uchPinLevel))
+ * @fn     void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(uint8_t uchPinLevel))
  *
  * @brief  Register reset pin level control function
  *
@@ -1717,14 +1675,14 @@ GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
  *
  * @return  None
  */
-void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uchPinLevel))
+void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(uint8_t uchPinLevel))
 {
     g_pGh3x2xResetPinLevelControlFunc = pResetPinLevelControlFunc;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
 }
 
 /**
- * @fn     GS8 GH3X2X_HardReset(void)
+ * @fn     int8_t GH3X2X_HardReset(void)
  *
  * @brief  Gh3x2x softreset via i2c/spi, can read&write reg with gh3x2x after reset
  *
@@ -1737,14 +1695,14 @@ void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uc
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    reset pin control function not register
  */
-GS8 GH3X2X_HardReset(void)
+int8_t GH3X2X_HardReset(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (g_pGh3x2xResetPinLevelControlFunc != GH3X2X_PTR_NULL)
     {
         g_pGh3x2xResetPinLevelControlFunc(0);
-        GH3X2X_DelayUs(GH3X2X_HARD_RESET_DELAY_X_US); /* hard reset delay 20us. */
+        up_udelay(GH3X2X_HARD_RESET_DELAY_X_US); /* hard reset delay 20us. */
         g_pGh3x2xResetPinLevelControlFunc(1);
         chRet = GH3X2X_RET_OK;
     }
@@ -1756,7 +1714,8 @@ GS8 GH3X2X_HardReset(void)
     if (g_uchResetFromProtocolFlag == 1)
     {
         g_uchResetFromProtocolFlag = 0;
-        gh3x2x_active_reset_hook();
+        up_mdelay(20);
+        gh3020_fifo_process();
     }
     return chRet;
 }
@@ -1775,28 +1734,28 @@ GS8 GH3X2X_HardReset(void)
  */
 void GH3X2X_WearDetectEnable(EMWearDetectEnableType emWearDetectEnable)
 {
-    GU16 usWearStatus = 0;
+    uint16_t usWearStatus = 0;
 
     GH3X2X_WAIT_CHIP_WAKEUP();
-    usWearStatus = GH3X2X_ReadReg(GH3X2X_ADT_WEARON_CR_REG_ADDR);
-    
+    usWearStatus = gh3020_spi_readreg(GH3020_REG_ADT_WEARON_CR);
+
     if (WEAR_DETECT_ENABLE == emWearDetectEnable)
     {
-        GH3X2X_VAL_SET_BIT(usWearStatus, GH3X2X_ADT_WEAR_DET_EN_MASK_BIT);
+        GH3X2X_VAL_SET_BIT(usWearStatus, GH3020_MSK_ADT_WEAR_DET_EN);
     }
     else
     {
-        GH3X2X_VAL_CLEAR_BIT(usWearStatus, (GU16)GH3X2X_ADT_WEAR_DET_EN_MASK_BIT);
+        GH3X2X_VAL_CLEAR_BIT(usWearStatus, (uint16_t)GH3020_MSK_ADT_WEAR_DET_EN);
     }
 
-    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); 
+    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus);
     GH3X2X_WAIT_CHIP_DSLP();
 }
 
 /**
- * @fn     GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
+ * @fn     int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
  *
- * @brief  Gh3x2x switch to detect wear on/off type 
+ * @brief  Gh3x2x switch to detect wear on/off type
  *
  * @attention   Should follow that use WEAR_DETECT_DONT_FORCE_SWITCH @wear on/off irq status process.
  *              If want force switch to detect on/off, should use WEAR_DETECT_FORCE_SWITCH. careful!!!
@@ -1810,11 +1769,11 @@ void GH3X2X_WearDetectEnable(EMWearDetectEnableType emWearDetectEnable)
  * @retval  #GH3X2X_RET_GENERIC_ERROR       detect type equal last type, don't need to switch
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
+int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
-    GU16 usWearStatus = 0;
-    GU16 usWearLogicSel = 0;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
+    uint16_t usWearStatus = 0;
+    uint16_t usWearLogicSel = 0;
 
     GH3X2X_DEBUG_LOG_PARAM("%s:type = %d\r\n", __FUNCTION__, emWearDetectType);
     if (emWearDetectType > WEAR_DETECT_WEAR_OFF)
@@ -1825,69 +1784,69 @@ GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectFor
     else
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        usWearStatus = GH3X2X_ReadReg(GH3X2X_ADT_WEARON_CR_REG_ADDR);
+        usWearStatus = gh3020_spi_readreg(GH3020_REG_ADT_WEARON_CR);
         GH3X2X_DEBUG_LOG_PARAM("[GH3X2X_WearDetectSwitchTo] usWearStatus = %d\n",(int)usWearStatus);
         if (emWearDetectType == WEAR_DETECT_WEAR_ON) // switch to detect wear on (got wear off evt)
         {
-            if ((GH3X2X_CHECK_BIT_SET(usWearStatus, GH3X2X_ADT_WEAR_STATUS_MASK_BIT)) \
+            if ((GH3X2X_CHECK_BIT_SET(usWearStatus, GH3020_MSK_ADT_WEAR_STATUS)) \
                 || (emForceSwitch != WEAR_DETECT_DONT_FORCE_SWITCH)) // system is wear on
             {
                 GH3X2X_DEBUG_LOG_PARAM("[GH3X2X_WearDetectSwitchTo] WEAR_DETECT_WEAR_ON\n");
 #if (GH3X2X_WEAR_ON_FORCE_SWITCH_WITH_LOGIC_SEL) // wear on force switch with adt logic sel
-                GH3X2X_VAL_CLEAR_BIT(usWearStatus, (GU16)GH3X2X_ADT_WEAR_STATUS_MASK_BIT);
+                GH3X2X_VAL_CLEAR_BIT(usWearStatus, (uint16_t)GH3020_MSK_ADT_WEAR_STATUS);
                 if (emForceSwitch != WEAR_DETECT_DONT_FORCE_SWITCH)
                 {
-                    usWearLogicSel = GH3X2X_ReadReg(GH3X2X_ADT_WEARON_LOGIC_SEL_REG_ADDR);
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_LOGIC_SEL_REG_ADDR, 0); // clear all logic
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); // set system into wear off
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, \
-                                    GH3X2X_SET_BIT(usWearStatus, GH3X2X_ADT_WEAR_CR_WEAR_ON_VAL));
-                    GH3X2X_DelayUs(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_LOGIC_SEL_REG_ADDR, usWearLogicSel); // re-sel wear on logic
+                    usWearLogicSel = gh3020_spi_readreg(GH3020_REG_ADT_WEARON_LOGIC_SEL);
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_LOGIC_SEL, 0); // clear all logic
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear off
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, \
+                                    GH3X2X_SET_BIT(usWearStatus, GH3020_REGVAL_ADT_WEAR_CR_WEAR_ON));
+                    up_udelay(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_LOGIC_SEL, usWearLogicSel); // re-sel wear on logic
                 }
                 else
                 {
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); // set system into wear off
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear off
                 }
 #else
-                GH3X2X_VAL_CLEAR_BIT(usWearStatus, (GU16)GH3X2X_ADT_WEAR_STATUS_MASK_BIT);
-                if ((GH3X2X_CHECK_BIT_SET(usWearStatus, GH3X2X_ADT_WEAR_DET_EN_MASK_BIT))
+                GH3X2X_VAL_CLEAR_BIT(usWearStatus, (uint16_t)GH3020_MSK_ADT_WEAR_STATUS);
+                if ((GH3X2X_CHECK_BIT_SET(usWearStatus, GH3020_MSK_ADT_WEAR_DET_EN))
                     && (emForceSwitch != WEAR_DETECT_DONT_FORCE_SWITCH))
                 {
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, \
-                                        GH3X2X_CLEAR_BIT(usWearStatus, GH3X2X_ADT_WEAR_DET_EN_MASK_BIT));
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, \
+                                        GH3X2X_CLEAR_BIT(usWearStatus, GH3020_MSK_ADT_WEAR_DET_EN));
 
                               GH3X2X_DEBUG_LOG_PARAM("[GH3X2X_WearDetectSwitchTo] write det en to 0 !!!\n");
                 }
-                GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); // set system into wear off
+                gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear off
 
                         GH3X2X_DEBUG_LOG_PARAM("[GH3X2X_WearDetectSwitchTo] usWearStatus = %d\n",(int)usWearStatus);
 
-                
+
 #endif
                 chRet = GH3X2X_RET_OK;
-            } // end of if (GH3X2X_CHECK_BIT_SET(usWearStatus, GH3X2X_ADT_WEAR_STATUS_MASK_BIT))
+            } // end of if (GH3X2X_CHECK_BIT_SET(usWearStatus, GH3020_MSK_ADT_WEAR_STATUS))
         } // end of if (emWearDetectType == WEAR_DETECT_WEAR_ON)
         else // switch to detect wear off (got wear on evt)
         {
-            if (GH3X2X_CHECK_BIT_NOT_SET(usWearStatus, GH3X2X_ADT_WEAR_STATUS_MASK_BIT) \
+            if (GH3X2X_CHECK_BIT_NOT_SET(usWearStatus, GH3020_MSK_ADT_WEAR_STATUS) \
                 || (emForceSwitch != WEAR_DETECT_DONT_FORCE_SWITCH)) // system is wear off
             {
                 GH3X2X_DEBUG_LOG_PARAM("[GH3X2X_WearDetectSwitchTo] WEAR_DETECT_WEAR_OFF\n");
-                GH3X2X_VAL_SET_BIT(usWearStatus, GH3X2X_ADT_WEAR_STATUS_MASK_BIT);
+                GH3X2X_VAL_SET_BIT(usWearStatus, GH3020_MSK_ADT_WEAR_STATUS);
                 if (emForceSwitch != WEAR_DETECT_DONT_FORCE_SWITCH)
                 {
-                    usWearLogicSel = GH3X2X_ReadReg(GH3X2X_ADT_WEAROFF_LOGIC_SEL_REG_ADDR);
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEAROFF_LOGIC_SEL_REG_ADDR, 0); // clear all logic
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); // set system into wear on
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, \
-                                    GH3X2X_SET_BIT(usWearStatus, GH3X2X_ADT_WEAR_CR_WEAR_OFF_VAL));
-                    GH3X2X_DelayUs(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEAROFF_LOGIC_SEL_REG_ADDR, usWearLogicSel); // re-sel wear off logic
+                    usWearLogicSel = gh3020_spi_readreg(GH3020_REG_ADT_WEAROFF_LOGIC_SEL);
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEAROFF_LOGIC_SEL, 0); // clear all logic
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear on
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, \
+                                    GH3X2X_SET_BIT(usWearStatus, GH3020_REGVAL_ADT_WEAR_CR_WEAR_OFF));
+                    up_udelay(GH3X2X_WEAR_DETECT_SWITCH_WAIT_X_US);
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEAROFF_LOGIC_SEL, usWearLogicSel); // re-sel wear off logic
                 }
                 else
                 {
-                    GH3X2X_WriteReg(GH3X2X_ADT_WEARON_CR_REG_ADDR, usWearStatus); // set system into wear on
+                    gh3020_spi_writereg(GH3020_REG_ADT_WEARON_CR, usWearStatus); // set system into wear on
                 }
                 chRet = GH3X2X_RET_OK;
             }
@@ -1911,16 +1870,16 @@ GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectFor
  */
 EMSkinColorStatusType GH3X2X_GetSkinStatus(void)
 {
-    GU16 usSkinStatus = 0;
+    uint16_t usSkinStatus = 0;
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     GH3X2X_WAIT_CHIP_WAKEUP();
-    usSkinStatus = GH3X2X_ReadReg(GH3X2X_SKIN_STR_REG_ADDR);
+    usSkinStatus = gh3020_spi_readreg(GH3020_REG_SKIN_STR);
     GH3X2X_WAIT_CHIP_DSLP();
-    return ((EMSkinColorStatusType) GH3X2X_VAL_GET_BIT(usSkinStatus, GH3X2X_SKIN_COLOR_STATUS_MASK_BIT));
+    return ((EMSkinColorStatusType) GH3X2X_VAL_GET_BIT(usSkinStatus, GH3020_MSK_SKIN_COLOR_STATUS));
 }
 
 /**
- * @fn     GS8 GH3X2X_HsiClockCalibration(void)
+ * @fn     int8_t GH3X2X_HsiClockCalibration(void)
  *
  * @brief  Calibration Hsi(high-speed internal) clock
  *
@@ -1933,31 +1892,31 @@ EMSkinColorStatusType GH3X2X_GetSkinStatus(void)
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR       input clock is unstable, or sampling was started
  */
-GS8 GH3X2X_HsiClockCalibration(void)
+int8_t GH3X2X_HsiClockCalibration(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (g_uchGh3x2xStatus < GH3X2X_STATUS_STARTED)
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        GH3X2X_WriteReg(GH3X2X_OSC_THR_REG_ADDR, GH3X2X_HSI_CALI_THR_CNT_VAL);
-        GH3X2X_WriteReg(GH3X2X_OSC_CR_REG_ADDR, GH3X2X_HSI_CALI_CTRL_EN_VAL);
-        GH3X2X_DelayUs(GH3X2X_HSI_CALI_DELAY_VAL);
-        if (GH3X2X_CHECK_BIT_SET(GH3X2X_ReadReg(GH3X2X_OSC_FLAG_REG_ADDR), GH3X2X_OSC_CALI_CODE_LOACKED))
+        gh3020_spi_writereg(GH3020_REG_OSC_THR, GH3X2X_HSI_CALI_THR_CNT_VAL);
+        gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_HSI_CALI_CTRL_EN_VAL);
+        up_udelay(GH3X2X_HSI_CALI_DELAY_VAL);
+        if (GH3X2X_CHECK_BIT_SET (gh3020_spi_readreg(GH3020_REG_OSC_FLAG), GH3X2X_OSC_CALI_CODE_LOACKED))
         {
             chRet = GH3X2X_RET_OK;
         }
-        GH3X2X_DEBUG_LOG_PARAM("Hsi: 0x%.4x\r\n", GH3X2X_ReadReg(GH3X2X_OSC13M_TUNE_REG_ADDR));
-        GH3X2X_WriteReg(GH3X2X_OSC_CR_REG_ADDR, GH3X2X_OSC_CALI_CTRL_DIS_VAL);
+        GH3X2X_DEBUG_LOG_PARAM("Hsi: 0x%.4x\r\n", gh3020_spi_readreg(GH3020_REG_OSC13M_TUNE));
+        gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_OSC_CALI_CTRL_DIS_VAL);
         GH3X2X_WAIT_CHIP_DSLP();
     }
-    
+
     return chRet;
 }
 
 /**
- * @fn     GS8 GH3X2X_LsiClockCalibration(void)
+ * @fn     int8_t GH3X2X_LsiClockCalibration(void)
  *
  * @brief  Calibration Lsi(low-speed internal) clock
  *
@@ -1970,53 +1929,53 @@ GS8 GH3X2X_HsiClockCalibration(void)
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR       input clock is unstable, or sampling was started
  */
-GS8 GH3X2X_LsiClockCalibration(void)
+int8_t GH3X2X_LsiClockCalibration(void)
 {
-    GS8 chRet = GH3X2X_RET_GENERIC_ERROR;
-    GU16 usCaliVal = 0;
-    GS16 sFreqErrVal = 0;
-    GS16 sLastFreqErrVal = GH3X2X_LSI_CALI_ERR_MAX_VAL;
-    GU8 uchIndex = 0;
-    GU8 uchMinVal = 0;
-    GU8 uchMaxVal = GH3X2X_LSI_CALI_FINE_VAL_MAX;
-    GU8 uchCalcVal = 0;
-    GU8 uchLastCalcVal = GH3X2X_LSI_CALI_FINE_VAL_MAX;
+    int8_t chRet = GH3X2X_RET_GENERIC_ERROR;
+    uint16_t usCaliVal = 0;
+    int16_t sFreqErrVal = 0;
+    int16_t sLastFreqErrVal = GH3X2X_LSI_CALI_ERR_MAX_VAL;
+    uint8_t uchIndex = 0;
+    uint8_t uchMinVal = 0;
+    uint8_t uchMaxVal = GH3X2X_LSI_CALI_FINE_VAL_MAX;
+    uint8_t uchCalcVal = 0;
+    uint8_t uchLastCalcVal = GH3X2X_LSI_CALI_FINE_VAL_MAX;
 
     GH3X2X_DEBUG_LOG_PARAM("%s\r\n", __FUNCTION__);
     if (g_uchGh3x2xStatus < GH3X2X_STATUS_STARTED)
     {
         GH3X2X_WAIT_CHIP_WAKEUP();
-        GH3X2X_WriteReg(GH3X2X_OSC_THR_REG_ADDR, GH3X2X_LSI_CALI_THR_CNT_VAL);
-        GH3X2X_WriteReg(GH3X2X_OSC_CR_REG_ADDR, GH3X2X_LSI_CALI_CTRL_C_EN_VAL);
-        GH3X2X_DelayUs(GH3X2X_LSI_COR_CALI_DELAY_VAL);
-        if (GH3X2X_CHECK_BIT_SET(GH3X2X_ReadReg(GH3X2X_OSC_FLAG_REG_ADDR), GH3X2X_OSC_CALI_CODE_LOACKED))
+        gh3020_spi_writereg(GH3020_REG_OSC_THR, GH3X2X_LSI_CALI_THR_CNT_VAL);
+        gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_LSI_CALI_CTRL_C_EN_VAL);
+        up_udelay(GH3X2X_LSI_COR_CALI_DELAY_VAL);
+        if (GH3X2X_CHECK_BIT_SET (gh3020_spi_readreg(GH3020_REG_OSC_FLAG), GH3X2X_OSC_CALI_CODE_LOACKED))
         {
-            usCaliVal = GH3X2X_ReadReg(GH3X2X_OSC32K_TUNE_REG_ADDR);
+            usCaliVal = gh3020_spi_readreg(GH3020_REG_OSC32K_TUNE);
             uchCalcVal = GH3X2X_GET_HIGH_BYTE_FROM_WORD(usCaliVal);
             for (uchIndex = 0; uchIndex < GH3X2X_LSI_CALI_FINE_TUNE_MAX; uchIndex++)
             {
                 usCaliVal = GH3X2X_MAKEUP_WORD(uchCalcVal, GH3X2X_GET_LOW_BYTE_FROM_WORD(usCaliVal));
-                GH3X2X_WriteReg(GH3X2X_OSC32K_TUNE_REG_ADDR, usCaliVal);
-                GH3X2X_WriteReg(GH3X2X_OSC_CR_REG_ADDR, GH3X2X_LSI_CALI_CTRL_F_EN_VAL);
-                GH3X2X_DelayUs(GH3X2X_LSI_FINE_CALI_DELAY_VAL);
-                sFreqErrVal = GH3X2X_ReadReg(GH3X2X_OSC_FREQ_ERR_UR_REG_ADDR);
+                gh3020_spi_writereg(GH3020_REG_OSC32K_TUNE, usCaliVal);
+                gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_LSI_CALI_CTRL_F_EN_VAL);
+                up_udelay(GH3X2X_LSI_FINE_CALI_DELAY_VAL);
+                sFreqErrVal = gh3020_spi_readreg(GH3020_REG_OSC_FREQ_ERR_UR);
                 if (sFreqErrVal > GH3X2X_LSI_CALI_ERR_MAX_VAL)
                 {
-                    sFreqErrVal = (GS16)(GH3X2X_LSI_CALI_ERR_FIXED_VAL - sFreqErrVal);
+                    sFreqErrVal = (int16_t)(GH3X2X_LSI_CALI_ERR_FIXED_VAL - sFreqErrVal);
                     uchMinVal = uchCalcVal;
                 }
                 else
                 {
                     uchMaxVal = uchCalcVal;
                 }
-                uchCalcVal = ((GU16)uchMaxVal + (GU16)uchMinVal) / GH3X2X_LSI_CALI_FINE_DIV_NUM;
+                uchCalcVal = ((uint16_t)uchMaxVal + (uint16_t)uchMinVal) / GH3X2X_LSI_CALI_FINE_DIV_NUM;
                 if (uchLastCalcVal == uchCalcVal)
                 {
                     chRet = GH3X2X_RET_OK;
                     if (sLastFreqErrVal < sFreqErrVal)
                     {
                         usCaliVal = GH3X2X_MAKEUP_WORD(uchMaxVal, GH3X2X_GET_LOW_BYTE_FROM_WORD(usCaliVal));
-                        GH3X2X_WriteReg(GH3X2X_OSC32K_TUNE_REG_ADDR, usCaliVal);
+                        gh3020_spi_writereg(GH3020_REG_OSC32K_TUNE, usCaliVal);
                     }
                     break;
                 }
@@ -2026,19 +1985,19 @@ GS8 GH3X2X_LsiClockCalibration(void)
                     sLastFreqErrVal = sFreqErrVal;
                 }
             } // end of for (uchIndex = 0; uchIndex < GH3X2X_LSI_CALI_FINE_TUNE_MAX; uchIndex++)
-        } // end of if (GH3X2X_CHECK_BIT_SET(GH3X2X_ReadReg(GH3X2X_OSC_FLAG_REG_ADDR), GH3X2X_OSC_CALI_CODE_LOACKED))
-        GH3X2X_DEBUG_LOG_PARAM("Lsi: 0x%.4x\r\n", GH3X2X_ReadReg(GH3X2X_OSC32K_TUNE_REG_ADDR));
-        GH3X2X_WriteReg(GH3X2X_OSC_CR_REG_ADDR, GH3X2X_OSC_CALI_CTRL_DIS_VAL);
+        } // end of if (GH3X2X_CHECK_BIT_SET (gh3020_spi_readreg(GH3020_REG_OSC_FLAG), GH3X2X_OSC_CALI_CODE_LOACKED))
+        GH3X2X_DEBUG_LOG_PARAM("Lsi: 0x%.4x\r\n", gh3020_spi_readreg(GH3020_REG_OSC32K_TUNE));
+        gh3020_spi_writereg(GH3020_REG_OSC_CR, GH3X2X_OSC_CALI_CTRL_DIS_VAL);
         GH3X2X_WAIT_CHIP_DSLP();
     } // end of if (g_uchGh3x2xStatus < GH3X2X_STATUS_STARTED)
     return chRet;
 }
 
 /**
- * @fn     void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
- *                                     GU8 (*pReadResetPinStatusFunc)(void),
- *                                     GU8 (*pReadSpcsPinStatusFunc)(void),
- *                                     GU8 (*pReadSpdoPinStatusFunc)(void))
+ * @fn     void GH3X2X_RegisterReadPinStatusFunc(uint8_t (*pReadIntPinStatusFunc)(void),
+ *                                     uint8_t (*pReadResetPinStatusFunc)(void),
+ *                                     uint8_t (*pReadSpcsPinStatusFunc)(void),
+ *                                     uint8_t (*pReadSpdoPinStatusFunc)(void))
  *
  * @brief  Register read pin status function
  *
@@ -2053,10 +2012,10 @@ GS8 GH3X2X_LsiClockCalibration(void)
  *
  * @return  None
  */
-void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
-                                      GU8 (*pReadResetPinStatusFunc)(void),
-                                      GU8 (*pReadSpcsPinStatusFunc)(void),
-                                      GU8 (*pReadSpdoPinStatusFunc)(void))
+void GH3X2X_RegisterReadPinStatusFunc(uint8_t (*pReadIntPinStatusFunc)(void),
+                                      uint8_t (*pReadResetPinStatusFunc)(void),
+                                      uint8_t (*pReadSpcsPinStatusFunc)(void),
+                                      uint8_t (*pReadSpdoPinStatusFunc)(void))
 {
     g_pGh3x2xReadIntPinStatusFunc = pReadIntPinStatusFunc;
     g_pGh3x2xReadResetPinStatusFunc = pReadResetPinStatusFunc;
@@ -2066,7 +2025,7 @@ void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
 }
 
 /**
- * @fn     GCHAR *GH3X2X_GetDriverLibVersion(void)
+ * @fn     char *GH3X2X_GetDriverLibVersion(void)
  *
  * @brief  Get driver version
  *
@@ -2077,13 +2036,13 @@ void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
  *
  * @return  library version string
  */
-GCHAR *GH3X2X_GetDriverLibVersion(void)
+char *GH3X2X_GetDriverLibVersion(void)
 {
-    return (GCHAR *)GH3X2X_VERSION_STRING;
+    return (char *)GH3X2X_VERSION_STRING;
 }
 
 /**
- * @fn     GCHAR *GH3X2X_GetDriverLibFuncSupport(void)
+ * @fn     char *GH3X2X_GetDriverLibFuncSupport(void)
  *
  * @brief  Get driver function support
  *
@@ -2094,13 +2053,13 @@ GCHAR *GH3X2X_GetDriverLibVersion(void)
  *
  * @return  library version string
  */
-GCHAR *GH3X2X_GetDriverLibFuncSupport(void)
+char *GH3X2X_GetDriverLibFuncSupport(void)
 {
-    return (GCHAR *)GH3X2X_ALGO_FNC_SUPPORT_STRING;
+    return (char *)GH3X2X_ALGO_FNC_SUPPORT_STRING;
 }
 
 /**
- * @fn     void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum)
+ * @fn     void GH3X2X_SetMaxNumWhenReadFifo(uint16_t usMaxNum)
  *
  * @brief  Set max number of rawdata read from fifo every time
  *
@@ -2111,17 +2070,17 @@ GCHAR *GH3X2X_GetDriverLibFuncSupport(void)
  *
  * @return  None
  */
-void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum)
+void GH3X2X_SetMaxNumWhenReadFifo(uint16_t usMaxNum)
 {
     if (usMaxNum <= GH3X2X_FIFO_DATA_BYTES_MAX_LEN)
     {
         g_usMaxNumReadFromFifo = (usMaxNum/4) * 4;
-    }    
+    }
 }
 
 
 /**
- * @fn     GU16 GH3X2X_GetCurrentFifoWaterLine(void)
+ * @fn     uint16_t GH3X2X_GetCurrentFifoWaterLine(void)
  *
  * @brief  get current fifo water line setting
  *
@@ -2132,23 +2091,23 @@ void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum)
  *
  * @return  None
  */
-GU16 GH3X2X_GetCurrentFifoWaterLine(void)
+uint16_t GH3X2X_GetCurrentFifoWaterLine(void)
 {
     return g_usCurrentFiFoWaterLine;
 }
 
 
 
-const GU8 g_uchLedCurrentFullScal[4] = {25,50,100,200};
+const uint8_t g_uchLedCurrentFullScal[4] = {25,50,100,200};
 
 
 
 
 /**
- * @fn      GU8  Gh3x2x_GetLedCurrentFullScal(void)
- 
+ * @fn      uint8_t  Gh3x2x_GetLedCurrentFullScal(void)
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2158,12 +2117,12 @@ const GU8 g_uchLedCurrentFullScal[4] = {25,50,100,200};
  * @return  None
  */
 
-void  GH3x2x_GetLedCurrentFullScal(GU8 *puchDrv0Fs, GU8 *puchDrv1Fs)
+void  GH3x2x_GetLedCurrentFullScal(uint8_t *puchDrv0Fs, uint8_t *puchDrv1Fs)
 {
-    (*puchDrv0Fs)= GH3X2X_ReadRegBitField(GH3X2X_LED_DRV_AD_REG_REG_ADDR,GH3X2X_DRV0_FULL_SCAL_CURRENT_LSB,GH3X2X_DRV0_FULL_SCAL_CURRENT_MSB);
-    (*puchDrv1Fs)= GH3X2X_ReadRegBitField(GH3X2X_LED_DRV_AD_REG_REG_ADDR,GH3X2X_DRV1_FULL_SCAL_CURRENT_LSB,GH3X2X_DRV1_FULL_SCAL_CURRENT_MSB);
+    (*puchDrv0Fs)= gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,GH3020_DRV0_FULL_SCAL_CURRENT_LSB,GH3020_DRV0_FULL_SCAL_CURRENT_MSB);
+    (*puchDrv1Fs)= gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,GH3020_DRV1_FULL_SCAL_CURRENT_LSB,GH3020_DRV1_FULL_SCAL_CURRENT_MSB);
 
-    
+
     (*puchDrv0Fs) = g_uchLedCurrentFullScal[*puchDrv0Fs];
     (*puchDrv1Fs) = g_uchLedCurrentFullScal[*puchDrv1Fs];
 
@@ -2173,45 +2132,45 @@ void  GH3x2x_GetLedCurrentFullScal(GU8 *puchDrv0Fs, GU8 *puchDrv1Fs)
 
 void GH3x2x_DisableHardwareAgc(void)
 {
-    for(GU8 uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
+    for(uint8_t uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
     {
-        GH3X2X_WriteRegBitField(GH3X2X_SLOT0_CTRL_3_REG_ADDR + GH3X2X_SLOT_CTRL_OFFSET*uchSlotCnt,GH3X2X_SLOT_AGC_EN_LSB,GH3X2X_SLOT_AGC_EN_MSB, 0);
+        gh3020_spi_writebits(GH3020_REG_SLOT0_CTRL_3 + GH3020_OFFSET_SLOT_CTRL*uchSlotCnt,GH3020_SLOT_AGC_EN_LSB,GH3020_SLOT_AGC_EN_MSB, 0);
     }
 }
 
 
-void GH3x2x_GetBgLevel(GU8 *puchBglevel)
-{    
-    for(GU8 uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
+void GH3x2x_GetBgLevel(uint8_t *puchBglevel)
+{
+    for(uint8_t uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
     {
-        puchBglevel[uchSlotCnt] = GH3X2X_ReadRegBitField(GH3X2X_SLOT0_CTRL_3_REG_ADDR + GH3X2X_SLOT_CTRL_OFFSET*uchSlotCnt,GH3X2X_SLOT_BG_LEVEL_LSB,GH3X2X_SLOT_BG_LEVEL_MSB);
+        puchBglevel[uchSlotCnt] = gh3020_spi_readbits(GH3020_REG_SLOT0_CTRL_3 + GH3020_OFFSET_SLOT_CTRL*uchSlotCnt,GH3020_SLOT_BG_LEVEL_LSB,GH3020_SLOT_BG_LEVEL_MSB);
     }
 }
 
-void GH3x2x_GetBgCancel(GU8 *puchBgCancel)
-{    
-    for(GU8 uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
+void GH3x2x_GetBgCancel(uint8_t *puchBgCancel)
+{
+    for(uint8_t uchSlotCnt = 0; uchSlotCnt < 8; uchSlotCnt ++)
     {
-        puchBgCancel[uchSlotCnt] = GH3X2X_ReadRegBitField(GH3X2X_SLOT0_CTRL_3_REG_ADDR + GH3X2X_SLOT_CTRL_OFFSET*uchSlotCnt,GH3X2X_SLOT_BG_CANCEL_LSB,GH3X2X_SLOT_BG_CANCEL_MSB);
+        puchBgCancel[uchSlotCnt] = gh3020_spi_readbits(GH3020_REG_SLOT0_CTRL_3 + GH3020_OFFSET_SLOT_CTRL*uchSlotCnt,GH3020_SLOT_BG_CANCEL_LSB,GH3020_SLOT_BG_CANCEL_MSB);
     }
 }
 
 
 
-void GH3x2x_SetIntTime(GU8 uchSlotNo, GU8 uchIntTimeIndex)
-{    
-    GH3X2X_WriteRegBitField(GH3X2X_SLOT0_CTRL_3_REG_ADDR + GH3X2X_SLOT_CTRL_OFFSET*uchSlotNo,GH3X2X_SLOT_ADC_INT_TIME_LSB,GH3X2X_SLOT_ADC_INT_TIME_MSB, uchIntTimeIndex);
+void GH3x2x_SetIntTime(uint8_t uchSlotNo, uint8_t uchIntTimeIndex)
+{
+    gh3020_spi_writebits(GH3020_REG_SLOT0_CTRL_3 + GH3020_OFFSET_SLOT_CTRL*uchSlotNo,GH3020_SLOT_ADC_INT_TIME_LSB,GH3020_SLOT_ADC_INT_TIME_MSB, uchIntTimeIndex);
 }
 
-void GH3x2x_SetSlotTime(GU8 uchSlotNo, GU16 usSlotTime)
-{    
-    GH3X2X_WriteReg(GH3X2X_RG_SLOT_TMR0_REG_ADDR + 2*uchSlotNo, usSlotTime);
+void GH3x2x_SetSlotTime(uint8_t uchSlotNo, uint16_t usSlotTime)
+{
+    gh3020_spi_writereg(GH3020_REG_SLOT_TMR0 + 2*uchSlotNo, usSlotTime);
 }
 
 
-void GH3x2x_SetSlotSampleRate(GU8 uchSlotNo, GU16 usSampleRate)
-{    
-    GU16 usDivReg;
+void GH3x2x_SetSlotSampleRate(uint8_t uchSlotNo, uint16_t usSampleRate)
+{
+    uint16_t usDivReg;
     if(usSampleRate > 1000)
     {
         usSampleRate = 1000;
@@ -2224,9 +2183,9 @@ void GH3x2x_SetSlotSampleRate(GU8 uchSlotNo, GU16 usSampleRate)
     usDivReg = (1000/usSampleRate) - 1;
 
 
-    GH3X2X_WriteRegBitField(GH3X2X_SLOT0_CTRL_0_REG_ADDR + GH3X2X_SLOT_CTRL_OFFSET*uchSlotNo,GH3X2X_SLOT_SR_LSB,GH3X2X_SLOT_SR_MSB, usDivReg);
+    gh3020_spi_writebits(GH3020_REG_SLOT0_CTRL_0 + GH3020_OFFSET_SLOT_CTRL*uchSlotNo,GH3020_SLOT_SR_LSB,GH3020_SLOT_SR_MSB, usDivReg);
 
-    
+
     GH3X2X_DEBUG_LOG_PARAM("GH3x2x_SetSlotSampleRate: uchSlotNo = %d, usSampleRate = %d, usDivReg = %d \r\n",(int)uchSlotNo,(int)usSampleRate,(int)usDivReg);
 }
 
@@ -2234,16 +2193,16 @@ void GH3x2x_SetSlotSampleRate(GU8 uchSlotNo, GU16 usSampleRate)
 
 
 
-const GU16 gusSlotTimeList[3][7] = {
+const uint16_t gusSlotTimeList[3][7] = {
 {26,    36,    46,    56,    95,    174,    331},
 {48,    67,    87,    107,    186,    343,    658},
 {69,    99,    128,    158,    276,    512,    985}
 };
 
 
-GU16 GH3x2x_CalSlotTime(GU8 uchBgLevel, GU8 uchBgCancel ,GU8 uchIntTimeIndex)
+uint16_t GH3x2x_CalSlotTime(uint8_t uchBgLevel, uint8_t uchBgCancel ,uint8_t uchIntTimeIndex)
 {
-    GU16 usSlotTime;
+    uint16_t usSlotTime;
     if(uchBgLevel > 2)
     {
         uchBgLevel = 2;
@@ -2264,10 +2223,10 @@ GU16 GH3x2x_CalSlotTime(GU8 uchBgLevel, GU8 uchBgCancel ,GU8 uchIntTimeIndex)
 
 
 /**
- * @fn      void GH3x2x_ChangeSampleParmForEngineeringMode(GU32 unFunctionMode, STGh3x2xEngineeringModeSampleParam *pstSampleParaGroup , GU8 uchSampleParaGroupNum)
- 
+ * @fn      void GH3x2x_ChangeSampleParmForEngineeringMode(uint32_t unFunctionMode, struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum)
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2278,17 +2237,17 @@ GU16 GH3x2x_CalSlotTime(GU8 uchBgLevel, GU8 uchBgCancel ,GU8 uchIntTimeIndex)
  *
  * @return  None
  */
-void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  pstGh3x2xFrameInfo[], GU32 unFunctionMode, STGh3x2xEngineeringModeSampleParam *pstSampleParaGroup , GU8 uchSampleParaGroupNum)
+void GH3x2x_ChangeSampleParmForEngineeringMode(const struct gh3020_frameinfo_s * const  pstGh3x2xFrameInfo[], uint32_t unFunctionMode, FAR struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum)
 {
-    GU32 unFunctionID;
-    GU8 uchFunctionCnt;
-    GU8 *puchChnlMap;
-    GU8 uchChnlNum;
-    GU8 uchDr0Fs;
-    GU8 uchDr1Fs;
-    GU8 puchBglevel[8];    //slot0 ~ slot1 bg level
-    GU8 puchBgCancel[8];   //slot0 ~ slot1 bg cancel
-    
+    uint32_t unFunctionID;
+    uint8_t uchFunctionCnt;
+    uint8_t *puchChnlMap;
+    uint8_t uchChnlNum;
+    uint8_t uchDr0Fs;
+    uint8_t uchDr1Fs;
+    uint8_t puchBglevel[8];    //slot0 ~ slot1 bg level
+    uint8_t puchBgCancel[8];   //slot0 ~ slot1 bg cancel
+
     if(0 == pstSampleParaGroup) //is the point is invalid, do nothing
     {
         return ;
@@ -2309,17 +2268,17 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  
 
 
     //process every sample parm group
-    for(GU8 uchSampleParaGroupCnt = 0; uchSampleParaGroupCnt < uchSampleParaGroupNum; uchSampleParaGroupCnt ++)
+    for(uint8_t uchSampleParaGroupCnt = 0; uchSampleParaGroupCnt < uchSampleParaGroupNum; uchSampleParaGroupCnt ++)
     {
-        STGh3x2xEngineeringModeSampleParam *pstTempSampleParam = pstSampleParaGroup + uchSampleParaGroupCnt;
-        unFunctionID = pstTempSampleParam->unFunctionID;
+        FAR struct gh3020_factestmode_param_s *pstTempSampleParam = pstSampleParaGroup + uchSampleParaGroupCnt;
+        unFunctionID = pstTempSampleParam->channelmode;
         if(0 == unFunctionID)
         {
             continue;
         }
         puchChnlMap = 0;
         uchChnlNum = 0;
-        
+
         if(unFunctionID == (unFunctionMode&unFunctionID))   //unFunctionMode have cover unFunctionID
         {
             // get channl map and chnl num
@@ -2327,7 +2286,7 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  
             {
                 if(pstGh3x2xFrameInfo[uchFunctionCnt])
                 {
-                    if(unFunctionID == (((GU32)1) << uchFunctionCnt))
+                    if(unFunctionID == (((uint32_t)1) << uchFunctionCnt))
                     {
                         break;
                     }
@@ -2344,47 +2303,47 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  
 
             if((0 != puchChnlMap)&&(0 != uchChnlNum)) //channel map and channel num is all valid
             {
-                
+
                 GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParmForEngineeringMode: ParaGroupCnt = %d, uchFunctionID = %d, uchChnlNum = %d\r\n", (int)uchSampleParaGroupCnt, (int)unFunctionID, (int)uchChnlNum);
-                for(GU8 uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
+                for(uint8_t uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
                 {
-                    GU8  uchTempSlotNo = GH3X2X_BYTE_RAWDATA_GET_SLOT_NUM(puchChnlMap[uchChnlCnt]);
-                    GU8  uchTempAdtNo = GH3X2X_BYTE_RAWDATA_GET_ADC_NUM(puchChnlMap[uchChnlCnt]);
-                    if(pstTempSampleParam->uchIntTimeChangeEn)
-                    {    
-                        GU16 usTimeSlot;
+                    uint8_t  uchTempSlotNo = GH3X2X_BYTE_RAWDATA_GET_SLOT_NUM(puchChnlMap[uchChnlCnt]);
+                    uint8_t  uchTempAdtNo = GH3X2X_BYTE_RAWDATA_GET_ADC_NUM(puchChnlMap[uchChnlCnt]);
+                    if(pstTempSampleParam->int_time_change_en)
+                    {
+                        uint16_t usTimeSlot;
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParm[int time]: need change int time. \r\n");
-                        usTimeSlot = GH3x2x_CalSlotTime(puchBglevel[uchTempSlotNo],puchBgCancel[uchTempSlotNo], pstTempSampleParam->uchIntTime);
-                        GH3x2x_SetIntTime(uchTempSlotNo,pstTempSampleParam->uchIntTime);
+                        usTimeSlot = GH3x2x_CalSlotTime(puchBglevel[uchTempSlotNo],puchBgCancel[uchTempSlotNo], pstTempSampleParam->int_time);
+                        GH3x2x_SetIntTime(uchTempSlotNo,pstTempSampleParam->int_time);
                         GH3x2x_SetSlotTime(uchTempSlotNo,usTimeSlot);
                     }
-                    if(pstTempSampleParam->uchSampleRateChangeEn)
-                    {    
+                    if(pstTempSampleParam->sample_rate_change_en)
+                    {
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParm[sample rate]\r\n");
 
-                        GH3x2x_SetSlotSampleRate(uchTempSlotNo,pstTempSampleParam->usSampleRate);
+                        GH3x2x_SetSlotSampleRate(uchTempSlotNo,pstTempSampleParam->sample_rate);
                     }
-                    if(pstTempSampleParam->uchTiaGainChangeEn)
-                    {    
-                        GH3X2X_SlotLedTiaGainConfig(uchTempSlotNo, uchTempAdtNo, pstTempSampleParam->uchTiaGain[uchChnlCnt]);
-                        
+                    if(pstTempSampleParam->tia_gain_change_en)
+                    {
+                        GH3X2X_SlotLedTiaGainConfig(uchTempSlotNo, uchTempAdtNo, pstTempSampleParam->tia_gain[uchChnlCnt]);
+
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParm[tia gain]: uchSlotNo = %d, uchTempAdtNo = %d, TiaGain = %d \r\n",(int)uchTempSlotNo,(int)uchTempAdtNo,(int)pstTempSampleParam->uchTiaGain[uchChnlCnt]);
                     }
-                    if(pstTempSampleParam->uchLedCurrentChangeEn)
-                    {    
+                    if(pstTempSampleParam->led_current_change_en)
+                    {
 
-                        GU16 usDrv0Reg;
-                        
-                        GU16 usDrv1Reg;
+                        uint16_t usDrv0Reg;
+
+                        uint16_t usDrv1Reg;
 
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParm[led current]\r\n");
 
-                        usDrv0Reg = ((GU16)pstTempSampleParam->uchLedDrv0Current[uchChnlCnt]) * 255 /uchDr0Fs;
+                        usDrv0Reg = ((uint16_t)pstTempSampleParam->led_drv0_current[uchChnlCnt]) * 255 /uchDr0Fs;
                         if(usDrv0Reg > 255)
                         {
                             usDrv0Reg = 255;
                         }
-                        usDrv1Reg = ((GU16)pstTempSampleParam->uchLedDrv1Current[uchChnlCnt]) * 255 /uchDr1Fs;
+                        usDrv1Reg = ((uint16_t)pstTempSampleParam->led_drv1_current[uchChnlCnt]) * 255 /uchDr1Fs;
                         if(usDrv1Reg > 255)
                         {
                             usDrv1Reg = 255;
@@ -2396,48 +2355,48 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParmForEngineeringMode: uchSlotNo = %d, uchTempAdtNo = %d, Drv0 = %d mA, Drv1 = %d mA \r\n",(int)uchTempSlotNo,(int)uchTempAdtNo,(int)pstTempSampleParam->uchLedDrv0Current[uchChnlCnt],(int)pstTempSampleParam->uchLedDrv1Current[uchChnlCnt]);
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParmForEngineeringMode: Drv0_reg = %d, Drv1_reg = %d \r\n",(int)usDrv0Reg,(int)usDrv1Reg);
                     }
-                
+
                 }
 
 
             }
-            
-            
-            
+
+
+
         }
     }
 
-    
+
 }
 
 
 
 /**
- * @fn       GU8 GH3x2x_GetActiveChipResetFlag(void)
- 
- 
+ * @fn       uint8_t GH3x2x_GetActiveChipResetFlag(void)
+
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
  * @param[in]   None
- * @param[out]  ActiveChipResetFlag  1: user have done chip reset(soft reset and hardwear reset) actively    gh3x2x_init will clear it 
+ * @param[out]  ActiveChipResetFlag  1: user have done chip reset(soft reset and hardwear reset) actively    gh3x2x_init will clear it
  *
  * @return  None
  */
-GU8 GH3x2x_GetActiveChipResetFlag(void)
+uint8_t GH3x2x_GetActiveChipResetFlag(void)
 {
     return g_uchActiveChipResetFlag;
 }
 
 
 /**
- * @fn       GU8 GH3x2x_GetChipResetRecoveringFlag(void)
- 
- 
+ * @fn       uint8_t GH3x2x_GetChipResetRecoveringFlag(void)
+
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2446,7 +2405,7 @@ GU8 GH3x2x_GetActiveChipResetFlag(void)
  *
  * @return  None
  */
-GU8 GH3x2x_GetChipResetRecoveringFlag(void)
+uint8_t GH3x2x_GetChipResetRecoveringFlag(void)
 {
     return g_uchChipResetRecoveringFlag;
 }
@@ -2454,11 +2413,11 @@ GU8 GH3x2x_GetChipResetRecoveringFlag(void)
 
 
 /**
- * @fn       GU8 GH3x2x_SetChipResetRecoveringFlag(void)
- 
- 
+ * @fn       uint8_t GH3x2x_SetChipResetRecoveringFlag(void)
+
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2467,7 +2426,7 @@ GU8 GH3x2x_GetChipResetRecoveringFlag(void)
  *
  * @return  None
  */
-void GH3x2x_SetChipResetRecoveringFlag(GU8 uchChipResetRecoeringFlag)
+void GH3x2x_SetChipResetRecoveringFlag(uint8_t uchChipResetRecoeringFlag)
 {
     g_uchChipResetRecoveringFlag = uchChipResetRecoeringFlag;
 }
@@ -2478,16 +2437,16 @@ void GH3x2x_SetChipResetRecoveringFlag(GU8 uchChipResetRecoeringFlag)
 /**
  * @fn       void GH3x2x_GetNeedWakeUpGh3x2xFlag(void)
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
  * @param[in]   None
- * @param[out]  None 
+ * @param[out]  None
  *
  * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
-GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void)
+uint8_t GH3x2x_GetNeedWakeUpGh3x2xFlag(void)
 {
     return g_uchNeedWakeUpGh3x2x;
 }
@@ -2495,25 +2454,25 @@ GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void)
 /**
  * @fn       void GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void)
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
  * @param[in]   None
- * @param[out]  None 
+ * @param[out]  None
  *
  * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
-GU8 GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void)
+uint8_t GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void)
 {
     return g_uchNeedWakeUpGh3x2xBeforeInt;
 }
 
 /**
- * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag)
- 
+ * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlag(uint8_t uchFlag)
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2522,16 +2481,16 @@ GU8 GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void)
  *
  * @return  None
  */
-void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag)
+void GH3x2x_SetNeedWakeUpGh3x2xFlag(uint8_t uchFlag)
 {
     g_uchNeedWakeUpGh3x2x = uchFlag;
 }
 
 /**
- * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag)
- 
+ * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(uint8_t uchFlag)
+
  *
- * @brief  
+ * @brief
  *
  * @attention   None.
  *
@@ -2540,27 +2499,27 @@ void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag)
  *
  * @return  None
  */
-void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag)
+void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(uint8_t uchFlag)
 {
     g_uchNeedWakeUpGh3x2xBeforeInt = uchFlag;
 }
 
 
 
-void GH3x2xCreatTagArray(GU8 *puchTagArray, GU16 usArrayLen,GU32 *unCompeletMask, const STGh3x2xFrameInfo * const pstFrameInfo)
+void GH3x2xCreatTagArray(uint8_t *puchTagArray, uint16_t usArrayLen,uint32_t *unCompeletMask, const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-    GU8  uchChnlNum;
-    GU8 *puchChnlMap;
-    
-    uchChnlNum = pstFrameInfo->pstFunctionInfo->uchChnlNum; 
+    uint8_t  uchChnlNum;
+    uint8_t *puchChnlMap;
+
+    uchChnlNum = pstFrameInfo->pstFunctionInfo->uchChnlNum;
     puchChnlMap = pstFrameInfo->pchChnlMap;
 
     //create tag array
     GH3X2X_Memset(puchTagArray,0xFF,usArrayLen);
-    
-    for(GU8 uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
+
+    for(uint8_t uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
     {
-        GU8 uchTag;
+        uint8_t uchTag;
         uchTag = puchChnlMap[uchChnlCnt] >> 3;
         puchTagArray[uchTag] = uchChnlCnt;
     }
@@ -2573,27 +2532,27 @@ void GH3x2xCreatTagArray(GU8 *puchTagArray, GU16 usArrayLen,GU32 *unCompeletMask
 
 
 
-GU16 GH3x2xGetFrameNum(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, const STGh3x2xFrameInfo * const pstFrameInfo)
+uint16_t GH3x2xGetFrameNum(uint8_t *puchRawdataBuf, uint16_t usRawDataByteLen, const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-    GU32 unTempIncompeletFlag;
-    GU8  puchTagArray[32];
-    GU32 unCompeletMask;
-    GU16 usFrameNum = 0;
-    
-    
+    uint32_t unTempIncompeletFlag;
+    uint8_t  puchTagArray[32];
+    uint32_t unCompeletMask;
+    uint16_t usFrameNum = 0;
+
+
     unTempIncompeletFlag = *(pstFrameInfo->punIncompleteChnlMapBit);
 
     GH3x2xCreatTagArray(puchTagArray, 32,&unCompeletMask, pstFrameInfo);
 
     //set incomplete flag
-    for (GU16 usSearchStartPosi = 0; usSearchStartPosi < usRawDataByteLen; usSearchStartPosi += GH3X2X_FIFO_RAWDATA_SIZE)
+    for (uint16_t usSearchStartPosi = 0; usSearchStartPosi < usRawDataByteLen; usSearchStartPosi += GH3X2X_FIFO_RAWDATA_SIZE)
     {
-        GU8 uchTag;
-        GU8 uchChnlId;
+        uint8_t uchTag;
+        uint8_t uchChnlId;
         uchTag = puchRawdataBuf[usSearchStartPosi] >> 3;
         uchChnlId =  puchTagArray[uchTag];
         if(0xFF != uchChnlId)
-        {        
+        {
             unTempIncompeletFlag |= (1 << uchChnlId);
         }
 
@@ -2602,34 +2561,34 @@ GU16 GH3x2xGetFrameNum(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, const STGh3x2
             unTempIncompeletFlag = 0;
             usFrameNum ++;
         }
-        
+
     }
 
     return usFrameNum;
-    
+
 }
 
 
-float GH3x2xCalGsensorStep(GU16 usGsDataNum, GU16 usFrameNum)
+float GH3x2xCalGsensorStep(uint16_t usGsDataNum, uint16_t usFrameNum)
 {
     float fGsensorStep = 0;
-    
+
     if ((usFrameNum > 1) && (usGsDataNum > 0)) // calc gs index
     {
-        fGsensorStep = ((GF32)(usGsDataNum - 1)) / (usFrameNum - 1);
+        fGsensorStep = ((float)(usGsDataNum - 1)) / (usFrameNum - 1);
     }
-    
+
     return  fGsensorStep;
 
-    
+
 }
 
 __weak void GH3x2xSendAllVersion(void)
 {
-    GU8 uchPacketPayloadArr[240] = {0};
-    GU8 uchCmdArr[7 + GH3X2X_FUNC_OFFSET_MAX] = {(0x01),(0x0B),(0x0C),(0x0E),(0x0F),(0x10),(0x11)};
-    GU8 uchCmdLen = 7;
-    
+    uint8_t uchPacketPayloadArr[240] = {0};
+    uint8_t uchCmdArr[7 + GH3X2X_FUNC_OFFSET_MAX] = {(0x01),(0x0B),(0x0C),(0x0E),(0x0F),(0x10),(0x11)};
+    uint8_t uchCmdLen = 7;
+
     if (g_uchAlgoEnableFlag)
     {
         for (int nCnt = 0 ; nCnt < GH3X2X_FUNC_OFFSET_MAX ; nCnt++)
@@ -2638,26 +2597,24 @@ __weak void GH3x2xSendAllVersion(void)
         }
         uchCmdLen = 7 + GH3X2X_FUNC_OFFSET_MAX;
     }
-    
-    for (GU8 uchOffset = 0 ; uchOffset < uchCmdLen ; uchOffset ++)
+
+    for (uint8_t uchOffset = 0 ; uchOffset < uchCmdLen ; uchOffset ++)
     {
-        GU8 uchGetVersionType = UPROTOCOL_GET_VER_TYPE_ALGO_VER + uchOffset;
-        GCHAR *pszVersionString = GH3X2X_GetVersion(uchCmdArr[uchOffset]);
-        GU8 uchVersionStringLen = (GU8)GH3X2X_Strlen(pszVersionString);
+        uint8_t uchGetVersionType = UPROTOCOL_GET_VER_TYPE_ALGO_VER + uchOffset;
+        char *pszVersionString = GH3X2X_GetVersion(uchCmdArr[uchOffset]);
+        uint8_t uchVersionStringLen = (uint8_t)GH3X2X_Strlen(pszVersionString);
         uchPacketPayloadArr[UPROTOCOL_GET_VER_TYPE_INDEX + 4] = uchGetVersionType;
         uchPacketPayloadArr[UPROTOCOL_GET_VER_STRING_LEN_INDEX + 4] = uchVersionStringLen;
-        GH3X2X_Memcpy((GCHAR *)&uchPacketPayloadArr[UPROTOCOL_GET_VER_STRING_INDEX + 4], pszVersionString, uchVersionStringLen);
-        GU16 usRespondLen = GH3X2X_UprotocolPacketFormat(GH3X2X_UPROTOCOL_CMD_BP_DATA_TRANS, uchPacketPayloadArr, &uchPacketPayloadArr[4], uchVersionStringLen + 2);
-        Gh3x2xDemoSendProtocolData(uchPacketPayloadArr,usRespondLen);
+        GH3X2X_Memcpy((char *)&uchPacketPayloadArr[UPROTOCOL_GET_VER_STRING_INDEX + 4], pszVersionString, uchVersionStringLen);
     }
 }
 
 
-GU8 Gh3x2xFunctionID2Offset(GU32 unFunctionID)
+uint8_t Gh3x2xFunctionID2Offset(uint32_t unFunctionID)
 {
-    for(GU8 uchOffset = 0; uchOffset < 32; uchOffset ++)
+    for(uint8_t uchOffset = 0; uchOffset < 32; uchOffset ++)
     {
-        if(unFunctionID == (((GU32)1) << uchOffset))
+        if(unFunctionID == (((uint32_t)1) << uchOffset))
         {
             return uchOffset;
         }
@@ -2667,7 +2624,7 @@ GU8 Gh3x2xFunctionID2Offset(GU32 unFunctionID)
 
 void Gh3x2xFunctionInfoForUserInit(void)
 {
-    for(GU8 uchFuncitonCnt = 0; uchFuncitonCnt < GH3X2X_FUNC_OFFSET_MAX; uchFuncitonCnt ++)
+    for(uint8_t uchFuncitonCnt = 0; uchFuncitonCnt < GH3X2X_FUNC_OFFSET_MAX; uchFuncitonCnt ++)
     {
         if(g_pstGh3x2xFrameInfo[uchFuncitonCnt])
         {
@@ -2677,36 +2634,36 @@ void Gh3x2xFunctionInfoForUserInit(void)
     }
 }
 
-void GH3x2xHandleFrameData(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 *punTempIncompeletFlag,
-                                GU32 *punFunctionID, GU8 uchChnlNum, GU8 *puchRawdataBuf, GU32 *punFrameRawdata,
-                                GU8 *puchTag, GS16 *pusGsValueArr, float fGsensorIndex,
+void GH3x2xHandleFrameData(const struct gh3020_frameinfo_s * const pstFrameInfo, uint32_t *punTempIncompeletFlag,
+                                uint32_t *punFunctionID, uint8_t uchChnlNum, uint8_t *puchRawdataBuf, uint32_t *punFrameRawdata,
+                                uint8_t *puchTag, int16_t *pusGsValueArr, float fGsensorIndex,
                                 STCapRawdata* pstCapValueArr,float fCapIndex,STTempRawdata* pstTempValueArr,float fTempIndex)
 
 {
-    GU32 unTempIncompeletFlag = *punTempIncompeletFlag;
-    GU8 uchTag = *puchTag;
-    GU32 unFunctionID = *punFunctionID;
-    GU8  uchGyroEnable = g_uchGyroEnable;
+    uint32_t unTempIncompeletFlag = *punTempIncompeletFlag;
+    uint8_t uchTag = *puchTag;
+    uint32_t unFunctionID = *punFunctionID;
+    uint8_t  uchGyroEnable = g_uchGyroEnable;
 
     GH3X2X_DEBUG_LOG_PARAM("[%s]got one frame,funcID = %d\r\n",__FUNCTION__,(int)unFunctionID);
     unTempIncompeletFlag = 0;
-    GH3X2X_Memset((GU8*)(pstFrameInfo->punFrameFlag), 0, GH3X2X_FRAME_FLAG_NUM*4);       //clear flag
-    GH3X2X_Memset((GU8*)(pstFrameInfo ->pstAlgoResult), 0, sizeof(STGh3x2xAlgoResult)); //clear result
-    GH3X2X_Memset((GU8*)(pstFrameInfo ->punFrameAgcInfo), 0, uchChnlNum * 4);            //clear agc info
+    GH3X2X_Memset((uint8_t*)(pstFrameInfo->punFrameFlag), 0, GH3X2X_FRAME_FLAG_NUM*4);       //clear flag
+    GH3X2X_Memset((uint8_t*)(pstFrameInfo ->pstAlgoResult), 0, sizeof(STGh3x2xAlgoResult)); //clear result
+    GH3X2X_Memset((uint8_t*)(pstFrameInfo ->punFrameAgcInfo), 0, uchChnlNum * 4);            //clear agc info
 
-    for(GU8 uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
+    for(uint8_t uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
     {
-        GU32 unRawdataAndTag;
+        uint32_t unRawdataAndTag;
         unRawdataAndTag = pstFrameInfo->punIncompleteRawdata[uchChnlCnt];
         uchTag = GH3X2X_DWORD_RAWDATA_GET_SLOT_ADC_NUM(unRawdataAndTag);
-    
+
         //rawdata
         punFrameRawdata[uchChnlCnt] = unRawdataAndTag&0x00FFFFFF;
-        
-        //flag0 flag1 
-        pstFrameInfo->punFrameFlag[0] |= (((GU32)GH3X2X_RAWDATA_GET_ADJ_FLAG0(unRawdataAndTag) << uchChnlCnt));
-        pstFrameInfo->punFrameFlag[1] |= (((GU32)GH3X2X_RAWDATA_GET_ADJ_FLAG1(unRawdataAndTag) << uchChnlCnt));
-    
+
+        //flag0 flag1
+        pstFrameInfo->punFrameFlag[0] |= (((uint32_t)GH3X2X_RAWDATA_GET_ADJ_FLAG0(unRawdataAndTag) << uchChnlCnt));
+        pstFrameInfo->punFrameFlag[1] |= (((uint32_t)GH3X2X_RAWDATA_GET_ADJ_FLAG1(unRawdataAndTag) << uchChnlCnt));
+
         //flag2 bit 0    fast recovery flag
         if ((GH3X2X_FUNCTION_ECG == unFunctionID)||(GH3X2X_FUNCTION_PWTT == unFunctionID))
         {
@@ -2718,38 +2675,38 @@ void GH3x2xHandleFrameData(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 *p
                 }
             }
         }
-    
+
         // agc (gain/drv0/drv1)
         pstFrameInfo->punFrameAgcInfo[uchChnlCnt] |= g_puchGainBgCancelRecord[uchTag] & 0xF;    //gain
-        pstFrameInfo->punFrameAgcInfo[uchChnlCnt] |= ((GU32)g_pusDrvCurrentRecord[uchTag]) << 8; // drv 0/1 current
+        pstFrameInfo->punFrameAgcInfo[uchChnlCnt] |= ((uint32_t)g_pusDrvCurrentRecord[uchTag]) << 8; // drv 0/1 current
     }
-    
-    
+
+
     //g-sensor
-    pstFrameInfo->pusFrameGsensordata[0] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable)];
-    pstFrameInfo->pusFrameGsensordata[1] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable) + 1];
-    pstFrameInfo->pusFrameGsensordata[2] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable) + 2];
+    pstFrameInfo->pusFrameGsensordata[0] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable)];
+    pstFrameInfo->pusFrameGsensordata[1] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable) + 1];
+    pstFrameInfo->pusFrameGsensordata[2] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable) + 2];
     if(uchGyroEnable)
     {
-        pstFrameInfo->pusFrameGsensordata[3] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable) + 3];
-        pstFrameInfo->pusFrameGsensordata[4] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable) + 4];
-        pstFrameInfo->pusFrameGsensordata[5] = pusGsValueArr[((GU16)fGsensorIndex)*(3+3*uchGyroEnable) + 5];
+        pstFrameInfo->pusFrameGsensordata[3] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable) + 3];
+        pstFrameInfo->pusFrameGsensordata[4] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable) + 4];
+        pstFrameInfo->pusFrameGsensordata[5] = pusGsValueArr[((uint16_t)fGsensorIndex)*(3+3*uchGyroEnable) + 5];
     }
     //cap and temp
     if(GH3X2X_GetCapEnableFlag())
     {
-    	GH3X2X_Memcpy(pstFrameInfo->pstFrameCapdata,&pstCapValueArr[(GU16)fCapIndex],sizeof(STCapRawdata));
+    	GH3X2X_Memcpy(pstFrameInfo->pstFrameCapdata,&pstCapValueArr[(uint16_t)fCapIndex],sizeof(STCapRawdata));
     }
     if(GH3X2X_GetTempEnableFlag())
     {
-    	GH3X2X_Memcpy(pstFrameInfo->pstFrameTempdata,&pstTempValueArr[(GU16)fTempIndex],sizeof(STTempRawdata));
+    	GH3X2X_Memcpy(pstFrameInfo->pstFrameTempdata,&pstTempValueArr[(uint16_t)fTempIndex],sizeof(STTempRawdata));
     }
 
     //flag 2 bit1  first frame flag
 
     Gh3x2xSetFrameFlag2(pstFrameInfo);
     /*
-    pstFrameInfo->punFrameFlag[2] &= (~(((GU32)1) << 1));
+    pstFrameInfo->punFrameFlag[2] &= (~(((uint32_t)1) << 1));
     if(0 == (*(pstFrameInfo->punFrameCnt)))
     {
         pstFrameInfo->punFrameFlag[2] |= 0x02;
@@ -2757,11 +2714,11 @@ void GH3x2xHandleFrameData(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 *p
     */
     if(GH3x2xSleepFlagGet())
     {
-        pstFrameInfo->punFrameFlag[2] |= ((GU32)1)<<3;
+        pstFrameInfo->punFrameFlag[2] |= ((uint32_t)1)<<3;
     }
     if(GH3X2X_FUNCTION_SOFT_ADT_IR == unFunctionID)
     {
-        pstFrameInfo->punFrameFlag[2] |= ((GU32)1)<<4;
+        pstFrameInfo->punFrameFlag[2] |= ((uint32_t)1)<<4;
     }
 
     GH3X2X_DEBUG_LOG_PARAM_WANPENG("[GetFrameData] function id: 0x%X,  rawdata0 = %d, rawdata1 = %d\r\n",(int)pstFrameInfo->unFunctionID, (int)(pstFrameInfo->punFrameRawdata[0]), (int)(pstFrameInfo->punFrameRawdata[1]));
@@ -2773,54 +2730,54 @@ void GH3x2xHandleFrameData(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 *p
 		GH3X2X_RawdataCode(pstFrameInfo->punFrameRawdata, uchChnlNum);
 
     //get algo io data hook
-    gh3x2x_algorithm_get_io_data_hook_func(pstFrameInfo);
-    
+    gh3020_get_ppg_data(pstFrameInfo);
+
     SET_VAL_VIA_PTR(punFunctionID, unFunctionID);
     SET_VAL_VIA_PTR(puchTag, uchTag);
     SET_VAL_VIA_PTR(punTempIncompeletFlag, unTempIncompeletFlag);
 }
 
-void GH3x2xGetFrameDataAndProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen,
-                                        GS16 *pusGsValueArr, GU16 usGsDataNum,STCapRawdata* pstCapValueArr,GU16 usCapDataNum,STTempRawdata* pstTempValueArr,GU16 usTempDataNum,
-                                        const STGh3x2xFrameInfo * const pstFrameInfo, float fGensorStep, float fCapStep, float fTempStep, GU16 usFrameNum)
+void GH3x2xGetFrameDataAndProcess(uint8_t *puchRawdataBuf, uint16_t usRawDataByteLen,
+                                        int16_t *pusGsValueArr, uint16_t usGsDataNum,STCapRawdata* pstCapValueArr,uint16_t usCapDataNum,STTempRawdata* pstTempValueArr,uint16_t usTempDataNum,
+                                        const struct gh3020_frameinfo_s * const pstFrameInfo, float fGensorStep, float fCapStep, float fTempStep, uint16_t usFrameNum)
 
 {
-    GU32 unTempIncompeletFlag;
-    GU8  puchTagArray[32];
-    GU8  uchChnlNum;
-    GU32 unCompeletMask;
-    GU32 *punFrameRawdata;
+    uint32_t unTempIncompeletFlag;
+    uint8_t  puchTagArray[32];
+    uint8_t  uchChnlNum;
+    uint32_t unCompeletMask;
+    uint32_t *punFrameRawdata;
     float fGsensorIndex = 0;
     float fCapIndex = 0;
     float fTempIndex = 0;
-    GU32 unFunctionID;
-    GU16 usFrameCnt = 0;
+    uint32_t unFunctionID;
+    uint16_t usFrameCnt = 0;
 
     unTempIncompeletFlag = *(pstFrameInfo->punIncompleteChnlMapBit);
-    uchChnlNum = pstFrameInfo->pstFunctionInfo->uchChnlNum; 
+    uchChnlNum = pstFrameInfo->pstFunctionInfo->uchChnlNum;
     punFrameRawdata = pstFrameInfo->punFrameRawdata;
     unFunctionID = pstFrameInfo->unFunctionID;
 
     GH3x2xCreatTagArray(puchTagArray, 32, &unCompeletMask, pstFrameInfo);
 
     //set incomplete flag
-    for (GU16 usSearchStartPosi = 0; usSearchStartPosi < usRawDataByteLen; usSearchStartPosi += GH3X2X_FIFO_RAWDATA_SIZE)
+    for (uint16_t usSearchStartPosi = 0; usSearchStartPosi < usRawDataByteLen; usSearchStartPosi += GH3X2X_FIFO_RAWDATA_SIZE)
     {
-        GU8 uchTag;
-        GU8 uchChnlId;
+        uint8_t uchTag;
+        uint8_t uchChnlId;
         uchTag = puchRawdataBuf[usSearchStartPosi] >> 3;
         uchChnlId =  puchTagArray[uchTag];
         if(0xFF != uchChnlId)
-        {        
-            GU32 unRawdataAndTag;                
+        {
+            uint32_t unRawdataAndTag;
             unTempIncompeletFlag |= (1 << uchChnlId);
             unRawdataAndTag = GH3X2X_MAKEUP_DWORD(puchRawdataBuf[usSearchStartPosi],
                                                                     puchRawdataBuf[usSearchStartPosi + 1],
                                                                     puchRawdataBuf[usSearchStartPosi + 2],
                                                                     puchRawdataBuf[usSearchStartPosi + 3]);
-            //store incomplete rawdata 
+            //store incomplete rawdata
             pstFrameInfo->punIncompleteRawdata[uchChnlId] = unRawdataAndTag;
-            
+
         }
 
         if(unCompeletMask == (unCompeletMask&unTempIncompeletFlag))  //got one frame
@@ -2832,18 +2789,14 @@ void GH3x2xGetFrameDataAndProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen,
                                     &uchTag, pusGsValueArr, fGsensorIndex,
                                     pstCapValueArr,fCapIndex,pstTempValueArr,fTempIndex);
 
-                //send BLE package
-                Gh2x2xUploadDataToMaster(pstFrameInfo, usFrameCnt, usFrameNum, puchTagArray);
-                Gh2x2xUploadZipDataToMaster(pstFrameInfo, usFrameCnt, usFrameNum, puchTagArray);
-
                 // timestamp
                 (*(pstFrameInfo->punFrameCnt)) ++;
                 // bak last gain
-                for(GU8 uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
+                for(uint8_t uchChnlCnt = 0; uchChnlCnt < uchChnlNum; uchChnlCnt ++)
                 {
                     pstFrameInfo ->puchFrameLastGain[uchChnlCnt] = ((pstFrameInfo->punFrameAgcInfo[uchChnlCnt]) & 0x0000000F);
                 }
-                
+
 
                 usFrameCnt ++;
             }
@@ -2864,24 +2817,24 @@ void GH3x2xGetFrameDataAndProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen,
             fGsensorIndex += fGensorStep;
             fCapIndex  += fCapStep;
             fTempIndex  += fTempStep;
-            
+
         }
-        
+
     }
 
     //save IncompeletFlag
     *(pstFrameInfo->punIncompleteChnlMapBit) = unTempIncompeletFlag;
 }
 
-void GH3x2xFunctionProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, GS16 *pusGsValueArr, GU16 usGsDataNum, 
-                        STCapRawdata* pstCapValueArr,GU16 usCapDataNum,STTempRawdata* pstTempValueArr,GU16 usTempDataNum,
-                        const STGh3x2xFrameInfo * const pstFrameInfo)
+void GH3x2xFunctionProcess(uint8_t *puchRawdataBuf, uint16_t usRawDataByteLen, int16_t *pusGsValueArr, uint16_t usGsDataNum,
+                        STCapRawdata* pstCapValueArr,uint16_t usCapDataNum,STTempRawdata* pstTempValueArr,uint16_t usTempDataNum,
+                        const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-    GU16 usFrameNum;
+    uint16_t usFrameNum;
     float fGsensorStep;
     float fCapStep;
     float fTempStep;
-    
+
     //SlaverRttLog("[%s]:send to alg, packid = %d\r\n", __FUNCTION__, g_uchFifoPackageID);
     if(0 == pstFrameInfo)
     {
@@ -2901,27 +2854,27 @@ void GH3x2xFunctionProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, GS16 *pus
     fGsensorStep = GH3x2xCalGsensorStep(usGsDataNum, usFrameNum);
     fCapStep     = GH3x2xCalGsensorStep(usCapDataNum, usFrameNum);
     fTempStep    = GH3x2xCalGsensorStep(usTempDataNum, usFrameNum);
-    
+
     GH3X2X_DEBUG_LOG_PARAM_WANPENG("[GetFrameNum]FunctionID: %d FrameNum: %d, GsensorStep: %.3f\r\n",(int)pstFrameInfo->unFunctionID, usFrameNum, fGsensorStep);
 
     /***  get one frame data and process***/
     GH3x2xGetFrameDataAndProcess(puchRawdataBuf,usRawDataByteLen,pusGsValueArr,usGsDataNum,pstCapValueArr,usCapDataNum,pstTempValueArr,usTempDataNum,
                                             pstFrameInfo,fGsensorStep,fCapStep,fTempStep,usFrameNum);
-    
+
 
 }
 
-extern GU32 g_unFuncStartedBitmap;
+extern uint32_t g_unFuncStartedBitmap;
 
 void GH3X2X_ZipmodeInit(void)
 {
     g_uchOddEvenChangeFlag = 1;
 }
 
-GS8 GH3X2X_FunctionStart(const STGh3x2xFrameInfo * const pstFrameInfo)
+int8_t GH3X2X_FunctionStart(const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-    GS8 chRet = GH3X2X_RET_OK;
-    GU32 unFunctionID;
+    int8_t chRet = GH3X2X_RET_OK;
+    uint32_t unFunctionID;
     if(0 == pstFrameInfo)
     {
         return chRet;
@@ -2933,8 +2886,8 @@ GS8 GH3X2X_FunctionStart(const STGh3x2xFrameInfo * const pstFrameInfo)
 
     GH3x2xCalFunctionSlotBit(pstFrameInfo);
 
-	
-    
+
+
     /* if all func off, start sampling */
     if (GH3X2X_NO_FUNCTION == g_unFuncStartedBitmap)
     {
@@ -2943,7 +2896,7 @@ GS8 GH3X2X_FunctionStart(const STGh3x2xFrameInfo * const pstFrameInfo)
         GH3X2X_RET_ERROR_CHECK_E(chRet, GH3X2X_RET_NO_INITED_ERROR);
     }
 
-    
+
 #if GH3X2X_ALGORITHM_ECG_SUPPORT
     if (GH3X2X_FUNCTION_ECG == unFunctionID)
     {
@@ -2969,24 +2922,19 @@ GS8 GH3X2X_FunctionStart(const STGh3x2xFrameInfo * const pstFrameInfo)
 
     /* set last gain */
     GH3X2X_Memset(pstFrameInfo->puchFrameLastGain, 0xFF, pstFrameInfo->pstFunctionInfo->uchChnlNum);
-    
+
     return chRet;
 }
 
-__weak void Gh3x2xOutputValueStrategyInit(GU32 unFunctionID)
+int8_t GH3X2X_FunctionStop(const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-}
-
-
-GS8 GH3X2X_FunctionStop(const STGh3x2xFrameInfo * const pstFrameInfo)
-{
-    GS8 chRet = GH3X2X_RET_OK;
-    GU32 unFunctionID;
+    int8_t chRet = GH3X2X_RET_OK;
+    uint32_t unFunctionID;
     if(0 == pstFrameInfo)
     {
         return chRet;
     }
-    
+
     unFunctionID = pstFrameInfo->unFunctionID;
     GH3x2xCalFunctionSlotBit(pstFrameInfo);
 
@@ -3013,21 +2961,21 @@ GS8 GH3X2X_FunctionStop(const STGh3x2xFrameInfo * const pstFrameInfo)
 }
 
 
-GU8* GH3x2xGetFunctionChnlMap(const STGh3x2xFrameInfo * const pstFrameInfo)
+uint8_t* GH3x2xGetFunctionChnlMap(const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
     if(0 == pstFrameInfo)
     {
         return 0;
     }
     else
-    {        
+    {
         return pstFrameInfo->pchChnlMap;
     }
 }
 
-void GH3x2xSetFunctionChnlNum(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 uchChnlNum)
+void GH3x2xSetFunctionChnlNum(const struct gh3020_frameinfo_s * const pstFrameInfo, uint8_t uchChnlNum)
 {
-    GU8 uchChnlLimit;
+    uint8_t uchChnlLimit;
     if(pstFrameInfo)
     {
         uchChnlLimit = pstFrameInfo->uchFuntionChnlLimit;
@@ -3037,12 +2985,12 @@ void GH3x2xSetFunctionChnlNum(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 
         }
         pstFrameInfo ->pstFunctionInfo->uchChnlNum = uchChnlNum;
 
-        
+
         GH3X2X_DEBUG_LOG_PARAM("[SetFunctionChnlNum] function id: 0x%X, ChnlNum: %d\r\n",(int)pstFrameInfo->unFunctionID, uchChnlNum);
     }
 }
 
-void GH3x2xSetFunctionChnlMap(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 uchChnlId, GU8 uchChnlTag)
+void GH3x2xSetFunctionChnlMap(const struct gh3020_frameinfo_s * const pstFrameInfo, uint8_t uchChnlId, uint8_t uchChnlTag)
 {
     if(pstFrameInfo)
     {
@@ -3050,23 +2998,23 @@ void GH3x2xSetFunctionChnlMap(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 
         {
             pstFrameInfo ->pchChnlMap[uchChnlId] = uchChnlTag;
 
-            
+
             GH3X2X_DEBUG_LOG_PARAM("[SetFunctionChnlMap] function id: 0x%X, SlotAdc: %d\r\n",(int)pstFrameInfo->unFunctionID, uchChnlTag>>3);
         }
-        
+
     }
 }
 
 
-void GH3x2xCalFunctionSlotBit(const STGh3x2xFrameInfo * const pstFrameInfo)
+void GH3x2xCalFunctionSlotBit(const struct gh3020_frameinfo_s * const pstFrameInfo)
 {
-    GU8 uchSlotBit = 0;
-    GU8 uchChnlTag;
+    uint8_t uchSlotBit = 0;
+    uint8_t uchChnlTag;
     if(pstFrameInfo)
     {
-        for(GU8 uchChnlCnt = 0; uchChnlCnt < pstFrameInfo->pstFunctionInfo->uchChnlNum; uchChnlCnt ++)
+        for(uint8_t uchChnlCnt = 0; uchChnlCnt < pstFrameInfo->pstFunctionInfo->uchChnlNum; uchChnlCnt ++)
         {
-			if(pstFrameInfo->pstFunctionInfo->unChnlEnForUserSetting & (((GU32)1) << uchChnlCnt))
+			if(pstFrameInfo->pstFunctionInfo->unChnlEnForUserSetting & (((uint32_t)1) << uchChnlCnt))
 			{
 				uchChnlTag = pstFrameInfo->pchChnlMap[uchChnlCnt];
 	            uchSlotBit |= (1 << (GH3X2X_BYTE_RAWDATA_GET_SLOT_NUM(uchChnlTag)));
@@ -3076,10 +3024,10 @@ void GH3x2xCalFunctionSlotBit(const STGh3x2xFrameInfo * const pstFrameInfo)
 
 
 
-    
+
     pstFrameInfo ->pstFunctionInfo->uchSlotBit = uchSlotBit;
 
-    
+
     GH3X2X_DEBUG_LOG_PARAM("[GH3x2xCalFunctionSlotBit] function id: 0x%X, slot bit: 0x%X\r\n",(int)pstFrameInfo->unFunctionID, pstFrameInfo->pstFunctionInfo->uchSlotBit);
 }
 
@@ -3102,14 +3050,14 @@ void GH3x2xCalFunctionSlotBit(const STGh3x2xFrameInfo * const pstFrameInfo)
 
 void GH3X2X_AdtPramInit(void)
 {
-    GH3X2X_Memset(((GU8 *)(&g_stAdtModuleCfg)),0, sizeof(g_stAdtModuleCfg));
+    GH3X2X_Memset(((uint8_t *)(&g_stAdtModuleCfg)),0, sizeof(g_stAdtModuleCfg));
     g_uchElectrodeWearRevCnt = 0;
 }
 
 
 
 /**
- * @fn     void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi)
+ * @fn     void GH3X2X_AdtPramSet(uint16_t usRegVal, uint8_t uchRegPosi)
  *
  * @brief  GH3X2X_AdtPramSet
  *
@@ -3123,21 +3071,21 @@ void GH3X2X_AdtPramInit(void)
  */
 
 
-__weak void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi)
-{    
+__weak void GH3X2X_AdtPramSet(uint16_t usRegVal, uint8_t uchRegPosi)
+{
 
-    GU8 uchByteOffset;
-    GU8 uchByteVal;
-    GU8 uchByteCnt;
+    uint8_t uchByteOffset;
+    uint8_t uchByteVal;
+    uint8_t uchByteCnt;
     for(uchByteCnt = 0; uchByteCnt < 2; uchByteCnt ++)
     {
         uchByteVal = ((usRegVal >> (8*uchByteCnt))&0x00FF);
         uchByteOffset = (uchRegPosi * 2) + uchByteCnt;
         if(uchByteOffset < sizeof(g_stAdtModuleCfg))
         {
-            GH3X2X_Memcpy(((GU8 *)(&g_stAdtModuleCfg)) + uchByteOffset, (GU8*)(&uchByteVal), 1);
+            GH3X2X_Memcpy(((uint8_t *)(&g_stAdtModuleCfg)) + uchByteOffset, (uint8_t*)(&uchByteVal), 1);
 
-            if ((uchByteOffset) == (((GU8*)(&(g_stAdtModuleCfg.stAdtCfgByte0))) -((GU8*)(&(g_stAdtModuleCfg)))))
+            if ((uchByteOffset) == (((uint8_t*)(&(g_stAdtModuleCfg.stAdtCfgByte0))) -((uint8_t*)(&(g_stAdtModuleCfg)))))
             {
                 if(1 == g_stAdtModuleCfg.stAdtCfgByte0.uchElectrodeWearRevCntEn)
                 {
@@ -3160,15 +3108,15 @@ __weak void GH3X2X_AdtPramSet(GU16 usRegVal, GU8 uchRegPosi)
     }
 }
 
-__weak void Gh3x2xSetGh3x2xSoftWearOffDetFunctionId(GU32 unFunctionId)
+__weak void Gh3x2xSetGh3x2xSoftWearOffDetFunctionId(uint32_t unFunctionId)
 {}
 
-GU8 GH3X2X_GetAdtElectrodeAdtEn(void)
+uint8_t GH3X2X_GetAdtElectrodeAdtEn(void)
 {
     return g_stAdtModuleCfg.stAdtCfgByte0.uchElectrodeAdtEn;
 }
 
-__weak GU8 GH3X2X_GetSoftLeadDetMode(void)
+__weak uint8_t GH3X2X_GetSoftLeadDetMode(void)
 {
     return 0;
 }
@@ -3176,7 +3124,7 @@ __weak GU8 GH3X2X_GetSoftLeadDetMode(void)
 /**
  * @fn     void GH3X2X_AddElectrodeWearRevCnt(void)
  *
- * @brief  add count of electrode revert 
+ * @brief  add count of electrode revert
  *
  * @attention   None
  *
@@ -3195,7 +3143,7 @@ void GH3X2X_AddElectrodeWearRevCnt(void)
 
 
 /**
- * @fn     GU8 GH3X2X_GetAndClearElectrodeWearRevCnt(void)
+ * @fn     uint8_t GH3X2X_GetAndClearElectrodeWearRevCnt(void)
  *
  * @brief  get Electrode wear count,and reset the count
  *
@@ -3206,16 +3154,16 @@ void GH3X2X_AddElectrodeWearRevCnt(void)
  *
  * @return  ElectrodeWearRevCnt
  */
-GU8 GH3X2X_GetAndClearElectrodeWearRevCnt(void)
+uint8_t GH3X2X_GetAndClearElectrodeWearRevCnt(void)
 {
-    GU8 uchCurrentElectrodeWearRevCnt;
+    uint8_t uchCurrentElectrodeWearRevCnt;
     uchCurrentElectrodeWearRevCnt = g_uchElectrodeWearRevCnt;
     g_uchElectrodeWearRevCnt = 0;
     return uchCurrentElectrodeWearRevCnt;
 }
 
 /**
- * @fn     GU8 GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
+ * @fn     uint8_t GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
  *
  * @brief  Check if electrode wear revert debug mode is enabled
  *
@@ -3226,7 +3174,7 @@ GU8 GH3X2X_GetAndClearElectrodeWearRevCnt(void)
  *
  * @return  1: enabled, 0:disabled
  */
-GU8 GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
+uint8_t GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
 {
     return g_stAdtModuleCfg.stAdtCfgByte0.uchElectrodeWearRevCntEn;
 }
@@ -3235,38 +3183,38 @@ GU8 GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
 
 //G202008031001 wanpeng START
 /**
- * @fn     GU8 GH3X2X_GetSoftEvent(void)
+ * @fn     uint8_t GH3X2X_GetSoftEvent(void)
  * @brief  Get soft event
  * @param[in]   None
  * @param[out]  Soft event
  *
  * @return  soft event
  */
-GU8 GH3X2X_GetSoftEvent(void)
+uint8_t GH3X2X_GetSoftEvent(void)
 {
     return gubSoftEvent;
 }
 
 /**
- * @fn     void GH3X2X_SetSoftEvent(GU8 uchEvent)
+ * @fn     void GH3X2X_SetSoftEvent(uint8_t uchEvent)
  * @brief  set soft event
  * @param[in]   uchEvent
  * @param[out]  None
  * @return  None
  */
-void GH3X2X_SetSoftEvent(GU8 uchEvent)
+void GH3X2X_SetSoftEvent(uint8_t uchEvent)
 {
     gubSoftEvent |= uchEvent;
 }
 /**
- * @fn     void GH3X2X_ClearSoftEvent(GU8 uchEvent)
+ * @fn     void GH3X2X_ClearSoftEvent(uint8_t uchEvent)
  * @brief  clear soft event
  * @param[in]   uchEvent
  * @param[out]  None
  * @return  None
  */
 
-void GH3X2X_ClearSoftEvent(GU8 uchEvent)
+void GH3X2X_ClearSoftEvent(uint8_t uchEvent)
 {
     gubSoftEvent &= (~uchEvent);
 }
@@ -3274,7 +3222,7 @@ void GH3X2X_ClearSoftEvent(GU8 uchEvent)
 
 
 /**
- * @fn     GU8 GH3X2X_GetGsensorEnableFlag(void)
+ * @fn     uint8_t GH3X2X_GetGsensorEnableFlag(void)
  *
  * @brief  Inquire if need gsensor data
  *
@@ -3285,17 +3233,17 @@ void GH3X2X_ClearSoftEvent(GU8 uchEvent)
  *
  * @return  1: need gsensor data  0: not need gsensor data
  */
-__weak GU8 GH3X2X_GetGsensorEnableFlag(void)
+__weak uint8_t GH3X2X_GetGsensorEnableFlag(void)
 {
     return g_uchGsensorEnable;
 }
 
-__weak GU8 GH3X2X_GetCapEnableFlag(void)
+__weak uint8_t GH3X2X_GetCapEnableFlag(void)
 {
     return g_uchCapEnable;
 }
 
-__weak GU8 GH3X2X_GetTempEnableFlag(void)
+__weak uint8_t GH3X2X_GetTempEnableFlag(void)
 {
     return g_uchTempEnable;
 }
@@ -3303,20 +3251,20 @@ __weak GU8 GH3X2X_GetTempEnableFlag(void)
 
 void Gh3x2xFunctionInit(void)
 {
-    for(GU8 uchFuncitonCnt = 0; uchFuncitonCnt < GH3X2X_FUNC_OFFSET_MAX; uchFuncitonCnt ++)
+    for(uint8_t uchFuncitonCnt = 0; uchFuncitonCnt < GH3X2X_FUNC_OFFSET_MAX; uchFuncitonCnt ++)
     {
         if(g_pstGh3x2xFrameInfo[uchFuncitonCnt])
         {
             GH3x2xSetFunctionChnlNum(g_pstGh3x2xFrameInfo[uchFuncitonCnt], 0);   //chnl num
             g_pstGh3x2xFrameInfo[uchFuncitonCnt] -> pstFunctionInfo -> usSampleRate = 0; //set sample rate to invalid value
-            g_pstGh3x2xFrameInfo[uchFuncitonCnt] -> pstDownSampleInfo -> uchDownSampleFactor = 0; 
-            g_pstGh3x2xFrameInfo[uchFuncitonCnt] -> pstDownSampleInfo -> uchDownSampleCnt = 0; 
+            g_pstGh3x2xFrameInfo[uchFuncitonCnt] -> pstDownSampleInfo -> uchDownSampleFactor = 0;
+            g_pstGh3x2xFrameInfo[uchFuncitonCnt] -> pstDownSampleInfo -> uchDownSampleCnt = 0;
         }
     }
 }
 
 /**
- * @fn     void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag)
+ * @fn     void GH3X2X_ReinitAllSwModuleParam(uint16_t usReinitFlag)
  *
  * @brief  reinit all software param config
  *
@@ -3327,7 +3275,7 @@ void Gh3x2xFunctionInit(void)
  *
  * @return  None
  */
-void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag)
+void GH3X2X_ReinitAllSwModuleParam(uint16_t usReinitFlag)
 {
     if (usReinitFlag != 0) // if != 0, that need reinit all software module param
     {
@@ -3358,7 +3306,7 @@ void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag)
 /* util function, memcpy & memset & strlen */
 
 /**
- * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize)
  *
  * @brief  memcpy() Re-implementation
  *
@@ -3370,11 +3318,11 @@ void GH3X2X_ReinitAllSwModuleParam(GU16 usReinitFlag)
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize)
 {
-    GU8 *puchSrc = (GU8 *)pSrc;
-    GU8 *puchDest = (GU8 *)pDest;
-    GU32 unAlign = ((GU32)puchDest | (GU32)puchSrc) << GH3X2X_UPROTOCOL_ALIGN_LEFTSHIFT;
+    uint8_t *puchSrc = (uint8_t *)pSrc;
+    uint8_t *puchDest = (uint8_t *)pDest;
+    uint32_t unAlign = ((uint32_t)puchDest | (uint32_t)puchSrc) << GH3X2X_UPROTOCOL_ALIGN_LEFTSHIFT;
 
     if ((pDest == GH3X2X_PTR_NULL) || (pSrc == GH3X2X_PTR_NULL))
     {
@@ -3384,7 +3332,7 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
     {
         while (unByteSize >= GH3X2X_UPROTOCOL_SIZE_T)
         {
-            *(GU32 *)puchDest = *(GU32 *)puchSrc;
+            *(uint32_t *)puchDest = *(uint32_t *)puchSrc;
             puchSrc += GH3X2X_UPROTOCOL_SIZE_T;
             puchDest += GH3X2X_UPROTOCOL_SIZE_T;
             unByteSize -= GH3X2X_UPROTOCOL_SIZE_T;
@@ -3392,7 +3340,7 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
     }
     while (unByteSize) // bytes
     {
-        *(GU8 *)puchDest = *(GU8 *)puchSrc;
+        *(uint8_t *)puchDest = *(uint8_t *)puchSrc;
         puchSrc++;
         puchDest++;
         unByteSize--;
@@ -3401,7 +3349,7 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
 }
 
 /**
- * @fn     void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize)
  *
  * @brief  memset() Re-implementation
  *
@@ -3413,11 +3361,11 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize)
 {
-    GU8 *puchDest = (GU8 *)pDest;
-    GU32 unAlign = ((GU32)puchDest) << GH3X2X_UPROTOCOL_ALIGN_LEFTSHIFT;
-    GU32 unWordVal = GH3X2X_MAKEUP_DWORD(chVal, chVal, chVal, chVal);
+    uint8_t *puchDest = (uint8_t *)pDest;
+    uint32_t unAlign = ((uint32_t)puchDest) << GH3X2X_UPROTOCOL_ALIGN_LEFTSHIFT;
+    uint32_t unWordVal = GH3X2X_MAKEUP_DWORD(chVal, chVal, chVal, chVal);
 
     if (pDest == GH3X2X_PTR_NULL)
     {
@@ -3427,14 +3375,14 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
     {
         while (unByteSize >= GH3X2X_UPROTOCOL_SIZE_T)
         {
-            *(GU32 *)puchDest = unWordVal;
+            *(uint32_t *)puchDest = unWordVal;
             puchDest += GH3X2X_UPROTOCOL_SIZE_T;
             unByteSize -= GH3X2X_UPROTOCOL_SIZE_T;
         }
     }
     while (unByteSize) // bytes
     {
-        *(GU8 *)puchDest = (GU8)chVal;
+        *(uint8_t *)puchDest = (uint8_t)chVal;
         puchDest++;
         unByteSize--;
     }
@@ -3442,7 +3390,7 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
 }
 
 /**
- * @fn     GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+ * @fn     uint32_t GH3X2X_Strlen(const char *pszSrc)
  *
  * @brief  strlen() Re-implementation
  *
@@ -3453,9 +3401,9 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
  *
  * @return  string len
  */
-GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+uint32_t GH3X2X_Strlen(const char *pszSrc)
 {
-    GU32 unCnt = 0;
+    uint32_t unCnt = 0;
     if (pszSrc != GH3X2X_PTR_NULL)
     {
         while ((*pszSrc) != 0) // if not equal '\0'
@@ -3468,7 +3416,7 @@ GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
 }
 
 /**
- * @fn     GU8 GH3X2X_GetSoftWearColor(void)
+ * @fn     uint8_t GH3X2X_GetSoftWearColor(void)
  *
  * @brief  GetSoftWearColor
  *
@@ -3480,18 +3428,18 @@ GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
  * @return  SoftWearColor 0: green  1:ir
  */
 
-GU8 GH3X2X_GetSoftWearColor(void)
+uint8_t GH3X2X_GetSoftWearColor(void)
 {
     return g_stAdtModuleCfg.stAdtCfgByte0.uchElectrodeSoftWearColor;
 }
 
-void GH3X2X_SetAlgoEnableFlag(GU8 uchAlgoEnableFlag)
+void GH3X2X_SetAlgoEnableFlag(uint8_t uchAlgoEnableFlag)
 {
     g_uchAlgoEnableFlag = uchAlgoEnableFlag;
 }
 
 /**
- * @fn     void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue) 
+ * @fn     void GH3X2X_ModifyFunctionFrequency(uint8_t uchFunctionID, uint16_t usFrequencyValue)
  *
  * @brief  Modify fs for each function
  *
@@ -3503,11 +3451,11 @@ void GH3X2X_SetAlgoEnableFlag(GU8 uchAlgoEnableFlag)
  *
  * @return  None
  */
-void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue)
+void GH3X2X_ModifyFunctionFrequency(uint8_t uchFunctionID, uint16_t usFrequencyValue)
 {
-    GU8 uchTempSlotNo = 0;
-    GU8 uchTempSlotLastNo = 0xff;
-    GU8 uchChnlCnt = 0;
+    uint8_t uchTempSlotNo = 0;
+    uint8_t uchTempSlotLastNo = 0xff;
+    uint8_t uchChnlCnt = 0;
     for(uchChnlCnt = 0; uchChnlCnt < g_pstGh3x2xFrameInfo[uchFunctionID]->pstFunctionInfo->uchChnlNum; uchChnlCnt ++)
     {
         uchTempSlotNo = GH3X2X_BYTE_RAWDATA_GET_SLOT_NUM(g_pstGh3x2xFrameInfo[uchFunctionID]->pchChnlMap[uchChnlCnt]);
@@ -3521,7 +3469,7 @@ void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue)
 }
 
 /**
- * @fn     void GH3X2X_ModifyFunctionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current)
+ * @fn     void GH3X2X_ModifyFunctionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current)
  *
  * @brief  Modify led current for each function
  *
@@ -3534,29 +3482,29 @@ void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue)
  *
  * @return  None
  */
-void GH3X2X_ModifyFunctionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current)
+void GH3X2X_ModifyFunctionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current)
 {
-    GU8 uchTempSlotNo = 0;
-    GU8 uchTempSlotLastNo = 0xff;
-    GU8 uchChnlCnt = 0;
-    GU16 usDrv0Reg = 0;
-    GU16 usDrv1Reg = 0;
-    GU16 usDr0Fs = 0;
-    GU16 usDr1Fs = 0;
+    uint8_t uchTempSlotNo = 0;
+    uint8_t uchTempSlotLastNo = 0xff;
+    uint8_t uchChnlCnt = 0;
+    uint16_t usDrv0Reg = 0;
+    uint16_t usDrv1Reg = 0;
+    uint16_t usDr0Fs = 0;
+    uint16_t usDr1Fs = 0;
 
-    GH3x2x_GetLedCurrentFullScal((GU8*)&usDr0Fs, (GU8*)&usDr1Fs);
-    
+    GH3x2x_GetLedCurrentFullScal((uint8_t*)&usDr0Fs, (uint8_t*)&usDr1Fs);
+
     for(uchChnlCnt = 0; uchChnlCnt < g_pstGh3x2xFrameInfo[uchFunctionID]->pstFunctionInfo->uchChnlNum; uchChnlCnt ++)
     {
         uchTempSlotNo = GH3X2X_BYTE_RAWDATA_GET_SLOT_NUM(g_pstGh3x2xFrameInfo[uchFunctionID]->pchChnlMap[uchChnlCnt]);
         if (uchTempSlotLastNo != uchTempSlotNo)
         {
-            usDrv0Reg = (GU16)usLedDrv0Current * 255 /usDr0Fs;
+            usDrv0Reg = (uint16_t)usLedDrv0Current * 255 /usDr0Fs;
             if(usDrv0Reg > 255)
             {
                 usDrv0Reg = 255;
             }
-            usDrv1Reg = (GU16)usLedDrv1Current * 255 /usDr1Fs;
+            usDrv1Reg = (uint16_t)usLedDrv1Current * 255 /usDr1Fs;
             if(usDrv1Reg > 255)
             {
                 usDrv1Reg = 255;
@@ -3569,60 +3517,13 @@ void GH3X2X_ModifyFunctionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, G
     }
 }
 
-__weak void GH3X2X_SendOverflowLengthBuffer(GU8 *puchBuffer, GS32 nBufferLen, GU8 uchCmd)
+uint8_t guchCurrentOverflowPackageCrcValue = 0;
+uint8_t guchCurrentOverflowPackageStatus = 0;
+uint32_t gunCurrentOverflowPackageLen = 0;
+__weak uint8_t GH3X2X_ReceiveOverflowLengthBuffer(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchReceiveBuffer, int32_t *pnReceiveBufferLen)
 {
-    if (nBufferLen == 0)
-    {
-        return;
-    }
-    GU8  *puchUploadBuf = g_pstGh3x2xProtocolData->puchPacketPayloadArr + 4;
-    GU32 unPackageCnt = 0;
-    GU16 usPackageNum = nBufferLen / GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX + 1;
-    //GU16 usPackageByteNum = GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX;
-    GU16 usLastPackageByteNum = nBufferLen % GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX;
-    GU16 usSinglePackgeByteNum = 0;
-    GU16 usRespondLen = 0;
-    GU8 uchCrcValue = GH3X2X_CalcArrayCrc8Val(puchBuffer, 0, nBufferLen);
-    if (usLastPackageByteNum == 0)
-    {
-        usLastPackageByteNum = GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX;
-        usPackageNum--;
-    }
-    puchUploadBuf[0] = 0xBB;
-    puchUploadBuf[1] = 0x22;
-    
-    //send buffer
-    for (unPackageCnt = 0 ; unPackageCnt < usPackageNum ; unPackageCnt ++)
-    {
-        puchUploadBuf[3] = uchCrcValue;
-        usSinglePackgeByteNum = GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX;
-        GH3X2X_Memcpy(&puchUploadBuf[5], &nBufferLen, sizeof(GS32));
-        if (unPackageCnt == (usPackageNum - 1))
-        {
-            puchUploadBuf[2] = 2;
-            usSinglePackgeByteNum = nBufferLen % GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX;
-        }
-        else
-        {
-            puchUploadBuf[2] = (unPackageCnt != 0);
-        }
-        puchUploadBuf[4] = usSinglePackgeByteNum;
-        GH3X2X_Memcpy(&puchUploadBuf[GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_HEADER_LEN],\
-            &puchBuffer[unPackageCnt * GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_LEN_MAX],\
-            (GU32)usSinglePackgeByteNum);
-        usRespondLen = GH3X2X_UprotocolPacketFormat(uchCmd, puchUploadBuf - 4, puchUploadBuf,\
-            usSinglePackgeByteNum + GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_HEADER_LEN);
-        Gh3x2xDemoSendProtocolData(puchUploadBuf - 4,usRespondLen);
-    } 
-}
-
-GU8 guchCurrentOverflowPackageCrcValue = 0;
-GU8 guchCurrentOverflowPackageStatus = 0;
-GU32 gunCurrentOverflowPackageLen = 0;
-__weak GU8 GH3X2X_ReceiveOverflowLengthBuffer(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchReceiveBuffer, GS32 *pnReceiveBufferLen)
-{
-    GS8 chRet = GH3X2X_RET_OK;
-    GU16 usRespondLen = *pusRespondLen;
+    int8_t chRet = GH3X2X_RET_OK;
+    uint16_t usRespondLen = *pusRespondLen;
     if (puchRespondBuffer[0] == 0xBB && puchRespondBuffer[1] == 0x22)
     {
         usRespondLen -= GH3X2X_UPROTOCOL_OVERFLOW_PAYLOAD_HEADER_LEN;
@@ -3633,7 +3534,7 @@ __weak GU8 GH3X2X_ReceiveOverflowLengthBuffer(GU8 *puchRespondBuffer, GU16 *pusR
                 GH3X2X_DEBUG_LOG_PARAM("[%s]:find package loss when start!!!restart!!!\r\n", __FUNCTION__);
                 guchCurrentOverflowPackageStatus = 0;
             }
-            GH3X2X_Memcpy(&gunCurrentOverflowPackageLen, &puchRespondBuffer[5], sizeof(GU32));
+            GH3X2X_Memcpy(&gunCurrentOverflowPackageLen, &puchRespondBuffer[5], sizeof(uint32_t));
             guchCurrentOverflowPackageCrcValue = puchRespondBuffer[3];
             guchCurrentOverflowPackageStatus = 1;
         }
@@ -3667,13 +3568,13 @@ __weak GU8 GH3X2X_ReceiveOverflowLengthBuffer(GU8 *puchRespondBuffer, GU16 *pusR
     return chRet;
 }
 
-__weak void GH3x2xSleepFlagSet(GU8 uchSleepFlag)
+__weak void GH3x2xSleepFlagSet(uint8_t uchSleepFlag)
 {
 	g_uchGh3x2xSleepFlag = uchSleepFlag;
 }
 
 
-__weak GU8 GH3x2xSleepFlagGet(void)
+__weak uint8_t GH3x2xSleepFlagGet(void)
 {
 	return g_uchGh3x2xSleepFlag;
 }

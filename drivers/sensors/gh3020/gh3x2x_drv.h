@@ -15,24 +15,11 @@
 #ifndef _GH3X2X_DRV_H_
 #define _GH3X2X_DRV_H_
 
+#include "gh3020_def.h"
+
 #ifndef UNUSED_VAR
 #define UNUSED_VAR(X) ((void)(X))
 #endif  // UNUSED_VAR
-
-/* type redefine */
-typedef unsigned char       GU8;    /**< 8bit unsigned integer type */
-typedef signed char         GS8;    /**< 8bit signed integer type */
-typedef unsigned short      GU16;   /**< 16bit unsigned integer type */
-typedef signed short        GS16;   /**< 16bit signed integer type */
-typedef int                 GS32;   /**< 32bit signed integer type */
-typedef unsigned int        GU32;   /**< 32bit unsigned integer type */
-typedef float               GF32;   /**< float type */
-typedef double              GD64;   /**< double type */
-typedef char                GCHAR;  /**< char type */
-typedef unsigned char       GBOOL;  /**< bool type */
-typedef long long           GS64;   /**< 64bit signed integer type */
-
-
 
 /* communicate interface macro */
 #define __GH3X2X_INTERFACE_I2C__            (1)     /**< interface use i2c */
@@ -56,9 +43,6 @@ typedef long long           GS64;   /**< 64bit signed integer type */
 #define __DRV_LIB_WITH_ALGO__               (2)    /**< use driver lib interface about algo */
 
 
-
-
-
 /**
  * @brief universal protocol cmd enum
  */
@@ -76,17 +60,6 @@ typedef enum
     UPROTOCOL_CMD_IGNORE = 0xFF,            /**< ignore */
 } EMUprotocolParseCmdType;
 
-/**
- * @brief i2c addr (7bits) low two bit select enum
- */
-enum EMGh3x2xI2cIdSelect
-{
-    GH3X2X_I2C_ID_SEL_1L0L = 0,     /**< i2c ID0 & ID1 pin low */
-    GH3X2X_I2C_ID_SEL_1L0H,         /**< i2c ID0 pin high & ID1 pin low */
-    GH3X2X_I2C_ID_SEL_1H0L,         /**< i2c ID0 pin low & ID1 pin high */
-    GH3X2X_I2C_ID_SEL_1H0H,         /**< i2c ID0 & ID1 pin high */
-    GH3X2X_I2C_ID_INVALID,          /**< invalid val */
-};
 
 /**
  * @brief gsensor sensitivity(counts/g) enum
@@ -120,47 +93,6 @@ typedef enum
     IRQ_MODE_EDGE_RISING = 0x02,        /**< int pin output rising edge */
     IRQ_MODE_EDGE_FALLING = 0x03,       /**< int pin output falling edge */
 } EMIrqModeConfig;
-
-/**
- * @brief hba scene config
- */
-typedef enum {
-        HBA_SCENES_DEFAULT = 0,             // default
-
-        HBA_SCENES_DAILY_LIFE = 1,            // daily life
-        HBA_SCENES_RUNNING_INSIDE = 2,        // running machine
-        HBA_SCENES_WALKING_INSIDE = 3,        // walking inside
-        HBA_SCENES_STAIRS = 4,                // stair
-
-        HBA_SCENES_RUNNING_OUTSIDE = 5,     // running outside
-        HBA_SCENES_WALKING_OUTSIDE = 6,     // walking outing
-
-        HBA_SCENES_STILL_REST = 7,            // still rest
-        HBA_SCENES_REST = 8,                // rest
-        HBA_SCENES_STILLRADON = 9,            // breath holding
-
-        HBA_SCENES_BIKING_INSIDE = 10,        //biking inside
-        HBA_SCENES_BIKING_OUTSIDE = 11,     //biking outside
-        HBA_SCENES_BIKING_MOUNTAIN= 12,     //biking mountain
-        HBA_SCENES_RUNNING_HIGH_HR = 13,    //running in high heart rate
-
-        HBA_SCENES_RUNNING_TREADMILL_CCOMBINE= 14,        // combination of treadmill running
-
-        HBA_SCENES_HIGH_INTENSITY_COMBINE = 15,     // combination of high intensity exercise
-        HBA_SCENES_TRADITIONAL_STRENGTH_COMBINE = 16,        // combination of traditional strength training
-        HBA_SCENES_STEP_TEST = 17,            // step test
-
-        HBA_SCENES_BALL_SPORTS = 18,        // ball sports
-        HBA_SCENES_AEROBICS = 19,            // aerobics
-
-
-        HBA_SCENES_SLEEP = 20,                // sleep
-        HBA_SCENES_JUMP = 21,                //jump
-        HBA_SCENES_CORDLESS_JUMP = 22,        // cordless jump
-        HBA_SCENES_SWIMMING = 23,            // SWIMMING
-        HBA_SCENES_SIZE = 24,
-}hba_scenes_e;
-
 
 /**
  * @brief wear detect enable type enum
@@ -210,30 +142,12 @@ typedef enum
 }EMWearRecordType;
 
 /**
- * @brief register struct
- */
-typedef struct
-{
-    GU16 usRegAddr;     /**< register address */
-    GU16 usRegData;     /**< register val */
-} STGh3x2xReg;
-
-/**
- * @brief init config struct type
- */
-typedef struct
-{
-    const STGh3x2xReg *pstRegConfigArr;   /**< pointer of register config array */
-    GU16        usConfigArrLen;     /**< register config array length */
-} STGh3x2xInitConfig;
-
-/**
  * @brief slot rawwdata struct type
  */
 typedef struct
 {
-    GU32 (*punRawdata)[4];   /**< pointer of buffer store 4 adc rawdata, if slot no use, can set NULL */
-    GU16 usRawdataCnt;       /**< slot rawdata count */
+    uint32_t (*punRawdata)[4];   /**< pointer of buffer store 4 adc rawdata, if slot no use, can set NULL */
+    uint16_t usRawdataCnt;       /**< slot rawdata count */
 } STGh3x2xSlotRawdata;
 
 /**
@@ -241,7 +155,7 @@ typedef struct
  */
 typedef struct
 {
-    GU8 *puchReadBuffer;                        /**< pointer of buffer for read rawdata */
+    uint8_t *puchReadBuffer;                        /**< pointer of buffer for read rawdata */
     STGh3x2xSlotRawdata stSlotRawdataArr[8];    /**< 8 slot rawdata array */
 } STGh3x2xRawdata;
 
@@ -255,10 +169,10 @@ typedef struct
  */
 typedef struct
 {
-    GU32 *punChRawdataArr;              /**< pointer to buffer store channel data, data map e.g. ch0 ch1...chx ch0 */
-    GU16 usChRawdataCnt;                /**< channel rawdata count output */
-    GU32 *punIncompleteChRawdataArr;    /**< pointer to last incomplete packet buffer */
-    GU32  unIncompleteChMark;           /**< last channel rawdata incomplete mark, if chx incomplete bit[x] set 1 */
+    uint32_t *punChRawdataArr;              /**< pointer to buffer store channel data, data map e.g. ch0 ch1...chx ch0 */
+    uint16_t usChRawdataCnt;                /**< channel rawdata count output */
+    uint32_t *punIncompleteChRawdataArr;    /**< pointer to last incomplete packet buffer */
+    uint32_t  unIncompleteChMark;           /**< last channel rawdata incomplete mark, if chx incomplete bit[x] set 1 */
 } STGh3x2xChannelRawdata;
 
 /**
@@ -266,8 +180,8 @@ typedef struct
  */
 typedef struct
 {
-    GU16 usEvent;                       /**< event */
-    GU8 uchNeedForceReadFifo;           /**< need force read fifo after call GH3X2X_LeadHandle(...) */
+    uint16_t usEvent;                       /**< event */
+    uint8_t uchNeedForceReadFifo;           /**< need force read fifo after call GH3X2X_LeadHandle(...) */
 } STSoftLeadResult;
 
 /**
@@ -275,10 +189,10 @@ typedef struct
  */
 typedef struct
 {
-    GS32 snHbOut;                       /**< hb algorithm output value */
-    GS32 snHbConfi;                     /**< hb algorithm output confidence */
-    GS32 snHbSnr;                       /**< hb snr */
-    GS32 snHbValidLv;                   /**< hb confidence valid level */
+    int32_t snHbOut;                       /**< hb algorithm output value */
+    int32_t snHbConfi;                     /**< hb algorithm output confidence */
+    int32_t snHbSnr;                       /**< hb snr */
+    int32_t snHbValidLv;                   /**< hb confidence valid level */
 } STHbAlgoResult;
 
 /**
@@ -286,12 +200,12 @@ typedef struct
  */
 typedef struct
 {
-    GS32 snHrvOut0;                     /**< hrv algorithm output 0 */
-    GS32 snHrvOut1;                     /**< hrv algorithm output 1 */
-    GS32 snHrvOut2;                     /**< hrv algorithm output 2 */
-    GS32 snHrvOut3;                     /**< hrv algorithm output 3 */
-    GS32 snHrvNum;                      /**< hrv effective result num of snHrvOut */
-    GS32 snHrvConfi;                    /**< hrv algorithm output confidence */
+    int32_t snHrvOut0;                     /**< hrv algorithm output 0 */
+    int32_t snHrvOut1;                     /**< hrv algorithm output 1 */
+    int32_t snHrvOut2;                     /**< hrv algorithm output 2 */
+    int32_t snHrvOut3;                     /**< hrv algorithm output 3 */
+    int32_t snHrvNum;                      /**< hrv effective result num of snHrvOut */
+    int32_t snHrvConfi;                    /**< hrv algorithm output confidence */
 } STHrvAlgoResult;
 
 /**
@@ -299,10 +213,10 @@ typedef struct
  */
 typedef struct
 {
-    GS32 snSpo2Out;                     /**< spo2 algorithm output value */
-    GS32 snSpo2Rvalue;                  /**< R value */
-    GS32 snSpo2Confi;                   /**< confidence */
-    GS32 snSpo2ValidLevel;              /**< valid level */
+    int32_t snSpo2Out;                     /**< spo2 algorithm output value */
+    int32_t snSpo2Rvalue;                  /**< R value */
+    int32_t snSpo2Confi;                   /**< confidence */
+    int32_t snSpo2ValidLevel;              /**< valid level */
 } STSpo2AlgoResult;
 
 /**
@@ -310,9 +224,9 @@ typedef struct
  */
 typedef struct
 {
-    GS32 snEcgOut;                      /**< ecg algorithm output value */
-    GS32 snEcgBpm;                      /**< bpm */
-    GS32 snEcgSnr;                      /**< snr */
+    int32_t snEcgOut;                      /**< ecg algorithm output value */
+    int32_t snEcgBpm;                      /**< bpm */
+    int32_t snEcgSnr;                      /**< snr */
 } STEcgAlgoResult;
 
 /**
@@ -320,21 +234,21 @@ typedef struct
  */
 typedef struct
 {
-    GS32* pnAlgoCalcResult;     //pointer to algorithm result array
-    GU16* pusAlgoResIndex;      //pointer to frame index array corresponding to algorithm result
-    GU16  usAlgoResCnt;         //number of algorithm result
-    GU8   uchAlgoResSize;       //item number of every algorithm result
+    int32_t* pnAlgoCalcResult;     //pointer to algorithm result array
+    uint16_t* pusAlgoResIndex;      //pointer to frame index array corresponding to algorithm result
+    uint16_t  usAlgoResCnt;         //number of algorithm result
+    uint8_t   uchAlgoResSize;       //item number of every algorithm result
 } STAlgoCalculateRes;
 
 typedef struct
 {
-    GU32 unCapData[4];
+    uint32_t unCapData[4];
 
 }STCapRawdata;
 
 typedef struct
 {
-    GU32 unTempData[4];
+    uint32_t unTempData[4];
 }STTempRawdata;
 
 /* byte false or true */
@@ -372,7 +286,7 @@ typedef struct
 #define   GH3X2X_IRQ_MSK_CHIP_RESET_BIT             (0x4000)        /**< chip reset */
 
 /*some reg addr*/
-#define   GH3X2X_INT_FIFO_UR_REG_ADDR               (0x050A)        /**< fifo use cnt */
+#define   GH3020_REG_INT_FIFO_UR               (0x050A)        /**< fifo use cnt */
 
 /**
  * @brief channel map for function id
@@ -458,89 +372,16 @@ typedef enum
 #define   GH3X2X_DEMO_GET_WORK_MODE                 (6)
 
 /* soft event list*/
-#define GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO      ((GU8)1)
-#define GH3X2X_SOFT_EVENT_WEAR_OFF                  ((GU8)2)
-#define GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO        ((GU8)4)
+#define GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO      ((uint8_t)1)
+#define GH3X2X_SOFT_EVENT_WEAR_OFF                  ((uint8_t)2)
+#define GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO        ((uint8_t)4)
 /* adt confirm status */
-#define GH3X2X_SENSOR_IS_NOT_MOVING                 ((GU8)0)
-#define GH3X2X_SENSOR_IS_MOVING                     ((GU8)1)
+#define GH3X2X_SENSOR_IS_NOT_MOVING                 ((uint8_t)0)
+#define GH3X2X_SENSOR_IS_MOVING                     ((uint8_t)1)
 
 /* algorithm run mode:simultaneously or not */
 #define GH3X2X_ALGORITHM_RUN_ALONE                  (0)             /**< only excute one algorithm at the same time */
 #define GH3X2X_ALGORITHM_RUN_SIMULTANEOUSLY         (1)             /**< excute more than one algorithm */
-
-/* algorithm mem size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_PEAK_1CHNL             (9116)       /**< HB 1 chnl algorithm peak memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_PEAK_2CHNL             (9116)       /**< HB 2 chnl  algorithm peak memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_PEAK_3CHNL             (9116)       /**< HB 3 chnl  algorithm peak memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_PEAK_4CHNL             (9116)       /**< HB 4 chnl  algorithm peak memory size in byte */
-
-#define GH3X2X_HR_ALGORITHM_MEMORY_RESIDENT_1CHNL         (4120)       /**< HB 1 chnl  algorithm desident memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_RESIDENT_2CHNL         (4120)       /**< HB 2 chnl  algorithm desident memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_RESIDENT_3CHNL         (4120)       /**< HB 3 chnl  algorithm desident memory size in byte */
-#define GH3X2X_HR_ALGORITHM_MEMORY_RESIDENT_4CHNL         (4120)       /**< HB 4 chnl  algorithm desident memory size in byte */
-
-#define GH3X2X_HR_ALGORITHM_MEMORY_REDUNDANCY             (1000)
-
-
-
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_PEAK_1CHNL           (10260)        /**< SPO2 1 chnl  algorithm peak memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_PEAK_2CHNL           (17064)       /**< SPO2 2 chnl  algorithm peak memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_PEAK_3CHNL           (23868)       /**< SPO2 3 chnl  algorithm peak memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_PEAK_4CHNL           (30672)       /**< SPO2 4 chnl  algorithm peak memory size in byte */
-
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_RESIDENT_1CHNL       (6916)        /**< SPO2 1 chnl  algorithm memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_RESIDENT_2CHNL       (13720)       /**< SPO2 2 chnl  algorithm memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_RESIDENT_3CHNL       (20524)       /**< SPO2 3 chnl  algorithm memory size in byte */
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_RESIDENT_4CHNL       (27328)       /**< SPO2 4 chnl  algorithm memory size in byte */
-
-#define GH3X2X_SPO2_ALGORITHM_MEMORY_REDUNDANCY           (1000)
-
-
-
-#define GH3X2X_ECG_ALGORITHM_MEMORY_PEAK                  (25764)       /**< ECG algorithm peak memory size in byte */
-#define GH3X2X_ECG_ALGORITHM_MEMORY_RESIDENT              (25764)       /**< ECG algorithm resident memory size in byte */
-#define GH3X2X_ECG_ALGORITHM_MEMORY_REDUNDANCY            (1000)
-
-
-#define GH3X2X_HRV_ALGORITHM_MEMORY_PEAK                  (2856)        /**< HRV algorithm peak memory size in byte */
-#define GH3X2X_HRV_ALGORITHM_MEMORY_RESIDENT              (2856)        /**< HRV algorithm resident memory size in byte */
-#define GH3X2X_HRV_ALGORITHM_MEMORY_REDUNDANCY            (300)
-
-
-#define GH3X2X_SOFT_ADT_ALGORITHM_MEMORY_PEAK             (800)          /**< SOFT ADT algorithm peak memory size in byte */
-#define GH3X2X_SOFT_ADT_ALGORITHM_MEMORY_RESIDENT         (0)          /**< SOFT ADT algorithm resident memory size in byte */
-#define GH3X2X_SOFT_ADT_ALGORITHM_MEMORY_REDUNDANCY       (80)        /**< SOFT ADT algorithm redundancy memory size in byte */
-
-
-#define GH3X2X_HSM_ALGORITHM_MEMORY_PEAK                  (944)       /**< HSM algorithm memory peak size in byte */
-#define GH3X2X_HSM_ALGORITHM_MEMORY_RESIDENT              (944)       /**< HSM algorithm memory resident size in byte */
-#define GH3X2X_HSM_ALGORITHM_MEMORY_REDUNDANCY            (100)
-
-
-#define GH3X2X_BT_ALGORITHM_MEMORY_PEAK                   (0)        /**< BT algorithm memory peak size in byte */
-#define GH3X2X_BT_ALGORITHM_MEMORY_RESIDENT               (0)        /**< BT algorithm memory resident size in byte */
-#define GH3X2X_BT_ALGORITHM_MEMORY_REDUNDANCY             (0)
-
-
-#define GH3X2X_RESP_ALGORITHM_MEMORY_PEAK                 (5435)        /**< RESP algorithm memory peak size in byte */
-#define GH3X2X_RESP_ALGORITHM_MEMORY_RESIDENT             (2363)        /**< RESP algorithm memory resident size in byte */
-#define GH3X2X_RESP_ALGORITHM_MEMORY_REDUNDANCY           (500)
-
-
-#define GH3X2X_AF_ALGORITHM_MEMORY_PEAK                   (3262)        /**< AF algorithm memory peak size in byte */
-#define GH3X2X_AF_ALGORITHM_MEMORY_RESIDENT               (1102)        /**< AF algorithm memory resident size in byte */
-#define GH3X2X_AF_ALGORITHM_MEMORY_REDUNDANCY             (300)
-
-#ifdef ANDROID_REE_PLATFORM
-#define GH3X2X_BP_ALGORITHM_MEMORY_PEAK                   (10000*1024)  /**< FPBP algorithm memory peak size in byte */
-#define GH3X2X_BP_ALGORITHM_MEMORY_RESIDENT               (10000*1024)  /**< FPBP algorithm memory resident size in byte */
-#define GH3X2X_BP_ALGORITHM_MEMORY_REDUNDANCY             (0)
-#else
-#define GH3X2X_BP_ALGORITHM_MEMORY_PEAK                   (1)  /**< FPBP algorithm memory peak size in byte */
-#define GH3X2X_BP_ALGORITHM_MEMORY_RESIDENT               (1)  /**< FPBP algorithm memory resident size in byte */
-#define GH3X2X_BP_ALGORITHM_MEMORY_REDUNDANCY             (0)
-#endif
 
 #define GH3X2X_ALGO_INFO_RECORD_GSENSOR_NUM               (3)
 #define GH3X2X_ALGO_INFO_RECORD_RAWDARA_NUM               (4)
@@ -592,14 +433,14 @@ typedef enum
 
 typedef struct
 {
-   GU32  unFunctionID;  //Function id     use maroc exp: GH3X2X_FUNCTION_HR
-   GU8  ubChnlNum;
-   GU8  ubFrameId;
-   GS16 usGsensor[GH3X2X_ALGO_INFO_RECORD_GSENSOR_NUM];
-   GU32 unRawdata[GH3X2X_ALGO_INFO_RECORD_RAWDARA_NUM];
-   GU32 unAgcInfo[GH3X2X_ALGO_INFO_RECORD_AGC_INFO_NUM];
-   GU32 unFlag[GH3X2X_ALGO_INFO_RECORD_FALG_NUM];
-   GU32 unResult[GH3X2X_ALGO_INFO_RECORD_RESULT_NUM];
+   uint32_t  unFunctionID;  //Function id     use maroc exp: GH3X2X_FUNCTION_HR
+   uint8_t  ubChnlNum;
+   uint8_t  ubFrameId;
+   int16_t usGsensor[GH3X2X_ALGO_INFO_RECORD_GSENSOR_NUM];
+   uint32_t unRawdata[GH3X2X_ALGO_INFO_RECORD_RAWDARA_NUM];
+   uint32_t unAgcInfo[GH3X2X_ALGO_INFO_RECORD_AGC_INFO_NUM];
+   uint32_t unFlag[GH3X2X_ALGO_INFO_RECORD_FALG_NUM];
+   uint32_t unResult[GH3X2X_ALGO_INFO_RECORD_RESULT_NUM];
 } STGh3x2xAlgoInfoRecordData;
 
 
@@ -608,12 +449,12 @@ typedef struct
 typedef struct
 {
     // void (*DumpInit) (void);
-    //void (*BgLevelSet)(GU16);
-    //void (*DumpModeSet)(GU16);
+    //void (*BgLevelSet)(uint16_t);
+    //void (*DumpModeSet)(uint16_t);
     //void (*MemSetSpo2IncompleteArr)(void);
     //void (*MemSetHbaIncompleteArr)(void);
-    void (*AlgoInfoRecordInputData)(GS32* ,GU8 ,GU32 ,GU8* ,GU32 );
-    void (*AlgoInfoRecordOutputData)(GS32 *, GU8 );
+    void (*AlgoInfoRecordInputData)(int32_t* ,uint8_t ,uint32_t ,uint8_t* ,uint32_t );
+    void (*AlgoInfoRecordOutputData)(int32_t *, uint8_t );
 } STGh3x2xModuleFunList;
 
 
@@ -622,8 +463,8 @@ typedef struct
 
 typedef struct
 {
-   GU8 puchPacketPayloadArr[GH3X2X_UPROTOCOL_PAYLOAD_LEN_MAX + 8];
-   GU8 uchFrameIdArr[CHANNEL_MAP_ID_NUM];
+   uint8_t puchPacketPayloadArr[GH3X2X_UPROTOCOL_PAYLOAD_LEN_MAX + 8];
+   uint8_t uchFrameIdArr[CHANNEL_MAP_ID_NUM];
 } STGh3x2xProtocolData;
 
 
@@ -647,97 +488,49 @@ typedef struct
 #define GH3X2X_AGC_ECG_PPG_RX_EN                  15
 
 
-
-
-
-
-
-#define GH3X2X_ENGINEERING_MODE_CHNL_NUM_MAX      32
-
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_10_US    0
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_20_US    1
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_30_US    2
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_39_US    3
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_79_US    4
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_158_US   5
-#define GH3X2X_ENGINEERING_MODE_INT_TIME_316_US   6
-
-
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_10_K     0
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_25_K     1
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_50_K     2
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_75_K     3
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_100_K    4
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_250_K    5
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_500_K    6
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_750_K    7
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_1000_K   8
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_1250_K   9
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_1500_K   10
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_1750_K   11
-#define GH3X2X_ENGINEERING_MODE_TIA_GAIN_2000_K   12
-
 #define GH3X2X_FRAME_FLAG_NUM                     8
 
-
-
 typedef struct
 {
-   GU32 unFunctionID;            //Function id     use maroc exp: GH3X2X_FUNCTION_HR
-   GU8  uchSampleRateChangeEn;   // 0: do not need change sample rate   1: need change sample rate
-   GU16 usSampleRate;            // sample rate (unit Hz  range 5Hz~1000Hz)
-   GU8  uchIntTimeChangeEn;      // 0: do not need change integrator time  1: need change intergrator time
-   GU8  uchIntTime;              // use maroc exp: GH3X2X_ENGINEERING_MODE_INT_TIME_10_US
-   GU8  uchTiaGainChangeEn;      // 0: do not need change TIA gain    1: need change TIA gain
-   GU8  uchTiaGain[GH3X2X_ENGINEERING_MODE_CHNL_NUM_MAX];  //TIA gain for every channel, use maroc GH3X2X_ENGINEERING_MODE_TIA_GAIN_10_K
-   GU8  uchLedCurrentChangeEn;      // 0: do not need change LED current    1: need change change LED current
-   GU8  uchLedDrv0Current[GH3X2X_ENGINEERING_MODE_CHNL_NUM_MAX];  //LED driver0 current for every channel (unit: mA   range: 0~200)
-   GU8  uchLedDrv1Current[GH3X2X_ENGINEERING_MODE_CHNL_NUM_MAX];  //LED driver1 current for every channel (unit: mA   range: 0~200)
-} STGh3x2xEngineeringModeSampleParam;
-
-
-
-typedef struct
-{
-    GU8 uchEnable;
-    GU8 uchSlotAdc;
-    GU8  uchCurrentTiaGain;
-    GU8  uchCurrentDrv;
-    GU8  uchTiaGainUpLimit;
-    GU8  uchHaveBakRegFlag;
-    GU8  uchBakRegAgcEn;
-    GU8  uchBakRegAgcSrc;
-    GU8  uchBakRegLedCurrentMin;
-    GU8  uchBakRegLedCurrentMax;
-    GU8  uchBakTiaGain;
+    uint8_t uchEnable;
+    uint8_t uchSlotAdc;
+    uint8_t  uchCurrentTiaGain;
+    uint8_t  uchCurrentDrv;
+    uint8_t  uchTiaGainUpLimit;
+    uint8_t  uchHaveBakRegFlag;
+    uint8_t  uchBakRegAgcEn;
+    uint8_t  uchBakRegAgcSrc;
+    uint8_t  uchBakRegLedCurrentMin;
+    uint8_t  uchBakRegLedCurrentMax;
+    uint8_t  uchBakTiaGain;
 } STGh3x2xNewAgcMainChnlInfo;
 
 typedef struct
 {
-    GU16 usAnalysisDiscardLen;
-    GU16 usAnalysisEndLen;
+    uint16_t usAnalysisDiscardLen;
+    uint16_t usAnalysisEndLen;
 }STGh3x2xNewAgcSubChnlSlotInfo;
 
 typedef struct
 {
-    GU8 uchEn;
-    GU8 uchSlotAdcNo;
-    GU8 uchCurrentGain;
-    GU32 unLastRawdata;
-    GU32 unLastLastRawdata;
-    GU32 unRawdataSum;
-    GU16 usAnalysisCnt;
-    GU16 usMoreThanUpLimitPointCnt;
-    GU16 usMoreThanUpLimitPointCntForBiggerGain;
-    GU16 usTrigeUpLimitForBiggerGain;   //  rawdate/256
+    uint8_t uchEn;
+    uint8_t uchSlotAdcNo;
+    uint8_t uchCurrentGain;
+    uint32_t unLastRawdata;
+    uint32_t unLastLastRawdata;
+    uint32_t unRawdataSum;
+    uint16_t usAnalysisCnt;
+    uint16_t usMoreThanUpLimitPointCnt;
+    uint16_t usMoreThanUpLimitPointCntForBiggerGain;
+    uint16_t usTrigeUpLimitForBiggerGain;   //  rawdate/256
 }STGh3x2xNewAgcSubChnlRxInfo;
 
 
 extern STGh3x2xNewAgcMainChnlInfo  * const g_pstGh3x2xNewAgcMainChnlInfo;
 extern STGh3x2xNewAgcSubChnlSlotInfo  * const g_pstGh3x2xNewAgcSubChnlSlotInfo;
 extern STGh3x2xNewAgcSubChnlRxInfo    * const g_pstGh3x2xNewAgcSubChnlRxInfo;
-extern const GU8 g_uchNewAgcSlotNumLimit;
-extern const GU8 g_uchNewAgcSubChnlNumLimit;
+extern const uint8_t g_uchNewAgcSlotNumLimit;
+extern const uint8_t g_uchNewAgcSubChnlNumLimit;
 
 
 
@@ -748,77 +541,26 @@ void ResisterpGh3x2xModuleFunList(STGh3x2xModuleFunList *pGh3x2xModuleFunList);
 #if 0
 void GH3X2X_DumpInit(void);
 void GH3X2X_DumpInitNullFun(void);
-void GH3X2X_BgLevelSet(GU16 usRegVal);
-void GH3X2X_BgLevelSetNullFun(GU16 usRegVal);
-void GH3X2X_DumpModeSet(GU16 usRegVal);
-void GH3X2X_DumpModeSetNullFun(GU16 usRegVal);
+void GH3X2X_BgLevelSet(uint16_t usRegVal);
+void GH3X2X_BgLevelSetNullFun(uint16_t usRegVal);
+void GH3X2X_DumpModeSet(uint16_t usRegVal);
+void GH3X2X_DumpModeSetNullFun(uint16_t usRegVal);
 void GH3X2X_MemSetSpo2IncompleteArr(void);
 void GH3X2X_MemSetSpo2IncompleteArrNullFun(void);
 void GH3X2X_MemSetHbaIncompleteArr(void);
 void GH3X2X_MemSetHbaIncompleteArrNullFun(void);
 #endif
 
-void GH3x2xAlgoInfoRecordInputDataNulFun(GS32 *snRawdataArray,GU8 uchChannelMapCnt ,GU32 unTimeStamp ,GU8 *uchChannelMapArr ,GU32 unFunctionID);
-void GH3x2xAlgoInfoRecordInputData(GS32 *snRawdataArray,GU8 uchChannelMapCnt ,GU32 unTimeStamp ,GU8 *uchChannelMapArr ,GU32 unFunctionID);
-void GH3x2xAlgoInfoRecordOutputDataNullFun(GS32 *psnAlgoResult, GU8 uchResultNum);
-void GH3x2xAlgoInfoRecordOutputData(GS32 *psnAlgoResult, GU8 uchResultNum);
 
-
-
-
-
-
-
-
-//extern GU8 * const g_uchPacketPayloadArr;//[GH3X2X_UPROTOCOL_PAYLOAD_LEN_MAX];
+//extern uint8_t * const g_uchPacketPayloadArr;//[GH3X2X_UPROTOCOL_PAYLOAD_LEN_MAX];
 
 extern STGh3x2xProtocolData * const g_pstGh3x2xProtocolData;//[GH3X2X_UPROTOCOL_PAYLOAD_LEN_MAX];
 
 
-extern void GH3X2X_ProtocolFrameIdClean(GU8 uchFunctionID);
-
-
-
+extern void GH3X2X_ProtocolFrameIdClean(uint8_t uchFunctionID);
 
 /**
- * @fn     void GH3X2X_RegisterHookFunc(void (*pInitHookFunc)(void),
- *                          void (*pStartHookFunc)(void),
- *                             void (*pStopHookFunc)(void),
- *                           void (*pGetRawdataHookFunc)(GU8 *puchReadDataBuffer, GU16 usReadDataLen))
- *
- * @brief  Register hook function callback.
- *
- * @attention   None
- *
- * @param[in]   pInitHookFunc           pointer to init hook function
- * @param[in]   pStartHookFunc          pointer to start hook function
- * @param[in]   pStopHookFunc           pointer to stop hook function
- * @param[in]   pGetRawdataHookFunc     pointer to get rawdata hook function
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_RegisterHookFunc(void (*pInitHookFunc)(void),
-                             void (*pStartHookFunc)(void),
-                             void (*pStopHookFunc)(void),
-                             void (*pGetRawdataHookFunc)(GU8 *puchReadDataBuffer, GU16 usReadDataLen));
-
-/**
- * @fn     void GH3X2X_RegisterDelayUsCallback(void (*pPlatformDelayUsFunc)(GU16 usUsec))
- *
- * @brief  Register delay us callback function, should register delay us function in platforms
- *
- * @attention   None
- *
- * @param[in]   pPlatformDelayUsFunc      pointer to delay us function
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_RegisterDelayUsCallback(void (*pPlatformDelayUsFunc)(GU16 usUsec));
-
-/**
- * @fn     void GH3X2X_WriteReg(GU16 usRegAddr, GU16 usRegValue)
+ * @fn     void GH3X2X_WriteReg(uint16_t usRegAddr, uint16_t usRegValue)
  *
  * @brief  Write register via i2c or spi
  *
@@ -830,10 +572,10 @@ void GH3X2X_RegisterDelayUsCallback(void (*pPlatformDelayUsFunc)(GU16 usUsec));
  *
  * @return  None
  */
-void GH3X2X_WriteReg(GU16 usRegAddr, GU16 usRegValue);
+void GH3X2X_WriteReg(uint16_t regaddr, uint16_t regval);
 
 /**
- * @fn     GU16 GH3X2X_ReadReg(GU16 usRegAddr)
+ * @fn     uint16_t GH3X2X_ReadReg(uint16_t usRegAddr)
  *
  * @brief  Read register via i2c or spi
  *
@@ -844,158 +586,10 @@ void GH3X2X_WriteReg(GU16 usRegAddr, GU16 usRegValue);
  *
  * @return  register data
  */
-GU16 GH3X2X_ReadReg(GU16 usRegAddr);
+uint16_t GH3X2X_ReadReg(uint16_t regaddr);
 
 /**
- * @fn     GU32 GH3X2X_ReadRegs(GU16 usRegAddr, GU16 *pusRegValueBuffer, GU16 usLen)
- *
- * @brief  Read multi register via i2c or spi
- *
- * @attention   None
- *
- * @param[in]   usRegAddr           register addr
- * @param[in]   pusRegValueBuffer   pointer to register value buffer
- * @param[in]   uchLen              registers len
- * @param[out]  None
- *
- * @return  None
- */
-GU32 GH3X2X_ReadRegs(GU16 usRegAddr, GU16 *pusRegValueBuffer, GU16 usLen);
-
-/**
- * @fn     void GH3X2X_ReadFifo(GU8 *puchDataBuffer, GU16 usLen)
- *
- * @brief  Read fifo via i2c or spi
- *
- * @attention   None
- *
- * @param[in]   puchDataBuffer      pointer to buffer for fifo rawdata
- * @param[in]   usLen               fifo bytes len
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_ReadFifo(GU8 *puchDataBuffer, GU16 usLen);
-
-/**
- * @fn     void GH3X2X_WriteRegBitField(GU16 usRegAddr, GU8 uchLsb, GU8 uchMsb, GU16 usValue)
- *
- * @brief  write register bit field via i2c or spi
- *
- * @attention   None
- *
- * @param[in]   usRegAddr      register addr
- * @param[in]   uchLsb         lsb of bit field
- * @param[in]   uchMsb         msb of bit field
- * @param[in]   usRegValue     register data
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_WriteRegBitField(GU16 usRegAddr, GU8 uchLsb, GU8 uchMsb, GU16 usValue);
-
-/**
- * @fn     GU16 GH3X2X_ReadRegBitField(GU16 usRegAddr, GU8 uchLsb, GU8 uchMsb)
- *
- * @brief  Read register bit field via i2c or spi
- *
- * @attention   None
- *
- * @param[in]   usRegAddr      register addr
- * @param[in]   uchLsb         lsb of bit field
- * @param[in]   uchMsb         msb of bit field
- * @param[out]  None
- *
- * @return  register bit field data
- */
-GU16 GH3X2X_ReadRegBitField(GU16 usRegAddr, GU8 uchLsb, GU8 uchMsb);
-
-/**
- * @fn     GS8 GH3X2X_RegisterSpiOperationFunc(GU8 (*pSpiWriteFunc)(GU8 uchWriteBytesArr[], GU16 usWriteLen),
- *                                     GU8 (*pSpiReadFunc)(GU8 uchReadBytesArr[], GU16 usMaxReadLen),
- *                                   void (*pSpiCsCtrlFunc)(GU8 uchCsLevelHigh))
- *
- * @brief  Register spi operation function callback
- *
- * @attention   None
- *
- * @param[in]   pSpiWriteFunc       pointer to spi write function
- * @param[in]   pSpiReadFunc        pointer to spi read function
- * @param[in]   pSpiCsCtrlFunc      pointer to spi cs operation function
- * @param[out]  None
- *
- * @return  errcode
- * @retval  #GH3X2X_RET_OK               return successfully
- * @retval  #GH3X2X_RET_PARAMETER_ERROR  spi operation function pointer parameter error
- */
-GS8 GH3X2X_RegisterSpiOperationFunc(GU8 (*pSpiWriteFunc)(GU8 uchWriteBytesArr[], GU16 usWriteLen),
-                                    GU8 (*pSpiReadFunc)(GU8 uchReadBytesArr[], GU16 usMaxReadLen),
-                                    void (*pSpiCsCtrlFunc)(GU8 uchCsLevelHigh));
-
-
-
-
-
-
-
-
-
-
-
-/**
- * @fn     GS8 GH3X2X_RegisterSpiHwCsOperationFunc(GU8 (*pSpiWriteFunc)(GU8 uchWriteBytesArr[], GU16 usWriteLen),
- *                                   GU8 (*pSpiWriteF0ReadFunc)(GU8 uchReadBytesArr[], GU16 usMaxReadLen)
- *                                  )
- *
- * @brief  Register spi operation function callback
- *
- * @attention   None
- *
- * @param[in]   pSpiWriteFunc                pointer to spi write function
- * @param[in]   pSpiWriteF1ReadFunc        pointer to spi write f1 and read function
- * @param[out]  None
- *
- * @return  errcode
- * @retval  #GH3X2X_RET_OK               return successfully
- * @retval  #GH3X2X_RET_PARAMETER_ERROR  spi operation function pointer parameter error
- */
-GS8 GH3X2X_RegisterSpiHwCsOperationFunc(GU8 (*pSpiWriteFunc)(GU8 uchWriteBytesArr[], GU16 usWriteLen),
-                                    GU8 (*pSpiWriteF1ReadFunc)(GU8 uchReadBytesArr[], GU16 usMaxReadLen)
-                                    );
-
-
-
-
-
-
-
-
-/**
- * @fn     GS8 GH3X2X_RegisterI2cOperationFunc(GU8 uchI2cIdLowTwoBitsSelect,
- *                                GU8 (*pI2cWriteFunc)(GU8 uchDeviceId, const GU8 uchWriteBytesArr[], GU16 usWriteLen),
- *                                GU8 (*pI2cReadFunc)(GU8 uchDeviceId, const GU8 uchCmddBytesArr[], GU16 usCmddLen,
- *                                                      GU8 uchReadBytesArr[], GU16 usMaxReadLen))
- *
- * @brief  Register i2c operation function callback
- *
- * @attention   None
- *
- * @param[in]   uchI2cIdLowTwoBitsSelect    i2c low two bits addr selected, ref EMGh3x2xI2cIdSelect
- * @param[in]   pI2cWriteFunc               pointer to i2c write function
- * @param[in]   pI2cReadFunc                pointer to i2c read function
- * @param[out]  None
- *
- * @return  errcode
- * @retval  #GH3X2X_RET_OK               return successfully
- * @retval  #GH3X2X_RET_PARAMETER_ERROR  i2c operation function pointer parameter error
- */
-GS8 GH3X2X_RegisterI2cOperationFunc(GU8 uchI2cIdLowTwoBitsSelect,
-                                GU8 (*pI2cWriteFunc)(GU8 uchDeviceId, const GU8 uchWriteBytesArr[], GU16 usWriteLen),
-                                GU8 (*pI2cReadFunc)(GU8 uchDeviceId, const GU8 uchCmddBytesArr[], GU16 usCmddLen,
-                                                        GU8 uchReadBytesArr[], GU16 usMaxReadLen));
-
-/**
- * @fn     GS8 GH3X2X_ExitLowPowerMode(void)
+ * @fn     int8_t GH3X2X_ExitLowPowerMode(void)
  *
  * @brief  Exit lowpower mode, in this mode, can read&write reg with gh3x2x
  *
@@ -1008,10 +602,10 @@ GS8 GH3X2X_RegisterI2cOperationFunc(GU8 uchI2cIdLowTwoBitsSelect,
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    exit low power mode error
  */
-GS8 GH3X2X_ExitLowPowerMode(void);
+int8_t GH3X2X_ExitLowPowerMode(void);
 
 /**
- * @fn     GS8 GH3X2X_EnterLowPowerMode(void)
+ * @fn     int8_t GH3X2X_EnterLowPowerMode(void)
  *
  * @brief  Enter lowpower mode, in this mode, can't read&write reg with gh3x2x
  *
@@ -1024,10 +618,11 @@ GS8 GH3X2X_ExitLowPowerMode(void);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    enter low power mode error
  */
-GS8 GH3X2X_EnterLowPowerMode(void);
+int8_t GH3X2X_EnterLowPowerMode(void);
+int8_t GH3X2X_EnterLowPowerModeWithoutWaiting(void);
 
 /**
- * @fn     void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uchPinLevel))
+ * @fn     void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(uint8_t uchPinLevel))
  *
  * @brief  Register reset pin level control function
  *
@@ -1038,10 +633,10 @@ GS8 GH3X2X_EnterLowPowerMode(void);
  *
  * @return  None
  */
-void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uchPinLevel));
+void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(uint8_t uchPinLevel));
 
 /**
- * @fn     GS8 GH3X2X_HardReset(void)
+ * @fn     int8_t GH3X2X_HardReset(void)
  *
  * @brief  Gh3x2x softreset via i2c/spi, can read&write reg with gh3x2x after reset
  *
@@ -1054,21 +649,7 @@ void GH3X2X_RegisterResetPinControlFunc(void (*pResetPinLevelControlFunc)(GU8 uc
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    reset pin control function not register
  */
-GS8 GH3X2X_HardReset(void);
-
-/**
- * @fn     void GH3X2X_SendCmd(GU8 uchCmd)
- *
- * @brief  Send cmd via i2c or spi
- *
- * @attention   None
- *
- * @param[in]   uchCmd      cmd
- * @param[out]  None
- *
- * @return  None
- */
-void GH3X2X_SendCmd(GU8 uchCmd);
+int8_t GH3X2X_HardReset(void);
 
 /**
  * @fn     void GH3X2X_WearDetectEnable(EMWearDetectEnableType emWearDetectEnable)
@@ -1085,7 +666,7 @@ void GH3X2X_SendCmd(GU8 uchCmd);
 void GH3X2X_WearDetectEnable(EMWearDetectEnableType emWearDetectEnable);
 
 /**
- * @fn     GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
+ * @fn     int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch)
  *
  * @brief  Gh3x2x switch to detect wear on/off type
  *
@@ -1101,7 +682,7 @@ void GH3X2X_WearDetectEnable(EMWearDetectEnableType emWearDetectEnable);
  * @retval  #GH3X2X_RET_GENERIC_ERROR       detect type equal last type, don't need to switch
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch);
+int8_t GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectForceSwitch emForceSwitch);
 
 /**
  * @fn     EMSkinColorStatusType GH3X2X_GetSkinStatus(void)
@@ -1118,7 +699,7 @@ GS8 GH3X2X_WearDetectSwitchTo(EMWearDetectType emWearDetectType, EMWearDetectFor
 EMSkinColorStatusType GH3X2X_GetSkinStatus(void);
 
 /**
- * @fn     GS8 GH3X2X_SoftReset(void)
+ * @fn     int8_t GH3X2X_SoftReset(void)
  *
  * @brief  Gh3x2x softreset via i2c/spi, can read&write reg with gh3x2x after reset
  *
@@ -1131,10 +712,10 @@ EMSkinColorStatusType GH3X2X_GetSkinStatus(void);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    exit low power mode error
  */
-GS8 GH3X2X_SoftReset(void);
+int8_t GH3X2X_SoftReset(void);
 
 /**
- * @fn     GS8 GH3X2X_LoadNewRegConfigArr(const STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen)
+ * @fn     int8_t GH3X2X_LoadNewRegConfigArr(const struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen)
  *
  * @brief  Load new gh3x2x reg config array
  *
@@ -1153,10 +734,10 @@ GS8 GH3X2X_SoftReset(void);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_COMM_ERROR       gh3x2x communicate error
  */
-GS8 GH3X2X_LoadNewRegConfigArr(const STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen);
+int8_t GH3X2X_LoadNewRegConfigArr(FAR const struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen);
 
 /**
- * @fn     GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 usDumpRegsLen)
+ * @fn     int8_t GH3X2X_DumpRegs(struct gh3020_reg_s *pstDumpRegsArr, uint16_t usDumpRegsStartAddr, uint16_t usDumpRegsLen)
  *
  * @brief  Dump gh3x2x regs
  *
@@ -1172,10 +753,10 @@ GS8 GH3X2X_LoadNewRegConfigArr(const STGh3x2xReg *pstRegConfigArr, GU16 usRegCon
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR    dump gh3x2x address out of bounds
  */
-GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 usDumpRegsLen);
+int8_t GH3X2X_DumpRegs(FAR struct gh3020_reg_s *pstDumpRegsArr, uint16_t usDumpRegsStartAddr, uint16_t usDumpRegsLen);
 
 /**
- * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize)
  *
  * @brief  memcpy() Re-implementation
  *
@@ -1187,10 +768,10 @@ GS8 GH3X2X_DumpRegs(STGh3x2xReg *pstDumpRegsArr, GU16 usDumpRegsStartAddr, GU16 
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
+void *GH3X2X_Memcpy(void *pDest, const void *pSrc, uint32_t unByteSize);
 
 /**
- * @fn     void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize)
+ * @fn     void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize)
  *
  * @brief  memset() Re-implementation
  *
@@ -1202,10 +783,10 @@ void *GH3X2X_Memcpy(void *pDest, const void *pSrc, GU32 unByteSize);
  *
  * @return  pointer to destination buffer
  */
-void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
+void *GH3X2X_Memset(void* pDest, char chVal, uint32_t unByteSize);
 
 /**
- * @fn     GU32 GH3X2X_Strlen(const GCHAR *pszSrc)
+ * @fn     uint32_t GH3X2X_Strlen(const char *pszSrc)
  *
  * @brief  strlen() Re-implementation
  *
@@ -1216,7 +797,7 @@ void *GH3X2X_Memset(void* pDest, GCHAR chVal, GU32 unByteSize);
  *
  * @return  string len
  */
-GU32 GH3X2X_Strlen(const GCHAR *pszSrc);
+uint32_t GH3X2X_Strlen(const char *pszSrc);
 
 /**
  * @fn     void GH3X2X_HbaAlgoChnlMapDefultSet(void)
@@ -1258,7 +839,7 @@ void GH3X2X_HrvAlgoChnlMapDefultSet(void);
 void GH3X2X_Spo2AlgoChnlMapDefultSet(void);
 
 /**
- * @fn     GS8 GH3X2X_CommunicateConfirm(void)
+ * @fn     int8_t GH3X2X_CommunicateConfirm(void)
  *
  * @brief  Communication operation interface confirm
  *
@@ -1271,10 +852,10 @@ void GH3X2X_Spo2AlgoChnlMapDefultSet(void);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_COMM_ERROR       gh3x2x communicate error
  */
-GS8 GH3X2X_CommunicateConfirm(void);
+int8_t GH3X2X_CommunicateConfirm(void);
 
 /**
- * @fn     GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam)
+ * @fn     int8_t GH3X2X_Init(const struct gh3020_initcfg_s *pstGh3x2xInitConfigParam)
  *
  * @brief  Init gh3x2x with configure parameters
  *
@@ -1287,10 +868,10 @@ GS8 GH3X2X_CommunicateConfirm(void);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_COMM_ERROR       gh3x2x communicate error
  */
-GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam);
+int8_t GH3X2X_Init(FAR const struct gh3020_initcfg_s *pstGh3x2xInitConfigParam);
 
 /**
- * @fn     GS8 GH3X2X_StartSampling(void)
+ * @fn     int8_t GH3X2X_StartSampling(void)
  *
  * @brief  Start gh3x2x sampling
  *
@@ -1304,10 +885,10 @@ GS8 GH3X2X_Init(const STGh3x2xInitConfig *pstGh3x2xInitConfigParam);
  * @retval  #GH3X2X_RET_NO_INITED_ERROR     gh3x2x has not inited
  * @retval  #GH3X2X_RET_GENERIC_ERROR       gh3x2x has started, need restart should call GH3X2X_StopSampling then start
  */
-GS8 GH3X2X_StartSampling(void);
+int8_t GH3X2X_StartSampling(void);
 
 /**
- * @fn     GS8 GH3X2X_StopSampling(void)
+ * @fn     int8_t GH3X2X_StopSampling(void)
  *
  * @brief  Stop gh3x2x sampling
  *
@@ -1320,10 +901,10 @@ GS8 GH3X2X_StartSampling(void);
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_NO_INITED_ERROR     gh3x2x has not inited
  */
-GS8 GH3X2X_StopSampling(void);
+int8_t GH3X2X_StopSampling(void);
 
 /**
- * @fn     GU16 GH3X2X_GetIrqStatus(void)
+ * @fn     uint16_t GH3X2X_GetIrqStatus(void)
  *
  * @brief  Get irq status reg val
  *
@@ -1334,10 +915,10 @@ GS8 GH3X2X_StopSampling(void);
  *
  * @return  irq status val, ref irq status mask
  */
-GU16 GH3X2X_GetIrqStatus(void);
+uint16_t GH3X2X_GetIrqStatus(void);
 
 /**
- * @fn     GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen)
+ * @fn     int16_t GH3X2X_ReadFifodata(uint8_t *puchGh3x2xReadFifoData, uint16_t* pusReadFifoDataLen)
  *
  * @brief  Read Gh3x2x Fifo Data
  *
@@ -1352,11 +933,11 @@ GU16 GH3X2X_GetIrqStatus(void);
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  */
-GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen ,GU16 usFifoReadByteNum);
+int16_t GH3X2X_ReadFifodata(uint8_t *puchGh3x2xReadFifoData, uint16_t* pusReadFifoDataLen ,uint16_t usFifoReadByteNum);
 
 
 /**
- * @fn     GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength)
+ * @fn     int16_t GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, uint16_t* usFifoLength)
  *
  * @brief  Get rawdata from fifo
  *
@@ -1370,11 +951,11 @@ GS16 GH3X2X_ReadFifodata(GU8 *puchGh3x2xReadFifoData, GU16* pusReadFifoDataLen ,
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo not empty
  */
-GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength);
+int16_t GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, uint16_t* usFifoLength);
 
 /**
  * @fn     void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
- *                                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen)
+ *                                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen)
  *
  * @brief  Unpack to 8 slot rawdata from read fifo data buffer
  *
@@ -1388,12 +969,12 @@ GS16 GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, GU16* usFifoLength);
  * @return  None
  */
 void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
-                                    GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen);
+                                    uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen);
 
 /**
- * @fn     GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
- *                                       GU8 *puchReadRawdataBuffer, GU16* usFifoLength, GU8 uchChannelMapCnt,
- *                                       GU8 *puchChannelMapArr)
+ * @fn     int16_t GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+ *                                       uint8_t *puchReadRawdataBuffer, uint16_t* usFifoLength, uint8_t uchChannelMapCnt,
+ *                                       uint8_t *puchChannelMapArr)
  *
  * @brief  Get rawdata from fifo with channel map
  *
@@ -1409,12 +990,12 @@ void GH3X2X_UnpackRawdataPackage(STGh3x2xSlotRawdata *pstSlotRawdataArr,
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE      return fifo is not empty
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
-                                        GU8 *puchReadRawdataBuffer, GU16* usFifoLength, GU8 uchChannelMapCnt,
-                                        GU8 *puchChannelMapArr);
+int16_t GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+                                        uint8_t *puchReadRawdataBuffer, uint16_t* usFifoLength, uint8_t uchChannelMapCnt,
+                                        uint8_t *puchChannelMapArr);
 
 /**
- * @fn     GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
+ * @fn     int8_t GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata)
  *
  * @brief  clear channel map rawdata struct
  *
@@ -1428,11 +1009,11 @@ GS16 GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRaw
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata);
+int8_t GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata);
 
 /**
- * @fn     GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
- *               GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr)
+ * @fn     int8_t GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+ *               uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr)
  *
  * @brief  Unpack to channel rawdata from read fifo data buffer;
  *         if last channel rawdata incomplete, should change fifo watermark
@@ -1449,11 +1030,11 @@ GS8 GH3X2X_ChannelMapRawdataClear(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdat
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return param error
  */
-GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
-                GU8 *puchReadRawdataBuffer, GU16 usReadRawdataLen, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr);
+int8_t GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelRawdata,
+                uint8_t *puchReadRawdataBuffer, uint16_t usReadRawdataLen, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr);
 
 /**
- * @fn     GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
+ * @fn     int8_t GH3X2X_SlotEnableConfig(uint16_t usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType)
  *
  * @brief  Slot enable config
  *
@@ -1467,10 +1048,10 @@ GS8 GH3X2X_UnpackRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannelR
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType);
+int8_t GH3X2X_SlotEnableConfig(uint16_t usSlotEnableConfig, EMSlotEnableConfigType emSlotEnableConfigType);
 
 /**
- * @fn     GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr)
+ * @fn     int8_t GH3X2X_FifoWatermarkThrConfig(uint16_t usFifoWatermarkThr)
  *
  * @brief  Fifo water mark threshold config
  *
@@ -1483,10 +1064,10 @@ GS8 GH3X2X_SlotEnableConfig(GU16 usSlotEnableConfig, EMSlotEnableConfigType emSl
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr);
+int8_t GH3X2X_FifoWatermarkThrConfig(uint16_t usFifoWatermarkThr);
 
 /**
- * @fn     GU16 GH3X2X_GetFifoWatermarkThr(void)
+ * @fn     uint16_t GH3X2X_GetFifoWatermarkThr(void)
  *
  * @brief  Get fifo water mark threshold
  *
@@ -1497,10 +1078,10 @@ GS8 GH3X2X_FifoWatermarkThrConfig(GU16 usFifoWatermarkThr);
  *
  * @return  fifo water mark threshold
  */
-GU16 GH3X2X_GetFifoWatermarkThr(void);
+uint16_t GH3X2X_GetFifoWatermarkThr(void);
 
 /**
- * @fn     void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum)
+ * @fn     void GH3X2X_SetMaxNumWhenReadFifo(uint16_t usMaxNum)
  *
  * @brief  Set max number of rawdata read from fifo every time
  *
@@ -1511,10 +1092,10 @@ GU16 GH3X2X_GetFifoWatermarkThr(void);
  *
  * @return  None
  */
-void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum);
+void GH3X2X_SetMaxNumWhenReadFifo(uint16_t usMaxNum);
 
 /**
- * @fn     GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurrentVal)
+ * @fn     int8_t GH3X2X_SlotLedCurrentConfig(uint8_t uchSlotIndex, uint8_t uchDrvIndex, uint8_t uchCurrentVal)
  *
  * @brief  Slot led current config
  *
@@ -1529,10 +1110,10 @@ void GH3X2X_SetMaxNumWhenReadFifo(GU16 usMaxNum);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurrentVal);
+int8_t GH3X2X_SlotLedCurrentConfig(uint8_t uchSlotIndex, uint8_t uchDrvIndex, uint8_t uchCurrentVal);
 
 /**
- * @fn     GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex)
+ * @fn     uint8_t GH3X2X_GetSlotLedCurrent(uint8_t uchSlotIndex, uint8_t uchDrvIndex)
  *
  * @brief  Get slot led current config
  *
@@ -1544,10 +1125,10 @@ GS8 GH3X2X_SlotLedCurrentConfig(GU8 uchSlotIndex, GU8 uchDrvIndex, GU8 uchCurren
  *
  * @return  current val. if param error, return val always equal 0
  */
-GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex);
+uint8_t GH3X2X_GetSlotLedCurrent(uint8_t uchSlotIndex, uint8_t uchDrvIndex);
 
 /**
- * @fn     GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVal)
+ * @fn     int8_t GH3X2X_SlotLedTiaGainConfig(uint8_t uchSlotIndex, uint8_t uchAdcIndex, uint8_t uchGainVal)
  *
  * @brief  Slot gain config
  *
@@ -1562,10 +1143,10 @@ GU8 GH3X2X_GetSlotLedCurrent(GU8 uchSlotIndex, GU8 uchDrvIndex);
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVal);
+int8_t GH3X2X_SlotLedTiaGainConfig(uint8_t uchSlotIndex, uint8_t uchAdcIndex, uint8_t uchGainVal);
 
 /**
- * @fn     GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex)
+ * @fn     uint8_t GH3X2X_GetSlotLedTiaGain(uint8_t uchSlotIndex, uint8_t uchAdcIndex)
  *
  * @brief  Get slot gain config
  *
@@ -1577,10 +1158,10 @@ GS8 GH3X2X_SlotLedTiaGainConfig(GU8 uchSlotIndex, GU8 uchAdcIndex, GU8 uchGainVa
  *
  * @return  tia gain val. if param error, return val always equal 0
  */
-GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex);
+uint8_t GH3X2X_GetSlotLedTiaGain(uint8_t uchSlotIndex, uint8_t uchAdcIndex);
 
 /**
- * @fn     GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal)
+ * @fn     int8_t GH3X2X_AdcBgcThrConfig(uint8_t uchAdcIndex, uint8_t uchBgcThrVal)
  *
  * @brief  adc bgc thr config
  *
@@ -1594,10 +1175,10 @@ GU8 GH3X2X_GetSlotLedTiaGain(GU8 uchSlotIndex, GU8 uchAdcIndex);
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR     return param error
  */
-GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal);
+int8_t GH3X2X_AdcBgcThrConfig(uint8_t uchAdcIndex, uint8_t uchBgcThrVal);
 
 /**
- * @fn     GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex)
+ * @fn     uint8_t GH3X2X_GetAdcBgcThr(uint8_t uchAdcIndex)
  *
  * @brief  Get adc bgc thr config
  *
@@ -1608,10 +1189,10 @@ GS8 GH3X2X_AdcBgcThrConfig(GU8 uchAdcIndex, GU8 uchBgcThrVal);
  *
  * @return  tia gain val. if param error, return val always equal 0
  */
-GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex);
+uint8_t GH3X2X_GetAdcBgcThr(uint8_t uchAdcIndex);
 
 /**
- * @fn     GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth)
+ * @fn     int8_t GH3X2X_IrqWidthConfig(uint16_t usIrqPulseWidth, uint16_t usIrqColdWidth)
  *
  * @brief  Irq width config
  *
@@ -1625,10 +1206,10 @@ GU8 GH3X2X_GetAdcBgcThr(GU8 uchAdcIndex);
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth);
+int8_t GH3X2X_IrqWidthConfig(uint16_t usIrqPulseWidth, uint16_t usIrqColdWidth);
 
 /**
- * @fn     GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
+ * @fn     int8_t GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode)
  *
  * @brief  Irq mode config
  *
@@ -1640,10 +1221,10 @@ GS8 GH3X2X_IrqWidthConfig(GU16 usIrqPulseWidth, GU16 usIrqColdWidth);
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode);
+int8_t GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode);
 
 /**
- * @fn     GS8 GH3X2X_HsiClockCalibration(void)
+ * @fn     int8_t GH3X2X_HsiClockCalibration(void)
  *
  * @brief  Calibration Hsi(high-speed internal) clock
  *
@@ -1656,10 +1237,10 @@ GS8 GH3X2X_IrqModeConfig(EMIrqModeConfig emIrqMode);
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR       input clock is unstable, or sampling was started
  */
-GS8 GH3X2X_HsiClockCalibration(void);
+int8_t GH3X2X_HsiClockCalibration(void);
 
 /**
- * @fn     GS8 GH3X2X_LsiClockCalibration(void)
+ * @fn     int8_t GH3X2X_LsiClockCalibration(void)
  *
  * @brief  Calibration Lsi(low-speed internal) clock
  *
@@ -1672,10 +1253,10 @@ GS8 GH3X2X_HsiClockCalibration(void);
  * @retval  #GH3X2X_RET_OK                  return successfully
  * @retval  #GH3X2X_RET_GENERIC_ERROR       input clock is unstable, or sampling was started
  */
-GS8 GH3X2X_LsiClockCalibration(void);
+int8_t GH3X2X_LsiClockCalibration(void);
 
 /**
- * @fn     GU8 GH3X2X_GetLedAgcState(void)
+ * @fn     uint8_t GH3X2X_GetLedAgcState(void)
  *
  * @brief  get agc state
  *
@@ -1686,7 +1267,7 @@ GS8 GH3X2X_LsiClockCalibration(void);
  *
  * @return  GH3X2X_LED_AGC_ENABLE or GH3X2X_LED_AGC_DISABLE
  */
-GU8 GH3X2X_GetLedAgcState(void);
+uint8_t GH3X2X_GetLedAgcState(void);
 
 /**
  * @fn     void GH3X2X_SoftLedADJAutoADJInt(void)
@@ -1703,7 +1284,7 @@ GU8 GH3X2X_GetLedAgcState(void);
 void GH3X2X_SoftLedADJAutoADJInt(void);
 
 /**
- * @fn     void GH3X2X_LedAgcProcess(GU8* puchReadFifoBuffer, GU16 usFifoLen)
+ * @fn     void GH3X2X_LedAgcProcess(uint8_t* puchReadFifoBuffer, uint16_t usFifoLen)
  *
  * @brief  led agc process function
  *
@@ -1715,10 +1296,10 @@ void GH3X2X_SoftLedADJAutoADJInt(void);
  *
  * @return  None
  */
-void GH3X2X_LedAgcProcess(GU8* puchReadFifoBuffer, GU16 usFifoLen);
+void GH3X2X_LedAgcProcess(uint8_t* puchReadFifoBuffer, uint16_t usFifoLen);
 
 /**
- * @fn     void GH3X2X_LedAgcProcessEx(GU8* puchReadFifoBuffer)
+ * @fn     void GH3X2X_LedAgcProcessEx(uint8_t* puchReadFifoBuffer)
  *
  * @brief  led agc process function
  *
@@ -1729,13 +1310,13 @@ void GH3X2X_LedAgcProcess(GU8* puchReadFifoBuffer, GU16 usFifoLen);
  *
  * @return  None
  */
-void GH3X2X_LedAgcProcessEx(GU8* puchReadFifoBuffer);
+void GH3X2X_LedAgcProcessEx(uint8_t* puchReadFifoBuffer);
 
 /**
- * @fn     void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
- *                                       GU8 (*pReadResetPinStatusFunc)(void),
- *                                      GU8 (*pReadSpcsPinStatusFunc)(void),
- *                                     GU8 (*pReadSpdoPinStatusFunc)(void))
+ * @fn     void GH3X2X_RegisterReadPinStatusFunc(uint8_t (*pReadIntPinStatusFunc)(void),
+ *                                       uint8_t (*pReadResetPinStatusFunc)(void),
+ *                                      uint8_t (*pReadSpcsPinStatusFunc)(void),
+ *                                     uint8_t (*pReadSpdoPinStatusFunc)(void))
  *
  * @brief  Register read pin status function
  *
@@ -1750,13 +1331,13 @@ void GH3X2X_LedAgcProcessEx(GU8* puchReadFifoBuffer);
  *
  * @return  None
  */
-void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
-                                      GU8 (*pReadResetPinStatusFunc)(void),
-                                      GU8 (*pReadSpcsPinStatusFunc)(void),
-                                      GU8 (*pReadSpdoPinStatusFunc)(void));
+void GH3X2X_RegisterReadPinStatusFunc(uint8_t (*pReadIntPinStatusFunc)(void),
+                                      uint8_t (*pReadResetPinStatusFunc)(void),
+                                      uint8_t (*pReadSpcsPinStatusFunc)(void),
+                                      uint8_t (*pReadSpdoPinStatusFunc)(void));
 
 /**
- * @fn     GCHAR *GH3X2X_GetDriverLibVersion(void)
+ * @fn     char *GH3X2X_GetDriverLibVersion(void)
  *
  * @brief  Get driver version
  *
@@ -1767,11 +1348,11 @@ void GH3X2X_RegisterReadPinStatusFunc(GU8 (*pReadIntPinStatusFunc)(void),
  *
  * @return  library version string
  */
-GCHAR *GH3X2X_GetDriverLibVersion(void);
-GCHAR *GH3X2X_GetProtocolVersion(void);
+char *GH3X2X_GetDriverLibVersion(void);
+char *GH3X2X_GetProtocolVersion(void);
 
 /**
- * @fn     void GH3X2X_AlgoRunModeConfig(GU8 uchAlgoRunMode)
+ * @fn     void GH3X2X_AlgoRunModeConfig(uint8_t uchAlgoRunMode)
  *
  * @brief  Config run mode of algorithm.
  *
@@ -1782,10 +1363,10 @@ GCHAR *GH3X2X_GetProtocolVersion(void);
  *
  * @return  None
  */
-void GH3X2X_AlgoRunModeConfig(GU8 uchAlgoRunMode);
+void GH3X2X_AlgoRunModeConfig(uint8_t uchAlgoRunMode);
 
 /**
- * @fn     GU8 GH3X2X_SetHbAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt)
+ * @fn     uint8_t GH3X2X_SetHbAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt)
  *
  * @brief  Set max count of algorithm output of one package rawdata
  *
@@ -1796,10 +1377,10 @@ void GH3X2X_AlgoRunModeConfig(GU8 uchAlgoRunMode);
  *
  * @return  None
  */
-void GH3X2X_SetHbAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
+void GH3X2X_SetHbAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt);
 
 /**
- * @fn     GU8 GH3X2X_SetHrvAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt)
+ * @fn     uint8_t GH3X2X_SetHrvAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt)
  *
  * @brief  Set max count of algorithm output of one package rawdata
  *
@@ -1810,11 +1391,11 @@ void GH3X2X_SetHbAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
  *
  * @return  None
  */
-void GH3X2X_SetHrvAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
+void GH3X2X_SetHrvAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt);
 
 
 /**
- * @fn     GU8 GH3X2X_SetSpo2AlgoOutMaxCnt(GU16 usAlgoOutMaxCnt)
+ * @fn     uint8_t GH3X2X_SetSpo2AlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt)
  *
  * @brief  Set max count of algorithm output of one package rawdata
  *
@@ -1825,10 +1406,10 @@ void GH3X2X_SetHrvAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
  *
  * @return  None
  */
-void GH3X2X_SetSpo2AlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
+void GH3X2X_SetSpo2AlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt);
 
 /**
- * @fn     GU8 GH3X2X_SetEcgAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt)
+ * @fn     uint8_t GH3X2X_SetEcgAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt)
  *
  * @brief  Set max count of algorithm output of one package rawdata
  *
@@ -1839,10 +1420,10 @@ void GH3X2X_SetSpo2AlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
  *
  * @return  None
  */
-void GH3X2X_SetEcgAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
+void GH3X2X_SetEcgAlgoOutMaxCnt(uint16_t usAlgoOutMaxCnt);
 
 /**
- * @fn     GS8 GH3X2X_GetRawdataForAlgorithm(GU8 *puchPackageDataBuffer)
+ * @fn     int8_t GH3X2X_GetRawdataForAlgorithm(uint8_t *puchPackageDataBuffer)
  *
  * @brief  Get rawdata package for algorithm
  *
@@ -1856,11 +1437,11 @@ void GH3X2X_SetEcgAlgoOutMaxCnt(GU16 usAlgoOutMaxCnt);
  * @retval  #GH3X2X_RET_READ_FIFO_CONTINUE   fifo is not empty
  * @retval  #GH3X2X_RET_RESOURCE_ERROR       resource error
  */
-GS8 GH3X2X_GetRawdataForAlgorithm(GU8 *puchPackageDataBuffer ,GU16 usReadByteNum);
+int8_t GH3X2X_GetRawdataForAlgorithm(uint8_t *puchPackageDataBuffer ,uint16_t usReadByteNum);
 
 
 /**
- * @fn     GS8 GH3X2X_HbAlgorithmDeInit(void)
+ * @fn     int8_t GH3X2X_HbAlgorithmDeInit(void)
  *
  * @brief  Hb algorithm deinitialization
  *
@@ -1874,10 +1455,10 @@ GS8 GH3X2X_GetRawdataForAlgorithm(GU8 *puchPackageDataBuffer ,GU16 usReadByteNum
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HbAlgorithmDeInit(void);
+int8_t GH3X2X_HbAlgorithmDeInit(void);
 
 /**
- * @fn     GS8 GH3X2X_HbAlgorithmInit(void)
+ * @fn     int8_t GH3X2X_HbAlgorithmInit(void)
  *
  * @brief  Hb algorithm initialization
  *
@@ -1891,12 +1472,12 @@ GS8 GH3X2X_HbAlgorithmDeInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm init error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HbAlgorithmInit(void);
+int8_t GH3X2X_HbAlgorithmInit(void);
 
 /**
- * @fn     GS8 GH3X2X_HbAlgorithmCalc(STHbAlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[], GU16* pusAlgoResCnt,
- *                        GU8 *puchReadDataBuffer, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr,
-                          STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn     int8_t GH3X2X_HbAlgorithmCalc(STHbAlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[], uint16_t* pusAlgoResCnt,
+ *                        uint8_t *puchReadDataBuffer, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr,
+                          STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call Hb algorithm calc with read rawdata
  *
@@ -1921,28 +1502,8 @@ GS8 GH3X2X_HbAlgorithmInit(void);
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
 
-
-
 /**
- * @fn     GS8 GH3X2X_HbAlgorithmScenarioConfig(GU8 uchScenario)
- *
- * @brief  Hb algorithm scenario config
- *
- * @attention   None
- *
- * @param[in]  uchScenario     @ref hba_scenes_e
- *                             others: fixed 0(default) and return GH3X2X_RET_PARAMETER_ERROR
- * @param[out]  None
- *
- * @return  error code
- * @retval  #GH3X2X_RET_OK                      return successfully
- * @retval  #GH3X2X_RET_PARAMETER_ERROR         return paramters error
- * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
- */
-GS8 GH3X2X_HbAlgorithmScenarioConfig(GU8 uchScenario);
-
-/**
- * @fn     GS8 GH3X2X_HbAlgorithmOutputTimeConfig(GS32 nOutputTime)
+ * @fn     int8_t GH3X2X_HbAlgorithmOutputTimeConfig(int32_t nOutputTime)
  *
  * @brief  Hb algorithm output time config
  *
@@ -1955,10 +1516,10 @@ GS8 GH3X2X_HbAlgorithmScenarioConfig(GU8 uchScenario);
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HbAlgorithmOutputTimeConfig(GS32 nOutputTime);
+int8_t GH3X2X_HbAlgorithmOutputTimeConfig(int32_t nOutputTime);
 
 /**
- * @fn     GS8 GH3X2X_HbAlgorithmSamplingFreqConfig(GU32 unSamplingFreq)
+ * @fn     int8_t GH3X2X_HbAlgorithmSamplingFreqConfig(uint32_t unSamplingFreq)
  *
  * @brief  Hb algorithm sampling frequency config
  *
@@ -1971,10 +1532,10 @@ GS8 GH3X2X_HbAlgorithmOutputTimeConfig(GS32 nOutputTime);
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HbAlgorithmSamplingFreqConfig(GU32 unSamplingFreq);
+int8_t GH3X2X_HbAlgorithmSamplingFreqConfig(uint32_t unSamplingFreq);
 
 /**
- * @fn     GS8 GH3X2X_HrvAlgorithmDeInit(void)
+ * @fn     int8_t GH3X2X_HrvAlgorithmDeInit(void)
  *
  * @brief  Hrv algorithm deinitialization
  *
@@ -1988,10 +1549,10 @@ GS8 GH3X2X_HbAlgorithmSamplingFreqConfig(GU32 unSamplingFreq);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HrvAlgorithmDeInit(void);
+int8_t GH3X2X_HrvAlgorithmDeInit(void);
 
 /**
- * @fn     GS8 GH3X2X_HrvAlgorithmInit(void)
+ * @fn     int8_t GH3X2X_HrvAlgorithmInit(void)
  *
  * @brief  Hrv algorithm initialization
  *
@@ -2005,12 +1566,12 @@ GS8 GH3X2X_HrvAlgorithmDeInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm init error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_HrvAlgorithmInit(void);
+int8_t GH3X2X_HrvAlgorithmInit(void);
 
 /**
- * @fn     GS8 GH3X2X_HrvAlgorithmCalc(STHbAlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[], GU16* pusAlgoResCnt,
- *                        GU8 *puchReadDataBuffer, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr,
-                          STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn     int8_t GH3X2X_HrvAlgorithmCalc(STHbAlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[], uint16_t* pusAlgoResCnt,
+ *                        uint8_t *puchReadDataBuffer, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr,
+                          STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call Hrv algorithm calc with read rawdata
  *
@@ -2038,7 +1599,7 @@ GS8 GH3X2X_HrvAlgorithmInit(void);
 
 
 /**
- * @fn     GS8 GH3X2X_Spo2AlgorithmDeInit(void)
+ * @fn     int8_t GH3X2X_Spo2AlgorithmDeInit(void)
  *
  * @brief  Spo2 algorithm deinitialization
  *
@@ -2052,10 +1613,10 @@ GS8 GH3X2X_HrvAlgorithmInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_Spo2AlgorithmDeInit(void);
+int8_t GH3X2X_Spo2AlgorithmDeInit(void);
 
 /**
- * @fn     GS8 GH3X2X_Spo2AlgorithmInit(void)
+ * @fn     int8_t GH3X2X_Spo2AlgorithmInit(void)
  *
  * @brief  Spo2 algorithm initialization
  *
@@ -2069,12 +1630,12 @@ GS8 GH3X2X_Spo2AlgorithmDeInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm init error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_Spo2AlgorithmInit(void);
+int8_t GH3X2X_Spo2AlgorithmInit(void);
 
 /**
- * @fn      GS8 GH3X2X_Spo2AlgorithmCalc(STSpo2AlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[],
- *                       GU16* pusAlgoResCnt, GU8 *puchReadDataBuffer, GU8 uchChannelMapCnt, GU8 *puchChannelMapArr,
- *                       STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn      int8_t GH3X2X_Spo2AlgorithmCalc(STSpo2AlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[],
+ *                       uint16_t* pusAlgoResCnt, uint8_t *puchReadDataBuffer, uint8_t uchChannelMapCnt, uint8_t *puchChannelMapArr,
+ *                       STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call spo2 algorithm calc with read rawdata
  *
@@ -2101,7 +1662,7 @@ GS8 GH3X2X_Spo2AlgorithmInit(void);
 
 
 /**
- * @fn     GS8 GH3X2X_EcgAlgorithmDeInit(void)
+ * @fn     int8_t GH3X2X_EcgAlgorithmDeInit(void)
  *
  * @brief  Ecg algorithm deinitialization
  *
@@ -2115,10 +1676,10 @@ GS8 GH3X2X_Spo2AlgorithmInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_EcgAlgorithmDeInit(void);
+int8_t GH3X2X_EcgAlgorithmDeInit(void);
 
 /**
- * @fn     GS8 GH3X2X_EcgAlgorithmInit(void)
+ * @fn     int8_t GH3X2X_EcgAlgorithmInit(void)
  *
  * @brief  Ecg algorithm initialization
  *
@@ -2132,12 +1693,12 @@ GS8 GH3X2X_EcgAlgorithmDeInit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm init error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_EcgAlgorithmInit(void);
+int8_t GH3X2X_EcgAlgorithmInit(void);
 
 /**
- * @fn     GS8 GH3X2X_EcgAlgorithmCalc(STEcgAlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[], GU16* pusAlgoResCnt,
- *                          GU8 *puchReadDataBuffer, GU8 uchEcgChannelMap, STGsensorRawdata *pstGsAxisValueArr,
-                            GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ * @fn     int8_t GH3X2X_EcgAlgorithmCalc(STEcgAlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[], uint16_t* pusAlgoResCnt,
+ *                          uint8_t *puchReadDataBuffer, uint8_t uchEcgChannelMap, STGsensorRawdata *pstGsAxisValueArr,
+                            uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call ecg algorithm calc with read rawdata
  *
@@ -2164,7 +1725,7 @@ GS8 GH3X2X_EcgAlgorithmInit(void);
 
 /**
  * @fn     void GH3X2X_RegisterAlgoCalcHookFunc(
- *             void (*pAlgorithmCalcHookFunc)(GU32 unRawdataFrameIndex, GS32 *pnRawdataFrame, GU8 uchRawdataFrameLen))
+ *             void (*pAlgorithmCalcHookFunc)(uint32_t unRawdataFrameIndex, int32_t *pnRawdataFrame, uint8_t uchRawdataFrameLen))
  *
  * @brief  Register algorithm calculate hook function callback
  *
@@ -2179,10 +1740,10 @@ GS8 GH3X2X_EcgAlgorithmInit(void);
  * @return  None
  */
 void GH3X2X_RegisterAlgoCalcHookFunc(
-            void (*pAlgorithmCalcHookFunc)(GU32 unRawdataFrameIndex, GS32 *pnRawdataFrame, GU8 uchRawdataFrameLen));
+            void (*pAlgorithmCalcHookFunc)(uint32_t unRawdataFrameIndex, int32_t *pnRawdataFrame, uint8_t uchRawdataFrameLen));
 
 /**
- * @fn     void GH3X2X_RegisterGetFirmwareVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(void))
+ * @fn     void GH3X2X_RegisterGetFirmwareVersionFunc(char* (*pGetFirmwareVersionFunc)(void))
  *
  * @brief  Register get firmware version function
  *
@@ -2193,10 +1754,10 @@ void GH3X2X_RegisterAlgoCalcHookFunc(
  *
  * @return  None
  */
-void GH3X2X_RegisterGetFirmwareVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(void));
+void GH3X2X_RegisterGetFirmwareVersionFunc(char* (*pGetFirmwareVersionFunc)(void));
 
 /**
- * @fn     void GH3X2X_RegisterGetBootloaderVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(void))
+ * @fn     void GH3X2X_RegisterGetBootloaderVersionFunc(char* (*pGetFirmwareVersionFunc)(void))
  *
  * @brief  Register get Bootloader version function
  *
@@ -2208,11 +1769,11 @@ void GH3X2X_RegisterGetFirmwareVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(voi
  * @return  None
  */
 
-void GH3X2X_RegisterGetBootloaderVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(void));
+void GH3X2X_RegisterGetBootloaderVersionFunc(char* (*pGetFirmwareVersionFunc)(void));
 
 /**
- * @fn     EMUprotocolParseCmdType GH3X2X_UprotocolParseHandler(GU8 *puchRespondBuffer, GU16 *pusRespondLen,
- *                                                     GU8 *puchRecvDataBuffer, GU16 usRecvLen)
+ * @fn     EMUprotocolParseCmdType GH3X2X_UprotocolParseHandler(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen,
+ *                                                     uint8_t *puchRecvDataBuffer, uint16_t usRecvLen)
  *
  * @brief  universal protocol parse handler, parse protocol receive data
  *
@@ -2225,11 +1786,11 @@ void GH3X2X_RegisterGetBootloaderVersionFunc(GCHAR* (*pGetFirmwareVersionFunc)(v
  *
  * @return  @ref EMUprotocolParseCmdType
  */
-EMUprotocolParseCmdType GH3X2X_UprotocolParseHandler(GU8 *puchRespondBuffer, GU16 *pusRespondLen,
-                                                     GU8 *puchRecvDataBuffer, GU16 usRecvLen);
+EMUprotocolParseCmdType GH3X2X_UprotocolParseHandler(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen,
+                                                     uint8_t *puchRecvDataBuffer, uint16_t usRecvLen);
 
 /**
- * @fn     GU8 GH3X2X_UprotocolPacketMaxLenConfig(GU8 uchPacketMaxLen)
+ * @fn     uint8_t GH3X2X_UprotocolPacketMaxLenConfig(uint8_t uchPacketMaxLen)
  *
  * @brief  packet max len support, default len is 243
  *
@@ -2240,13 +1801,13 @@ EMUprotocolParseCmdType GH3X2X_UprotocolParseHandler(GU8 *puchRespondBuffer, GU1
  *
  * @return  packet max len after config
  */
-GU8 GH3X2X_UprotocolPacketMaxLenConfig(GU8 uchPacketMaxLen);
+uint8_t GH3X2X_UprotocolPacketMaxLenConfig(uint8_t uchPacketMaxLen);
 
 /**
- * @fn     GS8 GH3X2X_SendRawDataPkg(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
- *                    GU16 usFifoRawdataLen, GU8 uchChannelMapArr[], GU8 uchChannelMapCnt,
- *                   STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity,
- *                   GU8 uchChannelMapId, GU32 *punLastIncompleteMark, GU32 *punIncompleteRawdataArr)
+ * @fn     int8_t GH3X2X_SendRawDataPkg(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
+ *                    uint16_t usFifoRawdataLen, uint8_t uchChannelMapArr[], uint8_t uchChannelMapCnt,
+ *                   STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity,
+ *                   uint8_t uchChannelMapId, uint32_t *punLastIncompleteMark, uint32_t *punIncompleteRawdataArr)
  *
  * @brief  Pack rawdata with g sensor data
  *
@@ -2273,7 +1834,7 @@ GU8 GH3X2X_UprotocolPacketMaxLenConfig(GU8 uchPacketMaxLen);
 
 
 /**
- * @fn     GS8 GH3X2X_CustomizeFuncStartedBitSet(void)
+ * @fn     int8_t GH3X2X_CustomizeFuncStartedBitSet(void)
  *
  * @brief  Set Customize started bitmap
  *
@@ -2285,10 +1846,10 @@ GU8 GH3X2X_UprotocolPacketMaxLenConfig(GU8 uchPacketMaxLen);
  * @return  error code
  * @retval  #GH3X2X_RET_OK                      return algorithm run successfully
  */
-GS8 GH3X2X_CustomizeFuncStartedBitSet(void);
+int8_t GH3X2X_CustomizeFuncStartedBitSet(void);
 
 /**
- * @fn     GS8 GH3X2X_CustomizeFuncStartedBitClear(void)
+ * @fn     int8_t GH3X2X_CustomizeFuncStartedBitClear(void)
  *
  * @brief  Clear Customize started bitmap
  *
@@ -2300,10 +1861,10 @@ GS8 GH3X2X_CustomizeFuncStartedBitSet(void);
  * @return  error code
  * @retval  #GH3X2X_RET_OK                      return algorithm run successfully
  */
-GS8 GH3X2X_CustomizeFuncStartedBitClear(void);
+int8_t GH3X2X_CustomizeFuncStartedBitClear(void);
 
 /**
- * @fn     GS8 GH3X2X_FifoWatermarkThrConfigEx(GU16 usFifoWatermarkThr)
+ * @fn     int8_t GH3X2X_FifoWatermarkThrConfigEx(uint16_t usFifoWatermarkThr)
  *
  * @brief  Fifo water mark threshold config
  *
@@ -2317,10 +1878,10 @@ GS8 GH3X2X_CustomizeFuncStartedBitClear(void);
  * @return  errcode
  * @retval  #GH3X2X_RET_OK               return successfully
  */
-GS8 GH3X2X_FifoWatermarkThrConfigEx(GU16 usFifoWatermarkThr);
+int8_t GH3X2X_FifoWatermarkThrConfigEx(uint16_t usFifoWatermarkThr);
 
 /**
- * @fn     GS8 GH3X2X_GetRawdataForAlgorithmEx(GU8 *puchPackageDataBuffer)
+ * @fn     int8_t GH3X2X_GetRawdataForAlgorithmEx(uint8_t *puchPackageDataBuffer)
  *
  * @brief  Get rawdata package for algorithm
  *
@@ -2333,10 +1894,10 @@ GS8 GH3X2X_FifoWatermarkThrConfigEx(GU16 usFifoWatermarkThr);
  * @retval  #GH3X2X_RET_OK               return successfully
  * @retval  #GH3X2X_RET_RESOURCE_ERROR   resource error
  */
-GS8 GH3X2X_GetRawdataForAlgorithmEx(GU8 *puchPackageDataBuffer ,GU16 uchFifoReadByteNum);
+int8_t GH3X2X_GetRawdataForAlgorithmEx(uint8_t *puchPackageDataBuffer ,uint16_t uchFifoReadByteNum);
 
 /**
- * @fn     GS8 GH3X2X_AllFuncDeinit(void)
+ * @fn     int8_t GH3X2X_AllFuncDeinit(void)
  *
  * @brief  deinit all func
  *
@@ -2350,10 +1911,10 @@ GS8 GH3X2X_GetRawdataForAlgorithmEx(GU8 *puchPackageDataBuffer ,GU16 uchFifoRead
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_AllFuncDeinit(void);
+int8_t GH3X2X_AllFuncDeinit(void);
 
 /**
- * @fn     GS8 GH3X2X_AllFuncDeinitEx(void)
+ * @fn     int8_t GH3X2X_AllFuncDeinitEx(void)
  *
  * @brief  deinit all func
  *
@@ -2367,10 +1928,10 @@ GS8 GH3X2X_AllFuncDeinit(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm deinit error
  * @retval  #GH3X2X_RET_ALGO_NO_SUPPORTED       return algorithm no supported error
  */
-GS8 GH3X2X_AllFuncDeinitEx(void);
+int8_t GH3X2X_AllFuncDeinitEx(void);
 
 /**
- * @fn     GS8 GH3X2X_AlgoMemConfig(GU32 unMemSize)
+ * @fn     int8_t GH3X2X_AlgoMemConfig(uint32_t unMemSize)
  *
  * @brief  Config algorithm memory.
  *
@@ -2383,10 +1944,10 @@ GS8 GH3X2X_AllFuncDeinitEx(void);
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_RESOURCE_ERROR          return algorithm mem config error
  */
-GS8 GH3X2X_AlgoMemConfig( GU32 unMemSize);
+int8_t GH3X2X_AlgoMemConfig( uint32_t unMemSize);
 
 /**
- * @fn     void GH3X2X_ReportIrqStatus(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU16 usIrqStatus)
+ * @fn     void GH3X2X_ReportIrqStatus(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint16_t usIrqStatus)
  *
  * @brief  report irq status of Gh3x2x
  *
@@ -2397,12 +1958,12 @@ GS8 GH3X2X_AlgoMemConfig( GU32 unMemSize);
  * @param[in]   usIrqStatus             irq status need report
  * @return  none
  */
-void GH3X2X_ReportIrqStatus(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU16 usIrqStatus);
+void GH3X2X_ReportIrqStatus(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint16_t usIrqStatus);
 
 
 
 /**
- * @fn     void Gh3x2x_SetAdtConfirmPara(GU8 uchMoveThreshold, GU16 usMoveCntThreshold)
+ * @fn     void Gh3x2x_SetAdtConfirmPara(uint8_t uchMoveThreshold, uint16_t usMoveCntThreshold)
  *
  * @brief  Set some parameter of adt confirm
  *
@@ -2414,10 +1975,10 @@ void GH3X2X_ReportIrqStatus(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU16 us
  *
  * @return  None
  */
-void Gh3x2x_SetAdtConfirmPara(GU8 uchMoveThreshold, GU16 usMoveCntThreshold, GU16 usNotMoveCntThreshold, GU32 unIRTimeoutSecondsThreshold);
+void Gh3x2x_SetAdtConfirmPara(uint8_t uchMoveThreshold, uint16_t usMoveCntThreshold, uint16_t usNotMoveCntThreshold, uint32_t unIRTimeoutSecondsThreshold);
 
 /**
- * @fn     GS8 GH3X2X_AdtFuncStartWithConfirm(void)
+ * @fn     int8_t GH3X2X_AdtFuncStartWithConfirm(void)
  *
  * @brief  Start adt function with move detect confirm
  *
@@ -2431,7 +1992,7 @@ void Gh3x2x_SetAdtConfirmPara(GU8 uchMoveThreshold, GU16 usMoveCntThreshold, GU1
 void GH3X2X_AdtFuncStartWithConfirm(void);
 
 /**
- * @fn     GS8 GH3X2X_AdtFuncStopWithConfirm(void)
+ * @fn     int8_t GH3X2X_AdtFuncStopWithConfirm(void)
  *
  * @brief  stop adt function with move detect confirm
  *
@@ -2445,7 +2006,7 @@ void GH3X2X_AdtFuncStartWithConfirm(void);
 void GH3X2X_AdtFuncStopWithConfirm(void);
 
 /**
- * @fn      void GH3X2X_MoveDetectByGsData(STGsensorRawdata* stGsData, GU16 usGsDataCnt, GU8 uchCheckWindowSize)
+ * @fn      void GH3X2X_MoveDetectByGsData(STGsensorRawdata* stGsData, uint16_t usGsDataCnt, uint8_t uchCheckWindowSize)
 
  *
  * @brief  Move detection by software.
@@ -2459,7 +2020,7 @@ void GH3X2X_AdtFuncStopWithConfirm(void);
  *
  * @return  None
  */
-void GH3X2X_MoveDetectByGsData(GS16* pusGsData, GU16 usGsDataCnt);
+void GH3X2X_MoveDetectByGsData(int16_t* pusGsData, uint16_t usGsDataCnt);
 
 
 
@@ -2478,7 +2039,7 @@ void GH3X2X_MoveDetectByGsData(GS16* pusGsData, GU16 usGsDataCnt);
 void Gh3x2x_ResetMoveDetectByGsData(void);
 
 /**
- * @fn     GU8 Gh3x2x_GetAdtConfirmStatus(void)
+ * @fn     uint8_t Gh3x2x_GetAdtConfirmStatus(void)
  *
  * @brief  Get status of movement detected
  *
@@ -2489,12 +2050,12 @@ void Gh3x2x_ResetMoveDetectByGsData(void);
  *
  * @return  GH3X2X_SENSOR_IS_NOT_MOVING/GH3X2X_SENSOR_IS_MOVING
  */
-GU8 Gh3x2x_GetAdtConfirmStatus(void);
+uint8_t Gh3x2x_GetAdtConfirmStatus(void);
 
 /**
- * @fn     GS8 GH3X2X_SendAdtRawdataPkg(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
+ * @fn     int8_t GH3X2X_SendAdtRawdataPkg(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
  *                       STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
- *                       GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ *                       uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  pack GH3X2X adt rawdata and other type of data according to specific protocol
  *
@@ -2518,9 +2079,9 @@ GU8 Gh3x2x_GetAdtConfirmStatus(void);
 
 
 /**
- * @fn     GS8 GH3X2X_SendAdtRawdataPkgEx(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
- *                      GU16 usFifoDataLen, STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
-                        GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity);
+ * @fn     int8_t GH3X2X_SendAdtRawdataPkgEx(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
+ *                      uint16_t usFifoDataLen, STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
+                        uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity);
  *
  * @brief  pack GH3X2X adt rawdata and other type of data according to specific protocol
  *
@@ -2545,9 +2106,9 @@ GU8 Gh3x2x_GetAdtConfirmStatus(void);
 
 
 /**
- * @fn     GS8 GH3X2X_SendZipAdtRawdataPkg(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
+ * @fn     int8_t GH3X2X_SendZipAdtRawdataPkg(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
  *                       STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
- *                       GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity)
+ *                       uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  pack GH3X2X Zip adt rawdata and other type of data according to specific protocol
  *
@@ -2571,9 +2132,9 @@ GU8 Gh3x2x_GetAdtConfirmStatus(void);
 
 
 /**
- * @fn     GS8 GH3X2X_SendZipAdtRawdataPkgEx(GU8 *puchRespondBuffer, GU16 *pusRespondLen, GU8 *puchFifoRawdata,
- *                      GU16 usFifoDataLen, STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
-                        GU16 usGsDataNum, EMGsensorSensitivity emGsSensitivity);
+ * @fn     int8_t GH3X2X_SendZipAdtRawdataPkgEx(uint8_t *puchRespondBuffer, uint16_t *pusRespondLen, uint8_t *puchFifoRawdata,
+ *                      uint16_t usFifoDataLen, STAlgoCalculateRes* pstAlgoRes, STGsensorRawdata *pstGsAxisValueArr,
+                        uint16_t usGsDataNum, EMGsensorSensitivity emGsSensitivity);
  *
  * @brief  pack GH3X2X Zip adt rawdata and other type of data according to specific protocol
  *
@@ -2598,7 +2159,7 @@ GU8 Gh3x2x_GetAdtConfirmStatus(void);
 
 
 /**
- * @fn     GU32 GH3X2X_GetFuncModeAvailable(void)
+ * @fn     uint32_t GH3X2X_GetFuncModeAvailable(void)
  *
  * @brief  Get all function mode available
  *
@@ -2608,10 +2169,10 @@ GU8 Gh3x2x_GetAdtConfirmStatus(void);
  * @param[in]   None
  * @return  function mode, @ref GH3X2X_NO_FUNCTION ... GH3X2X_FUNCTION_PWTT
  */
-GU32 GH3X2X_GetFuncModeAvailable(void);
+uint32_t GH3X2X_GetFuncModeAvailable(void);
 
 /**
- * @fn     GU32 GH3X2X_GetFuncModeOpened(void)
+ * @fn     uint32_t GH3X2X_GetFuncModeOpened(void)
  *
  * @brief  Get function mode that already opened
  *
@@ -2621,10 +2182,10 @@ GU32 GH3X2X_GetFuncModeAvailable(void);
  * @param[in]   None
  * @return  function mode, @ref GH3X2X_NO_FUNCTION ... GH3X2X_FUNCTION_PWTT
  */
-GU32 GH3X2X_GetFuncModeOpened(void);
+uint32_t GH3X2X_GetFuncModeOpened(void);
 
 /**
- * @fn     GU32 GH3X2X_GetTargetFuncMode(void)
+ * @fn     uint32_t GH3X2X_GetTargetFuncMode(void)
  *
  * @brief  Get function mode that will be opened or closed
  *
@@ -2634,10 +2195,10 @@ GU32 GH3X2X_GetFuncModeOpened(void);
  * @param[in]   None
  * @return  function mode, @ref GH3X2X_NO_FUNCTION ... GH3X2X_FUNCTION_PWTT
  */
-GU32 GH3X2X_GetTargetFuncMode(void);
+uint32_t GH3X2X_GetTargetFuncMode(void);
 
 /**
- * @fn     GS8 GH3X2X_DecodeRegCfgArr(GU32* punRunMode, const STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen)
+ * @fn     int8_t GH3X2X_DecodeRegCfgArr(uint32_t* punRunMode, const struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen)
  *
  * @brief  Analyze reg cfg array to get the run mode.
  *
@@ -2650,10 +2211,10 @@ GU32 GH3X2X_GetTargetFuncMode(void);
  * @retval  #GH3X2X_RET_OK                      return successfully
  * @retval  #GH3X2X_RET_PARAMETER_ERROR         return parameter error
  */
-GS8 GH3X2X_DecodeRegCfgArr(GU32* punRunMode, const STGh3x2xReg *pstRegConfigArr, GU16 usRegConfigLen);
+int8_t GH3X2X_DecodeRegCfgArr(uint32_t* punRunMode, FAR const struct gh3020_reg_s *pstRegConfigArr, uint16_t usRegConfigLen);
 
 /**
- * @fn     GU8 GH3X2X_GetGsensorEnableFlag(void)
+ * @fn     uint8_t GH3X2X_GetGsensorEnableFlag(void)
  *
  * @brief  Inquire if need gsensor data
  *
@@ -2664,11 +2225,11 @@ GS8 GH3X2X_DecodeRegCfgArr(GU32* punRunMode, const STGh3x2xReg *pstRegConfigArr,
  *
  * @return  1: need gsensor data  0: not need gsensor data
  */
-GU8 GH3X2X_GetGsensorEnableFlag(void);
-GU8 GH3X2X_GetCapEnableFlag(void);
-GU8 GH3X2X_GetTempEnableFlag(void);
+uint8_t GH3X2X_GetGsensorEnableFlag(void);
+uint8_t GH3X2X_GetCapEnableFlag(void);
+uint8_t GH3X2X_GetTempEnableFlag(void);
 /**
- * @fn     STSoftLeadResult GH3X2X_LeadHandle(GU16 usIrqStatus, GU8 *puchReadFifoBuffer, GU16* pusFifoBufferLen)
+ * @fn     STSoftLeadResult GH3X2X_LeadHandle(uint16_t usIrqStatus, uint8_t *puchReadFifoBuffer, uint16_t* pusFifoBufferLen)
  *
  * @brief  ecg soft lead handle
  *
@@ -2681,10 +2242,10 @@ GU8 GH3X2X_GetTempEnableFlag(void);
  *
  * @return  soft lead handle process, @ref STSoftLeadResult
  */
-STSoftLeadResult GH3X2X_LeadHandle(GU16 usIrqStatus, GU8 *puchReadFifoBuffer, GU16* pusFifoBufferLen);
+STSoftLeadResult GH3X2X_LeadHandle(uint16_t usIrqStatus, uint8_t *puchReadFifoBuffer, uint16_t* pusFifoBufferLen);
 
 /**
- * @fn     STSoftLeadResult GH3X2X_LeadHandleEx(GU16 usIrqStatus, GU8 *puchReadFifoBuffer)
+ * @fn     STSoftLeadResult GH3X2X_LeadHandleEx(uint16_t usIrqStatus, uint8_t *puchReadFifoBuffer)
  *
  * @brief  ecg soft lead handle
  *
@@ -2696,35 +2257,35 @@ STSoftLeadResult GH3X2X_LeadHandle(GU16 usIrqStatus, GU8 *puchReadFifoBuffer, GU
  *
  * @return  soft lead handle process, @ref STSoftLeadResult
  */
-//STSoftLeadResult GH3X2X_LeadHandleEx(GU16 usIrqStatus, GU8 *puchReadFifoBuffer);
+//STSoftLeadResult GH3X2X_LeadHandleEx(uint16_t usIrqStatus, uint8_t *puchReadFifoBuffer);
 
 /**
- * @fn     GU8 GH3X2X_GetSoftEvent(void)
+ * @fn     uint8_t GH3X2X_GetSoftEvent(void)
  * @brief  Get soft event
  * @param[in]   None
  * @param[out]  Soft event
  *
  * @return  soft event
  */
-GU8 GH3X2X_GetSoftEvent(void);
+uint8_t GH3X2X_GetSoftEvent(void);
 
 /**
- * @fn     void GH3X2X_SetSoftEvent(GU8 uchEvent)
+ * @fn     void GH3X2X_SetSoftEvent(uint8_t uchEvent)
  * @brief  set soft event
  * @param[in]   uchEvent
  * @param[out]  None
  * @return  None
  */
-void GH3X2X_SetSoftEvent(GU8 uchEvent);
+void GH3X2X_SetSoftEvent(uint8_t uchEvent);
 
 /**
- * @fn     void GH3X2X_ClearSoftEvent(GU8 uchEvent)
+ * @fn     void GH3X2X_ClearSoftEvent(uint8_t uchEvent)
  * @brief  clear soft event
  * @param[in]   uchEvent
  * @param[out]  None
  * @return  None
  */
-void GH3X2X_ClearSoftEvent(GU8 uchEvent);
+void GH3X2X_ClearSoftEvent(uint8_t uchEvent);
 
 
 /**
@@ -2742,7 +2303,7 @@ void GH3X2X_ClearSoftEvent(GU8 uchEvent);
 void GH3X2X_AddElectrodeWearRevCnt(void);
 
 /**
- * @fn     GU8 GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
+ * @fn     uint8_t GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void)
  *
  * @brief  Check if electrode wear revert debug mode is enabled
  *
@@ -2753,7 +2314,7 @@ void GH3X2X_AddElectrodeWearRevCnt(void);
  *
  * @return  1: enabled, 0:disabled
  */
-GU8 GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void);
+uint8_t GH3X2X_ElectrodeWearRevertDebugModeIsEnabled(void);
 
 
 
@@ -2773,7 +2334,7 @@ void GH3X2X_SoftWearOffDetInit(void);
 
 
 /**
- * @fn     GU8 GH3X2X_GetSoftWearOffDetEn(void);
+ * @fn     uint8_t GH3X2X_GetSoftWearOffDetEn(void);
  *
  * @brief  get soft wear off dectect module  is disable or enable
  *
@@ -2784,12 +2345,12 @@ void GH3X2X_SoftWearOffDetInit(void);
  *
  * @return  0: disable  1: enable
  */
-GU8 GH3X2X_GetSoftWearOffDetEn(void);
+uint8_t GH3X2X_GetSoftWearOffDetEn(void);
 
 
 
 /**
- * @fn     GU8 GH3X2X_UpdateSoftWearOffStatus(GU16 *pusEvent)
+ * @fn     uint8_t GH3X2X_UpdateSoftWearOffStatus(uint16_t *pusEvent)
  *
  * @brief  update wear status
  *
@@ -2800,14 +2361,14 @@ GU8 GH3X2X_GetSoftWearOffDetEn(void);
  *
  * @return  new event
  */
-GU8 GH3X2X_UpdateSoftWearOffStatus(GU16 *pusEvent, GU8 *puchSoftAdtFlag ,GU8 *puchLivingConfi);
+uint8_t GH3X2X_UpdateSoftWearOffStatus(uint16_t *pusEvent, uint8_t *puchSoftAdtFlag ,uint8_t *puchLivingConfi);
 
 
 
 
 /**
- * @fn     GS8 GH3X2X_SoftWearOffDetCalc(STHbAlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[], GU16* pusAlgoResCnt,
- *                          GU8 *puchReadDataBuffer, STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum,
+ * @fn     int8_t GH3X2X_SoftWearOffDetCalc(STHbAlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[], uint16_t* pusAlgoResCnt,
+ *                          uint8_t *puchReadDataBuffer, STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum,
  *                          EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call Hb algorithm calc with read rawdata
@@ -2834,8 +2395,8 @@ GU8 GH3X2X_UpdateSoftWearOffStatus(GU16 *pusEvent, GU8 *puchSoftAdtFlag ,GU8 *pu
 
 
 /**
- * @fn     GS8 GH3X2X_SoftWearOffDetCalc(STHbAlgoResult pstAlgoResArr[], GU16 pusAlgoResIndexArr[], GU16* pusAlgoResCnt,
- *                          GU8 *puchReadDataBuffer, STGsensorRawdata *pstGsAxisValueArr, GU16 usGsDataNum,
+ * @fn     int8_t GH3X2X_SoftWearOffDetCalc(STHbAlgoResult pstAlgoResArr[], uint16_t pusAlgoResIndexArr[], uint16_t* pusAlgoResCnt,
+ *                          uint8_t *puchReadDataBuffer, STGsensorRawdata *pstGsAxisValueArr, uint16_t usGsDataNum,
  *                          EMGsensorSensitivity emGsSensitivity)
  *
  * @brief  Call Hb algorithm calc with read rawdata
@@ -2862,7 +2423,7 @@ GU8 GH3X2X_UpdateSoftWearOffStatus(GU16 *pusEvent, GU8 *puchSoftAdtFlag ,GU8 *pu
 
 
 /**
- * @fn     GU16 GH3X2X_GetCurrentFifoWaterLine(void)
+ * @fn     uint16_t GH3X2X_GetCurrentFifoWaterLine(void)
  *
  * @brief  get current fifo water line setting
  *
@@ -2873,12 +2434,12 @@ GU8 GH3X2X_UpdateSoftWearOffStatus(GU16 *pusEvent, GU8 *puchSoftAdtFlag ,GU8 *pu
  *
  * @return  None
  */
-GU16 GH3X2X_GetCurrentFifoWaterLine(void);
+uint16_t GH3X2X_GetCurrentFifoWaterLine(void);
 
 
 
 /**
- * @fn     GS8 GH3X2X_CalibrateECGGainEx(GU8 *puchReadFifoBuffer)
+ * @fn     int8_t GH3X2X_CalibrateECGGainEx(uint8_t *puchReadFifoBuffer)
  *
  * @brief  Calibrate ECG Gain
  *
@@ -2891,11 +2452,11 @@ GU16 GH3X2X_GetCurrentFifoWaterLine(void);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm generic error
  */
 
-GS8 GH3X2X_CalibrateECGGainEx(GU8 *puchReadFifoBuffer);
+int8_t GH3X2X_CalibrateECGGainEx(uint8_t *puchReadFifoBuffer);
 
 
 /**
- * @fn     GS8 GH3X2X_CalibrateECGGain(GU8 *puchReadFifoBuffer)
+ * @fn     int8_t GH3X2X_CalibrateECGGain(uint8_t *puchReadFifoBuffer)
  *
  * @brief  Calibrate ECG Gain
  *
@@ -2908,12 +2469,12 @@ GS8 GH3X2X_CalibrateECGGainEx(GU8 *puchReadFifoBuffer);
  * @retval  #GH3X2X_RET_GENERIC_ERROR           return algorithm generic error
  */
 
-GS8 GH3X2X_CalibrateECGGain(GU8 *puchReadFifoBuffer, GU16 usFifoBufferLen);
+int8_t GH3X2X_CalibrateECGGain(uint8_t *puchReadFifoBuffer, uint16_t usFifoBufferLen);
 
 
 
 /**
- * @fn       GU8 GH3x2x_SetChipResetRecoveringFlag(void)
+ * @fn       uint8_t GH3x2x_SetChipResetRecoveringFlag(void)
 
 
  *
@@ -2926,11 +2487,11 @@ GS8 GH3X2X_CalibrateECGGain(GU8 *puchReadFifoBuffer, GU16 usFifoBufferLen);
  *
  * @return  None
  */
-void GH3x2x_SetChipResetRecoveringFlag(GU8 uchChipResetRecoeringFlag);
+void GH3x2x_SetChipResetRecoveringFlag(uint8_t uchChipResetRecoeringFlag);
 
 
 /**
- * @fn       GU8 GH3x2x_GetChipResetRecoveringFlag(void)
+ * @fn       uint8_t GH3x2x_GetChipResetRecoveringFlag(void)
 
 
  *
@@ -2943,13 +2504,13 @@ void GH3x2x_SetChipResetRecoveringFlag(GU8 uchChipResetRecoeringFlag);
  *
  * @return  None
  */
-GU8 GH3x2x_GetChipResetRecoveringFlag(void);
+uint8_t GH3x2x_GetChipResetRecoveringFlag(void);
 
 
 
 
 /**
- * @fn       GU8 GH3x2x_GetActiveChipResetFlag(void)
+ * @fn       uint8_t GH3x2x_GetActiveChipResetFlag(void)
 
 
  *
@@ -2962,7 +2523,7 @@ GU8 GH3x2x_GetChipResetRecoveringFlag(void);
  *
  * @return  None
  */
-GU8 GH3x2x_GetActiveChipResetFlag(void);
+uint8_t GH3x2x_GetActiveChipResetFlag(void);
 
 
 /**
@@ -2993,11 +2554,11 @@ void GH3X2X_RecordTiaGainInfo(void);
  *
  * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
-GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void);
+uint8_t GH3x2x_GetNeedWakeUpGh3x2xFlag(void);
 
 
 /**
- * @fn     GU8 GH3X2X_UpdateSoftWearStatus(void)
+ * @fn     uint8_t GH3X2X_UpdateSoftWearStatus(void)
  *
  * @brief  update wear status
  *
@@ -3008,11 +2569,11 @@ GU8 GH3x2x_GetNeedWakeUpGh3x2xFlag(void);
  *
  * @return  new event
  */
-GU8 GH3X2X_UpdateSoftWearStatus(void);
+uint8_t GH3X2X_UpdateSoftWearStatus(void);
 void GH3X2X_SetSoftWearStatus(EMWearRecordType emStatus);
 
 /**
- * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag)
+ * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlag(uint8_t uchFlag)
 
  *
  * @brief
@@ -3024,10 +2585,10 @@ void GH3X2X_SetSoftWearStatus(EMWearRecordType emStatus);
  *
  * @return  None
  */
-void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag);
+void GH3x2x_SetNeedWakeUpGh3x2xFlag(uint8_t uchFlag);
 
 /**
- * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag)
+ * @fn        void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(uint8_t uchFlag)
 
  *
  * @brief
@@ -3039,7 +2600,7 @@ void GH3x2x_SetNeedWakeUpGh3x2xFlag(GU8 uchFlag);
  *
  * @return  None
  */
-void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag);
+void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(uint8_t uchFlag);
 
 /**
  * @fn       void GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void)
@@ -3053,10 +2614,10 @@ void GH3x2x_SetNeedWakeUpGh3x2xFlagBeforeInt(GU8 uchFlag);
  *
  * @return  NeedWakeUpGh3x2xFlag  0: do not need wake up gh3x2x  1: need wake up gh3x2x
  */
-GU8 GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void);
+uint8_t GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void);
 
 /**
- * @fn     void GH3X2X_SlotEnRegSet(GU8 uchSetValue)
+ * @fn     void GH3X2X_SlotEnRegSet(uint8_t uchSetValue)
  *
  * @brief  Slot enable reg set
  *
@@ -3067,10 +2628,10 @@ GU8 GH3x2x_GetNeedWakeUpGh3x2xFlagBeforeInt(void);
  *
  * @return  None
  */
-void GH3X2X_SlotEnRegSet(GU8 uchSetValue);
+void GH3X2X_SlotEnRegSet(uint8_t uchSetValue);
 
 /**
- * @fn     void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue)
+ * @fn     void GH3X2X_ModifyFunctionFrequency(uint8_t uchFunctionID, uint16_t usFrequencyValue)
  *
  * @brief  Modify fs for each function
  *
@@ -3082,10 +2643,10 @@ void GH3X2X_SlotEnRegSet(GU8 uchSetValue);
  *
  * @return  None
  */
-void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue);
+void GH3X2X_ModifyFunctionFrequency(uint8_t uchFunctionID, uint16_t usFrequencyValue);
 
 /**
- * @fn     void GH3X2X_ModifyFunctionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current)
+ * @fn     void GH3X2X_ModifyFunctionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current)
  *
  * @brief  Modify led current for each function
  *
@@ -3098,56 +2659,53 @@ void GH3X2X_ModifyFunctionFrequency(GU8 uchFunctionID, GU16 usFrequencyValue);
  *
  * @return  None
  */
-void GH3X2X_ModifyFunctionLedCurrent(GU8 uchFunctionID, GU16 usLedDrv0Current, GU16 usLedDrv1Current);
+void GH3X2X_ModifyFunctionLedCurrent(uint8_t uchFunctionID, uint16_t usLedDrv0Current, uint16_t usLedDrv1Current);
 
 typedef struct
 {
-    GU16 usSampleRate;                  //current sample rate
-    GU16 usSampleRateForUserSetting;    //0:  use default sample rate via cfg array    others: use usSampleRateForUserSetting
-    GU32 unChnlEnForUserSetting;        //BitN = 1: channel N is enable     BitN = 0: channel N is disable
-    GU8  uchChnlNum;
-    GU8 uchSlotBit;
+    uint16_t usSampleRate;                  //current sample rate
+    uint16_t usSampleRateForUserSetting;    //0:  use default sample rate via cfg array    others: use usSampleRateForUserSetting
+    uint32_t unChnlEnForUserSetting;        //BitN = 1: channel N is enable     BitN = 0: channel N is disable
+    uint8_t  uchChnlNum;
+    uint8_t uchSlotBit;
 } STGh3x2xFunctionInfo;
 
 typedef struct
 {
-    GU8 uchUpdateFlag;
-    GU8 uchResultNum;
-    GS32 snResult[16];
+    uint8_t uchUpdateFlag;
+    uint8_t uchResultNum;
+    int32_t snResult[16];
 } STGh3x2xAlgoResult;
 
 
 
 typedef struct
 {
-    GU8 uchDownSampleFactor;   //0: down sample disable    N(N != 0):  down sample radio = (N + 1) : 1
-    GU8 uchDownSampleCnt;      // data will output when uchDownSampleFactor = uchDownSampleCnt
+    uint8_t uchDownSampleFactor;   //0: down sample disable    N(N != 0):  down sample radio = (N + 1) : 1
+    uint8_t uchDownSampleCnt;      // data will output when uchDownSampleFactor = uchDownSampleCnt
 } STGh3x2xDownSampleInfo;
 
 
-
-typedef struct
+struct gh3020_frameinfo_s
 {
-    GU32 unFunctionID ;
+    uint32_t unFunctionID ;
     STGh3x2xFunctionInfo *pstFunctionInfo;
     STGh3x2xDownSampleInfo *pstDownSampleInfo;
-    GU8   uchFuntionChnlLimit;   //max chnl num
-    GU8   *pchChnlMap;
-    GU32 *punFrameRawdata;
-    GS16 *pusFrameGsensordata;
+    uint8_t   uchFuntionChnlLimit;   //max chnl num
+    uint8_t   *pchChnlMap;
+    uint32_t *punFrameRawdata;
+    int16_t *pusFrameGsensordata;
     STCapRawdata *pstFrameCapdata;
     STTempRawdata *pstFrameTempdata;
-    GU32 *punFrameAgcInfo;
-    GU32 *punFrameFlag;
-    GU32 *punIncompleteRawdata;
-    GU32 *punIncompleteChnlMapBit;
-    GU8 * puchFrameLastGain;
-    GU32 * punFrameCnt;
+    uint32_t *punFrameAgcInfo;
+    uint32_t *punFrameFlag;
+    uint32_t *punIncompleteRawdata;
+    uint32_t *punIncompleteChnlMapBit;
+    uint8_t * puchFrameLastGain;
+    uint32_t * punFrameCnt;
     STGh3x2xAlgoResult * pstAlgoResult;
     STGh3x2xAlgoResult * pstAlgoRecordResult;
-} STGh3x2xFrameInfo;
-
-
+};
 
 /******************************************/
 /** GH3x2x BP Function Parameter & API **/
@@ -3172,56 +2730,56 @@ typedef enum
 
 typedef struct
 {
-    GU32 unResulttype;
-    GU32 unSbp;
-    GU32 unDbp;
-    GU32 unHr;
-    GS32 nIsHyperFlag;
-    GU32 unConfscore;
-    GU32 unPi;
-    GU32 unCtr;
-    GU32 unSnr;
+    uint32_t unResulttype;
+    uint32_t unSbp;
+    uint32_t unDbp;
+    uint32_t unHr;
+    int32_t nIsHyperFlag;
+    uint32_t unConfscore;
+    uint32_t unPi;
+    uint32_t unCtr;
+    uint32_t unSnr;
 }STGh3x2xBpResult;
 
 typedef struct
 {
-    GU8 uchUpdateFLag;
-    GU32 unCaliSbp;
-    GU32 unCaliDbp;
-    GU32 unCaliHr;
+    uint8_t uchUpdateFLag;
+    uint32_t unCaliSbp;
+    uint32_t unCaliDbp;
+    uint32_t unCaliHr;
     double CaliFeatureValue[GH3X2X_PWA_CALI_NUMS][GH3X2X_PWA_FEATURE_NUMS];
     double CaliFittingCoef[GH3X2X_PWA_CALI_NUMS][GH3X2X_PWA_FITTING_COEF_KB_NUMS];
 }STGh3x2xBpCaliPara;
 
 typedef struct
 {
-    GU32 unErrorCode;
-    GU8 uchResultUpdateFlag; //refer to EMBpOutputFlagOffset
-    GS32 nOffset;
-    GS32 nPressure;
+    uint32_t unErrorCode;
+    uint8_t uchResultUpdateFlag; //refer to EMBpOutputFlagOffset
+    int32_t nOffset;
+    int32_t nPressure;
     STGh3x2xBpResult stBpResult;
     STGh3x2xBpCaliPara stPwaCali;
 }STGh3x2xBpAlgoOutput;
 
 typedef struct
 {
-    GS32 nOffset;
-    GS32 nFactor;
-    GS32 nArea;
+    int32_t nOffset;
+    int32_t nFactor;
+    int32_t nArea;
 }STGh3x2xBpPressureSensorConfig;
 
 typedef struct
 {
-    GS32 nTmperature;
-    GU32 unAge;
-    GU32 unHeight;
-    GU32 unWeight;
-    GU32 unGender;//0:male, 1:female
+    int32_t nTmperature;
+    uint32_t unAge;
+    uint32_t unHeight;
+    uint32_t unWeight;
+    uint32_t unGender;//0:male, 1:female
     STGh3x2xBpPressureSensorConfig stPressureSensorConfig;
     STGh3x2xBpCaliPara stCaliInfo;
 }STGh3x2xBpAlgoInput;
 
-extern const GU8 g_uchGyroEnable;
+extern const uint8_t g_uchGyroEnable;
 
 //extern void Gh3x2x_BpAlgorithmPersonalInfoInput(EMBpModeType EMBpMode, STGh3x2xBpAlgoInput *pstAlgoInput);
 extern void Gh3x2x_BpAlgorithmResultReport(STGh3x2xBpAlgoOutput *pstAlgoResult);
@@ -3230,15 +2788,15 @@ extern void Gh3x2x_BpAlgorithmResultReport(STGh3x2xBpAlgoOutput *pstAlgoResult);
 /******************************************/
 
 
-//extern void GH3X2X_SetFifoPackageMode(GU8 uchMode, GU8 *puchFifoBuffer);
-extern void GH3X2X_SendRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadByteNum);
-//extern void GH3X2X_PackRawdataFifoPackage(GU8 *puchGh3x2xReadFifoData, GU16 usFifoReadByteNum);
-extern GU32 *g_punGh3x2xAlgoMemBufferPointer;
-extern GU8 GH3X2X_GetFifoPackageMode(void);
+//extern void GH3X2X_SetFifoPackageMode(uint8_t uchMode, uint8_t *puchFifoBuffer);
+extern void GH3X2X_SendRawdataFifoPackage(uint8_t *puchGh3x2xReadFifoData, uint16_t usFifoReadByteNum);
+//extern void GH3X2X_PackRawdataFifoPackage(uint8_t *puchGh3x2xReadFifoData, uint16_t usFifoReadByteNum);
+extern uint32_t *g_punGh3x2xAlgoMemBufferPointer;
+extern uint8_t GH3X2X_GetFifoPackageMode(void);
 
 
 /**
- * @fn      void GH3x2x_ChangeSampleParmForEngineeringMode(GU32 unFunctionMode, STGh3x2xEngineeringModeSampleParam *pstSampleParaGroup , GU8 uchSampleParaGroupNum)
+ * @fn      void GH3x2x_ChangeSampleParmForEngineeringMode(uint32_t unFunctionMode, FAR struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum)
 
  *
  * @brief
@@ -3252,38 +2810,38 @@ extern GU8 GH3X2X_GetFifoPackageMode(void);
  *
  * @return  None
  */
-void GH3x2x_ChangeSampleParmForEngineeringMode(const STGh3x2xFrameInfo * const  pstGh3x2xFrameInfo[], GU32 unFunctionMode, STGh3x2xEngineeringModeSampleParam *pstSampleParaGroup , GU8 uchSampleParaGroupNum);
+void GH3x2x_ChangeSampleParmForEngineeringMode(const struct gh3020_frameinfo_s * const  pstGh3x2xFrameInfo[], uint32_t unFunctionMode, FAR struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum);
 
 
-GS8 GH3X2X_FunctionStart(const STGh3x2xFrameInfo * const pstFrameInfo);
-GS8 GH3X2X_FunctionStop(const STGh3x2xFrameInfo * const pstFrameInfo);
-
-
-
-
-
-
-void GH3x2xFunctionProcess(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, GS16 *pusGsValueArr, GU16 usGsDataNum,
-                        STCapRawdata* pstCapValueArr,GU16 usCapDataNum,STTempRawdata* pstTempValueArr,GU16 usTempDataNum,
-                        const STGh3x2xFrameInfo * const pstFrameInfo);
-GU8* GH3x2xGetFunctionChnlMap(const STGh3x2xFrameInfo * const pstFrameInfo);
-void GH3x2xSetFunctionChnlNum(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 uchChnlNum);
-void GH3x2xSetFunctionChnlMap(const STGh3x2xFrameInfo * const pstFrameInfo, GU8 uchChnlId, GU8 uchChnlTag);
-void GH3x2xCalFunctionSlotBit(const STGh3x2xFrameInfo * const pstFrameInfo);
+int8_t GH3X2X_FunctionStart(const struct gh3020_frameinfo_s * const pstFrameInfo);
+int8_t GH3X2X_FunctionStop(const struct gh3020_frameinfo_s * const pstFrameInfo);
 
 
 
 
 
 
+void GH3x2xFunctionProcess(uint8_t *puchRawdataBuf, uint16_t usRawDataByteLen, int16_t *pusGsValueArr, uint16_t usGsDataNum,
+                        STCapRawdata* pstCapValueArr,uint16_t usCapDataNum,STTempRawdata* pstTempValueArr,uint16_t usTempDataNum,
+                        const struct gh3020_frameinfo_s * const pstFrameInfo);
+uint8_t* GH3x2xGetFunctionChnlMap(const struct gh3020_frameinfo_s * const pstFrameInfo);
+void GH3x2xSetFunctionChnlNum(const struct gh3020_frameinfo_s * const pstFrameInfo, uint8_t uchChnlNum);
+void GH3x2xSetFunctionChnlMap(const struct gh3020_frameinfo_s * const pstFrameInfo, uint8_t uchChnlId, uint8_t uchChnlTag);
+void GH3x2xCalFunctionSlotBit(const struct gh3020_frameinfo_s * const pstFrameInfo);
 
 
 
-extern const STGh3x2xFrameInfo * const g_pstGh3x2xFrameInfo[];
+
+
+
+
+
+
+extern const struct gh3020_frameinfo_s * const g_pstGh3x2xFrameInfo[];
 
 
 /**
- * @fn     void GH3X2X_EcgSampleHookHandle(GU8 uchEventType, GU8 uchEventInfo)
+ * @fn     void GH3X2X_EcgSampleHookHandle(uint8_t uchEventType, uint8_t uchEventInfo)
  *
  * @brief  ecg sample  hook handle
  *
@@ -3295,13 +2853,13 @@ extern const STGh3x2xFrameInfo * const g_pstGh3x2xFrameInfo[];
  *
  * @return  None
  */
-void GH3X2X_EcgSampleHookHandle(GU8 uchEventType, GU8 uchEventInfo);
+void GH3X2X_EcgSampleHookHandle(uint8_t uchEventType, uint8_t uchEventInfo);
 
 
-void GH3X2X_LeadDetEnInHardAdt(GU8 uchEn);
+void GH3X2X_LeadDetEnInHardAdt(uint8_t uchEn);
 
 /**
- * @fn     GH3X2X_LeadDetEnControl(GU8 uchEventInfo)
+ * @fn     GH3X2X_LeadDetEnControl(uint8_t uchEventInfo)
  *
  * @brief  lead detect enable control
  *
@@ -3312,9 +2870,9 @@ void GH3X2X_LeadDetEnInHardAdt(GU8 uchEn);
  *
  * @return  None
  */
-void GH3X2X_LeadDetEnControl(GU8 uchEventInfo);
+void GH3X2X_LeadDetEnControl(uint8_t uchEventInfo);
 /**
- * @fn     void GH3X2X_SlaverSoftLeadPramSet(GU16 usRegVal, GU8 uchRegPosi)
+ * @fn     void GH3X2X_SlaverSoftLeadPramSet(uint16_t usRegVal, uint8_t uchRegPosi)
  *
  * @brief  slave soft lead off param set from virtual reg
  *
@@ -3326,7 +2884,7 @@ void GH3X2X_LeadDetEnControl(GU8 uchEventInfo);
  *
  * @return  None
  */
-void GH3X2X_SlaverSoftLeadPramSet(GU16 usRegVal, GU8 uchRegPosi);
+void GH3X2X_SlaverSoftLeadPramSet(uint16_t usRegVal, uint8_t uchRegPosi);
 
 /**
  * @fn     void GH3X2X_SlaverSoftLeadPramInit(void)
@@ -3342,70 +2900,42 @@ void GH3X2X_SlaverSoftLeadPramSet(GU16 usRegVal, GU8 uchRegPosi);
  */
 void GH3X2X_SlaverSoftLeadPramInit(void);
 
-
-
-
-
-
 void GH3X2X_StartHardAdtAndResetGsDetect(void);
 void GH3X2X_StopHardAdtAndStartGsDetect(void);
-GU8 GH3X2X_GetSoftLeadDetMode(void);
-GU8 GH3X2X_GetAdtElectrodeAdtEn(void);
+uint8_t GH3X2X_GetSoftLeadDetMode(void);
+uint8_t GH3X2X_GetAdtElectrodeAdtEn(void);
 
+extern uint8_t GH3X2X_UprotocolPacketFormat(uint8_t uchCmd, uint8_t *puchPacketBuffer, uint8_t *puchPayloadData, uint8_t uchPayloadDataLen);
 
-extern void gh3x2x_algorithm_get_io_data_hook_func(const STGh3x2xFrameInfo * const pstFrameInfo);
-extern void gh3x2x_active_reset_hook(void);
-
-
-
-/**
- * @fn     void Gh3x2x_DemoSendProtocolData(GU8* puchProtocolDataBuffer, GU16 usProtocolDataLen)
- *
- * @brief  Copy protocol data to buffer that will be sent out to APP/EVK.
- *
- * @attention   None
- *
- * @param[in]   puchProtocolDataBuffer      point to protocol data
- * @param[in]   usProtocolDataLen           protocol data length
- * @param[out]  None
- *
- * @return  None
- */
-extern void Gh3x2xDemoSendProtocolData(GU8* puchProtocolDataBuffer, GU16 usProtocolDataLen);
-extern GU8 GH3X2X_UprotocolPacketFormat(GU8 uchCmd, GU8 *puchPacketBuffer, GU8 *puchPayloadData, GU8 uchPayloadDataLen);
-
-extern void Gh2x2xUploadDataToMaster(const STGh3x2xFrameInfo * const pstFrameInfo, GU16 usFrameCnt, GU16 usFrameNum, GU8* puchTagArray);
-extern void Gh2x2xUploadZipDataToMaster(const STGh3x2xFrameInfo * const pstFrameInfo, GU16 usFrameCnt, GU16 usFrameNum, GU8* puchTagArray);
-
-extern GU16 GH3x2xGetFrameNum(GU8 *puchRawdataBuf, GU16 usRawDataByteLen, const STGh3x2xFrameInfo * const pstFrameInfo);
-GU8  GH3X2X_CalcArrayCrc8Val(GU8 uchDataArr[], GU16 usDataIndex, GU16 usDataLen);
+extern uint16_t GH3x2xGetFrameNum(uint8_t *puchRawdataBuf, uint16_t usRawDataByteLen, const struct gh3020_frameinfo_s * const pstFrameInfo);
+uint8_t  GH3X2X_CalcArrayCrc8Val(uint8_t uchDataArr[], uint16_t usDataIndex, uint16_t usDataLen);
 
 void Gh3x2xSetProtocolEventAck(void);
-GU8 Gh3x2xGetProtocolEventReportId(void);
+uint8_t Gh3x2xGetProtocolEventReportId(void);
 
-extern void Gh3x2xSetFrameFlag2(const STGh3x2xFrameInfo * const pstFrameInfo);
+extern void Gh3x2xSetFrameFlag2(const struct gh3020_frameinfo_s * const pstFrameInfo);
 
-extern GU8 Gh3x2xGetHrAlgoSupportChnl(void);
-extern GU8 Gh3x2xGetSpo2AlgoSupportChnl(void);
+extern uint8_t Gh3x2xGetHrAlgoSupportChnl(void);
+extern uint8_t Gh3x2xGetSpo2AlgoSupportChnl(void);
 
 extern void GH3X2X_ReadIntTime(void);
-extern GU8 GH3X2X_GetIntTimeInArray(GU8 uchSlotIndex);
+extern uint8_t GH3X2X_GetIntTimeInArray(uint8_t uchSlotIndex);
 
-extern GU8 Gh3x2xCheckSoftAdtTimeOut(const STGh3x2xFrameInfo * const pstFrameInfo, GU32 unSpecialAngleTimeSec, GU32 unMovelessTimeSec);
+extern uint8_t Gh3x2xCheckSoftAdtTimeOut(const struct gh3020_frameinfo_s * const pstFrameInfo, uint32_t unSpecialAngleTimeSec, uint32_t unMovelessTimeSec);
 
 extern void Gh3x2xFunctionInfoForUserInit(void);
 
-extern void GH3x2xCalFunctionSlotBit(const STGh3x2xFrameInfo * const pstFrameInfo);
+extern void GH3x2xCalFunctionSlotBit(const struct gh3020_frameinfo_s * const pstFrameInfo);
 
-extern void GH3x2xSetAgcReg(GU8 uchAgcReg,  GU8 uchSlot, GU16 usValue);
+extern void GH3x2xSetAgcReg(uint8_t uchAgcReg,  uint8_t uchSlot, uint16_t usValue);
 
-extern GU16 GH3x2xGetAgcReg(GU8 uchAgcReg,  GU8 uchSlot);
+extern uint16_t GH3x2xGetAgcReg(uint8_t uchAgcReg,  uint8_t uchSlot);
 
 extern void GH3x2xSendAllVersion(void);
 
 
 /**
- * @fn     void GH3x2xSleepFlagSet(GU8 uchSleepFlag)
+ * @fn     void GH3x2xSleepFlagSet(uint8_t uchSleepFlag)
  *
  * @brief  sleep flag set
  *
@@ -3416,39 +2946,36 @@ extern void GH3x2xSendAllVersion(void);
  *
  * @return  None
  */
-extern void GH3x2xSleepFlagSet(GU8 uchSleepFlag);
-extern GU8 GH3x2xSleepFlagGet(void);
+extern void GH3x2xSleepFlagSet(uint8_t uchSleepFlag);
+extern uint8_t GH3x2xSleepFlagGet(void);
 
-extern void GH3X2X_SetAlgoEnableFlag(GU8 uchAlgoEnableFlag);
+extern void GH3X2X_SetAlgoEnableFlag(uint8_t uchAlgoEnableFlag);
 
-extern void* Gh3x2xAlgoMemApply(GU32 unMemSize);
+extern void* Gh3x2xAlgoMemApply(uint32_t unMemSize);
 extern void Gh3x2xAlgoMemFree(void* MemAddr);
 
-extern void GH3X2X_UprotocolFpbpDataReceiveCmd(GU8 *puchRespondBuffer, GU16 *pusRespondLen);
-extern void GH3x2xBpAlgoInitSetting(GU8 *puchRespondBuffer);
-
-extern void Gh3x2xOutputValueStrategyInit(GU32 unFunctionID);
+extern void GH3x2xBpAlgoInitSetting(uint8_t *puchRespondBuffer);
 
 
 
 
-extern GS32 GH3X2X_LeadOffDetect2Init(void);
-extern GU8 GH3X2X_LeadOffDetect2(GU8* puchFifoBuffer, GU16* pusFifoBufferLen);
+extern int32_t GH3X2X_LeadOffDetect2Init(void);
+extern uint8_t GH3X2X_LeadOffDetect2(uint8_t* puchFifoBuffer, uint16_t* pusFifoBufferLen);
 
-extern GU8 GH3X2X_LeadOffDetect(GU8* puchFifoBuffer, GU16 usFifoBufferLen);
+extern uint8_t GH3X2X_LeadOffDetect(uint8_t* puchFifoBuffer, uint16_t usFifoBufferLen);
 extern void GH3X2X_LeadOffDetectInit(void);
-extern GU8 GH3X2X_EcgRsHandle(GU8 *puchFifoBuffer, GU16 *pusFifoBufferLen);
-extern void Gh3x2xSetGh3x2xSoftWearOffDetFunctionId(GU32 unFunctionId);
+extern uint8_t GH3X2X_EcgRsHandle(uint8_t *puchFifoBuffer, uint16_t *pusFifoBufferLen);
+extern void Gh3x2xSetGh3x2xSoftWearOffDetFunctionId(uint32_t unFunctionId);
 extern void Gh3x2xPollingModePro(void);
-extern void GH3X2X_ECGResampleConfig(GU16 usEcgSampleRate);
+extern void GH3X2X_ECGResampleConfig(uint16_t usEcgSampleRate);
 extern void Gh3x2xNewAgcSubChnlModuleReset(void);
-extern GU8 GH3x2xNewAgcSetNewSubChnl(GU8 uchSlotNo, GU8 uchRxEn);
-extern void GH3X2X_NewAgcSubChnlGainAdj(GU8* puchReadFifoBuffer, GU16 usFifoLen);
-extern void GH3x2xNewAgcSubChnlClearAnalysisCntAndSetGain(GU8 uchSlotNo, GU8 uchRxEn ,GU8 uchNextGain);
-extern void GH3x2xNewAgcSetSubChnlSlotInfo(GU8 uchSlotCnt, GU16 usSampleRate);
+extern uint8_t GH3x2xNewAgcSetNewSubChnl(uint8_t uchSlotNo, uint8_t uchRxEn);
+extern void GH3X2X_NewAgcSubChnlGainAdj(uint8_t* puchReadFifoBuffer, uint16_t usFifoLen);
+extern void GH3x2xNewAgcSubChnlClearAnalysisCntAndSetGain(uint8_t uchSlotNo, uint8_t uchRxEn ,uint8_t uchNextGain);
+extern void GH3x2xNewAgcSetSubChnlSlotInfo(uint8_t uchSlotCnt, uint16_t usSampleRate);
 extern void GH3x2xWriteCapToFlash(void);
 extern void GH3x2xReadCapFromFlash(void);
-extern void GH3X2X_MoveDetectByCapData(STCapRawdata* pusCapData, GU16 usCapDataCnt);
+extern void GH3X2X_MoveDetectByCapData(STCapRawdata* pusCapData, uint16_t usCapDataCnt);
 extern void GH3x2xSlotTimeInfo(void);
 
 #endif /* _GH3X2X_DRV_H_ */
