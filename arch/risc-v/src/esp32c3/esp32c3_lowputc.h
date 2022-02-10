@@ -410,6 +410,19 @@ void esp32c3_lowputc_rst_txfifo(const struct esp32c3_uart_s *priv);
 void esp32c3_lowputc_rst_rxfifo(const struct esp32c3_uart_s *priv);
 
 /****************************************************************************
+ * Name: esp32c3_lowputc_enable_sysclk
+ *
+ * Description:
+ *   Enable clock for the UART using the System register.
+ *
+ * Parameters:
+ *   priv           - Pointer to the private driver struct.
+ *
+ ****************************************************************************/
+
+void esp32c3_lowputc_enable_sysclk(const struct esp32c3_uart_s *priv);
+
+/****************************************************************************
  * Name: esp32c3_lowputc_disable_all_uart_int
  *
  * Description:
