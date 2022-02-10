@@ -216,7 +216,7 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
    * incremented by one so that the delay is always at least as long as
    * requested.
    *
-   * This is extensive documentation about this time issue elsewhere.
+   * There is extensive documentation about this time issue elsewhere.
    */
 
   if (delay <= 0)
