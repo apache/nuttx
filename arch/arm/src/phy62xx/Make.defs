@@ -104,7 +104,7 @@ CFLAGS += -DHUGE_MODE=0
 CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
 #CFLAGS += -Wimplicit-function-declaration
-#CFLAGS += -Wunused-but-set-variable
+CFLAGS += -Wno-unused-but-set-variable
 CFLAGS += -DEXTERN_BLE_FUNC=0
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
 

@@ -36,6 +36,7 @@
 #include "phyplus_wdt.h"
 #include "jump_function.h"
 #include "mcu_phy_bumbee.h"
+#include "clock.h"
 
 #if defined(CONFIG_WATCHDOG)
 
@@ -75,10 +76,6 @@ static int    phyplus_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
                                      FAR struct watchdog_status_s *status);
 static int    phyplus_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
                                       uint32_t timeout);
-static xcpt_t phyplus_wdt_capture(FAR struct watchdog_lowerhalf_s *lower,
-                                   xcpt_t handler);
-static int    phyplus_wdt_ioctl(FAR struct watchdog_lowerhalf_s *lower,
-                                 int cmd, unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -184,7 +181,7 @@ static int pp_watchdog_start(bool interrupt_mode, WDG_CYCLE_Type_e cycle)
   return 0;
 }
 
-static int pp_watchdog_stop()
+static int pp_watchdog_stop(void)
 {
   wdinfo("pp_stop not support\n");
 
@@ -193,14 +190,14 @@ static int pp_watchdog_stop()
   return 0;
 }
 
-static int pp_watchdog_settimer(WDG_CYCLE_Type_e cycle)
+static int __attribute__((used)) pp_watchdog_settimer(WDG_CYCLE_Type_e cycle)
 {
   wdinfo("pp_settimer\n");
   AP_WDT->TORR = cycle;
   return 0;
 }
 
-static int pp_watchdog_feed()
+static int pp_watchdog_feed(void)
 {
   wdinfo("pp_feed\n");
   AP_WDT->CRR = 0x76;
@@ -300,8 +297,10 @@ static int phyplus_wdt_stop(FAR struct watchdog_lowerhalf_s *lower)
 
 static int phyplus_wdt_keepalive(FAR struct watchdog_lowerhalf_s *lower)
 {
-  FAR struct phyplus_lowerhalf_s *priv =
-    (FAR struct phyplus_lowerhalf_s *)lower;
+  /* FAR struct phyplus_lowerhalf_s *priv =
+   * (FAR struct phyplus_lowerhalf_s *)lower;
+   */
+
   irqstate_t flags;
 
   wdinfo("wdt_feed\n");
@@ -340,7 +339,7 @@ static int phyplus_wdt_getstatus(FAR struct watchdog_lowerhalf_s *lower,
 
   wdinfo("wdt getstatus\n");
 
-  wdinfo("CR:%08x , TORR:%08x , CCVR:%08x , STAT:%08x\n", AP_WDT->CR ,
+  wdinfo("CR:%08x , TORR:%08lx , CCVR:%08lx , STAT:%08x\n", AP_WDT->CR ,
       AP_WDT->TORR , AP_WDT->CCVR , AP_WDT->STAT);
 
   if (priv->started)
@@ -380,7 +379,7 @@ static int phyplus_wdt_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   FAR struct phyplus_lowerhalf_s *priv =
     (FAR struct phyplus_lowerhalf_s *)lower;
 
-  wdinfo("wdt set timeout timeout=%d\n", timeout);
+  wdinfo("wdt set timeout timeout=%lu\n", timeout);
   timeout = timeout / 1000;
 
   if (timeout < 4)

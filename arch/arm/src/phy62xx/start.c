@@ -40,7 +40,7 @@
 #include "log.h"
 #include "flash.h"
 #include "jump_function.h"
-
+#include "rom_sym_def.h"
 /* #include "rf_phy_driver.h" */
 
 /****************************************************************************
@@ -95,6 +95,9 @@ const uintptr_t g_idle_topstack = IDLE_STACK;
 extern uint32_t *jump_table_base[];
 
 extern volatile sysclk_t g_system_clk;
+extern void *osal_memset(void *s, int c, size_t n);
+extern void *osal_memcpy(void *dest, const void *src, size_t n);
+
 void c_start(void)
 {
   const uint8_t *src;
@@ -122,8 +125,8 @@ void c_start(void)
    * certain that there are no issues with the state of global variables.
    */
 
-  dest = &_sbss;
-  edest = &_ebss;
+  dest = (uint8_t *)&_sbss;
+  edest = (uint8_t *)&_ebss;
   osal_memset(dest, 0, edest - dest);
 
   /* for (dest = &_sbss; dest < &_ebss; )
@@ -140,9 +143,9 @@ void c_start(void)
    * end of all of the other read-only data (.text, .rodata) at _eronly.
    */
 
-  src = &_eronly;
-  dest = &_sdata;
-  edest = &_edata;
+  src = (const uint8_t *)&_eronly;
+  dest = (uint8_t *)&_sdata;
+  edest = (uint8_t *)&_edata;
   osal_memcpy(dest, src, edest - dest);
 
   /* for (src = &_eronly, dest = &_sdata; dest < &_edata; )
@@ -159,9 +162,9 @@ void c_start(void)
    *  }
    */
 
-  src = &_sjtblss;
-  dest = &_sjtbls;
-  edest = &_ejtbls;
+  src = (const uint8_t *)&_sjtblss;
+  dest = (uint8_t *)&_sjtbls;
+  edest = (uint8_t *)&_ejtbls;
   osal_memcpy(dest, src, edest - dest);
 
   /* osal_memcpy(&_sjtbls, &_sjtblss, _ejtbls - _sjtbls);
