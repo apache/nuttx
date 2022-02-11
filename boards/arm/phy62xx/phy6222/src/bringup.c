@@ -138,7 +138,7 @@ int phy62xx_bringup(void)
       /* Mount the LittleFS file system */
 
       ret = nx_mount("/dev/mtd", "/data", "littlefs", 0,
-                "forceformat");
+                "autoformat");
       if (ret < 0)
         {
           syslog(LOG_ERR,

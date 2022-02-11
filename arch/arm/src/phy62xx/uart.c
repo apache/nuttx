@@ -48,13 +48,14 @@
 #include <nuttx/serial/serial.h>
 #include <nuttx/mm/circbuf.h>
 
-#define UART_TX_BUFFER_SIZE   256
-#define UART_RX_BUFFER_SIZE   256
+#define UART_TX_BUFFER_SIZE   64
+#define UART_RX_BUFFER_SIZE   64
 uint8_t fifo_data_store[2][UART_RX_FIFO_SIZE];
 uint8_t fifo_len_store[2] =
 {
   0, 0
 };
+
 typedef struct _uart_Context
 {
   bool          enable;
