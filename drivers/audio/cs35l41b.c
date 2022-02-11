@@ -564,7 +564,7 @@ static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
 
               /* Report the Sample rates we support */
 
-              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_48K;
+              caps->ac_controls.b[0] = AUDIO_SAMP_RATE_44K;
               break;
 
             case AUDIO_FMT_MP3:
@@ -1258,6 +1258,11 @@ static int cs35l41b_set_bclk(FAR struct cs35l41b_dev_s *priv,
     case 512000:
       regval_control = CS35L41B_ASP_BCLK_FREQ_512KHZ;
       temp |= CS35L41B_PLL_REFCLK_FREQ_512000HZ;
+      break;
+
+    case 1411200:
+      regval_control = CS35L41B_ASP_BCLK_FREQ_1P4112MHZ;
+      temp |= CS35L41B_PLL_REFCLK_FREQ_1411200HZ;
       break;
 
     case 1536000:

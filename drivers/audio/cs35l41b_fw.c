@@ -102,6 +102,8 @@
 
 #define CS35L41B_CALIBERATION_INFO_STR                  "ro.factory.audio_par"
 
+#define SUPPORT_DEFAULT_SAMPLERATE                      (44100)
+
 /****************************************************************************
  * Private Type Declarations
  ****************************************************************************/
@@ -210,6 +212,22 @@ g_cs35l41_dsp_status_controls[CS35L41_DSP_STATUS_WORDS_TOTAL] =
   CS35L41_SYM_CSPL_CAL_CHECKSUM,
   CS35L41_SYM_CSPL_CSPL_TEMPERATURE,
 };
+
+#if (SUPPORT_DEFAULT_SAMPLERATE == 48000)
+static const uint32_t g_cs35l41_fs_syscfg[] =
+{
+  0x00002C04, 0x00000430,
+  0x00002C0C, 0x00000003,
+  0x00004804, 0x00000021,
+};
+#elif (SUPPORT_DEFAULT_SAMPLERATE == 44100)
+static const uint32_t g_cs35l41_fs_syscfg[] =
+{
+  0x00002C04, 0x000003F0,
+  0x00002C0C, 0x0000000B,
+  0x00004804, 0x0000001F,
+};
+#endif
 
 /****************************************************************************
  * Private Functions
@@ -731,6 +749,16 @@ cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
   if (ret == ERROR)
     {
       return ERROR;
+    }
+
+  for (i = 0; i < 3; i++)
+    {
+      ret = cs35l41b_write_register(priv, g_cs35l41_fs_syscfg[2 * i],
+                                    g_cs35l41_fs_syscfg[2 * i + 1]);
+      if (ret == ERROR)
+        {
+          return ERROR;
+        }
     }
 
   ret = cs35l41b_write_register(priv, CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG,
