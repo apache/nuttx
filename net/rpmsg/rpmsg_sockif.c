@@ -786,7 +786,7 @@ static int rpmsg_socket_accept(FAR struct socket *psock,
         }
       else
         {
-          if (_SS_ISNONBLOCK(conn->sconn.s_flags))
+          if (_SS_ISNONBLOCK(server->sconn.s_flags))
             {
               ret = -EAGAIN;
               break;
