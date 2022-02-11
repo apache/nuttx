@@ -164,13 +164,11 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
-   * appear here strictly one at a time
+   * appear here strictly one at a time, except for the FIN + ACK case.
    */
 
   DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
               (flags & TCP_REXMIT) == 0);
-  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
-              (flags & TCP_ACKDATA) == 0);
   DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
               (flags & TCP_REXMIT) == 0);
 

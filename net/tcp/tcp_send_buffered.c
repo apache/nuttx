@@ -384,45 +384,19 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
   ninfo("flags: %04x\n", flags);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
-   * appear here strictly one at a time
+   * appear here strictly one at a time, except for the FIN + ACK case.
    */
 
   DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
               (flags & TCP_REXMIT) == 0);
   DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
-              (flags & TCP_ACKDATA) == 0);
-  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
               (flags & TCP_REXMIT) == 0);
-
-  /* Check for a loss of connection */
-
-  if ((flags & TCP_DISCONN_EVENTS) != 0)
-    {
-      ninfo("Lost connection: %04x\n", flags);
-
-      /* We could get here recursively through the callback actions of
-       * tcp_lost_connection().  So don't repeat that action if we have
-       * already been disconnected.
-       */
-
-      if (_SS_ISCONNECTED(conn->sconn.s_flags))
-        {
-          /* Report not connected */
-
-          tcp_lost_connection(conn, conn->sndcb, flags);
-        }
-
-      /* Free write buffers and terminate polling */
-
-      psock_lost_connection(conn, !!(flags & NETDEV_DOWN));
-      return flags;
-    }
 
   /* If this packet contains an acknowledgment, then update the count of
    * acknowledged bytes.
    */
 
-  else if ((flags & TCP_ACKDATA) != 0)
+  if ((flags & TCP_ACKDATA) != 0)
     {
       FAR struct tcp_wrbuffer_s *wrb;
       FAR struct tcp_hdr_s *tcp;
@@ -600,6 +574,30 @@ static uint16_t psock_send_eventhandler(FAR struct net_driver_s *dev,
           ninfo("ACK: wrb=%p seqno=%" PRIu32 " pktlen=%u sent=%u\n",
                 wrb, TCP_WBSEQNO(wrb), TCP_WBPKTLEN(wrb), TCP_WBSENT(wrb));
         }
+    }
+
+  /* Check for a loss of connection */
+
+  if ((flags & TCP_DISCONN_EVENTS) != 0)
+    {
+      ninfo("Lost connection: %04x\n", flags);
+
+      /* We could get here recursively through the callback actions of
+       * tcp_lost_connection().  So don't repeat that action if we have
+       * already been disconnected.
+       */
+
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
+        {
+          /* Report not connected */
+
+          tcp_lost_connection(conn, conn->sndcb, flags);
+        }
+
+      /* Free write buffers and terminate polling */
+
+      psock_lost_connection(conn, !!(flags & NETDEV_DOWN));
+      return flags;
     }
 
   /* Check if we are being asked to retransmit data */
