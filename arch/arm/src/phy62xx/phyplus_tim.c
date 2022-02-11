@@ -50,7 +50,7 @@ struct phyplus_tim_priv_s
 /****************************************************************************
  * Private Function prototypes
  ****************************************************************************/
- 
+
 /* static int  phyplus_tim_checkint(FAR struct phyplus_tim_dev_s *dev,
  *     int source);
  */
@@ -331,7 +331,7 @@ void phyplus_tim_getcontrolreg(FAR struct phyplus_tim_dev_s *dev,
 int phyplus_tim_setisr(FAR struct phyplus_tim_dev_s *dev, xcpt_t handler,
     void *arg)
 {
-  FAR struct phyplus_tim_priv_s *tim = NULL; 
+  FAR struct phyplus_tim_priv_s *tim = NULL;
   int vectorno;
 
   DEBUGASSERT(dev);
@@ -342,23 +342,28 @@ int phyplus_tim_setisr(FAR struct phyplus_tim_dev_s *dev, xcpt_t handler,
     {
       vectorno = PHY62XX_IRQ_TIM1_IRQn;
     }
-  else if ((long unsigned int)AP_TIM2 == ((struct phyplus_tim_priv_s *)dev)->base)
+  else if ((long unsigned int)AP_TIM2 ==
+    ((struct phyplus_tim_priv_s *)dev)->base)
     {
       vectorno = PHY62XX_IRQ_TIM2_IRQn;
     }
-  else if ((long unsigned int)AP_TIM3 == ((struct phyplus_tim_priv_s *)dev)->base)
+  else if ((long unsigned int)AP_TIM3 ==
+    ((struct phyplus_tim_priv_s *)dev)->base)
     {
       vectorno = PHY62XX_IRQ_TIM3_IRQn;
     }
-  else if ((long unsigned int)AP_TIM4 == ((struct phyplus_tim_priv_s *)dev)->base)
+  else if ((long unsigned int)AP_TIM4 ==
+    ((struct phyplus_tim_priv_s *)dev)->base)
     {
       vectorno = PHY62XX_IRQ_TIM4_IRQn;
     }
-  else if ((long unsigned int)AP_TIM5 == ((struct phyplus_tim_priv_s *)dev)->base)
+  else if ((long unsigned int)AP_TIM5 ==
+    ((struct phyplus_tim_priv_s *)dev)->base)
     {
       vectorno = PHY62XX_IRQ_TIM5_IRQn;
     }
-  else if ((long unsigned int)AP_TIM6 == ((struct phyplus_tim_priv_s *)dev)->base)
+  else if ((long unsigned int)AP_TIM6 ==
+    ((struct phyplus_tim_priv_s *)dev)->base)
     {
       vectorno = PHY62XX_IRQ_TIM6_IRQn;
     }
