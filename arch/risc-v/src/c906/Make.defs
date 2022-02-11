@@ -44,11 +44,11 @@ CMN_CSRCS += riscv_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS  += riscv_fpu.S
+CMN_ASRCS += riscv_fpu.S
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += riscv_vfork.c
+CMN_CSRCS += riscv_vfork.c
 endif
 
 # Specify our C code within this directory to be included
