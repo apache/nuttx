@@ -155,7 +155,7 @@
 #define PROGMEM_NBLOCKS STM32_FLASH_NBLOCKS
 #define FLASH_NPAGES (STM32_FLASH_SIZE / FLASH_PAGE_SIZE)
 
-#define FLASH_TIMEOUT_VALUE 500000  /* 5s */
+#define FLASH_TIMEOUT_VALUE 5000000  /* 5s */
 
 /****************************************************************************
  * Private Types
@@ -429,7 +429,7 @@ static int stm32h7_wait_for_last_operation(FAR struct stm32h7_flash_priv_s
           break;
         }
 
-      usleep(1000);
+      up_udelay(1);
     }
 
   if (timeout)
