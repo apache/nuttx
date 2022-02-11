@@ -44,11 +44,11 @@ CMN_CSRCS += riscv_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS  += riscv_fpu.S
+CMN_ASRCS += riscv_fpu.S
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += riscv_vfork.c
+CMN_CSRCS += riscv_vfork.c
 endif
 
 # Specify our C code within this directory to be included
@@ -67,16 +67,16 @@ CHIP_CSRCS += bl602_spi.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS  += bl602_tim_lowerhalf.c
+CHIP_CSRCS += bl602_tim_lowerhalf.c
 endif
 ifeq ($(CONFIG_ONESHOT),y)
-CHIP_CSRCS  += bl602_oneshot_lowerhalf.c
+CHIP_CSRCS += bl602_oneshot_lowerhalf.c
 endif
 ifeq ($(CONFIG_WATCHDOG),y)
-CHIP_CSRCS  += bl602_wdt_lowerhalf.c
+CHIP_CSRCS += bl602_wdt_lowerhalf.c
 endif
 ifeq ($(CONFIG_PWM),y)
-CHIP_CSRCS  += bl602_pwm_lowerhalf.c
+CHIP_CSRCS += bl602_pwm_lowerhalf.c
 endif
 ifeq ($(CONFIG_BL602_SPIFLASH),y)
 CHIP_CSRCS += bl602_flash.c bl602_spiflash.c
