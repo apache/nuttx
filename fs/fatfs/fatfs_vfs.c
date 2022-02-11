@@ -1363,7 +1363,7 @@ static int fatfs_chstat(FAR struct inode *mountpt, FAR const char *relpath,
   int ret;
 
   /* Get the mountpoint private data from the inode structure */
- 
+
   fs = mountpt->i_private;
   ret = fatfs_semtake(fs);
   if (ret < 0)
