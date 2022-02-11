@@ -33,7 +33,7 @@ CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 #CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 #CMN_CSRCS += arm_etherstub.c
-CMN_CSRCS += arm_switchcontext.c
+CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c

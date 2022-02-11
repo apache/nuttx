@@ -30,7 +30,7 @@ CMN_CSRCS += arm_interruptcontext.c arm_prefetchabort.c arm_releasepending.c
 CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_stackframe.c
 CMN_CSRCS += arm_syscall.c arm_unblocktask.c arm_undefinedinsn.c arm_usestack.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c
-CMN_CSRCS += arm_lowputs.c arm_vfork.c arm_puts.c
+CMN_CSRCS += arm_lowputs.c arm_vfork.c arm_puts.c arm_tcbinfo.c
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += arm_idle.c
