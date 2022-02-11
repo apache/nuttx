@@ -29,6 +29,7 @@ CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_releasepending.c
 CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_unblocktask.c arm_usestack.c
 CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_svcall.c arm_vfork.c
 CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_switchcontext.c arm_puts.c
+CMN_CSRCS += arm_tcbinfo.c
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
