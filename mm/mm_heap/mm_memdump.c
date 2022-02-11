@@ -78,6 +78,7 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
           FAR const char *format = " %0*p";
           char buf[MM_BACKTRACE_DEPTH * MM_PTR_FMT_WIDTH + 1];
 
+          buf[0] = '\0';
           for (i = 0; i < MM_BACKTRACE_DEPTH && node->backtrace[i]; i++)
             {
               sprintf(buf + i * MM_PTR_FMT_WIDTH, format,
