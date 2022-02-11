@@ -782,8 +782,8 @@ begin_packed_struct struct tcbinfo_s
 
   union
   {
-    uint8_t       u[8];
-    FAR uint16_t *p;
+    uint8_t             u[8];
+    FAR const uint16_t *p;
   } reg_off;
 } end_packed_struct;
 #endif
