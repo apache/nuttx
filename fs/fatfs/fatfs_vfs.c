@@ -1246,6 +1246,7 @@ static int fatfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
 {
   FAR struct fatfs_mountpt_s *fs;
   char path[strlen(relpath) + 3];
+  FILINFO fno;
   int ret;
 
   /* Get the mountpoint private data from the inode structure */
@@ -1260,7 +1261,21 @@ static int fatfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   path[0] = '0' + fs->pdrv;
   path[1] = ':';
   path[2] = '\0';
-  ret = fatfs_convert_result(f_rmdir(strcat(path, relpath)));
+  ret = fatfs_convert_result(f_stat(strcat(path, relpath), &fno));
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  if (fno.fattrib & AM_DIR)
+    {
+      ret = fatfs_convert_result(f_rmdir(path));
+    }
+  else
+    {
+      ret = -ENOTDIR;
+    }
+
   fatfs_semgive(fs);
 
   return ret;
