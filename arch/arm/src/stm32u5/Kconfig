@@ -1,0 +1,3533 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_STM32U5
+
+comment "STM32U5 Configuration Options"
+
+choice
+	prompt "STM32 U5 Chip Selection"
+	default ARCH_CHIP_STM32U585AI
+	depends on ARCH_CHIP_STM32U5
+
+config ARCH_CHIP_STM32U585AI
+	bool "STM32U585AI"
+	select STM32U5_STM32U585XX
+	select STM32U5_FLASH_CONFIG_I
+	select STM32U5_IO_CONFIG_A
+	---help---
+		STM32 U5 Cortex M33, 2048 Kb FLASH, 768 Kb SRAM
+
+endchoice # STM32 L5 Chip Selection
+
+# Chip families:
+
+config STM32U5_STM32U585XX
+	# STM32U575 and STM32U585 devices documented in RM0456
+	bool
+	default n
+	select ARCH_HAVE_FPU
+	select STM32U5_HAVE_LPUART1
+	select STM32U5_HAVE_USART1
+	select STM32U5_HAVE_USART2
+	select STM32U5_HAVE_USART3
+	select STM32U5_HAVE_UART4
+	select STM32U5_HAVE_UART5
+
+choice
+	prompt "Override Flash Size Designator"
+	depends on ARCH_CHIP_STM32U5
+	default STM32U5_FLASH_OVERRIDE_DEFAULT
+	---help---
+		STM32U5 series parts numbering (sans the package type) ends with a letter
+		that designates the FLASH size.
+
+			Designator  Size in KiB
+			     8          64
+			     B         128
+			     C         256
+			     E         512
+			     G        1024
+			     I        2048
+
+		This configuration option defaults to using the configuration based on that designator
+		or the default smaller size if there is no last character designator is present in the
+		STM32 Chip Selection.
+
+		Examples:
+		   If the STM32U585AI is chosen, the Flash configuration would be 'I', if a variant of
+		   the part with a 1024 KiB Flash is released in the future one could simply select
+		   the 'G' designator here.
+
+		   If an STM32U5xxx Series parts is chosen the default Flash configuration will be set
+		   herein and can be changed.
+
+config STM32U5_FLASH_OVERRIDE_DEFAULT
+	bool "Default"
+
+config STM32U5_FLASH_OVERRIDE_8
+	bool "8 64 KB"
+
+config STM32U5_FLASH_OVERRIDE_B
+	bool "B 128 KB"
+
+config STM32U5_FLASH_OVERRIDE_C
+	bool "C 256 KB"
+
+config STM32U5_FLASH_OVERRIDE_E
+	bool "E 512 KB"
+
+config STM32U5_FLASH_OVERRIDE_G
+	bool "G 1024 KB"
+
+config STM32U5_FLASH_OVERRIDE_I
+	bool "I 2048 KB"
+
+endchoice # "Override Flash Size Designator"
+
+# Flash configurations
+
+config STM32U5_FLASH_CONFIG_8
+	bool
+	default n
+
+config STM32U5_FLASH_CONFIG_B
+	bool
+	default n
+
+config STM32U5_FLASH_CONFIG_C
+	bool
+	default n
+
+config STM32U5_FLASH_CONFIG_E
+	bool
+	default n
+
+config STM32U5_FLASH_CONFIG_G
+	bool
+	default n
+
+config STM32U5_FLASH_CONFIG_I
+	bool
+	default n
+
+# Pin/package configurations
+
+config STM32U5_IO_CONFIG_K
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_T
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_C
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_R
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_J
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_M
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_V
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_Q
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_Z
+	bool
+	default n
+
+config STM32U5_IO_CONFIG_A
+	bool
+	default n
+
+comment "STM32U5 SRAM2 Options"
+
+config STM32U5_SRAM2_HEAP
+	bool "SRAM2 is used for heap"
+	default n
+	select STM32U5_SRAM2_INIT
+	---help---
+		The STM32U5 SRAM2 region has special properties (power, protection, parity)
+		which may be used by the application for special purposes.  But if these
+		special properties are not needed, it may be instead added to the heap for
+		use by malloc().
+		NOTE: you must also select an appropriate number of memory regions in the
+		'Memory Management' section.
+
+config STM32U5_SRAM2_INIT
+	bool "SRAM2 is initialized to zero"
+	default n
+	---help---
+		The STM32U5 SRAM2 region has parity checking.  However, when the system
+		powers on, the memory is in an unknown state, and reads from uninitialized
+		memory can trigger parity faults from the random data.  This can be
+		avoided by first writing to all locations to force the parity into a valid
+		state.
+		However, if the SRAM2 is being used for it's battery-backed capability,
+		this may be undesirable (because it will destroy the contents).  In that
+		case, the board should handle the initialization itself at the appropriate
+		time.
+
+comment "STM32U5 Peripherals"
+
+menu "STM32U5 Peripheral Support"
+
+# These "hidden" settings determine is a peripheral option is available for the
+# selection MCU
+
+config STM32U5_HAVE_LPUART1
+	bool
+	default n
+
+config STM32U5_HAVE_USART1
+	bool
+	default n
+
+config STM32U5_HAVE_USART2
+	bool
+	default n
+
+config STM32U5_HAVE_USART3
+	bool
+	default n
+
+config STM32U5_HAVE_UART4
+	bool
+	default n
+
+config STM32U5_HAVE_UART5
+	bool
+	default n
+
+# These "hidden" settings are the OR of individual peripheral selections
+# indicating that the general capability is required.
+
+config STM32U5_SPI
+	bool
+	default n
+
+config STM32U5_USART
+	bool
+	default n
+
+# These are the peripheral selections proper
+
+comment "AHB1 Peripherals"
+
+config STM32U5_GPADMA1
+	bool "GPADMA1"
+	default n
+
+config STM32U5_CORDIC
+	bool "CORDIC"
+	default n
+
+config STM32U5_FMAC
+	bool "FMAC"
+	default n
+
+config STM32U5_MDF1
+	bool "MDF1"
+	default n
+
+config STM32U5_FLASH
+	bool "FLASH"
+	default n
+
+config STM32U5_CRC
+	bool "CRC"
+	default n
+
+config STM32U5_TSC
+	bool "TSC"
+	default n
+
+config STM32U5_RAMCFG
+	bool "RAMCFG"
+	default n
+
+config STM32U5_DMA2D
+	bool "DMA2D"
+	default n
+
+config STM32U5_GTZC1
+	bool "GTZC1"
+	default n
+
+config STM32U5_BKPSRAM
+	bool "BKPSRAM"
+	default n
+
+config STM32U5_DCACHE1
+	bool "DCACHE1"
+	default n
+
+config STM32U5_SRAM1
+	bool "SRAM1"
+	default n
+
+comment "AHB2 Peripherals"
+
+config STM32U5_ADC1
+	bool "ADC1"
+	default n
+
+config STM32U5_DCMI_PSSI
+	bool "DCMI_PSSI"
+	default n
+
+config STM32U5_OTG
+	bool "OTG"
+	default n
+
+config STM32U5_AES
+	bool "AES"
+	default n
+
+config STM32U5_HASH
+	bool "HASH"
+	default n
+
+config STM32U5_RNG
+	bool "RNG"
+	default n
+
+config STM32U5_PKA
+	bool "PKA"
+	default n
+
+config STM32U5_SAES
+	bool "SAES"
+	default n
+
+config STM32U5_OCTOSPIM
+	bool "OCTOSPIM"
+	default n
+
+config STM32U5_OTFDEC1
+	bool "OTFDEC1"
+	default n
+
+config STM32U5_OTFDEC2
+	bool "OTFDEC2"
+	default n
+
+config STM32U5_SDMMC1
+	bool "SDMMC1"
+	default n
+
+config STM32U5_SDMMC2
+	bool "SDMMC2"
+	default n
+
+config STM32U5_SRAM2
+	bool "SRAM2"
+	default n
+
+config STM32U5_SRAM3
+	bool "SRAM3"
+	default n
+
+config STM32U5_FSMC
+	bool "FSMC"
+	default n
+
+config STM32U5_OCTOSPI1
+	bool "OCTOSPI1"
+	default n
+
+config STM32U5_OCTOSPI2
+	bool "OCTOSPI2"
+	default n
+
+comment "AHB3 Peripherals"
+
+config STM32U5_LPGPIO1
+	bool "LPGPIO1"
+	default n
+
+config STM32U5_PWR
+	bool "PWR"
+	default n
+
+config STM32U5_ADC4
+	bool "ADC4"
+	default n
+
+config STM32U5_DAC1
+	bool "DAC1"
+	default n
+
+config STM32U5_LPDMA1
+	bool "LPDMA1"
+	default n
+
+config STM32U5_ADF1
+	bool "ADF1"
+	default n
+
+config STM32U5_GTZC2
+	bool "GTZC2"
+	default n
+
+config STM32U5_SRAM4
+	bool "SRAM4"
+	default n
+
+comment "APB1 Peripherals"
+
+config STM32U5_TIM2
+	bool "TIM2"
+	default n
+
+config STM32U5_TIM3
+	bool "TIM3"
+	default n
+
+config STM32U5_TIM4
+	bool "TIM4"
+	default n
+
+config STM32U5_TIM5
+	bool "TIM5"
+	default n
+
+config STM32U5_TIM6
+	bool "TIM6"
+	default n
+
+config STM32U5_TIM7
+	bool "TIM7"
+	default n
+
+config STM32U5_WWDG
+	bool "WWDG"
+	default n
+
+config STM32U5_SPI2
+	bool "SPI2"
+	default n
+	select SPI
+	select STM32U5_SPI
+
+config STM32U5_USART2
+	bool "USART2"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_USART3
+	bool "USART3"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_UART4
+	bool "UART4"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_UART5
+	bool "UART5"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_I2C1
+	bool "I2C1"
+	default n
+
+config STM32U5_I2C2
+	bool "I2C2"
+	default n
+
+config STM32U5_CRS
+	bool "CRS"
+	default n
+
+config STM32U5_I2C4
+	bool "I2C4"
+	default n
+
+config STM32U5_LPTIM2
+	bool "LPTIM2"
+	default n
+
+config STM32U5_FDCAN1
+	bool "FDCAN1"
+	default n
+
+config STM32U5_UCPD1
+	bool "UCPD1"
+	default n
+
+comment "APB2 Peripherals"
+
+config STM32U5_TIM1
+	bool "TIM1"
+	default n
+
+config STM32U5_SPI1
+	bool "SPI1"
+	default n
+	select SPI
+	select STM32U5_SPI
+
+config STM32U5_TIM8
+	bool "TIM8"
+	default n
+
+config STM32U5_USART1
+	bool "USART1"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_TIM15
+	bool "TIM15"
+	default n
+
+config STM32U5_TIM16
+	bool "TIM16"
+	default n
+
+config STM32U5_TIM17
+	bool "TIM17"
+	default n
+
+config STM32U5_SAI1
+	bool "SAI1"
+	default n
+
+config STM32U5_SAI2
+	bool "SAI2"
+	default n
+
+comment "APB3 Peripherals"
+
+config STM32U5_SYSCFG
+	bool "SYSCFG"
+	default y
+
+config STM32U5_SPI3
+	bool "SPI3"
+	default n
+	select SPI
+	select STM32U5_SPI
+
+config STM32U5_LPUART1
+	bool "LPUART1"
+	default n
+	select ARCH_HAVE_SERIAL_TERMIOS
+	select STM32U5_USART
+
+config STM32U5_I2C3
+	bool "I2C3"
+	default n
+
+config STM32U5_LPTIM1
+	bool "LPTIM1"
+	default n
+
+config STM32U5_LPTIM3
+	bool "LPTIM3"
+	default n
+
+config STM32U5_LPTIM4
+	bool "LPTIM4"
+	default n
+
+config STM32U5_OPAMP
+	bool "OPAMP"
+	default n
+
+config STM32U5_COMP
+	bool "COMP"
+	default n
+
+config STM32U5_VREF
+	bool "VREF"
+	default n
+
+config STM32U5_RTCAPB
+	bool "RTCAPB"
+	default n
+
+endmenu
+
+config STM32U5_SAI1PLL
+	bool "SAI1PLL"
+	default n
+	---help---
+		The STM32U5 has a separate PLL for the SAI1 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32U5_SAI2PLL
+	bool "SAI2PLL"
+	default n
+	depends on STM32U5_HAVE_SAI2
+	---help---
+		The STM32U5 has a separate PLL for the SAI2 block.
+		Set this true and provide configuration parameters in
+		board.h to use this PLL.
+
+config STM32U5_FLASH_PREFETCH
+	bool "Enable FLASH Pre-fetch"
+	default y
+	---help---
+	Enable FLASH prefetch
+
+config STM32U5_DISABLE_IDLE_SLEEP_DURING_DEBUG
+	bool "Disable IDLE Sleep (WFI) in debug mode"
+	default n
+	---help---
+		In debug configuration, disables the WFI instruction in the IDLE loop
+		to prevent the JTAG from disconnecting.  With some JTAG debuggers, such
+		as the ST-LINK2 with OpenOCD, if the ARM is put to sleep via the WFI
+		instruction, the debugger will disconnect, terminating the debug session.
+
+config ARCH_BOARD_STM32U5_CUSTOM_CLOCKCONFIG
+	bool "Custom clock configuration"
+	default n
+	---help---
+		Enables special, board-specific STM32 clock configuration.
+
+config STM32U5_HAVE_RTC_SUBSECONDS
+	bool
+	select ARCH_HAVE_RTC_SUBSECONDS
+	default y
+
+menu "RTC Configuration"
+	depends on STM32U5_RTC
+
+config STM32U5_RTC_MAGIC_REG
+	int "BKP register"
+	default 0
+	range  0 31
+	---help---
+		The BKP register used to store/check the Magic value to determine if
+		RTC is already setup
+
+config STM32U5_RTC_MAGIC
+	hex "RTC Magic 1"
+	default 0xfacefeed
+	---help---
+		Value used as Magic to determine if the RTC is already setup
+
+config STM32U5_RTC_MAGIC_TIME_SET
+	hex "RTC Magic 2"
+	default 0xf00dface
+	---help---
+		Value used as Magic to determine if the RTC has been setup and has
+		time set
+
+choice
+	prompt "RTC clock source"
+	default STM32U5_RTC_LSECLOCK
+	depends on STM32U5_RTC
+
+config STM32U5_RTC_LSECLOCK
+	bool "LSE clock"
+	---help---
+		Drive the RTC with the LSE clock
+
+config STM32U5_RTC_LSICLOCK
+	bool "LSI clock"
+	---help---
+		Drive the RTC with the LSI clock
+
+config STM32U5_RTC_HSECLOCK
+	bool "HSE clock"
+	---help---
+		Drive the RTC with the HSE clock, divided down to 1MHz.
+
+endchoice
+
+if STM32U5_RTC_LSECLOCK
+
+config STM32U5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	bool "Automatically boost the LSE oscillator drive capability level until it starts-up"
+	default n
+	---help---
+		This will cycle through the values from low to high. To avoid
+		damaging the the crystal. We want to use the lowest setting that gets
+		the OSC running. See app note AN2867
+
+			0 = Low drive capability (default)
+			1 = Medium low drive capability
+			2 = Medium high drive capability
+			3 = High drive capability
+
+config STM32U5_RTC_LSECLOCK_START_DRV_CAPABILITY
+	int "LSE oscillator drive capability level at LSE start-up"
+	default 0
+	range 0 3
+	depends on !STM32U5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	---help---
+		0 = Low drive capability (default)
+		1 = Medium low drive capability
+		2 = Medium high drive capability
+		3 = High drive capability
+
+config STM32U5_RTC_LSECLOCK_LOWER_RUN_DRV_CAPABILITY
+	bool "Decrease LSE oscillator drive capability after LSE start-up"
+	default n
+	depends on !STM32U5_RTC_AUTO_LSECLOCK_START_DRV_CAPABILITY
+	---help---
+		The LSE oscillator drive capability can remain at the level used
+		during LSE start-up at run-time, or it can be reduced to the
+		'Low drive capability' once the LSE started up successfully.
+
+endif # STM32U5_RTC_LSECLOCK
+
+endmenu # RTC Configuration
+
+menu "Timer Configuration"
+
+if SCHED_TICKLESS
+
+config STM32U5_ONESHOT
+	bool
+	default y
+
+config STM32U5_FREERUN
+	bool
+	default y
+
+config STM32U5_TICKLESS_ONESHOT
+	int "Tickless one-shot timer channel"
+	default 2
+	range 1 8
+	depends on STM32U5_ONESHOT
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the one-shot timer needed by the OS.
+
+config STM32U5_TICKLESS_FREERUN
+	int "Tickless free-running timer channel"
+	default 5
+	range 1 8
+	depends on STM32U5_FREERUN
+	---help---
+		If the Tickless OS feature is enabled, then one clock must be
+		assigned to provide the free-running timer needed by the OS.
+
+endif # SCHED_TICKLESS
+
+if !SCHED_TICKLESS
+
+config STM32U5_ONESHOT
+	bool "TIM one-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+config STM32U5_FREERUN
+	bool "TIM free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
+endif # !SCHED_TICKLESS
+
+config STM32U5_ONESHOT_MAXTIMERS
+	int "Maximum number of oneshot timers"
+	default 1
+	range 1 8
+	depends on STM32U5_ONESHOT
+	---help---
+		Determines the maximum number of oneshot timers that can be
+		supported.  This setting pre-allocates some minimal support for each
+		of the timers and places an upper limit on the number of oneshot
+		timers that you can use.
+
+config STM32U5_LPTIM1_PWM
+	bool "LPTIM1 PWM"
+	default n
+	depends on STM32U5_LPTIM1
+	select PWM
+	---help---
+		Reserve low-power timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_LPTIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_LPTIM1_PWM
+
+choice
+	prompt "LPTIM1 clock source"
+	default STM32U5_LPTIM1_CLK_APB1
+
+config STM32U5_LPTIM1_CLK_APB1
+	bool "Clock LPTIM1 from APB1"
+
+config STM32U5_LPTIM1_CLK_LSE
+	bool "Clock LPTIM1 from LSE"
+
+config STM32U5_LPTIM1_CLK_LSI
+	bool "Clock LPTIM1 from LSI"
+
+config STM32U5_LPTIM1_CLK_HSI
+	bool "Clock LPTIM1 from HSI"
+endchoice
+
+endif # STM32U5_LPTIM1_PWM
+
+config STM32U5_LPTIM2_PWM
+	bool "LPTIM2 PWM"
+	default n
+	depends on STM32U5_LPTIM2
+	select PWM
+	---help---
+		Reserve low-power timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_LPTIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_LPTIM2_PWM
+
+choice
+	prompt "LPTIM2 clock source"
+	default STM32U5_LPTIM2_CLK_APB1
+
+config STM32U5_LPTIM2_CLK_APB1
+	bool "Clock LPTIM2 from APB1"
+
+config STM32U5_LPTIM2_CLK_LSE
+	bool "Clock LPTIM2 from LSE"
+
+config STM32U5_LPTIM2_CLK_LSI
+	bool "Clock LPTIM2 from LSI"
+
+config STM32U5_LPTIM2_CLK_HSI
+	bool "Clock LPTIM2 from HSI"
+endchoice
+
+endif # STM32U5_LPTIM2_PWM
+
+config STM32U5_TIM1_PWM
+	bool "TIM1 PWM"
+	default n
+	depends on STM32U5_TIM1
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 1 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM1
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM1_PWM
+
+config STM32U5_TIM1_MODE
+	int "TIM1 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM1_CHANNEL1
+	bool "TIM1 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM1_CHANNEL1
+
+config STM32U5_TIM1_CH1MODE
+	int "TIM1 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM1_CH1OUT
+	bool "TIM1 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32U5_TIM1_CH1NOUT
+	bool "TIM1 Channel 1 Complementary Output"
+	default n
+	depends on STM32U5_TIM1_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32U5_TIM1_CHANNEL1
+
+config STM32U5_TIM1_CHANNEL2
+	bool "TIM1 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM1_CHANNEL2
+
+config STM32U5_TIM1_CH2MODE
+	int "TIM1 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM1_CH2OUT
+	bool "TIM1 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32U5_TIM1_CH2NOUT
+	bool "TIM1 Channel 2 Complemenrary Output"
+	default n
+	depends on STM32U5_TIM1_CH2OUT
+	---help---
+		Enables channel 2 complementary output.
+
+endif # STM32U5_TIM1_CHANNEL2
+
+config STM32U5_TIM1_CHANNEL3
+	bool "TIM1 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM1_CHANNEL3
+
+config STM32U5_TIM1_CH3MODE
+	int "TIM1 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM1_CH3OUT
+	bool "TIM1 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32U5_TIM1_CH3NOUT
+	bool "TIM1 Channel 3 Complementary Output"
+	default n
+	depends on STM32U5_TIM1_CH3OUT
+	---help---
+		Enables channel 3 complementary output.
+
+endif # STM32U5_TIM1_CHANNEL3
+
+config STM32U5_TIM1_CHANNEL5
+	bool "TIM1 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM1_CHANNEL5
+
+config STM32U5_TIM1_CH4MODE
+	int "TIM1 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM1_CH4OUT
+	bool "TIM1 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM1_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM1_CHANNEL
+	int "TIM1 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM1 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM1_CHMODE
+	int "TIM1 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM1_PWM
+
+config STM32U5_TIM2_PWM
+	bool "TIM2 PWM"
+	default n
+	depends on STM32U5_TIM2
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 2 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM2
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM2_PWM
+
+config STM32U5_TIM2_MODE
+	int "TIM2 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM2_CHANNEL1
+	bool "TIM2 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM2_CHANNEL1
+
+config STM32U5_TIM2_CH1MODE
+	int "TIM2 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM2_CH1OUT
+	bool "TIM2 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32U5_TIM2_CHANNEL1
+
+config STM32U5_TIM2_CHANNEL2
+	bool "TIM2 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM2_CHANNEL2
+
+config STM32U5_TIM2_CH2MODE
+	int "TIM2 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM2_CH2OUT
+	bool "TIM2 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32U5_TIM2_CHANNEL2
+
+config STM32U5_TIM2_CHANNEL3
+	bool "TIM2 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM2_CHANNEL3
+
+config STM32U5_TIM2_CH3MODE
+	int "TIM2 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM2_CH3OUT
+	bool "TIM2 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32U5_TIM2_CHANNEL3
+
+config STM32U5_TIM2_CHANNEL5
+	bool "TIM2 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM2_CHANNEL5
+
+config STM32U5_TIM2_CH4MODE
+	int "TIM2 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM2_CH4OUT
+	bool "TIM2 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM2_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM2_CHANNEL
+	int "TIM2 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM2 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM2_CHMODE
+	int "TIM2 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM2_PWM
+
+config STM32U5_TIM3_PWM
+	bool "TIM3 PWM"
+	default n
+	depends on STM32U5_TIM3
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 3 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM3
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM3_PWM
+
+config STM32U5_TIM3_MODE
+	int "TIM3 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM3_CHANNEL1
+	bool "TIM3 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM3_CHANNEL1
+
+config STM32U5_TIM3_CH1MODE
+	int "TIM3 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM3_CH1OUT
+	bool "TIM3 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32U5_TIM3_CHANNEL1
+
+config STM32U5_TIM3_CHANNEL2
+	bool "TIM3 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM3_CHANNEL2
+
+config STM32U5_TIM3_CH2MODE
+	int "TIM3 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM3_CH2OUT
+	bool "TIM3 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32U5_TIM3_CHANNEL2
+
+config STM32U5_TIM3_CHANNEL3
+	bool "TIM3 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM3_CHANNEL3
+
+config STM32U5_TIM3_CH3MODE
+	int "TIM3 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM3_CH3OUT
+	bool "TIM3 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32U5_TIM3_CHANNEL3
+
+config STM32U5_TIM3_CHANNEL5
+	bool "TIM3 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM3_CHANNEL5
+
+config STM32U5_TIM3_CH4MODE
+	int "TIM3 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM3_CH4OUT
+	bool "TIM3 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM3_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM3_CHANNEL
+	int "TIM3 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM3 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM3_CHMODE
+	int "TIM3 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM3_PWM
+
+config STM32U5_TIM4_PWM
+	bool "TIM4 PWM"
+	default n
+	depends on STM32U5_TIM4
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 4 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM4
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM4_PWM
+
+config STM32U5_TIM4_MODE
+	int "TIM4 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM4_CHANNEL1
+	bool "TIM4 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM4_CHANNEL1
+
+config STM32U5_TIM4_CH1MODE
+	int "TIM4 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM4_CH1OUT
+	bool "TIM4 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32U5_TIM4_CHANNEL1
+
+config STM32U5_TIM4_CHANNEL2
+	bool "TIM4 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM4_CHANNEL2
+
+config STM32U5_TIM4_CH2MODE
+	int "TIM4 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM4_CH2OUT
+	bool "TIM4 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32U5_TIM4_CHANNEL2
+
+config STM32U5_TIM4_CHANNEL3
+	bool "TIM4 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM4_CHANNEL3
+
+config STM32U5_TIM4_CH3MODE
+	int "TIM4 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM4_CH3OUT
+	bool "TIM4 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32U5_TIM4_CHANNEL3
+
+config STM32U5_TIM4_CHANNEL5
+	bool "TIM4 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM4_CHANNEL5
+
+config STM32U5_TIM4_CH4MODE
+	int "TIM4 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM4_CH4OUT
+	bool "TIM4 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM4_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM4_CHANNEL
+	int "TIM4 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM4 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM4_CHMODE
+	int "TIM4 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM4_PWM
+
+config STM32U5_TIM5_PWM
+	bool "TIM5 PWM"
+	default n
+	depends on STM32U5_TIM5
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 5 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM5
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM5_PWM
+
+config STM32U5_TIM5_MODE
+	int "TIM5 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM5_CHANNEL1
+	bool "TIM5 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM5_CHANNEL1
+
+config STM32U5_TIM5_CH1MODE
+	int "TIM5 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM5_CH1OUT
+	bool "TIM5 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+endif # STM32U5_TIM5_CHANNEL1
+
+config STM32U5_TIM5_CHANNEL2
+	bool "TIM5 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM5_CHANNEL2
+
+config STM32U5_TIM5_CH2MODE
+	int "TIM5 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM5_CH2OUT
+	bool "TIM5 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32U5_TIM5_CHANNEL2
+
+config STM32U5_TIM5_CHANNEL3
+	bool "TIM5 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM5_CHANNEL3
+
+config STM32U5_TIM5_CH3MODE
+	int "TIM5 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM5_CH3OUT
+	bool "TIM5 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+endif # STM32U5_TIM5_CHANNEL3
+
+config STM32U5_TIM5_CHANNEL5
+	bool "TIM5 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM5_CHANNEL5
+
+config STM32U5_TIM5_CH4MODE
+	int "TIM5 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM5_CH4OUT
+	bool "TIM5 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM5_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM5_CHANNEL
+	int "TIM5 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM5 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM5_CHMODE
+	int "TIM5 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM5_PWM
+
+config STM32U5_TIM8_PWM
+	bool "TIM8 PWM"
+	default n
+	depends on STM32U5_TIM8
+	select PWM
+	select ARCH_HAVE_PWM_PULSECOUNT
+	---help---
+		Reserve timer 8 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM8
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM8_PWM
+
+config STM32U5_TIM8_MODE
+	int "TIM8 Mode"
+	default 0
+	range 0 4
+	---help---
+		Specifies the timer mode.
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM8_CHANNEL1
+	bool "TIM8 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM8_CHANNEL1
+
+config STM32U5_TIM8_CH1MODE
+	int "TIM8 Channel 1 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM8_CH1OUT
+	bool "TIM8 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32U5_TIM8_CH1NOUT
+	bool "TIM8 Channel 1 Complementary Output"
+	default n
+	depends on STM32U5_TIM8_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32U5_TIM8_CHANNEL1
+
+config STM32U5_TIM8_CHANNEL2
+	bool "TIM8 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM8_CHANNEL2
+
+config STM32U5_TIM8_CH2MODE
+	int "TIM8 Channel 2 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM8_CH2OUT
+	bool "TIM8 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+config STM32U5_TIM8_CH2NOUT
+	bool "TIM8 Channel 2 Complementary Output"
+	default n
+	depends on STM32U5_TIM8_CH2OUT
+	---help---
+		Enables channel 2 complementary output.
+
+endif # STM32U5_TIM8_CHANNEL2
+
+config STM32U5_TIM8_CHANNEL3
+	bool "TIM8 Channel 3"
+	default n
+	---help---
+		Enables channel 3.
+
+if STM32U5_TIM8_CHANNEL3
+
+config STM32U5_TIM8_CH3MODE
+	int "TIM8 Channel 3 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM8_CH3OUT
+	bool "TIM8 Channel 3 Output"
+	default n
+	---help---
+		Enables channel 3 output.
+
+config STM32U5_TIM8_CH3NOUT
+	bool "TIM8 Channel 3 Complementary Output"
+	default n
+	depends on STM32U5_TIM8_CH3OUT
+	---help---
+		Enables channel 3 complementary output.
+
+endif # STM32U5_TIM8_CHANNEL3
+
+config STM32U5_TIM8_CHANNEL5
+	bool "TIM8 Channel 4"
+	default n
+	---help---
+		Enables channel 4.
+
+if STM32U5_TIM8_CHANNEL5
+
+config STM32U5_TIM8_CH4MODE
+	int "TIM8 Channel 4 Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM8_CH4OUT
+	bool "TIM8 Channel 4 Output"
+	default n
+	---help---
+		Enables channel 4 output.
+
+endif # STM32U5_TIM8_CHANNEL5
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM8_CHANNEL
+	int "TIM8 PWM Output Channel"
+	default 1
+	range 1 4
+	---help---
+		If TIM8 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,..,4}
+
+config STM32U5_TIM8_CHMODE
+	int "TIM8 Channel Mode"
+	default 0
+	range 0 5
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM8_PWM
+
+config STM32U5_TIM15_PWM
+	bool "TIM15 PWM"
+	default n
+	depends on STM32U5_TIM15
+	select PWM
+	---help---
+		Reserve timer 15 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM15
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM15_PWM
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM15_CHANNEL1
+	bool "TIM15 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM15_CHANNEL1
+
+config STM32U5_TIM15_CH1MODE
+	int "TIM15 Channel 1 Mode"
+	default 0
+	range 0 3
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM15_CH1OUT
+	bool "TIM15 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32U5_TIM15_CH1NOUT
+	bool "TIM15 Channel 1 Complementary Output"
+	default n
+	depends on STM32U5_TIM15_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32U5_TIM15_CHANNEL1
+
+config STM32U5_TIM15_CHANNEL2
+	bool "TIM15 Channel 2"
+	default n
+	---help---
+		Enables channel 2.
+
+if STM32U5_TIM15_CHANNEL2
+
+config STM32U5_TIM15_CH2MODE
+	int "TIM15 Channel 2 Mode"
+	default 0
+	range 0 3
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM15_CH2OUT
+	bool "TIM15 Channel 2 Output"
+	default n
+	---help---
+		Enables channel 2 output.
+
+endif # STM32U5_TIM15_CHANNEL2
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM15_CHANNEL
+	int "TIM15 PWM Output Channel"
+	default 1
+	range 1 2
+	---help---
+		If TIM15 is enabled for PWM usage, you also need specifies the timer output
+		channel {1,2}
+
+config STM32U5_TIM15_CHMODE
+	int "TIM15 Channel Mode"
+	default 0
+	range 0 3
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM15_PWM
+
+config STM32U5_TIM16_PWM
+	bool "TIM16 PWM"
+	default n
+	depends on STM32U5_TIM16
+	select PWM
+	---help---
+		Reserve timer 16 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM16
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM16_PWM
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM16_CHANNEL1
+	bool "TIM16 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM16_CHANNEL1
+
+config STM32U5_TIM16_CH1MODE
+	int "TIM16 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM16_CH1OUT
+	bool "TIM16 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32U5_TIM16_CH1NOUT
+	bool "TIM16 Channel 1 Complementary Output"
+	default n
+	depends on STM32U5_TIM16_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32U5_TIM16_CHANNEL1
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM16_CHANNEL
+	int "TIM16 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM16 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+config STM32U5_TIM16_CHMODE
+	int "TIM16 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM16_PWM
+
+config STM32U5_TIM17_PWM
+	bool "TIM17 PWM"
+	default n
+	depends on STM32U5_TIM17
+	select PWM
+	---help---
+		Reserve timer 17 for use by PWM
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to generate modulated outputs for such things as motor control.  If STM32U5_TIM17
+		is defined then THIS following may also be defined to indicate that
+		the timer is intended to be used for pulsed output modulation.
+
+if STM32U5_TIM17_PWM
+
+if STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM17_CHANNEL1
+	bool "TIM17 Channel 1"
+	default n
+	---help---
+		Enables channel 1.
+
+if STM32U5_TIM17_CHANNEL1
+
+config STM32U5_TIM17_CH1MODE
+	int "TIM17 Channel 1 Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+config STM32U5_TIM17_CH1OUT
+	bool "TIM17 Channel 1 Output"
+	default n
+	---help---
+		Enables channel 1 output.
+
+config STM32U5_TIM17_CH1NOUT
+	bool "TIM17 Channel 1 Complementary Output"
+	default n
+	depends on STM32U5_TIM17_CH1OUT
+	---help---
+		Enables channel 1 complementary output.
+
+endif # STM32U5_TIM17_CHANNEL1
+
+endif # STM32U5_PWM_MULTICHAN
+
+if !STM32U5_PWM_MULTICHAN
+
+config STM32U5_TIM17_CHANNEL
+	int "TIM17 PWM Output Channel"
+	default 1
+	range 1 1
+	---help---
+		If TIM17 is enabled for PWM usage, you also need specifies the timer output
+		channel {1}
+
+config STM32U5_TIM17_CHMODE
+	int "TIM17 Channel Mode"
+	default 0
+	range 0 1
+	---help---
+		Specifies the channel mode.
+
+endif # !STM32U5_PWM_MULTICHAN
+
+endif # STM32U5_TIM17_PWM
+
+config STM32U5_PWM_MULTICHAN
+	bool "PWM Multiple Output Channels"
+	default n
+	depends on STM32U5_TIM1_PWM || STM32U5_TIM2_PWM || STM32U5_TIM3_PWM || STM32U5_TIM4_PWM || STM32U5_TIM5_PWM || STM32U5_TIM8_PWM || STM32U5_TIM15_PWM || STM32U5_TIM16_PWM || STM32U5_TIM17_PWM
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
+		Specifies that the PWM driver supports multiple output
+		channels per timer.
+
+config STM32U5_TIM1_ADC
+	bool "TIM1 ADC"
+	default n
+	depends on STM32U5_TIM1 && STM32U5_ADC
+	---help---
+		Reserve timer 1 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM1 ADC channel"
+	default STM32U5_TIM1_ADC1
+	depends on STM32U5_TIM1_ADC
+
+config STM32U5_TIM1_ADC1
+	bool "TIM1 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC1
+
+config STM32U5_TIM1_ADC2
+	bool "TIM1 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC2
+
+config STM32U5_TIM1_ADC3
+	bool "TIM1 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM1 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM2_ADC
+	bool "TIM2 ADC"
+	default n
+	depends on STM32U5_TIM2 && STM32U5_ADC
+	---help---
+		Reserve timer 2 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM2 ADC channel"
+	default STM32U5_TIM2_ADC1
+	depends on STM32U5_TIM2_ADC
+
+config STM32U5_TIM2_ADC1
+	bool "TIM2 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC1
+
+config STM32U5_TIM2_ADC2
+	bool "TIM2 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC2
+
+config STM32U5_TIM2_ADC3
+	bool "TIM2 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM2 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM3_ADC
+	bool "TIM3 ADC"
+	default n
+	depends on STM32U5_TIM3 && STM32U5_ADC
+	---help---
+		Reserve timer 3 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM3 ADC channel"
+	default STM32U5_TIM3_ADC1
+	depends on STM32U5_TIM3_ADC
+
+config STM32U5_TIM3_ADC1
+	bool "TIM3 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC1
+
+config STM32U5_TIM3_ADC2
+	bool "TIM3 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC2
+
+config STM32U5_TIM3_ADC3
+	bool "TIM3 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM3 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM4_ADC
+	bool "TIM4 ADC"
+	default n
+	depends on STM32U5_TIM4 && STM32U5_ADC
+	---help---
+		Reserve timer 4 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM4 ADC channel"
+	default STM32U5_TIM4_ADC1
+	depends on STM32U5_TIM4_ADC
+
+config STM32U5_TIM4_ADC1
+	bool "TIM4 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC1
+
+config STM32U5_TIM4_ADC2
+	bool "TIM4 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC2
+
+config STM32U5_TIM4_ADC3
+	bool "TIM4 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM4 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM6_ADC
+	bool "TIM6 ADC"
+	default n
+	depends on STM32U5_TIM6 && STM32U5_ADC
+	---help---
+		Reserve timer 6 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM6 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM6 ADC channel"
+	default STM32U5_TIM6_ADC1
+	depends on STM32U5_TIM6_ADC
+
+config STM32U5_TIM6_ADC1
+	bool "TIM6 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC1
+
+config STM32U5_TIM6_ADC2
+	bool "TIM6 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC2
+
+config STM32U5_TIM6_ADC3
+	bool "TIM6 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM6 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM8_ADC
+	bool "TIM8 ADC"
+	default n
+	depends on STM32U5_TIM8 && STM32U5_ADC
+	---help---
+		Reserve timer 8 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM8 ADC channel"
+	default STM32U5_TIM8_ADC1
+	depends on STM32U5_TIM8_ADC
+
+config STM32U5_TIM8_ADC1
+	bool "TIM8 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC1
+
+config STM32U5_TIM8_ADC2
+	bool "TIM8 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC2
+
+config STM32U5_TIM8_ADC3
+	bool "TIM8 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM8 to trigger ADC3
+
+endchoice
+
+config STM32U5_TIM15_ADC
+	bool "TIM15 ADC"
+	default n
+	depends on STM32U5_TIM15 && STM32U5_ADC
+	---help---
+		Reserve timer 15 for use by ADC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM15 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for ADC conversion. Note that ADC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the ADC, but then you also have to configure which ADC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM15 ADC channel"
+	default STM32U5_TIM15_ADC1
+	depends on STM32U5_TIM15_ADC
+
+config STM32U5_TIM15_ADC1
+	bool "TIM15 ADC channel 1"
+	depends on STM32U5_ADC1
+	select STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC1
+
+config STM32U5_TIM15_ADC2
+	bool "TIM15 ADC channel 2"
+	depends on STM32U5_ADC2
+	select STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC2
+
+config STM32U5_TIM15_ADC3
+	bool "TIM15 ADC channel 3"
+	depends on STM32U5_ADC3
+	select STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Reserve TIM15 to trigger ADC3
+
+endchoice
+
+config STM32U5_HAVE_ADC1_TIMER
+	bool
+
+config STM32U5_HAVE_ADC2_TIMER
+	bool
+
+config STM32U5_HAVE_ADC3_TIMER
+	bool
+
+config STM32U5_ADC1_SAMPLE_FREQUENCY
+	int "ADC1 Sampling Frequency"
+	default 100
+	depends on STM32U5_HAVE_ADC1_TIMER
+	---help---
+		ADC1 sampling frequency.  Default:  100Hz
+
+config STM32U5_ADC1_TIMTRIG
+	int "ADC1 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32U5_HAVE_ADC1_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32U5_ADC2_SAMPLE_FREQUENCY
+	int "ADC2 Sampling Frequency"
+	default 100
+	depends on STM32U5_HAVE_ADC2_TIMER
+	---help---
+		ADC2 sampling frequency.  Default:  100Hz
+
+config STM32U5_ADC2_TIMTRIG
+	int "ADC2 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32U5_HAVE_ADC2_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32U5_ADC3_SAMPLE_FREQUENCY
+	int "ADC3 Sampling Frequency"
+	default 100
+	depends on STM32U5_HAVE_ADC3_TIMER
+	---help---
+		ADC3 sampling frequency.  Default:  100Hz
+
+config STM32U5_ADC3_TIMTRIG
+	int "ADC3 Timer Trigger"
+	default 0
+	range 0 4
+	depends on STM32U5_HAVE_ADC3_TIMER
+	---help---
+		Values 0:CC1 1:CC2 2:CC3 3:CC4 4:TRGO
+
+config STM32U5_TIM1_DAC
+	bool "TIM1 DAC"
+	default n
+	depends on STM32U5_TIM1 && STM32U5_DAC
+	---help---
+		Reserve timer 1 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM1 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM1 DAC channel"
+	default STM32U5_TIM1_DAC1
+	depends on STM32U5_TIM1_DAC
+
+config STM32U5_TIM1_DAC1
+	bool "TIM1 DAC channel 1"
+	---help---
+		Reserve TIM1 to trigger DAC1
+
+config STM32U5_TIM1_DAC2
+	bool "TIM1 DAC channel 2"
+	---help---
+		Reserve TIM1 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM2_DAC
+	bool "TIM2 DAC"
+	default n
+	depends on STM32U5_TIM2 && STM32U5_DAC
+	---help---
+		Reserve timer 2 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM2 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM2 DAC channel"
+	default STM32U5_TIM2_DAC1
+	depends on STM32U5_TIM2_DAC
+
+config STM32U5_TIM2_DAC1
+	bool "TIM2 DAC channel 1"
+	---help---
+		Reserve TIM2 to trigger DAC1
+
+config STM32U5_TIM2_DAC2
+	bool "TIM2 DAC channel 2"
+	---help---
+		Reserve TIM2 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM3_DAC
+	bool "TIM3 DAC"
+	default n
+	depends on STM32U5_TIM3 && STM32U5_DAC
+	---help---
+		Reserve timer 3 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM3 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM3 DAC channel"
+	default STM32U5_TIM3_DAC1
+	depends on STM32U5_TIM3_DAC
+
+config STM32U5_TIM3_DAC1
+	bool "TIM3 DAC channel 1"
+	---help---
+		Reserve TIM3 to trigger DAC1
+
+config STM32U5_TIM3_DAC2
+	bool "TIM3 DAC channel 2"
+	---help---
+		Reserve TIM3 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM4_DAC
+	bool "TIM4 DAC"
+	default n
+	depends on STM32U5_TIM4 && STM32U5_DAC
+	---help---
+		Reserve timer 4 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM4 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM4 DAC channel"
+	default STM32U5_TIM4_DAC1
+	depends on STM32U5_TIM4_DAC
+
+config STM32U5_TIM4_DAC1
+	bool "TIM4 DAC channel 1"
+	---help---
+		Reserve TIM4 to trigger DAC1
+
+config STM32U5_TIM4_DAC2
+	bool "TIM4 DAC channel 2"
+	---help---
+		Reserve TIM4 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM5_DAC
+	bool "TIM5 DAC"
+	default n
+	depends on STM32U5_TIM5 && STM32U5_DAC
+	---help---
+		Reserve timer 5 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM5 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM5 DAC channel"
+	default STM32U5_TIM5_DAC1
+	depends on STM32U5_TIM5_DAC
+
+config STM32U5_TIM5_DAC1
+	bool "TIM5 DAC channel 1"
+	---help---
+		Reserve TIM5 to trigger DAC1
+
+config STM32U5_TIM5_DAC2
+	bool "TIM5 DAC channel 2"
+	---help---
+		Reserve TIM5 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM6_DAC
+	bool "TIM6 DAC"
+	default n
+	depends on STM32U5_TIM6 && STM32U5_DAC
+	---help---
+		Reserve timer 6 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM6 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM6 DAC channel"
+	default STM32U5_TIM6_DAC1
+	depends on STM32U5_TIM6_DAC
+
+config STM32U5_TIM6_DAC1
+	bool "TIM6 DAC channel 1"
+	---help---
+		Reserve TIM6 to trigger DAC1
+
+config STM32U5_TIM6_DAC2
+	bool "TIM6 DAC channel 2"
+	---help---
+		Reserve TIM6 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM7_DAC
+	bool "TIM7 DAC"
+	default n
+	depends on STM32U5_TIM7 && STM32U5_DAC
+	---help---
+		Reserve timer 7 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM7 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM7 DAC channel"
+	default STM32U5_TIM7_DAC1
+	depends on STM32U5_TIM7_DAC
+
+config STM32U5_TIM7_DAC1
+	bool "TIM7 DAC channel 1"
+	---help---
+		Reserve TIM7 to trigger DAC1
+
+config STM32U5_TIM7_DAC2
+	bool "TIM7 DAC channel 2"
+	---help---
+		Reserve TIM7 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM8_DAC
+	bool "TIM8 DAC"
+	default n
+	depends on STM32U5_TIM8 && STM32U5_DAC
+	---help---
+		Reserve timer 8 for use by DAC
+
+		Timer devices may be used for different purposes.  If STM32U5_TIM8 is
+		defined then the following may also be defined to indicate that the
+		timer is intended to be used for DAC conversion. Note that DAC usage
+		requires two definition:  Not only do you have to assign the timer
+		for used by the DAC, but then you also have to configure which DAC
+		channel it is assigned to.
+
+choice
+	prompt "Select TIM8 DAC channel"
+	default STM32U5_TIM8_DAC1
+	depends on STM32U5_TIM8_DAC
+
+config STM32U5_TIM8_DAC1
+	bool "TIM8 DAC channel 1"
+	---help---
+		Reserve TIM8 to trigger DAC1
+
+config STM32U5_TIM8_DAC2
+	bool "TIM8 DAC channel 2"
+	---help---
+		Reserve TIM8 to trigger DAC2
+
+endchoice
+
+config STM32U5_TIM1_CAP
+	bool "TIM1 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM1
+	---help---
+		Reserve timer 1 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32U5_TIM2_CAP
+	bool "TIM2 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM2
+	---help---
+		Reserve timer 2 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32U5_TIM3_CAP
+	bool "TIM3 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM3
+	---help---
+		Reserve timer 3 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32U5_TIM4_CAP
+	bool "TIM4 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM4
+	---help---
+		Reserve timer 4 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32U5_TIM5_CAP
+	bool "TIM5 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM5
+	---help---
+		Reserve timer 5 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+config STM32U5_TIM8_CAP
+	bool "TIM8 Capture"
+	default n
+	depends on STM32U5_HAVE_TIM8
+	---help---
+		Reserve timer 8 for use by Capture
+
+		Timer devices may be used for different purposes.  One special purpose is
+		to capture input.
+
+endmenu # Timer Configuration
+
+menu "ADC Configuration"
+	depends on STM32U5_ADC
+
+config STM32U5_ADC1_DMA
+	bool "ADC1 DMA"
+	depends on STM32U5_ADC1
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32U5_ADC2_DMA
+	bool "ADC2 DMA"
+	depends on STM32U5_ADC2
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32U5_ADC3_DMA
+	bool "ADC3 DMA"
+	depends on STM32U5_ADC3
+	default n
+	---help---
+		If DMA is selected, then the ADC may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+config STM32U5_ADC1_OUTPUT_DFSDM
+	bool "ADC1 output to DFSDM"
+	depends on STM32U5_ADC1 && STM32U5_DFSDM1 && (STM32U5_STM32U596XX || STM32U5_STM32U5XR)
+	default n
+	---help---
+		Route ADC1 output directly to DFSDM parallel inputs.
+
+config STM32U5_ADC2_OUTPUT_DFSDM
+	bool "ADC2 output to DFSDM"
+	depends on STM32U5_ADC2 && STM32U5_DFSDM1 && STM32U5_STM32U596XX
+	default n
+	---help---
+		Route ADC2 output directly to DFSDM parallel inputs.
+
+config STM32U5_ADC3_OUTPUT_DFSDM
+	bool "ADC3 output to DFSDM"
+	depends on STM32U5_ADC3 && STM32U5_DFSDM1 && STM32U5_STM32U596XX
+	default n
+	---help---
+		Route ADC3 output directly to DFSDM parallel inputs.
+
+endmenu
+
+menu "DAC Configuration"
+	depends on STM32U5_DAC
+
+config STM32U5_DAC1_DMA
+	bool "DAC1 DMA"
+	depends on STM32U5_DAC1
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32U5_DAC1_DMA
+
+config STM32U5_DAC1_TIMER
+	int "DAC1 timer"
+	range 2 8
+
+config STM32U5_DAC1_TIMER_FREQUENCY
+	int "DAC1 timer frequency"
+	default 100
+	---help---
+		DAC1 output frequency.  Default:  100Hz
+
+config STM32U5_DAC1_DMA_BUFFER_SIZE
+	int "DAC1 DMA buffer size"
+	default 1
+
+endif
+
+config STM32U5_DAC1_OUTPUT_ADC
+	bool "DAC1 output to ADC"
+	depends on STM32U5_DAC1
+	default n
+	---help---
+		Route DAC1 output to ADC input instead of external pin.
+
+config STM32U5_DAC2_DMA
+	bool "DAC2 DMA"
+	depends on STM32U5_DAC2
+	default n
+	---help---
+		If DMA is selected, then a timer and output frequency must also be
+		provided to support the DMA transfer.  The DMA transfer could be
+		supported by an EXTI trigger, but this feature is not currently
+		supported by the driver.
+
+if STM32U5_DAC2_DMA
+
+config STM32U5_DAC2_TIMER
+	int "DAC2 timer"
+	default 0
+	range 2 8
+
+config STM32U5_DAC2_TIMER_FREQUENCY
+	int "DAC2 timer frequency"
+	default 100
+	---help---
+		DAC2 output frequency.  Default:  100Hz
+
+config STM32U5_DAC2_DMA_BUFFER_SIZE
+	int "DAC2 DMA buffer size"
+	default 1
+
+endif
+
+config STM32U5_DAC2_OUTPUT_ADC
+	bool "DAC2 output to ADC"
+	depends on STM32U5_DAC2
+	default n
+	---help---
+		Route DAC2 output to ADC input instead of external pin.
+
+endmenu
+
+menu "DFSDM Configuration"
+	depends on STM32U5_DFSDM1
+
+config STM32U5_DFSDM1_FLT0
+	bool "DFSDM1 Filter 0"
+	default n
+	select STM32U5_DFSDM
+
+config STM32U5_DFSDM1_FLT1
+	bool "DFSDM1 Filter 1"
+	default n
+	select STM32U5_DFSDM
+
+config STM32U5_DFSDM1_FLT2
+	bool "DFSDM1 Filter 2"
+	default n
+	depends on !STM32U5_STM32U5X3
+	select STM32U5_DFSDM
+
+config STM32U5_DFSDM1_FLT3
+	bool "DFSDM1 Filter 3"
+	default n
+	depends on !STM32U5_STM32U5X3
+	select STM32U5_DFSDM
+
+config STM32U5_DFSDM1_DMA
+	bool "DFSDM1 DMA"
+	depends on STM32U5_DFSDM
+	default n
+	---help---
+		If DMA is selected, then the DFSDM may be configured to support
+		DMA transfer, which is necessary if multiple channels are read
+		or if very high trigger frequencies are used.
+
+endmenu
+
+config STM32U5_SERIALDRIVER
+	bool
+
+config STM32U5_1WIREDRIVER
+	bool
+
+menu "[LP]U[S]ART Configuration"
+	depends on STM32U5_USART
+
+choice
+	prompt "LPUART1 Driver Configuration"
+	default STM32U5_LPUART1_SERIALDRIVER
+	depends on STM32U5_LPUART1
+
+config STM32U5_LPUART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select LPUART1_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_LPUART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # LPUART1 Driver Configuration
+
+if LPUART1_SERIALDRIVER
+
+config LPUART1_RS485
+	bool "RS-485 on LPUART1"
+	default n
+	depends on STM32U5_LPUART1
+	---help---
+		Enable RS-485 interface on LPUART1. Your board config will have to
+		provide GPIO_LPUART1_RS485_DIR pin definition. Currently it cannot be
+		used with LPUART1_RXDMA.
+
+config LPUART1_RS485_DIR_POLARITY
+	int "LPUART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on LPUART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on LPUART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config LPUART1_RXDMA
+	bool "LPUART1 Rx DMA"
+	default n
+	depends on STM32U5_LPUART1 && (STM32U5_DMA1 || STM32U5_DMA2 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # LPUART1_SERIALDRIVER
+
+choice
+	prompt "USART1 Driver Configuration"
+	default STM32U5_USART1_SERIALDRIVER
+	depends on STM32U5_USART1
+
+config STM32U5_USART1_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART1_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_USART1_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # USART1 Driver Configuration
+
+if USART1_SERIALDRIVER
+
+config USART1_RS485
+	bool "RS-485 on USART1"
+	default n
+	depends on STM32U5_USART1
+	---help---
+		Enable RS-485 interface on USART1. Your board config will have to
+		provide GPIO_USART1_RS485_DIR pin definition. Currently it cannot be
+		used with USART1_RXDMA.
+
+config USART1_RS485_DIR_POLARITY
+	int "USART1 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART1_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART1. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART1_RXDMA
+	bool "USART1 Rx DMA"
+	default n
+	depends on STM32U5_USART1 && (STM32U5_DMA1 || STM32U5_DMA2 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART1_SERIALDRIVER
+
+choice
+	prompt "USART2 Driver Configuration"
+	default STM32U5_USART2_SERIALDRIVER
+	depends on STM32U5_USART2
+
+config STM32U5_USART2_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART2_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_USART2_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # USART2 Driver Configuration
+
+if USART2_SERIALDRIVER
+
+config USART2_RS485
+	bool "RS-485 on USART2"
+	default n
+	depends on STM32U5_USART2
+	---help---
+		Enable RS-485 interface on USART2. Your board config will have to
+		provide GPIO_USART2_RS485_DIR pin definition. Currently it cannot be
+		used with USART2_RXDMA.
+
+config USART2_RS485_DIR_POLARITY
+	int "USART2 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART2_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART2. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART2_RXDMA
+	bool "USART2 Rx DMA"
+	default n
+	depends on STM32U5_USART2 && (STM32U5_DMA1 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART2_SERIALDRIVER
+
+choice
+	prompt "USART3 Driver Configuration"
+	default STM32U5_USART3_SERIALDRIVER
+	depends on STM32U5_USART3
+
+config STM32U5_USART3_SERIALDRIVER
+	bool "Standard serial driver"
+	select USART3_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_USART3_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # USART3 Driver Configuration
+
+if USART3_SERIALDRIVER
+
+config USART3_RS485
+	bool "RS-485 on USART3"
+	default n
+	depends on STM32U5_USART3
+	---help---
+		Enable RS-485 interface on USART3. Your board config will have to
+		provide GPIO_USART3_RS485_DIR pin definition. Currently it cannot be
+		used with USART3_RXDMA.
+
+config USART3_RS485_DIR_POLARITY
+	int "USART3 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on USART3_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on USART3. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config USART3_RXDMA
+	bool "USART3 Rx DMA"
+	default n
+	depends on STM32U5_USART3 && (STM32U5_DMA1 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # USART3_SERIALDRIVER
+
+choice
+	prompt "UART4 Driver Configuration"
+	default STM32U5_UART4_SERIALDRIVER
+	depends on STM32U5_UART4
+
+config STM32U5_UART4_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART4_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_UART4_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # UART4 Driver Configuration
+
+if UART4_SERIALDRIVER
+
+config UART4_RS485
+	bool "RS-485 on UART4"
+	default n
+	depends on STM32U5_UART4
+	---help---
+		Enable RS-485 interface on UART4. Your board config will have to
+		provide GPIO_UART4_RS485_DIR pin definition. Currently it cannot be
+		used with UART4_RXDMA.
+
+config UART4_RS485_DIR_POLARITY
+	int "UART4 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART4_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART4. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART4_RXDMA
+	bool "UART4 Rx DMA"
+	default n
+	depends on STM32U5_UART4 && (STM32U5_DMA2 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # UART4_SERIALDRIVER
+
+choice
+	prompt "UART5 Driver Configuration"
+	default STM32U5_UART5_SERIALDRIVER
+	depends on STM32U5_UART5
+
+config STM32U5_UART5_SERIALDRIVER
+	bool "Standard serial driver"
+	select UART5_SERIALDRIVER
+	select STM32U5_SERIALDRIVER
+
+config STM32U5_UART5_1WIREDRIVER
+	bool "1-Wire driver"
+	select STM32U5_1WIREDRIVER
+
+endchoice # UART5 Driver Configuration
+
+if UART5_SERIALDRIVER
+
+config UART5_RS485
+	bool "RS-485 on UART5"
+	default n
+	depends on STM32U5_UART5
+	---help---
+		Enable RS-485 interface on UART5. Your board config will have to
+		provide GPIO_UART5_RS485_DIR pin definition. Currently it cannot be
+		used with UART5_RXDMA.
+
+config UART5_RS485_DIR_POLARITY
+	int "UART5 RS-485 DIR pin polarity"
+	default 1
+	range 0 1
+	depends on UART5_RS485
+	---help---
+		Polarity of DIR pin for RS-485 on UART5. Set to state on DIR pin which
+		enables TX (0 - low / nTXEN, 1 - high / TXEN).
+
+config UART5_RXDMA
+	bool "UART5 Rx DMA"
+	default n
+	depends on STM32U5_UART5 && (STM32U5_DMA2 || STM32U5_DMAMUX)
+	---help---
+		In high data rate usage, Rx DMA may eliminate Rx overrun errors
+
+endif # UART5_SERIALDRIVER
+
+if STM32U5_SERIALDRIVER
+
+comment "Serial Driver Configuration"
+
+config STM32U5_SERIAL_RXDMA_BUFFER_SIZE
+	int "Rx DMA buffer size"
+	default 32
+	depends on USART1_RXDMA || USART2_RXDMA || USART3_RXDMA || UART4_RXDMA || UART5_RXDMA
+	---help---
+		The DMA buffer size when using RX DMA to emulate a FIFO.
+
+		When streaming data, the generic serial layer will be called
+		every time the FIFO receives half this number of bytes.
+
+		Value given here will be rounded up to next multiple of 32 bytes.
+
+config STM32U5_SERIAL_DISABLE_REORDERING
+	bool "Disable reordering of ttySx devices."
+	depends on STM32U5_USART1 || STM32U5_USART2 || STM32U5_USART3 || STM32U5_UART4 || STM32U5_UART5
+	default n
+	---help---
+		NuttX per default reorders the serial ports (/dev/ttySx) so that the
+		console is always on /dev/ttyS0. If more than one UART is in use this
+		can, however, have the side-effect that all port mappings
+		(hardware USART1 -> /dev/ttyS0) change if the console is moved to another
+		UART. This is in particular relevant if a project uses the USB console
+		in some boards and a serial console in other boards, but does not
+		want the side effect of having all serial port names change when just
+		the console is moved from serial to USB.
+
+config STM32U5_FLOWCONTROL_BROKEN
+	bool "Use Software UART RTS flow control"
+	depends on STM32U5_USART
+	default n
+	---help---
+		Enable UART RTS flow control using Software. Because STM
+		Current STM32 have broken HW based RTS behavior (they assert
+		nRTS after every byte received)  Enable this setting workaround
+		this issue by using software based management of RTS
+
+config STM32U5_USART_BREAKS
+	bool "Add TIOxSBRK to support sending Breaks"
+	depends on STM32U5_USART
+	default n
+	---help---
+		Add TIOCxBRK routines to send a line break per the STM32 manual, the
+		break will be a pulse based on the value M. This is not a BSD compatible
+		break.
+
+config STM32U5_SERIALBRK_BSDCOMPAT
+	bool "Use GPIO To send Break"
+	depends on STM32U5_USART && STM32U5_USART_BREAKS
+	default n
+	---help---
+		Enable using GPIO on the TX pin to send a BSD compatible break:
+		TIOCSBRK will start the break and TIOCCBRK will end the break.
+		The current STM32 U[S]ARTS have no way to leave the break (TX=LOW)
+		on because the SW starts the break and then the HW automatically clears
+		the break. This makes it is difficult to sent a long break.
+
+config STM32U5_USART_SINGLEWIRE
+	bool "Single Wire Support"
+	default n
+	depends on STM32U5_USART
+	---help---
+		Enable single wire UART support.  The option enables support for the
+		TIOCSSINGLEWIRE ioctl in the STM32U5 serial driver.
+
+config STM32U5_USART_INVERT
+	bool "Signal Invert Support"
+	default n
+	depends on STM32U5_USART
+	---help---
+		Enable signal inversion UART support. The option enables support for the
+		TIOCSINVERT ioctl in the STM32U5 serial driver.
+
+config STM32U5_USART_SWAP
+	bool "Swap RX/TX pins support"
+	default n
+	depends on STM32U5_USART
+	---help---
+		Enable RX/TX pin swapping support. The option enables support for the
+		TIOCSSWAP ioctl in the STM32U5 serial driver.
+
+if PM
+
+config STM32U5_PM_SERIAL_ACTIVITY
+	int "PM serial activity"
+	default 10
+	---help---
+		PM activity reported to power management logic on every serial
+		interrupt.
+
+endif
+endif # STM32U5_SERIALDRIVER
+
+endmenu # U[S]ART Configuration
+
+menu "SPI Configuration"
+	depends on STM32U5_SPI
+
+config STM32U5_SPI_INTERRUPTS
+	bool "Interrupt driver SPI"
+	default n
+	---help---
+		Select to enable interrupt driven SPI support. Non-interrupt-driven,
+		poll-waiting is recommended if the interrupt rate would be to high in
+		the interrupt driven case.
+
+config STM32U5_SPI_DMA
+	bool "SPI DMA"
+	default n
+	---help---
+		Use DMA to improve SPI transfer performance.  Cannot be used with STM32U5_SPI_INTERRUPT.
+
+endmenu
+
+menu "I2C Configuration"
+	depends on STM32U5_I2C
+
+config STM32U5_I2C_DYNTIMEO
+	bool "Use dynamic timeouts"
+	default n
+	depends on STM32U5_I2C
+
+config STM32U5_I2C_DYNTIMEO_USECPERBYTE
+	int "Timeout Microseconds per Byte"
+	default 500
+	depends on STM32U5_I2C_DYNTIMEO
+
+config STM32U5_I2C_DYNTIMEO_STARTSTOP
+	int "Timeout for Start/Stop (Milliseconds)"
+	default 1000
+	depends on STM32U5_I2C_DYNTIMEO
+
+config STM32U5_I2CTIMEOSEC
+	int "Timeout seconds"
+	default 0
+	depends on STM32U5_I2C
+
+config STM32U5_I2CTIMEOMS
+	int "Timeout Milliseconds"
+	default 500
+	depends on STM32U5_I2C && !STM32U5_I2C_DYNTIMEO
+
+config STM32U5_I2CTIMEOTICKS
+	int "Timeout for Done and Stop (ticks)"
+	default 500
+	depends on STM32U5_I2C && !STM32U5_I2C_DYNTIMEO
+
+endmenu
+
+menu "SD/MMC Configuration"
+	depends on STM32U5_SDMMC
+
+config STM32U5_SDMMC_XFRDEBUG
+	bool "SDMMC transfer debug"
+	depends on DEBUG_FS_INFO
+	default n
+	---help---
+		Enable special debug instrumentation analyze SDMMC data transfers.
+		This logic is as non-invasive as possible:  It samples SDMMC
+		registers at key points in the data transfer and then dumps all of
+		the registers at the end of the transfer.  If DEBUG_DMA is also
+		enabled, then DMA register will be collected as well.  Requires also
+		DEBUG_FS and CONFIG_DEBUG_INFO.
+
+config STM32U5_SDMMC_DMA
+	bool "Support DMA data transfers"
+	default n
+	select SDIO_DMA
+	depends on STM32U5_DMA
+	---help---
+		Support DMA data transfers.
+
+menu "SDMMC1 Configuration"
+	depends on STM32U5_SDMMC1
+
+config STM32U5_SDMMC1_DMAPRIO
+	hex "SDMMC1 DMA priority"
+	default 0x00001000
+	---help---
+		Select SDMMC1 DMA priority.
+
+		Options are: 0x00000000 low, 0x00001000 medium,
+		0x00002000 high, 0x00003000 very high.  Default: medium.
+
+config SDMMC1_WIDTH_D1_ONLY
+	bool "Use D1 only on SDMMC1"
+	default n
+	---help---
+		Select 1-bit transfer mode.  Default: 4-bit transfer mode.
+
+endmenu # SDMMC1 Configuration
+endmenu # SD/MMC Configuration
+
+menu "CAN driver configuration"
+	depends on STM32U5_CAN1 || STM32U5_CAN2
+
+config STM32U5_CAN1_BAUD
+	int "CAN1 BAUD"
+	default 250000
+	depends on STM32U5_CAN1
+	---help---
+		CAN1 BAUD rate.  Required if CONFIG_STM32U5_CAN1 is defined.
+
+config STM32U5_CAN2_BAUD
+	int "CAN2 BAUD"
+	default 250000
+	depends on STM32U5_CAN2
+	---help---
+		CAN2 BAUD rate.  Required if CONFIG_STM32U5_CAN2 is defined.
+
+config STM32U5_CAN_TSEG1
+	int "TSEG1 quanta"
+	default 6
+	---help---
+		The number of CAN time quanta in segment 1. Default: 6
+
+config STM32U5_CAN_TSEG2
+	int "TSEG2 quanta"
+	default 7
+	---help---
+		The number of CAN time quanta in segment 2. Default: 7
+
+config STM32U5_CAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+endmenu
+
+menu "QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on STM32U5_TIM1 || STM32U5_TIM2 || STM32U5_TIM3 || STM32U5_TIM4 || STM32U5_TIM5 || STM32U5_TIM8
+
+config STM32U5_TIM1_QE
+	bool "TIM1"
+	default n
+	depends on STM32U5_TIM1
+	---help---
+		Reserve TIM1 for use by QEncoder.
+
+if STM32U5_TIM1_QE
+
+config STM32U5_TIM1_QEPSC
+	int "TIM1 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM1." (CONFIG_TIM1_QECLKOUT).
+
+endif
+
+config STM32U5_TIM2_QE
+	bool "TIM2"
+	default n
+	depends on STM32U5_TIM2
+	---help---
+		Reserve TIM2 for use by QEncoder.
+
+if STM32U5_TIM2_QE
+
+config STM32U5_TIM2_QEPSC
+	int "TIM2 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM2." (CONFIG_TIM2_QECLKOUT).
+
+endif
+
+config STM32U5_TIM3_QE
+	bool "TIM3"
+	default n
+	depends on STM32U5_TIM3
+	---help---
+		Reserve TIM3 for use by QEncoder.
+
+if STM32U5_TIM3_QE
+
+config STM32U5_TIM3_QEPSC
+	int "TIM3 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM3." (CONFIG_TIM3_QECLKOUT).
+
+endif
+
+config STM32U5_TIM4_QE
+	bool "TIM4"
+	default n
+	depends on STM32U5_TIM4
+	---help---
+		Reserve TIM4 for use by QEncoder.
+
+if STM32U5_TIM4_QE
+
+config STM32U5_TIM4_QEPSC
+	int "TIM4 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM4." (CONFIG_TIM4_QECLKOUT).
+
+endif
+
+config STM32U5_TIM5_QE
+	bool "TIM5"
+	default n
+	depends on STM32U5_TIM5
+	---help---
+		Reserve TIM5 for use by QEncoder.
+
+if STM32U5_TIM5_QE
+
+config STM32U5_TIM5_QEPSC
+	int "TIM5 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM5." (CONFIG_TIM5_QECLKOUT).
+
+endif
+
+config STM32U5_TIM8_QE
+	bool "TIM8"
+	default n
+	depends on STM32U5_TIM8
+	---help---
+		Reserve TIM8 for use by QEncoder.
+
+if STM32U5_TIM8_QE
+
+config STM32U5_TIM8_QEPSC
+	int "TIM8 pulse prescaler"
+	default 1
+	---help---
+		This prescaler divides the number of recorded encoder pulses, limiting the count rate at the expense of resolution.
+		Replaces the obscure "output clock of TIM8." (CONFIG_TIM8_QECLKOUT).
+
+endif
+
+config STM32U5_QENCODER_FILTER
+	bool "Enable filtering on STM32 QEncoder input"
+	default y
+
+choice
+	depends on STM32U5_QENCODER_FILTER
+	prompt "Input channel sampling frequency"
+	default STM32U5_QENCODER_SAMPLE_FDTS_4
+
+config STM32U5_QENCODER_SAMPLE_FDTS
+	bool "fDTS"
+
+config STM32U5_QENCODER_SAMPLE_CKINT
+	bool "fCK_INT"
+
+config STM32U5_QENCODER_SAMPLE_FDTS_2
+	bool "fDTS/2"
+
+config STM32U5_QENCODER_SAMPLE_FDTS_4
+	bool "fDTS/4"
+
+config STM32U5_QENCODER_SAMPLE_FDTS_8
+	bool "fDTS/8"
+
+config STM32U5_QENCODER_SAMPLE_FDTS_16
+	bool "fDTS/16"
+
+config STM32U5_QENCODER_SAMPLE_FDTS_32
+	bool "fDTS/32"
+
+endchoice
+
+choice
+	depends on STM32U5_QENCODER_FILTER
+	prompt "Input channel event count"
+	default STM32U5_QENCODER_SAMPLE_EVENT_6
+
+config STM32U5_QENCODER_SAMPLE_EVENT_1
+	depends on STM32U5_QENCODER_SAMPLE_FDTS
+	bool "1"
+
+config STM32U5_QENCODER_SAMPLE_EVENT_2
+	depends on STM32U5_QENCODER_SAMPLE_CKINT
+	bool "2"
+
+config STM32U5_QENCODER_SAMPLE_EVENT_4
+	depends on STM32U5_QENCODER_SAMPLE_CKINT
+	bool "4"
+
+config STM32U5_QENCODER_SAMPLE_EVENT_5
+	depends on STM32U5_QENCODER_SAMPLE_FDTS_16 || STM32U5_QENCODER_SAMPLE_FDTS_32
+	bool "5"
+
+config STM32U5_QENCODER_SAMPLE_EVENT_6
+	depends on !STM32U5_QENCODER_SAMPLE_FDTS && !STM32U5_QENCODER_SAMPLE_CKINT
+	bool "6"
+
+config STM32U5_QENCODER_SAMPLE_EVENT_8
+	depends on !STM32U5_QENCODER_SAMPLE_FDTS
+	bool "8"
+
+endchoice
+
+endmenu
+
+menu "SAI Configuration"
+	depends on STM32U5_SAI
+
+choice
+	prompt "Operation mode"
+	default STM32U5_SAI_DMA
+	---help---
+		Select the operation mode the SAI driver should use.
+
+config STM32U5_SAI_POLLING
+	bool "Polling"
+	---help---
+		The SAI registers are polled for events.
+
+config STM32U5_SAI_INTERRUPTS
+	bool "Interrupt"
+	---help---
+		Select to enable interrupt driven SAI support.
+
+config STM32U5_SAI_DMA
+	bool "DMA"
+	---help---
+		Use DMA to improve SAI transfer performance.
+
+endchoice # Operation mode
+
+choice
+	prompt "SAI1 synchronization enable"
+	default STM32U5_SAI1_BOTH_ASYNC
+	depends on STM32U5_SAI1_A && STM32U5_SAI1_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32U5_SAI1_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32U5_SAI1_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32U5_SAI1_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI1 synchronization enable
+
+choice
+	prompt "SAI2 synchronization enable"
+	default STM32U5_SAI2_BOTH_ASYNC
+	depends on STM32U5_SAI2_A && STM32U5_SAI2_B
+	---help---
+		Select the synchronization mode of the SAI sub-blocks
+
+config STM32U5_SAI2_BOTH_ASYNC
+	bool "Both asynchronous"
+
+config STM32U5_SAI2_A_SYNC_WITH_B
+	bool "Block A is synchronous with Block B"
+
+config STM32U5_SAI2_B_SYNC_WITH_A
+	bool "Block B is synchronous with Block A"
+
+endchoice # SAI2 synchronization enable
+
+endmenu
+
+endif # ARCH_CHIP_STM32U5
