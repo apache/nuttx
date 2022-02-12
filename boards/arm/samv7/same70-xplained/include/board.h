@@ -340,6 +340,12 @@
 #define GPIO_MCAN1_TX         GPIO_MCAN1_TX_2
 #define GPIO_MCAN1_RX         GPIO_MCAN1_RX_2
 
+/* PWM */
+
+#define GPIO_PWMC0_H0         GPIO_PWMC0_H0_1   /* PA_0 */
+#define GPIO_PWMC0_H1         GPIO_PWMC0_H1_1   /* PA_2 */
+#define GPIO_PWMC0_H2         GPIO_PWMC0_H2_5   /* PC_19 */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
