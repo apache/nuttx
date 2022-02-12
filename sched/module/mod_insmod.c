@@ -200,7 +200,7 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
 
   /* Save the module name in the registry entry */
 
-  strncpy(modp->modname, modname, MODLIB_NAMEMAX);
+  strlcpy(modp->modname, modname, MODLIB_NAMEMAX);
 
   /* Load the program binary */
 
