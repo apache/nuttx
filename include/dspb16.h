@@ -124,6 +124,22 @@
 #define SVM3_BASE_VOLTAGE_GET_B16(vbus) (b16mulb16(vbus, SQRT3_BY_THREE_B16))
 
 /****************************************************************************
+ * Name: SIGN_B16
+ *
+ * Description:
+ *  Get sign of x
+ *
+ *  Notes:
+ *   if x>0:
+ *     sign of x is 1
+ *   if x<0:
+ *     sign of x is -1
+ *
+ ****************************************************************************/
+
+#define SIGN_B16(x) ((x > 0) ? ftob16(1.0f) : ftob16(-1.0f))
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -282,6 +298,7 @@ struct foc_data_b16_s
 
   b16_t vdq_mag_max;         /* Maximum dq voltage magnitude */
   b16_t vab_mod_scale;       /* Voltage alpha-beta modulation scale */
+  b16_t duty_now;            /* Current duty */
 
   phase_angle_b16_t   angle; /* Phase angle */
 };

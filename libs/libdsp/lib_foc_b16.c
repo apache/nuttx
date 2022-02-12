@@ -351,6 +351,7 @@ void foc_iabc_update_b16(FAR struct foc_data_b16_s *foc,
 void foc_voltage_control_b16(FAR struct foc_data_b16_s *foc,
                              FAR dq_frame_b16_t *vdq_ref)
 {
+  dq_frame_b16_t v_dq_mod;
   LIBDSP_DEBUGASSERT(foc != NULL);
 
   /* Update VDQ request */
@@ -373,6 +374,15 @@ void foc_voltage_control_b16(FAR struct foc_data_b16_s *foc,
 
   foc->v_ab_mod.a = b16mulb16(foc->v_ab.a, foc->vab_mod_scale);
   foc->v_ab_mod.b = b16mulb16(foc->v_ab.b, foc->vab_mod_scale);
+
+  /* Convert alpha-beta modulation to dq modulation */
+
+  park_transform_b16(&foc->angle, &foc->v_ab_mod, &v_dq_mod);
+
+  /* Update duty cycle now */
+
+  foc->duty_now = SIGN_B16(foc->v_dq.q) *
+                vector2d_mag_b16(v_dq_mod.d, v_dq_mod.q) / SQRT3_BY_TWO_B16;
 }
 
 /****************************************************************************

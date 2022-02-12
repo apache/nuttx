@@ -134,6 +134,22 @@
 #define SVM3_BASE_VOLTAGE_GET(vbus) (vbus * SQRT3_BY_THREE_F)
 
 /****************************************************************************
+ * Name: SIGN
+ *
+ * Description:
+ *  Get sign of x
+ *
+ *  Notes:
+ *   if x>0.0:
+ *     sign of x is 1.0
+ *   if x<0.0:
+ *     sign of x is -1.0
+ *
+ ****************************************************************************/
+
+#define SIGN(x)	((x > 0.0f) ? 1.0f : -1.0f)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -355,6 +371,7 @@ struct foc_data_f32_s
 
   float vdq_mag_max;         /* Maximum dq voltage magnitude */
   float vab_mod_scale;       /* Voltage alpha-beta modulation scale */
+  float duty_now;            /* Current duty */
 
   phase_angle_f32_t   angle; /* Phase angle */
 };
