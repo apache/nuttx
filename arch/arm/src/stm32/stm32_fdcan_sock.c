@@ -1716,35 +1716,38 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
    *   Transfer message ID (ID)          - Value from message structure
    *   Remote Transmission Request (RTR) - Value from message structure
    *   Extended Identifier (XTD)         - Depends on configuration.
+   *   Error state indicator (ESI)       - ESI bit in CAN FD
+   *
+   * Format word T1:
+   *   Data Length Code (DLC)            - Value from message structure
+   *   Bit Rate Switch (BRS)             - Bit rate switching for CAN FD
+   *   FD format (FDF)                   - Frame transmited in CAN FD format
+   *   Event FIFO Control (EFC)          - Do not store events.
+   *   Message Marker (MM)               - Always zero
    */
+
+  txbuffer[0] = 0;
+  txbuffer[1] = 0;
 
 #ifdef CONFIG_NET_CAN_EXTID
   if (frame->can_id & CAN_EFF_FLAG)
     {
       DEBUGASSERT(frame->can_id < (1 << 29));
 
-      regval = BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
+      txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
     }
   else
 #endif
     {
       DEBUGASSERT(frame->can_id < (1 << 11));
 
-      regval = BUFFER_R0_STDID(frame->can_id);
+      txbuffer[0] |= BUFFER_R0_STDID(frame->can_id);
     }
 
   if (frame->can_id & CAN_RTR_FLAG)
     {
-      regval |= BUFFER_R0_RTR;
+      txbuffer[0] |= BUFFER_R0_RTR;
     }
-
-  txbuffer[0] = regval;
-
-  /* Format word T1:
-   *   Data Length Code (DLC)            - Value from message structure
-   *   Event FIFO Control (EFC)          - Do not store events.
-   *   Message Marker (MM)               - Always zero
-   */
 
   txbuffer[1] = BUFFER_R1_DLC(frame->can_dlc);
 
@@ -2392,40 +2395,37 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
                           unsigned long nwords)
 {
   FAR struct can_frame *frame  = (struct can_frame *)priv->rxdesc;
-  uint32_t              regval = 0;
 
   fdcan_dumprxregs(dev->cd_priv, "Before receive");
 
   /* Format the CAN header */
 
-  /* Work R0 contains the CAN ID */
-
-  regval = *rxbuffer++;
+  /* Word R0 contains the CAN ID */
 
   /* Extract the RTR bit */
 
-  if ((regval & BUFFER_R0_RTR) != 0)
+  if ((rxbuffer[0] & BUFFER_R0_RTR) != 0)
     {
       frame->can_id |= CAN_RTR_FLAG;
     }
 
 #ifdef CONFIG_NET_CAN_EXTID
-  if ((regval & BUFFER_R0_XTD) != 0)
+  if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
     {
       /* Save the extended ID of the newly received message */
 
-      frame->can_id  = (regval & BUFFER_R0_EXTID_MASK) >>
+      frame->can_id  = (rxbuffer[0] & BUFFER_R0_EXTID_MASK) >>
                         BUFFER_R0_EXTID_SHIFT;
       frame->can_id |= CAN_EFF_FLAG;
     }
   else
     {
-      frame->can_id  = (regval & BUFFER_R0_STDID_MASK) >>
+      frame->can_id  = (rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
                         BUFFER_R0_STDID_SHIFT;
       frame->can_id &= ~CAN_EFF_FLAG;
     }
 #else
-  if ((regval & BUFFER_R0_XTD) != 0)
+  if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
     {
       /* Drop any messages with extended IDs */
 
@@ -2434,18 +2434,16 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
 
   /* Save the standard ID of the newly received message */
 
-  frame->can_id = (regval & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+  frame->can_id = (rxbuffer[0] & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
 #endif
 
   /* Word R1 contains the DLC and timestamp */
 
-  regval = *rxbuffer++;
-
-  frame->can_dlc = (regval & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
+  frame->can_dlc = (rxbuffer[1] & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
 
   /* Save the message data */
 
-  memcpy(frame->data, (void *)rxbuffer, frame->can_dlc);
+  memcpy(frame->data, (void *)&rxbuffer[2], frame->can_dlc);
 
   /* Copy the buffer pointer to priv->dev..  Set amount of data
    * in priv->dev.d_len
