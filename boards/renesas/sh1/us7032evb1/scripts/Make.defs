@@ -29,7 +29,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -Os -fno-strict-aliasing -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS = -m1 -fno-builtin
+ARCHCPUFLAGS = -m1
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld

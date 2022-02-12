@@ -38,7 +38,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
+ARCHCPUFLAGS		= -mcpu=m16c
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 

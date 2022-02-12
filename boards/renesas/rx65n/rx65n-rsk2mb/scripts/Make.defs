@@ -44,7 +44,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHPICFLAGS = -fpic
-ARCHCFLAGS = -fno-common -std=c99 -fno-builtin
+ARCHCFLAGS = -fno-common -std=c99
 ARCHCPUFLAGS = -mcpu=rx64m
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
