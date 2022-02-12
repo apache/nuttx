@@ -38,11 +38,11 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION)
 endif
 
-ARCHCFLAGS = -fno-common -fno-builtin
+ARCHCFLAGS = -fno-common
 ifeq ($(CONFIG_CXX_EXCEPTION),y)
-  ARCHCXXFLAGS = -fno-common -fno-builtin
+  ARCHCXXFLAGS = -fno-common
 else
-  ARCHCXXFLAGS = -fno-common -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+  ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new -fno-rtti
 endif
 
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -fno-strict-aliasing
