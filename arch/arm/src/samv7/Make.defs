@@ -185,6 +185,10 @@ ifeq ($(CONFIG_SAMV7_PROGMEM),y)
 CHIP_CSRCS += sam_progmem.c sam_eefc.c
 endif
 
+ifeq ($(CONFIG_SAMV7_PWM),y)
+CHIP_CSRCS += sam_pwm.c
+endif
+
 ifeq ($(CONFIG_SAMV7_DAC),y)
 CHIP_CSRCS += sam_dac.c
 endif
