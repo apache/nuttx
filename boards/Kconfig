@@ -1967,13 +1967,21 @@ config ARCH_BOARD_B_L072Z_LRWAN1
 		STMicro STM32L0 Discovery kit with LoRa/SigFox based on STM32L072CZ MCU.
 
 config ARCH_BOARD_B_L475E_IOT01A
-	bool "STMicro IoT Discovery kit"
+	bool "STMicro IoT Discovery kit (B-L475E-IOT01A)"
 	depends on ARCH_CHIP_STM32L475VG
 	select ARCH_HAVE_LEDS
 	---help---
 		STMicro IoT development board featuring the STM32L475VG
 		MCU. The STM32L475VG is a Cortex-M4 optimised for low-power operation
 		at up to 80MHz operation with 1024Kb Flash memory and 96+32Kb SRAM.
+
+config ARCH_BOARD_B_U585I_IOT02A
+	bool "STMicro IoT Discovery kit (B-U585-IOT02A)"
+	depends on ARCH_CHIP_STM32U585AI
+	---help---
+		STMicro IoT development board featuring the STM32U585AI
+		MCU. The STM32U585AI is a Cortex-M33 optimised for low-power operation
+		at up to 160MHz operation with 2048Kb Flash memory and 768Kb SRAM.
 
 config ARCH_BOARD_STM32L476VG_DISCO
 	bool "STMicro STM32L476VG -Discovery board"
@@ -2582,6 +2590,7 @@ config ARCH_BOARD
 	default "nucleo-g431rb"            if ARCH_BOARD_NUCLEO_G431RB
 	default "b-l072z-lrwan1"           if ARCH_BOARD_B_L072Z_LRWAN1
 	default "b-l475e-iot01a"           if ARCH_BOARD_B_L475E_IOT01A
+	default "b-u585i-iot02a"           if ARCH_BOARD_B_U585I_IOT02A
 	default "stm32l476vg-disco"        if ARCH_BOARD_STM32L476VG_DISCO
 	default "stm32l476-mdk"            if ARCH_BOARD_STM32L476_MDK
 	default "stm32l4r9ai-disco"        if ARCH_BOARD_STM32L4R9AI_DISCO
@@ -2984,6 +2993,9 @@ source "boards/arm/stm32h7/nucleo-h743zi2/Kconfig"
 endif
 if ARCH_BOARD_B_L475E_IOT01A
 source "boards/arm/stm32l4/b-l475e-iot01a/Kconfig"
+endif
+if ARCH_BOARD_B_U585I_IOT02A
+source "boards/arm/stm32u5/b-u585i-iot02a/Kconfig"
 endif
 if ARCH_BOARD_NUCLEO_L432KC
 source "boards/arm/stm32l4/nucleo-l432kc/Kconfig"
