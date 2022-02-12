@@ -34,8 +34,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
+ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS = -fno-exceptions -fcheck-new
 endif

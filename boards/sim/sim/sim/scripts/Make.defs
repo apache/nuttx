@@ -67,8 +67,8 @@ endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
-ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections -nostdinc++
+ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections -nostdinc++
 
 ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new

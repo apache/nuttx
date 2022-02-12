@@ -47,13 +47,13 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ifeq ($(OLDGCC),n)
-  ARCHCPUFLAGS = -mtune=arm9tdmi -march=armv5te -mfloat-abi=soft -fno-builtin
+  ARCHCPUFLAGS = -mtune=arm9tdmi -march=armv5te -mfloat-abi=soft
 else
-  ARCHCPUFLAGS = -mapcs-32 -mtune=arm9tdmi -march=armv5te -msoft-float -fno-builtin
+  ARCHCPUFLAGS = -mapcs-32 -mtune=arm9tdmi -march=armv5te -msoft-float
 endif
 
-ARCHCFLAGS = -fno-common -fno-builtin
-ARCHCXXFLAGS = -fno-common -fno-builtin -fno-exceptions -fcheck-new
+ARCHCFLAGS = -fno-common
+ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
