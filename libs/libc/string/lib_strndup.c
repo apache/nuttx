@@ -53,24 +53,22 @@
 FAR char *strndup(FAR const char *s, size_t size)
 {
   FAR char *news = NULL;
-  if (s)
+
+  /* Get the size of the new string (limited to size) */
+
+  size_t allocsize = strnlen(s, size);
+
+  /* Allocate the new string, adding 1 for the NUL terminator */
+
+  news = (FAR char *)lib_malloc(allocsize + 1);
+  if (news)
     {
-      /* Get the size of the new string (limited to size) */
+      /* Copy the string into the allocated memory and add a NUL
+       * terminator in any case.
+       */
 
-      size_t allocsize = strnlen(s, size);
-
-      /* Allocate the new string, adding 1 for the NUL terminator */
-
-      news = (FAR char *)lib_malloc(allocsize + 1);
-      if (news)
-        {
-          /* Copy the string into the allocated memory and add a NUL
-           * terminator in any case.
-           */
-
-          memcpy(news, s, allocsize);
-          news[allocsize] = '\0';
-        }
+      memcpy(news, s, allocsize);
+      news[allocsize] = '\0';
     }
 
   return news;

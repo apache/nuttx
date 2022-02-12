@@ -37,23 +37,20 @@ int vfprintf(FAR FILE *stream, FAR const IPTR char *fmt, va_list ap)
   struct lib_stdoutstream_s stdoutstream;
   int  n = ERROR;
 
-  if (stream)
-    {
-      /* Wrap the stream in a stream object and let lib_vsprintf
-       * do the work.
-       */
+  /* Wrap the stream in a stream object and let lib_vsprintf
+   * do the work.
+   */
 
-      lib_stdoutstream(&stdoutstream, stream);
+  lib_stdoutstream(&stdoutstream, stream);
 
-      /* Hold the stream semaphore throughout the lib_vsprintf
-       * call so that this thread can get its entire message out
-       * before being pre-empted by the next thread.
-       */
+  /* Hold the stream semaphore throughout the lib_vsprintf
+   * call so that this thread can get its entire message out
+   * before being pre-empted by the next thread.
+   */
 
-      lib_take_semaphore(stream);
-      n = lib_vsprintf(&stdoutstream.public, fmt, ap);
-      lib_give_semaphore(stream);
-    }
+  lib_take_semaphore(stream);
+  n = lib_vsprintf(&stdoutstream.public, fmt, ap);
+  lib_give_semaphore(stream);
 
   return n;
 }
