@@ -41,11 +41,7 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 void up_copyfullstate(unsigned long *dest, unsigned long *src)
-#else
-void up_copyfullstate(uint32_t *dest, uint32_t *src)
-#endif
 {
   int i;
 
