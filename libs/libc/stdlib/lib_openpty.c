@@ -68,7 +68,7 @@
 int posix_openpt(int oflag)
 {
 #ifdef CONFIG_PSEUDOTERM_SUSV1
-  return open("dev/ptmx", oflag);
+  return open("/dev/ptmx", oflag);
 #else
   int minor;
 
