@@ -98,8 +98,8 @@ pid_t up_vfork(const xcpt_reg_t *context)
   xcpt_reg_t stackutil;
 
   sinfo("vfork context [%p]:\n", context);
-  sinfo("  frame pointer:%08" PRIxPTR " sp:%08" PRIxPTR " pc:%08" PRIxPTR ""
-        "\n", context[JB_FP], context[JB_SP], context[JB_PC]);
+  sinfo("  frame pointer:%08lx sp:%08lx pc:%08lx\n",
+        context[JB_FP], context[JB_SP], context[JB_PC]);
 
   /* Allocate and initialize a TCB for the child task. */
 
@@ -123,7 +123,7 @@ pid_t up_vfork(const xcpt_reg_t *context)
   DEBUGASSERT(stacktop > context[JB_SP]);
   stackutil = stacktop - context[JB_SP];
 
-  sinfo("Parent: stackutil:%" PRIuPTR "\n", stackutil);
+  sinfo("Parent: stackutil:%lu\n", stackutil);
 
   /* Make some feeble effort to preserve the stack contents.  This is
    * feeble because the stack surely contains invalid pointers and other
@@ -151,9 +151,9 @@ pid_t up_vfork(const xcpt_reg_t *context)
       newfp = context[JB_FP];
     }
 
-  sinfo("Old stack top:%08" PRIxPTR " SP:%08" PRIxPTR " FP:%08" PRIxPTR "\n",
+  sinfo("Old stack top:%08lx SP:%08lx FP:%08lx\n",
         stacktop, context[JB_SP], context[JB_FP]);
-  sinfo("New stack top:%08" PRIxPTR " SP:%08" PRIxPTR " FP:%08" PRIxPTR "\n",
+  sinfo("New stack top:%08lx SP:%08lx FP:%08lx\n",
         newtop, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and volatile registers.  When

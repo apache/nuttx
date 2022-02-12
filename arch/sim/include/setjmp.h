@@ -111,12 +111,7 @@
 
 #ifndef __ASSEMBLY__
 
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 typedef unsigned long xcpt_reg_t;
-#else
-typedef unsigned int xcpt_reg_t;
-#endif
-
 typedef xcpt_reg_t jmp_buf[XCPTCONTEXT_REGS];
 #endif
 
