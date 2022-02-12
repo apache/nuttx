@@ -437,6 +437,18 @@ int sam_afec_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: sam_pwm_setup
+ *
+ * Description:
+ *   Initialize PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SAMV7_PWM
+int sam_pwm_setup(void);
+#endif
+
+/****************************************************************************
  * Name: sam_dacdev_initialize
  *
  * Description:

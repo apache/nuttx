@@ -316,6 +316,16 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SAMV7_PWM
+  /* Initialize PWM and register the driver. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_afec_initialize failed: %d\n", ret);
+    }
+#endif
+
 #ifdef CONFIG_SAMV7_AFEC
   /* Initialize AFEC and register the ADC driver. */
 
