@@ -449,7 +449,7 @@ enum stm32_frameformat_e
 enum stm32_canmode_e
 {
   FDCAN_CLASSIC_MODE = 0,   /* Classic CAN operation */
-#ifdef CONFIG_CAN_FD
+#ifdef CONFIG_NET_CAN_CANFD
   FDCAN_FD_MODE      = 1,   /* CAN FD operation */
   FDCAN_FD_BRS_MODE  = 2    /* CAN FD operation with bit rate switching */
 #endif
@@ -551,8 +551,13 @@ struct stm32_fdcan_s
 
   /* TX/RX pool */
 
+#ifdef CONFIG_NET_CAN_CANFD
+  uint8_t tx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
+  uint8_t rx_pool[sizeof(struct canfd_frame)*POOL_SIZE];
+#else
   uint8_t tx_pool[sizeof(struct can_frame)*POOL_SIZE];
   uint8_t rx_pool[sizeof(struct can_frame)*POOL_SIZE];
+#endif
 };
 
 /****************************************************************************
@@ -627,8 +632,6 @@ static int  fdcan_setup(FAR struct stm32_fdcan_s *priv);
 static void fdcan_shutdown(FAR struct stm32_fdcan_s *priv);
 
 /* FDCAN helpers */
-
-static uint8_t fdcan_dlc2bytes(FAR struct stm32_fdcan_s *priv, uint8_t dlc);
 
 #if 0 /* not used for now */
 static int
@@ -1195,62 +1198,6 @@ static void fdcan_dumpramlayout(FAR struct stm32_fdcan_s *priv)
 #endif
 
 /****************************************************************************
- * Name: fdcan_dlc2bytes
- *
- * Description:
- *   In the CAN FD format, the coding of the DLC differs from the standard
- *   CAN format. The DLC codes 0 to 8 have the same coding as in standard
- *   CAN.  But the codes 9 to 15 all imply a data field of 8 bytes with
- *   standard CAN.  In CAN FD mode, the values 9 to 15 are encoded to values
- *   in the range 12 to 64.
- *
- * Input Parameters:
- *   dlc    - the DLC value to convert to a byte count
- *
- * Returned Value:
- *   The number of bytes corresponding to the DLC value.
- *
- ****************************************************************************/
-
-static uint8_t fdcan_dlc2bytes(FAR struct stm32_fdcan_s *priv, uint8_t dlc)
-{
-  if (dlc > 8)
-    {
-#ifdef CONFIG_CAN_FD
-      if (priv->config->mode == FDCAN_CLASSIC_MODE)
-        {
-          return 8;
-        }
-      else
-        {
-          switch (dlc)
-            {
-              case 9:
-                return 12;
-              case 10:
-                return 16;
-              case 11:
-                return 20;
-              case 12:
-                return 24;
-              case 13:
-                return 32;
-              case 14:
-                return 48;
-              default:
-              case 15:
-                return 64;
-            }
-        }
-#else
-      return 8;
-#endif
-    }
-
-  return dlc;
-}
-
-/****************************************************************************
  * Name: fdcan_start_busoff_recovery_sequence
  *
  * Description:
@@ -1673,7 +1620,6 @@ static void fdcan_errint(FAR struct stm32_fdcan_s *priv, bool enable)
 
 static int fdcan_send(FAR struct stm32_fdcan_s *priv)
 {
-  struct can_frame                *frame      = NULL;
   FAR const struct stm32_config_s *config     = NULL;
   FAR volatile uint32_t           *txbuffer   = NULL;
   FAR const uint8_t               *src        = NULL;
@@ -1687,11 +1633,6 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
   DEBUGASSERT(priv);
   config = priv->config;
   DEBUGASSERT(config);
-
-  frame = (struct can_frame *)priv->dev.d_buf;
-
-  ninfo("CAN%" PRIu8 " ID: %" PRIu32 " DLC: %" PRIu8 "\n",
-        config->port, (uint32_t)frame->can_id, frame->can_dlc);
 
   fdcan_dumptxregs(priv, "Before send");
 
@@ -1729,33 +1670,116 @@ static int fdcan_send(FAR struct stm32_fdcan_s *priv)
   txbuffer[0] = 0;
   txbuffer[1] = 0;
 
+  /* CAN 2.0 or CAN FD */
+
+  if (priv->dev.d_len == sizeof(struct can_frame))
+    {
+      struct can_frame *frame = NULL;
+
+      frame = (struct can_frame *)priv->dev.d_buf;
+
+      ninfo("CAN%" PRIu8 " 2.0 ID: %" PRIu32 " DLC: %" PRIu8 "\n",
+            config->port, (uint32_t)frame->can_id, frame->can_dlc);
+
+      /* Extended or standard ID */
+
 #ifdef CONFIG_NET_CAN_EXTID
-  if (frame->can_id & CAN_EFF_FLAG)
-    {
-      DEBUGASSERT(frame->can_id < (1 << 29));
+      if ((frame->can_id & CAN_EFF_FLAG) != 0)
+        {
+          DEBUGASSERT(frame->can_id < (1 << 29));
 
-      txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
-    }
-  else
+          txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
+        }
+      else
 #endif
-    {
-      DEBUGASSERT(frame->can_id < (1 << 11));
+        {
+          DEBUGASSERT(frame->can_id < (1 << 11));
 
-      txbuffer[0] |= BUFFER_R0_STDID(frame->can_id);
+          txbuffer[0] |= BUFFER_R0_STDID(frame->can_id);
+        }
+
+      /* Set DLC */
+
+      txbuffer[1] |= BUFFER_R1_DLC(frame->can_dlc);
+
+      /* Set flags */
+
+      if ((frame->can_id & CAN_RTR_FLAG) != 0)
+        {
+          txbuffer[0] |= BUFFER_R0_RTR;
+        }
+
+      /* Reset CAN FD bits */
+
+      txbuffer[0] &= ~BUFFER_R0_ESI;
+      txbuffer[1] &= ~BUFFER_R1_FDF;
+      txbuffer[1] &= ~BUFFER_R1_BRS;
+
+      /* Followed by the amount of data corresponding to the DLC (T2..) */
+
+      src    = frame->data;
+      nbytes = frame->can_dlc;
     }
-
-  if (frame->can_id & CAN_RTR_FLAG)
+#ifdef CONFIG_NET_CAN_CANFD
+  else /* CAN FD frame */
     {
-      txbuffer[0] |= BUFFER_R0_RTR;
+      struct canfd_frame *frame = (struct canfd_frame *)priv->dev.d_buf;
+
+      frame = (struct canfd_frame *)priv->dev.d_buf;
+
+      ninfo("CAN%" PRIu8 " FD ID: %" PRIu32 " len: %" PRIu8 "\n",
+            config->port, (uint32_t)frame->can_id, frame->len);
+
+      /* Extended or standard ID */
+
+#ifdef CONFIG_NET_CAN_EXTID
+      if ((frame->can_id & CAN_EFF_FLAG) != 0)
+        {
+          DEBUGASSERT(frame->can_id < (1 << 29));
+
+          txbuffer[0] |= BUFFER_R0_EXTID(frame->can_id) | BUFFER_R0_XTD;
+        }
+      else
+#endif
+        {
+          DEBUGASSERT(frame->can_id < (1 << 11));
+
+          txbuffer[0] |= BUFFER_R0_STDID(frame->can_id);
+        }
+
+      /* CANFD frame */
+
+      txbuffer[1] |= BUFFER_R1_FDF;
+
+      /* Set DLC */
+
+      txbuffer[1] |= BUFFER_R1_DLC(len_to_can_dlc[frame->len]);
+
+      /* Set flags */
+
+      if ((frame->can_id & CAN_RTR_FLAG) != 0)
+        {
+          txbuffer[0] |= BUFFER_R0_RTR;
+        }
+
+      if ((frame->flags & CANFD_BRS) != 0)
+        {
+          txbuffer[1] |= BUFFER_R1_BRS;
+        }
+
+      if ((frame->flags & CANFD_ESI) != 0)
+        {
+          txbuffer[0] |= BUFFER_R0_ESI;
+        }
+
+      /* Followed by the amount of data corresponding to the DLC (T2..) */
+
+      src    = frame->data;
+      nbytes = frame->len;
     }
-
-  txbuffer[1] = BUFFER_R1_DLC(frame->can_dlc);
-
-  /* Followed by the amount of data corresponding to the DLC (T2..) */
+#endif
 
   dest   = (FAR uint32_t *)&txbuffer[2];
-  src    = frame->data;
-  nbytes = fdcan_dlc2bytes(priv, frame->can_dlc);
 
   /* Writes must be word length */
 
@@ -2394,63 +2418,142 @@ static void fdcan_receive(FAR struct stm32_fdcan_s *priv,
                           FAR volatile uint32_t *rxbuffer,
                           unsigned long nwords)
 {
-  FAR struct can_frame *frame  = (struct can_frame *)priv->rxdesc;
-
   fdcan_dumprxregs(dev->cd_priv, "Before receive");
 
-  /* Format the CAN header */
+  /* CAN 2.0 or CAN FD */
 
-  /* Word R0 contains the CAN ID */
-
-  /* Extract the RTR bit */
-
-  if ((rxbuffer[0] & BUFFER_R0_RTR) != 0)
+#ifdef CONFIG_NET_CAN_CANFD
+  if ((rxbuffer[1] & BUFFER_R1_FDF) != 0)
     {
-      frame->can_id |= CAN_RTR_FLAG;
-    }
+      struct canfd_frame *frame = (struct canfd_frame *)priv->rxdesc;
+
+      /* Format the CAN FD header */
+
+      /* Extract the RTR bit */
+
+      if ((rxbuffer[0] & BUFFER_R0_RTR) != 0)
+        {
+          frame->can_id |= CAN_RTR_FLAG;
+        }
 
 #ifdef CONFIG_NET_CAN_EXTID
-  if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
-    {
-      /* Save the extended ID of the newly received message */
+      if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
+        {
+          /* Save the extended ID of the newly received message */
 
-      frame->can_id  = (rxbuffer[0] & BUFFER_R0_EXTID_MASK) >>
-                        BUFFER_R0_EXTID_SHIFT;
-      frame->can_id |= CAN_EFF_FLAG;
-    }
-  else
-    {
-      frame->can_id  = (rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
-                        BUFFER_R0_STDID_SHIFT;
-      frame->can_id &= ~CAN_EFF_FLAG;
-    }
+          frame->can_id = ((rxbuffer[0] & BUFFER_R0_EXTID_MASK) >>
+                           BUFFER_R0_EXTID_SHIFT);
+          frame->can_id |= CAN_EFF_FLAG;
+        }
+      else
+        {
+          frame->can_id = ((rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
+                           BUFFER_R0_STDID_SHIFT);
+          frame->can_id &= ~CAN_EFF_FLAG;
+        }
 #else
-  if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
-    {
-      /* Drop any messages with extended IDs */
+      if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
+        {
+          /* Drop any messages with extended IDs */
 
-      return;
-    }
+          return;
+        }
 
-  /* Save the standard ID of the newly received message */
+      /* Save the standard ID of the newly received message */
 
-  frame->can_id = (rxbuffer[0] & BUFFER_R0_STDID_MASK) >> BUFFER_R0_STDID_SHIFT;
+      frame->can_id = ((rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
+                       BUFFER_R0_STDID_SHIFT);
 #endif
 
-  /* Word R1 contains the DLC and timestamp */
+      /* Word R1 contains the DLC and timestamp */
 
-  frame->can_dlc = (rxbuffer[1] & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
+      frame->len = can_dlc_to_len[((rxbuffer[1] & BUFFER_R1_DLC_MASK) >>
+                                   BUFFER_R1_DLC_SHIFT)];
 
-  /* Save the message data */
+      /* Get CANFD flags */
 
-  memcpy(frame->data, (void *)&rxbuffer[2], frame->can_dlc);
+      frame->flags = 0;
 
-  /* Copy the buffer pointer to priv->dev..  Set amount of data
-   * in priv->dev.d_len
-   */
+      if ((rxbuffer[0] & BUFFER_R0_ESI) != 0)
+        {
+          frame->flags |= CANFD_ESI;
+        }
 
-  priv->dev.d_len = sizeof(struct can_frame);
-  priv->dev.d_buf = (uint8_t *)frame;
+      if ((rxbuffer[1] & BUFFER_R1_BRS) != 0)
+        {
+          frame->flags |= CANFD_BRS;
+        }
+
+      /* Save the message data */
+
+      memcpy(frame->data, (void *)&rxbuffer[2], frame->len);
+
+      /* Copy the buffer pointer to priv->dev..  Set amount of data
+       * in priv->dev.d_len
+       */
+
+      priv->dev.d_len = sizeof(struct canfd_frame);
+      priv->dev.d_buf = (uint8_t *)frame;
+    }
+  else
+#endif
+    {
+      FAR struct can_frame *frame  = (struct can_frame *)priv->rxdesc;
+
+      /* Format the CAN header */
+
+      /* Extract the RTR bit */
+
+      if ((rxbuffer[0] & BUFFER_R0_RTR) != 0)
+        {
+          frame->can_id |= CAN_RTR_FLAG;
+        }
+
+#ifdef CONFIG_NET_CAN_EXTID
+      if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
+        {
+          /* Save the extended ID of the newly received message */
+
+          frame->can_id = ((rxbuffer[0] & BUFFER_R0_EXTID_MASK) >>
+                            BUFFER_R0_EXTID_SHIFT);
+          frame->can_id |= CAN_EFF_FLAG;
+        }
+      else
+        {
+          frame->can_id = ((rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
+                           BUFFER_R0_STDID_SHIFT);
+          frame->can_id &= ~CAN_EFF_FLAG;
+        }
+#else
+      if ((rxbuffer[0] & BUFFER_R0_XTD) != 0)
+        {
+          /* Drop any messages with extended IDs */
+
+          return;
+        }
+
+      /* Save the standard ID of the newly received message */
+
+      frame->can_id = ((rxbuffer[0] & BUFFER_R0_STDID_MASK) >>
+                       BUFFER_R0_STDID_SHIFT);
+#endif
+
+      /* Word R1 contains the DLC and timestamp */
+
+      frame->can_dlc = ((rxbuffer[1] & BUFFER_R1_DLC_MASK) >>
+                        BUFFER_R1_DLC_SHIFT);
+
+      /* Save the message data */
+
+      memcpy(frame->data, (void *)&rxbuffer[2], frame->can_dlc);
+
+      /* Copy the buffer pointer to priv->dev..  Set amount of data
+       * in priv->dev.d_len
+       */
+
+      priv->dev.d_len = sizeof(struct can_frame);
+      priv->dev.d_buf = (uint8_t *)frame;
+    }
 
   /* Send to socket interface */
 
@@ -2740,7 +2843,7 @@ static int fdcan_hw_initialize(struct stm32_fdcan_s *priv)
           break;
         }
 
-#ifdef CONFIG_CAN_FD
+#ifdef CONFIG_NET_CAN_CANFD
       case FDCAN_FD_MODE:
         {
           regval |= FDCAN_CCCR_FDOE;

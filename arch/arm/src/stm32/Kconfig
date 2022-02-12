@@ -10918,6 +10918,7 @@ config STM32_FDCAN_CHARDRIVER
 config STM32_FDCAN_SOCKET
 	bool "STM32 FDCAN SocketCAN support"
 	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
 
 endchoice # FDCAN character driver or SocketCAN support
 

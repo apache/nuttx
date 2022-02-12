@@ -2368,7 +2368,7 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
   txbuffer[1] = 0;
 
 #ifdef CONFIG_CAN_EXTID
-  if (msg->cm_hdr.ch_extid)
+  if (msg->cm_hdr.ch_extid == 1)
     {
       DEBUGASSERT(msg->cm_hdr.ch_id <= CAN_MAX_EXTMSGID);
 
@@ -2382,12 +2382,38 @@ static int fdcan_send(FAR struct can_dev_s *dev, FAR struct can_msg_s *msg)
       txbuffer[0] |= BUFFER_R0_STDID(msg->cm_hdr.ch_id);
     }
 
-  if (msg->cm_hdr.ch_rtr)
+  if (msg->cm_hdr.ch_rtr == 1)
     {
       txbuffer[0] |= BUFFER_R0_RTR;
     }
 
   txbuffer[1] |= BUFFER_R1_DLC(msg->cm_hdr.ch_dlc);
+
+#ifdef CONFIG_CAN_FD
+  /* CAN FD Format */
+
+  if (msg->cm_hdr.ch_edl == 1)
+    {
+      txbuffer[1] |= BUFFER_R1_FDF;
+
+      if (msg->cm_hdr.ch_brs == 1)
+        {
+          txbuffer[1] |= BUFFER_R1_BRS;
+        }
+
+      if (msg->cm_hdr.ch_esi == 1)
+        {
+          txbuffer[0] |= BUFFER_R0_ESI;
+        }
+    }
+  else
+#else
+    {
+      txbuffer[0] &= ~BUFFER_R0_ESI;
+      txbuffer[1] &= ~BUFFER_R1_FDF;
+      txbuffer[1] &= ~BUFFER_R1_BRS;
+    }
+#endif
 
   /* Followed by the amount of data corresponding to the DLC (T2..) */
 
@@ -2827,6 +2853,23 @@ static void fdcan_receive(FAR struct can_dev_s *dev,
   /* Word R1 contains the DLC and timestamp */
 
   hdr.ch_dlc = (rxbuffer[1] & BUFFER_R1_DLC_MASK) >> BUFFER_R1_DLC_SHIFT;
+
+#ifdef CONFIG_CAN_FD
+  /* CAN FD format */
+
+  hdr.ch_esi = ((rxbuffer[0] & BUFFER_R0_ESI) != 0);
+  hdr.ch_edl = ((rxbuffer[1] & BUFFER_R1_FDF) != 0);
+  hdr.ch_brs = ((rxbuffer[1] & BUFFER_R1_BRS) != 0);
+#else
+  if ((rxbuffer[1] & BUFFER_R1_FDF) != 0)
+    {
+      /* Drop any FD CAN messages if not supported */
+
+      canerr("ERROR: Received CAN FD message.  Dropped\n");
+
+      return;
+    }
+#endif
 
   /* And provide the CAN message to the upper half logic */
 
