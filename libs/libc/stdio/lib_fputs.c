@@ -51,16 +51,6 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
   int ret;
   char ch;
 
-  /* Make sure that a string was provided. */
-
-#ifdef CONFIG_DEBUG_FEATURES /* Most parameter checking is disabled if DEBUG is off */
-  if (!s)
-    {
-      set_errno(EINVAL);
-      return EOF;
-    }
-#endif
-
   /* Write the string.  Loop until the null terminator is encountered */
 
   for (nput = 0, ch = up_romgetc(s); ch; nput++, s++, ch = up_romgetc(s))
@@ -92,16 +82,6 @@ int fputs(FAR const IPTR char *s, FAR FILE *stream)
 int fputs(FAR const IPTR char *s, FAR FILE *stream)
 {
   int nput;
-
-  /* Make sure that a string was provided. */
-
-#ifdef CONFIG_DEBUG_FEATURES /* Most parameter checking is disabled if DEBUG is off */
-  if (s == NULL || stream == NULL)
-    {
-      set_errno(EINVAL);
-      return EOF;
-    }
-#endif
 
   /* If line buffering is enabled, then we will have to output one character
    * at a time, checking for a newline character each time.

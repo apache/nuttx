@@ -37,15 +37,13 @@
 #undef strrchr /* See mm/README.txt */
 FAR char *strrchr(FAR const char *s, int c)
 {
-  if (s)
+  FAR const char *p = &s[strlen(s)];
+
+  for (; p >= s; p--)
     {
-      const char *p = &s[strlen(s)];
-      for (; p >= s; p--)
+      if (*p == c)
         {
-          if (*p == c)
-            {
-              return (FAR char *)p;
-            }
+          return (FAR char *)p;
         }
     }
 
