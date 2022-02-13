@@ -410,7 +410,7 @@ void motor_aobserver_smo(FAR struct motor_aobserver_f32_s *o,
  *
  * Input Parameters:
  *   so     - (in/out) pointer to the DIV speed observer data
- *   sample - (in) number of mechanical angle samples
+ *   sample - (in) number of angle samples
  *   filter - (in) low-pass filter for final omega
  *   per    - (in) speed observer execution period
  *
@@ -447,13 +447,13 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
  * Name: motor_sobserver_div
  *
  * Description:
- *   Estimate motor mechanical speed based on motor mechanical angle
- *   difference.
+ *   Estimate motor speed based on motor angle difference (electrical
+ *   or mechanical)
  *
  * Input Parameters:
  *   o      - (in/out) pointer to the speed observer data
- *   angle  - (in) mechanical angle normalized to <0.0, 2PI>
- *   dir    - (in) mechanical rotation direction. Valid values:
+ *   angle  - (in) angle normalized to <0.0, 2PI>
+ *   dir    - (in) rotation direction. Valid values:
  *                 DIR_CW (1.0f) or DIR_CCW(-1.0f)
  *
  ****************************************************************************/
@@ -731,13 +731,13 @@ void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o,
  * Name: motor_sobserver_speed_get
  *
  * Description:
- *   Get the estmiated motor mechanical speed from the observer
+ *   Get the estmiated motor speed from the observer
  *
  * Input Parameters:
  *   o      - (in/out) pointer to the speed observer data
  *
  * Returned Value:
- *   Return estimated motor mechanical speed from observer
+ *   Return estimated motor speed from observer
  *
  ****************************************************************************/
 
@@ -758,7 +758,7 @@ float motor_sobserver_speed_get(FAR struct motor_sobserver_f32_s *o)
  *   o      - (in/out) pointer to the angle observer data
  *
  * Returned Value:
- *   Return estimated motor mechanical angle from observer
+ *   Return estimated motor electrical angle from observer
  *
  ****************************************************************************/
 
