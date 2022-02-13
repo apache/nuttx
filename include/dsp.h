@@ -551,8 +551,7 @@ void motor_aobserver_smo(FAR struct motor_aobserver_f32_s *o,
 
 void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
                               uint8_t samples, float filer, float per);
-void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o,
-                         float angle, float dir);
+void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o, float angle);
 
 void motor_aobserver_nfo_init(FAR struct motor_aobserver_nfo_f32_s *nfo);
 void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
@@ -561,8 +560,7 @@ void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
 
 void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
                               float pll_kp, float pll_ki);
-void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o,
-                         float angle, float dir);
+void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o, float angle);
 
 /* Motor openloop control */
 

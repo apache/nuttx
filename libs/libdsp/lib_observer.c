@@ -458,12 +458,10 @@ void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
  *
  ****************************************************************************/
 
-void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o,
-                         float angle, float dir)
+void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o, float angle)
 {
   LIBDSP_DEBUGASSERT(o != NULL);
   LIBDSP_DEBUGASSERT(angle >= 0.0f && angle <= 2*M_PI_F);
-  LIBDSP_DEBUGASSERT(dir == DIR_CW || dir == DIR_CCW);
 
   FAR struct motor_sobserver_div_f32_s *so =
     (FAR struct motor_sobserver_div_f32_s *)o->so;
@@ -471,28 +469,17 @@ void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o,
 
   LIBDSP_DEBUGASSERT(so != NULL);
 
+  /* Normalize angle to range <-PI, PI> */
+
+  angle_norm_2pi(&angle, -M_PI_F, M_PI_F);
+
   /* Get angle diff */
 
   so->angle_diff = angle - so->angle_prev;
 
-  /* Correct angle if we crossed angle boundary
-   * REVISIT:
-   */
+  /* Normalize angle to range <-PI, PI> */
 
-  if ((dir == DIR_CW && so->angle_diff < -ANGLE_DIFF_THR) ||
-      (dir == DIR_CCW && so->angle_diff > ANGLE_DIFF_THR))
-    {
-      /* Correction sign depends on rotation direction */
-
-      so->angle_diff += dir * 2 * M_PI_F;
-    }
-
-  /* Get absolute value */
-
-  if (so->angle_diff < 0.0f)
-    {
-      so->angle_diff = -so->angle_diff;
-    }
+  angle_norm_2pi(&so->angle_diff, -M_PI_F, M_PI_F);
 
   /* Accumulate angle only if sample is valid */
 
@@ -525,7 +512,7 @@ void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o,
        *
        *          where:
        *             omega0 - minimum angular speed
-       *             T      - speed estimation period (samples*one_by_dt)
+       *             T      - speed estimation period (samples*per)
        */
 
       LP_FILTER(o->speed, omega, so->filter);
@@ -690,13 +677,10 @@ void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
  * Input Parameters:
  *   o      - (in/out) pointer to the speed observer data
  *   angle  - (in) electrical angle normalized to <0.0, 2PI>
- *   dir    - (in) electrical rotation direction. Valid values:
- *                 DIR_CW (1.0f) or DIR_CCW(-1.0f)
  *
  ****************************************************************************/
 
-void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o,
-                         float angle, float dir)
+void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o, float angle)
 {
   FAR struct motor_sobserver_pll_f32_s *so =
       (FAR struct motor_sobserver_pll_f32_s *)o->so;
