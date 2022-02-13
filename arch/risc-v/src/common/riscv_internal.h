@@ -115,6 +115,10 @@ EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 #define CURRENT_REGS (g_current_regs[up_cpu_index()])
 EXTERN uintptr_t g_idle_topstack;
 
+/* Address of per-cpu idle stack base */
+
+EXTERN uint8_t *g_cpu_basestack[CONFIG_SMP_NCPUS];
+
 /* Address of the saved user stack pointer */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
