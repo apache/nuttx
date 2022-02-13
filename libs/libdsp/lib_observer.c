@@ -511,9 +511,7 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
  *   Initialize motor nolinear fluxlink observer.
  *
  * Input Parameters:
- *   smo     - pointer to the nolinear fluxlink observer private data
- *   kslide  - SMO gain
- *   err_max - linear region upper limit
+ *   nfo     - pointer to the nolinear fluxlink observer private data
  *
  * Returned Value:
  *   None
