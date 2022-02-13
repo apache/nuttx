@@ -293,12 +293,13 @@ struct motor_sobserver_div_f32_s
 };
 
 /* Speed observer PLL method data */
-#if 0
+
 struct motor_sobserver_pll_f32_s
 {
-  /* TODO */
+  float pll_phase;
+  float pll_kp;
+  float pll_ki;
 };
-#endif
 
 /* Motor Sliding Mode Observer private data */
 
@@ -318,6 +319,14 @@ struct motor_observer_smo_f32_s
   ab_frame_f32_t v_err; /* v_err = v_ab - emf */
   ab_frame_f32_t i_err; /* i_err = i_est - i_dq */
   ab_frame_f32_t sign;  /* Bang-bang controller sign */
+};
+
+/* Motor Nonlinear FluxLink Observer private data */
+
+struct motor_observer_nfo_f32_s
+{
+  float x1;
+  float x2;
 };
 
 /* FOC initialize data */
@@ -367,6 +376,7 @@ struct foc_data_f32_s
 struct motor_phy_params_f32_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
+  float   flux_link;           /* Flux linkage */
   float   res;                 /* Phase-to-neutral resistance */
   float   ind;                 /* Average phase-to-neutral inductance */
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
@@ -533,6 +543,16 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
 void motor_sobserver_div_init(FAR struct motor_sobserver_div_f32_s *so,
                               uint8_t samples, float filer, float per);
 void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
+                         float angle, float dir);
+
+void motor_observer_nfo_init(FAR struct motor_observer_nfo_f32_s *nfo);
+void motor_observer_nfo(FAR struct motor_observer_f32_s *o,
+                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                        FAR struct motor_phy_params_f32_s *phy, float gain);
+
+void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
+                              float pll_kp, float pll_ki);
+void motor_sobserver_pll(FAR struct motor_observer_f32_s *o,
                          float angle, float dir);
 
 /* Motor openloop control */

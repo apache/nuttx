@@ -31,6 +31,15 @@
 
 #define ANGLE_DIFF_THR (M_PI_F)
 
+/* nan check for floats */
+
+#define IS_NAN(x)   ((x) != (x))
+#define NAN_ZERO(x) (x = IS_NAN(x) ? 0.0 : x)
+
+/* Squared */
+
+#define SQ(x)       ((x) * (x))
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -258,7 +267,7 @@ void motor_observer_smo(FAR struct motor_observer_f32_s *o,
     {
       filter = 0.99f;
     }
-  else if (filter <= 0.0f)
+  else if (filter < 0.005f)
     {
       filter = 0.005f;
     }
@@ -493,6 +502,190 @@ void motor_sobserver_div(FAR struct motor_observer_f32_s *o,
   /* Store current angle as previous angle */
 
   so->angle_prev = angle;
+}
+
+/****************************************************************************
+ * Name: motor_observer_nfo_init
+ *
+ * Description:
+ *   Initialize motor nolinear fluxlink observer.
+ *
+ * Input Parameters:
+ *   smo     - pointer to the nolinear fluxlink observer private data
+ *   kslide  - SMO gain
+ *   err_max - linear region upper limit
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_observer_nfo_init(FAR struct motor_observer_nfo_f32_s *nfo)
+{
+  LIBDSP_DEBUGASSERT(smo != NULL);
+
+  /* Reset structure */
+
+  memset(nfo, 0, sizeof(struct motor_observer_nfo_f32_s));
+}
+
+/****************************************************************************
+ * Name: motor_observer_nfo
+ *
+ * Description:
+ *  nolinear fluxlink observer.
+ *  REFERENCE: http://cas.ensmp.fr/~praly/Telechargement/Journaux/
+ *  2010-IEEE_TPEL-Lee-Hong-Nam-Ortega-Praly-Astolfi.pdf
+ *
+ * Input Parameters:
+ *   o      - (in/out) pointer to the common observer data
+ *   i_ab   - (in) inverter alpha-beta current
+ *   v_ab   - (in) inverter alpha-beta voltage
+ *   phy    - (in) pointer to the motor physical parameters
+ *   gain   - (in) dynamic observer gain
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_observer_nfo(FAR struct motor_observer_f32_s *o,
+                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                        FAR struct motor_phy_params_f32_s *phy, float gain)
+{
+  FAR struct motor_observer_nfo_f32_s *nfo =
+                               (FAR struct motor_observer_nfo_f32_s *)o->ao;
+  float angle;
+  float err;
+  float x1_dot;
+  float x2_dot;
+
+  float l_ia = (3.0 / 2.0) * phy->ind * i_ab->a;
+  float l_ib = (3.0 / 2.0) * phy->ind * i_ab->b;
+  float r_ia = (3.0 / 2.0) * phy->res * i_ab->a;
+  float r_ib = (3.0 / 2.0) * phy->res * i_ab->b;
+
+  err = SQ(phy->flux_link) - (SQ(nfo->x1 - l_ia) + SQ(nfo->x2 - l_ib));
+
+  /* Forcing this term to stay negative helps convergence according to
+   * http://cas.ensmp.fr/Publications/Publications/Papers/
+   * ObserverPermanentMagnet.pdf and
+   * https://arxiv.org/pdf/1905.00833.pdf
+   */
+
+  if (err > 0.0)
+    {
+      err = 0.0;
+    }
+
+  x1_dot = -r_ia + v_ab->a + gain * (nfo->x1 - l_ia) * err;
+  x2_dot = -r_ib + v_ab->b + gain * (nfo->x2 - l_ib) * err;
+  nfo->x1 += x1_dot * o->per;
+  nfo->x2 += x2_dot * o->per;
+
+  NAN_ZERO(nfo->x1);
+  NAN_ZERO(nfo->x2);
+
+  /* Prevent the magnitude from getting too low
+   * as that makes the angle very unstable.
+   */
+
+  if (vector2d_mag(nfo->x1, nfo->x2) < (phy->flux_link * 0.5))
+    {
+      nfo->x1 *= 1.1;
+      nfo->x2 *= 1.1;
+    }
+
+  angle = fast_atan2(nfo->x2 - l_ib, nfo->x1 - l_ia);
+
+  /* Normalize angle to range <0, 2PI> */
+
+  angle_norm_2pi(&angle, 0.0f, 2.0f * M_PI_F);
+
+  /* Store estimated angle in observer data */
+
+  o->angle = angle;
+}
+
+/****************************************************************************
+ * Name: motor_sobserver_pll_init
+ *
+ * Description:
+ *   Initialize PLL speed observer
+ *
+ * Input Parameters:
+ *   so     - (in/out) pointer to the PLL speed observer data
+ *   pll_kp - (in) pll proportional gain
+ *   pll_ki - (in) pll integral gain
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
+                              float pll_kp, float pll_ki)
+{
+  LIBDSP_DEBUGASSERT(so != NULL);
+  LIBDSP_DEBUGASSERT(pll_kp > 0);
+  LIBDSP_DEBUGASSERT(pll_ki > 0.0f);
+
+  /* Reset observer data */
+
+  memset(so, 0, sizeof(struct motor_sobserver_pll_f32_s));
+
+  /* Store kp for PLL observer */
+
+  so->pll_kp = pll_kp;
+
+  /* Store ki for PLL observer speed */
+
+  so->pll_ki  = pll_ki;
+}
+
+/****************************************************************************
+ * Name: motor_sobserver_pll
+ *
+ * Description:
+ *   Estimate motor electrical speed based on motor electrical angle
+ *   difference.
+ *
+ * Input Parameters:
+ *   o      - (in/out) pointer to the common observer data
+ *   angle  - (in) electrical angle normalized to <0.0, 2PI>
+ *   dir    - (in) electrical rotation direction. Valid values:
+ *                 DIR_CW (1.0f) or DIR_CCW(-1.0f)
+ *
+ ****************************************************************************/
+
+void motor_sobserver_pll(FAR struct motor_observer_f32_s *o,
+                         float angle, float dir)
+{
+  FAR struct motor_sobserver_pll_f32_s *so =
+      (FAR struct motor_sobserver_pll_f32_s *)o->so;
+  float delta_theta = 0.0;
+
+  NAN_ZERO(so->pll_phase);
+
+  /* Normalize angle to range <-PI, PI> */
+
+  angle_norm_2pi(&angle, -M_PI_F, -M_PI_F);
+
+  delta_theta = angle - so->pll_phase;
+
+  /* Normalize angle to range <-PI, PI> */
+
+  angle_norm_2pi(&delta_theta, -M_PI_F, -M_PI_F);
+
+  NAN_ZERO(o->speed);
+
+  so->pll_phase += (o->speed + so->pll_kp * delta_theta) * o->per;
+
+  /* Normalize angle to range <-PI, PI> */
+
+  angle_norm_2pi(&so->pll_phase, -M_PI_F, -M_PI_F);
+
+  o->speed += so->pll_ki * delta_theta * o->per;
 }
 
 /****************************************************************************
