@@ -131,7 +131,7 @@ void binfmt_freeargv(FAR char * const *argv);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_BINFS
+#ifdef CONFIG_BUILTIN
 int builtin_initialize(void);
 #endif
 
@@ -146,7 +146,7 @@ int builtin_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_FS_BINFS
+#ifdef CONFIG_BUILTIN
 void builtin_uninitialize(void);
 #endif
 

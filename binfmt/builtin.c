@@ -24,21 +24,15 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <sys/ioctl.h>
-
 #include <stdint.h>
 #include <string.h>
-#include <fcntl.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/fs/fs.h>
-#include <nuttx/fs/ioctl.h>
 #include <nuttx/binfmt/binfmt.h>
 #include <nuttx/lib/builtin.h>
 
-#ifdef CONFIG_FS_BINFS
+#ifdef CONFIG_BUILTIN
 
 /****************************************************************************
  * Private Function Prototypes
@@ -79,20 +73,9 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
 {
   FAR const struct builtin_s *builtin;
   FAR char *name;
-  struct file file;
   int index;
-  int ret;
 
   binfo("Loading file: %s\n", filename);
-
-  /* Open the binary file for reading (only) */
-
-  ret = file_open(&file, filename, O_RDONLY);
-  if (ret < 0)
-    {
-      berr("ERROR: Failed to open binary %s: %d\n", filename, ret);
-      return ret;
-    }
 
   name = strrchr(filename, '/');
   if (name != NULL)
@@ -106,7 +89,6 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   if (index < 0)
     {
       berr("ERROR: %s is not a builtin application\n", filename);
-      file_close(&file);
       return index;
     }
 
@@ -118,7 +100,6 @@ static int builtin_loadbinary(FAR struct binary_s *binp,
   binp->entrypt   = builtin->main;
   binp->stacksize = builtin->stacksize;
   binp->priority  = builtin->priority;
-  file_close(&file);
   return OK;
 }
 
@@ -173,4 +154,4 @@ void builtin_uninitialize(void)
   unregister_binfmt(&g_builtin_binfmt);
 }
 
-#endif /* CONFIG_FS_BINFS */
+#endif /* CONFIG_BUILTIN */
