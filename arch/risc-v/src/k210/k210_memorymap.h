@@ -25,6 +25,8 @@
  * Included Files
  ****************************************************************************/
 
+#include "riscv_internal.h"
+
 #include "hardware/k210_memorymap.h"
 #include "hardware/k210_uart.h"
 #include "hardware/k210_clint.h"
@@ -38,10 +40,9 @@
 /* Idle thread stack starts from _ebss */
 
 #ifndef __ASSEMBLY__
-extern uintptr_t *_default_stack_limit;
-#define K210_IDLESTACK_BASE  (uintptr_t)&_default_stack_limit
+#define K210_IDLESTACK_BASE  (uintptr_t)&_ebss
 #else
-#define K210_IDLESTACK_BASE  _default_stack_limit
+#define K210_IDLESTACK_BASE  _ebss
 #endif
 
 #define K210_IDLESTACK0_BASE (K210_IDLESTACK_BASE)
