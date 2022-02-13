@@ -410,7 +410,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
   struct can_recvfrom_s *pstate = (struct can_recvfrom_s *)pvpriv;
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_CAN_CANFD) || \
+#if (defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)) || \
   defined(CONFIG_NET_TIMESTAMP)
   struct can_conn_s *conn = (struct can_conn_s *)pstate->pr_sock->s_conn;
 #endif
