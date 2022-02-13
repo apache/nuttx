@@ -171,8 +171,7 @@ Symbol Handling
    
    :configuration: This command is always available when
      CONFIG_BUILTIN is enabled, but does nothing unless
-     CONFIG_BUILD_PROTECTED and CONFIG_FS_BINFS are also
-     selected.
+     CONFIG_BUILD_PROTECTED is also selected.
      
 USB
 ---
