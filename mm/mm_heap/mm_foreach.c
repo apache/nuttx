@@ -68,7 +68,10 @@ void mm_foreach(FAR struct mm_heap_s *heap, mmchunk_handler_t handler,
        * Retake the semaphore for each region to reduce latencies
        */
 
-      DEBUGVERIFY(mm_takesemaphore(heap));
+      if (!mm_takesemaphore(heap))
+        {
+          return;
+        }
 
       for (node = heap->mm_heapstart[region];
            node < heap->mm_heapend[region];
