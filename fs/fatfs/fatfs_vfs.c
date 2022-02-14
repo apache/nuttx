@@ -1264,7 +1264,7 @@ static int fatfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
   ret = fatfs_convert_result(f_stat(strcat(path, relpath), &fno));
   if (ret < 0)
     {
-      return ret;
+      goto errout_with_sem;
     }
 
   if (fno.fattrib & AM_DIR)
@@ -1276,8 +1276,8 @@ static int fatfs_rmdir(FAR struct inode *mountpt, FAR const char *relpath)
       ret = -ENOTDIR;
     }
 
+errout_with_sem:
   fatfs_semgive(fs);
-
   return ret;
 }
 
