@@ -314,6 +314,32 @@ extern "C"
 void pm_initialize(void);
 
 /****************************************************************************
+ * Name: pm_greedy_governor_initialize
+ *
+ * Description:
+ *   Return the greedy governor instance.
+ *
+ * Returned Value:
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
+ *
+ ****************************************************************************/
+
+FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
+
+/****************************************************************************
+ * Name: pm_activity_governor_initialize
+ *
+ * Description:
+ *   Return the activity governor instance.
+ *
+ * Returned Value:
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
+ *
+ ****************************************************************************/
+
+FAR const struct pm_governor_s *pm_activity_governor_initialize(void);
+
+/****************************************************************************
  * Name: pm_auto_update
  *
  * Description:

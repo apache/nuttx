@@ -192,7 +192,7 @@ struct pm_activity_governor_s g_pm_activity_governor =
 #endif
 };
 
-struct pm_governor_s g_pmgovernor =
+static const struct pm_governor_s g_pmgovernor =
 {
   .initialize   = governor_initialize,
   .checkstate   = governor_checkstate,
@@ -596,7 +596,7 @@ static void governor_timer(int domain)
  * Public Functions
  ****************************************************************************/
 
-FAR struct pm_governor_s *pm_activity_governor_initialize(void)
+FAR const struct pm_governor_s *pm_activity_governor_initialize(void)
 {
   return &g_pmgovernor;
 }
