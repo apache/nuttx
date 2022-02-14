@@ -83,7 +83,7 @@ static uint8_t aligned_data(16) cpu7_idlestack[CONFIG_IDLETHREAD_STACKSIZE];
  * Public Data
  ****************************************************************************/
 
-uint8_t *g_cpu_basestack[CONFIG_SMP_NCPUS] =
+const uint8_t * const g_cpu_basestack[CONFIG_SMP_NCPUS] =
 {
     (uint8_t *)&_ebss,
 #if CONFIG_SMP_NCPUS > 1
