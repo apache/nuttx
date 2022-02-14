@@ -723,7 +723,7 @@ static int nvt_clear_fw_status(FAR struct nt38350_dev_s *priv)
 
   if (i >= retry)
     {
-      ierr("ERROR: Failed to clear FW status\n");
+      ierr("failed, i=%d, buf[1]=0x%02X\n", i, buf[1]);
       return -1;
     }
   else
@@ -767,7 +767,7 @@ static int nvt_check_fw_status(FAR struct nt38350_dev_s *priv)
 
   if (i >= retry)
     {
-      ierr("ERROR: Failed to clear FW status\n");
+      ierr("failed, i=%d, buf[1]=0x%02X\n", i, buf[1]);
       return -1;
     }
   else
