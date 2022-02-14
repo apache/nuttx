@@ -45,8 +45,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCPUFLAGS += -mno-relax
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fno-exceptions -fcheck-new -std=c++17 -D__NuttX__ -pipe -nostdinc++
+ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections -fno-exceptions -fcheck-new -std=c++17 -D__NuttX__ -pipe -nostdinc++
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -66,8 +66,8 @@ AFLAGS += $(CFLAGS) -D__ASSEMBLY__ $(ASARCHCPUFLAGS)
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -fno-common
-CXXELFFLAGS = $(CXXFLAGS) -fno-common
+CELFFLAGS = $(CFLAGS)
+CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -melf32lriscv -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
