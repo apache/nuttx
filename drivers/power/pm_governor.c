@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/pm_initialize.c
+ * drivers/power/pm_governor.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,70 +24,69 @@
 
 #include <nuttx/config.h>
 
+#include <sys/types.h>
+#include <errno.h>
+#include <debug.h>
+
 #include <nuttx/power/pm.h>
 
 #include "pm.h"
 
-#ifdef CONFIG_PM
-
 /****************************************************************************
- * Public Data
+ * Private Types
  ****************************************************************************/
 
-/* All PM global data: */
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
 
-/* Initialize the registry and the PM global data structures.  The PM
- * global data structure resides in .data which is zeroed at boot time.  So
- * it is only required to initialize non-zero elements of the PM global
- * data structure here.
- */
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
-struct pm_global_s g_pmglobals =
-{
-  .regsem = SEM_INITIALIZER(1)
-};
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_initialize
+ * Name: pm_set_governor
  *
  * Description:
- *   This function is called by MCU-specific one-time at power on reset in
- *   order to initialize the power management capabilities.  This function
- *   must be called *very* early in the initialization sequence *before* any
- *   other device drivers are initialize (since they may attempt to register
- *   with the power management subsystem).
+ *   This function set the domain with assigned governor
  *
  * Input Parameters:
- *   None.
+ *   domain        - The PM domain to Set
+ *   gov           - The governor to use
  *
  * Returned Value:
- *    None.
+ *  On success - OK
+ *  On error   - -EINVAL
  *
  ****************************************************************************/
 
-void pm_initialize(void)
+int pm_set_governor(int domain, FAR const struct pm_governor_s *gov)
 {
-  FAR const struct pm_governor_s *gov;
-  int i;
-
-  /* Select governor */
-
-  for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
+  if (gov == NULL)
     {
-#if defined(CONFIG_PM_GOVERNOR_GREEDY)
-      gov = pm_greedy_governor_initialize();
-#elif defined(CONFIG_PM_GOVERNOR_ACTIVITY)
-      gov = pm_activity_governor_initialize();
-#else
-      static struct pm_governor_s null;
-      gov = &null;
-#endif
-      pm_set_governor(i, gov);
+      return -EINVAL;
     }
-}
 
-#endif /* CONFIG_PM */
+  if (g_pmglobals.domain[domain].governor &&
+      g_pmglobals.domain[domain].governor->deinitialize)
+    {
+      g_pmglobals.domain[domain].governor->deinitialize();
+    }
+
+  g_pmglobals.domain[domain].governor = gov;
+
+  if (g_pmglobals.domain[domain].governor->initialize)
+    {
+      g_pmglobals.domain[domain].governor->initialize();
+    }
+
+  return 0;
+}

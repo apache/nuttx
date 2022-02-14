@@ -72,9 +72,9 @@
 enum pm_state_e pm_checkstate(int domain)
 {
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS &&
-              g_pmglobals.governor->checkstate);
+              g_pmglobals.domain[domain].governor->checkstate);
 
-  return g_pmglobals.governor->checkstate(domain);
+  return g_pmglobals.domain[domain].governor->checkstate(domain);
 }
 
 #endif /* CONFIG_PM */
