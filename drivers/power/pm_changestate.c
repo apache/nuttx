@@ -242,9 +242,9 @@ int pm_changestate(int domain, enum pm_state_e newstate)
 
   /* Notify governor of (possible) state change */
 
-  if (g_pmglobals.governor->statechanged)
+  if (g_pmglobals.domain[domain].governor->statechanged)
     {
-      g_pmglobals.governor->statechanged(domain, newstate);
+      g_pmglobals.domain[domain].governor->statechanged(domain, newstate);
     }
 
   /* Restore the interrupt state */

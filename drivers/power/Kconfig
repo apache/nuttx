@@ -24,13 +24,6 @@ config PM_NDOMAINS
 		Network domain, shutting down the network when it is not be used,
 		from the UI domain, shutting down the UI when it is not in use.
 
-choice
-	prompt "PM system governor"
-	default PM_GOVERNOR_ACTIVITY
-	---help---
-		A PM governor applies a policy to control the change in power
-		states.
-
 config PM_GOVERNOR_GREEDY
 	bool "Greedy governor"
 	---help---
@@ -45,14 +38,6 @@ config PM_GOVERNOR_ACTIVITY
 		in units which are accumulated during a certain time slice interval.
 		The governor will then switch between power states given a set of
 		activity thresholds for each state.
-
-config PM_GOVERNOR_CUSTOM
-	bool "Custom governor"
-	---help---
-		By selecting this option, a custom governor can be supplied from
-		board-logic.
-
-endchoice
 
 menu "Governor options"
 
