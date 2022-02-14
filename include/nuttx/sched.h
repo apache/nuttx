@@ -781,11 +781,13 @@ begin_packed_struct struct tcbinfo_s
    * value 0: This regsiter was not priovided by NuttX
    */
 
+  begin_packed_struct
   union
   {
     uint8_t             u[8];
     FAR const uint16_t *p;
-  } reg_off;
+  }
+  end_packed_struct reg_off;
 } end_packed_struct;
 #endif
 

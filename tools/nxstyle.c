@@ -324,6 +324,24 @@ static const char *g_white_list[] =
   "__asan_loadN_noabort",
   "__asan_storeN_noabort",
 
+  /* Ref:
+   * tools/jlink-nuttx.c
+   */
+
+  "RTOS_Init",
+  "RTOS_GetVersion",
+  "RTOS_GetSymbols",
+  "RTOS_GetNumThreads",
+  "RTOS_GetCurrentThreadId",
+  "RTOS_GetThreadId",
+  "RTOS_GetThreadDisplay",
+  "RTOS_GetThreadReg",
+  "RTOS_GetThreadRegList",
+  "RTOS_GetThreadRegList",
+  "RTOS_SetThreadReg",
+  "RTOS_SetThreadRegList",
+  "RTOS_UpdateThreads",
+
   NULL
 };
 

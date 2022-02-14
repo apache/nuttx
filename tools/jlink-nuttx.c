@@ -59,6 +59,25 @@
 #define PERROR                    g_plugin_priv.jops->erroroutf
 #define PLOG                      g_plugin_priv.jops->logoutf
 
+/* GCC specific definitions */
+
+#ifdef __GNUC__
+
+/* The packed attribute informs GCC that the structure elements are packed,
+ * ignoring other alignment rules.
+ */
+
+#  define begin_packed_struct
+#  define end_packed_struct __attribute__ ((packed))
+
+#else
+
+#  warning "Unsupported compiler"
+#  define begin_packed_struct
+#  define end_packed_struct
+
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -72,20 +91,22 @@ enum symbol_e
   NSYMBOLS
 };
 
-__attribute__ ((packed)) struct tcbinfo_s
+begin_packed_struct struct tcbinfo_s
 {
   uint16_t pid_off;
   uint16_t state_off;
   uint16_t pri_off;
   uint16_t name_off;
   uint16_t reg_num;
+  begin_packed_struct
   union
   {
     uint8_t  u[8];
     uint16_t *p;
-  } reg_off;
+  }
+  end_packed_struct reg_off;
   uint16_t reg_offs[0];
-};
+} end_packed_struct;
 
 struct symbols_s
 {
