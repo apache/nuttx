@@ -24,7 +24,6 @@ include $(TOPDIR)/tools/mpfs/Config.mk
 include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
 LDMEMORY =
-ARCHSCRIPT =
 
 ifeq ($(CONFIG_MPFS_BOOTLOADER),y)
   ifeq ($(CONFIG_MPFS_OPENSBI),y)
@@ -39,17 +38,10 @@ else
   LDSCRIPT = ld.script
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ifneq ($(LDMEMORY),)
-    ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)}"
-  endif
-  ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-else
-  ifneq ($(LDMEMORY),)
-    ARCHSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)
-  endif
-  ARCHSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
+ifneq ($(LDMEMORY),)
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDMEMORY)
 endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g

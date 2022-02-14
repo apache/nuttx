@@ -21,11 +21,7 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)linker_script.ld}"
-else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)linker_script.ld
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)linker_script.ld
 
 CROSSDEV = rx-elf-
 CC = $(CROSSDEV)gcc
