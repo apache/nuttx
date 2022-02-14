@@ -104,9 +104,23 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   else if (sched_idletask())
     {
-      /* Try to take the semaphore */
+      return false;
+    }
+  else if (up_interrupt_context())
+    {
+#ifdef CONFIG_SMP
+      return false;
+#else
+      int val;
 
-      return _SEM_TRYWAIT(&heap->mm_semaphore) >= 0;
+      /* Check the semaphore value, if held by someone, then return false.
+       * Else, we can take it, return true.
+       */
+
+      _SEM_GETVALUE(&heap->mm_semaphore, &val);
+
+      return val > 0;
+#endif
     }
 #endif
   else
@@ -145,5 +159,12 @@ bool mm_takesemaphore(FAR struct mm_heap_s *heap)
 
 void mm_givesemaphore(FAR struct mm_heap_s *heap)
 {
+#if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
+  if (up_interrupt_context())
+    {
+      return;
+    }
+#endif
+
   DEBUGVERIFY(_SEM_POST(&heap->mm_semaphore));
 }
