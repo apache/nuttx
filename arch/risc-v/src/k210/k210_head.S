@@ -53,6 +53,13 @@ __start:
   j    2f
 1:
 
+  /* In case of single CPU config, stop here */
+
+#if !defined(CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
+  csrw mie, zero
+  wfi
+#endif
+
   /* To get g_cpu_basestack[mhartid], must get g_cpu_basestack first */
 
   la   t0, g_cpu_basestack
@@ -71,11 +78,6 @@ __start:
   li   t0, CONFIG_IDLETHREAD_STACKSIZE
   add  sp, sp, t0
 
-  /* In case of single CPU config, stop here */
-
-#if !(defined CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
-  wfi
-#endif
 2:
 
   /* Disable all interrupts (i.e. timer, external) in mie */
