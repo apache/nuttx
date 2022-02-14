@@ -18,11 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT)
-endif
+ARCHSCRIPT = $(LDSCRIPT)
 
 include ${TOPDIR}/arch/arm/src/armv8-m/Toolchain.defs
 

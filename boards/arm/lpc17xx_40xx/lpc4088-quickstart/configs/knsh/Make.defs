@@ -22,13 +22,8 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld}"
-else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld
-  ARCHSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)kernel-space.ld
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g

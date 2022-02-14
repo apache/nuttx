@@ -28,11 +28,7 @@ else ifeq ($(CONFIG_BOOT_RUNFROMISRAM),y)
   LDSCRIPT = flash-ocram.ld
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 CC = $(CROSSDEV)gcc
 CXX = $(CROSSDEV)g++

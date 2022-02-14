@@ -64,7 +64,7 @@ OBJS = $(AOBJS) $(COBJS)
 
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT)))
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -114,7 +114,7 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
-nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT) $(ARCHSCRIPT)
 	@echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \

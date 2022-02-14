@@ -95,7 +95,7 @@ UOBJS = $(UAOBJS) $(UCOBJS)
 KBIN = libkarch$(LIBEXT)
 BIN  = libarch$(LIBEXT)
 
-LDFLAGS += $(ARCHSCRIPT) $(EXTRALINKCMDS)
+LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT))) $(EXTRALINKCMDS)
 
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
@@ -162,7 +162,7 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
-nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(ARCHSCRIPT)
 	$(Q) echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \

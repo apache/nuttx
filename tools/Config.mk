@@ -548,3 +548,12 @@ else
   ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
 endif
 ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+
+# Convert filepaths to their proper system format (i.e. Windows/Unix)
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  CONVERT_PATH = $(foreach FILE,$1,${shell cygpath -w $(FILE)})
+else
+  CONVERT_PATH = $1
+endif

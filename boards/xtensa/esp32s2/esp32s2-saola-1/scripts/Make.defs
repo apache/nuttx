@@ -23,28 +23,20 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32s2/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
 
-LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_out.ld
-LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
-LDSCRIPT4 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_out.ld
 
 ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
-  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
 else
   ifeq ($(CONFIG_ESP32S2_RUN_IRAM),y)
-    LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_iram.ld
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_iram.ld
   else
-    LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_flash.ld
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_flash.ld
   endif
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT4)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3) -T$(LDSCRIPT4)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g

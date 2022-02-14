@@ -62,7 +62,7 @@ OBJS = $(AOBJS) $(COBJS)
 
 LDSTARTGROUP ?= --start-group
 LDENDGROUP ?= --end-group
-LDFLAGS += $(ARCHSCRIPT)
+LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT)))
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
@@ -114,7 +114,7 @@ libarch$(LIBEXT): $(OBJS)
 board/libboard$(LIBEXT):
 	$(Q) $(MAKE) -C board libboard$(LIBEXT) EXTRAFLAGS="$(EXTRAFLAGS)"
 
-nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT)
+nuttx$(EXEEXT): $(HEAD_OBJ) board/libboard$(LIBEXT) $(ARCHSCRIPT)
 	$(Q) echo "LD: nuttx"
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \

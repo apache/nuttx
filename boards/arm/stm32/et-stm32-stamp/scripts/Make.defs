@@ -24,11 +24,7 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
 LDSCRIPT = ld.script
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing

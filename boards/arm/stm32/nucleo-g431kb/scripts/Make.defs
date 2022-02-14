@@ -28,13 +28,7 @@ else
   LDSCRIPT = ld.script
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  # Windows-native toolchains
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-else
-  # Linux/Cygwin-native toolchain
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
