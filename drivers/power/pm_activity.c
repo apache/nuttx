@@ -71,9 +71,9 @@ void pm_activity(int domain, int priority)
 {
   DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
 
-  if (g_pmglobals.governor->activity)
+  if (g_pmglobals.domain[domain].governor->activity)
     {
-      g_pmglobals.governor->activity(domain, priority);
+      g_pmglobals.domain[domain].governor->activity(domain, priority);
     }
 
   pm_auto_updatestate(domain);
