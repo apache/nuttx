@@ -283,11 +283,14 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 
+# Note: Use objcopy for Linux because for some reasons visibility=hidden
+# stuff doesn't work there as we expect.
+# Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
+# necessary for macOS.
 nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
-ifeq ("$(shell $(CC) --version | grep clang)","")
-	# none clang based native compilers need opjcopy to build simulation
+ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
