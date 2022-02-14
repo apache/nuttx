@@ -46,7 +46,7 @@ else
 # Only update .version if the contents of version.tmp actually changes
 # Note: this is executed before any rule is run
 
-$(shell tools/version.sh .version.tmp)
+$(shell tools/version.sh .version.tmp > /dev/null)
 $(shell $(call TESTANDREPLACEFILE, .version.tmp, .version))
 endif
 
