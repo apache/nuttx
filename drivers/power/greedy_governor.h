@@ -41,23 +41,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: pm_greedy_governor_register
- *
- * Description:
- *   Return the greedy governor instance.
- *
- * Returned Value:
- *   A pointer to the governor struct. Otherwise NULL is returned on error.
- *
- ****************************************************************************/
-
-FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
-
 #undef EXTERN
 #ifdef __cplusplus
 }
