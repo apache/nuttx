@@ -176,12 +176,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-/****************************************************************************
- * Public Function Prototypes
- ****************************************************************************/
-
-FAR struct pm_governor_s *pm_activity_governor_initialize(void);
-
 #undef EXTERN
 #ifdef __cplusplus
 }

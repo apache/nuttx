@@ -62,7 +62,7 @@ static enum pm_state_e greedy_governor_checkstate(int domain);
  * Private Data
  ****************************************************************************/
 
-static struct pm_governor_s g_greedy_governor_ops =
+static const struct pm_governor_s g_greedy_governor_ops =
 {
   greedy_governor_initialize,   /* initialize */
   NULL,                         /* deinitialize */
