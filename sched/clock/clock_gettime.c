@@ -61,7 +61,6 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
   sinfo("clock_id=%d\n", clock_id);
   DEBUGASSERT(tp != NULL);
 
-#ifdef CONFIG_CLOCK_MONOTONIC
   /* CLOCK_MONOTONIC is an optional under POSIX: "If the Monotonic Clock
    * option is supported, all implementations shall support a clock_id
    * of CLOCK_MONOTONIC defined in <time.h>. This clock represents the
@@ -82,8 +81,6 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
 
       ret = clock_systime_timespec(tp);
     }
-  else
-#endif
 
   /* CLOCK_REALTIME - POSIX demands this to be present.  CLOCK_REALTIME
    * represents the machine's best-guess as to the current wall-clock,
@@ -91,7 +88,7 @@ int clock_gettime(clockid_t clock_id, struct timespec *tp)
    * backward as the system time-of-day clock is changed.
    */
 
-  if (clock_id == CLOCK_REALTIME)
+  else if (clock_id == CLOCK_REALTIME)
     {
       /* Get the elapsed time since the time-of-day was last set.
        * clock_systime_timespec() provides the time since power was applied;
