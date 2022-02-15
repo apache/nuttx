@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_svcall.c
+ * arch/xtensa/src/common/xtensa_swint.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "svcall.h"
+#include "syscall.h"
 #include "xtensa.h"
 
 /****************************************************************************
@@ -39,14 +39,15 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: xtensa_svcall
+ * Name: xtensa_swint
  *
  * Description:
- *   This is SVCall exception handler that performs context switching
+ *   This is software interrupt exception handler that performs context
+ *   switching and manages system calls
  *
  ****************************************************************************/
 
-int xtensa_svcall(int irq, void *context, void *arg)
+int xtensa_swint(int irq, void *context, void *arg)
 {
   uint32_t *regs = (uint32_t *)context;
   uint32_t cmd;
@@ -61,16 +62,16 @@ int xtensa_svcall(int irq, void *context, void *arg)
   DEBUGASSERT(regs && regs == CURRENT_REGS);
   cmd = regs[REG_A2];
 
-  /* The SVCall software interrupt is called with A2 = system call command
+  /* The SYSCall software interrupt is called with A2 = system call command
    * and A3..A9 = variable number of arguments depending on the system call.
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SVCALL
+# ifndef CONFIG_DEBUG_SYSCALL
   if (cmd > SYS_switch_context)
 # endif
     {
-      svcinfo("SVCALL Entry: regs: %p cmd: %d\n", regs, cmd);
+      svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
       svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
               regs[REG_A0],  regs[REG_A1],  regs[REG_A2],  regs[REG_A3],
               regs[REG_A4],  regs[REG_A5],  regs[REG_A6],  regs[REG_A7]);
@@ -82,7 +83,7 @@ int xtensa_svcall(int irq, void *context, void *arg)
     }
 #endif
 
-  /* Handle the SVCall according to the command in A2 */
+  /* Handle the SYSCall according to the command in A2 */
 
   switch (cmd)
     {
@@ -103,10 +104,15 @@ int xtensa_svcall(int irq, void *context, void *arg)
         {
           DEBUGASSERT(regs[REG_A3] != 0);
           memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
+#if XCHAL_CP_NUM > 0
+          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
+          xtensa_coproc_savestate((struct xtensa_cpstate_s *)cpstate);
+#endif
         }
-      break;
 
-      /* A2=SYS_restore_context:  This a restore context command:
+        break;
+
+      /* A2=SYS_restore_context:  This is a restore context command:
        *
        * void xtensa_fullcontextrestore(uint32_t *restoreregs)
        *      noreturn_function;
@@ -125,12 +131,17 @@ int xtensa_svcall(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
+#if XCHAL_CP_NUM > 0
+          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
+          xtensa_coproc_restorestate((struct xtensa_cpstate_s *)cpstate);
+#endif
           DEBUGASSERT(regs[REG_A3] != 0);
           CURRENT_REGS = (uint32_t *)regs[REG_A3];
         }
-      break;
 
-      /* A2=SYS_switch_context:  This a switch context command:
+        break;
+
+      /* A2=SYS_switch_context:  This is a switch context command:
        *
        * void xtensa_switchcontext
        *      (uint32_t *saveregs, uint32_t *restoreregs);
@@ -152,18 +163,13 @@ int xtensa_svcall(int irq, void *context, void *arg)
           DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
 
           memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
-#if XCHAL_CP_NUM > 0
-          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
-          xtensa_coproc_savestate(cpstate);
-          cpstate = (uintptr_t)regs[REG_A4] + cpstate_off;
-          xtensa_coproc_restorestate(cpstate);
-#endif
           CURRENT_REGS = (uint32_t *)regs[REG_A4];
         }
-      break;
+
+        break;
     }
 
-  if (CURRENT_REGS[REG_PS] & PS_EXCM_MASK)
+  if ((CURRENT_REGS[REG_PS] & PS_EXCM_MASK) != 0)
     {
       CURRENT_REGS[REG_PS] &= ~PS_EXCM_MASK;
     }
@@ -173,13 +179,13 @@ int xtensa_svcall(int irq, void *context, void *arg)
    */
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-# ifndef CONFIG_DEBUG_SVCALL
+# ifndef CONFIG_DEBUG_SYSCALL
   if (cmd > SYS_switch_context)
 # else
   if (regs != CURRENT_REGS)
 # endif
     {
-      svcinfo("SVCall Return:\n");
+      svcinfo("SYSCall Return:\n");
       svcinfo("  A0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
               CURRENT_REGS[REG_A0],  CURRENT_REGS[REG_A1],
               CURRENT_REGS[REG_A2],  CURRENT_REGS[REG_A3],
@@ -193,14 +199,13 @@ int xtensa_svcall(int irq, void *context, void *arg)
       svcinfo(" PC: %08x PS: %08x\n",
               regs[REG_PC], regs[REG_PS]);
     }
-# ifdef CONFIG_DEBUG_SVCALL
+# ifdef CONFIG_DEBUG_SYSCALL
   else
     {
-      svcinfo("SVCall Return: %d\n", regs[REG_A2]);
+      svcinfo("SYSCall Return: %d\n", regs[REG_A2]);
     }
 # endif
 #endif
 
   return OK;
 }
-
