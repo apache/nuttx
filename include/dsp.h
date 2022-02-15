@@ -536,9 +536,9 @@ void foc_vdq_mag_max_get(FAR struct foc_data_f32_s *foc, FAR float *max);
 /* BLDC/PMSM motor observers */
 
 void motor_sobserver_init(FAR struct motor_sobserver_f32_s *observer,
-                         FAR void *so, float per);
+                          FAR void *so, float per);
 void motor_aobserver_init(FAR struct motor_aobserver_f32_s *observer,
-                           FAR void *ao, float per);
+                          FAR void *ao, float per);
 float motor_sobserver_speed_get(FAR struct motor_sobserver_f32_s *o);
 float motor_aobserver_angle_get(FAR struct motor_aobserver_f32_s *o);
 
@@ -555,8 +555,8 @@ void motor_sobserver_div(FAR struct motor_sobserver_f32_s *o, float angle);
 
 void motor_aobserver_nfo_init(FAR struct motor_aobserver_nfo_f32_s *nfo);
 void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
-                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
-                        FAR struct motor_phy_params_f32_s *phy, float gain);
+                         FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                         FAR struct motor_phy_params_f32_s *phy, float gain);
 
 void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
                               float pll_kp, float pll_ki);
