@@ -169,7 +169,7 @@ static int up_getvideoinfo(FAR struct fb_vtable_s *vtable,
                   fbinfo->display < RFB_MAX_DISPLAYS);
       session = g_vnc_sessions[fbinfo->display];
 
-      if (session == NULL || session->state != VNCSERVER_RUNNING)
+      if (session == NULL)
         {
           gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -211,7 +211,7 @@ static int up_getplaneinfo(FAR struct fb_vtable_s *vtable, int planeno,
                   fbinfo->display < RFB_MAX_DISPLAYS);
       session = g_vnc_sessions[fbinfo->display];
 
-      if (session == NULL || session->state != VNCSERVER_RUNNING)
+      if (session == NULL)
         {
           gerr("ERROR: session is not connected\n");
           return -ENOTCONN;
@@ -508,7 +508,6 @@ static int vnc_start_server(int display)
 
   g_fbstartup[display].result = -EBUSY;
   nxsem_reset(&g_fbstartup[display].fbinit, 0);
-  nxsem_reset(&g_fbstartup[display].fbconnect, 0);
 
   /* Format the kernel thread arguments (ASCII.. yech) */
 
@@ -577,83 +576,6 @@ static inline int vnc_wait_start(int display)
 }
 
 /****************************************************************************
- * Name: vnc_wait_connect
- *
- * Description:
- *   Wait for the server to be connected to the VNC client.  We can do
- *   nothing until that connection is established.
- *
- * Input Parameters:
- *   display - In the case of hardware with multiple displays, this
- *     specifies the display.  Normally this is zero.
- *
- * Returned Value:
- *   Zero is returned on success; a negated errno value is returned on any
- *   failure.
- *
- ****************************************************************************/
-
-static inline int vnc_wait_connect(int display)
-{
-  int ret;
-
-  /* Check if there has been a session allocated yet.  This is one of the
-   * first things that the VNC server will do with the kernel thread is
-   * started.  But we might be here before the thread has gotten that far.
-   *
-   * If it has been allocated, then wait until it is in the RUNNING state.
-   * The RUNNING state indicates that the server has started, it has
-   * established a connection with the VNC client, it is negotiated
-   * encodings and framebuffer characteristics, and it has started the
-   * updater thread.  The server is now ready to receive Client-to-Server
-   * messages and to perform remote framebuffer updates.
-   */
-
-  while (g_vnc_sessions[display] == NULL ||
-         g_vnc_sessions[display]->state != VNCSERVER_RUNNING)
-    {
-      /* The server is not yet running.  Wait for the server to post the FB
-       * semaphore.  In certain error situations, the server may post the
-       * semaphore, then reset it to zero.  There are are certainly race
-       * conditions here, but I think none that are fatal.
-       */
-
-      ret = nxsem_wait_uninterruptible(&g_fbstartup[display].fbconnect);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      /* We were awakened.  A result of -EBUSY means that the negotiation
-       * is not complete.  Why would we be awakened in that case?  Some
-       * counting semaphore screw-up?
-       */
-
-      ret = g_fbstartup[display].result;
-      if (ret != -EBUSY)
-        {
-#ifdef CONFIG_DEBUG_FEATURES
-          if (ret < 0)
-            {
-              DEBUGASSERT(g_vnc_sessions[display] == NULL);
-              gerr("ERROR: VNC server startup failed: %d\n", ret);
-            }
-          else
-            {
-              DEBUGASSERT(g_vnc_sessions[display] != NULL &&
-                          g_vnc_sessions[display]->state ==
-                          VNCSERVER_RUNNING);
-            }
-#endif
-
-          return ret;
-        }
-    }
-
-  return OK;
-}
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -688,12 +610,13 @@ int up_fbinitialize(int display)
       return ret;
     }
 
-  /* Wait for the VNC client to connect and for the RFB to be ready */
+  /* Wait for the VNC server to be ready */
 
-  ret = vnc_wait_connect(display);
+  ret = vnc_wait_start(display);
+
   if (ret < 0)
     {
-      gerr("ERROR: vnc_wait_connect() failed: %d\n", ret);
+      gerr("ERROR: wait for vnc server start failed: %d\n", ret);
     }
 
   return ret;
@@ -817,7 +740,7 @@ FAR struct fb_vtable_s *up_fbgetvplane(int display, int vplane)
 
   /* Verify that the session is still valid */
 
-  if (session == NULL || session->state != VNCSERVER_RUNNING)
+  if (session == NULL)
     {
       return NULL;
     }
