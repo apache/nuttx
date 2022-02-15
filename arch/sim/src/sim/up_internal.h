@@ -55,6 +55,18 @@
 #  endif
 #endif
 
+/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
+ * rounded up to the next boundary
+ */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /* Simulated Heap Definitions ***********************************************/
 
 /* Size of the simulated heap */

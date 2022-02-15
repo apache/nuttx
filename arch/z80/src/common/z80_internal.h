@@ -61,6 +61,18 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
+/* The Z80 stack does not need to be aligned.  Here is is aligned at word
+ * (4 byte) boundary.
+ */
+
+#define STACK_ALIGNMENT     4
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

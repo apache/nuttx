@@ -47,11 +47,6 @@
 #  define HAVE_KERNEL_HEAP 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (sizeof(uint32_t) - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/

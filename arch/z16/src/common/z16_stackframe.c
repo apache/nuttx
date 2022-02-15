@@ -35,22 +35,6 @@
 #include "z16_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Align the stack to word (4 byte) boundaries.  This is probablya greater
- * alignment than is required.
- */
-
-#define STACK_ALIGNMENT     4
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -105,7 +89,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr   = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
+  tcb->stack_base_ptr  = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
   tcb->adj_stack_size -= frame_size;
 
   /* And return a pointer to the allocated memory */
