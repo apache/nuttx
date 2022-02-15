@@ -455,7 +455,7 @@ static int sps30_read_values(FAR struct sps30_dev_s *priv,
   struct timespec ts;
   int ret;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   if (wait || !priv->valid ||
       has_time_passed(ts, priv->last_update, SPS30_MEASUREMENT_INTERVAL))

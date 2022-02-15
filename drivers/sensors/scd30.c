@@ -443,7 +443,7 @@ static int scd30_read_values(FAR struct scd30_dev_s *priv, FAR float *temp,
   struct timespec ts;
   int ret;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   if (wait || !priv->valid ||
       has_time_passed(ts, priv->last_update,

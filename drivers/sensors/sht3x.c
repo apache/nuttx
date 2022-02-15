@@ -391,7 +391,7 @@ static int sht3x_read_values(FAR struct sht3x_dev_s *priv,
   struct timespec ts;
   int ret;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   /* Read the raw data */
 
