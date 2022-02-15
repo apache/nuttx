@@ -446,7 +446,7 @@ void up_rngaddentropy(enum rnd_source_t kindof, FAR const uint32_t *buf,
    * reseeding too fast.
    */
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
   tbuf[0] = ROTL_32((uint32_t)ts.tv_nsec, 17) ^ ROTL_32(ts.tv_sec, 3);
   tbuf[0] += ROTL_32(kindof, 27);
   tbuf[0] += ROTL_32((uintptr_t)&tbuf[0], 11);
