@@ -37,6 +37,7 @@
 
 #include <arch/barriers.h>
 
+#include "pgalloc.h"
 #include "riscv_mmu.h"
 
 #ifdef CONFIG_BUILD_KERNEL
@@ -66,7 +67,7 @@
 
 static inline void wipe_page(uintptr_t paddr)
 {
-  uintptr_t vaddr = paddr;
+  uintptr_t vaddr = riscv_pgvaddr(paddr);
   memset((void *)vaddr, 0, MM_PGSIZE);
 }
 
@@ -88,7 +89,7 @@ static uintptr_t get_pgtable(group_addrenv_t *addrenv, uintptr_t vaddr)
   /* Get the current level MAX_LEVELS-1 entry corresponding to this vaddr */
 
   ptlevel = ARCH_SPGTS;
-  ptprev  = addrenv->spgtables[ARCH_SPGTS - 1];
+  ptprev  = riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   paddr   = mmu_pte_to_paddr(mmu_ln_getentry(ptlevel, ptprev, vaddr));
 
   if (!paddr)
@@ -188,7 +189,7 @@ uintptr_t pgalloc(uintptr_t brkaddr, unsigned int npages)
     {
       /* Get the address of the last level page table */
 
-      ptlast = get_pgtable(&group->tg_addrenv, vaddr);
+      ptlast = riscv_pgvaddr(get_pgtable(&group->tg_addrenv, vaddr));
       if (!ptlast)
         {
           return 0;
