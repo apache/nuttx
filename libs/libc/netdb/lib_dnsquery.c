@@ -181,7 +181,7 @@ static inline uint16_t dns_alloc_id(void)
 {
   struct timespec ts;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_gettime(CLOCK_MONOTONIC, &ts);
   return (uint32_t)ts.tv_nsec + ((uint32_t)ts.tv_nsec >> 16);
 }
 

@@ -71,15 +71,11 @@
  * system time-of-day clock.
  */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-#  define CLOCK_MONOTONIC  1
-#endif
+#define CLOCK_MONOTONIC    1
 
 /* Monotonic system-wide clock that includes time spent in suspension. */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-#  define CLOCK_BOOTTIME   2
-#endif
+#define CLOCK_BOOTTIME     2
 
 /* This is a flag that may be passed to the timer_settime() and
  * clock_nanosleep() functions.
