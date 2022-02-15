@@ -179,7 +179,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-      FAR void *top_of_stack;
+      uintptr_t top_of_stack;
       size_t size_of_stack;
 
       /* The CEVA uses a push-down stack:  the stack grows toward lower
@@ -193,12 +193,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * boundary
        */
 
-      size_of_stack = STACK_ALIGN_DOWN(stack_size);
-      top_of_stack  = tcb->stack_alloc_ptr + size_of_stack;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->stack_base_ptr = top_of_stack;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
