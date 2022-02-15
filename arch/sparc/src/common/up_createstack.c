@@ -105,14 +105,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr = (uint32_t *)kmm_malloc(stack_size);
+          tcb->stack_alloc_ptr = kmm_malloc(stack_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
+          tcb->stack_alloc_ptr = kumm_malloc(stack_size);
         }
 
 #ifdef CONFIG_DEBUG_FEATURES
