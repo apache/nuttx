@@ -313,7 +313,7 @@ static int sht21_read_values(FAR struct sht21_dev_s *priv, FAR int *temp,
   struct timespec ts;
   int ret;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   /* Datasheet section 2.3: "To keep self heating below 0.1°C, SHT2x
    * should not be active for more than 10% of the time – e.g. maximum

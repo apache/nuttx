@@ -428,7 +428,7 @@ static int t67xx_read_gas_ppm(FAR struct t67xx_dev_s *priv,
   struct timespec ts;
   int ret;
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   if (!has_time_passed(ts, priv->boot_time, T67XX_UPTIME_MINIMAL_SEC))
     {
@@ -562,7 +562,7 @@ static int t67xx_reset(FAR struct t67xx_dev_s *priv)
 
   /* Sensor uptime starting again from zero. */
 
-  clock_gettime(CLOCK_REALTIME, &priv->boot_time);
+  clock_systime_timespec(&priv->boot_time);
 
   return ret;
 }
@@ -770,7 +770,7 @@ int t67xx_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   nxsem_init(&priv->devsem, 0, 1);
 
-  clock_gettime(CLOCK_REALTIME, &priv->boot_time);
+  clock_systime_timespec(&priv->boot_time);
 
   /* Register the character driver. */
 

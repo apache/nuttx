@@ -1147,7 +1147,7 @@ int bl_os_workqueue_submit_lpwork(void *work,
 uint64_t bl_os_clock_gettime_ms(void)
 {
   struct timespec ts;
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
   return ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 }
 
