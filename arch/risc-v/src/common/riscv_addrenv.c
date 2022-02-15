@@ -68,6 +68,7 @@
 
 #include <arch/barriers.h>
 
+#include "pgalloc.h"
 #include "riscv_mmu.h"
 
 /****************************************************************************
@@ -111,7 +112,7 @@ extern uintptr_t            g_kernel_mappings;
 
 static inline void wipe_page(uintptr_t paddr)
 {
-  uintptr_t vaddr = paddr;
+  uintptr_t vaddr = riscv_pgvaddr(paddr);
   memset((void *)vaddr, 0, MM_PGSIZE);
 }
 
@@ -133,7 +134,7 @@ static void map_spgtables(group_addrenv_t *addrenv, uintptr_t vaddr)
 
   /* Start from L1, and connect until max level - 1 */
 
-  prev = addrenv->spgtables[0];
+  prev = riscv_pgvaddr(addrenv->spgtables[0]);
 
   /* Check if the mapping already exists */
 
@@ -146,7 +147,7 @@ static void map_spgtables(group_addrenv_t *addrenv, uintptr_t vaddr)
 
   for (i = 0; i < (ARCH_SPGTS - 1); i++)
     {
-      uintptr_t next = addrenv->spgtables[i + 1];
+      uintptr_t next = riscv_pgvaddr(addrenv->spgtables[i + 1]);
       mmu_ln_setentry(i + 1, prev, next, vaddr, MMU_UPGT_FLAGS);
       prev = next;
     }
@@ -211,7 +212,7 @@ static int create_spgtables(group_addrenv_t *addrenv)
 
 static int copy_kernel_mappings(group_addrenv_t *addrenv)
 {
-  uintptr_t user_mappings = addrenv->spgtables[0];
+  uintptr_t user_mappings = riscv_pgvaddr(addrenv->spgtables[0]);
 
   /* Copy the L1 references */
 
@@ -258,7 +259,7 @@ static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
 
   nmapped   = 0;
   npages    = MM_NPAGES(size);
-  ptprev    = addrenv->spgtables[ARCH_SPGTS - 1];
+  ptprev    = riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   ptlevel   = ARCH_SPGTS;
 
   /* Create mappings for the lower level tables */
@@ -292,7 +293,7 @@ static int create_region(group_addrenv_t *addrenv, uintptr_t vaddr,
           wipe_page(paddr);
         }
 
-      ptlast = paddr;
+      ptlast = riscv_pgvaddr(paddr);
 
       /* Then allocate memory for the region data */
 
@@ -505,12 +506,12 @@ int up_addrenv_destroy(group_addrenv_t *addrenv)
 
   /* First destroy the allocated memory and the final level page table */
 
-  ptprev = (uintptr_t *)addrenv->spgtables[ARCH_SPGTS - 1];
+  ptprev = (uintptr_t *)riscv_pgvaddr(addrenv->spgtables[ARCH_SPGTS - 1]);
   if (ptprev)
     {
       for (i = 0; i < ENTRIES_PER_PGT; i++)
         {
-          ptlast = (uintptr_t *)mmu_pte_to_paddr(ptprev[i]);
+          ptlast = (uintptr_t *)riscv_pgvaddr(mmu_pte_to_paddr(ptprev[i]));
           if (ptlast)
             {
               /* Page table allocated, free any allocated memory */
