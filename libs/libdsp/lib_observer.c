@@ -61,7 +61,7 @@
  ****************************************************************************/
 
 void motor_sobserver_init(FAR struct motor_sobserver_f32_s *observer,
-                         FAR void *so, float per)
+                          FAR void *so, float per)
 {
   LIBDSP_DEBUGASSERT(observer != NULL);
   LIBDSP_DEBUGASSERT(so != NULL);
@@ -572,8 +572,8 @@ void motor_aobserver_nfo_init(FAR struct motor_aobserver_nfo_f32_s *nfo)
  ****************************************************************************/
 
 void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
-                        FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
-                        FAR struct motor_phy_params_f32_s *phy, float gain)
+                         FAR ab_frame_f32_t *i_ab, FAR ab_frame_f32_t *v_ab,
+                         FAR struct motor_phy_params_f32_s *phy, float gain)
 {
   FAR struct motor_aobserver_nfo_f32_s *nfo =
                                (FAR struct motor_aobserver_nfo_f32_s *)o->ao;
