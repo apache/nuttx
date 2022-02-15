@@ -112,6 +112,7 @@
 #define NVT_XDATA_SECTOR_SIZE        256
 
 #define NVT_RESULT_FOLDER            "data/tp"
+#define NVT_INIT_RETRY_TIMES         5
 
 #ifdef  CONFIG_NVT_OFFLINE_LOG
 #define NVT_POINT_DATA_EXT_LEN       4   /* Event buffer offset 0x11~0x14 */
@@ -4187,7 +4188,7 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
         case PM_NORMAL:
           if (dev->current_state == PM_NORMAL)
             return;
-          if (dev->nvt_pwr_resume.times >= 4)
+          if (dev->nvt_pwr_resume.times >= NVT_INIT_RETRY_TIMES)
             {
               ierr("Retry resume NT38350 touch failed! times = %d\n",
                    dev->nvt_pwr_resume.times);
@@ -4227,6 +4228,27 @@ static void nt38350_pm_notify(FAR struct pm_callback_s *cb,
 
       dev->current_state = pmstate;
     }
+}
+#endif
+
+#if CONFIG_PM
+static int nt38350_recovery_cb(void *arg)
+{
+  int ret;
+  FAR struct nt38350_dev_s *dev = (struct nt38350_dev_s *)arg;
+
+  ret = nt38350_hardware_reinit(dev);
+  if (ret != OK)
+    {
+      ierr("Failed to reinit hardware\n");
+      return ret;
+    }
+
+  nt38350_ts_resume(dev);
+  dev->current_state = PM_NORMAL;
+  iwarn("Change to pm normal state\n");
+
+  return ret;
 }
 #endif
 
@@ -4412,6 +4434,7 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   priv->nvt_pwr_resume.icpower_state = NVT_POWER_ON;
   priv->config->powerdev_register_cb(NULL,
                 nt38350_poweroff_cb, &(priv->nvt_pwr_resume));
+  priv->config->panel_recovery_register(nt38350_recovery_cb, priv);
 #endif
 
   ret = touch_register(&(priv->lower), devname,

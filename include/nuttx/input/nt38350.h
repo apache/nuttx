@@ -116,6 +116,7 @@ struct nt38350_config_s
   void  (*powerdev_register_cb)(void (*poweron_cb)(void *),
                              void (*poweroff_cb)(void *),
                              void *arg);
+  void (*panel_recovery_register)(int (*rcb)(void *), void *args);
 #endif
 };
 
