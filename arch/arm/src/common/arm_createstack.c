@@ -41,24 +41,6 @@
 #include "arm_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Configuration */
-
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define CONFIG_STACK_ALIGNMENT 8
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (CONFIG_STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -156,16 +138,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr =
-              kmm_memalign(CONFIG_STACK_ALIGNMENT, stack_size);
+          tcb->stack_alloc_ptr = kmm_memalign(STACK_ALIGNMENT, stack_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr =
-              kumm_memalign(CONFIG_STACK_ALIGNMENT, stack_size);
+          tcb->stack_alloc_ptr = kumm_memalign(STACK_ALIGNMENT, stack_size);
         }
 #endif /* CONFIG_TLS_ALIGNED */
 
@@ -191,7 +171,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        */
 
       /* Since both stack_alloc_ptr and stack_size are in
-       * CONFIG_STACK_ALIGNMENT, and the stack ptr is decremented before
+       * STACK_ALIGNMENT, and the stack ptr is decremented before
        * the first write, we can directly save our variables to struct
        * tcb_s.
        */
