@@ -337,7 +337,7 @@ void xtensa_pminitialize(void);
 
 /* Exception Handlers */
 
-int xtensa_svcall(int irq, void *context, void *arg);
+int xtensa_swint(int irq, void *context, void *arg);
 
 /* Debug ********************************************************************/
 
