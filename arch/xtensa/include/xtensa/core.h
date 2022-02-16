@@ -1400,6 +1400,18 @@
 
 #define XTHAL_INST_ILL            0x000000    /* 3-byte illegal instruction */
 
+/*  Version comparison operators (among major/minor pairs):  */
+
+#define XTHAL_REL_GE(maja,mina, majb,minb)  ((maja) > (majb) || \
+             ((maja) == (majb) && (mina) >= (minb)))
+#define XTHAL_REL_GT(maja,mina, majb,minb)  ((maja) > (majb) || \
+             ((maja) == (majb) && (mina) > (minb)))
+#define XTHAL_REL_LE(maja,mina, majb,minb)  ((maja) < (majb) || \
+             ((maja) == (majb) && (mina) <= (minb)))
+#define XTHAL_REL_LT(maja,mina, majb,minb)  ((maja) < (majb) || \
+             ((maja) == (majb) && (mina) < (minb)))
+#define XTHAL_REL_EQ(maja,mina, majb,minb)  ((maja) == (majb) && (mina) == (minb))
+
 /* Because information as to exactly which hardware version is targeted
  * by a given software build is not always available, compile-time HAL
  * Hardware-Release "_AT" macros are fuzzy (return 0, 1, or XCHAL_MAYBE):
