@@ -633,10 +633,6 @@
 
 #define DA9168_DEV_ID                                   0xE7
 
-/* work time 2s */
-
-#define DA9168_WORK_POLL_TIME                           20000
-
 /* Ship mode entry delay time */
 
 enum da9168_ship_mode_entry_delay_sel

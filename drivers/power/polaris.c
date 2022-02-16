@@ -83,6 +83,7 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
                                      ioe_pinset_t pinset, FAR void *arg);
 static void stwlc38_worker(FAR void *arg);
+static void detect_worker(FAR void *arg);
 
 struct stwlc38_dev_s
 {
@@ -97,6 +98,9 @@ struct stwlc38_dev_s
   FAR struct ioexpander_dev_s *rpmsg_dev;   /* Ioexpander device */
   FAR struct ioexpander_dev_s *io_dev;      /* Ioexpander device */
   struct work_s work;                       /* Interrupt handler worker */
+  struct work_s detect_work;                /* charger detect work */
+  bool charging;                            /* Mark charge_manager is not running */
+  int batt_state_flag;
 };
 
 static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
@@ -646,6 +650,58 @@ static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 }
 
 /****************************************************************************
+ * Name: detect_worker
+ *
+ * Description:
+ *   Task the worker with retrieving the latest sensor data. We should not do
+ *   this in a interrupt since it might take too long. Also we cannot lock
+ *   the I2C bus from within an interrupt.
+ *
+ * Input Parameters:
+ *   arg    - Device struct.
+ *
+ * Returned Value:
+ *   none.
+ *
+ * Assumptions/Limitations:
+ *   none.
+ *
+ ****************************************************************************/
+
+static void detect_worker(FAR void *arg)
+{
+  FAR struct stwlc38_dev_s *priv = arg;
+  bool charger_is_exit;
+  int ret;
+
+  ret = stwlc38_state(priv, &charger_is_exit);
+  if (ret == OK)
+    {
+      if (!charger_is_exit)
+        {
+          battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
+          work_cancel(LPWORK, &priv->detect_work);
+          priv->batt_state_flag = true;
+        }
+      else
+        {
+          if (priv->batt_state_flag)
+            {
+              battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
+              priv->batt_state_flag = false;
+            }
+
+          work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
+                     CHARGER_DETECT_WORK_TIME);
+        }
+    }
+  else
+    {
+      baterr("[WLC] get stwlc38_state fail\n");
+    }
+}
+
+/****************************************************************************
  * Name: stwlc38_worker
  *
  * Description:
@@ -766,10 +822,10 @@ static void stwlc38_worker(FAR void *arg)
    *  if removed tx, the charge_manager app will return
    **************************************************************************/
 
-  if (rx_int_state.wlc_rx_int_output_on)
+  if (rx_int_state.wlc_rx_int_output_on && priv->charging == false)
     {
-      batinfo("[WLC] start charge_manager !!!\n");
-      system("charge_manager &");
+      priv->charging = true; /* Mark charge manager will be running */
+      work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
     }
 
   return;
@@ -985,6 +1041,13 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
           }
           break;
 
+      case BATIO_OPRTN_CHARGE:
+
+        /* if informed, mark charge_manager has been destroyed */
+
+        priv->charging = false;
+        break;
+
       default:
         batinfo("Unsupported opt: 0x%X\n", op);
         ret = -EINVAL;
@@ -1100,6 +1163,8 @@ FAR struct battery_charger_dev_s *
       priv->lower     = lower;
       priv->rpmsg_dev = rpmsg_dev;
       priv->io_dev    = io_dev;
+      priv->charging  = false;
+      priv->batt_state_flag = true;
     }
   else
     {

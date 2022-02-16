@@ -41,7 +41,6 @@
 #include <nuttx/ioexpander/ioexpander.h>
 #include <nuttx/power/battery_charger.h>
 #include <nuttx/power/battery_ioctl.h>
-#include <nuttx/wqueue.h>
 #include "da9168.h"
 
 /****************************************************************************
@@ -96,8 +95,6 @@ struct da9168_dev_s
   uint8_t addr;                      /* I2C address */
   uint32_t frequency;                /* I2C frequency */
   int pin;                           /* Interrupt pin */
-  struct work_s work;                /* Work queue for reading data. */
-  uint8_t last_state;                /* charge state change */
 };
 
 /****************************************************************************
@@ -1743,43 +1740,6 @@ static int da9168_operate(FAR struct battery_charger_dev_s *dev,
 }
 
 /****************************************************************************
- * Name: da9168_worker
- *
- * Description:
- *   Polling the battery charge data, according to 2s Frequency
- *
- * Input Parameters
- *   priv    - Device struct
- *
- * Returned Value
- *   Return 0 if the driver was success; A negated errno
- *   value is returned on any failure;
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void da9168_worker(FAR void *arg)
-{
-  FAR struct da9168_dev_s *priv = arg;
-  uint8_t state;
-
-  state = da9168_chg_get_phase(priv);
-  if (state != DA9168_CHG_PHASE_UNKNOWN)
-    {
-      if (state != priv->last_state)
-        {
-          priv->last_state = state;
-          battery_charger_changed(&priv->dev,BATTERY_STATE_CHANGED);
-        }
-    }
-
-  work_queue(HPWORK, &priv->work, da9168_worker, priv,
-             DA9168_WORK_POLL_TIME);
-}
-
-/****************************************************************************
  * Name: da9168_init
  *
  * Description:
@@ -1921,9 +1881,6 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  work_queue(HPWORK, &priv->work, da9168_worker, priv,
-             DA9168_WORK_POLL_TIME);
-
   return ret;
 }
 
@@ -1977,7 +1934,6 @@ FAR struct battery_charger_dev_s *
   priv->frequency = frequency;
   priv->ioe       = dev;
   priv->pin       = int_pin;
-  priv->last_state = DA9168_CHG_PHASE_MAX;
 
   /* Reset the DA9168 */
 
