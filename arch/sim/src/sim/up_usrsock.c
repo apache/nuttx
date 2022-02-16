@@ -152,14 +152,14 @@ static int usrsock_socket_handler(FAR struct usrsock_s *usrsock,
 {
   FAR const struct usrsock_request_socket_s *req = data;
   int fd = usrsock_host_socket(req->domain, req->type, req->protocol);
+  int ret = usrsock_send_ack(usrsock, req->head.xid, fd);
 
-  usrsock_send_ack(usrsock, req->head.xid, fd);
-  if (fd > 0)
+  if (ret >= 0 && fd >= 0)
     {
-      usrsock_send_event(usrsock, fd, USRSOCK_EVENT_SENDTO_READY);
+      ret = usrsock_send_event(usrsock, fd, USRSOCK_EVENT_SENDTO_READY);
     }
 
-  return fd;
+  return ret;
 }
 
 static int usrsock_close_handler(FAR struct usrsock_s *usrsock,
@@ -192,9 +192,10 @@ static int usrsock_sendto_handler(FAR struct usrsock_s *usrsock,
                                 req->addrlen ?
                                 (FAR const struct sockaddr *)(req + 1) :
                                 NULL, req->addrlen);
+  bool sent = (ret > 0);
 
-  usrsock_send_ack(usrsock, req->head.xid, ret);
-  if (ret > 0)
+  ret = usrsock_send_ack(usrsock, req->head.xid, ret);
+  if (ret >= 0 && sent)
     {
       ret = usrsock_send_event(usrsock, req->usockid,
                                USRSOCK_EVENT_SENDTO_READY);
@@ -331,7 +332,7 @@ static int usrsock_accept_handler(FAR struct usrsock_s *usrsock,
                                outaddrlen ?
                                (FAR struct sockaddr *)(ack + 1) : NULL,
                                outaddrlen ? &outaddrlen : NULL);
-  if (sockfd > 0)
+  if (sockfd >= 0)
     {
       /* Append index as usockid to the payload */
 
@@ -351,11 +352,11 @@ static int usrsock_accept_handler(FAR struct usrsock_s *usrsock,
       ret = sockfd;
     }
 
-  usrsock_send_dack(usrsock, ack, req->head.xid, ret,
-                    inaddrlen, outaddrlen);
-  if (ret > 0)
+  ret = usrsock_send_dack(usrsock, ack, req->head.xid, ret,
+                          inaddrlen, outaddrlen);
+  if (ret >= 0 && sockfd >= 0)
     {
-      usrsock_send_event(usrsock, sockfd, USRSOCK_EVENT_SENDTO_READY);
+      ret = usrsock_send_event(usrsock, sockfd, USRSOCK_EVENT_SENDTO_READY);
     }
 
   return ret;

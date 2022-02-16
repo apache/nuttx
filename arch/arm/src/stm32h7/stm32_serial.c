@@ -686,7 +686,9 @@ static bool up_rxflowcontrol(struct uart_dev_s *dev, unsigned int nbuffered,
                              bool upper);
 #endif
 static void up_send(struct uart_dev_s *dev, int ch);
+#ifndef SERIAL_HAVE_ONLY_TXDMA
 static void up_txint(struct uart_dev_s *dev, bool enable);
+#endif
 static bool up_txready(struct uart_dev_s *dev);
 
 #ifdef SERIAL_HAVE_TXDMA
@@ -1574,6 +1576,8 @@ static inline void up_setusartint(struct up_dev_s *priv, uint16_t ie)
  * Name: up_restoreusartint
  ****************************************************************************/
 
+#if !defined(SERIAL_HAVE_ONLY_DMA) || defined(CONFIG_PM) || \
+    defined(HAVE_RS485)
 static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 {
   irqstate_t flags;
@@ -1584,6 +1588,7 @@ static void up_restoreusartint(struct up_dev_s *priv, uint16_t ie)
 
   leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: up_disableusartint
@@ -3487,6 +3492,7 @@ static void up_dma_txint(struct uart_dev_s *dev, bool enable)
  *
  ****************************************************************************/
 
+#if defined(SERIAL_HAVE_RXDMA_OPS) || defined(SERIAL_HAVE_NODMA_OPS)
 static void up_txint(struct uart_dev_s *dev, bool enable)
 {
   struct up_dev_s *priv = (struct up_dev_s *)dev->priv;
@@ -3549,6 +3555,7 @@ static void up_txint(struct uart_dev_s *dev, bool enable)
 
   leave_critical_section(flags);
 }
+#endif
 
 /****************************************************************************
  * Name: up_txready

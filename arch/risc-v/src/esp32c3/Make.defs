@@ -23,19 +23,20 @@ include chip/Bootloader.mk
 # Specify our HEAD assembly file.  This will be linked as
 # the first object file, so it will appear at address 0
 
-HEAD_ASRC  = esp32c3_head.S
+HEAD_ASRC = esp32c3_head.S
 
-CHIP_ASRCS  = esp32c3_vectors.S esp32c3_interrupt.S
+CHIP_ASRCS = esp32c3_vectors.S esp32c3_interrupt.S
 
 # Specify C code within the common directory to be included
 
-CMN_CSRCS  += riscv_initialize.c riscv_swint.c
-CMN_CSRCS  += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_exception.c
-CMN_CSRCS  += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
-CMN_CSRCS  += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c riscv_mdelay.c
-CMN_CSRCS  += riscv_releasepending.c riscv_reprioritizertr.c riscv_copyfullstate.c
-CMN_CSRCS  += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
-CMN_CSRCS  += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
+CMN_CSRCS += riscv_initialize.c riscv_swint.c
+CMN_CSRCS += riscv_allocateheap.c riscv_createstack.c riscv_exit.c riscv_exception.c
+CMN_CSRCS += riscv_assert.c riscv_blocktask.c riscv_copystate.c riscv_initialstate.c
+CMN_CSRCS += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c riscv_mdelay.c
+CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c riscv_copyfullstate.c
+CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
+CMN_CSRCS += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
+CMN_CSRCS += riscv_tcbinfo.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c
@@ -184,10 +185,10 @@ CHIP_CSRCS += esp32c3_brownout.c
 endif
 
 ifeq ($(CONFIG_ESP32C3_WIRELESS),y)
-WIRELESS_DRV_UNPACK  = esp-wireless-drivers-3rdparty
-WIRELESS_DRV_ID      = 055f1ef
-WIRELESS_DRV_ZIP     = $(WIRELESS_DRV_ID).zip
-WIRELESS_DRV_URL     = https://github.com/espressif/esp-wireless-drivers-3rdparty/archive
+WIRELESS_DRV_UNPACK = esp-wireless-drivers-3rdparty
+WIRELESS_DRV_ID     = 055f1ef
+WIRELESS_DRV_ZIP    = $(WIRELESS_DRV_ID).zip
+WIRELESS_DRV_URL    = https://github.com/espressif/esp-wireless-drivers-3rdparty/archive
 
 $(WIRELESS_DRV_ZIP):
 	$(Q) echo "Downloading: ESP Wireless Drivers"

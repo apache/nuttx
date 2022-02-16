@@ -114,7 +114,7 @@ void can_initialize(void)
     {
       /* Mark the connection closed and move it to the free list */
 
-      dq_addlast(&g_can_connections[i].node, &g_free_can_connections);
+      dq_addlast(&g_can_connections[i].sconn.node, &g_free_can_connections);
     }
 #endif
 }
@@ -146,7 +146,7 @@ FAR struct can_conn_s *can_alloc(void)
         {
           for (i = 0; i < CONFIG_CAN_CONNS; i++)
             {
-              dq_addlast(&conn[i].node, &g_free_can_connections);
+              dq_addlast(&conn[i].sconn.node, &g_free_can_connections);
             }
         }
     }
@@ -175,7 +175,7 @@ FAR struct can_conn_s *can_alloc(void)
 
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_can_connections);
+      dq_addlast(&conn->sconn.node, &g_active_can_connections);
     }
 
   _can_semgive(&g_free_sem);
@@ -201,7 +201,7 @@ void can_free(FAR struct can_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_can_connections);
+  dq_rem(&conn->sconn.node, &g_active_can_connections);
 
   /* Reset structure */
 
@@ -209,7 +209,7 @@ void can_free(FAR struct can_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_can_connections);
+  dq_addlast(&conn->sconn.node, &g_free_can_connections);
   _can_semgive(&g_free_sem);
 }
 
@@ -232,7 +232,7 @@ FAR struct can_conn_s *can_nextconn(FAR struct can_conn_s *conn)
     }
   else
     {
-      return (FAR struct can_conn_s *)conn->node.flink;
+      return (FAR struct can_conn_s *)conn->sconn.node.flink;
     }
 }
 

@@ -524,9 +524,18 @@ static void _check_pkt_q_empty(FAR struct gs2200m_dev_s *dev, char cid)
 
       while (pkt_dat)
         {
-          wlerr("=== error: found (type=%d msg[0]=%s|)\n",
-                pkt_dat->type, pkt_dat->msg[0]);
+          wlerr("=== error: found (cid=%c type=%d msg[0]=%s|)\n",
+                cid, pkt_dat->type, pkt_dat->msg[0]);
           pkt_dat = (FAR struct pkt_dat_s *)pkt_dat->dq.flink;
+
+          if (_cid_is_set(&dev->valid_cid_bits, cid))
+            {
+              wlerr("+++ error: cid=%c is still active !!!\n", cid);
+            }
+
+          /* NOTE: force to disable the cid to remove */
+
+          _enable_cid(&dev->valid_cid_bits, cid, false);
         }
 
       _remove_all_pkt(dev, c);
@@ -2536,13 +2545,20 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
   uint8_t c;
   char s_cid;
   char c_cid;
+  int ret = OK;
   int n;
 
   wlinfo("+++ start: cid=%c\n", msg->cid);
 
   c = _cid_to_uint8(msg->cid);
   pkt_dat = (FAR struct pkt_dat_s *)dq_peek(&dev->pkt_q[c]);
-  ASSERT(pkt_dat);
+
+  if (NULL == pkt_dat)
+    {
+      wlerr("*** error: cid=%c not found\n", msg->cid);
+      ret = -EINVAL;
+      goto errout;
+    }
 
   n = sscanf(pkt_dat->msg[0], "CONNECT %c %c", &s_cid, &c_cid);
   ASSERT(2 == n);
@@ -2574,13 +2590,20 @@ static int gs2200m_ioctl_accept(FAR struct gs2200m_dev_s *dev,
   nmsg.local = 0;
   nmsg.cid = msg->cid;
   r = gs2200m_get_cstatus(dev, &nmsg);
-  ASSERT(TYPE_OK == r);
+
+  if (TYPE_OK != r)
+    {
+      wlerr("*** error: cid=%c not found\n", msg->cid);
+      ret = -EINVAL;
+      goto errout;
+    }
 
   msg->addr = nmsg.addr;
 
+errout:
   wlinfo("+++ end: type=%d (msg->cid=%c)\n", msg->type, msg->cid);
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

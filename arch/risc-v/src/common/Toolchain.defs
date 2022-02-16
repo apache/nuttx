@@ -82,7 +82,7 @@ ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
   endif
 
   ifeq ($(CONFIG_ARCH_FPU),y)
-      ARCHRVISAF = f
+    ARCHRVISAF = f
   endif
 
   ifeq ($(CONFIG_ARCH_DPFPU),y)

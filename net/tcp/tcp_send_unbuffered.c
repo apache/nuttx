@@ -210,13 +210,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
-   * appear here strictly one at a time
+   * appear here strictly one at a time, except for the FIN + ACK case.
    */
 
   DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
               (flags & TCP_REXMIT) == 0);
-  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
-              (flags & TCP_ACKDATA) == 0);
   DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
               (flags & TCP_REXMIT) == 0);
 
@@ -370,11 +368,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
+          tcp_lost_connection(conn, pstate->snd_cb, flags);
         }
 
       pstate->snd_sent = -ENOTCONN;
@@ -545,12 +543,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
   /* Check early if this is an un-connected socket, if so, then
    * return -ENOTCONN. Note, we will have to check this again, as we can't
    * guarantee the state won't change until we have the network locked.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -558,8 +558,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   /* Make sure that we have the IP address mapping */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -607,7 +605,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * state again to ensure the connection is still valid.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
       net_unlock();
@@ -666,7 +664,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
               uint32_t acked = state.snd_acked;
 
               ret = net_timedwait(&state.snd_sem,
-                                  _SO_TIMEOUT(psock->s_sndtimeo));
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   break; /* Timeout without any progress */
@@ -719,7 +717,7 @@ errout:
  *   write occurs first.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK (Always can send).
@@ -729,7 +727,7 @@ errout:
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock)
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
 {
   return OK;
 }

@@ -40,12 +40,6 @@
 #if CONFIG_DEV_PIPE_SIZE > 0
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#define MAX_PIPES 32
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -59,7 +53,7 @@ static int pipe_close(FAR struct file *filep);
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations pipe_fops =
+static const struct file_operations g_pipe_fops =
 {
   pipecommon_open,     /* open */
   pipe_close,          /* close */
@@ -68,14 +62,10 @@ static const struct file_operations pipe_fops =
   NULL,                /* seek */
   pipecommon_ioctl,    /* ioctl */
   pipecommon_poll      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , pipecommon_unlink  /* unlink */
-#endif
 };
 
-static sem_t  g_pipesem       = SEM_INITIALIZER(1);
-static uint32_t g_pipeset     = 0;
-static uint32_t g_pipecreated = 0;
+static sem_t g_pipesem = SEM_INITIALIZER(1);
+static int   g_pipeno;
 
 /****************************************************************************
  * Private Functions
@@ -87,36 +77,22 @@ static uint32_t g_pipecreated = 0;
 
 static inline int pipe_allocate(void)
 {
-  int pipeno;
-  int ret = -ENFILE;
-
-  for (pipeno = 0; pipeno < MAX_PIPES; pipeno++)
-    {
-      if ((g_pipeset & (1 << pipeno)) == 0)
-        {
-          g_pipeset |= (1 << pipeno);
-          ret = pipeno;
-          break;
-        }
-    }
-
-  return ret;
-}
-
-/****************************************************************************
- * Name: pipe_free
- ****************************************************************************/
-
-static inline void pipe_free(int pipeno)
-{
   int ret;
 
   ret = nxsem_wait(&g_pipesem);
-  if (ret == OK)
+  if (ret < 0)
     {
-      g_pipeset &= ~(1 << pipeno);
-      nxsem_post(&g_pipesem);
+      return ret;
     }
+
+  ret = g_pipeno++;
+  if (g_pipeno < 0)
+    {
+      g_pipeno = 0;
+    }
+
+  nxsem_post(&g_pipesem);
+  return ret;
 }
 
 /****************************************************************************
@@ -138,7 +114,7 @@ static int pipe_close(FAR struct file *filep)
     {
       /* Release the pipe when there are no further open references to it. */
 
-      pipe_free(dev->d_pipeno);
+      pipecommon_freedev(dev);
     }
 
   return ret;
@@ -155,69 +131,34 @@ static int pipe_register(size_t bufsize, int flags,
   int pipeno;
   int ret;
 
-  /* Get exclusive access to the pipe allocation data */
-
-  ret = nxsem_wait(&g_pipesem);
-  if (ret < 0)
-    {
-      goto errout;
-    }
-
   /* Allocate a minor number for the pipe device */
 
   pipeno = pipe_allocate();
   if (pipeno < 0)
     {
-      ret = pipeno;
-      goto errout_with_sem;
+      return pipeno;
     }
 
   /* Create a pathname to the pipe device */
 
-  snprintf(devname, namesize, "/dev/pipe%d", pipeno);
+  snprintf(devname, namesize, CONFIG_DEV_PIPE_VFS_PATH"/%d", pipeno);
 
-  /* Check if the pipe device has already been created */
+  /* Allocate and initialize a new device structure instance */
 
-  if ((g_pipecreated & (1 << pipeno)) == 0)
+  dev = pipecommon_allocdev(bufsize);
+  if (dev == NULL)
     {
-      /* No.. Allocate and initialize a new device structure instance */
-
-      dev = pipecommon_allocdev(bufsize);
-      if (!dev)
-        {
-          ret = -ENOMEM;
-          goto errout_with_pipe;
-        }
-
-      dev->d_pipeno = pipeno;
-
-      /* Register the pipe device */
-
-      ret = register_driver(devname, &pipe_fops, 0666, (FAR void *)dev);
-      if (ret != 0)
-        {
-          nxsem_post(&g_pipesem);
-          goto errout_with_dev;
-        }
-
-      /* Remember that we created this device */
-
-       g_pipecreated |= (1 << pipeno);
+      return -ENOMEM;
     }
 
-  nxsem_post(&g_pipesem);
-  return OK;
+  /* Register the pipe device */
 
-errout_with_dev:
-  pipecommon_freedev(dev);
+  ret = register_driver(devname, &g_pipe_fops, 0666, (FAR void *)dev);
+  if (ret != 0)
+    {
+      pipecommon_freedev(dev);
+    }
 
-errout_with_pipe:
-  pipe_free(pipeno);
-
-errout_with_sem:
-  nxsem_post(&g_pipesem);
-
-errout:
   return ret;
 }
 
@@ -251,7 +192,7 @@ errout:
 
 int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
 {
-  char devname[16];
+  char devname[32];
   int ret;
 
   /* Register a new pipe device */
@@ -278,6 +219,9 @@ int file_pipe(FAR struct file *filep[2], size_t bufsize, int flags)
       goto errout_with_wrfd;
     }
 
+  /* Remove the pipe name from file system */
+
+  unregister_driver(devname);
   return OK;
 
 errout_with_wrfd:
@@ -290,7 +234,7 @@ errout_with_driver:
 
 int nx_pipe(int fd[2], size_t bufsize, int flags)
 {
-  char devname[16];
+  char devname[32];
   int ret;
 
   /* Register a new pipe device */
@@ -319,6 +263,9 @@ int nx_pipe(int fd[2], size_t bufsize, int flags)
       goto errout_with_wrfd;
     }
 
+  /* Remove the pipe name from file system */
+
+  unregister_driver(devname);
   return OK;
 
 errout_with_wrfd:

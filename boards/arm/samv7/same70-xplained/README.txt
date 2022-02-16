@@ -1738,3 +1738,17 @@ Configuration sub-directories
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"
+
+  pysim:
+    This configuration includes support for pysimCoder appliaction (for further
+    information regarding NuttX and pysimCoder please refer to NuttX documentation).
+
+    Following peripherals are included:
+
+      ADC - AFEC0 - channels 0, 6 and 8
+      PWM - PWM0  - channels 0, 1, 2
+      Ethernet - TCP and UPD support
+
+  pwm:
+    This configuration is an example of PWM driver. The multichannel option is set on
+    and PWM is generated on channels 0, 1 and 2 for driver PWM0.

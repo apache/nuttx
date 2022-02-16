@@ -75,6 +75,8 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
                                     FAR const void *value,
                                     socklen_t value_len)
 {
+  FAR struct socket_conn_s *conn = psock->s_conn;
+
   /* Verify that the socket option if valid (but might not be supported ) */
 
   if (!_SO_SETVALID(option) || !value)
@@ -114,22 +116,22 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           if (option == SO_RCVTIMEO)
             {
-              psock->s_rcvtimeo = timeo;
+              conn->s_rcvtimeo = timeo;
             }
           else
             {
-              psock->s_sndtimeo = timeo;
+              conn->s_sndtimeo = timeo;
             }
 
           /* Set/clear the corresponding enable/disable bit */
 
           if (timeo)
             {
-              _SO_CLROPT(psock->s_options, option);
+              _SO_CLROPT(conn->s_options, option);
             }
           else
             {
-              _SO_SETOPT(psock->s_options, option);
+              _SO_SETOPT(conn->s_options, option);
             }
 
           return OK;
@@ -304,11 +306,11 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           if (setting)
             {
-              _SO_SETOPT(psock->s_options, option);
+              _SO_SETOPT(conn->s_options, option);
             }
           else
             {
-              _SO_CLROPT(psock->s_options, option);
+              _SO_CLROPT(conn->s_options, option);
             }
 
           net_unlock();
@@ -360,13 +362,13 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           if (setting->l_onoff)
             {
-              _SO_SETOPT(psock->s_options, option);
-              psock->s_linger = 10 * setting->l_linger;
+              _SO_SETOPT(conn->s_options, option);
+              conn->s_linger = 10 * setting->l_linger;
             }
           else
             {
-              _SO_CLROPT(psock->s_options, option);
-              psock->s_linger = 0;
+              _SO_CLROPT(conn->s_options, option);
+              conn->s_linger = 0;
             }
 
           net_unlock();
@@ -390,7 +392,7 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           net_lock();
 
-          psock->s_timestamp = *((FAR int32_t *)value);
+          conn->s_timestamp = *((FAR int32_t *)value);
 
           net_unlock();
         }

@@ -284,29 +284,30 @@ static int pca9635pw_ioctl(FAR struct file *filep, int cmd,
        * Arg: pca9635pw_brightness_s pointer.
        */
 
-    case PWMIOC_SETLED_BRIGHTNESS:
-      {
-        /* Retrieve the information handed over as argument for this ioctl */
+      case PWMIOC_SETLED_BRIGHTNESS:
+        {
+          /* Retrieve the information handed over as argument for this ioctl
+           */
 
-        FAR const struct pca9635pw_brightness_s *ptr =
-          (FAR const struct pca9635pw_brightness_s *)((uintptr_t)arg);
+          FAR const struct pca9635pw_brightness_s *ptr =
+            (FAR const struct pca9635pw_brightness_s *)((uintptr_t)arg);
 
-        DEBUGASSERT(ptr != NULL);
+          DEBUGASSERT(ptr != NULL);
 
-        /* Set the brighntess of the led */
+          /* Set the brightness of the led */
 
-        ret = pca9635pw_i2c_write_byte(priv, ptr->led, ptr->brightness);
-      }
-      break;
+          ret = pca9635pw_i2c_write_byte(priv, ptr->led, ptr->brightness);
+        }
+        break;
 
-      /* The used ioctl command was invalid */
+        /* The used ioctl command was invalid */
 
-    default:
-      {
-        lcderr("ERROR: Unrecognized cmd: %d\n", cmd);
-        ret = -ENOTTY;
-      }
-      break;
+      default:
+        {
+          lcderr("ERROR: Unrecognized cmd: %d\n", cmd);
+          ret = -ENOTTY;
+        }
+        break;
     }
 
   return ret;
@@ -357,7 +358,7 @@ int pca9635pw_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 
   /* Register the character driver */
 
-  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 0666, priv);
+  int const ret = register_driver(devpath, &g_pca9635pw_fileops, 0222, priv);
   if (ret != OK)
     {
       lcderr("ERROR: Failed to register driver: %d\n", ret);

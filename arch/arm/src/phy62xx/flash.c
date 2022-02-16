@@ -234,7 +234,7 @@ static void __RAMRUN hw_spif_cache_config(void)
   hal_cache_init();
 }
 
-int __RAMRUN hal_spif_cache_init(void) /* xflash_Ctx_t cfg) */
+int __RAMRUN hal_spif_cache_init(xflash_Ctx_t cfg)
 {
   /* memset(&(s_xflashCtx), 0, sizeof(s_xflashCtx)); */
 
@@ -251,6 +251,7 @@ int __RAMRUN hal_flash_read(uint32_t addr, uint8_t *data, uint32_t size)
                 ((addr & 0x7ffff) | FLASH_BASE_ADDR);
 
   /* uint32_t cb = AP_PCR->CACHE_BYPASS; */
+
   #if(SPIF_FLASH_SIZE == FLASH_SIZE_1MB)
   uint32_t remap = addr & 0xf80000;
 

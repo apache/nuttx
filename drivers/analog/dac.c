@@ -74,8 +74,6 @@
 
 static int     dac_open(FAR struct file *filep);
 static int     dac_close(FAR struct file *filep);
-static ssize_t dac_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
 static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
@@ -88,7 +86,7 @@ static const struct file_operations dac_fops =
 {
   dac_open,       /* open */
   dac_close,      /* close */
-  dac_read,       /* read */
+  NULL,           /* read */
   dac_write,      /* write */
   NULL,           /* seek */
   dac_ioctl,      /* ioctl */
@@ -222,16 +220,6 @@ static int dac_close(FAR struct file *filep)
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: dac_read
- ****************************************************************************/
-
-static ssize_t dac_read(FAR struct file *filep, FAR char *buffer,
-                        size_t buflen)
-{
-  return 0;
 }
 
 /****************************************************************************

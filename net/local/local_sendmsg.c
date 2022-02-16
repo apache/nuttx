@@ -324,7 +324,7 @@ static ssize_t local_sendto(FAR struct socket *psock,
   /* Open the sending side of the transfer */
 
   ret = local_open_sender(conn, unaddr->sun_path,
-                          _SS_ISNONBLOCK(psock->s_flags) ||
+                          _SS_ISNONBLOCK(conn->lc_conn.s_flags) ||
                           (flags & MSG_DONTWAIT) != 0);
   if (ret < 0)
     {

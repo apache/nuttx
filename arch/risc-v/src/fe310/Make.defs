@@ -33,6 +33,7 @@ CMN_CSRCS += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c riscv_mde
 CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c riscv_copyfullstate.c
 CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
+CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c
@@ -48,6 +49,6 @@ endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = fe310_allocateheap.c fe310_clockconfig.c fe310_gpio.c
-CHIP_CSRCS += fe310_idle.c fe310_irq.c fe310_irq_dispatch.c
+CHIP_CSRCS += fe310_irq.c fe310_irq_dispatch.c
 CHIP_CSRCS += fe310_lowputc.c fe310_serial.c
 CHIP_CSRCS += fe310_start.c fe310_timerisr.c

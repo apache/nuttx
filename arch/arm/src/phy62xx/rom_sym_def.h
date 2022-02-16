@@ -31,6 +31,7 @@
    * #define x _symrom_
    */
 
+  #define TIM2_IRQHandler _symrom_TIM2_IRQHandler
   #define gpio_write _symrom_gpio_write
   #define ll_processExtInitIRQ _symrom_ll_processExtInitIRQ
   #define ll_processExtScanIRQ _symrom_ll_processExtScanIRQ
@@ -956,6 +957,7 @@
   #define spif_wrdata _symrom_spif_wrdata
   #define spif_write _symrom_spif_write
   #define spif_write_protect _symrom_spif_write_protect
+  #define spif_write_dma _symrom_spif_write_dma
   #define sram_ret_patch _symrom_sram_ret_patch
   #define supportedCmdsTable _symrom_supportedCmdsTable
   #define syncInfo _symrom_syncInfo

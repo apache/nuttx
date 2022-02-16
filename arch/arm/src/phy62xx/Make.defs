@@ -33,7 +33,11 @@ CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 #CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 #CMN_CSRCS += arm_etherstub.c
-CMN_CSRCS += arm_switchcontext.c
+CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
+
+ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c
@@ -50,7 +54,8 @@ ifeq ($(CONFIG_DEBUG_FEATURES),y)
 CMN_CSRCS += arm_dumpnvic.c
 endif
 
-CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c
+CHIP_CSRCS  = start.c gpio.c irq.c timer.c uart.c pwrmgr.c idle.c my_printf.c
+#CHIP_CSRCS  = start.c gpio.c irq.c timer.c clock.c uart.c pwrmgr.c idle.c my_printf.c flash.c
 CHIP_CSRCS += jump_table.c
 CHIP_CSRCS += pplus_mtd_flash.c
 ifeq ($(CONFIG_PHY6222_BLE),y)
@@ -69,6 +74,10 @@ endif
 ifeq ($(CONFIG_DEV_GPIO),y)
 CHIP_CSRCS += phyplus_gpio.c
 endif
+
+#ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += phyplus_wdt.c
+#endif
 
 ifeq ($(CONFIG_PHYPLUS_STUB),y)
 CHIP_CSRCS += phyplus_stub.c
@@ -96,13 +105,9 @@ CFLAGS += -DHUGE_MODE=0
 CFLAGS += -DMAX_NUM_LL_CONN=1
 CFLAGS += -DUSE_ROMSYM_ALIAS
 #CFLAGS += -Wimplicit-function-declaration
-#CFLAGS += -Wunused-but-set-variable
+CFLAGS += -Wno-unused-but-set-variable
 CFLAGS += -DEXTERN_BLE_FUNC=0
 LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
-#CFLAGS += -Wstrict-prototypes
-#LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)board$(DELIM)bb_rom_sym_m0.gdbsym"
-#LDFLAGS += -Wl,-Map="../../../phyplus_build.map"		# param error
-#LDFLAGS += -Wl,--gc-sections					# param error
 
 .buildlib:
 	$(Q) if [ -d ../../../../phy62xxble ]; then \
@@ -112,6 +117,7 @@ LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
 		if [ ! -f libphy62xxble.a ]; then \
 			echo "############download lib form server############"; \
 			curl -L -o libphy62xxble.a http://www.phyplusinc.com/phyplus/libphy62xxble.a; \
+			mkdir -p ../../../staging; \
 			cp -a libphy62xxble.a ../../../staging; \
 		 else \
 			echo "############file exist############"; \
@@ -120,4 +126,34 @@ LDFLAGS += "$(ARCH_SRCDIR)$(DELIM)chip$(DELIM)bb_rom_sym_m0.gdbsym"
 
 context:: .buildlib
 
+LDFLAGS += -Map="../../../phyplus_build.map"
+
+ifndef CONFIG_PHY6222_SDK
+EXTRA_LIBPATHS += -L$(TOPDIR)/arch/arm/src/chip
 EXTRA_LIBS += -lphy62xxble
+CHIP_CSRCS += flash.c
+CHIP_CSRCS += clock.c 
+else
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/lib
+EXTRA_LIBS += -lphy6222_rf
+EXTRA_LIBS += -lphy6222_sec_boot
+EXTRA_LIBS += -lphy6222_host
+endif
+
+ifdef CONFIG_PHY6222_PHY_MESH
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/ethermind/lib/meshlibs/phyos/armgcc/
+EXTRA_LIBS += -lethermind_mesh_core
+EXTRA_LIBS += -lethermind_mesh_models
+EXTRA_LIBS += -lethermind_utils
+#LDLIBPATH += $(APPDIR)/phy6222/bbb_sdk/components/ethermind/lib/meshlibs/phyos/armgcc/
+#LDLIBS += -lethermind_mesh_core
+#LDLIBS += -lethermind_mesh_models
+#LDLIBS += -lethermind_utils
+endif
+
+ifdef CONFIG_MIJIA_APIS
+EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/xiaomi/libs/mesh_auth/debug/
+EXTRA_LIBS += -lmesh-auth-cortex-m0plus-debug
+endif
+
+

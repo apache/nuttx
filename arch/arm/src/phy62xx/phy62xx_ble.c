@@ -299,11 +299,13 @@ static int pplus_ble_open(struct bt_driver_s *drv)
 extern uint8_t hciCtrlCmdToken;
 int drv_disable_irq1(void)
 {
+  NVIC_DisableIRQs(BIT(TIM1_IRQn) | BIT(TIM2_IRQn) | BIT(BB_IRQn));
   return 0;
 }
 
 int drv_enable_irq1(void)
 {
+  NVIC_EnableIRQs(BIT(TIM1_IRQn) | BIT(TIM2_IRQn) | BIT(BB_IRQn));
   return 0;
 }
 

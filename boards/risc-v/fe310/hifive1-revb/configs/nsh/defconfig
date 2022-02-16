@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_DISABLE_PTHREAD is not set
 # CONFIG_NSH_DISABLEBG is not set
 # CONFIG_NSH_DISABLE_CAT is not set
 # CONFIG_NSH_DISABLE_ECHO is not set

@@ -31,6 +31,8 @@
 #include <queue.h>
 #include <netpacket/ieee802154.h>
 
+#include <nuttx/net/net.h>
+
 #ifdef CONFIG_NET_IEEE802154
 
 /****************************************************************************
@@ -40,9 +42,9 @@
 /* Allocate a new IEEE 802.15.4 socket data callback */
 
 #define ieee802154_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->list, &conn->list_tail)
+  devif_callback_alloc(dev, &conn->sconn.list, &conn->sconn.list_tail)
 #define ieee802154_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list, &conn->list_tail)
+  devif_conn_callback_free(dev, cb, &conn->sconn.list, &conn->sconn.list_tail)
 
 /* Memory Pools */
 
@@ -97,14 +99,7 @@ struct ieee802154_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;                             /* Supports a double linked list */
-
-  /* This is a list of IEEE 802.15.4 callbacks.  Each callback represents
-   * a thread that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *list;
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* IEEE 802.15.4-specific content follows */
 

@@ -49,7 +49,7 @@ CMN_ASRCS += arm_saveusercontext.S arm_vectoraddrexcptn.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S cp15_invalidate_dcache_all.S
-CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S
+CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S cp15_cache_size.S
 
 # Common C source files
 
@@ -62,7 +62,7 @@ CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_initialstate.c arm_mmu.c
 CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
+CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_tcbinfo.c
 
 ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
 CMN_CSRCS += arm_hostfs.c
@@ -94,7 +94,6 @@ endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c arm_signal_dispatch.c
-CMN_CSRCS += arm_pthread_exit.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)

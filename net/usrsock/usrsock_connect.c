@@ -214,7 +214,7 @@ int usrsock_connect(FAR struct socket *psock,
 
   /* Do not block on waiting for request completion if nonblocking socket. */
 
-  if (!conn->resp.inprogress || !_SS_ISNONBLOCK(psock->s_flags))
+  if (!conn->resp.inprogress || !_SS_ISNONBLOCK(conn->sconn.s_flags))
     {
       /* Wait for completion of request (or signal). */
 

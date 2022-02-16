@@ -120,14 +120,10 @@ struct pty_dev_s
   struct file pd_src;           /* Provides data to read() method (pipe output) */
   struct file pd_sink;          /* Accepts data from write() method (pipe input) */
   bool pd_master;               /* True: this is the master */
-
 #ifdef CONFIG_SERIAL_TERMIOS
-  /* Terminal control flags */
-
-  tcflag_t pd_iflag;            /* Terminal nput modes */
-  tcflag_t pd_oflag;            /* Terminal output modes */
+  tcflag_t pd_iflag;            /* Terminal input modes */
 #endif
-
+  tcflag_t pd_oflag;            /* Terminal output modes */
   struct pty_poll_s pd_poll[CONFIG_DEV_PTY_NPOLLWAITERS];
 };
 
@@ -138,12 +134,11 @@ struct pty_devpair_s
   struct pty_dev_s pp_master;   /* Maseter device */
   struct pty_dev_s pp_slave;    /* Slave device */
 
+  bool pp_susv1;                /* SUSv1 or BSD style */
   bool pp_locked;               /* Slave is locked */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   bool pp_unlinked;             /* File has been unlinked */
   uint8_t pp_minor;             /* Minor device number */
   uint16_t pp_nopen;            /* Open file count */
-#endif
   sem_t pp_slavesem;            /* Slave lock semaphore */
   sem_t pp_exclsem;             /* Mutual exclusion */
 };
@@ -153,14 +148,10 @@ struct pty_devpair_s
  ****************************************************************************/
 
 static int     pty_semtake(FAR struct pty_devpair_s *devpair);
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void    pty_destroy(FAR struct pty_devpair_s *devpair);
-#endif
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
 static int     pty_close(FAR struct file *filep);
-#endif
 static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
@@ -178,13 +169,8 @@ static int     pty_unlink(FAR struct inode *inode);
 
 static const struct file_operations g_pty_fops =
 {
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   pty_open,      /* open */
   pty_close,     /* close */
-#else
-  NULL,          /* open */
-  NULL,          /* close */
-#endif
   pty_read,      /* read */
   pty_write,     /* write */
   NULL,          /* seek */
@@ -218,53 +204,183 @@ static int pty_semtake(FAR struct pty_devpair_s *devpair)
  * Name: pty_destroy
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static void pty_destroy(FAR struct pty_devpair_s *devpair)
 {
   char devname[16];
 
-  /* Un-register the slave device */
+  if (devpair->pp_susv1)
+    {
+      /* Free this minor number so that it can be reused */
 
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
-#endif
+      ptmx_minor_free(devpair->pp_minor);
+
+      /* Un-register the slave device */
+
+      snprintf(devname, 16, "/dev/pts/%d", devpair->pp_minor);
+    }
+  else
+    {
+      /* Un-register the master device (/dev/ptyN may have already been
+       * unlinked).
+       */
+
+      snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
+      unregister_driver(devname);
+
+      /* Un-register the slave device */
+
+      snprintf(devname, 16, "/dev/ttyp%d", devpair->pp_minor);
+    }
+
   unregister_driver(devname);
-
-  /* Un-register the master device (/dev/ptyN may have already been
-   * unlinked).
-   */
-
-  snprintf(devname, 16, "/dev/pty%d", (int)devpair->pp_minor);
-  unregister_driver(devname);
-
-  /* Close the contained file structures */
-
-  file_close(&devpair->pp_master.pd_src);
-  file_close(&devpair->pp_master.pd_sink);
-  file_close(&devpair->pp_slave.pd_src);
-  file_close(&devpair->pp_slave.pd_sink);
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Free this minor number so that it can be reused */
-
-  ptmx_minor_free(devpair->pp_minor);
-#endif
 
   /* And free the device structure */
 
   nxsem_destroy(&devpair->pp_exclsem);
+  nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
 }
-#endif
+
+/****************************************************************************
+ * Name: pty_pipe
+ ****************************************************************************/
+
+static int pty_pipe(FAR struct pty_devpair_s *devpair)
+{
+  FAR struct file *pipe_a[2];
+  FAR struct file *pipe_b[2];
+  int ret;
+
+  /* Create two pipes:
+   *
+   *   pipe_a:  Master source, slave sink (TX, slave-to-master)
+   *   pipe_b:  Master sink, slave source (RX, master-to-slave)
+   */
+
+  pipe_a[0] = &devpair->pp_master.pd_src;
+  pipe_a[1] = &devpair->pp_slave.pd_sink;
+
+  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  pipe_b[0] = &devpair->pp_slave.pd_src;
+  pipe_b[1] = &devpair->pp_master.pd_sink;
+
+  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
+  if (ret < 0)
+    {
+      file_close(pipe_a[0]);
+      file_close(pipe_a[1]);
+    }
+
+  return ret;
+}
 
 /****************************************************************************
  * Name: pty_open
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int pty_open(FAR struct file *filep)
+{
+  FAR struct inode *inode;
+  FAR struct pty_dev_s *dev;
+  FAR struct pty_devpair_s *devpair;
+  int ret = OK;
+
+  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
+  inode   = filep->f_inode;
+  dev     = inode->i_private;
+  DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
+  devpair = dev->pd_devpair;
+
+  /* Get exclusive access to the device structure */
+
+  ret = pty_semtake(devpair);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  /* Wait if this is an attempt to open the slave device and the slave
+   * device is locked.
+   */
+
+  if (!dev->pd_master)
+    {
+      /* Slave... Check if the slave driver is locked. */
+
+      while (devpair->pp_locked)
+        {
+          /* Release the exclusive access before wait */
+
+          pty_semgive(devpair);
+
+          /* Wait until unlocked.
+           * We will also most certainly suspend here.
+           */
+
+          ret = nxsem_wait(&devpair->pp_slavesem);
+          if (ret < 0)
+            {
+              return ret;
+            }
+
+          /* Restore the semaphore count */
+
+          DEBUGVERIFY(nxsem_post(&devpair->pp_slavesem));
+
+          /* Get exclusive access to the device structure.  This might also
+           * cause suspension.
+           */
+
+          ret = pty_semtake(devpair);
+          if (ret < 0)
+            {
+              return ret;
+            }
+        }
+    }
+
+  /* If one side of the driver has been unlinked, then refuse further
+   * opens.
+   */
+
+  if (devpair->pp_unlinked)
+    {
+      ret = -EIDRM;
+    }
+  else
+    {
+      /* First open? */
+
+      if (devpair->pp_nopen == 0)
+        {
+          /* Yes, create the internal pipe */
+
+          ret = pty_pipe(devpair);
+        }
+
+      /* Increment the count of open references on the driver */
+
+      if (ret >= 0)
+        {
+          devpair->pp_nopen++;
+          DEBUGASSERT(devpair->pp_nopen > 0);
+        }
+    }
+
+  pty_semgive(devpair);
+  return ret;
+}
+
+/****************************************************************************
+ * Name: pty_open
+ ****************************************************************************/
+
+static int pty_close(FAR struct file *filep)
 {
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
@@ -277,116 +393,6 @@ static int pty_open(FAR struct file *filep)
   DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
   devpair = dev->pd_devpair;
 
-  /* Wait if this is an attempt to open the slave device and the slave
-   * device is locked.
-   */
-
-  if (!dev->pd_master)
-    {
-      /* Slave... Check if the slave driver is locked.  We need to lock the
-       * scheduler while we are running to prevent asyncrhonous modification
-       * of pp_locked by pty_ioctl().
-       */
-
-      sched_lock();
-      while (devpair->pp_locked)
-        {
-          /* Wait until unlocked.
-           * We will also most certainly suspend here.
-           */
-
-          ret = nxsem_wait(&devpair->pp_slavesem);
-          if (ret < 0)
-            {
-              sched_unlock();
-              return ret;
-            }
-
-          /* Get exclusive access to the device structure.  This might also
-           * cause suspension.
-           */
-
-          ret = pty_semtake(devpair);
-          if (ret < 0)
-            {
-              sched_unlock();
-              return ret;
-            }
-
-          /* Check again in case something happened asynchronously while we
-           * were suspended.
-           */
-
-          if (devpair->pp_locked)
-            {
-              /* This cannot suspend because we have the scheduler locked.
-               * So pp_locked cannot change asyncrhonously between this test
-               * and the redundant test at the top of the loop.
-               */
-
-              pty_semgive(devpair);
-            }
-        }
-
-      sched_unlock();
-    }
-  else
-    {
-      /* Master ... Get exclusive access to the device structure */
-
-      ret = pty_semtake(devpair);
-      if (ret < 0)
-        {
-          return ret;
-        }
-    }
-
-#ifndef CONFIG_PSEUDOTERM_SUSV1
-  /* If one side of the driver has been unlinked, then refuse further
-   * opens.
-   *
-   * NOTE: We ignore this case in the SUSv1 case.  In the SUSv1 case, the
-   * master side is always unlinked.
-   */
-
-  if (devpair->pp_unlinked)
-    {
-      ret = -EIDRM;
-    }
-  else
-#endif
-    {
-      /* Increment the count of open references on the driver */
-
-      devpair->pp_nopen++;
-      DEBUGASSERT(devpair->pp_nopen > 0);
-
-      ret = OK;
-    }
-
-  pty_semgive(devpair);
-  return ret;
-}
-#endif
-
-/****************************************************************************
- * Name: pty_open
- ****************************************************************************/
-
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-static int pty_close(FAR struct file *filep)
-{
-  FAR struct inode *inode;
-  FAR struct pty_dev_s *dev;
-  FAR struct pty_devpair_s *devpair;
-  int ret;
-
-  DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
-  inode     = filep->f_inode;
-  dev       = inode->i_private;
-  DEBUGASSERT(dev != NULL && dev->pd_devpair != NULL);
-  devpair   = dev->pd_devpair;
-
   /* Get exclusive access */
 
   ret = pty_semtake(devpair);
@@ -395,19 +401,27 @@ static int pty_close(FAR struct file *filep)
       return ret;
     }
 
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Did the (single) master just close its reference? */
+  /* Check if the decremented inode reference count would go to zero */
 
-  if (dev->pd_master)
+  if (inode->i_crefs == 1)
     {
-      /* Yes, then we are essentially unlinked and when all of the
-       * slaves close there references, then the PTY should be
-       * destroyed.
-       */
+      /* Did the (single) master just close its reference? */
 
-      devpair->pp_unlinked = true;
+      if (dev->pd_master && devpair->pp_susv1)
+        {
+          /* Yes, then we are essentially unlinked and when all of the
+           * slaves close there references, then the PTY should be
+           * destroyed.
+           */
+
+          devpair->pp_unlinked = true;
+        }
+
+      /* Close the contained file structures */
+
+      file_close(&dev->pd_src);
+      file_close(&dev->pd_sink);
     }
-#endif
 
   /* Is this the last open reference?  If so, was the driver previously
    * unlinked?
@@ -431,7 +445,6 @@ static int pty_close(FAR struct file *filep)
   pty_semgive(devpair);
   return OK;
 }
-#endif
 
 /****************************************************************************
  * Name: pty_read
@@ -623,18 +636,15 @@ static ssize_t pty_write(FAR struct file *filep,
   FAR struct inode *inode;
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
-#ifdef CONFIG_SERIAL_TERMIOS
   ssize_t nwritten;
   size_t i;
   char ch;
-#endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
   inode = filep->f_inode;
   dev   = inode->i_private;
   DEBUGASSERT(dev != NULL);
 
-#ifdef CONFIG_SERIAL_TERMIOS
   /* Do output post-processing */
 
   if ((dev->pd_oflag & OPOST) != 0)
@@ -709,7 +719,6 @@ static ssize_t pty_write(FAR struct file *filep,
         }
     }
   else
-#endif
     {
       /* Write the 'len' bytes to the sink pipe.  This will block until all
        * 'len' bytes have been written to the pipe.
@@ -763,9 +772,6 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case TIOCGPTN:    /* Get Pty Number (of pty-mux device): FAR int* */
         {
-#ifdef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-          ret = -ENOSYS;
-#else
           FAR int *ptyno = (FAR int *)((uintptr_t)arg);
           if (ptyno == NULL)
             {
@@ -773,10 +779,9 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              *ptyno = (int)devpair->pp_minor;
+              *ptyno = devpair->pp_minor;
               ret = OK;
             }
-#endif
         }
         break;
 
@@ -784,35 +789,26 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           if (arg == 0)
             {
-               int sval;
+              if (devpair->pp_locked)
+                {
+                  /* Release any waiting threads */
 
-               /* Unlocking */
-
-               sched_lock();
-               devpair->pp_locked = false;
-
-               /* Release any waiting threads */
-
-               do
-                 {
-                   DEBUGVERIFY(nxsem_get_value(&devpair->pp_slavesem,
-                                               &sval));
-                   if (sval < 0)
-                     {
-                       nxsem_post(&devpair->pp_slavesem);
-                     }
-                 }
-               while (sval < 0);
-
-               sched_unlock();
-               ret = OK;
+                  ret = nxsem_post(&devpair->pp_slavesem);
+                  if (ret >= 0)
+                    {
+                      devpair->pp_locked = false;
+                    }
+                }
             }
-          else
+          else if (!devpair->pp_locked)
             {
               /* Locking */
 
-               devpair->pp_locked = true;
-               ret = OK;
+              ret = nxsem_wait(&devpair->pp_slavesem);
+              if (ret >= 0)
+                {
+                  devpair->pp_locked = true;
+                }
             }
         }
         break;
@@ -826,7 +822,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             }
           else
             {
-              *ptr = (int)devpair->pp_locked;
+              *ptr = devpair->pp_locked;
               ret = OK;
             }
         }
@@ -1024,8 +1020,8 @@ static int pty_unlink(FAR struct inode *inode)
   int ret;
 
   DEBUGASSERT(inode != NULL && inode->i_private != NULL);
-  dev       = inode->i_private;
-  devpair   = dev->pd_devpair;
+  dev     = inode->i_private;
+  devpair = dev->pd_devpair;
   DEBUGASSERT(dev->pd_devpair != NULL);
 
   /* Get exclusive access */
@@ -1060,7 +1056,7 @@ static int pty_unlink(FAR struct inode *inode)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pty_register
+ * Name: pty_register2
  *
  * Description:
  *   Create and register PTY master and slave devices.  The slave side of
@@ -1069,6 +1065,7 @@ static int pty_unlink(FAR struct inode *inode)
  *
  * Input Parameters:
  *   minor - The number that qualifies the naming of the created devices.
+ *   susv1 - select SUSv1 or BSD behaviour
  *
  * Returned Value:
  *   0 is returned on success; otherwise, the negative error code return
@@ -1076,11 +1073,9 @@ static int pty_unlink(FAR struct inode *inode)
  *
  ****************************************************************************/
 
-int pty_register(int minor)
+int pty_register2(int minor, bool susv1)
 {
   FAR struct pty_devpair_s *devpair;
-  FAR struct file *pipe_a[2];
-  FAR struct file *pipe_b[2];
   char devname[16];
   int ret;
 
@@ -1103,65 +1098,17 @@ int pty_register(int minor)
 
   nxsem_set_protocol(&devpair->pp_slavesem, SEM_PRIO_NONE);
 
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  devpair->pp_susv1             = susv1;
   devpair->pp_minor             = minor;
-#endif
   devpair->pp_locked            = true;
   devpair->pp_master.pd_devpair = devpair;
   devpair->pp_master.pd_master  = true;
   devpair->pp_slave.pd_devpair  = devpair;
-#ifdef CONFIG_SERIAL_TERMIOS
-  devpair->pp_slave.pd_iflag    = ISIG;
   devpair->pp_slave.pd_oflag    = OPOST | ONLCR;
-#endif
-
-  /* Create two pipes:
-   *
-   *   pipe_a:  Master source, slave sink (TX, slave-to-master)
-   *   pipe_b:  Master sink, slave source (RX, master-to-slave)
-   */
-
-  pipe_a[0] = &devpair->pp_master.pd_src;
-  pipe_a[1] = &devpair->pp_slave.pd_sink;
-
-  ret = file_pipe(pipe_a, CONFIG_PSEUDOTERM_TXBUFSIZE, 0);
-  if (ret < 0)
-    {
-      goto errout_with_devpair;
-    }
-
-  pipe_b[0] = &devpair->pp_slave.pd_src;
-  pipe_b[1] = &devpair->pp_master.pd_sink;
-
-  ret = file_pipe(pipe_b, CONFIG_PSEUDOTERM_RXBUFSIZE, 0);
-  if (ret < 0)
-    {
-      goto errout_with_pipea;
-    }
-
-  /* Register the slave device
-   *
-   * BSD style (deprecated): /dev/ttypN
-   * SUSv1 style:  /dev/pts/N
-   *
-   * Where N is the minor number
-   */
-
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", minor);
-#endif
-
-  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
-  if (ret < 0)
-    {
-      goto errout_with_pipeb;
-    }
 
   /* Register the master device
    *
-   * BSD style (deprecated):  /dev/ptyN
+   * BSD style (deprecated): /dev/ptyN
    * SUSv1 style: Master: /dev/ptmx (multiplexor, see ptmx.c)
    *
    * Where N is the minor number
@@ -1172,30 +1119,66 @@ int pty_register(int minor)
   ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_master);
   if (ret < 0)
     {
-      goto errout_with_slave;
+      goto errout_with_devpair;
+    }
+
+  /* Register the slave device
+   *
+   * BSD style (deprecated): /dev/ttypN
+   * SUSv1 style: /dev/pts/N
+   *
+   * Where N is the minor number
+   */
+
+  if (susv1)
+    {
+      snprintf(devname, 16, "/dev/pts/%d", minor);
+    }
+  else
+    {
+      snprintf(devname, 16, "/dev/ttyp%d", minor);
+    }
+
+  ret = register_driver(devname, &g_pty_fops, 0666, &devpair->pp_slave);
+  if (ret < 0)
+    {
+      goto errout_with_master;
     }
 
   return OK;
 
-errout_with_slave:
-#ifdef CONFIG_PSEUDOTERM_BSD
-  snprintf(devname, 16, "/dev/ttyp%d", minor);
-#else
-  snprintf(devname, 16, "/dev/pts/%d", minor);
-#endif
+errout_with_master:
+  snprintf(devname, 16, "/dev/pty%d", minor);
   unregister_driver(devname);
-
-errout_with_pipeb:
-  file_close(pipe_b[0]);
-  file_close(pipe_b[1]);
-
-errout_with_pipea:
-  file_close(pipe_a[0]);
-  file_close(pipe_a[1]);
 
 errout_with_devpair:
   nxsem_destroy(&devpair->pp_exclsem);
   nxsem_destroy(&devpair->pp_slavesem);
   kmm_free(devpair);
   return ret;
+}
+
+/****************************************************************************
+ * Name: pty_register
+ *
+ * Description:
+ *   Create and register PTY master and slave devices.  The master device
+ *   will be registered at /dev/ptyN and slave at /dev/ttypN where N is
+ *   the provided minor number.
+ *
+ *   The slave side of the interface is always locked initially.  The
+ *   master must call unlockpt() before the slave device can be opened.
+ *
+ * Input Parameters:
+ *   minor - The number that qualifies the naming of the created devices.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned on
+ *   any failure.
+ *
+ ****************************************************************************/
+
+int pty_register(int minor)
+{
+  return pty_register2(minor, false);
 }

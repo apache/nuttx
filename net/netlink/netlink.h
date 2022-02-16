@@ -59,7 +59,7 @@ struct netlink_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;                   /* Supports a doubly linked list */
+  struct socket_conn_s sconn;
 
   /* NetLink-specific content follows */
 

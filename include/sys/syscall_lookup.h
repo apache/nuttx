@@ -54,6 +54,8 @@ SYSCALL_LOOKUP(nxsched_get_stackinfo,      2)
   SYSCALL_LOOKUP(sched_setaffinity,        3)
 #endif
 
+SYSCALL_LOOKUP(sysinfo,                    1)
+
 SYSCALL_LOOKUP(gethostname,                2)
 SYSCALL_LOOKUP(sethostname,                2)
 
@@ -144,11 +146,7 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(exec,                     4)
 #endif
 #ifdef CONFIG_LIBC_EXECFUNCS
-#ifdef CONFIG_LIBC_ENVPATH
-  SYSCALL_LOOKUP(posix_spawnp,             6)
-#else
   SYSCALL_LOOKUP(posix_spawn,              6)
-#endif
   SYSCALL_LOOKUP(execv,                    2)
 #endif
 #endif
@@ -309,7 +307,7 @@ SYSCALL_LOOKUP(futimens,                   2)
   SYSCALL_LOOKUP(pthread_cond_broadcast,   1)
   SYSCALL_LOOKUP(pthread_cond_signal,      1)
   SYSCALL_LOOKUP(pthread_cond_wait,        2)
-  SYSCALL_LOOKUP(nx_pthread_create,        6)
+  SYSCALL_LOOKUP(nx_pthread_create,        5)
   SYSCALL_LOOKUP(pthread_detach,           1)
   SYSCALL_LOOKUP(nx_pthread_exit,          1)
   SYSCALL_LOOKUP(pthread_getschedparam,    3)

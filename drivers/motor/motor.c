@@ -589,7 +589,7 @@ int motor_register(FAR const char *path,
 
   /* Register the motor character driver */
 
-  ret = register_driver(path, &motor_fops, 0444, upper);
+  ret = register_driver(path, &motor_fops, 0666, upper);
   if (ret < 0)
     {
       nxsem_destroy(&upper->closesem);

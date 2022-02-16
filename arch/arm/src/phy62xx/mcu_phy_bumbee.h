@@ -31,7 +31,7 @@ extern "C"
  ****************************************************************************/
 
 #include "types.h"
-
+#include "bus_dev.h"
 typedef enum
 {
     MOD_NONE        = 0, MOD_CK802_CPU   = 0,

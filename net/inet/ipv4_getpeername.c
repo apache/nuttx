@@ -71,6 +71,7 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 {
 #if defined(NET_TCP_HAVE_STACK) || defined(NET_UDP_HAVE_STACK)
   FAR struct sockaddr_in *outaddr = (FAR struct sockaddr_in *)addr;
+  FAR struct socket_conn_s *conn = psock->s_conn;
   in_addr_t ripaddr;
 
   /* Check if enough space has been provided for the full address */
@@ -87,7 +88,7 @@ int ipv4_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Verify that the socket has been connected */
 
-  if (_SS_ISCONNECTED(psock->s_flags) == 0)
+  if (_SS_ISCONNECTED(conn->s_flags) == 0)
     {
       return -ENOTCONN;
     }

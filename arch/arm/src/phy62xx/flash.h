@@ -135,7 +135,7 @@ extern void spif_cmd(uint8_t op, uint8_t addrlen,
 extern void spif_rddata(uint8_t *data, uint8_t len);
 extern int spif_config(sysclk_t ref_clk, uint8_t div,
     uint32_t rd_instr, uint8_t mode_bit, uint8_t QE);
-int hal_spif_cache_init(void);  /* xflash_Ctx_t cfg); */
+int hal_spif_cache_init(xflash_Ctx_t cfg);
 
 int hal_flash_write(uint32_t addr, uint8_t *data, uint32_t size);
 int hal_flash_write_by_dma(uint32_t addr, uint8_t *data, uint32_t size);

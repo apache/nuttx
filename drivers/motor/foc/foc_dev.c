@@ -845,7 +845,7 @@ int foc_register(FAR const char *path, FAR struct foc_dev_s *dev)
 
   /* Register the FOC character driver */
 
-  ret = register_driver(path, &g_foc_fops, 0444, dev);
+  ret = register_driver(path, &g_foc_fops, 0666, dev);
   if (ret < 0)
     {
       nxsem_destroy(&dev->closesem);

@@ -293,11 +293,11 @@ ssize_t psock_6lowpan_udp_sendto(FAR struct socket *psock,
    */
 
   ret = sixlowpan_send(dev,
-                       &conn->list,
-                       &conn->list_tail,
+                       &conn->sconn.list,
+                       &conn->sconn.list_tail,
                        (FAR const struct ipv6_hdr_s *)&ipv6udp,
                        buf, buflen, &destmac,
-                       _SO_TIMEOUT(psock->s_sndtimeo));
+                       _SO_TIMEOUT(conn->sconn.s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send() failed: %d\n", ret);
@@ -349,18 +349,18 @@ ssize_t psock_6lowpan_udp_send(FAR struct socket *psock, FAR const void *buf,
       return (ssize_t)-EBADF;
     }
 
+  /* Get the underlying UDP "connection" structure */
+
+  conn = (FAR struct udp_conn_s *)psock->s_conn;
+
   /* Was the UDP socket connected via connect()? */
 
-  if (psock->s_type != SOCK_DGRAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (psock->s_type != SOCK_DGRAM || !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* No, then it is not legal to call send() with this socket. */
 
       return -ENOTCONN;
     }
-
-  /* Get the underlying UDP "connection" structure */
-
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
 
   /* Ignore if not IPv6 domain */
 

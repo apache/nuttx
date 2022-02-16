@@ -54,8 +54,7 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS) && \
-    defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
 /* In the PROTECTED build, the builtin arrays are only needed by BINFS.
  * in this case, the user-space globals are not accessible and must be
  * provided to the OS via the boardctl(BOARDIOC_BUILTINS) call.  In this
@@ -108,8 +107,7 @@ EXTERN const int g_builtin_count;
  *
  ****************************************************************************/
 
-#if defined(CONFIG_BUILD_PROTECTED) && defined(CONFIG_FS_BINFS) && \
-    defined(__KERNEL__)
+#if defined(CONFIG_BUILD_PROTECTED) && defined(__KERNEL__)
 void builtin_setlist(FAR const struct builtin_s *builtins, int count);
 #endif
 

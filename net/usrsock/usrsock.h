@@ -83,14 +83,7 @@ struct usrsock_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;                   /* Supports a doubly linked list */
-
-  /* This is a list of usrsock callbacks.  Each callback represents a thread
-   * that is stalled, waiting for a specific event.
-   */
-
-  FAR struct devif_callback_s *list; /* Usersock callbacks */
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* usrsock-specific content follows */
 

@@ -581,7 +581,7 @@ static int sst39vf_erase(FAR struct mtd_dev_s *dev, off_t startblock,
     {
       /* Clear the sector */
 
-      ret = sst39vf_sectorerase(priv, address);
+      ret = sst39vf_sectorerase(priv, address >> 1);
       if (ret < 0)
         {
           return ret;
@@ -611,7 +611,7 @@ static ssize_t sst39vf_bread(FAR struct mtd_dev_s *dev, off_t startblock,
   /* Get the source address and the size of the transfer */
 
   source = (FAR const uint8_t *)
-           SST39VF_ADDR(startblock * priv->chip->sectorsize);
+           SST39VF_ADDR(startblock * priv->chip->sectorsize >> 1);
   nbytes = nblocks * priv->chip->sectorsize;
 
   /* Copy the data to the user buffer */
@@ -642,8 +642,7 @@ static ssize_t sst39vf_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
 
   /* Get the destination address and the size of the transfer */
 
-  wrinfo.address =
-    (uintptr_t)SST39VF_ADDR((startblock * priv->chip->sectorsize));
+  wrinfo.address = (uintptr_t)(startblock * priv->chip->sectorsize >> 1);
   nwords = nblocks * (priv->chip->sectorsize >> 1);
 
   /* Copy the data to the user buffer */
@@ -657,7 +656,7 @@ static ssize_t sst39vf_bwrite(FAR struct mtd_dev_s *dev, off_t startblock,
           return ret;
         }
 
-      wrinfo.address += sizeof(uint16_t);
+      wrinfo.address += sizeof(uint8_t);
     }
 
   return nblocks;
@@ -684,7 +683,7 @@ static ssize_t sst39vf_read(FAR struct mtd_dev_s *dev, off_t offset,
 
   /* Get the source address and the size of the transfer */
 
-  source = (FAR const uint8_t *)SST39VF_ADDR(offset);
+  source = (FAR const uint8_t *)SST39VF_ADDR(offset >> 1);
 
   /* Copy the data to the user buffer */
 

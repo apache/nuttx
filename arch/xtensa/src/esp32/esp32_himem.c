@@ -151,13 +151,16 @@ irqstate_t spinlock_flags;
 
 static const struct file_operations g_himemfops =
 {
-  himem_open,
-  himem_close,
-  himem_read,
-  himem_write,
-  NULL,
-  himem_ioctl,
-  NULL
+  himem_open,       /* open   */
+  himem_close,      /* close */
+  himem_read,       /* read */
+  himem_write,      /* write */
+  NULL,             /* seek */
+  himem_ioctl,      /* ioctl */
+  NULL              /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************

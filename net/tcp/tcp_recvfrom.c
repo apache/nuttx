@@ -58,7 +58,7 @@
 
 struct tcp_recvfrom_s
 {
-  FAR struct socket       *ir_sock;      /* The parent socket structure */
+  FAR struct tcp_conn_s   *ir_conn;      /* Connection associated with the socket */
   FAR struct devif_callback_s *ir_cb;    /* Reference to callback instance */
   sem_t                    ir_sem;       /* Semaphore signals recv completion */
   size_t                   ir_buflen;    /* Length of receive buffer */
@@ -170,8 +170,7 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
                                    FAR struct tcp_recvfrom_s *pstate,
                                    uint16_t flags)
 {
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)
-                                pstate->ir_sock->s_conn;
+  FAR struct tcp_conn_s *conn = pstate->ir_conn;
 
   /* Take as much data from the packet as we can */
 
@@ -237,8 +236,7 @@ static inline uint16_t tcp_newdata(FAR struct net_driver_s *dev,
 
 static inline void tcp_readahead(struct tcp_recvfrom_s *pstate)
 {
-  FAR struct tcp_conn_s *conn =
-    (FAR struct tcp_conn_s *)pstate->ir_sock->s_conn;
+  FAR struct tcp_conn_s *conn = pstate->ir_conn;
   FAR struct iob_s *iob;
   int recvlen;
 
@@ -461,7 +459,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
 
       else if ((flags & TCP_DISCONN_EVENTS) != 0)
         {
-          FAR struct socket *psock = pstate->ir_sock;
+          FAR struct tcp_conn_s *conn = pstate->ir_conn;
 
           nwarn("WARNING: Lost connection\n");
 
@@ -470,12 +468,12 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
            * already been disconnected.
            */
 
-          DEBUGASSERT(psock != NULL);
-          if (_SS_ISCONNECTED(psock->s_flags))
+          DEBUGASSERT(conn != NULL);
+          if (_SS_ISCONNECTED(conn->sconn.s_flags))
             {
               /* Handle loss-of-connection event */
 
-              tcp_lost_connection(psock, pstate->ir_cb, flags);
+              tcp_lost_connection(conn, pstate->ir_cb, flags);
             }
 
           /* Check if the peer gracefully closed the connection. */
@@ -510,7 +508,7 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
  *   Initialize the state structure
  *
  * Input Parameters:
- *   psock    Pointer to the socket structure for the socket
+ *   conn     The TCP connection of interest
  *   buf      Buffer to receive data
  *   len      Length of buffer
  *   pstate   A pointer to the state structure to be initialized
@@ -522,8 +520,9 @@ static uint16_t tcp_recvhandler(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static void tcp_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
-                                    size_t len, FAR struct sockaddr *infrom,
+static void tcp_recvfrom_initialize(FAR struct tcp_conn_s *conn,
+                                    FAR void *buf, size_t len,
+                                    FAR struct sockaddr *infrom,
                                     FAR socklen_t *fromlen,
                                     FAR struct tcp_recvfrom_s *pstate)
 {
@@ -545,7 +544,7 @@ static void tcp_recvfrom_initialize(FAR struct socket *psock, FAR void *buf,
 
   /* Set up the start time for the timeout */
 
-  pstate->ir_sock      = psock;
+  pstate->ir_conn      = conn;
 }
 
 /* The only un-initialization that has to be performed is destroying the
@@ -641,7 +640,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
    * because we don't want anything to happen until we are ready.
    */
 
-  tcp_recvfrom_initialize(psock, buf, len, from, fromlen, &state);
+  tcp_recvfrom_initialize(conn, buf, len, from, fromlen, &state);
 
   /* Handle any any TCP data already buffered in a read-ahead buffer.  NOTE
    * that there may be read-ahead data to be retrieved even after the
@@ -660,7 +659,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
 
   /* Verify that the SOCK_STREAM has been and still is connected */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* Was any data transferred from the readahead buffer after we were
        * disconnected?  If so, then return the number of bytes received.  We
@@ -673,7 +672,7 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
        * recvfrom() will get an end-of-file indication.
        */
 
-      if (ret <= 0 && !_SS_ISCLOSED(psock->s_flags))
+      if (ret <= 0 && !_SS_ISCLOSED(conn->sconn.s_flags))
         {
           /* Nothing was previously received from the read-ahead buffers.
            * The SOCK_STREAM must be (re-)connected in order to receive any
@@ -690,7 +689,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
    * return EAGAIN if no data was obtained from the read-ahead buffers.
    */
 
-  else if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+           (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.
@@ -738,7 +738,8 @@ ssize_t psock_tcp_recvfrom(FAR struct socket *psock, FAR void *buf,
            * received.
            */
 
-          ret = net_timedwait(&state.ir_sem, _SO_TIMEOUT(psock->s_rcvtimeo));
+          ret = net_timedwait(&state.ir_sem,
+                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret == -ETIMEDOUT)
             {
               ret = -EAGAIN;

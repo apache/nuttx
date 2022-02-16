@@ -2769,14 +2769,12 @@ config STM32_BKPSRAM
 config STM32_CAN1
 	bool "CAN1"
 	default n
-	select CAN
 	select STM32_CAN
 	depends on STM32_HAVE_CAN1
 
 config STM32_CAN2
 	bool "CAN2"
 	default n
-	select CAN
 	select STM32_CAN
 	depends on STM32_HAVE_CAN2
 
@@ -3391,11 +3389,9 @@ config STM32_I2C
 
 config STM32_CAN
 	bool
-	select ARCH_HAVE_CAN_ERRORS
 
 config STM32_FDCAN
 	bool
-	select ARCH_HAVE_CAN_ERRORS
 
 config STM32_TIM
 	bool
@@ -10863,6 +10859,7 @@ choice
 config STM32_CAN_CHARDRIVER
 	bool "STM32 CAN character driver support"
 	select ARCH_HAVE_CAN_ERRORS
+	select CAN
 
 config STM32_CAN_SOCKET
 	bool "STM32 CAN SocketCAN support"
@@ -10915,11 +10912,13 @@ choice
 
 config STM32_FDCAN_CHARDRIVER
 	bool "STM32 FDCAN character driver support"
-	select ARCH_HAVE_FDCAN_ERRORS
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
 
 config STM32_FDCAN_SOCKET
-	bool "STM32 FDCAN SocketCAN support (not supported yet)"
-	select NET_FDCAN_HAVE_ERRORS
+	bool "STM32 FDCAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
 
 endchoice # FDCAN character driver or SocketCAN support
 

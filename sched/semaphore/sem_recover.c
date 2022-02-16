@@ -108,5 +108,9 @@ void nxsem_recover(FAR struct tcb_s *tcb)
       tcb->waitsem = NULL;
     }
 
+  /* Release all semphore holders for the task */
+
+  nxsem_release_all(tcb);
+
   leave_critical_section(flags);
 }

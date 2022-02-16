@@ -36,6 +36,13 @@ config CAN_CONNS
 	---help---
 		Maximum number of CAN connections (all tasks).
 
+config NET_CAN_EXTID
+	bool "Enable CAN extended IDs"
+	default n
+	---help---
+		Enables support for the 29-bit extended ID in SocketCAN stack.
+		Default Standard 11-bit IDs.
+
 config NET_CAN_CANFD
 	bool "Enable CAN FD support"
 	default y

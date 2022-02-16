@@ -28,8 +28,6 @@
 #include <sys/types.h>
 
 #include <inttypes.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -66,7 +64,7 @@
  *
  ****************************************************************************/
 
-static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
+static uint32_t romfs_devread32(FAR struct romfs_mountpt_s *rm, int ndx)
 {
   /* This should not read past the end of the sector since the directory
    * entries are aligned at 16-byte boundaries.
@@ -86,10 +84,10 @@ static uint32_t romfs_devread32(struct romfs_mountpt_s *rm, int ndx)
  *
  ****************************************************************************/
 
-static inline int romfs_checkentry(struct romfs_mountpt_s *rm,
-                                   uint32_t offset, const char *entryname,
-                                   int entrylen,
-                                   struct romfs_dirinfo_s *dirinfo)
+static inline int romfs_checkentry(FAR struct romfs_mountpt_s *rm,
+                                   uint32_t offset,
+                                   FAR const char *entryname, int entrylen,
+                                   FAR struct romfs_dirinfo_s *dirinfo)
 {
   char name[NAME_MAX + 1];
   uint32_t linkoffset;
@@ -163,7 +161,8 @@ static inline int romfs_checkentry(struct romfs_mountpt_s *rm,
  *
  ****************************************************************************/
 
-int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
+static int16_t romfs_devcacheread(FAR struct romfs_mountpt_s *rm,
+                                  uint32_t offset)
 {
   uint32_t sector;
   int      ret;
@@ -222,8 +221,8 @@ int16_t romfs_devcacheread(struct romfs_mountpt_s *rm, uint32_t offset)
  *
  ****************************************************************************/
 
-static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
-                                 uint32_t *poffset)
+static int romfs_followhardlinks(FAR struct romfs_mountpt_s *rm,
+                                 uint32_t offset, FAR uint32_t *poffset)
 {
   uint32_t next;
   int16_t  ndx;
@@ -271,9 +270,9 @@ static int romfs_followhardlinks(struct romfs_mountpt_s *rm, uint32_t offset,
  *
  ****************************************************************************/
 
-static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
-                                  const char *entryname, int entrylen,
-                                  struct romfs_dirinfo_s *dirinfo)
+static inline int romfs_searchdir(FAR struct romfs_mountpt_s *rm,
+                                  FAR const char *entryname, int entrylen,
+                                  FAR struct romfs_dirinfo_s *dirinfo)
 {
   uint32_t offset;
   uint32_t next;
@@ -336,7 +335,7 @@ static inline int romfs_searchdir(struct romfs_mountpt_s *rm,
  * Name: romfs_semtake
  ****************************************************************************/
 
-int romfs_semtake(struct romfs_mountpt_s *rm)
+int romfs_semtake(FAR struct romfs_mountpt_s *rm)
 {
   return nxsem_wait_uninterruptible(&rm->rm_sem);
 }
@@ -345,7 +344,7 @@ int romfs_semtake(struct romfs_mountpt_s *rm)
  * Name: romfs_semgive
  ****************************************************************************/
 
-void romfs_semgive(struct romfs_mountpt_s *rm)
+void romfs_semgive(FAR struct romfs_mountpt_s *rm)
 {
   nxsem_post(&rm->rm_sem);
 }
@@ -357,7 +356,7 @@ void romfs_semgive(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
+int romfs_hwread(FAR struct romfs_mountpt_s *rm, FAR uint8_t *buffer,
                  uint32_t sector, unsigned int nsectors)
 {
   int ret = OK;
@@ -369,14 +368,14 @@ int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
       /* In XIP mode, we just copy the requested data */
 
       memcpy(buffer,
-             rm->rm_xipbase + sector*rm->rm_hwsectorsize,
-             nsectors*rm->rm_hwsectorsize);
+             rm->rm_xipbase + sector * rm->rm_hwsectorsize,
+             nsectors * rm->rm_hwsectorsize);
     }
   else
     {
       /* In non-XIP mode, we have to read the data from the device */
 
-      struct inode *inode = rm->rm_blkdriver;
+      FAR struct inode *inode = rm->rm_blkdriver;
       ssize_t nsectorsread = -ENODEV;
 
       DEBUGASSERT(inode);
@@ -412,8 +411,8 @@ int romfs_hwread(struct romfs_mountpt_s *rm, uint8_t *buffer,
  *
  ****************************************************************************/
 
-int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
-                        uint32_t sector)
+int romfs_filecacheread(FAR struct romfs_mountpt_s *rm,
+                        FAR struct romfs_file_s *rf, uint32_t sector)
 {
   int ret;
 
@@ -472,9 +471,9 @@ int romfs_filecacheread(struct romfs_mountpt_s *rm, struct romfs_file_s *rf,
  *
  ****************************************************************************/
 
-int romfs_hwconfigure(struct romfs_mountpt_s *rm)
+int romfs_hwconfigure(FAR struct romfs_mountpt_s *rm)
 {
-  struct inode *inode = rm->rm_blkdriver;
+  FAR struct inode *inode = rm->rm_blkdriver;
   int ret;
 
   /* Get the underlying device geometry */
@@ -556,7 +555,7 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
 
   /* Allocate the device cache buffer for normal sector accesses */
 
-  rm->rm_buffer = (FAR uint8_t *)kmm_malloc(rm->rm_hwsectorsize);
+  rm->rm_buffer = kmm_malloc(rm->rm_hwsectorsize);
   if (!rm->rm_buffer)
     {
       return -ENOMEM;
@@ -576,10 +575,10 @@ int romfs_hwconfigure(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_fsconfigure(struct romfs_mountpt_s *rm)
+int romfs_fsconfigure(FAR struct romfs_mountpt_s *rm)
 {
-  const char *name;
-  int16_t     ndx;
+  FAR const char *name;
+  int16_t         ndx;
 
   /* Then get information about the ROMFS filesystem on the devices managed
    * by this block driver. Read sector zero which contains the volume header.
@@ -623,7 +622,8 @@ int romfs_fsconfigure(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
+int romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
+                        FAR struct romfs_file_s *rf)
 {
   /* Check if XIP access mode is supported.  If so, then we do not need
    * to allocate anything.
@@ -663,9 +663,9 @@ int romfs_fileconfigure(struct romfs_mountpt_s *rm, struct romfs_file_s *rf)
  *
  ****************************************************************************/
 
-int romfs_checkmount(struct romfs_mountpt_s *rm)
+int romfs_checkmount(FAR struct romfs_mountpt_s *rm)
 {
-  struct inode *inode;
+  FAR struct inode *inode;
   struct geometry geo;
   int ret;
 
@@ -713,11 +713,12 @@ int romfs_checkmount(struct romfs_mountpt_s *rm)
  *
  ****************************************************************************/
 
-int romfs_finddirentry(struct romfs_mountpt_s *rm,
-                       struct romfs_dirinfo_s *dirinfo, const char *path)
+int romfs_finddirentry(FAR struct romfs_mountpt_s *rm,
+                       FAR struct romfs_dirinfo_s *dirinfo,
+                       FAR const char *path)
 {
-  const char *entryname;
-  const char *terminator;
+  FAR const char *entryname;
+  FAR const char *terminator;
   int entrylen;
   int ret;
 
@@ -737,7 +738,7 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
 
   /* Then loop for each directory/file component in the full path */
 
-  entryname    = path;
+  entryname  = path;
   terminator = NULL;
 
   for (; ; )
@@ -817,9 +818,9 @@ int romfs_finddirentry(struct romfs_mountpt_s *rm,
  *
  ****************************************************************************/
 
-int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
-                        uint32_t *poffset, uint32_t *pnext, uint32_t *pinfo,
-                        uint32_t *psize)
+int romfs_parsedirentry(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+                        FAR uint32_t *poffset, uint32_t *pnext,
+                        FAR uint32_t *pinfo, FAR uint32_t *psize)
 {
   uint32_t save;
   uint32_t next;
@@ -884,8 +885,8 @@ int romfs_parsedirentry(struct romfs_mountpt_s *rm, uint32_t offset,
  *
  ****************************************************************************/
 
-int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
-                        char *pname)
+int romfs_parsefilename(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+                        FAR char *pname)
 {
   int16_t  ndx;
   uint16_t namelen;
@@ -952,8 +953,8 @@ int romfs_parsefilename(struct romfs_mountpt_s *rm, uint32_t offset,
  *
  ****************************************************************************/
 
-int romfs_datastart(struct romfs_mountpt_s *rm, uint32_t offset,
-                    uint32_t *start)
+int romfs_datastart(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+                    FAR uint32_t *start)
 {
   int16_t ndx;
   int     ret;

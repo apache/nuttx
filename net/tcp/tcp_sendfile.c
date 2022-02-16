@@ -164,13 +164,11 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
-   * appear here strictly one at a time
+   * appear here strictly one at a time, except for the FIN + ACK case.
    */
 
   DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
               (flags & TCP_REXMIT) == 0);
-  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
-              (flags & TCP_ACKDATA) == 0);
   DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
               (flags & TCP_REXMIT) == 0);
 
@@ -329,11 +327,11 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
+          tcp_lost_connection(conn, pstate->snd_cb, flags);
         }
 
       /* Report not connected */
@@ -457,18 +455,18 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
   off_t startpos;
   int ret;
 
+  conn = psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
   /* If this is an un-connected socket, then return ENOTCONN */
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       return -ENOTCONN;
     }
 
   /* Make sure that we have the IP address mapping */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn != NULL);
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -568,8 +566,8 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
     {
       uint32_t acked = state.snd_acked;
 
-      ret = net_timedwait_uninterruptible(&state.snd_sem,
-                                          _SO_TIMEOUT(psock->s_sndtimeo));
+      ret = net_timedwait_uninterruptible(
+              &state.snd_sem, _SO_TIMEOUT(conn->sconn.s_sndtimeo));
       if (ret != -ETIMEDOUT || acked == state.snd_acked)
         {
           break; /* Successful completion or timeout without any progress */

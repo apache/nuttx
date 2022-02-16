@@ -84,6 +84,7 @@
 
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 {
+#if CONFIG_SIM_STACKSIZE_ADJUSTMENT == 0
   size_t adj_stack_size;
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -101,7 +102,7 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 
   tcb->adj_stack_size  = adj_stack_size;
   tcb->stack_alloc_ptr = stack;
-  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 
 #if defined(CONFIG_STACK_COLORATION)
   /* If stack debug is enabled, then fill the stack with a
@@ -113,4 +114,11 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 #endif
 
   return OK;
+#else
+  /* Ignore the stack argument and allocate a new stack instead
+   * since it's impossible to extend a preallocated memory in place.
+   */
+
+  return up_create_stack(tcb, stack_size, tcb->flags & TCB_FLAG_TTYPE_MASK);
+#endif
 }

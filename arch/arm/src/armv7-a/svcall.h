@@ -44,8 +44,8 @@
 
 #ifdef CONFIG_BUILD_KERNEL
 #  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to have the value 7"
-#  elif CONFIG_SYS_RESERVED != 7
+#    error "CONFIG_SYS_RESERVED must be defined to have the value 6"
+#  elif CONFIG_SYS_RESERVED != 6
 #    error "CONFIG_SYS_RESERVED must have the value 6"
 #  endif
 #else
@@ -108,13 +108,6 @@
  */
 
 #define SYS_pthread_start         (3)
-
-/* SYS call 8:
- *
- * void up_pthread_exit(pthread_exitroutine_t exit, FAR void *exit_value)
- */
-
-#define SYS_pthread_exit         (6)
 
 #endif /* CONFIG_BUILD_KERNEL */
 
