@@ -58,8 +58,6 @@ int rpmsg_wait(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 int rpmsg_post(FAR struct rpmsg_endpoint *ept, FAR sem_t *sem);
 
 const char *rpmsg_get_cpuname(FAR struct rpmsg_device *rdev);
-int rpmsg_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx);
-void rpmsg_dump(FAR struct rpmsg_virtio_device *rvdev);
 
 int rpmsg_register_callback(FAR void *priv,
                             rpmsg_dev_cb_t device_created,

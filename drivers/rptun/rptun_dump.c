@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/rptun/rpmsg_dump.c
+ * drivers/rptun/rptun_dump.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -28,11 +28,13 @@
 
 #include <rpmsg/rpmsg_internal.h>
 
+#include "rptun.h"
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
 
-static void rpmsg_dump_addr(FAR struct rpmsg_device *rdev,
+static void rptun_dump_addr(FAR struct rpmsg_device *rdev,
                             FAR void *addr, bool rx)
 {
   FAR struct rpmsg_hdr *hdr = addr;
@@ -47,7 +49,7 @@ static void rpmsg_dump_addr(FAR struct rpmsg_device *rdev,
     }
 }
 
-static void rpmsg_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
+static void rptun_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
                               bool rx)
 {
   FAR struct virtqueue *vq = rx ? rvdev->rvq : rvdev->svq;
@@ -56,7 +58,7 @@ static void rpmsg_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
   int num;
   int i;
 
-  num = rpmsg_buffer_nused(rvdev, rx);
+  num = rptun_buffer_nused(rvdev, rx);
   metal_log(METAL_LOG_INFO,
             "    %s buffer, total %d, pending %d\n",
             rx ? "RX" : "TX", vq->vq_nentries, num);
@@ -78,7 +80,7 @@ static void rpmsg_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
                                    vq->vq_ring.desc[desc_idx].addr);
       if (addr)
         {
-          rpmsg_dump_addr(&rvdev->rdev, addr, rx);
+          rptun_dump_addr(&rvdev->rdev, addr, rx);
         }
     }
 }
@@ -87,7 +89,7 @@ static void rpmsg_dump_buffer(FAR struct rpmsg_virtio_device *rvdev,
  * Public Functions
  ****************************************************************************/
 
-void rpmsg_dump(FAR struct rpmsg_virtio_device *rvdev)
+void rptun_dump(FAR struct rpmsg_virtio_device *rvdev)
 {
   FAR struct rpmsg_device *rdev = &rvdev->rdev;
   FAR struct rpmsg_endpoint *ept;
@@ -114,8 +116,8 @@ void rpmsg_dump(FAR struct rpmsg_virtio_device *rvdev)
 
   metal_log(METAL_LOG_INFO, "  rpmsg buffer list:\n");
 
-  rpmsg_dump_buffer(rvdev, true);
-  rpmsg_dump_buffer(rvdev, false);
+  rptun_dump_buffer(rvdev, true);
+  rptun_dump_buffer(rvdev, false);
 
   metal_mutex_release(&rdev->lock);
 }
