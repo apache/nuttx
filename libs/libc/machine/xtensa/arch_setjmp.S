@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <arch/xtensa/core.h>
 #include <arch/chip/core-isa.h>
 #include <arch/xtensa/xtensa_abi.h>
 
@@ -29,7 +30,7 @@
  * Public Functions
  ****************************************************************************/
 
-#if XCHAL_HAVE_WINDOWED && !__XTENSA_CALL0_ABI__
+#if XCHAL_HAVE_WINDOWED && !defined(__XTENSA_CALL0_ABI___)
 
 /* Windowed ABI:
 
