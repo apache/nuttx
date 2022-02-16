@@ -29,8 +29,6 @@
 
 #include <syscall.h>
 
-#ifdef CONFIG_LIB_SYSCALL
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -43,17 +41,19 @@
  * more syscall values must be reserved.
  */
 
-#ifdef CONFIG_BUILD_PROTECTED
-#  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to have the value 6"
-#  elif CONFIG_SYS_RESERVED != 6
-#    error "CONFIG_SYS_RESERVED must have the value 6"
-#  endif
-#else
-#  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to have the value 1"
-#  elif CONFIG_SYS_RESERVED != 1
-#    error "CONFIG_SYS_RESERVED must have the value 1"
+#ifdef CONFIG_LIB_SYSCALL
+#  ifdef CONFIG_BUILD_KERNEL
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 7"
+#    elif CONFIG_SYS_RESERVED != 7
+#      error "CONFIG_SYS_RESERVED must have the value 7"
+#    endif
+#  else
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 4"
+#    elif CONFIG_SYS_RESERVED != 4
+#      error "CONFIG_SYS_RESERVED must have the value 4"
+#    endif
 #  endif
 #endif
 
@@ -61,60 +61,68 @@
 
 /* SYS call 0:
  *
- * void arm_syscall_return(void);
- */
-
-#define SYS_syscall_return        (0)
-
-#ifndef CONFIG_BUILD_FLAT
-#ifdef CONFIG_BUILD_PROTECTED
-/* SYS call 1:
- *
  * void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
  */
 
-#define SYS_restore_context       (1)
+#define SYS_restore_context       (0)
 
+/* SYS call 1:
+ *
+ * void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ */
+
+#define SYS_switch_context        (1)
+
+#ifdef CONFIG_LIB_SYSCALL
 /* SYS call 2:
+ *
+ * void arm_syscall_return(void);
+ */
+
+#define SYS_syscall_return        (2)
+
+#ifndef CONFIG_BUILD_FLAT
+#ifdef CONFIG_BUILD_KERNEL
+/* SYS call 3:
  *
  * void up_task_start(main_t taskentry, int argc, FAR char *argv[])
  *        noreturn_function;
  */
 
-#define SYS_task_start            (2)
+#define SYS_task_start            (3)
 
-/* SYS call 4:
+/* SYS call 5:
  *
- * void signal_handler(_sa_sigaction_t sighand, int signo,
- *                     FAR siginfo_t *info,
+ * void signal_handler(_sa_sigaction_t sighand,
+ *                     int signo, FAR siginfo_t *info,
  *                     FAR void *ucontext);
  */
 
-#define SYS_signal_handler        (4)
+#define SYS_signal_handler        (5)
 
-/* SYS call 5:
+/* SYS call 6:
  *
  * void signal_handler_return(void);
  */
 
-#define SYS_signal_handler_return (5)
+#define SYS_signal_handler_return (6)
 
-#endif /* CONFIG_BUILD_PROTECTED */
+#endif /* !CONFIG_BUILD_FLAT */
 
-/* SYS call 3:
+/* SYS call 4:
  *
  * void up_pthread_start(pthread_startroutine_t startup,
  *                       pthread_startroutine_t entrypt, pthread_addr_t arg)
  *        noreturn_function
  */
 
-#define SYS_pthread_start         (3)
+#define SYS_pthread_start         (4)
 
 #endif /* !CONFIG_BUILD_FLAT */
+#endif /* CONFIG_LIB_SYSCALL */
 
 /****************************************************************************
  * Inline Functions
  ****************************************************************************/
 
-#endif /* CONFIG_LIB_SYSCALL */
 #endif /* __ARCH_ARM_SRC_ARMV7_R_SVCALL_H */
