@@ -1,5 +1,5 @@
 ############################################################################
-# boards/risc-v/rv32m1/rv32m1-vega/src/Makefile
+# boards/risc-v/qemu-rv/rv-virt/src/Makefile
 #
 # Licensed to the Apache Software Foundation (ASF) under one or more
 # contributor license agreements.  See the NOTICE file distributed with
@@ -22,6 +22,6 @@ include $(TOPDIR)/Make.defs
 
 RCSRCS = etc/init.d/rcS
 
-CSRCS = qemu_rv_appinit.c
+CSRCS = qemu_rv_appinit.c qemu_rv_ostest.c
 
 include $(TOPDIR)/boards/Board.mk
