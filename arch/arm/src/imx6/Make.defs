@@ -63,6 +63,7 @@ CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_initialstate.c arm_mmu.c
 CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_tcbinfo.c
+CMN_CSRCS += arm_switchcontext.c
 
 ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
 CMN_CSRCS += arm_hostfs.c

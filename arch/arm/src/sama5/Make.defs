@@ -62,6 +62,7 @@ CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_tcbinfo.c
+CMN_CSRCS += arm_switchcontext.c
 
 # Configuration dependent C files
 
