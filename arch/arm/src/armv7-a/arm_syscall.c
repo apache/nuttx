@@ -302,9 +302,9 @@ uint32_t *arm_syscall(uint32_t *regs)
            *   CSPR = user mode
            */
 
-          regs[REG_PC]   = regs[REG_R0];
-          regs[REG_R0]   = regs[REG_R1];
-          regs[REG_R1]   = regs[REG_R2];
+          regs[REG_PC]   = regs[REG_R1];
+          regs[REG_R0]   = regs[REG_R2];
+          regs[REG_R1]   = regs[REG_R3];
 
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
           regs[REG_CPSR] = cpsr | PSR_MODE_USR;
