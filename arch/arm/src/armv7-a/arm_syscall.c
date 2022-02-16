@@ -123,7 +123,6 @@ static void dispatch_syscall(void)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_LIB_SYSCALL
 uint32_t *arm_syscall(uint32_t *regs)
 {
   uint32_t cmd;
@@ -170,6 +169,7 @@ uint32_t *arm_syscall(uint32_t *regs)
        * unprivileged thread mode.
        */
 
+#ifdef CONFIG_LIB_SYSCALL
       case SYS_syscall_return:
         {
           FAR struct tcb_s *rtcb = nxsched_self();
@@ -218,6 +218,7 @@ uint32_t *arm_syscall(uint32_t *regs)
           (void)nxsig_unmask_pendingsignal();
         }
         break;
+#endif
 
       /* R0=SYS_restore_context:  Restore task context
        *
@@ -230,7 +231,6 @@ uint32_t *arm_syscall(uint32_t *regs)
        *   R1 = restoreregs
        */
 
-#ifdef CONFIG_BUILD_KERNEL
       case SYS_restore_context:
         {
           /* Replace 'regs' with the pointer to the register set in
@@ -238,11 +238,40 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
+          arm_restorefpu((uint32_t *)regs[REG_R1]);
           regs = (uint32_t *)regs[REG_R1];
           DEBUGASSERT(regs);
         }
         break;
+
+      /* R0=SYS_switch_context:  This a switch context command:
+       *
+       *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_switch_context
+       *   R1 = saveregs
+       *   R2 = restoreregs
+       *
+       * In this case, we do both: We save the context registers to the save
+       * register area reference by the saved contents of R1 and then set
+       * regs to the save register area referenced by the saved
+       * contents of R2.
+       */
+
+      case SYS_switch_context:
+        {
+          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
+#if defined(CONFIG_ARCH_FPU)
+          arm_copyarmstate((uint32_t *)regs[REG_R1], regs);
+          arm_restorefpu((uint32_t *)regs[REG_R2]);
+#else
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #endif
+          regs = (uint32_t *)regs[REG_R2];
+        }
+        break;
 
       /* R0=SYS_task_start:  This a user task start
        *
@@ -457,9 +486,6 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Indicate that we are in a syscall handler. */
 
           rtcb->flags   |= TCB_FLAG_SYSCALL;
-#else
-          svcerr("ERROR: Bad SYS call: %d\n", regs[REG_R0]);
-#endif
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
           /* If this is the first SYSCALL and if there is an allocated
@@ -477,6 +503,9 @@ uint32_t *arm_syscall(uint32_t *regs)
           /* Save the new SYSCALL nesting level */
 
           rtcb->xcp.nsyscalls   = index + 1;
+#else
+          svcerr("ERROR: Bad SYS call: 0x%" PRIx32 "\n", regs[REG_R0]);
+#endif
         }
         break;
     }
@@ -501,14 +530,3 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   return regs;
 }
-
-#else
-
-uint32_t *arm_syscall(uint32_t *regs)
-{
-  _alert("SYSCALL from 0x%x\n", regs[REG_PC]);
-  CURRENT_REGS = regs;
-  PANIC();
-}
-
-#endif
