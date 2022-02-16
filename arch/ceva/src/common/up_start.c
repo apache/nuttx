@@ -245,7 +245,7 @@ static void init_kernelspace(void)
     g_idle_topstack - g_idle_basestack);
 #ifdef CONFIG_STACK_COLORATION
   up_stack_color(g_idle_basestack,
-    g_idle_topstack - g_idle_basestack - B2C(256));
+    g_idle_topstack - g_idle_basestack - 256);
 #endif
 }
 

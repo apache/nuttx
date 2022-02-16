@@ -96,10 +96,6 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  /* Conver the stack size unit from byte to char */
-
-  stack_size = B2C(stack_size);
-
 #ifdef CONFIG_TLS
   /* Add the size of the TLS information structure */
 
@@ -109,10 +105,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
    * TLS feature.
    */
 
-  DEBUGASSERT(stack_size <= B2C(TLS_MAXSTACK));
-  if (stack_size >= B2C(TLS_MAXSTACK))
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
     {
-      stack_size = B2C(TLS_MAXSTACK);
+      stack_size = TLS_MAXSTACK;
     }
 #endif
 
@@ -145,7 +141,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         {
           tcb->stack_alloc_ptr = mm_memalign(
                       KMM_HEAP(CONFIG_ARCH_KERNEL_STACK_HEAP),
-                      B2C(TLS_STACK_ALIGN), stack_size);
+                      TLS_STACK_ALIGN, stack_size);
         }
       else
 #endif
@@ -154,7 +150,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = mm_memalign(
                       UMM_HEAP(CONFIG_ARCH_STACK_HEAP),
-                      B2C(TLS_STACK_ALIGN), stack_size);
+                      TLS_STACK_ALIGN, stack_size);
         }
 
 #else /* CONFIG_TLS */

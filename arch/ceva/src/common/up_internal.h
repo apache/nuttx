@@ -80,7 +80,7 @@
 #define _DATA_INIT     ((const void *)&_eronly)
 #define _START_DATA    ((void *)&_sdata)
 #define _END_DATA      ((void *)&_edata)
-#define _START_HEAP    ((void *)&_ebss + B2C(CONFIG_IDLETHREAD_STACKSIZE))
+#define _START_HEAP    ((void *)&_ebss + CONFIG_IDLETHREAD_STACKSIZE)
 #define _END_HEAP      ((void *)&_eheap)
 #define _END_MEM       ((void *)~0)
 
