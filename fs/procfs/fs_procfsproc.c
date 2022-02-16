@@ -50,6 +50,7 @@
 #include <nuttx/environ.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/procfs.h>
+#include <nuttx/fs/ioctl.h>
 #include <nuttx/fs/dirent.h>
 #include <nuttx/mm/mm.h>
 
@@ -1150,6 +1151,7 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 {
   FAR struct task_group_s *group = tcb->group;
   FAR struct file *file;
+  char path[PATH_MAX];
   size_t remaining;
   size_t linesize;
   size_t copysize;
@@ -1163,8 +1165,8 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
   totalsize = 0;
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "\n%-3s %-8s %s\n",
-                               "FD", "POS", "OFLAGS");
+                               "\n%-3s %-8s %-8s %s\n",
+                               "FD", "POS", "OFLAGS", "PATH");
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -1189,11 +1191,25 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
 
           if (file->f_inode && !INODE_IS_SOCKET(file->f_inode))
             {
+              if (file_ioctl(file, FIOC_FILEPATH, path) < 0)
+                {
+                  path[0] = '\0';
+                }
+
               linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                                    "%3d %8ld %04x\n",
+                                    "%3d %8ld %8x",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
                                     j, (long)file->f_pos,
                                     file->f_oflags);
+              copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                                         remaining, &offset);
+
+              totalsize += copysize;
+              buffer    += copysize;
+              remaining -= copysize;
+
+              linesize   = procfs_snprintf(procfile->line, PATH_MAX,
+                                           " %s\n", path);
               copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                          remaining, &offset);
 
