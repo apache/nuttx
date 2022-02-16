@@ -216,6 +216,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
 #endif /* CONFIG_STACK_COLORATION */
 
+      tcb->flags |= TCB_FLAG_FREE_STACK;
       return OK;
     }
 
