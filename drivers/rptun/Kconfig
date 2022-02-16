@@ -52,4 +52,11 @@ config RPTUN_PM
 		goto RAM-retention mode, can't access from another CPU.
 		So, we provide this method to resolve this.
 
+config RPTUN_PING
+	bool "rptun ping support"
+	default n
+	---help---
+		This is for rptun debugging & profiling, create ping rpmsg
+		channel, user can use it to get send/recv speed & latency.
+
 endif # RPTUN
