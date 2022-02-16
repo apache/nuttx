@@ -108,7 +108,7 @@ void up_initialize(void)
 
   idle = this_task(); /* It should be idle task */
   idle->stack_alloc_ptr = g_idle_basestack;
-  idle->adj_stack_ptr   = g_idle_topstack;
+  idle->stack_base_ptr  = g_idle_topstack;
   idle->adj_stack_size  = g_idle_topstack - g_idle_basestack;
 
   /* Colorize the interrupt stack */
