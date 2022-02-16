@@ -97,10 +97,6 @@
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
 #ifdef CONFIG_TLS
-  /* Add the size of the TLS information structure */
-
-  stack_size += sizeof(struct tls_info_s);
-
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
@@ -188,9 +184,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
-      FAR void *stack_base;
-#endif
       FAR void *top_of_stack;
       size_t size_of_stack;
 
@@ -213,23 +206,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       tcb->adj_stack_ptr  = top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
-#ifdef CONFIG_TLS
-      /* Initialize the TLS data structure */
-
-      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      stack_base = tcb->stack_alloc_ptr + sizeof(struct tls_info_s);
-      stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
-      up_stack_color(stack_base, stack_size);
-
-#endif /* CONFIG_STACK_COLORATION */
-#else /* CONFIG_TLS */
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
@@ -239,7 +215,6 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
-#endif /* CONFIG_TLS */
 
       return OK;
     }
