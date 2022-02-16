@@ -77,7 +77,7 @@ static size_t do_stackcheck(uintptr_t alloc, size_t size, bool int_stack)
     {
       /* Skip over the TLS data structure at the bottom of the stack */
 
-      DEBUGASSERT(alloc & (B2C(TLS_STACK_ALIGN) - 1) == 0);
+      DEBUGASSERT(alloc & (TLS_STACK_ALIGN - 1) == 0);
       start = alloc + sizeof(struct tls_info_s);
     }
   else
