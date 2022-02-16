@@ -114,10 +114,10 @@ arm_saveusercontext:
 #endif
 
 	/* Store the floating point control and status register.  At the end of the
-	 * vstmia, r1 will point to the FPCSR storage location.
+	 * vstmia, r1 will point to the FPSCR storage location.
 	 */
 
-	vmrs		r2, fpscr		/* Fetch the FPCSR */
+	vmrs		r2, fpscr		/* Fetch the FPSCR */
 	str		r2, [r1], #4		/* Save the floating point control and status register */
 #endif
 
