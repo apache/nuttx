@@ -195,7 +195,7 @@ static void up_dumpstate(void)
 
   /* Get the limits on the user stack memory */
 
-  ustackbase = (uint32_t)rtcb->adj_stack_ptr;
+  ustackbase = (uint32_t)rtcb->stack_base_ptr;
   ustacksize = rtcb->adj_stack_size;
 
   /* Get the limits on the interrupt stack memory */

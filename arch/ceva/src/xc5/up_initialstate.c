@@ -55,9 +55,9 @@ void up_initial_state(struct tcb_s *tcb)
 
   memset(xcp, 0, sizeof(struct xcptcontext));
 
-  if (tcb->adj_stack_ptr)
+  if (tcb->stack_base_ptr)
     {
-      xcp->regs = tcb->adj_stack_ptr - XCPTCONTEXT_SIZE;
+      xcp->regs = tcb->stack_base_ptr - XCPTCONTEXT_SIZE;
       memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
       /* Save the initial stack pointer */

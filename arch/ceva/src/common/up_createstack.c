@@ -68,7 +68,7 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *   - stack_base_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
  * Inputs:
@@ -203,7 +203,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->adj_stack_ptr  = top_of_stack;
+      tcb->stack_base_ptr = top_of_stack;
       tcb->adj_stack_size = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
