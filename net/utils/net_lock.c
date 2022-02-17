@@ -451,6 +451,59 @@ int net_lockedwait_uninterruptible(sem_t *sem)
   return net_timedwait_uninterruptible(sem, UINT_MAX);
 }
 
+#ifdef CONFIG_MM_IOB
+
+/****************************************************************************
+ * Name: net_timedalloc
+ *
+ * Description:
+ *   Allocate an IOB.  If no IOBs are available, then atomically wait for
+ *   for the IOB while temporarily releasing the lock on the network.
+ *   This function is wrapped version of nxsem_timedwait(), this wait will
+ *   be terminated when the specified timeout expires.
+ *
+ *   Caution should be utilized.  Because the network lock is relinquished
+ *   during the wait, there could be changes in the network state that occur
+ *   before the lock is recovered.  Your design should account for this
+ *   possibility.
+ *
+ * Input Parameters:
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   timeout    - The relative time to wait until a timeout is declared.
+ *   consumerid - id representing who is consuming the IOB
+ *
+ * Returned Value:
+ *   A pointer to the newly allocated IOB is returned on success.  NULL is
+ *   returned on any allocation failure.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout,
+                                    enum iob_user_e consumerid)
+{
+  FAR struct iob_s *iob;
+
+  iob = iob_tryalloc(throttled, consumerid);
+  if (iob == NULL && timeout != 0)
+    {
+      unsigned int count;
+      int blresult;
+
+      /* There are no buffers available now.  We will have to wait for one to
+       * become available. But let's not do that with the network locked.
+       */
+
+      blresult = net_breaklock(&count);
+      iob      = iob_timedalloc(throttled, timeout, consumerid);
+      if (blresult >= 0)
+        {
+          net_restorelock(count);
+        }
+    }
+
+  return iob;
+}
+
 /****************************************************************************
  * Name: net_ioballoc
  *
@@ -464,7 +517,8 @@ int net_lockedwait_uninterruptible(sem_t *sem)
  *   possibility.
  *
  * Input Parameters:
- *   throttled - An indication of the IOB allocation is "throttled"
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   consumerid - id representing who is consuming the IOB
  *
  * Returned Value:
  *   A pointer to the newly allocated IOB is returned on success.  NULL is
@@ -472,29 +526,8 @@ int net_lockedwait_uninterruptible(sem_t *sem)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_IOB
 FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid)
 {
-  FAR struct iob_s *iob;
-
-  iob = iob_tryalloc(throttled, consumerid);
-  if (iob == NULL)
-    {
-      unsigned int count;
-      int blresult;
-
-      /* There are no buffers available now.  We will have to wait for one to
-       * become available. But let's not do that with the network locked.
-       */
-
-      blresult = net_breaklock(&count);
-      iob      = iob_alloc(throttled, consumerid);
-      if (blresult >= 0)
-        {
-          net_restorelock(count);
-        }
-    }
-
-  return iob;
+  return net_iobtimedalloc(throttled, UINT_MAX, consumerid);
 }
 #endif
