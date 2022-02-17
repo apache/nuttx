@@ -117,8 +117,9 @@ config ARCH_CHIP_QEMU_RV
 	bool "QEMU RV"
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MULTICPU
 	---help---
-		QEMU Generic RV32 processor
+		QEMU Generic RV32/RV64 processor
 
 config ARCH_CHIP_RISCV_CUSTOM
 	bool "Custom RISC-V chip"
