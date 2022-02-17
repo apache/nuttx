@@ -477,8 +477,8 @@ int esp32s3_cpuint_initialize(void)
 
   /* Special case the 6 internal interrupts.
    *
-   *   CPU interrupt bit           IRQ number
-   *   --------------------------- ---------------------
+   *   CPU interrupt bit             IRQ number
+   *   ----------------------------  ---------------------
    *   ESP32S3_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
    *   ESP32S3_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32S3_CPUINT_PROFILING  11  Not yet defined
