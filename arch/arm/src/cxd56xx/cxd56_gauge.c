@@ -81,11 +81,9 @@ static const struct file_operations g_gaugeops =
   gauge_close,  /* close */
   gauge_read,   /* read */
   gauge_write,  /* write */
-  0,            /* seek */
-  gauge_ioctl   /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  , NULL        /* poll */
-#endif
+  NULL,         /* seek */
+  gauge_ioctl,  /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL        /* unlink */
 #endif
@@ -306,7 +304,7 @@ static ssize_t gauge_write(FAR struct file *filep,
 static int gauge_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct bat_gauge_dev_s *priv  = inode->i_private;
+  FAR struct bat_gauge_dev_s *priv = inode->i_private;
   int ret = -ENOTTY;
 
   nxsem_wait_uninterruptible(&priv->batsem);

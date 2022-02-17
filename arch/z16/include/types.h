@@ -60,6 +60,12 @@ typedef unsigned int       _uint32_t;
 typedef _int32_t           _intmax_t;
 typedef _uint32_t          _uintmax_t;
 
+#if defined(__WCHAR_TYPE__)
+typedef __WCHAR_TYPE__     _wchar_t;
+#else
+typedef int                _wchar_t;
+#endif
+
 /* A size is 4 bytes */
 
 #if defined(__SIZE_TYPE__)

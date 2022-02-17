@@ -37,19 +37,6 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_EVENT_FD_VFS_PATH
-#define CONFIG_EVENT_FD_VFS_PATH "/dev"
-#endif
-
-#ifndef CONFIG_EVENT_FD_NPOLLWAITERS
-/* Maximum number of threads than can be waiting for POLL events */
-#define CONFIG_EVENT_FD_NPOLLWAITERS 2
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 
@@ -66,10 +53,10 @@ struct eventfd_priv_s
   sem_t     exclsem;            /* Enforces device exclusive access */
   eventfd_waiter_sem_t *rdsems; /* List of blocking readers */
   eventfd_waiter_sem_t *wrsems; /* List of blocking writers */
-  eventfd_t counter;            /* eventfd counter */
-  size_t    minor;              /* eventfd minor number */
-  uint8_t   crefs;              /* References counts on eventfd (max: 255) */
-  uint8_t   mode_semaphore;     /* eventfd mode (semaphore or counter) */
+  eventfd_t    counter;         /* eventfd counter */
+  unsigned int minor;           /* eventfd minor number */
+  uint8_t      crefs;           /* References counts on eventfd (max: 255) */
+  bool         mode_semaphore;  /* eventfd mode (semaphore or counter) */
 
   /* The following is a list if poll structures of threads waiting for
    * driver events.
@@ -91,8 +78,6 @@ static ssize_t eventfd_do_read(FAR struct file *filep, FAR char *buffer,
                                size_t len);
 static ssize_t eventfd_do_write(FAR struct file *filep,
                                 FAR const char *buffer, size_t len);
-static int eventfd_do_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
                        bool setup);
@@ -105,8 +90,8 @@ static int eventfd_blocking_io(FAR struct eventfd_priv_s *dev,
                                eventfd_waiter_sem_t *sem,
                                FAR eventfd_waiter_sem_t **slist);
 
-static size_t eventfd_get_unique_minor(void);
-static void eventfd_release_minor(size_t minor);
+static unsigned int eventfd_get_unique_minor(void);
+static void eventfd_release_minor(unsigned int minor);
 
 static FAR struct eventfd_priv_s *eventfd_allocdev(void);
 static void eventfd_destroy(FAR struct eventfd_priv_s *dev);
@@ -121,10 +106,15 @@ static const struct file_operations g_eventfd_fops =
   eventfd_do_close, /* close */
   eventfd_do_read,  /* read */
   eventfd_do_write, /* write */
-  0,                /* seek */
-  eventfd_do_ioctl  /* ioctl */
+  NULL,             /* seek */
+  NULL,             /* ioctl */
 #ifdef CONFIG_EVENT_FD_POLL
-  , eventfd_do_poll /* poll */
+  eventfd_do_poll   /* poll */
+#else
+  NULL              /* poll */
+#endif
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
 #endif
 };
 
@@ -177,14 +167,14 @@ static void eventfd_pollnotify(FAR struct eventfd_priv_s *dev,
 }
 #endif
 
-static size_t eventfd_get_unique_minor(void)
+static unsigned int eventfd_get_unique_minor(void)
 {
-  static size_t minor;
+  static unsigned int minor;
 
   return minor++;
 }
 
-static void eventfd_release_minor(size_t minor)
+static void eventfd_release_minor(unsigned int minor)
 {
 }
 
@@ -228,9 +218,9 @@ static int eventfd_do_close(FAR struct file *filep)
   FAR struct inode *inode = filep->f_inode;
   FAR struct eventfd_priv_s *priv = inode->i_private;
 
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %d (3) + null char (1) */
+  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %u (10) + null char (1) */
 
-  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 3 + 1];
+  char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
 
   /* Get exclusive access to the device structures */
 
@@ -258,7 +248,7 @@ static int eventfd_do_close(FAR struct file *filep)
   /* Re-create the path to the driver. */
 
   finfo("destroy\n");
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%d", priv->minor);
+  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%u", priv->minor);
 
   /* Will be unregistered later after close is done */
 
@@ -475,21 +465,6 @@ static ssize_t eventfd_do_write(FAR struct file *filep,
   return sizeof(eventfd_t);
 }
 
-static int eventfd_do_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct eventfd_priv_s *priv = inode->i_private;
-
-  if (cmd == FIOC_MINOR)
-    {
-      *(FAR int *)((uintptr_t)arg) = priv->minor;
-      return OK;
-    }
-
-  return -ENOSYS;
-}
-
 #ifdef CONFIG_EVENT_FD_POLL
 static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
@@ -518,7 +493,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       *slot                = NULL;
       fds->priv            = NULL;
-      goto errout;
+      goto out;
     }
 
   /* This is a request to set up the poll. Find an available
@@ -543,7 +518,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
     {
       fds->priv = NULL;
       ret       = -EBUSY;
-      goto errout;
+      goto out;
     }
 
   /* Notify the POLLOUT event if the pipe is not full, but only if
@@ -568,7 +543,7 @@ static int eventfd_do_poll(FAR struct file *filep, FAR struct pollfd *fds,
       eventfd_pollnotify(dev, eventset);
     }
 
-errout:
+out:
   nxsem_post(&dev->exclsem);
   return ret;
 }
@@ -584,7 +559,7 @@ int eventfd(unsigned int count, int flags)
   int new_fd;
   FAR struct eventfd_priv_s *new_dev;
 
-  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + size_t (10) + null char (1) */
+  /* devpath: EVENT_FD_VFS_PATH + /efd (4) + %u (10) + null char (1) */
 
   char devpath[sizeof(CONFIG_EVENT_FD_VFS_PATH) + 4 + 10 + 1];
 
@@ -595,7 +570,7 @@ int eventfd(unsigned int count, int flags)
     {
       /* Failed to allocate new device */
 
-      ret = ENOMEM;
+      ret = -ENOMEM;
       goto exit_set_errno;
     }
 
@@ -608,7 +583,7 @@ int eventfd(unsigned int count, int flags)
 
   /* Get device path */
 
-  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%d", new_dev->minor);
+  sprintf(devpath, CONFIG_EVENT_FD_VFS_PATH "/efd%u", new_dev->minor);
 
   /* Register the driver */
 
@@ -616,7 +591,6 @@ int eventfd(unsigned int count, int flags)
   if (ret < 0)
     {
       ferr("Failed to register new device %s: %d\n", devpath, ret);
-      ret = -ret;
       goto exit_release_minor;
     }
 
@@ -631,7 +605,7 @@ int eventfd(unsigned int count, int flags)
 
   if (new_fd < 0)
     {
-      ret = -new_fd;
+      ret = new_fd;
       goto exit_unregister_driver;
     }
 
@@ -643,6 +617,6 @@ exit_release_minor:
   eventfd_release_minor(new_dev->minor);
   eventfd_destroy(new_dev);
 exit_set_errno:
-  set_errno(ret);
+  set_errno(-ret);
   return ERROR;
 }

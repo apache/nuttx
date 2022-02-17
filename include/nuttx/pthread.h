@@ -140,7 +140,6 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
  *                 for the new thread
  *    entry      - The new thread starts execution by invoking entry
  *    arg        - It is passed as the sole argument of entry
- *    exit       - The user-space pthread exit function
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
@@ -150,8 +149,7 @@ EXTERN const pthread_attr_t g_default_pthread_attr;
 
 int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
-                      pthread_startroutine_t entry, pthread_addr_t arg,
-                      pthread_exitroutine_t exit);
+                      pthread_startroutine_t entry, pthread_addr_t arg);
 
 /****************************************************************************
  * Name: nx_pthread_exit
@@ -178,7 +176,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  *   within the pthread_exit() and pthread_cancellation() logic
  *
  * Input Parameters:
- *   None
+ *   tls - The local storage info of the exiting thread
  *
  * Returned Value:
  *   None
@@ -186,7 +184,7 @@ void nx_pthread_exit(FAR void *exit_value) noreturn_function;
  ****************************************************************************/
 
 #ifdef CONFIG_PTHREAD_CLEANUP
-void pthread_cleanup_popall(void);
+void pthread_cleanup_popall(FAR struct tls_info_s *tls);
 #endif
 
 #undef EXTERN

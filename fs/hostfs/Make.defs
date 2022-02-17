@@ -26,11 +26,3 @@ VPATH += :hostfs
 ifeq ($(CONFIG_FS_HOSTFS),y)
 CSRCS += hostfs.c
 endif
-
-ifeq ($(CONFIG_FS_HOSTFS_RPMSG),y)
-CSRCS += hostfs_rpmsg.c
-endif
-
-ifeq ($(CONFIG_FS_HOSTFS_RPMSG_SERVER),y)
-CSRCS += hostfs_rpmsg_server.c
-endif

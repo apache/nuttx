@@ -1,0 +1,461 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_CHIP_ESP32S3
+
+comment "ESP32-S3 Configuration Options"
+
+choice
+	prompt "ESP32-S3 Chip Selection"
+	default ARCH_CHIP_ESP32S3WROOM1
+
+config ARCH_CHIP_ESP32S3WROOM1
+	bool "ESP32-S3-WROOM-1"
+	select ESP32S3_FLASH_4M
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+config ARCH_CHIP_ESP32S3WROOM2
+	bool "ESP32-S3-WROOM-2"
+	select ESP32S3_FLASH_16M
+	select ESP32S3_PSRAM_8M
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+config ARCH_CHIP_ESP32S3MINI1
+	bool "ESP32-S3-MINI-1"
+	select ESP32S3_FLASH_8M
+	---help---
+		Generic module with an embedded ESP32-S3.
+
+endchoice # ESP32-S3 Chip Selection
+
+choice ESP32S3_DEFAULT_CPU_FREQ
+	prompt "CPU frequency"
+	default ESP32S3_DEFAULT_CPU_FREQ_240
+	---help---
+		CPU frequency to be set on application startup.
+
+	config ESP32S3_DEFAULT_CPU_FREQ_80
+		bool "80 MHz"
+
+	config ESP32S3_DEFAULT_CPU_FREQ_160
+		bool "160 MHz"
+
+	config ESP32S3_DEFAULT_CPU_FREQ_240
+		bool "240 MHz"
+
+endchoice # CPU frequency
+
+config ESP32S3_DEFAULT_CPU_FREQ_MHZ
+	int
+	default 80 if ESP32S3_DEFAULT_CPU_FREQ_80
+	default 160 if ESP32S3_DEFAULT_CPU_FREQ_160
+	default 240 if ESP32S3_DEFAULT_CPU_FREQ_240
+
+menu "Cache config"
+
+choice
+	prompt "Instruction cache size"
+	default ESP32S3_INSTRUCTION_CACHE_16KB
+	---help---
+		Instruction cache size to be set on application startup.
+		If you use 16KB instruction cache rather than 32KB instruction cache,
+		then the other 16KB will be managed by heap allocator.
+
+config ESP32S3_INSTRUCTION_CACHE_16KB
+	bool "16KB"
+	---help---
+		Use 16KB of SRAM as Instruction Cache
+
+config ESP32S3_INSTRUCTION_CACHE_32KB
+	bool "32KB"
+	---help---
+		Use 32KB of SRAM as Instruction Cache
+
+endchoice # Instruction cache size
+
+config ESP32S3_INSTRUCTION_CACHE_SIZE
+	hex
+	default 0x4000 if ESP32S3_INSTRUCTION_CACHE_16KB
+	default 0x8000 if ESP32S3_INSTRUCTION_CACHE_32KB
+
+choice ESP32S3_ICACHE_ASSOCIATED_WAYS
+	prompt "Instruction cache associated ways"
+	default ESP32S3_INSTRUCTION_CACHE_8WAYS
+	---help---
+		Instruction cache associated ways to be set on application startup.
+
+	config ESP32S3_INSTRUCTION_CACHE_4WAYS
+		bool "4 ways"
+
+	config ESP32S3_INSTRUCTION_CACHE_8WAYS
+		bool "8 ways"
+
+endchoice
+
+config ESP32S3_ICACHE_ASSOCIATED_WAYS
+	int
+	default 4 if ESP32S3_INSTRUCTION_CACHE_4WAYS
+	default 8 if ESP32S3_INSTRUCTION_CACHE_8WAYS
+
+choice ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
+	prompt "Instruction cache line size"
+	default ESP32S3_INSTRUCTION_CACHE_LINE_32B
+	---help---
+		Instruction cache line size to be set on application startup.
+
+	config ESP32S3_INSTRUCTION_CACHE_LINE_16B
+		bool "16 Bytes"
+		depends on ESP32S3_INSTRUCTION_CACHE_16KB
+
+	config ESP32S3_INSTRUCTION_CACHE_LINE_32B
+		bool "32 Bytes"
+
+endchoice
+
+config ESP32S3_INSTRUCTION_CACHE_LINE_SIZE
+	int
+	default 16 if ESP32S3_INSTRUCTION_CACHE_LINE_16B
+	default 32 if ESP32S3_INSTRUCTION_CACHE_LINE_32B
+
+choice
+	prompt "Data cache size"
+	default ESP32S3_DATA_CACHE_32KB
+	---help---
+		Data cache size to be set on application startup.
+		If you use 32KB data cache rather than 64KB data cache,
+		the other 32KB will be added to the heap.
+
+config ESP32S3_DATA_CACHE_16KB
+	bool "16KB"
+	---help---
+		Use 16KB of SRAM as Data Cache
+
+config ESP32S3_DATA_CACHE_32KB
+	bool "32KB"
+	---help---
+		Use 32KB of SRAM as Data Cache
+
+config ESP32S3_DATA_CACHE_64KB
+	bool "64KB"
+	---help---
+		Use 64KB of SRAM as Data Cache
+
+endchoice # Data cache size
+
+config ESP32S3_DATA_CACHE_SIZE
+	hex
+	# For 16KB the actual configuration is 32kb cache, but 16kb will be reserved for heap at startup
+	default 0x8000 if ESP32S3_DATA_CACHE_16KB
+	default 0x8000 if ESP32S3_DATA_CACHE_32KB
+	default 0x10000 if ESP32S3_DATA_CACHE_64KB
+
+choice ESP32S3_DCACHE_ASSOCIATED_WAYS
+	prompt "Data cache associated ways"
+	default ESP32S3_DATA_CACHE_8WAYS
+	---help---
+		Data cache associated ways to be set on application startup.
+
+	config ESP32S3_DATA_CACHE_4WAYS
+		bool "4 ways"
+
+	config ESP32S3_DATA_CACHE_8WAYS
+		bool "8 ways"
+
+endchoice
+
+config ESP32S3_DCACHE_ASSOCIATED_WAYS
+	int
+	default 4 if ESP32S3_DATA_CACHE_4WAYS
+	default 8 if ESP32S3_DATA_CACHE_8WAYS
+
+choice ESP32S3_DATA_CACHE_LINE_SIZE
+	prompt "Data cache line size"
+	default ESP32S3_DATA_CACHE_LINE_32B
+	---help---
+		Data cache line size to be set on application startup.
+
+	config ESP32S3_DATA_CACHE_LINE_16B
+		bool "16 Bytes"
+		depends on ESP32S3_DATA_CACHE_16KB || ESP32S3_DATA_CACHE_32KB
+
+	config ESP32S3_DATA_CACHE_LINE_32B
+		bool "32 Bytes"
+
+	config ESP32S3_DATA_CACHE_LINE_64B
+		bool "64 Bytes"
+
+endchoice
+
+config ESP32S3_DATA_CACHE_LINE_SIZE
+	int
+	default 16 if ESP32S3_DATA_CACHE_LINE_16B
+	default 32 if ESP32S3_DATA_CACHE_LINE_32B
+	default 64 if ESP32S3_DATA_CACHE_LINE_64B
+
+endmenu # Cache config
+
+config ESP32S3_ULP_COPROC_ENABLED
+	bool "Enable Ultra Low Power (ULP) Coprocessor"
+	default n
+	---help---
+		Set to 'y' if you plan to load a firmware for the coprocessor.
+
+config ESP32S3_ULP_COPROC_RESERVE_MEM
+	int
+	prompt "RTC slow memory reserved for coprocessor" if ESP32S3_ULP_COPROC_ENABLED
+	default 512 if ESP32S3_ULP_COPROC_ENABLED
+	range 32 8176 if ESP32S3_ULP_COPROC_ENABLED
+	default 0 if !ESP32S3_ULP_COPROC_ENABLED
+	range 0 0 if !ESP32S3_ULP_COPROC_ENABLED
+	help
+		Bytes of memory to reserve for ULP coprocessor firmware & data.
+		Data is reserved at the beginning of RTC slow memory.
+
+config ESP32S3_FLASH_4M
+	bool
+	default n
+
+config ESP32S3_FLASH_8M
+	bool
+	default n
+
+config ESP32S3_FLASH_16M
+	bool
+	default n
+
+config ESP32S3_ESPTOOLPY_NO_STUB
+	bool "Disable download stub"
+	default n
+	---help---
+		The flasher tool sends a precompiled download stub first by default.
+		That stub allows things like compressed downloads and more.
+		Usually you should not need to disable that feature.
+		It is only required to be disabled in certain scenarios when either
+		Secure Boot V2 or Flash Encryption is enabled.
+
+config ESP32S3_FLASH_DETECT
+	bool "Auto-detect FLASH size"
+	default y
+	---help---
+		Auto detect flash size when flashing.
+
+config ESP32S3_PSRAM_8M
+	bool
+	default n
+
+choice ESP32S3_FLASH_MODE
+	prompt "SPI FLASH mode"
+	default ESP32S3_FLASH_MODE_DIO
+	---help---
+		These options control how many I/O pins are used for communication
+		with the attached SPI flash chip.
+		The option selected here is then used by esptool when flashing.
+
+	config ESP32S3_FLASH_MODE_DIO
+		bool "Dual IO (DIO)"
+
+	config ESP32S3_FLASH_MODE_DOUT
+		bool "Dual Output (DOUT)"
+
+	config ESP32S3_FLASH_MODE_QIO
+		bool "Quad IO (QIO)"
+
+	config ESP32S3_FLASH_MODE_QOUT
+		bool "Quad Output (QOUT)"
+
+endchoice # ESP32S3_FLASH_MODE
+
+choice ESP32S3_FLASH_FREQ
+	prompt "SPI FLASH frequency"
+	default ESP32S3_FLASH_FREQ_40M
+	---help---
+		SPI FLASH frequency
+
+	config ESP32S3_FLASH_FREQ_120M
+		bool "120 MHz"
+
+	config ESP32S3_FLASH_FREQ_80M
+		bool "80 MHz"
+
+	config ESP32S3_FLASH_FREQ_40M
+		bool "40 MHz"
+
+	config ESP32S3_FLASH_FREQ_20M
+		bool "20 MHz"
+
+endchoice # ESP32S3_FLASH_FREQ
+
+config ESP32S3_RUN_IRAM
+	bool "Run from IRAM"
+	default n
+	---help---
+		This loads all of NuttX inside IRAM. Used to test somewhat small
+		images that can fit entirely in IRAM.
+
+menu "ESP32-S3 Peripheral Selection"
+
+config ESP32S3_UART
+	bool
+	default n
+
+config ESP32S3_UART0
+	bool "UART 0"
+	default n
+	select ESP32S3_UART
+	select UART0_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32S3_UART1
+	bool "UART 1"
+	default n
+	select ESP32S3_UART
+	select UART1_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+config ESP32S3_UART2
+	bool "UART 2"
+	default n
+	select ESP32S3_UART
+	select UART2_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
+endmenu # ESP32S3 Peripheral Selection
+
+menu "UART configuration"
+	depends on ESP32S3_UART
+
+if ESP32S3_UART0
+
+config ESP32S3_UART0_TXPIN
+	int "UART0 Tx Pin"
+	default 43
+	range 0 48
+
+config ESP32S3_UART0_RXPIN
+	int "UART0 Rx Pin"
+	default 44
+	range 0 48
+
+config ESP32S3_UART0_RTSPIN
+	int "UART0 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 15
+	range 0 48
+
+config ESP32S3_UART0_CTSPIN
+	int "UART0 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 16
+	range 0 48
+
+endif # ESP32S3_UART0
+
+if ESP32S3_UART1
+
+config ESP32S3_UART1_TXPIN
+	int "UART1 Tx Pin"
+	default 17
+	range 0 48
+
+config ESP32S3_UART1_RXPIN
+	int "UART1 Rx Pin"
+	default 18
+	range 0 48
+
+config ESP32S3_UART1_RTSPIN
+	int "UART1 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 19
+	range 0 48
+
+config ESP32S3_UART1_CTSPIN
+	int "UART1 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 20
+	range 0 48
+
+endif # ESP32S3_UART1
+
+if ESP32S3_UART2
+
+config ESP32S3_UART2_TXPIN
+	int "UART2 Tx Pin"
+	default 17
+	range 0 48
+
+config ESP32S3_UART2_RXPIN
+	int "UART2 Rx Pin"
+	default 16
+	range 0 48
+
+config ESP32S3_UART2_RTSPIN
+	int "UART2 RTS Pin"
+	depends on SERIAL_IFLOWCONTROL
+	default 35
+	range 0 48
+
+config ESP32S3_UART2_CTSPIN
+	int "UART2 CTS Pin"
+	depends on SERIAL_OFLOWCONTROL
+	default 36
+	range 0 48
+
+endif # ESP32S3_UART2
+
+endmenu # UART configuration
+
+menu "Application Image Configuration"
+
+choice
+	prompt "Application Image Format"
+	default ESP32S3_APP_FORMAT_LEGACY
+	---help---
+		Depending on the chosen 2nd stage bootloader, the application may
+		be required to be perform a specific startup routine. Furthermore,
+		the image binary must be formatted according to the definition from
+		the 2nd stage bootloader.
+
+config ESP32S3_APP_FORMAT_LEGACY
+	bool "Legacy format"
+	---help---
+		This is the legacy application image format, as supported by the ESP-IDF
+		2nd stage bootloader.
+
+endchoice # Application Image Format
+
+choice
+	prompt "Source for bootloader binaries"
+	default ESP32S3_BOOTLOADER_DOWNLOAD_PREBUILT
+	---help---
+		Select the action to be taken by the build system for the
+		"make bootloader" target.
+
+config ESP32S3_BOOTLOADER_DOWNLOAD_PREBUILT
+	bool "Download prebuilt binaries"
+	---help---
+		The build system will download the prebuilt binaries from
+		https://github.com/espressif/esp-nuttx-bootloader according to the chosen
+		Application Image Format (ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT)
+
+config ESP32S3_BOOTLOADER_BUILD_FROM_SOURCE
+	bool "Build binaries from source"
+	---help---
+		The build system will build all the required binaries from source. It will clone
+		the https://github.com/espressif/esp-nuttx-bootloader repository and build a
+		custom bootloader according to the chosen Application Image Format
+		(ESP32S3_APP_FORMAT_LEGACY or ESP32S3_APP_FORMAT_MCUBOOT) and partition information.
+
+endchoice
+
+config ESP32S3_PARTITION_TABLE_OFFSET
+	hex "Partition Table offset"
+	default 0x8000
+	depends on ESP32S3_APP_FORMAT_LEGACY
+
+endmenu # Application Image Configuration
+
+endif # ARCH_CHIP_ESP32S3

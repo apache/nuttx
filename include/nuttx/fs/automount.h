@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H
-#define __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H
+#ifndef __INCLUDE_NUTTX_FS_AUTOMOUNT_H
+#define __INCLUDE_NUTTX_FS_AUTOMOUNT_H
 
 /****************************************************************************
  * Included Files
@@ -27,6 +27,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <signal.h>
 
 #include <nuttx/irq.h>
 
@@ -69,6 +70,22 @@ struct automount_lower_s; /* Forward reference.  Defined below */
 typedef CODE int
   (*automount_handler_t)(FAR const struct automount_lower_s *lower,
                          FAR void *arg, bool inserted);
+
+#ifdef CONFIG_FS_AUTOMOUNTER_DRIVER
+
+/* A reference to this structure is provided with the FIOC_NOTIFY IOCTL
+ * command and describes the conditions under which the client would like
+ * to receive notification.
+ */
+
+struct automount_notify_s
+{
+  bool an_mount;              /* FS mount to be notified */
+  bool an_umount;             /* FS umount to be notified */
+  struct sigevent an_event;   /* Describe the way a task is to be notified */
+};
+
+#endif /* CONFIG_FS_AUTOMOUNTER_DRIVER */
 
 /* A reference to a structure of this type must be passed to the FS
  * automounter.  This structure provides information about the volume to be
@@ -179,4 +196,4 @@ void automount_uninitialize(FAR void *handle);
 #endif
 
 #endif /* CONFIG_FS_AUTOMOUNTER */
-#endif /* __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H */
+#endif /* __INCLUDE_NUTTX_FS_AUTOMOUNT_H */

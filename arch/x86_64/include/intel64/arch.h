@@ -414,7 +414,7 @@ static inline void write_msr(unsigned int msr, unsigned long val)
     : "memory");
 }
 
-static inline uint64_t read_fsbase()
+static inline uint64_t read_fsbase(void)
 {
     uint64_t val;
   asm volatile("rdfsbase %0"
@@ -433,7 +433,7 @@ static inline void write_fsbase(unsigned long val)
     : "memory");
 }
 
-static inline uint64_t read_gsbase()
+static inline uint64_t read_gsbase(void)
 {
     uint64_t val;
   asm volatile("rdgsbase %0"
@@ -454,7 +454,7 @@ static inline void write_gsbase(unsigned long val)
 
 /* Return stack pointer */
 
-static inline uint64_t up_getsp()
+static inline uint64_t up_getsp(void)
 {
   uint64_t regval;
 
@@ -468,7 +468,7 @@ static inline uint64_t up_getsp()
 
 /* Get segment registers */
 
-static inline uint32_t up_getds()
+static inline uint32_t up_getds(void)
 {
   uint32_t regval;
 
@@ -480,7 +480,7 @@ static inline uint32_t up_getds()
   return regval;
 }
 
-static inline uint32_t up_getcs()
+static inline uint32_t up_getcs(void)
 {
   uint32_t regval;
 
@@ -492,7 +492,7 @@ static inline uint32_t up_getcs()
   return regval;
 }
 
-static inline uint32_t up_getss()
+static inline uint32_t up_getss(void)
 {
   uint32_t regval;
 
@@ -504,7 +504,7 @@ static inline uint32_t up_getss()
   return regval;
 }
 
-static inline uint32_t up_getes()
+static inline uint32_t up_getes(void)
 {
   uint32_t regval;
 
@@ -516,7 +516,7 @@ static inline uint32_t up_getes()
   return regval;
 }
 
-static inline uint32_t up_getfs()
+static inline uint32_t up_getfs(void)
 {
   uint32_t regval;
 
@@ -528,7 +528,7 @@ static inline uint32_t up_getfs()
   return regval;
 }
 
-static inline uint32_t up_getgs()
+static inline uint32_t up_getgs(void)
 {
   uint32_t regval;
 

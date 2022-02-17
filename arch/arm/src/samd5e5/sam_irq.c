@@ -71,11 +71,7 @@
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#else
-volatile uint32_t *g_current_regs[1];
-#endif
 
 /* This is the address of the  exception vector table (determined by the
  * linker script).

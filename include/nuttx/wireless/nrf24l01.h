@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NRF24L01_H
-#define __INCLUDE_NUTTX_NRF24L01_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_NRF24L01_H
+#define __INCLUDE_NUTTX_WIRELESS_NRF24L01_H
 
 /****************************************************************************
  * Included Files
@@ -532,4 +532,4 @@ void nrf24l01_dumprxfifo(FAR struct nrf24l01_dev_s *dev);
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_NRF24L01_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_NRF24L01_H */

@@ -39,60 +39,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: uart_check_signo
- *
- * Description:
- *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
- *   buffer region.  The first signal associated with the first such
- *   character is returned.
- *
- *   If there multiple such characters in the buffer, only the signal
- *   associated with the first is returned (this a bug!)
- *
- * Returned Value:
- *   0 if a signal-related character does not appear in the.  Otherwise,
- *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
- *   action.
- *
- ****************************************************************************/
-
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC)
-static int uart_check_signo(int pid, const char *buf, size_t size)
-{
-  size_t i;
-
-  for (i = 0; i < size; i++)
-    {
-#ifdef CONFIG_TTY_FORCE_PANIC
-      if (buf[i] == CONFIG_TTY_FORCE_PANIC_CHAR)
-        {
-          PANIC();
-          return 0;
-        }
-#endif
-
-#ifdef CONFIG_TTY_SIGINT
-      if (pid > 0 && buf[i] == CONFIG_TTY_SIGINT_CHAR)
-        {
-          return SIGINT;
-        }
-#endif
-
-#ifdef CONFIG_TTY_SIGTSTP
-      if (pid > 0 && buf[i] == CONFIG_TTY_SIGTSTP_CHAR)
-        {
-          return SIGTSTP;
-        }
-#endif
-    }
-
-  return 0;
-}
-#endif
-
-/****************************************************************************
- * Name: uart_recvchars_signo
+ * Name: uart_recvchars_check_special
  *
  * Description:
  *   Check if the SIGINT character is anywhere in the newly received DMA
@@ -105,8 +52,8 @@ static int uart_check_signo(int pid, const char *buf, size_t size)
 
 #if defined(CONFIG_SERIAL_RXDMA) && \
    (defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC))
-static int uart_recvchars_signo(FAR uart_dev_t *dev)
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH))
+static int uart_recvchars_check_special(FAR uart_dev_t *dev)
 {
   FAR struct uart_dmaxfer_s *xfer = &dev->dmarx;
   int signo;
@@ -115,20 +62,20 @@ static int uart_recvchars_signo(FAR uart_dev_t *dev)
 
   if (xfer->nbytes <= xfer->length)
     {
-      return uart_check_signo(dev->pid, xfer->buffer, xfer->nbytes);
+      return uart_check_special(dev, xfer->buffer, xfer->nbytes);
     }
   else
     {
       /* REVISIT:  Additional signals could be in the second region. */
 
-      signo = uart_check_signo(dev->pid, xfer->buffer, xfer->length);
+      signo = uart_check_special(dev, xfer->buffer, xfer->length);
       if (signo != 0)
         {
           return signo;
         }
 
-      return uart_check_signo(dev->pid, xfer->nbuffer,
-                              xfer->nbytes - xfer->length);
+      return uart_check_special(dev, xfer->nbuffer,
+                                xfer->nbytes - xfer->length);
     }
 }
 #endif
@@ -369,17 +316,14 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
   FAR struct uart_buffer_s *rxbuf = &dev->recv;
   size_t nbytes = xfer->nbytes;
 #if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
-    defined(CONFIG_TTY_FORCE_PANIC)
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 
   /* Check if the SIGINT character is anywhere in the newly received DMA
    * buffer.
    */
 
-  if ((dev->tc_lflag & ISIG))
-    {
-      signo = uart_recvchars_signo(dev);
-    }
+  signo = uart_recvchars_check_special(dev);
 #endif
 
   /* Move head for nbytes. */
@@ -397,7 +341,8 @@ void uart_recvchars_done(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   /* Send the signal if necessary */
 
   if (signo != 0)

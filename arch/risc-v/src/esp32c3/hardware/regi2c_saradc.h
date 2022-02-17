@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,4 +49,4 @@
 #define I2C_ADC1_DEF_MSB        (0x6)
 #define I2C_ADC1_DEF_LSB        (0x4)
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_REGI2C_SARADC_H */

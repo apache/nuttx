@@ -424,7 +424,6 @@ pid_t nx_waitpid(pid_t pid, int *stat_loc, int options)
               /* Recover the exiting child */
 
               child = group_find_child(rtcb->group, info.si_pid);
-              DEBUGASSERT(child != NULL);
 
               /* Discard the child entry, if we have one */
 

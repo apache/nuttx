@@ -98,10 +98,6 @@ apps/grahpics/nxwidgets
   The NxWidgets code is provided as a separate package located outside of the
   NuttX source tree (probably at this location).
 
-graphics/vnc
-  The future home of the VNC Remote Frame Buffer (RFB) server and client
-  implementations.
-
 Installing New Fonts
 ^^^^^^^^^^^^^^^^^^^^
 

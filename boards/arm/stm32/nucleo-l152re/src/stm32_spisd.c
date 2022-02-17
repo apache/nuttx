@@ -113,7 +113,7 @@ int stm32_spisd_initialize(int port, int minor)
   stm32_configgpio(GPIO_SPI1_CS);   /* Assign CS */
   stm32_gpiowrite(GPIO_SPI1_CS, 1); /* Ensure the CS is inactive */
 
-  mcinfo("INFO: Initializing mmcsd port %d minor %d \n",
+  mcinfo("INFO: Initializing mmcsd port %d minor %d\n",
          port, minor);
 
   spi = stm32_spibus_initialize(port);

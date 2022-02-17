@@ -1,31 +1,37 @@
 menuconfig MOTOR_FOC
-  bool "FOC (Field Oriented Controller) driver support"
-  default n
-  ---help---
-    Enables building of the "upper-half" FOC driver.
+	bool "FOC (Field Oriented Controller) driver support"
+	default n
+	---help---
+		Enables building of the "upper-half" FOC driver.
 
 if MOTOR_FOC
 
 config MOTOR_FOC_INST
-       int "FOC instances"
-       default 1
+	int "FOC instances"
+	default 1
 
 config MOTOR_FOC_PHASES
-       int "FOC phases number"
-       default 3
+	int "FOC phases number"
+	default 3
 
 config MOTOR_FOC_SHUNTS
-       int "FOC number of shunts"
-       range 1 3
-       default 3
-       ---help---
-         Number of shunts supported (or other types of current sensors).
-         Any current reconstruction must be done on the lower-half side.
+	int "FOC number of shunts"
+	range 1 3
+	default 3
+	---help---
+		Number of shunts supported (or other types of current sensors).
+		Any current reconstruction must be done on the lower-half side.
 
 config MOTOR_FOC_TRACE
-       bool "FOC trace support"
-       default n
-       ---help---
-         Enables FOC driver trace interface.
+	bool "FOC trace support"
+	default n
+	---help---
+		Enables FOC driver trace interface.
+
+config MOTOR_FOC_DUMMY
+	bool "Simulated FOC device"
+	default n
+	---help---
+		Build a simulated lower-half FOC device
 
 endif #MOTOR_FOC

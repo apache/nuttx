@@ -52,8 +52,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H
-#define _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H
+#ifndef __NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H
+#define __NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -805,4 +805,4 @@ FAR struct sixlowpan_reassbuf_s *
 void sixlowpan_reass_free(FAR struct sixlowpan_reassbuf_s *reass);
 
 #endif /* CONFIG_NET_6LOWPAN */
-#endif /* _NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */
+#endif /* __NET_SIXLOWPAN_SIXLOWPAN_INTERNAL_H */

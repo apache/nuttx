@@ -71,7 +71,7 @@ static inline int open_mountpoint(FAR struct inode *inode,
 
   if (!inode->u.i_mops || !inode->u.i_mops->opendir)
     {
-      return ENOSYS;
+      return -ENOSYS;
     }
 
   /* Take reference to the mountpoint inode.  Note that we do not use
@@ -98,7 +98,7 @@ static inline int open_mountpoint(FAR struct inode *inode,
 
       /* Negate the error value so that it can be used to set errno */
 
-      return -ret;
+      return ret;
     }
 
   return OK;
@@ -227,7 +227,6 @@ FAR DIR *opendir(FAR const char *path)
   ret = inode_semtake();
   if (ret < 0)
     {
-      ret = -ret;
       goto errout;
     }
 
@@ -249,7 +248,7 @@ FAR DIR *opendir(FAR const char *path)
     {
       /* Inode for 'path' does not exist. */
 
-      ret = ENOTDIR;
+      ret = -ENOTDIR;
       goto errout_with_semaphore;
     }
 
@@ -262,7 +261,7 @@ FAR DIR *opendir(FAR const char *path)
     {
       /* Insufficient memory to complete the operation. */
 
-      ret = ENOMEM;
+      ret = -ENOMEM;
       goto errout_with_semaphore;
     }
 
@@ -315,7 +314,7 @@ FAR DIR *opendir(FAR const char *path)
         }
       else
         {
-          ret = ENOTDIR;
+          ret = -ENOTDIR;
           goto errout_with_direntry;
         }
     }
@@ -334,6 +333,6 @@ errout_with_semaphore:
   inode_semgive();
 
 errout:
-  set_errno(ret);
+  set_errno(-ret);
   return NULL;
 }

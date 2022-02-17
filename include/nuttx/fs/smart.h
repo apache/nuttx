@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SMART_H
-#define __INCLUDE_NUTTX_SMART_H
+#ifndef __INCLUDE_NUTTX_FS_SMART_H
+#define __INCLUDE_NUTTX_FS_SMART_H
 
 /****************************************************************************
  * Included Files
@@ -158,4 +158,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __INCLUDE_NUTTX_SMART_H */
+#endif /* __INCLUDE_NUTTX_FS_SMART_H */

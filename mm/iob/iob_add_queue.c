@@ -28,6 +28,8 @@
 #include <errno.h>
 #include <debug.h>
 
+#include <nuttx/irq.h>
+#include <nuttx/arch.h>
 #include <nuttx/mm/iob.h>
 
 #include "iob.h"
@@ -66,6 +68,8 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
   /* Add the container to the end of the queue */
 
   qentry->qe_flink = NULL;
+
+  irqstate_t flags = enter_critical_section();
   if (!iobq->qh_head)
     {
       iobq->qh_head = qentry;
@@ -77,6 +81,8 @@ static int iob_add_queue_internal(FAR struct iob_s *iob,
       iobq->qh_tail->qe_flink = qentry;
       iobq->qh_tail = qentry;
     }
+
+  leave_critical_section(flags);
 
   return 0;
 }

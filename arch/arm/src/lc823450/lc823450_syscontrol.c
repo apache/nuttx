@@ -67,16 +67,16 @@ uint32_t get_cpu_ver(void)
   switch (reg)
     {
       case MODEM_MAV_ES1:
-        sinfo("ES1 \n");
+        sinfo("ES1\n");
         break;
 
       case MODEM_MAV_ES2:
-        sinfo("ES2 \n");
+        sinfo("ES2\n");
         ret = 1;
         break;
 
       default:
-        sinfo("??? \n");
+        sinfo("???\n");
         break;
     }
 
@@ -119,7 +119,7 @@ void mod_stby_regs(uint32_t enabits, uint32_t disbits)
       modifyreg32(ISOCNT, 0, enabits);
     }
 
-  /* sinfo("ISOCNT=0x%x, LSISTBY=0x%x \n",
+  /* sinfo("ISOCNT=0x%x, LSISTBY=0x%x\n",
    * getreg32(ISOCNT), getreg32(LSISTBY));
    */
 }

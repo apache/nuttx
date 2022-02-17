@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_MAX6675_C
-#define __STM32_MAX6675_C
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX6675_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX6675_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_max6675_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_MAX6675_C
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_MAX6675_H */

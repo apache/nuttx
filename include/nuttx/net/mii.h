@@ -118,6 +118,22 @@
 #define MII_KSZ8051_PHYCTRL1         0x1e      /* PHY Control 1 */
 #define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
 
+/* Micrel KSZ8061:  0x10-0x18, 0x1b, 0x1c-0x1f */
+#define MII_KSZ8061_DIG_CTRL           0x10   /* Digital Control */
+#define MII_KSZ8061_AFE_CTRL_0         0x11   /* AFE Control 0 */
+#define MII_KSZ8061_AFE_CTRL_1         0x12   /* AFE Control 1 */
+#define MII_KSZ8061_AFE_CTRL_2         0x13   /* AFE Control 2 */
+#define MII_KSZ8061_AFE_CTRL_3         0x14   /* AFE Control 3 */
+#define MII_KSZ8061_RXER_CNTR          0x15   /* RXER Counter */
+#define MII_KSZ8061_OP_MODE            0x16   /* Operation Mode */
+#define MII_KSZ8061_OP_MODE_STRAP_STAT 0x17   /* Operation Mode Strap Status */
+#define MII_KSZ8061_EXP_CTRL           0x18   /* Expanded Control */
+#define MII_KSZ8061_INTR_CTRL_STAT     0x1B   /* Interrupt Control/Status */
+#define MII_KSZ8061_FUNC_CTRL          0x1C   /* Function Control */
+#define MII_KSZ8061_LINKMD_CTRL_STAT   0x1D   /* LinkMD® Control/Status */
+#define MII_KSZ8061_PHY_CTRL_1         0x1E   /* PHY Control 1 */
+#define MII_KSZ8061_PHY_CTRL_2         0x1F   /* PHY Control 2 */
+
 /* Micrel KSZ8081:  0x10-0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
 #define MII_KSZ8081_DRCTRL           0x10      /* Digital Reserve Control */
@@ -791,6 +807,29 @@
 #  define MII_CONFIG2_SLP_T_1             (1 << MII_CONFIG2_SLP_T_SHIFT)  /* sleep request timeout 1 ms */
 #  define MII_CONFIG2_SLP_T_4             (2 << MII_CONFIG2_SLP_T_SHIFT)  /* sleep request timeout 4 ms */
 #  define MII_CONFIG2_SLP_T_16            (3 << MII_CONFIG2_SLP_T_SHIFT)  /* sleep request timeout 16 ms */
+
+/* DP83848C-specific register bit settings **********************************/
+
+/* DP83848C Register 0x11: Interrupt control/status */
+#define MII_DP83848C_INT_TEST         (1 << 2)  /* Test Interrupt */
+#define MII_DP83848C_INT_EN           (1 << 1)  /* Interrupt enable */
+#define MII_DP83848C_INT_OEN          (1 << 0)  /* Interrupt output enable */
+
+/* DP83848C Register 0x12: Interrupt control/status */
+#define MII_DP83848C_ED_INT           (1 << 14) /* Energy Detect interrupt: */
+#define MII_DP83848C_LINK_INT         (1 << 13) /* Change of Link Status interrupt: */
+#define MII_DP83848C_SPD_INT          (1 << 12) /* Change of speed status interrupt: */
+#define MII_DP83848C_DUP_INT          (1 << 11) /* Change of duplex status interrupt: */
+#define MII_DP83848C_ANC_INT          (1 << 10) /* Auto-Negotiation Complete interrupt: */
+#define MII_DP83848C_FHF_INT          (1 << 9)  /* False Carrier Counter half-full interrupt: */
+#define MII_DP83848C_RHF_INT          (1 << 8)  /* Receive Error Counter half-full interrupt: */
+#define MII_DP83848C_ED_INT_EN        (1 << 6)  /* Enable Interrupt on energy detect event. */
+#define MII_DP83848C_LINK_INT_EN      (1 << 5)  /* Enable Interrupt on change of link status. */
+#define MII_DP83848C_SPD_INT_EN       (1 << 4)  /* Enable Interrupt on change of speed status. */
+#define MII_DP83848C_DUP_INT_EN       (1 << 3)  /* Enable Interrupt on change of duplex status. */
+#define MII_DP83848C_ANC_INT_EN       (1 << 2)  /* Enable Interrupt on Auto-negotiation complete event. */
+#define MII_DP83848C_FHF_INT_EN       (1 << 1)  /* Enable Interrupt on False Carrier Counter Register half-full event. */
+#define MII_DP83848C_RHF_INT_EN       (1 << 0)  /* Enable Interrupt on Receive Error Counter Register half-full event. */
 
 /****************************************************************************
  * Type Definitions

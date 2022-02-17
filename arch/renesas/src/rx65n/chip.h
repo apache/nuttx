@@ -50,4 +50,4 @@ extern uint16_t ebss;
 #endif
 
 #endif
-#endif /* __ARCH_RENESAS_SRC_SH1_CHIP_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_CHIP_H */

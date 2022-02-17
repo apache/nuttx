@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_WQUEUE_WQUEUE_H
-#define __LIBC_WQUEUE_WQUEUE_H
+#ifndef __LIBS_LIBC_WQUEUE_WQUEUE_H
+#define __LIBS_LIBC_WQUEUE_WQUEUE_H
 
 /****************************************************************************
  * Included Files
@@ -64,4 +64,4 @@ extern struct usr_wqueue_s g_usrwork;
  ****************************************************************************/
 
 #endif /* CONFIG_LIBC_USRWORK && !__KERNEL__*/
-#endif /* __LIBC_WQUEUE_WQUEUE_H */
+#endif /* __LIBS_LIBC_WQUEUE_WQUEUE_H */

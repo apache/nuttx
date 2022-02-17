@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_IHM08M1_H
-#define __STM32_IHM08M1_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_IHM08M1_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_IHM08M1_H
 
 /****************************************************************************
  * Included Files
@@ -56,4 +56,4 @@ int board_ihm08m1_initialize(FAR struct stm32_foc_adc_s *adc_cfg);
 }
 #endif
 
-#endif // __STM32_IHM08M1_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_IHM08M1_H */

@@ -227,21 +227,10 @@ struct socket_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
-  /* Connection-specific content may follow */
-};
+  /* Definitions of 8-bit socket flags */
 
-/* This is the internal representation of a socket reference by a file
- * descriptor.
- */
-
-struct devif_callback_s;  /* Forward reference */
-
-struct socket
-{
-  uint8_t       s_domain;    /* IP domain */
-  uint8_t       s_type;      /* Protocol type */
-  uint8_t       s_proto;     /* Socket Protocol */
   uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Socket options */
@@ -259,18 +248,25 @@ struct socket
 #endif
 #endif
 
+  /* Connection-specific content may follow */
+};
+
+/* This is the internal representation of a socket reference by a file
+ * descriptor.
+ */
+
+struct devif_callback_s;  /* Forward reference */
+
+struct socket
+{
+  uint8_t       s_domain;    /* IP domain */
+  uint8_t       s_type;      /* Protocol type */
+  uint8_t       s_proto;     /* Socket Protocol */
   FAR void     *s_conn;      /* Connection inherits from struct socket_conn_s */
 
   /* Socket interface */
 
   FAR const struct sock_intf_s *s_sockif;
-
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
-    defined(CONFIG_NET_UDP_WRITE_BUFFERS)
-  /* Callback instance for TCP send() or UDP sendto() */
-
-  FAR struct devif_callback_s *s_sndcb;
-#endif
 };
 
 /****************************************************************************

@@ -104,15 +104,15 @@ static inline int pn532_attachirq(FAR struct pn532_dev_s *dev, xcpt_t isr);
 
 static const struct file_operations g_pn532fops =
 {
-  _open,
-  _close,
-  _read,
-  _write,
-  NULL,
-  _ioctl,
-  NULL
+  _open,          /* open */
+  _close,         /* close */
+  _read,          /* read */
+  _write,         /* write */
+  NULL,           /* seek */
+  _ioctl,         /* ioctl */
+  NULL            /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL          /* unlink */
 #endif
 };
 

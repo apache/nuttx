@@ -26,10 +26,13 @@
 
 #include <sys/types.h>
 #include <syslog.h>
+#include <debug.h>
 
 #include <nuttx/board.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/leds/userled.h>
+
+#include "stm32_i2c.h"
 
 #include "nucleo-l152re.h"
 
@@ -80,6 +83,52 @@
 int board_app_initialize(uintptr_t arg)
 {
   int ret;
+#ifdef CONFIG_STM32_I2C1
+  FAR struct i2c_master_s *i2c1;
+#endif
+#ifdef CONFIG_STM32_I2C2
+  FAR struct i2c_master_s *i2c2;
+#endif
+
+#ifdef CONFIG_STM32_I2C1
+  /* Get the I2C lower half instance */
+
+  i2c1 = stm32_i2cbus_initialize(1);
+  if (i2c1 == NULL)
+    {
+      i2cerr("ERROR: Initialize I2C1: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c1, 1);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C1 device: %d\n", ret);
+        }
+    }
+#endif
+
+#ifdef CONFIG_STM32_I2C2
+  /* Get the I2C lower half instance */
+
+  i2c2 = stm32_i2cbus_initialize(2);
+  if (i2c2 == NULL)
+    {
+      i2cerr("ERROR: Initialize I2C2: %d\n", ret);
+    }
+  else
+    {
+      /* Register the I2C character driver */
+
+      ret = i2c_register(i2c2, 2);
+      if (ret < 0)
+        {
+          i2cerr("ERROR: Failed to register I2C2 device: %d\n", ret);
+        }
+    }
+#endif
 
 #ifdef HAVE_LEDS
   /* Register the LED driver */

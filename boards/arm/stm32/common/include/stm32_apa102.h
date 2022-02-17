@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_APA102_H
-#define __STM32_APA102_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_APA102_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_APA102_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_apa102_initialize(int devno, int spino);
 }
 #endif
 
-#endif // __STM32_APA102_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_APA102_H */

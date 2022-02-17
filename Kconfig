@@ -40,6 +40,17 @@ config ALLOW_GPL_COMPONENTS
 		NOTE: Please check that the license for each enabled
 		component matches your project license.
 
+config ALLOW_BSDNORDIC_COMPONENTS
+	bool "Use components that have 5-Clause Nordic licenses"
+	depends on ARCH_CHIP_NRF52
+	default n
+	---help---
+		When this option is enabled the project will allow the use
+		of components that have 5-Clause Nordic licenses.
+
+		NOTE: Please check that the license for each enabled
+		component matches your project license.
+
 endmenu # License Setup
 
 menu "Build Setup"
@@ -545,6 +556,10 @@ endchoice # debug.h selection
 endmenu # Customize Header Files
 
 menu "Debug Options"
+
+config NDEBUG
+	bool "Define NDEBUG globally"
+	default y
 
 config DEBUG_ALERT
 	bool
@@ -1807,37 +1822,45 @@ config DEBUG_MOTOR_INFO
 endif # DEBUG_MOTOR
 
 config DEBUG_VIDEO
-        bool "Video Debug Features"
-        default n
-        depends on DRIVERS_VIDEO
-        ---help---
-                Enable video debug features.
+	bool "Video Debug Features"
+	default n
+	depends on DRIVERS_VIDEO
+	---help---
+		Enable video debug features.
 
 if DEBUG_VIDEO
 
 config DEBUG_VIDEO_ERROR
-        bool "Video Error Output"
-        default n
-        depends on DEBUG_ERROR
-        ---help---
-                Enable video error output to SYSLOG.
+	bool "Video Error Output"
+	default n
+	depends on DEBUG_ERROR
+	---help---
+		Enable video error output to SYSLOG.
 
 config DEBUG_VIDEO_WARN
-        bool "Video Warnings Output"
-        default n
-        depends on DEBUG_WARN
-        ---help---
-                Enable video warning output to SYSLOG.
+	bool "Video Warnings Output"
+	default n
+	depends on DEBUG_WARN
+	---help---
+		Enable video warning output to SYSLOG.
 
 config DEBUG_VIDEO_INFO
-        bool "Video Informational Output"
-        default n
-        depends on DEBUG_INFO
-        ---help---
-                Enable video informational output to SYSLOG.
+	bool "Video Informational Output"
+	default n
+	depends on DEBUG_INFO
+	---help---
+		Enable video informational output to SYSLOG.
 
 endif # DEBUG_VIDEO
 endif # DEBUG_FEATURES
+
+config DEBUG_TCBINFO
+	bool "Enable TCBinfo struct for debug"
+	default n
+	---help---
+		Enables tcbinfo struct for debugger infomation.
+		Selecting this option will enable g_tcbinfo in arch and
+		procfs.
 
 config ARCH_HAVE_STACKCHECK
 	bool
@@ -1853,20 +1876,6 @@ config STACK_COLORATION
 		to monitor the level of stack usage.
 
 		Only supported by a few architectures.
-
-config STACK_USAGE_SAFE_PERCENT
-	int "Stack usage safe percent"
-	default 0
-	range 0 100
-	depends on STACK_COLORATION
-	---help---
-		Stack usage percent = up_check_tcbstack() * 100 / tcb->adj_stack_size,
-		this should be lower than STACK_USAGE_SAFE_PERCENT.
-
-		Idle thread will periodically check stack usage when this macro
-		value > 0.
-
-		N.B. This feature should not be used in production code.
 
 config STACK_CANARIES
 	bool "Compiler stack canaries"
@@ -1899,6 +1908,14 @@ config DEBUG_SYMBOLS
 	default n
 	---help---
 		Build with debug symbols (needed for use with a debugger).
+
+config FRAME_POINTER
+	bool "Compile the NuttX with frame pointers"
+	default n
+	---help---
+		If you say Y here the resulting NuttX image will be slightly
+		larger and slower, but it gives very useful debugging information
+		in case of bugs.
 
 endmenu # Debug Options
 
@@ -2016,7 +2033,7 @@ endmenu
 # does not contain a Kconfig file
 
 config EXTERNALDIR
-        string
-        option env="EXTERNALDIR"
+	string
+	option env="EXTERNALDIR"
 
 source "$EXTERNALDIR/Kconfig"

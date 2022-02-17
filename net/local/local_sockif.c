@@ -163,7 +163,7 @@ static int local_setup(FAR struct socket *psock, int protocol)
    * connection structure, it is unallocated at this point.  It will not
    * actually be initialized until the socket is connected.
    *
-   * REVIST:  Only SOCK_STREAM and SOCK_DGRAM are supported.  Should also
+   * REVISIT:  Only SOCK_STREAM and SOCK_DGRAM are supported.  Should also
    * support SOCK_RAW.
    */
 
@@ -515,9 +515,11 @@ static int local_connect(FAR struct socket *psock,
 #ifdef CONFIG_NET_LOCAL_STREAM
       case SOCK_STREAM:
         {
+          FAR struct socket_conn_s *conn = psock->s_conn;
+
           /* Verify that the socket is not already connected */
 
-          if (_SS_ISCONNECTED(psock->s_flags))
+          if (_SS_ISCONNECTED(conn->s_flags))
             {
               return -EISCONN;
             }
@@ -797,7 +799,7 @@ static int local_socketpair(FAR struct socket *psocks[2])
       goto errout;
     }
 
-  nonblock = _SS_ISNONBLOCK(psocks[0]->s_flags);
+  nonblock = _SS_ISNONBLOCK(conns[0]->lc_conn.s_flags);
 
   /* Open the client-side write-only FIFO. */
 

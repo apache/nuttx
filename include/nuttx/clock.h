@@ -84,32 +84,32 @@
 
 #define NSEC_PER_SEC          1000000000L /* Seconds */
 #define USEC_PER_SEC             1000000L
-#define MSEC_PER_SEC                1000L
-#define DSEC_PER_SEC                  10L
-#define HSEC_PER_SEC                   2L
+#define MSEC_PER_SEC                1000
+#define DSEC_PER_SEC                  10
+#define HSEC_PER_SEC                   2
 
 #define NSEC_PER_HSEC          500000000L /* Half seconds */
 #define USEC_PER_HSEC             500000L
-#define MSEC_PER_HSEC                500L
-#define DSEC_PER_HSEC                  5L
+#define MSEC_PER_HSEC                500
+#define DSEC_PER_HSEC                  5
 
 #define NSEC_PER_DSEC          100000000L /* Deciseconds */
 #define USEC_PER_DSEC             100000L
-#define MSEC_PER_DSEC                100L
+#define MSEC_PER_DSEC                100
 
 #define NSEC_PER_MSEC            1000000L /* Milliseconds */
-#define USEC_PER_MSEC               1000L
+#define USEC_PER_MSEC               1000
 
-#define NSEC_PER_USEC               1000L /* Microseconds */
+#define NSEC_PER_USEC               1000  /* Microseconds */
 
-#define SEC_PER_MIN                   60L
+#define SEC_PER_MIN                   60
 #define NSEC_PER_MIN           (NSEC_PER_SEC * SEC_PER_MIN)
 #define USEC_PER_MIN           (USEC_PER_SEC * SEC_PER_MIN)
 #define MSEC_PER_MIN           (MSEC_PER_SEC * SEC_PER_MIN)
 #define DSEC_PER_MIN           (DSEC_PER_SEC * SEC_PER_MIN)
 #define HSEC_PER_MIN           (HSEC_PER_SEC * SEC_PER_MIN)
 
-#define MIN_PER_HOUR                  60L
+#define MIN_PER_HOUR                  60
 #define NSEC_PER_HOUR          (NSEC_PER_MIN * MIN_PER_HOUR)
 #define USEC_PER_HOUR          (USEC_PER_MIN * MIN_PER_HOUR)
 #define MSEC_PER_HOUR          (MSEC_PER_MIN * MIN_PER_HOUR)
@@ -117,7 +117,7 @@
 #define HSEC_PER_HOUR          (HSEC_PER_MIN * MIN_PER_HOUR)
 #define SEC_PER_HOUR           (SEC_PER_MIN  * MIN_PER_HOUR)
 
-#define HOURS_PER_DAY                 24L
+#define HOURS_PER_DAY                 24
 #define SEC_PER_DAY            (HOURS_PER_DAY * SEC_PER_HOUR)
 
 /* If CONFIG_SCHED_TICKLESS is not defined, then the interrupt interval of
@@ -322,7 +322,7 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
  *   timers and delays.  So use this interface with care.
  *
  * Input Parameters:
- *   None
+ *   tp: rtc time should be synced, set NULL to re-get time
  *
  * Returned Value:
  *   None
@@ -332,7 +332,7 @@ void clock_timespec_subtract(FAR const struct timespec *ts1,
  ****************************************************************************/
 
 #ifdef CONFIG_RTC
-void clock_synchronize(void);
+void clock_synchronize(FAR const struct timespec *tp);
 #endif
 
 /****************************************************************************
@@ -393,6 +393,51 @@ void clock_resynchronize(FAR struct timespec *rtc_diff);
 #if !defined(__HAVE_KERNEL_GLOBALS) || defined(CONFIG_SYSTEM_TIME64)
 clock_t clock_systime_ticks(void);
 #endif
+
+/****************************************************************************
+ * Name: clock_time2ticks
+ *
+ * Description:
+ *   Return the given struct timespec as systime ticks.
+ *
+ *   NOTE:  This is an internal OS interface and should not be called from
+ *   application code.
+ *
+ * Input Parameters:
+ *   reltime - Pointer to the time presented as struct timespec
+ *
+ * Output Parameters:
+ *   ticks - Pointer to receive the time value presented as systime ticks
+ *
+ * Returned Value:
+ *   Always returns OK (0)
+ *
+ ****************************************************************************/
+
+int clock_time2ticks(FAR const struct timespec *reltime,
+                     FAR sclock_t *ticks);
+
+/****************************************************************************
+ * Name: clock_ticks2time
+ *
+ * Description:
+ *   Return the given systime ticks as a struct timespec.
+ *
+ *   NOTE:  This is an internal OS interface and should not be called from
+ *   application code.
+ *
+ * Input Parameters:
+ *   ticks - Time presented as systime ticks
+ *
+ * Output Parameters:
+ *   reltime - Pointer to receive the time value presented as struct timespec
+ *
+ * Returned Value:
+ *   Always returns OK (0)
+ *
+ ****************************************************************************/
+
+int clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
 
 /****************************************************************************
  * Name: clock_systime_timespec

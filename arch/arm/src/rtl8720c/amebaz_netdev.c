@@ -156,7 +156,7 @@ void amebaz_netdev_notify_receive(FAR struct amebaz_dev_s *priv,
   NETDEV_RXPACKETS(&priv->dev);
   net_lock();
   oldbuf = priv->dev.d_buf;
-  hdr = (struct eth_hdr_s *)skb->data;
+  hdr = (FAR struct eth_hdr_s *)skb->data;
   priv->dev.d_buf = (void *)skb->data;
   priv->dev.d_len = len;
 #ifdef CONFIG_NET_PKT
@@ -195,7 +195,7 @@ void amebaz_netdev_notify_receive(FAR struct amebaz_dev_s *priv,
         {
 #endif
 #ifdef CONFIG_NET_ARP
-          if (hdr->type == htons(ETHTYPE_ARP))
+          if (hdr->type == HTONS(ETHTYPE_ARP))
             {
               arp_arpin(&priv->dev);
               NETDEV_RXARP(&priv->dev);

@@ -61,5 +61,5 @@ int fsetpos(FAR FILE *stream, FAR fpos_t *pos)
     }
 #endif
 
-  return fseek(stream, (FAR off_t)*pos, SEEK_SET);
+  return fseeko(stream, *pos, SEEK_SET);
 }

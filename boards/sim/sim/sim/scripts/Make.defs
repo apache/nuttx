@@ -38,6 +38,7 @@ include $(TOPDIR)/tools/Config.mk
 
 ARCHDEFINES += -U_AIX -U_WIN32 -U__APPLE__ -U__FreeBSD__
 ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
+ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -95,16 +96,11 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
-# Note: -fshort-wchar for the case where NuttX and the host OS have
-# different wchar_t. On NuttX, it's uint16_t. On macOS, it's 32-bit.
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
-   -fshort-wchar
+   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe \
-   -fshort-wchar
-CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) \
-   -fshort-wchar
+   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 ifeq ($(CONFIG_LIBCXX),y)
@@ -127,19 +123,35 @@ ifeq ($(CONFIG_LIBCXX),y)
     # XXX what to do for windows?
     CXXFLAGS += -D__GLIBCXX__
   endif
+
+  # Disable availability macros.
+  # The availability on Host OS is not likely appropriate for NuttX.
+  #
+  # Note: When compiling NuttX apps, we undefine __APPLE__.
+  # It makes libcxx __availability header unhappy.
+  # https://github.com/llvm/llvm-project/blob/2e2999cd44f6ec9a5e396fa0113497ea82582f69/libcxx/include/__availability#L258
+  CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=address
+  CXXFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CFLAGS += -fsanitize=kernel-address
   CXXFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=undefined
+  CXXFLAGS += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CFLAGS += -fomit-frame-pointer
+  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
@@ -184,6 +196,11 @@ CXXELFFLAGS = $(CXXFLAGS)
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
+ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+  # See the comment on CMODULEFLAGS above.
+  CELFFLAGS += -mcmodel=large
+  CXXELFFLAGS += -mcmodel=large
+endif
 
 LDELFFLAGS = -r -e main
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
@@ -206,15 +223,20 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CCLINKFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=undefined
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CCLINKFLAGS += -fomit-frame-pointer
+endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe

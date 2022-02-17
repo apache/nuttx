@@ -85,7 +85,7 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
  * Name: syslog_register
  *
  * Description:
- *   Register a simple character driver at /dev/syslog whose write() method
+ *   Register a simple character driver at /dev/log whose write() method
  *   will transfer data to the SYSLOG device.  This can be useful if, for
  *   example, you want to redirect the output of a program to the SYSLOG.
  *
@@ -97,7 +97,7 @@ static ssize_t syslog_chardev_write(FAR struct file *filep,
 
 void syslog_register(void)
 {
-  register_driver("/dev/syslog", &syslog_fops, 0222, NULL);
+  register_driver("/dev/log", &syslog_fops, 0222, NULL);
 }
 
 #endif /* CONFIG_SYSLOG_CHARDEV */

@@ -1690,6 +1690,8 @@ config STM32_STM32F412
 	select STM32_HAVE_I2C2
 	select STM32_HAVE_I2C3
 	select STM32_HAVE_SPI1
+	select STM32_HAVE_SPI2
+	select STM32_HAVE_SPI3
 	select STM32_HAVE_CAN1
 	select STM32_HAVE_CAN2
 	select STM32_HAVE_OTGFS
@@ -2767,14 +2769,12 @@ config STM32_BKPSRAM
 config STM32_CAN1
 	bool "CAN1"
 	default n
-	select CAN
 	select STM32_CAN
 	depends on STM32_HAVE_CAN1
 
 config STM32_CAN2
 	bool "CAN2"
 	default n
-	select CAN
 	select STM32_CAN
 	depends on STM32_HAVE_CAN2
 
@@ -2912,16 +2912,19 @@ config STM32_FDCAN1
 	bool "FDCAN1"
 	default n
 	depends on STM32_HAVE_FDCAN1
+	select STM32_FDCAN
 
 config STM32_FDCAN2
 	bool "FDCAN2"
 	default n
 	depends on STM32_HAVE_FDCAN2
+	select STM32_FDCAN
 
 config STM32_FDCAN3
 	bool "FDCAN3"
 	default n
 	depends on STM32_HAVE_FDCAN3
+	select STM32_FDCAN
 
 config STM32_FSMC
 	bool "FSMC"
@@ -3385,6 +3388,9 @@ config STM32_I2C
 	bool
 
 config STM32_CAN
+	bool
+
+config STM32_FDCAN
 	bool
 
 config STM32_TIM
@@ -10818,6 +10824,19 @@ endmenu
 
 comment "USB Device Configuration"
 
+menu "OTG Configuration"
+	depends on STM32_OTGFS
+
+config OTG_ID_GPIO_DISABLE
+	bool "Disable the use of GPIO_OTG_ID pin."
+	default n
+	---help---
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
+		cases to reuse this GPIO pin and ensure it is not set incorrectlty
+		during OS boot.
+
+endmenu
+
 config STM32_USB_ITRMP
 	bool "Re-map USB interrupt"
 	default n if !STM32_CAN1
@@ -10832,6 +10851,21 @@ config STM32_USB_ITRMP
 
 menu "CAN driver configuration"
 	depends on STM32_CAN
+
+choice
+	prompt "CAN character driver or SocketCAN support"
+	default STM32_CAN_CHARDRIVER
+
+config STM32_CAN_CHARDRIVER
+	bool "STM32 CAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32_CAN_SOCKET
+	bool "STM32 CAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+
+endchoice # CAN character driver or SocketCAN support
 
 config STM32_CAN1_BAUD
 	int "CAN1 BAUD"
@@ -10867,7 +10901,382 @@ config STM32_CAN_REGDEBUG
 		Output detailed register-level CAN device debug information.
 		Requires also CONFIG_DEBUG_CAN_INFO.
 
-endmenu
+endmenu # "CAN driver configuration"
+
+menu "FDCAN driver configuration"
+	depends on STM32_FDCAN
+
+choice
+	prompt "FDCAN character driver or SocketCAN support"
+	default STM32_FDCAN_CHARDRIVER
+
+config STM32_FDCAN_CHARDRIVER
+	bool "STM32 FDCAN character driver support"
+	select ARCH_HAVE_CAN_ERRORS
+	select CAN
+
+config STM32_FDCAN_SOCKET
+	bool "STM32 FDCAN SocketCAN support"
+	select NET_CAN_HAVE_ERRORS
+	select NET_CAN_HAVE_CANFD
+
+endchoice # FDCAN character driver or SocketCAN support
+
+config STM32_FDCAN_REGDEBUG
+	bool "CAN Register level debug"
+	depends on DEBUG_CAN_INFO
+	default n
+	---help---
+		Output detailed register-level CAN device debug information.
+		Requires also CONFIG_DEBUG_CAN_INFO.
+
+config STM32_FDCAN_QUEUE_MODE
+	bool "FDCAN QUEUE mode (vs FIFO mode)"
+	default n
+
+menu "FDCAN1 device driver options"
+	depends on STM32_FDCAN1
+
+choice
+	prompt "FDCAN1 frame format"
+	default STM32_FDCAN1_ISO11898_1
+
+config STM32_FDCAN1_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN1_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN1 frame format
+
+choice
+	prompt "FDCAN1 mode"
+	default STM32_FDCAN1_CLASSIC
+
+config STM32_FDCAN1_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN1_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN1_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN1 mode
+
+config STM32_FDCAN1_LOOPBACK
+	bool "Enable FDCAN1 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN1 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN1_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if STM32_FDCAN1 is defined.
+
+config STM32_FDCAN1_NTSEG1
+	int "FDCAN1 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_NTSEG2
+	int "FDCAN1 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_NSJW
+	int "FDCAN1 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+
+config STM32_FDCAN1_DBITRATE
+	int "FDCAN1 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		FDCAN1 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN1_DTSEG1
+	int "FDCAN1 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_DTSEG2
+	int "FDCAN1 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN1_DSJW
+	int "FDCAN1 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN1_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN1 device driver options
+
+menu "FDCAN2 device driver options"
+	depends on STM32_FDCAN2
+
+choice
+	prompt "FDCAN2 frame format"
+	default STM32_FDCAN2_ISO11898_1
+
+config STM32_FDCAN2_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN2_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN2 frame format
+
+choice
+	prompt "FDCAN2 mode"
+	default STM32_FDCAN2_CLASSIC
+
+config STM32_FDCAN2_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN2_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN2_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN2 mode
+
+config STM32_FDCAN2_LOOPBACK
+	bool "Enable FDCAN2 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN2 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN2_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if STM32_FDCAN2 is defined.
+
+config STM32_FDCAN2_NTSEG1
+	int "FDCAN2 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_NTSEG2
+	int "FDCAN2 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_NSJW
+	int "FDCAN2 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+
+config STM32_FDCAN2_DBITRATE
+	int "FDCAN2 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		FDCAN2 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN2_DTSEG1
+	int "FDCAN2 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_DTSEG2
+	int "FDCAN2 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN2_DSJW
+	int "FDCAN2 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN2_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN2 device driver options
+
+menu "FDCAN3 device driver options"
+	depends on STM32_FDCAN3
+
+choice
+	prompt "FDCAN3 frame format"
+	default STM32_FDCAN3_ISO11898_1
+
+config STM32_FDCAN3_ISO11898_1
+	bool "ISO11898-1"
+	---help---
+		Enable ISO11898-1 frame format
+
+config STM32_FDCAN3_NONISO_FORMAT
+	bool "Non ISO"
+	---help---
+		Enable Non ISO, Bosch CAN FD Specification V1.0
+
+endchoice # FDCAN3 frame format
+
+choice
+	prompt "FDCAN3 mode"
+	default STM32_FDCAN3_CLASSIC
+
+config STM32_FDCAN3_CLASSIC
+	bool "Classic CAN"
+	---help---
+		Enable Clasic CAN mode
+
+config STM32_FDCAN3_FD
+	bool "CAN FD"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode
+
+config STM32_FDCAN3_FD_BRS
+	bool "CAN FD with fast bit rate switching"
+	depends on CAN_FD || NET_CAN_CANFD
+	---help---
+		Enable CAN FD mode with fast bit rate switching mode.
+
+endchoice # FDCAN3 mode
+
+config STM32_FDCAN3_LOOPBACK
+	bool "Enable FDCAN3 loopback mode"
+	default n
+	---help---
+		Enable the FDCAN3 local loopback mode for testing purposes.
+
+comment "Nominal Bit Timing"
+
+config STM32_FDCAN3_BITRATE
+	int "FDCAN bitrate"
+	default 500000
+	range 0 1000000
+	---help---
+		FDCAN3 bitrate in bits per second.  Required if STM32_FDCAN3 is defined.
+
+config STM32_FDCAN3_NTSEG1
+	int "FDCAN3 NTSEG1 (PropSeg + PhaseSeg1)"
+	default 6
+	range 1 256 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_NTSEG2
+	int "FDCAN3 NTSEG2 (PhaseSeg2)"
+	default 7
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_NSJW
+	int "FDCAN3 synchronization jump width"
+	default 1
+	range 1 128 if STM32_STM32G4XXX
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+comment "Data Bit Timing"
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+
+config STM32_FDCAN3_DBITRATE
+	int "FDCAN3 data bitrate"
+	default 2000000
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		FDCAN3 bitrate in bits per second.  Required if operating in FD mode with bit rate switching (BRS).
+
+config STM32_FDCAN3_DTSEG1
+	int "FDCAN3 DTSEG1 (PropSeg + PhaseSeg1 of data phase)"
+	default 4
+	range 1 31 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_DTSEG2
+	int "FDCAN3 DTSEG2 (PhaseSeg2 of data phase)"
+	default 4
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The length of the bit time is Tquanta * (SyncSeg + PropSeg + PhaseSeg1 + PhaseSeg2).
+
+config STM32_FDCAN3_DSJW
+	int "FDCAN3 fast synchronization jump width"
+	default 2
+	range 1 15 if STM32_STM32G4XXX
+	depends on CAN_FD && STM32_FDCAN3_FD_BRS
+	---help---
+		The duration of a synchronization jump is Tcan_clk x DSJW.
+
+endmenu # FDCAN3 device driver options
+
+endmenu  # "FDCAN driver configuration"
 
 if STM32_LTDC
 
@@ -11166,6 +11575,10 @@ config STM32_QENCODER_DISABLE_EXTEND16BTIMERS
 	bool "Disable QEncoder timers extension from 16-bit to 32-bit"
 	default n
 
+config STM32_QENCODER_INDEX_PIN
+	bool "Enable QEncoder timers support for index pin"
+	default n
+
 config STM32_TIM1_QE
 	bool "TIM1 QE"
 	default n
@@ -11353,38 +11766,38 @@ menuconfig STM32_FOC
 if STM32_FOC
 
 config STM32_FOC_FOC0
-       bool "FOC0 device (TIM1 for PWM modulation)"
-       default n
-       depends on STM32_HAVE_TIM1
-       select STM32_FOC_USE_TIM1
-       ---help---
-         Enable support for FOC0 device that uses TIM1 for PWM modulation
+	bool "FOC0 device (TIM1 for PWM modulation)"
+	default n
+	depends on STM32_HAVE_TIM1
+	select STM32_FOC_USE_TIM1
+	---help---
+		Enable support for FOC0 device that uses TIM1 for PWM modulation
 
 config STM32_FOC_FOC1
-       bool "FOC1 device (TIM8 for PWM modulation)"
-       default n
-       depends on STM32_HAVE_TIM8
-       select STM32_FOC_USE_TIM8
-       ---help---
-         Enable support for FOC1 device that uses TIM8 for PWM modulation
+	bool "FOC1 device (TIM8 for PWM modulation)"
+	default n
+	depends on STM32_HAVE_TIM8
+	select STM32_FOC_USE_TIM8
+	---help---
+		Enable support for FOC1 device that uses TIM8 for PWM modulation
 
 choice
 	prompt "FOC ADC trigger selection"
 	default STM32_FOC_ADC_TRGO
 
 config STM32_FOC_ADC_CCR4
-       bool "FOC uses CCR4 as ADC trigger"
-       ---help---
-         This option uses the software frequency prescaler and is
-         not possible for 4-phase output.
+	bool "FOC uses CCR4 as ADC trigger"
+	---help---
+		This option uses the software frequency prescaler and is
+		not possible for 4-phase output.
 
 config STM32_FOC_ADC_TRGO
-       bool "FOC uses TRGO as ADC trigger"
-       depends on STM32_HAVE_IP_ADC_V2 || (STM32_HAVE_IP_ADC_V1 && !STM32_FOC_FOC1)
-       select STM32_PWM_TRGO
-       ---help---
-         This option allows you to use higher PWM frequency and works for 4-phase output.
-         It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
+	bool "FOC uses TRGO as ADC trigger"
+	depends on STM32_HAVE_IP_ADC_V2 || (STM32_HAVE_IP_ADC_V1 && !STM32_FOC_FOC1)
+	select STM32_PWM_TRGO
+	---help---
+		This option allows you to use higher PWM frequency and works for 4-phase output.
+		It is not possible for ADC IPv1 if FOC1 enabled (no T8TRGO in JEXTSEL).
 
 endchoice # "FOC ADC trigger selection"
 
@@ -11395,24 +11808,24 @@ choice
 	default STM32_FOC_FOC0_ADC1
 
 config STM32_FOC_FOC0_ADC1
-       bool "FOC0 uses ADC1"
-       depends on STM32_HAVE_ADC1
-       select STM32_FOC_USE_ADC1
+	bool "FOC0 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
 
 config STM32_FOC_FOC0_ADC2
-       bool "FOC0 uses ADC2"
-       depends on STM32_HAVE_ADC2
-       select STM32_FOC_USE_ADC2
+	bool "FOC0 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
 
 config STM32_FOC_FOC0_ADC3
-       bool "FOC0 uses ADC3"
-       depends on STM32_HAVE_ADC3
-       select STM32_FOC_USE_ADC3
+	bool "FOC0 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
 
 config STM32_FOC_FOC0_ADC4
-       bool "FOC0 uses ADC4"
-       depends on STM32_HAVE_ADC4
-       select STM32_FOC_USE_ADC4
+	bool "FOC0 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
 
 endchoice # "FOC0 device ADC selection"
 
@@ -11425,115 +11838,115 @@ choice
 	default STM32_FOC_FOC1_ADC2
 
 config STM32_FOC_FOC1_ADC1
-       bool "FOC1 uses ADC1"
-       depends on STM32_HAVE_ADC1
-       select STM32_FOC_USE_ADC1
+	bool "FOC1 uses ADC1"
+	depends on STM32_HAVE_ADC1
+	select STM32_FOC_USE_ADC1
 
 config STM32_FOC_FOC1_ADC2
-       bool "FOC1 uses ADC2"
-       depends on STM32_HAVE_ADC2
-       select STM32_FOC_USE_ADC2
+	bool "FOC1 uses ADC2"
+	depends on STM32_HAVE_ADC2
+	select STM32_FOC_USE_ADC2
 
 config STM32_FOC_FOC1_ADC3
-       bool "FOC1 uses ADC3"
-       depends on STM32_HAVE_ADC3
-       select STM32_FOC_USE_ADC3
+	bool "FOC1 uses ADC3"
+	depends on STM32_HAVE_ADC3
+	select STM32_FOC_USE_ADC3
 
 config STM32_FOC_FOC1_ADC4
-       bool "FOC1 uses ADC4"
-       depends on STM32_HAVE_ADC4
-       select STM32_FOC_USE_ADC4
+	bool "FOC1 uses ADC4"
+	depends on STM32_HAVE_ADC4
+	select STM32_FOC_USE_ADC4
 
 endchoice # "FOC0 device ADC selection"
 
 endif # STM32_FOC_FOC1
 
 config STM32_FOC_HAS_PWM_COMPLEMENTARY
-       bool "FOC PWM has complementary outputs"
-       default n
-       ---help---
-         Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
+	bool "FOC PWM has complementary outputs"
+	default n
+	---help---
+		Enable complementary outputs for the FOC PWM (sometimes called 6-PWM mode)
 
 # hidden variables and automatic configuration
 
 config STM32_FOC_USE_TIM1
-       bool
-       default n
-       select STM32_TIM1
-       select STM32_TIM1_PWM
-       select STM32_TIM1_CHANNEL1
-       select STM32_TIM1_CHANNEL2
-       select STM32_TIM1_CHANNEL3
-       select STM32_TIM1_CHANNEL4 if STM32_FOC_ADC_CCR4
-       select STM32_TIM1_CH1OUT
-       select STM32_TIM1_CH2OUT
-       select STM32_TIM1_CH3OUT
-       select STM32_TIM1_CH4OUT if STM32_FOC_ADC_CCR4
-       select STM32_TIM1_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM1_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM1_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       ---help---
-         The TIM1 generates PWM for the FOC
+	bool
+	default n
+	select STM32_TIM1
+	select STM32_TIM1_PWM
+	select STM32_TIM1_CHANNEL1
+	select STM32_TIM1_CHANNEL2
+	select STM32_TIM1_CHANNEL3
+	select STM32_TIM1_CHANNEL4 if STM32_FOC_ADC_CCR4
+	select STM32_TIM1_CH1OUT
+	select STM32_TIM1_CH2OUT
+	select STM32_TIM1_CH3OUT
+	select STM32_TIM1_CH4OUT if STM32_FOC_ADC_CCR4
+	select STM32_TIM1_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM1_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM1_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM1 generates PWM for the FOC
 
 config STM32_FOC_USE_TIM8
-       bool
-       default n
-       select STM32_TIM8
-       select STM32_TIM8_PWM
-       select STM32_TIM8_CHANNEL1
-       select STM32_TIM8_CHANNEL2
-       select STM32_TIM8_CHANNEL3
-       select STM32_TIM8_CHANNEL4 if STM32_FOC_ADC_CCR4
-       select STM32_TIM8_CH1OUT
-       select STM32_TIM8_CH2OUT
-       select STM32_TIM8_CH3OUT
-       select STM32_TIM8_CH4OUT if STM32_FOC_ADC_CCR4
-       select STM32_TIM8_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM8_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       select STM32_TIM8_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
-       ---help---
-         The TIM8 generates PWM for the FOC
+	bool
+	default n
+	select STM32_TIM8
+	select STM32_TIM8_PWM
+	select STM32_TIM8_CHANNEL1
+	select STM32_TIM8_CHANNEL2
+	select STM32_TIM8_CHANNEL3
+	select STM32_TIM8_CHANNEL4 if STM32_FOC_ADC_CCR4
+	select STM32_TIM8_CH1OUT
+	select STM32_TIM8_CH2OUT
+	select STM32_TIM8_CH3OUT
+	select STM32_TIM8_CH4OUT if STM32_FOC_ADC_CCR4
+	select STM32_TIM8_CH1NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM8_CH2NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	select STM32_TIM8_CH3NOUT if STM32_FOC_HAS_PWM_COMPLEMENTARY
+	---help---
+		The TIM8 generates PWM for the FOC
 
 config STM32_FOC_USE_ADC1
-       bool
-       default n
-       select STM32_ADC1
-       select STM32_ADC1_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC1_JEXTSEL
+	bool
+	default n
+	select STM32_ADC1
+	select STM32_ADC1_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC1_JEXTSEL
 
 config STM32_FOC_USE_ADC2
-       bool
-       default n
-       select STM32_ADC2
-       select STM32_ADC2_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC2_JEXTSEL
+	bool
+	default n
+	select STM32_ADC2
+	select STM32_ADC2_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC2_JEXTSEL
 
 config STM32_FOC_USE_ADC3
-       bool
-       default n
-       select STM32_ADC3
-       select STM32_ADC3_SCAN if STM32_HAVE_IP_ADC_V1
-       select STM32_ADC3_JEXTSEL
+	bool
+	default n
+	select STM32_ADC3
+	select STM32_ADC3_SCAN if STM32_HAVE_IP_ADC_V1
+	select STM32_ADC3_JEXTSEL
 
 config STM32_FOC_USE_ADC4
-       bool
-       default n
-       select STM32_ADC4
-       select STM32_ADC3_JEXTSEL
+	bool
+	default n
+	select STM32_ADC4
+	select STM32_ADC3_JEXTSEL
 
 config STM32_FOC_G4_ADCCHAN0_WORKAROUND
-       bool "FOC G4 ADC channel 0 unwanted conversion workaround"
-       default n
-       ---help---
-         Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
-         conversion when a regular conversion is interrupted by an injected conversion.
-         This FOC implementation uses injected conversion to sample phase currents
-         and allows user to use regular conversion as an auxiliary analog conversion.
-         In this case, there is a certain probability that regular conversion will be
-         interrupted by an injected conversion that will lead to an incorrect reading
-         of phase currents.
+	bool "FOC G4 ADC channel 0 unwanted conversion workaround"
+	default n
+	---help---
+		Some STM32G4 family chips have an issue that causes unwanted ADC channel 0
+		conversion when a regular conversion is interrupted by an injected conversion.
+		This FOC implementation uses injected conversion to sample phase currents
+		and allows user to use regular conversion as an auxiliary analog conversion.
+		In this case, there is a certain probability that regular conversion will be
+		interrupted by an injected conversion that will lead to an incorrect reading
+		of phase currents.
 
-         This workaround inserts a dummy conversion at the beginning of the injected
-         sequence. For more details look at the chip errata documents.
+		This workaround inserts a dummy conversion at the beginning of the injected
+		sequence. For more details look at the chip errata documents.
 
 endif #STM32_FOC

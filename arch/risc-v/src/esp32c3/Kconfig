@@ -70,13 +70,21 @@ config ESP32C3_FLASH_16M
 	bool
 	default n
 
+config ESP32C3_ESPTOOLPY_NO_STUB
+	bool "Disable download stub"
+	default n
+	---help---
+		The flasher tool sends a precompiled download stub first by default.
+		That stub allows things like compressed downloads and more.
+		Usually you should not need to disable that feature.
+		It is only required to be disabled in certain scenarios when either
+		Secure Boot V2 or Flash Encryption is enabled.
+
 config ESP32C3_FLASH_DETECT
-	bool "Auto-detect FLASH size (to be used with master esptool)"
+	bool "Auto-detect FLASH size"
 	default n
 	---help---
 		Auto detect flash size when flashing.
-		Current released version of esptool doesn't support auto-detecting flash size.
-		Use latest master from https://github.com/espressif/esptool.
 
 choice ESP32C3_FLASH_MODE
 	prompt "SPI FLASH mode"
@@ -169,6 +177,14 @@ config ESP32C3_WIRELESS
 	default n
 	select ESP32C3_RT_TIMER
 
+config ESP32C3_EXCEPTION_ENABLE_CACHE
+	bool
+	default y
+	depends on ESP32C3_SPIFLASH
+	---help---
+		When exception triggers, panic function enables SPI Flash cache to
+		let functions be able to call functions which locate in SPI Flash.
+
 menu "ESP32-C3 Peripheral Support"
 
 config ESP32C3_ADC
@@ -229,6 +245,12 @@ config ESP32C3_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
+config ESP32C3_USBSERIAL
+	bool "USB-Serial Driver"
+	default n
+	select OTHER_UART_SERIALDRIVER
+	select ARCH_HAVE_SERIAL_TERMIOS
+
 config ESP32C3_I2C0
 	bool "I2C 0"
 	default n
@@ -258,9 +280,6 @@ config ESP32C3_TIMER1
 config ESP32C3_SPIFLASH
 	bool "SPI Flash"
 	default n
-	select MTD
-	select MTD_BYTE_WRITE
-	select MTD_PARTITION
 
 config ESP32C3_SPI2
 	bool "SPI 2"
@@ -350,6 +369,14 @@ config ESP32C3_BLE
 	select ESP32C3_WIRELESS
 	---help---
 		Enable BLE support
+
+config ESP32C3_BROWNOUT_DET
+	bool "Brownout Detect"
+	default y
+	---help---
+		The ESP32-C3 has a built-in brownout detector which can detect if the voltage is lower than
+		a specific value. If this happens, it will reset the chip in order to prevent unintended
+		behaviour.
 
 endmenu # ESP32-C3 Peripheral Support
 
@@ -751,6 +778,11 @@ config ESP32C3_WIFI_FS_MOUNTPT
 	---help---
 		Mount point of Wi-Fi storage file system.
 
+config ESP32C3_WIFI_MTD_ENCRYPT
+	bool "Encrypt Wi-Fi MTD partition"
+	default y
+	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
 config ESP32C3_WIFI_MTD_OFFSET
 	hex "Wi-Fi MTD partition offset"
 	default 0x280000 if !ESP32C3_HAVE_OTA_PARTITION
@@ -807,14 +839,40 @@ config ESP32C3_WIFI_RECONNECT
 	---help---
 		Select this option to enable Wi-Fi to reconnect for station when disconnected.
 
+choice ESP32C3_WIFI_LOG_LEVEL
+	depends on DEBUG_INFO
+	prompt "WiFi debug log level"
+	default WIFI_LOG_LEVEL_INFO
+	---help---
+		The WiFi log is divided into the following levels: ERROR,WARNING,INFO,DEBUG,VERBOSE.
+
+	config WIFI_LOG_LEVEL_NONE
+		bool "No output"
+	config WIFI_LOG_LEVEL_ERROR
+		bool "Error"
+	config WIFI_LOG_LEVEL_WARN
+		bool "Warning"
+	config WIFI_LOG_LEVEL_INFO
+		bool "Info"
+	config WIFI_LOG_LEVEL_DEBUG
+		bool "Debug"
+	config WIFI_LOG_LEVEL_VERBOSE
+		bool "Verbose"
+endchoice
+
+config WIFI_LOG_LEVEL
+	int
+	default 0 if WIFI_LOG_LEVEL_NONE
+	default 1 if WIFI_LOG_LEVEL_ERROR
+	default 2 if WIFI_LOG_LEVEL_WARN
+	default 3 if WIFI_LOG_LEVEL_INFO
+	default 4 if WIFI_LOG_LEVEL_DEBUG
+	default 5 if WIFI_LOG_LEVEL_VERBOSE
+
 endmenu # Wi-Fi configuration
 
 menu "BLE Configuration"
 	depends on ESP32C3_BLE
-
-config ESP32C3_BLE_PKTBUF_NUM
-	int "BLE netcard packet buffer number per netcard"
-	default 16
 
 config ESP32C3_BLE_TTY_NAME
 	string "BLE TTY device name"
@@ -827,7 +885,7 @@ config ESP32C3_BLE_TASK_STACK_SIZE
 
 config ESP32C3_BLE_TASK_PRIORITY
 	int "Controller task priority"
-	default 110
+	default 253
 
 endmenu # BLE Configuration
 
@@ -838,9 +896,14 @@ if ESP32C3_HAVE_OTA_PARTITION
 
 comment "Application Image OTA Update support"
 
+config ESP32C3_OTA_PARTITION_ENCRYPT
+	bool "Encrypt OTA partitions"
+	default y
+	depends on ESP32C3_SECURE_FLASH_ENC_ENABLED
+
 config ESP32C3_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default "0x10000"
+	default 0x10000
 
 config ESP32C3_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -848,7 +911,7 @@ config ESP32C3_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32C3_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default "0x110000"
+	default 0x110000
 
 config ESP32C3_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -856,15 +919,15 @@ config ESP32C3_OTA_SECONDARY_SLOT_DEVPATH
 
 config ESP32C3_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default "0x100000"
+	default 0x100000
 
 config ESP32C3_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default "0x210000"
+	default 0x210000
 
 config ESP32C3_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
-	default "0x40000"
+	default 0x40000
 
 config ESP32C3_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
@@ -874,25 +937,27 @@ endif
 
 comment "General storage MTD configuration"
 
-config ESP32C3_STORAGE_MTD_OFFSET
-	hex "Storage MTD base address in SPI Flash"
-	default 0x180000 if !ESP32C3_HAVE_OTA_PARTITION
-	default 0x250000 if ESP32C3_HAVE_OTA_PARTITION
+config ESP32C3_MTD
+	bool "MTD driver"
+	default y
+	select MTD
+	select MTD_BYTE_WRITE
+	select MTD_PARTITION
 	---help---
-		MTD base address in SPI Flash.
+		Initialize an MTD driver for the ESP32-C3 SPI Flash, which will
+		add an entry at /dev for application access from userspace.
 
-config ESP32C3_STORAGE_MTD_SIZE
-	hex "Storage MTD size in SPI Flash"
-	default 0x100000
-	---help---
-		MTD size in SPI Flash.
+config ESP32C3_SPIFLASH_MTD_BLKSIZE
+	int "Storage MTD block size"
+	default 64
+	depends on ESP32C3_MTD
 
-config ESP32C3_SPIFLASH_DEBUG
-	bool "Debug SPI Flash"
+config ESP32C3_STORAGE_MTD_DEBUG
+	bool "Storage MTD Debug"
 	default n
-	depends on DEBUG_FS_INFO
+	depends on ESP32C3_MTD && DEBUG_FS_INFO
 	---help---
-		If this option is enabled, SPI Flash driver read and write functions
+		If this option is enabled, Storage MTD driver read and write functions
 		will output input parameters and return values (if applicable).
 
 if ESP32C3_APP_FORMAT_LEGACY
@@ -1024,9 +1089,55 @@ config ESP32C3_APP_MCUBOOT_HEADER_SIZE
 
 config ESP32C3_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
-	default "0x8000"
+	default 0x8000
 	depends on ESP32C3_APP_FORMAT_LEGACY
 
+source "arch/risc-v/src/esp32c3/Kconfig.security"
+
 endmenu # Application Image Configuration
+
+menu "Brownout Detect Configuration"
+	depends on ESP32C3_BROWNOUT_DET
+
+choice ESP32C3_BROWNOUT_DET_LVL_SEL
+	prompt "Brownout voltage level"
+	default ESP32C3_BROWNOUT_DET_LVL_SEL_7
+	---help---
+		The brownout detector will reset the chip when the supply voltage is approximately
+		below this level. Note that there may be some variation of brownout voltage level
+		between each chip.
+
+		#The voltage levels here are estimates, more work needs to be done to figure out the exact voltages
+		#of the brownout threshold levels.
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_7
+		bool "2.51V"
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_6
+		bool "2.64V"
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_5
+		bool "2.76V"
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_4
+		bool "2.92V"
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_3
+		bool "3.10V"
+
+	config ESP32C3_BROWNOUT_DET_LVL_SEL_2
+		bool "3.27V"
+endchoice
+
+config ESP32C3_BROWNOUT_DET_LVL
+	int
+	default 2 if ESP32C3_BROWNOUT_DET_LVL_SEL_2
+	default 3 if ESP32C3_BROWNOUT_DET_LVL_SEL_3
+	default 4 if ESP32C3_BROWNOUT_DET_LVL_SEL_4
+	default 5 if ESP32C3_BROWNOUT_DET_LVL_SEL_5
+	default 6 if ESP32C3_BROWNOUT_DET_LVL_SEL_6
+	default 7 if ESP32C3_BROWNOUT_DET_LVL_SEL_7
+
+endmenu # ESP32C3_BROWNOUT_DET
 
 endif # ARCH_CHIP_ESP32C3

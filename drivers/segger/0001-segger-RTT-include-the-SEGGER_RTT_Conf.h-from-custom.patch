@@ -1,0 +1,29 @@
+From 47aaa5806bc4679386de191ede6ffb8982a66975 Mon Sep 17 00:00:00 2001
+From: "chao.an" <anchao@xiaomi.com>
+Date: Thu, 27 Jan 2022 12:39:50 +0800
+Subject: [PATCH] segger/RTT: include the SEGGER_RTT_Conf.h from custom path
+
+VELAPLATFO-1419
+
+Change-Id: Idd1d8a38ab38d3e60ee9dddbed26ba8aca510595
+Signed-off-by: chao.an <anchao@xiaomi.com>
+---
+ RTT/SEGGER_RTT.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/RTT/SEGGER_RTT.h segger/RTT/RTT/SEGGER_RTT.h
+index a91c36d..744b3a1 100644
+--- a/RTT/SEGGER_RTT.h
++++ segger/RTT/RTT/SEGGER_RTT.h
+@@ -58,7 +58,7 @@ Revision: $Rev: 24324 $
+ #ifndef SEGGER_RTT_H
+ #define SEGGER_RTT_H
+
+-#include "../Config/SEGGER_RTT_Conf.h"
++#include "SEGGER_RTT_Conf.h"
+
+ /*********************************************************************
+ *
+--
+2.25.1
+

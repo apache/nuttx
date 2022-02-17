@@ -18,19 +18,18 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBC_UNISTD_UNISTD_H
-#define __LIBC_UNISTD_UNISTD_H
+#ifndef __LIBS_LIBC_UNISTD_UNISTD_H
+#define __LIBS_LIBC_UNISTD_UNISTD_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/tls.h>
 
 #include <stdbool.h>
 #include <getopt.h>
-
-#include <nuttx/lib/getopt.h>
 
 /****************************************************************************
  * Public Data
@@ -106,4 +105,4 @@ int getopt_common(int argc, FAR char * const argv[],
 }
 #endif
 
-#endif /* __LIBC_UNISTD_UNISTD_H */
+#endif /* __LIBS_LIBC_UNISTD_UNISTD_H */

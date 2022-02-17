@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H_
-#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H_
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H
+#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H
 
 /****************************************************************************
  * Included Files
@@ -66,4 +66,4 @@
 #define EXTMEM_PRO_ICACHE_MASK_IRAM1        EXTMEM_PRO_ICACHE_MASK_BUS1
 #define EXTMEM_PRO_ICACHE_MASK_DROM0        EXTMEM_PRO_ICACHE_MASK_BUS2
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H_ */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_EXTMEM_H */

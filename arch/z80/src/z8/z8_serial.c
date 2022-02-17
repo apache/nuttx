@@ -256,7 +256,7 @@ static inline uint8_t z8_getuart(FAR struct z8_uart_s *priv, uint8_t offset)
 
 static uint8_t z8_disableuartirq(FAR struct uart_dev_s *dev)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
+  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
   uint8_t             state = priv->rxenabled ?
                               STATE_RXENABLED : STATE_DISABLED | \
@@ -586,7 +586,7 @@ static int z8_receive(FAR struct uart_dev_s *dev, FAR uint32_t *status)
 
 static void z8_rxint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
+  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)
@@ -642,7 +642,7 @@ static void z8_send(FAR struct uart_dev_s *dev, int ch)
 
 static void z8_txint(FAR struct uart_dev_s *dev, bool enable)
 {
-  struct z8_uart_s *priv  = (struct z8_uart_s *)dev->priv;
+  struct z8_uart_s *priv    = (struct z8_uart_s *)dev->priv;
   irqstate_t          flags = enter_critical_section();
 
   if (enable)

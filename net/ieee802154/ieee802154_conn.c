@@ -31,6 +31,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -50,8 +51,10 @@
  * network lock.
  */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct ieee802154_conn_s
   g_ieee802154_connections[CONFIG_NET_IEEE802154_NCONNS];
+#endif
 
 /* A list of all free packet socket connections */
 
@@ -79,20 +82,24 @@ static dq_queue_t g_active_ieee802154_connections;
 
 void ieee802154_conn_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
   dq_init(&g_free_ieee802154_connections);
   dq_init(&g_active_ieee802154_connections);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
     {
       /* Link each pre-allocated connection structure into the free list. */
 
-      dq_addlast(&g_ieee802154_connections[i].node,
+      dq_addlast(&g_ieee802154_connections[i].sconn.node,
                  &g_free_ieee802154_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -107,19 +114,33 @@ void ieee802154_conn_initialize(void)
 FAR struct ieee802154_conn_s *ieee802154_conn_alloc(void)
 {
   FAR struct ieee802154_conn_s *conn;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
 
   /* The free list is protected by the network lock. */
 
   net_lock();
-  conn = (FAR struct ieee802154_conn_s *)
-    dq_remfirst(&g_free_ieee802154_connections);
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (dq_peek(&g_free_ieee802154_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_IEEE802154_NCONNS);
+      if (conn != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
+            {
+              dq_addlast(&conn[i].sconn.node,
+                         &g_free_ieee802154_connections);
+            }
+        }
+    }
+#endif
 
+  conn = (FAR struct ieee802154_conn_s *)
+         dq_remfirst(&g_free_ieee802154_connections);
   if (conn)
     {
-      /* Enqueue the connection into the active list */
-
-      memset(conn, 0, sizeof(struct ieee802154_conn_s));
-      dq_addlast(&conn->node, &g_active_ieee802154_connections);
+      dq_addlast(&conn->sconn.node, &g_active_ieee802154_connections);
     }
 
   net_unlock();
@@ -147,7 +168,7 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
   /* Remove the connection from the active list */
 
   net_lock();
-  dq_rem(&conn->node, &g_active_ieee802154_connections);
+  dq_rem(&conn->sconn.node, &g_active_ieee802154_connections);
 
   /* Check if there any any frames attached to the container */
 
@@ -170,9 +191,13 @@ void ieee802154_conn_free(FAR struct ieee802154_conn_s *conn)
       ieee802154_container_free(container);
     }
 
+  /* Enqueue the connection into the active list */
+
+  memset(conn, 0, sizeof(*conn));
+
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_ieee802154_connections);
+  dq_addlast(&conn->sconn.node, &g_free_ieee802154_connections);
   net_unlock();
 }
 
@@ -198,7 +223,7 @@ FAR struct ieee802154_conn_s *
   for (conn  = (FAR struct ieee802154_conn_s *)
        g_active_ieee802154_connections.head;
        conn != NULL;
-       conn = (FAR struct ieee802154_conn_s *)conn->node.flink)
+       conn = (FAR struct ieee802154_conn_s *)conn->sconn.node.flink)
     {
       /* Does the destination address match the bound address of the socket.
        *
@@ -276,7 +301,7 @@ FAR struct ieee802154_conn_s *
     }
   else
     {
-      return (FAR struct ieee802154_conn_s *)conn->node.flink;
+      return (FAR struct ieee802154_conn_s *)conn->sconn.node.flink;
     }
 }
 

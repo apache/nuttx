@@ -133,11 +133,11 @@ uintptr_t up_getsp(void);
 /* Dump stack and registers */
 
 #ifdef CONFIG_ARCH_STACKDUMP
-void up_stackdump(void);
-# define REGISTER_DUMP() _REGISTER_DUMP()
+void z80_stackdump(void);
+# define Z80_REGISTER_DUMP() _REGISTER_DUMP()
 #else
-# define up_stackdump()
-# define REGISTER_DUMP()
+# define z80_stackdump()
+# define Z80_REGISTER_DUMP()
 #endif
 
 #ifdef __cplusplus

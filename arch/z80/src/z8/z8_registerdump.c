@@ -48,15 +48,15 @@ static chipreg_t s_last_regs[XCPTCONTEXT_REGS];
 static inline void z8_dumpregs(FAR chipret_t *regs)
 {
   _alert("REGS: %04x %04x %04x %04x %04x %04x %04x %04x\n",
-        regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
-        regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
+         regs[XCPT_RR0], regs[XCPT_RR2], regs[XCPT_RR4], regs[XCPT_RR6],
+         regs[XCPT_RR8], regs[XCPT_RR10], regs[XCPT_RR12], regs[XCPT_RR14]);
 }
 
 static inline void z8_dumpstate(chipreg_t sp, chipreg_t pc, uint8_t irqctl,
                                 chipreg_t rpflags)
 {
   _alert("SP: %04x PC: %04x IRQCTL: %02x RP: %02x FLAGS: %02x\n",
-        sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
+         sp, pc, irqctl & 0xff, rpflags >> 8, rpflags & 0xff);
 }
 
 /****************************************************************************

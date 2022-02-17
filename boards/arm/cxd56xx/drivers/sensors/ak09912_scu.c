@@ -171,12 +171,12 @@ static const struct file_operations g_ak09912fops =
   ak09912_close,                 /* close */
   ak09912_read,                  /* read */
   ak09912_write,                 /* write */
-  0,                             /* seek */
+  NULL,                          /* seek */
   ak09912_ioctl,                 /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                             /* poll */
+  NULL                           /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                         /* unlink */
 #endif
-  0                              /* unlink */
 };
 
 /* Take XYZ data, temperature and Status 2 register.
@@ -336,7 +336,7 @@ static int ak09912_seqinit(FAR struct ak09912_dev_s *priv)
 static int ak09912_open(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
 
   if (g_refcnt == 0)
     {
@@ -374,7 +374,7 @@ static int ak09912_open(FAR struct file *filep)
 static int ak09912_close(FAR struct file *filep)
 {
   FAR struct inode        *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
 
   g_refcnt--;
 
@@ -406,7 +406,7 @@ static ssize_t ak09912_read(FAR struct file *filep, FAR char *buffer,
                             size_t len)
 {
   FAR struct inode        *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
 
   len = len / AK09912_BYTESPERSAMPLE * AK09912_BYTESPERSAMPLE;
   len = seq_read(priv->seq, priv->id, buffer, len);
@@ -431,7 +431,7 @@ static ssize_t ak09912_write(FAR struct file *filep, FAR const char *buffer,
 static int ak09912_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct ak09912_dev_s *priv  = inode->i_private;
+  FAR struct ak09912_dev_s *priv = inode->i_private;
   int ret = OK;
 
   switch (cmd)

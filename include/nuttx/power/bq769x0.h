@@ -19,8 +19,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_POWER_BQ769X0_H
-#define __DRIVERS_POWER_BQ769X0_H
+#ifndef __INCLUDE_NUTTX_POWER_BQ769X0_H
+#define __INCLUDE_NUTTX_POWER_BQ769X0_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -168,16 +168,16 @@
 
 /* REG_PROTECT1 */
 
-#define BQ769X0_RSNS                    (1 << 7 ) /* Selects low or high input range for OCD/SCD */
-                                              /* Bit 6: Reserved */
-                                              /* Bit 5: Reserved */
-#define BQ769X0_SCD_DELAY_SHIFT         (3)   /* Short circuit in discharge delay timer */
+#define BQ769X0_RSNS                    (1 << 7) /* Selects low or high input range for OCD/SCD */
+                                                 /* Bit 6: Reserved */
+                                                 /* Bit 5: Reserved */
+#define BQ769X0_SCD_DELAY_SHIFT         (3)      /* Short circuit in discharge delay timer */
 #define BQ769X0_SCD_DELAY_MASK          (0x03 << BQ769X0_SCD_DELAY_SHIFT)
 #  define BQ769X0_SCD_DELAY_70US        (0 << BQ769X0_SCD_DELAY_SHIFT)
 #  define BQ769X0_SCD_DELAY_100US       (1 << BQ769X0_SCD_DELAY_SHIFT)
 #  define BQ769X0_SCD_DELAY_200US       (2 << BQ769X0_SCD_DELAY_SHIFT)
 #  define BQ769X0_SCD_DELAY_400US       (3 << BQ769X0_SCD_DELAY_SHIFT)
-#define BQ769X0_SCD_THRESH_SHIFT        (0) /* Short circuit in discharge threshold value */
+#define BQ769X0_SCD_THRESH_SHIFT        (0)      /* Short circuit in discharge threshold value */
 #define BQ769X0_SCD_THRESH_MASK         (0x07 << BQ769X0_SCD_THRESH_SHIFT)
 
 /* These defines apply when RSNS is 0 */
@@ -281,4 +281,4 @@
 #define BQ769X0_ADCGAIN2_SHIFT          (5)
 #define BQ769X0_ADCGAIN2_MASK           (0x07 << BQ769X0_ADCGAIN2_SHIFT)
 
-#endif /* __DRIVERS_POWER_BQ769X0_H */
+#endif /* __INCLUDE_NUTTX_POWER_BQ769X0_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_POWER_SMPS_H
-#define __INCLUDE_NUTTX_DRIVERS_POWER_SMPS_H
+#ifndef __INCLUDE_NUTTX_POWER_SMPS_H
+#define __INCLUDE_NUTTX_POWER_SMPS_H
 
 /* The SMPS (switched-mode power supply) driver is split into two parts:
  *
@@ -289,4 +289,4 @@ int smps_register(FAR const char *path, FAR struct smps_dev_s *dev,
 #endif
 
 #endif /* CONFIG_DRIVERS_SMPS */
-#endif /* __INCLUDE_NUTTX_DRIVERS_POWER_SMPS_H */
+#endif /* __INCLUDE_NUTTX_POWER_SMPS_H */

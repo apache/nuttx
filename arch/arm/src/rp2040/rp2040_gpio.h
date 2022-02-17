@@ -130,8 +130,44 @@ static inline void rp2040_gpio_setdir(uint32_t gpio, int out)
  * Public Function Prototypes
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: r2040_gpio_get_function_pin
+ *
+ * Description:
+ *   Get the GPIO pin number to which the specified function is assigned
+ *
+ ****************************************************************************/
+
+int rp2040_gpio_get_function_pin(uint32_t func, uint32_t port);
+
+/****************************************************************************
+ * Name: r2040_gpio_set_function
+ *
+ * Description:
+ *   Assign functions to the specified GPIO pin
+ *
+ ****************************************************************************/
+
 void rp2040_gpio_set_function(uint32_t gpio, uint32_t func);
+
+/****************************************************************************
+ * Name: r2040_gpio_set_pulls
+ *
+ * Description:
+ *   Set pull-up or pull-down to the specified GPIO pin
+ *
+ ****************************************************************************/
+
 void rp2040_gpio_set_pulls(uint32_t gpio, int up, int down);
+
+/****************************************************************************
+ * Name: r2040_gpio_init
+ *
+ * Description:
+ *   Initialize software-controlled GPIO function
+ *
+ ****************************************************************************/
+
 void rp2040_gpio_init(uint32_t gpio);
 
 /****************************************************************************
@@ -164,6 +200,16 @@ void rp2040_gpio_enable_irq(uint32_t gpio);
  ****************************************************************************/
 
 void rp2040_gpio_disable_irq(uint32_t gpio);
+
+/****************************************************************************
+ * Name: r2040_gpio_initialize
+ *
+ * Description:
+ *   Initialize GPIO function management
+ *
+ ****************************************************************************/
+
+void rp2040_gpio_initialize(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

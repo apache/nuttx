@@ -370,7 +370,7 @@ int xen1210_register(XEN1210_HANDLE handle, int minor)
   /* Register the character driver */
 
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ret = register_driver(devname, &g_xen1210fops, 0666, priv);
+  ret = register_driver(devname, &g_xen1210fops, 0444, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);

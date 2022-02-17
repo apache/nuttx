@@ -217,10 +217,13 @@
                                    MPFS_EMMCSD_SRS14_TC_IE)
 
 /* SD-Card IOMUX */
-
 #define LIBERO_SETTING_IOMUX1_CR_SD                     0x00000000UL
-#define LIBERO_SETTING_IOMUX2_CR_SD                     0x00000000UL
-#define LIBERO_SETTING_IOMUX6_CR_SD                     0x0000001DUL
+#ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
+#define LIBERO_SETTING_IOMUX2_CR_SD   0X00BB0000UL
+#else
+#define LIBERO_SETTING_IOMUX2_CR_SD   0x00000000UL
+#endif
+#define LIBERO_SETTING_IOMUX6_CR_SD   0X0000001DUL
 #define LIBERO_SETTING_MSSIO_BANK4_CFG_CR_SD            0x00080907UL
 #define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_0_1_CR_SD     0x08290829UL
 #define LIBERO_SETTING_MSSIO_BANK4_IO_CFG_2_3_CR_SD     0x08290829UL
@@ -1350,6 +1353,13 @@ static void mpfs_sdcard_init(struct mpfs_dev_s *priv)
   putreg32(LIBERO_SETTING_IOMUX2_CR_SD, MPFS_SYSREG_IOMUX2);
   putreg32(LIBERO_SETTING_IOMUX6_CR_SD, MPFS_SYSREG_IOMUX6);
 
+#ifdef CONFIG_MPFS_EMMCSD_MUX_GPIO
+  /* Select SD-card */
+
+  mcinfo("Selecting SD card\n");
+  mpfs_gpiowrite(MPFS_EMMCSD_GPIO, true);
+
+#else /* CONFIG_ARCH_BOARD_ICICLE_MPFS */
   /* With 3.3v we exit from here */
 
   if (priv->jumpers_3v3)
@@ -1370,6 +1380,7 @@ static void mpfs_sdcard_init(struct mpfs_dev_s *priv)
           MPFS_SYSREG_4_12_13);
 
   putreg32(1, SDIO_REGISTER_ADDRESS);
+#endif
 }
 
 /****************************************************************************
@@ -2332,7 +2343,6 @@ static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
   struct mpfs_dev_s *priv = (struct mpfs_dev_s *)dev;
   uint32_t status;
   int32_t timeout;
-  uint32_t waitbits;
 
   mcinfo("cmd: %08" PRIx32 "\n", cmd);
 
@@ -2363,22 +2373,17 @@ static int mpfs_waitresponse(struct sdio_dev_s *dev, uint32_t cmd)
 
   /* Then wait for the response (or timeout) */
 
-  if (cmd & MMCSD_DATAXFR_MASK)
-    {
-      waitbits = MPFS_EMMCSD_SRS12_CC;
-    }
-
   do
     {
       status = getreg32(MPFS_EMMCSD_SRS12);
     }
-  while (!(status & (waitbits | MPFS_EMMCSD_SRS12_EINT))
+  while (!(status & (MPFS_EMMCSD_SRS12_CC | MPFS_EMMCSD_SRS12_EINT))
          && --timeout);
 
   if (timeout == 0 || (status & MPFS_EMMCSD_SRS12_ECT))
     {
-      mcerr("ERROR: Timeout cmd: %08" PRIx32 " stat: %08" PRIx32 " wb: %08"
-            PRIx32 "\n", cmd, status, waitbits);
+      mcerr("ERROR: Timeout cmd: %08" PRIx32 " stat: %08" PRIx32 "\n", cmd,
+            status);
       return -EBUSY;
     }
 

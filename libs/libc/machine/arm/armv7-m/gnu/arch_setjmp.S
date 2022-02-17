@@ -77,10 +77,10 @@ setjmp:
 	vstmia		r0!, {s16-s31}			/* Save the callee-saved FP registers */
 
 	/* Store the floating point control and status register.  At the end of the
-	 * vstmia, r0 will point to the FPCSR storage location.
+	 * vstmia, r0 will point to the FPSCR storage location.
 	 */
 
-	vmrs		r1, fpscr			/* Fetch the FPCSR */
+	vmrs		r1, fpscr			/* Fetch the FPSCR */
 	str		r1, [r0], #4			/* Save the floating point control and status register */
 							/* DSA: don't need to inc r0 */
 #endif /* CONFIG_ARCH_FPU */
@@ -132,7 +132,7 @@ longjmp:
 
 	ldr		r2, [r0], #4			/* Fetch the floating point control and status register */
 							/* DSA: don't need to inc r0 */
-	vmsr		fpscr, r2			/* Restore the FPCSR */
+	vmsr		fpscr, r2			/* Restore the FPSCR */
 #endif /* CONFIG_ARCH_FPU */
 
 	mov		r0, r1				/* return val */

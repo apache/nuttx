@@ -39,6 +39,14 @@ ifeq ($(CONFIG_SPI_BITBANG),y)
   CSRCS += spi_bitbang.c
 endif
 
+ifeq ($(CONFIG_SPI_FLASH),y)
+  CSRCS += spi_flash.c
+endif
+
+ifeq ($(CONFIG_QSPI_FLASH),y)
+  CSRCS += qspi_flash.c
+endif
+
 # Include SPI device driver build support
 
 DEPPATH += --dep-path spi

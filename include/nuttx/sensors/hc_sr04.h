@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTT_SENSORS_HCSR04_H
-#define __INCLUDE_NUTT_SENSORS_HCSR04_H
+#ifndef __INCLUDE_NUTTX_SENSORS_HC_SR04_H
+#define __INCLUDE_NUTTX_SENSORS_HC_SR04_H
 
 /****************************************************************************
  * Included Files
@@ -52,4 +52,4 @@ struct hcsr04_config_s
 int hcsr04_register(FAR const char *devpath,
                     FAR struct hcsr04_config_s *config);
 
-#endif /* __INCLUDE_NUTT_SENSORS_HCSR04_H */
+#endif /* __INCLUDE_NUTTX_SENSORS_HC_SR04_H */

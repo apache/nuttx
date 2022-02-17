@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H
-#define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H
+#ifndef __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2C_H
+#define __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2C_H
 
 /****************************************************************************
  * Included Files
@@ -283,4 +283,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2CE_H */
+#endif /* __ARCH_ARM_SRC_KINETIS_HARDWARE_KINETIS_I2C_H */

@@ -18,8 +18,8 @@ config ARCH_INTEL64
 	bool "Intel x86_64"
 	select ARCH_HAVE_MPU
 	select ARCH_USE_MPU
-    select ARCH_HAVE_TICKLESS
-    select ARCH_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_RNG
 	---help---
 		Intel x86_64 architecture
@@ -66,8 +66,8 @@ endif # ARCH_CHIP_QEMU
 config ARCH_EXCLUDE_MULTIBOOT
 	bool "Don't append multiboot2 header"
 	default n
-    ---help---
-        Some platforms, e.g. jailhouse, do not like to have a multiboot header
+	---help---
+		Some platforms, e.g. jailhouse, do not like to have a multiboot header
 
 
 endif # ARCH_X86_64

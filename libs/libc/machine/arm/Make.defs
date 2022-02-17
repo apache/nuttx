@@ -46,7 +46,5 @@ ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CSRCS += gnu_unwind_find_exidx.c
 endif
 
-CSRCS += arm_fenv.c
-
 DEPPATH += --dep-path machine/arm
 VPATH += :machine/arm

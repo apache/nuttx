@@ -57,13 +57,6 @@ void arm_sigdeliver(void)
   struct tcb_s  *rtcb = this_task();
   uint32_t regs[XCPTCONTEXT_REGS];
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = get_errno();
-
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
    * handler executes, but we also need to restore the irqcount when the
@@ -140,10 +133,6 @@ void arm_sigdeliver(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   up_irq_save();
 #endif
-
-  /* Restore the saved errno value */
-
-  set_errno(saved_errno);
 
   /* Modify the saved return state with the actual saved values in the
    * TCB.  This depends on the fact that nested signal handling is

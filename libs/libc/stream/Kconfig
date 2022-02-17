@@ -1,0 +1,24 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+menu "Stream C I/O"
+
+if LIBC_LZF
+
+config STREAM_LZF_BLOG
+	int "Log2 of block size"
+	default 10
+	range 9 12
+	---help---
+		This stream uses two buffers of size a little more than
+		(1 << CONFIG_STREAM_LZF_BLOG) to compress and decompress data in
+		chunks. Slightly better compression should be obtainable with larger
+
+		NOTE:  This is a pairing option for using the decompression tool,
+		       chunks must match with compression
+
+endif
+
+endmenu # Locale Support

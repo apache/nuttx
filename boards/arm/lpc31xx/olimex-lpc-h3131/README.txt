@@ -693,7 +693,7 @@ Configurations
             CONFIG_EXAMPLES_HIDKBD_DEVNAME="/dev/kbda"
 
           RTOS Features
-            CONFIG_USER_ENTRYPOINT="hidkbd_main"
+            CONFIG_INIT_ENTRYPOINT="hidkbd_main"
 
           These settings disable NSH:
 

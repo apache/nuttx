@@ -422,6 +422,14 @@ static int bch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case BIOC_FLUSH:
+        {
+          /* Flush any dirty pages remaining in the cache */
+
+          ret = bchlib_flushsector(bch);
+        }
+        break;
+
 #ifdef CONFIG_BCH_ENCRYPTION
       /* This is a request to set the encryption key? */
 

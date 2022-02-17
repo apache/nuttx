@@ -24,6 +24,14 @@ ifeq ($(CONFIG_IOEXPANDER),y)
 
 # Include the selected I/O expander drivers
 
+ifeq ($(CONFIG_IOEXPANDER_RPMSG),y)
+  CSRCS += ioe_rpmsg.c
+endif
+
+ifeq ($(CONFIG_IOEXPANDER_DUMMY),y)
+  CSRCS += ioe_dummy.c
+endif
+
 ifeq ($(CONFIG_IOEXPANDER_PCA9555),y)
   CSRCS += pca9555.c
 endif

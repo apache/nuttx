@@ -35,6 +35,7 @@
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/hdc1008.h>
 #include <nuttx/random.h>
+#include <nuttx/signal.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_HDC1008)
 
@@ -512,8 +513,8 @@ static int hdc1008_putreg(FAR struct hdc1008_dev_s *priv, uint8_t regaddr,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int hdc1008_open(FAR struct file *filep)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 
@@ -545,8 +546,8 @@ static int hdc1008_open(FAR struct file *filep)
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int hdc1008_close(FAR struct file *filep)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 
@@ -588,8 +589,8 @@ static int hdc1008_close(FAR struct file *filep)
 static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
   int len = 0;
@@ -631,7 +632,7 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
 
   if (priv->mode == HDC1008_MEAS_TEMPERATURE)
     {
-      len = snprintf(buffer, buflen, "%d.%d", data.temperature / 100,
+      len = snprintf(buffer, buflen, "%d.%02d", data.temperature / 100,
                      data.temperature % 100);
     }
   else if (priv->mode == HDC1008_MEAS_HUMIDITY)
@@ -641,7 +642,7 @@ static ssize_t hdc1008_read(FAR struct file *filep, FAR char *buffer,
     }
   else if (priv->mode == HDC1008_MEAS_T_AND_RH)
     {
-      len = snprintf(buffer, buflen, "%d.%d %d.%d",
+      len = snprintf(buffer, buflen, "%d.%02d %d.%d",
                      data.temperature / 100, data.temperature % 100,
                      data.humidity / 10, data.humidity % 10);
     }
@@ -737,8 +738,8 @@ static ssize_t hdc1008_write(FAR struct file *filep, FAR const char *buffer,
 
 static int hdc1008_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode         = filep->f_inode;
-  FAR struct hdc1008_dev_s *priv  =
+  FAR struct inode *inode        = filep->f_inode;
+  FAR struct hdc1008_dev_s *priv =
     (FAR struct hdc1008_dev_s *)inode->i_private;
   int ret;
 

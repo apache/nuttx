@@ -59,6 +59,14 @@
 #  define HAVE_UART_DEVICE 1
 #endif
 
+/* Is RS-485 used? */
+
+#if defined(CONFIG_ESP32_UART0_RS485) || \
+    defined(CONFIG_ESP32_UART1_RS485) || \
+    defined(CONFIG_ESP32_UART2_RS485)
+#  define HAVE_RS485 1
+#endif
+
 /* UART Flow Control ********************************************************/
 
 #ifndef CONFIG_ESP32_UART0

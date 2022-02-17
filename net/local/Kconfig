@@ -15,7 +15,7 @@ config NET_LOCAL
 
 if NET_LOCAL
 
-config NET_LOCAL_PATH_PREFIX
+config NET_LOCAL_VFS_PATH
 	string "Path prefix to Unix domain sockets"
 	default "/var/socket"
 	---help---

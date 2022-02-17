@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32L4_DFUMODE_H
-#define __ARCH_ARM_SRC_STM32L4_DFUMODE_H
+#ifndef __ARCH_ARM_SRC_STM32L4_STM32L4_DFUMODE_H
+#define __ARCH_ARM_SRC_STM32L4_STM32L4_DFUMODE_H
 
 /****************************************************************************
  * Included Files
@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_STM32L4_STM32L4X6)
+#if defined(CONFIG_STM32L4_STM32L4X6) || defined(CONFIG_STM32L4_STM32L4XR)
 void stm32l4_dfumode(void) noreturn_function;
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32L4_DFUMODE_H */
+#endif /* __ARCH_ARM_SRC_STM32L4_STM32L4_DFUMODE_H */

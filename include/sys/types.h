@@ -60,6 +60,10 @@
 #  endif
 #endif
 
+#ifndef CONFIG_SMP_NCPUS
+#  define CONFIG_SMP_NCPUS 1
+#endif
+
 /* Scheduling Priorities.
  *
  * NOTES:
@@ -161,13 +165,13 @@ typedef int16_t      key_t;
 typedef intptr_t     ptrdiff_t;
 
 #if !defined(__cplusplus)
-/* Wide, 16-bit character types.  wchar_t is a built-in type in C++ and
+/* Wide character types.  wchar_t is a built-in type in C++ and
  * its declaration here may cause compilation errors on some compilers.
  *
  * REVISIT: wchar_t belongs in stddef.h
  */
 
-typedef uint16_t     wchar_t;
+typedef _wchar_t     wchar_t;
 #endif
 
 /* wint_t
@@ -219,6 +223,7 @@ typedef int16_t      blksize_t;
 /* Network related */
 
 typedef unsigned int socklen_t;
+#define __socklen_t_defined
 typedef uint16_t     sa_family_t;
 
 /* Used for system times in clock ticks. This type is the natural width of
@@ -243,7 +248,6 @@ typedef uint32_t     clock_t;
 typedef uint32_t     useconds_t;
 typedef int32_t      suseconds_t;
 
-#ifdef CONFIG_SMP
 /* This is the smallest integer type that will hold a bitset of all CPUs */
 
 #if (CONFIG_SMP_NCPUS <= 8)
@@ -255,9 +259,6 @@ typedef volatile uint32_t cpu_set_t;
 #else
 #  error SMP: Extensions needed to support this number of CPUs
 #endif
-#else
-typedef volatile uint8_t cpu_set_t;
-#endif /* CONFIG_SMP */
 
 /* BSD types provided only to support porting to NuttX. */
 

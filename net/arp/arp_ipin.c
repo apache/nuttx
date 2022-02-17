@@ -56,8 +56,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ETHBUF ((struct eth_hdr_s *)&dev->d_buf[0])
-#define IPBUF  ((struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
+#define ETHBUF ((FAR struct eth_hdr_s *)&dev->d_buf[0])
+#define IPBUF  ((FAR struct arp_iphdr_s *)&dev->d_buf[ETH_HDRLEN])
 
 /****************************************************************************
  * Public Functions
@@ -90,7 +90,7 @@ void arp_ipin(FAR struct net_driver_s *dev)
   srcipaddr = net_ip4addr_conv32(IPBUF->eh_srcipaddr);
   if (net_ipv4addr_maskcmp(srcipaddr, dev->d_ipaddr, dev->d_netmask))
     {
-      arp_hdr_update(IPBUF->eh_srcipaddr, ETHBUF->src);
+      arp_hdr_update(dev, IPBUF->eh_srcipaddr, ETHBUF->src);
     }
 }
 

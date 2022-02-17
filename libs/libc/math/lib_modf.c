@@ -46,12 +46,12 @@ double modf(double x, double *iptr)
     }
   else if (fabs(x) < 1.0)
     {
-      *iptr = (x * 0.0);
+      *iptr = 0.0;
       return x;
     }
   else
     {
-      *iptr = (double)(int64_t) x;
+      *iptr = (double)(int64_t)x;
       return (x - *iptr);
     }
 }

@@ -99,6 +99,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
       /* Allocate one physical page for the L2 page table */
 
       paddr = mm_pgalloc(1);
+      binfo("a new l2 page table (paddr=%x)\n", paddr);
       if (!paddr)
         {
           return -ENOMEM;
@@ -134,6 +135,7 @@ int arm_addrenv_create_region(FAR uintptr_t **list, unsigned int listlen,
           /* Allocate one physical page for region data */
 
           paddr = mm_pgalloc(1);
+          binfo("a new page (paddr=%x)\n", paddr);
           if (!paddr)
             {
 #ifndef CONFIG_ARCH_PGPOOL_MAPPING

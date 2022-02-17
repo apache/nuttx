@@ -41,14 +41,16 @@ REQUIREDOBJS = $(LINKOBJS)
 
 ifeq ($(CONFIG_HOST_X86_64),y)
 ifeq ($(CONFIG_SIM_M32),y)
-  ASRCS += up_vfork32.S
+  ASRCS += up_vfork_x86.S
 else
-  ASRCS += up_vfork64.S
+  ASRCS += up_vfork_x86_64.S
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
-  ASRCS += up_vfork32.S
+  ASRCS += up_vfork_x86.S
 else ifeq ($(CONFIG_HOST_ARM),y)
   ASRCS += up_vfork_arm.S
+else ifeq ($(CONFIG_HOST_ARM64),y)
+  ASRCS += up_vfork_arm64.S
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
@@ -60,6 +62,10 @@ CSRCS += up_reprioritizertr.c up_exit.c up_schedulesigaction.c
 CSRCS += up_heap.c up_uart.c up_assert.c up_puts.c
 CSRCS += up_copyfullstate.c
 CSRCS += up_sigdeliver.c
+
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CSRCS += up_backtrace.c
+endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
 ifeq ($(CONFIG_SCHED_WAITPID),y)
@@ -75,11 +81,14 @@ ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
 endif
 
-HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_host_abort.c
+HOSTSRCS = up_hostirq.c up_hostmemory.c up_hosttime.c up_simuart.c up_hostmisc.c
 STDLIBS += -lpthread
 ifeq ($(CONFIG_HOST_MACOS),y)
-ifeq ($(CONFIG_LIBCXX),y)
-  STDLIBS += -lc++abi
+ifeq ($(CONFIG_HAVE_CXXINITIALIZE),y)
+  # Note: up_macho_init.c is not in CSRCS because it's picky about
+  # the place in the object list for linking. Namely, its constructor
+  # should be the first one in the executable.
+  HEADSRC = up_macho_init.c
 endif
 else
   STDLIBS += -lrt
@@ -113,10 +122,8 @@ endif
 
 ifeq ($(CONFIG_SIM_LCDDRIVER),y)
   CSRCS += up_lcd.c
-else
-  ifeq ($(CONFIG_SIM_FRAMEBUFFER),y)
-    CSRCS += up_framebuffer.c
-  endif
+else ifeq ($(CONFIG_SIM_FRAMEBUFFER),y)
+  CSRCS += up_framebuffer.c
 endif
 
 ifeq ($(CONFIG_SIM_X11FB),y)
@@ -134,18 +141,6 @@ else ifeq ($(CONFIG_SIM_BUTTONS),y)
 endif
 endif
 
-ifeq ($(CONFIG_SIM_IOEXPANDER),y)
-  CSRCS += up_ioexpander.c
-endif
-
-ifeq ($(CONFIG_SIM_SPIFLASH),y)
-  CSRCS += up_spiflash.c
-endif
-
-ifeq ($(CONFIG_SIM_QSPIFLASH),y)
-  CSRCS += up_qspiflash.c
-endif
-
 ifeq ($(CONFIG_FS_FAT),y)
   CSRCS += up_blockdevice.c up_deviceimage.c
   STDLIBS += -lz
@@ -153,10 +148,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_ROMGETC),y)
   CSRCS += up_romgetc.c
-endif
-
-ifeq ($(CONFIG_SIM_MOTOR_FOC),y)
-CSRCS += up_foc.c
 endif
 
 ifeq ($(CONFIG_SIM_NETDEV_TAP),y)
@@ -207,8 +198,7 @@ ifeq ($(CONFIG_SIM_SOUND_ALSA),y)
   STDLIBS += -lasound
 endif
 
-ifeq ($(CONFIG_FS_HOSTFS),y)
-ifneq ($(CONFIG_FS_HOSTFS_RPMSG),y)
+ifeq ($(CONFIG_SIM_HOSTFS),y)
   HOSTSRCS += up_hostfs.c
 
 hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
@@ -217,12 +207,12 @@ hostfs.h: $(TOPDIR)/include/nuttx/fs/hostfs.h
 
 up_hostfs.c: hostfs.h
 endif
-endif
 
 COBJS = $(CSRCS:.c=$(OBJEXT))
 
 NUTTXOBJS = $(AOBJS) $(COBJS)
 HOSTOBJS = $(HOSTSRCS:.c=$(OBJEXT))
+HEADOBJ = $(HEADSRC:.c=$(OBJEXT))
 
 SRCS = $(ASRCS) $(CSRCS) $(HOSTSRCS)
 OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
@@ -230,10 +220,11 @@ OBJS = $(AOBJS) $(COBJS) $(HOSTOBJS)
 # Override in Make.defs if linker is not 'ld'
 
 ifneq ($(CONFIG_HOST_MACOS),y)
-  ARCHSCRIPT += -T nuttx.ld
+  ARCHSCRIPT += nuttx.ld
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
 endif
+LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT)))
 
 # Determine which NuttX libraries will need to be linked in
 # Most are provided by LINKLIBS on the MAKE command line
@@ -259,7 +250,7 @@ $(AOBJS): %$(OBJEXT): %.S
 $(COBJS) $(LINKOBJS): %$(OBJEXT): %.c
 	$(call COMPILE, $<, $@)
 
-$(HOSTOBJS): %$(OBJEXT): %.c
+$(HOSTOBJS) $(HEADOBJ): %$(OBJEXT): %.c
 	$(Q) echo "CC:  $<"
 	$(Q) "$(CC)" -c $(HOSTCFLAGS) $< -o $@
 
@@ -294,17 +285,23 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
+# Note: Use objcopy for Linux because for some reasons visibility=hidden
+# stuff doesn't work there as we expect.
+# Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
+# necessary for macOS.
+nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
+endif
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ nuttx.rel $(HOSTOBJS) $(STDLIBS))
+	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

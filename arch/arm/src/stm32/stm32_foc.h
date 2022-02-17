@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_FOC_H
-#define __ARCH_ARM_SRC_STM32_FOC_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_FOC_H
+#define __ARCH_ARM_SRC_STM32_STM32_FOC_H
 
 /****************************************************************************
  * Included Files
@@ -185,4 +185,4 @@ FAR struct adc_dev_s *stm32_foc_adcget(FAR struct foc_dev_s *dev);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_FOC_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_FOC_H */

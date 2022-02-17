@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_X86_SRC_QEMU_QEMU_CHIP_H
-#define __ARCH_X86_SRC_QEMU_QEMU_CHIP_H
+#ifndef __ARCH_X86_SRC_QEMU_CHIP_H
+#define __ARCH_X86_SRC_QEMU_CHIP_H
 
 /************************************************************************************
  * Included Files
@@ -56,4 +56,4 @@
  * Public Functions Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_X86_SRC_QEMU_QEMU_CHIP_H */
+#endif /* __ARCH_X86_SRC_QEMU_CHIP_H */

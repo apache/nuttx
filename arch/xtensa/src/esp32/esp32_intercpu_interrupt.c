@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
 #include "hardware/esp32_dport.h"

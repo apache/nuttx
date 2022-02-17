@@ -440,7 +440,7 @@ static int skel_readdir(FAR struct fs_dirent_s *dir)
       /* TODO:  Specify the type of entry */
 
       dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, filename, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, filename, sizeof(dir->fd_dir.d_name));
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.

@@ -24,7 +24,6 @@ include nxglib/Make.defs
 include nxbe/Make.defs
 include nxmu/Make.defs
 include nxterm/Make.defs
-include vnc/Make.defs
 
 CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)graphics}
 

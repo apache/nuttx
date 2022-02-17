@@ -107,7 +107,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
           /* Get the port number */
 
-          port = ntohs(in4->sin_port);
+          port = NTOHS(in4->sin_port);
 #endif
         }
     }
@@ -140,7 +140,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
 #ifdef CONFIG_NETDB_RESOLVCONF_NONSTDPORT
           /* Get the port number */
 
-          port = ntohs(in6->sin6_port);
+          port = NTOHS(in6->sin6_port);
 #endif
         }
     }

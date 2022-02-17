@@ -582,7 +582,7 @@ static ssize_t ieee802154_send(FAR struct socket *psock, FAR const void *buf,
     {
       /* send() may be used only if the socket has been connected. */
 
-      if (!_SS_ISCONNECTED(psock->s_flags) ||
+      if (!_SS_ISCONNECTED(conn->sconn.s_flags) ||
           conn->raddr.s_mode == IEEE802154_ADDRMODE_NONE)
         {
           ret = -ENOTCONN;

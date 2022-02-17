@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/usrsock/usrsock.h
  *
- *  Copyright (C) 2015, 2017 Haltian Ltd. All rights reserved.
- *  Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -84,7 +69,7 @@ enum usrsock_conn_state_e
   USRSOCK_CONN_STATE_UNINITIALIZED = 0,
   USRSOCK_CONN_STATE_ABORTED,
   USRSOCK_CONN_STATE_READY,
-  USRSOCK_CONN_STATE_CONNECTING,
+  USRSOCK_CONN_STATE_CONNECTING
 };
 
 struct usrsock_poll_s
@@ -98,14 +83,7 @@ struct usrsock_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;                   /* Supports a doubly linked list */
-
-  /* This is a list of usrsock callbacks.  Each callback represents a thread
-   * that is stalled, waiting for a specific event.
-   */
-
-  FAR struct devif_callback_s *list; /* Usersock callbacks */
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* usrsock-specific content follows */
 
@@ -121,7 +99,7 @@ struct usrsock_conn_s
   struct
   {
     sem_t    sem;               /* Request semaphore (only one outstanding request) */
-    uint8_t  xid;               /* Expected message exchange id */
+    uint64_t xid;               /* Expected message exchange id */
     bool     inprogress;        /* Request was received but daemon is still processing */
     uint16_t valuelen;          /* Length of value from daemon */
     uint16_t valuelen_nontrunc; /* Actual length of value at daemon */
@@ -223,12 +201,6 @@ void usrsock_free(FAR struct usrsock_conn_s *conn);
  ****************************************************************************/
 
 FAR struct usrsock_conn_s *usrsock_nextconn(FAR struct usrsock_conn_s *conn);
-
-/****************************************************************************
- * Name: usrsock_connidx()
- ****************************************************************************/
-
-int usrsock_connidx(FAR struct usrsock_conn_s *conn);
 
 /****************************************************************************
  * Name: usrsock_active()

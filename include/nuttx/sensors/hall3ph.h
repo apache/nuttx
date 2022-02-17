@@ -46,7 +46,7 @@ enum hall3_120deg_position_e
   HALL3_120DEG_POS_6 = 0b101
 };
 
-/* 60-degree Hall effect sensors postions */
+/* 60-degree Hall effect sensors positions */
 
 enum hall3_60deg_position_e
 {

@@ -318,11 +318,10 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* When using sector buffering, current sector with its header should
    * always be present in sf->buffer. Otherwise data corruption may arise
-   * when writing. However, this does not apply when overwriting without
-   * append mode.
+   * when writing.
    */
 
-  if ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) && (oflags & O_APPEND))
+  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
     {
       readwrite.logsector = sf->currsector;
       readwrite.offset    = 0;
@@ -1272,7 +1271,6 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
   struct smartfs_mountpt_s *fs;
   int                   ret;
   uint16_t              entrysize;
-  uint16_t              namelen;
   struct                smartfs_chain_header_s *header;
   struct                smart_read_write_s readwrite;
   struct                smartfs_entry_header_s *entry;
@@ -1350,14 +1348,8 @@ static int smartfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
 
           /* Copy the entry name to dirent */
 
-          namelen = fs->fs_llformat.namesize;
-          if (namelen > NAME_MAX)
-            {
-              namelen = NAME_MAX;
-            }
-
-          memset(dir->fd_dir.d_name, 0, namelen);
-          strncpy(dir->fd_dir.d_name, entry->name, namelen);
+          strlcpy(dir->fd_dir.d_name, entry->name,
+                  sizeof(dir->fd_dir.d_name));
 
           /* Now advance to the next entry */
 

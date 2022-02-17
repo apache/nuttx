@@ -50,13 +50,16 @@ volatile bool g_rtc_enabled = false;
  * Public Functions
  ****************************************************************************/
 
-void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower)
+void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower, bool sync)
 {
   g_rtc_lower   = lower;
   g_rtc_enabled = true;
 
 #ifdef CONFIG_RTC_EXTERNAL
-  clock_synchronize();
+  if (sync)
+    {
+      clock_synchronize(NULL);
+    }
 #endif
 }
 
@@ -79,7 +82,7 @@ void up_rtc_set_lowerhalf(FAR struct rtc_lowerhalf_s *lower)
  ****************************************************************************/
 
 #ifndef CONFIG_RTC_HIRES
-time_t up_rtc_time(void)
+time_t weak_function up_rtc_time(void)
 {
   time_t time = 0;
 
@@ -114,7 +117,7 @@ time_t up_rtc_time(void)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_HIRES
-int up_rtc_gettime(FAR struct timespec *tp)
+int weak_function up_rtc_gettime(FAR struct timespec *tp)
 {
   int ret = -EAGAIN;
 
@@ -158,7 +161,7 @@ int up_rtc_gettime(FAR struct timespec *tp)
  ****************************************************************************/
 
 #ifdef CONFIG_RTC_DATETIME
-int up_rtc_getdatetime(FAR struct tm *tp)
+int weak_function up_rtc_getdatetime(FAR struct tm *tp)
 {
   int ret = -EAGAIN;
 
@@ -202,7 +205,8 @@ int up_rtc_getdatetime(FAR struct tm *tp)
  ****************************************************************************/
 
 #if defined(CONFIG_RTC_DATETIME) && defined(CONFIG_ARCH_HAVE_RTC_SUBSECONDS)
-int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
+int weak_function up_rtc_getdatetime_with_subseconds(FAR struct tm *tp,
+                                                     FAR long *nsec)
 {
   int ret = -EAGAIN;
 
@@ -237,7 +241,7 @@ int up_rtc_getdatetime_with_subseconds(FAR struct tm *tp, FAR long *nsec)
  *
  ****************************************************************************/
 
-int up_rtc_settime(FAR const struct timespec *tp)
+int weak_function up_rtc_settime(FAR const struct timespec *tp)
 {
   int ret = -EAGAIN;
 

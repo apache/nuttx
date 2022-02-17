@@ -22,8 +22,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARCH_RENESAS_INCLUDE_SH1_TYPES_H
-#define __ARCH_RENESAS_INCLUDE_SH1_TYPES_H
+#ifndef __ARCH_RENESAS_INCLUDE_SH1_PTYPES_H
+#define __ARCH_RENESAS_INCLUDE_SH1_PTYPES_H
 
 /****************************************************************************
  * Included Files
@@ -73,4 +73,4 @@ typedef unsigned long      irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_RENESAS_INCLUDE_SH1_TYPES_H */
+#endif /* __ARCH_RENESAS_INCLUDE_SH1_PTYPES_H */

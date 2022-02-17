@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
-#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H
+#ifndef __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REG_H
+#define __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REG_H
 
 /* MRF24J40 Registers *******************************************************/
 
@@ -284,4 +284,4 @@
 
 #define MRF24J40_SLPCON1_CLKOUT_DISABLED 0x20
 
-#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_REG_H */
+#endif /* __DRIVERS_WIRELESS_IEEE802154_MRF24J40_MRF24J40_REG_H */

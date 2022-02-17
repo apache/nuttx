@@ -16,7 +16,7 @@ config STM32_OLIMEXP407_PRIO
 	depends on USBHOST
 
 config STM32_OLIMEXP407_UEXT_USART3
-  bool "Enable UEXT USART3"
-  default n
+	bool "Enable UEXT USART3"
+	default n
 
 endif

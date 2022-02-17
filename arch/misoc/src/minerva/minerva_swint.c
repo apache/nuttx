@@ -41,11 +41,11 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_registerdump
+ * Name: minerva_registerdump
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
-static void up_registerdump(const uint32_t * regs)
+static void minerva_registerdump(const uint32_t * regs)
 {
 #if 0
   svcinfo("EPC:%08x\n", regs[REG_CSR_MEPC]);
@@ -73,8 +73,6 @@ static void up_registerdump(const uint32_t * regs)
 #endif
 #endif
 }
-#else
-#  define up_registerdump(regs)
 #endif
 
 /****************************************************************************
@@ -139,7 +137,7 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
 
 #ifdef CONFIG_DEBUG_SYSCALL_INFO
   svcinfo("Entry: regs: %p cmd: %d\n", regs, regs[REG_A0]);
-  up_registerdump(regs);
+  minerva_registerdump(regs);
 #endif
 
   /* Handle the SWInt according to the command in $a0 */
@@ -267,7 +265,7 @@ int minerva_swint(int irq, FAR void *context, FAR void *arg)
   if (regs != g_current_regs)
     {
       svcinfo("SWInt Return: Context switch!\n");
-      up_registerdump((const uint32_t *)g_current_regs);
+      minerva_registerdump((const uint32_t *)g_current_regs);
     }
   else
     {

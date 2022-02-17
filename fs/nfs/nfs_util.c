@@ -136,7 +136,7 @@ int nfs_request(FAR struct nfsmount *nmp, int procnum,
 
       /* Reconnect */
 
-      finfo("Reconnect due to timeout \n");
+      finfo("Reconnect due to timeout\n");
 
       error = rpcclnt_connect(nmp->nm_rpcclnt);
 

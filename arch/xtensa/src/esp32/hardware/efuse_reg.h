@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
-#define __ARCH_XTENSA_INCLUDE_EFUSE_REG_H
+#ifndef __ARCH_XTENSA_SRC_ESP32_HARDWARE_EFUSE_REG_H
+#define __ARCH_XTENSA_SRC_ESP32_HARDWARE_EFUSE_REG_H
 
 /****************************************************************************
  * Included Files
@@ -1824,4 +1824,4 @@
 #define EFUSE_DATE_V                   0xffffffff
 #define EFUSE_DATE_S                   0
 
-#endif /* __ARCH_XTENSA_INCLUDE_EFUSE_REG_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32_HARDWARE_EFUSE_REG_H */

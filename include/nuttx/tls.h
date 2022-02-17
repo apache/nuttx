@@ -27,9 +27,8 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
-#include <nuttx/lib/getopt.h>
 #include <sys/types.h>
+#include <pthread.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -82,9 +81,27 @@ typedef CODE void (*tls_dtor_t)(FAR void *);
 
 #endif
 
+/* This structure encapsulates all variables associated with getopt(). */
+
+struct getopt_s
+{
+  /* Part of the implementation of the public getopt() interface */
+
+  FAR char *go_optarg;       /* Optional argument following option */
+  int       go_opterr;       /* Print error message */
+  int       go_optind;       /* Index into argv */
+  int       go_optopt;       /* unrecognized option character */
+
+  /* Internal getopt() state */
+
+  FAR char *go_optptr;       /* Current parsing location */
+  bool      go_binitialized; /* true:  getopt() has been initialized */
+};
+
 struct task_info_s
 {
   sem_t           ta_sem;
+  FAR char      **argv;                         /* Name+start-up parameters     */
 #if CONFIG_TLS_NELEM > 0
   tls_ndxset_t    ta_tlsset;                    /* Set of TLS indexes allocated */
   tls_dtor_t      ta_tlsdtor[CONFIG_TLS_NELEM]; /* List of TLS destructors      */
@@ -97,6 +114,18 @@ struct task_info_s
 #  endif
 #endif
 };
+
+/* struct pthread_cleanup_s *************************************************/
+
+/* This structure describes one element of the pthread cleanup stack */
+
+#ifdef CONFIG_PTHREAD_CLEANUP
+struct pthread_cleanup_s
+{
+  pthread_cleanup_t pc_cleaner;     /* Cleanup callback address */
+  FAR void *pc_arg;                 /* Argument that accompanies the callback */
+};
+#endif
 
 /* When TLS is enabled, up_createstack() will align allocated stacks to the
  * TLS_STACK_ALIGN value.  An instance of the following structure will be
@@ -111,7 +140,7 @@ struct task_info_s
  * The stack memory is fully accessible to user mode threads.  TLS is not
  * available from interrupt handlers (nor from the IDLE thread).
  *
- * The following diagram represent the typic stack layout:
+ * The following diagram represent the typical stack layout:
  *
  *      Push Down             Push Up
  *   +-------------+      +-------------+ <- Stack memory allocation

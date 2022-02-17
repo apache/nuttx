@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_MOTOR_MOTOR_H
-#define __INCLUDE_NUTTX_DRIVERS_MOTOR_MOTOR_H
+#ifndef __INCLUDE_NUTTX_MOTOR_MOTOR_H
+#define __INCLUDE_NUTTX_MOTOR_MOTOR_H
 
 /* The motor driver is split into two parts:
  *
@@ -43,7 +43,6 @@
 #include <nuttx/compiler.h>
 
 #include <nuttx/motor/motor_ioctl.h>
-#include <nuttx/semaphore.h>
 
 #ifdef CONFIG_MOTOR_UPPER
 
@@ -212,95 +211,80 @@ struct motor_params_s
 #endif
 };
 
-/* Motor private data structure */
-
-struct motor_s
-{
-  uint8_t                    opmode;  /* Motor operation mode */
-  uint8_t                    opflags; /* Motor operation flags */
-  struct motor_limits_s      limits;  /* Motor absolute limits */
-  struct motor_params_s      param;   /* Motor settings */
-  struct motor_state_s       state;   /* Motor state */
-  FAR void                   *priv;   /* Private data */
-};
-
 /* Motor operations used to call from the upper-half, generic motor driver
  * into lower-half, platform-specific logic.
  */
 
-struct motor_dev_s;
+struct motor_lowerhalf_s;
 struct motor_ops_s
 {
   /* Configure motor */
 
-  CODE int (*setup)(FAR struct motor_dev_s *dev);
+  CODE int (*setup)(FAR struct motor_lowerhalf_s *dev);
 
   /* Disable motor */
 
-  CODE int (*shutdown)(FAR struct motor_dev_s *dev);
+  CODE int (*shutdown)(FAR struct motor_lowerhalf_s *dev);
 
   /* Stop motor */
 
-  CODE int (*stop)(FAR struct motor_dev_s *dev);
+  CODE int (*stop)(FAR struct motor_lowerhalf_s *dev);
 
   /* Start motor */
 
-  CODE int (*start)(FAR struct motor_dev_s *dev);
+  CODE int (*start)(FAR struct motor_lowerhalf_s *dev);
 
   /* Set motor parameters */
 
-  CODE int (*params_set)(FAR struct motor_dev_s *dev,
+  CODE int (*params_set)(FAR struct motor_lowerhalf_s *dev,
                          FAR struct motor_params_s *param);
 
   /* Set motor operation mode */
 
-  CODE int (*mode_set)(FAR struct motor_dev_s *dev, uint8_t mode);
+  CODE int (*mode_set)(FAR struct motor_lowerhalf_s *dev, uint8_t mode);
 
   /* Set motor limits */
 
-  CODE int (*limits_set)(FAR struct motor_dev_s *dev,
+  CODE int (*limits_set)(FAR struct motor_lowerhalf_s *dev,
                          FAR struct motor_limits_s *limits);
 
   /* Set motor fault */
 
-  CODE int (*fault_set)(FAR struct motor_dev_s *dev, uint8_t fault);
+  CODE int (*fault_set)(FAR struct motor_lowerhalf_s *dev, uint8_t fault);
 
   /* Get motor state  */
 
-  CODE int (*state_get)(FAR struct motor_dev_s *dev,
+  CODE int (*state_get)(FAR struct motor_lowerhalf_s *dev,
                         FAR struct motor_state_s *state);
 
   /* Get current fault state */
 
-  CODE int (*fault_get)(FAR struct motor_dev_s *dev, FAR uint8_t *fault);
+  CODE int (*fault_get)(FAR struct motor_lowerhalf_s *dev,
+                        FAR uint8_t *fault);
 
   /* Clear fault state */
 
-  CODE int (*fault_clear)(FAR struct motor_dev_s *dev, uint8_t fault);
+  CODE int (*fault_clear)(FAR struct motor_lowerhalf_s *dev, uint8_t fault);
 
   /* Lower-half logic may support platform-specific ioctl commands */
 
-  CODE int (*ioctl)(FAR struct motor_dev_s *dev, int cmd, unsigned long arg);
+  CODE int (*ioctl)(FAR struct motor_lowerhalf_s *dev, int cmd,
+                    unsigned long arg);
 };
 
-/*  */
+/* This structure is the generic form of state structure used by lower half
+ * motor driver.
+ */
 
-struct motor_dev_s
+struct motor_lowerhalf_s
 {
-  /* Fields managed by common upper half motor logic */
-
-  uint8_t                     ocount;   /* The number of times the device
-                                         * has been opened
-                                         */
-  sem_t                       closesem; /* Locks out new opens while close
-                                         * is in progress
-                                         */
-
-  /* Fields provided by lower half motor logic */
-
   FAR const struct motor_ops_s *ops;    /* Arch-specific operations */
-  FAR void                     *priv;   /* Reference to motor private data */
-  FAR void                     *lower;  /* Reference to lower level drivers */
+  uint8_t                      opmode;  /* Motor operation mode */
+  uint8_t                      opflags; /* Motor operation flags */
+  struct motor_limits_s        limits;  /* Motor absolute limits */
+  struct motor_params_s        param;   /* Motor settings */
+  struct motor_state_s         state;   /* Motor state */
+  FAR void                     *priv;   /* Private data */
 };
 
 /****************************************************************************
@@ -321,10 +305,28 @@ extern "C"
 
 /****************************************************************************
  * Name: motor_register
+ *
+ * Description:
+ *   This function binds an instance of a "lower half" motor driver with the
+ *   "upper half" motor device and registers that device so that can be used
+ *   by application code.
+ *
+ *   We will register the chararter device with specified path.
+ *
+ * Input Parameters:
+ *   path  - The user specifies path name.
+ *   lower - A pointer to an instance of lower half motor driver. This
+ *           instance is bound to the motor driver and must persists as long
+ *           as the driver persists.
+ *
+ * Returned Value:
+ *   OK if the driver was successfully register; A negated errno value is
+ *   returned on any failure.
+ *
  ****************************************************************************/
 
-int motor_register(FAR const char *path, FAR struct motor_dev_s *dev,
-                   FAR void *lower);
+int motor_register(FAR const char *path,
+                   FAR struct motor_lowerhalf_s *lower);
 
 #undef EXTERN
 #ifdef __cplusplus

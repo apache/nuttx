@@ -281,7 +281,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->c_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->c_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -946,7 +946,7 @@ static int c5471_transmit(struct c5471_driver_s *priv)
         {
           /* 16-bits at a time. */
 
-          packetmem[i] = htons(((uint16_t *)dev->d_buf)[j]);
+          packetmem[i] = HTONS(((uint16_t *)dev->d_buf)[j]);
         }
 
       putreg32(((getreg32(priv->c_rxcpudesc) & ~EIM_RXDESC_BYTEMASK) |
@@ -1257,7 +1257,7 @@ static void c5471_receive(struct c5471_driver_s *priv)
                * 16-bits at a time.
                */
 
-              ((uint16_t *)dev->d_buf)[j] = htons(packetmem[i]);
+              ((uint16_t *)dev->d_buf)[j] = HTONS(packetmem[i]);
             }
         }
       else
@@ -1314,7 +1314,7 @@ static void c5471_receive(struct c5471_driver_s *priv)
 
       dev->d_len = packetlen;
       ninfo("Received packet, packetlen: %d type: %02x\n",
-            packetlen, ntohs(BUF->type));
+            packetlen, NTOHS(BUF->type));
       c5471_dumpbuffer("Received packet", dev->d_buf, dev->d_len);
 
 #ifdef CONFIG_NET_PKT

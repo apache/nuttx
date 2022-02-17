@@ -154,7 +154,7 @@ kconfig2html.c
 
   or more quickly with:
 
-    make dirlinks
+    make .dirlinks
 
 Libraries.mk, FlatLibs.mk, ProtectedLibs.mk, and KernelLib.mk
 -------------------------------------------------------------
@@ -175,11 +175,11 @@ lowhex.c
 Makefile.[unix|win]
 -----------------
 
-  Makefile.unix is the Makefile used when building NuttX in Unix-like
-  systems.  It is selected from the top-level Makefile.
+  Unix.mk is the Makefile used when building NuttX in Unix-like systems.
+  It is selected from the top-level Makefile.
 
-  Makefile.win is the Makefile used when building natively under
-  Windows.  It is selected from the top-level Makefile.
+  Win.mk is the Makefile used when building natively under Windows.
+  It is selected from the top-level Makefile.
 
 mkconfig.c, cfgdefine.c, and cfgdefine.h
 ----------------------------------------
@@ -191,10 +191,10 @@ mkconfig.c, cfgdefine.c, and cfgdefine.h
   in the top level NuttX directory (See boards/README.txt or
   Documentation/NuttXPortingGuide.html).  The first time you make NuttX,
   the top-level makefile will build the mkconfig executable from mkconfig.c
-  (using Makefile.host).  The top-level Makefile will then execute the
-  mkconfig program to convert the .config file in the top level directory
-  into include/nuttx/config.h.  config.h is a another version of the
-  NuttX configuration that can be included by C files.
+  (using Makefile.host).  The top-level Makefile will then execute the mkconfig
+  program to convert the .config file in the top level directory into
+  include/nuttx/config.h.  config.h is a another version of the NuttX
+  configuration that can be included by C files.
 
 mkconfigvars.sh
 ---------------
@@ -218,14 +218,14 @@ mkconfigvars.sh
     -h
        show this help message and exit
 
-mkexport.sh and Makefile.export
+mkexport.sh and Export.mk
 -------------------------------
 
   These implement part of the top-level Makefile's 'export' target.  That
   target will bundle up all of the NuttX libraries, header files, and the
   startup object into an export-able, binary NuttX distribution.  The
-  Makefile.export is used only by the mkexport.sh script to parse out
-  options from the top-level Make.defs file.
+  Export.mk is used only by the mkexport.sh script to parse out options
+  from the top-level Make.defs file.
 
   USAGE: tools/mkexport.sh [-d] [-z] [-u] -t <top-dir> [-x <lib-ext>] -l "lib1 [lib2 [lib3 ...]]"
 
@@ -253,8 +253,8 @@ mkversion.c, cfgdefine.c, and cfgdefine.h
   When you build NuttX there should be a version file called .version in
   the top level NuttX directory (See Documentation/NuttXPortingGuide.html).
   The first time you make NuttX, the top-level makefile will build the
-  mkversion executable from mkversion.c (using Makefile.host).  The top-
-  level Makefile will then execute the mkversion program to convert the
+  mkversion executable from mkversion.c (using Makefile.host).  The top-level
+  Makefile will then execute the mkversion program to convert the
   .version file in the top level directory into include/nuttx/version.h.
   version.h provides version information that can be included by C files.
 
@@ -1030,7 +1030,7 @@ testbuild.sh
     stm32f429i-disco:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
     arduino-due:nsh,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
     /arm,CONFIG_ARMV7M_TOOLCHAIN_GNU_EABIL
-    /risc-v,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
+    /risc-v,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
 
   The first value is the usual configuration description of the form
   <board-name>:<configuration-name> or /<folder-name> and must correspond to a

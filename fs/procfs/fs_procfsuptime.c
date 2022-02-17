@@ -139,14 +139,6 @@ static int uptime_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "uptime" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "uptime") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   attr = kmm_zalloc(sizeof(struct uptime_file_s));
@@ -330,14 +322,6 @@ static int uptime_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int uptime_stat(FAR const char *relpath, FAR struct stat *buf)
 {
-  /* "uptime" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "uptime") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "uptime" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

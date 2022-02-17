@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PRS_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PRS_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PRS_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PRS_H
 
 /****************************************************************************
  * Included Files
@@ -608,4 +608,4 @@
 #define PRS_LESENSE_DEC1                        ((59 << 16) + 1) /* PRS LESENSE Decoder PRS out 1 */
 #define PRS_LESENSE_DEC2                        ((59 << 16) + 2) /* PRS LESENSE Decoder PRS out 2 */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_PRS_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_PRS_H */

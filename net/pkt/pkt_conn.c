@@ -31,6 +31,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -55,7 +56,9 @@
 
 /* The array containing all packet socket connections */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct pkt_conn_s g_pkt_connections[CONFIG_NET_PKT_CONNS];
+#endif
 
 /* A list of all free packet socket connections */
 
@@ -100,7 +103,9 @@ static inline void _pkt_semtake(FAR sem_t *sem)
 
 void pkt_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -108,13 +113,12 @@ void pkt_initialize(void)
   dq_init(&g_active_pkt_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
     {
-      /* Mark the connection closed and move it to the free list */
-
-      g_pkt_connections[i].ifindex = 0;
-      dq_addlast(&g_pkt_connections[i].node, &g_free_pkt_connections);
+      dq_addlast(&g_pkt_connections[i].sconn.node, &g_free_pkt_connections);
     }
+#endif
 }
 
 /****************************************************************************
@@ -129,20 +133,33 @@ void pkt_initialize(void)
 FAR struct pkt_conn_s *pkt_alloc(void)
 {
   FAR struct pkt_conn_s *conn;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
 
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _pkt_semtake(&g_free_sem);
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (dq_peek(&g_free_pkt_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_PKT_CONNS);
+      if (conn != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
+            {
+              dq_addlast(&conn[i].sconn.node, &g_free_pkt_connections);
+            }
+        }
+    }
+#endif
+
   conn = (FAR struct pkt_conn_s *)dq_remfirst(&g_free_pkt_connections);
   if (conn)
     {
-      /* Make sure that the connection is marked as uninitialized */
-
-      conn->ifindex = 0;
-
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_pkt_connections);
+      dq_addlast(&conn->sconn.node, &g_active_pkt_connections);
     }
 
   _pkt_semgive(&g_free_sem);
@@ -168,11 +185,15 @@ void pkt_free(FAR struct pkt_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_pkt_connections);
+  dq_rem(&conn->sconn.node, &g_active_pkt_connections);
+
+  /* Make sure that the connection is marked as uninitialized */
+
+  memset(conn, 0, sizeof(*conn));
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_pkt_connections);
+  dq_addlast(&conn->sconn.node, &g_free_pkt_connections);
   _pkt_semgive(&g_free_sem);
 }
 
@@ -206,7 +227,7 @@ FAR struct pkt_conn_s *pkt_active(FAR struct eth_hdr_s *buf)
 
       /* Look at the next active connection */
 
-      conn = (FAR struct pkt_conn_s *)conn->node.flink;
+      conn = (FAR struct pkt_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -231,7 +252,7 @@ FAR struct pkt_conn_s *pkt_nextconn(FAR struct pkt_conn_s *conn)
     }
   else
     {
-      return (FAR struct pkt_conn_s *)conn->node.flink;
+      return (FAR struct pkt_conn_s *)conn->sconn.node.flink;
     }
 }
 

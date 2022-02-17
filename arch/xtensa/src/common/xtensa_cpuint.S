@@ -40,7 +40,7 @@
 #include <nuttx/config.h>
 #include <arch/chip/core-isa.h>
 
-#include "xtensa_abi.h"
+#include <arch/xtensa/xtensa_abi.h>
 
 #if XCHAL_HAVE_INTERRUPTS
 

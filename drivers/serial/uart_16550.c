@@ -513,7 +513,7 @@ static inline uart_datawidth_t u16550_serialin(FAR struct u16550_s *priv,
                                                int offset)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
-  return *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset);
+  return *((FAR volatile uart_datawidth_t *)priv->uartbase + offset);
 #else
   return uart_getreg(priv->uartbase, offset);
 #endif
@@ -527,7 +527,7 @@ static inline void u16550_serialout(FAR struct u16550_s *priv, int offset,
                                     uart_datawidth_t value)
 {
 #ifdef CONFIG_SERIAL_UART_ARCH_MMIO
-  *((FAR volatile uart_addrwidth_t *)priv->uartbase + offset) = value;
+  *((FAR volatile uart_datawidth_t *)priv->uartbase + offset) = value;
 #else
   uart_putreg(priv->uartbase, offset, value);
 #endif
@@ -860,7 +860,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
               /* Read the modem status register (MSR) to clear */
 
               status = u16550_serialin(priv, UART_MSR_OFFSET);
-              sinfo("MSR: %02x\n", status);
+              sinfo("MSR: %02"PRIx32"\n", status);
               break;
             }
 
@@ -871,7 +871,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
               /* Read the line status register (LSR) to clear */
 
               status = u16550_serialin(priv, UART_LSR_OFFSET);
-              sinfo("LSR: %02x\n", status);
+              sinfo("LSR: %02"PRIx32"\n", status);
               break;
             }
 
@@ -879,7 +879,7 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
           default:
             {
-              serr("ERROR: Unexpected IIR: %02x\n", status);
+              serr("ERROR: Unexpected IIR: %02"PRIx32"\n", status);
               break;
             }
         }
@@ -898,8 +898,8 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct uart_dev_s *dev   = inode->i_private;
+  FAR struct inode *inode    = filep->f_inode;
+  FAR struct uart_dev_s *dev = inode->i_private;
   FAR struct u16550_s *priv  = (FAR struct u16550_s *)dev->priv;
   int ret;
 

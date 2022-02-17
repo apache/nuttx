@@ -20,10 +20,10 @@
 
 include $(TOPDIR)/libs/libc/machine/risc-v/common/Make.defs
 
-ifeq ($(CONFIG_ARCH_RV64GC),y)
+ifeq ($(CONFIG_ARCH_RV64),y)
 include $(TOPDIR)/libs/libc/machine/risc-v/rv64/Make.defs
 endif
 
-ifeq ($(CONFIG_ARCH_RV32IM),y)
+ifeq ($(CONFIG_ARCH_RV32),y)
 include $(TOPDIR)/libs/libc/machine/risc-v/rv32/Make.defs
 endif

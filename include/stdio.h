@@ -96,6 +96,8 @@
 #  define fsetpos64 fsetpos
 #endif
 
+#define setlinebuf(stream)   setvbuf(stream, NULL, _IOLBF, 0)
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

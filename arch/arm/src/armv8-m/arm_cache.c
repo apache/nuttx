@@ -404,10 +404,16 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
    *   (ssize - 1)  = 0x007f : Mask of the set field
    */
 
-  start &= ~(ssize - 1);
   ARM_DSB();
 
-  do
+  if (start & (ssize - 1))
+    {
+      start &= ~(ssize - 1);
+      putreg32(start, NVIC_DCCIMVAC);
+      start += ssize;
+    }
+
+  while (start + ssize <= end)
     {
       /* The below store causes the cache to check its directory and
        * determine if this address is contained in the cache. If so, it
@@ -422,7 +428,11 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
       start += ssize;
     }
-  while (start < end);
+
+  if (start < end)
+    {
+      putreg32(start, NVIC_DCCIMVAC);
+    }
 
   ARM_DSB();
   ARM_ISB();
@@ -526,15 +536,25 @@ void up_clean_dcache(uintptr_t start, uintptr_t end)
   uint32_t ccsidr;
   uint32_t sshift;
   uint32_t ssize;
+  uint32_t sets;
+  uint32_t ways;
 
   /* Get the characteristics of the D-Cache */
 
   ccsidr = getreg32(NVIC_CCSIDR);
   sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+  sets   = CCSIDR_SETS(ccsidr);          /* (Number of sets) - 1 */
+  ways   = CCSIDR_WAYS(ccsidr);          /* (Number of ways) - 1 */
 
   /* Clean the D-Cache over the range of addresses */
 
   ssize  = (1 << sshift);
+
+  if ((end - start) >= ssize * (sets + 1) * (ways + 1))
+    {
+      return up_clean_dcache_all();
+    }
+
   start &= ~(ssize - 1);
   ARM_DSB();
 
@@ -669,15 +689,25 @@ void up_flush_dcache(uintptr_t start, uintptr_t end)
   uint32_t ccsidr;
   uint32_t sshift;
   uint32_t ssize;
+  uint32_t sets;
+  uint32_t ways;
 
   /* Get the characteristics of the D-Cache */
 
   ccsidr = getreg32(NVIC_CCSIDR);
   sshift = CCSIDR_LSSHIFT(ccsidr) + 4;   /* log2(cache-line-size-in-bytes) */
+  sets   = CCSIDR_SETS(ccsidr);          /* (Number of sets) - 1 */
+  ways   = CCSIDR_WAYS(ccsidr);          /* (Number of ways) - 1 */
 
   /* Clean and invalidate the D-Cache over the range of addresses */
 
   ssize  = (1 << sshift);
+
+  if ((end - start) >= ssize * (sets + 1) * (ways + 1))
+    {
+      return up_flush_dcache_all();
+    }
+
   start &= ~(ssize - 1);
   ARM_DSB();
 

@@ -281,7 +281,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->dm_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dm_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -1019,7 +1019,7 @@ static void dm9x_receive(FAR struct dm9x_driver_s *priv)
           else
 #endif
 #ifdef CONFIG_NET_ARP
-          if (BUF->type == htons(ETHTYPE_ARP))
+          if (BUF->type == HTONS(ETHTYPE_ARP))
             {
               arp_arpin(&priv->dm_dev);
               NETDEV_RXARP(&priv->dm_dev);

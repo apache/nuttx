@@ -40,18 +40,3 @@ int eventfd_write(int fd, eventfd_t value)
   return write(fd, &value,
       sizeof (eventfd_t)) != sizeof (eventfd_t) ? -1 : 0;
 }
-
-int eventfd_get_minor(int fd)
-{
-  int ret;
-  int minor;
-
-  ret = ioctl(fd, EFD_FIOC_MINOR, &minor);
-
-  if (ret < 0)
-    {
-      return ret;
-    }
-
-  return minor;
-}

@@ -62,10 +62,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_SMP_NCPUS
-#  define CONFIG_SMP_NCPUS       1
-#endif
-
 /* This set of all CPUs */
 
 #define SCHED_ALL_CPUS           ((1 << CONFIG_SMP_NCPUS) - 1)
@@ -457,7 +453,6 @@ void nx_start(void)
       g_idleargv[i][0]  = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
       g_idleargv[i][1]  = NULL;
-      g_idletcb[i].argv = &g_idleargv[i][0];
 
       /* Then add the idle task's TCB to the head of the current ready to
        * run list.
@@ -563,6 +558,7 @@ void nx_start(void)
       /* Allocate the IDLE group */
 
       DEBUGVERIFY(group_allocate(&g_idletcb[i], g_idletcb[i].cmn.flags));
+      g_idletcb[i].cmn.group->tg_info->argv = &g_idleargv[i][0];
 
 #ifdef CONFIG_SMP
       /* Create a stack for all CPU IDLE threads (except CPU0 which already
@@ -580,7 +576,9 @@ void nx_start(void)
 
       up_initial_state(&g_idletcb[i].cmn);
 
-      /* Initialize the thread local storage */
+      /* Initialize the thread local storage
+       * Note: Don't copy tdata and tss for idle task to improve footprint
+       */
 
       info = up_stack_frame(&g_idletcb[i].cmn, sizeof(struct tls_info_s));
       DEBUGASSERT(info == g_idletcb[i].cmn.stack_alloc_ptr);
@@ -789,35 +787,6 @@ void nx_start(void)
   sinfo("CPU0: Beginning Idle Loop\n");
   for (; ; )
     {
-#if defined(CONFIG_STACK_COLORATION) && CONFIG_STACK_USAGE_SAFE_PERCENT > 0
-
-      /* Check stack in idle thread */
-
-      for (i = 0; i < g_npidhash; i++)
-        {
-          FAR struct tcb_s *tcb;
-          irqstate_t flags;
-
-          flags = enter_critical_section();
-
-          tcb = g_pidhash[i];
-          if (tcb && (up_check_tcbstack(tcb) * 100 / tcb->adj_stack_size
-                      > CONFIG_STACK_USAGE_SAFE_PERCENT))
-            {
-              _alert("Stack check failed, pid %d, name %s\n",
-                      tcb->pid, tcb->name);
-              PANIC();
-            }
-
-          leave_critical_section(flags);
-        }
-
-#endif
-
-      /* Check heap in idle thread */
-
-      kmm_checkcorruption();
-
       /* Perform any processor-specific idle state operations */
 
       up_idle();

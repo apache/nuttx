@@ -133,7 +133,7 @@ int nxffs_readdir(FAR struct inode *mountpt, FAR struct fs_dirent_s *dir)
 
       finfo("Offset %jd: \"%s\"\n", (intmax_t)entry.hoffset, entry.name);
       dir->fd_dir.d_type = DTYPE_FILE;
-      strncpy(dir->fd_dir.d_name, entry.name, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, entry.name, sizeof(dir->fd_dir.d_name));
 
       /* Discard this entry and set the next offset. */
 

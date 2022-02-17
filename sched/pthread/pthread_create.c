@@ -79,7 +79,6 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
  *   tcb        - Address of the new task's TCB
  *   trampoline - User space pthread startup function
  *   arg        - The argument to provide to the pthread on startup.
- *   exit       - The user-space pthread exit function
  *
  * Returned Value:
  *  None
@@ -88,8 +87,7 @@ const pthread_attr_t g_default_pthread_attr = PTHREAD_ATTR_INITIALIZER;
 
 static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
                                      pthread_trampoline_t trampoline,
-                                     pthread_addr_t arg,
-                                     pthread_exitroutine_t exit)
+                                     pthread_addr_t arg)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
   /* Copy the pthread name into the TCB */
@@ -104,7 +102,6 @@ static inline void pthread_tcb_setup(FAR struct pthread_tcb_s *ptcb,
 
   ptcb->trampoline = trampoline;
   ptcb->arg        = arg;
-  ptcb->exit       = exit;
 }
 
 /****************************************************************************
@@ -196,12 +193,7 @@ static void pthread_start(void)
   /* The thread has returned (should never happen) */
 
   DEBUGPANIC();
-#ifndef CONFIG_BUILD_FLAT
-  ptcb->cmn.flags &= ~TCB_FLAG_CANCEL_PENDING;
-  ptcb->cmn.flags |= TCB_FLAG_CANCEL_DOING;
-
-  up_pthread_exit(ptcb->exit, NULL);
-#endif
+  pthread_exit(NULL);
 }
 
 /****************************************************************************
@@ -223,7 +215,6 @@ static void pthread_start(void)
  *                 for the new thread
  *    entry      - The new thread starts execution by invoking entry
  *    arg        - It is passed as the sole argument of entry
- *    exit       - The user-space pthread exit function
  *
  * Returned Value:
  *   OK (0) on success; a (non-negated) errno value on failure. The errno
@@ -233,8 +224,7 @@ static void pthread_start(void)
 
 int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
                       FAR const pthread_attr_t *attr,
-                      pthread_startroutine_t entry, pthread_addr_t arg,
-                      pthread_exitroutine_t exit)
+                      pthread_startroutine_t entry, pthread_addr_t arg)
 {
   FAR struct pthread_tcb_s *ptcb;
   FAR struct tls_info_s *info;
@@ -247,7 +237,6 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
   bool group_joined = false;
 
   DEBUGASSERT(trampoline != NULL);
-  DEBUGASSERT(exit != NULL);
 
   /* If attributes were not supplied, use the default attributes */
 
@@ -315,7 +304,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
       /* Allocate the stack for the TCB */
 
       ret = up_create_stack((FAR struct tcb_s *)ptcb,
-                            sizeof(struct tls_info_s) + attr->stacksize,
+                            up_tls_size() + attr->stacksize,
                             TCB_FLAG_TTYPE_PTHREAD);
     }
 
@@ -327,7 +316,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* Initialize thread local storage */
 
-  info = up_stack_frame(&ptcb->cmn, sizeof(struct tls_info_s));
+  info = up_stack_frame(&ptcb->cmn, up_tls_size());
   if (info == NULL)
     {
       errcode = ENOMEM;
@@ -335,6 +324,8 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
     }
 
   DEBUGASSERT(info == ptcb->cmn.stack_alloc_ptr);
+
+  up_tls_initialize(info);
 
   /* Attach per-task info in group to TLS */
 
@@ -465,7 +456,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
    * passed by value
    */
 
-  pthread_tcb_setup(ptcb, trampoline, arg, exit);
+  pthread_tcb_setup(ptcb, trampoline, arg);
 
   /* Join the parent's task group */
 

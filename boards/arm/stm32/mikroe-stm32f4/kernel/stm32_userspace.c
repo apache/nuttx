@@ -55,10 +55,10 @@
  * the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
- *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
  *    that the value _sdata is the address of a uint32_t variable _data (it
  *    is not!).
- *  - We can recoved the linker value then by simply taking the address of
+ *  - We can recover the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
@@ -72,13 +72,13 @@ extern uint32_t _ebss;            /* End+1 of .bss */
 
 /* This is the user space entry point */
 
-int CONFIG_USER_ENTRYPOINT(int argc, char *argv[]);
+int CONFIG_INIT_ENTRYPOINT(int argc, char *argv[]);
 
 const struct userspace_s userspace locate_data(".userspace") =
 {
   /* General memory map */
 
-  .us_entrypoint    = (main_t)CONFIG_USER_ENTRYPOINT,
+  .us_entrypoint    = (main_t)CONFIG_INIT_ENTRYPOINT,
   .us_textstart     = (uintptr_t)&_stext,
   .us_textend       = (uintptr_t)&_etext,
   .us_datasource    = (uintptr_t)&_eronly,

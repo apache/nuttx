@@ -124,6 +124,7 @@
  *   startdelay - The delay between CS active and first CLK
  *   stopdelay  - The delay between last CLK and CS inactive
  *   csdelay    - The delay between CS inactive and CS active again
+ *   ifdelay    - The delay between frames
  *
  * Returned Value:
  *   Returns zero (OK) on success; a negated errno value is return on any
@@ -131,8 +132,8 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
-#  define SPI_SETDELAY(d,a,b,c) ((d)->ops->setdelay(d,a,b,c))
+#ifdef CONFIG_SPI_DELAY_CONTROL
+#  define SPI_SETDELAY(d,a,b,c,i) ((d)->ops->setdelay(d,a,b,c,i))
 #endif
 
 /****************************************************************************
@@ -473,6 +474,7 @@
 #define SPIDEV_USBHOST(n)       SPIDEV_ID(SPIDEVTYPE_USBHOST,       (n))
 #define SPIDEV_LPWAN(n)         SPIDEV_ID(SPIDEVTYPE_LPWAN,         (n))
 #define SPIDEV_ADC(n)           SPIDEV_ID(SPIDEVTYPE_ADC,           (n))
+#define SPIDEV_MOTOR(n)         SPIDEV_ID(SPIDEVTYPE_MOTOR,         (n))
 #define SPIDEV_USER(n)          SPIDEV_ID(SPIDEVTYPE_USER,          (n))
 
 /****************************************************************************
@@ -512,6 +514,7 @@ enum spi_devtype_e
   SPIDEVTYPE_USBHOST,       /* Select SPI USB host controller over SPI */
   SPIDEVTYPE_LPWAN,         /* Select SPI LPWAN controller over SPI */
   SPIDEVTYPE_ADC,           /* Select SPI ADC device */
+  SPIDEVTYPE_MOTOR,         /* Select SPI motor device */
   SPIDEVTYPE_USER           /* Board-specific values start here
                              * This must always be the last definition. */
 };
@@ -543,9 +546,9 @@ struct spi_ops_s
                   bool selected);
   CODE uint32_t (*setfrequency)(FAR struct spi_dev_s *dev,
                   uint32_t frequency);
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
   CODE int      (*setdelay)(FAR struct spi_dev_s *dev, uint32_t a,
-                  uint32_t b, uint32_t c);
+                  uint32_t b, uint32_t c, uint32_t i);
 #endif
   CODE void     (*setmode)(FAR struct spi_dev_s *dev, enum spi_mode_e mode);
   CODE void     (*setbits)(FAR struct spi_dev_s *dev, int nbits);

@@ -55,10 +55,10 @@
 #include "xtensa_attr.h"
 #include "esp32_rt_timer.h"
 #include "esp32_ble_adapter.h"
+#include "esp32_wireless.h"
 
 #ifdef CONFIG_ESP32_WIFI_BT_COEXIST
 #  include "esp_coexist_internal.h"
-#  include "esp_coexist_adapter.h"
 #endif
 
 /****************************************************************************
@@ -107,10 +107,6 @@ do {\
 #define ESP_BT_CONTROLLER_CONFIG_MAGIC_VAL  0x20200622
 
 extern void btdm_controller_set_sleep_mode(uint8_t mode);
-
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
-extern void coex_pti_v2(void);
-#endif
 
 /****************************************************************************
  * Private Types
@@ -437,6 +433,19 @@ int coex_bt_release_wrapper(uint32_t event);
 uint32_t coex_bb_reset_lock_wrapper(void);
 void coex_bb_reset_unlock_wrapper(uint32_t restore);
 extern void coex_ble_adv_priority_high_set(bool high);
+extern int coex_bt_request(uint32_t event,
+                           uint32_t latency,
+                           uint32_t duration);
+extern int coex_bt_release(uint32_t event);
+extern int coex_enable(void);
+extern int coex_register_bt_cb(coex_func_cb_t cb);
+extern int coex_schm_register_btdm_callback(void *callback);
+extern int coex_register_wifi_channel_change_callback(void *cb);
+extern int coex_wifi_channel_get(uint8_t *primary,
+                                 uint8_t *secondary);
+extern int coex_register_bt_cb(coex_func_cb_t cb);
+extern void coex_bb_reset_unlock(uint32_t restore);
+extern uint32_t coex_bb_reset_lock(void);
 
 extern char _bss_start_btdm;
 extern char _bss_end_btdm;
@@ -497,9 +506,6 @@ static DRAM_ATTR esp_timer_handle_t g_btdm_slp_tmr;
 /* BT interrupt private data */
 
 static irqstate_t g_inter_flags;
-static uint32_t g_phy_clk_en_cnt;
-static int64_t g_phy_rf_en_ts;
-static uint8_t g_phy_access_ref;
 
 /****************************************************************************
  * Public Data
@@ -627,47 +633,81 @@ static btdm_dram_available_region_t btdm_dram_available_region[] =
 
 static int adapter_coex_register_bt_cb_wrapper(coex_func_cb_t cb)
 {
-  return ESP_ERR_INVALID_STATE;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_register_bt_cb(cb);
+#else
+  return 0;
+#endif
 }
 
 static int adapter_coex_schm_register_btdm_callback(void *callback)
 {
-  return ESP_ERR_INVALID_STATE;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_schm_register_btdm_callback(callback);
+#else
+  return 0;
+#endif
 }
 
 static int adapter_coex_register_wifi_channel_change_callback(void *cb)
 {
-  return ESP_ERR_INVALID_STATE;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_register_wifi_channel_change_callback(cb);
+#else
+  return -1;
+#endif
 }
 
 static int adapter_coex_wifi_channel_get(uint8_t *primary,
                                          uint8_t *secondary)
 {
-  return -ERROR;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_wifi_channel_get(primary, secondary);
+#else
+  return -1;
+#endif
 }
 
 static void adapter_coex_schm_status_bit_clear(uint32_t type,
                                                uint32_t status)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  coex_schm_status_bit_clear(type, status);
+#endif
 }
 
 static void adapter_coex_schm_status_bit_set(uint32_t type, uint32_t status)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  coex_schm_status_bit_set(type, status);
+#endif
 }
 
 static uint32_t adapter_coex_schm_interval_get(void)
 {
-  return ESP_ERR_INVALID_STATE;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+    return coex_schm_interval_get();
+#else
+    return 0;
+#endif
 }
 
 static uint8_t adapter_coex_schm_curr_period_get(void)
 {
-  return OK;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+    return coex_schm_interval_get();
+#else
+    return 0;
+#endif
 }
 
 static void *adapter_coex_schm_curr_phase_get(void)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_schm_curr_phase_get();
+#else
   return NULL;
+#endif
 }
 
 /****************************************************************************
@@ -2066,69 +2106,6 @@ int coexist_printf(const char *format, ...)
 }
 
 /****************************************************************************
- * Name: bt_phy_enable_clock
- *
- * Description:
- *    Enable BT clock.
- * Input Parameters:
- *    None
- *
- * Returned Value:
- *    None
- *
- ****************************************************************************/
-
-static void bt_phy_enable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt == 0)
-    {
-      modifyreg32(DPORT_WIFI_CLK_EN_REG, 0,
-                  DPORT_WIFI_CLK_WIFI_BT_COMMON_M);
-    }
-
-  g_phy_clk_en_cnt++;
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
- * Name: bt_phy_disable_clock
- *
- * Description:
- *    Disable BT clock.
- * Input Parameters:
- *    None
- *
- * Returned Value:
- *    None
- *
- ****************************************************************************/
-
-static void bt_phy_disable_clock(void)
-{
-  irqstate_t flags;
-
-  flags = enter_critical_section();
-
-  if (g_phy_clk_en_cnt)
-    {
-      g_phy_clk_en_cnt--;
-      if (!g_phy_clk_en_cnt)
-        {
-          modifyreg32(DPORT_WIFI_CLK_EN_REG,
-                      DPORT_WIFI_CLK_WIFI_BT_COMMON_M,
-                      0);
-        }
-    }
-
-  leave_critical_section(flags);
-}
-
-/****************************************************************************
  * Name: bt_phy_disable
  *
  * Description:
@@ -2144,25 +2121,7 @@ static void bt_phy_disable_clock(void)
 
 static void bt_phy_disable(void)
 {
-  irqstate_t flags;
-  flags = enter_critical_section();
-
-  g_phy_access_ref--;
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Disable PHY and RF. */
-
-      phy_close_rf();
-
-      /* Disable Wi-Fi/BT common peripheral clock.
-       * Do not disable clock for hardware RNG.
-       */
-
-      bt_phy_disable_clock();
-    }
-
-  leave_critical_section(flags);
+  esp32_phy_disable();
 }
 
 /****************************************************************************
@@ -2181,35 +2140,7 @@ static void bt_phy_disable(void)
 
 static void bt_phy_enable(void)
 {
-  irqstate_t flags;
-  esp_phy_calibration_data_t *cal_data;
-
-  cal_data = kmm_zalloc(sizeof(esp_phy_calibration_data_t));
-  if (cal_data == NULL)
-    {
-      wlerr("Failed to kmm_zalloc");
-      DEBUGASSERT(0);
-    }
-
-  flags = enter_critical_section();
-
-  if (g_phy_access_ref == 0)
-    {
-      /* Update time stamp */
-
-      g_phy_rf_en_ts = (int64_t)rt_timer_time_us();
-
-      bt_phy_enable_clock();
-      phy_set_wifi_mode_only(0);
-      register_chipv7_phy(&phy_init_data, cal_data, PHY_RF_CAL_NONE);
-#ifdef CONFIG_ESP32_WIFI_BT_COEXIST
-      coex_pti_v2();
-#endif
-    }
-
-  g_phy_access_ref++;
-  leave_critical_section(flags);
-  kmm_free(cal_data);
+  esp32_phy_enable();
 }
 
 /****************************************************************************
@@ -2248,7 +2179,7 @@ static void *queue_create_wrapper(uint32_t queue_len, uint32_t item_size)
 
   if (ret < 0)
     {
-      wlerr("Failed to create mqueue %d \n", ret);
+      wlerr("Failed to create mqueue %d\n", ret);
       kmm_free(mq_adpt);
       return NULL;
     }
@@ -2933,21 +2864,35 @@ int coex_bt_request_wrapper(uint32_t event,
                             uint32_t latency,
                             uint32_t duration)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_bt_request(event, latency, duration);
+#else
   return 0;
+#endif
 }
 
 int coex_bt_release_wrapper(uint32_t event)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_bt_release(event);
+#else
   return 0;
+#endif
 }
 
 uint32_t coex_bb_reset_lock_wrapper(void)
 {
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  return coex_bb_reset_lock();
+#else
   return 0;
+#endif
 }
 
 void coex_bb_reset_unlock_wrapper(uint32_t restore)
 {
-  return;
+#if defined(CONFIG_ESP32_WIFI_BT_COEXIST)
+  coex_bb_reset_unlock(restore);
+#endif
 }
 

@@ -129,9 +129,9 @@ static const struct file_operations rtc_fops =
   rtc_write,     /* write */
   NULL,          /* seek */
   rtc_ioctl,     /* ioctl */
-  NULL,          /* poll */
+  NULL           /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  rtc_unlink     /* unlink */
+  , rtc_unlink   /* unlink */
 #endif
 };
 
@@ -401,7 +401,7 @@ static int rtc_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                  * current system time to match.
                  */
 
-                clock_synchronize();
+                clock_synchronize(NULL);
               }
           }
       }

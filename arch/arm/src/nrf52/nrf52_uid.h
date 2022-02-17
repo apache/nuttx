@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_NRF52_UID_H
-#define __ARCH_ARM_SRC_NRF52_UID_H
+#ifndef __ARCH_ARM_SRC_NRF52_NRF52_UID_H
+#define __ARCH_ARM_SRC_NRF52_NRF52_UID_H
 
 /****************************************************************************
  * Included Files
@@ -33,4 +33,4 @@
 
 void nrf52_get_uniqueid(uint8_t uniqueid[]);
 
-#endif /* __ARCH_ARM_SRC_NRF52_UID_H */
+#endif /* __ARCH_ARM_SRC_NRF52_NRF52_UID_H */

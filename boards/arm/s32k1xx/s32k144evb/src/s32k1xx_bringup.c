@@ -38,6 +38,10 @@
 
 #ifdef CONFIG_FS_PROCFS
 #  include <nuttx/fs/fs.h>
+
+#  ifdef CONFIG_S32K1XX_RESETCAUSE_PROCFS
+#    include "s32k1xx_resetcause_procfs.h"
+#  endif
 #endif
 
 #ifdef CONFIG_S32K1XX_PROGMEM
@@ -93,6 +97,17 @@ int s32k1xx_bringup(void)
 #endif
 
 #ifdef CONFIG_FS_PROCFS
+  /* Register procfs entries before mounting */
+
+#  ifdef CONFIG_S32K1XX_RESETCAUSE_PROCFS
+  ret = s32k1xx_resetcause_procfs_register();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to register resetcause procfs entry: %d\n", ret);
+    }
+#  endif /* CONFIG_RESETCAUSE_PROCFS */
+
   /* Mount the procfs file system */
 
   ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);

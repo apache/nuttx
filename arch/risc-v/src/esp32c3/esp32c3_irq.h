@@ -116,6 +116,6 @@ void esp32c3_free_cpuint(uint8_t periphid);
  *
  ****************************************************************************/
 
-uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs);
+uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs);
 
 #endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_IRQ_H */

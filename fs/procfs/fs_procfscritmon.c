@@ -137,14 +137,6 @@ static int critmon_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "critmon" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "critmon") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   attr = kmm_zalloc(sizeof(struct critmon_file_s));
@@ -201,7 +193,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   if (g_premp_max[cpu] > 0)
     {
-      up_critmon_convert(g_premp_max[cpu], &maxtime);
+      up_perf_convert(g_premp_max[cpu], &maxtime);
     }
   else
     {
@@ -233,7 +225,7 @@ static ssize_t critmon_read_cpu(FAR struct critmon_file_s *attr,
 
   if (g_crit_max[cpu] > 0)
     {
-      up_critmon_convert(g_crit_max[cpu], &maxtime);
+      up_perf_convert(g_crit_max[cpu], &maxtime);
     }
   else
     {
@@ -266,9 +258,7 @@ static ssize_t critmon_read(FAR struct file *filep, FAR char *buffer,
   FAR struct critmon_file_s *attr;
   off_t offset;
   ssize_t ret;
-#ifdef CONFIG_SMP
   int cpu;
-#endif
 
   finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
 
@@ -280,7 +270,6 @@ static ssize_t critmon_read(FAR struct file *filep, FAR char *buffer,
   ret    = 0;
   offset = filep->f_pos;
 
-#ifdef CONFIG_SMP
   /* Get the status for each CPU  */
 
   for (cpu = 0; cpu < CONFIG_SMP_NCPUS; cpu++)
@@ -296,12 +285,6 @@ static ssize_t critmon_read(FAR struct file *filep, FAR char *buffer,
 
       offset += nbytes;
     }
-
-#else
-  /* Get status for the single CPU */
-
-  ret = critmon_read_cpu(attr, buffer + ret, buflen -ret, &offset, 0);
-#endif
 
   if (ret > 0)
     {
@@ -359,14 +342,6 @@ static int critmon_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int critmon_stat(const char *relpath, struct stat *buf)
 {
-  /* "critmon" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "critmon") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "critmon" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

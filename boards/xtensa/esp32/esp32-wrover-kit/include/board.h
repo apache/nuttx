@@ -105,6 +105,10 @@
  * NuttX controls the LEDs:
  */
 
+/* These values index an array that contains the bit definitions for the
+ * correct LEDs (see esp32_autoleds.c).
+ */
+
 #define LED_STARTED       0  /* LED2 */
 #define LED_HEAPALLOCATE  1  /* LED3 */
 #define LED_IRQSENABLED   2  /* LED3 + LED2 */
@@ -113,6 +117,21 @@
 #define LED_SIGNAL        5  /* LED2 + LED3 */
 #define LED_ASSERTION     6  /* LED1 + LED2 + LED3 */
 #define LED_PANIC         7  /* LED1  + N/C  + N/C */
+
+/* The values below are used only to distinguish between the CPUs.
+ * The LEDs are actually mapped as:
+ *    CPU0 -> GPIO_LED1 (Red LED)
+ *    CPU1 -> GPIO_LED2 (Green LED)
+ * Note that from the previous list only LED_HEAPALLOCATE will still be
+ * valid.  This is to avoid collisions and to keep a way to show a successful
+ * heap allocation.  The LED used is still LED3 (Blue LED).
+ */
+
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+#  define LED_CPU0        8
+#  define LED_CPU1        9
+#  define LED_CPU         (LED_CPU0 + up_cpu_index())
+#endif
 
 /* GPIO pins used by the GPIO Subsystem */
 

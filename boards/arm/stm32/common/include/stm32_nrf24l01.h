@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_NRF24L01_H
-#define __STM32_NRF24L01_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NRF24L01_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NRF24L01_H
 
 /****************************************************************************
  * Included Files
@@ -76,4 +76,4 @@ int board_nrf24l01_initialize(int busno);
 }
 #endif
 
-#endif // __STM32_NRF24L01_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_NRF24L01_H */

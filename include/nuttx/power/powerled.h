@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_DRIVERS_POWER_POWERLED_H
-#define __INCLUDE_NUTTX_DRIVERS_POWER_POWERLED_H
+#ifndef __INCLUDE_NUTTX_POWER_POWERLED_H
+#define __INCLUDE_NUTTX_POWER_POWERLED_H
 
 /* The powerled driver is split into two parts:
  *
@@ -243,4 +243,4 @@ int powerled_register(FAR const char *path, FAR struct powerled_dev_s *dev,
 #endif
 
 #endif /* CONFIG_DRIVERS_POWERLED */
-#endif /* __INCLUDE_NUTTX_DRIVERS_POWER_POWERLED_H */
+#endif /* __INCLUDE_NUTTX_POWER_POWERLED_H */

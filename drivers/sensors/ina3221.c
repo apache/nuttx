@@ -118,15 +118,15 @@ static int     ina3221_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_ina3221fops =
 {
-  ina3221_open,
-  ina3221_close,
-  ina3221_read,
-  ina3221_write,
-  NULL,
-  ina3221_ioctl,
-  NULL
+  ina3221_open,    /* open */
+  ina3221_close,   /* close */
+  ina3221_read,    /* read */
+  ina3221_write,   /* write */
+  NULL,            /* seek */
+  ina3221_ioctl,   /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

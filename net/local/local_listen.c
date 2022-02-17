@@ -107,8 +107,7 @@ int local_listen(FAR struct socket *psock, int backlog)
     {
       /* The connection should not reside in any other list */
 
-      DEBUGASSERT(server->lc_node.flink == NULL &&
-                  server->lc_node.flink == NULL);
+      DEBUGASSERT(server->lc_conn.node.flink == NULL);
 
       /* And change the server state to listing */
 

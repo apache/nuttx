@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -156,4 +156,4 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

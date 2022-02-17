@@ -54,6 +54,8 @@
 #define BATIOC_CHGDSG        _BATIOC(0x000E)
 #define BATIOC_CLEARFAULTS   _BATIOC(0x000F)
 #define BATIOC_COULOMBS      _BATIOC(0x0010)
+#define BATIOC_CHIPID        _BATIOC(0x0011)
+#define BATIOC_GET_VOLTAGE   _BATIOC(0x0012)
 
 /* Special input values for BATIOC_INPUT_CURRENT that may optionally
  * be supported by lower-half driver:

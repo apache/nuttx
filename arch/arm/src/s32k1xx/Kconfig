@@ -329,23 +329,32 @@ config S32K1XX_RTC
 	default n
 
 config S32K1XX_PROGMEM
-    bool "PROGMEM"
-    default n
-    select ARCH_HAVE_PROGMEM
-    depends on (ARCH_CHIP_S32K11X || (ARCH_CHIP_S32K14X && !ARCH_CHIP_S32K148) )
-    ---help---
-        Use the FlexNVM 32/64 KB of d-flash memory as a
+	bool "PROGMEM"
+	default n
+	select ARCH_HAVE_PROGMEM
+	depends on (ARCH_CHIP_S32K11X || (ARCH_CHIP_S32K14X && !ARCH_CHIP_S32K148) )
+	---help---
+		Use the FlexNVM 32/64 KB of d-flash memory as a
 		Memory-Technology-Device (MTD).
 
 config S32K1XX_EEEPROM
 	bool "Emulated EEPROM"
 	default n
-    ---help---
-       Enables Emulated EEPROM function which uses the FlexRAM and FlexNVM
-       memory to emulate non-volatile memory. The EEEPROM will be registered
-       as a ramdisk block device
+	---help---
+		Enables Emulated EEPROM function which uses the FlexRAM and FlexNVM
+		memory to emulate non-volatile memory. The EEEPROM will be registered
+		as a ramdisk block device
 
 endmenu # S32K1XX Peripheral Selection
+
+menu "S32K1xx Reset Control Module (RCM)"
+
+config S32K1XX_RESETCAUSE_PROCFS
+	bool "S32K1XX MCU Reset Cause PROCFS entry"
+	default n
+	depends on !DISABLE_MOUNTPOINT && FS_PROCFS && FS_PROCFS_REGISTER
+
+endmenu # S32K1XX Reset Control Module (RCM)
 
 menu "S32K1XX FTM PWM Configuration"
 	depends on S32K1XX_FTM

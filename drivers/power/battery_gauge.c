@@ -87,13 +87,16 @@ static int     bat_gauge_poll(FAR struct file *filep,
 
 static const struct file_operations g_batteryops =
 {
-  bat_gauge_open,
-  bat_gauge_close,
-  bat_gauge_read,
-  bat_gauge_write,
-  NULL,
-  bat_gauge_ioctl,
-  bat_gauge_poll
+  bat_gauge_open,   /* open */
+  bat_gauge_close,  /* close */
+  bat_gauge_read,   /* read */
+  bat_gauge_write,  /* write */
+  NULL,             /* seek */
+  bat_gauge_ioctl,  /* ioctl */
+  bat_gauge_poll    /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -101,11 +104,16 @@ static const struct file_operations g_batteryops =
  ****************************************************************************/
 
 static int battery_gauge_notify(FAR struct battery_gauge_priv_s *priv,
-                                   uint32_t mask)
+                                uint32_t mask)
 {
   FAR struct pollfd *fd = priv->fds;
   int semcnt;
   int ret;
+
+  if (!fd)
+    {
+      return OK;
+    }
 
   ret = nxsem_wait_uninterruptible(&priv->lock);
   if (ret < 0)
@@ -348,6 +356,16 @@ static int bat_gauge_ioctl(FAR struct file *filep,
         }
         break;
 
+      case BATIOC_CHIPID:
+        {
+          FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->chipid(dev, ptr);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
@@ -461,7 +479,7 @@ int battery_gauge_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_batteryops, 0555, dev);
+  ret = register_driver(devpath, &g_batteryops, 0666, dev);
   if (ret < 0)
     {
       _err("ERROR: Failed to register driver: %d\n", ret);

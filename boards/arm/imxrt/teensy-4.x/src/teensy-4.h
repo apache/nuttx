@@ -19,23 +19,23 @@
  ****************************************************************************/
 
 #ifndef __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_TEENSY_4_H
-#  define __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_TEENSY_4_H
+#define __BOARDS_ARM_IMXRT_TEENSY_4X_SRC_TEENSY_4_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#  include <nuttx/config.h>
+#include <nuttx/config.h>
 
-#  include <stdint.h>
-#  include <stdbool.h>
+#include <stdint.h>
+#include <stdbool.h>
 
-#  include <arch/irq.h>
-#  include <nuttx/irq.h>
+#include <arch/irq.h>
+#include <nuttx/irq.h>
 
-#  include "imxrt_gpio.h"
-#  include "imxrt_iomuxc.h"
-#  include "hardware/imxrt_pinmux.h"
+#include "imxrt_gpio.h"
+#include "imxrt_iomuxc.h"
+#include "hardware/imxrt_pinmux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -57,33 +57,33 @@
  * Only a single LED, D3, is under software control.
  */
 
-#  define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
+#define GPIO_LED        (GPIO_OUTPUT | IOMUX_LED_DEFAULT | \
                          GPIO_OUTPUT_ZERO | GPIO_PORT2 | GPIO_PIN3)  /* BO_03 */
 
-#  define LED_DRIVER_PATH "/dev/userleds"
+#define LED_DRIVER_PATH "/dev/userleds"
 
 /* LPSPI3 CS:  GPIO_AD_B1_12 */
 
-#  define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+#define IOMUX_LPSPI3_CS (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
                          IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
                          _IOMUX_PULL_ENABLE)
-#  define GPIO_LPSPI3_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+#define GPIO_LPSPI3_CS  (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                          GPIO_PORT1 | GPIO_PIN28 | IOMUX_LPSPI3_CS)
 
 /* LPSPI4 CS:  GPIO_B0_00  */
 
-#  define IOMUX_LPSPI4_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
+#define IOMUX_LPSPI4_CS      (IOMUX_SLEW_FAST | IOMUX_DRIVE_50OHM | \
                               IOMUX_SPEED_MEDIUM | IOMUX_PULL_UP_100K | \
                               _IOMUX_PULL_ENABLE)
-#  define GPIO_LPSPI4_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+#define GPIO_LPSPI4_CS       (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                               GPIO_PORT2 | GPIO_PIN0 | IOMUX_LPSPI4_CS)
 
 /* LCD dispay */
 
-#  define GPIO_LCD_RST        (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+#define GPIO_LCD_RST        (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                               GPIO_PORT2 | GPIO_PIN18 | IOMUX_LPSPI4_CS)    /* B1_02 */
 
-#  define GPIO_LCD_CD         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
+#define GPIO_LCD_CD         (GPIO_OUTPUT | GPIO_OUTPUT_ONE | \
                               GPIO_PORT2 | GPIO_PIN19 | IOMUX_LPSPI4_CS)    /* B1_03 */
 
 /* USB OTG ID Pin： GPIO_AD_B1_02 */
@@ -135,7 +135,7 @@
  * Public Data
  ****************************************************************************/
 
-#  ifndef __ASSEMBLY__
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Name: imxrt_bringup
@@ -145,9 +145,9 @@
  *
  ****************************************************************************/
 
-#    if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
+#if defined(CONFIG_BOARDCTL) || defined(CONFIG_BOARD_LATE_INITIALIZE)
 int imxrt_bringup(void);
-#    endif
+#endif
 
 /****************************************************************************
  * Name: imxrt_spidev_initialize

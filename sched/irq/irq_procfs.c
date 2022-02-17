@@ -284,14 +284,6 @@ static int irq_open(FAR struct file *filep, FAR const char *relpath,
       return -EACCES;
     }
 
-  /* "irqs" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "irqs") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* Allocate a container to hold the file attributes */
 
   irqfile = (FAR struct irq_file_s *)kmm_zalloc(sizeof(struct irq_file_s));
@@ -422,14 +414,6 @@ static int irq_dup(FAR const struct file *oldp, FAR struct file *newp)
 
 static int irq_stat(const char *relpath, struct stat *buf)
 {
-  /* "irqs" is the only acceptable value for the relpath */
-
-  if (strcmp(relpath, "irqs") != 0)
-    {
-      ferr("ERROR: relpath is '%s'\n", relpath);
-      return -ENOENT;
-    }
-
   /* "irqs" is the name for a read-only file */
 
   memset(buf, 0, sizeof(struct stat));

@@ -26,6 +26,7 @@
 
 #include <assert.h>
 #include <debug.h>
+#include <inttypes.h>
 
 #include <arch/irq.h>
 
@@ -38,11 +39,9 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DEBUG_MEMFAULT
-# define mferr(format, ...)  _alert(format, ##__VA_ARGS__)
-# define mfinfo(format, ...) _alert(format, ##__VA_ARGS__)
+# define mfalert(format, ...)  _alert(format, ##__VA_ARGS__)
 #else
-# define mferr(x...)
-# define mfinfo(x...)
+# define mfalert(x...)
 #endif
 
 /****************************************************************************
@@ -62,16 +61,44 @@
 
 int arm_memfault(int irq, FAR void *context, FAR void *arg)
 {
+  uint32_t cfsr = getreg32(NVIC_CFAULTS);
+
   /* Dump some memory management fault info */
 
-  up_irq_save();
-  _alert("PANIC!!! Memory Management Fault:\n");
-  mfinfo("  IRQ: %d context: %p\n", irq, context);
-  _alert("  CFAULTS: %08x MMFAR: %08x\n",
-        getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
-  mfinfo("  BASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
-         getbasepri(), getprimask(), getipsr(), getcontrol());
+  mfalert("PANIC!!! Memory Management Fault:\n");
+  mfalert("\tIRQ: %d context: %p\n", irq, context);
+  mfalert("\tCFSR: %08x MMFAR: %08x\n",
+          getreg32(NVIC_CFAULTS), getreg32(NVIC_MEMMANAGE_ADDR));
+  mfalert("\tBASEPRI: %08x PRIMASK: %08x IPSR: %08x CONTROL: %08x\n",
+          getbasepri(), getprimask(), getipsr(), getcontrol());
 
+  mfalert("Memory Management Fault Reason:\n");
+  if (cfsr & NVIC_CFAULTS_IACCVIOL)
+    {
+      mfalert("\tInstruction access violation\n");
+    }
+
+  if (cfsr & NVIC_CFAULTS_DACCVIOL)
+    {
+      mfalert("\tData access violation\n");
+    }
+
+  if (cfsr & NVIC_CFAULTS_MUNSTKERR)
+    {
+      mfalert("\tMemManage fault on unstacking\n");
+    }
+
+  if (cfsr & NVIC_CFAULTS_MSTKERR)
+    {
+      mfalert("\tMemManage fault on stacking\n");
+    }
+
+  if (cfsr & NVIC_CFAULTS_MLSPERR)
+    {
+      mfalert("\tFloating-point lazy state preservation error\n");
+    }
+
+  up_irq_save();
   PANIC();
   return OK; /* Won't get here */
 }

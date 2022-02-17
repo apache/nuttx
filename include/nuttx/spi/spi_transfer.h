@@ -100,10 +100,11 @@ struct spi_sequence_s
   uint8_t nbits;               /* Number of bits */
   uint8_t ntrans;              /* Number of transactions */
   uint32_t frequency;          /* SPI frequency (Hz) */
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
   uint32_t a;                  /* Arguments to setdelay() */
   uint32_t b;
   uint32_t c;
+  uint32_t i;
 #endif
 
   /* A pointer to the list of transfers to be be performed. */

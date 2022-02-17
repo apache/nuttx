@@ -26,7 +26,7 @@
 
 #include <nuttx/config.h>
 
-#include "xtensa_abi.h"
+#include <arch/xtensa/xtensa_abi.h>
 
 /****************************************************************************
  * Public Functions

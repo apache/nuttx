@@ -110,6 +110,18 @@ int esp32_gpio_init(void);
 #endif
 
 /****************************************************************************
+ * Name: esp32_ledc_setup
+ *
+ * Description:
+ *   Initialize LEDC PWM and register the PWM device.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32_LEDC
+int esp32_pwm_setup(void);
+#endif
+
+/****************************************************************************
  * Name: board_spidev_initialize
  *
  * Description:

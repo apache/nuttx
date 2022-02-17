@@ -1,0 +1,57 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_SPARC
+choice
+	prompt "SPARC chip selection"
+	default ARCH_CHIP_BM3803
+
+config ARCH_CHIP_BM3803
+	bool "BM3803"
+	select ARCH_SPARC_V8
+	select ARCH_HAVE_MATH_H
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Microchip BM3803 (ARCH_SPARC_V8)
+
+config ARCH_CHIP_BM3823
+	bool "BM3823"
+	select ARCH_SPARC_V8
+	select ARCH_HAVE_MATH_H
+	select ARCH_HAVE_IRQPRIO
+	select ARCH_VECNOTIRQ
+	select ARCH_HAVE_RAMFUNCS
+	select ARCH_HAVE_SERIAL_TERMIOS
+	---help---
+		Microchip BM3823 (ARCH_SPARC_V8)
+
+endchoice
+
+config ARCH_SPARC_V8
+	bool
+	default n
+	select ARCH_HAVE_STACKCHECK
+
+
+config ARCH_FAMILY
+	string
+	default "sparc_v8"	if ARCH_SPARC_V8
+
+config ARCH_CHIP
+	string
+	default "bm3803"	if ARCH_CHIP_BM3803
+	default "bm3823"	if ARCH_CHIP_BM3823
+
+source arch/sparc/src/common/Kconfig
+source arch/sparc/src/sparc_v8/Kconfig
+source arch/sparc/src/bm3803/Kconfig
+source arch/sparc/src/bm3823/Kconfig
+
+endif

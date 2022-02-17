@@ -99,6 +99,18 @@
   memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
+/* Note dump module tag definitions */
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+#  define NOTE_MODULE(a, b, c, d)  \
+  ((uint32_t)((a) & 0xff)        | \
+  ((uint32_t)((b) & 0xff) << 8)  | \
+  ((uint32_t)((c) & 0xff) << 16) | \
+  ((uint32_t)((d) & 0xff) << 24))
+#else
+#  define NOTE_MODULE(a,b,c,d)
+#endif
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -108,17 +120,23 @@
 enum note_type_e
 {
   NOTE_START           = 0,
-  NOTE_STOP            = 1,
+  NOTE_STOP            = 1
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+  ,
   NOTE_SUSPEND         = 2,
   NOTE_RESUME          = 3
+#endif
 #ifdef CONFIG_SMP
   ,
   NOTE_CPU_START       = 4,
-  NOTE_CPU_STARTED     = 5,
+  NOTE_CPU_STARTED     = 5
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
+  ,
   NOTE_CPU_PAUSE       = 6,
   NOTE_CPU_PAUSED      = 7,
   NOTE_CPU_RESUME      = 8,
   NOTE_CPU_RESUMED     = 9
+#endif
 #endif
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
   ,
@@ -146,6 +164,11 @@ enum note_type_e
   ,
   NOTE_IRQ_ENTER       = 20,
   NOTE_IRQ_LEAVE       = 21
+#endif
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+  ,
+  NOTE_DUMP_STRING     = 22,
+  NOTE_DUMP_BINARY     = 23
 #endif
 };
 
@@ -186,6 +209,7 @@ struct note_stop_s
   struct note_common_s nsp_cmn; /* Common note parameters */
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_SUSPEND note */
 
 struct note_suspend_s
@@ -200,6 +224,7 @@ struct note_resume_s
 {
   struct note_common_s nre_cmn; /* Common note parameters */
 };
+#endif
 
 #ifdef CONFIG_SMP
 
@@ -218,6 +243,7 @@ struct note_cpu_started_s
   struct note_common_s ncs_cmn; /* Common note parameters */
 };
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 /* This is the specific form of the NOTE_CPU_PAUSE note */
 
 struct note_cpu_pause_s
@@ -247,6 +273,7 @@ struct note_cpu_resumed_s
 {
   struct note_common_s ncr_cmn; /* Common note parameters */
 };
+#endif
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -318,6 +345,29 @@ struct note_irqhandler_s
 };
 #endif /* CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER */
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+struct note_string_s
+{
+  struct note_common_s nst_cmn; /* Common note parameters */
+  char nst_data[1];             /* String data terminated by '\0' */
+};
+
+#define SIZEOF_NOTE_STRING(n) (sizeof(struct note_string_s) + \
+                               (n) * sizeof(char))
+
+struct note_binary_s
+{
+  struct note_common_s nbi_cmn; /* Common note parameters */
+  uint8_t  nbi_module[4];       /* Module number */
+  uint8_t  nbi_event;           /* Event number */
+  uint8_t  nbi_data[1];         /* Binary data */
+};
+
+#define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
+                               ((n) - 1) * sizeof(uint8_t))
+
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
+
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 
 /* This is the type of the argument passed to the NOTECTL_GETMODE and
@@ -378,23 +428,36 @@ struct note_filter_irq_s
 
 void sched_note_start(FAR struct tcb_s *tcb);
 void sched_note_stop(FAR struct tcb_s *tcb);
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb);
 void sched_note_resume(FAR struct tcb_s *tcb);
+#else
+#  define sched_note_suspend(t)
+#  define sched_note_resume(t)
+#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_started(FAR struct tcb_s *tcb);
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_paused(FAR struct tcb_s *tcb);
 void sched_note_cpu_resume(FAR struct tcb_s *tcb, int cpu);
 void sched_note_cpu_resumed(FAR struct tcb_s *tcb);
 #else
-#  define sched_note_cpu_start(t,c)
-#  define sched_note_cpu_started(t)
 #  define sched_note_cpu_pause(t,c)
 #  define sched_note_cpu_paused(t)
 #  define sched_note_cpu_resume(t,c)
 #  define sched_note_cpu_resumed(t)
+#endif
+#else
+#  define sched_note_cpu_pause(t,c)
+#  define sched_note_cpu_paused(t)
+#  define sched_note_cpu_resume(t,c)
+#  define sched_note_cpu_resumed(t)
+#  define sched_note_cpu_start(t,c)
+#  define sched_note_cpu_started(t)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -438,6 +501,25 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #else
 #  define sched_note_irqhandler(i,h,e)
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+void sched_note_string(FAR const char *buf);
+void sched_note_dump(uint32_t module, uint8_t event,
+                     FAR const void *buf, size_t len);
+void sched_note_vprintf(FAR const char *fmt, va_list va) printflike(1, 0);
+void sched_note_vbprintf(uint32_t module, uint8_t event,
+                         FAR const char *fmt, va_list va) printflike(3, 0);
+void sched_note_printf(FAR const char *fmt, ...) printflike(1, 2);
+void sched_note_bprintf(uint32_t module, uint8_t event,
+                        FAR const char *fmt, ...) printflike(3, 4);
+#else
+#  define sched_note_string(b)
+#  define sched_note_dump(m,e,b,l)
+#  define sched_note_vprintf(f,v)
+#  define sched_note_vbprintf(m,e,f,v)
+#  define sched_note_printf(f...)
+#  define sched_note_bprintf(m,e,f...)
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
 
@@ -542,6 +624,7 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
+#  define NOTE_MODULE(a,b,c,d)
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)
@@ -561,6 +644,12 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 #  define sched_note_syscall_enter(n,a...)
 #  define sched_note_syscall_leave(n,r)
 #  define sched_note_irqhandler(i,h,e)
+#  define sched_note_string(b)
+#  define sched_note_dump(m,e,b,l)
+#  define sched_note_vprintf(f,v)
+#  define sched_note_vbprintf(m,e,f,v)
+#  define sched_note_printf(f...)
+#  define sched_note_bprintf(m,e,f...)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */

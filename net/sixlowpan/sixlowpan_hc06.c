@@ -245,9 +245,9 @@ static FAR struct sixlowpan_addrcontext_s *
           ninfo("Context found for "
                 "ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x "
                 "Context: %d\n",
-                ntohs(ipaddr[0]), ntohs(ipaddr[1]), ntohs(ipaddr[2]),
-                ntohs(ipaddr[3]), ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-                ntohs(ipaddr[6]), ntohs(ipaddr[7]),
+                NTOHS(ipaddr[0]), NTOHS(ipaddr[1]), NTOHS(ipaddr[2]),
+                NTOHS(ipaddr[3]), NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
+                NTOHS(ipaddr[6]), NTOHS(ipaddr[7]),
                 g_hc06_addrcontexts[i].number);
 
           return &g_hc06_addrcontexts[i];
@@ -324,10 +324,10 @@ static uint8_t compress_tagaddr(FAR const net_ipv6addr_t ipaddr,
 #ifdef CONFIG_DEBUG_NET_INFO
   ninfo("Compressing bitpos=%u addrlen=%u\n", bitpos, macaddr->nv_addrlen);
   ninfo("            ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(ipaddr[0]), ntohs(ipaddr[1]),
-        ntohs(ipaddr[2]), ntohs(ipaddr[3]),
-        ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-        ntohs(ipaddr[6]), ntohs(ipaddr[7]));
+        NTOHS(ipaddr[0]), NTOHS(ipaddr[1]),
+        NTOHS(ipaddr[2]), NTOHS(ipaddr[3]),
+        NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
+        NTOHS(ipaddr[6]), NTOHS(ipaddr[7]));
 
   switch (macaddr->nv_addrlen)
     {
@@ -376,9 +376,9 @@ static uint8_t compress_laddr(FAR const net_ipv6addr_t srcipaddr,
 #ifdef CONFIG_DEBUG_NET_INFO
   ninfo("Compressing bitpos=%u\n", bitpos);
   ninfo("            srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        ntohs(srcipaddr[0]), ntohs(srcipaddr[1]), ntohs(srcipaddr[2]),
-        ntohs(srcipaddr[3]), ntohs(srcipaddr[4]), ntohs(srcipaddr[5]),
-        ntohs(srcipaddr[6]), ntohs(srcipaddr[7]));
+        NTOHS(srcipaddr[0]), NTOHS(srcipaddr[1]), NTOHS(srcipaddr[2]),
+        NTOHS(srcipaddr[3]), NTOHS(srcipaddr[4]), NTOHS(srcipaddr[5]),
+        NTOHS(srcipaddr[6]), NTOHS(srcipaddr[7]));
 
   switch (macaddr->nv_addrlen)
     {
@@ -562,10 +562,10 @@ static void uncompress_addr(FAR const struct netdev_varaddr_s *addr,
   ninfo("Uncompressing %d + %d "
         "ipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
         prefcount, postcount,
-        ntohs(ipaddr[0]), ntohs(ipaddr[1]),
-        ntohs(ipaddr[2]), ntohs(ipaddr[3]),
-        ntohs(ipaddr[4]), ntohs(ipaddr[5]),
-        ntohs(ipaddr[6]), ntohs(ipaddr[7]));
+        NTOHS(ipaddr[0]), NTOHS(ipaddr[1]),
+        NTOHS(ipaddr[2]), NTOHS(ipaddr[3]),
+        NTOHS(ipaddr[4]), NTOHS(ipaddr[5]),
+        NTOHS(ipaddr[6]), NTOHS(ipaddr[7]));
 }
 
 /****************************************************************************
@@ -931,10 +931,10 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
 
       ninfo("Uncompressable "
             "srcipaddr=%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-            ntohs(ipv6->srcipaddr[0]), ntohs(ipv6->srcipaddr[1]),
-            ntohs(ipv6->srcipaddr[2]), ntohs(ipv6->srcipaddr[3]),
-            ntohs(ipv6->srcipaddr[4]), ntohs(ipv6->srcipaddr[5]),
-            ntohs(ipv6->srcipaddr[6]), ntohs(ipv6->srcipaddr[7]));
+            NTOHS(ipv6->srcipaddr[0]), NTOHS(ipv6->srcipaddr[1]),
+            NTOHS(ipv6->srcipaddr[2]), NTOHS(ipv6->srcipaddr[3]),
+            NTOHS(ipv6->srcipaddr[4]), NTOHS(ipv6->srcipaddr[5]),
+            NTOHS(ipv6->srcipaddr[6]), NTOHS(ipv6->srcipaddr[7]));
 
       iphc1 |= SIXLOWPAN_IPHC_SAM_128;   /* 128-bits */
       memcpy(g_hc06ptr, ipv6->srcipaddr, 16);
@@ -1051,12 +1051,12 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
         (FAR struct udp_hdr_s *)((FAR uint8_t *)ipv6 + IPv6_HDRLEN);
 
       ninfo("Uncompressed UDP ports: srcport=%04x destport=%04x\n",
-            ntohs(udp->srcport), ntohs(udp->destport));
+            NTOHS(udp->srcport), NTOHS(udp->destport));
 
       /* Mask out the last 4 bits can be used as a mask */
 
-      if (((ntohs(udp->srcport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN) &&
-          ((ntohs(udp->destport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN))
+      if (((NTOHS(udp->srcport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN) &&
+          ((NTOHS(udp->destport) & 0xfff0) == SIXLOWPAN_UDP_4_BIT_PORT_MIN))
         {
           /* We can compress 12 bits of both source and dest */
 
@@ -1065,14 +1065,14 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
           ninfo("Remove 12b of both source & dest with prefix 0xf0b*\n");
 
           *(g_hc06ptr + 1) =
-            (uint8_t)((ntohs(udp->srcport) -
+            (uint8_t)((NTOHS(udp->srcport) -
              SIXLOWPAN_UDP_4_BIT_PORT_MIN) << 4) +
-            (uint8_t)((ntohs(udp->destport) -
+            (uint8_t)((NTOHS(udp->destport) -
              SIXLOWPAN_UDP_4_BIT_PORT_MIN));
 
           g_hc06ptr += 2;
         }
-      else if ((ntohs(udp->destport) & 0xff00) ==
+      else if ((NTOHS(udp->destport) & 0xff00) ==
                SIXLOWPAN_UDP_8_BIT_PORT_MIN)
         {
           /* We can compress 8 bits of dest, leave source. */
@@ -1083,11 +1083,11 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
 
           memcpy(g_hc06ptr + 1, &udp->srcport, 2);
           *(g_hc06ptr + 3) =
-            (uint8_t) ((ntohs(udp->destport) -
+            (uint8_t) ((NTOHS(udp->destport) -
                         SIXLOWPAN_UDP_8_BIT_PORT_MIN));
           g_hc06ptr += 4;
         }
-      else if ((ntohs(udp->srcport) & 0xff00) ==
+      else if ((NTOHS(udp->srcport) & 0xff00) ==
                SIXLOWPAN_UDP_8_BIT_PORT_MIN)
         {
           /* We can compress 8 bits of src, leave dest.
@@ -1100,7 +1100,7 @@ int sixlowpan_compresshdr_hc06(FAR struct radio_driver_s *radio,
                 "leave dest. hch: %u\n", *g_hc06ptr);
 
           *(g_hc06ptr + 1) =
-            (uint8_t)((ntohs(udp->srcport) - SIXLOWPAN_UDP_8_BIT_PORT_MIN));
+            (uint8_t)((NTOHS(udp->srcport) - SIXLOWPAN_UDP_8_BIT_PORT_MIN));
 
           memcpy(g_hc06ptr + 2, &udp->destport, 2);
           g_hc06ptr += 4;
@@ -1462,7 +1462,7 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               memcpy(&udp->destport, g_hc06ptr + 3, 2);
 
               ninfo("Uncompressed UDP ports (ptr+5): %x, %x\n",
-                     htons(udp->srcport), htons(udp->destport));
+                    HTONS(udp->srcport), HTONS(udp->destport));
 
               g_hc06ptr += 5;
               break;
@@ -1477,10 +1477,10 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
 
               memcpy(&udp->srcport, g_hc06ptr + 1, 2);
               udp->destport =
-                htons(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 3)));
+                HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 3)));
 
               ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
-                     htons(udp->srcport), htons(udp->destport));
+                    HTONS(udp->srcport), HTONS(udp->destport));
 
               g_hc06ptr += 4;
               break;
@@ -1494,11 +1494,11 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               ninfo("Decompressing source\n");
 
               udp->srcport =
-                htons(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 1)));
+                HTONS(SIXLOWPAN_UDP_8_BIT_PORT_MIN + (*(g_hc06ptr + 1)));
               memcpy(&udp->destport, g_hc06ptr + 2, 2);
 
               ninfo("Uncompressed UDP ports (ptr+4): %x, %x\n",
-                     htons(udp->srcport), htons(udp->destport));
+                    HTONS(udp->srcport), HTONS(udp->destport));
 
               g_hc06ptr += 4;
               break;
@@ -1508,14 +1508,14 @@ void sixlowpan_uncompresshdr_hc06(FAR struct radio_driver_s *radio,
               /* 1 byte for NHC, 1 byte for ports */
 
               udp->srcport =
-                htons(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
+                HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
                           (*(g_hc06ptr + 1) >> 4));
               udp->destport =
-                htons(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
+                HTONS(SIXLOWPAN_UDP_4_BIT_PORT_MIN +
                           ((*(g_hc06ptr + 1)) & 0x0f));
 
               ninfo("Uncompressed UDP ports (ptr+2): %x, %x\n",
-                     htons(udp->srcport), htons(udp->destport));
+                    HTONS(udp->srcport), HTONS(udp->destport));
 
               g_hc06ptr += 2;
               break;

@@ -35,8 +35,13 @@
 #include "esp32c3_lowputc.h"
 #include "esp32c3_start.h"
 #include "esp32c3_wdt.h"
+#include "esp32c3_rtc.h"
 #include "hardware/esp32c3_cache_memory.h"
 #include "hardware/extmem_reg.h"
+
+#ifdef CONFIG_ESP32C3_BROWNOUT_DET
+#  include "esp32c3_brownout.h"
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -120,7 +125,7 @@ HDR_ATTR static void (*_entry_point)(void) = &__start;
 
 uint8_t g_idlestack[CONFIG_IDLETHREAD_STACKSIZE]
   aligned_data(16) locate_data(".noinit");
-uint32_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
+uintptr_t g_idle_topstack = ESP32C3_IDLESTACK_TOP;
 
 /****************************************************************************
  * Private Functions
@@ -236,9 +241,25 @@ void __esp32c3_start(void)
 
 #endif
 
+  /* Initialize RTC parameters */
+
+  esp32c3_rtc_init();
+  esp32c3_rtc_clk_set();
+
   /* Set CPU frequency */
 
   esp32c3_clockconfig();
+
+  /* Initialize peripherals parameters */
+
+  esp32c3_perip_clk_init();
+
+#ifdef CONFIG_ESP32C3_BROWNOUT_DET
+
+  /* Initialize hardware brownout check and reset */
+
+  esp32c3_brownout_init();
+#endif
 
   /* Configure the UART so we can get debug output */
 

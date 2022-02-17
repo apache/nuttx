@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_TCP_TCP_H
-#define _NET_TCP_TCP_H
+#ifndef __NET_TCP_TCP_H
+#define __NET_TCP_TCP_H
 
 /****************************************************************************
  * Included Files
@@ -34,6 +34,7 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/net.h>
 
 #ifdef CONFIG_NET_TCP_NOTIFIER
 #  include <nuttx/wqueue.h>
@@ -54,9 +55,9 @@
  */
 
 #define tcp_callback_alloc(conn) \
-  devif_callback_alloc((conn)->dev, &(conn)->list, &(conn)->list_tail)
+  devif_callback_alloc((conn)->dev, &(conn)->sconn.list, &(conn)->sconn.list_tail)
 #define tcp_callback_free(conn,cb) \
-  devif_conn_callback_free((conn)->dev, (cb), &(conn)->list, &(conn)->list_tail)
+  devif_conn_callback_free((conn)->dev, (cb), &(conn)->sconn.list, &(conn)->sconn.list_tail)
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 /* TCP write buffer access macros */
@@ -65,7 +66,9 @@
 #  define TCP_WBPKTLEN(wrb)          ((wrb)->wb_iob->io_pktlen)
 #  define TCP_WBSENT(wrb)            ((wrb)->wb_sent)
 #  define TCP_WBNRTX(wrb)            ((wrb)->wb_nrtx)
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
 #  define TCP_WBNACK(wrb)            ((wrb)->wb_nack)
+#endif
 #  define TCP_WBIOB(wrb)             ((wrb)->wb_iob)
 #  define TCP_WBCOPYOUT(wrb,dest,n)  (iob_copyout(dest,(wrb)->wb_iob,(n),0))
 #  define TCP_WBCOPYIN(wrb,src,n,off) \
@@ -101,6 +104,12 @@
 
 #define TCP_WSCALE            0x01U /* Window Scale option enabled */
 
+/* After receiving 3 duplicate ACKs, TCP performs a retransmission
+ * (RFC 5681 (3.2))
+ */
+
+#define TCP_FAST_RETRANSMISSION_THRESH 3
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -128,7 +137,7 @@ struct tcp_hdr_s;         /* Forward reference */
 
 struct tcp_poll_s
 {
-  FAR struct socket *psock;        /* Needed to handle loss of connection */
+  FAR struct tcp_conn_s *conn;     /* Needed to handle loss of connection */
   struct pollfd *fds;              /* Needed to handle poll events */
   FAR struct devif_callback_s *cb; /* Needed to teardown the poll */
 };
@@ -136,8 +145,6 @@ struct tcp_poll_s
 struct tcp_conn_s
 {
   /* Common prologue of all connection structures. */
-
-  dq_entry_t node;        /* Implements a doubly linked list */
 
   /* TCP callbacks:
    *
@@ -163,8 +170,7 @@ struct tcp_conn_s
    *                 then dev->d_len should also be cleared).
    */
 
-  FAR struct devif_callback_s *list;
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* TCP-specific content follows */
 
@@ -172,6 +178,10 @@ struct tcp_conn_s
   uint8_t  rcvseq[4];     /* The sequence number that we expect to
                            * receive next */
   uint8_t  sndseq[4];     /* The sequence number that was last sent by us */
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
+    defined(CONFIG_NET_SENDFILE)
+  uint32_t rexmit_seq;    /* The sequence number to be retrasmitted */
+#endif
   uint8_t  crefs;         /* Reference counts on this instance */
 #if defined(CONFIG_NET_IPv4) && defined(CONFIG_NET_IPv6)
   uint8_t  domain;        /* IP domain: PF_INET or PF_INET6 */
@@ -212,7 +222,8 @@ struct tcp_conn_s
   int32_t  snd_bufs;      /* Maximum amount of bytes queued in send */
   sem_t    snd_sem;       /* Semaphore signals send completion */
 #endif
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
+    defined(CONFIG_NET_TCP_WINDOW_SCALE)
   uint32_t tx_unacked;    /* Number bytes sent but not yet ACKed */
 #else
   uint16_t tx_unacked;    /* Number bytes sent but not yet ACKed */
@@ -283,6 +294,10 @@ struct tcp_conn_s
   uint8_t    keepretries; /* Number of retries attempted */
 #endif
 
+#if defined(CONFIG_NET_SENDFILE) && defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  bool       sendfile;    /* True if sendfile operation is in progress */
+#endif
+
   /* connevents is a list of callbacks for each socket the uses this
    * connection (there can be more that one in the event that the the socket
    * was dup'ed).  It is used with the network monitor to handle
@@ -291,6 +306,12 @@ struct tcp_conn_s
 
   FAR struct devif_callback_s *connevents;
   FAR struct devif_callback_s *connevents_tail;
+
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
+  /* Callback instance for TCP send() */
+
+  FAR struct devif_callback_s *sndcb;
+#endif
 
   /* accept() is called when the TCP logic has created a connection
    *
@@ -321,7 +342,9 @@ struct tcp_wrbuffer_s
   uint16_t   wb_sent;      /* Number of bytes sent from the I/O buffer chain */
   uint8_t    wb_nrtx;      /* The number of retransmissions for the last
                             * segment sent */
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint8_t    wb_nack;      /* The number of ack count */
+#endif
   struct iob_s *wb_iob;    /* Head of the I/O buffer chain */
 };
 #endif
@@ -630,29 +653,6 @@ int tcp_start_monitor(FAR struct socket *psock);
 void tcp_stop_monitor(FAR struct tcp_conn_s *conn, uint16_t flags);
 
 /****************************************************************************
- * Name: tcp_close_monitor
- *
- * Description:
- *   One socket in a group of dup'ed sockets has been closed.  We need to
- *   selectively terminate just those things that are waiting of events
- *   from this specific socket.  And also recover any resources that are
- *   committed to monitoring this socket.
- *
- * Input Parameters:
- *   psock - The TCP socket structure that is closed
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The caller holds the network lock (if not, it will be locked momentarily
- *   by this function).
- *
- ****************************************************************************/
-
-void tcp_close_monitor(FAR struct socket *psock);
-
-/****************************************************************************
  * Name: tcp_lost_connection
  *
  * Description:
@@ -662,7 +662,7 @@ void tcp_close_monitor(FAR struct socket *psock);
  *   the event handler.
  *
  * Input Parameters:
- *   psock - The TCP socket structure associated.
+ *   conn  - The TCP connection of interest
  *   cb    - devif callback structure
  *   flags - Set of connection events events
  *
@@ -675,7 +675,7 @@ void tcp_close_monitor(FAR struct socket *psock);
  *
  ****************************************************************************/
 
-void tcp_lost_connection(FAR struct socket *psock,
+void tcp_lost_connection(FAR struct tcp_conn_s *conn,
                          FAR struct devif_callback_s *cb, uint16_t flags);
 
 /****************************************************************************
@@ -1517,7 +1517,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
  *   another means.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK
@@ -1531,7 +1531,7 @@ bool tcp_should_send_recvwindow(FAR struct tcp_conn_s *conn);
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock);
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn);
 
 /****************************************************************************
  * Name: tcp_wrbuffer_initialize
@@ -1924,4 +1924,4 @@ void tcp_sendbuffer_notify(FAR struct tcp_conn_s *conn);
 #endif
 
 #endif /* CONFIG_NET_TCP && !CONFIG_NET_TCP_NO_STACK */
-#endif /* _NET_TCP_TCP_H */
+#endif /* __NET_TCP_TCP_H */

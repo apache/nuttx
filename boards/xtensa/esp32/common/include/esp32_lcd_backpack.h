@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ESP32_LCD_BACKPACK_H
-#define __ESP32_LCD_BACKPACK_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_LCD_BACKPACK_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_LCD_BACKPACK_H
 
 /****************************************************************************
  * Included Files
@@ -80,4 +80,4 @@ int board_lcd_backpack_init(int devno, int busno, int rows, int cols);
 }
 #endif
 
-#endif /* __ESP3232_LCD_BACKPACK_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_LCD_BACKPACK_H */

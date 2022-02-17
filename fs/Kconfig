@@ -42,6 +42,22 @@ config FS_AUTOMOUNTER_DEBUG
 		system debug is not enable.  This is useful primarily for in vivo
 		unit testing of the auto-mount feature.
 
+config FS_AUTOMOUNTER_DRIVER
+	bool "Auto-mounter driver"
+	default n
+	depends on FS_AUTOMOUNTER
+	---help---
+		Enabling this option will lead to registering of a character driver
+		on FS_AUTOMOUNTER_VFS_PATH + mount point path for auto-mounter.
+		Example: /var/mnt/sdcard0
+		
+config FS_AUTOMOUNTER_VFS_PATH
+	string "Path to auto-mounter driver"
+	default "/var"
+	depends on FS_AUTOMOUNTER_DRIVER
+	---help---
+		The path to where auto-mounter driver will exist in the VFS namespace.
+
 config FS_NEPOLL_DESCRIPTORS
 	int "Maximum number of default epoll descriptors for epoll_create1(2)"
 	default 8
@@ -85,35 +101,7 @@ config SENDFILE_BUFSIZE
 	---help---
 		Size of the I/O buffer to allocate in sendfile().  Default: 512b
 
-config EVENT_FD
-	bool "EventFD"
-	default n
-	---help---
-		Create a file descriptor for event notification
-
-if EVENT_FD
-
-config EVENT_FD_VFS_PATH
-	string "Path to eventfd storage"
-	default "/var/event"
-	---help---
-		The path to where eventfd will exist in the VFS namespace.
-
-config EVENT_FD_POLL
-	bool "EventFD poll support"
-	default y
-	---help---
-		Poll support for file descriptor based events
-
-config EVENT_FD_NPOLLWAITERS
-	int "Number of eventFD poll waiters"
-	default 2
-	depends on EVENT_FD_POLL
-	---help---
-		Maximum number of threads that can be waiting on poll()
-
-endif # EVENT_FD
-
+source "fs/vfs/Kconfig"
 source "fs/aio/Kconfig"
 source "fs/semaphore/Kconfig"
 source "fs/mqueue/Kconfig"
@@ -134,3 +122,4 @@ source "fs/littlefs/Kconfig"
 source "fs/unionfs/Kconfig"
 source "fs/userfs/Kconfig"
 source "fs/hostfs/Kconfig"
+source "fs/rpmsgfs/Kconfig"

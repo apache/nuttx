@@ -27,14 +27,14 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS += arch_setjmp.S
+ASRCS += arch_setjmp_x86.S
 endif
 else
 ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf64.c
 endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS += arch_setjmp64.S
+ASRCS += arch_setjmp_x86_64.S
 endif
 endif
 else ifeq ($(CONFIG_HOST_X86),y)
@@ -42,11 +42,15 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF),y)
 CSRCS += arch_elf.c
 endif
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS += arch_setjmp.S
+ASRCS += arch_setjmp_x86.S
 endif
 else ifeq ($(CONFIG_HOST_ARM),y)
 ifeq ($(CONFIG_ARCH_SETJMP_H),y)
 ASRCS += arch_setjmp_arm.S
+endif
+else ifeq ($(CONFIG_HOST_ARM64),y)
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ASRCS += arch_setjmp_arm64.S
 endif
 endif
 

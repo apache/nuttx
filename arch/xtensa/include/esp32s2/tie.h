@@ -30,8 +30,8 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-#ifndef _ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H
-#define _ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H
+#ifndef __ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H
+#define __ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -135,4 +135,4 @@
   3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3, 3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3,\
   3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3, 3,3,3,3,3,3,3,3,2,2,2,2,2,2,3,3
 
-#endif /* _ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H */
+#endif /* __ARCH_XTENSA_INCLUDE_ESP32S2_TIE_H */

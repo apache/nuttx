@@ -77,8 +77,8 @@ struct mtdconfig_struct_s
 {
   FAR struct mtd_dev_s *mtd;  /* Contained MTD interface */
   sem_t        exclsem;       /* Supports mutual exclusion */
-  uint32_t     blocksize :14; /* Size of blocks in contained MTD */
-  uint32_t     erasesize :18; /* Size of erase block  in contained MTD */
+  uint32_t     blocksize;     /* Size of blocks in contained MTD */
+  uint32_t     erasesize;     /* Size of erase block  in contained MTD */
   size_t       nblocks;       /* Number of blocks available */
   size_t       neraseblocks;  /* Number of erase blocks available */
   off_t        readoff;       /* Read offset (for hexdump) */
@@ -119,10 +119,13 @@ static const struct file_operations mtdconfig_fops =
   mtdconfig_open,  /* open */
   mtdconfig_close, /* close */
   mtdconfig_read,  /* read */
-  0,               /* write */
-  0,               /* seek */
+  NULL,            /* write */
+  NULL,            /* seek */
   mtdconfig_ioctl, /* ioctl */
   mtdconfig_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL            /* unlink */
+#endif
 };
 
 /****************************************************************************

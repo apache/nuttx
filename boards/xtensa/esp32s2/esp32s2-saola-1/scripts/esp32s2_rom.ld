@@ -45,7 +45,7 @@ PROVIDE ( Cache_Get_Mode = 0x40017ff0 );
 PROVIDE ( Cache_Get_Virtual_Addr = 0x40019210 );
 PROVIDE ( cache_ibus_mmu_set = 0x40018df4 );
 PROVIDE ( Cache_ICache_Preload_Done = 0x4001859c );
-PROVIDE ( Cache_Invalidate_Addr = 0x400182e4 );
+PROVIDE ( cache_invalidate_addr = 0x400182e4 );
 PROVIDE ( Cache_Invalidate_DCache_All = 0x4001842c );
 PROVIDE ( Cache_Invalidate_DCache_Items = 0x40018208 );
 PROVIDE ( cache_invalidate_icache_all = 0x40018420 );
@@ -815,6 +815,28 @@ PROVIDE ( strlcpy = 0x4001adf8 );
 PROVIDE ( strncpy = 0x40007f20 );
 PROVIDE ( strlen = 0x40007e08 );
 PROVIDE ( strnlen = 0x4001ae9c );
+
+/* Rename the SPI Flash data and functions. */
+
+PROVIDE ( g_rom_spiflash_dummy_len_plus = dummy_len_plus);
+PROVIDE ( g_spiflash_chip = SPI_flashchip_data );
+PROVIDE ( spi_flash_config_param = SPIParamCfg );
+PROVIDE ( spi_flash_read = SPIRead );
+PROVIDE ( spi_flash_read_status = SPI_read_status );
+PROVIDE ( spi_flash_read_statushigh = SPI_read_status_high );
+PROVIDE ( spi_flash_read_user_cmd = SPI_user_command_read );
+PROVIDE ( spi_flash_write = SPIWrite );
+PROVIDE ( spi_flash_write_encrypted_disable = SPI_Write_Encrypt_Disable );
+PROVIDE ( spi_flash_write_encrypted_enable = SPI_Write_Encrypt_Enable );
+PROVIDE ( spi_flash_config_clk = SPIClkConfig );
+PROVIDE ( spi_flash_select_qio_pins = SelectSpiQIO );
+PROVIDE ( spi_flash_unlock = SPIUnlock );
+PROVIDE ( spi_flash_erase_sector = SPIEraseSector );
+PROVIDE ( spi_flash_erase_block = SPIEraseBlock );
+PROVIDE ( spi_flash_wait_idle = SPI_Wait_Idle );
+PROVIDE ( spi_flash_config_readmode = SPIReadModeCnfig );
+PROVIDE ( spi_flash_erase_block = SPIEraseBlock );
+PROVIDE ( spi_flash_write_encrypted = SPI_Encrypt_Write );
 
 /* Unlike other ROM functions which are exported using PROVIDE, which declares weak symbols,
  * these libgcc functions are exported using assignment, which declare strong symbols.

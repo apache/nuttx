@@ -52,9 +52,9 @@
        { \
          uint32_t start; \
          uint32_t elapsed; \
-         start = up_critmon_gettime(); \
+         start = up_perf_gettime(); \
          worker(arg); \
-         elapsed = up_critmon_gettime() - start; \
+         elapsed = up_perf_gettime() - start; \
          if (elapsed > CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) \
            { \
              serr("WORKER %p execute too long %"PRIu32"\n", \
@@ -73,13 +73,23 @@
 #if defined(CONFIG_SCHED_HPWORK)
 /* The state of the kernel mode, high priority work queue(s). */
 
-struct hp_wqueue_s g_hpwork;
+struct hp_wqueue_s g_hpwork =
+{
+  {},
+  NXSEM_INITIALIZER(0, SEM_PRIO_NONE),
+};
+
 #endif /* CONFIG_SCHED_HPWORK */
 
 #if defined(CONFIG_SCHED_LPWORK)
 /* The state of the kernel mode, low priority work queue(s). */
 
-struct lp_wqueue_s g_lpwork;
+struct lp_wqueue_s g_lpwork =
+{
+  {},
+  NXSEM_INITIALIZER(0, SEM_PRIO_NONE),
+};
+
 #endif /* CONFIG_SCHED_LPWORK */
 
 /****************************************************************************
@@ -202,9 +212,6 @@ static int work_thread_create(FAR const char *name, int priority,
   snprintf(args, 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
   argv[0] = args;
   argv[1] = NULL;
-
-  nxsem_init(&wqueue->sem, 0, 0);
-  nxsem_set_protocol(&wqueue->sem, SEM_PRIO_NONE);
 
   /* Don't permit any of the threads to run until we have fully initialized
    * g_hpwork and g_lpwork.

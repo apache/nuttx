@@ -14,6 +14,47 @@ config IOEXPANDER
 
 if IOEXPANDER
 
+config IOEXPANDER_RPMSG
+	bool "IO expander rpmsg server and client"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		This settings enable ioexpander rpmsg server and client.
+
+if IOEXPANDER_RPMSG
+
+config IOEXPANDER_RPMSG_INT_NCALLBACKS
+	int "number of ioexpander rpmsg interrupt callbacks"
+	default 32
+	---help---
+		This set the IO expander number in interrupt callbacks.
+
+endif # IOEXPANDER_RPMSG
+
+config IOEXPANDER_DUMMY
+	bool "Simulated I/O Expander"
+	default n
+	select IOEXPANDER_INT_ENABLE
+	---help---
+		Build a simple, simulated I/O Expander chip simulation (for testing
+		purposes only).
+
+if IOEXPANDER_DUMMY
+
+config IOEXPANDER_DUMMY_INT_NCALLBACKS
+	int "Max number of interrupt callbacks"
+	default 4
+	---help---
+		This is the maximum number of interrupt callbacks supported
+
+config IOEXPANDER_DUMMY_INT_POLLDELAY
+	int "Interrupt poll delay (used)"
+	default 500000
+	---help---
+		This microsecond delay defines the polling rate for missed interrupts.
+
+endif # IOEXPANDER_DUMMY
+
 config IOEXPANDER_MCP23X17
 	bool "MCP23017/MCP23S17 I2C/SPI IO expander"
 	default n

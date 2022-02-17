@@ -26,7 +26,17 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <lzf.h>
 #include <stdio.h>
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_LIBC_LZF
+#define LZF_STREAM_BLOCKSIZE  ((1 << CONFIG_STREAM_LZF_BLOG) - 1)
+#endif
 
 /****************************************************************************
  * Public Types
@@ -39,6 +49,8 @@ typedef CODE int  (*lib_getc_t)(FAR struct lib_instream_s *this);
 
 struct lib_outstream_s;
 typedef CODE void (*lib_putc_t)(FAR struct lib_outstream_s *this, int ch);
+typedef CODE int  (*lib_puts_t)(FAR struct lib_outstream_s *this,
+                                FAR const void *buf, int len);
 typedef CODE int  (*lib_flush_t)(FAR struct lib_outstream_s *this);
 
 struct lib_instream_s
@@ -51,6 +63,7 @@ struct lib_instream_s
 struct lib_outstream_s
 {
   lib_putc_t             put;     /* Put one character to the outstream */
+  lib_puts_t             puts;    /* Writes the string to the outstream */
   lib_flush_t            flush;   /* Flush any buffered characters in the outstream */
   int                    nput;    /* Total number of characters put.  Written
                                    * by put method, readable by user */
@@ -170,20 +183,19 @@ struct lib_rawsostream_s
   int                    fd;
 };
 
-/* This is a special stream that does buffered character I/O.  NOTE that is
- * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
- * lib_outstream_s
- */
+/* LZF compressed stream pipeline */
 
-struct iob_s;  /* Forward reference */
-
-struct lib_syslogstream_s
+#ifdef CONFIG_LIBC_LZF
+struct lib_lzfoutstream_s
 {
-  struct lib_outstream_s public;
-#ifdef CONFIG_SYSLOG_BUFFER
-  FAR struct iob_s *iob;
-#endif
+  struct lib_outstream_s      public;
+  FAR struct lib_outstream_s *backend;
+  lzf_state_t                 state;
+  size_t                      offset;
+  char                        in[LZF_STREAM_BLOCKSIZE];
+  char                        out[LZF_MAX_HDR_SIZE + LZF_STREAM_BLOCKSIZE];
 };
+#endif
 
 /****************************************************************************
  * Public Data
@@ -342,42 +354,24 @@ void lib_nullinstream(FAR struct lib_instream_s *nullinstream);
 void lib_nulloutstream(FAR struct lib_outstream_s *nulloutstream);
 
 /****************************************************************************
- * Name: syslogstream_create
+ * Name: lib_lzfoutstream
  *
  * Description:
- *   Initializes a stream for use with the configured syslog interface.
- *   Only accessible from with the OS SYSLOG logic.
+ *  LZF compressed pipeline stream
  *
  * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
+ *   stream  - User allocated, uninitialized instance of struct
+ *                lib_lzfoutstream_s to be initialized.
+ *   backend - Stream backend port.
  *
  * Returned Value:
  *   None (User allocated instance initialized).
  *
  ****************************************************************************/
 
-void syslogstream_create(FAR struct lib_syslogstream_s *stream);
-
-/****************************************************************************
- * Name: syslogstream_destroy
- *
- * Description:
- *   Free resources held by the syslog stream.
- *
- * Input Parameters:
- *   stream - User allocated, uninitialized instance of struct
- *            lib_syslogstream_s to be initialized.
- *
- * Returned Value:
- *   None (Resources freed).
- *
- ****************************************************************************/
-
-#ifdef CONFIG_SYSLOG_BUFFER
-void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
-#else
-#  define syslogstream_destroy(s)
+#ifdef CONFIG_LIBC_LZF
+void lib_lzfoutstream(FAR struct lib_lzfoutstream_s *stream,
+                      FAR struct lib_outstream_s *backend);
 #endif
 
 /****************************************************************************

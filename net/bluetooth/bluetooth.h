@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_BLUETOOTH_BLUETOOTH_H
-#define _NET_BLUETOOTH_BLUETOOTH_H
+#ifndef __NET_BLUETOOTH_BLUETOOTH_H
+#define __NET_BLUETOOTH_BLUETOOTH_H
 
 /****************************************************************************
  * Included Files
@@ -30,6 +30,8 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <queue.h>
+
+#include <nuttx/net/net.h>
 
 #include <nuttx/wireless/bluetooth/bt_hci.h>
 
@@ -42,9 +44,9 @@
 /* Allocate a new Bluetooth socket data callback */
 
 #define bluetooth_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->bc_list, &conn->bc_list_tail)
+  devif_callback_alloc(dev, &conn->bc_conn.list, &conn->bc_conn.list_tail)
 #define bluetooth_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->bc_list, &conn->bc_list_tail)
+  devif_conn_callback_free(dev, cb, &conn->bc_conn.list, &conn->bc_conn.list_tail)
 
 /* Memory Pools */
 
@@ -78,14 +80,7 @@ struct bluetooth_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t bc_node;                         /* Supports a doubly linked list */
-
-  /* This is a list of Bluetooth callbacks.  Each callback represents
-   * a thread that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *bc_list;       /* Bluetooth callbacks */
-  FAR struct devif_callback_s *bc_list_tail;  /* Bluetooth callbacks */
+  struct socket_conn_s bc_conn;
 
   /* Bluetooth-specific content follows. */
 
@@ -448,4 +443,4 @@ void bluetooth_container_free(FAR struct bluetooth_container_s *container);
 #endif
 
 #endif /* CONFIG_NET_BLUETOOTH */
-#endif /* _NET_BLUETOOTH_BLUETOOTH_H */
+#endif /* __NET_BLUETOOTH_BLUETOOTH_H */

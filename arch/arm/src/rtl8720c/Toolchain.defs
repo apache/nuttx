@@ -18,11 +18,7 @@
 #
 ############################################################################
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT)
-endif
+ARCHSCRIPT = $(LDSCRIPT)
 
 include ${TOPDIR}/arch/arm/src/armv8-m/Toolchain.defs
 
@@ -43,15 +39,15 @@ ifeq ($(CONFIG_STACK_CANARIES),y)
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
   ARCHOPTIMIZATION += -ffunction-sections -fdata-sections
 ifneq ($(CONFIG_ARMV8M_STACKCHECK),y)
   #ARCHOPTIMIZATION += -flto -fuse-linker-plugin
 endif
 endif
 
-ARCHCFLAGS = -fno-builtin -march=armv8-m.main+dsp -mthumb -mfloat-abi=soft -D__thumb2__ -g -gdwarf-3 -Os  -fno-tree-scev-cprop
-ARCHCXXFLAGS = -fno-builtin -nostdinc++ -std=c++11
+ARCHCFLAGS = -fno-common -fno-builtin -march=armv8-m.main+dsp -mthumb -mfloat-abi=soft -D__thumb2__ -g -gdwarf-3 -Os  -fno-tree-scev-cprop
+ARCHCXXFLAGS = -fno-common -fno-builtin -nostdinc++ -std=c++11
 ifneq ($(CONFIG_CXX_EXCEPTION),y)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new -fno-rtti
 endif
@@ -66,15 +62,15 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
 # ELF module definitions
 
-CELFFLAGS = $(CFLAGS) -mlong-calls -fno-common
-CXXELFFLAGS = $(CXXFLAGS) -mlong-calls -fno-common
+CELFFLAGS = $(CFLAGS) -mlong-calls
+CXXELFFLAGS = $(CXXFLAGS) -mlong-calls
 AELFFLAGS = $(AFLAGS)
 LDELFFLAGS = -r -e main -Bstatic $(LDFLAGS)
 LDELFFLAGS += -T $(TOPDIR)/binfmt/libelf/gnu-elf.ld
 
 # Loadable module definitions
 
-CMODULEFLAGS = $(CFLAGS) -mlong-calls -fno-common
+CMODULEFLAGS = $(CFLAGS) -mlong-calls
 
 LDMODULEFLAGS = -r -e module_initialize $(LDFLAGS)
 ifeq ($(WINTOOL),y)

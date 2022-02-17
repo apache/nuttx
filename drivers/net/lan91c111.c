@@ -722,7 +722,7 @@ static void lan91c111_receive(FAR struct net_driver_s *dev)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (eth->type == htons(ETHTYPE_ARP))
+  if (eth->type == HTONS(ETHTYPE_ARP))
     {
       ninfo("ARP frame\n");
       NETDEV_RXARP(dev);

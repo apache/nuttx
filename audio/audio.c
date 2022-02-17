@@ -122,6 +122,9 @@ static const struct file_operations g_audioops =
   NULL,        /* seek */
   audio_ioctl, /* ioctl */
   NULL         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL       /* unlink */
+#endif
 };
 
 /****************************************************************************

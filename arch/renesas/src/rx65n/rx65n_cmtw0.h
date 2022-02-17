@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_CMTW0_H
-#define __ARCH_RENESAS_SRC_RX65N_CMTW0_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW0_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW0_H
 
 /****************************************************************************
  * Included Files
@@ -95,4 +95,4 @@ void rx65n_cmtw0_start(uint8_t type, uint32_t timeout);
 
 void rx65n_cmtw0_stop(uint8_t type);
 
-#endif /* __ARCH_RENESAS_SRC_RX65N_CMTW0_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_CMTW0_H */

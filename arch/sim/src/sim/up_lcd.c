@@ -37,6 +37,9 @@
 #include <nuttx/lcd/lcd.h>
 #include "up_internal.h"
 
+#if defined(CONFIG_SIM_X11FB)
+#include <nuttx/wqueue.h>
+#endif
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -61,7 +64,7 @@
 
 #undef FB_FMT
 #if CONFIG_SIM_FBBPP == 1
-#  define FB_FMT FB_FMT_RGB1
+#  define FB_FMT FB_FMT_Y1
 #elif CONFIG_SIM_FBBPP == 4
 #  define FB_FMT FB_FMT_RGB4
 #elif CONFIG_SIM_FBBPP == 8

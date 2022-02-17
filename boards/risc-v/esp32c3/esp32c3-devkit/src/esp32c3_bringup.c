@@ -145,7 +145,7 @@ int esp32c3_bringup(void)
 #endif
 
 #ifdef CONFIG_ESP32C3_SPIFLASH
-  ret = esp32c3_spiflash_init();
+  ret = board_spiflash_init();
   if (ret)
     {
       syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");

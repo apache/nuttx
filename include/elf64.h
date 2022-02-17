@@ -135,6 +135,15 @@ typedef struct
   Elf64_Word   p_align;    /* Alignment of segment */
 } Elf64_Phdr;
 
+/* Figure 7. Format of a Note Section */
+
+typedef struct
+{
+  Elf64_Word   n_namesz;   /* Length of the note's name.  */
+  Elf64_Word   n_descsz;   /* Length of the note's descriptor.  */
+  Elf64_Word   n_type;     /* Type of the note.  */
+} Elf64_Nhdr;
+
 /* Figure 8: Dynamic Table Structure */
 
 typedef struct
@@ -151,6 +160,8 @@ typedef Elf64_Addr  Elf_Addr;
 typedef Elf64_Ehdr  Elf_Ehdr;
 typedef Elf64_Rel   Elf_Rel;
 typedef Elf64_Rela  Elf_Rela;
+typedef Elf64_Nhdr  Elf_Nhdr;
+typedef Elf64_Phdr  Elf_Phdr;
 typedef Elf64_Sym   Elf_Sym;
 typedef Elf64_Shdr  Elf_Shdr;
 typedef Elf64_Word  Elf_Word;

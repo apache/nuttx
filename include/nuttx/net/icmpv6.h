@@ -39,8 +39,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_NET_ICMPv6_H
-#define __INCLUDE_NUTTX_NET_ICMPv6_H
+#ifndef __INCLUDE_NUTTX_NET_ICMPV6_H
+#define __INCLUDE_NUTTX_NET_ICMPV6_H
 
 /****************************************************************************
  * Included Files
@@ -131,6 +131,16 @@
 #define ICMPv6_OPT_SIZE(a)    ((a) > 0 ? ((a) + 2 + 7) & ~7 : 0)
 #define ICMPv6_OPT_OCTECTS(a) ((a) > 0 ? ((a) + 2 + 7) >> 3 : 0)
 
+/* Codes for Destination Unreachable */
+
+#define ICMPv6_NOROUTE        0
+#define ICMPv6_ADM_PROHIBITED 1
+#define ICMPv6_NOT_NEIGHBOUR  2
+#define ICMPv6_ADDR_UNREACH   3
+#define ICMPv6_PORT_UNREACH   4
+#define ICMPv6_POLICY_FAIL    5
+#define ICMPv6_REJECT_ROUTE   6
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/
@@ -146,6 +156,8 @@ struct icmpv6_hdr_s
   /* Data following the ICMP header contains the data specific to the
    * message type indicated by the Type and Code fields.
    */
+
+  uint16_t data[2];
 };
 
 /* The ICMPv6 and IPv6 headers */
@@ -368,4 +380,4 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif /* __INCLUDE_NUTTX_NET_ICMPv6_H */
+#endif /* __INCLUDE_NUTTX_NET_ICMPV6_H */

@@ -34,10 +34,10 @@
 #include <arch/board/board.h>
 
 #include <arch/irq.h>
-#include <arch/rv32im/mcause.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_interrupt.h"
+#include "rom/esp32c3_spiflash.h"
 
 #include "esp32c3.h"
 #include "esp32c3_attr.h"
@@ -59,7 +59,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uint32_t *g_current_regs;
+volatile uintptr_t *g_current_regs[1];
 
 /****************************************************************************
  * Private Data
@@ -372,14 +372,32 @@ void esp32c3_free_cpuint(uint8_t periphid)
  *
  ****************************************************************************/
 
-IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
+IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 {
   int irq;
+  uintptr_t *mepc = regs;
 
-  DEBUGASSERT(g_current_regs == NULL);
-  g_current_regs = regs;
+  if (((RISCV_IRQ_BIT & mcause) == 0) &&
+      (mcause != RISCV_IRQ_ECALLM))
+    {
+#ifdef CONFIG_ESP32C3_EXCEPTION_ENABLE_CACHE
+      if (!spi_flash_cache_enabled())
+        {
+          spi_flash_enable_cache(0);
+          _err("ERROR: Cache was disabled and re-enabled\n");
+        }
+#endif
+    }
+  else
+    {
+      /* Check "CURRENT_REGS" only in interrupt or ecall */
 
-  irqinfo("INFO: mcause=%08" PRIX32 "\n", mcause);
+      DEBUGASSERT(CURRENT_REGS == NULL);
+    }
+
+  CURRENT_REGS = regs;
+
+  irqinfo("INFO: mcause=%08" PRIXPTR "\n", mcause);
 
   /* If the board supports LEDs, turn on an LED now to indicate that we are
    * processing an interrupt.
@@ -387,9 +405,9 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
 
   board_autoled_on(LED_INIRQ);
 
-  if ((MCAUSE_INTERRUPT & mcause) != 0)
+  if ((RISCV_IRQ_BIT & mcause) != 0)
     {
-      uint8_t cpuint = mcause & MCAUSE_INTERRUPT_MASK;
+      uint8_t cpuint = mcause & RISCV_IRQ_MASK;
 
       DEBUGASSERT(cpuint <= ESP32C3_CPUINT_MAX);
 
@@ -404,12 +422,13 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
 
       /* Toggle the bit back to zero. */
 
-      resetbits(1 << cpuint, INTERRUPT_CPU_INT_CLEAR_REG);
+      putreg32(0, INTERRUPT_CPU_INT_CLEAR_REG);
     }
   else
     {
-      if (mcause == MCAUSE_ECALL_M)
+      if (mcause == RISCV_IRQ_ECALLM)
         {
+          *mepc += 4;
           irq_dispatch(ESP32C3_IRQ_ECALL_M, regs);
         }
       else
@@ -418,8 +437,14 @@ IRAM_ATTR uint32_t *esp32c3_dispatch_irq(uint32_t mcause, uint32_t *regs)
         }
     }
 
-  regs = (uint32_t *)g_current_regs;
-  g_current_regs = NULL;
+  /* If a context switch occurred while processing the interrupt then
+   * CURRENT_REGS may have change value.  If we return any value different
+   * from the input regs, then the lower level will know that a context
+   * switch occurred during interrupt processing.
+   */
+
+  regs = (uintptr_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
 
   board_autoled_off(LED_INIRQ);
 

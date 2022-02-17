@@ -39,7 +39,7 @@
  * Name: nxsched_merge_prioritized
  *
  * Description:
- *  This function merges the content of the prioritized task list '1ist1'
+ *  This function merges the content of the prioritized task list 'list1'
  *  into the prioritized task list, 'list2'.  On return 'list2' will contain
  *  the prioritized content of both lists; 'list1' will be empty.
  *

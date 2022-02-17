@@ -36,7 +36,7 @@ config SINC_BEST_CONVERTER
 	bool "Slowest conversion speed with best quality"
 	---help---
 		Slowest conversion speed with best quality.
-		 Not suitable for most boards due to resource constrains.
+		Not suitable for most boards due to resource constrains.
 
 endchoice
 

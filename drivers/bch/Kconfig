@@ -24,4 +24,8 @@ config BCH_ENCRYPTION_KEY_SIZE
 	default 16
 	depends on BCH_ENCRYPTION
 
+config BCH_BUFFER_ALIGNMENT
+	int "Buffer aligned bytes"
+	default 0
+
 endif # BCH

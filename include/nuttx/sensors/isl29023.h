@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SENSORS_ISL29023
-#define __INCLUDE_NUTTX_SENSORS_ISL29023
+#ifndef __INCLUDE_NUTTX_SENSORS_ISL29023_H
+#define __INCLUDE_NUTTX_SENSORS_ISL29023_H
 
 /****************************************************************************
  * Included Files
@@ -108,4 +108,4 @@ int isl29023_register(FAR const char *devpath, FAR struct i2c_master_s *i2c,
 #endif
 
 #endif /* CONFIG_I2C && CONFIG_SENSORS_ISL29023 */
-#endif /* __INCLUDE_NUTTX_SENSORS_ISL29023 */
+#endif /* __INCLUDE_NUTTX_SENSORS_ISL29023_H */

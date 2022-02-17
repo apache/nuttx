@@ -31,9 +31,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <errno.h>
-#ifdef CONFIG_SERIAL_TERMIOS
-#  include <termios.h>
-#endif
+#include <termios.h>
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/semaphore.h>
@@ -280,15 +278,16 @@ struct uart_dev_s
 #endif
   bool                 isconsole;    /* true: This is the serial console */
 
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+  pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
+#endif
+
 #ifdef CONFIG_SERIAL_TERMIOS
   /* Terminal control flags */
 
   tcflag_t             tc_iflag;     /* Input modes */
   tcflag_t             tc_oflag;     /* Output modes */
   tcflag_t             tc_lflag;     /* Local modes */
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
-  pid_t                pid;          /* Thread PID to receive signals (-1 if none) */
-#endif
 #endif
 
   /* Semaphores */
@@ -495,6 +494,29 @@ void uart_recvchars_done(FAR uart_dev_t *dev);
  ****************************************************************************/
 
 void uart_reset_sem(FAR uart_dev_t *dev);
+
+/****************************************************************************
+ * Name: uart_check_special
+ *
+ * Description:
+ *   Check if the SIGINT or SIGTSTP character is in the contiguous Rx DMA
+ *   buffer region.  The first signal associated with the first such
+ *   character is returned.
+ *
+ *   If there multiple such characters in the buffer, only the signal
+ *   associated with the first is returned (this a bug!)
+ *
+ * Returned Value:
+ *   0 if a signal-related character does not appear in the.  Otherwise,
+ *   SIGKILL or SIGTSTP may be returned to indicate the appropriate signal
+ *   action.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

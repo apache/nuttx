@@ -21,33 +21,27 @@
 include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32c3/Config.mk
-include $(TOPDIR)/arch/risc-v/src/rv32im/Toolchain.defs
+include $(TOPDIR)/arch/risc-v/src/common/Toolchain.defs
 
-LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_out.ld
+
 ifeq ($(CONFIG_ESP32C3_APP_FORMAT_MCUBOOT),y)
-  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_mcuboot.ld
 else
-  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3.ld
 endif
-LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32c3_rom.ld
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -msmall-data-limit=0
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -msmall-data-limit=0
 ARCHCXXFLAGS = $(ARCHCFLAGS) -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -59,10 +53,6 @@ CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
-
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
-LDNXFLATFLAGS = -e main -s 2048
 
 # Loadable module definitions
 

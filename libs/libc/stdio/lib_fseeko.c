@@ -22,13 +22,66 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#include <sys/types.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+
+#include "libc.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
+/****************************************************************************
+ * Name: fseeko
+ *
+ * Description:
+ *   The fseeko() function sets the file position indicator for the stream
+ *   pointed to by stream. The new position, measured in bytes, is obtained
+ *   by adding offset bytes to the position specified by whence. If whence is
+ *   set to SEEK_SET, SEEK_CUR, or SEEK_END, the offset is relative to the
+ *   start of the file, the current position indicator, or end-of-file,
+ *   respectively. A successful call to the fseeko() function clears the
+ *   end-of-file indicator for the stream and undoes any effects of the
+ *   ungetc(3) function on the same stream.
+ *
+ * Returned Value:
+ *   Zero on success; -1 on failure with errno set appropriately.
+ *
+ ****************************************************************************/
+
 int fseeko(FAR FILE *stream, off_t offset, int whence)
 {
-  return fseek(stream, offset, whence);
+#ifdef CONFIG_DEBUG_FEATURES
+  /* Verify that we were provided with a stream */
+
+  if (!stream)
+    {
+      set_errno(EBADF);
+      return ERROR;
+    }
+#endif
+
+#ifndef CONFIG_STDIO_DISABLE_BUFFERING
+  /* Flush any valid read/write data in the buffer (also verifies stream) */
+
+  if (lib_rdflush(stream) < 0 || lib_wrflush(stream) < 0)
+    {
+      return ERROR;
+    }
+#endif
+
+  /* On success or failure, discard any characters saved by ungetc() */
+
+#if CONFIG_NUNGET_CHARS > 0
+  stream->fs_nungotten = 0;
+#endif
+
+  /* Perform the fseeko on the underlying file descriptor */
+
+  return lseek(stream->fs_fd, offset, whence) == (off_t)-1 ? ERROR : OK;
 }

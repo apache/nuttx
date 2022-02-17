@@ -1,0 +1,76 @@
+############################################################################
+# drivers/segger/Make.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+TARGET_ZIP =
+SGDIR      = segger
+
+ifeq ($(CONFIG_SEGGER_RTT),y)
+  CSRCS += segger/RTT/RTT/SEGGER_RTT.c
+
+  CFLAGS += -Wno-shadow -Wno-array-bounds
+
+  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)RTT$(DELIM)RTT}
+
+  ifeq ($(CONFIG_ARCH_ARMV7M),y)
+    ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
+  endif
+
+  RTT_VERSION ?= 7.54
+
+$(SGDIR)/RTT.zip:
+	$(Q) curl -L https://github.com/SEGGERMicro/RTT/archive/refs/tags/V$(RTT_VERSION).zip -o $(SGDIR)/RTT.zip
+	$(Q) unzip -o $(SGDIR)/RTT.zip -d $(SGDIR)
+	$(Q) mv $(SGDIR)/RTT-$(RTT_VERSION) $(SGDIR)/RTT
+	$(Q) patch -p0 < segger/0001-segger-RTT-include-the-SEGGER_RTT_Conf.h-from-custom.patch
+
+TARGET_ZIP += $(SGDIR)/RTT.zip
+
+endif
+
+ifeq ($(CONFIG_SYSLOG_RTT),y)
+  CSRCS += segger/syslog_rtt.c
+endif
+
+ifeq ($(CONFIG_SEGGER_SYSVIEW),y)
+  CSRCS += segger/note_sysview.c
+  CSRCS += segger/SystemView/SYSVIEW/SEGGER_SYSVIEW.c
+
+  CFLAGS += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SEGGER}
+  CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)SystemView$(DELIM)SYSVIEW}
+
+  SYSVIEW_VERSION ?= 3.30
+
+$(SGDIR)/SystemView.zip:
+	$(Q) curl -L https://github.com/SEGGERMicro/SystemView/archive/refs/tags/V$(SYSVIEW_VERSION).zip -o $(SGDIR)/SystemView.zip
+	$(Q) unzip -o $(SGDIR)/SystemView.zip -d $(SGDIR)
+	$(Q) mv $(SGDIR)/SystemView-$(SYSVIEW_VERSION) $(SGDIR)/SystemView
+
+TARGET_ZIP += $(SGDIR)/SystemView.zip
+
+endif
+
+context:: $(TARGET_ZIP)
+
+distclean::
+	$(call DELDIR, $(SGDIR)/SystemView)
+	$(call DELDIR, $(SGDIR)/RTT)
+	$(call DELFILE, $(TARGET_ZIP))

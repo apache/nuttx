@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __CONFIGS_SIM_INCLUDE_NSH_ROMFSIMG_H
-#define __CONFIGS_SIM_INCLUDE_NSH_ROMFSIMG_H
+#ifndef __BOARDS_SIM_SIM_SIM_INCLUDE_NSH_ROMFSIMG_H
+#define __BOARDS_SIM_SIM_SIM_INCLUDE_NSH_ROMFSIMG_H
 extern const unsigned char romfs_img[];
 extern const unsigned int romfs_img_len;
-#endif
+#endif /* __BOARDS_SIM_SIM_SIM_INCLUDE_NSH_ROMFSIMG_H */

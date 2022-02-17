@@ -33,36 +33,7 @@
 
 /* Map RISC-V exception code to NuttX IRQ */
 
-/* IRQ 0-15 : (exception:interrupt=0) */
-
-#define MPFS_IRQ_IAMISALIGNED   (0) /* Instruction Address Misaligned */
-#define MPFS_IRQ_IAFAULT        (1) /* Instruction Address Fault */
-#define MPFS_IRQ_IINSTRUCTION   (2) /* Illegal Instruction */
-#define MPFS_IRQ_BPOINT         (3) /* Break Point */
-#define MPFS_IRQ_LAMISALIGNED   (4) /* Load Address Misaligned */
-#define MPFS_IRQ_LAFAULT        (5) /* Load Access Fault */
-#define MPFS_IRQ_SAMISALIGNED   (6) /* Store/AMO Address Misaligned */
-#define MPFS_IRQ_SAFAULT        (7) /* Store/AMO Access Fault */
-#define MPFS_IRQ_ECALLU         (8) /* Environment Call from U-mode */
-#define MPFS_IRQ_ECALLS         (9) /* Environment Call from S-mode */
-#define MPFS_IRQ_ECALLH        (10) /* Environment Call from H-mode */
-#define MPFS_IRQ_ECALLM        (11) /* Environment Call from M-mode */
-#define MPFS_IRQ_INSTRUCTIONPF (12) /* Instruction page fault */
-#define MPFS_IRQ_LOADPF        (13) /* Load page fault */
-#define MPFS_IRQ_RESERVED      (14) /* Reserved */
-#define MPFS_IRQ_SROREPF       (15) /* Store/AMO page fault */
-
-/* IRQ 16- : (async event:interrupt=1) */
-
-#define MPFS_IRQ_ASYNC                      (16)
-#define MPFS_IRQ_SSOFT                      (MPFS_IRQ_ASYNC + 1)         /* Supervisor Software Int */
-#define MPFS_IRQ_MSOFT                      (MPFS_IRQ_ASYNC + 3)         /* Machine Software Int */
-#define MPFS_IRQ_STIMER                     (MPFS_IRQ_ASYNC + 5)         /* Supervisor Timer Int */
-#define MPFS_IRQ_MTIMER                     (MPFS_IRQ_ASYNC + 7)         /* Machine Timer Int */
-#define MPFS_IRQ_SEXT                       (MPFS_IRQ_ASYNC + 9)         /* Supervisor External Int */
-#define MPFS_IRQ_MEXT                       (MPFS_IRQ_ASYNC + 11)        /* Machine External Int */
-
-/* IRQ 32-79 : 47 Local interrupts. */
+#define MPFS_IRQ_ASYNC RISCV_IRQ_ASYNC
 
 #define MPFS_IRQ_LOCAL_START                (MPFS_IRQ_ASYNC + 16)
 #define MPFS_IRQ_LOCAL_0                    (MPFS_IRQ_LOCAL_START + 0)   /* Local 0 spare */

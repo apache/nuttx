@@ -254,9 +254,9 @@ static int      spi_lock(struct spi_dev_s *dev, bool lock);
 static void     spi_select(struct spi_dev_s *dev, uint32_t devid,
                   bool selected);
 static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency);
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
 static int      spi_setdelay(struct spi_dev_s *dev, uint32_t a, uint32_t b,
-                             uint32_t c);
+                             uint32_t c, uint32_t i);
 #endif
 #ifdef CONFIG_SPI_HWFEATURES
 static int      spi_hwfeatures(struct spi_dev_s *dev, uint8_t features);
@@ -311,7 +311,7 @@ static const struct spi_ops_s g_spi0ops =
   .lock              = spi_lock,
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
   .setdelay          = spi_setdelay,
 #endif
   .setmode           = spi_setmode,
@@ -353,7 +353,7 @@ static const struct spi_ops_s g_spi1ops =
   .lock              = spi_lock,
   .select            = spi_select,
   .setfrequency      = spi_setfrequency,
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
   .setdelay          = spi_setdelay,
 #endif
   .setmode           = spi_setmode,
@@ -1105,15 +1105,17 @@ static uint32_t spi_setfrequency(struct spi_dev_s *dev, uint32_t frequency)
  *   startdelay - The delay between CS active and first CLK
  *   stopdelay  - The delay between last CLK and CS inactive
  *   csdelay    - The delay between CS inactive and CS active again
+ *   ifdelay    - The delay between frames
  *
  * Returned Value:
  *   Returns 0 if ok
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SPI_CS_DELAY_CONTROL
+#ifdef CONFIG_SPI_DELAY_CONTROL
 static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
-                        uint32_t stopdelay, uint32_t csdelay)
+                        uint32_t stopdelay, uint32_t csdelay,
+                        uint32_t ifdelay)
 {
   struct sam_spics_s *spics = (struct sam_spics_s *)dev;
   struct sam_spidev_s *spi = spi_device(spics);
@@ -1126,6 +1128,7 @@ static int spi_setdelay(struct spi_dev_s *dev, uint32_t startdelay,
   spiinfo("cs=%d startdelay=%d\n", spics->cs, startdelay);
   spiinfo("cs=%d stopdelay=%d\n", spics->cs, stopdelay);
   spiinfo("cs=%d csdelay=%d\n", spics->cs, csdelay);
+  spiinfo("cs=%d ifdelay=%d\n", spics->if, ifdelay);
 
   offset = (unsigned int)g_csroffset[spics->cs];
 

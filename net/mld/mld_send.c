@@ -154,7 +154,7 @@ void mld_send(FAR struct net_driver_s *dev, FAR struct mld_group_s *group,
 
       default:
         {
-          mlderr("Bad msgtype: %02x \n", msgtype);
+          mlderr("Bad msgtype: %02x\n", msgtype);
           DEBUGPANIC();
         }
 

@@ -60,5 +60,5 @@
 
 int tcgetattr(int fd, FAR struct termios *termiosp)
 {
-  return ioctl(fd, TCGETS, (unsigned long)termiosp);
+  return ioctl(fd, TCGETS, (unsigned long)(uintptr_t)termiosp);
 }

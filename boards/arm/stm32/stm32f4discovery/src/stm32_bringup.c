@@ -72,6 +72,10 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MS5611
+#include "stm32_ms5611.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include "stm32_max6675.h"
 #endif
@@ -209,6 +213,17 @@ int stm32_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_SENSORS_MS5611
+  /* Initialize the MS5611 pressure sensor. */
+
+  ret = board_ms5611_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MS5611, error %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_SENSORS_BH1750FVI
   ret = board_bh1750_initialize(0, 1);
   if (ret < 0)
@@ -332,7 +347,7 @@ int stm32_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_CAN
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 
   ret = stm32_can_setup();
@@ -518,7 +533,7 @@ int stm32_bringup(void)
   ret = stm32_gs2200m_initialize("/dev/gs2200m", 3);
   if (ret < 0)
     {
-      serr("ERROR: Failed to initialize GS2200M: %d \n", ret);
+      serr("ERROR: Failed to initialize GS2200M: %d\n", ret);
     }
 #endif
 

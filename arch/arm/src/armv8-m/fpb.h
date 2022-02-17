@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV8-M_FPB_H
-#define __ARCH_ARM_SRC_ARMV8-M_FPB_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_FPB_H
+#define __ARCH_ARM_SRC_ARMV8_M_FPB_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -173,4 +173,4 @@
 #define FPB_COMP0_ENABLE_SHIFT    0
 #  define FPB_COMP0_ENABLE        0x00000001
 
-#endif /* __ARCH_ARM_SRC_ARMV8-M_FPB_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_FPB_H */

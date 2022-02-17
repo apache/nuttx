@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_GPIO_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_GPIO_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_40XX_GPIO_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_40XX_GPIO_H
 
 /****************************************************************************
  * Included Files
@@ -208,4 +208,4 @@ extern "C"
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_GPIO_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC178X_40XX_GPIO_H */

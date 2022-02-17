@@ -142,8 +142,8 @@ void up_assert(const char *filename, int lineno)
          filename, lineno);
 #endif
 
-  REGISTER_DUMP();
-  up_stackdump();
+  Z80_REGISTER_DUMP();
+  z80_stackdump();
 
 #ifdef CONFIG_ARCH_USBDUMP
   /* Dump USB trace data */

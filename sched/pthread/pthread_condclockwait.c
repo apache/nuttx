@@ -154,6 +154,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                            FAR const struct timespec *abstime)
 {
   FAR struct tcb_s *rtcb = this_task();
+  irqstate_t flags;
   sclock_t ticks;
   int mypid = getpid();
   int ret = OK;
@@ -192,15 +193,14 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
     {
       sinfo("Give up mutex...\n");
 
-      /* NOTE: We do not need a critical section here,
-       * because nxsem_wait() uses a critical section and
-       * pthread_condtimedout() is called from wd_timer()
-       * which uses a critical section for SMP case
+      /* We must disable pre-emption and interrupts here so that
+       * the time stays valid until the wait begins.   This adds
+       * complexity because we assure that interrupts and
+       * pre-emption are re-enabled correctly.
        */
 
-      /* REVISIT: Do we need to disable pre-emption? */
-
       sched_lock();
+      flags = enter_critical_section();
 
       /* Convert the timespec to clock ticks.  We must disable pre-
        * emption here so that this time stays valid until the wait
@@ -208,7 +208,15 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
        */
 
       ret = clock_abstime2ticks(clockid, abstime, &ticks);
-      if (ret == 0)
+      if (ret)
+        {
+          /* Restore interrupts  (pre-emption will be enabled when
+           * we fall through the if/then/else)
+           */
+
+          leave_critical_section(flags);
+        }
+      else
         {
           /* Check the absolute time to wait.  If it is now or in the
            * past, then just return with the timedout condition.
@@ -216,6 +224,12 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 
           if (ticks <= 0)
             {
+              /* Restore interrupts and indicate that we have already
+               * timed out. (pre-emption will be enabled when we fall
+               * through the if/then/else
+               */
+
+              leave_critical_section(flags);
               ret = ETIMEDOUT;
             }
           else
@@ -238,7 +252,15 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
               nlocks     = mutex->nlocks;
 #endif
               ret        = pthread_mutex_give(mutex);
-              if (ret == 0)
+              if (ret != 0)
+                {
+                  /* Restore interrupts  (pre-emption will be enabled
+                   * when we fall through the if/then/else)
+                   */
+
+                  leave_critical_section(flags);
+                }
+              else
                 {
                   /* Start the watchdog */
 
@@ -277,6 +299,14 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
                           ret = status;
                         }
                     }
+
+                  /* The interrupts stay disabled until after we sample
+                   * the errno.  This is because when debug is enabled
+                   * and the console is used for debug output, then the
+                   * errno can be altered by interrupt handling! (bad)
+                   */
+
+                  leave_critical_section(flags);
                 }
 
               /* Reacquire the mutex (retaining the ret). */
@@ -302,7 +332,9 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
             }
         }
 
-      /* Re-enable pre-emption */
+      /* Re-enable pre-emption (It is expected that interrupts
+       * have already been re-enabled in the above logic)
+       */
 
       sched_unlock();
     }

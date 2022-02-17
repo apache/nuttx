@@ -38,8 +38,8 @@
  * ARRAY and return the exact number of values stored.
  */
 
-#define backtrace(buffer, size) sched_backtrace(gettid(), buffer, size)
-#define dump_stack()            sched_dumpstack(gettid())
+# define backtrace(buffer, size) sched_backtrace(gettid(), buffer, size, 0)
+# define dump_stack()            sched_dumpstack(gettid())
 
 #else
 # define backtrace(buffer, size) 0
@@ -58,6 +58,9 @@ extern "C"
 #else
 #define EXTERN extern
 #endif
+
+FAR char **backtrace_symbols(FAR void *const *buffer, int size);
+void backtrace_symbols_fd(FAR void *const *buffer, int size, int fd);
 
 #undef EXTERN
 #if defined(__cplusplus)

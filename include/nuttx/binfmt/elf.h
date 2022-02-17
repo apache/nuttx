@@ -95,10 +95,9 @@ struct elf_loadinfo_s
   uintptr_t         textalloc;   /* .text memory allocated when ELF file was loaded */
   uintptr_t         dataalloc;   /* .bss/.data memory allocated when ELF file was loaded */
   size_t            textsize;    /* Size of the ELF .text memory allocation */
-#ifdef CONFIG_ARCH_USE_TEXT_HEAP
-  size_t            textalign;   /* Necessary alignment of .text */
-#endif
   size_t            datasize;    /* Size of the ELF .bss/.data memory allocation */
+  size_t            textalign;   /* Necessary alignment of .text */
+  size_t            dataalign;   /* Necessary alignment of .bss/.data */
   off_t             filelen;     /* Length of the entire ELF file */
 
   Elf_Ehdr          ehdr;        /* Buffered ELF file header */
@@ -134,6 +133,18 @@ struct elf_loadinfo_s
   uint16_t           buflen;     /* size of iobuffer[] */
   struct file        file;       /* Descriptor for the file being loaded */
 };
+
+/* This struct provides a description of the dump information of
+ * memory regions.
+ */
+
+#ifdef CONFIG_ELF_COREDUMP
+struct elf_dumpinfo_s
+{
+  FAR struct memory_region_s *regions;
+  FAR struct lib_outstream_s *stream;
+};
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
@@ -254,6 +265,24 @@ int elf_bind(FAR struct elf_loadinfo_s *loadinfo,
  ****************************************************************************/
 
 int elf_unload(struct elf_loadinfo_s *loadinfo);
+
+/****************************************************************************
+ * Name: elf_coredump
+ *
+ * Description:
+ *   Generat the core dump stream as ELF structure.
+ *
+ * Input Parameters:
+ *   dumpinfo - elf coredump informations
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ELF_COREDUMP
+int elf_coredump(FAR struct elf_dumpinfo_s *dumpinfo);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

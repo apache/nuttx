@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_PCD8544_H
-#define __INCLUDE_NUTTX_PCD8544_H
+#ifndef __INCLUDE_NUTTX_LCD_PCD8544_H
+#define __INCLUDE_NUTTX_LCD_PCD8544_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@ FAR struct lcd_dev_s *pcd8544_initialize(FAR struct spi_dev_s *spi,
 }
 #endif
 
-#endif /* __INCLUDE_NUTTX_PCD8544_H */
+#endif /* __INCLUDE_NUTTX_LCD_PCD8544_H */

@@ -212,10 +212,21 @@
                                      STM32_SDMMC_CLKCR_EDGE       |     \
                                      STM32_SDMMC_CLKCR_PWRSAV     |     \
                                      STM32_SDMMC_CLKCR_WIDBUS_D1)
-#define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
-                                     STM32_SDMMC_CLKCR_EDGE       |     \
-                                     STM32_SDMMC_CLKCR_PWRSAV     |     \
-                                     STM32_SDMMC_CLKCR_WIDBUS_D4)
+#ifdef HAVE_SDMMC_SDIO_MODE
+/* Do not enable power saving configuration bit (in SD 4-bit mode) because
+ * the SDIO clock is not enabled when the bus goes to the idle state.
+ * This condition breaks interrupts delivering mechanism over DAT[1]/IRQ
+ * SDIO line to the host.
+ */
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
+                                       STM32_SDMMC_CLKCR_EDGE       |     \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#else
+#  define STM32_SDMMC_CLCKR_SDWIDEXFR (STM32_SDMMC_SDXFR_CLKDIV     |     \
+                                       STM32_SDMMC_CLKCR_EDGE       |     \
+                                       STM32_SDMMC_CLKCR_PWRSAV     |     \
+                                       STM32_SDMMC_CLKCR_WIDBUS_D4)
+#endif
 
 /* Timing */
 

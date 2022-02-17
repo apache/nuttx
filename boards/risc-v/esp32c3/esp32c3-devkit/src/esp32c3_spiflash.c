@@ -43,6 +43,7 @@
 #endif
 
 #include "esp32c3_spiflash.h"
+#include "esp32c3_spiflash_mtd.h"
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
@@ -50,6 +51,24 @@
  ****************************************************************************/
 
 #define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
+
+#ifdef CONFIG_ESP32C3_OTA_PARTITION_ENCRYPT
+#  define OTA_ENCRYPT true
+#else
+#  define OTA_ENCRYPT false
+#endif
+
+#ifdef CONFIG_ESP32C3_WIFI_MTD_ENCRYPT
+#  define WIFI_ENCRYPT true
+#else
+#  define WIFI_ENCRYPT false
+#endif
+
+#ifdef CONFIG_ESP32C3_STORAGE_MTD_ENCRYPT
+#  define STORAGE_ENCRYPT true
+#else
+#  define STORAGE_ENCRYPT false
+#endif
 
 /****************************************************************************
  * Private Types
@@ -129,7 +148,8 @@ static int init_ota_partitions(void)
   for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
     {
       const struct ota_partition_s *part = &g_ota_partition_table[i];
-      mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size);
+      mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size,
+                                           OTA_ENCRYPT);
 
       ret = ftl_initialize(i, mtd);
       if (ret < 0)
@@ -139,7 +159,7 @@ static int init_ota_partitions(void)
         }
 
 #ifdef CONFIG_BCH
-      snprintf(blockdev, 18, "/dev/mtdblock%d", i);
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
 
       ret = bchdev_register(blockdev, part->devpath, false);
       if (ret < 0)
@@ -369,7 +389,8 @@ static int init_wifi_partition(void)
   FAR struct mtd_dev_s *mtd;
 
   mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_WIFI_MTD_OFFSET,
-                                       CONFIG_ESP32C3_WIFI_MTD_SIZE);
+                                       CONFIG_ESP32C3_WIFI_MTD_SIZE,
+                                       WIFI_ENCRYPT);
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -433,7 +454,8 @@ static int init_storage_partition(void)
   FAR struct mtd_dev_s *mtd;
 
   mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_STORAGE_MTD_OFFSET,
-                                       CONFIG_ESP32C3_STORAGE_MTD_SIZE);
+                                       CONFIG_ESP32C3_STORAGE_MTD_SIZE,
+                                       STORAGE_ENCRYPT);
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -497,15 +519,17 @@ static int init_storage_partition(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spiflash_init
+ * Name: board_spiflash_init
  *
  * Description:
  *   Initialize the SPIFLASH and register the MTD device.
  ****************************************************************************/
 
-int esp32c3_spiflash_init(void)
+int board_spiflash_init(void)
 {
   int ret = OK;
+
+  esp32c3_spiflash_init();
 
 #ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
   ret = init_ota_partitions();

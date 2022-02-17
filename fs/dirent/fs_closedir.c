@@ -70,7 +70,7 @@ int closedir(FAR DIR *dirp)
 
   if (!idir)
     {
-      ret = EBADF;
+      ret = -EBADF;
       goto errout;
     }
 
@@ -107,7 +107,6 @@ int closedir(FAR DIR *dirp)
               ret = inode->u.i_mops->closedir(inode, idir);
               if (ret < 0)
                 {
-                  ret = -ret;
                   goto errout_with_inode;
                 }
             }
@@ -142,6 +141,6 @@ errout_with_inode:
 #endif
 
 errout:
-  set_errno(ret);
+  set_errno(-ret);
   return ERROR;
 }

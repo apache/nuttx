@@ -782,7 +782,7 @@ static int littlefs_readdir(FAR struct inode *mountpt,
           dir->fd_dir.d_type = DTYPE_DIRECTORY;
         }
 
-      strcpy(dir->fd_dir.d_name, info.name);
+      strlcpy(dir->fd_dir.d_name, info.name, sizeof(dir->fd_dir.d_name));
     }
   else if (ret == 0)
     {

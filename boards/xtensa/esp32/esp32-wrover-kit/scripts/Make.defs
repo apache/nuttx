@@ -23,23 +23,28 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx6/Toolchain.defs
 
+# This is the generated memory layout linker script.  It will always be
+# generated at the board level.
+
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
+
 # Pick the linker scripts from the board level if they exist, if not
 # pick the common linker scripts.
 
-ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld),)
-	LDSCRIPT_ROM = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
-else
-	LDSCRIPT_ROM = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
-endif
-
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld),)
-	LDSCRIPT_SECT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.ld
 else
 	ifeq ($(CONFIG_ESP32_APP_FORMAT_MCUBOOT),y)
-		LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
+		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_mcuboot.ld
 	else
-		LDSCRIPT_SECT = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
+		ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.ld
 	endif
+endif
+
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld),)
+	ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
+else
+	ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32_rom.ld
 endif
 
 ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld),)
@@ -48,28 +53,19 @@ else
 	LDSCRIPT_TEMPLATE = $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)esp32.template.ld
 endif
 
-# This is the generated memory layout linker script.  It will always be
-# generated at the board level.
-
-LDSCRIPT_MEMORY = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
-
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT_MEMORY)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT_SECT)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT_ROM)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT_MEMORY) -T$(LDSCRIPT_SECT) -T$(LDSCRIPT_ROM)
-endif
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
 
-ifneq ($(CONFIG_DEBUG_NOOPT),y)
-  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing -fno-strength-reduce -fomit-frame-pointer
+ifeq ($(CONFIG_STACK_CANARIES),y)
+  ARCHOPTIMIZATION += -fstack-protector-all
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -fstrict-volatile-bitfields -mlongcalls
+ifneq ($(CONFIG_DEBUG_NOOPT),y)
+  ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
+endif
+
+ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -mlongcalls
 ARCHCXXFLAGS = $(ARCHCFLAGS) -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -87,10 +83,6 @@ CXXFLAGS := $(ARCHCXXFLAGS) $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) $(ARCHCPUFLAGS
 CXXPICFLAGS = $(ARCHPICFLAGS) $(CXXFLAGS)
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
-
-NXFLATLDFLAGS1 = -r -d -warn-common
-NXFLATLDFLAGS2 = $(NXFLATLDFLAGS1) -T$(TOPDIR)/binfmt/libnxflat/gnu-nxflat-pcrel.ld -no-check-sections
-LDNXFLATFLAGS = -e main -s 2048
 
 # Loadable module definitions
 

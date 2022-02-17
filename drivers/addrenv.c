@@ -79,20 +79,19 @@ FAR void *up_addrenv_pa_to_va(uintptr_t pa)
         {
           if (pa - addrenv[i].pa < addrenv[i].size)
             {
-              return (FAR void *)(addrenv[i].va +
-                     B2C(pa - addrenv[i].pa));
+              return (FAR void *)(addrenv[i].va + pa - addrenv[i].pa);
             }
         }
     }
 
-  return (FAR void *)B2C(pa);
+  return (FAR void *)pa;
 }
 
 uintptr_t up_addrenv_va_to_pa(FAR void *va_)
 {
   FAR struct simple_addrenv_node_s *node;
   FAR const struct simple_addrenv_s *addrenv;
-  uintptr_t va = C2B((uintptr_t)va_);
+  uintptr_t va = (uintptr_t)va_;
   uint32_t i;
 
   list_for_every_entry(&g_addrenv_list, node,
@@ -101,7 +100,7 @@ uintptr_t up_addrenv_va_to_pa(FAR void *va_)
       addrenv = node->addrenv;
       for (i = 0; addrenv[i].size; i++)
         {
-          uintptr_t tmp = C2B(addrenv[i].va);
+          uintptr_t tmp = addrenv[i].va;
           if (va - tmp < addrenv[i].size)
             {
               return addrenv[i].pa + (va - tmp);

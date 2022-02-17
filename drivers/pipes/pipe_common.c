@@ -37,9 +37,6 @@
 #include <assert.h>
 #include <debug.h>
 
-#ifdef CONFIG_DEBUG_FEATURES
-#  include <nuttx/arch.h>
-#endif
 #include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/fs/fs.h>

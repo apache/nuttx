@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_ESP32_ETHERNETKIT_SRC_ESP32_ETHERNETKIT_H
-#define __BOARDS_XTENSA_ESP32_ESP32_ETHERNETKIT_SRC_ESP32_ETHERNETKIT_H
+#ifndef __BOARDS_XTENSA_ESP32_ESP32_ETHERNET_KIT_SRC_ESP32_ETHERNET_KIT_H
+#define __BOARDS_XTENSA_ESP32_ESP32_ETHERNET_KIT_SRC_ESP32_ETHERNET_KIT_H
 
 /****************************************************************************
  * Included Files
@@ -100,4 +100,4 @@ int esp32_mmcsd_initialize(int minor);
 int esp32_spiflash_init(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32_ESP32_ETHERNETKIT_SRC_ESP32_ETHERNETKIT_H */
+#endif /* __BOARDS_XTENSA_ESP32_ESP32_ETHERNET_KIT_SRC_ESP32_ETHERNET_KIT_H */

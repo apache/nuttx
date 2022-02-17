@@ -270,7 +270,7 @@ int arm_pause_handler(int irq, void *c, FAR void *arg)
   int cpu = up_cpu_index();
   int ret = OK;
 
-  DPRINTF("cpu%d will be paused \n", cpu);
+  DPRINTF("cpu%d will be paused\n", cpu);
 
   /* Clear SW_INT for APP_DSP(cpu) */
 

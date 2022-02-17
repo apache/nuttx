@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_HT16K33_H
-#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_HT16K33_H
+#ifndef __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_HT16K33_H
+#define __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_HT16K33_H
 
 /****************************************************************************
  * Included Files
@@ -81,4 +81,4 @@ int board_ht16k33_initialize(int devno, int busno);
 }
 #endif
 
-#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_BOARD_HT16K33_H */
+#endif /* __BOARDS_XTENSA_ESP32_COMMON_INCLUDE_ESP32_HT16K33_H */

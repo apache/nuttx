@@ -200,7 +200,9 @@
 #  elif defined( CONFIG_ETH0_PHY_KSZ90x1)
 #    error missing logic
 #  elif defined( CONFIG_ETH0_PHY_DP83848C)
-#    error missing logic
+#    define MII_INT_REG    MII_DP83848C_MISR
+#    define MII_INT_SETEN  MII_DP83848C_LINK_INT_EN
+#    define MII_INT_CLREN  0
 #  elif defined( CONFIG_ETH0_PHY_LAN8720)
 #    error missing logic
 #  elif defined( CONFIG_ETH0_PHY_LAN8740)
@@ -607,7 +609,7 @@
  * header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -1839,7 +1841,7 @@ static void stm32_receive(FAR struct stm32_ethmac_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP frame\n");
 
@@ -2995,6 +2997,10 @@ static int stm32_phyintenable(struct stm32_ethmac_s *priv)
     {
       /* Enable link up/down interrupts */
 
+#ifdef CONFIG_ETH0_PHY_DP83848C
+      ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_DP83848C_MICR,
+                           MII_DP83848C_INT_EN | MII_DP83848C_INT_OEN);
+#endif
       ret = stm32_phywrite(CONFIG_STM32_PHYADDR, MII_INT_REG,
                            (phyval & ~MII_INT_CLREN) | MII_INT_SETEN);
     }
@@ -3690,7 +3696,7 @@ static int stm32_ethreset(FAR struct stm32_ethmac_s *priv)
   while (((stm32_getreg(STM32_ETH_DMABMR) & ETH_DMABMR_SR) != 0) &&
          retries > 0)
     {
-      retries --;
+      retries--;
       up_mdelay(10);
     }
 

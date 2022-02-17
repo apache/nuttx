@@ -86,13 +86,16 @@ static int     bat_monitor_poll(FAR struct file *filep,
 
 static const struct file_operations g_batteryops =
 {
-  bat_monitor_open,
-  bat_monitor_close,
-  bat_monitor_read,
-  bat_monitor_write,
-  NULL,
-  bat_monitor_ioctl,
-  bat_monitor_poll
+  bat_monitor_open,    /* open */
+  bat_monitor_close,   /* close */
+  bat_monitor_read,    /* read */
+  bat_monitor_write,   /* write */
+  NULL,                /* seek */
+  bat_monitor_ioctl,   /* ioctl */
+  bat_monitor_poll     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL               /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -100,11 +103,16 @@ static const struct file_operations g_batteryops =
  ****************************************************************************/
 
 static int battery_monitor_notify(FAR struct battery_monitor_priv_s *priv,
-                                   uint32_t mask)
+                                  uint32_t mask)
 {
   FAR struct pollfd *fd = priv->fds;
   int semcnt;
   int ret;
+
+  if (!fd)
+    {
+      return OK;
+    }
 
   ret = nxsem_wait_uninterruptible(&priv->lock);
   if (ret < 0)
@@ -423,6 +431,16 @@ static int bat_monitor_ioctl(FAR struct file *filep, int cmd,
           if (coulombp)
             {
               ret = dev->ops->coulombs(dev, coulombp);
+            }
+        }
+        break;
+
+      case BATIOC_CHIPID:
+        {
+          FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->chipid(dev, ptr);
             }
         }
         break;

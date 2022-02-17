@@ -1,35 +1,20 @@
 /****************************************************************************
  * net/usrsock/usrsock_conn.c
  *
- *  Copyright (C) 2015, 2017 Haltian Ltd. All rights reserved.
- *  Author: Jussi Kivilinna <jussi.kivilinna@haltian.com>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -48,6 +33,7 @@
 
 #include <arch/irq.h>
 
+#include <nuttx/kmalloc.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/net/netconfig.h>
 #include <nuttx/net/net.h>
@@ -60,7 +46,9 @@
 
 /* The array containing all usrsock connections. */
 
+#ifndef CONFIG_NET_ALLOC_CONNS
 static struct usrsock_conn_s g_usrsock_connections[CONFIG_NET_USRSOCK_CONNS];
+#endif
 
 /* A list of all free usrsock connections */
 
@@ -109,27 +97,40 @@ static void _usrsock_semgive(FAR sem_t *sem)
 FAR struct usrsock_conn_s *usrsock_alloc(void)
 {
   FAR struct usrsock_conn_s *conn;
+#ifdef CONFIG_NET_ALLOC_CONNS
+  int i;
+#endif
 
   /* The free list is protected by a semaphore (that behaves like a mutex). */
 
   _usrsock_semtake(&g_free_sem);
+#ifdef CONFIG_NET_ALLOC_CONNS
+  if (dq_peek(&g_free_usrsock_connections) == NULL)
+    {
+      conn = kmm_zalloc(sizeof(*conn) * CONFIG_NET_USRSOCK_CONNS);
+      if (conn != NULL)
+        {
+          for (i = 0; i < CONFIG_NET_USRSOCK_CONNS; i++)
+            {
+              dq_addlast(&conn[i].sconn.node, &g_free_usrsock_connections);
+            }
+        }
+    }
+#endif
+
   conn = (FAR struct usrsock_conn_s *)
-    dq_remfirst(&g_free_usrsock_connections);
+         dq_remfirst(&g_free_usrsock_connections);
   if (conn)
     {
       /* Make sure that the connection is marked as uninitialized */
 
-      memset(conn, 0, sizeof(*conn));
       nxsem_init(&conn->resp.sem, 0, 1);
-      conn->dev = NULL;
       conn->usockid = -1;
       conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
-      conn->list = NULL;
-      conn->connected = false;
 
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_usrsock_connections);
+      dq_addlast(&conn->sconn.node, &g_active_usrsock_connections);
     }
 
   _usrsock_semgive(&g_free_sem);
@@ -155,20 +156,16 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_usrsock_connections);
+  dq_rem(&conn->sconn.node, &g_active_usrsock_connections);
 
   /* Reset structure */
 
   nxsem_destroy(&conn->resp.sem);
   memset(conn, 0, sizeof(*conn));
-  conn->dev = NULL;
-  conn->usockid = -1;
-  conn->state = USRSOCK_CONN_STATE_UNINITIALIZED;
-  conn->list = NULL;
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_usrsock_connections);
+  dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
   _usrsock_semgive(&g_free_sem);
 }
 
@@ -191,22 +188,8 @@ FAR struct usrsock_conn_s *usrsock_nextconn(FAR struct usrsock_conn_s *conn)
     }
   else
     {
-      return (FAR struct usrsock_conn_s *)conn->node.flink;
+      return (FAR struct usrsock_conn_s *)conn->sconn.node.flink;
     }
-}
-
-/****************************************************************************
- * Name: usrsock_connidx()
- ****************************************************************************/
-
-int usrsock_connidx(FAR struct usrsock_conn_s *conn)
-{
-  int idx = conn - g_usrsock_connections;
-
-  DEBUGASSERT(idx >= 0);
-  DEBUGASSERT(idx < ARRAY_SIZE(g_usrsock_connections));
-
-  return idx;
 }
 
 /****************************************************************************
@@ -247,14 +230,15 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
   nxsem_init(&pstate->recvsem, 0, 0);
   nxsem_set_protocol(&pstate->recvsem, SEM_PRIO_NONE);
 
-  pstate->conn   = conn;
-  pstate->result = -EAGAIN;
+  pstate->conn      = conn;
+  pstate->result    = -EAGAIN;
   pstate->completed = false;
-  pstate->unlock = false;
+  pstate->unlock    = false;
 
   /* Set up the callback in the connection */
 
-  pstate->cb = devif_callback_alloc(NULL, &conn->list, &conn->list_tail);
+  pstate->cb = devif_callback_alloc(NULL, &conn->sconn.list,
+                                    &conn->sconn.list_tail);
   if (pstate->cb)
     {
       /* Take a lock since only one outstanding request is allowed */
@@ -308,7 +292,8 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate)
 
   /* Make sure that no further events are processed */
 
-  devif_conn_callback_free(NULL, pstate->cb, &conn->list, &conn->list_tail);
+  devif_conn_callback_free(NULL, pstate->cb, &conn->sconn.list,
+                           &conn->sconn.list_tail);
   nxsem_destroy(&pstate->recvsem);
 
   pstate->cb = NULL;
@@ -345,7 +330,10 @@ void usrsock_setup_datain(FAR struct usrsock_conn_s *conn,
 
 void usrsock_initialize(void)
 {
+#ifndef CONFIG_NET_ALLOC_CONNS
+  FAR struct usrsock_conn_s *conn;
   int i;
+#endif
 
   /* Initialize the queues */
 
@@ -353,20 +341,18 @@ void usrsock_initialize(void)
   dq_init(&g_active_usrsock_connections);
   nxsem_init(&g_free_sem, 0, 1);
 
+#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_USRSOCK_CONNS; i++)
     {
-      FAR struct usrsock_conn_s *conn = &g_usrsock_connections[i];
+      conn = &g_usrsock_connections[i];
 
       /* Mark the connection closed and move it to the free list */
 
-      memset(conn, 0, sizeof(*conn));
-      conn->dev     = NULL;
       conn->usockid = -1;
       conn->state   = USRSOCK_CONN_STATE_UNINITIALIZED;
-      conn->list    = NULL;
-      conn->flags   = 0;
-      dq_addlast(&conn->node, &g_free_usrsock_connections);
+      dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
     }
+#endif
 
   /* Register /dev/usrsock character device. */
 

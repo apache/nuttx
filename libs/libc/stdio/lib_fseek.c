@@ -22,15 +22,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <sys/types.h>
 #include <stdio.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-
-#include "libc.h"
 
 /****************************************************************************
  * Public Functions
@@ -56,32 +48,5 @@
 
 int fseek(FAR FILE *stream, long int offset, int whence)
 {
-#ifdef CONFIG_DEBUG_FEATURES
-  /* Verify that we were provided with a stream */
-
-  if (!stream)
-    {
-      set_errno(EBADF);
-      return ERROR;
-    }
-#endif
-
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-  /* Flush any valid read/write data in the buffer (also verifies stream) */
-
-  if (lib_rdflush(stream) < 0 || lib_wrflush(stream) < 0)
-    {
-      return ERROR;
-    }
-#endif
-
-  /* On success or failure, discard any characters saved by ungetc() */
-
-#if CONFIG_NUNGET_CHARS > 0
-  stream->fs_nungotten = 0;
-#endif
-
-  /* Perform the fseek on the underlying file descriptor */
-
-  return lseek(stream->fs_fd, offset, whence) == (off_t)-1 ? ERROR : OK;
+  return fseeko(stream, offset, whence);
 }

@@ -124,7 +124,8 @@ void uart_recvchars(FAR uart_dev_t *dev)
 #endif
   unsigned int status;
   int nexthead = rxbuf->head + 1;
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   int signo = 0;
 #endif
   uint16_t nbytes = 0;
@@ -202,55 +203,9 @@ void uart_recvchars(FAR uart_dev_t *dev)
 
       ch = uart_receive(dev, &status);
 
-#ifdef CONFIG_TTY_SIGINT
-      /* Is this the special character that will generate the SIGINT
-       * signal?
-       */
-
-      if (dev->pid >= 0 && (dev->tc_lflag & ISIG) &&
-          ch == CONFIG_TTY_SIGINT_CHAR)
-        {
-          /* Yes.. note that the kill is needed and do not put the character
-           * into the Rx buffer.  It should not be read as normal data.
-           */
-
-          signo = SIGINT;
-        }
-      else
-#endif
-#ifdef CONFIG_TTY_SIGTSTP
-      /* Is this the special character that will generate the SIGTSTP
-       * signal?
-       */
-
-      if (dev->pid >= 0 && (dev->tc_lflag & ISIG) &&
-          ch == CONFIG_TTY_SIGTSTP_CHAR)
-        {
-#ifdef CONFIG_TTY_SIGINT
-          /* Give precedence to SIGINT */
-
-          if (signo == 0)
-#endif
-            {
-              /* Note that the kill is needed and do not put the character
-               * into the Rx buffer.  It should not be read as normal data.
-               */
-
-              signo = SIGTSTP;
-            }
-        }
-      else
-#endif
-#ifdef CONFIG_TTY_FORCE_PANIC
-      /* Is this the special character that will generate the SIGTSTP
-       * signal?
-       */
-
-      if ((dev->tc_lflag & ISIG) && ch == CONFIG_TTY_FORCE_PANIC_CHAR)
-        {
-          PANIC();
-        }
-      else
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
+      signo = uart_check_special(dev, &ch, 1);
 #endif
 
       /* If the RX buffer becomes full, then the serial data is discarded.
@@ -288,7 +243,8 @@ void uart_recvchars(FAR uart_dev_t *dev)
       uart_datareceived(dev);
     }
 
-#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP)
+#if defined(CONFIG_TTY_SIGINT) || defined(CONFIG_TTY_SIGTSTP) || \
+    defined(CONFIG_TTY_FORCE_PANIC) || defined(CONFIG_TTY_LAUNCH)
   /* Send the signal if necessary */
 
   if (signo != 0)

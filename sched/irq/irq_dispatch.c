@@ -27,6 +27,7 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
+#include <nuttx/mm/mm.h>
 #include <nuttx/random.h>
 #include <nuttx/sched_note.h>
 
@@ -79,10 +80,10 @@
          struct timespec delta; \
          uint32_t start; \
          uint32_t elapsed; \
-         start = up_critmon_gettime(); \
+         start = up_perf_gettime(); \
          vector(irq, context, arg); \
-         elapsed = up_critmon_gettime() - start; \
-         up_critmon_convert(elapsed, &delta); \
+         elapsed = up_perf_gettime() - start; \
+         up_perf_convert(elapsed, &delta); \
          if (delta.tv_nsec > g_irqvector[ndx].time) \
            { \
              g_irqvector[ndx].time = delta.tv_nsec; \
@@ -182,6 +183,14 @@ void irq_dispatch(int irq, FAR void *context)
   /* Notify that we are leaving from the interrupt handler */
 
   sched_note_irqhandler(irq, vector, false);
+#endif
+
+#ifdef CONFIG_DEBUG_MM
+  if ((g_running_tasks[this_cpu()]->flags & TCB_FLAG_MEM_CHECK) || \
+       (this_task()->flags & TCB_FLAG_MEM_CHECK))
+    {
+      kmm_checkcorruption();
+    }
 #endif
 
   /* Record the new "running" task.  g_running_tasks[] is only used by

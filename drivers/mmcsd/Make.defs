@@ -23,7 +23,7 @@ ifeq ($(CONFIG_MMCSD),y)
 # Include MMC/SD drivers
 
 ifeq ($(CONFIG_MMCSD_SDIO),y)
-CSRCS += mmcsd_sdio.c
+CSRCS += mmcsd_sdio.c sdio.c
 endif
 
 ifeq ($(CONFIG_MMCSD_SPI),y)

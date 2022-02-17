@@ -29,6 +29,7 @@
 
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
+#  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
 #endif
@@ -153,6 +154,10 @@
 #  define _DATA_INIT   &_eronly
 #  define _START_DATA  &_sdata
 #  define _END_DATA    &_edata
+#  define _START_TDATA &_stdata
+#  define _END_TDATA   &_etdata
+#  define _START_TBSS  &_stbss
+#  define _END_TBSS    &_etbss
 #endif
 
 /* This is the value used to mark the stack for subsequent stack monitoring
@@ -190,21 +195,12 @@ extern "C"
  * CURRENT_REGS for portability.
  */
 
-#ifdef CONFIG_SMP
 /* For the case of architectures with multiple CPUs, then there must be one
  * such value for each processor that can receive an interrupt.
  */
 
-int up_cpu_index(void); /* See include/nuttx/arch.h */
 EXTERN volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
-#  define CURRENT_REGS (g_current_regs[up_cpu_index()])
-
-#else
-
-EXTERN volatile uint32_t *g_current_regs[1];
-#  define CURRENT_REGS (g_current_regs[0])
-
-#endif
+#define CURRENT_REGS (g_current_regs[up_cpu_index()])
 
 /* This is the beginning of heap as provided from arm_head.S.
  * This is the first address in DRAM after the loaded
@@ -226,10 +222,10 @@ EXTERN uint32_t g_intstacktop;   /* Initial top of interrupt stack */
  * meaningfully in the following way:
  *
  *  - The linker script defines, for example, the symbol_sdata.
- *  - The declareion extern uint32_t _sdata; makes C happy.  C will believe
+ *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
  *    that the value _sdata is the address of a uint32_t variable _data (it
  *    is not!).
- *  - We can recoved the linker value then by simply taking the address of
+ *  - We can recover the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
@@ -240,6 +236,10 @@ EXTERN uint32_t _sdata;           /* Start of .data */
 EXTERN uint32_t _edata;           /* End+1 of .data */
 EXTERN uint32_t _sbss;            /* Start of .bss */
 EXTERN uint32_t _ebss;            /* End+1 of .bss */
+EXTERN uint32_t _stdata;          /* Start of .tdata */
+EXTERN uint32_t _etdata;          /* End+1 of .tdata */
+EXTERN uint32_t _stbss;           /* Start of .tbss */
+EXTERN uint32_t _etbss;           /* End+1 of .tbss */
 
 /* Sometimes, functions must be executed from RAM.  In this case, the
  * following macro may be used (with GCC!) to specify a function that will
@@ -335,6 +335,9 @@ int  arm_hardfault(int irq, FAR void *context, FAR void *arg);
 #  if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
 
 int  arm_memfault(int irq, FAR void *context, FAR void *arg);
+int  arm_busfault(int irq, FAR void *context, FAR void *arg);
+int  arm_usagefault(int irq, FAR void *context, FAR void *arg);
+int  arm_securefault(int irq, FAR void *context, FAR void *arg);
 
 #  endif /* CONFIG_ARCH_CORTEXM3,4,7 */
 

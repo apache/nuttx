@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_CXD56XX_CXD56_GE2D_H
-#define __ARCH_ARM_SRC_CXD56XX_CXD56_GE2D_H
+#ifndef __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_GE2D_H
+#define __ARCH_ARM_SRC_CXD56XX_HARDWARE_CXD56_GE2D_H
 
 /****************************************************************************
  * Included Files

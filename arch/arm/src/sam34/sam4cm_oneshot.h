@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_SAM34_SAM_ONESHOT_H
-#define __ARCH_ARM_SRC_SAM34_SAM_ONESHOT_H
+#ifndef __ARCH_ARM_SRC_SAM34_SAM4CM_ONESHOT_H
+#define __ARCH_ARM_SRC_SAM34_SAM4CM_ONESHOT_H
 
 /****************************************************************************
  * Included Files
@@ -194,4 +194,4 @@ int sam_oneshot_cancel(struct sam_oneshot_s *oneshot,
 #endif
 
 #endif /* CONFIG_SAM34_ONESHOT */
-#endif /* __ARCH_ARM_SRC_SAM34_SAM_ONESHOT_H */
+#endif /* __ARCH_ARM_SRC_SAM34_SAM4CM_ONESHOT_H */

@@ -1067,6 +1067,22 @@ void cp15_invalidate_dcache_all(void);
 void cp15_clean_dcache(uintptr_t start, uintptr_t end);
 
 /****************************************************************************
+ * Name: cp15_clean_dcache_all
+ *
+ * Description:
+ *   Clean the entire contents of D cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_clean_dcache_all(void);
+
+/****************************************************************************
  * Name: cp15_flush_dcache
  *
  * Description:
@@ -1083,6 +1099,38 @@ void cp15_clean_dcache(uintptr_t start, uintptr_t end);
  ****************************************************************************/
 
 void cp15_flush_dcache(uintptr_t start, uintptr_t end);
+
+/****************************************************************************
+ * Name: cp15_flush_dcache_all
+ *
+ * Description:
+ *   Flush the entire contents of D cache.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void cp15_flush_dcache_all(void);
+
+/****************************************************************************
+ * Name: cp15_cache_size
+ *
+ * Description:
+ *   Get cp15 cache size in byte
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Cache size in byte
+ *
+ ****************************************************************************/
+
+uint32_t cp15_cache_size(void);
 
 #undef EXTERN
 #ifdef __cplusplus

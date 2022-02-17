@@ -57,6 +57,6 @@ char *fgets(FAR char *buf, int buflen, FAR FILE *stream)
 
   else
     {
-      return lib_fgets(buf, (size_t)buflen, stream, true, false);
+      return lib_fgets(buf, buflen, stream, true, false);
     }
 }

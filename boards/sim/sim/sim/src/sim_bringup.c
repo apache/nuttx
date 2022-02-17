@@ -34,8 +34,9 @@
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
-#include <nuttx/fs/hostfs_rpmsg.h>
+#include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/i2c/i2c_master.h>
+#include <nuttx/input/uinput.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
@@ -44,9 +45,7 @@
 #include <nuttx/sensors/wtgahrs2.h>
 #include <nuttx/serial/uart_rpmsg.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
-#include <nuttx/timers/arch_rtc.h>
 #include <nuttx/timers/oneshot.h>
-#include <nuttx/timers/rpmsg_rtc.h>
 #include <nuttx/video/fb.h>
 #include <nuttx/timers/oneshot.h>
 #include <nuttx/wireless/pktradio.h>
@@ -105,7 +104,6 @@ int sim_bringup(void)
 #ifdef CONFIG_SIM_SPI
   FAR struct spi_dev_s *spidev;
 #endif
-
   int ret = OK;
 
 #ifdef CONFIG_FS_BINFS
@@ -281,17 +279,7 @@ int sim_bringup(void)
   sim_ajoy_initialize();
 #endif
 
-#if defined(CONFIG_NX) && defined(CONFIG_SIM_TOUCHSCREEN)
-  /* Initialize the touchscreen */
-
-  ret = sim_tsc_setup(0);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: sim_tsc_setup failed: %d\n", ret);
-    }
-#else
-
-#  ifdef CONFIG_VIDEO_FB
+#ifdef CONFIG_VIDEO_FB
   /* Initialize and register the simulated framebuffer driver */
 
   ret = fb_register(0, 0);
@@ -299,9 +287,9 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: fb_register() failed: %d\n", ret);
     }
-#  endif
+#endif
 
-#  ifdef CONFIG_LCD
+#ifdef CONFIG_LCD
 
   ret = board_lcd_initialize();
   if (ret < 0)
@@ -319,9 +307,9 @@ int sim_bringup(void)
 
 #  endif
 
-#  endif
+#endif
 
-#  ifdef CONFIG_SIM_TOUCHSCREEN
+#ifdef CONFIG_SIM_TOUCHSCREEN
   /* Initialize the touchscreen */
 
   ret = sim_tsc_initialize(0);
@@ -329,8 +317,16 @@ int sim_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: sim_tsc_initialize failed: %d\n", ret);
     }
-#  endif
+#endif
 
+#ifdef CONFIG_INPUT_UINPUT
+  /* Initialize the touchscreen uinput */
+
+  ret = uinput_touch_initialize("utouch", 1, 4);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: uinput_touch_initialize failed: %d\n", ret);
+    }
 #endif
 
 #ifdef CONFIG_IEEE802154_LOOPBACK
@@ -437,7 +433,7 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_SIM_MOTOR_FOC
+#ifdef CONFIG_MOTOR_FOC_DUMMY
   /* Setup FOC device */
 
   ret = sim_foc_setup();
@@ -458,16 +454,8 @@ int sim_bringup(void)
   syslog_rpmsg_server_init();
 #endif
 
-#ifndef CONFIG_RTC_RPMSG_SERVER
-  up_rtc_set_lowerhalf(rpmsg_rtc_initialize(0));
-#endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG
-  hostfs_rpmsg_init("server");
-#endif
-
-#ifdef CONFIG_FS_HOSTFS_RPMSG_SERVER
-  hostfs_rpmsg_server_init();
+#if defined(CONFIG_FS_RPMSGFS) && defined(CONFIG_SIM_RPTUN_MASTER)
+  rpmsgfs_server_init();
 #endif
 #endif
 

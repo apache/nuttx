@@ -975,7 +975,6 @@ void esp32_pmstandby(uint64_t time_in_us)
 
   /* don't power down XTAL — powering it up takes different time on. */
 
-  fflush(stdout);
   esp32_sleep_enable_timer_wakeup(time_in_us);
 
 #ifdef CONFIG_ESP32_RT_TIMER
@@ -1128,7 +1127,6 @@ void esp32_deep_sleep_start(void)
 
 void esp32_pmsleep(uint64_t time_in_us)
 {
-  fflush(stdout);
   esp32_sleep_enable_timer_wakeup(time_in_us);
   esp32_deep_sleep_start();
 }

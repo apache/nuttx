@@ -226,16 +226,16 @@ struct geometry
 
 struct partition_info_s
 {
-  size_t          numsectors;   /* Number of sectors in the partition */
-  size_t          sectorsize;   /* Size in bytes of a single sector */
-  off_t           startsector;  /* Offset to the first section/block of the
-                                 * managed sub-region */
+  size_t    numsectors;   /* Number of sectors in the partition */
+  size_t    sectorsize;   /* Size in bytes of a single sector */
+  off_t     startsector;  /* Offset to the first section/block of the
+                           * managed sub-region */
 
   /* NULL-terminated string representing the name of the parent node of the
    * partition.
    */
 
-  char            parent[NAME_MAX + 1];
+  char      parent[NAME_MAX + 1];
 };
 
 /* This structure is provided by block devices when they register with the
@@ -759,7 +759,8 @@ void files_releaselist(FAR struct filelist *list);
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist);
+int files_duplist(FAR struct filelist *plist,
+                  FAR struct filelist *clist, bool stdio_only);
 
 /****************************************************************************
  * Name: file_dup

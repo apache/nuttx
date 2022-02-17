@@ -28,6 +28,7 @@ include analog/Make.defs
 include audio/Make.defs
 include bch/Make.defs
 include can/Make.defs
+include clk/Make.defs
 include crypto/Make.defs
 include math/Make.defs
 include motor/Make.defs
@@ -63,6 +64,7 @@ include contactless/Make.defs
 include 1wire/Make.defs
 include rf/Make.defs
 include rc/Make.defs
+include segger/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
@@ -101,7 +103,7 @@ OBJS = $(AOBJS) $(COBJS)
 BIN = libdrivers$(LIBEXT)
 
 all: $(BIN)
-.PHONY: depend clean distclean
+.PHONY: context depend clean distclean
 
 $(AOBJS): %$(OBJEXT): %.S
 	$(call ASSEMBLE, $<, $@)
@@ -111,6 +113,8 @@ $(COBJS): %$(OBJEXT): %.c
 
 $(BIN): $(OBJS)
 	$(call ARCHIVE, $@, $(OBJS))
+
+context::
 
 makedepfile: $(CSRCS:.c=.ddc) $(ASRCS:.S=.dds)
 	$(call CATFILE, Make.dep, $^)
@@ -126,7 +130,7 @@ clean:
 	$(call DELFILE, $(BIN))
 	$(call CLEAN)
 
-distclean: clean
+distclean:: clean
 	$(call DELFILE, Make.dep)
 	$(call DELFILE, .depend)
 

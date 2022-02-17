@@ -103,6 +103,12 @@ config SYMTAB_ORDEREDBYNAME
 		Otherwise, the symbol table is assumed to be un-ordered and only
 		slow, linear searches are supported.
 
+config SYMTAB_ORDEREDBYVALUE
+	bool "Symbol Tables Ordered by Value"
+	default n
+	---help---
+		Select if the symbol table is ordered by symbol value.
+
 config SYMTAB_DECORATED
 	bool "Symbols are decorated with leading underscores"
 	default n

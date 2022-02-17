@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_SX127X_H
-#define __INCLUDE_NUTTX_SX127X_H
+#ifndef __INCLUDE_NUTTX_WIRELESS_LPWAN_SX127X_H
+#define __INCLUDE_NUTTX_WIRELESS_LPWAN_SX127X_H
 
 /****************************************************************************
  * Included Files
@@ -295,4 +295,4 @@ struct sx127x_lower_s
 int sx127x_register(FAR struct spi_dev_s *spi,
                     FAR const struct sx127x_lower_s *lower);
 
-#endif /* __INCLUDE_NUTTX_SX127X_H */
+#endif /* __INCLUDE_NUTTX_WIRELESS_LPWAN_SX127X_H */

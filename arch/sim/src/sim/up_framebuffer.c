@@ -41,7 +41,7 @@
 
 #undef FB_FMT
 #if CONFIG_SIM_FBBPP == 1
-#  define FB_FMT FB_FMT_RGB1
+#  define FB_FMT FB_FMT_Y1
 #elif CONFIG_SIM_FBBPP == 4
 #  define FB_FMT FB_FMT_RGB4
 #elif CONFIG_SIM_FBBPP == 8

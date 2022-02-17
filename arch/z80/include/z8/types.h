@@ -22,8 +22,8 @@
  * through sys/types.h
  */
 
-#ifndef __ARCH_Z80_INCLUDE_Z8_IRQ_H
-#define __ARCH_Z80_INCLUDE_Z8_IRQ_H
+#ifndef __ARCH_Z80_INCLUDE_Z8_TYPES_H
+#define __ARCH_Z80_INCLUDE_Z8_TYPES_H
 
 /****************************************************************************
  * Included Files
@@ -76,6 +76,12 @@ typedef unsigned long      _uint32_t;
 typedef _int32_t           _intmax_t;
 typedef _uint32_t          _uintmax_t;
 
+#if defined(__WCHAR_TYPE__)
+typedef __WCHAR_TYPE__     _wchar_t;
+#else
+typedef int                _wchar_t;
+#endif
+
 /* A size is 2 bytes */
 
 #if defined(__SIZE_TYPE__)
@@ -103,4 +109,4 @@ typedef _uint8_t           irqstate_t;
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_Z80_INCLUDE_Z8_IRQ_H */
+#endif /* __ARCH_Z80_INCLUDE_Z8_TYPES_H */

@@ -23,6 +23,10 @@ config HOST_ARM
 	bool "arm"
 	select ARCH_HAVE_STACKCHECK
 
+config HOST_ARM64
+	bool "arm64"
+	select ARCH_HAVE_STACKCHECK
+
 endchoice # Host CPU Type
 
 config ARCH_CHIP
@@ -61,7 +65,7 @@ config SIM_CYGWIN_DECORATED
 config SIM_ASAN
 	bool "Address Sanitizer"
 	default n
-	depends on MM_CUSTOMIZE_MANAGER
+	depends on MM_CUSTOMIZE_MANAGER && FRAME_POINTER
 	---help---
 		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
 		bugs in native code.
@@ -69,6 +73,7 @@ config SIM_ASAN
 config SIM_UBSAN
 	bool "Undefined Behaviour Sanitizer"
 	default n
+	depends on FRAME_POINTER
 	---help---
 		Compile-time instrumentation is used to detect various undefined behaviours
 		at runtime.
@@ -133,6 +138,19 @@ config SIM_WALLTIME_SIGNAL
 		The simulated 'tick' events from Idle task are no longer sent.
 
 endchoice
+
+config SIM_STACKSIZE_ADJUSTMENT
+	int "The adjustment of stack size for sim"
+	default 65536
+	---help---
+		The adjustment of stack size for sim. When the task is created,
+		the stack size is increased by this amount.
+
+config SIM_HOSTFS
+	bool "Simulated HostFS"
+	depends on FS_HOSTFS
+	---help---
+		Access host filesystem through HostFS.
 
 choice
 	prompt "Simulated Network Interface"
@@ -294,6 +312,12 @@ config SIM_FRAMEBUFFER
 	---help---
 		Emulate a framebuffer
 
+config SIM_VNCSERVER
+	bool "VNC server"
+	depends on VNCSERVER
+	---help---
+		Serve a VNC server
+
 endchoice
 
 if INPUT
@@ -303,6 +327,7 @@ choice
 
 config SIM_TOUCHSCREEN
 	bool "X11 mouse-based touchscreen emulation"
+	select INPUT_TOUCHSCREEN
 	depends on SIM_X11FB
 	---help---
 		Support an X11 mouse-based touchscreen emulation.  Also needs INPUT=y
@@ -335,212 +360,6 @@ config SIM_TCNWAITERS
 	---help---
 		The maximum number of threads that can be waiting on poll() for a
 		touchscreen event. Default: 4
-
-config SIM_IOEXPANDER
-	bool "Simulated I/O Expander"
-	default n
-	depends on IOEXPANDER
-	select IOEXPANDER_INT_ENABLE
-	---help---
-		Build a simple, simulated I/O Expander chip simulation (for testing
-		purposes only).
-
-if SIM_IOEXPANDER
-
-config SIM_INT_NCALLBACKS
-	int "Max number of interrupt callbacks"
-	default 4
-	---help---
-		This is the maximum number of interrupt callbacks supported
-
-config SIM_INT_POLLDELAY
-	int "Interrupt poll delay (used)"
-	default 500000
-	---help---
-		This microsecond delay defines the polling rate for missed interrupts.
-
-endif # SIM_IOEXPANDER
-
-config SIM_SPIFLASH
-	bool "Simulated SPI FLASH with SMARTFS"
-	default n
-	select FS_SMARTFS
-	select MTD_SMART
-	---help---
-		Adds a simulated SPI FLASH that responds to standard M25 style
-		commands on the SPI bus.
-
-choice
-	prompt "Simulated SPI FLASH Size"
-	default SIM_SPIFLASH_1M
-	depends on SIM_SPIFLASH
-
-config SIM_SPIFLASH_1M
-	bool "1 MBit (128K Byte)"
-
-config SIM_SPIFLASH_8M
-	bool "8 MBit (1M Byte)"
-
-config SIM_SPIFLASH_32M
-	bool "32 MBit (4M Byte)"
-
-config SIM_SPIFLASH_64M
-	bool "64 MBit (8M Byte)"
-
-config SIM_SPIFLASH_128M
-	bool "128 MBit (16M Byte)"
-
-endchoice
-
-config SIM_SPIFLASH_SECTORSIZE
-	int "FLASH Sector Erase Size"
-	default 65536
-	depends on SIM_SPIFLASH
-	---help---
-		Sets the large sector erase size that the part simulates.
-		This driver simulates SPI devices that have both a large
-		sector erase as well as a "sub-sector" (per the datasheet)
-		erase size (typically 4K bytes).
-
-config SIM_SPIFLASH_SUBSECTORSIZE
-	int "FLASH Sub-Sector Erase Size"
-	default 4096
-	depends on SIM_SPIFLASH
-	---help---
-		Sets the smaller sub-sector erase size supported by the
-		FLASH emulation
-
-config SIM_SPIFLASH_M25P
-	bool "Enable M25Pxx FLASH"
-	depends on MTD_M25P
-	---help---
-		Enables simulation of an M25P type FLASH
-
-config SIM_SPIFLASH_SST26
-	bool "Enable SST26 FLASH"
-	depends on MTD_SST26
-	---help---
-		Enables simulation of an SST26 type FLASH
-
-config SIM_SPIFLASH_W25
-	bool "Enable W25 FLASH"
-	depends on MTD_W25
-	---help---
-		Enables simulation of a W25 type FLASH
-
-config SIM_SPIFLASH_CUSTOM
-	bool "Enable Emulation of a Custom Manufacturer / ID FLASH"
-	depends on SIM_SPIFLASH
-	---help---
-		Enables simulation of FLASH with a custom Manufacturer, ID and Capacity
-
-config SIM_SPIFLASH_MANUFACTURER
-	hex "Hex ID of the FLASH manufacturer code"
-	default 0x20
-	depends on SIM_SPIFLASH_CUSTOM
-	---help---
-		Allows the simulated FLASH Manufacturer ID to be set.
-
-config SIM_SPIFLASH_MEMORY_TYPE
-	hex "Hex ID of the FLASH Memory Type code"
-	default 0x20
-	depends on SIM_SPIFLASH_CUSTOM
-	---help---
-		Allows the simulated FLASH Memory Type code to be set.
-
-config SIM_SPIFLASH_CAPACITY
-	hex "Hex ID of the FLASH capacity code"
-	default 0x14
-	depends on SIM_SPIFLASH_CUSTOM
-	---help---
-		Allows the simulated FLASH Memory Capacity code to be set.
-
-config SIM_SPIFLASH_PAGESIZE
-	int "FLASH Write / Program Page Size"
-	default 256
-	depends on SIM_SPIFLASH
-	---help---
-		Sets the size of a page program operation.  The page size
-		represents the maximum number of bytes that can be sent
-		for a program operation.  If more bytes than this are
-		sent on a single Page Program, then the address will
-		"wrap" causing the initial data sent to be overwritten.
-		This is consistent with standard SPI FLASH operation.
-
-config SIM_QSPIFLASH
-	bool "Simulated QSPI FLASH with SMARTFS"
-	default n
-	select FS_SMARTFS
-	select MTD_SMART
-	---help---
-		Adds a simulated QSPI FLASH that responds to N25QXXX style
-		commands on the QSPI bus.
-
-choice
-	prompt "Simulated QSPI FLASH Size"
-	default SIM_QSPIFLASH_1M
-	depends on SIM_QSPIFLASH
-
-config SIM_QSPIFLASH_1M
-	bool "1 MBit (128K Byte)"
-
-config SIM_QSPIFLASH_8M
-	bool "8 MBit (1M Byte)"
-
-config SIM_QSPIFLASH_32M
-	bool "32 MBit (4M Byte)"
-
-config SIM_QSPIFLASH_64M
-	bool "64 MBit (8M Byte)"
-
-config SIM_QSPIFLASH_128M
-	bool "128 MBit (16M Byte)"
-
-endchoice
-
-config SIM_QSPIFLASH_MANUFACTURER
-	hex "Hex ID of the FLASH manufacturer code"
-	default 0x20
-	depends on SIM_QSPIFLASH
-	---help---
-		Allows the simulated FLASH Manufacturer ID to be set.
-
-config SIM_QSPIFLASH_MEMORY_TYPE
-	hex "Hex ID of the FLASH Memory Type code"
-	default 0xba
-	depends on SIM_QSPIFLASH
-	---help---
-		Allows the simulated FLASH Memory Type code to be set.
-
-config SIM_QSPIFLASH_SECTORSIZE
-	int "FLASH Sector Erase Size"
-	default 65536
-	depends on SIM_QSPIFLASH
-	---help---
-		Sets the large sector erase size that the part simulates.
-		This driver simulates QSPI devices that have both a large
-		sector erase as well as a "sub-sector" (per the datasheet)
-		erase size (typically 4K bytes).
-
-config SIM_QSPIFLASH_SUBSECTORSIZE
-	int "FLASH Sub-Sector Erase Size"
-	default 4096
-	depends on SIM_QSPIFLASH
-	---help---
-		Sets the smaller sub-sector erase size supported by the
-		FLASH emulation
-
-config SIM_QSPIFLASH_PAGESIZE
-	int "FLASH Write / Program Page Size"
-	default 256
-	depends on SIM_QSPIFLASH
-	---help---
-		Sets the size of a page program operation.  The page size
-		represents the maximum number of bytes that can be sent
-		for a program operation.  If more bytes than this are
-		sent on a single Page Program, then the address will
-		"wrap" causing the initial data sent to be overwritten.
-		This is consistent with standard SPI FLASH operation.
 
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"
@@ -607,35 +426,99 @@ endchoice
 
 endif
 
+menu "Simulated UART"
+
 config SIM_UART_NUMBER
-	int "The number of tty ports on sim platform, range is 0~4"
+	int "Number of simulated UART ports"
 	default 0
+	range 0 4
+	---help---
+		Under simulation, a NuttX port can be bound to a serial
+		port on the host machine. This way NuttX can access the
+		host's hardware directly.
+				
+		There are two possibilities regarding the host's port:
+		it can be either a physical one, or a simulated one.
+		
+		In case of a physical port, NuttX will be able to open
+		this port and communicate with any actual hardware that
+		it is connected to. This is useful for testing code that
+		uses external hardware (e.g. sensors or other boards).
+		In order for this to work, NuttX port name must be set to
+		the same name that the host is using for this port (e.g.
+		/dev/ttyUSB0).
+		
+		Alternativelly, a "simulated" host port may be used to.
+		This is useful if you need to also simulate the external
+		hardware, or to have NuttX communicate with any other
+		software in your system.
+		You can create a "simulated" port in your host,
+		by running:
+		
+			socat PTY,link=/dev/ttySIM0 PTY,link=/dev/ttyNX0
+		 	stty -F /dev/ttySIM0 raw
+		 	stty -F /dev/ttyNX0 raw
+		
+		This will create two new ports on your system.
+		NuttX will use the ttySIM0 port, and another software
+		may open and use the ttyNX0 port.
+		Anything sent to the one of these ports will be relayed
+		automatically to the other, and vice-versa.
+
+config SIM_UART_BUFFER_SIZE
+	int "UART buffer size"
+	default 256
+	depends on SIM_UART_NUMBER >= 1
+	---help---
+		The size of the transmit and receive buffers of the
+		simulated UART ports.
+		
+		Note that all ports will have the same buffer size.
 
 config SIM_UART0_NAME
-	string "the name of uart0 on sim"
+	string "UART port 0 name"
 	default "/dev/ttySIM0"
 	depends on SIM_UART_NUMBER >= 1
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART1_NAME
-	string "the name of uart1 on sim"
+	string "UART port 1 name"
 	default "/dev/ttySIM1"
 	depends on SIM_UART_NUMBER >= 2
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART2_NAME
-	string "the name of uart2 on sim"
+	string "UART port 2 name"
 	default "/dev/ttySIM2"
 	depends on SIM_UART_NUMBER >= 3
+	---help---
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
 
 config SIM_UART3_NAME
-	string "the name of uart3 on sim"
+	string "UART port 3 name"
 	default "/dev/ttySIM3"
 	depends on SIM_UART_NUMBER >= 4
-
-config SIM_MOTOR_FOC
-	bool "Simulated FOC device"
-	default n
-	depends on MOTOR_FOC
 	---help---
-		Build a simulated lower-half FOC device
+		This is the name of the simulated UART port.
+		The port will be mounted in NuttX under this name.
+		
+		A UART port must also exist on the host system
+		with the exact same name specified here.
+
+endmenu
 
 endif # ARCH_SIM

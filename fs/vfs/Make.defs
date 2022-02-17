@@ -48,6 +48,12 @@ ifeq ($(CONFIG_EVENT_FD),y)
 CSRCS += fs_eventfd.c
 endif
 
+# Support for timerfd
+
+ifeq ($(CONFIG_TIMER_FD),y)
+CSRCS += fs_timerfd.c
+endif
+
 # Include vfs build support
 
 DEPPATH += --dep-path vfs

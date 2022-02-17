@@ -65,9 +65,13 @@ static const struct file_operations g_adxl345fops =
   adxl345_open,    /* open */
   adxl345_close,   /* close */
   adxl345_read,    /* read */
-  0,               /* write */
-  0,               /* seek */
-  0,               /* ioctl */
+  NULL,            /* write */
+  NULL,            /* seek */
+  NULL,            /* ioctl */
+  NULL             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -207,7 +211,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   /* Register the character driver */
 
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ret = register_driver(devname, &g_adxl345fops, 0666, priv);
+  ret = register_driver(devname, &g_adxl345fops, 0444, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);

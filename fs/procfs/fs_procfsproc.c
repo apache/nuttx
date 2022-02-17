@@ -498,8 +498,8 @@ static ssize_t proc_status(FAR struct proc_file_s *procfile,
   DEBUGASSERT(group != NULL);
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                               "%-12s%d\n", "PPID:",
-                               group->tg_ppid);
+                               "%-12s%d\n",
+                               "Group:", group->tg_pid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer, remaining,
                              &offset);
 
@@ -635,7 +635,6 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
                             FAR struct tcb_s *tcb, FAR char *buffer,
                             size_t buflen, off_t offset)
 {
-  FAR struct task_tcb_s *ttcb;
   FAR const char *name;
   FAR char **argv;
   size_t remaining;
@@ -689,9 +688,7 @@ static ssize_t proc_cmdline(FAR struct proc_file_s *procfile,
 
   /* Show the task argument list (skipping over the name) */
 
-  ttcb = (FAR struct task_tcb_s *)tcb;
-
-  for (argv = ttcb->argv + 1; *argv; argv++)
+  for (argv = tcb->group->tg_info->argv + 1; *argv; argv++)
     {
       linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                    " %s", *argv);
@@ -788,7 +785,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->premp_max > 0)
     {
-      up_critmon_convert(tcb->premp_max, &maxtime);
+      up_perf_convert(tcb->premp_max, &maxtime);
     }
   else
     {
@@ -821,7 +818,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->crit_max > 0)
     {
-      up_critmon_convert(tcb->crit_max, &maxtime);
+      up_perf_convert(tcb->crit_max, &maxtime);
     }
   else
     {
@@ -854,7 +851,7 @@ static ssize_t proc_critmon(FAR struct proc_file_s *procfile,
 
   if (tcb->run_max > 0)
     {
-      up_critmon_convert(tcb->run_max, &maxtime);
+      up_perf_convert(tcb->run_max, &maxtime);
     }
   else
     {
@@ -983,6 +980,20 @@ static ssize_t proc_groupstatus(FAR struct proc_file_s *procfile,
 
   linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
                                "Main task:", group->tg_pid);
+  copysize   = procfs_memcpy(procfile->line, linesize, buffer,
+                             remaining, &offset);
+
+  totalsize += copysize;
+  buffer    += copysize;
+  remaining -= copysize;
+
+  if (totalsize >= buflen)
+    {
+      return totalsize;
+    }
+
+  linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN, "%-12s%d\n",
+                               "Parent:", group->tg_ppid);
   copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                              remaining, &offset);
 
@@ -1166,11 +1177,11 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
           if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
             {
               FAR struct socket *socket = file->f_priv;
+              FAR struct socket_conn_s *conn = socket->s_conn;
               linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                     "%3d %3d %02x",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, socket->s_type,
-                                    socket->s_flags);
+                                    j, socket->s_type, conn->s_flags);
               copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                          remaining, &offset);
 
@@ -1768,7 +1779,7 @@ static int proc_readdir(struct fs_dirent_s *dir)
       /* Save the filename and file type */
 
       dir->fd_dir.d_type = node->dtype;
-      strncpy(dir->fd_dir.d_name, node->name, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, node->name, sizeof(dir->fd_dir.d_name));
 
       /* Set up the next directory entry offset.  NOTE that we could use the
        * standard f_pos instead of our own private index.

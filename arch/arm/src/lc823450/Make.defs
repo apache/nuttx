@@ -29,7 +29,7 @@ CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_systemreset.c
 CMN_CSRCS += arm_unblocktask.c arm_usestack.c arm_doirq.c arm_hardfault.c
 CMN_CSRCS += arm_svcall.c arm_vfork.c arm_trigger_irq.c arm_switchcontext.c
-CMN_CSRCS += arm_puts.c
+CMN_CSRCS += arm_puts.c arm_tcbinfo.c
 
 # CMN_CSRCS += up_dwt.c
 
@@ -43,7 +43,6 @@ endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_task_start.c arm_pthread_start.c
-CMN_CSRCS += arm_pthread_exit.c
 CMN_CSRCS += arm_signal_dispatch.c
 CMN_UASRCS += arm_signal_handler.S
 endif

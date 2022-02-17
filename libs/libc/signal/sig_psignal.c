@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 /* Uses streams... not available to kernel code */
 
@@ -72,15 +73,15 @@ void psignal(int signum, FAR const char *message)
       fprintf(stderr, "%s\n", strsignal(signum));
     }
 #else
-  /* No stderr!  Write to whatever alternative console is available */
+  /* No stream! Write to file handle(fd == 2) directly without buffer */
 
   if (message != NULL)
     {
-      printf("%s: %s\n", message, strsignal(signum));
+      dprintf(STDERR_FILENO, "%s: %s\n", message, strsignal(signum));
     }
   else
     {
-      printf("%s\n", strsignal(signum));
+      dprintf(STDERR_FILENO, "%s\n", strsignal(signum));
     }
 #endif
 }

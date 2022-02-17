@@ -605,8 +605,8 @@ int mx25rxx_erase(FAR struct mtd_dev_s *dev,
           /* Erase each sector */
 
           mx25rxx_erase_sector(priv, startblock);
-          startblock ++;
-          blocksleft --;
+          startblock++;
+          blocksleft--;
         }
     }
 #endif
@@ -711,7 +711,7 @@ int mx25rxx_ioctl(FAR struct mtd_dev_s *dev, int cmd, unsigned long arg)
   FAR struct mx25rxx_dev_s *priv = (FAR struct mx25rxx_dev_s *)dev;
   int ret = -EINVAL; /* Assume good command with bad parameters */
 
-  finfo("cmd: %d \n", cmd);
+  finfo("cmd: %d\n", cmd);
 
   switch (cmd)
     {

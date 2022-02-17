@@ -61,11 +61,11 @@
 
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
+#include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "chip.h"
 #include "xtensa.h"
-#include "xtensa_abi.h"
 #include "xtensa_timer.h"
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -104,14 +104,15 @@ g_intstacktop:
 	addi	\aout, \aout, 1				/* Return aout + 1 */
 	.endm
 
-/************************************************************************************
+/****************************************************************************
  * Name: setintstack
  *
  * Description:
- *   Set the current stack pointer to the "top" the interrupt stack.  Single CPU
- *   case.  Must be provided by MCU-specific logic in the SMP case.
+ *   Set the current stack pointer to the "top" the interrupt stack.
+ *   Single CPU case.
+ *   Must be provided by MCU-specific logic in the SMP case.
  *
- ************************************************************************************/
+ ****************************************************************************/
 
 #if !defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
 	.macro	setintstack tmp1 tmp2
@@ -311,6 +312,7 @@ _xtensa_level1_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							      /* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
   /* Save current SP before (possibly) overwriting it, it's the register save
@@ -414,6 +416,7 @@ _xtensa_level2_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -422,6 +425,12 @@ _xtensa_level2_handler:
 	 */
 
 	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -486,6 +495,7 @@ _xtensa_level3_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -494,6 +504,12 @@ _xtensa_level3_handler:
 	 */
 
 	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -558,6 +574,7 @@ _xtensa_level4_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -566,6 +583,12 @@ _xtensa_level4_handler:
 	 */
 
 	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -630,6 +653,7 @@ _xtensa_level5_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -638,6 +662,12 @@ _xtensa_level5_handler:
 	 */
 
 	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 
@@ -702,6 +732,7 @@ _xtensa_level6_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -710,6 +741,12 @@ _xtensa_level6_handler:
 	 */
 
 	mov  a12, sp
+
+	/* Switch to an interrupt stack if we have one */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+	setintstack a13 a14
+#endif
 
 	/* Set up PS for C, enable interrupts above this level and clear EXCM. */
 

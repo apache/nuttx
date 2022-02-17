@@ -27,6 +27,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -39,8 +40,10 @@
 
 #ifdef CONFIG_LIBC_PERROR_STDOUT
 #  define PERROR_STREAM stdout
+#  define PERROR_FILENO STDOUT_FILENO
 #else
 #  define PERROR_STREAM stderr
+#  define PERROR_FILENO STDERR_FILENO
 #endif
 
 /****************************************************************************
@@ -56,8 +59,16 @@ void perror(FAR const char *s)
   /* If strerror() is not enabled, then just print the error number */
 
 #ifdef CONFIG_LIBC_STRERROR
+# ifdef CONFIG_FILE_STREAM
   fprintf(PERROR_STREAM, "%s: %s\n", s, strerror(get_errno()));
+# else
+  dprintf(PERROR_FILENO, "%s: %s\n", s, strerror(get_errno()));
+# endif
 #else
+# ifdef CONFIG_FILE_STREAM
   fprintf(PERROR_STREAM, "%s: Error %d\n", s, get_errno());
+# else
+  dprintf(PERROR_FILENO, "%s: Error %d\n", s, get_errno());
+# endif
 #endif
 }

@@ -24,9 +24,8 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/sched.h>
+#include <nuttx/arch.h>
 #include <nuttx/tls.h>
-#include <arch/tls.h>
 
 /****************************************************************************
  * Public Functions

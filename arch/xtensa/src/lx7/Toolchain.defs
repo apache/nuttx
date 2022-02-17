@@ -29,7 +29,6 @@
 #                   reliable code generation.
 #
 
-
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CROSSDEV = xt-
 endif
@@ -39,7 +38,7 @@ ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
 endif
 
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
-  CROSSDEV = xtensa-esp32s2-elf-
+  CROSSDEV = xtensa-$(CONFIG_ARCH_CHIP)-elf-
 endif
 
 ARCHCPUFLAGS =
@@ -48,6 +47,12 @@ ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 else
   MAXOPTIMIZATION := -Os
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
 # Default toolchain
@@ -74,15 +79,12 @@ OBJDUMP = $(CROSSDEV)objdump
 
 # Add the builtin library
 
-EXTRA_LIBS += -lgcc
-EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name`"}"
+EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += -lm
-  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a`"}"
+  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += -lsupc++
-  EXTRA_LIBPATHS += -L "${shell dirname "`$(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a`"}"
+  EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}
 endif

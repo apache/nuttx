@@ -23,7 +23,7 @@ ifeq ($(CONFIG_FS_PROCFS),y)
 
 CSRCS += fs_procfs.c fs_procfsutil.c fs_procfsproc.c fs_procfsuptime.c
 CSRCS += fs_procfscpuload.c fs_procfsmeminfo.c fs_procfsiobinfo.c
-CSRCS += fs_procfsversion.c
+CSRCS += fs_procfsversion.c fs_procfstcbinfo.c
 
 ifeq ($(CONFIG_SCHED_CRITMONITOR),y)
 CSRCS += fs_procfscritmon.c

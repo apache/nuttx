@@ -95,7 +95,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->bc_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->bc_dev.d_buf)
 
 /****************************************************************************
  * Private Function Prototypes
@@ -369,7 +369,7 @@ static void bcmf_receive(FAR struct bcmf_dev_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(&priv->bc_dev);
           NETDEV_RXARP(&priv->bc_dev);

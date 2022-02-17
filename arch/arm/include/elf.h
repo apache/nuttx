@@ -37,8 +37,13 @@
  *                     ELFDATA2MSB (big endian)
  */
 
-#if 0 /* Defined in include/elf32.h */
-#define EM_ARM                   40
+#define EM_ARCH                  EM_ARM
+#define ELF_CLASS                ELFCLASS32
+
+#ifdef CONFIG_ENDIAN_BIG
+#  define ELF_DATA               ELFDATA2MSB
+#else
+#  define ELF_DATA               ELFDATA2LSB
 #endif
 
 /* Table 4-2, ARM-specific e_flags */
@@ -52,6 +57,21 @@
 #define EF_ARM_EABI_VER5         0x05000000
 
 #define EF_ARM_BE8               0x00800000
+
+#define EF_ARM_ABI_FLOAT_SOFT    0x00000200
+#define EF_ARM_ABI_FLOAT_HARD    0x00000400
+
+#ifdef __VFP_FP__
+#  ifdef __ARM_PCS_VFP
+#    define EF_ARM_ABI_FLOAT     EF_ARM_ABI_FLOAT_HARD
+#  else
+#    define EF_ARM_ABI_FLOAT     EF_ARM_ABI_FLOAT_SOFT
+#  endif
+#else
+#  define EF_ARM_ABI_FLOAT       0
+#endif
+
+#define EF_FLAG                  (EF_ARM_EABI_VER5 | EF_ARM_ABI_FLOAT)
 
 /* Table 4-4, Processor specific section types */
 
@@ -227,5 +247,14 @@
 #define DT_ARM_SYMTABSZ          0x70000001
 #define DT_ARM_PREEMPTMAP        0x70000002
 #define DT_ARM_RESERVED2         0x70000003
+
+/* ELF register definitions */
+
+/* Holds the general purpose registers $a1 * through to $pc
+ * at indices 0 to 15.  At index 16 the program status register.
+ * Index 17 should be set to zero.
+ */
+
+typedef unsigned long elf_gregset_t[18];
 
 #endif /* __ARCH_ARM_INCLUDE_ELF_H */

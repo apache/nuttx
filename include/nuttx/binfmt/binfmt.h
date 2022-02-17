@@ -33,6 +33,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
+#include <nuttx/streams.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -102,6 +103,15 @@ struct binary_s
   CODE int (*unload)(FAR struct binary_s *bin);
 };
 
+/* This describes binfmt coredump filed */
+
+struct memory_region_s
+{
+  uintptr_t start;   /* Start address of this region */
+  uintptr_t end;     /* End address of this region */
+  uint32_t  flags;   /* Figure 5-3: Segment Flag Bits: PF_[X|W|R] */
+};
+
 /* This describes one binary format handler */
 
 struct binfmt_s
@@ -120,6 +130,11 @@ struct binfmt_s
   /* Unload module callback */
 
   CODE int (*unload)(FAR struct binary_s *bin);
+
+  /* Unload module callback */
+
+  CODE int (*coredump)(FAR struct memory_region_s *regions,
+                       FAR struct lib_outstream_s *stream);
 };
 
 /****************************************************************************
@@ -174,6 +189,22 @@ int register_binfmt(FAR struct binfmt_s *binfmt);
  ****************************************************************************/
 
 int unregister_binfmt(FAR struct binfmt_s *binfmt);
+
+/****************************************************************************
+ * Name: core_dump
+ *
+ * Description:
+ *   This function for generating core dump stream.
+ *
+ * Returned Value:
+ *   This is a NuttX internal function so it follows the convention that
+ *   0 (OK) is returned on success and a negated errno is returned on
+ *   failure.
+ *
+ ****************************************************************************/
+
+int core_dump(FAR struct memory_region_s *regions,
+              FAR struct lib_outstream_s *stream);
 
 /****************************************************************************
  * Name: load_module

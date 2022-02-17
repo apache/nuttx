@@ -195,7 +195,7 @@ static void hostfs_mkpath(FAR struct hostfs_mountpt_s  *fs,
 
   /* Copy base host path to output */
 
-  strncpy(path, fs->fs_root, pathlen);
+  strlcpy(path, fs->fs_root, pathlen);
 
   /* Be sure we aren't trying to use ".." to display outside of our
    * mounted path.
@@ -970,14 +970,30 @@ static int hostfs_readdir(FAR struct inode *mountpt,
 static int hostfs_rewinddir(FAR struct inode *mountpt,
                             FAR struct fs_dirent_s *dir)
 {
+  FAR struct hostfs_mountpt_s *fs;
+  int ret;
+
   /* Sanity checks */
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
+
+  /* Recover our private data from the inode instance */
+
+  fs = mountpt->i_private;
+
+  /* Take the semaphore */
+
+  ret = hostfs_semtake(fs);
+  if (ret < 0)
+    {
+      return ret;
+    }
 
   /* Call the host and let it do all the work */
 
   host_rewinddir(dir->u.hostfs.fs_dir);
 
+  hostfs_semgive(fs);
   return OK;
 }
 
@@ -997,7 +1013,8 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
 {
   FAR struct hostfs_mountpt_s  *fs;
   FAR char *options;
-  char *ptr, *saveptr;
+  char *saveptr;
+  char *ptr;
   int len;
   int ret;
 
@@ -1034,7 +1051,7 @@ static int hostfs_bind(FAR struct inode *blkdriver, FAR const void *data,
     {
       if ((strncmp(ptr, "fs=", 3) == 0))
         {
-          strncpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
+          strlcpy(fs->fs_root, &ptr[3], sizeof(fs->fs_root));
         }
 
       ptr = strtok_r(NULL, ",", &saveptr);
@@ -1327,10 +1344,10 @@ int hostfs_rename(FAR struct inode *mountpt, FAR const char *oldrelpath,
 
   /* Append to the host's root directory */
 
-  strncpy(oldpath, fs->fs_root, sizeof(oldpath));
-  strncat(oldpath, oldrelpath, sizeof(oldpath)-strlen(oldpath)-1);
-  strncpy(newpath, fs->fs_root, sizeof(newpath));
-  strncat(newpath, newrelpath, sizeof(newpath)-strlen(newpath)-1);
+  strlcpy(oldpath, fs->fs_root, sizeof(oldpath));
+  strlcat(oldpath, oldrelpath, sizeof(oldpath));
+  strlcpy(newpath, fs->fs_root, sizeof(newpath));
+  strlcat(newpath, newrelpath, sizeof(newpath));
 
   /* Call the host FS to do the mkdir */
 

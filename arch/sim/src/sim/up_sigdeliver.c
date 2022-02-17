@@ -66,13 +66,6 @@ void sim_sigdeliver(void)
   irqstate_t flags = enter_critical_section();
 #endif
 
-  /* Save the errno.  This must be preserved throughout the signal handling
-   * so that the user code final gets the correct errno value (probably
-   * EINTR).
-   */
-
-  int saved_errno = get_errno();
-
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
    * handler executes, but we also need to restore the irqcount when the
@@ -133,10 +126,6 @@ void sim_sigdeliver(void)
       enter_critical_section();
     }
 #endif
-
-  /* Restore the saved errno value */
-
-  set_errno(saved_errno);
 
   /* Allows next handler to be scheduled */
 

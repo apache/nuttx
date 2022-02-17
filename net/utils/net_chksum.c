@@ -119,7 +119,7 @@ uint16_t chksum(uint16_t sum, FAR const uint8_t *data, uint16_t len)
 #ifndef CONFIG_NET_ARCH_CHKSUM
 uint16_t net_chksum(FAR uint16_t *data, uint16_t len)
 {
-  return htons(chksum(0, (uint8_t *)data, len));
+  return HTONS(chksum(0, (uint8_t *)data, len));
 }
 #endif /* CONFIG_NET_ARCH_CHKSUM */
 

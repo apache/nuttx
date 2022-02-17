@@ -42,8 +42,8 @@
  * Broadcom 802.11abg Networking Device Driver
  */
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_IOCTL_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_IOCTL_H
 
 /****************************************************************************
  * Included Files
@@ -3053,4 +3053,4 @@ typedef enum
   WLC_E_REASON_FORCE_32_BIT     = 0x7ffffffe                     /* Force enum to be stored in 32 bit variable */
 } wl_event_reason_t;
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_IOCTL_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_IOCTL_H */

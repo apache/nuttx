@@ -1,0 +1,12 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config FS_RPMSGFS
+	bool "RPMSG File System"
+	default n
+	depends on OPENAMP
+	---help---
+		Use rpmsg file system to mount remote directories to local.
+		This the method for user to use remote file like own core.

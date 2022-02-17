@@ -238,6 +238,9 @@ static const struct file_operations g_tsdops =
   NULL,            /* seek */
   sam_tsd_ioctl,   /* ioctl */
   sam_tsd_poll     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL           /* unlink */
+#endif
 };
 
 /* The driver state structure is pre-allocated. */
@@ -921,7 +924,7 @@ static ssize_t sam_tsd_read(struct file *filep, char *buffer, size_t len)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (struct sam_tsd_s *)inode->i_private;
+  priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Verify that the caller has provided a buffer large enough to receive
    * the touch data.
@@ -1043,7 +1046,7 @@ static int sam_tsd_ioctl(struct file *filep, int cmd, unsigned long arg)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (struct sam_tsd_s *)inode->i_private;
+  priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Get exclusive access to the driver data structure */
 
@@ -1078,7 +1081,7 @@ static int sam_tsd_poll(struct file *filep, struct pollfd *fds, bool setup)
   inode = filep->f_inode;
 
   DEBUGASSERT(inode && inode->i_private);
-  priv  = (struct sam_tsd_s *)inode->i_private;
+  priv = (struct sam_tsd_s *)inode->i_private;
 
   /* Get exclusive access to the ADC hardware */
 
@@ -1194,7 +1197,7 @@ static void sam_tsd_startuptime(struct sam_tsd_s *priv, uint32_t time)
       startup /= 10;
       if (startup)
         {
-          startup --;
+          startup--;
         }
     }
 
@@ -1318,7 +1321,7 @@ static void sam_tsd_tracking(struct sam_tsd_s *priv, uint32_t time)
       tracktim /= 10;
       if (tracktim)
         {
-          tracktim --;
+          tracktim--;
         }
     }
 

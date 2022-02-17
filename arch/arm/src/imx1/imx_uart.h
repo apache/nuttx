@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMX1_CHIP_IMX_UART_H
-#define __ARCH_ARM_SRC_IMX1_CHIP_IMX_UART_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_UART_H
+#define __ARCH_ARM_SRC_IMX1_IMX_UART_H
 
 /****************************************************************************
  * Included Files
@@ -209,4 +209,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_IMX1_CHIP_IMX_UART_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_UART_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_COMMON_ARMV8_M_PSR_H
-#define __ARCH_ARM_SRC_COMMON_ARMV8_M_PSR_H
+#ifndef __ARCH_ARM_SRC_ARMV8_M_PSR_H
+#define __ARCH_ARM_SRC_ARMV8_M_PSR_H
 
 /****************************************************************************
  * Included Files
@@ -117,4 +117,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_COMMON_ARMV8_M_PSR_H */
+#endif /* __ARCH_ARM_SRC_ARMV8_M_PSR_H */

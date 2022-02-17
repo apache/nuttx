@@ -537,7 +537,7 @@ if you want to build the sim:
 
   * ELF toolchain (if you want to build modules for CONFIG_LIBC_MODLIB)
 
-    brew install x86_64-elf-gc
+    brew install x86_64-elf-gcc
 
 # INSTALLATION
 
@@ -1325,7 +1325,7 @@ damage your configuration (see
   environment:
 
   1. You can run the configuration tool using Cygwin.  However, the
-     Cygwin `Makefile.win` will complain so to do this will, you have
+     Cygwin `Win.mk` will complain so to do this will, you have
      to manually edit the `.config` file:
 
      a. Delete the line: `CONFIG_WINDOWS_NATIVE=y`
@@ -2079,6 +2079,8 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |   `- metro-m4/
      |   |   |      `- README.txt
      |   |   |- samv7/
+     |   |   |   |- same70-qmtech/
+     |   |   |   |   `- README.txt
      |   |   |   |- same70-xplained/
      |   |   |   |   `- README.txt
      |   |   |   `- samv71-xult/

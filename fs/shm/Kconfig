@@ -12,7 +12,7 @@ config FS_SHM
 
 if FS_SHM
 
-config FS_SHMPATH
+config FS_SHM_VFS_PATH
 	string "Path to shared memory object storage"
 	default "/var/shm"
 	---help---

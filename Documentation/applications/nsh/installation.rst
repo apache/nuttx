@@ -14,11 +14,11 @@ increasing difficulty:
   #. You replace the sample code at ``apps/examples/nsh/nsh_main.c`` with
      whatever start-up logic that you want. NSH is a library at
      ``apps/nshlib``. ``apps.examples/nsh`` is just a tiny, example
-     start-up function (``CONFIG_USER_ENTRYPOINT``\ ()) that that runs
+     start-up function (``CONFIG_INIT_ENTRYPOINT``\ ()) that runs
      immediately and illustrates how to start NSH If you want something
      else to run immediately then you can write your write your own custom
-     ``CONFIG_USER_ENTRYPOINT``\ () function and then start other tasks
-     from your custom ``CONFIG_USER_ENTRYPOINT``\ ().
+     ``CONFIG_INIT_ENTRYPOINT``\ () function and then start other tasks
+     from your custom ``CONFIG_INIT_ENTRYPOINT``\ ().
 
   #. NSH also supports a start-up script that executed when NSH first
      runs. This mechanism has the advantage that the start-up script can

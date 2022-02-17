@@ -52,9 +52,9 @@
 #define ICMPv6REPLY      ((FAR struct icmpv6_echo_reply_s *)icmpv6)
 #define ICMPv6SIZE       ((dev)->d_len - iplen)
 
-#define ICMPv6SOLICIT    ((struct icmpv6_neighbor_solicit_s *)icmpv6)
-#define ICMPv6ADVERTISE  ((struct icmpv6_neighbor_advertise_s *)icmpv6)
-#define ICMPv6RADVERTISE ((struct icmpv6_router_advertise_s *)icmpv6)
+#define ICMPv6SOLICIT    ((FAR struct icmpv6_neighbor_solicit_s *)icmpv6)
+#define ICMPv6ADVERTISE  ((FAR struct icmpv6_neighbor_advertise_s *)icmpv6)
+#define ICMPv6RADVERTISE ((FAR struct icmpv6_router_advertise_s *)icmpv6)
 
 #define MLDQUERY         ((FAR struct mld_mcast_listen_query_s *)icmpv6)
 #define MLDREPORT_V1     ((FAR struct mld_mcast_listen_report_v1_s *)icmpv6)
@@ -460,7 +460,7 @@ void icmpv6_input(FAR struct net_driver_s *dev, unsigned int iplen)
 
         /* Dispatch the ECHO reply to the waiting thread */
 
-        flags = devif_conn_event(dev, conn, flags, conn->list);
+        flags = devif_conn_event(dev, conn, flags, conn->sconn.list);
 
         /* Was the ECHO reply consumed by any waiting thread? */
 

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H
-#define __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H
+#ifndef __BOARDS_RENESAS_SH1_US7032EVB1_INCLUDE_BOARD_H
+#define __BOARDS_RENESAS_SH1_US7032EVB1_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ extern "C"
 #endif
 #endif
 
-#endif /* __BOARDS_RENESAS_SH7032_US7032EVB1_BOARD_H */
+#endif /* __BOARDS_RENESAS_SH1_US7032EVB1_INCLUDE_BOARD_H */

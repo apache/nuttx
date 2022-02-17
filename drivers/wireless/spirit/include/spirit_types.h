@@ -32,8 +32,8 @@
  *
  ******************************************************************************/
 
-#ifndef __INCLUDE_NUTT_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H
-#define __INCLUDE_NUTT_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H
+#ifndef __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H
+#define __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H
 
 /* This module provide some types definitions which will be used in
  * all the modules of this library. Here is defined also the global
@@ -171,4 +171,4 @@ struct spirit_library_s
 }
 #endif
 
-#endif /* __INCLUDE_NUTT_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H */
+#endif /* __DRIVERS_WIRELESS_SPIRIT_INCLUDE_SPIRIT_TYPES_H */

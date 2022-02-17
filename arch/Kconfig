@@ -9,6 +9,7 @@ choice
 
 config ARCH_ARM
 	bool "ARM"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_STACKCHECK
@@ -16,6 +17,7 @@ config ARCH_ARM
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_THREAD_LOCAL
 	---help---
 		The ARM architectures
 
@@ -58,17 +60,20 @@ config ARCH_RENESAS
 
 config ARCH_RISCV
 	bool "RISC-V"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_HAVE_STDARG_H
 	select ARCH_HAVE_SYSCALL_HOOKS
 	select ARCH_HAVE_RDWR_MEM_CPU_RUN
+	select ARCH_HAVE_THREAD_LOCAL
 	---help---
 		RISC-V 32 and 64-bit RV32 / RV64 architectures.
 
 config ARCH_SIM
 	bool "Simulation"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_MULTICPU
 	select ARCH_HAVE_RTC_SUBSECONDS
 	select ARCH_HAVE_SERIAL_TERMIOS
@@ -98,11 +103,13 @@ config ARCH_X86_64
 
 config ARCH_XTENSA
 	bool "Xtensa"
+	select ARCH_HAVE_BACKTRACE
 	select ARCH_HAVE_INTERRUPTSTACK
 	select ARCH_HAVE_STACKCHECK
 	select ARCH_HAVE_CUSTOMOPT
-	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_STDARG_H
+	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
+	select ARCH_HAVE_SYSCALL_HOOKS
 	---help---
 		Cadence® Tensilica® Xtensa® actictures.
 
@@ -123,6 +130,13 @@ config ARCH_OR1K
 	---help---
 		OpenRISC architectures.
 
+config ARCH_SPARC
+	bool "SPARC"
+	select ARCH_HAVE_INTERRUPTSTACK
+	select ARCH_HAVE_CUSTOMOPT
+	---help---
+		SPARC architectures (SPARC V8)
+
 endchoice
 
 config ARCH
@@ -140,6 +154,7 @@ config ARCH
 	default "z16"     if ARCH_Z16
 	default "z80"     if ARCH_Z80
 	default "or1k"    if ARCH_OR1K
+	default "sparc"   if ARCH_SPARC
 
 source "arch/arm/Kconfig"
 source "arch/avr/Kconfig"
@@ -155,6 +170,7 @@ source "arch/xtensa/Kconfig"
 source "arch/z16/Kconfig"
 source "arch/z80/Kconfig"
 source "arch/or1k/Kconfig"
+source "arch/sparc/Kconfig"
 
 config ARCH_CHIP_CUSTOM
 	bool
@@ -338,11 +354,20 @@ config ARCH_HAVE_PROGMEM_READ
 	default n
 	depends on ARCH_HAVE_PROGMEM
 
+config ARCH_HAVE_PROGMEM_ERASESTATE
+	bool
+	default n
+	depends on ARCH_HAVE_PROGMEM
+
 config ARCH_HAVE_RESET
 	bool
 	default n
 
 config ARCH_HAVE_TESTSET
+	bool
+	default n
+
+config ARCH_HAVE_THREAD_LOCAL
 	bool
 	default n
 
@@ -411,8 +436,8 @@ config ARCH_USE_TEXT_HEAP
 	default n
 	depends on ARCH_HAVE_TEXT_HEAP
 	---help---
-		This option enables architecture-sepecific memory allocator
-		for dynamic code loading. For example, ESP32 has a separate memory
+		This option enables architecture-specific memory allocator
+		for dynamic code loading. For example, ESP32 has separate memory
 		regions for instruction and data and the memory region used for
 		usual malloc doesn't work for instruction.
 

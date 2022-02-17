@@ -26,6 +26,70 @@
  ****************************************************************************/
 
 #include <elf.h>
+#ifdef CONFIG_ELF_COREDUMP
+#include <arch/elf.h>
+#endif
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define ELF_PRARGSZ    (80)  /* Number of chars for args */
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+#ifdef CONFIG_ELF_COREDUMP
+typedef struct elf_prpsinfo_s
+{
+  char           pr_state;    /* Numeric process state */
+  char           pr_sname;    /* Char for pr_state */
+  char           pr_zomb;     /* Zombie */
+  char           pr_nice;     /* Nice val */
+  unsigned long  pr_flag;     /* Flags */
+  unsigned short pr_uid;
+  unsigned short pr_gid;
+  int            pr_pid;
+  int            pr_ppid;
+  int            pr_pgrp;
+  int            pr_sid;
+  char           pr_fname[16];           /* Filename of executable */
+  char           pr_psargs[ELF_PRARGSZ]; /* Initial part of arg list */
+} elf_prpsinfo_t;
+
+typedef struct elf_siginfo_s
+{
+  int            si_signo;    /* Signal number */
+  int            si_code;     /* Extra code */
+  int            si_errno;    /* Errno */
+} elf_siginfo_t;
+
+typedef struct elf_timeval_s
+{
+  long           tv_sec;      /* Seconds */
+  long           tv_usec;     /* Microseconds */
+} elf_timeval_t;
+
+typedef struct elf_prstatus_s
+{
+  elf_siginfo_t  pr_info;     /* Info associated with signal */
+  short          pr_cursig;   /* Current signal */
+  short          pr_padding;  /* Padding align */
+  unsigned long  pr_sigpend;  /* Set of pending signals */
+  unsigned long  pr_sighold;  /* Set of held signals */
+  int            pr_pid;
+  int            pr_ppid;
+  int            pr_pgrp;
+  int            pr_sid;
+  elf_timeval_t  pr_utime;    /* User time */
+  elf_timeval_t  pr_stime;    /* System time */
+  elf_timeval_t  pr_cutime;   /* Cumulative user time */
+  elf_timeval_t  pr_cstime;   /* Cumulative system time */
+  elf_gregset_t  pr_regs;
+  int            pr_fpvalid;  /* True if math co-processor being used */
+} elf_prstatus_t;
+#endif
 
 /****************************************************************************
  * Public Function Prototypes

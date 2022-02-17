@@ -134,8 +134,7 @@
  * ARG:           A pointer to an instance of struct boardioc_builtin_s
  * CONFIGURATION: This BOARDIOC command is always available when
  *                CONFIG_BUILTIN is enabled, but does nothing unless
- *                CONFIG_BUILD_PROTECTED and CONFIG_FS_BINFS are also
- *                selected.
+ *                CONFIG_BUILD_PROTECTED is also selected.
  * DEPENDENCIES:  None
  *
  * CMD:           BOARDIOC_USBDEV_CONTROL
@@ -155,7 +154,7 @@
  * ARG:           A reference readable instance of struct
  *                boardioc_vncstart_s
  * CONFIGURATION: CONFIG_VNCSERVER
- * DEPENDENCIES:  VNC server provides vnc_default_fbinitialize()
+ * DEPENDENCIES:  VNC server provides nx_vnc_fbinitialize()
  *
  * CMD:           BOARDIOC_NXTERM
  * DESCRIPTION:   Create an NX terminal device

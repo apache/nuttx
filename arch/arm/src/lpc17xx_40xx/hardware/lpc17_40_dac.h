@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_DAC_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_DAC_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_DAC_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_DAC_H
 
 /****************************************************************************
  * Included Files
@@ -82,4 +82,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_DAC_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_DAC_H */

@@ -785,7 +785,7 @@ static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
       /* Look up the DMA channel code for TX:  Peripheral is the sink. */
 
       field   = sam_sink_channel(xdmach, pid);
-      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+      regval |= (field << XDMACH_CC_PERID_SHIFT);
 
 #if 0 /* Not supported */
       /* 10. Set SWREQ to use software request (only relevant for a
@@ -1356,7 +1356,7 @@ static inline int sam_multiple(struct sam_xdmach_s *xdmach)
    *    (CNDA) Register with the first descriptor address and bit NDAIF
    *    with the master interface identifier.
    *
-   * REVIST:  Using NDAIF=0.  Is that correct?
+   * REVISIT:  Using NDAIF=0.  Is that correct?
    */
 
   paddr = sam_physramaddr((uintptr_t)llhead);

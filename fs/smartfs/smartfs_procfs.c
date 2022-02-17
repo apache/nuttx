@@ -604,7 +604,8 @@ static int smartfs_closedir(FAR struct fs_dirent_s *dir)
 static int smartfs_readdir(struct fs_dirent_s *dir)
 {
   FAR struct smartfs_level1_s *level1;
-  int ret, index;
+  int ret;
+  int index;
 
   DEBUGASSERT(dir && dir->u.procfs);
   level1 = dir->u.procfs;
@@ -640,8 +641,8 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
             }
 
           dir->fd_dir.d_type = DTYPE_DIRECTORY;
-          strncpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name,
-                  NAME_MAX);
+          strlcpy(dir->fd_dir.d_name, level1->mount->fs_blkdriver->i_name,
+                  sizeof(dir->fd_dir.d_name));
 
           /* Advance to next entry */
 
@@ -653,16 +654,16 @@ static int smartfs_readdir(struct fs_dirent_s *dir)
           /* Listing the contents of a specific mount */
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strncpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name,
-                  NAME_MAX);
+          strlcpy(dir->fd_dir.d_name, g_direntry[level1->base.index++].name,
+                  sizeof(dir->fd_dir.d_name));
         }
       else if (level1->base.level == 3)
         {
           /* Listing the contents of a specific entry */
 
           dir->fd_dir.d_type = g_direntry[level1->base.index].type;
-          strncpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name,
-                  NAME_MAX);
+          strlcpy(dir->fd_dir.d_name, g_direntry[level1->direntry].name,
+                  sizeof(dir->fd_dir.d_name));
           level1->base.index++;
         }
 
@@ -874,7 +875,8 @@ static size_t   smartfs_mem_read(FAR struct file *filep, FAR char *buffer,
   FAR struct smartfs_file_s *priv;
   int       ret;
   uint16_t  x;
-  size_t    len, total;
+  size_t    len;
+  size_t    total;
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 
@@ -938,9 +940,13 @@ static size_t   smartfs_erasemap_read(FAR struct file *filep,
 {
   struct mtd_smart_procfs_data_s procfs_data;
   FAR struct smartfs_file_s *priv;
-  int       ret, rows, cols;
-  size_t    x, y;
-  size_t    len, copylen;
+  int       ret;
+  int       rows;
+  int       cols;
+  size_t    x;
+  size_t    y;
+  size_t    len;
+  size_t    copylen;
 
   priv = (FAR struct smartfs_file_s *) filep->f_priv;
 

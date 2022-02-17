@@ -61,3 +61,9 @@ config LIBC_ENVPATH
 	---help---
 		Use the contents of the common environment variable to locate executable
 		or library files.  Default: n
+
+config LIBC_ERR
+	bool "Support err() verr() verrx() warn() vwarn() vwarnx()"
+	default y
+	---help---
+		Support err() verr() verrx() warn() vwarn() vwarnx().  Default: y

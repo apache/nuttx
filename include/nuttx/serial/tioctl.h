@@ -197,6 +197,10 @@
 
 #define SER_SWAP_ENABLED   (1 << 0) /* Enable/disable RX/TX swap */
 
+/* LIN Protocol Support */
+
+#define TIOCSLINID      _TIOC(0x0037) /* Master send one LIN header with specified LIN identifier: uint8_t */
+
 /****************************************************************************
  * Public Type Definitions
  ****************************************************************************/

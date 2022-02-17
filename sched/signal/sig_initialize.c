@@ -71,12 +71,6 @@ sq_queue_t  g_sigpendingirqsignal;
  * Private Data
  ****************************************************************************/
 
-/* g_sigactionalloc is a pointer to the start of the allocated blocks of
- * signal actions.
- */
-
-static sigactq_t  *g_sigactionalloc;
-
 /* g_sigpendingactionalloc is a pointer to the start of the allocated
  * blocks of pending signal actions.
  */
@@ -229,33 +223,4 @@ void nxsig_initialize(void)
                                    CONFIG_SIG_PREALLOC_IRQ_ACTIONS,
                                    SIG_ALLOC_IRQ);
   DEBUGASSERT(g_sigpendingirqsignalalloc != NULL);
-}
-
-/****************************************************************************
- * Name: nxsig_alloc_actionblock
- *
- * Description:
- *   Allocate a block of signal actions and place them
- *   on the free list.
- *
- ****************************************************************************/
-
-void nxsig_alloc_actionblock(void)
-{
-  FAR sigactq_t *sigact;
-  int i;
-
-  /* Allocate a block of signal actions */
-
-  g_sigactionalloc =
-    (FAR sigactq_t *)kmm_malloc((sizeof(sigactq_t)) * NUM_SIGNAL_ACTIONS);
-
-  if (g_sigactionalloc != NULL)
-    {
-      sigact = g_sigactionalloc;
-      for (i = 0; i < NUM_SIGNAL_ACTIONS; i++)
-        {
-          sq_addlast((FAR sq_entry_t *)sigact++, &g_sigfreeaction);
-        }
-    }
 }

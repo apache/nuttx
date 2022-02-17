@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MODEM_ALTMDM_ALTMDM_PM_STATE_H
-#define __DRIVERS_MODEM_ALTMDM_ALTMDM_PM_STATE_H
+#ifndef __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H
+#define __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H
 
 #if defined(CONFIG_MODEM_ALTMDM)
 
@@ -68,4 +68,4 @@ uint32_t altmdm_pm_getinternalstate(void);
 void altmdm_pm_setinternalstate(uint32_t state);
 
 #endif
-#endif /* __DRIVERS_MODEM_ALTMDM_ALTMDM_PM_STATE_H */
+#endif /* __DRIVERS_MODEM_ALTAIR_ALTMDM_PM_STATE_H */

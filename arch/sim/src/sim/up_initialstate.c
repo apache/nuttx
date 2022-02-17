@@ -57,9 +57,11 @@ void up_initial_state(struct tcb_s *tcb)
   if (tcb->pid == 0)
     {
       tcb->stack_alloc_ptr = (void *)(up_getsp() -
-                                      CONFIG_IDLETHREAD_STACKSIZE);
+                                      CONFIG_IDLETHREAD_STACKSIZE -
+                                      CONFIG_SIM_STACKSIZE_ADJUSTMENT);
       tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
-      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE;
+      tcb->adj_stack_size  = CONFIG_IDLETHREAD_STACKSIZE +
+                             CONFIG_SIM_STACKSIZE_ADJUSTMENT;
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -80,12 +82,19 @@ void up_initial_state(struct tcb_s *tcb)
    * Thus, we need to emulate the effect of a CALL here, by subtracting
    * sizeof(xcpt_reg_t), which is the amount a CALL would move RSP to store
    * the return address.
+   *
+   * Note: On ARM64 architectures the return address is passed via LR
+   *       register. No extra adjustment for the stack needed.
    */
 
-  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size -
-                                     sizeof(xcpt_reg_t);
+  tcb->xcp.regs[JB_SP] = (xcpt_reg_t)tcb->stack_base_ptr
+#if !defined(CONFIG_HOST_ARM64)
+                                   - sizeof(xcpt_reg_t)
+#endif
+                                   + tcb->adj_stack_size;
+
   tcb->xcp.regs[JB_PC] = (xcpt_reg_t)tcb->start;
+
 #ifdef CONFIG_SIM_ASAN
   __asan_unpoison_memory_region(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 #endif

@@ -131,5 +131,10 @@ config FS_PROCFS_EXCLUDE_SMARTFS
 	depends on FS_SMARTFS
 	default n
 
+config FS_PROCFS_EXCLUDE_TCBINFO
+	bool "Exclude tcbinfo procfs"
+	depends on DEBUG_TCBINFO
+	default n
+
 endmenu # Exclude individual procfs entries
 endif # FS_PROCFS

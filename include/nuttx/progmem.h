@@ -234,6 +234,18 @@ ssize_t up_progmem_write(size_t addr, FAR const void *buf, size_t count);
 ssize_t up_progmem_read(size_t addr, FAR void *buf, size_t count);
 #endif
 
+/****************************************************************************
+ * Name: up_progmem_erasestate
+ *
+ * Description:
+ *   Return value of erase state.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_HAVE_PROGMEM_ERASESTATE
+ssize_t up_progmem_erasestate(void);
+#endif /* CONFIG_ARCH_HAVE_PROGMEM_ERASESTATE */
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

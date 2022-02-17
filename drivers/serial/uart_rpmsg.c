@@ -77,9 +77,6 @@ struct uart_rpmsg_priv_s
   FAR const char        *cpuname;
   FAR void              *recv_data;
   bool                  last_upper;
-#ifdef CONFIG_SERIAL_TERMIOS
-  struct termios        termios;
-#endif
 };
 
 /****************************************************************************
@@ -90,8 +87,6 @@ static int  uart_rpmsg_setup(FAR struct uart_dev_s *dev);
 static void uart_rpmsg_shutdown(FAR struct uart_dev_s *dev);
 static int  uart_rpmsg_attach(FAR struct uart_dev_s *dev);
 static void uart_rpmsg_detach(FAR struct uart_dev_s *dev);
-static int  uart_rpmsg_ioctl(FAR struct file *filep,
-                             int cmd, unsigned long arg);
 static void uart_rpmsg_rxint(FAR struct uart_dev_s *dev, bool enable);
 static bool uart_rpmsg_rxflowcontrol(FAR struct uart_dev_s *dev,
                                      unsigned int nbuffered, bool upper);
@@ -120,7 +115,6 @@ static const struct uart_ops_s g_uart_rpmsg_ops =
   .shutdown      = uart_rpmsg_shutdown,
   .attach        = uart_rpmsg_attach,
   .detach        = uart_rpmsg_detach,
-  .ioctl         = uart_rpmsg_ioctl,
   .rxint         = uart_rpmsg_rxint,
   .rxflowcontrol = uart_rpmsg_rxflowcontrol,
   .dmasend       = uart_rpmsg_dmasend,
@@ -153,54 +147,6 @@ static int uart_rpmsg_attach(FAR struct uart_dev_s *dev)
 
 static void uart_rpmsg_detach(FAR struct uart_dev_s *dev)
 {
-}
-
-static int uart_rpmsg_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg)
-{
-  int ret = -ENOTTY;
-
-#ifdef CONFIG_SERIAL_TERMIOS
-  struct uart_dev_s *dev = filep->f_inode->i_private;
-  struct uart_rpmsg_priv_s *priv = dev->priv;
-
-  switch (cmd)
-    {
-    case TCGETS:
-      {
-        FAR struct termios *termiosp = (struct termios *)arg;
-
-        if (termiosp)
-          {
-            *termiosp = priv->termios;
-            ret = OK;
-          }
-        else
-          {
-            ret = -EINVAL;
-          }
-      }
-      break;
-
-    case TCSETS:
-      {
-        FAR struct termios *termiosp = (struct termios *)arg;
-
-        if (termiosp)
-          {
-            priv->termios = *termiosp;
-            ret = OK;
-          }
-        else
-          {
-            ret = -EINVAL;
-          }
-      }
-      break;
-    }
-#endif
-
-  return ret;
 }
 
 static void uart_rpmsg_rxint(FAR struct uart_dev_s *dev, bool enable)
@@ -245,7 +191,7 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
 
   memset(msg, 0, sizeof(*msg));
 
-  space = C2B(space - sizeof(*msg));
+  space = space - sizeof(*msg);
 
   if (len > space)
     {
@@ -254,13 +200,12 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
 
   if (len > xfer->length)
     {
-      cmem2bmem(msg->data, 0, xfer->buffer, xfer->length);
-      cmem2bmem(msg->data + B2C_OFF(xfer->length), B2C_REM(xfer->length),
-              xfer->nbuffer, len - xfer->length);
+      memcpy(msg->data, xfer->buffer, xfer->length);
+      memcpy(msg->data + xfer->length, xfer->nbuffer, len - xfer->length);
     }
   else
     {
-      cmem2bmem(msg->data, 0, xfer->buffer, len);
+      memcpy(msg->data, xfer->buffer, len);
     }
 
   msg->count          = len;
@@ -268,7 +213,7 @@ static void uart_rpmsg_dmasend(FAR struct uart_dev_s *dev)
   msg->header.result  = -ENXIO;
   msg->header.cookie  = (uintptr_t)dev;
 
-  rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + B2C(len));
+  rpmsg_send_nocopy(&priv->ept, msg, sizeof(*msg) + len);
 }
 
 static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
@@ -286,13 +231,12 @@ static void uart_rpmsg_dmareceive(FAR struct uart_dev_s *dev)
 
   if (len > xfer->length)
     {
-      bmem2cmem(xfer->buffer, msg->data, 0, xfer->length);
-      bmem2cmem(xfer->nbuffer, msg->data + B2C_OFF(xfer->length),
-              B2C_REM(xfer->length), len - xfer->length);
+      memcpy(xfer->buffer, msg->data, xfer->length);
+      memcpy(xfer->nbuffer, msg->data, len - xfer->length);
     }
   else
     {
-      bmem2cmem(xfer->buffer, msg->data, 0, len);
+      memcpy(xfer->buffer, msg->data, len);
     }
 
   xfer->nbytes = len;

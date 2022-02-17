@@ -839,11 +839,11 @@ int rwb_initialize(FAR struct rwbuffer_s *rwb)
       rwb->wrbuffer = kmm_malloc(allocsize);
       if (!rwb->wrbuffer)
         {
-          ferr("Write buffer kmm_malloc(%d) failed\n", allocsize);
+          ferr("Write buffer kmm_malloc(%" PRIu32 ") failed\n", allocsize);
           return -ENOMEM;
         }
 
-      finfo("Write buffer size: %d bytes\n", allocsize);
+      finfo("Write buffer size: %" PRIu32 " bytes\n", allocsize);
     }
 #endif /* CONFIG_DRVR_WRITEBUFFER */
 

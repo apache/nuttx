@@ -20,7 +20,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_umask.c lib_utsname.c
+CSRCS += lib_mknod.c lib_umask.c lib_utsname.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 
 # Support for platforms that do not have long long types
@@ -36,7 +36,7 @@ endif
 
 CSRCS += lib_dumpbuffer.c lib_dumpvbuffer.c lib_fnmatch.c lib_debug.c
 CSRCS += lib_crc64.c lib_crc32.c lib_crc16.c lib_crc8.c lib_crc8ccitt.c
-CSRCS += lib_crc8table.c lib_glob.c
+CSRCS += lib_crc8table.c lib_glob.c lib_execinfo.c
 
 # Keyboard driver encoder/decoder
 
@@ -54,6 +54,10 @@ endif
 
 ifeq ($(CONFIG_LIBC_ENVPATH),y)
 CSRCS += lib_envpath.c
+endif
+
+ifeq ($(CONFIG_LIBC_ERR),y)
+CSRCS += lib_err.c
 endif
 
 # To ensure uname information is newest,

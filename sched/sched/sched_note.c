@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
@@ -38,6 +39,18 @@
 #include <nuttx/sched_note.h>
 
 #include "sched/sched.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* CONFIG_LIBC_LONG_LONG is not a valid selection of the compiler does not
+ * support long long types.
+ */
+
+#ifndef CONFIG_HAVE_LONG_LONG
+#  undef CONFIG_LIBC_LONG_LONG
+#endif
 
 /****************************************************************************
  * Private Types
@@ -86,10 +99,8 @@ static struct note_filter_s g_note_filter =
     }
 };
 
-#ifdef CONFIG_SMP
+#ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
 static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
-#else
-static unsigned int g_note_disabled_irq_nest[1];
 #endif
 #endif
 
@@ -436,6 +447,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_stop_s));
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
   struct note_suspend_s note;
@@ -473,6 +485,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 
   sched_note_add(&note, sizeof(struct note_resume_s));
 }
+#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
@@ -514,6 +527,7 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
   sched_note_add(&note, sizeof(struct note_cpu_started_s));
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
   struct note_cpu_pause_s note;
@@ -591,6 +605,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
 
   sched_note_add(&note, sizeof(struct note_cpu_resumed_s));
 }
+#endif
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
@@ -786,6 +801,332 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
                  sizeof(struct note_irqhandler_s));
 }
 #endif
+
+#ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
+void sched_note_string(FAR const char *buf)
+{
+  FAR struct note_string_s *note;
+  uint8_t data[255];
+  unsigned int length;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  note = (FAR struct note_string_s *)data;
+  length = SIZEOF_NOTE_STRING(strlen(buf));
+  if (length > sizeof(data))
+    {
+      length = sizeof(data);
+    }
+
+  /* Format the note */
+
+  note_common(tcb, &note->nst_cmn, length,
+              NOTE_DUMP_STRING);
+
+  memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
+  data[length - 1] = '\0';
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(note, length);
+}
+
+void sched_note_dump(uint32_t module, uint8_t event,
+                     FAR const void *buf, size_t len)
+{
+  FAR struct note_binary_s *note;
+  char data[255];
+  unsigned int length;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  note = (FAR struct note_binary_s *)data;
+  length = SIZEOF_NOTE_BINARY(len);
+  if (length > sizeof(data))
+    {
+      length = sizeof(data);
+    }
+
+  /* Format the note */
+
+  note_common(tcb, &note->nbi_cmn, length,
+              NOTE_DUMP_BINARY);
+
+  note->nbi_module[0] = (uint8_t)(module         & 0xff);
+  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
+  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
+  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
+  note->nbi_event = event;
+  memcpy(note->nbi_data, buf, length - sizeof(struct note_binary_s) + 1);
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(note, length);
+}
+
+void sched_note_vprintf(FAR const char *fmt, va_list va)
+{
+  FAR struct note_string_s *note;
+  uint8_t data[255];
+  unsigned int length;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  note = (FAR struct note_string_s *)data;
+  length = vsnprintf(note->nst_data,
+                     sizeof(data) - sizeof(struct note_string_s),
+                     fmt,
+                     va);
+  length = SIZEOF_NOTE_STRING(length);
+  if (length > sizeof(data))
+    {
+      length = sizeof(data);
+    }
+
+  /* Format the note */
+
+  note_common(tcb, &note->nst_cmn, length,
+              NOTE_DUMP_STRING);
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(note, length);
+}
+
+void sched_note_vbprintf(uint32_t module, uint8_t event,
+                         FAR const char *fmt, va_list va)
+{
+  FAR struct note_binary_s *note;
+  uint8_t data[255];
+  begin_packed_struct union
+    {
+      char c;
+      short s;
+      int i;
+      long l;
+#ifdef CONFIG_LIBC_LONG_LONG
+      long long ll;
+#endif
+      intmax_t im;
+      size_t sz;
+      ptrdiff_t ptr;
+#ifdef CONFIG_HAVE_FLOAT
+      float f;
+#endif
+#ifdef CONFIG_HAVE_DOUBLE
+      double d;
+#endif
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+      long double ld;
+#endif
+    }
+
+  end_packed_struct *var;
+
+  char c;
+  int length;
+  bool search_fmt = 0;
+  int next = 0;
+  FAR struct tcb_s *tcb = this_task();
+
+  if (!note_isenabled())
+    {
+      return;
+    }
+
+  note = (FAR struct note_binary_s *)data;
+  length = sizeof(data) - sizeof(struct note_binary_s) + 1;
+
+  while ((c = *fmt++) != '\0')
+    {
+      if (c != '%' && search_fmt == 0)
+        {
+          continue;
+        }
+
+      search_fmt = 1;
+      var = (FAR void *)&note->nbi_data[next];
+
+      if (c == 'd' || c == 'i' || c == 'u' ||
+          c == 'o' || c == 'x' || c == 'X')
+        {
+          if (*(fmt - 2) == 'h' && *(fmt - 3) == 'h')
+            {
+              if (next + sizeof(var->c) > length)
+                {
+                  break;
+                }
+
+              var->c = va_arg(va, int);
+              next += sizeof(var->c);
+            }
+          else if (*(fmt - 2) == 'h')
+            {
+              if (next + sizeof(var->s) > length)
+                {
+                  break;
+                }
+
+              var->s = va_arg(va, int);
+              next += sizeof(var->s);
+            }
+          else if (*(fmt - 2) == 'j')
+            {
+              if (next + sizeof(var->im) > length)
+                {
+                  break;
+                }
+
+              var->im = va_arg(va, intmax_t);
+              next += sizeof(var->im);
+            }
+#ifdef CONFIG_LIBC_LONG_LONG
+          else if (*(fmt - 2) == 'l' && *(fmt - 3) == 'l')
+            {
+              if (next + sizeof(var->ll) > length)
+                {
+                  break;
+                }
+
+              var->ll = va_arg(va, long long);
+              next += sizeof(var->ll);
+            }
+#endif
+          else if (*(fmt - 2) == 'l')
+            {
+              if (next + sizeof(var->l) > length)
+                {
+                  break;
+                }
+
+              var->l = va_arg(va, long);
+              next += sizeof(var->l);
+            }
+          else if (*(fmt - 2) == 'z')
+            {
+              if (next + sizeof(var->sz) > length)
+                {
+                  break;
+                }
+
+              var->sz = va_arg(va, size_t);
+              next += sizeof(var->sz);
+            }
+          else if (*(fmt - 2) == 't')
+            {
+              if (next + sizeof(var->ptr) > length)
+                {
+                  break;
+                }
+
+              var->ptr = va_arg(va, ptrdiff_t);
+              next += sizeof(var->ptr);
+            }
+          else
+            {
+              if (next + sizeof(var->i) > length)
+                {
+                  break;
+                }
+
+              var->i = va_arg(va, int);
+              next += sizeof(var->i);
+            }
+
+          search_fmt = 0;
+        }
+
+      if (c == 'e' || c == 'f' || c == 'g' ||
+          c == 'E' || c == 'F' || c == 'G')
+        {
+          if (*(fmt - 2) == 'L')
+            {
+#ifdef CONFIG_HAVE_LONG_DOUBLE
+              if (next + sizeof(var->ld) > length)
+                {
+                  break;
+                }
+
+              var->ld = va_arg(va, long double);
+              next += sizeof(var->ld);
+#endif
+            }
+          else if (*(fmt - 2) == 'l')
+            {
+#ifdef CONFIG_HAVE_DOUBLE
+              if (next + sizeof(var->d) > length)
+                {
+                  break;
+                }
+
+              var->d = va_arg(va, double);
+              next += sizeof(var->d);
+#endif
+            }
+          else
+#ifdef CONFIG_HAVE_FLOAT
+            {
+              if (next + sizeof(var->l) > length)
+                {
+                  break;
+                }
+
+              var->l = va_arg(va, double);
+              next += sizeof(var->l);
+#endif
+            }
+
+          search_fmt = 0;
+        }
+    }
+
+  length = SIZEOF_NOTE_BINARY(next);
+
+  /* Format the note */
+
+  note_common(tcb, &note->nbi_cmn, length,
+              NOTE_DUMP_BINARY);
+
+  note->nbi_module[0] = (uint8_t)(module         & 0xff);
+  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
+  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
+  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
+  note->nbi_event = event;
+
+  /* Add the note to circular buffer */
+
+  sched_note_add(note, length);
+}
+
+void sched_note_printf(FAR const char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  sched_note_vprintf(fmt, va);
+  va_end(va);
+}
+
+void sched_note_bprintf(uint32_t module, uint8_t event,
+                        FAR const char *fmt, ...)
+{
+  va_list va;
+  va_start(va, fmt);
+  sched_note_vbprintf(module, event, fmt, va);
+  va_end(va);
+}
+#endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
 

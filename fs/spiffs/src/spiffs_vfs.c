@@ -342,9 +342,9 @@ static int spiffs_readdir_callback(FAR struct spiffs_s *fs,
         }
 #endif
 
-      strncpy(entryp->d_name,
+      strlcpy(entryp->d_name,
               (FAR char *)objhdr.name + SPIFFS_LEADING_SLASH_SIZE,
-              NAME_MAX);
+              sizeof(entryp->d_name));
       entryp->d_type = objhdr.type;
       return OK;
     }

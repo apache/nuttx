@@ -28,6 +28,7 @@
 #include <syslog.h>
 
 #include <nuttx/board.h>
+#include <nuttx/fs/fs.h>
 
 #ifdef CONFIG_USERLED
 #  include <nuttx/leds/userled.h>
@@ -74,6 +75,17 @@
 int stm32_bringup(void)
 {
   int ret;
+
+#ifdef CONFIG_FS_PROCFS
+  /* Mount the procfs file system */
+
+  ret = nx_mount(NULL, STM32_PROCFS_MOUNTPOINT, "procfs", 0, NULL);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR,
+             "ERROR: Failed to mount the PROC filesystem: %d\n",  ret);
+    }
+#endif /* CONFIG_FS_PROCFS */
 
 #ifdef CONFIG_INPUT_BUTTONS
   /* Register the BUTTON driver */
@@ -146,6 +158,26 @@ int stm32_bringup(void)
              "ERROR: Failed to register the qencoder: %d\n",
              ret);
       return ret;
+    }
+#endif
+
+#ifdef CONFIG_STM32_FDCAN_CHARDRIVER
+  /* Initialize CAN and register the CAN driver. */
+
+  ret = stm32_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_fdcan_setup failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_STM32_FDCAN_SOCKET
+  /* Initialize CAN socket interface */
+
+  ret = stm32_cansock_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: stm32_cansock_setup failed: %d\n", ret);
     }
 #endif
 

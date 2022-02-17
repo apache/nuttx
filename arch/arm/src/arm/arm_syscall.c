@@ -28,7 +28,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include <arch/irq.h>
+#include <nuttx/arch.h>
 
 #include "arm_arch.h"
 #include "arm_internal.h"

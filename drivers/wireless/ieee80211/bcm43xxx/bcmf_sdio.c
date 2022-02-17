@@ -37,8 +37,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/kthread.h>
 #include <nuttx/wdog.h>
+#include <nuttx/sdio.h>
 
-#include <nuttx/wireless/ieee80211/mmc_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_sdio.h>
 #include <nuttx/wireless/ieee80211/bcmf_board.h>
 
@@ -80,6 +80,9 @@
 #endif
 #ifdef CONFIG_IEEE80211_BROADCOM_BCM43438
   extern const struct bcmf_sdio_chip bcmf_43438_config_sdio;
+#endif
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM43455
+  extern const struct bcmf_sdio_chip bcmf_43455_config_sdio;
 #endif
 
 /****************************************************************************
@@ -255,8 +258,12 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
    */
 
   ret = bcmf_read_reg(sbus, 0, SDIO_CCCR_HIGHSPEED, &value);
+  if (ret != OK)
+    {
+      goto exit_error;
+    }
 
-  if (ret & SDIO_CCCR_HIGHSPEED_SHS)
+  if (value & SDIO_CCCR_HIGHSPEED_SHS)
     {
       /* If the chip confirms its High-Speed capability,
        * enable the High-Speed mode.
@@ -264,10 +271,14 @@ int bcmf_probe(FAR struct bcmf_sdio_dev_s *sbus)
 
       ret = bcmf_write_reg(sbus, 0, SDIO_CCCR_HIGHSPEED,
                            SDIO_CCCR_HIGHSPEED_EHS);
+      if (ret != OK)
+        {
+          goto exit_error;
+        }
     }
   else
     {
-      wlwarn("High-Speed mode is not supported by the chip!\n", value);
+      wlwarn("High-Speed mode is not supported by the chip!\n");
     }
 #endif
 
@@ -813,6 +824,13 @@ int bcmf_chipinitialize(FAR struct bcmf_sdio_dev_s *sbus)
       case SDIO_DEVICE_ID_BROADCOM_43430:
         wlinfo("bcm43438 chip detected\n");
         sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43438_config_sdio;
+        break;
+#endif
+
+#ifdef CONFIG_IEEE80211_BROADCOM_BCM43455
+      case SDIO_DEVICE_ID_BROADCOM_43455:
+        wlinfo("bcm43455 chip detected\n");
+        sbus->chip = (struct bcmf_sdio_chip *)&bcmf_43455_config_sdio;
         break;
 #endif
 

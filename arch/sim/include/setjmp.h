@@ -41,6 +41,7 @@
 #  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
 
 #  ifdef __ASSEMBLY__
+
 #    define JB_RBX            (0*8)
 #    define JB_RSP            (1*8)
 #    define JB_RBP            (2*8)
@@ -51,6 +52,7 @@
 #    define JB_RSI            (7*8)
 
 #  else
+
 #    define JB_RBX            (0)
 #    define JB_RSP            (1)
 #    define JB_RBP            (2)
@@ -75,6 +77,7 @@
 #  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 #  ifdef __ASSEMBLY__
+
 #    define JB_EBX            (0*4)
 #    define JB_ESI            (1*4)
 #    define JB_EDI            (2*4)
@@ -83,6 +86,7 @@
 #    define JB_PC             (5*4)
 
 #  else
+
 #    define JB_EBX            (0)
 #    define JB_ESI            (1)
 #    define JB_EDI            (2)
@@ -97,12 +101,42 @@
 #  define JB_FP               JB_EBP
 
 #elif defined(CONFIG_HOST_ARM)
+
 #  define XCPTCONTEXT_REGS    16
 #  define XCPTCONTEXT_SIZE    (4 * XCPTCONTEXT_REGS)
 
 #  define JB_FP               7
 #  define JB_SP               8
 #  define JB_PC               9
+
+#elif defined(CONFIG_HOST_ARM64)
+
+#  define XCPTCONTEXT_REGS    32
+#  define XCPTCONTEXT_SIZE    (8 * XCPTCONTEXT_REGS)
+
+#  ifdef __ASSEMBLY__
+
+#    define JB_X19_X20        #0x00
+#    define JB_X21_X22        #0x10
+#    define JB_X23_X24        #0x20
+#    define JB_X25_X26        #0x30
+#    define JB_X27_X28        #0x40
+#    define JB_X29_XLR        #0x50
+#    define JB_XFP_XSP        #0x60
+
+#    define JB_D08_D09        #0x70
+#    define JB_D10_D11        #0x80
+#    define JB_D12_D13        #0x90
+#    define JB_D14_D15        #0xA0
+
+#  else
+
+#    define JB_PC             (11)
+#    define JB_FP             (12)
+#    define JB_SP             (13)
+
+#  endif /* __ASSEMBLY__ */
+
 #endif
 
 /****************************************************************************
@@ -111,13 +145,9 @@
 
 #ifndef __ASSEMBLY__
 
-#if defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)
 typedef unsigned long xcpt_reg_t;
-#else
-typedef unsigned int xcpt_reg_t;
-#endif
-
 typedef xcpt_reg_t jmp_buf[XCPTCONTEXT_REGS];
+
 #endif
 
 /****************************************************************************

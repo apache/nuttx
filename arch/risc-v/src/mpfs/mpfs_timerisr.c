@@ -120,7 +120,7 @@ void up_timer_initialize(void)
 
   /* Attach timer interrupt handler */
 
-  irq_attach(MPFS_IRQ_MTIMER, mpfs_timerisr, NULL);
+  irq_attach(RISCV_IRQ_MTIMER, mpfs_timerisr, NULL);
 
   /* Reload CLINT mtimecmp */
 
@@ -128,5 +128,5 @@ void up_timer_initialize(void)
 
   /* And enable the timer interrupt */
 
-  up_enable_irq(MPFS_IRQ_MTIMER);
+  up_enable_irq(RISCV_IRQ_MTIMER);
 }

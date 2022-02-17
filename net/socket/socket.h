@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef _NET_SOCKET_SOCKET_H
-#define _NET_SOCKET_SOCKET_H
+#ifndef __NET_SOCKET_SOCKET_H
+#define __NET_SOCKET_SOCKET_H
 
 /****************************************************************************
  * Included Files
@@ -95,9 +95,10 @@
 #  define _SO_SETERRNO(s,e) \
     do \
       { \
-        if (s != NULL) \
+        if (s != NULL && (s)->s_conn != NULL) \
           { \
-            s->s_error = (int16_t)e; \
+            FAR struct socket_conn_s *_conn = (s)->s_conn; \
+            _conn->s_error = (int16_t)e; \
           } \
         set_errno(e); \
       } \
@@ -171,4 +172,4 @@ int net_timeo(clock_t start_time, socktimeo_t timeo);
 #endif
 
 #endif /* CONFIG_NET */
-#endif /* _NET_SOCKET_SOCKET_H */
+#endif /* __NET_SOCKET_SOCKET_H */

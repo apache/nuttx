@@ -93,6 +93,7 @@
 #define HOSTFS_MAGIC          0x54534f48
 #define USERFS_MAGIC          0x52455355
 #define CROMFS_MAGIC          0x4d4f5243
+#define RPMSGFS_MAGIC         0x54534f47
 
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define statfs64            statfs

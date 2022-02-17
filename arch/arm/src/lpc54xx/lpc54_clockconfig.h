@@ -40,8 +40,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_LPC54XX_LPC54_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_LPC54XX_LPC54_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -136,4 +136,4 @@ void lpc54_clockconfig(FAR const struct pll_setup_s *pllsetup);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_LPC54_LPC54_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC54XX_LPC54_CLOCKCONFIG_H */

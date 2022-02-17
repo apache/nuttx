@@ -13,7 +13,6 @@ if CRYPTO
 
 config CRYPTO_AES
 	bool "AES cypher support"
-	depends on ALLOW_BSD_COMPONENTS
 	default n
 
 config CRYPTO_ALGTEST
@@ -42,6 +41,7 @@ config CRYPTO_CRYPTODEV
 
 config CRYPTO_SW_AES
 	bool "Software AES library"
+	depends on ALLOW_BSD_COMPONENTS
 	default n
 	---help---
 		Enable the software AES library as described in

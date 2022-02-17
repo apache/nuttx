@@ -40,14 +40,14 @@ config ESP32S2_INSTRUCTION_CACHE_16KB
 endchoice # ESP32S2 Instruction CACHE size
 
 choice
-	prompt "Instruction CACHE Size"
-	default ESP32S2_INSTRUCTION_CACHE_8KB
+	prompt "Data CACHE Size"
+	default ESP32S2_DATA_CACHE_8KB
 	depends on ARCH_CHIP_ESP32S2
 
 config ESP32S2_DATA_CACHE_0KB
 	bool "No DATA CACHE"
 	---help---
-		Use 8KB of SRAM as Data Cache
+		Disable Data Cache
 
 config ESP32S2_DATA_CACHE_8KB
 	bool "8KB"
@@ -80,6 +80,16 @@ config ESP32S2_FLASH_8M
 config ESP32S2_FLASH_16M
 	bool
 	default n
+
+config ESP32S2_ESPTOOLPY_NO_STUB
+	bool "Disable download stub"
+	default n
+	---help---
+		The flasher tool sends a precompiled download stub first by default.
+		That stub allows things like compressed downloads and more.
+		Usually you should not need to disable that feature.
+		It is only required to be disabled in certain scenarios when either
+		Secure Boot V2 or Flash Encryption is enabled.
 
 config ESP32S2_FLASH_DETECT
 	bool "Auto-detect FLASH size"
@@ -618,7 +628,7 @@ comment "Application Image OTA Update support"
 
 config ESP32S2_OTA_PRIMARY_SLOT_OFFSET
 	hex "Application image primary slot offset"
-	default "0x10000"
+	default 0x10000
 
 config ESP32S2_OTA_PRIMARY_SLOT_DEVPATH
 	string "Application image primary slot device path"
@@ -626,7 +636,7 @@ config ESP32S2_OTA_PRIMARY_SLOT_DEVPATH
 
 config ESP32S2_OTA_SECONDARY_SLOT_OFFSET
 	hex "Application image secondary slot offset"
-	default "0x110000"
+	default 0x110000
 
 config ESP32S2_OTA_SECONDARY_SLOT_DEVPATH
 	string "Application image secondary slot device path"
@@ -634,15 +644,15 @@ config ESP32S2_OTA_SECONDARY_SLOT_DEVPATH
 
 config ESP32S2_OTA_SLOT_SIZE
 	hex "Application image slot size (in bytes)"
-	default "0x100000"
+	default 0x100000
 
 config ESP32S2_OTA_SCRATCH_OFFSET
 	hex "Scratch partition offset"
-	default "0x210000"
+	default 0x210000
 
 config ESP32S2_OTA_SCRATCH_SIZE
 	hex "Scratch partition size"
-	default "0x40000"
+	default 0x40000
 
 config ESP32S2_OTA_SCRATCH_DEVPATH
 	string "Scratch partition device path"
@@ -989,8 +999,10 @@ config ESP32S2_APP_MCUBOOT_HEADER_SIZE
 
 config ESP32S2_PARTITION_TABLE_OFFSET
 	hex "Partition Table offset"
-	default "0x8000"
+	default 0x8000
 	depends on ESP32S2_APP_FORMAT_LEGACY
+
+source "arch/xtensa/src/esp32s2/Kconfig.security"
 
 endmenu # Application Image Configuration
 

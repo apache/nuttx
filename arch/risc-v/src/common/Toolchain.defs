@@ -1,0 +1,140 @@
+############################################################################
+# arch/risc-v/src/common/Toolchain.defs
+#
+# Licensed to the Apache Software Foundation (ASF) under one or more
+# contributor license agreements.  See the NOTICE file distributed with
+# this work for additional information regarding copyright ownership.  The
+# ASF licenses this file to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance with the
+# License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+############################################################################
+
+# Setup for the selected toolchain
+
+#
+# Handle old-style chip-specific toolchain names in the absence of
+# a new-style toolchain specification, force the selection of a single
+# toolchain and allow the selected toolchain to be overridden by a
+# command-line selection.
+#
+
+ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RVGL)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+endif
+
+ifeq ($(filter y, $(CONFIG_RISCV_TOOLCHAIN_GNU_RVGW)),y)
+  CONFIG_RISCV_TOOLCHAIN ?= GNU_RVG
+endif
+
+#
+# Supported toolchains
+#
+# Each toolchain definition should set:
+#
+#  CROSSDEV         The GNU toolchain triple (command prefix)
+#  ARCHCPUFLAGS     CPU-specific flags selecting the instruction set
+#                   options, etc.
+#  MAXOPTIMIZATION  The maximum optimization level that results in
+#                   reliable code generation.
+#
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
+endif
+
+# Generic GNU RVG toolchain
+
+ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
+
+  # Generic GNU RVG toolchain
+
+  CROSSDEV ?= riscv64-unknown-elf-
+
+  # Detect cpu ISA support flags
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_M),y)
+    ARCHRVISAM = m
+  endif
+
+  ifeq ($(CONFIG_ARCH_RV_ISA_A),y)
+    ARCHRVISAA = a
+  endif
+  
+  ifeq ($(CONFIG_ARCH_RV_ISA_C),y)
+    ARCHRVISAC = c
+  endif
+
+  ifeq ($(CONFIG_ARCH_FPU),y)
+    ARCHRVISAF = f
+  endif
+
+  ifeq ($(CONFIG_ARCH_DPFPU),y)
+      ARCHRVISAD = d
+  endif
+
+  # Detect abi type
+
+  ifeq ($(CONFIG_ARCH_RV32),y)
+    ARCHTYPE = rv32
+    ARCHABITYPE = ilp32
+  else ifeq ($(CONFIG_ARCH_RV64),y)
+    ARCHTYPE = rv64
+    ARCHABITYPE = lp64
+  endif
+
+  # Construct arch flags
+
+  ARCHCPUFLAGS = -march=$(ARCHTYPE)i$(ARCHRVISAM)$(ARCHRVISAA)$(ARCHRVISAF)$(ARCHRVISAD)$(ARCHRVISAC)
+
+  # Construct arch abi flags
+
+  ifeq ($(CONFIG_ARCH_DPFPU),y)
+    ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)d
+  else ifeq ($(CONFIG_ARCH_FPU),y)
+    ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)f
+  else
+    ARCHCPUFLAGS += -mabi=$(ARCHABITYPE)
+  endif
+
+endif
+
+# Default toolchain
+
+CC = $(CROSSDEV)gcc
+CXX = $(CROSSDEV)g++
+CPP = $(CROSSDEV)gcc -E -P -x c
+LD = $(CROSSDEV)ld
+STRIP = $(CROSSDEV)strip --strip-unneeded
+AR = $(CROSSDEV)ar rcs
+NM = $(CROSSDEV)nm
+OBJCOPY = $(CROSSDEV)objcopy
+OBJDUMP = $(CROSSDEV)objdump
+
+# Add the builtin library
+
+EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}
+
+ifneq ($(CONFIG_LIBM),y)
+  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
+endif
+
+ifeq ($(CONFIG_LIBSUPCXX),y)
+  EXTRA_LIBS += ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}
+endif

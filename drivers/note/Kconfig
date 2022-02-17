@@ -34,10 +34,10 @@ config DRIVER_NOTERAM
 		buffer.
 
 		NOTE: This option is not available if critical sections are being
-		monitor (nor if spinlocks are being monitored in SMP configuration)
+		monitored (nor if spinlocks are being monitored in SMP configuration)
 		because there would be a logical error in the design in those cases.
 		That error is that these interfaces call enter_ and leave_critical_section
-		(and which us spinlocks in SMP mode).  That means that each call to
+		(which use spinlocks in SMP mode).  That means that each call to
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 
@@ -51,6 +51,18 @@ config DRIVER_NOTELOG
 	select SCHED_INSTRUMENTATION_EXTERNAL
 	---help---
 		The note driver output to syslog.
+
+config SEGGER_SYSVIEW
+	bool "Note SEGGER SystemView driver"
+	select SEGGER_RTT
+	select SCHED_INSTRUMENTATION_EXTERNAL
+	---help---
+		SystemView is a real-time recording and visualization tool for embedded
+		systems that reveals the true runtime behavior of an application,
+		going far deeper than the system insights provided by debuggers. This is
+		particularly effective when developing and working with complex embedded
+		systems comprising multiple threads and interrupts. SystemView can ensure
+		unintended interactions and resource conflicts.
 
 endchoice
 

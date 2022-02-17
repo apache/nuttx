@@ -29,7 +29,8 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
-#include "esp32_rtc.h"
+#include "clock/clock.h"
+
 #include "esp32_clockconfig.h"
 #include "esp32_rt_timer.h"
 
@@ -39,6 +40,8 @@
 
 #include "xtensa.h"
 #include "xtensa_attr.h"
+
+#include "esp32_rtc.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -2066,8 +2069,7 @@ int up_rtc_gettime(struct timespec *tp)
     }
   else
     {
-      time_us = = esp32_rtc_get_time_us() +
-                    esp32_rtc_get_boot_time();
+      time_us = esp32_rtc_get_time_us() + esp32_rtc_get_boot_time();
     }
 
   tp->tv_sec  = time_us / USEC_PER_SEC;

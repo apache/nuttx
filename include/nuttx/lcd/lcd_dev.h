@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_LCD_LCD_DEV_H
-#define __DRIVERS_LCD_LCD_DEV_H
+#ifndef __INCLUDE_NUTTX_LCD_LCD_DEV_H
+#define __INCLUDE_NUTTX_LCD_LCD_DEV_H
 
 /****************************************************************************
  * Included Files
@@ -114,4 +114,4 @@ int lcddev_register(int devno);
 }
 #endif
 
-#endif /* __DRIVERS_LCD_LCD_DEV_H */
+#endif /* __INCLUDE_NUTTX_LCD_LCD_DEV_H */

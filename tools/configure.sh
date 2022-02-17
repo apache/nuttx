@@ -220,7 +220,7 @@ fi
 # not be in a usable form.
 
 defappdir=y
-if [ -z "${appdir}" -a "X$oldnative" = "$winnative" ]; then
+if [ -z "${appdir}" -a "X$oldnative" = "X$winnative" ]; then
   quoted=`grep "^CONFIG_APPS_DIR=" ${src_config} | cut -d'=' -f2`
   if [ ! -z "${quoted}" ]; then
     appdir=`echo ${quoted} | sed -e "s/\"//g"`

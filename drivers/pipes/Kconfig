@@ -14,8 +14,7 @@ if PIPES
 
 config DEV_PIPE_MAXSIZE
 	int "Maximum pipe/FIFO size"
-	default 1024 if !DEFAULT_SMALL
-	default 256 if DEFAULT_SMALL
+	default 65535
 	---help---
 		Maximum configurable size of a pipe or FIFO at runtime.
 
@@ -34,5 +33,11 @@ config DEV_FIFO_SIZE
 	---help---
 		Sets the default size of the FIFO ringbuffer in bytes.  A value of
 		zero disables FIFO support.
+
+config DEV_PIPE_VFS_PATH
+	string "Path to the pipe device"
+	default "/var/pipe"
+	---help---
+		The path to where pipe device will exist in the VFS namespace.
 
 endif # PIPES

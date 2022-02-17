@@ -34,6 +34,7 @@
 
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/ip.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
 #if defined(CONFIG_NET_ICMP) && !defined(CONFIG_NET_ICMP_NO_STACK)
@@ -47,9 +48,9 @@
 /* Allocate/free an ICMP data callback */
 
 #define icmp_callback_alloc(dev, conn) \
-  devif_callback_alloc((dev), &(conn)->list, &(conn)->list_tail)
+  devif_callback_alloc((dev), &(conn)->sconn.list, &(conn)->sconn.list_tail)
 #define icmp_callback_free(dev, conn, cb) \
-  devif_conn_callback_free((dev), (cb), &(conn)->list, &(conn)->list_tail)
+  devif_conn_callback_free((dev), (cb), &(conn)->sconn.list, &(conn)->sconn.list_tail)
 
 /****************************************************************************
  * Public types
@@ -77,14 +78,7 @@ struct icmp_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;               /* Supports a doubly linked list */
-
-  /* This is a list of ICMP callbacks.  Each callback represents a thread
-   * that is stalled, waiting for a device-specific event.
-   */
-
-  FAR struct devif_callback_s *list;
-  FAR struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* ICMP-specific content follows */
 
@@ -361,6 +355,30 @@ int icmp_pollsetup(FAR struct socket *psock, FAR struct pollfd *fds);
 #ifdef CONFIG_NET_ICMP_SOCKET
 int icmp_pollteardown(FAR struct socket *psock, FAR struct pollfd *fds);
 #endif
+
+/****************************************************************************
+ * Name: icmp_reply
+ *
+ * Description:
+ *   Send an ICMP message in response to a situation
+ *   RFC 1122: 3.2.2 MUST send at least the IP header and 8 bytes of header.
+ *       MAY send more (we do).
+ *       MUST NOT change this header information.
+ *       MUST NOT reply to a multicast/broadcast IP address.
+ *       MUST NOT reply to a multicast/broadcast MAC address.
+ *       MUST reply to only the first fragment.
+ *
+ * Input Parameters:
+ *   dev   - The device driver structure containing the received packet
+ *   type  - ICMP Message Type, eg. ICMP_DEST_UNREACHABLE
+ *   code  - ICMP Message Code, eg. ICMP_PORT_UNREACH
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void icmp_reply(FAR struct net_driver_s *dev, int type, int code);
 
 #undef EXTERN
 #ifdef __cplusplus

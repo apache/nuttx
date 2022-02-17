@@ -55,6 +55,8 @@
 
 void rp2040_boardearlyinitialize(void)
 {
+  rp2040_gpio_initialize();
+
   /* Disable IE on GPIO 26-29 */
 
   clrbits_reg32(RP2040_PADS_BANK0_GPIO_IE, RP2040_PADS_BANK0_GPIO(26));

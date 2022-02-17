@@ -31,7 +31,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "esp32c3_spiflash.h"
+#include "esp32c3_spiflash_mtd.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -496,12 +496,6 @@ static int esp32c3_part_ioctl(struct mtd_dev_s *dev, int cmd,
   struct mtd_dev_priv_s *mtd_priv = (struct mtd_dev_priv_s *)dev;
 
   finfo("INFO: cmd=%d(0x%x) arg=0x%" PRIx32 "\n", cmd, cmd, arg);
-
-  if (!_MTDIOCVALID(cmd))
-    {
-      ferr("ERROR: cmd=%d(0x%x) is error\n", cmd, cmd);
-      return -EINVAL;
-    }
 
   switch (_IOC_NR(cmd))
     {

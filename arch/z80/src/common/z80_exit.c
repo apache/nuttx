@@ -66,13 +66,10 @@
 static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
 {
   FAR struct filelist *filelist;
-#ifdef CONFIG_FILE_STREAM
-  FAR struct file_struct *filep;
-#endif
   int i;
   int j;
 
-  sinfo("  TCB=%p name=%s\n", tcb, tcb->argv[0]);
+  sinfo("  TCB=%p name=%s\n", tcb, tcb->name);
   sinfo("    priority=%d state=%d\n", tcb->sched_priority, tcb->task_state);
 
   filelist = tcb->group->tg_filelist;
@@ -89,28 +86,6 @@ static void _up_dumponexit(FAR struct tcb_s *tcb, FAR void *arg)
             }
         }
     }
-
-#ifdef CONFIG_FILE_STREAM
-  filep = tcb->group->tg_streamlist->sl_head;
-  for (; filep != NULL; filep = filep->fs_next)
-    {
-      if (filep->fs_fd >= 0)
-        {
-#ifndef CONFIG_STDIO_DISABLE_BUFFERING
-          if (filep->fs_bufstart != NULL)
-            {
-              sinfo("      fd=%d nbytes=%d\n",
-                    filep->fs_fd,
-                    filep->fs_bufpos - filep->fs_bufstart);
-            }
-          else
-#endif
-            {
-              sinfo("      fd=%d\n", filep->fs_fd);
-            }
-        }
-    }
-#endif
 }
 #endif
 

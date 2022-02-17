@@ -171,8 +171,7 @@ Symbol Handling
    
    :configuration: This command is always available when
      CONFIG_BUILTIN is enabled, but does nothing unless
-     CONFIG_BUILD_PROTECTED and CONFIG_FS_BINFS are also
-     selected.
+     CONFIG_BUILD_PROTECTED is also selected.
      
 USB
 ---
@@ -208,7 +207,7 @@ Graphics
    
    :configuration: CONFIG_VNCSERVER
    
-   :dependencies: VNC server provides :c:func:`vnc_default_fbinitialize`.
+   :dependencies: VNC server provides :c:func:`nx_vnc_fbinitialize`.
    
 .. c:macro:: BOARDIOC_NXTERM
 

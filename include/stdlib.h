@@ -62,9 +62,7 @@
  * function call.  However, get_environ_ptr() can be used in its place.
  */
 
-#ifndef CONFIG_DISABLE_ENVIRON
-#  define environ get_environ_ptr()
-#endif
+#define environ get_environ_ptr()
 
 #if defined(CONFIG_FS_LARGEFILE) && defined(CONFIG_HAVE_LONG_LONG)
 #  define mkstemp64            mkstemp
@@ -225,6 +223,7 @@ int       posix_memalign(FAR void **, size_t, size_t);
 /* Pseudo-Terminals */
 
 #ifdef CONFIG_PSEUDOTERM
+int       posix_openpt(int oflag);
 FAR char *ptsname(int fd);
 int       ptsname_r(int fd, FAR char *buf, size_t buflen);
 int       unlockpt(int fd);
@@ -264,6 +263,10 @@ void      qsort(FAR void *base, size_t nel, size_t width,
 FAR void  *bsearch(FAR const void *key, FAR const void *base, size_t nel,
                    size_t width, CODE int (*compar)(FAR const void *,
                    FAR const void *));
+
+/* Current program name manipulation */
+
+FAR const char *getprogname(void);
 
 #undef EXTERN
 #if defined(__cplusplus)

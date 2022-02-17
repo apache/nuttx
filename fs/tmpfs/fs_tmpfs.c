@@ -124,6 +124,7 @@ static ssize_t tmpfs_write(FAR struct file *filep, FAR const char *buffer,
               size_t buflen);
 static off_t tmpfs_seek(FAR struct file *filep, off_t offset, int whence);
 static int  tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
+static int  tmpfs_sync(FAR struct file *filep);
 static int  tmpfs_dup(FAR const struct file *oldp, FAR struct file *newp);
 static int  tmpfs_fstat(FAR const struct file *filep, FAR struct stat *buf);
 static int  tmpfs_truncate(FAR struct file *filep, off_t length);
@@ -165,7 +166,7 @@ const struct mountpt_operations tmpfs_operations =
   tmpfs_seek,       /* seek */
   tmpfs_ioctl,      /* ioctl */
 
-  NULL,             /* sync */
+  tmpfs_sync,       /* sync */
   tmpfs_dup,        /* dup */
   tmpfs_fstat,      /* fstat */
   NULL,             /* fchstat */
@@ -1751,6 +1752,15 @@ static int tmpfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 }
 
 /****************************************************************************
+ * Name: tmpfs_sync
+ ****************************************************************************/
+
+static int tmpfs_sync(FAR struct file *filep)
+{
+  return 0;
+}
+
+/****************************************************************************
  * Name: tmpfs_dup
  ****************************************************************************/
 
@@ -2025,7 +2035,7 @@ static int tmpfs_readdir(FAR struct inode *mountpt,
 
       /* Copy the entry name */
 
-      strncpy(dir->fd_dir.d_name, tde->tde_name, NAME_MAX);
+      strlcpy(dir->fd_dir.d_name, tde->tde_name, sizeof(dir->fd_dir.d_name));
 
       /* Save the index for next time */
 

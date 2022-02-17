@@ -26,8 +26,28 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/streams.h>
 
 #include <stdbool.h>
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/* This is a special stream that does buffered character I/O.  NOTE that is
+ * CONFIG_SYSLOG_BUFFER is not defined, it is the same as struct
+ * lib_outstream_s
+ */
+
+struct iob_s;  /* Forward reference */
+
+struct lib_syslogstream_s
+{
+  struct lib_outstream_s public;
+#ifdef CONFIG_SYSLOG_BUFFER
+  FAR struct iob_s *iob;
+#endif
+};
 
 /****************************************************************************
  * Public Data
@@ -163,7 +183,7 @@ FAR struct syslog_channel_s *syslog_console_channel(void);
  * Name: syslog_register
  *
  * Description:
- *   Register a simple character driver at /dev/syslog whose write() method
+ *   Register a simple character driver at /dev/log whose write() method
  *   will transfer data to the SYSLOG device.  This can be useful if, for
  *   example, you want to redirect the output of a program to the SYSLOG.
  *
@@ -277,6 +297,45 @@ ssize_t syslog_write(FAR const char *buffer, size_t buflen);
  ****************************************************************************/
 
 int syslog_force(int ch);
+
+/****************************************************************************
+ * Name: syslogstream_create
+ *
+ * Description:
+ *   Initializes a stream for use with the configured syslog interface.
+ *   Only accessible from with the OS SYSLOG logic.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_syslogstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (User allocated instance initialized).
+ *
+ ****************************************************************************/
+
+void syslogstream_create(FAR struct lib_syslogstream_s *stream);
+
+/****************************************************************************
+ * Name: syslogstream_destroy
+ *
+ * Description:
+ *   Free resources held by the syslog stream.
+ *
+ * Input Parameters:
+ *   stream - User allocated, uninitialized instance of struct
+ *            lib_syslogstream_s to be initialized.
+ *
+ * Returned Value:
+ *   None (Resources freed).
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_SYSLOG_BUFFER
+void syslogstream_destroy(FAR struct lib_syslogstream_s *stream);
+#else
+#  define syslogstream_destroy(s)
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus

@@ -36,34 +36,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Some environments may return CR as end-of-line, others LF, and others
- * both.  If not specified, the logic here assumes either (but not both) as
- * the default.
- */
-
-#if defined(CONFIG_EOL_IS_CR)
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_LF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_BOTH_CRLF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_EITHER_CRLF
-#elif defined(CONFIG_EOL_IS_EITHER_CRLF)
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#else
-#  undef  CONFIG_EOL_IS_CR
-#  undef  CONFIG_EOL_IS_LF
-#  undef  CONFIG_EOL_IS_BOTH_CRLF
-#  define CONFIG_EOL_IS_EITHER_CRLF 1
-#endif
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

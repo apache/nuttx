@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_LIS3DSH_H
-#define __STM32_LIS3DSH_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LIS3DSH_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LIS3DSH_H
 
 /****************************************************************************
  * Included Files
@@ -77,4 +77,4 @@ int board_lis3dsh_initialize(int devno, int busno);
 }
 #endif
 
-#endif // __STM32_LIS3DSH_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_LIS3DSH_H */

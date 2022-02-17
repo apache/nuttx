@@ -106,8 +106,7 @@ ssize_t readlink(FAR const char *path, FAR char *buf, size_t bufsize)
 
   /* Copy the link target pathto the user-provided buffer. */
 
-  *buf = '\0';
-  strncpy(buf, node->u.i_link, bufsize);
+  strlcpy(buf, node->u.i_link, bufsize);
 
   /* Release our reference on the inode and return the length */
 

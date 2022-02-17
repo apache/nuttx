@@ -326,7 +326,7 @@
 #  define SPI_CFG2_MSSI_13CLK     (13 << SPI_CFG2_MSSI_SHIFT)
 #  define SPI_CFG2_MSSI_14CLK     (14 << SPI_CFG2_MSSI_SHIFT)
 #  define SPI_CFG2_MSSI_15CLK     (15 << SPI_CFG2_MSSI_SHIFT)
-#define SPI_CFG2_MIDI_SHIFT       (0)  /* Bits 4-7: master Inter-Data idleness */
+#define SPI_CFG2_MIDI_SHIFT       (4)  /* Bits 4-7: master Inter-Data idleness */
 #define SPI_CFG2_MIDI_MASK        (0xf << SPI_CFG2_MIDI_SHIFT)
 #  define SPI_CFG2_MIDI_0CLK      (0 << SPI_CFG2_MIDI_SHIFT)
 #  define SPI_CFG2_MIDI_1CLK      (1 << SPI_CFG2_MIDI_SHIFT)

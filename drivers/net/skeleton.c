@@ -88,7 +88,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->sk_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->sk_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -447,7 +447,7 @@ static void skel_receive(FAR struct skel_driver_s *priv)
 #ifdef CONFIG_NET_ARP
       /* Check for an ARP packet */
 
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           /* Dispatch ARP packet to the network layer */
 

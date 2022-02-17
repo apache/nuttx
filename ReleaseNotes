@@ -3109,7 +3109,7 @@ Or
 Additional new features and extended functionality:
 
     * RTOS: Application entry point is no longer user_start, but can be
-      configured using CONFIG_USER_ENTRYPOINT.  NuttX now supports two work
+      configured using CONFIG_INIT_ENTRYPOINT.  NuttX now supports two work
       queues:  A lower priority work queue (for extended processing) and a
       higher priority work queue (for quick, high priority operations).
 
@@ -23783,7 +23783,7 @@ Additional new features and extended functionality:
         Jerpelea.
       - Enable internal flash storage for SPresence boards. The SmartFS
         flash is mounted under /mnt/spif folder.  From Alin Jerpelea.
-      - For compatibility with SDK we need to change the USER_ENTRYPOINT
+      - For compatibility with SDK we need to change the INIT_ENTRYPOINT
         in all configurations to spresense_main().  From Alin Jerpelea.
 
     * STMicro STM32:

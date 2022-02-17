@@ -476,7 +476,7 @@ static bool sam_checkreg(struct sam_chan_s *chan, bool wr, uint32_t regaddr,
  * Name: sam_chan_getreg
  *
  * Description:
- *  Read an SPI register
+ *  Read an TC register
  *
  ****************************************************************************/
 
@@ -500,7 +500,7 @@ static inline uint32_t sam_chan_getreg(struct sam_chan_s *chan,
  * Name: sam_chan_putreg
  *
  * Description:
- *  Write a value to an SPI register
+ *  Write a value to an TC register
  *
  ****************************************************************************/
 
@@ -921,7 +921,7 @@ void sam_tc_free(TC_HANDLE handle)
    * is stopped and disabled.
    */
 
-  sam_tc_attach(handle, NULL, NULL, 0);
+  sam_tc_detach(handle);
   sam_tc_stop(handle);
 
   /* Mark the channel as available */

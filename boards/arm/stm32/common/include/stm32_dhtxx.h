@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_DHTXX_H
-#define __STM32_DHTXX_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_DHTXX_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_DHTXX_H
 
 /****************************************************************************
  * Included Files
@@ -78,4 +78,4 @@ int board_dhtxx_initialize(int devno);
 }
 #endif
 
-#endif // __STM32_DHTXX_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_STM32_DHTXX_H */

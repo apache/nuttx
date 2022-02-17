@@ -237,9 +237,9 @@ static const struct file_operations g_tun_file_ops =
   tun_write,    /* write */
   NULL,         /* seek */
   tun_ioctl,    /* ioctl */
-  tun_poll,     /* poll */
+  tun_poll      /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  NULL,         /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 
@@ -605,7 +605,7 @@ static void tun_net_receive_tap(FAR struct tun_device_s *priv)
   else
 #endif
 #ifdef CONFIG_NET_ARP
-  if (BUF->type == htons(ETHTYPE_ARP))
+  if (BUF->type == HTONS(ETHTYPE_ARP))
     {
       arp_arpin(&priv->dev);
       NETDEV_RXARP(&priv->dev);
@@ -883,6 +883,7 @@ static int tun_ifup(FAR struct net_driver_s *dev)
   wd_start(&priv->txpoll, TUN_WDDELAY, tun_poll_expiry, (wdparm_t)priv);
 
   priv->bifup = true;
+  netdev_carrier_on(dev);
   return OK;
 }
 
@@ -906,6 +907,8 @@ static int tun_ifdown(FAR struct net_driver_s *dev)
 {
   FAR struct tun_device_s *priv = (FAR struct tun_device_s *)dev->d_private;
   irqstate_t flags;
+
+  netdev_carrier_off(dev);
 
   flags = enter_critical_section();
 

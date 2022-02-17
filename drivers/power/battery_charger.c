@@ -85,13 +85,16 @@ static int     bat_charger_poll(FAR struct file *filep,
 
 static const struct file_operations g_batteryops =
 {
-  bat_charger_open,
-  bat_charger_close,
-  bat_charger_read,
-  bat_charger_write,
-  NULL,
-  bat_charger_ioctl,
-  bat_charger_poll,
+  bat_charger_open,    /* open */
+  bat_charger_close,   /* close */
+  bat_charger_read,    /* read */
+  bat_charger_write,   /* write */
+  NULL,                /* seek */
+  bat_charger_ioctl,   /* ioctl */
+  bat_charger_poll     /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL               /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -99,11 +102,16 @@ static const struct file_operations g_batteryops =
  ****************************************************************************/
 
 static int battery_charger_notify(FAR struct battery_charger_priv_s *priv,
-                                   uint32_t mask)
+                                  uint32_t mask)
 {
   FAR struct pollfd *fd = priv->fds;
   int semcnt;
   int ret;
+
+  if (!fd)
+    {
+      return OK;
+    }
 
   ret = nxsem_wait_uninterruptible(&priv->lock);
   if (ret < 0)
@@ -360,6 +368,26 @@ static int bat_charger_ioctl(FAR struct file *filep, int cmd,
         }
         break;
 
+      case BATIOC_CHIPID:
+        {
+          FAR unsigned int *ptr = (FAR unsigned int *)((uintptr_t)arg);
+          if (ptr)
+            {
+              ret = dev->ops->chipid(dev, ptr);
+            }
+        }
+        break;
+
+      case BATIOC_GET_VOLTAGE:
+        {
+          FAR int *outvoltsp = (FAR int *)((uintptr_t)arg);
+          if (outvoltsp)
+            {
+              ret = dev->ops->get_voltage(dev, outvoltsp);
+            }
+        }
+        break;
+
       default:
         _err("ERROR: Unrecognized cmd: %d\n", cmd);
         ret = -ENOTTY;
@@ -473,7 +501,7 @@ int battery_charger_register(FAR const char *devpath,
 
   /* Register the character driver */
 
-  ret = register_driver(devpath, &g_batteryops, 0555, dev);
+  ret = register_driver(devpath, &g_batteryops, 0666, dev);
   if (ret < 0)
     {
       _err("ERROR: Failed to register driver: %d\n", ret);

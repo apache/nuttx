@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_TIMER_H
-#define __ARCH_ARM_IMX_TIMER_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_TIMER_H
+#define __ARCH_ARM_SRC_IMX1_IMX_TIMER_H
 
 /****************************************************************************
  * Included Files
@@ -86,4 +86,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_IMX_TIMER_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_TIMER_H */

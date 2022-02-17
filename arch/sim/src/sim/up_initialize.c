@@ -38,6 +38,8 @@
 #include <nuttx/note/note_driver.h>
 #include <nuttx/syslog/syslog_console.h>
 #include <nuttx/serial/pty.h>
+#include <nuttx/spi/spi_flash.h>
+#include <nuttx/spi/qspi_flash.h>
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/power/pm.h>
 
@@ -56,23 +58,24 @@
  *
  ****************************************************************************/
 
-#if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
+#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_MTD_SMART) && \
+    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_QSPI_FLASH))
 static void up_init_smartfs(void)
 {
-  FAR struct mtd_dev_s *mtd;
-  int minor = 0;
 #if defined(CONFIG_MTD_M25P) || defined(CONFIG_MTD_W25) || defined(CONFIG_MTD_SST26)
+  FAR struct mtd_dev_s *mtd;
   FAR struct spi_dev_s *spi;
+  int minor = 0;
 #endif
 #ifdef CONFIG_MTD_N25QXXX
   FAR struct qspi_dev_s *qspi;
 #endif
 
-#ifdef CONFIG_SIM_SPIFLASH
+#ifdef CONFIG_SPI_FLASH
 #ifdef CONFIG_MTD_M25P
   /* Initialize a simulated SPI FLASH block device m25p MTD driver */
 
-  spi = up_spiflashinitialize("m25p");
+  spi = spi_flash_initialize("m25p");
   if (spi != NULL)
     {
       mtd = m25p_initialize(spi);
@@ -91,7 +94,7 @@ static void up_init_smartfs(void)
 #ifdef CONFIG_MTD_SST26
   /* Initialize a simulated SPI FLASH block device sst26 MTD driver */
 
-  spi = up_spiflashinitialize("sst26");
+  spi = spi_flash_initialize("sst26");
   if (spi != NULL)
     {
       mtd = sst26_initialize_spi(spi);
@@ -110,7 +113,7 @@ static void up_init_smartfs(void)
 #ifdef CONFIG_MTD_W25
   /* Initialize a simulated SPI FLASH block device w25 MTD driver */
 
-  spi = up_spiflashinitialize("w25");
+  spi = spi_flash_initialize("w25");
   if (spi != NULL)
     {
       mtd = w25_initialize(spi);
@@ -125,12 +128,12 @@ static void up_init_smartfs(void)
         }
     }
 #endif
-#endif      /* CONFIG_SIM_SPIFLASH */
+#endif /* CONFIG_SPI_FLASH */
 
-#if defined(CONFIG_MTD_N25QXXX) && defined(CONFIG_SIM_QSPIFLASH)
+#if defined(CONFIG_MTD_N25QXXX) && defined(CONFIG_QSPI_FLASH)
   /* Initialize a simulated SPI FLASH block device n25qxxx MTD driver */
 
-  qspi = up_qspiflashinitialize();
+  qspi = qspi_flash_initialize();
   if (qspi != NULL)
     {
       mtd = n25qxxx_initialize(qspi, 0);
@@ -270,7 +273,8 @@ void up_initialize(void)
   telnet_initialize();
 #endif
 
-#if defined(CONFIG_FS_SMARTFS) && (defined(CONFIG_SIM_SPIFLASH) || defined(CONFIG_SIM_QSPIFLASH))
+#if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_MTD_SMART) && \
+    (defined(CONFIG_SPI_FLASH) || defined(CONFIG_QSPI_FLASH))
   up_init_smartfs();
 #endif
 

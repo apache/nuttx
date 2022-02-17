@@ -59,82 +59,82 @@ config VIDEO_STREAM
 if VIDEO_STREAM
 
 config VIDEO_SCENE_BACKLIGHT
-        bool "Enable backlight scene"
-        default y
-        ---help---
-                Enable backlight scene
+	bool "Enable backlight scene"
+	default y
+	---help---
+		Enable backlight scene
 
 config VIDEO_SCENE_BEACHSNOW
-        bool "Enable beach snow scene"
-        default y
-        ---help---
-                Enable beach snow scene
+	bool "Enable beach snow scene"
+	default y
+	---help---
+		Enable beach snow scene
 
 config VIDEO_SCENE_CANDLELIGHT
-        bool "Enable candle light scene"
-        default y
-        ---help---
-                Enable candle light scene
+	bool "Enable candle light scene"
+	default y
+	---help---
+		Enable candle light scene
 
 config VIDEO_SCENE_DAWNDUSK
-        bool "Enable dawn dusk scene"
-        default y
-        ---help---
-                Enable dawn dusk scene
+	bool "Enable dawn dusk scene"
+	default y
+	---help---
+		Enable dawn dusk scene
 
 config VIDEO_SCENE_FALLCOLORS
-        bool "Enable fall colors scene"
-        default y
-        ---help---
-                Enable fall colors scene
+	bool "Enable fall colors scene"
+	default y
+	---help---
+		Enable fall colors scene
 
 config VIDEO_SCENE_FIREWORKS
-        bool "Enable fireworks scene"
-        default y
-        ---help---
-                Enable fireworks scene
+	bool "Enable fireworks scene"
+	default y
+	---help---
+		Enable fireworks scene
 
 config VIDEO_SCENE_LANDSCAPE
-        bool "Enable landscape scene"
-        default y
-        ---help---
-                Enable landscape scene
+	bool "Enable landscape scene"
+	default y
+	---help---
+		Enable landscape scene
 
 config VIDEO_SCENE_NIGHT
-        bool "Enable night scene"
-        default y
-        ---help---
-                Enable night scene
+	bool "Enable night scene"
+	default y
+	---help---
+		Enable night scene
 
 config VIDEO_SCENE_PARTYINDOOR
-        bool "Enable party and indoor scene"
-        default y
-        ---help---
-                Enable party and indoor scene
+	bool "Enable party and indoor scene"
+	default y
+	---help---
+		Enable party and indoor scene
 
 config VIDEO_SCENE_PORTRAIT
-        bool "Enable portrait scene"
-        default y
-        ---help---
-                Enable portrait scene
+	bool "Enable portrait scene"
+	default y
+	---help---
+		Enable portrait scene
 
 config VIDEO_SCENE_SPORTS
-        bool "Enable sports scene"
-        default y
-        ---help---
-                Enable sports scene
+	bool "Enable sports scene"
+	default y
+	---help---
+		Enable sports scene
 
 config VIDEO_SCENE_SUNSET
-        bool "Enable sunset scene"
-        default y
-        ---help---
-                Enable sunset scene
+	bool "Enable sunset scene"
+	default y
+	---help---
+		Enable sunset scene
 
 config VIDEO_SCENE_TEXT
-        bool "Enable text scene"
-        default y
-        ---help---
-                Enable text scene
+	bool "Enable text scene"
+	default y
+	---help---
+		Enable text scene
 endif
 
 config VIDEO_MAX7456
@@ -146,9 +146,9 @@ config VIDEO_MAX7456
 		multiplexer.
 
 config VIDEO_ISX012
-        bool "ISX012 Image sensor"
-        default n
-        select I2C
+	bool "ISX012 Image sensor"
+	default n
+	select I2C
 
 config VIDEO_OV2640
 	bool "OV2640 camera chip"
@@ -257,5 +257,7 @@ config OV2640_REGDEBUG
 		Enable details, register level debug output.
 
 endif
+
+source "drivers/video/vnc/Kconfig"
 
 endif # DRIVERS_VIDEO
