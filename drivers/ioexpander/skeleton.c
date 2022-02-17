@@ -81,30 +81,33 @@ struct skel_dev_s
 static int skel_lock(FAR struct skel_dev_s *priv);
 
 static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             int dir);
+                          int dir);
 static int skel_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             int opt, void *val);
+                       int opt, void *val);
 static int skel_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             bool value);
+                         bool value);
 static int skel_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             FAR bool *value);
+                        FAR bool *value);
 static int skel_readbuf(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-             FAR bool *value);
+                        FAR bool *value);
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+                              FAR uint8_t *pins, FAR bool *values,
+                              int count);
 static int skel_multireadpin(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+                             FAR uint8_t *pins, FAR bool *values, int count);
 static int skel_multireadbuf(FAR struct ioexpander_dev_s *dev,
-             FAR uint8_t *pins, FAR bool *values, int count);
+                             FAR uint8_t *pins, FAR bool *values, int count);
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int skel_attach(FAR struct ioexpander_dev_s *dev,
-             ioe_pinset_t pinset, ioe_callback_t callback);
-#endif
+                       ioe_pinset_t pinset, ioe_callback_t callback);
+static int skel_detach(FAR struct ioexpander_dev_s *dev,
+                       FAR void *handle);
 
 static void skel_irqworker(void *arg);
 static void skel_interrupt(FAR void *arg);
+#endif
 
 /****************************************************************************
  * Private Data
@@ -134,6 +137,7 @@ static const struct ioexpander_ops_s g_skel_ops =
 #endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
   , skel_attach
+  , skel_detach
 #endif
 };
 
@@ -412,7 +416,7 @@ static int skel_getmultibits(FAR struct skel_dev_s *priv, FAR uint8_t *pins,
           return -ENXIO;
         }
 
-      values[i] = ((pinset & (1 << pin) != 0);
+      values[i] = ((pinset & (1 << pin)) != 0);
     }
 
   return OK;
@@ -438,8 +442,7 @@ static int skel_getmultibits(FAR struct skel_dev_s *priv, FAR uint8_t *pins,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
-                                 FAR uint8_t *pins, FAR bool *values,
-                                 int count)
+                              FAR uint8_t *pins, FAR bool *values, int count)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   ioe_pinset_t pinset;
@@ -506,8 +509,7 @@ static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int skel_multireadpin(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count)
+                             FAR uint8_t *pins, FAR bool *values, int count)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
@@ -549,8 +551,7 @@ static int skel_multireadpin(FAR struct ioexpander_dev_s *dev,
 
 #ifdef CONFIG_IOEXPANDER_MULTIPIN
 static int skel_multireadbuf(FAR struct ioexpander_dev_s *dev,
-                                FAR uint8_t *pins, FAR bool *values,
-                                int count)
+                             FAR uint8_t *pins, FAR bool *values, int count)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret;
@@ -590,7 +591,7 @@ static int skel_multireadbuf(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_skeleton_INT_ENABLE
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static int skel_attach(FAR struct ioexpander_dev_s *dev, ioe_pinset_t pinset,
                        ioe_callback_t callback)
 {
@@ -631,6 +632,41 @@ static int skel_attach(FAR struct ioexpander_dev_s *dev, ioe_pinset_t pinset,
 #endif
 
 /****************************************************************************
+ * Name: skel_detach_detach
+ *
+ * Description:
+ *   Detach and disable a pin interrupt callback function.
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   handle   - The non-NULL opaque value return by skel_attach_attch()
+ *
+ * Returned Value:
+ *   0 on success, else a negative error code
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
+static int skel_detach(FAR struct ioexpander_dev_s *dev, FAR void *handle)
+{
+  FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
+  FAR struct skel_callback_s *cb =
+    (FAR struct skel_callback_s *)handle;
+
+  DEBUGASSERT(priv != NULL && cb != NULL);
+  DEBUGASSERT((uintptr_t)cb >= (uintptr_t)&priv->cb[0] &&
+              (uintptr_t)cb <=
+              (uintptr_t)&priv->cb[CONFIG_SKELETON_INT_NCALLBACKS - 1]);
+  UNUSED(priv);
+
+  cb->pinset = 0;
+  cb->cbfunc = NULL;
+  cb->cbarg  = NULL;
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: skel_irqworker
  *
  * Description:
@@ -639,7 +675,7 @@ static int skel_attach(FAR struct ioexpander_dev_s *dev, ioe_pinset_t pinset,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_skeleton_INT_ENABLE
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static void skel_irqworker(void *arg)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)arg;
@@ -697,7 +733,7 @@ static void skel_irqworker(void *arg)
  *
  ****************************************************************************/
 
-#ifdef CONFIG_skeleton_INT_ENABLE
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
 static void skel_interrupt(FAR void *arg)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)arg;
@@ -778,7 +814,7 @@ FAR struct ioexpander_dev_s *skel_initialize(void)
 
   priv->dev.ops = &g_skel_ops;
 
-#ifdef CONFIG_skeleton_INT_ENABLE
+#ifdef CONFIG_IOEXPANDER_INT_ENABLE
   /* Attach the I/O expander interrupt handler and enable interrupts */
 #warning Missing logic
 

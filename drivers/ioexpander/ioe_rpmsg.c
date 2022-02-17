@@ -212,10 +212,15 @@ static const struct ioexpander_ops_s g_ioe_rpmsg_ops =
   ioe_rpmsg_option,
   ioe_rpmsg_writepin,
   ioe_rpmsg_readpin,
-  ioe_rpmsg_readpin,
+  ioe_rpmsg_readpin
+#ifdef CONFIG_IOEXPANDER_MULTIPIN
+  , NULL
+  , NULL
+  , NULL
+#endif
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
-  ioe_rpmsg_attach,
-  ioe_rpmsg_detach,
+  , ioe_rpmsg_attach
+  , ioe_rpmsg_detach
 #endif
 };
 
@@ -288,31 +293,27 @@ static int ioe_rpmsg_sendrecv(FAR struct rpmsg_endpoint *ept,
 static int ioe_rpmsg_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                                int dir)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_direction_s msg;
 
   msg.pin = pin;
   msg.val = dir;
 
   return ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_DIRECTION,
-                           (struct ioe_rpmsg_header_s *)&msg,
-                           sizeof(msg));
+                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
 }
 
 static int ioe_rpmsg_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                              FAR bool *value)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_readpin_s msg;
   int ret;
 
   msg.pin = pin;
 
   ret = ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_READPIN,
-                          (struct ioe_rpmsg_header_s *)&msg,
-                           sizeof(msg));
+                           (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
   if (ret >= 0)
     {
       *value = ret;
@@ -324,23 +325,20 @@ static int ioe_rpmsg_readpin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 static int ioe_rpmsg_writepin(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                               bool value)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_writepin_s msg;
 
   msg.pin = pin;
   msg.val = value;
 
   return ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_WRITEPIN,
-                           (struct ioe_rpmsg_header_s *)&msg,
-                           sizeof(msg));
+                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
 }
 
 static int ioe_rpmsg_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
                             int opt, void *regval)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_option_s msg;
 
   msg.pin = pin;
@@ -348,8 +346,7 @@ static int ioe_rpmsg_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
   msg.val = (uintptr_t)regval;
 
   return ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_OPTION,
-                           (struct ioe_rpmsg_header_s *)&msg,
-                           sizeof(msg));
+                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
 }
 
 #ifdef CONFIG_IOEXPANDER_INT_ENABLE
@@ -358,8 +355,7 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
                               ioe_callback_t callback,
                               FAR void *arg)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                        (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_attach_s msg;
   int ret;
 
@@ -368,8 +364,7 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
   msg.cbarg  = (uintptr_t)arg;
 
   ret = ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_ATTACH,
-                          (struct ioe_rpmsg_header_s *)&msg,
-                           sizeof(msg));
+                           (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
   if (ret >= 0)
     {
       return (FAR void *)(ret + 1);
@@ -381,15 +376,13 @@ static void *ioe_rpmsg_attach(FAR struct ioexpander_dev_s *dev,
 static int ioe_rpmsg_detach(FAR struct ioexpander_dev_s *dev,
                             FAR void *handle)
 {
-  FAR struct ioe_rpmsg_client_s *priv =
-                        (struct ioe_rpmsg_client_s *)dev;
+  FAR struct ioe_rpmsg_client_s *priv = (struct ioe_rpmsg_client_s *)dev;
   struct ioe_rpmsg_detach_s msg;
 
   msg.cbidx = (uintptr_t)handle - 1;
 
   return ioe_rpmsg_sendrecv(&priv->ept, IOE_RPMSG_DETACH,
-                           (struct ioe_rpmsg_header_s *)&msg,
-                            sizeof(msg));
+                            (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
 }
 #endif
 
@@ -400,8 +393,7 @@ static int ioe_rpmsg_direction_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct ioe_rpmsg_direction_s *msg = data;
   FAR struct ioe_rpmsg_server_s *priv = priv_;
 
-  msg->header.result = IOEXP_SETDIRECTION(priv->ioe,
-                                          msg->pin, msg->val);
+  msg->header.result = IOEXP_SETDIRECTION(priv->ioe, msg->pin, msg->val);
 
   return rpmsg_send(ept, msg, len);
 }
@@ -413,8 +405,7 @@ static int ioe_rpmsg_option_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct ioe_rpmsg_option_s *msg = data;
   FAR struct ioe_rpmsg_server_s *priv = priv_;
 
-  msg->header.result = IOEXP_SETOPTION(priv->ioe,
-                                       msg->pin, msg->opt,
+  msg->header.result = IOEXP_SETOPTION(priv->ioe, msg->pin, msg->opt,
                                        (void *)(uintptr_t)msg->val);
 
   return rpmsg_send(ept, msg, len);
@@ -427,8 +418,7 @@ static int ioe_rpmsg_writepin_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct ioe_rpmsg_writepin_s *msg = data;
   FAR struct ioe_rpmsg_server_s *priv = priv_;
 
-  msg->header.result = IOEXP_WRITEPIN(priv->ioe,
-                                      msg->pin, msg->val);
+  msg->header.result = IOEXP_WRITEPIN(priv->ioe, msg->pin, msg->val);
 
   return rpmsg_send(ept, msg, len);
 }
@@ -463,21 +453,19 @@ static void ioe_rpmsg_irqworker(FAR void *priv_)
   msg.cbarg  = cb->cbarg;
 
   ioe_rpmsg_sendrecv(cb->ept, IOE_RPMSG_IRQ,
-                    (struct ioe_rpmsg_header_s *)&msg,
-                     sizeof(msg));
+                     (struct ioe_rpmsg_header_s *)&msg, sizeof(msg));
 
   cb->pendset = 0;
 }
 
 static int ioe_rpmsg_irq_cb(FAR struct ioexpander_dev_s *dev,
-                     ioe_pinset_t pinset, FAR void *priv_)
+                            ioe_pinset_t pinset, FAR void *priv_)
 {
   FAR struct ioe_rpmsg_cb_s *cb = priv_;
 
   cb->pendset |= pinset;
 
-  work_queue(HPWORK, &cb->work, ioe_rpmsg_irqworker,
-             cb, 0);
+  work_queue(HPWORK, &cb->work, ioe_rpmsg_irqworker, cb, 0);
 
   return OK;
 }
@@ -494,9 +482,8 @@ static int ioe_rpmsg_attach_handler(FAR struct rpmsg_endpoint *ept,
     {
       if (!priv->cb[i].handler)
         {
-          priv->cb[i].handler =
-              IOEP_ATTACH(priv->ioe, msg->pinset,
-                          ioe_rpmsg_irq_cb, &priv->cb[i]);
+          priv->cb[i].handler = IOEP_ATTACH(priv->ioe, msg->pinset,
+                                            ioe_rpmsg_irq_cb, &priv->cb[i]);
 
           if (priv->cb[i].handler)
             {
@@ -521,8 +508,7 @@ static int ioe_rpmsg_detach_handler(FAR struct rpmsg_endpoint *ept,
   FAR struct ioe_rpmsg_detach_s *msg = data;
   FAR struct ioe_rpmsg_server_s *priv = priv_;
 
-  msg->header.result = IOEP_DETACH(priv->ioe,
-                                   priv->cb[msg->cbidx].handler);
+  msg->header.result = IOEP_DETACH(priv->ioe, priv->cb[msg->cbidx].handler);
 
   if (msg->header.result >= 0)
     {
@@ -585,13 +571,11 @@ static void ioe_rpmsg_client_created(FAR struct rpmsg_device *rdev,
   if (!strcmp(priv->cpuname, rpmsg_get_cpuname(rdev)))
     {
       char eptname[RPMSG_NAME_SIZE];
-      snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT,
-               priv->name);
+      snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
       priv->ept.priv = priv;
-      rpmsg_create_ept(&priv->ept, rdev, eptname,
-                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       ioe_rpmsg_ept_cb, NULL);
+      rpmsg_create_ept(&priv->ept, rdev, eptname, RPMSG_ADDR_ANY,
+                       RPMSG_ADDR_ANY, ioe_rpmsg_ept_cb, NULL);
 
       nxsem_post(&priv->sem);
     }
@@ -624,8 +608,7 @@ static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
   FAR struct ioe_rpmsg_server_s *priv = priv_;
   char eptname[RPMSG_NAME_SIZE];
 
-  snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT,
-           priv->name);
+  snprintf(eptname, RPMSG_NAME_SIZE, IOE_RPMSG_EPT_FORMAT, priv->name);
 
   if (!strcmp(name, eptname))
     {
@@ -639,10 +622,8 @@ static void ioe_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
 
       ept->priv = priv;
 
-      rpmsg_create_ept(ept, rdev, name,
-                       RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
-                       ioe_rpmsg_ept_cb,
-                       ioe_rpmsg_server_unbind);
+      rpmsg_create_ept(ept, rdev, name, RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
+                       ioe_rpmsg_ept_cb, ioe_rpmsg_server_unbind);
     }
 }
 
@@ -678,10 +659,7 @@ int ioe_rpmsg_server_initialize(FAR const char *name,
   priv->name = name;
   priv->ioe  = ioe;
 
-  ret = rpmsg_register_callback(priv,
-                                NULL,
-                                NULL,
-                                ioe_rpmsg_server_bind);
+  ret = rpmsg_register_callback(priv, NULL, NULL, ioe_rpmsg_server_bind);
   if (ret < 0)
     {
       kmm_free(priv);
@@ -699,8 +677,7 @@ int ioe_rpmsg_server_initialize(FAR const char *name,
  ****************************************************************************/
 
 FAR struct ioexpander_dev_s *
-ioe_rpmsg_client_initialize(FAR const char *cpuname,
-                            FAR const char *name)
+ioe_rpmsg_client_initialize(FAR const char *cpuname, FAR const char *name)
 {
   FAR struct ioe_rpmsg_client_s *priv;
   int ret;
@@ -717,14 +694,12 @@ ioe_rpmsg_client_initialize(FAR const char *cpuname,
     }
 
   priv->ioe.ops = &g_ioe_rpmsg_ops;
-  priv->cpuname   = cpuname;
-  priv->name      = name;
+  priv->cpuname = cpuname;
+  priv->name    = name;
 
   nxsem_init(&priv->sem, 0, 0);
-  ret = rpmsg_register_callback(priv,
-                                ioe_rpmsg_client_created,
-                                ioe_rpmsg_client_destroy,
-                                NULL);
+  ret = rpmsg_register_callback(priv, ioe_rpmsg_client_created,
+                                ioe_rpmsg_client_destroy, NULL);
   if (ret < 0)
     {
       kmm_free(priv);
