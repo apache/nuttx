@@ -46,8 +46,10 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_UINPUT_TOUCHSCREEN
 int uinput_touch_initialize(FAR const char *name, int maxpoint,
                             int buffnums);
+#endif
 
 /****************************************************************************
  * Name: uinput_button_initialize
@@ -64,6 +66,8 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint,
  *
  ****************************************************************************/
 
+#ifdef CONFIG_UINPUT_BUTTONS
 int uinput_button_initialize(FAR const char *name);
+#endif
 
 #endif /* __INCLUDE_NUTTX_INPUT_UINPUT_H */

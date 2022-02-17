@@ -319,15 +319,21 @@ int sim_bringup(void)
     }
 #endif
 
-#ifdef CONFIG_INPUT_UINPUT
-  /* Initialize the touchscreen uinput */
-
+#ifdef CONFIG_UINPUT_TOUCHSCREEN
   ret = uinput_touch_initialize("utouch", 1, 4);
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: uinput_touch_initialize failed: %d\n", ret);
     }
-#endif
+#endif /* CONFIG_UINPUT_TOUCHSCREEN */
+
+#ifdef CONFIG_UINPUT_BUTTONS
+  ret = uinput_button_initialize("ubutton");
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: uinput_button_initialize failed: %d\n", ret);
+    }
+#endif /* CONFIG_UINPUT_BUTTONS */
 
 #ifdef CONFIG_IEEE802154_LOOPBACK
   /* Initialize and register the IEEE802.15.4 MAC network loop device */
