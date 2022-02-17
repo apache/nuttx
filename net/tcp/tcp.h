@@ -1548,6 +1548,30 @@ int psock_tcp_cansend(FAR struct tcp_conn_s *conn);
 void tcp_wrbuffer_initialize(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+
+struct tcp_wrbuffer_s;
+
+/****************************************************************************
+ * Name: tcp_wrbuffer_timedalloc
+ *
+ * Description:
+ *   Allocate a TCP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from TCP logic when a buffer
+ *   of TCP data is about to sent
+ *   This function is wrapped version of tcp_wrbuffer_alloc(),
+ *   this wait will be terminated when the specified timeout expires.
+ *
+ * Input Parameters:
+ *   timeout   - The relative time to wait until a timeout is declared.
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout);
+
 /****************************************************************************
  * Name: tcp_wrbuffer_alloc
  *
@@ -1564,8 +1588,6 @@ void tcp_wrbuffer_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct tcp_wrbuffer_s;
 FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 
 /****************************************************************************
