@@ -204,11 +204,15 @@ int wd_start(FAR struct wdog_s *wdog, sclock_t delay,
   up_getpicbase(&wdog->picbase);
   wdog->arg = arg;
 
-  /* Forcing the delay into a range that we can handle */
+  /* Calculate delay+1, forcing the delay into a range that we can handle */
 
   if (delay <= 0)
     {
       delay = 1;
+    }
+  else if (++delay <= 0)
+    {
+      delay--;
     }
 
 #ifdef CONFIG_SCHED_TICKLESS
