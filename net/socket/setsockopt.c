@@ -165,26 +165,26 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
           if (psock->s_type == SOCK_STREAM)
             {
-              FAR struct tcp_conn_s *conn;
+              FAR struct tcp_conn_s *tcp;
 
-              conn = (FAR struct tcp_conn_s *)psock->s_conn;
+              tcp = (FAR struct tcp_conn_s *)conn;
 
               /* Save the receive buffer size */
 
-              conn->rcv_bufs = buffersize;
+              tcp->rcv_bufs = buffersize;
             }
           else
 #endif
 #if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
           if (psock->s_type == SOCK_DGRAM)
             {
-              FAR struct udp_conn_s *conn;
+              FAR struct udp_conn_s *udp;
 
-              conn = (FAR struct udp_conn_s *)psock->s_conn;
+              udp = (FAR struct udp_conn_s *)conn;
 
               /* Save the receive buffer size */
 
-              conn->rcvbufs = buffersize;
+              udp->rcvbufs = buffersize;
             }
           else
 #endif
@@ -227,26 +227,26 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 #if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
           if (psock->s_type == SOCK_STREAM)
             {
-              FAR struct tcp_conn_s *conn;
+              FAR struct tcp_conn_s *tcp;
 
-              conn = (FAR struct tcp_conn_s *)psock->s_conn;
+              tcp = (FAR struct tcp_conn_s *)conn;
 
               /* Save the send buffer size */
 
-              conn->snd_bufs = buffersize;
+              tcp->snd_bufs = buffersize;
             }
           else
 #endif
 #if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
           if (psock->s_type == SOCK_DGRAM)
             {
-              FAR struct udp_conn_s *conn;
+              FAR struct udp_conn_s *udp;
 
-              conn = (FAR struct udp_conn_s *)psock->s_conn;
+              udp = (FAR struct udp_conn_s *)conn;
 
               /* Save the send buffer size */
 
-              conn->sndbufs = buffersize;
+              udp->sndbufs = buffersize;
             }
           else
 #endif
