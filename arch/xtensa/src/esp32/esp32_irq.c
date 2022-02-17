@@ -452,6 +452,7 @@ static void esp32_free_cpuint(int cpuint)
 void up_irqinitialize(void)
 {
   int i;
+
   for (i = 0; i < NR_IRQS; i++)
     {
       g_irqmap[i] = IRQ_UNMAPPED;
@@ -474,6 +475,22 @@ void up_irqinitialize(void)
   /* Initialize CPU interrupts */
 
   esp32_cpuint_initialize();
+
+  /* Reserve CPU0 interrupt for some special drivers */
+
+#ifdef CONFIG_ESP32_WIRELESS
+  g_cpu0_intmap[ESP32_CPUINT_MAC]  = CPUINT_ASSIGN(ESP32_IRQ_MAC);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
+#endif
+
+#ifdef CONFIG_ESP32_BLE
+  g_cpu0_intmap[ESP32_PERIPH_BT_BB_NMI] = CPUINT_ASSIGN(ESP32_IRQ_BT_BB_NMI);
+  g_cpu0_intmap[ESP32_PERIPH_RWBT_NMI]  = CPUINT_ASSIGN(ESP32_IRQ_RWBT_NMI);
+  g_cpu0_intmap[ESP32_PERIPH_RWBLE_IRQ] = CPUINT_ASSIGN(ESP32_IRQ_RWBLE_IRQ);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_BT_BB_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBT_NMI);
+  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBLE_IRQ);
+#endif
 
   /* Attach and enable internal interrupts */
 
@@ -734,22 +751,6 @@ int esp32_cpuint_initialize(void)
   intmap[ESP32_CPUINT_TIMER0] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER0);
   intmap[ESP32_CPUINT_TIMER1] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER1);
   intmap[ESP32_CPUINT_TIMER2] = CPUINT_ASSIGN(XTENSA_IRQ_TIMER2);
-
-  /* Reserve CPU interrupt for some special drivers */
-
-#ifdef CONFIG_ESP32_WIRELESS
-  intmap[ESP32_CPUINT_MAC]    = CPUINT_ASSIGN(ESP32_IRQ_MAC);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_CPUINT_MAC);
-#endif
-
-#ifdef CONFIG_ESP32_BLE
-  intmap[ESP32_PERIPH_BT_BB_NMI] = CPUINT_ASSIGN(ESP32_IRQ_BT_BB_NMI);
-  intmap[ESP32_PERIPH_RWBT_NMI]  = CPUINT_ASSIGN(ESP32_IRQ_RWBT_NMI);
-  intmap[ESP32_PERIPH_RWBLE_IRQ] = CPUINT_ASSIGN(ESP32_IRQ_RWBLE_IRQ);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_BT_BB_NMI);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBT_NMI);
-  xtensa_enable_cpuint(&g_intenable[0], 1 << ESP32_PERIPH_RWBLE_IRQ);
-#endif
 
   return OK;
 }
