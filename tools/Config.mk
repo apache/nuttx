@@ -291,6 +291,24 @@ define COMPILEXX
 	$(Q) $(CXX) -c $(CXXFLAGS) $($(strip $1)_CXXFLAGS) $1 -o $2
 endef
 
+# COMPILERUST - Default macro to compile one Rust file
+# Example: $(call COMPILERUST, in-file, out-file)
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   RUST - The command to invoke the Rust compiler
+#   RUSTFLAGS - Options to pass to the Rust compiler
+#
+# '<filename>.rs_RUSTFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.rs. The same
+# applies mutatis mutandis.
+
+define COMPILERUST
+	@echo "RUSTC: $1"
+	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $1 -o $2
+endef
+
 # ASSEMBLE - Default macro to assemble one assembly language file
 # Example: $(call ASSEMBLE, in-file, out-file)
 #
