@@ -173,9 +173,7 @@ static uint32_t g_cpu0_freeints = ESP32_CPUINT_PERIPHSET &
                                   (~ESP32_WIRELESS_RESERVE_INT &
                                    ~ESP32_BLE_RESERVE_INT);
 #ifdef CONFIG_SMP
-static uint32_t g_cpu1_freeints = ESP32_CPUINT_PERIPHSET &
-                                  (~ESP32_WIRELESS_RESERVE_INT &
-                                   ~ESP32_BLE_RESERVE_INT);
+static uint32_t g_cpu1_freeints = ESP32_CPUINT_PERIPHSET;
 #endif
 
 /* Bitsets for each interrupt priority 1-5 */
