@@ -985,6 +985,34 @@ static uint32_t tcp_max_wrb_size(FAR struct tcp_conn_s *conn)
 }
 
 /****************************************************************************
+ * Name: tcp_send_gettimeout
+ *
+ * Description:
+ *   Calculate the send timeout
+ *
+ ****************************************************************************/
+
+static unsigned int tcp_send_gettimeout(clock_t start, unsigned int timeout)
+{
+  unsigned int elapse;
+
+  if (timeout != UINT_MAX)
+    {
+      elapse = TICK2MSEC(clock_systime_ticks() - start);
+      if (elapse >= timeout)
+        {
+          timeout = 0;
+        }
+      else
+        {
+          timeout -= elapse;
+        }
+    }
+
+  return timeout;
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1050,9 +1078,11 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
   FAR struct tcp_conn_s *conn;
   FAR struct tcp_wrbuffer_s *wrb;
   FAR const uint8_t *cp;
+  unsigned int timeout;
   ssize_t    result = 0;
   bool       nonblock;
   int        ret = OK;
+  clock_t    start;
 
   if (psock == NULL || psock->s_type != SOCK_STREAM ||
       psock->s_conn == NULL)
@@ -1108,6 +1138,8 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
 
   nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
                             (flags & MSG_DONTWAIT) != 0;
+  start    = clock_systime_ticks();
+  timeout  = _SO_TIMEOUT(conn->sconn.s_sndtimeo);
 
   /* Dump the incoming buffer */
 
@@ -1172,7 +1204,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               goto errout_with_lock;
             }
 
-          net_lockedwait_uninterruptible(&conn->snd_sem);
+          ret = net_timedwait_uninterruptible(&conn->snd_sem,
+            tcp_send_gettimeout(start, timeout));
+          if (ret < 0)
+            {
+              goto errout_with_lock;
+            }
         }
 #endif /* CONFIG_NET_SEND_BUFSIZE */
 
@@ -1210,13 +1247,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
             {
               wrb = tcp_wrbuffer_tryalloc();
               ninfo("new wrb %p (non blocking)\n", wrb);
-              DEBUGASSERT(wrb == NULL || TCP_WBPKTLEN(wrb) == 0);
             }
           else
             {
-              wrb = tcp_wrbuffer_alloc();
+              wrb = tcp_wrbuffer_timedalloc(tcp_send_gettimeout(start,
+                                                                timeout));
               ninfo("new wrb %p\n", wrb);
-              DEBUGASSERT(TCP_WBPKTLEN(wrb) == 0);
             }
 
           if (wrb == NULL)
@@ -1224,7 +1260,20 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
               /* A buffer allocation error occurred */
 
               nerr("ERROR: Failed to allocate write buffer\n");
-              ret = nonblock ? -EAGAIN : -ENOMEM;
+
+              if (nonblock)
+                {
+                  ret = -EAGAIN;
+                }
+              else if (timeout != UINT_MAX)
+                {
+                  ret = -ETIMEDOUT;
+                }
+              else
+                {
+                  ret = -ENOMEM;
+                }
+
               goto errout_with_lock;
             }
 
@@ -1311,8 +1360,12 @@ ssize_t psock_tcp_send(FAR struct socket *psock, FAR const void *buf,
            * we risk a deadlock with other threads competing on IOBs.
            */
 
-          iob = net_ioballoc(true, IOBUSER_NET_TCP_WRITEBUFFER);
-          iob_free_chain(iob, IOBUSER_NET_TCP_WRITEBUFFER);
+          iob = net_iobtimedalloc(true, tcp_send_gettimeout(start, timeout),
+                                  IOBUSER_NET_TCP_WRITEBUFFER);
+          if (iob != NULL)
+            {
+              iob_free_chain(iob, IOBUSER_NET_TCP_WRITEBUFFER);
+            }
         }
 
       /* Dump I/O buffer chain */
