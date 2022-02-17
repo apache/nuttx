@@ -755,7 +755,6 @@ int esp32_cpuint_initialize(void)
    *
    *   CPU interrupt bit           IRQ number
    *   --------------------------- ---------------------
-   *   ESP32_CPUINT_MAC         0  ESP32_IRQ_MAC      4
    *   ESP32_CPUINT_TIMER0      6  XTENSA_IRQ_TIMER0  0
    *   ESP32_CPUINT_SOFTWARE0   7  Not yet defined
    *   ESP32_CPUINT_PROFILING  11  Not yet defined
