@@ -593,22 +593,40 @@ void up_disable_irq(int irq)
 
 void up_enable_irq(int irq)
 {
-  int cpu = IRQ_GETCPU(g_irqmap[irq]);
   int cpuint = IRQ_GETCPUINT(g_irqmap[irq]);
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32_CPUINT_MAX);
-  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {
+      /* For internal interrupts, use the current CPU.  We can't enable other
+       * CPUs' internal interrupts.
+       * The CPU interrupt can still be taken from the map as internal
+       * interrupts have the same number for all CPUs.  In this case then
+       * we are just overwriting the cpu part of the map.
+       */
+
+      int cpu = up_cpu_index();
+
       /* Enable the CPU interrupt now for internal CPU. */
 
       xtensa_enable_cpuint(&g_intenable[cpu], (1ul << cpuint));
     }
   else
     {
-      /* For peripheral interrupts, attach the interrupt to the peripheral;
-       * the CPU interrupt was already enabled when allocated.
+      /* Retrive the CPU that enabled this interrupt from the IRQ map.
+       *
+       * For peripheral interrupts we rely on the interrupt matrix to manage
+       * interrupts.  The interrupt matrix registers are available for both
+       * CPUs.
+       */
+
+      int cpu = IRQ_GETCPU(g_irqmap[irq]);
+
+      DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+
+      /* Attach the interrupt to the peripheral; the CPU interrupt was
+       * already enabled when allocated.
        */
 
       int periph = ESP32_IRQ2PERIPH(irq);
