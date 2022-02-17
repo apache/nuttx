@@ -221,6 +221,7 @@ void rpmsg_serialinit(void);
 
 /* Exception Handler ********************************************************/
 
+void riscv_fault(int irq, uintptr_t *regs);
 void riscv_exception(uintptr_t mcause, uintptr_t *regs);
 
 /* Debug ********************************************************************/
