@@ -36,11 +36,26 @@ config INPUT_TOUCHSCREEN
 	default n
 
 config INPUT_UINPUT
-	bool "Enable uinput"
-	select INPUT_TOUCHSCREEN
+	bool
 	default n
 	---help---
 		Enable support virtual input device driver
+
+config UINPUT_TOUCHSCREEN
+	bool "Enable uinput touchscreen"
+	select INPUT_TOUCHSCREEN
+	select INPUT_UINPUT
+	default n
+	---help---
+		Enable support virtual input touchscreen device driver
+
+config UINPUT_BUTTONS
+	bool "Enable uinput buttons"
+	select INPUT_BUTTONS
+	select INPUT_UINPUT
+	default n
+	---help---
+		Enable support virtual input button device driver
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
