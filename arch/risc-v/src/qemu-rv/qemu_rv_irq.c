@@ -37,8 +37,7 @@
 #include "riscv_internal.h"
 #include "riscv_arch.h"
 
-#include "hardware/qemu_rv_memorymap.h"
-#include "hardware/qemu_rv_plic.h"
+#include "chip.h"
 
 /****************************************************************************
  * Public Functions
@@ -87,6 +86,17 @@ void up_irqinitialize(void)
 
   irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
+#ifdef CONFIG_SMP
+  /* Clear MSOFT for CPU0 */
+
+  putreg32(0, RISCV_CLINT_MSIP);
+
+  /* Setup MSOFT for CPU0 with pause handler */
+
+  irq_attach(RISCV_IRQ_MSOFT, riscv_pause_handler, NULL);
+  up_enable_irq(RISCV_IRQ_MSOFT);
+#endif
+
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
 
   /* And finally, enable interrupts */
@@ -108,7 +118,13 @@ void up_disable_irq(int irq)
   int extirq;
   uint32_t oldstat;
 
-  if (irq == RISCV_IRQ_MTIMER)
+  if (irq == RISCV_IRQ_MSOFT)
+    {
+      /* Read mstatus & clear machine software interrupt enable in mie */
+
+      asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+    }
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
@@ -147,7 +163,13 @@ void up_enable_irq(int irq)
   int extirq;
   uint32_t oldstat;
 
-  if (irq == RISCV_IRQ_MTIMER)
+  if (irq == RISCV_IRQ_MSOFT)
+    {
+      /* Read mstatus & set machine software interrupt enable in mie */
+
+      asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+    }
+  else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 

@@ -52,7 +52,7 @@
  * Public Data
  ****************************************************************************/
 
-volatile uintptr_t *g_current_regs[1];
+volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 /****************************************************************************
  * Public Functions
@@ -66,6 +66,11 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   uintptr_t irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
+
+  if (vector < RISCV_IRQ_ECALLM)
+    {
+      riscv_fault(irq, regs);
+    }
 
   /* Firstly, check if the irq is machine external interrupt */
 
@@ -97,9 +102,14 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
   DEBUGASSERT(CURRENT_REGS == NULL);
   CURRENT_REGS = regs;
 
-  /* Deliver the IRQ */
+  /* MEXT means no interrupt */
 
-  irq_dispatch(irq, regs);
+  if (RISCV_IRQ_MEXT != irq)
+    {
+      /* Deliver the IRQ */
+
+      irq_dispatch(irq, regs);
+    }
 
   if (RISCV_IRQ_MEXT <= irq)
     {

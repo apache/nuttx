@@ -22,11 +22,11 @@
 
 4. Run the nuttx with qemu
 
-  $ qemu-system-riscv32 -M virt -cpu rv32 -bios none -kernel nuttx -nographic
+  $ qemu-system-riscv32 -M virt -cpu rv32 -smp 8 -bios none -kernel nuttx -nographic
 
   or
 
-  $ qemu-system-riscv64 -M virt -cpu rv64 -bios none -kernel nuttx -nographic
+  $ qemu-system-riscv64 -M virt -cpu rv64 -smp 8-bios none -kernel nuttx -nographic
 
 5. TODO
 
