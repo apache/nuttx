@@ -49,7 +49,7 @@
  * Name: riscv_cpu_boot
  *
  * Description:
- *   Boot handler for cpu1
+ *   Boot handler for cpu[x]
  *
  * Input Parameters:
  *   None
@@ -61,11 +61,6 @@
 
 void riscv_cpu_boot(int cpu)
 {
-  if (1 < cpu)
-    {
-      return;
-    }
-
   /* Clear machine software interrupt for CPU(cpu) */
 
   putreg32(0, (uintptr_t)RISCV_CLINT_MSIP + (4 * cpu));
