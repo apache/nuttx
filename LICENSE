@@ -1509,6 +1509,7 @@ boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
 
 
 arch/arm/src/imxrt/imxrt_lcd.c
+arch/arm/src/imxrt/hardware/imxrt_lcd.h
 ==============================
 
  Copyright (C) 2019 Gregory Nutt. All rights reserved.
