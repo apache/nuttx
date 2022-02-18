@@ -1367,6 +1367,12 @@ ustream
   Note that the binfs file system is mounted at /bin when the system starts
   up.
 
+vncserver
+
+  This a simple vnc server test configuration, Remmina is tested and recommended since
+  there are some compatibility issues. By defualt SIM will be blocked at startup to
+  wait client connection, if a client connected, then the fb example will launch. 
+
 vpnkit
 
   This is a configuration with VPNKit support.  See NETWORK-VPNKIT.txt.
