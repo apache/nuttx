@@ -98,6 +98,12 @@ static int files_extend(FAR struct filelist *list, size_t row)
 
   list->fl_files = tmp;
   list->fl_rows = row;
+
+  /* Note: If assertion occurs, the fl_rows has a overflow.
+   * And there may be file descriptors leak in system.
+   */
+
+  DEBUGASSERT(list->fl_rows == row);
   return 0;
 }
 
