@@ -1064,13 +1064,15 @@ config SCHED_INSTRUMENTATION_FILTER
 config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
 	hex "Default instrumentation filter mode"
 	depends on SCHED_INSTRUMENTATION_FILTER
-	default 0xf
+	default 0x3f
 	---help---
 		Default mode of the instrumentation filter logic.
 			Bit 0 = Enable instrumentation
-			Bit 1 = Enable syscall instrumentation
-			Bit 2 = Enable IRQ instrumentation
-			Bit 3 = Enable collecting syscall arguments
+			Bit 1 = Enable switch instrumentation
+			Bit 2 = Enable syscall instrumentation
+			Bit 3 = Enable IRQ instrumentation
+			Bit 4 = Enable dump instrumentation
+			Bit 5 = Enable collecting syscall arguments
 
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
