@@ -63,7 +63,7 @@ int inode_getpath(FAR struct inode *node, FAR char *path)
     }
 
   strcat(path, node->i_name);
-  if (node->i_child)
+  if (node->i_child || INODE_IS_MOUNTPT(node))
     {
       strcat(path, "/");
     }
