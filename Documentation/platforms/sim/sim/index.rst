@@ -21,6 +21,8 @@ Compiling
 All you need to do is select your desired board profile configuratioon
 (see: nuttx/sim/sim/sim/configs for the listing) ::
 
+    $ make distclean
+
     $ ./tools/configure.sh sim:nsh
 
     $ make
@@ -54,3 +56,50 @@ When the compilation finishes it will create a ``nuttx`` binary, then run it::
     NuttX 10.1.0 508215581f Sep  3 2021 10:47:34 sim sim
     nsh>
 
+Running LVGL
+============
+
+It is possible to run the LVGL Demo directly in the NuttX simulator ::
+
+    $ make distclean
+
+    $ ./tools/configure.sh sim:lvgl
+
+    $ make -j
+
+    $ ./nuttx
+
+You should see a window with the touch calibration and then the LVGL demo:
+
+.. figure:: images/lvgl.png
+   :align: center
+   :width: 100%
+
+   LVGL Demo running in the NuttX's simulator
+
+Running VNC Server
+==================
+
+NuttX supports a VNC server, so it means even boards without a LCD display
+could export a display interface over network. Also you can test it on NuttX
+simulator before getting it working on your board, just follow these steps ::
+
+    $ make distclean
+
+    $ ./tools/configure.sh sim:vncserver
+
+    $ make -j
+
+    $ ./nuttx
+
+Open a new terminal and execute ::
+
+    $ remmina -c vnc://localhost
+
+You should see some squares in different colors displayed in remmina:
+
+.. figure:: images/vnc.png
+   :align: center
+   :width: 100%
+
+   remmina connected to sim's VNC Server
