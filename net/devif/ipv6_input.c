@@ -341,9 +341,9 @@ int ipv6_input(FAR struct net_driver_s *dev)
        * ffx2 are interface-local, and therefore, should not be forwarded
        */
 
-      if ((ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff00)) &&
-          (ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff01)) &&
-          (ipv6->destipaddr[0] & HTONS(0xff0f) != HTONS(0xff02)))
+      if (((ipv6->destipaddr[0] & HTONS(0xff0f)) != HTONS(0xff00)) &&
+          ((ipv6->destipaddr[0] & HTONS(0xff0f)) != HTONS(0xff01)) &&
+          ((ipv6->destipaddr[0] & HTONS(0xff0f)) != HTONS(0xff02)))
         {
           /* Forward broadcast packets */
 
