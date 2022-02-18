@@ -445,6 +445,7 @@ include/nuttx/lcd/ili9488.h
 
 include/nuttx/input/x11_keysym.h
 include/nuttx/input/x11_keysymdef.h
+include/nuttx/input/x11_xf86keysym.h
 ===================================
 
   Copyright 1987, 1994, 1998 The Open Group
