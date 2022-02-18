@@ -27,6 +27,7 @@
 #include <stdio.h>
 
 #include <nuttx/input/buttons.h>
+#include <nuttx/input/keyboard.h>
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/uinput.h>
 #include <nuttx/kmalloc.h>
@@ -88,6 +89,15 @@ struct uinput_button_lowerhalf_s
   FAR void              *arg;
 };
 
+struct uinput_keyboard_lowerhalf_s
+{
+#ifdef CONFIG_UINPUT_RPMSG
+  struct uinput_context_s ctx;
+#endif
+
+  struct keyboard_lowerhalf_s lower;
+};
+
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
@@ -143,6 +153,16 @@ static void uinput_button_enable(FAR const struct btn_lowerhalf_s *lower,
                                  FAR void *arg);
 
 #endif /* CONFIG_UINPUT_BUTTONS */
+
+#ifdef CONFIG_UINPUT_KEYBOARD
+
+static ssize_t uinput_keyboard_notify(FAR void *uinput_lower,
+                                      FAR const char *buffer, size_t buflen);
+
+static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
+                                     FAR const char *buffer, size_t buflen);
+
+#endif /* CONFIG_UINPUT_KEYBOARD */
 
 /****************************************************************************
  * Private Functions
@@ -380,6 +400,48 @@ static void uinput_button_enable(FAR const struct btn_lowerhalf_s *lower,
 
 #endif /* CONFIG_UINPUT_BUTTONS */
 
+#ifdef CONFIG_UINPUT_KEYBOARD
+
+/****************************************************************************
+ * Name: uinput_keyboard_notify
+ ****************************************************************************/
+
+static ssize_t uinput_keyboard_notify(FAR void *uinput_lower,
+                                      FAR const char *buffer, size_t buflen)
+{
+  FAR struct uinput_keyboard_lowerhalf_s *ukbd_lower =
+    (FAR struct uinput_keyboard_lowerhalf_s *)uinput_lower;
+  FAR struct keyboard_event_s *key = (FAR struct keyboard_event_s *)buffer;
+
+  keyboard_event(&ukbd_lower->lower, key->code, key->type);
+  return buflen;
+}
+
+/****************************************************************************
+ * Name: uinput_keyboard_write
+ ****************************************************************************/
+
+static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
+                                     FAR const char *buffer, size_t buflen)
+{
+  FAR struct keyboard_event_s *key = (FAR struct keyboard_event_s *)buffer;
+  FAR struct uinput_keyboard_lowerhalf_s *ukbd_lower =
+      container_of(lower, struct uinput_keyboard_lowerhalf_s, lower);
+
+  if (key == NULL || buflen != sizeof(struct keyboard_event_s))
+    {
+      return -EINVAL;
+    }
+
+#ifdef CONFIG_UINPUT_RPMSG
+  uinput_rpmsg_notify(&ukbd_lower->ctx, buffer, buflen);
+#endif
+
+  return uinput_keyboard_notify(ukbd_lower, buffer, buflen);
+}
+
+#endif /* CONFIG_UINPUT_KEYBOARD */
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -489,3 +551,58 @@ int uinput_button_initialize(FAR const char *name)
 }
 
 #endif /* CONFIG_UINPUT_BUTTONS */
+
+/****************************************************************************
+ * Name: uinput_keyboard_initialize
+ *
+ * Description:
+ *   Initialized the uinput keyboard device
+ *
+ * Input Parameters:
+ *   name: keyboard devices name
+ *
+ * Returned Value:
+ *   Zero is returned on success.  Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UINPUT_KEYBOARD
+
+int uinput_keyboard_initialize(FAR const char *name)
+{
+  char devname[UINPUT_NAME_SIZE];
+  FAR struct uinput_keyboard_lowerhalf_s *ukbd_lower;
+  int ret;
+
+  ukbd_lower = kmm_zalloc(sizeof(struct uinput_keyboard_lowerhalf_s));
+  if (ukbd_lower == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ukbd_lower->lower.write = uinput_keyboard_write;
+
+#ifdef CONFIG_UINPUT_RPMSG
+  ukbd_lower->ctx.notify = uinput_keyboard_notify;
+#endif
+
+  /* Regiest Touchscreen device */
+
+  snprintf(devname, sizeof(devname), "/dev/%s", name);
+  ret = keyboard_register(&ukbd_lower->lower, devname);
+  if (ret < 0)
+    {
+      kmm_free(ukbd_lower);
+      ierr("ERROR: uinput keyboard initialize failed\n");
+      return ret;
+    }
+
+#ifdef CONFIG_UINPUT_RPMSG
+  uinput_rpmsg_initialize(&ukbd_lower->ctx, name);
+#endif
+
+  return  0;
+}
+
+#endif /* CONFIG_UINPUT_KEYBOARD */
