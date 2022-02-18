@@ -35,6 +35,21 @@ config INPUT_TOUCHSCREEN
 	select MM_CIRCBUF
 	default n
 
+config INPUT_KEYBOARD
+	bool
+	select MM_CIRCBUF
+	default n
+
+if INPUT_KEYBOARD
+
+config INPUT_KEYBOARD_BUFFSIZE
+	int "Number keyboard data buffer"
+	default 64
+	---help---
+		Maximum number of keyboard data buffer
+
+endif # INPUT_KEYBOARD
+
 config INPUT_UINPUT
 	bool
 	default n
