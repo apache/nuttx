@@ -228,7 +228,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
    * file.
    */
 
-  rf = kmm_zalloc(sizeof(struct romfs_file_s));
+  rf = kmm_zalloc(sizeof(struct romfs_file_s) + strlen(relpath));
   if (!rf)
     {
       ferr("ERROR: Failed to allocate private data\n");
@@ -242,6 +242,7 @@ static int romfs_open(FAR struct file *filep, FAR const char *relpath,
 
   rf->rf_size = dirinfo.rd_size;
   rf->rf_type = (uint8_t)(dirinfo.rd_next & RFNEXT_ALLMODEMASK);
+  strcpy(rf->rf_path, relpath);
 
   /* Get the start of the file data */
 
@@ -585,6 +586,13 @@ static int romfs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
        */
 
       *ppv = (FAR void *)(rm->rm_xipbase + rf->rf_startoffset);
+      return OK;
+    }
+  else if (cmd == FIOC_FILEPATH)
+    {
+      FAR char *ptr = (FAR char *)((uintptr_t)arg);
+      inode_getpath(filep->f_inode, ptr);
+      strcat(ptr, rf->rf_path);
       return OK;
     }
 

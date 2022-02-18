@@ -151,6 +151,7 @@ struct romfs_file_s
   uint32_t rf_cachesector;        /* Current sector in the rf_buffer */
   FAR uint8_t *rf_buffer;         /* File sector buffer, allocated if rm_xipbase==0 */
   uint8_t rf_type;                /* File type (for fstat()) */
+  char rf_path[1];                /* Path of open file */
 };
 
 /* This structure is used internally for describing the result of
