@@ -294,9 +294,8 @@ struct foc_data_b16_s
 struct motor_phy_params_b16_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
-  b16_t   res;                 /* Phase-to-neutral temperature compensated
-                                * resistance
-                                */
+  b16_t   flux_link;           /* Flux linkage */
+  b16_t   res;                 /* Average phase-to-neutral resistance */
   b16_t   ind;                 /* Average phase-to-neutral inductance */
   b16_t   one_by_ind;          /* Inverse phase-to-neutral inductance */
   b16_t   one_by_p;            /* Inverse number of motor pole pairs */
@@ -308,7 +307,6 @@ struct pmsm_phy_params_b16_s
 {
   struct motor_phy_params_b16_s motor;       /* Motor common PHY */
   b16_t                         iner;        /* Rotor inertia */
-  b16_t                         flux_link;   /* Flux linkage */
   b16_t                         ind_d;       /* d-inductance */
   b16_t                         ind_q;       /* q-inductance */
   b16_t                         one_by_iner; /* One by J */
@@ -467,7 +465,8 @@ b16_t motor_angle_e_get_b16(FAR struct motor_angle_b16_s *angle);
 /* Motor physical parameters */
 
 void motor_phy_params_init_b16(FAR struct motor_phy_params_b16_s *phy,
-                               uint8_t poles, b16_t res, b16_t ind);
+                               uint8_t poles, b16_t res, b16_t ind,
+                               b16_t fluxlink);
 
 /* PMSM physical parameters functions */
 
