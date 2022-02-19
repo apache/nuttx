@@ -299,6 +299,7 @@ struct motor_phy_params_b16_s
                                 */
   b16_t   ind;                 /* Average phase-to-neutral inductance */
   b16_t   one_by_ind;          /* Inverse phase-to-neutral inductance */
+  b16_t   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
 /* PMSM motor physcial parameters */

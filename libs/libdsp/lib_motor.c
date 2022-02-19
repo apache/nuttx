@@ -372,6 +372,7 @@ void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
   phy->res        = res;
   phy->ind        = ind;
   phy->one_by_ind = (1.0f / ind);
+  phy->one_by_p   = (1.0f / poles);
 }
 
 /****************************************************************************
