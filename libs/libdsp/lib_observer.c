@@ -29,8 +29,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define ANGLE_DIFF_THR (M_PI_F)
-
 /* nan check for floats */
 
 #define IS_NAN(x)   ((x) != (x))
@@ -582,10 +580,10 @@ void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
   float x1_dot;
   float x2_dot;
 
-  float l_ia = (3.0 / 2.0) * phy->ind * i_ab->a;
-  float l_ib = (3.0 / 2.0) * phy->ind * i_ab->b;
-  float r_ia = (3.0 / 2.0) * phy->res * i_ab->a;
-  float r_ib = (3.0 / 2.0) * phy->res * i_ab->b;
+  float l_ia = (3.0f / 2.0f) * phy->ind * i_ab->a;
+  float l_ib = (3.0f / 2.0f) * phy->ind * i_ab->b;
+  float r_ia = (3.0f / 2.0f) * phy->res * i_ab->a;
+  float r_ib = (3.0f / 2.0f) * phy->res * i_ab->b;
 
   LIBDSP_DEBUGASSERT(nfo != NULL);
 
@@ -597,9 +595,9 @@ void motor_aobserver_nfo(FAR struct motor_aobserver_f32_s *o,
    * https://arxiv.org/pdf/1905.00833.pdf
    */
 
-  if (err > 0.0)
+  if (err > 0.0f)
     {
-      err = 0.0;
+      err = 0.0f;
     }
 
   x1_dot = -r_ia + v_ab->a + gain * (nfo->x1 - l_ia) * err;
@@ -651,7 +649,7 @@ void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
                               float pll_kp, float pll_ki)
 {
   LIBDSP_DEBUGASSERT(so != NULL);
-  LIBDSP_DEBUGASSERT(pll_kp > 0);
+  LIBDSP_DEBUGASSERT(pll_kp > 0.0f);
   LIBDSP_DEBUGASSERT(pll_ki > 0.0f);
 
   /* Reset observer data */
@@ -664,7 +662,7 @@ void motor_sobserver_pll_init(FAR struct motor_sobserver_pll_f32_s *so,
 
   /* Store ki for PLL observer speed */
 
-  so->pll_ki  = pll_ki;
+  so->pll_ki = pll_ki;
 }
 
 /****************************************************************************
@@ -684,7 +682,7 @@ void motor_sobserver_pll(FAR struct motor_sobserver_f32_s *o, float angle)
 {
   FAR struct motor_sobserver_pll_f32_s *so =
       (FAR struct motor_sobserver_pll_f32_s *)o->so;
-  float delta_theta = 0.0;
+  float delta_theta = 0.0f;
 
   LIBDSP_DEBUGASSERT(so != NULL);
 
