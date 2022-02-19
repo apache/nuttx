@@ -53,8 +53,8 @@ ifeq ($(CONFIG_RV32M1_OPENISA_TOOLCHAIN),y)
   endif
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
