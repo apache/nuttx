@@ -408,10 +408,9 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
 #ifdef CONFIG_SERIAL_TERMIOS
-  ssize_t nread;
-  size_t i;
+  ssize_t i;
+  ssize_t j;
   char ch;
-  int ret;
 #endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -433,118 +432,43 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (dev->pd_iflag & (INLCR | IGNCR | ICRNL))
     {
-      /* We will transfer one byte at a time, making the appropriate
-       * translations.
-       */
-
-      ntotal = 0;
-      for (i = 0; i < len; i++)
+      while ((ntotal = file_read(&dev->pd_src, buffer, len)) > 0)
         {
-          /* This logic should return if the pipe becomes empty after some
-           * bytes were read from the pipe.  If we have already read some
-           * data, we use the FIONREAD ioctl to test if there are more bytes
-           * in the pipe.
-           *
-           * REVISIT:  An alternative design might be to (1) configure the
-           * source file as non-blocking, then (2) wait using poll() for the
-           * first byte to be received.  (3) Subsequent bytes would
-           * use file_read() without polling and would (4) terminate when no
-           * data is returned.
-           */
-
-          if (ntotal > 0)
+          for (i = j = 0; i < ntotal; i++)
             {
-              int nsrc;
+              /* Perform input processing */
 
-              /* There are inherent race conditions in this test.  We lock
-               * the scheduler before the test and after the file_read()
-               * below to eliminate one race:  (a) We detect that there is
-               * data in the source file, (b) we are suspended and another
-               * thread reads the data, emptying the fifo, then (c) we
-               * resume and call file_read(), blocking indefinitely.
-               */
+              ch = buffer[i];
 
-              sched_lock();
+              /* \n -> \r or \r -> \n translation? */
 
-              /* Check how many bytes are waiting in the pipe */
-
-              ret = file_ioctl(&dev->pd_src, FIONREAD,
-                               (unsigned long)((uintptr_t)&nsrc));
-              if (ret < 0)
+              if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
                 {
-                  sched_unlock();
-                  ntotal = ret;
-                  break;
+                  ch = '\r';
+                }
+              else if (ch == '\r' && (dev->pd_iflag & ICRNL) != 0)
+                {
+                  ch = '\n';
                 }
 
-              /* Break out of the loop and return ntotal if the pipe is
-               * empty.  This is another race:  There fifo was empty when we
-               * called file_ioctl() above, but it might not be empty right
-               * now.  Losing that race should not lead to any bad behaviors,
-               * however, we the caller will get those bytes on the next
-               * read.
+              /* Discarding \r ?  Print character if (1) character is not \r
+               * or if (2) we were not asked to ignore \r.
                */
 
-              if (nsrc < 1)
+              if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
                 {
-                  sched_unlock();
-                  break;
+                  buffer[j++] = ch;
                 }
-
-              /* Read one byte from the source the byte.  This should not
-               * block.
-               */
-
-              nread = file_read(&dev->pd_src, &ch, 1);
-              sched_unlock();
-            }
-          else
-            {
-              /* Read one byte from the source the byte.  This call will
-               * block if the source pipe is empty.
-               *
-               * REVISIT: Should not block if the oflags include O_NONBLOCK.
-               * How would we ripple the O_NONBLOCK characteristic to the
-               * contained source pipe?  file_fcntl()?  Or FIONREAD? See the
-               * TODO comment at the top of this file.
-               */
-
-              nread = file_read(&dev->pd_src, &ch, 1);
             }
 
-          /* Check if file_read was successful */
+          /* Is the buffer not empty after process? */
 
-          if (nread < 0)
+          if (j != 0)
             {
-              ntotal = nread;
+              /* Yes, we are done. */
+
+              ntotal = j;
               break;
-            }
-
-          /* Perform input processing */
-
-          /* \n -> \r or \r -> \n translation? */
-
-          if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
-            {
-               ch = '\r';
-            }
-          else if (ch == '\r' && (dev->pd_iflag & ICRNL) != 0)
-            {
-              ch = '\n';
-            }
-
-          /* Discarding \r ?  Print character if (1) character is not \r or
-           * if (2) we were not asked to ignore \r.
-           */
-
-          if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
-            {
-              /* Transfer the (possibly translated) character and update the
-               * count of bytes transferred.
-               */
-
-              *buffer++ = ch;
-              ntotal++;
             }
         }
     }
