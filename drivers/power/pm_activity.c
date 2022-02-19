@@ -69,9 +69,9 @@
 
 void pm_activity(int domain, int priority)
 {
-  if (g_pmglobals.domain[domain].governor->activity)
+  if (g_pmglobals.governor->activity)
     {
-      g_pmglobals.domain[domain].governor->activity(domain, priority);
+      g_pmglobals.governor->activity(domain, priority);
     }
 
   pm_auto_updatestate(domain);

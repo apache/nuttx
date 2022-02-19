@@ -224,17 +224,6 @@ struct pm_governor_s
   CODE void (*initialize)(void);
 
   /**************************************************************************
-   * Name: deinitialize
-   *
-   * Description:
-   *   Allow the governor to release its internal data. This can be left to
-   *   to NULL if not needed by the governor.
-   *
-   **************************************************************************/
-
-  CODE void (*deinitialize)(void);
-
-  /**************************************************************************
    * Name: statechanged
    *
    * Description:
@@ -349,25 +338,6 @@ FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
  ****************************************************************************/
 
 FAR const struct pm_governor_s *pm_activity_governor_initialize(void);
-
-/****************************************************************************
- * Name: pm_set_governor
- *
- * Description:
- *   This function set the domain with assigned governor
- *
- * Input Parameters:
- *   domain        - The PM domain to Set
- *   gov           - The governor to use
- *
- * Returned Value:
- *  On success - OK
- *  On error   - -EINVAL
- *
- *
- ****************************************************************************/
-
-int pm_set_governor(int domain, FAR const struct pm_governor_s *gov);
 
 /****************************************************************************
  * Name: pm_auto_update

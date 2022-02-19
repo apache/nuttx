@@ -87,10 +87,6 @@ struct pm_domain_s
   /* The worker of update callback */
 
   struct work_s update_work;
-
-  /* A pointer to the PM governor instance */
-
-  FAR const struct pm_governor_s *governor;
 };
 
 /* This structure encapsulates all of the global data used by the PM system */
@@ -113,6 +109,10 @@ struct pm_global_s
   /* The state information for each PM domain */
 
   struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
+
+  /* A pointer to the PM governor instance */
+
+  FAR const struct pm_governor_s *governor;
 };
 
 /****************************************************************************
