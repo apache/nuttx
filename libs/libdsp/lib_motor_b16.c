@@ -324,6 +324,7 @@ void motor_phy_params_init_b16(FAR struct motor_phy_params_b16_s *phy,
   phy->res        = res;
   phy->ind        = ind;
   phy->one_by_ind = b16divb16(b16ONE, ind);
+  phy->one_by_p   = b16divb16(b16ONE, poles);
 }
 
 /****************************************************************************

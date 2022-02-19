@@ -386,6 +386,7 @@ struct motor_phy_params_f32_s
   float   res;                 /* Phase-to-neutral resistance */
   float   ind;                 /* Average phase-to-neutral inductance */
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
+  float   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
 /* PMSM motor physcial parameters */
