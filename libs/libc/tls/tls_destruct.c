@@ -65,7 +65,7 @@ void tls_destruct(void)
     {
       /* Is this candidate index available? */
 
-      tls_ndxset_t mask = (1 << candidate);
+      tls_ndxset_t mask = (tls_ndxset_t)1 << candidate;
       if (tlsset & mask)
         {
           tls_elem_ptr = (FAR void *)tls->tl_elem[candidate];

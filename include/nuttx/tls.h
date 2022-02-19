@@ -67,8 +67,10 @@
  */
 
 #if CONFIG_TLS_NELEM > 0
-#  if CONFIG_TLS_NELEM > 32
+#  if CONFIG_TLS_NELEM > 64
 #    error Too many TLS elements
+#  elif CONFIG_TLS_NELEM > 32
+     typedef uint64_t tls_ndxset_t;
 #  elif CONFIG_TLS_NELEM > 16
      typedef uint32_t tls_ndxset_t;
 #  elif CONFIG_TLS_NELEM > 8
