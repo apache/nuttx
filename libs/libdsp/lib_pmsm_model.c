@@ -187,7 +187,7 @@ int pmsm_model_elec(FAR struct pmsm_model_f32_s *model,
 
   tmp1 = model->phy.motor.res * model->state.i_dq.q;
   tmp2 = model->phy.ind_d * model->state.i_dq.d;
-  tmp3 = tmp2 + model->phy.flux_link;
+  tmp3 = tmp2 + model->phy.motor.flux_link;
   tmp4 = model->state.omega_e * tmp3;
   tmp5 = model->state.v_dq.q - tmp1 - tmp4;
   tmp6 = model->per * tmp5;
@@ -248,7 +248,7 @@ int pmsm_model_mech(FAR struct pmsm_model_f32_s *model, float load)
 
   tmp1 = model->phy.ind_d - model->phy.ind_q;
   tmp2 = tmp1 * model->state.i_dq.d;
-  tmp3 = model->phy.flux_link - tmp2;
+  tmp3 = model->phy.motor.flux_link - tmp2;
   tmp4 = 1.5f * model->phy.motor.p;
   tmp5 = tmp4 * model->state.i_dq.q;
 
