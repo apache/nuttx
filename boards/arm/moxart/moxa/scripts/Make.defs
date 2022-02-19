@@ -32,8 +32,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin -mno-thumb-interwork -march=armv4 -Uarm
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -mno-thumb-interwork -march=armv4 -Uarm
+ARCHCFLAGS = -fno-common -fno-builtin -mno-thumb-interwork -march=armv4 -Uarm
+ARCHCXXFLAGS = -fno-common -fno-builtin -fno-exceptions -fcheck-new -mno-thumb-interwork -march=armv4 -Uarm
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
