@@ -1,0 +1,17 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "Basic Rust Support"
+
+config HAVE_RUST
+	bool "Have Rust compiler"
+	default n
+	---help---
+        Toolchain supports Rust and RUSTC, RUSTFLAGS, COMPILERUST and
+        COMPILERLIB have been defined in the configurations Make.defs file.
+
+if HAVE_RUST
+
+endif
