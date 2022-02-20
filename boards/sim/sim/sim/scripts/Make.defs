@@ -55,10 +55,13 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
 endif
 
-ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -nostdinc++
+# Add -fno-common because macOS "ld -r" doesn't seem to pick objects
+# for common symbols.
+ARCHCFLAGS = -fno-common -fno-builtin
+ARCHCXXFLAGS = -fno-common -fno-builtin -nostdinc++
+
 ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCPUFLAGSXX += -fno-exceptions -fcheck-new
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
@@ -67,17 +70,12 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
 
-ARCHCPUFLAGS += -fvisibility=hidden
-ARCHCPUFLAGSXX += -fvisibility=hidden
-
-# Add -fno-common because macOS "ld -r" doesn't seem to pick objects
-# for common symbols.
-ARCHCPUFLAGS += -fno-common
-ARCHCPUFLAGSXX += -fno-common
+ARCHCFLAGS += -fvisibility=hidden
+ARCHCXXFLAGS += -fvisibility=hidden
 
 ifeq ($(CONFIG_SIM_M32),y)
-  ARCHCPUFLAGS += -m32
-  ARCHCPUFLAGSXX += -m32
+  ARCHCFLAGS += -m32
+  ARCHCXXFLAGS += -m32
 endif
 
 CC = $(CROSSDEV)cc
@@ -96,9 +94,9 @@ OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 
@@ -202,4 +200,4 @@ endif
 
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe
