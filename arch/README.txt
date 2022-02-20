@@ -49,7 +49,6 @@ directory plus the board-specific configurations in the boards/
 directory.  Each architecture must provide a subdirectory <arch-name>
 under arch/ with the following characteristics:
 
-
         <arch-name>/
         |-- include/
         |   |--<chip-name>/

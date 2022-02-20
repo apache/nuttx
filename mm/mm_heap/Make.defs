@@ -31,7 +31,6 @@ ifeq ($(CONFIG_DEBUG_MM),y)
 CSRCS += mm_checkcorruption.c
 endif
 
-
 # Add the core heap directory to the build
 
 DEPPATH += --dep-path mm_heap

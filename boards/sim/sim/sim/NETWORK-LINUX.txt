@@ -10,7 +10,6 @@ Bridge mode is recommended where possible.  It requires slightly more effort
 to set up, but is much more flexible, and is likely to be easier to maintain
 in the end.
 
-
 Host Route Mode
 ---------------
 
@@ -68,7 +67,6 @@ On Linux:
     $ # is nuttx up?
     $ ping 10.0.1.2
 
-
 Bridge Mode
 -----------
 
@@ -91,7 +89,6 @@ one or more simulations.  You only need one bridge per host; if you start
 multiple simulations, they will all be added to the same bridge and can talk
 amongst themselves.
 
-
 Option 1: Routing Local Traffic to the Bridge
 ---------------------------------------------
 If you want the host to be able to talk to the simulator, you will
@@ -106,7 +103,6 @@ would do something like the following:
 
 The standard Linux ifconfig utility will automatically add the appropriate
 network route, so no further effort is needed.
-
 
 Option 2: Live Network Access
 -----------------------------
@@ -148,7 +144,6 @@ accessing, whether or not the bridge has an IP address.  The bridge is acting
 as an ethernet hub; your simluation has direct access to the normal gateway as
 if the simluation were a device physically connected to the network.
 
-
 Configuring at Startup
 ----------------------
 Most Linux distributions have a mechanism for configuring a bridge at startup.
@@ -158,7 +153,6 @@ Setup Script
 ------------
 
 There is a script, `tools/simbridge.sh` that will do the setup for you.
-
 
 Notes
 -----

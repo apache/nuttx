@@ -153,7 +153,6 @@ fix_pil:
         nop;
         nop;
 
-
 simple_return:
         ldd     [%o0 + ISF_I6_FP_OFFSET], %i6 ! restore i6/fp, i7
         sub     %fp, CONTEXT_CONTROL_INTERRUPT_FRAME_SIZE, %sp
@@ -199,7 +198,6 @@ simple_return:
         std	    %l4, [%fp + CPU_STACK_FRAME_I4_OFFSET]
         ldd     [%o0 + PRE_STACK_FRAME_I6_FP_OFFSET], %l4
         std	    %l4, [%fp + CPU_STACK_FRAME_I6_FP_OFFSET]
-
 
         ldd     [%o0 + ISF_F0_OFFSET]  ,%f0
         ldd     [%o0 + ISF_F2_OFFSET]  ,%f2

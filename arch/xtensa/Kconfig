@@ -107,7 +107,6 @@ config ARCH_CHIP_XTENSA_CUSTOM
 	---help---
 		Select this option if there is no directory for the chip under arch/xtensa/src/.
 
-
 endchoice # XTENSA chip selection
 
 config XTENSA_HAVE_ICACHE

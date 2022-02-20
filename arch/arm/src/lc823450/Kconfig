@@ -214,7 +214,6 @@ config LC823450_SLEEP_MODE
 	bool "sleep mode"
 	default n
 
-
 config HRT_TIMER
 	bool "High resolution timer"
 	default n

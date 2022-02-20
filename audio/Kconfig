@@ -230,7 +230,6 @@ config AUDIO_DEV_PATH
 endif
 endif
 
-
 # These are here as placeholders of what could be added
 
 if AUDIO_PLANNED

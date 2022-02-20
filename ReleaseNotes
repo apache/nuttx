@@ -11568,7 +11568,6 @@ detailed bugfix information):
 
     * Atmel SAMA5:
 
-
     * Atmel SAM3/4 Drivers:
 
       - Fix some errors in AFEC header file.  From OrbitalFox.
@@ -27370,7 +27369,6 @@ NuttX-9.1.0 Release Notes -------------------------
       See git commit # e83c1400b65c65cbdf59c5abcf2ae368f540faef in the main
       NuttX repository.
 
-
 NuttX-10.0.0 Release Notes
 ------------------------
 
@@ -27644,8 +27642,6 @@ of all remaining wdog function calls from. For example, replace a call like `ret
  * [PR-1997](https://github.com/apache/incubator-nuttx/pull/1997) libc: Remove
  all calls to fclose with stdin/stdout/stderr with fclose
 
-
-
 ## Major Changes to Documentation
 
  * [PR-1763](https://github.com/apache/incubator-nuttx/pulls/1763) Add
@@ -27784,8 +27780,6 @@ PR-1516 Kinetis K28: Add support for USB High Speed Host
 PR-1531 Kinetis K28: Add USB state change notifiers in notifier work queue
 
 PR-1456 Kinetis K28: Reworked USB driver for setup out data phase
-
-
 
 #### NRF52
 
@@ -28100,8 +28094,6 @@ both FlexCAN and ENET are used
 
  * [PR-1452](https://github.com/apache/incubator-nuttx/pull/1452) lcd: Fix
  memory leak when board\_graphics\_setup fail
-
-
 
 ### New Driver Support
 
@@ -28554,8 +28546,6 @@ want to remove this unnecessary boilerplate.
 
 In your custom board's `scripts/Make.defs` file, remove lines like these:
 
-
-
 ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e
 's/^gcc version \\(\[0-9\\.\]\\)/\\1/g' -e 's/\[-\\ \].\*//g' -e '1q'}
 ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
@@ -28608,8 +28598,6 @@ If you have lines that define `CC`, `CXX`, `CPP`, `LD`, `STRIP`, `AR`, `NM`,
 CC = $(CROSSDEV)gcc CXX = $(CROSSDEV)g++ CPP = $(CROSSDEV)gcc -E -P -x c LD =
 $(CROSSDEV)ld STRIP = $(CROSSDEV)strip --strip-unneeded AR = $(ARCROSSDEV)ar rcs
 NM = $(ARCROSSDEV)nm OBJCOPY = $(CROSSDEV)objcopy OBJDUMP = $(CROSSDEV)objdump
-
-
 
 You may want to do one of the following:
 

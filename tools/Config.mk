@@ -570,7 +570,6 @@ else
 endif
 ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
 
-
 # Convert filepaths to their proper system format (i.e. Windows/Unix)
 
 ifeq ($(CONFIG_CYGWIN_WINTOOL),y)

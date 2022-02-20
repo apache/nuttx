@@ -26,7 +26,6 @@
 
 #include <arch/irq.h>
 
-
 #define RTRAP(_vector, _handler)  mov   %g0, %l0 ; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 #define TRAP(_vector, _handler)   mov   %psr, %l0; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 
@@ -370,7 +369,6 @@ zerobss:
         ret
         restore
 
-
 /*
  * Init END
  */
@@ -421,7 +419,6 @@ _window_overflow:
         jmp  %l1                         ! Re-execute save.
          rett %l2
 
-
         /*
          *  Window underflow trap handler.
          *
@@ -467,7 +464,6 @@ _window_underflow:
         save
         jmp  %l1                        ! Re-execute restore.
          rett  %l2
-
 
         /*
          *  Flush All Windows trap handler.
@@ -603,7 +599,6 @@ _fpdis_enable:
         nop
         nop
 /*************************************************/
-
 
 /*************************************************/
 	.data

@@ -52,7 +52,6 @@ LEDs
   LED_PANIC            The system has crashed    ON   OFF  (flashing 2Hz)
   LED_IDLE             MCU is is sleep mode      NC   ON
 
-
   OFF -  means that the OS is still initializing. Initialization is very fast
          so if you see this at all, it probably means that the system is
          hanging up somewhere in the initialization phases.

@@ -802,7 +802,6 @@ mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
   eventually be solvable but for now continue to use mkwindeps.sh in
   that mixed environment.
 
-
  netusb.sh
  ---------
 
@@ -819,7 +818,6 @@ mkdeps.c, cnvwindeps.c, mkwindeps.sh, and mknulldeps.sh
     This has been tested on the SAMA5D3-Xplained board; see
     `boards/arm/sama5/sama5d3-xplained/README.txt` for more information on how
     to configure the CDC ECM driver for that board.
-
 
 README.txt
 ----------

@@ -238,8 +238,6 @@ This will stay on the USB drive
 nsh> 
 ```
 
-
-
 ```
 ❯ telnet 192.168.86.249
 Trying 192.168.86.249...

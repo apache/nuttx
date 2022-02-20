@@ -82,7 +82,6 @@ The previously selected example will basically do the following:
 * Ping (feed the dog) during the ``pingtime`` with a delay of ``pingdelay`` and print out the wdt status in case debug was enabled.
 * Enter into an endless loop without pinging. It will cause the watchdog timer to reset the chip on timeout, i.e., after timer expiration.
 
-
 The `example code <https://github.com/apache/incubator-nuttx-apps/blob/master/examples/watchdog/watchdog_main.c>`_  may be explored, its path is at ``/examples/watchdog/watchdog_main.c`` in the apps' repository.
 
 In NuttX, the watchdog timer driver is a character driver and when a chip supports multiple watchdog timers, each one is accessible through its respective special file in ``/dev`` directory. Each watchdog timer is registered using a unique numeric identifier (i.e. ``/dev/watchdog0``, ``/dev/watchdog1``, ...).
@@ -107,7 +106,6 @@ The first necessary thing to be done in order to use the watchdog timer driver i
 .. code-block:: c
 
   #include <nuttx/timers/watchdog.h>
-
 
 At an application level, the watchdog timer functionalities may be accessed through ``ioctl`` systems calls. These ``ioctl`` commands internally call lower-half layer operations and the parameters are forwarded to these operations through the ``ioctl`` system call. The example provides a great resource to demonstrate how to use those ``ioctl`` commands. The available ``ioctl`` commands are:
 

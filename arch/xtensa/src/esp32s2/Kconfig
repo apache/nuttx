@@ -387,7 +387,6 @@ config ESP32S2_UART1
 	select UART1_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-
 config ESP32S2_WIRELESS
 	bool "Wireless"
 	default n

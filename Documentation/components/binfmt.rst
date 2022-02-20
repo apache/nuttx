@@ -75,7 +75,6 @@ pointer to a write-able instance of :c:struct:`binfmt_s`.
       int (*load)(FAR struct binary_s *bin); /* Verify and load binary into memory */
     };
 
-
   The ``load`` method is used to load the binary format into memory. It
   returns either ``OK`` (0) meaning that the binary object was loaded
   successfully, or a negated ``errno`` indicating why the object was not

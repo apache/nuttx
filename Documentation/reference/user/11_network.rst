@@ -276,7 +276,6 @@ the following paragraphs.
      socket. In this case the process will also receive a SIGPIPE unless
      MSG_NOSIGNAL is set.
 
-
 .. c:function:: ssize_t recv(int sockfd, void *buf, size_t len, int flags);
 
   The ``recv()`` call is identical to
@@ -290,7 +289,6 @@ the following paragraphs.
   -  flags: Receive flags
 
   **Returned Value:** See ```recvfrom()`` <#recvfrom>`__.
-
 
 .. c:function:: ssize_t recvfrom(int sockfd, void *buf, size_t len, int flags, \
                  struct sockaddr *from, socklen_t *fromlen);

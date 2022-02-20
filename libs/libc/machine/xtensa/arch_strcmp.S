@@ -51,7 +51,6 @@ strcmp:
 #if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && !XCHAL_HAVE_BE && XCHAL_HAVE_FLIX3
 /*  Fast version for FLIX3 Little Endian */
 
-
   ENTRY(16)
   /* a2 = s1, a3 = s2 */
 
@@ -170,7 +169,6 @@ strcmp:
   sub a2, a8, a9
   RET(16)
 
-
 .Lprobeq2:
   /* Adjust pointers to account for the loop unrolling.  */
         mov a8, a11
@@ -259,7 +257,6 @@ strcmp:
 #else
 #if XCHAL_HAVE_LOOPS && XCHAL_HAVE_DENSITY && !XCHAL_HAVE_BE && XCHAL_HAVE_PDX4
 /*  Fast version for FLIX3 Little Endian */
-
 
   ENTRY(16)
   /* a2 = s1, a3 = s2 */
@@ -383,7 +380,6 @@ strcmp:
   sub a2, a8, a9
   RET(16)
 
-
 .Lprobeq2:
   /* Adjust pointers to account for the loop unrolling.  */
         mov a8, a11
@@ -468,7 +464,6 @@ strcmp:
   extui a11, a9, 16, 8
   sub a2, a10, a11
   RET(16)
-
 
 #else /* Not FLIX3 */
   ENTRY(16)

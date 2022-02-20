@@ -277,7 +277,6 @@ Development Environment
 GNU Toolchain Options
 =====================
 
-
   The NuttX make system can be configured to support the various different
   toolchain options.  All testing has been conducted using the NuttX buildroot
   toolchain.  To use alternative toolchain, you simply need to add change of

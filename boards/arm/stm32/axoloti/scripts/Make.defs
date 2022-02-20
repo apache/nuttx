@@ -74,7 +74,6 @@ else
   LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
 endif
 
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif

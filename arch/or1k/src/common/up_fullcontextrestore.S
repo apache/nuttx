@@ -80,7 +80,6 @@ up_fullcontextrestore:
   l.lwz   r30, 4*REG_R30(r3);
   l.lwz   r31, 4*REG_R31(r3);
 
-
   /* Get the return value */
 
   l.lwz   r11, 4*REG_R11(r3);

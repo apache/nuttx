@@ -96,7 +96,6 @@ config SENSORS_BMG160
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
 
-
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
 	default n
@@ -315,7 +314,6 @@ config SENSORS_L3GD20_BUFFER_SIZE
 	---help---
 		The size of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
-
 
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"

@@ -155,7 +155,6 @@ GPIOS (6-9). Regular and high speed GPIO share the same pins (GPIO1 is with GPIO
 therefore IOMUXC_GPR_GPR26-29 registers are used to determine what module is used for the
 GPIO pins.
 
-
 I2C
 ---
 
