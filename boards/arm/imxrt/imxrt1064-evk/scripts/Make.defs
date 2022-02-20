@@ -39,7 +39,11 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 endif
 
 ARCHCFLAGS = -fno-builtin
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+ifeq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS = -fno-builtin
+else
+  ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti
+endif
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -fno-strict-aliasing
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
