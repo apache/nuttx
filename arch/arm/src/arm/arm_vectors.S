@@ -91,6 +91,41 @@ arm_vectorirq:
 	orr	r0, r0, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, r0
 
+#ifdef CONFIG_BUILD_KERNEL
+	/* Did we enter from user mode?  If so then we need get the values of
+	 * USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r1, #PSR_MODE_USR		/* User mode? */
+	bne	.Lirqentersvc			/* Branch if not user mode */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add	r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	b	.Lirqcontinue
+
+.Lirqentersvc:
+	/* Otherwise, get the correct values of SVC r13(sp) and r14(lr) in r1
+	 * and r2.
+	 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
+.Lirqcontinue:
+
+#else
 	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
@@ -100,6 +135,7 @@ arm_vectorirq:
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the IRQ handler with interrupts disabled. */
 
@@ -123,6 +159,31 @@ arm_vectorirq:
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
+
+#ifdef CONFIG_BUILD_KERNEL
+	/* Are we leaving in user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r2, r0, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r2, #PSR_MODE_USR		/* User mode? */
+	bne	.Lirqleavesvc			/* Branch if not user mode */
+
+	mov	r14, sp				/* Get r14=xcp */
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	ldmia	r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^			/* Return */
+
+.Lirqleavesvc:
+#endif
+
 	ldmia	sp, {r0-r15}^		/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
@@ -159,6 +220,41 @@ arm_vectorsvc:
 	mov	r3, r14			/* Save r14 as the PC as well */
 	mrs	r4, spsr		/* Get the saved CPSR */
 
+#ifdef CONFIG_BUILD_KERNEL
+	/* Did we enter from user mode?  If so then we need get the values of
+	 * USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r1, #PSR_MODE_USR		/* User mode? */
+	bne	.Lsvcentersvc			/* Branch if not user mode */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add	r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	b	.Lsvccontinue
+
+.Lsvcentersvc:
+	/* Otherwise, get the correct values of SVC r13(sp) and r14(lr) in r1
+	 * and r2.
+	 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
+.Lsvccontinue:
+
+#else
 	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
@@ -168,6 +264,7 @@ arm_vectorsvc:
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
@@ -181,6 +278,31 @@ arm_vectorsvc:
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
+
+#ifdef CONFIG_BUILD_KERNEL
+	/* Are we leaving in user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r2, r0, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r2, #PSR_MODE_USR		/* User mode? */
+	bne	.Lleavesvcsvc			/* Branch if not user mode */
+
+	mov	r14, sp				/* Get r0=xcp */
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	ldmia	r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^			/* Return */
+
+.Lleavesvcsvc:
+#endif
+
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
@@ -229,6 +351,41 @@ arm_vectordata:
 	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, r0
 
+#ifdef CONFIG_BUILD_KERNEL
+	/* Did we enter from user mode?  If so then we need get the values of
+	 * USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r1, #PSR_MODE_USR		/* User mode? */
+	bne	.Ldabtentersvc			/* Branch if not user mode */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add	r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	b	.Ldabtcontinue
+
+.Ldabtentersvc:
+	/* Otherwise, get the correct values of SVC r13(sp) and r14(lr) in r1
+	 * and r2.
+	 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
+.Ldabtcontinue:
+
+#else
 	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
@@ -238,6 +395,7 @@ arm_vectordata:
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
@@ -255,6 +413,31 @@ arm_vectordata:
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
+
+#ifdef CONFIG_BUILD_KERNEL
+	/* Are we leaving in user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r2, r0, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r2, #PSR_MODE_USR		/* User mode? */
+	bne	.Ldabtleavesvc			/* Branch if not user mode */
+
+	mov	r14, sp				/* Get r0=xcp */
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	ldmia	r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^			/* Return */
+
+.Ldabtleavesvc:
+#endif
+
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
@@ -303,6 +486,41 @@ arm_vectorprefetch:
 	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, r0
 
+#ifdef CONFIG_BUILD_KERNEL
+	/* Did we enter from user mode?  If so then we need get the values of
+	 * USER mode r13(sp) and r14(lr).
+	 */
+
+	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp		r1, #PSR_MODE_USR		/* User mode? */
+	bne		.Lpabtentersvc			/* Branch if not user mode */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia		r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add		r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia		r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	b		.Lpabtcontinue
+
+.Lpabtentersvc:
+	/* Otherwise, get the correct values of SVC r13(sp) and r14(lr) in r1
+	 * and r2.
+	 */
+
+	add		r1, sp, #XCPTCONTEXT_SIZE
+	mov		r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia		r0, {r1-r4}
+
+.Lpabtcontinue:
+
+#else
 	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
@@ -312,6 +530,7 @@ arm_vectorprefetch:
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
@@ -325,6 +544,31 @@ arm_vectorprefetch:
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
+
+#ifdef CONFIG_BUILD_KERNEL
+	/* Are we leaving in user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r2, r0, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r2, #PSR_MODE_USR		/* User mode? */
+	bne	.Lpabtleavesvc			/* Branch if not user mode */
+
+	mov	r14, sp				/* Get r14=xcp */
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	ldmia	r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^			/* Return */
+
+.Lpabtleavesvc:
+#endif
+
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
@@ -371,6 +615,41 @@ arm_vectorundefinsn:
 	mov	r0, #(PSR_MODE_SVC | PSR_I_BIT)
 	msr	cpsr_c, r0
 
+#ifdef CONFIG_BUILD_KERNEL
+	/* Did we enter from user mode?  If so then we need get the values of
+	 * USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r1, #PSR_MODE_USR		/* User mode? */
+	bne	.Lundefentersvc			/* Branch if not user mode */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to sp/lr storage */
+	stmia	r0, {r13, r14}^			/* Save user mode r13(sp) and r14(lr) */
+	add	r0, sp, #(4*REG_R15)		/* Offset to pc/cpsr storage */
+	stmia	r0, {r3, r4}			/* Save r15(pc), and the CPSR */
+	b	.Lundefcontinue
+
+.Lundefentersvc:
+	/* Otherwise, get the correct values of SVC r13(sp) and r14(lr) in r1
+	 * and r2.
+	 */
+
+	add	r1, sp, #XCPTCONTEXT_SIZE
+	mov	r2, r14
+
+	/* Save r13(sp), r14(lr), r15(pc), and the CPSR */
+
+	add	r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
+	stmia	r0, {r1-r4}
+
+.Lundefcontinue:
+
+#else
 	/* Get the correct values of SVC r13(sp) and r14(lr) in r1 and r2 */
 
 	add	r1, sp, #XCPTCONTEXT_SIZE
@@ -380,6 +659,7 @@ arm_vectorundefinsn:
 
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
+#endif
 
 	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
@@ -393,6 +673,31 @@ arm_vectorundefinsn:
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
+
+#ifdef CONFIG_BUILD_KERNEL
+	/* Are we leaving in user mode?  If so then we need to restore the
+	 * values of USER mode r13(sp) and r14(lr).
+	 */
+
+	and	r2, r0, #PSR_MODE_MASK		/* Interrupted mode */
+	cmp	r2, #PSR_MODE_USR		/* User mode? */
+	bne	.Lundefleavesvc			/* Branch if not user mode */
+
+	mov	r14, sp				/* Get r0=xcp */
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
+	/* ldmia with ^ will return the user mode registers (provided that r15
+	 * is not in the register list).
+	 */
+
+	ldmia	r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^			/* Return */
+
+.Lundefleavesvc:
+#endif
+
 	ldmia	sp, {r0-r15}^		/* Return */
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
