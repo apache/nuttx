@@ -37,7 +37,7 @@ EXTRA_PATH=
 
 case ${os} in
   Darwin)
-    install="python-tools u-boot-tools elf-toolchain gen-romfs kconfig-frontends arm-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain avr-gcc-toolchain c-cache binutils"
+    install="python-tools u-boot-tools elf-toolchain gen-romfs kconfig-frontends arm-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain avr-gcc-toolchain c-cache binutils rust"
     mkdir -p "${prebuilt}"/homebrew
     export HOMEBREW_CACHE=${prebuilt}/homebrew
     # https://github.com/actions/virtual-environments/issues/2322#issuecomment-749211076
@@ -46,7 +46,7 @@ case ${os} in
     brew update --quiet
     ;;
   Linux)
-    install="python-tools gen-romfs gperf kconfig-frontends arm-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache"
+    install="python-tools gen-romfs gperf kconfig-frontends arm-gcc-toolchain mips-gcc-toolchain riscv-gcc-toolchain xtensa-esp32-gcc-toolchain rx-gcc-toolchain sparc-gcc-toolchain c-cache rust"
     ;;
 esac
 
@@ -358,6 +358,24 @@ function binutils {
         # symlink if it exists
         rm -f "${prebuilt}"/bintools/bin/objcopy
         ln -s /usr/local/opt/binutils/bin/objcopy "${prebuilt}"/bintools/bin/objcopy
+        ;;
+    esac
+  fi
+}
+
+function rust {
+  mkdir -p "${prebuilt}"/rust/bin
+  add_path "${prebuilt}"/rust/bin
+
+  if ! type rustc &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew install rust
+        ;;
+      Linux)
+        # Currently Debian installed rustc doesn't support 2021 edition.
+        export CARGO_HOME=${prebuilt}/rust
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
         ;;
     esac
   fi
