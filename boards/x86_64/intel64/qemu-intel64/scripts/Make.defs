@@ -30,10 +30,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
 
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  MAXOPTIMIZATION = -O2
-endif
-
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)qemu.ld
 
 ARCHCPUFLAGS = -fPIC -fno-builtin -fno-stack-protector -mno-red-zone -mrdrnd

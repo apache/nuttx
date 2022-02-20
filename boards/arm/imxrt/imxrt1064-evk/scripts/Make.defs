@@ -64,17 +64,9 @@ LDNXFLATFLAGS = -e main -s 2048
 CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}"
-else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map
-endif
+LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)/nuttx.map)
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif

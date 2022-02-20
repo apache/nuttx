@@ -177,11 +177,7 @@ endif
 CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # NuttX modules are ELF binaries.
 # Non-ELF platforms like macOS need to use a separate ELF toolchain.
@@ -206,11 +202,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
 endif
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   CCLINKFLAGS += -g

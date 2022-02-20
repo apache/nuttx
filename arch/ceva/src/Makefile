@@ -41,22 +41,13 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   CFLAGS += -I$(TOPDIR)\sched
 else
   ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  NUTTX = "${shell cygpath -w $(OUTDIR)/nuttx$(EXEEXT)}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  CFLAGS += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(CONFIG_ARCH_CHIP)}"
-  CFLAGS += -I "${shell cygpath -w $(TOPDIR)/sched}"
-  LDSCRIPT := ${shell cygpath -m $(LDSCRIPT)}
-else
-  NUTTX = "$(OUTDIR)/nuttx$(EXEEXT)"
-  CFLAGS += -I$(ARCH_SRCDIR)/chip
-  CFLAGS += -I$(ARCH_SRCDIR)/common
-  CFLAGS += -I$(ARCH_SRCDIR)/$(ARCH_SUBDIR)
-  CFLAGS += -I$(ARCH_SRCDIR)/$(CONFIG_ARCH_CHIP)
-  CFLAGS += -I$(TOPDIR)/sched
-endif
+  NUTTX = $(call CONVERT_PATH,$(OUTDIR)/nuttx$(EXEEXT))
+  CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/chip)
+  CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/common)
+  CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/$(ARCH_SUBDIR))
+  CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/$(CONFIG_ARCH_CHIP))
+  CFLAGS += -I $(call CONVERT_PATH,$(TOPDIR)/sched)
+  LDSCRIPT := $(call CONVERT_PATH,$(LDSCRIPT))
 endif
 
 # The "head" object
@@ -97,25 +88,15 @@ LINKLIBS ?=
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)
   LIBPATHS += -I "$(OUTDIR)\staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -I "$(OUTDIR)\arch\$(CONFIG_ARCH)\src\board"
-endif
-
+  ifeq ($(BOARDMAKE),y)
+    LIBPATHS += -I "$(OUTDIR)\arch\$(CONFIG_ARCH)\src\board"
+  endif
 else
   BOARDMAKE = $(if $(wildcard ./board/Makefile),y,)
-
-ifeq ($(WINTOOL),y)
-  LIBPATHS += -I "${shell cygpath -w "$(OUTDIR)/staging"}"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -I "${shell cygpath -w "$(OUTDIR)/arch/$(CONFIG_ARCH)/src/board"}"
-endif
-
-else
-  LIBPATHS += -I "$(OUTDIR)/staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -I "$(OUTDIR)/arch/$(CONFIG_ARCH)/src/board"
-endif
-endif
+  LIBPATHS += -I $(call CONVERT_PATH,$(OUTDIR)/staging)
+  ifeq ($(BOARDMAKE),y)
+    LIBPATHS += -I $(call CONVERT_PATH,$(OUTDIR)/arch/$(CONFIG_ARCH)/src/board)
+  endif
 endif
 
 LDLIBS = $(patsubst %, -lib %,$(LINKLIBS))
@@ -129,11 +110,7 @@ VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
 VPATH := $(patsubst %,:$(SRCDIR)$(DELIM)%,$(VPATH))
-ifeq ($(WINTOOL),y)
-VPATH += :$(shell cygpath -m $(OUTDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip)
-else
-VPATH += :$(OUTDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip
-endif
+VPATH += :$(call CONVERT_PATH,$(OUTDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip)
 
 all: $(HEAD_OBJ) $(BIN)
 

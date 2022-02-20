@@ -22,11 +22,7 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  NXFLATLDSCRIPT = -T "${shell cygpath -w $(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-gotoff.ld}"
-else
-  NXFLATLDSCRIPT = -T"$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-gotoff.ld"
-endif
+NXFLATLDSCRIPT = -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libnxflat$(DELIM)gnu-nxflat-gotoff.ld)
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)ld.script
 
 MKNXFLAT = mknxflat

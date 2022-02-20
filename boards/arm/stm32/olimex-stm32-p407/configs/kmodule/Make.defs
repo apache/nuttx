@@ -57,11 +57,7 @@ LDNXFLATFLAGS = -e main -s 2048
 CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF program module definitions
 
@@ -69,11 +65,7 @@ CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w  $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T  $(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)libs$(DELIM)libc$(DELIM)modlib$(DELIM)gnu-elf.ld)
 
 # File extensions
 
