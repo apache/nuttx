@@ -239,15 +239,16 @@ arm_vectorirq:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lirqleavesvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Lirqleavesvc:
@@ -367,15 +368,16 @@ arm_vectorsvc:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lleavesvcsvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Lleavesvcsvc:
@@ -509,22 +511,23 @@ arm_vectordata:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Ldabtleavesvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Ldabtleavesvc:
 #endif
 	/* Life is simple when everything is SVC mode */
 
-	ldmia		r0, {r1-r15}^			/* Return */
+	ldmia		r0, {r0-r15}^			/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -651,15 +654,16 @@ arm_vectorprefetch:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lpabtleavesvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Lpabtleavesvc:
@@ -789,15 +793,16 @@ arm_vectorundefinsn:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lundefleavesvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Lundefleavesvc:
@@ -936,15 +941,16 @@ arm_vectorfiq:
 	cmp		r2, #PSR_MODE_USR		/* User mode? */
 	bne		.Lfiqleavesvc			/* Branch if not user mode */
 
+	add		sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
+
 	/* ldmia with ^ will return the user mode registers (provided that r15
 	 * is not in the register list).
 	 */
 
-	mov		r13, r0				/* (SVC) R13=Register storage area */
-	ldmia		r13, {r0-r12}			/* Restore common R0-R12 */
-	add		r14, r13, #(4*REG_R13)		/* (SVC) R14=address of R13/R14 storage */
-	ldmia		r14, {r13, r14}^		/* Restore user mode R13/R14 */
-	add		r14, r13, #(4*REG_R15)		/* (SVC) R14=address of R15 storage */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
 	ldmia		r14, {r15}^			/* Return */
 
 .Lfiqleavesvc:
