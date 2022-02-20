@@ -41,11 +41,7 @@ CFLAGS += $(INCLUDES)
 CXXFLAGS += $(INCLUDES)
 AFLAGS += $(INCLUDES)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  NUTTX = "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx$(EXEEXT)}"
-else
-  NUTTX = "$(TOPDIR)$(DELIM)nuttx$(EXEEXT)"
-endif
+NUTTX = $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx$(EXEEXT))
 
 HEAD_OBJ = $(HEAD_ASRC:.S=$(OBJEXT))
 STARTUP_OBJS ?= $(HEAD_OBJ)
@@ -67,18 +63,9 @@ LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT)))
 
 BOARDMAKE = $(if $(wildcard board$(DELIM)Makefile),y,)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)staging"}"
+LIBPATHS += -L $(call CONVERT_PATH,$(TOPDIR)$(DELIM)staging)
 ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board"}"
-endif
-
-else
-  LIBPATHS += -L"$(TOPDIR)$(DELIM)staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board"
-endif
-
+  LIBPATHS += -L $(call CONVERT_PATH,$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board)
 endif
 
 LDLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))

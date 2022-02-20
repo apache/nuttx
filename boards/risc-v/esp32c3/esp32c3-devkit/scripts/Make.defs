@@ -59,11 +59,7 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 CMODULEFLAGS = $(CFLAGS)
 
 LDMODULEFLAGS = -melf32lriscv -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -71,16 +67,7 @@ CELFFLAGS = $(CFLAGS) -fno-common
 CXXELFFLAGS = $(CXXFLAGS) -fno-common
 
 LDELFFLAGS = -melf32lriscv -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)$(DELIM)binfmt$(DELIM)libelf$(DELIM)gnu-elf.ld)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" --cref
-else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map --cref
-endif
-
+LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)/nuttx.map) --cref
 LDFLAGS += --gc-sections -melf32lriscv

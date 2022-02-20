@@ -32,19 +32,11 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   INCLUDES += -I "$(TOPDIR)\sched"
 else
   ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-ifeq ($(WINTOOL),y)
-  NUTTX = "${shell cygpath -w $(TOPDIR)/nuttx$(EXEEXT)}"
-  INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/chip}"
-  INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/common}"
-  INCLUDES += -I "${shell cygpath -w $(ARCH_SRCDIR)/$(ARCH_SUBDIR)}"
-  INCLUDES += -I "${shell cygpath -w $(TOPDIR)/sched}"
-else
-  NUTTX = "$(TOPDIR)/nuttx$(EXEEXT)"
-  INCLUDES += -I "$(ARCH_SRCDIR)/chip"
-  INCLUDES += -I "$(ARCH_SRCDIR)/common"
-  INCLUDES += -I "$(ARCH_SRCDIR)/$(ARCH_SUBDIR)"
-  INCLUDES += -I "$(TOPDIR)/sched"
-endif
+  NUTTX = $(call CONVERT_PATH,$(TOPDIR)/nuttx$(EXEEXT))
+  INCLUDES += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/chip)
+  INCLUDES += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/common)
+  INCLUDES += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/$(ARCH_SUBDIR))
+  INCLUDES += -I $(call CONVERT_PATH,$(TOPDIR)/sched)
 endif
 
 CPPFLAGS += $(INCLUDES) $(EXTRADEFINES)
@@ -76,25 +68,15 @@ LINKLIBS ?=
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)
   LIBPATHS += -L"$(TOPDIR)\staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"$(TOPDIR)\arch\$(CONFIG_ARCH)\src\board"
-endif
-
+  ifeq ($(BOARDMAKE),y)
+    LIBPATHS += -L"$(TOPDIR)\arch\$(CONFIG_ARCH)\src\board"
+  endif
 else
   BOARDMAKE = $(if $(wildcard ./board/Makefile),y,)
-
-ifeq ($(WINTOOL),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/staging"}"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"${shell cygpath -w "$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board"}"
-endif
-
-else
-  LIBPATHS += -L"$(TOPDIR)/staging"
-ifeq ($(BOARDMAKE),y)
-  LIBPATHS += -L"$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board"
-endif
-endif
+  LIBPATHS += -L $(call CONVERT_PATH,$(TOPDIR)/staging)
+  ifeq ($(BOARDMAKE),y)
+    LIBPATHS += -L $(call CONVERT_PATH,$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board)
+  endif
 endif
 
 LDLIBS = $(patsubst %.a,%,$(patsubst lib%,-l%,$(LINKLIBS)))

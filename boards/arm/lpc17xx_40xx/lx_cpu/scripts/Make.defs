@@ -69,22 +69,14 @@ CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 # Loadable module definitions
 
 CMODULEFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # File extensions
 

@@ -71,11 +71,7 @@ all: libboard$(LIBEXT)
 
 ifneq ($(ZDSVERSION),)
 $(ASRCS) $(HEAD_ASRC): %$(ASMEXT): %.S
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-	$(Q) $(CPP) $(CPPFLAGS) `cygpath -w $<` -o $@.tmp
-else
-	$(Q) $(CPP) $(CPPFLAGS) $< -o $@.tmp
-endif
+	$(Q) $(CPP) $(CPPFLAGS) $(call CONVERT_PATH,$<) -o $@.tmp
 	$(Q) cat $@.tmp | sed -e "s/^#/;/g" > $@
 	$(Q) rm $@.tmp
 endif

@@ -66,11 +66,7 @@ CELFFLAGS = $(CFLAGS)
 CXXELFFLAGS = $(CXXFLAGS)
 
 LDELFFLAGS = -melf32lriscv -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 LDFLAGS += --gc-sections -melf32lriscv --cref
 LDFLAGS += -Map=$(TOPDIR)/nuttx.map

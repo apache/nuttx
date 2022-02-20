@@ -70,11 +70,7 @@ CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
