@@ -33,7 +33,7 @@ CXXFLAGS += $(EXTRADEFINES)
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   ARCH_SRCDIR = $(TOPDIR)\arch\$(CONFIG_ARCH)\src
-  NUTTX = "$(OUTDIR)\nuttx$(EXEEXT)"
+  NUTTX = "$(TOPDIR)\nuttx$(EXEEXT)"
   CFLAGS += -I$(ARCH_SRCDIR)\chip
   CFLAGS += -I$(ARCH_SRCDIR)\common
   CFLAGS += -I$(ARCH_SRCDIR)\$(ARCH_SUBDIR)
@@ -41,7 +41,7 @@ ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   CFLAGS += -I$(TOPDIR)\sched
 else
   ARCH_SRCDIR = $(TOPDIR)/arch/$(CONFIG_ARCH)/src
-  NUTTX = $(call CONVERT_PATH,$(OUTDIR)/nuttx$(EXEEXT))
+  NUTTX = $(call CONVERT_PATH,$(TOPDIR)/nuttx$(EXEEXT))
   CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/chip)
   CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/common)
   CFLAGS += -I $(call CONVERT_PATH,$(ARCH_SRCDIR)/$(ARCH_SUBDIR))
@@ -87,15 +87,15 @@ LINKLIBS ?=
 
 ifeq ($(CONFIG_WINDOWS_NATIVE),y)
   BOARDMAKE = $(if $(wildcard .\board\Makefile),y,)
-  LIBPATHS += -I "$(OUTDIR)\staging"
+  LIBPATHS += -I "$(TOPDIR)\staging"
   ifeq ($(BOARDMAKE),y)
-    LIBPATHS += -I "$(OUTDIR)\arch\$(CONFIG_ARCH)\src\board"
+    LIBPATHS += -I "$(TOPDIR)\arch\$(CONFIG_ARCH)\src\board"
   endif
 else
   BOARDMAKE = $(if $(wildcard ./board/Makefile),y,)
-  LIBPATHS += -I $(call CONVERT_PATH,$(OUTDIR)/staging)
+  LIBPATHS += -I $(call CONVERT_PATH,$(TOPDIR)/staging)
   ifeq ($(BOARDMAKE),y)
-    LIBPATHS += -I $(call CONVERT_PATH,$(OUTDIR)/arch/$(CONFIG_ARCH)/src/board)
+    LIBPATHS += -I $(call CONVERT_PATH,$(TOPDIR)/arch/$(CONFIG_ARCH)/src/board)
   endif
 endif
 
@@ -110,7 +110,7 @@ VPATH += common
 VPATH += $(ARCH_SUBDIR)
 
 VPATH := $(patsubst %,:$(SRCDIR)$(DELIM)%,$(VPATH))
-VPATH += :$(call CONVERT_PATH,$(OUTDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip)
+VPATH += :$(call CONVERT_PATH,$(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)chip)
 
 all: $(HEAD_OBJ) $(BIN)
 
@@ -142,10 +142,10 @@ nuttx$(EXEEXT): $(HEAD_OBJ) board$(DELIM)libboard$(LIBEXT) $(LDSCRIPT)
 	$(Q) $(LD) $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
 		-o $(NUTTX) $(HEAD_OBJ) $(EXTRA_OBJS) \
 		$(LDLIBS) $(EXTRA_LIBS) $(LIBGCC) \
-		-l $(OUTDIR)$(DELIM)nuttx.lin $(notdir $(LDSCRIPT))
-	$(Q) $(DISASM) -o $(OUTDIR)$(DELIM)nuttx.lst $(NUTTX)
-	$(Q) $(OBJDUMP) $(NUTTX) > $(OUTDIR)$(DELIM)nuttx.dump
-	$(Q) $(OBJCOPY) -b $(OUTDIR)$(DELIM)nuttx -c -split $(NUTTX)
+		-l $(TOPDIR)$(DELIM)nuttx.lin $(notdir $(LDSCRIPT))
+	$(Q) $(DISASM) -o $(TOPDIR)$(DELIM)nuttx.lst $(NUTTX)
+	$(Q) $(OBJDUMP) $(NUTTX) > $(TOPDIR)$(DELIM)nuttx.dump
+	$(Q) $(OBJCOPY) -b $(TOPDIR)$(DELIM)nuttx -c -split $(NUTTX)
 
 # This is part of the top-level export target
 # Note that there may not be a head object if layout is handled
