@@ -1222,7 +1222,6 @@ config STM32F7_HAVE_SAI2
 	bool
 	default n
 
-
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 

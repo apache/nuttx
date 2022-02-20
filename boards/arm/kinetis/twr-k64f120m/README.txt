@@ -104,7 +104,6 @@ to the Primary and Secondary Elevator boards in a Tower system. The Primary
 Connector (comprised of sides A and B) is identified by a white strip.
 The Secondary Connector is comprised of sides C and D.
 
-
 TWR-SER Serial Board Connection
 ===============================
 
@@ -255,7 +254,6 @@ Networking Support
     3 packets transmitted, 3 received, 0% packet loss, time 2003ms
     rtt min/avg/max/mdev = 2.040/4.789/7.822/2.369 ms
 
-
   From the target side, you may should also be able to ping the host
   (assuming it's IP is 192.168.0.1):
 
@@ -377,7 +375,6 @@ Networking Support
       CONFIG_NSH_NETINIT_MONITOR=y          : Enable the network monitor
       CONFIG_NSH_NETINIT_RETRYMSEC=2000     : Configure the network monitor as you like
       CONFIG_NSH_NETINIT_SIGNO=18
-
 
 LEDs
 ====

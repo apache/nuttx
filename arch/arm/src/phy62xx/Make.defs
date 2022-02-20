@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-
 CMN_ASRCS  = phy62xx_exception.S phy62xx_start.S arm_saveusercontext.S arm_fullcontextrestore.S
 #CMN_ASRCS += arm_switchcontext.S vfork.S
 CMN_ASRCS += vfork.S
@@ -155,5 +154,4 @@ ifdef CONFIG_MIJIA_APIS
 EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/xiaomi/libs/mesh_auth/debug/
 EXTRA_LIBS += -lmesh-auth-cortex-m0plus-debug
 endif
-
 

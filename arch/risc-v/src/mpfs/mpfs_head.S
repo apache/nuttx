@@ -43,7 +43,6 @@
 
 __start:
 
-
   /* Disable all interrupts (i.e. timer, external) in mie */
 
   csrw mie, zero

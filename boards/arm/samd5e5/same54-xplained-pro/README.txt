@@ -39,7 +39,6 @@ STATUS
   That configuration in FLASH is most likely lock up your board irrecoverably
   is there are any start-up errors!
 
-
 Serial Console
 ==============
 
@@ -52,7 +51,6 @@ Serial Console
     PB24 SERCOM2 PAD1 RXD
     PB25 SERCOM2 PAD0 TXD
 
-
   An external RS-232 or serial-to-USB adapter can be connected on pins PA22
   and PA23:
 
@@ -62,14 +60,12 @@ Serial Console
     PA23 SERCOM3 PAD1 RXD
     PA22 SERCOM3 PAD0 TXD
 
-
 LEDs
 ====
 
   The SAME54 Xplained Pro has three LEDs, but only one is controllable by software:
 
     1. LED0 near the edge of the board
-
 
     ----------------- -----------
     SAMD5E5           FUNCTION

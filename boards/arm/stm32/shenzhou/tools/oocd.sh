@@ -54,7 +54,6 @@ OPENOCD_PATH="/cygdrive/c/Program Files (x86)/OpenOCD/0.4.0/bin"
 OPENOCD_EXE=openocd.exe
 OPENOCD_INTERFACE="olimex-arm-usb-ocd.cfg"
 
-
 OPENOCD_TARGET="stm32.cfg"
 OPENOCD_ARGS="${DEBUG} -s ${OPENOCD_WSEARCHDIR} -f ${OPENOCD_INTERFACE} -f ${OPENOCD_TARGET}"
 

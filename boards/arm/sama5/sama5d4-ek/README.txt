@@ -3649,7 +3649,6 @@ Configurations
     UDP relay bridge test using apps/examples/bridge.  See
     apps/examples/README.txt for more information about this test.
 
-
     NOTES:
 
     1. This configuration uses the USART3 for the serial console

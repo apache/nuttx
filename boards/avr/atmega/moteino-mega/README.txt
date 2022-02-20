@@ -86,7 +86,6 @@ Pin Connections
   45 PC6               22
   46 PC7               23 (used by optional flash)
 
-
 DualOptiboot Bootloader
 ^^^^^^^^^^^^^^^^^^^^^^^
 

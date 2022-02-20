@@ -920,7 +920,6 @@ conditional compilation does *not* cause any change to the indentation.
     ...
     #endif /* __INCLUDE_SOMEHEADER_H */
 
-
 Parentheses
 ===========
 
@@ -1145,7 +1144,6 @@ Parameters and Local Variables
 
       return ret;
     }
-
 
 **NOTE:** You will see the local variable named ``ret`` is frequently
 used in the code base for the name of a local variable whose value will
@@ -2392,7 +2390,6 @@ Appendix
 C Source File Structure
 =======================
 
-
 .. code-block:: c
 
    /****************************************************************************
@@ -2429,7 +2426,6 @@ C Source File Structure
     ****************************************************************************/
 
 *All C pre-processor macros are defined here.*
-
 
 .. code-block:: c
 

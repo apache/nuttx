@@ -27,4 +27,3 @@ Linux/Cygwin-based NuttX simulator. Instructions are provided for
 building that simulation are provided in `Appendix C <#testcoverage>`__
 of this document.
 
-

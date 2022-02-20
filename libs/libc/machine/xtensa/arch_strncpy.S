@@ -90,7 +90,6 @@ strncpy:
 
   j .Ldstunaligned
 
-
 /* Fill the dst with zeros -- n is at least 1.  */
 
 .Lfill:
@@ -147,7 +146,6 @@ strncpy:
   beqz    a4, 2b    # if n is zero
   addi    a10, a10, 2 # advance dst pointer
   j .Lfillaligned
-
 
 /* dst is word-aligned; src is word-aligned; n is at least 1.  */
 

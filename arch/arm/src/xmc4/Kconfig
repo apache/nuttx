@@ -27,7 +27,6 @@ endchoice
 # These "hidden" settings determine whether a peripheral option is available
 # for the selected MCU
 
-
 # When there are multiple instances of a device, these "hidden" settings
 # will automatically be selected and will represent the 'OR' of the
 # instances selected.

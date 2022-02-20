@@ -358,4 +358,3 @@ containing the ROMFS file system image.
 NuttShell <#customizingnsh>`__ for additional, more detailed
 information about the NSH start-up script and how to modify it.
 
-

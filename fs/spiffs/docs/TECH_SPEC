@@ -2,7 +2,6 @@
 
 TODO
 
-
 * SPIFFS DESIGN
 
 Spiffs is inspired by YAFFS. However, YAFFS is designed for NAND flashes, and
@@ -12,7 +11,6 @@ been borrowed from YAFFS when writing spiffs. Kudos!
 The main complication writing spiffs was that it cannot be assumed the target
 has a heap. Spiffs must go along only with the work ram buffer given to it.
 This forces extra implementation on many areas of spiffs.
-
 
 ** SPI flash devices using NOR technology
 
@@ -48,12 +46,10 @@ Common characteristics of NOR flashes are quick reads, but slow writes.
 And finally, unlike NAND flashes, NOR flashes seem to not need any error
 correction. They always write correctly I gather.
 
-
 ** Spiffs logical structure
 
 Some terminology before proceeding. Physical blocks/sectors means sizes stated
 in the datasheet. Logical blocks and pages is something the integrator choose.
-
 
 ** Blocks and pages
 
@@ -121,7 +117,6 @@ spiffs. Use the golden rule:
 
 This is a good starting point. The final page size can then be derived through
 heuristical experimenting for us non-analytical minds.
-
 
 ** Objects, indices and look-ups
 

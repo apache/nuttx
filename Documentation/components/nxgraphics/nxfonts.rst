@@ -33,7 +33,6 @@ NXFONTS types
       FAR const uint8_t *bitmap;     /* Pointer to the character bitmap */
     };
 
-
 .. c:struct:: nx_fontset_s
 
   This structure describes one contiguous grouping of glyphs that can be

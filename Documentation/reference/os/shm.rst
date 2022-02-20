@@ -25,7 +25,6 @@ below:
 
   :return: Zero (OK) is returned on success; a negated errno value is returned on failure.
 
-
 .. c:function:: int up_shmdt(uintptr_t vaddr, unsigned int npages)
 
   Detach, i.e, unmap, on shared memory region from a user virtual address.

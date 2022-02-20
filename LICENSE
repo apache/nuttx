@@ -414,7 +414,6 @@ drivers/video/ov2640
   so, but I am not a copyright attorney so you should use this driver in
   products at your own risk.
 
-
 include/nuttx/lcd/ili9488.h
 ===========================
 
@@ -441,7 +440,6 @@ include/nuttx/lcd/ili9488.h
   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
 
 include/nuttx/input/x11_keysym.h
 include/nuttx/input/x11_keysymdef.h
@@ -594,7 +592,6 @@ arch/arm/src/armv6-m/arm_exception.S
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/armv7-a/cp15_cacheops.h
 arch/arm/src/armv7-a/cp15_clean_dcache.S
 arch/arm/src/armv7-a/cp15_coherent_dcache.S
@@ -639,7 +636,6 @@ arch/arm/src/armv7-a/cp15_invalidate_dcache_all.S
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/armv7-m/arm_cache.c
 arch/arm/src/armv8-m/arm_cache.c
 ================================
@@ -679,7 +675,6 @@ arch/arm/src/armv8-m/arm_cache.c
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/armv7-m/arm_stackcheck.c
 arch/arm/src/armv8-m/arm_stackcheck.c
@@ -985,7 +980,6 @@ arch/arm/src/armv7-r/cp15_cacheops.h
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/armv7-r/cp15_cacheops.h
 arch/arm/src/armv7-r/cp15_clean_dcache.S
 arch/arm/src/armv7-r/cp15_coherent_dcache.S
@@ -1029,7 +1023,6 @@ arch/arm/src/armv7-r/cp15_invalidate_dcache_all.S
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/sam34/sam4cm_freerun.c
 arch/arm/src/sam34/sam4cm_oneshot.c
@@ -1180,7 +1173,6 @@ arch/arm/src/samv7/sam_usbdevhs.c
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/x86_64/include/multiboot2.h
 ================================
 
@@ -1203,7 +1195,6 @@ arch/x86_64/include/multiboot2.h
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  DEALINGS IN THE SOFTWARE.
-
 
 arch/xtensa/include/esp32/core-isa.h
 =====================================
@@ -1230,7 +1221,6 @@ arch/xtensa/include/esp32/core-isa.h
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 arch/xtensa/include/xtensa/xtensa_specregs.h
 arch/xtensa/include/xtensa/xtensa_corebits.h
@@ -1266,7 +1256,6 @@ arch/xtensa/include/xtensa/xtensa_corebits.h
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 arch/xtensa/src/common/xtensa_windowspill.S
 ===========================================
 
@@ -1297,7 +1286,6 @@ arch/xtensa/src/common/xtensa_windowspill.S
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 arch/xtensa/include/esp32/tie-asm.h
 arch/xtensa/include/esp32/tie.h
@@ -1331,7 +1319,6 @@ arch/xtensa/include/esp32/tie.h
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-
 arch/xtensa/include/xtensa/core.h
 =================================
 
@@ -1361,7 +1348,6 @@ arch/xtensa/include/xtensa/core.h
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 arch/xtensa/include/xtensa/xtensa_coproc.h
 arch/xtensa/src/common/xtensa_abi.h
@@ -1404,7 +1390,6 @@ arch/xtensa/src/esp32/chip_macros.h
  CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
  TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 boards/arm/stm32/photon/src/stm32_wlan_firmware.c
 drivers/wireless/ieee80211/bcm43xxx/bcmf_ioctl.h
@@ -1514,7 +1499,6 @@ arch/arm/src/lpc43xx/spifi/inc/private/spifilib_chiphw.h
  copyright, permission, and disclaimer notice must appear in all copies of
  this code.
 
-
 boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
 =========================================================
 
@@ -1546,7 +1530,6 @@ boards/arm/imxrt/imxrt1050-evk/src/imxrt_sdram_ini_dcd.c
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/imxrt/imxrt_lcd.c
 arch/arm/src/imxrt/hardware/imxrt_lcd.h
@@ -1582,7 +1565,6 @@ arch/arm/src/imxrt/hardware/imxrt_lcd.h
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/imxrt/imxrt_edma.c
 arch/arm/src/imxrt/imxrt_edma.h
@@ -1624,7 +1606,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/kinetis/kinetis_cfmconfig.c
 ============================================
 
@@ -1632,7 +1613,6 @@ arch/arm/src/kinetis/kinetis_cfmconfig.c
 
 Barely based on "bare metal" sample from Freedom board:
 Copyright (c) 2012-2013 Andrew Payne
-
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -1651,7 +1631,6 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
 OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 arch/arm/src/kinetis/kinetis_edma.c
 arch/arm/src/kinetis/kinetis_edma.h
@@ -1695,7 +1674,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/kl/kl_cfmconfig.c
 ==============================
 Copyright (c) 2012-2013 Andrew Payne
@@ -1717,7 +1695,6 @@ IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
 CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
 TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
 
 arch/arm/src/nrf52/nrf52_flash.c
 arch/arm/src/nrf52/nrf52_nvmc.c
@@ -1797,7 +1774,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/rp2040/hardware/rp2040_clocks.h
 arch/arm/src/rp2040/hardware/rp2040_dma.h
 arch/arm/src/rp2040/hardware/rp2040_i2c.h
@@ -1853,7 +1829,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/s32k1xx/hardware/s32k1xx_wdog.h
 arch/arm/src/s32k1xx/s32k11x/s32k11x_clocknames.h
@@ -1912,7 +1887,6 @@ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
 IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 THE POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/s32k1xx/s32k1xx_edma.c
 arch/arm/src/s32k1xx/s32k1xx_edma.h
 ====================================
@@ -1953,7 +1927,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32/hardware/stm32f100_pinmap.h
 =================================================
@@ -2067,7 +2040,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32/stm32_i2c_v2.c
 ===========================================
 
@@ -2115,7 +2087,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32/stm32_sdadc.c
 arch/arm/src/stm32/stm32_sdadc.h
 ===================================
@@ -2151,7 +2122,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32/stm32_tickless.c
 ======================================
   Copyright (C) 2016-2017 Gregory Nutt. All rights reserved.
@@ -2185,7 +2155,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32/stm32_tim_lowerhalf.c
 ===========================================
@@ -2221,7 +2190,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32/stm32_uid.c
 arch/arm/src/stm32/stm32_uid.h
 ===================================
@@ -2254,7 +2222,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f0l0g0/hardware/stm32g0_pinmap.h
 =====================================================
@@ -2290,7 +2257,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f0l0g0/stm32_i2c.c
 ===========================================
@@ -2337,7 +2303,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32f0l0g0/stm32_pwm.c
 =======================================
   Copyright (C) 2019 Fundação CERTI. All rights reserved.
@@ -2370,7 +2335,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f0l0g0/stm32_pwm.h
 arch/arm/src/stm32f0l0g0/stm32_tim.c
@@ -2405,7 +2369,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f0l0g0/stm32_tim_lowerhalf.c
 =================================================
@@ -2445,7 +2408,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32f7/stm32_flash.c
 =======================================
   Copyright (C) 2018 Wolpike LLC. All rights reserved.
@@ -2482,7 +2444,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f7/stm32_i2c.c
 arch/arm/src/stm32h7/stm32_i2c.c
@@ -2531,7 +2492,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32f7/stm32_sai.c
 arch/arm/src/stm32f7/stm32_sai.h
 ===================================
@@ -2565,7 +2525,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32f7/stm32_tickless.c
 =========================================
@@ -2601,7 +2560,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32f7/stm32_tim_lowerhalf.c
 =============================================
   Copyright (C) 2015 Wail Khemir. All rights reserved.
@@ -2636,7 +2594,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32f7/stm32_uid.c
 arch/arm/src/stm32f7/stm32_uid.h
 ======================================
@@ -2669,7 +2626,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32h7/stm32_adc.c
 ====================================
@@ -2709,7 +2665,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32h7/stm32_flash.c
 ======================================
@@ -2754,7 +2709,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32h7/stm32_uid.c
 arch/arm/src/stm32h7/stm32_uid.h
 =====================================
@@ -2788,7 +2742,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/stm32l4/hardware/stm32l4_lptim.h
 
@@ -2990,7 +2943,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/stm32l4/stm32l4_lptim.c
 arch/arm/src/stm32l4/stm32l4_lptim.h
 ====================================
@@ -3101,7 +3053,6 @@ LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/xmc4/hardware/xmc4_ethernet.h
 arch/arm/src/xmc4/hardware/xmc4_flash.h
 arch/arm/src/xmc4/hardware/xmc4_memorymap.h
@@ -3157,7 +3108,6 @@ arch/arm/src/xmc4/xmc4_usic.c
  SOFTWARE. INFINEON SHALL NOT, IN ANY CIRCUMSTANCES, BE LIABLE FOR SPECIAL,
  INCIDENTAL, OR CONSEQUENTIAL DAMAGES, FOR ANY REASON WHATSOEVER.
 
-
 crypto/aes.c
 include/nuttx/crypto/aes.h
 
@@ -3191,8 +3141,6 @@ include/nuttx/crypto/aes.h
  THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-
 
 arch/arm/src/tms570/tms570_selftest.c
 arch/arm/src/tms570/tms570_lowputc.c
@@ -3235,7 +3183,6 @@ arch/arm/src/tms570/tms570_clockconfig.c
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/tiva/tiva_chipinfo.h
 arch/arm/src/tiva/hardware/cc13x2_cc26x2/cc13x2_cc26x2_vims.h
@@ -3325,7 +3272,6 @@ arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v2_rom.h
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tms570/tms570_boot.c
 =================================
 
@@ -3409,7 +3355,6 @@ arch/arm/src/tiva/common/tiva_adclow.c
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tiva/common/tiva_adclib.c
 =======================================
 
@@ -3451,7 +3396,6 @@ arch/arm/src/tiva/common/tiva_adclib.c
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tiva/cc13xx/cc13xx_prcm.c
 arch/arm/src/tiva/cc13xx/cc13xx_prcm.h
 ======================================
@@ -3491,7 +3435,6 @@ arch/arm/src/tiva/cc13xx/cc13xx_prcm.h
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/tiva/cc13xx/cc13x2_v1_trim.c
 arch/arm/src/tiva/cc13xx/cc13x2_v2_trim.c
@@ -3534,7 +3477,6 @@ arch/arm/src/tiva/cc13xx/cc13x0_trim.c
   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.h
 ===============================================
 
@@ -3573,7 +3515,6 @@ arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.h
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/tiva/cc13xx/cc13x2_cc26x2_v1_rom.c
 arch/arm/src/tiva/cc13xx/cc13x0_rom.c
@@ -3615,7 +3556,6 @@ arch/arm/src/tiva/cc13xx/cc13x0_rom.c
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.h
 ===========================================
 
@@ -3655,7 +3595,6 @@ arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.h
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
 
-
 arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.c
 ===========================================
 
@@ -3694,7 +3633,6 @@ arch/arm/src/tiva/cc13xx/cc13x2_aux_sysif.c
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
 arch/arm/src/tiva/cc13xx/cc13x0_rom.h
 =====================================
@@ -3858,7 +3796,6 @@ include/nuttx/mtd/onfi.h
  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  POSSIBILITY OF SUCH DAMAGE.
-
 
  drivers/usbhost/hid_parser.c
 =============================
@@ -4284,8 +4221,6 @@ AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-
-
 
 arch/arm/src/lpc43xx/spifi/inc/private/spifilib_chiphw.h
 arch/arm/src/lpc43xx/spifi/inc/spifilib_api.h

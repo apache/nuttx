@@ -9,19 +9,16 @@ Configure and build
 tools/configure.sh stm32f746g-disco:fb
 make
 
-
 Configuration
 ------------
 
 This configuration provides 1 LTDC with
 16bpp pixel format and a resolution of 480x272.
 
-
 Loading
 -------
 
 st-flash write nuttx.bin 0x8000000
-
 
 Executing
 ---------

@@ -32,7 +32,6 @@ Board Features
 - 1 channel USB Function and 1 channel USB Host can be evaluated
 - In addition, CAN, RSPI, QSPI, etc. can be evaluated
 
-
 See the RX65N RSK2MB website for further information about this board:
 
   - https://www.renesas.com/br/en/products/software-tools/boards-and-kits/starter-kits/renesas-starter-kitplus-for-rx65n-2mb.html

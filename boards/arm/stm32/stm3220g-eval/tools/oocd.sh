@@ -5,7 +5,6 @@
 USAGE="USAGE: $0 [-dh] <TOPDIR>"
 ADVICE="Try '$0 -h' for more information"
 
-
 while [ ! -z "$1" ]; do
 	case $1 in
 	-d )
@@ -51,7 +50,6 @@ OPENOCD_WSEARCHDIR="`cygpath -w ${OPENOCD_SEARCHDIR}`"
 OPENOCD_PATH="/cygdrive/c/Program Files (x86)/OpenOCD/0.4.0/bin"
 OPENOCD_EXE=openocd.exe
 OPENOCD_INTERFACE="olimex-arm-usb-ocd.cfg"
-
 
 OPENOCD_TARGET="stm32.cfg"
 OPENOCD_ARGS="-s ${OPENOCD_WSEARCHDIR} -f ${OPENOCD_INTERFACE} -f ${OPENOCD_TARGET}"

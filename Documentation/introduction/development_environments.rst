@@ -130,8 +130,6 @@ user using the ZiLOG ZDS-II Windows-native toolchain:
    scripts) and setting ``CONVPATH`` to ``cygpath`` or ``winepath``
    regarding to currently used environment.
 
-
-
 Other Environments
 ==================
 

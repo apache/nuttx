@@ -589,7 +589,6 @@ boards/arm/tiva/tm4c123g-launchpad/configs/ and can be selected as follows:
 
 Where <subdir> is one of the following:
 
-
   mcp2515
   =======
     Configuration uses the MCP2515 SPI CAN part.  See the section entitled

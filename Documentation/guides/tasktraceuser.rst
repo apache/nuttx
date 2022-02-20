@@ -30,7 +30,6 @@ The following configurations must be enabled.
 - ``CONFIG_SYSTEM_TRACE`` : Enables "``trace``" command
 - ``CONFIG_SYSTEM_SYSTEM`` : Enables "``system``" command (required by :ref:`trace_cmd`)
 
-
 The following configurations are configurable parameters for trace.
 
 - ``CONFIG_SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE``
@@ -81,7 +80,6 @@ Getting the trace
 
 Trace is started by the following command.
 
-
 .. code-block::
 
   nsh> trace start
@@ -97,7 +95,6 @@ If you want to get the trace while executing some command, the following command
 .. code-block::
 
   nsh> trace cmd <command> [<args>...]
-
 
 Displaying the trace result
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -130,7 +127,6 @@ This will get the trace results like the following:
   <noname>-0   [0]   7.650000000: irq_handler_entry: irq=15
       :
 
-
 By using the logging function of your terminal software, the trace result can be saved into the host environment and it can be used as the input for `"Trace Compass" <https://www.eclipse.org/tracecompass/>`_.
 
 If the target has a storage, the trace result can be stored into the file by using the following command.
@@ -140,11 +136,9 @@ It also can be used as the input for "Trace Compass" by transferring the file in
 
   nsh> trace dump <file name>
 
-
 To display the trace result by `"Trace Compass" <https://www.eclipse.org/tracecompass/>`_, choose ``File`` -> ``Open Trace`` menu to specify the trace data file name.
 
 .. image:: image/trace-compass-screenshot.png
-
 
 Trace command description
 =========================
@@ -197,7 +191,6 @@ To use this command, ``CONFIG_SYSTEM_SYSTEM`` needs to be enabled.
 
   trace cmd [-c] <command> [<args>...]
 
-
 - ``-c`` : Continue the previous trace.
   The trace data is not cleared before starting new trace.
 
@@ -230,7 +223,6 @@ If the task trace is running, it is stopped before the output.
 
 - ``<filename>`` : Specify the filename to save the trace result.
   If not specified, the trace result is displayed to console.
-
 
 .. _trace_mode:
 

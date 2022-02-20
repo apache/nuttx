@@ -171,8 +171,6 @@ LEDs
     initialization;  Stuck in the ON state would indicated that the system
     initialized, but is not taking interrupts.
 
-
-
   - If a fatal assertion or a fatal unhandled exception occurs, the LED will flash
     strongly as a slow, 2Hz rate.
 

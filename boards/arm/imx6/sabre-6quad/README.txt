@@ -586,7 +586,6 @@ A: Yes with the following modifications to the procedure above.
        gdb> mon reg pc 0x10800040
        gdb> s
 
-
 Debugging with QEMU
 ================================
 

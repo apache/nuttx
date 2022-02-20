@@ -1843,4 +1843,3 @@ Example::
 
 ``ping6`` differs from ``ping`` in that it uses IPv6 addressing.
 
-

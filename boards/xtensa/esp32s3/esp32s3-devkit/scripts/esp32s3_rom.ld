@@ -70,7 +70,6 @@ ets_set_user_start = 0x40000780;
 ets_rom_layout_p = 0x3ff1fffc;
 ets_ops_table_ptr = 0x3fcefffc;
 
-
 /***************************************
  Group miniz
  ***************************************/
@@ -94,7 +93,6 @@ tinfl_decompress_mem_to_callback = 0x40000834;
 tinfl_decompress_mem_to_heap = 0x40000840;
 tinfl_decompress_mem_to_mem = 0x4000084c;
 
-
 /***************************************
  Group tjpgd
  ***************************************/
@@ -103,14 +101,12 @@ tinfl_decompress_mem_to_mem = 0x4000084c;
 PROVIDE( jd_prepare = 0x40000858 );
 PROVIDE (jd_decomp = 0x40000864 );
 
-
 /***************************************
  Group esp-dsp
  ***************************************/
 
 /* Data (.data, .bss, .rodata) */
 dsps_fft2r_w_table_fc32_1024 = 0x3fcefff8;
-
 
 /***************************************
  Group opi_flash
@@ -141,7 +137,6 @@ PROVIDE( esp_rom_opiflash_read_raw = 0x4004d9d4);
 /* Data (.data, .bss, .rodata) */
 PROVIDE( rom_opiflash_cmd_def = 0x3fcefff4 );
 PROVIDE( rom_spi_usr_cmd_legacy_funcs = 0x3fcefff0 );
-
 
 /***************************************
  Group spiflash_legacy
@@ -235,7 +230,6 @@ PROVIDE( rom_spiflash_legacy_funcs = 0x3fceffe8 );
 PROVIDE( rom_spiflash_legacy_data = 0x3fceffe4 );
 PROVIDE( g_flash_guard_ops = 0x3fceffec );
 
-
 /***************************************
  Group hal_soc
  ***************************************/
@@ -276,7 +270,6 @@ PROVIDE( systimer_hal_init = 0x40000eac );
 PROVIDE( systimer_hal_select_alarm_mode = 0x40000eb8 );
 PROVIDE( systimer_hal_connect_alarm_counter = 0x40000ec4 );
 
-
 /***************************************
  Group spi_flash_chips
  ***************************************/
@@ -314,7 +307,6 @@ PROVIDE( spi_flash_chip_gd_set_io_mode = 0x40001020 );
 /* Data (.data, .bss, .rodata) */
 PROVIDE( spi_flash_chip_generic_config_data = 0x3fceffe0 );
 
-
 /***************************************
  Group memspi_host
  ***************************************/
@@ -332,7 +324,6 @@ PROVIDE( memspi_host_set_write_protect = 0x4000108c );
 PROVIDE( memspi_host_set_max_read_len = 0x40001098 );
 PROVIDE( memspi_host_read_data_slicer = 0x400010a4 );
 PROVIDE( memspi_host_write_data_slicer = 0x400010b0 );
-
 
 /***************************************
  Group esp_flash
@@ -366,7 +357,6 @@ PROVIDE( esp_rom_spiflash_write_disable = 0x400011d0 );
 /* Data (.data, .bss, .rodata) */
 PROVIDE( esp_flash_default_chip = 0x3fceffdc );
 PROVIDE( esp_flash_api_funcs = 0x3fceffd8 );
-
 
 /***************************************
  Group cache
@@ -467,7 +457,6 @@ PROVIDE( rom_config_data_cache_mode = 0x40001a28 );
 PROVIDE( rom_cache_op_cb = 0x3fceffc8 );
 PROVIDE( rom_cache_internal_table_ptr = 0x3fceffc4 );
 
-
 /***************************************
  Group clock
  ***************************************/
@@ -480,7 +469,6 @@ ets_get_printf_channel = 0x40001a58;
 ets_get_xtal_div = 0x40001a64;
 ets_set_xtal_div = 0x40001a70;
 ets_get_xtal_freq = 0x40001a7c;
-
 
 /***************************************
  Group gpio
@@ -505,7 +493,6 @@ gpio_pin_wakeup_disable = 0x40001b30;
 gpio_pin_wakeup_enable = 0x40001b3c;
 gpio_bypass_matrix_in = 0x40001b48;
 
-
 /***************************************
  Group interrupts
  ***************************************/
@@ -517,7 +504,6 @@ ets_intr_unlock = 0x40001b6c;
 ets_isr_attach = 0x40001b78;
 ets_isr_mask = 0x40001b84;
 ets_isr_unmask = 0x40001b90;
-
 
 /***************************************
  Group xtos
@@ -539,7 +525,6 @@ _xtos_set_interrupt_handler = 0x40001c20;
 _xtos_set_interrupt_handler_arg = 0x40001c2c;
 _xtos_set_intlevel = 0x40001c38;
 _xtos_set_vpri = 0x40001c44;
-
 
 /***************************************
  Group crypto
@@ -595,7 +580,6 @@ ets_aes_setkey_dec = 0x40001e6c;
 ets_aes_setkey_enc = 0x40001e78;
 ets_mgf1_sha256 = 0x40001e84;
 
-
 /***************************************
  Group efuse
  ***************************************/
@@ -637,7 +621,6 @@ ets_efuse_ecc_en = 0x40002010;
 ets_efuse_ecc_flash_page_size = 0x4000201c;
 ets_efuse_ecc_16to17_mode = 0x40002028;
 
-
 /***************************************
  Group ecc
  ***************************************/
@@ -666,7 +649,6 @@ ets_ecc_get_sram_range = 0x40002118;
 /* Data (.data, .bss, .rodata) */
 ets_ecc_table_ptr = 0x3fceffc0;
 
-
 /***************************************
  Group secureboot
  ***************************************/
@@ -678,7 +660,6 @@ ets_secure_boot_verify_bootloader_with_keys = 0x4000213c;
 ets_secure_boot_verify_signature = 0x40002148;
 ets_secure_boot_read_key_digests = 0x40002154;
 ets_secure_boot_revoke_public_key_digest = 0x40002160;
-
 
 /***************************************
  Group usb_uart
@@ -698,7 +679,6 @@ PROVIDE( Uart_Init_USB = 0x40002604 );
 PROVIDE( uart_acm_dev = 0x3fceffbc );
 PROVIDE( g_uart_print = 0x3fceffb9 );
 PROVIDE( g_usb_print = 0x3fceffb8 );
-
 
 /***************************************
  Group usb_module
@@ -801,7 +781,6 @@ usb_dev_deinit = 0x40002a60;
 usb_dw_ctrl_deinit = 0x40002a6c;
 /* Data (.data, .bss, .rodata) */
 s_usb_osglue = 0x3fceffac;
-
 
 /***************************************
  Group bluetooth
@@ -1801,7 +1780,6 @@ rwip_coex_cfg = 0x3ff1eebe;
 rwip_priority = 0x3ff1eea8;
 veryBigHexP256 = 0x3ff1ee5c;
 
-
 /***************************************
  Group rom_pp
  ***************************************/
@@ -2014,7 +1992,6 @@ g_tx_done_cb_func = 0x3fcef8ac;
 g_per_conn_trc = 0x3fcef860;
 s_encap_amsdu_func = 0x3fcef85c;
 
-
 /***************************************
  Group rom_net80211
  ***************************************/
@@ -2067,7 +2044,6 @@ s_netstack_free = 0x3fcef840;
 mesh_rxcb = 0x3fcef83c;
 sta_rxcb = 0x3fcef838;
 
-
 /***************************************
  Group rom_coexist
  ***************************************/
@@ -2100,7 +2076,6 @@ coex_schm_env_ptr = 0x3fcef82c;
 coexist_funcs = 0x3fcef828;
 g_coa_funcs_p = 0x3fcef824;
 g_coex_param_ptr = 0x3fcef820;
-
 
 /***************************************
  Group rom_phy

@@ -191,7 +191,6 @@ RUN cd renesas-tools/source/newlib && \
 RUN cd /tools/renesas-tools/build/gcc && \
   make && make install
 
-
 ###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
@@ -234,7 +233,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   wget \
   xxd \
   && rm -rf /var/lib/apt/lists/*
-
 
 # Configure out base setup for adding python packages
 ENV PIP_DISABLE_PIP_VERSION_CHECK=true

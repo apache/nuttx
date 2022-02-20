@@ -27,7 +27,6 @@ All you need to do is select your desired board profile configuratioon
 
     $ make
 
-
 Running
 =======
 

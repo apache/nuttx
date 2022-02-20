@@ -26,7 +26,6 @@ HEAD_ASRC = z80_head.asm
 endif
 endif
 
-
 CMN_CSRCS  = z80_initialize.c z80_allocateheap.c z80_createstack.c
 CMN_CSRCS += z80_releasestack.c z80_interruptcontext.c z80_blocktask.c
 CMN_CSRCS += z80_unblocktask.c z80_exit.c z80_releasepending.c

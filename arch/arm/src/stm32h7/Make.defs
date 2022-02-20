@@ -135,7 +135,6 @@ ifeq ($(CONFIG_STM32H7_PWR),y)
 CHIP_CSRCS += stm32_pwr.c
 endif
 
-
 ifeq ($(CONFIG_STM32H7_QUADSPI),y)
 CHIP_CSRCS += stm32_qspi.c
 endif

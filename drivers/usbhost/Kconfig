@@ -711,5 +711,4 @@ config USBHOST_FT232R_LATENCY
 
 endif # USBHOST_FT232R
 
-
 endif # USBHOST
