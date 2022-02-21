@@ -346,6 +346,13 @@ static int fatfs_open(FAR struct file *filep, FAR const char *relpath,
       goto errsem;
     }
 
+  /* In append mode, need to set the file pointer to end of the file */
+
+  if (filep->f_oflags & O_APPEND)
+    {
+      filep->f_pos = f_size(&fp->f);
+    }
+
   fp->refs = 1;
   filep->f_priv = fp;
 
@@ -441,6 +448,19 @@ static ssize_t fatfs_write(FAR struct file *filep, FAR const char *buffer,
       return ret;
     }
 
+  /* In append mode, need to set the file pointer to end of the file */
+
+  if ((filep->f_oflags & O_APPEND) && f_tell(&fp->f) < f_size(&fp->f))
+    {
+      ret = fatfs_convert_result(f_lseek(&fp->f, f_size(&fp->f)));
+      if (ret < 0)
+        {
+          goto errout_with_sem;
+        }
+
+      filep->f_pos = f_size(&fp->f);
+    }
+
   ret = fatfs_convert_result(f_write(&fp->f, buffer, buflen, &size));
   if (ret >= 0)
     {
@@ -448,6 +468,7 @@ static ssize_t fatfs_write(FAR struct file *filep, FAR const char *buffer,
       ret = size;
     }
 
+errout_with_sem:
   fatfs_semgive(fs);
   return ret;
 }
