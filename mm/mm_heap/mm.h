@@ -140,6 +140,10 @@
 
 #define SIZEOF_MM_FREENODE sizeof(struct mm_freenode_s)
 
+/* What is the size of the start/end node? */
+
+#define SIZEOF_MM_STARTENDNODE MM_MIN_CHUNK
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
