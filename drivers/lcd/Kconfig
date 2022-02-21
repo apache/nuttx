@@ -1333,6 +1333,7 @@ config LCD_LCDDRV_SPEED
 config LCD_RA8875
 	bool "RA8875 LCD Display Controller"
 	default n
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		LCD controller driver for RA8875 by RAiO Technologies Inc.
 
