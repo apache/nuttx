@@ -67,6 +67,7 @@ config ADC_ADS125X
 	default n
 	select SPI
 	select SCHED_HPWORK
+	depends on ALLOW_BSD_COMPONENTS
 
 if ADC_ADS125X
 
@@ -207,6 +208,7 @@ if DAC
 config DAC_AD5410
 	bool "AD5410 support"
 	default n
+	depends on ALLOW_BSD_COMPONENTS
 	select SPI
 
 config DAC7571
