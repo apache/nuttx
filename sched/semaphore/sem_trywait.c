@@ -29,6 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
+#include <nuttx/init.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
@@ -69,9 +70,10 @@ int nxsem_trywait(FAR sem_t *sem)
   irqstate_t flags;
   int ret;
 
-  /* This API should not be called from interrupt handlers */
+  /* This API should not be called from interrupt handlers & idleloop */
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
+  DEBUGASSERT(!OSINIT_IDLELOOP() || !sched_idletask());
 
   if (sem != NULL)
     {
