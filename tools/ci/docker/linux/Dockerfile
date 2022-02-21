@@ -191,6 +191,14 @@ RUN cd renesas-tools/source/newlib && \
 RUN cd /tools/renesas-tools/build/gcc && \
   make && make install
 
+# Install Rust and targets supported from NuttX
+ENV CARGO_HOME=/tools/rust
+RUN mkdir -p $CARGO_HOME && \
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+  $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi && \
+  $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+ENV PATH="$CARGO_HOME/bin:$PATH"
+
 ###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
@@ -227,7 +235,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   python3 \
   python3-pip \
   python-is-python3 \
-  rustc \
   u-boot-tools \
   unzip \
   wget \
