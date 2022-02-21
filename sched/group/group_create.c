@@ -222,7 +222,7 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
 
 errout_with_stream:
 #if defined(CONFIG_FILE_STREAM) && defined(CONFIG_MM_KERNEL_HEAP)
-      group_free(group, group->tg_streamlist);
+  group_free(group, group->tg_streamlist);
 #endif
 errout_with_group:
   group_deallocate(group);
