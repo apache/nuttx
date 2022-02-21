@@ -151,8 +151,6 @@ static int da9168_control_rev_vbus(FAR struct da9168_dev_s *priv,
                                    bool enable);
 static int da9168_control_boost_en(FAR struct da9168_dev_s *priv,
                                    bool enable);
-static inline int da9168_set_rin_n_button_time(FAR struct da9168_dev_s *priv,
-                                            int regval);
 
 /* Battery driver lower half methods */
 
@@ -1263,30 +1261,6 @@ static inline int da9168_set_recharge_level(FAR struct da9168_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: da9168_set_rin__n_button_time
- *
- * Description:
- *   Set Rin_n button press time(s)
- *
- ****************************************************************************/
-
-static inline int da9168_set_rin_n_button_time(FAR struct da9168_dev_s *priv,
-                                               int regval)
-{
-  int ret;
-
-  ret = da9168_reg_update_bits(priv, DA9168_PMC_SYS_03, DA9168_RST_TMR_MASK,
-                               (regval << DA9168_RST_TMR_SHIFT));
-  if (ret < 0)
-    {
-      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
-      return ret;
-    }
-
-  return ret;
-}
-
-/****************************************************************************
  * Name: da9168_set_chg_range
  *
  * Description:
@@ -1830,15 +1804,6 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   if (ret < 0)
     {
       baterr("ERROR: Failed to set DA9168 recharge level: %d\n", ret);
-      return ret;
-    }
-
-  /* set rin_n button press time , 4s */
-
-  ret = da9168_set_rin_n_button_time(priv, 0);
-  if (ret < 0)
-    {
-      baterr("ERROR: Failed to set DA9168 rin_n button time: %d\n", ret);
       return ret;
     }
 
