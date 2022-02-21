@@ -381,6 +381,7 @@ config BQ2425X
 	select I2C
 	select I2C_BQ2425X
 	depends on BATTERY_CHARGER
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		The BQ24250/BQ24251 are battery charger for lithium-ion batteries.
 
