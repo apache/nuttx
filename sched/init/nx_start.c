@@ -776,6 +776,10 @@ void nx_start(void)
 
   DEBUGVERIFY(nx_bringup());
 
+  /* Enter to idleloop */
+
+  g_nx_initstate = OSINIT_IDLELOOP;
+
   /* Let other threads have access to the memory manager */
 
   sched_unlock();
