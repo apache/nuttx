@@ -548,7 +548,7 @@ int up_rtc_settime(FAR const struct timespec *ts)
   up_rtc_set_default_datetime(tp);
 #endif /* CONFIG_RTC_SAVE_DEFAULT */
 
-  clock_gettime(CLOCK_MONOTONIC, &lastupdate_mono);
+  clock_systime_timespec(&lastupdate_mono);
   lastupdate_rtc = *ts;
 
   /* Start rtc update */
@@ -660,7 +660,7 @@ int up_rtc_getrawtime(FAR struct timespec *ts)
   struct timespec now;
   struct timespec diff;
 
-  clock_gettime(CLOCK_MONOTONIC, &now);
+  clock_systime_timespec(&now);
   timespec_sub(&now, &lastupdate_mono, &diff);
 
   if (lastupdate_rtc.tv_sec != 0 && diff.tv_sec < 1)

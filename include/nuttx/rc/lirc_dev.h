@@ -44,7 +44,7 @@ static inline uint64_t lirc_get_timestamp(void)
 {
   struct timespec ts;
 
-  clock_gettime(CLOCK_MONOTONIC, &ts);
+  clock_systime_timespec(&ts);
   return 1000000000ull * ts.tv_sec + ts.tv_nsec;
 }
 
