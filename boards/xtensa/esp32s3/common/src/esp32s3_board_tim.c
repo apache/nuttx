@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_bringup.c
+ * boards/xtensa/esp32s3/common/src/esp32s3_board_tim.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,84 +24,68 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <syslog.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
+#include "esp32s3_board_tim.h"
+#include "esp32s3_tim.h"
+#include "esp32s3_tim_lowerhalf.h"
 
-#ifdef CONFIG_ESP32S3_TIMER
-#  include "esp32s3_board_tim.h"
-#endif
-
-#include "esp32s3-devkit.h"
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_bringup
+ * Name: board_tim_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Configure the timer driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32s3_bringup(void)
+int board_tim_init(void)
 {
-  int ret;
+  int ret = OK;
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+#if defined(CONFIG_ESP32S3_TIMER0)
+  ret = esp32s3_timer_initialize("/dev/timer0", ESP32S3_TIMER0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize TIMER0: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_FS_TMPFS
-  /* Mount the tmpfs file system */
-
-  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+#if defined(CONFIG_ESP32S3_TIMER1)
+  ret = esp32s3_timer_initialize("/dev/timer1", ESP32S3_TIMER1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
-             CONFIG_LIBC_TMPDIR, ret);
+      syslog(LOG_ERR, "Failed to initialize TIMER1: %d\n", ret);
     }
 #endif
 
-#ifdef CONFIG_ESP32S3_TIMER
-  /* Configure general purpose timers */
-
-  ret = board_tim_init();
+#if defined(CONFIG_ESP32S3_TIMER2)
+  ret = esp32s3_timer_initialize("/dev/timer2", ESP32S3_TIMER2);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize timers: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize TIMER2: %d\n", ret);
     }
 #endif
 
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
+#if defined(CONFIG_ESP32S3_TIMER3)
+  ret = esp32s3_timer_initialize("/dev/timer3", ESP32S3_TIMER3);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize TIMER3: %d\n", ret);
+    }
+#endif
 
-  UNUSED(ret);
-  return OK;
+  return ret;
 }
