@@ -18,50 +18,6 @@
  *
  ****************************************************************************/
 
-/* TODO:  O_NONBLOCK is not yet supported.  Currently, the source and sink
- * pipes are opened in blocking mode on both the slave and master so only
- * blocking behavior is supported.  This driver must be able to support
- * multiple slave as well as master clients that may have the PTY device
- * opened in blocking and non-blocking modes simultaneously.
- *
- * There are two different possible implementations under consideration:
- *
- * 1. Keep the pipes in blocking mode, but use a test based on FIONREAD (for
- *    the source pipe) or FIONSPACE (for the sink pipe) to determine if the
- *    read or write would block.  There is existing logic like this in
- *    pty_read() to handle the case of a single byte reads which must never
- *    block in any case:  Essentially, this logic uses FIONREAD to determine
- *    if there is anything to read before calling file_read().  Similar
- *    logic could be replicated for all read cases.
- *
- *    Analogous logic could be added for all writes using FIONSPACE to
- *    assure that there is sufficient free space in the sink pipe to write
- *    without blocking.  The write length could be adjusted, in necceary,
- *    to assure that there is no blocking.
- *
- *    Locking, perhaps via sched_lock(), would be required to assure the
- *    test via FIONREAD or FIONWRITE is atomic with respect to the
- *    file_read() or file_write() operation.
- *
- * 2. An alternative that appeals to me is to modify the contained source
- *    or sink pipe file structures before each file_read() or file_write()
- *    operation to assure that the O_NONBLOCK is set correctly when the
- *    pipe read or write operation is performed.  This might be done with
- *    file_fcntl() or directly into the source/sink file structure oflags
- *    mode settings.
- *
- *    This would require (1) the ability to lock each pipe individually,
- *    setting the blocking mode for the source or sink pipe to match the
- *    mode in the open flags of the PTY device file structure, and (2)
- *    logic to restore the default pipe mode after the file_read/write()
- *    operation and before the pipe is unlocked.
- *
- * There are existing locks to support (1) destruction of the driver
- * (pp_exclsem) and (2) slave PTY locking (pp_slavesem), as well as (3)
- * locks within the pipe implementation.  Care must be taken with any new
- * source/sink pipe locking to assure that deadlocks are not possible.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
