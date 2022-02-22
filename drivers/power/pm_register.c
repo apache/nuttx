@@ -62,11 +62,19 @@ int pm_register(FAR struct pm_callback_s *callbacks)
 
   /* Add the new entry to the end of the list of registered callbacks */
 
-  ret = pm_lock();
-  if (ret == OK)
+  if (OSINIT_OS_READY())
+    {
+      ret = pm_lock();
+      if (ret == OK)
+        {
+          dq_addlast(&callbacks->entry, &g_pmglobals.registry);
+          pm_unlock();
+        }
+    }
+  else
     {
       dq_addlast(&callbacks->entry, &g_pmglobals.registry);
-      pm_unlock();
+      ret = OK;
     }
 
   return ret;
