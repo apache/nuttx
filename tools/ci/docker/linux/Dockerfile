@@ -61,6 +61,7 @@ RUN mkdir bloaty -p \
 
 # Install Rust and targets supported from NuttX
 ENV CARGO_HOME=/tools/rust
+ENV RUSTUP_HOME=/tools/rust/rustup
 RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
@@ -264,6 +265,7 @@ ENV PATH="/tools/bloaty/bin:$PATH"
 # Pull in the Rust toolchain including supported targets
 COPY --from=nuttx-tools /tools/rust/ /tools/rust/
 ENV CARGO_HOME=/tools/rust
+ENV RUSTUP_HOME=/tools/rust/rustup
 ENV PATH="/tools/rust/bin:$PATH"
 
 # ARM toolchain
