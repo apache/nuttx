@@ -280,6 +280,10 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
 
   for (opriv = priv->bu_open; opriv; opriv = opriv->bo_flink)
     {
+      /* Always set bo_pending true, only clear it after button read */
+
+      opriv->bo_pending = true;
+
       /* Have any poll events occurred? */
 
       if ((press & opriv->bo_pollevents.bp_press)     != 0 ||
@@ -296,11 +300,6 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
                   iinfo("Report events: %02x\n", fds->revents);
                   nxsem_post(fds->sem);
                 }
-            }
-          else
-            {
-              opriv->bo_pending = true;
-              iinfo("bo_pending set true\n");
             }
         }
 
@@ -495,9 +494,11 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   FAR struct inode *inode;
   FAR struct btn_upperhalf_s *priv;
   FAR const struct btn_lowerhalf_s *lower;
+  FAR struct btn_open_s *opriv;
   int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
+  opriv = filep->f_priv;
   inode = filep->f_inode;
   DEBUGASSERT(inode->i_private);
   priv  = (FAR struct btn_upperhalf_s *)inode->i_private;
@@ -528,7 +529,7 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   lower = priv->bu_lower;
   DEBUGASSERT(lower && lower->bl_buttons);
   *(FAR btn_buttonset_t *)buffer = lower->bl_buttons(lower);
-
+  opriv->bo_pending = false;
   btn_givesem(&priv->bu_exclsem);
   return (ssize_t)sizeof(btn_buttonset_t);
 }
@@ -769,7 +770,6 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
                 {
                   iinfo("Report events: %02x\n", fds->revents);
                   nxsem_post(fds->sem);
-                  opriv->bo_pending = false;
                 }
             }
         }
