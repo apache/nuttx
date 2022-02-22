@@ -103,8 +103,9 @@ static void dispatch_syscall(void)
       " ldr r2, [sp, #16]\n"         /* Restore (orig_SP - new_SP) value */
       " add sp, sp, r2\n"            /* Restore SP */
       " mov r2, r0\n"                /* R2=Save return value in R2 */
-      " mov r0, #3\n"                /* R0=SYS_syscall_return */
-      " svc %0\n"::"i"(SYS_syscall)  /* Return from the SYSCALL */
+      " mov r0, %0\n"                /* R0=SYS_syscall_return */
+      " svc %1\n"::"i"(SYS_syscall_return),
+                   "i"(SYS_syscall)  /* Return from the SYSCALL */
     );
 }
 #endif
