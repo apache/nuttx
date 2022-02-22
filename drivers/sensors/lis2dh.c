@@ -1667,7 +1667,7 @@ static int lis2dh_reboot(FAR struct lis2dh_dev_s *dev)
 
   /* Prefer monotonic for timeout calculation when enabled. */
 
-  clock_gettime(CLOCK_MONOTONIC, &start);
+  clock_systime_timespec(&start);
 
   /* Reboot to reset chip. */
 
@@ -1692,7 +1692,7 @@ static int lis2dh_reboot(FAR struct lis2dh_dev_s *dev)
           break;
         }
 
-      clock_gettime(CLOCK_MONOTONIC, &curr);
+      clock_systime_timespec(&curr);
 
       diff_msec = (curr.tv_sec - start.tv_sec) * 1000;
       diff_msec += (curr.tv_nsec - start.tv_nsec) / (1000 * 1000);

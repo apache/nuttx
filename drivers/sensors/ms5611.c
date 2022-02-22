@@ -158,7 +158,7 @@ static unsigned long ms5611_curtime(void)
 {
   struct timespec ts;
 
-  clock_gettime(CLOCK_MONOTONIC, &ts);
+  clock_systime_timespec(&ts);
   return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
 }
 

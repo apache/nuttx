@@ -127,7 +127,7 @@ static uint64_t _get_current_time64(void)
 {
   struct timespec ts;
 
-  clock_gettime(CLOCK_MONOTONIC, &ts);
+  clock_systime_timespec(&ts);
   return (uint64_t)ts.tv_sec * NSEC_PER_SEC + (uint64_t)ts.tv_nsec;
 }
 

@@ -387,7 +387,7 @@ int epoll_pwait(int epfd, FAR struct epoll_event *evs,
       expire.tv_sec  = timeout / 1000;
       expire.tv_nsec = timeout % 1000 * 1000;
 
-      clock_gettime(CLOCK_MONOTONIC, &curr);
+      clock_systime_timespec(&curr);
       clock_timespec_add(&curr, &expire, &expire);
     }
 
@@ -398,7 +398,7 @@ again:
     }
   else
     {
-      clock_gettime(CLOCK_MONOTONIC, &curr);
+      clock_systime_timespec(&curr);
       clock_timespec_subtract(&expire, &curr, &diff);
 
       rc = ppoll(eph->poll, eph->occupied + 1, &diff, sigmask);
