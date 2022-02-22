@@ -28,7 +28,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include <nuttx/init.h>
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/cancelpt.h>
@@ -74,10 +73,9 @@ int nxsem_wait(FAR sem_t *sem)
   irqstate_t flags;
   int ret = -EINVAL;
 
-  /* This API should not be called from interrupt handlers & idleloop */
+  /* This API should not be called from interrupt handlers */
 
   DEBUGASSERT(sem != NULL && up_interrupt_context() == false);
-  DEBUGASSERT(OSINIT_IDLELOOP() && !sched_idletask());
 
   /* The following operations must be performed with interrupts
    * disabled because nxsem_post() may be called from an interrupt
