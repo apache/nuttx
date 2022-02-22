@@ -306,6 +306,10 @@ config ESP32S3_TIMER
 	bool
 	default n
 
+config ESP32S3_WDT
+	bool
+	default n
+
 config ESP32S3_UART0
 	bool "UART 0"
 	default n
@@ -354,6 +358,33 @@ config ESP32S3_TIMER3
 	select ESP32S3_TIMER
 	---help---
 		Enables Timer 3
+
+config ESP32S3_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S3_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S3_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
 
 endmenu # ESP32-S3 Peripheral Selection
 
