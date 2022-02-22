@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3_bringup.c
+ * boards/xtensa/esp32s3/common/src/esp32s3_board_wdt.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,98 +24,66 @@
 
 #include <nuttx/config.h>
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <syslog.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
 #include <sys/types.h>
-#include <syslog.h>
 #include <debug.h>
-#include <stdio.h>
 
-#include <errno.h>
-#include <nuttx/fs/fs.h>
-
-#ifdef CONFIG_ESP32S3_TIMER
-#  include "esp32s3_board_tim.h"
-#endif
-
-#ifdef CONFIG_WATCHDOG
-#  include "esp32s3_board_wdt.h"
-#endif
+#include "esp32s3_board_wdt.h"
+#include "esp32s3_wdt_lowerhalf.h"
+#include "esp32s3_wdt.h"
 
 #include "esp32s3-devkit.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_bringup
+ * Name: board_wdt_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Configure the watchdog timer driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=n && CONFIG_BOARDCTL=y :
- *     Called from the NSH library
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
-int esp32s3_bringup(void)
+int board_wdt_init(void)
 {
-  int ret;
+  int ret = OK;
 
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = nx_mount(NULL, "/proc", "procfs", 0, NULL);
+#ifdef CONFIG_ESP32S3_MWDT0
+  ret = esp32s3_wdt_initialize("/dev/watchdog0", ESP32S3_WDT_MWDT0);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount procfs at /proc: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize MWDT0: %d\n", ret);
+      return ret;
     }
-#endif
+#endif /* CONFIG_ESP32S3_MWDT0 */
 
-#ifdef CONFIG_FS_TMPFS
-  /* Mount the tmpfs file system */
-
-  ret = nx_mount(NULL, CONFIG_LIBC_TMPDIR, "tmpfs", 0, NULL);
+#ifdef CONFIG_ESP32S3_MWDT1
+  ret = esp32s3_wdt_initialize("/dev/watchdog1", ESP32S3_WDT_MWDT1);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
-             CONFIG_LIBC_TMPDIR, ret);
+      syslog(LOG_ERR, "Failed to initialize MWDT1: %d\n", ret);
+      return ret;
     }
-#endif
+#endif /* CONFIG_ESP32S3_MWDT1 */
 
-#ifdef CONFIG_ESP32S3_TIMER
-  /* Configure general purpose timers */
-
-  ret = board_tim_init();
+#ifdef CONFIG_ESP32S3_RWDT
+  ret = esp32s3_wdt_initialize("/dev/watchdog2", ESP32S3_WDT_RWDT);
   if (ret < 0)
     {
-      syslog(LOG_ERR, "Failed to initialize timers: %d\n", ret);
+      syslog(LOG_ERR, "Failed to initialize RWDT: %d\n", ret);
+      return ret;
     }
-#endif
+#endif /* CONFIG_ESP32S3_RWDT */
 
-#ifdef CONFIG_WATCHDOG
-  /* Configure watchdog timer */
-
-  ret = board_wdt_init();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize watchdog timer: %d\n", ret);
-    }
-#endif
-
-  /* If we got here then perhaps not all initialization was successful, but
-   * at least enough succeeded to bring-up NSH with perhaps reduced
-   * capabilities.
-   */
-
-  UNUSED(ret);
-  return OK;
+  return ret;
 }
+
