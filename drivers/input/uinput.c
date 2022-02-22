@@ -472,7 +472,7 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
 int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
 {
   char devname[UINPUT_NAME_SIZE];
-  FAR struct touch_lowerhalf_s *utcs_lower;
+  FAR struct uinput_touch_lowerhalf_s *utcs_lower;
   int ret;
 
   utcs_lower = kmm_zalloc(sizeof(struct uinput_touch_lowerhalf_s));
