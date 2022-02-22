@@ -302,6 +302,10 @@ config ESP32S3_UART
 	bool
 	default n
 
+config ESP32S3_TIMER
+	bool
+	default n
+
 config ESP32S3_UART0
 	bool "UART 0"
 	default n
@@ -323,7 +327,35 @@ config ESP32S3_UART2
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-endmenu # ESP32S3 Peripheral Selection
+config ESP32S3_TIMER0
+	bool "54-bit Timer 0 (Group 0 Timer 0)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 0
+
+config ESP32S3_TIMER1
+	bool "54-bit Timer 1 (Group 0 Timer 1)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 1
+
+config ESP32S3_TIMER2
+	bool "54-bit Timer 2 (Group 1 Timer 0)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 2
+
+config ESP32S3_TIMER3
+	bool "54-bit Timer 3 (Group 1 Timer 1)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 3
+
+endmenu # ESP32-S3 Peripheral Selection
 
 menu "UART configuration"
 	depends on ESP32S3_UART
