@@ -1839,7 +1839,7 @@ static int nvt_write_flash(FAR struct nt38350_dev_s *priv, uint8_t *data)
       percent = ((i + 1) * 100) / count;
       if (((percent % 10) == 0) && (percent != previous_percent))
         {
-          iinfo("Programming...%2ld%%\n", percent);
+          iwarn("Programming...%2ld%%\n", percent);
           previous_percent = percent;
         }
     }
@@ -2781,7 +2781,6 @@ static void nvt_log_data_to_csv(FAR void *arg)
   int32_t  x = 0;
   int32_t  y = 0;
   int32_t  write_ret;
-  char     date_buf[64];
   char     *fbufp = NULL;
   int      fp = -1;
   int32_t  iarrayindex  = 0;
@@ -2793,7 +2792,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
   uint32_t input_y2     = 0;
   char     *csv_file_path = CONFIG_NVTLOG_PATH;
   FAR struct nt38350_dev_s    *priv = (FAR struct nt38350_dev_s *)arg;
-  struct tm tm =
+  struct tm tmz =
   {
   };
 
@@ -2846,10 +2845,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
    */
 
   clock_gettime(CLOCK_REALTIME, &ts);
-
-  localtime_r(&ts.tv_sec, &tm);
-
-  strftime(date_buf, 64, "%e/%m/%Y %H:%M:%S", &tm);
+  localtime_r(&ts.tv_sec, &tmz);
 
   input_x1 = (uint32_t)((priv->point_xdata_temp[1]) << 4) +
                        (uint32_t) ((priv->point_xdata_temp[3]) >> 4);
@@ -2862,9 +2858,9 @@ static void nvt_log_data_to_csv(FAR void *arg)
   fw_frame_cnt = (int32_t)((priv->point_xdata_temp[89]) +
                        256 * priv->point_xdata_temp[90]);
 
-  sprintf(fbufp, "timestamp: %s,Frame index: %5ld ,"
-            "RawData: ,%2X,%4X,%5ld,%5ld,%5ld,%5ld\r\n",
-            date_buf, fw_frame_cnt, priv->fw_ver,
+  sprintf(fbufp, "timestamp:''%2d:%2d:%2d:000'',Frame index:''%5ld'',"
+            "RawData:,,%2X,%4X,%5ld,%5ld,%5ld,%5ld,\r\n",
+            tmz.tm_hour, tmz.tm_min, tmz.tm_sec, fw_frame_cnt, priv->fw_ver,
             priv->nvt_pid, input_x1, input_y1, input_x2, input_y2);
   for (y = 0; y < priv->y_num; y++)
     {
@@ -3876,7 +3872,7 @@ static void nt38350_data_worker(FAR void *arg)
         (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN +
         NVT_S2D_DATA_LEN + NVT_FW_CMD_HANDLE_LEN),
         (NVT_S2D_DATA_EXT_LEN + NVT_FW_FRAME_CNT_LEN));
-  work_queue(LPWORK, &priv->nvt_log_wq, nvt_log_data_to_csv, priv, 100);
+  work_queue(LPWORK, &priv->nvt_log_wq, nvt_log_data_to_csv, priv, 20);
 #endif
 
 #ifdef CONFIG_WAKEUP_GESTURE
