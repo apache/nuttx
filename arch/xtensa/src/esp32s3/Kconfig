@@ -388,7 +388,7 @@ config ESP32S3_RWDT
 
 endmenu # ESP32-S3 Peripheral Selection
 
-menu "UART configuration"
+menu "UART Configuration"
 	depends on ESP32S3_UART
 
 if ESP32S3_UART0
@@ -469,7 +469,19 @@ config ESP32S3_UART2_CTSPIN
 
 endif # ESP32S3_UART2
 
-endmenu # UART configuration
+endmenu # UART Configuration
+
+menu "Timer/Counter Configuration"
+	depends on ESP32S3_TIMER
+
+config ESP32S3_ONESHOT
+	bool "One-shot wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support one-shot timer.
+
+endmenu # Timer/Counter Configuration
 
 menu "Application Image Configuration"
 

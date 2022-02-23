@@ -83,3 +83,10 @@ endif
 ifeq ($(CONFIG_WATCHDOG),y)
 CHIP_CSRCS += esp32s3_wdt_lowerhalf.c
 endif
+
+ifeq ($(CONFIG_ESP32S3_ONESHOT),y)
+CHIP_CSRCS += esp32s3_oneshot.c
+ifeq ($(CONFIG_ONESHOT),y)
+CHIP_CSRCS += esp32s3_oneshot_lowerhalf.c
+endif
+endif
