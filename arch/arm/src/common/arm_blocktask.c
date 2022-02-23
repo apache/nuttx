@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_releasepending.c
+ * arch/arm/src/common/arm_blocktask.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,12 +24,16 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <sched.h>
+#include <assert.h>
 #include <debug.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -37,47 +41,72 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_release_pending
+ * Name: up_block_task
  *
  * Description:
- *   Release and ready-to-run tasks that have
- *   collected in the pending task list.  This can call a
- *   context switch if a new task is placed at the head of
- *   the ready to run list.
+ *   The currently executing task at the head of the ready to run list must
+ *   be stopped.  Save its context and move it to the inactive list
+ *   specified by task_state.
+ *
+ * Input Parameters:
+ *   tcb: Refers to a task in the ready-to-run list (normally the task at
+ *     the head of the list).  It must be stopped, its context saved and
+ *     moved into one of the waiting task lists.  If it was the task at the
+ *     head of the ready-to-run list, then a context switch to the new
+ *     ready to run task must be performed.
+ *   task_state: Specifies which waiting task list should hold the blocked
+ *     task TCB.
  *
  ****************************************************************************/
 
-void up_release_pending(void)
+void up_block_task(struct tcb_s *tcb, tstate_t task_state)
 {
   struct tcb_s *rtcb = this_task();
+  bool switch_needed;
 
-  sinfo("From TCB=%p\n", rtcb);
+  /* Verify that the context switch can be performed */
 
-  /* Merge the g_pendingtasks list into the ready-to-run task list */
+  DEBUGASSERT((tcb->task_state >= FIRST_READY_TO_RUN_STATE) &&
+              (tcb->task_state <= LAST_READY_TO_RUN_STATE));
 
-#if 0
-  sched_lock();
-#endif
+  /* Remove the tcb task from the ready-to-run list.  If we are blocking the
+   * task at the head of the task list (the most likely case), then a
+   * context switch to the next ready-to-run task is needed. In this case,
+   * it should also be true that rtcb == tcb.
+   */
 
-  if (nxsched_merge_pending())
+  switch_needed = nxsched_remove_readytorun(tcb);
+
+  /* Add the task to the specified blocked task list */
+
+  nxsched_add_blocked(tcb, (tstate_t)task_state);
+
+  /* If there are any pending tasks, then add them to the ready-to-run
+   * task list now
+   */
+
+  if (g_pendingtasks.head)
     {
-      /* The currently active task has changed!  We will need to switch
-       * contexts.
-       */
+      switch_needed |= nxsched_merge_pending();
+    }
 
+  /* Now, perform the context switch if one is needed */
+
+  if (switch_needed)
+    {
       /* Update scheduler parameters */
 
       nxsched_suspend_scheduler(rtcb);
 
-      /* Are we operating in interrupt context? */
+      /* Are we in an interrupt handler? */
 
       if (CURRENT_REGS)
         {
-          /* Yes, then we have to do things differently. Just copy the
-           * CURRENT_REGS into the OLD rtcb.
+          /* Yes, then we have to do things differently.
+           * Just copy the CURRENT_REGS into the OLD rtcb.
            */
 
-           arm_savestate(rtcb->xcp.regs);
+          arm_savestate(rtcb->xcp.regs);
 
           /* Restore the exception context of the rtcb at the (new) head
            * of the ready-to-run task list.
@@ -85,11 +114,13 @@ void up_release_pending(void)
 
           rtcb = this_task();
 
-          /* Update scheduler parameters */
+          /* Reset scheduler parameters */
 
           nxsched_resume_scheduler(rtcb);
 
-          /* Then switch contexts */
+          /* Then switch contexts.  Any necessary address environment
+           * changes will be made when the interrupt returns.
+           */
 
           arm_restorestate(rtcb->xcp.regs);
         }
@@ -100,7 +131,16 @@ void up_release_pending(void)
         {
           struct tcb_s *nexttcb = this_task();
 
-          /* Update scheduler parameters */
+#ifdef CONFIG_ARCH_ADDRENV
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
+
+          group_addrenv(nexttcb);
+#endif
+          /* Reset scheduler parameters */
 
           nxsched_resume_scheduler(nexttcb);
 

@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-m/arm_reprioritizertr.c
+ * arch/arm/src/common/arm_reprioritizertr.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -33,6 +33,7 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "arm_internal.h"
 
 /****************************************************************************
@@ -82,8 +83,8 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
       sinfo("TCB=%p PRI=%d\n", tcb, priority);
 
       /* Remove the tcb task from the ready-to-run list.
-       * nxsched_remove_readytorun will return true if we just removed the
-       * head of the ready to run list.
+       * nxsched_remove_readytorun will return true if we just
+       * remove the head of the ready to run list.
        */
 
       switch_needed = nxsched_remove_readytorun(tcb);
@@ -92,19 +93,17 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
       tcb->sched_priority = (uint8_t)priority;
 
-      /* Return the task to the ready-to-run task list.
-       * nxsched_add_readytorun() will return true if the task was added to
-       * the head of ready-to-run list.  We will need to perform a context
-       * switch only if the EXCLUSIVE or of the two calls is non-zero (i.e.,
-       * one and only one the calls changes the head of the ready-to-run
-       * list).
+      /* Return the task to the specified blocked task list.
+       * nxsched_add_readytorun will return true if the task was
+       * added to the new list.  We will need to perform a context
+       * switch only if the EXCLUSIVE or of the two calls is non-zero
+       * (i.e., one and only one the calls changes the head of the
+       * ready-to-run list).
        */
 
       switch_needed ^= nxsched_add_readytorun(tcb);
 
-      /* Now, perform the context switch if one is needed (i.e. if the head
-       * of the ready-to-run list is no longer the same).
-       */
+      /* Now, perform the context switch if one is needed */
 
       if (switch_needed)
         {
@@ -141,7 +140,9 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
 
               nxsched_resume_scheduler(rtcb);
 
-              /* Then switch contexts */
+              /* Then switch contexts.  Any necessary address environment
+               * changes will be made when the interrupt returns.
+               */
 
               arm_restorestate(rtcb->xcp.regs);
             }
@@ -152,6 +153,15 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
             {
               struct tcb_s *nexttcb = this_task();
 
+#ifdef CONFIG_ARCH_ADDRENV
+              /* Make sure that the address environment for the previously
+               * running task is closed down gracefully (data caches dump,
+               * MMU flushed) and set up the address environment for the new
+               * thread at the head of the ready-to-run list.
+               */
+
+              group_addrenv(nexttcb);
+#endif
               /* Update scheduler parameters */
 
               nxsched_resume_scheduler(nexttcb);
