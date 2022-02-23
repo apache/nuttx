@@ -86,7 +86,7 @@ int unsetenv(FAR const char *name)
 
           if (group->tg_envp != NULL)
             {
-              kumm_free(group->tg_envp);
+              group_free(group, group->tg_envp);
               group->tg_envp = NULL;
             }
 
@@ -96,7 +96,9 @@ int unsetenv(FAR const char *name)
         {
           /* Reallocate the environment to reclaim a little memory */
 
-          newenvp = (FAR char *)kumm_realloc(group->tg_envp, newsize);
+          newenvp = (FAR char *)group_realloc(group, group->tg_envp,
+                                              newsize);
+
           if (newenvp == NULL)
             {
               set_errno(ENOMEM);
