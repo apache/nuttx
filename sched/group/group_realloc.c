@@ -1,5 +1,5 @@
 /****************************************************************************
- * sched/environ/env_release.c
+ * sched/group/group_realloc.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,62 +22,62 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
+#include <sys/types.h>
 
-#ifndef CONFIG_DISABLE_ENVIRON
-
-#include <sched.h>
 #include <assert.h>
-#include <errno.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/kmalloc.h>
 
-#include "environ/environ.h"
+#include "sched/sched.h"
+#include "group/group.h"
+
+#ifdef CONFIG_MM_KERNEL_HEAP
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: env_release
+ * Name: group_realloc
  *
  * Description:
- *   env_release() is called only from group_leave() when the last member of
- *   a task group exits.  The env_release() function clears the environment
- *   of all name-value pairs and sets the value of the external variable
- *   environ to NULL.
- *
- * Input Parameters:
- *   group - Identifies the task group containing the environment structure
- *           to be released.
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Not called from an interrupt handler
+ *   Re-allocate memory appropriate for the group type.  If the memory is
+ *   part of a privileged group, then it should be allocated so that it
+ *   is only accessible by privileged code;  Otherwise, it is a user mode
+ *   group and must be allocated so that it accessible by unprivileged
+ *   code.
  *
  ****************************************************************************/
 
-void env_release(FAR struct task_group_s *group)
+FAR void *group_realloc(FAR struct task_group_s *group, FAR void *oldmem,
+                        size_t newsize)
 {
-  DEBUGASSERT(group != NULL);
+  /* A NULL group pointer means the current group */
 
-  /* Free any allocate environment strings */
-
-  if (group->tg_envp)
+  if (group == NULL)
     {
-      /* Free the environment */
-
-      group_free(group, group->tg_envp);
+      FAR struct tcb_s *tcb = this_task();
+      DEBUGASSERT(tcb && tcb->group);
+      group = tcb->group;
     }
 
-  /* In any event, make sure that all environment-related variables in the
-   * task group structure are reset to initial values.
-   */
+  /* Check the group type */
 
-  group->tg_envsize = 0;
-  group->tg_envp = NULL;
+  if ((group->tg_flags & GROUP_FLAG_PRIVILEGED) != 0)
+    {
+      /* It is a privileged group... use the kernel mode memory allocator */
+
+      return kmm_realloc(oldmem, newsize);
+    }
+  else
+    {
+      /* This is an unprivileged group... use the user mode memory
+       * allocator.
+       */
+
+      return kumm_realloc(oldmem, newsize);
+    }
 }
 
-#endif /* CONFIG_DISABLE_ENVIRON */
+#endif /* CONFIG_MM_KERNEL_HEAP */

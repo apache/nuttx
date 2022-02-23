@@ -123,6 +123,11 @@ extern "C"
 
 FAR void *group_malloc(FAR struct task_group_s *group, size_t nbytes);
 
+/* Functions defined in group/group_realloc.c *******************************/
+
+FAR void *group_realloc(FAR struct task_group_s *group, FAR void *oldmem,
+                        size_t newsize);
+
 /* Functions defined in group/group_zalloc.c ********************************/
 
 FAR void *group_zalloc(FAR struct task_group_s *group, size_t nbytes);
@@ -136,9 +141,10 @@ void group_free(FAR struct task_group_s *group, FAR void *mem);
    * in privileges.
    */
 
-#  define group_malloc(g,n) kumm_malloc(n)
-#  define group_zalloc(g,n) kumm_zalloc(n)
-#  define group_free(g,m)   kumm_free(m)
+#  define group_malloc(g,n)      kumm_malloc(n)
+#  define group_realloc(g,p,s)   kumm_realloc((p),(s))
+#  define group_zalloc(g,n)      kumm_zalloc(n)
+#  define group_free(g,m)        kumm_free(m)
 
 #endif
 
