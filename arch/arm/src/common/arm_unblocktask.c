@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv8-m/arm_unblocktask.c
+ * arch/arm/src/common/arm_unblocktask.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -31,6 +31,7 @@
 #include <nuttx/sched.h>
 
 #include "sched/sched.h"
+#include "group/group.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
 
@@ -101,7 +102,9 @@ void up_unblock_task(struct tcb_s *tcb)
 
           nxsched_resume_scheduler(rtcb);
 
-          /* Then switch contexts */
+          /* Then switch contexts.  Any necessary address environment
+           * changes will be made when the interrupt returns.
+           */
 
           arm_restorestate(rtcb->xcp.regs);
         }
@@ -112,6 +115,15 @@ void up_unblock_task(struct tcb_s *tcb)
         {
           struct tcb_s *nexttcb = this_task();
 
+#ifdef CONFIG_ARCH_ADDRENV
+          /* Make sure that the address environment for the previously
+           * running task is closed down gracefully (data caches dump,
+           * MMU flushed) and set up the address environment for the new
+           * thread at the head of the ready-to-run list.
+           */
+
+          group_addrenv(nexttcb);
+#endif
           /* Update scheduler parameters */
 
           nxsched_resume_scheduler(nexttcb);
