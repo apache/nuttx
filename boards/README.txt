@@ -716,6 +716,9 @@ boards/arm/sam34/sam4s-xplained
 boards/arm/sam34/sam4s-xplained-pro
   The port of NuttX to the Atmel SAM4S-Xplained Pro development board.
 
+boards/arm/samv7/same70-qmtech
+  The port of NuttX to the Atmel SAME70 evaluation board from QMTECH.
+
 boards/arm/samv7/same70-xplained
   The port of NuttX to the Atmel SAME70 Xplained evaluation board.
 

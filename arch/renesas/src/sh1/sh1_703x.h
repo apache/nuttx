@@ -18,8 +18,8 @@
  *
  ************************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_SH1_703X_H
-#define __ARCH_RENESAS_SRC_SH1_703X_H
+#ifndef __ARCH_RENESAS_SRC_SH1_SH1_703X_H
+#define __ARCH_RENESAS_SRC_SH1_SH1_703X_H
 
 /************************************************************************************
  * Included Files
@@ -444,4 +444,4 @@
  * Public Functions Prototypes
  ************************************************************************************/
 
-#endif /* __ARCH_RENESAS_SRC_SH1_703X_H */
+#endif /* __ARCH_RENESAS_SRC_SH1_SH1_703X_H */

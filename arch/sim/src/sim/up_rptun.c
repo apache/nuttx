@@ -225,20 +225,20 @@ void up_rptun_loop(void)
     {
       if (dev->shmem != NULL)
         {
-          bool diff = false;
+          bool should_notify = false;
 
           if (dev->master && dev->seq != dev->shmem->seqs)
             {
               dev->seq = dev->shmem->seqs;
-              diff = true;
+              should_notify = true;
             }
           else if (!dev->master && dev->seq != dev->shmem->seqm)
             {
               dev->seq = dev->shmem->seqm;
-              diff = true;
+              should_notify = true;
             }
 
-          if (diff && dev->callback != NULL)
+          if (should_notify && dev->callback != NULL)
             {
               dev->callback(dev->arg, RPTUN_NOTIFY_ALL);
             }

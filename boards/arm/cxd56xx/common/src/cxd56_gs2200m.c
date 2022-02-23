@@ -113,7 +113,7 @@ static void gs2200m_irq_enable(void)
 {
   irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 "\n",
          _enable_count, _n_called++);
 
   if (0 == _enable_count)
@@ -134,7 +134,7 @@ static void gs2200m_irq_disable(void)
 {
   irqstate_t flags = enter_critical_section();
 
-  wlinfo("== ec:%" PRId32 " called=%" PRId32 " \n",
+  wlinfo("== ec:%" PRId32 " called=%" PRId32 "\n",
          _enable_count, _n_called++);
 
   _enable_count--;

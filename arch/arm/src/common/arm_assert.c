@@ -353,11 +353,12 @@ static void arm_dumpstate(void)
   sched_dumpstack(rtcb->pid);
 #endif
 
-  /* Restore the xcp context */
+  /* Update the xcp context */
 
   if (CURRENT_REGS)
     {
-      memcpy(rtcb->xcp.regs, CURRENT_REGS, XCPTCONTEXT_SIZE);
+      memcpy(rtcb->xcp.regs,
+             (FAR uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
     }
   else
     {

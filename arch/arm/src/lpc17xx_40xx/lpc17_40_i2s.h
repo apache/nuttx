@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_CHIP_LPC17_40_I2S_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_CHIP_LPC17_40_I2S_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_I2S_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_I2S_H
 
 /****************************************************************************
  * Included Files
@@ -44,4 +44,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_CHIP_LPC17_40_I2S_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_LPC17_40_I2S_H */

@@ -253,7 +253,7 @@ static void mld_v1dog_work(FAR void *arg)
 
       CLR_MLD_V1COMPAT(dev->d_mld.flags);
 
-      /* REVIST:  Whenever a host changes its compatibility mode, it cancels
+      /* REVISIT:  Whenever a host changes its compatibility mode, it cancels
        * all of its pending responses and retransmission timers.
        */
     }

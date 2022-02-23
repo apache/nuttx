@@ -50,13 +50,11 @@
 
 static inline void clk_write(uint32_t reg, uint32_t value)
 {
-  reg = reg / (CHAR_BIT / 8);
   *((volatile uint32_t *) (reg)) = value;
 }
 
 static inline uint32_t clk_read(uint32_t reg)
 {
-  reg = reg / (CHAR_BIT / 8);
   return *((volatile uint32_t *) (reg));
 }
 

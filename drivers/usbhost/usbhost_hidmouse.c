@@ -380,32 +380,35 @@ static int usbhost_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
 static const struct usbhost_id_s g_hidmouse_id =
 {
-  USB_CLASS_HID,           /* base     */
+  USB_CLASS_HID,           /* base */
   USBHID_SUBCLASS_BOOTIF,  /* subclass */
-  USBHID_PROTOCOL_MOUSE,   /* proto    */
-  0,                       /* vid      */
-  0                        /* pid      */
+  USBHID_PROTOCOL_MOUSE,   /* proto */
+  0,                       /* vid */
+  0                        /* pid */
 };
 
 /* This is the USB host storage class's registry entry */
 
 static struct usbhost_registry_s g_hidmouse =
 {
-  NULL,                    /* flink     */
-  usbhost_create,          /* create    */
-  1,                       /* nids      */
-  &g_hidmouse_id           /* id[]      */
+  NULL,                    /* flink */
+  usbhost_create,          /* create */
+  1,                       /* nids */
+  &g_hidmouse_id           /* id[] */
 };
 
 static const struct file_operations g_hidmouse_fops =
 {
-  usbhost_open,            /* open      */
-  usbhost_close,           /* close     */
-  usbhost_read,            /* read      */
-  usbhost_write,           /* write     */
-  NULL,                    /* seek      */
-  NULL,                    /* ioctl     */
-  usbhost_poll             /* poll      */
+  usbhost_open,            /* open */
+  usbhost_close,           /* close */
+  usbhost_read,            /* read */
+  usbhost_write,           /* write */
+  NULL,                    /* seek */
+  NULL,                    /* ioctl */
+  usbhost_poll             /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                   /* unlink */
+#endif
 };
 
 /* This is a bitmap that is used to allocate device names /dev/mouse0-31. */

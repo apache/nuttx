@@ -44,7 +44,7 @@ float modff(float x, float *iptr)
     }
   else if (fabsf(x) < 1.0F)
     {
-      *iptr = (x * 0.0F);
+      *iptr = 0.0F;
       return x;
     }
   else

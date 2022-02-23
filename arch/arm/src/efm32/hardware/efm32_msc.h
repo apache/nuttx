@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_EFM32_EFM32_MSC_H
-#define __ARCH_ARM_SRC_EFM32_EFM32_EFM32_MSC_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_MSC_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_MSC_H
 
 /****************************************************************************
  * Included Files

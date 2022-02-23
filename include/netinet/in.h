@@ -156,7 +156,7 @@
 
 /* Test if an IPv4 address is a multicast address */
 
-#define IN_CLASSD(i)          (((uint32_t)(i) & 0xf0000000) == 0xe0000000)
+#define IN_CLASSD(i)          (((in_addr_t)(i) & 0xf0000000) == 0xe0000000)
 #define IN_MULTICAST(i)       IN_CLASSD(i)
 
 /* Special values of in_addr_t */

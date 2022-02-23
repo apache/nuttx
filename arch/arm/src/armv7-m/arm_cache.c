@@ -413,7 +413,7 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
       start += ssize;
     }
 
-  do
+  while (start + ssize <= end)
     {
       /* The below store causes the cache to check its directory and
        * determine if this address is contained in the cache. If so, it
@@ -428,9 +428,8 @@ void up_invalidate_dcache(uintptr_t start, uintptr_t end)
 
       start += ssize;
     }
-  while (start + ssize <= end);
 
-  if (start != end)
+  if (start < end)
     {
       putreg32(start, NVIC_DCCIMVAC);
     }

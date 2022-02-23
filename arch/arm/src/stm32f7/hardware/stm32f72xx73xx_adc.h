@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H
-#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H
+#ifndef __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX73XX_ADC_H
+#define __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX73XX_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -480,4 +480,4 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX77XX_ADC_H */
+#endif /* __ARCH_ARM_SRC_STM32F7_HARDWARE_STM32F74XX73XX_ADC_H */

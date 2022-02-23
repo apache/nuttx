@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
-#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H
+#ifndef __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ADC_H
+#define __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -168,4 +168,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_CHIP_ADC_H */
+#endif /* __ARCH_ARM_SRC_LPC17XX_40XX_HARDWARE_LPC17_40_ADC_H */

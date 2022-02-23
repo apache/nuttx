@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-/* This file should never be included directly but, rather, only indirectly\
+/* This file should never be included directly but, rather, only indirectly
  * through sys/types.h
  */
 

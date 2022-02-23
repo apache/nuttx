@@ -148,7 +148,7 @@ int mld_leavegroup(FAR const struct ipv6_mreq *mrec)
 
               MLD_STATINCR(g_netstats.mld.done_sched);
 
-              /* REVIST:  This will interfere is the are any other tasks
+              /* REVISIT:  This will interfere if there are any other tasks
                * waiting for a message to be sent.  Can that happen?
                */
 

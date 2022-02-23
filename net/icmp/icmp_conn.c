@@ -124,7 +124,7 @@ FAR struct icmp_conn_s *icmp_alloc(void)
             {
               for (ret = 0; ret < CONFIG_NET_ICMP_NCONNS; ret++)
                 {
-                  dq_addlast(&conn[ret].node, &g_free_retcmp_connectretons);
+                  dq_addlast(&conn[ret].node, &g_free_icmp_connections);
                 }
             }
         }

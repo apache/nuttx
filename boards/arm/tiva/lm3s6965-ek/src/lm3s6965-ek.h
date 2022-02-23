@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H
-#define __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H
+#ifndef __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965_EK_H
+#define __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965_EK_H
 
 /****************************************************************************
  * Included Files
@@ -134,4 +134,4 @@ int lm_bringup(void);
 void weak_function lm_ssidev_initialize(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965EK_H */
+#endif /* __BOARDS_ARM_TIVA_LM3S6965_EK_SRC_LM3S6965_EK_H */

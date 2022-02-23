@@ -43,10 +43,8 @@ long double fmodl(long double x, long double div)
 {
   long double n0;
 
-  x /= div;
-  x = modfl(x, &n0);
-  x *= div;
+  modfl(x / div, &n0);
 
-  return x;
+  return x - n0 * div;
 }
 #endif

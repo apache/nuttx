@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_ARCH_AVR_DEBUG_H
-#define __INCLUDE_ARCH_AVR_DEBUG_H
+#ifndef __ARCH_AVR_INCLUDE_DEBUG_H
+#define __ARCH_AVR_INCLUDE_DEBUG_H
 
 /****************************************************************************
  * Included Files
@@ -68,4 +68,4 @@
 
 #endif /* CONFIG_AVR_HAS_MEMX_PTR */
 
-#endif /* __INCLUDE_ARCH_DEBUG_H */
+#endif /* __ARCH_AVR_INCLUDE_DEBUG_H */

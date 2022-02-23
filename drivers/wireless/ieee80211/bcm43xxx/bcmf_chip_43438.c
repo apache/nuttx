@@ -52,6 +52,7 @@ const struct bcmf_sdio_chip bcmf_43438_config_sdio =
 {
   /* General chip stats */
 
+  .ram_base = 0,
   .ram_size = 512 * 1024,
 
   /* Backplane architecture */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H_
-#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H_
+#ifndef __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H
+#define __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H
 
 /****************************************************************************
  * Included Files
@@ -47,4 +47,4 @@
 #define FE2_TX_INF_FORCE_PU_V 1
 #define FE2_TX_INF_FORCE_PU_S 10
 
-#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H_ */
+#endif /* __ARCH_RISCV_SRC_ESP32C3_HARDWARE_FE_REG_H */

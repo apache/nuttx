@@ -57,21 +57,7 @@
 
 void nxsched_resume_scheduler(FAR struct tcb_s *tcb)
 {
-#if CONFIG_RR_INTERVAL > 0
 #ifdef CONFIG_SCHED_SPORADIC
-  if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_RR)
-#endif
-    {
-      /* Reset the task's timeslice. */
-
-      tcb->timeslice = MSEC2TICK(CONFIG_RR_INTERVAL);
-    }
-#endif
-
-#ifdef CONFIG_SCHED_SPORADIC
-#if CONFIG_RR_INTERVAL > 0
-  else
-#endif
   if ((tcb->flags & TCB_FLAG_POLICY_MASK) == TCB_FLAG_SCHED_SPORADIC)
     {
       /* Reset the replenishment cycle if it is appropriate to do so */

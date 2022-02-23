@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
-#define __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO__H
+#ifndef __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H
+#define __BOARDS_ARM_STM32_STM32F429I_DISCO_SRC_STM32F429I_DISCO_H
 
 /****************************************************************************
  * Included Files

@@ -585,8 +585,8 @@ static int foc_cfg_set(FAR struct foc_dev_s *dev, FAR struct foc_cfg_s *cfg)
 
   memcpy(&dev->cfg, cfg, sizeof(struct foc_cfg_s));
 
-  mtrinfo("FOC %" PRIu8 " PWM=%" PRIu32 " notifier=%" PRIu32 "\n",
-          dev->devno, dev->cfg.pwm_freq, dev->cfg.notifier_freq);
+  mtrinfo("FOC PWM=%" PRIu32 " notifier=%" PRIu32 "\n",
+          dev->cfg.pwm_freq, dev->cfg.notifier_freq);
 
   /* Call arch configuration */
 

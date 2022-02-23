@@ -38,6 +38,7 @@ include $(TOPDIR)/tools/Config.mk
 
 ARCHDEFINES += -U_AIX -U_WIN32 -U__APPLE__ -U__FreeBSD__
 ARCHDEFINES += -U__NetBSD__ -U__linux__ -U__sun__ -U__unix__
+ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -110,19 +111,45 @@ ifeq ($(CONFIG_LIBCXX),y)
   #    (boards/arm/stm32l4/nucleo-l476rg/scripts/Make.defs)
   #  * libs/libxx/libcxx/src/barrier.cpp depends on aligned new
   CXXFLAGS += -std=c++17
+
+  ifeq ($(CONFIG_HOST_MACOS),y)
+    # macOS uses libc++abi
+    CXXFLAGS += -DLIBCXX_BUILDING_LIBCXXABI
+  else
+    # Linux C++ ABI seems vary.
+    # Probably __GLIBCXX__ is the best bet.
+    # XXX what to do for windows?
+    CXXFLAGS += -D__GLIBCXX__
+  endif
+
+  # Disable availability macros.
+  # The availability on Host OS is not likely appropriate for NuttX.
+  #
+  # Note: When compiling NuttX apps, we undefine __APPLE__.
+  # It makes libcxx __availability header unhappy.
+  # https://github.com/llvm/llvm-project/blob/2e2999cd44f6ec9a5e396fa0113497ea82582f69/libcxx/include/__availability#L258
+  CXXFLAGS += -D_LIBCPP_DISABLE_AVAILABILITY
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CFLAGS += -fsanitize=address -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=address
+  CXXFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CFLAGS += -fsanitize=kernel-address
   CXXFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
-  CXXFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CFLAGS += -fsanitize=undefined
+  CXXFLAGS += -fsanitize=undefined
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+  CXXFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CFLAGS += -fomit-frame-pointer
+  CXXFLAGS += -fomit-frame-pointer
 endif
 
 # Loadable module definitions
@@ -189,15 +216,20 @@ ifeq ($(CONFIG_SIM_M32),y)
 endif
 
 ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=address
 else ifeq ($(CONFIG_MM_KASAN),y)
   CCLINKFLAGS += -fsanitize=kernel-address
 endif
 
 ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined -fno-omit-frame-pointer
+  CCLINKFLAGS += -fsanitize=undefined
 endif
 
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  CCLINKFLAGS += -fomit-frame-pointer
+endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe

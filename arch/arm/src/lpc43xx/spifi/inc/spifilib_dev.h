@@ -30,8 +30,8 @@
  * this code.
  ****************************************************************************/
 
-#ifndef __SPIFILIB_DEV_H_
-#define __SPIFILIB_DEV_H_
+#ifndef __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_DEV_H
+#define __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_DEV_H
 
 /****************************************************************************
  * Included Files
@@ -383,4 +383,4 @@ SPIFI_FAM_NODE_T *spifi_REG_FAMILY_CommonCommandSet(void);
 }
 #endif
 
-#endif /* __SPIFILIB_DEV_H_ */
+#endif /* __ARCH_ARM_SRC_LPC43XX_SPIFI_INC_SPIFILIB_DEV_H */

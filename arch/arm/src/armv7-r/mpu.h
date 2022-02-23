@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_ARMV7R_MPU_H
-#define __ARCH_ARM_SRC_ARMV7R_MPU_H
+#ifndef __ARCH_ARM_SRC_ARMV7_R_MPU_H
+#define __ARCH_ARM_SRC_ARMV7_R_MPU_H
 
 /****************************************************************************
  * Included Files
@@ -118,6 +118,36 @@ extern "C"
 {
 #else
 #define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: mpu_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled during
+ *   MPU initialization.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MPU_RESET)
+void mpu_reset(void);
+#else
+#  define mpu_reset() do { } while (0)
+#endif
+
+/****************************************************************************
+ * Name: mpu_early_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled immediately
+ *   after reset.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARM_MPU_EARLY_RESET)
+void mpu_early_reset(void);
+#else
+#  define mpu_early_reset() do { } while (0)
 #endif
 
 /****************************************************************************
@@ -815,4 +845,4 @@ static inline void mpu_user_intsram_wb(uintptr_t base, size_t size)
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_ARMV7R_MPU_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_MPU_H */

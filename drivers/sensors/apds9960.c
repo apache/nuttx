@@ -680,7 +680,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
 
       for (i = priv->gesture_data.total_gestures - 1; i >= 0; i--)
         {
-          sninfo("Finding last: \n");
+          sninfo("Finding last:\n");
           sninfo("U: %03d\n", priv->gesture_data.u_data[i]);
           sninfo("D: %03d\n", priv->gesture_data.d_data[i]);
           sninfo("L: %03d\n", priv->gesture_data.l_data[i]);
@@ -707,13 +707,13 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
   ud_ratio_last  = ((u_last  - d_last)  * 100) / (u_last  + d_last);
   lr_ratio_last  = ((l_last  - r_last)  * 100) / (l_last  + r_last);
 
-  sninfo("Last Values: \n");
+  sninfo("Last Values:\n");
   sninfo("U: %03d\n", u_last);
   sninfo("D: %03d\n", d_last);
   sninfo("L: %03d\n", l_last);
   sninfo("R: %03d\n", r_last);
 
-  sninfo("Ratios: \n");
+  sninfo("Ratios:\n");
   sninfo("UD Fi: %03d\n", ud_ratio_first);
   sninfo("UD La: %03d\n", ud_ratio_last);
   sninfo("LR Fi: %03d\n", lr_ratio_first);
@@ -724,7 +724,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
   ud_delta = ud_ratio_last - ud_ratio_first;
   lr_delta = lr_ratio_last - lr_ratio_first;
 
-  sninfo("Deltas: \n");
+  sninfo("Deltas:\n");
   sninfo("UD: %03d\n", ud_delta);
   sninfo("LR: %03d\n", lr_delta);
 
@@ -733,7 +733,7 @@ static bool apds9960_processgesture(FAR struct apds9960_dev_s *priv)
   priv->gesture_ud_delta += ud_delta;
   priv->gesture_lr_delta += lr_delta;
 
-  sninfo("Accumulations: \n");
+  sninfo("Accumulations:\n");
   sninfo("UD: %03d\n", priv->gesture_ud_delta);
   sninfo("LR: %03d\n", priv->gesture_lr_delta);
 

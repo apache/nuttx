@@ -79,8 +79,7 @@ FAR void *up_addrenv_pa_to_va(uintptr_t pa)
         {
           if (pa - addrenv[i].pa < addrenv[i].size)
             {
-              return (FAR void *)(addrenv[i].va +
-                     pa - addrenv[i].pa);
+              return (FAR void *)(addrenv[i].va + pa - addrenv[i].pa);
             }
         }
     }

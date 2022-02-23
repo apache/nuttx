@@ -29,4 +29,8 @@
 
 int k210_bringup(void);
 
+#ifdef CONFIG_DEV_GPIO
+int k210_gpio_init(void);
+#endif
+
 #endif /* __BOARDS_RISCV_K210_MAIX_BIT_SRC_MAIX_BIT_H */

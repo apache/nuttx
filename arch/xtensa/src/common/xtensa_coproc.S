@@ -127,7 +127,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
 	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_ncp_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -151,7 +151,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 3, 2f
 	l32i	a14, a13, 12
 	add		a3, a14, a15
-	xchal_cp3store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp3_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -159,7 +159,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 4, 2f
 	l32i	a14, a13, 16
 	add		a3, a14, a15
-	xchal_cp4store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp4_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -167,7 +167,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 5, 2f
 	l32i	a14, a13, 20
 	add		a3, a14, a15
-	xchal_cp5store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp5_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -175,7 +175,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 6, 2f
 	l32i	a14, a13, 24
 	add		a3, a14, a15
-	xchal_cp6store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp6_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -183,7 +183,7 @@ _xtensa_coproc_savestate:
 	bbci.l	a2, 7, 2f
 	l32i	a14, a13, 28
 	add		a3, a14, a15
-	xchal_cp7store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp7_store	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 
@@ -326,7 +326,7 @@ _xtensa_coproc_restorestate:
 	bbci.l	a2, 0, 2f						/* CP 0 not enabled */
 	l32i	a14, a13, 0						/* a14 = _xtensa_coproc_saoffsets[0] */
 	add		a3, a14, a15					/* a3 = save area for CP 0 */
-	xchal_ncp_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
+	xchal_cp0_load	a3, a4, a5, a6, a7 continue=0 ofs=-1 select=XTHAL_SAS_TIE|XTHAL_SAS_NOCC|XTHAL_SAS_CALE alloc=XTHAL_SAS_ALL
 2:
 #endif
 

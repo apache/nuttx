@@ -29,11 +29,8 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdbool.h>
 #include <math.h>
-
-#include <assert.h>
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -69,6 +66,16 @@
 #define TWO_BY_SQRT3_F     (1.15470f)
 
 /* Some lib constants *******************************************************/
+
+/* These are defined only in the NuttX math library */
+
+#ifndef M_PI_F
+#define M_PI_F    ((float)M_PI)
+#endif
+
+#ifndef M_PI_2_F
+#define M_PI_2_F  ((float)M_PI_2)
+#endif
 
 /* Motor electrical angle is in range 0.0 to 2*PI */
 

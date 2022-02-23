@@ -72,8 +72,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define IPv4BUF ((struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
-#define IPv6BUF ((struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv4BUF ((FAR struct ipv4_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
+#define IPv6BUF ((FAR struct ipv6_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev)])
 
 /****************************************************************************
  * Private Data
@@ -234,7 +234,7 @@ static int tcp_selectport(uint8_t domain,
               g_last_tcp_port = 4096;
             }
 
-          portno = htons(g_last_tcp_port);
+          portno = HTONS(g_last_tcp_port);
         }
       while (tcp_listener(domain, ipaddr, portno));
     }

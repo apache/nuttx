@@ -142,4 +142,4 @@ int rx65n_sbram_savepanic(int fileno, uint8_t *context, int length);
 }
 #endif
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_RX65N_RX65N_SBRAM_H */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_SBSRAM_H */

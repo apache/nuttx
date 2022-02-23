@@ -118,6 +118,22 @@
 #define MII_KSZ8051_PHYCTRL1         0x1e      /* PHY Control 1 */
 #define MII_KSZ8051_PHYCTRL2         0x1f      /* PHY Control 2 */
 
+/* Micrel KSZ8061:  0x10-0x18, 0x1b, 0x1c-0x1f */
+#define MII_KSZ8061_DIG_CTRL           0x10   /* Digital Control */
+#define MII_KSZ8061_AFE_CTRL_0         0x11   /* AFE Control 0 */
+#define MII_KSZ8061_AFE_CTRL_1         0x12   /* AFE Control 1 */
+#define MII_KSZ8061_AFE_CTRL_2         0x13   /* AFE Control 2 */
+#define MII_KSZ8061_AFE_CTRL_3         0x14   /* AFE Control 3 */
+#define MII_KSZ8061_RXER_CNTR          0x15   /* RXER Counter */
+#define MII_KSZ8061_OP_MODE            0x16   /* Operation Mode */
+#define MII_KSZ8061_OP_MODE_STRAP_STAT 0x17   /* Operation Mode Strap Status */
+#define MII_KSZ8061_EXP_CTRL           0x18   /* Expanded Control */
+#define MII_KSZ8061_INTR_CTRL_STAT     0x1B   /* Interrupt Control/Status */
+#define MII_KSZ8061_FUNC_CTRL          0x1C   /* Function Control */
+#define MII_KSZ8061_LINKMD_CTRL_STAT   0x1D   /* LinkMD® Control/Status */
+#define MII_KSZ8061_PHY_CTRL_1         0x1E   /* PHY Control 1 */
+#define MII_KSZ8061_PHY_CTRL_2         0x1F   /* PHY Control 2 */
+
 /* Micrel KSZ8081:  0x10-0x11, 0x15-0x18, 0x1b, 0x1d-0x1f */
 
 #define MII_KSZ8081_DRCTRL           0x10      /* Digital Reserve Control */

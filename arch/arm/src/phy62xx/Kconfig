@@ -1,0 +1,27 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "PHY62xx Configuration Options"
+
+choice
+	prompt "only PHY 6222 Chip Selection"
+	default ARCH_CHIP_PHY6222
+	depends on ARCH_CHIP_PHY62XX
+
+config ARCH_CHIP_PHY6222
+	bool "PHY6222"
+endchoice
+
+config PHY6222_BLE
+	bool "Enable ble"
+	default n
+
+config PHYPLUS_STUB
+	bool "Enable phyplus stub"
+	default y
+
+#config PHYPLUS_DOWNLOAD
+#	bool "Enable phyplus ble lib file download from server"
+#	default n

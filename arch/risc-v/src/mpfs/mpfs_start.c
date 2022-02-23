@@ -31,6 +31,8 @@
 #include "chip.h"
 #include "mpfs.h"
 #include "mpfs_clockconfig.h"
+#include "mpfs_ddr.h"
+#include "mpfs_cache.h"
 #include "mpfs_userspace.h"
 #include "riscv_arch.h"
 
@@ -96,9 +98,11 @@ void __mpfs_start(uint32_t mhartid)
       *dest++ = *src++;
     }
 
-  /* Setup PLL */
+  /* Setup PLL if not already provided */
 
+#ifdef CONFIG_MPFS_BOOTLOADER
   mpfs_clockconfig();
+#endif
 
   /* Configure the UART so we can get debug output */
 
@@ -110,6 +114,10 @@ void __mpfs_start(uint32_t mhartid)
   riscv_earlyserialinit();
 #endif
 
+#ifdef CONFIG_MPFS_DDR_INIT
+  mpfs_ddr_init();
+#endif
+
   showprogress('B');
 
   g_serial_ok = true;
@@ -117,6 +125,18 @@ void __mpfs_start(uint32_t mhartid)
   /* Do board initialization */
 
   mpfs_boardinitialize();
+
+  /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
+   * functional.  Consider the caches already configured if running without
+   * the CONFIG_MPFS_BOOTLOADER -option.
+   */
+
+#ifdef CONFIG_MPFS_BOOTLOADER
+  if (mhartid == 0)
+    {
+      mpfs_enable_cache();
+    }
+#endif
 
   showprogress('C');
 

@@ -942,12 +942,13 @@ void nxsem_add_holder_tcb(FAR struct tcb_s *htcb, FAR sem_t *sem)
 {
   FAR struct semholder_s *pholder;
 
-  /* If priority inheritance is disabled for this thread, then do not add
-   * the holder.  If there are never holders of the semaphore, the priority
+  /* If priority inheritance is disabled for this thread or it is IDLE hread,
+   * then do not add the holder.
+   * If there are never holders of the semaphore, the priority
    * inheritance is effectively disabled.
    */
 
-  if ((sem->flags & PRIOINHERIT_FLAGS_DISABLE) == 0)
+  if (htcb->flink != NULL && (sem->flags & PRIOINHERIT_FLAGS_DISABLE) == 0)
     {
       /* Find or allocate a container for this new holder */
 

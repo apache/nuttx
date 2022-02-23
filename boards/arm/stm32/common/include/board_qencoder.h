@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __STM32_QENCODER_H
-#define __STM32_QENCODER_H
+#ifndef __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_QENCODER_H
+#define __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_QENCODER_H
 
 /****************************************************************************
  * Included Files
@@ -70,4 +70,4 @@ int board_qencoder_initialize(int devno, int timerno);
 }
 #endif
 
-#endif // __STM32_QENCODER_H
+#endif /* __BOARDS_ARM_STM32_COMMON_INCLUDE_BOARD_QENCODER_H */

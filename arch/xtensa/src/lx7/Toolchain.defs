@@ -29,6 +29,20 @@
 #                   reliable code generation.
 #
 
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
+  CROSSDEV = xt-
+endif
+
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
+  CROSSDEV = xt-
+endif
+
+ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
+  CROSSDEV = xtensa-esp32s2-elf-
+endif
+
+ARCHCPUFLAGS =
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 else
@@ -44,20 +58,6 @@ ifeq ($(CONFIG_FRAME_POINTER),y)
 else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
-
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
-  CROSSDEV = xt-
-endif
-
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
-  CROSSDEV = xt-
-endif
-
-ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
-  CROSSDEV = xtensa-esp32s2-elf-
-endif
-
-ARCHCPUFLAGS =
 
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)

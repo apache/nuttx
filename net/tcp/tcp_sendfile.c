@@ -62,8 +62,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define TCPIPv4BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
-#define TCPIPv6BUF ((struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
+#define TCPIPv4BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv4_HDRLEN])
+#define TCPIPv6BUF ((FAR struct tcp_hdr_s *)&dev->d_buf[NET_LL_HDRLEN(dev) + IPv6_HDRLEN])
 
 /****************************************************************************
  * Private Types
@@ -76,8 +76,7 @@
 struct sendfile_s
 {
   FAR struct socket *snd_sock;             /* Points to the parent socket structure */
-  FAR struct devif_callback_s *snd_datacb; /* Data callback */
-  FAR struct devif_callback_s *snd_ackcb;  /* ACK callback */
+  FAR struct devif_callback_s *snd_cb;     /* Reference to callback instance */
   FAR struct file   *snd_file;             /* File structure of the input file */
   sem_t              snd_sem;              /* Used to wake up the waiting thread */
   off_t              snd_foffset;          /* Input file offset */
@@ -91,13 +90,131 @@ struct sendfile_s
  * Private Functions
  ****************************************************************************/
 
-static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
-                                 FAR void *pvconn,
-                                 FAR void *pvpriv, uint16_t flags)
-{
-  FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
+/****************************************************************************
+ * Name: sendfile_txnotify
+ *
+ * Description:
+ *   Notify the appropriate device driver that we are have data ready to
+ *   be send (TCP)
+ *
+ * Input Parameters:
+ *   psock - Socket state structure
+ *   conn  - The TCP connection structure
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
 
-  ninfo("flags: %04x\n", flags);
+static inline void sendfile_txnotify(FAR struct socket *psock,
+                                     FAR struct tcp_conn_s *conn)
+{
+#ifdef CONFIG_NET_IPv4
+#ifdef CONFIG_NET_IPv6
+  /* If both IPv4 and IPv6 support are enabled, then we will need to select
+   * the device driver using the appropriate IP domain.
+   */
+
+  if (psock->s_domain == PF_INET)
+#endif
+    {
+      /* Notify the device driver that send data is available */
+
+      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
+    }
+#endif /* CONFIG_NET_IPv4 */
+
+#ifdef CONFIG_NET_IPv6
+#ifdef CONFIG_NET_IPv4
+  else /* if (psock->s_domain == PF_INET6) */
+#endif /* CONFIG_NET_IPv4 */
+    {
+      /* Notify the device driver that send data is available */
+
+      DEBUGASSERT(psock->s_domain == PF_INET6);
+      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
+    }
+#endif /* CONFIG_NET_IPv6 */
+}
+
+/****************************************************************************
+ * Name: sendfile_eventhandler
+ *
+ * Description:
+ *   This function is called to perform the actual send operation when
+ *   polled by the lower, device interfacing layer.
+ *
+ * Input Parameters:
+ *   dev      The structure of the network driver that caused the event
+ *   conn     The connection structure associated with the socket
+ *   flags    Set of events describing why the callback was invoked
+ *
+ * Returned Value:
+ *   None
+ *
+ * Assumptions:
+ *   The network is locked
+ *
+ ****************************************************************************/
+
+static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
+                                      FAR void *pvconn, FAR void *pvpriv,
+                                      uint16_t flags)
+{
+  /* FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+   *
+   * Do not use pvconn argument to get the TCP connection pointer (the above
+   * commented line) because pvconn is normally NULL for some events like
+   * NETDEV_DOWN. Instead, the TCP connection pointer can be reliably
+   * obtained from the corresponding TCP socket.
+   */
+
+  FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
+  FAR struct socket *psock;
+  FAR struct tcp_conn_s *conn;
+  int ret;
+
+  DEBUGASSERT(pstate != NULL);
+
+  psock = pstate->snd_sock;
+  DEBUGASSERT(psock != NULL);
+
+  /* Get the TCP connection pointer reliably from
+   * the corresponding TCP socket.
+   */
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn != NULL);
+
+  /* The TCP socket is connected and, hence, should be bound to a device.
+   * Make sure that the polling device is the own that we are bound to.
+   */
+
+  DEBUGASSERT(conn->dev != NULL);
+  if (dev != conn->dev)
+    {
+      return flags;
+    }
+
+  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
+        flags, pstate->snd_acked, pstate->snd_sent);
+
+  /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
+   * appear here strictly one at a time
+   */
+
+  DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
+              (flags & TCP_REXMIT) == 0);
+  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
+              (flags & TCP_ACKDATA) == 0);
+  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
+              (flags & TCP_REXMIT) == 0);
+
+  /* If this packet contains an acknowledgement, then update the count of
+   * acknowledged bytes.
+   * This condition is located here for performance reasons
+   * (TCP_ACKDATA is the most frequent event).
+   */
 
   if ((flags & TCP_ACKDATA) != 0)
     {
@@ -131,31 +248,84 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
        * is the number of bytes to be acknowledged.
        */
 
-      pstate->snd_acked = tcp_getsequence(tcp->ackno) - pstate->snd_isn;
+      pstate->snd_acked = TCP_SEQ_SUB(tcp_getsequence(tcp->ackno),
+                                      pstate->snd_isn);
       ninfo("ACK: acked=%" PRId32 " sent=%zd flen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_flen);
 
-      dev->d_sndlen = 0;
+      /* Have all of the bytes in the buffer been sent and acknowledged? */
 
-      flags &= ~TCP_ACKDATA;
+      if (pstate->snd_acked >= pstate->snd_flen)
+        {
+          /* Yes. Then pstate->snd_flen should hold the number of bytes
+           * actually sent.
+           */
+
+          goto end_wait;
+        }
+
+      /* No. Fall through to send more data if necessary */
     }
+
+  /* Check if we are being asked to retransmit data.
+   * This condition is located here after TCP_ACKDATA for performance reasons
+   * (TCP_REXMIT is less frequent than TCP_ACKDATA).
+   */
+
   else if ((flags & TCP_REXMIT) != 0)
     {
       nwarn("WARNING: TCP_REXMIT\n");
 
-      /* Yes.. in this case, reset the number of bytes that have been sent
-       * to the number of bytes that have been ACKed.
+      /* According to RFC 6298 (5.4), retransmit the earliest segment
+       * that has not been acknowledged by the TCP receiver.
        */
 
-      pstate->snd_sent = pstate->snd_acked;
+      /* Reconstruct the length of the earliest segment to be retransmitted */
+
+      uint32_t sndlen = pstate->snd_flen - pstate->snd_acked;
+
+      if (sndlen > conn->mss)
+        {
+          sndlen = conn->mss;
+        }
+
+      conn->rexmit_seq = pstate->snd_isn + pstate->snd_acked;
+
+      /* Then set-up to send that amount of data. (this won't actually
+       * happen until the polling cycle completes).
+       */
+
+      ret = file_seek(pstate->snd_file,
+                      pstate->snd_foffset + pstate->snd_acked, SEEK_SET);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to lseek: %d\n", ret);
+          pstate->snd_sent = ret;
+          goto end_wait;
+        }
+
+      ret = file_read(pstate->snd_file, dev->d_appdata, sndlen);
+      if (ret < 0)
+        {
+          nerr("ERROR: Failed to read from input file: %d\n", (int)ret);
+          pstate->snd_sent = ret;
+          goto end_wait;
+        }
+
+      dev->d_sndlen = sndlen;
+
+      /* Continue waiting */
+
+      return flags;
     }
 
-  /* Check for a loss of connection */
+  /* Check for a loss of connection.
+   * This condition is located here after both the TCP_ACKDATA and TCP_REXMIT
+   * because TCP_DISCONN_EVENTS is the least frequent event.
+   */
 
   else if ((flags & TCP_DISCONN_EVENTS) != 0)
     {
-      FAR struct socket *psock = pstate->snd_sock;
-
       nwarn("WARNING: Lost connection\n");
 
       /* We could get here recursively through the callback actions of
@@ -163,79 +333,11 @@ static uint16_t ack_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      DEBUGASSERT(psock != NULL);
       if (_SS_ISCONNECTED(psock->s_flags))
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_ackcb, flags);
-        }
-
-      /* Report not connected */
-
-      pstate->snd_sent = -ENOTCONN;
-    }
-
-  /* Prohibit further callbacks */
-
-  pstate->snd_ackcb->flags = 0;
-  pstate->snd_ackcb->priv  = NULL;
-  pstate->snd_ackcb->event = NULL;
-
-  /* Wake up the waiting thread */
-
-  nxsem_post(&pstate->snd_sem);
-
-  return flags;
-}
-
-/****************************************************************************
- * Name: sendfile_eventhandler
- *
- * Description:
- *   This function is called to perform the actual send operation when
- *   polled by the lower, device interfacing layer.
- *
- * Input Parameters:
- *   dev      The structure of the network driver that caused the event
- *   conn     The connection structure associated with the socket
- *   flags    Set of events describing why the callback was invoked
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   The network is locked
- *
- ****************************************************************************/
-
-static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
-                                      FAR void *pvconn, FAR void *pvpriv,
-                                      uint16_t flags)
-{
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
-  FAR struct sendfile_s *pstate = (FAR struct sendfile_s *)pvpriv;
-  int ret;
-
-  /* Check for a loss of connection */
-
-  if ((flags & TCP_DISCONN_EVENTS) != 0)
-    {
-      FAR struct socket *psock = pstate->snd_sock;
-
-      nwarn("WARNING: Lost connection\n");
-
-      /* We could get here recursively through the callback actions of
-       * tcp_lost_connection().  So don't repeat that action if we have
-       * already been disconnected.
-       */
-
-      DEBUGASSERT(psock != NULL);
-      if (_SS_ISCONNECTED(psock->s_flags))
-        {
-          /* Report not connected */
-
-          tcp_lost_connection(psock, pstate->snd_datacb, flags);
+          tcp_lost_connection(psock, pstate->snd_cb, flags);
         }
 
       /* Report not connected */
@@ -243,20 +345,6 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       pstate->snd_sent = -ENOTCONN;
       goto end_wait;
     }
-
-  /* The TCP socket is connected and, hence, should be bound to a device.
-   * Make sure that the polling device is the own that we are bound to.
-   */
-
-  DEBUGASSERT(conn);
-  DEBUGASSERT(conn->dev != NULL);
-  if (dev != conn->dev)
-    {
-      return flags;
-    }
-
-  ninfo("flags: %04x acked: %" PRId32 " sent: %zd\n",
-        flags, pstate->snd_acked, pstate->snd_sent);
 
   /* We get here if (1) not all of the data has been ACKed, (2) we have been
    * asked to retransmit data, (3) the connection is still healthy, and (4)
@@ -320,6 +408,10 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
 
           tcp_setsequence(conn->sndseq, seqno);
 
+          /* Notify the device driver of the availability of TX data */
+
+          sendfile_txnotify(psock, conn);
+
           /* Update the amount of data sent (but not necessarily ACKed) */
 
           pstate->snd_sent += sndlen;
@@ -330,79 +422,31 @@ static uint16_t sendfile_eventhandler(FAR struct net_driver_s *dev,
       else
         {
           nwarn("WARNING: Window full, wait for ack\n");
-          goto wait;
         }
     }
 
-  if (pstate->snd_sent >= pstate->snd_flen
-      && pstate->snd_acked < pstate->snd_flen)
-    {
-      /* All data has been sent, but there are outstanding ACK's */
+  /* Continue waiting */
 
-      goto wait;
-    }
+  return flags;
 
 end_wait:
 
   /* Do not allow any further callbacks */
 
-  pstate->snd_datacb->flags   = 0;
-  pstate->snd_datacb->priv    = NULL;
-  pstate->snd_datacb->event   = NULL;
+  DEBUGASSERT(pstate->snd_cb != NULL);
+
+  pstate->snd_cb->flags   = 0;
+  pstate->snd_cb->priv    = NULL;
+  pstate->snd_cb->event   = NULL;
+
+  /* There are no outstanding, unacknowledged bytes */
+
+  conn->tx_unacked        = 0;
 
   /* Wake up the waiting thread */
 
   nxsem_post(&pstate->snd_sem);
-
-wait:
   return flags;
-}
-
-/****************************************************************************
- * Name: sendfile_txnotify
- *
- * Description:
- *   Notify the appropriate device driver that we are have data ready to
- *   be send (TCP)
- *
- * Input Parameters:
- *   psock - Socket state structure
- *   conn  - The TCP connection structure
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-static inline void sendfile_txnotify(FAR struct socket *psock,
-                                     FAR struct tcp_conn_s *conn)
-{
-#ifdef CONFIG_NET_IPv4
-#ifdef CONFIG_NET_IPv6
-  /* If both IPv4 and IPv6 support are enabled, then we will need to select
-   * the device driver using the appropriate IP domain.
-   */
-
-  if (psock->s_domain == PF_INET)
-#endif
-    {
-      /* Notify the device driver that send data is available */
-
-      netdev_ipv4_txnotify(conn->u.ipv4.laddr, conn->u.ipv4.raddr);
-    }
-#endif /* CONFIG_NET_IPv4 */
-
-#ifdef CONFIG_NET_IPv6
-#ifdef CONFIG_NET_IPv4
-  else /* if (psock->s_domain == PF_INET6) */
-#endif /* CONFIG_NET_IPv4 */
-    {
-      /* Notify the device driver that send data is available */
-
-      DEBUGASSERT(psock->s_domain == PF_INET6);
-      netdev_ipv6_txnotify(conn->u.ipv6.laddr, conn->u.ipv6.raddr);
-    }
-#endif /* CONFIG_NET_IPv6 */
 }
 
 /****************************************************************************
@@ -495,6 +539,9 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
    */
 
   net_lock();
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->sendfile = true;
+#endif
   memset(&state, 0, sizeof(struct sendfile_s));
 
   /* This semaphore is used for signaling and, hence, should not have
@@ -511,22 +558,13 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   /* Allocate resources to receive a callback */
 
-  state.snd_datacb = tcp_callback_alloc(conn);
+  state.snd_cb = tcp_callback_alloc(conn);
 
-  if (state.snd_datacb == NULL)
+  if (state.snd_cb == NULL)
     {
-      nerr("ERROR: Failed to allocate data callback\n");
+      nerr("ERROR: Failed to allocate callback\n");
       ret = -ENOMEM;
       goto errout_locked;
-    }
-
-  state.snd_ackcb = tcp_callback_alloc(conn);
-
-  if (state.snd_ackcb == NULL)
-    {
-      nerr("ERROR: Failed to allocate ack callback\n");
-      ret = -ENOMEM;
-      goto errout_datacb;
     }
 
   /* Get the initial sequence number that will be used */
@@ -539,17 +577,12 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
 
   conn->tx_unacked       = 0;
 
-  /* Set up the ACK callback in the connection */
+  /* Set up the callback in the connection */
 
-  state.snd_ackcb->flags = (TCP_ACKDATA | TCP_REXMIT | TCP_DISCONN_EVENTS);
-  state.snd_ackcb->priv  = (FAR void *)&state;
-  state.snd_ackcb->event = ack_eventhandler;
-
-  /* Perform the TCP send operation */
-
-  state.snd_datacb->flags = TCP_POLL;
-  state.snd_datacb->priv  = (FAR void *)&state;
-  state.snd_datacb->event = sendfile_eventhandler;
+  state.snd_cb->flags    = (TCP_ACKDATA | TCP_REXMIT | TCP_POLL |
+                            TCP_DISCONN_EVENTS);
+  state.snd_cb->priv     = (FAR void *)&state;
+  state.snd_cb->event    = sendfile_eventhandler;
 
   /* Notify the device driver of the availability of TX data */
 
@@ -563,17 +596,17 @@ ssize_t tcp_sendfile(FAR struct socket *psock, FAR struct file *infile,
                                           _SO_TIMEOUT(psock->s_sndtimeo));
       if (ret != -ETIMEDOUT || acked == state.snd_acked)
         {
-          break; /* Timeout without any progress */
+          break; /* Successful completion or timeout without any progress */
         }
     }
 
-  tcp_callback_free(conn, state.snd_ackcb);
-
-errout_datacb:
-  tcp_callback_free(conn, state.snd_datacb);
+  tcp_callback_free(conn, state.snd_cb);
 
 errout_locked:
   nxsem_destroy(&state.snd_sem);
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+  conn->sendfile = false;
+#endif
   net_unlock();
 
   /* Return the current file position */

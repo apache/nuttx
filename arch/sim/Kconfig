@@ -61,7 +61,7 @@ config SIM_CYGWIN_DECORATED
 config SIM_ASAN
 	bool "Address Sanitizer"
 	default n
-	depends on MM_CUSTOMIZE_MANAGER
+	depends on MM_CUSTOMIZE_MANAGER && FRAME_POINTER
 	---help---
 		AddressSanitizer (ASan) is a fast compiler-based tool for detecting memory
 		bugs in native code.
@@ -69,6 +69,7 @@ config SIM_ASAN
 config SIM_UBSAN
 	bool "Undefined Behaviour Sanitizer"
 	default n
+	depends on FRAME_POINTER
 	---help---
 		Compile-time instrumentation is used to detect various undefined behaviours
 		at runtime.
@@ -134,6 +135,13 @@ config SIM_WALLTIME_SIGNAL
 
 endchoice
 
+config SIM_STACKSIZE_ADJUSTMENT
+	int "The adjustment of stack size for sim"
+	default 65536
+	---help---
+		The adjustment of stack size for sim. When the task is created,
+		the stack size is increased by this amount.
+
 config SIM_HOSTFS
 	bool "Simulated HostFS"
 	depends on FS_HOSTFS
@@ -142,27 +150,23 @@ config SIM_HOSTFS
 
 choice
 	prompt "Simulated Network Interface"
-	default SIM_NETNULL if !NET_ETHERNET
-	default SIM_NETDEV if NET_ETHERNET
-
-config SIM_NETNULL
-	bool "Simulated Network NULL Device"
-	---help---
-		Simulated Network NULL Device.
+	default SIM_NETDEV
+	depends on NET
+	optional
 
 config SIM_NETDEV
 	bool "Simulated Network Device"
 	select ARCH_HAVE_NETDEV_STATISTICS
 	select SCHED_LPWORK
-	depends on NET_ETHERNET
+	select NET_ETHERNET
 	---help---
 		Build in support for a simulated network device.
 
 config SIM_NETUSRSOCK
 	bool "Simulated Network Device with Native Stack via usrsock"
-	depends on NET_USRSOCK
+	select NET_USRSOCK
 	---help---
-		Build in support for a simulated network device using native stack via usrsock
+		Built-in support for a simulated network device using native stack via usrsock
 
 endchoice
 
@@ -352,6 +356,14 @@ config SIM_KEYBOARD
 endif # if INPUT
 
 endmenu
+
+config SIM_TCNWAITERS
+	bool "Maximum number poll() waiters"
+	default 4
+	depends on SIM_TOUCHSCREEN
+	---help---
+		The maximum number of threads that can be waiting on poll() for a
+		touchscreen event. Default: 4
 
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"

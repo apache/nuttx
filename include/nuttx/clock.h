@@ -395,6 +395,51 @@ clock_t clock_systime_ticks(void);
 #endif
 
 /****************************************************************************
+ * Name: clock_time2ticks
+ *
+ * Description:
+ *   Return the given struct timespec as systime ticks.
+ *
+ *   NOTE:  This is an internal OS interface and should not be called from
+ *   application code.
+ *
+ * Input Parameters:
+ *   reltime - Pointer to the time presented as struct timespec
+ *
+ * Output Parameters:
+ *   ticks - Pointer to receive the time value presented as systime ticks
+ *
+ * Returned Value:
+ *   Always returns OK (0)
+ *
+ ****************************************************************************/
+
+int clock_time2ticks(FAR const struct timespec *reltime,
+                     FAR sclock_t *ticks);
+
+/****************************************************************************
+ * Name: clock_ticks2time
+ *
+ * Description:
+ *   Return the given systime ticks as a struct timespec.
+ *
+ *   NOTE:  This is an internal OS interface and should not be called from
+ *   application code.
+ *
+ * Input Parameters:
+ *   ticks - Time presented as systime ticks
+ *
+ * Output Parameters:
+ *   reltime - Pointer to receive the time value presented as struct timespec
+ *
+ * Returned Value:
+ *   Always returns OK (0)
+ *
+ ****************************************************************************/
+
+int clock_ticks2time(sclock_t ticks, FAR struct timespec *reltime);
+
+/****************************************************************************
  * Name: clock_systime_timespec
  *
  * Description:

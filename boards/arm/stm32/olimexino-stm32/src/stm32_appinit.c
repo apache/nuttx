@@ -87,7 +87,7 @@ int board_app_initialize(uintptr_t arg)
   ret = board_composite_initialize(0);
 #endif
 
-#ifdef CONFIG_CAN
+#ifdef CONFIG_STM32_CAN_CHARDRIVER
   /* Initialize CAN and register the CAN driver. */
 
   ret = stm32_can_setup();

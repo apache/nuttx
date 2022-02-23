@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
-#define __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H
+#ifndef __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H
+#define __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H
 
 /****************************************************************************
  * Included Files
@@ -66,6 +66,7 @@ struct bcmf_dev_s
   bool bc_bifup;             /* true:ifup false:ifdown */
   struct wdog_s bc_txpoll;   /* TX poll timer */
   struct work_s bc_irqwork;  /* For deferring interrupt work to the work queue */
+  struct work_s bc_rxwork;   /* For deferring rx work to the work queue */
   struct work_s bc_pollwork; /* For deferring poll work to the work queue */
 
   /* This holds the information visible to the NuttX network */
@@ -155,4 +156,4 @@ int bcmf_wl_set_mode(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
 int bcmf_wl_set_ssid(FAR struct bcmf_dev_s *priv, struct iwreq *iwr);
 
-#endif /* __DRIVERS_WIRELESS_IEEE80211_BCMF_DRIVER_H */
+#endif /* __DRIVERS_WIRELESS_IEEE80211_BCM43XXX_BCMF_DRIVER_H */

@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DEVINFO_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DEVINFO_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DEVINFO_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DEVINFO_H
 
 /****************************************************************************
  * Included Files
@@ -224,4 +224,4 @@
  * Public Type Definitions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_DEVINFO_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_DEVINFO_H */

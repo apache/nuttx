@@ -24,7 +24,7 @@ default: elf2uf2
 
 # Add CFLAGS=-g on the make command line to build debug versions
 
-CFLAGS = -O2
+CFLAGS = -O2 -std=c++14
 CFLAGS += -I$(PICO_SDK_PATH)/src/common/boot_uf2/include
 
 elf2uf2: $(PICO_SDK_PATH)/tools/elf2uf2/main.cpp

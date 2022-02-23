@@ -71,7 +71,7 @@ static inline int open_mountpoint(FAR struct inode *inode,
 
   if (!inode->u.i_mops || !inode->u.i_mops->opendir)
     {
-      return ENOSYS;
+      return -ENOSYS;
     }
 
   /* Perform the opendir() operation */
@@ -81,7 +81,7 @@ static inline int open_mountpoint(FAR struct inode *inode,
     {
       /* Negate the error value so that it can be used to set errno */
 
-      return -ret;
+      return ret;
     }
 
   return OK;
@@ -283,7 +283,7 @@ FAR DIR *opendir(FAR const char *path)
         }
       else
         {
-          ret = ENOTDIR;
+          ret = -ENOTDIR;
           goto errout_with_direntry;
         }
     }

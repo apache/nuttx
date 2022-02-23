@@ -22,13 +22,17 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <assert.h>
 #include <stdint.h>
 #include <debug.h>
-#include <nuttx/config.h>
+
+#include <nuttx/board.h>
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 #include <nuttx/power/pm.h>
+#include <arch/board/board.h>
 
 #include "esp32_pm.h"
 #include "xtensa.h"
@@ -44,6 +48,18 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Does the board support an IDLE LED to indicate that the board is in the
+ * IDLE state?
+ */
+
+#ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
+#  define BEGIN_IDLE() board_autoled_off(LED_CPU)
+#  define END_IDLE()
+#else
+#  define BEGIN_IDLE()
+#  define END_IDLE()
+#endif
 
 /* Values for the RTC Alarm to wake up from the PM_STANDBY mode
  * (which corresponds to ESP32 stop mode).  If this alarm expires,
@@ -85,7 +101,7 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_idlepm
+ * Name: esp32_idlepm
  *
  * Description:
  *   Perform IDLE state power management.
@@ -93,7 +109,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_PM
-static void up_idlepm(void)
+static void esp32_idlepm(void)
 {
   irqstate_t flags;
 
@@ -232,7 +248,7 @@ static void up_idlepm(void)
 #endif
 }
 #else
-#  define up_idlepm()
+#  define esp32_idlepm()
 #endif
 
 /****************************************************************************
@@ -266,13 +282,15 @@ void up_idle(void)
    * sleep in a reduced power mode until an interrupt occurs to save power
    */
 
+  BEGIN_IDLE();
 #if XCHAL_HAVE_INTERRUPTS
   __asm__ __volatile__ ("waiti 0");
 #endif
+  END_IDLE();
 
   /* Perform IDLE mode power management */
 
-  up_idlepm();
+  esp32_idlepm();
 
 #endif
 }

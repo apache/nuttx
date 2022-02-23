@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ADC_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ADC_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ADC_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ADC_H
 
 /****************************************************************************
  * Included Files
@@ -749,4 +749,4 @@
 #define _ADC_BIASPROG_COMPBIAS_DEFAULT          0x00000007UL                          /* Mode DEFAULT for ADC_BIASPROG */
 #define ADC_BIASPROG_COMPBIAS_DEFAULT           (_ADC_BIASPROG_COMPBIAS_DEFAULT << 8) /* Shifted mode DEFAULT for ADC_BIASPROG */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_ADC_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_ADC_H */

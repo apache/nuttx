@@ -57,15 +57,15 @@ GPIO9 as an interrupt pin.
 
 At the nsh, we can turn the outputs on and off with the following::
 
-  nsh> gpio -o 1 /dev/gpout0
-  nsh> gpio -o 1 /dev/gpout1
+  nsh> gpio -o 1 /dev/gpio0
+  nsh> gpio -o 1 /dev/gpio1
 
-  nsh> gpio -o 0 /dev/gpout0
-  nsh> gpio -o 0 /dev/gpout1
+  nsh> gpio -o 0 /dev/gpio0
+  nsh> gpio -o 0 /dev/gpio1
 
 We can use the interrupt pin to send a signal when the interrupt fires::
 
-    nsh> gpio -w 14 /dev/gpint2
+    nsh> gpio -w 14 /dev/gpio2
 
 The pin is configured as a rising edge interrupt, so after issuing the
 above command, connect it to 3.3V.
@@ -94,4 +94,18 @@ To test it, just run the following command::
 
   nsh> watcher
   nsh> watched
+
+usbconsole
+==========
+
+This configuration tests the built-in USB-to-serial converter found in ESP32-C3 (revision 3).
+`esptool` can be used to check the version of the chip and if this feature is
+supported.  Running `esptool.py -p <port> chip_id` should have `Chip is
+ESP32-C3 (revision 3)` in its output.  
+When connecting the board a new device should appear, a `/dev/ttyACMX` on Linux
+or a `/dev/cu.usbmodemXXX` om macOS.  
+This can be used to flash and monitor the device with the usual commands::
+
+    make download ESPTOOL_PORT=/dev/ttyACM0
+    minicom -D /dev/ttyACM0
 

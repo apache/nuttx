@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H
-#define __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H
+#ifndef __INCLUDE_NUTTX_FS_AUTOMOUNT_H
+#define __INCLUDE_NUTTX_FS_AUTOMOUNT_H
 
 /****************************************************************************
  * Included Files
@@ -179,4 +179,4 @@ void automount_uninitialize(FAR void *handle);
 #endif
 
 #endif /* CONFIG_FS_AUTOMOUNTER */
-#endif /* __INCLUDE_NUTTX_AUDIO_AUTOMOUNT_H */
+#endif /* __INCLUDE_NUTTX_FS_AUTOMOUNT_H */

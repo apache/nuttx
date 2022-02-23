@@ -372,8 +372,9 @@ static void regulator_rpmsg_server_bind(FAR struct rpmsg_device *rdev,
     }
 }
 
-static int regulator_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept, FAR void *data,
-                                  size_t len, uint32_t src, FAR void *priv_)
+static int regulator_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
+                                  FAR void *data, size_t len,
+                                  uint32_t src, FAR void *priv_)
 {
   FAR struct regulator_rpmsg_header_s *header = data;
   uint32_t cmd = header->command;

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_HARDWARE_STM32H7_WDG_H
-#define __ARCH_ARM_SRC_STM32_HARDWARE_STM32H7_WDG_H
+#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_WDG_H
+#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_WDG_H
 
 /****************************************************************************
  * Included Files
@@ -141,4 +141,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32_HARDWARE_STM32H7_WDG_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_WDG_H */

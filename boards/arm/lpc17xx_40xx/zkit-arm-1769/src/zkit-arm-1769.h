@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_LPC17XX_40XX_ZKITARM_LPC1768_SRC_ZKITARM_H
-#define __BOARDS_ARM_LPC17XX_40XX_ZKITARM_LPC1768_SRC_ZKITARM_H
+#ifndef __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1768_SRC_ZKIT_ARM_1768_H
+#define __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1768_SRC_ZKIT_ARM_1768_H
 
 /****************************************************************************
  * Included Files
@@ -259,4 +259,4 @@ int zkit_can_setup(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_ARM_LPC17XX_40XX_ZKITARM_LPC1768_SRC_ZKITARM_H */
+#endif /* __BOARDS_ARM_LPC17XX_40XX_ZKIT_ARM_1768_SRC_ZKIT_ARM_1768_H */

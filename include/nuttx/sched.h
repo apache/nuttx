@@ -759,8 +759,8 @@ struct pthread_tcb_s
 
 /* struct tcbinfo_s *********************************************************/
 
-/* The structure save key filed offset of tcb_s while can be used by debuggers
- * to parse the tcb information
+/* The structure save key filed offset of tcb_s while can be used by
+ * debuggers to parse the tcb information
  */
 
 #ifdef CONFIG_DEBUG_TCBINFO

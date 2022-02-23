@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __RISCV_CSR_DEFS__
-#define __RISCV_CSR_DEFS__
+#ifndef __ARCH_MISOC_INCLUDE_MINERVA_CSRDEFS_H
+#define __ARCH_MISOC_INCLUDE_MINERVA_CSRDEFS_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -62,4 +62,4 @@
 #define CSR_MSTATUS_TSR      (1 << 22)
 #define CSR_MSTATUS_SD       (1 << 31)
 
-#endif
+#endif /* __ARCH_MISOC_INCLUDE_MINERVA_CSRDEFS_H */

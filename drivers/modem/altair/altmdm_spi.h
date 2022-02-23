@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_MODEM_ALTMDM_ALTMDM_ALTMDM_SPI_H
-#define __DRIVERS_MODEM_ALTMDM_ALTMDM_ALTMDM_SPI_H
+#ifndef __DRIVERS_MODEM_ALTAIR_ALTMDM_SPI_H
+#define __DRIVERS_MODEM_ALTAIR_ALTMDM_SPI_H
 
 /****************************************************************************
  * Included Files
@@ -169,4 +169,4 @@ struct altmdm_spi_dev_s
 };
 
 #endif
-#endif /* __DRIVERS_MODEM_ALTMDM_ALTMDM_SPI_H */
+#endif /* __DRIVERS_MODEM_ALTAIR_ALTMDM_SPI_H */

@@ -201,7 +201,6 @@ static noreturn_function void __esp32_start(void)
   showprogress("A");
 
 #if defined(CONFIG_ESP32_SPIRAM_BOOT_INIT)
-  esp_spiram_init_cache();
   if (esp_spiram_init() != OK)
     {
 #  if defined(ESP32_SPIRAM_IGNORE_NOTFOUND)
@@ -209,6 +208,10 @@ static noreturn_function void __esp32_start(void)
 #  else
       PANIC();
 #  endif
+    }
+  else
+    {
+      esp_spiram_init_cache();
     }
 
   /* Set external memory bss section to zero */

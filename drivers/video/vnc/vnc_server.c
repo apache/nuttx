@@ -155,7 +155,7 @@ static int vnc_connect(FAR struct vnc_session_s *session, int port)
   /* Create a listening socket */
 
   addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
+  addr.sin_port = HTONS(port);
   addr.sin_addr.s_addr = INADDR_ANY;
 
   ret = psock_socket(AF_INET, SOCK_STREAM, 0, &session->listen);

@@ -25,10 +25,7 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include "chip.h"
-#include "hardware/imxrt_enc.h"
+#include <nuttx/sensors/qencoder.h>
 
 /****************************************************************************
  * Pre-processor Definitions

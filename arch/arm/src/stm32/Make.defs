@@ -53,7 +53,7 @@ ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
 
-ifeq ($(CONFIG_ARM_MPU),y)
+ifneq ($(filter y,$(CONFIG_ARM_MPU) $(CONFIG_ARM_MPU_EARLY_RESET)),)
 CMN_CSRCS += arm_mpu.c
 endif
 
@@ -241,7 +241,18 @@ CHIP_CSRCS += stm32_hall3ph.c
 endif
 
 ifeq ($(CONFIG_STM32_CAN),y)
+ifeq ($(CONFIG_STM32_CAN_CHARDRIVER),y)
 CHIP_CSRCS += stm32_can.c
+endif
+ifeq ($(CONFIG_STM32_CAN_SOCKET),y)
+CHIP_CSRCS += stm32_can_sock.c
+endif
+endif
+
+ifeq ($(CONFIG_STM32_FDCAN),y)
+ifeq ($(CONFIG_STM32_FDCAN_CHARDRIVER),y)
+CHIP_CSRCS += stm32_fdcan.c
+endif
 endif
 
 ifeq ($(CONFIG_STM32_IWDG),y)

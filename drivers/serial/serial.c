@@ -127,7 +127,7 @@ static const struct file_operations g_serialops =
   uart_close, /* close */
   uart_read,  /* read */
   uart_write, /* write */
-  0,          /* seek */
+  NULL,       /* seek */
   uart_ioctl, /* ioctl */
   uart_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
@@ -1634,7 +1634,7 @@ errout:
  ****************************************************************************/
 
 #ifdef CONFIG_TTY_LAUNCH
-static void uart_lanuch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
+static void uart_launch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
 {
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
   if (!strcmp(tcb->name, CONFIG_TTY_LAUNCH_ENTRYNAME))
@@ -1646,7 +1646,7 @@ static void uart_lanuch_foreach(FAR struct tcb_s *tcb, FAR void *arg)
     }
 }
 
-static void uart_lanuch_worker(void *arg)
+static void uart_launch_worker(void *arg)
 {
 #ifdef CONFIG_TTY_LAUNCH_ARGS
   FAR char *const argv[] =
@@ -1659,7 +1659,7 @@ static void uart_lanuch_worker(void *arg)
 #endif
   int found = 0;
 
-  nxsched_foreach(uart_lanuch_foreach, &found);
+  nxsched_foreach(uart_launch_foreach, &found);
   if (!found)
     {
 #ifdef CONFIG_TTY_LAUNCH_ENTRY
@@ -1682,7 +1682,7 @@ static void uart_lanuch_worker(void *arg)
 
 static void uart_launch(void)
 {
-  work_queue(HPWORK, &g_serial_work, uart_lanuch_worker, NULL, 0);
+  work_queue(HPWORK, &g_serial_work, uart_launch_worker, NULL, 0);
 }
 #endif
 
@@ -1920,7 +1920,7 @@ int uart_check_special(FAR uart_dev_t *dev, const char *buf, size_t size)
   size_t i;
 
 #ifdef CONFIG_SERIAL_TERMIOS
-  if (!(dev->tc_lflag & ISIG))
+  if ((dev->tc_lflag & ISIG) == 0)
 #else
   if (!dev->isconsole)
 #endif

@@ -149,6 +149,7 @@ ssize_t host_read(int fd, void *buf, size_t count)
     .buf = buf,
     .count = count,
   };
+
   ssize_t ret;
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE
@@ -173,6 +174,7 @@ ssize_t host_write(int fd, const void *buf, size_t count)
     .buf = buf,
     .count = count,
   };
+
   ssize_t ret;
 
 #ifdef CONFIG_ARM_SEMIHOSTING_HOSTFS_CACHE_COHERENCE

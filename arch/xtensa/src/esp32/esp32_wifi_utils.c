@@ -72,7 +72,7 @@ enum scan_status_e
   ESP_SCAN_DONE
 };
 
-/* WiFi scan result information */
+/* Wi-Fi scan result information */
 
 struct wifi_scan_result
 {
@@ -548,7 +548,7 @@ scan_result_full:
  * Name: esp_wifi_scan_init
  *
  * Description:
- *   Initialize ESP32 WiFi scan parameter.
+ *   Initialize ESP32 Wi-Fi scan parameter.
  *
  * Input Parameters:
  *   None

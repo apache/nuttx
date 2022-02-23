@@ -56,8 +56,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32GG_MEMORYMAP_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32GG_MEMORYMAP_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32GG_MEMORYMAP_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32GG_MEMORYMAP_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -140,4 +140,4 @@
 #define EFM32_USERDATA_SIZE     0x00000800 /* User data page size */
 #define EFM32_USERDATA_NPAGES            1 /* User data page number */
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32GG_MEMORYMAP_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32GG_MEMORYMAP_H */

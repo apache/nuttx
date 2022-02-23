@@ -25,8 +25,8 @@
  *   All rights reserved. ARM DDI 0406C.c (ID051414)
  */
 
-#ifndef __ARCH_ARM_SRC_ARMV7_R_CPSR_H
-#define __ARCH_ARM_SRC_ARMV7_R_CPSR_H
+#ifndef __ARCH_ARM_SRC_ARMV7_R_ARM_H
+#define __ARCH_ARM_SRC_ARMV7_R_ARM_H
 
 /****************************************************************************
  * Included Files
@@ -154,4 +154,4 @@ void arm_data_initialize(void);
 #endif
 #endif /* __ASSEMBLY__ */
 
-#endif /* __ARCH_ARM_SRC_ARMV7_R_CPSR_H */
+#endif /* __ARCH_ARM_SRC_ARMV7_R_ARM_H */

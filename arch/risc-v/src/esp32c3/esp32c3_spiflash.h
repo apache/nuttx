@@ -47,114 +47,6 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spiflash_mtd
- *
- * Description:
- *   Get ESP32-C3 SPI Flash MTD.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   ESP32-C3 SPI Flash MTD pointer.
- *
- ****************************************************************************/
-
-struct mtd_dev_s *esp32c3_spiflash_mtd(void);
-
-/****************************************************************************
- * Name: esp32c3_spiflash_alloc_mtdpart
- *
- * Description:
- *   Allocate an MTD partition from the ESP32-C3 SPI Flash.
- *
- * Input Parameters:
- *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
- *   mtd_size   - Size for the MTD partition.
- *
- * Returned Value:
- *   ESP32-C3 SPI Flash MTD data pointer if success or NULL if fail
- *
- ****************************************************************************/
-
-struct mtd_dev_s *esp32c3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                     uint32_t mtd_size);
-
-/****************************************************************************
- * Name: esp32c3_spiflash_encrypt_mtd
- *
- * Description:
- *   Get ESP32-C3 SPI Flash encryption MTD.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   ESP32-C3 SPI Flash encryption MTD pointer.
- *
- ****************************************************************************/
-
-struct mtd_dev_s *esp32c3_spiflash_encrypt_mtd(void);
-
-/****************************************************************************
- * Name: spi_flash_write_encrypted
- *
- * Description:
- *   Write data encrypted to Flash.
- *
- *   Flash encryption must be enabled for this function to work.
- *
- *   Flash encryption must be enabled when calling this function.
- *   If flash encryption is disabled, the function returns
- *   ESP_ERR_INVALID_STATE.  Use esp_flash_encryption_enabled()
- *   function to determine if flash encryption is enabled.
- *
- *   Both dest_addr and size must be multiples of 16 bytes. For
- *   absolute best performance, both dest_addr and size arguments should
- *   be multiples of 32 bytes.
- *
- * Input Parameters:
- *   dest_addr - Destination address in Flash. Must be a multiple of 16
- *               bytes.
- *   src       - Pointer to the source buffer.
- *   size      - Length of data, in bytes. Must be a multiple of 16 bytes.
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-int spi_flash_write_encrypted(uint32_t dest_addr, const void *src,
-                              uint32_t size);
-
-/****************************************************************************
- * Name: spi_flash_write
- *
- * Description:
- *
- *   Write data to Flash.
- *
- *   Note: For fastest write performance, write a 4 byte aligned size at a
- *   4 byte aligned offset in flash from a source buffer in DRAM. Varying
- *   any of these parameters will still work, but will be slower due to
- *   buffering.
- *
- *   Writing more than 8KB at a time will be split into multiple
- *   write operations to avoid disrupting other tasks in the system.
- *
- * Parameters:
- *   dest_addr - Destination address in Flash.
- *   src       - Pointer to the source buffer.
- *   size      - Length of data, in bytes.
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
- *
- ****************************************************************************/
-
-int spi_flash_write(uint32_t dest_addr, const void *src, uint32_t size);
-
-/****************************************************************************
  * Name: spi_flash_read_encrypted
  *
  * Description:
@@ -170,79 +62,66 @@ int spi_flash_write(uint32_t dest_addr, const void *src, uint32_t size);
  *   encryption is enabled.
  *
  * Parameters:
- *   src   - source address of the data in Flash.
- *   dest  - pointer to the destination buffer
- *   size  - length of data
+ *   addr   - source address of the data in Flash.
+ *   buffer - pointer to the destination buffer
+ *   size   - length of data
  *
  * Returned Values: esp_err_t
  *
  ****************************************************************************/
 
-int spi_flash_read_encrypted(uint32_t src, void *dest, uint32_t size);
+int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size);
 
 /****************************************************************************
- * Name: spi_flash_read
+ * Name: esp32c3_spiflash_unmask_cpuint
  *
  * Description:
- *   Read data from Flash.
+ *   Unmask CPU interrupt and keep this interrupt work when read, write,
+ *   erase SPI Flash.
  *
- *   Note: For fastest read performance, all parameters should be
- *   4 byte aligned. If source address and read size are not 4 byte
- *   aligned, read may be split into multiple flash operations. If
- *   destination buffer is not 4 byte aligned, a temporary buffer will
- *   be allocated on the stack.
+ *   By default, all CPU interrupts are masked.
  *
- *   Reading more than 16KB of data at a time will be split
- *   into multiple reads to avoid disruption to other tasks in the
- *   system. Consider using spi_flash_mmap() to read large amounts
- *   of data.
+ * Input Parameters:
+ *   cpuint - CPU interrupt ID
  *
- * Parameters:
- *   src_addr - source address of the data in Flash.
- *   dest     - pointer to the destination buffer
- *   size     - length of data
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-int spi_flash_read(uint32_t src_addr, void *dest, uint32_t size);
+void esp32c3_spiflash_unmask_cpuint(int cpuint);
 
 /****************************************************************************
- * Name: spi_flash_erase_sector
+ * Name: esp32c3_spiflash_unmask_cpuint
  *
  * Description:
- *   Erase the Flash sector.
+ *   Mask CPU interrupt and disable this interrupt when read, write,
+ *   erase SPI Flash.
  *
- * Parameters:
- *   sector - Sector number, the count starts at sector 0, 4KB per sector.
+ *   By default, all CPU interrupts are masked.
  *
- * Returned Values: esp_err_t
- *   Zero (OK) is returned or a negative error.
+ * Input Parameters:
+ *   cpuint - CPU interrupt ID
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-int spi_flash_erase_sector(uint32_t sector);
+void esp32c3_spiflash_mask_cpuint(int cpuint);
 
 /****************************************************************************
- * Name: spi_flash_erase_range
+ * Name: esp32c3_spiflash_init
  *
  * Description:
- *   Erase a range of flash sectors
+ *   Initialize ESP32-C3 SPI flash driver.
  *
- * Parameters:
- *   start_address - Address where erase operation has to start.
- *                   Must be 4kB-aligned
- *   size          - Size of erased range, in bytes. Must be divisible by
- *                   4kB.
- *
- * Returned Values:
- *   Zero (OK) is returned or a negative error.
+ * Returned Value:
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
-int spi_flash_erase_range(uint32_t start_address, uint32_t size);
+int esp32c3_spiflash_init(void);
 
 #ifdef __cplusplus
 }

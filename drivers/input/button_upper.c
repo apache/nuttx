@@ -133,6 +133,11 @@ static int     btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
 static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen);
 
+#ifdef CONFIG_INPUT_UINPUT
+static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
+                         size_t buflen);
+#endif
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -142,10 +147,17 @@ static const struct file_operations btn_fops =
   btn_open,  /* open */
   btn_close, /* close */
   btn_read,  /* read */
+#ifdef CONFIG_INPUT_UINPUT
   btn_write, /* write */
+#else
+  NULL,      /* write */
+#endif
   NULL,      /* seek */
   btn_ioctl, /* ioctl */
   btn_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL     /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -538,6 +550,8 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
  * Name: btn_write
  ****************************************************************************/
 
+#ifdef CONFIG_INPUT_UINPUT
+
 static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
                          size_t buflen)
 {
@@ -588,6 +602,7 @@ static ssize_t btn_write(FAR struct file *filep, FAR const char *buffer,
   btn_givesem(&priv->bu_exclsem);
   return (ssize_t)ret;
 }
+#endif
 
 /****************************************************************************
  * Name: btn_ioctl

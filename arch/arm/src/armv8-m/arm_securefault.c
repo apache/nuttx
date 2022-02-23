@@ -69,7 +69,6 @@ int arm_securefault(int irq, FAR void *context, FAR void *arg)
           getbasepri(), getprimask(), getipsr(), getcontrol());
   sfalert("\tCFSR: %08x HFSR: %08x DFSR: %08x\n", getreg32(NVIC_CFAULTS),
           getreg32(NVIC_HFAULTS), getreg32(NVIC_DFAULTS));
-
   sfalert("\tBFAR: %08x AFSR: %08x SFAR: %08x\n",
           getreg32(NVIC_BFAULT_ADDR), getreg32(NVIC_AFAULTS),
           getreg32(SAU_SFAR));

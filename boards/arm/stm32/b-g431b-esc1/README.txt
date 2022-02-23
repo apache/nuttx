@@ -43,11 +43,14 @@ Configuration Sub-directories
     VBUS             ADC1_IN1           PA0
     POT              ADC1_IN11          PB12
     LED              GPIO_PC6           PC6
-    ENCO_A/HALL_H1                      PB6
-    ENCO_B/HALL_H2                      PB7
-    ENCO_Z/HALL_H3                      PB8
+    ENCO_A/HALL_H1   TIM4_CH1           PB6
+    ENCO_B/HALL_H2   TIM4_CH2           PB7
+    ENCO_Z/HALL_H3   TIM4_CH3           PB8
     BUTTON           GPIO_PC10          PC10
     PWM                                 PA15
+    CAN_RX                              PA11
+    CAN_TX                              PB9
+    CAN_TERM                            PC14
 
     Current shunt resistance          = 0.003
     PGA gain                          = 16

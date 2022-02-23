@@ -12,13 +12,19 @@ choice
 
 config ARCH_CHIP_FE310
 	bool "SiFive FE310"
-	select ARCH_RV32IM
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
 	---help---
 		SiFive FE310 processor (E31 RISC-V Core with MAC extensions).
 
 config ARCH_CHIP_K210
 	bool "Kendryte K210"
-	select ARCH_RV64GC
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_MULTICPU
@@ -27,13 +33,18 @@ config ARCH_CHIP_K210
 
 config ARCH_CHIP_LITEX
 	bool "Enjoy Digital LITEX VEXRISCV"
-	select ARCH_RV32IM
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
 config ARCH_CHIP_BL602
 	bool "BouffaloLab BL602"
-	select ARCH_RV32IM
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
 	---help---
@@ -41,46 +52,70 @@ config ARCH_CHIP_BL602
 
 config ARCH_CHIP_ESP32C3
 	bool "Espressif ESP32-C3"
-	select ARCH_RV32IM
-	select RV32IM_HW_MULDIV
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
 	select ARCH_VECNOTIRQ
 	select ARCH_HAVE_RESET
 	select LIBC_ARCH_ATOMIC
+	select LIBC_ARCH_MEMCPY
 	select LIBC_ARCH_MEMCHR
 	select LIBC_ARCH_MEMCMP
-	select LIBC_ARCH_MEMCCMP
 	select LIBC_ARCH_MEMMOVE
 	select LIBC_ARCH_MEMSET
+	select LIBC_ARCH_STRCHR
+	select LIBC_ARCH_STRCMP
+	select LIBC_ARCH_STRCPY
+	select LIBC_ARCH_STRLCPY
+	select LIBC_ARCH_STRNCPY
+	select LIBC_ARCH_STRLEN
+	select LIBC_ARCH_STRNLEN
 	select ARCH_HAVE_TEXT_HEAP
+	select ARCH_HAVE_BOOTLOADER
 	---help---
 		Espressif ESP32-C3 (RV32IMC).
 
 config ARCH_CHIP_C906
 	bool "THEAD C906"
-	select ARCH_RV64GC
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	select ARCH_HAVE_MPU
 	---help---
 		THEAD C906 processor (RISC-V 64bit core with GCVX extensions).
 
 config ARCH_CHIP_MPFS
-        bool "MicroChip Polarfire (MPFS)"
-        select ARCH_RV64GC
-        select ARCH_HAVE_MPU
-        select ARCH_HAVE_RESET
-        select ARCH_HAVE_SPI_CS_CONTROL
-        select ARCH_HAVE_PWM_MULTICHAN
-        ---help---
+	bool "MicroChip Polarfire (MPFS)"
+	select ARCH_RV64
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_A
+	select ARCH_RV_ISA_C
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_MMU
+	select ARCH_MMU_TYPE_SV39
+	select ARCH_HAVE_RESET
+	select ARCH_HAVE_SPI_CS_CONTROL
+	select ARCH_HAVE_PWM_MULTICHAN
+	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
 
 config ARCH_CHIP_RV32M1
 	bool "NXP RV32M1"
-	select ARCH_RV32IM
+	select ARCH_RV32
+	select ARCH_RV_ISA_M
+	select ARCH_RV_ISA_C
 	---help---
 		NXP RV32M1 processor (RISC-V Core with PULP extensions).
 
-config ARCH_CHIP_QEMU_RV32
-	bool "QEMU RV32"
-	select ARCH_RV32IM
+config ARCH_CHIP_QEMU_RV
+	bool "QEMU RV"
+	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	---help---
 		QEMU Generic RV32 processor
 
@@ -92,26 +127,34 @@ config ARCH_CHIP_RISCV_CUSTOM
 
 endchoice
 
-config ARCH_RV32I
+config ARCH_RV32
 	bool
 	default n
 	select ARCH_HAVE_SETJMP
 
-config ARCH_RV32IM
-	bool
-	default n
-	select ARCH_HAVE_SETJMP
-
-config ARCH_RV64GC
+config ARCH_RV64
 	bool
 	default n
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
 	select ARCH_HAVE_SETJMP
 
+config ARCH_RV_ISA_M
+	bool
+	default n
+
+config ARCH_RV_ISA_A
+	bool
+	default n
+	select ARCH_HAVE_TESTSET
+
+config ARCH_RV_ISA_C
+	bool
+	default n
+
 config ARCH_FAMILY
 	string
-	default "rv32im"	if ARCH_RV32IM
-	default "rv64gc"	if ARCH_RV64GC
+	default "rv32"		if ARCH_RV32
+	default "rv64"		if ARCH_RV64
 
 config ARCH_CHIP
 	string
@@ -123,11 +166,12 @@ config ARCH_CHIP
 	default "c906"		if ARCH_CHIP_C906
 	default "mpfs"		if ARCH_CHIP_MPFS
 	default "rv32m1"	if ARCH_CHIP_RV32M1
-	default "qemu-rv32"	if ARCH_CHIP_QEMU_RV32
+	default "qemu-rv"	if ARCH_CHIP_QEMU_RV
 
 config ARCH_RISCV_INTXCPT_EXTENSIONS
 	bool "RISC-V Integer Context Extensions"
 	default n
+	depends on RV32M1_OPENISA_TOOLCHAIN
 	---help---
 		RISC-V could be customized with extensions. Some Integer Context
 		Registers have to be saved and restored when Contexts switch.
@@ -140,12 +184,13 @@ config ARCH_RISCV_INTXCPT_EXTREGS
 
 endif
 
-if ARCH_RV32IM
-source "arch/risc-v/src/rv32im/Kconfig"
-endif
-if ARCH_RV64GC
-source "arch/risc-v/src/rv64gc/Kconfig"
-endif
+config ARCH_MMU_TYPE_SV39
+	bool
+	default n
+
+source "arch/risc-v/src/opensbi/Kconfig"
+source "arch/risc-v/src/common/Kconfig"
+
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"
 endif
@@ -170,7 +215,7 @@ endif
 if ARCH_CHIP_RV32M1
 source "arch/risc-v/src/rv32m1/Kconfig"
 endif
-if ARCH_CHIP_QEMU_RV32
-source "arch/risc-v/src/qemu-rv32/Kconfig"
+if ARCH_CHIP_QEMU_RV
+source "arch/risc-v/src/qemu-rv/Kconfig"
 endif
 endif

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_SIM_SRC_UP_INTERNAL_H
-#define __ARCH_SIM_SRC_UP_INTERNAL_H
+#ifndef __ARCH_SIM_SRC_SIM_UP_INTERNAL_H
+#define __ARCH_SIM_SRC_SIM_UP_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -351,4 +351,4 @@ void up_stack_color(void *stackbase, size_t nbytes);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_SIM_SRC_UP_INTERNAL_H */
+#endif /* __ARCH_SIM_SRC_SIM_UP_INTERNAL_H */

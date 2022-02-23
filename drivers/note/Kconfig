@@ -34,10 +34,10 @@ config DRIVER_NOTERAM
 		buffer.
 
 		NOTE: This option is not available if critical sections are being
-		monitor (nor if spinlocks are being monitored in SMP configuration)
+		monitored (nor if spinlocks are being monitored in SMP configuration)
 		because there would be a logical error in the design in those cases.
 		That error is that these interfaces call enter_ and leave_critical_section
-		(and which us spinlocks in SMP mode).  That means that each call to
+		(which use spinlocks in SMP mode).  That means that each call to
 		sched_note_get() causes several additional entries to be added from
 		the note buffer in order to remove one entry.
 

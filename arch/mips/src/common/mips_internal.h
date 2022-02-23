@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H
-#define __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H
+#ifndef __ARCH_MIPS_SRC_COMMON_MIPS_INTERNAL_H
+#define __ARCH_MIPS_SRC_COMMON_MIPS_INTERNAL_H
 
 /****************************************************************************
  * Included Files
@@ -124,7 +124,7 @@ extern void g_intstacktop;
  *  - The declaration extern uint32_t _sdata; makes C happy.  C will believe
  *    that the value _sdata is the address of a uint32_t variable _data (it
  *    is not!).
- *  - We can recoved the linker value then by simply taking the address of
+ *  - We can recover the linker value then by simply taking the address of
  *    of _data.  like:  uint32_t *pdata = &_sdata;
  */
 
@@ -252,4 +252,4 @@ void up_usbuninitialize(void);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_MIPS_SRC_COMMON_UP_INTERNAL_H */
+#endif /* __ARCH_MIPS_SRC_COMMON_MIPS_INTERNAL_H */

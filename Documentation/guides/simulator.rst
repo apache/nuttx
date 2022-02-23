@@ -172,16 +172,60 @@ Accessing the Network
 
    Success!
 
+Testing / capturing TCP network traffic
+---------------------------------------
+
+#. Start Wireshark (or tcpdump) on Linux and capture the appeared tap0 interface.
+
+#. Optionally activate emulating packet loss on Linux:
+
+    .. code-block:: console
+
+       $ sudo iptables -A INPUT -p tcp --dport 31337 -m statistic --mode random --probability 0.01 -j DROP
+
+#. Run netcat server on Linux:
+
+    .. code-block:: console
+
+       $ netcat -l -p 31337
+
+#. Run netcat client on Apache NuttX:
+
+    .. code-block:: console
+
+       nsh> dd if=/dev/zero of=/tmp/test.bin count=1000
+       nsh> netcat LINUX_HOST_IP_ADDRESS 31337 /tmp/test.bin
+
+#. Observe TCP network traffic in Wireshark / tcpdump on Linux.
+
 Stopping
 --------
 
-If you don't have an nsh prompt, the only effective way to stop the simulator is kill it from another terminal:
+#. The normal way to stop:
+
+    .. code-block:: console
+
+       nsh> poweroff
+       $
+       $ # we're back at the Linux prompt.
+
+   If you don't have an nsh prompt, the only effective way to stop the simulator is kill it from another terminal:
 
     .. code-block:: console
 
        $ pkill nuttx
 
+#. Optionally deactivate emulating packet loss on Linux:
 
+    .. code-block:: console
+
+       $ sudo iptables -D INPUT -p tcp --dport 31337 -m statistic --mode random --probability 0.01 -j DROP
+
+#. If you do not need tap0 interface anymore, it can be disabled on Linux as follows:
+
+    .. code-block:: console
+
+       $ sudo ./tools/simhostroute.sh wlan0 off
 
 Debugging
 ---------

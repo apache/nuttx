@@ -38,8 +38,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC2378_LPC23XX_H
-#define __ARCH_ARM_SRC_LPC2378_LPC23XX_H
+#ifndef __ARCH_ARM_SRC_LPC2378_LPC2378_H
+#define __ARCH_ARM_SRC_LPC2378_LPC2378_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@ void lpc2378_statledon(void);
 
 #endif
 
-#endif /* __ARCH_ARM_SRC_LPC2378_LPC23XX_H */
+#endif /* __ARCH_ARM_SRC_LPC2378_LPC2378_H */

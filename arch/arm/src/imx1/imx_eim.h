@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_WIEM_H
-#define __ARCH_ARM_IMX_WIEM_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_IEM_H
+#define __ARCH_ARM_SRC_IMX1_IMX_IEM_H
 
 /****************************************************************************
  * Included Files
@@ -67,4 +67,4 @@
  * Inline Functions
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_IMX_EIM_H */
+#endif /* __ARCH_ARM_SRC_IMX1_IMX_IEM_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RENESAS_SRC_RX65N_USBDEV_H
-#define __ARCH_RENESAS_SRC_RX65N_USBDEV_H
+#ifndef __ARCH_RENESAS_SRC_RX65N_RX65N_USBDEV_H
+#define __ARCH_RENESAS_SRC_RX65N_RX65N_USBDEV_H
 
 /****************************************************************************
  * Included Files
@@ -91,4 +91,4 @@ extern "C"
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* #if defined(CONFIG_USBHOST) && defined(RX65N_NUSBHOST) > 0 */
+#endif /* __ARCH_RENESAS_SRC_RX65N_RX65N_USBDEV_H */

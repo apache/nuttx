@@ -263,15 +263,15 @@ static int mpu_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_mpu_fops =
 {
-  mpu_open,
-  mpu_close,
-  mpu_read,
-  mpu_write,
-  mpu_seek,
-  mpu_ioctl,
-  NULL
+  mpu_open,        /* open */
+  mpu_close,       /* close */
+  mpu_read,        /* read */
+  mpu_write,       /* write */
+  mpu_seek,        /* seek */
+  mpu_ioctl,       /* ioctl */
+  NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL
+  , NULL           /* unlink */
 #endif
 };
 

@@ -95,7 +95,7 @@
  * header.
  */
 
-#define BUF ((struct eth_hdr_s *)priv->ft_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->ft_dev.d_buf)
 
 /* RX/TX buffer alignment */
 
@@ -767,7 +767,7 @@ static void ftmac100_receive(FAR struct ftmac100_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(&priv->ft_dev);
 

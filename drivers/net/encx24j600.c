@@ -164,7 +164,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 /* Debug ********************************************************************/
 
@@ -243,7 +243,7 @@ struct enc_driver_s
   sq_queue_t            txqueue;       /* Enqueued descriptors waiting for transmission */
   sq_queue_t            rxqueue;       /* Unhandled incoming packets waiting for reception */
 
-  /* This is the contained SPI driver intstance */
+  /* This is the contained SPI driver instance */
 
   FAR struct spi_dev_s *spi;
 
@@ -1561,7 +1561,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           ninfo("ARP packet received (%02x)\n", BUF->type);
           NETDEV_RXARP(&priv->dev);
@@ -1590,7 +1590,7 @@ static void enc_rxdispatch(FAR struct enc_driver_s *priv)
           enc_rxrmpkt(priv, descr);
 
           nerr("ERROR: Unsupported packet type dropped (%02x)\n",
-               htons(BUF->type));
+               HTONS(BUF->type));
           NETDEV_RXDROPPED(&priv->dev);
         }
 

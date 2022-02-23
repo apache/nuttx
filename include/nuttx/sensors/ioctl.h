@@ -299,9 +299,9 @@
 
 /* Command:      SNIOC_SET_CALIBVALUE
  * Description:  Set calibration value for sensor.
- * Argument:     A argument of calibration value for sensor.
- * Note:         If setting calibvalue is failed, return errno, otherwise,
- *               return OK.
+ * Argument:     Calibration value for the sensor.
+ * Note:         If setting calibvalue failed, a negated errno value is
+ *               returned, otherwise, OK is returned.
  *               This cmd is handled by sensor_ops_s::set_calibvalue.
  */
 

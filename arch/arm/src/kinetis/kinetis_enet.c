@@ -194,7 +194,7 @@
  * header
  */
 
-#define BUF ((struct eth_hdr_s *)priv->dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->dev.d_buf)
 
 #define KINETIS_BUF_SIZE  ((CONFIG_NET_ETH_PKTSIZE & 0xfffffff0) + 0x10)
 
@@ -718,7 +718,7 @@ static void kinetis_receive(FAR struct kinetis_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           NETDEV_RXARP(&priv->dev);
           arp_arpin(&priv->dev);

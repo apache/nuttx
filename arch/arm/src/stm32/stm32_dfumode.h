@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_DFUMODE_H
-#define __ARCH_ARM_SRC_STM32_DFUMODE_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_DFUMODE_H
+#define __ARCH_ARM_SRC_STM32_STM32_DFUMODE_H
 
 /****************************************************************************
  * Included Files
@@ -46,4 +46,4 @@
 void stm32_dfumode(void) noreturn_function;
 #endif
 
-#endif /* __ARCH_ARM_SRC_STM32_DFUMODE_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_DFUMODE_H */

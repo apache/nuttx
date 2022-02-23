@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_STM32H7_H
-#define __ARCH_ARM_SRC_STM32H7_STM32H7_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_H
 
 /****************************************************************************
  * Included Files

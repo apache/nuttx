@@ -1,0 +1,62 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config EVENT_FD
+	bool "EventFD"
+	default n
+	---help---
+		Create a file descriptor for event notification
+
+if EVENT_FD
+
+config EVENT_FD_VFS_PATH
+	string "Path to eventfd storage"
+	default "/var/event"
+	---help---
+		The path to where eventfd will exist in the VFS namespace.
+
+config EVENT_FD_POLL
+	bool "EventFD poll support"
+	default y
+	---help---
+		Poll support for file descriptor based events
+
+config EVENT_FD_NPOLLWAITERS
+	int "Number of eventFD poll waiters"
+	default 2
+	depends on EVENT_FD_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # EVENT_FD
+
+config TIMER_FD
+	bool "TimerFD"
+	default n
+	---help---
+		Create a file descriptor for timer notification
+
+if TIMER_FD
+
+config TIMER_FD_VFS_PATH
+	string "Path to timerfd storage"
+	default "/var/timer"
+	---help---
+		The path to where timerfd will exist in the VFS namespace.
+
+config TIMER_FD_POLL
+	bool "TimerFD poll support"
+	default y
+	---help---
+		Poll support for file descriptor based timers
+
+config TIMER_FD_NPOLLWAITERS
+	int "Number of timerFD poll waiters"
+	default 2
+	depends on TIMER_FD_POLL
+	---help---
+		Maximum number of threads that can be waiting on poll()
+
+endif # TIMER_FD

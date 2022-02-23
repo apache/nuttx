@@ -58,8 +58,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LEUART_H
-#define __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LEUART_H
+#ifndef __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LEUART_H
+#define __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LEUART_H
 
 /****************************************************************************
  * Included Files
@@ -825,4 +825,4 @@
 #  define LEUART_INPUT_RXPRS_DEFAULT             (_LEUART_INPUT_RXPRS_DEFAULT << 4)    /* Shifted mode DEFAULT for LEUART_INPUT */
 #endif
 
-#endif /* __ARCH_ARM_SRC_EFM32_CHIP_EFM32_LEUART_H */
+#endif /* __ARCH_ARM_SRC_EFM32_HARDWARE_EFM32_LEUART_H */

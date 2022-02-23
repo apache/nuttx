@@ -96,22 +96,6 @@ void esp32c3_sleep_enable_rtc_timer_wakeup(uint64_t time_in_us);
 int esp32c3_light_sleep_start(uint64_t *sleep_time);
 
 /****************************************************************************
- * Name: esp32c3_pminit
- *
- * Description:
- *   Initialize force sleep parameters.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void esp32c3_pminit(void);
-
-/****************************************************************************
  * Name: esp32c3_pmstandby
  *
  * Description:

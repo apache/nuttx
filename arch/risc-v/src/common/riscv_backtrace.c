@@ -143,7 +143,7 @@ int up_backtrace(struct tcb_s *tcb, void **buffer, int size, int skip)
         {
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
           ret = backtrace((void *)&g_intstackalloc,
-                          (void *)((uint32_t)&g_intstackalloc +
+                          (void *)((uintptr_t)&g_intstackalloc +
                                    CONFIG_ARCH_INTERRUPTSTACK),
                           (void *)getfp(), NULL, buffer, size, &skip);
 #else

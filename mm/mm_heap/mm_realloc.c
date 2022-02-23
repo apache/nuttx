@@ -342,8 +342,8 @@ FAR void *mm_realloc(FAR struct mm_heap_s *heap, FAR void *oldmem,
       if (newmem != oldmem)
         {
           /* Now we have to move the user contents 'down' in memory.  memcpy
-          * should be safe for this.
-          */
+           * should be safe for this.
+           */
 
           memcpy(newmem, oldmem, oldsize - SIZEOF_MM_ALLOCNODE);
         }

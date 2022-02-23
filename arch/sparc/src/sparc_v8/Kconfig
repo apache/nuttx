@@ -1,0 +1,31 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+if ARCH_SPARC_V8
+comment "SPARC Configuration Options"
+
+choice
+	prompt "Toolchain"
+	default SPARC_TOOLCHAIN_CODEREDW if TOOLCHAIN_WINDOWS
+	default SPARC_TOOLCHAIN_BUILDROOT if !TOOLCHAIN_WINDOWS
+
+config SPARC_TOOLCHAIN_BUILDROOT
+	bool "Buildroot (Cygwin or Linux)"
+	depends on !WINDOWS_NATIVE
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		There is a buildroot version for the SPARC boards here:
+		https://www.gaisler.com/anonftp/bcc/bin/linux/. See
+		the following section for details on building this toolchain.
+
+config SPARC_TOOLCHAIN_CODEREDW
+	bool "CodeRed for Windows"
+	depends on TOOLCHAIN_WINDOWS
+	select ARCH_TOOLCHAIN_GNU
+	---help---
+		none.
+endchoice # Toolchain
+
+endif # ARCH_FAMILY_SPARC

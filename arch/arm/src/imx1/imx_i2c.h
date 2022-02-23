@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_IMX_I2C_H
-#define __ARCH_ARM_IMX_I2C_H
+#ifndef __ARCH_ARM_SRC_IMX1_IMX_I2C_H
+#define __ARCH_ARM_SRC_IMX1_IMX_I2C_H
 
 /****************************************************************************
  * Included Files

@@ -312,7 +312,7 @@ _xtensa_level1_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							      /* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
   /* Save current SP before (possibly) overwriting it, it's the register save
@@ -416,7 +416,7 @@ _xtensa_level2_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -495,7 +495,7 @@ _xtensa_level3_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -574,7 +574,7 @@ _xtensa_level4_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -653,7 +653,7 @@ _xtensa_level5_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save
@@ -732,7 +732,7 @@ _xtensa_level6_handler:
 
 	s32i	a2, sp, (4 * REG_A2)
 	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3,  a2, (4 * REG_A3)
+	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it, it's the register save

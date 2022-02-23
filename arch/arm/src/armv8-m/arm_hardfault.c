@@ -80,6 +80,8 @@ int arm_hardfault(int irq, FAR void *context, FAR void *arg)
   uint32_t sfsr = getreg32(SAU_SFSR);
 #endif /* CONFIG_DEBUG_SECUREFAULT */
 
+  UNUSED(cfsr);
+
   /* Get the value of the program counter where the fault occurred */
 
 #ifndef CONFIG_ARMV8M_USEBASEPRI

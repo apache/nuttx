@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_IOMUXC_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_IOMUXC_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_IOMUXC_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_IOMUXC_H
 
 /****************************************************************************
  * Included Files
@@ -2528,4 +2528,4 @@
 #define GPR_GPR34_SIP_TEST_MUX_BOOT_PIN_SEL(n)                  ((uint32_t)(n) << GPR_GPR34_SIP_TEST_MUX_BOOT_PIN_SEL_SHIFT)
 #define GPR_GPR34_SIP_TEST_MUX_QSPI_SIP_EN                      (1 << 8)
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT106X_IOMUXC_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT106X_IMXRT106X_IOMUXC_H */

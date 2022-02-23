@@ -290,7 +290,7 @@ DTC has been tested using RSPI driver.
 
 USB Host Configurations
 --------------------------
-The following configurations need to be enabled for USB Host Mode driver to 
+The following configurations need to be enabled for USB Host Mode driver to
 support USB HID Keyboard class and MSC Class.
 
 CONFIG_USBHOST=y
@@ -300,10 +300,10 @@ CONFIG_EXAMPLES_HIDKBD=y
 
 USB Host Driver Testing
 ------------------------
-The Following Class Drivers were tested as mentioned below : 
+The Following Class Drivers were tested as mentioned below :
 
 - USB HID Keyboard Class
-On the NuttX Console "hidkbd" application was executed 
+On the NuttX Console "hidkbd" application was executed
 
 nsh> hidkbd
 The characters typed from the keyboard were executed correctly.
@@ -312,11 +312,11 @@ The characters typed from the keyboard were executed correctly.
 
 The MSC device is enumerated as sda in /dev directory.
 
-The block device is mounted using the command as mentioned below : 
+The block device is mounted using the command as mentioned below :
 
 mount -t vfat /dev/sda /mnt
 
-The MSC device is mounted in /dev directory 
+The MSC device is mounted in /dev directory
 
 The copy command is executed to test the Read/Write functionality
 
@@ -324,7 +324,7 @@ cp /mnt/<file.txt> /mnt/file_copy.txt
 
 USB Host Hub Configurations
 --------------------------
-The following configurations need to be enabled for USB Host Mode driver to 
+The following configurations need to be enabled for USB Host Mode driver to
 support USB HID Keyboard class and MSC Class.
 
 CONFIG_RX65N_USBHOST=y
@@ -337,10 +337,10 @@ CONFIG_EXAMPLES_HIDKBD=y
 
 USB Host Hub Driver Testing
 ------------------------
-The Following Class Drivers were tested as mentioned below : 
+The Following Class Drivers were tested as mentioned below :
 
 - USB HID Keyboard Class
-On the NuttX Console "hidkbd" application was executed 
+On the NuttX Console "hidkbd" application was executed
 
 nsh> hidkbd
 The characters typed from the keyboard were executed correctly.
@@ -348,11 +348,11 @@ The characters typed from the keyboard were executed correctly.
 - USB MSC Class
 The MSC device is enumerated as sda in /dev directory.
 
-The block device is mounted using the command as mentioned below : 
+The block device is mounted using the command as mentioned below :
 
 mount -t vfat /dev/sda /mnt
 
-The MSC device is mounted in /dev directory 
+The MSC device is mounted in /dev directory
 
 The copy command is executed to test the Read/Write functionality
 
@@ -381,7 +381,7 @@ Alternatively, NuttX binary can be flashed using Renesas flash programmer tool w
 Below are the steps mentioned to flash NuttX binary using Renesas flash programmer tool(RFP).
 
 1.In order to flash using Renesas flash programmer tool, nuttx.mot file should be generated.
-2. Add the following lines in tools/Makefile.unix file :
+2. Add the following lines in tools/Unix.mk file :
 ifeq ($(CONFIG_MOTOROLA_SREC),y)
 	@echo "CP: nuttx.mot"
 	$(Q) $(OBJCOPY) $(OBJCOPYARGS) $(BIN) -O srec -I elf32-rx-be-ns nuttx.mot

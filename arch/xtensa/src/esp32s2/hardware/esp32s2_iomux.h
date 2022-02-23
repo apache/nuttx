@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_IOMUM_H
-#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_IOMUM_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_IOMUX_H
+#define __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_IOMUX_H
 
 /****************************************************************************
  * Included Files
@@ -457,4 +457,4 @@
 #define IO_MUX_DATE_S 0
 #define IO_MUX_DATE_VERSION 0x1907160
 
-#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_I2CBBPLL_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S2_HARDWARE_ESP32S2_IOMUX_H */

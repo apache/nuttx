@@ -38,17 +38,141 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/mtd/mtd.h>
 #include <nuttx/fs/nxffs.h>
+#ifdef CONFIG_BCH
+#include <nuttx/drivers/drivers.h>
+#endif
 
 #include "esp32c3_spiflash.h"
+#include "esp32c3_spiflash_mtd.h"
 #include "esp32c3-devkit.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ARRAYSIZE(x)                (sizeof((x)) / sizeof((x)[0]))
+
+#ifdef CONFIG_ESP32C3_OTA_PARTITION_ENCRYPT
+#  define OTA_ENCRYPT true
+#else
+#  define OTA_ENCRYPT false
+#endif
+
+#ifdef CONFIG_ESP32C3_WIFI_MTD_ENCRYPT
+#  define WIFI_ENCRYPT true
+#else
+#  define WIFI_ENCRYPT false
+#endif
+
+#ifdef CONFIG_ESP32C3_STORAGE_MTD_ENCRYPT
+#  define STORAGE_ENCRYPT true
+#else
+#  define STORAGE_ENCRYPT false
+#endif
+
+/****************************************************************************
+ * Private Types
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+
+struct ota_partition_s
+{
+  uint32_t    offset;          /* Partition offset from the beginning of MTD */
+  uint32_t    size;            /* Partition size in bytes */
+  const char *devpath;         /* Partition device path */
+};
+
+#endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void);
+#endif
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static const struct ota_partition_s g_ota_partition_table[] =
+{
+  {
+    .offset  = CONFIG_ESP32C3_OTA_PRIMARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_PRIMARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32C3_OTA_SECONDARY_SLOT_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SLOT_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_SECONDARY_SLOT_DEVPATH
+  },
+  {
+    .offset  = CONFIG_ESP32C3_OTA_SCRATCH_OFFSET,
+    .size    = CONFIG_ESP32C3_OTA_SCRATCH_SIZE,
+    .devpath = CONFIG_ESP32C3_OTA_SCRATCH_DEVPATH
+  }
+};
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: init_ota_partitions
+ *
+ * Description:
+ *   Initialize partitions that are dedicated to firmware OTA update.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+static int init_ota_partitions(void)
+{
+  FAR struct mtd_dev_s *mtd;
+#ifdef CONFIG_BCH
+  char blockdev[18];
+#endif
+  int ret = OK;
+
+  for (int i = 0; i < ARRAYSIZE(g_ota_partition_table); ++i)
+    {
+      const struct ota_partition_s *part = &g_ota_partition_table[i];
+      mtd = esp32c3_spiflash_alloc_mtdpart(part->offset, part->size,
+                                           OTA_ENCRYPT);
+
+      ret = ftl_initialize(i, mtd);
+      if (ret < 0)
+        {
+          ferr("ERROR: Failed to initialize the FTL layer: %d\n", ret);
+          return ret;
+        }
+
+#ifdef CONFIG_BCH
+      snprintf(blockdev, sizeof(blockdev), "/dev/mtdblock%d", i);
+
+      ret = bchdev_register(blockdev, part->devpath, false);
+      if (ret < 0)
+        {
+          ferr("ERROR: bchdev_register %s failed: %d\n", part->devpath, ret);
+          return ret;
+        }
+#endif
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: setup_smartfs
@@ -265,7 +389,8 @@ static int init_wifi_partition(void)
   FAR struct mtd_dev_s *mtd;
 
   mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_WIFI_MTD_OFFSET,
-                                       CONFIG_ESP32C3_WIFI_MTD_SIZE);
+                                       CONFIG_ESP32C3_WIFI_MTD_SIZE,
+                                       WIFI_ENCRYPT);
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -328,8 +453,9 @@ static int init_storage_partition(void)
   int ret = OK;
   FAR struct mtd_dev_s *mtd;
 
-  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_MTD_OFFSET,
-                                       CONFIG_ESP32C3_MTD_SIZE);
+  mtd = esp32c3_spiflash_alloc_mtdpart(CONFIG_ESP32C3_STORAGE_MTD_OFFSET,
+                                       CONFIG_ESP32C3_STORAGE_MTD_SIZE,
+                                       STORAGE_ENCRYPT);
   if (!mtd)
     {
       ferr("ERROR: Failed to alloc MTD partition of SPI Flash\n");
@@ -393,15 +519,25 @@ static int init_storage_partition(void)
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32c3_spiflash_init
+ * Name: board_spiflash_init
  *
  * Description:
  *   Initialize the SPIFLASH and register the MTD device.
  ****************************************************************************/
 
-int esp32c3_spiflash_init(void)
+int board_spiflash_init(void)
 {
   int ret = OK;
+
+  esp32c3_spiflash_init();
+
+#ifdef CONFIG_ESP32C3_HAVE_OTA_PARTITION
+  ret = init_ota_partitions();
+  if (ret < 0)
+    {
+      return ret;
+    }
+#endif
 
 #ifdef CONFIG_ESP32C3_WIFI_SAVE_PARAM
   ret = init_wifi_partition();
@@ -420,164 +556,3 @@ int esp32c3_spiflash_init(void)
   return ret;
 }
 
-/****************************************************************************
- * Name: esp32c3_spiflash_encrypt_test
- *
- * Description:
- *   Test ESP32-C3 SPI Flash driver read/write with encryption.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST
-
-void esp32c3_spiflash_encrypt_test(void)
-{
-  int i;
-  int ret;
-  uint8_t *wbuf;
-  uint8_t *rbuf;
-  struct mtd_geometry_s geo;
-  uint32_t erase_block;
-  uint32_t erase_nblocks;
-  uint32_t rw_block;
-  uint32_t rw_nblocks;
-  struct mtd_dev_s *mtd = esp32c3_spiflash_mtd();
-  struct mtd_dev_s *enc_mtd = esp32c3_spiflash_encrypt_mtd();
-  const uint32_t address = CONFIG_ESP32C3_SPIFLASH_TEST_ADDRESS;
-  const uint32_t size = 4096;
-
-  ret = MTD_IOCTL(enc_mtd, MTDIOC_GEOMETRY,
-                  (unsigned long)(uintptr_t)&geo);
-  if (ret < 0)
-    {
-      ferr("ERROR: Failed to get GEO errno =%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  wbuf = kmm_malloc(size);
-  if (!wbuf)
-    {
-      ferr("ERROR: Failed to alloc %" PRIu32 " heap\n", size);
-      DEBUGASSERT(0);
-    }
-
-  rbuf = kmm_malloc(size);
-  if (!rbuf)
-    {
-      ferr("ERROR: Failed to alloc %" PRIu32 " heap\n", size);
-      DEBUGASSERT(0);
-    }
-
-  for (i = 0; i < size; i++)
-    {
-      wbuf[i] = (uint8_t)random();
-    }
-
-  erase_block = address / geo.erasesize;
-  erase_nblocks = size / geo.erasesize;
-
-  rw_block = address / geo.blocksize;
-  rw_nblocks = size / geo.blocksize;
-
-  ret = MTD_ERASE(enc_mtd, erase_block, erase_nblocks);
-  if (ret != erase_nblocks)
-    {
-      ferr("ERROR: Failed to erase block errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  ret = MTD_BWRITE(enc_mtd, rw_block, rw_nblocks, wbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to encrypt write errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  memset(rbuf, 0, size);
-  ret = MTD_BREAD(enc_mtd, rw_block, rw_nblocks, rbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to decrypt read errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  if (memcmp(wbuf, rbuf, size))
-    {
-      ferr("ASSERT: Encrypted and decrypted data is not same\n");
-      DEBUGASSERT(0);
-    }
-
-  memset(rbuf, 0, size);
-  ret = MTD_BREAD(mtd, rw_block, rw_nblocks, rbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to read errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  if (!memcmp(wbuf, rbuf, size))
-    {
-      ferr("ASSERT: Encrypted and normal data is same\n");
-      DEBUGASSERT(0);
-    }
-
-  for (i = 0; i < size; i++)
-    {
-      wbuf[i] = (uint8_t)random();
-    }
-
-  ret = MTD_ERASE(enc_mtd, erase_block, erase_nblocks);
-  if (ret != erase_nblocks)
-    {
-      ferr("ERROR: Failed to erase errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  ret = MTD_BWRITE(mtd, rw_block, rw_nblocks, wbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to write errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  memset(rbuf, 0, size);
-  ret = MTD_BREAD(enc_mtd, rw_block, rw_nblocks, rbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to decrypt read errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  if (!memcmp(wbuf, rbuf, size))
-    {
-      ferr("ASSERT: Normal and decrypted data is same\n");
-      DEBUGASSERT(0);
-    }
-
-  memset(rbuf, 0, size);
-  ret = MTD_BREAD(mtd, rw_block, rw_nblocks, rbuf);
-  if (ret != rw_nblocks)
-    {
-      ferr("ERROR: Failed to read errno=%d\n", ret);
-      DEBUGASSERT(0);
-    }
-
-  if (memcmp(wbuf, rbuf, size))
-    {
-      ferr("ASSERT: Normal and normal data is not same\n");
-      DEBUGASSERT(0);
-    }
-
-  kmm_free(wbuf);
-  kmm_free(rbuf);
-
-  finfo("INFO: SPI Flash encryption test success\n");
-}
-
-#endif /* CONFIG_ESP32C3_SPIFLASH_ENCRYPTION_TEST */

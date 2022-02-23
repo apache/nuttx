@@ -1,0 +1,11 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+comment "XM6 Configuration Options"
+
+config ARCH_XM6_BUG001
+	bool "Enable bug 001 workaround"
+	---help---
+		Read CEVA-XM6 Bug List for more information

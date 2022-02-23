@@ -136,6 +136,40 @@ enum esp32c3_rtc_slow_freq_e
   RTC_SLOW_FREQ_8MD256 = 2,   /* Internal 8 MHz RC oscillator, divided by 256 */
 };
 
+/* Periph module values */
+
+enum esp32c3_periph_module_e
+{
+  PERIPH_LEDC_MODULE = 0,
+  PERIPH_UART0_MODULE,
+  PERIPH_UART1_MODULE,
+  PERIPH_USB_DEVICE_MODULE,
+  PERIPH_I2C0_MODULE,
+  PERIPH_I2S1_MODULE,
+  PERIPH_TIMG0_MODULE,
+  PERIPH_TIMG1_MODULE,
+  PERIPH_UHCI0_MODULE,
+  PERIPH_RMT_MODULE,
+  PERIPH_SPI_MODULE,
+  PERIPH_SPI2_MODULE,
+  PERIPH_TWAI_MODULE,
+  PERIPH_RNG_MODULE,
+  PERIPH_WIFI_MODULE,
+  PERIPH_BT_MODULE,
+  PERIPH_WIFI_BT_COMMON_MODULE,
+  PERIPH_BT_BASEBAND_MODULE,
+  PERIPH_BT_LC_MODULE,
+  PERIPH_RSA_MODULE,
+  PERIPH_AES_MODULE,
+  PERIPH_SHA_MODULE,
+  PERIPH_HMAC_MODULE,
+  PERIPH_DS_MODULE,
+  PERIPH_GDMA_MODULE,
+  PERIPH_SYSTIMER_MODULE,
+  PERIPH_SARADC_MODULE,
+  PERIPH_MODULE_MAX
+};
+
 /* CPU clock configuration structure */
 
 struct esp32c3_cpu_freq_config_s
@@ -257,6 +291,39 @@ void esp32c3_rtc_clk_set(void);
  ****************************************************************************/
 
 void esp32c3_rtc_init(void);
+
+/****************************************************************************
+ * Name: esp32c3_periph_ll_periph_enabled
+ *
+ * Description:
+ *   Whether the current Periph module is enabled
+ *
+ * Input Parameters:
+ *   periph - Periph module (one of enum esp32c3_periph_module_e values)
+ *
+ * Returned Value:
+ *   Periph module is enabled or not
+ *
+ ****************************************************************************/
+
+bool IRAM_ATTR esp32c3_periph_ll_periph_enabled(
+                                     enum esp32c3_periph_module_e periph);
+
+/****************************************************************************
+ * Name:  esp32c3_perip_clk_init
+ *
+ * Description:
+ *   This function disables clock of useless peripherals when cpu starts.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void esp32c3_perip_clk_init(void);
 
 /****************************************************************************
  * Name: esp32c3_rtc_time_get

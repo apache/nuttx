@@ -88,7 +88,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->misoc_net_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->misoc_net_dev.d_buf)
 
 /****************************************************************************
  * Private Types
@@ -489,7 +489,7 @@ static void misoc_net_receive(FAR struct misoc_net_driver_s *priv)
       else
 #endif
 #ifdef CONFIG_NET_ARP
-      if (BUF->type == htons(ETHTYPE_ARP))
+      if (BUF->type == HTONS(ETHTYPE_ARP))
         {
           arp_arpin(&priv->misoc_net_dev);
           NETDEV_RXARP(&priv->misoc_net_dev);

@@ -79,7 +79,7 @@ to be resolved.  General problems are listed below.  But see the STATUS
 section associated with each configuration for additional issues specific
 to a particular configuration.
 
-  1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 is set to disable multi-block
+  1. HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
      transfers only because I have not yet had a chance to verify this.  The
      is very low priority to me but might be important to you if you are need
      very high performance SD card accesses.
@@ -160,6 +160,18 @@ Serial Console
 The SAMV71-XULT has no on-board RS-232 drivers so it will be necessary to
 use either the VCOM or an external RS-232 driver.  Here are some options.
 
+  - VCOM.  The Virtual Com Port gateway is available on USART1 and it is the
+    default console.  Besides PB04 is by default connected to debug pin TDI,
+    both JTAG port and EDBG can only be used in SWD mode in this board.
+
+    ------ --------
+    SAMV71 SAMV71
+    PIO    Function
+    ------ --------
+    PB04   TXD1
+    PA21   RXD1
+    ------ --------
+
   - Arduino Serial Shield:  One option is to use an Arduino-compatible
     serial shield.  This will use the RXD and TXD signals available at pins
     0 an 1, respectively, of the Arduino "Digital Low" connector.  On the
@@ -219,27 +231,12 @@ use either the VCOM or an external RS-232 driver.  Here are some options.
     13   USART_RX PA21   RXD1
     14   USART_TX PB04   TXD1
 
-  - VCOM.  The Virtual Com Port gateway is available on USART1:
-
-    ------ --------
-    SAMV71 SAMV71
-    PIO    Function
-    ------ --------
-    PB04   TXD1
-    PA21   RXD1
-    ------ --------
-
 Any of these options can be selected as the serial console by:
 
   1. Enabling the UART/USART peripheral in the
      "System Type -> Peripheral Selection" menu, then
   2. Configuring the peripheral in the "Drivers -> Serial Configuration"
      menu.
-
-NOTE: If USART1 is used (TXD1, RXD1), then PB4 must be reconfigured in the
-SUPC.  Normally, PB4 is TDI.  When it is reconfigured for use with USART1,
-the capability to debug is lost!  If you plan to debug you should most
-certainly not use USART1.
 
 SD Card
 =======
@@ -278,7 +275,7 @@ Enabling HSMCI support. The SAMV7-XULT provides a one, full-size SD memory card 
   Device Drivers -> MMC/SD Driver Support
     CONFIG_MMCSD=y                        : Enable MMC/SD support
     CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-    CONFIG_MMCSD_MULTIBLOCK_LIMIT=1     : (REVISIT)
+    CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
     CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
     CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
     CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
@@ -352,12 +349,12 @@ Auto-Mounter
       CONFIG_FS_AUTOMOUNTER=y
 
     Board-Specific Options
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT=y
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_DDELAY=1000
-      CONFIG_SAMV71XULT_HSMCI0_AUTOMOUNT_UDELAY=2000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT=y
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_FSTYPE="vfat"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_BLKDEV="/dev/mmcsd0"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_MOUNTPOINT="/mnt/sdcard"
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_DDELAY=1000
+      CONFIG_SAMV7_HSMCI0_AUTOMOUNT_UDELAY=2000
 
   WARNING:  SD cards should never be removed without first unmounting
   them.  This is to avoid data and possible corruption of the file
@@ -1355,7 +1352,7 @@ MCAN1 Loopback Test
 SPI Slave
 =========
 
-  An interrutp driven SPI slave driver as added on 2015-08-09 but has not
+  An interrupt driven SPI slave driver as added on 2015-08-09 but has not
   been verified as of this writing. See discussion in include/nuttx/spi/slave.h
   and below.
 
@@ -2575,3 +2572,83 @@ Configuration sub-directories
          probably means some kind of memory corruption.
 
        2017-01-30: knsh configuration does not yet run correctly.
+
+  mcuboot-loader:
+    This configuration exercises the port of MCUboot loader to NuttX.
+
+    In this configuration both primary, secondary and scratch partitions are
+    mapped into the internal flash.
+    Relevant configuration settings:
+
+      CONFIG_BOARD_LATE_INITIALIZE=y
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_BOOTLOADER=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
+
+      Flash bootloader using embedded debugger:
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program nuttx.bin 0x400000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+  mcuboot-nsh:
+    This configuration exercises the MCUboot compatible application slot
+    example. The application is NuttX nsh with some special commands.
+
+    Generate signed binaries for MCUboot compatible application:
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v1.bin
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 2.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v2.bin
+
+      Flash application version 1.0.0 at MCUboot Slot-0:
+
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v1.bin 0x420000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+      Flash version 2.0.0 at MCUboot Slot-1:
+
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v2.bin 0x500000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+    Relevant configuration settings:
+
+      CONFIG_BOOT_MCUBOOT=y
+      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="nsh_main"

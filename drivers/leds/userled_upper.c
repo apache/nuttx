@@ -316,8 +316,8 @@ static ssize_t userled_write(FAR struct file *filep, FAR const char *buffer,
   /* Read and return the current state of the LEDs */
 
   lower = priv->lu_lower;
-  DEBUGASSERT(lower && lower->ll_ledset);
-  lower->ll_ledset(lower, ledset);
+  DEBUGASSERT(lower && lower->ll_setall);
+  lower->ll_setall(lower, ledset);
 
   userled_givesem(&priv->lu_exclsem);
   return (ssize_t)sizeof(userled_set_t);
@@ -416,8 +416,8 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
                 /* Set the LED state */
 
                 lower = priv->lu_lower;
-                DEBUGASSERT(lower != NULL && lower->ll_led != NULL);
-                lower->ll_led(lower, led, ledon);
+                DEBUGASSERT(lower != NULL && lower->ll_setled != NULL);
+                lower->ll_setled(lower, led, ledon);
                 ret = OK;
               }
           }
@@ -446,15 +446,15 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
             /* Set the new LED state */
 
             lower = priv->lu_lower;
-            DEBUGASSERT(lower != NULL && lower->ll_led != NULL);
-            lower->ll_ledset(lower, ledset);
+            DEBUGASSERT(lower != NULL && lower->ll_setall != NULL);
+            lower->ll_setall(lower, ledset);
             ret = OK;
           }
       }
       break;
 
     /* Command:     ULEDIOC_GETALL
-     * Description: Get the state of one LED.
+     * Description: Get the state of all LEDs.
      * Argument:    A write-able pointer to a userled_set_t memory location
      *              in which to return the LED state.
      * Return:      Zero (OK) on success.  Minus one will be returned on
@@ -469,7 +469,13 @@ static int userled_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (ledset)
           {
+#ifdef CONFIG_USERLED_LOWER_READSTATE
+            lower = priv->lu_lower;
+            DEBUGASSERT(lower != NULL && lower->ll_getall != NULL);
+            lower->ll_getall(lower, ledset);
+#else
             *ledset = priv->lu_ledset;
+#endif
             ret = OK;
           }
       }
@@ -536,9 +542,9 @@ int userled_register(FAR const char *devname,
   DEBUGASSERT(lower && lower->ll_supported);
   priv->lu_supported = lower->ll_supported(lower);
 
-  DEBUGASSERT(lower && lower->ll_ledset);
+  DEBUGASSERT(lower && lower->ll_setall);
   priv->lu_ledset = 0;
-  lower->ll_ledset(lower, priv->lu_ledset);
+  lower->ll_setall(lower, priv->lu_ledset);
 
   /* And register the LED driver */
 

@@ -55,22 +55,6 @@ endif
 #                   reliable code generation.
 #
 
-ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
-  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
-else
-  MAXOPTIMIZATION ?= -Os
-endif
-
-ifeq ($(CONFIG_MM_KASAN),y)
-  MAXOPTIMIZATION += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  MAXOPTIMIZATION += -fomit-frame-pointer
-endif
-
 ifeq ($(CONFIG_ARM_THUMB),y)
 ARCHCPUFLAGS += -mthumb
 endif
@@ -87,6 +71,22 @@ else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
 ARCHCPUFLAGS += -mcpu=cortex-a8
 else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
 ARCHCPUFLAGS += -mcpu=cortex-a9
+endif
+
+ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
+  MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else
+  MAXOPTIMIZATION ?= -Os
+endif
+
+ifeq ($(CONFIG_MM_KASAN),y)
+  MAXOPTIMIZATION += -fsanitize=kernel-address
+endif
+
+ifeq ($(CONFIG_FRAME_POINTER),y)
+  MAXOPTIMIZATION += -fno-omit-frame-pointer -fno-optimize-sibling-calls
+else
+  MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
 ifeq ($(CONFIG_ENDIAN_BIG),y)

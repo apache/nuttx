@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7_QSPI_H
-#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H7_QSPI_H
+#ifndef __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_QSPI_H
+#define __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_QSPI_H
 
 /****************************************************************************
  * Included Files
@@ -221,4 +221,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32H4_QSPI_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_HARDWARE_STM32_QSPI_H */

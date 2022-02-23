@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H
-#define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_H
+#define __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_H
 
 /****************************************************************************
  * Included Files
@@ -458,4 +458,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_SCU_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_HARDWARE_LPC43_SCU_H */

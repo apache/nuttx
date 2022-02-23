@@ -24,7 +24,7 @@ config MODLIB_MAXDEPEND
 		current design because it uses some very simple, pre-allocated data
 		structures.
 
-		All dependencies logic my be eliminated by sett CONFIG_MODLIB_MAXDEPEND
+		All dependencies logic my be eliminated by set CONFIG_MODLIB_MAXDEPEND
 		to zero.
 
 config MODLIB_ALIGN_LOG2

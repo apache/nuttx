@@ -36,8 +36,8 @@
  *
  ****************************************************************************/
 
-#ifndef __DRIVERS_POWER_BQ2429X_H
-#define __DRIVERS_POWER_BQ2429X_H
+#ifndef __INCLUDE_NUTTX_POWER_BQ2429X_H
+#define __INCLUDE_NUTTX_POWER_BQ2429X_H
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -242,4 +242,4 @@
 #define BQ24296M_VENDOR_ID              0x20 /* BQ24296M */
 #define BQ24297_VENDOR_ID               0x60 /* BQ24297 */
 
-#endif /* __DRIVERS_POWER_BQ2429X_H */
+#endif /* __INCLUDE_NUTTX_POWER_BQ2429X_H */

@@ -30,12 +30,21 @@
 #include <arch/irq.h>
 
 /****************************************************************************
- * Private Data
+ * Public Data
  ****************************************************************************/
 
-static const uint16_t g_reg_offs[] =
+const struct tcbinfo_s g_tcbinfo =
 {
-  0,                       /* x0 */
+  TCB_PID_OFF,
+  TCB_STATE_OFF,
+  TCB_PRI_OFF,
+#if CONFIG_TASK_NAME_SIZE > 0
+  TCB_NAME_OFF,
+#endif
+
+  XCPTCONTEXT_REGS,
+
+  0,
   TCB_REG_OFF(REG_X1_NDX),
   TCB_REG_OFF(REG_X2_NDX),
   TCB_REG_OFF(REG_X3_NDX),
@@ -102,26 +111,15 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_F29_NDX),
   TCB_REG_OFF(REG_F30_NDX),
   TCB_REG_OFF(REG_F31_NDX),
-  0,                        /* fflags */
-  0,                        /* frm */
+  0,
+  0,
   TCB_REG_OFF(REG_FCSR_NDX),
 #endif
 };
 
+#endif
+
 /****************************************************************************
- * Public Data
+ * Public Functions
  ****************************************************************************/
 
-const struct tcbinfo_s g_tcbinfo =
-{
-  TCB_PID_OFF,
-  TCB_STATE_OFF,
-  TCB_PRI_OFF,
-  TCB_NAME_OFF,
-  XCPTCONTEXT_REGS,
-  {
-    .p = g_reg_offs,
-  },
-};
-
-#endif

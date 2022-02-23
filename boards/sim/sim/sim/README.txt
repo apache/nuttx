@@ -538,7 +538,7 @@ bluetooth
   drivers/wireless/bluetooth/bt_null.c
 
   There is also support on a Linux Host for attaching the bluetooth hardware
-  from the host to the NuttX bluetoooth stack via the HCI Socket interface
+  from the host to the NuttX bluetooth stack via the HCI Socket interface
   over the User Channel.  This is enabled in the bthcisock configuration.
   In order to use this you must give the nuttx elf additional capabilities:
 

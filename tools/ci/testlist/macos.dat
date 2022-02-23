@@ -17,9 +17,9 @@
 
 # RISC-V
 
-/risc-v/bl602/bl602evb/configs/wifi,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
+/risc-v/bl602/bl602evb/configs/wifi,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
 
-/risc-v/esp32c3/esp32c3-devkit/configs/wapi,CONFIG_RV32IM_TOOLCHAIN_GNU_RVGL
+/risc-v/esp32c3/esp32c3-devkit/configs/wapi,CONFIG_RISCV_TOOLCHAIN_GNU_RVGL
 
 # ARM
 

@@ -104,6 +104,27 @@ void sdio_mediachange(FAR struct sdio_dev_s *dev, bool cardinslot);
 
 void sdio_wrprotect(FAR struct sdio_dev_s *dev, bool wrprotect);
 
+/****************************************************************************
+ * Name: sdio_set_sdio_card_isr
+ *
+ * Description:
+ *   SDIO card generates interrupt via SDIO_DATA_1 pin.
+ *   Called by board-specific logic to register an ISR for SDIO card.
+ *
+ * Input Parameters:
+ *   func      - callback function.
+ *   arg       - arg to be passed to the function.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SDMMC1_SDIO_MODE) || defined(CONFIG_SDMMC2_SDIO_MODE)
+void sdio_set_sdio_card_isr(FAR struct sdio_dev_s *dev,
+                            int (*func)(void *), void *arg);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }

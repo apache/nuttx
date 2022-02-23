@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_X86_64_INTEL64_QEMU_SRC_QEMU_INTEL64_H
-#define __BOARDS_X86_64_INTEL64_QEMU_SRC_QEMU_INTEL64_H
+#ifndef __BOARDS_X86_64_INTEL64_QEMU_INTEL64_SRC_QEMU_INTEL64_H
+#define __BOARDS_X86_64_INTEL64_QEMU_INTEL64_SRC_QEMU_INTEL64_H
 
 /****************************************************************************
  * Included Files
@@ -51,4 +51,4 @@
 int qemu_bringup(void);
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_X86_64_INTEL64_QEMU_SRC_QEMU_INTEL64_H */
+#endif /* __BOARDS_X86_64_INTEL64_QEMU_INTEL64_SRC_QEMU_INTEL64_H */

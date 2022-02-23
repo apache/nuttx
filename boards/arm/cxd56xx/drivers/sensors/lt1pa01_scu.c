@@ -176,12 +176,12 @@ static const struct file_operations g_lt1pa01alsfops =
   lt1pa01_close_als,           /* close */
   lt1pa01_read_als,            /* read */
   lt1pa01_write,               /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   lt1pa01_ioctl_als,           /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* Proximity sensor */
@@ -192,12 +192,12 @@ static const struct file_operations g_lt1pa01proxfops =
   lt1pa01_close_prox,          /* close */
   lt1pa01_read_prox,           /* read */
   lt1pa01_write,               /* write */
-  0,                           /* seek */
+  NULL,                        /* seek */
   lt1pa01_ioctl_prox,          /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  0,                           /* poll */
+  NULL                         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                       /* unlink */
 #endif
-  0                            /* unlink */
 };
 
 /* SCU instructions for pick ambient light sensing data. */

@@ -101,6 +101,9 @@ static const struct file_operations g_pwmops =
   NULL,      /* seek */
   pwm_ioctl, /* ioctl */
   NULL       /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL     /* unlink */
+#endif
 };
 
 /****************************************************************************
@@ -629,7 +632,7 @@ int pwm_register(FAR const char *path, FAR struct pwm_lowerhalf_s *dev)
  *   1. The upper half driver calls the start method, providing the lower
  *      half driver with the pulse train characteristics.  If a fixed
  *      number of pulses is required, the 'count' value will be nonzero.
- *   2. The lower half driver's start() methoc must verify that it can
+ *   2. The lower half driver's start() method must verify that it can
  *      support the request pulse train (frequency, duty, AND pulse count).
  *      If it cannot, it should return an error.  If the pulse count is
  *      non-zero, it should set up the hardware for that number of pulses

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_DMAMUX_H
-#define __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_DMAMUX_H
+#ifndef __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_DMAMUX_H
+#define __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_DMAMUX_H
 
 /****************************************************************************
  * Included Files
@@ -124,4 +124,4 @@
 
 #define IMXRT_DMA_NCHANNELS          128  /* Includes reserved channels */
 
-#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_IMXRT102X_DMAMUX_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_HARDWARE_RT102X_IMXRT102X_DMAMUX_H */

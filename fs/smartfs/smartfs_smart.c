@@ -318,11 +318,10 @@ static int smartfs_open(FAR struct file *filep, const char *relpath,
 
   /* When using sector buffering, current sector with its header should
    * always be present in sf->buffer. Otherwise data corruption may arise
-   * when writing. However, this does not apply when overwriting without
-   * append mode.
+   * when writing.
    */
 
-  if ((sf->currsector != SMARTFS_ERASEDSTATE_16BIT) && (oflags & O_APPEND))
+  if (sf->currsector != SMARTFS_ERASEDSTATE_16BIT)
     {
       readwrite.logsector = sf->currsector;
       readwrite.offset    = 0;

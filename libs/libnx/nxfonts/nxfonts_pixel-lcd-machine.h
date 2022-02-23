@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H
-#define __LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H
+#ifndef __LIBS_LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H
+#define __LIBS_LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H
 
 /****************************************************************************
  * Included Files
@@ -692,4 +692,4 @@ extern "C"
 }
 #endif
 
-#endif /* __LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H */
+#endif /* __LIBS_LIBNX_NXFONTS_NXFONTS_PIXEL_LCD_MACHINE_H */

@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_STM32H7_QSPI_H
-#define __ARCH_ARM_SRC_STM32_STM32H7_QSPI_H
+#ifndef __ARCH_ARM_SRC_STM32H7_STM32_QSPI_H
+#define __ARCH_ARM_SRC_STM32H7_STM32_QSPI_H
 
 /****************************************************************************
  * Included Files
@@ -126,4 +126,4 @@ void stm32h7_qspi_exit_memorymapped(struct qspi_dev_s *dev);
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_STM32H7_QSPI */
-#endif /* __ARCH_ARM_SRC_STM32_STM32H7_QSPI_H */
+#endif /* __ARCH_ARM_SRC_STM32H7_STM32_QSPI_H */

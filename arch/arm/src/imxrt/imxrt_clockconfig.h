@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_IMXRT_IMX_CLOCKCONFIG_H
-#define __ARCH_ARM_SRC_IMXRT_IMX_CLOCKCONFIG_H
+#ifndef __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_H
+#define __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -43,4 +43,4 @@
 
 void imxrt_clockconfig(void);
 
-#endif /* __ARCH_ARM_SRC_IMXRT_IMX_CLOCKCONFIG_H */
+#endif /* __ARCH_ARM_SRC_IMXRT_IMXRT_CLOCKCONFIG_H */

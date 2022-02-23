@@ -1199,7 +1199,7 @@ static uint8_t att_read_mult_req(FAR struct bt_conn_s *conn,
     {
       handle = bt_buf_get_le16(buf);
 
-      wlinfo("handle 0x%04x \n", handle);
+      wlinfo("handle 0x%04x\n", handle);
 
       bt_gatt_foreach_attr(handle, handle, read_cb, &data);
 

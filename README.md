@@ -537,7 +537,7 @@ if you want to build the sim:
 
   * ELF toolchain (if you want to build modules for CONFIG_LIBC_MODLIB)
 
-    brew install x86_64-elf-gc
+    brew install x86_64-elf-gcc
 
 # INSTALLATION
 
@@ -1325,7 +1325,7 @@ damage your configuration (see
   environment:
 
   1. You can run the configuration tool using Cygwin.  However, the
-     Cygwin `Makefile.win` will complain so to do this will, you have
+     Cygwin `Win.mk` will complain so to do this will, you have
      to manually edit the `.config` file:
 
      a. Delete the line: `CONFIG_WINDOWS_NATIVE=y`
@@ -1546,12 +1546,12 @@ build directory.
     build. (2) The logic in tools/mkexport.sh only supports GCC and, for example,
     explicitly assumes that the archiver is 'ar'
 
-  * `download`
+  * `flash` (or `download` : DEPRECATED)
 
-    This is a helper target that will rebuild NuttX and download it to the target
+    This is a helper target that will rebuild NuttX and flash it to the target
     system in one step.  The operation of this target depends completely upon
-    implementation of the DOWNLOAD command in the user Make.defs file.  It will
-    generate an error an error if the DOWNLOAD command is not defined.
+    implementation of the FLASH command in the user Make.defs file.  It will
+    generate an error if the FLASH command is not defined.
 
 The following targets are used internally by the make logic but can be invoked
 from the command under certain conditions if necessary.
@@ -1873,7 +1873,7 @@ into your Web browser:
 
     Documentation/index.html
 
-NuttX documentation is also available online at <https://apache.nuttx.org>.
+NuttX documentation is also available online at <https://nuttx.apache.org/>.
 
 Below is a guide to the available README files in the NuttX source tree:
 
@@ -2079,6 +2079,8 @@ Below is a guide to the available README files in the NuttX source tree:
      |   |   |   `- metro-m4/
      |   |   |      `- README.txt
      |   |   |- samv7/
+     |   |   |   |- same70-qmtech/
+     |   |   |   |   `- README.txt
      |   |   |   |- same70-xplained/
      |   |   |   |   `- README.txt
      |   |   |   `- samv71-xult/

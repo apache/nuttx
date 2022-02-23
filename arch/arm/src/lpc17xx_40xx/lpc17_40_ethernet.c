@@ -165,7 +165,7 @@
 
 /* This is a helper pointer for accessing the contents of Ethernet header */
 
-#define BUF ((struct eth_hdr_s *)priv->lp_dev.d_buf)
+#define BUF ((FAR struct eth_hdr_s *)priv->lp_dev.d_buf)
 
 /* This is the number of ethernet GPIO pins that must be configured */
 
@@ -1041,7 +1041,7 @@ static void lpc17_40_rxdone_work(FAR void *arg)
           else
 #endif
 #ifdef CONFIG_NET_ARP
-          if (BUF->type == htons(ETHTYPE_ARP))
+          if (BUF->type == HTONS(ETHTYPE_ARP))
             {
               NETDEV_RXARP(&priv->lp_dev);
               arp_arpin(&priv->lp_dev);

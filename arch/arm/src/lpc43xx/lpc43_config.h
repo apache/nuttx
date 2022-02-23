@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43XX_CONFIG_H
-#define __ARCH_ARM_SRC_LPC43XX_LPC43XX_CONFIG_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_CONFIG_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_CONFIG_H
 
 /****************************************************************************
  * Included Files
@@ -126,4 +126,4 @@
  * Public Functions Prototypes
  ****************************************************************************/
 
-#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43XX_CONFIG_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_CONFIG_H */

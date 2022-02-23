@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_STM32_I2S_H
-#define __ARCH_ARM_SRC_STM32_I2S_H
+#ifndef __ARCH_ARM_SRC_STM32_STM32_I2S_H
+#define __ARCH_ARM_SRC_STM32_STM32_I2S_H
 
 /****************************************************************************
  * Included Files
@@ -71,4 +71,4 @@ FAR struct i2s_dev_s *stm32_i2sbus_initialize(int port);
 #endif
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_ARM_SRC_STM32_I2S_H */
+#endif /* __ARCH_ARM_SRC_STM32_STM32_I2S_H */

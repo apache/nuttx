@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_ARM_NRF52_NRF52_FEATHER_INCLUDE_BOARD_H
-#define __BOARDS_ARM_NRF52_NRF52_FEATHER_INCLUDE_BOARD_H
+#ifndef __BOARDS_ARM_NRF52_NRF52832_DK_INCLUDE_BOARD_H
+#define __BOARDS_ARM_NRF52_NRF52832_DK_INCLUDE_BOARD_H
 
 /****************************************************************************
  * Included Files
@@ -107,4 +107,4 @@
 #define BOARD_UART0_RX_PIN  (GPIO_INPUT  | GPIO_PORT0 | GPIO_PIN(8))
 #define BOARD_UART0_TX_PIN  (GPIO_OUTPUT | GPIO_VALUE_ONE | GPIO_PORT0 | GPIO_PIN(6))
 
-#endif /* __BOARDS_ARM_NRF52_NRF52_FEATHER_INCLUDE_BOARD_H */
+#endif /* __BOARDS_ARM_NRF52_NRF52832_DK_INCLUDE_BOARD_H */

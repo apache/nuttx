@@ -14,47 +14,50 @@ config ESP32_MERGE_BINS
 config ESP32_QEMU_IMAGE
 	bool "ESP32 binary image for QEMU"
 	default n
+	select ESP32_MERGE_BINS
 	---help---
 		Create a binary flash image used for QEMU.
 
 choice ESP32_SPIFLASH_FS
-	prompt "SPIFLASH File System"
+	prompt "Mount SPI Flash MTD on bring-up"
 	default ESP32_SPIFLASH_SMARTFS
 	depends on ESP32_SPIFLASH
+	optional
+	---help---
+		Mount the SPI Flash MTD with the selected File System format on board
+		bring-up.
+		If not selected, the MTD will be registered as a device node on /dev.
 
 	config ESP32_SPIFLASH_SMARTFS
 		bool "SmartFS"
-		depends on FS_SMARTFS
+		select FS_SMARTFS
+		select MTD_SMART
+		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+
+	comment "SmartFS not supported with Flash Encryption"
+		depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
 	config ESP32_SPIFLASH_NXFFS
 		bool "NXFFS"
-		depends on FS_NXFFS
+		select FS_NXFFS
+		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+
+	comment "NXFFS not supported with Flash Encryption"
+		depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
 	config ESP32_SPIFLASH_SPIFFS
 		bool "SPIFFS"
-		depends on FS_SPIFFS
+		select FS_SPIFFS
+		depends on !ESP32_SECURE_FLASH_ENC_ENABLED
+
+	comment "SPIFFS not supported with Flash Encryption"
+		depends on ESP32_SECURE_FLASH_ENC_ENABLED
 
 	config ESP32_SPIFLASH_LITTLEFS
 		bool "LittleFS"
-		depends on FS_LITTLEFS
+		select FS_LITTLEFS
 
 endchoice
-
-config ESP32_SPIFLASH_ENCRYPTION_TEST
-	bool "SPI Flash encryption test"
-	default n
-	depends on ESP32_SPIFLASH
-	select DEBUG_ASSERTIONS
-	---help---
-		Enable SPI Flash encryption test. This option will also select
-		DEBUG_ASSERTIONS to enable kernel assert macro.
-
-config ESP32_SPIFLASH_TEST_ADDRESS
-	hex "SPI Flash test address"
-	default 0x180000
-	depends on ESP32_SPIFLASH_ENCRYPTION_TEST
-	---help---
-		SPI Flash encryption test read/write address.
 
 config ESP32_LCD_OVERCLOCK
 	bool "Run LCD at higher clock speed than allowed"

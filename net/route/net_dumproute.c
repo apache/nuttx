@@ -55,7 +55,7 @@ void net_ipv4_dumproute(FAR const char *msg,
 {
   ninfo("%s:\n", msg);
   ninfo("  target=%08lx netmask=%08lx router=%08lx\n",
-        htonl(route->target), htonl(route->netmask), htonl(route->router));
+        HTONL(route->target), HTONL(route->netmask), HTONL(route->router));
 }
 #endif
 
@@ -65,20 +65,20 @@ void net_ipv6_dumproute(FAR const char *msg,
 {
   ninfo("%s:\n", msg);
   ninfo("  target:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        htons(route->target[0]),  htons(route->target[1]),
-        htons(route->target[2]),  htons(route->target[3]),
-        htons(route->target[4]),  htons(route->target[5]),
-        htons(route->target[6]),  htons(route->target[7]));
+        HTONS(route->target[0]),  HTONS(route->target[1]),
+        HTONS(route->target[2]),  HTONS(route->target[3]),
+        HTONS(route->target[4]),  HTONS(route->target[5]),
+        HTONS(route->target[6]),  HTONS(route->target[7]));
   ninfo("  netmask: %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        htons(route->netmask[0]), htons(route->netmask[1]),
-        htons(route->netmask[2]), htons(route->netmask[3]),
-        htons(route->netmask[4]), htons(route->netmask[5]),
-        htons(route->netmask[6]), htons(route->netmask[7]));
+        HTONS(route->netmask[0]), HTONS(route->netmask[1]),
+        HTONS(route->netmask[2]), HTONS(route->netmask[3]),
+        HTONS(route->netmask[4]), HTONS(route->netmask[5]),
+        HTONS(route->netmask[6]), HTONS(route->netmask[7]));
   ninfo("  router:  %04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x\n",
-        htons(route->router[0]),  htons(route->router[1]),
-        htons(route->router[2]),  htons(route->router[3]),
-        htons(route->router[4]),  htons(route->router[5]),
-        htons(route->router[6]),  htons(route->router[7]));
+        HTONS(route->router[0]),  HTONS(route->router[1]),
+        HTONS(route->router[2]),  HTONS(route->router[3]),
+        HTONS(route->router[4]),  HTONS(route->router[5]),
+        HTONS(route->router[6]),  HTONS(route->router[7]));
 }
 #endif
 

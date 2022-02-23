@@ -319,15 +319,15 @@ config ARCH_BOARD_FIRE_STM32
 		tested.
 
 config ARCH_BOARD_CHIPKIT_WIFIRE
-    bool "chipKIT Wi-FIRE"
-    depends on ARCH_CHIP_PIC32MZ2048EFG
-    select ARCH_HAVE_LEDS
-    select ARCH_HAVE_BUTTONS
-    select ARCH_HAVE_IRQBUTTONS
-    ---help---
-        This options selects the chipKIT Wi-FIRE board. This
-        board is a chipKIT Arduino-compatible board. This board
-        features the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
+	bool "chipKIT Wi-FIRE"
+	depends on ARCH_CHIP_PIC32MZ2048EFG
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		This options selects the chipKIT Wi-FIRE board. This
+		board is a chipKIT Arduino-compatible board. This board
+		features the Microchip PIC32MZ2048EFG100 MCU running at 200 MHz.
 
 config ARCH_BOARD_FLIPNCLICK_PIC32MZ
 	bool "Mikroe Flip&Click PIC32MZ"
@@ -674,12 +674,20 @@ config ARCH_BOARD_SMARTL_C906
 		THEAD smartl-c906 board. This board features the RISC-V C906.
 
 config ARCH_BOARD_ICICLE_MPFS
-        bool "Polarfire Icicle evaluation board for MPFS"
-        depends on ARCH_CHIP_MPFS
-        select ARCH_HAVE_LEDS if !MPFS_WITH_QEMU
-        ---help---
-                This is the board configuration for the port of NuttX to the
-                MicroChip icicle-mpfs board. This board features the RISC-V MPFS.
+	bool "Polarfire Icicle evaluation board for MPFS"
+	depends on ARCH_CHIP_MPFS
+	select ARCH_HAVE_LEDS if !MPFS_WITH_QEMU
+	---help---
+		This is the board configuration for the port of NuttX to the
+		MicroChip icicle-mpfs board. This board features the RISC-V MPFS.
+
+config ARCH_BOARD_M100PFSEVP_MPFS
+	bool "Aries M100PFSEVP evaluation platform for MPFS"
+	depends on ARCH_CHIP_MPFS
+	select MPFS_EMMCSD_MUX_GPIO if !MPFS_WITH_QEMU
+	---help---
+			This is the board configuration for the port of NuttX to the
+			MicroChip m100pfsevp-mpfs board. This board features the RISC-V MPFS.
 
 config ARCH_BOARD_MAX32660_EVSYS
 	bool "Maxim Integrated MAX32660-EVSYS"
@@ -1390,6 +1398,14 @@ config ARCH_BOARD_RASPBERRYPI_PICO
 	---help---
 		This is a port to the Raspberry Pi Pico board.
 
+config ARCH_BOARD_PIMORONI_TINY2040
+	bool "Pimoroni Tiny2040 board"
+	depends on ARCH_CHIP_RP2040
+	---help---
+		This is a port to the Pimoroni Tiny2040 board.
+		Support is derived from Raspberry Pi Pico support.
+		STATUS:  Work has just began on this port.
+
 config ARCH_BOARD_RX65N
 	bool "RX65N renesas board"
 	depends on ARCH_CHIP_R5F565NEDDFC
@@ -1435,9 +1451,9 @@ config ARCH_BOARD_RV32M1_VEGA
 		This is the board configuration for the port of NuttX to the
 		RV32M1 VEGA board. This board features the RV32M1 RISC-V Core(s).
 
-config ARCH_BOARD_QEMU_RV32_VIRT
-	bool "QEMU RV32 Virt"
-	depends on ARCH_CHIP_QEMU_RV32
+config ARCH_BOARD_QEMU_RV_VIRT
+	bool "QEMU RV Virt"
+	depends on ARCH_CHIP_QEMU_RV
 	---help---
 		This is the board configuration for the port of NuttX to the
 		QEMU RV32 Virt board. This board features the QEMU RV32 CPU.
@@ -1503,22 +1519,22 @@ config ARCH_BOARD_SABRE_6QUAD
 		board featuring the iMX 6Quad CPU.
 
 config ARCH_BOARD_SAMA5D2_XULT
-    bool "Atmel SAMA5D2 Xplained Ultra development board"
-    depends on ARCH_CHIP_ATSAMA5D27
-    select ARCH_HAVE_LEDS
-    select ARCH_HAVE_BUTTONS
-    select ARCH_HAVE_IRQBUTTONS
-    ---help---
-        The port of NuttX to the Atmel SAMA5D2-XULT development board
+	bool "Atmel SAMA5D2 Xplained Ultra development board"
+	depends on ARCH_CHIP_ATSAMA5D27
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAMA5D2-XULT development board
 
 config ARCH_BOARD_GIANT_BOARD
 	bool "Groboards Giant Board (SAMA5D27C-D1G)"
 	depends on ARCH_CHIP_ATSAMA5D27
-    select SAMA5D27_GIANT_BOARD_492MHZ
+	select SAMA5D27_GIANT_BOARD_492MHZ
 	select ARCH_HAVE_LEDS
 	---help---
-	    This options selects support for NuttX on the Groboards Giant Board,
-	    featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
+		This options selects support for NuttX on the Groboards Giant Board,
+		featuring the SAMA5D27C-D1G SIP with 128MB DDR2 RAM.
 
 config ARCH_BOARD_SAMA5D3X_EK
 	bool "Atmel SAMA5D3x-EK development board"
@@ -1644,6 +1660,15 @@ config ARCH_BOARD_SAM4S_XPLAINED_PRO
 	select ARCH_HAVE_IRQBUTTONS
 	---help---
 		The port of NuttX to the Atmel SAM4S-Xplained Pro development board.
+
+config ARCH_BOARD_SAME70_QMTECH
+	bool "Atmel SAME70 evaluation board from QMTECH"
+	depends on ARCH_CHIP_SAME70N19
+	select ARCH_HAVE_LEDS
+	select ARCH_HAVE_BUTTONS
+	select ARCH_HAVE_IRQBUTTONS
+	---help---
+		The port of NuttX to the Atmel SAME70 evaluation board from QMTECH.
 
 config ARCH_BOARD_SAME70_XPLAINED
 	bool "Atmel SAME70 Xplained evaluation board"
@@ -2048,7 +2073,7 @@ config ARCH_BOARD_TEENSY_3X
 
 		This board configuration can also be used with the older Teensy-3.0.  The
 		Teensy-3.0 has the same schematic (although some pins are not used on the
-		Teensy-3.0).  the primary difference is that the Teensy 3.0 has a
+		Teensy-3.0).  The primary difference is that the Teensy 3.0 has a
 		MK20DX128VLH5 with slightly less capability.
 
 config ARCH_BOARD_TEENSY_4X
@@ -2067,7 +2092,7 @@ config ARCH_BOARD_TEENSY_LC
 	select ARCH_HAVE_LEDS
 	---help---
 		This is the configuration for the Teensy LC board.
-		See https://www.pjrc.com/teensy/teensyLC.html.	The
+		See https://www.pjrc.com/teensy/teensyLC.html.  The
 		Teensy LC is based on the Freescale KL25Z.
 
 config ARCH_BOARD_TM4C123G_LAUNCHPAD
@@ -2249,6 +2274,26 @@ config ARCH_BOARD_SPRESENSE
 	---help---
 		none
 
+config ARCH_BOARD_PHY6222
+	bool "Phyplus PHY6222 EVB Board"
+	depends on ARCH_CHIP_PHY62XX
+	---help---
+		none
+
+config ARCH_BOARD_XX3803
+	bool "Sparc Bm3803 XX3803 Board"
+	depends on ARCH_CHIP_BM3803
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
+config ARCH_BOARD_XX3823
+	bool "Sparc Bm3823 XX3823 Board"
+	depends on ARCH_CHIP_BM3823
+	select ARCH_HAVE_LEDS
+	---help---
+		none
+
 config ARCH_BOARD_SIM
 	bool "User mode simulation"
 	select ARCH_HAVE_BUTTONS
@@ -2396,6 +2441,7 @@ config ARCH_BOARD
 	default "maix-bit"                 if ARCH_BOARD_MAIX_BIT
 	default "smartl-c906"              if ARCH_BOARD_SMARTL_C906
 	default "icicle"                   if ARCH_BOARD_ICICLE_MPFS
+	default "m100pfsevp"               if ARCH_BOARD_M100PFSEVP_MPFS
 	default "maple"                    if ARCH_BOARD_MAPLE
 	default "makerlisp"                if ARCH_BOARD_MAKERLISP
 	default "max32660-evsys"           if ARCH_BOARD_MAX32660_EVSYS
@@ -2465,6 +2511,7 @@ config ARCH_BOARD
 	default "qemu-i486"                if ARCH_BOARD_QEMU_I486
 	default "intel64-qemu"             if ARCH_BOARD_INTEL64_QEMU
 	default "raspberrypi-pico"         if ARCH_BOARD_RASPBERRYPI_PICO
+	default "pimoroni-tiny2040"        if ARCH_BOARD_PIMORONI_TINY2040
 	default "rx65n"                    if ARCH_BOARD_RX65N
 	default "rx65n-rsk1mb"             if ARCH_BOARD_RX65N_RSK1MB
 	default "rx65n-rsk2mb"             if ARCH_BOARD_RX65N_RSK2MB
@@ -2473,7 +2520,7 @@ config ARCH_BOARD
 	default "s32k144evb"               if ARCH_BOARD_S32K144EVB
 	default "ucans32k146"              if ARCH_BOARD_UCANS32K146
 	default "rv32m1-vega"              if ARCH_BOARD_RV32M1_VEGA
-	default "rv32-virt"		           if ARCH_BOARD_QEMU_RV32_VIRT
+	default "rv-virt"                  if ARCH_BOARD_QEMU_RV_VIRT
 	default "s32k146evb"               if ARCH_BOARD_S32K146EVB
 	default "s32k148evb"               if ARCH_BOARD_S32K148EVB
 	default "sabre-6quad"              if ARCH_BOARD_SABRE_6QUAD
@@ -2492,6 +2539,7 @@ config ARCH_BOARD
 	default "sam4l-xplained"           if ARCH_BOARD_SAM4L_XPLAINED
 	default "sam4s-xplained"           if ARCH_BOARD_SAM4S_XPLAINED
 	default "sam4s-xplained-pro"       if ARCH_BOARD_SAM4S_XPLAINED_PRO
+	default "same70-qmtech"            if ARCH_BOARD_SAME70_QMTECH
 	default "same70-xplained"          if ARCH_BOARD_SAME70_XPLAINED
 	default "samv71-xult"              if ARCH_BOARD_SAMV71_XULT
 	default "shenzhou"                 if ARCH_BOARD_SHENZHOU
@@ -2553,9 +2601,12 @@ config ARCH_BOARD
 	default "z8f64200100kit"           if ARCH_BOARD_Z8F64200100KIT
 	default "zp214xpa"                 if ARCH_BOARD_ZP214XPA
 	default "zkit-arm-1769"            if ARCH_BOARD_ZKITARM
+	default "phy6222"                  if ARCH_BOARD_PHY6222
 	default "sim"                      if ARCH_BOARD_SIM
 	default "moxa"                     if ARCH_BOARD_MOXA
 	default "spresense"                if ARCH_BOARD_SPRESENSE
+	default "xx3803"                   if ARCH_BOARD_XX3803
+	default "xx3823"                   if ARCH_BOARD_XX3823
 
 comment "Common Board Options"
 
@@ -2790,6 +2841,9 @@ endif
 if ARCH_BOARD_RASPBERRYPI_PICO
 source "boards/arm/rp2040/raspberrypi-pico/Kconfig"
 endif
+if ARCH_BOARD_PIMORONI_TINY2040
+source "boards/arm/rp2040/pimoroni-tiny2040/Kconfig"
+endif
 if ARCH_BOARD_ARDUINO_DUE
 source "boards/arm/sam34/arduino-due/Kconfig"
 endif
@@ -2849,6 +2903,9 @@ source "boards/arm/samd2l2/saml21-xplained/Kconfig"
 endif
 if ARCH_BOARD_METRO_M4
 source "boards/arm/samd5e5/metro-m4/Kconfig"
+endif
+if ARCH_BOARD_SAME70_QMTECH
+source "boards/arm/samv7/same70-qmtech/Kconfig"
 endif
 if ARCH_BOARD_SAME70_XPLAINED
 source "boards/arm/samv7/same70-xplained/Kconfig"
@@ -3207,11 +3264,14 @@ endif
 if ARCH_BOARD_ICICLE_MPFS
 source "boards/risc-v/mpfs/icicle/Kconfig"
 endif
+if ARCH_BOARD_M100PFSEVP_MPFS
+source "boards/risc-v/mpfs/m100pfsevp/Kconfig"
+endif
 if ARCH_BOARD_RV32M1_VEGA
 source "boards/risc-v/rv32m1/rv32m1-vega/Kconfig"
 endif
-if ARCH_BOARD_QEMU_RV32_VIRT
-source "boards/risc-v/qemu-rv32/rv32-virt/Kconfig"
+if ARCH_BOARD_QEMU_RV_VIRT
+source "boards/risc-v/qemu-rv/rv-virt/Kconfig"
 endif
 if ARCH_BOARD_ESP32C3_DEVKIT
 source "boards/risc-v/esp32c3/esp32c3-devkit/Kconfig"
@@ -3288,9 +3348,21 @@ endif
 if ARCH_BOARD_BL602EVB
 source "boards/risc-v/bl602/bl602evb/Kconfig"
 endif
+if ARCH_BOARD_PHY6222
+source "boards/arm/phy62xx/phy6222/Kconfig"
+endif
+if ARCH_BOARD_XX3803
+source "boards/sparc/bm3803/xx3803/Kconfig"
+endif
+if ARCH_BOARD_XX3823
+source "boards/sparc/bm3823/xx3823/Kconfig"
+endif
 
 comment "Board-Common Options"
 
+if ARCH_CHIP_SAMV7
+source "boards/arm/samv7/common/Kconfig"
+endif
 if ARCH_CHIP_STM32
 source "boards/arm/stm32/common/Kconfig"
 endif
@@ -3380,7 +3452,7 @@ config BOARD_RESET_ON_ASSERT
 
 config BOARD_ASSERT_RESET_VALUE
 	int "Board reset argument"
-	default 0
+	default 1
 	depends on BOARDCTL_RESET
 	---help---
 		Parameter that will be passed to board_reset() by when an
@@ -3491,3 +3563,7 @@ config BOARDCTL_IOCTL
 		Architecture specific logic must provide board_ioctl() interface.
 
 endif # BOARDCTL
+
+config BOARD_USBDEV_SERIALSTR
+	bool
+	default n

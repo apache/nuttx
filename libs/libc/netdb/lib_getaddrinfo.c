@@ -173,7 +173,7 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
         {
           /* Force network byte order */
 
-          port = htons(port);
+          port = HTONS(port);
         }
       else if ((flags & AI_NUMERICSERV) != 0)
         {

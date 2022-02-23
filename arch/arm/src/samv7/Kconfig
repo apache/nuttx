@@ -16,74 +16,110 @@ choice
 config ARCH_CHIP_SAME70Q19
 	bool "SAME70Q19"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70Q20
 	bool "SAME70Q20"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70Q21
 	bool "SAME70Q21"
 	select ARCH_CHIP_SAME70Q
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70N19
 	bool "SAME70N19"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70N20
 	bool "SAME70N20"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70N21
 	bool "SAME70N21"
 	select ARCH_CHIP_SAME70N
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70J19
 	bool "SAME70J10"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAME70J20
 	bool "SAME70J20"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAME70J21
 	bool "SAME70J21"
 	select ARCH_CHIP_SAME70J
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71Q19
 	bool "SAMV71Q19"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71Q20
 	bool "SAMV71Q20"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71Q21
 	bool "SAMV71Q21"
 	select ARCH_CHIP_SAMV71Q
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71N19
 	bool "SAMV71N19"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71N20
 	bool "SAMV71N20"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71N21
 	bool "SAMV71N21"
 	select ARCH_CHIP_SAMV71N
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71J19
 	bool "SAMV71J19"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_512
+	select SAMV7_MEM_RAM_256
 
 config ARCH_CHIP_SAMV71J20
 	bool "SAMV71J20"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_1024
+	select SAMV7_MEM_RAM_384
 
 config ARCH_CHIP_SAMV71J21
 	bool "SAMV71J21"
 	select ARCH_CHIP_SAMV71J
+	select SAMV7_MEM_FLASH_2048
+	select SAMV7_MEM_RAM_384
 
 endchoice # Atmel SAMV7 Chip Selection
 
@@ -188,11 +224,46 @@ config ARCH_CHIP_SAMV71J
 
 # Chip Capabilities
 
+config SAMV7_MEM_FLASH_512
+	bool
+	default n
+
+config SAMV7_MEM_FLASH_1024
+	bool
+	default n
+
+config SAMV7_MEM_FLASH_2048
+	bool
+	default n
+
+config ARCH_CHIP_SAMV7_MEM_FLASH
+	hex
+	default 0x80000  if SAMV7_MEM_FLASH_512
+	default 0x100000 if SAMV7_MEM_FLASH_1024
+	default 0x200000 if SAMV7_MEM_FLASH_2048
+
+config SAMV7_MEM_RAM_256
+	bool
+	default n
+
+config SAMV7_MEM_RAM_384
+	bool
+	default n
+
+config ARCH_CHIP_SAMV7_MEM_RAM
+	hex
+	default 0x40000 if SAMV7_MEM_RAM_256
+	default 0x60000 if SAMV7_MEM_RAM_384
+
 config SAMV7_MCAN
 	bool
 	default n
 
 config SAMV7_HAVE_MCAN1
+	bool
+	default n
+
+config SAMV7_AFEC
 	bool
 	default n
 
@@ -310,13 +381,155 @@ config SAMV7_ADC
 	bool "12-bit ADC Controller (ADC)"
 	default n
 
-config SAMV7_AFEC0
-	bool "Analog Front End 0 (AFEC0)"
+config SAMV7_AFEC_TIOATRIG
+	bool
 	default n
 
-config SAMV7_AFEC1
+menuconfig SAMV7_AFEC0
+	bool "Analog Front End 0 (AFEC0)"
+	default n
+	select SAMV7_AFEC
+	---help---
+		Support for AFEC0 (ADC) driver.
+
+if SAMV7_AFEC0
+
+config SAMV7_AFEC0_RES
+	int "AFEC0 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+
+config SAMV7_AFEC_DMA
+	bool "DMA Support"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Enables transfer of converted data over DMA.
+
+config SAMV7_AFEC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMV7_AFEC_DMA
+	---help---
+		Number of DMA samples to be transfered. Number of samples less than
+		2 might be inneficient.
+
+choice
+	prompt "AFEC Trigger mode"
+	default SAMV7_AFEC0_TIOATRIG
+
+config SAMV7_AFEC0_TIOATRIG
+	bool "Timer/counter trigger"
+	select SAMV7_AFEC_TIOATRIG
+	---help---
+		Use output of Timer/Counter as a trigger.
+
+config SAMV7_AFEC0_SWTRIG
+	bool "Software trigger"
+	---help---
+		Use software trigger.
+
+endchoice
+
+if SAMV7_AFEC0_TIOATRIG
+
+config SAMV7_AFEC0_TIOAFREQ
+	int "AFEC sampling frequency"
+	default 1000
+	---help---
+		This setting provides the rate at which the timer will driver AFEC
+		sampling.
+
+config SAMV7_AFEC0_TIOACHAN
+	int "Timer/counter channel number"
+	default 0
+	range 0 2
+	---help---
+		Number of TC channel to trigger the AFEC conversion.
+
+endif #SAMV7_AFEC0_TIOATRIG
+
+endif # SAMV7_AFEC0
+
+menuconfig SAMV7_AFEC1
 	bool "Analog Front End 1 (AFEC1)"
 	default n
+	select SAMV7_AFEC
+	---help---
+		Support for AFEC1 (ADC) driver.
+
+if SAMV7_AFEC1
+
+config SAMV7_AFEC1_RES
+	int "AFEC1 Resolution"
+	default 0
+	range 0 5
+	---help---
+		0		no average
+		1		low resolution
+		2		OSR4
+		3		OSR16
+		4		OSR64
+		5		OSR256
+
+config SAMV7_AFEC_DMA
+	bool "DMA Support"
+	default n
+	depends on SAMV7_XDMAC
+	---help---
+		Enables transfer of converted data over DMA.
+
+config SAMV7_AFEC_DMASAMPLES
+	int "Number of DMA samples"
+	default 2
+	depends on SAMV7_AFEC_DMA
+	---help---
+		Number of DMA samples to be transfered. Number of samples less than
+		2 might be inneficient.
+
+choice
+	prompt "AFEC Trigger mode"
+	default SAMV7_AFEC1_TIOATRIG
+
+config SAMV7_AFEC1_TIOATRIG
+	bool "Timer/counter trigger"
+	select SAMV7_AFEC_TIOATRIG
+	---help---
+		Use output of Timer/Counter as a trigger.
+
+config SAMV7_AFEC1_SWTRIG
+	bool "Software trigger"
+	---help---
+		Use software trigger.
+
+endchoice
+
+if SAMV7_AFEC1_TIOATRIG
+
+config SAMV7_AFEC1_TIOAFREQ
+	int "AFEC sampling frequency"
+	default 1000
+	---help---
+		This setting provides the rate at which the timer will driver ADC
+		sampling.
+
+config SAMV7_AFEC1_TIOACHAN
+	int "Timer/counter channel number"
+	default 3
+	range 3 5
+	---help---
+		Number of TC channel to trigger the AFEC conversion.
+
+endif #SAMV7_AFEC1_TIOATRIG
+
+endif # SAMV7_AFEC1
 
 config SAMV7_MCAN0
 	bool "CAN controller 0 (MCAN0)"
@@ -394,6 +607,17 @@ config SAMV7_QSPI
 	select ARCH_USE_MPU
 	select ARM_MPU
 
+if SAMV7_QSPI
+
+config SAMV7_QSPI_SPI_MODE
+	bool "SPI Mode"
+	default n
+	depends on SAMV7_QSPI_IS_SPI
+	---help---
+		Use Quad SPI in SPI mode
+
+endif
+
 config SAMV7_RTC
 	bool "Real Time Clock (RTC)"
 	default n
@@ -446,7 +670,7 @@ config SAMV7_TC2
 	select SAMV7_HAVE_TC
 
 config SAMV7_TC3
-	bool "Timer Counter 3 (ch. 9, 10, 11) (TC2)"
+	bool "Timer Counter 3 (ch. 9, 10, 11) (TC3)"
 	default n
 	select SAMV7_HAVE_TC
 
@@ -762,12 +986,21 @@ if SAMV7_PROGMEM
 
 config SAMV7_PROGMEM_NSECTORS
 	int "Number of 128KB sectors"
-	default 4
+	default 4  if SAMV7_MEM_FLASH_512
+	default 8  if SAMV7_MEM_FLASH_1024
+	default 16 if SAMV7_MEM_FLASH_2048
 	range 1 16
 	---help---
 		This is the number of 128KB FLASH sectors at the end of the program
 		flash memory that will be reserved for use with by the interfaces
 		prototyped in include/nuttx/progmem.h
+
+config SAMV7_PROGMEM_ERASESTATE
+	bool "Flash progmem erasestate ioctl support"
+	default y
+	select ARCH_HAVE_PROGMEM_ERASESTATE
+	---help---
+		Add progmem erasestate ioctl command.
 
 endif # SAMV7_PROGMEM
 
@@ -1627,7 +1860,7 @@ if SCHED_TICKLESS
 config SAMV7_TICKLESS_ONESHOT
 	int "Tickless one-shot timer channel"
 	default 0
-	range 0 8
+	range 0 11
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the one-shot timer needed by the OS.
@@ -1635,7 +1868,7 @@ config SAMV7_TICKLESS_ONESHOT
 config SAMV7_TICKLESS_FREERUN
 	int "Tickless free-running timer channel"
 	default 1
-	range 0 8
+	range 0 11
 	---help---
 		If the Tickless OS feature is enabled, the one clock must be
 		assigned to provided the free-running timer needed by the OS.
@@ -1711,7 +1944,7 @@ config SAMV7_DAC_TRIGGER_SELECT
 	default 3
 	range 1 3
 	---help---
-		Define DAC trigger source.  Snly support for TC0, TC1, TC2 output is
+		Define DAC trigger source.  Only support for TC0, TC1, TC2 output is
 		currently implemented:
 
 		1 -> TC0
@@ -2770,4 +3003,51 @@ config SAMV7_MCAN_REGDEBUG
 
 endmenu # CAN device driver options
 endif # SAMV7_MCAN
+
+menu "QEncoder Driver"
+	depends on SENSORS_QENCODER
+	depends on SAMV7_HAVE_TC
+
+config SAMV7_TC0_QE
+	bool "TC0"
+	default n
+	depends on SAMV7_TC0
+	select SAMV7_TC0_TIOA0
+	select SAMV7_TC0_TIOB0
+	---help---
+		Reserve TC0 for use by QEncoder.
+
+config SAMV7_TC1_QE
+	bool "TC1"
+	default n
+	depends on SAMV7_TC1
+	select SAMV7_TC1_TIOA3
+	select SAMV7_TC1_TIOB3
+	---help---
+		Reserve TC1 for use by QEncoder.
+
+config SAMV7_TC2_QE
+	bool "TC2"
+	default n
+	depends on SAMV7_TC2
+	select SAMV7_TC2_TIOA6
+	select SAMV7_TC2_TIOB6
+	---help---
+		Reserve TC2 for use by QEncoder.
+
+config SAMV7_TC3_QE
+	bool "TC3"
+	default n
+	depends on SAMV7_TC3
+	select SAMV7_TC3_TIOA9
+	select SAMV7_TC3_TIOB9
+	---help---
+		Reserve TC3 for use by QEncoder.
+
+config SAMV7_QENCODER_FILTER
+	bool "Enable filtering on SAMV7 QEncoder input"
+	default y
+
+endmenu
+
 endif # ARCH_CHIP_SAMV7

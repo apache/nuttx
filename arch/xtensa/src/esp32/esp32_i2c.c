@@ -41,6 +41,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/clock.h>
 #include <nuttx/semaphore.h>
+#include <nuttx/spinlock.h>
 #include <nuttx/i2c/i2c_master.h>
 
 #include <arch/board/board.h>
@@ -218,6 +219,8 @@ struct esp32_i2c_priv_s
   bool ready_read;             /* If I2C has read data */
 
   uint32_t clk_freq;           /* Current I2C Clock frequency */
+
+  spinlock_t lock;             /* Device specific lock */
 
   /* I2C trace support */
 
@@ -1164,7 +1167,7 @@ static int esp32_i2c_reset(struct i2c_master_s *dev)
 
   DEBUGASSERT(priv->refs > 0);
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   esp32_i2c_deinit(priv);
 
@@ -1177,7 +1180,7 @@ static int esp32_i2c_reset(struct i2c_master_s *dev)
   priv->bytes = 0;
   priv->ready_read = 0;
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return OK;
 }
@@ -1420,7 +1423,7 @@ static inline void esp32_i2c_process(struct esp32_i2c_priv_s *priv,
       esp32_i2c_traceevent(priv, I2CEVENT_ERROR, priv->error,
                            esp32_i2c_get_reg(priv, I2C_SR_OFFSET));
       esp32_i2c_set_reg(priv, I2C_INT_ENA_OFFSET, 0);
-#ifndef CONFIG_I2C_POLLED      
+#ifndef CONFIG_I2C_POLLED
       nxsem_post(&priv->sem_isr);
 #endif
     }
@@ -1545,11 +1548,11 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
       return NULL;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if ((volatile int)priv->refs++ != 0)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       return (struct i2c_master_s *)priv;
     }
@@ -1566,7 +1569,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
     {
       /* Failed to allocate a CPU interrupt of this type */
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       return NULL;
     }
@@ -1576,7 +1579,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
     {
       esp32_teardown_irq(priv->cpu, config->periph, priv->cpuint);
 
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
 
       return NULL;
     }
@@ -1588,7 +1591,7 @@ struct i2c_master_s *esp32_i2cbus_initialize(int port)
 
   esp32_i2c_init(priv);
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
   return (struct i2c_master_s *)priv;
 }
@@ -1613,15 +1616,15 @@ int esp32_i2cbus_uninitialize(struct i2c_master_s *dev)
       return ERROR;
     }
 
-  flags = enter_critical_section();
+  flags = spin_lock_irqsave(&priv->lock);
 
   if (--priv->refs)
     {
-      leave_critical_section(flags);
+      spin_unlock_irqrestore(&priv->lock, flags);
       return OK;
     }
 
-  leave_critical_section(flags);
+  spin_unlock_irqrestore(&priv->lock, flags);
 
 #ifndef CONFIG_I2C_POLLED
   up_disable_irq(priv->config->irq);

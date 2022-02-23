@@ -55,7 +55,7 @@
 #include "hardware/sam_qspi.h"
 #include "hardware/sam_pinmap.h"
 
-#ifdef CONFIG_SAMV7_QSPI
+#if defined(CONFIG_SAMV7_QSPI) && !defined(CONFIG_SAMV7_QSPI_SPI_MODE)
 
 /****************************************************************************
  * Pre-processor Definitions

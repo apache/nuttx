@@ -1,39 +1,20 @@
 /****************************************************************************
  * drivers/can/can.c
  *
- *   Copyright (C) 2008-2009, 2011-2012, 2014-2015, 2017, 2019 Gregory Nutt.
- *     All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
- *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -391,7 +372,7 @@ static FAR struct can_reader_s *init_can_reader(FAR struct file *filep)
   reader->fifo.rx_head  = 0;
   reader->fifo.rx_tail  = 0;
 
-  nxsem_init(&reader->fifo.rx_sem, 0, 1);
+  nxsem_init(&reader->fifo.rx_sem, 0, 0);
   nxsem_set_protocol(&reader->fifo.rx_sem, SEM_PRIO_NONE);
   filep->f_priv = reader;
 
@@ -628,24 +609,24 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
 
       fifo = &reader->fifo;
 
-      while (fifo->rx_head == fifo->rx_tail)
+      if (filep->f_oflags & O_NONBLOCK)
         {
-          /* The receive FIFO is empty -- was non-blocking mode selected? */
-
-          if (filep->f_oflags & O_NONBLOCK)
-            {
-              ret = -EAGAIN;
-              goto return_with_irqdisabled;
-            }
-
-          /* Wait for a message to be received */
-
+          ret = nxsem_trywait(&fifo->rx_sem);
+        }
+      else
+        {
           ret = can_takesem(&fifo->rx_sem);
+        }
 
-          if (ret < 0)
-            {
-              goto return_with_irqdisabled;
-            }
+      if (ret < 0)
+        {
+          goto return_with_irqdisabled;
+        }
+
+      if (fifo->rx_head == fifo->rx_tail)
+        {
+          canerr("RX FIFO sem posted but FIFO is empty.\n");
+          goto return_with_irqdisabled;
         }
 
       /* The cd_recv FIFO is not empty.  Copy all buffered data that will fit
@@ -680,9 +661,17 @@ static ssize_t can_read(FAR struct file *filep, FAR char *buffer,
         }
       while (fifo->rx_head != fifo->rx_tail);
 
-      /* All on the messages have bee transferred.  Return the number of
-       * bytes that were read.
-       */
+      if (fifo->rx_head != fifo->rx_tail)
+        {
+          /* The user's buffer was too small, so some messages remain in the
+           * FIFO. Post the semaphore so future calls to poll() or read()
+           * don't block.
+           */
+
+          can_givesem(&fifo->rx_sem);
+        }
+
+      /* Return the number of bytes that were read. */
 
       ret = nread;
 
@@ -1070,6 +1059,7 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct can_reader_s *reader = NULL;
   pollevent_t eventset;
   int ndx;
+  int sval;
   irqstate_t flags;
   int ret;
   int i;
@@ -1082,6 +1072,10 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
       return -ENODEV;
     }
 #endif
+
+  /* Ensure exclusive access to FIFO indices - don't want can_receive or
+   * can_read changing them in the middle of the comparison
+   */
 
   flags = enter_critical_section();
 
@@ -1148,38 +1142,41 @@ static int can_poll(FAR struct file *filep, FAR struct pollfd *fds,
       while (ret < 0);
       dev->cd_ntxwaiters--;
 
-      ndx = dev->cd_xmit.tx_head + 1;
+      ndx = dev->cd_xmit.tx_tail + 1;
       if (ndx >= CONFIG_CAN_FIFOSIZE)
         {
           ndx = 0;
         }
 
-      if (ndx != dev->cd_xmit.tx_tail)
+      if (ndx != dev->cd_xmit.tx_head)
         {
           eventset |= fds->events & POLLOUT;
         }
 
       can_givesem(&dev->cd_xmit.tx_sem);
 
-      /* Check if the receive buffer is empty.
-       *
-       * Get exclusive access to the cd_recv buffer indices.  NOTE: that
-       * we do not let this wait be interrupted by a signal (we probably
-       * should, but that would be a little awkward).
-       */
+      /* Check whether there are messages in the RX FIFO. */
 
-      do
+      ret = nxsem_get_value(&reader->fifo.rx_sem, &sval);
+
+      if (ret < 0)
         {
-          ret = can_takesem(&reader->fifo.rx_sem);
+          DEBUGASSERT(false);
+          goto return_with_irqdisabled;
         }
-      while (ret < 0);
-
-      if (reader->fifo.rx_head != reader->fifo.rx_tail)
+      else if (sval > 0)
         {
-          eventset |= fds->events & POLLIN;
-        }
+          if (reader->fifo.rx_head != reader->fifo.rx_tail)
+            {
+              /* No need to wait, just notify the application immediately */
 
-      can_givesem(&reader->fifo.rx_sem);
+              eventset |= fds->events & POLLIN;
+            }
+          else
+            {
+              canerr("RX FIFO sem not locked but FIFO is empty.\n");
+            }
+        }
 
       if (eventset != 0)
         {
@@ -1413,9 +1410,9 @@ int can_receive(FAR struct can_dev_s *dev, FAR struct can_hdr_s *hdr,
               return -EINVAL;
             }
 
-          /* Increment the counting semaphore. The maximum value should
-           * be CONFIG_CAN_FIFOSIZE -- one possible count for each allocated
-           * message buffer.
+          /* Unlock the binary semaphore, waking up can_read if it is
+           * blocked. If can_read were not blocked, we would not be
+           * executing this because interrupts would be disabled.
            */
 
           if (sval <= 0)

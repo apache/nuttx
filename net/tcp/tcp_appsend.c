@@ -226,9 +226,19 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
 
   else
     {
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      /* The application cannot send more than what is allowed by the
+       * MSS (the minimum of the MSS and the available window).
+       */
+
       DEBUGASSERT(dev->d_sndlen <= conn->mss);
-#else
+
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_SENDFILE)
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+      if (conn->sendfile)
+        {
+#endif
+
       /* If d_sndlen > 0, the application has data to be sent. */
 
       if (dev->d_sndlen > 0)
@@ -241,15 +251,14 @@ void tcp_appsend(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
            */
 
           conn->tx_unacked += dev->d_sndlen;
-
-          /* The application cannot send more than what is allowed by the
-           * MSS (the minimum of the MSS and the available window).
-           */
-
-          DEBUGASSERT(dev->d_sndlen <= conn->mss);
         }
 
       conn->nrtx = 0;
+
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+        }
+#endif
+
 #endif
 
       /* Then handle the rest of the operation just as for the rexmit case */
@@ -313,7 +322,33 @@ void tcp_rexmit(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
    * new data in it, we must send out a packet.
    */
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) && defined(CONFIG_NET_SENDFILE)
+  if (conn->sendfile)
+#endif
+    {
+#if !defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_SENDFILE)
+      if ((result & TCP_REXMIT) != 0 &&
+          dev->d_sndlen > 0 && conn->tx_unacked > 0)
+        {
+          uint32_t saveseq;
+
+          /* According to RFC 6298 (5.4), retransmit the earliest segment
+           * that has not been acknowledged by the TCP receiver.
+           */
+
+          saveseq = tcp_getsequence(conn->sndseq);
+          tcp_setsequence(conn->sndseq, conn->rexmit_seq);
+
+          tcp_send(dev, conn, TCP_ACK | TCP_PSH, dev->d_sndlen + hdrlen);
+
+          tcp_setsequence(conn->sndseq, saveseq);
+
+          return;
+        }
+#endif
+    }
+
+#if defined(CONFIG_NET_TCP_WRITE_BUFFERS)
   if (dev->d_sndlen > 0)
 #else
   if (dev->d_sndlen > 0 && conn->tx_unacked > 0)

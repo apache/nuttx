@@ -1103,7 +1103,6 @@ static int rpmsgfs_bind(FAR struct inode *blkdriver, FAR const void *data,
           fs->timeout = atoi(&ptr[8]);
         }
 
-
       ptr = strtok_r(NULL, ",", &saveptr);
     }
 

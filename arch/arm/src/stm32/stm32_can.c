@@ -1,38 +1,20 @@
 /****************************************************************************
  * arch/arm/src/stm32/stm32_can.c
  *
- *   Copyright (C) 2011, 2016-2017 Gregory Nutt. All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
- *   Copyright (C) 2016 Omni Hoverboards Inc. All rights reserved.
- *   Author: Paul Alexander Patience <paul-a.patience@polymtl.ca>
+ *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in
- *    the documentation and/or other materials provided with the
- *    distribution.
- * 3. Neither the name NuttX nor the names of its contributors may be
- *    used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
- * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
- * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
- * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
- * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
- * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
- * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
- * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
  *
  ****************************************************************************/
 
@@ -85,6 +67,14 @@
 #  undef CONFIG_STM32_CAN_REGDEBUG
 #endif
 
+/* CAN error interrupts */
+
+#ifdef CONFIG_CAN_ERRORS
+#  define STM32_CAN_ERRINT (CAN_IER_LECIE | CAN_IER_ERRIE |             \
+                            CAN_IER_BOFIE | CAN_IER_EPVIE |             \
+                            CAN_IER_EWGIE)
+#endif
+
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -94,6 +84,9 @@ struct stm32_can_s
   uint8_t  port;     /* CAN port number (1 or 2) */
   uint8_t  canrx[2]; /* CAN RX FIFO 0/1 IRQ number */
   uint8_t  cantx;    /* CAN TX IRQ number */
+#ifdef CONFIG_CAN_ERRORS
+  uint8_t  cansce;   /* CAN SCE IRQ number */
+#endif
   uint8_t  filter;   /* Filter number */
   uint32_t base;     /* Base address of the CAN control registers */
   uint32_t fbase;    /* Base address of the CAN filter registers */
@@ -156,12 +149,19 @@ static int  stm32can_send(FAR struct can_dev_s *dev,
 static bool stm32can_txready(FAR struct can_dev_s *dev);
 static bool stm32can_txempty(FAR struct can_dev_s *dev);
 
+#ifdef CONFIG_CAN_ERRORS
+static void stm32can_errint(FAR struct can_dev_s *dev, bool enable);
+#endif
+
 /* CAN interrupt handling */
 
 static int  stm32can_rxinterrupt(FAR struct can_dev_s *dev, int rxmb);
 static int  stm32can_rx0interrupt(int irq, FAR void *context, FAR void *arg);
 static int  stm32can_rx1interrupt(int irq, FAR void *context, FAR void *arg);
 static int  stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg);
+#ifdef CONFIG_CAN_ERRORS
+static int  stm32can_sceinterrupt(int irq, FAR void *context, FAR void *arg);
+#endif
 
 /* Initialization */
 
@@ -205,6 +205,9 @@ static struct stm32_can_s g_can1priv =
                       STM32_IRQ_CAN1RX1,
   },
   .cantx            = STM32_IRQ_CAN1TX,
+#ifdef CONFIG_CAN_ERRORS
+  .cansce           = STM32_IRQ_CAN1SCE,
+#endif
   .filter           = 0,
   .base             = STM32_CAN1_BASE,
   .fbase            = STM32_CAN1_BASE,
@@ -228,6 +231,9 @@ static struct stm32_can_s g_can2priv =
                       STM32_IRQ_CAN2RX1,
   },
   .cantx            = STM32_IRQ_CAN2TX,
+#ifdef CONFIG_CAN_ERRORS
+  .cansce           = STM32_IRQ_CAN2SCE,
+#endif
   .filter           = CAN_NFILTERS / 2,
   .base             = STM32_CAN2_BASE,
   .fbase            = STM32_CAN1_BASE,
@@ -633,9 +639,16 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
   FAR struct stm32_can_s *priv = dev->cd_priv;
   int ret;
 
-  caninfo("CAN%" PRIu8 " RX0 irq: %" PRIu8 " RX1 irq: %" PRIu8
-          " TX irq: %" PRIu8 "\n",
-          priv->port, priv->canrx[0], priv->canrx[1], priv->cantx);
+#ifdef CONFIG_CAN_ERRORS
+  ninfo("CAN%" PRIu8 " RX0 irq: %" PRIu8 " RX1 irq: %" PRIu8
+        " TX irq: %" PRIu8 " SCE irq: %" PRIu8 "\n",
+        priv->port, priv->canrx[0], priv->canrx[1], priv->cantx,
+        priv->cansce);
+#else
+  ninfo("CAN%" PRIu8 " RX0 irq: %" PRIu8 " RX1 irq: %" PRIu8
+        " TX irq: %" PRIu8 "\n",
+        priv->port, priv->canrx[0], priv->canrx[1], priv->cantx);
+#endif
 
   /* CAN cell initialization */
 
@@ -690,6 +703,20 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
       return ret;
     }
 
+#ifdef CONFIG_CAN_ERRORS
+  ret = irq_attach(priv->cansce, stm32can_sceinterrupt, dev);
+  if (ret < 0)
+    {
+      nerr("ERROR: Failed to attach CAN%" PRIu8 " SCE IRQ (%" PRIu8 ")",
+           priv->port, priv->cansce);
+      return ret;
+    }
+
+  /* Enable CAN error interrupts */
+
+  stm32can_errint(dev, true);
+#endif
+
   /* Enable the interrupts at the NVIC.  Interrupts are still disabled in
    * the CAN module.  Since we coming out of reset here, there should be
    * no pending interrupts.
@@ -698,6 +725,9 @@ static int stm32can_setup(FAR struct can_dev_s *dev)
   up_enable_irq(priv->canrx[0]);
   up_enable_irq(priv->canrx[1]);
   up_enable_irq(priv->cantx);
+#ifdef CONFIG_CAN_ERRORS
+  up_enable_irq(priv->cansce);
+#endif
   return OK;
 }
 
@@ -722,17 +752,23 @@ static void stm32can_shutdown(FAR struct can_dev_s *dev)
 
   caninfo("CAN%" PRIu8 "\n", priv->port);
 
-  /* Disable the RX FIFO 0/1 and TX interrupts */
+  /* Disable the RX FIFO 0/1, TX and SCE interrupts */
 
   up_disable_irq(priv->canrx[0]);
   up_disable_irq(priv->canrx[1]);
   up_disable_irq(priv->cantx);
+#ifdef CONFIG_CAN_ERRORS
+  up_disable_irq(priv->cansce);
+#endif
 
-  /* Detach the RX FIFO 0/1 and TX interrupts */
+  /* Detach the RX FIFO 0/1, TX and SCE interrupts */
 
   irq_detach(priv->canrx[0]);
   irq_detach(priv->canrx[1]);
   irq_detach(priv->cantx);
+#ifdef CONFIG_CAN_ERRORS
+  irq_detach(priv->cansce);
+#endif
 
   /* And reset the hardware */
 
@@ -758,7 +794,7 @@ static void stm32can_rxint(FAR struct can_dev_s *dev, bool enable)
   FAR struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  caninfo("CAN%" PRIu8 " enable: %d\n", priv->port, enable);
+  caninfo("CAN%" PRIu8 " rxint enable: %d\n", priv->port, enable);
 
   /* Enable/disable the FIFO 0/1 message pending interrupt */
 
@@ -794,7 +830,7 @@ static void stm32can_txint(FAR struct can_dev_s *dev, bool enable)
   FAR struct stm32_can_s *priv = dev->cd_priv;
   uint32_t regval;
 
-  caninfo("CAN%" PRIu8 " enable: %d\n", priv->port, enable);
+  caninfo("CAN%" PRIu8 " txint enable: %d\n", priv->port, enable);
 
   /* Support only disabling the transmit mailbox interrupt */
 
@@ -805,6 +841,44 @@ static void stm32can_txint(FAR struct can_dev_s *dev, bool enable)
       stm32can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
     }
 }
+
+#ifdef CONFIG_CAN_ERRORS
+/****************************************************************************
+ * Name: stm32can_errint
+ *
+ * Description:
+ *   Call to enable or disable CAN error interrupts.
+ *
+ * Input Parameters:
+ *   dev - An instance of the "upper half" can driver state structure.
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+static void stm32can_errint(FAR struct can_dev_s *dev, bool enable)
+{
+  FAR struct stm32_can_s *priv = dev->cd_priv;
+  uint32_t regval = 0;
+
+  caninfo("CAN%" PRIu8 " errint enable: %d\n", priv->port, enable);
+
+  /* Enable/disable the transmit mailbox interrupt */
+
+  regval  = stm32can_getreg(priv, STM32_CAN_IER_OFFSET);
+  if (enable)
+    {
+      regval |= STM32_CAN_ERRINT;
+    }
+  else
+    {
+      regval &= ~STM32_CAN_ERRINT;
+    }
+
+  stm32can_putreg(priv, STM32_CAN_IER_OFFSET, regval);
+}
+#endif
 
 /****************************************************************************
  * Name: stm32can_ioctl
@@ -1666,6 +1740,172 @@ static int stm32can_txinterrupt(int irq, FAR void *context, FAR void *arg)
 
   return OK;
 }
+
+#ifdef CONFIG_CAN_ERRORS
+/****************************************************************************
+ * Name: stm32can_sceinterrupt
+ *
+ * Description:
+ *   CAN status change interrupt handler
+ *
+ * Input Parameters:
+ *   irq - The IRQ number of the interrupt.
+ *   context - The register state save array at the time of the interrupt.
+ *
+ * Returned Value:
+ *   Zero on success; a negated errno on failure
+ *
+ ****************************************************************************/
+
+static int stm32can_sceinterrupt(int irq, FAR void *context, FAR void *arg)
+{
+  FAR struct can_dev_s   *dev     = (FAR struct can_dev_s *)arg;
+  FAR struct stm32_can_s *priv    = NULL;
+  struct can_hdr_s        hdr;
+  uint32_t                regval  = 0;
+  uint16_t                errbits = 0;
+  uint8_t                 data[CAN_ERROR_DLC];
+  int                     ret     = OK;
+
+  DEBUGASSERT(dev != NULL && dev->cd_priv != NULL);
+  priv = dev->cd_priv;
+
+  /* Check Error Interrupt flag */
+
+  regval = stm32can_getreg(priv, STM32_CAN_MSR_OFFSET);
+  if (regval & CAN_MSR_ERRI)
+    {
+      /* Encode error bits */
+
+      errbits = 0;
+      memset(data, 0, sizeof(data));
+
+      /* Get Error statur register */
+
+      regval = stm32can_getreg(priv, STM32_CAN_ESR_OFFSET);
+
+      if (regval & CAN_ESR_EWGF)
+        {
+          /* Error warning flag */
+
+          data[1] |= (CAN_ERROR1_RXWARNING | CAN_ERROR1_TXWARNING);
+          errbits |= CAN_ERROR_CONTROLLER;
+        }
+
+      if (regval & CAN_ESR_EPVF)
+        {
+          /* Error passive flag */
+
+          data[1] |= (CAN_ERROR1_RXPASSIVE | CAN_ERROR1_TXPASSIVE);
+          errbits |= CAN_ERROR_CONTROLLER;
+        }
+
+      if (regval & CAN_ESR_BOFF)
+        {
+          /* Bus-off flag */
+
+          errbits |= CAN_ERROR_BUSOFF;
+        }
+
+      /* Last error code */
+
+      if (regval & CAN_ESR_LEC_MASK)
+        {
+          if (regval & CAN_ESR_STUFFERROR)
+            {
+              /* Stuff Error */
+
+              errbits |= CAN_ERROR_PROTOCOL;
+              data[2] |= CAN_ERROR2_STUFF;
+            }
+          else if (regval & CAN_ESR_FORMERROR)
+            {
+              /* Format Error */
+
+              errbits |= CAN_ERROR_PROTOCOL;
+              data[2] |= CAN_ERROR2_FORM;
+            }
+          else if (regval & CAN_ESR_ACKERROR)
+            {
+              /* Acknowledge Error */
+
+              errbits |= CAN_ERROR_NOACK;
+            }
+          else if (regval & CAN_ESR_BRECERROR)
+            {
+              /* Bit recessive Error */
+
+              errbits |= CAN_ERROR_PROTOCOL;
+              data[2] |= CAN_ERROR2_BIT1;
+            }
+          else if (regval & CAN_ESR_BDOMERROR)
+            {
+              /* Bit dominant Error */
+
+              errbits |= CAN_ERROR_PROTOCOL;
+              data[2] |= CAN_ERROR2_BIT0;
+            }
+          else if (regval & CAN_ESR_CRCERRPR)
+            {
+              /* Receive CRC Error */
+
+              errbits |= CAN_ERROR_PROTOCOL;
+              data[3] |= CAN_ERROR3_CRCSEQ;
+            }
+        }
+
+      /* Get transmit status register */
+
+      regval = stm32can_getreg(priv, STM32_CAN_TSR_OFFSET);
+
+      if (regval & CAN_TSR_ALST0 || regval & CAN_TSR_ALST1 ||
+          regval & CAN_TSR_ALST2)
+        {
+          /* Lost arbitration Error */
+
+          errbits |= CAN_ERROR_LOSTARB;
+        }
+
+      /* Clear TSR register */
+
+      stm32can_putreg(priv, STM32_CAN_TSR_OFFSET, regval);
+
+      /* Clear ERRI flag */
+
+      stm32can_putreg(priv, STM32_CAN_MSR_OFFSET, CAN_MSR_ERRI);
+    }
+
+  /* TODO: RX overflow and TX overflow */
+
+  /* Report a CAN error */
+
+  if (errbits != 0)
+    {
+      canerr("ERROR: errbits = %08" PRIx16 "\n", errbits);
+
+      /* Format the CAN header for the error report. */
+
+      hdr.ch_id     = errbits;
+      hdr.ch_dlc    = CAN_ERROR_DLC;
+      hdr.ch_rtr    = 0;
+      hdr.ch_error  = 1;
+#ifdef CONFIG_CAN_EXTID
+      hdr.ch_extid  = 0;
+#endif
+      hdr.ch_unused = 0;
+
+      /* And provide the error report to the upper half logic */
+
+      ret = can_receive(dev, &hdr, data);
+      if (ret < 0)
+        {
+          canerr("ERROR: can_receive failed: %d\n", ret);
+        }
+    }
+
+  return ret;
+}
+#endif
 
 /****************************************************************************
  * Name: stm32can_bittiming

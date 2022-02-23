@@ -72,6 +72,33 @@ unsigned int mpu_allocregion(void)
 }
 
 /****************************************************************************
+ * Name: mpu_reset_internal
+ *
+ * Description:
+ *   Resets the MPU to disabled.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_MPU_RESET) || defined(CONFIG_ARM_MPU_EARLY_RESET)
+static void mpu_reset_internal()
+{
+  int region;
+  int regions;
+  regions = (getreg32(MPU_TYPE) & MPU_TYPE_DREGION_MASK)
+                                  >> MPU_TYPE_DREGION_SHIFT;
+
+  for (region = 0; region < regions; region++)
+    {
+      putreg32(region, MPU_RNR);
+      putreg32(0, MPU_RASR);
+      putreg32(0, MPU_RBAR);
+    }
+
+  putreg32(0, MPU_CTRL);
+}
+#endif
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -148,3 +175,33 @@ void mpu_configure_region(uintptr_t base, size_t size,
   putreg32(base | flags1, MPU_RBAR);
   putreg32(limit | flags2 | MPU_RLAR_ENABLE, MPU_RLAR);
 }
+
+/****************************************************************************
+ * Name: mpu_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled during
+ *   MPU initialization.
+ *
+ ****************************************************************************/
+#if defined(CONFIG_MPU_RESET)
+void mpu_reset()
+{
+  mpu_reset_internal();
+}
+#endif
+
+/****************************************************************************
+ * Name: mpu_early_reset
+ *
+ * Description:
+ *   Conditional public interface that resets the MPU to disabled immediately
+ *   after reset.
+ *
+ ****************************************************************************/
+#if defined(CONFIG_ARM_MPU_EARLY_RESET)
+void mpu_early_reset()
+{
+  mpu_reset_internal();
+}
+#endif

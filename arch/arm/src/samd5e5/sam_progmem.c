@@ -806,7 +806,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
           /* Write the page buffer */
 
-          for (i = 0; i < (SAMD5E5_PAGE_SIZE / sizeof(uint32_t)); i++)
+          for (i = 0; i < SAMD5E5_PAGE_WORDS; i++)
             {
               *dest++ = *src++;
             }
@@ -830,7 +830,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
           /* Compare page data */
 
-          for (i = 0; i < (SAMD5E5_PAGE_SIZE / sizeof(uint32_t)); i++)
+          for (i = 0; i < SAMD5E5_PAGE_WORDS; i++)
             {
               if (*dest != *src)
                 {
@@ -852,7 +852,7 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
 
       address += xfrsize;
       dest     = (FAR uint32_t *)address;
-      buffer   = (FAR void *)((uint8_t *)buffer + xfrsize);
+      buffer   = (FAR void *)((uintptr_t)buffer + xfrsize);
       buflen  -= xfrsize;
       offset   = 0;
       page++;

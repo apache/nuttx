@@ -76,11 +76,9 @@ static ssize_t cxd56_geofence_read(FAR struct file *filep,
 static int cxd56_geofence_ioctl(FAR struct file *filep,
                                 int cmd,
                                 unsigned long arg);
-#ifndef CONFIG_DISABLE_POLL
 static int cxd56_geofence_poll(FAR struct file *filep,
                                FAR struct pollfd *fds,
                                bool setup);
-#endif
 
 /* ioctl command functions */
 
@@ -106,11 +104,12 @@ static const struct file_operations g_geofencefops =
   cxd56_geofence_open,  /* open */
   cxd56_geofence_close, /* close */
   cxd56_geofence_read,  /* read */
-  0,                    /* write */
-  0,                    /* seek */
+  NULL,                 /* write */
+  NULL,                 /* seek */
   cxd56_geofence_ioctl, /* ioctl */
-#ifndef CONFIG_DISABLE_POLL
-  cxd56_geofence_poll,  /* poll */
+  cxd56_geofence_poll   /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                /* unlink */
 #endif
 };
 
@@ -607,7 +606,6 @@ static int cxd56_geofence_ioctl(FAR struct file *filep, int cmd,
  *
  ****************************************************************************/
 
-#ifndef CONFIG_DISABLE_POLL
 static int cxd56_geofence_poll(FAR struct file *filep,
                                FAR struct pollfd *fds,
                                bool setup)
@@ -674,7 +672,6 @@ errout:
   nxsem_post(&priv->devsem);
   return ret;
 }
-#endif
 
 /****************************************************************************
  * Name: cxd56_geofence_register

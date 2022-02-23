@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_ARM_SRC_LPC43XX_SSP_H
-#define __ARCH_ARM_SRC_LPC43XX_SSP_H
+#ifndef __ARCH_ARM_SRC_LPC43XX_LPC43_SSP_H
+#define __ARCH_ARM_SRC_LPC43XX_LPC43_SSP_H
 
 /****************************************************************************
  * Included Files
@@ -187,4 +187,4 @@ int lpc43_ssp1register(FAR struct spi_dev_s *dev, spi_mediachange_t callback,
 
 #endif /* __ASSEMBLY__ */
 #endif /* CONFIG_LPC43_SSP0/1 */
-#endif /* __ARCH_ARM_SRC_LPC43XX_SSP_H */
+#endif /* __ARCH_ARM_SRC_LPC43XX_LPC43_SSP_H */
