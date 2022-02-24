@@ -29,7 +29,7 @@
 
 #include <nuttx/addrenv.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
 
 #ifdef CONFIG_BUILD_KERNEL
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]);
  *
  * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see svcall.h)
+ *   via the SYS_signal_handler_return (see syscall.h)
  *
  ****************************************************************************/
 

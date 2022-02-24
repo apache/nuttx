@@ -29,12 +29,12 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 
 #include "signal/signal.h"
-#include "svcall.h"
 #include "exc_return.h"
 #include "arm_internal.h"
 

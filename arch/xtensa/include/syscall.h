@@ -100,7 +100,6 @@
 
 #define SYS_switch_context        (2)
 
-#ifndef CONFIG_BUILD_FLAT
 #ifdef CONFIG_LIB_SYSCALL
 
 /* SYS call 3:
@@ -109,9 +108,9 @@
  */
 
 #define SYS_syscall_return        (3)
+#endif /* CONFIG_LIB_SYSCALL */
 
-#ifdef CONFIG_BUILD_PROTECTED
-
+#ifndef CONFIG_BUILD_FLAT
 /* SYS call 4:
  *
  * void up_task_start(main_t taskentry, int argc, char *argv[])
@@ -119,6 +118,15 @@
  */
 
 #define SYS_task_start            (4)
+
+/* SYS call 5:
+ *
+ * void up_pthread_start(pthread_trampoline_t startup,
+ *                       pthread_startroutine_t entrypt, pthread_addr_t arg)
+ *        noreturn_function
+ */
+
+#define SYS_pthread_start         (5)
 
 /* SYS call 6:
  *
@@ -134,20 +142,7 @@
  */
 
 #define SYS_signal_handler_return (7)
-
-#endif /* CONFIG_BUILD_PROTECTED */
-
-/* SYS call 5:
- *
- * void up_pthread_start(pthread_trampoline_t startup,
- *                       pthread_startroutine_t entrypt, pthread_addr_t arg)
- *        noreturn_function
- */
-
-#define SYS_pthread_start         (5)
-
 #endif /* !CONFIG_BUILD_FLAT */
-#endif /* CONFIG_LIB_SYSCALL */
 
 /****************************************************************************
  * Public Types

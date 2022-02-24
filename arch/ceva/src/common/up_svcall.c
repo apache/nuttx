@@ -27,12 +27,12 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <nuttx/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/userspace.h>
 
-#include "svcall.h"
 #include "up_internal.h"
 
 /****************************************************************************

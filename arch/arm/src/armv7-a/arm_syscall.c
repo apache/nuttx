@@ -29,6 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
@@ -36,7 +37,6 @@
 
 #include "signal/signal.h"
 #include "arm.h"
-#include "svcall.h"
 #include "addrenv.h"
 #include "arm_internal.h"
 

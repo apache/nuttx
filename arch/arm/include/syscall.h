@@ -47,15 +47,97 @@
 #  define SYS_smhcall 0x123456
 #endif
 
-/* The SYS_signal_handler_return is executed here... its value is not always
- * available in this context and so is assumed to be 7.
+/* Configuration ************************************************************/
+
+/* This logic uses three system calls {0,1,2} for context switching and one
+ * for the syscall return.
+ * So a minimum of four syscall values must be reserved.
+ * If CONFIG_BUILD_PROTECTED is defined, then four more syscall values must
+ * be reserved.
  */
 
-#ifndef SYS_signal_handler_return
-#  define SYS_signal_handler_return (7)
-#elif SYS_signal_handler_return != 7
-#  error "SYS_signal_handler_return was assumed to be 7"
+#ifdef CONFIG_LIB_SYSCALL
+#  ifdef CONFIG_BUILD_PROTECTED
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 8"
+#    elif CONFIG_SYS_RESERVED != 8
+#      error "CONFIG_SYS_RESERVED must have the value 8"
+#    endif
+#  else
+#    ifndef CONFIG_SYS_RESERVED
+#      error "CONFIG_SYS_RESERVED must be defined to have the value 4"
+#    elif CONFIG_SYS_RESERVED != 4
+#      error "CONFIG_SYS_RESERVED must have the value 4"
+#    endif
+#  endif
 #endif
+
+/* Cortex-M system calls ****************************************************/
+
+/* SYS call 0:
+ *
+ * int arm_saveusercontext(uint32_t *saveregs);
+ */
+
+#define SYS_save_context          (0)
+
+/* SYS call 1:
+ *
+ * void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ */
+
+#define SYS_restore_context       (1)
+
+/* SYS call 2:
+ *
+ * void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ */
+
+#define SYS_switch_context        (2)
+
+#ifdef CONFIG_LIB_SYSCALL
+/* SYS call 3:
+ *
+ * void arm_syscall_return(void);
+ */
+
+#define SYS_syscall_return        (3)
+#endif /* CONFIG_LIB_SYSCALL */
+
+#ifndef CONFIG_BUILD_FLAT
+/* SYS call 4:
+ *
+ * void up_task_start(main_t taskentry, int argc, FAR char *argv[])
+ *        noreturn_function;
+ */
+
+#define SYS_task_start            (4)
+
+/* SYS call 5:
+ *
+ * void up_pthread_start((pthread_startroutine_t startup,
+ *                        pthread_startroutine_t entrypt, pthread_addr_t arg)
+ *        noreturn_function
+ */
+
+#define SYS_pthread_start         (5)
+
+/* SYS call 6:
+ *
+ * void signal_handler(_sa_sigaction_t sighand,
+ *                     int signo, FAR siginfo_t *info,
+ *                     FAR void *ucontext);
+ */
+
+#define SYS_signal_handler        (6)
+
+/* SYS call 7:
+ *
+ * void signal_handler_return(void);
+ */
+
+#define SYS_signal_handler_return (7)
+#endif /* !CONFIG_BUILD_FLAT */
 
 /****************************************************************************
  * Public Types
