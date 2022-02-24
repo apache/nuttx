@@ -189,7 +189,7 @@ int exec_module(FAR const struct binary_s *binp,
       goto errout_with_addrenv;
     }
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
   /* Allocate the kernel stack */
 
   ret = up_addrenv_kstackalloc(&tcb->cmn);
