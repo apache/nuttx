@@ -32,6 +32,7 @@ CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_mdelay.c riscv_udelay.c
 CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_getnewintctx.c
+CMN_CSRCS += riscv_cpuindex.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c

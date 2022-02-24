@@ -62,7 +62,7 @@ void up_irqinitialize(void)
 
   /* Disable all global interrupts for current hart */
 
-  uint64_t hart_id = READ_CSR(mhartid);
+  uintptr_t hart_id = riscv_mhartid();
 
   uint32_t *miebase;
   if (hart_id == 0)
@@ -180,7 +180,7 @@ void up_disable_irq(int irq)
 
       /* Clear enable bit for the irq */
 
-      uint64_t hart_id = READ_CSR(mhartid);
+      uintptr_t hart_id = riscv_mhartid();
       uintptr_t miebase;
 
       if (hart_id == 0)
@@ -234,7 +234,7 @@ void up_enable_irq(int irq)
 
       /* Set enable bit for the irq */
 
-      uint64_t hart_id = READ_CSR(mhartid);
+      uintptr_t hart_id = riscv_mhartid();
       uintptr_t miebase;
 
       if (hart_id == 0)
