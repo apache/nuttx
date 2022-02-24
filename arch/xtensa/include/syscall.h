@@ -65,7 +65,7 @@
 #  ifdef CONFIG_BUILD_PROTECTED
 #    ifndef CONFIG_SYS_RESERVED
 #      error "CONFIG_SYS_RESERVED must be defined to have the value 9"
-#    elif CONFIG_SYS_RESERVED != 9
+#    elif CONFIG_SYS_RESERVED != 8
 #      error "CONFIG_SYS_RESERVED must have the value 9"
 #    endif
 #  else
@@ -145,13 +145,6 @@
  */
 
 #define SYS_pthread_start         (5)
-
-/* SYS call 8:
- *
- * void up_pthread_exit(pthread_exitroutine_t exit, void *exit_value)
- */
-
-#define SYS_pthread_exit          (8)
 
 #endif /* !CONFIG_BUILD_FLAT */
 #endif /* CONFIG_LIB_SYSCALL */
