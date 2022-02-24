@@ -27,12 +27,12 @@
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <nuttx/arch.h>
 
 #include "arm_arch.h"
 #include "arm_internal.h"
-#include "svcall.h"
 
 /****************************************************************************
  * Public Functions

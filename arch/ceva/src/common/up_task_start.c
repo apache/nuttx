@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
 
 #if defined(CONFIG_BUILD_PROTECTED) || defined(CONFIG_BUILD_KERNEL)
 

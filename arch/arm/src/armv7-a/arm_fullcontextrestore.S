@@ -24,8 +24,8 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include <arch/syscall.h>
 
-#include "svcall.h"
 #include "arm.h"
 
 /****************************************************************************

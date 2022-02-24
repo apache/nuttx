@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
 
 #ifdef CONFIG_LIB_SYSCALL
 
@@ -59,7 +59,7 @@
  *
  * Return:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_syscall_return (see svcall.h)
+ *   via the SYS_syscall_return (see syscall.h)
  *
  ****************************************************************************/
 
