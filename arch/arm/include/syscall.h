@@ -29,25 +29,33 @@
  * Included Files
  ****************************************************************************/
 
-/* Include ARM architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#if defined(CONFIG_ARCH_ARMV7A)
-#  include <arch/armv7-a/syscall.h>
-#elif defined(CONFIG_ARCH_ARMV7R)
-#  include <arch/armv7-r/syscall.h>
-#elif defined(CONFIG_ARCH_ARMV7M)
-#  include <arch/armv7-m/syscall.h>
-#elif defined(CONFIG_ARCH_ARMV8M)
-#  include <arch/armv8-m/syscall.h>
-#elif defined(CONFIG_ARCH_ARMV6M)
-#  include <arch/armv6-m/syscall.h>
-#else
-#  include <arch/arm/syscall.h>
+#ifndef __ASSEMBLY__
+#  include <stdint.h>
 #endif
 
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/
+
+#define SYS_syscall 0x00
+
+#if defined(__thumb__) || defined(__thumb2__)
+#  define SYS_smhcall 0xab
+#else
+#  define SYS_smhcall 0x123456
+#endif
+
+/* The SYS_signal_handler_return is executed here... its value is not always
+ * available in this context and so is assumed to be 7.
+ */
+
+#ifndef SYS_signal_handler_return
+#  define SYS_signal_handler_return (7)
+#elif SYS_signal_handler_return != 7
+#  error "SYS_signal_handler_return was assumed to be 7"
+#endif
 
 /****************************************************************************
  * Public Types
@@ -57,6 +65,184 @@
  * Inline functions
  ****************************************************************************/
 
+#ifndef __ASSEMBLY__
+
+/* SVC with SYS_ call number and no parameters */
+
+static inline uintptr_t sys_call0(unsigned int nbr)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and one parameter */
+
+static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and two parameters */
+
+static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg2 __asm__("r2") = (long)(parm2);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and three parameters */
+
+static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg3 __asm__("r3") = (long)(parm3);
+  register long reg2 __asm__("r2") = (long)(parm2);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2), "r"(reg3)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and four parameters */
+
+static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg4 __asm__("r4") = (long)(parm4);
+  register long reg3 __asm__("r3") = (long)(parm3);
+  register long reg2 __asm__("r2") = (long)(parm2);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
+      "r"(reg3), "r"(reg4)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and five parameters */
+
+static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg5 __asm__("r5") = (long)(parm5);
+  register long reg4 __asm__("r4") = (long)(parm4);
+  register long reg3 __asm__("r3") = (long)(parm3);
+  register long reg2 __asm__("r2") = (long)(parm2);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
+      "r"(reg3), "r"(reg4), "r"(reg5)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* SVC with SYS_ call number and six parameters */
+
+static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
+                                  uintptr_t parm2, uintptr_t parm3,
+                                  uintptr_t parm4, uintptr_t parm5,
+                                  uintptr_t parm6)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg6 __asm__("r6") = (long)(parm6);
+  register long reg5 __asm__("r5") = (long)(parm5);
+  register long reg4 __asm__("r4") = (long)(parm4);
+  register long reg3 __asm__("r3") = (long)(parm3);
+  register long reg2 __asm__("r2") = (long)(parm2);
+  register long reg1 __asm__("r1") = (long)(parm1);
+
+  __asm__ __volatile__
+  (
+    "svc %1"
+    : "=r"(reg0)
+    : "i"(SYS_syscall), "r"(reg0), "r"(reg1), "r"(reg2),
+      "r"(reg3), "r"(reg4), "r"(reg5), "r"(reg6)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
+/* semihosting(SMH) call with call number and one parameter */
+
+static inline long smh_call(unsigned int nbr, void *parm)
+{
+  register long reg0 __asm__("r0") = (long)(nbr);
+  register long reg1 __asm__("r1") = (long)(parm);
+
+  __asm__ __volatile__
+  (
+#if defined(CONFIG_ARCH_ARMV6M) || \
+    defined(CONFIG_ARCH_ARMV7M) || \
+    defined(CONFIG_ARCH_ARMV8M)
+  "bkpt %1"
+#else
+  "svc %1"
+#endif
+    : "=r"(reg0)
+    : "i"(SYS_smhcall), "r"(reg0), "r"(reg1)
+    : "memory", "r14"
+  );
+
+  return reg0;
+}
+
 /****************************************************************************
  * Public Data
  ****************************************************************************/
@@ -65,7 +251,6 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-#ifndef __ASSEMBLY__
 #ifdef __cplusplus
 #define EXTERN extern "C"
 extern "C"
@@ -78,6 +263,6 @@ extern "C"
 #ifdef __cplusplus
 }
 #endif
-#endif
 
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_ARM_INCLUDE_SYSCALL_H */
