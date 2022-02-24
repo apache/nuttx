@@ -174,9 +174,9 @@ int up_relocate(FAR const Elf32_Rel *rel, FAR const Elf32_Sym *sym,
         offset += sym->st_value - addr;
 
 #ifdef CONFIG_ARM_THUMB
-        if (offset & 2 || offset < (int32_t) 0xfe000000 ||
+        if ((offset & 2) != 0 || offset < (int32_t) 0xfe000000 ||
 #else
-        if (offset & 3 || offset < (int32_t) 0xfe000000 ||
+        if ((offset & 3) != 0 || offset < (int32_t) 0xfe000000 ||
 #endif
             offset >= (int32_t) 0x02000000)
           {
