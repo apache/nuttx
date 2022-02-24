@@ -112,6 +112,6 @@ void up_irqinitialize(void)
 
   /* Enable the software interrupt. */
 
-  up_enable_irq(XTENSA_IRQ_SWINT);
+  up_enable_irq(ESP32S2_CPUINT_SOFTWARE1);
 }
 
