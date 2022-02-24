@@ -107,7 +107,7 @@ void up_irqinitialize(void)
 
   irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifndef CONFIG_BUILD_FLAT
   irq_attach(RISCV_IRQ_ECALLU, riscv_swint, NULL);
 #endif
 

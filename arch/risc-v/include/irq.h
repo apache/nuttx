@@ -471,7 +471,7 @@
 struct xcpt_syscall_s
 {
   uintptr_t sysreturn;   /* The return PC */
-#ifdef CONFIG_BUILD_PROTECTED
+#ifndef CONFIG_BUILD_FLAT
   uintptr_t int_ctx;     /* Interrupt context (i.e. mstatus) */
 #endif
 };
@@ -500,7 +500,7 @@ struct xcptcontext
 
   uintptr_t *saved_regs;
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifndef CONFIG_BUILD_FLAT
   /* This is the saved address to use when returning from a user-space
    * signal handler.
    */
