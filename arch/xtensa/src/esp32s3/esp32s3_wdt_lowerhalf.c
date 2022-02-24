@@ -86,7 +86,7 @@ enum wdt_peripheral_e
 
 struct esp32s3_wdt_lowerhalf_s
 {
-  const struct watchdog_ops_s *ops;        /* Lower half operations */
+  const struct watchdog_ops_s *ops;        /* Lower-half operations */
   struct esp32s3_wdt_dev_s *wdt;           /* ESP32-S3 watchdog driver */
   uint32_t timeout;                        /* The current timeout */
   enum wdt_peripheral_e peripheral;        /* Indicates if it is from RTC or Timer Module */
@@ -104,7 +104,7 @@ struct esp32s3_wdt_lowerhalf_s
 
 static int    wdt_handler(int irq, void *context, void *arg);
 
-/* "Lower half" driver methods **********************************************/
+/* "Lower-half" driver methods **********************************************/
 
 static int    wdt_lh_start(struct watchdog_lowerhalf_s *lower);
 static int    wdt_lh_stop(struct watchdog_lowerhalf_s *lower);
@@ -120,7 +120,7 @@ static xcpt_t wdt_lh_capture(struct watchdog_lowerhalf_s *lower,
  * Private Data
  ****************************************************************************/
 
-/* "Lower half" driver methods */
+/* "Lower-half" driver methods */
 
 static const struct watchdog_ops_s g_esp32s3_wdg_ops =
 {
@@ -551,7 +551,7 @@ static xcpt_t wdt_lh_capture(struct watchdog_lowerhalf_s *lower,
    * change the callback function once a callback has already been settled.
    */
 
-  if (priv->handler != NULL && priv->started == true)
+  if (priv->handler != NULL && priv->started)
     {
       /* Deallocate the previous allocated interrupt
        * If there is a previous allocated interrupt.
