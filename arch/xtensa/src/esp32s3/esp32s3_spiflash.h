@@ -47,6 +47,32 @@ extern "C"
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: spi_flash_read_encrypted
+ *
+ * Description:
+ *
+ *   Read data from Encrypted Flash.
+ *
+ *   If flash encryption is enabled, this function will transparently
+ *   decrypt data as it is read.
+ *   If flash encryption is not enabled, this function behaves the same as
+ *   spi_flash_read().
+ *
+ *   See esp_flash_encryption_enabled() for a function to check if flash
+ *   encryption is enabled.
+ *
+ * Parameters:
+ *   addr   - source address of the data in Flash.
+ *   buffer - pointer to the destination buffer
+ *   size   - length of data
+ *
+ * Returned Values: esp_err_t
+ *
+ ****************************************************************************/
+
+int spi_flash_read_encrypted(uint32_t addr, void *buffer, uint32_t size);
+
+/****************************************************************************
  * Name: esp32s3_spiflash_init
  *
  * Description:
