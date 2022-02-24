@@ -307,13 +307,13 @@ enum reset_reason_e
   TG1WDT_SYS_RESET       =  8,  /* Timer Group1 Watch dog reset digital core */
   RTCWDT_SYS_RESET       =  9,  /* RTC Watch dog Reset digital core */
   INTRUSION_RESET        = 10,  /* Instrusion tested to reset CPU */
-  TG0WDT_CPU_RESET       = 11,  /* Time Group0 reset CPU */
+  TG0WDT_CPU_RESET       = 11,  /* Timer Group0 reset CPU */
   RTC_SW_CPU_RESET       = 12,  /* Software reset CPU */
   RTCWDT_CPU_RESET       = 13,  /* RTC Watch dog Reset CPU */
   RTCWDT_BROWN_OUT_RESET = 15,  /* Reset when the vdd voltage is not stable */
   RTCWDT_RTC_RESET       = 16,  /* RTC Watch dog reset digital core and rtc module */
-  TG1WDT_CPU_RESET       = 17,  /* Time Group1 reset CPU */
-  SUPER_WDT_RESET        = 18,  /* super watchdog reset digital core and rtc module */
+  TG1WDT_CPU_RESET       = 17,  /* Timer Group1 reset CPU */
+  SUPER_WDT_RESET        = 18,  /* Super watchdog reset digital core and rtc module */
 };
 
 /* RTC FAST_CLK frequency values */
@@ -2380,9 +2380,8 @@ void IRAM_ATTR esp32c3_perip_clk_init(void)
    * UART, I2S and bring them to known state.
    */
 
-  if ((rst_reas >= TG0WDT_CPU_RESET &&
-       rst_reas <= TG0WDT_CPU_RESET &&
-       rst_reas != RTCWDT_BROWN_OUT_RESET))
+  if ((rst_reas == TG0WDT_CPU_RESET || rst_reas == RTC_SW_CPU_RESET ||
+       rst_reas == RTCWDT_CPU_RESET || rst_reas == TG1WDT_CPU_RESET))
     {
       common_perip_clk = ~getreg32(SYSTEM_PERIP_CLK_EN0_REG);
       hwcrypto_perip_clk = ~getreg32(SYSTEM_PERIP_CLK_EN1_REG);
