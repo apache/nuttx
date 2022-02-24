@@ -842,8 +842,8 @@ struct esp32s3_wdt_dev_s *esp32s3_wdt_init(enum esp32s3_wdt_inst_e wdt_id)
       wdt->inuse = true;
     }
 
-  errout:
-    return (struct esp32s3_wdt_dev_s *)wdt;
+errout:
+  return (struct esp32s3_wdt_dev_s *)wdt;
 }
 
 /****************************************************************************
@@ -882,7 +882,6 @@ void esp32s3_wdt_deinit(struct esp32s3_wdt_dev_s *dev)
   DEBUGASSERT(dev != NULL);
 
   wdt = (struct esp32s3_wdt_priv_s *)dev;
-
   wdt->inuse = false;
 }
 
