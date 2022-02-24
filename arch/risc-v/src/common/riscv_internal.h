@@ -253,6 +253,19 @@ void riscv_cpu_boot(int cpu);
 int riscv_pause_handler(int irq, void *c, void *arg);
 #endif
 
+/****************************************************************************
+ * Name: riscv_mhartid
+ *
+ * Description:
+ *   Context aware way to query hart id
+ *
+ * Returned Value:
+ *   Hart id
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_mhartid(void);
+
 #undef EXTERN
 #ifdef __cplusplus
 }

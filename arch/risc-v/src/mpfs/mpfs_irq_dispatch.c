@@ -33,6 +33,7 @@
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
+
 #include "group/group.h"
 #include "hardware/mpfs_memorymap.h"
 #include "hardware/mpfs_plic.h"
@@ -70,7 +71,7 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  uint64_t hart_id = READ_CSR(mhartid);
+  uintptr_t hart_id = riscv_mhartid();
   uintptr_t claim_address;
 
   if (hart_id == 0)

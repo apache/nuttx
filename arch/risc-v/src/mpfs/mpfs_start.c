@@ -111,7 +111,7 @@ const uint64_t g_entrypoints[5] =
  * Name: __mpfs_start
  ****************************************************************************/
 
-void __mpfs_start(uint32_t mhartid)
+void __mpfs_start(uint64_t mhartid)
 {
   const uint32_t *src;
   uint32_t *dest;
