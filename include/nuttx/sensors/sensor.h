@@ -33,6 +33,7 @@
 #include <time.h>
 
 #include <nuttx/sensors/ioctl.h>
+#include <nuttx/clock.h>
 
 /****************************************************************************
  * Pre-processor Definitions
