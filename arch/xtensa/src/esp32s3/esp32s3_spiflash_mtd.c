@@ -84,12 +84,24 @@ static int esp32s3_erase(struct mtd_dev_s *dev, off_t startblock,
                          size_t nblocks);
 static ssize_t esp32s3_read(struct mtd_dev_s *dev, off_t offset,
                             size_t nbytes, uint8_t *buffer);
+static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
+                                    off_t offset,
+                                    size_t nbytes,
+                                    uint8_t *buffer);
 static ssize_t esp32s3_bread(struct mtd_dev_s *dev, off_t startblock,
                              size_t nblocks, uint8_t *buffer);
+static ssize_t esp32s3_bread_decrypt(struct mtd_dev_s *dev,
+                                     off_t startblock,
+                                     size_t nblocks,
+                                     uint8_t *buffer);
 static ssize_t esp32s3_write(struct mtd_dev_s *dev, off_t offset,
                              size_t nbytes, const uint8_t *buffer);
 static ssize_t esp32s3_bwrite(struct mtd_dev_s *dev, off_t startblock,
                               size_t nblocks, const uint8_t *buffer);
+static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
+                                      off_t startblock,
+                                      size_t nblocks,
+                                      const uint8_t *buffer);
 static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
                          unsigned long arg);
 
@@ -110,6 +122,23 @@ static const struct esp32s3_mtd_dev_s g_esp32s3_spiflash =
             .write  = esp32s3_write,
 #endif
             .name   = "esp32s3_spiflash"
+          },
+  .data = &rom_spiflash_legacy_data,
+};
+
+static const struct esp32s3_mtd_dev_s g_esp32s3_spiflash_encrypt =
+{
+  .mtd =
+          {
+            .erase  = esp32s3_erase,
+            .bread  = esp32s3_bread_decrypt,
+            .bwrite = esp32s3_bwrite_encrypt,
+            .read   = esp32s3_read_decrypt,
+            .ioctl  = esp32s3_ioctl,
+#ifdef CONFIG_MTD_BYTE_WRITE
+            .write  = NULL,
+#endif
+            .name   = "esp32s3_spiflash_encrypt"
           },
   .data = &rom_spiflash_legacy_data,
 };
@@ -294,6 +323,117 @@ static ssize_t esp32s3_bread(struct mtd_dev_s *dev, off_t startblock,
 }
 
 /****************************************************************************
+ * Name: esp32s3_read_decrypt
+ *
+ * Description:
+ *   Read encrypted data and decrypt automatically from SPI Flash
+ *   at designated address.
+ *
+ * Input Parameters:
+ *   dev    - MTD device data
+ *   offset - target address offset
+ *   nbytes - data number
+ *   buffer - data buffer pointer
+ *
+ * Returned Value:
+ *   Read data bytes if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32s3_read_decrypt(struct mtd_dev_s *dev,
+                                  off_t offset,
+                                  size_t nbytes,
+                                  uint8_t *buffer)
+{
+  ssize_t ret;
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, offset, nbytes, buffer);
+
+  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", offset, buffer,
+        nbytes);
+#endif
+
+  /* Acquire the semaphore. */
+
+  ret = nxsem_wait(&g_exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = spi_flash_read_encrypted(offset, buffer, nbytes);
+
+  nxsem_post(&g_exclsem);
+
+  if (ret == OK)
+    {
+      ret = nbytes;
+    }
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s()=%d\n", __func__, ret);
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: esp32s3_bread_decrypt
+ *
+ * Description:
+ *   Read encrypted data and decrypt automatically from designated blocks.
+ *
+ * Input Parameters:
+ *   dev        - MTD device data
+ *   startblock - start block number, it is not equal to SPI Flash's block
+ *   nblocks    - blocks number
+ *   buffer     - data buffer pointer
+ *
+ * Returned Value:
+ *   Read block number if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32s3_bread_decrypt(struct mtd_dev_s *dev,
+                                     off_t startblock,
+                                     size_t nblocks,
+                                     uint8_t *buffer)
+{
+  ssize_t ret;
+  uint32_t addr = startblock * MTD_BLK_SIZE;
+  uint32_t size = nblocks * MTD_BLK_SIZE;
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock, nblocks,
+        buffer);
+
+  finfo("spi_flash_read_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
+#endif
+
+  ret = nxsem_wait(&g_exclsem);
+  if (ret < 0)
+    {
+      return ret;
+    }
+
+  ret = spi_flash_read_encrypted(addr, buffer, size);
+
+  nxsem_post(&g_exclsem);
+
+  if (ret == OK)
+    {
+      ret = nblocks;
+    }
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s()=%d\n", __func__, ret);
+#endif
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: esp32s3_write
  *
  * Description:
@@ -353,6 +493,64 @@ static ssize_t esp32s3_write(struct mtd_dev_s *dev, off_t offset,
 error_with_buffer:
 
   return (ssize_t)ret;
+}
+
+/****************************************************************************
+ * Name: esp32s3_bwrite_encrypt
+ *
+ * Description:
+ *   Write data to designated blocks by SPI Flash hardware encryption.
+ *
+ * Input Parameters:
+ *   dev        - MTD device data
+ *   startblock - start MTD block number,
+ *                it is not equal to SPI Flash's block
+ *   nblocks    - blocks number
+ *   buffer     - data buffer pointer
+ *
+ * Returned Value:
+ *   Writen block number if success or a negative value if fail.
+ *
+ ****************************************************************************/
+
+static ssize_t esp32s3_bwrite_encrypt(struct mtd_dev_s *dev,
+                                      off_t startblock,
+                                      size_t nblocks,
+                                      const uint8_t *buffer)
+{
+  ssize_t ret;
+  uint32_t addr = startblock * MTD_BLK_SIZE;
+  uint32_t size = nblocks * MTD_BLK_SIZE;
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s(%p, 0x%x, %d, %p)\n", __func__, dev, startblock,
+        nblocks, buffer);
+
+  finfo("spi_flash_write_encrypted(0x%x, %p, %d)\n", addr, buffer, size);
+#endif
+
+  ret = nxsem_wait(&g_exclsem);
+  if (ret < 0)
+    {
+      goto error_with_buffer;
+    }
+
+  ret = spi_flash_write_encrypted(addr, buffer, size);
+
+  nxsem_post(&g_exclsem);
+
+  if (ret == OK)
+    {
+      ret = nblocks;
+    }
+
+#ifdef CONFIG_ESP32S3_STORAGE_MTD_DEBUG
+  finfo("%s()=%d\n", __func__, ret);
+#endif
+
+error_with_buffer:
+
+  return ret;
 }
 
 /****************************************************************************
@@ -496,6 +694,8 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
  * Input Parameters:
  *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
  *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
  *
  * Returned Value:
  *   ESP32-S3 SPI Flash MTD data pointer if success or NULL if fail.
@@ -503,7 +703,8 @@ static int esp32s3_ioctl(struct mtd_dev_s *dev, int cmd,
  ****************************************************************************/
 
 struct mtd_dev_s *esp32s3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                 uint32_t mtd_size)
+                                                 uint32_t mtd_size,
+                                                 bool encrypted)
 {
   const struct esp32s3_mtd_dev_s *priv;
   const esp32s3_spiflash_chip_t *chip;
@@ -512,7 +713,14 @@ struct mtd_dev_s *esp32s3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
   uint32_t startblock;
   uint32_t size;
 
-  priv = &g_esp32s3_spiflash;
+  if (encrypted)
+    {
+      priv = &g_esp32s3_spiflash_encrypt;
+    }
+  else
+    {
+      priv = &g_esp32s3_spiflash;
+    }
 
   chip = &(*priv->data)->chip;
 
@@ -572,6 +780,28 @@ struct mtd_dev_s *esp32s3_spiflash_mtd(void)
 {
   struct esp32s3_mtd_dev_s *priv =
       (struct esp32s3_mtd_dev_s *)&g_esp32s3_spiflash;
+
+  return &priv->mtd;
+}
+
+/****************************************************************************
+ * Name: esp32s3_spiflash_encrypt_mtd
+ *
+ * Description:
+ *   Get SPI Flash encryption MTD.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   SPI Flash encryption MTD pointer.
+ *
+ ****************************************************************************/
+
+struct mtd_dev_s *esp32s3_spiflash_encrypt_mtd(void)
+{
+  struct esp32s3_mtd_dev_s *priv =
+      (struct esp32s3_mtd_dev_s *)&g_esp32s3_spiflash_encrypt;
 
   return &priv->mtd;
 }

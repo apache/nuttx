@@ -63,6 +63,22 @@ extern "C"
 struct mtd_dev_s *esp32s3_spiflash_mtd(void);
 
 /****************************************************************************
+ * Name: esp32s3_spiflash_encrypt_mtd
+ *
+ * Description:
+ *   Get SPI Flash encryption MTD.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   SPI Flash encryption MTD pointer.
+ *
+ ****************************************************************************/
+
+struct mtd_dev_s *esp32s3_spiflash_encrypt_mtd(void);
+
+/****************************************************************************
  * Name: esp32s3_spiflash_alloc_mtdpart
  *
  * Description:
@@ -80,7 +96,8 @@ struct mtd_dev_s *esp32s3_spiflash_mtd(void);
  ****************************************************************************/
 
 struct mtd_dev_s *esp32s3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
-                                                 uint32_t mtd_size);
+                                                 uint32_t mtd_size,
+                                                 bool encrypted);
 
 #ifdef __cplusplus
 }
