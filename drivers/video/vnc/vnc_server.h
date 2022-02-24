@@ -34,6 +34,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/video/rfb.h>
 #include <nuttx/video/vnc.h>
+#include <nuttx/input/touchscreen.h>
 #include <nuttx/net/net.h>
 #include <nuttx/semaphore.h>
 
@@ -221,6 +222,10 @@ struct vnc_session_s
   vnc_kbdout_t kbdout;         /* Callout when keyboard input is received */
   vnc_mouseout_t mouseout;     /* Callout when keyboard input is received */
   FAR void *arg;               /* Argument that accompanies the callouts */
+
+#ifdef CONFIG_VNCSERVER_TOUCH
+  FAR struct touch_lowerhalf_s touch; /* Touch driver instance */
+#endif
 
   /* Updater information */
 
@@ -502,6 +507,45 @@ int vnc_raw(FAR struct vnc_session_s *session, FAR struct fb_area_s *rect);
 
 void vnc_key_map(FAR struct vnc_session_s *session, uint16_t keysym,
                  bool keydown);
+
+#ifdef CONFIG_VNCSERVER_TOUCH
+
+/****************************************************************************
+ * Name: vnc_touch_register
+ *
+ * Description:
+ *   Register touch device to fetch touch event from VNC client.
+ *
+ * Returned Value:
+ *   Driver instance
+ *
+ ****************************************************************************/
+
+int vnc_touch_register(FAR const char *devpath,
+                       FAR struct vnc_session_s *session);
+
+/****************************************************************************
+ * Name: vnc_touch_register
+ *
+ * Description:
+ *   Unregister touch device.
+ *
+ ****************************************************************************/
+
+void vnc_touch_unregister(FAR struct vnc_session_s *session,
+                          FAR const char *devpath);
+
+/****************************************************************************
+ * Name: vnc_touch_event
+ *
+ * Description:
+ *   Report a touch event from vnc client.
+ *
+ ****************************************************************************/
+
+int vnc_touch_event(FAR void *arg, int16_t x, int16_t y, uint8_t buttons);
+
+#endif
 
 /****************************************************************************
  * Name: vnc_convert_rgbNN
