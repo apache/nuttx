@@ -623,7 +623,7 @@ void up_enable_irq(int irq)
     }
   else
     {
-      /* Retrive the CPU that enabled this interrupt from the IRQ map.
+      /* Retrieve the CPU that enabled this interrupt from the IRQ map.
        *
        * For peripheral interrupts we rely on the interrupt matrix to manage
        * interrupts.  The interrupt matrix registers are available for both
