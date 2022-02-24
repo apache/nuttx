@@ -104,6 +104,7 @@ jobs:
 
       - name: Tar sources
         run: tar zcf sources.tar.gz sources
+
       - name: Archive Source Bundle
         uses: actions/upload-artifact@v1
         with:
@@ -126,19 +127,23 @@ jobs:
         with:
           name: source-bundle
           path: .
+
       - name: Extract sources
         run: tar zxf sources.tar.gz
+
       - name: Docker Login
-        uses: azure/docker-login@v1
+        uses: docker/login-action@v1
         with:
-          login-server: ghcr.io
-          username: ${GITHUB_ACTOR}
+          registry: ghcr.io
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Docker Pull
         run: docker pull ghcr.io/apache/incubator-nuttx/apache-nuttx-ci-linux
+
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+
       - name: Run builds
         uses: ./sources/nuttx/.github/actions/ci-container
         env:
@@ -152,6 +157,7 @@ jobs:
             cd sources/nuttx/tools/ci
             ./cibuild.sh -A -R -c testlist/${{matrix.boards}}.dat
             ccache -s
+
       - uses: actions/upload-artifact@v2
         with:
           name: linux-builds
@@ -170,8 +176,10 @@ jobs:
         with:
           name: source-bundle
           path: .
+
       - name: Extract sources
         run: tar zxf sources.tar.gz
+
       - name: Restore Tools Cache
         id: cache-tools
         uses: actions/cache@v2
@@ -183,6 +191,7 @@ jobs:
 
       - name: Export NuttX Repo SHA
         run: echo "nuttx_sha=`git -C sources/nuttx rev-parse HEAD`" >> $GITHUB_ENV
+
       - name: Run Builds
         run: |
           echo "::add-matcher::sources/nuttx/.github/gcc.json"
@@ -192,6 +201,7 @@ jobs:
           cd sources/nuttx/tools/ci
           ./cibuild.sh -i -A -R -c testlist/${{matrix.boards}}.dat
           ccache -s
+
       - uses: actions/upload-artifact@v2
         with:
           name: macos-builds
