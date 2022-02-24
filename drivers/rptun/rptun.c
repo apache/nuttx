@@ -720,13 +720,13 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
           shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da0,
                                               v0sz, 0, NULL) + v0sz;
           shbufsz = rsc->config.rxbuf_size * rsc->rpmsg_vring0.num;
-          rpmsg_virtio_init_shm_pool(&priv->tx_shpool, shbuf, shbufsz);
+          rpmsg_virtio_init_shm_pool(&priv->rx_shpool, shbuf, shbufsz);
 
           da1 = rsc->rpmsg_vring1.da;
           shbuf = (FAR char *)remoteproc_mmap(rproc, NULL, &da1,
                                               v1sz, 0, NULL) + v1sz;
           shbufsz = rsc->config.txbuf_size * rsc->rpmsg_vring1.num;
-          rpmsg_virtio_init_shm_pool(&priv->rx_shpool, shbuf, shbufsz);
+          rpmsg_virtio_init_shm_pool(&priv->tx_shpool, shbuf, shbufsz);
         }
 
       role = RPMSG_MASTER;
