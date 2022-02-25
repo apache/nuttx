@@ -51,5 +51,16 @@ ifeq ($(CONFIG_CXX_EXCEPTION),y)
 CSRCS += gnu_unwind_find_exidx.c
 endif
 
+ifeq ($(CONFIG_ARCH_SETJMP_H),y)
+ifeq ($(CONFIG_ARM_THUMB),y)
+ASRCS += arch_setjmp_thumb.S
+endif
+endif
+
+ifeq ($(CONFIG_ARCH_TOOLCHAIN_GNU),y)
+DEPPATH += --dep-path machine/arm/gnu
+VPATH += :machine/arm/gnu
+endif
+
 DEPPATH += --dep-path machine/arm
 VPATH += :machine/arm
