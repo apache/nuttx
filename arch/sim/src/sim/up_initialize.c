@@ -24,13 +24,17 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <debug.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
+#include <nuttx/clock.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
 #include <nuttx/fs/ioctl.h>
+#include <nuttx/kthread.h>
+#include <nuttx/motor/foc/foc_dummy.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
@@ -150,6 +154,70 @@ static void up_init_smartfs(void)
 #endif
 }
 #endif
+
+static int up_loop_task(int argc, FAR char **argv)
+{
+  while (1)
+    {
+      /* Handle UART data availability */
+
+      up_uartloop();
+
+#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
+    defined(CONFIG_SIM_BUTTONS)
+      /* Drive the X11 event loop */
+
+      up_x11events();
+#endif
+
+#ifdef CONFIG_SIM_NETDEV
+      /* Run the network if enabled */
+
+      netdriver_loop();
+#endif
+
+#ifdef CONFIG_SIM_NETUSRSOCK
+      usrsock_loop();
+#endif
+
+#ifdef CONFIG_RPTUN
+      up_rptun_loop();
+#endif
+
+#ifdef CONFIG_SIM_HCISOCKET
+      bthcisock_loop();
+#endif
+
+#ifdef CONFIG_SIM_SOUND
+      sim_audio_loop();
+#endif
+
+#ifdef CONFIG_MOTOR_FOC_DUMMY
+      /* Update simulated FOC device */
+
+      foc_dummy_update();
+#endif
+
+      /* Sleep minimal time, let the idle run */
+
+      usleep(USEC_PER_TICK);
+    }
+
+  return 0;
+}
+
+static void up_loop_init(void)
+{
+  int ret;
+
+  /* Use loop_task to simulate the IRQ */
+
+  ret = kthread_create("loop_task", 1,
+                       CONFIG_DEFAULT_TASK_STACKSIZE,
+                       up_loop_task, NULL);
+
+  DEBUGASSERT(ret > 0);
+}
 
 /****************************************************************************
  * Public Functions
@@ -282,4 +350,6 @@ void up_initialize(void)
   audio_register("pcm0p", sim_audio_initialize(true));
   audio_register("pcm0c", sim_audio_initialize(false));
 #endif
+
+  up_loop_init();
 }

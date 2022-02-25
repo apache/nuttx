@@ -26,7 +26,6 @@
 #include <debug.h>
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
-#include <nuttx/motor/foc/foc_dummy.h>
 
 #include "up_internal.h"
 
@@ -74,48 +73,9 @@ void up_idle(void)
     }
 #endif
 
-  /* Handle UART data availability */
-
-  up_uartloop();
-
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_SIM_BUTTONS)
-  /* Drive the X11 event loop */
-
-  up_x11events();
-#endif
-
-#ifdef CONFIG_SIM_NETDEV
-  /* Run the network if enabled */
-
-  netdriver_loop();
-#endif
-
-#ifdef CONFIG_SIM_NETUSRSOCK
-  usrsock_loop();
-#endif
-
-#ifdef CONFIG_RPTUN
-  up_rptun_loop();
-#endif
-
-#ifdef CONFIG_SIM_HCISOCKET
-  bthcisock_loop();
-#endif
-
-#ifdef CONFIG_SIM_SOUND
-  sim_audio_loop();
-#endif
-
 #ifdef CONFIG_ONESHOT
   /* Driver the simulated interval timer */
 
   up_timer_update();
-#endif
-
-#ifdef CONFIG_MOTOR_FOC_DUMMY
-  /* Update simulated FOC device */
-
-  foc_dummy_update();
 #endif
 }
