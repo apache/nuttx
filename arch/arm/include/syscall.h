@@ -56,20 +56,10 @@
  * be reserved.
  */
 
-#ifdef CONFIG_LIB_SYSCALL
-#  ifdef CONFIG_BUILD_PROTECTED
-#    ifndef CONFIG_SYS_RESERVED
-#      error "CONFIG_SYS_RESERVED must be defined to have the value 8"
-#    elif CONFIG_SYS_RESERVED != 8
-#      error "CONFIG_SYS_RESERVED must have the value 8"
-#    endif
-#  else
-#    ifndef CONFIG_SYS_RESERVED
-#      error "CONFIG_SYS_RESERVED must be defined to have the value 4"
-#    elif CONFIG_SYS_RESERVED != 4
-#      error "CONFIG_SYS_RESERVED must have the value 4"
-#    endif
-#  endif
+#ifndef CONFIG_BUILD_FLAT
+#  define CONFIG_SYS_RESERVED 8
+#else
+#  define CONFIG_SYS_RESERVED 4
 #endif
 
 /* Cortex-M system calls ****************************************************/
