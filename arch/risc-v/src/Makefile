@@ -24,19 +24,10 @@ ifeq ($(CONFIG_OPENSBI),y)
 include opensbi/Make.defs
 endif
 
-# TODO: Merge these implementaions into one
-
-ifeq ($(CONFIG_ARCH_RV32),y)
-ARCH_SUBDIR = rv32im
-else ifeq ($(CONFIG_ARCH_RV64),y)
-ARCH_SUBDIR = rv64gc
-endif
-
 ARCH_SRCDIR = $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src
 
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)chip}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)common}
-INCLUDES += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)$(ARCH_SUBDIR)}
 INCLUDES += ${shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)sched}
 ifeq ($(CONFIG_OPENSBI),y)
 INCLUDES += $(shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)$(DELIM)opensbi$(DELIM)opensbi-3rdparty$(DELIM)include)
