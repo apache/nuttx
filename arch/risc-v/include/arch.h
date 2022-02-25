@@ -41,27 +41,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Macros to get the core and vendor ID, HART, arch and ISA codes, etc.
- */
-
-#ifdef CONFIG_RV32IM_SYSTEM_CSRRS_SUPPORT
-
-uint32_t up_getmisa(void);
-uint32_t up_getarchid(void);
-uint32_t up_getimpid(void);
-uint32_t up_getvendorid(void);
-uint32_t up_gethartid(void);
-
-#else
-
-#define up_getmisa() 0
-#define up_getarchid() 0
-#define up_getimpid() 0
-#define up_getvendorid() 0
-#define up_gethartid() 0
-
-#endif
-
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
