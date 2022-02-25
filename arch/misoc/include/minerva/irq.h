@@ -22,8 +22,8 @@
  * through nuttx/irq.h
  */
 
-#ifndef __ARCH_MINERVA_INCLUDE_IRQ_H
-#define __ARCH_MINERVA_INCLUDE_IRQ_H
+#ifndef __ARCH_MISOC_INCLUDE_MINERVA_IRQ_H
+#define __ARCH_MISOC_INCLUDE_MINERVA_IRQ_H
 
 /****************************************************************************
  * Included Files
@@ -306,4 +306,4 @@ struct xcptcontext
  ****************************************************************************/
 
 #endif /* __ASSEMBLY__ */
-#endif /* __ARCH_RISCV_INCLUDE_RV32IM_IRQ_H */
+#endif /* __ARCH_MISOC_INCLUDE_MINERVA_IRQ_H */
