@@ -278,8 +278,8 @@ static void configure_mmu(void)
 
   /* Setup the L2 and L1 references */
 
-  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, PGT_L3_VBASE, PTE_G);
-  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
+  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, UFLASH_START, PTE_G);
+  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, UFLASH_START, PTE_G);
 
   /* Enable MMU */
 
