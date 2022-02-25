@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/armv7-m/gnu/arm_setjmp.S
+ * libs/libc/machine/arm/gnu/arm_setjmp_thumb.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with

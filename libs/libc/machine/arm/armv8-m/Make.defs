@@ -74,10 +74,6 @@ endif
 
 endif # CONFIG_ARMV8M_LIBM
 
-ifeq ($(CONFIG_ARCH_SETJMP_H),y)
-ASRCS += arch_setjmp.S
-endif
-
 ifeq ($(CONFIG_ARMV8M_MEMCHR),y)
 ASRCS += arch_memchr.S
 endif
