@@ -147,16 +147,3 @@ void up_x11events(void)
         }
     }
 }
-
-/****************************************************************************
- * Name: up_x11events_check
- *
- * Description:
- *   Called periodically from the IDLE loop to check for queued X11 events.
- *
- ****************************************************************************/
-
-bool up_x11events_check(void)
-{
-  return g_display && XPending(g_display) > 0;
-}

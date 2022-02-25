@@ -235,7 +235,6 @@ void up_kbdevent(uint32_t key, int type);
 #if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
     defined(CONFIG_ARCH_BUTTONS) || defined(CONFING_SIM_KEYBOARD)
 void up_x11events(void);
-bool up_x11events_check(void);
 void up_buttonevent(int x, int y, int buttons);
 #endif
 

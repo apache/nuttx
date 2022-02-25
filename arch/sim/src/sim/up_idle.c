@@ -27,7 +27,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/motor/foc/foc_dummy.h>
-#include <nuttx/wqueue.h>
 
 #include "up_internal.h"
 
@@ -36,27 +35,6 @@
  ****************************************************************************/
 
 #define PM_IDLE_DOMAIN 0 /* Revisit */
-
-/****************************************************************************
- * Private Data
- ****************************************************************************/
-
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_SIM_BUTTONS)
-static struct work_s g_x11eventwork;
-#endif
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-#if defined(CONFIG_SIM_TOUCHSCREEN) || defined(CONFIG_SIM_AJOYSTICK) || \
-    defined(CONFIG_SIM_BUTTONS)
-static void up_x11events_worker(FAR void *arg)
-{
-  up_x11events();
-}
-#endif
 
 /****************************************************************************
  * Public Functions
@@ -104,10 +82,7 @@ void up_idle(void)
     defined(CONFIG_SIM_BUTTONS)
   /* Drive the X11 event loop */
 
-  if (up_x11events_check())
-    {
-      work_queue(HPWORK, &g_x11eventwork, up_x11events_worker, NULL, 0);
-    }
+  up_x11events();
 #endif
 
 #ifdef CONFIG_SIM_NETDEV
