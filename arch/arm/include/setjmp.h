@@ -32,7 +32,7 @@
  * Public Types
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ARMV7M) || defined(CONFIG_ARCH_ARMV8M)
+#if defined(CONFIG_ARM_THUMB)
 struct setjmp_buf_s
 {
   /* Note: core registers r0-r3 are caller-saved */
@@ -78,7 +78,7 @@ typedef struct setjmp_buf_s jmp_buf[1];
 
 #else
 #  error "setjmp() not compiled!"
-#endif /* CONFIG_ARCH_ARMV7M */
+#endif /* CONFIG_ARM_THUMB */
 
 /****************************************************************************
  * Public Function Prototypes
