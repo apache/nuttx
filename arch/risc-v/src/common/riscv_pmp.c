@@ -22,6 +22,7 @@
  * Included Files
  ****************************************************************************/
 
+#include <stdint.h>
 #include <stdbool.h>
 
 #include <nuttx/compiler.h>
@@ -35,10 +36,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+/* PMP register length in bits */
+
+#ifdef CONFIG_ARCH_RV32
+#define PMP_XLEN                (32)
+#else
+#define PMP_XLEN                (64)
+#endif
+
 /* Minimum supported block size */
 
 #if !defined CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
-#define MIN_BLOCK_SIZE          (__riscv_xlen / 8)
+#define MIN_BLOCK_SIZE          (PMP_XLEN / 8)
 #else
 #define MIN_BLOCK_SIZE          CONFIG_ARCH_MPU_MIN_BLOCK_SIZE
 #endif
@@ -50,7 +59,7 @@
 #define PMP_CFG_BITS_CNT        (8)
 #define PMP_CFG_FLAG_MASK       (0xFF)
 
-#define PMP_CFG_CNT_IN_REG      (__riscv_xlen / PMP_CFG_BITS_CNT)
+#define PMP_CFG_CNT_IN_REG      (PMP_XLEN / PMP_CFG_BITS_CNT)
 
 #define PMP_MASK_SET_ONE_REGION(region, attr, reg) \
   do { \
@@ -198,7 +207,7 @@ static bool pmp_check_region_attrs(uintptr_t base, uintptr_t size)
 
 static uintptr_t pmp_read_region_cfg(uintptr_t region)
 {
-# if (__riscv_xlen == 32)
+# if (PMP_XLEN == 32)
   switch (region)
     {
       case 0 ... 3:
@@ -216,7 +225,7 @@ static uintptr_t pmp_read_region_cfg(uintptr_t region)
       default:
         break;
     }
-# elif (__riscv_xlen == 64)
+# elif (PMP_XLEN == 64)
   switch (region)
     {
       case 0 ... 7:
@@ -318,19 +327,17 @@ static uintptr_t pmp_read_addr(uintptr_t region)
  *
  * Input Parameters:
  *   val  - Value to decode.
- *   base - Base out.
  *   size - Size out.
  *
  * Returned Value:
- *   None
+ *   Base address
  *
  ****************************************************************************/
 
-static void pmp_napot_decode(uintptr_t val, uintptr_t * base,
-                             uintptr_t * size)
+static uintptr_t pmp_napot_decode(uintptr_t val, uintptr_t * size)
 {
-  uint64_t mask = (uint64_t)(-1) >> 1;
-  uint64_t pot  = __riscv_xlen + 2;
+  uintptr_t mask = (uintptr_t)(-1) >> 1;
+  uintptr_t pot  = PMP_XLEN + 2;
 
   while (mask)
     {
@@ -344,8 +351,8 @@ static void pmp_napot_decode(uintptr_t val, uintptr_t * base,
     }
 
   val &= ~mask;
-  *base = (val << 2);
-  *size = (1 << pot);
+  *size = UINT64_C(1) << pot;
+  return (val << 2);
 }
 
 /****************************************************************************
@@ -400,7 +407,7 @@ static void pmp_read(uintptr_t region, pmp_entry_t * entry)
       break;
 
     case PMPCFG_A_NAPOT:
-      pmp_napot_decode(addr, &addr, &size);
+      addr = pmp_napot_decode(addr, &size);
       break;
 
     default:
@@ -540,7 +547,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
 
   /* Set the configuration register value */
 
-# if (__riscv_xlen == 32)
+# if (PMP_XLEN == 32)
   switch (region)
     {
       case 0 ... 3:
@@ -570,7 +577,7 @@ int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
       default:
         break;
     }
-# elif (__riscv_xlen == 64)
+# elif (PMP_XLEN == 64)
   switch (region)
     {
       case 0 ... 7:
@@ -647,6 +654,8 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size)
 
       /* Does this address range match ? Take partial matches into account.
        *
+       * NOTE: The PMP end address itself is not part of the mapping
+       *
        * There are four possibilities:
        * 1: Full match; region inside mapped area
        * 2: Partial match; mapped area inside region
@@ -655,9 +664,9 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size)
        */
 
       if ((base >= entry.base && end  <= entry.end) ||
-          (base <= entry.base && end  >= entry.end) ||
-          (base >= entry.base && base <= entry.end) ||
-          (end  >= entry.base && end  <= entry.end))
+          (base <  entry.base && end  >  entry.end) ||
+          (base >= entry.base && base <  entry.end) ||
+          (end  >  entry.base && end  <= entry.end))
         {
           /* Found a matching splice, check rights */
 
