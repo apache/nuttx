@@ -609,6 +609,13 @@ void nx_start(void)
     }
 #endif
 
+  /* Disables context switching beacuse we need take the memory manager
+   * semaphore on this CPU so that it will not be available on the other
+   * CPUs until we have finished initialization.
+   */
+
+  sched_lock();
+
   /* Initialize the file system (needed to support device drivers) */
 
   fs_initialize();
@@ -745,13 +752,6 @@ void nx_start(void)
    */
 
   syslog_initialize();
-
-  /* Disables context switching beacuse we need take the memory manager
-   * semaphore on this CPU so that it will not be available on the other
-   * CPUs until we have finished initialization.
-   */
-
-  sched_lock();
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/
