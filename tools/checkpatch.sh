@@ -42,14 +42,36 @@ usage() {
   exit $@
 }
 
-check_file() {
-  if ! $TOOLDIR/nxstyle $@ 2>&1; then
-    fail=1
-  fi
+is_rust_file() {
+  file_ext=${@##*.}
+  file_ext_r=${file_ext/R/r}
+  file_ext_rs=${file_ext_r/S/s}
 
-  if [ $spell != 0 ]; then
-    if ! codespell -q 7 ${@: -1}; then
+  if [ "$file_ext_rs" == "rs" ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
+check_file() {
+  if [ "$(is_rust_file $@)" == "1" ]; then
+    if ! command -v rustfmt &> /dev/null; then
       fail=1
+    else
+      if ! rustfmt --edition 2021 --check $@ 2>&1; then
+        fail=1
+      fi
+    fi
+  else
+    if ! $TOOLDIR/nxstyle $@ 2>&1; then
+      fail=1
+    fi
+
+    if [ $spell != 0 ]; then
+      if ! codespell -q 7 ${@: -1}; then
+        fail=1
+      fi
     fi
   fi
 }
