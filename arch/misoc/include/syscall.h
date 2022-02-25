@@ -50,11 +50,7 @@
  */
 
 #ifdef CONFIG_BUILD_KERNEL
-#  ifndef CONFIG_SYS_RESERVED
-#    error "CONFIG_SYS_RESERVED must be defined to the value 4"
-#  elif CONFIG_SYS_RESERVED != 4
-#    error "CONFIG_SYS_RESERVED must have the value 4"
-#  endif
+#  define CONFIG_SYS_RESERVED 4
 #endif
 
 /* sys_call macros **********************************************************/
