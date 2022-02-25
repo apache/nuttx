@@ -483,6 +483,12 @@ config ESP32S3_ONESHOT
 
 endmenu # Timer/Counter Configuration
 
+config ESP32S3_TICKLESS
+	bool "Enable Tickless OS"
+	default n
+	select ARCH_HAVE_TICKLESS
+	select SCHED_TICKLESS
+
 menu "Application Image Configuration"
 
 choice

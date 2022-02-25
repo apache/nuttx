@@ -64,14 +64,19 @@ endif
 # Required ESP32-S3 files (arch/xtensa/src/esp32s3)
 
 CHIP_CSRCS  = esp32s3_irq.c esp32s3_clockconfig.c esp32s3_region.c
-CHIP_CSRCS += esp32s3_timerisr.c esp32s3_user.c esp32s3_allocateheap.c
+CHIP_CSRCS += esp32s3_systemreset.c esp32s3_user.c esp32s3_allocateheap.c
 CHIP_CSRCS += esp32s3_wdt.c esp32s3_gpio.c esp32s3_lowputc.c esp32s3_serial.c
-CHIP_CSRCS += esp32s3_systemreset.c
 
 # Configuration-dependent ESP32-S3 files
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += esp32s3_idle.c
+endif
+
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += esp32s3_tickless.c
+else
+CHIP_CSRCS += esp32s3_timerisr.c
 endif
 
 ifeq ($(CONFIG_ESP32S3_TIMER),y)
