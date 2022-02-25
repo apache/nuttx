@@ -54,7 +54,7 @@
 /* Configuration ************************************************************/
 
 /* SYS call 1 and 2 are defined for internal use by the RISC-V port (see
- * arch/risc-v/include/rv64gc/syscall.h). In addition, SYS call 3 is the
+ * arch/risc-v/include/syscall.h). In addition, SYS call 3 is the
  * return from a SYS call in kernel mode. The first four syscall values must,
  * therefore, be reserved (0 is not used).
  */
