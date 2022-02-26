@@ -22,7 +22,6 @@
  * Included Files
  ****************************************************************************/
 
-#include <execinfo.h>
 #include <stdlib.h>
 
 #include "up_internal.h"
@@ -50,7 +49,10 @@ void host_abort(int status)
 
 int host_backtrace(void** array, int size)
 {
-  /* exit the simulation */
-
+#ifdef CONFIG_WINDOWS_CYGWIN
+  return 0;
+#else
+  extern int backtrace(void **array, int size);
   return backtrace(array, size);
+#endif
 }
