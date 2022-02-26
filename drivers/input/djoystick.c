@@ -331,10 +331,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
         }
     }
 
-  /* Enable/disable interrupt handling */
-
-  djoy_enable(priv);
-
   priv->du_sample = sample;
   leave_critical_section(flags);
 }
