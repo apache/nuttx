@@ -59,7 +59,6 @@ struct btn_upperhalf_s
 
   FAR const struct btn_lowerhalf_s *bu_lower;
 
-  btn_buttonset_t bu_enabled; /* Set of currently enabled button interrupts */
   btn_buttonset_t bu_sample;  /* Last sampled button states */
   sem_t bu_exclsem;           /* Supports exclusive access to the device */
 
