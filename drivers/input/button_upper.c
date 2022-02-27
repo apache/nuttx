@@ -324,10 +324,6 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
         }
     }
 
-  /* Enable/disable interrupt handling */
-
-  btn_enable(priv);
-
   priv->bu_sample = sample;
   leave_critical_section(flags);
 }
