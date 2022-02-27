@@ -428,7 +428,6 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   FAR const struct btn_lowerhalf_s *lower;
   FAR struct btn_open_s *opriv;
   irqstate_t flags;
-  int ret;
 
   DEBUGASSERT(filep && filep->f_inode);
   opriv = filep->f_priv;
@@ -458,7 +457,6 @@ static ssize_t btn_read(FAR struct file *filep, FAR char *buffer,
   DEBUGASSERT(lower && lower->bl_buttons);
   *(FAR btn_buttonset_t *)buffer = lower->bl_buttons(lower);
   opriv->bo_pending = false;
-  btn_givesem(&priv->bu_exclsem);
   leave_critical_section(flags);
   return (ssize_t)sizeof(btn_buttonset_t);
 }
@@ -651,6 +649,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct btn_upperhalf_s *priv;
   FAR struct btn_open_s *opriv;
   int ret;
+  irqstate_t flags;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
