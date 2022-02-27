@@ -175,11 +175,12 @@ static inline void group_release(FAR struct task_group_s *group)
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
-  /* Destroy the group address environment */
-
-  up_addrenv_destroy(&group->tg_addrenv);
-
-  /* Mark no address environment */
+  /* NOTE:
+   * We do not destroy the group address environment here.
+   * It will be done in the group_deallocate().
+   * However, we mark no address environment here,
+   * so that group_addrenv() can work correctly
+   */
 
   g_pid_current = INVALID_PROCESS_ID;
 #endif
