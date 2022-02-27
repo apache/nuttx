@@ -378,7 +378,7 @@ uintptr_t task_tls_get_value(int tlsindex);
  *
  ****************************************************************************/
 
-#ifndef CONFIG_TLS_ALIGNED
+#if !defined(CONFIG_TLS_ALIGNED) || defined(__KERNEL__)
 FAR struct tls_info_s *tls_get_info(void);
 #endif
 
