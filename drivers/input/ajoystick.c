@@ -63,7 +63,6 @@ struct ajoy_upperhalf_s
 
   FAR const struct ajoy_lowerhalf_s *au_lower;
 
-  ajoy_buttonset_t au_enabled; /* Set of currently enabled button interrupts */
   ajoy_buttonset_t au_sample;  /* Last sampled button states */
   sem_t au_exclsem;            /* Supports exclusive access to the device */
 
