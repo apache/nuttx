@@ -2600,8 +2600,8 @@ Configuration sub-directories
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
 
-  mcuboot-nsh:
-    This configuration exercises the MCUboot compatible application slot
+  mcuboot-swap-test:
+    This configuration exercises the MCUboot compatible application swap image
     example. The application is NuttX nsh with some special commands.
 
     Generate signed binaries for MCUboot compatible application:
@@ -2609,12 +2609,12 @@ Configuration sub-directories
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
         --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
-        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v1.bin
+        nuttx/nuttx.bin mcuboot_nuttx.app.swap.test.confirm-v1.bin
 
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
         --version 2.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
-        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v2.bin
+        nuttx/nuttx.bin mcuboot_nuttx.app.swap.test.confirm-v2.bin
 
       Flash application version 1.0.0 at MCUboot Slot-0:
 
@@ -2625,7 +2625,7 @@ Configuration sub-directories
 	      -c 'reset_config srst_only' \
 	      -c init -c targets \
 	      -c 'reset halt' \
-	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v1.bin 0x420000' \
+	      -c 'program mcuboot_nuttx.app.swap.test.confirm-v1.bin 0x420000' \
 	      -c 'reset halt' \
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
@@ -2639,15 +2639,14 @@ Configuration sub-directories
 	      -c 'reset_config srst_only' \
 	      -c init -c targets \
 	      -c 'reset halt' \
-	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v2.bin 0x500000' \
+	      -c 'program mcuboot_nuttx.app.swap.test.confirm-v2.bin 0x500000' \
 	      -c 'reset halt' \
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
 
     Relevant configuration settings:
 
-      CONFIG_BOOT_MCUBOOT=y
-      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+      CONFIG_EXAMPLES_MCUBOOT_SWAP_TEST=y
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_INIT_ENTRYPOINT="nsh_main"
