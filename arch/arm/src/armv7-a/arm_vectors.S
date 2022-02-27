@@ -423,7 +423,11 @@ arm_vectordata:
 	 * r13 and r14
 	 */
 
+#ifdef CONFIG_ARMV7A_DECODEFIQ
 	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r13, #(PSR_MODE_SVC | PSR_I_BIT)
+#endif
 	msr		cpsr_c, r13			/* Switch to SVC mode */
 
 	/* Create a context structure.  First set aside a stack frame
@@ -433,7 +437,11 @@ arm_vectordata:
 	sub		sp, sp, #XCPTCONTEXT_SIZE
 	stmia		sp, {r0-r12}			/* Save the SVC mode regs */
 
+#ifdef CONFIG_ARMV7A_DECODEFIQ
 	mov		r0, #(PSR_MODE_ABT | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r0, #(PSR_MODE_ABT | PSR_I_BIT)
+#endif
 	msr		cpsr_c, r0			/* Switch back ABT mode */
 
 	/* Get the values for r15(pc) and CPSR in r3 and r4 */
@@ -443,7 +451,11 @@ arm_vectordata:
 
 	/* Then switch back to SVC mode */
 
+#ifdef CONFIG_ARMV7A_DECODEFIQ
 	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT)
+#endif
 	msr		cpsr_c, r0
 
 #ifdef CONFIG_BUILD_KERNEL
