@@ -1719,7 +1719,7 @@ Configuration sub-directories
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_INIT_ENTRYPOINT="mcuboot_loader_main"
 
-  mcuboot-confirm:
+  mcuboot-slot-confirm:
     This configuration exercises the MCUboot compatible application slot
     confirm example.
 
@@ -1733,8 +1733,7 @@ Configuration sub-directories
 
       CONFIG_BOARD_LATE_INITIALIZE=y
 
-      CONFIG_BOOT_MCUBOOT=y
-      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+      CONFIG_EXAMPLES_MCUBOOT_SLOT_CONFIRM=y
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_INIT_ENTRYPOINT="mcuboot_confirm_main"
