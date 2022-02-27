@@ -63,7 +63,6 @@ struct djoy_upperhalf_s
 
   FAR const struct djoy_lowerhalf_s *du_lower;
 
-  djoy_buttonset_t du_enabled; /* Set of currently enabled button interrupts */
   djoy_buttonset_t du_sample;  /* Last sampled button states */
   sem_t du_exclsem;            /* Supports exclusive access to the device */
 
