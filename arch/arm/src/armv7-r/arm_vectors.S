@@ -297,10 +297,24 @@ arm_vectorsvc:
 
 	mov		fp, #0				/* Init frame pointer */
 	mov		r0, sp				/* Get r0=xcp */
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_syscall() on the interrupt stack */
+
+	ldr		sp, .Lirqstacktop		/* SP = interrupt stack top */
+	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
+	mov		r4, sp				/* Save the SP in a preserved register */
+	bic		sp, sp, #7			/* Force 8-byte alignment */
+	bl		arm_syscall			/* Call the handler */
+	ldr		sp, [r4]			/* Restore the user stack pointer */
+#else
+	/* Call arm_syscall() on the user stack */
+
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_syscall			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
 
 	/* Upon return from arm_syscall, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
