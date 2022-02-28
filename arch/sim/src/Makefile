@@ -76,6 +76,9 @@ endif
 VPATH = sim
 DEPPATH = $(patsubst %,--dep-path %,$(subst :, ,$(VPATH)))
 
+HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
+   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe
+
 HOSTCFLAGS += ${shell $(INCDIR) "$(CC)" $(ARCH_SRCDIR)}
 ifeq ($(CONFIG_HOST_MACOS),y)
   HOSTCFLAGS += -Wno-deprecated-declarations
@@ -234,7 +237,6 @@ RELPATHS += -L"$(TOPDIR)/staging"
 
 # Add the board-specific library and directory
 
-LIBPATHS += -L board
 RELPATHS += -L board
 RELLIBS += -lboard
 
@@ -300,8 +302,8 @@ ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
+	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
