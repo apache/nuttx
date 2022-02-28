@@ -225,7 +225,8 @@ uint32_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode.
    * Also set machine previous interrupt enable
+   * Note: In qemu, FPU is always exist even if don't use F|D ISA extension
    */
 
-  return (MSTATUS_MPPM | MSTATUS_MPIE);
+  return (MSTATUS_MPPM | MSTATUS_MPIE | MSTATUS_FS_INIT);
 }
