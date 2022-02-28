@@ -30,7 +30,9 @@
 #include <debug.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/fs/fs.h>
 #include <nuttx/kmalloc.h>
+#include <nuttx/lib/lib.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/sched.h>
 #include <nuttx/tls.h>
@@ -200,6 +202,16 @@ int group_allocate(FAR struct task_tcb_s *tcb, uint8_t ttype)
       tcb->cmn.group = NULL;
       goto errout_with_group;
     }
+
+  /* Initialize file descriptors for the TCB */
+
+  files_initlist(&group->tg_filelist);
+
+#ifdef CONFIG_FILE_STREAM
+  /* Initialize file streams for the task group */
+
+  lib_stream_initialize(group);
+#endif
 
 #ifndef CONFIG_DISABLE_PTHREAD
   /* Initialize the pthread join semaphore */

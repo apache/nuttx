@@ -66,10 +66,6 @@ int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
   DEBUGASSERT(group);
   DEBUGASSERT(ttype != TCB_FLAG_TTYPE_PTHREAD);
 
-  /* Initialize file descriptors for the TCB */
-
-  files_initlist(&group->tg_filelist);
-
 #ifndef CONFIG_FDCLONE_DISABLE
   DEBUGASSERT(rtcb->group);
 
