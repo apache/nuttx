@@ -64,9 +64,3 @@ ASMEXT = .S
 OBJEXT = .o
 LIBEXT = .a
 EXEEXT = .elf
-
-HOSTCC = gcc
-HOSTINCLUDES = -I.
-HOSTCFLAGS = -Wall -Wstrict-prototypes -Wshadow -Wundef -g -pipe
-HOSTLDFLAGS =
-
