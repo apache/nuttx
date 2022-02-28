@@ -200,7 +200,21 @@ exception_common:
 
 	setintstack	r2, r3			/* SP = IRQ stack top */
 
+	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 #else
+	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
+	 * that signal processing can have a separate xcpcontext to handle
+	 * signal context (reference: arm_schedulesigaction.c):
+	 *      ----------------------
+	 *     |    IRQ XCP context   |
+	 *      -------------------
+	 *     |  Signal XCP context  |
+	 *      ----------------------   <- SP
+	 * also the sp should be restore after arm_doirq()
+	 */
+
+	sub		r4, r4, #XCPTCONTEXT_SIZE		/* Reserve signal context */
+
 	/* Otherwise, we will re-use the interrupted thread's stack.  That may
 	 * mean using either MSP or PSP stack for interrupt level processing (in
 	 * kernel mode).
@@ -209,9 +223,13 @@ exception_common:
 	bic		r2, r4, #7				/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
 
+	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
+
+	/* If the interrupt stack is disabled, restore the signal context */
+
+	add		r4, r4, #XCPTCONTEXT_SIZE		/* Restore signal context */
 #endif
 
-	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 	mov		r1, r4					/* Recover R1=main stack pointer */
 
 	/* On return from arm_doirq, R0 will hold a pointer to register context

@@ -55,6 +55,10 @@ void up_initial_state(struct tcb_s *tcb)
   struct xcptcontext *xcp = &tcb->xcp;
   uint32_t cpsr;
 
+  /* Initialize the initial exception register context structure */
+
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
   /* Initialize the idle thread stack */
 
   if (tcb->pid == 0)
@@ -72,20 +76,28 @@ void up_initial_state(struct tcb_s *tcb)
 
       arm_stack_color(tcb->stack_alloc_ptr, 0);
 #endif /* CONFIG_STACK_COLORATION */
+
+      return;
     }
 
-  /* Initialize the initial exception register context structure */
+  /* Initialize the context registers to stack top */
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
+  xcp->regs = (FAR void *)STACK_ALIGN_DOWN(
+                          (uint32_t)tcb->stack_base_ptr +
+                                    tcb->adj_stack_size -
+                                    XCPTCONTEXT_SIZE);
+
+  /* Initialize the xcp registers */
+
+  memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
   /* Save the initial stack pointer */
 
-  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
-                                     tcb->adj_stack_size;
+  xcp->regs[REG_SP] = (uint32_t)xcp->regs;
 
   /* Save the task entry point */
 
-  xcp->regs[REG_PC]      = (uint32_t)tcb->start;
+  xcp->regs[REG_PC] = (uint32_t)tcb->start;
 
   /* If this task is running PIC, then set the PIC base register to the
    * address of the allocated D-Space region.

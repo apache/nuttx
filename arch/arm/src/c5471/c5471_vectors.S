@@ -150,7 +150,21 @@ arm_vectorirq:
 	bl	arm_doirq		/* Call the handler */
 	ldr	sp, [sp]		/* Restore the user stack pointer */
 #else
-	bl	arm_doirq		/* Call the handler */
+	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
+	 * that signal processing can have a separate xcpcontext to handle
+	 * signal context (reference: arm_schedulesigaction.c):
+	 *      ----------------------
+	 *     |    IRQ XCP context   |
+	 *      -------------------
+	 *     |  Signal XCP context  |
+	 *      ----------------------   <- SP
+	 */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+
+	bl	arm_doirq			/* Call the handler */
+
+	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore signal context */
 #endif
 
 	/* Restore the CPSR, SYS mode registers and return */

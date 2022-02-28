@@ -174,10 +174,10 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
-          arm_savefpu((uint32_t *)regs[REG_R1]);
+          arm_savefpu(regs);
 #endif
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
         }
         break;
 
@@ -207,7 +207,8 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
 
       /* R0=SYS_switch_context:  This a switch context command:
        *
-       *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *   void arm_switchcontext(uint32_t **saveregs,
+       *                          uint32_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -224,10 +225,10 @@ int arm_svcall(int irq, FAR void *context, FAR void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
-          arm_savefpu((uint32_t *)regs[REG_R1]);
+          arm_savefpu(regs);
 #endif
+          *(uint32_t **)regs[REG_R1] = regs;
           CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
         break;
