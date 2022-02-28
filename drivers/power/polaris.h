@@ -107,6 +107,7 @@ struct rx_int_state_s
 #define WLC_HEALTH_OVERCOLD  2
 
 #define CHARGER_DETECT_WORK_TIME  10000
+#define DETECT_WORK_INIT_TIME     20000
 
 #endif /* __POLARIS_H */
 

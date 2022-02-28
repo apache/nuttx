@@ -880,12 +880,14 @@ static int cps4019_check_intr(FAR struct cps4019_dev_s *priv,
  *   none.
  *
  ****************************************************************************/
+
 static void detect_worker(FAR void *arg)
 {
   FAR struct cps4019_dev_s *priv = arg;
-  bool charger_is_exit;
+  int charger_is_exit;
   int ret;
-  ret = cps4019_state(priv, &charger_is_exit);
+
+  ret = cps4019_state(&priv->dev, &charger_is_exit);
   if (ret == OK)
     {
       if (!charger_is_exit)
@@ -1302,6 +1304,7 @@ FAR struct battery_charger_dev_s *
                      FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct cps4019_dev_s *priv;
+  int status = 0;
   int ret;
 
   /* Initialize the cps4019 device structure */
@@ -1350,6 +1353,16 @@ FAR struct battery_charger_dev_s *
   if (ret < 0)
     {
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
+    }
+
+  ret = cps4019_state(&priv->dev, &status);
+  if (ret == OK)
+    {
+      if (status)
+        {
+          work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
+                     DETECT_WORK_INIT_TIME);
+        }
     }
 
   return (FAR struct battery_charger_dev_s *)priv;

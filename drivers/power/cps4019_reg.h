@@ -230,6 +230,7 @@ typedef enum
 #define CPS_ANA_STATUS_REG            0x0067  /* Length: 1, default: 0x00 */
 
 #define CHARGER_DETECT_WORK_TIME  10000
+#define DETECT_WORK_INIT_TIME     20000
 
 #endif /* __CPS4019_REG_H */
 
