@@ -76,7 +76,7 @@ arm_savefpu:
 	 * s0, s1, ... in increasing address order.
 	 */
 
-#ifdef CONFIG_ARM_HAVE_FPU_D32
+#ifdef CONFIG_ARM_DPFPU32
 	vstmia.64	r1!, {d0-d15}			/* Save the full FP context */
 	vstmia.64	r1!, {d16-d31}
 #else

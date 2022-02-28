@@ -67,6 +67,29 @@ else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
+ifeq ($(CONFIG_ARCH_CORTEXR4),y)
+  ARCHCPUFLAGS += -mcpu=cortex-r4
+else ifeq ($(CONFIG_ARCH_CORTEXR5),y)
+  ARCHCPUFLAGS += -mcpu=cortex-r5
+else ifeq ($(CONFIG_ARCH_CORTEXR7),y)
+  ARCHCPUFLAGS += -mcpu=cortex-r7
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  ARCHCPUFLAGS += -mfpu=vfpv3-d16
+  ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+    ARCHCPUFLAGS += -mfloat-abi=softfp
+  else
+    ARCHCPUFLAGS += -mfloat-abi=hard
+  endif
+else
+  ARCHCPUFLAGS += -mfloat-abi=soft
+endif
+
+ifeq ($(CONFIG_ENDIAN_BIG),y)
+  ARCHCPUFLAGS += -mbig-endian
+endif
+
 ifeq ($(CONFIG_ENDIAN_BIG),y)
   TARGET_ARCH := armeb
 else
