@@ -61,6 +61,12 @@ config RAMLOG_OVERWRITE
 		Enable overwrite of circular buffer. If RAMLOG buffer overflows,
 		overwrite it from the top of buffer and always keep the latest log.
 
+config RAMLOG_POLLTHRESHOLD
+	int "The threshold value of circular buffer to notify poll waiters"
+	default 1
+	---help---
+		When the length of circular buffer exceeds the threshold value, the poll() will
+		return POLLIN to all poll waiters.
 endif
 
 config SYSLOG_BUFFER
