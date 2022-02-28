@@ -63,11 +63,11 @@
 #include <arch/irq.h>
 #include <arch/chip/core-isa.h>
 #include <arch/chip/tie.h>
-#include <arch/xtensa/core.h>
 #include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "svcall.h"
+#include "syscall.h"
+#include "xtensa_swi.h"
 
 /****************************************************************************
  * Public Functions
@@ -546,16 +546,9 @@ xtensa_context_restore:
 
 	mov  a3, a2
 	movi a2, SYS_restore_context
-	isync
-	dsync
-	esync
-	memw
-	movi a4, XCHAL_SW_SYSCALL
+	movi a4, XCHAL_SWINT_CALL
 	wsr  a4, intset
 	isync
-	dsync
-	esync
-	memw
 
 	RET(16)
 

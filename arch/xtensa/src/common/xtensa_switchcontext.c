@@ -24,7 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include "svcall.h"
 #include "syscall.h"
 #include <arch/irq.h>
 
