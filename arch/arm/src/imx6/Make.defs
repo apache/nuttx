@@ -149,3 +149,7 @@ endif
 ifeq ($(CONFIG_IMX6_ENET),y)
 CHIP_CSRCS += imx_enet.c
 endif
+
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CHIP_CSRCS += imx_pgalloc.c
+endif
