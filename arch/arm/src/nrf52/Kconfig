@@ -392,8 +392,7 @@ menu "GPIO Interrupt Configuration"
 
 config NRF52_PER_PIN_INTERRUPTS
 	bool "Per-pin interrupt callbacks"
-	default n if DEFAULT_SMALL
-	default y if !DEFAULT_SMALL
+	default !DEFAULT_SMALL
 	depends on NRF52_GPIOTE
 	---help---
 		The GPIOTE peripheral supports a limited number of channels which can
