@@ -178,6 +178,7 @@
 #define BMI270_500DPS_FACTOR          500.0f     /* Gyroscope 500dps factor */
 #define BMI270_1000DPS_FACTOR         1000.0f    /* Gyroscope 1000dps factor */
 #define BMI270_2000DPS_FACTOR         2000.0f    /* Gyroscope 2000dps factor */
+#define BMI270_DPS2RPS_FACTOR         (M_PI/180) /* Convert dps to rad/s factor */
 
 /* Gyroscope Bandwidth parameters */
 
@@ -820,7 +821,8 @@ static const struct sensor_ops_s g_bmi270_xl_ops =
   .activate = bmi270_activate,         /* Enable/disable sensor */
   .set_interval = bmi270_set_interval, /* Set output data period */
   .batch = bmi270_batch,               /* Set maximum report latency */
-  .selftest = bmi270_selftest          /* Sensor selftest function */
+  .selftest = bmi270_selftest,         /* Sensor selftest function */
+  .control = bmi270_control            /* Set special config for sensor */
 };
 
 static const struct sensor_ops_s g_bmi270_gy_ops =
@@ -2527,8 +2529,8 @@ static int bmi270_xl_enable(FAR struct bmi270_dev_s *priv,
 {
   bmi270_pwr_ctrl_t regval_pwr_ctrl;
 
-  bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_2G);
-  priv->dev[BMI270_XL_IDX].factor = BMI270_2G_FACTOR;
+  bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
+  priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
 
   bmi270_xl_setfilter(priv, BMI270_XL_OSR4_AVG1);
 
@@ -2859,7 +2861,8 @@ static int bmi270_gy_enable(FAR struct bmi270_dev_s *priv,
   bmi270_pwr_ctrl_t regval_pwr_ctrl;
 
   bmi270_gy_setfullscale(priv, BMI270_GY_RANGE_2000);
-  priv->dev[BMI270_GY_IDX].factor = BMI270_2000DPS_FACTOR;
+  priv->dev[BMI270_GY_IDX].factor = BMI270_2000DPS_FACTOR
+                                  * BMI270_DPS2RPS_FACTOR;
 
   bmi270_gy_setfilter(priv, BMI270_GY_NORMAL_MODE);
 
@@ -4351,39 +4354,39 @@ static int bmi270_control(FAR struct sensor_lowerhalf_s *lower,
         {
           switch (arg)
           {
-          case BMI270_XL_SET_2G:
-            {
-              ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_2G);
-              priv->dev[BMI270_XL_IDX].factor = BMI270_2G_FACTOR;
-            }
-            break;
+            case BMI270_XL_SET_2G:
+              {
+                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_2G);
+                priv->dev[BMI270_XL_IDX].factor = BMI270_2G_FACTOR;
+              }
+              break;
 
-          case BMI270_XL_SET_4G:
-            {
-              ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_4G);
-              priv->dev[BMI270_XL_IDX].factor = BMI270_4G_FACTOR;
-            }
-            break;
+            case BMI270_XL_SET_4G:
+              {
+                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_4G);
+                priv->dev[BMI270_XL_IDX].factor = BMI270_4G_FACTOR;
+              }
+              break;
 
-          case BMI270_XL_SET_8G:
-            {
-              ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
-              priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
-            }
-            break;
+            case BMI270_XL_SET_8G:
+              {
+                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_8G);
+                priv->dev[BMI270_XL_IDX].factor = BMI270_8G_FACTOR;
+              }
+              break;
 
-          case BMI270_XL_SET_16G:
-            {
-              ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_16G);
-              priv->dev[BMI270_XL_IDX].factor = BMI270_16G_FACTOR;
-            }
-            break;
+            case BMI270_XL_SET_16G:
+              {
+                ret = bmi270_xl_setfullscale(priv, BMI270_XL_RANGE_16G);
+                priv->dev[BMI270_XL_IDX].factor = BMI270_16G_FACTOR;
+              }
+              break;
 
-          default:
-            {
-              ret = -EINVAL;
-            }
-            break;
+            default:
+              {
+                ret = -EINVAL;
+              }
+              break;
           }
 
           if (ret < 0)

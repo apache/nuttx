@@ -118,10 +118,12 @@
 #define LSM6DSO_2G                0x00       /* Accelerator scale 2g */
 #define LSM6DSO_4G                0x02       /* Accelerator scale 4g */
 #define LSM6DSO_8G                0x03       /* Accelerator scale 8g */
+#define LSM6DSO_16G               0x01       /* Accelerator scale 16g */
 
 #define LSM6DSO_2G_FACTOR         0.061f     /* Accelerator 2g factor (mg) */
 #define LSM6DSO_4G_FACTOR         0.122f     /* Accelerator 4g factor (mg) */
 #define LSM6DSO_8G_FACTOR         0.244f     /* Accelerator 8g factor (mg) */
+#define LSM6DSO_16G_FACTOR        0.488f     /* Accelerator 16g factor (mg) */
 #define LSM6DSO_MG2MS_FACTOR      0.0098f    /* Convert mg to m/s² factor */
 
 #define LSM6DSO_125DPS            0x01       /* Gyroscope scale 125dps */
@@ -136,10 +138,17 @@
 #define LSM6DSO_1000DPS_FACTOR    35.0f      /* Gyroscope 1000dps factor (mdps/LSB) */
 #define LSM6DSO_2000DPS_FACTOR    70.0f      /* Gyroscope 2000dps factor (mdps/LSB) */
 #define LSM6DSO_MDPS2DPS_FACTOR   0.001f     /* Convert mdps to dps factor */
+#define LSM6DSO_DPS2RPS_FACTOR    (M_PI/180) /* Convert dps to rad/s factor */
 
 /* IO control command. */
 
-#define LSM6DSO_FSM_MANAGE_CMD    0xf1        /* Finite state machine manage command */
+#define LSM6DSO_FSM_MANAGE_CMD    0xf1       /* Finite state machine manage command */
+#define LSM6DSO_SET_SCALE_XL_CMD  0xf2       /* Set accelerator scale command */
+
+#define LSM6DSO_XL_SET_2G         2          /* Accelerometer set 2G */
+#define LSM6DSO_XL_SET_4G         4          /* Accelerometer set 4G */
+#define LSM6DSO_XL_SET_8G         8          /* Accelerometer set 8G */
+#define LSM6DSO_XL_SET_16G        16         /* Accelerometer set 16G */
 
 /* Factory test instructions. */
 
@@ -1323,7 +1332,8 @@ static const struct sensor_ops_s g_lsm6dso_xl_ops =
   .activate = lsm6dso_activate,         /* Enable/disable sensor */
   .set_interval = lsm6dso_set_interval, /* Set output data period */
   .batch = lsm6dso_batch,               /* Set maximum report latency */
-  .selftest = lsm6dso_selftest          /* Sensor selftest function */
+  .selftest = lsm6dso_selftest,         /* Sensor selftest function */
+  .control = lsm6dso_control            /* Set special config for sensor */
 };
 
 static const struct sensor_ops_s g_lsm6dso_gy_ops =
@@ -2523,11 +2533,11 @@ static int lsm6dso_xl_enable(FAR struct lsm6dso_dev_s *priv,
   if (enable)
     {
       /* Accelerometer config registers:
-       * Turn on the accelerometer: +-2g.
+       * Turn on the accelerometer: +-8g.
        */
 
-      lsm6dso_xl_setfullscale(priv, LSM6DSO_2G);
-      priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
+      lsm6dso_xl_setfullscale(priv, LSM6DSO_8G);
+      priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_8G_FACTOR
                                        * LSM6DSO_MG2MS_FACTOR;
 
       /* Set worker for accelerometer. */
@@ -2823,7 +2833,8 @@ static int lsm6dso_gy_enable(FAR struct lsm6dso_dev_s *priv,
 
       lsm6dso_gy_setfullscale(priv, LSM6DSO_2000DPS);
       priv->dev[LSM6DSO_GY_IDX].factor = LSM6DSO_2000DPS_FACTOR
-                                       * LSM6DSO_MDPS2DPS_FACTOR;
+                                       * LSM6DSO_MDPS2DPS_FACTOR
+                                       * LSM6DSO_DPS2RPS_FACTOR;
 
       /* Set interrupt for gyroscope. */
 
@@ -4328,6 +4339,52 @@ static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
           if (ret < 0)
             {
               snerr("ERROR: Failed to selftest: %d\n", ret);
+            }
+        }
+        break;
+
+      case LSM6DSO_SET_SCALE_XL_CMD:  /* Set accelerator scale command tag */
+        {
+          switch (arg)
+            {
+              case LSM6DSO_XL_SET_2G:
+                {
+                  ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_2G);
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR;
+                }
+                break;
+
+              case LSM6DSO_XL_SET_4G:
+                {
+                  ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_4G);
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_4G_FACTOR;
+                }
+                break;
+
+              case LSM6DSO_XL_SET_8G:
+                {
+                  ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_8G);
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_8G_FACTOR;
+                }
+                break;
+
+              case LSM6DSO_XL_SET_16G:
+                {
+                  ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_16G);
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_16G_FACTOR;
+                }
+                break;
+
+              default:
+                {
+                  ret = -EINVAL;
+                }
+                break;
+            }
+
+          if (ret < 0)
+            {
+              snerr("ERROR: Failed to set scale for accelerator: %d\n", ret);
             }
         }
         break;
