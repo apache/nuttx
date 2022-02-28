@@ -59,18 +59,27 @@ ifeq ($(CONFIG_ARM_THUMB),y)
 ARCHCPUFLAGS += -mthumb
 endif
 
-ifeq ($(CONFIG_ARCH_FPU),y)
-ARCHCPUFLAGS += -mfloat-abi=hard
+ifeq ($(CONFIG_ARCH_CORTEXA5),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a5
+else ifeq ($(CONFIG_ARCH_CORTEXA7),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a7
+else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a8
+else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
+  ARCHCPUFLAGS += -mcpu=cortex-a9
 endif
 
-ifeq ($(CONFIG_ARCH_CORTEXA5),y)
-ARCHCPUFLAGS += -mcpu=cortex-a5
-else ifeq ($(CONFIG_ARCH_CORTEXA7),y)
-ARCHCPUFLAGS += -mcpu=cortex-a7
-else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
-ARCHCPUFLAGS += -mcpu=cortex-a8
-else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
-ARCHCPUFLAGS += -mcpu=cortex-a9
+ifeq ($(CONFIG_ARCH_FPU),y)
+  ARCHCPUFLAGS += -mfloat-abi=hard
+  ifeq ($(CONFIG_ARCH_CORTEXA8),y)
+    ARCHCPUFLAGS += -mfpu=vfpv3-d16
+  else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
+    ARCHCPUFLAGS += -mfpu=vfpv3-d16
+  else
+    ARCHCPUFLAGS += -mfpu=vfpv4-d16
+  endif
+else
+  ARCHCPUFLAGS += -mfloat-abi=soft
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)

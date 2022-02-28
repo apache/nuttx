@@ -28,29 +28,12 @@ LDSCRIPT = sdram.ld
 
 ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
-ARCHCCVERSION = ${shell $(CC) -v 2>&1 | sed -n '/^gcc version/p' | sed -e 's/^gcc version \([0-9\.]\)/\1/g' -e 's/[-\ ].*//g' -e '1q'}
-ARCHCCMAJOR = ${shell echo $(ARCHCCVERSION) | cut -d'.' -f1}
-
-ifeq ($(ARCHCCMAJOR),2)
-  OLDGCC = y
-else ifeq ($(ARCHCCMAJOR),3)
-  OLDGCC = y
-else
-  OLDGCC = n
-endif
-
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
-endif
-
-ifeq ($(OLDGCC),n)
-  ARCHCPUFLAGS = -mcpu=cortex-a8 -mfpu=neon -mfloat-abi=softfp -ftree-vectorize
-else
-  ARCHCPUFLAGS = -mapcs-32 -march=arm7-a -msoft-float
 endif
 
 ARCHCFLAGS = -fno-common -fno-builtin
