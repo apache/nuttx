@@ -30,7 +30,6 @@
 
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
-#include <nuttx/lib/lib.h>
 
 #include "group/group.h"
 
@@ -56,10 +55,6 @@
 int group_setupstreams(FAR struct task_tcb_s *tcb)
 {
   DEBUGASSERT(tcb && tcb->cmn.group);
-
-  /* Initialize file streams for the task group */
-
-  lib_stream_initialize(tcb->cmn.group);
 
   /* fdopen to get the stdin, stdout and stderr streams. The following logic
    * depends on the fact that the library layer will allocate FILEs in order.
