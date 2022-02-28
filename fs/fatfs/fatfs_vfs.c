@@ -52,9 +52,9 @@
 
 struct fatfs_file_s
 {
-  FIL        f;
   int        refs;
   char       path[PATH_MAX + 3];
+  FIL        f;
 };
 
 struct fatfs_mountpt_s
@@ -320,13 +320,13 @@ static int fatfs_open(FAR struct file *filep, FAR const char *relpath,
   FAR struct fatfs_file_s *fp;
   int ret;
 
-  fp = kmm_malloc(sizeof(*fp));
+  fs = filep->f_inode->i_private;
+  fp = kmm_malloc(sizeof(*fp) - FF_MAX_SS + fs->fat.ssize);
   if (!fp)
     {
       return -ENOMEM;
     }
 
-  fs = filep->f_inode->i_private;
   ret = fatfs_semtake(fs);
   if (ret < 0)
     {
