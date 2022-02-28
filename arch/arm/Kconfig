@@ -13,7 +13,7 @@ choice
 config ARCH_CHIP_A1X
 	bool "Allwinner A1X"
 	select ARCH_CORTEXA8
-	select ARCH_HAVE_FPU
+	select ARM_HAVE_NEON
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
@@ -27,7 +27,7 @@ config ARCH_CHIP_A1X
 config ARCH_CHIP_AM335X
 	bool "TI AM335X"
 	select ARCH_CORTEXA8
-	select ARCH_HAVE_FPU
+	select ARM_HAVE_NEON
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
@@ -82,7 +82,7 @@ config ARCH_CHIP_IMX6
 	select ARCH_CORTEXA9
 	select ARM_THUMB
 	select ARMV7A_HAVE_L2CC_PL310
-	select ARCH_HAVE_FPU
+	select ARM_HAVE_NEON
 	select ARCH_HAVE_TRUSTZONE
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
@@ -249,7 +249,6 @@ config ARCH_CHIP_S32K1XX
 config ARCH_CHIP_SAMA5
 	bool "Atmel SAMA5"
 	select ARCH_CORTEXA5
-	select ARCH_HAVE_FPU
 	select ARCH_HAVE_IRQPRIO
 	select ARCH_HAVE_LOWVECTORS
 	select ARCH_HAVE_FETCHADD
@@ -888,17 +887,18 @@ config ARM_HAVE_WFE_SEV
 	---help---
 		Use WFE and SEV instructions for spinlock to reduce power consumption
 
-config ARM_HAVE_FPU_D32
+config ARM_HAVE_DPFPU32
 	bool
-	select ARCH_HAVE_FPU
+	select ARCH_HAVE_DPFPU
 	default n
 	---help---
-		FPU implemented in the VFPv3-D32 format that supports
+		FPU implemented in the VFPv[3|4]-D32 format that supports
 		32 double-precision floating-point registers.
 
 config ARM_HAVE_NEON
 	bool
 	default n
+	select ARM_HAVE_DPFPU32
 	---help---
 		Decide whether support NEON instruction
 
@@ -907,6 +907,23 @@ config ARM_HAVE_MVE
 	default n
 	---help---
 		Decide whether support MVE instruction
+
+config ARM_FPU_ABI_SOFT
+	bool "Soft Float ABI"
+	default n
+	depends on ARCH_HAVE_FPU
+	---help---
+		Pass float value via integer register (-mfloat-abi=softfp) 
+
+config ARM_DPFPU32
+	bool "FPU with 32 double-precision register"
+	default y
+	depends on ARCH_DPFPU && ARM_HAVE_DPFPU32
+
+config ARM_NEON
+	bool "Advanced SIMD (NEON) Extension"
+	default y
+	depends on ARM_HAVE_NEON && ARM_DPFPU32
 
 config ARM_HAVE_MPU_UNIFIED
 	bool

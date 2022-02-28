@@ -72,7 +72,7 @@ arm_restorefpu:
 	 * s0, s1, ... in increasing address order.
 	 */
 
-#ifdef CONFIG_ARM_HAVE_FPU_D32
+#ifdef CONFIG_ARM_DPFPU32
 	vldmia.64	r1!, {d0-d15}			/* Restore the full FP context */
 	vldmia.64	r1!, {d16-d31}
 #else

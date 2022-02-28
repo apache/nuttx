@@ -168,18 +168,6 @@ all of these configurations is the MIO283QT-2.  But MIO283QT-9A is also
 supported and you can switch from the MIO283QT-2 to the MIO283QT-9A by simply
 modifying the NuttX configuration
 
-CFLAGS
-------
-
-Only recent GCC toolchains have built-in support for the Cortex-M4 FPU.  You will see
-the following lines in each Make.defs file:
-
-  ifeq ($(CONFIG_ARCH_FPU),y)
-    ARCHCPUFLAGS = -mcpu=cortex-m4 -mthumb -march=armv7e-m -mfpu=fpv4-sp-d16 -mfloat-abi=hard
-  else
-    ARCHCPUFLAGS = -mcpu=cortex-m3 -mthumb -mfloat-abi=soft
-  endif
-
 Mikroe-STM32F4-specific Configuration Options
 ===============================================
 

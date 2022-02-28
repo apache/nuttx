@@ -72,7 +72,7 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_D15),
 #endif
 
-#ifdef CONFIG_ARM_HAVE_FPU_D32
+#ifdef CONFIG_ARM_DPFPU32
   TCB_REG_OFF(REG_D16),
   TCB_REG_OFF(REG_D17),
   TCB_REG_OFF(REG_D18),

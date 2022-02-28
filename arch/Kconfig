@@ -325,6 +325,7 @@ config ARCH_HAVE_FPU
 config ARCH_HAVE_DPFPU
 	bool
 	default n
+	select ARCH_HAVE_FPU
 
 config ARCH_HAVE_LAZYFPU
 	bool

@@ -136,7 +136,7 @@
 #  define REG_D15           (ARM_CONTEXT_REGS+30) /* D15 */
 #  define REG_S30           (ARM_CONTEXT_REGS+30) /* S30 */
 #  define REG_S31           (ARM_CONTEXT_REGS+31) /* S31 */
-#  ifdef CONFIG_ARM_HAVE_FPU_D32
+#  ifdef CONFIG_ARM_HAVE_DPFPU32
 #    define REG_D16         (ARM_CONTEXT_REGS+32) /* D16 */
 #    define REG_D17         (ARM_CONTEXT_REGS+34) /* D17 */
 #    define REG_D18         (ARM_CONTEXT_REGS+36) /* D18 */

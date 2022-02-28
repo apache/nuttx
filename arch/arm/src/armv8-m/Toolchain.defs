@@ -94,17 +94,13 @@ else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m33
   TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
-  else
-    TOOLCHAIN_MFLOAT := -mfloat-abi=soft
+    TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m35p
   TOOLCHAIN_MARCH    := -march=armv8-m.main+dsp
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16 -mfloat-abi=hard
-  else
-    TOOLCHAIN_MFLOAT := -mfloat-abi=soft
+    TOOLCHAIN_MFLOAT := -mfpu=fpv5-sp-d16
   endif
 else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m55
@@ -114,10 +110,18 @@ else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
     TOOLCHAIN_MARCH    := -march=armv8.1-m.main+dsp
   endif
   ifeq ($(CONFIG_ARCH_FPU),y)
-    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16 -mfloat-abi=hard
-  else
-    TOOLCHAIN_MFLOAT := -mfloat-abi=soft
+    TOOLCHAIN_MFLOAT := -mfpu=fpv5-d16
   endif
+endif
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+    TOOLCHAIN_MFLOAT += -mfloat-abi=softfp
+  else
+    TOOLCHAIN_MFLOAT += -mfloat-abi=hard
+  endif
+else
+  TOOLCHAIN_MFLOAT += -mfloat-abi=soft
 endif
 
 # NuttX buildroot under Linux or Cygwin
