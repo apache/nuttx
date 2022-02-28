@@ -1297,7 +1297,7 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
     {
       /* Auto format the device if -o autoformat */
 
-      if (ret != -EBUSY || !data || strcmp(data, "autoformat"))
+      if (ret != -EFAULT || !data || strcmp(data, "autoformat"))
         {
           goto errout_with_fs;
         }
