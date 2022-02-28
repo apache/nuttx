@@ -53,8 +53,8 @@
 
 void arm_sigdeliver(void)
 {
-  struct tcb_s  *rtcb = this_task();
-  uint32_t regs[XCPTCONTEXT_REGS];
+  struct tcb_s *rtcb = this_task();
+  uint32_t *regs = rtcb->xcp.saved_regs;
 
 #ifdef CONFIG_SMP
   /* In the SMP case, we must terminate the critical section while the signal
@@ -70,10 +70,6 @@ void arm_sigdeliver(void)
   sinfo("rtcb=%p sigdeliver=%p sigpendactionq.head=%p\n",
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
-
-  /* Save the return state on the stack. */
-
-  arm_copyfullstate(regs, rtcb->xcp.regs);
 
 #ifdef CONFIG_SMP
   /* In the SMP case, up_schedule_sigaction(0) will have incremented
@@ -143,8 +139,6 @@ void arm_sigdeliver(void)
    * could be modified by a hostile program.
    */
 
-  regs[REG_PC]         = rtcb->xcp.saved_pc;
-  regs[REG_CPSR]       = rtcb->xcp.saved_cpsr;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
 
   /* Then restore the correct state for this thread of execution. */

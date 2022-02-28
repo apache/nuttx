@@ -80,7 +80,7 @@
 
 /* SYS call 2:
  *
- * void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void arm_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
  */
 
 #define SYS_switch_context        (2)

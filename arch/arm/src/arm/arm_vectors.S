@@ -116,7 +116,24 @@ arm_vectorirq:
 #else
 	/* Call arm_decodeirq() on the user stack */
 
-	bl	arm_decodeirq		/* Call the handler */
+	mov		r4, sp			/* Save the SP in a preserved register */
+
+	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
+	 * that signal processing can have a separate xcpcontext to handle
+	 * signal context (reference: arm_schedulesigaction.c):
+	 *      ----------------------
+	 *     |    IRQ XCP context   |
+	 *      -------------------
+	 *     |  Signal XCP context  |
+	 *      ----------------------   <- SP
+	 * also the sp should be restore from r4 after arm_doirq()
+	 */
+
+	sub	sp, sp, #XCPTCONTEXT_SIZE	/* Reserve signal context */
+
+	bic	sp, sp, #7			/* Force 8-byte alignment */
+	bl	arm_decodeirq			/* Call the handler */
+	mov	sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
 	/* Restore the CPSR, SYS mode registers and return */

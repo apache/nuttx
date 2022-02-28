@@ -172,8 +172,25 @@ exception_common:
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 	pop		{r1}					/* Recover R1=main stack pointer */
 #else
+	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
+	 * that signal processing can have a separate xcpcontext to handle
+	 * signal context (reference: arm_schedulesigaction.c):
+	 *      ----------------------
+	 *     |    IRQ XCP context   |
+	 *      ----------------------
+	 *     |  Signal XCP context  |
+	 *      ----------------------   <- SP
+	 * also the sp should be restore after arm_doirq()
+	 */
+
+	sub		r1, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
+
 	msr		msp, r1					/* We are using the main stack pointer */
+
+	add		r1, r1, #XCPTCONTEXT_SIZE		/* Restore signal context */
+
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
+
 	mrs		r1, msp					/* Recover R1=main stack pointer */
 #endif
 

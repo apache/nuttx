@@ -105,10 +105,11 @@
    * applies if "lazy" floating point register save/restore is used
    */
 
-#  if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV7M_LAZYFPU)
-#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#  if defined(CONFIG_ARCH_FPU) && (defined(CONFIG_ARMV7M_LAZYFPU) || \
+                                   defined(CONFIG_ARMV8M_LAZYFPU))
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
 #  endif
 #  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -123,9 +124,9 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
 #  endif
 #  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
@@ -142,11 +143,11 @@
    */
 
 #  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  arm_copyarmstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
 #  else
-#    define arm_savestate(regs)  arm_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
+#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
 #  endif
-#  define arm_restorestate(regs) arm_copyfullstate((uint32_t*)CURRENT_REGS, regs)
+#  define arm_restorestate(regs) (CURRENT_REGS = regs)
 
 #endif
 
@@ -333,7 +334,7 @@ void arm_copyarmstate(uint32_t *dest, uint32_t *src);
 uint32_t *arm_decodeirq(uint32_t *regs);
 int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
-void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+void arm_switchcontext(uint32_t **saveregs, uint32_t *restoreregs);
 
 /* Signal handling **********************************************************/
 
