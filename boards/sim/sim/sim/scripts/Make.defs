@@ -61,8 +61,8 @@ endif
 
 # Add -fno-common because macOS "ld -r" doesn't seem to pick objects
 # for common symbols.
-ARCHCFLAGS = -fno-common -fno-builtin
-ARCHCXXFLAGS = -fno-common -fno-builtin -nostdinc++
+ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections -nostdinc++
 
 ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
@@ -176,7 +176,7 @@ endif
 # not available on NuttX.
 CMODULEFLAGS += -fno-stack-protector
 
-LDMODULEFLAGS = -r -e module_initialize
+LDMODULEFLAGS = -r -e module_initialize --gc-sections
 LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # NuttX modules are ELF binaries.
@@ -201,7 +201,7 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
   CXXELFFLAGS += -mcmodel=large
 endif
 
-LDELFFLAGS = -r -e main
+LDELFFLAGS = -r -e main --gc-sections
 LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 ifeq ($(CONFIG_SIM_M32),y)
