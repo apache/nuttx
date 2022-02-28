@@ -42,7 +42,6 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/init.h>
 #include <nuttx/fs/ioctl.h>
-#include <nuttx/semaphore.h>
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
@@ -238,10 +237,6 @@ static bool imx_txempty(struct uart_dev_s *dev);
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-/* Used to assure mutually exclusive access up_putc() */
-
-static sem_t g_putc_lock = SEM_INITIALIZER(1);
 
 /* Serial driver UART operations */
 
@@ -1123,30 +1118,12 @@ int up_putc(int ch)
 {
   struct imx_uart_s *priv = (struct imx_uart_s *)CONSOLE_DEV.priv;
   uint32_t ier;
-  bool locked;
-  int ret;
-
-  /* Only one thread may enter up_putc at a time. */
-
-  locked = false;
-
-  if (!up_interrupt_context() && g_nx_initstate >= OSINIT_HARDWARE)
-    {
-      ret = nxsem_wait(&g_putc_lock);
-      if (ret < 0)
-        {
-          return ret;
-        }
-
-      locked = true;
-    }
 
   /* Disable UART interrupts and wait until the hardware is ready to send
    * a byte.
    */
 
   imx_disableuartint(priv, &ier);
-  imx_waittxready(priv);
 
   /* Check for LF */
 
@@ -1154,18 +1131,11 @@ int up_putc(int ch)
     {
       /* Add CR */
 
-      imx_serialout(priv, UART_TXD_OFFSET, (uint32_t)'\r');
-      imx_waittxready(priv);
+      imx_lowputc('\r');
     }
 
-  imx_serialout(priv, UART_TXD_OFFSET, (uint32_t)ch);
-  imx_waittxready(priv);
+  imx_lowputc(ch);
   imx_restoreuartint(priv, ier);
-
-  if (locked)
-    {
-      nxsem_post(&g_putc_lock);
-    }
 
   return ch;
 }
