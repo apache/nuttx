@@ -294,14 +294,14 @@ nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) 
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
-	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
+	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
+	$(Q) "$(CXX)" $(CFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CFLAGS) $(LIBPATHS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map

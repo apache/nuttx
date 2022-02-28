@@ -204,33 +204,12 @@ endif
 LDELFFLAGS = -r -e main
 LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  CCLINKFLAGS += -g
-endif
-
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
-  CCLINKFLAGS += -m32
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
   HOSTLDFLAGS += -m32
-endif
-
-ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
-  CCLINKFLAGS += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CCLINKFLAGS += -fomit-frame-pointer
 endif
 
 HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
