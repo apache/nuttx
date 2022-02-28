@@ -56,21 +56,50 @@ endif
 #
 
 ifeq ($(CONFIG_ARM_THUMB),y)
-ARCHCPUFLAGS += -mthumb
-endif
-
-ifeq ($(CONFIG_ARCH_FPU),y)
-ARCHCPUFLAGS += -mfloat-abi=hard
+  ARCHCPUFLAGS += -mthumb
 endif
 
 ifeq ($(CONFIG_ARCH_CORTEXA5),y)
-ARCHCPUFLAGS += -mcpu=cortex-a5
+  ARCHCPUFLAGS += -mcpu=cortex-a5
 else ifeq ($(CONFIG_ARCH_CORTEXA7),y)
-ARCHCPUFLAGS += -mcpu=cortex-a7
+  ARCHCPUFLAGS += -mcpu=cortex-a7
 else ifeq ($(CONFIG_ARCH_CORTEXA8),y)
-ARCHCPUFLAGS += -mcpu=cortex-a8
+  ARCHCPUFLAGS += -mcpu=cortex-a8
 else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
-ARCHCPUFLAGS += -mcpu=cortex-a9
+  ARCHCPUFLAGS += -mcpu=cortex-a9
+endif
+
+ifneq ($(CONFIG_ARM_DPFPU32),y)
+  ARCHFPUD16 = -d16
+endif
+
+# Cortex-A5  | -mfpu=vfpv4-fp16 | -mfpu=vfpv4-d16-fp16 | -mfpu=neon-fp16
+# Cortex-A7  | -mfpu=vfpv4      | -mfpu=vfpv4-d16      | -mfpu=neon-vfpv4
+# Cortex-A8  | -mfpu=vfpv3      |                      | -mfpu=neon (alias for neon-vfpv3)
+# Cortex-A9  | -mfpu=vfpv3-fp16 | -mfpu=vfpv3-d16-fp16 | -mfpu=neon-fp16
+# Cortex-A15 | -mfpu=vfpv4      |                      | -mfpu=neon-vfpv4
+
+ifeq ($(CONFIG_ARCH_FPU),y)
+  ifeq ($(CONFIG_ARM_FPU_ABI_SOFT),y)
+    ARCHCPUFLAGS += -mfloat-abi=softfp
+  else
+    ARCHCPUFLAGS += -mfloat-abi=hard
+  endif
+
+  ifeq ($(CONFIG_ARM_NEON),y)
+    ARCHNEON = neon-
+  endif
+  ifeq ($(CONFIG_ARCH_CORTEXA8),y)
+    ARCHFPU = vfpv3
+  else ifeq ($(CONFIG_ARCH_CORTEXA9),y)
+    ARCHFPU = vfpv3
+  else
+    ARCHFPU = vfpv4
+  endif
+  ARCHCPUFLAGS += -mfpu=$(ARCHNEON)$(ARCHFPU)$(ARCHFPUD16)
+
+else
+  ARCHFPUFLAGS += -mfloat-abi=soft
 endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)

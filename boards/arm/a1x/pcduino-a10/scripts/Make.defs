@@ -34,7 +34,6 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCPUFLAGS = -mcpu=cortex-a8 -mfpu=vfpv4-d16
 ARCHCFLAGS = -fno-common
 ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
