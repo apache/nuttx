@@ -1173,7 +1173,7 @@ int romfs_datastart(FAR struct romfs_mountpt_s *rm,
 {
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
   *start = ROMFS_ALIGNUP(nodeinfo->rn_offset +
-                         ROMFS_FHDR_NAME + nodeinfo->rn_namesize);
+                         ROMFS_FHDR_NAME + nodeinfo->rn_namesize + 1);
   return OK;
 #else
   uint32_t offset = nodeinfo->rn_offset;
