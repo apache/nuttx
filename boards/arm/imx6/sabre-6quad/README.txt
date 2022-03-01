@@ -903,3 +903,40 @@ Configuration sub-directories
     2. See the STATUS and SMP sections above for detailed SMP-related
        issues.  There are a some major problems with the current SMP
        implementation.
+
+  knsh
+  ---
+    This is a configuration of testing the BUILD_KERNEL configuration.
+
+    $ cd nuttx
+    $ ./tools/configure.sh sabre-6quad:knsh
+    $ make V=1 -j7
+    $ make export V=1
+    $ cd ../apps
+    $ ./tools/mkimport.sh -x ../nuttx/nuttx-export-*.zip
+    $ make import V=1
+    $ cd ../nuttx
+    $ qemu-system-arm -semihosting -M sabrelite -m 1024 -smp 4 -nographic -kernel ./nuttx
+
+    NuttShell (NSH) NuttX-10.2.0
+    nsh> uname -a
+    NuttX 10.2.0 31283faf71 Mar  1 2022 19:52:48 arm sabre-6quad
+    nsh> ps
+    PID GROUP PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK   STACK   USED  FILLED COMMAND
+      0     0   0 FIFO     Kthread N-- Ready              00000000 002024 000984  48.6%  Idle Task
+      1     1 100 RR       Task    --- Running            00000000 002016 001232  61.1%  /system/bin/init
+    nsh> free
+                       total       used       free    largest  nused  nfree
+            Umem:    1048224       3728    1044496    1038304      6      2
+            Kmem: 1065201424      10720 1065190704 1065190704     30      1
+            Page:  134217728    1122304  133095424  133095424
+    nsh> /system/bin/hello
+    Hello, World!!
+    nsh> /system/bin/getprime
+    Set thread priority to 10
+    Set thread policy to SCHED_RR
+    Start thread #0
+    thread #0 started, looking for primes < 10000, doing 10 run(s)
+    thread #0 finished, found 1230 primes, last one was 9973
+    Done
+    /system/bin/getprime took 1850 msec
