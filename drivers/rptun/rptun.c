@@ -277,14 +277,8 @@ static inline void rptun_pm_action(FAR struct rptun_priv_s *priv,
   leave_critical_section(flags);
 }
 
-static inline void rptun_enable_rx_kick(FAR struct rptun_priv_s *priv)
-{
-  virtqueue_enable_cb(priv->rvdev.svq);
-}
-
 #else
 #  define rptun_pm_action(priv, stay)
-#  define rptun_enable_rx_kick(priv)
 #endif
 
 static void rptun_worker(FAR void *arg)
@@ -790,7 +784,7 @@ static int rptun_dev_start(FAR struct remoteproc *rproc)
 
   rptun_unlock();
 
-  rptun_enable_rx_kick(priv);
+  virtqueue_enable_cb(priv->rvdev.svq);
   return 0;
 }
 
