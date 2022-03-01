@@ -507,20 +507,27 @@ static int nt38350_i2c_read(FAR struct i2c_master_s *dev,
 
   /* Then perform the transfer dev addr and reg addr, read reg value */
 
-  while (retries < NVT_IIC_RETRY_NUM)
+  for (retries = 0; retries < NVT_IIC_RETRY_NUM; retries++)
     {
       ret = I2C_TRANSFER(dev, msg, 2);
-      if (ret == 0)
+      if (ret >= 0)
+        {
           break;
-      retries++;
-    }
+        }
+      else
+        {
+          /* Some error. Try to reset I2C bus and keep trying. */
 
-  if (retries >= NVT_IIC_RETRY_NUM)
-    {
-      /* Failed read */
+#ifdef CONFIG_I2C_RESET
+          if (retries == NVT_IIC_RETRY_NUM -1)
+            {
+              break;
+            }
 
-      syslog(LOG_ERR, "Failed to I2C read\n");
-      return -1;
+          I2C_RESET(dev);
+          iwarn("reset I2C, retries %d \n", retries);
+#endif
+        }
     }
 
   return (ret >= 0) ? OK : ret;
@@ -533,6 +540,7 @@ static int nt38350_i2c_write(FAR struct i2c_master_s *dev,
 {
   struct i2c_msg_s msg[1];
   int ret;
+  int retries;
 
   /* Setup for the transfer */
 
@@ -544,7 +552,29 @@ static int nt38350_i2c_write(FAR struct i2c_master_s *dev,
 
   /* Then perform the transfer. */
 
-  ret = I2C_TRANSFER(dev, msg, 1);
+  for (retries = 0; retries < NVT_IIC_RETRY_NUM; retries++)
+    {
+      ret = I2C_TRANSFER(dev, msg, 1);
+      if (ret >= 0)
+        {
+          break;
+        }
+      else
+        {
+          /* Some error. Try to reset I2C bus and keep trying. */
+
+#ifdef CONFIG_I2C_RESET
+          if (retries == NVT_IIC_RETRY_NUM -1)
+            {
+              break;
+            }
+
+          I2C_RESET(dev);
+          iwarn("reset I2C , retries %d\n",  retries);
+#endif
+        }
+    }
+
   return (ret >= 0) ? OK : ret;
 }
 
@@ -565,9 +595,8 @@ static int nt38350_read_reg(FAR struct nt38350_dev_s *priv,
                          address, buffer, length);
   if (ret != OK)
     {
-      /* Read error */
 
-      ierr("ERROR: %s Failed to read reg: %d\n", __func__, ret);
+      ierr("ERROR: Failed to read reg: %d\n", ret);
       return ret;
     }
 
@@ -591,10 +620,7 @@ static int nt38350_write_reg(FAR struct nt38350_dev_s *priv,
                           address, buffer, length);
   if (ret != OK)
     {
-      ierr("ERROR: Failed to write reg %s : %d\n", __func__, __LINE__);
-
-      /* syserr("ERROR: i2c_write returned error code %d\n", ret); */
-
+      ierr("ERROR: Failed to write reg: %d\n", ret);
       return ret;
     }
 
