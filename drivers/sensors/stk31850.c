@@ -44,14 +44,20 @@
 #define STK31850_DEFAULT_INTERVAL   100000        /* Default conversion interval. */
 #define STK31850_DEVICE_ID          0x82          /* Device ID. */
 #define STK31850_RESET_CODE         0xff          /* Software reset code. */
+#define STK31850_FSM_SET            0x01          /* FSM set value. */
 #define STK31850_DISABLE            0x00          /* Pre-define of disable. */
 #define STK31850_ENABLE             0x01          /* Pre-define of enable. */
 #define STK31850_DEFAULT_WAIT       0x40          /* Defalut wait period set. */
-#define STK31850_DEFAULT_GAIN       0x00          /* Defalut gain set. */
-#define STK31850_DEFAULT_SPEC       0x09          /* Defalut spec set. */
+#define STK31850_DEFAULT_SPEC1      0x09          /* Defalut spec1 set. */
+#define STK31850_DEFAULT_SPEC2      0x03          /* Defalut spec2 set. */
 #define STK31850_LONG_INTEG         0x00          /* Define ALS long integration time. */
 #define STK31850_RESET_TIME         30000         /* Reset delay time(us). */
-#define STK31850_FACTORY            0.0245f       /* Light factory. */
+#define STK31850_ALS_THD_H          60000         /* ALS high threshold. */
+#define STK31850_ALS_THD_L          1200          /* ALS low threshold. */
+#define STK31850_FREQ_SET           20            /* ALS frequency set. */
+#define STK31850_GAIN_SET_MAX       3             /* Gain setting index max. */
+#define STK31850_WAIT_COUNT         5             /* Data read wait count. */
+#define STK31850_WAIT_TIME          5             /* Wait for data ready(ms). */
 
 /* FIFO mode. */
 
@@ -84,9 +90,12 @@
 #define STK31850_FLAG               0x10          /* Flag register. */
 #define STK31850_DATA1_ALS_F_REG    0x13          /* ALS data 1 register. */
 #define STK31850_DATA2_ALS_F_REG    0x14          /* ALS data 2 register. */
+#define STK31850_DATA1_C_REG        0x15          /* C data 1 register. */
+#define STK31850_DATA2_C_REG        0x16          /* C data 2 register. */
 #define STK31850_GAINCTRL           0x4e          /* Gain control register. */
-#define STK31850_PDCTRL1            0xa1          /* PD control 1 register. */
+#define STK31850_FSM                0x5f          /* FSM register. */
 #define STK31850_ALSCTRL2           0x6f          /* ALS control 2 register. */
+#define STK31850_PDCTRL1            0xa1          /* PD control 1 register. */
 #define STK31850_INTCTRL2           0xa5          /* Interrupt control 2 register. */
 #define STK31850_AGAINCTRL1         0xdb          /* A gain control register. */
 #define STK31850_FIFOCTRL1          0x60          /* FIFO control 1 register. */
@@ -94,7 +103,8 @@
 #define STK31850_FIFO2_WM_LV        0x62          /* FIFO watermark level 2 register. */
 #define STK31850_FIFOCTRL2          0x63          /* FIFO control 2 register. */
 #define STK31850_SOFT_RESET         0x80          /* Software reset register. */
-#define STK31850_SPEC1              0xf6          /* SPEC register. */
+#define STK31850_SPEC1              0xf6          /* SPEC1 register. */
+#define STK31850_SPEC2              0x81          /* SPEC2 register. */
 
 /****************************************************************************
  * Private Types
@@ -241,12 +251,30 @@ struct stk31850_spec1_s
 
 typedef struct stk31850_spec1_s stk31850_spec1_t;
 
+struct stk31850_spec2_s
+{
+  uint8_t value                     : 8;
+};
+
+typedef struct stk31850_spec2_s stk31850_spec2_t;
+
 /* Sensor ODR */
 
 struct stk31850_odr_s
 {
   uint8_t regval;                                 /* the data of register */
   float odr;                                      /* the unit is Hz */
+};
+
+/* Light gain */
+
+struct stk31850_gain_s
+{
+  uint8_t pow;                                       /* ALS stage pow */
+  uint8_t gain_als;                                  /* ALS gain setting */
+  uint8_t gain_c;                                    /* C channel gain setting */
+  uint8_t gain_c_128;                                /* C channel gain dx128 */
+  uint8_t gain_als_128;                              /* ALS gain gain dx128 */
 };
 
 /* Device struct */
@@ -260,6 +288,9 @@ struct stk31850_dev_s
   unsigned int interval;                          /* Sensor acquisition interval. */
   FAR const struct stk31850_config_s *config;     /* The board config function. */
   struct work_s work;                             /* Interrupt handler worker. */
+  float last_lux;                                 /* Last light data. */
+  float last_ir;                                  /* Last ir data. */
+  uint8_t gain_idx;                               /* Gain set index. */
 };
 
 /****************************************************************************
@@ -285,7 +316,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
                            bool enable);
 static int stk31850_findodr(FAR float *freq);
 static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value);
-static int stk31850_setgain(FAR struct stk31850_dev_s *priv, uint8_t value);
+static int stk31850_setgain(FAR struct stk31850_dev_s *priv);
 static int stk31850_setintmode(FAR struct stk31850_dev_s *priv,
                                uint8_t value);
 static int stk31850_setpd(FAR struct stk31850_dev_s *priv,
@@ -293,10 +324,12 @@ static int stk31850_setpd(FAR struct stk31850_dev_s *priv,
 static int stk31850_setwait(FAR struct stk31850_dev_s *priv,
                             uint8_t value);
 static int stk31850_setfifo(FAR struct stk31850_dev_s *priv);
-static int stk31850_setspec(FAR struct stk31850_dev_s *priv, uint8_t value);
+static int stk31850_setspec(FAR struct stk31850_dev_s *priv);
+static int stk31850_checkgain(FAR struct stk31850_dev_s *priv,
+                              uint16_t data_f, uint16_t data_c);
 static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value);
 static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
-                            FAR float *lux);
+                            FAR float *lux, FAR float *ir);
 
 /* Sensor ops functions */
 
@@ -325,6 +358,14 @@ static const struct stk31850_odr_s g_stk31850_odr[] =
   {STK31850_ODR_80Hz, 80},                   /* Sampling interval is 12.5ms. */
   {STK31850_ODR_160Hz, 160},                 /* Sampling interval is 6.25ms. */
   {STK31850_ODR_320Hz, 320},                 /* Sampling interval is 3.125ms. */
+};
+
+static const struct stk31850_gain_s g_stk31850_gain[] =
+{
+  {1, 0x03, 0x03, 0x01, 0x01},               /* Gain set x128 times. */
+  {2, 0x03, 0x03, 0x00, 0x00},               /* Gain set x64 times. */
+  {8, 0x02, 0x02, 0x00, 0x00},               /* Gain set x32 times. */
+  {32, 0x01, 0x01, 0x00, 0x00},              /* Gain set x16 times. */
 };
 
 static const struct sensor_ops_s g_stk31850_ops =
@@ -601,9 +642,9 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
           return ret;
         }
 
-      /* Set gain. */
+      /* Set default gain. */
 
-      ret = stk31850_setgain(priv, STK31850_DEFAULT_GAIN);
+      ret = stk31850_setgain(priv);
       if (ret < 0)
         {
           snerr("Failed to set gain: %d\n", ret);
@@ -639,7 +680,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
 
       /* Set spec. */
 
-      ret = stk31850_setspec(priv, STK31850_DEFAULT_SPEC);
+      ret = stk31850_setspec(priv);
       if (ret < 0)
         {
           snerr("Failed to set spec: %d\n", ret);
@@ -663,6 +704,7 @@ static int stk31850_enable(FAR struct stk31850_dev_s *priv,
     {
       /* Set to shut down */
 
+      priv->last_lux = 0;
       work_cancel(HPWORK, &priv->work);
       ret = stk31850_setstate(priv, STK31850_DISABLE);
       if (ret < 0)
@@ -699,8 +741,7 @@ static int stk31850_findodr(FAR float *freq)
 
   for (i = 0; i < num; i++)
     {
-      if (*freq < g_stk31850_odr[i].odr
-          || *freq == g_stk31850_odr[i].odr)
+      if (*freq <= g_stk31850_odr[i].odr)
         {
           *freq = g_stk31850_odr[i].odr;
           return i;
@@ -752,7 +793,6 @@ static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value)
   reg_ctl2.it2_als = 0;
 
   reg_ctl1.it_als = value;
-  reg_ctl1.gain_als = 0;
   reg_ctl1.prst_als = 0;
 
   ret = stk31850_i2c_write(priv, STK31850_ALSCTRL2,
@@ -781,7 +821,6 @@ static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value)
  *
  * Input Parameters:
  *   priv  - Device struct.
- *   value - The value set to register.
  *
  * Returned Value:
  *   Zero (OK) or positive on success; a negated errno value on failure.
@@ -791,10 +830,11 @@ static int stk31850_setodr(FAR struct stk31850_dev_s *priv, uint8_t value)
  *
  ****************************************************************************/
 
-static int stk31850_setgain(FAR struct stk31850_dev_s *priv, uint8_t value)
+static int stk31850_setgain(FAR struct stk31850_dev_s *priv)
 {
   stk31850_gainctrl_t reg_gain;
   stk31850_againctrl_t reg_again;
+  stk31850_alsctl1_t reg_alsctrl1;
   int ret;
 
   ret = stk31850_i2c_read(priv, STK31850_GAINCTRL, (FAR uint8_t *)&reg_gain);
@@ -812,12 +852,22 @@ static int stk31850_setgain(FAR struct stk31850_dev_s *priv, uint8_t value)
       return ret;
     }
 
-  reg_gain.gain_als_dx128 = 0;
-  reg_gain.gain_c_dx128 = 0;
-  reg_gain.gain_c = value;
+  ret = stk31850_i2c_read(priv, STK31850_ALSCTRL1,
+                          (FAR uint8_t *)&reg_alsctrl1);
+  if (ret < 0)
+    {
+      snerr("Failed to read als ctrl1 register: %d\n", ret);
+      return ret;
+    }
+
+  reg_gain.gain_c = g_stk31850_gain[priv->gain_idx].gain_c;
+  reg_gain.gain_als_dx128 = g_stk31850_gain[priv->gain_idx].gain_als_128;
+  reg_gain.gain_c_dx128 = g_stk31850_gain[priv->gain_idx].gain_c_128;
 
   reg_again.als_ci = 0;
   reg_again.c_ci = 0;
+
+  reg_alsctrl1.gain_als = g_stk31850_gain[priv->gain_idx].gain_als;
 
   ret = stk31850_i2c_write(priv, STK31850_GAINCTRL,
                            (FAR uint8_t *)&reg_gain);
@@ -832,6 +882,13 @@ static int stk31850_setgain(FAR struct stk31850_dev_s *priv, uint8_t value)
   if (ret < 0)
     {
       snerr("Failed to write again register: %d\n", ret);
+    }
+
+  ret = stk31850_i2c_write(priv, STK31850_ALSCTRL1,
+                           (FAR uint8_t *)&reg_alsctrl1);
+  if (ret < 0)
+    {
+      snerr("Failed to write als ctrl1 register: %d\n", ret);
     }
 
   return ret;
@@ -1062,7 +1119,6 @@ static int stk31850_setfifo(FAR struct stk31850_dev_s *priv)
  *
  * Input Parameters:
  *   priv  - Device struct.
- *   value - Register value.
  *
  * Returned Value:
  *   Return 0 if the driver was success; A negated errno
@@ -1073,17 +1129,99 @@ static int stk31850_setfifo(FAR struct stk31850_dev_s *priv)
  *
  ****************************************************************************/
 
-static int stk31850_setspec(FAR struct stk31850_dev_s *priv, uint8_t value)
+static int stk31850_setspec(FAR struct stk31850_dev_s *priv)
 {
-  stk31850_spec1_t reg;
+  stk31850_spec1_t reg1;
+  stk31850_spec2_t reg2;
   int ret;
 
-  reg.value = value;
+  reg1.value = STK31850_DEFAULT_SPEC1;
 
-  ret = stk31850_i2c_write(priv, STK31850_SPEC1, (FAR uint8_t *)&reg);
+  ret = stk31850_i2c_write(priv, STK31850_SPEC1, (FAR uint8_t *)&reg1);
   if (ret < 0)
     {
-      snerr("Failed to write spec register: %d\n", ret);
+      snerr("Failed to write spec 1 register: %d\n", ret);
+      return ret;
+    }
+
+  reg2.value = STK31850_DEFAULT_SPEC2;
+
+  ret = stk31850_i2c_write(priv, STK31850_SPEC2, (FAR uint8_t *)&reg2);
+  if (ret < 0)
+    {
+      snerr("Failed to write spec 2 register: %d\n", ret);
+    }
+
+  return ret;
+}
+
+/****************************************************************************
+ * Name: stk31850_checkgain
+ *
+ * Description:
+ *   Check the gain.
+ *
+ * Input Parameters:
+ *   priv     - Device struct.
+ *   data_f   - als data.
+ *   data_c   - c_data.
+ *
+ * Returned Value:
+ *   Return 0 if the driver was success; A negated errno
+ *   value is returned on any failure; A positive value
+ *   indicates the pow after switching.
+ *
+ * Assumptions/Limitations:
+ *
+ ****************************************************************************/
+
+static int stk31850_checkgain(FAR struct stk31850_dev_s *priv,
+                              uint16_t data_f, uint16_t data_c)
+{
+  uint8_t fsm_reg = STK31850_FSM_SET;
+  unsigned int temp_idx = 0;
+  int ret;
+
+  temp_idx = priv->gain_idx;
+
+  if (data_f > STK31850_ALS_THD_H || data_c > STK31850_ALS_THD_H)
+    {
+      /* Greater than the current range. */
+
+      if (priv->gain_idx < STK31850_GAIN_SET_MAX)
+        {
+          priv->gain_idx++;
+        }
+    }
+  else if (data_f < STK31850_ALS_THD_L || data_c < STK31850_ALS_THD_L)
+    {
+      /* Less than the current range. */
+
+      if (priv->gain_idx > 0)
+        {
+          priv->gain_idx--;
+        }
+    }
+
+  /* Need to change range. */
+
+  if (temp_idx != priv->gain_idx)
+    {
+      ret = stk31850_setgain(priv);
+      if (ret < 0)
+        {
+          snerr("Failed to set gain: %d\n", ret);
+          return ret;
+        }
+
+      ret = stk31850_i2c_write(priv, STK31850_FSM, &fsm_reg);
+      if (ret < 0)
+        {
+          snerr("Failed to set gain: %d\n", ret);
+          return ret;
+        }
+
+      return g_stk31850_gain[priv->gain_idx].pow;
     }
 
   return ret;
@@ -1145,19 +1283,70 @@ static int stk31850_setstate(FAR struct stk31850_dev_s *priv, uint8_t value)
  ****************************************************************************/
 
 static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
-                           FAR float *lux)
+                            FAR float *lux, FAR float *ir)
 {
-  static uint16_t readvalue;
-  int ret;
+  stk31850_flag_t reg_flag;
+  uint16_t value_f;
+  uint16_t value_c;
+  uint8_t count;
+  int ret = 0;
 
-  ret = stk31850_i2c_readword(priv, STK31850_DATA1_ALS_F_REG, &readvalue);
+  for (count = 0; count < STK31850_WAIT_COUNT; count++)
+    {
+      ret = stk31850_i2c_read(priv, STK31850_FLAG,
+                              (FAR uint8_t *)&reg_flag);
+      if (ret < 0)
+        {
+          snerr("Failed to read flag: %d\n", ret);
+          return ret;
+        }
+
+      if (reg_flag.flg_als_dr != 0)
+        {
+          break;
+        }
+
+      up_mdelay(STK31850_WAIT_TIME);
+    }
+
+  if (count == STK31850_WAIT_COUNT)
+    {
+      snerr("Failed to read data: %d\n", ret);
+      return -ETIME;
+    }
+
+  ret = stk31850_i2c_readword(priv, STK31850_DATA1_ALS_F_REG, &value_f);
   if (ret < 0)
     {
-      snerr("Failed to read lux: %d\n", ret);
+      snerr("Failed to read f data: %d\n", ret);
       return ret;
     }
 
-  *lux = readvalue * STK31850_FACTORY;
+  ret = stk31850_i2c_readword(priv, STK31850_DATA1_C_REG, &value_c);
+  if (ret < 0)
+    {
+      snerr("Failed to read c data: %d\n", ret);
+      return ret;
+    }
+
+  ret = stk31850_checkgain(priv, value_f, value_c);
+  if (ret < 0)
+    {
+      snerr("Failed to check gain: %d\n", ret);
+      return ret;
+    }
+  else if (ret == 0)
+    {
+      *lux = value_f * g_stk31850_gain[priv->gain_idx].pow;
+      *ir = value_c * g_stk31850_gain[priv->gain_idx].pow;
+      priv->last_lux = *lux;
+      priv->last_ir = *ir;
+    }
+  else
+    {
+      *lux = priv->last_lux;
+      *ir = priv->last_ir;
+    }
 
   return ret;
 }
@@ -1198,7 +1387,7 @@ static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
   DEBUGASSERT(priv != NULL && period_us != NULL);
 
-  freq = STK31850_UNIT_TIME / *period_us;
+  freq = STK31850_FREQ_SET;
 
   /* Find the period that matches best.  */
 
@@ -1344,7 +1533,6 @@ static void stk31850_worker(FAR void *arg)
 {
   FAR struct stk31850_dev_s *priv = arg;
   struct sensor_event_light light;
-  int interval;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1352,17 +1540,19 @@ static void stk31850_worker(FAR void *arg)
 
   light.timestamp = sensor_get_timestamp();
 
-  work_queue(HPWORK, &priv->work, stk31850_worker, priv,
-             priv->interval / USEC_PER_TICK);
-
   /* Read out the latest sensor data */
 
-  if (stk31850_readlux(priv, &light.light) == 0)
+  if (stk31850_readlux(priv, &light.light, &light.ir) == 0)
     {
       /* push data to upper half driver */
 
       priv->lower.push_event(priv->lower.priv, &light, sizeof(light));
     }
+
+  /* Set next task */
+
+  work_queue(HPWORK, &priv->work, stk31850_worker, priv,
+             priv->interval / USEC_PER_TICK);
 }
 
 /****************************************************************************
@@ -1412,6 +1602,7 @@ int stk31850_register(int devno, FAR const struct stk31850_config_s *config)
   priv->lower.type = SENSOR_TYPE_LIGHT;
   priv->lower.uncalibrated = true;
   priv->interval = STK31850_DEFAULT_INTERVAL;
+  priv->gain_idx = STK31850_GAIN_SET_MAX;
   priv->lower.buffer_number = CONFIG_SENSORS_STK31850_BUFFER_NUMBER;
 
   /* Read and verify the deviceid */
