@@ -1,5 +1,6 @@
 /****************************************************************************
- * boards/arm/tiva/tm4c123g-launchpad/src/tm4c_bringup.c
+ * arch/arm/src/tiva/tiva_can.h
+ * Classic (character-device) lower-half driver for the Tiva CAN modules.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,89 +19,71 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_CAN_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_CAN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <syslog.h>
-
-#include "tm4c123g-launchpad.h"
+#include <nuttx/can/can.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
+#if defined(CONFIG_CAN) && (defined(CONFIG_TIVA_CAN0) || defined(CONFIG_TIVA_CAN1))
+
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
- * Public Functions
+ * Public Types
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tm4c_bringup
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tiva_can_initialize
  *
  * Description:
- *   Bring up board features
+ *   Initialize the selected CAN module
+ *
+ * Input Parameters:
+ *   Device path, a string of the form "/dev/can0" or "/dev/can1"
+ *   Module number, for chips with multiple modules (typically 0 or 1)
+ *
+ * Returned Value:
+ *   Pointer to can_dev_s (CAN device structure), or NULL on failure.
  *
  ****************************************************************************/
 
-int tm4c_bringup(void)
-{
-  int ret = OK;
+int tiva_can_initialize(FAR char *devpath, int modnum);
 
-#ifdef CONFIG_TIVA_ADC
-  /* Initialize ADC and register the ADC driver. */
-
-  ret = tm4c_adc_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: tm4c_adc_setup failed: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_TIVA_CAN
-  /* Initialize CAN module and register the CAN driver(s) */
-
-  ret = tm4c_can_setup();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: tm4c_can_setup failed %d\n", ret);
-    }
-#endif
-
-#ifdef HAVE_AT24
-  /* Initialize the AT24 driver */
-
-  ret = tm4c_at24_automount(AT24_MINOR);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: tm4c_at24_automount failed: %d\n", ret);
-      return ret;
-    }
-#endif /* HAVE_AT24 */
-
-#ifdef CONFIG_TIVA_TIMER
-  /* Initialize the timer driver */
-
-  ret = tiva_timer_configure();
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: tiva_timer_configure failed: %d\n", ret);
-      return ret;
-    }
-#endif /* CONFIG_TIVA_TIMER */
-
-#ifdef CONFIG_CAN_MCP2515
-  /* Configure and initialize the MCP2515 CAN device */
-
-  ret = tiva_mcp2515initialize("/dev/can0");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: stm32_mcp2515initialize() failed: %d\n", ret);
-      return ret;
-    }
-#endif
-
-  UNUSED(ret);
-  return ret;
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_CAN && (CONFIG_TIVA_CAN0 || CONFIG_TIVA_CAN1) */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_CAN_H */
