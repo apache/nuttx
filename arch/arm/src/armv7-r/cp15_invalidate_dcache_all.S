@@ -91,13 +91,23 @@
 
 cp15_invalidate_dcache_all:
 
+	push		{r4, r5}
+
 	mrc		CP15_CCSIDR(r1)			/* Read the Cache Size Identification Register */
 
 	ldr		r3, =0x7fff			/* Isolate the NumSets field (bits 13-27) */
 	and		r0, r3, r1, lsr #13		/* r0=NumSets (number of sets - 1) */
 
+	ldr		r3,=0x7				/* Isolate the LineSize field (bits 0-2) */
+	and		r5, r3				/* r4=(Log2LineSize - 2) in word */
+	add		r5, #4				/* r4=Set/way operation line shfit */
+
 	ldr		r3, =0x3ff			/* Isolate the way field (bits 3-12) */
 	and		r1, r3, r1, lsr #3		/* r1=(number of ways - 1) */
+
+	add		r4, r1, #1
+	clz		r4, r4
+	add		r4, #1				/* r4=Set/way operation Way shift */
 
 way_loop:
 	mov		r3, r0				/* Init Sets */
@@ -112,6 +122,7 @@ set_loop:
 	bcs		way_loop			/* Keep looping if not */
 
 	dsb
+	pop		{r4, r5}
 	bx		lr
 	.size cp15_invalidate_dcache_all, . - cp15_invalidate_dcache_all
 	.end
