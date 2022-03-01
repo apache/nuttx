@@ -76,7 +76,7 @@ void group_del_waiter(FAR struct task_group_s *group)
        * freed).
        */
 
-      group_deallocate(group);
+      kmm_free(group);
     }
 }
 
