@@ -588,7 +588,7 @@ void nx_start(void)
        * of child status in the IDLE group.
        */
 
-      DEBUGVERIFY(group_initialize(&g_idletcb[i]));
+      group_initialize(&g_idletcb[i]);
       g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
     }
 
