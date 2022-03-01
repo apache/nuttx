@@ -43,4 +43,36 @@ config TM4C123G_LAUNCHPAD_AT24_NXFFS
 
 endchoice # AT24 serial EPPROM configuration
 
+choice
+	prompt "CAN0 RX pin selection"
+	default TM4C123G_LAUNCHPAD_CAN0RX_PE4
+	depends on TIVA_CAN0
+
+config TM4C123G_LAUNCHPAD_CAN0RX_PF0
+	bool "Use pin 0 on GPIO port F"
+
+config TM4C123G_LAUNCHPAD_CAN0RX_PB4
+	bool "Use pin 4 on GPIO port B"
+
+config TM4C123G_LAUNCHPAD_CAN0RX_PE4
+	bool "Use pin 4 on GPIO port E"
+
+endchoice # CAN0 RX pin selection
+
+choice
+	prompt "CAN0 TX pin selection"
+	default TM4C123G_LAUNCHPAD_CAN0TX_PE5
+	depends on TIVA_CAN0
+
+config TM4C123G_LAUNCHPAD_CAN0TX_PF3
+	bool "Use pin 3 on GPIO port F"
+
+config TM4C123G_LAUNCHPAD_CAN0TX_PB5
+	bool "Use pin 5 on GPIO port B"
+
+config TM4C123G_LAUNCHPAD_CAN0TX_PE5
+	bool "Use pin 5 on GPIO port E"
+
+endchoice # CAN0 TX pin selection
+
 endif
