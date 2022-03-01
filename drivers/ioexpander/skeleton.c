@@ -228,7 +228,7 @@ static int skel_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 static int skel_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                       int opt, FAR void *val)
+                       int opt, FAR void *value)
 {
   FAR struct skel_dev_s *priv = (FAR struct skel_dev_s *)dev;
   int ret = -ENOSYS;

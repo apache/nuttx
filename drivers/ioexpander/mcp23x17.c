@@ -204,7 +204,7 @@ static inline int mcp23x17_writeread(FAR struct mcp23x17_dev_s *priv,
  ****************************************************************************/
 
 static int mcp23x17_setbit(FAR struct mcp23x17_dev_s *priv, uint8_t addr,
-                           uint8_t pin, int bitval)
+                           uint8_t pin, bool bitval)
 {
   uint8_t buf[2];
   int ret;
@@ -366,15 +366,13 @@ static int mcp23x17_direction(FAR struct ioexpander_dev_s *dev, uint8_t pin,
  ****************************************************************************/
 
 static int mcp23x17_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
-                           int opt, FAR void *val)
+                           int opt, FAR void *value)
 {
   FAR struct mcp23x17_dev_s *priv = (FAR struct mcp23x17_dev_s *)dev;
   int ret = -EINVAL;
 
   if (opt == IOEXPANDER_OPTION_INVERT)
     {
-      int ival = (int)((intptr_t)val);
-
       /* Get exclusive access to the MCP23X17 */
 
       ret = mcp23x17_lock(priv);
@@ -383,7 +381,8 @@ static int mcp23x17_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
           return ret;
         }
 
-      ret = mcp23x17_setbit(priv, MCP23X17_IPOLA, pin, ival);
+      ret = mcp23x17_setbit(priv, MCP23X17_IPOLA, pin,
+                            ((uintptr_t)value == IOEXPANDER_VAL_INVERT));
       mcp23x17_unlock(priv);
     }
 
