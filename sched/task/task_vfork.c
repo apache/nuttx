@@ -210,17 +210,10 @@ FAR struct task_tcb_s *nxtask_setup_vfork(start_t retaddr)
 
   /* Now we have enough in place that we can join the group */
 
-  ret = group_initialize(child);
-  if (ret < OK)
-    {
-      goto errout_with_list;
-    }
-
+  group_initialize(child);
   sinfo("parent=%p, returning child=%p\n", parent, child);
   return child;
 
-errout_with_list:
-  dq_rem((FAR dq_entry_t *)child, (FAR dq_queue_t *)&g_inactivetasks);
 errout_with_tcb:
   nxsched_release_tcb((FAR struct tcb_s *)child, ttype);
 errout:
