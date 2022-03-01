@@ -244,8 +244,8 @@ static int ioe_dummy_direction(FAR struct ioexpander_dev_s *dev,
  *
  ****************************************************************************/
 
-static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev,
-                            uint8_t pin, int opt, FAR void *value)
+static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
+                            int opt, FAR void *value)
 {
   FAR struct ioe_dummy_dev_s *priv = (FAR struct ioe_dummy_dev_s *)dev;
   int ret = -ENOSYS;
@@ -264,7 +264,7 @@ static int ioe_dummy_option(FAR struct ioexpander_dev_s *dev,
 
   if (opt == IOEXPANDER_OPTION_INVERT)
     {
-      if ((uintptr_t)value == IOEXPANDER_OPTION_INVERT)
+      if ((uintptr_t)value == IOEXPANDER_VAL_INVERT)
         {
           priv->invert |= (1 << pin);
         }
