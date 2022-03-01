@@ -250,8 +250,7 @@ int files_allocate(FAR struct inode *inode, int oflags, off_t pos,
  *
  ****************************************************************************/
 
-int files_duplist(FAR struct filelist *plist,
-                  FAR struct filelist *clist, bool stdio_only)
+int files_duplist(FAR struct filelist *plist, FAR struct filelist *clist)
 {
   int ret;
   int i;
@@ -265,28 +264,25 @@ int files_duplist(FAR struct filelist *plist,
       return ret;
     }
 
-#ifdef CONFIG_FDCLONE_STDIO
-
-  /* Determine how many file descriptors to clone.  If
-   * CONFIG_FDCLONE_DISABLE is set, no file descriptors will be
-   * cloned.  If CONFIG_FDCLONE_STDIO is set, only the first
-   * three descriptors (stdin, stdout, and stderr) will be
-   * cloned.  Otherwise all file descriptors will be cloned.
-   */
-
-  stdio_only = true;
-#endif
-
   for (i = 0; i < plist->fl_rows; i++)
     {
       for (j = 0; j < CONFIG_NFILE_DESCRIPTORS_PER_BLOCK; j++)
         {
           FAR struct file *filep;
+#ifdef CONFIG_FDCLONE_STDIO
 
-          if (stdio_only && i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j >= 3)
+          /* Determine how many file descriptors to clone.  If
+           * CONFIG_FDCLONE_DISABLE is set, no file descriptors will be
+           * cloned.  If CONFIG_FDCLONE_STDIO is set, only the first
+           * three descriptors (stdin, stdout, and stderr) will be
+           * cloned.  Otherwise all file descriptors will be cloned.
+           */
+
+          if (i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK + j >= 3)
             {
               goto out;
             }
+#endif
 
           filep = &plist->fl_files[i][j];
           if (filep->f_inode == NULL || (filep->f_oflags & O_CLOEXEC) != 0)
