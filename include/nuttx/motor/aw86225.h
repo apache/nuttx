@@ -38,6 +38,21 @@
  * Public Types
  ****************************************************************************/
 
+struct aw86225_pattern_s
+{
+  uint8_t patternid[8];
+  uint8_t waveloop[8];
+  uint8_t mainloop;
+  float strength;
+  uint32_t duration; /* in millisecond */
+};
+
+struct aw86225_patterns_s
+{
+  uint32_t count;
+  struct aw86225_pattern_s pattern[1];
+};
+
 struct aw86225_config_s
 {
   uint8_t addr;                        /* I2C address */

@@ -1117,46 +1117,23 @@ static int drv2624_setparam(FAR struct motor_lowerhalf_s  *dev,
 {
   int ret = -EINVAL;
   FAR struct drv2624_dev_s *priv = (FAR struct drv2624_dev_s *)dev;
-  uint8_t strength;
   uint8_t rtpin;
 
   DEBUGASSERT(dev != NULL && param != NULL);
 
-  if (param->pattern.patternid >= 0)
+  if (priv->lower.opmode == MOTOR_OPMODE_PATTERN)
     {
-      ret = drv2624_i2c_writereg(priv, DRV2624_R0X0F_SEQ1,
-                                param->pattern.patternid);
-    }
+      /* drv2624 not used in L61A, just keep simple pattern play */
 
-  if (param->pattern.strength > 0 && param->pattern.strength <= 0.25)
-    {
-      strength = DRV2624_R0X0D_DIG_MEM_GAIN_STRENGTH_25;
-      ret = drv2624_i2c_write_bits(priv, DRV2624_R0X0D,
-                              DRV2624_R0X0D_DIG_MEM_GAIN_MASK, strength);
+      ret = drv2624_i2c_writereg(priv, DRV2624_R0X0F_SEQ1, 1);
     }
-  else if(param->pattern.strength > 0.25 && param->pattern.strength <= 0.5)
+  else if (priv->lower.opmode == MOTOR_OPMODE_FORCE)
     {
-      strength = DRV2624_R0X0D_DIG_MEM_GAIN_STRENGTH_50;
-      ret = drv2624_i2c_write_bits(priv, DRV2624_R0X0D,
-                              DRV2624_R0X0D_DIG_MEM_GAIN_MASK, strength);
-    }
-  else if(param->pattern.strength > 0.5 && param->pattern.strength <= 0.75)
-    {
-      strength = DRV2624_R0X0D_DIG_MEM_GAIN_STRENGTH_75;
-      ret = drv2624_i2c_write_bits(priv, DRV2624_R0X0D,
-                              DRV2624_R0X0D_DIG_MEM_GAIN_MASK, strength);
-    }
-  else if(param->pattern.strength > 0.75 && param->pattern.strength <= 1)
-    {
-      strength = DRV2624_R0X0D_DIG_MEM_GAIN_STRENGTH_100;
-      ret = drv2624_i2c_write_bits(priv, DRV2624_R0X0D,
-                              DRV2624_R0X0D_DIG_MEM_GAIN_MASK, strength);
-    }
-
-  if (param->force > 0.0 || param->force <= 1.0)
-    {
-      rtpin = (param->force * 10 * 127) / 10.f;
-      ret = drv2624_i2c_writereg(priv, DRV2624_R0X0E_RTP_INPUT, rtpin);
+      if (param->force > 0.0 || param->force <= 1.0)
+        {
+          rtpin = (param->force * 10 * 127) / 10.f;
+          ret = drv2624_i2c_writereg(priv, DRV2624_R0X0E_RTP_INPUT, rtpin);
+        }
     }
 
   return ret;

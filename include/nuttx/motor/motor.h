@@ -178,14 +178,6 @@ struct motor_limits_s
  * NOTE: All parameters require not negative value.
  */
 
-#ifdef CONFIG_MOTOR_UPPER_HAVE_PATTERN
-struct motor_patten_s
-{
-  uint8_t patternid;
-  float strength;
-};
-#endif
-
 struct motor_params_s
 {
   bool  lock;                        /* Lock this structure. Set this bit
@@ -218,9 +210,7 @@ struct motor_params_s
 #ifdef CONFIG_MOTOR_UPPER_HAVE_DECELERATION
   float deceleration;                /* Motor deceleration */
 #endif
-#ifdef CONFIG_MOTOR_UPPER_HAVE_PATTERN
-  struct motor_patten_s pattern;     /* Motor pattern setting */
-#endif
+  FAR void *privdata;                /* out of band data */
 };
 
 /* Motor operations used to call from the upper-half, generic motor driver
