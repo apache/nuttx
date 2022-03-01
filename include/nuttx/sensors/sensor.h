@@ -364,6 +364,7 @@ struct sensor_light         /* Type: Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float light;              /* in SI lux units */
+  float ir;                 /* in SI lux units */
 };
 
 struct sensor_humi          /* Type: Relative Humidity */
