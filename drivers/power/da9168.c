@@ -1771,7 +1771,7 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set precurr 40ma */
+  /* set precurr 20ma */
 
   ret = da9168_set_pre_curr(priv, DA9168_PRE_CURR_DEFAULT_UA, TRUE);
   if (ret < 0)
@@ -1780,9 +1780,9 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set iterm current 30ma */
+  /* set iterm current 40ma */
 
-  ret = da9168_set_iterm_curr(priv, 30, TRUE);
+  ret = da9168_set_iterm_curr(priv, 40, TRUE);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set da9168 iterm current, Error = %d\n", ret);

@@ -608,7 +608,7 @@
 #define DA9168_PCFG_CHG_CURR_CC_HIGH_MIN_MA             20
 #define DA9168_PCFG_CHG_CURR_CC_HIGH_MAX_MA             2000
 #define DA9168_ICHG_DEFAULT_UA                          300
-#define DA9168_PRE_CURR_DEFAULT_UA                      40
+#define DA9168_PRE_CURR_DEFAULT_UA                      20
 #define DA9168_ITERM_DEFAULT_UA                         60
 
 /* charge voltage cfg value */
