@@ -405,6 +405,7 @@ libs/libc/math
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 
 libs/libc/lzf
+include/lzf
 ======================
 
 Copyright (c) 2000-2007 Marc Alexander Lehmann <schmorp@schmorp.de>
