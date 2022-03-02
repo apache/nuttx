@@ -1095,16 +1095,15 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
                                 int *value)
 {
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
-  uint8_t read_buff[2];
+  uint16_t reg_value;
 
-  memset(read_buff, 0, 2);
-  if (fw_i2c_read(priv, WLC_RX_VOUT_REG, read_buff, 2) < OK)
+  if (fw_i2c_read(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2) < OK)
     {
-      baterr("[WLC] Error in reading WLC_RX_VOUT_REG\n");
+      baterr("[WLC] Error in reading WLC_RX_VOUT_SET_REG\n");
       return E_BUS_R;
     }
 
-  *value = read_buff[1] << 8 | read_buff[0];
+  *value = (reg_value * 25) >> 6;
 
   batinfo("The the actual output voltage of stwlc38 is %d mv \n", *value);
   return OK;
