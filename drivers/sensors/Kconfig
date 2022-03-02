@@ -99,12 +99,13 @@ config SENSORS_SX9373_BUFFER_NUMBER
 		The number of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
-config SENSORS_SX9373_DEBUG
-	bool "Debug interface for Sensor SX9373"
+config SENSOR_SX9373_RAWDATA
+	bool "Semtech SX9373 capacitive sensor raw data"
 	default n
 	depends on SENSORS_SX9373
 	---help---
-		Enable Debug interface for SX9373 Capacitive Sensor.
+		Enable to obtain the raw data of each channel of sx9373 for
+		algorithm analysis and parameter debugging.
 
 config SENSORS_CT7117
 	bool "Sensylink CT7117 Temperature Sensor"

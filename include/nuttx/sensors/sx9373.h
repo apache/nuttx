@@ -41,11 +41,10 @@
 
 struct sx9373_config_s
 {
-  uint8_t addr;                                    /* I2C address. */
-  int freq;                                        /* I2C frequency. */
-  int pin;                                         /* Interrupt pin. */
-  FAR struct i2c_master_s *i2c;                    /* I2C interface. */
-  FAR struct ioexpander_dev_s *ioe;                /* Ioexpander device. */
+  uint8_t addr;                              /* I2C address. */
+  int freq;                                  /* I2C frequency. */
+  FAR struct i2c_master_s *i2c;              /* I2C interface. */
+  FAR const char *file_path;                 /* File path of parameter. */
 };
 
 /****************************************************************************
