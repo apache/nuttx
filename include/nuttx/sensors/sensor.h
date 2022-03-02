@@ -281,9 +281,17 @@
 
 #define SENSOR_TYPE_WAKE_GESTURE                    31
 
+/* CAP (Capacitive proximity sensor)
+ * The purpose of the proximity sensing interface is to detect when a
+ * conductive object (usually a body part i.e. finger, palm, face, etc.)
+ * is in the proximity of the system.
+ */
+
+#define SENSOR_TYPE_CAP                             32
+
 /* The total number of sensor */
 
-#define SENSOR_TYPE_COUNT                           32
+#define SENSOR_TYPE_COUNT                           33
 
 /****************************************************************************
  * Inline Functions
@@ -566,6 +574,13 @@ struct sensor_event_wake_gesture     /* Type: Wake gesture */
   uint32_t event;
 };
 
+struct sensor_event_cap     /* Type: Capacitance */
+{
+  uint64_t timestamp;       /* Unit is microseconds */
+  int32_t status;           /* Detection status */
+  int32_t rawdata[4];       /* in SI units pF */
+};
+
 /* The sensor lower half driver interface */
 
 struct sensor_lowerhalf_s;
@@ -735,7 +750,7 @@ struct sensor_ops_s
   CODE int (*set_calibvalue)(FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
-/****************************************************************************
+  /**************************************************************************
    * Name: calibrate
    *
    * This operation can trigger the calibration operation, and if the
