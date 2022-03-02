@@ -481,6 +481,13 @@ config ESP32S3_ONESHOT
 		Enable a wrapper around the low level timer/counter functions to
 		support one-shot timer.
 
+config ESP32S3_FREERUN
+	bool "Free-running wrapper"
+	default n
+	---help---
+		Enable a wrapper around the low level timer/counter functions to
+		support a free-running timer.
+
 endmenu # Timer/Counter Configuration
 
 menu "Application Image Configuration"
