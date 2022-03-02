@@ -55,7 +55,7 @@ unsigned int if_nametoindex(FAR const char *ifname)
   if (sockfd >= 0)
     {
       struct ifreq req;
-      strncpy(req.ifr_name, ifname, IF_NAMESIZE);
+      strlcpy(req.ifr_name, ifname, IF_NAMESIZE);
       if (ioctl(sockfd, SIOCGIFINDEX, (unsigned long)&req) >= 0)
         {
           close(sockfd);
