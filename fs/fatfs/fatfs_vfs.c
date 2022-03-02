@@ -648,6 +648,7 @@ static int fatfs_stat_i(FAR const char *path, FAR struct stat *buf)
 
   buf->st_size  = fno.fsize;
 
+  memset(&gm, 0, sizeof(gm));
   gm.tm_year    = 80 + (fno.fdate >> 9);
   gm.tm_mon     = ((fno.fdate >> 5) & 0xf) - 1;
   gm.tm_mday    = fno.fdate & 0x1f;
