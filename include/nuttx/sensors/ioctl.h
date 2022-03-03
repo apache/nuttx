@@ -315,4 +315,24 @@
 
 #define SNIOC_CALIBRATE            _SNIOC(0x0088)
 
+#ifdef CONFIG_USENSOR
+/* Command:      SNIOC_REGISTER
+ * Description:  Register user sensor.
+ * Argument:     A pointer of structure sensor_reginfo_s for user sensor.
+ * Note:         If register is failed, return errno, otherwise,
+ *               return OK.
+ */
+
+#define SNIOC_REGISTER             _SNIOC(0x0089)
+
+/* Command:      SNIOC_UNREGISTER
+ * Description:  Unregister user sensor.
+ * Argument:     The path name of user sensor character node.
+ * Note:         If register is failed, return errno, otherwise,
+ *               return OK.
+ */
+
+#define SNIOC_UNREGISTER           _SNIOC(0x0090)
+#endif
+
 #endif /* __INCLUDE_NUTTX_SENSORS_IOCTL_H */
