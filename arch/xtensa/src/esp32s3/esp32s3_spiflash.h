@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3-devkit.h
+ * arch/xtensa/src/esp32s3/esp32s3_spiflash.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,51 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
-#define __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include <sys/types.h>
 #include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#include <nuttx/mtd/mtd.h>
 
 #ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_bringup
+ * Name: esp32s3_spiflash_init
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Initialize ESP32-S3 SPI flash driver.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
- *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ * Returned Value:
+ *   OK if success or a negative value if fail.
  *
  ****************************************************************************/
 
-int esp32s3_bringup(void);
+int esp32s3_spiflash_init(void);
 
-/****************************************************************************
- * Name: board_spiflash_init
- *
- * Description:
- *   Initialize the SPIFLASH and register the MTD device.
- *
- ****************************************************************************/
-
-#ifdef CONFIG_ESP32S3_SPIFLASH
-int board_spiflash_init(void);
+#ifdef __cplusplus
+}
 #endif
+#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_H */
