@@ -21,7 +21,7 @@
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_testset.S vfork.S
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
 CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c
@@ -66,7 +66,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
-CMN_CSRCS += arm_copyarmstate.c
 endif
 
 CHIP_CSRCS  = nrf52_start.c nrf52_clockconfig.c nrf52_irq.c nrf52_utils.c
