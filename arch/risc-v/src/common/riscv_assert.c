@@ -320,7 +320,7 @@ static void riscv_dumpstate(void)
   if (CURRENT_REGS)
     {
       memcpy(rtcb->xcp.regs,
-             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_REGS);
+             (uintptr_t *)CURRENT_REGS, XCPTCONTEXT_SIZE);
     }
   else
     {
