@@ -31,6 +31,7 @@
 
 #include <nuttx/arch.h>
 #include <arch/irq.h>
+#include <arch/csr.h>
 
 #include "riscv_internal.h"
 #include "riscv_arch.h"
@@ -138,19 +139,18 @@ void up_irqinitialize(void)
 void up_disable_irq(int irq)
 {
   int extirq;
-  uint64_t oldstat;
 
   if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & clear machine software interrupt enable in mie */
 
-      asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+      CLEAR_CSR(mie, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & clear machine timer interrupt enable in mie */
 
-      asm volatile ("csrrc %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
+      CLEAR_CSR(mie, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {
@@ -181,19 +181,18 @@ void up_disable_irq(int irq)
 void up_enable_irq(int irq)
 {
   int extirq;
-  uint64_t oldstat;
 
   if (irq == RISCV_IRQ_MSOFT)
     {
       /* Read mstatus & set machine software interrupt enable in mie */
 
-      asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MSIE));
+      SET_CSR(mie, MIE_MSIE);
     }
   else if (irq == RISCV_IRQ_MTIMER)
     {
       /* Read mstatus & set machine timer interrupt enable in mie */
 
-      asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MTIE));
+      SET_CSR(mie, MIE_MTIE);
     }
   else if (irq > RISCV_IRQ_MEXT)
     {
@@ -256,18 +255,18 @@ void riscv_ack_irq(int irq)
 
 irqstate_t up_irq_enable(void)
 {
-  uint64_t oldstat;
+  irqstate_t oldstat;
 
 #if 1
   /* Enable MEIE (machine external interrupt enable) */
 
   /* TODO: should move to up_enable_irq() */
 
-  asm volatile ("csrrs %0, mie, %1": "=r" (oldstat) : "r"(MIE_MEIE));
+  SET_CSR(mie, MIE_MEIE);
 #endif
 
   /* Read mstatus & set machine interrupt enable (MIE) in mstatus */
 
-  asm volatile ("csrrs %0, mstatus, %1": "=r" (oldstat) : "r"(MSTATUS_MIE));
+  oldstat = READ_AND_SET_CSR(mstatus, MSTATUS_MIE);
   return oldstat;
 }
