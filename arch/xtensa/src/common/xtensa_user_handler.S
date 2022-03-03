@@ -219,6 +219,13 @@ _xtensa_user_handler:
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 
+	/* Save EXCCAUSE and EXCVADDR into the user frame */
+
+	rsr		a0, EXCCAUSE
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR
+	s32i	a0, sp, (4 * REG_EXCVADDR)
+
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
@@ -227,8 +234,8 @@ _xtensa_user_handler:
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
-	* it's the register save area.
-	*/
+	 * it's the register save area.
+	 */
 
 	mov	a12, sp
 
@@ -237,13 +244,6 @@ _xtensa_user_handler:
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 	setintstack a13 a14
 #endif
-
-	/* Save exc cause and vaddr into exception frame */
-
-	rsr		a0, EXCCAUSE
-	s32i	a0, sp, (4 * REG_EXCCAUSE)
-	rsr		a0, EXCVADDR
-	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
