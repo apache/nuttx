@@ -326,6 +326,13 @@
      tmp; \
   })
 
+#define READ_AND_SET_CSR(reg, bits) \
+  ({ \
+     unsigned long tmp; \
+     asm volatile("csrrs %0, " CSR_STR(reg) ", %1": "=r"(tmp) : "rK"(bits)); \
+     tmp; \
+  })
+
 #define WRITE_CSR(reg, val) \
   ({ \
      asm volatile("csrw " CSR_STR(reg) ", %0" :: "rK"(val)); \
