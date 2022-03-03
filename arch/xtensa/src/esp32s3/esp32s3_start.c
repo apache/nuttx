@@ -37,6 +37,7 @@
 #include "esp32s3_lowputc.h"
 #include "esp32s3_clockconfig.h"
 #include "esp32s3_region.h"
+#include "esp32s3_spiram.h"
 #include "esp32s3_wdt.h"
 #include "hardware/esp32s3_cache_memory.h"
 #include "hardware/esp32s3_system.h"
@@ -284,6 +285,22 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
 #endif
 
   showprogress('A');
+
+#if defined(CONFIG_ESP32S3_SPIRAM_BOOT_INIT)
+  if (esp_spiram_init() != OK)
+    {
+#  if defined(ESP32S3_SPIRAM_IGNORE_NOTFOUND)
+      mwarn("SPIRAM Initialization failed!\n");
+#  else
+      PANIC();
+#  endif
+    }
+  else
+    {
+      esp_spiram_init_cache();
+      esp_spiram_test();
+    }
+#endif
 
   /* Initialize onboard resources */
 

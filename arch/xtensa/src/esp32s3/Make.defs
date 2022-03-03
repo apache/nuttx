@@ -108,3 +108,7 @@ CHIP_CSRCS += esp32s3_spiflash_mtd.c
 endif
 endif
 
+ifeq ($(CONFIG_ESP32S3_SPIRAM),y)
+CHIP_CSRCS += esp32s3_spiram.c
+CHIP_CSRCS += esp32s3_psram.c
+endif
