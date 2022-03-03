@@ -235,7 +235,7 @@ static struct stm32_can_s g_can3priv =
                       STM32_IRQ_CAN3RX1,
   },
   .cantx            = STM32_IRQ_CAN3TX,
-  .filter           = CAN_NFILTERS / 2,
+  .filter           = 0,
   .base             = STM32_CAN3_BASE,
   .fbase            = STM32_CAN3_BASE,
   .baud             = CONFIG_STM32F7_CAN3_BAUD,
@@ -2003,10 +2003,11 @@ static int stm32can_cellinit(FAR struct stm32_can_s *priv)
  *      more filters;  The advantage of 32-bit filters is that you get
  *      finer control of the filtering.
  *
- *   One filter is set up for each CAN.  The filter resources are shared
- *   between the two CAN modules:  CAN1 uses only filter 0 (but reserves
+ *   One filter is set up for each CAN. The filter resources are shared
+ *   between CAN1 and CAN2 modules: CAN1 uses only filter 0 (but reserves
  *   0 through CAN_NFILTERS/2-1); CAN2 uses only filter CAN_NFILTERS/2
  *   (but reserves CAN_NFILTERS/2 through CAN_NFILTERS-1).
+ *   CAN3 works in single peripheral configuration and uses only filter 0.
  *
  *   32-bit IdMask mode is configured.  However, both the ID and the MASK
  *   are set to zero thus suppressing all filtering because anything masked
@@ -2037,12 +2038,17 @@ static int stm32can_filterinit(FAR struct stm32_can_s *priv)
   regval |= CAN_FMR_FINIT;
   stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
 
-  /* Assign half the filters to CAN1, half to CAN2 */
+#if defined(CONFIG_STM32F7_CAN1) || defined(CONFIG_STM32F7_CAN2)
+  if (priv->port == 1 || priv->port == 2)
+    {
+      /* Assign half the filters to CAN1, half to CAN2 */
 
-  regval  = stm32can_getfreg(priv, STM32_CAN_FMR_OFFSET);
-  regval &= CAN_FMR_CAN2SB_MASK;
-  regval |= (CAN_NFILTERS / 2) << CAN_FMR_CAN2SB_SHIFT;
-  stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
+      regval  = stm32can_getfreg(priv, STM32_CAN_FMR_OFFSET);
+      regval &= CAN_FMR_CAN2SB_MASK;
+      regval |= (CAN_NFILTERS / 2) << CAN_FMR_CAN2SB_SHIFT;
+      stm32can_putfreg(priv, STM32_CAN_FMR_OFFSET, regval);
+    }
+#endif
 
   /* Disable the filter */
 
@@ -2320,4 +2326,4 @@ FAR struct can_dev_s *stm32_caninitialize(int port)
   return dev;
 }
 
-#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2) */
+#endif /* CONFIG_CAN && (CONFIG_STM32_CAN1 || CONFIG_STM32_CAN2 || CONFIG_STM32_CAN3) */
