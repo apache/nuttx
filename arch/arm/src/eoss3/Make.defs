@@ -21,7 +21,7 @@
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
 CMN_CSRCS += arm_itm.c arm_mdelay.c arm_memfault.c arm_modifyreg8.c

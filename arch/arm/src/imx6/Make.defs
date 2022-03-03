@@ -58,7 +58,7 @@ CMN_CSRCS += arm_releasestack.c arm_usestack.c arm_vfork.c arm_puts.c arm_mdelay
 CMN_CSRCS += arm_stackframe.c arm_udelay.c arm_modifyreg8.c arm_modifyreg16.c
 CMN_CSRCS += arm_modifyreg32.c
 
-CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_dataabort.c
+CMN_CSRCS += arm_assert.c arm_blocktask.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_gicv2.c arm_initialstate.c arm_mmu.c
 CMN_CSRCS += arm_prefetchabort.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
@@ -125,7 +125,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
-CMN_CSRCS += arm_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)

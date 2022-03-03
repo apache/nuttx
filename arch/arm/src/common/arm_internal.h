@@ -309,10 +309,6 @@ void arm_boot(void);
 
 /* Context switching */
 
-void arm_copyfullstate(uint32_t *dest, uint32_t *src);
-#ifdef CONFIG_ARCH_FPU
-void arm_copyarmstate(uint32_t *dest, uint32_t *src);
-#endif
 uint32_t *arm_decodeirq(uint32_t *regs);
 int  arm_saveusercontext(uint32_t *saveregs);
 void arm_fullcontextrestore(uint32_t *restoreregs) noreturn_function;

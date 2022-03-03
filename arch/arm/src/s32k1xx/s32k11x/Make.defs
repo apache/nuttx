@@ -23,7 +23,7 @@
 CMN_ASRCS += arm_exception.S arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += vfork.S
 
-CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_createstack.c
+CMN_CSRCS += arm_assert.c arm_blocktask.c arm_createstack.c
 CMN_CSRCS += arm_initialstate.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_systemreset.c
 CMN_CSRCS += arm_unblocktask.c arm_doirq.c arm_hardfault.c arm_svcall.c

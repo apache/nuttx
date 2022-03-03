@@ -25,7 +25,7 @@
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
 CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_exit.c arm_initialize.c arm_initialstate.c
 CMN_CSRCS += arm_interruptcontext.c arm_mdelay.c arm_memfault.c arm_modifyreg8.c
 CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_releasepending.c
@@ -56,7 +56,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
-CMN_CSRCS += arm_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_STACK_COLORATION),y)
