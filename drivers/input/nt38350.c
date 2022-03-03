@@ -111,6 +111,8 @@
 #define NVT_HANDSHAKING_HOST_READY   0xbb
 #define NVT_XDATA_SECTOR_SIZE        256
 
+#define NVT_RESULT_FOLDER            "data/tp"
+
 #ifdef  CONFIG_NVT_OFFLINE_LOG
 #define NVT_POINT_DATA_EXT_LEN       4   /* Event buffer offset 0x11~0x14 */
 #define NVT_S2D_DATA_LEN             59  /* Event buffer offset 0x15~0x4F
@@ -595,7 +597,6 @@ static int nt38350_read_reg(FAR struct nt38350_dev_s *priv,
                          address, buffer, length);
   if (ret != OK)
     {
-
       ierr("ERROR: Failed to read reg: %d\n", ret);
       return ret;
     }
@@ -2728,10 +2729,6 @@ static int nvt_diff_get(FAR struct nt38350_dev_s *priv, int32_t *data)
 
   flags = enter_critical_section();
 
-#ifdef CONFIG_NVT_TOUCH_ESD_PROTECT
-  nvt_esd_check_enable(false);
-#endif /* #if NVT_TOUCH_ESD_PROTECT */
-
   if (nvt_clear_fw_status(priv))
     {
       ret = -EACCES;
@@ -2833,6 +2830,13 @@ static void nvt_log_data_to_csv(FAR void *arg)
       return;
     }
 
+  /* if file folder not exist, first create the folder */
+
+  if (access(NVT_RESULT_FOLDER, F_OK) < 0)
+    {
+      mkdir(NVT_RESULT_FOLDER, 0777);
+    }
+
   /* open csv file */
 
   fp = open(csv_file_path, O_RDWR | O_CREAT);
@@ -2851,7 +2855,7 @@ static void nvt_log_data_to_csv(FAR void *arg)
   ret = read(fp, fbufp, 1);
   if (ret <= 0)
     {
-      ierr("ERROR: %s Read error\n", __func__);
+      iwarn("read header fail, maybe it is first time create.\n");
     }
 
   if (fbufp[0] != 'L')
@@ -3643,6 +3647,13 @@ static int32_t nvt_read_fw_open(FAR struct nt38350_dev_s *priv,
 static void nvt_selftest(FAR struct nt38350_dev_s *priv,
                          FAR struct nvt_mp_test_s *mp)
 {
+  /* if file folder not exist, first create the folder */
+
+  if (access(NVT_RESULT_FOLDER, F_OK) < 0)
+    {
+      mkdir(NVT_RESULT_FOLDER, 0777);
+    }
+
   if (nvt_check_fw_reset_state(priv, RESET_STATE_REK))
     {
       ierr("check fw reset state failed!\n");
