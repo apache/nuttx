@@ -66,6 +66,7 @@ void riscv_sigdeliver(void)
    */
 
   int16_t saved_irqcount;
+  irqstate_t flags;
 #endif
 
   board_autoled_on(LED_SIGNAL);
@@ -84,6 +85,7 @@ void riscv_sigdeliver(void)
    * pre-incremented irqcount.
    */
 
+  flags          = (irqstate_t)regs[REG_INT_CTX];
   saved_irqcount = rtcb->irqcount - 1;
   DEBUGASSERT(saved_irqcount >= 0);
 
@@ -93,7 +95,7 @@ void riscv_sigdeliver(void)
 
   do
     {
-      leave_critical_section(regs[REG_INT_CTX]);
+      leave_critical_section(flags);
     }
   while (rtcb->irqcount > 0);
 #endif /* CONFIG_SMP */
@@ -118,19 +120,20 @@ void riscv_sigdeliver(void)
   sinfo("Resuming EPC: %" PRIxREG " INT_CTX: %" PRIxREG "\n",
         regs[REG_EPC], regs[REG_INT_CTX]);
 
-#ifdef CONFIG_SMP
-  /* Restore the saved 'irqcount' and recover the critical section
-   * spinlocks.
+  /* Call enter_critical_section() to disable local interrupts before
+   * restoring local context.
+   *
+   * Here, we should not use up_irq_save() in SMP mode.
+   * For example, if we call up_irq_save() here and another CPU might
+   * have called up_cpu_pause() to this cpu, hence g_cpu_irqlock has
+   * been locked by the cpu, in this case, we would see a deadlock in
+   * later call of enter_critical_section() to restore irqcount.
+   * To avoid this situation, we need to call enter_critical_section().
    */
 
-  DEBUGASSERT(rtcb->irqcount == 0);
-  while (rtcb->irqcount < saved_irqcount)
-    {
-      (void)enter_critical_section();
-    }
-#endif
-
-#ifndef CONFIG_SUPPRESS_INTERRUPTS
+#ifdef CONFIG_SMP
+  enter_critical_section();
+#else
   up_irq_save();
 #endif
 
@@ -147,6 +150,27 @@ void riscv_sigdeliver(void)
   regs[REG_EPC]        = rtcb->xcp.saved_epc;
   regs[REG_INT_CTX]    = rtcb->xcp.saved_int_ctx;
   rtcb->xcp.sigdeliver = NULL;  /* Allows next handler to be scheduled */
+
+#ifdef CONFIG_SMP
+  /* Restore the saved 'irqcount' and recover the critical section
+   * spinlocks.
+   *
+   * REVISIT:  irqcount should be one from the above call to
+   * enter_critical_section().  Could the saved_irqcount be zero?  That
+   * would be a problem.
+   */
+
+  DEBUGASSERT(rtcb->irqcount == 1);
+  while (rtcb->irqcount < saved_irqcount)
+    {
+      enter_critical_section();
+    }
+
+  if (saved_irqcount == 0)
+    {
+      leave_critical_section(flags);
+    }
+#endif
 
   /* Then restore the correct state for this thread of
    * execution.
