@@ -19,6 +19,12 @@ config SENSORS_NPOLLWAITERS
 		Maximum number of threads than can be waiting for POLL events.
 		Default: 2
 
+config USENSOR
+	bool "Usensor Device Support"
+	default n
+	---help---
+		Allow application to register user sensor by /dev/usensor.
+
 config SENSORS_WTGAHRS2
 	bool "Wtgahrs2 Sensor Support"
 	default n

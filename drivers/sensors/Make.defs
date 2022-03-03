@@ -24,6 +24,10 @@ ifeq ($(CONFIG_SENSORS),y)
 
 CSRCS += sensor.c
 
+ifeq ($(CONFIG_USENSOR),y)
+CSRCS += usensor.c
+endif
+
 ifeq ($(CONFIG_SENSORS_WTGAHRS2),y)
   CSRCS += wtgahrs2.c
 endif
