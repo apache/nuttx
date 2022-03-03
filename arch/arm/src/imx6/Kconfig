@@ -40,6 +40,7 @@ config ARCH_CHIP_IMX6_6DUAL
 config ARCH_CHIP_IMX6_6QUAD
 	bool "i.MX 6Quad"
 	select ARCH_HAVE_MULTICPU
+	select ARM_HAVE_FPU_D32
 	select ARMV7A_HAVE_GICv2
 	select ARMV7A_HAVE_GTM
 	select ARMV7A_HAVE_PTM
