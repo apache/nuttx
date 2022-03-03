@@ -5,7 +5,7 @@
 
 config BOARD_SAMV7_COMMON
 	bool "Board common logic"
-	default y
+	default n
 	---help---
 		 Board common logic located in each board/common folder.
 
