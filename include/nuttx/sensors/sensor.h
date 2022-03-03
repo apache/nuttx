@@ -874,6 +874,17 @@ struct sensor_lowerhalf_s
   FAR void *priv;
 };
 
+/* This structure describes the register info for the user sensor */
+
+#ifdef CONFIG_USENSOR
+struct sensor_reginfo_s
+{
+  FAR const char *path; /* The path of user sensor */
+  uint16_t esize;       /* The element size of user sensor */
+  uint32_t nqueue;      /* The number of queue buffered elements */
+};
+#endif
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
@@ -978,6 +989,20 @@ void sensor_unregister(FAR struct sensor_lowerhalf_s *dev, int devno);
 
 void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *dev,
                               FAR const char *path);
+
+/****************************************************************************
+ * Name: usensor_initialize
+ *
+ * Description:
+ *   This function registers usensor character node "/dev/usensor", so that
+ *   application can register user sensor by this node. The node will
+ *   manager all user sensor in this character dirver.
+ ****************************************************************************/
+
+#ifdef CONFIG_USENSOR
+int usensor_initialize(void);
+#endif
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
