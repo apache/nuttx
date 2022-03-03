@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/xtensa/esp32s3/esp32s3-devkit/src/esp32s3-devkit.h
+ * arch/xtensa/src/esp32s3/esp32s3_spiflash_mtd.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,62 +18,74 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
-#define __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H
+#ifndef __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_MTD_H
+#define __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_MTD_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/compiler.h>
+
+#include <sys/types.h>
 #include <stdint.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Public Types
- ****************************************************************************/
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
+#include <nuttx/mtd/mtd.h>
 
 #ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: esp32s3_bringup
+ * Name: esp32s3_spiflash_mtd
  *
  * Description:
- *   Perform architecture-specific initialization
+ *   Get SPI Flash MTD.
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y :
- *     Called from board_late_initialize().
+ * Input Parameters:
+ *   None
  *
- *   CONFIG_BOARD_LATE_INITIALIZE=y && CONFIG_BOARDCTL=y :
- *     Called from the NSH library via board_app_initialize()
+ * Returned Value:
+ *   ESP32-S3 SPI Flash MTD pointer.
  *
  ****************************************************************************/
 
-int esp32s3_bringup(void);
+struct mtd_dev_s *esp32s3_spiflash_mtd(void);
 
 /****************************************************************************
- * Name: board_spiflash_init
+ * Name: esp32s3_spiflash_alloc_mtdpart
  *
  * Description:
- *   Initialize the SPIFLASH and register the MTD device.
+ *   Allocate an MTD partition from the ESP32-S3 SPI Flash.
+ *
+ * Input Parameters:
+ *   mtd_offset - MTD Partition offset from the base address in SPI Flash.
+ *   mtd_size   - Size for the MTD partition.
+ *   encrypted  - Flag indicating whether the newly allocated partition will
+ *                have its content encrypted.
+ *
+ * Returned Value:
+ *   SPI Flash MTD data pointer if success or NULL if fail.
  *
  ****************************************************************************/
 
-#ifdef CONFIG_ESP32S3_SPIFLASH
-int board_spiflash_init(void);
+struct mtd_dev_s *esp32s3_spiflash_alloc_mtdpart(uint32_t mtd_offset,
+                                                 uint32_t mtd_size);
+
+#ifdef __cplusplus
+}
 #endif
+#undef EXTERN
 
 #endif /* __ASSEMBLY__ */
-#endif /* __BOARDS_XTENSA_ESP32S3_ESP32S3_DEVKIT_SRC_ESP32S3_DEVKIT_H */
+#endif /* __ARCH_XTENSA_SRC_ESP32S3_ESP32S3_SPIFLASH_MTD_H */
