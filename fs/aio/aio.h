@@ -33,7 +33,6 @@
 #include <queue.h>
 
 #include <nuttx/wqueue.h>
-#include <nuttx/net/net.h>
 
 #ifdef CONFIG_FS_AIO
 
