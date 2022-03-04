@@ -416,7 +416,7 @@ static int skel_getmultibits(FAR struct skel_dev_s *priv, FAR uint8_t *pins,
           return -ENXIO;
         }
 
-      values[i] = ((pinset & (1 << pin)) != 0);
+      values[i] = (((pinset >> pin) & 1) != 0);
     }
 
   return OK;
@@ -474,11 +474,11 @@ static int skel_multiwritepin(FAR struct ioexpander_dev_s *dev,
 
       if (values[i])
         {
-          pinset |= (1 << pin);
+          pinset |= ((ioe_pinset_t)1 << pin);
         }
       else
         {
-          pinset &= ~(1 << pin);
+          pinset &= ~((ioe_pinset_t)1 << pin);
         }
     }
 
