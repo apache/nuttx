@@ -33,7 +33,6 @@
 #include <nuttx/sched.h>
 #include <nuttx/cancelpt.h>
 #include <nuttx/fs/fs.h>
-#include <nuttx/net/net.h>
 
 #include "inode/inode.h"
 
@@ -55,20 +54,6 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
     {
       return -EBADF;
     }
-
-  /* check for operations on a socket descriptor */
-
-#ifdef CONFIG_NET
-  if (INODE_IS_SOCKET(filep->f_inode) &&
-      cmd != F_DUPFD && cmd != F_GETFD && cmd != F_SETFD)
-    {
-      /* Yes.. defer socket descriptor operations to
-       * psock_vfcntl(). The errno is not set on failures.
-       */
-
-      return psock_vfcntl(file_socket(filep), cmd, ap);
-    }
-#endif
 
   switch (cmd)
     {
