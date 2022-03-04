@@ -121,14 +121,12 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
 
           if (oflags & FD_CLOEXEC)
             {
-              filep->f_oflags |= O_CLOEXEC;
+              ret = file_ioctl(filep, FIOCLEX, NULL);
             }
           else
             {
-              filep->f_oflags &= ~O_CLOEXEC;
+              ret = file_ioctl(filep, FIONCLEX, NULL);
             }
-
-          ret = OK;
         }
         break;
 
@@ -172,7 +170,6 @@ static int file_vfcntl(FAR struct file *filep, int cmd, va_list ap)
                 {
                   file_seek(filep, 0, SEEK_END);
                 }
-              ret              =  OK;
             }
         }
         break;
