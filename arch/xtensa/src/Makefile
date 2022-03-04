@@ -101,7 +101,7 @@ define LINK_ALLSYMS
 	$(Q) $(call DELFILE, allsyms.tmp allsyms$(OBJEXT))
 endef
 
-nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT) $(ARCHSCRIPT)
+nuttx$(EXEEXT): $(STARTUP_OBJS) board/libboard$(LIBEXT)
 	@echo "LD: nuttx"
 ifneq ($(CONFIG_ALLSYMS),y)
 	$(Q) $(LD) --entry=__start $(LDFLAGS) $(LIBPATHS) $(EXTRA_LIBPATHS) \
