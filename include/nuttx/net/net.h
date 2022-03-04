@@ -1410,46 +1410,6 @@ ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
 #endif
 
 /****************************************************************************
- * Name: psock_vfcntl
- *
- * Description:
- *   Performs fcntl operations on socket.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   cmd   - The fcntl command.
- *   ap    - Command-specific arguments.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap);
-
-/****************************************************************************
- * Name: psock_fcntl
- *
- * Description:
- *   Similar to the standard fcntl function except that is accepts a struct
- *   struct socket instance instead of a file descriptor.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   cmd   - Identifies the operation to be performed.  Command specific
- *           arguments may follow.
- *
- * Returned Value:
- *   The nature of the return value depends on the command.  Non-negative
- *   values indicate success.  Failures are reported as negated errno
- *   values.
- *
- ****************************************************************************/
-
-int psock_fcntl(FAR struct socket *psock, int cmd, ...);
-
-/****************************************************************************
  * Name: psock_socketpair
  *
  * Description:
