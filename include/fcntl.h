@@ -103,7 +103,7 @@
 #define F_WRLCK     1  /* Take out a write lease */
 #define F_UNLCK     2  /* Remove a lease */
 
-/* close-on-exec flag for F_GETRL and F_SETFL */
+/* close-on-exec flag for F_GETFD and F_SETFD */
 
 #define FD_CLOEXEC  1
 
