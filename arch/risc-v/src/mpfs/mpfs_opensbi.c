@@ -26,7 +26,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdint.h>
-#include <riscv_arch.h>
+#include "riscv_arch.h"
 
 #include <hardware/mpfs_plic.h>
 #include <hardware/mpfs_memorymap.h>
@@ -41,16 +41,9 @@
   #undef NULL
 #endif
 
-#include <sbi/sbi_types.h>
-#include <sbi/riscv_atomic.h>
-#include <sbi/riscv_asm.h>
-#include <sbi/riscv_io.h>
 #include <sbi/riscv_encoding.h>
-#include <sbi/sbi_hart.h>
 #include <sbi/sbi_console.h>
 #include <sbi/sbi_platform.h>
-#include <sbi/sbi_domain.h>
-#include <sbi/sbi_timer.h>
 #include <sbi/sbi_init.h>
 #include <sbi/sbi_scratch.h>
 #include <sbi_utils/irqchip/plic.h>
@@ -70,8 +63,6 @@
 
 #define MPFS_PMP_DEFAULT_ADDR      0xfffffffff
 #define MPFS_PMP_DEFAULT_PERM      0x000000009f
-
-#define UBOOT_LOAD_ADDR            0x80200000  /* We expect u-boot here */
 
 /* The following define is not accessible with assember.  Make sure it's in
  * sync with the assembler usage in mpfs_opensbi_utils.S.
@@ -178,13 +169,43 @@ static struct aclint_mswi_data mpfs_mswi =
   .hart_count     = MPFS_HART_COUNT,
 };
 
-const struct sbi_platform platform =
+/* OpenSBI picks the used and unused harts via the hart_index2id table.
+ * Unused hart is marked with -1.  Mpfs will always have the hart0 unused.
+ */
+
+static const u32 mpfs_hart_index2id[MPFS_HART_COUNT] =
+{
+  [0] = -1,
+#ifdef CONFIG_MPFS_HART1_SBI
+  [1] = 1,
+#else
+  [1] = -1,
+#endif
+#ifdef CONFIG_MPFS_HART2_SBI
+  [2] = 2,
+#else
+  [2] = -1,
+#endif
+#ifdef CONFIG_MPFS_HART3_SBI
+  [3] = 3,
+#else
+  [3] = -1,
+#endif
+#ifdef CONFIG_MPFS_HART4_SBI
+  [4] = 4,
+#else
+  [4] = -1,
+#endif
+};
+
+static const struct sbi_platform platform =
 {
   .opensbi_version   = OPENSBI_VERSION,
   .platform_version  = SBI_PLATFORM_VERSION(0x0, 0x01),
   .name              = "Microchip PolarFire(R) SoC",
   .features          = SBI_PLATFORM_DEFAULT_FEATURES,
   .hart_count        = MPFS_HART_COUNT,
+  .hart_index2id     = mpfs_hart_index2id,
   .hart_stack_size   = SBI_PLATFORM_DEFAULT_HART_STACK_SIZE,
   .platform_ops_addr = (unsigned long)&platform_ops,
   .firmware_context  = 0
@@ -199,7 +220,16 @@ static sbi_scratch_holder_t g_scratches[MPFS_MAX_NUM_HARTS] \
 
 uint8_t g_hart_stacks[SBI_PLATFORM_DEFAULT_HART_STACK_SIZE * \
                       MPFS_HART_COUNT] \
-                      __attribute__((section(".ddrstorage")));
+                      __attribute__((section(".ddrstorage"), aligned(16)));
+
+static const uint64_t sbi_entrypoints[] =
+{
+  CONFIG_MPFS_HART0_ENTRYPOINT,
+  CONFIG_MPFS_HART1_ENTRYPOINT,
+  CONFIG_MPFS_HART2_ENTRYPOINT,
+  CONFIG_MPFS_HART3_ENTRYPOINT,
+  CONFIG_MPFS_HART4_ENTRYPOINT
+};
 
 /****************************************************************************
  * Private Functions
@@ -519,12 +549,12 @@ void __attribute__((noreturn)) mpfs_opensbi_setup(void)
 
   csr_write(mscratch, &g_scratches[hartid].scratch);
   g_scratches[hartid].scratch.next_mode = PRV_S;
-  g_scratches[hartid].scratch.next_addr = UBOOT_LOAD_ADDR;
+  g_scratches[hartid].scratch.next_addr = sbi_entrypoints[hartid];
   g_scratches[hartid].scratch.next_arg1 = 0;
 
   sbi_init(&g_scratches[hartid].scratch);
 
   /* Will never get here */
 
-  DEBUGPANIC();
+  PANIC();
 }

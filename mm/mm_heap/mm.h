@@ -258,11 +258,11 @@ void mm_shrinkchunk(FAR struct mm_heap_s *heap,
 void mm_addfreechunk(FAR struct mm_heap_s *heap,
                      FAR struct mm_freenode_s *node);
 
-/* Functions contained in mm_size2ndx.c ***********************************/
+/* Functions contained in mm_size2ndx.c *************************************/
 
 int mm_size2ndx(size_t size);
 
-/* Functions contained in mm_foreach.c ***********************************/
+/* Functions contained in mm_foreach.c **************************************/
 
 void mm_foreach(FAR struct mm_heap_s *heap, mmchunk_handler_t handler,
                 FAR void *arg);

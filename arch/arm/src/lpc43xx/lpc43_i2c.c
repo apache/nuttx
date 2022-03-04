@@ -521,6 +521,7 @@ struct i2c_master_s *lpc43_i2cbus_initialize(int port)
   else
 #endif
     {
+      leave_critical_section(flags);
       return NULL;
     }
 

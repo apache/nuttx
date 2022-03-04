@@ -447,15 +447,18 @@ static int bluetooth_l2cap_bind(FAR struct socket *psock,
    * Only SOCK_RAW is supported
    */
 
-  if (psock->s_type != SOCK_RAW)
+  if (psock == NULL || psock->s_conn == NULL ||
+      psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
     }
 
+  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+
   /* Verify that the socket is not already bound. */
 
-  if (_SS_ISBOUND(psock->s_flags))
+  if (_SS_ISBOUND(conn->bc_conn.s_flags))
     {
       nerr("ERROR: Already bound\n");
       return -EINVAL;
@@ -466,8 +469,6 @@ static int bluetooth_l2cap_bind(FAR struct socket *psock,
    * REVISIT: Currently and explicit address must be assigned.  Should we
    * support some moral equivalent to INADDR_ANY?
    */
-
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
 
   conn->bc_proto = psock->s_proto;
 
@@ -519,21 +520,22 @@ static int bluetooth_hci_bind(FAR struct socket *psock,
    * Only SOCK_RAW is supported
    */
 
-  if (psock->s_type != SOCK_RAW)
+  if (psock == NULL || psock->s_conn == NULL ||
+      psock->s_type != SOCK_RAW)
     {
       nerr("ERROR: Invalid socket type: %u\n", psock->s_type);
       return -EBADF;
     }
 
+  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
+
   /* Verify that the socket is not already bound. */
 
-  if (_SS_ISBOUND(psock->s_flags))
+  if (_SS_ISBOUND(conn->bc_conn.s_flags))
     {
       nerr("ERROR: Already bound\n");
       return -EINVAL;
     }
-
-  conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
 
   conn->bc_proto = psock->s_proto;
   conn->bc_channel = hciaddr->hci_channel;

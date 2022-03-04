@@ -343,6 +343,7 @@ static void mld_polldog_work(FAR void *arg)
 
           fwarn("WARNING: No device associated with ifindex=%d\n",
                 group->ifindex);
+          net_unlock();
           return;
         }
 

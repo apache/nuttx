@@ -45,15 +45,6 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifndef CONFIG_TIMER_FD_VFS_PATH
-#define CONFIG_TIMER_FD_VFS_PATH "/var/timer"
-#endif
-
-#ifndef CONFIG_TIMER_FD_NPOLLWAITERS
-/* Maximum number of threads than can be waiting for POLL events */
-#define CONFIG_TIMER_FD_NPOLLWAITERS 2
-#endif
-
 #define TIMER_FD_WORK LPWORK
 
 /****************************************************************************
@@ -549,12 +540,9 @@ int timerfd_create(int clockid, int flags)
 
   /* Sanity checks. */
 
-  if (clockid != CLOCK_REALTIME
-#ifdef CONFIG_CLOCK_MONOTONIC
-      && clockid != CLOCK_MONOTONIC
-      && clockid != CLOCK_BOOTTIME
-#endif /* CONFIG_CLOCK_MONOTONIC */
-      )
+  if (clockid != CLOCK_REALTIME &&
+      clockid != CLOCK_MONOTONIC &&
+      clockid != CLOCK_BOOTTIME)
     {
       ret = -EINVAL;
       goto errout;

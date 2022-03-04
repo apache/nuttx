@@ -582,6 +582,10 @@ ssize_t up_progmem_write(size_t address, const void *buffer, size_t buflen)
       for (i = 0; i < SAMV7_PAGE_WORDS; i++)
         {
           *dest++ = *src++;
+
+#ifdef CONFIG_ARMV7M_DCACHE_WRITETHROUGH
+          ARM_DMB();
+#endif
         }
 
       /* Flush the data cache to memory */

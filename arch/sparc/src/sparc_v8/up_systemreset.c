@@ -62,4 +62,8 @@ void up_systemreset(void)
   asm("jmp %l4");
   asm("nop");
   asm("nop");
+
+  /* Wait for the reset */
+
+  for (; ; );
 }

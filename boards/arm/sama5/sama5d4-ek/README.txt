@@ -1633,8 +1633,8 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
-      CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
+      CONFIG_MMCSD_MULTIBLOCK_LIMIT=1       : (REVISIT)
+      CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
@@ -3649,7 +3649,6 @@ Configurations
     UDP relay bridge test using apps/examples/bridge.  See
     apps/examples/README.txt for more information about this test.
 
-
     NOTES:
 
     1. This configuration uses the USART3 for the serial console
@@ -3848,7 +3847,6 @@ Configurations
       RTOS Features -> System call support
         CONFIG_LIB_SYSCALL=y                   : Enable system call support
         CONFIG_SYS_NNEST=2                     : Max number of nested system calls
-        CONFIG_SYS_RESERVED=1                  : SYStem call 0 is reserved on this platform
 
       Application Configurations -> Examples -> ELF Loader Example
         CONFIG_EXAMPLES_ELF_SYSCALL=y          : Link apps with the SYStem call library
@@ -4001,9 +3999,6 @@ Configurations
          CONFIG_INIT_FILE=y                     : Start-up is via an ELF file
          CONFIG_INIT_FILEPATH="/bin/init"       : The location of the startup
          CONFIG_SCHED_HAVE_PARENT=y             : Needed to handle task exit
-
-       RTOS Features -> System call support
-         CONFIG_SYS_RESERVED=5                  : More reserved SYSCALLs
 
        RTOS Features -> RTOS hooks
          CONFIG_SCHED_ONEXIT=y                 : Needed to handle task exit
@@ -4929,7 +4924,7 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 is set to disable multi-block
    transfers because of some issues that I saw during testing.  The is very
    low priority to me but might be important to you if you are need very
    high performance SD card accesses.

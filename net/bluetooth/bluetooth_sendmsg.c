@@ -426,7 +426,7 @@ static ssize_t bluetooth_l2cap_send(FAR struct socket *psock,
   conn = (FAR struct bluetooth_conn_s *)psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->bc_conn.s_flags))
     {
       ret = -ENOTCONN;
     }

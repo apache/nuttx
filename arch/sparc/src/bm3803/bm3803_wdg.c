@@ -159,7 +159,7 @@ static int bm3803_start(FAR struct watchdog_lowerhalf_s *lower)
   uint32_t val = bm3803_getreg(BM3803_TIM1_BASE + BM3803_TIM_CR_OFFSET);
   val |= TIMER_WDG;
 
-  wdinfo("Entry: started=%d\n");
+  wdinfo("Entry: started\n");
   DEBUGASSERT(priv);
 
   /* Have we already been started? */

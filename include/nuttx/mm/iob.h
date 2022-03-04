@@ -234,6 +234,23 @@ struct iob_userstats_s
 void iob_initialize(void);
 
 /****************************************************************************
+ * Name: iob_timedalloc
+ *
+ * Description:
+ *  Allocate an I/O buffer by taking the buffer at the head of the free list.
+ *  This wait will be terminated when the specified timeout expires.
+ *
+ * Input Parameters:
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   timeout    - Timeout value in milliseconds.
+ *   consumerid - id representing who is consuming the IOB
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *iob_timedalloc(bool throttled, unsigned int timeout,
+                                 enum iob_user_e consumerid);
+
+/****************************************************************************
  * Name: iob_alloc
  *
  * Description:

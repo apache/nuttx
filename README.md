@@ -987,7 +987,6 @@ The `menuconfig` make target depends on two things:
      the more detailed build instructions in the top-level README.txt
      file of the tools repository at <https://bitbucket.org/nuttx/tools>.
 
-
      The `make install` step will, by default, install the `kconfig-mconf`
      tool at `/usr/local/bin/mconf`.  Where ever you choose to
      install `kconfig-mconf`, make certain that your PATH variable includes

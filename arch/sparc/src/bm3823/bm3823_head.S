@@ -26,7 +26,6 @@
 
 #include <arch/irq.h>
 
-
 #define RTRAP(_vector, _handler)  mov   %g0, %l0 ; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 #define TRAP(_vector, _handler)   mov   %psr, %l0; sethi %hi(_handler), %l4 ; jmp %l4+%lo(_handler); mov _vector, %l3
 
@@ -69,6 +68,8 @@
   sethi %hi(_handler), %l4 ; \
   jmp   %l4+%lo(_handler); \
    sll  %l3, 1, %l4 ! l4 = WIM << 1
+
+#define BM3823_STACK_TOP       _end+CONFIG_IDLETHREAD_STACKSIZE
 
     .text
     .global _trap_table, _hardreset
@@ -329,9 +330,9 @@ __start:
         nop
 
         ! initial the stack point
-        sethi  %hi(__stack), %g1
-        or     %g1, %lo(__stack), %g1
-        subcc  %g1, 16, %g1
+        sethi  %hi(BM3823_STACK_TOP), %g1
+        or     %g1, %lo(BM3823_STACK_TOP), %g1
+        subcc  %g1, CPU_MINIMUM_STACK_FRAME_SIZE, %g1
         mov    %g1, %sp
         nop
 
@@ -367,7 +368,6 @@ zerobss:
 
         ret
         restore
-
 
 /*
  * Init END
@@ -419,7 +419,6 @@ _window_overflow:
         jmp  %l1                         ! Re-execute save.
          rett %l2
 
-
         /*
          *  Window underflow trap handler.
          *
@@ -465,7 +464,6 @@ _window_underflow:
         save
         jmp  %l1                        ! Re-execute restore.
          rett  %l2
-
 
         /*
          *  Flush All Windows trap handler.
@@ -592,7 +590,6 @@ done_flushing:
         jmpl    %l2, %g0
         rett    %l2 + 4
 
-
 /* fpdis_enable */
     .global  _fpdis_enable
 _fpdis_enable:
@@ -602,7 +599,6 @@ _fpdis_enable:
         nop
         nop
 /*************************************************/
-
 
 /*************************************************/
 	.data
@@ -618,7 +614,7 @@ _fpdata:
 
 .align 8
 g_idle_topstack:
-	.long	_end + CONFIG_IDLETHREAD_STACKSIZE
+	.long	BM3823_STACK_TOP
 	.size	g_idle_topstack, .-g_idle_topstack
 	.end
 

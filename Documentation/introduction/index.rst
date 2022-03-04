@@ -14,4 +14,3 @@ In the following sections you will find basic information introducing main NuttX
   trademarks.rst
   resources.rst
 
-

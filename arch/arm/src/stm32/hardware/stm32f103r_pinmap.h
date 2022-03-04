@@ -57,6 +57,15 @@
 #define GPIO_ADC12_IN14       (GPIO_INPUT|GPIO_CNF_ANALOGIN|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN4)
 #define GPIO_ADC12_IN15       (GPIO_INPUT|GPIO_CNF_ANALOGIN|GPIO_MODE_INPUT|GPIO_PORTC|GPIO_PIN5)
 
+/* DAC - "Once the DAC channelx is enabled, the corresponding GPIO pin
+ * (PA4 or PA5) is automatically connected to the analog converter output
+ * (DAC_OUTx). In order to avoid parasitic consumption, the PA4 or PA5 pin
+ * should first be configured to analog (AIN)."
+ */
+
+#define GPIO_DAC1_OUT1      (GPIO_INPUT|GPIO_CNF_ANALOGIN|GPIO_MODE_INPUT|GPIO_PORTA|GPIO_PIN4)
+#define GPIO_DAC1_OUT2      (GPIO_INPUT|GPIO_CNF_ANALOGIN|GPIO_MODE_INPUT|GPIO_PORTA|GPIO_PIN5)
+
 /* TIMERS */
 
 #if defined(CONFIG_STM32_TIM1_FULL_REMAP)

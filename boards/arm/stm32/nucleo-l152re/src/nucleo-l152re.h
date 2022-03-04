@@ -116,3 +116,17 @@ int stm32_spisd_initialize(int port, int minor);
     #endif
 #endif /* CONFIG_FS_PROCFS */
 #endif /* __BOARDS_ARM_STM32_NUCLEO_L152RE_SRC_NUCLEO_L152RE_H */
+
+/****************************************************************************
+ * Public Functions Definitions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: stm32_spiinitialize
+ *
+ * Description:
+ *   Called to configure SPI chip select GPIO pins.
+ *
+ ****************************************************************************/
+
+void stm32_spiinitialize(void);

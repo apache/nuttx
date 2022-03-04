@@ -38,4 +38,3 @@ Block device drivers have these properties:
 -  **Examples**. ``drivers/loop.c``,
    ``drivers/mmcsd/mmcsd_spi.c``, ``drivers/ramdisk.c``, etc.
 
-

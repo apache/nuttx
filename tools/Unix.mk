@@ -46,7 +46,7 @@ else
 # Only update .version if the contents of version.tmp actually changes
 # Note: this is executed before any rule is run
 
-$(shell tools/version.sh .version.tmp)
+$(shell tools/version.sh .version.tmp > /dev/null)
 $(shell $(call TESTANDREPLACEFILE, .version.tmp, .version))
 endif
 
@@ -328,6 +328,12 @@ arch/dummy/Kconfig:
 	@echo "CP: $@ to $(CHIP_KCONFIG)"
 	$(Q) cp -f $(CHIP_KCONFIG) $@
 
+# Copy $(BOARD_KCONFIG) to boards/dummy/Kconfig
+
+boards/dummy/Kconfig:
+	@echo "CP: $@ to $(BOARD_KCONFIG)"
+	$(Q) cp -f $(BOARD_KCONFIG) $@
+
 DIRLINKS_SYMLINK = \
   include/arch \
   include/arch/board \
@@ -335,6 +341,7 @@ DIRLINKS_SYMLINK = \
 
 DIRLINKS_FILE = \
   arch/dummy/Kconfig \
+  boards/dummy/Kconfig \
 
 ifneq ($(INCLUDE_ARCH_CHIP_SYMLINK_DIR),)
 DIRLINKS_SYMLINK += include/arch/chip
@@ -351,8 +358,6 @@ endif
 ifneq ($(ARCH_SRC_BOARD_BOARD_SYMLINK),)
 DIRLINKS_SYMLINK += $(ARCH_SRC)/board/board
 endif
-
-DIRLINKS_EXTERNAL_DIRS = boards
 
 ifneq ($(APPDIR),)
 DIRLINKS_EXTERNAL_DIRS += $(APPDIR)
@@ -397,7 +402,6 @@ endif
 ifneq ($(ARCH_SRC_CHIP_SYMLINK_DIR),)
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
 endif
-
 
 # context
 #

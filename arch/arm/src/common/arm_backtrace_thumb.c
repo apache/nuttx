@@ -361,7 +361,7 @@ static int backtrace_push(FAR void *limit, FAR void **sp, FAR void *pc,
       return 0;
     }
 
-  pc = (uintptr_t)pc & 0xfffffffe;
+  pc = (FAR void *)((uintptr_t)pc & 0xfffffffe);
 
   if ((*skip)-- <= 0)
     {
@@ -411,7 +411,7 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
   for (i = 0; i < size && sp < limit; sp += sizeof(uint32_t))
     {
       addr = *(FAR uint32_t *)sp;
-      if (!in_code_region(addr))
+      if (!in_code_region((FAR void *)addr))
         {
           continue;
         }
@@ -422,7 +422,7 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
         {
           if ((*skip)-- <= 0)
             {
-              buffer[i++] = addr;
+              buffer[i++] = (FAR void *)addr;
             }
         }
 
@@ -441,7 +441,7 @@ static int backtrace_branch(FAR void *limit, FAR void *sp,
             {
               if ((*skip)-- <= 0)
                 {
-                  buffer[i++] = addr;
+                  buffer[i++] = (FAR void *)addr;
                 }
             }
         }
@@ -588,7 +588,7 @@ int up_backtrace(FAR struct tcb_s *tcb,
 
       if (skip-- <= 0)
         {
-          buffer[ret++] = tcb->xcp.regs[REG_PC];
+          buffer[ret++] = (FAR void *)tcb->xcp.regs[REG_PC];
         }
 
       if (ret < size)

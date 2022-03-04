@@ -917,6 +917,10 @@ struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
       case 0:
         {
           tim = &g_esp32c3_tim0_priv;
+
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0, SYSTEM_TIMERGROUP_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP_RST_M, 0);
+
           break;
         }
 #endif
@@ -925,6 +929,11 @@ struct esp32c3_tim_dev_s *esp32c3_tim_init(int timer)
       case 1:
         {
           tim = &g_esp32c3_tim1_priv;
+
+          modifyreg32(SYSTEM_PERIP_CLK_EN0_REG, 0,
+                      SYSTEM_TIMERGROUP1_CLK_EN);
+          modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_TIMERGROUP1_RST_M, 0);
+
           break;
         }
 #endif

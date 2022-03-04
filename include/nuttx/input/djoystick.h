@@ -220,12 +220,6 @@ struct djoy_lowerhalf_s
   CODE void (*dl_enable)(FAR const struct djoy_lowerhalf_s *lower,
                          djoy_buttonset_t press, djoy_buttonset_t release,
                          djoy_interrupt_t handler, FAR void *arg);
-
-  /* Allow for storing implementation specific data to support cases where
-   * their may be more than one joystick
-   */
-
-  FAR void *config;
 };
 
 /****************************************************************************

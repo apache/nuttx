@@ -117,7 +117,6 @@ NXGL Types
                     FAR const struct nxgl_point_s *v1, \
                     FAR const struct nxgl_point_s *v2);
 
-
  Add two 2x1 vectors and save the result to a third.
 
 .. c:function:: void nxgl_vectsubtract(FAR struct nxgl_point_s *dest, \
@@ -246,7 +245,6 @@ NXGL Types
 
 .. c:function:: void nxgl_circletraps(FAR const struct nxgl_point_s *center, nxgl_coord_t radius, \
                      FAR struct nxgl_trapezoid_s *circle);
-
 
   Given a description of a a circle, return 8 trapezoids
   that can be used to fill the circle by

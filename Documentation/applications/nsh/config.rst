@@ -398,7 +398,6 @@ CMD                 w/o ``CONFIG_NSH_VARS``               w/``CONFIG_NSH_VARS``
 ``env``             Lists all environment variables       Lists all environment variables (*only*)
 ==================  ===================================   =============================================
 
-
 If Telnet is selected for the NSH console, then we must configure the
 resources used by the Telnet daemon and by the Telnet clients.
 

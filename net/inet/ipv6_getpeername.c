@@ -69,6 +69,7 @@
 int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
                      FAR socklen_t *addrlen)
 {
+  FAR struct socket_conn_s *conn = psock->s_conn;
   FAR struct sockaddr_in6 *outaddr = (FAR struct sockaddr_in6 *)addr;
   net_ipv6addr_t *ripaddr;
 
@@ -86,7 +87,7 @@ int ipv6_getpeername(FAR struct socket *psock, FAR struct sockaddr *addr,
 
   /* Verify that the socket has been connected */
 
-  if (_SS_ISCONNECTED(psock->s_flags) == 0)
+  if (_SS_ISCONNECTED(conn->s_flags) == 0)
     {
       return -ENOTCONN;
     }

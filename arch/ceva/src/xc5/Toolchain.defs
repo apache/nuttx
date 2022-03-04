@@ -59,10 +59,6 @@ LDFLAGS += -internalCode$(ITCM_KB) -internalData$(DTCM_KB)
 LIBGCC  = $(CROSSDEV)libs/xc5/cevaxclib.lib
 LIBGCC += $(CROSSDEV)libs/xc5/libcc.lib
 
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-  WINTOOL = y
-endif
-
 CC  = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet
 CXX = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet -x c++
 CPP = $(CROSSDEV)/cevaxccc -mquiet -Wa,-quiet -E -P -x c

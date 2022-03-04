@@ -111,7 +111,7 @@ pid_t up_vfork(const uint32_t *regs)
 
   /* Allocate the stack for the TCB */
 
-  ret = up_create_stack((FAR struct tcb_s *)child, C2B(stacksize + argsize),
+  ret = up_create_stack((FAR struct tcb_s *)child, stacksize + argsize,
                         parent->flags & TCB_FLAG_TTYPE_MASK);
   if (ret != OK)
     {
@@ -123,7 +123,7 @@ pid_t up_vfork(const uint32_t *regs)
   /* Allocate the memory and copy argument from parent task */
 
   argv = up_stack_frame((FAR struct tcb_s *)child, argsize);
-  memcpy(argv, parent->adj_stack_ptr, argsize);
+  memcpy(argv, parent->stack_base_ptr, argsize);
 
   /* How much of the parent's stack was utilized?  The CEVA uses
    * a push-down stack so that the current stack pointer should
@@ -131,8 +131,8 @@ pid_t up_vfork(const uint32_t *regs)
    * stack usage should be the difference between those two.
    */
 
-  DEBUGASSERT(parent->adj_stack_ptr >= sp);
-  stackutil = parent->adj_stack_ptr - sp;
+  DEBUGASSERT(parent->stack_base_ptr >= sp);
+  stackutil = parent->stack_base_ptr - sp;
 
   sinfo("Parent: stacksize:%d stackutil:%d\n", stacksize, stackutil);
 
@@ -143,7 +143,7 @@ pid_t up_vfork(const uint32_t *regs)
    * effort is overkill.
    */
 
-  newsp = child->cmn.adj_stack_ptr - stackutil;
+  newsp = child->cmn.stack_base_ptr - stackutil;
   memcpy(newsp, sp, stackutil);
 
   /* Allocate the context and copy the parent snapshot */
@@ -154,11 +154,11 @@ pid_t up_vfork(const uint32_t *regs)
 
   /* Was there a frame pointer in place before? */
 
-  if (regs[REG_FP] <= (uint32_t)parent->adj_stack_ptr &&
-      regs[REG_FP] >= (uint32_t)parent->adj_stack_ptr - stacksize)
+  if (regs[REG_FP] <= (uint32_t)parent->stack_base_ptr &&
+      regs[REG_FP] >= (uint32_t)parent->stack_base_ptr - stacksize)
     {
-      uint32_t frameutil = (uint32_t)parent->adj_stack_ptr - regs[REG_FP];
-      newfp = (uint32_t)child->cmn.adj_stack_ptr - frameutil;
+      uint32_t frameutil = (uint32_t)parent->stack_base_ptr - regs[REG_FP];
+      newfp = (uint32_t)child->cmn.stack_base_ptr - frameutil;
     }
   else
     {
@@ -166,9 +166,9 @@ pid_t up_vfork(const uint32_t *regs)
     }
 
   sinfo("Parent: stack base:%08x SP:%08x FP:%08x\n",
-        parent->adj_stack_ptr, sp, regs[REG_FP]);
+        parent->stack_base_ptr, sp, regs[REG_FP]);
   sinfo("Child:  stack base:%08x SP:%08x FP:%08x\n",
-        child->cmn.adj_stack_ptr, newsp, newfp);
+        child->cmn.stack_base_ptr, newsp, newfp);
 
   /* Update the stack pointer, frame pointer, and the return value in A0
    * should be cleared to zero, providing the indication to the newly started

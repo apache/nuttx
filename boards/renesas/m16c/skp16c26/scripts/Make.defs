@@ -42,7 +42,7 @@ ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 
-ARCHSCRIPT		= -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)skp16c26.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)skp16c26.ld
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

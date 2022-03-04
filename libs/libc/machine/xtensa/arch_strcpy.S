@@ -76,7 +76,6 @@ strcpy:
   bnez  a8, .Lsrcaligned
 1:  RET(16)
 
-
 /* dst is word-aligned; src is word-aligned.  */
 
   .align  4

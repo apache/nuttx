@@ -33,9 +33,22 @@
 #include <nuttx/board.h>
 #include <nuttx/drivers/ramdisk.h>
 
+#ifdef CONFIG_MPFS_ROMFS_MOUNT
+#  include <arch/board/boot_romfsimg.h>
+#endif
+
 #include "board_config.h"
 #include "mpfs_corepwm.h"
 #include "mpfs.h"
+
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#ifdef CONFIG_MPFS_ROMFS_MOUNT
+#  define SECTORSIZE    512
+#  define NSECTORS(b)   (((b) + SECTORSIZE - 1) / SECTORSIZE)
+#endif /* CONFIG_MPFS_ROMFS_MOUNT */
 
 /****************************************************************************
  * Public Functions
@@ -69,6 +82,26 @@ int mpfs_bringup(void)
       serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
     }
 #endif
+
+#ifdef CONFIG_MPFS_ROMFS_MOUNT
+  /* Create a ROM disk for the /bin filesystem */
+
+  ret = romdisk_register(0, romfs_img, NSECTORS(romfs_img_len), SECTORSIZE);
+  if (ret < 0)
+    {
+      serr("ERROR: Failed to register romdisk: %d\n", -ret);
+    }
+  else
+    {
+      /* Mount the file system */
+
+      ret = mount("/dev/ram0", "/bin", "romfs", MS_RDONLY, NULL);
+      if (ret < 0)
+        {
+          serr("ERROR: Failed to mount romfs: %d\n", -ret);
+        }
+    }
+#endif /* CONFIG_MPFS_ROMFS_MOUNT */
 
 #if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
   /* Configure SPI peripheral interfaces */

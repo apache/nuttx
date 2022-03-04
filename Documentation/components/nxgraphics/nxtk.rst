@@ -436,7 +436,6 @@ these sub-windows to be managed more-or-less independently:
                      FAR const struct nx_callback_s *cb, \
                      FAR void *arg);
 
-
   Create a tool bar at the top of the specified framed
   window.
 
@@ -468,7 +467,6 @@ these sub-windows to be managed more-or-less independently:
 .. c:function:: int nxtk_filltoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect, \
                      nxgl_mxpixel_t color[CONFIG_NX_NPLANES]);
 
-
   Fill the specified rectangle in the toolbar sub-window
   with the specified color.
 
@@ -486,7 +484,6 @@ these sub-windows to be managed more-or-less independently:
 .. c:function:: int nxtk_gettoolbar(NXTKWINDOW hfwnd, FAR const struct nxgl_rect_s *rect, \
                     unsigned int plane, FAR uint8_t *dest, \
                     unsigned int deststride);
-
 
   Get the raw contents of graphic memory within a
   rectangular region. NOTE: Since raw graphic memory is returned, the
@@ -530,7 +527,6 @@ these sub-windows to be managed more-or-less independently:
                          nxgl_coord_t width, nxgl_mxpixel_t color[CONFIG_NX_NPLANES], \
                          uint8_t caps);
 
-
   Fill the specified line in the toolbar sub-window with
   the specified color. This is simply a wrapper that uses
   ``nxgl_splitline()`` to break the line into trapezoids and then calls
@@ -557,7 +553,6 @@ these sub-windows to be managed more-or-less independently:
       #define NX_LINECAP_PT1   0x01  /* Line cap on pt1 on of the vector only */
       #define NX_LINECAP_PT2   0x02  /* Line cap on pt2 on of the vector only */
       #define NX_LINECAP_BOTH  0x03  /* Line cap on both ends of the vector only */
-
 
   :return: ``OK`` on success; ``ERROR`` on failure with
     ``errno`` set appropriately
@@ -649,5 +644,4 @@ these sub-windows to be managed more-or-less independently:
     ``errno`` set appropriately
 
 .. _nx-fonts-support-nxfonts-1:
-
 

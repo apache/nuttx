@@ -95,8 +95,7 @@
 static inline void sendto_ipselect(FAR struct net_driver_s *dev,
                                    FAR struct udp_conn_s *conn);
 #endif
-static int sendto_next_transfer(FAR struct socket *psock,
-                                FAR struct udp_conn_s *conn);
+static int sendto_next_transfer(FAR struct udp_conn_s *conn);
 static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
                                     FAR void *pvconn, FAR void *pvpriv,
                                     uint16_t flags);
@@ -146,8 +145,7 @@ static uint32_t udp_inqueue_wrb_size(FAR struct udp_conn_s *conn)
  *   Release the write buffer at the head of the write buffer queue.
  *
  * Input Parameters:
- *   dev   - The structure of the network driver that caused the event
- *   psock - Socket state structure
+ *   conn  - The UDP connection of interest
  *
  * Returned Value:
  *   None
@@ -157,8 +155,7 @@ static uint32_t udp_inqueue_wrb_size(FAR struct udp_conn_s *conn)
  *
  ****************************************************************************/
 
-static void sendto_writebuffer_release(FAR struct socket *psock,
-                                       FAR struct udp_conn_s *conn)
+static void sendto_writebuffer_release(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   int ret = OK;
@@ -173,9 +170,9 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
            * enqueued.
            */
 
-          psock->s_sndcb->flags = 0;
-          psock->s_sndcb->priv  = NULL;
-          psock->s_sndcb->event = NULL;
+          conn->sndcb->flags = 0;
+          conn->sndcb->priv  = NULL;
+          conn->sndcb->event = NULL;
           wrb = NULL;
 
 #ifdef CONFIG_NET_UDP_NOTIFIER
@@ -200,7 +197,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
            * the write buffer queue.
            */
 
-          ret = sendto_next_transfer(psock, conn);
+          ret = sendto_next_transfer(conn);
         }
     }
   while (wrb != NULL && ret < 0);
@@ -223,7 +220,7 @@ static void sendto_writebuffer_release(FAR struct socket *psock,
  *
  * Input Parameters:
  *   dev   - The structure of the network driver that caused the event
- *   psock - Socket state structure
+ *   conn  - The UDP connection of interest
  *
  * Returned Value:
  *   None
@@ -266,7 +263,6 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *   the head of the write queue.
  *
  * Input Parameters:
- *   psock - Socket state structure
  *   conn  - The UDP connection structure
  *
  * Returned Value:
@@ -274,8 +270,7 @@ static inline void sendto_ipselect(FAR struct net_driver_s *dev,
  *
  ****************************************************************************/
 
-static int sendto_next_transfer(FAR struct socket *psock,
-                                FAR struct udp_conn_s *conn)
+static int sendto_next_transfer(FAR struct udp_conn_s *conn)
 {
   FAR struct udp_wrbuffer_s *wrb;
   FAR struct net_driver_s *dev;
@@ -331,24 +326,24 @@ static int sendto_next_transfer(FAR struct socket *psock,
    * callback instance.
    */
 
-  if (psock->s_sndcb != NULL && conn->dev != dev)
+  if (conn->sndcb != NULL && conn->dev != dev)
     {
-      udp_callback_free(conn->dev, conn, psock->s_sndcb);
-      psock->s_sndcb = NULL;
+      udp_callback_free(conn->dev, conn, conn->sndcb);
+      conn->sndcb = NULL;
     }
 
   /* Allocate resources to receive a callback from this device if the
    * callback is not already in place.
    */
 
-  if (psock->s_sndcb == NULL)
+  if (conn->sndcb == NULL)
     {
-      psock->s_sndcb = udp_callback_alloc(dev, conn);
+      conn->sndcb = udp_callback_alloc(dev, conn);
     }
 
   /* Test if the callback has been allocated */
 
-  if (psock->s_sndcb == NULL)
+  if (conn->sndcb == NULL)
     {
       /* A buffer allocation error occurred */
 
@@ -360,9 +355,9 @@ static int sendto_next_transfer(FAR struct socket *psock,
 
   /* Set up the callback in the connection */
 
-  psock->s_sndcb->flags = (UDP_POLL | NETDEV_DOWN);
-  psock->s_sndcb->priv  = (FAR void *)psock;
-  psock->s_sndcb->event = sendto_eventhandler;
+  conn->sndcb->flags = (UDP_POLL | NETDEV_DOWN);
+  conn->sndcb->priv  = (FAR void *)conn;
+  conn->sndcb->event = sendto_eventhandler;
 
   /* Notify the device driver of the availability of TX data */
 
@@ -394,10 +389,9 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
                                     FAR void *pvconn, FAR void *pvpriv,
                                     uint16_t flags)
 {
-  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvconn;
-  FAR struct socket *psock = (FAR struct socket *)pvpriv;
+  FAR struct udp_conn_s *conn = (FAR struct udp_conn_s *)pvpriv;
 
-  DEBUGASSERT(dev != NULL && psock != NULL);
+  DEBUGASSERT(dev != NULL && conn != NULL);
 
   ninfo("flags: %04x\n", flags);
 
@@ -411,7 +405,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * the next transfer.
        */
 
-      sendto_writebuffer_release(psock, psock->s_conn);
+      sendto_writebuffer_release(conn);
       return flags;
     }
 
@@ -492,7 +486,7 @@ static uint16_t sendto_eventhandler(FAR struct net_driver_s *dev,
        * setup the next transfer.
        */
 
-      sendto_writebuffer_release(psock, conn);
+      sendto_writebuffer_release(conn);
 
       /* Only one data can be sent by low level driver at once,
        * tell the caller stop polling the other connections.
@@ -539,11 +533,16 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags,
                          FAR const struct sockaddr *to, socklen_t tolen)
 {
-  FAR struct udp_conn_s *conn;
   FAR struct udp_wrbuffer_s *wrb;
+  FAR struct udp_conn_s *conn;
   bool nonblock;
   bool empty;
   int ret = OK;
+
+  /* Get the underlying the UDP connection structure.  */
+
+  conn = psock->s_conn;
+  DEBUGASSERT(conn);
 
   /* If the UDP socket was previously assigned a remote peer address via
    * connect(), then as with connection-mode socket, sendto() may not be
@@ -551,7 +550,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * used with such connected UDP sockets.
    */
 
-  if (to != NULL && _SS_ISCONNECTED(psock->s_flags))
+  if (to != NULL && _SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* EISCONN - A destination address was specified and the socket is
        * already connected.
@@ -564,7 +563,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
    * must be provided.
    */
 
-  else if (to == NULL && !_SS_ISCONNECTED(psock->s_flags))
+  else if (to == NULL && !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       /* EDESTADDRREQ - The socket is not connection-mode and no peer
        * address is set.
@@ -572,11 +571,6 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       return -EDESTADDRREQ;
     }
-
-  /* Get the underlying the UDP connection structure.  */
-
-  conn = (FAR struct udp_conn_s *)psock->s_conn;
-  DEBUGASSERT(conn);
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -592,7 +586,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Check if the socket is connection mode */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. use the connected remote address (the 'to' address is
            * null).
@@ -631,7 +625,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
 
       /* Check if the socket is connection mode */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. use the connected remote address (the 'to' address is
            * null).
@@ -666,7 +660,8 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
     }
 #endif /* CONFIG_NET_ARP_SEND || CONFIG_NET_ICMPv6_NEIGHBOR */
 
-  nonblock = _SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0;
+  nonblock = _SS_ISNONBLOCK(conn->sconn.s_flags) ||
+                            (flags & MSG_DONTWAIT) != 0;
 
   /* Dump the incoming buffer */
 
@@ -720,7 +715,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
        * Check if the socket is connected
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Yes.. get the connection address from the connection structure */
 
@@ -825,7 +820,7 @@ ssize_t psock_udp_sendto(FAR struct socket *psock, FAR const void *buf,
            * the write buffer queue.
            */
 
-          ret = sendto_next_transfer(psock, conn);
+          ret = sendto_next_transfer(conn);
           if (ret < 0)
             {
               sq_remlast(&conn->write_q);
@@ -858,7 +853,7 @@ errout_with_lock:
  *   another means.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     A reference to UDP connection structure.
  *
  * Returned Value:
  *   OK
@@ -870,11 +865,11 @@ errout_with_lock:
  *
  ****************************************************************************/
 
-int psock_udp_cansend(FAR struct socket *psock)
+int psock_udp_cansend(FAR struct udp_conn_s *conn)
 {
   /* Verify that we received a valid socket */
 
-  if (psock == NULL || psock->s_conn == NULL)
+  if (conn == NULL)
     {
       nerr("ERROR: Invalid socket\n");
       return -EBADF;

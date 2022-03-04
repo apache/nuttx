@@ -1047,7 +1047,6 @@ Networking
    [302074.760638] cdc_ether 1-2:1.0 usb0: register 'cdc_ether' at usb-0000:02:03.0-2, CDC Ethernet Device, 02:00:00:11:22:33
    [302074.796215] cdc_ether 1-2:1.0 ens160u4u2: renamed from usb0
 
-
   If you execute the command 'ifconfig -a' you should see a new interface:
 
   $ ifconfig -a
@@ -1089,7 +1088,6 @@ Networking
 
   The helper script also sets up Network Address Translation (NAT) so the NuttX system
   can access the Internet. If that is not what you want, you can remove the iptables
-
 
 AT25 Serial FLASH
 =================
@@ -1224,8 +1222,8 @@ HSMCI Card Slots
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                        : Enable MMC/SD support
       CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
-      CONFIG_MMCSD_HAVE_CARDDETECT=y         : Supports card-detect PIOs
+      CONFIG_MMCSD_MULTIBLOCK_LIMIT=1       : (REVISIT)
+      CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
       CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
       CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
       CONFIG_MMCSD_SDIO=y                   : SDIO-based MMC/SD support
@@ -1455,7 +1453,6 @@ USB High-Speed Device
   This allows networking to the host system via Ethernet over USB. See the
   Networking section for configuration. On USB 2.0 High Speed, the CDC ECM
   driver uses DMA and can transfer 4.4 MBytes/sec (34 Mbits/sec).
-
 
   Debugging USB Device
   --------------------
@@ -3162,7 +3159,6 @@ Configurations
     UDP relay bridge test using apps/examples/bridge.  See
     apps/examples/README.txt for more information about this test.
 
-
     NOTES:
 
     1. This configuration uses the default DBGU serial console.  That
@@ -3318,7 +3314,7 @@ To-Do List
    endpoint support in the EHCI driver is untested (but works in similar
    EHCI drivers).
 
-2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_DISABLE=y is set to disable multi-block
+2) HSCMI. CONFIG_MMCSD_MULTIBLOCK_LIMIT=1 is set to disable multi-block
    transfers because of some issues that I saw during testing.  The is very
    low priority to me but might be important to you if you are need very
    high performance SD card accesses.

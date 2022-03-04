@@ -25,12 +25,7 @@ include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 LDSCRIPT1 = memory.ld
 LDSCRIPT2 = kernel-space.ld
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT1)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT2)}"
-else
-  ARCHSCRIPT = -T$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT1)
-  ARCHSCRIPT += -T$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT2)
-endif
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT1)
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT2)
 
 include $(BOARD_COMMON_DIR)/scripts/Make.defs

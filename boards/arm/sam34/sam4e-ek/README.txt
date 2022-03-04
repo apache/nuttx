@@ -675,9 +675,9 @@ HSMCI
     Device Drivers -> MMC/SD Driver Support
       CONFIG_MMCSD=y                          : Enable MMC/SD support
       CONFIG_MMCSD_NSLOTS=1                   : One slot per driver instance
-      CONFIG_MMCSD_HAVE_CARDDETECT=y           : Supports card-detect PIOs
+      CONFIG_MMCSD_HAVE_CARDDETECT=y          : Supports card-detect PIOs
       CONFIG_MMCSD_SDIO=y                     : SDIO-based MMC/SD support
-      CONFIG_MMCSD_MULTIBLOCK_DISABLE=y       : Probably works but is untested
+      CONFIG_MMCSD_MULTIBLOCK_LIMIT=1         : Probably works but is untested
 
       CONFIG_SDIO_DMA=y                       : Use SDIO DMA
       CONFIG_SDIO_BLOCKSETUP=y                : Needs to know block sizes

@@ -31,6 +31,7 @@ CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
 CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_mdelay.c riscv_udelay.c riscv_copyfullstate.c
+CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c
@@ -50,7 +51,7 @@ endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = mpfs_allocateheap.c mpfs_clockconfig.c
-CHIP_CSRCS += mpfs_idle.c mpfs_irq.c mpfs_irq_dispatch.c
+CHIP_CSRCS += mpfs_irq.c mpfs_irq_dispatch.c
 CHIP_CSRCS += mpfs_lowputc.c mpfs_serial.c
 CHIP_CSRCS += mpfs_start.c mpfs_timerisr.c
 CHIP_CSRCS += mpfs_gpio.c mpfs_systemreset.c
@@ -60,9 +61,9 @@ CHIP_CSRCS += mpfs_dma.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
-CMN_CSRCS  += riscv_task_start.c
-CMN_CSRCS  += riscv_pthread_start.c riscv_pthread_exit.c
-CMN_CSRCS  += riscv_signal_dispatch.c
+CMN_CSRCS += riscv_task_start.c
+CMN_CSRCS += riscv_pthread_start.c
+CMN_CSRCS += riscv_signal_dispatch.c
 
 CMN_UASRCS += riscv_signal_handler.S
 

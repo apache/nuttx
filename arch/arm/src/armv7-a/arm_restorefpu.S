@@ -80,11 +80,11 @@ arm_restorefpu:
 #endif
 
 	/* Load the floating point control and status register.   At the end of the
-	 * vstmia, r1 will point to the FPCSR storage location.
+	 * vstmia, r1 will point to the FPSCR storage location.
 	 */
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	vmsr		fpscr, r2			/* Restore the FPCSR */
+	vmsr		fpscr, r2			/* Restore the FPSCR */
 	bx		lr
 
 	.size	arm_restorefpu, .-arm_restorefpu

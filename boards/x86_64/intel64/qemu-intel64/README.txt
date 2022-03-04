@@ -53,7 +53,6 @@ P.S. In some distros, `grub-mkrescue` is called `grub2-mkrescue`
 grub-mkrescue -o boot.iso iso
 ```
 
-
 QEMU/KVM
 ====
 
@@ -131,7 +130,6 @@ Running Bochs
   The emulator will drop into debugger mode.
   Enter 'c' to start the emulation.
   COM port output will be in the com1.out file.
-
 
 Real machine
 ============

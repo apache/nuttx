@@ -105,5 +105,13 @@ void up_irqinitialize(void)
 
   up_irq_enable();
 #endif
+
+  /* Attach the software interrupt */
+
+  irq_attach(XTENSA_IRQ_SWINT, (xcpt_t)xtensa_swint, NULL);
+
+  /* Enable the software interrupt. */
+
+  up_enable_irq(ESP32S2_CPUINT_SOFTWARE1);
 }
 

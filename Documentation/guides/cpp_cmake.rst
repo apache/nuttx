@@ -147,7 +147,7 @@ Creating the project
 
     set(AC_HW_FLAGS         "-mcpu=cortex-m4 -mthumb -mfloat-abi=soft ")
     set(AC_HW_FLAGS         "${AC_HW_FLAGS} -isystem ${NUTTX_PATH}/include")
-    set(AC_HW_FLAGS         "${AC_HW_FLAGS} -pipe -D__NuttX__")
+    set(AC_HW_FLAGS         "${AC_HW_FLAGS} -pipe")
 
     set(AC_LINKER_FLAGS     "--entry=__start -nostartfiles -nodefaultlibs -T${MCU_LINKER_SCRIPT}")
 

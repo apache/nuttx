@@ -80,6 +80,7 @@ config ARCH_CHIP_IMX1
 config ARCH_CHIP_IMX6
 	bool "NXP/Freescale iMX.6"
 	select ARCH_CORTEXA9
+	select ARM_THUMB
 	select ARMV7A_HAVE_L2CC_PL310
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TRUSTZONE
@@ -411,7 +412,22 @@ config ARCH_CHIP_STM32L5
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV8M_HAVE_STACKCHECK
 	---help---
-		STMicro STM32 architectures (ARM Cortex-M33).
+		STMicro STM32 L5 architectures (ARM Cortex-M33).
+
+config ARCH_CHIP_STM32U5
+	bool "STMicro STM32 U5"
+	select ARCH_CORTEXM33
+	select ARCH_HAVE_MPU
+	select ARCH_HAVE_FETCHADD
+	select ARCH_HAVE_HEAPCHECK
+	select ARCH_HAVE_PROGMEM
+	select ARCH_HAVE_SPI_BITORDER
+	select ARCH_HAVE_TICKLESS
+	select ARM_HAVE_MPU_UNIFIED
+	select ARMV8M_HAVE_STACKCHECK
+	select ARCH_HAVE_TRUSTZONE
+	---help---
+		STMicro STM32 U5 architectures (ARM Cortex-M33).
 
 config ARCH_CHIP_STR71X
 	bool "STMicro STR71x"
@@ -834,6 +850,7 @@ config ARCH_CHIP
 	default "stm32h7"	if ARCH_CHIP_STM32H7
 	default "stm32l4"	if ARCH_CHIP_STM32L4
 	default "stm32l5"	if ARCH_CHIP_STM32L5
+	default "stm32u5"	if ARCH_CHIP_STM32U5
 	default "str71x"	if ARCH_CHIP_STR71X
 	default "tms570"	if ARCH_CHIP_TMS570
 	default "xmc4"		if ARCH_CHIP_XMC4
@@ -1189,6 +1206,9 @@ source "arch/arm/src/stm32l4/Kconfig"
 endif
 if ARCH_CHIP_STM32L5
 source "arch/arm/src/stm32l5/Kconfig"
+endif
+if ARCH_CHIP_STM32U5
+source "arch/arm/src/stm32u5/Kconfig"
 endif
 if ARCH_CHIP_STR71X
 source "arch/arm/src/str71x/Kconfig"

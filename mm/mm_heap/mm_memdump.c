@@ -67,13 +67,15 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
       DEBUGASSERT(node->size >= SIZEOF_MM_ALLOCNODE);
 #ifndef CONFIG_DEBUG_MM
       if (info->pid == -1)
+#else
+      if (info->pid == -1 || node->pid == info->pid)
+#endif
         {
+#ifndef CONFIG_DEBUG_MM
           syslog(LOG_INFO, "%12zu%*p\n",
                  (size_t)node->size, MM_PTR_FMT_WIDTH,
                  ((FAR char *)node + SIZEOF_MM_ALLOCNODE));
 #else
-      if (info->pid == -1 || node->pid == info->pid)
-        {
           int i;
           FAR const char *format = " %0*p";
           char buf[MM_BACKTRACE_DEPTH * MM_PTR_FMT_WIDTH + 1];
@@ -130,7 +132,6 @@ static void memdump_handler(FAR struct mm_allocnode_s *node, FAR void *arg)
  *   backtrace for every allocated node for this heap, if pid equals -2, this
  *   function will dump all free node for this heap, and if pid is greater
  *   than or equal to 0, will dump pid allocated node and output backtrace.
- *
  ****************************************************************************/
 
 void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid)

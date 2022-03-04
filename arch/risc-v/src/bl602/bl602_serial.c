@@ -452,7 +452,7 @@ static int bl602_ioctl(struct file *filep, int cmd, unsigned long arg)
       do
         {
           struct termios * termiosp = (struct termios *)arg;
-          struct bl602_uart_s *priv     = (struct bl602_uart_s *)dev->priv;
+          struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
 
           if (!termiosp)
             {
@@ -662,7 +662,7 @@ static int bl602_receive(struct uart_dev_s *dev, unsigned int *status)
 static void bl602_rxint(struct uart_dev_s *dev, bool enable)
 {
   uint32_t int_mask;
-  struct bl602_uart_s *priv  = (struct bl602_uart_s *)dev->priv;
+  struct bl602_uart_s *priv = (struct bl602_uart_s *)dev->priv;
   uint8_t uart_idx = priv->config.idx;
   irqstate_t       flags = enter_critical_section();
 

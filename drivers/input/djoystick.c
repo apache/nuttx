@@ -63,7 +63,6 @@ struct djoy_upperhalf_s
 
   FAR const struct djoy_lowerhalf_s *du_lower;
 
-  djoy_buttonset_t du_enabled; /* Set of currently enabled button interrupts */
   djoy_buttonset_t du_sample;  /* Last sampled button states */
   sem_t du_exclsem;            /* Supports exclusive access to the device */
 
@@ -330,10 +329,6 @@ static void djoy_sample(FAR struct djoy_upperhalf_s *priv)
                              SI_QUEUE, &opriv->do_work);
         }
     }
-
-  /* Enable/disable interrupt handling */
-
-  djoy_enable(priv);
 
   priv->du_sample = sample;
   leave_critical_section(flags);

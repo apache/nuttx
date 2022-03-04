@@ -227,21 +227,10 @@ struct socket_conn_s
    */
 
   FAR struct devif_callback_s *list;
+  FAR struct devif_callback_s *list_tail;
 
-  /* Connection-specific content may follow */
-};
+  /* Definitions of 8-bit socket flags */
 
-/* This is the internal representation of a socket reference by a file
- * descriptor.
- */
-
-struct devif_callback_s;  /* Forward reference */
-
-struct socket
-{
-  uint8_t       s_domain;    /* IP domain */
-  uint8_t       s_type;      /* Protocol type */
-  uint8_t       s_proto;     /* Socket Protocol */
   uint8_t       s_flags;     /* See _SF_* definitions */
 
   /* Socket options */
@@ -259,18 +248,25 @@ struct socket
 #endif
 #endif
 
+  /* Connection-specific content may follow */
+};
+
+/* This is the internal representation of a socket reference by a file
+ * descriptor.
+ */
+
+struct devif_callback_s;  /* Forward reference */
+
+struct socket
+{
+  uint8_t       s_domain;    /* IP domain */
+  uint8_t       s_type;      /* Protocol type */
+  uint8_t       s_proto;     /* Socket Protocol */
   FAR void     *s_conn;      /* Connection inherits from struct socket_conn_s */
 
   /* Socket interface */
 
   FAR const struct sock_intf_s *s_sockif;
-
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || \
-    defined(CONFIG_NET_UDP_WRITE_BUFFERS)
-  /* Callback instance for TCP send() or UDP sendto() */
-
-  FAR struct devif_callback_s *s_sndcb;
-#endif
 };
 
 /****************************************************************************
@@ -464,6 +460,36 @@ int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
 
 int net_lockedwait_uninterruptible(sem_t *sem);
 
+#ifdef CONFIG_MM_IOB
+
+/****************************************************************************
+ * Name: net_iobtimedalloc
+ *
+ * Description:
+ *   Allocate an IOB.  If no IOBs are available, then atomically wait for
+ *   for the IOB while temporarily releasing the lock on the network.
+ *   This function is wrapped version of net_ioballoc(), this wait will
+ *   be terminated when the specified timeout expires.
+ *
+ *   Caution should be utilized.  Because the network lock is relinquished
+ *   during the wait, there could be changes in the network state that occur
+ *   before the lock is recovered.  Your design should account for this
+ *   possibility.
+ *
+ * Input Parameters:
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   timeout    - The relative time to wait until a timeout is declared.
+ *   consumerid - id representing who is consuming the IOB
+ *
+ * Returned Value:
+ *   A pointer to the newly allocated IOB is returned on success.  NULL is
+ *   returned on any allocation failure.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout,
+                                    enum iob_user_e consumerid);
+
 /****************************************************************************
  * Name: net_ioballoc
  *
@@ -477,7 +503,8 @@ int net_lockedwait_uninterruptible(sem_t *sem);
  *   possibility.
  *
  * Input Parameters:
- *   throttled - An indication of the IOB allocation is "throttled"
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   consumerid - id representing who is consuming the IOB
  *
  * Returned Value:
  *   A pointer to the newly allocated IOB is returned on success.  NULL is
@@ -485,7 +512,6 @@ int net_lockedwait_uninterruptible(sem_t *sem);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_IOB
 FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
 #endif
 

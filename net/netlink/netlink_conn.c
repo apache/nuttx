@@ -138,7 +138,7 @@ void netlink_initialize(void)
     {
       /* Mark the connection closed and move it to the free list */
 
-      dq_addlast(&g_netlink_connections[i].node,
+      dq_addlast(&g_netlink_connections[i].sconn.node,
                  &g_free_netlink_connections);
     }
 #endif
@@ -171,7 +171,7 @@ FAR struct netlink_conn_s *netlink_alloc(void)
         {
           for (i = 0; i < CONFIG_NETLINK_CONNS; i++)
             {
-              dq_addlast(&conn[i].node, &g_free_netlink_connections);
+              dq_addlast(&conn[i].sconn.node, &g_free_netlink_connections);
             }
         }
     }
@@ -183,7 +183,7 @@ FAR struct netlink_conn_s *netlink_alloc(void)
     {
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_netlink_connections);
+      dq_addlast(&conn->sconn.node, &g_active_netlink_connections);
     }
 
   _netlink_semgive(&g_free_sem);
@@ -211,7 +211,7 @@ void netlink_free(FAR struct netlink_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_netlink_connections);
+  dq_rem(&conn->sconn.node, &g_active_netlink_connections);
 
   /* Free any unclaimed responses */
 
@@ -226,7 +226,7 @@ void netlink_free(FAR struct netlink_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_netlink_connections);
+  dq_addlast(&conn->sconn.node, &g_free_netlink_connections);
   _netlink_semgive(&g_free_sem);
 }
 
@@ -249,7 +249,7 @@ FAR struct netlink_conn_s *netlink_nextconn(FAR struct netlink_conn_s *conn)
     }
   else
     {
-      return (FAR struct netlink_conn_s *)conn->node.flink;
+      return (FAR struct netlink_conn_s *)conn->sconn.node.flink;
     }
 }
 

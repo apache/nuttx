@@ -501,7 +501,7 @@ static void nxtask_setup_name(FAR struct task_tcb_s *tcb,
  *
  * Input Parameters:
  *   tcb  - Address of the new task's TCB
- *   argv - A pointer to an array of input parameters. The arrau should be
+ *   argv - A pointer to an array of input parameters. The array should be
  *          terminated with a NULL argv[] value. If no parameters are
  *          required, argv may be NULL.
  *

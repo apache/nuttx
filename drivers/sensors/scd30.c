@@ -596,7 +596,7 @@ static int scd30_configure(FAR struct scd30_dev_s *priv, bool start)
 static int scd30_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct scd30_dev_s *priv  = inode->i_private;
+  FAR struct scd30_dev_s *priv = inode->i_private;
   int ret = OK;
 
   /* Get exclusive access */

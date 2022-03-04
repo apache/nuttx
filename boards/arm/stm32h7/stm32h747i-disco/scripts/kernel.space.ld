@@ -92,7 +92,6 @@ SECTIONS
         _sram4_heap_start = ABSOLUTE(.);
     } > sram4
 
-
     /* Stabs debugging sections */
 
     .stab 0 : { *(.stab) }

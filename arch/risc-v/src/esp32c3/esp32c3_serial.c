@@ -335,6 +335,10 @@ static int esp32c3_setup(struct uart_dev_s *dev)
   modifyreg32(UART_MEM_CONF_REG(priv->id), UART_TX_SIZE_M | UART_RX_SIZE_M,
               (1 << UART_TX_SIZE_S) | (1 << UART_RX_SIZE_S));
 
+  /* Enable the UART Clock */
+
+  esp32c3_lowputc_enable_sysclk(priv);
+
   /* Configure the UART Baud Rate */
 
   esp32c3_lowputc_baud(priv);
@@ -769,8 +773,8 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCGETS:
       {
-        struct termios  *termiosp    = (struct termios *)arg;
-        struct esp32c3_uart_s *priv  = (struct esp32c3_uart_s *)dev->priv;
+        struct termios  *termiosp   = (struct termios *)arg;
+        struct esp32c3_uart_s *priv = (struct esp32c3_uart_s *)dev->priv;
         if (!termiosp)
           {
             ret = -EINVAL;
@@ -825,8 +829,8 @@ static int esp32c3_ioctl(struct file *filep, int cmd, unsigned long arg)
 
     case TCSETS:
       {
-        struct termios  *termiosp    = (struct termios *)arg;
-        struct esp32c3_uart_s *priv  = (struct esp32c3_uart_s *)dev->priv;
+        struct termios  *termiosp   = (struct termios *)arg;
+        struct esp32c3_uart_s *priv = (struct esp32c3_uart_s *)dev->priv;
         uint32_t baud;
         uint32_t current_int_sts;
         uint8_t  parity;

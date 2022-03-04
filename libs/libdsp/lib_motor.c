@@ -355,6 +355,7 @@ float motor_angle_e_get(FAR struct motor_angle_f32_s *angle)
  *   res   - (in) average phase-to-neutral base motor resistance
  *                (without temperature compensation)
  *   ind   - (in) average phase-to-neutral motor inductance
+ *   flux  - (in) flux linkage
  *
  * Returned Value:
  *   None
@@ -362,16 +363,19 @@ float motor_angle_e_get(FAR struct motor_angle_f32_s *angle)
  ****************************************************************************/
 
 void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
-                           uint8_t poles, float res, float ind)
+                           uint8_t poles, float res, float ind,
+                           float flux_link)
 {
   LIBDSP_DEBUGASSERT(phy != NULL);
 
   memset(phy, 0, sizeof(struct motor_phy_params_f32_s));
 
   phy->p          = poles;
+  phy->flux_link  = flux_link;
   phy->res        = res;
   phy->ind        = ind;
   phy->one_by_ind = (1.0f / ind);
+  phy->one_by_p   = (1.0f / poles);
 }
 
 /****************************************************************************
@@ -405,12 +409,11 @@ void pmsm_phy_params_init(FAR struct pmsm_phy_params_f32_s *phy,
 
   /* Initialize motor phy */
 
-  motor_phy_params_init(&phy->motor, poles, res, ind);
+  motor_phy_params_init(&phy->motor, poles, res, ind, flux);
 
   /* Iniitalize PMSM specific data */
 
   phy->iner        = iner;
-  phy->flux_link   = flux;
   phy->ind_d       = ind_d;
   phy->ind_q       = ind_q;
   phy->one_by_iner = (1.0f / iner);

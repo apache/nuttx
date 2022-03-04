@@ -6,7 +6,6 @@ Detailed Platform Support
 information see the *README* files that can be found
 `here <https://cwiki.apache.org/confluence/display/NUTTX/README+Files>`__.
 
-
 Linux User Mode Simulation
 ==========================
 
@@ -96,7 +95,6 @@ Support for the NXP LPC315x
 family has been incorporated into the code base as of NuttX-6.4. Support
 was added for the Embedded Artists EA3152 board in NuttX-6.11.
 
-
 Other ARMv4
 ===========
 
@@ -107,7 +105,6 @@ A port to the Moxa NP51x0 series of 2-port advanced
 RS-232/422/485 serial device servers was contributed by Anton D.
 Kachalov in NuttX-7.11. This port includes :ref:`NSH <nsh>`
 configuration with support for the Faraday FTMAC100 Ethernet MAC Driver.
-
 
 ARM1176JZ
 =========
@@ -129,8 +126,6 @@ The incomplete port along with all support for the BCM2708 was removed
 from the repository with the NuttX-7.28 release but can still be be
 found in the *Obsoleted* repository.
 
-
-
 ARM Cortex-A5
 =============
 
@@ -145,7 +140,6 @@ Microchip SAMA5D2
 - **Groboards Giant Board**. This is the port of NuttX to the Groboards
   Giant Board board. This board features the Microchip SAMA5D27C-D1G.
   See http://groboards.com/giant-board.
-
 
 Microchip SAMA5D3
 -----------------
@@ -291,7 +285,6 @@ native toolchain, or 4) Native Windows. All testing has been performed
 with the CodeSourcery toolchain (GCC version 4.7.3) in the Cygwin
 environment under Windows.
 
-
 ARM Cortex-A8
 =============
 
@@ -367,8 +360,6 @@ The basic port has been completed for the following i.MX6 board:
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/imx6/sabre-6quad/README.txt>`__
    file for the board.
 
-
-
 ARM Cortex-R4
 =============
 
@@ -385,8 +376,6 @@ TI/Hercules TMS570LS31xx
 Architecture support for the TMS570LS3137ZWT
 part was added in NuttX 7.25 by Ivan Ucherdzhiev. Ivan also added
 support for the TI Hercules TMS570LS31x USB Kit.
-
-
 
 ARM Cortex-M0/M0+
 =================
@@ -771,7 +760,6 @@ to two different STM32 L0 boards in the repository:
    NuttX-8.2. Refer to the board
    `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/stm32f0l0g0/nucleo-g070rb/README.txt>`__
    file for further information.
-
 
 **STATUS:** Status for the STM32F0xx, STM32L0xx, and STM32G0xx is shown
 together since these parts share many drivers in common.
@@ -1273,8 +1261,6 @@ SPI0-based SD card.
 
 ` <#>`__ (ARM Cortex-M3)
 
-
-
 ARM Cortex-M4
 =============
 
@@ -1382,7 +1368,6 @@ Refer to the NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/kinetis/twr-k64f120m/README.txt>`__
 file for further information.
 
-
 **Driver Status**.
 
 -  **NuttX-6.8**. Ethernet and SD card (SDHC) drivers also exist: The
@@ -1405,7 +1390,6 @@ specifically for the **NXP/Freescale Freedom K66F** board was
 contributed by David Sidrane in NuttX 7.20. Refer to the NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/arm/kinetis/freedom-k66f/README.txt>`__
 file for further information.
-
 
 **Driver Status**.
 
@@ -2063,7 +2047,6 @@ LPC4337-WS development board featuring the NXP LPC4337JBD144 MCU.
    Alexander Vasiljev. Alexander also contributed an LPC43xx AES driver
    available in NuttX-7.16.
 
-
 **Driver Status**.
 
 -  **NuttX-6.20** Several drivers have been copied from the related
@@ -2118,7 +2101,6 @@ graphics configurations (nxwm, fb, and lvgl).
 
 **LPC4508**. The port was verified on an LPC5408 by a NuttX user with
 relevant changes incorporated in NuttX-7.26.
-
 
 **Driver Status**.
 
@@ -2364,8 +2346,6 @@ provided by the NuttX
 `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 package.
 
-
-
 ARM Cortex-M7
 =============
 
@@ -2594,7 +2574,6 @@ for one board from this family:
 
    This port is still a work in progress.
 
-
 **NuttX-7.30**. Added support for Ethernet, SDMMC, and Timer drivers.
 All from Jukka Laitinen.
 
@@ -2676,8 +2655,6 @@ NuttX-7.27.
 recommended for the Cortex-M7 as for the Cortex-M4. It would be wise to
 use the latest GNU toolchains for this part because as of this writing
 (2015-02-09), support for the Cortex-M7 is a very new GCC feature.
-
-
 
 Microchip AVR
 =============
@@ -2785,7 +2762,6 @@ NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/avr/at32uc3/avr32dev1/README.txt>`__
 file for further information.
 
-
 Misoc
 =====
 
@@ -2798,8 +2774,6 @@ Ramtin Amin in NuttX 7.29.
 **Drivers**. Driver support is basic in these initial releases: Serial,
 Timer, and Ethernet. "Board" support is a available for developing with
 Misoc LM32 under Qemu or on your custom FPGA.
-
-
 
 OpenRISC mor1kx
 ===============
@@ -2822,8 +2796,6 @@ Both use a GNU arm-nuttx-elf toolchain\* under Linux or Cygwin. The
 NuttX `buildroot <https://bitbucket.org/nuttx/buildroot/downloads/>`__
 provides a properly patched GCC 3.4.4 toolchain that is highly optimized
 for the m9s12x family.
-
-
 
 Intel 80x86
 ===========
@@ -2855,8 +2827,6 @@ This kernel with ostest have been tested with
 
 -  Qemu/KVM on a Xeon 2630v4 machine.
 -  Bochs with broadwell_ult emulation.
-
-
 
 Microchip PIC32MX
 =================
@@ -2916,7 +2886,6 @@ PIC32MX795F512L. There one two board ports using this chip:
    `website <https://code.google.com/archive/p/pinguino32/>`__.
 #. The MIPS SDE toolchain available from the `Mentor
    Graphics <http://www.mentor.com>`__ website.
-
 
 Microchip PIC32MZEC
 -------------------
@@ -2983,7 +2952,6 @@ Renesas/Hitachi SuperH
 Board (SH1_LCEVB1), US7032EVB, with a GNU ELF toolchain\* under Linux or
 Cygwin.
 
-
 Renesas M16C/26
 ---------------
 
@@ -3017,8 +2985,6 @@ release:
 -  **NuttX-8.2**
 -  **NuttX-9.0** RTC driver for the RX65N was added.
 
-
-
 RISC-V
 ======
 
@@ -3034,7 +3000,6 @@ LiteX on ARTY A7
 
 Support for the Digilent ARTY_A7 board along with CPU VexRiscV SOC were
 added in NuttX-9.0.
-
 
 ESP32 (Dual Xtensa LX6)
 =======================
@@ -3078,7 +3043,6 @@ work around an issue with a ZDS-II 5.0.1 tool problem). An ESPI
 driver was added in NuttX-7.2. Refer to the NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/z16/z16f/z16f2800100zcog/README.txt>`__
 file for further information.
-
 
 Zilog eZ80 Acclaim!
 ===================
@@ -3149,8 +3113,6 @@ however, until the third quarter of 2013. So it will be some time before
 this port is verified on hardware. Refer to the NuttX board
 `README <https://github.com/apache/incubator-nuttx/blob/master/boards/z80/z180/p112/README.txt>`__
 file for further information.
-
-
 
 Zilog Z80
 =========

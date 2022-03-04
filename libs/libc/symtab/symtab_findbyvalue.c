@@ -62,7 +62,11 @@ symtab_findbyvalue(FAR const struct symtab_s *symtab,
   int low  = 0;
 #endif
 
-  DEBUGASSERT(symtab != NULL);
+  if (symtab == NULL)
+    {
+      DEBUGASSERT(nsyms == 0);
+      return NULL;
+    }
 
 #ifdef CONFIG_SYMTAB_ORDEREDBYVALUE
 

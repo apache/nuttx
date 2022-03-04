@@ -354,6 +354,7 @@
                                               /* (always 1 in XEA1;
                                                * levels 2 .. EXCM_LEVEL are
                                                * "medium priority") */
+#define XCHAL_SYSCALL_LEVEL              2
 
 /* Masks of interrupts at each interrupt level: */
 
@@ -464,11 +465,13 @@
 
 #define XTHAL_TIMER_UNCONFIGURED         -1    /* REVISIT: should be in hal.h */
 #define XCHAL_TIMER0_INTERRUPT           6     /* CCOMPARE0 */
+#define XCHAL_SOFTWARE0_INTERRUPT        7     /* software interrupt 0 */
 #define XCHAL_TIMER1_INTERRUPT           15    /* CCOMPARE1 */
 #define XCHAL_TIMER2_INTERRUPT           16    /* CCOMPARE2 */
 #define XCHAL_TIMER3_INTERRUPT           XTHAL_TIMER_UNCONFIGURED
 #define XCHAL_NMI_INTERRUPT              14    /* non-maskable interrupt */
 #define XCHAL_PROFILING_INTERRUPT        11    /* profiling interrupt */
+#define XCHAL_SOFTWARE1_INTERRUPT        29    /* software interrupt 1 */
 
 /* Interrupt numbers for levels at which only one interrupt is configured: */
 

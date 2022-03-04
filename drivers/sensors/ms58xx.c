@@ -34,6 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/i2c/i2c_master.h>
 #include <nuttx/sensors/ms58xx.h>
+#include <nuttx/sensors/msxxxx_crc4.h>
 #include <nuttx/random.h>
 
 #if defined(CONFIG_I2C) && defined(CONFIG_SENSORS_MS58XX)
@@ -121,12 +122,6 @@ struct ms58xx_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-/* CRC Calculation */
-
-static uint8_t ms58xx_crc(FAR uint16_t *src,
-                          uint8_t crcndx,
-                          uint16_t crcmask);
-
 /* I2C Helpers */
 
 static int ms58xx_i2c_write(FAR struct ms58xx_dev_s *priv,
@@ -175,56 +170,6 @@ static const struct file_operations g_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: ms58xx_crc
- *
- * Description:
- *   Calculate the CRC.
- *
- ****************************************************************************/
-
-static uint8_t ms58xx_crc(FAR uint16_t *src,
-                          uint8_t crcndx,
-                          uint16_t crcmask)
-{
-  uint16_t cnt;
-  uint16_t n_rem;
-  uint16_t crc_read;
-  uint8_t n_bit;
-
-  n_rem = 0x00;
-  crc_read = src[crcndx];
-  src[crcndx] &= ~crcmask;
-
-  for (cnt = 0; cnt < 16; cnt++)
-    {
-      if (cnt % 2 == 1)
-        {
-          n_rem ^= (uint16_t)((src[cnt >> 1]) & 0x00ff);
-        }
-      else
-        {
-          n_rem ^= (uint16_t)(src[cnt >> 1] >> 8);
-        }
-
-      for (n_bit = 8; n_bit > 0; n_bit--)
-        {
-          if (n_rem & (0x8000))
-            {
-              n_rem = (n_rem << 1) ^ 0x3000;
-            }
-          else
-            {
-              n_rem = (n_rem << 1);
-            }
-        }
-    }
-
-  n_rem = (0x000f & (n_rem >> 12));
-  src[crcndx] = crc_read;
-  return (n_rem ^ 0x00);
-}
 
 /****************************************************************************
  * Name: ms58xx_i2c_write
@@ -556,7 +501,7 @@ static int ms58xx_readprom(FAR struct ms58xx_dev_s *priv)
   crcmask         = (uint16_t)0xf << crcshift;
   crc             = (uint8_t)((prom[crcindex] & crcmask) >> crcshift);
 
-  if (crc != ms58xx_crc(prom, crcindex, crcmask))
+  if (crc != msxxxx_crc4(prom, crcindex, crcmask))
     {
       snerr("ERROR: crc mismatch\n");
       return -ENODEV;

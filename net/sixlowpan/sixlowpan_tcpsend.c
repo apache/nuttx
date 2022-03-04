@@ -401,11 +401,11 @@ static uint16_t tcp_send_eventhandler(FAR struct net_driver_s *dev,
        */
 
       DEBUGASSERT(psock != NULL);
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report the disconnection event to all socket clones */
 
-          tcp_lost_connection(psock, sinfo->s_cb, flags);
+          tcp_lost_connection(conn, sinfo->s_cb, flags);
         }
 
       /* Report not connected to the sender */
@@ -730,17 +730,17 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
       return (ssize_t)-EBADF;
     }
 
+  /* Get the underlying TCP connection structure */
+
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
   /* Make sure that this is a connected TCP socket */
 
-  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(psock->s_flags))
+  if (psock->s_type != SOCK_STREAM || !_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       return (ssize_t)-ENOTCONN;
     }
-
-  /* Get the underlying TCP connection structure */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
 #ifdef CONFIG_NET_IPv4
   /* Ignore if not IPv6 domain */
@@ -799,7 +799,7 @@ ssize_t psock_6lowpan_tcp_send(FAR struct socket *psock, FAR const void *buf,
    */
 
   ret = sixlowpan_send_packet(psock, dev, conn, buf, buflen, &destmac,
-                              _SO_TIMEOUT(psock->s_sndtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
   if (ret < 0)
     {
       nerr("ERROR: sixlowpan_send_packet() failed: %d\n", ret);

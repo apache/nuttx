@@ -7,7 +7,6 @@ see:
 
   https://www.st.com/content/st_com/en/products/evaluation-tools/product-evaluation-tools/mcu-mpu-eval-tools/stm32-mcu-mpu-eval-tools/stm32-discovery-kits/b-g474e-dpow1.html
 
-
 Contents
 ========
 
@@ -25,12 +24,10 @@ Contents
   - FLASH Bootloader Support
   - Configurations
 
-
 Status
 ======
 
   This port boots NuttX through to a functional NSH prompt.
-
 
 Development Environment
 =======================
@@ -40,7 +37,6 @@ Development Environment
   An appropriate ARM toolchain is needed, such as the one built with the
   customized NuttX buildroot or the ready-made GNU Tools for Arm Embedded
   Processors.
-
 
   Debugging
   ---------
@@ -67,7 +63,6 @@ Development Environment
     (gdb) monitor reset halt
     (gdb) load
 
-
 Hardware
 ========
 
@@ -80,21 +75,17 @@ Hardware
   following other sources: a 24 MHz oscillator on X2, MCO from STLINK-V3E, or
   external clock from connector CN9, pin 26.
 
-
   GPIOs
   -----
-
 
   Buttons
   -------
   The board has 5 user buttons in the form of a 4-direction "joystick" with a
   selection button (pressing down on the "joystick").
 
-
   LEDs
   ----
   The board has 4 user LEDs.
-
 
   RGB Power LED
   -------------
@@ -102,7 +93,6 @@ Hardware
 
   Caution: For eye safety, ensure that the power LED is covered by the
   diffuser that comes installed over it.
-
 
 Serial Consoles
 ===============
@@ -113,7 +103,6 @@ Serial Consoles
 
   On Debian Linux, this shows up as /dev/ttyACM0. Other operating systems may
   differ.
-
 
 FLASH Bootloader Support
 ========================
@@ -135,7 +124,6 @@ FLASH Bootloader Support
 
   where the given address (0x08006000 in this case) must match the starting
   address in scripts/ld.script.dfu.
-
 
 Configurations
 ==============

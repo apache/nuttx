@@ -44,7 +44,7 @@
     {(c), (f), NULL}                    /* semcount, flags, hhead */
 # else
 #  define NXSEM_INITIALIZER(c, f) \
-    {(c), (f), {{NULL, 0}, {NULL, 0}}}  /* semcount, flags, holder[2] */
+    {(c), (f), {SEMHOLDER_INITIALIZER, SEMHOLDER_INITIALIZER}}  /* semcount, flags, holder[2] */
 # endif
 #else /* CONFIG_PRIORITY_INHERITANCE */
 #  define NXSEM_INITIALIZER(c, f) \

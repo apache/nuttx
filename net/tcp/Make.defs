@@ -60,7 +60,7 @@ NET_CSRCS += tcp_recvwindow.c tcp_netpoll.c tcp_ioctl.c
 ifeq ($(CONFIG_NET_TCP_WRITE_BUFFERS),y)
 NET_CSRCS += tcp_wrbuffer.c
 ifeq ($(CONFIG_DEBUG_FEATURES),y)
-NET_CSRCS += tcp_wrbuffer_dump.c
+NET_CSRCS += tcp_dump.c
 endif
 endif
 

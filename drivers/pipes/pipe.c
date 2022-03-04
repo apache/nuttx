@@ -62,9 +62,6 @@ static const struct file_operations g_pipe_fops =
   NULL,                /* seek */
   pipecommon_ioctl,    /* ioctl */
   pipecommon_poll      /* poll */
-#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , pipecommon_unlink  /* unlink */
-#endif
 };
 
 static sem_t g_pipesem = SEM_INITIALIZER(1);

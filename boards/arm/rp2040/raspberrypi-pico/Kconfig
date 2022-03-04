@@ -26,7 +26,6 @@ config RP2040_UF2_BINARY
 	---help---
 		Create nuttx.uf2 binary format used on RP2040 based arch.
 
-
 config RP2040_UART0_GPIO
 	int "UART0 GPIO pin assign (0,12,16,28 or -1:no assign)"
 	default 0

@@ -127,7 +127,6 @@ Configurations
          CONFIG_UART0_PARITY=0
          CONFIG_UART0_2STOP=0
 
-
     3. All of these configurations are set up to build under Windows using
        the  "GNU Tools for ARM Embedded Processors" that is maintained by
        ARM (unless stated otherwise in the description of the configuration).

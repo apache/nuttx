@@ -283,7 +283,8 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
 
       if (!(conn->flags & USRSOCK_EVENT_SENDTO_READY))
         {
-          if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+          if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+              (flags & MSG_DONTWAIT) != 0)
             {
               /* Send busy at daemon side. */
 
@@ -306,7 +307,7 @@ ssize_t usrsock_sendmsg(FAR struct socket *psock,
           /* Wait for send-ready (or abort, or timeout, or signal). */
 
           ret = net_timedwait(&state.recvsem,
-                              _SO_TIMEOUT(psock->s_sndtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_sndtimeo));
           if (ret < 0)
             {
               if (ret == -ETIMEDOUT)

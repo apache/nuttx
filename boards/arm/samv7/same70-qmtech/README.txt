@@ -66,21 +66,21 @@ SD Card
 Card Slot
 ---------
 The SAM E70 QMTECH has one standard SD card connector that is connected to
-the High Speed Multimedia Card Interface (HSMCI) of the SAM
-E70. SD card connector:
+the High Speed Multimedia Card Interface (HSMCI) of the SAM E70.
+SD card connector:
 
-  ------ ----------------- ---------------------
-  SAME70 SAME70            Shared functionality
+  ------ -----------------
+  SAME70 SAME70
   Pin    Function
-  ------ ----------------- ---------------------
+  ------ -----------------
   PA30   MCDA0 (DAT0)
   PA31   MCDA1 (DAT1)
   PA26   MCDA2 (DAT2)
   PA27   MCDA3 (DAT3)
-  PA25   MCCK (CLK)        Shield
+  PA25   MCCK (CLK)
   PA28   MCCDA (CMD)
-  PD17   Card Detect (C/D) Shield
-  ------ ----------------- ---------------------
+  N/A    Card Detect (C/D)
+  ------ -----------------
 
 Configuration Settings
 ----------------------
@@ -99,7 +99,7 @@ the SD slots can be enabled with the following settings:
   Device Drivers -> MMC/SD Driver Support
     CONFIG_MMCSD=y                        : Enable MMC/SD support
     CONFIG_MMSCD_NSLOTS=1                 : One slot per driver instance
-    CONFIG_MMCSD_MULTIBLOCK_DISABLE=y     : (REVISIT)
+    CONFIG_MMCSD_MULTIBLOCK_LIMIT=1       : (REVISIT)
     CONFIG_MMCSD_HAVE_CARDDETECT=y        : Supports card-detect PIOs
     CONFIG_MMCSD_MMCSUPPORT=n             : Interferes with some SD cards
     CONFIG_MMCSD_SPI=n                    : No SPI-based MMC/SD support
@@ -804,7 +804,7 @@ Configuration sub-directories
     Generate signed binaries for MCUboot compatible application:
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
-        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0x28000 \
         nuttx/nuttx.bin signed_app_1_0_0.bin
 
     Relevant configuration settings:

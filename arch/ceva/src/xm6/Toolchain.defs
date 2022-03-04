@@ -64,10 +64,6 @@ ifneq ($(CONFIG_ARCH_NR_FPUS),)
   ARCHCPUFLAGS += -CG:SPU_FP_num=$(CONFIG_ARCH_NR_FPUS) -Wa,-fp=$(CONFIG_ARCH_NR_FPUS)
 endif
 
-ifeq ($(CONFIG_WINDOWS_CYGWIN),y)
-  WINTOOL = y
-endif
-
 CC  = $(CROSSDEV)/cevaxm6cc -mquiet -Wa,-quiet
 CXX = $(CROSSDEV)/cevaxm6cc -mquiet -Wa,-quiet -x c++
 CPP = $(CROSSDEV)/cevaxm6cc -mquiet -Wa,-quiet -E -P -x c

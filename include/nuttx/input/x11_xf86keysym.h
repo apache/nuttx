@@ -281,7 +281,7 @@
  *
  */
 
-#define _EVDEVK(_v) (0x10081000 + _v)
+#define _EVDEVK(_v) (0x10081000 + (_v))
 #define XF86XK_BrightnessAuto           _EVDEVK(0x0F4)          /* v3.16 KEY_BRIGHTNESS_AUTO */
 #define XF86XK_DisplayOff               _EVDEVK(0x0F5)          /* v2.6.23 KEY_DISPLAY_OFF */
 #define XF86XK_Info                     _EVDEVK(0x166)          /*       KEY_INFO */

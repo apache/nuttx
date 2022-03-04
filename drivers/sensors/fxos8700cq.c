@@ -441,7 +441,7 @@ int fxos8700cq_register(FAR const char *devpath,
       return ret;
     }
 
-  ret = register_driver(devpath, &g_fxos8700cqfops, 0666, priv);
+  ret = register_driver(devpath, &g_fxos8700cqfops, 0444, priv);
   if (ret < 0)
     {
       snerr("Failed to register driver: %d\n", ret);

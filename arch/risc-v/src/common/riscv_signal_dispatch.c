@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_signal_dispatch.c
+ * arch/risc-v/src/common/riscv_signal_dispatch.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,7 +25,8 @@
 #include <nuttx/config.h>
 #include <nuttx/arch.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
+
 #include "riscv_internal.h"
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__)
@@ -46,7 +47,7 @@
  *
  *   Normally the user-mode signaling handling stub will also execute
  *   before the ultimate signal handler is called.  See
- *   arch/risc-v/src/rv64gc/up_signal_handler.S.  This function is the
+ *   arch/risc-v/src/common/riscv_signal_handler.S.  This function is the
  *   user-space, signal handler trampoline function.  It is called from
  *   up_signal_dispatch() in user-mode.
  *

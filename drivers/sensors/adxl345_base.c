@@ -211,7 +211,7 @@ int adxl345_register(ADXL345_HANDLE handle, int minor)
   /* Register the character driver */
 
   snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
-  ret = register_driver(devname, &g_adxl345fops, 0666, priv);
+  ret = register_driver(devname, &g_adxl345fops, 0444, priv);
   if (ret < 0)
     {
       snerr("ERROR: Failed to register driver %s: %d\n", devname, ret);

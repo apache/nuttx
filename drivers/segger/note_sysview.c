@@ -119,8 +119,8 @@ static void sysview_send_tasklist(void)
 
 static void sysview_send_description(void)
 {
-  SEGGER_SYSVIEW_SendSysDesc("N="SEGGER_SYSVIEW_APP_NAME"");
-  SEGGER_SYSVIEW_SendSysDesc("D="CONFIG_LIBC_HOSTNAME"");
+  SEGGER_SYSVIEW_SendSysDesc("N="SEGGER_SYSVIEW_APP_NAME);
+  SEGGER_SYSVIEW_SendSysDesc("D="CONFIG_LIBC_HOSTNAME);
   SEGGER_SYSVIEW_SendSysDesc("O=NuttX");
 }
 
@@ -186,7 +186,7 @@ static bool sysview_isenabled_irq(int irq, bool enter)
    * subsequent syscall traces until leaving the interrupt handler
    */
 
-  if (!(g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_IRQ) ||
+  if ((g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_IRQ) == 0 ||
       NOTE_FILTER_IRQMASK_ISSET(irq, &g_sysview.irq_mask))
     {
       return false;
@@ -367,7 +367,7 @@ int sysview_initialize(void)
   SEGGER_SYSVIEW_SetRAMBase(CONFIG_SEGGER_SYSVIEW_RAM_BASE);
 #endif
 
-  if (g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE)
+  if ((g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE) != 0)
     {
       SEGGER_SYSVIEW_Start();
     }
@@ -425,7 +425,7 @@ void sched_note_filter_mode(struct note_filter_mode_s *oldm,
     {
       g_sysview.mode = *newm;
 
-      if (g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE)
+      if ((g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE) != 0)
         {
           if (!SEGGER_SYSVIEW_IsStarted())
             {

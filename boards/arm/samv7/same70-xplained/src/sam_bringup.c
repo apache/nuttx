@@ -196,26 +196,29 @@ int sam_bringup(void)
              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
-#ifdef CONFIG_SAME70XPLAINED_HSMCI0_MOUNT
+#ifdef CONFIG_SAMV7_HSMCI0_MOUNT
   else
     {
-      /* REVISIT: A delay seems to be required here or the mount will fail */
-
-      /* Mount the volume on HSMCI0 */
-
-      ret = nx_mount(CONFIG_SAMV7_HSMCI0_MOUNT_BLKDEV,
-                     CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT,
-                     CONFIG_SAMV7_HSMCI0_MOUNT_FSTYPE,
-                     0, NULL);
-
-      if (ret < 0)
+      if (sam_cardinserted(HSMCI0_SLOTNO))
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT, ret);
+          usleep(1000 * 1000);
+
+          /* Mount the volume on HSMCI0 */
+
+          ret = nx_mount(CONFIG_SAMV7_HSMCI0_MOUNT_BLKDEV,
+                         CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT,
+                         CONFIG_SAMV7_HSMCI0_MOUNT_FSTYPE,
+                         0, NULL);
+
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
+                     CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT, ret);
+            }
         }
     }
 
-#endif /* CONFIG_SAME70XPLAINED_HSMCI0_MOUNT */
+#endif /* CONFIG_SAMV7_HSMCI0_MOUNT */
 #endif /* HAVE_HSMCI */
 
 #ifdef HAVE_AUTOMOUNTER
@@ -310,6 +313,16 @@ int sam_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "ERROR: sam_xbee_initialize() failed: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SAMV7_PWM
+  /* Initialize PWM and register the driver. */
+
+  ret = sam_pwm_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_afec_initialize failed: %d\n", ret);
     }
 #endif
 

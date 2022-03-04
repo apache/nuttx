@@ -253,7 +253,7 @@ static ssize_t nrf52_rng_read(FAR struct file *filep, FAR char *buffer,
 void devrandom_register(void)
 {
   nrf52_rng_initialize();
-  register_driver("/dev/random", FAR & g_rngops, 0444, NULL);
+  register_driver("/dev/random", &g_rngops, 0444, NULL);
 }
 #endif
 
@@ -277,7 +277,7 @@ void devurandom_register(void)
 #ifndef CONFIG_DEV_RANDOM
   nrf52_rng_initialize();
 #endif
-  register_driver("dev/urandom", FAR & g_rngops, 0444, NULL);
+  register_driver("dev/urandom", &g_rngops, 0444, NULL);
 }
 #endif
 

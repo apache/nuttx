@@ -311,7 +311,7 @@ struct mallinfo_task kmm_mallinfo_task(pid_t pid);
 #  endif
 #endif
 
-/* Functions contained in mm_memdump.c *************************************/
+/* Functions contained in mm_memdump.c **************************************/
 
 void mm_memdump(FAR struct mm_heap_s *heap, pid_t pid);
 

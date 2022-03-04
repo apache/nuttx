@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-
 CMN_ASRCS  = phy62xx_exception.S phy62xx_start.S arm_saveusercontext.S arm_fullcontextrestore.S
 #CMN_ASRCS += arm_switchcontext.S vfork.S
 CMN_ASRCS += vfork.S
@@ -33,7 +32,11 @@ CMN_CSRCS += arm_systemreset.c arm_unblocktask.c arm_usestack.c arm_doirq.c
 #CMN_CSRCS += arm_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 CMN_CSRCS += phy62xx_hardfault.c arm_svcall.c arm_vectors.c arm_vfork.c
 #CMN_CSRCS += arm_etherstub.c
-CMN_CSRCS += arm_switchcontext.c
+CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
+
+ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
 
 ifeq ($(CONFIG_ARCH_HAVE_BACKTRACE),y)
 CMN_CSRCS += arm_backtrace_thumb.c
@@ -155,5 +158,4 @@ ifdef CONFIG_MIJIA_APIS
 EXTRA_LIBPATHS += -L$(TOPDIR)/../apps/phy6222/bbb_sdk/components/xiaomi/libs/mesh_auth/debug/
 EXTRA_LIBS += -lmesh-auth-cortex-m0plus-debug
 endif
-
 

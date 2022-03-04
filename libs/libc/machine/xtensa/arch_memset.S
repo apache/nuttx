@@ -47,7 +47,6 @@
    case of an aligned destination (except for the branches to
    the alignment labels).  */
 
-
 /* Byte-by-byte set.  */
 
 	.section .text
@@ -152,7 +151,6 @@ memset:
 	/* Set 1 byte.  */
 	s8i	a3, a5, 0
 6:	RET(16)
-
 
 	// .align	XCHAL_INST_FETCH_WIDTH
 __memset_aux:

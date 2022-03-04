@@ -63,7 +63,7 @@ uint16_t pkt_callback(FAR struct net_driver_s *dev,
     {
       /* Perform the callback */
 
-      flags = devif_conn_event(dev, conn, flags, conn->list);
+      flags = devif_conn_event(dev, conn, flags, conn->sconn.list);
     }
 
   return flags;

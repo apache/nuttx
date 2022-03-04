@@ -13,7 +13,6 @@ config BM3803_WDG
 	default n
 	select WATCHDOG
 
-
 config BM3803_TIM1
 	bool "Timer 1 (T1)"
 	default n
@@ -66,7 +65,6 @@ config BM3803_GPIOIRQ_PORT7
 	default n
 
 endif # BM3803_GPIOIRQ
-
 
 menu "Timer Configuration"
 

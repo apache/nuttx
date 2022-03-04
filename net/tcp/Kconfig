@@ -79,9 +79,9 @@ config NET_MAX_LISTENPORTS
 	---help---
 		Maximum number of listening TCP/IP ports (all tasks).  Default: 20
 
-config NET_TCP_FAST_RETRANSMIT_WATERMARK
-	int "WaterMark to trigger Fast Retransmission"
-	default 3
+config NET_TCP_FAST_RETRANSMIT
+	bool "Enable the Fast Retransmit algorithm"
+	default y
 	---help---
 		RFC2001:
 		3.  Fast Retransmit

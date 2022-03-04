@@ -36,22 +36,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
- * rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -89,9 +73,6 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  FAR uint8_t *stack_alloc_ptr;
-  int ret = ERROR;
-
   stack_size += CONFIG_SIM_STACKSIZE_ADJUSTMENT;
 
 #ifdef CONFIG_TLS_ALIGNED
@@ -106,27 +87,49 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
     }
 #endif
 
-  /* Move up to next even word boundary if necessary */
+  /* Is there already a stack allocated of a different size?  Because of
+   * alignment issues, stack_size might erroneously appear to be of a
+   * different size.  Fortunately, this is not a critical operation.
+   */
 
-  size_t adj_stack_size = STACK_ALIGN_UP(stack_size);
+  if (tcb->stack_alloc_ptr && tcb->adj_stack_size != stack_size)
+    {
+      /* Yes.. Release the old stack */
 
-  /* Allocate the memory for the stack */
+      up_release_stack(tcb, ttype);
+    }
+
+  /* Do we need to allocate a new stack? */
+
+  if (!tcb->stack_alloc_ptr)
+    {
+      /* Allocate the stack.  If DEBUG is enabled (but not stack debug),
+       * then create a zeroed stack to make stack dumps easier to trace.
+       * If TLS is enabled, then we must allocate aligned stacks.
+       */
 
 #ifdef CONFIG_TLS_ALIGNED
-  stack_alloc_ptr = kumm_memalign(TLS_STACK_ALIGN, adj_stack_size);
+      tcb->stack_alloc_ptr = kumm_memalign(TLS_STACK_ALIGN, stack_size);
 #else
-  stack_alloc_ptr = kumm_malloc(adj_stack_size);
+      tcb->stack_alloc_ptr = kumm_malloc(stack_size);
 #endif
+    }
 
-  /* Was the allocation successful? */
+  /* Did we successfully allocate a stack? */
 
-  if (stack_alloc_ptr)
+  if (tcb->stack_alloc_ptr)
     {
+      uintptr_t top_of_stack;
+      size_t size_of_stack;
+
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
+
       /* Save the values in the TCB */
 
-      tcb->adj_stack_size  = adj_stack_size;
-      tcb->stack_alloc_ptr = stack_alloc_ptr;
-      tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
+      tcb->adj_stack_size = size_of_stack;
 
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
@@ -138,10 +141,10 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #endif /* CONFIG_STACK_COLORATION */
       tcb->flags |= TCB_FLAG_FREE_STACK;
 
-      ret = OK;
+      return OK;
     }
 
-  return ret;
+  return ERROR;
 }
 
 /****************************************************************************

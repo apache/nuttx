@@ -38,22 +38,6 @@
 #include "arm_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* For use with EABI and floating point, the stack must be aligned to 8-byte
- * addresses.
- */
-
-#define CONFIG_STACK_ALIGNMENT 8
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (CONFIG_STACK_ALIGNMENT - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -108,7 +92,7 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
    * Items on the stack are referenced as positive word offsets from sp.
    */
 
-  /* We align all sizes and pointer to CONFIG_STACK_ALIGNMENT.
+  /* We align all sizes and pointer to STACK_ALIGNMENT.
    * Since the stack ptr is decremented before
    * the first write, we can directly save our variables to struct
    * tcb_s.

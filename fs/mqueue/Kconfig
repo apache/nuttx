@@ -5,7 +5,7 @@
 
 if !DISABLE_MQUEUE
 
-config FS_MQUEUE_MPATH
+config FS_MQUEUE_VFS_PATH
 	string "Path to message queue"
 	default "/var/mqueue"
 	---help---

@@ -30,6 +30,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
   CSRCS += esp32_board_i2c.c
 endif
 
+ifeq ($(CONFIG_I2CMULTIPLEXER_TCA9548A),y)
+  CSRCS += esp32_tca9548a.c
+endif
+
 ifeq ($(CONFIG_ESP32_SPI),y)
   CSRCS += esp32_board_spi.c
 endif
@@ -52,6 +56,10 @@ endif
 
 ifeq ($(CONFIG_SENSORS_SHT3X),y)
   CSRCS += esp32_sht3x.c
+endif
+
+ifeq ($(CONFIG_SENSORS_MS5611),y)
+  CSRCS += esp32_ms5611.c
 endif
 
 ifeq ($(CONFIG_LCD_HT16K33),y)

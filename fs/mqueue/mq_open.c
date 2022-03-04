@@ -177,7 +177,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
       goto errout;
     }
 
-  if (sizeof(CONFIG_FS_MQUEUE_MPATH) + 1 + strlen(mq_name)
+  if (sizeof(CONFIG_FS_MQUEUE_VFS_PATH) + 1 + strlen(mq_name)
       >= MAX_MQUEUE_PATH)
     {
       ret = -ENAMETOOLONG;
@@ -199,7 +199,7 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
   mode &= ~umask;
 
   /* Skip over any leading '/'.  All message queue paths are relative to
-   * CONFIG_FS_MQUEUE_MPATH.
+   * CONFIG_FS_MQUEUE_VFS_PATH.
    */
 
   while (*mq_name == '/')
@@ -209,7 +209,8 @@ static int file_mq_vopen(FAR struct file *mq, FAR const char *mq_name,
 
   /* Get the full path to the message queue */
 
-  snprintf(fullpath, MAX_MQUEUE_PATH, CONFIG_FS_MQUEUE_MPATH "/%s", mq_name);
+  snprintf(fullpath, MAX_MQUEUE_PATH,
+           CONFIG_FS_MQUEUE_VFS_PATH "/%s", mq_name);
 
   /* Make sure that the check for the existence of the message queue
    * and the creation of the message queue are atomic with respect to

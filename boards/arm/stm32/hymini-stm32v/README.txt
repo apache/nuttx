@@ -465,7 +465,6 @@ Where <subdir> is one of the following:
        CONFIG_USBMONITOR_TRACECONTROLLER=y
        CONFIG_USBMONITOR_TRACEINTERRUPTS=y
 
-
     Using the Prolifics PL2303 Emulation
     ------------------------------------
     You could also use the non-standard PL2303 serial device instead of

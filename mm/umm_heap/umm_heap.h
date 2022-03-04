@@ -35,7 +35,7 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_ARCH_ADDRENV) && defined(__KERNEL__)
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
 /* In the kernel build, there are multiple user heaps; one for each task
  * group.  In this build configuration, the user heap structure lies
  * in a reserved region at the beginning of the .bss/.data address

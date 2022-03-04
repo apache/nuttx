@@ -32,19 +32,13 @@
 #  include <stdint.h>
 #endif
 
+#include <arch/syscall.h>
+
 #ifdef CONFIG_LIB_SYSCALL
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Reserve the first system calls for platform-specific usage if so
- * configured.
- */
-
-#ifndef CONFIG_SYS_RESERVED
-#  define CONFIG_SYS_RESERVED          (0)
-#endif
 
 /* Note that the reported number of system calls does *NOT* include the
  * architecture-specific system calls.  If the "real" total is required,

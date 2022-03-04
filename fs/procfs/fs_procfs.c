@@ -116,11 +116,9 @@ static const struct procfs_entry_s g_procfs_entries[] =
 
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMINFO
   { "meminfo",       &meminfo_operations,         PROCFS_FILE_TYPE   },
-
 #ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
   { "memdump",       &memdump_operations,         PROCFS_FILE_TYPE   },
 #endif
-
 #endif
 
 #if defined(CONFIG_MM_IOB) && !defined(CONFIG_FS_PROCFS_EXCLUDE_IOBINFO)

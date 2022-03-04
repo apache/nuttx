@@ -128,8 +128,7 @@ struct romfs_mountpt_s
 {
   FAR struct inode *rm_blkdriver; /* The block driver inode that hosts the romfs */
 #ifdef CONFIG_FS_ROMFS_CACHE_NODE
-  FAR struct romfs_nodeinfo_s *rm_root;
-                                  /* The node for root node */
+  FAR struct romfs_nodeinfo_s *rm_root; /* The node for root node */
 #else
   uint32_t rm_rootoffset;         /* Saved offset to the first root directory entry */
 #endif

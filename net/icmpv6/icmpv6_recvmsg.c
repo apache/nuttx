@@ -417,7 +417,8 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
       ret = icmpv6_readahead(conn, buf, len,
                              (FAR struct sockaddr_in6 *)from, fromlen);
     }
-  else if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags) ||
+           (flags & MSG_DONTWAIT) != 0)
     {
       /* Handle non-blocking ICMP sockets */
 
@@ -458,7 +459,7 @@ ssize_t icmpv6_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
            */
 
           ret = net_timedwait(&state.recv_sem,
-                              _SO_TIMEOUT(psock->s_rcvtimeo));
+                              _SO_TIMEOUT(conn->sconn.s_rcvtimeo));
           if (ret < 0)
             {
               state.recv_result = ret;

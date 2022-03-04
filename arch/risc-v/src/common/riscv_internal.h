@@ -46,6 +46,16 @@
 #define INTSTACK_COLOR 0xdeadbeef
 #define HEAP_COLOR     'h'
 
+/* RISC-V requires a 16-byte stack alignment. */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /* Format output with register width and hex */
 
 #ifdef CONFIG_ARCH_RV32
@@ -91,6 +101,12 @@
 #  endif
 #endif
 
+/* Return values from riscv_check_pmp_access */
+
+#define PMP_ACCESS_OFF      (0)     /* Access for area not set */
+#define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
+#define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -108,6 +124,10 @@ extern "C"
 EXTERN volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 #define CURRENT_REGS (g_current_regs[up_cpu_index()])
 EXTERN uintptr_t g_idle_topstack;
+
+/* Address of per-cpu idle stack base */
+
+EXTERN const uint8_t * const g_cpu_basestack[CONFIG_SMP_NCPUS];
 
 /* Address of the saved user stack pointer */
 
@@ -177,8 +197,12 @@ void riscv_restorefpu(const uintptr_t *regs);
 
 /* RISC-V PMP Config ********************************************************/
 
-void riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
-                             uintptr_t base, uintptr_t size);
+int riscv_config_pmp_region(uintptr_t region, uintptr_t attr,
+                            uintptr_t base, uintptr_t size);
+
+int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
+int riscv_configured_pmp_regions(void);
+int riscv_next_free_pmp_region(void);
 
 /* Power management *********************************************************/
 
@@ -207,12 +231,18 @@ void rpmsg_serialinit(void);
 
 /* Exception Handler ********************************************************/
 
+void riscv_fault(int irq, uintptr_t *regs);
 void riscv_exception(uintptr_t mcause, uintptr_t *regs);
 
 /* Debug ********************************************************************/
 
 #ifdef CONFIG_STACK_COLORATION
 void riscv_stack_color(void *stackbase, size_t nbytes);
+#endif
+
+#ifdef CONFIG_SMP
+void riscv_cpu_boot(int cpu);
+int riscv_pause_handler(int irq, void *c, void *arg);
 #endif
 
 #undef EXTERN

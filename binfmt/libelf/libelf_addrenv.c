@@ -122,7 +122,8 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
                          up_textheap_memalign(loadinfo->textalign,
                                               textsize);
 #else
-  loadinfo->textalloc = (uintptr_t)kumm_malloc(textsize + datasize);
+  loadinfo->textalloc = (uintptr_t)kumm_memalign(loadinfo->textalign,
+                                                 textsize);
 #endif
 
   if (!loadinfo->textalloc)
@@ -130,16 +131,15 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
       return -ENOMEM;
     }
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
-  loadinfo->dataalloc = (uintptr_t)kumm_malloc(datasize);
-
-  if (0 != datasize && !loadinfo->dataalloc)
+  if (loadinfo->datasize > 0)
     {
-      return -ENOMEM;
+      loadinfo->dataalloc = (uintptr_t)kumm_memalign(loadinfo->dataalign,
+                                                     datasize);
+      if (!loadinfo->dataalloc)
+        {
+          return -ENOMEM;
+        }
     }
-#else
-  loadinfo->dataalloc = loadinfo->textalloc + textsize;
-#endif
 
   return OK;
 #endif
@@ -177,24 +177,19 @@ void elf_addrenv_free(FAR struct elf_loadinfo_s *loadinfo)
     }
 #else
 
-#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
   if (loadinfo->textalloc != 0)
     {
+#if defined(CONFIG_ARCH_USE_TEXT_HEAP)
       up_textheap_free((FAR void *)loadinfo->textalloc);
+#else
+      kumm_free((FAR void *)loadinfo->textalloc);
+#endif
     }
 
   if (loadinfo->dataalloc != 0)
     {
       kumm_free((FAR void *)loadinfo->dataalloc);
     }
-#else
-  /* If there is an allocation for the ELF image, free it */
-
-  if (loadinfo->textalloc != 0)
-    {
-      kumm_free((FAR void *)loadinfo->textalloc);
-    }
-#endif
 
 #endif
 

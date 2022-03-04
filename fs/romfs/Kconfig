@@ -14,7 +14,7 @@ if FS_ROMFS
 
 config FS_ROMFS_CACHE_NODE
 	bool "Enable cache node of ROMFS file system"
-	default n
+	default !DEFAULT_SMALL
 	---help---
 		All node will be cached to ram when file system
 		is mounted so that we can quick access entry of ROMFS

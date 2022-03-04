@@ -31,6 +31,7 @@
 
 #include "mpfs_userspace.h"
 #include "riscv_internal.h"
+#include "riscv_mmu.h"
 
 #ifdef CONFIG_BUILD_PROTECTED
 
@@ -38,21 +39,89 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Configuration ************************************************************/
+#define PMP_UFLASH_FLAGS    (PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R)
+#define PMP_USRAM_FLAGS     (PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R)
 
-/* TODO: get user space mem layout info from ld script or Configuration ? */
+#define UFLASH_START        (uintptr_t)&__uflash_start
+#define UFLASH_SIZE         (uintptr_t)&__uflash_size
+#define USRAM_START         (uintptr_t)&__usram_start
+#define USRAM_SIZE          (uintptr_t)&__usram_size
 
-#ifndef CONFIG_NUTTX_USERSPACE_SIZE
-#  define CONFIG_NUTTX_USERSPACE_SIZE        (0x00100000)
-#endif
+/* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
 
-#ifndef CONFIG_NUTTX_USERSPACE_RAM_START
-#  define CONFIG_NUTTX_USERSPACE_RAM_START   (0x00100000)
-#endif
+#define PGT_L1_PBASE        (uint64_t)&m_l1_pgtable
+#define PGT_L2_PBASE        (uint64_t)&m_l2_pgtable
+#define PGT_L3_PBASE        (uint64_t)&m_l3_pgtable
+#define PGT_L1_VBASE        PGT_L1_PBASE
+#define PGT_L2_VBASE        PGT_L2_PBASE
+#define PGT_L3_VBASE        PGT_L3_PBASE
 
-#ifndef CONFIG_NUTTX_USERSPACE_RAM_SIZE
-#  define CONFIG_NUTTX_USERSPACE_RAM_SIZE    (0x00100000)
-#endif
+/* Flags for user FLASH (RX) and user RAM (RW) */
+
+#define MMU_UFLASH_FLAGS    (PTE_R | PTE_X | PTE_U | PTE_G)
+#define MMU_USRAM_FLAGS     (PTE_R | PTE_W | PTE_U | PTE_G)
+
+/* Kernel RAM needs to be opened (the page tables) */
+
+#define KSRAM_START         (uintptr_t)&__ksram_start
+#define KSRAM_SIZE          (uintptr_t)&__ksram_size
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: configure_mpu
+ *
+ * Description:
+ *   This function configures the MPU for for kernel- / userspace separation.
+ *   It will also grant access to the page table memory for the supervisor.
+ *
+ ****************************************************************************/
+
+static void configure_mpu(void);
+
+/****************************************************************************
+ * Name: configure_mmu
+ *
+ * Description:
+ *   This function configures the MMU and page tables for kernel- / userspace
+ *   separation.
+ *
+ ****************************************************************************/
+
+static void configure_mmu(void);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+/* With a 3 level page table setup the total available memory is 512GB.
+ * However, this is overkill. A single L3 page table can map 2MB of memory,
+ * and for MPFS, this user space is plenty enough. If more memory is needed,
+ * simply increase the size of the L3 page table (n * 512), where each 'n'
+ * provides 2MB of memory.
+ */
+
+/* L1-L3 tables must be in memory always for this to work */
+
+static uint64_t             m_l1_pgtable[512] locate_data(".pgtables");
+static uint64_t             m_l2_pgtable[512] locate_data(".pgtables");
+static uint64_t             m_l3_pgtable[512] locate_data(".pgtables");
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+extern uintptr_t            __uflash_start;
+extern uintptr_t            __uflash_size;
+extern uintptr_t            __usram_start;
+extern uintptr_t            __usram_size;
+
+/* Needed to allow access to the page tables, which reside in kernel RAM */
+
+extern uintptr_t            __ksram_start;
+extern uintptr_t            __ksram_size;
 
 /****************************************************************************
  * Public Functions
@@ -103,25 +172,118 @@ void mpfs_userspace(void)
       *dest++ = *src++;
     }
 
+  /* Configure MPU / PMP to grant access to the userspace */
+
+  configure_mpu();
+  configure_mmu();
+}
+
+/****************************************************************************
+ * Name: configure_mpu
+ *
+ * Description:
+ *   This function configures the MPU for for kernel- / userspace separation.
+ *   It will also grant access to the page table memory for the supervisor.
+ *
+ ****************************************************************************/
+
+static void configure_mpu(void)
+{
   /* Configure the PMP to permit user-space access to its ROM and RAM.
-   * Now this is done by simply adding the whole memory area to PMP.
-   * 1. no access for the 1st 4KB
-   * 2. "RX" for the left space until 1MB
-   * 3. "RW" for the user RAM area
-   * TODO: more accurate memory size control.
+   *
+   * Note: PMP by default revokes access, thus if different privilege modes
+   * are in use, the user space _must_ be granted access here, otherwise
+   * an exception will fire when the user space task is started.
+   *
+   * Note: according to the Polarfire reference manual, address bits [1:0]
+   * are not considered (due to 4 octet alignment), so strictly they don't
+   * have to be cleared here.
+   *
+   * Note: do not trust the stext / etc sections to be correctly aligned
+   * here, they should be but it is simpler and safer to handle the user
+   * region as a whole
+   *
+   * Access is currently granted by simply adding each userspace memory area
+   * to PMP, without further granularity.
+   *
+   * "RX" for the user progmem
+   * "RW" for the user RAM area
+   *
    */
 
-  riscv_config_pmp_region(0, PMPCFG_A_NAPOT,
-                          0,
-                          0x1000);
+  int ret;
+  int idx;
 
-  riscv_config_pmp_region(1, PMPCFG_A_TOR | PMPCFG_X | PMPCFG_R,
-                          0 + CONFIG_NUTTX_USERSPACE_SIZE,
-                          0);
+  /* First, test access to user flash */
 
-  riscv_config_pmp_region(2, PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R,
-                          CONFIG_NUTTX_USERSPACE_RAM_START,
-                          CONFIG_NUTTX_USERSPACE_RAM_SIZE);
+  ret = riscv_check_pmp_access(PMP_UFLASH_FLAGS, UFLASH_START, UFLASH_SIZE);
+
+  /* No access or partial access means we must crash */
+
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_UFLASH_FLAGS, UFLASH_START,
+                              UFLASH_SIZE);
+    }
+
+  /* Then, test access to user RAM */
+
+  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, USRAM_START, USRAM_SIZE);
+    }
+
+  /* The supervisor must have access to the page tables */
+
+  ret = riscv_check_pmp_access(PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
+  DEBUGASSERT(ret != PMP_ACCESS_DENIED);
+  if (ret == PMP_ACCESS_OFF)
+    {
+      idx = riscv_next_free_pmp_region();
+      DEBUGASSERT(idx >= 0);
+      riscv_config_pmp_region(idx, PMP_USRAM_FLAGS, KSRAM_START, KSRAM_SIZE);
+    }
+}
+
+/****************************************************************************
+ * Name: configure_mmu
+ *
+ * Description:
+ *   This function configures the MMU and page tables for kernel- / userspace
+ *   separation.
+ *
+ ****************************************************************************/
+
+static void configure_mmu(void)
+{
+  /* Setup MMU for user */
+
+  /* Setup the L3 references for executable memory */
+
+  mmu_ln_map_region(3, PGT_L3_VBASE, UFLASH_START, UFLASH_START,
+                    UFLASH_SIZE, MMU_UFLASH_FLAGS);
+
+  /* Setup the L3 references for data memory */
+
+  mmu_ln_map_region(3, PGT_L3_VBASE, USRAM_START, USRAM_START,
+                    USRAM_SIZE, MMU_USRAM_FLAGS);
+
+  /* Setup the L2 and L1 references */
+
+  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, PGT_L3_VBASE, PTE_G);
+  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
+
+  /* Enable MMU */
+
+  mmu_enable(PGT_L1_PBASE, 0);
 }
 
 #endif /* CONFIG_BUILD_PROTECTED */

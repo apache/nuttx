@@ -47,11 +47,6 @@
 #  define HAVE_KERNEL_HEAP 1
 #endif
 
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (sizeof(uint32_t) - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -68,7 +63,7 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *   - stack_base_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
  * Inputs:
@@ -96,23 +91,15 @@
 
 int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 {
-  /* Conver the stack size unit from byte to char */
-
-  stack_size = B2C(stack_size);
-
 #ifdef CONFIG_TLS
-  /* Add the size of the TLS information structure */
-
-  stack_size += sizeof(struct tls_info_s);
-
   /* The allocated stack size must not exceed the maximum possible for the
    * TLS feature.
    */
 
-  DEBUGASSERT(stack_size <= B2C(TLS_MAXSTACK));
-  if (stack_size >= B2C(TLS_MAXSTACK))
+  DEBUGASSERT(stack_size <= TLS_MAXSTACK);
+  if (stack_size >= TLS_MAXSTACK)
     {
-      stack_size = B2C(TLS_MAXSTACK);
+      stack_size = TLS_MAXSTACK;
     }
 #endif
 
@@ -145,7 +132,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
         {
           tcb->stack_alloc_ptr = mm_memalign(
                       KMM_HEAP(CONFIG_ARCH_KERNEL_STACK_HEAP),
-                      B2C(TLS_STACK_ALIGN), stack_size);
+                      TLS_STACK_ALIGN, stack_size);
         }
       else
 #endif
@@ -154,7 +141,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
           tcb->stack_alloc_ptr = mm_memalign(
                       UMM_HEAP(CONFIG_ARCH_STACK_HEAP),
-                      B2C(TLS_STACK_ALIGN), stack_size);
+                      TLS_STACK_ALIGN, stack_size);
         }
 
 #else /* CONFIG_TLS */
@@ -192,10 +179,7 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
   if (tcb->stack_alloc_ptr)
     {
-#if defined(CONFIG_TLS) && defined(CONFIG_STACK_COLORATION)
-      FAR void *stack_base;
-#endif
-      FAR void *top_of_stack;
+      uintptr_t top_of_stack;
       size_t size_of_stack;
 
       /* The CEVA uses a push-down stack:  the stack grows toward lower
@@ -209,31 +193,15 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * boundary
        */
 
-      size_of_stack = STACK_ALIGN_DOWN(stack_size);
-      top_of_stack  = tcb->stack_alloc_ptr + size_of_stack;
+      top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+      top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+      size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
-      tcb->adj_stack_ptr  = top_of_stack;
+      tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
 
-#ifdef CONFIG_TLS
-      /* Initialize the TLS data structure */
-
-      memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-
-#ifdef CONFIG_STACK_COLORATION
-      /* If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-      stack_base = tcb->stack_alloc_ptr + sizeof(struct tls_info_s);
-      stack_size = tcb->adj_stack_size - sizeof(struct tls_info_s);
-      up_stack_color(stack_base, stack_size);
-
-#endif /* CONFIG_STACK_COLORATION */
-#else /* CONFIG_TLS */
 #ifdef CONFIG_STACK_COLORATION
       /* If stack debug is enabled, then fill the stack with a
        * recognizable value that we can use later to test for high
@@ -243,8 +211,8 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
 
 #endif /* CONFIG_STACK_COLORATION */
-#endif /* CONFIG_TLS */
 
+      tcb->flags |= TCB_FLAG_FREE_STACK;
       return OK;
     }
 

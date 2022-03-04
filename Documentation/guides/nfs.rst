@@ -190,7 +190,6 @@ called ``/export``.
 
   # sudo mkdir /export
 
-
 It is important that ``/export`` directory allow access to everyone (777
 permissions) as we will be accessing the NFS share from the client with
 no authentication.
@@ -279,6 +278,5 @@ And also we can verify if NFS is running in the system with:
        100021   1   tcp   1629  nlockmgr
        100021   3   tcp   1629  nlockmgr
        100021   4   tcp   1629  nlockmgr
-
 
 Now your NFS sever is sharing ``/export`` directory to be accessed.

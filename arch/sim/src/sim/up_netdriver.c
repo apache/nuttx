@@ -1,10 +1,24 @@
 /****************************************************************************
  * arch/sim/src/sim/up_netdriver.c
  *
- *   Copyright (C) 2007, 2009-2012, 2015-2016 Gregory Nutt.
- *   All rights reserved.
- *   Author: Gregory Nutt <gnutt@nuttx.org>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.  The
+ * ASF licenses this file to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance with the
+ * License.  You may obtain a copy of the License at
  *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ *
+ ****************************************************************************/
+
+/****************************************************************************
  * Based on code from uIP which also has a BSD-like license:
  *
  *   Copyright (c) 2001, Adam Dunkels.
@@ -120,98 +134,106 @@ static void netdriver_recv_work(FAR void *arg)
 
   net_lock();
 
-  /* netdev_read will return 0 on a timeout event and > 0
-   * on a data received event
+  /* Retrieve all the queued RX frames from the network device
+   * to prevent RX data stream congestion.
    */
 
-  dev->d_len = netdev_read((FAR unsigned char *)dev->d_buf,
-                           dev->d_pktsize);
-  if (dev->d_len > 0)
+  while (netdev_avail())
     {
-      NETDEV_RXPACKETS(dev);
-
-      /* Data received event.  Check for valid Ethernet header with
-       * destination == our MAC address
+      /* netdev_read will return 0 on a timeout event and > 0
+       * on a data received event
        */
 
-      eth = (FAR struct eth_hdr_s *)dev->d_buf;
-      if (dev->d_len > ETH_HDRLEN)
+      dev->d_len = netdev_read((FAR unsigned char *)dev->d_buf,
+                               dev->d_pktsize);
+      if (dev->d_len > 0)
         {
-#ifdef CONFIG_NET_PKT
-          /* When packet sockets are enabled, feed the frame into the packet
-           * tap.
+          NETDEV_RXPACKETS(dev);
+
+          /* Data received event.  Check for valid Ethernet header with
+           * destination == our MAC address
            */
 
-          pkt_input(dev);
+          eth = (FAR struct eth_hdr_s *)dev->d_buf;
+          if (dev->d_len > ETH_HDRLEN)
+            {
+#ifdef CONFIG_NET_PKT
+              /* When packet sockets are enabled, feed the frame into
+               * the packet tap.
+               */
+
+              pkt_input(dev);
 #endif /* CONFIG_NET_PKT */
 
-          /* We only accept IP packets of the configured type
-           * and ARP packets
-           */
+              /* We only accept IP packets of the configured type
+               * and ARP packets
+               */
 
 #ifdef CONFIG_NET_IPv4
-          if (eth->type == HTONS(ETHTYPE_IP))
-            {
-              ninfo("IPv4 frame\n");
-              NETDEV_RXIPV4(dev);
+              if (eth->type == HTONS(ETHTYPE_IP))
+                {
+                  ninfo("IPv4 frame\n");
+                  NETDEV_RXIPV4(dev);
 
-              /* Handle ARP on input then give the IPv4 packet to the network
-               * layer
-               */
+                  /* Handle ARP on input then give the IPv4 packet to
+                   * the network layer
+                   */
 
-              arp_ipin(dev);
-              ipv4_input(dev);
+                  arp_ipin(dev);
+                  ipv4_input(dev);
 
-              /* Check for a reply to the IPv4 packet */
+                  /* Check for a reply to the IPv4 packet */
 
-              netdriver_reply(dev);
-            }
-          else
+                  netdriver_reply(dev);
+                }
+              else
 #endif /* CONFIG_NET_IPv4 */
 #ifdef CONFIG_NET_IPv6
-          if (eth->type == HTONS(ETHTYPE_IP6))
-            {
-              ninfo("IPv6 frame\n");
-              NETDEV_RXIPV6(dev);
+              if (eth->type == HTONS(ETHTYPE_IP6))
+                {
+                  ninfo("IPv6 frame\n");
+                  NETDEV_RXIPV6(dev);
 
-              /* Give the IPv6 packet to the network layer */
+                  /* Give the IPv6 packet to the network layer */
 
-              ipv6_input(dev);
+                  ipv6_input(dev);
 
-              /* Check for a reply to the IPv6 packet */
+                  /* Check for a reply to the IPv6 packet */
 
-              netdriver_reply(dev);
-            }
-          else
+                  netdriver_reply(dev);
+                }
+              else
 #endif/* CONFIG_NET_IPv6 */
 #ifdef CONFIG_NET_ARP
-          if (eth->type == HTONS(ETHTYPE_ARP))
-            {
-              ninfo("ARP frame\n");
-              NETDEV_RXARP(dev);
-
-              arp_arpin(dev);
-
-              /* If the above function invocation resulted in data that
-               * should be sent out on the network, the global variable
-               * d_len is set to a value > 0.
-               */
-
-              if (dev->d_len > 0)
+              if (eth->type == HTONS(ETHTYPE_ARP))
                 {
-                  netdev_send(dev->d_buf, dev->d_len);
+                  ninfo("ARP frame\n");
+                  NETDEV_RXARP(dev);
+
+                  arp_arpin(dev);
+
+                  /* If the above function invocation resulted in data that
+                   * should be sent out on the network, the global variable
+                   * d_len is set to a value > 0.
+                   */
+
+                  if (dev->d_len > 0)
+                    {
+                      netdev_send(dev->d_buf, dev->d_len);
+                    }
+                }
+              else
+#endif
+                {
+                  NETDEV_RXDROPPED(dev);
+                  nwarn("WARNING: Unsupported Ethernet type %u\n",
+                        eth->type);
                 }
             }
           else
-#endif
             {
-              NETDEV_RXDROPPED(dev);
-              nwarn("WARNING: Unsupported Ethernet type %u\n", eth->type);
+              NETDEV_RXERRORS(dev);
             }
-        }
-      else
-        {
-          NETDEV_RXERRORS(dev);
         }
     }
 
@@ -315,13 +337,25 @@ static int netdriver_txavail(FAR struct net_driver_s *dev)
       work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
     }
 
-  /* Check RX data availability and read the data from the network device now
-   * to prevent RX data stream congestion in case of high TX network traffic.
-   */
-
-  netdriver_loop();
-
   return OK;
+}
+
+static void netdriver_txdone_interrupt(FAR void *priv)
+{
+  if (work_available(&g_avail_work))
+    {
+      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      work_queue(LPWORK, &g_avail_work, netdriver_txavail_work, dev, 0);
+    }
+}
+
+static void netdriver_rxready_interrupt(FAR void *priv)
+{
+  if (work_available(&g_recv_work))
+    {
+      FAR struct net_driver_s *dev = (FAR struct net_driver_s *)priv;
+      work_queue(LPWORK, &g_recv_work, netdriver_recv_work, dev, 0);
+    }
 }
 
 /****************************************************************************
@@ -336,7 +370,9 @@ int netdriver_init(void)
 
   /* Internal initialization */
 
-  netdev_init();
+  netdev_init(dev,
+              netdriver_txdone_interrupt,
+              netdriver_rxready_interrupt);
 
   /* Update the buffer size */
 
@@ -363,6 +399,7 @@ int netdriver_init(void)
   return netdev_register(dev, NET_LL_ETHERNET);
 }
 
+__attribute__ ((visibility("default")))
 void netdriver_setmacaddr(unsigned char *macaddr)
 {
   memcpy(g_sim_dev.d_mac.ether.ether_addr_octet, macaddr, IFHWADDRLEN);

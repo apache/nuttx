@@ -59,6 +59,15 @@ RUN mkdir bloaty -p \
   && cmake -DCMAKE_SYSTEM_PREFIX_PATH=/tools/bloaty \
   && make install
 
+# Install Rust and targets supported from NuttX
+ENV RUST_HOME=/tools/rust
+ENV CARGO_HOME=$RUST_HOME/cargo
+ENV RUSTUP_HOME=$RUST_HOME/rustup
+RUN mkdir -p $CARGO_HOME \
+  && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+  && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
+  && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+
 CMD [ "/bin/bash" ]
 
 ###############################################################################
@@ -75,7 +84,7 @@ WORKDIR /tools
 FROM nuttx-toolchain-base AS nuttx-toolchain-arm
 # Download the latest ARM GCC toolchain prebuilt by ARM
 RUN mkdir gcc-arm-none-eabi && \
-  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu-rm/9-2019q4/gcc-arm-none-eabi-9-2019-q4-major-x86_64-linux.tar.bz2?revision=108bd959-44bd-4619-9c19-26187abf5225&la=en&hash=E788CE92E5DFD64B2A8C246BBA91A249CB8E2D2D" \
+  curl -s -L  "https://developer.arm.com/-/media/Files/downloads/gnu-rm/10.3-2021.10/gcc-arm-none-eabi-10.3-2021.10-x86_64-linux.tar.bz2" \
   | tar -C gcc-arm-none-eabi --strip-components 1 -xj
 
 ###############################################################################
@@ -98,6 +107,15 @@ RUN mkdir riscv64-unknown-elf-gcc && \
   | tar -C riscv64-unknown-elf-gcc --strip-components 1 -xz
 
 ###############################################################################
+# Build image for tool required by SPARC builds
+###############################################################################
+FROM nuttx-toolchain-base AS nuttx-toolchain-sparc
+# Download the SPARC GCC toolchain prebuilt by Gaisler
+RUN mkdir sparc-gaisler-elf-gcc && \
+  curl -s -L "https://www.gaisler.com/anonftp/bcc2/bin/bcc-2.1.0-gcc-linux64.tar.xz" \
+  | tar -C sparc-gaisler-elf-gcc --strip-components 1 -xJ
+
+###############################################################################
 # Build image for tool required by ESP32 builds
 ###############################################################################
 FROM nuttx-toolchain-base AS nuttx-toolchain-esp32
@@ -110,14 +128,20 @@ RUN mkdir -p xtensa-esp32s2-elf-gcc && \
   curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s2-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
   | tar -C xtensa-esp32s2-elf-gcc --strip-components 1 -xz
 
-RUN echo "ESP Binaries: 2021/06/01"
+RUN mkdir -p xtensa-esp32s3-elf-gcc && \
+  curl -s -L "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r1/xtensa-esp32s3-elf-gcc8_4_0-esp-2021r1-linux-amd64.tar.gz" \
+  | tar -C xtensa-esp32s3-elf-gcc --strip-components 1 -xz
+
+RUN echo "ESP Binaries: 2022/01/26"
 RUN mkdir -p /tools/blobs && cd /tools/blobs \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32.bin" -o bootloader-esp32.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32c3.bin" -o bootloader-esp32c3.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32s2.bin" -o bootloader-esp32s2.bin \
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/bootloader-esp32s3.bin" -o bootloader-esp32s3.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32.bin" -o partition-table-esp32.bin \
   && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32c3.bin" -o partition-table-esp32c3.bin \
-  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s2.bin" -o partition-table-esp32s2.bin
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s2.bin" -o partition-table-esp32s2.bin \
+  && curl -s -L "https://github.com/espressif/esp-nuttx-bootloader/releases/download/latest/partition-table-esp32s3.bin" -o partition-table-esp32s3.bin
 
 ###############################################################################
 # Build image for tool required by Renesas builds
@@ -176,7 +200,6 @@ RUN cd renesas-tools/source/newlib && \
 RUN cd /tools/renesas-tools/build/gcc && \
   make && make install
 
-
 ###############################################################################
 # Final Docker image used for running CI system.  This includes all toolchains
 # supported by the CI system.
@@ -219,7 +242,6 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   xxd \
   && rm -rf /var/lib/apt/lists/*
 
-
 # Configure out base setup for adding python packages
 ENV PIP_DISABLE_PIP_VERSION_CHECK=true
 # This disables the cache with value 0. We do not want caching as it
@@ -241,6 +263,12 @@ ENV PATH="/tools/kconfig-frontends/bin:$PATH"
 COPY --from=nuttx-tools /tools/bloaty/ bloaty/
 ENV PATH="/tools/bloaty/bin:$PATH"
 
+# Pull in the Rust toolchain including supported targets
+COPY --from=nuttx-tools /tools/rust/ /tools/rust/
+ENV CARGO_HOME=/tools/rust/cargo
+ENV RUSTUP_HOME=/tools/rust/rustup
+ENV PATH="/tools/rust/cargo/bin:$PATH"
+
 # ARM toolchain
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/
 ENV PATH="/tools/gcc-arm-none-eabi/bin:$PATH"
@@ -253,6 +281,10 @@ ENV PATH="/tools/pinguino-compilers/p32/bin:$PATH"
 COPY --from=nuttx-toolchain-riscv /tools/riscv64-unknown-elf-gcc/ riscv64-unknown-elf-gcc/
 ENV PATH="/tools/riscv64-unknown-elf-gcc/bin:$PATH"
 
+# SPARC toolchain
+COPY --from=nuttx-toolchain-sparc /tools/sparc-gaisler-elf-gcc/ sparc-gaisler-elf-gcc/
+ENV PATH="/tools/sparc-gaisler-elf-gcc/bin:$PATH"
+
 # ESP32 toolchain
 COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32-elf-gcc/ xtensa-esp32-elf-gcc/
 ENV PATH="/tools/xtensa-esp32-elf-gcc/bin:$PATH"
@@ -260,6 +292,10 @@ ENV PATH="/tools/xtensa-esp32-elf-gcc/bin:$PATH"
 # ESP32-S2 toolchain
 COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s2-elf-gcc/ xtensa-esp32s2-elf-gcc/
 ENV PATH="/tools/xtensa-esp32s2-elf-gcc/bin:$PATH"
+
+# ESP32-S3 toolchain
+COPY --from=nuttx-toolchain-esp32 /tools/xtensa-esp32s3-elf-gcc/ xtensa-esp32s3-elf-gcc/
+ENV PATH="/tools/xtensa-esp32s3-elf-gcc/bin:$PATH"
 
 RUN mkdir -p /tools/blobs/esp-bins
 COPY --from=nuttx-toolchain-esp32 /tools/blobs/* /tools/blobs/esp-bins/
@@ -285,10 +321,14 @@ RUN mkdir -p /tools/ccache/bin && \
   ln -sf `which ccache` /tools/ccache/bin/p32-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/riscv64-unknown-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/sparc-gaisler-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s2-elf-g++ && \
+  ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-gcc && \
+  ln -sf `which ccache` /tools/ccache/bin/xtensa-esp32s3-elf-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/avr-gcc && \
   ln -sf `which ccache` /tools/ccache/bin/avr-g++ && \
   ln -sf `which ccache` /tools/ccache/bin/rx-elf-gcc

@@ -42,10 +42,13 @@ ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
+  ARCHOPTIMIZATIONRUST = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -O2 -fno-strict-aliasing
+else
+  ARCHOPTIMIZATIONRUST += -C opt-level=0
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -93,6 +96,7 @@ endif
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+RUSTC = rustc --edition 2021
 
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
@@ -100,6 +104,7 @@ CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
    $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
   # Why c++17?
@@ -172,11 +177,7 @@ endif
 CMODULEFLAGS += -fno-stack-protector
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # NuttX modules are ELF binaries.
 # Non-ELF platforms like macOS need to use a separate ELF toolchain.
@@ -194,42 +195,18 @@ CXXELFFLAGS = $(CXXFLAGS)
 # -fno-pic to avoid GOT relocations
 CELFFLAGS += -fno-pic
 CXXELFFLAGS += -fno-pic
+ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
+  # See the comment on CMODULEFLAGS above.
+  CELFFLAGS += -mcmodel=large
+  CXXELFFLAGS += -mcmodel=large
+endif
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  CCLINKFLAGS += -g
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
-  CCLINKFLAGS += -m32
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
-  HOSTLDFLAGS += -m32
 endif
-
-ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
-  CCLINKFLAGS += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CCLINKFLAGS += -fomit-frame-pointer
-endif
-
-HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe

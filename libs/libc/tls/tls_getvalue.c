@@ -78,6 +78,23 @@ uintptr_t tls_get_value(int tlsindex)
 
 #if CONFIG_TLS_TASK_NELEM > 0
 
+/****************************************************************************
+ * Name: task_tls_get_value
+ *
+ * Description:
+ *   Return an the task local storage data value associated with 'tlsindx'
+ *
+ * Input Parameters:
+ *   tlsindex - Index of task local storage data element to return
+ *
+ * Returned Value:
+ *   The value of TLS element associated with 'tlsindex'. Errors are not
+ *   reported.  Zero is returned in the event of an error, but zero may also
+ *   be valid value and returned when there is no error.  The only possible
+ *   error would be if tlsindex < 0 or tlsindex >=CONFIG_TLS_TASK_NELEM.
+ *
+ ****************************************************************************/
+
 uintptr_t task_tls_get_value(int tlsindex)
 {
   FAR struct task_info_s *info = task_get_info();

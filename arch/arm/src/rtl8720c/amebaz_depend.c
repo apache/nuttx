@@ -39,11 +39,11 @@
 int __wrap_printf(const char *fmt, ...)
 {
   va_list ap;
-  int ret;
+
   va_start(ap, fmt);
-  ret = nx_vsyslog(LOG_INFO, fmt, &ap);
+  vsyslog(LOG_INFO, fmt, &ap);
   va_end(ap);
-  return ret;
+  return 0;
 }
 
 /* stdio.h Wrapper End */

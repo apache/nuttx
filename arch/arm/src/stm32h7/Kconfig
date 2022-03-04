@@ -138,7 +138,6 @@ config ARCH_CHIP_STM32H753AI
 		STM32 H7 Cortex M7, 2048 Kb FLASH, 1024K Kb SRAM,
 		with cryptographic accelerator, UFBGA169
 
-
 config ARCH_CHIP_STM32H753BI
 	bool "STM32H753BI"
 	select STM32H7_STM32H7X3XX
@@ -891,7 +890,7 @@ config OTG_ID_GPIO_DISABLE
 	bool "Disable the use of GPIO_OTG_ID pin."
 	default n
 	---help---
-		Disables/Enabled the use of GPIO_OTG_ID pin. This allows non OTG use
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
 		cases to reuse this GPIO pin and ensure it is not set incorrectlty
 		during OS boot.
 
@@ -4221,7 +4220,6 @@ config STM32H7_TIM17_CAP
 
 		Timer devices may be used for different purposes.  One special purpose is
 		to capture input.
-
 
 menu "STM32 TIMx Outputs Configuration"
 

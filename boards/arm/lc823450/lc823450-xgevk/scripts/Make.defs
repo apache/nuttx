@@ -32,11 +32,7 @@ else
 endif
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)}"
-else
-  ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(LDSCRIPT)
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -46,8 +42,8 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections
-ARCHCXXFLAGS = -fno-builtin -fno-exceptions -fcheck-new -fno-rtti -nostdinc++
+ARCHCFLAGS = -fno-common -fno-builtin -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -fno-builtin -fno-exceptions -fcheck-new -fno-rtti -nostdinc++
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 ARCHPICFLAGS = -fpic -msingle-pic-base -mpic-register=r10
@@ -71,11 +67,7 @@ CELFFLAGS = $(CFLAGS) -mlong-calls # --target1-abs
 CXXELFFLAGS = $(CXXFLAGS) -mlong-calls # --target1-abs
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 # File extensions
 
@@ -87,22 +79,16 @@ endif
 
 LDFLAGS += --gc-sections
 
-
 ifeq ($(CONFIG_LC823450_SDIF_PATCH),y)
 ARCH_LIBS += -lSdDr_patch_es2
 ARCH_LIBPATHS += -L"$(TOPDIR)/arch/arm/src/lc823450"
 endif
 
 ifeq ($(CONFIG_LC823450_SDIF),y)
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCH_SYMBOLS = "${shell cygpath -w $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld}"
-else
-  ARCH_SYMBOLS = $(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld
-endif
+  ARCH_SYMBOLS = $(call CONVERT_PATH,$(TOPDIR)/arch/arm/src/lc823450/lc823450_symbols.ld)
   ARCH_LIBS += $(ARCH_LIBS_OPT) --just-symbols=$(ARCH_SYMBOLS)
   LDFLAGS += --no-wchar-size-warning
 endif
-
 
 # NEVER use 'override' variables
 # NUTTX_EXTRA_LIBS and NUTTX_EXTRA_LIBPATHS are defined by out-of-repository

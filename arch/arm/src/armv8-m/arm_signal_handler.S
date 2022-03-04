@@ -63,7 +63,7 @@
  *
  * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see svcall.h)
+ *   via the SYS_signal_handler_return (see syscall.h)
  *
  ****************************************************************************/
 

@@ -39,6 +39,14 @@
 
 #include "same70-qmtech.h"
 
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+#  include <nuttx/input/buttons.h>
+#else
+#  include <nuttx/board.h>
+#endif
+#endif
+
 #ifdef HAVE_HSMCI
 #  include "board_hsmci.h"
 #endif /* HAVE_HSMCI */
@@ -94,6 +102,23 @@ int sam_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_INPUT_BUTTONS
+#ifdef CONFIG_INPUT_BUTTONS_LOWER
+  /* Register the BUTTON driver */
+
+  ret = btn_lower_initialize("/dev/buttons");
+  if (ret != OK)
+    {
+      syslog(LOG_ERR, "ERROR: btn_lower_initialize() failed: %d\n", ret);
+      return ret;
+    }
+#else
+  /* Enable BUTTON support for some other purpose */
+
+  board_button_initialize();
+#endif /* CONFIG_INPUT_BUTTONS_LOWER */
+#endif /* CONFIG_INPUT_BUTTONS */
+
 #ifdef HAVE_HSMCI
   /* Initialize the HSMCI0 driver */
 
@@ -105,26 +130,29 @@ int sam_bringup(void)
              HSMCI0_SLOTNO, HSMCI0_MINOR, ret);
     }
 
-#ifdef CONFIG_SAME70QMTECH_HSMCI0_MOUNT
+#ifdef CONFIG_SAMV7_HSMCI0_MOUNT
   else
     {
-      /* REVISIT: A delay seems to be required here or the mount will fail */
-
-      /* Mount the volume on HSMCI0 */
-
-      ret = nx_mount(CONFIG_SAMV7_HSMCI0_MOUNT_BLKDEV,
-                     CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT,
-                     CONFIG_SAMV7_HSMCI0_MOUNT_FSTYPE,
-                     0, NULL);
-
-      if (ret < 0)
+      if (sam_cardinserted(HSMCI0_SLOTNO))
         {
-          syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
-                 CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT, ret);
+          usleep(1000 * 1000);
+
+          /* Mount the volume on HSMCI0 */
+
+          ret = nx_mount(CONFIG_SAMV7_HSMCI0_MOUNT_BLKDEV,
+                         CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT,
+                         CONFIG_SAMV7_HSMCI0_MOUNT_FSTYPE,
+                         0, NULL);
+
+          if (ret < 0)
+            {
+              syslog(LOG_ERR, "ERROR: Failed to mount %s: %d\n",
+                     CONFIG_SAMV7_HSMCI0_MOUNT_MOUNTPOINT, ret);
+            }
         }
     }
 
-#endif /* CONFIG_SAME70QMTECH_HSMCI0_MOUNT */
+#endif /* CONFIG_SAMV7_HSMCI0_MOUNT */
 #endif /* HAVE_HSMCI */
 
 #ifdef HAVE_AUTOMOUNTER

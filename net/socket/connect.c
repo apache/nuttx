@@ -137,21 +137,21 @@ int psock_connect(FAR struct socket *psock, FAR const struct sockaddr *addr,
   DEBUGASSERT(psock->s_sockif != NULL &&
               psock->s_sockif->si_connect != NULL);
   ret = psock->s_sockif->si_connect(psock, addr, addrlen);
-  if (ret < 0)
+  if (ret >= 0)
     {
-      return ret;
+      FAR struct socket_conn_s *conn = psock->s_conn;
+
+      if (addr != NULL)
+        {
+          conn->s_flags |= _SF_CONNECTED;
+        }
+      else
+        {
+          conn->s_flags &= ~_SF_CONNECTED;
+        }
     }
 
-  if (addr != NULL)
-    {
-      psock->s_flags |= _SF_CONNECTED;
-    }
-  else
-    {
-      psock->s_flags &= ~_SF_CONNECTED;
-    }
-
-  return OK;
+  return ret;
 }
 
 /****************************************************************************

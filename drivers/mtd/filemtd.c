@@ -42,6 +42,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#ifndef MIN
+#  define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#endif
+
 /* Configuration ************************************************************/
 
 #ifndef CONFIG_FILEMTD_BLOCKSIZE
@@ -131,7 +135,8 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
   FAR const uint8_t *pin  = (FAR const uint8_t *)src;
   FAR uint8_t       *pout;
   char               buf[128];
-  int                buflen = 0;
+  int                buflen;
+  int                remain;
   uint8_t            oldvalue;
   uint8_t            srcvalue;
   uint8_t            newvalue;
@@ -141,15 +146,16 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
 
   seekpos = priv->offset + offset;
 
-  while (len-- > 0)
+  for (buflen = 0; len > 0; len--)
     {
       if (buflen == 0)
         {
           /* Read more data from the file */
 
           file_seek(&priv->mtdfile, seekpos, SEEK_SET);
-          buflen = file_read(&priv->mtdfile, buf, sizeof(buf));
+          buflen = file_read(&priv->mtdfile, buf, MIN(len, sizeof(buf)));
           pout   = (FAR uint8_t *) buf;
+          remain = buflen;
         }
 
       /* Get the source and destination values */
@@ -182,17 +188,18 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
       /* Write the modified value to simulated FLASH */
 
       *pout++ = newvalue;
-      buflen--;
+      remain--;
 
       /* If our buffer is full, then seek back to beginning of
        * the file and write the buffer contents
        */
 
-      if (buflen == 0)
+      if (remain == 0)
         {
           file_seek(&priv->mtdfile, seekpos, SEEK_SET);
-          file_write(&priv->mtdfile, buf, sizeof(buf));
-          seekpos += sizeof(buf);
+          file_write(&priv->mtdfile, buf, buflen);
+          seekpos += buflen;
+          buflen = 0;
         }
     }
 
@@ -201,7 +208,7 @@ static ssize_t filemtd_write(FAR struct file_dev_s *priv, size_t offset,
   if (buflen != 0)
     {
       file_seek(&priv->mtdfile, seekpos, SEEK_SET);
-      file_write(&priv->mtdfile, buf, sizeof(buf));
+      file_write(&priv->mtdfile, buf, buflen);
     }
 
   return len;
@@ -266,10 +273,10 @@ static int filemtd_erase(FAR struct mtd_dev_s *dev, off_t startblock,
 
   file_seek(&priv->mtdfile, priv->offset + offset, SEEK_SET);
   memset(buffer, CONFIG_FILEMTD_ERASESTATE, sizeof(buffer));
-  while (nbytes)
+  while (nbytes > 0)
     {
-      file_write(&priv->mtdfile, buffer, sizeof(buffer));
-      nbytes -= sizeof(buffer);
+      file_write(&priv->mtdfile, buffer, MIN(nbytes, sizeof(buffer)));
+      nbytes -= MIN(nbytes, sizeof(buffer));
     }
 
   return OK;
