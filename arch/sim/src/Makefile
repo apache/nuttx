@@ -292,42 +292,30 @@ board/libboard$(LIBEXT):
 nuttx-names.dat: nuttx-names.in
 	$(call PREPROCESS, nuttx-names.in, nuttx-names.dat)
 
-<<<<<<< HEAD
+# Note: Use objcopy for Linux because for some reasons visibility=hidden
+# stuff doesn't work there as we expect.
+# Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
+# necessary for macOS.
 nuttx.rel: libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) nuttx-names.dat
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
 	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel \
 	  $(filter-out libarch$(LIBEXT) board/libboard$(LIBEXT) nuttx-names.dat, $^) \
 	  $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
-	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
-
-nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
-	$(Q) $(CC) $(CCLINKFLAGS) -Wl,-verbose 2>&1 | \
-	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
-	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
-	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
-	$(eval _HOSTOBJS=$(filter-out nuttx.rel, $^))
-	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(_HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CCLINKFLAGS) $(LIBPATHS) $(ARCHSCRIPT) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(_HOSTOBJS) $(STDLIBS))
-=======
-# Note: Use objcopy for Linux because for some reasons visibility=hidden
-# stuff doesn't work there as we expect.
-# Note: _stext stuff is for CONFIG_CXX_INITIALIZE_SINIT, which in not
-# necessary for macOS.
-nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
-	$(Q) echo "LD:  nuttx$(EXEEXT)"
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
+endif
+
+nuttx$(EXEEXT): nuttx.rel $(HOSTOBJS)
+ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
 	     sed -e '/====/,/====/!d;//d' -e 's/__executable_start/_stext/g' -e 's/__init_array_start/_sinit/g' \
 	         -e 's/__init_array_end/_einit/g' -e 's/__fini_array_start/_sfini/g' -e 's/__fini_array_end/_efini/g' >nuttx.ld
 	$(Q) echo "__init_array_start = .; __init_array_end = .; __fini_array_start = .; __fini_array_end = .;" >>nuttx.ld
 endif
+	$(eval _HOSTOBJS=$(filter-out nuttx.rel, $^))
 	$(if $(CONFIG_HAVE_CXX),\
-	$(Q) "$(CXX)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS),\
-	$(Q) "$(CC)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(HOSTOBJS) $(STDLIBS))
->>>>>>> mirtos/master
+	$(Q) "$(CXX)" $(CFLAGS)  $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(_HOSTOBJS) $(STDLIBS),\
+	$(Q) "$(CC)" $(CFLAGS) $(LDFLAGS) -o $(TOPDIR)/$@ $(HEADOBJ) nuttx.rel $(_HOSTOBJS) $(STDLIBS))
 	$(Q) $(NM) $(TOPDIR)/$@ | \
 		grep -v '\(compiled\)\|\(\.o$$\)\|\( [aUw] \)\|\(\.\.ng$$\)\|\(LASH[RL]DI\)' | \
 		sort > $(TOPDIR)/System.map
