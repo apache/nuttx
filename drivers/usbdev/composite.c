@@ -601,7 +601,7 @@ static int composite_setup(FAR struct usbdevclass_driver_s *driver,
 
                       buf->len = 18;
                       buf->type = USB_DESC_TYPE_STRING;
-                      memcpy(buf->data, msft_response, 16);
+                      memcpy(buf + 1, msft_response, 16);
                       ret = buf->len;
                     }
 #endif
