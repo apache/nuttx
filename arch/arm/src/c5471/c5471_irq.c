@@ -59,7 +59,7 @@ volatile uint32_t *g_current_regs[1];
  * because we know that correct IRAM area is 0xffc00000.
  */
 
-extern int _svectors; /* Type does not matter */
+extern up_vector_t _svectors[];
 
 /* The C5471 has FLASH at the low end of memory.  The rrload bootloaer will
  * catch all interrupts and re-vector them to vectors stored in IRAM.  The
@@ -126,7 +126,7 @@ static inline void up_ackfiq(unsigned int irq)
 static inline void up_vectorinitialize(void)
 {
   up_vector_t *src  = g_vectorinittab;
-  up_vector_t *dest = (up_vector_t *)&_svectors;
+  up_vector_t *dest = _svectors;
   int i;
 
   for (i = 0; i < NVECTORS; i++)
