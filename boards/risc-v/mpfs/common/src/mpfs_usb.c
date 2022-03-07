@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/m100pfsevp/src/mpfs_bringup.c
+ * boards/risc-v/mpfs/common/src/mpfs_usb.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,91 +24,56 @@
 
 #include <nuttx/config.h>
 
-#include <sys/mount.h>
-#include <stdbool.h>
-#include <stdio.h>
 #include <debug.h>
 #include <errno.h>
 
-#include <nuttx/board.h>
-#include <nuttx/drivers/ramdisk.h>
+#include <nuttx/usb/cdcacm.h>
+#include <nuttx/usb/usbmonitor.h>
 
+#include "mpfs_usb.h"
 #include "board_config.h"
-#include "mpfs_corepwm.h"
-#include "mpfs.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: mpfs_bringup
+ * Name: mpfs_board_usb_init
+ *
+ * Description:
+ *   Configure the USB driver.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
  ****************************************************************************/
 
-int mpfs_bringup(void)
+int mpfs_board_usb_init(void)
 {
   int ret = OK;
 
-#ifdef CONFIG_USBDEV
-  /* Configure USB device driver */
+  mpfs_usbinitialize();
 
-  ret = mpfs_board_usb_init();
-
-  if (ret < 0)
+#ifdef CONFIG_CDCACM
+  ret = cdcacm_initialize(0, NULL);
+  if (ret != OK)
     {
-      syslog(LOG_ERR, "Failed to initialize USB driver: %d\n", ret);
+      syslog(LOG_ERR,
+             "ERROR: Failed to register the CDC/ACM serial class: %d\n",
+             ret);
     }
 #endif
 
-#if defined(CONFIG_I2C_DRIVER)
-  /* Configure I2C peripheral interfaces */
+#ifdef CONFIG_USBMONITOR
+  /* Start the USB Monitor */
 
-  ret = mpfs_board_i2c_init();
-
-  if (ret < 0)
+  syslog(LOG_INFO, "Starting USB Monitor\n");
+  ret = usbmonitor_start();
+  if (ret != OK)
     {
-      syslog(LOG_ERR, "Failed to initialize I2C driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_FS_PROCFS
-  /* Mount the procfs file system */
-
-  ret = mount(NULL, "/proc", "procfs", 0, NULL);
-  if (ret < 0)
-    {
-      serr("ERROR: Failed to mount procfs at %s: %d\n", "/proc", ret);
-    }
-#endif
-
-#if defined(CONFIG_MPFS_SPI0) || defined(CONFIG_MPFS_SPI1)
-  /* Configure SPI peripheral interfaces */
-
-  ret = mpfs_board_spi_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize SPI driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MPFS_HAVE_COREPWM
-  /* Configure PWM peripheral interfaces */
-
-  ret = mpfs_pwm_setup();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to initialize CorePWM driver: %d\n", ret);
-    }
-#endif
-
-#ifdef CONFIG_MPFS_EMMCSD
-  ret = mpfs_board_emmcsd_init();
-
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "Failed to init eMMCSD driver: %d\n", ret);
+      syslog(LOG_ERR, "ERROR: Failed to start USB monitor: %d\n", ret);
+      return ret;
     }
 #endif
 

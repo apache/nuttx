@@ -62,6 +62,17 @@ int mpfs_bringup(void)
 {
   int ret = OK;
 
+#ifdef CONFIG_USBDEV
+  /* Configure USB device driver */
+
+  ret = mpfs_board_usb_init();
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize USB driver: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_I2C_DRIVER)
   /* Configure I2C peripheral interfaces */
 
