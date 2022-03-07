@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/risc-v/mpfs/m100pfsevp/src/board_config.h
+ * arch/risc-v/src/mpfs/mpfs_usb.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,23 +18,55 @@
  *
  ****************************************************************************/
 
-#ifndef __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H
-#define __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H
+#ifndef __ARCH_RISCV_SRC_MPFS_MPFS_USB_H
+#define __ARCH_RISCV_SRC_MPFS_MPFS_USB_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <sys/types.h>
+#include <stdbool.h>
 
-#define SDIO_SLOTNO 0
-#define SDIO_MINOR  0
+#include "chip.h"
 
-int mpfs_bringup(void);
-int mpfs_board_spi_init(void);
-int mpfs_board_i2c_init(void);
-int mpfs_pwm_setup(void);
-int mpfs_board_emmcsd_init(void);
-int mpfs_board_usb_init(void);
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
 
-#endif /* __BOARDS_RISCV_MPFS_M100PFSEVP_SRC_BOARD_CONFIG_H */
+#ifndef __ASSEMBLY__
+
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: mpfs_usbinitialize
+ *
+ * Description:
+ *   This is called in the board startup phase.  This prepares the software
+ *   ready for the later phase.
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void mpfs_usbinitialize(void);
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* __ARCH_RISCV_SRC_MPFS_MPFS_USB_H */
