@@ -227,6 +227,13 @@ ifneq ($(CONFIG_HOST_MACOS),y)
   LDSTARTGROUP ?= --start-group
   LDENDGROUP ?= --end-group
 endif
+
+# Additional rules for system call wrapper
+
+ifeq ($(CONFIG_SCHED_INSTRUMENTATION_SYSCALL),y)
+  EXTRALINKCMDS += @$(TOPDIR)/syscall/syscall_wraps.ldcmd
+endif
+
 LDFLAGS += $(addprefix -T,$(call CONVERT_PATH,$(ARCHSCRIPT)))
 
 # Determine which NuttX libraries will need to be linked in
@@ -293,7 +300,8 @@ nuttx-names.dat: nuttx-names.in
 # necessary for macOS.
 nuttx$(EXEEXT): libarch$(LIBEXT) board/libboard$(LIBEXT) $(HEADOBJ) $(LINKOBJS) $(HOSTOBJS) nuttx-names.dat
 	$(Q) echo "LD:  nuttx$(EXEEXT)"
-	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
+	$(Q) $(LD) -r $(LDLINKFLAGS) $(RELPATHS) $(EXTRA_LIBPATHS) $(EXTRALINKCMDS) \
+	     -o nuttx.rel $(REQUIREDOBJS) $(LDSTARTGROUP) $(RELLIBS) $(EXTRA_LIBS) $(LDENDGROUP)
 ifneq ($(CONFIG_HOST_MACOS),y)
 	$(Q) $(OBJCOPY) --redefine-syms=nuttx-names.dat nuttx.rel
 	$(Q) $(CC) $(CFLAGS) -Wl,-verbose 2>&1 | \
