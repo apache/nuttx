@@ -23,7 +23,7 @@ include chip/Bootloader.mk
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
-HEAD_ASRC += xtensa_int_handlers.S  xtensa_user_handler.S
+HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
 HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c
 
 # Common XTENSA files (arch/xtensa/src/common)
@@ -86,6 +86,10 @@ CHIP_CSRCS += esp32s2_tim.c
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += esp32s2_tim_lowerhalf.c
 endif
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += esp32s2_wdt_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32S2_FREERUN),y)
