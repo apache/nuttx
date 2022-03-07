@@ -135,8 +135,8 @@ ARM architecture:
 .. tip::
   There are hints on how to get the latest tool chains for most supported
   architectures in the Apache NuttX CI helper
-  `script <https://github.com/apache/incubator-nuttx-testing/blob/master/cibuild.sh>`_
-  and Docker `container <https://github.com/apache/incubator-nuttx-testing/blob/master/docker/linux/Dockerfile>`_
+  `script <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/cibuild.sh>`_
+  and Docker `container <https://github.com/apache/incubator-nuttx/tree/master/tools/ci/docker/linux/Dockerfile>`_
   
 .. todo::
   Required toolchain should be part of each arch documentation (see `relevant issue <https://github.com/apache/incubator-nuttx/issues/2409>`_).
