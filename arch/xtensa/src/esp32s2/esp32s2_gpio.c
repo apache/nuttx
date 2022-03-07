@@ -34,10 +34,12 @@
 #include <arch/irq.h>
 
 #include "xtensa.h"
-#include "hardware/esp32s2_iomux.h"
-#include "hardware/esp32s2_gpio.h"
-#include "esp32s2_cpuint.h"
 #include "esp32s2_gpio.h"
+#ifdef CONFIG_ESP32S2_GPIO_IRQ
+#include "esp32s2_irq.h"
+#endif
+#include "hardware/esp32s2_gpio.h"
+#include "hardware/esp32s2_iomux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -300,20 +302,16 @@ bool esp32s2_gpioread(int pin)
 #ifdef CONFIG_ESP32S2_GPIO_IRQ
 void esp32s2_gpioirqinitialize(void)
 {
-  /* Allocate a level-sensitive, priority 1 CPU interrupt */
+  /* Setup the GPIO interrupt. */
 
-  g_gpio_cpuint = esp32s2_alloc_levelint(1);
+  g_gpio_cpuint = esp32s2_setup_irq(ESP32S2_PERIPH_GPIO_INT_PRO,
+                                    1, ESP32S2_CPUINT_LEVEL);
   DEBUGASSERT(g_gpio_cpuint >= 0);
-
-  /* Attach the GPIO peripheral to the allocated CPU interrupt */
-
-  up_disable_irq(g_gpio_cpuint);
-  esp32s2_attach_peripheral(ESP32S2_PERI_GPIO_INT_PRO, g_gpio_cpuint);
 
   /* Attach and enable the interrupt handler */
 
-  DEBUGVERIFY(irq_attach(ESP32S2_PERI_GPIO_INT_PRO, gpio_interrupt, NULL));
-  up_enable_irq(g_gpio_cpuint);
+  DEBUGVERIFY(irq_attach(ESP32S2_IRQ_GPIO_INT_PRO, gpio_interrupt, NULL));
+  up_enable_irq(ESP32S2_IRQ_GPIO_INT_PRO);
 }
 #endif
 
@@ -340,7 +338,7 @@ void esp32s2_gpioirqenable(int irq, gpio_intrtype_t intrtype)
 
   /* Get the address of the GPIO PIN register for this pin */
 
-  up_disable_irq(g_gpio_cpuint);
+  up_disable_irq(ESP32S2_IRQ_GPIO_INT_PRO);
 
   regaddr = GPIO_REG(pin);
   regval  = getreg32(regaddr);
@@ -362,7 +360,7 @@ void esp32s2_gpioirqenable(int irq, gpio_intrtype_t intrtype)
   regval |= (intrtype << GPIO_PIN_INT_TYPE_S);
   putreg32(regval, regaddr);
 
-  up_enable_irq(g_gpio_cpuint);
+  up_enable_irq(ESP32S2_IRQ_GPIO_INT_PRO);
 }
 #endif
 
@@ -389,14 +387,14 @@ void esp32s2_gpioirqdisable(int irq)
 
   /* Get the address of the GPIO PIN register for this pin */
 
-  up_disable_irq(g_gpio_cpuint);
+  up_disable_irq(ESP32S2_IRQ_GPIO_INT_PRO);
 
   regaddr = GPIO_REG(pin);
   regval  = getreg32(regaddr);
   regval &= ~(GPIO_PIN_INT_ENA_M | GPIO_PIN_INT_TYPE_M);
   putreg32(regval, regaddr);
 
-  up_enable_irq(g_gpio_cpuint);
+  up_enable_irq(ESP32S2_IRQ_GPIO_INT_PRO);
 }
 #endif
 
