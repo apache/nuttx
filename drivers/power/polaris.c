@@ -752,13 +752,6 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   rx_int_state->wlc_rx_pp_done       =
       ((reg_value & WLC_RX_PP_DONE_INT_MASK) == false) ? false : true;
 
-  ret = fw_i2c_read(priv, WLC_RX_INTR_EN_REG, (uint8_t *)&reg_value, 4);
-  batinfo("[WLC] read WLC_RX_INTR_EN_REG is %x \n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_INTR_LATCH_REG, (uint8_t *)&reg_value, 4);
-  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %x \n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_STAT_REG, (uint8_t *)&reg_value, 4);
-  batinfo("[WLC] read WLC_RX_STAT_REG is %x \n", reg_value);
-
   /* CLR int register */
 
   batinfo("[WLC] start to CLR INTR states !!!\n");
