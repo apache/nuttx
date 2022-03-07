@@ -54,6 +54,10 @@
 #  include "esp32s2_rt_timer.h"
 #endif
 
+#ifdef CONFIG_WATCHDOG
+#  include "esp32s2_board_wdt.h"
+#endif
+
 #include "esp32s2-saola-1.h"
 
 /****************************************************************************
@@ -96,6 +100,16 @@ int esp32s2_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  /* Configure watchdog timer */
+
+  ret = board_wdt_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize watchdog timer: %d\n", ret);
     }
 #endif
 
