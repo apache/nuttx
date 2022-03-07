@@ -61,14 +61,13 @@ ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
   CMN_CSRCS += xtensa_hostfs.c
 endif
 
-# Required ESP32S2 files (arch/xtensa/src/lx7)
+# Required ESP32-S2 files (arch/xtensa/src/lx7)
 
-CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_cpuint.c
-CHIP_CSRCS += esp32s2_gpio.c esp32s2_intdecode.c esp32s2_irq.c esp32s2_region.c
-CHIP_CSRCS += esp32s2_timerisr.c esp32s2_user.c esp32s2_lowputc.c
-CHIP_CSRCS += esp32s2_systemreset.c
+CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_irq.c
+CHIP_CSRCS += esp32s2_gpio.c esp32s2_region.c esp32s2_user.c
+CHIP_CSRCS += esp32s2_timerisr.c esp32s2_lowputc.c esp32s2_systemreset.c
 
-# Configuration-dependent ESP32S2 files
+# Configuration-dependent ESP32-S2 files
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += esp32s2_idle.c
