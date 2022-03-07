@@ -1946,7 +1946,7 @@ errout_with_buf:
 #endif
 }
 
-static int roundf(float num)
+static int stm32_i2s_roundf(float num)
 {
   if (((int)(num + 0.5f)) > num)
     {
@@ -2209,8 +2209,8 @@ static uint32_t i2s_mckdivider(struct stm32_i2s_s *priv)
             {
               for (n = 2; n <= 256; ++n)
                 {
-                  napprox = roundf(priv->samplerate / 1000000.0f *
-                                   (8 * 32 * R * (2 * n + od)));
+                  napprox = stm32_i2s_roundf(priv->samplerate / 1000000.0f *
+                                             (8 * 32 * R * (2 * n + od)));
                   if ((napprox > 432) || (napprox < 50))
                     {
                       continue;
