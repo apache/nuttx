@@ -199,10 +199,6 @@ config ESP32S2_UART
 	bool
 	default n
 
-config ESP32S2_UART
-	bool
-	default n
-
 config ESP32S2_TIMER
 	bool
 	default n
