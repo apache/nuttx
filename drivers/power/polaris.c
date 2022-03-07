@@ -1141,7 +1141,6 @@ FAR struct battery_charger_dev_s *
 {
   FAR struct stwlc38_dev_s *priv;
   struct polaris_chip_info chip_info;
-  int status = 0;
   int ret;
 
   /* Initialize the STWLC38 device structure */
@@ -1198,15 +1197,8 @@ FAR struct battery_charger_dev_s *
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
 
-  ret = stwlc38_state(&priv->dev, &status);
-  if (ret == OK)
-    {
-      if (status)
-        {
-          work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
-                     DETECT_WORK_INIT_TIME);
-        }
-    }
+  work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
+             DETECT_WORK_INIT_TIME);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }

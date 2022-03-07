@@ -827,6 +827,7 @@ static void cw2218_worker(FAR void *arg)
   int ret;
   int capacity;
   b16_t cap;
+  b16_t current;
   b8_t batt_temp;
 
   ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
@@ -852,6 +853,16 @@ static void cw2218_worker(FAR void *arg)
     {
       priv->last_batt_temp = batt_temp;
       battery_gauge_changed(&priv->dev, BATTERY_TEMPERATURE_CHANGED);
+    }
+
+  ret =  cw2218_getcurrent(priv, &current);
+  if (ret < 0)
+    {
+      baterr("ERROR: CW2218 work get current failed, Error = %d\n", ret);
+    }
+  else
+    {
+      battery_gauge_changed(&priv->dev, BATTERY_CURRENT_CHANGED);
     }
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv,
@@ -913,7 +924,7 @@ static int cw2218_init(FAR struct cw2218_dev_s *priv)
     }
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv,
-             CW2218_WORK_POLL_TIME);
+             CW2218_WORK_INIT_TIME);
 
   return OK;
 }

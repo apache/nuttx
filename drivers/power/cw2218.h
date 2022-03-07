@@ -91,5 +91,6 @@
 #define CW2218_SLEEP_COUNTS             60        /* cw2218 sleep count value */
 
 #define CW2218_WORK_POLL_TIME           50000     /* work time 5s */
+#define CW2218_WORK_INIT_TIME           20000     /* work time 2s */
 
 #endif /* __DRIVERS_POWER_CW2218_H */
