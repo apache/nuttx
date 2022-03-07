@@ -33,6 +33,7 @@
 #include <nuttx/init.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <nuttx/symtab.h>
 #include <nuttx/syslog/syslog_rpmsg.h>
 
 #include "up_internal.h"
@@ -52,6 +53,46 @@ char **g_argv;
 static char g_logbuffer[4096];
 #endif
 
+#ifdef CONFIG_ALLSYMS
+extern struct symtab_s g_allsyms[];
+extern int             g_nallsyms;
+#endif
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: allsyms_relocate
+ *
+ * Description:
+ *   Simple relocate to redirect the address from symbol table.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ALLSYMS
+static void allsyms_relocate(void)
+{
+  uintptr_t offset;
+  int       i;
+
+  for (i = 0; i < g_nallsyms; i++)
+    {
+      if (strcmp("allsyms_relocate", g_allsyms[i].sym_name) == 0)
+        {
+          offset = (uintptr_t)allsyms_relocate -
+                   (uintptr_t)g_allsyms[i].sym_value;
+          for (i = 0; i < g_nallsyms; i++)
+            {
+              g_allsyms[i].sym_value =
+                (void *)((uintptr_t)g_allsyms[i].sym_value + offset);
+            }
+          break;
+        }
+    }
+}
+#endif
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -69,6 +110,10 @@ int main(int argc, char **argv, char **envp)
 {
   g_argc = argc;
   g_argv = argv;
+
+#ifdef CONFIG_ALLSYMS
+  allsyms_relocate();
+#endif
 
 #ifdef CONFIG_SYSLOG_RPMSG
   syslog_rpmsg_init_early(g_logbuffer, sizeof(g_logbuffer));
