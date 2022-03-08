@@ -38,15 +38,26 @@
 
 #include "xtensa.h"
 
+#include "esp32s3_irq.h"
+#ifdef CONFIG_SMP
+#include "esp32s3_smp.h"
+#endif
+#include "hardware/esp32s3_interrupt_core0.h"
+#ifdef CONFIG_SMP
+#include "hardware/esp32s3_interrupt_core1.h"
+#endif
 #include "hardware/esp32s3_soc.h"
 #include "hardware/esp32s3_system.h"
-#include "hardware/esp32s3_interrupt_core0.h"
-
-#include "esp32s3_irq.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
+
+/* Interrupt stack definitions for SMP */
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+#  define INTSTACK_ALLOC (CONFIG_SMP_NCPUS * INTSTACK_SIZE)
+#endif
 
 /* IRQ to CPU and CPU interrupts mapping:
  *
@@ -77,6 +88,9 @@
 /* Mapping Peripheral IDs to map register addresses. */
 
 #define CORE0_MAP_REGADDR(n)    (DR_REG_INTERRUPT_CORE0_BASE + ((n) << 2))
+#ifdef CONFIG_SMP
+#  define CORE1_MAP_REGADDR(n)  (DR_REG_INTERRUPT_CORE1_BASE + ((n) << 2))
+#endif
 
 /* CPU interrupts can be detached from any peripheral source by setting the
  * map register to an internal CPU interrupt (6, 7, 11, 15, 16, or 29).
@@ -100,7 +114,29 @@
  * CURRENT_REGS for portability.
  */
 
-volatile uint32_t *g_current_regs[1];
+/* For the case of architectures with multiple CPUs, then there must be one
+ * such value for each processor that can receive an interrupt.
+ */
+
+volatile uint32_t *g_current_regs[CONFIG_SMP_NCPUS];
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+/* In the SMP configuration, we will need custom interrupt stacks.
+ * These definitions provide the aligned stack allocations.
+ */
+
+static uint32_t g_intstackalloc[INTSTACK_ALLOC >> 2];
+
+/* These definitions provide the "top" of the push-down stacks. */
+
+uintptr_t g_cpu_intstack_top[CONFIG_SMP_NCPUS] =
+{
+  (uintptr_t)g_intstackalloc + INTSTACK_SIZE,
+#if CONFIG_SMP_NCPUS > 1
+  (uintptr_t)g_intstackalloc + (2 * INTSTACK_SIZE),
+#endif /* CONFIG_SMP_NCPUS > 1 */
+};
+#endif /* defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15 */
 
 /****************************************************************************
  * Private Data
@@ -109,6 +145,9 @@ volatile uint32_t *g_current_regs[1];
 /* Maps a CPU interrupt to the IRQ of the attached peripheral interrupt */
 
 static uint8_t g_cpu0_intmap[ESP32S3_NCPUINTS];
+#ifdef CONFIG_SMP
+static uint8_t g_cpu1_intmap[ESP32S3_NCPUINTS];
+#endif
 
 static volatile uint8_t g_irqmap[NR_IRQS];
 
@@ -116,13 +155,16 @@ static volatile uint8_t g_irqmap[NR_IRQS];
  * content.
  */
 
-static uint32_t g_intenable[1];
+static uint32_t g_intenable[CONFIG_SMP_NCPUS];
 
 /* Bitsets for free, unallocated CPU interrupts available to peripheral
  * devices.
  */
 
 static uint32_t g_cpu0_freeints = ESP32S3_CPUINT_PERIPHSET;
+#ifdef CONFIG_SMP
+static uint32_t g_cpu1_freeints = ESP32S3_CPUINT_PERIPHSET;
+#endif
 
 /* Bitsets for each interrupt priority 1-5 */
 
@@ -140,6 +182,32 @@ static const uint32_t g_priority[5] =
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: xtensa_attach_fromcpu1_interrupt
+ ****************************************************************************/
+
+#ifdef CONFIG_SMP
+static inline void xtensa_attach_fromcpu1_interrupt(void)
+{
+  int cpuint;
+
+  /* Connect all CPU peripheral source to allocated CPU interrupt */
+
+  cpuint = esp32s3_setup_irq(0, ESP32S3_PERIPH_INT_FROM_CPU1, 1,
+                             ESP32S3_CPUINT_LEVEL);
+  DEBUGASSERT(cpuint >= 0);
+
+  /* Attach the inter-CPU interrupt. */
+
+  irq_attach(ESP32S3_IRQ_INT_FROM_CPU1, (xcpt_t)esp32s3_fromcpu1_interrupt,
+             NULL);
+
+  /* Enable the inter-CPU interrupt. */
+
+  up_enable_irq(ESP32S3_IRQ_INT_FROM_CPU1);
+}
+#endif
+
+/****************************************************************************
  * Name: esp32s3_intinfo
  *
  * Description:
@@ -151,8 +219,20 @@ static const uint32_t g_priority[5] =
 static void esp32s3_intinfo(int cpu, int periphid,
                             uintptr_t *regaddr, uint8_t **intmap)
 {
-  *regaddr = CORE0_MAP_REGADDR(periphid);
-  *intmap  = g_cpu0_intmap;
+#ifdef CONFIG_SMP
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+
+  if (cpu != 0)
+    {
+      *regaddr = CORE1_MAP_REGADDR(periphid);
+      *intmap  = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      *regaddr = CORE0_MAP_REGADDR(periphid);
+      *intmap  = g_cpu0_intmap;
+    }
 }
 
 /****************************************************************************
@@ -187,7 +267,16 @@ static int esp32s3_getcpuint(uint32_t intmask)
    */
 
   cpu = up_cpu_index();
-  freeints = &g_cpu0_freeints;
+#ifdef CONFIG_SMP
+  if (cpu != 0)
+    {
+      freeints = &g_cpu1_freeints;
+    }
+  else
+#endif
+    {
+      freeints = &g_cpu0_freeints;
+    }
 
   intset = *freeints & intmask;
   if (intset != 0)
@@ -308,7 +397,16 @@ static void esp32s3_free_cpuint(int cpuint)
 
   bitmask  = 1ul << cpuint;
 
-  freeints = &g_cpu0_freeints;
+#ifdef CONFIG_SMP
+  if (up_cpu_index() != 0)
+    {
+      freeints = &g_cpu1_freeints;
+    }
+  else
+#endif
+    {
+      freeints = &g_cpu0_freeints;
+    }
 
   DEBUGASSERT((*freeints & bitmask) == 0);
   *freeints |= bitmask;
@@ -341,6 +439,12 @@ void up_irqinitialize(void)
   /* Initialize CPU interrupts */
 
   esp32s3_cpuint_initialize();
+
+#ifdef CONFIG_SMP
+  /* Attach and enable the inter-CPU interrupt */
+
+  xtensa_attach_fromcpu1_interrupt();
+#endif
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts.  Also clears PS.EXCM */
@@ -378,13 +482,23 @@ void up_disable_irq(int irq)
     }
 
   DEBUGASSERT(cpuint >= 0 && cpuint <= ESP32S3_CPUINT_MAX);
-  DEBUGASSERT(cpu == 0);
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
   if (irq < XTENSA_NIRQ_INTERNAL)
     {
       /* This is an internal CPU interrupt, it cannot be disabled using
        * the Interrupt Matrix.
        */
+
+#ifdef CONFIG_SMP
+      int me = up_cpu_index();
+      if (me != cpu)
+        {
+          /* It was the other CPU that enabled this interrupt. */
+
+          return;
+        }
+#endif
 
       xtensa_disable_cpuint(&g_intenable[cpu], 1ul << cpuint);
     }
@@ -444,7 +558,7 @@ void up_enable_irq(int irq)
 
       int cpu = IRQ_GETCPU(g_irqmap[irq]);
 
-      DEBUGASSERT(cpu == 0);
+      DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
 
       /* For peripheral interrupts, attach the interrupt to the peripheral;
        * the CPU interrupt was already enabled when allocated.
@@ -462,6 +576,36 @@ void up_enable_irq(int irq)
       putreg32(cpuint, regaddr);
     }
 }
+
+/****************************************************************************
+ * Name: xtensa_intstack_top
+ *
+ * Description:
+ *   Return a pointer to the top of the correct interrupt stack for the
+ *   given CPU.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+uintptr_t xtensa_intstack_top(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()];
+}
+
+/****************************************************************************
+ * Name: xtensa_intstack_alloc
+ *
+ * Description:
+ *   Return a pointer to the "alloc" the correct interrupt stack allocation
+ *   for the current CPU.
+ *
+ ****************************************************************************/
+
+uintptr_t xtensa_intstack_alloc(void)
+{
+  return g_cpu_intstack_top[up_cpu_index()] - INTSTACK_SIZE;
+}
+#endif
 
 /****************************************************************************
  * Name:  esp32s3_cpuint_initialize
@@ -482,7 +626,17 @@ int esp32s3_cpuint_initialize(void)
 {
   uintptr_t regaddr;
   uint8_t *intmap;
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
   int i;
+
+#ifdef CONFIG_SMP
+  /* Which CPU are we initializing */
+
+  cpu = up_cpu_index();
+  DEBUGASSERT(cpu >= 0 && cpu < CONFIG_SMP_NCPUS);
+#endif
 
   /* Disable all CPU interrupts on this CPU */
 
@@ -492,14 +646,32 @@ int esp32s3_cpuint_initialize(void)
 
   for (i = 0; i < ESP32S3_NPERIPHERALS; i++)
     {
-      regaddr = CORE0_MAP_REGADDR(i);
+#ifdef CONFIG_SMP
+      if (cpu != 0)
+        {
+          regaddr = CORE1_MAP_REGADDR(i);
+        }
+      else
+#endif
+        {
+          regaddr = CORE0_MAP_REGADDR(i);
+        }
 
       putreg32(NO_CPUINT, regaddr);
     }
 
   /* Initialize CPU interrupt-to-IRQ mapping table */
 
-  intmap = g_cpu0_intmap;
+#ifdef CONFIG_SMP
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
 
   /* Indicate that no peripheral interrupts are assigned to CPU interrupts */
 
@@ -665,12 +837,27 @@ uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs)
   uint8_t *intmap;
   uint32_t mask;
   int bit;
+#ifdef CONFIG_SMP
+  int cpu;
+#endif
 
 #ifdef CONFIG_ARCH_LEDS_CPU_ACTIVITY
   board_autoled_on(LED_CPU);
 #endif
 
-  intmap = g_cpu0_intmap;
+#ifdef CONFIG_SMP
+  /* Select PRO or APP CPU interrupt mapping table */
+
+  cpu = up_cpu_index();
+  if (cpu != 0)
+    {
+      intmap = g_cpu1_intmap;
+    }
+  else
+#endif
+    {
+      intmap = g_cpu0_intmap;
+    }
 
   /* Skip over zero bits, eight at a time */
 
