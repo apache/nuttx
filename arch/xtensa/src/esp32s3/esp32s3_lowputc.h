@@ -26,23 +26,23 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <debug.h>
+#include <errno.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <debug.h>
+#include <nuttx/spinlock.h>
 
 #include "chip.h"
-
+#include "esp32s3_irq.h"
 #include "hardware/esp32s3_uart.h"
 #include "hardware/esp32s3_gpio_sigmap.h"
-
-#include "esp32s3_irq.h"
 
 /****************************************************************************
  * Public Types
@@ -116,6 +116,7 @@ struct esp32s3_uart_s
   uint8_t  ctssig;          /* CTS signal */
   bool     oflow;           /* Output flow control (CTS) enabled */
 #endif
+  spinlock_t lock;          /* Device-specific lock */
 };
 
 extern struct esp32s3_uart_s g_uart0_config;
@@ -424,7 +425,7 @@ void esp32s3_lowputc_rst_rxfifo(const struct esp32s3_uart_s *priv);
  *
  ****************************************************************************/
 
-void esp32s3_lowputc_disable_all_uart_int(const struct esp32s3_uart_s *priv,
+void esp32s3_lowputc_disable_all_uart_int(struct esp32s3_uart_s *priv,
                                           uint32_t *current_status);
 
 /****************************************************************************
