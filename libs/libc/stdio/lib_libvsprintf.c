@@ -124,7 +124,7 @@
  * Private Types
  ****************************************************************************/
 
-struct arg
+struct arg_s
 {
   unsigned char type;
   union
@@ -150,7 +150,7 @@ static const char g_nullstring[] = "(null)";
  ****************************************************************************/
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
-                             FAR struct arg *arglist, int numargs,
+                             FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap);
 
 /****************************************************************************
@@ -175,7 +175,7 @@ static int sprintf_internal(FAR struct lib_outstream_s *stream,
 #endif
 
 static int vsprintf_internal(FAR struct lib_outstream_s *stream,
-                             FAR struct arg *arglist, int numargs,
+                             FAR struct arg_s *arglist, int numargs,
                              FAR const IPTR char *fmt, va_list ap)
 {
   unsigned char c; /* Holds a char from the format string */
@@ -203,9 +203,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-
   int argnumber;
-
 #endif
 
   for (; ; )
@@ -297,8 +295,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                     {
                       int index;
 
-                      flags    &= ~FL_ASTERISK;
-
+                      flags &= ~FL_ASTERISK;
                       if ((flags & FL_PREC) == 0)
                         {
                           index = width;
@@ -559,7 +556,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
         }
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-
       if ((flags & FL_ARGNUMBER) != 0)
         {
           if (argnumber > 0 && argnumber <= numargs)
@@ -612,7 +608,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
         {
           continue; /* We do only parsing */
         }
-
 #endif
 
 #ifdef CONFIG_LIBC_FLOATINGPOINT
@@ -964,7 +959,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 #else
           buf[0] = va_arg(ap, int);
 #endif
-          pnt = (FAR char *) buf;
+          pnt = (FAR char *)buf;
           size = 1;
           goto str_lpad;
 
@@ -1319,7 +1314,6 @@ tail:
     }
 
 ret:
-
   return total_len;
 }
 
@@ -1331,9 +1325,9 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
                  FAR const IPTR char *fmt, va_list ap)
 {
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-  int i;
-  struct arg arglist[NL_ARGMAX];
+  struct arg_s arglist[NL_ARGMAX];
   int numargs;
+  int i;
 
   /* We do 2 passes of parsing and fill the arglist between the passes. */
 
@@ -1348,6 +1342,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
           arglist[i].value.ull = va_arg(ap, unsigned long long);
           break;
 #endif
+
         case TYPE_LONG:
           arglist[i].value.ul = va_arg(ap, unsigned long);
           break;
@@ -1367,10 +1362,7 @@ int lib_vsprintf(FAR struct lib_outstream_s *stream,
     }
 
   return vsprintf_internal(stream, arglist, numargs, fmt, ap);
-
 #else
-
   return vsprintf_internal(stream, NULL, 0, fmt, ap);
-
 #endif
 }
