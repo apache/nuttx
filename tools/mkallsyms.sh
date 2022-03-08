@@ -21,7 +21,7 @@
 
 export LC_ALL=C
 
-usage="Usage: $0 <ELFBIN> <CROSSDEV>"
+usage="Usage: $0 [noconst] <ELFBIN> <CROSSDEV>"
 
 # Get the symbol table
 
@@ -32,6 +32,12 @@ usage="Usage: $0 <ELFBIN> <CROSSDEV>"
 # undefined symbols are declared as void* types.  If the toolchain does
 # any kind of checking for function vs. data objects, then this could
 # failed
+
+CONST=const
+if [ $1 == 'noconst' ]; then
+  CONST=
+  shift
+fi
 
 nm="${2}nm"
 filt="${2}c++filt"
@@ -48,24 +54,24 @@ echo "#if defined(__GNUC__) && !defined(__clang__)"
 echo "#  pragma GCC diagnostic ignored \"-Wbuiltin-declaration-mismatch\""
 echo "#endif"
 echo ""
-echo "const int             g_nallsyms = ${count} + 2;"
-echo "const struct symtab_s g_allsyms[${count} + 2] = "
+echo "${CONST} int             g_nallsyms = ${count} + 2;"
+echo "${CONST} struct symtab_s g_allsyms[${count} + 2] = "
 echo "{"
 
 # Add start address boundary
 
-echo "  { \"Unknown\", (FAR const void *)0x00000000 },"
+echo "  { \"Unknown\", (FAR ${CONST} void *)0x00000000 },"
 
 if [ -f "${1}" ];then
   ${nm} -n ${1} | grep -E " [T|t] "  | uniq | \
   while read addr type name
   do
-    echo "  { \"`${filt} -p $name`\", (FAR const void *)0x$addr },"
+    echo "  { \"`${filt} -p $name`\", (FAR ${CONST} void *)0x$addr },"
   done
 fi
 
 # Add end address boundary
 
-echo "  { \"Unknown\", (FAR const void *)0xffffffff },"
+echo "  { \"Unknown\", (FAR ${CONST} void *)0xffffffff },"
 
 echo "};"
