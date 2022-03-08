@@ -1160,7 +1160,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
                           if (c == 'S')
                             {
-                              sprintf_internal(stream, "+%#x/%#x",
+                              sprintf_internal(stream, "+%#jx/%#zx",
                                                addr - symbol->sym_value,
                                                symbolsize);
                             }
