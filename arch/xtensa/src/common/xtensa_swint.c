@@ -131,12 +131,12 @@ int xtensa_swint(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
+          DEBUGASSERT(regs[REG_A3] != 0);
+          CURRENT_REGS = (uint32_t *)regs[REG_A3];
 #if XCHAL_CP_NUM > 0
           cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
           xtensa_coproc_restorestate((struct xtensa_cpstate_s *)cpstate);
 #endif
-          DEBUGASSERT(regs[REG_A3] != 0);
-          CURRENT_REGS = (uint32_t *)regs[REG_A3];
         }
 
         break;
