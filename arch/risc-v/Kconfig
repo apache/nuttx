@@ -132,13 +132,11 @@ endchoice
 config ARCH_RV32
 	bool
 	default n
-	select ARCH_HAVE_SETJMP
 
 config ARCH_RV64
 	bool
 	default n
 	select LIBC_ARCH_ELF_64BIT if LIBC_ARCH_ELF
-	select ARCH_HAVE_SETJMP
 
 config ARCH_RV_ISA_M
 	bool
