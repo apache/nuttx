@@ -93,47 +93,83 @@
  * Private Data
  ****************************************************************************/
 
-/* Indexed by NUCLEO_SPI_BUSx_CSx */
-
-static const uint32_t g_spigpio[] =
+#if defined(CONFIG_STM32L4_SPI1)
+static const uint32_t g_spi1gpio[] =
 {
 #if defined(GPIO_SPI1_CS0)
   GPIO_SPI1_CS0,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS1)
   GPIO_SPI1_CS1,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS2)
   GPIO_SPI1_CS2,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI1_CS3)
-  GPIO_SPI1_CS3,
+  GPIO_SPI1_CS3
+#else
+  0
 #endif
+};
+#endif
+
+#if defined(CONFIG_STM32L4_SPI2)
+static const uint32_t g_spi2gpio[] =
+{
 #if defined(GPIO_SPI2_CS0)
   GPIO_SPI2_CS0,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI2_CS1)
   GPIO_SPI2_CS1,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI2_CS2)
   GPIO_SPI2_CS2,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI2_CS3)
-  GPIO_SPI2_CS3,
+  GPIO_SPI2_CS3
+#else
+  0
 #endif
+};
+#endif
+
+#if defined(CONFIG_STM32L4_SPI3)
+static const uint32_t g_spi3gpio[] =
+{
 #if defined(GPIO_SPI3_CS0)
   GPIO_SPI3_CS0,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI3_CS1)
   GPIO_SPI3_CS1,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI3_CS2)
   GPIO_SPI3_CS2,
+#else
+  0,
 #endif
 #if defined(GPIO_SPI3_CS3)
-  GPIO_SPI3_CS3,
+  GPIO_SPI3_CS3
+#else
+  0
 #endif
 };
+#endif
 
 #if defined(CONFIG_NUCLEO_SPI_TEST)
 #  if defined(CONFIG_STM32L4_SPI1)
@@ -161,18 +197,41 @@ struct spi_dev_s *spi3;
 
 void weak_function stm32_spidev_initialize(void)
 {
-  int i;
-
   /* Configure SPI CS GPIO for output */
 
-  for (i = 0; i < ARRAYSIZE(g_spigpio); i++)
+#if defined(CONFIG_STM32L4_SPI1)
+  for (int i = 0; i < ARRAYSIZE(g_spi1gpio); i++)
     {
-      stm32l4_configgpio(g_spigpio[i]);
+      if (g_spi1gpio[i] != 0)
+        {
+          stm32l4_configgpio(g_spi1gpio[i]);
+        }
     }
+#endif
+
+#if defined(CONFIG_STM32L4_SPI2)
+  for (int i = 0; i < ARRAYSIZE(g_spi2gpio); i++)
+    {
+      if (g_spi2gpio[i] != 0)
+        {
+          stm32l4_configgpio(g_spi2gpio[i]);
+        }
+    }
+#endif
+
+#if defined(CONFIG_STM32L4_SPI3)
+  for (int i = 0; i < ARRAYSIZE(g_spi3gpio); i++)
+    {
+      if (g_spi3gpio[i] != 0)
+        {
+          stm32l4_configgpio(g_spi3gpio[i]);
+        }
+    }
+#endif
 }
 
 /****************************************************************************
- * Name:  stm32_spi1/2/3/4/5select and stm32_spi1/2/3/4/5status
+ * Name:  stm32_spi1/2/3select and stm32_spi1/2/3status
  *
  * Description:
  *   The external functions, stm32_spi1/2/3select and stm32_spi1/2/3status
@@ -201,9 +260,15 @@ void weak_function stm32_spidev_initialize(void)
 void stm32_spi1select(FAR struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
+  uint32_t index = SPIDEVID_INDEX(devid);
+
   spiinfo("devid: %d CS: %s\n",
           (int)devid, selected ? "assert" : "de-assert");
-  stm32l4_gpiowrite(g_spigpio[devid], !selected);
+
+  if (g_spi1gpio[index] != 0)
+    {
+      stm32l4_gpiowrite(g_spi1gpio[index], !selected);
+    }
 }
 
 uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -216,9 +281,15 @@ uint8_t stm32_spi1status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi2select(FAR struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
+  uint32_t index = SPIDEVID_INDEX(devid);
+
   spiinfo("devid: %d CS: %s\n",
-         (int)devid, selected ? "assert" : "de-assert");
-  stm32l4_gpiowrite(g_spigpio[devid], !selected);
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (g_spi2gpio[index] != 0)
+    {
+      stm32l4_gpiowrite(g_spi2gpio[index], !selected);
+    }
 }
 
 uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -231,9 +302,15 @@ uint8_t stm32_spi2status(FAR struct spi_dev_s *dev, uint32_t devid)
 void stm32_spi3select(FAR struct spi_dev_s *dev,
                       uint32_t devid, bool selected)
 {
+  uint32_t index = SPIDEVID_INDEX(devid);
+
   spiinfo("devid: %d CS: %s\n",
-         (int)devid, selected ? "assert" : "de-assert");
-  stm32l4_gpiowrite(g_spigpio[devid], !selected);
+          (int)devid, selected ? "assert" : "de-assert");
+
+  if (g_spi3gpio[index] != 0)
+    {
+      stm32l4_gpiowrite(g_spi3gpio[index], !selected);
+    }
 }
 
 uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
@@ -243,7 +320,7 @@ uint8_t stm32_spi3status(FAR struct spi_dev_s *dev, uint32_t devid)
 #endif
 
 /****************************************************************************
- * Name: stm32_spi1cmddata
+ * Name: stm32_spi1/2/3cmddata
  *
  * Description:
  *   Set or clear the SH1101A A0 or SD1306 D/C n bit to select data (true)
