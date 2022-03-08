@@ -329,7 +329,7 @@ void mac802154_createdatareq(FAR struct ieee802154_privmac_s *priv,
    * progession.
    */
 
-  memcpy(&txdesc->destaddr, &coordaddr, sizeof(struct ieee802154_addr_s));
+  memcpy(&txdesc->destaddr, coordaddr, sizeof(struct ieee802154_addr_s));
 
   /* Save a reference of the tx descriptor */
 
