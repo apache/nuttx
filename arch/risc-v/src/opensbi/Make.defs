@@ -32,10 +32,10 @@ OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_expected_trap.S
 OPENSBI_ASRCS += opensbi/opensbi-3rdparty/lib/sbi/sbi_hfence.S
 
 OPENSBI_UNPACK  = opensbi-3rdparty
-OPENSBI_COMMIT  = 5d025eb2353550eadbd2fa9b8083a92fe9b07bd9
+OPENSBI_COMMIT  = 4998a712b2ab504eff306110879ee05af6050177
 OPENSBI_URL     = https://github.com/riscv-software-src/opensbi/tarball
 OPENSBI_TARBALL = opensbi.tar.gz
-OPENSBI_DIR     = riscv-software-src-opensbi-5d025eb
+OPENSBI_DIR     = riscv-software-src-opensbi-4998a71
 
 $(OPENSBI_TARBALL):
 	$(Q) echo "Downloading: OpenSBI"
