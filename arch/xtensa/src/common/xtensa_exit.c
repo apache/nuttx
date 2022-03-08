@@ -143,12 +143,6 @@ void up_exit(int status)
 
   nxsched_resume_scheduler(tcb);
 
-#if XCHAL_CP_NUM > 0
-  /* Set up the co-processor state for the newly started thread. */
-
-  xtensa_coproc_restorestate(&tcb->xcp.cpstate);
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
   /* Make sure that the address environment for the previously running
    * task is closed down gracefully (data caches dump, MMU flushed) and
@@ -163,7 +157,7 @@ void up_exit(int status)
 
   xtensa_context_restore(tcb->xcp.regs);
 
-  /* xtensa_full_context_restore() should not return but could if the
+  /* xtensa_context_restore() should not return but could if the
    * software interrupts are disabled.
    */
 
