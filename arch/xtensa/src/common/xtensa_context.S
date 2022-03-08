@@ -277,96 +277,6 @@ xtensa_context_save:
 #ifndef __XTENSA_CALL0_ABI__
 
 /****************************************************************************
- * Name: _xtensa_save_hook:
- *
- * Input State:
- *   True return value has already been saved
- *   a0 = The return value into xtensa_context_save()
- *   a2 = The address of the register state structure
- *
- * Return state:
- *   a0, a3 modified.
- *   Other values as on entry
- *   Returned value is in a3 (non-stanadard)
- *
- ****************************************************************************/
-
-	.type	_xtensa_save_hook, @function
-
-	.align	4
-	.literal_position
-	.align	4
-
-_xtensa_save_hook:
-
-	/* Save the return value of 1 that will be used when returning from a
-	 * context switch.  NOTE that the returned value from this function is
-	 * expected in a3 (not the usual a2). This also frees up a3 for a use
-	 * as a scratch register.
-	 */
-
-	movi	a3,  1							/* Set saved a3 to 1 */
-	s32i	a3,  a2, (4 * REG_A3)
-
-	/* Save the rest of the processor state.
-	 *
-	 * REVISIT: We could save a lot here.  It should not be necessary to
-	 * preserve all of these registers.  The ABI permits volatile, callee-
-	 * saved, registers to be clobbered on function calls.  We save the
-	 * whole tamale here mostly for debug purposes.
-	 *
-	 * NOTE that a3 was saved above.  The true a0 return value was saved
-	 * in xtensa_context_save.  The a0 value saved below is the return into
-	 * xtensa_context_save.
-	 */
-
-	rsr		a3,  PS							/* Save callee's PS */
-	s32i	a3,  a2, (4 * REG_PS)
-	s32i	a0,  a2, (4 * REG_PC)			/* Save Return address as PC */
-
-	s32i	sp,  a2, (4 * REG_A1)			/* Save callee's SP */
-	s32i	a2,  a2, (4 * REG_A2)
-	s32i	a4,  a2, (4 * REG_A4)			/* Save remaining registers */
-	s32i	a5,  a2, (4 * REG_A5)
-	s32i	a6,  a2, (4 * REG_A6)
-	s32i	a7,  a2, (4 * REG_A7)
-	s32i	a8,  a2, (4 * REG_A8)
-	s32i	a9,  a2, (4 * REG_A9)
-	s32i	a10, a2, (4 * REG_A10)
-	s32i	a11, a2, (4 * REG_A11)
-
-	/* Call0 ABI callee-saved regs a12-15 */
-
-	s32i	a12, a2, (4 * REG_A12)
-	s32i	a13, a2, (4 * REG_A13)
-	s32i	a14, a2, (4 * REG_A14)
-	s32i	a15, a2, (4 * REG_A15)
-
-	rsr		a3, SAR
-	s32i	a3, a2, (4 * REG_SAR)
-
-#if XCHAL_HAVE_S32C1I != 0
-	rsr		a3, SCOMPARE1
-	s32i	a3, a2, (4 * REG_SCOMPARE1)
-#endif
-
-#if XCHAL_HAVE_LOOPS != 0
-	rsr		a3, LBEG
-	s32i	a3, a2, (4 * REG_LBEG)
-	rsr		a3, LEND
-	s32i	a3, a2, (4 * REG_LEND)
-	rsr		a3, LCOUNT
-	s32i	a3, a2, (4 * REG_LCOUNT)
-#endif
-
-	/* NOTE that the returned value is through a3 */
-
-	movi	a3, 0							/* Return zero, no context switch */
-	ret
-
-	.size	_xtensa_save_hook, . - _xtensa_save_hook
-
-/****************************************************************************
  * Name: xtensa_context_save:
  *
  * Description:
@@ -396,25 +306,12 @@ _xtensa_save_hook:
 xtensa_context_save:
 	ENTRY(16)
 
-	/* Save the true return address in the register save structure (a0). */
+	mov  a3, a2
+	movi a2, SYS_save_context
+	movi a4, XCHAL_SWINT_CALL
+	wsr  a4, intset
+	rsync
 
-	s32i	a0, a2, (4 * REG_A0)		/* Save true return address (a0) */
-
-	/* Then perform the actual state save in _xtensa_save_hook.  The saved
-	 * EPC will be set to the return from this function then we will do the
-	 * RET(16) window fix-up.
-	 */
-
-	call0	_xtensa_save_hook			/* Save full register state */
-
-	/* a0 and a2 will be automatically restored in the context switch case
-	 * with  a3=1.  In the non-context switch return with a2=0, a2 will still
-	 * be valid, but we have to restore	 a0 ourself.  The following should
-	 * work in either case.
-	 */
-
-	l32i	a0, a2, (4 * REG_A0)		/* Recover the true return address (a0) */
-	mov		a2, a3						/* Move a3 to the correct register for return */
 	RET(16)
 
 	.size	xtensa_context_save, . - xtensa_context_save
