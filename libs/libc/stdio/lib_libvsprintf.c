@@ -488,60 +488,6 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
 
       if (c == 'p')
         {
-          unsigned char sub_c = fmt_char(fmt);
-
-          switch (sub_c)
-            {
-              case 'V':
-                {
-                  FAR struct va_format *vaf = va_arg(ap, void *);
-#ifdef va_copy
-                  va_list copy;
-
-                  va_copy(copy, *vaf->va);
-                  vsprintf_internal(stream, NULL, 0, vaf->fmt, copy);
-                  va_end(copy);
-#else
-                  vsprintf_internal(stream, NULL, 0, vaf->fmt, *vaf->va);
-#endif
-                  continue;
-                }
-#ifdef CONFIG_ALLSYMS
-
-              case 'S':
-              case 's':
-                {
-                  FAR const struct symtab_s *symbol;
-                  FAR void *addr = va_arg(ap, FAR void *);
-                  size_t symbolsize;
-
-                  symbol = allsyms_findbyvalue(addr, &symbolsize);
-                  if (symbol)
-                    {
-                      pnt = symbol->sym_name;
-                      while (*pnt)
-                        {
-                          putc(*pnt++, stream);
-                        }
-
-                      if (sub_c == 'S')
-                        {
-                          sprintf_internal(stream, "+%#x/%#x",
-                                           addr - symbol->sym_value,
-                                           symbolsize);
-                        }
-
-                      continue;
-                    }
-                }
-#endif
-
-              default:
-                {
-                  fmt_ungetc(fmt);
-                }
-            }
-
           /* Determine size of pointer and set flags accordingly */
 
           flags &= ~(FL_LONG | FL_REPD_TYPE);
@@ -1177,6 +1123,60 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
               break;
 
             case 'p':
+              c = fmt_char(fmt);
+              switch (c)
+                {
+                  case 'V':
+                    {
+                      FAR struct va_format *vaf = (FAR void *)(uintptr_t)x;
+#ifdef va_copy
+                      va_list copy;
+
+                      va_copy(copy, *vaf->va);
+                      lib_vsprintf(stream, vaf->fmt, copy);
+                      va_end(copy);
+#else
+                      lib_vsprintf(stream, vaf->fmt, *vaf->va);
+#endif
+                      continue;
+                    }
+
+#ifdef CONFIG_ALLSYMS
+                  case 'S':
+                  case 's':
+                    {
+                      FAR const struct symtab_s *symbol;
+                      FAR void *addr = (FAR void *)(uintptr_t)x;
+                      size_t symbolsize;
+
+                      symbol = allsyms_findbyvalue(addr, &symbolsize);
+                      if (symbol != NULL)
+                        {
+                          pnt = symbol->sym_name;
+                          while (*pnt != '\0')
+                            {
+                              putc(*pnt++, stream);
+                            }
+
+                          if (c == 'S')
+                            {
+                              sprintf_internal(stream, "+%#x/%#x",
+                                               addr - symbol->sym_value,
+                                               symbolsize);
+                            }
+
+                          continue;
+                        }
+
+                      break;
+                    }
+#endif
+
+                  default:
+                    fmt_ungetc(fmt);
+                    break;
+                }
+
               flags |= FL_ALT;
 
               /* no break */
