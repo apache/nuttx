@@ -2913,19 +2913,22 @@ static void mpfs_ep0_ctrlread(struct mpfs_usbdev_s *priv)
 static void mpfs_ep_rx_interrupt(struct mpfs_usbdev_s *priv, int epno)
 {
   struct mpfs_ep_s *privep;
+#ifdef CONFIG_HAVE_USBTRACE
   uint16_t reg;
+#endif
   uint16_t count;
 
   privep = &priv->eplist[epno];
 
   mpfs_putreg8(epno, MPFS_USB_INDEX);
 
-  reg = getreg16(MPFS_USB_ENDPOINT(epno) + MPFS_USB_ENDPOINT_RX_CSR_OFFSET);
-
   count = getreg16(MPFS_USB_ENDPOINT(epno) +
                    MPFS_USB_ENDPOINT_RX_COUNT_OFFSET);
 
+#ifdef CONFIG_HAVE_USBTRACE
+  reg = getreg16(MPFS_USB_ENDPOINT(epno) + MPFS_USB_ENDPOINT_RX_CSR_OFFSET);
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP_RX_CSR), reg);
+#endif
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP_RX_COUNT), count);
 
   if (privep->epstate == USB_EPSTATE_IDLE)
