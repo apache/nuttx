@@ -148,7 +148,7 @@ int stm32_w25initialize(int minor)
       const char *partstring = CONFIG_STM32F103MINIMUM_FLASH_PART_LIST;
       const char *ptr;
       FAR struct mtd_dev_s *mtd_part;
-      char  partref[4];
+      char  partref[16];
 
       /* Now create a partition on the FLASH device */
 
@@ -205,7 +205,7 @@ int stm32_w25initialize(int minor)
                */
 
 #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-              sprintf(partref, "p%d", partno);
+              snprintf(partref, sizeof(partref), "p%d", partno);
               smart_initialize(CONFIG_STM32F103MINIMUM_FLASH_MINOR,
                                mtd_part, partref);
 #endif

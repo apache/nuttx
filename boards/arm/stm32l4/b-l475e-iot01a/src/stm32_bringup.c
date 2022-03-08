@@ -125,7 +125,7 @@ int stm32l4_bringup(void)
           FAR struct mtd_geometry_s geo;
           const char *ptr = CONFIG_B_L475E_IOT01A_MTD_PART_LIST;
           FAR struct mtd_dev_s *mtd_part;
-          char  partref[4];
+          char  partref[16];
 
           /* Now create a partition on the FLASH device */
 
@@ -182,7 +182,7 @@ int stm32l4_bringup(void)
                * the MTD device
                */
 
-              sprintf(partref, "p%d", partno);
+              snprintf(partref, sizeof(partref), "p%d", partno);
               smart_initialize(CONFIG_B_L475E_IOT01A_MTD_FLASH_MINOR,
                               mtd_part, partref);
 #endif
