@@ -18,16 +18,30 @@
 #
 ############################################################################
 
-#if __riscv_xlen == 64
-#  define SZREG	8
+#include <nuttx/config.h>
+
+#ifdef CONFIG_ARCH_RV64
+#  define SZREG	 8
 #  define REG_S sd
 #  define REG_L ld
-#elif __riscv_xlen == 32
-#  define SZREG	4
+#elif defined(CONFIG_ARCH_RV32)
+#  define SZREG	 4
 #  define REG_S sw
 #  define REG_L lw
-#else
-#  error __riscv_xlen must equal 32 or 64
+#endif
+
+#ifdef CONFIG_ARCH_QPFPU
+#  define SZFREG  16
+#  define FREG_S fsq
+#  define FREG_L flq
+#elif defined(CONFIG_ARCH_DPFPU)
+#  define SZFREG   8
+#  define FREG_S fsd
+#  define FREG_L fld
+#elif defined(CONFIG_ARCH_FPU)
+#  define SZFREG   4
+#  define FREG_S fsw
+#  define FREG_L flw
 #endif
 
 .section .text
@@ -35,21 +49,37 @@
 .type   setjmp, @function
 
 setjmp:
-	REG_S ra,  0*SZREG(a0)
-	REG_S s0,  1*SZREG(a0)
-	REG_S s1,  2*SZREG(a0)
+	REG_S ra,   0*SZREG(a0)
+	REG_S s0,   1*SZREG(a0)
+	REG_S s1,   2*SZREG(a0)
+	REG_S s2,   3*SZREG(a0)
+	REG_S s3,   4*SZREG(a0)
+	REG_S s4,   5*SZREG(a0)
+	REG_S s5,   6*SZREG(a0)
+	REG_S s6,   7*SZREG(a0)
+	REG_S s7,   8*SZREG(a0)
+	REG_S s8,   9*SZREG(a0)
+	REG_S s9,  10*SZREG(a0)
+	REG_S s10, 11*SZREG(a0)
+	REG_S s11, 12*SZREG(a0)
+	REG_S sp,  13*SZREG(a0)
 
-	REG_S s2,  3*SZREG(a0)
-	REG_S s3,  4*SZREG(a0)
-	REG_S s4,  5*SZREG(a0)
-	REG_S s5,  6*SZREG(a0)
-	REG_S s6,  7*SZREG(a0)
-	REG_S s7,  8*SZREG(a0)
-	REG_S s8,  9*SZREG(a0)
-	REG_S s9, 10*SZREG(a0)
-	REG_S s10,11*SZREG(a0)
-	REG_S s11,12*SZREG(a0)
-	REG_S sp, 13*SZREG(a0)
+	addi  a0, a0, 14 * SZREG
+
+#ifdef CONFIG_ARCH_FPU
+	FREG_S  fs0,   0*SZFREG(a0)
+	FREG_S  fs1,   1*SZFREG(a0)
+	FREG_S  fs2,   2*SZFREG(a0)
+	FREG_S  fs3,   3*SZFREG(a0)
+	FREG_S  fs4,   4*SZFREG(a0)
+	FREG_S  fs5,   5*SZFREG(a0)
+	FREG_S  fs6,   6*SZFREG(a0)
+	FREG_S  fs7,   7*SZFREG(a0)
+	FREG_S  fs8,   8*SZFREG(a0)
+	FREG_S  fs9,   9*SZFREG(a0)
+	FREG_S  fs10, 10*SZFREG(a0)
+	FREG_S  fs11, 11*SZFREG(a0)
+#endif
 
 	li    a0, 0
 	ret
@@ -61,21 +91,37 @@ setjmp:
 .globl  longjmp
 .type   longjmp, @function
 longjmp:
-	REG_L ra,  0*SZREG(a0)
-	REG_L s0,  1*SZREG(a0)
-	REG_L s1,  2*SZREG(a0)
+	REG_L ra,   0*SZREG(a0)
+	REG_L s0,   1*SZREG(a0)
+	REG_L s1,   2*SZREG(a0)
+	REG_L s2,   3*SZREG(a0)
+	REG_L s3,   4*SZREG(a0)
+	REG_L s4,   5*SZREG(a0)
+	REG_L s5,   6*SZREG(a0)
+	REG_L s6,   7*SZREG(a0)
+	REG_L s7,   8*SZREG(a0)
+	REG_L s8,   9*SZREG(a0)
+	REG_L s9,  10*SZREG(a0)
+	REG_L s10, 11*SZREG(a0)
+	REG_L s11, 12*SZREG(a0)
+	REG_L sp,  13*SZREG(a0)
 
-	REG_L s2,  3*SZREG(a0)
-	REG_L s3,  4*SZREG(a0)
-	REG_L s4,  5*SZREG(a0)
-	REG_L s5,  6*SZREG(a0)
-	REG_L s6,  7*SZREG(a0)
-	REG_L s7,  8*SZREG(a0)
-	REG_L s8,  9*SZREG(a0)
-	REG_L s9, 10*SZREG(a0)
-	REG_L s10,11*SZREG(a0)
-	REG_L s11,12*SZREG(a0)
-	REG_L sp, 13*SZREG(a0)
+	addi  a0, a0, 14 * SZREG
+
+#ifdef CONFIG_ARCH_FPU
+	FREG_L  fs0,   0*SZFREG(a0)
+	FREG_L  fs1,   1*SZFREG(a0)
+	FREG_L  fs2,   2*SZFREG(a0)
+	FREG_L  fs3,   3*SZFREG(a0)
+	FREG_L  fs4,   4*SZFREG(a0)
+	FREG_L  fs5,   5*SZFREG(a0)
+	FREG_L  fs6,   6*SZFREG(a0)
+	FREG_L  fs7,   7*SZFREG(a0)
+	FREG_L  fs8,   8*SZFREG(a0)
+	FREG_L  fs9,   9*SZFREG(a0)
+	FREG_L  fs10, 10*SZFREG(a0)
+	FREG_L  fs11, 11*SZFREG(a0)
+#endif
 
 	seqz a0, a1
 	add  a0, a0, a1   # a0 = (a1 == 0) ? 1 : a1

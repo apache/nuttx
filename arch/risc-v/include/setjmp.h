@@ -25,13 +25,27 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+#include <nuttx/compiler.h>
+
+#include <stdint.h>
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
 
 struct setjmp_buf_s
 {
-  long regs[14];
+  uintptr_t regs[14];
+
+  /* Float callee register : fs0-fs11 */
+#ifdef CONFIG_ARCH_QPFPU
+  long double fregs[12];
+#elif defined(CONFIG_ARCH_DPFPU)
+  double fregs[12];
+#elif defined(CONFIG_ARCH_FPU)
+  float fregs[12];
+#endif
 };
 
 /* Traditional typedef for setjmp_buf */
