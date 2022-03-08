@@ -363,6 +363,10 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
                       flags |= FL_ASTERISK;
                       continue;
                     }
+                  else if (stream == NULL)
+                    {
+                      continue; /* We do only parsing */
+                    }
 #endif
 
                   if ((flags & FL_PREC) != 0)
