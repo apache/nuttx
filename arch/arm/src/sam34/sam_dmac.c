@@ -196,12 +196,12 @@ static struct sam_dma_s g_dma[SAM34_NDMACHAN] =
     .chan     = 3,
     .flags    = DMACH_FLAG_FIFO_32BYTES,
     .base     = SAM_DMACHAN3_BASE,
-  }
+  },
   {
     .chan     = 4,
     .flags    = DMACH_FLAG_FIFO_8BYTES,
     .base     = SAM_DMACHAN4_BASE,
-  }
+  },
   {
     .chan     = 5,
     .flags    = DMACH_FLAG_FIFO_32BYTES,
