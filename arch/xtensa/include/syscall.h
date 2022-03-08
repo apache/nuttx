@@ -174,7 +174,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
   (
     "movi a3, %1\n"
     "wsr a3, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0)
     : "a3", "memory"
@@ -200,7 +200,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
   (
     "movi a4, %1\n"
     "wsr a4, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1)
     : "a4", "memory"
@@ -228,7 +228,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
   (
     "movi a5, %1\n"
     "wsr a5, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2)
     : "a5", "memory"
@@ -257,7 +257,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
   (
     "movi a6, %1\n"
     "wsr a6, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3)
@@ -289,7 +289,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
   (
     "movi a7, %1\n"
     "wsr a7, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4)
@@ -322,7 +322,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
   (
     "movi a8, %1\n"
     "wsr a8, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5)
@@ -357,7 +357,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
   (
     "movi a9, %1\n"
     "wsr a9, intset\n"
-    "isync\n"
+    "rsync\n"
     : "=r"(reg0)
     : "i"(XCHAL_SWINT_CALL), "r"(reg0), "r"(reg1), "r"(reg2),
       "r"(reg3), "r"(reg4), "r"(reg5)

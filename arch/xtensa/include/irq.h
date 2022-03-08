@@ -213,7 +213,7 @@ static inline void up_irq_restore(uint32_t ps)
 {
   __asm__ __volatile__
   (
-    "wsr %0, PS \n"
+    "wsr %0, PS\n"
     "rsync \n"
     :
     : "r"(ps)
@@ -276,6 +276,7 @@ static inline void xtensa_disable_all(void)
   (
     "movi a2, 0\n"
     "xsr a2, INTENABLE\n"
+    "rsync\n"
     : : : "a2"
   );
 }
@@ -289,6 +290,7 @@ static inline void xtensa_intclear(uint32_t mask)
   __asm__ __volatile__
   (
     "wsr %0, INTCLEAR\n"
+    "rsync\n"
     :
     : "r"(mask)
     : ""

@@ -547,7 +547,7 @@ xtensa_context_restore:
 	movi a2, SYS_restore_context
 	movi a4, XCHAL_SWINT_CALL
 	wsr  a4, intset
-	isync
+	rsync
 
 	RET(16)
 
