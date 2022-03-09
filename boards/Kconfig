@@ -2363,6 +2363,14 @@ config ARCH_BOARD_CUSTOM_DIR_RELPATH
 	---help---
 		Specifies that the board directory is relative to the NuttX directory.
 
+config BOARD_CUSTOM_BOARD_ARCH_CHIP_COMMON
+	bool "Use in-tree board-level common code"
+	default n
+	---help---
+		Enable this option to use NuttX in-tree board-level common code
+		for selected architecture.  The path to common folder will be set to
+		"boards/$(CONFIG_ARCH)/$(CONFIG_ARCH_CHIP)/common" location.
+
 config BOARD_CUSTOM_LEDS
 	bool "Custom board LEDs"
 	default n
