@@ -217,27 +217,25 @@ enum mpfs_ep0setup_e
  ****************************************************************************/
 
 static int    mpfs_ep_configure(struct usbdev_ep_s *ep,
-                const struct usb_epdesc_s *desc, bool last);
+                                const struct usb_epdesc_s *desc, bool last);
 static int    mpfs_ep_disable(struct usbdev_ep_s *ep);
-static struct usbdev_req_s *
-              mpfs_ep_allocreq(struct usbdev_ep_s *ep);
+static struct usbdev_req_s *mpfs_ep_allocreq(struct usbdev_ep_s *ep);
 #ifdef CONFIG_USBDEV_DMA
 static void  *mpfs_ep_allocbuffer(struct usbdev_ep_s *ep, uint16_t nbytes);
 static void   mpfs_ep_freebuffer(struct usbdev_ep_s *ep, void *buf);
 #endif
 static void   mpfs_ep_freereq(struct usbdev_ep_s *ep,
-                struct usbdev_req_s *);
+                              struct usbdev_req_s *);
 static int    mpfs_ep_submit(struct usbdev_ep_s *ep,
-                struct usbdev_req_s *req);
+                             struct usbdev_req_s *req);
 static int    mpfs_ep_cancel(struct usbdev_ep_s *ep,
-                struct usbdev_req_s *req);
+                             struct usbdev_req_s *req);
 static int    mpfs_ep_stallresume(struct usbdev_ep_s *ep, bool resume);
 
 /* USB device controller operations */
 
-static struct usbdev_ep_s *
-              mpfs_allocep(struct usbdev_s *dev, uint8_t epno, bool in,
-                uint8_t eptype);
+static struct usbdev_ep_s *mpfs_allocep(struct usbdev_s *dev, uint8_t epno,
+                                        bool in, uint8_t eptype);
 static void   mpfs_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep);
 static int    mpfs_getframe(struct usbdev_s *dev);
 static int    mpfs_wakeup(struct usbdev_s *dev);
@@ -248,7 +246,7 @@ static int    mpfs_pullup(struct usbdev_s *dev,  bool enable);
 
 static void   mpfs_ep0_ctrlread(struct mpfs_usbdev_s *priv);
 static void   mpfs_ep0_wrstatus(struct mpfs_usbdev_s *priv,
-                const uint8_t *buffer, size_t buflen);
+                                const uint8_t *buffer, size_t buflen);
 static void   mpfs_ep0_dispatch(struct mpfs_usbdev_s *priv);
 static void   mpfs_setdevaddr(struct mpfs_usbdev_s *priv, uint8_t value);
 static void   mpfs_ep0_setup(struct mpfs_usbdev_s *priv);
@@ -476,10 +474,10 @@ static struct mpfs_req_s *mpfs_req_dequeue(struct mpfs_rqhead_s *queue)
 {
   struct mpfs_req_s *ret = queue->head;
 
-  if (ret)
+  if (ret != NULL)
     {
       queue->head = ret->flink;
-      if (!queue->head)
+      if (queue->head == NULL)
         {
           queue->tail = NULL;
         }
@@ -510,7 +508,7 @@ static void mpfs_req_enqueue(struct mpfs_rqhead_s *queue,
 {
   req->flink = NULL;
 
-  if (!queue->head)
+  if (queue->head == NULL)
     {
       queue->head = req;
       queue->tail = req;
@@ -852,7 +850,7 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
       /* Check the request from the head of the endpoint request queue */
 
       privreq = mpfs_rqpeek(&privep->reqq);
-      if (!privreq)
+      if (privreq == NULL)
         {
           /* Was there a pending endpoint stall? */
 
@@ -894,7 +892,7 @@ static int mpfs_req_write(struct mpfs_usbdev_s *priv,
 
           /* Setup 0 length TX transfer */
 
-          priv->eplist[0].descb[1]->addr = (uintptr_t)&priv->ep0out[0];
+          priv->eplist[EP0].descb[1]->addr = (uintptr_t)&priv->ep0out[0];
 
           mpfs_putreg16(CSR0L_DEV_TX_PKT_RDY_MASK | CSR0L_DEV_DATA_END_MASK,
                         MPFS_USB_INDEXED_CSR_EP0_CSR0);
@@ -1025,7 +1023,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
       /* Peek at the next read request in the request queue */
 
       privreq = mpfs_rqpeek(&privep->reqq);
-      if (!privreq)
+      if (privreq == NULL)
         {
           /* When no read requests are pending no EP descriptors are set to
            * ready. HW sends NAK to host if it tries to send something.
@@ -1050,7 +1048,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
 
       /* complete read request with available data */
 
-      if ((privreq->inflight) && (recvsize != 0))
+      if ((privreq->inflight > 0) && (recvsize != 0))
         {
           /* Update the total number of bytes transferred */
 
@@ -1115,9 +1113,9 @@ static void mpfs_ep_set_fifo_size(uint8_t epno, uint8_t in,
 
   mpfs_putreg8(epno, MPFS_USB_INDEX);
 
-  temp = (fifo_size / MPFS_MIN_EP_FIFO_SIZE);
+  temp = fifo_size / MPFS_MIN_EP_FIFO_SIZE;
 
-  while (!(temp & 0x01))
+  while ((temp & 0x01) == 0)
     {
       temp >>= 1;
       i++;
@@ -1442,16 +1440,13 @@ static void mpfs_setdevaddr(struct mpfs_usbdev_s *priv, uint8_t address)
 
   DEBUGASSERT(address <= 0x7f);
 
-  /* Vendor specific delay before chaning the address */
+  /* Vendor specific delay before changing the address */
 
-  for (int delay = 0; delay < 5000 ; delay++)
-    {
-      asm volatile("");
-    }
+  up_udelay(1000);
 
   mpfs_putreg8(address, MPFS_USB_FADDR);
 
-  if (address)
+  if (address != 0)
     {
       priv->devstate = USB_DEVSTATE_ADDRESSED;
     }
@@ -1519,7 +1514,7 @@ static struct usbdev_req_s *mpfs_ep_allocreq(struct usbdev_ep_s *ep)
   struct mpfs_req_s *privreq;
 
   privreq = (struct mpfs_req_s *)kmm_malloc(sizeof(struct mpfs_req_s));
-  if (!privreq)
+  if (privreq == NULL)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_ALLOCFAIL), 0);
       return NULL;
@@ -1922,7 +1917,7 @@ mpfs_ep_reserve(struct mpfs_usbdev_s *priv, uint8_t epset)
 
   flags  = enter_critical_section();
   epset &= priv->epavail;
-  if (epset)
+  if (epset != 0)
     {
       /* Select the lowest bit in the set of matching, available endpoints
        * (skipping EP0)
@@ -2005,7 +2000,7 @@ static struct usbdev_ep_s *mpfs_allocep(struct usbdev_s *dev, uint8_t epno,
   /* Check if the selected endpoint number is available */
 
   privep = mpfs_ep_reserve(priv, epset);
-  if (!privep)
+  if (privep == NULL)
     {
       return NULL;
     }
@@ -2060,7 +2055,7 @@ static void mpfs_freeep(struct usbdev_s *dev, struct usbdev_ep_s *ep)
   priv   = (struct mpfs_usbdev_s *)dev;
   privep = (struct mpfs_ep_s *)ep;
 
-  if (priv && privep)
+  if (priv != NULL && privep != NULL)
     {
       /* Mark the endpoint as available */
 
@@ -2308,9 +2303,7 @@ static void mpfs_ep0_wrstatus(struct mpfs_usbdev_s *priv,
                              const uint8_t *buffer, size_t buflen)
 {
   struct mpfs_ep_s *privep;
-  privep = &priv->eplist[0];
-
-  uint32_t packetsize;
+  privep = &priv->eplist[EP0];
 
   /* We need to make copy of data as source is in stack
    * reusing the static ep0 setup buffer
@@ -2321,11 +2314,9 @@ static void mpfs_ep0_wrstatus(struct mpfs_usbdev_s *priv,
 
   /* Setup TX transfer */
 
-  priv->eplist[0].descb[1]->addr = (uintptr_t) &priv->ep0out[0];
-  packetsize = priv->eplist[0].descb[1]->pktsize;
-  priv->eplist[0].descb[1]->pktsize = packetsize;
+  priv->eplist[EP0].descb[1]->addr = (uintptr_t) &priv->ep0out[0];
 
-  if (buflen)
+  if (buflen > 0)
     {
       mpfs_write_tx_fifo(buffer, buflen, 0);
 
@@ -2423,16 +2414,16 @@ static void mpfs_ep0_dispatch(struct mpfs_usbdev_s *priv)
 
 static void mpfs_ep0_setup(struct mpfs_usbdev_s *priv)
 {
-  struct mpfs_ep_s     *ep0 = &priv->eplist[EP0];
-  struct mpfs_ep_s     *privep;
-  union wb_u           value;
-  union wb_u           index;
-  union wb_u           len;
-  union wb_u           response;
+  struct mpfs_ep_s      *ep0 = &priv->eplist[EP0];
+  struct mpfs_ep_s      *privep;
+  union wb_u            value;
+  union wb_u            index;
+  union wb_u            len;
+  union wb_u            response;
   enum mpfs_ep0setup_e  ep0result;
-  uint8_t              epno;
-  int                  nbytes = 0; /* Assume zero-length packet */
-  int                  ret;
+  uint8_t               epno;
+  int                   nbytes = 0; /* Assume zero-length packet */
+  int                   ret;
 
   /* Terminate any pending requests */
 
@@ -2891,8 +2882,8 @@ static void mpfs_ep0_setup(struct mpfs_usbdev_s *priv)
 
 static void mpfs_ep0_ctrlread(struct mpfs_usbdev_s *priv)
 {
-  priv->eplist[0].descb[0]->addr    = (uintptr_t)&priv->ep0out[0];
-  priv->eplist[0].descb[0]->pktsize = 8;
+  priv->eplist[EP0].descb[0]->addr    = (uintptr_t)&priv->ep0out[0];
+  priv->eplist[EP0].descb[0]->pktsize = 8;
 }
 
 /****************************************************************************
@@ -2966,7 +2957,7 @@ static void mpfs_ep_tx_interrupt(struct mpfs_usbdev_s *priv, int epno)
 
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP_TX_CSR), tx_csr);
 
-  if (tx_csr & TXCSRL_REG_EPN_UNDERRUN_MASK)
+  if ((tx_csr & TXCSRL_REG_EPN_UNDERRUN_MASK) != 0)
     {
       /* Under-run errors should happen only for ISO endpoints. */
 
@@ -2976,7 +2967,7 @@ static void mpfs_ep_tx_interrupt(struct mpfs_usbdev_s *priv, int epno)
                         0);
     }
 
-  if (tx_csr & TXCSRL_REG_EPN_STALL_SENT_MASK)
+  if ((tx_csr & TXCSRL_REG_EPN_STALL_SENT_MASK) != 0)
     {
       mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
                        MPFS_USB_ENDPOINT_TX_CSR_OFFSET,
@@ -3039,7 +3030,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_CSR0), csr0);
   usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_EP0_COUNT0), count0);
 
-  if (csr0 & CSR0L_DEV_STALL_SENT_MASK)
+  if ((csr0 & CSR0L_DEV_STALL_SENT_MASK) != 0)
     {
       if (privep->epstate != USB_EPSTATE_STALLED)
         {
@@ -3051,7 +3042,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
 
   /* Clear setup end if set */
 
-  if (csr0 & CSR0L_DEV_SETUP_END_MASK)
+  if ((csr0 & CSR0L_DEV_SETUP_END_MASK) != 0)
     {
       /* Setting SERVICED_SETUP_END bit clears Setup End bit */
 
@@ -3059,7 +3050,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
                     MPFS_USB_INDEXED_CSR_EP0_CSR0);
     }
 
-  if (!csr0)
+  if (csr0 == 0)
     {
       if (privep->epstate == USB_EPSTATE_SENDING ||
           privep->epstate == USB_EPSTATE_EP0STATUSIN)
@@ -3080,7 +3071,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
 
   /* RX packet received  */
 
-  if (csr0 & CSR0L_DEV_DATA_END_MASK)
+  if ((csr0 & CSR0L_DEV_DATA_END_MASK) != 0)
     {
       usbtrace(TRACE_INTDECODE(MPFS_TRACEINTID_DATA_END), csr0);
       mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0, 0,
@@ -3090,7 +3081,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
 
   /* SETUP packet received */
 
-  if (csr0 & CSR0L_DEV_RX_PKT_RDY_MASK)
+  if ((csr0 & CSR0L_DEV_RX_PKT_RDY_MASK) != 0)
     {
       uint16_t len;
 
@@ -3105,7 +3096,7 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
 
       usbtrace(TRACE_READ(USB_EPNO(EP0)), count0);
 
-      if (count0)
+      if (count0 > 0)
         {
           mpfs_read_rx_fifo((uint8_t *)&priv->ctrl, count0, EP0);
         }
@@ -3195,34 +3186,34 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   /* Serve Endpoint Interrupts first */
 
-  if (pending_tx_ep & 0x01)
+  if ((pending_tx_ep & 0x01) != 0)
     {
       mpfs_ctrl_ep_interrupt(priv, 0);
     }
 
-  if (pending_tx_ep)
+  if (pending_tx_ep != 0)
     {
       for (i = 1; i < MPFS_USB_NENDPOINTS; i++)
         {
-          if ((pending_tx_ep & (1 << i)))
+          if ((pending_tx_ep & (1 << i)) != 0)
             {
               mpfs_ep_tx_interrupt(priv, i);
             }
         }
     }
 
-  if (pending_rx_ep)
+  if (pending_rx_ep != 0)
     {
       for (i = 0; i < MPFS_USB_NENDPOINTS; i++)
         {
-          if ((pending_rx_ep & (1 << i)))
+          if ((pending_rx_ep & (1 << i)) != 0)
             {
               mpfs_ep_rx_interrupt(priv, i);
             }
         }
     }
 
-  if (isr & SUSPEND_IRQ_MASK)
+  if ((isr & SUSPEND_IRQ_MASK) != 0)
     {
       /* Unhandled */
 
@@ -3231,21 +3222,21 @@ static int mpfs_usb_interrupt(int irq, void *context, void *arg)
 
   /* SOF interrupt */
 
-  if (isr & SOF_IRQ_MASK)
+  if ((isr & SOF_IRQ_MASK) != 0)
     {
       /* Unhandled */
 
       uinfo("SOF IRQ received\n");
     }
 
-  if (isr & DISCONNECT_IRQ_MASK)
+  if ((isr & DISCONNECT_IRQ_MASK) != 0)
     {
       /* Unhandled */
 
       uinfo("Disconnect IRQ\n");
     }
 
-  if (isr & RESUME_IRQ_MASK)
+  if ((isr & RESUME_IRQ_MASK) != 0)
     {
       mpfs_resume(priv);
     }
@@ -3300,7 +3291,7 @@ static int mpfs_usb_dma_interrupt(int irq, void *context, void *arg)
 
 static void mpfs_epset_reset(struct mpfs_usbdev_s *priv, uint16_t epset)
 {
-  uint32_t bit;
+  uint16_t bit;
   int epno;
 
   /* Reset each endpoint in the set */
@@ -3395,31 +3386,31 @@ static void mpfs_usb_iomux(void)
   uint64_t pmpcfg_usb_x;
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_0);
-  if ((pmpcfg_usb_x & 0x1ffffff000000000) != 0x1f00000000000000)
+  if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_0 register.\n");
-      putreg64(0x1f00000fffffffff, MPFS_PMPCFG_USB_0);
+      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_0);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_1);
-  if ((pmpcfg_usb_x & 0x1ffffff000000000) != 0x1f00000000000000)
+  if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_1 register.\n");
-      putreg64(0x1f00000fffffffff, MPFS_PMPCFG_USB_1);
+      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_1);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_2);
-  if ((pmpcfg_usb_x & 0x1ffffff000000000) != 0x1f00000000000000)
+  if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_2 register.\n");
-      putreg64(0x1f00000fffffffff, MPFS_PMPCFG_USB_2);
+      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_2);
     }
 
   pmpcfg_usb_x = getreg64(MPFS_PMPCFG_USB_3);
-  if ((pmpcfg_usb_x & 0x1ffffff000000000) != 0x1f00000000000000)
+  if ((pmpcfg_usb_x & 0x1ffffff000000000llu) != 0x1f00000000000000llu)
     {
       uerr("Please check the MPFS_PMPCFG_USB_3 register.\n");
-      putreg64(0x1f00000fffffffff, MPFS_PMPCFG_USB_3);
+      putreg64(0x1f00000fffffffffllu, MPFS_PMPCFG_USB_3);
     }
 #endif
 }
@@ -3637,7 +3628,7 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
   /* Then bind the class driver */
 
   ret = CLASS_BIND(driver, &priv->usbdev);
-  if (ret)
+  if (ret != OK)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_BINDFAILED), (uint16_t)-ret);
       priv->driver = NULL;
@@ -3752,7 +3743,7 @@ void mpfs_usbinitialize(void)
   if (irq_attach(MPFS_IRQ_USB_MC, mpfs_usb_interrupt, priv) != 0)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_IRQREGISTRATION),
-                              (uint16_t)MPFS_IRQ_USB_MC);
+                              MPFS_IRQ_USB_MC);
       goto errout;
     }
 
@@ -3760,7 +3751,7 @@ void mpfs_usbinitialize(void)
   if (irq_attach(MPFS_IRQ_USB_DMA, mpfs_usb_dma_interrupt, priv) != 0)
     {
       usbtrace(TRACE_DEVERROR(MPFS_TRACEERR_IRQREGISTRATION),
-                              (uint16_t)MPFS_IRQ_USB_DMA);
+                              MPFS_IRQ_USB_DMA);
       goto errout;
     }
 #endif
