@@ -50,6 +50,16 @@ void xtensa_copystate(uint32_t *dest, uint32_t *src)
 
   if (src != dest)
     {
+#if XCHAL_CP_NUM > 0
+      uintptr_t cpstate;
+      uintptr_t cpstate_off;
+      cpstate_off = offsetof(struct xcptcontext, cpstate) -
+                    offsetof(struct xcptcontext, regs);
+      cpstate = (uintptr_t)dest + cpstate_off;
+
+      xtensa_coproc_savestate(cpstate);
+#endif
+
       for (i = 0; i < XCPTCONTEXT_REGS; i++)
         {
           *dest++ = *src++;

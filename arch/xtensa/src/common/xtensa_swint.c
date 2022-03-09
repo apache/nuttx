@@ -53,7 +53,7 @@ int xtensa_swint(int irq, void *context, void *arg)
   uint32_t cmd;
 #if XCHAL_CP_NUM > 0
   uintptr_t cpstate;
-  uint32_t cpstate_off;
+  uintptr_t cpstate_off;
 
   cpstate_off = offsetof(struct xcptcontext, cpstate) -
                 offsetof(struct xcptcontext, regs);
@@ -131,10 +131,6 @@ int xtensa_swint(int irq, void *context, void *arg)
 
       case SYS_restore_context:
         {
-#if XCHAL_CP_NUM > 0
-          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
-          xtensa_coproc_restorestate((struct xtensa_cpstate_s *)cpstate);
-#endif
           DEBUGASSERT(regs[REG_A3] != 0);
           CURRENT_REGS = (uint32_t *)regs[REG_A3];
         }
@@ -163,6 +159,10 @@ int xtensa_swint(int irq, void *context, void *arg)
           DEBUGASSERT(regs[REG_A3] != 0 && regs[REG_A4] != 0);
 
           memcpy((uint32_t *)regs[REG_A3], regs, (4 * XCPTCONTEXT_REGS));
+#if XCHAL_CP_NUM > 0
+          cpstate = (uintptr_t)regs[REG_A3] + cpstate_off;
+          xtensa_coproc_savestate(cpstate);
+#endif
           CURRENT_REGS = (uint32_t *)regs[REG_A4];
         }
 
