@@ -62,4 +62,5 @@ FAR struct audio_lowerhalf_s *
 cs35l41b_initialize(FAR struct i2c_master_s *i2c,
                     FAR struct cs35l41b_lower_s *lower);
 
+int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev);
 #endif

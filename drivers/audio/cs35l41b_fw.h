@@ -33,5 +33,6 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv,
 int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv);
 int cs35l41b_write_caliberate_ambient(FAR struct cs35l41b_dev_s *priv,
                                       uint32_t ambient_temp_deg_c);
+int cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv);
 
 #endif

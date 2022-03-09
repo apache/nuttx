@@ -714,6 +714,36 @@ static int cs35l41b_load_cal_process(FAR struct cs35l41b_dev_s *priv)
 }
 
 /****************************************************************************
+ * Name: get_symbol_link_address
+ *
+ * Description:
+ *   get symbol link table address of id
+ *
+ ****************************************************************************/
+
+static uint32_t get_symbol_link_address(int id)
+{
+  uint8_t *temp_buffer = (uint8_t *)g_cs35l41_fw_img;
+  uint32_t addr;
+
+  /* skip preheader and header */
+
+  temp_buffer += FW_SYM_TABLE_OFFSET;
+
+  temp_buffer += (id - 1) * FW_SYM_TABLE_SINGLE_OFFSET;
+  temp_buffer += 4;
+
+  addr = temp_buffer[0] + ((uint32_t)temp_buffer[1] << 8) +
+         ((uint32_t)temp_buffer[2] << 16) + ((uint32_t)temp_buffer[3] << 24);
+
+  return addr;
+}
+
+/****************************************************************************
+ * Public Functions
+ ****************************************************************************/
+
+/****************************************************************************
  * Name: cs35l41b_set_boot_configuration
  *
  * Description:
@@ -721,8 +751,7 @@ static int cs35l41b_load_cal_process(FAR struct cs35l41b_dev_s *priv)
  *
  ****************************************************************************/
 
-static int
-cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
+int cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
 {
   uint8_t i;
   int ret;
@@ -777,36 +806,6 @@ cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
 
   return OK;
 }
-
-/****************************************************************************
- * Name: get_symbol_link_address
- *
- * Description:
- *   get symbol link table address of id
- *
- ****************************************************************************/
-
-static uint32_t get_symbol_link_address(int id)
-{
-  uint8_t *temp_buffer = (uint8_t *)g_cs35l41_fw_img;
-  uint32_t addr;
-
-  /* skip preheader and header */
-
-  temp_buffer += FW_SYM_TABLE_OFFSET;
-
-  temp_buffer += (id - 1) * FW_SYM_TABLE_SINGLE_OFFSET;
-  temp_buffer += 4;
-
-  addr = temp_buffer[0] + ((uint32_t)temp_buffer[1] << 8) +
-         ((uint32_t)temp_buffer[2] << 16) + ((uint32_t)temp_buffer[3] << 24);
-
-  return addr;
-}
-
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
 
 /****************************************************************************
  * Name: cs35l41b_dsp_process
@@ -998,9 +997,10 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
 
   if (priv->lower->get_caliberate_result(&value) == OK)
     {
-      audwarn("caliberate value:0x%08ux\n", value);
-
       address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
+
+      audwarn("caliberate value:0x%08x | address:0x%08x\n", value, address);
+
       ret = cs35l41b_write_register(priv, address, value);
       if (ret == ERROR)
         {

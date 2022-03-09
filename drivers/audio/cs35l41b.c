@@ -473,10 +473,44 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             audio_msg->u.data = cs35l41b_get_calibration_result();
             *(FAR struct audio_msg_s *)arg = *audio_msg;
 
-            if (cs35l41b_reset(priv) == ERROR)
+            /* cs35l41b power down */
+
+            if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+                {
+                  auderr("power wake up error\n");
+                  return ERROR;
+                }
+
+            /* stop clocks to HALO DSP core */
+
+            if (cs35l41b_write_register(priv,
+                XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, 0) == ERROR)
               {
+                auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
                 return ERROR;
               }
+
+            /* dsp load normal fw */
+
+            if (cs35l41_dsp_boot(priv) == ERROR)
+              {
+                auderr("dsp boot process error\n");
+                return ERROR;
+              }
+
+            if (cs35l41b_load_calibration_value(priv) == ERROR)
+              {
+                auderr("dsp caliberate value load failed!\n");
+                return ERROR;
+              }
+
+            /* power hibernate */
+
+            if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+                {
+                  auderr("power wake up error\n");
+                  return ERROR;
+                }
             break;
 
           default:
@@ -856,18 +890,6 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
       return -EBUSY;
     }
 
-  if (cs35l41b_power(priv, POWER_UP) == ERROR)
-    {
-      auderr("power process failed\n");
-      return ERROR;
-    }
-
-  if (cs35l41b_mute(priv, false) == ERROR)
-    {
-      auderr("dsp mute failed\n");
-      return ERROR;
-    }
-
   /* if dsp do not load caliberate that can be load caliberated  value */
 
   if ((!priv->is_calibrating) && (!priv->is_calibrate_value_loaded))
@@ -879,6 +901,18 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
         }
 
       priv->is_calibrate_value_loaded = true;
+    }
+
+  if (cs35l41b_power(priv, POWER_UP) == ERROR)
+    {
+      auderr("power process failed\n");
+      return ERROR;
+    }
+
+  if (cs35l41b_mute(priv, false) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
     }
 
   return OK;
@@ -1717,6 +1751,27 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
+  /* restore boot configuration */
+
+  cs35l41b_set_boot_configuration(priv);
+
+  /* enable dsp output */
+
+  if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
+    {
+      auderr("write 0x00004c00 error\n");
+      return ERROR;
+    }
+
+  /* enable dsp fadein feature */
+
+  if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
+    {
+      auderr("write 0x00006000 error\n");
+      return ERROR;
+    }
+
+
   return OK;
 }
 
@@ -2428,6 +2483,21 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
 
   priv->is_calibrate_value_loaded = false;
 
+  /* if pa is first initialization,
+   * should be load caliberation value before power up.
+   */
+
+  if ((!priv->is_calibrating) && (!priv->is_calibrate_value_loaded))
+    {
+      if (cs35l41b_load_calibration_value(priv) == ERROR)
+        {
+          auderr("dsp caliberate value load failed\n");
+          return ERROR;
+        }
+
+      priv->is_calibrate_value_loaded = true;
+    }
+
   /* enable dsp output */
 
   if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
@@ -2447,6 +2517,7 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
   priv->power_state = CS35L41_STATE_DSP_STANDBY;
 
   /* if calibrate processing, should not enter hibernate mode */
+
   if (!priv->is_calibrating)
   {
     if (cs35l41b_mute(priv, true) == ERROR)
@@ -2785,6 +2856,28 @@ static void cs35l41b_load_fw_worker(FAR void *arg)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: cs35l41b_late_initialize
+ *
+ * Description:
+ *   Late initializa cs35l41b smart pa
+ *
+ ****************************************************************************/
+
+int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev)
+{
+  FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
+
+  if (cs35l41b_reset(priv) == OK)
+    {
+      priv->done = true;
+      return OK;
+    }
+
+  auderr("ERROR: cs35l41b reset failed!\n");
+  return ERROR;
+}
+
+/****************************************************************************
  * Name: cs35l41b_initialize
  *
  * Description:
@@ -2845,8 +2938,6 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
           auderr("cs35l41b check id failed!\n");
           goto errout_with_dev;
         }
-
-      work_queue(LPWORK, &priv->work, cs35l41b_load_fw_worker, priv, 0);
 
       return &priv->dev;
     }
