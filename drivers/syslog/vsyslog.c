@@ -130,7 +130,8 @@ int nx_vsyslog(int priority, FAR const IPTR char *fmt, FAR va_list *ap)
 
   if (ret > 0)
     {
-      ret = lib_sprintf(&stream.public, "[%s] ", date_buf);
+      ret = lib_sprintf(&stream.public, "[%s.%06ld] ",
+                        date_buf, ts.tv_nsec / 1000);
     }
 #else
   ret = lib_sprintf(&stream.public, "[%5jd.%06ld] ",
