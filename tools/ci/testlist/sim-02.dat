@@ -6,5 +6,9 @@
 -Darwin,sim:rpserver
 -Darwin,sim:sotest32
 
+# macOS doesn't support --wrap flag
+# ld: unknown option: --wrap
+-Darwin,sim:segger
+
 # macOS doesn't have X11
 -Darwin,sim:touchscreen
