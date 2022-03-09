@@ -137,6 +137,11 @@ config SYSLOG_TIMESTAMP_FORMAT
 		Formatter string for syslog timestamp printing.
 		Uses the standard "strftime" format specifiers.
 
+config SYSLOG_TIMESTAMP_FORMAT_MICROSECOND
+	bool "Append microseconds after seconds"
+	default y
+	depends on SYSLOG_TIMESTAMP_FORMAT = "%e/%m/%y %H:%M:%S"
+
 config SYSLOG_TIMESTAMP_BUFFER
 	int "Formatted timestamp buffer size"
 	default 64
