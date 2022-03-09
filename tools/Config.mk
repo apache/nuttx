@@ -150,9 +150,12 @@ else
   BOARD_KCONFIG = $(CUSTOM_BOARD_KPATH)
 endif
 
-BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
-ifeq ($(BOARD_COMMON_DIR),)
-  BOARD_COMMON_DIR = $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common)
+ifeq (,$(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common))
+  ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+    BOARD_COMMON_DIR ?= $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common)
+  endif
+else
+  BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
 endif
 BOARD_DRIVERS_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)drivers)
 ifeq ($(BOARD_DRIVERS_DIR),)
