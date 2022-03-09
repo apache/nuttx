@@ -173,14 +173,6 @@ config SENSORS_LSM6DSO
 	---help---
 		Enable driver support for the STMicro LSM6DSO sensor.
 
-config SENSORS_LSM6DSO_BUFFER_NUMBER
-	int "The nunmber of circular buffer for sensor LSM6DSO"
-	default 1
-	depends on SENSORS_LSM6DSO
-	---help---
-		The size of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
-
 config SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER
 	int "The nunmber of fifo slots for sensor LSM6DSO"
 	default 10
@@ -243,14 +235,6 @@ config SENSORS_BMI270
 	select IOEXPANDER
 	---help---
 		Enable driver support for the Bosch BMI270 sensor.
-
-config SENSORS_BMI270_BUFFER_NUMBER
-	int "The nunmber of circular buffer for sensor BMI270"
-	default 1
-	depends on SENSORS_BMI270
-	---help---
-		The size of the circular buffer used. If the value equal to zero,
-		indicates that the circular buffer is disabled.
 
 config SENSORS_BMI270_FIFO_SLOTS_NUMBER
 	int "The nunmber of fifo slots for sensor BMI270"

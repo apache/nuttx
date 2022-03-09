@@ -3921,7 +3921,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
-  max_latency = sensor->lower.batch_number * sensor->interval;
+  max_latency = sensor->lower.buffer_number * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -4022,17 +4022,17 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
       pin_int1_route.fifo_th = LSM6DSO_FIFO_INT_ENABLE;
 
       if (priv->dev[LSM6DSO_XL_IDX].fifowtm
-          > priv->dev[LSM6DSO_XL_IDX].lower.batch_number)
+          > priv->dev[LSM6DSO_XL_IDX].lower.buffer_number)
         {
           priv->dev[LSM6DSO_XL_IDX].fifowtm
-          = priv->dev[LSM6DSO_XL_IDX].lower.batch_number;
+          = priv->dev[LSM6DSO_XL_IDX].lower.buffer_number;
         }
 
       if (priv->dev[LSM6DSO_GY_IDX].fifowtm
-         > priv->dev[LSM6DSO_GY_IDX].lower.batch_number)
+         > priv->dev[LSM6DSO_GY_IDX].lower.buffer_number)
         {
           priv->dev[LSM6DSO_GY_IDX].fifowtm
-          = priv->dev[LSM6DSO_GY_IDX].lower.batch_number;
+          = priv->dev[LSM6DSO_GY_IDX].lower.buffer_number;
         }
 
       priv->fifowtm = priv->dev[LSM6DSO_XL_IDX].fifowtm
@@ -5244,8 +5244,6 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_XL_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_XL_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
   priv->dev[LSM6DSO_XL_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
-  priv->dev[LSM6DSO_XL_IDX].lower.batch_number
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   priv->dev[LSM6DSO_GY_IDX].lower.ops = &g_lsm6dso_gy_ops;
@@ -5253,8 +5251,6 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_GY_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_GY_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
   priv->dev[LSM6DSO_GY_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
-  priv->dev[LSM6DSO_GY_IDX].lower.batch_number
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   priv->fsmen = LSM6DSO_DEFAULT_FSM_EN;
@@ -5263,8 +5259,6 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_FSM_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_FSM_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
   priv->dev[LSM6DSO_FSM_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_LSM6DSO_BUFFER_NUMBER;
-  priv->dev[LSM6DSO_FSM_IDX].lower.batch_number
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   /* Wait sensor boot time. */

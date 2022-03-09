@@ -3481,7 +3481,7 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
-  max_latency = sensor->lower.batch_number * sensor->interval;
+  max_latency = sensor->lower.buffer_number * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -3596,17 +3596,17 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
       regval_int_map_data.fwm_int1 = BMI270_ENABLE;
 
       if (priv->dev[BMI270_XL_IDX].fifowtm
-          > priv->dev[BMI270_XL_IDX].lower.batch_number)
+          > priv->dev[BMI270_XL_IDX].lower.buffer_number)
         {
           priv->dev[BMI270_XL_IDX].fifowtm
-          = priv->dev[BMI270_XL_IDX].lower.batch_number;
+          = priv->dev[BMI270_XL_IDX].lower.buffer_number;
         }
 
       if (priv->dev[BMI270_GY_IDX].fifowtm
-          > priv->dev[BMI270_GY_IDX].lower.batch_number)
+          > priv->dev[BMI270_GY_IDX].lower.buffer_number)
         {
           priv->dev[BMI270_GY_IDX].fifowtm
-          = priv->dev[BMI270_GY_IDX].lower.batch_number;
+          = priv->dev[BMI270_GY_IDX].lower.buffer_number;
         }
 
       priv->fifowtm = priv->dev[BMI270_XL_IDX].fifowtm
@@ -4202,8 +4202,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv->dev[BMI270_XL_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_XL_IDX].interval = BMI270_DEFAULT_INTERVAL;
   priv->dev[BMI270_XL_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_BMI270_BUFFER_NUMBER;
-  priv->dev[BMI270_XL_IDX].lower.batch_number
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   priv->dev[BMI270_GY_IDX].lower.ops = &g_bmi270_gy_ops;
@@ -4211,8 +4209,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv->dev[BMI270_GY_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_GY_IDX].interval = BMI270_DEFAULT_INTERVAL;
   priv->dev[BMI270_GY_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_BMI270_BUFFER_NUMBER;
-  priv->dev[BMI270_GY_IDX].lower.batch_number
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   priv->featen = BMI270_DEFAULT_FSM_EN;
@@ -4221,8 +4217,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv->dev[BMI270_FEAT_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_FEAT_IDX].interval = BMI270_DEFAULT_INTERVAL;
   priv->dev[BMI270_FEAT_IDX].lower.buffer_number
-                            = CONFIG_SENSORS_BMI270_BUFFER_NUMBER;
-  priv->dev[BMI270_FEAT_IDX].lower.batch_number
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   /* Wait sensor boot time. */

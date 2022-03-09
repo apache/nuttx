@@ -1382,7 +1382,7 @@ static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
 
   if (*latency_us > 0)
     {
-      max_latency = sensor->lower.batch_number * sensor->interval;
+      max_latency = sensor->lower.buffer_number * sensor->interval;
       if (*latency_us > max_latency)
         {
           *latency_us = max_latency;
@@ -2460,7 +2460,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
     {
       priv->sensor[idx].lower.ops = &g_gh3020_ops;
       priv->sensor[idx].lower.type = SENSOR_TYPE_PPGQ;
-      priv->sensor[idx].lower.batch_number = GH3020_BATCH_NUMBER;
+      priv->sensor[idx].lower.buffer_number = GH3020_BATCH_NUMBER;
       priv->sensor[idx].dev = priv;
       priv->sensor[idx].interval = GH3020_INTVL_DFT;
       priv->sensor[idx].current = GH3020_CURRENT_DFT;

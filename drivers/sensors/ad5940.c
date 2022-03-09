@@ -5557,7 +5557,7 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
-      max_latency = lower->batch_number * priv->interval;
+      max_latency = lower->buffer_number * priv->interval;
       if (*latency_us > max_latency)
         {
           *latency_us = max_latency;
@@ -5915,7 +5915,7 @@ int ad5940_register(int devno, FAR const struct ad5940_config_s *config)
   priv->config = config;
   priv->lower.ops = &g_ad5940_ops;
   priv->lower.type = SENSOR_TYPE_IMPEDANCE;
-  priv->lower.batch_number = AD5940_FIFOSLOTS_MAX;
+  priv->lower.buffer_number = AD5940_FIFOSLOTS_MAX;
   priv->interval = AD5940_INTVL_DEFAULT;
   priv->odr = AD5940_BIAODR_DEFAULT;
   priv->fifowtm = AD5940_FIFOWTM_DEFAULT;
