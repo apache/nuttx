@@ -1,5 +1,5 @@
 /****************************************************************************
- * libs/libc/machine/arm/gnu/arm_setjmp_thumb.S
+ * libs/libc/machine/arm/gnu/arm_setjmp.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -25,10 +25,6 @@
 #include <nuttx/config.h>
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
@@ -36,7 +32,6 @@
 	.globl	longjmp
 
 	.syntax	unified
-	.thumb
 	.file	"setjmp.S"
 
 /****************************************************************************
@@ -64,7 +59,6 @@
  *
  ****************************************************************************/
 
-	.thumb_func
 	.type	setjmp, function
 setjmp:
 
@@ -114,7 +108,6 @@ setjmp:
  *
  ****************************************************************************/
 
-	.thumb_func
 	.type	longjmp, function
 longjmp:
 
