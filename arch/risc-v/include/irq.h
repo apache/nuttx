@@ -183,10 +183,10 @@
 #define INT_XCPT_SIZE       (INT_REG_SIZE * INT_XCPT_REGS)
 
 #ifdef CONFIG_ARCH_RV32
-#  if defined(CONFIG_ARCH_DPFPU)
-#    define FPU_REG_SIZE    2
-#  elif defined(CONFIG_ARCH_QPFPU)
+#  if defined(CONFIG_ARCH_QPFPU)
 #    define FPU_REG_SIZE    4
+#  elif defined(CONFIG_ARCH_DPFPU)
+#    define FPU_REG_SIZE    2
 #  elif defined(CONFIG_ARCH_FPU)
 #    define FPU_REG_SIZE    1
 #  endif
