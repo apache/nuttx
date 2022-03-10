@@ -288,7 +288,7 @@ arm_vectorsvc:
 	cmp	r2, #PSR_MODE_USR		/* User mode? */
 	bne	.Lleavesvcsvc			/* Branch if not user mode */
 
-	mov	r14, sp				/* Get r0=xcp */
+	mov	r14, sp				/* Get r14=xcp */
 	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
 
 	/* ldmia with ^ will return the user mode registers (provided that r15
@@ -423,7 +423,7 @@ arm_vectordata:
 	cmp	r2, #PSR_MODE_USR		/* User mode? */
 	bne	.Ldabtleavesvc			/* Branch if not user mode */
 
-	mov	r14, sp				/* Get r0=xcp */
+	mov	r14, sp				/* Get r14=xcp */
 	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
 
 	/* ldmia with ^ will return the user mode registers (provided that r15
@@ -683,7 +683,7 @@ arm_vectorundefinsn:
 	cmp	r2, #PSR_MODE_USR		/* User mode? */
 	bne	.Lundefleavesvc			/* Branch if not user mode */
 
-	mov	r14, sp				/* Get r0=xcp */
+	mov	r14, sp				/* Get r14=xcp */
 	add	sp, sp, #XCPTCONTEXT_SIZE	/* Restore SVC's sp */
 
 	/* ldmia with ^ will return the user mode registers (provided that r15

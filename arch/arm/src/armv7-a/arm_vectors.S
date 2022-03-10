@@ -884,7 +884,7 @@ arm_vectorfiq:
 
 #ifdef CONFIG_BUILD_KERNEL
 	/* Did we enter from user mode?  If so then we need get the values of
-	 * USER mode rr13(sp) and r14(lr).
+	 * USER mode r13(sp) and r14(lr).
 	 */
 
 	and		r1, r4, #PSR_MODE_MASK		/* Interrupted mode */
@@ -934,6 +934,8 @@ arm_vectorfiq:
 	mov		r0, sp				/* Get r0=xcp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
+	/* Call arm_decodefiq() on the interrupt stack */
+
 	setfiqstack	r1, r4				/* SP = interrupt stack top */
 	str		r0, [sp, #-4]!			/* Save the xcp address at SP-4 then update SP */
 	mov		r4, sp				/* Save the SP in a preserved register */
@@ -941,6 +943,8 @@ arm_vectorfiq:
 	bl		arm_decodefiq			/* Call the handler */
 	ldr		sp, [r4]			/* Restore the user stack pointer */
 #else
+	/* Call arm_decodefiq() on the user stack */
+
 	mov		r4, sp				/* Save the SP in a preserved register */
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
