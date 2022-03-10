@@ -55,7 +55,7 @@ config ESP32S3_DEFAULT_CPU_FREQ_MHZ
 	default 160 if ESP32S3_DEFAULT_CPU_FREQ_160
 	default 240 if ESP32S3_DEFAULT_CPU_FREQ_240
 
-menu "Cache config"
+menu "Cache configuration"
 
 choice
 	prompt "Instruction cache size"
@@ -298,11 +298,6 @@ config ESP32S3_RUN_IRAM
 
 menu "ESP32-S3 Peripheral Selection"
 
-config ESP32S3_SPIRAM
-	bool "SPI RAM Support"
-	default n
-	select ARCH_HAVE_HEAP2
-
 config ESP32S3_UART
 	bool
 	default n
@@ -313,6 +308,10 @@ config ESP32S3_TIMER
 
 config ESP32S3_WDT
 	bool
+	default n
+
+config ESP32S3_SPIRAM
+	bool "SPI RAM Support"
 	default n
 
 config ESP32S3_UART0
@@ -336,13 +335,70 @@ config ESP32S3_UART2
 	select UART2_SERIALDRIVER
 	select ARCH_HAVE_SERIAL_TERMIOS
 
-menu "SPI RAM Config"
+config ESP32S3_TIMER0
+	bool "54-bit Timer 0 (Group 0 Timer 0)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 0
+
+config ESP32S3_TIMER1
+	bool "54-bit Timer 1 (Group 0 Timer 1)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 1
+
+config ESP32S3_TIMER2
+	bool "54-bit Timer 2 (Group 1 Timer 0)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 2
+
+config ESP32S3_TIMER3
+	bool "54-bit Timer 3 (Group 1 Timer 1)"
+	default n
+	select ESP32S3_TIMER
+	---help---
+		Enables Timer 3
+
+config ESP32S3_MWDT0
+	bool "Main System Watchdog Timer (Group 0)"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes MWDT0. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S3_MWDT1
+	bool "Main System Watchdog Timer (Group 1)"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes MWDT1. This watchdog timer is part of the Group 0
+		timer submodule.
+
+config ESP32S3_RWDT
+	bool "RTC Watchdog Timer"
+	default n
+	select ESP32S3_WDT
+	---help---
+		Includes RWDT. This watchdog timer is from the RTC module.
+		When it is selected, if the developer sets it to reset on expiration
+		it will reset Main System and the RTC module. If you don't want
+		to have the RTC module reset, please, use the Timers' Module WDTs.
+		They will only reset Main System.
+
+endmenu # ESP32-S3 Peripheral Selection
+
+menu "SPI RAM Configuration"
 	depends on ESP32S3_SPIRAM
 
 choice ESP32S3_SPIRAM_MODE
 	prompt "Mode (QUAD/OCT) of SPI RAM chip"
 	default ESP32S3_SPIRAM_MODE_QUAD
-       
+
 config ESP32S3_SPIRAM_MODE_QUAD
 	bool "Quad Mode PSRAM"
 
@@ -447,64 +503,7 @@ config ESP32S3_SPIRAM_IGNORE_NOTFOUND
 		panic. If this is enabled, booting will complete but no PSRAM
 		will be available.
 
-endmenu #SPI RAM Config
-
-config ESP32S3_TIMER0
-	bool "54-bit Timer 0 (Group 0 Timer 0)"
-	default n
-	select ESP32S3_TIMER
-	---help---
-		Enables Timer 0
-
-config ESP32S3_TIMER1
-	bool "54-bit Timer 1 (Group 0 Timer 1)"
-	default n
-	select ESP32S3_TIMER
-	---help---
-		Enables Timer 1
-
-config ESP32S3_TIMER2
-	bool "54-bit Timer 2 (Group 1 Timer 0)"
-	default n
-	select ESP32S3_TIMER
-	---help---
-		Enables Timer 2
-
-config ESP32S3_TIMER3
-	bool "54-bit Timer 3 (Group 1 Timer 1)"
-	default n
-	select ESP32S3_TIMER
-	---help---
-		Enables Timer 3
-
-config ESP32S3_MWDT0
-	bool "Main System Watchdog Timer (Group 0)"
-	default n
-	select ESP32S3_WDT
-	---help---
-		Includes MWDT0. This watchdog timer is part of the Group 0
-		timer submodule.
-
-config ESP32S3_MWDT1
-	bool "Main System Watchdog Timer (Group 1)"
-	default n
-	select ESP32S3_WDT
-	---help---
-		Includes MWDT1. This watchdog timer is part of the Group 0
-		timer submodule.
-
-config ESP32S3_RWDT
-	bool "RTC Watchdog Timer"
-	default n
-	select ESP32S3_WDT
-	---help---
-		Includes RWDT. This watchdog timer is from the RTC module.
-		When it is selected, if the developer sets it to reset on expiration
-		it will reset Main System and the RTC module. If you don't want
-		to have the RTC module reset, please, use the Timers' Module WDTs.
-		They will only reset Main System.
-
-endmenu # ESP32-S3 Peripheral Selection
+endmenu # SPI RAM Configuration
 
 menu "UART Configuration"
 	depends on ESP32S3_UART
