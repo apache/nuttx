@@ -48,7 +48,6 @@
 #include <nuttx/spinlock.h>
 
 #include <arch/board/board.h>
-#include <arch/board/board_liberodefs.h>
 
 #include "hardware/mpfs_usb.h"
 #include "riscv_arch.h"
@@ -110,41 +109,6 @@
 #define MPFS_PMPCFG_USB_1    (MPFS_MPUCFG_BASE + 0x608)
 #define MPFS_PMPCFG_USB_2    (MPFS_MPUCFG_BASE + 0x610)
 #define MPFS_PMPCFG_USB_3    (MPFS_MPUCFG_BASE + 0x618)
-
-/* IOMUX registers */
-
-#define MPFS_SYSREG_IOMUX3   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_IOMUX3_CR_OFFSET)
-#define MPFS_SYSREG_IOMUX4   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_IOMUX4_CR_OFFSET)
-
-#define MPFS_SYSREG_B2_CFG   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_CFG_CR)
-
-#define MPFS_SYSREG_B2_0_1   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_0_1_CR_OFFSET)
-#define MPFS_SYSREG_B2_2_3   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_2_3_CR_OFFSET)
-#define MPFS_SYSREG_B2_4_5   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_4_5_CR_OFFSET)
-#define MPFS_SYSREG_B2_6_7   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_6_7_CR_OFFSET)
-#define MPFS_SYSREG_B2_8_9   (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_8_9_CR_OFFSET)
-#define MPFS_SYSREG_B2_10_11 (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_10_11_CR_OFFSET)
-#define MPFS_SYSREG_B2_12_13  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_12_13_CR_OFFSET)
-#define MPFS_SYSREG_B2_14_15  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_14_15_CR_OFFSET)
-#define MPFS_SYSREG_B2_16_17  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_16_17_CR_OFFSET)
-#define MPFS_SYSREG_B2_18_19  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_18_19_CR_OFFSET)
-#define MPFS_SYSREG_B2_20_21  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_20_21_CR_OFFSET)
-#define MPFS_SYSREG_B2_22_23  (MPFS_SYSREG_BASE + \
-                              MPFS_SYSREG_MSSIO_BANK2_IO_CFG_22_23_CR_OFFSET)
 
 /* Reset and clock control registers */
 
@@ -3353,30 +3317,18 @@ static int mpfs_pullup(struct usbdev_s *dev, bool enable)
 
 static void mpfs_usb_iomux(void)
 {
-  putreg32(LIBERO_SETTING_IOMUX3_CR, MPFS_SYSREG_IOMUX3);
-  putreg32(LIBERO_SETTING_IOMUX4_CR, MPFS_SYSREG_IOMUX4);
-
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_CFG_CR, MPFS_SYSREG_B2_CFG);
-
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_0_1_CR, MPFS_SYSREG_B2_0_1);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_2_3_CR, MPFS_SYSREG_B2_2_3);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_4_5_CR, MPFS_SYSREG_B2_4_5);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_6_7_CR, MPFS_SYSREG_B2_6_7);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_8_9_CR, MPFS_SYSREG_B2_8_9);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_10_11_CR,
-           MPFS_SYSREG_B2_10_11);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_12_13_CR,
-           MPFS_SYSREG_B2_12_13);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_14_15_CR,
-           MPFS_SYSREG_B2_14_15);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_16_17_CR,
-           MPFS_SYSREG_B2_16_17);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_18_19_CR,
-           MPFS_SYSREG_B2_18_19);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_20_21_CR,
-           MPFS_SYSREG_B2_20_21);
-  putreg32(LIBERO_SETTING_MSSIO_BANK2_IO_CFG_22_23_CR,
-           MPFS_SYSREG_B2_22_23);
+  mpfs_configgpio(MSSIO_USB_CLK);
+  mpfs_configgpio(MSSIO_USB_DIR);
+  mpfs_configgpio(MSSIO_USB_NXT);
+  mpfs_configgpio(MSSIO_USB_STP);
+  mpfs_configgpio(MSSIO_USB_DATA0);
+  mpfs_configgpio(MSSIO_USB_DATA1);
+  mpfs_configgpio(MSSIO_USB_DATA2);
+  mpfs_configgpio(MSSIO_USB_DATA3);
+  mpfs_configgpio(MSSIO_USB_DATA4);
+  mpfs_configgpio(MSSIO_USB_DATA5);
+  mpfs_configgpio(MSSIO_USB_DATA6);
+  mpfs_configgpio(MSSIO_USB_DATA7);
 
 #ifdef CONFIG_USBDEV_DMA
   /* DMA operations need to open the USB PMP registers for proper
