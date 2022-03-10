@@ -153,7 +153,7 @@ arm_vectorirq:
 	bl	arm_doirq		/* Call the handler */
 #endif
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 .Lnoirqset:
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -212,7 +212,7 @@ arm_vectorsvc:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_syscall		/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -269,7 +269,7 @@ arm_vectordata:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Then call the data abort handler with interrupt disabled.
+	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
 	 */
 
@@ -277,7 +277,7 @@ arm_vectordata:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_dataabort		/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -335,7 +335,7 @@ arm_vectorprefetch:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Then call the prefetch abort handler with interrupt disabled.
+	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */
 
@@ -343,7 +343,7 @@ arm_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_prefetchabort	/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -401,7 +401,7 @@ arm_vectorundefinsn:
 	add	r0, sp, #(4*REG_SP)	/* Offset to pc, cpsr storage */
 	stmia	r0, {r1-r4}
 
-	/* Then call the undef insn handler with interrupt disabled.
+	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
 	 */
 
@@ -409,7 +409,7 @@ arm_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_undefinedinsn	/* Call the handler */
 
-	/* Restore the CPSR, SVC modr registers and return */
+	/* Restore the CPSR, SVC mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
 	msr	spsr_cxsf, r0
@@ -425,10 +425,12 @@ arm_vectorundefinsn:
  *
  * Description:
  *   Shouldn't happen
+ *
  ****************************************************************************/
 
 	.globl	arm_vectorfiq
 	.type	arm_vectorfiq, %function
+
 arm_vectorfiq:
 	subs	pc, lr, #4
 
@@ -460,10 +462,12 @@ arm_vectoraddrexcptn:
 	.global	g_intstacktop
 	.type	g_intstackalloc, object
 	.type	g_intstacktop, object
+
 g_intstackalloc:
 	.skip	(CONFIG_ARCH_INTERRUPTSTACK & ~3)
 g_intstacktop:
 	.size	g_intstacktop, 0
 	.size	g_intstackalloc, (CONFIG_ARCH_INTERRUPTSTACK & ~3)
+
 #endif
 	.end
