@@ -390,6 +390,12 @@ config ESP32S3_RWDT
 		to have the RTC module reset, please, use the Timers' Module WDTs.
 		They will only reset Main System.
 
+config ESP32S3_RT_TIMER
+	bool "Real-Time Timer"
+	default n
+	---help---
+		Real-Time Timer is relying upon the Systimer 1.
+
 endmenu # ESP32-S3 Peripheral Selection
 
 menu "SPI RAM Configuration"
@@ -606,6 +612,26 @@ config ESP32S3_FREERUN
 		support a free-running timer.
 
 endmenu # Timer/Counter Configuration
+
+menu "Real-Time Timer Configuration"
+	depends on ESP32S3_RT_TIMER
+
+config ESP32S3_RT_TIMER_TASK_NAME
+	string "Real-Time Timer task name"
+	default "rt_timer"
+
+config ESP32S3_RT_TIMER_TASK_PRIORITY
+	int "Real-Time Timer task priority"
+	default 223
+	---help---
+		Priority level of the RT Timer task.
+		Must be lower than the SCHED_HPWORKPRIORITY.
+
+config ESP32S3_RT_TIMER_TASK_STACK_SIZE
+	int "Real-Time Timer task stack size"
+	default 2048
+
+endmenu # Real-Time Timer Configuration
 
 config ESP32S3_TICKLESS
 	bool "Enable Tickless OS"

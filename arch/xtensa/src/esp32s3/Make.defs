@@ -110,6 +110,10 @@ ifeq ($(CONFIG_ESP32S3_FREERUN),y)
 CHIP_CSRCS += esp32s3_freerun.c
 endif
 
+ifeq ($(CONFIG_ESP32S3_RT_TIMER),y)
+CHIP_CSRCS += esp32s3_rt_timer.c
+endif
+
 ifeq ($(CONFIG_ESP32S3_SPIFLASH),y)
 CHIP_CSRCS += esp32s3_spiflash.c
 ifeq ($(CONFIG_ESP32S3_MTD),y)
