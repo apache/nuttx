@@ -498,8 +498,7 @@ struct xcptcontext
    * another signal handler is executing will be ignored!
    */
 
-  uintptr_t saved_epc;     /* Trampoline PC */
-  uintptr_t saved_int_ctx; /* Interrupt context with interrupts disabled. */
+  uintptr_t *saved_regs;
 
 #ifdef CONFIG_BUILD_PROTECTED
   /* This is the saved address to use when returning from a user-space
@@ -521,7 +520,7 @@ struct xcptcontext
 
   /* Register save area */
 
-  uintptr_t regs[XCPTCONTEXT_REGS];
+  uintptr_t *regs;
 };
 
 #endif /* __ASSEMBLY__ */

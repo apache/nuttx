@@ -119,11 +119,24 @@ exception_common:
   la sp, g_intstacktop
 #endif
 
-#endif
+  /* Call interrupt handler in C */
+
+  jal        x1, riscv_dispatch_irq
+
+#else
+  /* Reserve some space for CURRENT_REGS if interrupt stack disabled */
+
+  addi       sp, sp, -XCPTCONTEXT_SIZE
 
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
+
+  /* Restore sp */
+
+  addi       sp, sp, XCPTCONTEXT_SIZE
+#endif
+
 
   /* If context switch is needed, return a new sp     */
 
