@@ -206,7 +206,7 @@ int riscv_swint(int irq, void *context, void *arg)
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void
-       *   riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+       * riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
        *
        * At this point, the following values are saved in context:
        *
@@ -228,7 +228,8 @@ int riscv_swint(int irq, void *context, void *arg)
 
       /* A0=SYS_switch_context: This a switch context command:
        *
-       * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+       * void
+       * riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
        *
        * At this point, the following values are saved in context:
        *
@@ -245,7 +246,10 @@ int riscv_swint(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          riscv_copystate((uintptr_t *)regs[REG_A1], regs);
+#ifdef CONFIG_ARCH_FPU
+          riscv_savefpu(regs);
+#endif
+          *(uintptr_t **)regs[REG_A1] = (uintptr_t *)regs;
           CURRENT_REGS = (uintptr_t *)regs[REG_A2];
         }
         break;

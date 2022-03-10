@@ -26,6 +26,7 @@
 #include <arch/irq.h>
 
 #include "chip.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Symbols
@@ -77,9 +78,14 @@ __start:
   ld   sp, 0(t0)
 #endif
 
-  /* sp (stack top) = sp + idle stack size */
+  /*
+   * sp (stack top) = sp + idle stack size - XCPTCONTEXT_SIZE
+   * 
+   * Note: Reserve some space used by up_initial_state since we are already
+   * running and using the per CPU idle stack.
+   */
 
-  li   t0, CONFIG_IDLETHREAD_STACKSIZE
+  li   t0, STACK_ALIGN_UP(CONFIG_IDLETHREAD_STACKSIZE - XCPTCONTEXT_SIZE)
   add  sp, sp, t0
 
 2:

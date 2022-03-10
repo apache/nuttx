@@ -68,7 +68,11 @@
  * only a referenced is passed to get the state from the TCB.
  */
 
-#define riscv_savestate(regs)    riscv_copystate(regs, (uintptr_t*)CURRENT_REGS)
+#ifdef CONFIG_ARCH_FPU
+#define riscv_savestate(regs) (regs = (uintptr_t *)CURRENT_REGS, riscv_savefpu(regs))
+#else
+#define riscv_savestate(regs) (regs = (uintptr_t *)CURRENT_REGS)
+#endif
 #define riscv_restorestate(regs) (CURRENT_REGS = regs)
 
 #define _START_TEXT  &_stext
@@ -193,7 +197,6 @@ void riscv_addregion(void);
 void riscv_ack_irq(int irq);
 
 void riscv_copystate(uintptr_t *dest, uintptr_t *src);
-void riscv_copyfullstate(uintptr_t *dest, uintptr_t *src);
 
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
