@@ -74,7 +74,7 @@
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+ * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
  */
 
 #define SYS_switch_context        (2)
@@ -150,7 +150,7 @@
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+ * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
  */
 
 #define riscv_switchcontext(saveregs, restoreregs) \

@@ -32,6 +32,7 @@
 #include <arch/irq.h>
 
 #include "riscv_internal.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -55,6 +56,10 @@ void up_initial_state(struct tcb_s *tcb)
   struct xcptcontext *xcp = &tcb->xcp;
   uintptr_t regval;
 
+  /* Initialize the initial exception register context structure */
+
+  memset(xcp, 0, sizeof(struct xcptcontext));
+
   /* Initialize the idle thread stack */
 
   if (tcb->pid == IDLE_PROCESS_ID)
@@ -72,11 +77,13 @@ void up_initial_state(struct tcb_s *tcb)
 
       riscv_stack_color(tcb->stack_alloc_ptr, 0);
 #endif /* CONFIG_STACK_COLORATION */
+      return;
     }
 
-  /* Initialize the initial exception register context structure */
+  xcp->regs = (uintptr_t *)(
+    (uintptr_t)tcb->stack_base_ptr + tcb->adj_stack_size - XCPTCONTEXT_SIZE);
 
-  memset(xcp, 0, sizeof(struct xcptcontext));
+  memset(xcp->regs, 0, XCPTCONTEXT_SIZE);
 
   /* Save the initial stack pointer.  Hmmm.. the stack is set to the very
    * beginning of the stack region.  Some functions may want to store data on
