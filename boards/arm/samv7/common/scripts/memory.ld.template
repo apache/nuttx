@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/samv7/common/scripts/memory.ld
+ * boards/arm/samv7/common/scripts/memory.ld.template
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,37 @@
  *
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
+#define FLASH_START_ADDR        0x00400000
+
+#ifdef CONFIG_ARMV7M_DTCM
+#  define SRAM_START_ADDR       0x20000000
+#else
+#  define SRAM_START_ADDR       0x20400000
+#endif
+
+#define KFLASH_START_ADDR       FLASH_START_ADDR
+#define KFLASH_SIZE             (CONFIG_ARCH_CHIP_SAMV7_MEM_FLASH / 2)
+
+#define UFLASH_START_ADDR       (KFLASH_START_ADDR + KFLASH_SIZE)
+#define UFLASH_SIZE             (CONFIG_ARCH_CHIP_SAMV7_MEM_FLASH - KFLASH_SIZE)
+
+#define KSRAM_START_ADDR        SRAM_START_ADDR
+#ifdef CONFIG_SAMV7_MEM_RAM_384
+#  define KSRAM_SIZE            (CONFIG_ARCH_CHIP_SAMV7_MEM_RAM / 3)
+#else
+#  define KSRAM_SIZE            (CONFIG_ARCH_CHIP_SAMV7_MEM_RAM / 2)
+#endif
+
+#define USRAM_START_ADDR        (KSRAM_START_ADDR + KSRAM_SIZE)
+#define USRAM_SIZE              ((CONFIG_ARCH_CHIP_SAMV7_MEM_RAM - KSRAM_SIZE) / 2)
+
+#define XSRAM_START_ADDR        (USRAM_START_ADDR + USRAM_SIZE)
+#define XSRAM_SIZE              (CONFIG_ARCH_CHIP_SAMV7_MEM_RAM - KSRAM_SIZE - USRAM_SIZE)
+
 /* The SAMV7 can have up to 2048Kb of FLASH beginning at address 0x0040:0000
- * and 384Kb of SRAM beginining at 0x2040:0000
+ * and up to 384Kb of SRAM beginining at 0x2040:0000 or 0x2000:0000
  *
  * When booting from FLASH, FLASH memory is aliased to address 0x0000:0000
  * where the code expects to begin execution by jumping to the entry point in
@@ -35,7 +64,7 @@
  * span the user spaces, or (2) poke holes in a larger region to trim it
  * to fit better.
  *
- * A detailed memory map for the 384KB SRAM region is as follows:
+ * A detailed memory map example for the 384KB SRAM region is as follows:
  *
  *   0x2040 0000:  Kernel .data region.  Typical size: 0.1KB
  *   ------ ----   Kernel .bss  region.  Typical size: 1.8KB
@@ -53,14 +82,14 @@
 
 MEMORY
 {
-  /* 2048KiB of internal FLASH */
+  /* Internal FLASH */
 
-  kflash (rx)      : ORIGIN = 0x00400000, LENGTH = 1M
-  uflash (rx)      : ORIGIN = 0x00500000, LENGTH = 1M
+  kflash (rx)      : ORIGIN = KFLASH_START_ADDR, LENGTH = KFLASH_SIZE
+  uflash (rx)      : ORIGIN = UFLASH_START_ADDR, LENGTH = UFLASH_SIZE
 
-  /* 384Kb of internal SRAM */
+  /* Internal SRAM */
 
-  ksram (rwx)      : ORIGIN = 0x20400000, LENGTH = 128K
-  usram (rwx)      : ORIGIN = 0x20420000, LENGTH = 128K
-  xsram (rwx)      : ORIGIN = 0x20440000, LENGTH = 128K
+  ksram (rwx)      : ORIGIN = KSRAM_START_ADDR, LENGTH = KSRAM_SIZE
+  usram (rwx)      : ORIGIN = USRAM_START_ADDR, LENGTH = USRAM_SIZE
+  xsram (rwx)      : ORIGIN = XSRAM_START_ADDR, LENGTH = XSRAM_SIZE
 }
