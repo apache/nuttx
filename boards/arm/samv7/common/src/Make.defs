@@ -18,8 +18,7 @@
 #
 #############################################################################
 
-ifeq ($(CONFIG_BOARDCTL),y)
-CSRCS += sam_progmem.c
+ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
 
 ifeq ($(CONFIG_BOARDCTL_RESET),y)
 CSRCS += sam_reset.c
@@ -29,8 +28,10 @@ ifeq ($(CONFIG_BOARDCTL_BOOT_IMAGE),y)
 CSRCS += sam_boot_image.c
 endif
 
-else ifeq ($(CONFIG_BOARD_LATE_INITIALIZE),y)
+ifeq ($(CONFIG_SAMV7_PROGMEM),y)
+ifeq ($(CONFIG_MTD_PROGMEM),y)
 CSRCS += sam_progmem.c
+endif
 endif
 
 ifeq ($(CONFIG_SAMV7_HSMCI0),y)
@@ -44,3 +45,5 @@ endif
 DEPPATH += --dep-path src
 VPATH += :src
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)src)
+
+endif
