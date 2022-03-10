@@ -233,7 +233,9 @@ uint32_t *arm_syscall(uint32_t *regs)
            * set will determine the restored context.
            */
 
+#if defined(CONFIG_ARCH_FPU)
           arm_restorefpu((uint32_t *)regs[REG_R1]);
+#endif
           regs = (uint32_t *)regs[REG_R1];
           DEBUGASSERT(regs);
         }
@@ -261,9 +263,8 @@ uint32_t *arm_syscall(uint32_t *regs)
 #if defined(CONFIG_ARCH_FPU)
           arm_copyarmstate((uint32_t *)regs[REG_R1], regs);
           arm_restorefpu((uint32_t *)regs[REG_R2]);
-#else
-          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
 #endif
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
           regs = (uint32_t *)regs[REG_R2];
         }
         break;
