@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-/* NOTE:  This depends on the memory.ld script having been included prior to
- * this script.
+/* NOTE:  This depends on the memory.ld.template script having been included
+ * prior to this script.
  */
 
 OUTPUT_ARCH(arm)

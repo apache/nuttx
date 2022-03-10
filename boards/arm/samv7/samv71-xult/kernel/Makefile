@@ -29,8 +29,12 @@ ENTRYPT = $(patsubst "%",%,$(CONFIG_INIT_ENTRYPOINT))
 # is appropriate for the host OS
 
 USER_LIBPATHS = $(addprefix -L,$(call CONVERT_PATH,$(addprefix $(TOPDIR)$(DELIM),$(dir $(USERLIBS)))))
-USER_LDSCRIPT = -T $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)memory.ld)
-USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
+USER_LDSCRIPT = -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld)
+ifneq ($(wildcard $(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld),)
+  USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
+else
+  USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
+endif
 USER_HEXFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.hex)
 USER_SRECFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.srec)
 USER_BINFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.bin)
