@@ -113,34 +113,34 @@
 
 _xtensa_context_save:
 
-	s32i	a4,  a2, (4 * REG_A4)
-	s32i	a5,  a2, (4 * REG_A5)
-	s32i	a6,  a2, (4 * REG_A6)
-	s32i	a7,  a2, (4 * REG_A7)
-	s32i	a8,  a2, (4 * REG_A8)
-	s32i	a9,  a2, (4 * REG_A9)
-	s32i	a10, a2, (4 * REG_A10)
-	s32i	a11, a2, (4 * REG_A11)
+	s32i	a4,  sp, (4 * REG_A4)
+	s32i	a5,  sp, (4 * REG_A5)
+	s32i	a6,  sp, (4 * REG_A6)
+	s32i	a7,  sp, (4 * REG_A7)
+	s32i	a8,  sp, (4 * REG_A8)
+	s32i	a9,  sp, (4 * REG_A9)
+	s32i	a10, sp, (4 * REG_A10)
+	s32i	a11, sp, (4 * REG_A11)
 
 	/* Call0 ABI callee-saved regs a12-15 do not need to be saved here */
 
 #ifndef __XTENSA_CALL0_ABI__
-	s32i	a12, a2, (4 * REG_A12)
-	s32i	a13, a2, (4 * REG_A13)
-	s32i	a14, a2, (4 * REG_A14)
-	s32i	a15, a2, (4 * REG_A15)
+	s32i	a12, sp, (4 * REG_A12)
+	s32i	a13, sp, (4 * REG_A13)
+	s32i	a14, sp, (4 * REG_A14)
+	s32i	a15, sp, (4 * REG_A15)
 #endif
 
 	rsr		a3, SAR
-	s32i	a3, a2, (4 * REG_SAR)
+	s32i	a3, sp, (4 * REG_SAR)
 
 #if XCHAL_HAVE_LOOPS != 0
 	rsr		a3, LBEG
-	s32i	a3, a2, (4 * REG_LBEG)
+	s32i	a3, sp, (4 * REG_LBEG)
 	rsr		a3, LEND
-	s32i	a3, a2, (4 * REG_LEND)
+	s32i	a3, sp, (4 * REG_LEND)
 	rsr		a3, LCOUNT
-	s32i	a3, a2, (4 * REG_LCOUNT)
+	s32i	a3, sp, (4 * REG_LCOUNT)
 #endif
 
 #ifndef __XTENSA_CALL0_ABI__
@@ -159,16 +159,16 @@ _xtensa_context_save:
 #error Overlay support is not implemented
 #endif
 
-	s32i	a0, a2, (4 * REG_TMP0)			/* Save return address */
-	s32i	sp, a2, (4 * REG_TMP1)			/* Save current stack pointer */
-	wsr		a2, EXCSAVE_1					/* Preserve register save area */
+	s32i	a0, sp, (4 * REG_TMP0)			/* Save return address */
+	s32i	sp, sp, (4 * REG_TMP1)			/* Save current stack pointer */
+	wsr		sp, EXCSAVE_1					/* Preserve register save area */
 
-	l32i	sp, a2, (4 * REG_A1)			/* Restore the interruptee's SP */
+	l32i	sp, sp, (4 * REG_A1)			/* Restore the interruptee's SP */
 	call0	_xtensa_window_spill			/* Preserves only a4-a5, a8-a9, a12-a13 */
 
-	rsr		a2, EXCSAVE_1					/* Save interruptee's a0 */
-	l32i	a0, a2, (4 * REG_TMP0)			/* Save return address */
-	l32i	sp, a2, (4 * REG_TMP1)			/* Save current stack pointer */
+	rsr		sp, EXCSAVE_1					/* Save interruptee's a0 */
+	l32i	a0, sp, (4 * REG_TMP0)			/* Save return address */
+	l32i	sp, sp, (4 * REG_TMP1)			/* Save current stack pointer */
 #endif
 
 	ret
