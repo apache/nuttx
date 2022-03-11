@@ -89,10 +89,14 @@ static int     sensor_open(FAR struct file *filep);
 static int     sensor_close(FAR struct file *filep);
 static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
                            size_t buflen);
+static ssize_t sensor_write(FAR struct file *filep, FAR const char *buffer,
+                            size_t buflen);
 static int     sensor_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
 static int     sensor_poll(FAR struct file *filep, FAR struct pollfd *fds,
                            bool setup);
+static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
+                                 size_t bytes);
 
 /****************************************************************************
  * Private Data
@@ -140,7 +144,7 @@ static const struct file_operations g_sensor_fops =
   sensor_open,    /* open  */
   sensor_close,   /* close */
   sensor_read,    /* read  */
-  NULL,           /* write */
+  sensor_write,   /* write */
   NULL,           /* seek  */
   sensor_ioctl,   /* ioctl */
   sensor_poll     /* poll  */
@@ -344,6 +348,15 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
 out:
   nxsem_post(&upper->exclsem);
   return ret;
+}
+
+static ssize_t sensor_write(FAR struct file *filep, FAR const char *buffer,
+                            size_t buflen)
+{
+  FAR struct inode *inode = filep->f_inode;
+  FAR struct sensor_upperhalf_s *upper = inode->i_private;
+
+  return sensor_push_event(upper, buffer, buflen);
 }
 
 static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -600,15 +613,22 @@ errout:
   return ret;
 }
 
-static void sensor_push_event(FAR void *priv, FAR const void *data,
-                              size_t bytes)
+static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
+                                 size_t bytes)
 {
   FAR struct sensor_upperhalf_s *upper = priv;
   int semcount;
+  int ret;
 
-  if (!bytes || nxsem_wait(&upper->exclsem) < 0)
+  if (!bytes)
     {
-      return;
+      return -EINVAL;
+    }
+
+  ret = nxsem_wait(&upper->exclsem);
+  if (ret < 0)
+    {
+      return ret;
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
@@ -620,6 +640,7 @@ static void sensor_push_event(FAR void *priv, FAR const void *data,
     }
 
   nxsem_post(&upper->exclsem);
+  return bytes;
 }
 
 static void sensor_notify_event(FAR void *priv)
