@@ -244,7 +244,7 @@ xtensa_context_save:
  ****************************************************************************/
 
 	.global _xtensa_context_restore
-	.type	xtensa_context_restore,@function
+	.type	_xtensa_context_restore,@function
 
 	.align  4
 	.literal_position
