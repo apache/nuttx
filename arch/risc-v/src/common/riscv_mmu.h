@@ -26,6 +26,10 @@
 #define RV_MMU_PAGE_SHIFT       (12)
 #define RV_MMU_PAGE_SIZE        (1 << RV_MMU_PAGE_SHIFT) /* 4K pages */
 
+/* Entries per PGT */
+
+#define RV_MMU_PAGE_ENTRIES     (RV_MMU_PAGE_SIZE / sizeof(uintptr_t))
+
 /* Supervisor Address Translation and Protection (satp) */
 
 #define SATP_PPN_SHIFT          (0)
@@ -90,10 +94,10 @@
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
 #define RV_MMU_PTE_PADDR_SHIFT  (10)
-#define RV_MMU_PTE_PPN_MASK     ((1 << RV_MMU_PTE_PADDR_SHIFT) - 1)
+#define RV_MMU_PTE_PPN_MASK     (((1ul << 44) - 1) << RV_MMU_PTE_PADDR_SHIFT)
 #define RV_MMU_PTE_PPN_SHIFT    (2)
 #define RV_MMU_VPN_WIDTH        (9)
-#define RV_MMU_VPN_MASK         ((1 << RV_MMU_VPN_WIDTH) - 1)
+#define RV_MMU_VPN_MASK         ((1ul << RV_MMU_VPN_WIDTH) - 1)
 #define RV_MMU_PT_LEVELS        (3)
 #define RV_MMU_VADDR_SHIFT(_n)  (RV_MMU_PAGE_SHIFT + RV_MMU_VPN_WIDTH * \
                                  (RV_MMU_PT_LEVELS - (_n)))
@@ -245,6 +249,28 @@ static inline void mmu_enable(uintptr_t pgbase, uint16_t asid)
 }
 
 /****************************************************************************
+ * Name: mmu_pte_to_paddr
+ *
+ * Description:
+ *   Extract physical address from PTE
+ *
+ * Input Parameters:
+ *   pte - Page table entry
+ *
+ * Returned Value:
+ *   Physical address from PTE
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
+{
+  uintptr_t paddr = pte;
+  paddr  &= RV_MMU_PTE_PPN_MASK;  /* Remove flags */
+  paddr <<= RV_MMU_PTE_PPN_SHIFT; /* Move to correct position */
+  return paddr;
+}
+
+/****************************************************************************
  * Name: mmu_ln_setentry
  *
  * Description:
@@ -279,6 +305,7 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
  *     level n
  *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
  *     address boundary which is dependent on the level of the entry
+ *
  ****************************************************************************/
 
 uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,

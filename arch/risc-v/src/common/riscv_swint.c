@@ -32,6 +32,7 @@
 #include <syscall.h>
 
 #include <arch/irq.h>
+#include <nuttx/addrenv.h>
 #include <nuttx/sched.h>
 #include <nuttx/userspace.h>
 
