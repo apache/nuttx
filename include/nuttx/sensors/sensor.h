@@ -843,13 +843,17 @@ struct sensor_lowerhalf_s
        *   It is provided by upper half driver to lower half driver.
        *
        * Input Parameters:
-       *   priv   - Upper half driver handle
+       *   priv   - Upper half driver handle.
        *   data   - The buffer of event, it can be all type of sensor events.
-       *   bytes  - The number of bytes of sensor event
+       *   bytes  - The number of bytes of sensor event.
+       *
+       * Returned Value:
+       *   The bytes of push is returned when success;
+       *   A negated errno value is returned on any failure.
        **********************************************************************/
 
-      CODE void (*push_event)(FAR void *priv, FAR const void *data,
-                              size_t bytes);
+      CODE ssize_t (*push_event)(FAR void *priv, FAR const void *data,
+                                 size_t bytes);
 
       /**********************************************************************
        * Name: notify_event
