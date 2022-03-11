@@ -189,7 +189,6 @@ void x86_64_boardinitialize(void);
 void up_copystate(uint64_t *dest, uint64_t *src);
 void up_savestate(uint64_t *regs);
 void up_decodeirq(uint64_t *regs);
-void up_irqinitialize(void);
 #ifdef CONFIG_ARCH_DMA
 void weak_function up_dmainitialize(void);
 #endif
@@ -217,10 +216,6 @@ void up_addregion(void);
 
 void up_earlyserialinit(void);
 void up_serialinit(void);
-
-/* Defined in xyz_watchdog.c */
-
-void up_wdtinit(void);
 
 /* Defined in xyz_timerisr.c */
 

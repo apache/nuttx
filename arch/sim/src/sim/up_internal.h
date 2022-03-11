@@ -189,12 +189,6 @@ int up_init_ipi(int irq);
 void up_timer_update(void);
 #endif
 
-/* rpmsg_serialinit *********************************************************/
-
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* up_uart.c ****************************************************************/
 
 void up_uartinit(void);

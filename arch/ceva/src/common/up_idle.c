@@ -163,8 +163,5 @@ void weak_function up_cpu_normal(void)
 #ifdef CONFIG_PM
 void up_pminitialize(void)
 {
-  /* Then initialize the power management subsystem proper */
-
-  pm_initialize();
 }
 #endif

@@ -22,26 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
-#include <arch/board/board.h>
 
 #include "misoc.h"
-#include "lm32.h"
 
 /****************************************************************************
  * Public Functions
@@ -52,10 +35,6 @@ void up_initialize(void)
   /* Initialize the serial driver */
 
   misoc_serial_initialize();
-
-#ifdef CONFIG_RPMSG_UART
-  rpmsg_serialinit();
-#endif
 
 #if 0 /* REVISIT */
   /* Initialize the network cores */

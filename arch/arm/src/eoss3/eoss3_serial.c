@@ -38,7 +38,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
-#include <nuttx/power/pm.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/wqueue.h>
