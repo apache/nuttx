@@ -278,7 +278,6 @@ _xtensa_context_restore:
 
 	l32i	a3, a2, (4 * REG_SAR)
 	wsr		a3, SAR
-	l32i	sp, a2, (4 * REG_A1)
 	l32i	a3, a2, (4 * REG_A3)
 	l32i	a4, a2, (4 * REG_A4)
 	l32i	a5, a2, (4 * REG_A5)
