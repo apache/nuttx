@@ -46,7 +46,6 @@
 #include <nuttx/arch.h>
 
 #include "up_internal.h"
-#include "up_arch.h"
 
 #include <arch/spr.h>
 

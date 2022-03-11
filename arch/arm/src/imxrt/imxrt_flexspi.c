@@ -42,7 +42,6 @@
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
 #include "barriers.h"
 
 #include "imxrt_gpio.h"

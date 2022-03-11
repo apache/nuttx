@@ -33,7 +33,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_start.h"
 #include "sam_pck.h"
 #include "same70-qmtech.h"

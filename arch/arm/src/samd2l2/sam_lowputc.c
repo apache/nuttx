@@ -40,7 +40,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_config.h"
 #include "sam_gclk.h"
 #include "sam_pm.h"

@@ -43,9 +43,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc43_usb0dev.h"
 #include "lpc43_creg.h"
 #include "lpc43_ccu.h"

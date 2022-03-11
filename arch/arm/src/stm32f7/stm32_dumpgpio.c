@@ -31,8 +31,7 @@
 #include <nuttx/irq.h>
 #include <arch/stm32f7/chip.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"

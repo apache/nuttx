@@ -38,7 +38,7 @@
 #include <nuttx/audio/audio.h>
 #include <nuttx/audio/i2s.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lc823450_dma.h"
 #include "lc823450_i2s.h"
 #include "lc823450_syscontrol.h"

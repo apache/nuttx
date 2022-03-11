@@ -30,8 +30,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_inputmux.h"
 #include "hardware/lpc54_pint.h"

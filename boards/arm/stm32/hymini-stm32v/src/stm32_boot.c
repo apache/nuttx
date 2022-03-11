@@ -28,7 +28,7 @@
 
 #include <nuttx/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hymini-stm32v.h"
 
 #include <arch/board/board.h>  /* Should always be included last due to dependencies */

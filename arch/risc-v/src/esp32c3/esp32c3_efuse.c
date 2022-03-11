@@ -29,7 +29,7 @@
 #include <nuttx/efuse/efuse.h>
 #include <arch/esp32c3/chip.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_efuse.h"
 

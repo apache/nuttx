@@ -30,7 +30,7 @@
 #include <nuttx/cache.h>
 #include <arch/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "mmu.h"
 #include "cp15_cacheops.h"
 

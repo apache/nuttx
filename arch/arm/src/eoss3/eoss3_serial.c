@@ -45,9 +45,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/eoss3_uart.h"
 #include "hardware/eoss3_intr.h"
 #include "eoss3_lowputc.h"

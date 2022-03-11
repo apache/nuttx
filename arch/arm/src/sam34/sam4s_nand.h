@@ -35,7 +35,7 @@
 #include <nuttx/mtd/nand_raw.h>
 #include <nuttx/semaphore.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "sam_gpio.h"
 #include "hardware/sam_smc.h"

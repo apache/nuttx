@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Functions

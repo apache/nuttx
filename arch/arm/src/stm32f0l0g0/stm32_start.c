@@ -31,9 +31,7 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "stm32_rcc.h"
 #include "stm32_lowputc.h"
 #include "stm32_start.h"

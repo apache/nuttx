@@ -42,9 +42,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "hardware/lpc17_40_usb.h"
 #include "hardware/lpc17_40_syscon.h"
@@ -2604,7 +2602,7 @@ static void lpc17_40_dmarestart(uint8_t epphy, uint32_t descndx)
 
   /* Clear DMA descriptor status */
 
-  USB_DmaDesc[descndx].status = 0;
+  g_usbddesc[descndx].status = 0;
 
   /* Enable DMA transfer on the endpoint */
 

@@ -28,7 +28,7 @@
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
-#include "arm_arch.h"                     /* getreg32(), putreg32() */
+#include "arm_internal.h"                     /* getreg32(), putreg32() */
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -173,8 +173,8 @@
 
 #ifndef __ASSEMBLY__
 
-/* Handler circular include... This file includes arm_arch.h, but this file
- * is included by arm_arch.h (via chip.h) BEFORE getreg32 is defined.
+/* Handler circular include... This file includes arm_internal.h, but this
+ * file is included by arm_internal.h(via chip.h) BEFORE getreg32 is defined.
  */
 
 #if !defined(__ARCH_ARM_IMX_GPIOHELPERS_H) && defined(getreg32)

@@ -39,7 +39,7 @@
 #include <arch/board/board.h>
 #include <arch/chip/timer.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "cxd56_timer.h"
 #include "hardware/cxd56_timer.h"
 #include "cxd56_clock.h"

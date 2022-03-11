@@ -30,9 +30,7 @@
 
 #include <nuttx/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
-
 #include "at90usb.h"
 #include "teensy-20.h"
 

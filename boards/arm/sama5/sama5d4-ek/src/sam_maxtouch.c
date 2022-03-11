@@ -35,7 +35,7 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/mxt.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_pio.h"
 #include "sam_twi.h"
 

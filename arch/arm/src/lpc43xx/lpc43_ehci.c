@@ -47,8 +47,7 @@
 
 #include "chip.h"
 #include "hardware/lpc43_usb0.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "lpc43_cgu.h"
 #include "hardware/lpc43_creg.h"
 #include "hardware/lpc43_evntrtr.h"

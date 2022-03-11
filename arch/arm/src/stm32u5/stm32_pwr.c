@@ -30,7 +30,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_pwr.h"
 #include "stm32_rcc.h"
 

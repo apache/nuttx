@@ -40,7 +40,6 @@
 #include "rx65n_macrodriver.h"
 #include "arch/rx65n/iodefine.h"
 #include "chip.h"
-#include "up_arch.h"
 #include "up_internal.h"
 #include "rx65n_definitions.h"
 #include "rx65n_sci.h"

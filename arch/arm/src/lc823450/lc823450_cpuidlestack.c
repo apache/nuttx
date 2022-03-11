@@ -27,7 +27,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Public Functions

@@ -32,7 +32,6 @@
 #include <arch/board/board.h>
 #include <arch/pic32mz/irq.h>
 
-#include "mips_arch.h"
 #include "mips_internal.h"
 #include "hardware/pic32mz_ioport.h"
 #include "pic32mz_gpio.h"

@@ -24,8 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "k210_memorymap.h"
 #include "k210_gpiohs.h"
 

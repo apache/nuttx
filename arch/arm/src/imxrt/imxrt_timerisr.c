@@ -37,8 +37,6 @@
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "hardware/imxrt_ccm.h"
 

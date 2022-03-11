@@ -44,8 +44,7 @@
 #include "stm32_rcc.h"
 #include "stm32_waste.h"
 #include "stm32_flash.h"
-
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #if !(defined(CONFIG_STM32U5_STM32U585XX))
 #  error "Unrecognized STM32 chip"

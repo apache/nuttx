@@ -31,7 +31,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_qencoder.h"
 #include "nucleo-144.h"
 

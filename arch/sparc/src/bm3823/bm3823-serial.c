@@ -43,9 +43,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
-
 #include "bm3823-config.h"
 #include "chip.h"
 #include "bm3823-uart.h"

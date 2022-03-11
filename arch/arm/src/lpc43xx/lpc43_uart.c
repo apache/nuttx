@@ -31,8 +31,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "lpc43_config.h"
 #include "lpc43_pinconfig.h"

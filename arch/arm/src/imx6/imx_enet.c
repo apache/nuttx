@@ -51,7 +51,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "gic.h"
 #include "chip.h"
 #include "imx_config.h"

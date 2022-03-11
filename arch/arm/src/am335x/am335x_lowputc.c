@@ -30,8 +30,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "am335x_config.h"
 #include "am335x_gpio.h"
 #include "am335x_pinmux.h"

@@ -26,8 +26,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/s32k1xx_sim.h"
 #include "s32k1xx_uid.h"
 

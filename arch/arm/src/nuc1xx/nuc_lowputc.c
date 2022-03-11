@@ -30,8 +30,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "chip.h"
 #include "nuc_config.h"
 #include "hardware/nuc_clk.h"

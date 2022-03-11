@@ -34,8 +34,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "nrf52_gpio.h"
 #include "nrf52_pwm.h"
 

@@ -34,7 +34,7 @@
 #include <arch/irq.h>
 #include <arch/esp32c3/chip.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "esp32c3_irq.h"
 #include "hardware/esp32c3_iomux.h"
 #include "hardware/esp32c3_gpio.h"

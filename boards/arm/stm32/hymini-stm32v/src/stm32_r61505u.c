@@ -37,7 +37,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/lcd.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32.h"
 #include "hymini-stm32v.h"
 

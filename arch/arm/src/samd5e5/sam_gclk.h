@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_config.h"
 #include "hardware/sam_gclk.h"
 

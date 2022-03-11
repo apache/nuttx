@@ -35,7 +35,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/timers/watchdog.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_soc.h"
 #include "esp32c3_wdt.h"
 #include "esp32c3_wdt_lowerhalf.h"

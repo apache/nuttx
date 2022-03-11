@@ -34,7 +34,6 @@
 #include <nuttx/userspace.h>
 
 #include "mpu.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "kinetis_mpuinit.h"
 

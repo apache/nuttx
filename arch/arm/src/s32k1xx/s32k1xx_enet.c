@@ -50,7 +50,7 @@
 #  include <nuttx/net/pkt.h>
 #endif
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "s32k1xx_config.h"
 #include "hardware/s32k1xx_enet.h"

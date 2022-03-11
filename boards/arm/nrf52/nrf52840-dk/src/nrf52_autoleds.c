@@ -32,9 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "nrf52840-dk.h"
 
 #ifdef CONFIG_ARCH_LEDS

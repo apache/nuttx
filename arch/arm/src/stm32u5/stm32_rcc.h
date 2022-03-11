@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 #if defined(CONFIG_STM32U5_STM32U585XX)

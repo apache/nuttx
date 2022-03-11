@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "am335x_pinmux.h"
 
 /****************************************************************************

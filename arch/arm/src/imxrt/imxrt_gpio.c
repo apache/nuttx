@@ -33,7 +33,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_daisy.h"

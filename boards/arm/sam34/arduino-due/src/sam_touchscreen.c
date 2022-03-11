@@ -36,7 +36,7 @@
 #include <nuttx/input/touchscreen.h>
 #include <nuttx/input/ads7843e.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_gpio.h"
 #include "hardware/sam3u_pio.h"
 

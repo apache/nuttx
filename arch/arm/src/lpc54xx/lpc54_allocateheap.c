@@ -34,9 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/lpc54_memorymap.h"
 #include "lpc54_mpuinit.h"
 

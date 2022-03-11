@@ -31,7 +31,6 @@
 
 #include <arch/irq.h>
 
-#include "arm_arch.h"
 #include "nvic.h"
 #include "sau.h"
 #include "arm_internal.h"

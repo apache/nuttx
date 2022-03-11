@@ -34,7 +34,7 @@
 #include <debug.h>
 #include <semaphore.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_sha.h"
 #include "hardware/esp32c3_system.h"
 

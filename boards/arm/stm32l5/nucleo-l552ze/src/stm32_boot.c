@@ -28,7 +28,7 @@
 
 #include <nuttx/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "nucleo-l552ze.h"
 
 #include <arch/board/board.h>

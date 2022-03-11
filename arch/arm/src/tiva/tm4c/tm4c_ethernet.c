@@ -54,7 +54,6 @@
 #endif
 
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "tiva_gpio.h"
 #include "tiva_sysctrl.h"

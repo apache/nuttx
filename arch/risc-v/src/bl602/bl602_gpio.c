@@ -24,8 +24,7 @@
 
 #include <stdint.h>
 
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "hardware/bl602_glb.h"
 #include "bl602_gpio.h"
 

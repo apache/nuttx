@@ -44,9 +44,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "cxd56_config.h"
 #include "cxd56_serial.h"
 #include "cxd56_powermgr.h"

@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "imxrt_xbar.h"
 
 /****************************************************************************

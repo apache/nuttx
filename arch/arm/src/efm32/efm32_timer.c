@@ -33,9 +33,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/efm32_timer.h"
 #include "efm32_config.h"
 #include "efm32_gpio.h"

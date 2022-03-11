@@ -107,6 +107,15 @@
 #define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
 #define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
 
+#define getreg8(a)          (*(volatile uint8_t *)(a))
+#define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))
+#define getreg16(a)         (*(volatile uint16_t *)(a))
+#define putreg16(v,a)       (*(volatile uint16_t *)(a) = (v))
+#define getreg32(a)         (*(volatile uint32_t *)(a))
+#define putreg32(v,a)       (*(volatile uint32_t *)(a) = (v))
+#define getreg64(a)         (*(volatile uint64_t *)(a))
+#define putreg64(v,a)       (*(volatile uint64_t *)(a) = (v))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -167,6 +176,9 @@ EXTERN uint32_t _etbss;           /* End+1 of .tbss */
   ***************************************************************************/
 
 #ifndef __ASSEMBLY__
+/* Atomic modification of registers */
+
+void modifyreg32(uintptr_t addr, uint32_t clearbits, uint32_t setbits);
 
 /* Memory allocation ********************************************************/
 

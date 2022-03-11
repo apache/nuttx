@@ -43,9 +43,7 @@
 #include "bl602_lowputc.h"
 #include "bl602_gpio.h"
 #include "bl602_hbn.h"
-#include "riscv_arch.h"
 #include "riscv_internal.h"
-
 #include "bl602_config.h"
 #include "chip.h"
 

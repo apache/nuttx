@@ -30,9 +30,7 @@
 #include <nuttx/analog/dac.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "zkit-arm-1769.h"
 #include "lpc17_40_dac.h"
 

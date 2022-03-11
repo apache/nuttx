@@ -49,7 +49,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/tiva_prcm.h"
 #include "cc13xx/cc13xx_prcm.h"
 

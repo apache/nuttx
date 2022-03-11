@@ -53,7 +53,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc2378.h"
 #include "lpc23xx_vic.h"
 

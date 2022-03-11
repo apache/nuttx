@@ -28,9 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "open1788.h"
 
 #if defined(CONFIG_LPC17_40_EMC) && defined(CONFIG_LPC17_40_EXTNAND)

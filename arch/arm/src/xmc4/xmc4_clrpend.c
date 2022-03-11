@@ -27,7 +27,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Public Functions

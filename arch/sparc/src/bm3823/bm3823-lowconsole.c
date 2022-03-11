@@ -32,7 +32,6 @@
 
 #include <arch/irq.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 #include "bm3823-uart.h"
 #include "bm3823.h"

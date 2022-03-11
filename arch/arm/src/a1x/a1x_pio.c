@@ -34,8 +34,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "a1x_pio.h"
 #include "hardware/a1x_pio.h"

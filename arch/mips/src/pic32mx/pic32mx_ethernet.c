@@ -53,7 +53,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "mips_arch.h"
+#include "mips_internal.h"
 #include "pic32mx_config.h"
 #include "pic32mx_ethernet.h"
 #include "pic32mx.h"

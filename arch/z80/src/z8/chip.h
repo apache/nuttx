@@ -185,22 +185,6 @@
 #define I2C_CTL_START      (1 << 6) /* Bit 6: 1=Send Start Condition */
 #define I2C_CTL_IEN        (1 << 7) /* Bit 7: 1=I2C Enable */
 
-/* Register access macros ***********************************************************
- *
- * The register access mechanism provided in ez8.h differs from the useful in other
- * NuttX architectures.  The following NuttX common macros will at least make the
- * access compatible at the source level (however, strict type check is lost).
- */
-
-#ifndef __ASSEMBLY__
-# define getreg8(a)           (a)
-# define putreg8(v,a)         (a) = (v)
-# define getreg16(a)          (a)
-# define putreg16(v,a)        (a) = (v)
-# define getreg32(a)          (a)
-# define putreg32(v,a)        (a) = (v)
-#endif /* __ASSEMBLY__ */
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

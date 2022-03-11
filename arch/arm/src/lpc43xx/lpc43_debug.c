@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc43_pinconfig.h"
 #include "lpc43_gpio.h"
 

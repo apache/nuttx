@@ -30,7 +30,6 @@
 #include <nuttx/board.h>
 
 #include "chip.h"
-#include "z80_arch.h"
 #include "z80_internal.h"
 
 /****************************************************************************

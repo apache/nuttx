@@ -42,7 +42,6 @@
 
 #include "arm_internal.h"
 #include "ram_vectors.h"
-#include "arm_arch.h"
 
 #include "hardware/nrf52_ficr.h"
 

@@ -42,7 +42,7 @@
 
 #include <arch/chip/sam_adc.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_adc.h"
 #include "sam_pinmap.h"
 #include "sam_gclk.h"

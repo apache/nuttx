@@ -30,7 +30,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_tim.h"
 
 #include "esp32c3_tim.h"

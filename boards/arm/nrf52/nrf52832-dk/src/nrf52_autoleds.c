@@ -43,9 +43,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "nrf52832-dk.h"
 
 #ifdef CONFIG_ARCH_LEDS

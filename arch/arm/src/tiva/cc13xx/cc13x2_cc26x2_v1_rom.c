@@ -45,8 +45,7 @@
 
 #include <stdint.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/tiva_adi2_refsys.h"
 #include "hardware/tiva_adi3_refsys.h"
 #include "hardware/tiva_adi4_aux.h"

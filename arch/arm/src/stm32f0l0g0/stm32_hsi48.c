@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "hardware/stm32_rcc.h"
 #include "hardware/stm32_crs.h"

@@ -27,8 +27,6 @@
 #include <stdint.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 
 #include "hardware/stm32_pinmap.h"

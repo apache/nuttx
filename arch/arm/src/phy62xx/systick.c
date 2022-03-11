@@ -28,7 +28,7 @@
 #include "clock.h"
 #include "pwrmgr.h"
 #include "nvic.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "jump_function.h"
 #include <arch/irq.h>
 

@@ -35,7 +35,7 @@
 #include <nuttx/semaphore.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include <arch/chip/pm.h>
 #include <arch/board/board.h>
@@ -59,7 +59,8 @@ static bool g_used_lna = false;
 static bool g_used_tcxo = true;
 #ifdef CONFIG_BOARDCTL_RESET
 static struct pm_cpu_freqlock_s g_hv_lock =
-  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('B','P',0), PM_CPUFREQLOCK_FLAG_HV);
+  PM_CPUFREQLOCK_INIT(PM_CPUFREQLOCK_TAG('B', 'P', 0),
+                      PM_CPUFREQLOCK_FLAG_HV);
 #endif
 
 /****************************************************************************

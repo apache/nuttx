@@ -36,9 +36,7 @@
 
 #include <arch/imxrt/chip.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/imxrt_memorymap.h"
 #include "imxrt_mpuinit.h"
 

@@ -31,7 +31,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_spi.h"
 #include "stm32_gpio.h"

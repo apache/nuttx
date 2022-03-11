@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "cxd56_cpuindex.h"
 
 #ifdef CONFIG_SMP

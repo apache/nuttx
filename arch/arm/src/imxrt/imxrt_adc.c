@@ -40,8 +40,6 @@
 #include <nuttx/analog/ioctl.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "hardware/imxrt_adc.h"
 #include "hardware/imxrt_pinmux.h"

@@ -33,8 +33,6 @@
 
 #include "clock/clock.h"
 #include "up_internal.h"
-#include "up_arch.h"
-
 #include "chip.h"
 #include "m9s12.h"
 #include "m9s12_crg.h"

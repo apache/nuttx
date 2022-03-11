@@ -43,9 +43,7 @@
 #  include <termios.h>
 #endif
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "hardware/stm32_pinmap.h"

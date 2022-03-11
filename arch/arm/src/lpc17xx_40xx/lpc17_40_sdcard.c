@@ -44,8 +44,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "lpc17_40_gpdma.h"
 #include "lpc17_40_gpio.h"
 #include "lpc17_40_sdcard.h"

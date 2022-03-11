@@ -31,7 +31,7 @@
 #include <arch/board/board.h>
 #include <arch/board/board_liberodefs.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/mpfs_cache.h"
 
 /****************************************************************************

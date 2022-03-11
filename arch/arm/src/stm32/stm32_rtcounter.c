@@ -52,8 +52,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "stm32_pwr.h"
 #include "stm32_rcc.h"
 #include "stm32_rtc.h"

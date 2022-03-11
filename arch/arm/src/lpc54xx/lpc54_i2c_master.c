@@ -65,9 +65,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/lpc54_pinmux.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_flexcomm.h"

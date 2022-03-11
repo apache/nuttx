@@ -36,7 +36,7 @@
 #include <nuttx/irq.h>
 #include <nuttx/timers/pwm.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "sam_config.h"
 #include "sam_pwm.h"

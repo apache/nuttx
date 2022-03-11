@@ -24,8 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nrf52_uid.h"
 
 #include "hardware/nrf52_ficr.h"

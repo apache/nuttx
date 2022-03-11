@@ -33,7 +33,7 @@
 #include <nuttx/timers/rtc.h>
 #include "chip.h"
 #include <rx65n_rtc.h>
-#include "up_arch.h"
+#include "up_internal.h"
 
 #ifdef CONFIG_RTC_DRIVER
 

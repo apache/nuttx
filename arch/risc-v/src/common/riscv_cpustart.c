@@ -35,7 +35,6 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "riscv_arch.h"
 #include "sched/sched.h"
 #include "init/init.h"
 #include "riscv_internal.h"

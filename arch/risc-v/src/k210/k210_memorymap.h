@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include "riscv_internal.h"
-
 #include "hardware/k210_memorymap.h"
 #include "hardware/k210_uart.h"
 #include "hardware/k210_clint.h"

@@ -35,7 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/rp2040_dma.h"
 #include "rp2040_dmac.h"
 

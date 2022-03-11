@@ -39,7 +39,7 @@
 #include <nuttx/wqueue.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include <arch/board/board.h>
 #include <arch/chip/pin.h>

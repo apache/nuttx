@@ -29,9 +29,7 @@
 
 #include <arch/irq.h>
 
-#include "mips_arch.h"
 #include "mips_internal.h"
-
 #include "pic32mz_config.h"
 #include "hardware/pic32mz_uart.h"
 #include "hardware/pic32mz_pps.h"

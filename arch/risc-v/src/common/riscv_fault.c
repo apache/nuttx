@@ -38,8 +38,6 @@
 
 #include "sched/sched.h"
 #include "irq/irq.h"
-
-#include "riscv_arch.h"
 #include "riscv_internal.h"
 
 /****************************************************************************

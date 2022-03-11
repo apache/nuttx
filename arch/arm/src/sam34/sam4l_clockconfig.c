@@ -30,8 +30,6 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
 #include "arm_internal.h"
 #include "hardware/sam4l_pm.h"
 #include "hardware/sam4l_scif.h"

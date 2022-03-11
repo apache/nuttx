@@ -32,7 +32,7 @@
 
 #include <arch/chip/chip.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/sam_usart.h"
 
 #include "sam_config.h"

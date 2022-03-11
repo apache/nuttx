@@ -41,7 +41,6 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "hardware/stm32_ltdc.h"
 #include "hardware/stm32_dma2d.h"

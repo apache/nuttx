@@ -73,6 +73,21 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+/* Register access macros ***************************************************
+ *
+ * The register access mechanism provided in ez8.h differs from the useful in
+ * other NuttX architectures. The following NuttX common macros will at least
+ * make the access compatible at the source level (however, strict type check
+ * is lost).
+ */
+
+#define getreg8(a)          (a)
+#define putreg8(v,a)        ((a) = (v))
+#define getreg16(a)         (a)
+#define putreg16(v,a)       ((a) = (v))
+#define getreg32(a)         (a)
+#define putreg32(v,a)       ((a) = (v))
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/

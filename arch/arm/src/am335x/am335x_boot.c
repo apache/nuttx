@@ -40,8 +40,6 @@
 #include "mmu.h"
 #include "fpu.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "am335x_clockconfig.h"
 #include "am335x_wdog.h"
 #include "am335x_lowputc.h"

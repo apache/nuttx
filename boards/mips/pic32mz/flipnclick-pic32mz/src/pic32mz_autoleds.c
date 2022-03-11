@@ -31,9 +31,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "mips_arch.h"
 #include "mips_internal.h"
-
 #include "pic32mz_gpio.h"
 #include "flipnclick-pic32mz.h"
 

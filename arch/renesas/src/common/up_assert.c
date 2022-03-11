@@ -32,12 +32,13 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <arch/board/board.h>
+
 #include <nuttx/syslog/syslog.h>
 #include <nuttx/usb/usbdev_trace.h>
 
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "up_arch.h"
 #include "sched/sched.h"
 #include "up_internal.h"
 

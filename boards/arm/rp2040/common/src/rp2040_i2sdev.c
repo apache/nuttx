@@ -35,7 +35,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "rp2040_i2s.h"
 
 /****************************************************************************

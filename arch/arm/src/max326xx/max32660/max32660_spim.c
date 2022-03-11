@@ -61,8 +61,6 @@
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "hardware/max326_pinmux.h"
 #include "max326_clockconfig.h"

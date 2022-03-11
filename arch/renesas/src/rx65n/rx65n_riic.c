@@ -34,7 +34,7 @@
 #include <arch/board/rx65n_gpio.h>
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include "up_arch.h"
+#include "up_internal.h"
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/

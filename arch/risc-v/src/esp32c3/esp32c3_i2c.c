@@ -48,8 +48,7 @@
 #include "esp32c3_i2c.h"
 #include "esp32c3_irq.h"
 #include "esp32c3_gpio.h"
-
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_gpio_sigmap.h"
 #include "hardware/esp32c3_i2c.h"
 #include "hardware/esp32c3_soc.h"

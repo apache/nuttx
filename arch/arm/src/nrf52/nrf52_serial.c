@@ -44,9 +44,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "nrf52_config.h"
 #include "hardware/nrf52_uarte.h"

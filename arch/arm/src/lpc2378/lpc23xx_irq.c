@@ -52,8 +52,6 @@
 #include "arm.h"
 #include "chip.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "lpc2378.h"
 #include "lpc23xx_vic.h"
 
