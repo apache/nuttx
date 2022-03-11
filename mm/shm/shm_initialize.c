@@ -43,32 +43,14 @@
 
 /* State of the all shared memory */
 
-struct shm_info_s g_shminfo;
+struct shm_info_s g_shminfo =
+{
+  SEM_INITIALIZER(1)
+};
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: shm_initialize
- *
- * Description:
- *   Perform one time, start-up initialization of the shared memory logic.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- ****************************************************************************/
-
-void shm_initialize(void)
-{
-  /* Initialize the shared memory region list */
-
-  nxsem_init(&g_shminfo.si_sem, 0, 1);
-}
 
 /****************************************************************************
  * Name: shm_group_initialize
