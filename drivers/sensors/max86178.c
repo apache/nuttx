@@ -204,8 +204,8 @@ struct max86178_ecg_sensor_s
 
   struct sensor_lowerhalf_s lower;       /* Lower half sensor driver */
   FAR struct max86178_dev_s *dev;        /* Point to the device struct */
-  uint32_t interval_desired;             /* Desired sample interval(us) */
-  uint32_t batch_desired;                /* Desired batch latency (us) */
+  unsigned long interval_desired;        /* Desired sample interval(us) */
+  unsigned long batch_desired;           /* Desired batch latency (us) */
   float factor;                          /* ECG = ADC counts * factor */
   uint16_t ndiv;                         /* Sample rate=PLL/(ndiv*decrate) */
   uint8_t decrate;                       /* Sample rate=PLL/(ndiv*decrate) */
@@ -224,8 +224,8 @@ struct max86178_ppg_sensor_s
   FAR struct max86178_dev_s *dev;        /* Point to the device struct */
   struct max86178_ppg_optim_s optm1;     /* For PPG ADC1 optimization */
   struct max86178_ppg_optim_s optm2;     /* For PPG ADC2 optimization */
-  uint32_t interval_desired;             /* Desired sensor interval */
-  uint32_t batch_desired;                /* Desired sensor batch latency */
+  unsigned long interval_desired;        /* Desired sensor interval */
+  unsigned long batch_desired;           /* Desired sensor batch latency */
   uint32_t current;                      /* LED driver current (uA) */
   uint16_t frdiv;                        /* PPG fps = ppg_ref_clk / frdiv */
   uint16_t samples_per_meas;             /* N samples in a measurement */
@@ -270,8 +270,8 @@ struct max86178_dev_s
   /* Buffer for reading FIFO. MAX86178 has a 256-sample (3Byte/sample) FIFO */
 
   uint8_t fifobuf[MAX86178_FIFO_SIZE_BYTES];
-  uint32_t interval;                     /* Device's sample interval */
-  uint32_t batch;                        /* Device's batch latency */
+  unsigned long interval;                /* Device's sample interval */
+  unsigned long batch;                   /* Device's batch latency */
   uint32_t fifowtm;                      /* Total FIFO water marker */
   uint8_t ppg_activated;                 /* How many PPGs are activated */
   bool update_interval;                  /* Any sensor is updating interval */
@@ -303,8 +303,8 @@ static int max86178_writesingle(FAR struct max86178_dev_s *priv,
 /* MAX86178 common handle functions */
 
 static void max86178_batch_calcu(FAR struct max86178_dev_s *priv,
-                                 FAR unsigned int *latency_us,
-                                 uint32_t batch_number, uint32_t interval);
+                                 FAR unsigned long *latency_us,
+                                 uint32_t batch_number, unsigned long interval);
 static int max86178_checkid(FAR struct max86178_dev_s *priv);
 static void max86178_enable(FAR struct max86178_dev_s *priv, bool enable);
 static void max86178_fifo_flush(FAR struct max86178_dev_s *priv);
@@ -320,7 +320,7 @@ static void max86178_update_sensors(FAR struct max86178_dev_s *priv);
 /* MAX86178 ECG handle functions */
 
 static void max86178_ecg_calcu_clk(FAR struct max86178_ecg_sensor_s *sensor,
-                                   FAR uint32_t *interval);
+                                   FAR unsigned long *interval);
 static float max86178_ecg_calcudata(FAR struct max86178_ecg_sensor_s *sensor,
                                     uint32_t sample);
 static int max86178_ecg_enable(FAR struct max86178_dev_s *priv, bool enable);
@@ -330,7 +330,7 @@ static void max86178_ecg_set_sr(FAR struct max86178_dev_s *priv,
 /* MAX86178 PPG handle functions */
 
 static uint32_t max86178_ppg_calcudata(uint32_t sample);
-static uint16_t max86178_ppg_calcu_frdiv(uint32_t interval);
+static uint16_t max86178_ppg_calcu_frdiv(unsigned long interval);
 static void max86178_ppg_dealsample(FAR struct max86178_dev_s *priv,
                                     uint8_t chidx, uint32_t sample,
                                     FAR uint32_t *count,
@@ -350,9 +350,9 @@ static void max86178_ppg_set_fps(FAR struct max86178_dev_s *priv,
 static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
 static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                     FAR unsigned int *period_us);
+                                     FAR unsigned long *period_us);
 static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
-                              FAR unsigned int *latency_us);
+                              FAR unsigned long *latency_us);
 static int max86178_ecg_selftest(FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg);
 static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
@@ -363,9 +363,9 @@ static int max86178_ecg_control(FAR struct sensor_lowerhalf_s *lower,
 static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
                                  bool enable);
 static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                     FAR unsigned int *period_us);
+                                     FAR unsigned long *period_us);
 static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
-                              FAR unsigned int *latency_us);
+                              FAR unsigned long *latency_us);
 static int max86178_ppg_selftest(FAR struct sensor_lowerhalf_s *lower,
                                  unsigned long arg);
 static int max86178_ppg_control(FAR struct sensor_lowerhalf_s *lower,
@@ -863,10 +863,10 @@ static int max86178_writesingle(FAR struct max86178_dev_s *priv,
  ****************************************************************************/
 
 static void max86178_batch_calcu(FAR struct max86178_dev_s *priv,
-                                 FAR unsigned int *latency_us,
-                                 uint32_t batch_number, uint32_t interval)
+                                 FAR unsigned long *latency_us,
+                                 uint32_t batch_number, unsigned long interval)
 {
-  uint32_t max_latency;
+  unsigned long max_latency;
   uint32_t fifowtm;
 
   if (*latency_us > 0)
@@ -1465,8 +1465,8 @@ static void max86178_softreset(FAR struct max86178_dev_s *priv)
 
 static void max86178_update_sensors(FAR struct max86178_dev_s *priv)
 {
-  uint32_t intrvl_min;
-  uint32_t batch_min;
+  unsigned long intrvl_min;
+  unsigned long batch_min;
   uint32_t fifowtm = 0;
   uint16_t ppg_frdiv;
   uint8_t ppg_activating;
@@ -1690,7 +1690,7 @@ static void max86178_update_sensors(FAR struct max86178_dev_s *priv)
  ****************************************************************************/
 
 static void max86178_ecg_calcu_clk(FAR struct max86178_ecg_sensor_s *sensor,
-                                   FAR uint32_t *interval)
+                                   FAR unsigned long *interval)
 {
   float freq;
   uint16_t decrate;
@@ -1739,7 +1739,7 @@ static void max86178_ecg_calcu_clk(FAR struct max86178_ecg_sensor_s *sensor,
 
   ndiv = MAX86178_ECG_PLL_DFT / (freq * decrate);
   freq = MAX86178_ECG_PLL_DFT / (ndiv * decrate);
-  *interval = (unsigned int)(MAX86178_ONE_SECOND / freq);
+  *interval = MAX86178_ONE_SECOND / freq;
   sensor->ndiv = ndiv;
   sensor->decrate = decrate_options[i];
 }
@@ -1971,7 +1971,7 @@ static uint32_t max86178_ppg_calcudata(uint32_t sample)
  *
  ****************************************************************************/
 
-static uint16_t max86178_ppg_calcu_frdiv(uint32_t interval)
+static uint16_t max86178_ppg_calcu_frdiv(unsigned long interval)
 {
   float freq;
   uint16_t frdiv;
@@ -2545,7 +2545,7 @@ static int max86178_ecg_activate(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
-                              FAR unsigned int *latency_us)
+                              FAR unsigned long *latency_us)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
     (FAR struct max86178_ecg_sensor_s *)lower;
@@ -2570,7 +2570,7 @@ static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
                        sensor->interval_desired);
   if (*latency_us != sensor->batch_desired)
     {
-      sensor->batch_desired = (uint32_t)*latency_us;
+      sensor->batch_desired = *latency_us;
       priv->update_batch = true;
     }
 
@@ -2600,12 +2600,12 @@ static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                     FAR unsigned int *period_us)
+                                     FAR unsigned long *period_us)
 {
   FAR struct max86178_ecg_sensor_s *sensor =
     (FAR struct max86178_ecg_sensor_s *)lower;
   FAR struct max86178_dev_s *priv;
-  uint32_t interval;
+  unsigned long interval;
 
   /* Sanity check */
 
@@ -2623,9 +2623,9 @@ static int max86178_ecg_set_interval(FAR struct sensor_lowerhalf_s *lower,
    * activated.
    */
 
-  interval = (uint32_t)*period_us;
+  interval = *period_us;
   max86178_ecg_calcu_clk(sensor, &interval);
-  *period_us = (unsigned int)interval;
+  *period_us = interval;
   if (sensor->interval_desired != interval)
     {
       sensor->interval_desired = interval;
@@ -2846,7 +2846,7 @@ static int max86178_ppg_activate(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
-                              FAR unsigned int *latency_us)
+                              FAR unsigned long *latency_us)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
     (FAR struct max86178_ppg_sensor_s *)lower;
@@ -2871,7 +2871,7 @@ static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
                        sensor->interval_desired);
   if (*latency_us != sensor->batch_desired)
     {
-      sensor->batch_desired = (uint32_t)*latency_us;
+      sensor->batch_desired = *latency_us;
       priv->update_batch = true;
     }
 
@@ -2902,7 +2902,7 @@ static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                     FAR unsigned int *period_us)
+                                     FAR unsigned long *period_us)
 {
   FAR struct max86178_ppg_sensor_s *sensor =
     (FAR struct max86178_ppg_sensor_s *)lower;
@@ -2927,11 +2927,11 @@ static int max86178_ppg_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
   frdiv = max86178_ppg_calcu_frdiv(*period_us);
   freq = MAX86178_REF_CLK_DFT / frdiv;
-  *period_us = (unsigned int)(MAX86178_ONE_SECOND / freq);
+  *period_us = MAX86178_ONE_SECOND / freq;
   sensor->frdiv = frdiv;
-  if (sensor->interval_desired != (uint32_t)*period_us)
+  if (sensor->interval_desired != *period_us)
     {
-      sensor->interval_desired = (uint32_t)*period_us;
+      sensor->interval_desired = *period_us;
       priv->update_interval = true;
     }
 

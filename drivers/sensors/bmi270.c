@@ -573,10 +573,9 @@ struct bmi270_sensor_s
 {
   struct sensor_lowerhalf_s lower;              /* Lower half sensor driver */
   struct work_s             work;               /* Sensor handler */
-  unsigned int              interval;           /* Sensor interval */
-  unsigned int              batch;              /* Sensor bat */
-  unsigned int              fifowtm;            /* Sensor fifo water marker */
-  unsigned int              last_update;        /* Last update flag */
+  unsigned long             interval;           /* Sensor interval */
+  unsigned long             batch;              /* Sensor bat */
+  unsigned long             fifowtm;            /* Sensor fifo water marker */
   float                     factor;             /* Data factor */
   bool                      fifoen;             /* Sensor fifo enable */
   bool                      activated;          /* Sensor working state */
@@ -592,7 +591,7 @@ struct bmi270_dev_s
   uint64_t timestamp;                           /* Units is microseconds */
   struct work_s work;                           /* Interrupt handler */
   FAR const char *file_path;                    /* File path of parameter. */
-  unsigned int fifowtm;                         /* FIFO water marker */
+  unsigned long fifowtm;                        /* FIFO water marker */
   unsigned int featen;                          /* Feature enable */
   int16_t cross_sense;                          /* Gyroscope cross sensitivity coefficient */
   FAR uint8_t *fifo_buff;                       /* FIFO temp buffer */
@@ -786,7 +785,7 @@ static int bmi270_gy_setfilter(FAR struct bmi270_dev_s *priv,
 /* FIFO handle functions */
 
 static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
-                                    unsigned int value);
+                                    unsigned long value);
 static int bmi270_fifo_xl_enable(FAR struct bmi270_dev_s *priv,
                                  uint8_t value);
 static int bmi270_fifo_gy_enable(FAR struct bmi270_dev_s *priv,
@@ -815,9 +814,9 @@ static int bmi270_feat_manage(FAR struct bmi270_dev_s *priv);
 /* Sensor ops functions */
 
 static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR unsigned int *latency_us);
+                        FAR unsigned long *latency_us);
 static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us);
+                               FAR unsigned long *period_us);
 static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int bmi270_selftest(FAR struct sensor_lowerhalf_s *lower,
@@ -2735,7 +2734,7 @@ static int bmi270_gy_setfilter(FAR struct bmi270_dev_s *priv,
  ****************************************************************************/
 
 static int bmi270_fifo_setwatermark(FAR struct bmi270_dev_s *priv,
-                                    unsigned int value)
+                                    unsigned long value)
 {
   bmi270_fifo_wtm_0_t fifo_wtm0;
   bmi270_fifo_wtm_1_t fifo_wtm1;
@@ -3470,12 +3469,12 @@ static int bmi270_feat_manage(FAR struct bmi270_dev_s *priv)
  ****************************************************************************/
 
 static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR unsigned int *latency_us)
+                        FAR unsigned long *latency_us)
 {
   FAR struct bmi270_sensor_s *sensor = (FAR struct bmi270_sensor_s *)lower;
   bmi270_int_map_data_t regval_int_map_data;
   FAR struct bmi270_dev_s * priv;
-  uint32_t max_latency;
+  unsigned long max_latency;
 
   /* Sanity check. */
 
@@ -3647,7 +3646,7 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct bmi270_sensor_s *sensor = (FAR struct bmi270_sensor_s *)lower;
   FAR struct bmi270_dev_s * priv;

@@ -106,7 +106,7 @@ typedef union ct7117_control_u ct7117_control_t;
 struct ct7117_odr_s
 {
   uint8_t regval;              /* the data of register. */
-  unsigned int odr;            /* the unit is us. */
+  unsigned long odr;           /* the unit is us. */
 };
 
 /* Structure for ct7117 device. */
@@ -116,7 +116,7 @@ struct ct7117_dev_s
   struct sensor_lowerhalf_s lower;          /* Lower half driver. */
   FAR const struct ct7117_config_s *config; /* The board config function. */
   bool activated;                           /* Sensor working state. */
-  unsigned int interval;                    /* Sensor acquisition interval. */
+  unsigned long interval;                   /* Sensor acquisition interval. */
   struct work_s work;                       /* Work queue for reading data. */
 };
 
@@ -143,14 +143,14 @@ static int ct7117_checkid(FAR struct ct7117_dev_s *priv);
 static int ct7117_setmode(FAR struct ct7117_dev_s *priv, uint8_t mode);
 static int ct7117_readtemp(FAR struct ct7117_dev_s *priv,
                            FAR struct sensor_event_temp *data);
-static int ct7117_findodr(FAR unsigned int *expect_period_us);
+static int ct7117_findodr(FAR unsigned long *expect_period_us);
 
 /* Sensor ops functions. */
 
 static int ct7117_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int ct7117_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *interval_us);
+                               FAR unsigned long *interval_us);
 static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg);
 
@@ -547,7 +547,7 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int ct7117_findodr(FAR unsigned int *expect_period_us)
+static int ct7117_findodr(FAR unsigned long *expect_period_us)
 {
   int i;
   int len = sizeof(g_ct7117_odr) / sizeof(struct ct7117_odr_s);
@@ -585,7 +585,7 @@ static int ct7117_findodr(FAR unsigned int *expect_period_us)
  ****************************************************************************/
 
 static int ct7117_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *interval_us)
+                               FAR unsigned long *interval_us)
 {
   FAR struct ct7117_dev_s *priv = (FAR struct ct7117_dev_s *)lower;
   ct7117_control_t ctrl;

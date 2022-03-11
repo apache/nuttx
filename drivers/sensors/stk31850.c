@@ -285,7 +285,7 @@ struct stk31850_dev_s
 
   struct sensor_lowerhalf_s lower;                /* Lower half sensor driver. */
   bool activated;                                 /* Sensor working state. */
-  unsigned int interval;                          /* Sensor acquisition interval. */
+  unsigned long interval;                         /* Sensor acquisition interval. */
   FAR const struct stk31850_config_s *config;     /* The board config function. */
   struct work_s work;                             /* Interrupt handler worker. */
   float last_lux;                                 /* Last light data. */
@@ -334,7 +334,7 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
 /* Sensor ops functions */
 
 static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us);
+                                 FAR unsigned long *period_us);
 static int stk31850_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
 static int stk31850_selftest(FAR struct sensor_lowerhalf_s *lower,
@@ -1376,7 +1376,7 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
  ****************************************************************************/
 
 static int stk31850_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us)
+                                 FAR unsigned long *period_us)
 {
   FAR struct stk31850_dev_s *priv = (FAR struct stk31850_dev_s *)lower;
   float freq;

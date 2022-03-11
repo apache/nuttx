@@ -185,9 +185,9 @@ struct ad5940_dev_s
 
   uint32_t                         fifobuf[AD5940_FIFOSLOTS_MAX
                                            * AD5940_RESULTS_PER_MEAS];
-  uint32_t                         interval;      /* Sensor interval(us) */
+  unsigned long                    interval;      /* Sensor interval(us) */
   float                            odr;           /* Sensor ODR(Hz) */
-  uint32_t                         batch_latency; /* Batch latency(us) */
+  unsigned long                    batch_latency; /* Batch latency(us) */
   uint16_t                         fifowtm;       /* FIFO water marker */
   bool                             activated;     /* Device state */
   bool                             poll2batch;    /* Change polling->batch */
@@ -361,9 +361,9 @@ static uint32_t ad5940_wgfreqwordcal(float sinfreqhz, float wgclock);
 static int  ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 static int  ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us);
+                                FAR unsigned long *period_us);
 static int  ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
-                         FAR unsigned int *latency_us);
+                         FAR unsigned long *latency_us);
 static int  ad5940_selftest(FAR struct sensor_lowerhalf_s *lower,
                             unsigned long arg);
 
@@ -5474,7 +5474,7 @@ static int ad5940_activate(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct ad5940_dev_s * priv = (FAR struct ad5940_dev_s *)lower;
   float freq;
@@ -5498,8 +5498,8 @@ static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
    * WUPTCLK in unit us.
    */
 
-  *period_us = (uint32_t)((uint32_t)(priv->biacfg.wuptclkfreq / freq) *
-                          AD5940_ONE_SECOND / priv->biacfg.wuptclkfreq);
+  *period_us = (priv->biacfg.wuptclkfreq / freq) *
+               AD5940_ONE_SECOND / priv->biacfg.wuptclkfreq;
   priv->interval = *period_us;
   priv->odr = AD5940_ONE_SECOND / (float)priv->interval;
 
@@ -5533,10 +5533,10 @@ static int ad5940_set_interval(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR unsigned int *latency_us)
+                        FAR unsigned long *latency_us)
 {
   FAR struct ad5940_dev_s *priv = (FAR struct ad5940_dev_s *)lower;
-  uint32_t max_latency;
+  unsigned long max_latency;
 
   /* Sanity check */
 

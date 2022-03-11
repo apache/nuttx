@@ -154,7 +154,7 @@ struct ak09919c_dev_s
   struct sensor_lowerhalf_s lower;            /* The lower half driver. */
   FAR const struct ak09919c_config_s *config; /* The board config function. */
   bool activated;                             /* Sensor working state. */
-  unsigned int interval;                      /* Sensor sample interval. */
+  unsigned long interval;                     /* Sensor sample interval. */
   uint8_t workmode;                           /* Sensor work mode. */
   struct work_s work;                         /* Work queue for reading. */
 };
@@ -164,7 +164,7 @@ struct ak09919c_dev_s
 struct ak09919c_odr_s
 {
   uint8_t regval;                             /* the data of register. */
-  unsigned int odr;                           /* the unit is us. */
+  unsigned long odr;                          /* the unit is us. */
 };
 
 /* Structure for ak09919c data threshold. */
@@ -224,7 +224,7 @@ static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
 static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
                             FAR struct sensor_event_mag *data);
 static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv);
-static int ak09919c_findodr(FAR unsigned int *expect_period_us);
+static int ak09919c_findodr(FAR unsigned long *expect_period_us);
 static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
                                 FAR const struct ak09919c_threshold_s
                                 *threshold);
@@ -234,7 +234,7 @@ static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
 static int ak09919c_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
 static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int * interval_us);
+                                 FAR unsigned long *interval_us);
 static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
@@ -799,7 +799,7 @@ static int ak09919c_enable(FAR struct ak09919c_dev_s *priv, bool enable)
  *
  ****************************************************************************/
 
-static int ak09919c_findodr(FAR unsigned int *expect_period_us)
+static int ak09919c_findodr(FAR unsigned long *expect_period_us)
 {
   int i;
   int len = sizeof(g_ak09919c_odr) / sizeof(struct ak09919c_odr_s);
@@ -999,7 +999,7 @@ static int ak09919c_checkdev(FAR struct ak09919c_dev_s *priv)
  ****************************************************************************/
 
 static int ak09919c_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int * interval_us)
+                                 FAR unsigned long * interval_us)
 {
   FAR struct ak09919c_dev_s *priv = (FAR struct ak09919c_dev_s *)lower;
   int ret;

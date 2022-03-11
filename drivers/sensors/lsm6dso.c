@@ -1149,10 +1149,9 @@ struct lsm6dso_sensor_s
 {
   struct sensor_lowerhalf_s lower;              /* Lower half sensor driver */
   struct work_s             work;               /* Sensor handler */
-  unsigned int              interval;           /* Sensor interval */
-  unsigned int              batch;              /* Sensor bat */
+  unsigned long             interval;           /* Sensor interval */
+  unsigned long             batch;              /* Sensor bat */
   unsigned int              fifowtm;            /* Sensor fifo water marker */
-  unsigned int              last_update;        /* Last update flag */
   float                     factor;             /* Data factor */
   bool                      fifoen;             /* Sensor fifo enable */
   bool                      activated;          /* Sensor working state */
@@ -1297,9 +1296,9 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
 /* Sensor ops functions */
 
 static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
-                         FAR unsigned int *latency_us);
+                         FAR unsigned long *latency_us);
 static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us);
+                                FAR unsigned long *period_us);
 static int lsm6dso_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 static int lsm6dso_selftest(FAR struct sensor_lowerhalf_s *lower,
@@ -3908,12 +3907,12 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
  ****************************************************************************/
 
 static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
-                         FAR unsigned int *latency_us)
+                         FAR unsigned long *latency_us)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
   lsm6dso_pin_int1_route_t pin_int1_route;
   FAR struct lsm6dso_dev_s * priv;
-  uint32_t max_latency;
+  unsigned long max_latency;
   int idx;
   int ret;
 
@@ -4071,7 +4070,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int lsm6dso_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us)
+                                FAR unsigned long *period_us)
 {
   FAR struct lsm6dso_sensor_s *sensor = (FAR struct lsm6dso_sensor_s *)lower;
   FAR struct lsm6dso_dev_s * priv;

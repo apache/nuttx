@@ -112,8 +112,8 @@ struct gh3020_sensor_s
 
   struct sensor_lowerhalf_s lower;       /* Lower half sensor driver */
   FAR struct gh3020_dev_s *dev;          /* Pointer to the device struct */
-  uint32_t interval;                     /* Sample interval (us) */
-  uint32_t batch;                        /* Batch latency (us) */
+  unsigned long interval;                /* Sample interval (us) */
+  unsigned long batch;                   /* Batch latency (us) */
   uint32_t current;                      /* LED driver current (uA) */
   uint8_t chidx;                         /* PPG channel index */
   bool activated;                        /* If it's activated now. */
@@ -140,8 +140,8 @@ struct gh3020_dev_s
 
   struct sensor_event_ppgq ppgdata[GH3020_SENSOR_NUM][GH3020_BATCH_NUMBER];
   int32_t adc_bias[4];                   /* ADCs bias (Unit in ADC counts) */
-  uint32_t batch;                        /* Common batch(us) for interrupts */
-  uint32_t interval;                     /* Common interval(us) for polling */
+  unsigned long batch;                   /* Common batch(us) for interrupts */
+  unsigned long interval;                /* Common interval(us) for polling */
   uint32_t intvl_prev;                   /* Previous common interval(us) */
   uint32_t channelmode;                  /* PPG channels status mode */
   float tia_calibr;                      /* TIA calibration coefficent */
@@ -196,9 +196,9 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
 static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us);
+                               FAR unsigned long *period_us);
 static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR unsigned int *latency_us);
+                        FAR unsigned long *latency_us);
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
 static int gh3020_selftest(FAR struct sensor_lowerhalf_s *lower,
                            unsigned long arg);
@@ -1023,7 +1023,7 @@ static void gh3020_switch_intrpt2poll(FAR struct gh3020_dev_s *priv)
 static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
 {
   FAR struct gh3020_sensor_s *sensor;
-  uint32_t interval_min;
+  unsigned long interval_min;
   uint16_t fifowtm;
   uint16_t rate;
   uint8_t idx;
@@ -1363,11 +1363,11 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
  ****************************************************************************/
 
 static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
-                        FAR unsigned int *latency_us)
+                        FAR unsigned long *latency_us)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
   FAR struct gh3020_dev_s *priv;
-  uint32_t max_latency;
+  unsigned long max_latency;
   uint16_t fifowtm = 0;
 
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL && latency_us != NULL);
@@ -1400,7 +1400,7 @@ static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
 
   if (*latency_us != sensor->batch)
     {
-      sensor->batch = (uint32_t)*latency_us;
+      sensor->batch = *latency_us;
 
       /* If GH3020 is running, flag it and new batch will take effect when
        * next FIFO procession comes. Otherwise the new batch will take effect
@@ -1443,7 +1443,7 @@ static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
  ****************************************************************************/
 
 static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
   FAR struct gh3020_dev_s *priv;
@@ -1469,13 +1469,13 @@ static int gh3020_set_interval(FAR struct sensor_lowerhalf_s *lower,
       freq = GH3020_SAMPLERATE_MIN;
     }
 
-  *period_us = (unsigned int)(GH3020_ONE_SECOND / (uint32_t)freq);
+  *period_us = GH3020_ONE_SECOND / freq;
 
   /* Do something only when the interval changed. */
 
   if (*period_us != sensor->interval)
     {
-      sensor->interval = (uint32_t)*period_us;
+      sensor->interval = *period_us;
 
       /* If this PPG channel is running, new interval will take effect when
        * next FIFO procession comes. Otherwise do nothing, the new interval

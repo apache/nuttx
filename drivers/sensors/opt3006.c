@@ -107,7 +107,7 @@ struct opt3006_dev_s
   struct sensor_lowerhalf_s lower;          /* Lower half sensor driver */
   bool activated;                           /* Sensor working state */
   uint64_t timestamp;                       /* Units is microseconds */
-  unsigned int interval;                    /* Sensor acquisition interval */
+  unsigned long interval;                   /* Sensor acquisition interval */
   FAR struct opt3006_config_s *config;      /* The board config function */
   FAR opt3006_registers_t *devreg;          /* opt3006 device register */
   struct work_s work;                       /* Interrupt handler worker */
@@ -133,7 +133,7 @@ static int opt3006_readdevid(FAR struct opt3006_dev_s *priv,
                              FAR opt3006_registers_t *devreg);
 static int opt3006_enable(FAR struct opt3006_dev_s *priv,
                           bool enable);
-static void opt3006_findodr(FAR unsigned int *expect_period_us);
+static void opt3006_findodr(FAR unsigned long *expect_period_us);
 static int opt3006_setrange(FAR struct opt3006_dev_s *priv,
                             FAR opt3006_registers_t *devreg,
                             uint16_t value);
@@ -160,7 +160,7 @@ static int opt3006_readreg(FAR struct opt3006_dev_s *priv,
 /* Sensor ops functions */
 
 static int opt3006_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us);
+                                FAR unsigned long *period_us);
 static int opt3006_activate(FAR struct sensor_lowerhalf_s *lower,
                             bool enable);
 
@@ -535,7 +535,7 @@ static int opt3006_enable(FAR struct opt3006_dev_s *priv,
  *
  ****************************************************************************/
 
-static void opt3006_findodr(FAR unsigned int *expect_period_us)
+static void opt3006_findodr(FAR unsigned long *expect_period_us)
 {
   if (*expect_period_us < OPT3006_INTERVAL_800MS)
     {
@@ -849,7 +849,7 @@ static int opt3006_readreg(FAR struct opt3006_dev_s *priv,
  ****************************************************************************/
 
 static int opt3006_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us)
+                                FAR unsigned long *period_us)
 {
   FAR struct opt3006_dev_s *priv = (FAR struct opt3006_dev_s *)lower;
   int ret;

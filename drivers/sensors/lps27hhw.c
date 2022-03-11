@@ -190,7 +190,7 @@ struct lps27hhw_sensor_s
 {
   struct sensor_lowerhalf_s lower;               /* Lower half sensor driver */
   bool                      activated;           /* Sensor working state */
-  uint32_t                  interval;            /* Sensor interval */
+  unsigned long             interval;            /* Sensor interval */
   uint64_t                  timestamp;           /* Units is microseconds */
 };
 
@@ -208,7 +208,7 @@ struct lps27hhw_dev_s
 struct lps27hhw_odr_s
 {
   enum lps27hhw_odr_e regval;                    /* The data register */
-  uint32_t            interval;                  /* The interval in us */
+  unsigned long       interval;                  /* The interval in us */
 };
 
 /****************************************************************************
@@ -234,7 +234,7 @@ static int lps27hhw_updatereg(FAR struct lps27hhw_dev_s *priv,
 static int lps27hhw_readdevid(FAR struct lps27hhw_dev_s *priv);
 static int lps27hhw_reset(FAR struct lps27hhw_dev_s *priv);
 static uint8_t lps27hhw_findodr(FAR struct lps27hhw_dev_s *priv,
-                                FAR uint32_t *interval);
+                                FAR unsigned long *interval);
 static int lps27hhw_setodr(FAR struct lps27hhw_dev_s *priv,
                            enum lps27hhw_odr_e odr);
 static int lps27hhw_setlpfilter(FAR struct lps27hhw_dev_s *priv,
@@ -251,7 +251,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv);
 /* Sensor ops functions */
 
 static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us);
+                                 FAR unsigned long *period_us);
 static int lps27hhw_activate(FAR struct sensor_lowerhalf_s *lower,
                              bool enable);
 static int lps27hhw_selftest(FAR struct sensor_lowerhalf_s *lower,
@@ -596,7 +596,7 @@ static int lps27hhw_reset(FAR struct lps27hhw_dev_s *priv)
  ****************************************************************************/
 
 static uint8_t lps27hhw_findodr(FAR struct lps27hhw_dev_s *priv,
-                                FAR uint32_t *interval)
+                                FAR unsigned long *interval)
 {
   uint8_t idx;
 
@@ -976,7 +976,7 @@ static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv)
  ****************************************************************************/
 
 static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                 FAR unsigned int *period_us)
+                                 FAR unsigned long *period_us)
 {
   FAR struct lps27hhw_dev_s *priv = (FAR struct lps27hhw_dev_s *)lower;
   uint8_t idx;
@@ -988,7 +988,7 @@ static int lps27hhw_set_interval(FAR struct sensor_lowerhalf_s *lower,
 
   /* Find best matching interval */
 
-  idx = lps27hhw_findodr(priv, (FAR uint32_t *)period_us);
+  idx = lps27hhw_findodr(priv, period_us);
   priv->dev.interval = g_lps27hhw_odr[idx].interval;
 
   ret = lps27hhw_setodr(priv, g_lps27hhw_odr[idx].regval);
