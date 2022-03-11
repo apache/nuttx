@@ -1,0 +1,89 @@
+#
+# For a description of the syntax of this configuration file,
+# see the file kconfig-language.txt in the NuttX tools repository.
+#
+
+config DEV_SIMPLE_ADDRENV
+	bool "Simple AddrEnv"
+	default n
+
+config DEV_NULL
+	bool "Enable /dev/null"
+	default y
+
+config DEV_ZERO
+	bool "Enable /dev/zero"
+	default n
+
+config DRVR_MKRD
+	bool "RAM disk wrapper (mkrd)"
+	default n
+	---help---
+		Build the mkrd() function which serves as a wrapper to simplify
+		creation of RAM disks.  If the boardctrl() interface is enabled,
+		the selecting this option will also enable the BOARDIOC_MKRD
+		command that will support creation of RAM disks from applications.
+
+# ARCH needs to support memory access while CPU is running to be able to use
+# the LWL CONSOLE
+
+config ARCH_HAVE_RDWR_MEM_CPU_RUN
+	bool
+	default n
+
+config LWL_CONSOLE
+bool "Lightweight Link Console Support"
+	default n
+	depends on DEV_CONSOLE && ARCH_HAVE_RDWR_MEM_CPU_RUN
+	---help---
+		Use the lightweight link console which provides console over a
+		debug channel by means of shared memory.  A terminal application
+		for openocd as the debugger is available in tools/ocdconsole.py.
+
+menu "Buffering"
+
+config DRVR_WRITEBUFFER
+	bool "Enable write buffer support"
+	default n
+	---help---
+		Enable generic write buffering support that can be used by a variety
+		of drivers.
+
+if DRVR_WRITEBUFFER
+
+config DRVR_WRDELAY
+	int "Write flush delay"
+	default 350
+	---help---
+		If there is no write activity for this configured amount of time,
+		then the contents will be automatically flushed to the media.  This
+		reduces the likelihood that data will be stuck in the write buffer
+		at the time of power down.
+
+endif # DRVR_WRITEBUFFER
+
+config DRVR_READAHEAD
+	bool "Enable read-ahead buffer support"
+	default n
+	---help---
+		Enable generic read-ahead buffering support that can be used by a
+		variety of drivers.
+
+if DRVR_WRITEBUFFER || DRVR_READAHEAD
+
+config DRVR_READBYTES
+	bool "Support byte read method"
+	default y if MTD_BYTE_WRITE
+	default n if !MTD_BYTE_WRITE
+
+config DRVR_REMOVABLE
+	bool "Support removable media"
+	default n
+
+config DRVR_INVALIDATE
+	bool "Support cache invalidation"
+	default n
+
+endif # DRVR_WRITEBUFFER || DRVR_READAHEAD
+
+endmenu # Buffering
