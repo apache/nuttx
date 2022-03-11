@@ -668,6 +668,12 @@ void nx_start(void)
   net_initialize();
 #endif
 
+#ifndef CONFIG_BINFMT_DISABLE
+  /* Initialize the binfmt system */
+
+  binfmt_initialize();
+#endif
+
   /* Initialize Hardware Facilities *****************************************/
 
   /* The processor specific details of running the operating system
@@ -692,12 +698,6 @@ void nx_start(void)
   g_nx_initstate = OSINIT_HARDWARE;
 
   /* Setup for Multi-Tasking ************************************************/
-
-#ifndef CONFIG_BINFMT_DISABLE
-  /* Initialize the binfmt system */
-
-  binfmt_initialize();
-#endif
 
   /* Announce that the CPU0 IDLE task has started */
 
