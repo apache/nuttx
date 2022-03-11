@@ -40,8 +40,6 @@
 #include "arm_arch.h"
 #include "arm_internal.h"
 
-#include "cxd56_irq.h"
-
 #ifdef CONFIG_SMP
 #  include "init/init.h"
 #endif

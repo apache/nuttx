@@ -41,7 +41,6 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
 #  include "cxd56_cpuindex.h"
-#  include "cxd56_irq.h"
 #endif
 
 /****************************************************************************

@@ -33,7 +33,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 
-#include "chip.h"
 #include "xtensa.h"
 #include "sched/sched.h"
 

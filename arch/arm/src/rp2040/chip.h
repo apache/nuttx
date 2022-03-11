@@ -49,7 +49,6 @@
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 3
 #  include "hardware/rp2040_sio.h"
-#  include "rp2040_irq.h"
 #endif
 
 /****************************************************************************

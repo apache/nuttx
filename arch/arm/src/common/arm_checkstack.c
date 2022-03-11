@@ -35,7 +35,6 @@
 
 #include "sched/sched.h"
 #include "arm_internal.h"
-#include "chip.h"
 
 #ifdef CONFIG_STACK_COLORATION
 
