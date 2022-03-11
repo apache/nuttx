@@ -37,8 +37,6 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "stm32_rcc.h"
 #include "stm32_gpio.h"
 #include "stm32_lptim.h"

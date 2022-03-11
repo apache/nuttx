@@ -40,9 +40,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "cxd56_clock.h"
 #include "cxd56_i2c.h"
 #include "hardware/cxd56_i2c.h"

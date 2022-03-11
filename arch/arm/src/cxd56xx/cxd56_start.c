@@ -57,7 +57,6 @@
 #include <arch/irq.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "nvic.h"
 #include "sched/sched.h"

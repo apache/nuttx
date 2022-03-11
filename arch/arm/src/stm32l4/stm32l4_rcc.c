@@ -32,8 +32,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "stm32l4_rcc.h"
 #include "stm32l4_flash.h"

@@ -33,7 +33,7 @@
 #include <nuttx/cache.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "barriers.h"
 
 #ifdef CONFIG_BOARDCTL_BOOT_IMAGE

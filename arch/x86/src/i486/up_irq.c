@@ -34,7 +34,6 @@
 #include <arch/irq.h>
 #include <arch/io.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 #include "qemu.h"
 

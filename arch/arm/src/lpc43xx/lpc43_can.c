@@ -38,8 +38,6 @@
 #include <nuttx/can/can.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "lpc43_gpio.h"
 #include "hardware/lpc43_can.h"

@@ -33,7 +33,6 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/timers/oneshot.h>
 
-#include "riscv_arch.h"
 #include "riscv_internal.h"
 
 #include <hardware/bl602_timer.h>

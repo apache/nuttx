@@ -619,17 +619,6 @@
 #  define Z16F_TIMERSCTL1_GATED   _HX8(06)        /*   Gated mode (CTL0 TMOD = 0)*/
 #  define Z16F_TIMERSCTL1_CAPCMP  _HX8(07)        /*   Capture/Compare mode (CTL0 TMOD = 0)*/
 
-/* Register access macros ***********************************************************/
-
-#ifndef __ASSEMBLY__
-#  define getreg8(a)              (*(uint8_t volatile _Near*)(a))
-#  define putreg8(v,a)            (*(uint8_t volatile _Near*)(a) = (v))
-#  define getreg16(a)             (*(uint16_t volatile _Near*)(a))
-#  define putreg16(v,a)           (*(uint16_t volatile _Near*)(a) = (v))
-#  define getreg32(a)             (*(uint32_t volatile _Near*)(a))
-#  define putreg32(v,a)           (*(uint32_t volatile _Near*)(a) = (v))
-#endif /* __ASSEMBLY__ */
-
 /************************************************************************************
  * Public Function Prototypes
  ************************************************************************************/

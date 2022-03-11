@@ -37,8 +37,6 @@
 
 #include "chip.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "stm32_gpio.h"
 #include "stm32_tim.h"
 #include "stm32_qencoder.h"

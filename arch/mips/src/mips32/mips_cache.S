@@ -28,7 +28,7 @@
 #include <arch/mips32/registers.h>
 #include <arch/mips32/cp0.h>
 
-#include "mips_arch.h"
+#include "mips_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

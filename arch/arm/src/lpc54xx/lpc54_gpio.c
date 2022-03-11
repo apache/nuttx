@@ -32,7 +32,7 @@
 
 #include <arch/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/lpc54_iocon.h"
 #include "hardware/lpc54_gpio.h"
 #include "lpc54_gpio.h"

@@ -29,7 +29,6 @@
 #include <debug.h>
 
 #include "riscv_internal.h"
-
 #include "hardware/esp32c3_system.h"
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_syscon.h"

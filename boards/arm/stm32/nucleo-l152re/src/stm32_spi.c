@@ -32,7 +32,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/spi/spi_transfer.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_gpio.h"
 #include "stm32_spi.h"

@@ -26,7 +26,6 @@
 
 #include <stdint.h>
 #include <assert.h>
-#include "z80_arch.h"
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
@@ -36,7 +35,6 @@
 
 #include "chip/switch.h"
 #include "z80_internal.h"
-
 #include "group/group.h"
 
 /****************************************************************************

@@ -29,7 +29,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/efm32_gpio.h"
 #include "efm32_gpio.h"
 

@@ -25,8 +25,7 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "hardware/bl602_glb.h"
 #include "hardware/bl602_hbn.h"
 #include "bl602_romapi.h"
@@ -68,6 +67,10 @@ void up_systemreset(void)
   asm volatile("csrci mstatus, 8");
 
   bl602_romapi_reset_system();
+
+  /* Wait for the reset */
+
+  for (; ; );
 }
 
 /****************************************************************************

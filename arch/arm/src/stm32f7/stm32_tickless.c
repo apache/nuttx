@@ -89,8 +89,7 @@
 #include <nuttx/arch.h>
 #include <debug.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "stm32_tim.h"
 #include "stm32_dbgmcu.h"
 

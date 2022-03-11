@@ -35,7 +35,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc31_cgu.h"
 
 /****************************************************************************
@@ -492,7 +492,8 @@ struct lpc31_clkinit_s
   {
     uint16_t  sel;
     struct lpc31_fdivconfig_s cfg;
-  } dynfdiv[CGU_NDYNFRACDIV];
+  }
+  dynfdiv[CGU_NDYNFRACDIV];
 #endif
 };
 

@@ -47,8 +47,6 @@
 #include <nuttx/analog/ioctl.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "stm32_rcc.h"
 #include "stm32_tim.h"

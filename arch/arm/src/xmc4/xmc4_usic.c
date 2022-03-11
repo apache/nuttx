@@ -60,7 +60,7 @@
 
 #include <arch/xmc4/chip.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/xmc4_usic.h"
 #include "hardware/xmc4_scu.h"
 #include "xmc4_clockconfig.h"

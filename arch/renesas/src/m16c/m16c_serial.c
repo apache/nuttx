@@ -38,7 +38,6 @@
 #include <nuttx/serial/serial.h>
 
 #include "chip.h"
-#include "up_arch.h"
 #include "up_internal.h"
 #include "m16c_uart.h"
 

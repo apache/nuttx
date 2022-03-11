@@ -32,7 +32,6 @@
 #include <nuttx/power/pm.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32.h"
 #include "nucleo-f4x1re.h"

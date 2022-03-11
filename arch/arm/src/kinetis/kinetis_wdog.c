@@ -26,7 +26,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "kinetis.h"
 #include "hardware/kinetis_wdog.h"
 

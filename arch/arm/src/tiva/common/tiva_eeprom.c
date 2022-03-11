@@ -30,7 +30,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/mtd/mtd.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "hardware/tiva_sysctrl.h"
 #include "tiva_eeprom.h"

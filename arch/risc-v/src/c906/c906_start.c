@@ -28,7 +28,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "c906_clockconfig.h"
 #include "c906_userspace.h"
 #include "c906.h"

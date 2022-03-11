@@ -67,9 +67,7 @@
 
 #include <nuttx/arch.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "s32k1xx_config.h"
 
 #if defined(CONFIG_ARCH_CHIP_S32K11X)

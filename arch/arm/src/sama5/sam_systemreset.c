@@ -31,7 +31,7 @@
 #include <nuttx/board.h>
 #include <arch/sama5/chip.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/sam_rstc.h"
 
 #ifdef CONFIG_SAMA5_SYSTEMRESET

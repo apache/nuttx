@@ -24,7 +24,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include <arch/board/board.h>
 #include "hardware/imxrt_ccm.h"
 #include "hardware/imxrt_dcdc.h"

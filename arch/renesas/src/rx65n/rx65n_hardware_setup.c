@@ -28,7 +28,6 @@
 #include "rx65n_port.h"
 #include "rx65n_sci.h"
 #include "chip.h"
-#include "up_arch.h"
 #include "up_internal.h"
 #include "rx65n_definitions.h"
 

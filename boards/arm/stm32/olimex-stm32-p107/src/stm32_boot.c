@@ -26,7 +26,7 @@
 #include <debug.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "olimex-stm32-p107.h"
 
 /****************************************************************************

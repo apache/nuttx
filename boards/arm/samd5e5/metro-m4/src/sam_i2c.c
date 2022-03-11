@@ -31,7 +31,7 @@
 
 #include <nuttx/i2c/i2c_master.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "metro-m4.h"
 #include "sam_config.h"

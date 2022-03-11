@@ -33,7 +33,7 @@
 #include <nuttx/clock.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "max326_start.h"
 #include "max32660-evsys.h"
 

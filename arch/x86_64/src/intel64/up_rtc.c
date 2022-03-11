@@ -34,7 +34,7 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "up_arch.h"
+#include "up_internal.h"
 
 /************************************************************************************
  * Pre-processor Definitions

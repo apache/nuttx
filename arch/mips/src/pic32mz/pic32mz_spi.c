@@ -39,8 +39,6 @@
 #include <nuttx/spi/spi.h>
 
 #include "mips_internal.h"
-#include "mips_arch.h"
-
 #include "hardware/pic32mz_spi.h"
 #include "hardware/pic32mz_pps.h"
 #include "pic32mz_spi.h"

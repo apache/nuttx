@@ -30,8 +30,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "chip.h"
 #include "nuc_gpio.h"
 

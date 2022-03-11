@@ -29,8 +29,6 @@
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
-#include "riscv_arch.h"
-
 #include "litex_config.h"
 #include "hardware/litex_memorymap.h"
 #include "hardware/litex_uart.h"

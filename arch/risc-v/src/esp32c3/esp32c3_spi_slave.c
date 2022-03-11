@@ -51,7 +51,7 @@
 #include "esp32c3_dma.h"
 #endif
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_gpio_sigmap.h"
 #include "hardware/esp32c3_pinmap.h"
 #include "hardware/esp32c3_spi.h"

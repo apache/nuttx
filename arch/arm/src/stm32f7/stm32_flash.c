@@ -61,7 +61,7 @@
 #include "barriers.h"
 
 #include "hardware/stm32_flash.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

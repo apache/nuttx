@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "cp15_cacheops.h"
 #include "barriers.h"
 #include "sctlr.h"

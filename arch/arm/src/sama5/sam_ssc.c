@@ -47,8 +47,6 @@
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "sam_pio.h"
 #include "sam_dmac.h"

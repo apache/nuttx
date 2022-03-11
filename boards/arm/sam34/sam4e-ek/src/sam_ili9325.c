@@ -117,7 +117,7 @@
 #include <arch/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_gpio.h"
 #include "sam_periphclks.h"
 #include "hardware/sam_pmc.h"
@@ -770,7 +770,7 @@ static int sam_getrun(fb_coord_t row, fb_coord_t col, FAR uint8_t *buffer,
       /* RRRR RGGG GGGB BBBB -> RRRR R000, GGGG GG00, BBBB B000 */
 
       *ptr++ = (value[0] & 0xf8);
-      *ptr++ = (value[0] & 0x07) << 5) | ((value[1] & 0xe0) >> 3);
+      *ptr++ = ((value[0] & 0x07) << 5) | ((value[1] & 0xe0) >> 3);
       *ptr++ = (value[1] & 0x1f) << 3;
 
 #else /* if defined(CONFIG_SAM4EEK_LCD_RGB32) */

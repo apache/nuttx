@@ -37,7 +37,7 @@
 #include <nuttx/timers/watchdog.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

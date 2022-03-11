@@ -33,8 +33,7 @@
 #include <arch/irq.h>
 #include <arch/stm32l4/chip.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32l4_gpio.h"
 

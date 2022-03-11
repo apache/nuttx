@@ -45,8 +45,6 @@
 #include <nuttx/can/can.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_matrix.h"
 #include "hardware/sam_chipid.h"
 #include "hardware/sam_pinmap.h"

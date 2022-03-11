@@ -32,7 +32,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "tiva_enablepwr.h"
 #include "tiva_enableclks.h"
 #include "tiva_gpio.h"

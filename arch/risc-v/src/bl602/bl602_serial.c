@@ -43,10 +43,7 @@
 
 #include "hardware/bl602_uart.h"
 #include "hardware/bl602_glb.h"
-
-#include "riscv_arch.h"
 #include "riscv_internal.h"
-
 #include "bl602_config.h"
 #include "chip.h"
 

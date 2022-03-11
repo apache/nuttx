@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/sam_cmcc.h"
 #include "sam_cmcc.h"
 

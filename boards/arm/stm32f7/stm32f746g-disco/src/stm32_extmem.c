@@ -44,8 +44,7 @@
 #include <debug.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "stm32_fmc.h"
 #include "stm32_gpio.h"
 #include "stm32_rcc.h"

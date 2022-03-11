@@ -27,8 +27,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nrf52_irq.h"
 #include "hardware/nrf52_utils.h"
 

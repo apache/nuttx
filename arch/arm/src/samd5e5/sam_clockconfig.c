@@ -28,8 +28,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/sam_pm.h"
 #include "hardware/sam_supc.h"
 #include "hardware/sam_oscctrl.h"

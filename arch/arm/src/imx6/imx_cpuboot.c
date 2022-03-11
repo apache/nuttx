@@ -30,9 +30,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/imx_src.h"
 #include "sctlr.h"
 #include "smp.h"

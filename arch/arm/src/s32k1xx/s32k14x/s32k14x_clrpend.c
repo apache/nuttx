@@ -27,8 +27,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "s32k14x_irq.h"
 
 /****************************************************************************

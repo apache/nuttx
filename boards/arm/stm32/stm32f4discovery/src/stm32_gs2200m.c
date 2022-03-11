@@ -33,7 +33,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/wireless/gs2200m.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
 

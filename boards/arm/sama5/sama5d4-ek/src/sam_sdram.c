@@ -122,7 +122,7 @@
 
 #include <nuttx/arch.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include "sam_periphclks.h"
 #include "hardware/sam_memorymap.h"

@@ -56,9 +56,7 @@
 #endif
 
 #include "up_internal.h"
-
 #include "chip.h"
-#include "up_arch.h"
 #include "rx65n_definitions.h"
 #include "rx65n_eth.h"
 #include "rx65n_cmt.h"

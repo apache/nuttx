@@ -34,7 +34,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "tms570_gio.h"
 #include "launchxl-tms57004.h"
 

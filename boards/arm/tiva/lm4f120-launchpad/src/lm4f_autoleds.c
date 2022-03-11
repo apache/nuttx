@@ -31,7 +31,6 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "tiva_gpio.h"
 #include "lmf4120-launchpad.h"

@@ -39,9 +39,7 @@
 
 #include <arch/board/board.h>
 
-#include "riscv_arch.h"
 #include "riscv_internal.h"
-
 #include "c906_config.h"
 #include "chip.h"
 #include "c906.h"

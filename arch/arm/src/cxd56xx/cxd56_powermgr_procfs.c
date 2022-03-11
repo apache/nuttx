@@ -38,7 +38,7 @@
 
 #include "cxd56_clock.h"
 #include "cxd56_powermgr.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/cxd56_crg.h"
 #include "hardware/cxd5602_topreg.h"
 

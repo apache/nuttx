@@ -33,9 +33,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/tms570_vim.h"
 #include "tms570_gio.h"
 #include "tms570_esm.h"

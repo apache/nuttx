@@ -91,6 +91,15 @@
 #define RESTORE_USERCONTEXT(tcb) z16_restoreusercontext((tcb)->xcp.regs)
 #define SIGNAL_RETURN(regs)      z16_restoreusercontext(regs)
 
+/* Register access macros ***************************************************/
+
+#define getreg8(a)              (*(uint8_t volatile _Near*)(a))
+#define putreg8(v,a)            (*(uint8_t volatile _Near*)(a) = (v))
+#define getreg16(a)             (*(uint16_t volatile _Near*)(a))
+#define putreg16(v,a)           (*(uint16_t volatile _Near*)(a) = (v))
+#define getreg32(a)             (*(uint32_t volatile _Near*)(a))
+#define putreg32(v,a)           (*(uint32_t volatile _Near*)(a) = (v))
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/

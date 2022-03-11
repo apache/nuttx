@@ -34,9 +34,7 @@
 
 #include <nuttx/arch.h>
 #include <nuttx/arch.h>
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "kinetis_config.h"
 #include "chip.h"
 #include "kinetis.h"

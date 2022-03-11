@@ -29,7 +29,6 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "hardware/lpc17_40_syscon.h"
 #include "lpc17_40_emc.h"

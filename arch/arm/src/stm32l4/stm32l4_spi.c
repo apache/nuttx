@@ -70,8 +70,6 @@
 #include <nuttx/power/pm.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "stm32l4.h"
 #include "stm32l4_gpio.h"

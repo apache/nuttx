@@ -34,9 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <nuttx/userspace.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/nrf52_memorymap.h"
 
 #include <arch/board/board.h>

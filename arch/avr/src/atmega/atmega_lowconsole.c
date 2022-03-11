@@ -32,7 +32,6 @@
 #include <arch/board/board.h>
 #include <avr/io.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 #include "atmega.h"
 

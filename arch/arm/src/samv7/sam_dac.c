@@ -38,8 +38,6 @@
 #include <nuttx/analog/dac.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_dacc.h"
 #include "hardware/sam_pmc.h"
 #include "hardware/sam_pinmap.h"

@@ -28,7 +28,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
 
 #ifdef CONFIG_PAGING
 #  include <nuttx/page.h>

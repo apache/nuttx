@@ -31,7 +31,7 @@
 #include <nuttx/irq.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "am335x_pinmux.h"
 #include "am335x_gpio.h"
 

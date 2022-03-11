@@ -25,8 +25,7 @@
 #include <nuttx/config.h>
 #include <stdint.h>
 
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "rv32m1.h"
 #include "hardware/rv32m1_tstmr.h"
 #include "rv32m1_timersvc.h"

@@ -28,9 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
-
 #include "atmega2560.h"
 #include "arduino_mega2560.h"
 

@@ -31,7 +31,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "sam_dac.h"
 #include "same70-qmtech.h"

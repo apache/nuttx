@@ -35,7 +35,7 @@
 #include <nuttx/video/fb.h>
 #include <nuttx/nx/nxglib.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "dm320_memorymap.h"
 #include "dm320_osd.h"
 

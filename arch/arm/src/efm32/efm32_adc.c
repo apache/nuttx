@@ -42,8 +42,6 @@
 #include <nuttx/analog/ioctl.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "efm32.h"
 #include "efm32_adc.h"

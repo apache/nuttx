@@ -26,9 +26,7 @@
 #include <stdint.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "str71x.h"
 
 /****************************************************************************

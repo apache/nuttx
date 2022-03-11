@@ -69,7 +69,6 @@
 #include <nuttx/analog/adc.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "tiva_gpio.h"
 #include "tiva_adc.h"

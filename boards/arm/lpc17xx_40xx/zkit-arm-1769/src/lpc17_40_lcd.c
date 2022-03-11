@@ -35,9 +35,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7567.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc17_40_gpio.h"
 #include "lpc17_40_ssp.h"
 #include "zkit-arm-1769.h"

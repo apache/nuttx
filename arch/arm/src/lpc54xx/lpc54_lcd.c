@@ -36,7 +36,7 @@
 
 #include <nuttx/video/fb.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_pinmux.h"
 #include "lpc54_config.h"

@@ -32,7 +32,7 @@
 
 #include <nuttx/spinlock.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/nrf52_gpio.h"
 #include "nrf52_gpio.h"
 

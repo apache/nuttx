@@ -35,7 +35,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/semaphore.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/efm32_cmu.h"
 #include "hardware/efm32_dma.h"
 #include "efm32_dma.h"

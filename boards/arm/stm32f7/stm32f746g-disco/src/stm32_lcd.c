@@ -33,7 +33,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32f746g-disco.h"
 #include "stm32_gpio.h"
 #include "stm32_ltdc.h"

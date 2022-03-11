@@ -79,8 +79,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/efm32_msc.h"
 #include "hardware/efm32_devinfo.h"
 
@@ -353,7 +351,7 @@ int __ramfunc__ msc_load_write_data(uint32_t *data, uint32_t num_words,
 
           /* Subtract this initial odd word for the write loop below */
 
-          num_words --;
+          num_words--;
           ret = 0;
         }
 

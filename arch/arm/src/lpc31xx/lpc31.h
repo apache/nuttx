@@ -32,7 +32,6 @@
 #include <stdbool.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
 #include "chip.h"
 #include "lpc31_ioconfig.h"
 

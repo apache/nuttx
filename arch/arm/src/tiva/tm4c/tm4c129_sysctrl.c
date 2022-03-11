@@ -31,7 +31,6 @@
 #include <nuttx/init.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "chip.h"
 #include "tiva_sysctrl.h"

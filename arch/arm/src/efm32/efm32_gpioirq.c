@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/efm32_gpio.h"
 #include "efm32_gpio.h"
 #include "efm32_bitband.h"

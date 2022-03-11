@@ -32,8 +32,6 @@
 #include <errno.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "rp2040_config.h"
 #include "rp2040_uart.h"

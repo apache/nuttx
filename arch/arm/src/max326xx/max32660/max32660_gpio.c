@@ -31,8 +31,7 @@
 
 #include <nuttx/spinlock.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "max326_gpio.h"
 
 /****************************************************************************

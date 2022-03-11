@@ -75,7 +75,7 @@
 #include <nuttx/lcd/slcd_codec.h>
 #include <nuttx/semaphore.h>
 
-#include "mips_arch.h"
+#include "mips_internal.h"
 #include "pic32mx_ioport.h"
 #include "pic32mx_int.h"
 #include "pic32mx.h"

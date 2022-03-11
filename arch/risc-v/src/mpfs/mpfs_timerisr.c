@@ -32,8 +32,7 @@
 #include <arch/board/board.h>
 #include <nuttx/spinlock.h>
 
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "mpfs.h"
 #include "mpfs_clockconfig.h"
 

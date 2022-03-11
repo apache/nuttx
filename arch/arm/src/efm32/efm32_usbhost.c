@@ -49,9 +49,7 @@
 #include "chip.h"             /* Includes default GPIO settings */
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "efm32_usb.h"
 
 #if defined(CONFIG_USBHOST) && defined(CONFIG_EFM32_OTGFS)

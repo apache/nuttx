@@ -41,7 +41,7 @@
 #include <arch/board/cxd56_imageproc.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

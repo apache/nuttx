@@ -31,8 +31,7 @@
 #include <nuttx/analog/adc.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "stm32_pwm.h"
 #include "nucleo-f4x1re.h"
 
