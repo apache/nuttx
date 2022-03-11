@@ -352,7 +352,7 @@ _xtensa_level1_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-  l32i  sp, a2, (4 * REG_A1)      /* Retrieve interrupt stack frame */
+	l32i  sp, a2, (4 * REG_A1)      /* Retrieve interrupt stack frame */
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync								          	/* Ensure PS and EPC written */
 
