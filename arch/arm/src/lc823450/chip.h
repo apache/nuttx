@@ -29,9 +29,6 @@
 #  include <sys/types.h>
 #  include <arch/lc823450/chip.h>
 #  include <arch/lc823450/irq.h>
-#  include "arm_arch.h"
-#  include "lc823450_irq.h"
-#  include "arm_arch.h"
 #endif
 
 /****************************************************************************

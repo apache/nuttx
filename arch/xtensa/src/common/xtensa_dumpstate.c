@@ -36,7 +36,7 @@
 #include <arch/xtensa/xtensa_corebits.h>
 #include <arch/board/board.h>
 #include <arch/chip/core-isa.h>
-#include "chip.h"
+
 #include "sched/sched.h"
 #include "xtensa.h"
 
