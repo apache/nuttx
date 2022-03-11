@@ -32,8 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nucleo-f410rb.h"
 
 #ifdef CONFIG_STM32_ADC1

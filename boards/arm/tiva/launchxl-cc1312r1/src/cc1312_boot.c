@@ -32,7 +32,7 @@
 #include <nuttx/board.h>
 #include <nuttx/clock.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "tiva_start.h"
 #include "launchxl-cc1312r1.h"
 

@@ -32,7 +32,7 @@
 #include <nuttx/timers/pwm.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "kinetis_pwm.h"
 
 #include <arch/board/board.h>

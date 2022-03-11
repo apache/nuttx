@@ -28,8 +28,7 @@
 #include <assert.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "imxrt_irq.h"
 
 /****************************************************************************

@@ -39,8 +39,6 @@
 #include "arm.h"
 #include "mmu.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_wdt.h"
 #include "hardware/sam_aximx.h"
 #include "hardware/sam_sfr.h"

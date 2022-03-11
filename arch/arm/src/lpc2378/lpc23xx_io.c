@@ -41,7 +41,7 @@
  * Included Files
  ****************************************************************************/
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include <sys/types.h>
 #include "lpc23xx_scb.h"
 #include "lpc23xx_pinsel.h"

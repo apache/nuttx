@@ -36,7 +36,6 @@
 #include <nuttx/semaphore.h>
 #include <arch/samd5e5/chip.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "sched/sched.h"
 

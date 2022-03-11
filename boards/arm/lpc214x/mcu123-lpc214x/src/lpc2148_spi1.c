@@ -61,8 +61,6 @@
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "lpc214x_power.h"
 #include "lpc214x_pinsel.h"

@@ -36,7 +36,7 @@
 #include <debug.h>
 #include <semaphore.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_rsa.h"
 #include "hardware/esp32c3_system.h"
 
@@ -1964,7 +1964,9 @@ int esp32c3_mpi_write_string(const struct esp32c3_mpi_s *X, int radix,
   if (radix == 16)
     {
       int c;
-      size_t i, j, k;
+      size_t i;
+      size_t j;
+      size_t k;
 
       for (i = X->n, k = 0; i > 0; i--)
         {
@@ -2146,8 +2148,11 @@ int esp32c3_mpi_write_binary(const struct esp32c3_mpi_s *X,
 int esp32c3_mpi_shift_l(struct esp32c3_mpi_s *X, size_t count)
 {
   int ret;
-  size_t i, v0, t1;
-  uint32_t r0 = 0, r1;
+  size_t i;
+  size_t v0;
+  size_t t1;
+  uint32_t r0 = 0;
+  uint32_t r1;
   DEBUGASSERT(X != NULL);
 
   v0 = count / (BIL);
@@ -2209,8 +2214,11 @@ cleanup:
 
 int esp32c3_mpi_shift_r(struct esp32c3_mpi_s *X, size_t count)
 {
-  size_t i, v0, v1;
-  uint32_t r0 = 0, r1;
+  size_t i;
+  size_t v0;
+  size_t v1;
+  uint32_t r0 = 0;
+  uint32_t r1;
   DEBUGASSERT(X != NULL);
 
   v0 = count /  BIL;
@@ -2274,7 +2282,9 @@ int esp32c3_mpi_shift_r(struct esp32c3_mpi_s *X, size_t count)
 int esp32c3_mpi_cmp_abs(const struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *Y)
 {
-  size_t i, j;
+  size_t i;
+  size_t j;
+
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(Y != NULL);
 
@@ -2345,7 +2355,8 @@ int esp32c3_mpi_cmp_abs(const struct esp32c3_mpi_s *X,
 int esp32c3_mpi_cmp_mpi(const struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *Y)
 {
-  size_t i, j;
+  size_t i;
+  size_t j;
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(Y != NULL);
 
@@ -2432,7 +2443,10 @@ int esp32c3_mpi_lt_mpi_ct(const struct esp32c3_mpi_s *X,
 
   /* The value of any of these variables is either 0 or 1 at all times. */
 
-  unsigned cond, done, x_is_negative, y_is_negative;
+  unsigned cond;
+  unsigned done;
+  unsigned x_is_negative;
+  unsigned y_is_negative;
 
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(Y != NULL);
@@ -2545,8 +2559,13 @@ int esp32c3_mpi_add_abs(struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *B)
 {
   int ret;
-  size_t i, j;
-  uint32_t *o, *p, c, tmp;
+  size_t i;
+  size_t j;
+  uint32_t *o;
+  uint32_t *p;
+  uint32_t c;
+  uint32_t tmp;
+
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(A != NULL);
   DEBUGASSERT(B != NULL);
@@ -2709,7 +2728,8 @@ int esp32c3_mpi_add_mpi(struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *A,
                         const struct esp32c3_mpi_s *B)
 {
-  int ret, s;
+  int ret;
+  int s;
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(A != NULL);
   DEBUGASSERT(B != NULL);
@@ -2759,7 +2779,8 @@ int esp32c3_mpi_sub_mpi(struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *A,
                         const struct esp32c3_mpi_s *B)
 {
-  int ret, s;
+  int ret;
+  int s;
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(A != NULL);
   DEBUGASSERT(B != NULL);
@@ -3011,8 +3032,15 @@ int esp32c3_mpi_div_mpi(struct esp32c3_mpi_s *Q,
                         const struct esp32c3_mpi_s *B)
 {
   int ret;
-  size_t i, n, t, k;
-  struct esp32c3_mpi_s X, Y, Z, T1, T2;
+  size_t i;
+  size_t n;
+  size_t t;
+  size_t k;
+  struct esp32c3_mpi_s X;
+  struct esp32c3_mpi_s Y;
+  struct esp32c3_mpi_s Z;
+  struct esp32c3_mpi_s T1;
+  struct esp32c3_mpi_s T2;
   DEBUGASSERT(A != NULL);
   DEBUGASSERT(B != NULL);
 
@@ -3246,7 +3274,10 @@ int esp32c3_mpi_mod_int(uint32_t *r,
                         const struct esp32c3_mpi_s *A, int32_t b)
 {
   size_t i;
-  uint32_t x, y, z;
+  uint32_t x;
+  uint32_t y;
+  uint32_t z;
+
   DEBUGASSERT(r != NULL);
   DEBUGASSERT(A != NULL);
 
@@ -3330,11 +3361,21 @@ int esp32c3_mpi_exp_mod(struct esp32c3_mpi_s *X,
                         struct esp32c3_mpi_s *_RR)
 {
   int ret;
-  size_t wbits, wsize, one = 1;
-  size_t i, j, nblimbs;
-  size_t bufsize, nbits;
-  uint32_t ei, mm, state;
-  struct esp32c3_mpi_s RR, T, W[1 << ESP32C3_MPI_WINDOW_SIZE], apos;
+  size_t wbits;
+  size_t wsize;
+  size_t one = 1;
+  size_t i;
+  size_t j;
+  size_t nblimbs;
+  size_t bufsize;
+  size_t nbits;
+  uint32_t ei;
+  uint32_t mm;
+  uint32_t state;
+  struct esp32c3_mpi_s RR;
+  struct esp32c3_mpi_s T;
+  struct esp32c3_mpi_s W[1 << ESP32C3_MPI_WINDOW_SIZE];
+  struct esp32c3_mpi_s apos;
   int neg;
 
   DEBUGASSERT(X != NULL);
@@ -3581,8 +3622,11 @@ int esp32c3_mpi_gcd(struct esp32c3_mpi_s *G,
                     const struct esp32c3_mpi_s *B)
 {
   int ret;
-  size_t lz, lzt;
-  struct esp32c3_mpi_s TG, TA, TB;
+  size_t lz;
+  size_t lzt;
+  struct esp32c3_mpi_s TG;
+  struct esp32c3_mpi_s TA;
+  struct esp32c3_mpi_s TB;
 
   DEBUGASSERT(G != NULL);
   DEBUGASSERT(A != NULL);
@@ -3705,7 +3749,16 @@ int esp32c3_mpi_inv_mod(struct esp32c3_mpi_s *X,
                         const struct esp32c3_mpi_s *N)
 {
   int ret;
-  struct esp32c3_mpi_s G, TA, TU, U1, U2, TB, TV, V1, V2;
+  struct esp32c3_mpi_s G;
+  struct esp32c3_mpi_s TA;
+  struct esp32c3_mpi_s TU;
+  struct esp32c3_mpi_s U1;
+  struct esp32c3_mpi_s U2;
+  struct esp32c3_mpi_s TB;
+  struct esp32c3_mpi_s TV;
+  struct esp32c3_mpi_s V1;
+  struct esp32c3_mpi_s V2;
+
   DEBUGASSERT(X != NULL);
   DEBUGASSERT(A != NULL);
   DEBUGASSERT(N != NULL);

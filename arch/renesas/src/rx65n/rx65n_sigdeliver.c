@@ -32,10 +32,10 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
+#include <arch/board/board.h>
 
 #include "sched/sched.h"
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
  * Public Functions

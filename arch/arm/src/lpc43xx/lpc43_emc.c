@@ -24,7 +24,6 @@
 #include <nuttx/wdog.h>
 
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "lpc43_pinconfig.h"
 #include "lpc43_emc.h"
@@ -33,7 +32,7 @@
 #include "hardware/lpc43_ccu.h"
 #include "lpc43_rgu.h"
 #include "lpc43_gpio.h"
-#include "arm_arch.h"
+
 #include <arch/board/board.h>
 
 /****************************************************************************

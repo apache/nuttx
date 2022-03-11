@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "chip.h"
 #include "hardware/rv32m1_scg.h"
 #include "hardware/rv32m1_smc.h"

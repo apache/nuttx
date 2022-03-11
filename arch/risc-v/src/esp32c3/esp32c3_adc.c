@@ -31,8 +31,7 @@
 
 #include <nuttx/semaphore.h>
 
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "esp32c3.h"
 #include "esp32c3_gpio.h"
 #include "esp32c3_adc.h"

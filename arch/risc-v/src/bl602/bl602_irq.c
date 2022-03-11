@@ -36,8 +36,6 @@
 #include <arch/csr.h>
 
 #include "riscv_internal.h"
-#include "riscv_arch.h"
-
 #include "hardware/bl602_clic.h"
 
 #include "chip.h"

@@ -67,8 +67,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "sam_memories.h"
 #include "sam_dmac.h"
 #include "sam_pmecc.h"

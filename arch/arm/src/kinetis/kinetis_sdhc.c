@@ -44,8 +44,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "kinetis.h"
 #include "hardware/kinetis_pinmux.h"
 #include "hardware/kinetis_sim.h"

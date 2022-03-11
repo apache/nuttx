@@ -32,7 +32,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_syscfg.h"
 #include "stm32_gpio.h"

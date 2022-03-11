@@ -32,8 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "lpc17_40_adc.h"
 #include "mcb1700.h"
 

@@ -32,9 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "efm32_gpio.h"
 #include "efm32-g8xx-stk.h"
 

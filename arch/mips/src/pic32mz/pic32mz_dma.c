@@ -33,7 +33,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 
-#include "mips_arch.h"
 #include "mips_internal.h"
 #include "sched/sched.h"
 

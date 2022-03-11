@@ -42,8 +42,6 @@
 #include <arch/board/board.h>
 
 #include "mips_internal.h"
-#include "mips_arch.h"
-
 #include "hardware/pic32mz_i2c.h"
 #include "pic32mz_i2c.h"
 

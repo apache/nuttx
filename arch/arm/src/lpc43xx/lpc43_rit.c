@@ -39,7 +39,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/lpc43_rit.h"
 #include "lpc43_rit.h"
 

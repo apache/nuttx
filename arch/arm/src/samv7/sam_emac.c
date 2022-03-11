@@ -59,9 +59,7 @@
 
 #include <arch/samv7/chip.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/sam_pinmap.h"
 #include "hardware/sam_chipid.h"
 #include "sam_gpio.h"

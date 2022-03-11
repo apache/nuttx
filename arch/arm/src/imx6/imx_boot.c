@@ -40,8 +40,6 @@
 #include "mmu.h"
 #include "scu.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "imx_config.h"
 #include "imx_clockconfig.h"
 #include "imx_memorymap.h"

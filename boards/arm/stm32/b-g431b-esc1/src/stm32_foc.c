@@ -44,8 +44,7 @@
 #  include "stm32_qencoder.h"
 #endif
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "b-g431b-esc1.h"
 
 /****************************************************************************

@@ -71,8 +71,6 @@
 #include <nuttx/power/pm.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "stm32l5.h"
 #include "stm32l5_gpio.h"

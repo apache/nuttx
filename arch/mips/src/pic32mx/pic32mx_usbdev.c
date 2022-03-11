@@ -51,7 +51,7 @@
 
 #include <nuttx/irq.h>
 
-#include "mips_arch.h"
+#include "mips_internal.h"
 #include "pic32mx.h"
 #include "pic32mx_usbotg.h"
 

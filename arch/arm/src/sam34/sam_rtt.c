@@ -36,7 +36,7 @@
 #include <nuttx/timers/timer.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_rtt.h"
 #include "sam_periphclks.h"
 

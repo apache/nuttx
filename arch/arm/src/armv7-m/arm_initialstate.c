@@ -32,8 +32,6 @@
 #include <arch/armv7-m/nvicpri.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "psr.h"
 #include "exc_return.h"
 

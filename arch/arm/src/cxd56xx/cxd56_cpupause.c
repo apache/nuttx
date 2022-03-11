@@ -34,7 +34,6 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "arm_arch.h"
 #include "sched/sched.h"
 #include "arm_internal.h"
 #include "hardware/cxd5602_memorymap.h"

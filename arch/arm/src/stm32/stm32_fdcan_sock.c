@@ -44,8 +44,6 @@
 #include <netpacket/can.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "stm32_fdcan.h"
 #include "hardware/stm32_pinmap.h"
 #include "stm32_gpio.h"

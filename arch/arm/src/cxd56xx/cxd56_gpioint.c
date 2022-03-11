@@ -32,7 +32,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 #include "cxd56_pinconfig.h"

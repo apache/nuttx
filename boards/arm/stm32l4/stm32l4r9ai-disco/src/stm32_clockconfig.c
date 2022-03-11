@@ -29,7 +29,7 @@
 #include <arch/board/board.h>
 #include <arch/board/stm32l4r9ai-disco-clocking.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32l4r9ai-disco.h"
 
 /****************************************************************************

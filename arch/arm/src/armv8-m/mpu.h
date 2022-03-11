@@ -33,8 +33,6 @@
 #  include <stdbool.h>
 #  include <assert.h>
 #  include <debug.h>
-
-#  include "arm_arch.h"
 #endif
 
 /****************************************************************************

@@ -47,8 +47,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "rp2040_gpio.h"
 #include "rp2040_dmac.h"
 #include "rp2040_i2s_pio.h"

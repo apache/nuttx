@@ -38,7 +38,6 @@
 #ifdef CONFIG_ARCH_RAMVECTORS
 #  include "ram_vectors.h"
 #endif
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32.h"
 

@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions

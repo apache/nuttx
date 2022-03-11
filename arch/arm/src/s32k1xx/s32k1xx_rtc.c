@@ -38,8 +38,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/s32k1xx_rtc.h"
 #include "s32k1xx_periphclocks.h"
 #include "s32k1xx_rtc.h"

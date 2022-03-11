@@ -43,9 +43,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/imxrt_usbotg.h"
 #include "hardware/imxrt_usbphy.h"
 #include "hardware/rt106x/imxrt106x_ccm.h"

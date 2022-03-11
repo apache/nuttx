@@ -36,8 +36,7 @@
 
 #include <arch/chip/cisif.h>
 #include <nuttx/video/imgdata.h>
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "cxd56_clock.h"
 #include "hardware/cxd56_cisif.h"
 

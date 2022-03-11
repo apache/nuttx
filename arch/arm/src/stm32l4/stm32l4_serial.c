@@ -50,7 +50,6 @@
 #include "stm32l4_uart.h"
 #include "stm32l4_dma.h"
 #include "stm32l4_rcc.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

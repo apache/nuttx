@@ -34,7 +34,6 @@
 #include "nvic.h"
 #include "clock/clock.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
 #include "systick.h"
 
 #include "chip.h"

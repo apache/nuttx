@@ -27,7 +27,6 @@
 #include <string.h>
 #include <nuttx/arch.h>
 #include "up_internal.h"
-#include "up_arch.h"
 
 /****************************************************************************
  * Private Functions

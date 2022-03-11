@@ -35,8 +35,7 @@
 #include <arch/irq.h>
 #include <nuttx/arch.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nrf52_gpio.h"
 #include "nrf52_gpiote.h"
 

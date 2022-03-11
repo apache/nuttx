@@ -29,7 +29,7 @@
 #include <stdbool.h>
 #include <errno.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32l5_pwr.h"
 #include "stm32l5_rcc.h"
 

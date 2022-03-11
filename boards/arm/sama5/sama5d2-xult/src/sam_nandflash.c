@@ -33,7 +33,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/fs/nxffs.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_periphclks.h"
 #include "sam_pio.h"
 #include "sam_nand.h"

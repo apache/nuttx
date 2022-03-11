@@ -34,8 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/rtc.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "chip.h"
 #include "imxrt_lpsrtc.h"
 #include "imxrt_hprtc.h"

@@ -62,7 +62,7 @@
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_periphclks.h"
 #include "hardware/sam_pinmap.h"
 #include "hardware/sam_pmc.h"

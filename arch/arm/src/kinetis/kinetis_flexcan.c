@@ -42,7 +42,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "kinetis_config.h"
 #include "hardware/kinetis_flexcan.h"

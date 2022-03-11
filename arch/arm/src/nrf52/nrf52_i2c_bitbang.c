@@ -28,7 +28,7 @@
 #include <nuttx/i2c/i2c_bitbang.h>
 #include <nuttx/kmalloc.h>
 #include "nrf52_gpio.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

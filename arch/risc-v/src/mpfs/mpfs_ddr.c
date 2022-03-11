@@ -43,7 +43,7 @@
 #include <arch/board/board.h>
 #include <arch/board/board_liberodefs.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "mpfs_dma.h"
 #include "hardware/mpfs_sysreg.h"
 #include "hardware/mpfs_ddr.h"
@@ -2540,7 +2540,8 @@ static void mpfs_ddr_manual_addcmd_training(struct mpfs_ddr_priv_s *priv)
         {
           uint32_t transition_a5_max = 0;
           uint32_t transition_a5_min = 128;
-          uint32_t rx_a5_last, rx_a5;
+          uint32_t rx_a5_last;
+          uint32_t rx_a5;
           uint32_t transition_a5;
           uint32_t range_a5 = 0;
 

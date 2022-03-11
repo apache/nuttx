@@ -44,7 +44,6 @@
 #include <nuttx/spi/qspi.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
 #include "barriers.h"
 
 #include "stm32l4_gpio.h"

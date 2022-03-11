@@ -26,8 +26,6 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
-
 #include "at32uc3_config.h"
 #include "up_internal.h"
 #include "at32uc3.h"

@@ -41,9 +41,7 @@
 #include <nuttx/config.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/nrf52_wdt.h"
 #include "nrf52_wdt.h"
 

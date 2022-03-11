@@ -39,9 +39,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "lpc54_config.h"
 #include "hardware/lpc54_usart.h"

@@ -49,7 +49,6 @@
 #include "stm32_uart.h"
 #include "stm32_dma.h"
 #include "stm32_rcc.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

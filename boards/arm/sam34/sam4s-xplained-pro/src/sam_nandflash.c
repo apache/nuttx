@@ -34,7 +34,7 @@
 #include <nuttx/fs/nxffs.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_periphclks.h"
 #include "sam4s_nand.h"
 #include "hardware/sam_smc.h"

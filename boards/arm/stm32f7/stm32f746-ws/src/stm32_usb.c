@@ -37,7 +37,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_otg.h"
 #include "stm32_gpio.h"
 #include "stm32f746-ws.h"

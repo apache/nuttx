@@ -45,7 +45,7 @@
 
 #include <kinetis_usbhshost.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/kinetis_k28pinmux.h"
 #include "hardware/kinetis_mcg.h"
 #include "hardware/kinetis_sim.h"

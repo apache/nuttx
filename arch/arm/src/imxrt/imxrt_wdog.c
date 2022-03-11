@@ -34,7 +34,7 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/timers/watchdog.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/imxrt_wdog.h"
 #include "imxrt_wdog.h"
 

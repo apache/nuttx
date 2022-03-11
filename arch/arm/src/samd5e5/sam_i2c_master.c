@@ -62,8 +62,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_i2c_master.h"
 #include "hardware/sam_pinmap.h"
 #include "sam_gclk.h"

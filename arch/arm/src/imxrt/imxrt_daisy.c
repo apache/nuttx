@@ -26,7 +26,7 @@
 
 #include <stdint.h>
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/imxrt_daisy.h"
 #include "imxrt_iomuxc.h"
 

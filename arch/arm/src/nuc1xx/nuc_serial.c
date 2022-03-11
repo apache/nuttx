@@ -44,9 +44,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "hardware/nuc_uart.h"
 #include "nuc_lowputc.h"

@@ -40,10 +40,7 @@
 #include <arch/board/board.h>
 
 #include "up_internal.h"
-#include "up_arch.h"
-
 #include "chip.h"
-#include "up_arch.h"
 #include "rx65n_definitions.h"
 #include "rx65n_rspi.h"
 

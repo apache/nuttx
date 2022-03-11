@@ -48,9 +48,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/imxrt_lpuart.h"
 #include "imxrt_gpio.h"
 #include "hardware/imxrt_pinmux.h"

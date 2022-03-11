@@ -43,7 +43,7 @@
 #  include <nuttx/usb/rndis.h>
 #endif
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 

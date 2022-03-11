@@ -31,8 +31,6 @@
 #include <arch/board/board.h>
 
 #include "mips_internal.h"
-#include "mips_arch.h"
-
 #include "hardware/pic32mz_features.h"
 #include "hardware/pic32mz_prefetch.h"
 #include "hardware/pic32mz_osc.h"

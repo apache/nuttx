@@ -31,7 +31,7 @@
 
 #include <nuttx/spi/spi.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32.h"
 

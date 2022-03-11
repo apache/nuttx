@@ -72,7 +72,7 @@
 #include <nuttx/irq.h>
 #include <debug.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "imxrt_periphclks.h"
 #include "hardware/imxrt_gpt.h"
 #include "imxrt_irq.h"

@@ -26,7 +26,6 @@
  ****************************************************************************/
 
 #include "riscv_internal.h"
-
 #include "hardware/c906_memorymap.h"
 #include "hardware/c906_uart.h"
 #include "hardware/c906_clint.h"

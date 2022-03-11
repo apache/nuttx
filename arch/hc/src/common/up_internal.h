@@ -82,6 +82,13 @@
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
 
+#define getreg8(a)          (*(volatile uint8_t *)(a))
+#define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))
+#define getreg16(a)         (*(volatile uint16_t *)(a))
+#define putreg16(v,a)       (*(volatile uint16_t *)(a) = (v))
+#define getreg32(a)         (*(volatile uint32_t *)(a))
+#define putreg32(v,a)       (*(volatile uint32_t *)(a) = (v))
+
 /* Macros to handle saving and restore interrupt state.  In the current CPU12
  * model, the state is copied from the stack to the TCB, but only
  * a referenced is passed to get the state from the TCB.
@@ -130,6 +137,12 @@ extern uint32_t g_intstacktop;
 /****************************************************************************
  * Public Functions Prototypes
  ****************************************************************************/
+
+/* Atomic modification of registers */
+
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 /* Context switching functions */
 

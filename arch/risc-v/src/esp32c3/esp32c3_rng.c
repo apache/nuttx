@@ -36,7 +36,7 @@
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/drivers/drivers.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "esp32c3_attr.h"
 #include "hardware/wdev_reg.h"
 #include "esp32c3_clockconfig.h"

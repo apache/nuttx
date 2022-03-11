@@ -44,9 +44,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "stm32_otghs.h"
 
 #if defined(CONFIG_USBDEV) && (defined(CONFIG_STM32_OTGHS))

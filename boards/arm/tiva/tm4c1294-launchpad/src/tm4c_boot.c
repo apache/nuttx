@@ -30,7 +30,6 @@
 #include <arch/board/board.h>
 
 #include "tm4c1294-launchpad.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

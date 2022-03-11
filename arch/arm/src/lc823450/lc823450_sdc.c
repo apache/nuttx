@@ -55,8 +55,7 @@
 #include <string.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "lc823450_sddrv_if.h"
 #include "lc823450_sdc.h"
 #include "lc823450_syscontrol.h"

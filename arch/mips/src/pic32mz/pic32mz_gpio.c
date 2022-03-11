@@ -32,8 +32,7 @@
 #include <nuttx/arch.h>
 #include <arch/board/board.h>
 
-#include "mips_arch.h"
-
+#include "mips_internal.h"
 #include "hardware/pic32mz_ioport.h"
 #include "pic32mz_gpio.h"
 
@@ -339,7 +338,7 @@ void pic32mz_dumpgpio(pinset_t pinset, const char *msg)
 
       sched_lock();
       gpioinfo("IOPORT%c pinset: %04x base: %08x -- %s\n",
-               'A'+port, pinset, base, msg);
+               'A' + port, pinset, base, msg);
       gpioinfo("   TRIS: %08x   PORT: %08x    LAT: %08x    ODC: %08x\n",
                getreg32(base + PIC32MZ_IOPORT_TRIS_OFFSET),
                getreg32(base + PIC32MZ_IOPORT_PORT_OFFSET),

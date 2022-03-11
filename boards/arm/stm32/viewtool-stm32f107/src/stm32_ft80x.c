@@ -35,7 +35,7 @@
 #include <nuttx/spi/spi.h>
 #include <nuttx/lcd/ft80x.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 

@@ -50,7 +50,7 @@
 
 #include <nuttx/sensors/qencoder.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "tiva_gpio.h"
 #include "tiva_qencoder.h"
 #include "tiva_enablepwr.h"

@@ -37,7 +37,7 @@
 #include <nuttx/usb/usbdev_trace.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "metro-m4.h"
 #include "sam_port.h"
 #include "sam_usbhost.h"

@@ -61,7 +61,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/sam_lcdc.h"
 #include "hardware/sam_pinmap.h"
 #include "sam_pio.h"
@@ -2476,7 +2476,7 @@ static void sam_show_layer(struct sam_layer_s *layer,
 
   if ((bprow & 7) != 0)
     {
-      bytesprow ++;
+      bytesprow++;
     }
 
   padding = 0;

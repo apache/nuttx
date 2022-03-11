@@ -33,14 +33,11 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "arm_arch.h"
-
 #include "hardware/s32k1xx_ftfc.h"
 #include "hardware/s32k1xx_sim.h"
 
 #include "s32k1xx_config.h"
 #include "s32k1xx_eeeprom.h"
-
 #include "arm_internal.h"
 
 #include <arch/board/board.h> /* Include last:  has dependencies */

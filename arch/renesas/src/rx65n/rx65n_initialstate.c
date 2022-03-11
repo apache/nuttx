@@ -30,7 +30,6 @@
 
 #include "chip/chip.h"
 #include "up_internal.h"
-#include "up_arch.h"
 #include "arch/rx65n/irq.h"
 
 /****************************************************************************

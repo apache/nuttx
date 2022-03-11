@@ -34,7 +34,7 @@
 
 #include <arch/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32l5_gpio.h"
 #include "stm32l5_exti.h"

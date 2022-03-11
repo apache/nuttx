@@ -44,8 +44,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "sam_pio.h"
 #include "sam_dmac.h"
 #include "sam_periphclks.h"

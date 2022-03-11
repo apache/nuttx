@@ -36,12 +36,10 @@
 #include <nuttx/spinlock.h>
 #include <nuttx/sched_note.h>
 
-#include "arm_arch.h"
 #include "nvic.h"
 #include "sched/sched.h"
 #include "init/init.h"
 #include "arm_internal.h"
-
 #include "lc823450_syscontrol.h"
 
 #if defined(CONFIG_BUILD_FLAT) && defined(CONFIG_ARM_MPU)

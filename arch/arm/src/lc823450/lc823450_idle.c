@@ -31,7 +31,6 @@
 
 #include "nvic.h"
 #include "arm_internal.h"
-#include "arm_arch.h"
 
 #ifdef CONFIG_DVFS
 #  include "lc823450_dvfs2.h"

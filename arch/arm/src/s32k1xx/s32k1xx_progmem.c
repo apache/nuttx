@@ -28,13 +28,10 @@
 #include <assert.h>
 #include <errno.h>
 
-#include "arm_arch.h"
-
 #include "hardware/s32k1xx_ftfc.h"
 
 #include "s32k1xx_config.h"
 #include "s32k1xx_progmem.h"
-
 #include "arm_internal.h"
 
 #include <arch/board/board.h> /* Include last:  has dependencies */

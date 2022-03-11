@@ -32,8 +32,7 @@
 #include <nuttx/arch.h>
 #include <arch/samd5e5/chip.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/sam_memorymap.h"
 #include "hardware/sam_nvmctrl.h"
 

@@ -46,9 +46,7 @@
 
 #include <arch/board/board.h> /* May redefine GPIO settings */
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "hardware/lpc54_usb.h"
 #include "hardware/lpc54_syscon.h"

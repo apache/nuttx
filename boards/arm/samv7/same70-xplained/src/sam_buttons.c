@@ -34,7 +34,7 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_gpio.h"
 #include "hardware/sam_matrix.h"
 #include "same70-xplained.h"

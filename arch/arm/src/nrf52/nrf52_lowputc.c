@@ -27,9 +27,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/nrf52_memorymap.h"
 #include "hardware/nrf52_uarte.h"
 

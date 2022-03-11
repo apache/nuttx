@@ -33,9 +33,7 @@
 #include <arch/irq.h>
 
 #include "nvic.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "s32k1xx_pin.h"
 #include "s32k11x/s32k11x_irq.h"
 

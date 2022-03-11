@@ -38,9 +38,7 @@
 
 #include "mpu.h"
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc43_mpuinit.h"
 #include "lpc43_emacram.h"
 #include "lpc43_usbram.h"

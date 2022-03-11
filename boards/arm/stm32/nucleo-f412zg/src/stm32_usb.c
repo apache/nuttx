@@ -55,7 +55,7 @@
 #include <nuttx/usb/usbhost.h>
 #include <nuttx/usb/usbdev_trace.h>
 
-#include "up_arch.h"
+#include "up_internal.h"
 #include "stm32.h"
 #include "stm32_otgfs.h"
 #include "nucleo-f412zg.h"

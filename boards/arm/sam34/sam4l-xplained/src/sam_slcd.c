@@ -44,7 +44,7 @@
 #include <nuttx/lcd/slcd_codec.h>
 #include <nuttx/semaphore.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_gpio.h"
 #include "sam4l_periphclks.h"
 #include "hardware/sam4l_lcdca.h"

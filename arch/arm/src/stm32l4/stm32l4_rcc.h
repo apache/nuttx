@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 #if defined(CONFIG_STM32L4_STM32L4X3)

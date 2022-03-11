@@ -29,8 +29,6 @@
 #include <nuttx/irq.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "sam_pio.h"
 #include "sam_periphclks.h"
 #include "sam_config.h"
