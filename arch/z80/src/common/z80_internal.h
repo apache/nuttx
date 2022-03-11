@@ -111,10 +111,6 @@ void rpmsg_serialinit(void);
 #  define rpmsg_serialinit()
 #endif
 
-/* Low level string output */
-
-void up_puts(const char *str);
-
 /* Architecture specific hook into the timer interrupt handler */
 
 #ifdef CONFIG_ARCH_TIMERHOOK

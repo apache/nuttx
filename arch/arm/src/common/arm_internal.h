@@ -428,7 +428,6 @@ void arm_restorefpu(const uint32_t *regs);
 /* Low level serial output **************************************************/
 
 void arm_lowputc(char ch);
-void up_puts(const char *str);
 void arm_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
