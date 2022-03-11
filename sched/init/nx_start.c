@@ -37,7 +37,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/mm/shm.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/syslog/syslog.h>
@@ -705,12 +704,6 @@ void nx_start(void)
   g_nx_initstate = OSINIT_HARDWARE;
 
   /* Setup for Multi-Tasking ************************************************/
-
-#ifdef CONFIG_MM_SHM
-  /* Initialize shared memory support */
-
-  shm_initialize();
-#endif
 
 #ifndef CONFIG_BINFMT_DISABLE
   /* Initialize the binfmt system */
