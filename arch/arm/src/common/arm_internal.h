@@ -69,12 +69,6 @@
 #  define USE_SERIALDRIVER 1
 #endif
 
-/* Check if an interrupt stack size is configured */
-
-#ifndef CONFIG_ARCH_INTERRUPTSTACK
-#  define CONFIG_ARCH_INTERRUPTSTACK 0
-#endif
-
 /* For use with EABI and floating point, the stack must be aligned to 8-byte
  * addresses.
  */
@@ -86,6 +80,14 @@
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+/* Check if an interrupt stack size is configured */
+
+#ifndef CONFIG_ARCH_INTERRUPTSTACK
+#  define CONFIG_ARCH_INTERRUPTSTACK 0
+#endif
+
+#define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
 /* Macros to handle saving and restoring interrupt state.  In the current ARM
  * model, the state is always copied to and from the stack and TCB.  In the
@@ -328,6 +330,11 @@ void arm_pminitialize(void);
 #endif
 
 /* Interrupt handling *******************************************************/
+
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 7
+uintptr_t arm_intstack_alloc(void);
+uintptr_t arm_intstack_top(void);
+#endif
 
 /* Exception handling logic unique to the Cortex-M family */
 
