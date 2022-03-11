@@ -39,6 +39,7 @@ include ioexpander/Make.defs
 include lcd/Make.defs
 include leds/Make.defs
 include loop/Make.defs
+include misc/Make.defs
 include mmcsd/Make.defs
 include modem/Make.defs
 include mtd/Make.defs
@@ -68,30 +69,6 @@ include segger/Make.defs
 
 ifeq ($(CONFIG_SPECIFIC_DRIVERS),y)
 -include platform/Make.defs
-endif
-
-ifeq ($(CONFIG_DEV_SIMPLE_ADDRENV),y)
-  CSRCS += addrenv.c
-endif
-
-CSRCS += dev_null.c dev_zero.c
-
-ifeq ($(CONFIG_LWL_CONSOLE),y)
-  CSRCS += lwl_console.c
-endif
-
-ifneq ($(CONFIG_DISABLE_MOUNTPOINT),y)
-  CSRCS += ramdisk.c
-ifeq ($(CONFIG_DRVR_MKRD),y)
-  CSRCS += mkrd.c
-endif
-ifeq ($(CONFIG_DRVR_WRITEBUFFER),y)
-  CSRCS += rwbuffer.c
-else
-ifeq ($(CONFIG_DRVR_READAHEAD),y)
-  CSRCS += rwbuffer.c
-endif
-endif
 endif
 
 AOBJS = $(ASRCS:.S=$(OBJEXT))
