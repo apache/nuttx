@@ -431,7 +431,6 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
           case IO_GET_CHIP_ID:
             audio_msg->msg_id = IO_GET_CHIP_ID;
             audio_msg->u.data = CS35L41_DEVID;
-            *(FAR struct audio_msg_s *)arg = *audio_msg;
             break;
 
           case IO_SET_CALIBRATED:
@@ -471,7 +470,6 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
 
             audio_msg->msg_id = IO_GET_CALIBRATED;
             audio_msg->u.data = cs35l41b_get_calibration_result();
-            *(FAR struct audio_msg_s *)arg = *audio_msg;
 
             /* cs35l41b power down */
 
@@ -498,11 +496,9 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                 return ERROR;
               }
 
-            if (cs35l41b_load_calibration_value(priv) == ERROR)
-              {
-                auderr("dsp caliberate value load failed!\n");
-                return ERROR;
-              }
+            /* reset calibration values load status*/
+
+            priv->is_calibrate_value_loaded = false;
 
             /* power hibernate */
 
