@@ -46,11 +46,8 @@
 
 #include "sched/sched.h"
 #include "signal/signal.h"
-#include "wdog/wdog.h"
 #include "semaphore/semaphore.h"
-#ifndef CONFIG_DISABLE_MQUEUE
-#  include "mqueue/mqueue.h"
-#endif
+#include "mqueue/mqueue.h"
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
@@ -625,15 +622,6 @@ void nx_start(void)
 #endif
     {
       irq_initialize();
-    }
-
-  /* Initialize the watchdog facility (if included in the link) */
-
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (wd_initialize != NULL)
-#endif
-    {
-      wd_initialize();
     }
 
   /* Initialize the POSIX timer facility (if included in the link) */
