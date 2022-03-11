@@ -130,6 +130,9 @@ void up_timer_initialize(void)
   /* Stall systimer 0 when CPU stalls, e.g., when using JTAG to debug */
 
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_CORE0_STALL_EN);
+#ifdef CONFIG_SMP
+  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_CORE1_STALL_EN);
+#endif
 
   /* Enable interrupt */
 
