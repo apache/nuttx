@@ -22,23 +22,8 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/note/note_driver.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
-
 #include <arch/board/board.h>
 
 #include "z16_arch.h"
@@ -78,10 +63,6 @@ volatile FAR chipreg_t *g_current_regs;
 
 void up_initialize(void)
 {
-  /* Initialize global variables */
-
-  g_current_regs = NULL;
-
 #if CONFIG_MM_REGIONS > 1
   /* Add any extra memory fragments to the memory manager */
 
@@ -98,88 +79,16 @@ void up_initialize(void)
   up_pminitialize();
 #endif
 
-  /* Register devices */
-
-#if defined(CONFIG_DEV_NULL)
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-#if defined(CONFIG_DEV_RANDOM)
-  devrandom_register(); /* Standard /dev/random */
-#endif
-
-#if defined(CONFIG_DEV_URANDOM)
-  devurandom_register();   /* Standard /dev/urandom */
-#endif
-
-#if defined(CONFIG_DEV_ZERO)
-  devzero_register();   /* Standard /dev/zero */
-#endif
-
-#if defined(CONFIG_DEV_LOOP)
-  loop_register();      /* Standard /dev/loop */
-#endif
-
-#if defined(CONFIG_DRIVER_NOTE)
-  note_register();      /* Non-standard /dev/note */
-#endif
-
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
   z16_serialinit();
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-  rpmsg_serialinit();
-#endif
-
-  /* Initialize the console device driver (if it is other than the standard
-   * serial driver).
-   */
-
-#if defined(CONFIG_CONSOLE_SYSLOG)
-  syslog_console_init();
-#endif
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Register the master pseudo-terminal multiplexor device */
-
-  ptmx_register();
-#endif
-
-#if defined(CONFIG_CRYPTO)
-  /* Initialize the HW crypto and /dev/crypto */
-
-  up_cryptoinitialize();
-#endif
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV
-  devcrypto_register();
-#endif
-
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   z16_netinitialize();
-#endif
-
-#ifdef CONFIG_NET_LOOPBACK
-  /* Initialize the local loopback device */
-
-  localhost_initialize();
-#endif
-
-#ifdef CONFIG_NET_TUN
-  /* Initialize the TUN device */
-
-  tun_initialize();
-#endif
-
-#ifdef CONFIG_NETDEV_TELNET
-  /* Initialize the Telnet session factory */
-
-  telnet_initialize();
 #endif
 
   board_autoled_on(LED_IRQSENABLED);

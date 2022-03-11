@@ -445,14 +445,6 @@ void arm_serialinit(void);
 void arm_earlyserialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
-#ifdef CONFIG_LWL_CONSOLE
-void lwlconsole_init(void);
-#endif
-
 /* DMA **********************************************************************/
 
 #ifdef CONFIG_ARCH_DMA
@@ -474,10 +466,6 @@ void arm_addregion(void);
 #else
 # define arm_addregion()
 #endif
-
-/* Watchdog timer ***********************************************************/
-
-void arm_wdtinit(void);
 
 /* Networking ***************************************************************/
 

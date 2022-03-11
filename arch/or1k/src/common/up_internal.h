@@ -279,10 +279,6 @@ void up_serialinit(void);
 void up_earlyserialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* DMA **********************************************************************/
 
 #ifdef CONFIG_ARCH_DMA
@@ -304,10 +300,6 @@ void up_addregion(void);
 #else
 # define up_addregion()
 #endif
-
-/* Watchdog timer ***********************************************************/
-
-void up_wdtinit(void);
 
 /* Networking ***************************************************************/
 

@@ -225,10 +225,6 @@ void riscv_serialinit(void);
 void riscv_earlyserialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* Exception Handler ********************************************************/
 
 void riscv_fault(int irq, uintptr_t *regs);

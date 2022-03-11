@@ -164,14 +164,6 @@ void up_consoleinit(void);
 void up_serialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
-/* Defined in xyz_watchdog.c */
-
-void up_wdtinit(void);
-
 /* Defined in board/xyz_lcd.c */
 
 #ifdef CONFIG_SLCD_CONSOLE

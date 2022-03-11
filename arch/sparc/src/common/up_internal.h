@@ -183,14 +183,6 @@ void up_copystate(uint32_t *dest, uint32_t *src);
 
 void up_lowputs(const char *str);
 
-/* Defined in drivers/lowconsole.c */
-
-#ifdef CONFIG_DEV_LOWCONSOLE
-void lowconsole_init(void);
-#else
-# define lowconsole_init()
-#endif
-
 /* Debug */
 
 #ifdef CONFIG_ARCH_STACKDUMP
@@ -217,7 +209,6 @@ void up_sigdeliver(void);
 
 /* IRQs */
 
-void up_irqinitialize(void);
 bool up_pending_irq(int irq);
 void up_clrpend_irq(int irq);
 
@@ -240,8 +231,6 @@ void up_addregion(void);
 void up_lowputc(char ch);
 void up_earlyserialinit(void);
 void up_serialinit(void);
-
-void rpmsg_serialinit(void);
 
 /* Network */
 
