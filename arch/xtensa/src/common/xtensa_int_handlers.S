@@ -311,7 +311,6 @@ _xtensa_level1_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							      /* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
@@ -415,7 +414,6 @@ _xtensa_level2_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
@@ -494,7 +492,6 @@ _xtensa_level3_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
@@ -573,7 +570,6 @@ _xtensa_level4_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
@@ -652,7 +648,6 @@ _xtensa_level5_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
@@ -731,7 +726,6 @@ _xtensa_level6_handler:
 	/* Save rest of interrupt context. */
 
 	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
 	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
