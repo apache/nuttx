@@ -178,7 +178,6 @@ void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
 void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 void up_sigdeliver(void);
 void up_lowputc(char ch);
-void up_puts(const char *str);
 void up_lowputs(const char *str);
 
 void up_syscall(uint32_t *regs);

@@ -198,7 +198,6 @@ void up_fullcontextrestore(uint64_t *restoreregs) noreturn_function;
 void up_switchcontext(uint64_t *saveregs, uint64_t *restoreregs);
 void up_sigdeliver(void);
 void up_lowputc(char ch);
-void up_puts(const char *str);
 void up_lowputs(const char *str);
 void up_restore_auxstate(struct tcb_s *rtcb);
 void up_checktasks(void);
