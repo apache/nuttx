@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/dev_null.c
+ * drivers/misc/dev_zero.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -38,26 +38,26 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t devzero_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
-static int     devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int     devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
                  bool setup);
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
 
-static const struct file_operations devnull_fops =
+static const struct file_operations devzero_fops =
 {
   NULL,          /* open */
   NULL,          /* close */
-  devnull_read,  /* read */
-  devnull_write, /* write */
+  devzero_read,  /* read */
+  devzero_write, /* write */
   NULL,          /* seek */
   NULL,          /* ioctl */
-  devnull_poll   /* poll */
+  devzero_poll   /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL         /* unlink */
 #endif
@@ -68,30 +68,31 @@ static const struct file_operations devnull_fops =
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devnull_read
+ * Name: devzero_read
  ****************************************************************************/
 
-static ssize_t devnull_read(FAR struct file *filep, FAR char *buffer,
+static ssize_t devzero_read(FAR struct file *filep, FAR char *buffer,
                             size_t len)
 {
-  return 0; /* Return EOF */
+  memset(buffer, 0, len);
+  return len;
 }
 
 /****************************************************************************
- * Name: devnull_write
+ * Name: devzero_write
  ****************************************************************************/
 
-static ssize_t devnull_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t devzero_write(FAR struct file *filep, FAR const char *buffer,
                              size_t len)
 {
-  return len; /* Say that everything was written */
+  return len;
 }
 
 /****************************************************************************
- * Name: devnull_poll
+ * Name: devzero_poll
  ****************************************************************************/
 
-static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
+static int devzero_poll(FAR struct file *filep, FAR struct pollfd *fds,
                         bool setup)
 {
   if (setup)
@@ -111,14 +112,14 @@ static int devnull_poll(FAR struct file *filep, FAR struct pollfd *fds,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: devnull_register
+ * Name: devzero_register
  *
  * Description:
- *   Register /dev/null
+ *   Register /dev/zero
  *
  ****************************************************************************/
 
-void devnull_register(void)
+void devzero_register(void)
 {
-  register_driver("/dev/null", &devnull_fops, 0666, NULL);
+  register_driver("/dev/zero", &devzero_fops, 0666, NULL);
 }
