@@ -29,7 +29,6 @@
 #include <debug.h>
 
 #include <nuttx/board.h>
-#include <nuttx/power/pm.h>
 #include <arch/board/board.h>
 
 #include "chip.h"

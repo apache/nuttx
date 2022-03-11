@@ -39,8 +39,8 @@
 #include <nuttx/mm/mm.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched_note.h>
-#include <nuttx/syslog/syslog.h>
 #include <nuttx/binfmt/binfmt.h>
+#include <nuttx/drivers/drivers.h>
 #include <nuttx/init.h>
 #include <nuttx/tls.h>
 
@@ -648,6 +648,10 @@ void nx_start(void)
   binfmt_initialize();
 #endif
 
+  /* Initialize common drivers */
+
+  drivers_initialize();
+
   /* Initialize Hardware Facilities *****************************************/
 
   /* The processor specific details of running the operating system
@@ -697,15 +701,6 @@ void nx_start(void)
           DEBUGVERIFY(group_setupidlefiles(&g_idletcb[i]));
         }
     }
-
-  /* Start SYSLOG ***********************************************************/
-
-  /* Late initialization of the system logging device.  Some SYSLOG channel
-   * must be initialized late in the initialization sequence because it may
-   * depend on having IDLE task file structures setup.
-   */
-
-  syslog_initialize();
 
 #ifdef CONFIG_SMP
   /* Start all CPUs *********************************************************/

@@ -148,10 +148,6 @@ void z16_serialinit(void);
 void z16_earlyserialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* Defined in xyz_irq.c */
 
 void z16_ack_irq(int irq);

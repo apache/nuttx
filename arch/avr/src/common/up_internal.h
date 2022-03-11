@@ -140,10 +140,6 @@ void up_earlyserialinit(void);
 void up_serialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* Defined in chip/xxx_ethernet.c */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

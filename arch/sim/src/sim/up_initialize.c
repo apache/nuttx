@@ -22,30 +22,13 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <assert.h>
-#include <debug.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/audio/audio.h>
-#include <nuttx/clock.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/fs/ioctl.h>
 #include <nuttx/kthread.h>
 #include <nuttx/motor/foc/foc_dummy.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
 #include <nuttx/mtd/mtd.h>
-#include <nuttx/note/note_driver.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
 #include <nuttx/spi/spi_flash.h>
 #include <nuttx/spi/qspi_flash.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
 
 #include "up_internal.h"
 
@@ -206,19 +189,6 @@ static int up_loop_task(int argc, FAR char **argv)
   return 0;
 }
 
-static void up_loop_init(void)
-{
-  int ret;
-
-  /* Use loop_task to simulate the IRQ */
-
-  ret = kthread_create("loop_task", 1,
-                       CONFIG_DEFAULT_TASK_STACKSIZE,
-                       up_loop_task, NULL);
-
-  DEBUGASSERT(ret > 0);
-}
-
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -245,69 +215,9 @@ static void up_loop_init(void)
 
 void up_initialize(void)
 {
-#ifdef CONFIG_PM
-  /* Initialize the power management subsystem.  This MCU-specific function
-   * must be called *very* early in the initialization sequence *before* any
-   * other device drivers are initialized (since they may attempt to register
-   * with the power management subsystem).
-   */
-
-  pm_initialize();
-#endif
-
-  /* Register devices */
-
-#if defined(CONFIG_DEV_NULL)
-  devnull_register();       /* Standard /dev/null */
-#endif
-
-#if defined(CONFIG_DEV_RANDOM)
-  devrandom_register(); /* Standard /dev/random */
-#endif
-
-#if defined(CONFIG_DEV_URANDOM)
-  devurandom_register();   /* Standard /dev/urandom */
-#endif
-
-#if defined(CONFIG_DEV_ZERO)
-  devzero_register();       /* Standard /dev/zero */
-#endif
-
-#if defined(CONFIG_DEV_LOOP)
-  loop_register();          /* Standard /dev/loop */
-#endif
-
-#if defined(CONFIG_DRIVER_NOTE)
-  note_register();          /* Non-standard /dev/note */
-#endif
-
-#ifdef CONFIG_RPMSG_UART
-  rpmsg_serialinit();
-#endif
-
   /* Register some tty-port to access tty-port on sim platform */
 
   up_uartinit();
-
-#if defined(CONFIG_CONSOLE_SYSLOG)
-  syslog_console_init();
-#endif
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Register the master pseudo-terminal multiplexor device */
-
-  ptmx_register();
-#endif
-
-#if defined(CONFIG_CRYPTO)
-  /* Initialize the HW crypto and /dev/crypto */
-
-  up_cryptoinitialize();
-#endif
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV
-  devcrypto_register();
-#endif
 
 #if defined(CONFIG_FS_FAT) && !defined(CONFIG_DISABLE_MOUNTPOINT)
   up_registerblockdevice(); /* Our FAT ramdisk at /dev/ram0 */
@@ -323,24 +233,6 @@ void up_initialize(void)
   usrsock_init();
 #endif
 
-#ifdef CONFIG_NET_LOOPBACK
-  /* Initialize the local loopback device */
-
-  localhost_initialize();
-#endif
-
-#ifdef CONFIG_NET_TUN
-  /* Initialize the TUN device */
-
-  tun_initialize();
-#endif
-
-#ifdef CONFIG_NETDEV_TELNET
-  /* Initialize the Telnet session factory */
-
-  telnet_initialize();
-#endif
-
 #if defined(CONFIG_FS_SMARTFS) && defined(CONFIG_MTD_SMART) && \
     (defined(CONFIG_SPI_FLASH) || defined(CONFIG_QSPI_FLASH))
   up_init_smartfs();
@@ -351,5 +243,7 @@ void up_initialize(void)
   audio_register("pcm0c", sim_audio_initialize(false));
 #endif
 
-  up_loop_init();
+  kthread_create("loop_task", SCHED_PRIORITY_MIN,
+                 CONFIG_DEFAULT_TASK_STACKSIZE,
+                 up_loop_task, NULL);
 }

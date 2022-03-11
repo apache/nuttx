@@ -244,10 +244,6 @@ void up_earlyserialinit(void);
 void up_serialinit(void);
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
 /* Network */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
