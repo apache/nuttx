@@ -269,7 +269,6 @@ uint32_t *or1k_syscall(uint32_t *regs);
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);
-void up_puts(const char *str);
 void up_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER
