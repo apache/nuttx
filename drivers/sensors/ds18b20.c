@@ -146,7 +146,7 @@ struct ds18b20_dev_s
   struct onewire_config_s     config;         /* 1wire device configuration */
   struct ds18b20_config_s     reg;            /* Sensor resolution */
 #ifdef CONFIG_SENSORS_DS18B20_POLL
-  unsigned int                interval;       /* Polling interval */
+  unsigned long               interval;       /* Polling interval */
   sem_t                       run;            /* Locks sensor thread */
 #endif
 };
@@ -168,7 +168,7 @@ static int ds18b20_control(FAR struct sensor_lowerhalf_s *lower,
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                FAR unsigned int *period_us);
+                                FAR unsigned long *period_us);
 #endif
 
 /****************************************************************************
@@ -778,7 +778,7 @@ static int ds18b20_active(FAR struct sensor_lowerhalf_s *lower,
 
 #ifdef CONFIG_SENSORS_DS18B20_POLL
 static int ds18b20_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct ds18b20_dev_s *priv = (FAR struct ds18b20_dev_s *)lower;
   priv->interval = *period_us;

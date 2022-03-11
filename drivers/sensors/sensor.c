@@ -75,8 +75,8 @@ struct sensor_upperhalf_s
   sem_t              exclsem;            /* Manages exclusive access to file operations */
   sem_t              buffersem;          /* Wakeup user waiting for data in circular buffer */
   bool               enabled;            /* The status of sensor enable or disable */
-  unsigned int       interval;           /* The sample interval for sensor, in us */
-  unsigned int       latency;            /* The batch latency for sensor, in us */
+  unsigned long      interval;           /* The sample interval for sensor, in us */
+  unsigned long      latency;            /* The batch latency for sensor, in us */
 };
 
 /****************************************************************************
@@ -340,7 +340,6 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
-  FAR unsigned int *val = (unsigned int *)(uintptr_t)arg;
   int ret;
 
   sninfo("cmd=%x arg=%08lx\n", cmd, arg);
@@ -382,15 +381,15 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          if (upper->interval == *val)
+          if (upper->interval == arg)
             {
               break;
             }
 
-          ret = lower->ops->set_interval(lower, val);
+          ret = lower->ops->set_interval(lower, &arg);
           if (ret >= 0)
             {
-              upper->interval = *val;
+              upper->interval = arg;
             }
         }
         break;
@@ -409,15 +408,15 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               break;
             }
 
-          if (upper->latency == *val)
+          if (upper->latency == arg)
             {
               break;
             }
 
-          ret = lower->ops->batch(lower, val);
+          ret = lower->ops->batch(lower, &arg);
           if (ret >= 0)
             {
-              upper->latency = *val;
+              upper->latency = arg;
             }
         }
         break;
@@ -460,7 +459,7 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
       case SNIOC_GET_NEVENTBUF:
         {
-          *val = lower->buffer_number;
+          *(FAR uint32_t *)(uintptr_t)arg = lower->buffer_number;
         }
         break;
 

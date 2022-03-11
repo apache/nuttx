@@ -628,7 +628,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
-                           FAR unsigned int *period_us);
+                           FAR unsigned long *period_us);
 
   /**************************************************************************
    * Name: batch
@@ -672,7 +672,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
-                    FAR unsigned int *latency_us);
+                    FAR unsigned long *latency_us);
 
   /**************************************************************************
    * Name: fetch
