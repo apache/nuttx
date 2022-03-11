@@ -186,7 +186,7 @@ static int can_bittiming(struct up_dev_s *priv);
 static const struct can_ops_s g_canops =
 {
   .co_reset         = can_reset,
-  .co_setup         =  can_setup,
+  .co_setup         = can_setup,
   .co_shutdown      = can_shutdown,
   .co_rxint         = can_rxint,
   .co_txint         = can_txint,
