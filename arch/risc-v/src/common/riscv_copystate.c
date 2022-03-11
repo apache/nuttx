@@ -55,6 +55,10 @@ void riscv_copystate(uintptr_t *dest, uintptr_t *src)
 {
   int i;
 
+#ifdef CONFIG_ARCH_FPU
+  uintptr_t *regs = dest;
+#endif
+
   /* In the RISC-V model, the state is copied from the stack to the TCB,
    * but only a reference is passed to get the state from the TCB.  So the
    * following check avoids copying the TCB save area onto itself:
@@ -75,7 +79,7 @@ void riscv_copystate(uintptr_t *dest, uintptr_t *src)
        */
 
 #ifdef CONFIG_ARCH_FPU
-      riscv_savefpu(dest);
+      riscv_savefpu(regs);
 #endif
     }
 }
