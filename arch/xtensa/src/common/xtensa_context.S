@@ -67,6 +67,7 @@
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include <arch/syscall.h>
+#include "xtensa_asm_utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -84,7 +85,7 @@
  *   This function saves Xtensa processor state.
  *   It is called directly by interrupt handling logic with interrupts
  *   disabled.  Registers PC, PS, A0, A1 (SP), A2 and A3 are saved before
- *   calling this function. 
+ *   calling this function.
  *
  *   The counterpart to this function is _xtensa_context_restore().
  *
@@ -159,16 +160,43 @@ _xtensa_context_save:
 #error Overlay support is not implemented
 #endif
 
-	s32i	a0, sp, (4 * REG_TMP0)			/* Save return address */
-	s32i	sp, sp, (4 * REG_TMP1)			/* Save current stack pointer */
-	wsr		sp, EXCSAVE_1					/* Preserve register save area */
+	/* SPILL_ALL_WINDOWS macro requires window overflow exceptions to be enabled,
+	 * i.e. PS.EXCM cleared and PS.WOE set.
+	 * Since we are going to clear PS.EXCM, we also need to increase INTLEVEL
+	 * at least to XCHAL_EXCM_LEVEL. This matches that value of effective INTLEVEL
+	 * at entry (CINTLEVEL=max(PS.INTLEVEL, XCHAL_EXCM_LEVEL) when PS.EXCM is set.
+	 * Since WindowOverflow exceptions will trigger inside SPILL_ALL_WINDOWS,
+	 * we need to save/restore EPC1 as well.
+	 * NOTE: Even though a4-a15 are saved into the exception frame, we should not
+	 * clobber them until after SPILL_ALL_WINDOWS. This is because these registers
+	 * may contain live windows belonging to previous frames in the call stack.
+	 * These frames will be spilled by SPILL_ALL_WINDOWS, and if the register was
+	 * used as a temporary by this code, the temporary value would get stored
+	 * onto the stack, instead of the real value.
+	 */
 
-	l32i	sp, sp, (4 * REG_A1)			/* Restore the interruptee's SP */
-	call0	_xtensa_window_spill			/* Preserves only a4-a5, a8-a9, a12-a13 */
+	s32i    a0, sp, (4 * REG_TMP0)     /* Save return address */
+	rsr     a2, PS                     /* To be restored after SPILL_ALL_WINDOWS */
+	movi    a0, PS_INTLEVEL_MASK
+	and     a3, a2, a0                 /* Get the current INTLEVEL */
+	bgeui   a3, XCHAL_EXCM_LEVEL, 1f   /* Calculate max(INTLEVEL, XCHAL_EXCM_LEVEL) */
+	movi    a3, XCHAL_EXCM_LEVEL
+1:
+	movi    a0, PS_UM | PS_WOE         /* Clear EXCM, enable window overflow, set new INTLEVEL */
+	or      a3, a3, a0
+	wsr     a3, ps
+	rsync
+	rsr     a0, EPC1                   /* To be restored after SPILL_ALL_WINDOWS */
 
-	rsr		sp, EXCSAVE_1					/* Save interruptee's a0 */
-	l32i	a0, sp, (4 * REG_TMP0)			/* Save return address */
-	l32i	sp, sp, (4 * REG_TMP1)			/* Save current stack pointer */
+	addi    sp,  sp, XCPTCONTEXT_SIZE  /* Go back to spill register region */
+	SPILL_ALL_WINDOWS                  /* Place the live register windows there */
+	addi    sp,  sp, -XCPTCONTEXT_SIZE /* Return the current stack pointer and proceed with context save*/
+
+	wsr     a2, PS                     /* Restore PS to the value at entry */
+	wsr     a0, EPC1                   /* Restore EPC1 to the value at entry */
+	rsync
+	l32i  a0, sp, (4 * REG_TMP0)       /* Restore return address */
+
 #endif
 
 	ret
