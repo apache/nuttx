@@ -96,7 +96,7 @@ struct hyt271_dev_s
   sem_t                   lock_measure_cycle;       /* Locks measure cycle */
   uint32_t                freq;                     /* I2C Frequency */
 #ifdef CONFIG_SENSORS_HYT271_POLL
-  unsigned int            interval;                 /* Polling interval */
+  unsigned long           interval;                 /* Polling interval */
   sem_t                   run;                      /* Locks sensor thread */
   bool                    initial_read;             /* Already read */
 #endif
@@ -120,7 +120,7 @@ static int hyt271_control(FAR struct sensor_lowerhalf_s *lower,
 
 #ifdef CONFIG_SENSORS_HYT271_POLL
 static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us);
+                               FAR unsigned long *period_us);
 #endif
 
 /****************************************************************************
@@ -751,7 +751,7 @@ static int hyt271_active(FAR struct sensor_lowerhalf_s *lower,
 
 #ifdef CONFIG_SENSORS_HYT271_POLL
 static int hyt271_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct hyt271_sensor_s *priv = (FAR struct hyt271_sensor_s *)lower;
   priv->dev->interval = *period_us;

@@ -47,8 +47,8 @@ struct fakesensor_s
 {
   struct sensor_lowerhalf_s lower;
   struct file data;
-  unsigned int interval;
-  unsigned int batch;
+  unsigned long interval;
+  unsigned long batch;
   int raw_start;
   FAR const char *file_path;
   sem_t wakeup;
@@ -62,9 +62,9 @@ struct fakesensor_s
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower,
                                bool sw);
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                   FAR unsigned int *period_us);
+                                   FAR unsigned long *period_us);
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
-                            FAR unsigned int *latency_us);
+                            FAR unsigned long *latency_us);
 static void fakesensor_push_event(FAR struct sensor_lowerhalf_s *lower);
 static int fakesensor_thread(int argc, char** argv);
 
@@ -120,7 +120,7 @@ static int fakesensor_read_csv_header(FAR struct fakesensor_s *sensor)
       fakesensor_read_csv_line(&sensor->data, buffer, sizeof(buffer), 0);
   if (sensor->interval == 0)
     {
-      sscanf(buffer, "interval:%d\n", &sensor->interval);
+      sscanf(buffer, "interval:%lu\n", &sensor->interval);
       sensor->interval *= 1000;
     }
 
@@ -234,7 +234,7 @@ static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
 }
 
 static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                                   FAR unsigned int *period_us)
+                                   FAR unsigned long *period_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
@@ -243,11 +243,11 @@ static int fakesensor_set_interval(FAR struct sensor_lowerhalf_s *lower,
 }
 
 static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
-                            FAR unsigned int *latency_us)
+                            FAR unsigned long *latency_us)
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
-  uint32_t max_latency = sensor->lower.buffer_number * sensor->interval;
+  unsigned long max_latency = sensor->lower.buffer_number * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;

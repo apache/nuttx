@@ -160,7 +160,7 @@ static int bmp280_putreg8(FAR struct bmp280_dev_s *priv, uint8_t regaddr,
 /* Sensor methods */
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us);
+                               FAR unsigned long *period_us);
 static int bmp280_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
@@ -504,7 +504,7 @@ static uint32_t bmp280_compensate_press(FAR struct bmp280_dev_s *priv,
  ****************************************************************************/
 
 static int bmp280_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct bmp280_dev_s *priv = container_of(lower,
                                                FAR struct bmp280_dev_s,

@@ -94,7 +94,7 @@ struct ms5611_dev_s
 
   uint32_t                  freq;      /* Bus Frequency I2C/SPI */
   struct ms5611_calib_s     calib;     /* Calib. params from ROM */
-  unsigned int              interval;  /* Polling interval */
+  unsigned long             interval;  /* Polling interval */
   bool                      enabled;   /* Enable/Disable MS5611 */
   sem_t                     run;       /* Locks measure cycle */
   sem_t                     exclsem;   /* Manages exclusive to device */
@@ -121,7 +121,7 @@ static unsigned long ms5611_curtime(void);
 /* Sensor methods */
 
 static int ms5611_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us);
+                               FAR unsigned long *period_us);
 static int ms5611_activate(FAR struct sensor_lowerhalf_s *lower,
                            bool enable);
 
@@ -540,7 +540,7 @@ static uint32_t ms5611_compensate_press(FAR struct ms5611_dev_s *priv,
  ****************************************************************************/
 
 static int ms5611_set_interval(FAR struct sensor_lowerhalf_s *lower,
-                               FAR unsigned int *period_us)
+                               FAR unsigned long *period_us)
 {
   FAR struct ms5611_dev_s *priv = container_of(lower,
                                                FAR struct ms5611_dev_s,
