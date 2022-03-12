@@ -56,7 +56,7 @@ static struct can_conn_s g_can_connections[CONFIG_CAN_CONNS];
 /* A list of all free NetLink connections */
 
 static dq_queue_t g_free_can_connections;
-static sem_t g_free_sem;
+static sem_t g_free_sem = SEM_INITIALIZER(1);
 
 /* A list of all allocated NetLink connections */
 
@@ -101,15 +101,7 @@ void can_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_can_connections);
-  dq_init(&g_active_can_connections);
-  nxsem_init(&g_free_sem, 0, 1);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_CAN_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */

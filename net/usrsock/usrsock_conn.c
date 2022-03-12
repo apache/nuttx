@@ -53,7 +53,7 @@ static struct usrsock_conn_s g_usrsock_connections[CONFIG_NET_USRSOCK_CONNS];
 /* A list of all free usrsock connections */
 
 static dq_queue_t g_free_usrsock_connections;
-static sem_t g_free_sem;
+static sem_t g_free_sem = SEM_INITIALIZER(1);
 
 /* A list of all allocated usrsock connections */
 
@@ -333,15 +333,7 @@ void usrsock_initialize(void)
 #ifndef CONFIG_NET_ALLOC_CONNS
   FAR struct usrsock_conn_s *conn;
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_usrsock_connections);
-  dq_init(&g_active_usrsock_connections);
-  nxsem_init(&g_free_sem, 0, 1);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_USRSOCK_CONNS; i++)
     {
       conn = &g_usrsock_connections[i];

@@ -63,7 +63,7 @@ static struct pkt_conn_s g_pkt_connections[CONFIG_NET_PKT_CONNS];
 /* A list of all free packet socket connections */
 
 static dq_queue_t g_free_pkt_connections;
-static sem_t g_free_sem;
+static sem_t g_free_sem = SEM_INITIALIZER(1);
 
 /* A list of all allocated packet socket connections */
 
@@ -105,15 +105,7 @@ void pkt_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_pkt_connections);
-  dq_init(&g_active_pkt_connections);
-  nxsem_init(&g_free_sem, 0, 1);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_PKT_CONNS; i++)
     {
       dq_addlast(&g_pkt_connections[i].sconn.node, &g_free_pkt_connections);
