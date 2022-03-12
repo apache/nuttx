@@ -90,7 +90,7 @@
 static inline void igmp_sched_send(FAR struct net_driver_s *dev,
                                    FAR struct igmp_group_s *group)
 {
-  in_addr_t *dest;
+  FAR const in_addr_t *dest;
 
   /* REVISIT:  This should be deferred to a work queue */
 

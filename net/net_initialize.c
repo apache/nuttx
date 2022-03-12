@@ -43,7 +43,6 @@
 #include "ieee802154/ieee802154.h"
 #include "can/can.h"
 #include "netlink/netlink.h"
-#include "igmp/igmp.h"
 #include "route/route.h"
 #include "usrsock/usrsock.h"
 
@@ -156,12 +155,6 @@ void net_initialize(void)
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   udp_wrbuffer_initialize();
 #endif
-#endif
-
-#ifdef CONFIG_NET_IGMP
-  /* Initialize IGMP support */
-
-  igmp_initialize();
 #endif
 
 #ifdef CONFIG_NET_ROUTE
