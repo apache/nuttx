@@ -137,10 +137,6 @@ void net_initialize(void)
 #endif
 
 #ifdef NET_TCP_HAVE_STACK
-  /* Initialize the listening port structures */
-
-  tcp_listen_initialize();
-
   /* Initialize the TCP/IP connection structures */
 
   tcp_initialize();

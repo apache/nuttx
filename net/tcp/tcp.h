@@ -831,20 +831,6 @@ void tcp_timer(FAR struct net_driver_s *dev, FAR struct tcp_conn_s *conn,
                int hsec);
 
 /****************************************************************************
- * Name: tcp_listen_initialize
- *
- * Description:
- *   Setup the listening data structures
- *
- * Assumptions:
- *   Called early in the initialization phase while the system is still
- *   single-threaded.
- *
- ****************************************************************************/
-
-void tcp_listen_initialize(void);
-
-/****************************************************************************
  * Name: tcp_findlistener
  *
  * Description:
