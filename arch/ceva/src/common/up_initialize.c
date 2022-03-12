@@ -47,8 +47,6 @@
 #include "up_internal.h"
 #include "chip.h"
 
-#include "sched/sched.h"
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -98,18 +96,9 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  struct tcb_s *idle;
-
   /* Initialize global variables */
 
   CURRENT_REGS = NULL;
-
-  /* Initialize the idle task stack info */
-
-  idle = this_task(); /* It should be idle task */
-  idle->stack_alloc_ptr = g_idle_basestack;
-  idle->stack_base_ptr  = g_idle_topstack;
-  idle->adj_stack_size  = g_idle_topstack - g_idle_basestack;
 
   /* Colorize the interrupt stack */
 
