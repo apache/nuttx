@@ -55,7 +55,7 @@ static struct icmp_conn_s g_icmp_connections[CONFIG_NET_ICMP_NCONNS];
 /* A list of all free IPPROTO_ICMP socket connections */
 
 static dq_queue_t g_free_icmp_connections;
-static sem_t g_free_sem;
+static sem_t g_free_sem = SEM_INITIALIZER(1);
 
 /* A list of all allocated IPPROTO_ICMP socket connections */
 
@@ -78,15 +78,7 @@ void icmp_sock_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_icmp_connections);
-  dq_init(&g_active_icmp_connections);
-  nxsem_init(&g_free_sem, 0, 1);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_ICMP_NCONNS; i++)
     {
       /* Move the connection structure to the free list */

@@ -57,7 +57,7 @@ static struct netlink_conn_s g_netlink_connections[CONFIG_NETLINK_CONNS];
 /* A list of all free NetLink connections */
 
 static dq_queue_t g_free_netlink_connections;
-static sem_t g_free_sem;
+static sem_t g_free_sem = SEM_INITIALIZER(1);
 
 /* A list of all allocated NetLink connections */
 
@@ -125,15 +125,7 @@ void netlink_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_netlink_connections);
-  dq_init(&g_active_netlink_connections);
-  nxsem_init(&g_free_sem, 0, 1);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NETLINK_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
