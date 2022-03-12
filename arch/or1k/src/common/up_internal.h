@@ -72,6 +72,18 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+/* For use with EABI and floating point, the stack must be aligned to 8-byte
+ * addresses.
+ */
+
+#define STACK_ALIGNMENT     8
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 #define up_savestate(regs)  up_copyfullstate(regs, (uint32_t*)CURRENT_REGS)
 #define up_restorestate(regs) up_copyfullstate((uint32_t*)CURRENT_REGS, regs)
 
@@ -257,7 +269,6 @@ uint32_t *or1k_syscall(uint32_t *regs);
 /* Low level serial output **************************************************/
 
 void up_lowputc(char ch);
-void up_puts(const char *str);
 void up_lowputs(const char *str);
 
 #ifdef USE_SERIALDRIVER

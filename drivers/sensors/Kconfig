@@ -74,6 +74,7 @@ config SENSORS_AS726X
 	bool "AMS AS726X Spetral sensor support"
 	default n
 	select I2C
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the AS726X Spectral Sensor.
 
@@ -95,7 +96,6 @@ config SENSORS_BMG160
 	select SPI
 	---help---
 		Enable driver support for the Bosch BMG160 gyroscope sensor.
-
 
 config SENSORS_BMI160
 	bool "Bosch BMI160 Inertial Measurement Sensor support"
@@ -316,7 +316,6 @@ config SENSORS_L3GD20_BUFFER_SIZE
 		The size of the circular buffer used. If the value equal to zero,
 		indicates that the circular buffer is disabled.
 
-
 config SENSOR_KXTJ9
 	bool "Kionix KXTJ9 Accelerometer support"
 	default n
@@ -375,6 +374,7 @@ config LIS3DH
 	bool "STMicro LIS3DH 3-Axis accelerometer support"
 	default n
 	select SPI
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the STMicro LIS3DH 3-Axis accelerometer.
 
@@ -400,6 +400,7 @@ config SENSORS_LSM303AGR
 	bool "STMicro LSM303AGR support"
 	default n
 	select I2C
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the STMicro LSM303AGR.
 
@@ -413,6 +414,7 @@ config SENSORS_LSM6DSL
 	bool "STMicro LSM6DSL support"
 	default n
 	select I2C
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the STMicro LSM6DSL.
 
@@ -994,6 +996,7 @@ config SENSORS_VL53L1X
 	bool "ST VL53L1X TOF sensor"
 	default n
 	select I2C
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable driver support for the VL53L1X Time Of Flight sensor.
 

@@ -216,7 +216,7 @@ int pipecommon_open(FAR struct file *filep)
 
       if (dev->d_nwriters == 1)
         {
-          while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
+          while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval <= 0)
             {
               nxsem_post(&dev->d_rdsem);
             }
@@ -232,19 +232,18 @@ int pipecommon_open(FAR struct file *filep)
       dev->d_nreaders++;
     }
 
-  /* If opened for read-only, then wait for either (1) at least one writer
-   * on the pipe (policy == 0), or (2) until there is buffered data to be
-   * read (policy == 1).
-   */
-
-  sched_lock();
-  nxsem_post(&dev->d_bfsem);
-
-  if (!(filep->f_oflags & O_NONBLOCK) &&         /* Non-blocking */
-      (filep->f_oflags & O_RDWR) == O_RDONLY &&  /* Read-only */
-      dev->d_nwriters < 1 &&                     /* No writers on the pipe */
-      dev->d_wrndx == dev->d_rdndx)              /* Buffer is empty */
+  while ((filep->f_oflags & O_NONBLOCK) == 0 &&    /* Non-blocking */
+         (filep->f_oflags & O_RDWR) == O_RDONLY && /* Read-only */
+         dev->d_nwriters < 1 &&                    /* No writers on the pipe */
+         dev->d_wrndx == dev->d_rdndx)             /* Buffer is empty */
     {
+      /* If opened for read-only, then wait for either (1) at least one
+       * writer on the pipe (policy == 0), or (2) until there is buffered
+       * data to be read (policy == 1).
+       */
+
+      nxsem_post(&dev->d_bfsem);
+
       /* NOTE: d_rdsem is normally used when the read logic waits for more
        * data to be written.  But until the first writer has opened the
        * pipe, the meaning is different: it is used prevent O_RDONLY open
@@ -255,7 +254,7 @@ int pipecommon_open(FAR struct file *filep)
        */
 
       ret = nxsem_wait(&dev->d_rdsem);
-      if (ret < 0)
+      if (ret < 0 || (ret = nxsem_wait(&dev->d_bfsem)) < 0)
         {
           /* The nxsem_wait() call should fail if we are awakened by a
            * signal or if the task is canceled.
@@ -266,10 +265,11 @@ int pipecommon_open(FAR struct file *filep)
           /* Immediately close the pipe that we just opened */
 
           pipecommon_close(filep);
+          return ret;
         }
     }
 
-  sched_unlock();
+  nxsem_post(&dev->d_bfsem);
   return ret;
 }
 
@@ -323,7 +323,7 @@ int pipecommon_close(FAR struct file *filep)
 
               pipecommon_pollnotify(dev, POLLHUP);
 
-              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval <= 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
@@ -344,7 +344,7 @@ int pipecommon_close(FAR struct file *filep)
 
                   pipecommon_pollnotify(dev, POLLERR);
                   while (nxsem_get_value(&dev->d_wrsem, &sval) == 0
-                         && sval < 0)
+                         && sval <= 0)
                     {
                       nxsem_post(&dev->d_wrsem);
                     }
@@ -396,12 +396,12 @@ int pipecommon_close(FAR struct file *filep)
 
 ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode      *inode  = filep->f_inode;
-  FAR struct pipe_dev_s *dev    = inode->i_private;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
 #ifdef CONFIG_DEV_PIPEDUMP
-  FAR uint8_t           *start  = (FAR uint8_t *)buffer;
+  FAR uint8_t           *start = (FAR uint8_t *)buffer;
 #endif
-  ssize_t                nread  = 0;
+  ssize_t                nread = 0;
   int                    sval;
   int                    ret;
 
@@ -446,10 +446,8 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
       /* Otherwise, wait for something to be written to the pipe */
 
-      sched_lock();
       nxsem_post(&dev->d_bfsem);
       ret = nxsem_wait(&dev->d_rdsem);
-      sched_unlock();
 
       if (ret < 0 || (ret = nxsem_wait(&dev->d_bfsem)) < 0)
         {
@@ -485,7 +483,7 @@ ssize_t pipecommon_read(FAR struct file *filep, FAR char *buffer, size_t len)
    * buffer.
    */
 
-  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 && sval < 0)
+  while (nxsem_get_value(&dev->d_wrsem, &sval) == 0 && sval <= 0)
     {
       nxsem_post(&dev->d_wrsem);
     }
@@ -520,17 +518,6 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
       return 0;
     }
 
-  /* REVISIT:  "If all file descriptors referring to the read end of a pipe
-   * have been closed, then a write will cause a SIGPIPE signal to be
-   * generated for the calling process.  If the calling process is ignoring
-   * this signal, then write(2) fails with the error EPIPE."
-   */
-
-  if (dev->d_nreaders <= 0)
-    {
-      return -EPIPE;
-    }
-
   /* At present, this method cannot be called from interrupt handlers.  That
    * is because it calls nxsem_wait() and nxsem_wait() cannot be called from
    * interrupt level.  This actually happens fairly commonly IF [a-z]err()
@@ -563,6 +550,18 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
   last = 0;
   for (; ; )
     {
+      /* REVISIT:  "If all file descriptors referring to the read end of a
+       * pipe have been closed, then a write will cause a SIGPIPE signal to
+       * be generated for the calling process.  If the calling process is
+       * ignoring this signal, then write(2) fails with the error EPIPE."
+       */
+
+      if (dev->d_nreaders <= 0)
+        {
+          nxsem_post(&dev->d_bfsem);
+          return nwritten == 0 ? -EPIPE : nwritten;
+        }
+
       /* Calculate the write index AFTER the next byte is written */
 
       nxtwrndx = dev->d_wrndx + 1;
@@ -595,7 +594,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                * available.
                */
 
-              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval <= 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
@@ -624,7 +623,7 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
                * available.
                */
 
-              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval < 0)
+              while (nxsem_get_value(&dev->d_rdsem, &sval) == 0 && sval <= 0)
                 {
                   nxsem_post(&dev->d_rdsem);
                 }
@@ -651,16 +650,8 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
            * the pipe
            */
 
-          sched_lock();
           nxsem_post(&dev->d_bfsem);
           ret = nxsem_wait(&dev->d_wrsem);
-          sched_unlock();
-
-          if (dev->d_nreaders <= 0)
-            {
-              ret = -EPIPE;
-            }
-
           if (ret < 0 || (ret = nxsem_wait(&dev->d_bfsem)) < 0)
             {
               /* Either call nxsem_wait may fail because a signal was
@@ -680,8 +671,8 @@ ssize_t pipecommon_write(FAR struct file *filep, FAR const char *buffer,
 int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
                     bool setup)
 {
-  FAR struct inode      *inode    = filep->f_inode;
-  FAR struct pipe_dev_s *dev      = inode->i_private;
+  FAR struct inode      *inode = filep->f_inode;
+  FAR struct pipe_dev_s *dev   = inode->i_private;
   pollevent_t            eventset;
   pipe_ndx_t             nbytes;
   int                    ret;
@@ -719,8 +710,8 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if (i >= CONFIG_DEV_PIPE_NPOLLWAITERS)
         {
-          fds->priv   = NULL;
-          ret          = -EBUSY;
+          fds->priv = NULL;
+          ret       = -EBUSY;
           goto errout;
         }
 
@@ -784,15 +775,15 @@ int pipecommon_poll(FAR struct file *filep, FAR struct pollfd *fds,
 #ifdef CONFIG_DEBUG_FEATURES
       if (!slot)
         {
-          ret              = -EIO;
+          ret = -EIO;
           goto errout;
         }
 #endif
 
       /* Remove all memory of the poll setup */
 
-      *slot                = NULL;
-      fds->priv            = NULL;
+      *slot     = NULL;
+      fds->priv = NULL;
     }
 
 errout:

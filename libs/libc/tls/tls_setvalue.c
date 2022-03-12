@@ -76,3 +76,42 @@ int tls_set_value(int tlsindex, uintptr_t tlsvalue)
 }
 
 #endif /* CONFIG_TLS_NELEM > 0 */
+
+#if CONFIG_TLS_TASK_NELEM > 0
+
+/****************************************************************************
+ * Name: task_tls_set_value
+ *
+ * Description:
+ *   Set the task local storage element associated with the 'tlsindex' to
+ *   'tlsvalue'
+ *
+ * Input Parameters:
+ *   tlsindex - Index of task local storage data element to set
+ *   tlsvalue - The new value of the task local storage data element
+ *
+ * Returned Value:
+ *   Zero is returned on success, a negated errno value is return on
+ *   failure:
+ *
+ *     EINVAL - tlsindex is not in range.
+ *
+ ****************************************************************************/
+
+int task_tls_set_value(int tlsindex, uintptr_t tlsvalue)
+{
+  FAR struct task_info_s *info = task_get_info();
+
+  if (tlsindex >= 0 && tlsindex < CONFIG_TLS_TASK_NELEM)
+    {
+      info->ta_telem[tlsindex] = tlsvalue;
+    }
+  else
+    {
+      return -ERANGE;
+    }
+
+  return OK;
+}
+
+#endif

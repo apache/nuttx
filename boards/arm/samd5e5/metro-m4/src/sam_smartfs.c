@@ -101,7 +101,7 @@ int sam_smartfs_initialize(void)
       const char *partstring = "256";
       const char *ptr;
       FAR struct mtd_dev_s *mtd_part;
-      char  partref[4];
+      char  partref[16];
 
       /* Now create a partition on the FLASH device */
 
@@ -160,7 +160,7 @@ int sam_smartfs_initialize(void)
                    */
 
             #if defined(CONFIG_MTD_SMART) && defined(CONFIG_FS_SMARTFS)
-                      sprintf(partref, "p%d", partno);
+                      snprintf(partref, sizeof(partref), "p%d", partno);
                       smart_initialize(0, mtd_part, partref);
             #endif
                 }

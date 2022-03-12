@@ -106,7 +106,6 @@ There are five user interface switches on the MIMXRT1050 EVK Board:
 Only the user button is available to the software.  It is sensed on the
 WAKEUP pin which will be pulled low when the button is pressed.
 
-
 J-Link External Debug Probe
 ===========================
 

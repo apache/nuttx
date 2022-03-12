@@ -73,8 +73,6 @@ MEMORY
 
   dram0_0_seg (RW) :                 org = SRAM_DRAM_ORG, len = I_D_SRAM_SIZE
 
-
-
   /* Flash mapped constant data */
 
   /* The 0x20 offset is a convenience for the app binary image generation.

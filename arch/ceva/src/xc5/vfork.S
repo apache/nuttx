@@ -25,7 +25,7 @@
 #include <nuttx/config.h>
 #include <nuttx/irq.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Symbols

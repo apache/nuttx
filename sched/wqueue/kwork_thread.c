@@ -205,11 +205,11 @@ static int work_thread_create(FAR const char *name, int priority,
                               FAR struct kwork_wqueue_s *wqueue)
 {
   FAR char *argv[2];
-  char args[16];
+  char args[32];
   int wndx;
   int pid;
 
-  snprintf(args, 16, "0x%" PRIxPTR, (uintptr_t)wqueue);
+  snprintf(args, sizeof(args), "0x%" PRIxPTR, (uintptr_t)wqueue);
   argv[0] = args;
   argv[1] = NULL;
 

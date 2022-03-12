@@ -50,4 +50,23 @@ struct mallinfo kmm_mallinfo(void)
   return info;
 }
 
+/****************************************************************************
+ * Name: kmm_mallinfo_task
+ *
+ * Description:
+ *   kmm_mallinfo_task returns a copy of updated current heap information of
+ *   task with specified pid for the user heap.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_MM
+struct mallinfo_task kmm_mallinfo_task(pid_t pid)
+{
+  struct mallinfo_task info;
+
+  info.pid = pid;
+  mm_mallinfo_task(g_kmmheap, &info);
+  return info;
+}
+#endif
 #endif /* CONFIG_MM_KERNEL_HEAP */

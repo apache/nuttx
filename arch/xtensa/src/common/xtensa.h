@@ -81,6 +81,16 @@
 #  define INTSTACK_SIZE         INTSTACK_ALIGNUP(CONFIG_ARCH_INTERRUPTSTACK)
 #endif
 
+/* XTENSA requires at least a 16-byte stack alignment. */
+
+#define STACK_ALIGNMENT     16
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /* An IDLE thread stack size for CPU0 must be defined */
 
 #if !defined(CONFIG_IDLETHREAD_STACKSIZE)
@@ -223,7 +233,6 @@ void xtensa_copystate(uint32_t *dest, uint32_t *src);
 
 /* Serial output */
 
-void up_puts(const char *str);
 void up_lowputs(const char *str);
 
 /* Debug */
@@ -246,6 +255,11 @@ void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 
 /* IRQs */
 
+#if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
+uintptr_t xtensa_intstack_alloc(void);
+uintptr_t xtensa_intstack_top(void);
+#endif
+
 uint32_t *xtensa_int_decode(uint32_t cpuints, uint32_t *regs);
 uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs);
 uint32_t xtensa_enable_cpuint(uint32_t *shadow, uint32_t intmask);
@@ -265,6 +279,7 @@ void xtensa_pause_handler(void);
 
 int xtensa_context_save(uint32_t *regs);
 void xtensa_context_restore(uint32_t *regs) noreturn_function;
+void xtensa_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
 
 #if XCHAL_CP_NUM > 0
 void xtensa_coproc_savestate(struct xtensa_cpstate_s *cpstate);
@@ -337,7 +352,7 @@ void xtensa_pminitialize(void);
 
 /* Exception Handlers */
 
-int xtensa_svcall(int irq, void *context, void *arg);
+int xtensa_swint(int irq, void *context, void *arg);
 
 /* Debug ********************************************************************/
 

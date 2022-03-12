@@ -1771,7 +1771,7 @@ config STM32L4_FLASH_PREFETCH
 config STM32L4_FLASH_WORKAROUND_DATA_CACHE_CORRUPTION_ON_RWW
 	bool "Workaround for FLASH data cache corruption"
 	default n
-	depends on STM32L4_STM32L475XX || STM32L4_STM32L476XX || STM32L4_STM32L486XX || STM32L4_STM32L496XX || STM32L4_STM32L4A6XX
+	depends on STM32L4_STM32L4X5 || STM32L4_STM32L4X6 || STM32L4_STM32L4XR
 	---help---
 		Enable the workaround to fix flash data cache corruption when reading
 		from one flash bank while writing on other flash bank.  See your STM32

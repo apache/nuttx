@@ -90,6 +90,11 @@
 /* Interrupts ***************************************************************/
 
 /* Indexing macros: */
+#ifndef XCHAL_SYSCALL_LEVEL
+#  define XCHAL_IRQ_LEVEL  XCHAL_EXCM_LEVEL
+#else
+#  define XCHAL_IRQ_LEVEL  XCHAL_SYSCALL_LEVEL
+#endif
 
 #define _XCHAL_INTLEVEL_MASK(n)         XCHAL_INTLEVEL ## n ## _MASK
 #define XCHAL_INTLEVEL_MASK(n)          _XCHAL_INTLEVEL_MASK(n) /* n = 0 .. 15 */
@@ -1392,6 +1397,18 @@
 /* Belongs in xtensa/hal.h: */
 
 #define XTHAL_INST_ILL            0x000000    /* 3-byte illegal instruction */
+
+/*  Version comparison operators (among major/minor pairs):  */
+
+#define XTHAL_REL_GE(maja,mina, majb,minb)  ((maja) > (majb) || \
+             ((maja) == (majb) && (mina) >= (minb)))
+#define XTHAL_REL_GT(maja,mina, majb,minb)  ((maja) > (majb) || \
+             ((maja) == (majb) && (mina) > (minb)))
+#define XTHAL_REL_LE(maja,mina, majb,minb)  ((maja) < (majb) || \
+             ((maja) == (majb) && (mina) <= (minb)))
+#define XTHAL_REL_LT(maja,mina, majb,minb)  ((maja) < (majb) || \
+             ((maja) == (majb) && (mina) < (minb)))
+#define XTHAL_REL_EQ(maja,mina, majb,minb)  ((maja) == (majb) && (mina) == (minb))
 
 /* Because information as to exactly which hardware version is targeted
  * by a given software build is not always available, compile-time HAL

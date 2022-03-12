@@ -311,6 +311,10 @@ struct tcp_conn_s
   /* Callback instance for TCP send() */
 
   FAR struct devif_callback_s *sndcb;
+
+#ifdef CONFIG_DEBUG_ASSERTIONS
+  int sndcb_alloc_cnt;    /* The callback allocation counter */
+#endif
 #endif
 
   /* accept() is called when the TCP logic has created a connection
@@ -1548,6 +1552,30 @@ int psock_tcp_cansend(FAR struct tcp_conn_s *conn);
 void tcp_wrbuffer_initialize(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
 
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+
+struct tcp_wrbuffer_s;
+
+/****************************************************************************
+ * Name: tcp_wrbuffer_timedalloc
+ *
+ * Description:
+ *   Allocate a TCP write buffer by taking a pre-allocated buffer from
+ *   the free list.  This function is called from TCP logic when a buffer
+ *   of TCP data is about to sent
+ *   This function is wrapped version of tcp_wrbuffer_alloc(),
+ *   this wait will be terminated when the specified timeout expires.
+ *
+ * Input Parameters:
+ *   timeout   - The relative time to wait until a timeout is declared.
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+FAR struct tcp_wrbuffer_s *tcp_wrbuffer_timedalloc(unsigned int timeout);
+
 /****************************************************************************
  * Name: tcp_wrbuffer_alloc
  *
@@ -1564,8 +1592,6 @@ void tcp_wrbuffer_initialize(void);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-struct tcp_wrbuffer_s;
 FAR struct tcp_wrbuffer_s *tcp_wrbuffer_alloc(void);
 
 /****************************************************************************
@@ -1619,6 +1645,22 @@ void tcp_wrbuffer_release(FAR struct tcp_wrbuffer_s *wrb);
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
 int tcp_wrbuffer_test(void);
 #endif /* CONFIG_NET_TCP_WRITE_BUFFERS */
+
+/****************************************************************************
+ * Name: tcp_event_handler_dump
+ *
+ * Description:
+ *  Dump the TCP event handler related variables
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_FEATURES
+void tcp_event_handler_dump(FAR struct net_driver_s *dev,
+                            FAR void *pvconn,
+                            FAR void *pvpriv,
+                            uint16_t flags,
+                            FAR struct tcp_conn_s *conn);
+#endif
 
 /****************************************************************************
  * Name: tcp_wrbuffer_dump

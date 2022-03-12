@@ -361,7 +361,6 @@ DIRLINKS_FILE += $(DIRLINKS_EXTERNAL_DEP)
 	$(Q) $(MAKE) -C $(patsubst %\.dirlinks,%,$@) dirlinks
 	$(Q) touch $@
 
-
 # clean_dirlinks
 #
 # This is part of the distclean target. It removes all symbolic links created by the dirlink target.
@@ -387,7 +386,6 @@ endif
 ifneq ($(ARCH_SRC_CHIP_SYMLINK_DIR),)
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)\chip
 endif
-
 
 # context
 #

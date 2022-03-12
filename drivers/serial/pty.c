@@ -18,50 +18,6 @@
  *
  ****************************************************************************/
 
-/* TODO:  O_NONBLOCK is not yet supported.  Currently, the source and sink
- * pipes are opened in blocking mode on both the slave and master so only
- * blocking behavior is supported.  This driver must be able to support
- * multiple slave as well as master clients that may have the PTY device
- * opened in blocking and non-blocking modes simultaneously.
- *
- * There are two different possible implementations under consideration:
- *
- * 1. Keep the pipes in blocking mode, but use a test based on FIONREAD (for
- *    the source pipe) or FIONSPACE (for the sink pipe) to determine if the
- *    read or write would block.  There is existing logic like this in
- *    pty_read() to handle the case of a single byte reads which must never
- *    block in any case:  Essentially, this logic uses FIONREAD to determine
- *    if there is anything to read before calling file_read().  Similar
- *    logic could be replicated for all read cases.
- *
- *    Analogous logic could be added for all writes using FIONSPACE to
- *    assure that there is sufficient free space in the sink pipe to write
- *    without blocking.  The write length could be adjusted, in necceary,
- *    to assure that there is no blocking.
- *
- *    Locking, perhaps via sched_lock(), would be required to assure the
- *    test via FIONREAD or FIONWRITE is atomic with respect to the
- *    file_read() or file_write() operation.
- *
- * 2. An alternative that appeals to me is to modify the contained source
- *    or sink pipe file structures before each file_read() or file_write()
- *    operation to assure that the O_NONBLOCK is set correctly when the
- *    pipe read or write operation is performed.  This might be done with
- *    file_fcntl() or directly into the source/sink file structure oflags
- *    mode settings.
- *
- *    This would require (1) the ability to lock each pipe individually,
- *    setting the blocking mode for the source or sink pipe to match the
- *    mode in the open flags of the PTY device file structure, and (2)
- *    logic to restore the default pipe mode after the file_read/write()
- *    operation and before the pipe is unlocked.
- *
- * There are existing locks to support (1) destruction of the driver
- * (pp_exclsem) and (2) slave PTY locking (pp_slavesem), as well as (3)
- * locks within the pipe implementation.  Care must be taken with any new
- * source/sink pipe locking to assure that deadlocks are not possible.
- */
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
@@ -90,10 +46,6 @@
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
-
-/* Should never be set... only for comparison to serial.c */
-
-#undef CONFIG_PSEUDOTERM_FULLBLOCKS
 
 /* Maximum number of threads than can be waiting for POLL events */
 
@@ -456,10 +408,9 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
   FAR struct pty_dev_s *dev;
   ssize_t ntotal;
 #ifdef CONFIG_SERIAL_TERMIOS
-  ssize_t nread;
-  size_t i;
+  ssize_t i;
+  ssize_t j;
   char ch;
-  int ret;
 #endif
 
   DEBUGASSERT(filep != NULL && filep->f_inode != NULL);
@@ -481,128 +432,43 @@ static ssize_t pty_read(FAR struct file *filep, FAR char *buffer, size_t len)
 
   if (dev->pd_iflag & (INLCR | IGNCR | ICRNL))
     {
-      /* We will transfer one byte at a time, making the appropriate
-       * translations.
-       */
-
-      ntotal = 0;
-      for (i = 0; i < len; i++)
+      while ((ntotal = file_read(&dev->pd_src, buffer, len)) > 0)
         {
-#ifndef CONFIG_PSEUDOTERM_FULLBLOCKS
-          /* This logic should return if the pipe becomes empty after some
-           * bytes were read from the pipe.  If we have already read some
-           * data, we use the FIONREAD ioctl to test if there are more bytes
-           * in the pipe.
-           *
-           * REVISIT:  An alternative design might be to (1) configure the
-           * source file as non-blocking, then (2) wait using poll() for the
-           * first byte to be received.  (3) Subsequent bytes would
-           * use file_read() without polling and would (4) terminate when no
-           * data is returned.
-           */
-
-          if (ntotal > 0)
+          for (i = j = 0; i < ntotal; i++)
             {
-              int nsrc;
+              /* Perform input processing */
 
-              /* There are inherent race conditions in this test.  We lock
-               * the scheduler before the test and after the file_read()
-               * below to eliminate one race:  (a) We detect that there is
-               * data in the source file, (b) we are suspended and another
-               * thread reads the data, emptying the fifo, then (c) we
-               * resume and call file_read(), blocking indefinitely.
-               */
+              ch = buffer[i];
 
-              sched_lock();
+              /* \n -> \r or \r -> \n translation? */
 
-              /* Check how many bytes are waiting in the pipe */
-
-              ret = file_ioctl(&dev->pd_src, FIONREAD,
-                               (unsigned long)((uintptr_t)&nsrc));
-              if (ret < 0)
+              if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
                 {
-                  sched_unlock();
-                  ntotal = ret;
-                  break;
+                  ch = '\r';
+                }
+              else if (ch == '\r' && (dev->pd_iflag & ICRNL) != 0)
+                {
+                  ch = '\n';
                 }
 
-              /* Break out of the loop and return ntotal if the pipe is
-               * empty.  This is another race:  There fifo was empty when we
-               * called file_ioctl() above, but it might not be empty right
-               * now.  Losing that race should not lead to any bad behaviors,
-               * however, we the caller will get those bytes on the next
-               * read.
+              /* Discarding \r ?  Print character if (1) character is not \r
+               * or if (2) we were not asked to ignore \r.
                */
 
-              if (nsrc < 1)
+              if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
                 {
-                  sched_unlock();
-                  break;
+                  buffer[j++] = ch;
                 }
-
-              /* Read one byte from the source the byte.  This should not
-               * block.
-               */
-
-              nread = file_read(&dev->pd_src, &ch, 1);
-              sched_unlock();
-            }
-          else
-#else
-          /* If we wanted to return full blocks of data, then file_read()
-           * may need to be called repeatedly.  That is because the pipe
-           * read() method will return early if the fifo becomes empty
-           * after any data has been read.
-           */
-
-# error Missing logic
-#endif
-            {
-              /* Read one byte from the source the byte.  This call will
-               * block if the source pipe is empty.
-               *
-               * REVISIT: Should not block if the oflags include O_NONBLOCK.
-               * How would we ripple the O_NONBLOCK characteristic to the
-               * contained source pipe?  file_fcntl()?  Or FIONREAD? See the
-               * TODO comment at the top of this file.
-               */
-
-              nread = file_read(&dev->pd_src, &ch, 1);
             }
 
-          /* Check if file_read was successful */
+          /* Is the buffer not empty after process? */
 
-          if (nread < 0)
+          if (j != 0)
             {
-              ntotal = nread;
+              /* Yes, we are done. */
+
+              ntotal = j;
               break;
-            }
-
-          /* Perform input processing */
-
-          /* \n -> \r or \r -> \n translation? */
-
-          if (ch == '\n' && (dev->pd_iflag & INLCR) != 0)
-            {
-               ch = '\r';
-            }
-          else if (ch == '\r' && (dev->pd_iflag & ICRNL) != 0)
-            {
-              ch = '\n';
-            }
-
-          /* Discarding \r ?  Print character if (1) character is not \r or
-           * if (2) we were not asked to ignore \r.
-           */
-
-          if (ch != '\r' || (dev->pd_iflag & IGNCR) == 0)
-            {
-              /* Transfer the (possibly translated) character and update the
-               * count of bytes transferred.
-               */
-
-              *buffer++ = ch;
-              ntotal++;
             }
         }
     }
@@ -888,6 +754,23 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
+      case FIONBIO:
+        {
+          ret = file_ioctl(&dev->pd_src, cmd, arg);
+          if (ret >= 0 || ret == -ENOTTY)
+            {
+              ret = file_ioctl(&dev->pd_sink, cmd, arg);
+            }
+
+          /* Let the default handler set O_NONBLOCK flags for us. */
+
+          if (ret >= 0)
+            {
+              ret = -ENOTTY;
+            }
+        }
+        break;
+
       /* Any unrecognized IOCTL commands will be passed to the contained
        * pipe driver.
        *
@@ -906,7 +789,7 @@ static int pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
               ret = file_ioctl(&dev->pd_sink, cmd, arg);
             }
 #else
-          ret = ENOTTY;
+          ret = -ENOTTY;
 #endif
         }
         break;

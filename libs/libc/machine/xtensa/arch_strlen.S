@@ -67,7 +67,6 @@ strlen:
   sub a2, a3, a2  # subtract to get length
   RET(16)
 
-
 /* String is word-aligned.  */
 
   .align  4

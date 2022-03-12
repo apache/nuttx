@@ -22,7 +22,6 @@ or dual 10-bit ADC(s), 10-bit DAC, PWM channels and 45 fast GPIO lines with up
 to nine edge or level sensitive external interrupt pins make these microcontrollers
 suitable for industrial control and medical systems.
 
-
 Features
 ^^^^^^^^
 

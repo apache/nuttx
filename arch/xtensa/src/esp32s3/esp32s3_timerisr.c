@@ -119,7 +119,7 @@ void up_timer_initialize(void)
   modifyreg32(SYSTEM_PERIP_RST_EN0_REG, SYSTEM_SYSTIMER_RST, 0);
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_CLK_EN);
 
-  /* Configure alarm0 (Comparator 0) */
+  /* Configure alarm 0 (Comparator 0) */
 
   regval = SYSTIMER_TARGET0_PERIOD_MODE |
            ((ESP32S3_SYSTIMER_TICKS_PER_SEC / CLOCKS_PER_SEC) <<
@@ -130,14 +130,17 @@ void up_timer_initialize(void)
   /* Stall systimer 0 when CPU stalls, e.g., when using JTAG to debug */
 
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_CORE0_STALL_EN);
+#ifdef CONFIG_SMP
+  modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_CORE1_STALL_EN);
+#endif
 
   /* Enable interrupt */
 
   modifyreg32(SYSTIMER_INT_CLR_REG, 0, SYSTIMER_TARGET0_INT_CLR);
   modifyreg32(SYSTIMER_INT_ENA_REG, 0, SYSTIMER_TARGET0_INT_ENA);
+
+  /* Start alarm 0 and counter 0 */
+
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TARGET0_WORK_EN);
-
-  /* Start alarm0 counter0 */
-
   modifyreg32(SYSTIMER_CONF_REG, 0, SYSTIMER_TIMER_UNIT0_WORK_EN);
 }

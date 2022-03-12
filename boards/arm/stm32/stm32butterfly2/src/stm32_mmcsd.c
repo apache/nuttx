@@ -118,7 +118,7 @@ static int stm32_cd(int irq, void *context, void *arg)
   static uint32_t prev = 0;
   struct timespec tp;
 
-  clock_gettime(CLOCK_MONOTONIC, &tp);
+  clock_systime_timespec(&tp);
   now = tp.tv_sec * 1000 + tp.tv_nsec / 1000000;
 
   /* When inserting card, card detect plate might bounce causing this

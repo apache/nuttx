@@ -403,7 +403,6 @@ ifneq ($(ARCH_SRC_CHIP_SYMLINK_DIR),)
 	$(Q) $(DIRUNLINK) $(ARCH_SRC)/chip
 endif
 
-
 # context
 #
 # The context target is invoked on each target build to assure that NuttX is

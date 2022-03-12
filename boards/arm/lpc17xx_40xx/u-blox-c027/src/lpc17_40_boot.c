@@ -89,7 +89,9 @@ void lpc17_40_boardinitialize(void)
 #ifdef CONFIG_BOARD_LATE_INITIALIZE
 void board_late_initialize(void)
 {
+#ifdef CONFIG_MODEM_U_BLOX
   lpc17_40_ubxmdm_init(false);
+#endif
 
 #if 0
   lpc17_40_configgpio(C027_MDMEN     | GPIO_VALUE_ZERO); /* Modem disabled */

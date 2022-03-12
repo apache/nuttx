@@ -29,6 +29,7 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
@@ -39,7 +40,6 @@
 #endif
 
 #include "signal/signal.h"
-#include "svcall.h"
 #include "riscv_internal.h"
 
 /****************************************************************************
@@ -182,6 +182,26 @@ int riscv_swint(int irq, void *context, void *arg)
 
   switch (regs[REG_A0])
     {
+      /* A0=SYS_save_context:  This is a save context command:
+       *
+       *   int riscv_saveusercontext(uintptr saveregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A0 = SYS_save_context
+       *   A1 = saveregs
+       *
+       * In this case, we simply need to copy the current registers to the
+       * save register space references in the saved A1 and return.
+       */
+
+      case SYS_save_context:
+        {
+          DEBUGASSERT(regs[REG_A1] != 0);
+          riscv_copystate((uintptr_t *)regs[REG_A1], regs);
+        }
+        break;
+
       /* A0=SYS_restore_context: This a restore context command:
        *
        * void

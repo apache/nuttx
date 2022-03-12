@@ -120,18 +120,22 @@
 
 /* This structure represents the overall mountpoint state.  An instance of
  * this structure is retained as inode private data on each mountpoint that
- * is mounted with a fat32 filesystem.
+ * is mounted with a romfs filesystem.
  */
 
 struct romfs_file_s;
 struct romfs_mountpt_s
 {
-  FAR struct inode *rm_blkdriver; /* The block driver inode that hosts the FAT32 fs */
+  FAR struct inode *rm_blkdriver; /* The block driver inode that hosts the romfs */
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+  FAR struct romfs_nodeinfo_s *rm_root; /* The node for root node */
+#else
+  uint32_t rm_rootoffset;         /* Saved offset to the first root directory entry */
+#endif
   bool     rm_mounted;            /* true: The file system is ready */
   uint16_t rm_hwsectorsize;       /* HW: Sector size reported by block driver */
   sem_t    rm_sem;                /* Used to assume thread-safe access */
   uint32_t rm_refs;               /* The references for all files opened on this mountpoint */
-  uint32_t rm_rootoffset;         /* Saved offset to the first root directory entry */
   uint32_t rm_hwnsectors;         /* HW: The number of sectors reported by the hardware */
   uint32_t rm_volsize;            /* Size of the ROMFS volume */
   uint32_t rm_cachesector;        /* Current sector in the rm_buffer */
@@ -151,26 +155,21 @@ struct romfs_file_s
   uint32_t rf_cachesector;        /* Current sector in the rf_buffer */
   FAR uint8_t *rf_buffer;         /* File sector buffer, allocated if rm_xipbase==0 */
   uint8_t rf_type;                /* File type (for fstat()) */
+  char rf_path[1];                /* Path of open file */
 };
 
 /* This structure is used internally for describing the result of
  * walking a path
  */
 
-struct romfs_dirinfo_s
+#ifndef CONFIG_FS_ROMFS_CACHE_NODE
+struct romfs_nodeinfo_s
 {
-  /* These values describe the directory containing the terminal
-   * path component (of the terminal component itself if it is
-   * a directory.
-   */
-
-  struct fs_romfsdir_s rd_dir;    /* Describes directory. */
-
-  /* Values from the ROMFS file entry */
-
-  uint32_t rd_next;               /* Offset of the next file header+flags */
-  uint32_t rd_size;               /* Size (if file) */
+  uint32_t rn_offset;             /* Offset of real file header */
+  uint32_t rn_next;               /* Offset of the next file header+flags */
+  uint32_t rn_size;               /* Size (if file) */
 };
+#endif
 
 /****************************************************************************
  * Public Data
@@ -201,15 +200,19 @@ int  romfs_fileconfigure(FAR struct romfs_mountpt_s *rm,
                          FAR struct romfs_file_s *rf);
 int  romfs_checkmount(FAR struct romfs_mountpt_s *rm);
 int  romfs_finddirentry(FAR struct romfs_mountpt_s *rm,
-                        FAR struct romfs_dirinfo_s *dirinfo,
+                        FAR struct romfs_nodeinfo_s *nodeinfo,
                         FAR const char *path);
 int  romfs_parsedirentry(FAR struct romfs_mountpt_s *rm, uint32_t offset,
                          FAR uint32_t *poffset, FAR uint32_t *pnext,
                          FAR uint32_t *pinfo, FAR uint32_t *psize);
 int  romfs_parsefilename(FAR struct romfs_mountpt_s *rm, uint32_t offset,
                          FAR char *pname);
-int  romfs_datastart(FAR struct romfs_mountpt_s *rm, uint32_t offset,
+int  romfs_datastart(FAR struct romfs_mountpt_s *rm,
+                     FAR struct romfs_nodeinfo_s *nodeinfo,
                      FAR uint32_t *start);
+#ifdef CONFIG_FS_ROMFS_CACHE_NODE
+void romfs_freenode(FAR struct romfs_nodeinfo_s *node);
+#endif
 
 #undef EXTERN
 #if defined(__cplusplus)

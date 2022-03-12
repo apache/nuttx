@@ -5,6 +5,4 @@
 
 if ARCH_BOARD_NUCLEO_F412ZG
 
-
-
 endif

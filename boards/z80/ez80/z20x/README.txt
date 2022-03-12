@@ -11,7 +11,6 @@ README.txt
   exposure to technical details, the system also avoids using secondary
   MCUs or programmable logic, and sticks only with true hardware solutions.
 
-
  System Summary
 
     eZ80 running at 20 MHz (default on board)

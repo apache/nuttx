@@ -45,7 +45,6 @@ ifeq ($(filter y, \
   CONFIG_SPARC_TOOLCHAIN ?= LINUXGCC
 endif
 
-
 # Chip-specific CPU flags
 
 ifeq ($(CONFIG_ARCH_CHIP_BM3803),y)

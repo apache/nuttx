@@ -47,4 +47,3 @@ NX Cursor Support (``NXCURSOR``)
 
   :return: OK on success; ERROR on failure with errno set appropriately.
 
-

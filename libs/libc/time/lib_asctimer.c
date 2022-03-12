@@ -70,10 +70,13 @@ static const char * const g_mon_name[12] =
 
 FAR char *asctime_r(FAR const struct tm *tp, FAR char *buf)
 {
-  snprintf(buf, 26, "%.3s %.3s%3d %.2d:%.2d:%.2d %d\n",
+  char tmp[128];
+
+  snprintf(tmp, sizeof(tmp), "%.3s %.3s%3d %.2d:%.2d:%.2d %d\n",
            g_wday_name[tp->tm_wday], g_mon_name[tp->tm_mon],
            tp->tm_mday, tp->tm_hour, tp->tm_min, tp->tm_sec,
            1900 + tp->tm_year);
+  strlcpy(buf, tmp, 26);
 
   return buf;
 }

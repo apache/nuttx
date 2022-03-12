@@ -67,7 +67,6 @@ Default USART/UART Configuration
 USART2 is enabled in all configurations (see */defconfig).  RX and TX are
 configured on pins PD6 and PD5, respectively (see include/board.h).
 
-
 Timer Inputs/Outputs
 ====================
 
@@ -554,7 +553,6 @@ Where <subdir> is one of the following:
        you do this a lot, you will probably want to invest a little time
        to develop a tool to automate these steps.
 
-
   nsh
   ---
   This is an NSH example that uses USART2 as the console.  Note that
@@ -566,7 +564,6 @@ Where <subdir> is one of the following:
 
   NOTE:  This demo doesn't quite work yet.  I can get output to the
          USART, but so far, I have not gotten nsh to actually come up.
-
 
   nx
   --

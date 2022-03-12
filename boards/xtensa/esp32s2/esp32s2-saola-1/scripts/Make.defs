@@ -23,28 +23,20 @@ include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/tools/esp32s2/Config.mk
 include $(TOPDIR)/arch/xtensa/src/lx7/Toolchain.defs
 
-LDSCRIPT1 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_out.ld
-LDSCRIPT3 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
-LDSCRIPT4 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_out.ld
 
 ifeq ($(CONFIG_ESP32S2_APP_FORMAT_MCUBOOT),y)
-  LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
+  ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_mcuboot.ld
 else
   ifeq ($(CONFIG_ESP32S2_RUN_IRAM),y)
-    LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_iram.ld
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_iram.ld
   else
-    LDSCRIPT2 = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_flash.ld
+    ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_flash.ld
   endif
 endif
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(LDSCRIPT1)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT2)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT3)}"
-  ARCHSCRIPT += -T "${shell cygpath -w $(LDSCRIPT4)}"
-else
-  ARCHSCRIPT = -T$(LDSCRIPT1) -T$(LDSCRIPT2) -T$(LDSCRIPT3) -T$(LDSCRIPT4)
-endif
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_rom.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32s2_peripherals.ld
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
@@ -54,7 +46,7 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-builtin -ffunction-sections -fdata-sections -mlongcalls
+ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections -mlongcalls
 ARCHCXXFLAGS = $(ARCHCFLAGS) -fno-exceptions -fcheck-new -fno-rtti
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef
@@ -78,11 +70,7 @@ AFLAGS := $(CFLAGS) -D__ASSEMBLY__
 CMODULEFLAGS = $(CFLAGS) -mtext-section-literals
 
 LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # ELF module definitions
 
@@ -90,18 +78,9 @@ CELFFLAGS = $(CFLAGS) -mtext-section-literals
 CXXELFFLAGS = $(CXXFLAGS) -mtext-section-literals
 
 LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDFLAGS += -Map="${shell cygpath -w $(TOPDIR)/nuttx.map}" --cref
-else
-  LDFLAGS += -Map=$(TOPDIR)/nuttx.map --cref
-endif
-
+LDFLAGS += -Map=$(call CONVERT_PATH,$(TOPDIR)/nuttx.map) --cref
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   LDFLAGS += -g
 endif

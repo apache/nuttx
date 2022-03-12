@@ -27,7 +27,8 @@
 
 #include <assert.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
+
 #include "arm_internal.h"
 
 #ifndef CONFIG_BUILD_FLAT

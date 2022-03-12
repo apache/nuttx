@@ -44,6 +44,10 @@ ifeq ($(CONFIG_MMCSD_SPI),y)
 CSRCS += stm32_spisd.c
 endif
 
+ifeq ($(CONFIG_STM32_SPI),y)
+CSRCS += stm32_spi.c
+endif
+
 DEPPATH += --dep-path board
 VPATH += :board
 CFLAGS += $(shell $(INCDIR) "$(CC)" $(TOPDIR)$(DELIM)arch$(DELIM)$(CONFIG_ARCH)$(DELIM)src$(DELIM)board$(DELIM)board)

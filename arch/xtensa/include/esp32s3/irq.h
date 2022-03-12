@@ -185,9 +185,10 @@
 #define XTENSA_IRQ_TIMER1           1  /* INTERRUPT, bit 15 */
 #define XTENSA_IRQ_TIMER2           2  /* INTERRUPT, bit 16 */
 #define XTENSA_IRQ_SYSCALL          3  /* User interrupt w/EXCCAUSE=syscall */
+#define XTENSA_IRQ_SWINT            4  /* Software interrupt */
 
-#define XTENSA_NIRQ_INTERNAL        4  /* Number of dispatch internal interrupts */
-#define XTENSA_IRQ_FIRSTPERIPH      4  /* First peripheral IRQ number */
+#define XTENSA_NIRQ_INTERNAL        5  /* Number of dispatch internal interrupts */
+#define XTENSA_IRQ_FIRSTPERIPH      5  /* First peripheral IRQ number */
 
 /* IRQ numbers for peripheral interrupts coming through the Interrupt
  * Matrix.

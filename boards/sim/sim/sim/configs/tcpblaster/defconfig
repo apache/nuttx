@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+CONFIG_ALLOW_BSD_COMPONENTS=y
 CONFIG_ARCH="sim"
 CONFIG_ARCH_BOARD="sim"
 CONFIG_ARCH_BOARD_SIM=y
@@ -12,7 +13,6 @@ CONFIG_ARCH_CHIP="sim"
 CONFIG_ARCH_SIM=y
 CONFIG_BOARDCTL_POWEROFF=y
 CONFIG_BUILTIN=y
-CONFIG_CLOCK_MONOTONIC=y
 CONFIG_DEBUG_ERROR=y
 CONFIG_DEBUG_FEATURES=y
 CONFIG_DEBUG_NET=y

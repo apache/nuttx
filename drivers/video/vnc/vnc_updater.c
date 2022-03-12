@@ -248,8 +248,8 @@ static void vnc_free_update(FAR struct vnc_session_s *session,
  *   session - A reference to the VNC session structure.
  *
  * Returned Value:
- *   A non-NULL structure pointer should always be returned.  This function
- *   will wait if no structure is available.
+ *   A structure pointer should always be returned. If the return value is
+ *   NULL, that means connection lost, no frame update request anymore.
  *
  ****************************************************************************/
 
@@ -274,7 +274,11 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
   rect = (FAR struct vnc_fbupdate_s *)sq_remfirst(&session->updqueue);
 
   vnc_sem_debug(session, "After remove", 0);
-  DEBUGASSERT(rect != NULL);
+
+  if (NULL == rect)
+    {
+      goto errout;
+    }
 
   /* Check if we just removed the whole screen update from the queue */
 
@@ -284,6 +288,7 @@ vnc_remove_queue(FAR struct vnc_session_s *session)
       updinfo("Whole screen update: nwhupd=%d\n", session->nwhupd);
     }
 
+errout:
   sched_unlock();
   return rect;
 }
@@ -369,6 +374,14 @@ static FAR void *vnc_updater(FAR void *arg)
        */
 
       srcrect = vnc_remove_queue(session);
+
+      /* If connect lost, exit this updater loop */
+
+      if (session->state == VNCSERVER_STOPPING)
+        {
+          break;
+        }
+
       DEBUGASSERT(srcrect != NULL);
 
       updinfo("Dequeued {(%d, %d),(%d, %d)}\n",
@@ -492,6 +505,10 @@ int vnc_stop_updater(FAR struct vnc_session_s *session)
       /* Yes.. ask it to please stop */
 
       session->state = VNCSERVER_STOPPING;
+
+      /* Notify updater thread we stopped */
+
+      nxsem_post(&session->queuesem);
 
       /* Wait for the thread to comply with our request */
 

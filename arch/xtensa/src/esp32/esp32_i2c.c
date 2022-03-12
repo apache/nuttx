@@ -784,11 +784,7 @@ static int esp32_i2c_polling_waitdone(struct esp32_i2c_priv_s *priv)
    * forward and backwards.
    */
 
-  #ifdef CONFIG_CLOCK_MONOTONIC
-    clock_gettime(CLOCK_MONOTONIC, &current_time);
-  #else
-    clock_gettime(CLOCK_REALTIME, &current_time);
-  #endif
+  clock_systime_timespec(&current_time);
 
   timeout.tv_sec  = current_time.tv_sec  + 10;
   timeout.tv_nsec = current_time.tv_nsec +  0;
@@ -829,11 +825,7 @@ static int esp32_i2c_polling_waitdone(struct esp32_i2c_priv_s *priv)
 
       /* Update current time */
 
-      #ifdef CONFIG_CLOCK_MONOTONIC
-        clock_gettime(CLOCK_MONOTONIC, &current_time);
-      #else
-        clock_gettime(CLOCK_REALTIME, &current_time);
-      #endif
+      clock_systime_timespec(&current_time);
       current_us = TIMESPEC_TO_US(current_time.tv_sec, current_time.tv_nsec);
     }
 

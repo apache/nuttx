@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <ctype.h>
 #include <endian.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -54,8 +55,17 @@ struct mofile_s
 {
   FAR struct mofile_s *next;
   char path[PATH_MAX];
+  FAR const char *plural_rule;
+  unsigned long nplurals;
   FAR void *map;
   size_t size;
+};
+
+struct eval_s
+{
+  unsigned long r;
+  unsigned long n;
+  int op;
 };
 
 /****************************************************************************
@@ -79,6 +89,13 @@ static FAR struct mofile_s *g_mofile;
 #ifdef CONFIG_BUILD_KERNEL
 static FAR char g_domain[NAME_MAX];
 #endif
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static FAR const char *evalexpr(FAR struct eval_s *ev,
+                                FAR const char *s, int d);
 
 /****************************************************************************
  * Private Functions
@@ -119,7 +136,8 @@ static FAR void *momap(FAR const char *path, FAR size_t *size)
     {
       *size = st.st_size;
       map = mmap(NULL, *size, PROT_READ, MAP_SHARED, fd, 0);
-      if (map[0] != MO_MAGIC && map[0] != __swap_uint32(MO_MAGIC))
+      if (map != MAP_FAILED &&
+          map[0] != MO_MAGIC && map[0] != __swap_uint32(MO_MAGIC))
         {
           munmap(map, *size);
           map = MAP_FAILED;
@@ -193,6 +211,272 @@ static FAR char *molookup(FAR char *p, size_t size, FAR const char *s)
     }
 
   return NULL;
+}
+
+static FAR const char *skipspace(FAR const char *s)
+{
+  while (isspace(*s))
+    {
+      s++;
+    }
+
+  return s;
+}
+
+/* Grammar:
+ *
+ * Start = Expr ';'
+ * Expr  = Or | Or '?' Expr ':' Expr
+ * Or    = And | Or '||' And
+ * And   = Eq | And '&&' Eq
+ * Eq    = Rel | Eq '==' Rel | Eq '!=' Rel
+ * Rel   = Add | Rel '<=' Add | Rel '>=' Add | Rel '<' Add | Rel '>' Add
+ * Add   = Mul | Add '+' Mul | Add '-' Mul
+ * Mul   = Prim | Mul '*' Prim | Mul '/' Prim | Mul '%' Prim
+ * Prim  = '(' Expr ')' | '!' Prim | decimal | 'n'
+ *
+ * Internals:
+ *
+ * Recursive descent expression evaluator with stack depth limit.
+ * for binary operators an operator-precedence parser is used.
+ * eval* functions store the result of the parsed subexpression
+ * and return a pointer to the next non-space character.
+ */
+
+static FAR const char *evalprim(FAR struct eval_s *ev,
+                                FAR const char *s, int d)
+{
+  FAR char *e;
+
+  if (--d < 0)
+    {
+      return "";
+    }
+
+  s = skipspace(s);
+  if (isdigit(*s))
+    {
+      ev->r = strtoul(s, &e, 10);
+      if (e == s || ev->r == -1)
+        {
+          return "";
+        }
+
+      return skipspace(e);
+    }
+
+  if (*s == 'n')
+    {
+      ev->r = ev->n;
+      return skipspace(s + 1);
+    }
+
+  if (*s == '(')
+    {
+      s = evalexpr(ev, s + 1, d);
+      if (*s != ')')
+        {
+          return "";
+        }
+
+      return skipspace(s + 1);
+    }
+
+  if (*s == '!')
+    {
+      s = evalprim(ev, s + 1, d);
+      ev->r = !ev->r;
+      return s;
+    }
+
+  return "";
+}
+
+static bool binop(FAR struct eval_s *ev, int op, unsigned long left)
+{
+  unsigned long a = left;
+  unsigned long b = ev->r;
+
+  switch (op)
+    {
+      case 0:
+        ev->r = a || b;
+        return true;
+
+      case 1:
+        ev->r = a && b;
+        return true;
+
+      case 2:
+        ev->r = a == b;
+        return true;
+
+      case 3:
+        ev->r = a != b;
+        return true;
+
+      case 4:
+        ev->r = a >= b;
+        return true;
+
+      case 5:
+        ev->r = a <= b;
+        return true;
+
+      case 6:
+        ev->r = a > b;
+        return true;
+
+      case 7:
+        ev->r = a < b;
+        return true;
+
+      case 8:
+        ev->r = a + b;
+        return true;
+
+      case 9:
+        ev->r = a - b;
+        return true;
+
+      case 10:
+        ev->r = a * b;
+        return true;
+
+      case 11:
+        if (b)
+          {
+            ev->r = a % b;
+            return true;
+          }
+
+        return false;
+
+      case 12:
+        if (b)
+          {
+            ev->r = a / b;
+            return true;
+          }
+
+        return false;
+    }
+
+  return false;
+}
+
+static FAR const char *parseop(FAR struct eval_s *ev, FAR const char *s)
+{
+  static const char opch[] =
+  {
+    '|', '&', '=', '!', '>', '<', '+', '-', '*', '%', '/'
+  };
+
+  static const char opch2[] =
+  {
+    '|', '&', '=', '=', '=', '='
+  };
+
+  int i;
+
+  for (i = 0; i < sizeof(opch); i++)
+    {
+      if (*s == opch[i])
+        {
+          /* note: >,< are accepted with or without = */
+
+          if (i < sizeof(opch2) && *(s + 1) == opch2[i])
+            {
+              ev->op = i;
+              return s + 2;
+            }
+
+          if (i >= 4)
+            {
+              ev->op = i + 2;
+              return s + 1;
+            }
+
+          break;
+        }
+    }
+
+  ev->op = 13;
+  return s;
+}
+
+static FAR const char *evalbinop(FAR struct eval_s *ev,
+                                 FAR const char *s, int minprec, int d)
+{
+  static const char prec[14] =
+  {
+    1, 2, 3, 3, 4, 4, 4, 4, 5, 5, 6, 6, 6, 0
+  };
+
+  unsigned long left;
+  int op;
+
+  s = evalprim(ev, s, --d);
+  s = parseop(ev, s);
+
+  for (; ; )
+    {
+      /* ev->r (left hand side value) and ev->op are now set,
+       * get the right hand side or back out if op has low prec,
+       * if op was missing then prec[op]==0
+       */
+
+      op = ev->op;
+      if (prec[op] <= minprec)
+        {
+          return s;
+        }
+
+      left = ev->r;
+      s = evalbinop(ev, s, prec[op], d);
+      if (!binop(ev, op, left))
+        {
+          return "";
+        }
+    }
+}
+
+static FAR const char *evalexpr(FAR struct eval_s *ev,
+                                FAR const char *s, int d)
+{
+  unsigned long a;
+  unsigned long b;
+
+  s = evalbinop(ev, s, 0, --d);
+  if (*s != '?')
+    {
+      return s;
+    }
+
+  a = ev->r;
+  s = evalexpr(ev, s + 1, d);
+  if (*s != ':')
+    {
+      return "";
+    }
+
+  b = ev->r;
+  s = evalexpr(ev, s + 1, d);
+  ev->r = a ? b : ev->r;
+
+  return s;
+}
+
+unsigned long eval(FAR const char *s, unsigned long n)
+{
+  struct eval_s ev;
+
+  memset(&ev, 0, sizeof(ev));
+
+  ev.n = n;
+  s = evalexpr(&ev, s, 100);
+
+  return *s == ';' ? ev.r : -1;
 }
 
 /****************************************************************************
@@ -305,6 +589,8 @@ FAR char *dcngettext(FAR const char *domainname,
 
   if (mofile == NULL)
     {
+      FAR const char *r;
+
       mofile = lib_malloc(sizeof(*mofile));
       if (mofile == NULL)
         {
@@ -321,6 +607,42 @@ FAR char *dcngettext(FAR const char *domainname,
           return notrans;
         }
 
+      /* Initialize the default plural rule */
+
+      mofile->plural_rule = "n!=1;";
+      mofile->nplurals = 2;
+
+      /* Parse the plural rule from the header entry(empty string) */
+
+      r = molookup(mofile->map, mofile->size, "");
+      while (r != NULL && strncmp(r, "Plural-Forms:", 13))
+        {
+          r = strchr(r, '\n');
+          if (r != NULL)
+            {
+              r += 1;
+            }
+        }
+
+      if (r != NULL)
+        {
+          r = skipspace(r + 13);
+          if (strncmp(r, "nplurals=", 9) == 0)
+            {
+              mofile->nplurals = strtoul(r + 9, (FAR char **)&r, 10);
+            }
+
+          r = strchr(r, ';');
+          if (r != NULL)
+            {
+              r = skipspace(r + 1);
+              if (strncmp(r, "plural=", 7) == 0)
+                {
+                  mofile->plural_rule = r + 7;
+                }
+            }
+        }
+
       mofile->next = g_mofile;
       g_mofile = mofile;
     }
@@ -328,7 +650,36 @@ FAR char *dcngettext(FAR const char *domainname,
   _SEM_POST(&g_sem); /* Leave look before search */
 
   trans = molookup(mofile->map, mofile->size, msgid1);
-  return trans ? trans : notrans;
+  if (trans == NULL)
+    {
+      return notrans;
+    }
+
+  /* Process the plural rule if request */
+
+  if (msgid2 && mofile->nplurals)
+    {
+      unsigned long plural = eval(mofile->plural_rule, n);
+      if (plural >= mofile->nplurals)
+        {
+          return notrans;
+        }
+
+      while (plural-- != 0)
+        {
+          size_t rem = mofile->size - (trans - (FAR char *)mofile->map);
+          size_t l = strnlen(trans, rem);
+
+          if (l + 1 >= rem)
+            {
+              return notrans;
+            }
+
+          trans += l + 1;
+        }
+    }
+
+  return trans;
 }
 
 /****************************************************************************

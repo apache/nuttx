@@ -46,11 +46,6 @@ hrtime_t gethrtime(void)
 {
   struct timespec ts;
 
-#ifdef CONFIG_CLOCK_MONOTONIC
   clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
-#endif
-
   return (hrtime_t)1000000000 * ts.tv_sec + ts.tv_nsec;
 }

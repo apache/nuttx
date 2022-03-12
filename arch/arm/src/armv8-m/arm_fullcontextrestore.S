@@ -24,9 +24,9 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include <arch/syscall.h>
 
 #include "nvic.h"
-#include "svcall.h"
 
 /****************************************************************************
  * Pre-processor Definitions

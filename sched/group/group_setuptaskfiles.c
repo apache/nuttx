@@ -57,31 +57,23 @@
 int group_setuptaskfiles(FAR struct task_tcb_s *tcb)
 {
   FAR struct task_group_s *group = tcb->cmn.group;
-  uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
 #ifndef CONFIG_FDCLONE_DISABLE
   FAR struct tcb_s *rtcb = this_task();
   int ret;
 #endif
 
   DEBUGASSERT(group);
-  DEBUGASSERT(ttype != TCB_FLAG_TTYPE_PTHREAD);
-
-  /* Initialize file descriptors for the TCB */
-
-  files_initlist(&group->tg_filelist);
+#ifndef CONFIG_DISABLE_PTHREAD
+  DEBUGASSERT((tcb->cmn.flags & TCB_FLAG_TTYPE_MASK) !=
+              TCB_FLAG_TTYPE_PTHREAD);
+#endif
 
 #ifndef CONFIG_FDCLONE_DISABLE
   DEBUGASSERT(rtcb->group);
 
-  /* Duplicate the parent task's file descriptors.
-   * If it's a kernel thread, only the first three
-   * descriptors (stdin, stdout, and stderr) will
-   * be cloned.
-   */
+  /* Duplicate the parent task's file descriptors */
 
-  ret = files_duplist(&rtcb->group->tg_filelist,
-                      &group->tg_filelist,
-                      ttype == TCB_FLAG_TTYPE_KERNEL);
+  ret = files_duplist(&rtcb->group->tg_filelist, &group->tg_filelist);
   if (ret < 0)
     {
       return ret;

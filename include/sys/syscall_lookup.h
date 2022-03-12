@@ -105,6 +105,10 @@ SYSCALL_LOOKUP(up_assert,                  2)
   SYSCALL_LOOKUP(task_testcancel,          0)
 #endif
 
+#if CONFIG_TLS_TASK_NELEM > 0
+  SYSCALL_LOOKUP(task_tls_alloc,           1)
+#endif
+
 /* The following can be individually enabled */
 
 #if defined(CONFIG_SCHED_WAITPID) && defined(CONFIG_ARCH_HAVE_VFORK)

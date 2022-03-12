@@ -147,10 +147,8 @@ static struct pm_callback_s pm_cb =
 static int cboot = 1;
 #endif /* CONFIG_RTC_DIV */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
 static struct timespec lastupdate_mono;
 static struct timespec lastupdate_rtc;
-#endif
 
 /****************************************************************************
  * Public Data
@@ -550,10 +548,8 @@ int up_rtc_settime(FAR const struct timespec *ts)
   up_rtc_set_default_datetime(tp);
 #endif /* CONFIG_RTC_SAVE_DEFAULT */
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &lastupdate_mono);
+  clock_systime_timespec(&lastupdate_mono);
   lastupdate_rtc = *ts;
-#endif
 
   /* Start rtc update */
 
@@ -661,12 +657,10 @@ int up_rtc_cancelalarm(void)
 int up_rtc_getrawtime(FAR struct timespec *ts)
 {
   struct tm tm;
-
-#ifdef CONFIG_CLOCK_MONOTONIC
   struct timespec now;
   struct timespec diff;
 
-  clock_gettime(CLOCK_MONOTONIC, &now);
+  clock_systime_timespec(&now);
   timespec_sub(&now, &lastupdate_mono, &diff);
 
   if (lastupdate_rtc.tv_sec != 0 && diff.tv_sec < 1)
@@ -676,7 +670,6 @@ int up_rtc_getrawtime(FAR struct timespec *ts)
       *ts = lastupdate_rtc;
       return 0;
     }
-#endif
 
   tm.tm_sec  = getreg8(RTC_SEC);
   tm.tm_min  = getreg8(RTC_MIN);

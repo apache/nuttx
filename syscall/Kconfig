@@ -29,17 +29,6 @@ menuconfig LIB_SYSCALL
 
 if LIB_SYSCALL
 
-config SYS_RESERVED
-	int "Number of reserved system calls"
-	default 0
-	---help---
-		Kernel system calls may share the same software trapping mechanism
-		as other functions used by architecture port.  Those software traps
-		must be reserved for use exclusively by the architecture.  These
-		value specifies the number of reserved software traps used by the
-		architecture; number of the kernel system calls will begin with this
-		number.
-
 config SYS_NNEST
 	int "Number of nested system calls"
 	default 2

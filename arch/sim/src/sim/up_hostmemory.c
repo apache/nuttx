@@ -63,8 +63,16 @@ void *host_alloc_heap(size_t sz)
 {
   void *p;
 
+#if defined(CONFIG_HOST_MACOS) && defined(CONFIG_HOST_ARM64)
+  /* see: https://developer.apple.com/forums/thread/672804 */
+
+  p = mmap(NULL, sz, PROT_READ | PROT_WRITE,
+           MAP_ANON | MAP_SHARED, -1, 0);
+#else
   p = mmap(NULL, sz, PROT_READ | PROT_WRITE | PROT_EXEC,
            MAP_ANON | MAP_PRIVATE, -1, 0);
+#endif
+
   if (p == MAP_FAILED)
     {
       return NULL;

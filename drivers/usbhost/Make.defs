@@ -18,7 +18,6 @@
 #
 ############################################################################
 
-CSRCS += hid_parser.c
 
 ifeq ($(CONFIG_USBHOST),y)
 
@@ -45,6 +44,10 @@ endif
 
 ifeq ($(CONFIG_USBHOST_CDCMBIM),y)
 CSRCS += usbhost_cdcmbim.c
+endif
+
+ifeq ($(CONFIG_USBHOST_HID),y)
+CSRCS += hid_parser.c
 endif
 
 ifeq ($(CONFIG_USBHOST_HIDKBD),y)

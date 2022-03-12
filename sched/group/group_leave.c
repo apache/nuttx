@@ -33,6 +33,7 @@
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
 #include <nuttx/lib/lib.h>
+#include <nuttx/tls.h>
 
 #ifdef CONFIG_BINFMT_LOADABLE
 #  include <nuttx/binfmt/binfmt.h>
@@ -127,6 +128,17 @@ static void group_remove(FAR struct task_group_s *group)
 
 static inline void group_release(FAR struct task_group_s *group)
 {
+#ifdef CONFIG_ARCH_ADDRENV
+  save_addrenv_t oldenv;
+#endif
+
+#if CONFIG_TLS_TASK_NELEM > 0
+  task_tls_destruct();
+#endif
+
+  nxsem_destroy(&group->tg_info->ta_sem);
+  group_free(group, group->tg_info);
+
 #if defined(CONFIG_SCHED_HAVE_PARENT) && defined(CONFIG_SCHED_CHILD_STATUS)
   /* Free all un-reaped child exit status */
 
@@ -167,16 +179,6 @@ static inline void group_release(FAR struct task_group_s *group)
   /* Release any resource held by shared memory virtual page allocator */
 
   shm_group_release(group);
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
-  /* Destroy the group address environment */
-
-  up_addrenv_destroy(&group->tg_addrenv);
-
-  /* Mark no address environment */
-
-  g_pid_current = INVALID_PROCESS_ID;
 #endif
 
 #if defined(HAVE_GROUP_MEMBERS) || defined(CONFIG_ARCH_ADDRENV)
@@ -235,6 +237,24 @@ static inline void group_release(FAR struct task_group_s *group)
     }
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+  /* Switch the addrenv and also save the current addrenv */
+
+  up_addrenv_select(&group->tg_addrenv, &oldenv);
+
+  /* Destroy the group address environment */
+
+  up_addrenv_destroy(&group->tg_addrenv);
+
+  /* Mark no address environment */
+
+  g_pid_current = INVALID_PROCESS_ID;
+
+  /* Restore the previous addrenv */
+
+  up_addrenv_restore(&oldenv);
+#endif
+
 #if defined(CONFIG_SCHED_WAITPID) && !defined(CONFIG_SCHED_HAVE_PARENT)
   /* If there are threads waiting for this group to be freed, then we cannot
    * yet free the memory resources.  Instead just mark the group deleted
@@ -250,7 +270,7 @@ static inline void group_release(FAR struct task_group_s *group)
     {
       /* Release the group container itself */
 
-      group_deallocate(group);
+      kmm_free(group);
     }
 }
 

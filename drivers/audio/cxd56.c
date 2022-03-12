@@ -2054,7 +2054,7 @@ static int cxd56_power_on_micbias(FAR struct cxd56_dev_s *dev)
 
   /* Set mic boot time */
 
-  if (clock_gettime(CLOCK_REALTIME, &start) < 0)
+  if (clock_systime_timespec(&start) < 0)
     {
       dev->mic_boot_start = 0x0ull;
     }
@@ -2922,7 +2922,7 @@ static int cxd56_start(FAR struct audio_lowerhalf_s *lower)
       if (priv->mic_boot_start != 0x0ull)
         {
           struct timespec end;
-          if (clock_gettime(CLOCK_REALTIME, &end) >= 0)
+          if (clock_systime_timespec(&end) == 0)
             {
               uint64_t time = (uint64_t)end.tv_sec * 1000 +
                               (uint64_t)end.tv_nsec / 1000000 -

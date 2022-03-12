@@ -21,11 +21,9 @@
 # Include socket source files
 
 SOCK_CSRCS += accept.c bind.c connect.c getsockname.c getpeername.c
-SOCK_CSRCS += listen.c recv.c recvfrom.c send.c sendto.c
-SOCK_CSRCS += socket.c socketpair.c net_close.c
-SOCK_CSRCS += recvmsg.c sendmsg.c
-SOCK_CSRCS += net_dup2.c net_sockif.c net_poll.c net_vfcntl.c
-SOCK_CSRCS += net_fstat.c
+SOCK_CSRCS += listen.c recv.c recvfrom.c send.c sendto.c socket.c
+SOCK_CSRCS += socketpair.c net_close.c recvmsg.c sendmsg.c
+SOCK_CSRCS += net_dup2.c net_sockif.c net_poll.c net_fstat.c
 
 # Socket options
 

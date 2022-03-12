@@ -35,22 +35,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
- * rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -85,24 +69,36 @@
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 {
 #if CONFIG_SIM_STACKSIZE_ADJUSTMENT == 0
-  size_t adj_stack_size;
+  uintptr_t top_of_stack;
+  size_t size_of_stack;
 
 #ifdef CONFIG_TLS_ALIGNED
   /* Make certain that the user provided stack is properly aligned */
 
   DEBUGASSERT(((uintptr_t)stack & TLS_STACK_MASK) == 0);
 #endif
-  /* Move down to next even word boundary within the pre-allocated stack
-   * memory, if necessary.
-   */
 
-  adj_stack_size = STACK_ALIGN_DOWN(stack_size);
+  /* Is there already a stack allocated? */
 
-  /* Save the values in the TCB */
+  if (tcb->stack_alloc_ptr)
+    {
+      /* Yes.. Release the old stack allocation */
 
-  tcb->adj_stack_size  = adj_stack_size;
+      up_release_stack(tcb, tcb->flags & TCB_FLAG_TTYPE_MASK);
+    }
+
+  /* Save the new stack allocation */
+
   tcb->stack_alloc_ptr = stack;
-  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
+
+  /* Save the adjusted stack values in the struct tcb_s */
+
+  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+  top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
+
+  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
+  tcb->adj_stack_size = size_of_stack;
 
 #if defined(CONFIG_STACK_COLORATION)
   /* If stack debug is enabled, then fill the stack with a

@@ -283,12 +283,7 @@ static inline uint64_t sensor_get_timestamp(void)
 {
   struct timespec ts;
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
-#endif
-
+  clock_systime_timespec(&ts);
   return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
 }
 

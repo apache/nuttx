@@ -29,24 +29,6 @@
 #  include <stdint.h>
 #endif /* __ASSEMBLY__ */
 
-/* Include ARM architecture-specific IRQ definitions (including register
- * save structure and up_irq_save()/up_irq_restore() functions)
- */
-
-#if defined(CONFIG_ARCH_ARMV7A)
-#  include <arch/armv7-a/spinlock.h>
-#elif defined(CONFIG_ARCH_ARMV7R)
-#  include <arch/armv7-r/spinlock.h>
-#elif defined(CONFIG_ARCH_ARMV7M)
-#  include <arch/armv7-m/spinlock.h>
-#elif defined(CONFIG_ARCH_ARMV8M)
-#  include <arch/armv8-m/spinlock.h>
-#elif defined(CONFIG_ARCH_ARMV6M)
-#  include <arch/armv6-m/spinlock.h>
-#else
-#  include <arch/arm/spinlock.h>
-#endif
-
 /****************************************************************************
  * Pre-processor Prototypes
  ****************************************************************************/

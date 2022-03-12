@@ -25,7 +25,10 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define QEMU_RV_CLINT_MSIP      (QEMU_RV_CLINT_BASE + 0x0000)
 #define QEMU_RV_CLINT_MTIMECMP  (QEMU_RV_CLINT_BASE + 0x4000)
 #define QEMU_RV_CLINT_MTIME     (QEMU_RV_CLINT_BASE + 0xbff8)
+
+#define RISCV_CLINT_MSIP        QEMU_RV_CLINT_MSIP
 
 #endif /* __ARCH_RISCV_SRC_QEMU_RV_HARDWARE_QEMU_RV_CLINT_H */

@@ -112,7 +112,6 @@ else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
   endif
 endif
 
-
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),BUILDROOT)

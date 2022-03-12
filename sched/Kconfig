@@ -17,8 +17,7 @@ if DISABLE_OS_API
 
 config DISABLE_POSIX_TIMERS
 	bool "Disable POSIX timers"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
+	default DEFAULT_SMALL
 	---help---
 		Disable support for the the entire POSIX timer family
 		including timer_create(), timer_gettime(), timer_settime(),
@@ -29,18 +28,15 @@ config DISABLE_POSIX_TIMERS
 
 config DISABLE_PTHREAD
 	bool "Disable pthread support"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
+	default DEFAULT_SMALL
 
 config DISABLE_MQUEUE
 	bool "Disable POSIX message queue support"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
+	default DEFAULT_SMALL
 
 config DISABLE_ENVIRON
 	bool "Disable environment variable support"
-	default y if DEFAULT_SMALL
-	default n if !DEFAULT_SMALL
+	default DEFAULT_SMALL
 
 endif # DISABLE_OS_API
 
@@ -161,20 +157,6 @@ config SYSTEM_TIME64
 		However, if the system timer rate is significantly higher than 100Hz
 		and/or if a very long "uptime" is required, then this option can be
 		selected to support a 64-bit wide timer.
-
-config CLOCK_MONOTONIC
-	bool "Support CLOCK_MONOTONIC"
-	default n
-	---help---
-		CLOCK_MONOTONIC is an optional standard POSIX clock.  Unlike
-		CLOCK_REALTIME which can move forward and backward when the
-		time-of-day changes, CLOCK_MONOTONIC is the elapsed time since some
-		arbitrary point in the post (the system start-up time for NuttX)
-		and, hence, is always monotonically increasing.  CLOCK_MONOTONIC
-		is, hence, the more appropriate clock for determining time
-		differences.
-
-		The value of the CLOCK_MONOTONIC clock cannot be set via clock_settime().
 
 config ARCH_HAVE_TIMEKEEPING
 	bool
@@ -1078,13 +1060,15 @@ config SCHED_INSTRUMENTATION_FILTER
 config SCHED_INSTRUMENTATION_FILTER_DEFAULT_MODE
 	hex "Default instrumentation filter mode"
 	depends on SCHED_INSTRUMENTATION_FILTER
-	default 0xf
+	default 0x3f
 	---help---
 		Default mode of the instrumentation filter logic.
 			Bit 0 = Enable instrumentation
-			Bit 1 = Enable syscall instrumentation
-			Bit 2 = Enable IRQ instrumentation
-			Bit 3 = Enable collecting syscall arguments
+			Bit 1 = Enable switch instrumentation
+			Bit 2 = Enable syscall instrumentation
+			Bit 3 = Enable IRQ instrumentation
+			Bit 4 = Enable dump instrumentation
+			Bit 5 = Enable collecting syscall arguments
 
 endif # SCHED_INSTRUMENTATION
 endmenu # Performance Monitoring
@@ -1379,7 +1363,7 @@ config SIG_PREALLOC_IRQ_ACTIONS
 		The number of pre-allocated irq action structures.
 
 config SIG_EVTHREAD
-	bool "Support SIGEV_THHREAD"
+	bool "Support SIGEV_THREAD"
 	default n
 	depends on !BUILD_KERNEL && SCHED_WORKQUEUE
 	select LIBC_USRWORK if BUILD_PROTECTED
@@ -1396,7 +1380,7 @@ config SIG_EVTHREAD_HPWORK
 	default n
 	depends on SIG_EVTHREAD && SCHED_HPWORK
 	---help---
-		if selected, SIGEV_THHREAD will use the high priority work queue.
+		if selected, SIGEV_THREAD will use the high priority work queue.
 		If not, it will use the low priority work queue (if available).
 
 		REVISIT:  This solution is non-optimal.  Some notifications should

@@ -49,7 +49,6 @@ directory plus the board-specific configurations in the boards/
 directory.  Each architecture must provide a subdirectory <arch-name>
 under arch/ with the following characteristics:
 
-
         <arch-name>/
         |-- include/
         |   |--<chip-name>/
@@ -251,14 +250,12 @@ arch/risc-v
     This directory is dedicated to ports to the RISC-V family.
 
     Architecture Support
-      arch/risc-v/include/rv32im
+      arch/risc-v/include and arch/risc-v/common
 
     MCU support
       arch/risc-v/include/fe310 and arch/risc-v/src/fe310
       arch/risc-v/include/k210 and arch/risc-v/src/k210
       arch/risc-v/include/litex and arch/risc-v/src/litex
-      arch/risc-v/include/rv32im and arch/risc-v/src/rv32im
-      arch/risc-v/include/rv64gc and arch/risc-v/src/rv64gc
 
 arch/x86 - Intel x86 architectures
     This directory holds related, 32- and 64-bit architectures from

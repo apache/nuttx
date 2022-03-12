@@ -23,28 +23,27 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+
+#include <debug.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 
-#include <sys/types.h>
-#include <stdint.h>
-#include <stdbool.h>
-#include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <debug.h>
-
 #include "xtensa.h"
-
-#include "hardware/esp32s2_system.h"
-#include "hardware/esp32s2_uart.h"
-#include "hardware/esp32s2_soc.h"
-
 #include "esp32s2_clockconfig.h"
 #include "esp32s2_config.h"
 #include "esp32s2_gpio.h"
-
 #include "esp32s2_lowputc.h"
+#include "hardware/esp32s2_gpio_sigmap.h"
+#include "hardware/esp32s2_soc.h"
+#include "hardware/esp32s2_system.h"
+#include "hardware/esp32s2_uart.h"
 
 /****************************************************************************
  * Private Types
@@ -60,7 +59,7 @@
 
 struct esp32s2_uart_s g_uart0_config =
 {
-  .periph = ESP32S2_PERI_UART,
+  .periph = ESP32S2_PERIPH_UART,
   .id = 0,
   .cpuint = -ENOMEM,
   .irq = ESP32S2_IRQ_UART,
@@ -99,7 +98,7 @@ struct esp32s2_uart_s g_uart0_config =
 
 struct esp32s2_uart_s g_uart1_config =
 {
-  .periph = ESP32S2_PERI_UART1,
+  .periph = ESP32S2_PERIPH_UART1,
   .id = 1,
   .cpuint = -ENOMEM,
   .irq = ESP32S2_IRQ_UART1,

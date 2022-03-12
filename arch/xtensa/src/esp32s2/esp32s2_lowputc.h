@@ -37,11 +37,6 @@
 #include <errno.h>
 #include <debug.h>
 
-#include "hardware/esp32s2_uart.h"
-#include "hardware/esp32s2_gpio_sigmap.h"
-
-#include "esp32s2_cpuint.h"
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/

@@ -5,13 +5,11 @@ Microchip Polarfile (MPFS)
 RV64 64-bit RISC-V multiprocessor-based Microcontroller Subsystem
 (MPFS025T, MPFS095T, MPFS160T, MPFS250T, MPFS460T)
 
-
 MPFS Toolchain
 ==============
 
 A generic RISC-V toolchain can be used to build MPFS projects.
 Like: https://xpack.github.io/riscv-none-embed-gcc or https://github.com/sifive/freedom-tools/releases
-
 
 Booting
 =======
@@ -19,7 +17,6 @@ Booting
 The NuttX works as a standalone operating system that may initialize all the required clocks and
 peripherals including DDR memory. Alternatively, the vendor's HSS bootloader may be used instead to
 perform all the initialization steps.
-
 
 Building and flashing
 =====================
@@ -49,18 +46,15 @@ Create HSS payload bin::
 
    hss-payload-generator -v -c hss-nuttx.yml payload.bin
 
-
 Debugging with OpenOCD
 ======================
 
 Compatible OpenOCD and configs can be downloaded from:
 https://www.microsemi.com/product-directory/design-tools/4879-softconsole#downloads
 
-
 OpenOCD can then be used::
 
    openocd -c "set DEVICE MPFS" --file board/microsemi-riscv.cfg
-
 
 Peripheral Support
 ==================
@@ -82,8 +76,6 @@ CAN            No
 eNVM           No       
 USB            No
 ============   =======  =====
-
-
 
 Supported Boards
 ================

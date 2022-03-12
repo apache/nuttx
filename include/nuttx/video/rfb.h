@@ -356,7 +356,7 @@ struct rfb_setencodings_s
 };
 
 #define SIZEOF_RFB_SETENCODINGS_S(n) \
-  (sizeof(struct rfb_setencodings_s) + (((n) - 1) << 2))
+  (sizeof(struct rfb_setencodings_s) + ((n) == 0 ? -4 : ((n) - 1) << 2))
 
 /* 6.4.3 FramebufferUpdateRequest
  *

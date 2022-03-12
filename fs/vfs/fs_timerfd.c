@@ -540,12 +540,9 @@ int timerfd_create(int clockid, int flags)
 
   /* Sanity checks. */
 
-  if (clockid != CLOCK_REALTIME
-#ifdef CONFIG_CLOCK_MONOTONIC
-      && clockid != CLOCK_MONOTONIC
-      && clockid != CLOCK_BOOTTIME
-#endif /* CONFIG_CLOCK_MONOTONIC */
-      )
+  if (clockid != CLOCK_REALTIME &&
+      clockid != CLOCK_MONOTONIC &&
+      clockid != CLOCK_BOOTTIME)
     {
       ret = -EINVAL;
       goto errout;

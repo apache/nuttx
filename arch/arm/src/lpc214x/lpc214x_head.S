@@ -379,7 +379,6 @@
 #endif
 	.endm
 
-
 /* Configure the Memory Accelerator Module (MAM) */
 
 	.macro	configmam, base, val

@@ -27,7 +27,8 @@
 #include <nuttx/arch.h>
 #include <assert.h>
 
-#include "svcall.h"
+#include <arch/syscall.h>
+
 #include "riscv_internal.h"
 
 #if !defined(CONFIG_BUILD_FLAT) && defined(__KERNEL__) && \

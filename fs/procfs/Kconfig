@@ -96,6 +96,10 @@ config FS_PROCFS_EXCLUDE_MEMINFO
 	bool "Exclude meminfo"
 	default n
 
+config FS_PROCFS_EXCLUDE_MEMDUMP
+	bool "Exclude memdump"
+	default n
+
 config FS_PROCFS_INCLUDE_PROGMEM
 	bool "Include prog mem"
 	default n

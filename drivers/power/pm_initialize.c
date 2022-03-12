@@ -77,23 +77,23 @@ struct pm_global_s g_pmglobals =
 
 void pm_initialize(void)
 {
+  FAR const struct pm_governor_s *gov;
+  int i;
+
   /* Select governor */
 
-#if defined(CONFIG_PM_GOVERNOR_ACTIVITY)
-  g_pmglobals.governor = pm_activity_governor_initialize();
-#elif defined(CONFIG_PM_GOVERNOR_GREEDY)
-  g_pmglobals.governor = pm_greedy_governor_initialize();
-#elif defined(CONFIG_PM_GOVERNOR_CUSTOM)
-  /* TODO: call to board function to retrieve custom governor,
-   * such as board_pm_governor_initialize()
-   */
-
-#  error "Not supported yet"
+  for (i = 0; i < CONFIG_PM_NDOMAINS; i++)
+    {
+#if defined(CONFIG_PM_GOVERNOR_GREEDY)
+      gov = pm_greedy_governor_initialize();
+#elif defined(CONFIG_PM_GOVERNOR_ACTIVITY)
+      gov = pm_activity_governor_initialize();
+#else
+      static struct pm_governor_s null;
+      gov = &null;
 #endif
-
-  /* Initialize selected governor */
-
-  g_pmglobals.governor->initialize();
+      pm_set_governor(i, gov);
+    }
 }
 
 #endif /* CONFIG_PM */

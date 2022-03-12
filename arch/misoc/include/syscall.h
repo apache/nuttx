@@ -29,14 +29,160 @@
  * Included Files
  ****************************************************************************/
 
-/* Include LM32 architecture-specific syscall macros */
+#include <nuttx/config.h>
 
-#ifdef CONFIG_ARCH_CHIP_LM32
-# include <arch/lm32/syscall.h>
+#ifndef __ASSEMBLY__
+#include <stdint.h>
 #endif
 
-#ifdef CONFIG_ARCH_CHIP_MINERVA
-# include <arch/minerva/syscall.h>
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define SYS_syscall 0x00
+
+/* Configuration ************************************************************/
+
+/* SYS call 1 and 2 are defined for internal use by the MINERVA port (see
+ * arch/miscoc/include/minerva/syscall.h).  In addition, SYS call 3 is the
+ * return from a SYS call in kernel mode.  The first four syscall values
+ * must, therefore, be reserved (0 is not used).
+ */
+
+#ifdef CONFIG_BUILD_KERNEL
+#  define CONFIG_SYS_RESERVED 4
 #endif
 
+/* sys_call macros **********************************************************/
+
+#ifndef __ASSEMBLY__
+
+/* Context switching system calls *******************************************/
+
+/* SYS call 0: (not used) */
+
+/* SYS call 1:
+ *
+ * void up_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ */
+
+#define SYS_restore_context (1)
+#define up_fullcontextrestore(restoreregs) \
+  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+
+/* SYS call 2:
+ *
+ * void up_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ */
+
+#define SYS_switch_context (2)
+#define up_switchcontext(saveregs, restoreregs) \
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, \
+            (uintptr_t)restoreregs)
+
+#ifdef CONFIG_BUILD_KERNEL
+
+/* SYS call 3:
+ *
+ * void up_syscall_return(void);
+ */
+
+#define SYS_syscall_return (3)
+#define up_syscall_return() (void)sys_call0(SYS_syscall_return)
+
+#endif
+
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
+
+/****************************************************************************
+ * Inline functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+#ifdef __cplusplus
+#  define EXTERN extern "C"
+extern "C"
+{
+#else
+#  define EXTERN extern
+#endif
+
+/****************************************************************************
+ * Name: up_syscall0
+ *
+ * Description:
+ *   System call SYS_ argument and no additional parameters.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call0(unsigned int nbr);
+
+/****************************************************************************
+ * Name: up_syscall1
+ *
+ * Description:
+ *   System call SYS_ argument and one additional parameter.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1);
+
+/****************************************************************************
+ * Name: up_syscall2
+ *
+ * Description:
+ *   System call SYS_ argument and two additional parameters.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1, uintptr_t parm2);
+
+/****************************************************************************
+ * Name: up_syscall3
+ *
+ * Description:
+ *   System call SYS_ argument and three additional parameters.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3);
+
+/****************************************************************************
+ * Name: up_syscall4
+ *
+ * Description:
+ *   System call SYS_ argument and four additional parameters.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4);
+
+/****************************************************************************
+ * Name: up_syscall5
+ *
+ * Description:
+ *   System call SYS_ argument and five additional parameters.
+ *
+ ****************************************************************************/
+
+uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1, uintptr_t parm2,
+                    uintptr_t parm3, uintptr_t parm4, uintptr_t parm5);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __ASSEMBLY__ */
 #endif /* __ARCH_MISOC_INCLUDE_SYSCALL_H */

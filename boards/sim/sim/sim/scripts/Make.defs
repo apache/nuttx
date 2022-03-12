@@ -42,10 +42,13 @@ ARCHDEFINES += -U__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
   ARCHOPTIMIZATION = -g
+  ARCHOPTIMIZATIONRUST = -g
 endif
 
 ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += -O2 -fno-strict-aliasing
+else
+  ARCHOPTIMIZATIONRUST += -C opt-level=0
 endif
 
 ifeq ($(CONFIG_STACK_CANARIES),y)
@@ -56,10 +59,13 @@ ifeq ($(CONFIG_ARCH_COVERAGE),y)
   ARCHOPTIMIZATION += -fprofile-arcs -ftest-coverage
 endif
 
-ARCHCPUFLAGS = -fno-builtin
-ARCHCPUFLAGSXX = -fno-builtin -nostdinc++
+# Add -fno-common because macOS "ld -r" doesn't seem to pick objects
+# for common symbols.
+ARCHCFLAGS = -fno-common -ffunction-sections -fdata-sections
+ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections -nostdinc++
+
 ifeq ($(CONFIG_CXX_EXCEPTION),)
-  ARCHCPUFLAGSXX += -fno-exceptions -fcheck-new
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
@@ -68,17 +74,12 @@ ARCHWARNINGSXX = -Wall -Wshadow -Wundef
 # Add -fvisibility=hidden
 # Because we don't want export nuttx's symbols to share libraries
 
-ARCHCPUFLAGS += -fvisibility=hidden
-ARCHCPUFLAGSXX += -fvisibility=hidden
-
-# Add -fno-common because macOS "ld -r" doesn't seem to pick objects
-# for common symbols.
-ARCHCPUFLAGS += -fno-common
-ARCHCPUFLAGSXX += -fno-common
+ARCHCFLAGS += -fvisibility=hidden
+ARCHCXXFLAGS += -fvisibility=hidden
 
 ifeq ($(CONFIG_SIM_M32),y)
-  ARCHCPUFLAGS += -m32
-  ARCHCPUFLAGSXX += -m32
+  ARCHCFLAGS += -m32
+  ARCHCXXFLAGS += -m32
 endif
 
 CC = $(CROSSDEV)cc
@@ -95,13 +96,15 @@ endif
 NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
+RUSTC = rustc --edition 2021
 
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CXXFLAGS := $(ARCHWARNINGSXX) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGSXX) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
+   $(ARCHCXXFLAGS) $(ARCHXXINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe
 CPPFLAGS := $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS)
 AFLAGS := $(CFLAGS) -D__ASSEMBLY__
+RUSTFLAGS := $(ARCHOPTIMIZATIONRUST)
 
 ifeq ($(CONFIG_LIBCXX),y)
   # Why c++17?
@@ -173,12 +176,8 @@ endif
 # not available on NuttX.
 CMODULEFLAGS += -fno-stack-protector
 
-LDMODULEFLAGS = -r -e module_initialize
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDMODULEFLAGS += -T "${shell cygpath -w $(TOPDIR)/libs/libc/modlib/gnu-elf.ld}"
-else
-  LDMODULEFLAGS += -T $(TOPDIR)/libs/libc/modlib/gnu-elf.ld
-endif
+LDMODULEFLAGS = -r -e module_initialize --gc-sections
+LDMODULEFLAGS += -T $(call CONVERT_PATH,$(TOPDIR)/libs/libc/modlib/gnu-elf.ld)
 
 # NuttX modules are ELF binaries.
 # Non-ELF platforms like macOS need to use a separate ELF toolchain.
@@ -202,41 +201,12 @@ ifeq ($(CONFIG_LIBC_ARCH_ELF_64BIT),y)
   CXXELFFLAGS += -mcmodel=large
 endif
 
-LDELFFLAGS = -r -e main
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  LDELFFLAGS += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld}"
-else
-  LDELFFLAGS += -T $(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld
-endif
-
-ifeq ($(CONFIG_DEBUG_SYMBOLS),y)
-  CCLINKFLAGS += -g
-endif
+LDELFFLAGS = -r -e main --gc-sections
+LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
-  CCLINKFLAGS += -m32
   LDFLAGS += -m32
   LDMODULEFLAGS += -melf_i386
   LDELFFLAGS += -melf_i386
-  HOSTLDFLAGS += -m32
 endif
-
-ifeq ($(CONFIG_SIM_ASAN),y)
-  CCLINKFLAGS += -fsanitize=address
-else ifeq ($(CONFIG_MM_KASAN),y)
-  CCLINKFLAGS += -fsanitize=kernel-address
-endif
-
-ifeq ($(CONFIG_SIM_UBSAN),y)
-  CCLINKFLAGS += -fsanitize=undefined
-endif
-
-ifeq ($(CONFIG_FRAME_POINTER),y)
-  CCLINKFLAGS += -fno-omit-frame-pointer -fno-optimize-sibling-calls
-else
-  CCLINKFLAGS += -fomit-frame-pointer
-endif
-
-HOSTCFLAGS = $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
-   $(ARCHCPUFLAGS) $(HOSTINCLUDES) $(EXTRAFLAGS) -D__SIM__ -pipe

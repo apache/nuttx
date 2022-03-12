@@ -18,15 +18,11 @@
 #
 ############################################################################
 
-CSRCS += task_getinfo.c
+CSRCS += task_getinfo.c tls_getinfo.c
 
 ifneq ($(CONFIG_TLS_NELEM),0)
 CSRCS += tls_alloc.c tls_free.c
 CSRCS += tls_setvalue.c tls_getvalue.c tls_destruct.c
-endif
-
-ifneq ($(CONFIG_TLS_ALIGNED),y)
-CSRCS += tls_getinfo.c
 endif
 
 # Include tls build support

@@ -29,7 +29,7 @@ CMN_CSRCS += arm_interruptcontext.c arm_prefetchabort.c arm_releasepending.c
 CMN_CSRCS += arm_releasestack.c arm_reprioritizertr.c arm_schedulesigaction.c
 CMN_CSRCS += arm_sigdeliver.c arm_stackframe.c arm_syscall.c arm_unblocktask.c
 CMN_CSRCS += arm_undefinedinsn.c arm_usestack.c arm_vfork.c arm_etherstub.c
-CMN_CSRCS += arm_puts.c arm_tcbinfo.c
+CMN_CSRCS += arm_puts.c arm_tcbinfo.c arm_switchcontext.c
 
 CHIP_ASRCS  = moxart_lowputc.S
 

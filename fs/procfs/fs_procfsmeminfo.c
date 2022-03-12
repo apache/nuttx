@@ -94,6 +94,12 @@ static void    meminfo_progmem(FAR struct progmem_info_s *progmem);
 static int     meminfo_open(FAR struct file *filep, FAR const char *relpath,
                  int oflags, mode_t mode);
 static int     meminfo_close(FAR struct file *filep);
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
+static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
+                             size_t buflen);
+static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t buflen);
+#endif
 static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
                  size_t buflen);
 static int     meminfo_dup(FAR const struct file *oldp,
@@ -122,6 +128,22 @@ const struct procfs_operations meminfo_operations =
   NULL,           /* rewinddir */
   meminfo_stat    /* stat */
 };
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
+const struct procfs_operations memdump_operations =
+{
+  meminfo_open,   /* open */
+  meminfo_close,  /* close */
+  memdump_read,   /* read */
+  memdump_write,  /* write */
+  meminfo_dup,    /* dup */
+  NULL,           /* opendir */
+  NULL,           /* closedir */
+  NULL,           /* readdir */
+  NULL,           /* rewinddir */
+  meminfo_stat    /* stat */
+};
+#endif
 
 FAR struct procfs_meminfo_entry_s *g_procfs_meminfo = NULL;
 
@@ -206,22 +228,9 @@ static int meminfo_open(FAR struct file *filep, FAR const char *relpath,
 
   finfo("Open '%s'\n", relpath);
 
-  /* PROCFS is read-only.  Any attempt to open with any kind of write
-   * access is not permitted.
-   *
-   * REVISIT:  Write-able proc files could be quite useful.
-   */
-
-  if ((oflags & O_WRONLY) != 0 || (oflags & O_RDONLY) == 0)
-    {
-      ferr("ERROR: Only O_RDONLY supported\n");
-      return -EACCES;
-    }
-
   /* Allocate a container to hold the file attributes */
 
-  procfile = (FAR struct meminfo_file_s *)
-    kmm_zalloc(sizeof(struct meminfo_file_s));
+  procfile = kmm_zalloc(sizeof(struct meminfo_file_s));
   if (!procfile)
     {
       ferr("ERROR: Failed to allocate file attributes\n");
@@ -230,7 +239,7 @@ static int meminfo_open(FAR struct file *filep, FAR const char *relpath,
 
   /* Save the attributes as the open-specific state in filep->f_priv */
 
-  filep->f_priv = (FAR void *)procfile;
+  filep->f_priv = procfile;
   return OK;
 }
 
@@ -381,6 +390,98 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
   filep->f_pos += totalsize;
   return totalsize;
 }
+
+/****************************************************************************
+ * Name: memdump_read
+ ****************************************************************************/
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
+static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen)
+{
+  FAR struct meminfo_file_s *procfile;
+  size_t linesize;
+  size_t copysize;
+  size_t totalsize;
+  off_t offset;
+
+  finfo("buffer=%p buflen=%d\n", buffer, (int)buflen);
+
+  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+  offset = filep->f_pos;
+
+  /* Recover our private data from the struct file instance */
+
+  procfile = (FAR struct meminfo_file_s *)filep->f_priv;
+  DEBUGASSERT(procfile);
+
+#ifdef CONFIG_DEBUG_MM
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                              "usage: <pid/used/free>\n"
+                              "pid: dump pid allocated node\n");
+#else
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                              "usage: <used/free>\n");
+#endif
+
+  copysize  = procfs_memcpy(procfile->line, linesize, buffer, buflen,
+                            &offset);
+  totalsize = copysize;
+  buffer   += copysize;
+  buflen   -= copysize;
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
+                              "used: dump all allocated node\n"
+                              "free: dump all free node\n");
+
+  totalsize += procfs_memcpy(procfile->line, linesize, buffer, buflen,
+                             &offset);
+  filep->f_pos += totalsize;
+  return totalsize;
+}
+#endif
+
+/****************************************************************************
+ * Name: memdump_write
+ ****************************************************************************/
+
+#ifndef CONFIG_FS_PROCFS_EXCLUDE_MEMDUMP
+static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
+                             size_t buflen)
+{
+  FAR const struct procfs_meminfo_entry_s *entry;
+  FAR struct meminfo_file_s *procfile;
+  pid_t pid = -1;
+
+  DEBUGASSERT(filep != NULL && buffer != NULL && buflen > 0);
+
+  /* Recover our private data from the struct file instance */
+
+  procfile = filep->f_priv;
+  DEBUGASSERT(procfile);
+
+  switch (buffer[0])
+    {
+      case 'u':
+        pid = -1;
+        break;
+
+      case 'f':
+        pid = -2;
+        break;
+#ifdef CONFIG_DEBUG_MM
+      default:
+        pid = atoi(buffer);
+#endif
+    }
+
+  for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+    {
+      mm_memdump(entry->user_data, pid);
+    }
+
+  return buflen;
+}
+#endif
 
 /****************************************************************************
  * Name: meminfo_dup

@@ -38,11 +38,11 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION	+= -Os -fno-strict-aliasing -fomit-frame-pointer
 endif
 
-ARCHCPUFLAGS		= -mcpu=m16c -fno-builtin
+ARCHCPUFLAGS		= -mcpu=m16c
 ARCHPICFLAGS		= -fpic
 ARCHWARNINGS		= -Wall -Wstrict-prototypes -Wshadow -Wundef
 
-ARCHSCRIPT		= -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)skp16c26.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)skp16c26.ld
 
 CFLAGS			= $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
 			  $(ARCHCPUFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

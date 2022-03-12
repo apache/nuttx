@@ -168,7 +168,6 @@ by starting "fb" in console. The LCD display is connected via SPI4.
 This configuration can be easily changed to work with Teensy 4.0 by
 selecting ``CONFIG_TEENSY_40=y``.
 
-
 Flash
 =====
 

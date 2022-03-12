@@ -43,7 +43,7 @@ config FAT_LFN
 config FAT_MAXFNAME
 	int "FAT maximum file name size"
 	depends on FAT_LFN
-	default 32
+	default NAME_MAX
 	range 12 255
 	---help---
 		If FAT_LFN is defined, then the default, maximum long file

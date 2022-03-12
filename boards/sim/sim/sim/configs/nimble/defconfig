@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_NDEBUG is not set
 # CONFIG_NET_ETHERNET is not set
 # CONFIG_NET_IPv4 is not set
 # CONFIG_NSH_CMDOPT_HEXDUMP is not set
@@ -22,7 +23,6 @@ CONFIG_BOARDCTL_POWEROFF=y
 CONFIG_BOARD_LOOPSPERMSEC=0
 CONFIG_BOOT_RUNFROMEXTSRAM=y
 CONFIG_BUILTIN=y
-CONFIG_CLOCK_MONOTONIC=y
 CONFIG_DEBUG_SYMBOLS=y
 CONFIG_DEV_LOOP=y
 CONFIG_DEV_ZERO=y

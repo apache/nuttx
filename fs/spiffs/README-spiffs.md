@@ -9,7 +9,6 @@ For legal stuff, see [LICENSE](https://github.com/pellepl/spiffs/blob/master/LIC
 
 Love to hear feedback though!
 
-
 ## INTRODUCTION
 
 Spiffs is a file system intended for SPI NOR flash devices on embedded targets.
@@ -22,13 +21,11 @@ Spiffs is designed with following characteristics in mind:
  - Zeroes can only be pulled to ones by erase
  - Wear leveling
 
-
 ## BUILDING
 
 `mkdir build; make`
 
 Otherwise, configure the `builddir` variable towards the top of `makefile` as something opposed to the default `build`. Sanity check on the host via `make test` and refer to `.travis.yml` for the official in-depth testing procedure. See the wiki for [integrating](https://github.com/pellepl/spiffs/wiki/Integrate-spiffs) spiffs into projects and [spiffsimg](https://github.com/nodemcu/nodemcu-firmware/tree/master/tools/spiffsimg) from [nodemcu](https://github.com/nodemcu) is a good example on the subject.
-
 
 ## FEATURES
 

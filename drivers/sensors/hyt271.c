@@ -187,12 +187,8 @@ static void hyt271_temp_from_rawdata(FAR struct hyt271_sensor_data_s *data,
 static unsigned long hyt271_curtime(void)
 {
   struct timespec ts;
-#ifdef CONFIG_CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
-#endif
 
+  clock_systime_timespec(&ts);
   return 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
 }
 

@@ -24,6 +24,9 @@
 
 #include <nuttx/config.h>
 #include <arch/irq.h>
+#include <arch/syscall.h>
+
+#include "arm.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -60,38 +63,14 @@
 	.type	arm_fullcontextrestore, function
 arm_fullcontextrestore:
 
-	/* On entry, a1 (r0) holds address of the register save area.  All other
-	 * registers are available for use.
-	 */
+	/* Perform the System call with R0=1 and R1=regs */
 
-	/* Recover all registers except for r0, r1, R15, and CPSR */
+	mov		r1, r0				/* R1: regs */
+	mov		r0, #SYS_restore_context	/* R0: restore context */
+	svc		#SYS_syscall			/* Force synchronous SVCall (or Hard Fault) */
 
-	add	r1, r0, #(4*REG_R2)	/* Offset to REG_R2 storage */
-	ldmia	r1, {r2-r14}		/* Recover registers */
+	/* This call should not return */
 
-	/* Create a stack frame to hold the some registers */
-
-	sub	sp, sp, #(3*4)		/* Frame for three registers */
-	ldr	r1, [r0, #(4*REG_R0)]	/* Fetch the stored r0 value */
-	str	r1, [sp]		/* Save it at the top of the stack */
-	ldr	r1, [r0, #(4*REG_R1)]	/* Fetch the stored r1 value */
-	str	r1, [sp, #4]		/* Save it in the stack */
-	ldr	r1, [r0, #(4*REG_PC)]	/* Fetch the stored pc value */
-	str	r1, [sp, #8]		/* Save it at the bottom of the frame */
-
-	/* Now we can restore the CPSR.  We wait until we are completely
-	 * finished with the context save data to do this. Restore the CPSR
-	 * may re-enable and interrupts and we could be in a context
-	 * where the save structure is only protected by interrupts being
-	 * disabled.
-	 */
-
-	ldr	r1, [r0, #(4*REG_CPSR)]	/* Fetch the stored CPSR value */
-	msr	spsr_cxsf, r1		/* Set the SPSR */
-
-	/* Now recover r0-r1, pc and cpsr, destroying the stack frame */
-
-	ldmia	sp!, {r0-r1, r15}^
-
+	bx		lr				/* Unnecessary ... will not return */
 	.size	arm_fullcontextrestore, .-arm_fullcontextrestore
 	.end

@@ -49,3 +49,23 @@ struct mallinfo mallinfo(void)
   mm_mallinfo(USR_HEAP, &info);
   return info;
 }
+
+/****************************************************************************
+ * Name: mallinfo_task
+ *
+ * Description:
+ *   mallinfo_task returns a copy of updated current heap information of
+ *   task with specified pid for the user heap.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_DEBUG_MM
+struct mallinfo_task mallinfo_task(pid_t pid)
+{
+  struct mallinfo_task info;
+
+  info.pid = pid;
+  mm_mallinfo_task(USR_HEAP, &info);
+  return info;
+}
+#endif

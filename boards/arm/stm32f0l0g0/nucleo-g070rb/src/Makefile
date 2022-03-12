@@ -48,5 +48,4 @@ ifeq ($(CONFIG_TIMER),y)
 CSRCS += stm32_timer.c
 endif
 
-
 include $(TOPDIR)/boards/Board.mk

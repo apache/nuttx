@@ -80,6 +80,7 @@ config ARCH_CHIP_IMX1
 config ARCH_CHIP_IMX6
 	bool "NXP/Freescale iMX.6"
 	select ARCH_CORTEXA9
+	select ARM_THUMB
 	select ARMV7A_HAVE_L2CC_PL310
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_TRUSTZONE
@@ -596,7 +597,6 @@ config ARCH_CORTEXM0
 config ARCH_ARMV7M
 	bool
 	default n
-	select ARCH_HAVE_SETJMP if ARCH_TOOLCHAIN_GNU
 
 config ARCH_CORTEXM3
 	bool
@@ -729,7 +729,6 @@ config ARCH_CORTEXR7
 config ARCH_ARMV8M
 	bool
 	default n
-	select ARCH_HAVE_SETJMP
 
 config ARCH_CORTEXM23
 	bool

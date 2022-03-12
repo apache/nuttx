@@ -188,8 +188,6 @@ Application Configuration -> NSH LIbrary     .
 .                                            with the usbmon_start and usbmon_stop commands from the NSH console.
 ===========================================  ===================================================
 
-
-
 ===============================================   ============================================
 Application Configuration -> System NSH Add-Ons   .
 ``CONFIG_USBMONITOR=y`` 	                        Enable the USB monitor daemon
@@ -209,7 +207,6 @@ Application Configuration -> System NSH Add-Ons   .
 ``CONFIG_USBMONITOR_TRACECONTROLLER=y``           .
 ``CONFIG_USBMONITOR_TRACEINTERRUPTS=y``           .
 ===============================================   ============================================
-
 
 NOTE: If USB debug output is also enabled, both outputs will appear on
 the serial console. However, the debug output will be asynchronous with

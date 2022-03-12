@@ -271,7 +271,7 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
       return -EINVAL;
     }
 
-  strdesc->len  = 2 + convert_to_utf16(strdesc->data, str);
+  strdesc->len  = 2 + convert_to_utf16((FAR uint8_t *)(strdesc + 1), str);
   strdesc->type = USB_DESC_TYPE_STRING;
   return strdesc->len;
 }

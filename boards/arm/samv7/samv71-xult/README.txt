@@ -1064,7 +1064,6 @@ Testing has also been performed using the maXTouch Xplained Pro LCD
   *                                                                        *
   **************************************************************************
 
-
 maXTouch Xplained Pro Standard Extension Header
 -----------------------------------------------
 The LCD could be connected either via EXT1 or EXT2 using the 2x10 20-pin

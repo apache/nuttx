@@ -362,7 +362,7 @@ void esp_wifi_scan_event_parse(void)
       return;
     }
 
-  ap_list_buffer = kmm_malloc(bss_total * sizeof(wifi_ap_record_t));
+  ap_list_buffer = kmm_zalloc(bss_total * sizeof(wifi_ap_record_t));
   if (ap_list_buffer == NULL)
     {
       priv->scan_status = ESP_SCAN_DONE;
@@ -370,7 +370,6 @@ void esp_wifi_scan_event_parse(void)
       return;
     }
 
-  memset(ap_list_buffer, 0x0, sizeof(ap_list_buffer));
   if (esp_wifi_scan_get_ap_records(&bss_total,
               (wifi_ap_record_t *)ap_list_buffer) == OK)
     {

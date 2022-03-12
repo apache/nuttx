@@ -383,9 +383,10 @@ struct motor_phy_params_f32_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
   float   flux_link;           /* Flux linkage */
-  float   res;                 /* Phase-to-neutral resistance */
+  float   res;                 /* Average phase-to-neutral resistance */
   float   ind;                 /* Average phase-to-neutral inductance */
   float   one_by_ind;          /* Inverse phase-to-neutral inductance */
+  float   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
 /* PMSM motor physcial parameters */
@@ -394,7 +395,6 @@ struct pmsm_phy_params_f32_s
 {
   struct motor_phy_params_f32_s motor;       /* Motor common PHY */
   float                         iner;        /* Rotor inertia */
-  float                         flux_link;   /* Flux linkage */
   float                         ind_d;       /* d-inductance */
   float                         ind_q;       /* q-inductance */
   float                         one_by_iner; /* One by intertia */
@@ -582,7 +582,8 @@ float motor_angle_e_get(FAR struct motor_angle_f32_s *angle);
 /* Motor physical parameters */
 
 void motor_phy_params_init(FAR struct motor_phy_params_f32_s *phy,
-                           uint8_t poles, float res, float ind);
+                           uint8_t poles, float res, float ind,
+                           float fluxlink);
 
 /* PMSM physical parameters functions */
 

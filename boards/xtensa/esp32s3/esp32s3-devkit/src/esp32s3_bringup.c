@@ -38,6 +38,18 @@
 #include <errno.h>
 #include <nuttx/fs/fs.h>
 
+#ifdef CONFIG_ESP32S3_TIMER
+#  include "esp32s3_board_tim.h"
+#endif
+
+#ifdef CONFIG_ESP32S3_RT_TIMER
+#  include "esp32s3_rt_timer.h"
+#endif
+
+#ifdef CONFIG_WATCHDOG
+#  include "esp32s3_board_wdt.h"
+#endif
+
 #include "esp32s3-devkit.h"
 
 /****************************************************************************
@@ -80,6 +92,42 @@ int esp32s3_bringup(void)
     {
       syslog(LOG_ERR, "ERROR: Failed to mount tmpfs at %s: %d\n",
              CONFIG_LIBC_TMPDIR, ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_TIMER
+  /* Configure general purpose timers */
+
+  ret = board_tim_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize timers: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_RT_TIMER
+  ret = esp32s3_rt_timer_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize RT timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_WATCHDOG
+  /* Configure watchdog timer */
+
+  ret = board_wdt_init();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize watchdog timer: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_ESP32S3_SPIFLASH
+  ret = board_spiflash_init();
+  if (ret)
+    {
+      syslog(LOG_ERR, "ERROR: Failed to initialize SPI Flash\n");
     }
 #endif
 

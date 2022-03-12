@@ -91,19 +91,28 @@
 
 cp15_clean_dcache_all:
 
-	mrc		CP15_CCSIDR(r1)			/* Read the Cache Size Identification Register */
+	push		{r4, r5}
 
+	mrc		CP15_CCSIDR(r1)			/* Read the Cache Size Identification Register */
 	ldr		r3, =0x7fff			/* Isolate the NumSets field (bits 13-27) */
 	and		r0, r3, r1, lsr #13		/* r0=NumSets (number of sets - 1) */
+
+	ldr		r3,=0x7				/* Isolate the LineSize field (bits 0-2) */
+	and		r5, r3, r1			/* r4=(Log2LineSize - 2) in word */
+	add		r5, #4				/* r4=Set/way operation line shfit */
 
 	ldr		r3, =0x3ff			/* Isolate the way field (bits 3-12) */
 	and		r1, r3, r1, lsr #3		/* r1=(number of ways - 1) */
 
+	add		r4, r1, #1
+	clz		r4, r4
+	add		r4, #1				/* r4=Set/way operation Way shift */
+
 way_loop:
 	mov		r3, r0				/* Init Sets */
 set_loop:
-	mov		r2, r1, lsl #30			/* r2 = way loop counter << 30 */
-	orr		r2, r3, lsl #5			/* r2 = set/way cache operation format */
+	mov		r2, r1, lsl r4			/* r2 = way loop counter << way shift */
+	orr		r2, r3, lsl r5			/* r2 = set/way cache operation format */
 	mcr		CP15_DCCSW(r2)			/* Data Cache Clean by Set/Way */
 	subs		r3, r3, #1			/* Subtraction set counter */
 	bcs		set_loop			/* Keep looping if not */
@@ -112,6 +121,7 @@ set_loop:
 	bcs		way_loop			/* Keep looping if not */
 
 	dsb
+	pop		{r4, r5}
 	bx		lr
 	.size cp15_clean_dcache_all, . - cp15_clean_dcache_all
 	.end

@@ -80,7 +80,7 @@ int tls_alloc(CODE void (*dtor)(FAR void *))
     {
       /* Is this candidate index available? */
 
-      tls_ndxset_t mask = (1 << candidate);
+      tls_ndxset_t mask = (tls_ndxset_t)1 << candidate;
       if ((info->ta_tlsset & mask) == 0)
         {
           /* Yes.. allocate the index and break out of the loop */

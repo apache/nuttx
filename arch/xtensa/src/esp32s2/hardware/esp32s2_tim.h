@@ -31,7 +31,29 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define SHIFT_32           		32
+/* Offset relative to each watchdog timer instance memory base */
+
+#define MWDT_CONFIG0_OFFSET             0x0048
+
+/* MWDT */
+
+#define MWDT_CLK_PRESCALE_OFFSET        0x004c
+#define MWDT_STAGE0_TIMEOUT_OFFSET      0x0050
+#define MWDT_STAGE1_TIMEOUT_OFFSET      0x0054
+#define MWDT_STAGE2_TIMEOUT_OFFSET      0x0058
+#define MWDT_STAGE3_TIMEOUT_OFFSET      0x005c
+#define MWDT_FEED_OFFSET                0x0060
+#define MWDT_WP_REG                     0x0064
+#define MWDT_INT_ENA_REG_OFFSET         0x0098
+#define MWDT_INT_CLR_REG_OFFSET         0x00a0
+
+/* The value that needs to be written to TIMG_WDT_WKEY to
+ * write-enable the WDT registers.
+ */
+
+#define TIMG_WDT_WKEY_VALUE             0x50d83aa1
+
+#define SHIFT_32                        32
 
 /* TIMG_T0CONFIG_REG(i) register
  * Timer 0 configuration register

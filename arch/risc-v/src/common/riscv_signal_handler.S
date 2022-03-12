@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/rv64gc/riscv_signal_handler.S
+ * arch/risc-v/src/common/riscv_signal_handler.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -57,7 +57,7 @@
  *
  * Returned Value:
  *   None.  This function does not return in the normal sense.  It returns
- *   via the SYS_signal_handler_return (see svcall.h)
+ *   via the SYS_signal_handler_return (see syscall.h)
  *
  ****************************************************************************/
 

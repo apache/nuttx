@@ -23,21 +23,21 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-#include <stdbool.h>
-#include <stdint.h>
+
 #include <assert.h>
 #include <debug.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include "xtensa.h"
-
-#include "hardware/esp32s2_tim.h"
+#include "esp32s2_irq.h"
+#include "esp32s2_tim.h"
 #include "hardware/esp32s2_system.h"
 #include "hardware/esp32s2_systimer.h"
-
-#include "esp32s2_tim.h"
-#include "esp32s2_cpuint.h"
+#include "hardware/esp32s2_tim.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -176,7 +176,7 @@ struct esp32s2_tim_priv_s g_esp32s2_tim0_priv =
   .gid        = GROUP0,
   .tid        = TIMER0,
   .int_pri    = ESP32S2_INT_PRIO_DEF,
-  .periph     = ESP32S2_PERI_TG_T0_LEVEL,   /* Peripheral ID */
+  .periph     = ESP32S2_PERIPH_TG_T0_LEVEL, /* Peripheral ID */
   .irq        = ESP32S2_IRQ_TG_T0_LEVEL,    /* Interrupt ID */
   .cpuint     = -ENOMEM,                    /* CPU interrupt assigned to this timer */
   .inuse      = false,
@@ -192,7 +192,7 @@ struct esp32s2_tim_priv_s g_esp32s2_tim1_priv =
   .gid        = GROUP0,
   .tid        = TIMER1,
   .int_pri    = ESP32S2_INT_PRIO_DEF,
-  .periph     = ESP32S2_PERI_TG_T1_LEVEL,   /* Peripheral ID */
+  .periph     = ESP32S2_PERIPH_TG_T1_LEVEL, /* Peripheral ID */
   .irq        = ESP32S2_IRQ_TG_T1_LEVEL,    /* Interrupt ID */
   .cpuint     = -ENOMEM,                    /* CPU interrupt assigned to this timer */
   .inuse      = false,
@@ -208,7 +208,7 @@ struct esp32s2_tim_priv_s g_esp32s2_tim2_priv =
   .gid        = GROUP1,
   .tid        = TIMER0,
   .int_pri    = ESP32S2_INT_PRIO_DEF,
-  .periph     = ESP32S2_PERI_TG1_T0_LEVEL,   /* Peripheral ID */
+  .periph     = ESP32S2_PERIPH_TG1_T0_LEVEL, /* Peripheral ID */
   .irq        = ESP32S2_IRQ_TG1_T0_LEVEL,    /* Interrupt ID */
   .cpuint     = -ENOMEM,                     /* CPU interrupt assigned to this timer */
   .inuse      = false,
@@ -224,7 +224,7 @@ struct esp32s2_tim_priv_s g_esp32s2_tim3_priv =
   .gid        = GROUP1,
   .tid        = TIMER1,
   .int_pri    = ESP32S2_INT_PRIO_DEF,
-  .periph     = ESP32S2_PERI_TG1_T1_LEVEL,   /* Peripheral ID */
+  .periph     = ESP32S2_PERIPH_TG1_T1_LEVEL, /* Peripheral ID */
   .irq        = ESP32S2_IRQ_TG1_T1_LEVEL,    /* Interrupt ID */
   .cpuint     = -ENOMEM,                     /* CPU interrupt assigned to this timer */
   .inuse      = false,
@@ -237,12 +237,12 @@ struct esp32s2_tim_priv_s g_esp32s2_tim3_priv =
 struct esp32s2_tim_priv_s g_esp32s2_tim4_priv =
 {
   .ops        = &esp32s2_systim_ops,
-  .gid        = -ENODEV,                       /* There's no group in systimer */
-  .tid        = SYSTIMER_COMP0,                /* Systimer contains 1 counter and 3 comps */
+  .gid        = -ENODEV,                          /* There's no group in systimer */
+  .tid        = SYSTIMER_COMP0,                   /* Systimer contains 1 counter and 3 comps */
   .int_pri    = ESP32S2_INT_PRIO_DEF,
-  .periph     = ESP32S2_PERI_SYSTIMER_TARGET0, /* Peripheral ID */
-  .irq        = ESP32S2_IRQ_SYSTIMER_TARGET0,  /* Interrupt ID */
-  .cpuint     = -ENOMEM,                       /* CPU interrupt assigned to this timer */
+  .periph     = ESP32S2_PERIPH_SYSTIMER_TARGET0,  /* Peripheral ID */
+  .irq        = ESP32S2_IRQ_SYSTIMER_TARGET0,     /* Interrupt ID */
+  .cpuint     = -ENOMEM,                          /* CPU interrupt assigned to this timer */
   .inuse      = false,
 };
 #endif
@@ -952,19 +952,18 @@ static int esp32s2_tim_setisr(struct esp32s2_tim_dev_s *dev,
 
   if (handler == NULL)
     {
+      /* If a CPU Interrupt was previously allocated, then deallocate it */
+
       if (priv->cpuint != -ENOMEM)
         {
-          /* Disable cpu interrupt */
+          /* Disable CPU Interrupt, free a previously allocated
+           * CPU Interrupt
+           */
 
-          up_disable_irq(priv->cpuint);
-
-          /* Dissociate the IRQ from the ISR */
-
+          up_disable_irq(priv->irq);
+          esp32s2_teardown_irq(priv->periph, priv->cpuint);
           irq_detach(priv->irq);
 
-          /* Free cpu interrupt that is attached to this peripheral */
-
-          esp32s2_free_cpuint(priv->periph);
           priv->cpuint = -ENOMEM;
         }
     }
@@ -975,50 +974,42 @@ static int esp32s2_tim_setisr(struct esp32s2_tim_dev_s *dev,
     {
       if (priv->cpuint != -ENOMEM)
         {
-          /* Disable the provided CPU interrupt to configure it. */
+          /* Disable the previous IRQ */
 
-          up_disable_irq(priv->cpuint);
-
-          /* Free cpu interrupt that is attached to this peripheral
-           * because we will get another from esp32s2_request_irq()
-           */
-
-          esp32s2_free_cpuint(priv->periph);
+          up_disable_irq(priv->irq);
         }
 
       if (priv->tid == SYSTIMER_COMP0)
         {
-          priv->cpuint = esp32s2_alloc_edgeint(priv->int_pri);
+          priv->cpuint = esp32s2_setup_irq(priv->periph, priv->int_pri,
+                                           ESP32S2_CPUINT_EDGE);
         }
       else
         {
-          priv->cpuint = esp32s2_alloc_levelint(priv->int_pri);
+          priv->cpuint = esp32s2_setup_irq(priv->periph, priv->int_pri,
+                                           ESP32S2_CPUINT_LEVEL);
         }
 
       if (priv->cpuint < 0)
         {
-          tmrerr("ERROR: Failed to get a CPU interrupt");
+          tmrerr("ERROR: No CPU Interrupt available");
           ret = priv->cpuint;
           goto errout;
         }
-
-      /* Attach a peripheral interrupt to a CPU interrupt */
-
-      esp32s2_attach_peripheral(priv->periph, priv->cpuint);
 
       /* Associate an IRQ Number (from the timer) to an ISR */
 
       ret = irq_attach(priv->irq, handler, arg);
       if (ret != OK)
         {
-          tmrerr("ERROR: Failed to associate an IRQ Number to and ISR");
-          esp32s2_free_cpuint(priv->periph);
+          esp32s2_teardown_irq(priv->periph, priv->cpuint);
+          tmrerr("ERROR: Failed to associate an IRQ Number");
           goto errout;
         }
 
       /* Enable the CPU Interrupt that is linked to the timer */
 
-      up_enable_irq(priv->cpuint);
+      up_enable_irq(priv->irq);
     }
 
 errout:

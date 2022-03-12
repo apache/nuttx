@@ -98,7 +98,6 @@ config MAC802154_LOCK_VERBOSE
 	---help---
 		Enable verbose logging of MAC lock management. Default: false
 
-
 config IEEE802154_MACDEV
 	bool "Character driver for IEEE 802.15.4 MAC layer"
 	default n

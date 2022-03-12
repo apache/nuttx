@@ -72,7 +72,6 @@ PB14    SPI2      SPI2_MISO
 PB13    SPI2      SPI2_SCLK
 PB12    SPI2      SPI2_NSS
 
-
 Build Instructions
 ==================
 

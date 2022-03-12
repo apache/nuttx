@@ -33,6 +33,7 @@
 #include <nuttx/clock.h>
 #include <nuttx/power/pm.h>
 #include <nuttx/wdog.h>
+#include <nuttx/wqueue.h>
 
 #ifdef CONFIG_PM
 
@@ -78,6 +79,20 @@ struct pm_domain_s
   /* The power state lock count */
 
   uint16_t stay[PM_COUNT];
+
+  /* Auto update or not */
+
+  bool auto_update;
+
+#if defined(CONFIG_SCHED_WORKQUEUE)
+  /* The worker of update callback */
+
+  struct work_s update_work;
+#endif
+
+  /* A pointer to the PM governor instance */
+
+  FAR const struct pm_governor_s *governor;
 };
 
 /* This structure encapsulates all of the global data used by the PM system */
@@ -100,10 +115,6 @@ struct pm_global_s
   /* The state information for each PM domain */
 
   struct pm_domain_s domain[CONFIG_PM_NDOMAINS];
-
-  /* A pointer to the PM governor instance */
-
-  FAR const struct pm_governor_s *governor;
 };
 
 /****************************************************************************
@@ -126,6 +137,22 @@ EXTERN struct pm_global_s g_pmglobals;
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: pm_auto_updatestate
+ *
+ * Description:
+ *   This function update the domain state and notify the power system.
+ *
+ * Input Parameters:
+ *   domain - The PM domain to check
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void pm_auto_updatestate(int domain);
 
 #undef EXTERN
 #if defined(__cplusplus)

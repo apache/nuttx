@@ -197,4 +197,30 @@ config IMX6_BOOT_SRAM
 
 endchoice # i.MX6 Boot Configuration
 
+config IMX6_DDRCS_PGHEAP
+	bool "Include DDR-SDRAM in page cache"
+	default y
+	depends on IMX6_BOOT_SDRAM && ARCH_ADDRENV
+	---help---
+		Include a portion of DDR-SDRAM memory in the page cache.
+
+if IMX6_DDRCS_PGHEAP
+
+config IMX6_DDRCS_PGHEAP_OFFSET
+	hex "DDR-SDRAM heap offset"
+	default 0x0
+	---help---
+		Preserve this number of bytes at the beginning of SDRAM.  The
+		portion of DRAM beginning at this offset from the DDRCS base will
+		be added to the heap.
+
+config IMX6_DDRCS_PGHEAP_SIZE
+	int "DDR-SDRAM heap size"
+	default 0
+	---help---
+		Add the region of DDR-SDRAM beginning at IMX6_DDRCS_PGHEAP_OFFSET
+		and of size IMX6_DDRCS_PGHEAP_SIZE to the heap.
+
+endif # IMX6_DDRCS_PGHEAP
+
 endif # ARCH_CHIP_IMX6

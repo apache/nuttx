@@ -210,7 +210,7 @@ _xtensa_user_handler:
 	/* Allocate exception frame and save minimal context. */
 
 	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, PS							/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
@@ -218,6 +218,13 @@ _xtensa_user_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+
+	/* Save EXCCAUSE and EXCVADDR into the user frame */
+
+	rsr		a0, EXCCAUSE
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR
+	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	/* Save rest of interrupt context. */
 
@@ -227,8 +234,8 @@ _xtensa_user_handler:
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
-	* it's the register save area.
-	*/
+	 * it's the register save area.
+	 */
 
 	mov	a12, sp
 
@@ -237,13 +244,6 @@ _xtensa_user_handler:
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 	setintstack a13 a14
 #endif
-
-	/* Save exc cause and vaddr into exception frame */
-
-	rsr		a0, EXCCAUSE
-	s32i	a0, sp, (4 * REG_EXCCAUSE)
-	rsr		a0, EXCVADDR
-	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
@@ -332,7 +332,7 @@ _xtensa_syscall_handler:
 	/* Allocate stack frame and save A0, A1, and PS */
 
 	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, PS							/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)
@@ -505,7 +505,7 @@ _xtensa_coproc_handler:
 	/* For now, just panic */
 
 	mov		a0, sp							/* Save SP in A0 */
-	addi	sp, sp, -(4 * XCPTCONTEXT_SIZE)	/* Allocate interrupt stack frame */
+	addi	sp, sp, -XCPTCONTEXT_SIZE	/* Allocate interrupt stack frame */
 	s32i	a0, sp, (4 * REG_A1)			/* Save pre-interrupt SP */
 	rsr		a0, PS							/* Save interruptee's PS */
 	s32i	a0, sp, (4 * REG_PS)

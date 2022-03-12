@@ -150,9 +150,12 @@ else
   BOARD_KCONFIG = $(CUSTOM_BOARD_KPATH)
 endif
 
-BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
-ifeq ($(BOARD_COMMON_DIR),)
-  BOARD_COMMON_DIR = $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common)
+ifeq (,$(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common))
+  ifeq ($(CONFIG_ARCH_BOARD_COMMON),y)
+    BOARD_COMMON_DIR ?= $(wildcard $(TOPDIR)$(DELIM)boards$(DELIM)$(CONFIG_ARCH)$(DELIM)$(CONFIG_ARCH_CHIP)$(DELIM)common)
+  endif
+else
+  BOARD_COMMON_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)common)
 endif
 BOARD_DRIVERS_DIR ?= $(wildcard $(BOARD_DIR)$(DELIM)..$(DELIM)drivers)
 ifeq ($(BOARD_DRIVERS_DIR),)
@@ -289,6 +292,24 @@ endef
 define COMPILEXX
 	@echo "CXX: $1"
 	$(Q) $(CXX) -c $(CXXFLAGS) $($(strip $1)_CXXFLAGS) $1 -o $2
+endef
+
+# COMPILERUST - Default macro to compile one Rust file
+# Example: $(call COMPILERUST, in-file, out-file)
+#
+# Depends on these settings defined in board-specific Make.defs file
+# installed at $(TOPDIR)/Make.defs:
+#
+#   RUST - The command to invoke the Rust compiler
+#   RUSTFLAGS - Options to pass to the Rust compiler
+#
+# '<filename>.rs_RUSTFLAGS += <options>' may also be used, as an example, to
+# change the options used with the single file <filename>.rs. The same
+# applies mutatis mutandis.
+
+define COMPILERUST
+	@echo "RUSTC: $1"
+	$(Q) $(RUSTC) --emit obj $(RUSTFLAGS) $($(strip $1)_RUSTFLAGS) $1 -o $2
 endef
 
 # ASSEMBLE - Default macro to assemble one assembly language file
@@ -535,6 +556,9 @@ endef
 # ARCHxxx means the predefined setting(either toolchain, arch, or system specific)
 
 ARCHDEFINES += ${shell $(DEFINE) "$(CC)" __NuttX__}
+ifeq ($(CONFIG_NDEBUG),y)
+  ARCHDEFINES += ${shell $(DEFINE) "$(CC)" NDEBUG}
+endif
 
 # The default C/C++ search path
 
@@ -548,3 +572,11 @@ else
   ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include$(DELIM)cxx}
 endif
 ARCHXXINCLUDES += ${shell $(INCDIR) -s "$(CC)" $(TOPDIR)$(DELIM)include}
+
+# Convert filepaths to their proper system format (i.e. Windows/Unix)
+
+ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
+  CONVERT_PATH = $(foreach FILE,$1,${shell cygpath -w $(FILE)})
+else
+  CONVERT_PATH = $1
+endif

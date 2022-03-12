@@ -23,8 +23,8 @@ include chip/Bootloader.mk
 # The start-up, "head", file.  May be either a .S or a .c file.
 
 HEAD_ASRC  = xtensa_vectors.S xtensa_window_vector.S xtensa_windowspill.S
-HEAD_ASRC += xtensa_int_handlers.S  xtensa_user_handler.S
-HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c 
+HEAD_ASRC += xtensa_int_handlers.S xtensa_user_handler.S
+HEAD_CSRC  = esp32s2_start.c esp32s2_wdt.c
 
 # Common XTENSA files (arch/xtensa/src/common)
 
@@ -39,7 +39,8 @@ CMN_CSRCS += xtensa_modifyreg8.c xtensa_modifyreg16.c xtensa_modifyreg32.c
 CMN_CSRCS += xtensa_puts.c xtensa_releasepending.c xtensa_releasestack.c
 CMN_CSRCS += xtensa_reprioritizertr.c xtensa_schedsigaction.c
 CMN_CSRCS += xtensa_sigdeliver.c xtensa_stackframe.c xtensa_udelay.c
-CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c
+CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c
+CMN_CSRCS += xtensa_switchcontext.c
 
 # Configuration-dependent common XTENSA files
 
@@ -60,14 +61,13 @@ ifeq ($(CONFIG_XTENSA_SEMIHOSTING_HOSTFS),y)
   CMN_CSRCS += xtensa_hostfs.c
 endif
 
-# Required ESP32S2 files (arch/xtensa/src/lx7)
+# Required ESP32-S2 files (arch/xtensa/src/lx7)
 
-CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_cpuint.c
-CHIP_CSRCS += esp32s2_gpio.c esp32s2_intdecode.c esp32s2_irq.c esp32s2_region.c
-CHIP_CSRCS += esp32s2_timerisr.c esp32s2_user.c esp32s2_lowputc.c
-CHIP_CSRCS += esp32s2_systemreset.c
+CHIP_CSRCS  = esp32s2_allocateheap.c esp32s2_clockconfig.c esp32s2_irq.c
+CHIP_CSRCS += esp32s2_gpio.c esp32s2_region.c esp32s2_user.c
+CHIP_CSRCS += esp32s2_timerisr.c esp32s2_lowputc.c esp32s2_systemreset.c
 
-# Configuration-dependent ESP32S2 files
+# Configuration-dependent ESP32-S2 files
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CHIP_CSRCS += esp32s2_idle.c
@@ -86,6 +86,10 @@ CHIP_CSRCS += esp32s2_tim.c
 ifeq ($(CONFIG_TIMER),y)
 CHIP_CSRCS += esp32s2_tim_lowerhalf.c
 endif
+endif
+
+ifeq ($(CONFIG_WATCHDOG),y)
+CHIP_CSRCS += esp32s2_wdt_lowerhalf.c
 endif
 
 ifeq ($(CONFIG_ESP32S2_FREERUN),y)

@@ -157,7 +157,6 @@ USB Interface
    3. The OTG FS module has is own, internal soft pull-up logic.  J51 should
       be open so that PE11 activity does effect USB.
 
-
   STM32F103 Configuration
   -----------------------
 
@@ -417,7 +416,6 @@ Freescale MPL115A barometer sensor
       CONFIG_SENSORS=y
       CONFIG_SENSORS_MPL115A=y
       CONFIG_NSH_ARCHINIT=y
-
 
   Note: this driver uses SPI3 then since PB3 pin is also use to JTAG TDO you
   need to disable JTAG support to get this driver working:

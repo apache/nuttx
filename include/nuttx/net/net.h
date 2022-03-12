@@ -460,6 +460,36 @@ int net_timedwait_uninterruptible(sem_t *sem, unsigned int timeout);
 
 int net_lockedwait_uninterruptible(sem_t *sem);
 
+#ifdef CONFIG_MM_IOB
+
+/****************************************************************************
+ * Name: net_iobtimedalloc
+ *
+ * Description:
+ *   Allocate an IOB.  If no IOBs are available, then atomically wait for
+ *   for the IOB while temporarily releasing the lock on the network.
+ *   This function is wrapped version of net_ioballoc(), this wait will
+ *   be terminated when the specified timeout expires.
+ *
+ *   Caution should be utilized.  Because the network lock is relinquished
+ *   during the wait, there could be changes in the network state that occur
+ *   before the lock is recovered.  Your design should account for this
+ *   possibility.
+ *
+ * Input Parameters:
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   timeout    - The relative time to wait until a timeout is declared.
+ *   consumerid - id representing who is consuming the IOB
+ *
+ * Returned Value:
+ *   A pointer to the newly allocated IOB is returned on success.  NULL is
+ *   returned on any allocation failure.
+ *
+ ****************************************************************************/
+
+FAR struct iob_s *net_iobtimedalloc(bool throttled, unsigned int timeout,
+                                    enum iob_user_e consumerid);
+
 /****************************************************************************
  * Name: net_ioballoc
  *
@@ -473,7 +503,8 @@ int net_lockedwait_uninterruptible(sem_t *sem);
  *   possibility.
  *
  * Input Parameters:
- *   throttled - An indication of the IOB allocation is "throttled"
+ *   throttled  - An indication of the IOB allocation is "throttled"
+ *   consumerid - id representing who is consuming the IOB
  *
  * Returned Value:
  *   A pointer to the newly allocated IOB is returned on success.  NULL is
@@ -481,7 +512,6 @@ int net_lockedwait_uninterruptible(sem_t *sem);
  *
  ****************************************************************************/
 
-#ifdef CONFIG_MM_IOB
 FAR struct iob_s *net_ioballoc(bool throttled, enum iob_user_e consumerid);
 #endif
 
@@ -1378,46 +1408,6 @@ int psock_fstat(FAR struct socket *psock, FAR struct stat *buf);
 ssize_t psock_sendfile(FAR struct socket *psock, FAR struct file *infile,
                        FAR off_t *offset, size_t count);
 #endif
-
-/****************************************************************************
- * Name: psock_vfcntl
- *
- * Description:
- *   Performs fcntl operations on socket.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   cmd   - The fcntl command.
- *   ap    - Command-specific arguments.
- *
- * Returned Value:
- *   Zero (OK) is returned on success; a negated errno value is returned on
- *   any failure to indicate the nature of the failure.
- *
- ****************************************************************************/
-
-int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap);
-
-/****************************************************************************
- * Name: psock_fcntl
- *
- * Description:
- *   Similar to the standard fcntl function except that is accepts a struct
- *   struct socket instance instead of a file descriptor.
- *
- * Input Parameters:
- *   psock - An instance of the internal socket structure.
- *   cmd   - Identifies the operation to be performed.  Command specific
- *           arguments may follow.
- *
- * Returned Value:
- *   The nature of the return value depends on the command.  Non-negative
- *   values indicate success.  Failures are reported as negated errno
- *   values.
- *
- ****************************************************************************/
-
-int psock_fcntl(FAR struct socket *psock, int cmd, ...);
 
 /****************************************************************************
  * Name: psock_socketpair

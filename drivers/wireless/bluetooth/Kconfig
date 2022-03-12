@@ -9,6 +9,7 @@ config BLUETOOTH_UART
 	bool "Bluetooth UART driver"
 	default n
 	select SCHED_HPWORK
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Enable Bluetooth UART driver.
 

@@ -140,4 +140,3 @@ application decoding interfaces.
 these interfaces. These stream interfaces are defined in
 ``include/nuttx/streams.h``.
 
-

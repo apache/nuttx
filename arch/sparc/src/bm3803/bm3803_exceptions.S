@@ -332,7 +332,6 @@ simple_return:
         ldd     [%o0 + ISF_I2_OFFSET], %i2    ! restore i2, i3
         ldd     [%o0 + ISF_I4_OFFSET], %i4    ! restore i4, i5
 
-
         ldd     [%o0 + ISF_F0_OFFSET]  ,%f0
         ldd     [%o0 + ISF_F2_OFFSET]  ,%f2
         ldd     [%o0 + ISF_F4_OFFSET]  ,%f4

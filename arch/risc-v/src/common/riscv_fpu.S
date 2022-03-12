@@ -48,12 +48,12 @@
 #define FS_CLEAN    0x4000
 #define FS_DIRTY    0x6000
 
-#if defined(CONFIG_ARCH_DPFPU)
-#  define FLOAD     fld
-#  define FSTORE    fsd
-#elif defined(CONFIG_ARCH_QPFPU)
+#if defined(CONFIG_ARCH_QPFPU)
 #  define FLOAD     flq
 #  define FSTORE    fsq
+#elif defined(CONFIG_ARCH_DPFPU)
+#  define FLOAD     fld
+#  define FSTORE    fsd
 #else
 #  define FLOAD     flw
 #  define FSTORE    fsw

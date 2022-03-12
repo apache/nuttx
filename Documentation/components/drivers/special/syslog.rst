@@ -2,7 +2,6 @@
 SYSLOG
 ======
 
-
 SYSLOG Interfaces
 =================
 

@@ -426,6 +426,17 @@ Where <subdir> is one of the following:
         -nic user,id=user0 \
         -serial mon:stdio -nographic
 
+  qemu-kostest:
+    An example config with PROTECTED memory model to run on qemu.
+
+        ./tools/configure.sh lm3s6965-ek:qemu-kostest
+        make
+        qemu-system-arm -semihosting \
+        -M lm3s6965evb \
+        -device loader,file=nuttx.bin,addr=0x00000000 \
+        -device loader,file=nuttx_user.bin,addr=0x00020000 \
+        -serial mon:stdio -nographic
+
   qemu-protected:
     An example config with PROTECTED memory model to run on qemu.
 

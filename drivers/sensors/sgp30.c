@@ -592,7 +592,7 @@ static int sgp30_open(FAR struct file *filep)
           add_sensor_randomness((buf[0].crc << 24) ^ (serial[0].crc << 16) ^
                                 (serial[1].crc << 8) ^ (serial[2].crc << 0));
 
-          clock_gettime(CLOCK_REALTIME, &start);
+          clock_systime_timespec(&start);
           ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY, NULL, 0);
           if (ret < 0)
             {
@@ -602,7 +602,7 @@ static int sgp30_open(FAR struct file *filep)
           else
             {
               uint32_t repeat = SGP30_INIT_RETRIES;
-              clock_gettime(CLOCK_REALTIME, &curr);
+              clock_systime_timespec(&curr);
               sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)\n");
               while (repeat-- &&
                      time_has_passed_ms(&curr, &start, SGP30_INIT_LIMIT_MS))
@@ -627,10 +627,10 @@ static int sgp30_open(FAR struct file *filep)
 
                   nxsig_usleep(CONFIG_SGP30_RESET_DELAY_US);
 
-                  clock_gettime(CLOCK_REALTIME, &start);
+                  clock_systime_timespec(&start);
                   ret = sgp30_write_cmd(priv, SGP30_CMD_INIT_AIR_QUALITY,
                                         NULL, 0);
-                  clock_gettime(CLOCK_REALTIME, &curr);
+                  clock_systime_timespec(&curr);
                   if (ret < 0)
                     {
                       sgp30_dbg("sgp30_write_cmd(SGP30_CMD_INIT_AIR_QUALITY)"
@@ -739,7 +739,7 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
    *       to run measurement command every 1 second.
    */
 
-  clock_gettime(CLOCK_REALTIME, &ts);
+  clock_systime_timespec(&ts);
 
   while (!has_time_passed(&ts, &priv->last_update, 1))
     {
@@ -767,7 +767,7 @@ static ssize_t sgp30_read(FAR struct file *filep, FAR char *buffer,
             }
         }
 
-      clock_gettime(CLOCK_REALTIME, &ts);
+      clock_systime_timespec(&ts);
     }
 
   ret = sgp30_measure_airq(priv, &data);

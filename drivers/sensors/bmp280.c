@@ -643,11 +643,7 @@ static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
   temp = bmp280_compensate_temp(priv, temp);
   press = bmp280_compensate_press(priv, press);
 
-#ifdef CONFIG_CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &ts);
-#else
-  clock_gettime(CLOCK_REALTIME, &ts);
-#endif
+  clock_systime_timespec(&ts);
 
   baro_data.timestamp = 1000000ull * ts.tv_sec + ts.tv_nsec / 1000;
   baro_data.pressure = press / 100.0f;

@@ -155,7 +155,7 @@ static int up_read_dreq(FAR const struct vs1053_lower_s *lower)
 void up_vs1053initialize(FAR struct spi_dev_s * spi)
 {
   int   ret;
-  char  name[8];
+  char  name[16];
   FAR struct audio_lowerhalf_s *PVS1053;
 
   /* Assumptions:
@@ -188,7 +188,7 @@ void up_vs1053initialize(FAR struct spi_dev_s * spi)
 
   /* Now register the audio device */
 
-  sprintf(name, "vs1053d%d", VS1053_DEVNO);
+  snprintf(name, sizeof(name), "vs1053d%d", VS1053_DEVNO);
   ret = audio_register(name, PVS1053);
   if (ret < 0)
     {

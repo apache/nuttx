@@ -524,7 +524,6 @@ i2c address of the sensor, the following hardware setup is necessary.
   |        |                                            |         |
   ---------                                             -----------
 
-
 DS18B20 sensor support:
 ======================
 
@@ -543,8 +542,6 @@ ds18b20 on 1wire bus number 2. The following hardware setup is necessary.
   |       |----- TX2 A02 -------.------.------- DQ ----|         |
   |       |                                            |         |
   --------                                             -----------
-
-
 
 USB Console support:
 ====================

@@ -104,8 +104,6 @@ MEMORY
 
   dram0_0_seg (RW) :                 org = DRAM_ORG, len = I_D_RAM_SIZE
 
-
-
   /* Flash mapped constant data */
 
 #ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT

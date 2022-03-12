@@ -193,6 +193,10 @@ void xtensa_appcpu_start(void)
 
   xtensa_attach_fromcpu0_interrupt();
 
+  /* Enable the software interrupt */
+
+  up_enable_irq(XTENSA_IRQ_SWINT);
+
 #if 0 /* Does it make since to have co-processors enabled on the IDLE thread? */
 #if XTENSA_CP_ALLSET != 0
   /* Set initial co-processor state */

@@ -61,14 +61,12 @@ USART3
 
 * these IO lines are intended to be used by the wireless module on the board.
 
-
 Default USART/UART Configuration
 --------------------------------
 
 USART1 (RX & TX only) is available through the RS-232 port on the board. A MAX232 chip converts
 voltage to RS-232 level. This serial port can be used to flash a firmware using the boot loader
 integrated in the MCU.
-
 
 Timer Inputs/Outputs
 ====================
@@ -96,7 +94,6 @@ TIM4
 
  * Indicates pins that have other on-board functions and should be used only
    with care (See board datasheet).
-
 
 STM32 Tiny - specific Configuration Options
 ===============================================

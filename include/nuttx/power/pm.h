@@ -55,6 +55,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <queue.h>
 
 #ifdef CONFIG_PM
@@ -223,6 +224,17 @@ struct pm_governor_s
   CODE void (*initialize)(void);
 
   /**************************************************************************
+   * Name: deinitialize
+   *
+   * Description:
+   *   Allow the governor to release its internal data. This can be left to
+   *   to NULL if not needed by the governor.
+   *
+   **************************************************************************/
+
+  CODE void (*deinitialize)(void);
+
+  /**************************************************************************
    * Name: statechanged
    *
    * Description:
@@ -311,6 +323,68 @@ extern "C"
  ****************************************************************************/
 
 void pm_initialize(void);
+
+/****************************************************************************
+ * Name: pm_greedy_governor_initialize
+ *
+ * Description:
+ *   Return the greedy governor instance.
+ *
+ * Returned Value:
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
+ *
+ ****************************************************************************/
+
+FAR const struct pm_governor_s *pm_greedy_governor_initialize(void);
+
+/****************************************************************************
+ * Name: pm_activity_governor_initialize
+ *
+ * Description:
+ *   Return the activity governor instance.
+ *
+ * Returned Value:
+ *   A pointer to the governor struct. Otherwise NULL is returned on error.
+ *
+ ****************************************************************************/
+
+FAR const struct pm_governor_s *pm_activity_governor_initialize(void);
+
+/****************************************************************************
+ * Name: pm_set_governor
+ *
+ * Description:
+ *   This function set the domain with assigned governor
+ *
+ * Input Parameters:
+ *   domain        - The PM domain to Set
+ *   gov           - The governor to use
+ *
+ * Returned Value:
+ *  On success - OK
+ *  On error   - -EINVAL
+ *
+ *
+ ****************************************************************************/
+
+int pm_set_governor(int domain, FAR const struct pm_governor_s *gov);
+
+/****************************************************************************
+ * Name: pm_auto_update
+ *
+ * Description:
+ *   This function set the domain with assign update mode.
+ *
+ * Input Parameters:
+ *   domain        - The PM domain to check
+ *   auto_update   - The PM domain auto update or not
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void pm_auto_update(int domain, bool auto_update);
 
 /****************************************************************************
  * Name: pm_register

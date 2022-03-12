@@ -557,6 +557,10 @@ endmenu # Customize Header Files
 
 menu "Debug Options"
 
+config NDEBUG
+	bool "Define NDEBUG globally"
+	default y
+
 config DEBUG_ALERT
 	bool
 	default n

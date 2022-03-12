@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <nuttx/arch.h>
 
@@ -50,9 +51,77 @@
  *
  ****************************************************************************/
 
-void arm_syscall(uint32_t *regs)
+uint32_t *arm_syscall(uint32_t *regs)
 {
-  _alert("Syscall from 0x%" PRIx32 "\n", regs[REG_PC]);
-  CURRENT_REGS = regs;
-  PANIC();
+  uint32_t cmd;
+
+  DEBUGASSERT(regs);
+
+  cmd = regs[REG_R0];
+
+  switch (cmd)
+    {
+      /* R0=SYS_restore_context:  Restore task context
+       *
+       * void arm_fullcontextrestore(uint32_t *restoreregs)
+       *   noreturn_function;
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_restore_context
+       *   R1 = restoreregs
+       */
+
+      case SYS_restore_context:
+        {
+          /* Replace 'regs' with the pointer to the register set in
+           * regs[REG_R1].  On return from the system call, that register
+           * set will determine the restored context.
+           */
+
+          regs = (uint32_t *)regs[REG_R1];
+          DEBUGASSERT(regs);
+        }
+        break;
+
+      /* R0=SYS_switch_context:  This a switch context command:
+       *
+       *   void arm_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   R0 = SYS_switch_context
+       *   R1 = saveregs
+       *   R2 = restoreregs
+       *
+       * In this case, we do both: We save the context registers to the save
+       * register area reference by the saved contents of R1 and then set
+       * regs to the save register area referenced by the saved
+       * contents of R2.
+       */
+
+      case SYS_switch_context:
+        {
+          DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
+          memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
+          regs = (uint32_t *)regs[REG_R2];
+        }
+        break;
+
+      default:
+        {
+          svcerr("ERROR: Bad SYS call: 0x%" PRIx32 "\n", regs[REG_R0]);
+          _alert("Syscall from 0x%" PRIx32 "\n", regs[REG_PC]);
+          CURRENT_REGS = regs;
+          PANIC();
+        }
+        break;
+    }
+
+  /* Return the last value of curent_regs.  This supports context switches
+   * on return from the exception.  That capability is only used with the
+   * SYS_context_switch system call.
+   */
+
+  return regs;
 }

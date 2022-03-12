@@ -113,7 +113,7 @@ FAR void *gran_alloc(GRAN_HANDLE handle, size_t size)
 
           /* Get the next entry from the GAT to support a 64 bit shift */
 
-          if (granidx < priv->ngranules)
+          if (granidx + 32 < priv->ngranules)
             {
               next = priv->gat[gatidx + 1];
             }

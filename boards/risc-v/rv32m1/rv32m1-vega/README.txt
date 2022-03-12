@@ -149,14 +149,11 @@ You will see the following lines in Make.defs file:
 
   ARCHCPUFLAGS = $(ARCHCPURV32IM)
 
-
-
 CONFIG_ARCH_RISV_INTXCPT_EXTREGS could be configured in the following menu:
 
 System Type  --->
   [*] RISC-V Integer Context Extensions
   (6)   Number of Extral RISC-V Integer Context Registers
-
 
 Program & Debug
 ========

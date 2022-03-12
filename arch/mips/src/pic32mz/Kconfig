@@ -893,7 +893,6 @@ config PIC32MZ_T9_EXTERNALCLOCK
 endmenu
 endif # PIC32MZ_T9
 
-
 endmenu # Timer Configuration
 
 menuconfig PIC32MZ_GPIOIRQ

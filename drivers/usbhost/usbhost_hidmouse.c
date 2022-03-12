@@ -157,10 +157,10 @@
 
 #ifdef CONFIG_HIDMOUSE_TSCIF
 #  define DEV_FORMAT        "/dev/input%d"
-#  define DEV_NAMELEN       13
+#  define DEV_NAMELEN       14
 #else
 #  define DEV_FORMAT        "/dev/mouse%d"
-#  define DEV_NAMELEN       13
+#  define DEV_NAMELEN       14
 #endif
 
 /* Used in usbhost_cfgdesc() */

@@ -55,7 +55,6 @@ struct posix_timer_s
   uint8_t          pt_crefs;       /* Reference count */
   pid_t            pt_owner;       /* Creator of timer */
   int              pt_delay;       /* If non-zero, used to reset repetitive timers */
-  int              pt_last;        /* Last value used to set watchdog */
   struct wdog_s    pt_wdog;        /* The watchdog that provides the timing */
   struct sigevent  pt_event;       /* Notification information */
   struct sigwork_s pt_work;

@@ -39,7 +39,6 @@ config ARCH_SPARC_V8
 	default n
 	select ARCH_HAVE_STACKCHECK
 
-
 config ARCH_FAMILY
 	string
 	default "sparc_v8"	if ARCH_SPARC_V8

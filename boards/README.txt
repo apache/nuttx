@@ -61,7 +61,6 @@ The boards/ directory contains board specific configuration logic.  Each
 board must provide a subdirectory <board> under boards/ with the
 following characteristics:
 
-
   <board>
   |-- README.txt
   |-- include/
