@@ -340,31 +340,6 @@ void nx_start(void)
 
   /* Initialize RTOS Data ***************************************************/
 
-  /* Initialize all task lists */
-
-  dq_init(&g_readytorun);
-  dq_init(&g_pendingtasks);
-  dq_init(&g_waitingforsemaphore);
-  dq_init(&g_waitingforsignal);
-#ifndef CONFIG_DISABLE_MQUEUE
-  dq_init(&g_waitingformqnotfull);
-  dq_init(&g_waitingformqnotempty);
-#endif
-#ifdef CONFIG_PAGING
-  dq_init(&g_waitingforfill);
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  dq_init(&g_stoppedtasks);
-#endif
-  dq_init(&g_inactivetasks);
-
-#ifdef CONFIG_SMP
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      dq_init(&g_assignedtasks[i]);
-    }
-#endif
-
   /* Initialize the IDLE task TCB *******************************************/
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
@@ -443,11 +418,10 @@ void nx_start(void)
        * stack and there is no support that yet.
        */
 
-      g_idleargv[i][0]  = g_idletcb[i].cmn.name;
+      g_idleargv[i][0] = g_idletcb[i].cmn.name;
 #else
-      g_idleargv[i][0]  = (FAR char *)g_idlename;
+      g_idleargv[i][0] = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
-      g_idleargv[i][1]  = NULL;
 
       /* Then add the idle task's TCB to the head of the current ready to
        * run list.
