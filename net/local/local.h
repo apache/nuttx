@@ -204,17 +204,6 @@ struct sockaddr; /* Forward reference */
 struct socket;   /* Forward reference */
 
 /****************************************************************************
- * Name: local_initialize
- *
- * Description:
- *   Initialize the local, Unix domain connection structures.  Called once
- *   and only from the common network initialization logic.
- *
- ****************************************************************************/
-
-void local_initialize(void);
-
-/****************************************************************************
  * Name: local_alloc
  *
  * Description:
