@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include "route/ramroute.h"
-#include "route/fileroute.h"
 #include "route/cacheroute.h"
 #include "route/route.h"
 
@@ -53,10 +52,6 @@ void net_init_route(void)
 {
 #if defined(CONFIG_ROUTE_IPv4_RAMROUTE) || defined(CONFIG_ROUTE_IPv6_RAMROUTE)
   net_init_ramroute();
-#endif
-
-#if defined(CONFIG_ROUTE_IPv4_FILEROUTE) || defined(CONFIG_ROUTE_IPv6_FILEROUTE)
-  net_init_fileroute();
 #endif
 
 #if defined(CONFIG_ROUTE_IPv4_CACHEROUTE) || defined(CONFIG_ROUTE_IPv6_CACHEROUTE)
