@@ -47,25 +47,6 @@
 struct file; /* Forward reference */
 
 /****************************************************************************
- * Name: net_init_fileroute
- *
- * Description:
- *   Initialize the in-memory, RAM routing table
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in initialization so that no special protection is needed.
- *
- ****************************************************************************/
-
-void net_init_fileroute(void);
-
-/****************************************************************************
  * Name: net_openroute_ipv4/net_openroute_ipv6
  *
  * Description:
