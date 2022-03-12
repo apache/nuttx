@@ -102,7 +102,7 @@ static uint16_t igmp_chksum(FAR uint8_t *buffer, int buflen)
  ****************************************************************************/
 
 void igmp_send(FAR struct net_driver_s *dev, FAR struct igmp_group_s *group,
-               FAR in_addr_t *destipaddr, uint8_t msgid)
+               FAR const in_addr_t *destipaddr, uint8_t msgid)
 {
   FAR struct igmp_iphdr_s *ipv4 = IPv4BUF;
   FAR struct igmp_hdr_s *igmp;
