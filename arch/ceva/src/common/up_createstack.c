@@ -230,8 +230,12 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #ifdef CONFIG_STACK_COLORATION
 void up_stack_color(FAR void *stackbase, size_t nbytes)
 {
-  uint32_t *stkptr = stackbase;
-  size_t    nwords = nbytes / sizeof(uint32_t);
+  /* Take extra care that we do not write outsize the stack boundaries */
+
+  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
+  uintptr_t stkend = nbytes ? (((uintptr_t)stackbase + nbytes) & ~3) :
+                     up_getsp(); /* 0: colorize the running stack */
+  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */
 
