@@ -115,6 +115,7 @@
 
 _xtensa_context_save:
 
+	s32i	a3,  sp, (4 * REG_A3)
 	s32i	a4,  sp, (4 * REG_A4)
 	s32i	a5,  sp, (4 * REG_A5)
 	s32i	a6,  sp, (4 * REG_A6)
@@ -307,6 +308,7 @@ _xtensa_context_restore:
 
 	l32i	a3, a2, (4 * REG_SAR)
 	wsr		a3, SAR
+
 	l32i	a3, a2, (4 * REG_A3)
 	l32i	a4, a2, (4 * REG_A4)
 	l32i	a5, a2, (4 * REG_A5)
