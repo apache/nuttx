@@ -338,16 +338,16 @@ _xtensa_syscall_handler:
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
 
-	/* Save EPC */
-
-#if XCHAL_HAVE_LOOPS != 0
-	/* Save A2 and A3 now to give us some registers to work with.  A0, A2
-	 * and A3 are now available.
-	 */
-
 	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
 	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
 
+	/* Save rest of interrupt context. */
+
+	call0	_xtensa_context_save
+
+	/* Save EPC */
+
+#if XCHAL_HAVE_LOOPS != 0
 	/* Get the interruptee's PC and skip over the 'syscall' instruction.
 	 * If it's at the end of a zero-overhead loop and it's not on the last
 	 * iteration, decrement loop counter and skip to beginning of loop.
@@ -378,14 +378,7 @@ _xtensa_syscall_handler:
 
 	wsr		a0, EPC_1						/* Update PC */
 	s32i	a0, sp, (4 * REG_PC)
-
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
 #endif
-
-	/* Save rest of interrupt context. */
-
-	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Dispatch the sycall as with other interrupts. */
 
