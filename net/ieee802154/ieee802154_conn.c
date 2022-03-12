@@ -84,14 +84,7 @@ void ieee802154_conn_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_ieee802154_connections);
-  dq_init(&g_active_ieee802154_connections);
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_IEEE802154_NCONNS; i++)
     {
       /* Link each pre-allocated connection structure into the free list. */
