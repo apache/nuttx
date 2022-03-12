@@ -49,9 +49,9 @@
  * Private Data
  ****************************************************************************/
 
-static sem_t        g_netlock;
-static pid_t        g_holder = NO_HOLDER;
-static unsigned int g_count  = 0;
+static sem_t        g_netlock = SEM_INITIALIZER(1);
+static pid_t        g_holder  = NO_HOLDER;
+static unsigned int g_count;
 
 /****************************************************************************
  * Private Functions
@@ -148,19 +148,6 @@ _net_timedwait(sem_t *sem, bool interruptible, unsigned int timeout)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: net_lockinitialize
- *
- * Description:
- *   Initialize the locking facility
- *
- ****************************************************************************/
-
-void net_lockinitialize(void)
-{
-  nxsem_init(&g_netlock, 0, 1);
-}
 
 /****************************************************************************
  * Name: net_lock
