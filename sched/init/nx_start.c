@@ -37,7 +37,6 @@
 #include <nuttx/net/net.h>
 #include <nuttx/mm/iob.h>
 #include <nuttx/mm/mm.h>
-#include <nuttx/mm/shm.h>
 #include <nuttx/kmalloc.h>
 #include <nuttx/sched_note.h>
 #include <nuttx/syslog/syslog.h>
@@ -47,11 +46,8 @@
 
 #include "sched/sched.h"
 #include "signal/signal.h"
-#include "wdog/wdog.h"
 #include "semaphore/semaphore.h"
-#ifndef CONFIG_DISABLE_MQUEUE
-#  include "mqueue/mqueue.h"
-#endif
+#include "mqueue/mqueue.h"
 #include "clock/clock.h"
 #include "timer/timer.h"
 #include "irq/irq.h"
@@ -344,31 +340,6 @@ void nx_start(void)
 
   /* Initialize RTOS Data ***************************************************/
 
-  /* Initialize all task lists */
-
-  dq_init(&g_readytorun);
-  dq_init(&g_pendingtasks);
-  dq_init(&g_waitingforsemaphore);
-  dq_init(&g_waitingforsignal);
-#ifndef CONFIG_DISABLE_MQUEUE
-  dq_init(&g_waitingformqnotfull);
-  dq_init(&g_waitingformqnotempty);
-#endif
-#ifdef CONFIG_PAGING
-  dq_init(&g_waitingforfill);
-#endif
-#ifdef CONFIG_SIG_SIGSTOP_ACTION
-  dq_init(&g_stoppedtasks);
-#endif
-  dq_init(&g_inactivetasks);
-
-#ifdef CONFIG_SMP
-  for (i = 0; i < CONFIG_SMP_NCPUS; i++)
-    {
-      dq_init(&g_assignedtasks[i]);
-    }
-#endif
-
   /* Initialize the IDLE task TCB *******************************************/
 
   for (i = 0; i < CONFIG_SMP_NCPUS; i++)
@@ -447,11 +418,10 @@ void nx_start(void)
        * stack and there is no support that yet.
        */
 
-      g_idleargv[i][0]  = g_idletcb[i].cmn.name;
+      g_idleargv[i][0] = g_idletcb[i].cmn.name;
 #else
-      g_idleargv[i][0]  = (FAR char *)g_idlename;
+      g_idleargv[i][0] = (FAR char *)g_idlename;
 #endif /* CONFIG_TASK_NAME_SIZE */
-      g_idleargv[i][1]  = NULL;
 
       /* Then add the idle task's TCB to the head of the current ready to
        * run list.
@@ -628,15 +598,6 @@ void nx_start(void)
       irq_initialize();
     }
 
-  /* Initialize the watchdog facility (if included in the link) */
-
-#ifdef CONFIG_HAVE_WEAKFUNCTIONS
-  if (wd_initialize != NULL)
-#endif
-    {
-      wd_initialize();
-    }
-
   /* Initialize the POSIX timer facility (if included in the link) */
 
 #ifdef CONFIG_HAVE_WEAKFUNCTIONS
@@ -681,6 +642,12 @@ void nx_start(void)
   net_initialize();
 #endif
 
+#ifndef CONFIG_BINFMT_DISABLE
+  /* Initialize the binfmt system */
+
+  binfmt_initialize();
+#endif
+
   /* Initialize Hardware Facilities *****************************************/
 
   /* The processor specific details of running the operating system
@@ -705,18 +672,6 @@ void nx_start(void)
   g_nx_initstate = OSINIT_HARDWARE;
 
   /* Setup for Multi-Tasking ************************************************/
-
-#ifdef CONFIG_MM_SHM
-  /* Initialize shared memory support */
-
-  shm_initialize();
-#endif
-
-#ifndef CONFIG_BINFMT_DISABLE
-  /* Initialize the binfmt system */
-
-  binfmt_initialize();
-#endif
 
   /* Announce that the CPU0 IDLE task has started */
 

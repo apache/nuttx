@@ -56,7 +56,7 @@
 #ifdef CONFIG_ROUTE_IPv4_FILEROUTE
 /* Semaphore used to lock a routing table for exclusive write-only access */
 
-static sem_t g_ipv4_exclsem;
+static sem_t g_ipv4_exclsem = SEM_INITIALIZER(1);
 static pid_t g_ipv4_holder = NO_HOLDER;
 static int g_ipv4_count;
 #endif
@@ -64,7 +64,7 @@ static int g_ipv4_count;
 #ifdef CONFIG_ROUTE_IPv6_FILEROUTE
 /* Semaphore used to lock a routing table for exclusive write-only access */
 
-static sem_t g_ipv6_exclsem;
+static sem_t g_ipv6_exclsem = SEM_INITIALIZER(1);
 static pid_t g_ipv6_holder = NO_HOLDER;
 static int g_ipv6_count;
 #endif
@@ -179,36 +179,6 @@ int net_routesize(FAR const char *path, size_t entrysize)
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: net_init_fileroute
- *
- * Description:
- *   Initialize the in-memory, RAM routing table
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   Called early in initialization so that no special protection is needed.
- *
- ****************************************************************************/
-
-void net_init_fileroute(void)
-{
-  /* Initialize semaphores */
-
-#ifdef CONFIG_ROUTE_IPv4_FILEROUTE
-  nxsem_init(&g_ipv4_exclsem, 0, 1);
-#endif
-
-#ifdef CONFIG_ROUTE_IPv6_FILEROUTE
-  nxsem_init(&g_ipv6_exclsem, 0, 1);
-#endif
-}
 
 /****************************************************************************
  * Name: net_openroute_ipv4/net_openroute_ipv6

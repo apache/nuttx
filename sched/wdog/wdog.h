@@ -87,27 +87,6 @@ extern clock_t g_wdtickbase;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: wd_initialize
- *
- * Description:
- * This function initializes the watchdog data structures
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   None
- *
- * Assumptions:
- *   This function must be called early in the initialization sequence
- *   before the timer interrupt is attached and before any watchdog
- *   services are used.
- *
- ****************************************************************************/
-
-void weak_function wd_initialize(void);
-
-/****************************************************************************
  * Name: wd_timer
  *
  * Description:

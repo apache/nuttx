@@ -146,27 +146,6 @@ FAR struct tcp_conn_s *tcp_findlistener(FAR union ip_binding_u *uaddr,
  ****************************************************************************/
 
 /****************************************************************************
- * Name: tcp_listen_initialize
- *
- * Description:
- *   Setup the listening data structures
- *
- * Assumptions:
- *   Called early in the initialization phase while the system is still
- *   single-threaded.
- *
- ****************************************************************************/
-
-void tcp_listen_initialize(void)
-{
-  int ndx;
-  for (ndx = 0; ndx < CONFIG_NET_MAX_LISTENPORTS; ndx++)
-    {
-      tcp_listenports[ndx] = NULL;
-    }
-}
-
-/****************************************************************************
  * Name: tcp_unlisten
  *
  * Description:
