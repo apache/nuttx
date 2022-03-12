@@ -232,5 +232,8 @@ typedef enum
 #define CHARGER_DETECT_WORK_TIME  10000
 #define DETECT_WORK_INIT_TIME     20000
 
+#define DETECT_WORK_NO_EXIST       0
+#define DETECT_WORK_EXIST          1
+#define BATT_CHARGING_STAT_INIT   -1
 #endif /* __CPS4019_REG_H */
 

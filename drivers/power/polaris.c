@@ -101,6 +101,7 @@ struct stwlc38_dev_s
   struct work_s detect_work;                /* charger detect work */
   bool charging;                            /* Mark charge_manager is not running */
   int batt_state_flag;
+  int detect_work_exit;
 };
 
 static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
@@ -677,20 +678,21 @@ static void detect_worker(FAR void *arg)
   ret = stwlc38_state(&priv->dev, &charger_is_exit);
   if (ret == OK)
     {
-      if (!charger_is_exit)
+      if (priv->batt_state_flag != charger_is_exit)
         {
+          syslog(LOG_INFO,"rx wireless detect pin:%d\n",charger_is_exit);
+          priv->batt_state_flag = charger_is_exit;
           battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
+        }
+
+      if (!priv->charging && !charger_is_exit)
+        {
+          syslog(LOG_INFO,"charge_manager exit work cancel:%d\n",charger_is_exit);
+          priv->detect_work_exit = DETECT_WORK_NO_EXIST;
           work_cancel(LPWORK, &priv->detect_work);
-          priv->batt_state_flag = true;
         }
       else
         {
-          if (priv->batt_state_flag)
-            {
-              battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
-              priv->batt_state_flag = false;
-            }
-
           work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
                      CHARGER_DETECT_WORK_TIME);
         }
@@ -816,9 +818,12 @@ static void stwlc38_worker(FAR void *arg)
    *  if removed tx, the charge_manager app will return
    **************************************************************************/
 
-  if (rx_int_state.wlc_rx_int_output_on && priv->charging == false)
+  if (rx_int_state.wlc_rx_int_output_on &&
+              priv->detect_work_exit == DETECT_WORK_NO_EXIST)
     {
+      syslog(LOG_INFO,"rx wireless charger inster\n");
       priv->charging = true; /* Mark charge manager will be running */
+      priv->detect_work_exit = DETECT_WORK_EXIST;
       work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
     }
 
@@ -901,7 +906,6 @@ static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
   unsigned int *chipid = NULL;
 
   ret = stwlc38_chipid(dev, chipid);
-
   *status = (ret == OK) ? true : false;
 
   return ret;
@@ -1066,7 +1070,8 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
   uint16_t reg_value;
 
-  if (fw_i2c_read(priv, WLC_RX_VOUT_SET_REG, (FAR uint8_t *)&reg_value, 2) < OK)
+  if (fw_i2c_read(priv, WLC_RX_VOUT_SET_REG,
+                 (FAR uint8_t *)&reg_value, 2) < OK)
     {
       baterr("[WLC] Error in reading WLC_RX_VOUT_SET_REG\n");
       return E_BUS_R;
@@ -1132,7 +1137,8 @@ FAR struct battery_charger_dev_s *
       priv->rpmsg_dev = rpmsg_dev;
       priv->io_dev    = io_dev;
       priv->charging  = false;
-      priv->batt_state_flag = true;
+      priv->batt_state_flag = BATT_CHARGING_STAT_INIT;
+      priv->detect_work_exit = DETECT_WORK_EXIST;
     }
   else
     {

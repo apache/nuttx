@@ -100,6 +100,7 @@ struct cps4019_dev_s
   struct work_s detect_work;                /* charger detect work */
   bool charging;                            /* Mark charge_manager is not running */
   int batt_state_flag;
+  int detect_work_exit;
 };
 
 static int cps_i2c_read(FAR struct cps4019_dev_s *priv, uint8_t *cmd,
@@ -889,20 +890,19 @@ static void detect_worker(FAR void *arg)
   ret = cps4019_state(&priv->dev, &charger_is_exit);
   if (ret == OK)
     {
-      if (!charger_is_exit)
+      if (priv->batt_state_flag != charger_is_exit)
         {
+          priv->batt_state_flag = charger_is_exit;
           battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
+        }
+
+      if (!priv->charging && !charger_is_exit)
+        {
+          priv->detect_work_exit = DETECT_WORK_NO_EXIST;
           work_cancel(LPWORK, &priv->detect_work);
-          priv->batt_state_flag = true;
         }
       else
         {
-          if (priv->batt_state_flag)
-            {
-              battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
-              priv->batt_state_flag = false;
-            }
-
           work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
                      CHARGER_DETECT_WORK_TIME);
         }
@@ -958,9 +958,11 @@ static void cps4019_worker(FAR void *arg)
    *  if removed tx, the charge_manager app will return
    **************************************************************************/
 
-  if (rx_int_state.cps_rx_int_output_on && priv->charging == false)
+  if (rx_int_state.cps_rx_int_output_on &&
+              priv->detect_work_exit == DETECT_WORK_NO_EXIST)
     {
       priv->charging = true; /* Mark charge manager will be running */
+      priv->detect_work_exit = DETECT_WORK_EXIST;
       work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
     }
 
@@ -1303,7 +1305,6 @@ FAR struct battery_charger_dev_s *
                      FAR struct ioexpander_dev_s *io_dev)
 {
   FAR struct cps4019_dev_s *priv;
-  int status = 0;
   int ret;
 
   /* Initialize the cps4019 device structure */
@@ -1319,7 +1320,8 @@ FAR struct battery_charger_dev_s *
       priv->rpmsg_dev = rpmsg_dev;
       priv->io_dev    = io_dev;
       priv->charging  = false;
-      priv->batt_state_flag = true;
+      priv->batt_state_flag = BATT_CHARGING_STAT_INIT;
+      priv->detect_work_exit = DETECT_WORK_EXIST;
     }
   else
     {
@@ -1354,15 +1356,8 @@ FAR struct battery_charger_dev_s *
       baterr("Failed to trun ON wpc ldo output: %d\n", ret);
     }
 
-  ret = cps4019_state(&priv->dev, &status);
-  if (ret == OK)
-    {
-      if (status)
-        {
-          work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
-                     DETECT_WORK_INIT_TIME);
-        }
-    }
+  work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
+             DETECT_WORK_INIT_TIME);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }
