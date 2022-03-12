@@ -218,6 +218,7 @@ _xtensa_user_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save EXCCAUSE and EXCVADDR into the user frame */
 
@@ -228,8 +229,6 @@ _xtensa_user_handler:
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
@@ -298,8 +297,8 @@ _xtensa_user_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, a2, (4 * REG_A1)			/* Retrieve interrupt stack frame */
+	l32i  a2, a2, (4 * REG_A2)		  /* Retrieve interruptee's A2 */
 	rsync									/* Ensure PS and EPC written */
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
@@ -337,9 +336,7 @@ _xtensa_syscall_handler:
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
-
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save rest of interrupt context. */
 
@@ -430,8 +427,8 @@ _xtensa_syscall_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
+	l32i	sp, a2, (4 * REG_A1)			/* Retrieve interrupt stack frame */
+	l32i  a2, a2, (4 * REG_A2)		  /* Retrieve interruptee's A2 */
 	rsync									/* Ensure PS and EPC written */
 
 	/* Return from exception. RFE returns from either the UserExceptionVector
@@ -502,11 +499,10 @@ _xtensa_coproc_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */
