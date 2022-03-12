@@ -827,7 +827,9 @@ static void cw2218_worker(FAR void *arg)
   int ret;
   int capacity;
   b16_t cap;
+#ifdef CONFIG_FACTEST_CHARGE
   b16_t current;
+#endif
   b8_t batt_temp;
 
   ret = cw2218_capacity((struct battery_gauge_dev_s *)priv, &cap);
@@ -855,6 +857,7 @@ static void cw2218_worker(FAR void *arg)
       battery_gauge_changed(&priv->dev, BATTERY_TEMPERATURE_CHANGED);
     }
 
+#ifdef CONFIG_FACTEST_CHARGE
   ret =  cw2218_getcurrent(priv, &current);
   if (ret < 0)
     {
@@ -864,6 +867,7 @@ static void cw2218_worker(FAR void *arg)
     {
       battery_gauge_changed(&priv->dev, BATTERY_CURRENT_CHANGED);
     }
+#endif
 
   work_queue(HPWORK, &priv->work, cw2218_worker, priv,
              CW2218_WORK_POLL_TIME);
