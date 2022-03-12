@@ -51,4 +51,21 @@
  * Public Function Prototypes
  ****************************************************************************/
 
+#ifdef __cplusplus
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
+/* Return the current value of the stack pointer */
+
+uintptr_t up_getsp(void);
+
+#undef EXTERN
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* __ARCH_Z80_INCLUDE_ARCH_H */
