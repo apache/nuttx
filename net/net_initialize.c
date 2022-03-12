@@ -47,7 +47,6 @@
 #include "igmp/igmp.h"
 #include "route/route.h"
 #include "usrsock/usrsock.h"
-#include "utils/utils.h"
 
 /****************************************************************************
  * Public Functions
@@ -78,10 +77,6 @@
 
 void net_initialize(void)
 {
-  /* Initialize the locking facility */
-
-  net_lockinitialize();
-
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_6LOWPAN
   /* Initialize 6LoWPAN data structures */
