@@ -580,16 +580,7 @@ void tcp_initialize(void)
 {
 #ifndef CONFIG_NET_ALLOC_CONNS
   int i;
-#endif
 
-  /* Initialize the queues */
-
-  dq_init(&g_free_tcp_connections);
-  dq_init(&g_active_tcp_connections);
-
-  /* Now initialize each connection structure */
-
-#ifndef CONFIG_NET_ALLOC_CONNS
   for (i = 0; i < CONFIG_NET_TCP_CONNS; i++)
     {
       /* Mark the connection closed and move it to the free list */
