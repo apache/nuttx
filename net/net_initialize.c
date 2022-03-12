@@ -75,6 +75,46 @@
 
 void net_initialize(void)
 {
+  /* Initialize the device interface layer */
+
+  devif_initialize();
+
+#ifdef CONFIG_NET_BLUETOOTH
+  /* Initialize Bluetooth  socket support */
+
+  bluetooth_initialize();
+#endif
+
+#ifdef CONFIG_NET_CAN
+  /* Initialize SocketCAN support */
+
+  can_initialize();
+#endif
+
+#ifdef CONFIG_NET_IEEE802154
+  /* Initialize IEEE 802.15.4  socket support */
+
+  ieee802154_initialize();
+#endif
+
+#ifdef CONFIG_NET_NETLINK
+  /* Initialize the Netlink IPC support */
+
+  netlink_initialize();
+#endif
+
+#ifdef CONFIG_NET_PKT
+  /* Initialize packet socket support */
+
+  pkt_initialize();
+#endif
+
+#ifdef CONFIG_NET_ROUTE
+  /* Initialize the routing table */
+
+  net_init_route();
+#endif
+
 #ifdef CONFIG_NET_IPv6
 #ifdef CONFIG_NET_6LOWPAN
   /* Initialize 6LoWPAN data structures */
@@ -83,20 +123,10 @@ void net_initialize(void)
 #endif
 #endif /* CONFIG_NET_IPv6 */
 
-  /* Initialize the device interface layer */
-
-  devif_initialize();
-
 #ifdef HAVE_FWDALLOC
   /* Initialize IP forwarding support */
 
   ipfwd_initialize();
-#endif
-
-#ifdef CONFIG_NET_PKT
-  /* Initialize packet socket support */
-
-  pkt_initialize();
 #endif
 
 #ifdef CONFIG_NET_ICMP_SOCKET
@@ -109,30 +139,6 @@ void net_initialize(void)
   /* Initialize IPPPROTO_ICMP6 socket support */
 
   icmpv6_sock_initialize();
-#endif
-
-#ifdef CONFIG_NET_BLUETOOTH
-  /* Initialize Bluetooth  socket support */
-
-  bluetooth_initialize();
-#endif
-
-#ifdef CONFIG_NET_IEEE802154
-  /* Initialize IEEE 802.15.4  socket support */
-
-  ieee802154_initialize();
-#endif
-
-#ifdef CONFIG_NET_CAN
-  /* Initialize SocketCAN support */
-
-  can_initialize();
-#endif
-
-#ifdef CONFIG_NET_NETLINK
-  /* Initialize the Netlink IPC support */
-
-  netlink_initialize();
 #endif
 
 #ifdef NET_TCP_HAVE_STACK
@@ -155,12 +161,6 @@ void net_initialize(void)
 #ifdef CONFIG_NET_UDP_WRITE_BUFFERS
   udp_wrbuffer_initialize();
 #endif
-#endif
-
-#ifdef CONFIG_NET_ROUTE
-  /* Initialize the routing table */
-
-  net_init_route();
 #endif
 
 #ifdef CONFIG_NET_USRSOCK
