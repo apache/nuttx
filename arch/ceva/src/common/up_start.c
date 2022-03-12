@@ -243,10 +243,6 @@ static void init_kernelspace(void)
 
   mpu_priv_data(g_idle_basestack,
     g_idle_topstack - g_idle_basestack);
-#ifdef CONFIG_STACK_COLORATION
-  up_stack_color(g_idle_basestack,
-    g_idle_topstack - g_idle_basestack - 256);
-#endif
 }
 
 #ifdef CONFIG_BUILD_PROTECTED
