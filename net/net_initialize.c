@@ -41,7 +41,6 @@
 #include "pkt/pkt.h"
 #include "bluetooth/bluetooth.h"
 #include "ieee802154/ieee802154.h"
-#include "local/local.h"
 #include "can/can.h"
 #include "netlink/netlink.h"
 #include "igmp/igmp.h"
@@ -123,12 +122,6 @@ void net_initialize(void)
   /* Initialize IEEE 802.15.4  socket support */
 
   ieee802154_initialize();
-#endif
-
-#ifdef CONFIG_NET_LOCAL
-  /* Initialize the local, "Unix domain" socket support */
-
-  local_initialize();
 #endif
 
 #ifdef CONFIG_NET_CAN
