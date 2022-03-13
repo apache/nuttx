@@ -91,6 +91,7 @@ void sched_note_stop(FAR struct tcb_s *tcb)
 #endif
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_suspend(FAR struct tcb_s *tcb)
 {
 #ifdef CONFIG_SMP
@@ -132,6 +133,7 @@ void sched_note_resume(FAR struct tcb_s *tcb)
 #endif
 #endif
 }
+#endif
 
 #ifdef CONFIG_SMP
 void sched_note_cpu_start(FAR struct tcb_s *tcb, int cpu)
@@ -156,6 +158,7 @@ void sched_note_cpu_started(FAR struct tcb_s *tcb)
 #endif
 }
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_SWITCH
 void sched_note_cpu_pause(FAR struct tcb_s *tcb, int cpu)
 {
 #if CONFIG_TASK_NAME_SIZE > 0
@@ -199,6 +202,7 @@ void sched_note_cpu_resumed(FAR struct tcb_s *tcb)
          tcb->cpu, tcb, tcb->cpu);
 #endif
 }
+#endif
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_PREEMPTION
