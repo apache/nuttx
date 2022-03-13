@@ -103,6 +103,9 @@ NM = $(CROSSDEV)nm
 OBJCOPY = $(CROSSDEV)objcopy
 OBJDUMP = $(CROSSDEV)objdump
 RUSTC = rustc --edition 2021
+ZIG = zig
+ZCC = zig cc
+ZCXX = zig c++
 
 CFLAGS := $(ARCHWARNINGS) $(ARCHOPTIMIZATION) \
    $(ARCHCFLAGS) $(ARCHINCLUDES) $(ARCHDEFINES) $(EXTRAFLAGS) -pipe

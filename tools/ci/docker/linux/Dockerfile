@@ -34,6 +34,7 @@ RUN apt-get update -qq && DEBIAN_FRONTEND="noninteractive" apt-get install -y -q
   cmake \
   g++ \
   gawk \
+  jq \
   git
 
 RUN mkdir /tools
@@ -67,6 +68,12 @@ RUN mkdir -p $CARGO_HOME \
   && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
   && $CARGO_HOME/bin/rustup target add thumbv6m-none-eabi \
   && $CARGO_HOME/bin/rustup target add thumbv7m-none-eabi
+
+# Install Zig from NuttX
+ENV ZIG_HOME=/tools/zig
+
+RUN mkdir -p $ZIG_HOME \
+  && curl -sL https://ziglang.org/download/0.9.1/zig-linux-x86_64-0.9.1.tar.xz | tar -xJC $ZIG_HOME --strip-components=1 
 
 CMD [ "/bin/bash" ]
 
@@ -268,6 +275,10 @@ COPY --from=nuttx-tools /tools/rust/ /tools/rust/
 ENV CARGO_HOME=/tools/rust/cargo
 ENV RUSTUP_HOME=/tools/rust/rustup
 ENV PATH="/tools/rust/cargo/bin:$PATH"
+
+# Zig toolchain
+COPY --from=nuttx-tools /tools/zig/ /tools/zig/
+ENV PATH="/tools/zig:$PATH"
 
 # ARM toolchain
 COPY --from=nuttx-toolchain-arm /tools/gcc-arm-none-eabi/ gcc-arm-none-eabi/
