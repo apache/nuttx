@@ -756,13 +756,13 @@ _xtensa_level6_handler:
 
 	/* Restore only level-specific regs (the rest were already restored) */
 
-	l32i	a0, a2, (4 * REG_PS)      /* Retrieve interruptee's PS */
+	l32i	a0, a2, (4 * REG_PS)			/* Retrieve interruptee's PS */
 	wsr		a0, EPS_6
-	l32i	a0, a2, (4 * REG_PC)      /* Retrieve interruptee's PC */
+	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_6
-	l32i	a0, a2, (4 * REG_A0)      /* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)      /* Retrieve interrupt stack frame */
-	l32i	a2, a2, (4 * REG_A2)      /* Retrieve interruptee's A2 */
+	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
+	l32i	sp, a2, (4 * REG_A1)			/* Retrieve interrupt stack frame */
+	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure EPS and EPC written */
 
 	/* Return from interrupt.  RFI  restores the PS from EPS_6 and jumps to
