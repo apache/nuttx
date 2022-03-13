@@ -14,6 +14,7 @@ if MODEM
 config MODEM_U_BLOX
 	bool "Enable u-blox modem driver"
 	default n
+	depends on ALLOW_BSD_COMPONENTS
 	---help---
 		Compile the u-blox serial modem driver. The driver consists of
 		the upper half in the OS and the lower half with implementation
@@ -25,7 +26,6 @@ config MODEM_U_BLOX_DEBUG
 	depends on MODEM_U_BLOX
 	---help---
 		Allow the u-blox modem driver print debug information.
-
 
 source "drivers/modem/altair/Kconfig"
 

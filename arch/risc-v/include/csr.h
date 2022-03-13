@@ -346,6 +346,7 @@
 #define PMPCFG_R        (1 << 0)  /* readable ? */
 #define PMPCFG_W        (1 << 1)  /* writeable ? */
 #define PMPCFG_X        (1 << 2)  /* excutable ? */
+#define PMPCFG_RWX_MASK (7 << 0)  /* access rights mask */
 #define PMPCFG_A_OFF    (0 << 3)  /* null region (disabled) */
 #define PMPCFG_A_TOR    (1 << 3)  /* top of range */
 #define PMPCFG_A_NA4    (2 << 3)  /* naturally aligned four-byte region */

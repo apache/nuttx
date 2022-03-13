@@ -69,6 +69,8 @@
 
 void pm_activity(int domain, int priority)
 {
+  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
+
   if (g_pmglobals.domain[domain].governor->activity)
     {
       g_pmglobals.domain[domain].governor->activity(domain, priority);

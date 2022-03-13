@@ -277,7 +277,6 @@ Development Environment
 GNU Toolchain Options
 =====================
 
-
   The NuttX make system can be configured to support the various different
   toolchain options.  All testing has been conducted using the NuttX buildroot
   toolchain.  To use alternative toolchain, you simply need to add change of
@@ -750,9 +749,9 @@ Configuration sub-directories
 
          CONFIG_MMCSD=y                    : Enable MMC/SD support
          CONFIG_MMCSD_NSLOTS=1             : Only one MMC/SD card slot
-         CONFIG_MMCSD_MULTIBLOCK_DISABLE=n : Should not need to disable multi-block transfers
+         CONFIG_MMCSD_MULTIBLOCK_LIMIT=0   : Should not need to disable multi-block transfers
          CONFIG_MMCSD_MMCSUPPORT=n         : May interfere with some SD cards
-         CONFIG_MMCSD_HAVE_CARDDETECT=y     : I/O1 module as a card detect GPIO
+         CONFIG_MMCSD_HAVE_CARDDETECT=y    : I/O1 module as a card detect GPIO
          CONFIG_MMCSD_SPI=y                : Use the SPI interface to the MMC/SD card
          CONFIG_MMCSD_SPICLOCK=20000000    : This is a guess for the optimal MMC/SD frequency
          CONFIG_MMCSD_SPIMODE=0            : Mode 0 is required

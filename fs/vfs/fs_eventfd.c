@@ -37,19 +37,6 @@
 #include "inode/inode.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-#ifndef CONFIG_EVENT_FD_VFS_PATH
-#define CONFIG_EVENT_FD_VFS_PATH "/var/event"
-#endif
-
-#ifndef CONFIG_EVENT_FD_NPOLLWAITERS
-/* Maximum number of threads than can be waiting for POLL events */
-#define CONFIG_EVENT_FD_NPOLLWAITERS 2
-#endif
-
-/****************************************************************************
  * Private Types
  ****************************************************************************/
 

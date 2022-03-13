@@ -33,15 +33,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (sizeof(uint32_t) - 1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -59,7 +50,7 @@
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *   - stack_base_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Inputs:
@@ -75,13 +66,13 @@
 
 int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
 {
-  FAR void *top_of_stack;
+  uintptr_t top_of_stack;
   size_t size_of_stack;
 
 #ifdef CONFIG_TLS
   /* Make certain that the user provided stack is properly aligned */
 
-  DEBUGASSERT((uintptr_t)stack & (B2C(TLS_STACK_ALIGN) - 1) == 0);
+  DEBUGASSERT((uintptr_t)stack & (TLS_STACK_ALIGN - 1) == 0);
 #else
   DEBUGASSERT((uintptr_t)stack & STACK_ALIGN_MASK == 0);
 #endif
@@ -110,32 +101,21 @@ int up_use_stack(FAR struct tcb_s *tcb, FAR void *stack, size_t stack_size)
    * boundary
    */
 
-  size_of_stack = STACK_ALIGN_DOWN(stack_size);
-  top_of_stack  = tcb->stack_alloc_ptr + size_of_stack;
+  top_of_stack = (uintptr_t)tcb->stack_alloc_ptr + stack_size;
+  top_of_stack = STACK_ALIGN_DOWN(top_of_stack);
+  size_of_stack = top_of_stack - (uintptr_t)tcb->stack_alloc_ptr;
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->adj_stack_ptr  = top_of_stack;
+  tcb->stack_base_ptr = tcb->stack_alloc_ptr;
   tcb->adj_stack_size = size_of_stack;
-
-#ifdef CONFIG_TLS
-  /* Initialize the TLS data structure */
-
-  memset(tcb->stack_alloc_ptr, 0, sizeof(struct tls_info_s));
-#endif
 
 #ifdef CONFIG_STACK_COLORATION
   /* If stack debug is enabled, then fill the stack with a recognizable
    * value that we can use later to test for high water marks.
    */
 
-#ifdef CONFIG_TLS
-  up_stack_color(
-      tcb->stack_alloc_ptr + sizeof(struct tls_info_s),
-      tcb->adj_stack_size - sizeof(struct tls_info_s));
-#else
   up_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
-#endif
 #endif
 
   return OK;

@@ -51,6 +51,7 @@ bool up_interrupt_context(void)
  * Name: up_doirq
  ****************************************************************************/
 
+__attribute__ ((visibility("default")))
 void *up_doirq(int irq, void *context)
 {
   /* Allocate temporary context on the stack */

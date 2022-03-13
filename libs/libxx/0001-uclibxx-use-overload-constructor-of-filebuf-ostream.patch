@@ -1,0 +1,299 @@
+From b9028c8bc1a4cd00feb5328521bdde332fefeda3 Mon Sep 17 00:00:00 2001
+From: zhuyanlin <zhuyanlin1@xiaomi.com>
+Date: Mon, 27 Sep 2021 21:47:41 +0800
+Subject: [PATCH] uclibxx: use overload constructor of filebuf & ostream
+
+Instead of set valiable in Init, use overload constructor in
+filebuf & stream class
+
+Change-Id: I090432b5576eb568f92f3c147b39ad2efd8ba6b0
+---
+ include/fstream   | 15 +++++++--
+ include/ios       | 21 +++---------
+ include/istream   |  4 +++
+ include/ostream   |  8 +++++
+ include/streambuf |  6 ++--
+ src/ios.cpp       | 84 ++++++++---------------------------------------
+ 6 files changed, 44 insertions(+), 94 deletions(-)
+
+diff --git a/uClibc++/include/fstream uClibc++/include/fstream
+index fddfa35..99a016e 100644
+--- a/uClibc++/include/fstream
++++ uClibc++/include/fstream
+@@ -53,9 +53,6 @@ namespace std{
+ 	template <class charT, class traits> class _UCXXEXPORT basic_filebuf
+ 		: public basic_streambuf<charT,traits>
+ 	{
+-#ifdef __UCLIBCXX_SUPPORT_CDIR__
+-		friend ios_base::Init::Init();	//Needed for cout/cin stuff
+-#endif
+ 	public:
+ 		// Types (inherited from basic_streambuf:
+ 		typedef typename basic_streambuf<charT, traits>::char_type	char_type;
+@@ -79,6 +76,18 @@ namespace std{
+ 				gbuffer + __UCLIBCXX_IOSTREAM_BUFSIZE__);
+ 		}
+
++		_UCXXEXPORT basic_filebuf(FILE *p, ios_base::openmode opdfor)
++			: basic_streambuf<charT, traits>(opdfor), fp(p), pbuffer(0),
++				gbuffer(0), append(false)
++		{
++			pbuffer = new char_type[__UCLIBCXX_IOSTREAM_BUFSIZE__];
++			gbuffer = new char_type[__UCLIBCXX_IOSTREAM_BUFSIZE__];
++
++			this->setp(pbuffer, pbuffer + __UCLIBCXX_IOSTREAM_BUFSIZE__);
++			//Position get buffer so that there is no data available
++			this->setg(gbuffer, gbuffer + __UCLIBCXX_IOSTREAM_BUFSIZE__,
++				gbuffer + __UCLIBCXX_IOSTREAM_BUFSIZE__);
++		}
+
+ 		_UCXXEXPORT virtual ~basic_filebuf(){
+ 			sync();
+diff --git a/uClibc++/include/ios uClibc++/include/ios
+index ac6566a..6d2dd68 100644
+--- a/uClibc++/include/ios
++++ uClibc++/include/ios
+@@ -45,15 +45,6 @@ namespace std{
+ 			}
+ 		};
+ #endif
+-#ifdef __UCLIBCXX_SUPPORT_CDIR__
+-		class _UCXXLOCAL Init{
+-		public:
+-			_UCXXEXPORT Init();
+-			_UCXXEXPORT ~Init();
+-		private:
+-			static int init_cnt;
+-		};
+-#endif
+
+ 	public:
+
+@@ -154,11 +145,7 @@ namespace std{
+ 	protected:
+ 		_UCXXEXPORT ios_base() : mLocale(), mformat(dec | skipws ), mstate(goodbit),
+ 			mmode(), mdir(), mprecision(6), mwidth(0)
+-#ifdef __UCLIBCXX_SUPPORT_CDIR__
+-			,mInit()
+-#endif
+ 		{
+-
+ 		}
+ 		locale mLocale;
+ 		fmtflags mformat;
+@@ -167,9 +154,6 @@ namespace std{
+ 		seekdir mdir;
+ 		streamsize mprecision;
+ 		streamsize mwidth;
+-#ifdef __UCLIBCXX_SUPPORT_CDIR__
+-		Init mInit;
+-#endif
+ 	};
+
+
+@@ -346,7 +330,10 @@ namespace std{
+ 			: fill_char(' '), mtied(0), mstreambuf(0), throw_mask(0) {
+ 			init(sb);
+ 		}
+-
++		explicit _UCXXEXPORT basic_ios(basic_streambuf<charT,traits>* sb, basic_ostream<charT,traits>* tied)
++			: fill_char(' '), mtied(tied), mstreambuf(0), throw_mask(0) {
++			init(sb);
++		}
+ 		basic_ios() : mtied(0), mstreambuf(0){ }
+
+ 		virtual _UCXXEXPORT ~basic_ios(){
+diff --git a/uClibc++/include/istream uClibc++/include/istream
+index 2d58abd..8fa9ad4 100644
+--- a/uClibc++/include/istream
++++ uClibc++/include/istream
+@@ -55,6 +55,10 @@ namespace std{
+ 		{
+ 			basic_ios<charT, traits>::init(sb);
+ 		}
++		explicit basic_istream(basic_streambuf<charT,traits>* sb, basic_ostream<charT,traits>* tied)
++			: basic_ios<charT, traits>(sb, tied), count_last_ufmt_input(0)
++		{
++		}
+ 		virtual ~basic_istream() { }
+
+ 		class sentry;
+diff --git a/uClibc++/include/ostream uClibc++/include/ostream
+index 3072589..086a297 100644
+--- a/uClibc++/include/ostream
++++ uClibc++/include/ostream
+@@ -58,6 +58,14 @@ namespace std {
+ 		{
+ 			basic_ios<charT,traits>::init(sb);
+ 		}
++
++		_UCXXEXPORT basic_ostream(basic_streambuf<charT,traits>* sb, ios_base::fmtflags fmtfl)
++			: basic_ios<charT, traits>(sb)
++		{
++			basic_ios<charT,traits>::init(sb);
++			ios_base::setf(fmtfl);
++		}
++
+ 		virtual _UCXXEXPORT ~basic_ostream();
+
+ 		class sentry;
+diff --git a/uClibc++/include/streambuf uClibc++/include/streambuf
+index 0daa388..5327296 100644
+--- a/uClibc++/include/streambuf
++++ uClibc++/include/streambuf
+@@ -33,9 +33,6 @@ namespace std{
+
+ 	template <class charT, class traits> class _UCXXEXPORT basic_streambuf{
+ 	public:
+-#ifdef __UCLIBCXX_SUPPORT_CDIR__
+-		friend ios_base::Init::Init();
+-#endif
+ 	// Types:
+ 		typedef charT				char_type;
+ 		typedef typename traits::int_type	int_type;
+@@ -116,6 +113,9 @@ namespace std{
+ 			mgbeg(0), mgnext(0), mgend(0), mpbeg(0), mpnext(0), mpend(0),
+ 			openedFor(0)
+ 		{ }
++		basic_streambuf(ios_base::openmode opdfor)
++			: openedFor(opdfor)
++		{ }
+ 		basic_streambuf<char, char_traits<char> > & operator=(const basic_streambuf<char, char_traits<char> > &){
+ 			return *this;
+ 		}
+diff --git a/uClibc++/src/ios.cpp uClibc++/src/ios.cpp
+index 3b85d5b..e6a390f 100644
+--- a/uClibc++/src/ios.cpp
++++ uClibc++/src/ios.cpp
+@@ -29,32 +29,31 @@ namespace std{
+
+
+ #ifdef __UCLIBCXX_SUPPORT_CDIR__
+-	_UCXXLOCAL int ios_base::Init::init_cnt = 0;	//Needed to ensure the static value is created
+
+ //Create buffers first
+ #ifdef __UCLIBCXX_SUPPORT_COUT__
+-	_UCXXEXPORT filebuf _cout_filebuf;
++	_UCXXEXPORT filebuf _cout_filebuf(stdout, ios_base::out);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CIN__
+-	_UCXXEXPORT filebuf _cin_filebuf;
++	_UCXXEXPORT filebuf _cin_filebuf(stdin, ios_base::in);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CERR__
+-	_UCXXEXPORT filebuf _cerr_filebuf;
++	_UCXXEXPORT filebuf _cerr_filebuf(stderr, ios_base::out);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CLOG__
+-	_UCXXEXPORT filebuf _clog_filebuf;
++	_UCXXEXPORT filebuf _clog_filebuf(stderr, ios_base::out);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCOUT__
+-	_UCXXEXPORT wfilebuf _wcout_filebuf;
++	_UCXXEXPORT wfilebuf _wcout_filebuf(stdout, ios_base::out);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCIN__
+-	_UCXXEXPORT wfilebuf _wcin_filebuf;
++	_UCXXEXPORT wfilebuf _wcin_filebuf(stdin, ios_base::in);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCERR__
+-	_UCXXEXPORT wfilebuf _wcerr_filebuf;
++	_UCXXEXPORT wfilebuf _wcerr_filebuf(stderr, ios_base::out);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCLOG__
+-	_UCXXEXPORT wfilebuf _wclog_filebuf;
++	_UCXXEXPORT wfilebuf _wclog_filebuf(stderr, ios_base::out);
+ #endif
+
+ //Then create streams
+@@ -62,10 +61,10 @@ namespace std{
+ 	_UCXXEXPORT ostream cout(&_cout_filebuf);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CIN__
+-	_UCXXEXPORT istream cin(&_cin_filebuf);
++	_UCXXEXPORT istream cin(&_cin_filebuf, &cout);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CERR__
+-	_UCXXEXPORT ostream cerr(&_cerr_filebuf);
++	_UCXXEXPORT ostream cerr(&_cerr_filebuf, ios_base::unitbuf);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_CLOG__
+ 	_UCXXEXPORT ostream clog(&_clog_filebuf);
+@@ -74,72 +73,15 @@ namespace std{
+ 	_UCXXEXPORT wostream wcout(&_wcout_filebuf);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCIN__
+-	_UCXXEXPORT wistream wcin(&_wcin_filebuf);
++	_UCXXEXPORT wistream wcin(&_wcin_filebuf, &wcout);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCERR__
+-	_UCXXEXPORT wostream wcerr(&_wcerr_filebuf);
++	_UCXXEXPORT wostream wcerr(&_wcerr_filebuf, ios_base::unitbuf);
+ #endif
+ #ifdef __UCLIBCXX_SUPPORT_WCLOG__
+ 	_UCXXEXPORT wostream wclog(&_wclog_filebuf);
+ #endif
+
+-
+-	_UCXXEXPORT ios_base::Init::Init(){
+-		if(init_cnt == 0){	//Need to construct cout et al
+-#ifdef __UCLIBCXX_SUPPORT_COUT__
+-			_cout_filebuf.fp = stdout;
+-			_cout_filebuf.openedFor = ios_base::out;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_CERR__
+-			_cerr_filebuf.fp = stderr;
+-			_cerr_filebuf.openedFor = ios_base::out;
+-			cerr.mformat |= ios_base::unitbuf;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_CLOG__
+-			_clog_filebuf.fp = stderr;
+-			_clog_filebuf.openedFor = ios_base::out;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_CIN__
+-			_cin_filebuf.fp = stdin;
+-			_cin_filebuf.openedFor = ios_base::in;
+-
+-#ifdef __UCLIBCXX_SUPPORT_COUT__
+-			cin.tie(&cout);
+-#endif
+-
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_WCOUT__
+-			_wcout_filebuf.fp = stdout;
+-			_wcout_filebuf.openedFor = ios_base::out;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_WCERR__
+-			_wcerr_filebuf.fp = stderr;
+-			_wcerr_filebuf.openedFor = ios_base::out;
+-			wcerr.mformat |= ios_base::unitbuf;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_WCLOG__
+-			_wclog_filebuf.fp = stderr;
+-			_wclog_filebuf.openedFor = ios_base::out;
+-#endif
+-#ifdef __UCLIBCXX_SUPPORT_WCIN__
+-			_wcin_filebuf.fp = stdin;
+-			_wcin_filebuf.openedFor = ios_base::in;
+-
+-#ifdef __UCLIBCXX_SUPPORT_WCOUT__
+-			wcin.tie(&wcout);
+-#endif
+-
+-#endif
+-		}
+-		init_cnt++;
+-	}
+-
+-	_UCXXEXPORT ios_base::Init::~Init(){
+-		--init_cnt;
+-		if(init_cnt==0){
+-
+-		}
+-	}
+ #endif
+
+
+--
+2.25.1
+

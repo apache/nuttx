@@ -29,13 +29,13 @@
 #include <string.h>
 #include <assert.h>
 #include <debug.h>
+#include <syscall.h>
 
 #include <arch/irq.h>
 #include <nuttx/sched.h>
 #include <nuttx/userspace.h>
 
 #include "signal/signal.h"
-#include "svcall.h"
 #include "exc_return.h"
 #include "arm_internal.h"
 
@@ -103,8 +103,9 @@ static void dispatch_syscall(void)
       " ldr r2, [sp, #16]\n"         /* Restore (orig_SP - new_SP) value */
       " add sp, sp, r2\n"            /* Restore SP */
       " mov r2, r0\n"                /* R2=Save return value in R2 */
-      " mov r0, #3\n"                /* R0=SYS_syscall_return */
-      " svc %0\n"::"i"(SYS_syscall)  /* Return from the SYSCALL */
+      " mov r0, %0\n"                /* R0=SYS_syscall_return */
+      " svc %1\n"::"i"(SYS_syscall_return),
+                   "i"(SYS_syscall)  /* Return from the SYSCALL */
     );
 }
 #endif

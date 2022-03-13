@@ -98,7 +98,7 @@ int up_cpu_idlestack(int cpu, struct tcb_s *tcb, size_t stack_size)
 
   tcb->stack_alloc_ptr = g_cpu1_idlestack;
   tcb->adj_stack_size  = CPU1_IDLETHREAD_STACKSIZE;
-  tcb->stack_base_ptr   = tcb->stack_alloc_ptr;
+  tcb->stack_base_ptr  = tcb->stack_alloc_ptr;
 
 #if XCHAL_CP_NUM > 0
   /* REVISIT: Does it make since to have co-processors enabled on the IDLE

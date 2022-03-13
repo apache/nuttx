@@ -18,8 +18,6 @@
  *
  ****************************************************************************/
 
-
-
 /*
  * The memory map looks like this:
  * +--------------------+ <- low memory
@@ -43,7 +41,6 @@
  * |        __stack     | top of stack
  * +--------------------+ <- high memory
  */
-
 
 /*
  * User modifiable values:

@@ -24,6 +24,9 @@
 HEAD_ASRC  = arm_vectortab.S
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
+crt0$(OBJEXT): crt0.c
+	$(CC) $(CFLAGS) -c armv7-a$(DELIM)crt0.c -o crt0$(OBJEXT)
+
 STARTUP_OBJS = crt0$(OBJEXT)
 endif
 
@@ -58,7 +61,8 @@ CMN_CSRCS += arm_assert.c arm_blocktask.c arm_copyfullstate.c arm_dataabort.c
 CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
-CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
+CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_tcbinfo.c
+CMN_CSRCS += arm_switchcontext.c
 
 # Configuration dependent C files
 

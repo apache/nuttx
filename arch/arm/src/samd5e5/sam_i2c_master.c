@@ -1210,6 +1210,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
     {
       i2cerr("ERROR: Cannot initialize I2C "
              "because it is already initialized!\n");
+      leave_critical_section(flags);
       return;
     }
 
@@ -1219,6 +1220,7 @@ static void i2c_hw_initialize(struct sam_i2c_dev_s *priv, uint32_t frequency)
   if (regval & I2C_CTRLA_SWRST)
     {
       i2cerr("ERROR: Module is in RESET process!\n");
+      leave_critical_section(flags);
       return;
     }
 

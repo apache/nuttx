@@ -21,19 +21,10 @@
 include $(TOPDIR)/.config
 include $(EXPORTDIR)/Make.defs
 
-ifdef ARCHSCRIPT
-
-# ARCHSCRIPT may contain a leading -T; it must not be followed by a space
-# for this to work.
-
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-LDPATH = $(shell cygpath -u $(patsubst -T%,%,$(ARCHSCRIPT)))
-else
-LDPATH = $(patsubst -T%,%,$(ARCHSCRIPT))
-endif
-
-LDNAME = ${notdir ${LDPATH}}
-LDDIR = ${dir ${LDPATH}}
+ifneq ($(ARCHSCRIPT),)
+  LDPATH = $(call CONVERT_PATH,$(ARCHSCRIPT))
+  LDNAME = ${notdir ${LDPATH}}
+  LDDIR = ${dir ${LDPATH}}
 endif
 
 ARCHSUBDIR = "arch/$(CONFIG_ARCH)/src"

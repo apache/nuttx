@@ -84,9 +84,11 @@ struct pm_domain_s
 
   bool auto_update;
 
+#if defined(CONFIG_SCHED_WORKQUEUE)
   /* The worker of update callback */
 
   struct work_s update_work;
+#endif
 
   /* A pointer to the PM governor instance */
 

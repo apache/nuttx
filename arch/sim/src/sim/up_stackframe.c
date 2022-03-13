@@ -32,21 +32,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-/****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* Use a stack alignment of 16 bytes.  If necessary frame_size must be
- * rounded up to the next boundary
- */
-
-#define STACK_ALIGNMENT     16
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+#include "up_internal.h"
 
 /****************************************************************************
  * Public Functions
@@ -103,7 +89,7 @@ FAR void *up_stack_frame(FAR struct tcb_s *tcb, size_t frame_size)
 
   /* Save the adjusted stack values in the struct tcb_s */
 
-  tcb->stack_base_ptr   = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
+  tcb->stack_base_ptr  = (FAR uint8_t *)tcb->stack_base_ptr + frame_size;
   tcb->adj_stack_size -= frame_size;
 
   /* And return a pointer to the allocated memory */

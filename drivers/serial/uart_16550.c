@@ -898,8 +898,8 @@ static int u16550_interrupt(int irq, FAR void *context, FAR void *arg)
 
 static int u16550_ioctl(struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct uart_dev_s *dev   = inode->i_private;
+  FAR struct inode *inode    = filep->f_inode;
+  FAR struct uart_dev_s *dev = inode->i_private;
   FAR struct u16550_s *priv  = (FAR struct u16550_s *)dev->priv;
   int ret;
 

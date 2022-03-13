@@ -11,7 +11,6 @@ cd tools
 cd ..
 make
 
-
 Framebuffer calculation
 ----------------------
 
@@ -22,7 +21,6 @@ buffers (LTDC and DMA2D) located in heap2 memory region starting at address
 overlay size or the pixel format you have to recalculate the heap2 settings.
 In this configuration all overlays (LTDC and DMA2D) positioned at the end of
 heap2.
-
 
 LTDC hardware acceleration
 --------------------------
@@ -53,7 +51,6 @@ operation with a LTDC overlay (Overlay 0 and Overlay 1) via nuttx framebuffer
 interface will be visible immediately.
 Think about continuous blending between both overlays.
 
-
 DMA2D hardware acceleration
 ---------------------------
 
@@ -80,19 +77,16 @@ be used for image preprocessing. The memory region affected by the operations
 configured overlay transparency of DMA2D overlays will be used for subsequently
 blend operation and is valid for the whole overlay.
 
-
 Configuration
 ------------
 
 This configuration provides 2 LTDC (visible overlays) and 2 DMA2D overlays with
 pixel format RGB565 and a resolution of 240x320.
 
-
 Loading
 -------
 
 st-flash write nuttx.bin 0x8000000
-
 
 Executing
 ---------

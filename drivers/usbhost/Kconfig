@@ -282,6 +282,13 @@ config USBHOST_CDCMBIM
 		Select this option to build in host support for CDC/MBIM network
 		devices.
 
+menuconfig USBHOST_HID
+	bool "USB Host HID Driver Support"
+	default n
+	depends on ALLOW_BSD_COMPONENTS
+	---help---
+		USB host HID drivers.  See also include/nuttx/usb/usbhost.h
+
 config USBHOST_HIDKBD
 	bool "HID Keyboard Class Support"
 	default n
@@ -710,6 +717,5 @@ config USBHOST_FT232R_LATENCY
 		occurs or the buffer is full. Measured in ms.
 
 endif # USBHOST_FT232R
-
 
 endif # USBHOST

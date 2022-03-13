@@ -91,7 +91,8 @@ void icmpv6_sock_initialize(void)
     {
       /* Move the connection structure to the free list */
 
-      dq_addlast(&g_icmpv6_connections[i].node, &g_free_icmpv6_connections);
+      dq_addlast(&g_icmpv6_connections[i].sconn.node,
+                 &g_free_icmpv6_connections);
     }
 #endif
 }
@@ -124,7 +125,8 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
             {
               for (ret = 0; ret < CONFIG_NET_ICMPv6_NCONNS; ret++)
                 {
-                  dq_addlast(&conn[ret].node, &g_free_icmpv6_connections);
+                  dq_addlast(&conn[ret].sconn.node,
+                             &g_free_icmpv6_connections);
                 }
             }
         }
@@ -136,7 +138,7 @@ FAR struct icmpv6_conn_s *icmpv6_alloc(void)
         {
           /* Enqueue the connection into the active list */
 
-          dq_addlast(&conn->node, &g_active_icmpv6_connections);
+          dq_addlast(&conn->sconn.node, &g_active_icmpv6_connections);
         }
 
       nxsem_post(&g_free_sem);
@@ -166,7 +168,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_icmpv6_connections);
+  dq_rem(&conn->sconn.node, &g_active_icmpv6_connections);
 
   /* Clear the connection structure */
 
@@ -174,7 +176,7 @@ void icmpv6_free(FAR struct icmpv6_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_icmpv6_connections);
+  dq_addlast(&conn->sconn.node, &g_free_icmpv6_connections);
   nxsem_post(&g_free_sem);
 }
 
@@ -208,7 +210,7 @@ FAR struct icmpv6_conn_s *icmpv6_active(uint16_t id)
 
       /* Look at the next active connection */
 
-      conn = (FAR struct icmpv6_conn_s *)conn->node.flink;
+      conn = (FAR struct icmpv6_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -233,7 +235,7 @@ FAR struct icmpv6_conn_s *icmpv6_nextconn(FAR struct icmpv6_conn_s *conn)
     }
   else
     {
-      return (FAR struct icmpv6_conn_s *)conn->node.flink;
+      return (FAR struct icmpv6_conn_s *)conn->sconn.node.flink;
     }
 }
 

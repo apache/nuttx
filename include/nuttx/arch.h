@@ -1780,7 +1780,7 @@ int up_timer_start(FAR const struct timespec *ts);
  */
 
 #ifndef up_tls_info
-#  ifdef CONFIG_TLS_ALIGNED
+#  if defined(CONFIG_TLS_ALIGNED) && !defined(__KERNEL__)
 #    define up_tls_info() TLS_INFO((uintptr_t)up_getsp())
 #  else
 #    define up_tls_info() tls_get_info()

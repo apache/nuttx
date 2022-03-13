@@ -100,7 +100,7 @@ int pmsm_model_elec_b16(FAR struct pmsm_model_b16_s *model,
 
   tmp1 = b16mulb16(model->phy.motor.res, model->state.i_dq.q);
   tmp2 = b16mulb16(model->phy.ind_d, model->state.i_dq.d);
-  tmp3 = tmp2 + model->phy.flux_link;
+  tmp3 = tmp2 + model->phy.motor.flux_link;
   tmp4 = b16mulb16(model->state.omega_e, tmp3);
   tmp5 = model->state.v_dq.q - tmp1 - tmp4;
   tmp6 = b16mulb16(model->per, tmp5);
@@ -161,7 +161,7 @@ int pmsm_model_mech_b16(FAR struct pmsm_model_b16_s *model, b16_t load)
 
   tmp1 = model->phy.ind_d - model->phy.ind_q;
   tmp2 = b16mulb16(tmp1, model->state.i_dq.d);
-  tmp3 = model->phy.flux_link - tmp2;
+  tmp3 = model->phy.motor.flux_link - tmp2;
   tmp4 = b16mulb16((b16ONE + b16HALF), itob16(model->phy.motor.p));
   tmp5 = b16mulb16(tmp4, model->state.i_dq.q);
 

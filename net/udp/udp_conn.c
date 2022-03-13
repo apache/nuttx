@@ -307,7 +307,7 @@ static inline FAR struct udp_conn_s *
 
       /* Look at the next active connection */
 
-      conn = (FAR struct udp_conn_s *)conn->node.flink;
+      conn = (FAR struct udp_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -446,7 +446,7 @@ static inline FAR struct udp_conn_s *
 
       /* Look at the next active connection */
 
-      conn = (FAR struct udp_conn_s *)conn->node.flink;
+      conn = (FAR struct udp_conn_s *)conn->sconn.node.flink;
     }
 
   return conn;
@@ -485,7 +485,7 @@ FAR struct udp_conn_s *udp_alloc_conn(void)
           /* Mark the connection closed and move it to the free list */
 
           conn[i].lport = 0;
-          dq_addlast(&conn[i].node, &g_free_udp_connections);
+          dq_addlast(&conn[i].sconn.node, &g_free_udp_connections);
         }
     }
 
@@ -594,7 +594,7 @@ void udp_initialize(void)
       /* Mark the connection closed and move it to the free list */
 
       g_udp_connections[i].lport = 0;
-      dq_addlast(&g_udp_connections[i].node, &g_free_udp_connections);
+      dq_addlast(&g_udp_connections[i].sconn.node, &g_free_udp_connections);
     }
 #endif
 }
@@ -650,7 +650,7 @@ FAR struct udp_conn_s *udp_alloc(uint8_t domain)
 #endif
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_udp_connections);
+      dq_addlast(&conn->sconn.node, &g_active_udp_connections);
     }
 
   _udp_semgive(&g_free_sem);
@@ -681,7 +681,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_udp_connections);
+  dq_rem(&conn->sconn.node, &g_active_udp_connections);
 
   /* Release any read-ahead buffers attached to the connection */
 
@@ -706,7 +706,7 @@ void udp_free(FAR struct udp_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_udp_connections);
+  dq_addlast(&conn->sconn.node, &g_free_udp_connections);
   _udp_semgive(&g_free_sem);
 }
 
@@ -763,7 +763,7 @@ FAR struct udp_conn_s *udp_nextconn(FAR struct udp_conn_s *conn)
     }
   else
     {
-      return (FAR struct udp_conn_s *)conn->node.flink;
+      return (FAR struct udp_conn_s *)conn->sconn.node.flink;
     }
 }
 

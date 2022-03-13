@@ -7,7 +7,6 @@ README for NuttX port to the SAM4CMP-DB board.
 
 The board is intended to test NuttX SMP features for dual Cortex-M4.
 
-
 Settings
 ^^^^^^^^
 1. Both CPUs are running at 92.160MHz with PLLB.

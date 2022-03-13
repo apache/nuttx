@@ -84,12 +84,16 @@ static uint8_t const g_chsensor[NSENSORS] =
 
 static const struct file_operations tsi_ops =
 {
-  0,           /* open */
-  0,           /* close */
+  NULL,        /* open */
+  NULL,        /* close */
   tsi_read,    /* read */
-  0,           /* write */
-  0,           /* seek */
-  0,           /* ioctl */
+  NULL,        /* write */
+  NULL,        /* seek */
+  NULL,        /* ioctl */
+  NULL         /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL       /* unlink */
+#endif
 };
 
 /****************************************************************************

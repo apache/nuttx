@@ -36,6 +36,7 @@ PRINTLISTONLY=0
 GITCLEAN=0
 SAVEARTIFACTS=0
 CHECKCLEAN=1
+RUN=0
 
 case $(uname -s) in
   Darwin*)
@@ -77,6 +78,7 @@ function showusage {
   echo "       * This assumes that only nuttx and apps repos need to be cleaned."
   echo "       * If the tree has files not managed by git, they will be removed"
   echo "         as well."
+  echo "  -R execute \"run\" script in the config directories if exists."
   echo "  -h will show this help test and terminate"
   echo "  <testlist-file> selects the list of configurations to test.  No default"
   echo ""
@@ -127,6 +129,9 @@ while [ ! -z "$1" ]; do
     ;;
   -C )
     CHECKCLEAN=0
+    ;;
+  -R )
+    RUN=1
     ;;
   -h )
     showusage
@@ -276,6 +281,18 @@ function build {
   return $fail
 }
 
+function run {
+  if [ ${RUN} -ne 0 ]; then
+    run_script="$path/run"
+    if [ -x $run_script ]; then
+      echo "  Running NuttX..."
+      if ! $run_script; then
+        fail=1
+      fi
+    fi
+  fi
+  return $fail
+}
 # Coordinate the steps for the next build test
 
 function dotest {
@@ -330,6 +347,7 @@ function dotest {
   distclean
   configure
   build
+  run
 }
 
 # Perform the build test for each entry in the test list file

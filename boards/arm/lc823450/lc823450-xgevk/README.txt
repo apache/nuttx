@@ -236,10 +236,8 @@ nsh> ifconfig
 eth0 Link encap:Ethernet HWaddr 00:e0:de:ad:be:ff at UP
      inet addr:192.168.1.244 DRaddr:192.168.1.1 Mask:255.255.255.0
 
-
 lo   Link encap:Local Loopback at UP
      inet addr:127.0.0.1 DRaddr:127.0.0.1 Mask:255.0.0.0
-
 
              IPv4   TCP   UDP  ICMP
 Received     0007  0000  0006  0000

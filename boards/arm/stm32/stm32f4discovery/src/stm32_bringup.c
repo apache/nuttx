@@ -72,6 +72,10 @@
 #include "stm32_bmp180.h"
 #endif
 
+#ifdef CONFIG_SENSORS_MS5611
+#include "stm32_ms5611.h"
+#endif
+
 #ifdef CONFIG_SENSORS_MAX6675
 #include "stm32_max6675.h"
 #endif
@@ -205,6 +209,17 @@ int stm32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize BMP180, error %d\n", ret);
+      return ret;
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MS5611
+  /* Initialize the MS5611 pressure sensor. */
+
+  ret = board_ms5611_initialize(0, 1);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MS5611, error %d\n", ret);
       return ret;
     }
 #endif

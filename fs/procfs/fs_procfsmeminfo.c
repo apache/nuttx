@@ -415,11 +415,12 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
   procfile = (FAR struct meminfo_file_s *)filep->f_priv;
   DEBUGASSERT(procfile);
 
-  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
 #ifdef CONFIG_DEBUG_MM
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                               "usage: <pid/used/free>\n"
                               "pid: dump pid allocated node\n");
 #else
+  linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                               "usage: <used/free>\n");
 #endif
 

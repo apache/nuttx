@@ -778,7 +778,7 @@ static ssize_t proc_loadavg(FAR struct proc_file_s *procfile,
     }
 
   linesize = procfs_snprintf(procfile->line, STATUS_LINELEN,
-                             "%3" PRId32 ".%01" PRId32 "%%",
+                             "%3" PRId32 ".%01" PRId32 "%%\n",
                              intpart, fracpart);
   copysize = procfs_memcpy(procfile->line, linesize, buffer, buflen,
                            &offset);
@@ -1268,11 +1268,11 @@ static ssize_t proc_groupfd(FAR struct proc_file_s *procfile,
           if (file->f_inode && INODE_IS_SOCKET(file->f_inode))
             {
               FAR struct socket *socket = file->f_priv;
+              FAR struct socket_conn_s *conn = socket->s_conn;
               linesize   = procfs_snprintf(procfile->line, STATUS_LINELEN,
                                     "%3d %3d %02x",
                                     i * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK +
-                                    j, socket->s_type,
-                                    socket->s_flags);
+                                    j, socket->s_type, conn->s_flags);
               copysize   = procfs_memcpy(procfile->line, linesize, buffer,
                                          remaining, &offset);
 

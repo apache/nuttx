@@ -221,6 +221,7 @@ endif # NET_SLIP
 menuconfig NET_TUN
 	bool "TUN Virtual Network Device support"
 	default n
+	depends on ALLOW_BSD_COMPONENTS
 	select ARCH_HAVE_NETDEV_STATISTICS
 
 if NET_TUN

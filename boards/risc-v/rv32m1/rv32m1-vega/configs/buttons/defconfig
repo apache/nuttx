@@ -5,6 +5,7 @@
 # You can then do "make savedefconfig" to generate a new defconfig file that includes your
 # modifications.
 #
+# CONFIG_DISABLE_PTHREAD is not set
 # CONFIG_NSH_DISABLEBG is not set
 # CONFIG_NSH_DISABLE_LOSMART is not set
 # CONFIG_NSH_DISABLE_UNAME is not set
@@ -23,7 +24,6 @@ CONFIG_ARCH_STACKDUMP=y
 CONFIG_BINFMT_DISABLE=y
 CONFIG_BOARD_LOOPSPERMSEC=6366
 CONFIG_BUILTIN=y
-CONFIG_CLOCK_MONOTONIC=y
 CONFIG_DEBUG_FULLOPT=y
 CONFIG_DEBUG_SYMBOLS=y
 CONFIG_DEFAULT_SMALL=y

@@ -102,7 +102,7 @@ void bluetooth_conn_initialize(void)
     {
       /* Link each pre-allocated connection structure into the free list. */
 
-      dq_addlast(&g_bluetooth_connections[i].bc_node,
+      dq_addlast(&g_bluetooth_connections[i].bc_conn.node,
                  &g_free_bluetooth_connections);
     }
 #endif
@@ -135,7 +135,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
         {
           for (i = 0; i < CONFIG_NET_BLUETOOTH_NCONNS; i++)
             {
-              dq_addlast(&conn[i].bc_node,
+              dq_addlast(&conn[i].bc_conn.node,
                          &g_active_bluetooth_connections);
             }
         }
@@ -152,7 +152,7 @@ FAR struct bluetooth_conn_s *bluetooth_conn_alloc(void)
 
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->bc_node, &g_active_bluetooth_connections);
+      dq_addlast(&conn->bc_conn.node, &g_active_bluetooth_connections);
     }
 
   net_unlock();
@@ -180,7 +180,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
   /* Remove the connection from the active list */
 
   net_lock();
-  dq_rem(&conn->bc_node, &g_active_bluetooth_connections);
+  dq_rem(&conn->bc_conn.node, &g_active_bluetooth_connections);
 
   /* Check if there any any frames attached to the container */
 
@@ -209,7 +209,7 @@ void bluetooth_conn_free(FAR struct bluetooth_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->bc_node, &g_free_bluetooth_connections);
+  dq_addlast(&conn->bc_conn.node, &g_free_bluetooth_connections);
 
   net_unlock();
 }
@@ -236,7 +236,7 @@ FAR struct bluetooth_conn_s *
   for (conn =
        (FAR struct bluetooth_conn_s *)g_active_bluetooth_connections.head;
        conn != NULL;
-       conn = (FAR struct bluetooth_conn_s *)conn->bc_node.flink)
+       conn = (FAR struct bluetooth_conn_s *)conn->bc_conn.node.flink)
     {
       /* match protocol and channel first */
 
@@ -303,7 +303,7 @@ FAR struct bluetooth_conn_s *
     }
   else
     {
-      return (FAR struct bluetooth_conn_s *)conn->bc_node.flink;
+      return (FAR struct bluetooth_conn_s *)conn->bc_conn.node.flink;
     }
 }
 

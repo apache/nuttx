@@ -186,7 +186,6 @@ All PM interfaces are declared in the file ``include/nuttx/power/pm.h``.
 Callbacks
 =========
 
-
 .. c:struct:: pm_callback_s
 
   This struct includes the pointers to the driver

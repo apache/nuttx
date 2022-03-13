@@ -195,6 +195,8 @@ static int up_addrenv_initdata(uintptr_t l2table)
    * the beginning of .bss/.data by setting it to zero.
    */
 
+  binfo("*** clear .bss/data (virtptr=%p, size=%d)\n",
+        virtptr, ARCH_DATA_RESERVE_SIZE);
   memset(virtptr, 0, ARCH_DATA_RESERVE_SIZE);
 
   /* Make sure that the initialized data is flushed to physical memory. */
@@ -248,8 +250,11 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
 {
   int ret;
 
-  binfo("addrenv=%p textsize=%lu datasize=%lu\n",
-        addrenv, (unsigned long)textsize, (unsigned long)datasize);
+  binfo("addrenv=%p textsize=%lu datasize=%lu heapsize=%lu\n",
+        addrenv,
+        (unsigned long)textsize,
+        (unsigned long)datasize,
+        (unsigned long)heapsize);
 
   DEBUGASSERT(addrenv);
 
@@ -319,6 +324,7 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
    */
 
   addrenv->heapsize = (size_t)ret << MM_PGSHIFT;
+  binfo("addrenv->heapsize=%d\n", addrenv->heapsize);
 #endif
   return OK;
 
@@ -500,6 +506,7 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
   uintptr_t paddr;
   int i;
 
+  binfo("addrenv=%p oldenv=%p\n", addrenv, oldenv);
   DEBUGASSERT(addrenv);
 
   for (vaddr = CONFIG_ARCH_TEXT_VBASE, i = 0;
@@ -518,10 +525,12 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->text[i];
       if (paddr)
         {
+          binfo("text: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
           mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
+          binfo("text: clear l1 (vaddr=%x)\n", vaddr);
           mmu_l1_clrentry(vaddr);
         }
     }
@@ -542,10 +551,12 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->data[i];
       if (paddr)
         {
+          binfo("data: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
           mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
+          binfo("data: clear l1 (vaddr=%x)\n", vaddr);
           mmu_l1_clrentry(vaddr);
         }
     }
@@ -567,10 +578,12 @@ int up_addrenv_select(FAR const group_addrenv_t *addrenv,
       paddr = (uintptr_t)addrenv->heap[i];
       if (paddr)
         {
+          binfo("heap: set l1 entry (paddr=%x vaddr=%x)\n", paddr, vaddr);
           mmu_l1_setentry(paddr, vaddr, MMU_L1_PGTABFLAGS);
         }
       else
         {
+          binfo("data: clear l1 (vaddr=%x)\n", vaddr);
           mmu_l1_clrentry(vaddr);
         }
     }

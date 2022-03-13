@@ -112,7 +112,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
         {
           for (i = 0; i < CONFIG_NET_USRSOCK_CONNS; i++)
             {
-              dq_addlast(&conn[i].node, &g_free_usrsock_connections);
+              dq_addlast(&conn[i].sconn.node, &g_free_usrsock_connections);
             }
         }
     }
@@ -130,7 +130,7 @@ FAR struct usrsock_conn_s *usrsock_alloc(void)
 
       /* Enqueue the connection into the active list */
 
-      dq_addlast(&conn->node, &g_active_usrsock_connections);
+      dq_addlast(&conn->sconn.node, &g_active_usrsock_connections);
     }
 
   _usrsock_semgive(&g_free_sem);
@@ -156,7 +156,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   /* Remove the connection from the active list */
 
-  dq_rem(&conn->node, &g_active_usrsock_connections);
+  dq_rem(&conn->sconn.node, &g_active_usrsock_connections);
 
   /* Reset structure */
 
@@ -165,7 +165,7 @@ void usrsock_free(FAR struct usrsock_conn_s *conn)
 
   /* Free the connection */
 
-  dq_addlast(&conn->node, &g_free_usrsock_connections);
+  dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
   _usrsock_semgive(&g_free_sem);
 }
 
@@ -188,7 +188,7 @@ FAR struct usrsock_conn_s *usrsock_nextconn(FAR struct usrsock_conn_s *conn)
     }
   else
     {
-      return (FAR struct usrsock_conn_s *)conn->node.flink;
+      return (FAR struct usrsock_conn_s *)conn->sconn.node.flink;
     }
 }
 
@@ -237,7 +237,8 @@ int usrsock_setup_request_callback(FAR struct usrsock_conn_s *conn,
 
   /* Set up the callback in the connection */
 
-  pstate->cb = devif_callback_alloc(NULL, &conn->list, &conn->list_tail);
+  pstate->cb = devif_callback_alloc(NULL, &conn->sconn.list,
+                                    &conn->sconn.list_tail);
   if (pstate->cb)
     {
       /* Take a lock since only one outstanding request is allowed */
@@ -291,7 +292,8 @@ void usrsock_teardown_request_callback(FAR struct usrsock_reqstate_s *pstate)
 
   /* Make sure that no further events are processed */
 
-  devif_conn_callback_free(NULL, pstate->cb, &conn->list, &conn->list_tail);
+  devif_conn_callback_free(NULL, pstate->cb, &conn->sconn.list,
+                           &conn->sconn.list_tail);
   nxsem_destroy(&pstate->recvsem);
 
   pstate->cb = NULL;
@@ -348,7 +350,7 @@ void usrsock_initialize(void)
 
       conn->usockid = -1;
       conn->state   = USRSOCK_CONN_STATE_UNINITIALIZED;
-      dq_addlast(&conn->node, &g_free_usrsock_connections);
+      dq_addlast(&conn->sconn.node, &g_free_usrsock_connections);
     }
 #endif
 

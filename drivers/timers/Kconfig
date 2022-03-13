@@ -291,6 +291,24 @@ config MCP794XX_I2C_FREQUENCY
 
 endif # RTC_MCP794XX
 
+config RTC_RX8010SJ
+	bool "RX8010SJ RTC Driver"
+	default n
+	select I2C
+	select RTC_DATETIME
+	depends on RTC_EXTERNAL
+	---help---
+		Enables support for the EPSON RX-8010SJ I2C RTC timer.
+
+if RTC_RX8010SJ
+
+config RX8010SJ_I2C_FREQUENCY
+	int "RX8010SJ I2C frequency"
+	default 400000
+	range 1 400000
+
+endif # RTC_RX8010SJ
+
 config RTC_RPMSG
 	bool "Rpmsg RTC Driver"
 	default n

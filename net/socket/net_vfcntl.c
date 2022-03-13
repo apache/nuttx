@@ -60,6 +60,7 @@
 
 int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
 {
+  FAR struct socket_conn_s *conn;
   int ret = -EINVAL;
 
   ninfo("sockfd=%p cmd=%d\n", psock, cmd);
@@ -70,6 +71,8 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
     {
       return -EBADF;
     }
+
+  conn = psock->s_conn;
 
   /* Interrupts must be disabled in order to perform operations on socket
    * structures
@@ -104,7 +107,7 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
           sockcaps = psock->s_sockif->si_sockcaps(psock);
 
           if ((sockcaps & SOCKCAP_NONBLOCKING) != 0 &&
-              _SS_ISNONBLOCK(psock->s_flags))
+              _SS_ISNONBLOCK(conn->s_flags))
             {
               ret |= O_NONBLOCK;
             }
@@ -138,11 +141,11 @@ int psock_vfcntl(FAR struct socket *psock, int cmd, va_list ap)
             {
                if ((mode & O_NONBLOCK) != 0)
                  {
-                   psock->s_flags |= _SF_NONBLOCK;
+                   conn->s_flags |= _SF_NONBLOCK;
                  }
                else
                  {
-                   psock->s_flags &= ~_SF_NONBLOCK;
+                   conn->s_flags &= ~_SF_NONBLOCK;
                  }
 
                ret = OK;

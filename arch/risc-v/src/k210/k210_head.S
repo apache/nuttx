@@ -52,13 +52,32 @@ __start:
   la   sp, K210_IDLESTACK0_TOP
   j    2f
 1:
-  la   sp, K210_IDLESTACK1_TOP
 
   /* In case of single CPU config, stop here */
 
-#if !(defined CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
+#if !defined(CONFIG_SMP) || (CONFIG_SMP_NCPUS == 1)
+  csrw mie, zero
   wfi
 #endif
+
+  /* To get g_cpu_basestack[mhartid], must get g_cpu_basestack first */
+
+  la   t0, g_cpu_basestack
+
+  /* Offset = pointer width * hart id */
+
+  slli t1, a0, 3
+  add  t0, t0, t1
+
+  /* Load idle stack base to sp */
+
+  ld   sp, 0(t0)
+
+  /* sp (stack top) = sp + idle stack size */
+
+  li   t0, CONFIG_IDLETHREAD_STACKSIZE
+  add  sp, sp, t0
+
 2:
 
   /* Disable all interrupts (i.e. timer, external) in mie */

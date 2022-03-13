@@ -38,12 +38,6 @@
 #include "group/group.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern void up_fault(int irq, uint64_t *regs);
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -60,7 +54,7 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   if (vector < RISCV_IRQ_ECALLU)
     {
-      up_fault((int)irq, regs);
+      riscv_fault((int)irq, regs);
     }
 
   /* Firstly, check if the irq is machine external interrupt */

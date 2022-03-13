@@ -785,7 +785,7 @@ static inline uint32_t sam_txcc(struct sam_xdmach_s *xdmach)
       /* Look up the DMA channel code for TX:  Peripheral is the sink. */
 
       field   = sam_sink_channel(xdmach, pid);
-      regval |= (field << XDMACH_CC_CSIZE_SHIFT);
+      regval |= (field << XDMACH_CC_PERID_SHIFT);
 
 #if 0 /* Not supported */
       /* 10. Set SWREQ to use software request (only relevant for a

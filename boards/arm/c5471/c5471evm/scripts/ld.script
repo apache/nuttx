@@ -44,7 +44,6 @@ SECTIONS
     . = 0xffc0010C;                 /* advance to .+strlen("etherMAC-->")+1 */
     __EtherMAC = .;
 
-
     /* The OS entry point is here */
 
     . = 0x10300000;

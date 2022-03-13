@@ -324,7 +324,6 @@ Hardware
   LED_PANIC            The system has crashed    ON   OFF   OFF (flashing 2Hz)
   LED_IDLE             MCU is is sleep mode      ON   OFF   OFF
 
-
 OFF -    means that the OS is still initializing. Initialization is very fast
          so if you see this at all, it probably means that the system is
          hanging up somewhere in the initialization phases.
@@ -341,7 +340,6 @@ VIOLET - If a recovered assertion occurs, the RED and blue LED will be
 
 Flashing RED - In the event of a fatal crash, all other LEDs will be
           extinguished and RED LED will FLASH at a 2Hz rate.
-
 
   Thus if the GREEN LED is lit, NuttX has successfully booted and is,
   apparently, running normally.  If the RED LED is flashing at
@@ -395,7 +393,6 @@ Serial Consoles
                CN10-33, D34
     ---- ---   ------- ----
 
-
   You must use a 3.3 TTL to RS-232 converter or a USB to 3.3V TTL
 
     Nucleo 144           FTDI TTL-232R-3V3
@@ -439,7 +436,6 @@ Serial Consoles
   -------
   As shipped, SB4 and SB7 are open and SB5 and SB6 closed, so the
   virtual COM port is enabled.
-
 
 SPI
 ---

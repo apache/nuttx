@@ -36,23 +36,12 @@ endif
 # Get the paths to the libraries and the links script path in format that
 # is appropriate for the host OS
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  # Windows-native toolchains
-  USER_LIBPATHS = ${shell for path in $(USERLIBS); do dir=`dirname $(TOPDIR)$(DELIM)$$path`;echo "-L\"`cygpath -w $$dir`\"";done}
-  USER_LDSCRIPT = -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)$(MEM_LAYOUT)}"
-  USER_LDSCRIPT += -T "${shell cygpath -w $(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld}"
-  USER_HEXFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.hex}"
-  USER_SRECFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.srec}"
-  USER_BINFILE += "${shell cygpath -w $(TOPDIR)$(DELIM)nuttx_user.bin}"
-else
-  # Linux/Cygwin-native toolchain
-  USER_LIBPATHS = $(addprefix -L$(TOPDIR)$(DELIM),$(dir $(USERLIBS)))
-  USER_LDSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)$(MEM_LAYOUT)
-  USER_LDSCRIPT += -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld
-  USER_HEXFILE += "$(TOPDIR)$(DELIM)nuttx_user.hex"
-  USER_SRECFILE += "$(TOPDIR)$(DELIM)nuttx_user.srec"
-  USER_BINFILE += "$(TOPDIR)$(DELIM)nuttx_user.bin"
-endif
+USER_LIBPATHS = $(addprefix -L,$(call CONVERT_PATH,$(addprefix $(TOPDIR)$(DELIM),$(dir $(USERLIBS)))))
+USER_LDSCRIPT = -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)memory.ld)
+USER_LDSCRIPT += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)user-space.ld)
+USER_HEXFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.hex)
+USER_SRECFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.srec)
+USER_BINFILE += $(call CONVERT_PATH,$(TOPDIR)$(DELIM)nuttx_user.bin)
 
 USER_LDFLAGS = --undefined=$(ENTRYPT) --entry=$(ENTRYPT) $(USER_LDSCRIPT)
 USER_LDLIBS = $(patsubst lib%,-l%,$(basename $(notdir $(USERLIBS))))

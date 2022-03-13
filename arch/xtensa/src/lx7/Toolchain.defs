@@ -38,7 +38,7 @@ ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCLANG), y)
 endif
 
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
-  CROSSDEV = xtensa-esp32s2-elf-
+  CROSSDEV = xtensa-$(CONFIG_ARCH_CHIP)-elf-
 endif
 
 ARCHCPUFLAGS =

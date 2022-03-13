@@ -105,7 +105,8 @@ int file_mq_unlink(FAR const char *mq_name)
 
   /* Get the full path to the message queue */
 
-  snprintf(fullpath, MAX_MQUEUE_PATH, CONFIG_FS_MQUEUE_MPATH "/%s", mq_name);
+  snprintf(fullpath, MAX_MQUEUE_PATH,
+           CONFIG_FS_MQUEUE_VFS_PATH "/%s", mq_name);
 
   /* Get the inode for this message queue. */
 

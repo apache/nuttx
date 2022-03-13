@@ -100,6 +100,10 @@
 #define SRCIN_SEL_CODECDSP_MIX 3
 
 /****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
  * Private Data
  ****************************************************************************/
 
@@ -429,6 +433,10 @@ const struct audio_ac_reg_s g_ac_reg[RI_REG_MAX_ENTRY] =
   {0x0700, 31,  1, 0x00000000},  /* DUMMY_31 (0x00) */
   {0x0780,  0,  1, 0x00000000},  /* RAM_RW_EN (0x00) */
 };
+
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
 
 /****************************************************************************
  * Private Functions
@@ -845,15 +853,7 @@ static CXD56_AUDIO_ECODE set_srcin_sel(AC_REG_ID ac_reg_id,
         break;
 
       case CXD56_AUDIO_SIG_MIX:
-        if ((read_ac_reg(RI_COD_INSEL2) == COD_INSEL_SRC1)
-         || (read_ac_reg(RI_COD_INSEL3) == COD_INSEL_SRC1))
-          {
-            return CXD56_AUDIO_ECODE_REG_AC_SEL_INV;
-          }
-        else
-          {
-            val = SRCIN_SEL_CODECDSP_MIX;
-          }
+        val = SRCIN_SEL_CODECDSP_MIX;
         break;
 
       default:

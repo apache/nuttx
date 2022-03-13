@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include "syscall.h"
-#include <arch/irq.h>
 
 /****************************************************************************
  * Public Functions

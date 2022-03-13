@@ -46,5 +46,4 @@ config SAME54_XPLAINED_PRO_32KHZXTAL
 		slow clock source.  This option will select instead XOSC32 as the
 		slow clock source.
 
-
 endif # ARCH_BOARD_SAME54_XPLAINED_PRO

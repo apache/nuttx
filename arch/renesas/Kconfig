@@ -78,7 +78,6 @@ config ARCH_RX65N_RSK2MB
 	default n
 	select ARCH_RENESAS_RX
 
-
 config ARCH_RX65N_GRROSE
 	bool
 	default n

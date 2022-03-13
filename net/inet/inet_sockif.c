@@ -157,6 +157,12 @@ static int inet_tcp_alloc(FAR struct socket *psock)
   DEBUGASSERT(conn->crefs == 0);
   conn->crefs = 1;
 
+  /* It is expected the socket has not yet been associated with
+   * any other connection.
+   */
+
+  DEBUGASSERT(psock->s_conn == NULL);
+
   /* Save the pre-allocated connection in the socket structure */
 
   psock->s_conn = conn;
@@ -716,9 +722,11 @@ static int inet_connect(FAR struct socket *psock,
 #if defined(CONFIG_NET_TCP) && defined(NET_TCP_HAVE_STACK)
       case SOCK_STREAM:
         {
+          FAR struct socket_conn_s *conn = psock->s_conn;
+
           /* Verify that the socket is not already connected */
 
-          if (_SS_ISCONNECTED(psock->s_flags))
+          if (_SS_ISCONNECTED(conn->s_flags))
             {
               return -EISCONN;
             }
@@ -1069,6 +1077,9 @@ static int inet_poll(FAR struct socket *psock, FAR struct pollfd *fds,
 static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
                          size_t len, int flags)
 {
+#ifdef NET_UDP_HAVE_STACK
+  FAR struct socket_conn_s *conn = psock->s_conn;
+#endif
   ssize_t ret;
 
   switch (psock->s_type)
@@ -1112,7 +1123,7 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
             {
               /* UDP/IP packet send */
 
-              ret = _SS_ISCONNECTED(psock->s_flags) ?
+              ret = _SS_ISCONNECTED(conn->s_flags) ?
                 psock_udp_sendto(psock, buf, len, 0, NULL, 0) : -ENOTCONN;
             }
 #endif /* NET_UDP_HAVE_STACK */
@@ -1120,7 +1131,7 @@ static ssize_t inet_send(FAR struct socket *psock, FAR const void *buf,
 #elif defined(NET_UDP_HAVE_STACK)
           /* Only UDP/IP packet send */
 
-          ret = _SS_ISCONNECTED(psock->s_flags) ?
+          ret = _SS_ISCONNECTED(conn->s_flags) ?
             psock_udp_sendto(psock, buf, len, 0, NULL, 0) : -ENOTCONN;
 #else
           ret = -ENOSYS;
@@ -1691,10 +1702,6 @@ int inet_close(FAR struct socket *psock)
               /* No.. Just decrement the reference count */
 
               conn->crefs--;
-
-              /* Stop monitor for this socket only */
-
-              tcp_close_monitor(psock);
             }
 #else
         nwarn("WARNING: SOCK_STREAM support is not available in this "

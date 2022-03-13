@@ -87,10 +87,10 @@ arm_savefpu:
 	vstmia		r1!, {s0-s31}			/* Save the full FP context */
 
 	/* Store the floating point control and status register.  At the end of the
-	 * vstmia, r1 will point to the FPCSR storage location.
+	 * vstmia, r1 will point to the FPSCR storage location.
 	 */
 
-	vmrs		r2, fpscr			/* Fetch the FPCSR */
+	vmrs		r2, fpscr			/* Fetch the FPSCR */
 	str		r2, [r1], #4			/* Save the floating point control and status register */
 #else
 	/* Store all floating point registers */
@@ -150,7 +150,7 @@ arm_savefpu:
 
 	/* Store the floating point control and status register */
 
-	fmrx		r2, fpscr			/* Fetch the FPCSR */
+	fmrx		r2, fpscr			/* Fetch the FPSCR */
 	str		r2, [r1], #4			/* Save the floating point control and status register */
 #endif
 	bx		lr
@@ -193,11 +193,11 @@ arm_restorefpu:
 	vldmia		r1!, {s0-s31}			/* Restore the full FP context */
 
 	/* Load the floating point control and status register.   At the end of the
-	 * vstmia, r1 will point to the FPCSR storage location.
+	 * vstmia, r1 will point to the FPSCR storage location.
 	 */
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	vmsr		fpscr, r2			/* Restore the FPCSR */
+	vmsr		fpscr, r2			/* Restore the FPSCR */
 #else
 	/* Load all floating point registers  Registers are loaded in numeric order,
 	 * s0, s1, ... in increasing address order.
@@ -257,11 +257,11 @@ arm_restorefpu:
 #endif
 
 	/* Load the floating point control and status register.  r1 points t
-	 * the address of the FPCSR register.
+	 * the address of the FPSCR register.
 	 */
 
 	ldr		r2, [r1], #4			/* Fetch the floating point control and status register */
-	fmxr		fpscr, r2			/* Restore the FPCSR */
+	fmxr		fpscr, r2			/* Restore the FPSCR */
 #endif
 	bx		lr
 

@@ -351,7 +351,7 @@ int bcmf_driver_download_clm(FAR struct bcmf_dev_s *priv)
     }
   else
     {
-      wlinfo("Download %d bytes @ 0x%08x\n", datalen, srcbuff);
+      wlinfo("Download %d bytes @ %p\n", datalen, srcbuff);
     }
 
   /* Divide CLM blob into chunks */

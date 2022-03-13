@@ -227,10 +227,9 @@ static inline int note_isenabled_switch(void)
       return false;
     }
 
-  /* If the switch trace is disabled, do nothing.
-   */
+  /* If the switch trace is disabled, do nothing. */
 
-  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SWITCH))
+  if ((g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_SWITCH) == 0)
     {
       return false;
     }
@@ -378,10 +377,9 @@ static inline int note_isenabled_dump(void)
       return false;
     }
 
-  /* If the dump trace is disabled, do nothing.
-   */
+  /* If the dump trace is disabled, do nothing. */
 
-  if (!(g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_DUMP))
+  if ((g_note_filter.mode.flag & NOTE_FILTER_MODE_FLAG_DUMP) == 0)
     {
       return false;
     }

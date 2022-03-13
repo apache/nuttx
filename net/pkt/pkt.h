@@ -30,6 +30,8 @@
 #include <sys/types.h>
 #include <queue.h>
 
+#include <nuttx/net/net.h>
+
 #ifdef CONFIG_NET_PKT
 
 /****************************************************************************
@@ -39,9 +41,9 @@
 /* Allocate a new packet socket data callback */
 
 #define pkt_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->list, &conn->list_tail)
+  devif_callback_alloc(dev, &conn->sconn.list, &conn->sconn.list_tail)
 #define pkt_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list, &conn->list_tail)
+  devif_conn_callback_free(dev, cb, &conn->sconn.list, &conn->sconn.list_tail)
 
 /****************************************************************************
  * Public Type Definitions
@@ -55,14 +57,7 @@ struct pkt_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;     /* Supports a double linked list */
-
-  /* This is a list of Pkt connection callbacks.  Each callback represents
-   * a thread that is stalled, waiting for a device-specific event.
-   */
-
-  struct devif_callback_s *list;
-  struct devif_callback_s *list_tail;
+  struct socket_conn_s sconn;
 
   /* Pkt socket-specific content follows */
 

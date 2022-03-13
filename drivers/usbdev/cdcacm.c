@@ -2342,7 +2342,11 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         termiosp->c_iflag = serdev->tc_iflag;
         termiosp->c_oflag = serdev->tc_oflag;
         termiosp->c_lflag = serdev->tc_lflag;
-        termiosp->c_cflag = CS8;
+        termiosp->c_cflag =
+            ((priv->linecoding.parity != CDC_PARITY_NONE) ? PARENB : 0) |
+            ((priv->linecoding.parity == CDC_PARITY_ODD) ? PARODD : 0) |
+            ((priv->linecoding.stop == CDC_CHFMT_STOP2) ? CSTOPB : 0) |
+            CS8;
 
 #ifdef CONFIG_CDCACM_OFLOWCONTROL
         /* Report state of output flow control */
@@ -2354,6 +2358,10 @@ static int cdcuart_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         termiosp->c_cflag |= (priv->iflow) ? CRTS_IFLOW : 0;
 #endif
+      cfsetispeed(termiosp, (speed_t) priv->linecoding.baud[3] << 24 |
+                            (speed_t) priv->linecoding.baud[2] << 16 |
+                            (speed_t) priv->linecoding.baud[1] << 8  |
+                            (speed_t) priv->linecoding.baud[0]);
       }
       break;
 

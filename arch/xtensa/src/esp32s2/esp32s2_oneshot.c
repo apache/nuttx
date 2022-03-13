@@ -85,19 +85,14 @@ static int esp32s2_oneshot_handler(int irq, void *context, void *arg);
 static int esp32s2_oneshot_handler(int irq, void *context, void *arg)
 {
   int ret = OK;
-  struct esp32s2_oneshot_s *oneshot =
-    (struct esp32s2_oneshot_s *)arg;
+  struct esp32s2_oneshot_s *oneshot = (struct esp32s2_oneshot_s *)arg;
+  oneshot_handler_t handler;
+  void *handler_arg;
 
-  DEBUGASSERT(oneshot != NULL && oneshot->handler != NULL);
+  DEBUGASSERT(oneshot != NULL);
+  DEBUGASSERT(oneshot->handler != NULL);
 
   tmrinfo("Oneshot handler triggered\n");
-
-  /* Stop timer
-   * Note: It's not necessary to disable the alarm because
-   * it automatically disables each time it expires.
-   */
-
-  ESP32S2_TIM_STOP(oneshot->tim);
 
   /* Disable interrupts */
 
@@ -107,19 +102,24 @@ static int esp32s2_oneshot_handler(int irq, void *context, void *arg)
 
   ret = ESP32S2_TIM_SETISR(oneshot->tim, NULL, NULL);
 
-  /* Call the callback */
-
-  oneshot->handler((void *)oneshot->arg);
-
-  /* Restore state */
-
-  oneshot->running = false;
-  oneshot->handler = NULL;
-  oneshot->arg = NULL;
-
   /* Clear the Interrupt */
 
   ESP32S2_TIM_ACKINT(oneshot->tim);
+
+  /* The timer is no longer running */
+
+  oneshot->running = false;
+
+  /* Forward the event, clearing out any vestiges */
+
+  handler          = (oneshot_handler_t)oneshot->handler;
+  oneshot->handler = NULL;
+  handler_arg      = (void *)oneshot->arg;
+  oneshot->arg     = NULL;
+
+  /* Call the callback */
+
+  handler(handler_arg);
 
   return ret;
 }

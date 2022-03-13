@@ -553,7 +553,7 @@ static int sgp30_measure_raw(FAR struct sgp30_dev_s *priv,
 static int sgp30_open(FAR struct file *filep)
 {
   FAR struct inode *inode = filep->f_inode;
-  FAR struct sgp30_dev_s *priv  = inode->i_private;
+  FAR struct sgp30_dev_s *priv = inode->i_private;
   int ret = OK;
 
   /* Get exclusive access */

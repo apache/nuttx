@@ -95,7 +95,6 @@ board + LAN8720 module. If users have some issue about using this driver,
 please refer the upper official document, specially the issue that GPIO0
 causes failing to bring the ESP32 chip up.
 
-
 Pin Mapping
 ===========
 

@@ -335,8 +335,7 @@ struct ioexpander_ops_s
   CODE FAR void *(*ioe_attach)(FAR struct ioexpander_dev_s *dev,
                                ioe_pinset_t pinset,
                                ioe_callback_t callback, FAR void *arg);
-  CODE int (*ioe_detach)(FAR struct ioexpander_dev_s *dev,
-                         FAR void *handle);
+  CODE int (*ioe_detach)(FAR struct ioexpander_dev_s *dev, FAR void *handle);
 #endif
 };
 

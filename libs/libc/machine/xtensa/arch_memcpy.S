@@ -131,7 +131,6 @@ memcpy:
 .Ldone:
   RET(16)
 
-
 /* Destination is aligned; source is unaligned.  */
 
   # .align 4
@@ -217,7 +216,6 @@ memcpy:
   s8i a6, a5, 0
   RET(16)
 
-
   # .align XCHAL_INST_FETCH_WIDTH
 __memcpy_aux:
 
@@ -239,7 +237,6 @@ __memcpy_aux:
   bltu  a3, a7, 1b
 #endif
 2:  RET(16)
-
 
 /* Destination is unaligned.  */
 

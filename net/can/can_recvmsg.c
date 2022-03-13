@@ -410,7 +410,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
                                           FAR void *pvpriv, uint16_t flags)
 {
   struct can_recvfrom_s *pstate = (struct can_recvfrom_s *)pvpriv;
-#if defined(CONFIG_NET_CANPROTO_OPTIONS) || defined(CONFIG_NET_CAN_CANFD) || \
+#if (defined(CONFIG_NET_CANPROTO_OPTIONS) && defined(CONFIG_NET_CAN_CANFD)) || \
   defined(CONFIG_NET_TIMESTAMP)
   struct can_conn_s *conn = (struct can_conn_s *)pstate->pr_sock->s_conn;
 #endif
@@ -438,9 +438,9 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
 #endif
             {
 #if defined(CONFIG_NET_TIMESTAMP)
-              if ((conn->psock->s_timestamp && (dev->d_len >
+              if ((conn->sconn.s_timestamp && (dev->d_len >
                   sizeof(struct can_frame) + sizeof(struct timeval)))
-                  || (!conn->psock->s_timestamp && (dev->d_len >
+                  || (!conn->sconn.s_timestamp && (dev->d_len >
                    sizeof(struct can_frame))))
 #else
               if (dev->d_len > sizeof(struct can_frame))
@@ -458,7 +458,7 @@ static uint16_t can_recvfrom_eventhandler(FAR struct net_driver_s *dev,
           can_newdata(dev, pstate);
 
 #ifdef CONFIG_NET_TIMESTAMP
-          if (pstate->pr_sock->s_timestamp)
+          if (conn->sconn.s_timestamp)
             {
               if (pstate->pr_msglen == sizeof(struct timeval))
                 {
@@ -597,7 +597,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   state.pr_buffer = msg->msg_iov->iov_base;
 
 #ifdef CONFIG_NET_TIMESTAMP
-  if (psock->s_timestamp && msg->msg_controllen >=
+  if (conn->sconn.s_timestamp && msg->msg_controllen >=
         (sizeof(struct cmsghdr) + sizeof(struct timeval)))
     {
       struct cmsghdr *cmsg = CMSG_FIRSTHDR(msg);
@@ -629,7 +629,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
   if (ret > 0)
     {
 #ifdef CONFIG_NET_TIMESTAMP
-      if (psock->s_timestamp)
+      if (conn->sconn.s_timestamp)
         {
           if (state.pr_msglen == sizeof(struct timeval))
             {
@@ -652,7 +652,7 @@ ssize_t can_recvmsg(FAR struct socket *psock, FAR struct msghdr *msg,
 
   /* Handle non-blocking CAN sockets */
 
-  if (_SS_ISNONBLOCK(psock->s_flags) || (flags & MSG_DONTWAIT) != 0)
+  if (_SS_ISNONBLOCK(conn->sconn.s_flags) || (flags & MSG_DONTWAIT) != 0)
     {
       /* Return the number of bytes read from the read-ahead buffer if
        * something was received (already in 'ret'); EAGAIN if not.

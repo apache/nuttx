@@ -616,8 +616,7 @@ int stm32_powerled_setup(void)
        * All control should be done via POWERLED character driver.
        */
 
-      ret = powerled_register(CONFIG_EXAMPLES_POWERLED_DEVPATH, powerled,
-                              (void *)lower);
+      ret = powerled_register("/dev/powerled0", powerled, (void *)lower);
       if (ret < 0)
         {
           pwrerr("ERROR: powerled_register failed: %d\n", ret);

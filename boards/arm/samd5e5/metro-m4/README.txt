@@ -135,7 +135,6 @@ Unlocking FLASH
       OEM: SEGGER-EDU
       VTref=3.296V
 
-
       Type "connect" to establish a target connection, '?' for help
       J-Link>con
       Please specify device / core. <Default>: ATSAMD51P19
@@ -148,7 +147,6 @@ Unlocking FLASH
       Specify target interface speed [kHz]. <Default>: 4000 kHz
       Speed>
       Device "ATSAMD51P19" selected.
-
 
       Connecting to target via SWD
       Found SW-DP with ID 0x2BA01477

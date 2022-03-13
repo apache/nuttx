@@ -69,6 +69,22 @@
 #  define CONFIG_ARCH_INTERRUPTSTACK 0
 #endif
 
+/* MIPS requires at least a 4-byte stack alignment.  For floating point use,
+ * however, the stack must be aligned to 8-byte addresses.
+ */
+
+#ifdef CONFIG_LIBC_FLOATINGPOINT
+#  define STACK_ALIGNMENT   8
+#else
+#  define STACK_ALIGNMENT   4
+#endif
+
+/* Stack alignment macros */
+
+#define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
+#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
+#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
 /* In the MIPS model, the state is copied from the stack to the TCB, but
  * only a referenced is passed to get the state from the TCB.
  */

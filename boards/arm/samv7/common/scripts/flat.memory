@@ -22,10 +22,6 @@ include $(TOPDIR)/.config
 include $(TOPDIR)/tools/Config.mk
 include $(TOPDIR)/arch/arm/src/armv7-m/Toolchain.defs
 
-ifeq ($(CONFIG_CYGWIN_WINTOOL),y)
-  ARCHSCRIPT = -T "${shell cygpath -w $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld}"
-else
-  ARCHSCRIPT = -T$(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld
-endif
+ARCHSCRIPT += $(BOARD_COMMON_DIR)$(DELIM)scripts$(DELIM)samv7.ld
 
 include $(BOARD_COMMON_DIR)/scripts/Make.defs

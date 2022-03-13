@@ -37,6 +37,21 @@
 
 float frexpf(float x, int *exponent)
 {
-  *exponent = (int)ceilf(log2f(x));
-  return x / ldexpf(1.0F, *exponent);
+  float res;
+
+  *exponent = (int)ceilf(log2f(fabsf(x)));
+  res = x / ldexpf(1.0F, *exponent);
+  if (res >= 1.0)
+    {
+      res -= 0.5;
+      *exponent += 1;
+    }
+
+  if (res <= -1.0)
+    {
+      res += 0.5;
+      *exponent += 1;
+    }
+
+  return res;
 }

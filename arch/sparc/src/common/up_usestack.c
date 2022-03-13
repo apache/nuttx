@@ -35,30 +35,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/* sparc requires at least a 4-byte stack alignment.  For floating point use,
- * however, the stack must be aligned to 8-byte addresses.
- */
-
-#define STACK_ALIGNMENT   8
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -76,7 +52,7 @@
  *     processor, etc.  This value is retained only for debug
  *     purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The
+ *   - stack_base_ptr: Adjusted stack_alloc_ptr for HW.  The
  *     initial value of the stack pointer.
  *
  * Input Parameters:
@@ -108,14 +84,6 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_alloc_ptr = stack;
 
-  /* If stack debug is enabled, then fill the stack with a recognizable value
-   * that we can use later to test for high water marks.
-   */
-
-#ifdef CONFIG_STACK_COLORATION
-  memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-#endif
-
   /* sparc uses a push-down stack:  the stack grows toward loweraddresses in
    * memory.  The stack pointer register, points to the lowest, valid work
    * address (the "top" of the stack).  Items on the stack are referenced
@@ -136,6 +104,15 @@ int up_use_stack(struct tcb_s *tcb, void *stack, size_t stack_size)
 
   tcb->stack_base_ptr = tcb->stack_alloc_ptr;
   tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_STACK_COLORATION
+  /* If stack debug is enabled, then fill the stack with a
+   * recognizable value that we can use later to test for high
+   * water marks.
+   */
+
+  up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
 
   return OK;
 }

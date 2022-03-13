@@ -242,7 +242,7 @@ int psock_tcp_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
    * return EAGAIN if there is no pending connection in the backlog.
    */
 
-  else if (_SS_ISNONBLOCK(psock->s_flags))
+  else if (_SS_ISNONBLOCK(conn->sconn.s_flags))
     {
       return -EAGAIN;
     }

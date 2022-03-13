@@ -1222,7 +1222,6 @@ config STM32F7_HAVE_SAI2
 	bool
 	default n
 
-
 # These "hidden" settings are the OR of individual peripheral selections
 # indicating that the general capability is required.
 
@@ -1741,7 +1740,7 @@ config OTG_ID_GPIO_DISABLE
 	bool "Disable the use of GPIO_OTG_ID pin."
 	default n
 	---help---
-		Disables/Enabled the use of GPIO_OTG_ID pin. This allows non OTG use
+		Disables/Enables the use of GPIO_OTG_ID pin. This allows non OTG use
 		cases to reuse this GPIO pin and ensure it is not set incorrectlty
 		during OS boot.
 

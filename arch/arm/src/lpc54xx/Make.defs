@@ -29,6 +29,7 @@ CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_svcall.c arm_trigger_irq.c arm_unblocktask.c arm_udelay.c
 CMN_CSRCS += arm_usestack.c arm_vfork.c arm_switchcontext.c arm_puts.c
+CMN_CSRCS += arm_tcbinfo.c
 
 ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
 CMN_ASRCS += arm_lazyexception.S

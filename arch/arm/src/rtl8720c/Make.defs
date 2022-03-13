@@ -42,7 +42,7 @@ CMN_CSRCS += arm_itm_syslog.c arm_memfault.c arm_mpu.c arm_ramvec_attach.c
 CMN_CSRCS += arm_ramvec_initialize.c arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_signal_dispatch.c
 CMN_CSRCS += arm_stackcheck.c arm_svcall.c arm_systick.c arm_unblocktask.c
-CMN_CSRCS += arm_switchcontext.c
+CMN_CSRCS += arm_switchcontext.c arm_tcbinfo.c
 
 # arch/arm/src/rtl8720c
 #

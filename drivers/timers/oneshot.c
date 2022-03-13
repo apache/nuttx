@@ -331,7 +331,7 @@ int oneshot_register(FAR const char *devname,
   FAR struct oneshot_dev_s *priv;
   int ret;
 
-  sninfo("devname=%s lower=%p\n", devname, lower);
+  tmrinfo("devname=%s lower=%p\n", devname, lower);
   DEBUGASSERT(devname != NULL && lower != NULL);
 
   /* Allocate a new oneshot timer driver instance */
@@ -341,7 +341,7 @@ int oneshot_register(FAR const char *devname,
 
   if (!priv)
     {
-      snerr("ERROR: Failed to allocate device structure\n");
+      tmrerr("ERROR: Failed to allocate device structure\n");
       return -ENOMEM;
     }
 
@@ -355,7 +355,7 @@ int oneshot_register(FAR const char *devname,
   ret = register_driver(devname, &g_oneshot_ops, 0666, priv);
   if (ret < 0)
     {
-      snerr("ERROR: register_driver failed: %d\n", ret);
+      tmrerr("ERROR: register_driver failed: %d\n", ret);
       nxsem_destroy(&priv->od_exclsem);
       kmm_free(priv);
     }

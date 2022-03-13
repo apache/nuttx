@@ -511,7 +511,6 @@ static int tca64_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
   if (opt == IOEXPANDER_OPTION_INVERT)
     {
-      unsigned int ival = (unsigned int)((uintptr_t)value);
       uint8_t regaddr;
       uint8_t polarity;
 
@@ -537,7 +536,7 @@ static int tca64_option(FAR struct ioexpander_dev_s *dev, uint8_t pin,
 
       /* Set/clear the pin option */
 
-      if (ival == IOEXPANDER_OPTION_INVERT)
+      if ((uintptr_t)value == IOEXPANDER_VAL_INVERT)
         {
           polarity |= (1 << (pin & 7));
         }

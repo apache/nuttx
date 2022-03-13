@@ -81,12 +81,20 @@
 #  include "esp32_board_i2c.h"
 #endif
 
+#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
+#  include "esp32_tca9548a.h"
+#endif
+
 #ifdef CONFIG_SENSORS_BMP180
 #  include "esp32_bmp180.h"
 #endif
 
 #ifdef CONFIG_SENSORS_SHT3X
 #  include "esp32_sht3x.h"
+#endif
+
+#ifdef CONFIG_SENSORS_MS5611
+#  include "esp32_ms5611.h"
 #endif
 
 #ifdef CONFIG_LCD_HT16K33
@@ -365,6 +373,21 @@ int esp32_bringup(void)
     }
 #endif
 
+  /* Register the TCA9548A Multiplexer before others I2C drivers to allow it
+   * be used by other drivers. Look at esp32_ms5611.c how to use it.
+   */
+
+#ifdef CONFIG_I2CMULTIPLEXER_TCA9548A
+  /* Add the TCA9548A Mux as device 0 (0x70) in I2C Bus 0 */
+
+  ret = board_tca9548a_initialize(0, 0);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize TCA9548A driver: %d\n", ret);
+      return ret;
+    }
+#endif
+
 #ifdef CONFIG_I2C_DRIVER
 
 #ifdef CONFIG_ESP32_I2C0
@@ -406,6 +429,18 @@ int esp32_bringup(void)
   if (ret < 0)
     {
       syslog(LOG_ERR, "Failed to initialize SHT3X driver: %d\n", ret);
+    }
+#endif
+
+#ifdef CONFIG_SENSORS_MS5611
+  /* Try to register MS5611 device in I2C0 as device 0: I2C addr 0x77 */
+
+  ret = board_ms5611_initialize(0, 0);
+
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "Failed to initialize MS5611 driver: %d\n", ret);
+      return ret;
     }
 #endif
 

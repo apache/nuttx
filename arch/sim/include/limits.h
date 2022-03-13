@@ -54,14 +54,15 @@
 
 /* These change on 32-bit and 64-bit platforms */
 
-#if !defined(CONFIG_HOST_X86_64) || defined(CONFIG_SIM_M32)
-#  define LONG_MIN   (-LONG_MAX - 1)
-#  define LONG_MAX   2147483647L
-#  define ULONG_MAX  4294967295UL
-#else
+#if (defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)) || \
+     defined(CONFIG_HOST_ARM64)
 #  define LONG_MIN   (-LONG_MAX - 1)
 #  define LONG_MAX   9223372036854775807L
 #  define ULONG_MAX  18446744073709551615UL
+#else
+#  define LONG_MIN   (-LONG_MAX - 1)
+#  define LONG_MAX   2147483647L
+#  define ULONG_MAX  4294967295UL
 #endif
 
 #define LLONG_MIN    (-LLONG_MAX - 1)
@@ -71,12 +72,13 @@
 /* A pointer is 4 or 8 bytes */
 
 #define PTR_MIN      (-PTR_MAX - 1)
-#if !defined(CONFIG_HOST_X86_64) || defined(CONFIG_SIM_M32)
-#  define PTR_MAX    2147483647
-#  define UPTR_MAX   4294967295U
-#else
+#if (defined(CONFIG_HOST_X86_64) && !defined(CONFIG_SIM_M32)) || \
+     defined(CONFIG_HOST_ARM64)
 #  define PTR_MAX    9223372036854775807LL
 #  define UPTR_MAX   18446744073709551615ULL
+#else
+#  define PTR_MAX    2147483647
+#  define UPTR_MAX   4294967295U
 #endif
 
 #endif /* __ARCH_SIM_INCLUDE_LIMITS_H  */

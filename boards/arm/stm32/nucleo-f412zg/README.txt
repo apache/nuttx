@@ -35,8 +35,6 @@ https://www.st.com/content/ccc/resource/technical/document/user_manual/group0/26
   Debug:          Serial wire debug and JTAG interfaces
   Expansion I/F   Ardino and Morpho Headers
 
-
-
 Contents
 ========
 

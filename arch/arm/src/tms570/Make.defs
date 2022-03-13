@@ -31,7 +31,7 @@ CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
 CMN_ASRCS += cp15_coherent_dcache.S cp15_invalidate_dcache.S
 CMN_ASRCS += cp15_clean_dcache.S cp15_flush_dcache.S
 CMN_ASRCS += cp15_clean_dcache_all.S cp15_flush_dcache_all.S
-CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_cache_size.S
+CMN_ASRCS += cp15_invalidate_dcache_all.S cp15_cache_size.S arm_tcbinfo.c
 
 # Configuration dependent assembly language files
 
@@ -51,6 +51,7 @@ CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c
+CMN_CSRCS += arm_switchcontext.c
 
 # Configuration dependent C files
 

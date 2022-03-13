@@ -81,6 +81,8 @@ int psock_close(FAR struct socket *psock)
 
   if (psock->s_conn != NULL)
     {
+      FAR struct socket_conn_s *conn = psock->s_conn;
+
       /* Assume that the socket close operation will be successful.  Save
        * the current flags and mark the socket uninitialized.  This avoids
        * race conditions in the SMP case.  We save the flags as a type
@@ -88,9 +90,9 @@ int psock_close(FAR struct socket *psock)
        * (currently uint8_t).
        */
 
-      unsigned int saveflags = psock->s_flags;
+      unsigned int saveflags = conn->s_flags;
 
-      psock->s_flags &= ~_SF_INITD;
+      conn->s_flags &= ~_SF_INITD;
 
       /* Let the address family's close() method handle the operation */
 
@@ -105,7 +107,7 @@ int psock_close(FAR struct socket *psock)
         {
           /* No.. restore the socket flags */
 
-          psock->s_flags = saveflags;
+          conn->s_flags = saveflags;
           return ret;
         }
     }

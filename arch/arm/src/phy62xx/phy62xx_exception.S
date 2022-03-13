@@ -156,7 +156,6 @@ exception_common:
 	mov		r10, r4
 	mov		r11, r5
 
-
 	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.
 	 */
@@ -193,7 +192,6 @@ exception_common:
  *   Shouldn't happen
  *
  ****************************************************************************/
-
 
 	.text
 	.align	2
@@ -309,7 +307,6 @@ exception_common_inline:
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
-
 
 	/* Recover SP (R2), PRIMASK (R3), and R4-R7. Determine the value of
 	 * the stack pointer as it was on entry to the exception handler.

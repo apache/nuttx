@@ -69,5 +69,4 @@ config ARCH_EXCLUDE_MULTIBOOT
 	---help---
 		Some platforms, e.g. jailhouse, do not like to have a multiboot header
 
-
 endif # ARCH_X86_64

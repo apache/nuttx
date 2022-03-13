@@ -81,7 +81,6 @@ The first necessary thing to be done in order to use the timer driver in an appl
 
   #include <nuttx/timers/timer.h>
 
-
 At an application level, the timer functionalities may be accessed through ``ioctl`` systems calls. The available ``ioctl`` commands are:
 
  * :c:macro:`TCIOC_START`
@@ -139,8 +138,6 @@ These ``struct timer_ops_s`` keeps pointers to the implementation of each operat
       CODE int (*maxtimeout)(FAR struct timer_lowerhalf_s *lower,
                               FAR uint32_t *maxtimeout);
    };
-
-
 
 Since  ``ioctl`` system calls expect a file descriptor, before using these commands, it's necessary to open the timer device special file in order to get a file descriptor. The following snippet demonstrates how to do so:
 
@@ -296,7 +293,6 @@ This command may be used like so:
       return EXIT_FAILURE;
     }
 
-
 .. c:macro:: TCIOC_MAXTIMEOUT
 
 The ``TCIOC_MAXTIMEOUT`` command calls the ``maxtimeout`` operation, which is described below.
@@ -327,7 +323,6 @@ This command may be used like so:
   /* Print the maximum supported timeout */
 
   printf("Maximum supported timeout: %" PRIu32 "\n", max_timeout);
-
 
 Those snippets were taken from the Example which provides a great resource to demonstrate how to use those ``ioctl`` commands.
 

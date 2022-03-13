@@ -2424,7 +2424,7 @@ static int usbhost_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   uartdev = (FAR struct uart_dev_s *)inode->i_private;
 
   DEBUGASSERT(uartdev && uartdev->priv);
-  priv  = (FAR struct usbhost_cdcacm_s *)uartdev->priv;
+  priv = (FAR struct usbhost_cdcacm_s *)uartdev->priv;
 
   /* Check if the CDC/ACM device is still connected */
 

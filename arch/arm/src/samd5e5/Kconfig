@@ -813,7 +813,6 @@ config SAMD5E5_USB_REGDEBUG
 
 endmenu # USB options
 
-
 if SAMD5E5_GMAC
 
 menu "GMAC device driver options"

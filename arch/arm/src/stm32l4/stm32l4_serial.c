@@ -1947,7 +1947,7 @@ static int stm32l4serial_ioctl(FAR struct file *filep, int cmd,
   FAR struct uart_dev_s *dev   = inode->i_private;
 #endif
 #if defined(CONFIG_SERIAL_TERMIOS)
-  FAR struct stm32l4_serial_s   *priv  =
+  FAR struct stm32l4_serial_s *priv =
       (FAR struct stm32l4_serial_s *)dev->priv;
 #endif
   int                ret    = OK;
@@ -2808,6 +2808,7 @@ static void stm32l4serial_txint(FAR struct uart_dev_s *dev, bool enable)
 #  ifdef CONFIG_STM32L4_SERIALBRK_BSDCOMPAT
       if (priv->ie & USART_CR1_IE_BREAK_INPROGRESS)
         {
+          leave_critical_section(flags);
           return;
         }
 #  endif

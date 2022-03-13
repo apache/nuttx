@@ -122,7 +122,6 @@ Known issues: (carried forward)
 2. Option SPIFI_CAP_SUBBLKERASE is not working.
 3. Device S25FL129P is un-tested.
 
-
 LPCSpifilib version <0.04>
 ===========================
 Release date <4/25/2014>

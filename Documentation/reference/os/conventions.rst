@@ -98,4 +98,3 @@ Naming and Header File Conventions
    in common logic outside of the platform-specific source
    directories.
 
-

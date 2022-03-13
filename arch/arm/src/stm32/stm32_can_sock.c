@@ -881,7 +881,7 @@ static int stm32can_transmit(FAR struct stm32_can_s *priv)
 
   /* Set up the ID, standard 11-bit or extended 29-bit. */
 
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   regval &= ~CAN_TIR_EXID_MASK;
   if (frame->can_id & CAN_EFF_FLAG)
     {
@@ -1205,7 +1205,7 @@ static int stm32can_rxinterrupt_work(FAR struct stm32_can_s *priv, int rxmb)
 
   regval = stm32can_getreg(priv, STM32_CAN_RIR_OFFSET(rxmb));
 
-#ifdef CONFIG_CAN_EXTID
+#ifdef CONFIG_NET_CAN_EXTID
   if ((regval & CAN_RIR_IDE) != 0)
     {
       frame->can_id  = (regval & CAN_RIR_EXID_MASK) >> CAN_RIR_EXID_SHIFT;
@@ -1277,7 +1277,7 @@ static int stm32can_rxinterrupt_work(FAR struct stm32_can_s *priv, int rxmb)
 
   /* Release the FIFO */
 
-#ifndef CONFIG_CAN_EXTID
+#ifndef CONFIG_NET_CAN_EXTID
 errout:
 #endif
   regval  = stm32can_getreg(priv, STM32_CAN_RFR_OFFSET(rxmb));
@@ -1572,16 +1572,16 @@ static void stm32can_sceinterrupt_work(FAR void *arg)
         {
           /* Error warning flag */
 
-          data[1] |= (CAN_ERR_CTRL_RX_WARNING | CAN_ERR_CTRL_TX_WARNING);
-          errbits |= CAN_ERR_CTRL;
+          data[1] |= (CAN_ERR_CRTL_RX_WARNING | CAN_ERR_CRTL_TX_WARNING);
+          errbits |= CAN_ERR_CRTL;
         }
 
       if (regval & CAN_ESR_EPVF)
         {
           /* Error passive flag */
 
-          data[1] |= (CAN_ERR_CTRL_RX_PASSIVE | CAN_ERR_CTRL_TX_PASSIVE);
-          errbits |= CAN_ERR_CTRL;
+          data[1] |= (CAN_ERR_CRTL_RX_PASSIVE | CAN_ERR_CRTL_TX_PASSIVE);
+          errbits |= CAN_ERR_CRTL;
         }
 
       if (regval & CAN_ESR_BOFF)

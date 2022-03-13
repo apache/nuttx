@@ -88,6 +88,7 @@ struct send_s
   ssize_t                 snd_sent;     /* The number of bytes sent */
   uint32_t                snd_isn;      /* Initial sequence number */
   uint32_t                snd_acked;    /* The number of bytes acked */
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
   uint32_t                snd_prev_ack; /* The previous ACKed seq number */
 #ifdef CONFIG_NET_TCP_WINDOW_SCALE
   uint32_t                snd_prev_wnd; /* The advertised window in the last
@@ -97,6 +98,7 @@ struct send_s
   uint16_t                snd_prev_wnd;
 #endif
   int                     snd_dup_acks; /* Duplicate ACK counter */
+#endif
 };
 
 /****************************************************************************
@@ -194,6 +196,19 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
   conn = psock->s_conn;
   DEBUGASSERT(conn != NULL);
 
+#ifdef CONFIG_DEBUG_NET_ERROR
+  if (conn->dev == NULL || (pvconn != conn && pvconn != NULL))
+    {
+      tcp_event_handler_dump(dev, pvconn, pvpriv, flags, conn);
+    }
+#endif
+
+  /* If pvconn is not NULL, make sure that pvconn refers to the same
+   * connection as the socket is bound to.
+   */
+
+  DEBUGASSERT(pvconn == conn || pvconn == NULL);
+
   /* The TCP socket is connected and, hence, should be bound to a device.
    * Make sure that the polling device is the one that we are bound to.
    */
@@ -208,13 +223,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
         flags, pstate->snd_acked, pstate->snd_sent);
 
   /* The TCP_ACKDATA, TCP_REXMIT and TCP_DISCONN_EVENTS flags are expected to
-   * appear here strictly one at a time
+   * appear here strictly one at a time, except for the FIN + ACK case.
    */
 
   DEBUGASSERT((flags & TCP_ACKDATA) == 0 ||
               (flags & TCP_REXMIT) == 0);
-  DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
-              (flags & TCP_ACKDATA) == 0);
   DEBUGASSERT((flags & TCP_DISCONN_EVENTS) == 0 ||
               (flags & TCP_REXMIT) == 0);
 
@@ -260,7 +273,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
       ackno = tcp_getsequence(tcp->ackno);
       pstate->snd_acked = TCP_SEQ_SUB(ackno,
                                       pstate->snd_isn);
-      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+      ninfo("ACK: acked=%" PRId32 " sent=%zd buflen=%zu\n",
             pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
 
       /* Have all of the bytes in the buffer been sent and acknowledged? */
@@ -274,6 +287,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           goto end_wait;
         }
 
+#ifdef CONFIG_NET_TCP_FAST_RETRANSMIT
       /* Fast Retransmit (RFC 5681): an acknowledgment is considered a
        * "duplicate" when (a) the receiver of the ACK has outstanding data,
        * (b) the incoming acknowledgment carries no data, (c) the SYN and
@@ -289,10 +303,10 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           ackno == pstate->snd_prev_ack &&
           conn->snd_wnd == pstate->snd_prev_wnd)
         {
-          if (++pstate->snd_dup_acks >=
-                CONFIG_NET_TCP_FAST_RETRANSMIT_WATERMARK)
+          if (++pstate->snd_dup_acks >= TCP_FAST_RETRANSMISSION_THRESH)
             {
               flags |= TCP_REXMIT;
+              pstate->snd_dup_acks = 0;
             }
         }
       else
@@ -302,6 +316,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       pstate->snd_prev_ack = ackno;
       pstate->snd_prev_wnd = conn->snd_wnd;
+#endif
     }
 
   /* Check if we are being asked to retransmit data.
@@ -311,6 +326,8 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
   if ((flags & TCP_REXMIT) != 0)
     {
+      uint32_t sndlen;
+
       nwarn("WARNING: TCP_REXMIT\n");
 
       /* According to RFC 6298 (5.4), retransmit the earliest segment
@@ -319,7 +336,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
 
       /* Reconstruct the length of the earliest segment to be retransmitted */
 
-      uint32_t sndlen = pstate->snd_buflen - pstate->snd_acked;
+      sndlen = pstate->snd_buflen - pstate->snd_acked;
 
       if (sndlen > conn->mss)
         {
@@ -364,11 +381,11 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
        * already been disconnected.
        */
 
-      if (_SS_ISCONNECTED(psock->s_flags))
+      if (_SS_ISCONNECTED(conn->sconn.s_flags))
         {
           /* Report not connected */
 
-          tcp_lost_connection(psock, pstate->snd_cb, flags);
+          tcp_lost_connection(conn, pstate->snd_cb, flags);
         }
 
       pstate->snd_sent = -ENOTCONN;
@@ -429,7 +446,7 @@ static uint16_t tcpsend_eventhandler(FAR struct net_driver_s *dev,
           /* Update the amount of data sent (but not necessarily ACKed) */
 
           pstate->snd_sent += sndlen;
-          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zd\n",
+          ninfo("SEND: acked=%" PRId32 " sent=%zd buflen=%zu\n",
                 pstate->snd_acked, pstate->snd_sent, pstate->snd_buflen);
         }
       else
@@ -539,12 +556,14 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
       goto errout;
     }
 
+  conn = (FAR struct tcp_conn_s *)psock->s_conn;
+
   /* Check early if this is an un-connected socket, if so, then
    * return -ENOTCONN. Note, we will have to check this again, as we can't
    * guarantee the state won't change until we have the network locked.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: Not connected\n");
       ret = -ENOTCONN;
@@ -552,8 +571,6 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
     }
 
   /* Make sure that we have the IP address mapping */
-
-  conn = (FAR struct tcp_conn_s *)psock->s_conn;
 
 #if defined(CONFIG_NET_ARP_SEND) || defined(CONFIG_NET_ICMPv6_NEIGHBOR)
 #ifdef CONFIG_NET_ARP_SEND
@@ -601,7 +618,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
    * state again to ensure the connection is still valid.
    */
 
-  if (!_SS_ISCONNECTED(psock->s_flags))
+  if (!_SS_ISCONNECTED(conn->sconn.s_flags))
     {
       nerr("ERROR: No longer connected\n");
       net_unlock();
@@ -660,7 +677,7 @@ ssize_t psock_tcp_send(FAR struct socket *psock,
               uint32_t acked = state.snd_acked;
 
               ret = net_timedwait(&state.snd_sem,
-                                  _SO_TIMEOUT(psock->s_sndtimeo));
+                                  _SO_TIMEOUT(conn->sconn.s_sndtimeo));
               if (ret != -ETIMEDOUT || acked == state.snd_acked)
                 {
                   break; /* Timeout without any progress */
@@ -713,7 +730,7 @@ errout:
  *   write occurs first.
  *
  * Input Parameters:
- *   psock    An instance of the internal socket structure.
+ *   conn     The TCP connection of interest
  *
  * Returned Value:
  *   OK (Always can send).
@@ -723,7 +740,7 @@ errout:
  *
  ****************************************************************************/
 
-int psock_tcp_cansend(FAR struct socket *psock)
+int psock_tcp_cansend(FAR struct tcp_conn_s *conn)
 {
   return OK;
 }

@@ -221,12 +221,6 @@ static int can_setup(FAR struct socket *psock, int protocol)
           return -ENOMEM;
         }
 
-#ifdef CONFIG_NET_TIMESTAMP
-      /* Store psock in conn se we can read the SO_TIMESTAMP value */
-
-      conn->psock = psock;
-#endif
-
       /* Initialize the connection instance */
 
       conn->protocol = (uint8_t)protocol;

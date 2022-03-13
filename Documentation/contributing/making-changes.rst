@@ -28,14 +28,12 @@ Here's how to do it:
    If you don't have a `GitHub <https://www.github.com>`_ account, it's free to
    sign up.
 
-
 #. Fork the Projects
 
    Visit both these links and hit the Fork button in the upper right of the page:
 
    * `NuttX <https://github.com/apache/incubator-nuttx/>`_
    * `NuttX Apps <https://github.com/apache/incubator-nuttx-apps/>`_
-
 
 #. Clone the Repositories
 
@@ -65,7 +63,6 @@ Here's how to do it:
 
        $ git checkout -b test/my-new-branch
        $ git push
-
 
 Git Workflow With an Upstream Repository
 ----------------------------------------
@@ -161,7 +158,6 @@ maybe doing that several times. Then when everything works, I get my branch read
        $ git add my-file.c
        $ git commit my-file.c
        $ git push
-
 
 Submitting Your Changes to NuttX
 --------------------------------

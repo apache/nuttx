@@ -364,7 +364,10 @@ static int sam_settimeout(FAR struct watchdog_lowerhalf_s *lower,
   /* check whether overflow */
 
   if (tmp >> 32)
-  return -ERANGE;
+    {
+      leave_critical_section(flags);
+      return -ERANGE;
+    }
 
   period_cycles = (uint32_t)tmp;
 

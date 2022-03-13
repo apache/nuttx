@@ -33,6 +33,7 @@
 #include <netpacket/can.h>
 #include <nuttx/semaphore.h>
 #include <nuttx/can.h>
+#include <nuttx/net/net.h>
 #include <nuttx/net/netdev.h>
 
 #include "devif/devif.h"
@@ -51,9 +52,9 @@
 /* Allocate a new packet socket data callback */
 
 #define can_callback_alloc(dev,conn) \
-  devif_callback_alloc(dev, &conn->list, &conn->list_tail)
+  devif_callback_alloc(dev, &conn->sconn.list, &conn->sconn.list_tail)
 #define can_callback_free(dev,conn,cb) \
-  devif_conn_callback_free(dev, cb, &conn->list, &conn->list_tail)
+  devif_conn_callback_free(dev, cb, &conn->sconn.list, &conn->sconn.list_tail)
 
 /****************************************************************************
  * Public Type Definitions
@@ -75,15 +76,7 @@ struct can_conn_s
 {
   /* Common prologue of all connection structures. */
 
-  dq_entry_t node;                   /* Supports a doubly linked list */
-
-  /* This is a list of NetLink connection callbacks.  Each callback
-   * represents a thread that is stalled, waiting for a device-specific
-   * event.
-   */
-
-  FAR struct devif_callback_s *list;      /* NetLink callbacks */
-  FAR struct devif_callback_s *list_tail; /* NetLink callbacks */
+  struct socket_conn_s sconn;
 
   FAR struct net_driver_s *dev;      /* Reference to CAN device */
 
@@ -117,10 +110,6 @@ struct can_conn_s
 # ifdef CONFIG_NET_CAN_RAW_TX_DEADLINE
   int32_t tx_deadline;
 # endif
-#endif
-
-#ifdef CONFIG_NET_TIMESTAMP
-  FAR struct socket *psock; /* Needed to get SO_TIMESTAMP value */
 #endif
 };
 

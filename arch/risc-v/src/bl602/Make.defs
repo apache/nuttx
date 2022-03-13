@@ -33,6 +33,7 @@ CMN_CSRCS += riscv_interruptcontext.c riscv_modifyreg32.c riscv_puts.c riscv_mde
 CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c riscv_copyfullstate.c
 CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_udelay.c riscv_unblocktask.c riscv_usestack.c
+CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c
@@ -43,16 +44,16 @@ CMN_CSRCS += riscv_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS  += riscv_fpu.S
+CMN_ASRCS += riscv_fpu.S
 endif
 
 ifeq ($(CONFIG_ARCH_HAVE_VFORK),y)
-CMN_CSRCS  += riscv_vfork.c
+CMN_CSRCS += riscv_vfork.c
 endif
 
 # Specify our C code within this directory to be included
 CHIP_CSRCS  = bl602_allocateheap.c
-CHIP_CSRCS += bl602_idle.c bl602_irq.c bl602_irq_dispatch.c
+CHIP_CSRCS += bl602_irq.c bl602_irq_dispatch.c
 CHIP_CSRCS += bl602_serial.c bl602_lowputc.c bl602_tim.c
 CHIP_CSRCS += bl602_start.c bl602_timerisr.c bl602_efuse.c
 CHIP_CSRCS += bl602_os_hal.c
@@ -66,16 +67,16 @@ CHIP_CSRCS += bl602_spi.c
 endif
 
 ifeq ($(CONFIG_TIMER),y)
-CHIP_CSRCS  += bl602_tim_lowerhalf.c
+CHIP_CSRCS += bl602_tim_lowerhalf.c
 endif
 ifeq ($(CONFIG_ONESHOT),y)
-CHIP_CSRCS  += bl602_oneshot_lowerhalf.c
+CHIP_CSRCS += bl602_oneshot_lowerhalf.c
 endif
 ifeq ($(CONFIG_WATCHDOG),y)
-CHIP_CSRCS  += bl602_wdt_lowerhalf.c
+CHIP_CSRCS += bl602_wdt_lowerhalf.c
 endif
 ifeq ($(CONFIG_PWM),y)
-CHIP_CSRCS  += bl602_pwm_lowerhalf.c
+CHIP_CSRCS += bl602_pwm_lowerhalf.c
 endif
 ifeq ($(CONFIG_BL602_SPIFLASH),y)
 CHIP_CSRCS += bl602_flash.c bl602_spiflash.c

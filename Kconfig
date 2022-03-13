@@ -561,14 +561,6 @@ config NDEBUG
 	bool "Define NDEBUG globally"
 	default y
 
-config DEBUG_TCBINFO
-	bool "Enable TCBinfo struct for debug"
-	default n
-	---help---
-		Enables tcbinfo struct for debugger infomation.
-		Selecting this option will enable g_tcbinfo in arch and
-		procfs.
-
 config DEBUG_ALERT
 	bool
 	default n
@@ -1884,20 +1876,6 @@ config STACK_COLORATION
 		to monitor the level of stack usage.
 
 		Only supported by a few architectures.
-
-config STACK_USAGE_SAFE_PERCENT
-	int "Stack usage safe percent"
-	default 0
-	range 0 100
-	depends on STACK_COLORATION
-	---help---
-		Stack usage percent = up_check_tcbstack() * 100 / tcb->adj_stack_size,
-		this should be lower than STACK_USAGE_SAFE_PERCENT.
-
-		Idle thread will periodically check stack usage when this macro
-		value > 0.
-
-		N.B. This feature should not be used in production code.
 
 config STACK_CANARIES
 	bool "Compiler stack canaries"

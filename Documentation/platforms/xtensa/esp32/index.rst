@@ -141,7 +141,6 @@ Data / Instruction 0x50000000 0x50001FFF Embedded Memory
 .                  0x50002000 0xFFFFFFFF                 Reserved
 ================== ========== ========== =============== ===============
 
-
 Embedded Memory
 ---------------
 

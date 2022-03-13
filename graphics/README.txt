@@ -35,7 +35,6 @@ at the present, but here is the longer term roadmap:
               an NX window.  This character device can be used to provide stdout
               and stderr and, hence, can provide the output side of NuttX console.
 
-
 Related Header Files
 ^^^^^^^^^^^^^^^^^^^^
 

@@ -247,6 +247,84 @@ struct openloop_data_b16_s
   b16_t per;           /* Open-loop control execution period */
 };
 
+/* Common motor speed observer structure */
+
+struct motor_sobserver_b16_s
+{
+  b16_t speed;             /* Estimated observer speed */
+  b16_t per;               /* Observer execution period */
+
+  /* There are different types of motor observers which different
+   * sets of private data.
+   */
+
+  void *so;                  /* Speed estimation observer data */
+};
+
+/* Common motor angle observer structure */
+
+struct motor_aobserver_b16_s
+{
+  b16_t angle;             /* Estimated observer angle */
+  b16_t per;               /* Observer execution period */
+
+  /* There are different types of motor observers which different
+   * sets of private data.
+   */
+
+  void *ao;                  /* Angle estimation observer data */
+};
+
+/* Speed observer division method data */
+
+struct motor_sobserver_div_b16_s
+{
+  b16_t angle_diff;           /* Angle difference */
+  b16_t angle_acc;            /* Accumulated angle */
+  b16_t angle_prev;           /* Previous angle */
+  b16_t one_by_dt;            /* Frequency of observer execution */
+  b16_t cntr;                 /* Sample counter */
+  b16_t samples;              /* Number of samples for observer */
+  b16_t filter;               /* Low-pass filter for final omega */
+};
+
+/* Speed observer PLL method data */
+
+struct motor_sobserver_pll_b16_s
+{
+  b16_t pll_phase;
+  b16_t pll_kp;
+  b16_t pll_ki;
+};
+
+/* Motor Sliding Mode Observer private data */
+
+struct motor_aobserver_smo_b16_s
+{
+  b16_t k_slide;        /* Bang-bang controller gain */
+  b16_t err_max;        /* Linear mode threshold */
+  b16_t one_by_err_max; /* One by err_max */
+  b16_t F;              /* Current observer F gain (1-Ts*R/L) */
+  b16_t G;              /* Current observer G gain (Ts/L) */
+  b16_t emf_lp_filter1; /* Adaptive first low pass EMF filter */
+  b16_t emf_lp_filter2; /* Adaptive second low pass EMF filter */
+  ab_frame_b16_t emf;   /* Estimated back-EMF */
+  ab_frame_b16_t emf_f; /* Fitlered estimated back-EMF */
+  ab_frame_b16_t z;     /* Correction factor */
+  ab_frame_b16_t i_est; /* Estimated idq current */
+  ab_frame_b16_t v_err; /* v_err = v_ab - emf */
+  ab_frame_b16_t i_err; /* i_err = i_est - i_dq */
+  ab_frame_b16_t sign;  /* Bang-bang controller sign */
+};
+
+/* Motor Nonlinear FluxLink Observer private data */
+
+struct motor_aobserver_nfo_b16_s
+{
+  b16_t x1;
+  b16_t x2;
+};
+
 /* FOC initialize data */
 
 struct foc_initdata_b16_s
@@ -294,11 +372,11 @@ struct foc_data_b16_s
 struct motor_phy_params_b16_s
 {
   uint8_t p;                   /* Number of the motor pole pairs */
-  b16_t   res;                 /* Phase-to-neutral temperature compensated
-                                * resistance
-                                */
+  b16_t   flux_link;           /* Flux linkage */
+  b16_t   res;                 /* Average phase-to-neutral resistance */
   b16_t   ind;                 /* Average phase-to-neutral inductance */
   b16_t   one_by_ind;          /* Inverse phase-to-neutral inductance */
+  b16_t   one_by_p;            /* Inverse number of motor pole pairs */
 };
 
 /* PMSM motor physcial parameters */
@@ -307,7 +385,6 @@ struct pmsm_phy_params_b16_s
 {
   struct motor_phy_params_b16_s motor;       /* Motor common PHY */
   b16_t                         iner;        /* Rotor inertia */
-  b16_t                         flux_link;   /* Flux linkage */
   b16_t                         ind_d;       /* d-inductance */
   b16_t                         ind_q;       /* q-inductance */
   b16_t                         one_by_iner; /* One by J */
@@ -446,6 +523,40 @@ void foc_vabmod_get_b16(FAR struct foc_data_b16_s *foc,
                         FAR ab_frame_b16_t *v_ab_mod);
 void foc_vdq_mag_max_get_b16(FAR struct foc_data_b16_s *foc, FAR b16_t *max);
 
+/* BLDC/PMSM motor observers */
+
+void motor_sobserver_init_b16(FAR struct motor_sobserver_b16_s *observer,
+                              FAR void *so, b16_t per);
+void motor_aobserver_init_b16(FAR struct motor_aobserver_b16_s *observer,
+                              FAR void *ao, b16_t per);
+b16_t motor_sobserver_speed_get_b16(FAR struct motor_sobserver_b16_s *o);
+b16_t motor_aobserver_angle_get_b16(FAR struct motor_aobserver_b16_s *o);
+
+void motor_aobserver_smo_init_b16(FAR struct motor_aobserver_smo_b16_s *smo,
+                                  b16_t kslide, b16_t err_max);
+void motor_aobserver_smo_b16(FAR struct motor_aobserver_b16_s *o,
+                             FAR ab_frame_b16_t *i_ab,
+                             FAR ab_frame_b16_t *v_ab,
+                             FAR struct motor_phy_params_b16_s *phy,
+                             b16_t dir, b16_t speed);
+
+void motor_sobserver_div_init_b16(FAR struct motor_sobserver_div_b16_s *so,
+                                  uint8_t samples, b16_t filer, b16_t per);
+void motor_sobserver_div_b16(FAR struct motor_sobserver_b16_s *o,
+                             b16_t angle);
+
+void motor_aobserver_nfo_init_b16(FAR struct motor_aobserver_nfo_b16_s *nfo);
+void motor_aobserver_nfo_b16(FAR struct motor_aobserver_b16_s *o,
+                             FAR ab_frame_b16_t *i_ab,
+                             FAR ab_frame_b16_t *v_ab,
+                             FAR struct motor_phy_params_b16_s *phy,
+                             b16_t gain);
+
+void motor_sobserver_pll_init_b16(FAR struct motor_sobserver_pll_b16_s *so,
+                                  b16_t pll_kp, b16_t pll_ki);
+void motor_sobserver_pll_b16(FAR struct motor_sobserver_b16_s *o,
+                             b16_t angle);
+
 /* Motor openloop control */
 
 void motor_openloop_init_b16(FAR struct openloop_data_b16_s *op, b16_t per);
@@ -466,7 +577,8 @@ b16_t motor_angle_e_get_b16(FAR struct motor_angle_b16_s *angle);
 /* Motor physical parameters */
 
 void motor_phy_params_init_b16(FAR struct motor_phy_params_b16_s *phy,
-                               uint8_t poles, b16_t res, b16_t ind);
+                               uint8_t poles, b16_t res, b16_t ind,
+                               b16_t fluxlink);
 
 /* PMSM physical parameters functions */
 

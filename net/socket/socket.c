@@ -87,17 +87,7 @@ int psock_socket(int domain, int type, int protocol,
   psock->s_domain = domain;
   psock->s_proto  = protocol;
   psock->s_conn   = NULL;
-#if defined(CONFIG_NET_TCP_WRITE_BUFFERS) || defined(CONFIG_NET_UDP_WRITE_BUFFERS)
-  psock->s_sndcb  = NULL;
-#endif
-
-  if (type & SOCK_NONBLOCK)
-    {
-      psock->s_flags |= _SF_NONBLOCK;
-    }
-
-  type            &= SOCK_TYPE_MASK;
-  psock->s_type   = type;
+  psock->s_type   = type & SOCK_TYPE_MASK;
 
 #ifdef CONFIG_NET_USRSOCK
   if (domain != PF_LOCAL && domain != PF_UNSPEC && domain != PF_RPMSG)
@@ -114,7 +104,7 @@ int psock_socket(int domain, int type, int protocol,
     {
       /* Get the socket interface */
 
-      sockif = net_sockif(domain, type, protocol);
+      sockif = net_sockif(domain, psock->s_type, protocol);
       if (sockif == NULL)
         {
           nerr("ERROR: socket address family unsupported: %d\n", domain);
@@ -129,16 +119,26 @@ int psock_socket(int domain, int type, int protocol,
       psock->s_sockif = sockif;
 
       ret = sockif->si_setup(psock, protocol);
-      if (ret < 0)
-        {
-          nerr("ERROR: socket si_setup() failed: %d\n", ret);
-          return ret;
-        }
     }
 
-  /* The socket has been successfully initialized */
+  if (ret >= 0)
+    {
+      FAR struct socket_conn_s *conn = psock->s_conn;
 
-  psock->s_flags |= _SF_INITD;
+      if (type & SOCK_NONBLOCK)
+        {
+          conn->s_flags |= _SF_NONBLOCK;
+        }
+
+      /* The socket has been successfully initialized */
+
+      conn->s_flags |= _SF_INITD;
+    }
+  else
+    {
+      nerr("ERROR: socket si_setup() failed: %d\n", ret);
+    }
+
   return ret;
 }
 

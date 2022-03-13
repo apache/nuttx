@@ -95,9 +95,10 @@
 #  define _SO_SETERRNO(s,e) \
     do \
       { \
-        if (s != NULL) \
+        if (s != NULL && (s)->s_conn != NULL) \
           { \
-            s->s_error = (int16_t)e; \
+            FAR struct socket_conn_s *_conn = (s)->s_conn; \
+            _conn->s_error = (int16_t)e; \
           } \
         set_errno(e); \
       } \

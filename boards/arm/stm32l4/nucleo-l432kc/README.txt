@@ -399,7 +399,6 @@ SPI Flash support:
   File Systems  --->
       [*] NXFFS file system
 
-
   Then after compiling and flashing the file nuttx.bin you can test the flash
   this way:
 

@@ -57,8 +57,8 @@
 #define GTM_CTRL               (MPCORE_GTM_VBASE+GTM_CTRL_OFFSET)
 #define GTM_STA                (MPCORE_GTM_VBASE+GTM_STA_OFFSET)
 #define GTM_COMP0              (MPCORE_GTM_VBASE+GTM_COMP0_OFFSET)
-#define GTM_COMP1              (MPCORE_GTM_VBASE+COMPARE1_OFFSET)
-#define GTM_AUTO               (MPCORE_GTM_VBASE+AUTO_OFFSET)
+#define GTM_COMP1              (MPCORE_GTM_VBASE+GTM_COMP1_OFFSET)
+#define GTM_AUTO               (MPCORE_GTM_VBASE+GTM_AUTO_OFFSET)
 
 /* GTM Register Bit Definitions *********************************************/
 

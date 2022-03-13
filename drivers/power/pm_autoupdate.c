@@ -72,12 +72,14 @@ void pm_auto_updatestate(int domain)
 
   if (pdom->auto_update)
     {
+#if defined(CONFIG_SCHED_WORKQUEUE)
       if (up_interrupt_context())
         {
           work_queue(HPWORK, &pdom->update_work,
                      pm_auto_updatestate_cb, (FAR void *)domain, 0);
         }
       else
+#endif
         {
           pm_auto_updatestate_cb((FAR void *)domain);
         }

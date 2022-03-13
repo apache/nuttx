@@ -38,30 +38,6 @@
 #include "up_internal.h"
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* sparc requires at least a 4-byte stack alignment.  For floating point use,
- * however, the stack must be aligned to 8-byte addresses.
- */
-
-#define STACK_ALIGNMENT   8
-
-/* Stack alignment macros */
-
-#define STACK_ALIGN_MASK    (STACK_ALIGNMENT-1)
-#define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
-#define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
-
-/****************************************************************************
- * Private Types
- ****************************************************************************/
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -77,7 +53,7 @@
  *   - adj_stack_size: Stack size after adjustment for hardware, processor,
  *     etc.  This value is retained only for debug purposes.
  *   - stack_alloc_ptr: Pointer to allocated stack
- *   - adj_stack_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
+ *   - stack_base_ptr: Adjusted stack_alloc_ptr for HW.  The initial value of
  *     the stack pointer.
  *
  * Input Parameters:
@@ -129,14 +105,14 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 
       if (ttype == TCB_FLAG_TTYPE_KERNEL)
         {
-          tcb->stack_alloc_ptr = (uint32_t *)kmm_malloc(stack_size);
+          tcb->stack_alloc_ptr = kmm_malloc(stack_size);
         }
       else
 #endif
         {
           /* Use the user-space allocator if this is a task or pthread */
 
-          tcb->stack_alloc_ptr = (uint32_t *)kumm_malloc(stack_size);
+          tcb->stack_alloc_ptr = kumm_malloc(stack_size);
         }
 
 #ifdef CONFIG_DEBUG_FEATURES
@@ -156,22 +132,13 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
       size_t top_of_stack;
       size_t size_of_stack;
 
-      /* Yes.. If stack debug is enabled, then fill the stack with a
-       * recognizable value that we can use later to test for high
-       * water marks.
-       */
-
-#ifdef CONFIG_STACK_COLORATION
-      memset(tcb->stack_alloc_ptr, 0xaa, stack_size);
-#endif
-
       /* sparc uses a push-down stack:  the stack grows toward lower
        * addresses in memory.  The stack pointer register points to the
        * lowest, valid working address (the "top" of the stack).  Items on
        * the stack are referenced as positive word offsets from sp.
        */
 
-      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size - 4;
+      top_of_stack = (uint32_t)tcb->stack_alloc_ptr + stack_size;
 
       /* The sparc stack must be aligned at word (8 byte) boundaries; for
        * floating point use, the stack must be aligned to 8-byte addresses.
@@ -187,12 +154,21 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
        * The size need not be aligned.
        */
 
-      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr + 4;
+      size_of_stack = top_of_stack - (uint32_t)tcb->stack_alloc_ptr;
 
       /* Save the adjusted stack values in the struct tcb_s */
 
       tcb->stack_base_ptr = tcb->stack_alloc_ptr;
       tcb->adj_stack_size = size_of_stack;
+
+#ifdef CONFIG_STACK_COLORATION
+      /* If stack debug is enabled, then fill the stack with a
+       * recognizable value that we can use later to test for high
+       * water marks.
+       */
+
+      up_stack_color(tcb->stack_base_ptr, tcb->adj_stack_size);
+#endif /* CONFIG_STACK_COLORATION */
       tcb->flags |= TCB_FLAG_FREE_STACK;
 
       board_autoled_on(LED_STACKCREATED);

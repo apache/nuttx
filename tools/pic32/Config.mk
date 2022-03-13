@@ -24,7 +24,6 @@
 
 # POSTBUILD -- Perform post build operations
 
-
 ifeq ($(CONFIG_INTELHEX_BINARY),y)
 
 define POSTBUILD

@@ -32,7 +32,7 @@ endif
 ARCHCPUFLAGS = -m1 -fno-builtin
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
-ARCHSCRIPT = -T$(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld
+ARCHSCRIPT += $(BOARD_DIR)$(DELIM)scripts$(DELIM)sdram.ld
 
 CROSSDEV = sh-nuttx-elf-
 CC = $(CROSSDEV)gcc

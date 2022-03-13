@@ -45,8 +45,8 @@
 
 struct tcp_close_s
 {
+  FAR struct tcp_conn_s       *cl_conn;   /* Needed to handle loss of connection */
   FAR struct devif_callback_s *cl_cb;     /* Reference to TCP callback instance */
-  FAR struct socket           *cl_psock;  /* Reference to the TCP socket */
   sem_t                        cl_sem;    /* Signals disconnect completion */
   int                          cl_result; /* The result of the close */
 };
@@ -64,7 +64,7 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
                                        uint16_t flags)
 {
   FAR struct tcp_close_s *pstate = (FAR struct tcp_close_s *)pvpriv;
-  FAR struct tcp_conn_s *conn = (FAR struct tcp_conn_s *)pvconn;
+  FAR struct tcp_conn_s *conn = pstate->cl_conn;
 
   DEBUGASSERT(pstate != NULL);
 
@@ -161,18 +161,16 @@ static uint16_t tcp_close_eventhandler(FAR struct net_driver_s *dev,
        */
 
 #ifdef CONFIG_NET_TCP_WRITE_BUFFERS
-      FAR struct socket *psock = pstate->cl_psock;
-
       /* We don't need the send callback anymore. */
 
-      if (psock->s_sndcb != NULL)
+      if (conn->sndcb != NULL)
         {
-          psock->s_sndcb->flags = 0;
-          psock->s_sndcb->event = NULL;
+          conn->sndcb->flags = 0;
+          conn->sndcb->event = NULL;
 
           /* The callback will be freed by tcp_free. */
 
-          psock->s_sndcb = NULL;
+          conn->sndcb = NULL;
         }
 #endif
 
@@ -283,11 +281,11 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
    *   state of the option and linger interval.
    */
 
-  if (_SO_GETOPT(psock->s_options, SO_LINGER))
+  if (_SO_GETOPT(conn->sconn.s_options, SO_LINGER))
     {
       /* Wait until for the buffered TX data to be sent. */
 
-      ret = tcp_txdrain(psock, _SO_TIMEOUT(psock->s_linger));
+      ret = tcp_txdrain(psock, _SO_TIMEOUT(conn->sconn.s_linger));
       if (ret < 0)
         {
           /* tcp_txdrain may fail, but that won't stop us from closing
@@ -324,7 +322,7 @@ static inline int tcp_close_disconnect(FAR struct socket *psock)
 
       /* Set up for the lingering wait */
 
-      state.cl_psock     = psock;
+      state.cl_conn      = conn;
       state.cl_result    = -EBUSY;
 
       /* This semaphore is used for signaling and, hence, should not have

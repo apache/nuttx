@@ -1472,7 +1472,7 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TCGETS:
       {
         struct termios  *termiosp = (struct termios *)arg;
-        struct esp32_dev_s *priv    = (struct esp32_dev_s *)dev->priv;
+        struct esp32_dev_s *priv  = (struct esp32_dev_s *)dev->priv;
 
         if (!termiosp)
           {
@@ -1532,7 +1532,7 @@ static int esp32_ioctl(struct file *filep, int cmd, unsigned long arg)
     case TCSETS:
       {
         struct termios  *termiosp = (struct termios *)arg;
-        struct esp32_dev_s *priv    = (struct esp32_dev_s *)dev->priv;
+        struct esp32_dev_s *priv  = (struct esp32_dev_s *)dev->priv;
         uint32_t baud;
         uint32_t intena;
         uint8_t parity;
