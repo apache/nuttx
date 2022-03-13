@@ -381,6 +381,24 @@ function rust {
   fi
 }
 
+function zig {
+  mkdir -p "${prebuilt}"/zig
+  add_path "${prebuilt}"/zig
+
+  if ! type zig &> /dev/null; then
+    case ${os} in
+      Darwin)
+        brew install zig
+        ;;
+      Linux)
+        # Currently Debian don't install zig (only built)
+        export ZIG_HOME=${prebuilt}/zig
+        curl -sL https://ziglang.org/download/0.9.1/zig-linux-x86_64-0.9.1.tar.xz | tar -xJC "${prebuilt}"/zig --strip-components=1
+	;;
+    esac
+  fi
+}
+
 function usage {
   echo ""
   echo "USAGE: $0 [-i] [-s] [-c] [-*] <testlist>"
