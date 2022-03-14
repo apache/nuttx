@@ -89,15 +89,11 @@ EXTERN const uintptr_t g_stublookup[SYS_nsyscalls];
 
 #endif
 
-#ifdef CONFIG_SCHED_INSTRUMENTATION_SYSCALL
-
 /* Given the system call number, the corresponding entry in this table
  * provides the name of the function.
  */
 
 EXTERN const char *g_funcnames[SYS_nsyscalls];
-
-#endif
 
 /****************************************************************************
  * Public Function Prototypes
