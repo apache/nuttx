@@ -45,23 +45,13 @@
 
 #define SYS_syscall 0x00
 
-/* The SYS_signal_handler_return is executed here... its value is not always
- * available in this context and so is assumed to be 7.
- */
-
-#ifndef SYS_signal_handler_return
-#  define SYS_signal_handler_return (7)
-#elif SYS_signal_handler_return != 7
-#  error "SYS_signal_handler_return was assumed to be 7"
-#endif
-
 /* This logic uses three system calls {0,1,2} for context switching and one
  * for the syscall return.  So a minimum of four syscall values must be
- * reserved.  If CONFIG_BUILD_PROTECTED is defined, then four more syscall
+ * reserved.  If CONFIG_BUILD_FLAT isn't defined, then four more syscall
  * values must be reserved.
  */
 
-#ifdef CONFIG_BUILD_PROTECTED
+#ifndef CONFIG_BUILD_FLAT
 #  define CONFIG_SYS_RESERVED 8
 #else
 #  define CONFIG_SYS_RESERVED 4
