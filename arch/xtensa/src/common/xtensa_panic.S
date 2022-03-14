@@ -128,6 +128,13 @@ _xtensa_panic:
 
 	call0	_xtensa_context_save			/* Save full register state */
 
+	/* Save exception cause and vaddr into the user frame */
+
+	rsr		a0, EXCCAUSE
+	s32i	a0, sp, (4 * REG_EXCCAUSE)
+	rsr		a0, EXCVADDR
+	s32i	a0, sp, (4 * REG_EXCVADDR)
+
 	/* Dispatch the sycall as with other interrupts. */
 
 	mov		a12, sp							/* a12 = address of register save area */
@@ -137,13 +144,6 @@ _xtensa_panic:
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 	setintstack a13 a14
 #endif
-
-	/* Save exc cause and vaddr into exception frame */
-
-	rsr		a0, EXCCAUSE
-	s32i	a0, sp, (4 * REG_EXCCAUSE)
-	rsr		a0, EXCVADDR
-	s32i	a0, sp, (4 * REG_EXCVADDR)
 
 	/* Set up PS for C, re-enable hi-pri interrupts, and clear EXCM. */
 
