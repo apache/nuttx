@@ -42,6 +42,32 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: dump_syscall
+ *
+ * Description:
+ *   Dump the syscall registers
+ *
+ ****************************************************************************/
+
+static void dump_syscall(const char *tag, uint32_t cmd, const uint32_t *regs)
+{
+  /* The SVCall software interrupt is called with R0 = system call command
+   * and R1..R7 =  variable number of arguments depending on the system call.
+   */
+
+  svcinfo("SYSCALL %s: regs: %p cmd: %" PRId32 "\n", tag, regs, cmd);
+  svcinfo("  R0: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
+          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
+          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
+  svcinfo("  R8: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
+          " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
+          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
+          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
+  svcinfo("CPSR: %08" PRIx32 "\n", regs[REG_CPSR]);
+}
+
+/****************************************************************************
  * Name: dispatch_syscall
  *
  * Description:
@@ -101,10 +127,6 @@ static void dispatch_syscall(void)
 #endif
 
 /****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -139,14 +161,7 @@ uint32_t *arm_syscall(uint32_t *regs)
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-  svcinfo("SYSCALL Entry: regs: %p cmd: %d\n", regs, cmd);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
+  dump_syscall("Entry", cmd, regs);
 
   /* Handle the SVCall according to the command in R0 */
 
@@ -507,14 +522,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
   /* Report what happened */
 
-  svcinfo("SYSCALL Exit: regs: %p\n", regs);
-  svcinfo("  R0: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
-          regs[REG_R4],  regs[REG_R5],  regs[REG_R6],  regs[REG_R7]);
-  svcinfo("  R8: %08x %08x %08x %08x %08x %08x %08x %08x\n",
-          regs[REG_R8],  regs[REG_R9],  regs[REG_R10], regs[REG_R11],
-          regs[REG_R12], regs[REG_R13], regs[REG_R14], regs[REG_R15]);
-  svcinfo("CPSR: %08x\n", regs[REG_CPSR]);
+  dump_syscall("Exit", cmd, regs);
 
   /* Return the last value of curent_regs.  This supports context switches
    * on return from the exception.  That capability is only used with the
