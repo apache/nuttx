@@ -89,7 +89,7 @@ void up_irqinitialize(void)
 
   /* And finally, enable interrupts */
 
-  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SYS | PSR_F_BIT);
 #endif
 }
 

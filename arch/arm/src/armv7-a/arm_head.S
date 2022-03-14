@@ -172,9 +172,9 @@
 	.type	__start, #function
 
 __start:
-	/* Make sure that we are in SVC mode with IRQs and FIQs disabled */
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
 
-	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, r0
 
 	/* The MMU and caches should be disabled */
