@@ -49,8 +49,10 @@
  * must, therefore, be reserved (0 is not used).
  */
 
-#ifdef CONFIG_BUILD_KERNEL
+#ifndef CONFIG_BUILD_FLAT
 #  define CONFIG_SYS_RESERVED 4
+#else
+#  define CONFIG_SYS_RESERVED 3
 #endif
 
 /* sys_call macros **********************************************************/
@@ -112,7 +114,7 @@
 
 /* System call SYS_ argument and six additional parameters. */
 
-#define sys_call5(nbr,parm1,parm2,parm3,parm4,parm5,parm6) __extension__({ \
+#define sys_call6(nbr,parm1,parm2,parm3,parm4,parm5,parm6) __extension__({ \
   uintptr_t __result; \
   __asm__ __volatile__ (\
     "\tmove	$4, %0\n" \
