@@ -288,23 +288,6 @@ uint16_t sam_tc_getcounter(TC_HANDLE handle);
 void sam_tc_setblockmode(TC_HANDLE handle, uint32_t regval);
 
 /****************************************************************************
- * Name: sam_tc_infreq
- *
- * Description:
- *   Return the timer input frequency, that is, the MCK frequency divided
- *   down so that the timer/counter is driven within its maximum frequency.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *  The timer input frequency.
- *
- ****************************************************************************/
-
-uint32_t sam_tc_infreq(void);
-
-/****************************************************************************
  * Name: sam_tc_divfreq
  *
  * Description:

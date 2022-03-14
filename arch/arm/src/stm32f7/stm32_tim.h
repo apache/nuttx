@@ -137,7 +137,7 @@ typedef enum
 
   STM32_TIM_CH_INCAPTURE      = 0x10,
   STM32_TIM_CH_INPWM          = 0x20
-  STM32_TIM_CH_DRIVE_OC -- open collector mode
+  STM32_TIM_CH_DRIVE_OC /* -- open collector mode */
 #endif
 } stm32_tim_channel_t;
 
@@ -196,15 +196,14 @@ int stm32_tim_deinit(FAR struct stm32_tim_dev_s *dev);
  *             form /dev/timer0
  *   timer   - the timer number.
  *
- * Returned Value:
+ * Returned Values:
  *   Zero (OK) is returned on success; A negated errno value is returned
  *   to indicate the nature of any failure.
  *
  ****************************************************************************/
 
 #ifdef CONFIG_TIMER
-FAR struct timer_lowerhalf_s *stm32_timer_initialize(FAR const char *devpath,
-                                                     int timer);
+int stm32_timer_initialize(FAR const char *devpath, int timer);
 #endif
 
 #undef EXTERN
