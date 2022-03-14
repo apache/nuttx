@@ -419,7 +419,7 @@ uint32_t *arm_syscall(uint32_t *regs)
 
           regs[REG_PC]         = rtcb->xcp.sigreturn;
           cpsr                 = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR]       = cpsr | PSR_MODE_SVC;
+          regs[REG_CPSR]       = cpsr | PSR_MODE_SYS;
           rtcb->xcp.sigreturn  = 0;
 
 #ifdef CONFIG_ARCH_KERNEL_STACK
@@ -472,7 +472,7 @@ uint32_t *arm_syscall(uint32_t *regs)
           regs[REG_PC]   = (uint32_t)dispatch_syscall;
 #ifdef CONFIG_BUILD_PROTECTED
           cpsr           = regs[REG_CPSR] & ~PSR_MODE_MASK;
-          regs[REG_CPSR] = cpsr | PSR_MODE_SVC;
+          regs[REG_CPSR] = cpsr | PSR_MODE_SYS;
 #endif
           /* Offset R0 to account for the reserved values */
 
