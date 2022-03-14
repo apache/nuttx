@@ -27,7 +27,6 @@
 
 #include <nuttx/config.h>
 
-#include "bl602_tim_lowerhalf.h"
 #include "bl602_tim.h"
 
 /****************************************************************************
