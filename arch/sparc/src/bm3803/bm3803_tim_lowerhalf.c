@@ -291,7 +291,7 @@ static int bm3803_getstatus(FAR struct timer_lowerhalf_s *lower,
 
   /* Get the time remaining until the timer expires (in microseconds) */
 
-  clock_factor     = (clock == 1000000)? 1: (clock / 1000000);
+  clock_factor     = (clock == 1000000) ? 1 : (clock / 1000000);
   status->timeleft = (timeout - BM3803_TIM_GETCOUNTER(priv->tim)) *
                      clock_factor;
   return OK;

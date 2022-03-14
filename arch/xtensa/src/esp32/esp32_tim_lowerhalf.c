@@ -97,8 +97,8 @@ static const struct timer_ops_s g_esp32_timer_ops =
   .getstatus   = esp32_timer_getstatus,
   .settimeout  = esp32_timer_settimeout,
   .setcallback = esp32_timer_setcallback,
-  .maxtimeout  = esp32_timer_maxtimeout,
   .ioctl       = NULL,
+  .maxtimeout  = esp32_timer_maxtimeout
 };
 
 #ifdef CONFIG_ESP32_TIMER0
@@ -477,7 +477,7 @@ static void esp32_timer_setcallback(struct timer_lowerhalf_s *lower,
 
   /* There is a user callback and the timer has already been started */
 
-  if (callback != NULL && priv->started == true)
+  if (callback != NULL && priv->started)
     {
       ret = ESP32_TIM_SETISR(priv->tim, esp32_timer_handler, priv);
       ESP32_TIM_ENABLEINT(priv->tim);
