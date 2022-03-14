@@ -237,6 +237,19 @@ void riscv_serialinit(void);
 void riscv_earlyserialinit(void);
 #endif
 
+/* Networking ***************************************************************/
+
+/* Defined in board/xyz_network.c for board-specific Ethernet
+ * implementations, or chip/xyx_ethernet.c for chip-specific Ethernet
+ * implementations.
+ */
+
+#if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)
+void riscv_netinitialize(void);
+#else
+# define riscv_netinitialize()
+#endif
+
 /* Exception Handler ********************************************************/
 
 void riscv_fault(int irq, uintptr_t *regs);
