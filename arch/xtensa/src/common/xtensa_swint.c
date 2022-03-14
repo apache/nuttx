@@ -167,6 +167,23 @@ int xtensa_swint(int irq, void *context, void *arg)
         }
 
         break;
+
+      /* A2=SYS_flush_context:  This flush windows to the stack:
+       *
+       * int xtensa_flushcontext(void);
+       *
+       * At this point, the following values are saved in context:
+       *
+       *   A2 = SYS_flush_context
+       *
+       * In this case, we simply need to do nothing.
+       * As flush the register windows to the stack has be done by
+       * interrupt enter handler.
+       */
+
+      case SYS_flush_context:
+
+        break;
     }
 
   if ((CURRENT_REGS[REG_PS] & PS_EXCM_MASK) != 0)
