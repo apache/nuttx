@@ -56,9 +56,10 @@
 #define RPTUNIOC_NONE               0
 #define NO_HOLDER                   (INVALID_PROCESS_ID)
 
-#define RPTUN_STATUS_FROM_MASTER    0x8
-#define RPTUN_STATUS_MASK           0x7
-#define RPTUN_STATUS_PANIC          0x7
+#define RPTUN_OPS_START             0
+#define RPTUN_OPS_DUMP              1
+#define RPTUN_OPS_RESET             2
+#define RPTUN_OPS_PANIC             3
 
 /****************************************************************************
  * Private Types
@@ -78,7 +79,7 @@ struct rptun_priv_s
 #ifdef CONFIG_RPTUN_WORKQUEUE
   struct work_s                work;
 #else
-  int                          tid;
+  pid_t                        tid;
 #endif
 #ifdef CONFIG_RPTUN_PM
   bool                         stay;
@@ -136,7 +137,6 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
 
 static int rptun_dev_start(FAR struct remoteproc *rproc);
 static int rptun_dev_stop(FAR struct remoteproc *rproc);
-static int rptun_dev_reset(FAR struct remoteproc *rproc, int value);
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
 
@@ -155,6 +155,7 @@ static metal_phys_addr_t rptun_pa_to_da(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t pa);
 static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
                                         metal_phys_addr_t da);
+static int rptun_ops_foreach(FAR const char *cpuname, int ops, int value);
 
 /****************************************************************************
  * Private Data
@@ -333,10 +334,7 @@ static void rptun_wakeup(FAR struct rptun_priv_s *priv)
 
 static void rptun_in_recursive(int tid, FAR void *arg)
 {
-  if (gettid() == tid)
-    {
-      *((FAR bool *)arg) = true;
-    }
+  *((FAR bool *)arg) = (gettid() == tid);
 }
 
 static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
@@ -376,28 +374,7 @@ static bool rptun_is_recursive(FAR struct rptun_priv_s *priv)
 
 static int rptun_callback(FAR void *arg, uint32_t vqid)
 {
-  FAR struct rptun_priv_s *priv = arg;
-
-  int status = rpmsg_virtio_get_status(&priv->rvdev);
-
-  if ((status & VIRTIO_CONFIG_STATUS_NEEDS_RESET)
-      && (RPTUN_IS_MASTER(priv->dev) ^
-          !!(status & RPTUN_STATUS_FROM_MASTER)))
-    {
-      status &= RPTUN_STATUS_MASK;
-      if (status == RPTUN_STATUS_PANIC)
-        {
-          PANIC();
-        }
-      else
-        {
-#ifdef CONFIG_BOARDCTL_RESET
-          board_reset(status);
-#endif
-        }
-    }
-
-  rptun_wakeup(priv);
+  rptun_wakeup(arg);
   return OK;
 }
 
@@ -465,7 +442,6 @@ static int rptun_notify(FAR struct remoteproc *rproc, uint32_t id)
     }
 
   RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
-
   return 0;
 }
 
@@ -842,18 +818,6 @@ static int rptun_dev_stop(FAR struct remoteproc *rproc)
   return 0;
 }
 
-static int rptun_dev_reset(FAR struct remoteproc *rproc, int value)
-{
-  FAR struct rptun_priv_s *priv = rproc->priv;
-
-  value = (value & RPTUN_STATUS_MASK) | VIRTIO_CONFIG_STATUS_NEEDS_RESET
-          | (RPTUN_IS_MASTER(priv->dev) ? RPTUN_STATUS_FROM_MASTER : 0);
-
-  rpmsg_virtio_set_status(&priv->rvdev, value);
-
-  return RPTUN_NOTIFY(priv->dev, RPTUN_NOTIFY_ALL);
-}
-
 static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg)
 {
@@ -869,10 +833,10 @@ static int rptun_dev_ioctl(FAR struct file *filep, int cmd,
         rptun_wakeup(priv);
         break;
       case RPTUNIOC_RESET:
-        rptun_dev_reset(&priv->rproc, arg);
+        RPTUN_RESET(priv->dev, arg);
         break;
       case RPTUNIOC_PANIC:
-        rptun_dev_reset(&priv->rproc, RPTUN_STATUS_PANIC);
+        RPTUN_PANIC(priv->dev);
         break;
       case RPTUNIOC_DUMP:
         rptun_dump(&priv->rvdev);
@@ -1003,6 +967,42 @@ static metal_phys_addr_t rptun_da_to_pa(FAR struct rptun_dev_s *dev,
     }
 
   return da;
+}
+
+static int rptun_ops_foreach(FAR const char *cpuname, int ops, int value)
+{
+  FAR struct metal_list *node;
+
+  metal_list_for_each(&g_rptun_priv, node)
+    {
+      FAR struct rptun_priv_s *priv;
+
+      priv = metal_container_of(node, struct rptun_priv_s, node);
+
+      if (!cpuname || !strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
+        {
+          switch (ops)
+            {
+              case RPTUN_OPS_START:
+                priv->cmd = RPTUNIOC_START;
+                rptun_wakeup(priv);
+                break;
+              case RPTUN_OPS_DUMP:
+                rptun_dump(&priv->rvdev);
+                break;
+              case RPTUN_OPS_RESET:
+                RPTUN_RESET(priv->dev, value);
+                break;
+              case RPTUN_OPS_PANIC:
+                RPTUN_PANIC(priv->dev);
+                break;
+              default:
+                return -ENOTTY;
+            }
+        }
+    }
+
+  return 0;
 }
 
 /****************************************************************************
@@ -1247,55 +1247,17 @@ err_mem:
 
 int rptun_boot(FAR const char *cpuname)
 {
-  struct file file;
-  char name[32];
-  int ret;
-
-  if (!cpuname)
-    {
-      return -EINVAL;
-    }
-
-  snprintf(name, 32, "/dev/rptun/%s", cpuname);
-  ret = file_open(&file, name, 0, 0);
-  if (ret)
-    {
-      return ret;
-    }
-
-  ret = file_ioctl(&file, RPTUNIOC_START, 0);
-  file_close(&file);
-
-  return ret;
+  return rptun_ops_foreach(cpuname, RPTUN_OPS_START, 0);
 }
 
 int rptun_reset(FAR const char *cpuname, int value)
 {
-  FAR struct metal_list *node;
-
-  if (!cpuname)
-    {
-      return -EINVAL;
-    }
-
-  metal_list_for_each(&g_rptun_priv, node)
-    {
-      FAR struct rptun_priv_s *priv;
-
-      priv = metal_container_of(node, struct rptun_priv_s, node);
-
-      if (!strcmp(RPTUN_GET_CPUNAME(priv->dev), cpuname))
-        {
-          rptun_dev_reset(&priv->rproc, value);
-        }
-    }
-
-  return -ENOENT;
+  return rptun_ops_foreach(cpuname, RPTUN_OPS_RESET, value);
 }
 
 int rptun_panic(FAR const char *cpuname)
 {
-  return rptun_reset(cpuname, RPTUN_STATUS_PANIC);
+  return rptun_ops_foreach(cpuname, RPTUN_OPS_PANIC, 0);
 }
 
 int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
@@ -1315,13 +1277,5 @@ int rptun_buffer_nused(FAR struct rpmsg_virtio_device *rvdev, bool rx)
 
 void rptun_dump_all(void)
 {
-  FAR struct metal_list *node;
-
-  metal_list_for_each(&g_rptun_priv, node)
-    {
-      FAR struct rptun_priv_s *priv =
-          metal_container_of(node, struct rptun_priv_s, node);
-
-      rptun_dump(&priv->rvdev);
-    }
+  rptun_ops_foreach(NULL, RPTUN_OPS_DUMP, 0);
 }
