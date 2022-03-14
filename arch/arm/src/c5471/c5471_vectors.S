@@ -85,18 +85,18 @@ arm_vectorirq:
 	mrs	lr, spsr
 	str	lr, [r13, #4]		/* Save spsr_IRQ */
 
-	/* Then switch back to SVC mode */
+	/* Then switch back to SYS mode */
 
 	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	orr	lr, lr, #(PSR_MODE_SYS | PSR_I_BIT)
+	msr	cpsr_c, lr		/* Switch to SYS mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SYS mode regs */
 
 	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
 
@@ -153,9 +153,9 @@ arm_vectorirq:
 	bl	arm_doirq		/* Call the handler */
 #endif
 
-	/* Restore the CPSR, SVC mode registers and return */
+	/* Restore the CPSR, SYS mode registers and return */
 .Lnoirqset:
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SYS mode SPSR */
 	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
@@ -171,7 +171,7 @@ arm_vectorirq:
  * Function: arm_vectorsvc
  *
  * Description:
- *   SWI interrupt. We enter the SWI in SVC mode
+ *   SWI interrupt. We enter the SWI in SYS mode
  ****************************************************************************/
 
 	.globl	arm_vectorsvc
@@ -191,7 +191,7 @@ arm_vectorsvc:
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SYS mode regs */
 
 	/* Get the correct values of r13(sp), r14(lr), r15(pc)
 	 * and CPSR in r1-r4 */
@@ -212,9 +212,9 @@ arm_vectorsvc:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_syscall		/* Call the handler */
 
-	/* Restore the CPSR, SVC mode registers and return */
+	/* Restore the CPSR, SYS mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SYS mode SPSR */
 	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
@@ -243,18 +243,18 @@ arm_vectordata:
 	mrs	lr, spsr		/* Get SPSR */
 	str	lr, [r13, #4]		/* Save in temp storage */
 
-	/* Then switch back to SVC mode */
+	/* Then switch back to SYS mode */
 
 	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	orr	lr, lr, #(PSR_MODE_SYS | PSR_I_BIT)
+	msr	cpsr_c, lr		/* Switch to SYS mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SYS mode regs */
 
 	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
 
@@ -277,9 +277,9 @@ arm_vectordata:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_dataabort		/* Call the handler */
 
-	/* Restore the CPSR, SVC mode registers and return */
+	/* Restore the CPSR, SYS mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SYS mode SPSR */
 	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
@@ -309,18 +309,18 @@ arm_vectorprefetch:
 	mrs	lr, spsr		/* Get SPSR */
 	str	lr, [r13, #4]		/* Save in temp storage */
 
-	/* Then switch back to SVC mode */
+	/* Then switch back to SYS mode */
 
 	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	orr	lr, lr, #(PSR_MODE_SYS | PSR_I_BIT)
+	msr	cpsr_c, lr		/* Switch to SYS mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SYS mode regs */
 
 	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
 
@@ -343,9 +343,9 @@ arm_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_prefetchabort	/* Call the handler */
 
-	/* Restore the CPSR, SVC mode registers and return */
+	/* Restore the CPSR, SYS mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SYS mode SPSR */
 	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
@@ -375,18 +375,18 @@ arm_vectorundefinsn:
 	mrs	lr, spsr		/* Get SPSR */
 	str	lr, [r13, #4]		/* Save in temp storage */
 
-	/* Then switch back to SVC mode */
+	/* Then switch back to SYS mode */
 
 	bic	lr, lr, #PSR_MODE_MASK	/* Keep F and T bits */
-	orr	lr, lr, #(PSR_MODE_SVC | PSR_I_BIT)
-	msr	cpsr_c, lr		/* Switch to SVC mode */
+	orr	lr, lr, #(PSR_MODE_SYS | PSR_I_BIT)
+	msr	cpsr_c, lr		/* Switch to SYS mode */
 
 	/* Create a context structure.  First set aside a stack frame
 	 * and store r0-r12 into the frame.
 	 */
 
 	sub	sp, sp, #XCPTCONTEXT_SIZE
-	stmia	sp, {r0-r12}		/* Save the SVC mode regs */
+	stmia	sp, {r0-r12}		/* Save the SYS mode regs */
 
 	/* Get the correct values of r13(sp) and r14(lr) in r1 and r2 */
 
@@ -409,9 +409,9 @@ arm_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_undefinedinsn	/* Call the handler */
 
-	/* Restore the CPSR, SVC mode registers and return */
+	/* Restore the CPSR, SYS mode registers and return */
 
-	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SVC mode SPSR */
+	ldr	r0, [sp, #(4*REG_CPSR)]	/* Setup the SYS mode SPSR */
 	msr	spsr_cxsf, r0
 	ldmia	sp, {r0-r15}^		/* Return */
 
