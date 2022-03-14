@@ -105,7 +105,6 @@ static void touch_notify(FAR struct touch_openpriv_s *openpriv,
                          pollevent_t eventset)
 {
   FAR struct pollfd *fd = openpriv->fds;
-  int i;
 
   fd = openpriv->fds;
   if (fd)

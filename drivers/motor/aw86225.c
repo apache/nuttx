@@ -570,7 +570,7 @@ static int aw86225_haptic_stop(FAR struct aw86225_dev_s *priv)
 
   if ((val & AW86225_BIT_GLBRD_STATE_MASK) == AW86225_BIT_STATE_STANDBY)
     {
-      mtrinfo("already in standby!\n", val);
+      mtrinfo("already in standby!\n");
       return OK;
     }
 
@@ -906,7 +906,7 @@ static int aw86225_read_lra_f0(FAR struct aw86225_dev_s *priv)
 
   f0_tmp = AW86225_F0_FORMULA(f0_reg);
   priv->data.f0 = f0_tmp;
-  mtrinfo("lra_f0=%d\n", priv->data.f0);
+  mtrinfo("lra_f0=%" PRId32 "\n", priv->data.f0);
   return OK;
 }
 
@@ -1264,7 +1264,7 @@ static uint32_t aw86225_get_lra_resistance(FAR struct aw86225_dev_s *priv)
   aw86225_raminit(priv, false);
   aw86225_i2c_write_bits(priv, AW86225_REG_SYSCTRL7,
                          AW86225_BIT_SYSCTRL7_D2S_GAIN_MASK, d2s_gain_temp);
-  mtrinfo("lra resistance= %d mohm\n", lra);
+  mtrinfo("lra resistance= %" PRId32 " mohm\n", lra);
 
   return lra;
 }
