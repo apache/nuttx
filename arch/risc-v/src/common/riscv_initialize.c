@@ -105,5 +105,11 @@ void up_initialize(void)
   riscv_serialinit();
 #endif
 
+#ifdef CONFIG_NET
+  /* Initialize the network */
+
+  riscv_netinitialize();
+#endif
+
   board_autoled_on(LED_IRQSENABLED);
 }
