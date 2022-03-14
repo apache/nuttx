@@ -1427,6 +1427,34 @@ uint32_t sam_tc_getpending(TC_HANDLE handle)
 }
 
 /****************************************************************************
+ * Name: sam_tc_settcclks
+ *
+ * Description:
+ *   Set the value of TCCLKS clock selection in TC_CMR register
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *   tcclks  The clock selection value to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_settcclks(TC_HANDLE handle, uint32_t tcclks)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  uint32_t regval;
+
+  DEBUGASSERT(chan);
+
+  regval  = sam_chan_getreg(chan, SAM_TC_CMR_OFFSET);
+  regval &= ~TC_CMR_TCCLKS_MASK;
+  regval |= tcclks;
+  sam_chan_putreg(chan, SAM_TC_CMR_OFFSET, regval);
+}
+
+/****************************************************************************
  * Name: sam_tc_setregister
  *
  * Description:
