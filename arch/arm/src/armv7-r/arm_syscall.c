@@ -55,7 +55,18 @@ static void dump_syscall(const char *tag, uint32_t cmd, const uint32_t *regs)
    * and R1..R7 =  variable number of arguments depending on the system call.
    */
 
-  svcinfo("SYSCALL %s: regs: %p cmd: %" PRId32 "\n", tag, regs, cmd);
+#ifdef CONFIG_LIB_SYSCALL
+  if (cmd >= CONFIG_SYS_RESERVED)
+    {
+      svcinfo("SYSCALL %s: regs: %p cmd: %" PRId32 " name: %s\n", tag,
+              regs, cmd, g_funcnames[cmd - CONFIG_SYS_RESERVED]);
+    }
+  else
+#endif
+    {
+      svcinfo("SYSCALL %s: regs: %p cmd: %" PRId32 "\n", tag, regs, cmd);
+    }
+
   svcinfo("  R0: %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32
           " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 " %08" PRIx32 "\n",
           regs[REG_R0],  regs[REG_R1],  regs[REG_R2],  regs[REG_R3],
