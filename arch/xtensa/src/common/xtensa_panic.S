@@ -126,7 +126,6 @@ _xtensa_panic:
 	 * stack.
 	 */
 
-	s32i	a2, sp, (4 * REG_A2)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Dispatch the sycall as with other interrupts. */
