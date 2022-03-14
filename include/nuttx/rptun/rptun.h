@@ -255,6 +255,41 @@
                                       (d)->ops->register_callback(d,NULL,NULL) : -ENOSYS)
 
 /****************************************************************************
+ * Name: RPTUN_RESET
+ *
+ * Description:
+ *   Reset remote cpu
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *   value    - reset value
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define RPTUN_RESET(d,v) ((d)->ops->reset ? \
+                          (d)->ops->reset(d,v) : -ENOSYS)
+
+/****************************************************************************
+ * Name: RPTUN_PANIC
+ *
+ * Description:
+ *   Panic remote cpu
+ *
+ * Input Parameters:
+ *   dev      - Device-specific state data
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+#define RPTUN_PANIC(d) ((d)->ops->panic ? \
+                        (d)->ops->panic(d) : -ENOSYS)
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
 
@@ -297,6 +332,9 @@ struct rptun_ops_s
   CODE int (*notify)(FAR struct rptun_dev_s *dev, uint32_t vqid);
   CODE int (*register_callback)(FAR struct rptun_dev_s *dev,
                                 rptun_callback_t callback, FAR void *arg);
+
+  CODE void (*reset)(FAR struct rptun_dev_s *dev, int value);
+  CODE void (*panic)(FAR struct rptun_dev_s *dev);
 };
 
 struct rptun_dev_s
