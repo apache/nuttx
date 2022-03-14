@@ -195,7 +195,7 @@ static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
   nxsem_post(&g_syslog_default_sem);
 #endif
 
-  return OK;
+  return buflen;
 }
 #endif
 
