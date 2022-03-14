@@ -30,8 +30,8 @@
 
 #include <nuttx/arch.h>
 #include <arch/xtensa/xtensa_specregs.h>
+#include <arch/syscall.h>
 
-#include "syscall.h"
 #include "xtensa.h"
 
 /****************************************************************************

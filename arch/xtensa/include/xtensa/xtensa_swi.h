@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/xtensa/src/common/xtensa_swi.h
+ * arch/xtensa/include/xtensa/xtensa_swi.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,8 +18,8 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_XTENSA_SRC_COMMON_XTENSA_SWI_H
-#define __ARCH_XTENSA_SRC_COMMON_XTENSA_SWI_H
+#ifndef __ARCH_XTENSA_INCLUDE_XTENSA_SWI_H
+#define __ARCH_XTENSA_INCLUDE_XTENSA_SWI_H
 
 /****************************************************************************
  * Included Files
@@ -69,4 +69,4 @@
 
 #define XCHAL_SWINT_CALL        (1 << XTENSA_SWINT)
 
-#endif /* __ARCH_XTENSA_SRC_COMMON_XTENSA_SWI_H */
+#endif /* __ARCH_XTENSA_INCLUDE_XTENSA_SWI_H */

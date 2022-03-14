@@ -37,7 +37,7 @@
 #  include <syscall.h>
 #endif
 
-#include "xtensa_swi.h"
+#include <arch/xtensa/xtensa_swi.h>
 
 /****************************************************************************
  * Pre-processor Definitions

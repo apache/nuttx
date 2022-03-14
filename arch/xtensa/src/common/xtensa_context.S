@@ -66,8 +66,7 @@
 #include <arch/xtensa/xtensa_abi.h>
 #include <arch/xtensa/xtensa_specregs.h>
 
-#include "syscall.h"
-#include "xtensa_swi.h"
+#include <arch/syscall.h>
 
 /****************************************************************************
  * Public Functions
