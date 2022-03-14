@@ -90,6 +90,10 @@ ifeq ($(CONFIG_MPFS_EMMCSD),y)
 CHIP_CSRCS += mpfs_emmcsd.c
 endif
 
+ifeq ($(CONFIG_MPFS_ETHMAC),y)
+CHIP_CSRCS += mpfs_ethernet.c
+endif
+
 ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)
 CHIP_CSRCS += mpfs_corepwm.c
 endif

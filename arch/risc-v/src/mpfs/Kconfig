@@ -244,6 +244,26 @@ config MPFS_EMMCSD
 	---help---
 		Selects the MPFS eMMCSD driver.
 
+config MPFS_ETHMAC
+	bool
+	default n
+	select NETDEVICES
+	select ARCH_HAVE_PHY
+
+config MPFS_ETHMAC_0
+	bool "Ethernet MAC 0"
+	default n
+	select MPFS_ETHMAC
+	---help---
+		Enable MPFS ethernet MAC-0.
+
+config MPFS_ETHMAC_1
+	bool "Ethernet MAC 1"
+	default n
+	select MPFS_ETHMAC
+	---help---
+		Enable MPFS ethernet MAC-1.
+
 comment "CorePWM Options"
 
 config MPFS_HAVE_COREPWM
@@ -317,9 +337,148 @@ config MPFS_DMA
 	---help---
 		Enable DMA Support. MPFS DMA is Memory-to-Memory only.
 
-menu "MPFS Others"
+menu "Ethernet MAC configuration"
+	depends on MPFS_ETHMAC
+
+choice
+	prompt "MII Interface mode"
+
+config MPFS_MAC_SGMII
+	bool "SGMII"
+	---help---
+		Use Ethernet SGMII interface.
+
+config MPFS_MAC_GMII
+	bool "GMII"
+	---help---
+		Use Ethernet GMII interface.
+endchoice
+
+config MPFS_PHYADDR
+	int "PHY address"
+	default 1
+	---help---
+		The 5-bit address of the PHY on the board.  Default: 1
+
+config MPFS_MAC_NO_BROADCAST
+	bool "Disable Broadcast"
+	default n
+	---help---
+		Select to disable receipt of broadcast packets.
+
+config MPFS_MAC_AUTONEG
+	bool "Use autonegotiation"
+	default y
+	---help---
+		Use PHY autonegotiation to determine speed and mode
+
+config MPFS_MAC_AUTONEG_DISABLE_1000MBPS
+	bool "Disable Gigabit mode"
+	default n
+	depends on MPFS_MAC_AUTONEG
+	---help---
+		Select to disable Gigabit speed support.
+		If disabled then autonegotiation don't advertise 1GB mode
+
+config MPFS_PHYINIT
+	bool "Use board phyinit"
+	default n
+	---help---
+		call mpfs_phy_boardinitialize() on init
+
+if !MPFS_MAC_AUTONEG
+
+config MPFS_MAC_ETHFD
+	bool "Full duplex"
+	default n
+	---help---
+		If MPFS_MAC_AUTONEG is not defined, then this may be defined to
+		select full duplex mode. Default: half-duplex
+
+choice
+	prompt "MAC Speed"
+	default MPFS_MAC_ETH100MBPS
+	---help---
+		If autonegotiation is not used, then you must select the fixed speed
+		of the PHY
+
+config MPFS_MAC_ETH10MBPS
+	bool "10 Mbps"
+	---help---
+		If MPFS_MAC_AUTONEG is not defined, then this may be defined to select 10 MBps
+		speed.  Default: 100 Mbps
+
+config MPFS_MAC_ETH100MBPS
+	bool "100 Mbps"
+	---help---
+		If MPFS_MAC_AUTONEG is not defined, then this may be defined to select 100 MBps
+		speed.  Default: 100 Mbps
+
+config MPFS_MAC_ETH1000MBPS
+	bool "1000 Mbps"
+	---help---
+		If MPFS_MAC_AUTONEG is not defined, then this may be defined to select 1000 MBps
+		speed.  Default: 100 Mbps
+
+endchoice # GMAC speed
+
+endif # !MPFS_MAC_AUTONEG
+
+config MPFS_ETHMAC_MDC_CLOCK_SOURCE_HZ
+	int "MDC Clock Source (Hz)"
+	default 125000000
+	range 1000000 240000000
+	depends on MPFS_ETHMAC
+	---help---
+		Select the MDC clock source frequency.
+
+config MPFS_ETHMAC_NTXBUFFERS
+	int "Number of TX DMA Buffers"
+	default 8
+	depends on MPFS_ETHMAC
+	---help---
+		Select the number of TX DMA buffers.
+
+config MPFS_ETHMAC_NRXBUFFERS
+	int "Number of RX DMA Buffers"
+	default 16
+	depends on MPFS_ETHMAC
+	---help---
+		Select the number of RX DMA buffers.
+
+config MPFS_ETHMAC_64BIT_ADDRESS_MODE
+	bool "64-bit DMA address mode"
+	default n
+	depends on MPFS_ETHMAC
+	---help---
+		Select to enable 64-bit DMA address mode. This is only needed if the
+		Nuttx memory address is above 4GB.
+
+config MPFS_ETHMAC_REGDEBUG
+	bool "Register-Level Debug"
+	default n
+	depends on DEBUG_NET_INFO
+	---help---
+		Enable very low-level register access debug.  Depends on
+		CONFIG_DEBUG_FEATURES.
+
+config MPFS_MPU_DMA_ENABLE
+	bool "Enable ALL memory access for eth DMA"
+	default n
+	---help---
+		Set ALL memory accessible for Ethernet DMA.
+		This should be done on bootloader. This is mostly for testing only.
 
 endmenu
+
+config MPFS_HAVE_CORERMII
+	bool "CoreRMII FPGA IP block configured"
+	default n
+
+config MPFS_CORERMII_ADDRESS
+	int "CoreRMII Phy address"
+	default 1
+	depends on MPFS_HAVE_CORERMII
 
 # Override the default values for MPU / PMP parameters here
 
