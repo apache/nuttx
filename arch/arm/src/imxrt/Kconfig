@@ -1355,6 +1355,33 @@ endif # IMXRT_GPIO_IRQ
 menu "Ethernet Configuration"
 	depends on IMXRT_ENET
 
+choice
+	prompt "i.MX RT Ethernet Interface"
+	default IMXRT_ENET1
+	depends on IMXRT_ENET
+
+config IMXRT_ENET1
+	bool "ENET 1"
+
+config IMXRT_ENET2
+	bool "ENET 2"
+
+endchoice # i.MX RT Ethernet Interface
+
+choice
+	prompt "i.MX RT Ethernet TX Clock Source"
+	default IMXRT_PROVIDES_TXC
+	depends on IMXRT_ENET
+
+config IMXRT_MAC_PROVIDES_TXC
+	bool "i.MX RT Ethernet provides TX Clock"
+
+config IMXRT_PHY_PROVIDES_TXC
+	bool "External PHY provides TX Clock"
+
+endchoice # i.MX RT Ethernet TX Clock Source
+
+
 config IMXRT_ENET_NRXBUFFERS
 	int "Number Rx buffers"
 	default 6
