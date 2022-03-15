@@ -479,6 +479,7 @@ config ARCH_BOARD_IMXRT1020_EVK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1020-EVKB.  This board features the MIMXRT1021DAG5A MCU.
@@ -489,6 +490,7 @@ config ARCH_BOARD_IMXRT1050_EVK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1050-EVKB.  This board features the MIMXRT1052DVL6A MCU.
@@ -499,6 +501,7 @@ config ARCH_BOARD_IMXRT1060_EVK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1060-EVK.  This board features the MIMXRT1062DVL6A MCU.
@@ -509,6 +512,7 @@ config ARCH_BOARD_IMXRT1064_EVK
 	select ARCH_HAVE_LEDS
 	select ARCH_HAVE_BUTTONS
 	select ARCH_HAVE_IRQBUTTONS
+	select ARCH_PHY_INTERRUPT
 	---help---
 		This is the board configuration for the port of NuttX to the NXP i.MXRT
 		evaluation kit, MIMXRT1064-EVK.  This board features the MIMXRT1064DVL6A MCU.
