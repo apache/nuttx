@@ -42,6 +42,38 @@
 
 #ifdef CONFIG_DEBUG_SECUREFAULT
 #  define sfalert(format, ...)  _alert(format, ##__VA_ARGS__)
+
+#define OFFSET_R0              (0 * 4) /* R0 */
+#define OFFSET_R1              (1 * 4) /* R1 */
+#define OFFSET_R2              (2 * 4) /* R2 */
+#define OFFSET_R3              (3 * 4) /* R3 */
+#define OFFSET_R12             (4 * 4) /* R12 */
+#define OFFSET_R14             (5 * 4) /* R14 = LR */
+#define OFFSET_R15             (6 * 4) /* R15 = PC */
+#define OFFSET_XPSR            (7 * 4) /* xPSR */
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static void generate_nonsecure_busfault(void)
+{
+  uint32_t nsp;
+
+  /* Get non-secure SP */
+
+  __asm__ __volatile__ ("mrs %0, msp_ns" : "=r" (nsp));
+
+  sfalert("Non-sec sp %08x\n", nsp);
+  syslog_flush();
+
+  /* Force set return ReturnAddress to 0, then non-secure cpu will crash.
+   * Also, the ReturnAddress is very important, so move it to R12.
+   */
+
+  putreg32(getreg32(nsp + OFFSET_R15), nsp + OFFSET_R12);
+  putreg32(0, nsp + OFFSET_R15);
+}
 #else
 #  define sfalert(...)
 #endif
@@ -113,7 +145,12 @@ int arm_securefault(int irq, FAR void *context, FAR void *arg)
 
   putreg32(0xff, SAU_SFSR);
 
+#ifdef CONFIG_DEBUG_SECUREFAULT
+  generate_nonsecure_busfault();
+#else
   up_irq_save();
   PANIC();
+#endif
+
   return OK;
 }
