@@ -137,7 +137,6 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 
 static noreturn_function void __esp32_start(void)
 {
-  uint32_t regval;
   uint32_t sp;
 
   /* Make sure that normal interrupts are disabled.  This is really only an
@@ -169,11 +168,15 @@ static noreturn_function void __esp32_start(void)
 
   memset(&_sbss, 0, (&_ebss - &_sbss) * sizeof(_sbss));
 
+#ifndef CONFIG_SMP
+  uint32_t regval;
+
   /* Make sure that the APP_CPU is disabled for now */
 
   regval  = getreg32(DPORT_APPCPU_CTRL_B_REG);
   regval &= ~DPORT_APPCPU_CLKGATE_EN;
   putreg32(regval, DPORT_APPCPU_CTRL_B_REG);
+#endif
 
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
