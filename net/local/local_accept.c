@@ -182,7 +182,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                */
 
               ret = local_open_server_tx(
-                      conn, _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+                      conn, _SS_ISNONBLOCK(server->lc_conn.s_flags));
               if (ret < 0)
                 {
                   nerr("ERROR: Failed to open write-only FIFOs for %s: %d\n",
@@ -202,7 +202,7 @@ int local_accept(FAR struct socket *psock, FAR struct sockaddr *addr,
                */
 
               ret = local_open_server_rx(
-                      conn, _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+                      conn, _SS_ISNONBLOCK(server->lc_conn.s_flags));
               if (ret < 0)
                 {
                    nerr("ERROR: Failed to open read-only FIFOs for %s: %d\n",
