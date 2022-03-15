@@ -237,7 +237,7 @@ static void governor_activity(int domain, int count)
     {
       /* Add the activity count to the accumulated counts. */
 
-      flags = enter_critical_section();
+      flags = pm_lock();
       accum = (uint32_t)pdomstate->accum + count;
 
       /* Make sure that we do not overflow the underlying representation */
@@ -277,7 +277,7 @@ static void governor_activity(int domain, int count)
           governor_update(domain, tmp);
         }
 
-      leave_critical_section(flags);
+      pm_unlock(flags);
     }
 }
 
@@ -478,7 +478,7 @@ static enum pm_state_e governor_checkstate(int domain)
    * logic in governor_activity().
    */
 
-  flags = enter_critical_section();
+  flags = pm_lock();
 
   /* Check the elapsed time.  In periods of low activity, time slicing is
    * controlled by IDLE loop polling; in periods of higher activity, time
@@ -517,7 +517,7 @@ static enum pm_state_e governor_checkstate(int domain)
         }
     }
 
-  leave_critical_section(flags);
+  pm_unlock(flags);
 
   return pdomstate->recommended;
 }

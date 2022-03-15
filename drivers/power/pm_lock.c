@@ -1,5 +1,5 @@
 /****************************************************************************
- * drivers/power/pm_autoupdate.c
+ * drivers/power/pm_lock.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,94 +24,60 @@
 
 #include <nuttx/config.h>
 
-#include <assert.h>
-#include <stdint.h>
-
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <nuttx/power/pm.h>
+#include <sched.h>
 #include "pm.h"
 
 #if defined(CONFIG_PM)
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-static void pm_auto_updatestate_cb(FAR void *arg)
-{
-  int domain = (uintptr_t)arg;
-  enum pm_state_e newstate;
-
-  newstate = pm_checkstate(domain);
-  pm_changestate(domain, newstate);
-}
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_auto_updatestate
+ * Name: pm_lock
  *
  * Description:
- *   This function update the domain state and notify the power system.
- *
- * Input Parameters:
- *   domain - The PM domain to check
- *
- * Returned Value:
- *   None.
+ *   Lock the power management operation.
  *
  ****************************************************************************/
 
-void pm_auto_updatestate(int domain)
+irqstate_t pm_lock(void)
 {
-  FAR struct pm_domain_s *pdom;
-  pdom = &g_pmglobals.domain[domain];
+  irqstate_t flags = 0;
 
-  if (pdom->auto_update)
+  if (up_interrupt_context() || sched_idletask())
     {
-#if defined(CONFIG_SCHED_WORKQUEUE)
-      if (up_interrupt_context())
-        {
-          work_queue(HPWORK, &pdom->update_work,
-                     pm_auto_updatestate_cb, (FAR void *)domain, 0);
-        }
-      else
-#endif
-        {
-          pm_auto_updatestate_cb((FAR void *)domain);
-        }
+      flags = enter_critical_section();
     }
+  else
+    {
+      nxsem_wait(&g_pmglobals.regsem);
+    }
+
+  return flags;
 }
 
 /****************************************************************************
- * Name: pm_auto_update
+ * Name: pm_unlock
  *
  * Description:
- *   This function set the domain with assign mode.
- *
- * Input Parameters:
- *   domain        - The PM domain to check
- *   auto_update   - The PM domain auto update or not
- *
- * Returned Value:
- *   None.
+ *   Unlock the power management operation.
  *
  ****************************************************************************/
 
-void pm_auto_update(int domain, bool auto_update)
+void pm_unlock(irqstate_t flags)
 {
-  FAR struct pm_domain_s *pdom;
-  irqstate_t flags;
-
-  DEBUGASSERT(domain >= 0 && domain < CONFIG_PM_NDOMAINS);
-  pdom = &g_pmglobals.domain[domain];
-
-  flags = pm_lock();
-  pdom->auto_update = auto_update;
-  pm_unlock(flags);
+  if (up_interrupt_context() || sched_idletask())
+    {
+      leave_critical_section(flags);
+    }
+  else
+    {
+      nxsem_post(&g_pmglobals.regsem);
+    }
 }
 
 #endif /* CONFIG_PM */
