@@ -28,8 +28,7 @@
 int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv);
 int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv);
 uint32_t cs35l41b_get_calibration_result(void);
-int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv,
-                       uint32_t ambient_temp_deg_c);
+int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv);
 int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv);
 int cs35l41b_write_caliberate_ambient(FAR struct cs35l41b_dev_s *priv,
                                       uint32_t ambient_temp_deg_c);

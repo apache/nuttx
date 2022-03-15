@@ -392,7 +392,7 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                           int cmd, unsigned long arg)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
-  FAR struct audio_msg_s *audio_msg = (FAR unsigned long *)arg;
+  FAR struct audio_msg_s *audio_msg = (FAR struct audio_msg_s *)arg;
 
   if (cmd == AUDIOIOC_SETPARAMTER)
     {
@@ -931,7 +931,6 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
 #  endif
 #endif
 {
-  uint32_t val;
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
@@ -950,7 +949,7 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
 
   if (priv->is_calibrating)
     {
-      cs35l41b_calibrate(priv, val);
+      cs35l41b_calibrate(priv);
     }
   else
     {
@@ -2813,40 +2812,6 @@ int cs35l41b_write_block(FAR struct cs35l41b_dev_s *priv,
     }
 
   return OK;
-}
-
-/****************************************************************************
- * Name: cs35l41b_load_fw_worker
- *
- * Description:
- *   load the firmware
- *
- * Input Parameters
- *
- * Returned Value
- *    None
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-
-static void cs35l41b_load_fw_worker(FAR void *arg)
-{
-  FAR struct cs35l41b_dev_s *priv = arg;
-
-  audinfo("cs35l41b reset start!\n");
-
-  if (cs35l41b_reset(priv) == OK)
-    {
-      priv->done = true;
-    }
-  else
-    {
-      auderr("ERROR: cs35l41b reset failed!\n");
-    }
-
-  audinfo("cs35l41b reset finish!\n");
 }
 
 /****************************************************************************

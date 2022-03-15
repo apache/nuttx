@@ -915,8 +915,7 @@ int cs35l41b_write_caliberate_ambient(FAR struct cs35l41b_dev_s *priv,
  *
  ****************************************************************************/
 
-int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv,
-                       uint32_t ambient_temp_deg_c)
+int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t address;
   uint32_t val;
@@ -999,7 +998,7 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
     {
       address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
 
-      audwarn("caliberate value:0x%08x | address:0x%08x\n", value, address);
+      audwarn("caliberate value:0x%08lx | address:0x%08lx\n", value, address);
 
       ret = cs35l41b_write_register(priv, address, value);
       if (ret == ERROR)
