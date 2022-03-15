@@ -210,6 +210,12 @@ endif
 LDELFFLAGS = -r -e main --gc-sections
 LDELFFLAGS += -T $(call CONVERT_PATH,$(BOARD_DIR)$(DELIM)scripts$(DELIM)gnu-elf.ld)
 
+ifeq ($(CONFIG_HOST_MACOS),y)
+  LDFLAGS += -Wl,-dead_strip
+else
+  LDFLAGS += -Wl,--gc-sections
+endif
+
 ifeq ($(CONFIG_SIM_M32),y)
   LDLINKFLAGS += -melf_i386
   LDFLAGS += -m32
