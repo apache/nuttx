@@ -183,6 +183,7 @@ static void IRAM_ATTR configure_cpu_caches(void)
  *
  ****************************************************************************/
 
+#ifndef CONFIG_SMP
 static void IRAM_ATTR disable_app_cpu(void)
 {
   uint32_t regval;
@@ -204,6 +205,7 @@ static void IRAM_ATTR disable_app_cpu(void)
   regval &= ~SYSTEM_CONTROL_CORE_1_RESETING;
   putreg32(regval, SYSTEM_CORE_1_CONTROL_0_REG);
 }
+#endif
 
 /****************************************************************************
  * Name: __esp32s3_start
@@ -257,9 +259,11 @@ void noreturn_function IRAM_ATTR __esp32s3_start(void)
       *dest = 0;
     }
 
+#ifndef CONFIG_SMP
   /* Make sure that the APP_CPU is disabled for now */
 
   disable_app_cpu();
+#endif
 
   /* The 2nd stage bootloader enables RTC WDT to check on startup sequence
    * related issues in application. Hence disable that as we are about to
