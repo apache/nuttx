@@ -755,7 +755,14 @@ static int mpfs_ep_stall(struct mpfs_ep_s *privep)
       privep->stalled = true;
       privep->pending = false;
 
-      if (USB_ISEPIN(privep->ep.eplog))
+      if (epno == EP0)
+        {
+          mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0,
+                           0,
+                           CSR0L_DEV_SEND_STALL_MASK |
+                           CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK);
+        }
+      else if (USB_ISEPIN(privep->ep.eplog))
         {
           mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
                            MPFS_USB_ENDPOINT_TX_CSR_OFFSET,
@@ -972,6 +979,7 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
                          struct mpfs_ep_s *privep, uint16_t recvsize)
 {
   struct mpfs_req_s *privreq;
+  bool earlyread = false;
   int epno;
 
   DEBUGASSERT(priv && privep && privep->epstate == USB_EPSTATE_IDLE);
@@ -1016,7 +1024,14 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
         {
           /* Update the total number of bytes transferred */
 
-          privreq->req.xfrd += recvsize;
+          privep->rxactive   = true;
+          privreq->req.xfrd += mpfs_read_rx_fifo(privreq->req.buf,
+                                                 privreq->req.len,
+                                                 epno);
+
+          /* Early read indicates a request that was already in place */
+
+          earlyread = true;
           privreq->inflight  = 0;
 
           usbtrace(TRACE_COMPLETE(epno), privreq->req.xfrd);
@@ -1036,15 +1051,24 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
 
   DEBUGASSERT(recvsize == 0);
 
-  /* activate new read request from queue */
+  /* Activate new read request from queue */
 
-  privep->rxactive  = true;
-  privreq->req.xfrd = 0;
   privreq->inflight = privreq->req.len;
-  priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
 
-  privreq->req.xfrd += mpfs_read_rx_fifo(privreq->req.buf, privreq->req.len,
-                                         epno);
+  /* It's possible the request has been completed already. If so, don't
+   * repeat the read as the buffer is empty.
+   */
+
+  if (!earlyread)
+    {
+      privep->rxactive  = true;
+      privreq->req.xfrd = 0;
+      priv->eplist[epno].descb[0]->addr = (uintptr_t)privreq->req.buf;
+
+      privreq->req.xfrd += mpfs_read_rx_fifo(privreq->req.buf,
+                                             privreq->req.len,
+                                             epno);
+    }
 
   if (epno == EP0)
     {
@@ -1736,9 +1760,15 @@ static int mpfs_ep_resume(struct mpfs_ep_s *privep)
       privep->pending = false;
       privep->epstate = USB_EPSTATE_IDLE;
 
-      /* Clear STALLRQx request and reset data toggle */
+      /* Clear STALLRQx request and reset data toggle if needed */
 
-      if (USB_ISEPIN(privep->ep.eplog))
+      if (epno == EP0)
+        {
+          mpfs_modifyreg16(MPFS_USB_INDEXED_CSR_EP0_CSR0,
+                           CSR0L_DEV_STALL_SENT_MASK,
+                           0);
+        }
+      else if (USB_ISEPIN(privep->ep.eplog))
         {
           mpfs_modifyreg16(MPFS_USB_ENDPOINT(epno) +
                       MPFS_USB_ENDPOINT_TX_CSR_OFFSET,
@@ -3572,6 +3602,8 @@ int usbdev_register(struct usbdevclass_driver_s *driver)
 {
   struct mpfs_usbdev_s *priv = &g_usbd;
   int ret;
+
+  DEBUGASSERT(driver != NULL);
 
   /* First hook up the driver */
 
