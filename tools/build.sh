@@ -61,7 +61,7 @@ function build_board()
 {
   echo -e "Build command line:"
   echo -e "  ${TOOLSDIR}/configure.sh -e $1"
-  echo -e "  make -C ${NUTTXDIR} EXTRAFLAGS=[-Wno-cpp] ${@:2}"
+  echo -e "  make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}"
   echo -e "  make -C ${NUTTXDIR} savedefconfig"
 
   if [ ! -f "${ROOTDIR}/prebuilts/kconfig-frontends/bin/kconfig-conf" ] &&
@@ -81,7 +81,7 @@ function build_board()
     exit 1
   fi
 
-  if ! make -C ${NUTTXDIR} EXTRAFLAGS=$EXTRAFLAGS ${@:2}; then
+  if ! make -C ${NUTTXDIR} EXTRAFLAGS="$EXTRA_FLAGS" ${@:2}; then
     echo "Error: ############# build ${1} fail ##############"
     exit 2
   fi
@@ -155,10 +155,11 @@ function pack_sdk()
 }
 
 if [ $# == 0 ]; then
-  echo "Usage: $0 [-m] <board-name>:<config-name> [make options]"
+  echo "Usage: $0 [-m] <board-name>:<config-name> [-e <extraflags>] [make options]"
   echo ""
   echo "Where:"
   echo "  -m: out of tree build. Or default in tree build without it."
+  echo "  -e: pass extra c/c++ flags such as -Werror via make command line"
   exit 1
 fi
 
@@ -193,11 +194,21 @@ else
 fi
 
 TOOLSDIR=${NUTTXDIR}/tools
+board_config=$1
+shift
 
-if [ -d ${ROOTDIR}/${1} ]; then
-  build_board ${ROOTDIR}/${1} ${@:2}
-else
-  build_board $*
+EXTRA_FLAGS="-Wno-cpp"
+if [ $1 == "-e" ]; then
+  shift
+  EXTRA_FLAGS+=" $1"
+  echo "extraflags: $EXTRA_FLAGS"
+  shift
 fi
 
-pack_sdk $*
+if [ -d ${ROOTDIR}/${board_config} ]; then
+  build_board ${ROOTDIR}/${board_config} $*
+else
+  build_board ${board_config} $*
+fi
+
+pack_sdk ${board_config} $*
