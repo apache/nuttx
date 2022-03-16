@@ -83,7 +83,7 @@ void riscv_cpu_boot(int cpu)
    * water marks.
    */
 
-  riscv_stack_color(tcb->stack_alloc_ptr, tcb->adj_stack_size);
+  riscv_stack_color(tcb->stack_alloc_ptr, 0);
 #endif
 
   /* TODO: Setup FPU */
