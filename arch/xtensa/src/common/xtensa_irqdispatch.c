@@ -88,13 +88,13 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
        * NOTE 2. We saved a reference  TCB of the original thread on entry.
        */
 
-      uintptr_t cpstate;
+      void *cpstate;
       uintptr_t cpstate_off;
 
       cpstate_off = offsetof(struct xcptcontext, cpstate) -
                     offsetof(struct xcptcontext, regs);
 
-      cpstate = (uintptr_t)CURRENT_REGS + cpstate_off;
+      cpstate = (void *)(CURRENT_REGS + cpstate_off);
       xtensa_coproc_restorestate(cpstate);
 
 #endif
