@@ -1751,22 +1751,24 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
 
   cs35l41b_set_boot_configuration(priv);
 
-  /* enable dsp output */
-
-  if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
+  if (!priv->is_bypassed)
     {
-      auderr("write 0x00004c00 error\n");
-      return ERROR;
+      /* enable dsp output */
+
+      if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
+        {
+          auderr("write 0x00004c00 error\n");
+          return ERROR;
+        }
+
+      /* enable dsp fadein feature */
+
+      if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
+        {
+          auderr("write 0x00006000 error\n");
+          return ERROR;
+        }
     }
-
-  /* enable dsp fadein feature */
-
-  if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
-    {
-      auderr("write 0x00006000 error\n");
-      return ERROR;
-    }
-
 
   return OK;
 }
@@ -2925,9 +2927,10 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
 
   if (priv)
     {
-      priv->dev.ops = &g_audioops;
-      priv->lower   = lower;
-      priv->i2c     = i2c;
+      priv->dev.ops     = &g_audioops;
+      priv->lower       = lower;
+      priv->i2c         = i2c;
+      priv->is_bypassed = false;
 
       if (cs35l41b_check_id(priv) != OK)
         {
