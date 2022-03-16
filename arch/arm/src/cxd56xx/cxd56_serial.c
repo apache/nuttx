@@ -1001,9 +1001,13 @@ static void up_txint(FAR struct uart_dev_s *dev, bool enable)
        * interrupts disabled (note this may recurse).
        */
 
+#  ifdef CONFIG_SMP
       spin_unlock_irqrestore(&priv->lock, flags);
+#  endif
       uart_xmitchars(dev);
+#  ifdef CONFIG_SMP
       flags = spin_lock_irqsave(&priv->lock);
+#  endif
 #endif
     }
   else
