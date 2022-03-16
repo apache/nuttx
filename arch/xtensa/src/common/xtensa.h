@@ -253,6 +253,10 @@ void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
 void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 #endif
 
+/* Window Spill */
+
+void xtensa_window_spill(void);
+
 /* IRQs */
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
