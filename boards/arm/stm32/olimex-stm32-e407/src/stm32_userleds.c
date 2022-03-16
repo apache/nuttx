@@ -27,11 +27,11 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <debug.h>
+
+#include <nuttx/board.h>
 #include <arch/board/board.h>
-#include <nuttx/power/pm.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32.h"
 #include "olimex-stm32-e407.h"

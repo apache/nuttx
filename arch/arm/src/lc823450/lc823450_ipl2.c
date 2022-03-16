@@ -61,7 +61,6 @@
 #include <libgen.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
 
 #ifdef CONFIG_ADC
 #  include "lc823450_adc.h"

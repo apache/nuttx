@@ -46,7 +46,7 @@
 #include <arch/board/board.h>
 
 #include "mpfs_emmcsd.h"
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/mpfs_emmcsd.h"
 
 /****************************************************************************

@@ -28,8 +28,6 @@
 #include <fixedmath.h>
 #include <assert.h>
 
-#include "arm_arch.h"
-
 #include "hardware/imxrt_iomuxc.h"
 #include "hardware/imxrt_pinmux.h"
 #include "hardware/imxrt_ccm.h"
@@ -39,7 +37,6 @@
 #include "imxrt_iomuxc.h"
 #include "imxrt_gpio.h"
 #include "imxrt_lowputc.h"
-
 #include "arm_internal.h"
 
 #include <arch/board/board.h> /* Include last:  has dependencies */

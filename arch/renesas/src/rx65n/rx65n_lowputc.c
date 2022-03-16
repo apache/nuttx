@@ -29,7 +29,6 @@
 
 #include "chip.h"
 #include "up_internal.h"
-#include "up_arch.h"
 #include "rx65n_definitions.h"
 
 /****************************************************************************

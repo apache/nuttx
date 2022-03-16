@@ -220,6 +220,23 @@ tc_handler_t sam_tc_attach(TC_HANDLE handle, tc_handler_t handler,
 uint32_t sam_tc_getpending(TC_HANDLE handle);
 
 /****************************************************************************
+ * Name: sam_tc_settcclks
+ *
+ * Description:
+ *   Set the value of TCCLKS clock selection in TC_CMR register
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *   tcclks  The clock selection value to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_settcclks(TC_HANDLE handle, uint32_t tcclks);
+
+/****************************************************************************
  * Name: sam_tc_setregister
  *
  * Description:
@@ -286,23 +303,6 @@ uint16_t sam_tc_getcounter(TC_HANDLE handle);
  ****************************************************************************/
 
 void sam_tc_setblockmode(TC_HANDLE handle, uint32_t regval);
-
-/****************************************************************************
- * Name: sam_tc_infreq
- *
- * Description:
- *   Return the timer input frequency, that is, the MCK frequency divided
- *   down so that the timer/counter is driven within its maximum frequency.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *  The timer input frequency.
- *
- ****************************************************************************/
-
-uint32_t sam_tc_infreq(void);
 
 /****************************************************************************
  * Name: sam_tc_divfreq

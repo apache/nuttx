@@ -33,8 +33,7 @@
 
 #include <nuttx/arch.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/nrf52_rtc.h"
 #include "nrf52_rtc.h"
 

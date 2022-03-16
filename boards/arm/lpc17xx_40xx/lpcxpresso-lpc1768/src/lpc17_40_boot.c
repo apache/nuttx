@@ -29,9 +29,7 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc17_40_ssp.h"
 #include "lpcxpresso-lpc1768.h"
 

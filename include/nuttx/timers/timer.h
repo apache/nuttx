@@ -116,6 +116,7 @@ struct timer_notify_s
 {
   struct sigevent event;    /* Describe the way a task is to be notified */
   pid_t           pid;      /* The ID of the task/thread to receive the signal */
+  bool            periodic; /* True for periodic notifications */
 };
 
 /* This structure provides the "lower-half" driver operations available to

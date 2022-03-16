@@ -34,7 +34,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "kinetis_pwm.h"
 
 #ifdef CONFIG_PWM

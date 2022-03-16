@@ -234,6 +234,18 @@ int tm4c_adc_setup(void);
 #endif
 
 /****************************************************************************
+ * Name: tm4c_can_setup
+ *
+ * Description:
+ *   Initialize CAN modules and register the CAN driver.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_TIVA_CAN
+int tm4c_can_setup(void);
+#endif
+
+/****************************************************************************
  * Name: tm4c_at24_automount
  *
  * Description:

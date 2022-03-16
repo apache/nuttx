@@ -28,7 +28,7 @@
 
 #include <nuttx/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32l562e-dk.h"
 #include "stm32l5_pwr.h"
 

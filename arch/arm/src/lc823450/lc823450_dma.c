@@ -37,7 +37,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/spinlock.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lc823450_dma.h"
 #include "lc823450_syscontrol.h"
 #include <arch/chip/clk.h>

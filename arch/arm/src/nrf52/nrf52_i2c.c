@@ -34,8 +34,7 @@
 #include <nuttx/kmalloc.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nrf52_gpio.h"
 #include "nrf52_i2c.h"
 

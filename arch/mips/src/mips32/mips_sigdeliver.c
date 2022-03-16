@@ -38,7 +38,6 @@
 
 #include "sched/sched.h"
 #include "mips_internal.h"
-#include "mips_arch.h"
 
 /****************************************************************************
  * Public Functions

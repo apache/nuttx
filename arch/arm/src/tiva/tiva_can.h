@@ -1,5 +1,6 @@
 /****************************************************************************
- * arch/arm/src/armv6-m/arm_copyfullstate.c
+ * arch/arm/src/tiva/tiva_can.h
+ * Classic (character-device) lower-half driver for the Tiva CAN modules.
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,53 +19,71 @@
  *
  ****************************************************************************/
 
+#ifndef __ARCH_ARM_SRC_TIVA_TIVA_CAN_H
+#define __ARCH_ARM_SRC_TIVA_TIVA_CAN_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
-#include <stdint.h>
-#include <arch/irq.h>
-
-#include "arm_internal.h"
+#include <nuttx/can/can.h>
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/****************************************************************************
- * Private Data
- ****************************************************************************/
+#if defined(CONFIG_CAN) && (defined(CONFIG_TIVA_CAN0) || defined(CONFIG_TIVA_CAN1))
 
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
+#ifndef __ASSEMBLY__
 
-/****************************************************************************
- * Public Functions
- ****************************************************************************/
-
-/****************************************************************************
- * Name: arm_copyfullstate
- ****************************************************************************/
-
-/* A little faster than most memcpy's */
-
-void arm_copyfullstate(uint32_t *dest, uint32_t *src)
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
 {
-  int i;
+#else
+#define EXTERN extern
+#endif
 
-  /* In the Cortex-M0 model, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
-   */
+/****************************************************************************
+ * Public Types
+ ****************************************************************************/
 
-  if (src != dest)
-    {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
-    }
+/****************************************************************************
+ * Public Data
+ ****************************************************************************/
+
+/****************************************************************************
+ * Inline Functions
+ ****************************************************************************/
+
+/****************************************************************************
+ * Public Function Prototypes
+ ****************************************************************************/
+
+/****************************************************************************
+ * Name: tiva_can_initialize
+ *
+ * Description:
+ *   Initialize the selected CAN module
+ *
+ * Input Parameters:
+ *   Device path, a string of the form "/dev/can0" or "/dev/can1"
+ *   Module number, for chips with multiple modules (typically 0 or 1)
+ *
+ * Returned Value:
+ *   Pointer to can_dev_s (CAN device structure), or NULL on failure.
+ *
+ ****************************************************************************/
+
+int tiva_can_initialize(FAR char *devpath, int modnum);
+
+#undef EXTERN
+#if defined(__cplusplus)
 }
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_CAN && (CONFIG_TIVA_CAN0 || CONFIG_TIVA_CAN1) */
+#endif /* __ARCH_ARM_SRC_TIVA_TIVA_CAN_H */

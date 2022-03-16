@@ -53,7 +53,6 @@
 #  include "stm32_dma.h"
 #endif
 #include "stm32_rcc.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

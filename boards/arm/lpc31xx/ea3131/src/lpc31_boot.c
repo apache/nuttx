@@ -29,7 +29,6 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "lpc31.h"
 #include "ea3131.h"

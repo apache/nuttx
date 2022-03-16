@@ -35,7 +35,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "cxd56_clock.h"
 #include "cxd56_wdt.h"
 #include "cxd56_powermgr.h"

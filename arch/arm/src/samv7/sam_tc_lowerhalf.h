@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/avr/src/common/up_arch.h
+ * arch/arm/src/samv7/sam_tc_lowerhalf.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,58 +18,38 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_AVR_SRC_COMMON_UP_ARCH_H
-#define __ARCH_AVR_SRC_COMMON_UP_ARCH_H
+#ifndef __ARCH_ARM_SRC_SAMV7_SAM_TC_LOWERHALF_H
+#define __ARCH_ARM_SRC_SAMV7_SAM_TC_LOWERHALF_H
 
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-#ifndef __ASSEMBLY__
-# include <stdint.h>
-#endif
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
-
-/****************************************************************************
- * Inline Functions
- ****************************************************************************/
-
-#ifndef __ASSEMBLY__
-
-# define getreg8(a)           (*(volatile uint8_t *)(a))
-# define putreg8(v,a)         (*(volatile uint8_t *)(a) = (v))
-# define getreg16(a)          (*(volatile uint16_t *)(a))
-# define putreg16(v,a)        (*(volatile uint16_t *)(a) = (v))
-# define getreg32(a)          (*(volatile uint32_t *)(a))
-# define putreg32(v,a)        (*(volatile uint32_t *)(a) = (v))
+#include <stdint.h>
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-#undef EXTERN
-#if defined(__cplusplus)
-#define EXTERN extern "C"
-extern "C"
-{
-#else
-#define EXTERN extern
-#endif
+/****************************************************************************
+ * Name: sam_timer_initialize
+ *
+ * Description:
+ *   Bind the configuration timer to a timer lower half instance and
+ *   register the timer drivers at 'devpath'
+ *
+ * Input Parameters:
+ *   devpath    The full path to the timer device.  This should be of the
+ *              form /dev/timer0.
+ *   chan       Timer counter channel to be used.  See the TC_CHAN*
+ *              definitions in arch/arm/src/samv7/sam_tc.h.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; A negated errno value is returned
+ *   to indicate the nature of any failure.
+ *
+ ****************************************************************************/
 
-/* Atomic modification of registers */
+int sam_timer_initialize(FAR const char *devpath, int chan);
 
-void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
-void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
-void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
-
-#undef EXTERN
-#if defined(__cplusplus)
-}
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* __ARCH_AVR_SRC_COMMON_UP_ARCH_H */
+#endif /* __ARCH_ARM_SRC_SAMV7_SAM_TC_LOWERHALF_H */

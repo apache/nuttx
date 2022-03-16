@@ -34,8 +34,6 @@
 #include <nuttx/arch.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/lpc54_inputmux.h"
 #include "hardware/lpc54_dma.h"
 #include "lpc54_enableclk.h"

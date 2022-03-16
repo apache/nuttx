@@ -29,7 +29,6 @@
 #include <nuttx/board.h>
 
 #include "chip.h"
-#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************

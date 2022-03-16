@@ -25,7 +25,7 @@ ifneq ($(CONFIG_CXD56_TESTSET),y)
 CMN_ASRCS += arm_testset.S
 endif
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_copyfullstate.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c
 CMN_CSRCS += arm_createstack.c arm_exit.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
 CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
@@ -62,7 +62,6 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
-CMN_CSRCS += arm_copyarmstate.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)

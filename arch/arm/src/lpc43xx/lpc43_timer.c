@@ -37,7 +37,7 @@
 #include <nuttx/timers/timer.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc43_timer.h"
 
 #if defined(CONFIG_TIMER) && (defined(CONFIG_LPC43_TMR0) || \
@@ -125,12 +125,12 @@ static int      lpc43_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 
 static const struct timer_ops_s g_tmrops =
 {
-  .start      = lpc43_start,
-  .stop       = lpc43_stop,
-  .getstatus  = lpc43_getstatus,
-  .settimeout = lpc43_settimeout,
+  .start       = lpc43_start,
+  .stop        = lpc43_stop,
+  .getstatus   = lpc43_getstatus,
+  .settimeout  = lpc43_settimeout,
   .setcallback = lpc43_setcallback,
-  .ioctl      = lpc43_ioctl,
+  .ioctl       = lpc43_ioctl,
 };
 
 /* "Lower half" driver state */

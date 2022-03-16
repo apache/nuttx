@@ -30,9 +30,7 @@
 #include <nuttx/spinlock.h>
 
 #include "clock/clock.h"
-
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_soc.h"
 #include "hardware/esp32c3_system.h"

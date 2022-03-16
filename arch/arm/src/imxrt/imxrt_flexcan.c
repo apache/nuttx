@@ -43,7 +43,7 @@
 #include <nuttx/net/netdev.h>
 #include <nuttx/net/can.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "imxrt_config.h"
 #include "imxrt_flexcan.h"

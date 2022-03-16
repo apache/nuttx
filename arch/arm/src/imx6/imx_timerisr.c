@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <arch/irq.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "gic.h"
 #include "hardware/imx_ccm.h"
 #include "hardware/imx_gpt.h"

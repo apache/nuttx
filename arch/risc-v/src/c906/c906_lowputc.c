@@ -29,8 +29,6 @@
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
-#include "riscv_arch.h"
-
 #include "c906_config.h"
 #include "hardware/c906_memorymap.h"
 #include "hardware/c906_uart.h"

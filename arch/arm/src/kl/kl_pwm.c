@@ -37,8 +37,6 @@
 #include <arch/board/board.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "kl_pwm.h"
 #include "kl_gpio.h"

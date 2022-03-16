@@ -27,7 +27,7 @@
 
 #include <nuttx/config.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/sam_eefc.h"
 
 #include <nuttx/progmem.h>

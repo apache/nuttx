@@ -320,8 +320,6 @@ void up_lowputc(char ch);
 void xtensa_earlyserialinit(void);
 void xtensa_serialinit(void);
 
-void rpmsg_serialinit(void);
-
 /* Network */
 
 #if defined(CONFIG_NET) && !defined(CONFIG_NETDEV_LATEINIT)

@@ -35,9 +35,7 @@
 #include <nuttx/lcd/lcd.h>
 #include <nuttx/lcd/st7735.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "stm32_gpio.h"
 #include "stm32_spi.h"
 #include "olimex-stm32-p407.h"

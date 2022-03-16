@@ -45,9 +45,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "rp2040_config.h"
 #include "rp2040_serial.h"
 

@@ -65,8 +65,6 @@
 #include <nuttx/semaphore.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_pinmap.h"
 #include "sam_periphclks.h"
 #include "sam_pio.h"

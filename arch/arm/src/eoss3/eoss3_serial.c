@@ -38,7 +38,6 @@
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
 #include <nuttx/init.h>
-#include <nuttx/power/pm.h>
 #include <nuttx/fs/ioctl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/wqueue.h>
@@ -46,9 +45,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/eoss3_uart.h"
 #include "hardware/eoss3_intr.h"
 #include "eoss3_lowputc.h"

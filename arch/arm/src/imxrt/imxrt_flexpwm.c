@@ -35,7 +35,7 @@
 
 #include <nuttx/timers/pwm.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "imxrt_config.h"
 #include "imxrt_flexpwm.h"

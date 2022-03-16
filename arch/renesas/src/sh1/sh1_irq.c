@@ -30,7 +30,6 @@
 
 #include <nuttx/irq.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 #include "chip.h"
 

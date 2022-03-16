@@ -35,7 +35,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_rtc.h"
 
 #if defined(CONFIG_RTC_HIRES) && defined (CONFIG_SAM34_RTT)

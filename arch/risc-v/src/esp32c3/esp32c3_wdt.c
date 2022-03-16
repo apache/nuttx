@@ -29,7 +29,7 @@
 #include <assert.h>
 #include <debug.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "hardware/esp32c3_rtccntl.h"
 #include "hardware/esp32c3_tim.h"
 #include "hardware/esp32c3_efuse.h"

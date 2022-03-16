@@ -220,9 +220,9 @@
 	.type	__start, #function
 
 __start:
-	/* Make sure that we are in SVC mode with all IRQs disabled */
+	/* Make sure that we are in SYS mode with all IRQs disabled */
 
-	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
 	msr		cpsr_c, r0
 
 	/* Initialize DRAM using a macro provided by board-specific logic */

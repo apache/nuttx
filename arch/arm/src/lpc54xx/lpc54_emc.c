@@ -50,8 +50,7 @@
 
 #include <nuttx/clock.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/lpc54_syscon.h"
 #include "hardware/lpc54_emc.h"
 #include "lpc54_config.h"
@@ -388,7 +387,7 @@ void lpc54_emc_sdram_initialize(
 
   putreg32(2 * EMC_REFRESH_CLOCK_SCALE, LPC54_EMC_DYNREFRESH);
 
-  for (i = 0; i < EMC_SDRAM_WAIT_CYCLES / 2; i ++)
+  for (j = 0; j < EMC_SDRAM_WAIT_CYCLES / 2; j++)
     {
     }
 

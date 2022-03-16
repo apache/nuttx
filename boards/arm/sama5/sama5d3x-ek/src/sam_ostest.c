@@ -32,7 +32,6 @@
 #include <nuttx/irq.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "sama5d3x-ek.h"
 

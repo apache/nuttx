@@ -41,8 +41,6 @@
 #include <nuttx/analog/ioctl.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "hardware/sam_matrix.h"
 #include "hardware/sam_pinmap.h"
 #include "hardware/sam_pio.h"
@@ -505,7 +503,7 @@ static void sam_afec_dmastart(struct adc_dev_s *dev)
 
 #ifdef CONFIG_SAMV7_AFEC_TIOATRIG
 static int sam_afec_settimer(struct samv7_dev_s *priv, uint32_t frequency,
-                            int channel)
+                             int channel)
 {
   uint32_t div;
   uint32_t tcclks;

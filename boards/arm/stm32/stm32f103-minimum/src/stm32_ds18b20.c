@@ -35,7 +35,7 @@
 #include <nuttx/sensors/ds18b20.h>
 
 #include "chip.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "stm32_1wire.h"
 #include "stm32f103_minimum.h"
 

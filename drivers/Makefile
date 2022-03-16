@@ -20,6 +20,8 @@
 
 include $(TOPDIR)/Make.defs
 
+CSRCS = drivers_initialize.c
+
 # Include support for various drivers.  Each Make.defs file will add its
 # files to the source file list, add its DEPPATH info, and will add
 # the appropriate paths to the VPATH variable

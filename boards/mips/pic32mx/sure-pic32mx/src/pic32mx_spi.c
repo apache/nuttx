@@ -31,7 +31,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "mips_arch.h"
+#include "mips_internal.h"
 #include "chip.h"
 #include "pic32mx.h"
 #include "sure-pic32mx.h"

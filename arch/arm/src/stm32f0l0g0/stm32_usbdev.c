@@ -46,7 +46,6 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "hardware/stm32_rcc.h"
 #include "hardware/stm32_usbdev.h"

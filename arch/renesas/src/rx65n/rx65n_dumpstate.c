@@ -32,7 +32,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/syslog/syslog.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 #include "sched/sched.h"
 #include "chip.h"

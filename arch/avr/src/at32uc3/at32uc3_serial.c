@@ -42,7 +42,6 @@
 #include "at32uc3_config.h"
 #include "chip.h"
 #include "at32uc3_usart.h"
-#include "up_arch.h"
 #include "up_internal.h"
 #include "at32uc3.h"
 

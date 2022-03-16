@@ -32,9 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "beaglebone-black.h"
 
 /* The beaglebone black has four user LEDs; all four can be controlled from

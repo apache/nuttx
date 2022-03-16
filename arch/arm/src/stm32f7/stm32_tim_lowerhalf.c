@@ -475,8 +475,7 @@ static void stm32_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-FAR struct timer_lowerhalf_s *stm32_timer_initialize(FAR const char *devpath,
-                                                     int timer)
+int stm32_timer_initialize(FAR const char *devpath, int timer)
 {
   FAR struct stm32_lowerhalf_s *lower;
 
@@ -553,7 +552,7 @@ FAR struct timer_lowerhalf_s *stm32_timer_initialize(FAR const char *devpath,
         break;
 #endif
       default:
-        return 0;
+        return -ENODEV;
     }
 
   /* Initialize the elements of lower half state structure */
@@ -564,7 +563,7 @@ FAR struct timer_lowerhalf_s *stm32_timer_initialize(FAR const char *devpath,
 
   if (lower->tim == NULL)
     {
-      return 0;
+      return -EINVAL;
     }
 
   /* Register the timer driver as /dev/timerX.  The returned value from
@@ -582,10 +581,10 @@ FAR struct timer_lowerhalf_s *stm32_timer_initialize(FAR const char *devpath,
        * indicate the failure (implying the non-unique devpath).
        */
 
-      return 0;
+      return -EEXIST;
     }
 
-  return (FAR struct timer_lowerhalf_s *)lower;
+  return OK;
 }
 
 #endif /* CONFIG_TIMER */

@@ -36,9 +36,7 @@
 #include "chip.h"
 #include "nvic.h"
 #include "ram_vectors.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc54_gpio.h"
 #include "lpc54_irq.h"
 

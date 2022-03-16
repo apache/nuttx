@@ -35,7 +35,7 @@
 #include <arch/board/board.h>
 #include <nuttx/power/pm.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "barriers.h"
 
 #include "nrf52_gpio.h"

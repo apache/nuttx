@@ -41,7 +41,7 @@
 #endif
 
 #include "mpcore.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #ifdef CONFIG_ARMV7A_HAVE_GICv2
 

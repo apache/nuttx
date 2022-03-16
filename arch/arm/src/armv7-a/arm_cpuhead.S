@@ -24,6 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/irq.h>
+
 #include "arm.h"
 #include "cp15.h"
 #include "sctlr.h"
@@ -90,9 +92,15 @@
 	.type	__cpu1_start, #function
 
 __cpu1_start:
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
+
+	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
+
 	/* Set up the stack pointer and the CPU index */
 
 	ldr		sp, .Lcpu1_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
 	mov		r5, #1
 
 	/* Then branch to the common startup logic (PC-relative) */
@@ -108,9 +116,15 @@ __cpu1_start:
 	.type	__cpu2_start, #function
 
 __cpu2_start:
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
+
+	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
+
 	/* Set up the stack pointer and the CPU index */
 
 	ldr		sp, .Lcpu2_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
 	mov		r5, #2
 
 	/* Then branch to the common startup logic (PC-relative) */
@@ -126,9 +140,15 @@ __cpu2_start:
 	.type	__cpu3_start, #function
 
 __cpu3_start:
+	/* Make sure that we are in SYS mode with IRQs and FIQs disabled */
+
+	mov		r0, #(PSR_MODE_SYS | PSR_I_BIT | PSR_F_BIT)
+	msr		cpsr_c, r0
+
 	/* Set up the stack pointer and the CPU index */
 
 	ldr		sp, .Lcpu3_stackpointer
+	sub		sp, sp, #XCPTCONTEXT_SIZE
 	mov		r5, #3
 
 	/* Then branch to the common startup logic (PC-relative) */
@@ -162,11 +182,6 @@ __cpu3_start:
 	.type	.Lcpu_start, #function
 
 .Lcpu_start:
-	/* Make sure that we are in SVC mode with IRQs and FIQs disabled */
-
-	mov		r0, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
-	msr		cpsr_c, r0
-
 	/* The MMU and caches should be disabled */
 
 	mrc		CP15_SCTLR(r0)

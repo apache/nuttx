@@ -40,7 +40,7 @@
 #include <string.h>
 
 #include "lc823450_syscontrol.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "clock/clock.h"
 
 /****************************************************************************

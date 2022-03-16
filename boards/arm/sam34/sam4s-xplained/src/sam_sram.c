@@ -26,7 +26,7 @@
 
 #include <debug.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam4s_periphclks.h"
 #include "hardware/sam_smc.h"
 #include "sam4s-xplained.h"

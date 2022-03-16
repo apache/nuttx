@@ -32,9 +32,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "pcduino_a10.h"
 
 /* The pcDuino v1 has four green LEDs; three can be controlled from software.

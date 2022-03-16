@@ -22,32 +22,9 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <debug.h>
-
 #include <nuttx/arch.h>
-#include <nuttx/sched_note.h>
-#include <nuttx/mm/iob.h>
-#include <nuttx/drivers/drivers.h>
-#include <nuttx/fs/loop.h>
-#include <nuttx/net/loopback.h>
-#include <nuttx/net/tun.h>
-#include <nuttx/net/telnet.h>
-#include <nuttx/syslog/ramlog.h>
-#include <nuttx/syslog/syslog.h>
-#include <nuttx/syslog/syslog_console.h>
-#include <nuttx/serial/pty.h>
-#include <nuttx/crypto/crypto.h>
-#include <nuttx/power/pm.h>
 
-#include <arch/board/board.h>
-
-#include "up_arch.h"
 #include "up_internal.h"
-#include "chip.h"
-
-#include "sched/sched.h"
 
 /****************************************************************************
  * Private Functions
@@ -98,19 +75,6 @@ static inline void up_color_intstack(void)
 
 void up_initialize(void)
 {
-  struct tcb_s *idle;
-
-  /* Initialize global variables */
-
-  CURRENT_REGS = NULL;
-
-  /* Initialize the idle task stack info */
-
-  idle = this_task(); /* It should be idle task */
-  idle->stack_alloc_ptr = g_idle_basestack;
-  idle->stack_base_ptr  = g_idle_topstack;
-  idle->adj_stack_size  = g_idle_topstack - g_idle_basestack;
-
   /* Colorize the interrupt stack */
 
   up_color_intstack();
@@ -137,91 +101,16 @@ void up_initialize(void)
   up_dma_initialize();
 #endif
 
-  /* Register devices */
-
-#if defined(CONFIG_DEV_NULL)
-  devnull_register();   /* Standard /dev/null */
-#endif
-
-#if defined(CONFIG_DEV_RANDOM)
-  devrandom_register(); /* Standard /dev/random */
-#endif
-
-#if defined(CONFIG_DEV_URANDOM)
-  devurandom_register();   /* Standard /dev/urandom */
-#endif
-
-#if defined(CONFIG_DEV_ZERO)
-  devzero_register();   /* Standard /dev/zero */
-#endif
-
-#if defined(CONFIG_DEV_LOOP)
-  loop_register();      /* Standard /dev/loop */
-#endif
-
-#if defined(CONFIG_SCHED_INSTRUMENTATION_BUFFER) && \
-    defined(CONFIG_DRIVER_NOTE)
-  note_register();      /* Non-standard /dev/note */
-#endif
-
   /* Initialize the serial device driver */
 
 #ifdef USE_SERIALDRIVER
   up_serialinit();
 #endif
 
-#ifdef CONFIG_RPMSG_UART
-  rpmsg_serialinit();
-#endif
-
-  /* Initialize the console device driver (if it is other than the standard
-   * serial driver).
-   */
-
-#if defined (CONFIG_ARM_LWL_CONSOLE)
-  lwlconsole_init();
-#elif defined(CONFIG_CONSOLE_SYSLOG)
-  syslog_console_init();
-#endif
-
-#ifdef CONFIG_PSEUDOTERM_SUSV1
-  /* Register the master pseudo-terminal multiplexor device */
-
-  ptmx_register();
-#endif
-
-#if defined(CONFIG_CRYPTO)
-  /* Initialize the HW crypto and /dev/crypto */
-
-  up_cryptoinitialize();
-#endif
-
-#ifdef CONFIG_CRYPTO_CRYPTODEV
-  devcrypto_register();
-#endif
-
 #ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   up_netinitialize();
-#endif
-
-#ifdef CONFIG_NET_LOOPBACK
-  /* Initialize the local loopback device */
-
-  localhost_initialize();
-#endif
-
-#ifdef CONFIG_NET_TUN
-  /* Initialize the TUN device */
-
-  tun_initialize();
-#endif
-
-#ifdef CONFIG_NETDEV_TELNET
-  /* Initialize the Telnet session factory */
-
-  telnet_initialize();
 #endif
 
 #if defined(CONFIG_USBDEV) || defined(CONFIG_USBHOST)

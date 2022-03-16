@@ -35,7 +35,6 @@
 #include <nuttx/tls.h>
 #include <nuttx/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
 
 /****************************************************************************

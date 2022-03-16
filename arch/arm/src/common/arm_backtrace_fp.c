@@ -27,7 +27,6 @@
 #include <nuttx/arch.h>
 
 #include "sched/sched.h"
-
 #include "arm_internal.h"
 
 /****************************************************************************

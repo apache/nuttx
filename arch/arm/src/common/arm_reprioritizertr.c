@@ -170,7 +170,7 @@ void up_reprioritize_rtr(struct tcb_s *tcb, uint8_t priority)
                * ready to run list.
                */
 
-              arm_switchcontext(rtcb->xcp.regs, nexttcb->xcp.regs);
+              arm_switchcontext(&rtcb->xcp.regs, nexttcb->xcp.regs);
 
               /* arm_switchcontext forces a context switch to the task at the
                * head of the ready-to-run list.  It does not 'return' in the

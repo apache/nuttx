@@ -41,7 +41,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/am335x_pinmux.h"
 #include "hardware/am335x_prcm.h"
 #include "hardware/am335x_i2c.h"

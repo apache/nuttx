@@ -51,7 +51,7 @@
 #include "stm32l4_comp.h"
 #include "stm32l4_exti.h"
 #include "stm32l4_gpio.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 #include <errno.h>
 

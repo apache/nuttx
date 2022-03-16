@@ -36,8 +36,7 @@
 #include <debug.h>
 
 #include "chip.h"
-#include "riscv_arch.h"
-
+#include "riscv_internal.h"
 #include "hardware/esp32c3_system.h"
 #include "hardware/esp32c3_uart.h"
 #include "hardware/esp32c3_soc.h"

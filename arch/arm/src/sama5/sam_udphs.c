@@ -67,9 +67,7 @@
 
 #include <nuttx/irq.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "sam_periphclks.h"
 #include "sam_memories.h"
 #include "hardware/sam_udphs.h"

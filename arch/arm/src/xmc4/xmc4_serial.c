@@ -39,9 +39,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "xmc4_config.h"
 #include "hardware/xmc4_usic.h"

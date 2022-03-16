@@ -30,9 +30,7 @@
 
 #include <nuttx/init.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "sam_config.h"
 #include "sam_lowputc.h"
 #include "sam_clockconfig.h"

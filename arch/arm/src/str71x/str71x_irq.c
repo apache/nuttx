@@ -33,7 +33,6 @@
 
 #include "arm.h"
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "str71x.h"
 
@@ -89,7 +88,7 @@ void up_irqinitialize(void)
   /* Enable global ARM interrupts */
 
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
-  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SYS | PSR_F_BIT);
 #endif
 }
 

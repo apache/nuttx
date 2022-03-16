@@ -45,7 +45,7 @@
 #include "hardware/bl602_glb.h"
 #include "hardware/bl602_spi.h"
 #include "hardware/bl602_hbn.h"
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions

@@ -35,9 +35,7 @@
 
 #include "chip.h"
 #include "mpu.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "hardware/lpc17_40_memorymap.h"
 #include "lpc17_40_emacram.h"
 #include "lpc17_40_ohciram.h"

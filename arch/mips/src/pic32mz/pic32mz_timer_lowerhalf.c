@@ -251,7 +251,7 @@ static uint32_t pic32mz_ticks2usec(FAR struct pic32mz_lowerhalf_s *priv,
 static int pic32mz_timer_handler(int irq, FAR void *context, FAR void *arg)
 {
   FAR struct pic32mz_lowerhalf_s *lower =
-    (struct pic32mz_lowerhalf_s *) arg;
+      (FAR struct pic32mz_lowerhalf_s *)arg;
   uint32_t next_interval_us = 0;
 
   PIC32MZ_TIMER_ACKINT(lower->timer);
@@ -530,8 +530,8 @@ static void pic32mz_setcallback(FAR struct timer_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-static int  pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
-                          unsigned long arg)
+static int pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
+                         unsigned long arg)
 {
   int ret = -ENOTTY;
 
@@ -557,8 +557,8 @@ static int  pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
  *
  ****************************************************************************/
 
-static int  pic32mz_maxtimeout(FAR struct timer_lowerhalf_s *lower,
-                               FAR uint32_t *maxtimeout)
+static int pic32mz_maxtimeout(FAR struct timer_lowerhalf_s *lower,
+                              FAR uint32_t *maxtimeout)
 {
   FAR struct pic32mz_lowerhalf_s *priv =
     (FAR struct pic32mz_lowerhalf_s *)lower;

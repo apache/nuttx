@@ -72,11 +72,11 @@ static bool    timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg);
 static int     timer_open(FAR struct file *filep);
 static int     timer_close(FAR struct file *filep);
 static ssize_t timer_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 static ssize_t timer_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                           size_t buflen);
 static int     timer_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -119,10 +119,9 @@ static bool timer_notifier(FAR uint32_t *next_interval_us, FAR void *arg)
 
   /* Signal the waiter.. if there is one */
 
-  nxsig_notification(notify->pid, &notify->event,
-                     SI_QUEUE, &upper->work);
+  nxsig_notification(notify->pid, &notify->event, SI_QUEUE, &upper->work);
 
-  return true;
+  return notify->periodic;
 }
 
 /****************************************************************************
@@ -378,8 +377,8 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         if (notify != NULL)
           {
             memcpy(&upper->notify, notify, sizeof(*notify));
-            ret = timer_setcallback((FAR void *)upper,
-                                    timer_notifier, upper);
+            ret = timer_setcallback((FAR void *)upper, timer_notifier,
+                                    (FAR void *)upper);
           }
         else
           {
@@ -399,7 +398,7 @@ static int timer_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 
         if (lower->ops->maxtimeout) /* Optional */
           {
-            ret = lower->ops->maxtimeout(lower, (uint32_t *)arg);
+            ret = lower->ops->maxtimeout(lower, (FAR uint32_t *)arg);
           }
         else
           {

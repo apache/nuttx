@@ -58,6 +58,16 @@ int tm4c_bringup(void)
     }
 #endif
 
+#ifdef CONFIG_TIVA_CAN
+  /* Initialize CAN module and register the CAN driver(s) */
+
+  ret = tm4c_can_setup();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: tm4c_can_setup failed %d\n", ret);
+    }
+#endif
+
 #ifdef HAVE_AT24
   /* Initialize the AT24 driver */
 

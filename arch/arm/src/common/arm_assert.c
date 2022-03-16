@@ -39,8 +39,6 @@
 
 #include "sched/sched.h"
 #include "irq/irq.h"
-
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

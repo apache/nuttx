@@ -218,6 +218,7 @@ _xtensa_user_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save EXCCAUSE and EXCVADDR into the user frame */
 
@@ -228,9 +229,6 @@ _xtensa_user_handler:
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Save current SP before (possibly) overwriting it,
@@ -299,7 +297,7 @@ _xtensa_user_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	sp, a2, (4 * REG_A1)			/* Retrieve interrupt stack frame */
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure PS and EPC written */
 
@@ -338,18 +336,15 @@ _xtensa_syscall_handler:
 	s32i	a0, sp, (4 * REG_PS)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
+
+	/* Save rest of interrupt context. */
+
+	call0	_xtensa_context_save
 
 	/* Save EPC */
 
 #if XCHAL_HAVE_LOOPS != 0
-	/* Save A2 and A3 now to give us some registers to work with.  A0, A2
-	 * and A3 are now available.  NOTE that A3 will get saved again in
-	 * _xtensa_context_save().
-	 */
-
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
-	s32i	a3, sp, (4 * REG_A3)			/* Save interruptee's A3 */
-
 	/* Get the interruptee's PC and skip over the 'syscall' instruction.
 	 * If it's at the end of a zero-overhead loop and it's not on the last
 	 * iteration, decrement loop counter and skip to beginning of loop.
@@ -380,16 +375,7 @@ _xtensa_syscall_handler:
 
 	wsr		a0, EPC_1						/* Update PC */
 	s32i	a0, sp, (4 * REG_PC)
-
-	/* Save a2 which will hold the argument to _xtensa_context_save*/
-
-	s32i	a2, sp, (4 * REG_A2)			/* Save interruptee's A2 */
 #endif
-
-	/* Save rest of interrupt context. */
-
-	mov		a2, sp							/* Address of state save on stack */
-	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Dispatch the sycall as with other interrupts. */
 
@@ -441,7 +427,7 @@ _xtensa_syscall_handler:
 	l32i	a0, a2, (4 * REG_PC)			/* Retrieve interruptee's PC */
 	wsr		a0, EPC_1
 	l32i	a0, a2, (4 * REG_A0)			/* Retrieve interruptee's A0 */
-	l32i	sp, a2, (4 * REG_A1)			/* Remove interrupt stack frame */
+	l32i	sp, a2, (4 * REG_A1)			/* Retrieve interrupt stack frame */
 	l32i	a2, a2, (4 * REG_A2)			/* Retrieve interruptee's A2 */
 	rsync									/* Ensure PS and EPC written */
 
@@ -513,12 +499,10 @@ _xtensa_coproc_handler:
 	s32i	a0, sp, (4 * REG_PC)
 	rsr		a0, EXCSAVE_1					/* Save interruptee's a0 */
 	s32i	a0, sp, (4 * REG_A0)
+	s32i	a2, sp, (4 * REG_A2)
 
 	/* Save rest of interrupt context. */
 
-	s32i	a2, sp, (4 * REG_A2)
-	mov		a2, sp							/* Address of state save on stack */
-	s32i	a3, sp, (4 * REG_A3)
 	call0	_xtensa_context_save			/* Save full register state */
 
 	/* Switch to an interrupt stack if we have one */

@@ -34,8 +34,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/timers/timer.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "nrf52_tim.h"
 
 /****************************************************************************

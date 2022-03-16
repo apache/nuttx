@@ -37,8 +37,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "hardware/lpc54_rtc.h"
 #include "lpc54_enableclk.h"
 #include "lpc54_rtc.h"

@@ -28,7 +28,7 @@
 #include <nuttx/arch.h>
 #include <errno.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc43_pinconfig.h"
 
 /****************************************************************************

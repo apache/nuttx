@@ -58,19 +58,3 @@ void up_allocate_heap(FAR void **heap_start, size_t * heap_size)
   *heap_start = (FAR void *)g_idle_topstack;
   *heap_size = CONFIG_RAM_END - g_idle_topstack;
 }
-
-/****************************************************************************
- * Name: minerva_add_region
- *
- * Description:
- *   Memory may be added in non-contiguous chunks.  Additional chunks are
- *   added by calling this function.
- *
- ****************************************************************************/
-
-#if CONFIG_MM_REGIONS > 1
-void minerva_add_region(void)
-{
-#  warning Missing logic
-}
-#endif

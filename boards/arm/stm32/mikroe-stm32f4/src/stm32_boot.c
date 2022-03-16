@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "mikroe-stm32f4.h"
 
 /****************************************************************************

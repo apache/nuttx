@@ -34,7 +34,7 @@
 #include <nuttx/timers/watchdog.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "lpc43_wdt.h"
 #include "hardware/lpc43_wwdt.h"
 

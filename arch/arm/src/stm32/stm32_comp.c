@@ -33,7 +33,7 @@
 #include <nuttx/analog/comp.h>
 #include <nuttx/analog/ioctl.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "stm32_comp.h"
 #include "stm32_gpio.h"

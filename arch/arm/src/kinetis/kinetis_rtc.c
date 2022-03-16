@@ -36,8 +36,7 @@
 #include <debug.h>
 #include <errno.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "kinetis_config.h"
 #include "chip.h"
 #include "hardware/kinetis_rtc.h"

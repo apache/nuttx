@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/power/pm.h>
-
 #include "arm_internal.h"
 #include "stm32_pm.h"
 #include "mikroe-stm32f4.h"
@@ -56,10 +54,6 @@
 
 void arm_pminitialize(void)
 {
-  /* Then initialize the NuttX power management subsystem proper */
-
-  pm_initialize();
-
 #if defined(CONFIG_ARCH_IDLE_CUSTOM) && defined(CONFIG_PM_BUTTONS)
   /* Initialize the buttons to wake up the system from low power modes */
 

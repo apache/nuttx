@@ -48,9 +48,7 @@
 
 #include <arch/board/board.h> /* May redefine PIO settings */
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "chip.h"
 #include "sam_periphclks.h"
 #include "sam_memories.h"

@@ -36,7 +36,6 @@
 
 #include <arch/chip/chip.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "sched/sched.h"
 #include "chip.h"

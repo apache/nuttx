@@ -29,7 +29,7 @@
 
 #include "imxrt_start.h"
 #include "teensy-4.h"
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "imxrt_flexspi_nor_boot.h"
 
 /****************************************************************************

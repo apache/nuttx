@@ -29,8 +29,6 @@
 #include <arch/board/board.h>
 
 #include "riscv_internal.h"
-#include "riscv_arch.h"
-
 #include "k210_config.h"
 #include "hardware/k210_memorymap.h"
 #include "hardware/k210_uart.h"

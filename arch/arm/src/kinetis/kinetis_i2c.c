@@ -42,9 +42,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "kinetis_config.h"
 #include "chip.h"
 #include "hardware/kinetis_i2c.h"

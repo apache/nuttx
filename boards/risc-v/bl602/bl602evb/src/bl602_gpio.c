@@ -31,7 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/ioexpander/gpio.h>
 #include <arch/board/board.h>
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "bl602_gpio.h"
 
 #if defined(CONFIG_DEV_GPIO) && !defined(CONFIG_GPIO_LOWER_HALF)

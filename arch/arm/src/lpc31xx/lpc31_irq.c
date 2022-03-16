@@ -32,9 +32,7 @@
 #include <arch/irq.h>
 
 #include "arm.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc31_intc.h"
 #include "lpc31_cgudrvr.h"
 #include "lpc31.h"
@@ -115,7 +113,7 @@ void up_irqinitialize(void)
 #ifndef CONFIG_SUPPRESS_INTERRUPTS
   /* And finally, enable interrupts */
 
-  up_irq_restore(PSR_MODE_SVC | PSR_F_BIT);
+  up_irq_restore(PSR_MODE_SYS | PSR_F_BIT);
 #endif
 }
 

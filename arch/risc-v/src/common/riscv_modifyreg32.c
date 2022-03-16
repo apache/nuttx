@@ -29,7 +29,7 @@
 
 #include <nuttx/spinlock.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Public Functions

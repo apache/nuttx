@@ -31,9 +31,7 @@
 #include <arch/board/board.h>
 #include <arch/sama5/chip.h>
 
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "sam_periphclks.h"
 #include "sam_clockconfig.h"
 #include "hardware/sam_pmc.h"

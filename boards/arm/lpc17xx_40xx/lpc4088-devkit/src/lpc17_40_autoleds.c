@@ -33,9 +33,7 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
-
 #include "lpc17_40_gpio.h"
 #include "lpc4088-devkit.h"
 

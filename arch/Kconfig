@@ -85,6 +85,7 @@ config ARCH_SIM
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_VFORK
 	select ARCH_HAVE_SETJMP
+	select ARCH_HAVE_CUSTOMOPT
 	select ARCH_SETJMP_H
 	select ALARM_ARCH
 	select ONESHOT

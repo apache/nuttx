@@ -35,7 +35,7 @@
 
 #include <nuttx/kmalloc.h>
 
-#include "riscv_arch.h"
+#include "riscv_internal.h"
 #include "chip.h"
 #include "hardware/rv32m1_port.h"
 #include "hardware/rv32m1_gpio.h"

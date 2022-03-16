@@ -35,7 +35,7 @@
 #include <nuttx/power/bq27426.h>
 #include <nuttx/power/battery_ioctl.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 #include "hardware/sam_i2c_master.h"
 #include "metro-m4.h"

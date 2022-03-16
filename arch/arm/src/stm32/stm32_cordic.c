@@ -32,7 +32,7 @@
 #include <arch/board/board.h>
 #include <nuttx/math/cordic.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "chip.h"
 
 #include "hardware/stm32g4xxxx_cordic.h"

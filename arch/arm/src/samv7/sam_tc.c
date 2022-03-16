@@ -63,7 +63,7 @@
 #include <nuttx/semaphore.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "sam_periphclks.h"
 #include "hardware/sam_pinmap.h"
 #include "hardware/sam_pmc.h"
@@ -1424,6 +1424,34 @@ uint32_t sam_tc_getpending(TC_HANDLE handle)
   struct sam_chan_s *chan = (struct sam_chan_s *)handle;
   DEBUGASSERT(chan);
   return sam_chan_getreg(chan, SAM_TC_SR_OFFSET);
+}
+
+/****************************************************************************
+ * Name: sam_tc_settcclks
+ *
+ * Description:
+ *   Set the value of TCCLKS clock selection in TC_CMR register
+ *
+ * Input Parameters:
+ *   handle  The handle that represents the timer state
+ *   tcclks  The clock selection value to set
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
+void sam_tc_settcclks(TC_HANDLE handle, uint32_t tcclks)
+{
+  struct sam_chan_s *chan = (struct sam_chan_s *)handle;
+  uint32_t regval;
+
+  DEBUGASSERT(chan);
+
+  regval  = sam_chan_getreg(chan, SAM_TC_CMR_OFFSET);
+  regval &= ~TC_CMR_TCCLKS_MASK;
+  regval |= tcclks;
+  sam_chan_putreg(chan, SAM_TC_CMR_OFFSET, regval);
 }
 
 /****************************************************************************

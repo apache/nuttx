@@ -36,8 +36,6 @@
 #include <nuttx/semaphore.h>
 #include <arch/stm32f7/chip.h>
 
-#include "arm_arch.h"
-
 #include "arm_internal.h"
 #include "sched/sched.h"
 #include "stm32_dma.h"

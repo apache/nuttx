@@ -44,8 +44,6 @@
 #include <nuttx/spi/spi.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 #include "xmc4_gpio.h"
 #include "xmc4_spi.h"

@@ -98,8 +98,8 @@ static const struct timer_ops_s g_esp32s3_timer_ops =
   .getstatus   = timer_lh_getstatus,
   .settimeout  = timer_lh_settimeout,
   .setcallback = timer_lh_setcallback,
-  .maxtimeout  = timer_lh_maxtimeout,
   .ioctl       = NULL,
+  .maxtimeout  = timer_lh_maxtimeout
 };
 
 #if defined(CONFIG_ESP32S3_TIMER0)

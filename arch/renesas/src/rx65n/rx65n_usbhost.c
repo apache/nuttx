@@ -50,9 +50,7 @@
 
 #include <arch/board/board.h>
 
-#include "up_arch.h"
 #include "up_internal.h"
-
 #include "chip.h"
 #include "rx65n_usbhost.h"
 

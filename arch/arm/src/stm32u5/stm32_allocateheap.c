@@ -38,7 +38,6 @@
 
 #include "chip.h"
 #include "mpu.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 #include "stm32_mpuinit.h"
 

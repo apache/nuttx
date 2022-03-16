@@ -26,7 +26,7 @@
 
 #include <stdbool.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "nvic.h"
 #include "stm32_rcc.h"
 #include "stm32_pwr.h"

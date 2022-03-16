@@ -32,8 +32,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
-
+#include "arm_internal.h"
 #include "imxrt_lpspi.h"
 #include "imxrt_gpio.h"
 #include "teensy-4.h"

@@ -29,7 +29,6 @@
 #include <arch/board/board.h>
 
 #include "chip.h"
-#include "arm_arch.h"
 #include "arm_internal.h"
 
 /****************************************************************************

@@ -62,8 +62,6 @@
 #include <nuttx/analog/dac.h>
 
 #include "arm_internal.h"
-#include "arm_arch.h"
-
 #include "chip.h"
 
 #include "lpc43_syscon.h"

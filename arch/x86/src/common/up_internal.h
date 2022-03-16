@@ -30,6 +30,7 @@
 #ifndef __ASSEMBLY__
 #  include <nuttx/compiler.h>
 #  include <stdint.h>
+#  include <arch/io.h>
 #endif
 
 /****************************************************************************
@@ -82,6 +83,13 @@
 #define STACK_ALIGN_MASK    (STACK_ALIGNMENT - 1)
 #define STACK_ALIGN_DOWN(a) ((a) & ~STACK_ALIGN_MASK)
 #define STACK_ALIGN_UP(a)   (((a) + STACK_ALIGN_MASK) & ~STACK_ALIGN_MASK)
+
+#define getreg8(p)          inb(p)
+#define putreg8(v,p)        outb(v,p)
+#define getreg16(p)         inw(p)
+#define putreg16(v,p)       outw(v,p)
+#define getreg32(p)         inl(p)
+#define putreg32(v,p)       outl(v,p)
 
 /* Macros to handle saving and restore interrupt state.  In the current
  * model, the state is copied from the stack to the TCB, but only a
@@ -153,6 +161,11 @@ extern uint32_t _ebss;            /* End+1 of .bss */
  ****************************************************************************/
 
 #ifndef __ASSEMBLY__
+/* Atomic modification of registers */
+
+void modifyreg8(unsigned int addr, uint8_t clearbits, uint8_t setbits);
+void modifyreg16(unsigned int addr, uint16_t clearbits, uint16_t setbits);
+void modifyreg32(unsigned int addr, uint32_t clearbits, uint32_t setbits);
 
 /****************************************************************************
  * Name: x86_boardinitialize
@@ -200,14 +213,6 @@ void up_earlyserialinit(void);
 #ifdef USE_SERIALDRIVER
 void up_serialinit(void);
 #endif
-
-#ifdef CONFIG_RPMSG_UART
-void rpmsg_serialinit(void);
-#endif
-
-/* Defined in xyz_watchdog.c */
-
-void up_wdtinit(void);
 
 /* Defined in board/up_network.c */
 

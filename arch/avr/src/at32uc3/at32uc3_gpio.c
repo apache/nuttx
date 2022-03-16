@@ -31,7 +31,6 @@
 #include "up_internal.h"
 #include "at32uc3.h"
 
-#include "up_arch.h"
 #include "chip.h"
 #include "at32uc3_gpio.h"
 

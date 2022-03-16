@@ -35,7 +35,6 @@
 #include <nuttx/tls.h>
 #include <nuttx/board.h>
 
-#include "z80_arch.h"
 #include "z80_internal.h"
 
 /****************************************************************************

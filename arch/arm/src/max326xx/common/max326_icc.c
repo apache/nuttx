@@ -28,7 +28,7 @@
 #include <stdbool.h>
 #include <assert.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "hardware/max326_icc.h"
 #include "max326_periphclks.h"
 #include "max326_icc.h"

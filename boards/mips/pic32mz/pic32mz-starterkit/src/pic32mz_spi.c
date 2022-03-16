@@ -31,8 +31,7 @@
 #include <nuttx/spi/spi.h>
 #include <arch/board/board.h>
 
-#include "mips_arch.h"
-
+#include "mips_internal.h"
 #include "pic32mz-starterkit.h"
 
 #ifdef CONFIG_PIC32MZ_SPI

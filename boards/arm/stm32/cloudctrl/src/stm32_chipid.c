@@ -28,7 +28,7 @@
 
 #include <arch/board/board.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -49,7 +49,7 @@ const char *stm32_getchipid(void)
 
   for (i = 0; i < 12; i++)
     {
-      cpuid[i] = getreg8(0x1ffff7e8+i);
+      cpuid[i] = getreg8(0x1ffff7e8 + i);
     }
 
   return cpuid;
@@ -63,7 +63,7 @@ const char *stm32_getchipid_string(void)
 
   for (i = 0, c = 0; i < 12; i++)
     {
-      sprintf(&cpuid[c], "%02X", getreg8(0x1ffff7e8+11-i));
+      sprintf(&cpuid[c], "%02X", getreg8(0x1ffff7e8 + 11 - i));
       c += 2;
       if (i % 4 == 3)
         {

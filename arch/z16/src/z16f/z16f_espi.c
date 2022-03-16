@@ -35,8 +35,8 @@
 #include <nuttx/semaphore.h>
 #include <nuttx/spi/spi.h>
 
-#include "z16_arch.h"
 #include "chip.h"
+#include "z16_internal.h"
 
 #ifdef CONFIG_Z16F_ESPI
 
