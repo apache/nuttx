@@ -118,22 +118,6 @@ EXTERN struct pm_global_s g_pmglobals;
  ****************************************************************************/
 
 /****************************************************************************
- * Name: pm_auto_updatestate
- *
- * Description:
- *   This function update the domain state and notify the power system.
- *
- * Input Parameters:
- *   domain - The PM domain to check
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-void pm_auto_updatestate(int domain);
-
-/****************************************************************************
  * Name: pm_lock
  *
  * Description:
