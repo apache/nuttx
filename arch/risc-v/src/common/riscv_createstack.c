@@ -213,18 +213,27 @@ int up_create_stack(struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 #ifdef CONFIG_STACK_COLORATION
 void riscv_stack_color(void *stackbase, size_t nbytes)
 {
-  /* Take extra care that we do not write outsize the stack boundaries */
+  uintptr_t start;
+  uintptr_t end;
+  size_t nwords;
+  uint32_t *ptr;
 
-  uint32_t *stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  uintptr_t stkend = nbytes ? (((uintptr_t)stackbase + nbytes) & ~3):
-                     up_getsp(); /* 0: colorize the running stack */
-  size_t    nwords = (stkend - (uintptr_t)stackbase) >> 2;
+  /* Take extra care that we do not write outside the stack boundaries */
+
+  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
+          up_getsp(); /* 0: colorize the running stack */
+
+  /* Get the adjusted size based on the top and bottom of the stack */
+
+  nwords = (end - start) >> 2;
+  ptr  = (uint32_t *)start;
 
   /* Set the entire stack to the coloration value */
 
   while (nwords-- > 0)
     {
-      *stkptr++ = STACK_COLOR;
+      *ptr++ = STACK_COLOR;
     }
 }
 #endif
