@@ -41,7 +41,7 @@ configuration system with:
 
 .. code-block:: console
 
-   $ cd nuttx/
+   $ cd nuttx
    $ make menuconfig
 
 Modifying the configuration is covered in :doc:`configuring`.
@@ -53,7 +53,7 @@ We can now build NuttX. To do so, you can simply run:
 
   .. code-block:: console
 
-     $ cd nuttx/
+     $ cd nuttx
      $ make
 
 The build will complete by generating the binary outputs

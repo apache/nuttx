@@ -152,8 +152,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
   
     .. code-block:: console
 
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ git clone https://github.com/apache/incubator-nuttx.git nuttx
        $ git clone https://github.com/apache/incubator-nuttx-apps apps
 
@@ -161,8 +161,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
     .. code-block:: console
 
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ curl -L https://github.com/apache/incubator-nuttx/tarball/master -o nuttx.tar.gz 
        $ curl -L https://github.com/apache/incubator-nuttx-apps/tarball/master -o apps.tar.gz
        $ tar zxf nuttx.tar.gz --one-top-level=nuttx --strip-components 1
@@ -178,8 +178,8 @@ Apache NuttX is actively developed on GitHub. There are two main repositories, `
 
     .. code-block:: console
     
-       $ mkdir nuttx
-       $ cd nuttx
+       $ mkdir nuttxspace
+       $ cd nuttxspace
        $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-10.1.0-incubating.tar.gz?action=download -o nuttx.tar.gz 
        $ curl -L https://www.apache.org/dyn/closer.lua/incubator/nuttx/10.1.0/apache-nuttx-apps-10.1.0-incubating.tar.gz?action=download -o apps.tar.gz
        $ tar zxf nuttx.tar.gz
