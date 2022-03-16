@@ -61,6 +61,7 @@
 #define AW86225_RL_FORMULA(code)            (((code) * 678* 100) / (1024))
 #define AW86225_RL_MAX                      (29000 * 1.3)
 #define AW86225_SINEWAVE_ID                 (4) /* sinewave id */
+#define MAX_RETRIES                          5
 
 /****************************************************************************
  * Private Types
@@ -345,6 +346,7 @@ static int aw86225_i2c_read(FAR struct aw86225_dev_s *priv, uint8_t addr,
 {
   struct i2c_msg_s msg[2];
   int ret;
+  int retries;
 
   msg[0].frequency = priv->config->freq;
   msg[0].addr      = priv->config->addr;
@@ -358,13 +360,20 @@ static int aw86225_i2c_read(FAR struct aw86225_dev_s *priv, uint8_t addr,
   msg[1].buffer    = val;
   msg[1].length    = cnt;
 
-  ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
-  if (ret < 0)
+  for (retries = 0; retries < MAX_RETRIES; retries++)
     {
-      mtrerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
+      if (ret >= 0)
+        {
+          break;
+        }
+      else
+        {
+          mtrerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+        }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -393,6 +402,7 @@ static int aw86225_i2c_write(FAR struct aw86225_dev_s *priv, uint8_t addr,
 {
   struct i2c_msg_s msg[2];
   int ret;
+  int retries;
 
   msg[0].frequency = priv->config->freq;
   msg[0].addr      = priv->config->addr;
@@ -406,14 +416,20 @@ static int aw86225_i2c_write(FAR struct aw86225_dev_s *priv, uint8_t addr,
   msg[1].buffer    = (FAR uint8_t *)val;
   msg[1].length    = cnt;
 
-  ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
-
-  if (ret < 0)
+  for (retries = 0; retries < MAX_RETRIES; retries++)
     {
-      mtrerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+      ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
+      if (ret >= 0)
+        {
+          break;
+        }
+      else
+        {
+          mtrerr("ERROR: I2C_TRANSFER failed: %d\n", ret);
+        }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************

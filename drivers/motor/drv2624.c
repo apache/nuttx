@@ -202,7 +202,7 @@
 #define DRV2624_CALIB_PROCESS_WAITTIME             (600*1000)
 
 #define DRV2624_FW_HEAD_LENGTH                     (10)
-
+#define MAX_RETRIES                                (5)
 /****************************************************************************
  * Private Types
  ****************************************************************************/
@@ -370,6 +370,7 @@ static int drv2624_i2c_read(FAR struct drv2624_dev_s *priv, uint8_t addr,
 {
   struct i2c_msg_s msg[2];
   int ret;
+  int retries;
 
   msg[0].frequency = priv->config->freq;
   msg[0].addr      = priv->config->addr;
@@ -383,13 +384,20 @@ static int drv2624_i2c_read(FAR struct drv2624_dev_s *priv, uint8_t addr,
   msg[1].buffer    = val;
   msg[1].length    = cnt;
 
-  ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
-  if (ret < 0)
+  for (retries = 0; retries < MAX_RETRIES; retries++)
     {
-      mtrerr("I2C_TRANSFER failed: %d\n", ret);
+      ret = I2C_TRANSFER(priv->config->i2c, msg, 2);
+      if (ret >= 0)
+        {
+          break;
+        }
+      else
+        {
+          mtrerr("I2C_TRANSFER failed: %d\n", ret);
+        }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
@@ -444,6 +452,7 @@ static int drv2624_i2c_writereg(FAR struct drv2624_dev_s *priv, uint8_t addr,
   struct  i2c_msg_s msg;
   int ret;
   uint8_t txbuffer[2];
+  int retries;
 
   txbuffer[0]   = addr;
   txbuffer[1]   = val;
@@ -454,13 +463,20 @@ static int drv2624_i2c_writereg(FAR struct drv2624_dev_s *priv, uint8_t addr,
   msg.buffer    = txbuffer;
   msg.length    = 2;
 
-  ret = I2C_TRANSFER(priv->config->i2c, &msg, 1);
-  if (ret < 0)
+  for (retries = 0; retries < MAX_RETRIES; retries++)
     {
-      mtrerr("I2C_TRANSFER failed ret = %d\n", ret);
+      ret = I2C_TRANSFER(priv->config->i2c, &msg, 1);
+      if (ret >= 0)
+        {
+          break;
+        }
+      else
+        {
+          mtrerr("I2C_TRANSFER failed ret = %d\n", ret);
+        }
     }
 
-  return ret;
+  return (ret >= 0) ? OK : ret;
 }
 
 /****************************************************************************
