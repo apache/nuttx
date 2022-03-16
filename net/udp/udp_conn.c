@@ -696,6 +696,10 @@ void udp_free(FAR struct udp_conn_s *conn)
 
 #endif
 
+  /* Clear the connection structure */
+
+  memset(conn, 0, sizeof(*conn));
+
   /* Free the connection */
 
   dq_addlast(&conn->sconn.node, &g_free_udp_connections);
