@@ -812,9 +812,6 @@ void up_lowputc(char ch)
   /* Then send the character */
 
   esp32s3_lowputc_send_byte(priv, ch);
-
-#elif defined (CONFIG_ESP32S3_USBSERIAL)
-  esp32s3_usbserial_write(ch);
 #endif /* CONSOLE_UART */
 }
 

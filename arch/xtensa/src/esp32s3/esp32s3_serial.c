@@ -51,10 +51,6 @@
 #include "esp32s3_irq.h"
 #include "esp32s3_lowputc.h"
 
-#ifdef CONFIG_ESP32S3_USBSERIAL
-#  include "esp32s3_usbserial.h"
-#endif
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -95,11 +91,6 @@
 #    define UART1_ASSIGNED      1
 #  endif
 #endif /* CONSOLE_UART */
-
-#ifdef CONFIG_ESP32S3_USBSERIAL
-#  define CONSOLE_DEV           g_uart_usbserial
-#  define TTYACM0_DEV           g_uart_usbserial
-#endif
 
 /* Pick ttys1 */
 
@@ -1092,10 +1083,6 @@ void xtensa_serialinit(void)
 
 #ifdef TTYS1_DEV
   uart_register("/dev/ttyS1", &TTYS1_DEV);
-#endif
-
-#ifdef CONFIG_ESP32S3_USBSERIAL
-  uart_register("/dev/ttyACM0", &TTYACM0_DEV);
 #endif
 }
 
