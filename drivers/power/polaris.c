@@ -733,7 +733,7 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
       return ret;
     }
 
-  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %08X \n", reg_value);
+  batinfo("[WLC] read WLC_RX_INTR_LATCH_REG is %08"PRIx32"\n", reg_value);
 
   rx_int_state->wlc_rx_int_otp       =
       ((reg_value & WLC_RX_OTP_INT_MASK) == false) ? false : true;
@@ -757,7 +757,7 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   batinfo("[WLC] start to CLR INTR states !!!\n");
   reg_value = 0xffffffff;
   ret = fw_i2c_write(priv, WLC_RX_INTR_CLR_REG, (uint8_t *)&reg_value, 4);
-  batinfo("[WLC] read WLC_RX_INTR_CLR_REG is %08X \n", reg_value);
+  batinfo("[WLC] read WLC_RX_INTR_CLR_REG is %08"PRIx32" \n", reg_value);
   if (ret != OK)
     {
       baterr("[WLC] Failed to CLR INTR states !!!\n");
@@ -785,6 +785,7 @@ static void stwlc38_worker(FAR void *arg)
 
   /* Read out the latest rx data */
 
+  memset(&rx_int_state, 0, sizeof(struct rx_int_state_s));
   if (stwlc38_check_intr(priv, &rx_int_state) == 0)
     {
       /* push data to upper half driver */
@@ -1090,7 +1091,7 @@ static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
   uint16_t reg_value;
 
-  if (fw_i2c_read(priv, WLC_RX_VOUT_SET_REG, &reg_value, 2) < OK)
+  if (fw_i2c_read(priv, WLC_RX_VOUT_SET_REG, (FAR uint8_t *)&reg_value, 2) < OK)
     {
       baterr("[WLC] Error in reading WLC_RX_VOUT_SET_REG\n");
       return E_BUS_R;

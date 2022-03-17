@@ -265,10 +265,9 @@ static int get_cps4019_chip_info(FAR struct cps4019_dev_s *priv,
   info->fw_revision_l = (uint16_t)(read_buff[2] + (read_buff[3] << 8));
   info->fw_revision_h = (uint16_t)(read_buff[4] + (read_buff[5] << 8));
 
-  batinfo("[CPS] ChipID: %04X Chip Revision: %02X CustomerID: %02X \
-          RomID: %04X NVMPatchID: %04X RAMPatchID: %04X CFG: %04X \
-          PE: %04X\n", info->chip_id, info->fw_revision_l, \
-          info->fw_revision_h);
+  batinfo("[CPS] ChipID: %04X Chip Revision: %02X CustomerID: %02X\n",
+          info->chip_id, info->fw_revision_l, info->fw_revision_h);
+
   return OK;
 }
 
@@ -603,7 +602,7 @@ static ssize_t nvm_program_show(FAR struct cps4019_dev_s *priv)
 
   chip_version = chip_info.fw_revision_l << 2 | chip_info.fw_revision_h;
   batinfo("[CPS] chip_id: 0x%x\n", chip_info.chip_id);
-  batinfo("[CPS] chip_version: 0x%x\n", chip_version);
+  batinfo("[CPS] chip_version: 0x%"PRIx32"\n", chip_version);
 
   /**************************************************************************
    * program both cfg and patch
