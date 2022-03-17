@@ -417,7 +417,8 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 
 #ifdef CONFIG_DEBUG_MM
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
-                              "usage: <pid/used/free>\n"
+                              "usage: <pid/used/free/on/off>\n"
+                              "on/off backtrace\n"
                               "pid: dump pid allocated node\n");
 #else
   linesize  = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
@@ -448,7 +449,7 @@ static ssize_t memdump_read(FAR struct file *filep, FAR char *buffer,
 static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
                              size_t buflen)
 {
-  FAR const struct procfs_meminfo_entry_s *entry;
+  FAR struct procfs_meminfo_entry_s *entry;
   FAR struct meminfo_file_s *procfile;
   pid_t pid = INVALID_PROCESS_ID;
 
@@ -458,6 +459,27 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 
   procfile = filep->f_priv;
   DEBUGASSERT(procfile);
+
+#ifdef CONFIG_DEBUG_MM
+  if (strcmp(buffer, "on") == 0)
+    {
+      for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+        {
+          entry->backtrace = true;
+        }
+
+      return buflen;
+    }
+  else if (strcmp(buffer, "off") == 0)
+    {
+      for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
+        {
+          entry->backtrace = false;
+        }
+
+      return buflen;
+    }
+#endif
 
   switch (buffer[0])
     {
