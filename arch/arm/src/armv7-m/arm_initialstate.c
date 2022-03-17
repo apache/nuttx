@@ -86,10 +86,9 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Initialize the context registers to stack top */
 
-  xcp->regs = (FAR void *)STACK_ALIGN_DOWN(
-                          (uint32_t)tcb->stack_base_ptr +
-                                    tcb->adj_stack_size -
-                                    XCPTCONTEXT_SIZE);
+  xcp->regs = (FAR void *)((uint32_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size -
+                                     XCPTCONTEXT_SIZE);
 
   /* Initialize the xcp registers */
 
@@ -97,7 +96,8 @@ void up_initial_state(struct tcb_s *tcb)
 
   /* Save the initial stack pointer */
 
-  xcp->regs[REG_SP]      = (uint32_t)xcp->regs;
+  xcp->regs[REG_SP]      = (uint32_t)tcb->stack_base_ptr +
+                                     tcb->adj_stack_size;
 
 #ifdef CONFIG_ARMV7M_STACKCHECK
   /* Set the stack limit value */
