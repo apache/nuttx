@@ -37,6 +37,7 @@
 #include "hardware/esp32s2_extmem.h"
 #include "esp32s2_clockconfig.h"
 #include "esp32s2_region.h"
+#include "esp32s2_spiram.h"
 #include "esp32s2_start.h"
 #include "esp32s2_lowputc.h"
 #include "esp32s2_wdt.h"
@@ -110,6 +111,9 @@ typedef enum
   CACHE_LINE_SIZE_64B = 2,            /* 64 Byte cache line size */
 } cache_line_size_t;
 
+#define CACHE_SIZE_8KB  CACHE_SIZE_HALF
+#define CACHE_SIZE_16KB CACHE_SIZE_FULL
+
 /****************************************************************************
  * ROM Function Prototypes
  ****************************************************************************/
@@ -123,13 +127,18 @@ extern int cache_ibus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
 
 extern uint32_t cache_suspend_icache(void);
 extern void cache_resume_icache(uint32_t val);
+extern void cache_invalidate_dcache_all(void);
 extern void cache_invalidate_icache_all(void);
+extern void cache_set_dcache_mode(cache_size_t cache_size, cache_ways_t ways,
+                                  cache_line_size_t cache_line_size);
 extern void cache_set_icache_mode(cache_size_t cache_size, cache_ways_t ways,
                                   cache_line_size_t cache_line_size);
 extern void cache_allocate_sram(cache_layout_t sram0_layout,
                                 cache_layout_t sram1_layout,
                                 cache_layout_t sram2_layout,
                                 cache_layout_t sram3_layout);
+extern void esp_config_data_cache_mode(void);
+extern void cache_enable_dcache(uint32_t autoload);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -159,6 +168,62 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp_config_data_cache_mode
+ *
+ * Description:
+ *   Configure the data cache mode to use with PSRAM.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+IRAM_ATTR void esp_config_data_cache_mode(void)
+{
+    cache_size_t cache_size;
+    cache_ways_t cache_ways;
+    cache_line_size_t cache_line_size;
+
+#if defined(CONFIG_ESP32S2_INSTRUCTION_CACHE_8KB)
+#if defined(CONFIG_ESP32S2_DATA_CACHE_8KB)
+    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_DCACHE_LOW,
+                        CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
+    cache_size = CACHE_SIZE_8KB;
+#else
+    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_DCACHE_LOW,
+                        CACHE_MEMORY_DCACHE_HIGH, CACHE_MEMORY_INVALID);
+    cache_size = CACHE_SIZE_16KB;
+#endif
+#else
+#if defined(CONFIG_ESP32S2_DATA_CACHE_8KB)
+    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
+                        CACHE_MEMORY_DCACHE_LOW, CACHE_MEMORY_INVALID);
+    cache_size = CACHE_SIZE_8KB;
+#else
+    cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
+                        CACHE_MEMORY_DCACHE_LOW, CACHE_MEMORY_DCACHE_HIGH);
+    cache_size = CACHE_SIZE_16KB;
+#endif
+#endif
+
+    cache_ways = CACHE_4WAYS_ASSOC;
+#if defined(CONFIG_ESP32S2_DATA_CACHE_LINE_16B)
+    cache_line_size = CACHE_LINE_SIZE_16B;
+#else
+    cache_line_size = CACHE_LINE_SIZE_32B;
+#endif
+    merr("Data cache \t\t: size %dKB, %dWays, cache line size %dByte",
+         cache_size == CACHE_SIZE_8KB ? 8 : 16, 4,
+         cache_line_size == CACHE_LINE_SIZE_16B ? 16 : 32);
+
+    cache_set_dcache_mode(cache_size, cache_ways, cache_line_size);
+    cache_invalidate_dcache_all();
+}
 
 /****************************************************************************
  * Name: configure_cpu_caches
@@ -196,7 +261,7 @@ static void IRAM_ATTR configure_cpu_caches(void)
 
   cache_ways = CACHE_4WAYS_ASSOC;
 
-#ifdef CONFIG_ESP32S2_INSTRUCTION_CACHE_LINE_16B
+#if defined(CONFIG_ESP32S2_INSTRUCTION_CACHE_LINE_16B)
   cache_line_size = CACHE_LINE_SIZE_16B;
 #else
   cache_line_size = CACHE_LINE_SIZE_32B;
@@ -206,6 +271,11 @@ static void IRAM_ATTR configure_cpu_caches(void)
   cache_set_icache_mode(cache_size, cache_ways, cache_line_size);
   cache_invalidate_icache_all();
   cache_resume_icache(0);
+
+#if defined(CONFIG_ESP32S2_SPIRAM_BOOT_INIT)
+  esp_config_data_cache_mode();
+  cache_enable_dcache(0);
+#endif
 }
 
 /****************************************************************************
@@ -284,6 +354,22 @@ static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 #endif
 
   showprogress('A');
+
+#if defined(CONFIG_ESP32S2_SPIRAM_BOOT_INIT)
+  if (esp_spiram_init() != OK)
+    {
+#  if defined(CONFIG_ESP32S2_SPIRAM_IGNORE_NOTFOUND)
+      mwarn("SPIRAM Initialization failed!\n");
+#  else
+      PANIC();
+#  endif
+    }
+  else
+    {
+      esp_spiram_init_cache();
+      esp_spiram_test();
+    }
+#endif
 
   /* Initialize onboard resources */
 
