@@ -70,6 +70,15 @@
 #define MMU_UTEXT_FLAGS         (PTE_R | PTE_X | PTE_U)
 #define MMU_UDATA_FLAGS         (PTE_R | PTE_W | PTE_U)
 
+/* I/O region flags */
+
+#define MMU_IO_FLAGS            (PTE_R | PTE_W | PTE_G)
+
+/* Kernel FLASH and RAM are mapped globally */
+
+#define MMU_KTEXT_FLAGS         (PTE_R | PTE_X | PTE_G)
+#define MMU_KDATA_FLAGS         (PTE_R | PTE_W | PTE_G)
+
 /* SvX definitions, only Sv39 is currently supported, but it should be
  * trivial to extend the driver to support other SvX implementations
  *
