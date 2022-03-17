@@ -216,12 +216,18 @@ irqstate_t up_irq_enable(void)
  *
  ****************************************************************************/
 
-uint32_t riscv_get_newintctx(void)
+uintptr_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode.
    * Also set machine previous interrupt enable
    * Note: In qemu, FPU is always exist even if don't use F|D ISA extension
    */
 
-  return (MSTATUS_MPPM | MSTATUS_MPIE | MSTATUS_FS_INIT);
+  uintptr_t mstatus = READ_CSR(mstatus);
+
+#ifdef CONFIG_ARCH_FPU
+  return (mstatus | MSTATUS_MPPM | MSTATUS_MPIE | MSTATUS_FS_INIT);
+#else
+  return (mstatus | MSTATUS_MPPM | MSTATUS_MPIE);
+#endif
 }

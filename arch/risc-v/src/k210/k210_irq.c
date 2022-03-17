@@ -220,7 +220,7 @@ void up_enable_irq(int irq)
  *
  ****************************************************************************/
 
-uint32_t riscv_get_newintctx(void)
+uintptr_t riscv_get_newintctx(void)
 {
   /* Set machine previous privilege mode to machine mode. Reegardless of
    * how NuttX is configured and of what kind of thread is being started.
@@ -230,7 +230,9 @@ uint32_t riscv_get_newintctx(void)
    * user code. Also set machine previous interrupt enable.
    */
 
-  return (MSTATUS_MPPM | MSTATUS_MPIE);
+  uintptr_t mstatus = READ_CSR(mstatus);
+
+  return (mstatus | MSTATUS_MPPM | MSTATUS_MPIE);
 }
 
 /****************************************************************************

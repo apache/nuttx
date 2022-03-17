@@ -185,7 +185,7 @@ void riscv_copyfullstate(uintptr_t *dest, uintptr_t *src);
 
 void riscv_sigdeliver(void);
 int riscv_swint(int irq, void *context, void *arg);
-uint32_t riscv_get_newintctx(void);
+uintptr_t riscv_get_newintctx(void);
 
 #ifdef CONFIG_ARCH_FPU
 void riscv_savefpu(uintptr_t *regs);
