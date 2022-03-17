@@ -118,6 +118,7 @@ int exec_module(FAR const struct binary_s *binp,
   FAR struct task_tcb_s *tcb;
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   save_addrenv_t oldenv;
+  FAR void *vheap;
 #endif
   pid_t pid;
   int ret;
@@ -173,8 +174,15 @@ int exec_module(FAR const struct binary_s *binp,
       goto errout_with_envp;
     }
 
-  binfo("Initialize the user heap (heapsize=%d)\n", binp->addrenv.heapsize);
-  umm_initialize((FAR void *)CONFIG_ARCH_HEAP_VBASE, binp->addrenv.heapsize);
+  ret = up_addrenv_vheap(&binp->addrenv, &vheap);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_vheap() failed: %d\n", ret);
+      goto errout_with_addrenv;
+    }
+
+  binfo("Initialize the user heap (heapsize=%zu)\n", binp->addrenv.heapsize);
+  umm_initialize(vheap, up_addrenv_heapsize(&binp->addrenv));
 #endif
 
   /* Note that tcb->flags are not modified.  0=normal task */
