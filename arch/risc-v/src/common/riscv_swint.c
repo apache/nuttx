@@ -122,13 +122,17 @@ static void dispatch_syscall(void)
      "slli a0, a0, 3\n"                     /* a0=Offset for the stub lookup table */
 #endif
      "add  t0, t0, a0\n"                    /* t0=The address in the table */
-     REGLOAD "   t0, 0(t0)\n"               /* t0=The address of the stub for this syscall */
+     REGLOAD " t0, 0(t0)\n"                 /* t0=The address of the stub for this syscall */
      "jalr ra, t0\n"                        /* Call the stub (modifies ra) */
      REGLOAD " ra, 0(sp)\n"                 /* Restore ra */
      "addi sp, sp, " STACK_FRAME_SIZE "\n"  /* Destroy the stack frame */
      "mv   a2, a0\n"                        /* a2=Save return value in a0 */
      "li   a0, 3\n"                         /* a0=SYS_syscall_return (3) */
-     "ecall"                                /* Return from the syscall */
+#ifdef CONFIG_ARCH_USE_S_MODE
+     " j    riscv_syscall_dispatch"         /* Return from the syscall */
+#else
+     " ecall"                               /* Return from the syscall */
+#endif
   );
 }
 #endif
@@ -332,7 +336,7 @@ int riscv_swint(int irq, void *context, void *arg)
           regs[REG_A0]       = regs[REG_A2]; /* argc */
           regs[REG_A1]       = regs[REG_A3]; /* argv */
 #endif
-          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+          regs[REG_INT_CTX] &= ~STATUS_PPP; /* User mode */
         }
         break;
 #endif
@@ -364,7 +368,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           regs[REG_A0]       = regs[REG_A2];  /* pthread entry */
           regs[REG_A1]       = regs[REG_A3];  /* arg */
-          regs[REG_INT_CTX] &= ~MSTATUS_MPPM; /* User mode */
+          regs[REG_INT_CTX] &= ~STATUS_PPP;   /* User mode */
         }
         break;
 #endif
@@ -403,7 +407,7 @@ int riscv_swint(int irq, void *context, void *arg)
           regs[REG_EPC]        =
               (uintptr_t)ARCH_DATA_RESERVE->ar_sigtramp & ~1;
 #endif
-          regs[REG_INT_CTX]   &= ~MSTATUS_MPPM; /* User mode */
+          regs[REG_INT_CTX]   &= ~STATUS_PPP; /* User mode */
 
           /* Change the parameter ordering to match the expectation of struct
            * userpace_s signal_handler.
@@ -453,7 +457,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           DEBUGASSERT(rtcb->xcp.sigreturn != 0);
           regs[REG_EPC]        = rtcb->xcp.sigreturn & ~1;
-          regs[REG_INT_CTX]   |= MSTATUS_MPPM; /* Machine mode */
+          regs[REG_INT_CTX]   |= STATUS_PPP; /* Privileged mode */
 
           rtcb->xcp.sigreturn  = 0;
 
@@ -501,7 +505,7 @@ int riscv_swint(int irq, void *context, void *arg)
 
           rtcb->xcp.syscall[index].sysreturn  = regs[REG_EPC];
 #ifndef CONFIG_BUILD_FLAT
-          rtcb->xcp.syscall[index].int_ctx     = regs[REG_INT_CTX];
+          rtcb->xcp.syscall[index].int_ctx    = regs[REG_INT_CTX];
 #endif
 
           rtcb->xcp.nsyscalls  = index + 1;
@@ -509,7 +513,7 @@ int riscv_swint(int irq, void *context, void *arg)
           regs[REG_EPC]        = (uintptr_t)dispatch_syscall & ~1;
 
 #ifndef CONFIG_BUILD_FLAT
-          regs[REG_INT_CTX]   |= MSTATUS_MPPM; /* Machine mode */
+          regs[REG_INT_CTX]   |= STATUS_PPP; /* Privileged mode */
 #endif
 
           /* Offset A0 to account for the reserved values */

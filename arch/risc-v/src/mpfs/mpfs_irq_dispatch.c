@@ -58,7 +58,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
   if (vector < RISCV_IRQ_ECALLU ||
       vector == RISCV_IRQ_INSTRUCTIONPF ||
       vector == RISCV_IRQ_LOADPF ||
-      vector == RISCV_IRQ_SROREPF ||
+      vector == RISCV_IRQ_STOREPF ||
       vector == RISCV_IRQ_RESERVED)
     {
       riscv_fault(irq, regs);

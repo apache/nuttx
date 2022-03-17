@@ -48,7 +48,16 @@
 
 uintptr_t riscv_mhartid(void)
 {
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Kernel is in S-mode */
+
+#error "Missing functionality..."
+
+#else
+  /* Kernel is in M-mode */
+
   return READ_CSR(mhartid);
+#endif
 }
 
 /****************************************************************************
