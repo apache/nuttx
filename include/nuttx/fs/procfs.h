@@ -127,12 +127,11 @@ struct procfs_dir_priv_s
 
 /* An entry for procfs_register_meminfo */
 
+struct mm_heap_s;
 struct procfs_meminfo_entry_s
 {
   FAR const char *name;
-  CODE void (*mallinfo)(FAR void *user_data, FAR struct mallinfo *);
-  FAR void *user_data;
-
+  FAR struct mm_heap_s *heap;
   struct procfs_meminfo_entry_s *next;
 };
 
