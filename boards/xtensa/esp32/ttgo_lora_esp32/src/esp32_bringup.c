@@ -36,9 +36,15 @@
 #include <stdio.h>
 
 #include <errno.h>
+#if defined(CONFIG_ESP32_EFUSE)
+#include <nuttx/efuse/efuse.h>
+#endif
 #include <nuttx/fs/fs.h>
 #include <nuttx/himem/himem.h>
 
+#if defined(CONFIG_ESP32_EFUSE)
+#include "esp32_efuse.h"
+#endif
 #include "esp32_partition.h"
 
 #ifdef CONFIG_USERLED

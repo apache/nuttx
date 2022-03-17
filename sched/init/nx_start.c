@@ -558,7 +558,8 @@ void nx_start(void)
        */
 
       group_initialize(&g_idletcb[i]);
-      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT;
+      g_idletcb[i].cmn.group->tg_flags = GROUP_FLAG_NOCLDWAIT |
+                                         GROUP_FLAG_PRIVILEGED;
     }
 
   g_lastpid = CONFIG_SMP_NCPUS - 1;

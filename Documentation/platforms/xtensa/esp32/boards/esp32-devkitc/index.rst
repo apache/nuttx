@@ -314,3 +314,8 @@ To test it, just run the following::
   nsh> wdog -d /dev/watchdogx
 
 Where x in the watchdog instance.
+
+efuse
+-----
+
+A config with EFUSE enabled.

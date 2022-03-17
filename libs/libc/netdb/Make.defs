@@ -29,7 +29,7 @@ CSRCS += lib_gethostbyaddr.c lib_gethostbyaddrr.c
 CSRCS += lib_getservbyname.c lib_getservbynamer.c
 CSRCS += lib_getservbyport.c lib_getservbyportr.c
 CSRCS += lib_gaistrerror.c lib_freeaddrinfo.c lib_getaddrinfo.c
-CSRCS += lib_getnameinfo.c lib_rexec.c
+CSRCS += lib_getnameinfo.c lib_rexec.c lib_dn.c
 
 # Add host file support
 
