@@ -38,6 +38,8 @@
 #include "hardware/mpfs_memorymap.h"
 #include "hardware/mpfs_plic.h"
 
+#include "mpfs_plic.h"
+
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
@@ -71,18 +73,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   /* Firstly, check if the irq is machine external interrupt */
 
-  uintptr_t hart_id = riscv_mhartid();
-  uintptr_t claim_address;
-
-  if (hart_id == 0)
-    {
-      claim_address = MPFS_PLIC_H0_MCLAIM;
-    }
-  else
-    {
-      claim_address = MPFS_PLIC_H1_MCLAIM +
-        ((hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET);
-    }
+  uintptr_t claim_address = mpfs_plic_get_claimbase();
 
   if (irq == RISCV_IRQ_MEXT)
     {
