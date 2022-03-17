@@ -31,6 +31,10 @@
 #include <nuttx/board.h>
 #include <arch/board/board.h>
 
+#ifdef CONFIG_MM_KERNEL_HEAP
+#include <arch/board/board_memorymap.h>
+#endif
+
 #include "mpfs.h"
 
 /****************************************************************************
@@ -38,7 +42,7 @@
  ****************************************************************************/
 
 #ifdef CONFIG_MM_KERNEL_HEAP
-#define KRAM_END    ((uintptr_t)&__ksram_end)
+#define KRAM_END    KSRAM_END
 #else
 #define KRAM_END    CONFIG_RAM_END
 #endif
@@ -46,10 +50,6 @@
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifdef CONFIG_MM_KERNEL_HEAP
-extern uintptr_t    __ksram_end;
-#endif
 
 /****************************************************************************
  * Public Functions
