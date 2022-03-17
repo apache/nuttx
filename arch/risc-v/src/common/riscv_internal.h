@@ -32,6 +32,7 @@
 #  include <nuttx/arch.h>
 #  include <sys/types.h>
 #  include <stdint.h>
+#  include <syscall.h>
 #endif
 
 /****************************************************************************
@@ -314,6 +315,53 @@ int riscv_pause_handler(int irq, void *c, void *arg);
  ****************************************************************************/
 
 uintptr_t riscv_mhartid(void);
+
+/* If kernel runs in Supervisor mode, a system call trampoline is needed */
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+void riscv_syscall_dispatch(void) noreturn_function;
+void *riscv_perform_syscall(uintptr_t *regs);
+#endif
+
+/* Context switching via system calls ***************************************/
+
+/* SYS call 0:
+ *
+ * int riscv_saveusercontext(uintptr_t *saveregs);
+ *
+ * Return:
+ * 0: Normal Return
+ * 1: Context Switch Return
+ */
+
+#define riscv_saveusercontext(saveregs) \
+  sys_call1(SYS_save_context, (uintptr_t)saveregs)
+
+/* SYS call 1:
+ *
+ * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
+ */
+
+#define riscv_fullcontextrestore(restoreregs) \
+  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+
+/* SYS call 2:
+ *
+ * void riscv_switchcontext(uintptr_t *saveregs, uintptr_t *restoreregs);
+ */
+
+#define riscv_switchcontext(saveregs, restoreregs) \
+  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+
+#ifdef CONFIG_BUILD_KERNEL
+/* SYS call 3:
+ *
+ * void riscv_syscall_return(void);
+ */
+
+#define riscv_syscall_return() sys_call0(SYS_syscall_return)
+
+#endif /* CONFIG_BUILD_KERNEL */
 
 #undef EXTERN
 #ifdef __cplusplus

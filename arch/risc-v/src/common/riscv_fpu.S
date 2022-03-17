@@ -26,6 +26,7 @@
 
 #include <arch/arch.h>
 #include <arch/irq.h>
+#include <arch/mode.h>
 
 #ifdef CONFIG_ARCH_FPU
 
@@ -74,7 +75,7 @@
 
 riscv_fpuconfig:
     li           a0, FS_INITIAL
-    csrs         mstatus, a0
+    csrs         CSR_STATUS, a0
     csrwi        fcsr, 0
     ret
 
