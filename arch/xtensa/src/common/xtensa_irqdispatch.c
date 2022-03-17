@@ -94,7 +94,7 @@ uint32_t *xtensa_irq_dispatch(int irq, uint32_t *regs)
       cpstate_off = offsetof(struct xcptcontext, cpstate) -
                     offsetof(struct xcptcontext, regs);
 
-      cpstate = (void *)(CURRENT_REGS + cpstate_off);
+      cpstate = (void *)((uintptr_t)CURRENT_REGS + cpstate_off);
       xtensa_coproc_restorestate(cpstate);
 
 #endif
