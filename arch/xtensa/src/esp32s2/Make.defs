@@ -102,3 +102,8 @@ ifeq ($(CONFIG_ONESHOT),y)
 CHIP_CSRCS += esp32s2_oneshot_lowerhalf.c
 endif
 endif
+
+ifeq ($(CONFIG_ESP32S2_SPIRAM),y)
+CHIP_CSRCS += esp32s2_spiram.c
+CHIP_CSRCS += esp32s2_psram.c
+endif
