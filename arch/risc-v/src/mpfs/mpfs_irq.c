@@ -35,6 +35,7 @@
 
 #include "riscv_internal.h"
 #include "mpfs.h"
+#include "mpfs_plic.h"
 
 /****************************************************************************
  * Public Data
@@ -62,39 +63,18 @@ void up_irqinitialize(void)
 
   /* Disable all global interrupts for current hart */
 
-  uintptr_t hart_id = riscv_mhartid();
+  uintptr_t iebase = mpfs_plic_get_iebase();
 
-  uint32_t *miebase;
-  if (hart_id == 0)
-    {
-      miebase = (uint32_t *)MPFS_PLIC_H0_MIE0;
-    }
-  else
-    {
-      miebase = (uint32_t *)(MPFS_PLIC_H1_MIE0 +
-                             (hart_id - 1)  * MPFS_HART_MIE_OFFSET);
-    }
-
-  putreg32(0x0, miebase + 0);
-  putreg32(0x0, miebase + 1);
-  putreg32(0x0, miebase + 2);
-  putreg32(0x0, miebase + 3);
-  putreg32(0x0, miebase + 4);
-  putreg32(0x0, miebase + 5);
+  putreg32(0x0, iebase + 0);
+  putreg32(0x0, iebase + 4);
+  putreg32(0x0, iebase + 8);
+  putreg32(0x0, iebase + 12);
+  putreg32(0x0, iebase + 16);
+  putreg32(0x0, iebase + 20);
 
   /* Clear pendings in PLIC (for current hart) */
 
-  uintptr_t claim_address;
-  if (hart_id == 0)
-    {
-      claim_address = MPFS_PLIC_H0_MCLAIM;
-    }
-  else
-    {
-      claim_address = MPFS_PLIC_H1_MCLAIM +
-        ((hart_id - 1) * MPFS_PLIC_NEXTHART_OFFSET);
-    }
-
+  uintptr_t claim_address = mpfs_plic_get_claimbase();
   uint32_t val = getreg32(claim_address);
   putreg32(val, claim_address);
 
@@ -116,18 +96,7 @@ void up_irqinitialize(void)
 
   /* Set irq threshold to 0 (permits all global interrupts) */
 
-  uint32_t *threshold_address;
-  if (hart_id == 0)
-    {
-      threshold_address = (uint32_t *)MPFS_PLIC_H0_MTHRESHOLD;
-    }
-  else
-    {
-      threshold_address = (uint32_t *)(MPFS_PLIC_H1_MTHRESHOLD +
-                                       ((hart_id - 1) *
-                                        MPFS_PLIC_NEXTHART_OFFSET));
-    }
-
+  uintptr_t threshold_address = mpfs_plic_get_thresholdbase();
   putreg32(0, threshold_address);
 
   /* currents_regs is non-NULL only while processing an interrupt */
@@ -180,22 +149,11 @@ void up_disable_irq(int irq)
 
       /* Clear enable bit for the irq */
 
-      uintptr_t hart_id = riscv_mhartid();
-      uintptr_t miebase;
-
-      if (hart_id == 0)
-        {
-          miebase =  MPFS_PLIC_H0_MIE0;
-        }
-      else
-        {
-          miebase = MPFS_PLIC_H1_MIE0 +
-            ((hart_id - 1) * MPFS_HART_MIE_OFFSET);
-        }
+      uintptr_t iebase = mpfs_plic_get_iebase();
 
       if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
         {
-          modifyreg32(miebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
+          modifyreg32(iebase + (4 * (extirq / 32)), 1 << (extirq % 32), 0);
         }
       else
         {
@@ -234,22 +192,11 @@ void up_enable_irq(int irq)
 
       /* Set enable bit for the irq */
 
-      uintptr_t hart_id = riscv_mhartid();
-      uintptr_t miebase;
-
-      if (hart_id == 0)
-        {
-          miebase = MPFS_PLIC_H0_MIE0;
-        }
-      else
-        {
-          miebase = MPFS_PLIC_H1_MIE0 +
-            ((hart_id - 1) * MPFS_HART_MIE_OFFSET);
-        }
+      uintptr_t iebase = mpfs_plic_get_iebase();
 
       if (0 <= extirq && extirq <= NR_IRQS - MPFS_IRQ_EXT_START)
         {
-          modifyreg32(miebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
+          modifyreg32(iebase + (4 * (extirq / 32)), 0, 1 << (extirq % 32));
         }
       else
         {
