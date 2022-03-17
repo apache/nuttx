@@ -218,6 +218,7 @@ begin_packed_struct struct usrsock_request_ioctl_s
 
 begin_packed_struct struct usrsock_message_common_s
 {
+  uint64_t xid;
   int8_t msgid;
   int8_t flags;
 } end_packed_struct;
