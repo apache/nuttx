@@ -831,6 +831,8 @@ void up_textheap_free(FAR void *p);
  *                         address environment
  *   up_addrenv_vdata    - Returns the virtual base address of the .bss/.data
  *                         address environment
+ *   up_addrenv_vheap    - Returns the virtual base address of the heap
+ *                         address environment
  *   up_addrenv_heapsize - Returns the size of the initial heap allocation.
  *   up_addrenv_select   - Instantiate an address environment
  *   up_addrenv_restore  - Restore an address environment
@@ -990,6 +992,28 @@ int up_addrenv_vtext(FAR group_addrenv_t *addrenv, FAR void **vtext);
 #ifdef CONFIG_ARCH_ADDRENV
 int up_addrenv_vdata(FAR group_addrenv_t *addrenv, uintptr_t textsize,
                      FAR void **vdata);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_vheap
+ *
+ * Description:
+ *   Return the heap virtual address associated with the newly created
+ *   address environment.  This function is used by the binary loaders in
+ *   order get an address that can be used to initialize the new task.
+ *
+ * Input Parameters:
+ *   addrenv - The representation of the task address environment previously
+ *      returned by up_addrenv_create.
+ *   vheap - The location to return the virtual address.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
+int up_addrenv_vheap(FAR const group_addrenv_t *addrenv, FAR void **vheap);
 #endif
 
 /****************************************************************************
