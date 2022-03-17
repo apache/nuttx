@@ -414,7 +414,7 @@ irqstate_t enter_critical_section(void)
        * call to enter_critical_section.
        */
 
-      DEBUGASSERT(rtcb->irqcount >= 0 && rtcb->irqcount < UINT16_MAX);
+      DEBUGASSERT(rtcb->irqcount >= 0 && rtcb->irqcount < INT16_MAX);
       if (++rtcb->irqcount == 1)
         {
           /* Note that we have entered the critical section */
