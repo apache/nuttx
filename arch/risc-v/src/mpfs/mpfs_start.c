@@ -33,6 +33,7 @@
 #include "mpfs_clockconfig.h"
 #include "mpfs_ddr.h"
 #include "mpfs_cache.h"
+#include "mpfs_mm_init.h"
 #include "mpfs_userspace.h"
 
 #include "riscv_internal.h"
@@ -207,6 +208,10 @@ void __mpfs_start(uint64_t mhartid)
 #ifdef CONFIG_BUILD_PROTECTED
   mpfs_userspace();
   showprogress('D');
+#endif
+
+#ifdef CONFIG_BUILD_KERNEL
+  mpfs_mm_init();
 #endif
 
   /* Call nx_start() */
