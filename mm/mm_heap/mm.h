@@ -93,17 +93,20 @@
 #ifdef CONFIG_DEBUG_MM
 #  define MM_MIN_SHIFT       (MM_MIN_SHIFT_ + 2)
 #  define MM_BACKTRACE_DEPTH 8
-#  define MM_ADD_BACKTRACE(ptr) \
+#  define MM_ADD_BACKTRACE(heap, ptr) \
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          tmp->pid = getpid(); \
-         memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
-         backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+         if (heap->mm_procfs.backtrace) \
+           { \
+             memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
+             backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+           } \
        } \
      while (0)
 #else
-#  define MM_ADD_BACKTRACE(ptr)
+#  define MM_ADD_BACKTRACE(heap, ptr)
 #  define MM_MIN_SHIFT MM_MIN_SHIFT_
 #endif
 
