@@ -31,6 +31,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/arch.h>
+
 #ifndef __ASSEMBLY__
 #  include <stdint.h>
 #endif
@@ -122,50 +124,17 @@
 #define SYS_signal_handler_return (7)
 #endif /* !CONFIG_BUILD_FLAT */
 
-/* sys_call macros **********************************************************/
-
-#ifndef __ASSEMBLY__
-
-/* Context switching system calls *******************************************/
-
-/* SYS call 0:
- *
- * int riscv_saveusercontext(uintptr_t *saveregs);
- *
- * Return:
- * 0: Normal Return
- * 1: Context Switch Return
- */
-
-#define riscv_saveusercontext(saveregs) \
-  (int)sys_call1(SYS_save_context, (uintptr_t)(saveregs))
-
-/* SYS call 1:
- *
- * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
- */
-
-#define riscv_fullcontextrestore(restoreregs) \
-  sys_call1(SYS_restore_context, (uintptr_t)(restoreregs))
-
-/* SYS call 2:
- *
- * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
- */
-
-#define riscv_switchcontext(saveregs, restoreregs) \
-  sys_call2(SYS_switch_context, (uintptr_t)(saveregs), (uintptr_t)(restoreregs))
-
-#ifdef CONFIG_BUILD_KERNEL
-/* SYS call 3:
- *
- * void riscv_syscall_return(void);
- */
-
-#define riscv_syscall_return() sys_call0(SYS_syscall_return)
-
+#if defined (CONFIG_ARCH_USE_S_MODE) && defined (__KERNEL__)
+#  define ASM_SYS_CALL \
+     " addi sp, sp, -16\n"                  /* Make room */ \
+     REGSTORE " ra, 0(sp)\n"                /* Save ra */ \
+     " jal  ra, riscv_syscall_dispatch\n"   /* Dispatch (modifies ra) */ \
+     REGLOAD " ra, 0(sp)\n"                 /* Restore ra */ \
+     " addi sp, sp, 16\n"                   /* Restore sp */
+#else
+#  define ASM_SYS_CALL \
+     "ecall"
 #endif
-#endif /* __ASSEMBLY__ */
 
 /****************************************************************************
  * Public Types
@@ -207,7 +176,7 @@ static inline uintptr_t sys_call0(unsigned int nbr)
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0)
      : "memory"
      );
@@ -232,7 +201,7 @@ static inline uintptr_t sys_call1(unsigned int nbr, uintptr_t parm1)
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1)
      : "memory"
      );
@@ -259,7 +228,7 @@ static inline uintptr_t sys_call2(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1), "r"(r2)
      : "memory"
      );
@@ -287,7 +256,7 @@ static inline uintptr_t sys_call3(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3)
      : "memory"
      );
@@ -317,7 +286,7 @@ static inline uintptr_t sys_call4(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4)
      : "memory"
      );
@@ -348,7 +317,7 @@ static inline uintptr_t sys_call5(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5)
      : "memory"
      );
@@ -381,7 +350,7 @@ static inline uintptr_t sys_call6(unsigned int nbr, uintptr_t parm1,
 
   asm volatile
     (
-     "ecall"
+     ASM_SYS_CALL
      :: "r"(r0), "r"(r1), "r"(r2), "r"(r3), "r"(r4), "r"(r5), "r"(r6)
      : "memory"
      );

@@ -102,6 +102,7 @@ config ARCH_CHIP_MPFS
 	select ARCH_HAVE_RESET
 	select ARCH_HAVE_SPI_CS_CONTROL
 	select ARCH_HAVE_PWM_MULTICHAN
+	select ARCH_HAVE_S_MODE
 	select PMP_HAS_LIMITED_FEATURES
 	---help---
 		MicroChip Polarfire processor (RISC-V 64bit core with GCVX extensions).
@@ -188,6 +189,27 @@ endif
 config ARCH_MMU_TYPE_SV39
 	bool
 	default n
+
+config ARCH_HAVE_S_MODE
+	bool
+	default n
+
+# Option to run NuttX in supervisor mode. This is obviously not usable in
+# flat mode, is questionable in protected mode, but is mandatory in kernel
+# mode.
+#
+# Kernel mode requires this as M-mode uses flat addressing and the kernel
+# memory must be mapped in order to share memory between the kernel and
+# different user tasks which reside in virtual memory.
+
+config ARCH_USE_S_MODE
+	bool "Run the NuttX kernel in S-mode"
+	default n
+	depends on ARCH_HAVE_S_MODE && BUILD_KERNEL && ARCH_USE_MMU
+	---help---
+		Most of the RISC-V implementations run in M-mode (flat addressing)
+		and/or U-mode (in case of separate kernel-/userspaces). This provides
+		an option to run the kernel in S-mode, if the target supports it.
 
 # MPU has certain architecture dependent configurations, which are presented
 # here. Default is that the full RISC-V PMP specification is supported.

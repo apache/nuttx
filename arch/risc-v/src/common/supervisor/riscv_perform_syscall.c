@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_vectors.S
+ * arch/risc-v/src/common/supervisor/riscv_perform_syscall.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,19 +22,44 @@
  * Included Files
  ****************************************************************************/
 
-  .section .text
-  .balign  8
-  .global  __trap_vec
+#include <nuttx/config.h>
+
+#include <stdint.h>
+
+#include "riscv_internal.h"
+#include "group/group.h"
 
 /****************************************************************************
- * Name: __trap_vec
- *
- * Description:
- *   All M-mode exceptions and interrupts will be handled from here. If
- *   kernel is in S-mode delegated exceptions and interrupts are handled.
- *
+ * Public Functions
  ****************************************************************************/
 
-__trap_vec:
-  j    exception_common
-  nop
+void *riscv_perform_syscall(uintptr_t *regs)
+{
+  /* Set up the interrupt register set needed by swint() */
+
+  CURRENT_REGS = regs;
+
+  /* Run the system call handler (swint) */
+
+  riscv_swint(0, regs, NULL);
+
+#ifdef CONFIG_ARCH_ADDRENV
+  if (regs != CURRENT_REGS)
+    {
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      group_addrenv(NULL);
+    }
+#endif
+
+  /* Set new context */
+
+  regs = (uintptr_t *)CURRENT_REGS;
+  CURRENT_REGS = NULL;
+
+  return regs;
+}
