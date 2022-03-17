@@ -312,7 +312,7 @@ int psock_local_connect(FAR struct socket *psock,
                   {
                     ret =
                       local_stream_connect(
-                        client, conn, _SS_ISNONBLOCK(conn->lc_conn.s_flags));
+                        client, conn, _SS_ISNONBLOCK(client->lc_conn.s_flags));
                   }
 
                 net_unlock();
