@@ -144,7 +144,14 @@ int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr)
 
   if ((attr & OUTPUT) != 0)
     {
-      putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+      if (pin < 32)
+        {
+          putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+        }
+      else
+        {
+          putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
+        }
     }
 
   /* Configure the pad's function */
@@ -259,7 +266,14 @@ void esp32s3_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
 
   DEBUGASSERT(is_valid_gpio(pin));
 
-  putreg32(1ul << pin, GPIO_ENABLE_W1TS_REG);
+  if (pin < 32)
+    {
+      putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+    }
+  else
+    {
+      putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
+    }
 
   if (out_inv)
     {
