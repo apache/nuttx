@@ -49,6 +49,10 @@
  * Private Data
  ****************************************************************************/
 
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+static int g_gpio_cpuint;
+#endif
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -73,6 +77,94 @@ static inline bool is_valid_gpio(uint32_t pin)
 
   return pin <= 21 || (pin >= 26 && pin < ESP32S3_NPINS);
 }
+
+/****************************************************************************
+ * Name: gpio_dispatch
+ *
+ * Description:
+ *   Second level dispatch for GPIO interrupt handling.
+ *
+ * Input Parameters:
+ *   irq           - GPIO IRQ number.
+ *   status        - Value from the GPIO interrupt status clear register.
+ *   regs          - Saved CPU context.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+static void gpio_dispatch(int irq, uint32_t status, uint32_t *regs)
+{
+  uint32_t mask;
+  int i;
+
+  /* Check each bit in the status register */
+
+  for (i = 0; i < 32 && status != 0; i++)
+    {
+      /* Check if there is an interrupt pending for this pin */
+
+      mask = UINT32_C(1) << i;
+      if ((status & mask) != 0)
+        {
+          /* Yes... perform the second level dispatch */
+
+          irq_dispatch(irq + i, regs);
+
+          /* Clear the bit in the status so that we might execute this loop
+           * sooner.
+           */
+
+          status &= ~mask;
+        }
+    }
+}
+#endif
+
+/****************************************************************************
+ * Name: gpio_interrupt
+ *
+ * Description:
+ *   GPIO interrupt handler.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *   context       - Context data from the ISR.
+ *   arg           - Opaque pointer to the internal driver state structure.
+ *
+ * Returned Value:
+ *   Zero (OK) is returned on success; a negated errno value is returned
+ *   on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+static int gpio_interrupt(int irq, void *context, void *arg)
+{
+  uint32_t status;
+
+  /* Read and clear the lower GPIO interrupt status */
+
+  status = getreg32(GPIO_STATUS_REG);
+  putreg32(status, GPIO_STATUS_W1TC_REG);
+
+  /* Dispatch pending interrupts in the lower GPIO status register */
+
+  gpio_dispatch(ESP32S3_FIRST_GPIOIRQ, status, (uint32_t *)context);
+
+  /* Read and clear the upper GPIO interrupt status */
+
+  status = getreg32(GPIO_STATUS1_REG);
+  putreg32(status, GPIO_STATUS1_W1TC_REG);
+
+  /* Dispatch pending interrupts in the lower GPIO status register */
+
+  gpio_dispatch(ESP32S3_FIRST_GPIOIRQ + 32, status, (uint32_t *)context);
+  return OK;
+}
+#endif
 
 /****************************************************************************
  * Public Functions
@@ -273,6 +365,137 @@ bool esp32s3_gpioread(int pin)
       return ((regval >> (pin - 32)) & 1) != 0;
     }
 }
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqinitialize(void)
+{
+  int cpu;
+
+  /* Setup the GPIO interrupt. */
+
+  cpu = up_cpu_index();
+
+  g_gpio_cpuint = esp32s3_setup_irq(cpu, ESP32S3_PERIPH_GPIO_INT_CPU, 1,
+                                    ESP32S3_CPUINT_LEVEL);
+  DEBUGASSERT(g_gpio_cpuint >= 0);
+
+  /* Attach and enable the interrupt handler */
+
+  DEBUGVERIFY(irq_attach(ESP32S3_IRQ_GPIO_INT_CPU, gpio_interrupt, NULL));
+  up_enable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified GPIO IRQ.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *   intrtype      - Interrupt type, select from gpio_intrtype_t.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqenable(int irq, gpio_intrtype_t intrtype)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+
+  DEBUGASSERT(irq >= ESP32S3_FIRST_GPIOIRQ && irq <= ESP32S3_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP32S3_IRQ2PIN(irq);
+
+  /* Disable the GPIO interrupt during the configuration. */
+
+  up_disable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
+
+  /* Get the address of the GPIO PIN register for this pin */
+
+  regaddr = GPIO_REG(pin);
+  regval  = getreg32(regaddr);
+  regval &= ~(GPIO_PIN0_INT_ENA_M | GPIO_PIN0_INT_TYPE_M);
+
+  /* Set the pin ENA field.
+   * On ESP32-S3, CPU0 and CPU1 share the same interrupt enable bit.
+   */
+
+  regval |= GPIO_PIN0_INT_ENA_M;
+  regval |= (uint32_t)intrtype << GPIO_PIN0_INT_TYPE_S;
+  putreg32(regval, regaddr);
+
+  /* Configuration done. Re-enable the GPIO interrupt. */
+
+  up_enable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
+}
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified GPIO IRQ.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqdisable(int irq)
+{
+  uintptr_t regaddr;
+  uint32_t regval;
+  int pin;
+
+  DEBUGASSERT(irq >= ESP32S3_FIRST_GPIOIRQ && irq <= ESP32S3_LAST_GPIOIRQ);
+
+  /* Convert the IRQ number to a pin number */
+
+  pin = ESP32S3_IRQ2PIN(irq);
+
+  /* Disable the GPIO interrupt during the configuration. */
+
+  up_disable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
+
+  /* Reset the pin ENA and TYPE fields */
+
+  regaddr = GPIO_REG(pin);
+  regval  = getreg32(regaddr);
+  regval &= ~(GPIO_PIN0_INT_ENA_M | GPIO_PIN0_INT_TYPE_M);
+  putreg32(regval, regaddr);
+
+  /* Configuration done. Re-enable the GPIO interrupt. */
+
+  up_enable_irq(ESP32S3_IRQ_GPIO_INT_CPU);
+}
+#endif
 
 /****************************************************************************
  * Name: esp32s3_gpio_matrix_in
