@@ -232,7 +232,7 @@ config TTY_LAUNCH_FILEPATH
 	---help---
 		The name of the entry point for user applications.  For the example
 		applications this is of the form 'app_main' where 'app' is the application
-		name. If not defined, USER_ENTRYPOINT defaults to "main".
+		name. If not defined, INIT_ENTRYPOINT defaults to "main".
 
 endif # TTY_LAUNCH
 
