@@ -137,10 +137,18 @@ pid_t up_vfork(const struct vfork_s *context)
    * effort is overkill.
    */
 
-  newtop = STACK_ALIGN_DOWN((uint32_t)child->cmn.stack_base_ptr +
-                                      child->cmn.adj_stack_size -
-                                      XCPTCONTEXT_SIZE);
+  newtop = (uint32_t)child->cmn.stack_base_ptr +
+                     child->cmn.adj_stack_size;
+
   newsp = newtop - stackutil;
+
+  /* Move the register context to newtop. */
+
+  memcpy((void *)(newsp - XCPTCONTEXT_SIZE),
+         child->cmn.xcp.regs, XCPTCONTEXT_SIZE);
+
+  child->cmn.xcp.regs = (void *)(newsp - XCPTCONTEXT_SIZE);
+
   memcpy((void *)newsp, (const void *)context->sp, stackutil);
 
   /* Was there a frame pointer in place before? */
