@@ -22,14 +22,30 @@
 #define __BOARDS_ARM_SAMV7_COMMON_INCLUDE_BOARD_PROGMEM_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <stddef.h>
+
+#include <nuttx/mtd/mtd.h>
+
+#ifndef __ASSEMBLY__
+
+/****************************************************************************
  * Public Types
  ****************************************************************************/
+
+struct mtd_partition_s
+{
+  size_t            offset;    /* Partition offset from the beginning of MTD */
+  size_t            size;      /* Partition size in bytes */
+  const char       *devpath;   /* Partition device path */
+  struct mtd_dev_s *mtd;       /* Pointer to allocated MTD partition */
+};
 
 /****************************************************************************
  * Public Data
  ****************************************************************************/
-
-#ifndef __ASSEMBLY__
 
 #undef EXTERN
 #if defined(__cplusplus)
@@ -52,6 +68,8 @@ extern "C"
  *
  * Input Parameters:
  *   minor - The starting minor number for progmem MTD partitions.
+ *   table - Progmem MTD partition table
+ *   count - Number of element in progmem MTD partition table
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -59,7 +77,8 @@ extern "C"
  *
  ****************************************************************************/
 
-int board_progmem_init(int minor);
+int board_progmem_init(int minor, struct mtd_partition_s *table,
+                       size_t count);
 
 #undef EXTERN
 #if defined(__cplusplus)
