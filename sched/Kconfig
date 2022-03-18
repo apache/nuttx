@@ -880,7 +880,6 @@ config CPULOAD_ENTROPY
 	int "Bits of entropy"
 	default 6
 	range 0 30
-	depends on CPULOAD_ONESHOT
 	---help---
 		This is the number of bits of entropy that will be applied. The
 		oneshot will be set to this interval:
