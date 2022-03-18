@@ -367,7 +367,7 @@ int     lchown(FAR const char *path, uid_t owner, gid_t group);
 /* Execution of programs from files */
 
 #ifdef CONFIG_LIBC_EXECFUNCS
-int     execl(FAR const char *path, ...);
+int     execl(FAR const char *path, FAR const char *arg0, ...);
 int     execv(FAR const char *path, FAR char * const argv[]);
 #endif
 
