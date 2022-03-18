@@ -280,12 +280,10 @@ uintptr_t riscv_get_newintctx(void)
    * user code. Also set machine previous interrupt enable.
    */
 
-  uintptr_t mstatus = READ_CSR(mstatus);
-
 #ifdef CONFIG_ARCH_FPU
-  return (mstatus | MSTATUS_FS_INIT | MSTATUS_MPPM | MSTATUS_MPIE);
+  return (MSTATUS_FS_INIT | MSTATUS_MPPM | MSTATUS_MPIE);
 #else
-  return (mstatus | MSTATUS_MPPM | MSTATUS_MPIE);
+  return (MSTATUS_MPPM | MSTATUS_MPIE);
 #endif
 }
 
