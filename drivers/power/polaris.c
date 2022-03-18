@@ -913,40 +913,15 @@ static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
   FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
   int ret;
   uint16_t reg_value;
-  uint8_t count = 5;
 
   reg_value = (uint16_t)((value << 6) / 25);
 
-  while (count)
+  ret = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG, (uint8_t *)&reg_value, 2);
+  if (ret != OK)
     {
-      ret = fw_i2c_write(priv, WLC_RX_VOUT_SET_REG,
-                         (uint8_t *)&reg_value, 2);
-      if (ret != OK)
-        {
-          if (count == 0)
-            {
-              return ret;
-            }
-          else
-            {
-              count--;
-              batinfo("[WLC] left %d time to try i2c0 status.. \n", count);
-              usleep(AFTER_SYS_RESET_SLEEP_MS);
-              continue;
-            }
-        }
-      else
-        {
-          break;
-        }
+      baterr("[WLC] fw i2c wirte faild \n");
+      return ret;
     }
-
-  ret = fw_i2c_read(priv, WLC_RX_OP_FREQ_REG, (uint8_t *)&reg_value, 2);
-  batinfo("[WLC] rx operation frequency is %dkHz\n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_VOUT_REG, (uint8_t *)&reg_value, 2);
-  batinfo("[WLC] rx output voltage is %dmV\n", reg_value);
-  ret = fw_i2c_read(priv, WLC_RX_IOUT_REG, (uint8_t *)&reg_value, 2);
-  batinfo("[WLC] rx output curerent is %dmA\n", reg_value);
 
   return ret;
 }
