@@ -266,6 +266,14 @@ int sam_bringup(void)
     }
 #endif
 
+#if defined(CONFIG_DEV_GPIO)
+  ret = sam_gpio_initialize();
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_gpio_initialize failed: %d\n", ret);
+    }
+#endif
+
 #if defined(CONFIG_TIMER) && defined(CONFIG_SAMV7_TC0)
   ret = sam_timer_initialize("/dev/timer0", TC_CHAN2);
   if (ret < 0)
