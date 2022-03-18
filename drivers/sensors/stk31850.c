@@ -1180,7 +1180,7 @@ static int stk31850_checkgain(FAR struct stk31850_dev_s *priv,
 {
   uint8_t fsm_reg = STK31850_FSM_SET;
   unsigned int temp_idx = 0;
-  int ret;
+  int ret = 0;
 
   temp_idx = priv->gain_idx;
 
@@ -1289,7 +1289,7 @@ static int stk31850_readlux(FAR struct stk31850_dev_s *priv,
   uint16_t value_f;
   uint16_t value_c;
   uint8_t count;
-  int ret = 0;
+  int ret;
 
   for (count = 0; count < STK31850_WAIT_COUNT; count++)
     {
