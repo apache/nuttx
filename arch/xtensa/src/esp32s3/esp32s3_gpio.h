@@ -155,11 +155,46 @@ extern "C"
 int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr);
 
 /****************************************************************************
+ * Name: esp32s3_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be written.
+ *   value         - Value to be written to the GPIO pin. True will output
+ *                   1 (one) to the GPIO, while false will output 0 (zero).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_gpiowrite(int pin, bool value);
+
+/****************************************************************************
+ * Name: esp32s3_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   True in case the read value is 1 (one). If 0 (zero), then false will be
+ *   returned.
+ *
+ ****************************************************************************/
+
+bool esp32s3_gpioread(int pin);
+
+/****************************************************************************
  * Name: esp32s3_gpio_matrix_in
  *
  * Description:
  *   Set GPIO input to a signal.
- *   NOTE: one GPIO can input to several signals.
+ *   NOTE: one GPIO can receive inputs from several signals.
  *
  * Input Parameters:
  *   pin           - GPIO pin to be configured.
