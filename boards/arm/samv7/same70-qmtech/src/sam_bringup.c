@@ -63,6 +63,11 @@
 #  include "board_progmem.h"
 #endif
 
+#ifdef CONFIG_TIMER
+#  include "sam_tc.h"
+#  include "sam_tc_lowerhalf.h"
+#endif
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -224,6 +229,14 @@ int sam_bringup(void)
     {
       syslog(LOG_ERR,
              "ERROR: Initialization of the DAC module failed: %d\n", ret);
+    }
+#endif
+
+#if defined(CONFIG_TIMER) && defined(CONFIG_SAMV7_TC0)
+  ret = sam_timer_initialize("/dev/timer0", TC_CHAN2);
+  if (ret < 0)
+    {
+      syslog(LOG_ERR, "ERROR: sam_timer_initialize failed: %d\n", ret);
     }
 #endif
 
