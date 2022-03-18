@@ -1086,6 +1086,22 @@ static int mpfs_req_read(struct mpfs_usbdev_s *priv,
   return OK;
 }
 
+/****************************************************************************
+ * Name: mpfs_ep_set_fifo_size
+ *
+ * Description:
+ *   Sets the fifo size for the endpoint.
+ *
+ * Input Parameters:
+ *   epno      - Endpoint number
+ *   in        - Device to host (TX) fifo if set, RX fifo if unset
+ *   fifo_size - Desired fifo size
+ *
+ * Returned Value:
+ *   None
+ *
+ ****************************************************************************/
+
 static void mpfs_ep_set_fifo_size(uint8_t epno, uint8_t in,
                                   uint16_t fifo_size)
 {
@@ -3093,6 +3109,12 @@ static void mpfs_ctrl_ep_interrupt(struct mpfs_usbdev_s *priv, int epno)
       if (count0 > 0)
         {
           mpfs_read_rx_fifo((uint8_t *)&priv->ctrl, count0, EP0);
+
+          /* Mark the read finished */
+
+          mpfs_putreg16(CSR0L_DEV_SERVICED_RX_PKT_RDY_MASK |
+                        CSR0L_DEV_DATA_END_MASK,
+                        MPFS_USB_INDEXED_CSR_EP0_CSR0);
         }
 
       /* SETUP data is ready */
