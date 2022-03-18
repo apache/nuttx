@@ -125,11 +125,9 @@ void up_initialize(void)
   xtensa_serialinit();
 #endif
 
-#ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   up_netinitialize();
-#endif
 
   /* Initialize USB -- device and/or host */
 

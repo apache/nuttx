@@ -86,11 +86,9 @@ void up_initialize(void)
   z80_serial_initialize();
 #endif
 
-#ifndef CONFIG_NETDEV_LATEINIT
   /* Initialize the network */
 
   up_netinitialize();
-#endif
 
   board_autoled_on(LED_IRQSENABLED);
 }

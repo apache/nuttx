@@ -61,7 +61,9 @@ extern "C"
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_LATEINIT
 int mpfs_ethinitialize(int intf);
+#endif
 
 /****************************************************************************
  * Function: mpfs_phy_boardinitialize
