@@ -251,7 +251,12 @@ xtensa_coproc_savestate:
    * a13-a15.  So a13-a15 may need to be preserved.
    */
 
-	ENTRY(32 /*16*/)						/* REVISIT: Why 32? */
+	/* Allocate the stack frame.  This function needs to allocate the usual 16
+	 * byte for the base save area + space for one variable.
+	 * NOTE: entry works in multiples of 8 bytes.
+	 */
+
+	ENTRY(24)
 	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
 
 	/* Call _xtensa_coproc_savestate() with A2=address of co-processor
@@ -263,7 +268,7 @@ xtensa_coproc_savestate:
 	/* Restore a0 and return */
 
 	l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-	RET(32 /*16*/)							/* REVISIT: Why 32? */
+	RET(24)
 
 #endif
 
@@ -450,7 +455,12 @@ xtensa_coproc_restorestate:
    * a13-a15.  So a13-a15 may need to be preserved.
    */
 
-	ENTRY(32 /*16*/)						/* REVISIT: Why 32? */
+	/* Allocate the stack frame.  This function needs to allocate the usual 16
+	 * byte for the base save area + space for one variable.
+	 * NOTE: entry works in multiples of 8 bytes.
+	 */
+
+	ENTRY(24)
 	s32i	a0,  sp, LOCAL_OFFSET(1)		/* Save return address */
 
 	/* Call _xtensa_coproc_restorestate() with A2=address of co-processor
@@ -462,7 +472,7 @@ xtensa_coproc_restorestate:
 	/* Restore a0 and return */
 
   l32i	a0,  sp, LOCAL_OFFSET(1)		/* Recover return address */
-  RET(32 /*16*/)							/* REVISIT: Why 32? */
+  RET(24)
 
 #endif
 
