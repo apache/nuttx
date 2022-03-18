@@ -24,21 +24,20 @@
 
 #include <nuttx/config.h>
 
-#include <sys/types.h>
-#include <stdint.h>
 #include <assert.h>
 #include <debug.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <sys/types.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
-#include <arch/irq.h>
 
 #include "xtensa.h"
-#include "esp32s3_irq.h"
-#include "hardware/esp32s3_iomux.h"
-#include "hardware/esp32s3_gpio.h"
-
 #include "esp32s3_gpio.h"
+#include "esp32s3_irq.h"
+#include "hardware/esp32s3_gpio.h"
+#include "hardware/esp32s3_iomux.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -199,11 +198,88 @@ int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr)
 }
 
 /****************************************************************************
+ * Name: esp32s3_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be written.
+ *   value         - Value to be written to the GPIO pin. True will output
+ *                   1 (one) to the GPIO, while false will output 0 (zero).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_gpiowrite(int pin, bool value)
+{
+  DEBUGASSERT(is_valid_gpio(pin));
+
+  if (value)
+    {
+      if (pin < 32)
+        {
+          putreg32(UINT32_C(1) << pin, GPIO_OUT_W1TS_REG);
+        }
+      else
+        {
+          putreg32(UINT32_C(1) << (pin - 32), GPIO_OUT1_W1TS_REG);
+        }
+    }
+  else
+    {
+      if (pin < 32)
+        {
+          putreg32(UINT32_C(1) << pin, GPIO_OUT_W1TC_REG);
+        }
+      else
+        {
+          putreg32(UINT32_C(1) << (pin - 32), GPIO_OUT1_W1TC_REG);
+        }
+    }
+}
+
+/****************************************************************************
+ * Name: esp32s3_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   True in case the read value is 1 (one). If 0 (zero), then false will be
+ *   returned.
+ *
+ ****************************************************************************/
+
+bool esp32s3_gpioread(int pin)
+{
+  uint32_t regval;
+
+  DEBUGASSERT(is_valid_gpio(pin));
+
+  if (pin < 32)
+    {
+      regval = getreg32(GPIO_IN_REG);
+      return ((regval >> pin) & 1) != 0;
+    }
+  else
+    {
+      regval = getreg32(GPIO_IN1_REG);
+      return ((regval >> (pin - 32)) & 1) != 0;
+    }
+}
+
+/****************************************************************************
  * Name: esp32s3_gpio_matrix_in
  *
  * Description:
  *   Set GPIO input to a signal.
- *   NOTE: one GPIO can input to several signals.
+ *   NOTE: one GPIO can receive inputs from several signals.
  *
  * Input Parameters:
  *   pin           - GPIO pin to be configured.
