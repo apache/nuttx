@@ -542,7 +542,7 @@ static int pic32mz_ioctl(FAR struct timer_lowerhalf_s *lower, int cmd,
 }
 
 /****************************************************************************
- * Name: pic32mz_ioctl
+ * Name: pic32mz_maxtimeout
  *
  * Description:
  *   Get the maximum supported timeout value
