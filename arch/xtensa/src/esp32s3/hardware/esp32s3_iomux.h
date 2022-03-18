@@ -167,7 +167,6 @@
 #define IO_MUX_GPIO47_REG       PERIPHS_IO_MUX_SPICLK_P_U
 #define IO_MUX_GPIO48_REG       PERIPHS_IO_MUX_SPICLK_N_U
 
-#define FUNC_GPIO_GPIO          1
 #define PIN_FUNC_GPIO           1
 
 #define GPIO_PAD_PULLUP(num) do{PIN_PULLDWN_DIS(IOMUX_REG_GPIO##num);PIN_PULLUP_EN(IOMUX_REG_GPIO##num);}while(0)
