@@ -54,6 +54,10 @@ ifneq (,$(findstring y,$(CONFIG_SAMV7_DAC0) $(CONFIG_SAMV7_DAC1)))
 CSRCS += sam_dac.c
 endif
 
+ifeq ($(CONFIG_DEV_GPIO),y)
+CSRCS += sam_gpio.c
+endif
+
 .PHONY = context distclean
 
 $(SCRIPTOUT): $(LDSCRIPT_TEMPLATE) $(CONFIGFILE)
