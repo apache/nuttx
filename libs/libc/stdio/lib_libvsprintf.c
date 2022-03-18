@@ -203,7 +203,7 @@ static int vsprintf_internal(FAR struct lib_outstream_s *stream,
   int total_len = 0;
 
 #ifdef CONFIG_LIBC_NUMBERED_ARGS
-  int argnumber;
+  int argnumber = 0;
 #endif
 
   for (; ; )
