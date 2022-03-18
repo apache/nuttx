@@ -56,25 +56,6 @@ extern "C"
 #endif
 
 /****************************************************************************
- * Function: arm_netinitialize
- *
- * Description:
- *   Initialize the EMAC driver.  Also prototyped in arm_internal.h.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called very early in the initialization sequence.
- *
- ****************************************************************************/
-
-void arm_netinitialize(void);
-
-/****************************************************************************
  * Function: sam_phy_boardinitialize
  *
  * Description:

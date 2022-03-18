@@ -52,8 +52,8 @@
 #endif
 
 #include "riscv_internal.h"
-#include "hardware/mpfs_ethernet.h"
 #include "mpfs_memorymap.h"
+#include "mpfs_ethernet.h"
 
 #if defined(CONFIG_NET) && defined(CONFIG_MPFS_ETHMAC)
 
