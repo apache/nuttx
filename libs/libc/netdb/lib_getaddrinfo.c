@@ -290,11 +290,10 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (ai != NULL)
         {
           *res = (FAR struct addrinfo *)ai;
-        }
-
-      if (flags & AI_CANONNAME)
-        {
-          ai->ai.ai_canonname = (FAR char *)hostname;
+          if (flags & AI_CANONNAME)
+            {
+              ai->ai.ai_canonname = (FAR char *)hostname;
+            }
         }
 
       return (*res != NULL) ? OK : EAI_MEMORY;
