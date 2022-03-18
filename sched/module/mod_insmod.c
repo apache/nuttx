@@ -192,9 +192,9 @@ FAR void *insmod(FAR const char *filename, FAR const char *modname)
   /* Allocate a module registry entry to hold the module data */
 
   modp = (FAR struct module_s *)kmm_zalloc(sizeof(struct module_s));
-  if (ret != 0)
+  if (modp == NULL)
     {
-      binfo("Failed to initialize for load of ELF program: %d\n", ret);
+      berr("Failed to allocate struct module_s\n");
       goto errout_with_loadinfo;
     }
 
