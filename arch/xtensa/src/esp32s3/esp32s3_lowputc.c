@@ -738,9 +738,9 @@ void esp32s3_lowputc_config_pins(const struct esp32s3_uart_s *priv)
   /* Configure the pins */
 
   esp32s3_gpio_matrix_out(priv->txpin, priv->txsig, 0, 0);
-  esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_1);
+  esp32s3_configgpio(priv->txpin, OUTPUT_FUNCTION_2);
 
-  esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_1);
+  esp32s3_configgpio(priv->rxpin, INPUT_FUNCTION_2);
   esp32s3_gpio_matrix_in(priv->rxpin, priv->rxsig, 0);
 
 #ifdef CONFIG_SERIAL_IFLOWCONTROL
