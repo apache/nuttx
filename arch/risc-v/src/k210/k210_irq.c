@@ -213,29 +213,6 @@ void up_enable_irq(int irq)
 }
 
 /****************************************************************************
- * Name: riscv_get_newintctx
- *
- * Description:
- *   Return initial mstatus when a task is created.
- *
- ****************************************************************************/
-
-uintptr_t riscv_get_newintctx(void)
-{
-  /* Set machine previous privilege mode to machine mode. Reegardless of
-   * how NuttX is configured and of what kind of thread is being started.
-   * That is because all threads, even user-mode threads will start in
-   * kernel trampoline at nxtask_start() or pthread_start().
-   * The thread's privileges will be dropped before transitioning to
-   * user code. Also set machine previous interrupt enable.
-   */
-
-  uintptr_t mstatus = READ_CSR(mstatus);
-
-  return (mstatus | MSTATUS_MPPM | MSTATUS_MPIE);
-}
-
-/****************************************************************************
  * Name: riscv_ack_irq
  *
  * Description:
