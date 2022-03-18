@@ -903,7 +903,7 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
   if (buflen > tmp)
     {
       buflen = tmp;
-      finfo("Read size truncated to %d\n", buflen);
+      finfo("Read size truncated to %zu\n", buflen);
     }
 
   /* Now loop until we fill the user buffer (or hit the end of the file) */
@@ -957,7 +957,7 @@ static ssize_t nfs_read(FAR struct file *filep, FAR char *buffer,
 
       /* Perform the read */
 
-      finfo("Reading %d bytes\n", readsize);
+      finfo("Reading %zu bytes\n", readsize);
       nfs_statistics(NFSPROC_READ);
       ret = nfs_request(nmp, NFSPROC_READ,
                         (FAR void *)&nmp->nm_msgbuffer.read, reqlen,
@@ -2006,7 +2006,7 @@ static int nfs_bind(FAR struct inode *blkdriver, FAR const void *data,
   nmp->nm_rsize       = nprmt.rsize;
   nmp->nm_readdirsize = nprmt.readdirsize;
 
-  strncpy(nmp->nm_path, argp->path, 90);
+  strlcpy(nmp->nm_path, argp->path, sizeof(nmp->nm_path));
   memcpy(&nmp->nm_nam, &argp->addr, argp->addrlen);
 
   /* Create an instance of the rpc state structure */
