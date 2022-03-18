@@ -307,6 +307,14 @@
 #define MSTATUS_FS_CLEAN  (0x2 << 13)
 #define MSTATUS_FS_DIRTY  (0x3 << 13)
 
+/* Mask of preserved bits for mstatus */
+
+#ifdef CONFIG_ARCH_RV32
+#define MSTATUS_WPRI      (0xff << 23 | 0x15)
+#else
+#define MSTATUS_WPRI      (UINT64_C(0x1ffffff) << 38 | UINT64_C(0x1ff) << 23 | 0x15)
+#endif
+
 /* In mie (machine interrupt enable) register */
 
 #define MIE_MSIE      (0x1 << 3)  /* Machine Software Interrupt Enable */
