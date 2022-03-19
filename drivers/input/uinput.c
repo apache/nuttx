@@ -592,7 +592,9 @@ int uinput_keyboard_initialize(void)
 
   /* Regiest Touchscreen device */
 
-  ret = keyboard_register(&ukbd_lower->lower, "/dev/" UINPUT_NAME_KEYBOARD);
+  ret = keyboard_register(&ukbd_lower->lower,
+                          "/dev/" UINPUT_NAME_KEYBOARD,
+                          CONFIG_UINPUT_KEYBOARD_BUFNUMBER);
   if (ret < 0)
     {
       kmm_free(ukbd_lower);

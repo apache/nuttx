@@ -50,16 +50,6 @@ config INPUT_KEYBOARD
 	select MM_CIRCBUF
 	default n
 
-if INPUT_KEYBOARD
-
-config INPUT_KEYBOARD_BUFFSIZE
-	int "Number keyboard data buffer"
-	default 64
-	---help---
-		Maximum number of keyboard data buffer
-
-endif # INPUT_KEYBOARD
-
 config INPUT_UINPUT
 	bool
 	default n
@@ -108,6 +98,14 @@ config UINPUT_KEYBOARD
 	default n
 	---help---
 		Enable support virtual input keyboard device driver
+
+if UINPUT_KEYBOARD
+
+config UINPUT_KEYBOARD_BUFNUMBER
+	int "Number keyboard data buffer"
+	default 8
+
+endif
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"
