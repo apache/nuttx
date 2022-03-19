@@ -1530,6 +1530,7 @@ static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
               ret = -ENOSYS;
             }
         }
+        break;
 
       default:
         ret = -ENOTTY;
