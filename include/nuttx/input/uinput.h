@@ -46,7 +46,7 @@
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UINPUT_TOUCHSCREEN
+#ifdef CONFIG_UINPUT_TOUCH
 int uinput_touch_initialize(FAR const char *name, int maxpoint,
                             int buffnums);
 #endif
