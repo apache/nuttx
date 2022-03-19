@@ -56,7 +56,7 @@ struct touch_openpriv_s
 
 struct touch_upperhalf_s
 {
-  uint32_t         nums;               /* Number of touch point structure */
+  uint8_t          nums;               /* Number of touch point structure */
   sem_t            exclsem;            /* Manages exclusive access to this structure */
   struct list_node head;               /* Opened file buffer chain header node */
   FAR struct touch_lowerhalf_s *lower; /* A pointer of lower half instance */
