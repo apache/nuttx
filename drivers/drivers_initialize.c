@@ -25,6 +25,7 @@
 #include <nuttx/crypto/crypto.h>
 #include <nuttx/drivers/drivers.h>
 #include <nuttx/fs/loop.h>
+#include <nuttx/input/uinput.h>
 #include <nuttx/net/loopback.h>
 #include <nuttx/net/tun.h>
 #include <nuttx/net/telnet.h>
@@ -117,6 +118,14 @@ void drivers_initialize(void)
 
 #ifdef CONFIG_CRYPTO_CRYPTODEV
   devcrypto_register();
+#endif
+
+#ifdef CONFIG_UINPUT_TOUCH
+  uinput_touch_initialize("utouch", 1, 4);
+#endif
+
+#ifdef CONFIG_UINPUT_BUTTONS
+  uinput_button_initialize("ubutton");
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK

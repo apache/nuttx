@@ -36,7 +36,6 @@
 #include <nuttx/fs/nxffs.h>
 #include <nuttx/fs/rpmsgfs.h>
 #include <nuttx/i2c/i2c_master.h>
-#include <nuttx/input/uinput.h>
 #include <nuttx/spi/spi_transfer.h>
 #include <nuttx/rc/lirc_dev.h>
 #include <nuttx/rc/dummy.h>
@@ -328,22 +327,6 @@ int sim_bringup(void)
       syslog(LOG_ERR, "ERROR: sim_kbd_initialize failed: %d\n", ret);
     }
 #endif
-
-#ifdef CONFIG_UINPUT_TOUCH
-  ret = uinput_touch_initialize("utouch", 1, 4);
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: uinput_touch_initialize failed: %d\n", ret);
-    }
-#endif /* CONFIG_UINPUT_TOUCH */
-
-#ifdef CONFIG_UINPUT_BUTTONS
-  ret = uinput_button_initialize("ubutton");
-  if (ret < 0)
-    {
-      syslog(LOG_ERR, "ERROR: uinput_button_initialize failed: %d\n", ret);
-    }
-#endif /* CONFIG_UINPUT_BUTTONS */
 
 #ifdef CONFIG_IEEE802154_LOOPBACK
   /* Initialize and register the IEEE802.15.4 MAC network loop device */
