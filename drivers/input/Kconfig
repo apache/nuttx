@@ -72,6 +72,18 @@ config UINPUT_TOUCH
 	---help---
 		Enable support virtual input touch device driver
 
+if UINPUT_TOUCH
+
+config UINPUT_TOUCH_MAXPOINT
+	int "Maximum number of touch points supported"
+	default 1
+
+config UINPUT_TOUCH_BUFNUMBER
+	int "Number of touch data buffer"
+	default 8
+
+endif
+
 config UINPUT_BUTTONS
 	bool "Enable uinput buttons"
 	select INPUT_BUTTONS
