@@ -122,7 +122,7 @@ static void uinput_rpmsg_notify(FAR struct uinput_context_s *ctx,
 
 #endif /* CONFIG_UINPUT_RPMSG */
 
-#ifdef CONFIG_UINPUT_TOUCHSCREEN
+#ifdef CONFIG_UINPUT_TOUCH
 
 static ssize_t uinput_touch_notify(FAR void *uinput_lower,
                                    FAR const char *buffer, size_t buflen);
@@ -130,7 +130,7 @@ static ssize_t uinput_touch_notify(FAR void *uinput_lower,
 static ssize_t uinput_touch_write(FAR struct touch_lowerhalf_s *lower,
                                   FAR const char *buffer, size_t buflen);
 
-#endif /* CONFIG_UINPUT_TOUCHSCREEN */
+#endif /* CONFIG_UINPUT_TOUCH */
 
 #ifdef CONFIG_UINPUT_BUTTONS
 
@@ -281,7 +281,7 @@ static void uinput_rpmsg_notify(FAR struct uinput_context_s *ctx,
 
 #endif /* CONFIG_UINPUT_RPMSG */
 
-#ifdef CONFIG_UINPUT_TOUCHSCREEN
+#ifdef CONFIG_UINPUT_TOUCH
 
 /****************************************************************************
  * Name: uinput_touch_notify
@@ -316,7 +316,7 @@ static ssize_t uinput_touch_write(FAR struct touch_lowerhalf_s *lower,
   return uinput_touch_notify(utcs_lower, buffer, buflen);
 }
 
-#endif /* CONFIG_UINPUT_TOUCHSCREEN */
+#endif /* CONFIG_UINPUT_TOUCH */
 
 #ifdef CONFIG_UINPUT_BUTTONS
 
@@ -463,7 +463,7 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
  *
  ****************************************************************************/
 
-#ifdef CONFIG_UINPUT_TOUCHSCREEN
+#ifdef CONFIG_UINPUT_TOUCH
 
 int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
 {
@@ -500,7 +500,7 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
   return 0;
 }
 
-#endif /* CONFIG_UINPUT_TOUCHSCREEN */
+#endif /* CONFIG_UINPUT_TOUCH */
 
 /****************************************************************************
  * Name: uinput_button_initialize
