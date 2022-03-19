@@ -97,6 +97,10 @@ void vwarnx(FAR const char *fmt, va_list ap)
 #else
   dprintf(STDERR_FILENO, "%d: %pV\n", getpid(), &vaf);
 #endif
+
+#ifdef va_copy
+  va_end(copy);
+#endif
 }
 
 /****************************************************************************
