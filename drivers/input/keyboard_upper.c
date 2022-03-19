@@ -60,6 +60,7 @@ struct keyboard_upperhalf_s
   struct list_node head;    /* Head of list */
   FAR struct keyboard_lowerhalf_s
                   *lower;   /* A pointer of lower half instance */
+  uint8_t          nums;    /* Number of buffer */
 };
 
 /****************************************************************************
@@ -148,7 +149,7 @@ static int keyboard_open(FAR struct file *filep)
 
   /* Initializes the buffer for each open file */
 
-  ret = circbuf_init(&opriv->circ, NULL, CONFIG_INPUT_KEYBOARD_BUFFSIZE);
+  ret = circbuf_init(&opriv->circ, NULL, upper->nums);
   if (ret < 0)
     {
       kmm_free(opriv);
@@ -342,7 +343,7 @@ static ssize_t keyboard_write(FAR struct file *filep,
  ****************************************************************************/
 
 int keyboard_register(FAR struct keyboard_lowerhalf_s *lower,
-                      FAR const char *path)
+                      FAR const char *path, uint8_t nums)
 {
   FAR struct keyboard_upperhalf_s *upper;
   int ret;
@@ -362,6 +363,7 @@ int keyboard_register(FAR struct keyboard_lowerhalf_s *lower,
     }
 
   upper->lower = lower;
+  upper->nums  = nums;
   lower->priv  = upper;
   list_initialize(&upper->head);
   nxsem_init(&upper->exclsem, 0, 1);

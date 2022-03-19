@@ -80,7 +80,7 @@ void keyboard_event(FAR struct keyboard_lowerhalf_s *lower, uint32_t keycode,
  ****************************************************************************/
 
 int keyboard_register(FAR struct keyboard_lowerhalf_s *lower,
-                      FAR const char *path);
+                      FAR const char *path, uint8_t nums);
 
 /****************************************************************************
  * Name: keyboard_register
