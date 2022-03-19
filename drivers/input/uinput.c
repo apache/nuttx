@@ -41,8 +41,12 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define UINPUT_NAME_SIZE  32
-#define RPMSG_UINPUT_NAME "rpmsg-uinput-%s"
+#define UINPUT_NAME_SIZE     16
+#define UINPUT_NAME_RPMSG    "rpmsg-uinput-%s"
+
+#define UINPUT_NAME_TOUCH    "utouch"
+#define UINPUT_NAME_KEYBOARD "ukeyboard"
+#define UINPUT_NAME_BUTTON   "ubutton"
 
 /****************************************************************************
  * Private Types
@@ -205,8 +209,8 @@ static void uinput_rpmsg_device_created(FAR struct rpmsg_device *rdev,
     }
 
   ept->ept.priv = ctx;
-  snprintf(rpmsg_ept_name, RPMSG_NAME_SIZE,
-           RPMSG_UINPUT_NAME, ctx->name);
+  snprintf(rpmsg_ept_name, sizeof(rpmsg_ept_name),
+           UINPUT_NAME_RPMSG, ctx->name);
   ret = rpmsg_create_ept(&ept->ept, rdev, rpmsg_ept_name,
                          RPMSG_ADDR_ANY, RPMSG_ADDR_ANY,
                          uinput_rpmsg_ept_cb, NULL);
@@ -457,9 +461,7 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
  *   Initialized the uinput touchscreen device
  *
  * Input Parameters:
- *   name:      Touchscreen devices name
- *   maxpoint:  Maximum number of touch points supported.
- *   buff_nums: Number of the touch points structure.
+ *   None
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -469,9 +471,8 @@ static ssize_t uinput_keyboard_write(FAR struct keyboard_lowerhalf_s *lower,
 
 #ifdef CONFIG_UINPUT_TOUCH
 
-int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
+int uinput_touch_initialize(void)
 {
-  char devname[UINPUT_NAME_SIZE];
   FAR struct uinput_touch_lowerhalf_s *utcs_lower;
   int ret;
 
@@ -482,15 +483,16 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
     }
 
   utcs_lower->lower.write    = uinput_touch_write;
-  utcs_lower->lower.maxpoint = maxpoint;
+  utcs_lower->lower.maxpoint = CONFIG_UINPUT_TOUCH_MAXPOINT;
 #ifdef CONFIG_UINPUT_RPMSG
   utcs_lower->ctx.notify     = uinput_touch_notify;
 #endif
 
   /* Regiest Touchscreen device */
 
-  snprintf(devname, UINPUT_NAME_SIZE, "/dev/%s", name);
-  ret = touch_register(&utcs_lower->lower, devname, buffnums);
+  ret = touch_register(&utcs_lower->lower,
+                       "/dev/" UINPUT_NAME_TOUCH,
+                       CONFIG_UINPUT_TOUCH_BUFNUMBER);
   if (ret < 0)
     {
       kmm_free(utcs_lower);
@@ -498,7 +500,7 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
     }
 
 #ifdef CONFIG_UINPUT_RPMSG
-  uinput_rpmsg_initialize(&utcs_lower->ctx, name);
+  uinput_rpmsg_initialize(&utcs_lower->ctx, UINPUT_NAME_TOUCH);
 #endif
 
   return 0;
@@ -513,7 +515,7 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
  *   Initialized the uinput button device
  *
  * Input Parameters:
- *   name:      Button devices name
+ *   None
  *
  * Returned Value:
  *   Zero is returned on success.  Otherwise, a negated errno value is
@@ -523,9 +525,8 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint, int buffnums)
 
 #ifdef CONFIG_UINPUT_BUTTONS
 
-int uinput_button_initialize(FAR const char *name)
+int uinput_button_initialize(void)
 {
-  char devname[UINPUT_NAME_SIZE];
   FAR struct uinput_button_lowerhalf_s *ubtn_lower;
   int ret;
 
@@ -538,8 +539,7 @@ int uinput_button_initialize(FAR const char *name)
   ubtn_lower->ctx.notify         = uinput_button_notify;
 #endif
 
-  snprintf(devname, UINPUT_NAME_SIZE, "/dev/%s", name);
-  ret = btn_register(devname, &ubtn_lower->lower);
+  ret = btn_register("/dev/" UINPUT_NAME_BUTTON, &ubtn_lower->lower);
   if (ret < 0)
     {
       kmm_free(ubtn_lower);
@@ -548,7 +548,7 @@ int uinput_button_initialize(FAR const char *name)
     }
 
 #ifdef CONFIG_UINPUT_RPMSG
-  uinput_rpmsg_initialize(&ubtn_lower->ctx, name);
+  uinput_rpmsg_initialize(&ubtn_lower->ctx, UINPUT_NAME_BUTTON);
 #endif
 
   return 0;
@@ -560,7 +560,7 @@ int uinput_button_initialize(FAR const char *name)
  * Name: uinput_keyboard_initialize
  *
  * Description:
- *   Initialized the uinput keyboard device
+ *   None
  *
  * Input Parameters:
  *   name: keyboard devices name
@@ -573,9 +573,8 @@ int uinput_button_initialize(FAR const char *name)
 
 #ifdef CONFIG_UINPUT_KEYBOARD
 
-int uinput_keyboard_initialize(FAR const char *name)
+int uinput_keyboard_initialize(void)
 {
-  char devname[UINPUT_NAME_SIZE];
   FAR struct uinput_keyboard_lowerhalf_s *ukbd_lower;
   int ret;
 
@@ -593,8 +592,7 @@ int uinput_keyboard_initialize(FAR const char *name)
 
   /* Regiest Touchscreen device */
 
-  snprintf(devname, UINPUT_NAME_SIZE, "/dev/%s", name);
-  ret = keyboard_register(&ukbd_lower->lower, devname);
+  ret = keyboard_register(&ukbd_lower->lower, "/dev/" UINPUT_NAME_KEYBOARD);
   if (ret < 0)
     {
       kmm_free(ukbd_lower);
@@ -603,7 +601,7 @@ int uinput_keyboard_initialize(FAR const char *name)
     }
 
 #ifdef CONFIG_UINPUT_RPMSG
-  uinput_rpmsg_initialize(&ukbd_lower->ctx, name);
+  uinput_rpmsg_initialize(&ukbd_lower->ctx, UINPUT_NAME_KEYBOARD);
 #endif
 
   return  0;
