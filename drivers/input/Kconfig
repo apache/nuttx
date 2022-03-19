@@ -73,13 +73,13 @@ config UINPUT_RPMSG
 	---help---
 		Enable support uinput cross core communication
 
-config UINPUT_TOUCHSCREEN
-	bool "Enable uinput touchscreen"
+config UINPUT_TOUCH
+	bool "Enable uinput touch"
 	select INPUT_TOUCHSCREEN
 	select INPUT_UINPUT
 	default n
 	---help---
-		Enable support virtual input touchscreen device driver
+		Enable support virtual input touch device driver
 
 config UINPUT_BUTTONS
 	bool "Enable uinput buttons"
