@@ -175,9 +175,9 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 
 #if defined(CONFIG_ARCH_LOWPUTC)
   return up_putc(ch);
-#endif
-
+#else
   return ch;
+#endif
 }
 
 static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
