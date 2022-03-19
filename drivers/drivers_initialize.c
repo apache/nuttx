@@ -121,11 +121,11 @@ void drivers_initialize(void)
 #endif
 
 #ifdef CONFIG_UINPUT_TOUCH
-  uinput_touch_initialize("utouch", 1, 4);
+  uinput_touch_initialize();
 #endif
 
 #ifdef CONFIG_UINPUT_BUTTONS
-  uinput_button_initialize("ubutton");
+  uinput_button_initialize();
 #endif
 
 #ifdef CONFIG_NET_LOOPBACK
