@@ -128,6 +128,10 @@ void drivers_initialize(void)
   uinput_button_initialize();
 #endif
 
+#ifdef CONFIG_UINPUT_KEYBOARD
+  uinput_keyboard_initialize();
+#endif
+
 #ifdef CONFIG_NET_LOOPBACK
   /* Initialize the local loopback device */
 
