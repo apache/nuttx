@@ -512,12 +512,8 @@ off_t rpmsgfs_client_lseek(FAR void *handle, int fd,
     .whence = whence,
   };
 
-  int ret;
-
-  ret = rpmsgfs_send_recv(handle, RPMSGFS_LSEEK, true,
-          (struct rpmsgfs_header_s *)&msg, sizeof(msg), NULL);
-
-  return ret < 0 ? ret : ret;
+  return rpmsgfs_send_recv(handle, RPMSGFS_LSEEK, true,
+           (struct rpmsgfs_header_s *)&msg, sizeof(msg), NULL);
 }
 
 int rpmsgfs_client_ioctl(FAR void *handle, int fd,
