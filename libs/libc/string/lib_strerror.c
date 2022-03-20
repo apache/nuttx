@@ -38,8 +38,8 @@
 
 struct errno_strmap_s
 {
-  uint8_t     errnum;
-  const char *str;
+  uint8_t   errnum;
+  FAR char *str;
 };
 
 /****************************************************************************
@@ -341,7 +341,7 @@ static const struct errno_strmap_s g_errnomap[] =
  * Name: strerror
  ****************************************************************************/
 
-FAR const char *strerror(int errnum)
+FAR char *strerror(int errnum)
 {
 #ifdef CONFIG_LIBC_STRERROR
   int ndxlow = 0;
