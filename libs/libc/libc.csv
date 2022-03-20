@@ -225,7 +225,7 @@
 "strcpy","string.h","","FAR char *","FAR char *","FAR const char *"
 "strcspn","string.h","","size_t","FAR const char *","FAR const char *"
 "strdup","string.h","","FAR char *","FAR const char *"
-"strerror","string.h","","FAR const char *","int"
+"strerror","string.h","","FAR char *","int"
 "strerror_r","string.h","","int","int","FAR char *","size_t"
 "strftime","time.h","","size_t","FAR char *","size_t","FAR const char *","FAR const struct tm *"
 "strlen","string.h","","size_t","FAR const char *"
