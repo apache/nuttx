@@ -1445,11 +1445,11 @@ static int proc_open(FAR struct file *filep, FAR const char *relpath,
 
   ptr++;
 
-  /* A valid PID would be in the range of 0-32767 (0 is reserved for the
+  /* A valid PID would be in the range of 0-INT_MAX (0 is reserved for the
    * IDLE thread).
    */
 
-  if (tmp >= 32768)
+  if (tmp > INT_MAX)
     {
       ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
@@ -1701,11 +1701,11 @@ static int proc_opendir(FAR const char *relpath, FAR struct fs_dirent_s *dir)
       return -ENOENT;
     }
 
-  /* A valid PID would be in the range of 0-32767 (0 is reserved for the
+  /* A valid PID would be in the range of 0-INT_MAX (0 is reserved for the
    * IDLE thread).
    */
 
-  if (tmp >= 32768)
+  if (tmp > INT_MAX)
     {
       ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
@@ -1947,11 +1947,11 @@ static int proc_stat(const char *relpath, struct stat *buf)
       return -ENOENT;
     }
 
-  /* A valid PID would be in the range of 0-32767 (0 is reserved for the
+  /* A valid PID would be in the range of 0-INT_MAX (0 is reserved for the
    * IDLE thread).
    */
 
-  if (tmp >= 32768)
+  if (tmp > INT_MAX)
     {
       ferr("ERROR: Invalid PID %ld\n", tmp);
       return -ENOENT;
