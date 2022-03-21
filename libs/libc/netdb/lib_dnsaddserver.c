@@ -199,7 +199,6 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
   size_t copylen;
   int nservers;
   int idx;
-  int i;
 
   DEBUGASSERT(addr != NULL);
 
@@ -225,7 +224,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       /* Set up for the IPv4 address copy */
 
       copylen = sizeof(struct sockaddr_in);
-      pport   = &((FAR struct sockaddr_in *)addr)->sin_port;
+      pport   = &g_dns_servers[idx].ipv4.sin_port;
     }
   else
 #endif
@@ -238,7 +237,7 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       /* Set up for the IPv6 address copy */
 
       copylen = sizeof(struct sockaddr_in6);
-      pport   = &((FAR struct sockaddr_in6 *)addr)->sin6_port;
+      pport   = &g_dns_servers[idx].ipv6.sin6_port;
     }
   else
 #endif
@@ -258,26 +257,14 @@ int dns_add_nameserver(FAR const struct sockaddr *addr, socklen_t addrlen)
       return -EINVAL;
     }
 
+  memcpy(&g_dns_servers[idx].addr, addr, copylen);
+
   /* A port number of zero means to use the default DNS server port number */
 
   if (*pport == 0)
     {
       *pport = HTONS(DNS_DEFAULT_PORT);
     }
-
-  for (i = 0; i < g_dns_nservers; i++)
-    {
-      if (g_dns_servers[i].addr.sa_family == addr->sa_family)
-        {
-          if (memcmp(&g_dns_servers[i].addr, addr, copylen) == 0)
-            {
-              dns_semgive();
-              return OK;
-            }
-        }
-    }
-
-  memcpy(&g_dns_servers[idx].addr, addr, copylen);
 
   /* We now have a valid DNS address */
 
