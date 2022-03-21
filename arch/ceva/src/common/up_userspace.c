@@ -189,7 +189,7 @@ const struct userspace_s userspace __attribute__ ((section ("userspace"))) =
 
   .us_base            =
   {
-    .us_entrypoint    = CONFIG_USER_ENTRYPOINT,
+    .us_entrypoint    = CONFIG_INIT_ENTRYPOINT,
     .us_textstart     = (uintptr_t)g_textstart,
     .us_textend       = (uintptr_t)g_textend,
     .us_datasource    = (uintptr_t)g_datasource,

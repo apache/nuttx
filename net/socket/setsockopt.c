@@ -136,130 +136,6 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
 
           return OK;
         }
-
-#if CONFIG_NET_RECV_BUFSIZE > 0
-      case SO_RCVBUF:     /* Sets receive buffer size */
-        {
-          int buffersize;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (value_len != sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the value.  Is the option being set or cleared? */
-
-          buffersize = *(FAR int *)value;
-
-          if (buffersize < 0 || buffersize > INT_MAX)
-            {
-              return -EINVAL;
-            }
-
-          net_lock();
-
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-          if (psock->s_type == SOCK_STREAM)
-            {
-              FAR struct tcp_conn_s *tcp;
-
-              tcp = (FAR struct tcp_conn_s *)conn;
-
-              /* Save the receive buffer size */
-
-              tcp->rcv_bufs = buffersize;
-            }
-          else
-#endif
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              FAR struct udp_conn_s *udp;
-
-              udp = (FAR struct udp_conn_s *)conn;
-
-              /* Save the receive buffer size */
-
-              udp->rcvbufs = buffersize;
-            }
-          else
-#endif
-            {
-              net_unlock();
-              return -ENOPROTOOPT;
-            }
-
-          net_unlock();
-
-          return OK;
-        }
-#endif
-
-#if CONFIG_NET_SEND_BUFSIZE > 0
-      case SO_SNDBUF:     /* Sets send buffer size */
-        {
-          int buffersize;
-
-          /* Verify that option is the size of an 'int'.  Should also check
-           * that 'value' is properly aligned for an 'int'
-           */
-
-          if (value_len != sizeof(int))
-            {
-              return -EINVAL;
-            }
-
-          /* Get the value.  Is the option being set or cleared? */
-
-          buffersize = *(FAR int *)value;
-
-          if (buffersize < 0 || buffersize > INT_MAX)
-            {
-              return -EINVAL;
-            }
-
-          net_lock();
-
-#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
-          if (psock->s_type == SOCK_STREAM)
-            {
-              FAR struct tcp_conn_s *tcp;
-
-              tcp = (FAR struct tcp_conn_s *)conn;
-
-              /* Save the send buffer size */
-
-              tcp->snd_bufs = buffersize;
-            }
-          else
-#endif
-#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
-          if (psock->s_type == SOCK_DGRAM)
-            {
-              FAR struct udp_conn_s *udp;
-
-              udp = (FAR struct udp_conn_s *)conn;
-
-              /* Save the send buffer size */
-
-              udp->sndbufs = buffersize;
-            }
-          else
-#endif
-            {
-              net_unlock();
-              return -ENOPROTOOPT;
-            }
-
-          net_unlock();
-
-          return OK;
-        }
-#endif
     }
 
 #ifdef CONFIG_NET_USRSOCK
@@ -398,6 +274,131 @@ static int psock_socketlevel_option(FAR struct socket *psock, int option,
         }
         break;
 #endif
+
+#if CONFIG_NET_RECV_BUFSIZE > 0
+      case SO_RCVBUF:     /* Sets receive buffer size */
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+          net_lock();
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp;
+
+              tcp = (FAR struct tcp_conn_s *)conn;
+
+              /* Save the receive buffer size */
+
+              tcp->rcv_bufs = buffersize;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp;
+
+              udp = (FAR struct udp_conn_s *)conn;
+
+              /* Save the receive buffer size */
+
+              udp->rcvbufs = buffersize;
+            }
+          else
+#endif
+            {
+              net_unlock();
+              return -ENOPROTOOPT;
+            }
+
+          net_unlock();
+
+          break;
+        }
+#endif
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+      case SO_SNDBUF:     /* Sets send buffer size */
+        {
+          int buffersize;
+
+          /* Verify that option is the size of an 'int'.  Should also check
+           * that 'value' is properly aligned for an 'int'
+           */
+
+          if (value_len != sizeof(int))
+            {
+              return -EINVAL;
+            }
+
+          /* Get the value.  Is the option being set or cleared? */
+
+          buffersize = *(FAR int *)value;
+
+          if (buffersize < 0)
+            {
+              return -EINVAL;
+            }
+
+          net_lock();
+
+#if defined(CONFIG_NET_TCP) && !defined(CONFIG_NET_TCP_NO_STACK)
+          if (psock->s_type == SOCK_STREAM)
+            {
+              FAR struct tcp_conn_s *tcp;
+
+              tcp = (FAR struct tcp_conn_s *)conn;
+
+              /* Save the send buffer size */
+
+              tcp->snd_bufs = buffersize;
+            }
+          else
+#endif
+#if defined(CONFIG_NET_UDP) && !defined(CONFIG_NET_UDP_NO_STACK)
+          if (psock->s_type == SOCK_DGRAM)
+            {
+              FAR struct udp_conn_s *udp;
+
+              udp = (FAR struct udp_conn_s *)conn;
+
+              /* Save the send buffer size */
+
+              udp->sndbufs = buffersize;
+            }
+          else
+#endif
+            {
+              net_unlock();
+              return -ENOPROTOOPT;
+            }
+
+          net_unlock();
+
+          break;
+        }
+#endif
+
       /* The following are not yet implemented */
 
       case SO_RCVLOWAT:   /* Sets the minimum number of bytes to input */

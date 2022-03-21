@@ -31,7 +31,8 @@ CMN_CSRCS += riscv_releasepending.c riscv_reprioritizertr.c
 CMN_CSRCS += riscv_releasestack.c riscv_stackframe.c riscv_schedulesigaction.c
 CMN_CSRCS += riscv_sigdeliver.c riscv_unblocktask.c riscv_usestack.c
 CMN_CSRCS += riscv_mdelay.c riscv_udelay.c riscv_copyfullstate.c
-CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c
+CMN_CSRCS += riscv_idle.c riscv_tcbinfo.c riscv_getnewintctx.c
+CMN_CSRCS += riscv_cpuindex.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += riscv_backtrace.c
@@ -55,19 +56,21 @@ CHIP_CSRCS += mpfs_irq.c mpfs_irq_dispatch.c
 CHIP_CSRCS += mpfs_lowputc.c mpfs_serial.c
 CHIP_CSRCS += mpfs_start.c mpfs_timerisr.c
 CHIP_CSRCS += mpfs_gpio.c mpfs_systemreset.c
+CHIP_CSRCS += mpfs_plic.c
 
 ifeq ($(CONFIG_MPFS_DMA),y)
 CHIP_CSRCS += mpfs_dma.c
 endif
 
 ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += mpfs_userspace.c
+CMN_UASRCS += riscv_signal_handler.S
+endif
+
+ifneq ($(CONFIG_BUILD_FLAT),y)
 CMN_CSRCS += riscv_task_start.c
 CMN_CSRCS += riscv_pthread_start.c
 CMN_CSRCS += riscv_signal_dispatch.c
-
-CMN_UASRCS += riscv_signal_handler.S
-
-CHIP_CSRCS += mpfs_userspace.c
 endif
 
 ifeq ($(CONFIG_ARCH_USE_MPU),y)
@@ -88,6 +91,10 @@ endif
 
 ifeq ($(CONFIG_MPFS_EMMCSD),y)
 CHIP_CSRCS += mpfs_emmcsd.c
+endif
+
+ifeq ($(CONFIG_MPFS_ETHMAC),y)
+CHIP_CSRCS += mpfs_ethernet.c
 endif
 
 ifeq (${CONFIG_MPFS_HAVE_COREPWM},y)

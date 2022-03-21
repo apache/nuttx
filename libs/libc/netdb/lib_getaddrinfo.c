@@ -77,7 +77,7 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
       case AF_LOCAL:
         ai->ai.ai_addrlen       = sizeof(struct sockaddr_un);
         ai->sa.sun.sun_family   = AF_LOCAL;
-        strncpy(ai->sa.sun.sun_path, addr, sizeof(ai->sa.sun.sun_path));
+        strlcpy(ai->sa.sun.sun_path, addr, sizeof(ai->sa.sun.sun_path));
         break;
 #endif
 #ifdef CONFIG_NET_IPv4
@@ -100,7 +100,7 @@ FAR static struct ai_s *alloc_ai(int family, int socktype, int protocol,
       case AF_RPMSG:
         ai->ai.ai_addrlen       = sizeof(struct sockaddr_rpmsg);
         ai->sa.srp.rp_family    = AF_RPMSG;
-        strncpy(ai->sa.srp.rp_cpu, addr, sizeof(ai->sa.srp.rp_cpu));
+        strlcpy(ai->sa.srp.rp_cpu, addr, sizeof(ai->sa.srp.rp_cpu));
         snprintf(ai->sa.srp.rp_name, sizeof(ai->sa.srp.rp_name), "%d", port);
         break;
 #endif
@@ -290,11 +290,10 @@ int getaddrinfo(FAR const char *hostname, FAR const char *servname,
       if (ai != NULL)
         {
           *res = (FAR struct addrinfo *)ai;
-        }
-
-      if (flags & AI_CANONNAME)
-        {
-          ai->ai.ai_canonname = (FAR char *)hostname;
+          if (flags & AI_CANONNAME)
+            {
+              ai->ai.ai_canonname = (FAR char *)hostname;
+            }
         }
 
       return (*res != NULL) ? OK : EAI_MEMORY;

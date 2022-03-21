@@ -26,11 +26,29 @@
 #include <stdint.h>
 #include <nuttx/arch.h>
 
+#include <arch/csr.h>
+
 #include "riscv_internal.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: riscv_mhartid
+ *
+ * Description:
+ *   Context aware way to query hart id
+ *
+ * Returned Value:
+ *   Hart id
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_mhartid(void)
+{
+  return READ_CSR(mhartid);
+}
 
 /****************************************************************************
  * Name: up_cpu_index
@@ -48,10 +66,9 @@
  *
  ****************************************************************************/
 
+#ifdef CONFIG_SMP
 int up_cpu_index(void)
 {
-  int mhartid;
-
-  asm volatile ("csrr %0, mhartid": "=r" (mhartid));
-  return mhartid;
+  return (int)riscv_mhartid();
 }
+#endif

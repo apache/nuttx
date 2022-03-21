@@ -37,6 +37,7 @@ __kflash_start = ORIGIN(kflash);
 __kflash_size = LENGTH(kflash);
 __ksram_start = ORIGIN(ksram);
 __ksram_size = LENGTH(ksram);
+__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
 
 ENTRY(_stext)
 EXTERN(_vectors)

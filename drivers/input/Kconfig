@@ -35,22 +35,68 @@ config INPUT_TOUCHSCREEN
 	select MM_CIRCBUF
 	default n
 
-if INPUT_TOUCHSCREEN
-
-config INPUT_TOUCHSCREEN_NPOLLWAITERS
-	int "Number touchscreen poll waiters"
-	default 4
-	---help---
-		Maximum number of threads that can be waiting on poll()
-
-endif # INPUT_TOUCHSCREEN
+config INPUT_KEYBOARD
+	bool
+	select MM_CIRCBUF
+	default n
 
 config INPUT_UINPUT
-	bool "Enable uinput"
-	select INPUT_TOUCHSCREEN
+	bool
 	default n
 	---help---
 		Enable support virtual input device driver
+
+config UINPUT_RPMSG
+	bool "Enable uinput rpmsg"
+	depends on INPUT_UINPUT
+	depends on RPTUN
+	default n
+	---help---
+		Enable support uinput cross core communication
+
+config UINPUT_TOUCH
+	bool "Enable uinput touch"
+	select INPUT_TOUCHSCREEN
+	select INPUT_UINPUT
+	default n
+	---help---
+		Enable support virtual input touch device driver
+
+if UINPUT_TOUCH
+
+config UINPUT_TOUCH_MAXPOINT
+	int "Maximum number of touch points supported"
+	default 1
+
+config UINPUT_TOUCH_BUFNUMBER
+	int "Number of touch data buffer"
+	default 8
+
+endif
+
+config UINPUT_BUTTONS
+	bool "Enable uinput buttons"
+	select INPUT_BUTTONS
+	select INPUT_UINPUT
+	default n
+	---help---
+		Enable support virtual input button device driver
+
+config UINPUT_KEYBOARD
+	bool "Enable uinput keyboard"
+	select INPUT_KEYBOARD
+	select INPUT_UINPUT
+	default n
+	---help---
+		Enable support virtual input keyboard device driver
+
+if UINPUT_KEYBOARD
+
+config UINPUT_KEYBOARD_BUFNUMBER
+	int "Number keyboard data buffer"
+	default 8
+
+endif
 
 config INPUT_MAX11802
 	bool "MAX11802 touchscreen controller"

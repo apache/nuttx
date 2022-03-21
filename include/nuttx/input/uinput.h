@@ -36,9 +36,7 @@
  *   Initialized the uinput touchscreen device
  *
  * Input Parameters:
- *   name:      Touchscreen devices name
- *   maxpoint:  Maximum number of touch points supported.
- *   buff_nums: Number of the touch points structure.
+ *   None
  *
  * Returned Value:
  *   Zero is returned on success. Otherwise, a negated errno value is
@@ -46,8 +44,28 @@
  *
  ****************************************************************************/
 
-int uinput_touch_initialize(FAR const char *name, int maxpoint,
-                            int buffnums);
+#ifdef CONFIG_UINPUT_TOUCH
+int uinput_touch_initialize(void);
+#endif
+
+/****************************************************************************
+ * Name: uinput_keyboard_initialize
+ *
+ * Description:
+ *   Initialized the uinput keyboard device
+ *
+ * Input Parameters:
+ *   None
+ *
+ * Returned Value:
+ *   Zero is returned on success. Otherwise, a negated errno value is
+ *   returned to indicate the nature of the failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_UINPUT_KEYBOARD
+int uinput_keyboard_initialize(void);
+#endif
 
 /****************************************************************************
  * Name: uinput_button_initialize
@@ -56,7 +74,7 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint,
  *   Initialized the uinput button device
  *
  * Input Parameters:
- *   name:      Button devices name
+ *   None
  *
  * Returned Value:
  *   Zero is returned on success. Otherwise, a negated errno value is
@@ -64,6 +82,8 @@ int uinput_touch_initialize(FAR const char *name, int maxpoint,
  *
  ****************************************************************************/
 
-int uinput_button_initialize(FAR const char *name);
+#ifdef CONFIG_UINPUT_BUTTONS
+int uinput_button_initialize(void);
+#endif
 
 #endif /* __INCLUDE_NUTTX_INPUT_UINPUT_H */

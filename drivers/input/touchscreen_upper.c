@@ -23,60 +23,56 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-
 #include <sys/types.h>
+
+#include <assert.h>
+#include <debug.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <poll.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <assert.h>
-#include <errno.h>
-#include <debug.h>
 
-#include <poll.h>
-#include <fcntl.h>
-#include <nuttx/kmalloc.h>
-#include <nuttx/mm/circbuf.h>
 #include <nuttx/input/touchscreen.h>
-
-/****************************************************************************
- * Pre-processor Definitions
- ****************************************************************************/
+#include <nuttx/kmalloc.h>
+#include <nuttx/list.h>
+#include <nuttx/mm/circbuf.h>
 
 /****************************************************************************
  * Private Types
  ****************************************************************************/
 
+struct touch_openpriv_s
+{
+  struct circbuf_s   circbuf; /* Store touch point data in circle buffer */
+  struct list_node   node;    /* Opened file buffer linked list node */
+  FAR struct pollfd *fds;     /* Polling structure of waiting thread */
+  sem_t              waitsem; /* Used to wait for the availability of data */
+  sem_t              locksem; /* Manages exclusive access to this structure */
+};
+
 /* This structure is for touchscreen upper half driver */
 
 struct touch_upperhalf_s
 {
-  uint8_t                      open_count;   /* Number of times the device has been opened */
-  uint32_t                     buff_nums;    /* Number of touch point structure */
-  uint8_t                      nwaiters;     /* Number of threads waiting for touch point data */
-  sem_t                        exclsem;      /* Manages exclusive access to this structure */
-  sem_t                        buffersem;    /* Used to wait for the availability of data */
-  struct circbuf_s             buffer;       /* Store touch point data in circle buffer */
-
-  /* The following is a list if poll structures of threads waiting for
-   * driver events. The 'struct pollfd' reference for each open is also
-   * retained in the f_priv field of the 'struct file'.
-   */
-
-  FAR struct pollfd            *fds[CONFIG_INPUT_TOUCHSCREEN_NPOLLWAITERS];
-  FAR struct touch_lowerhalf_s *lower;       /* A pointer of lower half instance */
+  uint8_t          nums;               /* Number of touch point structure */
+  sem_t            exclsem;            /* Manages exclusive access to this structure */
+  struct list_node head;               /* Opened file buffer chain header node */
+  FAR struct touch_lowerhalf_s *lower; /* A pointer of lower half instance */
 };
 
 /****************************************************************************
  * Private Function Prototypes
  ****************************************************************************/
 
-static void    touch_notify(FAR struct touch_upperhalf_s *upper,
+static void    touch_notify(FAR struct touch_openpriv_s *openpriv,
                             pollevent_t eventset);
 static int     touch_open(FAR struct file *filep);
 static int     touch_close(FAR struct file *filep);
 static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
-static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
+static ssize_t touch_write(FAR struct file *filep, FAR const char *openpriv,
                            size_t buflen);
 static int     touch_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
@@ -105,28 +101,24 @@ static const struct file_operations g_touch_fops =
  * Private Functions
  ****************************************************************************/
 
-static void touch_notify(FAR struct touch_upperhalf_s *upper,
+static void touch_notify(FAR struct touch_openpriv_s *openpriv,
                          pollevent_t eventset)
 {
-  FAR struct pollfd *fd;
-  int i;
+  FAR struct pollfd *fd = openpriv->fds;
 
-  for (i = 0; i < CONFIG_INPUT_TOUCHSCREEN_NPOLLWAITERS; i++)
+  fd = openpriv->fds;
+  if (fd)
     {
-      fd = upper->fds[i];
-      if (fd)
+      fd->revents |= (fd->events & eventset);
+      if (fd->revents != 0)
         {
-          fd->revents |= (fd->events & eventset);
-          if (fd->revents != 0)
-            {
-              /* report event log */
+          /* report event log */
 
-              int semcount;
-              nxsem_get_value(fd->sem, &semcount);
-              if (semcount < 1)
-                {
-                   nxsem_post(fd->sem);
-                }
+          int semcount;
+          nxsem_get_value(fd->sem, &semcount);
+          if (semcount < 1)
+            {
+              nxsem_post(fd->sem);
             }
         }
     }
@@ -138,37 +130,44 @@ static void touch_notify(FAR struct touch_upperhalf_s *upper,
 
 static int touch_open(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct touch_openpriv_s  *openpriv;
+  FAR struct inode             *inode = filep->f_inode;
   FAR struct touch_upperhalf_s *upper = inode->i_private;
   FAR struct touch_lowerhalf_s *lower = upper->lower;
   int ret;
-  int tmp;
+
+  openpriv = kmm_zalloc(sizeof(struct touch_openpriv_s));
+  if (openpriv == NULL)
+    {
+      return -ENOMEM;
+    }
+
+  ret = circbuf_init(&openpriv->circbuf, NULL,
+                     upper->nums * SIZEOF_TOUCH_SAMPLE_S(lower->maxpoint));
+  if (ret < 0)
+    {
+      kmm_free(openpriv);
+      return ret;
+    }
 
   ret = nxsem_wait(&upper->exclsem);
   if (ret < 0)
     {
+      circbuf_uninit(&openpriv->circbuf);
+      kmm_free(openpriv);
       return ret;
     }
 
-  tmp = upper->open_count + 1;
-  if (tmp == 0)
-    {
-      ret = -EMFILE;
-      goto err_out;
-    }
-  else if (tmp == 1)
-    {
-      ret = circbuf_init(&upper->buffer, NULL, upper->buff_nums *
-                         SIZEOF_TOUCH_SAMPLE_S(lower->maxpoint));
-      if (ret < 0)
-        {
-          goto err_out;
-        }
-    }
+  nxsem_init(&openpriv->waitsem, 0, 0);
+  nxsem_init(&openpriv->locksem, 0, 1);
+  nxsem_set_protocol(&openpriv->waitsem, SEM_PRIO_NONE);
+  list_add_tail(&upper->head, &openpriv->node);
 
-  upper->open_count = tmp;
+  /* Save the buffer node pointer so that it can be used directly
+   * in the read operation.
+   */
 
-err_out:
+  filep->f_priv = openpriv;
   nxsem_post(&upper->exclsem);
   return ret;
 }
@@ -179,8 +178,9 @@ err_out:
 
 static int touch_close(FAR struct file *filep)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct touch_upperhalf_s *upper = inode->i_private;
+  FAR struct touch_openpriv_s  *openpriv = filep->f_priv;
+  FAR struct inode             *inode    = filep->f_inode;
+  FAR struct touch_upperhalf_s *upper    = inode->i_private;
   int ret;
 
   ret = nxsem_wait(&upper->exclsem);
@@ -189,11 +189,11 @@ static int touch_close(FAR struct file *filep)
       return ret;
     }
 
-  if (upper->open_count == 1)
-    {
-      upper->open_count--;
-      circbuf_uninit(&upper->buffer);
-    }
+  list_delete(&openpriv->node);
+  circbuf_uninit(&openpriv->circbuf);
+  nxsem_destroy(&openpriv->waitsem);
+  nxsem_destroy(&openpriv->locksem);
+  kmm_free(openpriv);
 
   nxsem_post(&upper->exclsem);
   return ret;
@@ -222,11 +222,10 @@ static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
  * Name: touch_read
  ****************************************************************************/
 
-static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
-                          size_t len)
+static ssize_t
+touch_read(FAR struct file *filep, FAR char *buffer, size_t len)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct touch_upperhalf_s *upper = inode->i_private;
+  FAR struct touch_openpriv_s *openpriv = filep->f_priv;
   int ret;
 
   if (!buffer || !len)
@@ -234,13 +233,13 @@ static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
       return -EINVAL;
     }
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxsem_wait(&openpriv->locksem);
   if (ret < 0)
     {
       return ret;
     }
 
-  while (circbuf_is_empty(&upper->buffer))
+  while (circbuf_is_empty(&openpriv->circbuf))
     {
       if (filep->f_oflags & O_NONBLOCK)
         {
@@ -249,14 +248,14 @@ static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
         }
       else
         {
-          nxsem_post(&upper->exclsem);
-          ret = nxsem_wait_uninterruptible(&upper->buffersem);
+          nxsem_post(&openpriv->locksem);
+          ret = nxsem_wait_uninterruptible(&openpriv->waitsem);
           if (ret < 0)
             {
               return ret;
             }
 
-          ret = nxsem_wait(&upper->exclsem);
+          ret = nxsem_wait(&openpriv->locksem);
           if (ret < 0)
             {
               return ret;
@@ -264,16 +263,16 @@ static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
         }
     }
 
-  ret = circbuf_read(&upper->buffer, buffer, len);
+  ret = circbuf_read(&openpriv->circbuf, buffer, len);
 
 out:
-  nxsem_post(&upper->exclsem);
+  nxsem_post(&openpriv->locksem);
   return ret;
 }
 
 static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
 {
-  FAR struct inode *inode = filep->f_inode;
+  FAR struct inode             *inode = filep->f_inode;
   FAR struct touch_upperhalf_s *upper = inode->i_private;
   FAR struct touch_lowerhalf_s *lower = upper->lower;
   int ret;
@@ -297,16 +296,13 @@ static int touch_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
   return ret;
 }
 
-static int touch_poll(FAR struct file *filep,
-                      struct pollfd *fds, bool setup)
+static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
 {
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct touch_upperhalf_s *upper = inode->i_private;
+  FAR struct touch_openpriv_s *openpriv = filep->f_priv;
   pollevent_t eventset = 0;
   int ret;
-  int i;
 
-  ret = nxsem_wait(&upper->exclsem);
+  ret = nxsem_wait(&openpriv->locksem);
   if (ret < 0)
     {
       return ret;
@@ -314,48 +310,35 @@ static int touch_poll(FAR struct file *filep,
 
   if (setup)
     {
-      for (i = 0; i < CONFIG_INPUT_TOUCHSCREEN_NPOLLWAITERS; i++)
+      if (openpriv->fds == NULL)
         {
-          if (NULL == upper->fds[i])
-            {
-              upper->fds[i] = fds;
-              fds->priv = &upper->fds[i];
-              break;
-            }
+          openpriv->fds = fds;
+          fds->priv     = &openpriv->fds;
         }
-
-      if (i >= CONFIG_INPUT_TOUCHSCREEN_NPOLLWAITERS)
+      else
         {
-          fds->priv = NULL;
-          ret       = -EBUSY;
+          ret = -EBUSY;
           goto errout;
         }
 
-      if (!circbuf_is_empty(&upper->buffer))
+      if (!circbuf_is_empty(&openpriv->circbuf))
         {
           eventset |= (fds->events & POLLIN);
         }
 
       if (eventset)
         {
-          touch_notify(upper, eventset);
+          touch_notify(openpriv, POLLIN);
         }
     }
   else if (fds->priv)
     {
-      for (i = 0; i < CONFIG_INPUT_TOUCHSCREEN_NPOLLWAITERS; i++)
-        {
-          if (fds == upper->fds[i])
-            {
-              upper->fds[i] = NULL;
-              fds->priv = NULL;
-              break;
-            }
-        }
+      openpriv->fds = NULL;
+      fds->priv   = NULL;
     }
 
 errout:
-  nxsem_post(&upper->exclsem);
+  nxsem_post(&openpriv->locksem);
   return ret;
 }
 
@@ -366,6 +349,7 @@ errout:
 void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
 {
   FAR struct touch_upperhalf_s *upper = priv;
+  FAR struct touch_openpriv_s  *openpriv;
   int semcount;
 
   if (nxsem_wait(&upper->exclsem) < 0)
@@ -373,27 +357,32 @@ void touch_event(FAR void *priv, FAR const struct touch_sample_s *sample)
       return;
     }
 
-  circbuf_overwrite(&upper->buffer, sample,
-                    SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
-  touch_notify(upper, POLLIN);
-  nxsem_get_value(&upper->buffersem, &semcount);
-  if (semcount < 1)
+  list_for_every_entry(&upper->head, openpriv, struct touch_openpriv_s, node)
     {
-      nxsem_post(&upper->buffersem);
+      circbuf_overwrite(&openpriv->circbuf, sample,
+                        SIZEOF_TOUCH_SAMPLE_S(sample->npoints));
+
+      nxsem_get_value(&openpriv->waitsem, &semcount);
+      if (semcount < 1)
+        {
+          nxsem_post(&openpriv->waitsem);
+        }
+
+      touch_notify(openpriv, POLLIN);
     }
 
   nxsem_post(&upper->exclsem);
 }
 
 int touch_register(FAR struct touch_lowerhalf_s *lower,
-                   FAR const char *path, uint8_t buff_nums)
+                   FAR const char *path, uint8_t nums)
 {
   FAR struct touch_upperhalf_s *upper;
   int ret;
 
   iinfo("Registering %s\n", path);
 
-  if (lower == NULL || !buff_nums)
+  if (lower == NULL || nums == 0)
     {
       ierr("ERROR: invalid touchscreen device\n");
       return -EINVAL;
@@ -406,27 +395,20 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
       return -ENOMEM;
     }
 
-  upper->lower     = lower;
-  upper->buff_nums = buff_nums;
-
+  lower->priv  = upper;
+  upper->lower = lower;
+  upper->nums  = nums;
+  list_initialize(&upper->head);
   nxsem_init(&upper->exclsem, 0, 1);
-  nxsem_init(&upper->buffersem, 0, 0);
-
-  nxsem_set_protocol(&upper->buffersem, SEM_PRIO_NONE);
-
-  lower->priv = upper;
 
   ret = register_driver(path, &g_touch_fops, 0666, upper);
   if (ret < 0)
     {
-      goto err_out;
+      nxsem_destroy(&upper->exclsem);
+      kmm_free(upper);
+      return ret;
     }
 
-  return ret;
-err_out:
-  nxsem_destroy(&upper->exclsem);
-  nxsem_destroy(&upper->buffersem);
-  kmm_free(upper);
   return ret;
 }
 
@@ -439,12 +421,9 @@ void touch_unregister(FAR struct touch_lowerhalf_s *lower,
   DEBUGASSERT(lower->priv != NULL);
 
   upper = lower->priv;
-
   iinfo("UnRegistering %s\n", path);
   unregister_driver(path);
 
   nxsem_destroy(&upper->exclsem);
-  nxsem_destroy(&upper->buffersem);
-
   kmm_free(upper);
 }

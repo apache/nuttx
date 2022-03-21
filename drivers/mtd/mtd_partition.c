@@ -906,7 +906,7 @@ int mtd_setpartitionname(FAR struct mtd_dev_s *mtd, FAR const char *name)
 
   /* Allocate space for the name */
 
-  strncpy(priv->name, name, sizeof(priv->name));
+  strlcpy(priv->name, name, sizeof(priv->name));
   return OK;
 }
 #endif

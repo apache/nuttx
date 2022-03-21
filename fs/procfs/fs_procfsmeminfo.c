@@ -311,7 +311,7 @@ static ssize_t meminfo_read(FAR struct file *filep, FAR char *buffer,
 
           /* Show heap information */
 
-          entry->mallinfo(entry->user_data, &minfo);
+          mm_mallinfo(entry->heap, &minfo);
           linesize   = procfs_snprintf(procfile->line, MEMINFO_LINELEN,
                                        "%12s:%11lu%11lu%11lu%11lu%7lu%7lu\n",
                                        entry->name,
@@ -476,7 +476,7 @@ static ssize_t memdump_write(FAR struct file *filep, FAR const char *buffer,
 
   for (entry = g_procfs_meminfo; entry != NULL; entry = entry->next)
     {
-      mm_memdump(entry->user_data, pid);
+      mm_memdump(entry->heap, pid);
     }
 
   return buflen;

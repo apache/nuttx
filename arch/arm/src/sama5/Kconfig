@@ -193,6 +193,7 @@ config ARCH_CHIP_SAMA5D2
 	bool
 	default n
 	select ARMV7A_HAVE_L2CC_PL310
+	select ARM_HAVE_NEON
 	select SAMA5_HAVE_AESB
 	select ARCH_NAND_HWECC
 	select SAMA5_HAVE_EMACB
@@ -220,6 +221,7 @@ config ARCH_CHIP_SAMA5D2
 config ARCH_CHIP_SAMA5D3
 	bool
 	default n
+	select ARM_HAVE_DPFPU
 	select SAMA5_HAVE_DMA
 	select SAMA5_HAVE_PIOE
 	select SAMA5_HAVE_USART0
@@ -231,6 +233,7 @@ config ARCH_CHIP_SAMA5D4
 	bool
 	default n
 	select ARMV7A_HAVE_L2CC_PL310
+	select ARM_HAVE_NEON
 	select ARCH_NAND_HWECC
 	select SAMA5_HAVE_AESB
 	select SAMA5_HAVE_EMACB

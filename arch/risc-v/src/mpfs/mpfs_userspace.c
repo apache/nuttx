@@ -29,6 +29,8 @@
 
 #include <nuttx/userspace.h>
 
+#include <arch/board/board_memorymap.h>
+
 #include "mpfs_userspace.h"
 #include "riscv_internal.h"
 #include "riscv_mmu.h"
@@ -42,11 +44,6 @@
 #define PMP_UFLASH_FLAGS    (PMPCFG_A_NAPOT | PMPCFG_X | PMPCFG_R)
 #define PMP_USRAM_FLAGS     (PMPCFG_A_NAPOT | PMPCFG_W | PMPCFG_R)
 
-#define UFLASH_START        (uintptr_t)&__uflash_start
-#define UFLASH_SIZE         (uintptr_t)&__uflash_size
-#define USRAM_START         (uintptr_t)&__usram_start
-#define USRAM_SIZE          (uintptr_t)&__usram_size
-
 /* Physical and virtual addresses to page tables (vaddr = paddr mapping) */
 
 #define PGT_L1_PBASE        (uint64_t)&m_l1_pgtable
@@ -55,16 +52,6 @@
 #define PGT_L1_VBASE        PGT_L1_PBASE
 #define PGT_L2_VBASE        PGT_L2_PBASE
 #define PGT_L3_VBASE        PGT_L3_PBASE
-
-/* Flags for user FLASH (RX) and user RAM (RW) */
-
-#define MMU_UFLASH_FLAGS    (PTE_R | PTE_X | PTE_U | PTE_G)
-#define MMU_USRAM_FLAGS     (PTE_R | PTE_W | PTE_U | PTE_G)
-
-/* Kernel RAM needs to be opened (the page tables) */
-
-#define KSRAM_START         (uintptr_t)&__ksram_start
-#define KSRAM_SIZE          (uintptr_t)&__ksram_size
 
 /****************************************************************************
  * Private Functions
@@ -108,20 +95,6 @@ static void configure_mmu(void);
 static uint64_t             m_l1_pgtable[512] locate_data(".pgtables");
 static uint64_t             m_l2_pgtable[512] locate_data(".pgtables");
 static uint64_t             m_l3_pgtable[512] locate_data(".pgtables");
-
-/****************************************************************************
- * Public Data
- ****************************************************************************/
-
-extern uintptr_t            __uflash_start;
-extern uintptr_t            __uflash_size;
-extern uintptr_t            __usram_start;
-extern uintptr_t            __usram_size;
-
-/* Needed to allow access to the page tables, which reside in kernel RAM */
-
-extern uintptr_t            __ksram_start;
-extern uintptr_t            __ksram_size;
 
 /****************************************************************************
  * Public Functions
@@ -269,17 +242,17 @@ static void configure_mmu(void)
   /* Setup the L3 references for executable memory */
 
   mmu_ln_map_region(3, PGT_L3_VBASE, UFLASH_START, UFLASH_START,
-                    UFLASH_SIZE, MMU_UFLASH_FLAGS);
+                    UFLASH_SIZE, MMU_UTEXT_FLAGS);
 
   /* Setup the L3 references for data memory */
 
   mmu_ln_map_region(3, PGT_L3_VBASE, USRAM_START, USRAM_START,
-                    USRAM_SIZE, MMU_USRAM_FLAGS);
+                    USRAM_SIZE, MMU_UDATA_FLAGS);
 
   /* Setup the L2 and L1 references */
 
-  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, PGT_L3_VBASE, PTE_G);
-  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, PGT_L2_VBASE, PTE_G);
+  mmu_ln_setentry(2, PGT_L2_VBASE, PGT_L3_PBASE, UFLASH_START, PTE_G);
+  mmu_ln_setentry(1, PGT_L1_VBASE, PGT_L2_PBASE, UFLASH_START, PTE_G);
 
   /* Enable MMU */
 

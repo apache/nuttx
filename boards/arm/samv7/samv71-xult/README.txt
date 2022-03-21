@@ -2600,8 +2600,8 @@ Configuration sub-directories
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
 
-  mcuboot-nsh:
-    This configuration exercises the MCUboot compatible application slot
+  mcuboot-swap-test:
+    This configuration exercises the MCUboot compatible application swap image
     example. The application is NuttX nsh with some special commands.
 
     Generate signed binaries for MCUboot compatible application:
@@ -2609,12 +2609,12 @@ Configuration sub-directories
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
         --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
-        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v1.bin
+        nuttx/nuttx.bin mcuboot_nuttx.app.swap.test.confirm-v1.bin
 
       ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
         --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
         --version 2.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
-        nuttx/nuttx.bin mcuboot_nuttx.app.nsh.confirmed-v2.bin
+        nuttx/nuttx.bin mcuboot_nuttx.app.swap.test.confirm-v2.bin
 
       Flash application version 1.0.0 at MCUboot Slot-0:
 
@@ -2625,7 +2625,7 @@ Configuration sub-directories
 	      -c 'reset_config srst_only' \
 	      -c init -c targets \
 	      -c 'reset halt' \
-	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v1.bin 0x420000' \
+	      -c 'program mcuboot_nuttx.app.swap.test.confirm-v1.bin 0x420000' \
 	      -c 'reset halt' \
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
@@ -2639,15 +2639,110 @@ Configuration sub-directories
 	      -c 'reset_config srst_only' \
 	      -c init -c targets \
 	      -c 'reset halt' \
-	      -c 'program mcuboot_nuttx.app.nsh.confirmed-v2.bin 0x500000' \
+	      -c 'program mcuboot_nuttx.app.swap.test.confirm-v2.bin 0x500000' \
 	      -c 'reset halt' \
 	      -c 'atsamv gpnvm set 1' \
 	      -c 'reset run' -c shutdown
 
     Relevant configuration settings:
 
-      CONFIG_BOOT_MCUBOOT=y
-      CONFIG_MCUBOOT_SLOT_CONFIRM_EXAMPLE=y
+      CONFIG_EXAMPLES_MCUBOOT_SWAP_TEST=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="nsh_main"
+
+  mcuboot-agent:
+    This configuration exercises the MCUboot firmware upgrade example. The
+    application is NuttX nsh with some special commands.
+
+    Generate signed binaries for MCUboot compatible application:
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 1.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        --confirm nuttx/nuttx.bin mcuboot_nuttx.update.agent.bin
+
+      Flash agent application at MCUboot Slot-0:
+
+      openocd -f interface/cmsis-dap.cfg \
+              -c 'transport select swd' \
+	      -c 'set CHIPNAME atsamv71q21' \
+	      -f target/atsamv.cfg \
+	      -c 'reset_config srst_only' \
+	      -c init -c targets \
+	      -c 'reset halt' \
+	      -c 'program mcuboot_nuttx.update.agent.bin 0x420000' \
+	      -c 'reset halt' \
+	      -c 'atsamv gpnvm set 1' \
+	      -c 'reset run' -c shutdown
+
+    The board is ready to perform an upgrade. However, this example requires
+    use an image to be used as new application. You can use the Confirm example,
+    which will be used in the download process.
+
+    See mcuboot-confirm for more information.
+
+    Relevant configuration settings:
+
+      CONFIG_EXAMPLES_MCUBOOT_UPDATE_AGENT=y
+
+      CONFIG_SAMV7_FORMAT_MCUBOOT=y
+      CONFIG_INIT_ENTRYPOINT="nsh_main"
+
+  mcuboot-confirm:
+
+      ./apps/boot/mcuboot/mcuboot/scripts/imgtool.py sign \
+        --key apps/boot/mcuboot/mcuboot/root-rsa-2048.pem --align 8 \
+        --version 2.0.0 --header-size 0x200 --pad-header --slot-size 0xe0000 \
+        nuttx/nuttx.bin mcuboot_nuttx.slot.confirm.bin
+
+    The mcuboot_nuttx.app.confirm.bin would be used at http server in your
+    network to be downloaded by Agent at MCUboot Slot-1.
+
+    Using Python to create a http server at your NuttX workspace:
+
+    sudo python -m http.server 8080 &
+
+    Test download:
+
+    wget <your PC IP>:8080/mcuboot_nuttx.slot.confirm.bin -O test.bin
+
+    Check MD5:
+
+    md5sum mcuboot_nuttx.slot.confirm.bin test.bin
+    958b523f1049696aba73354615868b7f  mcuboot_nuttx.slot.confirm.bin test.bin
+    958b523f1049696aba73354615868b7f  test.bin
+    rm test.bin
+
+    The OTA config uses DHCP client to get local ip address. This way your board
+    will have automatically access to your network. Let's check board.
+
+    ping <your PC IP>
+    PING xxx.xxx.xxx.xxx 56 bytes of data
+    56 bytes from xxx.xxx.xxx.xxx: icmp_seq=0 time=0 ms
+    56 bytes from xxx.xxx.xxx.xxx: icmp_seq=1 time=0 ms
+    ...
+    56 bytes from xxx.xxx.xxx.xxx: icmp_seq=9 time=0 ms
+    10 packets transmitted, 10 received, 0% packet loss, time 10100 ms
+
+    nsh> mcuboot_agent http://xxx.xxx.xxx.xxx:8080/mcuboot_nuttx.slot.confirm.bin
+    MCUboot Update Agen192.168.10.104 - - [16/Dec/2021 19:29:08]
+    "GET /mcuboot_nuttx.slot.confirm.bin HTTP/1.0" 200 -t example
+    Downloading from http://xxx.xxx.xxx.xxx:8080/signedv2.bin
+    Firmware Update size: 194464 bytes
+    Received: 512      of 194464 bytes [0%]
+    Received: 1024     of 194464 bytes [0%]
+    ...
+    Received: 194048   of 194464 bytes [99%]
+    Received: 194468   of 194468 bytes [100%]
+    Application Image successfully downloaded!
+    Requested update for next boot. Restarting...
+    *** Booting MCUboot build 7c890f4b075aed73e4c825ccf875b2fb9ebf2ded ***
+    Application Image successfully confirmed!
+
+    Relevant configuration settings:
+
+      CONFIG_EXAMPLES_MCUBOOT_SLOT_CONFIRM=y
 
       CONFIG_SAMV7_FORMAT_MCUBOOT=y
       CONFIG_INIT_ENTRYPOINT="nsh_main"

@@ -113,10 +113,10 @@
  *
  ****************************************************************************/
 
-int execl(FAR const char *path, ...)
+int execl(FAR const char *path, FAR const char *arg0, ...)
 {
-  FAR char **argv = (FAR char **)NULL;
-  FAR char *arg;
+  FAR char **argv = NULL;
+  FAR char *arg = (FAR char *)arg0;
   size_t nargs;
   va_list ap;
   int argc;
@@ -124,67 +124,57 @@ int execl(FAR const char *path, ...)
 
   /* Count the number of arguments */
 
-  va_start(ap, path);
+  va_start(ap, arg0);
   nargs = 0;
-  do
+
+  while (arg != NULL)
     {
-      /* Check if the next argument is present */
+      /* Yes.. increment the number of arguments.  Here is a sanity
+       * check to prevent running away with an unterminated argv[] list.
+       * MAX_EXECL_ARGS should be sufficiently large that this never
+       * happens in normal usage.
+       */
+
+      if (++nargs > MAX_EXECL_ARGS)
+        {
+          set_errno(E2BIG);
+          va_end(ap);
+          return ERROR;
+        }
 
       arg = va_arg(ap, FAR char *);
-      if (arg)
-        {
-          /* Yes.. increment the number of arguments.  Here is a sanity
-           * check to prevent running away with an unterminated argv[] list.
-           * MAX_EXECL_ARGS should be sufficiently large that this never
-           * happens in normal usage.
-           */
-
-          if (++nargs > MAX_EXECL_ARGS)
-            {
-              set_errno(E2BIG);
-              va_end(ap);
-              return ERROR;
-            }
-        }
     }
-  while (arg);
 
   va_end(ap);
 
   /* Allocate a temporary argv[] array */
 
-  if (nargs > 0)
+  argv = (FAR char **)lib_malloc((nargs + 1) * sizeof(FAR char *));
+  if (argv == NULL)
     {
-      argv = (FAR char **)lib_malloc((nargs + 1) * sizeof(FAR char *));
-      if (argv == (FAR char **)NULL)
-        {
-          set_errno(ENOMEM);
-          return ERROR;
-        }
-
-      /* Collect the arguments into the argv[] array */
-
-      va_start(ap, path);
-      for (argc = 0; argc < nargs; argc++)
-        {
-          argv[argc] = va_arg(ap, FAR char *);
-        }
-
-      argv[nargs] = NULL;
-      va_end(ap);
+      set_errno(ENOMEM);
+      return ERROR;
     }
+
+  argv[0] = (FAR char *)arg0;
+
+  /* Collect the arguments into the argv[] array */
+
+  va_start(ap, arg0);
+  for (argc = 1; argc <= nargs; argc++)
+    {
+      argv[argc] = va_arg(ap, FAR char *);
+    }
+
+  va_end(ap);
 
   /* Then let execv() do the real work */
 
-  ret = execv(path, (FAR char * const *)argv);
+  ret = execv(path, argv);
 
   /* Free the allocated argv[] list */
 
-  if (argv)
-    {
-      lib_free(argv);
-    }
-
+  lib_free(argv);
   return ret;
 }
 

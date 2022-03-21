@@ -50,32 +50,6 @@ extern "C"
 #define EXTERN extern
 #endif
 
-#if !defined(CONFIG_NETDEV_LATEINIT)
-
-/****************************************************************************
- * Function: arm_netinitialize
- *
- * Description:
- *   Initialize the enabled CAN device interfaces.  If there are more
- *   different network devices in the chip, then board-specific logic will
- *   have to provide this function to determine which, if any, network
- *   devices should be initialized.
- *
- * Input Parameters:
- *   None
- *
- * Returned Value:
- *   OK on success; Negated errno on failure.
- *
- * Assumptions:
- *   Called very early in the initialization sequence.
- *
- ****************************************************************************/
-
-void arm_netinitialize(void);
-
-#else
-
 /****************************************************************************
  * Function: s32k1xx_caninitialize
  *
@@ -93,8 +67,8 @@ void arm_netinitialize(void);
  *
  ****************************************************************************/
 
+#ifdef CONFIG_NETDEV_LATEINIT
 int s32k1xx_caninitialize(int intf);
-
 #endif
 
 #undef EXTERN

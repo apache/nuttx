@@ -29,8 +29,6 @@
 #include <nuttx/config.h>
 #include <nuttx/streams.h>
 
-#ifdef CONFIG_LIBC_KBDCODEC
-
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -195,6 +193,8 @@ struct kbd_getstate_s
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+#ifdef CONFIG_LIBC_KBDCODEC
 
 #ifdef __cplusplus
 extern "C"

@@ -32,7 +32,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/irq.h>
 #include <arch/irq.h>
-#include <arch/esp32s3/chip.h>
 
 #include "xtensa.h"
 #include "esp32s3_irq.h"
@@ -45,6 +44,8 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
+#define ESP32S3_NPINS   49
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -52,6 +53,27 @@
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: is_valid_gpio
+ *
+ * Description:
+ *   Check if the requested pin is a valid GPIO pin.
+ *
+ * Input Parameters:
+ *   pin  - Pin to be checked for validity.
+ *
+ * Returned Value:
+ *   True if the requested pin is a valid GPIO pin, false otherwise.
+ *
+ ****************************************************************************/
+
+static inline bool is_valid_gpio(uint32_t pin)
+{
+  /* ESP32-S3 has 45 GPIO pins numbered from 0 to 21 and 26 to 48 */
+
+  return pin <= 21 || (pin >= 26 && pin < ESP32S3_NPINS);
+}
 
 /****************************************************************************
  * Public Functions
@@ -63,16 +85,30 @@
  * Description:
  *   Configure a GPIO pin based on encoded pin attributes.
  *
+ * Input Parameters:
+ *   pin           - GPIO pin to be configured.
+ *   attr          - Attributes to be configured for the selected GPIO pin.
+ *                   The following attributes are accepted:
+ *                   - Direction (OUTPUT or INPUT)
+ *                   - Pull (PULLUP, PULLDOWN or OPENDRAIN)
+ *                   - Function (if not provided, assume function GPIO by
+ *                     default)
+ *                   - Drive strength (if not provided, assume DRIVE_2 by
+ *                     default)
+ *
+ * Returned Value:
+ *   Zero (OK) on success, or -1 (ERROR) in case of failure.
+ *
  ****************************************************************************/
 
-int esp32s3_configgpio(int pin, gpio_pinattr_t attr)
+int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr)
 {
   uintptr_t regaddr;
   uint32_t func;
   uint32_t cntrl;
   uint32_t pin2func;
 
-  DEBUGASSERT(pin >= 0 && pin <= ESP32S3_NGPIOS);
+  DEBUGASSERT(is_valid_gpio(pin));
 
   func  = 0;
   cntrl = 0;
@@ -81,7 +117,14 @@ int esp32s3_configgpio(int pin, gpio_pinattr_t attr)
 
   if ((attr & INPUT) != 0)
     {
-      putreg32((1ul << pin), GPIO_ENABLE_W1TC_REG);
+      if (pin < 32)
+        {
+          putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TC_REG);
+        }
+      else
+        {
+          putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TC_REG);
+        }
 
       /* Input enable */
 
@@ -101,24 +144,42 @@ int esp32s3_configgpio(int pin, gpio_pinattr_t attr)
 
   if ((attr & OUTPUT) != 0)
     {
-      putreg32((1ul << pin), GPIO_ENABLE_W1TS_REG);
+      if (pin < 32)
+        {
+          putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+        }
+      else
+        {
+          putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
+        }
     }
 
-  /* Add drivers */
-
-  func |= (uint32_t)(2ul << FUN_DRV_S);
-
-  /* Select the pad's function. If no function was given, consider it a
-   * normal input or output (i.e. function1).
-   */
+  /* Configure the pad's function */
 
   if ((attr & FUNCTION_MASK) != 0)
     {
-      func |= (uint32_t)(((attr >> FUNCTION_SHIFT) - 1) << MCU_SEL_S);
+      uint32_t val = ((attr & FUNCTION_MASK) >> FUNCTION_SHIFT) - 1;
+      func |= val << MCU_SEL_S;
     }
   else
     {
+      /* Function not provided, assuming function GPIO by default */
+
       func |= (uint32_t)(PIN_FUNC_GPIO << MCU_SEL_S);
+    }
+
+  /* Configure the pad's drive strength */
+
+  if ((attr & DRIVE_MASK) != 0)
+    {
+      uint32_t val = ((attr & DRIVE_MASK) >> DRIVE_SHIFT) - 1;
+      func |= val << FUN_DRV_S;
+    }
+  else
+    {
+      /* Drive strength not provided, assuming strength 2 by default */
+
+      func |= UINT32_C(2) << FUN_DRV_S;
     }
 
   if ((attr & OPEN_DRAIN) != 0)
@@ -141,25 +202,35 @@ int esp32s3_configgpio(int pin, gpio_pinattr_t attr)
  * Name: esp32s3_gpio_matrix_in
  *
  * Description:
- *   Set gpio input to a signal
- *   NOTE: one gpio can input to several signals
- *   If gpio == 0x3c, cancel input to the signal, input 0 to signal.
- *   If gpio == 0x3a, input nothing to signal.
- *   If gpio == 0x38, cancel input to the signal, input 1 to signal.
+ *   Set GPIO input to a signal.
+ *   NOTE: one GPIO can input to several signals.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be configured.
+ *                   - If pin == 0x3c, cancel input to the signal, input 0
+ *                     to signal.
+ *                   - If pin == 0x3a, input nothing to signal.
+ *                   - If pin == 0x38, cancel input to the signal, input 1
+ *                     to signal.
+ *   signal_idx    - Signal index.
+ *   inv           - Flag indicating whether the signal is inverted.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-void esp32s3_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv)
+void esp32s3_gpio_matrix_in(uint32_t pin, uint32_t signal_idx, bool inv)
 {
   uint32_t regaddr = GPIO_FUNC0_IN_SEL_CFG_REG + (signal_idx * 4);
-  uint32_t regval = (gpio << GPIO_FUNC0_IN_SEL_S);
+  uint32_t regval = pin << GPIO_FUNC0_IN_SEL_S;
 
   if (inv)
     {
       regval |= GPIO_FUNC0_IN_INV_SEL;
     }
 
-  if (gpio != 0x3a)
+  if (pin != 0x3a)
     {
       regval |= GPIO_SIG0_IN_SEL;
     }
@@ -171,24 +242,38 @@ void esp32s3_gpio_matrix_in(uint32_t gpio, uint32_t signal_idx, bool inv)
  * Name: esp32s3_gpio_matrix_out
  *
  * Description:
- *   Set signal output to gpio
- *   NOTE: one signal can output to several gpios
- *   If signal_idx == 0x100, cancel output put to the gpio
+ *   Set signal output to GPIO.
+ *   NOTE: one signal can output to several GPIOs.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be configured.
+ *   signal_idx    - Signal index.
+ *                   - If signal_idx == 0x100, cancel output to the GPIO.
+ *   out_inv       - Flag indicating whether the signal output is inverted.
+ *   oen_inv       - Flag indicating whether the signal output enable is
+ *                   inverted.
+ *
+ * Returned Value:
+ *   None.
  *
  ****************************************************************************/
 
-void esp32s3_gpio_matrix_out(uint32_t gpio, uint32_t signal_idx,
-                             bool out_inv, bool oen_inv)
+void esp32s3_gpio_matrix_out(uint32_t pin, uint32_t signal_idx, bool out_inv,
+                             bool oen_inv)
 {
-  uint32_t regaddr = GPIO_FUNC0_OUT_SEL_CFG_REG + (gpio * 4);
+  uint32_t regaddr = GPIO_FUNC0_OUT_SEL_CFG_REG + (pin * 4);
   uint32_t regval = signal_idx << GPIO_FUNC0_OUT_SEL_S;
 
-  if (gpio >= ESP32S3_NGPIOS)
-    {
-      return;
-    }
+  DEBUGASSERT(is_valid_gpio(pin));
 
-  putreg32(1ul << gpio, GPIO_ENABLE_W1TS_REG);
+  if (pin < 32)
+    {
+      putreg32((UINT32_C(1) << pin), GPIO_ENABLE_W1TS_REG);
+    }
+  else
+    {
+      putreg32((UINT32_C(1) << (pin - 32)), GPIO_ENABLE1_W1TS_REG);
+    }
 
   if (out_inv)
     {

@@ -115,10 +115,6 @@ static struct syslog_channel_s g_rtt_channel =
 #endif
 
 #if defined(CONFIG_SYSLOG_DEFAULT)
-#  if defined(CONFIG_ARCH_LOWPUTC)
-static sem_t g_syslog_default_sem = SEM_INITIALIZER(1);
-#  endif
-
 static const struct syslog_channel_ops_s g_default_channel_ops =
 {
   syslog_default_putc,
@@ -175,24 +171,25 @@ static int syslog_default_putc(FAR struct syslog_channel_s *channel, int ch)
 
 #if defined(CONFIG_ARCH_LOWPUTC)
   return up_putc(ch);
-#endif
-
+#else
   return ch;
+#endif
 }
 
 static ssize_t syslog_default_write(FAR struct syslog_channel_s *channel,
                                     FAR const char *buffer, size_t buflen)
 {
 #if defined(CONFIG_ARCH_LOWPUTC)
+  static sem_t sem = SEM_INITIALIZER(1);
   size_t nwritten;
 
-  nxsem_wait(&g_syslog_default_sem);
+  nxsem_wait(&sem);
   for (nwritten = 0; nwritten < buflen; nwritten++)
     {
       up_putc(buffer[nwritten]);
     }
 
-  nxsem_post(&g_syslog_default_sem);
+  nxsem_post(&sem);
 #endif
 
   return buflen;
