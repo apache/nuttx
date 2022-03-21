@@ -106,6 +106,40 @@ bool stm32l4_pwr_enablebkp(bool writable);
 bool stm32l4_pwr_enableusv(bool set);
 
 /****************************************************************************
+ * Name: stm32l4_pwr_enable_pvme2
+ *
+ * Description:
+ *   Enables or disables the peripheral voltage monitoring for Vddio2.
+ *
+ * Input Parameters:
+ *   set - True: Vddio2 monitoring enable; False: Vddio2 monitoring disable.
+ *
+ * Returned Value:
+ *   True: The bit was previously set.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+bool stm32l4_pwr_enable_pvme2(bool set);
+#endif
+
+/****************************************************************************
+ * Name: stm32l4_pwr_get_pvmo2
+ *
+ * Description:
+ *   Get value of peripheral voltage monitor output 2 (Vddio2).
+ *
+ * Returned Value:
+ *   True: Vddio2 voltage is below PVM2 threshold.
+ *   False: Vddio2 voltage is above PVM2 threshold.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_STM32L4_STM32L4X3)
+bool stm32l4_pwr_get_pvmo2(void);
+#endif
+
+/****************************************************************************
  * Name: stm32l4_pwr_vddio2_valid
  *
  * Description:
@@ -113,7 +147,7 @@ bool stm32l4_pwr_enableusv(bool set);
  *   Setting this bit is mandatory to use the PG2 - PG15 I/Os.
  *
  * Input Parameters:
- *   set - True: Vddio2 is value; False: Vddio2 is not present.  Logical and
+ *   set - True: Vddio2 is valid; False: Vddio2 is not present.  Logical and
  *         electrical isolation is applied to ignore this supply.
  *
  * Returned Value:
