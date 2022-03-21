@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <sched.h>
+#include <nuttx/sched.h>
 #include <nuttx/kthread.h>
 #include <debug.h>
 
@@ -59,7 +60,7 @@ struct cxd56_sigtype_s
 
 struct cxd56cpu1_info_s
 {
-  int                    workerpid;
+  pid_t                  workerpid;
   int                    ndev;
   struct cxd56_sigtype_s sigtype[CXD56_CPU1_DATA_TYPE_MAX];
 };
@@ -70,7 +71,11 @@ struct cxd56cpu1_info_s
 
 static struct cxd56cpu1_info_s g_cpu1_info =
   {
-    0
+    INVALID_PROCESS_ID,
+    0,
+    {
+      0
+    }
   };
 
 /****************************************************************************
@@ -193,9 +198,9 @@ int cxd56_cpu1siginit(uint8_t sigtype, FAR void *data)
     }
 
   pid = kthread_create("gnss_receiver",
-                    CONFIG_CXD56CPU1_WORKER_THREAD_PRIORITY,
-                    CONFIG_CXD56CPU1_WORKER_STACKSIZE, cxd56cpu1_worker,
-                    (FAR char * const *) NULL);
+                       CONFIG_CXD56CPU1_WORKER_THREAD_PRIORITY,
+                       CONFIG_CXD56CPU1_WORKER_STACKSIZE, cxd56cpu1_worker,
+                       (FAR char * const *) NULL);
 
   if (pid < 0)
     {
@@ -221,7 +226,7 @@ err1:
 int cxd56_cpu1siguninit(uint8_t sigtype)
 {
   struct cxd56cpu1_info_s *priv = &g_cpu1_info;
-  int                      pid;
+  pid_t                    pid;
   int                      ret;
 
   if (sigtype >= CXD56_CPU1_DATA_TYPE_MAX)
@@ -249,7 +254,7 @@ int cxd56_cpu1siguninit(uint8_t sigtype)
     }
 
   pid             = priv->workerpid;
-  priv->workerpid = 0;
+  priv->workerpid = INVALID_PROCESS_ID;
 
   sched_unlock();
 

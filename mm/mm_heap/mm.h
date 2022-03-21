@@ -167,7 +167,7 @@ typedef uint32_t mmsize_t;
 struct mm_allocnode_s
 {
 #ifdef CONFIG_DEBUG_MM
-  uint32_t pid;                            /* The pid for caller */
+  pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif
   mmsize_t size;                           /* Size of this chunk */
@@ -182,7 +182,7 @@ static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
 struct mm_freenode_s
 {
 #ifdef CONFIG_DEBUG_MM
-  uint32_t pid;                            /* The pid for caller */
+  pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif
   mmsize_t size;                           /* Size of this chunk */

@@ -54,7 +54,7 @@
 #endif
 
 #define RPTUNIOC_NONE               0
-#define NO_HOLDER                   (pid_t)-1
+#define NO_HOLDER                   INVALID_PROCESS_ID
 
 #define RPTUN_STATUS_FROM_MASTER    0x8
 #define RPTUN_STATUS_MASK           0x7
@@ -198,7 +198,7 @@ static struct image_store_ops g_rptun_storeops =
 
 static sem_t        g_rptunlock = SEM_INITIALIZER(1);
 static pid_t        g_holder    = NO_HOLDER;
-static unsigned int g_count     = 0;
+static unsigned int g_count;
 
 static METAL_DECLARE_LIST(g_rptun_cb);
 static METAL_DECLARE_LIST(g_rptun_priv);
@@ -1223,11 +1223,8 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   argv[1] = arg1;
   argv[2] = NULL;
 
-  ret = kthread_create("rptun",
-                       CONFIG_RPTUN_PRIORITY,
-                       CONFIG_RPTUN_STACKSIZE,
-                       rptun_thread,
-                       argv);
+  ret = kthread_create("rptun", CONFIG_RPTUN_PRIORITY,
+                       CONFIG_RPTUN_STACKSIZE, rptun_thread, argv);
   if (ret < 0)
     {
       unregister_driver(name);

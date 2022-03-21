@@ -154,7 +154,7 @@ struct ft80x_eventinfo_s
   struct sigevent event;                  /* Describe the way a task is to be notified */
   struct sigwork_s work;                  /* Work for SIGEV_THREAD */
   bool enable;                            /* True: enable notification; false: disable */
-  int16_t pid;                            /* Send the notification to this task */
+  pid_t pid;                              /* Send the notification to this task */
 };
 
 /* This structure describes the overall state of the FT80x driver */

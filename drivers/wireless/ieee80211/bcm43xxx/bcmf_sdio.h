@@ -87,7 +87,7 @@ struct bcmf_sdio_dev_s
   volatile bool ready;             /* Current device status */
   bool sleeping;                   /* Current sleep status */
 
-  int thread_id;                   /* Processing thread id */
+  pid_t thread_id;                 /* Processing thread id */
   sem_t thread_signal;             /* Semaphore for processing thread event */
   struct wdog_s waitdog;           /* Processing thread waitdog */
 

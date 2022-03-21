@@ -96,5 +96,5 @@ pid_t getpid(void)
    * start-up/IDLE thread before the ready-to-run list has been initialized.
    */
 
-  return (pid_t)0;
+  return IDLE_PROCESS_ID;
 }

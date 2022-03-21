@@ -398,7 +398,6 @@ static void usb_msc_disconnect(FAR void *arg)
 
 int k28_usbhost_initialize(void)
 {
-  pid_t    pid;
   int      ret;
 #  ifdef HAVE_USB_AUTOMOUNTER
   int      index;
@@ -479,10 +478,10 @@ int k28_usbhost_initialize(void)
 
   /* Start a thread to handle device connection. */
 
-  pid = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,
+  ret = kthread_create("EHCI Monitor", CONFIG_USBHOST_DEFPRIO,
                        CONFIG_USBHOST_STACKSIZE,
                        (main_t)ehci_waiter, (FAR char * const *)NULL);
-  if (pid < 0)
+  if (ret < 0)
     {
       uerr("ERROR: Failed to create ehci_waiter task: %d\n", ret);
       return -ENODEV;

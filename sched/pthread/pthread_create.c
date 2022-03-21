@@ -527,7 +527,7 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
    * as well.
    */
 
-  pid = (int)ptcb->cmn.pid;
+  pid = ptcb->cmn.pid;
   pjoin->thread = (pthread_t)pid;
 
   /* Initialize the semaphores in the join structure to zero. */

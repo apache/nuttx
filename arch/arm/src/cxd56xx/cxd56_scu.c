@@ -114,7 +114,7 @@
 struct ev_notify_s
 {
   int signo;               /* Signal number */
-  int pid;                 /* Target PID */
+  pid_t pid;               /* Target PID */
   struct scuev_arg_s *arg; /* Event argument */
   struct scufifo_s *fifo;  /* Reverse reference to FIFO */
 };
@@ -122,7 +122,7 @@ struct ev_notify_s
 struct wm_notify_s
 {
   int signo;                 /* Signal number */
-  int pid;                   /* Target PID */
+  pid_t pid;                 /* Target PID */
   struct scutimestamp_s *ts; /* Event argument */
   struct scufifo_s *fifo;    /* Reverse reference to FIFO */
 };

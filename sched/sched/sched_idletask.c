@@ -43,7 +43,7 @@
  *   Check if the caller is an IDLE thread.  For most implementations of
  *   the SYSLOG output semaphore locking is required for mutual exclusion.
  *   The idle threads are unable to lock semaphores because they cannot
- *   want.  So IDLE thread output is a special case and is treated much as
+ *   wait.  So IDLE thread output is a special case and is treated much as
  *   we treat debug output from an interrupt handler.
  *
  * Input Parameters:

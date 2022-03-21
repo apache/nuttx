@@ -404,7 +404,8 @@ int fakesensor_init(int type, FAR const char *file_name,
   argv[0] = arg1;
   argv[1] = NULL;
   ret = kthread_create("fakesensor_thread", SCHED_PRIORITY_DEFAULT,
-                    CONFIG_DEFAULT_TASK_STACKSIZE, fakesensor_thread, argv);
+                       CONFIG_DEFAULT_TASK_STACKSIZE,
+                       fakesensor_thread, argv);
   if (ret < 0)
     {
       kmm_free(sensor);

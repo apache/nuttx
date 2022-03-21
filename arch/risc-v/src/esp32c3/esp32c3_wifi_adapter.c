@@ -1997,7 +1997,7 @@ static int32_t esp_task_create_pinned_to_core(void *entry,
       wlerr("ERROR: Failed to create task\n");
     }
 
-  return pid > 0 ? true : false;
+  return pid > 0;
 }
 
 /****************************************************************************
