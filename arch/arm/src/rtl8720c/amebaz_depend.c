@@ -661,7 +661,7 @@ int rtw_create_task(struct task_struct *task, const char *name,
       return pid;
     }
 
-  wrap->pid = pid;
+  wrap->pid = (pid_t)pid;
   return 1;
 }
 

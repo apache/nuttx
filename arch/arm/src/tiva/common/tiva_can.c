@@ -141,7 +141,7 @@ struct tiva_canmod_s
 
   /* kthread message handler thread ID */
 
-  int       kthd_id;
+  pid_t     kthd_id;
 
 #ifdef CONFIG_CAN_ERRORS
   /* Asynchronously report errors when status interrupts are disabled */
@@ -438,7 +438,7 @@ static int tivacan_setup(FAR struct can_dev_s *dev)
     }
   else
     {
-      canmod->kthd_id = ret;
+      canmod->kthd_id = (pid_t)ret;
     }
 
 #ifdef CONFIG_CAN_EXTID

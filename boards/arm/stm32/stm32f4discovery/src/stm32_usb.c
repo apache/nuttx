@@ -156,12 +156,7 @@ void stm32_usbinitialize(void)
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
 {
-  int pid;
-#if defined(CONFIG_USBHOST_HUB)    || defined(CONFIG_USBHOST_MSC) || \
-    defined(CONFIG_USBHOST_HIDKBD) || defined(CONFIG_USBHOST_HIDMOUSE) || \
-    defined(CONFIG_USBHOST_XBOXCONTROLLER)
   int ret;
-#endif
 
   /* First, register all of the class drivers needed to support the drivers
    * that we care about:
@@ -239,10 +234,10 @@ int stm32_usbhost_initialize(void)
 
       uinfo("Start usbhost_waiter\n");
 
-      pid = kthread_create("usbhost", CONFIG_STM32F4DISCO_USBHOST_PRIO,
-                        CONFIG_STM32F4DISCO_USBHOST_STACKSIZE,
-                        (main_t)usbhost_waiter, (FAR char * const *)NULL);
-      return pid < 0 ? -ENOEXEC : OK;
+      ret = kthread_create("usbhost", CONFIG_STM32F4DISCO_USBHOST_PRIO,
+                           CONFIG_STM32F4DISCO_USBHOST_STACKSIZE,
+                           (main_t)usbhost_waiter, (FAR char * const *)NULL);
+      return ret < 0 ? -ENOEXEC : OK;
     }
 
   return -ENODEV;

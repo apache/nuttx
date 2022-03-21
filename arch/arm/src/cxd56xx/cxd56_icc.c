@@ -116,7 +116,7 @@ struct iccdev_s
   /* for POSIX signal */
 
   int signo;
-  int pid;
+  pid_t pid;
   FAR void *sigdata;
 
   struct sq_queue_s recvq;

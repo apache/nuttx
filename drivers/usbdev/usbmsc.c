@@ -1689,15 +1689,16 @@ int usbmsc_exportluns(FAR void *handle)
   g_usbmsc_handoff = priv;
 
   uinfo("Starting SCSI worker thread\n");
-  priv->thpid = kthread_create("scsid", CONFIG_USBMSC_SCSI_PRIO,
-                               CONFIG_USBMSC_SCSI_STACKSIZE,
-                               usbmsc_scsi_main, NULL);
-  if (priv->thpid <= 0)
+  ret = kthread_create("scsid", CONFIG_USBMSC_SCSI_PRIO,
+                       CONFIG_USBMSC_SCSI_STACKSIZE,
+                       usbmsc_scsi_main, NULL);
+  if (ret < 0)
     {
-      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE),
-               (uint16_t)priv->thpid);
+      usbtrace(TRACE_CLSERROR(USBMSC_TRACEERR_THREADCREATE), (uint16_t)ret);
       goto errout_with_lock;
     }
+
+  priv->thpid = (pid_t)ret;
 
   /* Wait for the worker thread to run and initialize */
 

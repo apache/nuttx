@@ -1703,20 +1703,20 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
 
   g_priv = priv;
 
-  priv->pollpid = kthread_create("mouse", CONFIG_HIDMOUSE_DEFPRIO,
-                                 CONFIG_HIDMOUSE_STACKSIZE,
-                                 (main_t)usbhost_mouse_poll,
-                                 (FAR char * const *)NULL);
-  if (priv->pollpid < 0)
+  ret = kthread_create("mouse", CONFIG_HIDMOUSE_DEFPRIO,
+                       CONFIG_HIDMOUSE_STACKSIZE, (main_t)usbhost_mouse_poll,
+                       (FAR char * const *)NULL);
+  if (ret < 0)
     {
       /* Failed to started the poll thread...
        * probably due to memory resources
        */
 
       usbhost_givesem(&g_exclsem);
-      ret = priv->pollpid;
       goto errout;
     }
+
+  priv->pollpid = (pid_t)ret;
 
   /* Now wait for the poll task to get properly initialized */
 

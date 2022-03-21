@@ -316,7 +316,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
                 FAR char * const argv[], FAR char * const envp[])
 {
   struct sched_param param;
-  pid_t proxy;
+  int proxy;
 #ifdef CONFIG_SCHED_WAITPID
   int status;
 #endif
@@ -410,7 +410,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
    * for use within the OS.
    */
 
-  ret = nx_waitpid(proxy, &status, 0);
+  ret = nx_waitpid((pid_t)proxy, &status, 0);
   if (ret < 0)
     {
       serr("ERROR: waitpid() failed: %d\n", ret);

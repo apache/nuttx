@@ -162,7 +162,7 @@ static FAR struct phy_notify_s *phy_find_unassigned(void)
 
           client->assigned = true;
           client->intf[0]  = '\0';
-          client->pid      = -1;
+          client->pid      = INVALID_PROCESS_ID;
           client->enable   = NULL;
 
           /* Return the client entry assigned to the caller */
@@ -388,7 +388,7 @@ int phy_notify_unsubscribe(FAR const char *intf, pid_t pid)
 
       client->assigned = false;
       client->intf[0]  = '\0';
-      client->pid      = -1;
+      client->pid      = INVALID_PROCESS_ID;
 
       phy_semgive();
     }

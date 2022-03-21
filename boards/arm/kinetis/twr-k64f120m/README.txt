@@ -36,7 +36,7 @@ Kinetis TWR-K64F120M Features:
   o Touch TWRPI Socket adds support for various capacitive touch boards
     (e.g. keypads, rotary dials, sliders, etc.)
   o Tower connectivity for access to USB, Ethernet, RS232/RS485, CAN, SPI,
-    I²C, Flexbus, etc.
+    IÂ²C, Flexbus, etc.
   o Plus: Potentiometer, 4 LEDs, 2 pushbuttons, accelerometer, RTC battery
 
 Kinetis TWR-K64F120M Pin Configuration

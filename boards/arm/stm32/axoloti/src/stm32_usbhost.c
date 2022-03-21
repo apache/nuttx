@@ -203,7 +203,6 @@ int stm32_setup_overcurrent(xcpt_t handler, void *arg)
 #ifdef CONFIG_USBHOST
 int stm32_usbhost_initialize(void)
 {
-  int pid;
   int ret;
 
   /* First, register all of the class drivers needed to support the drivers
@@ -251,11 +250,10 @@ int stm32_usbhost_initialize(void)
       /* Start a thread to handle device connection. */
 
       uinfo("Start usbhost_waiter\n");
-      pid =
-        kthread_create("usbhost", CONFIG_AXOLOTI_USBHOST_PRIO,
-                       CONFIG_AXOLOTI_USBHOST_STACKSIZE,
-                       (main_t) usbhost_waiter, (FAR char *const *)NULL);
-      return pid < 0 ? -ENOEXEC : OK;
+      ret = kthread_create("usbhost", CONFIG_AXOLOTI_USBHOST_PRIO,
+                           CONFIG_AXOLOTI_USBHOST_STACKSIZE,
+                           (main_t)usbhost_waiter, (FAR char *const *)NULL);
+      return ret < 0 ? -ENOEXEC : OK;
     }
 
   return -ENODEV;
