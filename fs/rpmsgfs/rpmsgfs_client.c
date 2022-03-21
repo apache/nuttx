@@ -756,11 +756,12 @@ int rpmsgfs_client_rename(FAR void *handle, FAR const char *oldpath,
   struct rpmsgfs_rename_s *msg;
   size_t len;
   size_t oldlen;
+  size_t newlen;
   uint32_t space;
 
-  len     = sizeof(*msg);
-  oldlen  = (strlen(oldpath) + 1 + 0x7) & ~0x7;
-  len    += oldlen + strlen(newpath) + 1;
+  oldlen = strlen(oldpath) + 1;
+  newlen = strlen(newpath) + 1;
+  len    = sizeof(*msg) + oldlen + newlen;
 
   msg = rpmsgfs_get_tx_payload_buffer(priv, &space);
   if (!msg)
@@ -770,8 +771,8 @@ int rpmsgfs_client_rename(FAR void *handle, FAR const char *oldpath,
 
   DEBUGASSERT(len <= space);
 
-  strcpy(msg->pathname, oldpath);
-  strcpy(msg->pathname + oldlen, newpath);
+  memcpy(msg->pathname, oldpath, oldlen);
+  memcpy(msg->pathname + oldlen, newpath, newlen);
 
   return rpmsgfs_send_recv(priv, RPMSGFS_RENAME, false,
           (struct rpmsgfs_header_s *)msg, len, NULL);
