@@ -26,7 +26,7 @@
 #include <nuttx/arch.h>
 
 #include <arch/loadstore.h>
-#include <arch/xtensa/core.h>
+#include <arch/xtensa/xtensa_corebits.h>
 
 #include <sys/types.h>
 #include <assert.h>
@@ -337,7 +337,7 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
    * (thus binfo() is used below)
    */
 
-  if (exccause == XCHAL_EXCCAUSE_LOAD_STORE_ERROR &&
+  if (exccause == EXCCAUSE_LOAD_STORE_ERROR &&
       (uintptr_t)&_siramheap <= regs[REG_EXCVADDR] &&
       (uintptr_t)&_eiramheap > regs[REG_EXCVADDR])
     {
@@ -346,7 +346,7 @@ uint32_t *xtensa_user(int exccause, uint32_t *regs)
       uint8_t s;
       uint8_t t;
 
-      binfo("XCHAL_EXCCAUSE_LOAD_STORE_ERROR at %p, pc=%p\n",
+      binfo("EXCCAUSE_LOAD_STORE_ERROR at %p, pc=%p\n",
             (void *)regs[REG_EXCVADDR],
             pc);
 
