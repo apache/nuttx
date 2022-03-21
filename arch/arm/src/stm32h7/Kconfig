@@ -332,14 +332,6 @@ config STM32H7_PROGMEM
 		Add progmem support, start block and end block options are provided to
 		obtain an uniform flash memory mapping.
 
-config STM32H7_PROGMEM_ERASESTATE
-	bool "Flash progmem erasestate ioctl support"
-	depends on STM32H7_PROGMEM
-	default y
-	select ARCH_HAVE_PROGMEM_ERASESTATE
-	---help---
-		Add progmem erasestate ioctl command.
-
 menu "STM32H7 Peripheral Selection"
 
 # These "hidden" settings determine whether a peripheral option is available
