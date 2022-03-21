@@ -569,7 +569,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
       FAR struct rptun_cb_s *cb;
 
       bind->dest = dest;
-      strncpy(bind->name, name, RPMSG_NAME_SIZE);
+      strlcpy(bind->name, name, RPMSG_NAME_SIZE);
 
       rptun_lock();
 
