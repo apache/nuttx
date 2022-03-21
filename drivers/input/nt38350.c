@@ -2439,7 +2439,7 @@ static int nvt_check_flash_end_flag(FAR struct nt38350_dev_s *priv)
 
   /* buf[3:5] => NVT End Flag */
 
-  strncpy((char *)nvt_end_flag, (char *)&buf[3], NVT_FLASH_END_FLAG_LEN);
+  memcpy(nvt_end_flag, &buf[3], NVT_FLASH_END_FLAG_LEN);
 #ifdef CONFIG_NVT_DEBUG
   iinfo("nvt_end_flag=%s (%02X %02X %02X)\n",
         nvt_end_flag, buf[3], buf[4], buf[5]);
