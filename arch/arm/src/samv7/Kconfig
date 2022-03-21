@@ -1046,13 +1046,6 @@ config SAMV7_PROGMEM_NSECTORS
 		flash memory that will be reserved for use with by the interfaces
 		prototyped in include/nuttx/progmem.h
 
-config SAMV7_PROGMEM_ERASESTATE
-	bool "Flash progmem erasestate ioctl support"
-	default y
-	select ARCH_HAVE_PROGMEM_ERASESTATE
-	---help---
-		Add progmem erasestate ioctl command.
-
 endif # SAMV7_PROGMEM
 
 menu "SDRAM Configuration"
