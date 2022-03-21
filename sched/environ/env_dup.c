@@ -94,7 +94,7 @@ int env_dup(FAR struct task_group_s *group)
         {
           /* There is an environment, duplicate it */
 
-          envp = (FAR char *)group_malloc(ptcb->group, envlen);
+          envp = (FAR char *)group_malloc(group, envlen);
           if (envp == NULL)
             {
               /* The parent's environment can not be inherited due to a
