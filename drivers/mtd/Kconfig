@@ -137,13 +137,6 @@ config MTD_PROGMEM
 		interfaces must be exported by chip-specific logic.
 
 if MTD_PROGMEM
-
-config MTD_PROGMEM_ERASESTATE
-	bool "Enable FLASH MTD device erasestate"
-	depends on ARCH_HAVE_PROGMEM_ERASESTATE
-	---help---
-		Enable the ioctl MTDIOCTL_PROGMEM_ERASESTATE command in the on-chip
-		FLASH interface.
 		
 endif #MTD_PROGMEM
 
