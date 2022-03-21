@@ -276,7 +276,7 @@ pid_t nxtask_start_vfork(FAR struct task_tcb_s *child)
 
   /* Get the assigned pid before we start the task */
 
-  pid = (int)child->cmn.pid;
+  pid = child->cmn.pid;
 
   /* Eliminate a race condition by disabling pre-emption.  The child task
    * can be instantiated, but cannot run until we call waitpid().  This

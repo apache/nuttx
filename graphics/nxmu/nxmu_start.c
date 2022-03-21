@@ -182,7 +182,7 @@ int nxmu_start(int display, int plane)
     {
       FAR char display_str[8];
       FAR char plane_str[8];
-      pid_t server;
+      int server;
       FAR char * const argv[3] =
       {
         (FAR char * const)display_str,
@@ -201,8 +201,8 @@ int nxmu_start(int display, int plane)
       if (server < 0)
         {
           gerr("ERROR: Failed to create nx_server kernel thread: %d\n",
-               (int)server);
-          return (int)server;
+               server);
+          return server;
         }
 
       g_nxserver_started[display] = true;

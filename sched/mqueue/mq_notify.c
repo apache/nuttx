@@ -157,7 +157,7 @@ int mq_notify(mqd_t mqdes, FAR const struct sigevent *notification)
    * Is it trying to remove it?
    */
 
-  else if ((msgq->ntpid != rtcb->pid) || (notification))
+  else if ((msgq->ntpid != rtcb->pid) || (notification != NULL))
     {
       /* This thread does not own the notification OR it is
        * not trying to remove it.  Return EBUSY.

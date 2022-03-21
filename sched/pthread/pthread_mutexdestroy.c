@@ -94,7 +94,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
             {
               /* The thread associated with the PID no longer exists */
 
-              mutex->pid = -1;
+              mutex->pid = INVALID_PROCESS_ID;
 
               /* Reset the semaphore.  If threads are were on this
                * semaphore, then this will awakened them and make
@@ -111,7 +111,7 @@ int pthread_mutex_destroy(FAR pthread_mutex_t *mutex)
                * mutex.
                */
 
-              else if (mutex->pid != -1)
+              else if (mutex->pid != INVALID_PROCESS_ID)
                 {
                   /* Yes.. then we cannot destroy the mutex now. */
 

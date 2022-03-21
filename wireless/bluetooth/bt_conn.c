@@ -557,14 +557,12 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
     {
       case BT_CONN_CONNECTED:
         {
-          pid_t pid;
           int ret;
 
           ret = bt_queue_open(BT_CONN_TX, O_RDWR | O_CREAT,
                               CONFIG_BLUETOOTH_TXCONN_NMSGS,
                               &conn->tx_queue);
           DEBUGASSERT(ret >= 0);
-          UNUSED(ret);
 
           /* Get exclusive access to the handoff structure.  The count will
            * be zero when we complete this.
@@ -576,12 +574,11 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
               /* Start the Tx connection kernel thread */
 
               g_conn_handoff.conn = bt_conn_addref(conn);
-              pid = kthread_create("BT Conn Tx",
+              ret = kthread_create("BT Conn Tx",
                                    CONFIG_BLUETOOTH_TXCONN_PRIORITY,
                                    CONFIG_BLUETOOTH_TXCONN_STACKSIZE,
                                    conn_tx_kthread, NULL);
-              DEBUGASSERT(pid > 0);
-              UNUSED(pid);
+              DEBUGASSERT(ret > 0);
 
               /* Take the semaphore again.  This will force us to wait with
                * the sem_count at -1.  It will be zero again when we
@@ -591,6 +588,8 @@ void bt_conn_set_state(FAR struct bt_conn_s *conn,
               ret = nxsem_wait_uninterruptible(&g_conn_handoff.sync_sem);
               nxsem_post(&g_conn_handoff.sync_sem);
           }
+
+          UNUSED(ret);
         }
         break;
 

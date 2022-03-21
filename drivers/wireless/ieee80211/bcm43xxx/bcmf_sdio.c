@@ -781,7 +781,7 @@ int bcmf_bus_sdio_initialize(FAR struct bcmf_dev_s *priv,
       goto exit_uninit_hw;
     }
 
-  sbus->thread_id = ret;
+  sbus->thread_id = (pid_t)ret;
 
   /* SDIO bus is up and running */
 

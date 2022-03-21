@@ -66,7 +66,7 @@
 
 struct esp32_rt_priv_s
 {
-  int pid;
+  pid_t pid;
 
   sem_t toutsem;
 
@@ -81,7 +81,10 @@ struct esp32_rt_priv_s
  * Private Data
  ****************************************************************************/
 
-static struct esp32_rt_priv_s g_rt_priv;
+static struct esp32_rt_priv_s g_rt_priv =
+{
+  .pid = INVALID_PROCESS_ID
+};
 
 /****************************************************************************
  * Private Function Prototypes
@@ -705,7 +708,7 @@ int esp32_rt_timer_init(void)
   list_initialize(&priv->toutlist);
 
   priv->timer = tim;
-  priv->pid   = pid;
+  priv->pid   = (pid_t)pid;
 
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -757,7 +760,12 @@ void esp32_rt_timer_deinit(void)
 
   spin_unlock_irqrestore(&priv->lock, flags);
 
-  kthread_delete(priv->pid);
+  if (priv->pid != INVALID_PROCESS_ID)
+    {
+      kthread_delete(priv->pid);
+      priv->pid = INVALID_PROCESS_ID;
+    }
+
   nxsem_destroy(&priv->toutsem);
 }
 

@@ -103,7 +103,7 @@ int pthread_mutex_init(FAR pthread_mutex_t *mutex,
 
       /* Indicate that the semaphore is not held by any thread. */
 
-      mutex->pid = -1;
+      mutex->pid = INVALID_PROCESS_ID;
 
       /* Initialize the mutex like a semaphore with initial count = 1 */
 

@@ -1404,20 +1404,21 @@ static inline int usbhost_devinit(FAR struct usbhost_state_s *priv)
   g_priv = priv;
 
   uinfo("Starting thread\n");
-  priv->pollpid = kthread_create("xbox", CONFIG_XBOXCONTROLLER_DEFPRIO,
-                                 CONFIG_XBOXCONTROLLER_STACKSIZE,
-                                 (main_t)usbhost_xboxcontroller_poll,
-                                 (FAR char * const *)NULL);
-  if (priv->pollpid < 0)
+  ret = kthread_create("xbox", CONFIG_XBOXCONTROLLER_DEFPRIO,
+                       CONFIG_XBOXCONTROLLER_STACKSIZE,
+                       (main_t)usbhost_xboxcontroller_poll,
+                       (FAR char * const *)NULL);
+  if (ret < 0)
     {
       /* Failed to started the poll thread... probably due to memory
        * resources.
        */
 
       usbhost_givesem(&g_exclsem);
-      ret = priv->pollpid;
       goto errout;
     }
+
+  priv->pollpid = (pid_t)ret;
 
   /* Now wait for the poll task to get properly initialized */
 

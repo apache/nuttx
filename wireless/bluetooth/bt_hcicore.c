@@ -1438,7 +1438,6 @@ static int hci_initialize(void)
 
 static void cmd_queue_init(void)
 {
-  pid_t pid;
   int ret;
 
   /* When there is a command to be sent to the Bluetooth driver, it queued on
@@ -1448,17 +1447,16 @@ static void cmd_queue_init(void)
   ret = bt_queue_open(BT_HCI_TX, O_RDWR | O_CREAT,
                       CONFIG_BLUETOOTH_TXCMD_NMSGS, &g_btdev.tx_queue);
   DEBUGASSERT(ret >= 0);
-  UNUSED(ret);
 
   nxsem_init(&g_btdev.ncmd_sem, 0, 1);
   nxsem_set_protocol(&g_btdev.ncmd_sem, SEM_PRIO_NONE);
 
   g_btdev.ncmd = 1;
-  pid = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
+  ret = kthread_create("BT HCI Tx", CONFIG_BLUETOOTH_TXCMD_PRIORITY,
                        CONFIG_BLUETOOTH_TXCMD_STACKSIZE,
                        hci_tx_kthread, NULL);
-  DEBUGASSERT(pid > 0);
-  UNUSED(pid);
+  DEBUGASSERT(ret > 0);
+  UNUSED(ret);
 }
 
 /****************************************************************************

@@ -243,7 +243,7 @@ int pthread_cond_clockwait(FAR pthread_cond_t *cond,
 #endif
               /* Give up the mutex */
 
-              mutex->pid = -1;
+              mutex->pid = INVALID_PROCESS_ID;
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
               mflags     = mutex->flags;
 #endif

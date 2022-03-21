@@ -276,7 +276,6 @@ static int usbhost_detect(int argc, FAR char *argv[])
 int stm32_max3421e_setup(void)
 {
   FAR struct spi_dev_s *spi;
-  pid_t monpid;
   int ret;
 
   /* Configure the MAX3421E interrupt pin as an input and the reset and power
@@ -396,13 +395,13 @@ int stm32_max3421e_setup(void)
 
   /* Start the USB connection monitor kernel thread */
 
-  monpid = kthread_create("MAX3421E ConnMon",
-                          CONFIG_VIEWTOOL_MAX3421E_CONNMON_PRIORITY,
-                          CONFIG_VIEWTOOL_MAX3421E_CONNMON_STACKSIZE,
-                          usbhost_detect, NULL);
-  if (monpid < 0)
+  ret = kthread_create("MAX3421E ConnMon",
+                       CONFIG_VIEWTOOL_MAX3421E_CONNMON_PRIORITY,
+                       CONFIG_VIEWTOOL_MAX3421E_CONNMON_STACKSIZE,
+                       usbhost_detect, NULL);
+  if (ret < 0)
     {
-      uerr("ERROR: Failed to start connection monitor: %d\n", monpid);
+      uerr("ERROR: Failed to start connection monitor: %d\n", ret);
     }
 
   return OK;
