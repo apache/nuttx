@@ -30,6 +30,7 @@ ifeq ($(CONFIG_SEGGER_RTT),y)
   CFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)RTT$(DELIM)RTT}
 
   ifeq ($(CONFIG_ARCH_ARMV7M),y)
+    AFLAGS += ${shell $(INCDIR) "$(CC)" segger$(DELIM)config}
     ASRCS += segger/RTT/RTT/SEGGER_RTT_ASM_ARMv7M.S
   endif
 
