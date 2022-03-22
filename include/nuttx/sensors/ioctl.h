@@ -234,12 +234,13 @@
 #define SNIOC_READROMCODE          _SNIOC(0x0067)  /* Arg: uint64_t* pointer */
 #define SNIOC_SETALARM             _SNIOC(0x0068)  /* Arg: struct ds18b20_alarm_s* */
 
-/* Command:      SNIOC_ACTIVATE
- * Description:  Enable or disable sensor
- * Argument:     true or false.
+/* Command:      SNIOC_GET_STATE
+ * Description:  Get state for all subscribers, include min_interval,
+ *               min_latency and the number of subscribers.
+ * Argument:     This is the state pointer
  */
 
-#define SNIOC_ACTIVATE             _SNIOC(0x0080)
+#define SNIOC_GET_STATE            _SNIOC(0x0080)
 
 /* Command:      SNIOC_SET_INTERVAL
  * Description:  Set interval between samples
