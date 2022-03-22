@@ -71,7 +71,16 @@ void xtensa_sig_deliver(void)
         rtcb, rtcb->xcp.sigdeliver, rtcb->sigpendactionq.head);
   DEBUGASSERT(rtcb->xcp.sigdeliver != NULL);
 
-  /* Save the return state on the stack. */
+#if XCHAL_CP_NUM > 0
+
+#ifdef CONFIG_XTENSA_CP_LAZY
+  xcp.cpstate.cpenable = 0;  /* No co-processors are enabled */
+#else
+  xcp.cpstate.cpenable = (CONFIG_XTENSA_CP_INITSET & XTENSA_CP_ALLSET);
+#endif
+  xcp.cpstate.cpstored = 0;  /* No co-processors haved state saved */
+
+#endif
 
   xtensa_copystate(xcp.regs, rtcb->xcp.regs);
 
@@ -184,5 +193,6 @@ void xtensa_sig_deliver(void)
    */
 
   board_autoled_off(LED_SIGNAL);
+
   xtensa_context_restore(xcp.regs);
 }
