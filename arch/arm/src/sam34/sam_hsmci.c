@@ -41,6 +41,7 @@
 #include <nuttx/mmcsd.h>
 
 #include <nuttx/irq.h>
+#include <nuttx/signal.h>
 #include <arch/board/board.h>
 
 #include "chip.h"
@@ -1800,6 +1801,19 @@ static int sam_sendcmd(FAR struct sdio_dev_s *dev,
          cmd, arg, regval);
   putreg32(regval, SAM_HSMCI_CMDR);
   sam_cmdsample1(SAMPLENDX_AFTER_CMDR);
+
+  /* Card initialisation is unsuccessful without the following delay.
+   *
+   * It appears the timing from writing SAM_HSMCI_CMDR to calling
+   * sam_waitresponse is too short.
+   *
+   * For now the simplest solution is to add this delay.
+   * Further investigation is required to find the root cause and
+   * correct solution.
+   */
+
+  nxsig_usleep(10);
+
   return OK;
 }
 
