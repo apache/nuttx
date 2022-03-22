@@ -27,7 +27,9 @@
 
 #include <nuttx/config.h>
 
-#include <nuttx/spinlock.h>
+#ifndef __ASSEMBLY__
+#  include <nuttx/spinlock.h>
+#endif
 
 /****************************************************************************
  * Pre-processor Definitions
