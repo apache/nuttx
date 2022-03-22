@@ -138,11 +138,11 @@ static int usrsock_send_event(FAR struct usrsock_s *usrsock,
 {
   struct usrsock_message_socket_event_s event;
 
-  event.head.msgid = USRSOCK_MESSAGE_SOCKET_EVENT;
-  event.head.flags = USRSOCK_MESSAGE_FLAG_EVENT;
+  event.head.msgid  = USRSOCK_MESSAGE_SOCKET_EVENT;
+  event.head.flags  = USRSOCK_MESSAGE_FLAG_EVENT;
+  event.head.events = events;
 
   event.usockid = usockid;
-  event.events  = events;
 
   return usrsock_send(usrsock, &event, sizeof(event));
 }

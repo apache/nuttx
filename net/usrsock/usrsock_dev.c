@@ -479,13 +479,13 @@ static ssize_t usrsockdev_handle_event(FAR struct usrsockdev_s *dev,
 #ifdef CONFIG_DEV_RANDOM
         /* Add randomness. */
 
-        add_sw_randomness((hdr->events << 16) - hdr->usockid);
+        add_sw_randomness((hdr->head.events << 16) - hdr->usockid);
 #endif
 
         /* Handle event. */
 
         ret = usrsock_event(conn,
-                            hdr->events & ~USRSOCK_EVENT_INTERNAL_MASK);
+                            hdr->head.events & ~USRSOCK_EVENT_INTERNAL_MASK);
         if (ret < 0)
           {
             return ret;
