@@ -121,7 +121,7 @@ if __name__ == "__main__":
             break
         compare_dump_line(list, str)
     dump_file.close()
-    list.sort(key=lambda x: x.cnt, reverse=True)
+    list.sort(key=lambda x: (x.cnt, x.size), reverse=True)
 
     log = log_output(args)
     log.output("cnt   size   pid   addr         mem\n")
