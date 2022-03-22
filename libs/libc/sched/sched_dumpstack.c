@@ -84,7 +84,11 @@ void sched_dumpstack(pid_t tid)
             }
         }
 #else
-      syslog(LOG_EMERG, "backtrace:\n");
+      if (skip == 0)
+        {
+          syslog(LOG_EMERG, "backtrace:\n");
+        }
+
       for (i = 0; i < size; i++)
         {
           syslog(LOG_EMERG, "[%2d] [<%p>] %pS\n",
