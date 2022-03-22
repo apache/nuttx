@@ -12,13 +12,6 @@ menuconfig SENSORS
 
 if SENSORS
 
-config SENSORS_NPOLLWAITERS
-	int "Number of poll threads"
-	default 2
-	---help---
-		Maximum number of threads than can be waiting for POLL events.
-		Default: 2
-
 config USENSOR
 	bool "Usensor Device Support"
 	default n
