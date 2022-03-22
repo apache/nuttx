@@ -874,6 +874,17 @@ struct sensor_lowerhalf_s
   FAR void *priv;
 };
 
+/* This structure describes the state for the sensor device */
+
+struct sensor_state_s
+{
+  unsigned long min_interval;  /* The minimum subscription interval for sensor, in us */
+  unsigned long min_latency;   /* The minimum batch latency for sensor, in us */
+  unsigned long nsubscribers;  /* The number of subcribers, if subsrciber exists,
+                                * the sensor deivce is enabled */
+  unsigned long nadvertisers;  /* The number of advertisers */
+};
+
 /* This structure describes the register info for the user sensor */
 
 #ifdef CONFIG_USENSOR
