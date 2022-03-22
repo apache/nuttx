@@ -220,6 +220,7 @@ begin_packed_struct struct usrsock_message_common_s
 {
   int8_t msgid;
   int8_t flags;
+  uint16_t events;
 } end_packed_struct;
 
 /* Request acknowledgment/completion message */
@@ -228,7 +229,6 @@ begin_packed_struct struct usrsock_message_req_ack_s
 {
   struct usrsock_message_common_s head;
 
-  int16_t  reserved;
   int32_t  result;
   uint64_t xid;
 } end_packed_struct;
@@ -253,7 +253,6 @@ begin_packed_struct struct usrsock_message_socket_event_s
   struct usrsock_message_common_s head;
 
   int16_t usockid;
-  uint16_t events;
 } end_packed_struct;
 
 #endif /* __INCLUDE_NUTTX_NET_USRSOCK_H */
