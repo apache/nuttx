@@ -186,4 +186,9 @@ config MM_KASAN
 		bugs in native code. After turn on this option, Please
 		add -fsanitize=kernel-address to CFLAGS/CXXFLAGS too.
 
+config MM_BACKTRACE_DEFAULT
+	bool "Enable the backtrace record by default"
+	default n
+	depends on DEBUG_MM
+
 source "mm/iob/Kconfig"
