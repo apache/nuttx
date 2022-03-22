@@ -207,11 +207,11 @@ static inline uint32_t decode_hex(const char *line)
 }
 
 static int get_pid(struct plugin_priv_s *priv, uint32_t idx,
-                   uint16_t *pid)
+                   uint32_t *pid)
 {
   int ret;
 
-  ret = READU16(priv->pidhash[idx] + priv->tcbinfo->pid_off, pid);
+  ret = READU32(priv->pidhash[idx] + priv->tcbinfo->pid_off, pid);
   if (ret != 0)
     {
       PERROR("read %d pid error return %d\n", idx, ret);
@@ -228,7 +228,7 @@ static int get_idx_from_pid(struct plugin_priv_s *priv,
 
   for (idx = 0; idx < priv->ntcb; idx++)
     {
-      uint16_t tmppid;
+      uint32_t tmppid;
 
       if (get_pid(priv, idx, &tmppid))
         {
@@ -466,7 +466,7 @@ uint32_t RTOS_GetThreadId(uint32_t n)
 {
   if (n < g_plugin_priv.ntcb)
     {
-      uint16_t pid;
+      uint32_t pid;
 
       if (get_pid(&g_plugin_priv, n, &pid) == 0)
         {
