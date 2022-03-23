@@ -115,6 +115,7 @@
 #define NVT_INIT_RETRY_TIMES         5
 
 #ifdef  CONFIG_NVT_OFFLINE_LOG
+#define NVT_DEBUGLOG_TYPE            0x02
 #define NVT_POINT_DATA_EXT_LEN       4   /* Event buffer offset 0x11~0x14 */
 #define NVT_S2D_DATA_LEN             59  /* Event buffer offset 0x15~0x4F
                                           * (Byte  1~59 of 2Ddata)
@@ -275,6 +276,7 @@ struct nt38350_dev_s
 
   char                          *fw_path;
   uint8_t                       fw_ver;
+  uint8_t                       fw_type;
   uint8_t                       x_num;
   uint8_t                       y_num;
   uint8_t                       max_touch_num;
@@ -289,7 +291,6 @@ struct nt38350_dev_s
   uint8_t                       touch_awake;
   bool                          idle_mode;
 #ifdef CONFIG_NVT_OFFLINE_LOG
-  struct work_s                 nvt_log_wq;
   uint8_t point_xdata_temp[NVT_POINT_DATA_EXBUF_LEN];
 #endif
 };
@@ -900,11 +901,11 @@ info_retry:
   priv->abs_x_max = (uint16_t)((buf[5] << 8) | buf[6]);
   priv->abs_y_max = (uint16_t)((buf[7] << 8) | buf[8]);
   priv->max_button_num = buf[11];
+  priv->fw_type = buf[14];
 
-  iwarn("fw_ver: 0x%02x, x_num: %d, y_num: %d,"
-        "abs_x_max: %d, abs_y_max: %d\n", priv->fw_ver,
-        priv->x_num, priv->y_num, priv->abs_x_max,
-        priv->abs_y_max);
+  iwarn("fw_ver: 0x%02x, fw_type: 0x%02x, x_num: %d, y_num: %d,"
+        "abs_x_max: %d, abs_y_max: %d\n", priv->fw_ver, priv->fw_type,
+        priv->x_num, priv->y_num, priv->abs_x_max, priv->abs_y_max);
 
   if ((buf[1] + buf[2]) != 0xff)
     {
@@ -2843,12 +2844,13 @@ static void nvt_log_data_to_csv(FAR void *arg)
   fp = open(csv_file_path, O_RDWR | O_CREAT);
   if (fp < 0)
     {
-      ierr("ERROR: open %s failed\n", csv_file_path);
       if (fbufp)
         {
           kmm_free(fbufp);
           fbufp = NULL;
         }
+
+      return;
     }
 
   /* saved header info to csv file */
@@ -3902,15 +3904,19 @@ static void nt38350_data_worker(FAR void *arg)
 #endif
 
 #ifdef CONFIG_NVT_OFFLINE_LOG
-  memcpy(priv->point_xdata_temp, (point_data + 1), NVT_POINT_DATA_LEN);
-  memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN),
-         (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN),
-         NVT_S2D_DATA_LEN);
-  memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN + NVT_S2D_DATA_LEN),
-        (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN +
-        NVT_S2D_DATA_LEN + NVT_FW_CMD_HANDLE_LEN),
-        (NVT_S2D_DATA_EXT_LEN + NVT_FW_FRAME_CNT_LEN));
-  work_queue(LPWORK, &priv->nvt_log_wq, nvt_log_data_to_csv, priv, 20);
+  if (priv->fw_type == NVT_DEBUGLOG_TYPE)
+    {
+      memcpy(priv->point_xdata_temp, (point_data + 1), NVT_POINT_DATA_LEN);
+      memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN),
+            (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN),
+            NVT_S2D_DATA_LEN);
+      memcpy((priv->point_xdata_temp + NVT_POINT_DATA_LEN +
+             NVT_S2D_DATA_LEN),
+            (point_data + 1 + NVT_POINT_DATA_LEN + NVT_POINT_DATA_EXT_LEN +
+            NVT_S2D_DATA_LEN + NVT_FW_CMD_HANDLE_LEN),
+            (NVT_S2D_DATA_EXT_LEN + NVT_FW_FRAME_CNT_LEN));
+      nvt_log_data_to_csv(priv);
+    }
 #endif
 
 #ifdef CONFIG_WAKEUP_GESTURE
