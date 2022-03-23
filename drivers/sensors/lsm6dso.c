@@ -4350,28 +4350,32 @@ static int lsm6dso_control(FAR struct sensor_lowerhalf_s *lower,
               case LSM6DSO_XL_SET_2G:
                 {
                   ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_2G);
-                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR;
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_2G_FACTOR
+                                                   * LSM6DSO_MG2MS_FACTOR;
                 }
                 break;
 
               case LSM6DSO_XL_SET_4G:
                 {
                   ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_4G);
-                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_4G_FACTOR;
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_4G_FACTOR
+                                                   * LSM6DSO_MG2MS_FACTOR;
                 }
                 break;
 
               case LSM6DSO_XL_SET_8G:
                 {
                   ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_8G);
-                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_8G_FACTOR;
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_8G_FACTOR
+                                                   * LSM6DSO_MG2MS_FACTOR;
                 }
                 break;
 
               case LSM6DSO_XL_SET_16G:
                 {
                   ret = lsm6dso_xl_setfullscale(priv, LSM6DSO_16G);
-                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_16G_FACTOR;
+                  priv->dev[LSM6DSO_XL_IDX].factor = LSM6DSO_16G_FACTOR
+                                                   * LSM6DSO_MG2MS_FACTOR;
                 }
                 break;
 
