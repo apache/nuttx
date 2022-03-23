@@ -256,22 +256,12 @@
 
 #define SNIOC_BATCH                _SNIOC(0x0082)
 
-/* Command:      SNIOC_GET_NEVENTBUF
- * Description:  the number of sensor events that sensor buffer of upper half
- *               holds.
- * Argument:     This is the number of events pointer, is output parameter.
- * Note:         Tell the application layer number of sensor events in sensor
- *               buffer.
- *               This buffer is used to solve the problem that the
- *               application layer can't read the sensor event in time.
- *               Recommend the number of sensor events in application layer's
- *               buffer is same as result by call this function.
- *               This is number of sensor events rather than the length of
- *               buffer.
- *               See sensor.h(struct sensor_lower_half_s buffer_bytes).
+/* Command:      SNIOC_SET_USERPRIV
+ * Description:  Set the private data of userspace user.
+ * Argument:     This is the pointer of private data.
  */
 
-#define SNIOC_GET_NEVENTBUF        _SNIOC(0x0083)
+#define SNIOC_SET_USERPRIV         _SNIOC(0x0083)
 
 /* Command:      SNIOC_SET_BUFFER_NUMBER
  * Description:  Set the number of events intermediate circualr buffer can
