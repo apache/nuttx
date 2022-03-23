@@ -519,6 +519,22 @@ struct xcptcontext
 
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In this configuration, all syscalls execute from an internal kernel
+   * stack.  Why?  Because when we instantiate and initialize the address
+   * environment of the new user process, we will temporarily lose the
+   * address environment of the old user process, including its stack
+   * contents.  The kernel C logic will crash immediately with no valid
+   * stack in place.
+   */
+
+  uintptr_t *ustkptr;  /* Saved user stack pointer */
+  uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
+#endif
+#endif
+
   /* Register save area */
 
   uintptr_t regs[XCPTCONTEXT_REGS];
