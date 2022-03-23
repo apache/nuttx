@@ -313,7 +313,7 @@ static inline uint64_t sensor_get_timestamp(void)
  * reported.
  */
 
-struct sensor_event_accel   /* Type: Accerometer */
+struct sensor_accel         /* Type: Accerometer */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float x;                  /* Axis X in m/s^2 */
@@ -322,7 +322,7 @@ struct sensor_event_accel   /* Type: Accerometer */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_event_gyro    /* Type: Gyroscope */
+struct sensor_gyro          /* Type: Gyroscope */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float x;                  /* Axis X in rad/s */
@@ -331,7 +331,7 @@ struct sensor_event_gyro    /* Type: Gyroscope */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_event_mag     /* Type: Magnetic Field */
+struct sensor_mag           /* Type: Magnetic Field */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float x;                  /* Axis X in Gauss or micro Tesla (uT) */
@@ -340,38 +340,38 @@ struct sensor_event_mag     /* Type: Magnetic Field */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_event_baro    /* Type: Barometer */
+struct sensor_baro          /* Type: Barometer */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float pressure;           /* pressure measurement in millibar or hpa */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_event_prox    /* Type: proximity */
+struct sensor_prox          /* Type: proximity */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float proximity;          /* distance to the nearest object in centimeters */
 };
 
-struct sensor_event_light   /* Type: Light */
+struct sensor_light         /* Type: Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float light;              /* in SI lux units */
 };
 
-struct sensor_event_humi    /* Type: Relative Humidity */
+struct sensor_humi          /* Type: Relative Humidity */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float humidity;           /* in percent  */
 };
 
-struct sensor_event_temp    /* Type: Ambient Temperature */
+struct sensor_temp          /* Type: Ambient Temperature */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float temperature;        /* Temperature in degrees celsius */
 };
 
-struct sensor_event_rgb     /* Type: RGB */
+struct sensor_rgb           /* Type: RGB */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float r;                  /* Units is percent */
@@ -379,19 +379,19 @@ struct sensor_event_rgb     /* Type: RGB */
   float b;                  /* Units is percent */
 };
 
-struct sensor_event_hall    /* Type: HALL */
+struct sensor_hall          /* Type: HALL */
 {
   uint64_t timestamp;       /* Units is microseconds */
   bool hall;                /* Boolean type */
 };
 
-struct sensor_event_ir      /* Type: Infrared Ray */
+struct sensor_ir            /* Type: Infrared Ray */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float ir;                 /* in SI units lux */
 };
 
-struct sensor_event_gps     /* Type: Gps */
+struct sensor_gps           /* Type: Gps */
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
 
@@ -424,85 +424,85 @@ struct sensor_event_gps     /* Type: Gps */
   uint32_t satellites_used; /* Number of satellites used */
 };
 
-struct sensor_event_uv      /* Type: Ultraviolet Light */
+struct sensor_uv            /* Type: Ultraviolet Light */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float uvi;                /* the value range is 0 - 15 */
 };
 
-struct sensor_event_noise   /* Type: Noise Loudness */
+struct sensor_noise         /* Type: Noise Loudness */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float db;                 /* in SI units db */
 };
 
-struct sensor_event_pm25    /* Type: PM25 */
+struct sensor_pm25          /* Type: PM25 */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float pm25;               /* in SI units ug/m^3 */
 };
 
-struct sensor_event_pm10    /* Type: PM10 */
+struct sensor_pm10          /* Type: PM10 */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float pm10;               /* in SI units ug/m^3 */
 };
 
-struct sensor_event_pm1p0   /* Type: PM1P0 */
+struct sensor_pm1p0         /* Type: PM1P0 */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float pm1p0;              /* in SI units ug/m^3 */
 };
 
-struct sensor_event_co2     /* Type: CO2 */
+struct sensor_co2           /* Type: CO2 */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float co2;                /* in SI units ppm */
 };
 
-struct sensor_event_hcho    /* Type: HCHO */
+struct sensor_hcho          /* Type: HCHO */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float hcho;               /* in SI units ppm */
 };
 
-struct sensor_event_tvoc    /* Type: TVOC */
+struct sensor_tvoc          /* Type: TVOC */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float tvoc;               /* in SI units ppm */
 };
 
-struct sensor_event_ph      /* Type: PH */
+struct sensor_ph            /* Type: PH */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float ph;                 /* PH = 7.0 neutral, PH < 7.0 acidic, PH > 7.0 alkaline */
 };
 
-struct sensor_event_dust    /* Type: DUST */
+struct sensor_dust          /* Type: DUST */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float dust;               /* is SI units ug/m^3 */
 };
 
-struct sensor_event_hrate   /* Type: Heart Rate */
+struct sensor_hrate         /* Type: Heart Rate */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float bpm;                /* is SI units BPM */
 };
 
-struct sensor_event_hbeat   /* Type: Heart Beat */
+struct sensor_hbeat         /* Type: Heart Beat */
 {
   uint64_t timestamp;       /* Units is microseconds */
   float beat;               /* Units is times/minutes */
 };
 
-struct sensor_event_ecg     /* Type: ECG */
+struct sensor_ecg           /* Type: ECG */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   float ecg;                /* Unit is μV */
 };
 
-struct sensor_event_ppgd    /* Type: PPGD */
+struct sensor_ppgd          /* Type: PPGD */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   uint32_t ppg[2];          /* PPG from 2 channels. Units are ADC counts. */
@@ -510,7 +510,7 @@ struct sensor_event_ppgd    /* Type: PPGD */
   uint16_t gain[2];         /* ADC gains of channels. Units are V/V or V/A. */
 };
 
-struct sensor_event_ppgq    /* Type: PPDQ */
+struct sensor_ppgq          /* Type: PPDQ */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   uint32_t ppg[4];          /* PPG from 4 channels. Units are ADC counts. */
@@ -518,21 +518,21 @@ struct sensor_event_ppgq    /* Type: PPDQ */
   uint16_t gain[4];         /* ADC gains of channels. Units are V/V or V/A. */
 };
 
-struct sensor_event_impd    /* Type: Impedance */
+struct sensor_impd          /* Type: Impedance */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   float real;               /* Real part, unit is Ohm(Ω) */
   float imag;               /* Imaginary part, unit is Ohm(Ω) */
 };
 
-struct sensor_event_ots     /* Type: OTS */
+struct sensor_ots           /* Type: OTS */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t x;                /* Axis X in counts */
   int32_t y;                /* Axis Y in counts */
 };
 
-struct sensor_event_gps_satellite
+struct sensor_gps_satellite
 {
   uint64_t timestamp;       /* Time since system start, Units is microseconds */
   uint32_t count;           /* Total number of messages of satellites visible */
@@ -561,7 +561,7 @@ struct sensor_event_gps_satellite
   info[4];
 };
 
-struct sensor_event_wake_gesture     /* Type: Wake gesture */
+struct sensor_wake_gesture  /* Type: Wake gesture */
 {
   uint64_t timestamp;                /* Units is microseconds */
 
@@ -572,7 +572,7 @@ struct sensor_event_wake_gesture     /* Type: Wake gesture */
   uint32_t event;
 };
 
-struct sensor_event_cap     /* Type: Capacitance */
+struct sensor_cap           /* Type: Capacitance */
 {
   uint64_t timestamp;       /* Unit is microseconds */
   int32_t status;           /* Detection status */
@@ -814,10 +814,10 @@ struct sensor_lowerhalf_s
    *
    * If device support batch mode, the number of events that hardware fifo
    * hold maximum number of samples, must be aligned with size of
-   * struct sensor_event_xxx.
+   * struct sensor_xxx.
    */
 
-  uint32_t buffer_number;
+  unsigned long nbuffer;
 
   /* The uncalibrated use to describe whether the sensor event is
    * uncalibrated. True is uncalibrated data, false is calibrated data,
@@ -878,11 +878,14 @@ struct sensor_lowerhalf_s
 
 struct sensor_state_s
 {
-  unsigned long min_interval;  /* The minimum subscription interval for sensor, in us */
+  unsigned long esize;         /* The element size of circular buffer */
+  unsigned long nbuffer;       /* The number of events that the circular buffer can hold */
   unsigned long min_latency;   /* The minimum batch latency for sensor, in us */
-  unsigned long nsubscribers;  /* The number of subcribers, if subsrciber exists,
-                                * the sensor deivce is enabled */
+  unsigned long min_interval;  /* The minimum subscription interval for sensor, in us */
+  unsigned long nsubscribers;  /* The number of subcribers */
   unsigned long nadvertisers;  /* The number of advertisers */
+  unsigned long generation;    /* The recent generation of circular buffer */
+  FAR void     *priv;          /* The pointer to private data of userspace user */
 };
 
 /* This structure describes the register info for the user sensor */
@@ -890,9 +893,9 @@ struct sensor_state_s
 #ifdef CONFIG_USENSOR
 struct sensor_reginfo_s
 {
-  FAR const char *path; /* The path of user sensor */
-  uint16_t esize;       /* The element size of user sensor */
-  uint32_t nqueue;      /* The number of queue buffered elements */
+  FAR const char *path;        /* The path of user sensor */
+  unsigned long   esize;       /* The element size of user sensor */
+  unsigned long   nbuffer;     /* The number of queue buffered elements */
 };
 #endif
 
@@ -966,7 +969,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *dev, int devno);
  ****************************************************************************/
 
 int sensor_custom_register(FAR struct sensor_lowerhalf_s *dev,
-                           FAR const char *path, uint8_t esize);
+                           FAR const char *path, unsigned long esize);
 
 /****************************************************************************
  * Name: sensor_unregister
