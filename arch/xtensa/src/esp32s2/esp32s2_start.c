@@ -82,19 +82,54 @@ extern uint32_t _image_drom_lma;
 extern uint32_t _image_drom_size;
 #endif
 
+typedef enum
+{
+  CACHE_MEMORY_INVALID     = 0,
+  CACHE_MEMORY_ICACHE_LOW  = 1 << 0,
+  CACHE_MEMORY_ICACHE_HIGH = 1 << 1,
+  CACHE_MEMORY_DCACHE_LOW  = 1 << 2,
+  CACHE_MEMORY_DCACHE_HIGH = 1 << 3,
+} cache_layout_t;
+
+typedef enum
+{
+  CACHE_SIZE_HALF = 0,                /* 8KB for icache and dcache */
+  CACHE_SIZE_FULL = 1,                /* 16KB for icache and dcache */
+} cache_size_t;
+
+typedef enum
+{
+  CACHE_4WAYS_ASSOC = 0,              /* 4 way associated cache */
+  CACHE_8WAYS_ASSOC = 1,              /* 8 way associated cache */
+} cache_ways_t;
+
+typedef enum
+{
+  CACHE_LINE_SIZE_16B = 0,            /* 16 Byte cache line size */
+  CACHE_LINE_SIZE_32B = 1,            /* 32 Byte cache line size */
+  CACHE_LINE_SIZE_64B = 2,            /* 64 Byte cache line size */
+} cache_line_size_t;
+
 /****************************************************************************
  * ROM Function Prototypes
  ****************************************************************************/
 
 #ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
 extern int ets_printf(const char *fmt, ...);
-extern uint32_t cache_suspend_icache(void);
-extern void cache_resume_icache(uint32_t val);
-extern void cache_invalidate_icache_all(void);
 extern int cache_ibus_mmu_set(uint32_t ext_ram, uint32_t vaddr,
                               uint32_t paddr, uint32_t psize, uint32_t num,
                               uint32_t fixed);
 #endif
+
+extern uint32_t cache_suspend_icache(void);
+extern void cache_resume_icache(uint32_t val);
+extern void cache_invalidate_icache_all(void);
+extern void cache_set_icache_mode(cache_size_t cache_size, cache_ways_t ways,
+                                  cache_line_size_t cache_line_size);
+extern void cache_allocate_sram(cache_layout_t sram0_layout,
+                                cache_layout_t sram1_layout,
+                                cache_layout_t sram2_layout,
+                                cache_layout_t sram3_layout);
 
 /****************************************************************************
  * Private Function Prototypes
@@ -126,6 +161,54 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: configure_cpu_caches
+ *
+ * Description:
+ *   Configure the Instruction and Data CPU caches.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void IRAM_ATTR configure_cpu_caches(void)
+{
+  cache_size_t cache_size;
+  cache_ways_t cache_ways;
+  cache_line_size_t cache_line_size;
+
+  /* Configure the mode of instruction cache: cache size, cache associated
+   * ways, cache line size.
+   */
+
+#ifdef CONFIG_ESP32S2_INSTRUCTION_CACHE_8KB
+  cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_INVALID,
+                      CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
+  cache_size = CACHE_SIZE_HALF;
+#else
+  cache_allocate_sram(CACHE_MEMORY_ICACHE_LOW, CACHE_MEMORY_ICACHE_HIGH,
+                      CACHE_MEMORY_INVALID, CACHE_MEMORY_INVALID);
+  cache_size = CACHE_SIZE_FULL;
+#endif
+
+  cache_ways = CACHE_4WAYS_ASSOC;
+
+#ifdef CONFIG_ESP32S2_INSTRUCTION_CACHE_LINE_16B
+  cache_line_size = CACHE_LINE_SIZE_16B;
+#else
+  cache_line_size = CACHE_LINE_SIZE_32B;
+#endif
+
+  cache_suspend_icache();
+  cache_set_icache_mode(cache_size, cache_ways, cache_line_size);
+  cache_invalidate_icache_all();
+  cache_resume_icache(0);
+}
+
+/****************************************************************************
  * Name: __esp32s2_start
  *
  * Description:
@@ -139,14 +222,9 @@ uint32_t g_idlestack[IDLETHREAD_STACKWORDS]
  *
  ****************************************************************************/
 
-void IRAM_ATTR __esp32s2_start(void)
+static void noreturn_function IRAM_ATTR __esp32s2_start(void)
 {
-  uint32_t regval;
   uint32_t sp;
-
-  regval  = getreg32(DR_REG_BB_BASE + 0x48); /* DR_REG_BB_BASE+48 */
-  regval &= ~(1 << 14);
-  putreg32(regval, DR_REG_BB_BASE + 0x48);
 
   /* Make sure that normal interrupts are disabled.  This is really only an
    * issue when we are started in un-usual ways (such as from IRAM).  In this
@@ -172,8 +250,6 @@ void IRAM_ATTR __esp32s2_start(void)
   /* Move CPU0 exception vectors to IRAM */
 
   __asm__ __volatile__ ("wsr %0, vecbase\n"::"r" (&_init_start));
-
-  /* Set .bss to zero */
 
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
@@ -335,15 +411,11 @@ static int map_rom_segments(void)
  *
  * Description:
  *   We arrive here after the bootloader finished loading the program from
- *   flash. The hardware is mostly uninitialized, and the app CPU is in
- *   reset. We do have a stack, so we can do the initialization in C.
- *
- *   The app CPU will remain in reset unless CONFIG_SMP is selected and
- *   up_cpu_start() is called later in the bring-up sequence.
+ *   flash. We do have a stack, so we can do the initialization in C.
  *
  ****************************************************************************/
 
-void __start(void)
+void IRAM_ATTR __start(void)
 {
 #ifdef CONFIG_ESP32S2_APP_FORMAT_MCUBOOT
   if (map_rom_segments() != 0)
@@ -353,6 +425,9 @@ void __start(void)
     }
 
 #endif
+
+  configure_cpu_caches();
+
   __esp32s2_start();
 
   while (true); /* Should not return */
