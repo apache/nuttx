@@ -175,6 +175,9 @@ static void riscv_dump_task(struct tcb_s *tcb, void *arg)
   /* Dump interesting properties of this task */
 
   _alert("  %4d   %4d"
+#ifdef CONFIG_SMP
+         "  %4d"
+#endif
 #ifdef CONFIG_STACK_COLORATION
          "   %7lu"
 #endif
@@ -190,6 +193,9 @@ static void riscv_dump_task(struct tcb_s *tcb, void *arg)
 #endif
          "\n",
          tcb->pid, tcb->sched_priority,
+#ifdef CONFIG_SMP
+         tcb->cpu,
+#endif
 #ifdef CONFIG_STACK_COLORATION
          (unsigned long)up_check_tcbstack(tcb),
 #endif
@@ -244,6 +250,9 @@ static inline void riscv_showtasks(void)
   /* Dump interesting properties of each task in the crash environment */
 
   _alert("   PID    PRI"
+#ifdef CONFIG_SMP
+         "   CPU"
+#endif
 #ifdef CONFIG_STACK_COLORATION
          "      USED"
 #endif
@@ -261,6 +270,9 @@ static inline void riscv_showtasks(void)
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   _alert("  ----   ----"
+#  ifdef CONFIG_SMP
+         "  ----"
+#  endif
 #  ifdef CONFIG_STACK_COLORATION
          "   %7lu"
 #  endif
