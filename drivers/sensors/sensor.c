@@ -69,7 +69,7 @@ struct sensor_axis_map_s
 
 struct sensor_info_s
 {
-  uint8_t   esize;
+  unsigned long esize;
   FAR char *name;
 };
 
@@ -93,7 +93,7 @@ struct sensor_user_s
    * appear in dual role
    */
 
-  size_t           generation; /* Last generation subscriber has seen */
+  unsigned long    generation; /* Last generation subscriber has seen */
   unsigned long    interval;   /* The interval for subscriber */
   unsigned long    latency;    /* The bactch latency for subscriber */
 };
@@ -105,9 +105,7 @@ struct sensor_upperhalf_s
   FAR struct sensor_lowerhalf_s *lower;  /* The handle of lower half driver */
   struct sensor_state_s          state;  /* The state of sensor device */
   struct circbuf_s   buffer;             /* The circular buffer of sensor device */
-  uint8_t            esize;              /* The element size of circular buffer */
   sem_t              exclsem;            /* Manages exclusive access to file operations */
-  size_t             generation;         /* The current generation count */
   struct list_node   userlist;           /* List of users */
 };
 
@@ -148,39 +146,39 @@ static const struct sensor_axis_map_s g_remap_tbl[] =
 
 static const struct sensor_info_s g_sensor_info[] =
 {
-  {0,                                           NULL},
-  {sizeof(struct sensor_event_accel),           "accel"},
-  {sizeof(struct sensor_event_mag),             "mag"},
-  {sizeof(struct sensor_event_gyro),            "gyro"},
-  {sizeof(struct sensor_event_light),           "light"},
-  {sizeof(struct sensor_event_baro),            "baro"},
-  {sizeof(struct sensor_event_prox),            "prox"},
-  {sizeof(struct sensor_event_humi),            "humi"},
-  {sizeof(struct sensor_event_temp),            "temp"},
-  {sizeof(struct sensor_event_rgb),             "rgb"},
-  {sizeof(struct sensor_event_hall),            "hall"},
-  {sizeof(struct sensor_event_ir),              "ir"},
-  {sizeof(struct sensor_event_gps),             "gps"},
-  {sizeof(struct sensor_event_uv),              "uv"},
-  {sizeof(struct sensor_event_noise),           "noise"},
-  {sizeof(struct sensor_event_pm25),            "pm25"},
-  {sizeof(struct sensor_event_pm1p0),           "pm1p0"},
-  {sizeof(struct sensor_event_pm10),            "pm10"},
-  {sizeof(struct sensor_event_co2),             "co2"},
-  {sizeof(struct sensor_event_hcho),            "hcho"},
-  {sizeof(struct sensor_event_tvoc),            "tvoc"},
-  {sizeof(struct sensor_event_ph),              "ph"},
-  {sizeof(struct sensor_event_dust),            "dust"},
-  {sizeof(struct sensor_event_hrate),           "hrate"},
-  {sizeof(struct sensor_event_hbeat),           "hbeat"},
-  {sizeof(struct sensor_event_ecg),             "ecg"},
-  {sizeof(struct sensor_event_ppgd),            "ppgd"},
-  {sizeof(struct sensor_event_ppgq),            "ppgq"},
-  {sizeof(struct sensor_event_impd),            "impd"},
-  {sizeof(struct sensor_event_ots),             "ots"},
-  {sizeof(struct sensor_event_gps_satellite),   "gps_satellite"},
-  {sizeof(struct sensor_event_wake_gesture),    "wake_gesture"},
-  {sizeof(struct sensor_event_cap),             "cap"},
+  {0,                                     NULL},
+  {sizeof(struct sensor_accel),           "accel"},
+  {sizeof(struct sensor_mag),             "mag"},
+  {sizeof(struct sensor_gyro),            "gyro"},
+  {sizeof(struct sensor_light),           "light"},
+  {sizeof(struct sensor_baro),            "baro"},
+  {sizeof(struct sensor_prox),            "prox"},
+  {sizeof(struct sensor_humi),            "humi"},
+  {sizeof(struct sensor_temp),            "temp"},
+  {sizeof(struct sensor_rgb),             "rgb"},
+  {sizeof(struct sensor_hall),            "hall"},
+  {sizeof(struct sensor_ir),              "ir"},
+  {sizeof(struct sensor_gps),             "gps"},
+  {sizeof(struct sensor_uv),              "uv"},
+  {sizeof(struct sensor_noise),           "noise"},
+  {sizeof(struct sensor_pm25),            "pm25"},
+  {sizeof(struct sensor_pm1p0),           "pm1p0"},
+  {sizeof(struct sensor_pm10),            "pm10"},
+  {sizeof(struct sensor_co2),             "co2"},
+  {sizeof(struct sensor_hcho),            "hcho"},
+  {sizeof(struct sensor_tvoc),            "tvoc"},
+  {sizeof(struct sensor_ph),              "ph"},
+  {sizeof(struct sensor_dust),            "dust"},
+  {sizeof(struct sensor_hrate),           "hrate"},
+  {sizeof(struct sensor_hbeat),           "hbeat"},
+  {sizeof(struct sensor_ecg),             "ecg"},
+  {sizeof(struct sensor_ppgd),            "ppgd"},
+  {sizeof(struct sensor_ppgq),            "ppgq"},
+  {sizeof(struct sensor_impd),            "impd"},
+  {sizeof(struct sensor_ots),             "ots"},
+  {sizeof(struct sensor_gps_satellite),   "gps_satellite"},
+  {sizeof(struct sensor_wake_gesture),    "wake_gesture"},
+  {sizeof(struct sensor_cap),             "cap"},
 };
 
 static const struct file_operations g_sensor_fops =
@@ -201,7 +199,8 @@ static const struct file_operations g_sensor_fops =
  * Private Functions
  ****************************************************************************/
 
-static bool sensor_in_range(size_t left, size_t value, size_t right)
+static bool sensor_in_range(unsigned long left, unsigned long value,
+                            unsigned long right)
 {
   if (left < right)
     {
@@ -215,7 +214,8 @@ static bool sensor_in_range(size_t left, size_t value, size_t right)
     }
 }
 
-static bool sensor_is_updated(size_t generation, size_t ugeneration)
+static bool sensor_is_updated(unsigned long generation,
+                              unsigned long ugeneration)
 {
   return generation > ugeneration;
 }
@@ -413,7 +413,7 @@ static int sensor_open(FAR struct file *filep)
 
   user->interval   = ULONG_MAX;
   user->latency    = ULONG_MAX;
-  user->generation = upper->generation;
+  user->generation = upper->state.generation;
   nxsem_init(&user->buffersem, 0, 0);
   nxsem_set_protocol(&user->buffersem, SEM_PRIO_NONE);
   list_add_tail(&upper->userlist, &user->node);
@@ -481,8 +481,8 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user = filep->f_priv;
+  unsigned long nums;
   ssize_t ret;
-  size_t nums;
 
   if (!buffer || !len)
     {
@@ -557,7 +557,7 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * new data.
        */
 
-      if (user->generation == upper->generation)
+      if (user->generation == upper->state.generation)
         {
           user->generation--;
         }
@@ -566,21 +566,22 @@ static ssize_t sensor_read(FAR struct file *filep, FAR char *buffer,
        * oldest data in circbuffer are returned to the users.
        */
 
-      else if (!sensor_in_range(upper->generation - lower->buffer_number,
-                                user->generation, upper->generation))
+      else if (!sensor_in_range(upper->state.generation - lower->nbuffer,
+                                user->generation, upper->state.generation))
 
         {
-          user->generation = upper->generation - lower->buffer_number;
+          user->generation = upper->state.generation - lower->nbuffer;
         }
 
-      nums = upper->generation - user->generation;
-      if (len < nums * upper->esize)
+      nums = upper->state.generation - user->generation;
+      if (len < nums * upper->state.esize)
         {
-          nums = len / upper->esize;
+          nums = len / upper->state.esize;
         }
 
-      len = nums * upper->esize;
-      ret = circbuf_peekat(&upper->buffer, user->generation * upper->esize,
+      len = nums * upper->state.esize;
+      ret = circbuf_peekat(&upper->buffer,
+                           user->generation * upper->state.esize,
                            buffer, len);
       user->generation += nums;
     }
@@ -673,9 +674,9 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         }
         break;
 
-      case SNIOC_GET_NEVENTBUF:
+      case SNIOC_SET_USERPRIV:
         {
-          *(FAR uint32_t *)(uintptr_t)arg = lower->buffer_number;
+          upper->state.priv = (FAR void *)(uintptr_t)arg;
         }
         break;
 
@@ -683,9 +684,9 @@ static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
         {
           if (!circbuf_is_init(&upper->buffer))
             {
-              if (arg >= lower->buffer_number)
+              if (arg >= lower->nbuffer)
                 {
-                  lower->buffer_number = arg;
+                  lower->nbuffer = arg;
                 }
               else
                 {
@@ -765,7 +766,7 @@ static int sensor_poll(FAR struct file *filep,
                 }
             }
         }
-      else if (sensor_is_updated(upper->generation, user->generation))
+      else if (sensor_is_updated(upper->state.generation, user->generation))
         {
           eventset |= (fds->events & POLLIN);
         }
@@ -797,12 +798,12 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
   FAR struct sensor_upperhalf_s *upper = priv;
   FAR struct sensor_lowerhalf_s *lower = upper->lower;
   FAR struct sensor_user_s *user;
-  size_t envcount;
+  unsigned long envcount;
   int semcount;
   int ret;
 
-  envcount = bytes / upper->esize;
-  if (!envcount || bytes != envcount * upper->esize)
+  envcount = bytes / upper->state.esize;
+  if (!envcount || bytes != envcount * upper->state.esize)
     {
       return -EINVAL;
     }
@@ -817,8 +818,8 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
     {
       /* Initialize sensor buffer when data is first generated */
 
-      ret = circbuf_init(&upper->buffer, NULL, lower->buffer_number *
-                         upper->esize);
+      ret = circbuf_init(&upper->buffer, NULL, lower->nbuffer *
+                         upper->state.esize);
       if (ret < 0)
         {
           nxsem_post(&upper->exclsem);
@@ -827,10 +828,10 @@ static ssize_t sensor_push_event(FAR void *priv, FAR const void *data,
     }
 
   circbuf_overwrite(&upper->buffer, data, bytes);
-  upper->generation += envcount;
+  upper->state.generation += envcount;
   list_for_every_entry(&upper->userlist, user, struct sensor_user_s, node)
     {
-      if (sensor_is_updated(upper->generation, user->generation))
+      if (sensor_is_updated(upper->state.generation, user->generation))
         {
           nxsem_get_value(&user->buffersem, &semcount);
           if (semcount < 1)
@@ -968,7 +969,7 @@ int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
  ****************************************************************************/
 
 int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
-                           FAR const char *path, uint8_t esize)
+                           FAR const char *path, unsigned long esize)
 {
   FAR struct sensor_upperhalf_s *upper;
   int ret = -EINVAL;
@@ -993,9 +994,9 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   /* Initialize the upper-half data structure */
 
   upper->lower = lower;
-  upper->esize = esize;
 
   list_initialize(&upper->userlist);
+  upper->state.esize = esize;
   upper->state.min_interval = ULONG_MAX;
   upper->state.min_latency = ULONG_MAX;
   if (lower->ops->activate)
@@ -1011,9 +1012,9 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   if (!lower->ops->fetch)
     {
-      if (!lower->buffer_number)
+      if (!lower->nbuffer)
         {
-          lower->buffer_number = 1;
+          lower->nbuffer = 1;
         }
 
       lower->push_event = sensor_push_event;
@@ -1021,9 +1022,10 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
   else
     {
       lower->notify_event = sensor_notify_event;
-      lower->buffer_number = 0;
+      lower->nbuffer = 0;
     }
 
+  upper->state.nbuffer = lower->nbuffer;
   sninfo("Registering %s\n", path);
   ret = register_driver(path, &g_sensor_fops, 0666, upper);
   if (ret)
