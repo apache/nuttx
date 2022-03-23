@@ -103,6 +103,10 @@
              memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
              backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
            } \
+         else \
+           { \
+             tmp->backtrace[0] = 0; \
+           } \
        } \
      while (0)
 #else

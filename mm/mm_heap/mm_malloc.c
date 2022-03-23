@@ -27,6 +27,7 @@
 #include <assert.h>
 #include <debug.h>
 #include <string.h>
+#include <malloc.h>
 
 #include <nuttx/arch.h>
 #include <nuttx/mm/mm.h>
@@ -243,7 +244,13 @@ FAR void *mm_malloc(FAR struct mm_heap_s *heap, size_t size)
 #ifdef CONFIG_DEBUG_MM
   else
     {
+      struct mallinfo minfo;
+
       mwarn("WARNING: Allocation failed, size %zu\n", alignsize);
+      mm_mallinfo(heap, &minfo);
+      mwarn("Total:%d, used:%d, free:%d, largest:%d, nused:%d, nfree:%d\n",
+             minfo.arena, minfo.uordblks, minfo.fordblks,
+             minfo.mxordblk, minfo.aordblks, minfo.ordblks);
       mm_memdump(heap, -1);
       DEBUGASSERT(false);
     }
