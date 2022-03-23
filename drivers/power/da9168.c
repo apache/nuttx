@@ -1798,9 +1798,9 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
       return ret;
     }
 
-  /* set recharge threshold, 200mv */
+  /* set recharge threshold, 100mv */
 
-  ret = da9168_set_recharge_level(priv, true);
+  ret = da9168_set_recharge_level(priv, false);
   if (ret < 0)
     {
       baterr("ERROR: Failed to set DA9168 recharge level: %d\n", ret);
