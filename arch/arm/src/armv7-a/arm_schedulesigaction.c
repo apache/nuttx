@@ -139,13 +139,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * delivered.
                */
 
-              CURRENT_REGS            =
-                (FAR void *)STACK_ALIGN_DOWN((uint32_t)CURRENT_REGS -
-                                             (uint32_t)XCPTCONTEXT_SIZE);
+              CURRENT_REGS            = (FAR void *)
+                                        ((uint32_t)CURRENT_REGS -
+                                         (uint32_t)XCPTCONTEXT_SIZE);
               memcpy((FAR uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                      XCPTCONTEXT_SIZE);
 
-              CURRENT_REGS[REG_SP]    = (uint32_t)CURRENT_REGS;
+              CURRENT_REGS[REG_SP]    = (uint32_t)CURRENT_REGS +
+                                        (uint32_t)XCPTCONTEXT_SIZE;
 
               /* Then set up to vector to the trampoline with interrupts
                * disabled
@@ -183,12 +184,13 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs            =
-            (FAR void *)STACK_ALIGN_DOWN((uint32_t)tcb->xcp.regs -
-                                         (uint32_t)XCPTCONTEXT_SIZE);
+          tcb->xcp.regs            = (FAR void *)
+                                     ((uint32_t)tcb->xcp.regs -
+                                      (uint32_t)XCPTCONTEXT_SIZE);
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
-          tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs;
+          tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
+                                     (uint32_t)XCPTCONTEXT_SIZE;
 
           /* Then set up to vector to the trampoline with interrupts
            * disabled
@@ -284,13 +286,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  tcb->xcp.regs            =
-                    (FAR void *)STACK_ALIGN_DOWN((uint32_t)tcb->xcp.regs -
-                                                 (uint32_t)XCPTCONTEXT_SIZE);
+                  tcb->xcp.regs            = (FAR void *)
+                                             ((uint32_t)tcb->xcp.regs -
+                                              (uint32_t)XCPTCONTEXT_SIZE);
                   memcpy(tcb->xcp.regs, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
-                  tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs;
+                  tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
+                                             (uint32_t)XCPTCONTEXT_SIZE;
 
                   /* Then set up to vector to the trampoline with interrupts
                    * disabled
@@ -326,13 +329,14 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                    * been delivered.
                    */
 
-                  CURRENT_REGS            =
-                    (FAR void *)STACK_ALIGN_DOWN((uint32_t)CURRENT_REGS -
-                                                 (uint32_t)XCPTCONTEXT_SIZE);
+                  CURRENT_REGS            = (FAR void *)
+                                            ((uint32_t)CURRENT_REGS -
+                                             (uint32_t)XCPTCONTEXT_SIZE);
                   memcpy((FAR uint32_t *)CURRENT_REGS, tcb->xcp.saved_regs,
                          XCPTCONTEXT_SIZE);
 
-                  CURRENT_REGS[REG_SP]    = (uint32_t)CURRENT_REGS;
+                  CURRENT_REGS[REG_SP]    = (uint32_t)CURRENT_REGS +
+                                            (uint32_t)XCPTCONTEXT_SIZE;
 
                   /* Then set up vector to the trampoline with interrupts
                    * disabled.  The kernel-space trampoline must run in
@@ -393,12 +397,13 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
            * delivered.
            */
 
-          tcb->xcp.regs            =
-            (FAR void *)STACK_ALIGN_DOWN((uint32_t)tcb->xcp.regs -
-                                         (uint32_t)XCPTCONTEXT_SIZE);
+          tcb->xcp.regs            = (FAR void *)
+                                     ((uint32_t)tcb->xcp.regs -
+                                      (uint32_t)XCPTCONTEXT_SIZE);
           memcpy(tcb->xcp.regs, tcb->xcp.saved_regs, XCPTCONTEXT_SIZE);
 
-          tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs;
+          tcb->xcp.regs[REG_SP]    = (uint32_t)tcb->xcp.regs +
+                                     (uint32_t)XCPTCONTEXT_SIZE;
 
           /* Increment the IRQ lock count so that when the task is restarted,
            * it will hold the IRQ spinlock.
