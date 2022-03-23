@@ -41,6 +41,7 @@
 
 #include "signal/signal.h"
 #include "riscv_internal.h"
+#include "addrenv.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -286,6 +287,19 @@ int riscv_swint(int irq, void *context, void *arg)
 
           regs[REG_A0]         = regs[REG_A2];
 
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is the outermost SYSCALL and if there is a saved user
+           * stack pointer, then restore the user stack pointer on this
+           * final return to user code.
+           */
+
+          if (index == 0 && rtcb->xcp.ustkptr != NULL)
+            {
+              regs[REG_SP]      = (uintptr_t)rtcb->xcp.ustkptr;
+              rtcb->xcp.ustkptr = NULL;
+            }
+#endif
+
           /* Save the new SYSCALL nesting level */
 
           rtcb->xcp.nsyscalls  = index;
@@ -415,6 +429,24 @@ int riscv_swint(int irq, void *context, void *arg)
           regs[REG_A1]         = regs[REG_A2]; /* signal */
           regs[REG_A2]         = regs[REG_A3]; /* info */
           regs[REG_A3]         = regs[REG_A4]; /* ucontext */
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If we are signalling a user process, then we must be operating
+           * on the kernel stack now.  We need to switch back to the user
+           * stack before dispatching the signal handler to the user code.
+           * The existence of an allocated kernel stack is sufficient
+           * information to make this decision.
+           */
+
+          if (rtcb->xcp.kstack != NULL)
+            {
+              DEBUGASSERT(rtcb->xcp.kstkptr == NULL &&
+                          rtcb->xcp.ustkptr != NULL);
+
+              rtcb->xcp.kstkptr = (uintptr_t *)regs[REG_SP];
+              regs[REG_SP]      = (uintptr_t)rtcb->xcp.ustkptr;
+            }
+#endif
         }
         break;
 #endif
@@ -440,6 +472,22 @@ int riscv_swint(int irq, void *context, void *arg)
           regs[REG_INT_CTX]   |= MSTATUS_MPPM; /* Machine mode */
 
           rtcb->xcp.sigreturn  = 0;
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* We must enter here be using the user stack.  We need to switch
+           * to back to the kernel user stack before returning to the kernel
+           * mode signal trampoline.
+           */
+
+          if (rtcb->xcp.kstack != NULL)
+            {
+              DEBUGASSERT(rtcb->xcp.kstkptr != NULL &&
+                          (uintptr_t)rtcb->xcp.ustkptr == regs[REG_SP]);
+
+              regs[REG_SP]      = (uintptr_t)rtcb->xcp.kstkptr;
+              rtcb->xcp.kstkptr = NULL;
+            }
+#endif
         }
         break;
 #endif
@@ -489,6 +537,19 @@ int riscv_swint(int irq, void *context, void *arg)
           rtcb->flags         |= TCB_FLAG_SYSCALL;
 #else
           svcerr("ERROR: Bad SYS call: %" PRIdPTR "\n", regs[REG_A0]);
+#endif
+
+#ifdef CONFIG_ARCH_KERNEL_STACK
+          /* If this is the first SYSCALL and if there is an allocated
+           * kernel stack, then switch to the kernel stack.
+           */
+
+          if (index == 0 && rtcb->xcp.kstack != NULL)
+            {
+              rtcb->xcp.ustkptr = (uintptr_t *)regs[REG_SP];
+              regs[REG_SP]      = (uintptr_t)rtcb->xcp.kstack +
+                                  ARCH_KERNEL_STACKSIZE;
+            }
 #endif
         }
         break;

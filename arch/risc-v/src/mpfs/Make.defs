@@ -81,6 +81,10 @@ ifeq ($(CONFIG_ARCH_USE_MMU),y)
 CMN_CSRCS += riscv_mmu.c
 endif
 
+ifeq ($(CONFIG_ARCH_KERNEL_STACK),y)
+CMN_CSRCS += riscv_addrenv_kstack.c
+endif
+
 ifeq ($(CONFIG_SPI),y)
 CHIP_CSRCS += mpfs_spi.c
 endif
