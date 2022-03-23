@@ -22,12 +22,18 @@
 #define __BOARDS_XTENSA_ESP32S2_ESP32S2_SAOLA_1_INCLUDE_BOARD_H
 
 /****************************************************************************
+ * Included Files
+ ****************************************************************************/
+
+#include <nuttx/config.h>
+
+/****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
 /* Clocking *****************************************************************/
 
-/* The ESP32S2 board V2 is fitted with a 40MHz crystal */
+/* The ESP32-S2-Saola-1 is fitted with a 40MHz crystal */
 
 #define BOARD_XTAL_FREQUENCY  40000000
 
@@ -47,13 +53,11 @@
 /* Note: The bootloader (esp-idf bootloader.bin) configures:
  *
  * - CPU frequency to 80MHz
- * - The XTAL frequency according to the SDK config CONFIG_ESP32S2_XTAL_FREQ,
- *   which is 40MHz by default.
  *
  * Reference:
  *     https://github.com/espressif/esp-idf/blob
- *           /6fd855ab8d00d23bad4660216bc2122c2285d5be/components
- *           /bootloader_support/src/bootloader_clock.c#L38-L62
+ *           /ebf7e811b12e3c1e347340e5b9ec014e9c6319ba/components
+ *           /bootloader_support/src/bootloader_clock_init.c#L26-L27
  */
 
 #ifdef CONFIG_ESP32S2_RUN_IRAM
