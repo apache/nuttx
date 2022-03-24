@@ -67,7 +67,6 @@
 #include <arch/xtensa/xtensa_specregs.h>
 
 #include "syscall.h"
-#include "xtensa_swi.h"
 #include "xtensa_asm_utils.h"
 
 /****************************************************************************
