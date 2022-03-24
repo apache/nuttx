@@ -31,8 +31,13 @@
  * uses two additional CSRs: mask and pending.
  */
 
-#define LITEX_CPUTIMER_BASE 0xf0000800  /* riscv clint timer */
-#define LITEX_TIMER0_BASE   0xf0002800
-#define LITEX_UART0_BASE    0xf0002000  /* 0xf0002000 - : UART0 */
+#define LITEX_CPUTIMER_BASE     0xf0000800
+#define LITEX_SDBLOCK2MEM_BASE  0xf0002000
+#define LITEX_SDCORE_BASE       0xf0002800
+#define LITEX_SDIRQ_BASE        0xf0003000
+#define LITEX_SDMEM2BLOCK_BASE  0xf0003800
+#define LITEX_SDPHY_BASE        0xf0004000
+#define LITEX_TIMER0_BASE       0xf0005000
+#define LITEX_UART0_BASE        0xf0005800
 
 #endif /* __ARCH_RISCV_SRC_LITEX_HARDWARE_LITEX_MEMORYMAP_H */
