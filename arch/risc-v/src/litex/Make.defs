@@ -52,3 +52,4 @@ CHIP_CSRCS  = litex_allocateheap.c litex_clockconfig.c
 CHIP_CSRCS += litex_irq.c litex_irq_dispatch.c
 CHIP_CSRCS += litex_lowputc.c litex_serial.c
 CHIP_CSRCS += litex_start.c litex_timerisr.c
+CHIP_ASRCS += litex_cache.S

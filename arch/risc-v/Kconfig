@@ -36,6 +36,7 @@ config ARCH_CHIP_LITEX
 	select ARCH_RV32
 	select ARCH_RV_ISA_M
 	select ARCH_RV_ISA_A
+	select ARCH_DCACHE
 	---help---
 		Enjoy Digital LITEX VEXRISCV softcore processor (RV32IMA).
 
