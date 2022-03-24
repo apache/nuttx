@@ -5,4 +5,24 @@
 
 if ARCH_BOARD_ARTY_A7
 
+config LITEX_SDIO_MOUNT
+	bool "Mount SDIO at startup"
+	default n
+	depends on LITEX_SDIO
+
+config LITEX_SDIO_MOUNT_BLKDEV
+	string "SDIO block device name"
+	default "/dev/mmcsd0"
+	depends on LITEX_SDIO
+
+config LITEX_SDIO_MOUNT_MOUNTPOINT
+	string "SDIO mountpoint"
+	default "/mnt"
+	depends on LITEX_SDIO
+
+config LITEX_SDIO_MOUNT_FSTYPE
+	string "SDIO file system type"
+	default "vfat"
+	depends on LITEX_SDIO
+
 endif
