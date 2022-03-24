@@ -419,6 +419,16 @@ int8_t GH3X2X_StartSampling(void)
             #if GH3X2X_ALGORITHM_ECG_SUPPORT
             GH3X2X_LeadDetEnControl(ECG_SAMPLE_EVENT_INFO_SAMPLE_START);
             #endif
+
+            for (int uchSlotIdx=0; uchSlotIdx < 8; uchSlotIdx++)
+            {
+                for (int nAdcCnt=0; nAdcCnt < 4; nAdcCnt++)
+                {
+                    uint8_t uchBgCancel=GH3X2X_GetSlotLedTiaGain(uchSlotIdx, nAdcCnt);
+                    g_puchTiaGainAfterSoftAgc[uchSlotIdx*4 + nAdcCnt]=uchBgCancel;
+                }
+            }
+
             GH3X2X_LedAgcInit();
         #if GH3X2X_DUMP_MODE_EN
             GH3X2X_DumpInit();

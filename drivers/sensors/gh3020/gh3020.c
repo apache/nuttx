@@ -259,13 +259,13 @@ const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
   {0x0122, 0x0c7f}, /* LED current (12~127)/255*200 = 9~100mA */
   {0x0126, 0x277c}, /* Slot_cfg1: sync signal, use FIFO, 4ADCs */
   {0x012c, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
-  {0x012e, 0x2222}, /* TIA0~3 40KOHm */
+  {0x012e, 0x2222}, /* TIA0~3 50KOHm */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x013a, 0x0003}, /* LED drv0 to LED0(to green LED) pin, 3/255*200=2.5mA */
   {0x013c, 0x0003}, /* LED drv1 to LED0(to green LED) pin, 3/255*200=2.5mA */
   {0x0142, 0x277c}, /* Slot_cfg2: sync signal, use FIFO, 4ADCs */
   {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
-  {0x014a, 0x2222}, /* TIA0~3 40KOHm */
+  {0x014a, 0x2222}, /* TIA0~3 50KOHm */
   {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
   {0x0156, 0x0103}, /* LED drv0 to LED1(to IR LED) pin, 3/255*200=2.5mA */
   {0x0158, 0x0103}, /* LED drv1 to LED1(to IR LED) pin, 3/255*200=2.5mA */
@@ -683,17 +683,7 @@ static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
       raw = (int32_t)(pframeinfo->punFrameRawdata[i]);
       gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
       pppg->gain[i] = gh3020_gain_list[gain];
-
-      /* RAW PPG data may be negative because of BG cancellation. */
-
-      if (raw > 0)
-        {
-          pppg->ppg[i] = (uint32_t)raw;
-        }
-      else
-        {
-          pppg->ppg[i] = 0;
-        }
+      pppg->ppg[i] = (uint32_t)raw;
     }
 }
 
@@ -1394,7 +1384,7 @@ static int gh3020_selftest(FAR struct sensor_lowerhalf_s *lower,
             }
         }
 
-      /* In the case above, function has returned thus no break is need. */
+      /* In the case above, function has returned thus no break is needed. */
 
       default:                              /* Other cmd tag */
         {
@@ -1463,7 +1453,7 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
             {
               return -EINVAL;
             }
-        };
+        }
         break;
 
       case GH3020_CTRL_OPEN_FACTEST:    /* Enter factory test mode */
@@ -1476,7 +1466,7 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
                   gh3020_stop_sampling(priv->channelmode);
                 }
             }
-        };
+        }
         break;
 
       case GH3020_CTRL_EXIT_FACTEST:     /* Exit factory test mode */
@@ -1489,7 +1479,7 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
                   gh3020_stop_sampling_factest();
                 }
             }
-        };
+        }
         break;
 
       default:
@@ -2058,7 +2048,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
       case GH3X2X_FUNCTION_HR:        /* green dynamic */
         {
           idx = GH3020_PPG0_SENSOR_IDX;
-        };
+        }
         break;
 
       case GH3X2X_FUNCTION_TEST2:     /* green fixed */
@@ -2070,25 +2060,25 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
       case GH3X2X_FUNCTION_HSM:       /* IR fixed */
         {
           idx = GH3020_PPG5_SENSOR_IDX;
-        };
+        }
         break;
 
       case GH3X2X_FUNCTION_RESP:      /* Dark fixed */
         {
           idx = GH3020_PPG3_SENSOR_IDX;
-        };
+        }
         break;
 
       case GH3X2X_FUNCTION_SPO2:      /* red dynamic */
         {
           idx = GH3020_PPG1_SENSOR_IDX;
-        };
+        }
         break;
 
       case GH3X2X_FUNCTION_HRV:       /* IR dynamic */
         {
           idx = GH3020_PPG2_SENSOR_IDX;
-        };
+        }
         break;
 
       default:                        /* No such data */
@@ -2158,31 +2148,31 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
               case 0:       /* slot0 - dark */
                 {
                   chidx = GH3020_PPG3_SENSOR_IDX;
-                };
+                }
                 break;
 
               case 1:       /* slot1 - green */
                 {
                   chidx = GH3020_PPG0_SENSOR_IDX;
-                };
+                }
                 break;
 
               case 2:       /* slot2 - red */
                 {
                   chidx = GH3020_PPG1_SENSOR_IDX;
-                };
+                }
                 break;
 
               case 3:       /* slot3 - ir */
                 {
                   chidx = GH3020_PPG2_SENSOR_IDX;
-                };
+                }
                 break;
 
               default:      /* No such data */
                 {
                   chidx = GH3020_SENSOR_NUM;
-                };
+                }
                 break;
             }
 
