@@ -59,6 +59,17 @@ else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
+ARCHCFLAGS =
+ARCHCXXFLAGS =
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 # Generic GNU RVG toolchain
 
 ifeq ($(CONFIG_RISCV_TOOLCHAIN),GNU_RVG)
