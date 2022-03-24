@@ -20,7 +20,7 @@
 
 # Add the internal C files to the build
 
-CSRCS += lib_mknod.c lib_umask.c lib_utsname.c
+CSRCS += lib_mknod.c lib_umask.c lib_utsname.c lib_getrandom.c
 CSRCS += lib_xorshift128.c lib_tea_encrypt.c lib_tea_decrypt.c
 
 # Support for platforms that do not have long long types
