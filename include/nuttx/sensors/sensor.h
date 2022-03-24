@@ -414,6 +414,7 @@ struct sensor_event_gps     /* Type: Gps */
   float epv;                /* GPS vertical position accuracy (metres) */
 
   float hdop;               /* Horizontal dilution of precision */
+  float pdop;               /* Position dilution of precision */
   float vdop;               /* Vertical dilution of precision */
 
   float ground_speed;       /* GPS ground speed, Unit is m/s */
