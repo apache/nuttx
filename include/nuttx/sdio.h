@@ -477,6 +477,7 @@
 #define SDIO_CAPS_DMABEFOREWRITE  0x04 /* Bit 2=1: Executes DMA before write command */
 #define SDIO_CAPS_4BIT            0x08 /* Bit 3=1: Supports 4 bit operation */
 #define SDIO_CAPS_8BIT            0x10 /* Bit 4=1: Supports 8 bit operation */
+#define SDIO_CAPS_4BIT_ONLY       0x20 /* Bit 5=1: Supports 4-bit only operation */
 
 /****************************************************************************
  * Name: SDIO_STATUS
