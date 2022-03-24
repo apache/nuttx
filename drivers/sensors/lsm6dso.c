@@ -1222,6 +1222,8 @@ static int lsm6dso_pg_writelnbyte(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_pg_writeln(FAR struct lsm6dso_dev_s *priv,
                               uint16_t address, FAR uint8_t *buf,
                               uint8_t len);
+static int lsm6dso_temp_getdata(FAR struct lsm6dso_dev_s *priv,
+                                uint8_t regaddr, FAR float *value);
 
 /* Accelerator handle functions */
 
@@ -2381,6 +2383,43 @@ static int lsm6dso_pg_writeln(FAR struct lsm6dso_dev_s *priv,
 }
 
 /****************************************************************************
+ * Name: lsm6dso_temp_getdata
+ *
+ * Description:
+ *   Read the temperature data.
+ *
+ * Input Parameters:
+ *   priv     -  Device struct.
+ *   regaddr  -  Out put data start register address.
+ *   value    -  Out put data(celsius).
+ *
+ * Returned Value:
+ *   Zero (OK) or positive on success; a negated errno value on failure.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static int lsm6dso_temp_getdata(FAR struct lsm6dso_dev_s *priv,
+                                uint8_t regaddr, FAR float *value)
+{
+  uint8_t buff[2];
+  int16_t temp;
+
+  /* Read temperature data. */
+
+  lsm6dso_spi_read(priv, regaddr, buff, 2);
+  temp = buff[1] << 8 | buff[0];
+
+  /* Convert lsb to celsius. */
+
+  *value = temp / 256.0f + 25.0f;
+
+  return OK;
+}
+
+/****************************************************************************
  * Name: lsm6dso_xl_setselftest
  *
  * Description:
@@ -2666,6 +2705,10 @@ static void lsm6dso_xl_worker(FAR void *arg)
   /* Read out the latest sensor data. */
 
   lsm6dso_xl_getdata(priv, LSM6DSO_OUTX_L_XL, &temp_xl);
+
+  /* Read out the latest temperature data. */
+
+  lsm6dso_temp_getdata(priv, LSM6DSO_OUT_TEMP_L, &temp_xl.temperature);
 
   /* push data to upper half driver. */
 
@@ -2962,6 +3005,10 @@ static void lsm6dso_gy_worker(FAR void *arg)
   /* Read out the latest sensor data. */
 
   lsm6dso_gy_getdata(priv, LSM6DSO_OUTX_L_G, &temp_gy);
+
+  /* Read out the latest temperature data. */
+
+  lsm6dso_temp_getdata(priv, LSM6DSO_OUT_TEMP_L, &temp_gy.temperature);
 
   /* push data to upper half driver. */
 
@@ -3280,6 +3327,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
   unsigned int counter_gy = 0;
   unsigned int fifo_interval;
   unsigned int num;
+  float temperature;
   int ret;
   int i;
   uint8_t reg_tag;
@@ -3294,6 +3342,8 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
       return ret;
     }
 
+  lsm6dso_temp_getdata(priv, LSM6DSO_OUT_TEMP_L, &temperature);
+
   for (; num > 0; num--)
     {
       /* Read FIFO tag */
@@ -3306,6 +3356,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
               lsm6dso_xl_getdata(priv,
                                  LSM6DSO_FIFO_DATA_OUT_X_L,
                                  &temp_xl[counter_xl]);
+              temp_xl[counter_xl].temperature = temperature;
               counter_xl++;
             }
             break;
@@ -3315,6 +3366,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
               lsm6dso_gy_getdata(priv,
                                  LSM6DSO_FIFO_DATA_OUT_X_L,
                                  &temp_gy[counter_gy]);
+              temp_gy[counter_gy].temperature = temperature;
               counter_gy++;
             }
             break;
