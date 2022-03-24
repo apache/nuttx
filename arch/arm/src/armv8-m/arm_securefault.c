@@ -83,6 +83,19 @@ static void generate_nonsecure_busfault(void)
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: arm_securefault_should_generate
+ *
+ * Description:
+ *   Check whether should generate non-secure IRQ from securefault
+ *
+ ****************************************************************************/
+
+bool weak_function arm_should_generate_nonsecure_busfault(void)
+{
+  return true;
+}
+
+/****************************************************************************
  * Name: arm_securefault
  *
  * Description:
@@ -146,11 +159,15 @@ int arm_securefault(int irq, FAR void *context, FAR void *arg)
   putreg32(0xff, SAU_SFSR);
 
 #ifdef CONFIG_DEBUG_SECUREFAULT
-  generate_nonsecure_busfault();
-#else
+  if (arm_should_generate_nonsecure_busfault())
+    {
+      generate_nonsecure_busfault();
+      return OK;
+    }
+#endif
+
   up_irq_save();
   PANIC();
-#endif
 
   return OK;
 }
