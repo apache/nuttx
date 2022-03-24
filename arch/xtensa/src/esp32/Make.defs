@@ -43,6 +43,11 @@ CMN_CSRCS += xtensa_unblocktask.c xtensa_usestack.c xtensa_swint.c xtensa_switch
 
 # Configuration-dependent common XTENSA files
 
+ifeq ($(CONFIG_DEBUG_TCBINFO),y)
+  CMN_CSRCS += xtensa_tcbinfo.c
+endif
+
+
 ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
