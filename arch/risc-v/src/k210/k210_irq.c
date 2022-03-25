@@ -40,15 +40,7 @@
  * Public Data
  ****************************************************************************/
 
-/* For the case of configurations with multiple CPUs, then there must be one
- * such value for each processor that can receive an interrupt.
- */
-
 volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-#ifdef CONFIG_SMP
-extern int riscv_pause_handler(int irq, void *c, void *arg);
-#endif
 
 /****************************************************************************
  * Public Functions
