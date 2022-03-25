@@ -1171,7 +1171,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   FAR struct rptun_priv_s *priv;
 #ifndef CONFIG_RPTUN_WORKQUEUE
   FAR char *argv[3];
-  char arg1[16];
+  char arg1[19];
 #endif
   char name[32];
   int ret;
@@ -1194,7 +1194,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
   metal_list_init(&priv->bind);
 
-  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
   ret = register_driver(name, &g_rptun_devops, 0222, priv);
   if (ret < 0)
     {
@@ -1220,7 +1220,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
       nxsem_init(&priv->sem, 0, 0);
     }
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
