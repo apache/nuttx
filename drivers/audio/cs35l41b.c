@@ -359,7 +359,7 @@ static const cs35l41_otp_packed_entry_t g_otp_map[] =
 
 static const uint32_t g_cs35l41_hibernate_patch[] =
 {
-  IRQ1_IRQ1_MASK_1_REG,                      0xFFFFFFFF,
+  IRQ1_IRQ1_MASK_1_REG,                      0xffffffff,
   IRQ2_IRQ2_EINT_2_REG,                      (1 << 20),
   IRQ1_IRQ1_EINT_2_REG,                      (1 << 21),
   PWRMGT_WAKESRC_CTL,                        0x0044,
@@ -371,7 +371,7 @@ static const uint32_t g_cs35l41_pdn_patch[] =
 {
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_UNLOCK_1,
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_UNLOCK_2,
-  0x00002084,                          0x002F1AA3,
+  0x00002084,                          0x002f1aa3,
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_1,
   CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG, CS35L41_TEST_KEY_CTRL_LOCK_2,
 };
@@ -484,7 +484,7 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             if (cs35l41b_write_register(priv,
                 XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, 0) == ERROR)
               {
-                auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
+                auderr("write DSP1_CCM_CORE_CONTROL_REG error\n");
                 return ERROR;
               }
 
@@ -496,7 +496,7 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
                 return ERROR;
               }
 
-            /* reset calibration values load status*/
+            /* reset calibration values load status */
 
             priv->is_calibrate_value_loaded = false;
 
@@ -880,7 +880,6 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
-
   if (!priv->done)
     {
       return -EBUSY;
@@ -949,7 +948,10 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
 
   if (priv->is_calibrating)
     {
-      cs35l41b_calibrate(priv);
+      if (cs35l41b_calibrate(priv) == ERROR)
+        {
+          return ERROR;
+        }
     }
   else
     {
@@ -2131,7 +2133,7 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
   if (regval < 0)
     {
       auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
-       return ERROR;
+      return ERROR;
     }
 
   regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
@@ -2322,6 +2324,7 @@ static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                 auderr("cs35l41b hibernate failed!\n");
                 return ERROR;
               }
+
             priv->power_state = CS35L41_STATE_HIBERNATE;
           }
         else
@@ -2339,6 +2342,7 @@ static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                 auderr("cs35l41b wake up failed!\n");
                 return ERROR;
               }
+
             priv->power_state = CS35L41_STATE_DSP_STANDBY;
           }
         else
@@ -2516,33 +2520,33 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
   /* if calibrate processing, should not enter hibernate mode */
 
   if (!priv->is_calibrating)
-  {
-    if (cs35l41b_mute(priv, true) == ERROR)
-      {
-        auderr("dsp mute failed\n");
-        return ERROR;
-      }
+    {
+      if (cs35l41b_mute(priv, true) == ERROR)
+        {
+          auderr("dsp mute failed\n");
+          return ERROR;
+        }
 
-    if (cs35l41b_power(priv, POWER_UP) == ERROR)
-      {
-        auderr("power process failed\n");
-        return ERROR;
-      }
+      if (cs35l41b_power(priv, POWER_UP) == ERROR)
+        {
+          auderr("power process failed\n");
+          return ERROR;
+        }
 
-    priv->power_state = CS35L41_STATE_DSP_POWER_UP;
+      priv->power_state = CS35L41_STATE_DSP_POWER_UP;
 
-    if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
-      {
-        auderr("cs45l41b power down failed!\n");
-        return ERROR;
-      }
+      if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+        {
+          auderr("cs45l41b power down failed!\n");
+          return ERROR;
+        }
 
-    if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
-      {
-        auderr("cs45l41b power hibernate failed!\n");
-        return ERROR;
-      }
-  }
+      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+        {
+          auderr("cs45l41b power hibernate failed!\n");
+          return ERROR;
+        }
+    }
 
   return OK;
 }

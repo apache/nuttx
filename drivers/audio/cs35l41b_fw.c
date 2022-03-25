@@ -182,6 +182,7 @@ typedef struct
   bool is_hb_inc;              /* (True) The HALO HEARTBEAT is incrementing */
   bool is_calibration_applied; /* (True) Calibration values are applied */
   bool is_temp_changed;        /* (True) Monitored temperature is varying. */
+  bool is_cal_vaild;
 } dsp_status_t;
 
 /****************************************************************************
@@ -216,16 +217,16 @@ g_cs35l41_dsp_status_controls[CS35L41_DSP_STATUS_WORDS_TOTAL] =
 #if (SUPPORT_DEFAULT_SAMPLERATE == 48000)
 static const uint32_t g_cs35l41_fs_syscfg[] =
 {
-  0x00002C04, 0x00000430,
-  0x00002C0C, 0x00000003,
+  0x00002c04, 0x00000430,
+  0x00002c0c, 0x00000003,
   0x00004804, 0x00000021,
 };
 #elif (SUPPORT_DEFAULT_SAMPLERATE == 44100)
 static const uint32_t g_cs35l41_fs_syscfg[] =
 {
-  0x00002C04, 0x000003F0,
-  0x00002C0C, 0x0000000B,
-  0x00004804, 0x0000001F,
+  0x00002c04, 0x000003f0,
+  0x00002c0c, 0x0000000b,
+  0x00004804, 0x0000001f,
 };
 #endif
 
@@ -919,13 +920,15 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t address;
   uint32_t val;
+  int ret = OK;
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
   val = cs35l41b_read_register(priv, address);
   if (val < 0)
     {
       auderr("Error read register!\n");
-      return ERROR;
+      ret = ERROR;
+      goto error;
     }
 
   g_dsp_status.data.cal_r = val;
@@ -935,13 +938,15 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
   if (val < 0)
     {
       auderr("Error read register!\n");
-      return ERROR;
+      ret = ERROR;
+      goto error;
     }
 
   if ((val != CS35L41_CAL_STATUS_CALIB_SUCCESS) && (val != 3))
     {
       auderr("Error calibrate cs35l41b!\n");
-      return ERROR;
+      ret = ERROR;
+      goto error;
     }
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
@@ -949,14 +954,25 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
   if (val < 0)
     {
       auderr("Error read register!\n");
-      return ERROR;
+      ret = ERROR;
+      goto error;
     }
 
   if (val != (g_dsp_status.data.cal_r + CS35L41_CAL_STATUS_CALIB_SUCCESS))
     {
       auderr("Error verify calibrate cs35l41b!\n");
+      ret = ERROR;
+      goto error;
+    }
+
+error:
+  if (ret == ERROR)
+    {
+      g_dsp_status.is_cal_vaild = false;
       return ERROR;
     }
+
+  g_dsp_status.is_cal_vaild = true;
 
   return OK;
 }
@@ -971,6 +987,11 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
 
 uint32_t cs35l41b_get_calibration_result(void)
 {
+  if (!g_dsp_status.is_cal_vaild)
+    {
+      g_dsp_status.data.cal_r = 0x1fffffff;
+    }
+
   return g_dsp_status.data.cal_r;
 }
 
@@ -988,42 +1009,38 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
   int ret;
   uint32_t value;
 
-  if (!priv->lower->get_caliberate_result)
+  if (priv->lower->get_caliberate_result(&value) != OK)
     {
-      audwarn("cs45l41b don't need caliberate!\n");
-      return OK;
+      value = 0x1fb1;
     }
 
-  if (priv->lower->get_caliberate_result(&value) == OK)
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
+
+  audwarn("caliberate value:0x%08lx | address:0x%08lx\n", value, address);
+
+  ret = cs35l41b_write_register(priv, address, value);
+  if (ret == ERROR)
     {
-      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
+      auderr("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
+      return ERROR;
+    }
 
-      audwarn("caliberate value:0x%08lx | address:0x%08lx\n", value, address);
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_STATUS);
+  ret = cs35l41b_write_register(priv, address,
+                                CS35L41_CAL_STATUS_CALIB_SUCCESS);
+  if (ret == ERROR)
+    {
+      auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+      return ERROR;
+    }
 
-      ret = cs35l41b_write_register(priv, address, value);
-      if (ret == ERROR)
-        {
-          auderr("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
-          return ERROR;
-        }
-
-      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_STATUS);
-      ret = cs35l41b_write_register(priv, address,
-                                    CS35L41_CAL_STATUS_CALIB_SUCCESS);
-      if (ret == ERROR)
-        {
-          auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
-          return ERROR;
-        }
-
-      address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
-      ret = cs35l41b_write_register(priv, address,
-            (value + CS35L41_CAL_STATUS_CALIB_SUCCESS));
-      if (ret == ERROR)
-        {
-          auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
-          return ERROR;
-        }
+  address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
+  ret = cs35l41b_write_register(priv, address,
+        (value + CS35L41_CAL_STATUS_CALIB_SUCCESS));
+  if (ret == ERROR)
+    {
+      auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
+      return ERROR;
     }
 
   return OK;
