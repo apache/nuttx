@@ -84,7 +84,7 @@ static uint16_t recvfrom_event(FAR struct net_driver_s *dev,
           pstate->valuelen_nontrunc = conn->resp.valuelen_nontrunc;
         }
 
-      if (pstate->reqstate.result == 0 ||
+      if (pstate->reqstate.result >= 0 ||
           pstate->reqstate.result == -EAGAIN)
         {
           /* After reception of data, mark input not ready. Daemon will
