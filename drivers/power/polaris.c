@@ -102,6 +102,7 @@ struct stwlc38_dev_s
   bool charging;                            /* Mark charge_manager is not running */
   int batt_state_flag;
   int detect_work_exit;
+  bool tx_is_pp;                            /* XM tx or not */
 };
 
 static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
@@ -754,6 +755,8 @@ static int stwlc38_check_intr(FAR struct stwlc38_dev_s *priv,
   rx_int_state->wlc_rx_pp_done       =
       ((reg_value & WLC_RX_PP_DONE_INT_MASK) == false) ? false : true;
 
+  if (rx_int_state->wlc_rx_pp_done == true)  priv->tx_is_pp = true;
+
   /* CLR int register */
 
   batinfo("[WLC] start to CLR INTR states !!!\n");
@@ -867,6 +870,8 @@ static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
 
   *status = (int)wpc_det;
 
+  if (!*status) priv->tx_is_pp = false;
+
   return OK;
 }
 
@@ -902,13 +907,11 @@ static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
 static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
                            FAR bool *status)
 {
-  int ret;
-  unsigned int *chipid = NULL;
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
 
-  ret = stwlc38_chipid(dev, chipid);
-  *status = (ret == OK) ? true : false;
+  *status = priv->tx_is_pp;
 
-  return ret;
+  return OK;
 }
 
 static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
@@ -1139,6 +1142,7 @@ FAR struct battery_charger_dev_s *
       priv->charging  = false;
       priv->batt_state_flag = BATT_CHARGING_STAT_INIT;
       priv->detect_work_exit = DETECT_WORK_EXIST;
+      priv->tx_is_pp = false;
     }
   else
     {
