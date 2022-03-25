@@ -602,7 +602,7 @@ static int bmp280_fetch(FAR struct sensor_lowerhalf_s *lower,
   int32_t temp;
   int ret;
   struct timespec ts;
-  struct sensor_event_baro baro_data;
+  struct sensor_baro baro_data;
 
   if (buflen != sizeof(baro_data))
     {

@@ -133,7 +133,7 @@ static int fakesensor_read_csv_header(FAR struct fakesensor_s *sensor)
 
 static inline void fakesensor_read_accel(FAR struct fakesensor_s *sensor)
 {
-  struct sensor_event_accel accel;
+  struct sensor_accel accel;
   char raw[50];
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
@@ -141,12 +141,12 @@ static inline void fakesensor_read_accel(FAR struct fakesensor_s *sensor)
   accel.temperature = NAN;
   accel.timestamp = sensor_get_timestamp();
   sensor->lower.push_event(sensor->lower.priv, &accel,
-                    sizeof(struct sensor_event_accel));
+                    sizeof(struct sensor_accel));
 }
 
 static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor)
 {
-  struct sensor_event_mag mag;
+  struct sensor_mag mag;
   char raw[50];
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
@@ -154,12 +154,12 @@ static inline void fakesensor_read_mag(FAR struct fakesensor_s *sensor)
   mag.temperature = NAN;
   mag.timestamp = sensor_get_timestamp();
   sensor->lower.push_event(sensor->lower.priv, &mag,
-                           sizeof(struct sensor_event_mag));
+                           sizeof(struct sensor_mag));
 }
 
 static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor)
 {
-  struct sensor_event_gyro gyro;
+  struct sensor_gyro gyro;
   char raw[50];
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
@@ -167,12 +167,12 @@ static inline void fakesensor_read_gyro(FAR struct fakesensor_s *sensor)
   gyro.temperature = NAN;
   gyro.timestamp = sensor_get_timestamp();
   sensor->lower.push_event(sensor->lower.priv, &gyro,
-                    sizeof(struct sensor_event_gyro));
+                    sizeof(struct sensor_gyro));
 }
 
 static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
 {
-  struct sensor_event_gps gps;
+  struct sensor_gps gps;
   float time;
   char latitude;
   char longitude;
@@ -181,7 +181,7 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
   float hoop;
   float altitude;
   char raw[150];
-  memset(&gps, 0, sizeof(struct sensor_event_gps));
+  memset(&gps, 0, sizeof(struct sensor_gps));
   read:
   fakesensor_read_csv_line(
           &sensor->data, raw, sizeof(raw), sensor->raw_start);
@@ -210,7 +210,7 @@ static inline void fakesensor_read_gps(FAR struct fakesensor_s *sensor)
   gps.altitude = altitude;
 
   sensor->lower.push_event(sensor->lower.priv, &gps,
-                           sizeof(struct sensor_event_gps));
+                           sizeof(struct sensor_gps));
 }
 
 static int fakesensor_activate(FAR struct sensor_lowerhalf_s *lower, bool sw)
@@ -247,7 +247,7 @@ static int fakesensor_batch(FAR struct sensor_lowerhalf_s *lower,
 {
   FAR struct fakesensor_s *sensor = container_of(lower,
                                                  struct fakesensor_s, lower);
-  unsigned long max_latency = sensor->lower.buffer_number * sensor->interval;
+  unsigned long max_latency = sensor->lower.nbuffer * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -392,7 +392,7 @@ int fakesensor_init(int type, FAR const char *file_name,
 
   sensor->lower.type = type;
   sensor->lower.ops = &g_fakesensor_ops;
-  sensor->lower.buffer_number = batch_number;
+  sensor->lower.nbuffer = batch_number;
   sensor->file_path = file_name;
 
   nxsem_init(&sensor->wakeup, 0, 0);

@@ -571,12 +571,12 @@ static void ds18b20_notify(FAR struct ds18b20_dev_s *dev,
                            FAR struct ds18b20_sensor_data_s *data)
 {
   FAR struct ds18b20_sensor_s *sensor = &dev->sensor;
-  struct sensor_event_temp temp;
+  struct sensor_temp temp;
 
   temp.temperature = ds18b20_temp(data->spad);
   temp.timestamp   = data->timestamp;
   sensor->lower.push_event(sensor->lower.priv, &temp,
-                           sizeof(struct sensor_event_temp));
+                           sizeof(struct sensor_temp));
 }
 #endif
 
@@ -640,18 +640,18 @@ static int ds18b20_fetch(FAR struct sensor_lowerhalf_s *lower,
 
   /* Check if the user is reading the right size */
 
-  if (buflen != sizeof(struct sensor_event_temp))
+  if (buflen != sizeof(struct sensor_temp))
     {
       snerr("ERROR: You need to read %d bytes from this sensor!\n",
-            sizeof(struct sensor_event_temp));
+            sizeof(struct sensor_temp));
       return -EINVAL;
     }
 
   ret = ds18b20_measure_read(priv, &data);
   if (!ret)
     {
-      FAR struct sensor_event_temp *temp =
-        (FAR struct sensor_event_temp *)buffer;
+      FAR struct sensor_temp *temp =
+        (FAR struct sensor_temp *)buffer;
       temp->temperature = ds18b20_temp(data.spad);
       temp->timestamp   = data.timestamp;
     }
@@ -952,7 +952,7 @@ int ds18b20_register(int devno, FAR struct onewire_master_s *onewire,
   tmp->lower.ops = &g_ds18b20_ops;
   tmp->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
   tmp->lower.uncalibrated = false;
-  tmp->lower.buffer_number = 1;
+  tmp->lower.nbuffer = 1;
   ret = sensor_register(&tmp->lower, devno);
   if (ret < 0)
     {
