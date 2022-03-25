@@ -757,7 +757,7 @@ static int bmi270_xl_enable(FAR struct bmi270_dev_s *priv,
 static void bmi270_xl_worker(FAR void *arg);
 static int bmi270_xl_getdata(FAR struct bmi270_dev_s *priv,
                              uint8_t regaddr,
-                             FAR struct sensor_event_accel *value);
+                             FAR struct sensor_accel *value);
 static int bmi270_xl_findodr(FAR float *freq);
 static int bmi270_xl_setodr(FAR struct bmi270_dev_s *priv, uint8_t value);
 static int bmi270_xl_setfullscale(FAR struct bmi270_dev_s *priv,
@@ -774,7 +774,7 @@ static int bmi270_gy_enable(FAR struct bmi270_dev_s *priv,
 static void bmi270_gy_worker(FAR void *arg);
 static int bmi270_gy_getdata(FAR struct bmi270_dev_s *priv,
                              uint8_t regaddr,
-                             FAR struct sensor_event_gyro *value);
+                             FAR struct sensor_gyro *value);
 static int bmi270_gy_findodr(FAR float *freq);
 static int bmi270_gy_setodr(FAR struct bmi270_dev_s *priv, uint8_t value);
 static int bmi270_gy_setfullscale(FAR struct bmi270_dev_s *priv,
@@ -2170,7 +2170,7 @@ static int bmi270_xl_enable(FAR struct bmi270_dev_s *priv,
 static void bmi270_xl_worker(FAR void *arg)
 {
   FAR struct bmi270_dev_s *priv = arg;
-  struct sensor_event_accel temp_xl;
+  struct sensor_accel temp_xl;
 
   /* Sanity check. */
 
@@ -2198,7 +2198,7 @@ static void bmi270_xl_worker(FAR void *arg)
   priv->dev[BMI270_XL_IDX].lower.push_event(
         priv->dev[BMI270_XL_IDX].lower.priv,
         &temp_xl,
-        sizeof(struct sensor_event_accel));
+        sizeof(struct sensor_accel));
 }
 
 /****************************************************************************
@@ -2222,7 +2222,7 @@ static void bmi270_xl_worker(FAR void *arg)
 
 static int bmi270_xl_getdata(FAR struct bmi270_dev_s *priv,
                              uint8_t regaddr,
-                             FAR struct sensor_event_accel *value)
+                             FAR struct sensor_accel *value)
 {
   axis3bit16_t temp;
 
@@ -2508,7 +2508,7 @@ static int bmi270_gy_enable(FAR struct bmi270_dev_s *priv,
 static void bmi270_gy_worker(FAR void *arg)
 {
   FAR struct bmi270_dev_s *priv = arg;
-  struct sensor_event_gyro temp_gy;
+  struct sensor_gyro temp_gy;
 
   /* Sanity check. */
 
@@ -2536,7 +2536,7 @@ static void bmi270_gy_worker(FAR void *arg)
   priv->dev[BMI270_GY_IDX].lower.push_event(
         priv->dev[BMI270_GY_IDX].lower.priv,
         &temp_gy,
-        sizeof(struct sensor_event_gyro));
+        sizeof(struct sensor_gyro));
 }
 
 /****************************************************************************
@@ -2560,7 +2560,7 @@ static void bmi270_gy_worker(FAR void *arg)
 
 static int bmi270_gy_getdata(FAR struct bmi270_dev_s *priv,
                              uint8_t regaddr,
-                             FAR struct sensor_event_gyro *value)
+                             FAR struct sensor_gyro *value)
 {
   axis3bit16_t temp;
 
@@ -2882,9 +2882,9 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
   bmi270_fifo_header_t header;
   axis3bit16_t temp;
   float temperature;
-  struct sensor_event_accel
+  struct sensor_accel
          temp_xl[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
-  struct sensor_event_gyro
+  struct sensor_gyro
          temp_gy[CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER];
   unsigned int counter_xl = 0;
   unsigned int counter_gy = 0;
@@ -2985,7 +2985,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
       priv->dev[BMI270_XL_IDX].lower.push_event(
             priv->dev[BMI270_XL_IDX].lower.priv,
             temp_xl,
-            sizeof(struct sensor_event_accel) * counter_xl);
+            sizeof(struct sensor_accel) * counter_xl);
     }
 
   if (counter_gy)
@@ -3008,7 +3008,7 @@ static int bmi270_fifo_readdata(FAR struct bmi270_dev_s *priv)
       priv->dev[BMI270_GY_IDX].lower.push_event(
             priv->dev[BMI270_GY_IDX].lower.priv,
             temp_gy,
-            sizeof(struct sensor_event_gyro) * counter_gy);
+            sizeof(struct sensor_gyro) * counter_gy);
     }
 
   priv->timestamp_fifolast = priv->timestamp;
@@ -3393,7 +3393,7 @@ static int bmi270_set_axis_map(FAR struct bmi270_dev_s *priv,
 static int bmi270_feat_handler(FAR struct bmi270_dev_s *priv,
                                bmi270_int_status_0_t regval_int0)
 {
-  struct sensor_event_wake_gesture temp_feat;
+  struct sensor_wake_gesture temp_feat;
 
   temp_feat.timestamp = priv->timestamp;
 
@@ -3406,7 +3406,7 @@ static int bmi270_feat_handler(FAR struct bmi270_dev_s *priv,
       priv->dev[BMI270_FEAT_IDX].lower.push_event(
             priv->dev[BMI270_FEAT_IDX].lower.priv,
             &temp_feat,
-            sizeof(struct sensor_event_wake_gesture));
+            sizeof(struct sensor_wake_gesture));
     }
 
   return OK;
@@ -3480,7 +3480,7 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
-  max_latency = sensor->lower.buffer_number * sensor->interval;
+  max_latency = sensor->lower.nbuffer * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -3595,17 +3595,17 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
       regval_int_map_data.fwm_int1 = BMI270_ENABLE;
 
       if (priv->dev[BMI270_XL_IDX].fifowtm
-          > priv->dev[BMI270_XL_IDX].lower.buffer_number)
+          > priv->dev[BMI270_XL_IDX].lower.nbuffer)
         {
           priv->dev[BMI270_XL_IDX].fifowtm
-          = priv->dev[BMI270_XL_IDX].lower.buffer_number;
+          = priv->dev[BMI270_XL_IDX].lower.nbuffer;
         }
 
       if (priv->dev[BMI270_GY_IDX].fifowtm
-          > priv->dev[BMI270_GY_IDX].lower.buffer_number)
+          > priv->dev[BMI270_GY_IDX].lower.nbuffer)
         {
           priv->dev[BMI270_GY_IDX].fifowtm
-          = priv->dev[BMI270_GY_IDX].lower.buffer_number;
+          = priv->dev[BMI270_GY_IDX].lower.nbuffer;
         }
 
       priv->fifowtm = priv->dev[BMI270_XL_IDX].fifowtm
@@ -4200,14 +4200,14 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv->dev[BMI270_XL_IDX].lower.type = SENSOR_TYPE_ACCELEROMETER;
   priv->dev[BMI270_XL_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_XL_IDX].interval = BMI270_DEFAULT_INTERVAL;
-  priv->dev[BMI270_XL_IDX].lower.buffer_number
+  priv->dev[BMI270_XL_IDX].lower.nbuffer
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   priv->dev[BMI270_GY_IDX].lower.ops = &g_bmi270_gy_ops;
   priv->dev[BMI270_GY_IDX].lower.type = SENSOR_TYPE_GYROSCOPE;
   priv->dev[BMI270_GY_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_GY_IDX].interval = BMI270_DEFAULT_INTERVAL;
-  priv->dev[BMI270_GY_IDX].lower.buffer_number
+  priv->dev[BMI270_GY_IDX].lower.nbuffer
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   priv->featen = BMI270_DEFAULT_FSM_EN;
@@ -4215,7 +4215,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
   priv->dev[BMI270_FEAT_IDX].lower.type = SENSOR_TYPE_WAKE_GESTURE;
   priv->dev[BMI270_FEAT_IDX].lower.uncalibrated = true;
   priv->dev[BMI270_FEAT_IDX].interval = BMI270_DEFAULT_INTERVAL;
-  priv->dev[BMI270_FEAT_IDX].lower.buffer_number
+  priv->dev[BMI270_FEAT_IDX].lower.nbuffer
                             = CONFIG_SENSORS_BMI270_FIFO_SLOTS_NUMBER;
 
   /* Wait sensor boot time. */

@@ -251,7 +251,7 @@ static int pat9126ja_setmode(FAR struct pat9126ja_dev_s *priv,
 static int pat9126ja_isready(FAR struct pat9126ja_dev_s *priv,
                              FAR uint8_t *value);
 static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
-                             FAR struct sensor_event_ots *ots);
+                             FAR struct sensor_ots *ots);
 static int pat9126ja_read_push(FAR struct pat9126ja_dev_s *priv, bool push);
 static int pat9126ja_initchip(FAR struct pat9126ja_dev_s *priv);
 
@@ -740,7 +740,7 @@ static int pat9126ja_isready(FAR struct pat9126ja_dev_s *priv,
  ****************************************************************************/
 
 static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
-                             FAR struct sensor_event_ots *ots)
+                             FAR struct sensor_ots *ots)
 {
   uint8_t x_low;
   uint8_t y_low;
@@ -811,7 +811,7 @@ static int pat9126ja_getdata(FAR struct pat9126ja_dev_s *priv,
 
 static int pat9126ja_read_push(FAR struct pat9126ja_dev_s *priv, bool push)
 {
-  struct sensor_event_ots ots;
+  struct sensor_ots ots;
   uint8_t status;
   int ret;
 
@@ -845,7 +845,7 @@ static int pat9126ja_read_push(FAR struct pat9126ja_dev_s *priv, bool push)
   if (push && status)
     {
       priv->dev.lower.push_event(priv->dev.lower.priv, &ots,
-                                 sizeof(struct sensor_event_ots));
+                                 sizeof(struct sensor_ots));
     }
 
   return ret;
@@ -1412,11 +1412,11 @@ int pat9126ja_register(int devno,
       return -ENOMEM;
     }
 
-  priv->dev.lower.type          = SENSOR_TYPE_OTS;
-  priv->dev.lower.buffer_number = PAT9126JA_DEFAULT_BUFFER_NUMBER;
-  priv->dev.lower.ops           = &g_pat9126ja_ops;
-  priv->dev.x_resolution        = PAT9126JA_X_RESOLUTION;
-  priv->config                  = config;
+  priv->dev.lower.type     = SENSOR_TYPE_OTS;
+  priv->dev.lower.nbuffer  = PAT9126JA_DEFAULT_BUFFER_NUMBER;
+  priv->dev.lower.ops      = &g_pat9126ja_ops;
+  priv->dev.x_resolution   = PAT9126JA_X_RESOLUTION;
+  priv->config             = config;
 
   /* Initialize chip and enter into lowpower mode */
 

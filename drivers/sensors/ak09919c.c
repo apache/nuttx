@@ -222,7 +222,7 @@ static int ak09919c_setmode(FAR struct ak09919c_dev_s *priv, uint8_t mode);
 static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
                                    uint32_t nsf);
 static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
-                            FAR struct sensor_event_mag *data);
+                            FAR struct sensor_mag *data);
 static int ak09919c_softreset(FAR struct ak09919c_dev_s *priv);
 static int ak09919c_findodr(FAR unsigned long *expect_period_us);
 static int ak09919c_verifyparam(FAR struct ak09919c_magdata_s *magdata,
@@ -517,7 +517,7 @@ static int ak09919c_setnoisefilter(FAR struct ak09919c_dev_s *priv,
  ****************************************************************************/
 
 static int ak09919c_readmag(FAR struct ak09919c_dev_s *priv,
-                            FAR struct sensor_event_mag *data)
+                            FAR struct sensor_mag *data)
 {
   int ret;
   uint8_t state;
@@ -1152,7 +1152,7 @@ static int ak09919c_selftest(FAR struct sensor_lowerhalf_s *lower,
 static void ak09919c_worker(FAR void *arg)
 {
   FAR struct ak09919c_dev_s *priv = arg;
-  struct sensor_event_mag tmp;
+  struct sensor_mag tmp;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1168,7 +1168,7 @@ static void ak09919c_worker(FAR void *arg)
   if (ak09919c_readmag(priv, &tmp) >= 0)
     {
       priv->lower.push_event(priv->lower.priv, &tmp,
-                             sizeof(struct sensor_event_mag));
+                             sizeof(struct sensor_mag));
     }
 }
 
@@ -1215,7 +1215,7 @@ int ak09919c_register(int devno, FAR const struct ak09919c_config_s *config)
 
   priv->config = config;
   priv->lower.type = SENSOR_TYPE_MAGNETIC_FIELD;
-  priv->lower.buffer_number = CONFIG_SENSORS_AK09919C_BUFFER_NUMBER;
+  priv->lower.nbuffer = CONFIG_SENSORS_AK09919C_BUFFER_NUMBER;
   priv->lower.uncalibrated = true;
   priv->lower.ops = &g_ak09919c_ops;
   priv->interval = AK09919C_DEFAULT_ODR;

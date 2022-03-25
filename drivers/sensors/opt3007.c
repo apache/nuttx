@@ -1016,7 +1016,7 @@ static int opt3007_selftest(FAR struct sensor_lowerhalf_s *lower,
 static void opt3007_worker(FAR void *arg)
 {
   FAR struct opt3007_dev_s *priv = arg;
-  struct sensor_event_light light;
+  struct sensor_light light;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1087,7 +1087,7 @@ int opt3007_register(int devno, FAR const struct opt3007_config_s *config)
   priv->lower.type = SENSOR_TYPE_LIGHT;
   priv->lower.uncalibrated = true;
   priv->interval = OPT3007_DEFAULT_INTERVAL;
-  priv->lower.buffer_number = CONFIG_SENSORS_OPT3007_BUFFER_NUMBER;
+  priv->lower.nbuffer = CONFIG_SENSORS_OPT3007_BUFFER_NUMBER;
 
   /* Read and verify the manufacturerid */
 

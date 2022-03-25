@@ -195,7 +195,7 @@ static int icp10125_setmode(FAR struct icp10125_dev_s *priv,
 static float icp10125_from_lsb_to_hpa(FAR struct icp10125_dev_s *priv,
                                       int32_t p_lsb, int16_t t_lsb);
 static int icp10125_getdata(FAR struct icp10125_dev_s *priv,
-                            FAR struct sensor_event_baro *baro);
+                            FAR struct sensor_baro *baro);
 static int icp10125_read_push(FAR struct icp10125_dev_s *priv);
 static uint8_t icp10125_findodr(FAR struct icp10125_dev_s *priv,
                                 FAR uint32_t *interval);
@@ -735,7 +735,7 @@ static float icp10125_from_lsb_to_hpa(FAR struct icp10125_dev_s *priv,
  ****************************************************************************/
 
 static int icp10125_getdata(FAR struct icp10125_dev_s *priv,
-                            FAR struct sensor_event_baro *baro)
+                            FAR struct sensor_baro *baro)
 {
   uint8_t rbuffer[9];
   int32_t pressure;
@@ -793,7 +793,7 @@ static int icp10125_getdata(FAR struct icp10125_dev_s *priv,
 
 static int icp10125_read_push(FAR struct icp10125_dev_s *priv)
 {
-  struct sensor_event_baro baro;
+  struct sensor_baro baro;
   int ret;
 
   /* Get pressure and temperature data. */
@@ -812,7 +812,7 @@ static int icp10125_read_push(FAR struct icp10125_dev_s *priv)
   /* Push data to upper half. */
 
   priv->dev.lower.push_event(priv->dev.lower.priv, &baro,
-                             sizeof(struct sensor_event_baro));
+                             sizeof(struct sensor_baro));
 
   return ret;
 }
@@ -1187,11 +1187,11 @@ int icp10125_register(int devno, FAR const struct icp10125_config_s *config)
       return -ENOMEM;
     }
 
-  priv->dev.lower.type          = SENSOR_TYPE_BAROMETER;
-  priv->dev.lower.buffer_number = ICP10125_DEFAULT_BUFFER_NUMBER;
-  priv->dev.lower.ops           = &g_icp10125_ops;
-  priv->dev.interval            = ICP10125_DEFAULT_INTERVAL;
-  priv->config                  = config;
+  priv->dev.lower.type    = SENSOR_TYPE_BAROMETER;
+  priv->dev.lower.nbuffer = ICP10125_DEFAULT_BUFFER_NUMBER;
+  priv->dev.lower.ops     = &g_icp10125_ops;
+  priv->dev.interval      = ICP10125_DEFAULT_INTERVAL;
+  priv->config            = config;
 
   /* Initialize chip and enter into lowpower mode. */
 

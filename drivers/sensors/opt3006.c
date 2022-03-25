@@ -1008,7 +1008,7 @@ static int opt3006_interrupt_handler(FAR struct ioexpander_dev_s *dev,
 static void opt3006_worker(FAR void *arg)
 {
   FAR struct opt3006_dev_s *priv = arg;
-  struct sensor_event_light light;
+  struct sensor_light light;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1075,7 +1075,7 @@ int opt3006_register(int devno, FAR const struct opt3006_config_s *config)
   priv->lower.ops = &g_opt3006_ops;
   priv->lower.type = SENSOR_TYPE_LIGHT;
   priv->interval = OPT3006_DEFAULT_INTERVAL;
-  priv->lower.buffer_number = CONFIG_SENSORS_OPT3006_BUFFER_NUMBER;
+  priv->lower.nbuffer = CONFIG_SENSORS_OPT3006_BUFFER_NUMBER;
 
   /* Read and verify the manufacturerid */
 

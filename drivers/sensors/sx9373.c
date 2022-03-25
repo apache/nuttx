@@ -1188,12 +1188,12 @@ static void sx9373_worker(FAR void *arg)
 {
   FAR struct sx9373_dev_s *priv = arg;
   struct sx9373_rawdata_s rawdata;
-  struct sensor_event_cap cap;
+  struct sensor_cap cap;
   int ret;
 
   DEBUGASSERT(priv != NULL);
 
-  memset(&cap, 0, sizeof(struct sensor_event_cap));
+  memset(&cap, 0, sizeof(struct sensor_cap));
   cap.timestamp = sensor_get_timestamp();
 
   /* Set work queue. */
@@ -1293,7 +1293,7 @@ int sx9373_register(int devno, FAR const struct sx9373_config_s *config)
       priv->cap_ch[idx].dev = priv;
       priv->cap_ch[idx].lower.type = SENSOR_TYPE_CAP;
       priv->cap_ch[idx].lower.ops = &g_sx9373_ops;
-      priv->cap_ch[idx].lower.buffer_number =
+      priv->cap_ch[idx].lower.nbuffer =
         CONFIG_SENSORS_SX9373_BUFFER_NUMBER;
     }
 

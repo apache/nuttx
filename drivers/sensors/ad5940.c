@@ -4009,7 +4009,7 @@ static int ad5940_biactrl(FAR struct ad5940_dev_s *priv,
 static int ad5940_biadataprocess(FAR struct ad5940_dev_s *priv,
                                  FAR uint32_t *pdata, uint32_t cnt)
 {
-  struct sensor_event_impd pout[AD5940_FIFOSLOTS_MAX];
+  struct sensor_impd pout[AD5940_FIFOSLOTS_MAX];
   FAR struct ad5940_iimpcar_s *psrc = (FAR struct ad5940_iimpcar_s *)pdata;
   FAR struct ad5940_iimpcar_s *pdftvolt;
   FAR struct ad5940_iimpcar_s *pdftcurr;
@@ -4060,7 +4060,7 @@ static int ad5940_biadataprocess(FAR struct ad5940_dev_s *priv,
     }
 
   priv->lower.push_event(priv->lower.priv, pout,
-                         imprescnt * sizeof(struct sensor_event_impd));
+                         imprescnt * sizeof(struct sensor_impd));
 
   /* Calculate next frequency point */
 
@@ -5557,7 +5557,7 @@ static int ad5940_batch(FAR struct sensor_lowerhalf_s *lower,
     }
   else
     {
-      max_latency = lower->buffer_number * priv->interval;
+      max_latency = lower->nbuffer * priv->interval;
       if (*latency_us > max_latency)
         {
           *latency_us = max_latency;
@@ -5915,7 +5915,7 @@ int ad5940_register(int devno, FAR const struct ad5940_config_s *config)
   priv->config = config;
   priv->lower.ops = &g_ad5940_ops;
   priv->lower.type = SENSOR_TYPE_IMPEDANCE;
-  priv->lower.buffer_number = AD5940_FIFOSLOTS_MAX;
+  priv->lower.nbuffer = AD5940_FIFOSLOTS_MAX;
   priv->interval = AD5940_INTVL_DEFAULT;
   priv->odr = AD5940_BIAODR_DEFAULT;
   priv->fifowtm = AD5940_FIFOWTM_DEFAULT;

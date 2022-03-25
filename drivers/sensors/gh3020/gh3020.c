@@ -138,7 +138,7 @@ struct gh3020_dev_s
 
   /* Buffer for pushing PPG data. */
 
-  struct sensor_event_ppgq ppgdata[GH3020_SENSOR_NUM][GH3020_BATCH_NUMBER];
+  struct sensor_ppgq ppgdata[GH3020_SENSOR_NUM][GH3020_BATCH_NUMBER];
   int32_t adc_bias[4];                   /* ADCs bias (Unit in ADC counts) */
   unsigned long batch;                   /* Common batch(us) for interrupts */
   unsigned long interval;                /* Common interval(us) for polling */
@@ -172,7 +172,7 @@ static void gh3020_spi_exchange(FAR struct gh3020_dev_s *priv,
 static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv);
 static void gh3020_dark_pd_mux(bool linked);
 static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
-                                 FAR struct sensor_event_ppgq *pppg,
+                                 FAR struct sensor_ppgq *pppg,
                                  FAR const struct gh3020_frameinfo_s
                                  *pframeinfo);
 
@@ -738,7 +738,7 @@ static void gh3020_dark_pd_mux(bool linked)
  ****************************************************************************/
 
 static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv, uint8_t idx,
-                                 FAR struct sensor_event_ppgq *pppg,
+                                 FAR struct sensor_ppgq *pppg,
                                  FAR const struct gh3020_frameinfo_s
                                  *pframeinfo)
 {
@@ -852,7 +852,7 @@ static void gh3020_push_data(FAR struct gh3020_dev_s *priv)
 
           priv->sensor[idx].lower.push_event(priv->sensor[idx].lower.priv,
                                              priv->ppgdata[idx],
-                                             sizeof(struct sensor_event_ppgq)
+                                             sizeof(struct sensor_ppgq)
                                              * priv->ppgdatacnt[idx]);
         }
     }
@@ -1382,7 +1382,7 @@ static int gh3020_batch(FAR struct sensor_lowerhalf_s *lower,
 
   if (*latency_us > 0)
     {
-      max_latency = sensor->lower.buffer_number * sensor->interval;
+      max_latency = sensor->lower.nbuffer * sensor->interval;
       if (*latency_us > max_latency)
         {
           *latency_us = max_latency;
@@ -2320,7 +2320,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pframeinfo)
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
 void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 {
-  struct sensor_event_ppgq ppg[4];
+  struct sensor_ppgq ppg[4];
   struct gh3020_fifodata_s fifoinfo;
   uint32_t temp;
   int32_t rawdata;
@@ -2460,7 +2460,7 @@ int gh3020_register(int devno, FAR const struct gh3020_config_s *config)
     {
       priv->sensor[idx].lower.ops = &g_gh3020_ops;
       priv->sensor[idx].lower.type = SENSOR_TYPE_PPGQ;
-      priv->sensor[idx].lower.buffer_number = GH3020_BATCH_NUMBER;
+      priv->sensor[idx].lower.nbuffer = GH3020_BATCH_NUMBER;
       priv->sensor[idx].dev = priv;
       priv->sensor[idx].interval = GH3020_INTVL_DFT;
       priv->sensor[idx].current = GH3020_CURRENT_DFT;

@@ -244,7 +244,7 @@ static int lps27hhw_setupdate(FAR struct lps27hhw_dev_s *priv,
 static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
                             enum lps27hhw_mode_e mode);
 static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
-                            FAR struct sensor_event_baro *baro);
+                            FAR struct sensor_baro *baro);
 static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push);
 static int lps27hhw_initchip(FAR struct lps27hhw_dev_s *priv);
 
@@ -800,7 +800,7 @@ static int lps27hhw_setmode(FAR struct lps27hhw_dev_s *priv,
  ****************************************************************************/
 
 static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
-                            FAR struct sensor_event_baro *baro)
+                            FAR struct sensor_baro *baro)
 {
   uint8_t pressure_buff[LPS27HHW_PRESSURE_WIDTH];
   uint8_t temperature_buff[LPS27HHW_TEMP_WIDTH];
@@ -857,7 +857,7 @@ static int lps27hhw_getdata(FAR struct lps27hhw_dev_s *priv,
 
 static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push)
 {
-  struct sensor_event_baro baro;
+  struct sensor_baro baro;
   int ret;
 
   /* Get data */
@@ -874,7 +874,7 @@ static int lps27hhw_read_push(FAR struct lps27hhw_dev_s *priv, bool push)
   /* Push data to upper half driver */
 
   priv->dev.lower.push_event(priv->dev.lower.priv, &baro,
-                             sizeof(struct sensor_event_baro));
+                             sizeof(struct sensor_baro));
 
   return ret;
 }
@@ -1262,11 +1262,11 @@ int lps27hhw_register(int devno, FAR const struct lps27hhw_config_s *config)
       return -ENOMEM;
     }
 
-  priv->dev.lower.type          = SENSOR_TYPE_BAROMETER;
-  priv->dev.lower.buffer_number = LPS27HHW_DEFAULT_BUFFER_NUMBER;
-  priv->dev.lower.ops           = &g_lps27hhw_ops;
-  priv->dev.interval            = LPS27HHW_DEFAULT_INTERVAL;
-  priv->config                  = config;
+  priv->dev.lower.type    = SENSOR_TYPE_BAROMETER;
+  priv->dev.lower.nbuffer = LPS27HHW_DEFAULT_BUFFER_NUMBER;
+  priv->dev.lower.ops     = &g_lps27hhw_ops;
+  priv->dev.interval      = LPS27HHW_DEFAULT_INTERVAL;
+  priv->config            = config;
 
   /* Initialize chip and enter into lowpower mode */
 

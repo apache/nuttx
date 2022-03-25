@@ -142,7 +142,7 @@ static int ct7117_enable(FAR struct ct7117_dev_s *priv, bool enable);
 static int ct7117_checkid(FAR struct ct7117_dev_s *priv);
 static int ct7117_setmode(FAR struct ct7117_dev_s *priv, uint8_t mode);
 static int ct7117_readtemp(FAR struct ct7117_dev_s *priv,
-                           FAR struct sensor_event_temp *data);
+                           FAR struct sensor_temp *data);
 static int ct7117_findodr(FAR unsigned long *expect_period_us);
 
 /* Sensor ops functions. */
@@ -425,7 +425,7 @@ static int ct7117_setmode(FAR struct ct7117_dev_s *priv,
  ****************************************************************************/
 
 static int ct7117_readtemp(FAR struct ct7117_dev_s *priv,
-                           FAR struct sensor_event_temp *data)
+                           FAR struct sensor_temp *data)
 {
   int ret;
   uint8_t buffer[2];
@@ -739,7 +739,7 @@ static int ct7117_selftest(FAR struct sensor_lowerhalf_s *lower,
 
 static void ct7117_worker(FAR void *arg)
 {
-  struct sensor_event_temp tmp;
+  struct sensor_temp tmp;
   FAR struct ct7117_dev_s *priv = arg;
 
   DEBUGASSERT(priv != NULL);
@@ -756,7 +756,7 @@ static void ct7117_worker(FAR void *arg)
   if (ct7117_readtemp(priv, &tmp) >= 0)
     {
       priv->lower.push_event(priv->lower.priv, &tmp,
-                             sizeof(struct sensor_event_temp));
+                             sizeof(struct sensor_temp));
     }
 }
 
@@ -800,7 +800,7 @@ int ct7117_register(int devno, FAR const struct ct7117_config_s *config)
 
   priv->config = config;
   priv->lower.type = SENSOR_TYPE_AMBIENT_TEMPERATURE;
-  priv->lower.buffer_number = CONFIG_SENSORS_CT7117_BUFFER_NUMBER;
+  priv->lower.nbuffer = CONFIG_SENSORS_CT7117_BUFFER_NUMBER;
   priv->lower.ops = &g_ct7117_ops;
   priv->interval = CT7117_DEFAULT_ODR;
 

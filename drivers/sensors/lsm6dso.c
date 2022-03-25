@@ -1238,7 +1238,7 @@ static int lsm6dso_xl_isready(FAR struct lsm6dso_dev_s *priv,
                               FAR uint8_t *value);
 static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
-                              FAR struct sensor_event_accel *value);
+                              FAR struct sensor_accel *value);
 static void lsm6dso_xl_worker(FAR void *arg);
 
 /* Gyroscope handle functions */
@@ -1255,7 +1255,7 @@ static int lsm6dso_gy_isready(FAR struct lsm6dso_dev_s *priv,
                               FAR uint8_t *value);
 static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
-                              FAR struct sensor_event_gyro *value);
+                              FAR struct sensor_gyro *value);
 static void lsm6dso_gy_worker(FAR void *arg);
 
 /* FIFO handle functions */
@@ -1629,8 +1629,8 @@ static int lsm6dso_readdevid(FAR struct lsm6dso_dev_s *priv)
 
 static int lsm6dso_datatest(FAR struct lsm6dso_dev_s *priv, int type)
 {
-  struct sensor_event_accel temp_xl;
-  struct sensor_event_gyro temp_gy;
+  struct sensor_accel temp_xl;
+  struct sensor_gyro temp_gy;
   float val_st_off[3];
   float val_st_on[3];
   float test_val[3];
@@ -2652,7 +2652,7 @@ static int lsm6dso_xl_isready(FAR struct lsm6dso_dev_s *priv,
 
 static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
-                              FAR struct sensor_event_accel *value)
+                              FAR struct sensor_accel *value)
 {
   axis3bit16_t temp;
 
@@ -2686,7 +2686,7 @@ static int lsm6dso_xl_getdata(FAR struct lsm6dso_dev_s *priv,
 static void lsm6dso_xl_worker(FAR void *arg)
 {
   FAR struct lsm6dso_dev_s *priv = arg;
-  struct sensor_event_accel temp_xl;
+  struct sensor_accel temp_xl;
 
   /* Sanity check. */
 
@@ -2714,7 +2714,7 @@ static void lsm6dso_xl_worker(FAR void *arg)
   priv->dev[LSM6DSO_XL_IDX].lower.push_event(
         priv->dev[LSM6DSO_XL_IDX].lower.priv,
         &temp_xl,
-        sizeof(struct sensor_event_accel));
+        sizeof(struct sensor_accel));
 }
 
 /****************************************************************************
@@ -2952,7 +2952,7 @@ static int lsm6dso_gy_isready(FAR struct lsm6dso_dev_s *priv,
 
 static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
                               uint8_t regaddr,
-                              FAR struct sensor_event_gyro *value)
+                              FAR struct sensor_gyro *value)
 {
   axis3bit16_t temp;
 
@@ -2986,7 +2986,7 @@ static int lsm6dso_gy_getdata(FAR struct lsm6dso_dev_s *priv,
 static void lsm6dso_gy_worker(FAR void *arg)
 {
   FAR struct lsm6dso_dev_s *priv = arg;
-  struct sensor_event_gyro temp_gy;
+  struct sensor_gyro temp_gy;
 
   /* Sanity check. */
 
@@ -3014,7 +3014,7 @@ static void lsm6dso_gy_worker(FAR void *arg)
   priv->dev[LSM6DSO_GY_IDX].lower.push_event(
         priv->dev[LSM6DSO_GY_IDX].lower.priv,
         &temp_gy,
-        sizeof(struct sensor_event_gyro));
+        sizeof(struct sensor_gyro));
 }
 
 /****************************************************************************
@@ -3318,9 +3318,9 @@ static int lsm6dso_fifo_flushdata(FAR struct lsm6dso_dev_s *priv)
 
 static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
 {
-  struct sensor_event_accel
+  struct sensor_accel
          temp_xl[CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER];
-  struct sensor_event_gyro
+  struct sensor_gyro
          temp_gy[CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER];
   unsigned int counter_xl = 0;
   unsigned int counter_gy = 0;
@@ -3399,7 +3399,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
       priv->dev[LSM6DSO_XL_IDX].lower.push_event(
             priv->dev[LSM6DSO_XL_IDX].lower.priv,
             temp_xl,
-            sizeof(struct sensor_event_accel) * counter_xl);
+            sizeof(struct sensor_accel) * counter_xl);
     }
 
   if (counter_gy)
@@ -3422,7 +3422,7 @@ static int lsm6dso_fifo_readdata(FAR struct lsm6dso_dev_s *priv)
       priv->dev[LSM6DSO_GY_IDX].lower.push_event(
             priv->dev[LSM6DSO_GY_IDX].lower.priv,
             temp_gy,
-            sizeof(struct sensor_event_gyro) * counter_gy);
+            sizeof(struct sensor_gyro) * counter_gy);
     }
 
   priv->timestamp_fifolast = priv->timestamp;
@@ -3841,7 +3841,7 @@ static int lsm6dso_fsm_setodr(FAR struct lsm6dso_dev_s *priv,
 static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
                                lsm6dso_all_sources_t *status)
 {
-  struct sensor_event_wake_gesture temp_fsm;
+  struct sensor_wake_gesture temp_fsm;
   int ret = 0;
 
   temp_fsm.timestamp = priv->timestamp;
@@ -3855,7 +3855,7 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
       priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
             priv->dev[LSM6DSO_FSM_IDX].lower.priv,
             &temp_fsm,
-            sizeof(struct sensor_event_wake_gesture));
+            sizeof(struct sensor_wake_gesture));
     }
 
   if (status->fsm2)
@@ -3867,7 +3867,7 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
       priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
             priv->dev[LSM6DSO_FSM_IDX].lower.priv,
             &temp_fsm,
-            sizeof(struct sensor_event_wake_gesture));
+            sizeof(struct sensor_wake_gesture));
     }
 
   if (status->fsm3)
@@ -3879,7 +3879,7 @@ static int lsm6dso_fsm_handler(FAR struct lsm6dso_dev_s *priv,
       priv->dev[LSM6DSO_FSM_IDX].lower.push_event(
             priv->dev[LSM6DSO_FSM_IDX].lower.priv,
             &temp_fsm,
-            sizeof(struct sensor_event_wake_gesture));
+            sizeof(struct sensor_wake_gesture));
     }
 
   return ret;
@@ -3920,7 +3920,7 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
 
   DEBUGASSERT(sensor != NULL && latency_us != NULL);
 
-  max_latency = sensor->lower.buffer_number * sensor->interval;
+  max_latency = sensor->lower.nbuffer * sensor->interval;
   if (*latency_us > max_latency)
     {
       *latency_us = max_latency;
@@ -4021,17 +4021,17 @@ static int lsm6dso_batch(FAR struct sensor_lowerhalf_s *lower,
       pin_int1_route.fifo_th = LSM6DSO_FIFO_INT_ENABLE;
 
       if (priv->dev[LSM6DSO_XL_IDX].fifowtm
-          > priv->dev[LSM6DSO_XL_IDX].lower.buffer_number)
+          > priv->dev[LSM6DSO_XL_IDX].lower.nbuffer)
         {
           priv->dev[LSM6DSO_XL_IDX].fifowtm
-          = priv->dev[LSM6DSO_XL_IDX].lower.buffer_number;
+          = priv->dev[LSM6DSO_XL_IDX].lower.nbuffer;
         }
 
       if (priv->dev[LSM6DSO_GY_IDX].fifowtm
-         > priv->dev[LSM6DSO_GY_IDX].lower.buffer_number)
+         > priv->dev[LSM6DSO_GY_IDX].lower.nbuffer)
         {
           priv->dev[LSM6DSO_GY_IDX].fifowtm
-          = priv->dev[LSM6DSO_GY_IDX].lower.buffer_number;
+          = priv->dev[LSM6DSO_GY_IDX].lower.nbuffer;
         }
 
       priv->fifowtm = priv->dev[LSM6DSO_XL_IDX].fifowtm
@@ -5242,14 +5242,14 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_XL_IDX].lower.type = SENSOR_TYPE_ACCELEROMETER;
   priv->dev[LSM6DSO_XL_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_XL_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
-  priv->dev[LSM6DSO_XL_IDX].lower.buffer_number
+  priv->dev[LSM6DSO_XL_IDX].lower.nbuffer
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   priv->dev[LSM6DSO_GY_IDX].lower.ops = &g_lsm6dso_gy_ops;
   priv->dev[LSM6DSO_GY_IDX].lower.type = SENSOR_TYPE_GYROSCOPE;
   priv->dev[LSM6DSO_GY_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_GY_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
-  priv->dev[LSM6DSO_GY_IDX].lower.buffer_number
+  priv->dev[LSM6DSO_GY_IDX].lower.nbuffer
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   priv->fsmen = LSM6DSO_DEFAULT_FSM_EN;
@@ -5257,7 +5257,7 @@ int lsm6dso_register(int devno, FAR const struct lsm6dso_config_s *config)
   priv->dev[LSM6DSO_FSM_IDX].lower.type = SENSOR_TYPE_WAKE_GESTURE;
   priv->dev[LSM6DSO_FSM_IDX].lower.uncalibrated = true;
   priv->dev[LSM6DSO_FSM_IDX].interval = LSM6DSO_DEFAULT_INTERVAL;
-  priv->dev[LSM6DSO_FSM_IDX].lower.buffer_number
+  priv->dev[LSM6DSO_FSM_IDX].lower.nbuffer
                             = CONFIG_SENSORS_LSM6DSO_FIFO_SLOTS_NUMBER;
 
   /* Wait sensor boot time. */

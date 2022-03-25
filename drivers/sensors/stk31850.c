@@ -1532,7 +1532,7 @@ static int stk31850_selftest(FAR struct sensor_lowerhalf_s *lower,
 static void stk31850_worker(FAR void *arg)
 {
   FAR struct stk31850_dev_s *priv = arg;
-  struct sensor_event_light light;
+  struct sensor_light light;
 
   DEBUGASSERT(priv != NULL);
 
@@ -1603,7 +1603,7 @@ int stk31850_register(int devno, FAR const struct stk31850_config_s *config)
   priv->lower.uncalibrated = true;
   priv->interval = STK31850_DEFAULT_INTERVAL;
   priv->gain_idx = STK31850_GAIN_SET_MAX;
-  priv->lower.buffer_number = CONFIG_SENSORS_STK31850_BUFFER_NUMBER;
+  priv->lower.nbuffer = CONFIG_SENSORS_STK31850_BUFFER_NUMBER;
 
   /* Read and verify the deviceid */
 

@@ -260,12 +260,12 @@ struct max86178_dev_s
 
   /* Buffer to store PPGs data for pushing. */
 
-  struct sensor_event_ppgd ppgdata[MAX86178_PPG_SENSOR_NUM]
+  struct sensor_ppgd ppgdata[MAX86178_PPG_SENSOR_NUM]
                                   [MAX86178_FIFO_SLOTS_PPG];
 
   /* Buffer to store ECG data for pushing. */
 
-  struct sensor_event_ecg ecgdata[MAX86178_FIFO_SLOTS_ECG];
+  struct sensor_ecg ecgdata[MAX86178_FIFO_SLOTS_ECG];
 
   /* Buffer for reading FIFO. MAX86178 has a 256-sample (3Byte/sample) FIFO */
 
@@ -1196,7 +1196,7 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
 
       priv->ecg_sensor.lower.push_event(priv->ecg_sensor.lower.priv,
                                         priv->ecgdata,
-                                        sizeof(FAR struct sensor_event_ecg) *
+                                        sizeof(FAR struct sensor_ecg) *
                                         counter_ecg);
     }
 
@@ -1214,7 +1214,7 @@ static int max86178_fifo_read(FAR struct max86178_dev_s *priv)
 
         priv->ppg_sensor[i].lower.push_event(priv->ppg_sensor[i].lower.priv,
           priv->ppgdata[i],
-          sizeof(FAR struct sensor_event_ppgd) * counter_ppg[i]);
+          sizeof(FAR struct sensor_ppgd) * counter_ppg[i]);
       }
 
     /* Optimize PPG0~2 (dark channel need no optimization) if needed. */
@@ -2566,7 +2566,7 @@ static int max86178_ecg_batch(FAR struct sensor_lowerhalf_s *lower,
    * being activated.
    */
 
-  max86178_batch_calcu(priv, latency_us, sensor->lower.buffer_number,
+  max86178_batch_calcu(priv, latency_us, sensor->lower.nbuffer,
                        sensor->interval_desired);
   if (*latency_us != sensor->batch_desired)
     {
@@ -2867,7 +2867,7 @@ static int max86178_ppg_batch(FAR struct sensor_lowerhalf_s *lower,
    * being activated.
    */
 
-  max86178_batch_calcu(priv, latency_us, sensor->lower.buffer_number,
+  max86178_batch_calcu(priv, latency_us, sensor->lower.nbuffer,
                        sensor->interval_desired);
   if (*latency_us != sensor->batch_desired)
     {
@@ -3231,7 +3231,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
 
   priv->ecg_sensor.lower.ops = &g_max86178_ecg_ops;
   priv->ecg_sensor.lower.type = SENSOR_TYPE_ECG;
-  priv->ecg_sensor.lower.buffer_number = MAX86178_FIFO_SLOTS_ECG;
+  priv->ecg_sensor.lower.nbuffer = MAX86178_FIFO_SLOTS_ECG;
   priv->ecg_sensor.dev = priv;
   priv->ecg_sensor.interval_desired = MAX86178_ECG_INTVL_DFT;
   priv->ecg_sensor.ndiv = MAX86178_ECG_NDIV_DFT;
@@ -3243,7 +3243,7 @@ int max86178_register(int devno, FAR const struct max86178_config_s *config)
     {
       priv->ppg_sensor[idx].lower.ops = &g_max86178_ppg_ops;
       priv->ppg_sensor[idx].lower.type = SENSOR_TYPE_PPGD;
-      priv->ppg_sensor[idx].lower.buffer_number = MAX86178_FIFO_SLOTS_PPG;
+      priv->ppg_sensor[idx].lower.nbuffer = MAX86178_FIFO_SLOTS_PPG;
       priv->ppg_sensor[idx].dev = priv;
       priv->ppg_sensor[idx].optm1.adc_range = MAX86178_PPG_ADCRGE_DFT;
       priv->ppg_sensor[idx].optm2.adc_range = MAX86178_PPG_ADCRGE_DFT;
