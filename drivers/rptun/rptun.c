@@ -354,8 +354,6 @@ static int rptun_thread(int argc, FAR char *argv[])
   priv = (FAR struct rptun_priv_s *)((uintptr_t)strtoul(argv[2], NULL, 0));
   priv->tid = gettid();
 
-  remoteproc_init(&priv->rproc, &g_rptun_ops, priv);
-
   while (1)
     {
       nxsem_wait_uninterruptible(&priv->sem);
