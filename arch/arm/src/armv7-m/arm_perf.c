@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/stm32f4discovery/src/stm32_perfcount.c
+ * arch/arm/src/armv7-m/arm_perf.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,49 +22,55 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <time.h>
-#include <fixedmath.h>
-
-#include "dwt.h"
-#include "arm_internal.h"
-
+#include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#include <arch/board/board.h>
+#include "arm_arch.h"
+#include "dwt.h"
+#include "itm.h"
+#include "nvic.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static uint32_t g_cpu_freq;
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
-/****************************************************************************
- * Name: up_perf_gettime
- ****************************************************************************/
+void up_perf_init(FAR void *arg)
+{
+  g_cpu_freq = (uint32_t)(uintptr_t)arg;
+
+  /* Enable ITM and DWT resources, if not left enabled by debugger. */
+
+  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
+
+  /* Make sure the high speed cycle counter is running.  It will be started
+   * automatically only if a debugger is connected.
+   */
+
+  putreg32(0xc5acce55, ITM_LAR);
+  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+}
+
+uint32_t up_perf_getfreq(void)
+{
+  return g_cpu_freq;
+}
 
 uint32_t up_perf_gettime(void)
 {
   return getreg32(DWT_CYCCNT);
 }
 
-/****************************************************************************
- * Name: up_perf_getfreq
- ****************************************************************************/
-
-uint32_t up_perf_getfreq(void)
-{
-  return STM32_SYSCLK_FREQUENCY;
-}
-
-/****************************************************************************
- * Name: up_perf_convert
- ****************************************************************************/
-
 void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
 {
-  b32_t b32elapsed;
+  uint32_t left;
 
-  b32elapsed  = itob32(elapsed) / STM32_SYSCLK_FREQUENCY;
-  ts->tv_sec  = b32toi(b32elapsed);
-  ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
+  ts->tv_sec  = elapsed / g_cpu_freq;
+  left        = elapsed - ts->tv_sec * g_cpu_freq;
+  ts->tv_nsec = NSEC_PER_SEC * (uint64_t)left / g_cpu_freq;
 }

@@ -54,16 +54,7 @@
 void stm32_boardinitialize(void)
 {
 #ifdef CONFIG_SCHED_CRITMONITOR
-  /* Enable ITM and DWT resources, if not left enabled by debugger. */
-
-  modifyreg32(NVIC_DEMCR, 0, NVIC_DEMCR_TRCENA);
-
-  /* Make sure the high speed cycle counter is running.  It will be started
-   * automatically only if a debugger is connected.
-   */
-
-  putreg32(0xc5acce55, ITM_LAR);
-  modifyreg32(DWT_CTRL, 0, DWT_CTRL_CYCCNTENA_MASK);
+  up_perf_init((FAR void *)STM32_SYSCLK_FREQUENCY);
 #endif
 
 #if defined(CONFIG_STM32_SPI1) || defined(CONFIG_STM32_SPI2) || defined(CONFIG_STM32_SPI3)
