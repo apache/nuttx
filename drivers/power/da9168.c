@@ -151,6 +151,8 @@ static int da9168_control_rev_vbus(FAR struct da9168_dev_s *priv,
                                    bool enable);
 static int da9168_control_boost_en(FAR struct da9168_dev_s *priv,
                                    bool enable);
+static inline int da9168_control_pre_charge_safe_timer(
+                  FAR struct da9168_dev_s *priv, uint8_t value);
 
 /* Battery driver lower half methods */
 
@@ -1179,6 +1181,30 @@ static inline int da9168_set_vindpm(FAR struct da9168_dev_s *priv, int value)
 }
 
 /****************************************************************************
+ * Name: da9168_control_pre_charge_safe_timer
+ *
+ * Description:
+ *   Set the pre_charge safe timer time
+ *
+ ****************************************************************************/
+
+static inline int da9168_control_pre_charge_safe_timer(
+                  FAR struct da9168_dev_s *priv, uint8_t value)
+{
+  int ret;
+
+  ret = da9168_reg_update_bits(priv, DA9168_PMC_CHG_01,
+        DA9168_CHG_TMR_PRE_MASK, (value << DA9168_CHG_TMR_PRE_SHIFT));
+  if (ret < 0)
+    {
+      baterr("ERROR: da9168 reg uadate bits error: %d\n", ret);
+      return ret;
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: da9168_set_vbus_ovsel
  *
  * Description:
@@ -1843,6 +1869,15 @@ static int da9168_init(FAR struct da9168_dev_s *priv, int current)
   if (ret < 0)
     {
       baterr("ERROR: Failed to enable DA9168 boost: %d\n", ret);
+      return ret;
+    }
+
+  /* set pre_charge safe timer 120 min */
+
+  ret = da9168_control_pre_charge_safe_timer(priv, 0x03);
+  if (ret < 0)
+    {
+      baterr("ERROR: Failed to set pre charge safe timer: %d\n", ret);
       return ret;
     }
 
