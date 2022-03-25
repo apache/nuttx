@@ -83,6 +83,9 @@ config HAVE_CXXINITIALIZE
 config CXX_EXCEPTION
 	bool "Enable Exception Support"
 
+config CXX_RTTI
+	bool "Enable RTTI Support"
+
 if UCLIBCXX
 
 config UCLIBCXX_BUFSIZE
