@@ -21,7 +21,7 @@
 # Add the unistd C files to the build
 
 CSRCS += lib_access.c lib_daemon.c lib_swab.c lib_pathconf.c lib_sysconf.c
-CSRCS += lib_getopt_common.c lib_getopt.c lib_getopt_long.c
+CSRCS += lib_getentropy.c lib_getopt_common.c lib_getopt.c lib_getopt_long.c
 CSRCS += lib_getopt_longonly.c lib_getoptvars.c lib_getoptargp.c
 CSRCS += lib_getopterrp.c lib_getoptindp.c lib_getoptoptp.c lib_times.c
 CSRCS += lib_alarm.c lib_fstatvfs.c lib_statvfs.c lib_sleep.c lib_nice.c
