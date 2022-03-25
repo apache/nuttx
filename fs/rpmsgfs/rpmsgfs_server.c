@@ -443,7 +443,8 @@ static int rpmsgfs_ioctl_handler(FAR struct rpmsg_endpoint *ept,
   filep = rpmsgfs_get_file(priv, msg->fd);
   if (filep != NULL)
     {
-      ret = file_ioctl(filep, msg->request, msg->arg);
+      ret = file_ioctl(filep, msg->request, msg->arglen > 0 ?
+                       (unsigned long)msg->buf : msg->arg);
     }
 
   msg->header.result = ret;
