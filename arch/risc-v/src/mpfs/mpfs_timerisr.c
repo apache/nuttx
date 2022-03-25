@@ -47,8 +47,8 @@
  * Private Data
  ****************************************************************************/
 
-static bool _b_tick_started = false;
-static uint64_t *_mtime_cmp = 0L;
+static bool _b_tick_started;
+static uint64_t *_mtime_cmp;
 
 /****************************************************************************
  * Private Functions

@@ -36,12 +36,6 @@
 #include "chip.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[1];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -51,12 +45,12 @@ volatile uintptr_t *g_current_regs[1];
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t  irq  = vector & 0x3ff; /* E24 [9:0] */
+  int irq  = vector & 0x3ff; /* E24 [9:0] */
   uintptr_t *mepc = regs;
 
   /* If current is interrupt */
 
-  if (vector & 0x80000000u)
+  if ((vector & RISCV_IRQ_BIT) != 0)
     {
       irq += RISCV_IRQ_ASYNC;
     }
@@ -124,7 +118,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs           = (uintptr_t *)CURRENT_REGS;
+  regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   return regs;
