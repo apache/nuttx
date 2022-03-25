@@ -919,7 +919,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
   FAR char *argv[3];
-  char arg1[16];
+  char arg1[19];
   char name[32];
   int ret;
 
@@ -946,14 +946,14 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   nxsem_init(&priv->sem, 0, RPTUN_IS_AUTOSTART(dev) ? 1 : 0);
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
-  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
   ret = register_driver(name, &g_rptun_devops, 0222, priv);
   if (ret < 0)
     {
       goto err_driver;
     }
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
