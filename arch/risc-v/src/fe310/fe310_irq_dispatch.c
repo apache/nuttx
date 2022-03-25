@@ -39,10 +39,10 @@
 #include "fe310.h"
 
 /****************************************************************************
- * Public Data
+ * Pre-processor Definitions
  ****************************************************************************/
 
-volatile uintptr_t *g_current_regs[1];
+#define RV_IRQ_MASK 27
 
 /****************************************************************************
  * Public Functions
@@ -54,7 +54,7 @@ volatile uintptr_t *g_current_regs[1];
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t  irq = (vector >> 27) | (vector & 0xf);
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
 
   /* Firstly, check if the irq is machine external interrupt */

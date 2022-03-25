@@ -47,10 +47,10 @@
  * riscv_dispatch_irq
  ****************************************************************************/
 
-void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uint32_t irq = (vector & 0x3f);
-  uint64_t *mepc = regs;
+  int irq = (vector & 0x3f);
+  uintptr_t *mepc = regs;
 
   board_autoled_on(LED_INIRQ);
 
@@ -62,10 +62,10 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
       vector == RISCV_IRQ_SROREPF ||
       vector == RISCV_IRQ_RESERVED)
     {
-      riscv_fault((int)irq, regs);
+      riscv_fault(irq, regs);
     }
 
-  if (vector & 0x8000000000000000)
+  if ((vector & RISCV_IRQ_BIT) != 0)
     {
        irq += MPFS_IRQ_ASYNC;
     }
@@ -146,7 +146,7 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 #ifdef CONFIG_ARCH_FPU
       /* Restore floating point registers */
 
-      riscv_restorefpu((uint64_t *)CURRENT_REGS);
+      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
 #endif
 
 #ifdef CONFIG_ARCH_ADDRENV
@@ -169,7 +169,7 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)CURRENT_REGS;
+  regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   board_autoled_off(LED_INIRQ);

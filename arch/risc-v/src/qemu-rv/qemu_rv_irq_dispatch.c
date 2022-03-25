@@ -49,12 +49,6 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -64,7 +58,7 @@ volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
 
   if (vector < RISCV_IRQ_ECALLM)
