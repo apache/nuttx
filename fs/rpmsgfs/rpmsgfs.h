@@ -110,7 +110,9 @@ begin_packed_struct struct rpmsgfs_ioctl_s
   struct rpmsgfs_header_s header;
   int32_t                 fd;
   int32_t                 request;
-  int32_t                 arg;
+  uint64_t                arg;
+  uint32_t                arglen;
+  char                    buf[0];
 } end_packed_struct;
 
 #define rpmsgfs_sync_s rpmsgfs_close_s
