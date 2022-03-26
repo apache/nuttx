@@ -279,36 +279,36 @@ static struct lmp92001_dev_s g_devpriv;
 #ifdef CONFIG_DAC
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset    = lmp92001_dac_reset,
-  .ao_setup    = lmp92001_dac_setup,
-  .ao_shutdown = lmp92001_dac_shutdown,
-  .ao_txint    = lmp92001_dac_txint,
-  .ao_send     = lmp92001_dac_send,
-  .ao_ioctl    = lmp92001_dac_ioctl,
+  lmp92001_dac_reset,           /* ao_reset */
+  lmp92001_dac_setup,           /* ao_setup */
+  lmp92001_dac_shutdown,        /* ao_shutdown */
+  lmp92001_dac_txint,           /* ao_txint */
+  lmp92001_dac_send,            /* ao_send */
+  lmp92001_dac_ioctl            /* ao_ioctl */
 };
 
 static struct dac_dev_s g_dacdev =
 {
-  .ad_ops      = &g_dacops,
-  .ad_priv     = &g_devpriv,
+  &g_dacops,    /* ad_ops */
+  &g_devpriv    /* ad_priv */
 };
 #endif
 
 #ifdef CONFIG_ADC
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind     = lmp92001_adc_bind,
-  .ao_reset    = lmp92001_adc_reset,
-  .ao_setup    = lmp92001_adc_setup,
-  .ao_shutdown = lmp92001_adc_shutdown,
-  .ao_rxint    = lmp92001_adc_rxint,
-  .ao_ioctl    = lmp92001_adc_ioctl
+  lmp92001_adc_bind,            /* ao_bind */
+  lmp92001_adc_reset,           /* ao_reset */
+  lmp92001_adc_setup,           /* ao_setup */
+  lmp92001_adc_shutdown,        /* ao_shutdown */
+  lmp92001_adc_rxint,           /* ao_rxint */
+  lmp92001_adc_ioctl            /* ao_ioctl */
 };
 
 static struct adc_dev_s g_adcdev =
 {
-  .ad_ops  = &g_adcops,
-  .ad_priv = &g_devpriv,
+  &g_adcops,    /* ad_ops */
+  &g_devpriv    /* ad_priv */
 };
 #endif
 

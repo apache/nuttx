@@ -94,7 +94,7 @@ static int ads7828_readchannel(FAR struct ads7828_dev_s *priv,
 /* ADC methods */
 
 static int  ads7828_bind(FAR struct adc_dev_s *dev,
-                     FAR const struct adc_callback_s *callback);
+                         FAR const struct adc_callback_s *callback);
 static void ads7828_reset(FAR struct adc_dev_s *dev);
 static int  ads7828_setup(FAR struct adc_dev_s *dev);
 static void ads7828_shutdown(FAR struct adc_dev_s *dev);
@@ -108,20 +108,20 @@ static int  ads7828_ioctl(FAR struct adc_dev_s *dev, int cmd,
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind     = ads7828_bind,      /* ao_bind */
-  .ao_reset    = ads7828_reset,     /* ao_reset */
-  .ao_setup    = ads7828_setup,     /* ao_setup */
-  .ao_shutdown = ads7828_shutdown,  /* ao_shutdown */
-  .ao_rxint    = ads7828_rxint,     /* ao_rxint */
-  .ao_ioctl    = ads7828_ioctl      /* ao_read */
+  ads7828_bind,      /* ao_bind */
+  ads7828_reset,     /* ao_reset */
+  ads7828_setup,     /* ao_setup */
+  ads7828_shutdown,  /* ao_shutdown */
+  ads7828_rxint,     /* ao_rxint */
+  ads7828_ioctl      /* ao_read */
 };
 
 static struct ads7828_dev_s g_adcpriv;
 
 static struct adc_dev_s g_adcdev =
 {
-  .ad_ops  = &g_adcops,
-  .ad_priv = &g_adcpriv,
+  &g_adcops,    /* ad_ops */
+  &g_adcpriv    /* ad_priv */
 };
 
 /****************************************************************************
@@ -280,11 +280,10 @@ static int ads7828_bind(FAR struct adc_dev_s *dev,
 
 static void ads7828_reset(FAR struct adc_dev_s *dev)
 {
-    FAR struct ads7828_dev_s *priv =
-                                (FAR struct ads7828_dev_s *)dev->ad_priv;
+  FAR struct ads7828_dev_s *priv = (FAR struct ads7828_dev_s *)dev->ad_priv;
 
-    priv->cmdbyte = 0;
-    priv->chanstrobed = 0xffu;
+  priv->cmdbyte = 0;
+  priv->chanstrobed = 0xffu;
 }
 
 /****************************************************************************

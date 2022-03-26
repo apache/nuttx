@@ -69,12 +69,12 @@
 #define AD5410_REG_CMD    0x55
 #define AD5410_REG_RST    0x56
 
-#define AD5410_CMD_REXT       (1<<13)
-#define AD5410_CMD_OUTEN      (1<<12)
-#define AD5410_CMD_SRCLK(x)   (x<<8)
-#define AD5410_CMD_SRSTEP(x)  (x<<5)
-#define AD5410_CMD_SREN       (1<<4)
-#define AD5410_CMD_DCEN       (1<<3)
+#define AD5410_CMD_REXT       (1 << 13)
+#define AD5410_CMD_OUTEN      (1 << 12)
+#define AD5410_CMD_SRCLK(x)   ((x) << 8)
+#define AD5410_CMD_SRSTEP(x)  ((x) << 5)
+#define AD5410_CMD_SREN       (1 << 4)
+#define AD5410_CMD_DCEN       (1 << 3)
 #define AD5410_CMD_420MA      0x05
 #define AD5410_CMD_020MA      0x06
 #define AD5410_CMD_024MA      0x07
@@ -111,20 +111,20 @@ static int  dac_ioctl(FAR struct dac_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset    = dac_reset,
-  .ao_setup    = dac_setup,
-  .ao_shutdown = dac_shutdown,
-  .ao_txint    = dac_txint,
-  .ao_send     = dac_send,
-  .ao_ioctl    = dac_ioctl,
+  dac_reset,    /* ao_reset */
+  dac_setup,    /* ao_setup */
+  dac_shutdown, /* ao_shutdown */
+  dac_txint,    /* ao_txint */
+  dac_send,     /* ao_send */
+  dac_ioctl     /* ao_ioctl */
 };
 
 static struct up_dev_s g_dacpriv;
 
 static struct dac_dev_s g_dacdev =
 {
-  .ad_ops      = &g_dacops,
-  .ad_priv     = &g_dacpriv,
+  &g_dacops,    /* ad_ops */
+  &g_dacpriv    /* ad_priv */
 };
 
 /****************************************************************************
@@ -185,7 +185,7 @@ static void dac_reset(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  dac_setup(FAR struct dac_dev_s *dev)
+static int dac_setup(FAR struct dac_dev_s *dev)
 {
   FAR struct up_dev_s *priv = (FAR struct up_dev_s *)dev->ad_priv;
   FAR struct spi_dev_s *spi = priv->spi;

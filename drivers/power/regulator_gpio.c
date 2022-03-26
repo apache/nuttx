@@ -58,9 +58,14 @@ static int regulator_gpio_is_enabled(FAR struct regulator_dev_s *rdev);
 
 static const struct regulator_ops_s g_regulator_gpio_ops =
 {
-  .enable      = regulator_gpio_enable,
-  .disable     = regulator_gpio_disable,
-  .is_enabled  = regulator_gpio_is_enabled,
+  NULL,                         /* list_voltage */
+  NULL,                         /* set_voltage */
+  NULL,                         /* set_voltage_sel */
+  NULL,                         /* get_voltage */
+  NULL,                         /* get_voltage_sel */
+  regulator_gpio_enable,        /* enable */
+  regulator_gpio_is_enabled,    /* is_enabled */
+  regulator_gpio_disable        /* disable */
 };
 
 /****************************************************************************

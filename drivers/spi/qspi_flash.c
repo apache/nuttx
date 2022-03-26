@@ -196,19 +196,18 @@ static void qspi_flash_writeword(FAR struct qspi_flashdev_s *priv,
 
 static const struct qspi_ops_s g_qspiops =
 {
-  .lock              = qspi_flash_lock,
-  .setfrequency      = qspi_flash_setfrequency,
-  .setmode           = qspi_flash_setmode,
-  .setbits           = qspi_flash_setbits,
-  .command           = qspi_flash_command,
-  .memory            = qspi_flash_memory,
-  .alloc             = qspi_flash_alloc,
-  .free              = qspi_flash_free
+  qspi_flash_lock,              /* lock */
+  qspi_flash_setfrequency,      /* setfrequency */
+  qspi_flash_setmode,           /* setmode */
+  qspi_flash_setbits,           /* setbits */
+  qspi_flash_command,           /* command */
+  qspi_flash_memory,            /* memory */
+  qspi_flash_alloc,             /* alloc */
+  qspi_flash_free               /* free */
 };
 
 struct qspi_flashdev_s g_qspidev =
 {
-  .spidev =
   {
     &g_qspiops
   }

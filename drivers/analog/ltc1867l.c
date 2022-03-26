@@ -87,12 +87,12 @@ static int  adc_ioctl(FAR struct adc_dev_s *dev, int cmd, unsigned long arg);
 
 static const struct adc_ops_s g_adcops =
 {
-  .ao_bind     = adc_bind,      /* ao_bind */
-  .ao_reset    = adc_reset,     /* ao_reset */
-  .ao_setup    = adc_setup,     /* ao_setup */
-  .ao_shutdown = adc_shutdown,  /* ao_shutdown */
-  .ao_rxint    = adc_rxint,     /* ao_rxint */
-  .ao_ioctl    = adc_ioctl      /* ao_read */
+  adc_bind,      /* ao_bind */
+  adc_reset,     /* ao_reset */
+  adc_setup,     /* ao_setup */
+  adc_shutdown,  /* ao_shutdown */
+  adc_rxint,     /* ao_rxint */
+  adc_ioctl      /* ao_read */
 };
 
 /****************************************************************************

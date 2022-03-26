@@ -127,14 +127,14 @@ struct dac_ops_s
 
 struct dac_dev_s
 {
+  const struct dac_ops_s *ad_ops;      /* Arch-specific operations */
+  void                   *ad_priv;     /* Used by the arch-specific logic */
   uint8_t                 ad_ocount;   /* The number of times the device has
                                         * been opened */
   uint8_t                 ad_nchannel; /* Number of dac channel */
   sem_t                   ad_closesem; /* Locks out new opens while close is
                                         * in progress */
   struct dac_fifo_s       ad_xmit;     /* Describes receive FIFO */
-  const struct dac_ops_s *ad_ops;      /* Arch-specific operations */
-  void                   *ad_priv;     /* Used by the arch-specific logic */
 };
 
 /****************************************************************************

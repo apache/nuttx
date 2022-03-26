@@ -99,18 +99,18 @@ static struct dac7571_dev_s g_dacpriv;
 
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset    = dac7571_reset,
-  .ao_setup    = dac7571_setup,
-  .ao_shutdown = dac7571_shutdown,
-  .ao_txint    = dac7571_txint,
-  .ao_send     = dac7571_send,
-  .ao_ioctl    = dac7571_ioctl,
+  dac7571_reset,        /* ao_reset */
+  dac7571_setup,        /* ao_setup */
+  dac7571_shutdown,     /* ao_shutdown */
+  dac7571_txint,        /* ao_txint */
+  dac7571_send,         /* ao_send */
+  dac7571_ioctl         /* ao_ioctl */
 };
 
 static struct dac_dev_s g_dacdev =
 {
-  .ad_ops      = &g_dacops,
-  .ad_priv     = &g_dacpriv,
+  &g_dacops,    /* ad_ops */
+  &g_dacpriv    /* ad_priv */
 };
 
 /****************************************************************************
@@ -141,7 +141,7 @@ static void dac7571_reset(FAR struct dac_dev_s *dev)
  *
  ****************************************************************************/
 
-static int  dac7571_setup(FAR struct dac_dev_s *dev)
+static int dac7571_setup(FAR struct dac_dev_s *dev)
 {
   return OK;
 }

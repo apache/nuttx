@@ -68,62 +68,63 @@ struct null_dev_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int      null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
-                  FAR struct audio_caps_s *caps);
+static int   null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
+                          FAR struct audio_caps_s *caps);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_configure(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session, FAR const struct audio_caps_s *caps);
+static int   null_configure(FAR struct audio_lowerhalf_s *dev,
+                            FAR void *session,
+                            FAR const struct audio_caps_s *caps);
 #else
-static int      null_configure(FAR struct audio_lowerhalf_s *dev,
-                  FAR const struct audio_caps_s *caps);
+static int   null_configure(FAR struct audio_lowerhalf_s *dev,
+                            FAR const struct audio_caps_s *caps);
 #endif
-static int      null_shutdown(FAR struct audio_lowerhalf_s *dev);
-static void    *null_workerthread(pthread_addr_t pvarg);
+static int   null_shutdown(FAR struct audio_lowerhalf_s *dev);
+static void *null_workerthread(pthread_addr_t pvarg);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_start(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session);
+static int   null_start(FAR struct audio_lowerhalf_s *dev,
+                        FAR void *session);
 #else
-static int      null_start(FAR struct audio_lowerhalf_s *dev);
+static int   null_start(FAR struct audio_lowerhalf_s *dev);
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_STOP
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_stop(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session);
+static int   null_stop(FAR struct audio_lowerhalf_s *dev,
+                       FAR void *session);
 #else
-static int      null_stop(FAR struct audio_lowerhalf_s *dev);
+static int   null_stop(FAR struct audio_lowerhalf_s *dev);
 #endif
 #endif
 #ifndef CONFIG_AUDIO_EXCLUDE_PAUSE_RESUME
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_pause(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session);
-static int      null_resume(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session);
+static int   null_pause(FAR struct audio_lowerhalf_s *dev,
+                        FAR void *session);
+static int   null_resume(FAR struct audio_lowerhalf_s *dev,
+                         FAR void *session);
 #else
-static int      null_pause(FAR struct audio_lowerhalf_s *dev);
-static int      null_resume(FAR struct audio_lowerhalf_s *dev);
+static int   null_pause(FAR struct audio_lowerhalf_s *dev);
+static int   null_resume(FAR struct audio_lowerhalf_s *dev);
 #endif
 #endif
-static int      null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
-                  FAR struct ap_buffer_s *apb);
-static int      null_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
-                  FAR struct ap_buffer_s *apb);
-static int      null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
-                  unsigned long arg);
+static int   null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
+                                FAR struct ap_buffer_s *apb);
+static int   null_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
+                               FAR struct ap_buffer_s *apb);
+static int   null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
+                        unsigned long arg);
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_reserve(FAR struct audio_lowerhalf_s *dev,
-                  FAR void **session);
+static int   null_reserve(FAR struct audio_lowerhalf_s *dev,
+                          FAR void **session);
 #else
-static int      null_reserve(FAR struct audio_lowerhalf_s *dev);
+static int   null_reserve(FAR struct audio_lowerhalf_s *dev);
 #endif
 #ifdef CONFIG_AUDIO_MULTI_SESSION
-static int      null_release(FAR struct audio_lowerhalf_s *dev,
-                  FAR void *session);
+static int   null_release(FAR struct audio_lowerhalf_s *dev,
+                          FAR void *session);
 #else
-static int      null_release(FAR struct audio_lowerhalf_s *dev);
+static int   null_release(FAR struct audio_lowerhalf_s *dev);
 #endif
-static int      null_sleep(FAR struct audio_lowerhalf_s *dev,
-                           FAR struct ap_buffer_s *apb);
+static int   null_sleep(FAR struct audio_lowerhalf_s *dev,
+                        FAR struct ap_buffer_s *apb);
 
 /****************************************************************************
  * Private Data
@@ -206,7 +207,7 @@ static int null_sleep(FAR struct audio_lowerhalf_s *dev,
  ****************************************************************************/
 
 static int null_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
-                          FAR struct audio_caps_s *caps)
+                        FAR struct audio_caps_s *caps)
 {
   audinfo("type=%d\n", type);
 
@@ -699,7 +700,7 @@ static int null_resume(FAR struct audio_lowerhalf_s *dev)
  ****************************************************************************/
 
 static int null_enqueuebuffer(FAR struct audio_lowerhalf_s *dev,
-                                FAR struct ap_buffer_s *apb)
+                              FAR struct ap_buffer_s *apb)
 {
   FAR struct null_dev_s *priv = (FAR struct null_dev_s *)dev;
   struct audio_msg_s msg;
@@ -747,7 +748,7 @@ static int null_cancelbuffer(FAR struct audio_lowerhalf_s *dev,
  ****************************************************************************/
 
 static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
-                        unsigned long arg)
+                      unsigned long arg)
 {
   int ret = OK;
 #ifdef CONFIG_AUDIO_DRIVER_SPECIFIC_BUFFERS
@@ -801,7 +802,7 @@ static int null_ioctl(FAR struct audio_lowerhalf_s *dev, int cmd,
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int null_reserve(FAR struct audio_lowerhalf_s *dev,
-                          FAR void **session)
+                        FAR void **session)
 #else
 static int null_reserve(FAR struct audio_lowerhalf_s *dev)
 #endif
@@ -819,7 +820,7 @@ static int null_reserve(FAR struct audio_lowerhalf_s *dev)
 
 #ifdef CONFIG_AUDIO_MULTI_SESSION
 static int null_release(FAR struct audio_lowerhalf_s *dev,
-                          FAR void *session)
+                        FAR void *session)
 #else
 static int null_release(FAR struct audio_lowerhalf_s *dev)
 #endif

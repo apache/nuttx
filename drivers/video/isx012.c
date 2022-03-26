@@ -614,14 +614,14 @@ static uint8_t g_isx012_iso_regval[] =
 
 static struct imgsensor_ops_s g_isx012_ops =
 {
-  .init                   = isx012_init,
-  .uninit                 = isx012_uninit,
-  .validate_frame_setting = isx012_validate_frame_setting,
-  .start_capture          = isx012_start_capture,
-  .stop_capture           = isx012_stop_capture,
-  .get_supported_value    = isx012_get_supported_value,
-  .get_value              = isx012_get_value,
-  .set_value              = isx012_set_value,
+  isx012_init,                          /* init */
+  isx012_uninit,                        /* uninit */
+  isx012_validate_frame_setting,        /* validate_frame_setting */
+  isx012_start_capture,                 /* start_capture */
+  isx012_stop_capture,                  /* stop_capture */
+  isx012_get_supported_value,           /* get_supported_value */
+  isx012_get_value,                     /* get_value */
+  isx012_set_value                      /* set_value */
 };
 
 /****************************************************************************

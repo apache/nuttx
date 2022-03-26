@@ -60,9 +60,10 @@ static uint32_t g_btnnum;
 
 static const struct btn_lowerhalf_s g_btnlower =
 {
-  .bl_supported  = btn_supported,
-  .bl_buttons    = btn_buttons,
-  .bl_enable     = btn_enable,
+  btn_supported,        /* bl_supported */
+  btn_buttons,          /* bl_buttons */
+  btn_enable,           /* bl_enable */
+  NULL                  /* bl_write */
 };
 
 /* Current interrupt handler and argument */
