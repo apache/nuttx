@@ -107,16 +107,16 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
 
-  csrr s0, mhartid
+  csrr       s0, mhartid
 
   /* Switch to interrupt stack */
 #if IRQ_NSTACKS > 1
-  li t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-  mul t0, s0, t0
-  la s0, g_intstacktop
-  sub sp, s0, t0
+  li         t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
+  mul        t0, s0, t0
+  la         s0, g_intstacktop
+  sub        sp, s0, t0
 #else
-  la sp, g_intstacktop
+  la         sp, g_intstacktop
 #endif
 
   /* Call interrupt handler in C */
