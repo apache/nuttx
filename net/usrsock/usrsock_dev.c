@@ -222,7 +222,7 @@ static ssize_t iovec_do(FAR void *srcdst, size_t srcdstlen,
         }
     }
 
-  return total;
+  return total == 0 && iovcnt == 0 ? -1: total;
 }
 
 /****************************************************************************
