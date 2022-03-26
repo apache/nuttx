@@ -541,10 +541,10 @@ void up_timer_initialize(void)
   g_tickless.overflow  = 0;
 
   tmrinfo("timer=%d channel=%d frequency=%lu Hz\n",
-           g_tickless.timer, g_tickless.channel, g_tickless.frequency);
+          g_tickless.timer, g_tickless.channel, g_tickless.frequency);
 
   g_tickless.tch = stm32_tim_init(g_tickless.timer);
-  if (!g_tickless.tch)
+  if (g_tickless.tch == NULL)
     {
       tmrerr("ERROR: Failed to allocate TIM%d\n", g_tickless.timer);
       DEBUGASSERT(0);
@@ -640,7 +640,7 @@ int up_timer_gettime(FAR struct timespec *ts)
 
   /* Timer not initialized yet, return zero */
 
-  if (g_tickless.tch == 0)
+  if (g_tickless.tch == NULL)
     {
       ts->tv_nsec = 0;
       ts->tv_sec  = 0;
@@ -817,7 +817,7 @@ int up_timer_cancel(FAR struct timespec *ts)
        * (as when pre-emption is enabled and disabled).
        */
 
-      if (ts)
+      if (ts != NULL)
         {
           ts->tv_sec  = 0;
           ts->tv_nsec = 0;
