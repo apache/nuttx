@@ -150,19 +150,16 @@ static void governor_update(int domain, int16_t accum);
 
 struct pm_activity_governor_s g_pm_activity_governor =
 {
-  .pmcount =
   {
     CONFIG_PM_GOVERNOR_IDLEENTER_COUNT,
     CONFIG_PM_GOVERNOR_STANDBYENTER_COUNT,
     CONFIG_PM_GOVERNOR_SLEEPENTER_COUNT
   },
-  .pmenterthresh =
   {
     CONFIG_PM_GOVERNOR_IDLEENTER_THRESH,
     CONFIG_PM_GOVERNOR_STANDBYENTER_THRESH,
     CONFIG_PM_GOVERNOR_SLEEPENTER_THRESH
   },
-  .pmexitthresh =
   {
     CONFIG_PM_GOVERNOR_IDLEEXIT_THRESH,
     CONFIG_PM_GOVERNOR_STANDBYEXIT_THRESH,
@@ -170,7 +167,6 @@ struct pm_activity_governor_s g_pm_activity_governor =
   },
 
 #if CONFIG_PM_GOVERNOR_MEMORY > 1
-  .pmcoeffs =
   {
     CONFIG_PM_GOVERNOR_COEF1
 #if CONFIG_PM_GOVERNOR_MEMORY > 2
@@ -192,12 +188,14 @@ struct pm_activity_governor_s g_pm_activity_governor =
 #endif
 };
 
-struct pm_governor_s g_pmgovernor =
+static struct pm_governor_s g_pmgovernor =
 {
-  .initialize   = governor_initialize,
-  .checkstate   = governor_checkstate,
-  .statechanged = governor_statechanged,
-  .activity     = governor_activity
+  governor_initialize,   /* initialize */
+  NULL,                  /* deinitialize */
+  governor_statechanged, /* statechanged */
+  governor_checkstate,   /* checkstate */
+  governor_activity,     /* activity */
+  NULL                   /* priv */
 };
 
 /****************************************************************************

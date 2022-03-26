@@ -110,18 +110,18 @@ static struct mcp48xx_dev_s g_devpriv;
 
 static const struct dac_ops_s g_dacops =
 {
-  .ao_reset    = mcp48xx_reset,
-  .ao_setup    = mcp48xx_setup,
-  .ao_shutdown = mcp48xx_shutdown,
-  .ao_txint    = mcp48xx_txint,
-  .ao_send     = mcp48xx_send,
-  .ao_ioctl    = mcp48xx_ioctl,
+  mcp48xx_reset,        /* ao_reset */
+  mcp48xx_setup,        /* ao_setup */
+  mcp48xx_shutdown,     /* ao_shutdown */
+  mcp48xx_txint,        /* ao_txint */
+  mcp48xx_send,         /* ao_send */
+  mcp48xx_ioctl         /* ao_ioctl */
 };
 
 static struct dac_dev_s g_dacdev =
 {
-  .ad_ops      = &g_dacops,
-  .ad_priv     = &g_devpriv,
+  &g_dacops,    /* ad_ops */
+  &g_devpriv    /* ad_priv */
 };
 
 /****************************************************************************

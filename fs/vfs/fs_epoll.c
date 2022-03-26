@@ -85,12 +85,14 @@ static const struct file_operations g_epoll_ops =
 
 static struct inode g_epoll_inode =
 {
-  .i_crefs = 1,
-  .i_flags = FSNODEFLAG_TYPE_DRIVER,
-  .u =
-    {
-      .i_ops = &g_epoll_ops,
-    },
+  NULL,                   /* i_parent */
+  NULL,                   /* i_peer */
+  NULL,                   /* i_child */
+  1,                      /* i_crefs */
+  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
+  {
+    &g_epoll_ops          /* u */
+  }
 };
 
 /****************************************************************************

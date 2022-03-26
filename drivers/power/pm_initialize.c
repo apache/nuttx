@@ -50,7 +50,7 @@
 
 struct pm_global_s g_pmglobals =
 {
-  .regsem = SEM_INITIALIZER(1)
+  SEM_INITIALIZER(1)
 };
 
 /****************************************************************************

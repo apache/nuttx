@@ -178,6 +178,11 @@ struct adc_ops_s
 
 struct adc_dev_s
 {
+  /* Fields provided by lower half ADC logic */
+
+  FAR const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
+  FAR void                   *ad_priv;       /* Used by the arch-specific logic */
+
 #ifdef CONFIG_ADC
   /* Fields managed by common upper half ADC logic */
 
@@ -195,11 +200,6 @@ struct adc_dev_s
 
   struct pollfd *fds[CONFIG_ADC_NPOLLWAITERS];
 #endif /* CONFIG_ADC */
-
-  /* Fields provided by lower half ADC logic */
-
-  FAR const struct adc_ops_s *ad_ops;        /* Arch-specific operations */
-  FAR void                   *ad_priv;       /* Used by the arch-specific logic */
 };
 
 /****************************************************************************
