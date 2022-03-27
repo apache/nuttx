@@ -670,7 +670,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
 
   if (buf->st_size < 0)
     {
-      return buf->st_size;
+      return littlefs_convert_result(buf->st_size);
     }
 
   buf->st_mode    = S_IRWXO | S_IRWXG | S_IRWXU | S_IFREG;
