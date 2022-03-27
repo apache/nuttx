@@ -27,15 +27,14 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
 #include <debug.h>
 #include <assert.h>
 #include <errno.h>
 
-#include <nuttx/arch.h>
 #include <nuttx/random.h>
 #include <nuttx/board.h>
-
+#include <nuttx/clock.h>
+#include <nuttx/semaphore.h>
 #include <nuttx/crypto/blake2s.h>
 
 /****************************************************************************
