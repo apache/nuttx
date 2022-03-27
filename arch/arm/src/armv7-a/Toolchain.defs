@@ -102,6 +102,10 @@ else
   ARCHFPUFLAGS += -mfloat-abi=soft
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHCPUFLAGS += -fsanitize=kernel-address
+endif
+
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
 else
