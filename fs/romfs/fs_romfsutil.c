@@ -314,8 +314,7 @@ static inline int romfs_searchdir(FAR struct romfs_mountpt_s *rm,
   FAR struct romfs_nodeinfo_s **cnodeinfo;
 
   cnodeinfo = bsearch(entryname, nodeinfo->rn_child, nodeinfo->rn_count,
-                 sizeof(struct romfs_nodeinfo_s *),
-                 romfs_nodeinfo_search);
+                      sizeof(*nodeinfo->rn_child), romfs_nodeinfo_search);
   if (cnodeinfo)
     {
       memcpy(nodeinfo, *cnodeinfo, sizeof(*nodeinfo));
@@ -441,9 +440,8 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
             {
               FAR void *tmp;
 
-              tmp = kmm_realloc(nodeinfo->rn_child,
-                                (num + NODEINFO_NINCR) *
-                                sizeof(struct romfs_nodeinfo_s *));
+              tmp = kmm_realloc(nodeinfo->rn_child, (num + NODEINFO_NINCR) *
+                                sizeof(*nodeinfo->rn_child));
               if (tmp == NULL)
                 {
                   return -ENOMEM;
@@ -451,7 +449,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
 
               nodeinfo->rn_child = tmp;
               memset(nodeinfo->rn_child + num, 0, NODEINFO_NINCR *
-                     sizeof(struct romfs_nodeinfo_s *));
+                     sizeof(*nodeinfo->rn_child));
               num += NODEINFO_NINCR;
             }
 
@@ -478,8 +476,7 @@ static int romfs_cachenode(FAR struct romfs_mountpt_s *rm,
   if (nodeinfo->rn_count > 1)
     {
       qsort(nodeinfo->rn_child, nodeinfo->rn_count,
-            sizeof(struct romfs_nodeinfo_s *),
-            romfs_nodeinfo_compare);
+            sizeof(*nodeinfo->rn_child), romfs_nodeinfo_compare);
     }
 
   return 0;
