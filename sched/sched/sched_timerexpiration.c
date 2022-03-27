@@ -205,8 +205,8 @@ static uint32_t nxsched_cpu_scheduler(int cpu, uint32_t ticks,
        * committed to updating the scheduler for this TCB.
        */
 
-      sporadic->sched_time.tv_sec  = g_sched_time.tv_sec;
-      sporadic->sched_time.tv_nsec = g_sched_time.tv_nsec;
+      sporadic->eventtime = SEC2TICK(g_sched_time.tv_sec) +
+                            NSEC2TICK(g_sched_time.tv_nsec);
 
       /* Yes, check if the currently executing task has exceeded its
        * budget.
