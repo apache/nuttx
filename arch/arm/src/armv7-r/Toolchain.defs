@@ -90,6 +90,10 @@ ifeq ($(CONFIG_ENDIAN_BIG),y)
   ARCHCPUFLAGS += -mbig-endian
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHCPUFLAGS += -fsanitize=kernel-address
+endif
+
 ifeq ($(CONFIG_ENDIAN_BIG),y)
   TARGET_ARCH := armeb
 else

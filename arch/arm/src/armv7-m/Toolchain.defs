@@ -130,6 +130,10 @@ else
 endif
 endif
 
+ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHCPUFLAGS += -fsanitize=kernel-address
+endif
+
 # Generic GNU EABI toolchain
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
