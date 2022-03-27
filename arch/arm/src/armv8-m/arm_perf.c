@@ -25,7 +25,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 
-#include "arm_arch.h"
+#include "arm_internal.h"
 #include "dwt.h"
 #include "itm.h"
 #include "nvic.h"
