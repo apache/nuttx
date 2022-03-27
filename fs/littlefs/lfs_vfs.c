@@ -745,7 +745,7 @@ static int littlefs_fstat(FAR const struct file *filep, FAR struct stat *buf)
   buf->st_size = lfs_file_size(&fs->lfs, &priv->file);
   if (buf->st_size < 0)
     {
-      ret = buf->st_size;
+      ret = littlefs_convert_result(buf->st_size);
       goto errout;
     }
 
