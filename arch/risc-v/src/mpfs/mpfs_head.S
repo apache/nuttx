@@ -116,19 +116,14 @@ __start:
 
   sfence.vma x0, x0
 
-  /* enable FPU and accelerator if present, setting ignored on E51
+  /* Enable accelerator if present, setting ignored on E51
    * 15,16 = MSTATUS_XS, 17,18 = MSTATUS_MPRV
    * not defined on riscv-v/include/csr.h
    */
 
-  /*  li      t0, MSTATUS_FS_DIRTY | (1 << 15) | (1 << 16) | (1 << 17) | (1 << 18) */
-  li t0, 0x00006000 | 0x00018000 /* MSTATUS_FS | MSTATUS_XS */
+  /*  li      t0, (1 << 15) | (1 << 16) | (1 << 17) | (1 << 18) */
+  li t0, 0x00018000 /* MSTATUS_XS */
   csrs    mstatus, t0
-
-  /* Init floating point control register to zero */
-#ifdef __riscv_flen
-    fscsr x0
-#endif
 
 .skip_e51:
 
