@@ -55,10 +55,6 @@ else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
-ifeq ($(CONFIG_MM_KASAN),y)
-  MAXOPTIMIZATION += -fsanitize=kernel-address
-endif
-
 # Default toolchain
 ifeq ($(CONFIG_XTENSA_TOOLCHAIN_XCC), y)
   CC = $(CROSSDEV)xcc
