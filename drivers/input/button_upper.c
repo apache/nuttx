@@ -795,7 +795,9 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
       fds->priv = NULL;
     }
 
+#ifdef CONFIG_DEBUG_FEATURES
 errout_with_dusem:
+#endif
   btn_enable(priv);
   btn_givesem(&priv->bu_exclsem);
   return ret;
