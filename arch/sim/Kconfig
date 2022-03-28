@@ -282,7 +282,7 @@ config SIM_FBWIDTH
 	int "Display width"
 	default 320
 	---help---
-		Simulated width of the display.  Default: 320 or 480
+		Simulated width of the display.  Default: 320
 
 config SIM_FBBPP
 	int "Pixel depth in bits"
