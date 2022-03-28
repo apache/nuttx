@@ -82,9 +82,9 @@
 /* IRQ bit and IRQ mask */
 
 #ifdef CONFIG_ARCH_RV32
-#  define RISCV_IRQ_BIT           (1 << 31)
+#  define RISCV_IRQ_BIT           (UINT32_C(1) << 31)
 #else
-#  define RISCV_IRQ_BIT           (1 << 63)
+#  define RISCV_IRQ_BIT           (UINT64_C(1) << 63)
 #endif
 
 #define RISCV_IRQ_MASK            (~RISCV_IRQ_BIT)
