@@ -293,6 +293,9 @@ struct nt38350_dev_s
 #ifdef CONFIG_NVT_OFFLINE_LOG
   uint8_t point_xdata_temp[NVT_POINT_DATA_EXBUF_LEN];
 #endif
+#ifdef CONFIG_NT38350_NEED_UPGRADE_FW
+  struct work_s                 fwwork;
+#endif
 };
 
 /***************************************************************************
@@ -2510,19 +2513,19 @@ static int nvt_boot_update_firmware(FAR struct nt38350_dev_s *priv)
 
   if (ret < 0)
     {
-      iinfo("read firmware checksum failed\n");
+      iwarn("read firmware checksum failed\n");
       nvt_update_firmware(priv, fw_data);
     }
   else if ((ret == 0) && (nvt_check_fw_ver(priv, fw_data) == 0))
     {
   /* (fw checksum not match) && (bin fw version >= ic fw version) */
 
-      iinfo("firmware version not match\n");
+      iwarn("firmware version not match\n");
       ret = nvt_update_firmware(priv, fw_data);
     }
   else if (nvt_check_flash_end_flag(priv))
     {
-      iinfo("check flash end flag failed\n");
+      iwarn("check flash end flag failed\n");
       ret = nvt_update_firmware(priv, fw_data);
     }
   else
@@ -4346,6 +4349,33 @@ static int nt38350_control(FAR struct touch_lowerhalf_s *lower,
   return ret;
 }
 
+#ifdef CONFIG_NT38350_NEED_UPGRADE_FW
+
+/***************************************************************************
+ * Name: nvt_update_firmware_work
+ ***************************************************************************/
+
+static void nvt_update_firmware_work(FAR void *arg)
+{
+  FAR struct nt38350_dev_s *priv = (FAR struct nt38350_dev_s *)arg;
+
+  /* let touch screen stay in normal work mode, not power off */
+
+#if CONFIG_PM
+  pm_stay(PM_DOMAIN_OLED_TP, PM_NORMAL);
+#endif
+
+  nvt_boot_update_firmware(priv);
+
+  /* after update process, relax pm state */
+
+#if CONFIG_PM
+  pm_relax(PM_DOMAIN_OLED_TP, PM_NORMAL);
+#endif
+}
+
+#endif
+
 /***************************************************************************
  * Public Functions
  ***************************************************************************/
@@ -4408,12 +4438,11 @@ int nt38350_register(FAR struct nt38350_config_s *config,
   priv->max_touch_num = NVT_TOUCH_MAX_FINGER_NUM;
 
 #ifdef CONFIG_NT38350_NEED_UPGRADE_FW
-  ret = nvt_boot_update_firmware(priv);
-  if (ret)
+  ret = work_queue(HPWORK, &priv->fwwork, nvt_update_firmware_work,
+                   priv, 5000);
+  if (ret != OK)
     {
-      ierr("ERROR: Failed to nvt_boot_update_firmware\n");
-      ret = -ENODEV;
-      goto errout_with_priv;
+      ierr("ERROR: Failed to queue work: %d\n", ret);
     }
 #endif
 
