@@ -63,6 +63,10 @@ void qemu_rv_start(int mhartid)
 {
   uint32_t *dest;
 
+  /* Configure FPU */
+
+  riscv_fpuconfig();
+
   if (mhartid > 0)
     {
       goto cpux;

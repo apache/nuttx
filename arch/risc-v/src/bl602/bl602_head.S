@@ -126,20 +126,6 @@ bl602_entry_zero_wifi_bss_loop:
     bltu a0, a1, bl602_entry_zero_wifi_bss_loop
 bl602_entry_zero_wifi_bss_end:
 
-#ifndef __riscv_float_abi_soft
-
-    /* Enable FPU */
-
-    li t0, MSTATUS_FS
-    csrs mstatus, t0
-    csrr t1, mstatus
-    and t1, t1, t0
-    beqz t1, bl602_entry_enable_fpu_end
-    fssr x0
-
-bl602_entry_enable_fpu_end:
-#endif
-
     auipc ra, 0
     addi sp, sp, -16
     sw ra, 8(sp)
