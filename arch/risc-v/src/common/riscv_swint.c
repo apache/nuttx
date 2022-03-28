@@ -214,8 +214,8 @@ int riscv_swint(int irq, void *context, void *arg)
        *   A1 = restoreregs
        *
        * In this case, we simply need to set CURRENT_REGS to restore register
-       * area referenced in the saved R1. context == CURRENT_REGS is the
-       * normal exception return.  By setting CURRENT_REGS = context[R1], we
+       * area referenced in the saved A1. context == CURRENT_REGS is the
+       * normal exception return.  By setting CURRENT_REGS = context[A1], we
        * force the return to the saved context referenced in $a1.
        */
 
@@ -364,9 +364,9 @@ int riscv_swint(int irq, void *context, void *arg)
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = SYS_pthread_start
-       *   R1 = entrypt
-       *   R2 = arg
+       *   A0 = SYS_pthread_start
+       *   A1 = entrypt
+       *   A2 = arg
        */
 
 #if !defined(CONFIG_BUILD_FLAT) && !defined(CONFIG_DISABLE_PTHREAD)
@@ -396,11 +396,11 @@ int riscv_swint(int irq, void *context, void *arg)
        *
        * At this point, the following values are saved in context:
        *
-       *   R0 = SYS_signal_handler
-       *   R1 = sighand
-       *   R2 = signo
-       *   R3 = info
-       *   R4 = ucontext
+       *   A0 = SYS_signal_handler
+       *   A1 = sighand
+       *   A2 = signo
+       *   A3 = info
+       *   A4 = ucontext
        */
 
 #ifndef CONFIG_BUILD_FLAT

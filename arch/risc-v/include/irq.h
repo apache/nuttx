@@ -492,7 +492,7 @@ struct xcptcontext
   /* These additional register save locations are used to implement the
    * signal delivery trampoline.
    *
-   * REVISIT:  Because there is only one copy of these save areas,
+   * REVISIT:  Because there is only a reference of these save areas,
    * only a single signal handler can be active.  This precludes
    * queuing of signal actions.  As a result, signals received while
    * another signal handler is executing will be ignored!
