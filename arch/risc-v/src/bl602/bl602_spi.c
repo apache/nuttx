@@ -782,6 +782,15 @@ static uint32_t bl602_spi_poll_send(struct bl602_spi_priv_s *priv,
   uint32_t val;
   uint32_t tmp_val = 0;
 
+  /* spi enable master */
+
+  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_S_EN, SPI_CFG_CR_M_EN);
+
+  /* spi fifo clear  */
+
+  modifyreg32(BL602_SPI_FIFO_CFG_0, SPI_FIFO_CFG_0_RX_CLR
+              | SPI_FIFO_CFG_0_TX_CLR, 0);
+
   /* write data to tx fifo */
 
   putreg32(wd, BL602_SPI_FIFO_WDATA);
@@ -889,15 +898,6 @@ static void bl602_spi_poll_exchange(struct bl602_spi_priv_s *priv,
   int i;
   uint32_t w_wd = 0xffff;
   uint32_t r_wd;
-
-  /* spi enable master */
-
-  modifyreg32(BL602_SPI_CFG, SPI_CFG_CR_S_EN, SPI_CFG_CR_M_EN);
-
-  /* spi fifo clear  */
-
-  modifyreg32(BL602_SPI_FIFO_CFG_0, SPI_FIFO_CFG_0_RX_CLR
-              | SPI_FIFO_CFG_0_TX_CLR, 0);
 
   for (i = 0; i < nwords; i++)
     {
