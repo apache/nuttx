@@ -28,7 +28,7 @@ OUTPUT_ARCH("riscv")
 
 __ksram_start = ORIGIN(sram);
 __ksram_size = LENGTH(sram);
-__ksram_end = ORIGIN(ksram) + LENGTH(ksram);
+__ksram_end = ORIGIN(sram) + LENGTH(sram);
 
 ENTRY(_stext)
 EXTERN(_vectors)
