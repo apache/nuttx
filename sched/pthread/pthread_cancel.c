@@ -47,7 +47,7 @@ int pthread_cancel(pthread_t thread)
 
   /* First, make sure that the handle references a valid thread */
 
-  if (thread == 0)
+  if ((pid_t)thread == IDLE_PROCESS_ID)
     {
       /* pid == 0 is the IDLE task (in a single CPU configuration).  Callers
        * cannot cancel the IDLE task.

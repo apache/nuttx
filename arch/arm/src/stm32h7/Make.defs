@@ -36,6 +36,10 @@ CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_udelay.c arm_unblocktask.c
 CMN_CSRCS += arm_usestack.c arm_vfork.c arm_switchcontext.c arm_puts.c
 CMN_CSRCS += arm_tcbinfo.c
 
+ifeq ($(CONFIG_ARMV7M_SYSTICK),y)
+CMN_CSRCS += arm_systick.c
+endif
+
 # Configuration-dependent common files
 
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
@@ -86,7 +90,9 @@ CHIP_CSRCS  = stm32_allocateheap.c stm32_exti_gpio.c stm32_gpio.c stm32_irq.c
 CHIP_CSRCS += stm32_start.c stm32_rcc.c stm32_lowputc.c stm32_serial.c
 CHIP_CSRCS += stm32_uid.c
 
-ifneq ($(CONFIG_SCHED_TICKLESS),y)
+ifeq ($(CONFIG_SCHED_TICKLESS),y)
+CHIP_CSRCS += stm32_tickless.c
+else
 CHIP_CSRCS += stm32_timerisr.c
 endif
 

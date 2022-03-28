@@ -343,7 +343,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
                 addr, _get_val((uint16_t *)addr),
                 sym, sym->st_value);
 
-          offset = (long)sym->st_value - (long)addr;
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
 
           long imm_hi;
           long imm_lo;
@@ -386,7 +386,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           /* P.23 Conditinal Branches : B type (imm=12bit) */
 
-          offset = (long)sym->st_value - (long)addr;
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           uint32_t val = _get_val((uint16_t *)addr) & 0xfe000f80;
 
           /* NOTE: we assume that a compiler adds an immediate value */
@@ -409,7 +409,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           /* P.19 LUI */
 
-          offset = (long)sym->st_value;
+          offset = (long)sym->st_value + (long)rel->r_addend;
           uint32_t insn = _get_val((uint16_t *)addr);
 
           ASSERT(OPCODE_LUI == (insn & RVI_OPCODE_MASK));
@@ -433,7 +433,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           /* ADDI, FLW, LD, ... : I-type */
 
-          offset = (long)sym->st_value;
+          offset = (long)sym->st_value + (long)rel->r_addend;
           uint32_t insn = _get_val((uint16_t *)addr);
 
           long imm_hi;
@@ -458,7 +458,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
            * may not generates these two instructions continuously.
            */
 
-          offset = (long)sym->st_value;
+          offset = (long)sym->st_value + (long)rel->r_addend;
 
           long imm_hi;
           long imm_lo;
@@ -484,14 +484,10 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           /* P.111 Table 16.6 : Instruction listings for RVC */
 
-          offset = ((long)sym->st_value - (long)addr);
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           ASSERT(-2048 <= offset && offset <= 2047);
 
           uint16_t val = (*(uint16_t *)addr) & 0x1ffc;
-
-          /* NOTE: we assume that a compiler adds an immediate value */
-
-          ASSERT(offset && val);
 
           binfo("offset for C.J=%ld (0x%lx) (val=0x%04x) already set!\n",
                 offset, offset, val);
@@ -508,7 +504,7 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
 
           /* P.111 Table 16.6 : Instruction listings for RVC */
 
-          offset = ((long)sym->st_value - (long)addr);
+          offset = (long)sym->st_value + (long)rel->r_addend - (long)addr;
           ASSERT(-256 <= offset && offset <= 255);
 
           uint16_t val = (*(uint16_t *)addr) & 0x1c7c;
@@ -521,7 +517,26 @@ int up_relocateadd(FAR const Elf_Rela *rel, FAR const Elf_Sym *sym,
                 offset, offset, val);
         }
         break;
-
+      case R_RISCV_ADD32:
+        {
+          *(uint32_t *)addr += (uint32_t)(sym->st_value + rel->r_addend);
+        }
+        break;
+      case R_RISCV_ADD64:
+        {
+          *(uint64_t *)addr += (uint64_t)(sym->st_value + rel->r_addend);
+        }
+        break;
+      case R_RISCV_SUB32:
+        {
+          *(uint32_t *)addr -= (uint32_t)(sym->st_value + rel->r_addend);
+        }
+        break;
+      case R_RISCV_SUB64:
+        {
+          *(uint64_t *)addr -= (uint64_t)(sym->st_value + rel->r_addend);
+        }
+        break;
       default:
         berr("ERROR: Unsupported relocation: %ld\n",
              ARCH_ELF_RELTYPE(rel->r_info));

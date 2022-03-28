@@ -93,15 +93,6 @@
 #  define OUTPUT_FUNCTION_5 (OUTPUT_FUNCTION | FUNCTION_5)
 #  define OUTPUT_FUNCTION_6 (OUTPUT_FUNCTION | FUNCTION_6)
 
-/* Interrupt type used with esp32s3_gpioirqenable() */
-
-#define DISABLED          0x00
-#define RISING            0x01
-#define FALLING           0x02
-#define CHANGE            0x03
-#define ONLOW             0x04
-#define ONHIGH            0x05
-
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -111,7 +102,16 @@
 /* Must be big enough to hold the above encodings */
 
 typedef uint16_t gpio_pinattr_t;
-typedef uint8_t gpio_intrtype_t;
+
+typedef enum gpio_intrtype_e
+{
+  GPIO_INTR_DISABLE    = 0,     /* Disable GPIO interrupt       */
+  GPIO_INTR_POSEDGE    = 1,     /* Rising edge                  */
+  GPIO_INTR_NEGEDGE    = 2,     /* Falling edge                 */
+  GPIO_INTR_ANYEDGE    = 3,     /* Both rising and falling edge */
+  GPIO_INTR_LOW_LEVEL  = 4,     /* Input low level trigger      */
+  GPIO_INTR_HIGH_LEVEL = 5      /* Input high level trigger     */
+} gpio_intrtype_t;
 
 /****************************************************************************
  * Public Data
@@ -129,6 +129,27 @@ extern "C"
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqinitialize
+ *
+ * Description:
+ *   Initialize logic to support a second level of interrupt decoding for
+ *   GPIO pins.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqinitialize(void);
+#else
+#  define esp32s3_gpioirqinitialize()
+#endif
 
 /****************************************************************************
  * Name: esp32s3_configgpio
@@ -155,11 +176,87 @@ extern "C"
 int esp32s3_configgpio(uint32_t pin, gpio_pinattr_t attr);
 
 /****************************************************************************
+ * Name: esp32s3_gpiowrite
+ *
+ * Description:
+ *   Write one or zero to the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be written.
+ *   value         - Value to be written to the GPIO pin. True will output
+ *                   1 (one) to the GPIO, while false will output 0 (zero).
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+void esp32s3_gpiowrite(int pin, bool value);
+
+/****************************************************************************
+ * Name: esp32s3_gpioread
+ *
+ * Description:
+ *   Read one or zero from the selected GPIO pin.
+ *
+ * Input Parameters:
+ *   pin           - GPIO pin to be read.
+ *
+ * Returned Value:
+ *   True in case the read value is 1 (one). If 0 (zero), then false will be
+ *   returned.
+ *
+ ****************************************************************************/
+
+bool esp32s3_gpioread(int pin);
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqenable
+ *
+ * Description:
+ *   Enable the interrupt for the specified GPIO IRQ.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *   intrtype      - Interrupt type, select from gpio_intrtype_t.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqenable(int irq, gpio_intrtype_t intrtype);
+#else
+#  define esp32s3_gpioirqenable(irq,intrtype)
+#endif
+
+/****************************************************************************
+ * Name: esp32s3_gpioirqdisable
+ *
+ * Description:
+ *   Disable the interrupt for the specified GPIO IRQ.
+ *
+ * Input Parameters:
+ *   irq           - Identifier of the interrupt request.
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ESP32S3_GPIO_IRQ
+void esp32s3_gpioirqdisable(int irq);
+#else
+#  define esp32s3_gpioirqdisable(irq)
+#endif
+
+/****************************************************************************
  * Name: esp32s3_gpio_matrix_in
  *
  * Description:
  *   Set GPIO input to a signal.
- *   NOTE: one GPIO can input to several signals.
+ *   NOTE: one GPIO can receive inputs from several signals.
  *
  * Input Parameters:
  *   pin           - GPIO pin to be configured.

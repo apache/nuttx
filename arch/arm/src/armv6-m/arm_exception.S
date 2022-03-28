@@ -167,10 +167,7 @@ exception_common:
 	 */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
-	setintstack     r7, r6					/* SP = IRQ stack top */
-	push		{r1}					/* Save the MSP on the interrupt stack */
-	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
-	pop		{r1}					/* Recover R1=main stack pointer */
+	setintstack	r7, r6					/* SP = IRQ stack top */
 #else
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
@@ -183,64 +180,30 @@ exception_common:
 	 * also the sp should be restore after arm_doirq()
 	 */
 
-	sub		r1, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
-
-	msr		msp, r1					/* We are using the main stack pointer */
-
-	add		r1, r1, #XCPTCONTEXT_SIZE		/* Restore signal context */
+	mov		r2, r1					/* Reserve signal context */
+	sub		r2, r2, #XCPTCONTEXT_SIZE
+	msr		msp, r2					/* We are using the main stack pointer */
+#endif
 
 	bl		arm_doirq				/* R0=IRQ, R1=register save area on stack */
 
-	mrs		r1, msp					/* Recover R1=main stack pointer */
-#endif
-
 	/* On return from arm_doirq, R0 will hold a pointer to register context
-	 * array to use for the interrupt return.  If that return value is the same
-	 * as current stack pointer, then things are relatively easy.
-	 */
-
-	cmp		r0, r1					/* Context switch? */
-	beq		3f					/* Branch if no context switch */
-
-	/* We are returning with a pending context switch.  This case is different
-	 * because in this case, the register save structure does not lie on the
-	 * stack but, rather within a TCB structure.  We'll have to copy some
-	 * values to the stack.
-	 */
-
-	/* Copy the hardware-saved context to the new stack */
-
-	mov		r2, #SW_XCPT_SIZE		/* R2=Size of software-saved portion of the context array */
-	add		r1, r0, r2			/* R1=Address of HW save area in reg array */
-	ldr		r2, [r0, #(4*REG_SP)]		/* R2=Value of SP before the interrupt */
-	sub		r2, #HW_XCPT_SIZE		/* R2=Address of HW save area on the return stack */
-	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
-	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
-	ldmia		r1!, {r4-r7}			/* Fetch four registers from the HW save area */
-	stmia		r2!, {r4-r7}			/* Copy four registers to the return stack */
-
-	/* Restore the register contents */
-
-	mov		r1, r0
-
-3:
-	/* We are returning with no context switch.  We simply need to "unwind"
-	 * the same stack frame that we created at entry.
+	 * array to use for the interrupt return.
 	 */
 
 	/* Recover R8-R11 and EXEC_RETURN (5 registers) */
 
 	mov		r2, #(4*REG_R8)				/* R2=Offset to R8 storage */
-	add		r0, r1, r2				/* R0=Address of R8 storage */
+	add		r1, r0, r2				/* R1=Address of R8 storage */
 #ifdef CONFIG_BUILD_PROTECTED
-	ldmia		r0!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r1!, {r2-r6}				/* Recover R8-R11 and R14 (5 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
 	mov		r11, r5
 	mov		r14, r6					/* EXEC_RETURN */
 #else
-	ldmia		r0!, {r2-r5}				/* Recover R8-R11 and R14 (5 registers)*/
+	ldmia		r1!, {r2-r5}				/* Recover R8-R11 (4 registers)*/
 	mov		r8, r2					/* Move to position in high registers */
 	mov		r9, r3
 	mov		r10, r4
@@ -251,7 +214,7 @@ exception_common:
 	 * the stack pointer as it was on entry to the exception handler.
 	 */
 
-	ldmia		r1!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
+	ldmia		r0!, {r2-r7}				/* Recover R4-R7 + 2 temp values */
 	mov		r1, #HW_XCPT_SIZE			/* R1=Size of hardware-saved portion of the context array */
 	sub		r1, r2, r1				/* R1=Value of MSP/PSP on exception entry */
 
@@ -262,14 +225,14 @@ exception_common:
 #ifdef CONFIG_BUILD_PROTECTED
 	mov		r0, r14					/* Copy high register to low register */
 	lsl		r0, #(31 - EXC_RETURN_PROCESS_BITNO)	/* Move to bit 31 */
-	bmi		5f					/* Test bit 31 */
+	bmi		3f					/* Test bit 31 */
 	msr		msp, r1					/* R1=The main stack pointer */
-	b		6f
+	b		4f
 
-5:
+3:
 	msr		psp, r1					/* R1=The process stack pointer */
 
-6:
+4:
 #else
 	msr		msp, r1					/* R1=The main stack pointer */
 	ldr		r0, =EXC_RETURN_PRIVTHR			/* R0=EXC_RETURN to privileged mode */

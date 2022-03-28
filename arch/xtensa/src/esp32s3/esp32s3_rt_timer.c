@@ -72,7 +72,7 @@ static_assert(RT_TIMER_TASK_PRIORITY < CONFIG_SCHED_HPWORKPRIORITY,
 
 struct esp32s3_rt_priv_s
 {
-  int pid;                    /* PID of RT Timer kernel thread */
+  pid_t pid;                  /* PID of RT Timer kernel thread */
   int cpuint;                 /* CPU interrupt assigned to this timer */
   int core;                   /* Core that is taking care of the timer
                                * interrupts
@@ -91,7 +91,7 @@ struct esp32s3_rt_priv_s
 
 static struct esp32s3_rt_priv_s g_rt_priv =
 {
-  .pid    = -EINVAL,
+  .pid    = INVALID_PROCESS_ID,
   .cpuint = -ENOMEM,
   .core   = -ENODEV
 };
@@ -961,7 +961,7 @@ int esp32s3_rt_timer_init(void)
   list_initialize(&priv->runlist);
   list_initialize(&priv->toutlist);
 
-  priv->pid = pid;
+  priv->pid = (pid_t)pid;
 
   flags = spin_lock_irqsave(&priv->lock);
 
@@ -1044,10 +1044,10 @@ void esp32s3_rt_timer_deinit(void)
 
   spin_unlock_irqrestore(&priv->lock, flags);
 
-  if (priv->pid != -EINVAL)
+  if (priv->pid != INVALID_PROCESS_ID)
     {
       kthread_delete(priv->pid);
-      priv->pid = -EINVAL;
+      priv->pid = INVALID_PROCESS_ID;
     }
 
   nxsem_destroy(&priv->toutsem);

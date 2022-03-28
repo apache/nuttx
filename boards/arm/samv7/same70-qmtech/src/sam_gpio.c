@@ -279,9 +279,6 @@ static int gpint_enable(FAR struct gpio_dev_s *dev, bool enable)
 
 int sam_gpio_initialize(void)
 {
-#ifdef CONFIG_SAME70QMTECH_SN74HC595D_IOEXPANDER
-  FAR struct ioexpander_dev_s *ioe;
-#endif
   int pincount = 0;
   int i;
   int ret = 0;

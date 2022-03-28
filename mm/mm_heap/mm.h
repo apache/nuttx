@@ -93,17 +93,24 @@
 #ifdef CONFIG_DEBUG_MM
 #  define MM_MIN_SHIFT       (MM_MIN_SHIFT_ + 2)
 #  define MM_BACKTRACE_DEPTH 8
-#  define MM_ADD_BACKTRACE(ptr) \
+#  define MM_ADD_BACKTRACE(heap, ptr) \
      do \
        { \
          FAR struct mm_allocnode_s *tmp = (FAR struct mm_allocnode_s *)(ptr); \
          tmp->pid = getpid(); \
-         memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
-         backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+         if ((heap)->mm_procfs.backtrace) \
+           { \
+             memset(tmp->backtrace, 0, sizeof(tmp->backtrace)); \
+             backtrace(tmp->backtrace, MM_BACKTRACE_DEPTH); \
+           } \
+         else \
+           { \
+             tmp->backtrace[0] = 0; \
+           } \
        } \
      while (0)
 #else
-#  define MM_ADD_BACKTRACE(ptr)
+#  define MM_ADD_BACKTRACE(heap, ptr)
 #  define MM_MIN_SHIFT MM_MIN_SHIFT_
 #endif
 
@@ -160,7 +167,7 @@ typedef uint32_t mmsize_t;
 struct mm_allocnode_s
 {
 #ifdef CONFIG_DEBUG_MM
-  uint32_t pid;                            /* The pid for caller */
+  pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif
   mmsize_t size;                           /* Size of this chunk */
@@ -175,7 +182,7 @@ static_assert(SIZEOF_MM_ALLOCNODE <= MM_MIN_CHUNK,
 struct mm_freenode_s
 {
 #ifdef CONFIG_DEBUG_MM
-  uint32_t pid;                            /* The pid for caller */
+  pid_t pid;                               /* The pid for caller */
   FAR void *backtrace[MM_BACKTRACE_DEPTH]; /* The backtrace buffer for caller */
 #endif
   mmsize_t size;                           /* Size of this chunk */

@@ -47,12 +47,6 @@
 #endif
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -62,7 +56,7 @@ volatile uintptr_t *g_current_regs[CONFIG_SMP_NCPUS];
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
 
   if (vector < RISCV_IRQ_ECALLM)
@@ -116,6 +110,26 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       putreg32(irq - RISCV_IRQ_MEXT, QEMU_RV_PLIC_CLAIM);
     }
 #endif
+
+  /* Check for a context switch.  If a context switch occurred, then
+   * CURRENT_REGS will have a different value than it did on entry.  If an
+   * interrupt level context switch has occurred, then restore the floating
+   * point state and the establish the correct address environment before
+   * returning from the interrupt.
+   */
+
+  if (regs != CURRENT_REGS)
+    {
+#ifdef CONFIG_ARCH_ADDRENV
+      /* Make sure that the address environment for the previously
+       * running task is closed down gracefully (data caches dump,
+       * MMU flushed) and set up the address environment for the new
+       * thread at the head of the ready-to-run list.
+       */
+
+      group_addrenv(NULL);
+#endif
+    }
 
   /* If a context switch occurred while processing the interrupt then
    * CURRENT_REGS may have change value.  If we return any value different

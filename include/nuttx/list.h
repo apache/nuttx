@@ -60,7 +60,7 @@
 #define list_remove_tail_type(list, type, element) (\
 {\
   FAR struct list_node *__nod = list_remove_tail(list);\
-  FAR ype *__t;\
+  FAR type *__t;\
 \
   if(__nod)\
     {\

@@ -22,8 +22,38 @@
  * Included Files
  ****************************************************************************/
 
+#include <sys/random.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <uuid.h>
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int uuid_getrandom(FAR void *buf, size_t size, int flags)
+{
+  FAR char *tmp = buf;
+
+  while (size > 0)
+    {
+      ssize_t ret = getrandom(tmp, size, flags);
+      if (ret < 0)
+        {
+          if (errno == EINTR)
+            {
+              continue;
+            }
+
+          return ret;
+        }
+
+      tmp += ret;
+      size -= ret;
+    }
+
+  return 0;
+}
 
 /****************************************************************************
  * Public Functions
@@ -42,17 +72,24 @@
 
 void uuid_create(uuid_t *u, uint32_t *status)
 {
-#ifdef CONFIG_CRYPTO_RANDOM_POOL
-  arc4random_buf(u, sizeof(uuid_t));
-#else
-  unsigned long *beg = (unsigned long *)u;
-  unsigned long *end = (unsigned long *)(u + 1);
+  int ret;
 
-  while (beg < end)
+  ret = uuid_getrandom(u, sizeof(uuid_t), 0);
+  if (ret < 0)
     {
-      *beg++ = rand();
+      ret = uuid_getrandom(u, sizeof(uuid_t), GRND_RANDOM);
     }
-#endif
+
+  if (ret < 0)
+    {
+      unsigned long *beg = (unsigned long *)u;
+      unsigned long *end = (unsigned long *)(u + 1);
+
+      while (beg < end)
+        {
+          *beg++ = rand();
+        }
+    }
 
   u->clock_seq_hi_and_reserved &= ~(1 << 6);
   u->clock_seq_hi_and_reserved |= (1 << 7);

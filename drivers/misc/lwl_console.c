@@ -126,7 +126,7 @@ struct lwl_entry_s
 
 static struct lwl_entry_s g_d =
 {
-  .sig = LWL_ID_SIG
+  LWL_ID_SIG
 };
 
 static const struct file_operations g_consoleops =

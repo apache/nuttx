@@ -54,7 +54,7 @@
 
 void up_initial_state(struct tcb_s *tcb)
 {
-  if (tcb->pid == 0)
+  if (tcb->pid == IDLE_PROCESS_ID)
     {
       tcb->stack_alloc_ptr = (void *)(up_getsp() -
                                       CONFIG_IDLETHREAD_STACKSIZE -

@@ -150,10 +150,10 @@
 #define FLASH_KEY2           0xcdef89ab
 #define FLASH_OPTKEY1        0x08192a3b
 #define FLASH_OPTKEY2        0x4c5d6e7f
-#define FLASH_ERASEDVALUE    0xff
+#define FLASH_ERASEDVALUE    0xffu
 #define FLASH_ERASEDVALUE_DW 0xffffffff
-#define PROGMEM_NBLOCKS STM32_FLASH_NBLOCKS
-#define FLASH_NPAGES (STM32_FLASH_SIZE / FLASH_PAGE_SIZE)
+#define PROGMEM_NBLOCKS      STM32_FLASH_NBLOCKS
+#define FLASH_NPAGES         (STM32_FLASH_SIZE / FLASH_PAGE_SIZE)
 
 #define FLASH_TIMEOUT_VALUE 5000000  /* 5s */
 
@@ -987,7 +987,7 @@ exit_with_sem:
   return written;
 }
 
-ssize_t up_progmem_erasestate(void)
+uint8_t up_progmem_erasestate(void)
 {
   return FLASH_ERASEDVALUE;
 }

@@ -61,7 +61,7 @@ struct hciuart_state_s
   struct file f;                /* File structure */
   bool enabled;                 /* Flag indicating that reception is enabled */
 
-  int serialmontask;            /* The receive serial octets task handle */
+  pid_t serialmontask;          /* The receive serial octets task handle */
 };
 
 struct hciuart_config_s
@@ -423,10 +423,12 @@ FAR struct btuart_lowerhalf_s *btuart_shim_getdevice(FAR const char *path)
   argv[0] = arg1;
   argv[1] = NULL;
 
-  s->serialmontask = kthread_create("BT HCI Rx",
-                                    CONFIG_BLUETOOTH_TXCONN_PRIORITY,
-                                    CONFIG_DEFAULT_TASK_STACKSIZE,
-                                    hcicollecttask, argv);
+  ret = kthread_create("BT HCI Rx", CONFIG_BLUETOOTH_TXCONN_PRIORITY,
+                       CONFIG_DEFAULT_TASK_STACKSIZE, hcicollecttask, argv);
+  if (ret > 0)
+    {
+      s->serialmontask = (pid_t)ret;
+    }
 
   return (FAR struct btuart_lowerhalf_s *)n;
 }

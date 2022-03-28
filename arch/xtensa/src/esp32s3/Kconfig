@@ -511,6 +511,12 @@ config ESP32S3_SPIRAM_IGNORE_NOTFOUND
 
 endmenu # SPI RAM Configuration
 
+config ESP32S3_GPIO_IRQ
+	bool "GPIO pin interrupts"
+	default n
+	---help---
+		Enable support for interrupting GPIO pins.
+
 menu "UART Configuration"
 	depends on ESP32S3_UART
 

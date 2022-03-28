@@ -36,12 +36,6 @@
 #include "chip.h"
 
 /****************************************************************************
- * Public Data
- ****************************************************************************/
-
-volatile uintptr_t *g_current_regs[1];
-
-/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -51,12 +45,12 @@ volatile uintptr_t *g_current_regs[1];
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t  irq  = vector & 0x3ff; /* E24 [9:0] */
+  int irq  = vector & 0x3ff; /* E24 [9:0] */
   uintptr_t *mepc = regs;
 
   /* If current is interrupt */
 
-  if (vector & 0x80000000u)
+  if ((vector & RISCV_IRQ_BIT) != 0)
     {
       irq += RISCV_IRQ_ASYNC;
     }
@@ -88,7 +82,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -98,12 +91,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   if (regs != CURRENT_REGS)
     {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
-
-      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -114,7 +101,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       group_addrenv(NULL);
 #endif
     }
-#endif /* CONFIG_ARCH_FPU || CONFIG_ARCH_ADDRENV */
 
 #endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
@@ -124,7 +110,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs           = (uintptr_t *)CURRENT_REGS;
+  regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   return regs;

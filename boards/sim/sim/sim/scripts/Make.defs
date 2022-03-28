@@ -73,6 +73,9 @@ ARCHCXXFLAGS = -fno-common -ffunction-sections -fdata-sections -nostdinc++
 ifeq ($(CONFIG_CXX_EXCEPTION),)
   ARCHCXXFLAGS += -fno-exceptions -fcheck-new
 endif
+ifeq ($(CONFIG_CXX_RTTI),)
+  ARCHCXXFLAGS += -fno-rtti
+endif
 ARCHPICFLAGS = -fpic
 ARCHWARNINGS = -Wall -Wstrict-prototypes -Wshadow -Wundef
 ARCHWARNINGSXX = -Wall -Wshadow -Wundef

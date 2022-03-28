@@ -49,7 +49,7 @@
 #endif
 
 #define RPTUNIOC_NONE           0
-#define NO_HOLDER               (pid_t)-1
+#define NO_HOLDER               (INVALID_PROCESS_ID)
 
 /****************************************************************************
  * Private Types
@@ -177,7 +177,7 @@ static struct image_store_ops g_rptun_storeops =
 
 static sem_t        g_rptunlock = SEM_INITIALIZER(1);
 static pid_t        g_holder    = NO_HOLDER;
-static unsigned int g_count     = 0;
+static unsigned int g_count;
 
 static METAL_DECLARE_LIST(g_rptun_cb);
 static METAL_DECLARE_LIST(g_rptun_priv);
@@ -434,7 +434,7 @@ static void rptun_ns_bind(FAR struct rpmsg_device *rdev,
       FAR struct rptun_cb_s *cb;
 
       bind->dest = dest;
-      strncpy(bind->name, name, RPMSG_NAME_SIZE);
+      strlcpy(bind->name, name, RPMSG_NAME_SIZE);
 
       rptun_lock();
 
@@ -919,7 +919,7 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   struct metal_init_params params = METAL_INIT_DEFAULTS;
   FAR struct rptun_priv_s *priv;
   FAR char *argv[3];
-  char arg1[16];
+  char arg1[19];
   char name[32];
   int ret;
 
@@ -946,23 +946,20 @@ int rptun_initialize(FAR struct rptun_dev_s *dev)
   nxsem_init(&priv->sem, 0, RPTUN_IS_AUTOSTART(dev) ? 1 : 0);
   nxsem_set_protocol(&priv->sem, SEM_PRIO_NONE);
 
-  snprintf(name, 32, "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
+  snprintf(name, sizeof(name), "/dev/rptun/%s", RPTUN_GET_CPUNAME(dev));
   ret = register_driver(name, &g_rptun_devops, 0222, priv);
   if (ret < 0)
     {
       goto err_driver;
     }
 
-  snprintf(arg1, 16, "0x%" PRIxPTR, (uintptr_t)priv);
+  snprintf(arg1, sizeof(arg1), "0x%" PRIxPTR, (uintptr_t)priv);
   argv[0] = (void *)RPTUN_GET_CPUNAME(dev);
   argv[1] = arg1;
   argv[2] = NULL;
 
-  ret = kthread_create("rptun",
-                       CONFIG_RPTUN_PRIORITY,
-                       CONFIG_RPTUN_STACKSIZE,
-                       rptun_thread,
-                       argv);
+  ret = kthread_create("rptun", CONFIG_RPTUN_PRIORITY,
+                       CONFIG_RPTUN_STACKSIZE, rptun_thread, argv);
   if (ret < 0)
     {
       goto err_thread;

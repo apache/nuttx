@@ -76,7 +76,7 @@ int pthread_mutex_trylock(FAR pthread_mutex_t *mutex)
 
   if (mutex != NULL)
     {
-      int mypid = (int)getpid();
+      pid_t mypid = getpid();
 
       /* Make sure the semaphore is stable while we make the following
        * checks.  This all needs to be one atomic action.

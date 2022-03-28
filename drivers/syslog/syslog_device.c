@@ -57,7 +57,7 @@
 
 /* An invalid thread ID */
 
-#define NO_HOLDER     ((pid_t)-1)
+#define NO_HOLDER     (INVALID_PROCESS_ID)
 
 /****************************************************************************
  * Private Types
@@ -321,7 +321,7 @@ static int syslog_dev_outputready(FAR struct syslog_dev_s *syslog_dev)
 
   /* Cases (4) and (5) */
 
-  if (up_interrupt_context() || getpid() == 0)
+  if (up_interrupt_context() || sched_idletask())
     {
       return -ENOSYS;
     }
@@ -768,9 +768,9 @@ void syslog_dev_uninitialize(FAR struct syslog_channel_s *channel)
    * interrupt context.
    */
 
-  if (up_interrupt_context() || getpid() == 0)
+  if (up_interrupt_context() || sched_idletask())
     {
-      DEBUGASSERT(!up_interrupt_context() && getpid() != 0);
+      DEBUGASSERT(!up_interrupt_context() && !sched_idletask());
       return;
     }
 

@@ -380,7 +380,7 @@ struct cxd56_usbdev_s
   /* signal */
 
   int signo;
-  int pid;
+  pid_t pid;
 };
 
 /* For maintaining tables of endpoint info */

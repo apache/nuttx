@@ -67,14 +67,14 @@
 
 /* SYS call 1:
  *
- * void riscv_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
  */
 
 #define SYS_restore_context       (1)
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
  */
 
 #define SYS_switch_context        (2)
@@ -130,7 +130,7 @@
 
 /* SYS call 0:
  *
- * int riscv_saveusercontext(uint64_t *saveregs);
+ * int riscv_saveusercontext(uintptr_t *saveregs);
  *
  * Return:
  * 0: Normal Return
@@ -138,23 +138,23 @@
  */
 
 #define riscv_saveusercontext(saveregs) \
-  (int)sys_call1(SYS_save_context, (uintptr_t)saveregs)
+  (int)sys_call1(SYS_save_context, (uintptr_t)(saveregs))
 
 /* SYS call 1:
  *
- * void riscv_fullcontextrestore(uint32_t *restoreregs) noreturn_function;
+ * void riscv_fullcontextrestore(uintptr_t *restoreregs) noreturn_function;
  */
 
 #define riscv_fullcontextrestore(restoreregs) \
-  sys_call1(SYS_restore_context, (uintptr_t)restoreregs)
+  sys_call1(SYS_restore_context, (uintptr_t)(restoreregs))
 
 /* SYS call 2:
  *
- * void riscv_switchcontext(uint32_t *saveregs, uint32_t *restoreregs);
+ * void riscv_switchcontext(uintptr_t **saveregs, uintptr_t *restoreregs);
  */
 
 #define riscv_switchcontext(saveregs, restoreregs) \
-  sys_call2(SYS_switch_context, (uintptr_t)saveregs, (uintptr_t)restoreregs)
+  sys_call2(SYS_switch_context, (uintptr_t)(saveregs), (uintptr_t)(restoreregs))
 
 #ifdef CONFIG_BUILD_KERNEL
 /* SYS call 3:

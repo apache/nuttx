@@ -377,6 +377,8 @@ config ARCH_CHIP_STM32H7
 	select ARCH_HAVE_SPI_BITORDER
 	select ARM_HAVE_MPU_UNIFIED
 	select ARMV7M_HAVE_STACKCHECK
+	select ARCH_HAVE_TICKLESS
+	select ARCH_HAVE_TIMEKEEPING
 	---help---
 		STMicro STM32H7 architectures (ARM Cortex-M7).
 
@@ -898,6 +900,12 @@ config ARM_HAVE_NEON
 	select ARM_HAVE_DPFPU32
 	---help---
 		Decide whether support NEON instruction
+
+config ARM_HAVE_MVE
+	bool
+	default n
+	---help---
+		Decide whether support MVE instruction
 
 config ARM_FPU_ABI_SOFT
 	bool "Soft Float ABI"

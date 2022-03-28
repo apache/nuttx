@@ -2555,8 +2555,10 @@ void arch_sporadic_resume(FAR struct tcb_s *tcb);
  *
  *   The second interface simple converts an elapsed time into well known
  *   units.
+ *
  ****************************************************************************/
 
+void up_perf_init(FAR void *arg);
 uint32_t up_perf_gettime(void);
 uint32_t up_perf_getfreq(void);
 void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts);

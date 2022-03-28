@@ -46,11 +46,10 @@
 void lib_dumpbuffer(FAR const char *msg, FAR const uint8_t *buffer,
                     unsigned int buflen)
 {
-  struct iovec buf =
-    {
-      .iov_base = (FAR char *)buffer,
-      .iov_len = buflen,
-    };
+  struct iovec buf;
+
+  buf.iov_base = (FAR void *)buffer;
+  buf.iov_len = buflen;
 
   lib_dumpvbuffer(msg, &buf, 1);
 }

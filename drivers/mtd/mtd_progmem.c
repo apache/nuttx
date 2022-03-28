@@ -367,7 +367,6 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
         }
         break;
 
-#ifdef CONFIG_MTD_PROGMEM_ERASESTATE
       case MTDIOC_ERASESTATE:
         {
           FAR uint8_t *result = (FAR uint8_t *)arg;
@@ -376,8 +375,6 @@ static int progmem_ioctl(FAR struct mtd_dev_s *dev, int cmd,
           ret = OK;
         }
         break;
-
-#endif /* CONFIG_ARCH_PROGMEM_ERASESTATE */
 
       default:
         ret = -ENOTTY; /* Bad command */

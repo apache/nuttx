@@ -49,15 +49,16 @@ static dq_queue_t g_aioc_free;
 
 /* This counting semaphore tracks the number of free AIO containers */
 
-static sem_t g_aioc_freesem;
+static sem_t g_aioc_freesem = NXSEM_INITIALIZER(CONFIG_FS_NAIOC,
+                                                SEM_PRIO_NONE);
 
 /* This binary semaphore supports exclusive access to the list of pending
  * asynchronous I/O.  g_aio_holder and a_aio_count support the reentrant
  * lock.
  */
 
-static sem_t g_aio_exclsem;
-static pid_t g_aio_holder;
+static sem_t g_aio_exclsem = SEM_INITIALIZER(1);
+static pid_t g_aio_holder = INVALID_PROCESS_ID;
 static uint16_t g_aio_count;
 
 /****************************************************************************
@@ -91,19 +92,6 @@ dq_queue_t g_aio_pending;
 void aio_initialize(void)
 {
   int i;
-
-  /* Initialize counting semaphores */
-
-  nxsem_init(&g_aioc_freesem, 0, CONFIG_FS_NAIOC);
-  nxsem_set_protocol(&g_aioc_freesem, SEM_PRIO_NONE);
-  nxsem_init(&g_aio_exclsem, 0, 1);
-
-  g_aio_holder = INVALID_PROCESS_ID;
-
-  /* Initialize the container queues */
-
-  dq_init(&g_aioc_free);
-  dq_init(&g_aio_pending);
 
   /* Add all of the pre-allocated AIO containers to the free list */
 

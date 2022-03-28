@@ -36,6 +36,12 @@
 #include "group/group.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RV_IRQ_MASK 59
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -45,14 +51,14 @@
 
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uintptr_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
 
   /* Check if fault happened */
 
   if (vector < RISCV_IRQ_ECALLU)
     {
-      riscv_fault((int)irq, regs);
+      riscv_fault(irq, regs);
     }
 
   /* Firstly, check if the irq is machine external interrupt */

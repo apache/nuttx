@@ -82,9 +82,9 @@
 /* IRQ bit and IRQ mask */
 
 #ifdef CONFIG_ARCH_RV32
-#  define RISCV_IRQ_BIT           (1 << 31)
+#  define RISCV_IRQ_BIT           (UINT32_C(1) << 31)
 #else
-#  define RISCV_IRQ_BIT           (1 << 63)
+#  define RISCV_IRQ_BIT           (UINT64_C(1) << 63)
 #endif
 
 #define RISCV_IRQ_MASK            (~RISCV_IRQ_BIT)
@@ -492,14 +492,13 @@ struct xcptcontext
   /* These additional register save locations are used to implement the
    * signal delivery trampoline.
    *
-   * REVISIT:  Because there is only one copy of these save areas,
+   * REVISIT:  Because there is only a reference of these save areas,
    * only a single signal handler can be active.  This precludes
    * queuing of signal actions.  As a result, signals received while
    * another signal handler is executing will be ignored!
    */
 
-  uintptr_t saved_epc;     /* Trampoline PC */
-  uintptr_t saved_int_ctx; /* Interrupt context with interrupts disabled. */
+  uintptr_t *saved_regs;
 
 #ifndef CONFIG_BUILD_FLAT
   /* This is the saved address to use when returning from a user-space
@@ -519,9 +518,25 @@ struct xcptcontext
 
 #endif
 
+#ifdef CONFIG_ARCH_ADDRENV
+#ifdef CONFIG_ARCH_KERNEL_STACK
+  /* In this configuration, all syscalls execute from an internal kernel
+   * stack.  Why?  Because when we instantiate and initialize the address
+   * environment of the new user process, we will temporarily lose the
+   * address environment of the old user process, including its stack
+   * contents.  The kernel C logic will crash immediately with no valid
+   * stack in place.
+   */
+
+  uintptr_t *ustkptr;  /* Saved user stack pointer */
+  uintptr_t *kstack;   /* Allocate base of the (aligned) kernel stack */
+  uintptr_t *kstkptr;  /* Saved kernel stack pointer */
+#endif
+#endif
+
   /* Register save area */
 
-  uintptr_t regs[XCPTCONTEXT_REGS];
+  uintptr_t *regs;
 };
 
 #endif /* __ASSEMBLY__ */

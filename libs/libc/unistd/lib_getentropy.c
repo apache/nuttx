@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_copyfullstate.c
+ * libs/libc/unistd/lib_getentropy.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -22,41 +22,62 @@
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <stdint.h>
-#include <arch/irq.h>
-
-#include "riscv_internal.h"
+#include <sys/random.h>
+#include <errno.h>
+#include <unistd.h>
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: riscv_copyfullstate
+ * Name: getentropy
  *
  * Description:
- *    Copy the entire register save area (including the floating point
- *    registers if applicable).  This is a little faster than most memcpy's
- *    since it does 32-bit transfers.
+ *   The getentropy() function writes length bytes of high-quality
+ *   random data to the buffer starting at the location pointed to by
+ *   buffer. The maximum permitted value for the length argument is
+ *   256.
+ *
+ *   A successful call to getentropy() always provides the requested
+ *   number of bytes of entropy.
+ *
+ * Input Parameters:
+ *   buffer - Buffer for returned random bytes
+ *   length - Number of bytes requested.
+ *
+ * Returned Value:
+ *   On success, this function returns zero.  On error, -1 is
+ *   returned, and errno is set to indicate the error.
  *
  ****************************************************************************/
 
-void riscv_copyfullstate(uintptr_t *dest, uintptr_t *src)
+int getentropy(FAR void *buffer, size_t length)
 {
-  int i;
+  FAR char *pos = buffer;
 
-  /* In the RV32 targets, the state is copied from the stack to the TCB,
-   * but only a reference is passed to get the state from the TCB.  So the
-   * following check avoids copying the TCB save area onto itself:
-   */
-
-  if (src != dest)
+  if (length > 256)
     {
-      for (i = 0; i < XCPTCONTEXT_REGS; i++)
-        {
-          *dest++ = *src++;
-        }
+      errno = EIO;
+      return -1;
     }
+
+  while (length > 0)
+    {
+      int ret = getrandom(pos, length, 0);
+      if (ret < 0)
+        {
+          if (errno == EINTR)
+            {
+              continue;
+            }
+
+          return ret;
+        }
+
+      pos += ret;
+      length -= ret;
+    }
+
+  return 0;
 }

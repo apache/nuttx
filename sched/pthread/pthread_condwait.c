@@ -93,7 +93,7 @@ int pthread_cond_wait(FAR pthread_cond_t *cond, FAR pthread_mutex_t *mutex)
       sinfo("Give up mutex / take cond\n");
 
       sched_lock();
-      mutex->pid = -1;
+      mutex->pid = INVALID_PROCESS_ID;
 #ifndef CONFIG_PTHREAD_MUTEX_UNSAFE
       mflags     = mutex->flags;
 #endif

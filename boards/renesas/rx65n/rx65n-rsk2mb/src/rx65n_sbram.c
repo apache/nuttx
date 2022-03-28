@@ -184,7 +184,7 @@ typedef struct
   fault_flags_t flags;                  /* What is in the dump */
   uintptr_t     current_regs;           /* Used to validate the dump */
   int           lineno;                 /* __LINE__ to up_assert */
-  int           pid;                    /* Process ID */
+  pid_t         pid;                    /* Process ID */
   uint32_t      regs[XCPTCONTEXT_REGS]; /* Interrupt register save area */
   stack_t       stacks;                 /* Stack info */
 #if CONFIG_TASK_NAME_SIZE > 0

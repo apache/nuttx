@@ -282,7 +282,7 @@ config SIM_FBWIDTH
 	int "Display width"
 	default 320
 	---help---
-		Simulated width of the display.  Default: 320 or 480
+		Simulated width of the display.  Default: 320
 
 config SIM_FBBPP
 	int "Pixel depth in bits"
@@ -352,14 +352,6 @@ endchoice # Input Device
 endif # if INPUT
 
 endmenu
-
-config SIM_TCNWAITERS
-	bool "Maximum number poll() waiters"
-	default 4
-	depends on SIM_TOUCHSCREEN
-	---help---
-		The maximum number of threads that can be waiting on poll() for a
-		touchscreen event. Default: 4
 
 config SIM_HCISOCKET
 	bool "Attach Host Bluetooth"

@@ -88,7 +88,7 @@
 
 /* Only for the EFM32 family for now */
 
-#if (defined(CONFIG_ARCH_CHIP_EFM32) && defined(CONFIG_EFM32_FLASHPROG))
+#if defined(CONFIG_ARCH_CHIP_EFM32) && defined(CONFIG_EFM32_FLASHPROG)
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -113,6 +113,8 @@
 #ifndef EFM32_USERDATA_PAGESIZE
 #   define EFM32_USERDATA_PAGESIZE (EFM32_USERDATA_SIZE/EFM32_USERDATA_NPAGES)
 #endif
+
+#define EFM32_FLASH_ERASEDVAL (0xffu)
 
 /* brief:
  *    The timeout used while waiting for the flash to become ready after
@@ -749,7 +751,7 @@ ssize_t up_progmem_ispageerased(size_t page)
        count = up_progmem_pagesize(page);
        count; count--, addr++)
     {
-      if (getreg8(addr) != 0xff)
+      if (getreg8(addr) != EFM32_FLASH_ERASEDVAL)
         {
           bwritten++;
         }
@@ -878,6 +880,11 @@ ssize_t __ramfunc__ up_progmem_write(size_t addr,
     }
 
   return word_count;
+}
+
+uint8_t up_progmem_erasestate(void)
+{
+  return EFM32_FLASH_ERASEDVAL;
 }
 
 #endif /* defined(CONFIG_ARCH_CHIP_EFM32)  */

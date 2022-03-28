@@ -718,6 +718,17 @@ static int local_ioctl(FAR struct socket *psock, int cmd,
 
   switch (cmd)
     {
+      case FIONBIO:
+        if (conn->lc_infile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_infile, cmd, arg);
+          }
+
+        if (ret >= 0 && conn->lc_outfile.f_inode != NULL)
+          {
+            ret = file_ioctl(&conn->lc_outfile, cmd, arg);
+          }
+        break;
       case FIONREAD:
         if (conn->lc_infile.f_inode != NULL)
           {

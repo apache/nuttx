@@ -253,6 +253,10 @@ void xtensa_coproc_enable(struct xtensa_cpstate_s *cpstate, int cpset);
 void xtensa_coproc_disable(struct xtensa_cpstate_s *cpstate, int cpset);
 #endif
 
+/* Window Spill */
+
+void xtensa_window_spill(void);
+
 /* IRQs */
 
 #if defined(CONFIG_SMP) && CONFIG_ARCH_INTERRUPTSTACK > 15
@@ -313,6 +317,11 @@ void xtensa_add_region(void);
 #else
 # define xtensa_add_region()
 #endif
+
+/* Watchdog timer ***********************************************************/
+
+struct oneshot_lowerhalf_s *
+xtensa_oneshot_initialize(uint32_t irq, uint32_t freq);
 
 /* Serial output */
 

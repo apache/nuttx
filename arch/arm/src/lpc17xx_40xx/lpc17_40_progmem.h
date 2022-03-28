@@ -53,6 +53,10 @@
 #define LPC17_40_FLASH_NUM_SECTORS \
   (LPC17_40_FLASH_NUM_4K_SECTORS + LPC17_40_FLASH_NUM_32K_SECTORS)
 
+/* Flash erased byte value */
+
+#define LPC17_40_FLASH_ERASEDVAL (0xffu)
+
 /* Size of a write page. */
 
 #define LPC17_40_WRITE_SIZE 256

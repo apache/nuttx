@@ -117,7 +117,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   heap->mm_heapstart[IDX]            = (FAR struct mm_allocnode_s *)
                                        heapbase;
-  MM_ADD_BACKTRACE(heap->mm_heapstart[IDX]);
+  MM_ADD_BACKTRACE(heap, heap->mm_heapstart[IDX]);
   heap->mm_heapstart[IDX]->size      = SIZEOF_MM_ALLOCNODE;
   heap->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
   node                               = (FAR struct mm_freenode_s *)
@@ -128,7 +128,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
                                        (heapend - SIZEOF_MM_ALLOCNODE);
   heap->mm_heapend[IDX]->size        = SIZEOF_MM_ALLOCNODE;
   heap->mm_heapend[IDX]->preceding   = node->size | MM_ALLOC_BIT;
-  MM_ADD_BACKTRACE(heap->mm_heapend[IDX]);
+  MM_ADD_BACKTRACE(heap, heap->mm_heapend[IDX]);
 
 #undef IDX
 
@@ -213,6 +213,9 @@ FAR struct mm_heap_s *mm_initialize(FAR const char *name,
 #if defined(CONFIG_BUILD_FLAT) || defined(__KERNEL__)
   heap->mm_procfs.name = name;
   heap->mm_procfs.heap = heap;
+#if defined (CONFIG_DEBUG_MM) && defined(CONFIG_MM_BACKTRACE_DEFAULT)
+  heap->mm_procfs.backtrace = true;
+#endif
   procfs_register_meminfo(&heap->mm_procfs);
 #endif
 #endif

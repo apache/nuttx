@@ -1,5 +1,5 @@
 /****************************************************************************
- * boards/arm/stm32/omnibusf4/src/stm32_perfcount.c
+ * include/sys/random.h
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,53 +18,62 @@
  *
  ****************************************************************************/
 
+#ifndef __INCLUDE_SYS_RANDOM_H
+#define __INCLUDE_SYS_RANDOM_H
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
-#include <nuttx/config.h>
-
-#include <time.h>
-#include <fixedmath.h>
-
-#include "dwt.h"
-#include "arm_internal.h"
-
-#include <nuttx/clock.h>
-
-#include <arch/board/board.h>
+#include <stddef.h>
 
 /****************************************************************************
- * Public Functions
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Flags for getrandom(2)
+ *
+ * GRND_NONBLOCK  Don't block and return EAGAIN instead
+ * GRND_RANDOM    Open /dev/random instead of /dev/urandom
+ * GRND_INSECURE  Return non-cryptographic random bytes
+ */
+
+#define GRND_NONBLOCK   (1 << 0)
+#define GRND_RANDOM     (1 << 1)
+#define GRND_INSECURE   (1 << 2)
+
+/****************************************************************************
+ * Public Function Prototypes
  ****************************************************************************/
 
 /****************************************************************************
- * Name: up_perf_gettime
+ * Name: getrandom
+ *
+ * Description:
+ *   Fill a buffer of arbitrary length with randomness. This is the
+ *   preferred interface for getting random numbers. The traditional
+ *   /dev/random approach is susceptible for things like the attacker
+ *   exhausting file descriptors on purpose.
+ *
+ *   Note that this function cannot fail, other than by asserting.
+ *
+ * Input Parameters:
+ *   bytes  - Buffer for returned random bytes
+ *   nbytes - Number of bytes requested.
+ *   flags  - Bit mask that can contain zero or more of the ORed values
+ *            together.
+ *
+ * Returned Value:
+ *   On success, getrandom() returns the number of bytes that were copied
+ *   to the buffer bytes.  This may be less than the number of bytes
+ *   requested via nbytes if either GRND_RANDOM was specified in flags and
+ *   insufficient entropy was present in the random source or the system
+ *   call was interrupted by a signal.
+ *
+ *   On error, -1 is returned, and errno is set appropriately.
+ *
  ****************************************************************************/
 
-uint32_t up_perf_gettime(void)
-{
-  return getreg32(DWT_CYCCNT);
-}
+ssize_t getrandom(FAR void *bytes, size_t nbytes, unsigned int flags);
 
-/****************************************************************************
- * Name: up_perf_getfreq
- ****************************************************************************/
-
-uint32_t up_perf_getfreq(void)
-{
-  return STM32_SYSCLK_FREQUENCY;
-}
-
-/****************************************************************************
- * Name: up_perf_convert
- ****************************************************************************/
-
-void up_perf_convert(uint32_t elapsed, FAR struct timespec *ts)
-{
-  b32_t b32elapsed;
-
-  b32elapsed  = itob32(elapsed) / STM32_SYSCLK_FREQUENCY;
-  ts->tv_sec  = b32toi(b32elapsed);
-  ts->tv_nsec = NSEC_PER_SEC * b32frac(b32elapsed) / b32ONE;
-}
+#endif /* __INCLUDE_SYS_RANDOM_H */

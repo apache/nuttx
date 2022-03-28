@@ -188,10 +188,6 @@ exception_common:
 
 	mov		r1, sp
 
-	/* Also save the top of the stack in a preserved register */
-
-	mov		r4, sp
-
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 	/* If CONFIG_ARCH_INTERRUPTSTACK is defined, we will set the MSP to use
 	 * a special special interrupt stack pointer.  The way that this is done
@@ -199,9 +195,12 @@ exception_common:
 	 */
 
 	setintstack	r2, r3			/* SP = IRQ stack top */
-
-	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 #else
+	/* Otherwise, we will re-use the interrupted thread's stack.  That may
+	 * mean using either MSP or PSP stack for interrupt level processing (in
+	 * kernel mode).
+	 */
+
 	/* If the interrupt stack is disabled, reserve xcpcontext to ensure
 	 * that signal processing can have a separate xcpcontext to handle
 	 * signal context (reference: arm_schedulesigaction.c):
@@ -213,77 +212,22 @@ exception_common:
 	 * also the sp should be restore after arm_doirq()
 	 */
 
-	sub		r4, r4, #XCPTCONTEXT_SIZE		/* Reserve signal context */
-
-	/* Otherwise, we will re-use the interrupted thread's stack.  That may
-	 * mean using either MSP or PSP stack for interrupt level processing (in
-	 * kernel mode).
-	 */
-
-	bic		r2, r4, #7				/* Get the stack pointer with 8-byte alignment */
+	sub		r2, r1, #XCPTCONTEXT_SIZE		/* Reserve signal context */
+	bic		r2, r2, #7				/* Get the stack pointer with 8-byte alignment */
 	mov		sp, r2					/* Instantiate the aligned stack */
+#endif
 
 	bl		arm_doirq				/* R0=IRQ, R1=register save (msp) */
 
-	/* If the interrupt stack is disabled, restore the signal context */
-
-	add		r4, r4, #XCPTCONTEXT_SIZE		/* Restore signal context */
-#endif
-
-	mov		r1, r4					/* Recover R1=main stack pointer */
-
 	/* On return from arm_doirq, R0 will hold a pointer to register context
-	 * array to use for the interrupt return.  If that return value is the same
-	 * as current stack pointer, then things are relatively easy.
+	 * array to use for the interrupt return.
 	 */
 
-	cmp		r0, r1					/* Context switch? */
-	beq		2f					/* Branch if no context switch */
-
-	/* We are returning with a pending context switch.  This case is different
-	 * because in this case, the register save structure does not lie on the
-	 * stack but, rather within a TCB structure.  We'll have to copy some
-	 * values to the stack.
-	 */
-
-	/* Copy the hardware-saved context to the stack, and restore the software
-	 * saved context directly.
-	 *
-	 * XXX In the normal case, it appears that this entire operation is unnecessary;
-	 *     context switch time would be improved if we could work out when the stack
-	 *     is dirty and avoid the work...
-	 */
-
-	add		r1, r0, #SW_XCPT_SIZE 	/* R1=Address of HW save area in reg array */
-	ldmia		r1!, {r4-r11}		/* Fetch eight registers in HW save area */
-#ifdef CONFIG_ARCH_FPU
-	vldmia		r1!, {s0-s15}		/* Fetch sixteen FP registers in HW save area */
-	ldmia		r1, {r2-r3}		/* Fetch FPSCR and Reserved in HW save area */
-#endif
-	ldr		r1, [r0, #(4*REG_SP)]	/* R1=Value of SP before interrupt */
-#ifdef CONFIG_ARCH_FPU
-	stmdb		r1!, {r2-r3}		/* Store FPSCR and Reserved on the return stack */
-	vstmdb		r1!, {s0-s15}		/* Store sixteen FP registers on the return stack */
-#endif
-	stmdb		r1!, {r4-r11}		/* Store eight registers on the return stack */
 	ldmia		r0!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
 #ifdef CONFIG_ARCH_FPU
-	vldmia		r0, {s16-s31}		/* Recover S16-S31 */
+	vldmia		r0!, {s16-s31}		/* Recover S16-S31 */
 #endif
 
-	b		3f			/* Re-join common logic */
-
-2:
-	/* We are returning with no context switch.  We simply need to "unwind"
-	 * the same stack frame that we created at entry.
-	 */
-
-	ldmia		r1!, {r2-r11,r14}	/* Recover R4-R11, r14 + 2 temp values */
-#ifdef CONFIG_ARCH_FPU
-	vldmia		r1!, {s16-s31}		/* Recover S16-S31 */
-#endif
-
-3:
 	/* The EXC_RETURN value tells us whether we are returning on the MSP or PSP
 	 */
 
@@ -295,21 +239,21 @@ exception_common:
 
 	mrs		r2, control				/* R2=Contents of the control register */
 	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
-	beq		4f					/* Branch if privileged */
+	beq		2f					/* Branch if privileged */
 
 	orr		r2, r2, #1				/* Unprivileged mode */
-	msr		psp, r1					/* R1=The process stack pointer */
-	b		5f
-4:
+	msr		psp, r0					/* R0=The process stack pointer */
+	b		3f
+2:
 	bic		r2, r2, #1				/* Privileged mode */
-	msr		msp, r1					/* R1=The main stack pointer */
-5:
+	msr		msp, r0					/* R0=The main stack pointer */
+3:
 	msr		control, r2				/* Save the updated control register */
 #else
 	tst		r14, #EXC_RETURN_PROCESS_STACK		/* nonzero if context on process stack */
 	ite		eq					/* Next two instructions conditional */
-	msreq		msp, r1					/* R1=The main stack pointer */
-	msrne		psp, r1					/* R1=The process stack pointer */
+	msreq		msp, r0					/* R0=The main stack pointer */
+	msrne		psp, r0					/* R0=The process stack pointer */
 #endif
 
 	/* Restore the interrupt state */

@@ -107,23 +107,36 @@ exception_common:
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
 
-  csrr s0, mhartid
+  csrr       s0, mhartid
 
   /* Switch to interrupt stack */
 #if IRQ_NSTACKS > 1
-  li t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-  mul t0, s0, t0
-  la s0, g_intstacktop
-  sub sp, s0, t0
+  li         t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
+  mul        t0, s0, t0
+  la         s0, g_intstacktop
+  sub        sp, s0, t0
 #else
-  la sp, g_intstacktop
-#endif
-
+  la         sp, g_intstacktop
 #endif
 
   /* Call interrupt handler in C */
 
   jal        x1, riscv_dispatch_irq
+
+#else
+  /* Reserve some space for CURRENT_REGS if interrupt stack disabled */
+
+  addi       sp, sp, -XCPTCONTEXT_SIZE
+
+  /* Call interrupt handler in C */
+
+  jal        x1, riscv_dispatch_irq
+
+  /* Restore sp */
+
+  addi       sp, sp, XCPTCONTEXT_SIZE
+#endif
+
 
   /* If context switch is needed, return a new sp     */
 

@@ -83,6 +83,18 @@ static const struct file_operations g_epoll_ops =
 #endif
 };
 
+static struct inode g_epoll_inode =
+{
+  NULL,                   /* i_parent */
+  NULL,                   /* i_peer */
+  NULL,                   /* i_child */
+  1,                      /* i_crefs */
+  FSNODEFLAG_TYPE_DRIVER, /* i_flags */
+  {
+    &g_epoll_ops          /* u */
+  }
+};
+
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
@@ -109,12 +121,12 @@ static FAR struct epoll_head *epoll_head_from_fd(int fd)
       return NULL;
     }
 
-  return (FAR struct epoll_head *)filep->f_inode->i_private;
+  return (FAR struct epoll_head *)filep->f_priv;
 }
 
 static int epoll_do_open(FAR struct file *filep)
 {
-  FAR struct epoll_head *eph = filep->f_inode->i_private;
+  FAR struct epoll_head *eph = filep->f_priv;
   int ret;
 
   ret = nxsem_wait(&eph->sem);
@@ -130,7 +142,7 @@ static int epoll_do_open(FAR struct file *filep)
 
 static int epoll_do_close(FAR struct file *filep)
 {
-  FAR struct epoll_head *eph = filep->f_inode->i_private;
+  FAR struct epoll_head *eph = filep->f_priv;
   int ret;
 
   ret = nxsem_wait(&eph->sem);
@@ -187,7 +199,7 @@ static int epoll_do_create(int size, int flags)
 
   /* Alloc the file descriptor */
 
-  fd = files_allocate(&eph->in, flags, 0, eph, 0);
+  fd = files_allocate(&g_epoll_inode, flags, 0, eph, 0);
   if (fd < 0)
     {
       nxsem_destroy(&eph->sem);
@@ -196,6 +208,7 @@ static int epoll_do_create(int size, int flags)
       return -1;
     }
 
+  inode_addref(&g_epoll_inode);
   nxsem_post(&eph->sem);
   return fd;
 }

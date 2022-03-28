@@ -36,6 +36,12 @@
 #include "group/group.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+#define RV_IRQ_MASK 59
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -43,16 +49,16 @@
  * riscv_dispatch_irq
  ****************************************************************************/
 
-void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
+void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
-  uint32_t  irq = (vector >> (27 + 32)) | (vector & 0xf);
-  uint64_t *mepc = regs;
+  int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
+  uintptr_t *mepc = regs;
 
   /* Check if fault happened */
 
   if (vector < RISCV_IRQ_ECALLU)
     {
-      riscv_fault((int)irq, regs);
+      riscv_fault(irq, regs);
     }
 
   /* Firstly, check if the irq is machine external interrupt */
@@ -105,7 +111,6 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
       putreg32(irq - C906_IRQ_PERI_START, C906_PLIC_MCLAIM);
     }
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -115,12 +120,6 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
 
   if (regs != CURRENT_REGS)
     {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
-
-      riscv_restorefpu((uint64_t *)CURRENT_REGS);
-#endif
-
 #ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
@@ -131,9 +130,8 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
       group_addrenv(NULL);
 #endif
     }
-#endif
 
-#endif
+#endif /* CONFIG_SUPPRESS_INTERRUPTS */
 
   /* If a context switch occurred while processing the interrupt then
    * CURRENT_REGS may have change value.  If we return any value different
@@ -141,7 +139,7 @@ void *riscv_dispatch_irq(uint64_t vector, uint64_t *regs)
    * switch occurred during interrupt processing.
    */
 
-  regs = (uint64_t *)CURRENT_REGS;
+  regs = (uintptr_t *)CURRENT_REGS;
   CURRENT_REGS = NULL;
 
   return regs;
