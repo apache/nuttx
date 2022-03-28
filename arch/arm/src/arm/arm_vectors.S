@@ -119,12 +119,23 @@ arm_vectorirq:
 	bl	arm_decodeirq		/* Call the handler */
 #endif
 
+	/* Switch back IRQ mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_IRQ | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back IRQ mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is IRQ mode */
+
+	mov	r14, sp			/* (IRQ) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (IRQ) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 3
 .Lirqstacktop:
@@ -192,12 +203,23 @@ arm_vectorsvc:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_syscall		/* Call the handler */
 
+	/* Switch back SVC mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_SVC | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back SVC mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is SVC mode */
+
+	mov	r14, sp			/* (SVC) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (SVC) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
@@ -267,12 +289,23 @@ arm_vectordata:
 #endif
 	bl	arm_dataabort		/* Call the handler */
 
+	/* Switch back ABT mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back ABT mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is ABT mode */
+
+	mov	r14, sp			/* (ABT) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (ABT) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -338,12 +371,23 @@ arm_vectorprefetch:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_prefetchabort	/* Call the handler */
 
+	/* Switch back ABT mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_ABT | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back ABT mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is ABT mode */
+
+	mov	r14, sp			/* (ABT) r14=Register storage area */
+	ldmia	r14!, {r0-r12}		/* Restore common r0-r12 */
+	ldmia	r14, {r13, r14}^	/* Restore user mode r13/r14 */
+	add	r14, r14, #(4*2)	/* (ABT) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
@@ -407,12 +451,23 @@ arm_vectorundefinsn:
 	mov	r0, sp			/* Get r0=xcp */
 	bl	arm_undefinedinsn	/* Call the handler */
 
+	/* Switch back UND mode and return with shadow SPSR */
+
+	mov	r4, #(PSR_MODE_UND | PSR_I_BIT)
+	msr	cpsr_c, r4		/* Switch back UND mode */
+
 	/* Restore the CPSR, SYS mode registers and return */
 
 	ldr	r0, [sp, #(4*REG_CPSR)]	/* Fetch the return SPSR */
 	msr	spsr_cxsf, r0		/* Set the return mode SPSR */
 
-	ldmia	sp, {r0-r15}^		/* Return */
+	/* Life is simple when everything is UND mode */
+
+	mov	r14, sp			/* (FIQ) r14=Register storage area */
+	ldmia	r14!, {r0-r7}		/* Restore common r0-r7 */
+	ldmia	r14, {r8-r14}^		/* Restore user mode r8-r14 */
+	add	r14, r14, #(4*7)	/* (FIQ) r14=address of r15 storage */
+	ldmia	r14, {r15}^		/* Return */
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5
