@@ -313,7 +313,7 @@ static int touch_poll(FAR struct file *filep, struct pollfd *fds, bool setup)
       if (openpriv->fds == NULL)
         {
           openpriv->fds = fds;
-          fds->priv   = &openpriv->fds;
+          fds->priv     = &openpriv->fds;
         }
       else
         {
@@ -382,7 +382,7 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
 
   iinfo("Registering %s\n", path);
 
-  if (lower == NULL || !nums)
+  if (lower == NULL || nums == 0)
     {
       ierr("ERROR: invalid touchscreen device\n");
       return -EINVAL;
@@ -404,13 +404,11 @@ int touch_register(FAR struct touch_lowerhalf_s *lower,
   ret = register_driver(path, &g_touch_fops, 0666, upper);
   if (ret < 0)
     {
-      goto err_out;
+      nxsem_destroy(&upper->exclsem);
+      kmm_free(upper);
+      return ret;
     }
 
-  return ret;
-err_out:
-  nxsem_destroy(&upper->exclsem);
-  kmm_free(upper);
   return ret;
 }
 
