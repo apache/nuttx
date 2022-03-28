@@ -72,7 +72,7 @@ static int     touch_open(FAR struct file *filep);
 static int     touch_close(FAR struct file *filep);
 static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
-static ssize_t touch_write(FAR struct file *filep, FAR const char *openpriv,
+static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
                            size_t buflen);
 static int     touch_ioctl(FAR struct file *filep, int cmd,
                            unsigned long arg);
