@@ -64,8 +64,8 @@
 #  define PRIxREG "016" PRIxPTR
 #endif
 
-/* In the RISC_V model, the state is copied from the stack to the TCB, but
- * only a referenced is passed to get the state from the TCB.
+/* In the RISC-V model, the state is saved in stack,
+ * only a reference stored in TCB.
  */
 
 #ifdef CONFIG_ARCH_FPU
