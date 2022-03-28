@@ -91,7 +91,7 @@ struct btn_open_s
    */
 
   bool bo_pending;
-  FAR struct pollfd *bo_fds[CONFIG_INPUT_BUTTONS_NPOLLWAITERS];
+  FAR struct pollfd *bo_fds;
 };
 
 /****************************************************************************
@@ -230,7 +230,6 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
   btn_buttonset_t change;
   btn_buttonset_t press;
   btn_buttonset_t release;
-  int i;
 
   DEBUGASSERT(priv && priv->bu_lower);
   lower = priv->bu_lower;
@@ -267,17 +266,14 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
         {
           /* Yes.. Notify all waiters */
 
-          for (i = 0; i < CONFIG_INPUT_BUTTONS_NPOLLWAITERS; i++)
+          FAR struct pollfd *fds = opriv->bo_fds;
+          if (fds)
             {
-              FAR struct pollfd *fds = opriv->bo_fds[i];
-              if (fds)
+              fds->revents |= (fds->events & POLLIN);
+              if (fds->revents != 0)
                 {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %02x\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
+                  iinfo("Report events: %02x\n", fds->revents);
+                  nxsem_post(fds->sem);
                 }
             }
         }
@@ -652,7 +648,6 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
   FAR struct btn_open_s *opriv;
   irqstate_t flags;
   int ret = OK;
-  int i;
 
   DEBUGASSERT(filep && filep->f_priv && filep->f_inode);
   opriv = filep->f_priv;
@@ -672,34 +667,26 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
        * slot for the poll structure reference
        */
 
-      for (i = 0; i < CONFIG_INPUT_BUTTONS_NPOLLWAITERS; i++)
+      if (!opriv->bo_fds)
         {
-          /* Find an available slot */
+          /* Bind the poll structure and this slot */
 
-          if (!opriv->bo_fds[i])
+          opriv->bo_fds = fds;
+          fds->priv = &opriv->bo_fds;
+
+          /* Report if the event is pending */
+
+          if (opriv->bo_pending)
             {
-              /* Bind the poll structure and this slot */
-
-              opriv->bo_fds[i] = fds;
-              fds->priv = &opriv->bo_fds[i];
-
-              /* Report if the event is pending */
-
-              if (opriv->bo_pending)
+              fds->revents |= (fds->events & POLLIN);
+              if (fds->revents != 0)
                 {
-                  fds->revents |= (fds->events & POLLIN);
-                  if (fds->revents != 0)
-                    {
-                      iinfo("Report events: %02x\n", fds->revents);
-                      nxsem_post(fds->sem);
-                    }
+                  iinfo("Report events: %02x\n", fds->revents);
+                  nxsem_post(fds->sem);
                 }
-
-              break;
             }
         }
-
-      if (i >= CONFIG_INPUT_BUTTONS_NPOLLWAITERS)
+      else
         {
           ierr("ERROR: Too many poll waiters\n");
           fds->priv    = NULL;
@@ -707,7 +694,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
           goto errout;
         }
     }
-  else if (fds->priv)
+  else
     {
       /* This is a request to tear down the poll. */
 

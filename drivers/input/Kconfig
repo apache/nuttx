@@ -530,10 +530,6 @@ config INPUT_BUTTONS_LOWER
 		board src/ directory and modified for your specific board
 		requirements.
 
-config INPUT_BUTTONS_NPOLLWAITERS
-	int "Max Number of Poll Waiters"
-	default 2
-
 endif # INPUT_BUTTONS
 
 config INPUT_DJOYSTICK
