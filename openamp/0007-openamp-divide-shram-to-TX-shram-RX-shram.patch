@@ -1,0 +1,130 @@
+From 0de084b8b7c65502a2339221b59aeaa60edbe8c5 Mon Sep 17 00:00:00 2001
+From: ligd <liguiding1@xiaomi.com>
+Date: Mon, 7 Feb 2022 20:36:25 +0800
+Subject: [PATCH 2/3] openamp: divide shram to TX shram & RX shram
+
+Add new API rpmsg_init_vdev_ext()
+
+Signed-off-by: ligd <liguiding1@xiaomi.com>
+Change-Id: I790cdcf27276ed12a633fab9cc8aefff7c7da830
+---
+ lib/include/openamp/rpmsg_virtio.h | 30 +++++++++++++++++++++++++++++
+ lib/rpmsg/rpmsg_virtio.c           | 31 ++++++++++++++++++++----------
+ 2 files changed, 51 insertions(+), 10 deletions(-)
+
+diff --git a/lib/include/openamp/rpmsg_virtio.h open-amp/lib/include/openamp/rpmsg_virtio.h
+index ac155fb..9d6a16e 100644
+--- a/lib/include/openamp/rpmsg_virtio.h
++++ open-amp/lib/include/openamp/rpmsg_virtio.h
+@@ -156,6 +156,36 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 		    struct metal_io_region *shm_io,
+ 		    struct rpmsg_virtio_shm_pool *shpool);
+ 
++/**
++ * rpmsg_init_vdev_ext - initialize rpmsg virtio device
++ * Master side:
++ * Initialize RPMsg virtio queues and shared buffers, the address of shm can be
++ * ANY. In this case, function will get shared memory from system shared memory
++ * pools. If the vdev has RPMsg name service feature, this API will create an
++ * name service endpoint.
++ *
++ * Slave side:
++ * This API will not return until the driver ready is set by the master side.
++ *
++ * @param rvdev  - pointer to the rpmsg virtio device
++ * @param vdev   - pointer to the virtio device
++ * @param ns_bind_cb  - callback handler for name service announcement without
++ *                      local endpoints waiting to bind.
++ * @param shm_io - pointer to the share memory I/O region.
++ * @param tx_shpool - pointer to tx shared memory pool. rpmsg_virtio_init_shm_pool
++ *                    has to be called first to fill this structure.
++ * @param rx_shpool - pointer to rx shared memory pool. rpmsg_virtio_init_shm_pool
++ *                    has to be called first to fill this structure.
++ *
++ * @return - status of function execution
++ */
++int rpmsg_init_vdev_ext(struct rpmsg_virtio_device *rvdev,
++			struct virtio_device *vdev,
++			rpmsg_ns_bind_cb ns_bind_cb,
++			struct metal_io_region *shm_io,
++			struct rpmsg_virtio_shm_pool *tx_shpool,
++			struct rpmsg_virtio_shm_pool *rx_shpool);
++
+ /**
+  * rpmsg_deinit_vdev - deinitialize rpmsg virtio device
+  *
+diff --git a/lib/rpmsg/rpmsg_virtio.c open-amp/lib/rpmsg/rpmsg_virtio.c
+index 30c3ab3..8a2c795 100644
+--- a/lib/rpmsg/rpmsg_virtio.c
++++ open-amp/lib/rpmsg/rpmsg_virtio.c
+@@ -604,11 +604,12 @@ int rpmsg_virtio_get_buffer_size(struct rpmsg_device *rdev)
+ 	return size;
+ }
+ 
+-int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+-		    struct virtio_device *vdev,
+-		    rpmsg_ns_bind_cb ns_bind_cb,
+-		    struct metal_io_region *shm_io,
+-		    struct rpmsg_virtio_shm_pool *shpool)
++int rpmsg_init_vdev_ext(struct rpmsg_virtio_device *rvdev,
++			struct virtio_device *vdev,
++			rpmsg_ns_bind_cb ns_bind_cb,
++			struct metal_io_region *shm_io,
++			struct rpmsg_virtio_shm_pool *tx_shpool,
++			struct rpmsg_virtio_shm_pool *rx_shpool)
+ {
+ 	struct rpmsg_device *rdev;
+ 	const char *vq_names[RPMSG_NUM_VRINGS];
+@@ -654,11 +655,11 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 		 * Since device is RPMSG Remote so we need to manage the
+ 		 * shared buffers. Create shared memory pool to handle buffers.
+ 		 */
+-		if (!shpool)
++		if (!tx_shpool || !rx_shpool)
+ 			return RPMSG_ERR_PARAM;
+-		if (!shpool->size)
++		if (!tx_shpool->size || !rx_shpool->size)
+ 			return RPMSG_ERR_NO_BUFF;
+-		rvdev->shpool = shpool;
++		rvdev->shpool = tx_shpool;
+ 
+ 		vq_names[0] = "rx_vq";
+ 		vq_names[1] = "tx_vq";
+@@ -670,7 +671,8 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ #endif /*!VIRTIO_SLAVE_ONLY*/
+ 
+ #ifndef VIRTIO_MASTER_ONLY
+-	(void)shpool;
++	(void)tx_shpool;
++	(void)rx_shpool;
+ 	if (role == RPMSG_REMOTE) {
+ 		vq_names[0] = "tx_vq";
+ 		vq_names[1] = "rx_vq";
+@@ -711,7 +713,7 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 		vqbuf.len = rvdev->config.txbuf_size;
+ 		for (idx = 0; idx < rvdev->rvq->vq_nentries; idx++) {
+ 			/* Initialize TX virtqueue buffers for remote device */
+-			buffer = rpmsg_virtio_shm_pool_get_buffer(shpool,
++			buffer = rpmsg_virtio_shm_pool_get_buffer(rx_shpool,
+ 						rvdev->config.txbuf_size);
+ 
+ 			if (!buffer) {
+@@ -757,6 +759,15 @@ int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
+ 	return status;
+ }
+ 
++int rpmsg_init_vdev(struct rpmsg_virtio_device *rvdev,
++		    struct virtio_device *vdev,
++		    rpmsg_ns_bind_cb ns_bind_cb,
++		    struct metal_io_region *shm_io,
++		    struct rpmsg_virtio_shm_pool *shpool)
++{
++	return rpmsg_init_vdev_ext(rvdev, vdev, ns_bind_cb, shm_io, shpool, shpool);
++}
++
+ void rpmsg_deinit_vdev(struct rpmsg_virtio_device *rvdev)
+ {
+ 	struct metal_list *node;
+-- 
+2.25.1
+
