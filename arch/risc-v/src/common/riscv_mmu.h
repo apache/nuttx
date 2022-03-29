@@ -49,6 +49,7 @@
 /* satp address to PPN translation */
 
 #define SATP_ADDR_TO_PPN(_addr) ((_addr) >> RV_MMU_PAGE_SHIFT)
+#define SATP_PPN_TO_ADDR(_ppn)  ((_ppn)  << RV_MMU_PAGE_SHIFT)
 
 /* Common Page Table Entry (PTE) bits */
 
@@ -271,6 +272,25 @@ static inline uintptr_t mmu_pte_to_paddr(uintptr_t pte)
 }
 
 /****************************************************************************
+ * Name: mmu_get_satp_pgbase
+ *
+ * Description:
+ *   Utility function to read the base page table physical address
+ *
+ * Returned Value:
+ *   Physical address of the current base page table
+ *
+ ****************************************************************************/
+
+static inline uintptr_t mmu_get_satp_pgbase(void)
+{
+  uintptr_t ppn;
+  ppn = mmu_read_satp();
+  ppn = ((ppn >> SATP_PPN_SHIFT) & SATP_PPN_MASK);
+  return SATP_PPN_TO_ADDR(ppn);
+}
+
+/****************************************************************************
  * Name: mmu_ln_setentry
  *
  * Description:
@@ -310,6 +330,26 @@ void mmu_ln_setentry(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
 
 uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
                           uintptr_t vaddr);
+
+/****************************************************************************
+ * Name: mmu_ln_restore
+ *
+ * Description:
+ *   Restore a level n translation table entry.
+ *
+ * Input Parameters:
+ *   ptlevel - The translation table level, amount of levels is
+ *     MMU implementation specific
+ *   lnvaddr - The virtual address of the beginning of the page table at
+ *     level n
+ *   vaddr - The virtual address to get pte for. Must be aligned to a PPN
+ *     address boundary which is dependent on the level of the entry
+ *   entry - Entry to restore, previously obtained by mmu_ln_getentry
+ *
+ ****************************************************************************/
+
+void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
+                    uintptr_t entry);
 
 /****************************************************************************
  * Name: mmu_ln_map_region

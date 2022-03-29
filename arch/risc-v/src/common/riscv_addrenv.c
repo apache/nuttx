@@ -397,9 +397,9 @@ int up_addrenv_create(size_t textsize, size_t datasize, size_t heapsize,
       goto errout;
     }
 
-  /* Map each region in turn FIXME: Remove W-flag after .elf is loaded */
+  /* Map each region in turn */
 
-  ret = create_region(addrenv, textbase, textsize, MMU_UTEXT_FLAGS | PTE_W);
+  ret = create_region(addrenv, textbase, textsize, MMU_UTEXT_FLAGS);
 
   if (ret < 0)
     {
