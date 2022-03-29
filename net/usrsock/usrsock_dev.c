@@ -775,6 +775,8 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
   FAR struct inode *inode = filep->f_inode;
   FAR struct usrsock_conn_s *conn;
   FAR struct usrsockdev_s *dev;
+  FAR const struct usrsock_message_common_s *common =
+                   (FAR const struct usrsock_message_common_s *)buffer;
   size_t origlen = len;
   ssize_t ret = 0;
 
@@ -859,7 +861,7 @@ static ssize_t usrsockdev_write(FAR struct file *filep,
 
           /* Done with data response. */
 
-          usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+          usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE | common->events);
         }
     }
 
