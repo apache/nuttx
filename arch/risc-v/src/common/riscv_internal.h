@@ -68,13 +68,8 @@
  * only a reference stored in TCB.
  */
 
-#ifdef CONFIG_ARCH_FPU
-#define riscv_savestate(regs) (regs = (uintptr_t *)CURRENT_REGS, riscv_savefpu(regs))
-#define riscv_restorestate(regs) (CURRENT_REGS = regs, riscv_restorefpu((uintptr_t *)CURRENT_REGS))
-#else
 #define riscv_savestate(regs) (regs = (uintptr_t *)CURRENT_REGS)
 #define riscv_restorestate(regs) (CURRENT_REGS = regs)
-#endif
 
 #define _START_TEXT  &_stext
 #define _END_TEXT    &_etext

@@ -25,6 +25,8 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 
+#include "riscv_internal.h"
+
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
@@ -96,13 +98,18 @@ exception_common:
   addi       s0, sp, XCPTCONTEXT_SIZE
   REGSTORE   s0, REG_X2(sp)       /* original SP      */
 
-  /* Setup arg0(exception cause), arg1(context) */
-
-  csrr       a0, mcause           /* exception cause  */
   csrr       s0, mepc
   REGSTORE   s0, REG_EPC(sp)      /* exception PC     */
 
-  mv         a1, sp      /* context = sp */
+#ifdef CONFIG_ARCH_FPU
+  mv         a0, sp
+  jal        x1, riscv_savefpu    /* save FPU context */
+#endif
+
+  /* Setup arg0(exception cause), arg1(context) */
+
+  csrr       a0, mcause           /* exception cause  */
+  mv         a1, sp               /* context = sp */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Load mhartid (cpuid) */
@@ -137,6 +144,9 @@ exception_common:
   addi       sp, sp, XCPTCONTEXT_SIZE
 #endif
 
+#ifdef CONFIG_ARCH_FPU
+  jal        x1, riscv_restorefpu /* restore FPU context */
+#endif
 
   /* If context switch is needed, return a new sp     */
 
