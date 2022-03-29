@@ -257,6 +257,10 @@ config RISCV_TOOLCHAIN_GNU_RVGW
 
 endchoice
 
+config ARCH_CPU_COUNT
+    int "Amount of CPUs in SoC"
+    default 5 if ARCH_CHIP_MPFS
+
 source "arch/risc-v/src/opensbi/Kconfig"
 
 if ARCH_CHIP_FE310
