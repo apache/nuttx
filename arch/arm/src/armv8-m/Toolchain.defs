@@ -150,6 +150,17 @@ ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
+ARCHCFLAGS =
+ARCHCXXFLAGS =
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 # Default toolchain
 
 CC = $(CROSSDEV)gcc
