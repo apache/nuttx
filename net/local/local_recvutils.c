@@ -78,14 +78,22 @@ int local_fifo_read(FAR struct file *filep, FAR uint8_t *buf,
       nread = file_read(filep, buf, remaining);
       if (nread < 0)
         {
-          if (nread != -EINTR)
+          ret = (int)nread;
+
+          if (nread == -EINTR)
             {
-              ret = (int)nread;
+              ninfo("Ignoring signal\n");
+              continue;
+            }
+          else if (nread == -EAGAIN)
+            {
+              goto errout;
+            }
+          else
+            {
               nerr("ERROR: file_read() failed: %d\n", ret);
               goto errout;
             }
-
-          ninfo("Ignoring signal\n");
         }
       else if (nread == 0)
         {
