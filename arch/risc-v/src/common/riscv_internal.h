@@ -249,6 +249,11 @@ int riscv_check_pmp_access(uintptr_t attr, uintptr_t base, uintptr_t size);
 int riscv_configured_pmp_regions(void);
 int riscv_next_free_pmp_region(void);
 
+/* RISC-V Machine Timer */
+
+void riscv_init_mtimer(uintptr_t mcmpbase, uintptr_t mtime, uint64_t tick);
+void riscv_reload_mtimecmp(void);
+
 /* Power management *********************************************************/
 
 #ifdef CONFIG_PM
