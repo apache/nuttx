@@ -26,16 +26,13 @@
 
 #include <stdint.h>
 #include <time.h>
-#include <debug.h>
 
-#include <nuttx/arch.h>
 #include <arch/board/board.h>
-#include <nuttx/spinlock.h>
-
-#include "riscv_internal.h"
 
 #include "mpfs.h"
 #include "mpfs_clockconfig.h"
+
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -47,41 +44,9 @@
  * Private Data
  ****************************************************************************/
 
-static bool _b_tick_started;
-static uint64_t *_mtime_cmp;
-
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name:  mpfs_reload_mtimecmp
- ****************************************************************************/
-
-static void mpfs_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!_b_tick_started)
-    {
-      _b_tick_started = true;
-      current = getreg64(MPFS_CLINT_MTIME);
-    }
-  else
-    {
-      current = getreg64(_mtime_cmp);
-    }
-
-  uint64_t tick = TICK_COUNT;
-  next = current + tick;
-
-  putreg64(next, _mtime_cmp);
-
-  spin_unlock_irqrestore(NULL, flags);
-}
 
 /****************************************************************************
  * Name:  mpfs_timerisr
@@ -89,7 +54,9 @@ static void mpfs_reload_mtimecmp(void)
 
 static int mpfs_timerisr(int irq, void *context, void *arg)
 {
-  mpfs_reload_mtimecmp();
+  /* (Re-)load the timer compare match register */
+
+  riscv_reload_mtimecmp();
 
   /* Process timer interrupt */
 
@@ -102,6 +69,11 @@ static int mpfs_timerisr(int irq, void *context, void *arg)
  * Public Functions
  ****************************************************************************/
 
+void mpfs_mtimer_init(void)
+{
+  riscv_init_mtimer(MPFS_CLINT_MTIMECMP0, MPFS_CLINT_MTIME, TICK_COUNT);
+}
+
 /****************************************************************************
  * Name: up_timer_initialize
  *
@@ -113,20 +85,14 @@ static int mpfs_timerisr(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  /* what is our timecmp address for this hart */
+  mpfs_mtimer_init();
 
-  uintptr_t hart_id = riscv_mhartid();
-  _mtime_cmp = (uint64_t *)MPFS_CLINT_MTIMECMP0 + hart_id;
+  /* Reload the timer */
 
-  /* Attach timer interrupt handler */
+  riscv_reload_mtimecmp();
 
-  irq_attach(RISCV_IRQ_MTIMER, mpfs_timerisr, NULL);
+  /* Attach and enable the timer */
 
-  /* Reload CLINT mtimecmp */
-
-  mpfs_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  irq_attach(RISCV_IRQ_TIMER, mpfs_timerisr, NULL);
+  up_enable_irq(RISCV_IRQ_TIMER);
 }
