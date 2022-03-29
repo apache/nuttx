@@ -106,6 +106,8 @@ const struct tcbinfo_s g_tcbinfo =
   TCB_STATE_OFF,
   TCB_PRI_OFF,
   TCB_NAME_OFF,
+  TCB_REGS_OFF,
+  17,
   XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,

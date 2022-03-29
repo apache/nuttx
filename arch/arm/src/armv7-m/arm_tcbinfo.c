@@ -53,17 +53,17 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_R15),
   TCB_REG_OFF(REG_XPSR),
 
-  0,                            /* msp */
+  UINT16_MAX,                         /* msp */
   TCB_REG_OFF(REG_R13),
 #ifdef CONFIG_ARMV7M_USEBASEPRI
-  0,                            /* primask */
+  UINT16_MAX,                         /* primask */
   TCB_REG_OFF(REG_BASEPRI),
 #else
   TCB_REG_OFF(REG_PRIMASK),
-  0,                            /* basepri */
+  UINT16_MAX,                         /* basepri */
 #endif
-  0,                            /* faultmask */
-  0,                            /* control */
+  UINT16_MAX,                         /* faultmask */
+  UINT16_MAX,                         /* control */
 
 #ifdef CONFIG_ARCH_FPU
   TCB_REG_OFF(REG_S0),
@@ -112,6 +112,8 @@ const struct tcbinfo_s g_tcbinfo =
   TCB_STATE_OFF,
   TCB_PRI_OFF,
   TCB_NAME_OFF,
+  TCB_REGS_OFF,
+  17,
   XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,

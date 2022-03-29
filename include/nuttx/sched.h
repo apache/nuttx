@@ -188,12 +188,13 @@
 #  define TCB_PID_OFF                offsetof(struct tcb_s, pid)
 #  define TCB_STATE_OFF              offsetof(struct tcb_s, task_state)
 #  define TCB_PRI_OFF                offsetof(struct tcb_s, sched_priority)
+#  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
 #if CONFIG_TASK_NAME_SIZE > 0
 #  define TCB_NAME_OFF               offsetof(struct tcb_s, name)
 #else
 #  define TCB_NAME_OFF               0
 #endif
-#  define TCB_REG_OFF(reg)           offsetof(struct tcb_s, xcp.regs[reg])
+#  define TCB_REG_OFF(reg)           (reg * sizeof(uint32_t))
 #endif
 
 /****************************************************************************
@@ -771,13 +772,16 @@ begin_packed_struct struct tcbinfo_s
   uint16_t state_off;                    /* Offset of tcb.task_state        */
   uint16_t pri_off;                      /* Offset of tcb.sched_priority    */
   uint16_t name_off;                     /* Offset of tcb.name              */
-  uint16_t reg_num;                      /* Num of regs in tcbinfo.reg_offs */
+  uint16_t regs_off;                     /* Offset of tcb.regs              */
+  uint16_t basic_num;                    /* Num of genernal regs            */
+  uint16_t total_num;                    /* Num of regs in tcbinfo.reg_offs */
 
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
    * Please refer:
    * https://sourceware.org/gdb/current/onlinedocs/gdb/ARM-Features.html
-   * https://sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features.html
-   * value 0: This regsiter was not priovided by NuttX
+   * https:
+   * //sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features.html
+   * value UINT16_MAX: This regsiter was not priovided by NuttX
    */
 
   begin_packed_struct

@@ -35,7 +35,7 @@
 
 static const uint16_t g_reg_offs[] =
 {
-  0,                       /* x0 */
+  UINT16_MAX,                       /* x0 */
   TCB_REG_OFF(REG_X1_NDX),
   TCB_REG_OFF(REG_X2_NDX),
   TCB_REG_OFF(REG_X3_NDX),
@@ -102,8 +102,8 @@ static const uint16_t g_reg_offs[] =
   TCB_REG_OFF(REG_F29_NDX),
   TCB_REG_OFF(REG_F30_NDX),
   TCB_REG_OFF(REG_F31_NDX),
-  0,                        /* fflags */
-  0,                        /* frm */
+  UINT16_MAX,                      /* fflags */
+  UINT16_MAX,                      /* frm */
   TCB_REG_OFF(REG_FCSR_NDX),
 #endif
 };
@@ -118,6 +118,8 @@ const struct tcbinfo_s g_tcbinfo =
   TCB_STATE_OFF,
   TCB_PRI_OFF,
   TCB_NAME_OFF,
+  TCB_REGS_OFF,
+  33,
   XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,
