@@ -223,7 +223,6 @@ int riscv_swint(int irq, void *context, void *arg)
         {
           DEBUGASSERT(regs[REG_A1] != 0);
           CURRENT_REGS = (uintptr_t *)regs[REG_A1];
-          riscv_restorefpu((uintptr_t *)CURRENT_REGS);
         }
         break;
 
@@ -247,8 +246,6 @@ int riscv_swint(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_A1] != 0 && regs[REG_A2] != 0);
-          riscv_savefpu(regs);
-          riscv_restorefpu((uintptr_t *)regs[REG_A2]);
           *(uintptr_t **)regs[REG_A1] = (uintptr_t *)regs;
           CURRENT_REGS = (uintptr_t *)regs[REG_A2];
         }
