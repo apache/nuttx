@@ -712,8 +712,6 @@ static int bl602_spi_cmddata(struct spi_dev_s *dev,
   spiinfo("devid: %" PRIu32 " CMD: %s\n", devid, cmd ? "command" :
           "data");
 
-#if defined(CONFIG_LCD_ST7735) || defined(CONFIG_LCD_ST7789) || \
-    defined(CONFIG_LCD_GC9A01)
   if (devid == SPIDEV_DISPLAY(0))
     {
       gpio_pinset_t gpio;
@@ -738,7 +736,6 @@ static int bl602_spi_cmddata(struct spi_dev_s *dev,
 
       return OK;
     }
-#endif
 
   spierr("SPI cmddata not supported\n");
   DEBUGPANIC();
