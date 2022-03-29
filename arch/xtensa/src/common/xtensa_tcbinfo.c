@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/arm/src/armv7-a/arm_tcbinfo.c
+ * arch/xtensa/src/common/xtensa_tcbinfo.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -24,8 +24,6 @@
 
 #include <nuttx/config.h>
 
-#ifdef CONFIG_DEBUG_TCBINFO
-
 #include <nuttx/sched.h>
 #include <arch/irq.h>
 
@@ -35,65 +33,24 @@
 
 static const uint16_t g_reg_offs[] =
 {
-  TCB_REG_OFF(REG_R0),
-  TCB_REG_OFF(REG_R1),
-  TCB_REG_OFF(REG_R2),
-  TCB_REG_OFF(REG_R3),
-  TCB_REG_OFF(REG_R4),
-  TCB_REG_OFF(REG_R5),
-  TCB_REG_OFF(REG_R6),
-  TCB_REG_OFF(REG_R7),
-  TCB_REG_OFF(REG_R8),
-  TCB_REG_OFF(REG_R9),
-  TCB_REG_OFF(REG_R10),
-  TCB_REG_OFF(REG_R11),
-  TCB_REG_OFF(REG_R12),
-  TCB_REG_OFF(REG_R13),
-  TCB_REG_OFF(REG_R14),
-  TCB_REG_OFF(REG_R15),
-  TCB_REG_OFF(REG_CPSR),
-
-#ifdef CONFIG_ARCH_FPU
-  TCB_REG_OFF(REG_D0),
-  TCB_REG_OFF(REG_D1),
-  TCB_REG_OFF(REG_D2),
-  TCB_REG_OFF(REG_D3),
-  TCB_REG_OFF(REG_D4),
-  TCB_REG_OFF(REG_D5),
-  TCB_REG_OFF(REG_D6),
-  TCB_REG_OFF(REG_D7),
-  TCB_REG_OFF(REG_D8),
-  TCB_REG_OFF(REG_D9),
-  TCB_REG_OFF(REG_D10),
-  TCB_REG_OFF(REG_D11),
-  TCB_REG_OFF(REG_D12),
-  TCB_REG_OFF(REG_D13),
-  TCB_REG_OFF(REG_D14),
-  TCB_REG_OFF(REG_D15),
-#endif
-
-#ifdef CONFIG_ARM_DPFPU32
-  TCB_REG_OFF(REG_D16),
-  TCB_REG_OFF(REG_D17),
-  TCB_REG_OFF(REG_D18),
-  TCB_REG_OFF(REG_D19),
-  TCB_REG_OFF(REG_D20),
-  TCB_REG_OFF(REG_D21),
-  TCB_REG_OFF(REG_D22),
-  TCB_REG_OFF(REG_D23),
-  TCB_REG_OFF(REG_D24),
-  TCB_REG_OFF(REG_D25),
-  TCB_REG_OFF(REG_D26),
-  TCB_REG_OFF(REG_D27),
-  TCB_REG_OFF(REG_D28),
-  TCB_REG_OFF(REG_D29),
-  TCB_REG_OFF(REG_D30),
-  TCB_REG_OFF(REG_D31),
-#endif
-
-#ifdef CONFIG_ARCH_FPU
-  TCB_REG_OFF(REG_FPSCR),
-#endif
+  TCB_REG_OFF(REG_PC),
+  TCB_REG_OFF(REG_PS),
+  TCB_REG_OFF(REG_A0),
+  TCB_REG_OFF(REG_A1),
+  TCB_REG_OFF(REG_A2),
+  TCB_REG_OFF(REG_A3),
+  TCB_REG_OFF(REG_A4),
+  TCB_REG_OFF(REG_A5),
+  TCB_REG_OFF(REG_A6),
+  TCB_REG_OFF(REG_A7),
+  TCB_REG_OFF(REG_A8),
+  TCB_REG_OFF(REG_A9),
+  TCB_REG_OFF(REG_A10),
+  TCB_REG_OFF(REG_A11),
+  TCB_REG_OFF(REG_A12),
+  TCB_REG_OFF(REG_A13),
+  TCB_REG_OFF(REG_A14),
+  TCB_REG_OFF(REG_A15),
 };
 
 /****************************************************************************
@@ -107,14 +64,12 @@ const struct tcbinfo_s g_tcbinfo =
   .pri_off   = TCB_PRI_OFF,
   .name_off  = TCB_NAME_OFF,
   .regs_off  = TCB_REGS_OFF,
-  .basic_num = 17,
+  .basic_num = XCPTCONTEXT_REGS,
   .total_num = XCPTCONTEXT_REGS,
   {
     .p = g_reg_offs,
   },
 };
-
-#endif
 
 /****************************************************************************
  * Public Functions

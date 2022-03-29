@@ -778,8 +778,8 @@ begin_packed_struct struct tcbinfo_s
   /* Offset pointer of xcp.regs, order in GDB org.gnu.gdb.xxx feature.
    * Please refer:
    * https://sourceware.org/gdb/current/onlinedocs/gdb/ARM-Features.html
-   * https:
-   * //sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features.html
+   * https://sourceware.org/gdb/current/onlinedocs/gdb/RISC_002dV-Features
+   * -.html
    * value UINT16_MAX: This regsiter was not priovided by NuttX
    */
 
