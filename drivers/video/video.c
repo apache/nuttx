@@ -1324,6 +1324,16 @@ static int video_cancel_dqbuf(FAR struct video_mng_s *vmng,
   return OK;
 }
 
+static bool validate_clip_range(int32_t pos, uint32_t c_sz, uint16_t frm_sz)
+{
+  if ((pos < 0) || (c_sz > frm_sz) || (pos + c_sz > frm_sz))
+    {
+      return false;
+    }
+
+  return true;
+}
+
 static bool validate_clip_setting(FAR struct v4l2_rect *clip,
                                   FAR video_format_t *fmt)
 {
@@ -1333,10 +1343,8 @@ static bool validate_clip_setting(FAR struct v4l2_rect *clip,
 
   /* Not permit the setting which do not fit inside frame size. */
 
-  if ((clip->left < 0) ||
-      (clip->top  < 0) ||
-      (clip->left + clip->width > fmt->width) ||
-      (clip->top + clip->height > fmt->height))
+  if (!validate_clip_range(clip->left, clip->width,  fmt->width) ||
+      !validate_clip_range(clip->top,  clip->height, fmt->height))
     {
       ret = false;
     }
