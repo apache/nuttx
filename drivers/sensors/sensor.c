@@ -46,8 +46,7 @@
 /* Device naming ************************************************************/
 
 #define ROUNDUP(x, esize)  ((x + (esize - 1)) / (esize)) * (esize)
-#define DEVNAME_FMT        "/dev/sensor/%s%s%d"
-#define DEVNAME_MAX        64
+#define DEVNAME_FMT        "/dev/sensor/sensor_%s%s%d"
 #define DEVNAME_UNCAL      "_uncal"
 
 /****************************************************************************
@@ -932,11 +931,11 @@ void sensor_remap_vector_raw16(FAR const int16_t *in, FAR int16_t *out,
 
 int sensor_register(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  char path[DEVNAME_MAX];
+  char path[PATH_MAX];
 
   DEBUGASSERT(lower != NULL);
 
-  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
+  snprintf(path, PATH_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
            devno);
@@ -1059,9 +1058,9 @@ drv_err:
 
 void sensor_unregister(FAR struct sensor_lowerhalf_s *lower, int devno)
 {
-  char path[DEVNAME_MAX];
+  char path[PATH_MAX];
 
-  snprintf(path, DEVNAME_MAX, DEVNAME_FMT,
+  snprintf(path, PATH_MAX, DEVNAME_FMT,
            g_sensor_info[lower->type].name,
            lower->uncalibrated ? DEVNAME_UNCAL : "",
            devno);
