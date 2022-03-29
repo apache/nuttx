@@ -72,8 +72,10 @@
 
 /* Delay in ms between polling OTP_BOOT_DONE */
 
-#define CS35L41_POLL_OTP_BOOT_DONE_MS                     (10)
-#define CS35L41_POLL_OTP_BOOT_DONE_MAX                    (10)
+#define CS35L41_POLL_OTP_BOOT_DONE_MS         (10)
+#define CS35L41_POLL_OTP_BOOT_DONE_MAX        (10)
+
+#define CS35L41B_WAKE_UP(x)                   (priv->lower->wakeup_pin_set(x))
 
 /****************************************************************************
  * Private Type Declarations
@@ -362,8 +364,8 @@ static const uint32_t g_cs35l41_hibernate_patch[] =
   IRQ1_IRQ1_MASK_1_REG,                      0xffffffff,
   IRQ2_IRQ2_EINT_2_REG,                      (1 << 20),
   IRQ1_IRQ1_EINT_2_REG,                      (1 << 21),
-  PWRMGT_WAKESRC_CTL,                        0x0044,
-  PWRMGT_WAKESRC_CTL,                        0x0144,
+  0x2800820,                                 0x01,
+  0x2800824,                                 0x00,
   DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG, CS35L41_DSP_MBOX_CMD_HIBERNATE,
 };
 
@@ -771,11 +773,14 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
 
           if (!priv->is_calibrating)
             {
+              CS35L41B_WAKE_UP(true);
+              nxsig_usleep(1000);
               if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
                 {
                   auderr("power wake up error\n");
                   return ERROR;
                 }
+              CS35L41B_WAKE_UP(false);
             }
 
           if (cs35l41b_set_channel(priv, CHANNEL_LEFT_RIGHT) == ERROR)
@@ -2885,6 +2890,8 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
       auderr("ERROR: CS35L41B reset_en\n");
       return NULL;
     }
+
+  lower->wakeup_pin_set(false);
 
   /* wait 2 ms for stable */
 

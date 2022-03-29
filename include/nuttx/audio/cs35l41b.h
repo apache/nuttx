@@ -44,6 +44,7 @@ struct cs35l41b_lower_s
   CODE int (*reset_en)(bool flag);
   CODE int (*int_pin_set)();
   CODE int (*get_caliberate_result)(FAR uint32_t *value);
+  CODE int (*wakeup_pin_set)(bool value);
 };
 
 /****************************************************************************
