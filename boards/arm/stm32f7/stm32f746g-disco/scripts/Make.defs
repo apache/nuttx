@@ -30,14 +30,12 @@ ifneq ($(CONFIG_DEBUG_NOOPT),y)
   ARCHOPTIMIZATION += $(MAXOPTIMIZATION) -fno-strict-aliasing
 endif
 
-ARCHCFLAGS = -fno-common
-ARCHCXXFLAGS = -fno-common -fno-exceptions -fcheck-new
+ARCHCFLAGS += -fno-common
+ARCHCXXFLAGS += -fno-common
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN_CLANGL),y)
   ARCHCFLAGS += -nostdlib -ffreestanding
   ARCHCXXFLAGS += -nostdlib -ffreestanding
-else
-  ARCHCXXFLAGS += -fno-rtti
 endif
 
 ifeq ($(CONFIG_DEBUG_SYMBOLS),y)

@@ -141,6 +141,17 @@ ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),GNU_EABI)
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
 endif
 
+ARCHCFLAGS =
+ARCHCXXFLAGS =
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 # Clang toolchain
 
 ifeq ($(CONFIG_ARMV7M_TOOLCHAIN),CLANG)
