@@ -33,7 +33,7 @@
 memset:
 #ifdef __ARM_FEATURE_MVE
 	vmov.u8	q0, #0
-	vadd.u8	q0, r1
+	vadd.u8	q0, q0, r1
 	mov	r3, lr
 	mov	r1, r0
 	dlstp.8	lr, r2
