@@ -1841,6 +1841,8 @@ static int isx012_get_value(uint32_t id,
   uint16_t   read_src;
   uint16_t   *read_dst;
   int        ret = OK;
+  uint16_t   exposure_time_lsb;
+  uint16_t   exposure_time_msb;
 
   ASSERT(value);
 
@@ -2001,6 +2003,21 @@ static int isx012_get_value(uint32_t id,
                                        ISX012_REG_EXPOSURETIME,
                                        ISX012_SIZE_EXPOSURETIME);
 
+        if (value->value32 == REGVAL_EXPOSURETIME_AUTO)
+          {
+            exposure_time_lsb = isx012_getreg
+                                (priv,
+                                 ISX012_REG_EXPOSUREAUTOVALUE_LSB,
+                                 ISX012_SIZE_EXPOSUREAUTOVALUE);
+            exposure_time_msb = isx012_getreg
+                                (priv,
+                                 ISX012_REG_EXPOSUREAUTOVALUE_MSB,
+                                 ISX012_SIZE_EXPOSUREAUTOVALUE);
+
+            value->value32 = (uint16_t)(((exposure_time_msb << 16)
+                                         | exposure_time_lsb)
+                                        / ISX012_UNIT_EXPOSURETIME_US);
+          }
         break;
 
       case IMGSENSOR_ID_AUTO_N_PRESET_WB:
