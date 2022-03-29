@@ -113,6 +113,23 @@ uintptr_t mmu_ln_getentry(uint32_t ptlevel, uintptr_t lnvaddr,
   return lntable[index];
 }
 
+void mmu_ln_restore(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t vaddr,
+                    uintptr_t entry)
+{
+  uintptr_t *lntable = (uintptr_t *)lnvaddr;
+  uint32_t  index;
+
+  DEBUGASSERT(ptlevel > 0 && ptlevel <= RV_MMU_PT_LEVELS);
+
+  index = (vaddr >> RV_MMU_VADDR_SHIFT(ptlevel)) & RV_MMU_VPN_MASK;
+
+  lntable[index] = entry;
+
+  /* Update with memory by flushing the cache(s) */
+
+  mmu_invalidate_tlb_by_vaddr(vaddr);
+}
+
 void mmu_ln_map_region(uint32_t ptlevel, uintptr_t lnvaddr, uintptr_t paddr,
                        uintptr_t vaddr, size_t size, uint32_t mmuflags)
 {

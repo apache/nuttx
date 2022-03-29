@@ -146,6 +146,92 @@ int elf_addrenv_alloc(FAR struct elf_loadinfo_s *loadinfo, size_t textsize,
 }
 
 /****************************************************************************
+ * Name: elf_addrenv_restore
+ *
+ * Description:
+ *   Restore the address environment before elf_addrenv_select() was called..
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int elf_addrenv_select(FAR struct elf_loadinfo_s *loadinfo)
+{
+  int ret;
+
+  /* Instantiate the new address environment */
+
+  ret = up_addrenv_select(&loadinfo->addrenv, &loadinfo->oldenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_select failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Allow write access to .text */
+
+  ret = up_addrenv_text_enable_write(&loadinfo->addrenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_text_enable_write failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
+ * Name: elf_addrenv_free
+ *
+ * Description:
+ *   Release the address environment previously created by
+ *   elf_addrenv_alloc().  This function  is called only under certain error
+ *   conditions after the module has been loaded but not yet started.
+ *   After the module has been started, the address environment will
+ *   automatically be freed when the module exits.
+ *
+ * Input Parameters:
+ *   loadinfo - Load state information
+ *
+ * Returned Value:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int elf_addrenv_restore(FAR struct elf_loadinfo_s *loadinfo)
+{
+  int ret;
+
+  /* Remove write access to .text */
+
+  ret = up_addrenv_text_disable_write(&loadinfo->addrenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_text_disable_write failed: %d\n", ret);
+      return ret;
+    }
+
+  /* Restore the old address environment */
+
+  ret = up_addrenv_restore(&loadinfo->oldenv);
+  if (ret < 0)
+    {
+      berr("ERROR: up_addrenv_restore failed: %d\n", ret);
+      return ret;
+    }
+
+  return OK;
+}
+#endif
+
+/****************************************************************************
  * Name: elf_addrenv_free
  *
  * Description:

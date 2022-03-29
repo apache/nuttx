@@ -1186,6 +1186,44 @@ int up_addrenv_detach(FAR struct task_group_s *group, FAR struct tcb_s *tcb);
 #endif
 
 /****************************************************************************
+ * Name: up_addrenv_text_enable_write
+ *
+ * Description:
+ *   Temporarily enable write access to the .text section. This must be
+ *   called prior to loading the process code into memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be modified.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int up_addrenv_text_enable_write(FAR group_addrenv_t *addrenv);
+#endif
+
+/****************************************************************************
+ * Name: up_addrenv_text_disable_write
+ *
+ * Description:
+ *   Disable write access to the .text section. This must be called after the
+ *   process code is loaded into memory.
+ *
+ * Input Parameters:
+ *   addrenv - The address environment to be modified.
+ *
+ * Returned Value:
+ *   Zero (OK) on success; a negated errno value on failure.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_ADDRENV
+int up_addrenv_text_disable_write(FAR group_addrenv_t *addrenv);
+#endif
+
+/****************************************************************************
  * Name: up_addrenv_ustackalloc
  *
  * Description:

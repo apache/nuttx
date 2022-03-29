@@ -99,7 +99,7 @@ CMN_CSRCS += riscv_addrenv_kstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_ADDRENV),y)
-CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c
+CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c riscv_addrenv_perms.c
 endif
 
 ifeq ($(CONFIG_MM_PGALLOC),y)
