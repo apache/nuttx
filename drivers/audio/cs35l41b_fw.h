@@ -25,7 +25,7 @@
  * Public Function Prototypes
  ****************************************************************************/
 
-int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv);
+int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv, int mode);
 int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv);
 uint32_t cs35l41b_get_calibration_result(void);
 int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv);

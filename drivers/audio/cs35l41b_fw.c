@@ -163,7 +163,7 @@ typedef struct
 {
   union
     {
-      int32_t words[CS35L41_DSP_STATUS_WORDS_TOTAL];
+      uint32_t words[CS35L41_DSP_STATUS_WORDS_TOTAL];
       struct
         {
           uint32_t halo_state;
@@ -819,15 +819,16 @@ int cs35l41b_set_boot_configuration(FAR struct cs35l41b_dev_s *priv)
 int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t  i;
-  int32_t   regval;
+  uint32_t  regval;
   uint32_t  times;
+  int ret = OK;
 
   for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
     {
-      g_dsp_status.data.words[i] = cs35l41b_read_register(priv,
-      get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
+      ret = cs35l41b_read_register(priv, &g_dsp_status.data.words[i],
+            get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
 
-      if (g_dsp_status.data.words[i] < 0)
+      if (ret < 0)
         {
           auderr("cs35l41b read register failed\n");
           return ERROR;
@@ -842,9 +843,9 @@ int cs35l41b_is_dsp_processing(FAR struct cs35l41b_dev_s *priv)
     {
       for (i = 0; i < CS35L41_DSP_STATUS_WORDS_TOTAL; i++)
         {
-          regval = cs35l41b_read_register(priv,
-          get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
-          if (regval < 0)
+          ret = cs35l41b_read_register(priv, &regval,
+                get_symbol_link_address(g_cs35l41_dsp_status_controls[i]));
+          if (ret < 0)
             {
               auderr("cs35l41b read register failed\n");
               return ERROR;
@@ -923,22 +924,20 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
   int ret = OK;
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
-  val = cs35l41b_read_register(priv, address);
-  if (val < 0)
+  ret = cs35l41b_read_register(priv, &val, address);
+  if (ret < 0)
     {
       auderr("Error read register!\n");
-      ret = ERROR;
       goto error;
     }
 
   g_dsp_status.data.cal_r = val;
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_STATUS);
-  val = cs35l41b_read_register(priv, address);
-  if (val < 0)
+  ret = cs35l41b_read_register(priv, &val, address);
+  if (ret < 0)
     {
       auderr("Error read register!\n");
-      ret = ERROR;
       goto error;
     }
 
@@ -950,11 +949,10 @@ int cs35l41b_calibrate(FAR struct cs35l41b_dev_s *priv)
     }
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_CHECKSUM);
-  val = cs35l41b_read_register(priv, address);
-  if (val < 0)
+  ret = cs35l41b_read_register(priv, &val, address);
+  if (ret < 0)
     {
       auderr("Error read register!\n");
-      ret = ERROR;
       goto error;
     }
 
@@ -1009,6 +1007,11 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
   int ret;
   uint32_t value;
 
+  if (priv->is_calibrate_value_loaded)
+    {
+      return ERROR;
+    }
+
   if (priv->lower->get_caliberate_result(&value) != OK)
     {
       value = 0x1fb1;
@@ -1021,7 +1024,6 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
   ret = cs35l41b_write_register(priv, address, value);
   if (ret == ERROR)
     {
-      auderr("ERROR write CS35L41_SYM_CSPL_CAL_R register!\n");
       return ERROR;
     }
 
@@ -1030,7 +1032,6 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
                                 CS35L41_CAL_STATUS_CALIB_SUCCESS);
   if (ret == ERROR)
     {
-      auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
       return ERROR;
     }
 
@@ -1039,9 +1040,10 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
         (value + CS35L41_CAL_STATUS_CALIB_SUCCESS));
   if (ret == ERROR)
     {
-      auderr("ERROR write CS35L41_CAL_STATUS_CALIB_SUCCESS register!\n");
       return ERROR;
     }
+
+  priv->is_calibrate_value_loaded = true;
 
   return OK;
 }
@@ -1054,23 +1056,42 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
  *
  ****************************************************************************/
 
-int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv)
+int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv, int mode)
 {
+  if (mode == CS35L41_ASP_MODE)
+    {
+      priv->mode  = CS35L41_ASP_MODE;
+      priv->state = CS35L41_STATE_STANDBY;
+      return OK;
+    }
+
   if (cs35l41b_load_main_fw_process(priv) == ERROR)
     {
       return ERROR;
     }
 
-  if (!priv->is_calibrating)
+  if (mode == CS35L41_DSP_TUNE_MODE)
     {
+      priv->mode  = CS35L41_DSP_TUNE_MODE;
+
       if (cs35l41b_load_tune_process(priv) == ERROR)
         {
           return ERROR;
         }
     }
-  else
+  else if (mode == CS35L41_DSP_CAL_MODE)
     {
+      priv->mode  = CS35L41_DSP_CAL_MODE;
+
       if (cs35l41b_load_cal_process(priv) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+
+  if (priv->mode == CS35L41_DSP_TUNE_MODE)
+    {
+      if (cs35l41b_load_calibration_value(priv) == ERROR)
         {
           return ERROR;
         }
@@ -1080,6 +1101,8 @@ int cs35l41_dsp_boot(FAR struct cs35l41b_dev_s *priv)
     {
       return ERROR;
     }
+
+  priv->state = CS35L41_STATE_DSP_STANDBY;
 
   return OK;
 }

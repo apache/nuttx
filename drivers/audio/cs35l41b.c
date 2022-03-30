@@ -66,16 +66,28 @@
 #define IO_GET_CHIP_ID              3
 #define IO_SET_CALIBRATED           4
 #define IO_GET_CALIBRATED           5
+#define IO_CALIBERATE_REBOOT        6
+#define IO_SET_ASP_GAIN             7
+#define IO_GET_ASP_GAIN             8
+#define IO_SET_DSP_GAIN             9
+#define IO_GET_DSP_GAIN             10
 
 #define CALIBRATED_STATUS_OK        1
 #define CALIBRATED_STATUS_ERROR     2
 
 /* Delay in ms between polling OTP_BOOT_DONE */
 
-#define CS35L41_POLL_OTP_BOOT_DONE_MS         (10)
-#define CS35L41_POLL_OTP_BOOT_DONE_MAX        (10)
+#define CS35L41_POLL_OTP_BOOT_DONE_MS    (10)
+#define CS35L41_POLL_OTP_BOOT_DONE_MAX   (10)
 
-#define CS35L41B_WAKE_UP(x)                   (priv->lower->wakeup_pin_set(x))
+#define CS35L41B_WAKE_UP_PIN_HIGH()      (priv->lower->wakeup_pin_set(true))
+#define CS35L41B_WAKE_UP_PIN_LOW()       (priv->lower->wakeup_pin_set(false))
+
+#define CS35L41B_GPIO_WAKE_UP()          do {                              \
+                                              CS35L41B_WAKE_UP_PIN_HIGH(); \
+                                              nxsig_usleep(1000);          \
+                                              CS35L41B_WAKE_UP_PIN_LOW();  \
+                                          } while(0)
 
 /****************************************************************************
  * Private Type Declarations
@@ -100,7 +112,7 @@ typedef struct
  * Private Function Prototypes
  ****************************************************************************/
 
-static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv);
+static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv, bool hw_reset);
 
 static int cs35l41b_set_samplerate(FAR struct cs35l41b_dev_s *priv,
                                    uint32_t sample_rate);
@@ -122,6 +134,15 @@ static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
 
 static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
                          bool state);
+
+static int cs35l41b_set_fadein(FAR struct cs35l41b_dev_s *priv);
+
+static int cs35l41b_set_mixer(FAR struct cs35l41b_dev_s *priv, int mode);
+
+static int cs35l41b_boot_initialize(FAR struct cs35l41b_dev_s *priv,
+                                    int mode);
+
+static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv);
 
 static int cs35l41b_getcaps(FAR struct audio_lowerhalf_s *dev, int type,
                             FAR struct audio_caps_s *caps);
@@ -401,31 +422,31 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
       switch (audio_msg->msg_id)
         {
           case IO_SET_BYPASS:
-            if (cs35l41b_write_register(priv,
-                                        CS35L41_MIXER_DACPCM1_INPUT_REG,
-                                        0x08) == ERROR)
+            if (cs35l41b_reset(priv, true) == ERROR)
               {
-                auderr("write CS35L41_MIXER_DACPCM1_INPUT_REG error\n");
+                auderr("cs35l41b reset failed!\n");
                 return ERROR;
               }
 
-            if (cs35l41b_set_gain(priv,
-                                  CS35L41B_AMP_GAIN_PCM_10P5DB) == ERROR)
+            if (cs35l41b_boot_initialize(priv, CS35L41_ASP_MODE) == ERROR)
               {
-                auderr("cs35l41b_set_gain error\n");
+                auderr("boot initialize failed!\n");
                 return ERROR;
               }
 
-            priv->is_bypassed = true;
             break;
 
           case IO_CANCEL_BYPASS:
-            priv->is_bypassed = false;
-            if (cs35l41b_write_register(priv,
-                                        CS35L41_MIXER_DACPCM1_INPUT_REG,
-                                        0x32) == ERROR)
+            if (cs35l41b_reset(priv, true) == ERROR)
               {
-                auderr("write CS35L41_MIXER_DACPCM1_INPUT_REG error\n");
+                auderr("cs35l41b reset failed!\n");
+                return ERROR;
+              }
+
+            if (cs35l41b_boot_initialize(priv,
+                CS35L41_DSP_TUNE_MODE) == ERROR)
+              {
+                auderr("boot initialize failed!\n");
                 return ERROR;
               }
             break;
@@ -436,79 +457,81 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
             break;
 
           case IO_SET_CALIBRATED:
-            priv->is_calibrating = true;
             audio_msg->msg_id = IO_SET_CALIBRATED;
 
-            /* pa is hibernate, wake up first */
-
-            if (priv->is_calibrating)
-            {
-              if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
-                {
-                  auderr("power wake up error\n");
-                  return ERROR;
-                }
-            }
-
-            /* reload caliberate fw */
-
-            if (cs35l41b_reset(priv) == ERROR)
+            if (cs35l41b_reset(priv, true) == ERROR)
               {
-                audio_msg->u.data = CALIBRATED_STATUS_ERROR;
+                auderr("cs35l41b reset failed!\n");
+                return ERROR;
+              }
+
+            if (cs35l41b_boot_initialize(priv,
+                CS35L41_DSP_CAL_MODE) == ERROR)
+              {
+                auderr("boot initialize failed!\n");
+                return ERROR;
               }
 
             audio_msg->u.data = CALIBRATED_STATUS_OK;
 
             *(FAR struct audio_msg_s *)arg = *audio_msg;
+            break;
 
-            if (cs35l41b_write_caliberate_ambient(priv, 30) == ERROR)
+          case IO_GET_CALIBRATED:
+            audio_msg->msg_id = IO_GET_CALIBRATED;
+            audio_msg->u.data = cs35l41b_get_calibration_result();
+            break;
+
+          case IO_CALIBERATE_REBOOT:
+
+            if (cs35l41b_reset(priv, true) == ERROR)
               {
+                auderr("cs35l41b reset failed!\n");
+                return ERROR;
+              }
+
+            if (cs35l41b_boot_initialize(priv,
+                CS35L41_DSP_TUNE_MODE) == ERROR)
+              {
+                auderr("boot initialize failed!\n");
                 return ERROR;
               }
             break;
 
-          case IO_GET_CALIBRATED:
-            priv->is_calibrating = false;
-
-            audio_msg->msg_id = IO_GET_CALIBRATED;
-            audio_msg->u.data = cs35l41b_get_calibration_result();
-
-            /* cs35l41b power down */
-
-            if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
-                {
-                  auderr("power wake up error\n");
-                  return ERROR;
-                }
-
-            /* stop clocks to HALO DSP core */
-
-            if (cs35l41b_write_register(priv,
-                XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, 0) == ERROR)
+          case IO_SET_ASP_GAIN:
+            if (audio_msg->u.data > 20)
               {
-                auderr("write DSP1_CCM_CORE_CONTROL_REG error\n");
+                auderr("set asp gain out of limit!\n");
                 return ERROR;
               }
 
-            /* dsp load normal fw */
+            priv->asp_gain =
+            (audio_msg->u.data << CS35L41B_AMP_GAIN_PCM_SHIFT);
 
-            if (cs35l41_dsp_boot(priv) == ERROR)
+            break;
+
+          case IO_GET_ASP_GAIN:
+            audio_msg->u.data =
+            (priv->asp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
+
+            break;
+
+          case IO_SET_DSP_GAIN:
+            if (audio_msg->u.data > 20)
               {
-                auderr("dsp boot process error\n");
+                auderr("set dsp gain out of limit!\n");
                 return ERROR;
               }
 
-            /* reset calibration values load status */
+            priv->dsp_gain =
+            (audio_msg->u.data << CS35L41B_AMP_GAIN_PCM_SHIFT);
 
-            priv->is_calibrate_value_loaded = false;
+            break;
 
-            /* power hibernate */
+          case IO_GET_DSP_GAIN:
+            audio_msg->u.data =
+            (priv->dsp_gain >> CS35L41B_AMP_GAIN_PCM_SHIFT);
 
-            if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
-                {
-                  auderr("power wake up error\n");
-                  return ERROR;
-                }
             break;
 
           default:
@@ -766,58 +789,19 @@ static int cs35l41b_configure(FAR struct audio_lowerhalf_s *dev,
           priv->bclk    = caps->ac_controls.hw[0] *
                           (priv->lower->bclk_factor);
 
-          /* if calibrate processing, cs35l41b_configure should not call
-           * power wake up, cs35l41b_ioctl will call power wake up before
-           * cs35l41b_configure
-           */
-
-          if (!priv->is_calibrating)
+          if (priv->mode != CS35L41_ASP_MODE)
             {
-              CS35L41B_WAKE_UP(true);
-              nxsig_usleep(1000);
               if (cs35l41b_power(priv, POWER_WAKEUP) == ERROR)
                 {
-                  auderr("power wake up error\n");
+                  auderr("power wake up failed!\n");
                   return ERROR;
                 }
-              CS35L41B_WAKE_UP(false);
             }
 
-          if (cs35l41b_set_channel(priv, CHANNEL_LEFT_RIGHT) == ERROR)
+          if (cs35l41b_output_configuration(priv) == ERROR)
             {
-              auderr("cs35l41b_set_channel error\n");
+              auderr("output configuration failed!\n");
               return ERROR;
-            }
-
-          if (cs35l41b_set_samplerate(priv, priv->samprate) == ERROR)
-            {
-              auderr("cs35l41b_set_samplerate error\n");
-              return ERROR;
-            }
-
-          if (cs35l41b_set_bit_width(priv, priv->bpsamp) == ERROR)
-            {
-              auderr("cs35l41b_set_bit_width error\n");
-              return ERROR;
-            }
-
-          if (cs35l41b_set_bclk(priv,
-              priv->lower->bclk_factor * priv->samprate) == ERROR)
-            {
-              auderr("cs35l41b_set_bclk error\n");
-              return ERROR;
-            }
-
-          /* if set bypass,the gain modify of ioctl */
-
-          if (!priv->is_bypassed)
-            {
-              if (cs35l41b_set_gain(priv,
-                                    CS35L41B_AMP_GAIN_PCM_18P5DB) == ERROR)
-                {
-                  auderr("cs35l41b_set_gain error\n");
-                  return ERROR;
-                }
             }
         }
         break;
@@ -858,10 +842,13 @@ static int cs35l41b_shutdown(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
-  if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+  if (priv->mode != CS35L41_ASP_MODE)
     {
-      auderr("power hibernate error!\n");
-      return ERROR;
+      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+        {
+          auderr("power hibernate error!\n");
+          return ERROR;
+        }
     }
 
   return OK;
@@ -885,22 +872,9 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
-  if (!priv->done)
+  if (!priv->initialize)
     {
       return -EBUSY;
-    }
-
-  /* if dsp do not load caliberate that can be load caliberated  value */
-
-  if ((!priv->is_calibrating) && (!priv->is_calibrate_value_loaded))
-    {
-      if (cs35l41b_load_calibration_value(priv) == ERROR)
-        {
-          auderr("dsp caliberate error\n");
-          return ERROR;
-        }
-
-      priv->is_calibrate_value_loaded = true;
     }
 
   if (cs35l41b_power(priv, POWER_UP) == ERROR)
@@ -945,26 +919,23 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
-  /**
-   * if calibrate processing, just calibrate cs35l41b.
-   * after calibration, ca35l41b_ioctl will call cs35l41b_reset to reload FW
-   * therefore, cs35l41b_stop does not require call hibernate
-  */
+  /* if in caliberate mode , get caliberation value first */
 
-  if (priv->is_calibrating)
+  if (priv->mode == CS35L41_DSP_CAL_MODE)
     {
       if (cs35l41b_calibrate(priv) == ERROR)
         {
           return ERROR;
         }
     }
-  else
-    {
-      if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
-        {
-          return ERROR;
-        }
 
+  if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (priv->mode != CS35L41_ASP_MODE)
+    {
       if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
         {
           auderr("power hibernate error!\n");
@@ -1148,14 +1119,14 @@ static int cs35l41_otp_unpack(FAR struct cs35l41b_dev_s *priv)
                                 CS35L41_TEST_KEY_CTRL_UNLOCK_1);
   if (ret == ERROR)
     {
-      goto error_flags;
+      return ERROR;
     }
 
   ret = cs35l41b_write_register(priv, CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG,
                                 CS35L41_TEST_KEY_CTRL_UNLOCK_2);
   if (ret == ERROR)
     {
-      goto error_flags;
+      return ERROR;
     }
 
   for (i = 0; i < ARRAY_SIZE(g_otp_map); i++)
@@ -1166,11 +1137,11 @@ static int cs35l41_otp_unpack(FAR struct cs35l41b_dev_s *priv)
 
       if (temp_trim_entry.reg != 0x00000000)
         {
-          temp_reg_val = cs35l41b_read_register(priv, temp_trim_entry.reg);
-          if (temp_reg_val < 0)
+          ret = cs35l41b_read_register(priv, &temp_reg_val,
+                                      temp_trim_entry.reg);
+          if (ret < 0)
             {
-              ret = ERROR;
-              goto error_flags;
+              return ERROR;
             }
 
           /* Apply OTP trim bit-field to recently read trim register value.
@@ -1190,7 +1161,7 @@ static int cs35l41_otp_unpack(FAR struct cs35l41b_dev_s *priv)
                                         temp_reg_val);
           if (ret == ERROR)
             {
-              goto error_flags;
+              return ERROR;
             }
         }
 
@@ -1203,17 +1174,11 @@ static int cs35l41_otp_unpack(FAR struct cs35l41b_dev_s *priv)
                                 CS35L41_TEST_KEY_CTRL_LOCK_1);
   if (ret == ERROR)
     {
-      goto error_flags;
+      return ERROR;
     }
 
   ret = cs35l41b_write_register(priv, CS35L41_CTRL_KEYS_TEST_KEY_CTRL_REG,
                                 CS35L41_TEST_KEY_CTRL_LOCK_2);
-  if (ret == ERROR)
-    {
-      goto error_flags;
-    }
-
-error_flags:
   if (ret == ERROR)
     {
       return ERROR;
@@ -1279,8 +1244,8 @@ static int cs35l41b_set_bclk(FAR struct cs35l41b_dev_s *priv,
   uint32_t temp;
   int      ret;
 
-  regval_ccm = cs35l41b_read_register(priv, CS35L41B_REFCLK_INPUT_REG);
-  if (regval_ccm < 0)
+  ret = cs35l41b_read_register(priv, &regval_ccm, CS35L41B_REFCLK_INPUT_REG);
+  if (ret < 0)
     {
       auderr("read CS35L41B_REFCLK_INPUT_REG error\n");
       return ERROR;
@@ -1346,8 +1311,8 @@ static int cs35l41b_set_bit_width(FAR struct cs35l41b_dev_s *priv,
   uint32_t temp2;
   int      ret;
 
-  regval = cs35l41b_read_register(priv, CS35L41B_ASP_CONTROL2_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, CS35L41B_ASP_CONTROL2_REG);
+  if (ret < 0)
     {
       auderr("read CS35L41B_ASP_CONTROL2_REG failed\n");
       return ERROR;
@@ -1357,8 +1322,9 @@ static int cs35l41b_set_bit_width(FAR struct cs35l41b_dev_s *priv,
   temp   &= ~CS35L41B_ASP_TX_WIDTH_MASK;
   temp   &= regval;
 
-  regval = cs35l41b_read_register(priv, CS35L41B_ASP_DATA_CONTROL5_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval,
+                              CS35L41B_ASP_DATA_CONTROL5_REG);
+  if (ret < 0)
     {
       auderr("read CS35L41B_ASP_DATA_CONTROL5_REG failed\n");
       return ERROR;
@@ -1419,9 +1385,10 @@ static int cs35l41b_set_channel(FAR struct cs35l41b_dev_s *priv,
 {
   uint32_t regval;
   uint32_t temp;
+  int ret = OK;
 
-  regval = cs35l41b_read_register(priv, CS35L41B_ASP_ENABLES1_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, CS35L41B_ASP_ENABLES1_REG);
+  if (ret < 0)
     {
       auderr("read CS35L41B_ASP_ENABLES1_REG error\n");
       return ERROR;
@@ -1509,9 +1476,10 @@ static int cs35l41b_set_gain(FAR struct cs35l41b_dev_s *priv,
 {
   uint32_t regval;
   uint32_t temp;
+  int ret = OK;
 
-  regval = cs35l41b_read_register(priv, CS35L41B_AMP_GAIN_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, CS35L41B_AMP_GAIN_REG);
+  if (ret < 0)
     {
       auderr("read CS35L41B_AMP_GAIN_REG error\n");
       return ERROR;
@@ -1613,13 +1581,14 @@ static int cs35l41_wait_for_pwrmgt_sts(FAR struct cs35l41b_dev_s *priv)
 {
   uint32_t i;
   uint32_t wrpend_sts = 0x2;
+  int ret = OK;
 
   for (i = 0;
        (i < 10) && (wrpend_sts & PWRMGT_PWRMGT_STS_WR_PENDSTS_BITMASK);
        i++)
     {
-      wrpend_sts = cs35l41b_read_register(priv, PWRMGT_PWRMGT_STS);
-      if (wrpend_sts < 0)
+      ret = cs35l41b_read_register(priv, &wrpend_sts, PWRMGT_PWRMGT_STS);
+      if (ret < 0)
         {
           auderr("read PWRMGT_PWRMGT_STS error\n", 2 * i);
           return ERROR;
@@ -1646,6 +1615,10 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
   uint32_t mbox_cmd_drv_shift = 1 << 20;
   uint32_t mbox_cmd_fw_shift = 1 << 21;
 
+  /* gpio wake up */
+
+  CS35L41B_GPIO_WAKE_UP();
+
   for (retries = 0; retries < 5; retries++)
     {
       timeout = 10;
@@ -1663,15 +1636,17 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
               return ERROR;
             }
 
-          retval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
-          if (retval < 0)
+          ret = cs35l41b_read_register(priv, &retval,
+                                       DSP_MBOX_DSP_MBOX_2_REG);
+          if (ret < 0)
             {
               auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
               return ERROR;
             }
 
           nxsig_usleep(1000 * 2);
-        } while (retval != CS35L41_DSP_MBOX_STATUS_PAUSED && --timeout);
+        }
+      while (retval != CS35L41_DSP_MBOX_STATUS_PAUSED && --timeout);
 
       if (timeout != 0)
         {
@@ -1757,23 +1732,26 @@ static int cs35l41_wake(FAR struct cs35l41b_dev_s *priv)
 
   cs35l41b_set_boot_configuration(priv);
 
-  if (!priv->is_bypassed)
+  /* enable dsp output */
+
+  if (cs35l41b_set_mixer(priv, priv->mode) == ERROR)
     {
-      /* enable dsp output */
+      auderr("set dsp mixer failed!\n");
+      return ERROR;
+    }
 
-      if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
-        {
-          auderr("write 0x00004c00 error\n");
-          return ERROR;
-        }
+  /* enable dsp fadein feature */
 
-      /* enable dsp fadein feature */
+  if (cs35l41b_set_fadein(priv) == ERROR)
+    {
+      auderr("set dsp fadein failed!\n");
+      return ERROR;
+    }
 
-      if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
-        {
-          auderr("write 0x00006000 error\n");
-          return ERROR;
-        }
+  if (cs35l41b_mute(priv, true) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
     }
 
   return OK;
@@ -1793,156 +1771,153 @@ static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
   uint32_t regval;
   int i;
 
-  /* clear HALO DSP Virtual MBOX 1 IRQ flag */
-
-  ret = cs35l41b_write_register(
-        priv,
-        IRQ2_IRQ2_EINT_2_REG,
-        IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
-
-  if (ret == ERROR)
+  if (priv->state != CS35L41_STATE_POWER_UP)
     {
-      auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
-      return ERROR;
-    }
+      /* clear HALO DSP Virtual MBOX 1 IRQ flag */
 
-  /* Clear HALO DSP Virtual MBOX 2 IRQ flag */
+      ret = cs35l41b_write_register(priv, IRQ2_IRQ2_EINT_2_REG,
+            IRQ2_IRQ2_EINT_2_DSP_VIRTUAL1_MBOX_WR_EINT2_BITMASK);
 
-  ret = cs35l41b_write_register(
-        priv,
-        IRQ1_IRQ1_EINT_2_REG,
-        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
-
-  if (ret == ERROR)
-    {
-      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
-      return ERROR;
-    }
-
-  /* read IRQ2 mask register */
-
-  regval = cs35l41b_read_register(
-           priv,
-           IRQ2_IRQ2_MASK_2_REG);
-
-  if (regval < 0)
-    {
-      auderr("read IRQ2_IRQ2_MASK_2_REG error:0x%08lx\n", regval);
-      return ERROR;
-    }
-
-  /* Clear HALO DSP Virtual MBOX 1 IRQ mask */
-
-  regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
-  ret = cs35l41b_write_register(priv,
-                                IRQ2_IRQ2_MASK_2_REG,
-                                regval);
-
-  if (ret == ERROR)
-    {
-      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
-      return ERROR;
-    }
-
-  /* send HALO DSP MBOX 'Pause' Command */
-
-  ret = cs35l41b_write_register(priv,
-                                DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG,
-                                CS35L41_DSP_MBOX_CMD_PAUSE);
-
-  if (regval == ERROR)
-    {
-      auderr("write DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG error\n");
-      return ERROR;
-    }
-
-  for (i = 0; i < 5; i++)
-    {
-      /* read IRQ2 mask register */
-
-      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_2_REG);
-
-      if (regval < 0)
+      if (ret == ERROR)
         {
-          auderr("read IRQ1_IRQ1_EINT_2_REG error\n");
+          auderr("write IRQ2_IRQ2_EINT_2_REG error\n");
           return ERROR;
         }
 
-      if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
+      /* Clear HALO DSP Virtual MBOX 2 IRQ flag */
+
+      ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+            IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+
+      if (ret == ERROR)
         {
-          break;
+          auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+          return ERROR;
         }
 
-      /* wait for at least 2ms */
+      /* read IRQ2 mask register */
+
+      ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
+
+      if (ret < 0)
+        {
+          auderr("read IRQ2_IRQ2_MASK_2_REG error:0x%08lx\n", regval);
+          return ERROR;
+        }
+
+      /* Clear HALO DSP Virtual MBOX 1 IRQ mask */
+
+      regval &= ~(IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK);
+      ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+
+      if (ret == ERROR)
+        {
+          auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+          return ERROR;
+        }
+
+      /* send HALO DSP MBOX 'Pause' Command */
+
+      ret = cs35l41b_write_register(priv,
+            DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG,
+            CS35L41_DSP_MBOX_CMD_PAUSE);
+
+      if (regval == ERROR)
+        {
+          auderr("write DSP_VIRTUAL1_MBOX_DSP_VIRTUAL1_MBOX_1_REG error\n");
+          return ERROR;
+        }
 
       nxsig_usleep(1000 * 2);
-    }
 
-  if (i == 5)
-    {
-      auderr("read IRQ2 mask register 5 times error\n");
-      return ERROR;
-    }
+      for (i = 0; i < 5; i++)
+        {
+          /* Read IRQ1 flag register to poll for MBOX IRQ */
 
-  /* Clear MBOX IRQ flag */
+          ret = cs35l41b_read_register(priv, &regval, IRQ1_IRQ1_EINT_2_REG);
 
-  ret = cs35l41b_write_register(
-        priv,
-        IRQ1_IRQ1_EINT_2_REG,
-        IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
+          if (ret < 0)
+            {
+              auderr("read IRQ1_IRQ1_EINT_2_REG error\n");
+              return ERROR;
+            }
 
-  if (regval == ERROR)
-    {
-      auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
-      return ERROR;
-    }
+          if (regval & IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK)
+            {
+              break;
+            }
 
-  /* read IRQ2 Mask register to re-mask HALO DSP Virtual MBOX 1 IRQ */
+          /* wait for at least 2ms */
 
-  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
+          nxsig_usleep(1000 * 2);
+        }
 
-  if (regval < 0)
-    {
-      auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
-      return ERROR;
-    }
+      if (i == 5)
+        {
+          auderr("read IRQ2 mask register 5 times error\n");
+          return ERROR;
+        }
 
-  /* Re-mask HALO DSP Virtual MBOX 1 IRQ */
+      /* Clear MBOX IRQ flag */
 
-  regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
-  ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+      ret = cs35l41b_write_register(priv, IRQ1_IRQ1_EINT_2_REG,
+            IRQ1_IRQ1_EINT_2_DSP_VIRTUAL2_MBOX_WR_EINT1_BITMASK);
 
-  if (ret == ERROR)
-    {
-      auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
-      return ERROR;
-    }
+      if (regval == ERROR)
+        {
+          auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
+          return ERROR;
+        }
 
-  /* Read the MBOX status */
+      /* read IRQ2 Mask register to re-mask HALO DSP Virtual MBOX 1 IRQ */
 
-  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
+      ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
 
-  if (regval < 0)
-    {
-      auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
-      return ERROR;
-    }
+      if (ret < 0)
+        {
+          auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
+          return ERROR;
+        }
 
-  if (cs35l41_is_mbox_status_correct(CS35L41_DSP_MBOX_CMD_PAUSE, regval))
-    {
-      audwarn("cs35l41b mbox pause status is ok\n");
-    }
-  else
-    {
-      auderr("cs35l41b mbox pause status is error\n");
-      return ERROR;
+      /* Re-mask HALO DSP Virtual MBOX 1 IRQ */
+
+      regval |= IRQ2_IRQ2_MASK_2_DSP_VIRTUAL1_MBOX_WR_MASK2_BITMASK;
+      ret = cs35l41b_write_register(priv, IRQ2_IRQ2_MASK_2_REG, regval);
+
+      if (ret == ERROR)
+        {
+          auderr("write IRQ2_IRQ2_MASK_2_REG error\n");
+          return ERROR;
+        }
+
+      /* Read the MBOX status */
+
+      ret = cs35l41b_read_register(priv, &regval, DSP_MBOX_DSP_MBOX_2_REG);
+
+      if (ret < 0)
+        {
+          auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
+          return ERROR;
+        }
+
+      /* Check that MBOX status is correct for 'Pause' command just sent */
+
+      if (cs35l41_is_mbox_status_correct(CS35L41_DSP_MBOX_CMD_PAUSE, regval))
+        {
+          audwarn("cs35l41b mbox pause status is ok\n");
+        }
+      else
+        {
+          auderr("cs35l41b mbox pause status is error\n");
+          return ERROR;
+        }
     }
 
   /* Read GLOBAL_EN register in order to clear GLOBAL_EN */
 
-  regval = cs35l41b_read_register(priv, MSM_GLOBAL_ENABLES_REG);
+  ret = cs35l41b_read_register(priv, &regval, MSM_GLOBAL_ENABLES_REG);
 
-  if (regval < 0)
+  if (ret < 0)
     {
       auderr("read MSM_GLOBAL_ENABLES_REG error\n");
       return ERROR;
@@ -1962,9 +1937,9 @@ static int cs35l41_power_down(FAR struct cs35l41b_dev_s *priv)
 
   for (i = 0; i < 100; i++)
     {
-      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_1_REG);
+      ret = cs35l41b_read_register(priv, &regval, IRQ1_IRQ1_EINT_1_REG);
 
-      if (regval < 0)
+      if (ret < 0)
         {
           auderr("read IRQ1_IRQ1_EINT_1_REG error\n");
           return ERROR;
@@ -2028,52 +2003,57 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
   int      ret = OK;
   uint32_t mbox_cmd = CS35L41_DSP_MBOX_CMD_NONE;
 
-  /* send HALO DSP memory lock sequence */
+  /* check if dsp boot */
 
-  for (i = 0; i < ARRAY_SIZE(g_cs35l41_mem_lock) / 2; i++)
+  if (priv->state != CS35L41_STATE_STANDBY)
     {
-      ret = cs35l41b_write_register(priv, g_cs35l41_mem_lock[2 * i],
-                                    g_cs35l41_mem_lock[2 * i + 1]);
-      if (ret == ERROR)
+      /* send HALO DSP memory lock sequence */
+
+      for (i = 0; i < ARRAY_SIZE(g_cs35l41_mem_lock) / 2; i++)
         {
-          auderr("write g_cs35l41_mem_lock[%ld] error\n", 2 * i);
-          return ERROR;
+          ret = cs35l41b_write_register(priv, g_cs35l41_mem_lock[2 * i],
+                                        g_cs35l41_mem_lock[2 * i + 1]);
+          if (ret == ERROR)
+            {
+              auderr("write g_cs35l41_mem_lock[%ld] error\n", 2 * i);
+              return ERROR;
+            }
         }
-    }
 
-  /* Set next HALO DSP Sample Rate register to G1R2 */
+      /* Set next HALO DSP Sample Rate register to G1R2 */
 
-  for (i = 0; i < ARRAY_SIZE(g_cs35l41_frame_sync_regs); i++)
-    {
-      ret = cs35l41b_write_register(priv, g_cs35l41_frame_sync_regs[i],
+      for (i = 0; i < ARRAY_SIZE(g_cs35l41_frame_sync_regs); i++)
+        {
+          ret = cs35l41b_write_register(priv, g_cs35l41_frame_sync_regs[i],
                                     CS35L41_DSP1_SAMPLE_RATE_G1R2);
-      if (ret == ERROR)
+          if (ret == ERROR)
+            {
+              auderr("write g_cs35l41_frame_sync_regs[%ld] error\n", i);
+              return ERROR;
+            }
+        }
+
+      /* Read the HALO DSP CCM control register and
+       * enable clocks to HALO DSP core
+       */
+
+      ret = cs35l41b_read_register(priv, &regval,
+            XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG);
+      if (ret < 0)
         {
-          auderr("write g_cs35l41_frame_sync_regs[%ld] error\n", i);
+          auderr("read XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
           return ERROR;
         }
-    }
 
-  /* Read the HALO DSP CCM control register and
-   * enable clocks to HALO DSP core
-   */
-
-  regval = cs35l41b_read_register(priv,
-           XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG);
-  if (regval < 0)
-    {
-      auderr("read XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
-      return ERROR;
-    }
-
-  regval |=
-  XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_DSP1_CCM_CORE_EN_BITMASK;
-  ret = cs35l41b_write_register(priv,
-        XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, regval);
-  if (ret == ERROR)
-    {
-      auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
-      return ERROR;
+      regval |=
+      XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_DSP1_CCM_CORE_EN_BITMASK;
+      ret = cs35l41b_write_register(priv,
+            XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG, regval);
+      if (ret == ERROR)
+        {
+          auderr("write XM_UNPACKED24_DSP1_CCM_CORE_CONTROL_REG error\n");
+          return ERROR;
+        }
     }
 
   /* Send Power Up Patch */
@@ -2091,8 +2071,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   /* set global enable */
 
-  regval = cs35l41b_read_register(priv, MSM_GLOBAL_ENABLES_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, MSM_GLOBAL_ENABLES_REG);
+  if (ret < 0)
     {
       auderr("read MSM_GLOBAL_ENABLES_REG error\n");
       return ERROR;
@@ -2109,6 +2089,13 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
   /* wait for 1ms */
 
   nxsig_usleep(1000 * 1);
+
+  /* if dsp is not booted, then power up is finished */
+
+  if (priv->state == CS35L41_STATE_STANDBY)
+    {
+      return OK;
+    }
 
   /* clear HALO DSP virtual MBOX 1 IRQ */
 
@@ -2134,8 +2121,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
    * unmask IRQ for HALO DSP virtual MBOX 1
    */
 
-  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
+  if (ret < 0)
     {
       auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
       return ERROR;
@@ -2151,8 +2138,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   /* Read HALO DSP MBOX Space 2 register */
 
-  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, DSP_MBOX_DSP_MBOX_2_REG);
+  if (ret < 0)
     {
       auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
       return ERROR;
@@ -2191,8 +2178,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   for (i = 0; i < 5; i++)
     {
-      regval = cs35l41b_read_register(priv, IRQ1_IRQ1_EINT_2_REG);
-      if (regval < 0)
+      ret = cs35l41b_read_register(priv, &regval, IRQ1_IRQ1_EINT_2_REG);
+      if (ret < 0)
         {
           auderr("write IRQ1_IRQ1_EINT_2_REG error\n");
           return ERROR;
@@ -2226,8 +2213,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   /* Read IRQ2 Mask register to next re-mask the MBOX IRQ */
 
-  regval = cs35l41b_read_register(priv, IRQ2_IRQ2_MASK_2_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, IRQ2_IRQ2_MASK_2_REG);
+  if (ret < 0)
     {
       auderr("read IRQ2_IRQ2_MASK_2_REG error\n");
       return ERROR;
@@ -2243,8 +2230,8 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 
   /* Read the HALO DSP MBOX status */
 
-  regval = cs35l41b_read_register(priv, DSP_MBOX_DSP_MBOX_2_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, DSP_MBOX_DSP_MBOX_2_REG);
+  if (ret < 0)
     {
       auderr("read DSP_MBOX_DSP_MBOX_2_REG error\n");
       return ERROR;
@@ -2274,91 +2261,77 @@ static int cs35l41_power_up(FAR struct cs35l41b_dev_s *priv)
 static int cs35l41b_power(FAR struct cs35l41b_dev_s *priv,
                           uint8_t state)
 {
-  int ret;
+  int ret = OK;
+  uint8_t next_state = CS35L41_STATE_UNCONFIGURED;
+  int (*fp)(FAR struct cs35l41b_dev_s *priv) = NULL;
 
   switch (state)
     {
       case POWER_UP:
 
-        if (priv->power_state != CS35L41_STATE_STANDBY &&
-            priv->power_state != CS35L41_STATE_DSP_STANDBY)
+        if ((priv->state == CS35L41_STATE_STANDBY) ||
+            (priv->state == CS35L41_STATE_DSP_STANDBY))
           {
-            auderr("power status is not standby or dsp_standby!\n");
-            return ERROR;
-          }
-
-        if (priv->power_state == CS35L41_STATE_STANDBY)
-          {
-            priv->power_state = CS35L41_STATE_POWER_UP;
-          }
-        else
-          {
-            priv->power_state = CS35L41_STATE_DSP_POWER_UP;
-          }
-
-        if (cs35l41_power_up(priv) == ERROR)
-          {
-            auderr("cs35l41b power up failed!\n");
-            return ERROR;
+            fp = cs35l41_power_up;
+            if (priv->state == CS35L41_STATE_STANDBY)
+              {
+                next_state = CS35L41_STATE_POWER_UP;
+              }
+            else
+              {
+                next_state = CS35L41_STATE_DSP_POWER_UP;
+              }
           }
         break;
 
       case POWER_DOWN:
-        if (priv->power_state != CS35L41_STATE_POWER_UP &&
-            priv->power_state != CS35L41_STATE_DSP_POWER_UP)
+        if ((priv->state == CS35L41_STATE_POWER_UP) ||
+            (priv->state == CS35L41_STATE_DSP_POWER_UP))
           {
-            auderr("power status is not power up or dsp_power_up!\n");
-            return ERROR;
+            fp = cs35l41_power_down;
+            if (priv->state == CS35L41_STATE_POWER_UP)
+              {
+                next_state = CS35L41_STATE_STANDBY;
+              }
+            else
+              {
+                next_state = CS35L41_STATE_DSP_STANDBY;
+              }
           }
-
-          if (cs35l41_power_down(priv) == ERROR)
-            {
-              auderr("power down failed!\n");
-              return ERROR;
-            }
-
-          priv->power_state = CS35L41_STATE_DSP_STANDBY;
         break;
 
       case POWER_HIBERNATE:
-        if (priv->power_state == CS35L41_STATE_DSP_STANDBY)
+        if (priv->state == CS35L41_STATE_DSP_STANDBY)
           {
-            ret = cs35l41_hibernate(priv);
-            if (ret == ERROR)
-              {
-                auderr("cs35l41b hibernate failed!\n");
-                return ERROR;
-              }
+            fp = cs35l41_hibernate;
 
-            priv->power_state = CS35L41_STATE_HIBERNATE;
-          }
-        else
-          {
-            auderr("power status is not dsp standby!\n");
-            return ERROR;
+            next_state = CS35L41_STATE_HIBERNATE;
           }
         break;
 
       case POWER_WAKEUP:
-        if (priv->power_state == CS35L41_STATE_HIBERNATE)
+        if (priv->state == CS35L41_STATE_HIBERNATE)
           {
-            if (cs35l41_wake(priv) == ERROR)
-              {
-                auderr("cs35l41b wake up failed!\n");
-                return ERROR;
-              }
-
-            priv->power_state = CS35L41_STATE_DSP_STANDBY;
-          }
-        else
-          {
-            auderr("power status is not hibernate!\n");
-            return ERROR;
+            fp = cs35l41_wake;
+            next_state = CS35L41_STATE_DSP_STANDBY;
           }
         break;
     }
 
-  return OK;
+  if (fp == NULL)
+    {
+      auderr("power prev status is invalid!!\n");
+      return ERROR;
+    }
+
+  ret = fp(priv);
+  if (ret == OK)
+    {
+      priv->state = next_state;
+      audwarn("power state:%d\n", priv->state);
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -2376,7 +2349,8 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
 
   for (i = 0; i < CS35L41_POLL_OTP_BOOT_DONE_MAX; i++)
     {
-      regval = cs35l41b_read_register(priv, CS35L41_OTP_CTRL_OTP_CTRL8_REG);
+      cs35l41b_read_register(priv, &regval,
+                             CS35L41_OTP_CTRL_OTP_CTRL8_REG);
       if (regval & OTP_CTRL_OTP_CTRL8_OTP_BOOT_DONE_STS_BITMASK)
         {
           break;
@@ -2395,7 +2369,7 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
 
   /* DEVID */
 
-  regval = cs35l41b_read_register(priv, CS35L41_SW_RESET_DEVID_REG);
+  cs35l41b_read_register(priv, &regval, CS35L41_SW_RESET_DEVID_REG);
   if ((regval & CS35L41_DEVID) != CS35L41_DEVID)
     {
       auderr("cs35l41b DEVID:0x%08lx\n error", regval);
@@ -2404,7 +2378,7 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
 
   /* REVID */
 
-  regval = cs35l41b_read_register(priv, CS35L41_SW_RESET_REVID_REG);
+  cs35l41b_read_register(priv, &regval, CS35L41_SW_RESET_REVID_REG);
   if (regval != CS35L41_REVID_B2)
     {
       auderr("cs35l41b REVID:0x%08lx\n error", regval);
@@ -2413,7 +2387,7 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
 
   /* OTPID */
 
-  regval = cs35l41b_read_register(priv, CS35L41_SW_RESET_OTPID_REG);
+  cs35l41b_read_register(priv, &regval, CS35L41_SW_RESET_OTPID_REG);
   regval &= CS35L41_SW_RESET_OTPID_OTPID_BITMASK;
   if ((regval != 0x01) && (regval != 0x08))
     {
@@ -2432,23 +2406,31 @@ static int cs35l41b_check_id(FAR struct cs35l41b_dev_s *priv)
  *
  ****************************************************************************/
 
-static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
+static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv, bool hw_reset)
 {
-  uint32_t i;
   int  ret;
+
+  if (hw_reset)
+    {
+      priv->lower->reset_en(false);
+      nxsig_usleep(2000);
+      priv->lower->reset_en(true);
+      nxsig_usleep(1000);
+    }
+
+  if (cs35l41b_check_id(priv) != OK)
+    {
+      auderr("cs35l41b check id failed!\n");
+      return ERROR;
+    }
 
   /* write revb2 errata data */
 
-  for (i = 0; i < ARRAY_SIZE(g_cs35l41_revb2_errata_patch) / 2; i++)
+  ret = cs35l41_write_errata(priv);
+  if (ret == ERROR)
     {
-      ret = cs35l41b_write_register(priv,
-                                    g_cs35l41_revb2_errata_patch[2 * i],
-                                    g_cs35l41_revb2_errata_patch[2 * i + 1]);
-      if (ret == ERROR)
-        {
-          auderr("write g_cs35l41_revb2_errata_patch[%ld] error\n", 2 * i);
-          return ERROR;
-        }
+      auderr("cs35l41_write_errata error\n");
+      return ERROR;
     }
 
   /* read otp contents */
@@ -2477,81 +2459,12 @@ static int cs35l41b_reset(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
-  /* dsp boot */
-
-  if (cs35l41_dsp_boot(priv) == ERROR)
-    {
-      auderr("dsp boot process error\n");
-      return ERROR;
-    }
-
-  /* cs45l41b reset and reset caliberate value load state */
-
+  priv->initialize                = false;
   priv->is_calibrate_value_loaded = false;
-
-  /* if pa is first initialization,
-   * should be load caliberation value before power up.
-   */
-
-  if ((!priv->is_calibrating) && (!priv->is_calibrate_value_loaded))
-    {
-      if (cs35l41b_load_calibration_value(priv) == ERROR)
-        {
-          auderr("dsp caliberate value load failed\n");
-          return ERROR;
-        }
-
-      priv->is_calibrate_value_loaded = true;
-    }
-
-  /* enable dsp output */
-
-  if (cs35l41b_write_register(priv,  0x00004c00, 0x32) == ERROR)
-    {
-      auderr("write 0x00004c00 error\n");
-      return ERROR;
-    }
-
-  /* enable dsp fadein feature */
-
-  if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
-    {
-      auderr("write 0x00006000 error\n");
-      return ERROR;
-    }
-
-  priv->power_state = CS35L41_STATE_DSP_STANDBY;
-
-  /* if calibrate processing, should not enter hibernate mode */
-
-  if (!priv->is_calibrating)
-    {
-      if (cs35l41b_mute(priv, true) == ERROR)
-        {
-          auderr("dsp mute failed\n");
-          return ERROR;
-        }
-
-      if (cs35l41b_power(priv, POWER_UP) == ERROR)
-        {
-          auderr("power process failed\n");
-          return ERROR;
-        }
-
-      priv->power_state = CS35L41_STATE_DSP_POWER_UP;
-
-      if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
-        {
-          auderr("cs45l41b power down failed!\n");
-          return ERROR;
-        }
-
-      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
-        {
-          auderr("cs45l41b power hibernate failed!\n");
-          return ERROR;
-        }
-    }
+  priv->state                     = CS35L41_STATE_STANDBY;
+  priv->mode                      = CS35L41_ASP_MODE;
+  priv->asp_gain                  = CS35L41B_AMP_GAIN_PCM_10P5DB;
+  priv->dsp_gain                  = CS35L41B_AMP_GAIN_PCM_18P5DB;
 
   return OK;
 }
@@ -2568,9 +2481,10 @@ static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
                          bool state)
 {
   uint32_t regval;
+  int ret = OK;
 
-  regval = cs35l41b_read_register(priv, CS35L41B_GLOBAL_SYNC_REG);
-  if (regval < 0)
+  ret = cs35l41b_read_register(priv, &regval, CS35L41B_GLOBAL_SYNC_REG);
+  if (ret < 0)
     {
       auderr("cs35l41b read CS35L41B_GLOBAL_SYNC_REG  error\n");
       return ERROR;
@@ -2591,6 +2505,182 @@ static int cs35l41b_mute(FAR struct cs35l41b_dev_s *priv,
     {
       auderr("write CS35L41B_GLOBAL_SYNC_REG error\n");
       return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_mixer
+ *
+ * Description:
+ *   cs35l41b set mixer
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_mixer(FAR struct cs35l41b_dev_s *priv, int mode)
+{
+  if ((mode == CS35L41_DSP_TUNE_MODE) || (mode == CS35L41_DSP_CAL_MODE))
+    {
+      if (cs35l41b_write_register(priv,
+         CS35L41_MIXER_DACPCM1_INPUT_REG, 0x32) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+  else if (mode == CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_write_register(priv,
+         CS35L41_MIXER_DACPCM1_INPUT_REG, 0x08) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+  else
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_set_fadein
+ *
+ * Description:
+ *   cs35l41b set fade in
+ *
+ ****************************************************************************/
+
+static int cs35l41b_set_fadein(FAR struct cs35l41b_dev_s *priv)
+{
+  if (cs35l41b_write_register(priv,  0x00006000, 0x8004) == ERROR)
+    {
+      return ERROR;
+    }
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_boot_initialize
+ *
+ * Description:
+ *   cs35l41b boot initialize
+ *
+ ****************************************************************************/
+
+static int cs35l41b_boot_initialize(FAR struct cs35l41b_dev_s *priv,
+                                    int mode)
+{
+  /* dsp boot */
+
+  if (cs35l41_dsp_boot(priv, mode) == ERROR)
+    {
+      auderr("dsp boot process failed!\n");
+      return ERROR;
+    }
+
+  /* enable dsp output */
+
+  if (cs35l41b_set_mixer(priv, mode) == ERROR)
+    {
+      auderr("set dsp mixer failed!\n");
+      return ERROR;
+    }
+
+  /* enable dsp fadein feature */
+
+  if (cs35l41b_set_fadein(priv) == ERROR)
+    {
+      auderr("set dsp fadein failed!\n");
+      return ERROR;
+    }
+
+  if (cs35l41b_mute(priv, true) == ERROR)
+    {
+      auderr("dsp mute failed\n");
+      return ERROR;
+    }
+
+  if (mode != CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_power(priv, POWER_UP) == ERROR)
+        {
+          auderr("power process failed\n");
+          return ERROR;
+        }
+
+      if (cs35l41b_power(priv, POWER_DOWN) == ERROR)
+        {
+          auderr("cs45l41b power down failed!\n");
+          return ERROR;
+        }
+
+      if (cs35l41b_power(priv, POWER_HIBERNATE) == ERROR)
+        {
+          auderr("cs45l41b power hibernate failed!\n");
+          return ERROR;
+        }
+    }
+
+  priv->initialize = true;
+
+  return OK;
+}
+
+/****************************************************************************
+ * Name: cs35l41b_output_configuration
+ *
+ * Description:
+ *   cs35l41b output configuration
+ *
+ ****************************************************************************/
+
+static int cs35l41b_output_configuration(FAR struct cs35l41b_dev_s *priv)
+{
+  if (priv->mode == CS35L41_DSP_CAL_MODE)
+    {
+      if (cs35l41b_write_caliberate_ambient(priv, 30) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+
+  if (cs35l41b_set_channel(priv, CHANNEL_LEFT_RIGHT) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_set_samplerate(priv, priv->samprate) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_set_bit_width(priv, priv->bpsamp) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (cs35l41b_set_bclk(priv,
+      priv->lower->bclk_factor * priv->samprate) == ERROR)
+    {
+      return ERROR;
+    }
+
+  if (priv->mode == CS35L41_ASP_MODE)
+    {
+      if (cs35l41b_set_gain(priv, priv->asp_gain) == ERROR)
+        {
+          return ERROR;
+        }
+    }
+  else
+    {
+      if (cs35l41b_set_gain(priv, priv->dsp_gain) == ERROR)
+        {
+          return ERROR;
+        }
     }
 
   return OK;
@@ -2667,14 +2757,15 @@ int cs35l41b_write_register(FAR struct cs35l41b_dev_s *priv,
  *
  ****************************************************************************/
 
-int32_t cs35l41b_read_register(FAR struct cs35l41b_dev_s *priv,
-                               uint32_t regaddr)
+int cs35l41b_read_register(FAR struct cs35l41b_dev_s *priv,
+                           uint32_t *regval, uint32_t regaddr)
 {
-  int retries;
   struct i2c_config_s config;
-  uint8_t buffer[4];
-  uint8_t data[4];
-  int ret = OK;
+  int       retries;
+  uint8_t   buffer[4];
+  uint8_t   data[4];
+  uint32_t  regval_temp;
+  int       ret = OK;
 
   buffer[0] = (regaddr >> 24) & 0xff;
   buffer[1] = (regaddr >> 16) & 0xff;
@@ -2696,21 +2787,26 @@ int32_t cs35l41b_read_register(FAR struct cs35l41b_dev_s *priv,
         }
       else
         {
-          int32_t regval;
-
           /* The I2C transfer was successful... break out of the loop and
            * return the value read.
            */
 
-          regval = ((int32_t)data[0] << 24) | (int32_t)data[1] << 16 |
-                   ((int32_t)data[2] << 8) | (int32_t)data[3];
-          return regval;
+          regval_temp = ((uint32_t)data[0] << 24) | (uint32_t)data[1] << 16 |
+                        ((uint32_t)data[2] << 8) | (uint32_t)data[3];
+          break;
         }
 
         audinfo("retries=0x%08x regaddr=0x%08lx\n", retries, regaddr);
     }
 
-  return ERROR;
+  if (retries == MAX_RETRIES)
+    {
+      return ERROR;
+    }
+
+  *regval = regval_temp;
+
+  return OK;
 }
 
 /****************************************************************************
@@ -2839,14 +2935,13 @@ int cs35l41b_late_initialize(FAR struct audio_lowerhalf_s *dev)
 {
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
-  if (cs35l41b_reset(priv) == OK)
+  if (cs35l41b_boot_initialize(priv, CS35L41_DSP_TUNE_MODE) == ERROR)
     {
-      priv->done = true;
-      return OK;
+      auderr("boot initialize failed!\n");
+      return ERROR;
     }
 
-  auderr("ERROR: cs35l41b reset failed!\n");
-  return ERROR;
+  return OK;
 }
 
 /****************************************************************************
@@ -2906,11 +3001,10 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
       priv->dev.ops     = &g_audioops;
       priv->lower       = lower;
       priv->i2c         = i2c;
-      priv->is_bypassed = false;
 
-      if (cs35l41b_check_id(priv) != OK)
+      if (cs35l41b_reset(priv, false) != OK)
         {
-          auderr("cs35l41b check id failed!\n");
+          auderr("cs35l41b reset failed!\n");
           goto errout_with_dev;
         }
 

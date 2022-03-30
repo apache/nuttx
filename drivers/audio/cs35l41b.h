@@ -949,6 +949,12 @@
 #define CS35L41_STATE_DSP_STANDBY                         (6)
 #define CS35L41_STATE_HIBERNATE                           (7)
 
+/* mode type */
+
+#define CS35L41_ASP_MODE                                  (0)
+#define CS35L41_DSP_TUNE_MODE                             (1)
+#define CS35L41_DSP_CAL_MODE                              (2)
+
 /****************************************************************************
  * Public Types
  ****************************************************************************/
@@ -984,37 +990,32 @@ struct cs35l41b_dev_s
   uint8_t                 bpsamp;    /* Bits per sample (8 or 16) */
   uint32_t                bclk;      /* IIS BCLK */
   struct work_s           work;      /* Work queue for load firmware */
-  bool                    done;      /* Load firmware done */
-
-  /* set pa bypassed */
-
-  bool                    is_bypassed;
-  uint8_t                 power_state;
-
-  /* set pa calibration */
-
-  bool                    is_calibrating;
 
   /* is pa calibration value loaded */
 
   bool                    is_calibrate_value_loaded;
 
   uint8_t otp_contents[128];         /* Cache storage for OTP contents */
+  bool                    initialize;
+  int                     state;
+  int                     mode;
+  uint32_t                asp_gain;
+  uint32_t                dsp_gain;
 };
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
 
-int32_t cs35l41b_read_register  (FAR struct cs35l41b_dev_s *priv,
-                                 uint32_t regaddr);
-int     cs35l41b_write_register (FAR struct cs35l41b_dev_s *priv,
-                                 uint32_t regaddr, uint32_t regval);
-int     cs35l41b_read_block     (FAR struct cs35l41b_dev_s *priv,
-                                 uint32_t regaddr, uint8_t *data,
-                                 uint32_t len);
-int     cs35l41b_write_block    (FAR struct cs35l41b_dev_s *priv,
-                                 uint32_t waddr, uint8_t *data,
-                                 uint32_t len);
+int cs35l41b_read_register(FAR struct cs35l41b_dev_s *priv,
+                           uint32_t *regval, uint32_t regaddr);
+int cs35l41b_write_register(FAR struct cs35l41b_dev_s *priv,
+                            uint32_t regaddr, uint32_t regval);
+int cs35l41b_read_block(FAR struct cs35l41b_dev_s *priv,
+                        uint32_t regaddr, uint8_t *data,
+                        uint32_t len);
+int cs35l41b_write_block(FAR struct cs35l41b_dev_s *priv,
+                        uint32_t waddr, uint8_t *data,
+                        uint32_t len);
 
 #endif
