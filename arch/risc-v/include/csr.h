@@ -325,37 +325,6 @@
 
 #define MIP_MTIP      (0x1 << 7)
 
-#define CSR_STR(csr) #csr
-
-#define READ_CSR(reg) \
-  ({ \
-     unsigned long tmp; \
-     asm volatile("csrr %0, " CSR_STR(reg) : "=r"(tmp)); \
-     tmp; \
-  })
-
-#define READ_AND_SET_CSR(reg, bits) \
-  ({ \
-     unsigned long tmp; \
-     asm volatile("csrrs %0, " CSR_STR(reg) ", %1": "=r"(tmp) : "rK"(bits)); \
-     tmp; \
-  })
-
-#define WRITE_CSR(reg, val) \
-  ({ \
-     asm volatile("csrw " CSR_STR(reg) ", %0" :: "rK"(val)); \
-  })
-
-#define SET_CSR(reg, bits) \
-  ({ \
-     asm volatile("csrs " CSR_STR(reg) ", %0" :: "rK"(bits)); \
-  })
-
-#define CLEAR_CSR(reg, bits) \
-  ({ \
-     asm volatile("csrc " CSR_STR(reg) ", %0" :: "rK"(bits)); \
-  })
-
 /* In pmpcfg (PMP configuration) register */
 
 #define PMPCFG_R        (1 << 0)  /* readable ? */

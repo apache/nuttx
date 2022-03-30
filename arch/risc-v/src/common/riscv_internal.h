@@ -134,6 +134,8 @@
 #define PMP_ACCESS_DENIED   (-1)    /* Access set and denied */
 #define PMP_ACCESS_FULL     (1)     /* Access set and allowed */
 
+#ifndef __ASSEMBLY__
+
 #define getreg8(a)          (*(volatile uint8_t *)(a))
 #define putreg8(v,a)        (*(volatile uint8_t *)(a) = (v))
 #define getreg16(a)         (*(volatile uint16_t *)(a))
@@ -142,6 +144,37 @@
 #define putreg32(v,a)       (*(volatile uint32_t *)(a) = (v))
 #define getreg64(a)         (*(volatile uint64_t *)(a))
 #define putreg64(v,a)       (*(volatile uint64_t *)(a) = (v))
+
+#define READ_CSR(reg) \
+  ({ \
+     uintptr_t reg##_val; \
+     __asm__ __volatile__("csrr %0, " __STR(reg) : "=r"(reg##_val)); \
+     reg##_val; \
+  })
+
+#define READ_AND_SET_CSR(reg, bits) \
+  ({ \
+     uintptr_t reg##_val; \
+     __asm__ __volatile__("csrrs %0, " __STR(reg) ", %1": "=r"(reg##_val) : "rK"(bits)); \
+     reg##_val; \
+  })
+
+#define WRITE_CSR(reg, val) \
+  ({ \
+     __asm__ __volatile__("csrw " __STR(reg) ", %0" :: "rK"(val)); \
+  })
+
+#define SET_CSR(reg, bits) \
+  ({ \
+     __asm__ __volatile__("csrs " __STR(reg) ", %0" :: "rK"(bits)); \
+  })
+
+#define CLEAR_CSR(reg, bits) \
+  ({ \
+     __asm__ __volatile__("csrc " __STR(reg) ", %0" :: "rK"(bits)); \
+  })
+
+#endif
 
 /****************************************************************************
  * Public Types

@@ -23,8 +23,8 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/csr.h>
-#include <arch/irq.h>
+
+#include <nuttx/irq.h>
 
 #include "chip.h"
 #include "mpfs_memorymap.h"

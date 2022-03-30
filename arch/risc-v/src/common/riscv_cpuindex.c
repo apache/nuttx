@@ -23,10 +23,11 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <stdint.h>
-#include <nuttx/arch.h>
 
-#include <arch/csr.h>
+#include <stdint.h>
+
+#include <nuttx/arch.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 

@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdint.h>
 #include <assert.h>
 #include <errno.h>
 #include <debug.h>
@@ -32,10 +33,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <arch/board/board.h>
-
-#include <arch/irq.h>
-#include <arch/csr.h>
-#include <stdint.h>
 
 #include "riscv_internal.h"
 #include "hardware/esp32c3_interrupt.h"
