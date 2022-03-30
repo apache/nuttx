@@ -116,6 +116,13 @@ void __mpfs_start(uint64_t mhartid)
   const uint32_t *src;
   uint32_t *dest;
 
+  /* Configure FPU (hart 0 don't have an FPU) */
+
+  if (mhartid != 0)
+    {
+      riscv_fpuconfig();
+    }
+
   /* Clear .bss.  We'll do this inline (vs. calling memset) just to be
    * certain that there are no issues with the state of global variables.
    */

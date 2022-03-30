@@ -41,7 +41,11 @@ ifeq ($(CONFIG_XTENSA_TOOLCHAIN_ESP), y)
   CROSSDEV = xtensa-esp32-elf-
 endif
 
-ARCHCPUFLAGS =
+ARCHCPUFLAGS = -mlongcalls
+
+ifeq ($(CONFIG_MM_KASAN),y)
+  ARCHCPUFLAGS += -fsanitize=kernel-address
+endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
@@ -55,8 +59,15 @@ else
   MAXOPTIMIZATION += -fomit-frame-pointer
 endif
 
-ifeq ($(CONFIG_MM_KASAN),y)
-  ARCHCPUFLAGS += -fsanitize=kernel-address
+ARCHCFLAGS =
+ARCHCXXFLAGS =
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
 endif
 
 # Default toolchain

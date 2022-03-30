@@ -105,6 +105,13 @@ static int nxsig_queue_action(FAR struct tcb_s *stcb, siginfo_t *info)
 
           flags = enter_critical_section();
           sq_addlast((FAR sq_entry_t *)sigq, &(stcb->sigpendactionq));
+
+          /* Then schedule execution of the signal handling action on the
+           * recipient's thread. SMP related handling will be done in
+           * up_schedule_sigaction()
+           */
+
+          up_schedule_sigaction(stcb, nxsig_deliver);
           leave_critical_section(flags);
         }
     }
@@ -382,13 +389,6 @@ int nxsig_tcbdispatch(FAR struct tcb_s *stcb, siginfo_t *info)
       /* Deliver of the signal must be performed in a critical section */
 
       flags = enter_critical_section();
-
-      /* Then schedule execution of the signal handling action on the
-       * recipient's thread. SMP related handling will be done in
-       * up_schedule_sigaction()
-       */
-
-      up_schedule_sigaction(stcb, nxsig_deliver);
 
       /* Check if the task is waiting for an unmasked signal. If so, then
        * unblock it. This must be performed in a critical section because

@@ -36,7 +36,7 @@
  * Public Symbols
  ************************************************************************************/
 
-    .globl        up_fpuconfig
+    .globl        riscv_fpuconfig
     .globl        riscv_savefpu
     .globl        riscv_restorefpu
 
@@ -72,13 +72,13 @@
  ************************************************************************************/
 
 /************************************************************************************
- * Name: up_fpuconfig
+ * Name: riscv_fpuconfig
  *
  * Description:
  *   init fpu
  *
  * C Function Prototype:
- *   void up_fpuconfig(void);
+ *   void riscv_fpuconfig(void);
  *
  * Input Parameters:
  *   None
@@ -88,9 +88,9 @@
  *
  ************************************************************************************/
 
-    .type        up_fpuconfig, function
+    .type        riscv_fpuconfig, function
 
-up_fpuconfig:
+riscv_fpuconfig:
     li           a0, FS_INITIAL
     csrs         mstatus, a0
     csrwi        fcsr, 0

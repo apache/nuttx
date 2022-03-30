@@ -150,20 +150,33 @@ arm_vectorirq:
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
+	/* Switch back IRQ mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_IRQ | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_IRQ | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back IRQ mode */
+
 	/* Upon return from arm_decodeirq, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_decodeirq:  It will differ if a
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SYS mode registers and return */
+	/* Restore the CPSR, IRQ mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is IRQ mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (IRQ) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (IRQ) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lirqstacktop:
@@ -268,6 +281,15 @@ arm_vectorsvc:
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
+	/* Switch back SVC mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_SVC | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_SVC | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back SVC mode */
+
 	/* Upon return from arm_syscall, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_syscall:  It will differ if a
@@ -279,9 +301,13 @@ arm_vectorsvc:
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is SVC mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (SVC) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (SVC) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 	.size	arm_vectorsvc, . - arm_vectorsvc
 
 	.align	5
@@ -364,20 +390,33 @@ arm_vectordata:
 	bl		arm_dataabort			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
+	/* Switch back ABT mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_ABT | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_ABT | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back ABT mode */
+
 	/* Upon return from arm_dataabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_dataabort:  It will differ if a
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SYS mode registers and return */
+	/* Restore the CPSR, ABT mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is ABT mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (ABT) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (ABT) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 	.size	arm_vectordata, . - arm_vectordata
 
 	.align	5
@@ -448,20 +487,33 @@ arm_vectorprefetch:
 	bl		arm_prefetchabort		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
+	/* Switch back ABT mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_ABT | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_ABT | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back ABT mode */
+
 	/* Upon return from arm_prefetchabort, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_prefetchabort:  It will differ if a
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SYS mode registers and return */
+	/* Restore the CPSR, ABT mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is ABT mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (ABT) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (ABT) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 	.size	arm_vectorprefetch, . - arm_vectorprefetch
 
 	.align	5
@@ -528,20 +580,33 @@ arm_vectorundefinsn:
 	bl		arm_undefinedinsn		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 
+	/* Switch back UND mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_UND | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_UND | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back UND mode */
+
 	/* Upon return from arm_undefinedinsn, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_undefinedinsn:  It will differ if a
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SYS mode registers and return */
+	/* Restore the CPSR, UND mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is UND mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (UND) r14=Register storage area */
+	ldmia		r14!, {r0-r12}			/* Restore common r0-r12 */
+	ldmia		r14, {r13, r14}^		/* Restore user mode r13/r14 */
+	add		r14, r14, #(4*2)		/* (UND) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 	.size	arm_vectorundefinsn, . - arm_vectorundefinsn
 
 	.align	5
@@ -621,20 +686,33 @@ arm_vectorfiq:
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
 #endif
 
+	/* Switch back FIQ mode and return with shadow SPSR */
+
+#ifdef CONFIG_ARMV7A_DECODEFIQ
+	mov		r4, #(PSR_MODE_FIQ | PSR_I_BIT | PSR_F_BIT)
+#else
+	mov		r4, #(PSR_MODE_FIQ | PSR_I_BIT)
+#endif
+	msr		cpsr_c, r4			/* Switch back FIQ mode */
+
 	/* Upon return from arm_decodefiq, r0 holds the pointer to the register
 	 * state save area to use to restore the registers.  This may or may not
 	 * be the same value that was passed to arm_decodefiq:  It will differ if a
 	 * context switch is required.
 	 */
 
-	/* Restore the CPSR, SYS mode registers and return */
+	/* Restore the CPSR, FIQ mode registers and return */
 
 	ldr		r1, [r0, #(4*REG_CPSR)]		/* Fetch the return SPSR */
 	msr		spsr_cxsf, r1			/* Set the return mode SPSR */
 
-	/* Life is simple when everything is SYS mode */
+	/* Life is simple when everything is FIQ mode */
 
-	ldmia		r0, {r0-r15}^			/* Return */
+	mov		r14, r0				/* (FIQ) r14=Register storage area */
+	ldmia		r14!, {r0-r7}			/* Restore common r0-r7 */
+	ldmia		r14, {r8-r14}^			/* Restore user mode r8-r14 */
+	add		r14, r14, #(4*7)		/* (FIQ) r14=address of r15 storage */
+	ldmia		r14, {r15}^			/* Return */
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 7
 .Lfiqstacktop:

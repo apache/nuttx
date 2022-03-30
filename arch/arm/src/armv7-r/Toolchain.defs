@@ -116,6 +116,17 @@ ifeq ($(CONFIG_ARMV7R_TOOLCHAIN),GNU_EABI)
   CROSSDEV ?= $(TARGET_ARCH)-none-eabi-
 endif
 
+ARCHCFLAGS =
+ARCHCXXFLAGS =
+
+ifneq ($(CONFIG_CXX_EXCEPTION),y)
+  ARCHCXXFLAGS += -fno-exceptions -fcheck-new
+endif
+
+ifneq ($(CONFIG_CXX_RTTI),y)
+  ARCHCXXFLAGS += -fno-rtti
+endif
+
 # Default toolchain
 
 CC = $(CROSSDEV)gcc
