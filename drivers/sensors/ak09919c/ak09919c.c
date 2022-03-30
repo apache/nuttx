@@ -888,7 +888,7 @@ static int ak09919c_init(FAR struct ak09919c_dev_s *priv)
 
   /* Set power down mode. */
 
-  ret = ak09919c_setmode(priv, priv->workmode);
+  ret = ak09919c_setmode(priv, AK09919C_POWER_DOWN_MODE);
   if (ret < 0)
     {
       snerr("Failed set work mode: %d\n", ret);
