@@ -124,15 +124,14 @@
 #define MM_ALIGN_UP(a)   (((a) + MM_GRAN_MASK) & ~MM_GRAN_MASK)
 #define MM_ALIGN_DOWN(a) ((a) & ~MM_GRAN_MASK)
 
-/* An allocated chunk is distinguished from a free chunk by bit 31 (or 15)
+/* An allocated chunk is distinguished from a free chunk by bit 0
  * of the 'preceding' chunk size.  If set, then this is an allocated chunk.
  */
 
+#define MM_ALLOC_BIT     0x1
 #ifdef CONFIG_MM_SMALL
-# define MM_ALLOC_BIT    0x8000
 # define MMSIZE_MAX      UINT16_MAX
 #else
-# define MM_ALLOC_BIT    0x80000000
 # define MMSIZE_MAX      UINT32_MAX
 #endif
 
