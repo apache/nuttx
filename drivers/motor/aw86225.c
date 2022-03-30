@@ -1715,8 +1715,6 @@ static int aw86225_excute_pattern(FAR struct aw86225_dev_s *priv,
 {
   int ret = OK;
 
-  aw86225_haptic_stop(priv);
-
   for (uint8_t i = 0; i < 8; i++)
     {
       mtrinfo("i %d , waveseq %0x, waveloop %d\n", i,
