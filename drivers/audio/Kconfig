@@ -397,4 +397,9 @@ config AUDIO_CS35L41B
 	bool "Audio CS35L41B chip"
 	default n
 
+config AUDIO_CS35L41B_DEBUG
+  bool "Audio CS35L41B chip debug"
+  depends on  AUDIO_CS35L41B
+  default n
+
 endif # DRIVERS_AUDIO

@@ -1017,5 +1017,7 @@ int cs35l41b_read_block(FAR struct cs35l41b_dev_s *priv,
 int cs35l41b_write_block(FAR struct cs35l41b_dev_s *priv,
                         uint32_t waddr, uint8_t *data,
                         uint32_t len);
-
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv);
+#endif
 #endif

@@ -889,6 +889,10 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
       return ERROR;
     }
 
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  cs35l41b_dump_registers(priv);
+#endif
+
   return OK;
 }
 
@@ -912,6 +916,10 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   FAR struct cs35l41b_dev_s *priv = (FAR struct cs35l41b_dev_s *)dev;
 
   audinfo("cs35l41b stop!\n");
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  cs35l41b_dump_registers(priv);
+#endif
 
   if (cs35l41b_mute(priv, true) == ERROR)
     {

@@ -95,6 +95,10 @@ CSRCS += cs35l41b.c cs35l41b_fw.c cs35l41_fw_img.c cs35l41_cal_fw_img.c \
          cs35l41_tune_fw_img.c
 endif
 
+ifeq ($(CONFIG_AUDIO_CS35L41B_DEBUG), y)
+CSRCS += cs35l41b_debug.c
+endif
+
 # Include Audio driver support
 
 DEPPATH += --dep-path audio
