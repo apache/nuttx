@@ -516,7 +516,7 @@ static ssize_t usrsockdev_handle_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE | hdr->head.events);
     }
 
   return sizeof(*hdr);
@@ -586,7 +586,7 @@ usrsockdev_handle_datareq_response(FAR struct usrsockdev_s *dev,
 
       /* Done with request/response. */
 
-      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE);
+      usrsock_event(conn, USRSOCK_EVENT_REQ_COMPLETE | hdr->head.events);
 
       ret = sizeof(*datahdr);
       goto unlock_out;
