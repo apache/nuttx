@@ -33,7 +33,6 @@
 #include <nuttx/arch.h>
 #include <nuttx/board.h>
 #include <nuttx/syslog/syslog.h>
-#include <arch/irq.h>
 
 #include "riscv_internal.h"
 
