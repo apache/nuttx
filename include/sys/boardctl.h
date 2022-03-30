@@ -439,7 +439,7 @@ struct boardioc_reset_cause_s
 {
   enum boardioc_reset_cause_e cause;  /* The reason of last reset */
   uint32_t flag;                      /* watchdog number when watchdog reset,
-                                         or soft-reset subreason */
+                                       * or soft-reset subreason */
 };
 #endif
 
