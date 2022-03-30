@@ -116,7 +116,11 @@ static void dispatch_syscall(void)
      "addi sp, sp, -" STACK_FRAME_SIZE "\n" /* Create a stack frame to hold ra */
      REGSTORE " ra, 0(sp)\n"                /* Save ra in the stack frame */
      "la   t0, g_stublookup\n"              /* t0=The base of the stub lookup table */
+#ifdef CONFIG_ARCH_RV32
+     "slli a0, a0, 2\n"                     /* a0=Offset for the stub lookup table */
+#else
      "slli a0, a0, 3\n"                     /* a0=Offset for the stub lookup table */
+#endif
      "add  t0, t0, a0\n"                    /* t0=The address in the table */
      REGLOAD "   t0, 0(t0)\n"               /* t0=The address of the stub for this syscall */
      "jalr ra, t0\n"                        /* Call the stub (modifies ra) */
