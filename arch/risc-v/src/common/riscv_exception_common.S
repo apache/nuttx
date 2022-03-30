@@ -25,17 +25,11 @@
 #include <nuttx/config.h>
 #include <arch/irq.h>
 
+#include "riscv_internal.h"
+
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
-
-#ifdef CONFIG_ARCH_RV32
-#  define REGLOAD   lw
-#  define REGSTORE  sw
-#else
-#  define REGLOAD   ld
-#  define REGSTORE  sd
-#endif
 
 #ifdef CONFIG_IRQ_NSTACKS
 #  define IRQ_NSTACKS CONFIG_IRQ_NSTACKS
