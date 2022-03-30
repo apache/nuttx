@@ -26,11 +26,19 @@
 
 #include <arch/irq.h>
 
+#include "riscv_internal.h"
+
 #ifdef CONFIG_ARCH_FPU
 
 /************************************************************************************
  * Pre-processor Definitions
  ************************************************************************************/
+
+#define FS_MASK     0x6000
+#define FS_OFF      0x0000
+#define FS_INITIAL  0x2000
+#define FS_CLEAN    0x4000
+#define FS_DIRTY    0x6000
 
 /************************************************************************************
  * Public Symbols
@@ -41,31 +49,6 @@
     .globl        riscv_restorefpu
 
     .file         "riscv_fpu.S"
-
-#define FS_MASK     0x6000
-#define FS_OFF      0x0000
-#define FS_INITIAL  0x2000
-#define FS_CLEAN    0x4000
-#define FS_DIRTY    0x6000
-
-#if defined(CONFIG_ARCH_QPFPU)
-#  define FLOAD     flq
-#  define FSTORE    fsq
-#elif defined(CONFIG_ARCH_DPFPU)
-#  define FLOAD     fld
-#  define FSTORE    fsd
-#else
-#  define FLOAD     flw
-#  define FSTORE    fsw
-#endif
-
-#ifdef CONFIG_ARCH_RV32
-#  define REGLOAD   lw
-#  define REGSTORE  sw
-#else
-#  define REGLOAD   ld
-#  define REGSTORE  sd
-#endif
 
 /************************************************************************************
  * Public Functions
