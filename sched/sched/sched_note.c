@@ -494,7 +494,7 @@ void sched_note_start(FAR struct tcb_s *tcb)
   namelen = strlen(tcb->name);
 
   DEBUGASSERT(namelen <= CONFIG_TASK_NAME_SIZE);
-  strncpy(note.nsa_name, tcb->name, CONFIG_TASK_NAME_SIZE + 1);
+  strlcpy(note.nsa_name, tcb->name, sizeof(note.nsa_name));
 
   length = SIZEOF_NOTE_START(namelen + 1);
 #else
