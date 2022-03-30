@@ -32,14 +32,12 @@
 /* Include chip-specific IRQ definitions (including IRQ numbers) */
 
 #include <nuttx/config.h>
+
 #include <arch/types.h>
 
-#ifndef __ASSEMBLY__
-#include <stdint.h>
 #include <nuttx/irq.h>
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
-#endif
 
 /****************************************************************************
  * Pre-processor Definitions

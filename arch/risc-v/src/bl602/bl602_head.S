@@ -23,7 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
     .section .init
     .globl bl602_start

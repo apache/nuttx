@@ -22,13 +22,14 @@
  * Included Files
  ****************************************************************************/
 
+#include <nuttx/config.h>
+
 #include <stdint.h>
 #include <stdbool.h>
 
 #include <nuttx/compiler.h>
-#include <nuttx/config.h>
 #include <nuttx/arch.h>
-#include <arch/csr.h>
+#include <nuttx/irq.h>
 
 #include "riscv_internal.h"
 
@@ -70,10 +71,10 @@
 
 #define PMP_READ_REGION_FROM_REG(region, reg) \
   ({ \
-    uintptr_t tmp = READ_CSR(reg); \
-    tmp >>= ((region % PMP_CFG_CNT_IN_REG) * PMP_CFG_BITS_CNT); \
-    tmp &= PMP_CFG_FLAG_MASK; \
-    tmp; \
+    uintptr_t region##_val = READ_CSR(reg); \
+    region##_val >>= ((region % PMP_CFG_CNT_IN_REG) * PMP_CFG_BITS_CNT); \
+    region##_val &= PMP_CFG_FLAG_MASK; \
+    region##_val; \
   })
 
 #ifndef min
