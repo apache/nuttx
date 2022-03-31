@@ -70,6 +70,7 @@ struct cw2218_dev_s
   uint8_t addr;                                      /* I2C address */
   uint32_t frequency;                                /* I2C frequency */
   struct work_s work;                                /* Work queue for reading data. */
+  struct work_s init_work;                           /* Work queue for init work */
   int last_cap;                                      /* battery cap change */
   int last_batt_temp;                                /* battery temp change */
 };
@@ -1113,6 +1114,39 @@ static int cw2218_online(struct battery_gauge_dev_s *dev, bool *status)
 }
 
 /****************************************************************************
+ * Name: init_worker
+ *
+ * Description:
+ * The battery gauge init detect, according to 10s Frequency
+ *
+ * Input Parameters
+ *   priv    - Device struct
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+static void init_worker(FAR void *arg)
+{
+  FAR struct cw2218_dev_s *priv = arg;
+  int ret;
+
+  ret = cw2218_init(priv);
+  if (ret < 0)
+    {
+      baterr("battery gauge init error work runing\n");
+      work_queue(HPWORK, &priv->init_work, init_worker, priv,
+                 BATTERY_GAGUE_INIT_TIME);
+    }
+  else
+    {
+      baterr("battery gauge init success work cancel\n");
+      work_cancel(HPWORK, &priv->init_work);
+    }
+}
+
+/****************************************************************************
  * Public Functions
  ****************************************************************************/
 
@@ -1168,8 +1202,9 @@ FAR struct battery_gauge_dev_s *cw2218_initialize(
     {
       if (ret < 0)
         {
-          baterr("ERROR: Failed to init CW2218, Error = %d\n", ret);
-          goto err;
+          baterr("battery gauge init error start init work\n");
+          work_queue(HPWORK, &priv->init_work, init_worker, priv,
+                     BATTERY_GAGUE_INIT_FIRST_TIME);
         }
     }
 
