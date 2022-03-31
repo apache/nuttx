@@ -80,7 +80,6 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
 
   irq_dispatch(irq, regs);
 
-#if defined(CONFIG_ARCH_FPU) || defined(CONFIG_ARCH_ADDRENV)
   /* Check for a context switch.  If a context switch occurred, then
    * CURRENT_REGS will have a different value than it did on entry.  If an
    * interrupt level context switch has occurred, then restore the floating
@@ -88,15 +87,9 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
    * returning from the interrupt.
    */
 
+#ifdef CONFIG_ARCH_ADDRENV
   if (regs != CURRENT_REGS)
     {
-#ifdef CONFIG_ARCH_FPU
-      /* Restore floating point registers */
-
-      riscv_restorefpu((uintptr_t *)CURRENT_REGS);
-#endif
-
-#ifdef CONFIG_ARCH_ADDRENV
       /* Make sure that the address environment for the previously
        * running task is closed down gracefully (data caches dump,
        * MMU flushed) and set up the address environment for the new
@@ -104,7 +97,6 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
        */
 
       group_addrenv(NULL);
-#endif
     }
 #endif
 
