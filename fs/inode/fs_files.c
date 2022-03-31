@@ -71,7 +71,7 @@ static int files_extend(FAR struct filelist *list, size_t row)
       return 0;
     }
 
-  if (row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK > _POSIX_OPEN_MAX)
+  if (row * CONFIG_NFILE_DESCRIPTORS_PER_BLOCK > OPEN_MAX)
     {
       return -EMFILE;
     }
