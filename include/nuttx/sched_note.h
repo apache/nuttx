@@ -105,16 +105,32 @@
   memset((s), 0, sizeof(struct note_filter_irq_s))
 #endif
 
-/* Note dump module tag definitions */
-
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-#  define NOTE_MODULE(a, b, c, d)  \
-  ((uint32_t)((a) & 0xff)        | \
-  ((uint32_t)((b) & 0xff) << 8)  | \
-  ((uint32_t)((c) & 0xff) << 16) | \
-  ((uint32_t)((d) & 0xff) << 24))
+#  define SCHED_NOTE_LABEL__(x, y) x ## y
+#  define SCHED_NOTE_LABEL_(x, y) SCHED_NOTE_LABEL__(x, y)
+#  define SCHED_NOTE_LABEL \
+          SCHED_NOTE_LABEL_(sched_note_here, __LINE__)
+#  define SCHED_NOTE_IP \
+          ({SCHED_NOTE_LABEL: (uintptr_t)&&SCHED_NOTE_LABEL;})
+#  define SCHED_NOTE_STRING(buf) \
+          sched_note_string(SCHED_NOTE_IP, buf)
+#  define SCHED_NOTE_DUMP(event, buf, len) \
+          sched_note_dump(SCHED_NOTE_IP, event, buf, len)
+#  define SCHED_NOTE_VPRINTF(fmt, va) \
+          sched_note_vprintf(SCHED_NOTE_IP, fmt, va)
+#  define SCHED_NOTE_VBPRINTF(event, fmt, va) \
+          sched_note_vbprintf(SCHED_NOTE_IP, event, fmt, va)
+#  define SCHED_NOTE_PRINTF(fmt, args...) \
+          sched_note_printf(SCHED_NOTE_IP, fmt, ##args)
+#  define SCHED_NOTE_BPRINTF(event, fmt, args...) \
+          sched_note_bprintf(SCHED_NOTE_IP, event, fmt, ##args)
 #else
-#  define NOTE_MODULE(a,b,c,d)
+#  define SCHED_NOTE_STRING(buf)
+#  define SCHED_NOTE_DUMP(event, buf, len)
+#  define SCHED_NOTE_VPRINTF(fmt, va)
+#  define SCHED_NOTE_VBPRINTF(event, fmt, va)
+#  define SCHED_NOTE_PRINTF(fmt, args...)
+#  define SCHED_NOTE_BPRINTF(event, fmt, args...)
 #endif
 
 /****************************************************************************
@@ -354,8 +370,9 @@ struct note_irqhandler_s
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
 struct note_string_s
 {
-  struct note_common_s nst_cmn; /* Common note parameters */
-  char nst_data[1];             /* String data terminated by '\0' */
+  struct note_common_s nst_cmn;      /* Common note parameters */
+  uint8_t nst_ip[sizeof(uintptr_t)]; /* Instruction pointer called from */
+  char    nst_data[1];               /* String data terminated by '\0' */
 };
 
 #define SIZEOF_NOTE_STRING(n) (sizeof(struct note_string_s) + \
@@ -363,10 +380,10 @@ struct note_string_s
 
 struct note_binary_s
 {
-  struct note_common_s nbi_cmn; /* Common note parameters */
-  uint8_t  nbi_module[4];       /* Module number */
-  uint8_t  nbi_event;           /* Event number */
-  uint8_t  nbi_data[1];         /* Binary data */
+  struct note_common_s nbi_cmn;      /* Common note parameters */
+  uint8_t nbi_ip[sizeof(uintptr_t)]; /* Instruction pointer called from */
+  uint8_t nbi_event;                 /* Event number */
+  uint8_t nbi_data[1];               /* Binary data */
 };
 
 #define SIZEOF_NOTE_BINARY(n) (sizeof(struct note_binary_s) + \
@@ -509,22 +526,25 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter);
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-void sched_note_string(FAR const char *buf);
-void sched_note_dump(uint32_t module, uint8_t event,
+
+void sched_note_string(uintptr_t ip, FAR const char *buf);
+void sched_note_dump(uintptr_t ip, uint8_t event,
                      FAR const void *buf, size_t len);
-void sched_note_vprintf(FAR const char *fmt, va_list va) printflike(1, 0);
-void sched_note_vbprintf(uint32_t module, uint8_t event,
+void sched_note_vprintf(uintptr_t ip, FAR const char *fmt,
+                        va_list va) printflike(2, 0);
+void sched_note_vbprintf(uintptr_t ip, uint8_t event,
                          FAR const char *fmt, va_list va) printflike(3, 0);
-void sched_note_printf(FAR const char *fmt, ...) printflike(1, 2);
-void sched_note_bprintf(uint32_t module, uint8_t event,
+void sched_note_printf(uintptr_t ip,
+                       FAR const char *fmt, ...) printflike(2, 3);
+void sched_note_bprintf(uintptr_t ip, uint8_t event,
                         FAR const char *fmt, ...) printflike(3, 4);
 #else
-#  define sched_note_string(b)
-#  define sched_note_dump(m,e,b,l)
-#  define sched_note_vprintf(f,v)
-#  define sched_note_vbprintf(m,e,f,v)
-#  define sched_note_printf(f...)
-#  define sched_note_bprintf(m,e,f...)
+#  define sched_note_string(ip,b)
+#  define sched_note_dump(ip,e,b,l)
+#  define sched_note_vprintf(ip,f,v)
+#  define sched_note_vbprintf(ip,e,f,v)
+#  define sched_note_printf(ip,f...)
+#  define sched_note_bprintf(ip,e,f...)
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #if defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT)
@@ -630,7 +650,6 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
-#  define NOTE_MODULE(a,b,c,d)
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)
@@ -650,12 +669,12 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 #  define sched_note_syscall_enter(n,a...)
 #  define sched_note_syscall_leave(n,r)
 #  define sched_note_irqhandler(i,h,e)
-#  define sched_note_string(b)
-#  define sched_note_dump(m,e,b,l)
-#  define sched_note_vprintf(f,v)
-#  define sched_note_vbprintf(m,e,f,v)
-#  define sched_note_printf(f...)
-#  define sched_note_bprintf(m,e,f...)
+#  define sched_note_string(ip,b)
+#  define sched_note_dump(ip,e,b,l)
+#  define sched_note_vprintf(ip,f,v)
+#  define sched_note_vbprintf(ip,e,f,v)
+#  define sched_note_printf(ip,f...)
+#  define sched_note_bprintf(ip,e,f...)
 
 #endif /* CONFIG_SCHED_INSTRUMENTATION */
 #endif /* __INCLUDE_NUTTX_SCHED_NOTE_H */
