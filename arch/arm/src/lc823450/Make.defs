@@ -37,6 +37,10 @@ CMN_CSRCS += arm_stackframe.c
 CMN_ASRCS += arm_exception.S
 CMN_CSRCS += arm_vectors.c
 
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
+
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
 endif
