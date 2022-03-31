@@ -43,6 +43,10 @@ CMN_CSRCS += arm_vfork.c
 
 # Configuration-dependent common files
 
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
+
 ifeq ($(CONFIG_ARMV8M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
 endif
