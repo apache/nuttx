@@ -23,9 +23,9 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
-#include <arch/irq.h>
 
-#include "riscv_internal.h"
+#include <arch/arch.h>
+#include <arch/irq.h>
 
 /****************************************************************************
  * Public Symbols

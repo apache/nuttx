@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <arch/arch.h>
 #include <arch/syscall.h>
 
 #include "riscv_internal.h"

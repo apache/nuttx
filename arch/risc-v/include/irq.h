@@ -35,7 +35,6 @@
 
 #include <arch/types.h>
 
-#include <nuttx/irq.h>
 #include <arch/csr.h>
 #include <arch/chip/irq.h>
 
