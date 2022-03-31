@@ -81,7 +81,8 @@ const struct sock_intf_s g_icmp_sockif =
   icmp_netpoll,     /* si_poll */
   icmp_sendmsg,     /* si_sendmsg */
   icmp_recvmsg,     /* si_recvmsg */
-  icmp_close        /* si_close */
+  icmp_close,       /* si_close */
+  icmp_ioctl        /* si_ioctl */
 };
 
 /****************************************************************************

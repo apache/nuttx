@@ -74,6 +74,19 @@ int tcp_ioctl(FAR struct tcp_conn_s *conn,
             *(FAR int *)((uintptr_t)arg) = 0;
           }
         break;
+      case FIONSPACE:
+#ifdef CONFIG_NET_TCP_WRITE_BUFFERS
+#  if CONFIG_NET_SEND_BUFSIZE == 0
+        *(FAR int *)((uintptr_t)arg) =
+                                iob_navail(true) * CONFIG_IOB_BUFSIZE;
+#  else
+        *(FAR int *)((uintptr_t)arg) =
+                        conn->snd_bufs - tcp_wrbuffer_inqueue_size(conn);
+#  endif
+#else
+        *(FAR int *)((uintptr_t)arg) = MIN_TCP_MSS;
+#endif
+        break;
       default:
         ret = -ENOTTY;
         break;
