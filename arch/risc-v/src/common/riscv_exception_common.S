@@ -28,6 +28,25 @@
 #include "riscv_internal.h"
 
 /****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
+/* Using address environments currently require that a common interrupt stack
+ * is in place. This is needed because during context switch the procedure
+ * that swaps the active address environment is dependent on a stack, which
+ * must be a 'neutral' stack.
+ *
+ * Another option would be to use a per-process kernel stack, but full
+ * support for this is not yet in place, so use the common IRQ stack instead.
+ */
+
+#ifdef CONFIG_ARCH_ADDRENV
+#  if CONFIG_ARCH_INTERRUPTSTACK == 0 && !defined(CONFIG_ARCH_KERNEL_STACK)
+#    error "IRQ or kernel stack is needed for swapping address environments"
+#  endif
+#endif
+
+/****************************************************************************
  * Public Symbols
  ****************************************************************************/
 
