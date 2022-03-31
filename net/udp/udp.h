@@ -511,6 +511,24 @@ void udp_wrbuffer_release(FAR struct udp_wrbuffer_s *wrb);
 #endif /* CONFIG_NET_UDP_WRITE_BUFFERS */
 
 /****************************************************************************
+ * Name: udp_wrbuffer_inqueue_size
+ *
+ * Description:
+ *   Get the in-queued write buffer size from connection
+ *
+ * Input Parameters:
+ *   conn - The UDP connection of interest
+ *
+ * Assumptions:
+ *   Called from user logic with the network locked.
+ *
+ ****************************************************************************/
+
+#if CONFIG_NET_SEND_BUFSIZE > 0
+uint32_t udp_wrbuffer_inqueue_size(FAR struct udp_conn_s *conn);
+#endif /* CONFIG_NET_SEND_BUFSIZE */
+
+/****************************************************************************
  * Name: udp_wrbuffer_test
  *
  * Description:

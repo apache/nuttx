@@ -1,5 +1,5 @@
 /****************************************************************************
- * net/udp/udp_ioctl.c
+ * net/icmpv6/icmpv6_ioctl.c
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -35,30 +35,30 @@
 #include <nuttx/mm/iob.h>
 #include <nuttx/net/net.h>
 
-#include "udp/udp.h"
+#include "icmpv6/icmpv6.h"
 
 /****************************************************************************
  * Public Functions
  ****************************************************************************/
 
 /****************************************************************************
- * Name: udp_ioctl
+ * Name: icmpv6_ioctl
  *
  * Description:
- *   This function performs udp specific ioctl() operations.
+ *   This function performs icmpv6 specific ioctl() operations.
  *
  * Parameters:
- *   conn     The TCP connection of interest
+ *   conn     The icmpv6 connection of interest
  *   cmd      The ioctl command
  *   arg      The argument of the ioctl cmd
  *   arglen   The length of 'arg'
  *
  ****************************************************************************/
 
-int udp_ioctl(FAR struct udp_conn_s *conn,
-              int cmd, FAR void *arg, size_t arglen)
+int icmpv6_ioctl(FAR struct socket *psock,
+               int cmd, FAR void *arg, size_t arglen)
 {
-  FAR struct iob_s *iob;
+  FAR struct icmpv6_conn_s *conn = psock->s_conn;
   int ret = OK;
 
   net_lock();
@@ -66,10 +66,10 @@ int udp_ioctl(FAR struct udp_conn_s *conn,
   switch (cmd)
     {
       case FIONREAD:
-        iob = iob_peek_queue(&conn->readahead);
-        if (iob)
+        if (iob_peek_queue(&conn->readahead) != NULL)
           {
-            *(FAR int *)((uintptr_t)arg) = iob->io_pktlen;
+            *(FAR int *)((uintptr_t)arg) =
+                          iob_peek_queue(&conn->readahead)->io_pktlen;
           }
         else
           {
@@ -77,17 +77,7 @@ int udp_ioctl(FAR struct udp_conn_s *conn,
           }
         break;
       case FIONSPACE:
-#ifdef CONFIG_NET_UDP_WRITE_BUFFERS
-#  if CONFIG_NET_SEND_BUFSIZE == 0
-        *(FAR int *)((uintptr_t)arg) =
-                                iob_navail(true) * CONFIG_IOB_BUFSIZE;
-#  else
-        *(FAR int *)((uintptr_t)arg) =
-                        conn->sndbufs - udp_wrbuffer_inqueue_size(conn);
-#  endif
-#else
         *(FAR int *)((uintptr_t)arg) = MIN_UDP_MSS;
-#endif
         break;
       default:
         ret = -ENOTTY;
