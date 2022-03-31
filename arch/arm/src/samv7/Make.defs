@@ -42,6 +42,10 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
 CMN_CSRCS += arm_idle.c
 endif
 
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
+
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
 endif

@@ -31,6 +31,10 @@ CMN_CSRCS += arm_doirq.c arm_hardfault.c arm_svcall.c arm_vfork.c
 CMN_CSRCS += arm_systemreset.c arm_trigger_irq.c arm_switchcontext.c arm_puts.c
 CMN_CSRCS += arm_tcbinfo.c
 
+ifeq ($(CONFIG_SCHED_BACKTRACE),y)
+CMN_CSRCS += arm_backtrace_thumb.c
+endif
+
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
 endif
