@@ -70,12 +70,6 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
   DEBUGASSERT(CURRENT_REGS == NULL);
   CURRENT_REGS = regs;
 
-  /* Disable further occurrences of this interrupt (until the interrupt
-   * sources have been clear by the driver).
-   */
-
-  up_disable_irq(irq);
-
   /* Deliver the IRQ */
 
   irq_dispatch(irq, regs);
@@ -114,9 +108,6 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
 
   CURRENT_REGS = NULL;
 
-  /* Unmask the last interrupt (global interrupts are still disabled) */
-
-  up_enable_irq(irq);
 #endif
   board_autoled_off(LED_INIRQ);
   return regs;
