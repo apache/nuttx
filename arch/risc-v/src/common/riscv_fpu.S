@@ -24,9 +24,8 @@
 
 #include <nuttx/config.h>
 
+#include <arch/arch.h>
 #include <arch/irq.h>
-
-#include "riscv_internal.h"
 
 #ifdef CONFIG_ARCH_FPU
 
