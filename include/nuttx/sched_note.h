@@ -188,13 +188,13 @@ struct note_common_s
 #ifdef CONFIG_SMP
   uint8_t nc_cpu;              /* CPU thread/task running on */
 #endif
-  uint8_t nc_pid[2];           /* ID of the thread/task */
+  uint8_t nc_pid[sizeof(pid_t)]; /* ID of the thread/task */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
-  uint8_t nc_systime_sec[4];   /* Time when note was buffered (sec) */
-  uint8_t nc_systime_nsec[4];  /* Time when note was buffered (nsec) */
+  uint8_t nc_systime_sec[sizeof(time_t)]; /* Time when note was buffered (sec) */
+  uint8_t nc_systime_nsec[sizeof(long)];  /* Time when note was buffered (nsec) */
 #else
-  uint8_t nc_systime[4];       /* Time when note was buffered */
+  uint8_t nc_systime[sizeof(clock_t)]; /* Time when note was buffered */
 #endif
 };
 

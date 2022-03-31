@@ -109,6 +109,40 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: sched_note_flatten
+ *
+ * Description:
+ *   Copy the data in the little endian layout
+ *
+ ****************************************************************************/
+
+static inline void sched_note_flatten(FAR uint8_t *dst,
+                                      FAR void *src, size_t len)
+{
+  switch (len)
+    {
+#ifdef CONFIG_HAVE_LONG_LONG
+      case 8:
+        dst[7] = (uint8_t)((*(uint64_t *)src >> 56) & 0xff);
+        dst[6] = (uint8_t)((*(uint64_t *)src >> 48) & 0xff);
+        dst[5] = (uint8_t)((*(uint64_t *)src >> 40) & 0xff);
+        dst[4] = (uint8_t)((*(uint64_t *)src >> 32) & 0xff);
+#endif
+      case 4:
+        dst[3] = (uint8_t)((*(uint32_t *)src >> 24) & 0xff);
+        dst[2] = (uint8_t)((*(uint32_t *)src >> 16) & 0xff);
+      case 2:
+        dst[1] = (uint8_t)((*(uint16_t *)src >> 8) & 0xff);
+      case 1:
+        dst[0] = (uint8_t)(*(uint8_t *)src & 0xff);
+        break;
+      default:
+        DEBUGASSERT(FALSE);
+        break;
+    }
+}
+
+/****************************************************************************
  * Name: note_common
  *
  * Description:
@@ -134,36 +168,26 @@ static void note_common(FAR struct tcb_s *tcb,
 
   clock_systime_timespec(&ts);
 #else
-  uint32_t systime    = (uint32_t)clock_systime_ticks();
+  clock_t systime = clock_systime_ticks();
 #endif
 
   /* Save all of the common fields */
 
-  note->nc_length     = length;
-  note->nc_type       = type;
-  note->nc_priority   = tcb->sched_priority;
+  note->nc_length   = length;
+  note->nc_type     = type;
+  note->nc_priority = tcb->sched_priority;
 #ifdef CONFIG_SMP
-  note->nc_cpu        = tcb->cpu;
+  note->nc_cpu      = tcb->cpu;
 #endif
-  note->nc_pid[0]     = (uint8_t)(tcb->pid & 0xff);
-  note->nc_pid[1]     = (uint8_t)((tcb->pid >> 8) & 0xff);
+  sched_note_flatten(note->nc_pid, &tcb->pid, sizeof(tcb->pid));
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_HIRES
-  note->nc_systime_nsec[0] = (uint8_t)(ts.tv_nsec         & 0xff);
-  note->nc_systime_nsec[1] = (uint8_t)((ts.tv_nsec >> 8)  & 0xff);
-  note->nc_systime_nsec[2] = (uint8_t)((ts.tv_nsec >> 16) & 0xff);
-  note->nc_systime_nsec[3] = (uint8_t)((ts.tv_nsec >> 24) & 0xff);
-  note->nc_systime_sec[0] = (uint8_t)(ts.tv_sec         & 0xff);
-  note->nc_systime_sec[1] = (uint8_t)((ts.tv_sec >> 8)  & 0xff);
-  note->nc_systime_sec[2] = (uint8_t)((ts.tv_sec >> 16) & 0xff);
-  note->nc_systime_sec[3] = (uint8_t)((ts.tv_sec >> 24) & 0xff);
+  sched_note_flatten(note->nc_systime_nsec, &ts.tv_nsec, sizeof(ts.tv_nsec));
+  sched_note_flatten(note->nc_systime_sec, &ts.tv_sec, sizeof(ts.tv_sec));
 #else
   /* Save the LS 32-bits of the system timer in little endian order */
 
-  note->nc_systime[0] = (uint8_t)(systime         & 0xff);
-  note->nc_systime[1] = (uint8_t)((systime >> 8)  & 0xff);
-  note->nc_systime[2] = (uint8_t)((systime >> 16) & 0xff);
-  note->nc_systime[3] = (uint8_t)((systime >> 24) & 0xff);
+  sched_note_flatten(note->nc_systime, &systime, sizeof(systime));
 #endif
 }
 
@@ -420,20 +444,8 @@ static void note_spincommon(FAR struct tcb_s *tcb,
 
   note_common(tcb, &note.nsp_cmn, sizeof(struct note_spinlock_s), type);
 
-  note.nsp_spinlock[0] = (uint8_t)((uintptr_t)spinlock & 0xff);
-  note.nsp_spinlock[1] = (uint8_t)(((uintptr_t)spinlock >> 8)  & 0xff);
-#if UINTPTR_MAX > UINT16_MAX
-  note.nsp_spinlock[2] = (uint8_t)(((uintptr_t)spinlock >> 16) & 0xff);
-  note.nsp_spinlock[3] = (uint8_t)(((uintptr_t)spinlock >> 24) & 0xff);
-#if UINTPTR_MAX > UINT32_MAX
-  note.nsp_spinlock[4] = (uint8_t)(((uintptr_t)spinlock >> 32) & 0xff);
-  note.nsp_spinlock[5] = (uint8_t)(((uintptr_t)spinlock >> 40) & 0xff);
-  note.nsp_spinlock[6] = (uint8_t)(((uintptr_t)spinlock >> 48) & 0xff);
-  note.nsp_spinlock[7] = (uint8_t)(((uintptr_t)spinlock >> 56) & 0xff);
-#endif
-#endif
-
-  note.nsp_value    = (uint8_t)*spinlock;
+  sched_note_flatten(note.nsp_spinlock, &spinlock, sizeof(spilock));
+  note.nsp_value = (uint8_t)*spinlock;
 
   /* Add the note to circular buffer */
 
@@ -692,8 +704,8 @@ void sched_note_premption(FAR struct tcb_s *tcb, bool locked)
 
   note_common(tcb, &note.npr_cmn, sizeof(struct note_preempt_s),
               locked ? NOTE_PREEMPT_LOCK : NOTE_PREEMPT_UNLOCK);
-  note.npr_count[0] = (uint8_t)(tcb->lockcount & 0xff);
-  note.npr_count[1] = (uint8_t)((tcb->lockcount >> 8) & 0xff);
+  sched_note_flatten(note.npr_count,
+                     &tcb->lockcount, sizeof(tcb->lockcount));
 
   /* Add the note to circular buffer */
 
@@ -716,8 +728,7 @@ void sched_note_csection(FAR struct tcb_s *tcb, bool enter)
   note_common(tcb, &note.ncs_cmn, sizeof(struct note_csection_s),
               enter ? NOTE_CSECTION_ENTER : NOTE_CSECTION_LEAVE);
 #ifdef CONFIG_SMP
-  note.ncs_count[0] = (uint8_t)(tcb->irqcount & 0xff);
-  note.ncs_count[1] = (uint8_t)((tcb->irqcount >> 8) & 0xff);
+  sched_note_flatten(note.ncs_count, &tcb->irqcount, sizeof(tcb->irqcount));
 #endif
 
   /* Add the note to circular buffer */
@@ -790,18 +801,8 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   for (i = 0; i < argc; i++)
     {
       arg = (uintptr_t)va_arg(ap, uintptr_t);
-      *args++ = (uint8_t)(arg & 0xff);
-      *args++ = (uint8_t)((arg >> 8)  & 0xff);
-#if UINTPTR_MAX > UINT16_MAX
-      *args++ = (uint8_t)((arg >> 16) & 0xff);
-      *args++ = (uint8_t)((arg >> 24) & 0xff);
-#if UINTPTR_MAX > UINT32_MAX
-      *args++ = (uint8_t)((arg >> 32) & 0xff);
-      *args++ = (uint8_t)((arg >> 40) & 0xff);
-      *args++ = (uint8_t)((arg >> 48) & 0xff);
-      *args++ = (uint8_t)((arg >> 56) & 0xff);
-#endif
-#endif
+      sched_note_flatten(args, &arg, sizeof(arg));
+      args += sizeof(uintptr_t);
     }
 
   va_end(ap);
@@ -826,20 +827,9 @@ void sched_note_syscall_leave(int nr, uintptr_t result)
   note_common(tcb, &note.nsc_cmn, sizeof(struct note_syscall_leave_s),
               NOTE_SYSCALL_LEAVE);
   DEBUGASSERT(nr <= UCHAR_MAX);
-  note.nsc_nr     = nr;
+  note.nsc_nr = nr;
 
-  note.nsc_result[0] = (uint8_t)(result & 0xff);
-  note.nsc_result[1] = (uint8_t)((result >> 8)  & 0xff);
-#if UINTPTR_MAX > UINT16_MAX
-  note.nsc_result[2] = (uint8_t)((result >> 16) & 0xff);
-  note.nsc_result[3] = (uint8_t)((result >> 24) & 0xff);
-#if UINTPTR_MAX > UINT32_MAX
-  note.nsc_result[4] = (uint8_t)((result >> 32) & 0xff);
-  note.nsc_result[5] = (uint8_t)((result >> 40) & 0xff);
-  note.nsc_result[6] = (uint8_t)((result >> 48) & 0xff);
-  note.nsc_result[7] = (uint8_t)((result >> 56) & 0xff);
-#endif
-#endif
+  sched_note_flatten(note.nsc_result, &result, sizeof(result));
 
   /* Add the note to circular buffer */
 
@@ -930,10 +920,7 @@ void sched_note_dump(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  note->nbi_module[0] = (uint8_t)(module         & 0xff);
-  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
-  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
-  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
+  sched_note_flatten(note->nbi_module, &module, sizeof(module));
   note->nbi_event = event;
   memcpy(note->nbi_data, buf, length - sizeof(struct note_binary_s) + 1);
 
@@ -1169,10 +1156,7 @@ void sched_note_vbprintf(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  note->nbi_module[0] = (uint8_t)(module         & 0xff);
-  note->nbi_module[1] = (uint8_t)((module >> 8)  & 0xff);
-  note->nbi_module[2] = (uint8_t)((module >> 16) & 0xff);
-  note->nbi_module[3] = (uint8_t)((module >> 24) & 0xff);
+  sched_note_flatten(note->nbi_module, &module, sizeof(module));
   note->nbi_event = event;
 
   /* Add the note to circular buffer */
