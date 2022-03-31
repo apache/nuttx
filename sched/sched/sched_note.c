@@ -1184,6 +1184,16 @@ void sched_note_bprintf(uintptr_t ip, uint8_t event,
   sched_note_vbprintf(ip, event, fmt, va);
   va_end(va);
 }
+
+void sched_note_begin(uintptr_t ip, FAR const char *buf)
+{
+  sched_note_printf(ip, "B|%d|%s", getpid(), buf);
+}
+
+void sched_note_end(uintptr_t ip, FAR const char *buf)
+{
+  sched_note_printf(ip, "E|%d|%s", getpid(), buf);
+}
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
