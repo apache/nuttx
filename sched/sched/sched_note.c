@@ -766,10 +766,10 @@ void sched_note_syscall_enter(int nr, int argc, ...)
   struct note_syscall_enter_s note;
   FAR struct tcb_s *tcb = this_task();
   unsigned int length;
-  va_list ap;
   uintptr_t arg;
-  int i;
   uint8_t *args;
+  va_list ap;
+  int i;
 
   if (!note_isenabled_syscall(nr))
     {
@@ -862,7 +862,7 @@ void sched_note_irqhandler(int irq, FAR void *handler, bool enter)
 #endif
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_DUMP
-void sched_note_string(FAR const char *buf)
+void sched_note_string(uintptr_t ip, FAR const char *buf)
 {
   FAR struct note_string_s *note;
   uint8_t data[255];
@@ -886,6 +886,7 @@ void sched_note_string(FAR const char *buf)
   note_common(tcb, &note->nst_cmn, length,
               NOTE_DUMP_STRING);
 
+  sched_note_flatten(note->nst_ip, &ip, sizeof(uintptr_t));
   memcpy(note->nst_data, buf, length - sizeof(struct note_string_s));
   data[length - 1] = '\0';
 
@@ -894,7 +895,7 @@ void sched_note_string(FAR const char *buf)
   sched_note_add(note, length);
 }
 
-void sched_note_dump(uint32_t module, uint8_t event,
+void sched_note_dump(uintptr_t ip, uint8_t event,
                      FAR const void *buf, size_t len)
 {
   FAR struct note_binary_s *note;
@@ -919,7 +920,7 @@ void sched_note_dump(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  sched_note_flatten(note->nbi_module, &module, sizeof(module));
+  sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
   note->nbi_event = event;
   memcpy(note->nbi_data, buf, length - sizeof(struct note_binary_s) + 1);
 
@@ -928,7 +929,8 @@ void sched_note_dump(uint32_t module, uint8_t event,
   sched_note_add(note, length);
 }
 
-void sched_note_vprintf(FAR const char *fmt, va_list va)
+void sched_note_vprintf(uintptr_t ip,
+                        FAR const char *fmt, va_list va)
 {
   FAR struct note_string_s *note;
   uint8_t data[255];
@@ -956,12 +958,14 @@ void sched_note_vprintf(FAR const char *fmt, va_list va)
   note_common(tcb, &note->nst_cmn, length,
               NOTE_DUMP_STRING);
 
+  sched_note_flatten(note->nst_ip, &ip, sizeof(uintptr_t));
+
   /* Add the note to circular buffer */
 
   sched_note_add(note, length);
 }
 
-void sched_note_vbprintf(uint32_t module, uint8_t event,
+void sched_note_vbprintf(uintptr_t ip, uint8_t event,
                          FAR const char *fmt, va_list va)
 {
   FAR struct note_binary_s *note;
@@ -1155,7 +1159,7 @@ void sched_note_vbprintf(uint32_t module, uint8_t event,
   note_common(tcb, &note->nbi_cmn, length,
               NOTE_DUMP_BINARY);
 
-  sched_note_flatten(note->nbi_module, &module, sizeof(module));
+  sched_note_flatten(note->nbi_ip, &ip, sizeof(uintptr_t));
   note->nbi_event = event;
 
   /* Add the note to circular buffer */
@@ -1163,20 +1167,21 @@ void sched_note_vbprintf(uint32_t module, uint8_t event,
   sched_note_add(note, length);
 }
 
-void sched_note_printf(FAR const char *fmt, ...)
+void sched_note_printf(uintptr_t ip,
+                       FAR const char *fmt, ...)
 {
   va_list va;
   va_start(va, fmt);
-  sched_note_vprintf(fmt, va);
+  sched_note_vprintf(ip, fmt, va);
   va_end(va);
 }
 
-void sched_note_bprintf(uint32_t module, uint8_t event,
+void sched_note_bprintf(uintptr_t ip, uint8_t event,
                         FAR const char *fmt, ...)
 {
   va_list va;
   va_start(va, fmt);
-  sched_note_vbprintf(module, event, fmt, va);
+  sched_note_vbprintf(ip, event, fmt, va);
   va_end(va);
 }
 #endif /* CONFIG_SCHED_INSTRUMENTATION_DUMP */
