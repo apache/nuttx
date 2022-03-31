@@ -240,7 +240,14 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
 
   /* If attributes were not supplied, use the default attributes */
 
-  if (!attr)
+  if (attr)
+    {
+      if (!attr->stacksize)
+        {
+          return EINVAL;
+        }
+    }
+  else
     {
       attr = &g_default_pthread_attr;
     }
