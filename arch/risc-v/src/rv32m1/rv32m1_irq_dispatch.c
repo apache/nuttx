@@ -102,21 +102,9 @@ void *rv32m1_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   riscv_ack_irq(irq);
 
-#ifdef CONFIG_SUPPRESS_INTERRUPTS
-  PANIC();
-#else
-  /* Current regs non-zero indicates that we are processing an interrupt;
-   * CURRENT_REGS is also used to manage interrupt level context switches.
-   *
-   * Nested interrupts are not supported
-   */
-
-  DEBUGASSERT(CURRENT_REGS == NULL);
-  CURRENT_REGS = regs;
-
   /* Deliver the IRQ */
 
-  irq_dispatch(irq, regs);
+  regs = riscv_doirq(irq, regs);
 
   if (RV32M1_IRQ_MEXT <= irq)
     {
@@ -126,17 +114,6 @@ void *rv32m1_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
       putreg32(1 << vec, RV32M1_EU_INTPTPENDCLR);
     }
-
-#endif
-
-  /* If a context switch occurred while processing the interrupt then
-   * CURRENT_REGS may have change value.  If we return any value different
-   * from the input regs, then the lower level will know that a context
-   * switch occurred during interrupt processing.
-   */
-
-  regs = (uintptr_t *)CURRENT_REGS;
-  CURRENT_REGS = NULL;
 
   return regs;
 }
