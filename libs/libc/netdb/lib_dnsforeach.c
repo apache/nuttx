@@ -96,6 +96,8 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
       return ret;
     }
 
+  dns_semtake();
+
   keylen = strlen(NETDB_DNS_KEYWORD);
   while (fgets(line, DNS_MAX_LINE, stream) != NULL)
     {
@@ -218,14 +220,14 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
           if (ret != OK)
             {
-              fclose(stream);
-              return ret;
+              break;
             }
         }
     }
 
+  dns_semgive();
   fclose(stream);
-  return OK;
+  return ret;
 }
 
 #else /* CONFIG_NETDB_RESOLVCONF */
