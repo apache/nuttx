@@ -122,7 +122,7 @@ static int ifconf_ipv4_callback(FAR struct net_driver_s *dev, FAR void *arg)
            * transferred is returned in ifc_len.
            */
 
-          strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+          strlcpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
 
           inaddr->sin_family = AF_INET;
           inaddr->sin_port   = 0;
