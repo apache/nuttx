@@ -1421,6 +1421,11 @@ static int unionfs_opendir(FAR struct inode *mountpt,
 
   finfo("relpath: \"%s\"\n", relpath ? relpath : "NULL");
 
+  if (!relpath)
+    {
+      return -EINVAL;
+    }
+
   /* Recover the filesystem data from the struct inode instance */
 
   DEBUGASSERT(mountpt != NULL && mountpt->i_private != NULL);
@@ -1441,7 +1446,7 @@ static int unionfs_opendir(FAR struct inode *mountpt,
    * omit duplicates on file system 1.
    */
 
-  if (relpath && strlen(relpath) > 0)
+  if (strlen(relpath) > 0)
     {
       fu->fu_relpath = strdup(relpath);
       if (!fu->fu_relpath)
