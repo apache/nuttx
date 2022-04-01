@@ -115,7 +115,7 @@ int chdir(FAR const char *path)
   /* Verify that 'path' refers to a directory */
 
   ret = stat(path, &buf);
-  if (ret != 0)
+  if (ret < 0)
     {
       errcode = ENOENT;
       goto errout;
