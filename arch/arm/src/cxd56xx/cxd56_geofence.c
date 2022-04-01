@@ -450,7 +450,7 @@ static void cxd56_geofence_sighandler(uint32_t data, FAR void *userdata)
       if (fds)
         {
           fds->revents |= POLLIN;
-          gnssinfo("Report events: %02x\n", fds->revents);
+          gnssinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }

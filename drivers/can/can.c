@@ -186,7 +186,7 @@ static void can_pollnotify(FAR struct can_dev_s *dev, pollevent_t eventset)
           fds->revents |= fds->events & eventset;
           if (fds->revents != 0)
             {
-              caninfo("Report events: %02x\n", fds->revents);
+              caninfo("Report events: %08" PRIx32 "\n", fds->revents);
               nxsem_post(fds->sem);
             }
         }

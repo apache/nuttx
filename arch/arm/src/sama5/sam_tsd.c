@@ -271,7 +271,7 @@ static void sam_tsd_notify(struct sam_tsd_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          iinfo("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
