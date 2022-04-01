@@ -253,9 +253,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
           /* Perform the callback */
 
-          dns_semgive();
           ret = callback(arg, addr, sizeof(struct sockaddr_in));
-          dns_semtake();
         }
       else
 #endif
@@ -274,9 +272,7 @@ int dns_foreach_nameserver(dns_callback_t callback, FAR void *arg)
 
           /* Perform the callback */
 
-          dns_semgive();
           ret = callback(arg, addr, sizeof(struct sockaddr_in6));
-          dns_semtake();
         }
       else
 #endif
