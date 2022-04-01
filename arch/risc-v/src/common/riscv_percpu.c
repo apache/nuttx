@@ -26,6 +26,7 @@
 #include <nuttx/irq.h>
 
 #include <arch/barriers.h>
+#include <arch/mode.h>
 
 #include <assert.h>
 #include <stdint.h>
@@ -87,7 +88,7 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
   /* Set the scratch register value to point to the scratch area */
 
-  WRITE_CSR(sscratch, &g_scratch[hartid]);
+  WRITE_CSR(CSR_SCRATCH, &g_scratch[hartid]);
 
   /* Make sure it sticks */
 
@@ -108,7 +109,7 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
 uintptr_t riscv_percpu_get_hartid(void)
 {
-  uintptr_t scratch = READ_CSR(sscratch);
+  uintptr_t scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_scratch &&
               scratch <= (uintptr_t) &g_scratch + sizeof(g_scratch));
