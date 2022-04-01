@@ -359,25 +359,17 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
   int irq;
   uintptr_t *mepc = regs;
 
+#ifdef CONFIG_ESP32C3_EXCEPTION_ENABLE_CACHE
   if (((RISCV_IRQ_BIT & mcause) == 0) &&
       (mcause != RISCV_IRQ_ECALLM))
     {
-#ifdef CONFIG_ESP32C3_EXCEPTION_ENABLE_CACHE
       if (!spi_flash_cache_enabled())
         {
           spi_flash_enable_cache(0);
           _err("ERROR: Cache was disabled and re-enabled\n");
         }
+    }
 #endif
-    }
-  else
-    {
-      /* Check "CURRENT_REGS" only in interrupt or ecall */
-
-      DEBUGASSERT(CURRENT_REGS == NULL);
-    }
-
-  CURRENT_REGS = regs;
 
   irqinfo("INFO: mcause=%08" PRIXPTR "\n", mcause);
 
@@ -405,7 +397,7 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
       if (mcause == RISCV_IRQ_ECALLM)
         {
           *mepc += 4;
-          irq_dispatch(ESP32C3_IRQ_ECALL_M, regs);
+          regs = riscv_doirq(ESP32C3_IRQ_ECALL_M, regs);
         }
       else
         {
