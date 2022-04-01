@@ -30,6 +30,7 @@
 
 #include <arpa/inet.h>
 
+#include <nuttx/sched.h>
 #include <nuttx/semaphore.h>
 
 #include "netdb/lib_dns.h"
@@ -40,7 +41,9 @@
 
 /* Protects DNS cache, nameserver list and notify list. */
 
-static sem_t g_dns_sem = SEM_INITIALIZER(1);
+static sem_t g_dns_sem    = SEM_INITIALIZER(1);
+static pid_t g_dns_holder = INVALID_PROCESS_ID;
+static int   g_dns_count;
 
 /****************************************************************************
  * Public Data
@@ -143,8 +146,19 @@ bool dns_initialize(void)
 
 void dns_semtake(void)
 {
+  pid_t me = getpid();
   int errcode = 0;
   int ret;
+
+  /* Does this thread already hold the semaphore? */
+
+  if (g_dns_holder == me)
+    {
+      /* Yes.. just increment the reference count */
+
+      g_dns_count++;
+      return;
+    }
 
   do
     {
@@ -156,6 +170,9 @@ void dns_semtake(void)
         }
     }
   while (ret < 0 && errcode == EINTR);
+
+  g_dns_holder = me;
+  g_dns_count  = 1;
 }
 
 /****************************************************************************
@@ -168,5 +185,11 @@ void dns_semtake(void)
 
 void dns_semgive(void)
 {
-  DEBUGVERIFY(_SEM_POST(&g_dns_sem));
+  DEBUGASSERT(g_dns_holder == getpid() && g_dns_count > 0);
+
+  if (--g_dns_count == 0)
+    {
+      g_dns_holder = INVALID_PROCESS_ID;
+      DEBUGVERIFY(_SEM_POST(&g_dns_sem));
+    }
 }
