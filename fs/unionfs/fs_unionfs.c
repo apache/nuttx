@@ -1001,12 +1001,15 @@ static int unionfs_close(FAR struct file *filep)
     {
       unionfs_destroy(ui);
     }
+  else
+    {
+      unionfs_semgive(ui);
+    }
 
   /* Free the open file container */
 
   kmm_free(uf);
   filep->f_priv = NULL;
-  unionfs_semgive(ui);
   return ret;
 }
 
