@@ -275,7 +275,7 @@ static void btn_sample(FAR struct btn_upperhalf_s *priv)
                   fds->revents |= (fds->events & POLLIN);
                   if (fds->revents != 0)
                     {
-                      iinfo("Report events: %02x\n", fds->revents);
+                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
                       nxsem_post(fds->sem);
                     }
                 }
@@ -690,7 +690,7 @@ static int btn_poll(FAR struct file *filep, FAR struct pollfd *fds,
                   fds->revents |= (fds->events & POLLIN);
                   if (fds->revents != 0)
                     {
-                      iinfo("Report events: %02x\n", fds->revents);
+                      iinfo("Report events: %08" PRIx32 "\n", fds->revents);
                       nxsem_post(fds->sem);
                     }
                 }
