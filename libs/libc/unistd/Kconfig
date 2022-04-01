@@ -144,7 +144,7 @@ config LIBC_HOSTNAME
 	---help---
 		A unique name to identify device on the network
 
-config OPEN_MAX
+config LIBC_OPEN_MAX
 	int "OPEN_MAX for this device"
 	default 255
 	---help---
