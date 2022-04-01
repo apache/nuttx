@@ -195,7 +195,7 @@ static ssize_t tcbinfo_read(FAR struct file *filep, FAR char *buffer,
   if (filep->f_pos == 0)
     {
       linesize = procfs_snprintf(attr->line, TCBINFO_LINELEN,
-                                 "pointer %p size %d\n", g_tcbinfo,
+                                 "pointer %p size %d\n", &g_tcbinfo,
                                   sizeof(struct tcbinfo_s));
 
       /* Save the linesize in case we are re-entered with f_pos > 0 */
