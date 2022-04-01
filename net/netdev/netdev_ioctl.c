@@ -1086,7 +1086,7 @@ static int netdev_ifr_ioctl(FAR struct socket *psock, int cmd,
           dev = netdev_findbyindex(req->ifr_ifindex);
           if (dev != NULL)
             {
-              strncpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
+              strlcpy(req->ifr_name, dev->d_ifname, IFNAMSIZ);
               ret = OK;
             }
           else
