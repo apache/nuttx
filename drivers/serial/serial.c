@@ -187,7 +187,7 @@ static void uart_pollnotify(FAR uart_dev_t *dev, pollevent_t eventset)
             {
               int semcount;
 
-              finfo("Report events: %02x\n", fds->revents);
+              finfo("Report events: %08" PRIx32 "\n", fds->revents);
 
               nxsem_get_value(fds->sem, &semcount);
               if (semcount < 1)

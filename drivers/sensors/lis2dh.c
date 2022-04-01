@@ -754,7 +754,7 @@ static void lis2dh_notify(FAR struct lis2dh_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          lis2dh_dbg("lis2dh: Report events: %02x\n", fds->revents);
+          lis2dh_dbg("lis2dh: Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }

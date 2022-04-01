@@ -289,7 +289,7 @@ static void hcsr04_notify(FAR struct hcsr04_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          hcsr04_dbg("Report events: %02x\n", fds->revents);
+          hcsr04_dbg("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }

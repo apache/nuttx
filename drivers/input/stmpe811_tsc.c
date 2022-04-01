@@ -159,7 +159,7 @@ static void stmpe811_notify(FAR struct stmpe811_dev_s *priv)
       if (fds)
         {
           fds->revents |= POLLIN;
-          iinfo("Report events: %02x\n", fds->revents);
+          iinfo("Report events: %08" PRIx32 "\n", fds->revents);
           nxsem_post(fds->sem);
         }
     }
@@ -634,7 +634,8 @@ static int stmpe811_poll(FAR struct file *filep, FAR struct pollfd *fds,
 
       if ((fds->events & POLLIN) == 0)
         {
-          ierr("ERROR: Missing POLLIN: revents: %08x\n", fds->revents);
+          ierr("ERROR: Missing POLLIN: revents: %08" PRIx32 "\n",
+               fds->revents);
           ret = -EDEADLK;
           goto errout;
         }
