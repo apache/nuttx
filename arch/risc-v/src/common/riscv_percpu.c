@@ -40,6 +40,9 @@
 
 #define HART_CNT    (CONFIG_ARCH_CPU_COUNT)
 
+static_assert(RISCV_PERCPU_HARTID_OFFSET == offsetof(riscv_percpu_s, hartid),
+              "RISCV_PERCPU_HARTID_OFFSET with a wrong value");
+
 /****************************************************************************
  * Private Data
  ****************************************************************************/
@@ -70,7 +73,7 @@ void riscv_percpu_init(void)
 }
 
 /****************************************************************************
- * Name: riscv_percpu_get_addr
+ * Name: riscv_percpu_add_hart
  *
  * Description:
  *   Get add a hart to the per CPU area
