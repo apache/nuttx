@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/supervisor/riscv_exception_macros.S
+ * arch/risc-v/src/common/riscv_macros.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-.file "riscv_exception_macros.S"
+.file "riscv_macros.S"
 
 /****************************************************************************
  * Included Files
