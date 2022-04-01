@@ -37,6 +37,7 @@
 /* CSR definitions */
 
 #  define CSR_STATUS        sstatus          /* Global status register */
+#  define CSR_SCRATCH       sscratch         /* Scratch register */
 #  define CSR_EPC           sepc             /* Exception program counter */
 #  define CSR_IE            sie              /* Interrupt enable register */
 #  define CSR_CAUSE         scause           /* Interrupt cause register */
@@ -69,6 +70,7 @@
 /* CSR definitions */
 
 #  define CSR_STATUS        mstatus          /* Global status register */
+#  define CSR_SCRATCH       mscratch         /* Scratch register */
 #  define CSR_EPC           mepc             /* Exception program counter */
 #  define CSR_IE            mie              /* Interrupt enable register */
 #  define CSR_CAUSE         mcause           /* Interrupt cause register */
