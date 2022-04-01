@@ -297,7 +297,7 @@ static int modlib_relocate(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rel->r_offset < 0 ||
+      if (rel->r_offset ||
           rel->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("ERROR: Section %d reloc %d: "
@@ -485,7 +485,7 @@ static int modlib_relocateadd(FAR struct module_s *modp,
 
       /* Calculate the relocation address. */
 
-      if (rela->r_offset < 0 ||
+      if (rela->r_offset ||
           rela->r_offset > dstsec->sh_size - sizeof(uint32_t))
         {
           berr("ERROR: Section %d reloc %d: "
