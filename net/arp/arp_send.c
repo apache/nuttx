@@ -289,7 +289,7 @@ int arp_send(in_addr_t ipaddr)
 
   /* Remember the routing device name */
 
-  strncpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
+  strlcpy((FAR char *)state.snd_ifname, (FAR const char *)dev->d_ifname,
           IFNAMSIZ);
 
   /* Now loop, testing if the address mapping is in the ARP table and re-
