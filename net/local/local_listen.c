@@ -96,9 +96,9 @@ int local_listen(FAR struct socket *psock, int backlog)
 
   /* Set the backlog value */
 
-  if (backlog > 255)
+  if (backlog > UINT8_MAX)
     {
-      backlog = 255;
+      backlog = UINT8_MAX;
     }
 
   server->u.server.lc_backlog = backlog;
