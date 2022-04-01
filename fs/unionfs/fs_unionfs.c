@@ -1856,6 +1856,10 @@ static int unionfs_readdir(struct inode *mountpt, struct fs_dirent_s *dir)
                   if (ops->rewinddir != NULL)
                     {
                       ret = ops->rewinddir(um->um_node, fu->fu_lower[1]);
+                      if (ret < 0)
+                        {
+                          return ret;
+                        }
                     }
 
                   /* Then try the read operation again */
