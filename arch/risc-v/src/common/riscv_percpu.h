@@ -38,10 +38,9 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#ifdef __ASSEMBLY__
-#define SCRATCH_HARTID_OFFSET   (0 * INT_REG_SIZE)
-#else
-#define SCRATCH_HARTID_OFFSET   offsetof(riscv_percpu_s, hartid)
+#define RISCV_PERCPU_HARTID_OFFSET   (0 * INT_REG_SIZE)
+
+#ifndef __ASSEMBLY__
 
 /****************************************************************************
  * Public Types
@@ -74,7 +73,7 @@ struct riscv_percpu_s
 void riscv_percpu_init(void);
 
 /****************************************************************************
- * Name: riscv_percpu_get_addr
+ * Name: riscv_percpu_add_hart
  *
  * Description:
  *   Get add a hart to the per CPU area
