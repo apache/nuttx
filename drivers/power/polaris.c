@@ -177,10 +177,9 @@ static int wlc_i2c_write(FAR struct stwlc38_dev_s *priv,
 }
 
 static int hw_i2c_write(FAR struct stwlc38_dev_s *priv, uint32_t addr,
-                        uint8_t *data, uint32_t data_length)
+                        FAR uint8_t *data, uint32_t data_length)
 {
-  uint8_t *cmd;
-  cmd = kmm_zalloc((5 + data_length) * sizeof(uint8_t));
+  uint8_t cmd[5 + data_length];
 
   cmd[0] = OPCODE_WRITE;
   cmd[1] = (uint8_t)((addr >> 24) & 0xff);
@@ -189,34 +188,29 @@ static int hw_i2c_write(FAR struct stwlc38_dev_s *priv, uint32_t addr,
   cmd[4] = (uint8_t)((addr >> 0) & 0xff);
   memcpy(&cmd[5], data, data_length);
 
-  if ((wlc_i2c_write(priv, cmd, (5 + data_length))) < OK)
+  if ((wlc_i2c_write(priv, cmd, sizeof(cmd))) < OK)
     {
       baterr("[WLC] Error in writing Hardware I2c!\n");
-      kmm_free(cmd);
       return E_BUS_W;
     }
 
-  kmm_free(cmd);
   return OK;
 }
 
 static int fw_i2c_write(FAR struct stwlc38_dev_s *priv, uint16_t addr,
-                        uint8_t *data, uint32_t data_length)
+                        FAR uint8_t *data, uint32_t data_length)
 {
-  uint8_t *cmd;
-  cmd = kmm_zalloc((2 + data_length) * sizeof(uint8_t));
+  uint8_t cmd[2 + data_length];
 
   cmd[0] = (uint8_t)((addr >>  8) & 0xff);
   cmd[1] = (uint8_t)((addr >>  0) & 0xff);
   memcpy(&cmd[2], data, data_length);
-  if ((wlc_i2c_write(priv, cmd, (2 + data_length))) < OK)
+  if ((wlc_i2c_write(priv, cmd, sizeof(cmd))) < OK)
     {
       baterr("[WLC] ERROR: in writing Hardware I2c!\n");
-      kmm_free(cmd);
       return E_BUS_W;
     }
 
-  kmm_free(cmd);
   return OK;
 }
 
