@@ -1522,7 +1522,7 @@ static int netdev_file_ioctl(FAR struct socket *psock, int cmd,
                    conn->s_flags &= ~_SF_NONBLOCK;
                  }
 
-               ret = OK;
+               ret = -ENOTTY; /* let file_vioctl update f_oflags */
             }
           else
             {
