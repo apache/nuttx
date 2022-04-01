@@ -28,7 +28,7 @@
 #include <arch/irq.h>
 #include <arch/mode.h>
 
-#include "riscv_exception_macros.S"
+#include "riscv_macros.S"
 
 /****************************************************************************
  * Pre-processor Definitions
