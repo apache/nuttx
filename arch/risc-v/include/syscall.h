@@ -128,7 +128,7 @@
 #  define ASM_SYS_CALL \
      " addi sp, sp, -16\n"                  /* Make room */ \
      REGSTORE " ra, 0(sp)\n"                /* Save ra */ \
-     " jal  ra, riscv_syscall_dispatch\n"   /* Dispatch (modifies ra) */ \
+     " jal  ra, riscv_dispatch_syscall\n"   /* Dispatch (modifies ra) */ \
      REGLOAD " ra, 0(sp)\n"                 /* Restore ra */ \
      " addi sp, sp, 16\n"                   /* Restore sp */
 #else

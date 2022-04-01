@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/supervisor/riscv_syscall_dispatch.S
+ * arch/risc-v/src/common/supervisor/riscv_dispatch_syscall.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,7 +18,7 @@
  *
  ****************************************************************************/
 
-.file "riscv_syscall_dispatch.S"
+.file "riscv_dispatch_syscall.S"
 
 /****************************************************************************
  * Included Files
@@ -37,16 +37,16 @@
  * Public Symbols
  ****************************************************************************/
 
-    .globl  riscv_syscall_dispatch
+    .globl  riscv_dispatch_syscall
 
 /****************************************************************************
- * Name: riscv_syscall_dispatch
+ * Name: riscv_dispatch_syscall
  *
  * Description:
  *   Dispatch syscall from kernel
  *
  * C Function Prototype:
- *   void riscv_syscall_dispatch(void);
+ *   void riscv_dispatch_syscall(void);
  *
  * Input Parameters:
  *   Assumes the context to return is already set up
@@ -59,9 +59,9 @@
  *
  ****************************************************************************/
 
-.type riscv_syscall_dispatch, function
+.type riscv_dispatch_syscall, function
 
-riscv_syscall_dispatch:
+riscv_dispatch_syscall:
 
   addi       sp, sp, -XCPTCONTEXT_SIZE /* make room */
   save_ctx   sp                        /* save current context */
