@@ -44,7 +44,7 @@
  * Private Data
  ****************************************************************************/
 
-static struct riscv_percpu_s g_scratch[HART_CNT];
+static struct riscv_percpu_s g_percpu[HART_CNT];
 
 /****************************************************************************
  * Public Functions
@@ -61,11 +61,11 @@ static struct riscv_percpu_s g_scratch[HART_CNT];
 
 void riscv_percpu_init(void)
 {
-  int i;
+  uintptr_t i;
 
   for (i = 0; i < HART_CNT; i++)
     {
-      g_scratch[i].hartid = i;
+      g_percpu[i].hartid = i;
     }
 }
 
@@ -88,7 +88,7 @@ void riscv_percpu_add_hart(uintptr_t hartid)
 
   /* Set the scratch register value to point to the scratch area */
 
-  WRITE_CSR(CSR_SCRATCH, &g_scratch[hartid]);
+  WRITE_CSR(CSR_SCRATCH, &g_percpu[hartid]);
 
   /* Make sure it sticks */
 
@@ -111,8 +111,8 @@ uintptr_t riscv_percpu_get_hartid(void)
 {
   uintptr_t scratch = READ_CSR(CSR_SCRATCH);
 
-  DEBUGASSERT(scratch >= (uintptr_t) &g_scratch &&
-              scratch <= (uintptr_t) &g_scratch + sizeof(g_scratch));
+  DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
+              scratch < (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   return ((struct riscv_percpu_s *)scratch)->hartid;
 }
