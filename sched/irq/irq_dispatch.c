@@ -176,7 +176,13 @@ void irq_dispatch(int irq, FAR void *context)
 
   /* Then dispatch to the interrupt handler */
 
-  CALL_VECTOR(ndx, vector, irq, context, arg);
+#if NR_IRQS > 0
+  if ((unsigned)irq < NR_IRQS)
+    {
+      CALL_VECTOR(ndx, vector, irq, context, arg);
+    }
+#endif
+
   UNUSED(ndx);
 
 #ifdef CONFIG_SCHED_INSTRUMENTATION_IRQHANDLER
