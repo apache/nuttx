@@ -138,6 +138,13 @@ int pthread_join(pthread_t thread, FAR pthread_addr_t *pexit_value)
     }
   else
     {
+      if (pjoin->detached)
+        {
+          pthread_sem_give(&group->tg_joinsem);
+          leave_cancellation_point();
+          return EINVAL;
+        }
+
       /* NOTE: sched_lock() is not enough for SMP
        * because another CPU would continue the pthread and exit
        * sequences so need to protect it with a critical section
