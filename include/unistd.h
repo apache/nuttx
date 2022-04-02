@@ -412,6 +412,9 @@ int     setregid(gid_t rgid, gid_t egid);
 
 int     getentropy(FAR void *buffer, size_t length);
 
+void    sync(void);
+int     syncfs(int fd);
+
 #undef EXTERN
 #if defined(__cplusplus)
 }
