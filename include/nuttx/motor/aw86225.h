@@ -50,6 +50,7 @@ struct aw86225_pattern_s
 struct aw86225_patterns_s
 {
   uint32_t count;
+  uint8_t repeatable;
   struct aw86225_pattern_s pattern[1];
 };
 

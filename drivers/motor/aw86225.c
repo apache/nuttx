@@ -103,6 +103,7 @@ struct aw86225_dev_s
   FAR const struct aw86225_config_s *config; /* The board config function */
   struct aw86225_data_s data;                /* The struct of data */
   int pattern_index;
+  uint8_t state;
   FAR struct aw86225_patterns_s *patterns;
   struct wdog_s wdog;
   struct work_s worker;
@@ -1756,6 +1757,27 @@ static void worker_cb(FAR void *arg)
   int ret = OK;
   FAR struct aw86225_dev_s *priv = (FAR void *)arg;
   priv->pattern_index++;
+  if (priv->pattern_index == priv->patterns->count)
+    {
+      if (priv->patterns->repeatable)
+        {
+          mtrinfo("repeat again\n");
+          priv->pattern_index = 0;
+        }
+      else
+        {
+          mtrinfo("exit\n");
+
+          /* set state idle, play finish */
+
+          priv->state = MOTOR_STATE_IDLE ;
+          return;
+        }
+    }
+
+  mtrinfo("pattern %d duration %ld\n", priv->pattern_index,
+           priv->patterns->pattern[priv->pattern_index].duration);
+
   ret = aw86225_excute_pattern(priv,
                          &priv->patterns->pattern[priv->pattern_index]);
   if (ret < 0)
@@ -1768,11 +1790,6 @@ static void worker_cb(FAR void *arg)
   if (ret < 0)
     {
       mtrerr("pattern index %d play fail \n", priv->pattern_index);
-      return;
-    }
-
-  if (priv->pattern_index == priv->patterns->count - 1)
-    {
       return;
     }
 
@@ -1910,6 +1927,7 @@ static int aw86225_shutdown(FAR struct motor_lowerhalf_s *dev)
 static int aw86225_stop(FAR struct motor_lowerhalf_s *dev)
 {
   FAR struct aw86225_dev_s *priv = (FAR struct aw86225_dev_s *)dev;
+  int ret;
 
   DEBUGASSERT(dev != NULL);
 
@@ -1920,7 +1938,13 @@ static int aw86225_stop(FAR struct motor_lowerhalf_s *dev)
       work_cancel(HPWORK, &priv->worker);
     }
 
-  return aw86225_haptic_stop(priv);
+  ret = aw86225_haptic_stop(priv);
+  if (ret == 0)
+    {
+      priv->state = MOTOR_STATE_IDLE ;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1934,10 +1958,17 @@ static int aw86225_stop(FAR struct motor_lowerhalf_s *dev)
 static int aw86225_start(FAR struct motor_lowerhalf_s *dev)
 {
   FAR struct aw86225_dev_s *priv = (FAR struct aw86225_dev_s *)dev;
+  int ret;
 
   DEBUGASSERT(dev != NULL);
 
-  return aw86225_play_go(priv, true);
+  ret = aw86225_play_go(priv, true);
+  if (ret == 0)
+    {
+      priv->state = MOTOR_STATE_RUN ;
+    }
+
+  return ret;
 }
 
 /****************************************************************************
@@ -1960,14 +1991,7 @@ static int aw86225_setparam(FAR struct motor_lowerhalf_s *dev,
 
   if (priv->lower.opmode == MOTOR_OPMODE_PATTERN)
     {
-      if (patterns->count == 1)
-        {
-          ret = aw86225_excute_pattern(priv, &patterns->pattern[0]);
-        }
-      else
-        {
-          ret = aw86225_excute_patterns(priv, patterns);
-        }
+      ret = aw86225_excute_patterns(priv, patterns);
     }
   else if (priv->lower.opmode == MOTOR_OPMODE_FORCE)
     {
@@ -2054,6 +2078,13 @@ static int aw86225_setfault(FAR struct motor_lowerhalf_s *dev, uint8_t fault)
 static int aw86225_getstate(FAR struct motor_lowerhalf_s *dev,
                             FAR struct motor_state_s *state)
 {
+  FAR struct aw86225_dev_s *priv = (FAR struct aw86225_dev_s *)dev;
+  FAR uint8_t *motor_state = (FAR uint8_t *)state;
+
+  DEBUGASSERT(dev != NULL && state != NULL);
+
+  *motor_state = priv->state;
+
   return OK;
 }
 
@@ -2205,6 +2236,7 @@ int aw86225_register(FAR const char *devname,
 
   priv->config = config;
   priv->lower.ops = &g_aw86225_ops;
+  priv->state = MOTOR_OPMODE_INIT;
 
   /* Check Device ID */
 
