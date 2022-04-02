@@ -169,13 +169,18 @@ static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
 
 /* GH3020 common operation functions */
 
-static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
 static void gh3020_push_data(FAR struct gh3020_dev_s *priv);
 static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
                                        uint16_t fifowtm);
 static void gh3020_switch_poll2intrpt(FAR struct gh3020_dev_s *priv);
 static void gh3020_switch_intrpt2poll(FAR struct gh3020_dev_s *priv);
 static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv);
+
+/* Operations for factest */
+
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
+static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current);
+#endif
 
 /* Sensor ops functions */
 
@@ -705,7 +710,7 @@ static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
  *   None.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
 {
   struct gh3020_factestmode_param_s sample_para;
@@ -755,6 +760,7 @@ static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
 
   gh3020_start_sampling_factest(GH3X2X_FUNCTION_TEST1, &sample_para, 1);
 }
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
 /****************************************************************************
  * Name: gh3020_push_data
@@ -1081,6 +1087,8 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
   if (sensor->activated != enable)
     {
       sensor->activated = enable;
+
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
       if (priv->factest_mode == true)
         {
           if (enable == true)
@@ -1105,6 +1113,7 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
             }
         }
       else
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
         {
           /* If any PPG channel has been activated, mark it. */
 
@@ -1421,14 +1430,19 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
                           unsigned long arg)
 {
   FAR struct gh3020_sensor_s *sensor = (FAR struct gh3020_sensor_s *)lower;
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
   FAR struct gh3020_dev_s *priv;
+#endif
 
   DEBUGASSERT(sensor != NULL && sensor->dev != NULL);
 
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
   priv = sensor->dev;
+#endif
 
   switch (cmd)
     {
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
       case GH3020_CTRL_LED_CURRENT:      /* Set LED current(uA) */
         {
           if (priv->factest_mode == true)
@@ -1481,6 +1495,7 @@ static int gh3020_control(FAR struct sensor_lowerhalf_s *lower, int cmd,
             }
         }
         break;
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
       default:
         {
@@ -2085,7 +2100,8 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
         return;
     }
 
-  if (g_priv->sensor[idx].activated == true)
+  if (g_priv->sensor[idx].activated == true &&
+      g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
     {
       gh3020_extract_frame(&g_priv->ppgdata[idx][g_priv->ppgdatacnt[idx]],
                            pfameinfo);
@@ -2094,7 +2110,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
 }
 
 /****************************************************************************
- * Name: gh3020_get_rawdata_hook
+ * Name: gh3020_get_rawdata
  *
  * Description:
  *   Get PPG data from the FIFO in factest mode.
@@ -2109,7 +2125,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
  *   None.
  *
  ****************************************************************************/
-
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 {
   struct sensor_event_ppgq ppg[4];
@@ -2184,7 +2200,8 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 
       for (chidx = 0; chidx <= GH3020_PPG3_SENSOR_IDX; chidx++)
         {
-          if (g_priv->sensor[chidx].activated == true)
+          if (g_priv->sensor[chidx].activated == true &&
+              g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
             {
               g_priv->ppgdata[chidx][g_priv->ppgdatacnt[chidx]] = ppg[chidx];
               g_priv->ppgdatacnt[chidx]++;
@@ -2192,6 +2209,7 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
         }
     }
 }
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
 /****************************************************************************
  * Name: gh3020_register

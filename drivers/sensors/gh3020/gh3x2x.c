@@ -883,7 +883,7 @@ static uint8_t g_uchGh3x2xInitFlag = 0;
 uint8_t g_uchGh3x2xIntCallBackIsCalled = 0;
 #endif
 
-#if (__SUPPORT_ENGINEERING_MODE__)
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 uint8_t g_uchEngineeringModeStatus = 0;  // 0: is not in engineering mode   1: is in engineering mode
 FAR struct gh3020_factestmode_param_s *g_pstSampleParaGroup = 0;
 uint8_t g_uchEngineeringModeSampleParaGroupNum = 0;
@@ -1517,7 +1517,7 @@ void gh3020_fifo_process(void)
         /* Step 5: do soft agc process*/
 
         Gh3x2x_UserHandleCurrentInfo();
-    #if (__SUPPORT_ENGINEERING_MODE__)
+    #ifdef CONFIG_FACTEST_SENSORS_GH3020
       if(0 == g_uchEngineeringModeStatus)  //in engineering mode,  disable soft agc function
     #endif
         {
@@ -1585,7 +1585,7 @@ void gh3020_fifo_process(void)
                         g_uchGh3x2xRegCfgArrIndex = DRV_LIB_REG_CFG_EMPTY;
                         EXAMPLE_LOG("gh3020_fifo_process:recovery init fail, error code: %d\r\n", schret);
                     }
-                #if (__SUPPORT_ENGINEERING_MODE__)
+                #ifdef CONFIG_FACTEST_SENSORS_GH3020
                     if(1 == g_uchEngineeringModeStatus)
                     {
                         gh3020_start_sampling_factest(unDemoFuncModeBeforeChipReset, g_pstSampleParaGroup, g_uchEngineeringModeSampleParaGroupNum);
@@ -2369,7 +2369,7 @@ void Gh3x2xDemoStartSamplingInner(uint32_t unFuncMode)
 
     Gh3x2xFunctionSlotBitInit();
 
-#if (__SUPPORT_ENGINEERING_MODE__)
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
   if(1 == g_uchEngineeringModeStatus)
     {
       GH3X2X_ExitLowPowerMode();
@@ -2390,7 +2390,7 @@ void gh3020_start_sampling(uint32_t unFuncMode)
 
 
 
-#if (__SUPPORT_ENGINEERING_MODE__)
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 
 /**
  * @fn     void gh3020_start_sampling_factest()
@@ -2442,7 +2442,7 @@ void gh3020_stop_sampling(uint32_t unFuncMode)
 }
 
 
-#if (__SUPPORT_ENGINEERING_MODE__)
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 
 /**
  * @fn     void gh3020_stop_sampling_factest(void)

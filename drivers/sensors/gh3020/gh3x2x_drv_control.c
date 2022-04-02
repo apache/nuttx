@@ -630,7 +630,9 @@ int16_t GH3X2X_GetRawdata(STGh3x2xRawdata *pstGh3x2xRawdata, uint16_t* usFifoLen
             }
 
             /* call hook */
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
             gh3020_get_rawdata(pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
+#endif
             GH3X2X_WAIT_CHIP_DSLP();
             GH3X2X_UnpackRawdataPackage(pstGh3x2xRawdata->stSlotRawdataArr,
                                         pstGh3x2xRawdata->puchReadBuffer, *usFifoLength);
@@ -860,7 +862,9 @@ int16_t GH3X2X_ReadFifodata(uint8_t *puchGh3x2xReadFifoData, uint16_t* pusReadFi
         }
 
         /* call hook */
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
         gh3020_get_rawdata(puchGh3x2xReadFifoData, usFifoReadByteNum);
+#endif
         GH3X2X_WAIT_CHIP_DSLP();
         (*pusReadFifoDataLen) = usFifoReadByteNum;
     }// if (pstGh3x2xRawdata->puchReadBuffer != GH3X2X_PTR_NULL)
@@ -1179,7 +1183,9 @@ int16_t GH3X2X_GetRawdataWithChannelMap(STGh3x2xChannelRawdata *pstGh3x2xChannel
         }
 
         /* call hook */
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
         gh3020_get_rawdata(puchReadRawdataBuffer, *usFifoLength);
+#endif
         GH3X2X_WAIT_CHIP_DSLP();
         sRet = GH3X2X_UnpackRawdataWithChannelMap(pstGh3x2xChannelRawdata, puchReadRawdataBuffer, *usFifoLength,
                                                     uchChannelMapCnt, puchChannelMapArr);

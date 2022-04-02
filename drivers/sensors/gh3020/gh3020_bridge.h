@@ -80,7 +80,9 @@ void gh3020_spi_writebits(uint16_t regaddr, uint8_t lsb, uint8_t msb,
 uint16_t gh3020_spi_readbits(uint16_t regaddr, uint8_t lsb, uint8_t msb);
 void gh3020_rstctrl(uint8_t pinlevel);
 void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo);
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
 void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len);
+#endif
 
 #undef EXTERN
 #ifdef __cplusplus
