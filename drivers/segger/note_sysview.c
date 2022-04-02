@@ -478,7 +478,9 @@ int sysview_initialize(void)
   SEGGER_SYSVIEW_SetRAMBase(CONFIG_SEGGER_SYSVIEW_RAM_BASE);
 #endif
 
+#ifdef CONFIG_SCHED_INSTRUMENTATION_FILTER
   if ((g_sysview.mode.flag & NOTE_FILTER_MODE_FLAG_ENABLE) != 0)
+#endif
     {
       SEGGER_SYSVIEW_Start();
     }
