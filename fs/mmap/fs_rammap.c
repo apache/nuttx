@@ -122,6 +122,7 @@ int rammap(FAR struct file *filep, size_t length,
   map->addr   = alloc + sizeof(struct fs_rammap_s);
   map->length = length;
   map->offset = offset;
+  map->file   = filep;
 
   /* Seek to the specified file offset */
 
@@ -158,6 +159,10 @@ int rammap(FAR struct file *filep, size_t length,
 
               ret = nread;
               goto errout_with_region;
+            }
+          else
+            {
+              continue;
             }
         }
 
