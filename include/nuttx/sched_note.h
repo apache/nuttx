@@ -660,6 +660,15 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
+#  define SCHED_NOTE_STRING(buf)
+#  define SCHED_NOTE_DUMP(event, buf, len)
+#  define SCHED_NOTE_VPRINTF(fmt, va)
+#  define SCHED_NOTE_VBPRINTF(event, fmt, va)
+#  define SCHED_NOTE_PRINTF(fmt, args...)
+#  define SCHED_NOTE_BPRINTF(event, fmt, args...)
+#  define SCHED_NOTE_BEGIN()
+#  define SCHED_NOTE_END()
+
 #  define sched_note_start(t)
 #  define sched_note_stop(t)
 #  define sched_note_suspend(t)
