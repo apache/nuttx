@@ -887,7 +887,7 @@ static void gh3020_restart_new_fifowtm(FAR struct gh3020_dev_s *priv,
       gh3020_start_sampling(priv->channelmode);
     }
 
-  sched_note_printf("GH3020 starts, fifowtm=%u", fifowtm);
+  SCHED_NOTE_PRINTF("GH3020 starts, fifowtm=%u", fifowtm);
   priv->fifowtm = fifowtm;
 }
 
@@ -989,7 +989,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
                     gh3020_channel_function_list[idx], rate);
               if (sensor->activating == true)
                 {
-                  sched_note_printf("activate ppgq%u, rate=%u", idx, rate);
+                  SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u", idx, rate);
                 }
 
               sensor->activating = false;
@@ -1000,7 +1000,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
             {
               sensor->inactivating = false;
               sensor->activated = false;
-              sched_note_printf("inactivate ppgq%u", idx);
+              SCHED_NOTE_PRINTF("inactivate ppgq%u", idx);
             }
         }
 
@@ -1041,7 +1041,7 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
               work_cancel(HPWORK, &priv->work_poll);
             }
 
-          sched_note_printf("GH3020 stops");
+          SCHED_NOTE_PRINTF("GH3020 stops");
         }
     }
 }
@@ -1182,7 +1182,7 @@ static int gh3020_activate(FAR struct sensor_lowerhalf_s *lower, bool enable)
                                  priv->interval / USEC_PER_TICK);
                     }
 
-                  sched_note_printf("activate ppgq%u, rate=%u, GH3020 starts"
+                  SCHED_NOTE_PRINTF("activate ppgq%u, rate=%u, GH3020 starts"
                                     ", fifowtm=%u", sensor->chidx, rate,
                                     priv->fifowtm);
                 }
