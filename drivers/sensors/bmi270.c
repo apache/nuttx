@@ -49,11 +49,11 @@
 #define BMI270_SPI_WRITE_MAX_BUFFER   50         /* SPI write buffer size */
 #define BMI270_SPI_READ_MAX_BUFFER    20         /* SPI read buffer size */
 #define BMI270_WAIT_COUNT_MAX         300        /* Max count wait for reset */
-#define BMI270_WAIT_LOAD              140        /* Wait for loading config file(ms) */
-#define BMI270_WAIT_SELFTEST          500        /* Wait for selftest complete(ms) */
+#define BMI270_WAIT_LOAD              140000     /* Wait for loading config file(us) */
+#define BMI270_WAIT_SELFTEST          500000     /* Wait for selftest complete(us) */
 #define BMI270_WAIT_SELFTEST_COUNT    5          /* Max count of wait for selftest complete */
-#define BMI270_SET_DELAY              10         /* Delay after set(ms) */
-#define BMI270_POWER_MODE_DELAY       1          /* Delay after power mode switch(ms) */
+#define BMI270_SET_DELAY              10000      /* Delay after set(us) */
+#define BMI270_POWER_MODE_DELAY       1000       /* Delay after power mode switch(us) */
 #define BMI270_READWRITE_LEN          46         /* Max read/write length */
 #define BMI270_READWRITE_RLEN         2          /* Remaind read/write length */
 #define BMI270_FEAT_SIZE_IN_BYTES     16         /* Bytes remaining to read */
@@ -129,7 +129,7 @@
 
 #define BMI270_DEVICE_ID              0x24       /* Device Identification */
 #define BMI270_DEFAULT_INTERVAL       40000      /* Default conversion interval(us) */
-#define BMI270_WAITBOOT_TIME          10         /* Wait Sensor boot time(ms) */
+#define BMI270_WAIT_TIME              10000      /* Sensor boot wait time(ms) */
 
 /* Multi sensor index */
 
@@ -1833,6 +1833,8 @@ static int bmi270_readdevid(FAR struct bmi270_dev_s *priv)
 
   bmi270_spi_read(priv, BMI270_CHIP_ID, &regval, 1);
 
+  usleep(BMI270_WAIT_TIME);
+
   /* Read the device ID. */
 
   bmi270_spi_read(priv, BMI270_CHIP_ID, &regval, 1);
@@ -1882,7 +1884,7 @@ static int bmi270_wait_selftest(FAR struct bmi270_dev_s *priv)
           break;
         }
 
-      up_mdelay(BMI270_WAIT_SELFTEST);
+      usleep(BMI270_WAIT_SELFTEST);
     }
 
   if (count == 0)
@@ -1931,7 +1933,7 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
       /* Disable advanced power save mode */
 
       bmi270_set_powersave(priv, BMI270_DISABLE);
-      up_mdelay(2);
+      usleep(2000);
 
       /* Enable accelerometer. */
 
@@ -1965,7 +1967,7 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
 
       /* Wait for more than 2 ms. */
 
-      up_mdelay(10);
+      usleep(10000);
 
       /* Set positive self-test polarity. */
 
@@ -1981,7 +1983,7 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
 
       /* Wait for more than 50 ms. */
 
-      up_mdelay(100);
+      usleep(100000);
 
       /* Read and store positive acceleration value of each axis. */
 
@@ -2009,7 +2011,7 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
 
       /* Wait for more than 50 ms. */
 
-      up_mdelay(100);
+      usleep(100000);
 
       /* Read and store negative acceleration value of each axis. */
 
@@ -2067,7 +2069,7 @@ static int bmi270_datatest(FAR struct bmi270_dev_s *priv, int type)
       regval_pwr_ctrl.acc_en = BMI270_ENABLE;
       bmi270_spi_write(priv, BMI270_PWR_CTRL,
                        (FAR uint8_t *)&regval_pwr_ctrl);
-      up_mdelay(2);
+      usleep(2000);
 
       /* Enable the CRT. */
 
@@ -2179,7 +2181,7 @@ static void bmi270_resetwait(FAR struct bmi270_dev_s *priv)
 
   do
     {
-      up_mdelay(BMI270_SET_DELAY);
+      usleep(BMI270_SET_DELAY);
 
       /* Performing a dummy read to bring interface back to SPI from I2C. */
 
@@ -2238,7 +2240,7 @@ static int bmi270_write_config(FAR struct bmi270_dev_s *priv)
 
   bmi270_set_powersave(priv, BMI270_DISABLE);
 
-  up_mdelay(BMI270_POWER_MODE_DELAY);
+  usleep(BMI270_POWER_MODE_DELAY);
 
   /* Write the configuration file. */
 
@@ -2422,7 +2424,7 @@ static int bmi270_get_internal_status(FAR struct bmi270_dev_s *priv,
 {
   /* Wait till ASIC is initialized */
 
-  up_mdelay(BMI270_WAIT_LOAD);
+  usleep(BMI270_WAIT_LOAD);
 
   /* Get the error bits and message */
 
@@ -4578,7 +4580,7 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
 
   /* Wait sensor boot time. */
 
-  up_mdelay(BMI270_WAITBOOT_TIME);
+  usleep(BMI270_WAIT_TIME);
 
   /* Read the deviceID. */
 
@@ -4588,8 +4590,6 @@ int bmi270_register(int devno, FAR const struct bmi270_config_s *config)
       snerr("ERROR: Failed to get DeviceID: %d\n", ret);
       goto err;
     }
-
-  snerr("bmi270_readdevid\n");
 
   /* Reset devices. */
 
