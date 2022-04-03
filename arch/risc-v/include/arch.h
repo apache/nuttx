@@ -65,6 +65,11 @@
 #  define REGSTORE  __STR(sd)
 #endif
 
+/* RISC-V requires a 16-byte stack alignment. */
+
+#define STACK_ALIGNMENT     16
+#define STACK_FRAME_SIZE    __XSTR(STACK_ALIGNMENT)
+
 /****************************************************************************
  * Inline functions
  ****************************************************************************/
