@@ -182,7 +182,7 @@
 #  if defined(__clang__)
 #    define nostackprotect_function __attribute__ ((optnone))
 #  else
-#    define nostackprotect_function __attribute__ ((__optimize__ ("-fno-stack-protector")))
+#    define nostackprotect_function __attribute__ ((__optimize__("-fno-stack-protector")))
 #  endif
 #endif
 
@@ -381,6 +381,12 @@
 
 #  define UNUSED(a) ((void)(1 || (a)))
 
+#  if defined(__clang__)
+#    define no_builtin(n) __attribute__((no_builtin(n)))
+#  else
+#    define no_builtin(n) __attribute__((__optimize__("-fno-tree-loop-distribute-patterns")))
+#endif
+
 /* SDCC-specific definitions ************************************************/
 
 #elif defined(SDCC) || defined(__SDCC)
@@ -537,6 +543,8 @@
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
+#  define no_builtin(n)
+
 /* Zilog-specific definitions ***********************************************/
 
 #elif defined(__ZILOG__)
@@ -677,6 +685,8 @@
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
+#  define no_builtin(n)
+
 /* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
@@ -746,6 +756,8 @@
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
+#  define no_builtin(n)
+
 /* Unknown compiler *********************************************************/
 
 #else
@@ -802,6 +814,8 @@
 #  define UNUSED(a) ((void)(1 || (a)))
 
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
+
+#  define no_builtin(n)
 
 #endif
 
