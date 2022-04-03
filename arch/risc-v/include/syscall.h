@@ -126,11 +126,11 @@
 
 #if defined (CONFIG_ARCH_USE_S_MODE) && defined (__KERNEL__)
 #  define ASM_SYS_CALL \
-     " addi sp, sp, -16\n"                  /* Make room */ \
-     REGSTORE " ra, 0(sp)\n"                /* Save ra */ \
-     " jal  ra, riscv_dispatch_syscall\n"   /* Dispatch (modifies ra) */ \
-     REGLOAD " ra, 0(sp)\n"                 /* Restore ra */ \
-     " addi sp, sp, 16\n"                   /* Restore sp */
+     " addi sp, sp, -" STACK_FRAME_SIZE "\n" /* Make room */ \
+     REGSTORE " ra, 0(sp)\n"                 /* Save ra */ \
+     " jal  ra, riscv_dispatch_syscall\n"    /* Dispatch (modifies ra) */ \
+     REGLOAD " ra, 0(sp)\n"                  /* Restore ra */ \
+     " addi sp, sp, " STACK_FRAME_SIZE "\n"  /* Restore sp */
 #else
 #  define ASM_SYS_CALL \
      "ecall"

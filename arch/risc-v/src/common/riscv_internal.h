@@ -33,6 +33,8 @@
 #  include <sys/types.h>
 #  include <stdint.h>
 #  include <syscall.h>
+#else
+#  include <arch/arch.h>
 #endif
 
 /****************************************************************************
@@ -46,11 +48,6 @@
 #define STACK_COLOR    0xdeadbeef
 #define INTSTACK_COLOR 0xdeadbeef
 #define HEAP_COLOR     'h'
-
-/* RISC-V requires a 16-byte stack alignment. */
-
-#define STACK_ALIGNMENT     16
-#define STACK_FRAME_SIZE    __XSTR(STACK_ALIGNMENT)
 
 /* Stack alignment macros */
 
