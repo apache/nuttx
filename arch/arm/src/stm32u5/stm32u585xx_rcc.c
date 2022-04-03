@@ -45,7 +45,7 @@
 /* Same for HSI and MSI */
 
 #define HSIRDY_TIMEOUT HSERDY_TIMEOUT
-#define MSIRDY_TIMEOUT HSERDY_TIMEOUT
+#define MSISRDY_TIMEOUT HSERDY_TIMEOUT
 
 /* HSE divisor to yield ~1MHz RTC clock */
 
@@ -595,42 +595,15 @@ void stm32_stdclockconfig(void)
   uint32_t regval;
   volatile int32_t timeout;
 
-  /* Enable Internal Multi-Speed System (MSIS) and Kernel (MSIK) Clock */
+#if defined(STM32_BOARD_USEMSIS)
+  /* Enable Internal Multi-Speed Clock (MSIS) */
 
-#if defined(STM32_BOARD_USEHSI) || defined(STM32_I2C_USE_HSI16)
-  /* Enable Internal High-Speed Clock (HSI) */
+  /* Wait until the MSIS is either off or ready (or until timeout elapses) */
 
-  regval  = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_HSION;           /* Enable HSI */
-  putreg32(regval, STM32_RCC_CR);
-
-  /* Wait until the HSI is ready (or until a timeout elapsed) */
-
-  for (timeout = HSIRDY_TIMEOUT; timeout > 0; timeout--)
-    {
-      /* Check if the HSIRDY flag is the set in the CR */
-
-      if ((getreg32(STM32_RCC_CR) & RCC_CR_HSIRDY) != 0)
-        {
-          /* If so, then break-out with timeout > 0 */
-
-          break;
-        }
-    }
-#endif
-
-#if defined(STM32_BOARD_USEHSI)
-  /* Already set above */
-
-#elif defined(STM32_BOARD_USEMSI)
-  /* Enable Internal Multi-Speed Clock (MSI) */
-
-  /* Wait until the MSI is either off or ready (or until a timeout elapsed) */
-
-  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+  for (timeout = MSISRDY_TIMEOUT; timeout > 0; timeout--)
     {
       if ((regval = getreg32(STM32_RCC_CR)),
-          (regval & RCC_CR_MSIRDY) || ~(regval & RCC_CR_MSION))
+          (regval & RCC_CR_MSISRDY) || ~(regval & RCC_CR_MSISON))
         {
           /* If so, then break-out with timeout > 0 */
 
@@ -638,19 +611,24 @@ void stm32_stdclockconfig(void)
         }
     }
 
-  /* setting MSIRANGE */
+  /* setting MSISRANGE */
+
+  putreg32((STM32_BOARD_MSISRANGE |
+            STM32_BOARD_MSIKRANGE |
+            RCC_ICSCR1_MSIRGSEL_ICSCR1),
+           STM32_RCC_ICSCR1);
 
   regval  = getreg32(STM32_RCC_CR);
-  regval |= (STM32_BOARD_MSIRANGE | RCC_CR_MSION);    /* Enable MSI and frequency */
+  regval |= RCC_CR_MSISON;
   putreg32(regval, STM32_RCC_CR);
 
   /* Wait until the MSI is ready (or until a timeout elapsed) */
 
-  for (timeout = MSIRDY_TIMEOUT; timeout > 0; timeout--)
+  for (timeout = MSISRDY_TIMEOUT; timeout > 0; timeout--)
     {
       /* Check if the MSIRDY flag is the set in the CR */
 
-      if ((getreg32(STM32_RCC_CR) & RCC_CR_MSIRDY) != 0)
+      if ((getreg32(STM32_RCC_CR) & RCC_CR_MSISRDY) != 0)
         {
           /* If so, then break-out with timeout > 0 */
 
@@ -658,29 +636,9 @@ void stm32_stdclockconfig(void)
         }
     }
 
-#elif defined(STM32_BOARD_USEHSE)
-  /* Enable External High-Speed Clock (HSE) */
-
-  regval  = getreg32(STM32_RCC_CR);
-  regval |= RCC_CR_HSEON;           /* Enable HSE */
-  putreg32(regval, STM32_RCC_CR);
-
-  /* Wait until the HSE is ready (or until a timeout elapsed) */
-
-  for (timeout = HSERDY_TIMEOUT; timeout > 0; timeout--)
-    {
-      /* Check if the HSERDY flag is the set in the CR */
-
-      if ((getreg32(STM32_RCC_CR) & RCC_CR_HSERDY) != 0)
-        {
-          /* If so, then break-out with timeout > 0 */
-
-          break;
-        }
-    }
 #else
 
-#  error stm32_stdclockconfig(), must have one of STM32_BOARD_USEHSI, STM32_BOARD_USEMSI, STM32_BOARD_USEHSE defined
+#  error stm32_stdclockconfig() currently only supports STM32_BOARD_USEMSIS
 
 #endif
 
@@ -699,195 +657,130 @@ void stm32_stdclockconfig(void)
 
       stm32_pwr_enableclk(true);
 
+      /* Generate an EPOD booster clock frequency of 4 MHz.  FIXME: This must
+       * be computed based on the MSIS clock to yield a frequency between 4
+       * and 16 MHz.  Also, the EPOD booster clock is required only for
+       * SYSCLK frequencies greater than 55MHz.
+       */
+
+      regval = getreg32(STM32_RCC_PLL1CFGR);
+      regval &= ~(RCC_PLL1CFGR_PLL1SRC_MASK | RCC_PLL1CFGR_PLL1MBOOST_MASK);
+      regval |= RCC_PLL1CFGR_PLL1SRC_MSIS | RCC_PLL1CFGR_PLL1MBOOST_DIV_1;
+      putreg32(regval, STM32_RCC_PLL1CFGR);
+
       /* Select correct main regulator range */
 
-      regval = getreg32(STM32_PWR_CR1);
-      regval &= ~PWR_CR1_VOS_MASK;
+      regval = getreg32(STM32_PWR_VOSR);
+      regval &= ~PWR_VOSR_VOS_MASK;
 
-      if (STM32_SYSCLK_FREQUENCY > 80000000)
+      if (STM32_SYSCLK_FREQUENCY > 110000000)
         {
-          regval |= PWR_CR1_VOS_RANGE0;
+          regval |= PWR_VOSR_VOS_RANGE1;
         }
-      else if (STM32_SYSCLK_FREQUENCY > 26000000)
+      else if (STM32_SYSCLK_FREQUENCY > 55000000)
         {
-          regval |= PWR_CR1_VOS_RANGE1;
+          regval |= PWR_VOSR_VOS_RANGE2;
+        }
+      else if (STM32_SYSCLK_FREQUENCY > 25000000)
+        {
+          regval |= PWR_VOSR_VOS_RANGE3;
         }
       else
         {
-          regval |= PWR_CR1_VOS_RANGE0;
+          regval |= PWR_VOSR_VOS_RANGE4;
         }
 
-      putreg32(regval, STM32_PWR_CR1);
+      regval |= PWR_VOSR_BOOSTEN;
+
+      putreg32(regval, STM32_PWR_VOSR);
 
       /* Wait for voltage regulator to stabilize */
 
-      while (getreg32(STM32_PWR_SR2) & PWR_SR2_VOSF)
+      while ((getreg32(STM32_PWR_VOSR) &
+              (PWR_VOSR_VOSRDY | PWR_VOSR_BOOSTRDY)) !=
+             (PWR_VOSR_VOSRDY | PWR_VOSR_BOOSTRDY))
         {
         }
 
-      /* Set the HCLK source/divider */
-
-      regval  = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_HPRE_MASK;
-      regval |= STM32_RCC_CFGR_HPRE;
-      putreg32(regval, STM32_RCC_CFGR);
-
-      /* Set the PCLK2 divider */
-
-      regval  = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_PPRE2_MASK;
-      regval |= STM32_RCC_CFGR_PPRE2;
-      putreg32(regval, STM32_RCC_CFGR);
-
-      /* Set the PCLK1 divider */
-
-      regval  = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_PPRE1_MASK;
-      regval |= STM32_RCC_CFGR_PPRE1;
-      putreg32(regval, STM32_RCC_CFGR);
-
-#ifdef CONFIG_STM32U5_RTC_HSECLOCK
-      /* Set the RTC clock divisor */
-
-      regval  = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_RTCPRE_MASK;
-      regval |= RCC_CFGR_RTCPRE(HSE_DIVISOR);
-      putreg32(regval, STM32_RCC_CFGR);
-#endif
-
-      /* Set the PLL source and main divider */
-
-      regval  = getreg32(STM32_RCC_PLLCFG);
-
-      /* Configure Main PLL */
-
-      /* Set the PLL dividers and multipliers to configure the main PLL */
-
-      regval = (STM32_PLLCFG_PLLM | STM32_PLLCFG_PLLN |
-                STM32_PLLCFG_PLLP | STM32_PLLCFG_PLLQ |
-                STM32_PLLCFG_PLLR);
-
-#ifdef STM32_PLLCFG_PLLP_ENABLED
-      regval |= RCC_PLLCFG_PLLPEN;
-#endif
-#ifdef STM32_PLLCFG_PLLQ_ENABLED
-      regval |= RCC_PLLCFG_PLLQEN;
-#endif
-#ifdef STM32_PLLCFG_PLLR_ENABLED
-      regval |= RCC_PLLCFG_PLLREN;
-#endif
-
-      /* XXX The choice of clock source to PLL (all three) is independent
-       * of the sys clock source choice, review the STM32_BOARD_USEHSI
-       * name; probably split it into two, one for PLL source and one
-       * for sys clock source.
+      /* Configure 4 wait states and prefetch for FLASH access. FIXME: Flash
+       * wait states must be computed based on SYSCLK frequency.
        */
 
-#ifdef STM32_BOARD_USEHSI
-      regval |= RCC_PLLCFG_PLLSRC_HSI16;
-#elif defined(STM32_BOARD_USEMSI)
-      regval |= RCC_PLLCFG_PLLSRC_MSI;
-#else /* if STM32_BOARD_USEHSE */
-      regval |= RCC_PLLCFG_PLLSRC_HSE;
-#endif
-
-      putreg32(regval, STM32_RCC_PLLCFG);
-
-      /* Enable the main PLL */
-
-      regval  = getreg32(STM32_RCC_CR);
-      regval |= RCC_CR_PLLON;
-      putreg32(regval, STM32_RCC_CR);
-
-      /* Wait until the PLL is ready */
-
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLRDY) == 0)
-        {
-        }
-
-#ifdef CONFIG_STM32U5_SAI1PLL
-      /* Configure SAI1 PLL */
-
-      regval  = getreg32(STM32_RCC_PLLSAI1CFG);
-
-      /* Set the PLL dividers and multipliers to configure the SAI1 PLL */
-
-      regval = (STM32_PLLSAI1CFG_PLLN | STM32_PLLSAI1CFG_PLLP
-                 | STM32_PLLSAI1CFG_PLLQ | STM32_PLLSAI1CFG_PLLR);
-
-#ifdef STM32_PLLSAI1CFG_PLLP_ENABLED
-      regval |= RCC_PLLSAI1CFG_PLLPEN;
-#endif
-#ifdef STM32_PLLSAI1CFG_PLLQ_ENABLED
-      regval |= RCC_PLLSAI1CFG_PLLQEN;
-#endif
-#ifdef STM32_PLLSAI1CFG_PLLR_ENABLED
-      regval |= RCC_PLLSAI1CFG_PLLREN;
-#endif
-
-      putreg32(regval, STM32_RCC_PLLSAI1CFG);
-
-      /* Enable the SAI1 PLL */
-
-      regval  = getreg32(STM32_RCC_CR);
-      regval |= RCC_CR_PLLSAI1ON;
-      putreg32(regval, STM32_RCC_CR);
-
-      /* Wait until the PLL is ready */
-
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAI1RDY) == 0)
-        {
-        }
-#endif
-
-#ifdef CONFIG_STM32U5_SAI2PLL
-      /* Configure SAI2 PLL */
-
-      regval  = getreg32(STM32_RCC_PLLSAI2CFG);
-
-      /* Set the PLL dividers and multipliers to configure the SAI2 PLL */
-
-      regval = (STM32_PLLSAI2CFG_PLLN | STM32_PLLSAI2CFG_PLLP |
-                STM32_PLLSAI2CFG_PLLR);
-
-#ifdef STM32_PLLSAI2CFG_PLLP_ENABLED
-      regval |= RCC_PLLSAI2CFG_PLLPEN;
-#endif
-#ifdef STM32_PLLSAI2CFG_PLLR_ENABLED
-      regval |= RCC_PLLSAI2CFG_PLLREN;
-#endif
-
-      putreg32(regval, STM32_RCC_PLLSAI2CFG);
-
-      /* Enable the SAI2 PLL */
-
-      regval  = getreg32(STM32_RCC_CR);
-      regval |= RCC_CR_PLLSAI2ON;
-      putreg32(regval, STM32_RCC_CR);
-
-      /* Wait until the PLL is ready */
-
-      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLLSAI2RDY) == 0)
-        {
-        }
-#endif
-
-      /* Enable FLASH 5 wait states */
-
-      regval = FLASH_ACR_LATENCY_5;
+      regval = FLASH_ACR_LATENCY_4 | FLASH_ACR_PRFTEN;
       putreg32(regval, STM32_FLASH_ACR);
 
-      /* Select the main PLL as system clock source */
+      /* Set the HCLK, PCLK1 and PCLK2 dividers */
 
-      regval  = getreg32(STM32_RCC_CFGR);
-      regval &= ~RCC_CFGR_SW_MASK;
-      regval |= RCC_CFGR_SW_PLL;
-      putreg32(regval, STM32_RCC_CFGR);
+      regval  = getreg32(STM32_RCC_CFGR2);
+      regval &= ~(RCC_CFGR2_HPRE_MASK  |
+                  RCC_CFGR2_PPRE1_MASK |
+                  RCC_CFGR2_PPRE2_MASK);
+      regval |= STM32_RCC_CFGR2_HPRE  |
+                STM32_RCC_CFGR2_PPRE1 |
+                STM32_RCC_CFGR2_PPRE2;
+      putreg32(regval, STM32_RCC_CFGR2);
 
-      /* Wait until the PLL source is used as the system clock source */
+      /* Set the PCLK3 divider */
 
-      while ((getreg32(STM32_RCC_CFGR) & RCC_CFGR_SWS_MASK) !=
-             RCC_CFGR_SWS_PLL)
+      regval  = getreg32(STM32_RCC_CFGR3);
+      regval &= ~RCC_CFGR3_PPRE3_MASK;
+      regval |= STM32_RCC_CFGR3_PPRE3;
+      putreg32(regval, STM32_RCC_CFGR3);
+
+#ifdef CONFIG_STM32U5_RTC_HSECLOCK
+
+#  error stm32_stdclockconfig() currently doesn not support CONFIG_STM32U5_RTC_HSECLOCK
+
+#endif
+
+      /* Set the PLL1 source, dividers and multipliers */
+
+      regval = STM32_RCC_PLL1DIVR_PLL1N |
+               STM32_RCC_PLL1DIVR_PLL1P |
+               STM32_RCC_PLL1DIVR_PLL1Q |
+               STM32_RCC_PLL1DIVR_PLL1R;
+
+      putreg32(regval, STM32_RCC_PLL1DIVR);
+
+      regval = RCC_PLL1CFGR_PLL1SRC_MSIS      |
+               RCC_PLL1CFGR_PLL1RGE_4_TO_8MHZ |
+               STM32_RCC_PLL1CFGR_PLL1M       |
+               RCC_PLL1CFGR_PLL1MBOOST_DIV_1;
+#ifdef STM32_RCC_PLL1CFGR_PLL1P_ENABLED
+      regval |= RCC_PLL1CFGR_PLL1PEN;
+#endif
+#ifdef STM32_RCC_PLL1CFGR_PLL1Q_ENABLED
+      regval |= RCC_PLL1CFGR_PLL1QEN;
+#endif
+#ifdef STM32_RCC_PLL1CFGR_PLL1R_ENABLED
+      regval |= RCC_PLL1CFGR_PLL1REN;
+#endif
+
+      putreg32(regval, STM32_RCC_PLL1CFGR);
+
+      /* Enable PLL1 */
+
+      regval  = getreg32(STM32_RCC_CR);
+      regval |= RCC_CR_PLL1ON;
+      putreg32(regval, STM32_RCC_CR);
+
+      /* Wait until PLL1 is ready */
+
+      while ((getreg32(STM32_RCC_CR) & RCC_CR_PLL1RDY) == 0)
+        {
+        }
+
+      /* Select the PLL1 as system clock source */
+
+      regval  = getreg32(STM32_RCC_CFGR1);
+      regval &= ~RCC_CFGR1_SW_MASK;
+      regval |= RCC_CFGR1_SW_PLL;
+      putreg32(regval, STM32_RCC_CFGR1);
+
+      /* Wait until PLL1 source is used as the system clock source */
+
+      while ((getreg32(STM32_RCC_CFGR1) & RCC_CFGR1_SWS_MASK) !=
+             RCC_CFGR1_SWS_PLL)
         {
         }
 
