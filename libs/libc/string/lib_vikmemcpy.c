@@ -305,6 +305,7 @@ typedef uint32_t            uintn;
  *
  ****************************************************************************/
 
+no_builtin("memcpy")
 FAR void *memcpy(FAR void *dest, FAR const void *src, size_t count)
 {
   FAR uint8_t *dst8 = (FAR uint8_t *)dest;
