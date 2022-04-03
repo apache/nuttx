@@ -96,7 +96,7 @@ uint16_t ipv4_upperlayer_chksum(FAR struct net_driver_s *dev, uint8_t proto)
 
   /* Sum IP source and destination addresses. */
 
-  sum = chksum(sum, (FAR uint8_t *)&ipv4->srcipaddr, sizeof(in_addr_t));
+  sum = chksum(sum, (FAR uint8_t *)&ipv4->srcipaddr, 2 * sizeof(in_addr_t));
 
   /* Sum IP payload data. */
 
