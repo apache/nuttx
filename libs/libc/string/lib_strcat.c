@@ -32,11 +32,11 @@
 
 #ifndef CONFIG_ARCH_STRCAT
 #undef strcat /* See mm/README.txt */
-char *strcat(char *dest, const char *src)
+FAR char *strcat(FAR char *dest, FAR const char *src)
 {
-  char *ret   = dest;
+  FAR char *ret = dest;
 
-  dest  += strlen(dest);
+  dest += strlen(dest);
   while (*src != '\0')
     {
       *dest++ = *src++;
