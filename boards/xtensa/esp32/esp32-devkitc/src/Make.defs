@@ -51,6 +51,10 @@ ifeq ($(CONFIG_ARCH_BUTTONS),y)
 CSRCS += esp32_buttons.c
 endif
 
+ifeq ($(CONFIG_ESP32_TWAI),y)
+CSRCS += esp32_twai.c
+endif
+
 SCRIPTOUT = $(BOARD_DIR)$(DELIM)scripts$(DELIM)esp32_out.ld
 
 .PHONY = context distclean
