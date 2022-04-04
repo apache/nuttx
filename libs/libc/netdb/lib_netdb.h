@@ -105,7 +105,7 @@ EXTERN const struct services_db_s g_services_db[];
  * Public Function Prototypes
  ****************************************************************************/
 
-bool convert_hostent(const FAR struct hostent_s *in,
+bool convert_hostent(FAR const struct hostent_s *in,
                      int type, FAR struct hostent *out);
 
 ssize_t parse_hostfile(FAR FILE *stream, FAR struct hostent_s *host,
