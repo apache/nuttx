@@ -36,6 +36,7 @@
 #include <nuttx/tls.h>
 
 #include "sched/sched.h"
+#include "environ/environ.h"
 #include "group/group.h"
 #include "task/task.h"
 
@@ -83,7 +84,8 @@
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size,
-                main_t entry, FAR char * const argv[])
+                main_t entry, FAR char * const argv[],
+                FAR char * const envp[])
 {
   uint8_t ttype = tcb->cmn.flags & TCB_FLAG_TTYPE_MASK;
   FAR struct tls_info_s *info;
@@ -101,6 +103,14 @@ int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
   if (ret < 0)
     {
       return ret;
+    }
+
+  /* Duplicate the parent tasks environment */
+
+  ret = env_dup(tcb->cmn.group, envp);
+  if (ret < 0)
+    {
+      goto errout_with_group;
     }
 
   /* Associate file descriptors with the new task */

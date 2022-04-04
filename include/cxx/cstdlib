@@ -42,7 +42,9 @@ namespace std
 
   // Environment variable support
 
+#ifndef CONFIG_DISABLE_ENVIRON
   using ::get_environ_ptr;
+#endif
   using ::getenv;
   using ::putenv;
   using ::clearenv;
