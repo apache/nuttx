@@ -10,7 +10,7 @@ if CLK
 config CLK_RPMSG
 	bool "rpmsg clk driver"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	---help---
 		Rpmsg clk are proxy/master pairs clock that operate clks between client and
 		server processor.

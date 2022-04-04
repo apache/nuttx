@@ -337,7 +337,7 @@ config REGULATOR
 
 config REGULATOR_RPMSG
 	bool "Regulator rpmsg driver support"
-	depends on OPENAMP
+	depends on RPTUN
 	default n
 	---help---
 		The rpmsg regulator driver implements the common regulator APIs, inside which
