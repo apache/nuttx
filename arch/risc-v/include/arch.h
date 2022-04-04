@@ -66,11 +66,6 @@
 #  define REGSTORE  __STR(sd)
 #endif
 
-/* RISC-V requires a 16-byte stack alignment. */
-
-#define STACK_ALIGNMENT     16
-#define STACK_FRAME_SIZE    __XSTR(STACK_ALIGNMENT)
-
 /* Provide the maximum amount of page table levels per MMU type */
 
 #ifdef CONFIG_ARCH_MMU_TYPE_SV39
