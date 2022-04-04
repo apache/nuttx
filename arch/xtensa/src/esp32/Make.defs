@@ -47,7 +47,6 @@ ifeq ($(CONFIG_DEBUG_TCBINFO),y)
   CMN_CSRCS += xtensa_tcbinfo.c
 endif
 
-
 ifeq ($(CONFIG_DEBUG_ALERT),y)
   CMN_CSRCS += xtensa_dumpstate.c
 endif
