@@ -40,7 +40,8 @@
 
 #define HART_CNT    (CONFIG_ARCH_CPU_COUNT)
 
-static_assert(RISCV_PERCPU_HARTID_OFFSET == offsetof(riscv_percpu_s, hartid),
+static_assert(RISCV_PERCPU_HARTID_OFFSET ==
+              offsetof(struct riscv_percpu_s, hartid),
               "RISCV_PERCPU_HARTID_OFFSET with a wrong value");
 
 /****************************************************************************
@@ -115,7 +116,7 @@ uintptr_t riscv_percpu_get_hartid(void)
   uintptr_t scratch = READ_CSR(CSR_SCRATCH);
 
   DEBUGASSERT(scratch >= (uintptr_t) &g_percpu &&
-              scratch < (uintptr_t) &g_percpu + sizeof(g_percpu));
+              scratch <  (uintptr_t) &g_percpu + sizeof(g_percpu));
 
   return ((struct riscv_percpu_s *)scratch)->hartid;
 }
