@@ -365,6 +365,7 @@ int task_spawn(FAR const char *name, main_t entry,
   g_spawn_parms.file_actions = file_actions ? *file_actions : NULL;
   g_spawn_parms.attr         = attr;
   g_spawn_parms.argv         = argv;
+  g_spawn_parms.envp         = envp;
   g_spawn_parms.u.task.name  = name;
   g_spawn_parms.u.task.entry = entry;
 

@@ -85,7 +85,8 @@
 
 static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
                               FAR const posix_spawnattr_t *attr,
-                              FAR char * const argv[])
+                              FAR char * const argv[],
+                              FAR char * const envp[])
 {
   FAR const struct symtab_s *symtab;
   int nsymbols;
@@ -107,7 +108,7 @@ static int nxposix_spawn_exec(FAR pid_t *pidp, FAR const char *path,
 
   /* Start the task */
 
-  pid = exec_spawn(path, (FAR char * const *)argv, symtab, nsymbols, attr);
+  pid = exec_spawn(path, argv, envp, symtab, nsymbols, attr);
   if (pid < 0)
     {
       ret = -pid;
@@ -184,7 +185,8 @@ static int nxposix_spawn_proxy(int argc, FAR char *argv[])
       /* Start the task */
 
       ret = nxposix_spawn_exec(g_spawn_parms.pid, g_spawn_parms.u.posix.path,
-                               g_spawn_parms.attr, g_spawn_parms.argv);
+                               g_spawn_parms.attr, g_spawn_parms.argv,
+                               g_spawn_parms.envp);
 
 #ifdef CONFIG_SCHED_HAVE_PARENT
       if (ret == OK)
@@ -335,7 +337,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   if ((file_actions == NULL || *file_actions == NULL) &&
       (attr == NULL || (attr->flags & POSIX_SPAWN_SETSIGMASK) == 0))
     {
-      return nxposix_spawn_exec(pid, path, attr, argv);
+      return nxposix_spawn_exec(pid, path, attr, argv, envp);
     }
 
   /* Otherwise, we will have to go through an intermediary/proxy task in
@@ -365,6 +367,7 @@ int posix_spawn(FAR pid_t *pid, FAR const char *path,
   g_spawn_parms.file_actions = file_actions ? *file_actions : NULL;
   g_spawn_parms.attr         = attr;
   g_spawn_parms.argv         = argv;
+  g_spawn_parms.envp         = envp;
   g_spawn_parms.u.posix.path = path;
 
   /* Get the priority of this (parent) task */

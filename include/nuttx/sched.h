@@ -933,6 +933,7 @@ FAR struct streamlist *nxsched_get_streams(void);
  *   argv       - A pointer to an array of input parameters.  The array
  *                should be terminated with a NULL argv[] value. If no
  *                parameters are required, argv may be NULL.
+ *   envp       - A pointer to the program's environment, envp may be NULL
  *
  * Returned Value:
  *   OK on success; negative error value on failure appropriately.  (See
@@ -945,7 +946,7 @@ FAR struct streamlist *nxsched_get_streams(void);
 
 int nxtask_init(FAR struct task_tcb_s *tcb, const char *name, int priority,
                 FAR void *stack, uint32_t stack_size, main_t entry,
-                FAR char * const argv[]);
+                FAR char * const argv[], FAR char * const envp[]);
 
 /****************************************************************************
  * Name: nxtask_uninit
