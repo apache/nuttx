@@ -16,6 +16,7 @@ if IOEXPANDER
 
 config IOEXPANDER_RPMSG
 	bool "IO expander rpmsg server and client"
+	depends on RPTUN
 	default n
 	select IOEXPANDER_INT_ENABLE
 	---help---

@@ -208,7 +208,7 @@ config RAMLOG_SYSLOG
 
 config SYSLOG_RPMSG
 	bool "Log to RPMSG"
-	depends on OPENAMP
+	depends on RPTUN
 	depends on SCHED_WORKQUEUE
 	default n
 	---help---
@@ -292,7 +292,7 @@ endif # SYSLOG_RPMSG
 config SYSLOG_RPMSG_SERVER
 	bool "Enable RPMSG server for SYSLOG"
 	default n
-	depends on OPENAMP
+	depends on RPTUN
 	---help---
 		Use rpmsg to receive message from remote proc.
 
