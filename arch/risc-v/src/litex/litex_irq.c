@@ -30,9 +30,7 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
 #include <nuttx/irq.h>
-#include <arch/board/board.h>
 
 #include "riscv_internal.h"
 #include "litex.h"

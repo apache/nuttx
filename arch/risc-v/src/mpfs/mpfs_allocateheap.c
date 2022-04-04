@@ -28,8 +28,6 @@
 #include <nuttx/userspace.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #ifdef CONFIG_MM_KERNEL_HEAP
 #include <arch/board/board_memorymap.h>
