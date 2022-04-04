@@ -2965,40 +2965,12 @@ cs35l41b_initialize(FAR struct i2c_master_s *i2c,
                     FAR struct cs35l41b_lower_s *lower)
 {
   FAR struct cs35l41b_dev_s *priv;
-  int16_t ret = OK;
 
   if (lower == NULL)
     {
       auderr("ERROR: lower is NULL\n");
       return NULL;
     }
-
-  ret = lower->power_en(true);
-  if (ret < 0)
-    {
-      auderr("ERROR: CS35L41B power_en\n");
-      return NULL;
-    }
-
-  ret = lower->reset_en(true);
-  if (ret < 0)
-    {
-      auderr("ERROR: CS35L41B reset_en\n");
-      return NULL;
-    }
-
-  ret = lower->int_pin_set();
-  if (ret < 0)
-    {
-      auderr("ERROR: CS35L41B reset_en\n");
-      return NULL;
-    }
-
-  lower->wakeup_pin_set(false);
-
-  /* wait 2 ms for stable */
-
-  up_mdelay(2);
 
   /* Allocate a CS35L41B device structure */
 
