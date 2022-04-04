@@ -98,7 +98,7 @@ extern "C"
 
 /* Register image data operations. */
 
-void imgdata_register(const FAR struct imgdata_ops_s *ops);
+void imgdata_register(FAR const struct imgdata_ops_s *ops);
 
 #undef EXTERN
 #ifdef __cplusplus

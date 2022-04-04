@@ -533,27 +533,27 @@ static int kinetis_ehci_interrupt(int irq,
 /* USB Host Controller Operations *******************************************/
 
 static int kinetis_wait(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s **hport);
+                        FAR struct usbhost_hubport_s **hport);
 static int kinetis_rh_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
+                                FAR struct usbhost_hubport_s *hport);
 static int kinetis_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
-
+                             FAR struct usbhost_hubport_s *hport);
 static int kinetis_ep0configure(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-         uint16_t maxpacketsize);
+                                usbhost_ep_t ep0, uint8_t funcaddr,
+                                uint8_t speed, uint16_t maxpacketsize);
 static int kinetis_epalloc(FAR struct usbhost_driver_s *drvr,
-         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                           FAR const struct usbhost_epdesc_s *epdesc,
+                           FAR usbhost_ep_t *ep);
 static int kinetis_epfree(FAR struct usbhost_driver_s *drvr,
                           usbhost_ep_t ep);
 static int kinetis_alloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, FAR size_t *maxlen);
+                         FAR uint8_t **buffer, FAR size_t *maxlen);
 static int kinetis_free(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
+                        FAR uint8_t *buffer);
 static int kinetis_ioalloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, size_t buflen);
+                           FAR uint8_t **buffer, size_t buflen);
 static int kinetis_iofree(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
+                          FAR uint8_t *buffer);
 static int kinetis_ctrlin(FAR struct usbhost_driver_s *drvr,
                           usbhost_ep_t ep0,
                           FAR const struct usb_ctrlreq_s *req,
@@ -563,23 +563,22 @@ static int kinetis_ctrlout(FAR struct usbhost_driver_s *drvr,
                            FAR const struct usb_ctrlreq_s *req,
                            FAR const uint8_t *buffer);
 static ssize_t kinetis_transfer(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen);
+                                usbhost_ep_t ep, FAR uint8_t *buffer,
+                                size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
-static int kinetis_asynch(FAR struct usbhost_driver_s *drvr,
-                          usbhost_ep_t ep,
-                          FAR uint8_t *buffer,
-                          size_t buflen,
-                          usbhost_asynch_t callback,
-                          FAR void *arg);
+static int kinetis_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
+                          FAR uint8_t *buffer, size_t buflen,
+                          usbhost_asynch_t callback, FAR void *arg);
 #endif
 static int kinetis_cancel(FAR struct usbhost_driver_s *drvr,
                           usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int kinetis_connect(FAR struct usbhost_driver_s *drvr,
-         FAR struct usbhost_hubport_s *hport, bool connected);
+                           FAR struct usbhost_hubport_s *hport,
+                           bool connected);
 #endif
 static void kinetis_disconnect(FAR struct usbhost_driver_s *drvr,
-                             FAR struct usbhost_hubport_s *hport);
+                               FAR struct usbhost_hubport_s *hport);
 
 /* Initialization ***********************************************************/
 
@@ -4043,8 +4042,8 @@ static int kinetis_ep0configure(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 static int kinetis_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc,
-                         usbhost_ep_t *ep)
+                           FAR const struct usbhost_epdesc_s *epdesc,
+                           FAR usbhost_ep_t *ep)
 {
   struct kinetis_epinfo_s *epinfo;
   struct usbhost_hubport_s *hport;

@@ -904,7 +904,7 @@ static int usbclass_mkstrdesc(uint8_t id, FAR struct usb_strdesc_s *strdesc)
 
 #ifdef CONFIG_USBDEV_DUALSPEED
 static inline void usbclass_mkepbulkdesc(
-                             const FAR struct usb_epdesc_s *indesc,
+                             FAR const struct usb_epdesc_s *indesc,
                              uint16_t mxpacket,
                              FAR struct usb_epdesc_s *outdesc)
 {

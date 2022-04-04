@@ -515,41 +515,46 @@ static int imxrt_ehci_interrupt(int irq, FAR void *context, FAR void *arg);
 /* USB Host Controller Operations *******************************************/
 
 static int imxrt_wait(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s **hport);
+                      FAR struct usbhost_hubport_s **hport);
 static int imxrt_rh_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
+                              FAR struct usbhost_hubport_s *hport);
 static int imxrt_enumerate(FAR struct usbhost_connection_s *conn,
-         FAR struct usbhost_hubport_s *hport);
+                           FAR struct usbhost_hubport_s *hport);
 
 static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep0, uint8_t funcaddr, uint8_t speed,
-         uint16_t maxpacketsize);
+                              usbhost_ep_t ep0, uint8_t funcaddr,
+                              uint8_t speed, uint16_t maxpacketsize);
 static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
-         const FAR struct usbhost_epdesc_s *epdesc, usbhost_ep_t *ep);
+                         FAR const struct usbhost_epdesc_s *epdesc,
+                         FAR usbhost_ep_t *ep);
 static int imxrt_epfree(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 static int imxrt_alloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, FAR size_t *maxlen);
+                       FAR uint8_t **buffer, FAR size_t *maxlen);
 static int imxrt_free(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
+                      FAR uint8_t *buffer);
 static int imxrt_ioalloc(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t **buffer, size_t buflen);
+                         FAR uint8_t **buffer, size_t buflen);
 static int imxrt_iofree(FAR struct usbhost_driver_s *drvr,
-         FAR uint8_t *buffer);
+                        FAR uint8_t *buffer);
 static int imxrt_ctrlin(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR uint8_t *buffer);
+                        FAR const struct usb_ctrlreq_s *req,
+                        FAR uint8_t *buffer);
 static int imxrt_ctrlout(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep0,
-         FAR const struct usb_ctrlreq_s *req, FAR const uint8_t *buffer);
+                         FAR const struct usb_ctrlreq_s *req,
+                         FAR const uint8_t *buffer);
 static ssize_t imxrt_transfer(FAR struct usbhost_driver_s *drvr,
-         usbhost_ep_t ep, FAR uint8_t *buffer, size_t buflen);
+                              usbhost_ep_t ep, FAR uint8_t *buffer,
+                              size_t buflen);
 #ifdef CONFIG_USBHOST_ASYNCH
 static int imxrt_asynch(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep,
-         FAR uint8_t *buffer, size_t buflen, usbhost_asynch_t callback,
-         FAR void *arg);
+                        FAR uint8_t *buffer, size_t buflen,
+                        usbhost_asynch_t callback, FAR void *arg);
 #endif
 static int imxrt_cancel(FAR struct usbhost_driver_s *drvr, usbhost_ep_t ep);
 #ifdef CONFIG_USBHOST_HUB
 static int imxrt_connect(FAR struct usbhost_driver_s *drvr,
-         FAR struct usbhost_hubport_s *hport, bool connected);
+                         FAR struct usbhost_hubport_s *hport,
+                         bool connected);
 #endif
 static void imxrt_disconnect(FAR struct usbhost_driver_s *drvr,
                              FAR struct usbhost_hubport_s *hport);
@@ -3968,8 +3973,8 @@ static int imxrt_ep0configure(FAR struct usbhost_driver_s *drvr,
  ****************************************************************************/
 
 static int imxrt_epalloc(FAR struct usbhost_driver_s *drvr,
-                         const FAR struct usbhost_epdesc_s *epdesc,
-                         usbhost_ep_t *ep)
+                         FAR const struct usbhost_epdesc_s *epdesc,
+                         FAR usbhost_ep_t *ep)
 {
   struct imxrt_epinfo_s *epinfo;
   struct usbhost_hubport_s *hport;
