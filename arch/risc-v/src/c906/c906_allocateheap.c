@@ -28,8 +28,6 @@
 #include <nuttx/userspace.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "c906.h"
 

@@ -31,7 +31,6 @@
 #include <debug.h>
 
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
 
 #include "sched/sched.h"
 #include "riscv_internal.h"
