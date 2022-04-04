@@ -29,11 +29,11 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
-#include <nuttx/board.h>
-#include <arch/board/board.h>
 
 #include "riscv_internal.h"
 #include "group/group.h"
+
+#include "c906_memorymap.h"
 
 /****************************************************************************
  * Pre-processor Definitions
