@@ -33,8 +33,8 @@
  ****************************************************************************/
 
 #ifdef CONFIG_DISABLE_ENVIRON
-#  define env_dup(group)     (0)
-#  define env_release(group) (0)
+#  define env_dup(group, envp) (0)
+#  define env_release(group)   (0)
 #else
 
 /****************************************************************************
@@ -65,6 +65,7 @@ extern "C"
  * Input Parameters:
  *   group - The child task group to receive the newly allocated copy of the
  *           parent task groups environment structure.
+ *   envp  - Pointer to the environment strings.
  *
  * Returned Value:
  *   zero on success
@@ -74,7 +75,7 @@ extern "C"
  *
  ****************************************************************************/
 
-int env_dup(FAR struct task_group_s *group);
+int env_dup(FAR struct task_group_s *group, FAR char * const *envp);
 
 /****************************************************************************
  * Name: env_release
