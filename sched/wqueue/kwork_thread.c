@@ -46,7 +46,11 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#if defined(CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE) && CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0
+#ifndef CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE
+#  define CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE 0
+#endif
+
+#if CONFIG_SCHED_CRITMONITOR_MAXTIME_WQUEUE > 0
 #  define CALL_WORKER(worker, arg) \
      do \
        { \
