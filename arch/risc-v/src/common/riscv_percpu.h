@@ -38,7 +38,18 @@
  * Pre-processor Definitions
  ****************************************************************************/
 
-#define RISCV_PERCPU_HARTID_OFFSET   (0 * INT_REG_SIZE)
+/* Can be used by assembly code to access the structure, example:
+ *
+ * Get percpu structure:
+ * 1: csrr    a0, CSR_SCRATCH
+ *
+ * Get hartid:
+ * 2: REGLOAD a0, RISCV_PERCPU_HARTID(a0)
+ */
+
+#define RISCV_PERCPU_LIST       (0 * INT_REG_SIZE)
+#define RISCV_PERCPU_HARTID     (1 * INT_REG_SIZE)
+#define RISCV_PERCPU_IRQSTACK   (2 * INT_REG_SIZE)
 
 #ifndef __ASSEMBLY__
 
@@ -46,31 +57,24 @@
  * Public Types
  ****************************************************************************/
 
-/* Per CPU save area. Access to this structure can be gained via the
- * supervisor scratch (sscratch) register. Prior to this, every CPU that
+/* Per CPU save area. Access to this structure can be gained via the scratch
+ * ([m/s]scratch) register. Prior to this, every CPU that
  * wishes to access this information must call riscv_percpu_add_hart() which
- * will set up sscratch to point to the CPUs own area
+ * will set up [m/s]scratch to point to the CPUs own area
  */
 
 struct riscv_percpu_s
 {
-  uintptr_t hartid;  /* Hart ID */
+  struct riscv_percpu_s *next;      /* For sl list linkage */
+  uintptr_t              hartid;    /* Hart ID */
+  uintptr_t              irq_stack; /* Interrupt stack */
 };
+
+typedef struct riscv_percpu_s riscv_percpu_t;
 
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
-
-/****************************************************************************
- * Name: riscv_percpu_init
- *
- * Description:
- *   Initialize the per CPU structures, should only be done on the boot
- *   hart.
- *
- ****************************************************************************/
-
-void riscv_percpu_init(void);
 
 /****************************************************************************
  * Name: riscv_percpu_add_hart
@@ -98,6 +102,19 @@ void riscv_percpu_add_hart(uintptr_t hartid);
  ****************************************************************************/
 
 uintptr_t riscv_percpu_get_hartid(void);
+
+/****************************************************************************
+ * Name: riscv_percpu_get_irqstack
+ *
+ * Description:
+ *   Get harts own IRQ stack by reading it from the per CPU area.
+ *
+ * Returned Value:
+ *   IRQ stack, or 0 if no IRQ stack is assigned
+ *
+ ****************************************************************************/
+
+uintptr_t riscv_percpu_get_irqstack(void);
 
 #endif /* __ASSEMBLY__ */
 #endif /* __ARCH_RISC_V_SRC_COMMON_RISCV_PERCPU_H */

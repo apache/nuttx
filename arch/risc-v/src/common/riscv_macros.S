@@ -29,6 +29,11 @@
 #include <arch/arch.h>
 #include <arch/irq.h>
 
+#include <sys/types.h>
+
+#include "riscv_internal.h"
+#include "riscv_percpu.h"
+
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
@@ -128,3 +133,22 @@
   REGLOAD    x31, REG_X31(\out)  /* t6 */
 
 .endm
+
+/****************************************************************************
+ * Name: setintstack
+ *
+ * Description:
+ *   Set the current stack pointer to the "top" the interrupt stack. Works
+ *   for single CPU case in flat mode.
+ *   Must be provided by MCU-specific logic in the SMP case, or the kernel
+ *   runs in supervisor mode (S-mode).
+ *
+ ****************************************************************************/
+
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
+#if !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE)
+.macro  setintstack tmp0, tmp1
+  la    sp, g_intstacktop
+.endm
+#endif /* !defined(CONFIG_SMP) && !defined(CONFIG_ARCH_USE_S_MODE) */
+#endif /* CONFIG_ARCH_INTERRUPTSTACK > 15 */

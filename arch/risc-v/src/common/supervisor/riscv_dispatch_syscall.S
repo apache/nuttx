@@ -27,6 +27,8 @@
 #include <nuttx/config.h>
 #include <arch/mode.h>
 
+#include "chip.h"
+
 #include "riscv_macros.S"
 
 /****************************************************************************
@@ -96,18 +98,10 @@ riscv_dispatch_syscall:
 
   mv         a0, sp                    /* a0 = context */
 
+#if CONFIG_ARCH_INTERRUPTSTACK > 15
   /* Switch to interrupt stack */
 
-#if CONFIG_ARCH_INTERRUPTSTACK > 15
-#if IRQ_NSTACKS > 1
-  jal        x1, riscv_mhartid    /* get hartid */
-  li         t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-  mul        t0, a0, t0
-  la         a0, g_intstacktop
-  sub        sp, a0, t0
-#else
-  la         sp, g_intstacktop
-#endif
+  setintstack t0, t1
 #endif
 
   /* Run the handler */

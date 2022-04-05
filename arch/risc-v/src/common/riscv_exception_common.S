@@ -28,8 +28,13 @@
 #include <arch/irq.h>
 #include <arch/mode.h>
 
+#include <sys/types.h>
+
 #include "chip.h"
+
 #include "riscv_macros.S"
+
+#include "riscv_internal.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -99,27 +104,9 @@ exception_common:
 
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
 
-  /* Offset to hartid */
-
-  mv         s0, a0               /* save cause */
-#ifdef CONFIG_SMP
-  jal        x1, riscv_mhartid    /* get hartid */
-#else
-  li         a0, 0
-#endif
-
   /* Switch to interrupt stack */
 
-#if IRQ_NSTACKS > 1
-  li         t0, (CONFIG_ARCH_INTERRUPTSTACK & ~15)
-  mul        t0, a0, t0
-  la         a0, g_intstacktop
-  sub        sp, a0, t0
-#else
-  la         sp, g_intstacktop
-#endif
-
-  mv         a0, s0               /* restore cause */
+  setintstack t0, t1
 
   /* Call interrupt handler in C */
 
@@ -165,6 +152,10 @@ exception_common:
  *  Name: g_intstackalloc and g_intstacktop
  ****************************************************************************/
 
+/* Total required interrupt stack size */
+
+#define STACK_ALLOC_SIZE (CONFIG_ARCH_INTERRUPTSTACK * CONFIG_SMP_NCPUS)
+
 #if CONFIG_ARCH_INTERRUPTSTACK > 15
   .bss
   .balign 16
@@ -173,8 +164,8 @@ exception_common:
   .type   g_intstackalloc, object
   .type   g_intstacktop, object
 g_intstackalloc:
-  .skip  (((CONFIG_ARCH_INTERRUPTSTACK * IRQ_NSTACKS) + 8) & ~15)
+  .skip  STACK_ALIGN_UP(STACK_ALLOC_SIZE)
 g_intstacktop:
   .size  g_intstacktop, 0
-  .size  g_intstackalloc, ((CONFIG_ARCH_INTERRUPTSTACK * IRQ_NSTACKS) & ~15)
+  .size  g_intstackalloc, STACK_ALIGN_DOWN(STACK_ALLOC_SIZE)
 #endif
