@@ -70,10 +70,7 @@
 #  define CONFIG_SCHED_CRITMONITOR_MAXTIME_IRQ 0
 #endif
 
-#ifndef CONFIG_SCHED_IRQMONITOR
-#  define CALL_VECTOR(ndx, vector, irq, context, arg) \
-     vector(irq, context, arg)
-#elif defined(CONFIG_SCHED_CRITMONITOR)
+#ifdef CONFIG_SCHED_IRQMONITOR
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
      do \
        { \
@@ -98,21 +95,7 @@
      while (0)
 #else
 #  define CALL_VECTOR(ndx, vector, irq, context, arg) \
-     do \
-       { \
-         struct timespec start; \
-         struct timespec end; \
-         struct timespec delta; \
-         clock_systime_timespec(&start); \
-         vector(irq, context, arg); \
-         clock_systime_timespec(&end); \
-         clock_timespec_subtract(&end, &start, &delta); \
-         if (delta.tv_nsec > g_irqvector[ndx].time) \
-           { \
-             g_irqvector[ndx].time = delta.tv_nsec; \
-           } \
-       } \
-     while (0)
+     vector(irq, context, arg)
 #endif /* CONFIG_SCHED_IRQMONITOR */
 
 /****************************************************************************
