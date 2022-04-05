@@ -46,6 +46,7 @@ struct bmi270_config_s
   int freq;                               /* SPI frequency */
   uint32_t cs;                            /* SPI cs pin */
   FAR struct spi_dev_s *spi;              /* SPI interface */
+  FAR const char *file_path;              /* File path of parameter. */
   FAR struct ioexpander_dev_s *ioedev;    /* Ioexpander device */
 };
 
