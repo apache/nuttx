@@ -147,6 +147,8 @@
 "setitimer","sys/time.h","!defined(CONFIG_DISABLE_POSIX_TIMERS)","int","int","FAR const struct itimerval *","FAR struct itimerval *"
 "setsockopt","sys/socket.h","defined(CONFIG_NET)","int","int","int","int","FAR const void *","socklen_t"
 "setuid","unistd.h","defined(CONFIG_SCHED_USER_IDENTITY)","int","uid_t"
+"shm_open","sys/mman.h","defined(CONFIG_FS_SHMFS)","int","FAR const char *","int","mode_t"
+"shm_unlink","sys/mman.h","defined(CONFIG_FS_SHMFS)","int","FAR const char *"
 "shmat","sys/shm.h","defined(CONFIG_MM_SHM)","FAR void *","int","FAR const void *","int"
 "shmctl","sys/shm.h","defined(CONFIG_MM_SHM)","int","int","int","FAR struct shmid_ds *"
 "shmdt","sys/shm.h","defined(CONFIG_MM_SHM)","int","FAR const void *"

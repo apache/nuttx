@@ -287,6 +287,11 @@ SYSCALL_LOOKUP(munmap,                     2)
   SYSCALL_LOOKUP(shmdt,                    1)
 #endif
 
+#ifdef CONFIG_FS_SHMFS
+  SYSCALL_LOOKUP(shm_open,                 3)
+  SYSCALL_LOOKUP(shm_unlink,               1)
+#endif
+
 /* The following are defined if pthreads are enabled */
 
 #ifndef CONFIG_DISABLE_PTHREAD
