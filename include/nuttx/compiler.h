@@ -47,10 +47,6 @@
 #  define CONFIG_HAVE_FUNCTIONNAME 1 /* Has __FUNCTION__ */
 #  define CONFIG_HAVE_FILENAME     1 /* Has __FILE__ */
 
-/* Indicate that a local variable is not used */
-
-#  define UNUSED(a) ((void)(1 || (a)))
-
 /* Built-in functions */
 
 /* The <stddef.h> header shall define the following macros:
@@ -539,10 +535,6 @@
 #  undef  CONFIG_HAVE_DOUBLE
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 
-/* Indicate that a local variable is not used */
-
-#  define UNUSED(a) ((void)(1 || (a)))
-
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 #  define no_builtin(n)
@@ -670,6 +662,10 @@
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(1 || (a)))
+
 /* Older Zilog compilers support both types double and long long, but the
  * size is 32-bits (same as long and single precision) so it is safer to say
  * that they are not supported.  Later versions are more ANSII compliant and
@@ -681,10 +677,6 @@
 #  undef  CONFIG_HAVE_DOUBLE
 #  undef  CONFIG_HAVE_LONG_DOUBLE
 
-/* Indicate that a local variable is not used */
-
-#  define UNUSED(a) ((void)(1 || (a)))
-
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 #  define no_builtin(n)
@@ -692,14 +684,6 @@
 /* ICCARM-specific definitions **********************************************/
 
 #elif defined(__ICCARM__)
-
-#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
-#  define CONFIG_HAVE_FILENAME 1    /* Has __FILE__ */
-#  define CONFIG_HAVE_FLOAT 1
-
-/* Indicate that a local variable is not used */
-
-#  define UNUSED(a) ((void)(1 || (a)))
 
 #  define weak_alias(name, aliasname)
 #  define weak_data            __weak
@@ -756,6 +740,14 @@
 #  undef CONFIG_HAVE_ANONYMOUS_STRUCT
 #  undef  CONFIG_HAVE_ANONYMOUS_UNION
 
+/* Indicate that a local variable is not used */
+
+#  define UNUSED(a) ((void)(1 || (a)))
+
+#  define CONFIG_CPP_HAVE_VARARGS 1 /* Supports variable argument macros */
+#  define CONFIG_HAVE_FILENAME 1    /* Has __FILE__ */
+#  define CONFIG_HAVE_FLOAT 1
+
 #  define offsetof(a, b) ((size_t)(&(((a *)(0))->b)))
 
 #  define no_builtin(n)
@@ -769,7 +761,7 @@
 #  undef  CONFIG_HAVE_FUNCTIONNAME
 #  undef  CONFIG_HAVE_FILENAME
 #  undef  CONFIG_HAVE_WEAKFUNCTIONS
-#  undef CONFIG_HAVE_CXX14
+#  undef  CONFIG_HAVE_CXX14
 #  define weak_alias(name, aliasname)
 #  define weak_data
 #  define weak_function
