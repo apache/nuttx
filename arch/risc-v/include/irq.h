@@ -98,16 +98,6 @@
 #  define CONFIG_SYS_NNEST  2
 #endif
 
-/* Amount of interrupt stacks (amount of harts) */
-
-#ifdef CONFIG_IRQ_NSTACKS
-#  define IRQ_NSTACKS       CONFIG_IRQ_NSTACKS
-#elif defined CONFIG_SMP
-#  define IRQ_NSTACKS       CONFIG_SMP_NCPUS
-#else
-#  define IRQ_NSTACKS       1
-#endif
-
 /* Processor PC */
 
 #define REG_EPC_NDX         0
