@@ -286,7 +286,6 @@ void riscv_netinitialize(void);
 /* Exception Handler ********************************************************/
 
 uintptr_t *riscv_doirq(int irq, uintptr_t *regs);
-void riscv_fault(int irq, uintptr_t *regs);
 void riscv_exception(uintptr_t mcause, uintptr_t *regs);
 
 /* Debug ********************************************************************/

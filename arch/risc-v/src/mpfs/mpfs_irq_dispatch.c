@@ -61,7 +61,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       vector == RISCV_IRQ_STOREPF ||
       vector == RISCV_IRQ_RESERVED)
     {
-      riscv_fault(irq, regs);
+      riscv_exception(irq, regs);
     }
 
   if ((vector & RISCV_IRQ_BIT) != 0)
