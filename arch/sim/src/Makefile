@@ -144,6 +144,10 @@ else ifeq ($(CONFIG_SIM_AJOYSTICK),y)
 else ifeq ($(CONFIG_SIM_BUTTONS),y)
   HOSTSRCS += up_x11eventloop.c
 endif
+
+ifeq ($(CONFIG_SIM_KEYBOARD),y)
+  CSRCS += up_keyboard.c
+endif
 endif
 
 ifeq ($(CONFIG_FS_FAT),y)
