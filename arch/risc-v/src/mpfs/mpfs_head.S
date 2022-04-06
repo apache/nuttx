@@ -100,6 +100,17 @@ __start:
   csrr a0, mhartid
   beqz a0, .skip_e51
 
+  /* Clear sscratch if u54 */
+
+  csrw sscratch, zero
+  csrw scause, zero
+  csrw sepc, zero
+
+  /* Disable all interrupts in sie */
+
+  csrw sie, zero
+  csrw sip, zero
+
   /* Init delegation registers, mideleg, medeleg, if a U54
    * These are not initialised by the hardware and come up in a random state
    */
@@ -115,15 +126,6 @@ __start:
   /* invalid all MMU TLB Entry */
 
   sfence.vma x0, x0
-
-  /* Enable accelerator if present, setting ignored on E51
-   * 15,16 = MSTATUS_XS, 17,18 = MSTATUS_MPRV
-   * not defined on riscv-v/include/csr.h
-   */
-
-  /*  li      t0, (1 << 15) | (1 << 16) | (1 << 17) | (1 << 18) */
-  li t0, 0x00018000 /* MSTATUS_XS */
-  csrs    mstatus, t0
 
 .skip_e51:
 
