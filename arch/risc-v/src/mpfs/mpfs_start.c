@@ -34,7 +34,9 @@
 #include "mpfs_ddr.h"
 #include "mpfs_cache.h"
 #include "mpfs_userspace.h"
+
 #include "riscv_internal.h"
+#include "riscv_percpu.h"
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -44,6 +46,10 @@
 #  define showprogress(c) riscv_lowputc(c)
 #else
 #  define showprogress(c)
+#endif
+
+#if defined (CONFIG_BUILD_KERNEL) && !defined (CONFIG_ARCH_USE_S_MODE)
+#  error "Target requires kernel in S-mode, enable CONFIG_ARCH_USE_S_MODE"
 #endif
 
 /****************************************************************************
@@ -168,6 +174,15 @@ void __mpfs_start(uint64_t mhartid)
   /* Do board initialization */
 
   mpfs_boardinitialize();
+
+#ifdef CONFIG_ARCH_USE_S_MODE
+  /* Initialize the per CPU areas */
+
+  if (mhartid != 0)
+    {
+      riscv_percpu_add_hart(mhartid);
+    }
+#endif /* CONFIG_ARCH_USE_S_MODE */
 
   /* Initialize the caches.  Should only be executed from E51 (hart 0) to be
    * functional.  Consider the caches already configured if running without

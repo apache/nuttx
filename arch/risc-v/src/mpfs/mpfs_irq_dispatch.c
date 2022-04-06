@@ -51,7 +51,7 @@
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   int irq = (vector & 0x3f);
-  uintptr_t *mepc = regs;
+  uintptr_t *epc = regs;
 
   /* Check if fault happened  */
 
@@ -73,29 +73,29 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   uintptr_t claim_address = mpfs_plic_get_claimbase();
 
-  if (irq == RISCV_IRQ_MEXT)
+  if (irq == RISCV_IRQ_EXT)
     {
       uint32_t ext = getreg32(claim_address);
 
-      /* Add the value to nuttx irq which is offset to the mext */
+      /* Add the value to nuttx irq which is offset to the ext */
 
       irq = MPFS_IRQ_EXT_START + ext;
     }
 
-  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+  /* NOTE: In case of ecall, we need to adjust epc in the context */
 
   if (irq == RISCV_IRQ_ECALLM || irq == RISCV_IRQ_ECALLU)
     {
-      *mepc += 4;
+      *epc += 4;
     }
 
   /* Acknowledge the interrupt */
 
   riscv_ack_irq(irq);
 
-  /* MEXT means no interrupt */
+  /* EXT means no interrupt */
 
-  if (irq != RISCV_IRQ_MEXT && irq != MPFS_IRQ_INVALID)
+  if (irq != RISCV_IRQ_EXT && irq != MPFS_IRQ_INVALID)
     {
       /* Deliver the IRQ */
 
