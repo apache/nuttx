@@ -119,27 +119,15 @@ static unsigned int g_note_disabled_irq_nest[CONFIG_SMP_NCPUS];
 static inline void sched_note_flatten(FAR uint8_t *dst,
                                       FAR void *src, size_t len)
 {
-  switch (len)
+#ifdef CONFIG_ENDIAN_BIG
+  FAR uint8_t *end = (FAR uint8_t *)src + len - 1;
+  while (len-- > 0)
     {
-#ifdef CONFIG_HAVE_LONG_LONG
-      case 8:
-        dst[7] = (uint8_t)((*(uint64_t *)src >> 56) & 0xff);
-        dst[6] = (uint8_t)((*(uint64_t *)src >> 48) & 0xff);
-        dst[5] = (uint8_t)((*(uint64_t *)src >> 40) & 0xff);
-        dst[4] = (uint8_t)((*(uint64_t *)src >> 32) & 0xff);
-#endif
-      case 4:
-        dst[3] = (uint8_t)((*(uint32_t *)src >> 24) & 0xff);
-        dst[2] = (uint8_t)((*(uint32_t *)src >> 16) & 0xff);
-      case 2:
-        dst[1] = (uint8_t)((*(uint16_t *)src >> 8) & 0xff);
-      case 1:
-        dst[0] = (uint8_t)(*(uint8_t *)src & 0xff);
-        break;
-      default:
-        DEBUGASSERT(FALSE);
-        break;
+      *dst++ = *end--;
     }
+#else
+  memcpy(dst, src, len);
+#endif
 }
 
 /****************************************************************************
