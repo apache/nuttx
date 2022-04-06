@@ -145,7 +145,6 @@ static void syslog_rpmsg_work(FAR void *priv_)
     }
 
   priv->trans_len = len;
-  priv->transfer  = true;
 
   leave_critical_section(flags);
 
@@ -217,6 +216,7 @@ static void syslog_rpmsg_putchar(FAR struct syslog_rpmsg_s *priv, int ch,
           delay = 0;
         }
 
+      priv->transfer = true;
       work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, delay);
     }
 }
@@ -298,19 +298,21 @@ static int syslog_rpmsg_ept_cb(FAR struct rpmsg_endpoint *ept,
             }
 
           priv->tail += priv->trans_len;
-
-          nxsem_get_value(&priv->sem, &sval);
-          while (sval++ < 0)
-            {
-              nxsem_post(&priv->sem);
-            }
         }
-
-      priv->transfer = false;
 
       if (SYSLOG_RPMSG_COUNT(priv))
         {
           work_queue(HPWORK, &priv->work, syslog_rpmsg_work, priv, 0);
+        }
+      else
+        {
+          priv->transfer = false;
+        }
+
+      nxsem_get_value(&priv->sem, &sval);
+      while (sval++ < 0)
+        {
+          nxsem_post(&priv->sem);
         }
 
       leave_critical_section(flags);
