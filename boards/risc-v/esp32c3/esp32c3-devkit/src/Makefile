@@ -62,6 +62,10 @@ ifeq ($(CONFIG_I2C_DRIVER),y)
 CSRCS += esp32c3_i2c.c
 endif
 
+ifeq ($(CONFIG_CAN),y)
+CSRCS += esp32c3_twai.c
+endif
+
 ifeq ($(CONFIG_SENSORS_BMP180),y)
 CSRCS += esp32c3_bmp180.c
 endif
