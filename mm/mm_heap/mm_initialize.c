@@ -93,12 +93,17 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
 
   DEBUGVERIFY(mm_takesemaphore(heap));
 
-  /* Adjust the provided heap start and size so that they are both aligned
-   * with the MM_MIN_CHUNK size.
+  /* Adjust the provided heap start and size.
+   *
+   * Note: (uintptr_t)node + SIZEOF_MM_ALLOCNODE is what's actually
+   * returned to the malloc user, which should have natural alignment.
+   * (that is, in this implementation, MM_MIN_CHUNK-alignment.)
    */
 
-  heapbase = MM_ALIGN_UP((uintptr_t)heapstart);
-  heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize);
+  heapbase = MM_ALIGN_UP((uintptr_t)heapstart + SIZEOF_MM_ALLOCNODE)
+             - SIZEOF_MM_ALLOCNODE;
+  heapend  = MM_ALIGN_DOWN((uintptr_t)heapstart + (uintptr_t)heapsize)
+             - SIZEOF_MM_ALLOCNODE;
   heapsize = heapend - heapbase;
 
   minfo("Region %d: base=%p size=%zu\n", IDX + 1, heapstart, heapsize);
@@ -122,6 +127,7 @@ void mm_addregion(FAR struct mm_heap_s *heap, FAR void *heapstart,
   heap->mm_heapstart[IDX]->preceding = MM_ALLOC_BIT;
   node                               = (FAR struct mm_freenode_s *)
                                        (heapbase + SIZEOF_MM_STARTENDNODE);
+  DEBUGASSERT((((uintptr_t)node + SIZEOF_MM_ALLOCNODE) % MM_MIN_CHUNK) == 0);
   node->size                         = heapsize - 2*SIZEOF_MM_STARTENDNODE;
   node->preceding                    = SIZEOF_MM_STARTENDNODE;
   heap->mm_heapend[IDX]              = (FAR struct mm_allocnode_s *)
