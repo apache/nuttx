@@ -272,7 +272,7 @@ static void uinput_rpmsg_notify(FAR struct uinput_context_s *ctx,
 
   list_for_every_entry(&ctx->eptlist, ept, struct uinput_rpmsg_ept_s, node)
     {
-      if (is_rpmsg_ept_ready(&ept->ept) == 0)
+      if (is_rpmsg_ept_ready(&ept->ept))
         {
           if (rpmsg_send(&ept->ept, buffer, buflen) < 0)
             {
