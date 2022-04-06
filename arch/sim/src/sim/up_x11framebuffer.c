@@ -115,7 +115,7 @@ static inline int up_x11createframe(void)
 #else
   XSelectInput(g_display, g_window,
                ButtonPressMask | ButtonReleaseMask | PointerMotionMask |
-               KeyPressMask);
+               KeyPressMask | KeyReleaseMask);
 #endif
 
   /* Release queued events on the display */

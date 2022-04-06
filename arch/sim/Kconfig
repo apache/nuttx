@@ -357,6 +357,13 @@ config SIM_KEYBOARD
 	---help---
 		Support an X11 mouse-based keyboard emulation.  Also needs INPUT=y
 
+config SIM_KEYBOARD_BUFFSIZE
+	int "sim keyboard buffer size"
+	default 64
+	depends on SIM_KEYBOARD
+	---help---
+		Emulator keyboard buffer size
+
 endif # if INPUT
 
 endmenu

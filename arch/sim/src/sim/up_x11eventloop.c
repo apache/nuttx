@@ -119,10 +119,10 @@ void up_x11events(void)
         {
           #ifdef CONFIG_SIM_KEYBOARD
           case KeyPress:
-            up_kbdevent(XLookupKeysym(&event.xkey, 0), 0);
+            up_kbdevent(XLookupKeysym(&event.xkey, 0), true);
             break;
           case KeyRelease:
-            up_kbdevent(XLookupKeysym(&event.xkey, 0), 1);
+            up_kbdevent(XLookupKeysym(&event.xkey, 0), false);
             break;
           #endif
 
