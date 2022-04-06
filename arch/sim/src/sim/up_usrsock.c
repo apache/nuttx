@@ -97,6 +97,7 @@ static int usrsock_send_ack(FAR struct usrsock_s *usrsock,
 
   ack.head.msgid = USRSOCK_MESSAGE_RESPONSE_ACK;
   ack.head.flags = (result == -EINPROGRESS);
+  ack.head.events = 0;
 
   ack.xid    = xid;
   ack.result = result;
@@ -112,6 +113,7 @@ static int usrsock_send_dack(FAR struct usrsock_s *usrsock,
 {
   ack->reqack.head.msgid = USRSOCK_MESSAGE_RESPONSE_DATA_ACK;
   ack->reqack.head.flags = 0;
+  ack->reqack.head.events = 0;
 
   ack->reqack.xid    = xid;
   ack->reqack.result = result;
