@@ -61,7 +61,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 
   if (vector < RISCV_IRQ_ECALLM)
     {
-      riscv_fault(irq, regs);
+      riscv_exception(irq, regs);
     }
 
   /* Firstly, check if the irq is machine external interrupt */
