@@ -245,6 +245,10 @@ void group_initialize(FAR struct task_tcb_s *tcb)
   DEBUGASSERT(tcb && tcb->cmn.group);
   group = tcb->cmn.group;
 
+  /* Allocate mm_map list if required */
+
+  mm_map_initialize(&group->tg_mm_map);
+
 #ifdef HAVE_GROUP_MEMBERS
   /* Assign the PID of this new task as a member of the group. */
 
