@@ -43,6 +43,7 @@
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/mm/map.h>
 
 #include <arch/arch.h>
 
@@ -179,6 +180,14 @@
 #  define TCB_REGS_OFF               offsetof(struct tcb_s, xcp.regs)
 #  define TCB_REG_OFF(reg)           (reg * sizeof(uint32_t))
 #endif
+
+/* Get a pointer to the process' memory map struct from the task_group */
+
+#define get_group_mm(group)          (group ? &group->tg_mm_map : NULL)
+
+/* Get a pointer to current the process' memory map struct */
+
+#define get_current_mm()             (get_group_mm(nxsched_self()->group))
 
 /****************************************************************************
  * Public Type Definitions
@@ -506,6 +515,10 @@ struct task_group_s
 
   struct group_shm_s tg_shm;        /* Task shared memory logic             */
 #endif
+
+  /* Virtual memory mapping info ********************************************/
+
+  struct mm_map_s tg_mm_map;    /* Task mmappings */
 };
 
 /* struct tcb_s *************************************************************/

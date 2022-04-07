@@ -176,6 +176,10 @@ static inline void group_release(FAR struct task_group_s *group)
   env_release(group);
 #endif
 
+  /* Destroy the mm_map list */
+
+  mm_map_destroy(&group->tg_mm_map);
+
 #if defined(CONFIG_BUILD_KERNEL) && defined(CONFIG_MM_SHM)
   /* Release any resource held by shared memory virtual page allocator */
 
