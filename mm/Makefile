@@ -37,6 +37,7 @@ include mempool/Make.defs
 include tlsf/Make.defs
 include kasan/Make.defs
 include ubsan/Make.defs
+include map/Make.defs
 
 BINDIR ?= bin
 
