@@ -39,6 +39,7 @@ CMN_CSRCS += riscv_misaligned.c
 
 ifeq ($(CONFIG_SMP), y)
 CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c riscv_cpustart.c
+CMN_ASRCS += riscv_mhartid.S
 endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)

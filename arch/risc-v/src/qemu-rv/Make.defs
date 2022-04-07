@@ -38,6 +38,7 @@ CMN_CSRCS += riscv_exception.c riscv_getnewintctx.c riscv_doirq.c
 
 ifeq ($(CONFIG_SMP), y)
 CMN_CSRCS += riscv_cpuindex.c riscv_cpupause.c riscv_cpustart.c
+CMN_ASRCS += riscv_mhartid.S
 endif
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
