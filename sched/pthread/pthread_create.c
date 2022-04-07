@@ -592,18 +592,18 @@ int nx_pthread_create(pthread_trampoline_t trampoline, FAR pthread_t *thread,
     {
       nxtask_activate((FAR struct tcb_s *)ptcb);
 
-      /* Wait for the task to actually get running and to register
-       * its join structure.
-       */
-
-      pthread_sem_take(&pjoin->data_sem, NULL, false);
-
       /* Return the thread information to the caller */
 
       if (thread)
         {
           *thread = (pthread_t)pid;
         }
+
+      /* Wait for the task to actually get running and to register
+       * its join structure.
+       */
+
+      pthread_sem_take(&pjoin->data_sem, NULL, false);
 
       if (!pjoin->started)
         {
