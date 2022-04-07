@@ -30,6 +30,7 @@ include shm/Make.defs
 include iob/Make.defs
 include circbuf/Make.defs
 include kasan/Make.defs
+include vm_map/Make.defs
 
 BINDIR ?= bin
 

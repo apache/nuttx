@@ -206,4 +206,8 @@ config MM_PANIC_ON_FAILURE
 	default n
 	depends on DEBUG_MM
 
+config MM_VM_MAP
+       bool
+       default n
+
 source "mm/iob/Kconfig"
