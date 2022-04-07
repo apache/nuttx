@@ -53,9 +53,10 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 {
   FAR struct mm_allocnode_s *node;
   FAR void *ptr;
-  size_t rawchunk;
-  size_t alignedchunk;
-  size_t mask = (size_t)(alignment - 1);
+  FAR void *rawchunk_ptr;
+  uintptr_t rawchunk;
+  uintptr_t alignedchunk;
+  uintptr_t mask = (uintptr_t)alignment - 1;
   size_t allocsize;
   size_t newsize;
 
@@ -109,13 +110,13 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
 
   /* Then malloc that size */
 
-  rawchunk = (size_t)mm_malloc(heap, allocsize);
-  if (rawchunk == 0)
+  rawchunk_ptr = mm_malloc(heap, allocsize);
+  if (rawchunk_ptr == NULL)
     {
       return NULL;
     }
 
-  kasan_poison((FAR void *)rawchunk, mm_malloc_size((FAR void *)rawchunk));
+  kasan_poison(rawchunk_ptr, mm_malloc_size(rawchunk_ptr));
 
   /* We need to hold the MM semaphore while we muck with the chunks and
    * nodelist.
@@ -127,6 +128,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
    * the allocation.
    */
 
+  rawchunk = (uintptr_t)rawchunk_ptr;
   node = (FAR struct mm_allocnode_s *)(rawchunk - SIZEOF_MM_ALLOCNODE);
 
   /* Find the aligned subregion */
@@ -159,7 +161,7 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
        * SIZEOF_MM_ALLOCNODE
        */
 
-      precedingsize = (size_t)newnode - (size_t)node;
+      precedingsize = (uintptr_t)newnode - (uintptr_t)node;
 
       /* If we were unlucky, then the alignedchunk can lie in such a position
        * that precedingsize < SIZEOF_NODE_FREENODE.  We can't let that happen
@@ -174,12 +176,12 @@ FAR void *mm_memalign(FAR struct mm_heap_s *heap, size_t alignment,
           alignedchunk += alignment;
           newnode       = (FAR struct mm_allocnode_s *)
                           (alignedchunk - SIZEOF_MM_ALLOCNODE);
-          precedingsize = (size_t)newnode - (size_t)node;
+          precedingsize = (uintptr_t)newnode - (uintptr_t)node;
         }
 
       /* Set up the size of the new node */
 
-      newnode->size = (size_t)next - (size_t)newnode;
+      newnode->size = (uintptr_t)next - (uintptr_t)newnode;
       newnode->preceding = precedingsize | MM_ALLOC_BIT;
       MM_ADD_BACKTRACE(heap, newnode);
 
