@@ -25,7 +25,6 @@
 #include <nuttx/config.h>
 
 #include <stdint.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <debug.h>
 
@@ -33,6 +32,10 @@
 #include <nuttx/arch.h>
 
 #include "riscv_internal.h"
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
 
 static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
 {
@@ -46,7 +49,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
   "Store/AMO access fault",
   "Environment call from U-mode",
   "Environment call from S-mode",
-  "Reserved",
+  "Environment call from H-mode",
   "Environment call from M-mode",
   "Instruction page fault",
   "Load page fault",
