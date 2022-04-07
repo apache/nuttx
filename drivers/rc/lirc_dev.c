@@ -124,7 +124,7 @@ static void lirc_pollnotify(FAR struct lirc_fh_s *fh,
 
       if (fh->fd->revents != 0)
         {
-          rcinfo("Report events: %02x\n", fh->fd->revents);
+          rcinfo("Report events: %08" PRIx32 "\n", fh->fd->revents);
 
           nxsem_get_value(fh->fd->sem, &semcount);
           if (semcount < 1)
@@ -956,7 +956,7 @@ void lirc_raw_event(FAR struct lirc_lowerhalf_s *lower,
         }
 
       sample = ev.pulse ? LIRC_PULSE(ev.duration) : LIRC_SPACE(ev.duration);
-      rcinfo("delivering %uus %d to lirc\n", ev.duration, ev.pulse ? 1 : 0);
+      rcinfo("delivering %" PRIu32 "us %u to lirc\n", ev.duration, ev.pulse ? 1 : 0);
     }
 
   flags = enter_critical_section();
