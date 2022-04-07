@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/common/riscv_cpuindex.c
+ * arch/risc-v/src/common/riscv_mhartid.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,42 +18,36 @@
  *
  ****************************************************************************/
 
+.file "riscv_mhartid.S"
+
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include <stdint.h>
-
-#include <nuttx/arch.h>
-#include <nuttx/irq.h>
-
-#include "riscv_internal.h"
+#include "riscv_macros.S"
 
 /****************************************************************************
- * Public Functions
+ * Public Symbols
  ****************************************************************************/
 
+    .globl  riscv_mhartid
+
 /****************************************************************************
- * Name: up_cpu_index
+ * Name: riscv_mhartid
  *
  * Description:
- *   Return an index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
- *
- * Input Parameters:
- *   None
+ *   Context aware way to query hart id
  *
  * Returned Value:
- *   An integer index in the range of 0 through (CONFIG_SMP_NCPUS-1) that
- *   corresponds to the currently executing CPU.
+ *   Hart id
  *
  ****************************************************************************/
 
-#ifdef CONFIG_SMP
-int up_cpu_index(void)
-{
-  return (int)riscv_mhartid();
-}
-#endif
+.type riscv_mhartid, function
+
+riscv_mhartid:
+
+  riscv_mhartid a0
+  ret
