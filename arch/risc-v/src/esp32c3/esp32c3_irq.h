@@ -95,21 +95,4 @@ int esp32c3_request_irq(uint8_t periphid, uint8_t prio, uint32_t flags);
 
 void esp32c3_free_cpuint(uint8_t periphid);
 
-/****************************************************************************
- * Name: esp32c3_dispatch_irq
- *
- * Description:
- *   Process interrupt and its callback function.
- *
- * Input Parameters:
- *   mcause - RISC-V "mcause" register value
- *   regs   - Saved register value array
- *
- * Returned Value:
- *   None.
- *
- ****************************************************************************/
-
-uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs);
-
 #endif /* __ARCH_RISCV_SRC_ESP32C3_ESP32C3_IRQ_H */

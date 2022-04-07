@@ -25,7 +25,11 @@ include chip/Bootloader.mk
 
 HEAD_ASRC = esp32c3_head.S
 
-CHIP_ASRCS = esp32c3_vectors.S esp32c3_interrupt.S
+CHIP_ASRCS = esp32c3_vectors.S
+
+# Specify our general Assembly files
+
+CMN_ASRCS = riscv_exception_common.S
 
 # Specify C code within the common directory to be included
 
