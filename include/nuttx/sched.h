@@ -42,6 +42,7 @@
 #include <nuttx/mm/shm.h>
 #include <nuttx/fs/fs.h>
 #include <nuttx/net/net.h>
+#include <nuttx/mm/vm_map.h>
 
 #include <arch/arch.h>
 
@@ -523,6 +524,12 @@ struct task_group_s
   /* Shared Memory **********************************************************/
 
   struct group_shm_s tg_shm;        /* Task shared memory logic             */
+#endif
+
+  /* Virtual memory mapping info ********************************************/
+
+#ifdef CONFIG_MM_VM_MAP
+  FAR struct vm_map_s tg_vm_map;    /* Task mmappings */
 #endif
 };
 
