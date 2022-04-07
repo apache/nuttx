@@ -159,6 +159,10 @@ int rammap(FAR struct file *filep, size_t length,
               ret = nread;
               goto errout_with_region;
             }
+          else
+            {
+              continue;
+            }
         }
 
       /* Check for end of file. */
