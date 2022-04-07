@@ -49,6 +49,12 @@
 #  endif
 #endif
 
+/* Provide a default section for the exeception handler. */
+
+#ifndef EXCEPTION_SECTION
+#  define EXCEPTION_SECTION .text
+#endif
+
 /****************************************************************************
  * Public Symbols
  ****************************************************************************/
@@ -62,7 +68,7 @@
  *
  ****************************************************************************/
 
-  .section .text
+  .section EXCEPTION_SECTION
   .global exception_common
   .align  8
 
