@@ -140,9 +140,8 @@
 
 /* ecall is dispatched like normal interrupts.  It occupies an IRQ number. */
 
-#define ESP32C3_IRQ_ECALL_M          0
-#define RISCV_NIRQ_INTERRUPTS        1  /* Number of RISC-V dispatched interrupts. */
-#define ESP32C3_IRQ_FIRSTPERIPH      1  /* First peripheral IRQ number */
+#define RISCV_NIRQ_INTERRUPTS       16  /* Number of RISC-V dispatched interrupts. */
+#define ESP32C3_IRQ_FIRSTPERIPH     16  /* First peripheral IRQ number */
 
 /* Peripheral IRQs */
 

@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <assert.h>
 #include <errno.h>
@@ -113,7 +114,7 @@ void up_irqinitialize(void)
 
   /* Attach the ECALL interrupt. */
 
-  irq_attach(ESP32C3_IRQ_ECALL_M, riscv_swint, NULL);
+  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
 
 #ifdef CONFIG_ESP32C3_GPIO_IRQ
   /* Initialize GPIO interrupt support */
@@ -355,10 +356,11 @@ void esp32c3_free_cpuint(uint8_t periphid)
 IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 {
   int irq;
-  uintptr_t *mepc = regs;
+  uint8_t cpuint = mcause & RISCV_IRQ_MASK;
+  bool is_irq = (RISCV_IRQ_BIT & mcause) != 0;
 
 #ifdef CONFIG_ESP32C3_EXCEPTION_ENABLE_CACHE
-  if (((RISCV_IRQ_BIT & mcause) == 0) &&
+  if (!is_irq &&
       (mcause != RISCV_IRQ_ECALLM))
     {
       if (!spi_flash_cache_enabled())
@@ -371,36 +373,36 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 
   irqinfo("INFO: mcause=%08" PRIXPTR "\n", mcause);
 
-  if ((RISCV_IRQ_BIT & mcause) != 0)
+  DEBUGASSERT(cpuint <= ESP32C3_CPUINT_MAX);
+
+  irqinfo("INFO: cpuint=%" PRIu8 "\n", cpuint);
+
+  if (is_irq)
     {
-      uint8_t cpuint = mcause & RISCV_IRQ_MASK;
-
-      DEBUGASSERT(cpuint <= ESP32C3_CPUINT_MAX);
-
-      irqinfo("INFO: cpuint=%" PRIu8 "\n", cpuint);
-
       /* Clear edge interrupts. */
 
       putreg32(1 << cpuint, INTERRUPT_CPU_INT_CLEAR_REG);
-
       irq = g_cpuint_map[cpuint] + ESP32C3_IRQ_FIRSTPERIPH;
-      regs = riscv_doirq(irq, regs);
-
-      /* Toggle the bit back to zero. */
-
-      putreg32(0, INTERRUPT_CPU_INT_CLEAR_REG);
     }
   else
     {
-      if (mcause == RISCV_IRQ_ECALLM)
-        {
-          *mepc += 4;
-          regs = riscv_doirq(ESP32C3_IRQ_ECALL_M, regs);
-        }
-      else
-        {
-          riscv_exception(mcause, regs);
-        }
+      /* It's exception */
+
+      irq = mcause;
+    }
+
+  if (mcause == RISCV_IRQ_ECALLM)
+    {
+      regs[REG_EPC] += 4;
+    }
+
+  regs = riscv_doirq(irq, regs);
+
+  /* Toggle the bit back to zero. */
+
+  if (is_irq)
+    {
+      putreg32(0, INTERRUPT_CPU_INT_CLEAR_REG);
     }
 
   return regs;
