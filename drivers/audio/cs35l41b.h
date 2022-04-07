@@ -1001,6 +1001,10 @@ struct cs35l41b_dev_s
   int                     mode;
   uint32_t                asp_gain;
   uint32_t                dsp_gain;
+
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+  bool                    dump_dsp_info;
+#endif
 };
 
 /****************************************************************************
@@ -1018,6 +1022,11 @@ int cs35l41b_write_block(FAR struct cs35l41b_dev_s *priv,
                         uint32_t waddr, uint8_t *data,
                         uint32_t len);
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv);
+void cs35l41b_dump_registers(FAR struct cs35l41b_dev_s *priv,
+                             unsigned long arg);
+int cs35l41b_debug_set_gain(FAR struct cs35l41b_dev_s *priv,
+                            unsigned long arg);
+int cs35l41b_debug_get_gain(FAR struct cs35l41b_dev_s *priv,
+                            unsigned long arg);
 #endif
 #endif

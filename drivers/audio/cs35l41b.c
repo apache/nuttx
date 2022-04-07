@@ -72,6 +72,14 @@
 #define IO_SET_DSP_GAIN             9
 #define IO_GET_DSP_GAIN             10
 
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+# define IO_DEBUG_SET_GAIN          11
+# define IO_DEBUG_GET_GAIN          12
+# define IO_DEBUG_DUMP_INFO         13
+# define IO_DEBUG_DUMP_ENABLE       14
+# define IO_DEBUG_DUMP_DISABLE      15
+#endif
+
 #define CALIBRATED_STATUS_OK        1
 #define CALIBRATED_STATUS_ERROR     2
 
@@ -534,6 +542,28 @@ static int cs35l41b_ioctl(FAR struct audio_lowerhalf_s *dev,
 
             break;
 
+#ifdef CONFIG_AUDIO_CS35L41B_DEBUG
+          case IO_DEBUG_SET_GAIN:
+            cs35l41b_debug_set_gain(priv, (unsigned int)audio_msg->u.ptr);
+            break;
+
+          case IO_DEBUG_GET_GAIN:
+            cs35l41b_debug_get_gain(priv, (unsigned int)audio_msg->u.ptr);
+            break;
+
+          case IO_DEBUG_DUMP_INFO:
+            cs35l41b_dump_registers(priv, (unsigned int)audio_msg->u.ptr);
+            break;
+
+          case IO_DEBUG_DUMP_ENABLE:
+            priv->dump_dsp_info = true;
+            break;
+
+          case IO_DEBUG_DUMP_DISABLE:
+            priv->dump_dsp_info = false;
+            break;
+#endif
+
           default:
             auderr("paramter invaild!\n");
             return ERROR;
@@ -890,7 +920,7 @@ static int cs35l41b_start(FAR struct audio_lowerhalf_s *dev)
     }
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-  cs35l41b_dump_registers(priv);
+  cs35l41b_dump_registers(priv, 0);
 #endif
 
   return OK;
@@ -918,7 +948,7 @@ static int cs35l41b_stop(FAR struct audio_lowerhalf_s *dev)
   audinfo("cs35l41b stop!\n");
 
 #ifdef CONFIG_AUDIO_CS35L41B_DEBUG
-  cs35l41b_dump_registers(priv);
+  cs35l41b_dump_registers(priv, 0);
 #endif
 
   if (cs35l41b_mute(priv, true) == ERROR)
