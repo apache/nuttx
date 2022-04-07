@@ -167,7 +167,7 @@ static void sensor_pollnotify(FAR struct sensor_upperhalf_s *upper,
 
           if (fd->revents != 0)
             {
-              sninfo("Report events: %02x\n", fd->revents);
+              sninfo("Report events: %08" PRIx32 "\n", fd->revents);
 
               nxsem_get_value(fd->sem, &semcount);
               if (semcount < 1)
