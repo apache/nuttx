@@ -339,7 +339,7 @@ void esp32c3_free_cpuint(uint8_t periphid)
 }
 
 /****************************************************************************
- * Name: esp32c3_dispatch_irq
+ * Name: riscv_dispatch_irq
  *
  * Description:
  *   Process interrupt and its callback function.
@@ -353,7 +353,7 @@ void esp32c3_free_cpuint(uint8_t periphid)
  *
  ****************************************************************************/
 
-IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
+IRAM_ATTR uintptr_t *riscv_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
 {
   int irq;
   uint8_t cpuint = mcause & RISCV_IRQ_MASK;
