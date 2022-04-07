@@ -632,7 +632,7 @@ static int rpmsg_socket_getsockname(FAR struct socket *psock,
   ret = rpmsg_socket_getaddr(psock->s_conn, addr, addrlen);
   if (ret >= 0)
     {
-      strncpy(((struct sockaddr_rpmsg *)addr)->rp_cpu,
+      strlcpy(((struct sockaddr_rpmsg *)addr)->rp_cpu,
               CONFIG_RPTUN_LOCAL_CPUNAME, RPMSG_SOCKET_CPU_SIZE);
     }
 
