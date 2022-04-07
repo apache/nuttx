@@ -95,7 +95,11 @@ exception_common:
   /* Offset to hartid */
 
   mv         s0, a0               /* save cause */
+#ifdef CONFIG_SMP
   jal        x1, riscv_mhartid    /* get hartid */
+#else
+  li         a0, 0
+#endif
 
   /* Switch to interrupt stack */
 
