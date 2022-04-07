@@ -28,6 +28,7 @@
 #include <arch/irq.h>
 #include <arch/mode.h>
 
+#include "chip.h"
 #include "riscv_macros.S"
 
 /****************************************************************************
