@@ -1872,7 +1872,7 @@ static FAR struct tm *timesub(FAR const time_t *timep,
   y = EPOCH_YEAR;
   tdays = *timep / SECSPERDAY;
   rem = *timep - tdays * SECSPERDAY;
-  while (tdays < 0 || tdays >= g_year_lengths[isleap(y)])
+  while (tdays >= g_year_lengths[isleap(y)])
     {
       int newy;
       time_t tdelta;
