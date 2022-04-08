@@ -53,15 +53,7 @@ void *rv32m1_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   uint32_t vec = vector & 0x1f;
   int irq = (vector >> RV_IRQ_MASK) + vec;
-  uintptr_t *mepc = regs;
   int irqofs = 0;
-
-  /* NOTE: In case of ecall, we need to adjust mepc in the context */
-
-  if (RISCV_IRQ_ECALLM == irq)
-    {
-      *mepc += 4;
-    }
 
   if (RV32M1_IRQ_INTMUX0 <= irq)
     {

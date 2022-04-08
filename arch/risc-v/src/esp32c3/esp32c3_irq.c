@@ -391,11 +391,6 @@ IRAM_ATTR uintptr_t *esp32c3_dispatch_irq(uintptr_t mcause, uintptr_t *regs)
       irq = mcause;
     }
 
-  if (mcause == RISCV_IRQ_ECALLM)
-    {
-      regs[REG_EPC] += 4;
-    }
-
   regs = riscv_doirq(irq, regs);
 
   /* Toggle the bit back to zero. */

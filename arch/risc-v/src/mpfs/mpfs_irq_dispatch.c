@@ -50,7 +50,6 @@
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   int irq = (vector & 0x3f);
-  uintptr_t *epc = regs;
 
   if ((vector & RISCV_IRQ_BIT) != 0)
     {
@@ -68,13 +67,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       /* Add the value to nuttx irq which is offset to the ext */
 
       irq = MPFS_IRQ_EXT_START + ext;
-    }
-
-  /* NOTE: In case of ecall, we need to adjust epc in the context */
-
-  if (irq == RISCV_IRQ_ECALLM || irq == RISCV_IRQ_ECALLU)
-    {
-      *epc += 4;
     }
 
   /* Acknowledge the interrupt */

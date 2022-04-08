@@ -61,6 +61,14 @@ uintptr_t *riscv_doirq(int irq, uintptr_t *regs)
 #ifdef CONFIG_SUPPRESS_INTERRUPTS
   PANIC();
 #else
+
+  /* NOTE: In case of ecall, we need to adjust mepc in the context */
+
+  if (irq >= RISCV_IRQ_ECALLU && irq <= RISCV_IRQ_ECALLM)
+    {
+      regs[REG_EPC] += 4;
+    }
+
   /* Current regs non-zero indicates that we are processing an interrupt;
    * CURRENT_REGS is also used to manage interrupt level context switches.
    *
