@@ -328,7 +328,7 @@ static int do_glob(FAR char *buf, size_t pos, int type, FAR char *pat,
           continue;
         }
 
-      memcpy(buf + pos, de->d_name, l + 1);
+      strlcpy(buf + pos, de->d_name, l + 1);
 
       if (p2)
         {
