@@ -23,6 +23,7 @@
  ****************************************************************************/
 
 #include <nuttx/config.h>
+#include <nuttx/mm/map.h>
 
 #include <sys/types.h>
 #include <sys/mman.h>
@@ -158,7 +159,32 @@ errout_with_lock:
   nxmutex_unlock(&g_rammaps.lock);
   return ret;
 #else
-  return OK;
+
+  FAR struct tcb_s *tcb = nxsched_self();
+  FAR struct task_group_s *group = tcb->group;
+  FAR struct mm_map_entry_s *entry = NULL;
+  int ret = OK;
+
+  /* Iterate through all the mappings and call the underlying
+   * unmap for every mapping where "start" lies
+   * break loop on any errors.
+   *
+   * Get exclusive access to mm_map for this
+   */
+
+  ret = mm_map_lock();
+  if (ret == OK)
+    {
+      while (ret == OK && (entry = mm_map_find(start, length)))
+        {
+          DEBUGASSERT(entry->munmap);
+          ret = entry->munmap(group, entry, start, length);
+        }
+
+      mm_map_unlock();
+    }
+
+  return ret;
 #endif /* CONFIG_FS_RAMMAP */
 }
 

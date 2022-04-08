@@ -42,6 +42,46 @@
  ****************************************************************************/
 
 /****************************************************************************
+ * Name: unmap_anonymous
+ ****************************************************************************/
+
+static int unmap_anonymous(FAR struct task_group_s *group,
+                           FAR struct mm_map_entry_s *entry,
+                           FAR void *start,
+                           size_t length)
+{
+  int ret;
+
+  /* De-allocate memory.
+   * NB: This is incomplete anounymous mapping implementation
+   * see file_mmap_ below
+   */
+
+  if (start == entry->vaddr && length == entry->length)
+    {
+      /* entry->priv marks allocation from kernel heap */
+
+      if (entry->priv.i)
+        {
+          kmm_free(start);
+        }
+      else
+        {
+          kumm_free(start);
+        }
+
+      ret = mm_map_remove(group, &entry);
+    }
+  else
+    {
+      ret = -EINVAL;
+      ferr("ERROR: Unknown map type\n");
+    }
+
+  return ret;
+}
+
+/****************************************************************************
  * Name: file_mmap_
  ****************************************************************************/
 
@@ -50,6 +90,23 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
                       off_t offset, bool kernel, FAR void **mapped)
 {
   int ret;
+
+  /* Pass the information about the mapping in mm_map_entry_s structure.
+   * The driver may alter the structure, and if it supports unmap, it
+   * will also add it to the kernel maintained list of mappings.
+   */
+
+  struct mm_map_entry_s entry =
+    {
+     NULL,     /* sq_entry_t */
+     start,
+     length,
+     offset,
+     prot,
+     flags,
+     { NULL }, /* priv.p */
+     NULL      /* munmap */
+    };
 
   /* Since only a tiny subset of mmap() functionality, we have to verify many
    * things.
@@ -120,6 +177,11 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
           return -ENOMEM;
         }
 
+      entry.vaddr = *mapped;
+      entry.munmap = unmap_anonymous;
+      entry.priv.i = kernel;
+      mm_map_add(&entry);
+
       return OK;
     }
 
@@ -140,24 +202,10 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
 
   if (filep->f_inode && filep->f_inode->u.i_ops->mmap != NULL)
     {
-      /* Pass the information about the mapping in mm_map_entry_s structure.
-       * The driver may alter the structure, and if it supports unmap, it
-       * will also add it to the kernel maintained list of mappings.
-       */
-
-      struct mm_map_entry_s map =
-        {
-         NULL, /* sq_entry_t */
-         start, length, offset,
-         prot, flags,
-         NULL, /* priv */
-         NULL  /* munmap */
-        };
-
-      ret = filep->f_inode->u.i_ops->mmap(filep, &map);
+      ret = filep->f_inode->u.i_ops->mmap(filep, &entry);
       if (ret == OK)
         {
-          *mapped = (void *)map.vaddr;
+          *mapped = (void *)entry.vaddr;
         }
     }
   else
