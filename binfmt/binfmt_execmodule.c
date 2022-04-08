@@ -157,8 +157,7 @@ int exec_module(FAR const struct binary_s *binp,
   if (ret < 0)
     {
       berr("ERROR: up_addrenv_select() failed: %d\n", ret);
-      binfmt_freeargv(argv);
-      goto errout_with_tcb;
+      goto errout_with_args;
     }
 
   binfo("Initialize the user heap (heapsize=%d)\n", binp->addrenv.heapsize);
@@ -182,12 +181,13 @@ int exec_module(FAR const struct binary_s *binp,
                         binp->stacksize, binp->entrypt, argv);
     }
 
-  binfmt_freeargv(argv);
   if (ret < 0)
     {
       berr("nxtask_init() failed: %d\n", ret);
       goto errout_with_addrenv;
     }
+
+  binfmt_freeargv(argv);
 
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_ARCH_KERNEL_STACK)
   /* Allocate the kernel stack */
@@ -282,6 +282,8 @@ errout_with_addrenv:
 #if defined(CONFIG_ARCH_ADDRENV) && defined(CONFIG_BUILD_KERNEL)
   up_addrenv_restore(&oldenv);
 #endif
+errout_with_args:
+  binfmt_freeargv(argv);
 errout_with_tcb:
   kmm_free(tcb);
   return ret;
