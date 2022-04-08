@@ -84,9 +84,9 @@ void up_irqinitialize(void)
 
   CURRENT_REGS = NULL;
 
-  /* Attach the ecall interrupt handler */
+  /* Attach the common interrupt handler */
 
-  irq_attach(RISCV_IRQ_ECALLM, riscv_swint, NULL);
+  riscv_exception_attach();
 
 #ifdef CONFIG_SMP
   /* Clear MSOFT for CPU0 */

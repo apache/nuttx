@@ -52,17 +52,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
   int irq = (vector & 0x3f);
   uintptr_t *epc = regs;
 
-  /* Check if fault happened  */
-
-  if (vector < RISCV_IRQ_ECALLU ||
-      vector == RISCV_IRQ_INSTRUCTIONPF ||
-      vector == RISCV_IRQ_LOADPF ||
-      vector == RISCV_IRQ_STOREPF ||
-      vector == RISCV_IRQ_RESERVED)
-    {
-      riscv_exception(irq, regs, NULL);
-    }
-
   if ((vector & RISCV_IRQ_BIT) != 0)
     {
        irq += MPFS_IRQ_ASYNC;

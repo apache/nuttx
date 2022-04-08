@@ -58,11 +58,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
   int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
   uintptr_t *mepc = regs;
 
-  if (vector < RISCV_IRQ_ECALLM)
-    {
-      riscv_exception(irq, regs, NULL);
-    }
-
   /* Firstly, check if the irq is machine external interrupt */
 
   if (RISCV_IRQ_MEXT == irq)
