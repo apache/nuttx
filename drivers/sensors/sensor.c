@@ -599,8 +599,9 @@ static ssize_t sensor_write(FAR struct file *filep, FAR const char *buffer,
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct sensor_upperhalf_s *upper = inode->i_private;
+  FAR struct sensor_lowerhalf_s *lower = upper->lower;
 
-  return sensor_push_event(upper, buffer, buflen);
+  return lower->push_event(lower->priv, buffer, buflen);
 }
 
 static int sensor_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
@@ -967,8 +968,6 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
 
   /* Initialize the upper-half data structure */
 
-  upper->lower = lower;
-
   list_initialize(&upper->userlist);
   upper->state.esize = esize;
   upper->state.min_interval = ULONG_MAX;
@@ -1007,6 +1006,16 @@ int sensor_custom_register(FAR struct sensor_lowerhalf_s *lower,
       goto drv_err;
     }
 
+#ifdef CONFIG_SENSORS_RPMSG
+  lower = sensor_rpmsg_register(lower, path);
+  if (lower == NULL)
+    {
+      ret = -EIO;
+      goto drv_err;
+    }
+#endif
+
+  upper->lower = lower;
   return ret;
 
 drv_err:
@@ -1068,6 +1077,10 @@ void sensor_custom_unregister(FAR struct sensor_lowerhalf_s *lower,
 
   sninfo("UnRegistering %s\n", path);
   unregister_driver(path);
+
+#ifdef CONFIG_SENSORS_RPMSG
+  sensor_rpmsg_unregister(lower);
+#endif
 
   nxsem_destroy(&upper->exclsem);
   if (circbuf_is_init(&upper->buffer))
