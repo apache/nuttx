@@ -69,7 +69,7 @@ static const char *g_reasons_str[RISCV_MAX_EXCEPTION + 1] =
  *
  ****************************************************************************/
 
-void riscv_exception(uintptr_t mcause, uintptr_t *regs)
+int riscv_exception(int mcause, void *regs, void *args)
 {
   uintptr_t cause = mcause & RISCV_IRQ_MASK;
 
@@ -87,5 +87,6 @@ void riscv_exception(uintptr_t mcause, uintptr_t *regs)
   up_irq_save();
   CURRENT_REGS = regs;
   PANIC();
-}
 
+  return 0;
+}
