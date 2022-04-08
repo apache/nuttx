@@ -29,6 +29,7 @@
 
 #include <nuttx/irq.h>
 #include <nuttx/arch.h>
+#include <sys/types.h>
 
 #include "riscv_internal.h"
 
@@ -59,7 +60,7 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       vector == RISCV_IRQ_STOREPF ||
       vector == RISCV_IRQ_RESERVED)
     {
-      riscv_exception(irq, regs);
+      riscv_exception(irq, regs, NULL);
     }
 
   if ((vector & RISCV_IRQ_BIT) != 0)
