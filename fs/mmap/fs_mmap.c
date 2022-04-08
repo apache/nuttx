@@ -52,6 +52,10 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   FAR void *addr;
   int ret;
 
+#ifdef CONFIG_MM_VM_MAP
+  union vm_map_id_u map_id;
+#endif
+
   /* Since only a tiny subset of mmap() functionality, we have to verify many
    * things.
    */
@@ -121,6 +125,11 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
           return -ENOMEM;
         }
 
+#ifdef CONFIG_MM_VM_MAP
+      map_id.val = 0;
+      vm_map_add(VM_MAP_ANONYMOUS, map_id, *mapped, length);
+#endif
+
       return OK;
     }
 
@@ -163,6 +172,12 @@ static int file_mmap_(FAR struct file *filep, FAR void *start,
   /* Return the offset address */
 
   *mapped = (FAR void *)(((FAR uint8_t *)addr) + offset);
+
+#ifdef CONFIG_MM_VM_MAP
+      map_id.inode = filep->f_inode;
+      vm_map_add(VM_MAP_FILE, map_id, *mapped, length);
+#endif
+
   return OK;
 }
 

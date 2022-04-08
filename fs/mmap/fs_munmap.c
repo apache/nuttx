@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <sys/mman.h>
+#include <sys/ioctl.h>
 
 #include <stdint.h>
 #include <errno.h>
@@ -158,6 +159,57 @@ errout_with_semaphore:
   nxsem_post(&g_rammaps.exclsem);
   return ret;
 #else
+
+#ifdef CONFIG_MM_VM_MAP
+  const FAR struct vm_map_entry_s *map;
+  struct file tmp_file;
+
+  /* Find the first mapping containing the start address */
+
+  map = vm_map_find(start);
+
+  /* If this is a file-backed mapping, call ioctl to do unmap */
+
+  if (map && map->type == VM_MAP_FILE && map->id.inode)
+    {
+      /* Create a temporary file struct and make ioctl */
+
+      tmp_file.f_oflags = 0;
+      tmp_file.f_pos    = 0;
+      tmp_file.f_inode  = map->id.inode;
+      tmp_file.f_priv   = NULL;
+      file_ioctl(&tmp_file, FIOC_MUNMAP, map);
+
+      return vm_map_rm(start);
+    }
+
+  /* If this is an anonymous mapping, de-allocate memory
+   * NB: This is incomplete anounymous mapping implementation
+   * refer to fs_mmap.c
+   */
+
+  if (map && map->type == VM_MAP_ANONYMOUS)
+    {
+      if (map->vaddr == start && map->length == length)
+        {
+          if (kernel)
+            {
+              kmm_free(start);
+            }
+          else
+            {
+              kumm_free(start);
+            }
+
+          return vm_map_rm(start);
+        }
+      else
+        {
+          return EINVAL;
+        }
+    }
+#endif
+
   return OK;
 #endif /* CONFIG_FS_RAMMAP */
 }
