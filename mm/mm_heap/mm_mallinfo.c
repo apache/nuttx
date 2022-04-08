@@ -121,10 +121,7 @@ int mm_mallinfo(FAR struct mm_heap_s *heap, FAR struct mallinfo *info)
   mm_foreach(heap, mallinfo_handler, info);
 
   info->arena = heap->mm_heapsize;
-
-  /* Account for the tail node */
-
-  info->uordblks += region * SIZEOF_MM_STARTENDNODE;
+  info->uordblks += region * SIZEOF_MM_ALLOCNODE; /* account for the tail node */
 
   DEBUGASSERT(info->uordblks + info->fordblks == heap->mm_heapsize);
 
