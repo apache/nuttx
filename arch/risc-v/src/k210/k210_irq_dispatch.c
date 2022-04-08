@@ -53,7 +53,6 @@
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   int irq = (vector >> RV_IRQ_MASK) | (vector & 0xf);
-  uintptr_t *mepc = regs;
 
   /* Firstly, check if the irq is machine external interrupt */
 
@@ -64,13 +63,6 @@ void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
       /* Add the value to nuttx irq which is offset to the mext */
 
       irq += val;
-    }
-
-  /* NOTE: In case of ecall, we need to adjust mepc in the context */
-
-  if (RISCV_IRQ_ECALLM == irq || RISCV_IRQ_ECALLU == irq)
-    {
-      *mepc += 4;
     }
 
   /* Acknowledge the interrupt */
