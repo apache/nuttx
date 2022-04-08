@@ -44,20 +44,12 @@
 void *riscv_dispatch_irq(uintptr_t vector, uintptr_t *regs)
 {
   int irq  = vector & 0x3ff; /* E24 [9:0] */
-  uintptr_t *mepc = regs;
 
   /* If current is interrupt */
 
   if ((vector & RISCV_IRQ_BIT) != 0)
     {
       irq += RISCV_IRQ_ASYNC;
-    }
-
-  /* NOTE: In case of ecall, we need to adjust mepc in the context */
-
-  if (RISCV_IRQ_ECALLM == irq)
-    {
-      *mepc += 4;
     }
 
   /* Acknowledge the interrupt */
