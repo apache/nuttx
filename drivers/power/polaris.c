@@ -50,40 +50,18 @@
 #include "polaris_nvm.c"
 #include "polaris_reg.h"
 
+/****************************************************************************
+ * Pre-processor Definitions
+ ****************************************************************************/
+
 #define PAGE_SIZE 256
 #define ON        (bool)0
 #define OFF       (bool)1
 #define NO_DEBUG
 
 /****************************************************************************
- * Private Functions
+ * Private
  ****************************************************************************/
-
-static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
-                          FAR int *status);
-static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
-                           FAR int *health);
-static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
-                           FAR bool *status);
-static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
-                            int value);
-static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
-                            int value);
-static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
-                                  int value);
-static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
-                            uintptr_t param);
-static int stwlc38_chipid(FAR struct battery_charger_dev_s *dev,
-                           unsigned int *value);
-static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
-                                int *value);
-
-/* Charger rx interrupt functions */
-
-static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
-                                     ioe_pinset_t pinset, FAR void *arg);
-static void stwlc38_worker(FAR void *arg);
-static void detect_worker(FAR void *arg);
 
 struct stwlc38_dev_s
 {
@@ -103,7 +81,62 @@ struct stwlc38_dev_s
   int batt_state_flag;
   int detect_work_exit;
   bool tx_is_pp;                            /* XM tx or not */
+  bool rx_vout_off_flag;
+  int rx_vout_off_count;
 };
+
+/****************************************************************************
+ * Private Function Prototypes
+ ****************************************************************************/
+
+static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
+                          FAR int *status);
+static int stwlc38_health(FAR struct battery_charger_dev_s *dev,
+                           FAR int *health);
+static int stwlc38_online(FAR struct battery_charger_dev_s *dev,
+                           FAR bool *status);
+static int stwlc38_voltage(FAR struct battery_charger_dev_s *dev,
+                            int value);
+static int stwlc38_current(FAR struct battery_charger_dev_s *dev,
+                            int value);
+static int stwlc38_input_current(FAR struct battery_charger_dev_s *dev,
+                                  int value);
+static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
+                            uintptr_t param);
+static int stwlc38_chipid(FAR struct battery_charger_dev_s *dev,
+                           unsigned int *value);
+static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
+                          FAR int *status);
+static int stwlc38_get_voltage(FAR struct battery_charger_dev_s *dev,
+                                int *value);
+
+/* Charger rx interrupt functions */
+
+static int stwlc38_interrupt_handler(FAR struct ioexpander_dev_s *dev,
+                                ioe_pinset_t pinset, FAR void *arg);
+static void stwlc38_worker(FAR void *arg);
+static void detect_worker(FAR void *arg);
+
+/****************************************************************************
+ * Private Data
+ ****************************************************************************/
+
+static const struct battery_charger_operations_s g_stwlc38ops =
+{
+  stwlc38_state,
+  stwlc38_health,
+  stwlc38_online,
+  stwlc38_voltage,
+  stwlc38_current,
+  stwlc38_input_current,
+  stwlc38_operate,
+  stwlc38_chipid,
+  stwlc38_get_voltage,
+};
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
 
 static int wlc_i2c_read(FAR struct stwlc38_dev_s *priv, uint8_t *cmd,
                         int cmd_length, uint8_t *read_data, int read_count)
@@ -675,21 +708,22 @@ static void detect_worker(FAR void *arg)
     {
       if (priv->batt_state_flag != charger_is_exit)
         {
-          syslog(LOG_INFO,"rx wireless detect pin:%d\n",charger_is_exit);
+          syslog(LOG_INFO, "rx wireless detect pin:%d\n", charger_is_exit);
           priv->batt_state_flag = charger_is_exit;
           battery_charger_changed(&priv->dev, BATTERY_STATE_CHANGED);
         }
 
       if (!priv->charging && !charger_is_exit)
         {
-          syslog(LOG_INFO,"charge_manager exit work cancel:%d\n",charger_is_exit);
+          syslog(LOG_INFO, "charge_manager exit work cancel:%d\n",
+                 charger_is_exit);
           priv->detect_work_exit = DETECT_WORK_NO_EXIST;
           work_cancel(LPWORK, &priv->detect_work);
         }
       else
         {
           work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
-                     CHARGER_DETECT_WORK_TIME);
+                     CHARGER_DETECT_WORK_TIME / USEC_PER_TICK);
         }
     }
   else
@@ -773,7 +807,6 @@ static void stwlc38_worker(FAR void *arg)
   int ret;
 
   DEBUGASSERT(priv != NULL);
-
   ret = IOEXP_SETOPTION(priv->io_dev, priv->lower->int_pin,
                   IOEXPANDER_OPTION_INTCFG, (void *)IOEXPANDER_VAL_FALLING);
   if (ret < 0)
@@ -818,7 +851,7 @@ static void stwlc38_worker(FAR void *arg)
   if (rx_int_state.wlc_rx_int_output_on &&
               priv->detect_work_exit == DETECT_WORK_NO_EXIST)
     {
-      syslog(LOG_INFO,"rx wireless charger inster\n");
+      syslog(LOG_INFO, "rx wireless charger inster\n");
       priv->charging = true; /* Mark charge manager will be running */
       priv->detect_work_exit = DETECT_WORK_EXIST;
       work_queue(LPWORK, &priv->detect_work, detect_worker, priv, 0);
@@ -827,23 +860,9 @@ static void stwlc38_worker(FAR void *arg)
   return;
 }
 
-static const struct battery_charger_operations_s g_stwlc38ops =
-{
-  stwlc38_state,
-  stwlc38_health,
-  stwlc38_online,
-  stwlc38_voltage,
-  stwlc38_current,
-  stwlc38_input_current,
-  stwlc38_operate,
-  stwlc38_chipid,
-  stwlc38_get_voltage,
-};
-
-static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
+static int stwlc38_get_det_state(FAR struct stwlc38_dev_s *priv,
                           FAR int *status)
 {
-  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
   bool wpc_det = 0;
   int  ret;
 
@@ -865,6 +884,46 @@ static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
   *status = (int)wpc_det;
 
   if (!*status) priv->tx_is_pp = false;
+
+  return OK;
+}
+
+static int stwlc38_state(FAR struct battery_charger_dev_s *dev,
+                          FAR int *status)
+{
+  FAR struct stwlc38_dev_s *priv = (FAR struct stwlc38_dev_s *)dev;
+  int charge_det_state;
+  int ret;
+
+  if (priv->rx_vout_off_flag)
+    {
+      ret = stwlc38_get_det_state(priv, &charge_det_state);
+      if (ret < 0)
+        {
+          baterr("Error: stwlc38 get det state faild\n");
+        }
+
+      if (charge_det_state)
+        {
+          *status = true;
+          priv->rx_vout_off_count = 0;
+        }
+      else
+        {
+          priv->rx_vout_off_count++;
+          *status = true;
+          if (priv->rx_vout_off_count == 40)
+            {
+              *status = false;
+              priv->rx_vout_off_flag = false;
+              priv->rx_vout_off_count = 0;
+            }
+        }
+    }
+  else
+    {
+      stwlc38_get_det_state(priv, status);
+    }
 
   return OK;
 }
@@ -1018,6 +1077,10 @@ static int stwlc38_operate(FAR struct battery_charger_dev_s *dev,
         priv->charging = false;
         break;
 
+      case BATIO_OPRTN_EN_TERM:
+        priv->rx_vout_off_flag = msg->u8[0];
+        break;
+
       default:
         batinfo("Unsupported opt: 0x%X\n", op);
         ret = -EINVAL;
@@ -1137,6 +1200,8 @@ FAR struct battery_charger_dev_s *
       priv->batt_state_flag = BATT_CHARGING_STAT_INIT;
       priv->detect_work_exit = DETECT_WORK_EXIST;
       priv->tx_is_pp = false;
+      priv->rx_vout_off_flag = false;
+      priv->rx_vout_off_count = 0;
     }
   else
     {
@@ -1178,7 +1243,7 @@ FAR struct battery_charger_dev_s *
     }
 
   work_queue(LPWORK, &priv->detect_work, detect_worker, priv,
-             DETECT_WORK_INIT_TIME);
+             DETECT_WORK_INIT_TIME / USEC_PER_TICK);
 
   return (FAR struct battery_charger_dev_s *)priv;
 }
