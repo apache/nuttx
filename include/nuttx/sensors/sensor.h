@@ -960,6 +960,14 @@ struct sensor_reginfo_s
 };
 #endif
 
+/* This structure describes the context custom ioctl for device */
+
+struct sensor_ioctl_s
+{
+  size_t len;                  /* The length of argument of ioctl */
+  char data[0];                /* The argument buf of ioctl */
+};
+
 /****************************************************************************
  * Public Function Prototypes
  ****************************************************************************/
