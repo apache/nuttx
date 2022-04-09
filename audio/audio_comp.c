@@ -969,10 +969,13 @@ FAR struct audio_lowerhalf_s *audio_comp_initialize(FAR const char *name,
     }
 
   va_end(ap);
-  ret = audio_register(name, &priv->export);
-  if (ret < 0)
+  if (name != NULL)
     {
-      goto free_lower;
+      ret = audio_register(name, &priv->export);
+      if (ret < 0)
+        {
+          goto free_lower;
+        }
     }
 
   return &priv->export;
