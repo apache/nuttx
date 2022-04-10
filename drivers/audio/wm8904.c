@@ -1228,7 +1228,7 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
               {
                 /* Scale the balance setting to the range {0..(b16ONE - 1)} */
 		priv->balance = (balance * (b16ONE - 1)) / 1000;
-                wm8994_setvolume(priv, priv->volume, priv->mute);
+                wm8904_setvolume(priv, priv->volume, priv->mute);
               }
             else
               {
