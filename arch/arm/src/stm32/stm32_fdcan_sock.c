@@ -3293,3 +3293,28 @@ int stm32_fdcansockinitialize(int port)
 errout:
   return ret;
 }
+
+/****************************************************************************
+ * Name: arm_netinitialize
+ *
+ * Description:
+ *   Initialize the CAN device interfaces.  If there is more than one device
+ *   interface in the chip, then board-specific logic will have to provide
+ *   this function to determine which, if any, CAN interfaces should be
+ *   initialized.
+ *
+ ****************************************************************************/
+
+#if !defined(CONFIG_NETDEV_LATEINIT)
+void arm_netinitialize(void)
+{
+#ifdef CONFIG_STM32_CAN1
+  stm32_fdcansockinitialize(0);
+#endif
+
+#ifdef CONFIG_STM32_CAN2
+  stm32_fdcansockinitialize(1);
+#endif
+}
+#endif
+
