@@ -490,9 +490,12 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
     }
   else
     {
-      /* Note: b16ONE - balance goes from 0 to 0.5. Hence need to multiply volume by 2! */
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
 
-      leftlevel = wm8904_scalevolume(2 * volume, b16ONE - (b16_t)priv->balance);
+      leftlevel = wm8904_scalevolume(2 * volume,
+                                     b16ONE - (b16_t)priv->balance);
     }
 
   /* Calculate the right channel volume level {0..1000} */
@@ -507,9 +510,12 @@ static void wm8904_setvolume(FAR struct wm8904_dev_s *priv, uint16_t volume,
     }
   else
     {
-      /* Note: b16ONE - balance goes from 0 to 0.5. Hence need to multiply volume by 2! */
+      /* Note: b16ONE - balance goes from 0 to 0.5.
+       * Hence need to multiply volume by 2!
+       */
 
-      rightlevel = wm8904_scalevolume(2 * volume, (b16_t)priv->balance);
+      rightlevel = wm8904_scalevolume(2 * volume,
+                                      (b16_t)priv->balance);
     }
 #else
   leftlevel  = priv->volume;
@@ -1227,7 +1233,8 @@ static int wm8904_configure(FAR struct audio_lowerhalf_s *dev,
             if (balance >= 0 && balance <= 1000)
               {
                 /* Scale the balance setting to the range {0..(b16ONE - 1)} */
-		priv->balance = (balance * (b16ONE - 1)) / 1000;
+
+                priv->balance = (balance * (b16ONE - 1)) / 1000;
                 wm8904_setvolume(priv, priv->volume, priv->mute);
               }
             else
