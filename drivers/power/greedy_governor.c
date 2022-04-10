@@ -40,7 +40,6 @@
 
 #include <nuttx/irq.h>
 
-#include "greedy_governor.h"
 #include "pm.h"
 
 /****************************************************************************
