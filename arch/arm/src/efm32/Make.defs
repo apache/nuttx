@@ -58,6 +58,7 @@ endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
+CMN_CSRCS += arm_fpuconfig.c
 endif
 
 ifeq ($(CONFIG_ARMV7M_ITMSYSLOG),y)

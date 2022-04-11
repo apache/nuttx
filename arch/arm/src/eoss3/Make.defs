@@ -56,6 +56,10 @@ ifeq ($(CONFIG_STACK_COLORATION),y)
 CMN_CSRCS += arm_checkstack.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_CSRCS += arm_fpuconfig.c
+endif
+
 CHIP_CSRCS  = eoss3_start.c eoss3_gpio.c eoss3_lowputc.c eoss3_clockconfig.c
 CHIP_CSRCS += eoss3_irq.c
 CHIP_CSRCS += eoss3_serial.c
