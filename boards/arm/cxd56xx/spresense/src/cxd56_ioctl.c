@@ -34,6 +34,7 @@
 #include <arch/chip/chip.h>
 
 #include "cxd56_usbdev.h"
+#include "arch/board/cxd56_sdcard.h"
 
 #ifdef CONFIG_BOARDCTL_IOCTL
 
@@ -88,6 +89,22 @@ int board_ioctl(unsigned int cmd, uintptr_t arg)
       case BOARDIOC_USBDEV_SETNOTIFYSIG:
         {
           ret = cxd56_usbdev_setsigno((int)arg);
+        }
+        break;
+#endif
+
+#ifdef CONFIG_CXD56_SDIO
+      /* CMD:           BOARDIOC_SDCARD_SETNOTIFYCB
+       * DESCRIPTION:   Set a callback function pointer to SDCard driver
+       *                to notify when card status is changed.
+       * ARG:           Callback function.
+       * CONFIGURATION: CONFIG_BOARDCTL & CONFIG_CXD56_SDIO
+       * DEPENDENCIES:  Board logic must provide board_app_initialization
+       */
+
+      case BOARDIOC_SDCARD_SETNOTIFYCB:
+        {
+          ret = board_sdcard_set_state_cb(arg);
         }
         break;
 #endif
