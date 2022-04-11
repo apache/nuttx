@@ -100,30 +100,17 @@ __start:
   csrr a0, mhartid
   beqz a0, .skip_e51
 
-  /* Clear sscratch if u54 */
-
-  csrw sscratch, zero
-  csrw scause, zero
-  csrw sepc, zero
-
-  /* Disable all interrupts in sie */
-
-  csrw sie, zero
-  csrw sip, zero
-
-  /* Init delegation registers, mideleg, medeleg, if a U54
-   * These are not initialised by the hardware and come up in a random state
-   */
+  /* Delegation registers must be explicitly reset */
 
   csrw mideleg, 0
   csrw medeleg, 0
 
-  /* Disable MMU if not done already */
+  /* Remove MMU mappings (if any) */
 
   csrw satp, zero
   fence
 
-  /* invalid all MMU TLB Entry */
+  /* Flush TLB (does not make a difference really) */
 
   sfence.vma x0, x0
 
@@ -188,10 +175,10 @@ __start:
 
 .continue_boot:
 
-    /* Clear PMP */
+  /* Clear PMP */
 
-    csrw pmpcfg0, zero
-    csrw pmpcfg2, zero
+  csrw pmpcfg0, zero
+  csrw pmpcfg2, zero
 #endif
 
   /* Set stack pointer to the idle thread stack */
