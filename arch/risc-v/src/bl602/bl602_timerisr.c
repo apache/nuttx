@@ -24,6 +24,7 @@
 
 #include <nuttx/config.h>
 
+#include <assert.h>
 #include <stdint.h>
 #include <time.h>
 #include <debug.h>
@@ -31,94 +32,22 @@
 #include <nuttx/arch.h>
 #include <nuttx/clock.h>
 #include <nuttx/spinlock.h>
+#include <nuttx/timers/arch_alarm.h>
 #include <arch/board/board.h>
 #include "hardware/bl602_clic.h"
 #include "riscv_internal.h"
+#include "riscv_mtimer.h"
 #include "chip.h"
 
 /****************************************************************************
  * Pre-processor Definitions
  ****************************************************************************/
 
-/* Private definetions: mtimer frequency */
-#define TICK_COUNT (10 * 1000 * 1000 / TICK_PER_SEC)
+#define MTIMER_FREQ 10000000
 
 /****************************************************************************
  * Private Data
  ****************************************************************************/
-
-static bool g_b_tick_started = false;
-
-/****************************************************************************
- * Private Functions
- ****************************************************************************/
-
-/* bl602 mmio registers are a bit odd, by default they are byte-wide
- * registers that are on 32-bit word boundaries. So a "32-bit" registers
- * is actually broken into four bytes spanning a total address space of
- * 16 bytes.
- */
-
-static inline uint64_t bl602_clint_time_read(void)
-{
-  uint64_t r = getreg32(BL602_CLIC_MTIME + 4);
-  r <<= 32;
-  r |= getreg32(BL602_CLIC_MTIME);
-
-  return r;
-}
-
-static inline uint64_t bl602_clint_time_cmp_read(void)
-{
-  return getreg64(BL602_CLIC_MTIMECMP);
-}
-
-static inline void bl602_clint_time_cmp_write(uint64_t v)
-{
-  putreg64(v, BL602_CLIC_MTIMECMP);
-}
-
-/****************************************************************************
- * Name:  bl602_reload_mtimecmp
- ****************************************************************************/
-
-static void bl602_reload_mtimecmp(void)
-{
-  irqstate_t flags = spin_lock_irqsave(NULL);
-
-  uint64_t current;
-  uint64_t next;
-
-  if (!g_b_tick_started)
-    {
-      g_b_tick_started = true;
-      current          = bl602_clint_time_read();
-    }
-  else
-    {
-      current = bl602_clint_time_cmp_read();
-    }
-
-  next = current + TICK_COUNT;
-
-  bl602_clint_time_cmp_write(next);
-
-  spin_unlock_irqrestore(NULL, flags);
-}
-
-/****************************************************************************
- * Name:  bl602_timerisr
- ****************************************************************************/
-
-static int bl602_timerisr(int irq, void *context, void *arg)
-{
-  bl602_reload_mtimecmp();
-
-  /* Process timer interrupt */
-
-  nxsched_process_timer();
-  return 0;
-}
 
 /****************************************************************************
  * Public Functions
@@ -135,15 +64,11 @@ static int bl602_timerisr(int irq, void *context, void *arg)
 
 void up_timer_initialize(void)
 {
-  /* Attach timer interrupt handler */
+  struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
+    BL602_CLIC_MTIME, BL602_CLIC_MTIMECMP,
+    RISCV_IRQ_MTIMER, MTIMER_FREQ);
 
-  irq_attach(RISCV_IRQ_MTIMER, bl602_timerisr, NULL);
+  DEBUGASSERT(lower);
 
-  /* Reload CLINT mtimecmp */
-
-  bl602_reload_mtimecmp();
-
-  /* And enable the timer interrupt */
-
-  up_enable_irq(RISCV_IRQ_MTIMER);
+  up_alarm_set_lowerhalf(lower);
 }
