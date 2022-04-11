@@ -283,7 +283,6 @@ config RISCV_TOOLCHAIN_GNU_RVGW
 endchoice
 
 source "arch/risc-v/src/opensbi/Kconfig"
-source "arch/risc-v/src/common/Kconfig"
 
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"
