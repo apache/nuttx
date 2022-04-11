@@ -34,7 +34,6 @@
 #include "chip.h"
 #include "arm.h"
 #include "mmu.h"
-#include "fpu.h"
 #include "arm_internal.h"
 #include "arm_arch.h"
 
@@ -302,11 +301,9 @@ void arm_boot(void)
 
   a1x_copyvectorblock();
 
-#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-#endif
 
 #ifdef CONFIG_BOOT_SDRAM_DATA
   /* This setting is inappropriate for the A1x because the code is *always*

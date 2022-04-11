@@ -74,7 +74,6 @@
 volatile static spinlock_t g_appdsp_boot;
 
 extern int arm_pause_handler(int irq, void *c, FAR void *arg);
-extern void fpuconfig(void);
 
 /****************************************************************************
  * Private Functions
@@ -105,7 +104,7 @@ static void appdsp_boot(void)
 
   /* Setup FPU */
 
-  fpuconfig();
+  arm_fpuconfig();
 
   /* Clear SW_INT for APP_DSP(cpu) */
 

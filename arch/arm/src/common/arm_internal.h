@@ -422,9 +422,11 @@ void arm_vectorfiq(void);
 /* Floating point unit ******************************************************/
 
 #ifdef CONFIG_ARCH_FPU
+void arm_fpuconfig(void);
 void arm_savefpu(uint32_t *regs);
 void arm_restorefpu(const uint32_t *regs);
 #else
+#  define arm_fpuconfig()
 #  define arm_savefpu(regs)
 #  define arm_restorefpu(regs)
 #endif

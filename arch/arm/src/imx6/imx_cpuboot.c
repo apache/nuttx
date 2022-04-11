@@ -37,7 +37,6 @@
 #include "sctlr.h"
 #include "smp.h"
 #include "scu.h"
-#include "fpu.h"
 #include "gic.h"
 
 #ifdef CONFIG_SMP
@@ -249,11 +248,9 @@ void arm_cpu_boot(int cpu)
 
   arm_enable_smp(cpu);
 
-#ifdef CONFIG_ARCH_FPU
   /* Initialize the FPU */
 
   arm_fpuconfig();
-#endif
 
   /* Initialize the Generic Interrupt Controller (GIC) for CPUn (n != 0) */
 

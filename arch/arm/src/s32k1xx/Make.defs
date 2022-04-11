@@ -34,6 +34,10 @@ ifeq ($(CONFIG_BUILD_PROTECTED),y)
 CMN_CSRCS += arm_pthread_start.c
 endif
 
+ifeq ($(CONFIG_ARCH_FPU),y)
+CMN_CSRCS += arm_fpuconfig.c
+endif
+
 # Source files common to all S32K1xx chip families.
 
 CHIP_CSRCS  = s32k1xx_start.c s32k1xx_lowputc.c s32k1xx_clockconfig.c
