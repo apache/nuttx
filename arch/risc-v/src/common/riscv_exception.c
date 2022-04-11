@@ -105,10 +105,16 @@ void riscv_exception_attach(void)
   irq_attach(RISCV_IRQ_IAFAULT, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_IINSTRUCTION, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_BPOINT, riscv_exception, NULL);
-  irq_attach(RISCV_IRQ_LAMISALIGNED, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_LAFAULT, riscv_exception, NULL);
-  irq_attach(RISCV_IRQ_SAMISALIGNED, riscv_exception, NULL);
   irq_attach(RISCV_IRQ_SAFAULT, riscv_exception, NULL);
+
+#ifdef CONFIG_RISCV_MISALIGNED_HANDLER
+  irq_attach(RISCV_IRQ_LAMISALIGNED, riscv_misaligned, NULL);
+  irq_attach(RISCV_IRQ_SAMISALIGNED, riscv_misaligned, NULL);
+#else
+  irq_attach(RISCV_IRQ_LAMISALIGNED, riscv_exception, NULL);
+  irq_attach(RISCV_IRQ_SAMISALIGNED, riscv_exception, NULL);
+#endif
 
   /* Attach the ecall interrupt handler */
 

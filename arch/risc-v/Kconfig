@@ -30,6 +30,7 @@ config ARCH_CHIP_K210
 	select ARCH_HAVE_MPU
 	select ARCH_HAVE_TESTSET
 	select ARCH_HAVE_MULTICPU
+	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
@@ -52,6 +53,7 @@ config ARCH_CHIP_BL602
 	select ARCH_RV_ISA_C
 	select ARCH_HAVE_FPU
 	select ARCH_HAVE_RESET
+	select ARCH_HAVE_MISALIGN_EXCEPTION
 	select ONESHOT
 	select ALARM_ARCH
 	---help---
@@ -205,6 +207,17 @@ config ARCH_MMU_TYPE_SV39
 config ARCH_HAVE_S_MODE
 	bool
 	default n
+
+config ARCH_HAVE_MISALIGN_EXCEPTION
+	bool
+	default n
+	---help---
+		The chip will raise a exception while misaligned memory access.
+
+config RISCV_MISALIGNED_HANDLER
+	bool "Software misaligned memory access handler"
+	depends on ARCH_HAVE_MISALIGN_EXCEPTION
+	default y
 
 # Option to run NuttX in supervisor mode. This is obviously not usable in
 # flat mode, is questionable in protected mode, but is mandatory in kernel
