@@ -58,8 +58,10 @@ endif
 CMN_CSRCS += arm_vectors.c
 
 CMN_CSRCS += arm_cache.c
+
 ifeq ($(CONFIG_ARCH_FPU),y)
 CMN_ASRCS += arm_fpu.S
+CMN_CSRCS += arm_fpuconfig.c
 endif
 
 ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
