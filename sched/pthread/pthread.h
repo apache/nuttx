@@ -51,7 +51,6 @@ struct join_s
 {
   FAR struct join_s *next;       /* Implements link list */
   uint8_t        crefs;          /* Reference count */
-  bool           started;        /* true: pthread started. */
   bool           detached;       /* true: pthread_detached'ed */
   bool           terminated;     /* true: detach'ed+exit'ed */
   pthread_t      thread;         /* Includes pid */
