@@ -580,6 +580,7 @@ struct bmi270_sensor_s
   float                     factor;             /* Data factor */
   bool                      fifoen;             /* Sensor fifo enable */
   bool                      activated;          /* Sensor working state */
+  bool                      cfg_activated;      /* Sensor working state of cfg */
 };
 
 /* Device struct */
@@ -1668,6 +1669,15 @@ static void bmi270_config_worker(FAR void *arg)
   /* Get the gyroscope cross axis sensitivity */
 
   bmi270_get_gyro_crosssense(priv, &(priv->cross_sense));
+
+  /* Enable/disable sensor. */
+
+  bmi270_activate(&priv->dev[BMI270_XL_IDX].lower,
+                  priv->dev[BMI270_XL_IDX].cfg_activated);
+  bmi270_activate(&priv->dev[BMI270_GY_IDX].lower,
+                  priv->dev[BMI270_GY_IDX].cfg_activated);
+  bmi270_activate(&priv->dev[BMI270_FEAT_IDX].lower,
+                  priv->dev[BMI270_FEAT_IDX].cfg_activated);
 }
 
 /****************************************************************************
@@ -3529,7 +3539,7 @@ static int bmi270_batch(FAR struct sensor_lowerhalf_s *lower,
   if (priv->cfg_status == BMI270_DISABLE)
     {
       snerr("Failed to configure device.\n");
-      return -EINVAL;
+      return OK;
     }
 
   if (sensor->fifowtm > 1)
@@ -3689,7 +3699,7 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          return OK;
         }
 
       /* Find the period that matches best.  */
@@ -3711,7 +3721,7 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          return OK;
         }
 
       /* Find the period that matches best.  */
@@ -3733,7 +3743,7 @@ static int bmi270_set_interval(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          return OK;
         }
 
       ret = OK;
@@ -3783,7 +3793,8 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          sensor->cfg_activated = enable;
+          return OK;
         }
 
       if (sensor->activated != enable)
@@ -3804,7 +3815,8 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          sensor->cfg_activated = enable;
+          return OK;
         }
 
       if (sensor->activated != enable)
@@ -3825,7 +3837,8 @@ static int bmi270_activate(FAR struct sensor_lowerhalf_s *lower,
       if (priv->cfg_status == BMI270_DISABLE)
         {
           snerr("Failed to configure device.\n");
-          return -EINVAL;
+          sensor->cfg_activated = enable;
+          return OK;
         }
 
       if (sensor->activated != enable)
@@ -4014,7 +4027,7 @@ static int bmi270_control(FAR struct sensor_lowerhalf_s *lower,
   if (priv->cfg_status == BMI270_DISABLE)
     {
       snerr("Failed to configure device.\n");
-      return -EINVAL;
+      return OK;
     }
 
   /* Process ioctl commands. */
