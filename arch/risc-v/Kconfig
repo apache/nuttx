@@ -282,6 +282,9 @@ config RISCV_MISALIGNED_HANDLER
 # Kernel mode requires this as M-mode uses flat addressing and the kernel
 # memory must be mapped in order to share memory between the kernel and
 # different user tasks which reside in virtual memory.
+#
+# Note that S-mode requires a companion software (SBI)
+#
 
 config ARCH_USE_S_MODE
 	bool "Run the NuttX kernel in S-mode"
@@ -378,6 +381,7 @@ endchoice
 endif
 
 source "arch/risc-v/src/opensbi/Kconfig"
+source "arch/risc-v/src/nuttsbi/Kconfig"
 
 if ARCH_CHIP_FE310
 source "arch/risc-v/src/fe310/Kconfig"

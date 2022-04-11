@@ -1,0 +1,30 @@
+
+# S-mode requires a Supervisor Binary Interface (SBI) in order to access
+# M-mode ISA. A minimalistic SBI is provided here natively.
+
+config NUTTSBI
+	bool "Use NuttX native SBI"
+	default n
+	depends on ARCH_RISCV && ARCH_USE_S_MODE
+	---help---
+		Use NuttX minimalistic SBI
+
+if NUTTSBI
+
+config NUTTSBI_HART_CNT
+	int "Amount of harts in SoC"
+	default 1
+
+config NUTTSBI_MTIME_BASE
+	hex "MTIME base address"
+	default 0
+	---help---
+		Sets the address of mtime memory mapped register
+
+config NUTTSBI_MTIMECMP_BASE
+	hex "MTIMECMP base address"
+	default 0
+	---help---
+		Sets the address of mtimecmp memory mapped register
+
+endif
