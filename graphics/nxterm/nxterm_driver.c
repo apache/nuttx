@@ -166,7 +166,9 @@ static int nxterm_close(FAR struct file *filep)
     {
       /* Yes.. Unregister the terminal device */
 
+      nxterm_sempost(priv);
       nxterm_unregister(priv);
+      return OK;
     }
   else
     {
@@ -346,7 +348,9 @@ static int nxterm_unlink(FAR struct inode *inode)
     {
       /* No.. Unregister the terminal device now */
 
+      nxterm_sempost(priv);
       nxterm_unregister(priv);
+      return OK;
     }
 
   nxterm_sempost(priv);
