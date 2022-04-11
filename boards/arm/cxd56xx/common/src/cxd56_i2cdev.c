@@ -62,6 +62,7 @@ int board_i2cdev_initialize(int port)
   if (ret < 0)
     {
       _err("ERROR: Failed to register i2c%d: %d\n", port, ret);
+      cxd56_i2cbus_uninitialize(i2c);
     }
 
   return ret;
