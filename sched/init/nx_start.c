@@ -648,10 +648,6 @@ void nx_start(void)
   binfmt_initialize();
 #endif
 
-  /* Initialize common drivers */
-
-  drivers_initialize();
-
   /* Initialize Hardware Facilities *****************************************/
 
   /* The processor specific details of running the operating system
@@ -661,6 +657,10 @@ void nx_start(void)
    */
 
   up_initialize();
+
+  /* Initialize common drivers */
+
+  drivers_initialize();
 
 #ifdef CONFIG_BOARD_EARLY_INITIALIZE
   /* Call the board-specific up_initialize() extension to support
