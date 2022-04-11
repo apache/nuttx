@@ -845,6 +845,37 @@ config SCD30_DEBUG
 
 endif # SENSORS_SCD30
 
+config SENSORS_SCD41
+	bool "Sensirion SCD41 CO2, humidity and temperature sensor"
+	default n
+	---help---
+		Enable driver support for the Sensirion SCD41 CO₂, humidity and
+		temperature sensor.
+
+if SENSORS_SCD41
+
+config SCD41_I2C
+	bool "Sensirion SCD41 I2C mode"
+	default y
+	select I2C
+
+config SCD41_I2C_FREQUENCY
+	int "SCD41 I2C frequency"
+	default 100000
+	range 1 100000
+	depends on SCD41_I2C
+	---help---
+		I2C frequency for SCD41. Note, maximum supported frequency for
+		this sensor is 100kHz.
+
+config SCD41_DEBUG
+	bool "Debug support for the SCD41"
+	default n
+	---help---
+		Enables debug features for the SCD41
+
+endif # SENSORS_SCD41
+
 config SENSORS_SGP30
 	bool "Sensirion SGP30 Gas Platform sensor"
 	default n
