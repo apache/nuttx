@@ -563,7 +563,14 @@ static int littlefs_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
     }
   else
     {
-      return drv->u.i_bops->ioctl(drv, cmd, arg);
+      if (drv->u.i_bops->ioctl != NULL)
+        {
+          return drv->u.i_bops->ioctl(drv, cmd, arg);
+        }
+      else
+        {
+          return -ENOTTY;
+        }
     }
 }
 
@@ -998,7 +1005,14 @@ static int littlefs_sync_block(FAR const struct lfs_config *c)
     }
   else
     {
-      ret = drv->u.i_bops->ioctl(drv, BIOC_FLUSH, 0);
+      if (drv->u.i_bops->ioctl != NULL)
+        {
+          ret = drv->u.i_bops->ioctl(drv, BIOC_FLUSH, 0);
+        }
+      else
+        {
+          ret = -ENOTTY;
+        }
     }
 
   return ret == -ENOTTY ? OK : ret;
@@ -1053,8 +1067,16 @@ static int littlefs_bind(FAR struct inode *driver, FAR const void *data,
     {
       /* Try to get FLT MTD geometry first */
 
-      ret = driver->u.i_bops->ioctl(driver, MTDIOC_GEOMETRY,
-                                    (unsigned long)&fs->geo);
+      if (driver->u.i_bops->ioctl != NULL)
+        {
+          ret = driver->u.i_bops->ioctl(driver, MTDIOC_GEOMETRY,
+                                        (unsigned long)&fs->geo);
+        }
+      else
+        {
+          ret = -ENOTTY;
+        }
+
       if (ret < 0)
         {
           struct geometry geometry;
