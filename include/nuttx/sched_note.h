@@ -439,6 +439,15 @@ struct note_filter_irq_s
  * Public Function Prototypes
  ****************************************************************************/
 
+#undef EXTERN
+#if defined(__cplusplus)
+#define EXTERN extern "C"
+extern "C"
+{
+#else
+#define EXTERN extern
+#endif
+
 /****************************************************************************
  * Name: sched_note_*
  *
@@ -657,6 +666,11 @@ void sched_note_filter_irq(struct note_filter_irq_s *oldf,
 #endif
 
 #endif /* defined(__KERNEL__) || defined(CONFIG_BUILD_FLAT) */
+
+#undef EXTERN
+#if defined(__cplusplus)
+}
+#endif
 
 #else /* CONFIG_SCHED_INSTRUMENTATION */
 
