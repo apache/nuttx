@@ -110,8 +110,7 @@ config SYSLOG_TIMESTAMP_REALTIME
 	depends on SYSLOG_TIMESTAMP
 	---help---
 		Use wall-clock (CLOCK_REALTIME) for timestamp.  By default,
-		CLOCK_MONOTONIC, if enabled, will be used or the system timer
-		is not.
+		CLOCK_MONOTONIC will be used.
 
 config SYSLOG_TIMESTAMP_FORMATTED
 	bool "Formatted syslog time"
