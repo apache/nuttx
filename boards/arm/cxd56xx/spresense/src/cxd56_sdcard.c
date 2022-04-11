@@ -70,6 +70,7 @@ struct cxd56_sdhci_state_s
   struct sdio_dev_s *sdhci;   /* R/W device handle */
   bool initialized;           /* TRUE: SDHCI block driver is initialized */
   bool inserted;              /* TRUE: card is inserted */
+  void (*cb)(bool);           /* Callback function pointer to application */
 };
 
 /****************************************************************************
@@ -165,6 +166,13 @@ static void board_sdcard_enable(FAR void *arg)
         }
 
       g_sdhci.initialized = true;
+
+      /* Callback to application to notice card is inserted */
+
+      if (g_sdhci.cb != NULL)
+        {
+          g_sdhci.cb(true);
+        }
     }
 
 release_frequency_lock:
@@ -203,6 +211,13 @@ static void board_sdcard_disable(FAR void *arg)
       cxd56_sdhci_finalize(0);
 
       g_sdhci.initialized = false;
+
+      /* Callback to application to notice card is ejected */
+
+      if (g_sdhci.cb != NULL)
+        {
+          g_sdhci.cb(false);
+        }
     }
 }
 
@@ -514,4 +529,25 @@ void board_sdcard_set_high_voltage(void)
 
 void board_sdcard_set_low_voltage(void)
 {
+}
+
+/****************************************************************************
+ * Name: board_sdcard_set_state_cb
+ *
+ * Description:
+ *   Register callback function to notify state change of card slot.
+ *   This function is called by board_ioctl()
+ *    as BOARDIOC_SDCARD_SETNOTIFYCB command.
+ *
+ ****************************************************************************/
+
+int board_sdcard_set_state_cb(uintptr_t cb)
+{
+  if (g_sdhci.cb != NULL && cb != 0)
+    {
+      return -EBUSY;
+    }
+
+  g_sdhci.cb = (void (*)(bool))cb;
+  return OK;
 }
