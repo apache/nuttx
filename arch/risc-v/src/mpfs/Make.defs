@@ -20,7 +20,13 @@
 
 # Specify our general Assembly files
 
-CMN_ASRCS += mpfs_head.S riscv_vectors.S riscv_exception_common.S riscv_testset.S
+CMN_ASRCS += riscv_vectors.S riscv_exception_common.S riscv_testset.S
+
+ifeq ($(CONFIG_ARCH_USE_S_MODE),y)
+CMN_ASRCS += mpfs_shead.S
+else
+CMN_ASRCS += mpfs_head.S
+endif
 
 ifeq ($(CONFIG_BUILD_KERNEL),y)
 STARTUP_OBJS = crt0$(OBJEXT)

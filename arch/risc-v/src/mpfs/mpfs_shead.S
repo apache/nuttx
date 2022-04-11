@@ -1,5 +1,5 @@
 /****************************************************************************
- * arch/risc-v/src/mpfs/mpfs_mm_init.h
+ * arch/risc-v/src/mpfs/mpfs_shead.S
  *
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -18,60 +18,70 @@
  *
  ****************************************************************************/
 
-#ifndef __ARCH_RISC_V_SRC_MPFS_MPFS_MM_INIT_H
-#define __ARCH_RISC_V_SRC_MPFS_MPFS_MM_INIT_H
-
 /****************************************************************************
  * Included Files
  ****************************************************************************/
 
 #include <nuttx/config.h>
 
-#include "riscv_mmu.h"
+#include <nuttx/irq.h>
+
+#include "chip.h"
+#include "mpfs_memorymap.h"
+#include "riscv_internal.h"
 
 /****************************************************************************
- * Public Data
+ * Public Symbols
  ****************************************************************************/
 
-extern uintptr_t g_kernel_pgt_pbase;
+  /* Imported symbols */
+
+  .extern __trap_vec
+
+  .section .text
+  .global __start
 
 /****************************************************************************
- * Public Functions Prototypes
- ****************************************************************************/
-
-/****************************************************************************
- * Name: mpfs_kernel_mappings
+ * Name: __start
  *
  * Description:
- *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up the kernel
- *  MMU mappings.
+ *   Supervisor mode start function.
+ *
+ * Input Parameters:
+ *    a0 - hartid
  *
  ****************************************************************************/
 
-#ifdef CONFIG_BUILD_KERNEL
-void mpfs_kernel_mappings(void);
-#endif
+__start:
 
-/****************************************************************************
- * Name: mpfs_mm_init
- *
- * Description:
- *  Setup kernel mappings when using CONFIG_BUILD_KERNEL. Sets up kernel MMU
- *  mappings. Function also sets the first address environment (satp value).
- *
- ****************************************************************************/
+  /* Disable all interrupts in sie */
 
-#ifdef CONFIG_BUILD_KERNEL
-static inline void mpfs_mm_init(void)
-{
-  /* Setup the kernel mappings */
+  csrw sie, zero
+  csrw sip, zero
 
-  mpfs_kernel_mappings();
+  /* Set the S-mode trap vector */
 
-  /* Enable MMU (note: system is still in M-mode) */
+  la   t0, __trap_vec
+  csrw stvec, t0
 
-  mmu_enable(g_kernel_pgt_pbase, 0);
-}
-#endif
+  /* Clear sscratch */
 
-#endif /* __ARCH_RISC_V_SRC_MPFS_MPFS_MM_INIT_H */
+  csrw sscratch, zero
+  csrw scause, zero
+  csrw sepc, zero
+
+  /* initialize global pointer, global data */
+
+.option push
+.option norelax
+  la  gp, __global_pointer$
+.option pop
+
+  /* Make sure the writes to CSR stick before continuing */
+
+  fence
+
+  /* Set stack pointer and jump to start */
+
+  la sp, MPFS_IDLESTACK_TOP
+  j __mpfs_start
