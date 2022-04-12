@@ -60,7 +60,7 @@ CMN_CSRCS += arm_doirq.c arm_initialstate.c arm_mmu.c arm_prefetchabort.c
 CMN_CSRCS += arm_releasepending.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_syscall.c
 CMN_CSRCS += arm_unblocktask.c arm_undefinedinsn.c arm_tcbinfo.c
-CMN_CSRCS += arm_switchcontext.c
+CMN_CSRCS += arm_switchcontext.c arm_cache.c
 
 # Use common heap allocation for now (may need to be customized later)
 
@@ -101,10 +101,7 @@ CMN_CSRCS += arm_virtpgaddr.c
 endif
 endif
 
-CMN_CSRCS += arm_cache.c
-
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_savefpu.S arm_restorefpu.S
 CMN_CSRCS += arm_fpucmp.c
 endif
 

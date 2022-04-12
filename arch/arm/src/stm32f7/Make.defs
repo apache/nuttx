@@ -24,9 +24,9 @@
 # Common ARM and Cortex-M7 files
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c arm_vectors.c
 CMN_CSRCS += arm_doirq.c arm_exit.c arm_hardfault.c arm_initialize.c
 CMN_CSRCS += arm_initialstate.c arm_interruptcontext.c arm_mdelay.c
 CMN_CSRCS += arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
@@ -34,7 +34,7 @@ CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_svcall.c arm_systemreset.c arm_trigger_irq.c arm_unblocktask.c
 CMN_CSRCS += arm_udelay.c arm_usestack.c arm_vfork.c arm_switchcontext.c arm_puts.c
-CMN_CSRCS += arm_tcbinfo.c
+CMN_CSRCS += arm_tcbinfo.c arm_cache.c
 
 ifeq ($(CONFIG_SCHED_BACKTRACE),y)
 CMN_CSRCS += arm_backtrace_thumb.c
@@ -50,17 +50,7 @@ endif
 
 # Configuration-dependent common files
 
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
-
-CMN_CSRCS += arm_cache.c
-
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_fpuconfig.c
 CMN_CSRCS += arm_fpucmp.c
 endif

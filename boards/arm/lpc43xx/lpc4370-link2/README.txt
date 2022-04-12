@@ -400,7 +400,6 @@ ports.
    file:
 
      CONFIG_ARCH_FPU=y
-     CONFIG_ARMV7M_LAZYFPU=y
 
 LPC4370-Link2 Configuration Options
 =====================================
