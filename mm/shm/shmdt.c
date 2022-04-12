@@ -31,6 +31,7 @@
 #include <nuttx/arch.h>
 #include <nuttx/sched.h>
 #include <nuttx/mm/shm.h>
+#include <nuttx/mm/vm_map.h>
 
 #include "shm/shm.h"
 
@@ -70,6 +71,7 @@ int shmdt(FAR const void *shmaddr)
   FAR struct shm_region_s *region;
   FAR struct task_group_s *group;
   FAR struct tcb_s *tcb;
+  FAR const struct vm_map_entry_s *map;
   unsigned int npages;
   int shmid;
   int ret;
@@ -85,18 +87,17 @@ int shmdt(FAR const void *shmaddr)
    * shmaddr.
    */
 
-  for (shmid = 0;
-       shmid < CONFIG_ARCH_SHM_MAXREGIONS &&
-       group->tg_shm.gs_vaddr[shmid] != (uintptr_t)shmaddr;
-       shmid++);
+  map = vm_map_find(shmaddr);
 
-  if (shmid >= CONFIG_ARCH_SHM_MAXREGIONS)
+  if (!map || map->type != VM_MAP_SHM)
     {
+      ret = -EINVAL;
       shmerr("ERROR: No region matching this virtual address: %p\n",
              shmaddr);
-      ret = -EINVAL;
       goto errout_with_errno;
     }
+
+  shmid = map->id.shmid;
 
   /* Get the region associated with the shmid */
 
@@ -133,7 +134,10 @@ int shmdt(FAR const void *shmaddr)
 
   /* Indicate that there is no longer any mapping for this region. */
 
-  group->tg_shm.gs_vaddr[shmid] = 0;
+  if (vm_map_rm(shmaddr) < 0)
+    {
+      shmerr("ERROR: vm_map_rm() failed\n");
+    }
 
   /* Decrement the count of processes attached to this region.
    * If the count decrements to zero and there is a pending unlink,

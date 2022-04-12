@@ -161,6 +161,7 @@ config MM_SHM
 	bool "Shared memory support"
 	default n
 	depends on MM_PGALLOC && BUILD_KERNEL && EXPERIMENTAL
+	select MM_VM_MAP
 	---help---
 		Build in support for the shared memory interfaces shmget(), shmat(),
 		shmctl(), and shmdt().

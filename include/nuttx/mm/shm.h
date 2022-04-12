@@ -78,13 +78,6 @@ struct group_shm_s
    */
 
   GRAN_HANDLE gs_handle;
-
-  /* This array is used to do a reverse lookup:  Give the virtual address
-   * of a shared memory region, find the region index that performs that
-   * mapping.
-   */
-
-  uintptr_t gs_vaddr[CONFIG_ARCH_SHM_MAXREGIONS];
 };
 
 /****************************************************************************
