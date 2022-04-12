@@ -32,8 +32,11 @@ endif
 
 # Add motor lower-half driver
 
-ifeq ($(CONFIG_MOTOR_UPPER_HAVE_PATTERN),y)
+ifeq ($(CONFIG_MOTOR_DRV2624),y)
 CSRCS += drv2624.c
+endif
+
+ifeq ($(CONFIG_MOTOR_AW86225),y)
 CSRCS += aw86225.c
 endif
 

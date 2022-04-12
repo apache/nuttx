@@ -28,7 +28,7 @@
 #include <nuttx/config.h>
 #include <nuttx/i2c/i2c_master.h>
 
-#ifdef CONFIG_MOTOR_UPPER_HAVE_PATTERN
+#ifdef CONFIG_MOTOR_AW86225
 
 /****************************************************************************
  * Pre-processor Definitions
@@ -107,5 +107,5 @@ int aw86225_register(FAR const char *devname,
 #ifdef __cplusplus
 }
 #endif
-#endif /* CONFIG_MOTOR_UPPER_HAVE_PATTERN */
+#endif /* CONFIG_MOTOR_AW86225 */
 #endif /* __INCLUDE_NUTTX_MOTOR_AW86225_H */
