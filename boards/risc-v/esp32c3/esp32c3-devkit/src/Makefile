@@ -113,7 +113,11 @@ ifneq ($(CONFIG_NSH_CUSTOMROMFS),y)
 endif
 endif
 
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+SCRIPTIN = $(SCRIPTDIR)$(DELIM)protected.template.ld
+else
 SCRIPTIN = $(SCRIPTDIR)$(DELIM)esp32c3.template.ld
+endif
 SCRIPTOUT = $(SCRIPTDIR)$(DELIM)esp32c3_out.ld
 
 .PHONY = context distclean

@@ -1150,6 +1150,16 @@ config ESP32C3_PARTITION_TABLE_OFFSET
 	default 0x8000
 	depends on ESP32C3_APP_FORMAT_LEGACY
 
+if BUILD_PROTECTED
+
+config ESP32C3_USER_IMAGE_OFFSET
+	hex "User image offset"
+	default 0x90000
+	---help---
+		Offset in SPI Flash for flashing the User application firmware image.
+
+endif
+
 source "arch/risc-v/src/esp32c3/Kconfig.security"
 
 endmenu # Application Image Configuration

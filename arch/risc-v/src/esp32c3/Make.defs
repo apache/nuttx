@@ -56,6 +56,10 @@ CMN_ASRCS += vfork.S
 CMN_CSRCS += riscv_vfork.c
 endif
 
+ifeq ($(CONFIG_ARCH_USE_MPU),y)
+CMN_CSRCS += riscv_pmp.c
+endif
+
 # Specify our C code within this directory to be included
 
 CHIP_CSRCS  = esp32c3_allocateheap.c esp32c3_start.c esp32c3_wdt.c esp32c3_idle.c
@@ -64,6 +68,12 @@ CHIP_CSRCS += esp32c3_clockconfig.c esp32c3_gpio.c
 CHIP_CSRCS += esp32c3_lowputc.c esp32c3_serial.c
 CHIP_CSRCS += esp32c3_systemreset.c esp32c3_resetcause.c
 CHIP_CSRCS += esp32c3_uid.c
+
+ifeq ($(CONFIG_BUILD_PROTECTED),y)
+CHIP_CSRCS += esp32c3_userspace.c
+CMN_UASRCS += riscv_signal_handler.S
+CMN_CSRCS  += riscv_task_start.c riscv_pthread_start.c riscv_signal_dispatch.c
+endif
 
 ifeq ($(CONFIG_SCHED_TICKLESS),y)
 CHIP_CSRCS += esp32c3_tickless.c
