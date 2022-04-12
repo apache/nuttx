@@ -420,6 +420,10 @@ void syslog_rpmsg_init_early(FAR void *buffer, size_t size)
     {
       priv->head = priv->tail = 0;
     }
+  else if (priv->head < priv->tail)
+    {
+      priv->head += priv->size;
+    }
 }
 
 int syslog_rpmsg_init(void)
