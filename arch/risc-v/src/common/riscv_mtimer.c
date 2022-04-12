@@ -25,6 +25,8 @@
 #include <nuttx/irq.h>
 #include <nuttx/kmalloc.h>
 
+#include <arch/barriers.h>
+
 #include "riscv_mtimer.h"
 #include "riscv_internal.h"
 
@@ -107,6 +109,10 @@ static void riscv_mtimer_set_mtimecmp(struct riscv_mtimer_lowerhalf_s *priv,
   putreg32(value, priv->mtimecmp);
   putreg32(value >> 32, priv->mtimecmp + 4);
 #endif
+
+  /* Make sure it sticks */
+
+  __DMB();
 }
 
 /****************************************************************************
