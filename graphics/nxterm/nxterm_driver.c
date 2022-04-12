@@ -43,7 +43,7 @@
 static int     nxterm_open(FAR struct file *filep);
 static int     nxterm_close(FAR struct file *filep);
 static ssize_t nxterm_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                            size_t buflen);
 static int     nxterm_ioctl(FAR struct file *filep, int cmd,
                             unsigned long arg);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS

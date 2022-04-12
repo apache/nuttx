@@ -42,8 +42,6 @@
 
 /* Character driver methods. */
 
-static int altmdm_open(FAR struct file *filep);
-static int altmdm_close(FAR struct file *filep);
 static ssize_t altmdm_read(FAR struct file *filep, FAR char *buffer,
                            size_t len);
 static ssize_t altmdm_write(FAR struct file *filep, FAR const char *buffer,
@@ -58,15 +56,15 @@ static int altmdm_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 static const struct file_operations g_altmdmfops =
 {
-  altmdm_open,                  /* open */
-  altmdm_close,                 /* close */
-  altmdm_read,                  /* read */
-  altmdm_write,                 /* write */
-  NULL,                         /* seek */
-  altmdm_ioctl,                 /* ioctl */
-  NULL                          /* poll */
+  NULL,                 /* open */
+  NULL,                 /* close */
+  altmdm_read,          /* read */
+  altmdm_write,         /* write */
+  NULL,                 /* seek */
+  altmdm_ioctl,         /* ioctl */
+  NULL                  /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                        /* unlink */
+  , NULL                /* unlink */
 #endif
 };
 
@@ -145,32 +143,6 @@ static int altmdm_uninitialize(FAR struct altmdm_dev_s *priv)
     }
 
   return ret;
-}
-
-/****************************************************************************
- * Name: altmdm_open
- *
- * Description:
- *   Standard character driver open method.
- *
- ****************************************************************************/
-
-static int altmdm_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: altmdm_close
- *
- * Description:
- *   Standard character driver close method.
- *
- ****************************************************************************/
-
-static int altmdm_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

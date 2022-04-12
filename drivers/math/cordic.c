@@ -60,8 +60,6 @@ struct cordic_upperhalf_s
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     cordic_open(FAR struct file *filep);
-static int     cordic_close(FAR struct file *filep);
 static ssize_t cordic_read(FAR struct file *filep, FAR char *buffer,
                           size_t buflen);
 static ssize_t cordic_write(FAR struct file *filep, FAR const char *buffer,
@@ -75,8 +73,8 @@ static int     cordic_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_cordicops =
 {
-  cordic_open,  /* open */
-  cordic_close, /* close */
+  NULL,         /* open */
+  NULL,         /* close */
   cordic_read,  /* read */
   cordic_write, /* write */
   NULL,         /* seek */
@@ -90,32 +88,6 @@ static const struct file_operations g_cordicops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: cordic_open
- *
- * Description:
- *   This function is called whenever the cordic timer device is opened.
- *
- ****************************************************************************/
-
-static int cordic_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: cordic_close
- *
- * Description:
- *   This function is called when the cordic timer device is closed.
- *
- ****************************************************************************/
-
-static int cordic_close(FAR struct file *filep)
-{
-  return OK;
-}
 
 /****************************************************************************
  * Name: cordic_read

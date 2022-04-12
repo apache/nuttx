@@ -44,10 +44,10 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     powerled_open(FAR struct file *filep);
-static int     powerled_close(FAR struct file *filep);
-static int     powerled_ioctl(FAR struct file *filep, int cmd,
-                              unsigned long arg);
+static int powerled_open(FAR struct file *filep);
+static int powerled_close(FAR struct file *filep);
+static int powerled_ioctl(FAR struct file *filep, int cmd,
+                          unsigned long arg);
 
 /****************************************************************************
  * Private Data

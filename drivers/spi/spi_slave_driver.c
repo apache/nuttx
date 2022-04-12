@@ -93,7 +93,7 @@ struct spi_slave_driver_s
 static int     spi_slave_open(FAR struct file *filep);
 static int     spi_slave_close(FAR struct file *filep);
 static ssize_t spi_slave_read(FAR struct file *filep, FAR char *buffer,
-                             size_t buflen);
+                              size_t buflen);
 static ssize_t spi_slave_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int     spi_slave_unlink(FAR struct inode *inode);
@@ -105,9 +105,9 @@ static void    spi_slave_select(FAR struct spi_slave_dev_s *sdev,
 static void    spi_slave_cmddata(FAR struct spi_slave_dev_s *sdev,
                                  bool data);
 static size_t  spi_slave_getdata(FAR struct spi_slave_dev_s *sdev,
-                                FAR const void **data);
+                                 FAR const void **data);
 static size_t  spi_slave_receive(FAR struct spi_slave_dev_s *sdev,
-                                FAR const void *data, size_t nwords);
+                                 FAR const void *data, size_t nwords);
 
 /****************************************************************************
  * Private Data
@@ -609,7 +609,7 @@ int spi_slave_register(FAR struct spi_slave_ctrlr_s *ctrlr, int bus)
 
   /* Create the character device name */
 
-  snprintf(devname, DEVNAME_FMTLEN, DEVNAME_FMT, bus);
+  snprintf(devname, sizeof(devname), DEVNAME_FMT, bus);
 
   /* Register the character driver */
 

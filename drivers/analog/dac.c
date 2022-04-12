@@ -54,7 +54,7 @@
 static int     dac_open(FAR struct file *filep);
 static int     dac_close(FAR struct file *filep);
 static ssize_t dac_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                         size_t buflen);
 static int     dac_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 
 /****************************************************************************

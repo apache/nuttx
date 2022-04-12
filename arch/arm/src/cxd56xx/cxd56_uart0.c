@@ -72,7 +72,6 @@ static ssize_t uart0_read(FAR struct file *filep,
                           FAR char *buffer, size_t len);
 static ssize_t uart0_write(FAR struct file *filep,
                            FAR const char *buffer, size_t len);
-static int uart0_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int uart0_semtake(sem_t *id);
 static void uart0_semgive(sem_t *id);
 
@@ -98,9 +97,7 @@ static const struct file_operations g_uart0fops =
   .open  = uart0_open,
   .close = uart0_close,
   .read  = uart0_read,
-  .write = uart0_write,
-  .seek  = NULL,
-  .ioctl = uart0_ioctl,
+  .write = uart0_write
 };
 
 static sem_t g_lock;
@@ -249,15 +246,6 @@ static ssize_t uart0_write(FAR struct file *filep,
   uart0_semgive(&g_lock);
 
   return (ssize_t)ret;
-}
-
-/****************************************************************************
- * Name: uart0_ioctl
- ****************************************************************************/
-
-static int uart0_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  return -ENOTTY;
 }
 
 /****************************************************************************

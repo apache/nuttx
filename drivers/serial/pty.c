@@ -105,12 +105,12 @@ static int     pty_pipe(FAR struct pty_devpair_s *devpair);
 static int     pty_open(FAR struct file *filep);
 static int     pty_close(FAR struct file *filep);
 static ssize_t pty_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                        size_t buflen);
 static ssize_t pty_write(FAR struct file *filep, FAR const char *buffer,
-                 size_t buflen);
+                         size_t buflen);
 static int     pty_ioctl(FAR struct file *filep, int cmd, unsigned long arg);
 static int     pty_poll(FAR struct file *filep, FAR struct pollfd *fds,
-                 bool setup);
+                        bool setup);
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
 static int     pty_unlink(FAR struct inode *inode);
 #endif

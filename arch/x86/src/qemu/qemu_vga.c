@@ -109,11 +109,9 @@ static int vga_getpower(struct lcd_dev_s *dev);
 static int vga_setpower(struct lcd_dev_s *dev, int power);
 static int vga_getcontrast(struct lcd_dev_s *dev);
 static int vga_setcontrast(struct lcd_dev_s *dev, unsigned int contrast);
-static int vga_open(struct file *filep);
-static int vga_close(struct file *filep);
 static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen);
-static ssize_t vga_write(struct file *filep,
-                         FAR const char *buf, size_t buflen);
+static ssize_t vga_write(struct file *filep, FAR const char *buf,
+                         size_t buflen);
 static off_t vga_seek(FAR struct file *filp, off_t offset, int whence);
 
 /****************************************************************************
@@ -233,15 +231,15 @@ static struct lcd_dev_s g_lcddev =
 
 static const struct file_operations g_vgaops =
 {
-  vga_open,                  /* open */
-  vga_close,                 /* close */
-  vga_read,                  /* read */
-  vga_write,                 /* write */
-  vga_seek,                  /* seek */
-  NULL,                      /* ioctl */
-  NULL                       /* poll */
+  NULL,         /* open */
+  NULL,         /* close */
+  vga_read,     /* read */
+  vga_write,    /* write */
+  vga_seek,     /* seek */
+  NULL,         /* ioctl */
+  NULL          /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL                     /* unlink */
+  , NULL        /* unlink */
 #endif
 };
 
@@ -472,16 +470,6 @@ static int vga_setcontrast(struct lcd_dev_s *dev, unsigned int contrast)
   return -ENOSYS;
 }
 
-static int vga_open(struct file * filep)
-{
-  return OK;
-}
-
-static int vga_close(struct file * filep)
-{
-  return OK;
-}
-
 static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen)
 {
   if (buf == NULL || buflen < 1)
@@ -494,8 +482,8 @@ static ssize_t vga_read(struct file *filep, FAR char *buf, size_t buflen)
   return buflen;
 }
 
-static ssize_t vga_write(struct file *filep,
-                         FAR const char *buf, size_t buflen)
+static ssize_t vga_write(struct file *filep, FAR const char *buf,
+                         size_t buflen)
 {
   int i;
   int j;

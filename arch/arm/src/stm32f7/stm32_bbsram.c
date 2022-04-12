@@ -140,7 +140,7 @@ static const struct file_operations stm32_bbsram_fops =
   .ioctl  = stm32_bbsram_ioctl,
   .poll   = stm32_bbsram_poll,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .unlink = stm32_bbsram_unlink,
+  .unlink = stm32_bbsram_unlink
 #endif
 };
 

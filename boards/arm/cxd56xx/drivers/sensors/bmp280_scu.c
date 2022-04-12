@@ -175,9 +175,11 @@ static const struct file_operations g_bmp280pressfops =
   bmp280_close_press,           /* close */
   bmp280_read_press,            /* read */
   bmp280_write,                 /* write */
-  0,                            /* seek */
-  bmp280_ioctl_press,           /* ioctl */
-  0                             /* unlink */
+  NULL,                         /* seek */
+  bmp280_ioctl_press            /* ioctl */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                        /* unlink */
+#endif
 };
 
 static const struct file_operations g_bmp280tempfops =
@@ -186,9 +188,11 @@ static const struct file_operations g_bmp280tempfops =
   bmp280_close_temp,            /* close */
   bmp280_read_temp,             /* read */
   bmp280_write,                 /* write */
-  0,                            /* seek */
-  bmp280_ioctl_temp,            /* ioctl */
-  0                             /* unlink */
+  NULL,                         /* seek */
+  bmp280_ioctl_temp             /* ioctl */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+  , NULL                        /* unlink */
+#endif
 };
 
 /* SCU instructions for pick pressure sensing data. */

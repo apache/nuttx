@@ -130,11 +130,11 @@ static int mac802154dev_rxframe(FAR struct mac802154_chardevice_s *dev,
 static int  mac802154dev_open(FAR struct file *filep);
 static int  mac802154dev_close(FAR struct file *filep);
 static ssize_t mac802154dev_read(FAR struct file *filep, FAR char *buffer,
-              size_t len);
+                                 size_t len);
 static ssize_t mac802154dev_write(FAR struct file *filep,
-              FAR const char *buffer, size_t len);
+                                  FAR const char *buffer, size_t len);
 static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
-              unsigned long arg);
+                               unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -142,9 +142,9 @@ static int  mac802154dev_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations mac802154dev_fops =
 {
-  mac802154dev_open , /* open */
+  mac802154dev_open,  /* open */
   mac802154dev_close, /* close */
-  mac802154dev_read , /* read */
+  mac802154dev_read,  /* read */
   mac802154dev_write, /* write */
   NULL,               /* seek */
   mac802154dev_ioctl, /* ioctl */

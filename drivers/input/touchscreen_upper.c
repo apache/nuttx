@@ -204,7 +204,7 @@ static int touch_close(FAR struct file *filep)
  ****************************************************************************/
 
 static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen)
+                           size_t buflen)
 {
   FAR struct inode *inode             = filep->f_inode;
   FAR struct touch_upperhalf_s *upper = inode->i_private;
@@ -222,8 +222,8 @@ static ssize_t touch_write(FAR struct file *filep, FAR const char *buffer,
  * Name: touch_read
  ****************************************************************************/
 
-static ssize_t
-touch_read(FAR struct file *filep, FAR char *buffer, size_t len)
+static ssize_t touch_read(FAR struct file *filep, FAR char *buffer,
+                          size_t len)
 {
   FAR struct touch_openpriv_s *openpriv = filep->f_priv;
   int ret;

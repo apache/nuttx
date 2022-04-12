@@ -73,7 +73,7 @@ static int g_errcode = 0;
 
 static const struct file_operations g_sysctlfops =
 {
-  .ioctl = sysctl_ioctl,
+  .ioctl = sysctl_ioctl
 };
 
 /****************************************************************************

@@ -59,8 +59,6 @@ struct lcddev_dev_s
 
 /* Character driver methods */
 
-static int lcddev_open(FAR struct file *filep);
-static int lcddev_close(FAR struct file *filep);
 static int lcddev_ioctl(FAR struct file *filep, int cmd,
                         unsigned long arg);
 
@@ -70,8 +68,8 @@ static int lcddev_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations lcddev_fops =
 {
-  lcddev_open,  /* open */
-  lcddev_close, /* close */
+  NULL,         /* open */
+  NULL,         /* close */
   NULL,         /* read */
   NULL,         /* write */
   NULL,         /* seek */
@@ -85,28 +83,6 @@ static const struct file_operations lcddev_fops =
 /****************************************************************************
  * Private Functions
  ****************************************************************************/
-
-/****************************************************************************
- * Name: lcddev_open
- ****************************************************************************/
-
-static int lcddev_open(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
-
-/****************************************************************************
- * Name: lcddev_close
- ****************************************************************************/
-
-static int lcddev_close(FAR struct file *filep)
-{
-  /* Nothing to do */
-
-  return OK;
-}
 
 /****************************************************************************
  * Name: lcddev_ioctl

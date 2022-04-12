@@ -107,10 +107,8 @@ static int lsm6dsl_selftest(FAR struct lsm6dsl_dev_s *priv, uint32_t mode);
 
 /* Character Driver Methods */
 
-static int lsm6dsl_open(FAR struct file *filep);
-static int lsm6dsl_close(FAR struct file *filep);
-static ssize_t lsm6dsl_read(FAR struct file *filep,
-                            FAR char *buffer, size_t buflen);
+static ssize_t lsm6dsl_read(FAR struct file *filep, FAR char *buffer,
+                            size_t buflen);
 static ssize_t lsm6dsl_write(FAR struct file *filep,
                              FAR const char *buffer, size_t buflen);
 static int lsm6dsl_ioctl(FAR struct file *filep, int cmd,
@@ -134,8 +132,8 @@ static double g_gyrofactor = 0;
 
 static const struct file_operations g_fops =
 {
-  lsm6dsl_open,    /* open */
-  lsm6dsl_close,   /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   lsm6dsl_read,    /* read */
   lsm6dsl_write,   /* write */
   NULL,            /* seek */
@@ -953,33 +951,6 @@ static int lsm6dsl_sensor_read(FAR struct lsm6dsl_dev_s *priv,
   sdata->g_y_data = y_valg * g_gyrofactor;
   sdata->g_z_data = z_valg * g_gyrofactor;
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dsl_open
- *
- * Description:
- *   This method is called when the device is opened.
- *
- ****************************************************************************/
-
-static int lsm6dsl_open(FAR struct file *filep)
-{
-  sninfo("Device LSM6DSL opened!!\n");
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm6dsl_close
- *
- * Description:
- *   This method is called when the device is closed.
- *
- ****************************************************************************/
-
-static int lsm6dsl_close(FAR struct file *filep)
-{
   return OK;
 }
 
