@@ -2977,6 +2977,7 @@ extern void GH3x2xWriteCapToFlash(void);
 extern void GH3x2xReadCapFromFlash(void);
 extern void GH3X2X_MoveDetectByCapData(STCapRawdata* pusCapData, uint16_t usCapDataCnt);
 extern void GH3x2xSlotTimeInfo(void);
+extern void GH3X2X_SetDrvEcode(int8_t chECode);
 
 #endif /* _GH3X2X_DRV_H_ */
 

@@ -1499,11 +1499,15 @@ void gh3020_fifo_process(void)
             }
 
           GH3X2X_ClearSoftEvent(GH3X2X_SOFT_EVENT_NEED_FORCE_READ_FIFO|GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
-
-          if (GH3X2X_RET_READ_FIFO_CONTINUE == GH3X2X_ReadFifodata(g_uchGh3x2xReadRawdataBuffer, &g_usGh3x2xReadRawdataLen, usFifoByteNum))
-            {
-              GH3X2X_SetSoftEvent(GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
-            }
+          if (usFifoByteNum != 0)
+          {
+              if (GH3X2X_RET_READ_FIFO_CONTINUE ==
+                  GH3X2X_ReadFifodata(g_uchGh3x2xReadRawdataBuffer,
+                                      &g_usGh3x2xReadRawdataLen, usFifoByteNum))
+              {
+                  GH3X2X_SetSoftEvent(GH3X2X_SOFT_EVENT_NEED_TRY_READ_FIFO);
+              }
+          }
 
         #if ((__SUPPORT_PROTOCOL_ANALYZE__)||(__SUPPORT_ALGO_INPUT_OUTPUT_DATA_HOOK_CONFIG__))
         #if (__SUPPORT_ELECTRODE_WEAR_STATUS_DUMP__)

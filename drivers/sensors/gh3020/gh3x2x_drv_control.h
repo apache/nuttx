@@ -528,6 +528,8 @@ uint8_t GH3X2X_ReceiveOverflowLengthBuffer(uint8_t *puchRespondBuffer, uint16_t 
 
 uint8_t GH3X2X_GetSoftWearColor(void);
 
+void GH3X2X_SetConfigDrvEcode(const FAR struct gh3020_initcfg_s *pstGh3x2xInitConfigParam);
+
 #endif /* _GH3X2X_DRV_CONTROL_H_ */
 
 /********END OF FILE********* Copyright (c) 2003 - 2021, Goodix Co., Ltd. ********/

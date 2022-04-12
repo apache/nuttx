@@ -370,6 +370,10 @@ int8_t GH3X2X_Init(FAR const struct gh3020_initcfg_s *pstGh3x2xInitConfigParam)
         GH3X2X_DEBUG_LOG("gh3x2x init param is null!\r\n");
     }
 
+    uint16_t efuse = gh3020_get_efuse();
+    GH3X2X_SetDrvEcode((int8_t)(efuse & GH3020_MSK_EFUSE_CTRL_RDATA1_LED));
+    GH3X2X_SetConfigDrvEcode(pstGh3x2xInitConfigParam);
+
     /* @ fix chip error code below here.
      * e.g. otp clk err
      */
@@ -425,7 +429,7 @@ int8_t GH3X2X_StartSampling(void)
                 for (int nAdcCnt=0; nAdcCnt < 4; nAdcCnt++)
                 {
                     uint8_t uchBgCancel=GH3X2X_GetSlotLedTiaGain(uchSlotIdx, nAdcCnt);
-                    g_puchTiaGainAfterSoftAgc[uchSlotIdx*4 + nAdcCnt]=uchBgCancel;
+                    g_puchTiaGainAfterSoftAgc[uchSlotIdx*4 + nAdcCnt] = uchBgCancel;
                 }
             }
 
@@ -2236,7 +2240,44 @@ uint16_t GH3x2x_CalSlotTime(uint8_t uchBgLevel, uint8_t uchBgCancel ,uint8_t uch
     return usSlotTime;
 }
 
+int8_t g_chDrvECode = 0;
 
+void GH3X2X_SetDrvEcode(int8_t chECode)
+{
+    g_chDrvECode = chECode;
+}
+
+uint16_t GH3X2X_SetLedDrvCurrent(float current_mA, uint8_t uchDrvNum, int8_t chECODE)
+{
+    float fEr;
+    float fY;
+    uint8_t  uchN;
+    uint16_t usDrvCode;
+    uint16_t usDrvScale;
+
+    if(uchDrvNum == 0)
+    {
+        fY = 0.1f;
+        usDrvScale =
+          gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,
+                              GH3020_DRV0_FULL_SCAL_CURRENT_LSB,
+                              GH3020_DRV0_FULL_SCAL_CURRENT_MSB);
+    }
+    else
+    {
+        fY = 0.01f;
+        usDrvScale =
+          gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,
+                              GH3020_DRV1_FULL_SCAL_CURRENT_LSB,
+                              GH3020_DRV1_FULL_SCAL_CURRENT_MSB);
+    }
+    uchN = 1 << (3 - usDrvScale);
+
+    fEr = 1.0f + (float)chECODE / 256.0f;
+    usDrvCode = (uint16_t)(0.5f + (fEr* 255.0f *(float)uchN) / (225.0f / current_mA - fY));
+
+    return usDrvCode;
+}
 
 /**
  * @fn      void GH3x2x_ChangeSampleParmForEngineeringMode(uint32_t unFunctionMode, struct gh3020_factestmode_param_s *pstSampleParaGroup , uint8_t uchSampleParaGroupNum)
@@ -2354,12 +2395,18 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const struct gh3020_frameinfo_s *
 
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParm[led current]\r\n");
 
-                        usDrv0Reg = ((uint16_t)pstTempSampleParam->led_drv0_current[uchChnlCnt]) * 255 /uchDr0Fs;
+                        usDrv0Reg =
+                          GH3X2X_SetLedDrvCurrent(
+                              (float)pstTempSampleParam->led_drv0_current[uchChnlCnt],
+                              0, (int8_t)g_chDrvECode);
                         if(usDrv0Reg > 255)
                         {
                             usDrv0Reg = 255;
                         }
-                        usDrv1Reg = ((uint16_t)pstTempSampleParam->led_drv1_current[uchChnlCnt]) * 255 /uchDr1Fs;
+                        usDrv1Reg =
+                          GH3X2X_SetLedDrvCurrent(
+                              (float)pstTempSampleParam->led_drv1_current[uchChnlCnt],
+                              1, (int8_t)g_chDrvECode);
                         if(usDrv1Reg > 255)
                         {
                             usDrv1Reg = 255;
@@ -2371,21 +2418,65 @@ void GH3x2x_ChangeSampleParmForEngineeringMode(const struct gh3020_frameinfo_s *
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParmForEngineeringMode: uchSlotNo = %d, uchTempAdtNo = %d, Drv0 = %d mA, Drv1 = %d mA \r\n",(int)uchTempSlotNo,(int)uchTempAdtNo,(int)pstTempSampleParam->uchLedDrv0Current[uchChnlCnt],(int)pstTempSampleParam->uchLedDrv1Current[uchChnlCnt]);
                         GH3X2X_DEBUG_LOG_PARAM("ChangeSampleParmForEngineeringMode: Drv0_reg = %d, Drv1_reg = %d \r\n",(int)usDrv0Reg,(int)usDrv1Reg);
                     }
-
                 }
-
-
             }
-
-
-
         }
     }
-
-
 }
 
+void GH3X2X_SetConfigDrvEcode(const FAR struct gh3020_initcfg_s *pstGh3x2xInitConfigParam)
+{
+    uint16_t usDrvScale;
+    uint8_t uchN;
+    float current;
 
+    if (pstGh3x2xInitConfigParam == GH3X2X_PTR_NULL)
+    {
+        return;
+    }
+
+    for (uint16_t usArrCnt = 0; usArrCnt < pstGh3x2xInitConfigParam->arrlen; usArrCnt ++)
+    {
+        uint16_t usRegData = pstGh3x2xInitConfigParam->pregarr[usArrCnt].regval;
+        uint16_t usRegAddr = pstGh3x2xInitConfigParam->pregarr[usArrCnt].regaddr;
+        if ((pstGh3x2xInitConfigParam->pregarr[usArrCnt].regaddr & 0xF000) == 0)
+        {
+            for (int uchSlotIndex = 0; uchSlotIndex < 8; uchSlotIndex++)
+            {
+                if ((pstGh3x2xInitConfigParam->pregarr[usArrCnt].regaddr) == 0x011E + (uchSlotIndex * 0x001C) + (0 * 0x0002))
+                {
+                    usDrvScale =
+                      gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,
+                                          GH3020_DRV0_FULL_SCAL_CURRENT_LSB,
+                                          GH3020_DRV0_FULL_SCAL_CURRENT_MSB);
+                    uchN = 1 << (3 - usDrvScale);
+                    current = 225.0f / (255.0f * uchN / (float)(usRegData&0xFF) + 0.1f);
+                    uint16_t usDrv0Reg = GH3X2X_SetLedDrvCurrent(current, 0, g_chDrvECode);
+                    GH3X2X_SlotLedCurrentConfig(uchSlotIndex, 0, usDrv0Reg);
+                    if (usDrv0Reg != (GH3X2X_ReadReg(usRegAddr)&0xFF))
+                    {
+                        GH3X2X_SAMPLE_LOG_PARAM("[%s]:reg verify error!!!\r\n", __FUNCTION__);
+                    }
+                }
+                else if ((pstGh3x2xInitConfigParam->pregarr[usArrCnt].regaddr) == 0x011E + (uchSlotIndex * 0x001C) + (1 * 0x0002))
+                {
+                    usDrvScale =
+                      gh3020_spi_readbits(GH3020_REG_LED_DRV_AD_REG,
+                                          GH3020_DRV1_FULL_SCAL_CURRENT_LSB,
+                                          GH3020_DRV1_FULL_SCAL_CURRENT_MSB);
+                    uchN = 1 << (3 - usDrvScale);
+                    current = 225.0f / (255.0f * uchN / (float)(usRegData&0xFF) + 0.01f);
+                    uint16_t usDrv1Reg = GH3X2X_SetLedDrvCurrent(current, 1, g_chDrvECode);
+                    GH3X2X_SlotLedCurrentConfig(uchSlotIndex, 1, usDrv1Reg);
+                    if (usDrv1Reg != (GH3X2X_ReadReg(usRegAddr)&0xFF))
+                    {
+                        GH3X2X_SAMPLE_LOG_PARAM("[%s]:reg verify error!!!\r\n", __FUNCTION__);
+                    }
+                }
+            }
+        }
+    }
+}
 
 /**
  * @fn       uint8_t GH3x2x_GetActiveChipResetFlag(void)

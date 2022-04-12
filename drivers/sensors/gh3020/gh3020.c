@@ -51,6 +51,7 @@
 /* Configurations */
 
 #define GH3020_BATCH_NUMBER      10         /* Maximum slots for each PPG */
+#define GH3020_TIAGAIN_FACTEST   0          /* TIA gain = 0(10K) in factest */
 
 /* SPI parameters */
 
@@ -80,8 +81,6 @@
 
 /* Constants */
 
-#define GH3020_CFGLIST_LEN_NML   146        /* Normal init cfg list length */
-#define GH3020_CFGLIST_LEN_FAC   75         /* Factest init cfg list length */
 #define GH3020_CFGLIST_NUM       2          /* Init cfg list number */
 #define GH3020_ONE_SECOND        1000000.0f /* 1 second = 1000000 us */
 
@@ -143,11 +142,15 @@ struct gh3020_dev_s
   uint32_t interval;                     /* Common interval(us) for polling */
   uint32_t intvl_prev;                   /* Previous common interval(us) */
   uint32_t channelmode;                  /* PPG channels status mode */
+  float tia_calibr;                      /* TIA calibration coefficent */
+  float led_calibr;                      /* LED calibration coefficent */
+  uint16_t efuse;                        /* EFUSE for TIA and LED driver */
   uint16_t fifowtm;                      /* FIFO water marker */
   uint8_t ppgdatacnt[GH3020_SENSOR_NUM]; /* Data number of each PPG channel */
   uint8_t activated;                     /* How many sensors are activated */
   bool factest_mode;                     /* If it's in factory test mode */
   bool updating;                         /* If any sensor need updating */
+  bool load_efuse;                       /* If EFUSE has been loaded */
 };
 
 /****************************************************************************
@@ -163,7 +166,8 @@ static void gh3020_spi_exchange(FAR struct gh3020_dev_s *priv,
 /* Functions which won't operate GH3020 directly, such as data processions */
 
 static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv);
-static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
+static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv,
+                                 FAR struct sensor_event_ppgq *pppg,
                                  FAR const struct gh3020_frameinfo_s
                                  *pframeinfo);
 
@@ -217,9 +221,9 @@ static const uint32_t gh3020_channel_function_list[GH3020_SENSOR_NUM] =
     GH3X2X_FUNCTION_HR,               /* HR(slot0) for ch0 (green dynamic) */
     GH3X2X_FUNCTION_SPO2,             /* SPO2(slot4) for ch1 (red dynamic) */
     GH3X2X_FUNCTION_HRV,              /* HRV(slot5) for ch2 (IR dynamic) */
-    GH3X2X_FUNCTION_RESP,             /* RESP(slot3) for ch3 (dark fixed) */
+    GH3X2X_FUNCTION_RESP,             /* RESP(slot2) for ch3 (dark fixed) */
     GH3X2X_FUNCTION_TEST2,            /* TEST2(slot1) for ch4 (green fixed) */
-    GH3X2X_FUNCTION_HSM               /* HSM(slot2) for ch5 (IR fixed) */
+    GH3X2X_FUNCTION_HSM               /* HSM(slot3) for ch5 (IR fixed) */
   };
 
 /* GH3020 ADC gain register values vs actual ADC gains (KOhm) */
@@ -246,7 +250,7 @@ static const struct sensor_ops_s g_gh3020_ops =
 
 /* Initial register values for normal functions */
 
-const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
+const struct gh3020_reg_s gh3020_reglist_normal[] =
 {
   {0x0004, 0x001f}, /* Maxmium sample rate = 32KHz / (31 +１) = 1000Hz */
   {0x0006, 0x0006}, /* GH3020_REG_DATA_CTRL0. Not mentioned in datasheet. */
@@ -256,55 +260,55 @@ const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
   {0x0102, 0x0302}, /* Slot2 uses slot_cfg2, slot3 uses slot_cfg3 */
   {0x0104, 0x0504}, /* Slot4 uses slot_cfg4, slot5 uses slot_cfg5 */
   {0x0106, 0x0806}, /* Slot6 uses slot_cfg6, slot7 is disabled */
-  {0x010a, 0x277c}, /* Slot_cfg0: sync signal, use FIFO, 4ADCs */
+  {0x010a, 0x277c}, /* Slot_cfg0(tunning G): sync signal, use FIFO, 4ADCs */
   {0x0110, 0x0f14}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 512x ADC */
   {0x0114, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x011e, 0x0013}, /* LED drv0 to LED0(to green LED) pin, 19/255*200=15mA */
-  {0x0120, 0x0013}, /* LED drv1 to LED4(to green LED) pin, 19/255*200=15mA */
-  {0x0122, 0x0c7f}, /* LED current (12~127)/255*200 = 9~100mA */
-  {0x0126, 0x277c}, /* Slot_cfg1: sync signal, use FIFO, 4ADCs */
-  {0x012c, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x011e, 0x0011}, /* LED drv0 to LED0(to green LED) pin, 14.9mA */
+  {0x0120, 0x0011}, /* LED drv1 to LED4(to green LED) pin, 14.99mA */
+  {0x0122, 0x0c7f}, /* LED current approximately (12~127)/255*200 = 9~100mA */
+  {0x0126, 0x277c}, /* Slot_cfg1(fixed G): sync signal, use FIFO, 4ADCs */
+  {0x012c, 0x0c10}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 64x ADC */
   {0x012e, 0x2222}, /* TIA0~3 50KOHm */
   {0x0130, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x013a, 0x0003}, /* LED drv0 to LED0(to green LED) pin, 3/255*200=2.5mA */
-  {0x013c, 0x0003}, /* LED drv1 to LED0(to green LED) pin, 3/255*200=2.5mA */
-  {0x0142, 0x277c}, /* Slot_cfg2: sync signal, use FIFO, 4ADCs */
-  {0x0148, 0x0c14}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 512x ADC */
+  {0x013a, 0x0005}, /* LED drv0 to LED0(to green LED) pin, 4.4mA */
+  {0x013c, 0x0006}, /* LED drv1 to LED0(to green LED) pin, 5.3mA */
+  {0x0142, 0x277c}, /* Slot_cfg2(dark): sync signal, use FIFO, 4ADCs */
+  {0x0148, 0x0000}, /* No BG or DC cancel, 64x ADC */
   {0x014a, 0x2222}, /* TIA0~3 50KOHm */
   {0x014c, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x0156, 0x0103}, /* LED drv0 to LED1(to IR LED) pin, 3/255*200=2.5mA */
-  {0x0158, 0x0103}, /* LED drv1 to LED1(to IR LED) pin, 3/255*200=2.5mA */
-  {0x015e, 0x277c}, /* Slot_cfg3: sync signal, use FIFO, 4ADCs */
-  {0x0164, 0x0004}, /* No BG or DC cancel, 512x ADC */
-  {0x0166, 0x0000}, /* TIA0~3 10KOHm */
+  {0x015e, 0x277c}, /* Slot_cfg3(fix IR): sync signal, use FIFO, 4ADCs */
+  {0x0164, 0x0c10}, /* DC&BG cancel, LED drv0&1 fixed, 1st BG, 64x ADC */
+  {0x0166, 0x2222}, /* TIA0~3 50KOHm */
   {0x0168, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x017a, 0x277c}, /* Slot_cfg4: sync signal, use FIFO, 4ADCs */
+  {0x0172, 0x0105}, /* LED drv1 to LED1(to IR LED) pin, 4.4mA */
+  {0x0174, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
+  {0x017a, 0x277c}, /* Slot_cfg4(tunning R): sync signal, use FIFO, 4ADCs */
   {0x0180, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
   {0x0182, 0x0000}, /* TIA0~3 10KOHm */
   {0x0184, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x018e, 0x0219}, /* LED drv0 to LED2(to red LED) pin, 25/255*200=20mA */
-  {0x0190, 0x0219}, /* LED drv1 to LED2(to red LED) pin, 25/255*200=20mA */
-  {0x0192, 0x137f}, /* LED current (19~127)/255*200 = 15~100 mA */
-  {0x0196, 0x277c}, /* Slot_cfg5: sync signal, use FIFO, 4ADCs */
+  {0x018e, 0x021c}, /* LED drv0 to LED2(to red LED) pin, 24.44mA */
+  {0x0190, 0x021d}, /* LED drv1 to LED2(to red LED) pin, 25.56mA */
+  {0x0192, 0x137f}, /* LED current approximately (19~127)/255*200=15~100 mA */
+  {0x0196, 0x277c}, /* Slot_cfg5(tunning IR): sync signal, use FIFO, 4ADCs */
   {0x019c, 0x0f16}, /* DC&BG cancel, ADC0 modifies drv0&1, 1st BG, 2048xADC */
   {0x019e, 0x0000}, /* TIA0~3 10KOHm */
   {0x01a0, 0x00aa}, /* All ADCs use 200pF TIA_CF */
-  {0x01aa, 0x0119}, /* LED drv0 to LED1(to IR LED) pin, 25/255*200=20mA */
-  {0x01ac, 0x0119}, /* LED drv1 to LED1(to IR LED) pin, 25/255*200=20mA */
-  {0x01ae, 0x137f}, /* LED current (19~127) / 255 * 200 = 15~100 mA */
-  {0x01b2, 0xc744}, /* Slot_cfg6: use FIFO, ADC0 */
+  {0x01aa, 0x011c}, /* LED drv0 to LED1(to IR LED) pin, 24.44mA */
+  {0x01ac, 0x011d}, /* LED drv1 to LED1(to IR LED) pin, 25.56mA */
+  {0x01ae, 0x137f}, /* LED current approximately (19~127)/255*200=15~100 mA */
+  {0x01b2, 0xc744}, /* Slot_cfg6(Goodix ADT): use FIFO, ADC0 */
   {0x01b4, 0x0001}, /* TIA0 connected to PD0, TIA disconnected */
   {0x01b6, 0x0000}, /* TIA2&3 disconnected */
   {0x01b8, 0x0c10}, /* BG&DC cancel, fixed LED current, 1st BG, 64x ADC */
-  {0x01ba, 0x4442}, /* TIA0 10KOhm, TIA1~3 100KOhm */
+  {0x01ba, 0x4442}, /* TIA0 50KOhm, TIA1~3 100KOhm */
   {0x01bc, 0x0002}, /* ADC0 uses 200pF TIA_CF, the rest use 50pF */
   {0x01c2, 0x0003}, /* ADC0 BG cancel source 256uA max. */
-  {0x01c6, 0x0106}, /* LED drv0 to LED1(to IR LED) pin, 6/255*200=5mA */
-  {0x01c8, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 6/255*200=5mA */
+  {0x01c6, 0x0105}, /* LED drv0 to LED1(to IR LED) pin, 4.4mA */
+  {0x01c8, 0x0106}, /* LED drv1 to LED1(to IR LED) pin, 5.3mA */
   {0x01ec, 0x0122}, /* Slot0's time 290 us (green dynamic) */
-  {0x01ee, 0x0122}, /* Slot1's time 290 us (green fixed) */
-  {0x01f0, 0x0122}, /* Slot2's time 290 us (IR fixed) */
-  {0x01f2, 0x005f}, /* Slot3's time 95 us (dark fixed) */
+  {0x01ee, 0x0098}, /* Slot1's time 152 us (green fixed) */
+  {0x01f0, 0x001a}, /* Slot2's time 26 us (dark fixed) */
+  {0x01f2, 0x0098}, /* Slot3's time 152 us (IR fixed) */
   {0x01f4, 0x02fa}, /* Slot4's time 762 us (red dynamic) */
   {0x01f6, 0x02fa}, /* Slot5's time 762 us (IR dynamic) */
   {0x01f8, 0x0098}, /* Slot6's time 152 us (hard wear-on detection) */
@@ -333,8 +337,8 @@ const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
   {0x1000, 0x0000}, /* Virtual register. Maintained by Goodix. */
   {0x1002, 0x3080}, /* Virtual register. Maintained by Goodix. */
   {0x1004, 0x0000}, /* Virtual register. Maintained by Goodix. */
-  {0x1006, 0x45f0}, /* Virtual register. Maintained by Goodix. */
-  {0x1008, 0x29a2}, /* Virtual register. Maintained by Goodix. */
+  {0x1006, 0x492e}, /* Virtual register. Maintained by Goodix. */
+  {0x1008, 0x29f0}, /* Virtual register. Maintained by Goodix. */
   {0x100a, 0x0001}, /* Virtual register. Maintained by Goodix. */
   {0x10e0, 0x0202}, /* Virtual register. Maintained by Goodix. */
   {0x10e2, 0x0202}, /* Virtual register. Maintained by Goodix. */
@@ -368,14 +372,14 @@ const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
   {0x2046, 0xaaa2}, /* Virtual register. Maintained by Goodix. */
   {0x2048, 0xbab2}, /* Virtual register. Maintained by Goodix. */
   {0x2066, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2068, 0x4a42}, /* Virtual register. Maintained by Goodix. */
-  {0x206a, 0x5a52}, /* Virtual register. Maintained by Goodix. */
+  {0x2068, 0x6a62}, /* Virtual register. Maintained by Goodix. */
+  {0x206a, 0x7a72}, /* Virtual register. Maintained by Goodix. */
   {0x20cc, 0x0004}, /* Virtual register. Maintained by Goodix. */
   {0x20ce, 0x8b83}, /* Virtual register. Maintained by Goodix. */
   {0x20d0, 0x9b93}, /* Virtual register. Maintained by Goodix. */
   {0x2176, 0x0004}, /* Virtual register. Maintained by Goodix. */
-  {0x2178, 0x6d65}, /* Virtual register. Maintained by Goodix. */
-  {0x217a, 0x7d75}, /* Virtual register. Maintained by Goodix. */
+  {0x2178, 0x4d45}, /* Virtual register. Maintained by Goodix. */
+  {0x217a, 0x5d55}, /* Virtual register. Maintained by Goodix. */
   {0x21dc, 0x0004}, /* Virtual register. Maintained by Goodix. */
   {0x21de, 0x2921}, /* Virtual register. Maintained by Goodix. */
   {0x21e0, 0x3931}, /* Virtual register. Maintained by Goodix. */
@@ -398,7 +402,7 @@ const struct gh3020_reg_s gh3020_reglist_normal[GH3020_CFGLIST_LEN_NML] =
 
 /* Initial register values for factest mode */
 
-const struct gh3020_reg_s gh3020_reglist_factest[GH3020_CFGLIST_LEN_FAC] =
+const struct gh3020_reg_s gh3020_reglist_factest[] =
 {
   {0x0004, 0x001f},
   {0x000a, 0x00c8},
@@ -481,8 +485,15 @@ const struct gh3020_reg_s gh3020_reglist_factest[GH3020_CFGLIST_LEN_FAC] =
 
 const struct gh3020_initcfg_s gh3020_initcfg_list[GH3020_CFGLIST_NUM] =
 {
-  {gh3020_reglist_normal, GH3020_CFGLIST_LEN_NML},
-  {gh3020_reglist_factest, GH3020_CFGLIST_LEN_FAC}
+  {
+    gh3020_reglist_normal,
+    sizeof(gh3020_reglist_normal) / sizeof(FAR struct gh3020_reg_s)
+  },
+
+  {
+    gh3020_reglist_factest,
+    sizeof(gh3020_reglist_factest) / sizeof(FAR struct gh3020_reg_s)
+  }
 };
 
 /****************************************************************************
@@ -660,6 +671,7 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
  *   them in specialized PPGQ struct.
  *
  * Input Parameters:
+ *   priv - The device struct pointer.
  *   pppg       - Pointer to PPGQ struct to store this frame's useful infos.
  *   pframeinfo - Pointer to the info of frame readback.
  *
@@ -671,96 +683,52 @@ static uint16_t gh3020_calcu_fifowtm(FAR struct gh3020_dev_s *priv)
  *
  ****************************************************************************/
 
-static void gh3020_extract_frame(FAR struct sensor_event_ppgq *pppg,
+static void gh3020_extract_frame(FAR struct gh3020_dev_s *priv,
+                                 FAR struct sensor_event_ppgq *pppg,
                                  FAR const struct gh3020_frameinfo_s
                                  *pframeinfo)
 {
   int32_t raw;
+  int32_t raw_without_baseline;
   uint32_t gain;
+  uint8_t led_drv0;
+  uint8_t led_drv1;
   uint8_t i;
 
-  pppg->current = (((pframeinfo->punFrameAgcInfo[0] & 0x0000ff00u) >> 8)
-                  + ((pframeinfo->punFrameAgcInfo[0] & 0x00ff0000u) >> 16))
-                  * GH3020_LEDDRV_CURRENT_MA_MAX * 1000 / 0xffu ;
+  led_drv0 = (pframeinfo->punFrameAgcInfo[0] & 0x0000ff00u) >> 8;
+  led_drv1 = (pframeinfo->punFrameAgcInfo[0] & 0x00ff0000u) >> 16;
+  if (priv->load_efuse)
+    {
+      pppg->current = (uint32_t)
+        (GH3020_LED_DRV_VOLTAGE / (priv->led_calibr * 255.0f / led_drv0 +
+                                   GH3020_LED_DRV0_Y0) +
+         GH3020_LED_DRV_VOLTAGE / (priv->led_calibr * 255.0f / led_drv1 +
+                                   GH3020_LED_DRV1_Y1));
+    }
+  else
+    {
+      pppg->current = (uint32_t)
+        (GH3020_LED_DRV_VOLTAGE / (255.0f / led_drv0 + GH3020_LED_DRV0_Y0) +
+         GH3020_LED_DRV_VOLTAGE / (255.0f / led_drv1 + GH3020_LED_DRV1_Y1));
+    }
 
   for (i = 0; i < GH3020_ADC_NUM; i++)
     {
       raw = (int32_t)(pframeinfo->punFrameRawdata[i]);
       gain = (uint32_t)pframeinfo->punFrameAgcInfo[i] & 0x0000000f;
       pppg->gain[i] = gh3020_gain_list[gain];
+
+      if (priv->load_efuse)
+        {
+          raw_without_baseline = raw - GH3020_ADC_BASELINE;
+          raw_without_baseline = (int32_t)((float)raw_without_baseline *
+                                           priv->tia_calibr);
+          raw = raw_without_baseline + GH3020_ADC_BASELINE;
+        }
+
       pppg->ppg[i] = (uint32_t)raw;
     }
 }
-
-/****************************************************************************
- * Name: gh3020_factest_start
- *
- * Description:
- *   GH3020 start sample in factest mode with specialized LED color and
- *   driver current.
- *
- * Input Parameters:
- *   channelmode - The PPG channel want to test.
- *   current     - LED driver current.
- *
- * Returned Value:
- *   None.
- *
- * Assumptions/Limitations:
- *   None.
- *
- ****************************************************************************/
-#ifdef CONFIG_FACTEST_SENSORS_GH3020
-static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
-{
-  struct gh3020_factestmode_param_s sample_para;
-
-  memset(&sample_para, 0, sizeof(sample_para));
-  memset(&sample_para.tia_gain[4], GH3020_FACTEST_TIA_GAIN_100_K, 12);
-  sample_para.channelmode = GH3X2X_FUNCTION_TEST1;
-  sample_para.tia_gain_change_en = true;
-  sample_para.sample_rate_change_en = true;
-  sample_para.int_time_change_en = true;
-  sample_para.led_current_change_en = true;
-  sample_para.sample_rate = GH3020_SR_DFT;
-  sample_para.int_time = GH3020_FACTEST_INT_TIME_79_US;
-
-  switch (channelmode)
-    {
-      case GH3X2X_FUNCTION_HR:    /* Green */
-        {
-          sample_para.led_drv0_current[7] = (uint8_t)(current / 2000);
-          sample_para.led_drv1_current[7] = (uint8_t)(current / 2000);
-        }
-        break;
-
-      case GH3X2X_FUNCTION_SPO2:  /* Red */
-        {
-          sample_para.led_drv0_current[11] = (uint8_t)(current / 2000);
-          sample_para.led_drv1_current[11] = (uint8_t)(current / 2000);
-        }
-        break;
-
-      case GH3X2X_FUNCTION_HRV:   /* IR */
-        {
-          sample_para.led_drv0_current[15] = (uint8_t)(current / 2000);
-          sample_para.led_drv1_current[15] = (uint8_t)(current / 2000);
-        }
-        break;
-
-      case GH3X2X_FUNCTION_RESP:  /* Dark */
-          break;
-
-      default:
-        {
-          snerr("Invalid PPG channel mode.\n");
-          return;
-        }
-  }
-
-  gh3020_start_sampling_factest(GH3X2X_FUNCTION_TEST1, &sample_para, 1);
-}
-#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
 /****************************************************************************
  * Name: gh3020_push_data
@@ -1051,6 +1019,77 @@ static void gh3020_update_sensor(FAR struct gh3020_dev_s *priv)
         }
     }
 }
+
+/****************************************************************************
+ * Name: gh3020_factest_start
+ *
+ * Description:
+ *   GH3020 start sample in factest mode with specialized LED color and
+ *   driver current.
+ *
+ * Input Parameters:
+ *   channelmode - The PPG channel want to test.
+ *   current     - LED driver current.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_FACTEST_SENSORS_GH3020
+static void gh3x2x_factest_start(uint32_t channelmode, uint32_t current)
+{
+  struct gh3020_factestmode_param_s sample_para;
+
+  memset(&sample_para, 0, sizeof(sample_para));
+  memset(&sample_para.tia_gain[4], GH3020_FACTEST_TIA_GAIN_100_K, 12);
+  sample_para.channelmode = GH3X2X_FUNCTION_TEST1;
+  sample_para.tia_gain_change_en = true;
+  sample_para.sample_rate_change_en = true;
+  sample_para.int_time_change_en = true;
+  sample_para.led_current_change_en = true;
+  sample_para.sample_rate = GH3020_SR_DFT;
+  sample_para.int_time = GH3020_FACTEST_INT_TIME_79_US;
+
+  switch (channelmode)
+    {
+      case GH3X2X_FUNCTION_HR:    /* Green */
+        {
+          sample_para.led_drv0_current[7] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[7] = (uint8_t)(current / 2000);
+        }
+        break;
+
+      case GH3X2X_FUNCTION_SPO2:  /* Red */
+        {
+          sample_para.led_drv0_current[11] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[11] = (uint8_t)(current / 2000);
+        }
+        break;
+
+      case GH3X2X_FUNCTION_HRV:   /* IR */
+        {
+          sample_para.led_drv0_current[15] = (uint8_t)(current / 2000);
+          sample_para.led_drv1_current[15] = (uint8_t)(current / 2000);
+        }
+        break;
+
+      case GH3X2X_FUNCTION_RESP:  /* Dark */
+          break;
+
+      default:
+        {
+          snerr("Invalid PPG channel mode.\n");
+          return;
+        }
+  }
+
+  gh3020_start_sampling_factest(GH3X2X_FUNCTION_TEST1, &sample_para, 1);
+}
+#endif  /* CONFIG_FACTEST_SENSORS_GH3020 */
 
 /****************************************************************************
  * Name: gh3020_activate
@@ -2038,6 +2077,60 @@ void gh3020_rstctrl(uint8_t pinlevel)
 }
 
 /****************************************************************************
+ * Name: gh3020_get_efuse
+ *
+ * Description:
+ *   Get EFUSE for calibration.
+ *
+ * Input Parameters:
+ *   None.
+ *
+ * Returned Value:
+ *   None.
+ *
+ * Assumptions/Limitations:
+ *   None.
+ *
+ ****************************************************************************/
+
+uint16_t gh3020_get_efuse(void)
+{
+  if (g_priv->load_efuse == false)
+    {
+      int8_t tia_efuse;
+      int8_t led_efuse;
+
+      /* Enable EFUSE and load value into the register. */
+
+      gh3020_spi_writereg(GH3020_REG_EFUSE_CTRL_CMD,
+                          GH3020_MSK_EFUSE_CTRL_CMD_EN);
+      gh3020_spi_writereg(GH3020_REG_EFUSE_CTRL_CMD,
+                          GH3020_MSK_EFUSE_CTRL_CMD_EN |
+                          GH3020_MSK_EFUSE_CTRL_CMD_START);
+
+      /* Wait until it's ready, then read it. */
+
+      while (!(gh3020_spi_readreg(GH3020_REG_EFUSE_CTRL_STATUS) &
+               GH3020_MSK_EFUSE_CTRL_STATUS_DONE));
+      g_priv->efuse = gh3020_spi_readreg(GH3020_REG_EFUSE_CTRL_RDATA_1);
+
+      /* Disable EFUSE clock to save energy. */
+
+      gh3020_spi_writereg(GH3020_REG_EFUSE_CTRL_CMD, 0);
+
+      /* Mark EFUSE as loaded. Calculate TIA calibration coefficent. */
+
+      tia_efuse = (int8_t)(g_priv->efuse >> GH3020_OFFSET_EFUSE1_TIA);
+      led_efuse = (int8_t)(g_priv->efuse & GH3020_MSK_EFUSE_CTRL_RDATA1_LED);
+      g_priv->tia_calibr = 1.0f / (1.0f + (float)tia_efuse / 512.0f);
+      g_priv->led_calibr = 1.0f + (float)led_efuse / 255.0f;
+      g_priv->load_efuse = true;
+    }
+
+  return g_priv->efuse;
+}
+
+/****************************************************************************
  * Name: gh3020_get_ppg_data
  *
  * Description:
@@ -2103,7 +2196,8 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
   if (g_priv->sensor[idx].activated == true &&
       g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
     {
-      gh3020_extract_frame(&g_priv->ppgdata[idx][g_priv->ppgdatacnt[idx]],
+      gh3020_extract_frame(g_priv,
+                           &g_priv->ppgdata[idx][g_priv->ppgdatacnt[idx]],
                            pfameinfo);
       g_priv->ppgdatacnt[idx]++;
     }
@@ -2125,6 +2219,7 @@ void gh3020_get_ppg_data(FAR const struct gh3020_frameinfo_s *pfameinfo)
  *   None.
  *
  ****************************************************************************/
+
 #ifdef CONFIG_FACTEST_SENSORS_GH3020
 void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 {
@@ -2153,7 +2248,7 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
           fifoinfo.flag_ledadj_ecgrecover = (temp >> 26) & 0x00000001;
           fifoinfo.flag_ledadj_agc_up = (temp >> 25) & 0x00000001;
 
-          rawdata = (int32_t)(fifoinfo.adccode) - 0x800000;
+          rawdata = (int32_t)(fifoinfo.adccode) - GH3020_ADC_BASELINE;
           if (rawdata < 0)
             {
               rawdata = 0;
@@ -2194,14 +2289,26 @@ void gh3020_get_rawdata(FAR uint8_t *pbuf, uint16_t len)
 
           if (chidx < GH3020_SENSOR_NUM)
             {
-              ppg[chidx].ppg[fifoinfo.adc_idx] = (uint32_t)rawdata;
+              if (g_priv->load_efuse)
+                {
+                  ppg[chidx].ppg[fifoinfo.adc_idx] =
+                    (uint32_t)((float)rawdata * g_priv->tia_calibr);
+                }
+              else
+                {
+                  ppg[chidx].ppg[fifoinfo.adc_idx] = (uint32_t)rawdata;
+                }
+
+              ppg[chidx].current = g_priv->sensor[chidx].current;
+              ppg[chidx].gain[fifoinfo.adc_idx] =
+                gh3020_gain_list[GH3020_TIAGAIN_FACTEST];
             }
         }
 
       for (chidx = 0; chidx <= GH3020_PPG3_SENSOR_IDX; chidx++)
         {
           if (g_priv->sensor[chidx].activated == true &&
-              g_priv->ppgdatacnt[idx] < GH3020_BATCH_NUMBER)
+              g_priv->ppgdatacnt[chidx] < GH3020_BATCH_NUMBER)
             {
               g_priv->ppgdata[chidx][g_priv->ppgdatacnt[chidx]] = ppg[chidx];
               g_priv->ppgdatacnt[chidx]++;

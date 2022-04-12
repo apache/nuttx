@@ -378,10 +378,15 @@
 #define GH3020_MSK_SLOT_LED_CURRENT_CLEAR  0x00ffu /* Slot LED current clear */
 #define GH3020_MSK_SLOT_TIA_GAIN           0x000fu /* Slot TIA gain value */
 #define GH3020_MSK_SLOT_KDC_THR            0x0007u /* kdc thr bits mark */
+#define GH3020_MSK_EFUSE_CTRL_CMD_START    0x0010u /* Start EFUSE R/W */
+#define GH3020_MSK_EFUSE_CTRL_CMD_EN       0x0020u /* Enable EFUSE clock */
+#define GH3020_MSK_EFUSE_CTRL_STATUS_DONE  0x0001u /* EFUSE read finished */
+#define GH3020_MSK_EFUSE_CTRL_RDATA1_LED   0X00ffu /* LED driver in EFUSE1 */
 
 /* Bit offset */
 
 #define GH3020_OFFSET_SLOT_CTRL            0x001c  /* slot ctrl reg offset */
+#define GH3020_OFFSET_EFUSE1_TIA           8       /* TIA offset in EFUSE1 */
 
 /* Bit filed index */
 
@@ -462,11 +467,15 @@
 
 /* GH3020 constants */
 
-#define GH3020_FACTEST_CH_MAX              32      /* Maximum factest channels */
-#define GH3020_CMD_DELAY_US                750     /* Delay time(us) for a cmd */
-#define GH3020_ADC_NUM                     4       /* GH3020 has 4 ADC channels */
-#define GH3020_DATA_PER_SAMPLE             4       /* Each sample has 4 PD data */
-#define GH3020_LEDDRV_CURRENT_MA_MAX       200     /* Each LED driver output 200mA max. */
+#define GH3020_FACTEST_CH_MAX              32        /* Maximum factest channels */
+#define GH3020_CMD_DELAY_US                750       /* Delay time(us) for a cmd */
+#define GH3020_ADC_NUM                     4         /* GH3020 has 4 ADC channels */
+#define GH3020_DATA_PER_SAMPLE             4         /* Each sample has 4 PD data */
+#define GH3020_LEDDRV_CURRENT_MA_MAX       200       /* Each LED driver output 200mA max. */
+#define GH3020_ADC_BASELINE                0x800000  /* ADC baseline */
+#define GH3020_LED_DRV0_Y0                 0.1f      /* LED driver0 Y0 = 0.1 Ohm */
+#define GH3020_LED_DRV1_Y1                 0.01f     /* LED driver0 Y1 = 0.01 Ohm */
+#define GH3020_LED_DRV_VOLTAGE             225000.0f /* LED driver source voltage = 225000 uV */
 
 /* Part5 Macros */
 
@@ -521,10 +530,10 @@ struct gh3020_factestmode_param_s
   uint8_t  led_drv1_current[GH3020_FACTEST_CH_MAX];
   uint16_t sample_rate;                   /* Sample rate (5Hz~1000Hz) */
   uint8_t  int_time;                      /* ADC integation time */
-  bool  tia_gain_change_en;               /* If need to change TIA gain */
-  bool  led_current_change_en;            /* If need to change LED current */
-  bool  sample_rate_change_en;            /* If need to change sample rate */
-  bool  int_time_change_en;               /* If need to change ADC int time */
+  bool     tia_gain_change_en;            /* If need to change TIA gain */
+  bool     led_current_change_en;         /* If need to change LED current */
+  bool     sample_rate_change_en;         /* If need to change sample rate */
+  bool     int_time_change_en;            /* If need to change ADC int time */
 };
 
 /****************************************************************************
