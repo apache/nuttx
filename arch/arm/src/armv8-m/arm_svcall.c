@@ -174,9 +174,6 @@ int arm_svcall(int irq, void *context, void *arg)
       case SYS_save_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0);
-#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
-          arm_savefpu(regs);
-#endif
           memcpy((uint32_t *)regs[REG_R1], regs, XCPTCONTEXT_SIZE);
         }
         break;
@@ -225,9 +222,6 @@ int arm_svcall(int irq, void *context, void *arg)
       case SYS_switch_context:
         {
           DEBUGASSERT(regs[REG_R1] != 0 && regs[REG_R2] != 0);
-#if defined(CONFIG_ARCH_FPU) && defined(CONFIG_ARMV8M_LAZYFPU)
-          arm_savefpu(regs);
-#endif
           *(uint32_t **)regs[REG_R1] = regs;
           CURRENT_REGS = (uint32_t *)regs[REG_R2];
         }
