@@ -32,10 +32,31 @@
 #include <nuttx/sched.h>
 #include <nuttx/arch.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/mm/map.h>
 
 #include "shm/shm.h"
 
 #ifdef CONFIG_MM_SHM
+
+/****************************************************************************
+ * Private Functions
+ ****************************************************************************/
+
+static int munmap_shm(FAR struct task_group_s *group,
+                      FAR struct mm_map_entry_s *entry,
+                      FAR void *start,
+                      size_t length)
+{
+  FAR const void *shmaddr = entry->vaddr;
+  int shmid = entry->priv.i;
+
+  if (mm_map_remove(get_group_mm(group), entry))
+    {
+      shmerr("ERROR: mm_map_remove() failed\n");
+    }
+
+  return shmdt_priv(group, shmaddr, shmid);
+}
 
 /****************************************************************************
  * Public Functions
@@ -103,6 +124,7 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
   FAR void *vaddr;
   unsigned int npages;
   int ret;
+  struct mm_map_entry_s entry;
 
   /* Get the region associated with the shmid */
 
@@ -114,9 +136,8 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
 
   tcb = nxsched_self();
   DEBUGASSERT(tcb && tcb->group);
+
   group = tcb->group;
-  DEBUGASSERT(group->tg_shm.gs_handle != NULL &&
-              group->tg_shm.gs_vaddr[shmid] == 0);
 
   /* Get exclusive access to the region data structure */
 
@@ -150,12 +171,23 @@ FAR void *shmat(int shmid, FAR const void *shmaddr, int shmflg)
       goto errout_with_vaddr;
     }
 
-  /* Save the virtual address of the region.  We will need that in shmat()
+  /* Save the virtual address of the region.  We will need that in shmdt()
    * to do the reverse lookup:  Give the virtual address of the region to
    * detach, we need to get the region table index.
    */
 
-  group->tg_shm.gs_vaddr[shmid] = (uintptr_t)vaddr;
+  entry.vaddr = vaddr;
+  entry.length = region->sr_ds.shm_segsz;
+  entry.offset = 0;
+  entry.munmap = munmap_shm;
+  entry.priv.i = shmid;
+
+  ret = mm_map_add(&entry);
+  if (ret < 0)
+    {
+      shmerr("ERROR: mm_map_add() failed\n");
+      goto errout_with_vaddr;
+    }
 
   /* Increment the count of processes attached to this region */
 
