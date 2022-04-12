@@ -126,8 +126,6 @@ void up_schedule_sigaction(struct tcb_s *tcb, sig_deliver_t sigdeliver)
                * been delivered.
                */
 
-              tcb->xcp.saved_regs = (uintptr_t *)CURRENT_REGS;
-
               riscv_savestate(tcb->xcp.saved_regs);
 
               /* Duplicate the register context.  These will be
