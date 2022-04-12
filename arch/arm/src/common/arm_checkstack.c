@@ -168,12 +168,13 @@ void arm_stack_color(FAR void *stackbase, size_t nbytes)
   uintptr_t end;
   size_t nwords;
   FAR uint32_t *ptr;
+  uintptr_t sp;
 
   /* Take extra care that we do not write outside the stack boundaries */
 
   start = INT32_ALIGN_UP((uintptr_t)stackbase);
   end   = nbytes ? INT32_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
-          up_getsp(); /* 0: colorize the running stack */
+          (uintptr_t)&sp; /* 0: colorize the running stack */
 
   /* Get the adjusted size based on the top and bottom of the stack */
 

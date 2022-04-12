@@ -217,12 +217,13 @@ void riscv_stack_color(void *stackbase, size_t nbytes)
   uintptr_t end;
   size_t nwords;
   uint32_t *ptr;
+  uintptr_t sp;
 
   /* Take extra care that we do not write outside the stack boundaries */
 
   start = STACK_ALIGN_UP((uintptr_t)stackbase);
   end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
-          up_getsp(); /* 0: colorize the running stack */
+          (uintptr_t)&sp; /* 0: colorize the running stack */
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
