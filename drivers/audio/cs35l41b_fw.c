@@ -1012,9 +1012,17 @@ int cs35l41b_load_calibration_value(FAR struct cs35l41b_dev_s *priv)
       return ERROR;
     }
 
-  if (priv->lower->get_caliberate_result(&value) != OK)
+  if (!priv->lower->get_caliberate_result)
     {
+      audwarn("lower get calibration result is invalid!\n");
       value = 0x1fb1;
+    }
+  else
+    {
+      if (priv->lower->get_caliberate_result(&value) != OK)
+        {
+          value = 0x1fb1;
+        }
     }
 
   address = get_symbol_link_address(CS35L41_SYM_CSPL_CAL_R);
