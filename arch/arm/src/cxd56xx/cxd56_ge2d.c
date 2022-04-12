@@ -46,8 +46,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int ge2d_open(FAR struct file *filep);
-static int ge2d_close(FAR struct file *filep);
 static ssize_t ge2d_read(FAR struct file *filep, FAR char *buffer,
                          size_t len);
 static ssize_t ge2d_write(FAR struct file *filep, FAR const char *buffer,
@@ -63,12 +61,9 @@ static int ge2d_irqhandler(int irq, FAR void *context, FAR void *arg);
 
 static const struct file_operations g_ge2dfops =
 {
-  .open  = ge2d_open,
-  .close = ge2d_close,
   .read  = ge2d_read,
   .write = ge2d_write,
-  .seek  = NULL,
-  .ioctl = ge2d_ioctl,
+  .ioctl = ge2d_ioctl
 };
 
 static sem_t g_wait;
@@ -97,24 +92,6 @@ static void ge2d_semgive(sem_t *id)
 }
 
 /****************************************************************************
- * Name: ge2d_open
- ****************************************************************************/
-
-static int ge2d_open(FAR struct file *filep)
-{
-  return 0;
-}
-
-/****************************************************************************
- * Name: ge2d_close
- ****************************************************************************/
-
-static int ge2d_close(FAR struct file *filep)
-{
-  return 0;
-}
-
-/****************************************************************************
  * Name: ge2d_read
  ****************************************************************************/
 
@@ -129,8 +106,7 @@ static ssize_t ge2d_read(FAR struct file *filep,
  * Name: ge2d_write
  ****************************************************************************/
 
-static ssize_t ge2d_write(FAR struct file *filep,
-                          FAR const char *buffer,
+static ssize_t ge2d_write(FAR struct file *filep, FAR const char *buffer,
                           size_t len)
 {
   uint32_t bits;

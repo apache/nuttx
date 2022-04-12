@@ -70,12 +70,10 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 
 /* Character driver methods */
 
-static int     max7219_open(FAR struct file *filep);
-static int     max7219_close(FAR struct file *filep);
 static ssize_t max7219_read(FAR struct file *filep, FAR char *buffer,
                             size_t buflen);
 static ssize_t max7219_write(FAR struct file *filep, FAR const char *buffer,
-                            size_t buflen);
+                             size_t buflen);
 
 /****************************************************************************
  * Private Data
@@ -83,8 +81,8 @@ static ssize_t max7219_write(FAR struct file *filep, FAR const char *buffer,
 
 static const struct file_operations g_max7219fops =
 {
-  max7219_open,   /* open */
-  max7219_close,  /* close */
+  NULL,           /* open */
+  NULL,           /* close */
   max7219_read,   /* read */
   max7219_write,  /* write */
   NULL,           /* seek */
@@ -154,32 +152,6 @@ static inline void max7219_write16(FAR struct max7219_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: max7219_open
- *
- * Description:
- *   This function is called whenever the MAX7219 device is opened.
- *
- ****************************************************************************/
-
-static int max7219_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: max7219_close
- *
- * Description:
- *   This routine is called when the LM-75 device is closed.
- *
- ****************************************************************************/
-
-static int max7219_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: max7219_read
  ****************************************************************************/
 
@@ -194,7 +166,7 @@ static ssize_t max7219_read(FAR struct file *filep,
  ****************************************************************************/
 
 static ssize_t max7219_write(FAR struct file *filep, FAR const char *buffer,
-                          size_t buflen)
+                             size_t buflen)
 {
   FAR struct inode *inode = filep->f_inode;
   FAR struct max7219_dev_s *priv = inode->i_private;

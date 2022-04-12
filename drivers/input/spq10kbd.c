@@ -1060,7 +1060,7 @@ int spq10kbd_register(FAR struct i2c_master_s *i2c,
 
   priv->config->enable(priv->config, true);
 
-  snprintf(kbddevname, DEV_NAMELEN, DEV_FORMAT, kbdminor);
+  snprintf(kbddevname, sizeof(kbddevname), DEV_FORMAT, kbdminor);
   iinfo("Registering %s\n", kbddevname);
   ret = register_driver(kbddevname, &g_hidkbd_fops, 0666, priv);
 

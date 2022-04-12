@@ -1915,7 +1915,7 @@ int mxt_register(FAR struct i2c_master_s *i2c,
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &mxt_fops, 0666, priv);

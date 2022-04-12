@@ -2438,8 +2438,6 @@ static void cxd56_gnss_cpufifoapi_signalhandler(uint32_t data,
 
   priv->apiret = CXD56_CPU1_GET_DATA((int)data);
   nxsem_post(&priv->apiwait);
-
-  return;
 }
 
 /****************************************************************************

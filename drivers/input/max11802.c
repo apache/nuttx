@@ -1236,7 +1236,7 @@ int max11802_register(FAR struct spi_dev_s *spi,
 
   /* Register the device as an input device */
 
-  snprintf(devname, DEV_NAMELEN, DEV_FORMAT, minor);
+  snprintf(devname, sizeof(devname), DEV_FORMAT, minor);
   iinfo("Registering %s\n", devname);
 
   ret = register_driver(devname, &max11802_fops, 0666, priv);

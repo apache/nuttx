@@ -52,8 +52,6 @@
  * Private Function Prototypes
  ****************************************************************************/
 
-static int     phyplus_stub_open(FAR struct file *filep);
-static int     phyplus_stub_close(FAR struct file *filep);
 static ssize_t phyplus_stub_read(
                 FAR struct file *filep, FAR char *buffer, size_t buflen);
 static ssize_t phyplus_stub_write(
@@ -70,15 +68,15 @@ static int     phyplus_stub_ioctl(
 
 static const struct file_operations g_stub_drvrops =
 {
-  phyplus_stub_open,   /* open */
-  phyplus_stub_close,  /* close */
+  NULL,                /* open */
+  NULL,                /* close */
   phyplus_stub_read,   /* read */
   phyplus_stub_write,  /* write */
   phyplus_stub_seek,   /* seek */
   phyplus_stub_ioctl,  /* ioctl */
   NULL                 /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  , NULL       /* unlink */
+  , NULL               /* unlink */
 #endif
 };
 
@@ -567,33 +565,6 @@ static int phyplus_parse_params_and_action(char *buff)
 }
 
 /****************************************************************************
- * Name: phyplus_stub_open
- *
- * Description:
- *   Standard character driver open method.
- *
- ****************************************************************************/
-
-static int phyplus_stub_open(FAR struct file *filep)
-{
-  filep->f_pos = 0;
-  return OK;
-}
-
-/****************************************************************************
- * Name: phyplus_stub_close
- *
- * Description:
- *   Standard character driver close method.
- *
- ****************************************************************************/
-
-static int phyplus_stub_close(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
  * Name: phyplus_gpio_read
  *
  * Description:
@@ -633,7 +604,7 @@ static ssize_t phyplus_stub_read(
 static char phyplus_cmd[CMD_LEN];
 
 static ssize_t phyplus_stub_write(FAR struct file *filep,
-              FAR const char *buffer, size_t buflen)
+                                  FAR const char *buffer, size_t buflen)
 {
   FAR struct inode *inode;
 
@@ -686,8 +657,8 @@ static ssize_t phyplus_stub_write(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static off_t phyplus_stub_seek(FAR struct file *filep,
-               off_t offset, int whence)
+static off_t phyplus_stub_seek(FAR struct file *filep, off_t offset,
+                               int whence)
 {
   /* Only SEEK_SET is supported, return ENOSYS for other valid options */
 
@@ -717,8 +688,8 @@ static off_t phyplus_stub_seek(FAR struct file *filep,
  *
  ****************************************************************************/
 
-static int phyplus_stub_ioctl(FAR struct file *filep,
-             int cmd, unsigned long arg)
+static int phyplus_stub_ioctl(FAR struct file *filep, int cmd,
+                              unsigned long arg)
 {
     FAR struct inode *inode;
     int ret = 0;

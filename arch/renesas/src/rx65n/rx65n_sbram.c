@@ -135,7 +135,7 @@ static const struct file_operations rx65n_sbram_fops =
   .ioctl  = rx65n_sbram_ioctl,
   .poll   = rx65n_sbram_poll,
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
-  .unlink = rx65n_sbram_unlink,
+  .unlink = rx65n_sbram_unlink
 #endif
 };
 

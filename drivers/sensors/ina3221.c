@@ -103,14 +103,10 @@ static int     ina3221_readpower(FAR struct ina3221_dev_s *priv,
 
 /* Character driver methods */
 
-static int     ina3221_open(FAR struct file *filep);
-static int     ina3221_close(FAR struct file *filep);
 static ssize_t ina3221_read(FAR struct file *filep, FAR char *buffer,
-                           size_t buflen);
+                            size_t buflen);
 static ssize_t ina3221_write(FAR struct file *filep, FAR const char *buffer,
                             size_t buflen);
-static int     ina3221_ioctl(FAR struct file *filep, int cmd,
-                            unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -118,12 +114,12 @@ static int     ina3221_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_ina3221fops =
 {
-  ina3221_open,    /* open */
-  ina3221_close,   /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   ina3221_read,    /* read */
   ina3221_write,   /* write */
   NULL,            /* seek */
-  ina3221_ioctl,   /* ioctl */
+  NULL,            /* ioctl */
   NULL             /* poll */
 #ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
   , NULL           /* unlink */
@@ -275,40 +271,6 @@ static int ina3221_readpower(FAR struct ina3221_dev_s *priv,
 }
 
 /****************************************************************************
- * Name: ina3221_open
- *
- * Description:
- *   This function is called whenever the INA3221 device is opened.
- *
- ****************************************************************************/
-
-static int ina3221_open(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ina3221_dev_s *priv = inode->i_private;
-
-  UNUSED(priv);
-  return OK;
-}
-
-/****************************************************************************
- * Name: ina3221_close
- *
- * Description:
- *   This routine is called when the INA3221 device is closed.
- *
- ****************************************************************************/
-
-static int ina3221_close(FAR struct file *filep)
-{
-  FAR struct inode *inode = filep->f_inode;
-  FAR struct ina3221_dev_s *priv = inode->i_private;
-
-  UNUSED(priv);
-  return OK;
-}
-
-/****************************************************************************
  * Name: ina3221_read
  ****************************************************************************/
 
@@ -360,15 +322,6 @@ static ssize_t ina3221_write(FAR struct file *filep, FAR const char *buffer,
                           size_t buflen)
 {
   return -ENOSYS;
-}
-
-/****************************************************************************
- * Name: ina3221_ioctl
- ****************************************************************************/
-
-static int ina3221_ioctl(FAR struct file *filep, int cmd, unsigned long arg)
-{
-  return -ENOTTY;
 }
 
 /****************************************************************************

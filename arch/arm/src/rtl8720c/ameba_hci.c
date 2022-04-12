@@ -26,7 +26,7 @@
 #include <fcntl.h>
 #include <nuttx/serial/serial.h>
 #include <nuttx/net/netdev.h>
-#include <../../../../net/netdev/netdev.h>
+#include <nuttx/net/netdev/netdev.h>
 #include "amebaz_hci_board.h"
 
 /****************************************************************************

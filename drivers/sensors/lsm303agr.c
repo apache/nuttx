@@ -99,10 +99,8 @@ static int lsm303agr_selftest(FAR struct lsm303agr_dev_s *priv,
 
 /* Character Driver Methods */
 
-static int lsm303agr_open(FAR struct file *filep);
-static int lsm303agr_close(FAR struct file *filep);
-static ssize_t lsm303agr_read(FAR struct file *filep,
-                              FAR char *buffer, size_t buflen);
+static ssize_t lsm303agr_read(FAR struct file *filep, FAR char *buffer,
+                              size_t buflen);
 static ssize_t lsm303agr_write(FAR struct file *filep,
                                FAR const char *buffer, size_t buflen);
 static int lsm303agr_ioctl(FAR struct file *filep, int cmd,
@@ -126,8 +124,8 @@ static double g_magnetofactor = 0;
 
 static const struct file_operations g_fops =
 {
-  lsm303agr_open,     /* open */
-  lsm303agr_close,    /* close */
+  NULL,               /* open */
+  NULL,               /* close */
   lsm303agr_read,     /* read */
   lsm303agr_write,    /* write */
   NULL,               /* seek */
@@ -930,33 +928,6 @@ static int lsm303agr_sensor_read(FAR struct lsm303agr_dev_s *priv,
   sdata->m_y_data = y_valg;
   sdata->m_z_data = z_valg;
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm303agr_open
- *
- * Description:
- *   This method is called when the device is opened.
- *
- ****************************************************************************/
-
-static int lsm303agr_open(FAR struct file *filep)
-{
-  sninfo("Device LSM303AGR opened!!\n");
-  return OK;
-}
-
-/****************************************************************************
- * Name: lsm303agr_close
- *
- * Description:
- *   This method is called when the device is closed.
- *
- ****************************************************************************/
-
-static int lsm303agr_close(FAR struct file *filep)
-{
   return OK;
 }
 

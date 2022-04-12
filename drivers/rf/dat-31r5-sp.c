@@ -64,8 +64,6 @@ struct dat31r5sp_dev_s
 
 /* Character driver methods */
 
-static int dat31r5sp_open(FAR struct file *filep);
-static int dat31r5sp_close(FAR struct file *filep);
 static ssize_t dat31r5sp_read(FAR struct file *filep, FAR char *buffer,
                               size_t buflen);
 static ssize_t dat31r5sp_write(FAR struct file *filep,
@@ -79,8 +77,8 @@ static int dat31r5sp_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_dat31r5sp_fops =
 {
-  dat31r5sp_open,   /* open */
-  dat31r5sp_close,  /* close */
+  NULL,             /* open */
+  NULL,             /* close */
   dat31r5sp_read,   /* read */
   dat31r5sp_write,  /* write */
   NULL,             /* seek */
@@ -140,34 +138,6 @@ static void dat31r5sp_set_attenuation(FAR struct dat31r5sp_dev_s *priv,
   SPI_SELECT(priv->spi, priv->spidev, false);
 
   SPI_LOCK(priv->spi, false);
-}
-
-/****************************************************************************
- * Name: dat31r5sp_open
- *
- * Description:
- *   This function is called whenever the DAT-31R5-SP+ device is
- *   opened.
- *
- ****************************************************************************/
-
-static int dat31r5sp_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: dat31r5sp_close
- *
- * Description:
- *   This function is called whenever the DAT-31R5-SP+ device is
- *   closed.
- *
- ****************************************************************************/
-
-static int dat31r5sp_close(FAR struct file *filep)
-{
-  return OK;
 }
 
 /****************************************************************************

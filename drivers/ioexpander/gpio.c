@@ -44,8 +44,6 @@
  ****************************************************************************/
 
 static int     gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin);
-static int     gpio_open(FAR struct file *filep);
-static int     gpio_close(FAR struct file *filep);
 static ssize_t gpio_read(FAR struct file *filep, FAR char *buffer,
                          size_t buflen);
 static ssize_t gpio_write(FAR struct file *filep, FAR const char *buffer,
@@ -60,8 +58,8 @@ static int     gpio_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_gpio_drvrops =
 {
-  gpio_open,   /* open */
-  gpio_close,  /* close */
+  NULL,        /* open */
+  NULL,        /* close */
   gpio_read,   /* read */
   gpio_write,  /* write */
   gpio_seek,   /* seek */
@@ -103,33 +101,6 @@ static int gpio_handler(FAR struct gpio_dev_s *dev, uint8_t pin)
                          SI_QUEUE, &signal->gp_work);
     }
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: gpio_open
- *
- * Description:
- *   Standard character driver open method.
- *
- ****************************************************************************/
-
-static int gpio_open(FAR struct file *filep)
-{
-  filep->f_pos = 0;
-  return OK;
-}
-
-/****************************************************************************
- * Name: gpio_close
- *
- * Description:
- *   Standard character driver close method.
- *
- ****************************************************************************/
-
-static int gpio_close(FAR struct file *filep)
-{
   return OK;
 }
 

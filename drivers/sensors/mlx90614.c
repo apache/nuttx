@@ -78,20 +78,18 @@ struct mlx90614_dev_s
 /* I2C Helpers */
 
 static int     mlx90614_read_word(FAR struct mlx90614_dev_s *priv,
-                  uint8_t cmd, FAR uint16_t *regval);
+                                  uint8_t cmd, FAR uint16_t *regval);
 static int     mlx90614_write_word(FAR struct mlx90614_dev_s *priv,
-                  uint8_t cmd, uint16_t regval);
+                                   uint8_t cmd, uint16_t regval);
 
 /* Character driver methods */
 
-static int     mlx90614_open(FAR struct file *filep);
-static int     mlx90614_close(FAR struct file *filep);
 static ssize_t mlx90614_read(FAR struct file *filep, FAR char *buffer,
-                  size_t buflen);
+                             size_t buflen);
 static ssize_t mlx90614_write(FAR struct file *filep,
                   FAR const char *buffer, size_t buflen);
 static int     mlx90614_ioctl(FAR struct file *filep, int cmd,
-                  unsigned long arg);
+                              unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -99,8 +97,8 @@ static int     mlx90614_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_mlx90614_fops =
 {
-  mlx90614_open,   /* open */
-  mlx90614_close,  /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   mlx90614_read,   /* read */
   mlx90614_write,  /* write */
   NULL,            /* seek */
@@ -262,32 +260,6 @@ static int mlx90614_write_word(FAR struct mlx90614_dev_s *priv, uint8_t cmd,
 
   sninfo("New address 0x%02x stored correctly!\n", regval);
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: mlx90614_open
- *
- * Description:
- *   This function is called whenever the MLX90614 device is opened.
- *
- ****************************************************************************/
-
-static int mlx90614_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: mlx90614_close
- *
- * Description:
- *   This routine is called when the MLX90614 device is closed.
- *
- ****************************************************************************/
-
-static int mlx90614_close(FAR struct file *filep)
-{
   return OK;
 }
 

@@ -131,9 +131,9 @@ struct kxtj9_dev_s
 /* I2C helpers */
 
 static int     kxtj9_reg_read(FAR struct kxtj9_dev_s *priv, uint8_t regaddr,
-                 FAR uint8_t *regval, unsigned int len);
+                              FAR uint8_t *regval, unsigned int len);
 static int     kxtj9_reg_write(FAR struct kxtj9_dev_s *priv,
-                 uint8_t regaddr,  uint8_t regval);
+                               uint8_t regaddr,  uint8_t regval);
 
 /* KXTJ9 helpers */
 
@@ -146,14 +146,12 @@ static void    kxtj9_set_mode_standby(FAR struct kxtj9_dev_s *priv);
 
 /* Character driver methods */
 
-static int     kxtj9_open(FAR struct file *filep);
-static int     kxtj9_close(FAR struct file *filep);
 static ssize_t kxtj9_read(FAR struct file *filep, FAR char *buffer,
-                 size_t buflen);
+                          size_t buflen);
 static ssize_t kxtj9_write(FAR struct file *filep, FAR const char *buffer,
                  size_t buflen);
 static int     kxtj9_ioctl(FAR struct file *filep, int cmd,
-                 unsigned long arg);
+                           unsigned long arg);
 
 /****************************************************************************
  * Private Data
@@ -161,8 +159,8 @@ static int     kxtj9_ioctl(FAR struct file *filep, int cmd,
 
 static const struct file_operations g_fops =
 {
-  kxtj9_open,      /* open */
-  kxtj9_close,     /* close */
+  NULL,            /* open */
+  NULL,            /* close */
   kxtj9_read,      /* read */
   kxtj9_write,     /* write */
   NULL,            /* seek */
@@ -451,32 +449,6 @@ static int kxtj9_read_sensor_data(FAR struct kxtj9_dev_s *priv,
   add_sensor_randomness((acc_data[0] << 16) ^ (acc_data[1] << 8) ^
                         acc_data[2]);
 
-  return OK;
-}
-
-/****************************************************************************
- * Name: kxtj9_open
- *
- * Description:
- *   This method is called when the device is opened.
- *
- ****************************************************************************/
-
-static int kxtj9_open(FAR struct file *filep)
-{
-  return OK;
-}
-
-/****************************************************************************
- * Name: kxtj9_close
- *
- * Description:
- *   This method is called when the device is closed.
- *
- ****************************************************************************/
-
-static int kxtj9_close(FAR struct file *filep)
-{
   return OK;
 }
 
