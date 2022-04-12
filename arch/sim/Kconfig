@@ -378,6 +378,14 @@ config SIM_HCISOCKET
 		control of the device, but is abstracted from the
 		physical interface which is still handled by Linux.
 
+config SIM_HCISOCKET_DEVID
+	int "Bluetooth Device ID"
+	default 0
+	depends on SIM_HCISOCKET
+	---help---
+		Attached the local bluetooth device use specific
+		Bluetooth HCI number id.
+
 config SIM_I2CBUS
 	bool "Simulated I2C Bus"
 	default n
