@@ -33,6 +33,7 @@
 #include <nuttx/sched.h>
 #include <nuttx/mm/shm.h>
 #include <nuttx/pgalloc.h>
+#include <nuttx/mm/map.h>
 
 #include "shm/shm.h"
 
@@ -43,22 +44,23 @@
  ****************************************************************************/
 
 /****************************************************************************
- * Name: shmdt
+ * Name: shmdt_priv
  *
  * Description:
- *   The shmdt() function detaches the shared memory segment located at the
- *   address specified by shmaddr from the address space of the calling
+ *   The shmdt_priv() function detaches the shared memory segment located at
+ *   the address specified by shmaddr from the address space of the calling
  *   process.
  *
  * Input Parameters:
  *   shmid - Shared memory identifier
+ *   group - Current task_group, NULL during process exit
  *
  * Returned Value:
- *   Upon successful completion, shmdt() will decrement the value of
+ *   Upon successful completion, shmdt_priv() will decrement the value of
  *   shm_nattch in the data structure associated with the shared memory ID
  *   of the attached shared memory segment and return 0.
  *
- *   Otherwise, the shared memory segment will not be detached, shmdt()
+ *   Otherwise, the shared memory segment will not be detached, shmdt_priv()
  *   will return -1, and errno will be set to indicate the error.
  *
  *   - EINVAL
@@ -67,37 +69,13 @@
  *
  ****************************************************************************/
 
-int shmdt(FAR const void *shmaddr)
+int shmdt_priv(FAR struct task_group_s *group, FAR const void *shmaddr,
+               int shmid)
 {
   FAR struct shm_region_s *region;
-  FAR struct task_group_s *group;
-  FAR struct tcb_s *tcb;
+  pid_t pid;
   unsigned int npages;
-  int shmid;
   int ret;
-
-  /* Get the TCB and group containing our virtual memory allocator */
-
-  tcb = nxsched_self();
-  DEBUGASSERT(tcb && tcb->group);
-  group = tcb->group;
-
-  /* Perform the reverse lookup to get the shmid corresponding to this
-   * shmaddr.
-   */
-
-  for (shmid = 0;
-       shmid < CONFIG_ARCH_SHM_MAXREGIONS &&
-       group->tg_shm.gs_vaddr[shmid] != (uintptr_t)shmaddr;
-       shmid++);
-
-  if (shmid >= CONFIG_ARCH_SHM_MAXREGIONS)
-    {
-      shmerr("ERROR: No region matching this virtual address: %p\n",
-             shmaddr);
-      ret = -EINVAL;
-      goto errout_with_errno;
-    }
 
   /* Get the region associated with the shmid */
 
@@ -111,6 +89,16 @@ int shmdt(FAR const void *shmaddr)
     {
       shmerr("ERROR: nxsem_wait failed: %d\n", ret);
       goto errout_with_errno;
+    }
+
+  if (!group)
+    {
+      pid = 0;
+      goto on_process_exit;
+    }
+  else
+    {
+      pid = group->tg_pid;
     }
 
   /* Free the virtual address space */
@@ -131,9 +119,7 @@ int shmdt(FAR const void *shmaddr)
       shmerr("ERROR: up_shmdt() failed\n");
     }
 
-  /* Indicate that there is no longer any mapping for this region. */
-
-  group->tg_shm.gs_vaddr[shmid] = 0;
+on_process_exit:
 
   /* Decrement the count of processes attached to this region.
    * If the count decrements to zero and there is a pending unlink,
@@ -162,7 +148,7 @@ int shmdt(FAR const void *shmaddr)
 
   /* Save the process ID of the last operation */
 
-  region->sr_ds.shm_lpid = tcb->pid;
+  region->sr_ds.shm_lpid = pid;
 
   /* Save the time of the last shmdt() */
 
@@ -176,6 +162,57 @@ int shmdt(FAR const void *shmaddr)
 errout_with_errno:
   set_errno(-ret);
   return ERROR;
+}
+
+int shmdt(FAR const void *shmaddr)
+{
+  FAR struct tcb_s *tcb;
+  FAR struct mm_map_entry_s *entry;
+  FAR struct task_group_s *group;
+  int shmid;
+  int ret;
+
+  /* Get the TCB and group containing our virtual memory allocator */
+
+  tcb = nxsched_self();
+  DEBUGASSERT(tcb && tcb->group);
+  group = tcb->group;
+
+  /* Get exclusive access to process' mm_map */
+
+  ret = mm_map_lock();
+  if (ret == OK)
+    {
+      /* Perform the reverse lookup to get the shmid corresponding to this
+       * shmaddr. The mapping is matched with just shmaddr == map->vaddr.
+       */
+
+      entry = mm_map_find(shmaddr, 1);
+      if (!entry || entry->vaddr != shmaddr)
+        {
+          ret = -EINVAL;
+          shmerr("ERROR: No region matching this virtual address: %p\n",
+                 shmaddr);
+
+          mm_map_unlock();
+          return -EINVAL;
+        }
+
+      shmid = entry->priv.i;
+
+      /* Indicate that there is no longer any mapping for this region. */
+
+      if (mm_map_remove(get_group_mm(group), entry) < 0)
+        {
+          shmerr("ERROR: mm_map_remove() failed\n");
+        }
+
+      mm_map_unlock();
+
+      ret = shmdt_priv(tcb->group, shmaddr, shmid);
+    }
+
+  return ret;
 }
 
 #endif /* CONFIG_MM_SHM */
