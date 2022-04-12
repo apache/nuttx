@@ -21,9 +21,9 @@
 # Common ARMv7-M Source Files
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
 
-CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c
+CMN_CSRCS  = arm_allocateheap.c arm_assert.c arm_blocktask.c arm_vectors.c
 CMN_CSRCS += arm_createstack.c arm_doirq.c arm_exit.c arm_hardfault.c
 CMN_CSRCS += arm_initialize.c arm_initialstate.c arm_interruptcontext.c
 CMN_CSRCS += arm_mdelay.c arm_memfault.c arm_modifyreg8.c arm_modifyreg16.c
@@ -32,13 +32,6 @@ CMN_CSRCS += arm_reprioritizertr.c arm_schedulesigaction.c arm_sigdeliver.c
 CMN_CSRCS += arm_stackframe.c arm_svcall.c arm_trigger_irq.c arm_unblocktask.c
 CMN_CSRCS += arm_udelay.c arm_usestack.c arm_vfork.c arm_switchcontext.c
 CMN_CSRCS += arm_puts.c arm_tcbinfo.c
-
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
@@ -55,7 +48,6 @@ CMN_CSRCS += arm_checkstack.c
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_fpuconfig.c
 CMN_CSRCS += arm_fpucmp.c
 endif

@@ -26,11 +26,9 @@ CMN_CSRCS += arm_modifyreg16.c arm_modifyreg32.c arm_pthread_start.c
 CMN_CSRCS += arm_puts.c arm_releasestack.c arm_semi_syslog.c
 CMN_CSRCS += arm_stackframe.c arm_task_start.c arm_usestack.c arm_vfork.c
 
-CMN_ASRCS += arm_exception.S
-
 # arch/arm/src/armv8-m
 #
-CMN_ASRCS += arm_fetchadd.S arm_fpu.S arm_setjmp.S
+CMN_ASRCS += arm_exception.S arm_fetchadd.S arm_setjmp.S
 CMN_ASRCS += arm_fullcontextrestore.S arm_saveusercontext.S
 CMN_ASRCS += arm_testset.S vfork.S
 

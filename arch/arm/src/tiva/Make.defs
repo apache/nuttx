@@ -19,7 +19,7 @@
 ############################################################################
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S  vfork.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S  vfork.S arm_exception.S
 
 CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c
 CMN_CSRCS += arm_doirq.c arm_exit.c arm_hardfault.c arm_initialize.c
@@ -29,7 +29,7 @@ CMN_CSRCS += arm_releasepending.c arm_releasestack.c arm_reprioritizertr.c
 CMN_CSRCS += arm_schedulesigaction.c arm_sigdeliver.c arm_stackframe.c
 CMN_CSRCS += arm_svcall.c arm_trigger_irq.c arm_unblocktask.c arm_udelay.c
 CMN_CSRCS += arm_usestack.c arm_vfork.c arm_switchcontext.c arm_puts.c
-CMN_CSRCS += arm_tcbinfo.c
+CMN_CSRCS += arm_tcbinfo.c arm_vectors.c
 
 ifeq ($(CONFIG_ARM_SEMIHOSTING_HOSTFS),y)
   CMN_CSRCS += arm_hostfs.c
@@ -39,16 +39,7 @@ ifneq ($(CONFIG_ARCH_IDLE_CUSTOM),y)
   CMN_CSRCS += tiva_idle.c
 endif
 
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-  CMN_ASRCS += arm_lazyexception.S
-else
-  CMN_ASRCS += arm_exception.S
-endif
-
-CMN_CSRCS += arm_vectors.c
-
 ifeq ($(CONFIG_ARCH_FPU),y)
-  CMN_ASRCS += arm_fpu.S
   CMN_CSRCS += arm_fpuconfig.c
   CMN_CSRCS += arm_fpucmp.c
 endif

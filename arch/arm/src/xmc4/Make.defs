@@ -19,9 +19,9 @@
 ############################################################################
 
 CMN_ASRCS  = arm_saveusercontext.S arm_fullcontextrestore.S
-CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S
+CMN_ASRCS += arm_testset.S arm_fetchadd.S vfork.S arm_exception.S
 
-CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c
+CMN_CSRCS  = arm_assert.c arm_blocktask.c arm_createstack.c arm_vectors.c
 CMN_CSRCS += arm_doirq.c arm_exit.c arm_initialize.c arm_initialstate.c
 CMN_CSRCS += arm_hardfault.c arm_interruptcontext.c arm_memfault.c arm_mdelay.c
 CMN_CSRCS += arm_modifyreg8.c arm_modifyreg16.c arm_modifyreg32.c
@@ -33,13 +33,6 @@ CMN_CSRCS += arm_vfork.c arm_switchcontext.c arm_puts.c arm_tcbinfo.c
 ifeq ($(CONFIG_ARMV7M_STACKCHECK),y)
 CMN_CSRCS += arm_stackcheck.c
 endif
-
-ifeq ($(CONFIG_ARMV7M_LAZYFPU),y)
-CMN_ASRCS += arm_lazyexception.S
-else
-CMN_ASRCS += arm_exception.S
-endif
-CMN_CSRCS += arm_vectors.c
 
 ifeq ($(CONFIG_ARCH_RAMVECTORS),y)
 CMN_CSRCS += arm_ramvec_initialize.c arm_ramvec_attach.c
@@ -70,7 +63,6 @@ endif
 endif
 
 ifeq ($(CONFIG_ARCH_FPU),y)
-CMN_ASRCS += arm_fpu.S
 CMN_CSRCS += arm_fpuconfig.c
 CMN_CSRCS += arm_fpucmp.c
 endif

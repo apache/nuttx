@@ -89,67 +89,10 @@
 
 #define INTSTACK_SIZE (CONFIG_ARCH_INTERRUPTSTACK & ~STACK_ALIGN_MASK)
 
-/* Macros to handle saving and restoring interrupt state.  In the current ARM
- * model, the state is always copied to and from the stack and TCB.  In the
- * Cortex-M0/3 model, the state is copied from the stack to the TCB, but only
- * a referenced is passed to get the state from the TCB.  Cortex-M4 is the
- * same, but may have additional complexity for floating point support in
- * some configurations.
- */
+/* Macros to handle saving and restoring interrupt state. */
 
-#if defined(CONFIG_ARCH_ARMV6M) || defined(CONFIG_ARCH_ARMV7M) || \
-    defined(CONFIG_ARCH_ARMV8M)
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.  This only
-   * applies if "lazy" floating point register save/restore is used
-   */
-
-#  if defined(CONFIG_ARCH_FPU) && (defined(CONFIG_ARMV7M_LAZYFPU) || \
-                                   defined(CONFIG_ARMV8M_LAZYFPU))
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-/* The Cortex-A and Cortex-R support the same mechanism, but only lazy
- * floating point register save/restore.
- */
-
-#elif defined(CONFIG_ARCH_ARMV7A) || defined(CONFIG_ARCH_ARMV7R)
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.
-   */
-
-#  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-/* Otherwise, for the ARM7 and ARM9.  The state is copied in full from stack
- * to stack.  This is not very efficient and should be fixed to match
- * Cortex-A5.
- */
-
-#else
-
-  /* If the floating point unit is present and enabled, then save the
-   * floating point registers as well as normal ARM registers.  Only "lazy"
-   * floating point save/restore is supported.
-   */
-
-#  if defined(CONFIG_ARCH_FPU)
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS, arm_savefpu(regs))
-#  else
-#    define arm_savestate(regs)  (regs = (FAR uint32_t *)CURRENT_REGS)
-#  endif
-#  define arm_restorestate(regs) (CURRENT_REGS = regs)
-
-#endif
+#define arm_savestate(regs)    (regs = (FAR uint32_t *)CURRENT_REGS)
+#define arm_restorestate(regs) (CURRENT_REGS = regs)
 
 /* Toolchain dependent, linker defined section addresses */
 
@@ -440,12 +383,8 @@ void arm_vectorfiq(void);
 
 #ifdef CONFIG_ARCH_FPU
 void arm_fpuconfig(void);
-void arm_savefpu(uint32_t *regs);
-void arm_restorefpu(const uint32_t *regs);
 #else
 #  define arm_fpuconfig()
-#  define arm_savefpu(regs)
-#  define arm_restorefpu(regs)
 #endif
 
 /* Low level serial output **************************************************/

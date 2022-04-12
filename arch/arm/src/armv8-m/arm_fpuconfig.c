@@ -54,8 +54,6 @@
  *
  ****************************************************************************/
 
-#ifndef CONFIG_ARMV8M_LAZYFPU
-
 void arm_fpuconfig(void)
 {
   uint32_t regval;
@@ -83,35 +81,3 @@ void arm_fpuconfig(void)
   regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
   putreg32(regval, NVIC_CPACR);
 }
-
-#else
-
-void arm_fpuconfig(void)
-{
-  uint32_t regval;
-
-  /* Clear CONTROL.FPCA so that we do not get the extended context frame
-   * with the volatile FP registers stacked in the saved context.
-   */
-
-  regval = getcontrol();
-  regval &= ~CONTROL_FPCA;
-  setcontrol(regval);
-
-  /* Ensure that FPCCR.LSPEN is disabled, so that we don't have to contend
-   * with the lazy FP context save behavior.  Clear FPCCR.ASPEN since we
-   * are going to keep CONTROL.FPCA off for all contexts.
-   */
-
-  regval = getreg32(NVIC_FPCCR);
-  regval &= ~(NVIC_FPCCR_ASPEN | NVIC_FPCCR_LSPEN);
-  putreg32(regval, NVIC_FPCCR);
-
-  /* Enable full access to CP10 and CP11 */
-
-  regval = getreg32(NVIC_CPACR);
-  regval |= NVIC_CPACR_CP_FULL(10) | NVIC_CPACR_CP_FULL(11);
-  putreg32(regval, NVIC_CPACR);
-}
-
-#endif
