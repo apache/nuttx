@@ -2745,6 +2745,18 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
    * any card detection GPIOs must be set up in board-specific logic.
    */
 
+#if defined(CONFIG_ARCH_CHIP_SAM3X)
+  sam_configgpio(GPIO_HSMCIA_DAT0);   /* Data 0 of Slot A - PA21 */
+  sam_configgpio(GPIO_HSMCIA_DAT1);   /* Data 1 of Slot A - PA22 */
+  sam_configgpio(GPIO_HSMCIA_DAT2);   /* Data 2 of Slot A - PA23 */
+  sam_configgpio(GPIO_HSMCIA_DAT3);   /* Data 3 of Slot A - PA24 */
+  sam_configgpio(GPIO_HSMCI_CK);      /* SD clock - PA19 */
+  sam_configgpio(GPIO_HSMCIA_CD);     /* Command/Response - PA20 */
+
+#ifdef CONFIG_DEBUG_FS
+  sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 19-24");
+#endif
+#else
   sam_configgpio(GPIO_HSMCI_DAT0);   /* Data 0 of Slot A */
   sam_configgpio(GPIO_HSMCI_DAT1);   /* Data 1 of Slot A */
   sam_configgpio(GPIO_HSMCI_DAT2);   /* Data 2 of Slot A */
@@ -2755,6 +2767,7 @@ FAR struct sdio_dev_s *sdio_initialize(int slotno)
 #ifdef CONFIG_DEBUG_FS
   sam_dumpgpio(GPIO_PORT_PIOA, "Pins: 3-8");
   sam_dumpgpio(GPIO_PORT_PIOB, "Pins: 28-31");
+#endif
 #endif
 
   /* Reset the card and assure that it is in the initial, unconfigured
