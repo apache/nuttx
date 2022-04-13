@@ -256,7 +256,7 @@ static int mmcsd_takesem(FAR struct mmcsd_state_s *priv)
    * waiting)
    */
 
-  if (up_interrupt_context() == false)
+  if (!up_interrupt_context() && !sched_idletask())
     {
       ret = nxsem_wait_uninterruptible(&priv->sem);
       if (ret < 0)
@@ -282,7 +282,7 @@ static int mmcsd_takesem(FAR struct mmcsd_state_s *priv)
 
 static void mmcsd_givesem(FAR struct mmcsd_state_s *priv)
 {
-  if (up_interrupt_context() == false)
+  if (!up_interrupt_context() && !sched_idletask())
     {
       /* Release the SDIO bus lock, then the MMC/SD driver semaphore in the
        * opposite order that they were taken to assure that no deadlock
