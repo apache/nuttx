@@ -83,10 +83,7 @@ int env_removevar(FAR struct task_group_s *group, FAR char *pvar)
        * this is inefficient, but robably not high duty.
        */
 
-      while (count-- > 0)
-        {
-          *dest++ = *src++;
-        }
+      memmove(dest, src, count + 1);
 
       /* Then set to the new allocation size.  The caller is expected to
        * call realloc at some point but we don't do that here because the
