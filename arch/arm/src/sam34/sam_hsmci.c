@@ -1494,6 +1494,7 @@ static sdio_capset_t sam_capabilities(FAR struct sdio_dev_s *dev)
 
 #ifdef CONFIG_SAM34_HSMCI_DMA
   caps |= SDIO_CAPS_DMASUPPORTED;
+  caps |= SDIO_CAPS_DMABEFOREWRITE;
 #endif
 
   return caps;
