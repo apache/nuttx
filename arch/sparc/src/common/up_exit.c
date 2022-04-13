@@ -137,11 +137,6 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
-#ifdef CONFIG_DUMP_ON_EXIT
-  sinfo("Other tasks:\n");
-  sched_foreach(_up_dumponexit, NULL);
-#endif
-
   /* Update scheduler parameters */
 
   nxsched_suspend_scheduler(tcb);
@@ -149,6 +144,11 @@ void up_exit(int status)
   /* Destroy the task at the head of the ready to run list. */
 
   (void)nxtask_exit();
+
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
+  sched_foreach(_up_dumponexit, NULL);
+#endif
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
