@@ -447,7 +447,7 @@ static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
       case INSN_FSD:
         _alert("Misaligned float instruction not support yet\n");
       default:
-        _alert("Uncompressed: %lx\n", insn.insn);
+        _alert("Uncompressed: %x\n", insn.insn);
         return false;
     }
 
