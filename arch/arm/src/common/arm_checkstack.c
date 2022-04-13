@@ -148,28 +148,36 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
 
 void arm_stack_color(FAR void *stackbase, size_t nbytes)
 {
-  uintptr_t start;
-  uintptr_t end;
-  size_t nwords;
-  FAR uint32_t *ptr;
+  uint32_t *stkptr;
+  uintptr_t stkend;
+  size_t    nwords;
   uintptr_t sp;
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  start = STACK_ALIGN_UP((uintptr_t)stackbase);
-  end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
-          (uintptr_t)&sp; /* 0: colorize the running stack */
+  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
 
-  /* Get the adjusted size based on the top and bottom of the stack */
+  if (nbytes == 0) /* 0: colorize the running stack */
+    {
+      stkend = up_getsp();
+      if (stkend > (uintptr_t)&sp)
+        {
+          stkend = (uintptr_t)&sp;
+        }
+    }
+  else
+    {
+      stkend = (uintptr_t)stackbase + nbytes;
+    }
 
-  nwords = (end - start) >> 2;
-  ptr  = (FAR uint32_t *)start;
+  stkend = STACK_ALIGN_DOWN(stkend);
+  nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */
 
   while (nwords-- > 0)
     {
-      *ptr++ = STACK_COLOR;
+      *stkptr++ = STACK_COLOR;
     }
 }
 
