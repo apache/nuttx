@@ -363,6 +363,7 @@ static bool decode_insn_compressed(uintptr_t *regs, riscv_insn_ctx_t *ctx)
 
 static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
 {
+  static const uintptr_t x0;
   uint32_t in;
   int32_t imm;
   riscv_insn_t insn;
@@ -418,7 +419,17 @@ static bool decode_insn(uintptr_t *regs, riscv_insn_ctx_t *ctx)
         imm = sext(insn.s.imm2 | insn.s.imm1 << 5, 12);
 
         ctx->dest = (uint8_t *)regs[insn.s.rs1] + imm;
-        ctx->src = (uint8_t *)&regs[insn.s.rs2];
+
+        /* If source register is x0, target it to constant register */
+
+        if (insn.s.rs2 == 0)
+          {
+            ctx->src = (uint8_t *)&x0;
+          }
+        else
+          {
+            ctx->src = (uint8_t *)&regs[insn.s.rs2];
+          }
 
         /* Get data wide bit */
 
