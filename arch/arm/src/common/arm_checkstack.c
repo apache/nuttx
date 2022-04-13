@@ -39,22 +39,6 @@
 #ifdef CONFIG_STACK_COLORATION
 
 /****************************************************************************
- * Pre-processor Macros
- ****************************************************************************/
-
-/* 32bit alignment macros */
-
-#define INT32_ALIGN_MASK    (3)
-#define INT32_ALIGN_DOWN(a) ((a) & ~INT32_ALIGN_MASK)
-#define INT32_ALIGN_UP(a)   (((a) + INT32_ALIGN_MASK) & ~INT32_ALIGN_MASK)
-
-/****************************************************************************
- * Private Function Prototypes
- ****************************************************************************/
-
-static size_t do_stackcheck(FAR void *stackbase, size_t nbytes);
-
-/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -89,8 +73,8 @@ static size_t do_stackcheck(FAR void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not check outside the stack boundaries */
 
-  start = INT32_ALIGN_UP((uintptr_t)stackbase);
-  end   = INT32_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
+  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  end   = STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes);
 
   /* Get the adjusted size based on the top and bottom of the stack */
 
@@ -172,8 +156,8 @@ void arm_stack_color(FAR void *stackbase, size_t nbytes)
 
   /* Take extra care that we do not write outside the stack boundaries */
 
-  start = INT32_ALIGN_UP((uintptr_t)stackbase);
-  end   = nbytes ? INT32_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
+  start = STACK_ALIGN_UP((uintptr_t)stackbase);
+  end   = nbytes ? STACK_ALIGN_DOWN((uintptr_t)stackbase + nbytes) :
           (uintptr_t)&sp; /* 0: colorize the running stack */
 
   /* Get the adjusted size based on the top and bottom of the stack */
@@ -230,16 +214,16 @@ size_t up_check_intstack(void)
 {
 #ifdef CONFIG_SMP
   return do_stackcheck((FAR void *)arm_intstack_alloc(),
-                        INT32_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #else
   return do_stackcheck((FAR void *)&g_intstackalloc,
-                        INT32_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
+                        STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK));
 #endif
 }
 
 size_t up_check_intstack_remain(void)
 {
-  return INT32_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK) - up_check_intstack();
+  return STACK_ALIGN_DOWN(CONFIG_ARCH_INTERRUPTSTACK) - up_check_intstack();
 }
 #endif
 
