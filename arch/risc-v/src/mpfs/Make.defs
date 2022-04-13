@@ -99,6 +99,10 @@ ifeq ($(CONFIG_ARCH_ADDRENV),y)
 CMN_CSRCS += riscv_addrenv.c riscv_pgalloc.c
 endif
 
+ifeq ($(CONFIG_MM_PGALLOC),y)
+CHIP_CSRCS += mpfs_pgalloc.c
+endif
+
 ifeq ($(CONFIG_SPI),y)
 CHIP_CSRCS += mpfs_spi.c
 endif
