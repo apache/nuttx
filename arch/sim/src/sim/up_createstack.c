@@ -159,16 +159,29 @@ int up_create_stack(FAR struct tcb_s *tcb, size_t stack_size, uint8_t ttype)
 void nostackprotect_function up_stack_color(FAR void *stackbase,
                                             size_t nbytes)
 {
-  /* Take extra care that we do not write outsize the stack boundaries */
-
   uint32_t *stkptr;
   uintptr_t stkend;
   size_t    nwords;
   uintptr_t sp;
 
-  stkptr = (uint32_t *)(((uintptr_t)stackbase + 3) & ~3);
-  stkend = nbytes ? (((uintptr_t)stackbase + nbytes) & ~3) :
-           (uintptr_t)&sp; /* 0: colorize the running stack */
+  /* Take extra care that we do not write outside the stack boundaries */
+
+  stkptr = (uint32_t *)STACK_ALIGN_UP((uintptr_t)stackbase);
+
+  if (nbytes == 0) /* 0: colorize the running stack */
+    {
+      stkend = up_getsp();
+      if (stkend > (uintptr_t)&sp)
+        {
+          stkend = (uintptr_t)&sp;
+        }
+    }
+  else
+    {
+      stkend = (uintptr_t)stackbase + nbytes;
+    }
+
+  stkend = STACK_ALIGN_DOWN(stkend);
   nwords = (stkend - (uintptr_t)stackbase) >> 2;
 
   /* Set the entire stack to the coloration value */
