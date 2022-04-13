@@ -187,7 +187,7 @@
  */
 
 #ifdef CONFIG_SAM34_DMAC0
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #    define HSMCI_DATA_ERRORS \
        (HSMCI_INT_UNRE | HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | \
         HSMCI_INT_DTOE | HSMCI_INT_DCRCE)
@@ -206,7 +206,7 @@
   (HSMCI_INT_CSTOE | HSMCI_INT_DTOE)
 
 #ifdef CONFIG_SAM34_DMAC0
-#  if defined(CONFIG_ARCH_CHIP_SAM3U)
+#  if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
 #    define HSMCI_DATA_DMARECV_ERRORS \
       (HSMCI_INT_OVRE  | HSMCI_INT_BLKOVRE | HSMCI_INT_CSTOE | HSMCI_INT_DTOE | \
        HSMCI_INT_DCRCE)
@@ -355,7 +355,7 @@ struct sam_hsmciregs_s
   uint32_t rsp3;     /* Response Register 3 */
   uint32_t sr;       /* Status Register */
   uint32_t imr;      /* Interrupt Mask Register */
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   uint32_t dma;      /* DMA Configuration Register */
 #endif
   uint32_t cfg;      /* Configuration Register */
@@ -784,7 +784,7 @@ static void sam_hsmcisample(struct sam_hsmciregs_s *regs)
   regs->rsp3     = getreg32(SAM_HSMCI_RSPR3);
   regs->sr       = getreg32(SAM_HSMCI_SR);
   regs->imr      = getreg32(SAM_HSMCI_IMR);
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regs->dma      = getreg32(SAM_HSMCI_DMA);
 #endif
   regs->cfg      = getreg32(SAM_HSMCI_CFG);
@@ -844,7 +844,7 @@ static void sam_hsmcidump(struct sam_hsmciregs_s *regs, const char *msg)
          SAM_HSMCI_SR, regs->sr);
   mcinfo("    IMR[%08x]: %08x\n",
          SAM_HSMCI_IMR, regs->imr);
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   mcinfo("    DMA[%08x]: %08x\n",
          SAM_HSMCI_DMA, regs->dma);
 #endif
@@ -1182,7 +1182,7 @@ static void sam_endtransfer(struct sam_dev_s *priv,
   sam_dmastop(priv->dma);
   priv->dmabusy = false;
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
@@ -1225,7 +1225,7 @@ static void sam_notransfer(struct sam_dev_s *priv)
 
   regval = getreg32(SAM_HSMCI_MR);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
 #else
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF);
@@ -1437,7 +1437,7 @@ static void sam_reset(FAR struct sdio_dev_s *dev)
 
   /* Disable the DMA interface */
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   putreg32(0, SAM_HSMCI_DMA);
 #endif
 
@@ -1849,7 +1849,7 @@ static void sam_blocksetup(FAR struct sdio_dev_s *dev, unsigned int blocklen,
 
   regval = getreg32(SAM_HSMCI_MR);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   regval &= ~(HSMCI_MR_RDPROOF | HSMCI_MR_WRPROOF | HSMCI_MR_BLKLEN_MASK);
   regval |= HSMCU_PROOF_BITS;
   regval |= (blocklen << HSMCI_MR_BLKLEN_SHIFT);
@@ -1916,7 +1916,7 @@ static int sam_cancel(FAR struct sdio_dev_s *dev)
   priv->dmabusy = false;
 #endif
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Disable the DMA handshaking */
 
   putreg32(0, SAM_HSMCI_DMA);
@@ -2510,7 +2510,7 @@ static int sam_dmarecvsetup(FAR struct sdio_dev_s *dev, FAR uint8_t *buffer,
 
   sam_cmcc_invalidate((uintptr_t)buffer, (uintptr_t)buffer + buflen);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
@@ -2580,7 +2580,7 @@ static int sam_dmasendsetup(FAR struct sdio_dev_s *dev,
 
   sam_dmatxsetup(priv->dma, SAM_HSMCI_TDR, (uint32_t)buffer, buflen);
 
-#if defined(CONFIG_ARCH_CHIP_SAM3U)
+#if defined(CONFIG_ARCH_CHIP_SAM3U) || defined(CONFIG_ARCH_CHIP_SAM3X)
   /* Enable DMA handshaking */
 
   putreg32(HSMCI_DMA_DMAEN, SAM_HSMCI_DMA);
