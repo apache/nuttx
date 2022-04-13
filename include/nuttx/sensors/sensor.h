@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/sensors/ioctl.h>
 #include <nuttx/clock.h>
 
@@ -588,6 +589,48 @@ struct sensor_lowerhalf_s;
 struct sensor_ops_s
 {
   /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   The open method differs from the activate method with true because
+   *   it's called and turned off every times, and it receives the pointer
+   *   of file and the instance of lowerhalf sensor driver. It uses to do
+   *   something about initialize for every user.
+   *
+   * Input Parameters:
+   *   filep - The pointer of file, represents each user using the sensor
+   *   lower - The instance of lower half sensor driver
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct file *filep,
+                   FAR struct sensor_lowerhalf_s *lower);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   The close method differs from the activate method with false because
+   *   it's called and turned off every times, and it receives the pointer
+   *   of file and the instance of lowerhalf sensor driver. It uses to do
+   *   something about uninitialize for every user.
+   *
+   * Input Parameters:
+   *   filep - The pointer of file, represents each user using the sensor.
+   *   lower - The instance of lower half sensor driver.
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct file *filep,
+                    FAR struct sensor_lowerhalf_s *lower);
+
+  /**************************************************************************
    * Name: activate
    *
    * Description:
@@ -596,6 +639,7 @@ struct sensor_ops_s
    *   sensor, it will disable sense path and stop convert.
    *
    * Input Parameters:
+   *   filep  - The pointer of file, represents each user using the sensor.
    *   lower  - The instance of lower half sensor driver
    *   enable - true(enable) and false(disable)
    *
@@ -604,7 +648,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*activate)(FAR struct sensor_lowerhalf_s *lower, bool enable);
+  CODE int (*activate)(FAR struct file *filep,
+                       FAR struct sensor_lowerhalf_s *lower, bool enable);
 
   /**************************************************************************
    * Name: set_interval
@@ -621,6 +666,7 @@ struct sensor_ops_s
    *   ensure that they are not lost.
    *
    * Input Parameters:
+   *   filep     - The pointer of file, represents each user using the sensor.
    *   lower     - The instance of lower half sensor driver.
    *   period_us - the time between samples, in us, it may be overwrite by
    *               lower half driver.
@@ -630,7 +676,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*set_interval)(FAR struct file *filep,
+                           FAR struct sensor_lowerhalf_s *lower,
                            FAR unsigned long *period_us);
 
   /**************************************************************************
@@ -665,6 +712,7 @@ struct sensor_ops_s
    *   data will not be lost.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   latency_us - the time between batch data, in us. It may by overwrite
    *                by lower half driver.
@@ -674,7 +722,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*batch)(FAR struct file *filep,
+                    FAR struct sensor_lowerhalf_s *lower,
                     FAR unsigned long *latency_us);
 
   /**************************************************************************
@@ -695,6 +744,7 @@ struct sensor_ops_s
    * until sensor data ready, then read sensor data.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   buffer     - The buffer of receive sensor event, it's provided by
    *                file_operation::sensor_read.
@@ -706,7 +756,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*fetch)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*fetch)(FAR struct file *filep,
+                    FAR struct sensor_lowerhalf_s *lower,
                     FAR char *buffer, size_t buflen);
 
   /**************************************************************************
@@ -720,6 +771,7 @@ struct sensor_ops_s
    * the part is deemed to have failed selftest.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   arg        - The parameters associated with selftest.
    *
@@ -728,7 +780,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*selftest)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*selftest)(FAR struct file *filep,
+                       FAR struct sensor_lowerhalf_s *lower,
                        unsigned long arg);
 
   /**************************************************************************
@@ -740,6 +793,7 @@ struct sensor_ops_s
    * the absolute accuracy will be better than before.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   arg        - The parameters associated with calibration value.
    *
@@ -748,7 +802,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*set_calibvalue)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*set_calibvalue)(FAR struct file *filep,
+                             FAR struct sensor_lowerhalf_s *lower,
                              unsigned long arg);
 
   /**************************************************************************
@@ -763,6 +818,7 @@ struct sensor_ops_s
    * calibration value can be directly obtained after power-on.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   arg        - The parameters associated with calibration value.
    *
@@ -771,7 +827,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*calibrate)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*calibrate)(FAR struct file *filep,
+                        FAR struct sensor_lowerhalf_s *lower,
                         unsigned long arg);
 
   /**************************************************************************
@@ -782,6 +839,7 @@ struct sensor_ops_s
    * etc, which are all parsed and implemented by lower half driver.
    *
    * Input Parameters:
+   *   filep      - The pointer of file, represents each user using the sensor.
    *   lower      - The instance of lower half sensor driver.
    *   cmd        - The special cmd for sensor.
    *   arg        - The parameters associated with cmd.
@@ -792,7 +850,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*control)(FAR struct sensor_lowerhalf_s *lower,
+  CODE int (*control)(FAR struct file *filep,
+                      FAR struct sensor_lowerhalf_s *lower,
                       int cmd, unsigned long arg);
 };
 
