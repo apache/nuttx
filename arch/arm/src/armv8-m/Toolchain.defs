@@ -71,6 +71,8 @@ endif
 
 ifeq ($(CONFIG_DEBUG_CUSTOMOPT),y)
   MAXOPTIMIZATION := $(CONFIG_DEBUG_OPTLEVEL)
+else ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
+  MAXOPTIMIZATION ?= -Oz
 else
   MAXOPTIMIZATION ?= -Os
 endif
@@ -82,6 +84,7 @@ else
 endif
 
 # Parametrization for ARCHCPUFLAGS
+
 ifeq ($(CONFIG_ARCH_CORTEXM23),y)
   TOOLCHAIN_MTUNE    := -mtune=cortex-m23
   TOOLCHAIN_MARCH    := -march=armv8-m.main
@@ -120,6 +123,34 @@ else
   TOOLCHAIN_MFLOAT += -mfloat-abi=soft
 endif
 
+# Clang Configuration files
+
+ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
+
+  ifeq ($(CONFIG_ARCH_CORTEXM23),y)
+    TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
+  else ifeq ($(CONFIG_ARCH_CORTEXM33),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM35P),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv8m.main_hard_fp_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv8m.main_soft_nofp_nosys
+    endif
+  else ifeq ($(CONFIG_ARCH_CORTEXM55),y)
+    ifeq ($(CONFIG_ARCH_FPU),y)
+      TOOLCHAIN_MARCH += --config armv8.1m.main_hard_fp_nosys
+    else
+      TOOLCHAIN_MARCH += --config armv8.1m.main_soft_nofp_nomve_nosys
+    endif
+  endif
+
+endif
+
 # NuttX buildroot under Linux or Cygwin
 
 ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),BUILDROOT)
@@ -146,9 +177,39 @@ endif
 # Clang toolchain
 
 ifeq ($(CONFIG_ARMV8M_TOOLCHAIN),CLANG)
-  CROSSDEV ?= arm-none-eabi-
   ARCHCPUFLAGS = $(TOOLCHAIN_MARCH) $(TOOLCHAIN_MTUNE) -mthumb $(TOOLCHAIN_MFLOAT)
+
+  CC      = clang
+  CXX     = clang++
+  CPP     = clang -E -P -x c
+  LD      = ld.lld -m armelf
+  STRIP   = llvm-strip --strip-unneeded
+  AR      = llvm-ar rcs
+  NM      = llvm-nm
+  OBJCOPY = llvm-objcopy
+  OBJDUMP = llvm-objdump
+
+  # Since the no_builtin attribute is not fully supported on Clang
+  # disable the built-in functions, refer:
+  # https://github.com/apache/incubator-nuttx/pull/5971
+
+  MAXOPTIMIZATION += -fno-builtin
+
+# Default toolchain
+
+else
+  CC      = $(CROSSDEV)gcc
+  CXX     = $(CROSSDEV)g++
+  CPP     = $(CROSSDEV)gcc -E -P -x c
+  LD      = $(CROSSDEV)ld
+  STRIP   = $(CROSSDEV)strip --strip-unneeded
+  AR      = $(CROSSDEV)ar rcs
+  NM      = $(CROSSDEV)nm
+  OBJCOPY = $(CROSSDEV)objcopy
+  OBJDUMP = $(CROSSDEV)objdump
 endif
+
+# Architecture flags
 
 ARCHCFLAGS =
 ARCHCXXFLAGS =
@@ -161,26 +222,21 @@ ifneq ($(CONFIG_CXX_RTTI),y)
   ARCHCXXFLAGS += -fno-rtti
 endif
 
-# Default toolchain
-
-CC = $(CROSSDEV)gcc
-CXX = $(CROSSDEV)g++
-CPP = $(CROSSDEV)gcc -E -P -x c
-LD = $(CROSSDEV)ld
-STRIP = $(CROSSDEV)strip --strip-unneeded
-AR = $(CROSSDEV)ar rcs
-NM = $(CROSSDEV)nm
-OBJCOPY = $(CROSSDEV)objcopy
-OBJDUMP = $(CROSSDEV)objdump
-
 # Add the builtin library
 
-EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name}}
+COMPILER_RT_LIB = $(shell $(CC) $(ARCHCPUFLAGS) --print-libgcc-file-name)
+ifeq ($(wildcard $(COMPILER_RT_LIB)),)
+  # if "--print-libgcc-file-name" unable to find the correct libgcc PATH
+  # then go ahead and try "--print-file-name"
+  COMPILER_RT_LIB := $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name $(notdir $(COMPILER_RT_LIB))))
+endif
+
+EXTRA_LIBS += $(COMPILER_RT_LIB)
 
 ifneq ($(CONFIG_LIBM),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libm.a))
 endif
 
 ifeq ($(CONFIG_LIBSUPCXX),y)
-  EXTRA_LIBS += ${wildcard ${shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a}}
+  EXTRA_LIBS += $(wildcard $(shell $(CC) $(ARCHCPUFLAGS) --print-file-name=libsupc++.a))
 endif
