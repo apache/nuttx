@@ -1595,7 +1595,7 @@ static int aw86225_read_chipid(FAR struct aw86225_dev_s *priv)
       ret = -ENODEV;
     }
 
-  return OK;
+  return ret;
 }
 
 /****************************************************************************
