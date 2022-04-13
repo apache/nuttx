@@ -145,7 +145,8 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   if (group->tg_envp)
     {
       newsize = group->tg_envsize + varlen;
-      newenvp = (FAR char *)group_realloc(group, group->tg_envp, newsize);
+      newenvp = (FAR char *)group_realloc(group, group->tg_envp,
+                                          newsize + 1);
       if (!newenvp)
         {
           ret = ENOMEM;
@@ -157,7 +158,7 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
   else
     {
       newsize = varlen;
-      newenvp = (FAR char *)group_malloc(group, varlen);
+      newenvp = (FAR char *)group_malloc(group, varlen + 1);
       if (!newenvp)
         {
           ret = ENOMEM;
@@ -166,6 +167,8 @@ int setenv(FAR const char *name, FAR const char *value, int overwrite)
 
       pvar = newenvp;
     }
+
+  newenvp[newsize] = '\0';
 
   /* Save the new buffer and size */
 

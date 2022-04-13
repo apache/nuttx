@@ -97,7 +97,7 @@ int unsetenv(FAR const char *name)
           /* Reallocate the environment to reclaim a little memory */
 
           newenvp = (FAR char *)group_realloc(group, group->tg_envp,
-                                              newsize);
+                                              newsize + 1);
 
           if (newenvp == NULL)
             {
