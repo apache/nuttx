@@ -148,15 +148,15 @@ static int blkoutstream_puts(FAR struct lib_outstream_s *this,
 
 void lib_blkoutstream_close(FAR struct lib_blkoutstream_s *stream)
 {
-  if (stream)
+  if (stream != NULL)
     {
-      if (stream->inode)
+      if (stream->inode != NULL)
         {
           close_blockdriver(stream->inode);
           stream->inode = NULL;
         }
 
-      if (stream->cache)
+      if (stream->cache != NULL)
         {
           lib_free(stream->cache);
           stream->cache = NULL;
