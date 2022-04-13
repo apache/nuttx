@@ -116,11 +116,6 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
-#ifdef CONFIG_DUMP_ON_EXIT
-  sinfo("Other tasks:\n");
-  nxsched_foreach(_xtensa_dumponexit, NULL);
-#endif
-
 #if XCHAL_CP_NUM > 0
   /* Disable co-processor support for the task that is exit-ing. */
 
@@ -130,6 +125,11 @@ void up_exit(int status)
   /* Destroy the task at the head of the ready to run list. */
 
   nxtask_exit();
+
+#ifdef CONFIG_DUMP_ON_EXIT
+  sinfo("Other tasks:\n");
+  nxsched_foreach(_xtensa_dumponexit, NULL);
+#endif
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.

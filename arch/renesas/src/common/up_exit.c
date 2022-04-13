@@ -114,14 +114,14 @@ void up_exit(int status)
 
   sinfo("TCB=%p exiting\n", tcb);
 
+  /* Destroy the task at the head of the ready to run list. */
+
+  nxtask_exit();
+
 #ifdef CONFIG_DUMP_ON_EXIT
   sinfo("Other tasks:\n");
   nxsched_foreach(_up_dumponexit, NULL);
 #endif
-
-  /* Destroy the task at the head of the ready to run list. */
-
-  nxtask_exit();
 
   /* Now, perform the context switch to the new ready-to-run task at the
    * head of the list.
