@@ -67,7 +67,7 @@ void up_timer_initialize(void)
   uintptr_t hart_id = riscv_mhartid();
 
   struct oneshot_lowerhalf_s *lower = riscv_mtimer_initialize(
-    MPFS_CLINT_MTIME, MPFS_CLINT_MTIMECMP0 + hart_id,
+    MPFS_CLINT_MTIME, MPFS_CLINT_MTIMECMP0 + hart_id * sizeof(uintptr_t),
     RISCV_IRQ_MTIMER, MTIMER_FREQ);
 
   DEBUGASSERT(lower);
