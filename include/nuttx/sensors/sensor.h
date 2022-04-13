@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include <nuttx/fs/fs.h>
 #include <nuttx/sensors/ioctl.h>
 
 /****************************************************************************
@@ -585,6 +586,48 @@ struct sensor_lowerhalf_s;
 struct sensor_ops_s
 {
   /**************************************************************************
+   * Name: open
+   *
+   * Description:
+   *   The open method differs from the activate method with true because
+   *   it's called and turned off every times, and it receives the pointer
+   *   of file and the instance of lowerhalf sensor driver. It uses to do
+   *   something about initialize for every user.
+   *
+   * Input Parameters:
+   *   lower - The instance of lower half sensor driver
+   *   filep - The pointer of file, represents each user using the sensor
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*open)(FAR struct sensor_lowerhalf_s *lower,
+                   FAR struct file *filep);
+
+  /**************************************************************************
+   * Name: close
+   *
+   * Description:
+   *   The close method differs from the activate method with false because
+   *   it's called and turned off every times, and it receives the pointer
+   *   of file and the instance of lowerhalf sensor driver. It uses to do
+   *   something about uninitialize for every user.
+   *
+   * Input Parameters:
+   *   lower - The instance of lower half sensor driver.
+   *   filep - The pointer of file, represents each user using the sensor.
+   *
+   * Returned Value:
+   *   Zero (OK) or positive on success; a negated errno value on failure.
+   *
+   **************************************************************************/
+
+  CODE int (*close)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR struct file *filep);
+
+  /**************************************************************************
    * Name: activate
    *
    * Description:
@@ -594,6 +637,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower  - The instance of lower half sensor driver
+   *   filep  - The pointer of file, represents each user using the sensor.
    *   enable - true(enable) and false(disable)
    *
    * Returned Value:
@@ -601,7 +645,8 @@ struct sensor_ops_s
    *
    **************************************************************************/
 
-  CODE int (*activate)(FAR struct sensor_lowerhalf_s *lower, bool enable);
+  CODE int (*activate)(FAR struct sensor_lowerhalf_s *lower,
+                       FAR struct file *filep, bool enable);
 
   /**************************************************************************
    * Name: set_interval
@@ -619,6 +664,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower     - The instance of lower half sensor driver.
+   *   filep     - The pointer of file, represents each user using sensor.
    *   period_us - the time between samples, in us, it may be overwrite by
    *               lower half driver.
    *
@@ -628,6 +674,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*set_interval)(FAR struct sensor_lowerhalf_s *lower,
+                           FAR struct file *filep,
                            FAR unsigned long *period_us);
 
   /**************************************************************************
@@ -663,6 +710,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   latency_us - the time between batch data, in us. It may by overwrite
    *                by lower half driver.
    *
@@ -672,6 +720,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*batch)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR struct file *filep,
                     FAR unsigned long *latency_us);
 
   /**************************************************************************
@@ -693,6 +742,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   buffer     - The buffer of receive sensor event, it's provided by
    *                file_operation::sensor_read.
    *   buflen     - The size of buffer.
@@ -704,6 +754,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*fetch)(FAR struct sensor_lowerhalf_s *lower,
+                    FAR struct file *filep,
                     FAR char *buffer, size_t buflen);
 
   /**************************************************************************
@@ -718,6 +769,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   arg        - The parameters associated with selftest.
    *
    * Returned Value:
@@ -726,6 +778,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*selftest)(FAR struct sensor_lowerhalf_s *lower,
+                       FAR struct file *filep,
                        unsigned long arg);
 
   /**************************************************************************
@@ -738,6 +791,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   arg        - The parameters associated with calibration value.
    *
    * Returned Value:
@@ -746,6 +800,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*set_calibvalue)(FAR struct sensor_lowerhalf_s *lower,
+                             FAR struct file *filep,
                              unsigned long arg);
 
 /****************************************************************************
@@ -762,6 +817,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   arg        - The parameters associated with calibration value.
    *
    * Returned Value:
@@ -770,6 +826,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*calibrate)(FAR struct sensor_lowerhalf_s *lower,
+                        FAR struct file *filep,
                         unsigned long arg);
 
   /**************************************************************************
@@ -781,6 +838,7 @@ struct sensor_ops_s
    *
    * Input Parameters:
    *   lower      - The instance of lower half sensor driver.
+   *   filep      - The pointer of file, represents each user using sensor.
    *   cmd        - The special cmd for sensor.
    *   arg        - The parameters associated with cmd.
    *
@@ -791,6 +849,7 @@ struct sensor_ops_s
    **************************************************************************/
 
   CODE int (*control)(FAR struct sensor_lowerhalf_s *lower,
+                      FAR struct file *filep,
                       int cmd, unsigned long arg);
 };
 
