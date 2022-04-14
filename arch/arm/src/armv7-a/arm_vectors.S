@@ -89,6 +89,66 @@
 #endif
 
 /****************************************************************************
+ * Name: savefpu
+ *
+ * Description:
+ *   Save the state of the floating point registers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+	.macro	savefpu, out, tmp
+	/* Store all floating point registers.  Registers are stored in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vstmia.64	\out!, {d0-d15}			/* Save the full FP context */
+	vstmia.64	\out!, {d16-d31}
+#else
+	vstmia		\out!, {s0-s31}			/* Save the full FP context */
+#endif
+
+	/* Store the floating point control and status register.  At the end of the
+	 * vstmia, r1 will point to the FPSCR storage location.
+	 */
+
+	vmrs		\tmp, fpscr			/* Fetch the FPSCR */
+	str		\tmp, [\out], #4		/* Save the floating point control and status register */
+	.endm
+#endif
+
+/****************************************************************************
+ * Name: restorefpu
+ *
+ * Description:
+ *   Restore the state of the floating point registers.
+ *
+ ****************************************************************************/
+
+#ifdef CONFIG_ARCH_FPU
+	.macro	restorefpu, in, tmp
+	/* Load all floating point registers.  Registers are loaded in numeric order,
+	 * s0, s1, ... in increasing address order.
+	 */
+
+#ifdef CONFIG_ARM_DPFPU32
+	vldmia.64	\in!, {d0-d15}			/* Restore the full FP context */
+	vldmia.64	\in!, {d16-d31}
+#else
+	vldmia		\in!, {s0-s31}			/* Restore the full FP context */
+#endif
+
+	/* Load the floating point control and status register.   At the end of the
+	 * vstmia, \in will point to the FPSCR storage location.
+	 */
+
+	ldr		\tmp, [\in], #4			/* Fetch the floating point control and status register */
+	vmsr		fpscr, \tmp			/* Restore the FPSCR */
+	.endm
+#endif
+
+/****************************************************************************
  * Private Functions
  ****************************************************************************/
 
@@ -160,6 +220,13 @@ arm_vectorirq:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the IRQ handler with interrupts disabled. */
 
 	mov		fp, #0				/* Init frame pointer */
@@ -194,6 +261,13 @@ arm_vectorirq:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodeirq			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
 #endif
 
 	/* Switch back IRQ mode and return with shadow SPSR */
@@ -289,6 +363,13 @@ arm_vectorsvc:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the SVC handler with interrupts disabled.
 	 * void arm_syscall(struct xcptcontext *xcp)
 	 */
@@ -325,6 +406,13 @@ arm_vectorsvc:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_syscall			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
 #endif
 
 	/* Switch back SVC mode and return with shadow SPSR */
@@ -423,6 +511,13 @@ arm_vectordata:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the data abort handler with interrupts disabled.
 	 * void arm_dataabort(struct xcptcontext *xcp)
 	 */
@@ -435,6 +530,13 @@ arm_vectordata:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_dataabort			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
 
 	/* Switch back ABT mode and return with shadow SPSR */
 
@@ -520,6 +622,13 @@ arm_vectorprefetch:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the prefetch abort handler with interrupts disabled.
 	 * void arm_prefetchabort(struct xcptcontext *xcp)
 	 */
@@ -532,6 +641,13 @@ arm_vectorprefetch:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_prefetchabort		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
 
 	/* Switch back ABT mode and return with shadow SPSR */
 
@@ -615,6 +731,13 @@ arm_vectorundefinsn:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the undef insn handler with interrupts disabled.
 	 * void arm_undefinedinsn(struct xcptcontext *xcp)
 	 */
@@ -625,6 +748,13 @@ arm_vectorundefinsn:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_undefinedinsn		/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
+#endif
 
 	/* Switch back UND mode and return with shadow SPSR */
 
@@ -709,6 +839,13 @@ arm_vectorfiq:
 	add		r0, sp, #(4*REG_SP)		/* Offset to pc, cpsr storage */
 	stmia		r0, {r1-r4}
 
+#ifdef CONFIG_ARCH_FPU
+	/* Save the state of the floating point registers. */
+
+	add		r0, sp, #(4*REG_S0)		/* R1=Address of FP register storage */
+	savefpu		r0, r1
+#endif
+
 	/* Then call the FIQ handler with interrupts disabled. */
 
 	mov		fp, #0				/* Init frame pointer */
@@ -730,6 +867,13 @@ arm_vectorfiq:
 	bic		sp, sp, #7			/* Force 8-byte alignment */
 	bl		arm_decodefiq			/* Call the handler */
 	mov		sp, r4				/* Restore the possibly unaligned stack pointer */
+#endif
+
+#ifdef CONFIG_ARCH_FPU
+	/* Restore the state of the floating point registers. */
+
+	add		r1, r0, #(4*REG_S0)		/* R1=Address of FP register storage */
+	restorefpu	r1, r2
 #endif
 
 	/* Switch back FIQ mode and return with shadow SPSR */
